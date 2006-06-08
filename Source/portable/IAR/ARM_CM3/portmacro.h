@@ -19,29 +19,23 @@
 
 	A special exception to the GPL can be applied should you wish to distribute
 	a combined work that includes FreeRTOS.org, without being obliged to provide
-	the source code for any proprietary components.  See the licensing section
+	the source code for any proprietary components.  See the licensing section 
 	of http://www.FreeRTOS.org for full details of how and when the exception
 	can be applied.
 
 	***************************************************************************
-	See http://www.FreeRTOS.org for documentation, latest information, license
-	and contact details.  Please ensure to read the configuration and relevant
+	See http://www.FreeRTOS.org for documentation, latest information, license 
+	and contact details.  Please ensure to read the configuration and relevant 
 	port sections of the online documentation.
 	***************************************************************************
 */
 
-/*
-Changes from V1.2.3
-
-	+ portCPU_CLOSK_HZ definition changed to 8MHz base 10, previously it
-	  base 16.
-*/
 
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
 
 /*-----------------------------------------------------------
- * Port specific definitions.
+ * Port specific definitions.  
  *
  * The settings in this file configure FreeRTOS correctly for the
  * given hardware and compiler.
@@ -55,9 +49,9 @@ Changes from V1.2.3
 #define portFLOAT		float
 #define portDOUBLE		double
 #define portLONG		long
-#define portSHORT		int
-#define portSTACK_TYPE	unsigned portCHAR
-#define portBASE_TYPE	portCHAR
+#define portSHORT		short
+#define portSTACK_TYPE	unsigned portLONG
+#define portBASE_TYPE	long
 
 #if( configUSE_16_BIT_TICKS == 1 )
 	typedef unsigned portSHORT portTickType;
@@ -66,45 +60,42 @@ Changes from V1.2.3
 	typedef unsigned portLONG portTickType;
 	#define portMAX_DELAY ( portTickType ) 0xffffffff
 #endif
-
 /*-----------------------------------------------------------*/	
-
-/* Critical section management. */
-#define portENTER_CRITICAL()	asm( "in r15, 3fh" );		\
-								asm( "cli" );				\
-								asm( "st -y, r15" )
-
-#define portEXIT_CRITICAL()		asm( "ld r15, y+" );		\
-								asm( "out 3fh, r15" )
-
-#define portDISABLE_INTERRUPTS()	asm( "cli" );
-#define portENABLE_INTERRUPTS()		asm( "sti" );
-/*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
 #define portSTACK_GROWTH			( -1 )
 #define portTICK_RATE_MS			( ( portTickType ) 1000 / configTICK_RATE_HZ )		
-#define portBYTE_ALIGNMENT			1
-#define portNOP()					asm( "nop" )
+#define portBYTE_ALIGNMENT			4
+/*-----------------------------------------------------------*/	
+
+
+/* Scheduler utilities. */
+extern void vPortYieldFromISR( void );
+
+#define portYIELD()					vPortYieldFromISR()
+
+#define portEND_SWITCHING_ISR( xSwitchRequired ) if( xSwitchRequired ) vPortYieldFromISR()
 /*-----------------------------------------------------------*/
 
-/* Kernel utilities. */
-void vPortYield( void );
-#define portYIELD()	vPortYield()
 
-#ifdef IAR_MEGA_AVR
-	#define outb( PORT, VALUE ) PORT = VALUE
-#endif
-/*-----------------------------------------------------------*/
+/* Critical section management. */
 
-/* Compiler specifics. */
-#define inline
+extern void vPortEnableInterrupts( void );
+extern void vPortEnterCritical( void );
+extern void vPortExitCritical( void );
+
+#define portDISABLE_INTERRUPTS()	__asm ( "cpsid i" )
+#define portENABLE_INTERRUPTS()		__asm ( "cpsie i" )
+#define portENTER_CRITICAL()		vPortEnterCritical()
+#define portEXIT_CRITICAL()			vPortExitCritical()
 /*-----------------------------------------------------------*/
 
 /* Task function macros as described on the FreeRTOS.org WEB site. */
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
 
-#endif /* PORTMACRO_H */
+#define inline
+#define portNOP()
 
+#endif /* PORTMACRO_H */
 

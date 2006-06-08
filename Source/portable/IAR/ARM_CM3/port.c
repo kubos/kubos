@@ -30,13 +30,6 @@
 	***************************************************************************
 */
 
-/*
-	Changes between V4.0.0 and V4.0.1
-
-	+ Reduced the code used to setup the initial stack frame.
-	+ The kernel no longer has to install or handle the fault interrupt.
-*/
-
 
 /*-----------------------------------------------------------
  * Implementation of functions defined in portable.h for the ARM CM3 port.
@@ -73,16 +66,10 @@ unsigned portBASE_TYPE uxCriticalNesting = 0xaaaaaaaa;
 static void prvSetupTimerInterrupt( void );
 
 /*
- * Exception handlers.
- */
-void xPortPendSVHandler( void ) __attribute__ (( naked ));
-void xPortSysTickHandler( void ) __attribute__ (( naked ));
-
-/*
  * Set the MSP/PSP to a known value.
  */
-void prvSetMSP( unsigned long ulValue ) __attribute__ (( naked ));
-void prvSetPSP( unsigned long ulValue ) __attribute__ (( naked )); 
+extern void vSetMSP( unsigned long ulValue );
+extern void vSetPSP( unsigned long ulValue );
 
 /*-----------------------------------------------------------*/
 
@@ -107,20 +94,6 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 }
 /*-----------------------------------------------------------*/
 
-void prvSetPSP( unsigned long ulValue )
-{
-	asm volatile( "msr psp, r0" );
-	asm volatile( "bx lr" );
-}
-/*-----------------------------------------------------------*/
-
-void prvSetMSP( unsigned long ulValue )
-{
-	asm volatile( "msr msp, r0" );
-	asm volatile( "bx lr" );
-}
-/*-----------------------------------------------------------*/
-
 /* 
  * See header file for description. 
  */
@@ -135,8 +108,8 @@ portBASE_TYPE xPortStartScheduler( void )
 	prvSetupTimerInterrupt();
 	
 	/* Start the first task. */
-	prvSetPSP( 0 );
-	prvSetMSP( *((unsigned portLONG *) 0 ) );
+	vSetPSP( 0 );
+	vSetMSP( *((unsigned portLONG *) 0 ) );
 	*(portNVIC_INT_CTRL) |= portNVIC_PENDSVSET;
 
 	/* Enable interrupts */
@@ -182,108 +155,6 @@ void vPortExitCritical( void )
 }
 /*-----------------------------------------------------------*/
 
-void xPortPendSVHandler( void )
-{
-	/* Start first task if the stack has not yet been setup. */
-	__asm volatile
-	( 
-	"	mrs r0, psp						\n"
-	"	cbz r0, no_save					\n"
-	"									\n"	/* Save the context into the TCB. */					
-	"	sub r0, #0x20					\n"
-	"	stm r0, {r4-r11}				\n"
-	"	nop								\n"
-	"	sub r0, #0x04					\n"
-	"	ldr r1, uxCriticalNestingConst	\n"
-	"	ldr r1, [r1]					\n"
-	"	stm r0, {r1}					\n"
-	"	ldr r1, pxCurrentTCBConst		\n"
-	"	ldr r1, [r1]					\n"
-	"	str r0, [r1]					\n"
-	"									\n"
-	"no_save:\n"	
-	"	ldr r0, vTaskSwitchContextConst	\n"	/* Find the task to execute. */
-	"	push {r14}						\n"
-	"	cpsid i							\n"
-	"	blx r0							\n"
-	"	cpsie i							\n"
-	"	pop {r14}						\n"
-	"									\n"	/* Restore the context. */	
-	"	ldr r1, pxCurrentTCBConst		\n"
-	"	ldr r1, [r1]					\n"
-	"	ldr r0, [r1]					\n"
-	"	ldm r0, {r1, r4-r11}			\n"
-	"	nop								\n"
-	"	ldr r2, uxCriticalNestingConst	\n"
-	"	str r1, [r2]					\n"
-	"	add r0, #0x24					\n"
-	"	msr psp, r0						\n"
-	"	orr r14, #0xd					\n"
-	"									\n"	/* Exit with interrupts in the state required by the task. */	
-	"	cbnz r1, sv_disable_interrupts	\n"
-	"	bx r14							\n"
-	"									\n"
-	"sv_disable_interrupts:				\n"
-	"	cpsid i							\n"
-	"	bx r14							\n"
-	"									\n"
-	"	.align 2						\n"
-	"vTaskSwitchContextConst: .word vTaskSwitchContext	\n"
-	"pxCurrentTCBConst: .word pxCurrentTCB				\n"
-	"uxCriticalNestingConst: .word uxCriticalNesting	\n"
-	);
-}
-/*-----------------------------------------------------------*/
-
-void xPortSysTickHandler( void )
-{
-	extern void vTaskIncrementTick( void );
-	extern void vPortYieldFromISR( void );
-
-	/* Call the scheduler tick function. */
-	__asm volatile
-	( 
-	"	ldr r0, vTaskIncrementTickConst		\n"
-	"	push {r14}							\n"
-	"	cpsid i								\n"
-	"	blx r0								\n"
-	"	cpsie i								\n"
-	"	pop {r14}" 
-	);
-
-	/* If using preemption, also force a context switch. */
-	#if configUSE_PREEMPTION == 1
-	__asm volatile
-	( 
-	"	push {r14}							\n"
-	"	ldr r0, vPortYieldFromISRConst2		\n"
-	"	blx r0								\n"
-	"	pop {r14}" 
-	);
-	#endif
-
-	/* Exit with interrupts in the correct state. */
-	__asm volatile
-	(
-	"    ldr r2, uxCriticalNestingConst2	\n" 
-	"    ldr r2, [r2]						\n"
-	"    cbnz r2, tick_disable_interrupts	\n"
-	"    bx r14" 
-	);
-
-   __asm volatile
-   (
-	"tick_disable_interrupts:				\n"
-	"    cpsid i							\n"
-	"    bx r14								\n"
-	"										\n"
-	"	.align 2							\n"
-	"vPortYieldFromISRConst2: .word vPortYieldFromISR\n"
-	"vTaskIncrementTickConst: .word vTaskIncrementTick\n" 
-	"uxCriticalNestingConst2: .word uxCriticalNesting"
-	);
-}
-/*-----------------------------------------------------------*/
 
 /*
  * Setup the systick timer to generate the tick interrupts at the required
