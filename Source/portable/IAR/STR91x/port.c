@@ -1,24 +1,24 @@
 /*
 	FreeRTOS.org V4.0.4 - Copyright (C) 2003-2006 Richard Barry.
 
-	This file is part of the FreeRTOS.org distribution.
+	This file is part of the FreeRTOS distribution.
 
-	FreeRTOS.org is free software; you can redistribute it and/or modify
+	FreeRTOS is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-	FreeRTOS.org is distributed in the hope that it will be useful,
+	FreeRTOS is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with FreeRTOS.org; if not, write to the Free Software
+	along with FreeRTOS; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 	A special exception to the GPL can be applied should you wish to distribute
-	a combined work that includes FreeRTOS.org, without being obliged to provide
+	a combined work that includes FreeRTOS, without being obliged to provide
 	the source code for any proprietary components.  See the licensing section
 	of http://www.FreeRTOS.org for full details of how and when the exception
 	can be applied.
@@ -31,65 +31,50 @@
 */
 
 /*-----------------------------------------------------------
- * Implementation of functions defined in portable.h for the Philips ARM7 port.
+ * Implementation of functions defined in portable.h for the ST STR91x ARM7
+ * port.
  *----------------------------------------------------------*/
 
-/*
-	Changes from V3.2.2
-
-	+ Bug fix - The prescale value for the timer setup is now written to T0PR 
-	  instead of T0PC.  This bug would have had no effect unless a prescale 
-	  value was actually used.
-*/
+/* Library includes. */
+#include "91x_lib.h"
 
 /* Standard includes. */
 #include <stdlib.h>
-#include <intrinsic.h>
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* Constants required to setup the tick ISR. */
-#define portENABLE_TIMER			( ( unsigned portCHAR ) 0x01 )
-#define portPRESCALE_VALUE			0x00
-#define portINTERRUPT_ON_MATCH		( ( unsigned portLONG ) 0x01 )
-#define portRESET_COUNT_ON_MATCH	( ( unsigned portLONG ) 0x02 )
-
 /* Constants required to setup the initial stack. */
-#define portINITIAL_SPSR				( ( portSTACK_TYPE ) 0x3f ) /* System mode, THUMB mode, interrupts enabled. */
+#ifndef _RUN_TASK_IN_ARM_MODE_
+	#define portINITIAL_SPSR			( ( portSTACK_TYPE ) 0x3f ) /* System mode, THUMB mode, interrupts enabled. */
+#else
+	#define portINITIAL_SPSR 			( ( portSTACK_TYPE ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
+#endif
 #define portINSTRUCTION_SIZE			( ( portSTACK_TYPE ) 4 )
-
-/* Constants required to setup the PIT. */
-#define portPIT_CLOCK_DIVISOR			( ( unsigned portLONG ) 16 )
-#define portPIT_COUNTER_VALUE			( ( ( configCPU_CLOCK_HZ / portPIT_CLOCK_DIVISOR ) / 1000UL ) * portTICK_RATE_MS )
-
-/* Constants required to handle interrupts. */
-#define portTIMER_MATCH_ISR_BIT		( ( unsigned portCHAR ) 0x01 )
-#define portCLEAR_VIC_INTERRUPT		( ( unsigned portLONG ) 0 )
 
 /* Constants required to handle critical sections. */
 #define portNO_CRITICAL_NESTING 		( ( unsigned portLONG ) 0 )
 
 
-#define portINT_LEVEL_SENSITIVE  0
-#define portPIT_ENABLE      	( ( unsigned portSHORT ) 0x1 << 24 )
-#define portPIT_INT_ENABLE     	( ( unsigned portSHORT ) 0x1 << 25 )
-
-/* Constants required to setup the VIC for the tick ISR. */
-#define portTIMER_VIC_CHANNEL		( ( unsigned portLONG ) 0x0004 )
-#define portTIMER_VIC_CHANNEL_BIT	( ( unsigned portLONG ) 0x0010 )
-#define portTIMER_VIC_ENABLE		( ( unsigned portLONG ) 0x0020 )
-
 /*-----------------------------------------------------------*/
 
-/* Setup the PIT to generate the tick interrupts. */
+/* Setup the watchdog to generate the tick interrupts. */
 static void prvSetupTimerInterrupt( void );
 
 /* ulCriticalNesting will get set to zero when the first task starts.  It
 cannot be initialised to 0 as this will cause interrupts to be enabled
 during the kernel initialisation process. */
 unsigned portLONG ulCriticalNesting = ( unsigned portLONG ) 9999;
+
+/* Tick interrupt routines for cooperative and preemptive operation
+respectively.  The preemptive version is not defined as __irq as it is called
+from an asm wrapper function. */
+__arm __irq void vPortNonPreemptiveTick( void );
+void WDG_IRQHandler( void );
+
+/* VIC interrupt default handler. */
+static void prvDefaultHandler( void );
 
 /*-----------------------------------------------------------*/
 
@@ -101,7 +86,7 @@ unsigned portLONG ulCriticalNesting = ( unsigned portLONG ) 9999;
  */
 portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE pxCode, void *pvParameters )
 {
-portSTACK_TYPE *pxOriginalTOS;
+	portSTACK_TYPE *pxOriginalTOS;
 
 	pxOriginalTOS = pxTopOfStack;
 
@@ -184,103 +169,99 @@ void vPortEndScheduler( void )
 }
 /*-----------------------------------------------------------*/
 
-#if configUSE_PREEMPTION == 0
+/* This function is called from an asm wrapper, so does not require the __irq
+keyword. */
+void WDG_IRQHandler( void )
+{
+	/* Increment the tick counter. */
+	vTaskIncrementTick();
 
-	/* The cooperative scheduler requires a normal IRQ service routine to
-	simply increment the system tick. */
-	static __arm __irq void vPortNonPreemptiveTick( void );
-	static __arm __irq void vPortNonPreemptiveTick( void )
-	{
-		/* Increment the tick count - which may wake some tasks but as the
-		preemptive scheduler is not being used any woken task is not given
-		processor time no matter what its priority. */
-		vTaskIncrementTick();
-		
-		/* Ready for the next interrupt. */
-		T0IR = portTIMER_MATCH_ISR_BIT;
-		VICVectAddr = portCLEAR_VIC_INTERRUPT;
-	}
-
-#else
-
-	/* This function is called from an asm wrapper, so does not require the __irq
-	keyword. */
-	void vPortPreemptiveTick( void );
-	void vPortPreemptiveTick( void )
-	{
-		/* Increment the tick counter. */
-		vTaskIncrementTick();
-	
+	#if configUSE_PREEMPTION == 1
 		/* The new tick value might unblock a task.  Ensure the highest task that
 		is ready to execute is the task that will execute when the tick ISR
 		exits. */
 		vTaskSwitchContext();
-	
-		/* Ready for the next interrupt. */
-		T0IR = portTIMER_MATCH_ISR_BIT;
-		VICVectAddr = portCLEAR_VIC_INTERRUPT;
-	}
+	#endif
+		
+	/* Clear the interrupt in the watchdog. */
+	WDG->SR &= ~0x0001;
+}
+/*-----------------------------------------------------------*/
 
+#ifndef abs
+	#define abs(x) ((x)>0 ? (x) : -(x))
 #endif
 
+static void prvFindFactors(u32 n, u16 *a, u32 *b)
+{
+	/* This function is copied from the ST STR7 library and is
+	copyright STMicroelectronics.  Reproduced with permission. */
+
+	u32 b0;
+	u16 a0;
+	long err, err_min=n;
+
+	*a = a0 = ((n-1)/65536ul) + 1;
+	*b = b0 = n / *a;
+
+	for (; *a <= 256; (*a)++)
+	{
+		*b = n / *a;
+		err = (long)*a * (long)*b - (long)n;
+		if (abs(err) > (*a / 2))
+		{
+			(*b)++;
+			err = (long)*a * (long)*b - (long)n;
+		}
+		if (abs(err) < abs(err_min))
+		{
+			err_min = err;
+			a0 = *a;
+			b0 = *b;
+			if (err == 0) break;
+		}
+	}
+
+	*a = a0;
+	*b = b0;
+}
 /*-----------------------------------------------------------*/
 
 static void prvSetupTimerInterrupt( void )
 {
-unsigned portLONG ulCompareMatch;
+WDG_InitTypeDef xWdg;
+unsigned portSHORT a;
+unsigned portLONG n = configCPU_PERIPH_HZ / configTICK_RATE_HZ, b;
 
-	/* A 1ms tick does not require the use of the timer prescale.  This is
-	defaulted to zero but can be used if necessary. */
-	T0PR = portPRESCALE_VALUE;
+	/* Configure the watchdog as a free running timer that generates a
+	periodic interrupt. */
 
-	/* Calculate the match value required for our wanted tick rate. */
-	ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
-
-	/* Protect against divide by zero.  Using an if() statement still results
-	in a warning - hence the #if. */
-	#if portPRESCALE_VALUE != 0
-	{
-		ulCompareMatch /= ( portPRESCALE_VALUE + 1 );
-	}
-	#endif
-
-	T0MR0 = ulCompareMatch;
-
-	/* Generate tick with timer 0 compare match. */
-	T0MCR = portRESET_COUNT_ON_MATCH | portINTERRUPT_ON_MATCH;
-
-	/* Setup the VIC for the timer. */
-	VICIntSelect &= ~( portTIMER_VIC_CHANNEL_BIT );
-	VICIntEnable |= portTIMER_VIC_CHANNEL_BIT;
+	SCU_APBPeriphClockConfig( __WDG, ENABLE );
+	WDG_DeInit();
+	WDG_StructInit(&xWdg);
+	prvFindFactors( n, &a, &b );
+	xWdg.WDG_Prescaler = a - 1;
+	xWdg.WDG_Preload = b - 1;
+	WDG_Init( &xWdg );
+	WDG_ITConfig(ENABLE);
 	
-	/* The ISR installed depends on whether the preemptive or cooperative
-	scheduler is being used. */
-	#if configUSE_PREEMPTION == 1
-	{	
-		extern void ( vPortPreemptiveTickEntry )( void );
-
-		VICVectAddr0 = ( unsigned portLONG ) vPortPreemptiveTickEntry;
-	}
-	#else
-	{
-		extern void ( vNonPreemptiveTick )( void );
-
-		VICVectAddr0 = ( portLONG ) vPortNonPreemptiveTick;
-	}
-	#endif
-
-	VICVectCntl0 = portTIMER_VIC_CHANNEL | portTIMER_VIC_ENABLE;
-
-	/* Start the timer - interrupts are disabled when this function is called
-	so it is okay to do this here. */
-	T0TCR = portENABLE_TIMER;
+	/* Configure the VIC for the WDG interrupt. */
+	VIC_Config( WDG_ITLine, VIC_IRQ, 10 );
+	VIC_ITCmd( WDG_ITLine, ENABLE );
+	
+	/* Install the default handlers for both VIC's. */
+	VIC0->DVAR = ( unsigned portLONG ) prvDefaultHandler;
+	VIC1->DVAR = ( unsigned portLONG ) prvDefaultHandler;
+	
+	WDG_Cmd(ENABLE);
 }
+
 /*-----------------------------------------------------------*/
 
-void vPortEnterCritical( void )
+__arm __interwork void vPortEnterCritical( void )
 {
 	/* Disable interrupts first! */
-	__disable_interrupt();
+	portDISABLE_INTERRUPTS();
 
 	/* Now interrupts are disabled ulCriticalNesting can be accessed
 	directly.  Increment ulCriticalNesting to keep a count of how many times
@@ -289,7 +270,7 @@ void vPortEnterCritical( void )
 }
 /*-----------------------------------------------------------*/
 
-void vPortExitCritical( void )
+__arm __interwork void vPortExitCritical( void )
 {
 	if( ulCriticalNesting > portNO_CRITICAL_NESTING )
 	{
@@ -300,12 +281,15 @@ void vPortExitCritical( void )
 		re-enabled. */
 		if( ulCriticalNesting == portNO_CRITICAL_NESTING )
 		{
-			__enable_interrupt();
+			portENABLE_INTERRUPTS();
 		}
 	}
 }
 /*-----------------------------------------------------------*/
 
+static void prvDefaultHandler( void )
+{
+}
 
 
 
