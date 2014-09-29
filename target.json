@@ -1,0 +1,17 @@
+{
+  "name": "x86-linux-native",
+  "version": "0.0.1",
+  "similarTo": [
+    "linux",
+    "native",
+    "userland",
+    "x86_64",
+    "x86",
+    "*"
+  ],
+  "toolchain": "CMake/toolchain.cmake",
+  "debug": [
+    "gdb",
+    "$program"
+  ]
+}
