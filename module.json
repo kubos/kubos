@@ -18,8 +18,8 @@
       "efm32gg":{
           "cmsis-core-efm32gg":"ARMmbed/cmsis-core-efm32gg"
       },
-      "k64f":{
-          "cmsis-core-k64f":"ARMmbed/cmsis-core-k64f"
+      "freescale":{
+          "cmsis-core-freescale":"ARMmbed/cmsis-core-freescale"
       }
   }
 }
