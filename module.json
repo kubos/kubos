@@ -1,0 +1,21 @@
+{
+  "name": "cmsis-core-st",
+  "version": "0.0.0",
+  "description": "CMSIS Core Implementation for ST MCUs",
+  "keywords": [
+    "cmsis"
+  ],
+  "author": "Brendan Moran <brendan.moran@arm.com>",
+  "repository": {
+    "url": "git@github.com:ARMmbed/cmsis-core-st.git",
+    "type": "git"
+  },
+  "homepage": "https://github.com/ARMmbed/cmsis-core-st",
+  "license": "Apache-2",
+  "dependencies": {},
+  "targetDependencies": {
+    "stm32f4":{
+      "cmsis-core-stm32f4":"ARMmbed/cmsis-core-stm32f4"
+    }
+  }
+}
