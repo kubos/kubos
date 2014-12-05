@@ -20,6 +20,9 @@
       },
       "freescale":{
           "cmsis-core-freescale":"ARMmbed/cmsis-core-freescale"
+      },
+      "st":{
+        "cmsis-core-st":"ARMmbed/cmsis-core-st"
       }
   }
 }
