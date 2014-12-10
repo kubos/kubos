@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-st",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "CMSIS Core Implementation for ST MCUs",
   "keywords": [
     "cmsis"
@@ -14,8 +14,8 @@
   "license": "Apache-2",
   "dependencies": {},
   "targetDependencies": {
-    "stm32f4":{
-      "cmsis-core-stm32f4":"ARMmbed/cmsis-core-stm32f4#~0.0.1"
+    "stm32f4": {
+      "cmsis-core-stm32f4": "ARMmbed/cmsis-core-stm32f4#~0.0.1"
     }
   }
 }
