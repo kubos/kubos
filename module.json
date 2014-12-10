@@ -16,13 +16,13 @@
   "extraIncludes": ["cmsis-core"],
   "targetDependencies": {
       "efm32gg":{
-          "cmsis-core-efm32gg":"ARMmbed/cmsis-core-efm32gg"
+          "cmsis-core-efm32gg":"ARMmbed/cmsis-core-efm32gg#~0.0.0"
       },
       "freescale":{
-          "cmsis-core-freescale":"ARMmbed/cmsis-core-freescale"
+          "cmsis-core-freescale":"ARMmbed/cmsis-core-freescale#~0.0.1"
       },
       "st":{
-        "cmsis-core-st":"ARMmbed/cmsis-core-st"
+        "cmsis-core-st":"ARMmbed/cmsis-core-st#~0.0.0"
       }
   }
 }
