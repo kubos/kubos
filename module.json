@@ -21,10 +21,10 @@
       "cmsis-core-efm32gg": "ARMmbed/cmsis-core-efm32gg#~0.0.0"
     },
     "freescale": {
-      "cmsis-core-freescale": "ARMmbed/cmsis-core-freescale#~0.0.1"
+      "cmsis-core-freescale": "ARMmbed/cmsis-core-freescale-private#~0.1.0"
     },
     "st": {
-      "cmsis-core-st": "ARMmbed/cmsis-core-st#~0.0.0"
+      "cmsis-core-st": "ARMmbed/cmsis-core-st-private#~0.1.0"
     }
   }
 }
