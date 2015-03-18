@@ -15,7 +15,7 @@
   "dependencies": {},
   "targetDependencies": {
     "stm32f4": {
-      "cmsis-core-stm32f4": "ARMmbed/cmsis-core-stm32f4#~0.0.1"
+      "cmsis-core-stm32f4": "ARMmbed/cmsis-core-stm32f4-private#~0.1.0"
     }
   }
 }
