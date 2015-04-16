@@ -1,6 +1,6 @@
 {
   "name": "x86-linux-native",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "similarTo": [
     "linux",
     "native",
@@ -10,7 +10,10 @@
   ],
   "toolchain": "CMake/toolchain.cmake",
   "description": "Build target for programs compiled natively for Linux",
-  "keywords": ["linux", "native"],
+  "keywords": [
+    "linux",
+    "native"
+  ],
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
