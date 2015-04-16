@@ -5,13 +5,29 @@
     "linux",
     "native",
     "userland",
-    "x86_64",
-    "x86",
-    "*"
+    "x86-64",
+    "x86"
   ],
   "toolchain": "CMake/toolchain.cmake",
+  "description": "Build target for programs compiled natively for Linux",
+  "keywords": ["linux", "native"],
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
   "debug": [
     "gdb",
     "$program"
-  ]
+  ],
+  "scripts": {
+    "debug": [
+      "gdb",
+      "$program"
+    ],
+    "test": [
+      "$program"
+    ]
+  }
 }
