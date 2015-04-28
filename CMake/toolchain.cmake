@@ -34,6 +34,3 @@ include(CMakeForceCompiler)
 
 cmake_force_c_compiler(arm-none-eabi-gcc GNU)
 cmake_force_cxx_compiler(arm-none-eabi-g++ GNU)
-
-message("CMAKE_EXE_LINKER_FLAGS_INIT (base): ${CMAKE_EXE_LINKER_FLAGS_INIT}")
-message("CMAKE_EXE_LINKER_FLAGS (base): ${CMAKE_EXE_LINKER_FLAGS}")

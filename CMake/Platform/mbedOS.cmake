@@ -1,8 +1,8 @@
-# Copyright (C) 2014 ARM Limited. All rights reserved. 
+# Copyright (C) 2014-2015 ARM Limited. All rights reserved. 
 
-# This is a platform definition file for Yottos, there isn't much here because
+# This is a platform definition file for mbedOS there isn't much here because
 # most of our setup is related to the compiler used
-message("mbedOS.cmake included")
+#message("mbedOS.cmake included")
 
 # No shared libraries
 set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
