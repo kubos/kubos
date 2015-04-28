@@ -1,0 +1,28 @@
+{
+  "name": "mbed-gcc",
+  "version": "0.0.0",
+  "description": "base mbed build target for gcc toolchain",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "mbed-official",
+    "gcc"
+  ],
+  "similarTo": [
+    "mbed",
+    "arm",
+    "gcc"
+  ],
+  "config": {
+    "mbed":{
+    },
+    "arch":{
+      "arm":{}
+    }
+  },
+  "toolchain": "CMake/toolchain.cmake"
+}
