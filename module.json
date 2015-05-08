@@ -18,8 +18,8 @@
     "cmsis-core"
   ],
   "targetDependencies": {
-    "efm32gg": {
-      "cmsis-core-efm32gg": "~0.0.0"
+    "silabs": {
+      "cmsis-core-silabs": "~0.1.0"
     },
     "freescale": {
       "cmsis-core-freescale": "~0.1.0"
