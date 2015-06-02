@@ -1,0 +1,19 @@
+{
+  "name": "mbed-hal-st-stm32cubef4",
+  "version": "0.0.0",
+  "description": "STM32Cube HAL for STM32F4 microcontrollers",
+  "keywords": [],
+  "author": "",
+  "homepage": "",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "extraIncludes":["mbed-hal-st-stm32cubef4"],
+  "dependencies": {
+      "mbed-hal-st-stm32f4":"~0.0.0"
+  },
+  "targetDependencies": {}
+}
