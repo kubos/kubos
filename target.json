@@ -1,6 +1,6 @@
 {
   "name": "mbed-gcc",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "base mbed build target for gcc toolchain",
   "licenses": [
     {
@@ -18,10 +18,9 @@
     "gcc"
   ],
   "config": {
-    "mbed":{
-    },
-    "arch":{
-      "arm":{}
+    "mbed": {},
+    "arch": {
+      "arm": {}
     }
   },
   "toolchain": "CMake/toolchain.cmake"
