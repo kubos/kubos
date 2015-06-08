@@ -4,7 +4,7 @@
   "description": "STM32Cube HAL for STM32F4 microcontrollers",
   "keywords": [],
   "author": "",
-  "homepage": "",
+  "homepage": "https://github.com/ARMmbed/mbed-hal-st-stm32cubef4",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
