@@ -21,6 +21,9 @@
   "targetDependencies": {
     "stm32f401xe": {
       "cmsis-core-st-stm32f401xe": "~0.2.0"
+    },
+    "stm32f429xi": {
+      "cmsis-core-st-stm32f429xi": "~0.0.0"
     }
   }
 }
