@@ -25,7 +25,7 @@
       "cmsis-core-freescale": "~0.1.0"
     },
     "st": {
-      "cmsis-core-st": "~0.1.0"
+      "cmsis-core-st": "~0.2.0"
     }
   }
 }
