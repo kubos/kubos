@@ -15,8 +15,8 @@
     "cmsis-core-st-stm32f4"
   ],
   "dependencies": {
-    "cmsis-core": "~0.1.0",
-    "mbed-hal-st-stm32f4": "~0.1.0"
+    "cmsis-core": "~0.2.0",
+    "mbed-hal-st-stm32f4": "~0.2.0"
   },
   "targetDependencies": {
     "stm32f401xe": {
