@@ -15,6 +15,13 @@ set(CMAKE_SYSTEM_NAME mbedOS)
 set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR "armv7-m")
 
+# legacy definitions for building mbed 2.0 modules with a retrofitted build
+# system:
+set(MBED_LEGACY_TOOLCHAIN "GCC_ARM")
+# provide compatibility definitions for compiling with this target: these are
+# definitions that legacy code assumes will be defined. 
+add_definitions("-DTOOLCHAIN_GCC -DTOOLCHAIN_GCC_ARM -DMBED_OPERATORS")
+
 # post-process elf files into .bin files:
 set(YOTTA_POSTPROCESS_COMMAND "arm-none-eabi-objcopy -O binary YOTTA_CURRENT_EXE_NAME YOTTA_CURRENT_EXE_NAME.bin")
 
