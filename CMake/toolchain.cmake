@@ -15,6 +15,9 @@ set(CMAKE_SYSTEM_NAME mbedOS)
 set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR "armv7-m")
 
+# required for -include yotta_config.h
+set(YOTTA_FORCE_INCLUDE_FLAG "-include")
+
 # legacy definitions for building mbed 2.0 modules with a retrofitted build
 # system:
 set(MBED_LEGACY_TOOLCHAIN "GCC_ARM")
@@ -41,3 +44,4 @@ include(CMakeForceCompiler)
 
 cmake_force_c_compiler(arm-none-eabi-gcc GNU)
 cmake_force_cxx_compiler(arm-none-eabi-g++ GNU)
+
