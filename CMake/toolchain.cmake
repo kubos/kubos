@@ -45,3 +45,15 @@ include(CMakeForceCompiler)
 cmake_force_c_compiler(arm-none-eabi-gcc GNU)
 cmake_force_cxx_compiler(arm-none-eabi-g++ GNU)
 
+# post-process elf files into .bin files:
+function(yotta_apply_target_rules target_type target_name)
+    if(${target_type} STREQUAL "EXECUTABLE")
+        add_custom_command(TARGET ${target_name}
+            POST_BUILD
+            COMMAND arm-none-eabi-objcopy -O binary ${target_name} ${target_name}.bin
+            COMMENT "converting to .bin"
+            VERBATIM
+        )
+    endif()
+endfunction()
+
