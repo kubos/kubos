@@ -15,6 +15,7 @@
 #else
   #error "Unknown platform for core_generic.h"
 #endif
+#undef __CMSIS_GENERIC
 
 #endif // #ifndef __CMSIS_CORE_CORE_GENERIC_H__
 
