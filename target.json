@@ -1,6 +1,6 @@
 {
   "name": "mbed-gcc",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "base mbed build target for gcc toolchain",
   "licenses": [
     {
@@ -22,9 +22,9 @@
     "arch": {
       "arm": {}
     },
-    "minar" : {
-      "initial_event_pool_size"     : 50,
-      "additional_event_pools_size" : 100
+    "minar": {
+      "initial_event_pool_size": 50,
+      "additional_event_pools_size": 100
     }
   },
   "toolchain": "CMake/toolchain.cmake"
