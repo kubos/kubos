@@ -21,6 +21,10 @@
     "mbed": {},
     "arch": {
       "arm": {}
+    },
+    "minar" : {
+      "initial_event_pool_size"     : 50,
+      "additional_event_pools_size" : 100
     }
   },
   "toolchain": "CMake/toolchain.cmake"
