@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-st",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "CMSIS Core Implementation for ST MCUs",
   "private": true,
   "keywords": [
