@@ -15,7 +15,7 @@
     "mbed-hal-st-stm32cubef4"
   ],
   "dependencies": {
-    "mbed-hal-st-stm32f4": "~0.1.0"
+    "mbed-hal-st-stm32f4": "~0.2.0"
   },
   "targetDependencies": {}
 }
