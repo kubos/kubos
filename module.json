@@ -7,8 +7,8 @@
   "homepage": "https://github.com/ARMmbed/mbed-hal-st-stm32cubef4",
   "licenses": [
     {
-      "url": "https://spdx.org/licenses/Apache-2.0",
-      "type": "Apache-2.0"
+      "url": "https://spdx.org/licenses/BSD-3-Clause",
+      "type": "BSD-3-Clause"
     }
   ],
   "extraIncludes": [
