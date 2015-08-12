@@ -1,6 +1,6 @@
 {
   "name": "mbed-hal-st-stm32cubef4",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "STM32Cube HAL for STM32F4 microcontrollers",
   "keywords": [],
   "author": "",
