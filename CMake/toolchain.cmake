@@ -58,7 +58,7 @@ if(NOT ARM_NONE_EABI_OBJCOPY)
 endif()
 
 
-# post-process elf files into .bin files:
+# post-process elf files into .bin files (legacy backwards-compatible command):
 set(YOTTA_POSTPROCESS_COMMAND "${ARM_NONE_EABI_OBJCOPY} -O binary YOTTA_CURRENT_EXE_NAME YOTTA_CURRENT_EXE_NAME.bin")
 
 
