@@ -25,8 +25,41 @@ set(MBED_LEGACY_TOOLCHAIN "GCC_ARM")
 # definitions that legacy code assumes will be defined. 
 add_definitions("-DTOOLCHAIN_GCC -DTOOLCHAIN_GCC_ARM -DMBED_OPERATORS")
 
+
+# find the compiler and associated tools that we need:
+find_program(ARM_NONE_EABI_GCC arm-none-eabi-gcc)
+find_program(ARM_NONE_EABI_GPP arm-none-eabi-g++)
+find_program(ARM_NONE_EABI_OBJCOPY arm-none-eabi-objcopy)
+macro(gcc_program_notfound progname)
+    message("**************************************************************************\n")
+    message(" ERROR: the arm gcc program ${progname} could not be found\n")
+    if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+        message(" you can install the ARM GCC embedded compiler tools from:")
+        message(" https://launchpad.net/gcc-arm-embedded/+download ")
+    elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+        message(" it is included in the arm-none-eabi-gcc package that you can install")
+        message(" with homebrew:\n")
+        message("   brew tap ARMmbed/homebrew-formulae")
+        message("   brew install arm-none-eabi-gcc")
+    endif()
+    message("\n**************************************************************************")
+    message(FATAL_ERROR "missing program prevents build")
+    return()
+endmacro(gcc_program_notfound)
+
+if(${ARM_NONE_EABI_GCC} STREQUAL "ARM_NONE_EABI_GCC-NOTFOUND")
+    gcc_program_notfound("arm-none-eabi-gcc")
+endif()
+if(${ARM_NONE_EABI_GCC} STREQUAL "ARM_NONE_EABI_GPP-NOTFOUND")
+    gcc_program_notfound("arm-none-eabi-g++")
+endif()
+if(${ARM_NONE_EABI_GCC} STREQUAL "ARM_NONE_EABI_OBJCOPY-NOTFOUND")
+    gcc_program_notfound("arm-none-eabi-objcopy")
+endif()
+
+
 # post-process elf files into .bin files:
-set(YOTTA_POSTPROCESS_COMMAND "arm-none-eabi-objcopy -O binary YOTTA_CURRENT_EXE_NAME YOTTA_CURRENT_EXE_NAME.bin")
+set(YOTTA_POSTPROCESS_COMMAND "${ARM_NONE_EABI_OBJCOPY} -O binary YOTTA_CURRENT_EXE_NAME YOTTA_CURRENT_EXE_NAME.bin")
 
 
 # set default compilation flags
@@ -42,15 +75,15 @@ set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_MODULE_LINKER_FLAGS_INIT} -Wl,-wrap,mai
 # Set the compiler to ARM-GCC
 include(CMakeForceCompiler)
 
-cmake_force_c_compiler(arm-none-eabi-gcc GNU)
-cmake_force_cxx_compiler(arm-none-eabi-g++ GNU)
+cmake_force_c_compiler(${ARM_NONE_EABI_GCC} GNU)
+cmake_force_cxx_compiler(${ARM_NONE_EABI_GPP} GNU)
 
 # post-process elf files into .bin files:
 function(yotta_apply_target_rules target_type target_name)
     if(${target_type} STREQUAL "EXECUTABLE")
         add_custom_command(TARGET ${target_name}
             POST_BUILD
-            COMMAND arm-none-eabi-objcopy -O binary ${target_name} ${target_name}.bin
+            COMMAND ${ARM_NONE_EABI_OBJCOPY} -O binary ${target_name} ${target_name}.bin
             COMMENT "converting to .bin"
             VERBATIM
         )
