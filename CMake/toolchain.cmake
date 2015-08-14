@@ -75,15 +75,15 @@ set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_MODULE_LINKER_FLAGS_INIT} -Wl,-wrap,mai
 # Set the compiler to ARM-GCC
 include(CMakeForceCompiler)
 
-cmake_force_c_compiler(${ARM_NONE_EABI_GCC} GNU)
-cmake_force_cxx_compiler(${ARM_NONE_EABI_GPP} GNU)
+cmake_force_c_compiler("${ARM_NONE_EABI_GCC}" GNU)
+cmake_force_cxx_compiler("${ARM_NONE_EABI_GPP}" GNU)
 
 # post-process elf files into .bin files:
 function(yotta_apply_target_rules target_type target_name)
     if(${target_type} STREQUAL "EXECUTABLE")
         add_custom_command(TARGET ${target_name}
             POST_BUILD
-            COMMAND ${ARM_NONE_EABI_OBJCOPY} -O binary ${target_name} ${target_name}.bin
+            COMMAND "${ARM_NONE_EABI_OBJCOPY}" -O binary ${target_name} ${target_name}.bin
             COMMENT "converting to .bin"
             VERBATIM
         )
