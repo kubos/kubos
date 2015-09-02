@@ -1,6 +1,6 @@
 {
   "name": "mbed-gcc",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "base mbed build target for gcc toolchain",
   "licenses": [
     {
