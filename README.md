@@ -2,7 +2,13 @@
 TODO: Write a project description
 
 ## Installation
-TODO: Describe the installation process
+### Pre-Requisites
+1. Download RIOT-OS: `git clone git://github.com/RIOT-OS/RIOT.git`. See https://github.com/RIOT-OS/RIOT/wiki/Introduction for more details.
+
+### kubos-core Installation
+1. Download kubos-core to same parent directory as RIOT (or change default Makefile): `git clone git://github.com/openkosmosorg/kubos-core.git` 
+2. Within kubos-core directory, type `make all term`. Confirm shell is running ">"
+3. Type `help`.  Confirm list of available commands.  See "Usage" section for more details.
 
 ## Usage
 TODO: Write usage instructions
