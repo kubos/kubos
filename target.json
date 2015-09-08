@@ -4,6 +4,7 @@
   "similarTo": [
     "linux",
     "native",
+    "posix",
     "userland",
     "x86-64",
     "x86"
