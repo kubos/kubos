@@ -1,6 +1,10 @@
 
 #include <stdio.h>
 
+#ifdef MODULE_LOCATION
+    #include "location.h"
+#endif
+
 #include "kernel.h"
 #include "shell.h"
 #ifdef MODULE_NEWLIB
@@ -9,6 +13,7 @@
 #   include "posix_io.h"
 #   include "board_uart0.h"
 #endif
+
 
 int hello_world(int argc, char **argv) {
     /* Suppress compiler errors */
@@ -20,6 +25,9 @@ int hello_world(int argc, char **argv) {
 
 const shell_command_t shell_commands[] = {
     {"hello", "prints hello world", hello_world},
+#ifdef MODULE_LOCATION
+    {"gps_get", "Gets GPS Data", get_gps_data},
+#endif
     { NULL, NULL, NULL }
 };
 

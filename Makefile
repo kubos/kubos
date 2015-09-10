@@ -27,17 +27,28 @@ RIOTBASE ?= $(CURDIR)/../RIOT
 # development process:
 #CFLAGS += -DDEVELHELP
 
+#LINKFLAGS += -lgps
+
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1
 
 # Modules to include:
-
 USEMODULE += shell
 USEMODULE += uart0
 USEMODULE += posix
 #USEMODULE += vtimer
 
 #export INCLUDES += -Iapplication_include
+
+# **VANGUARD LOCATION MODULE**
+# comment this section out if not using
+EXTERNAL_MODULE_DIRS += $(CURDIR)/modules/location
+
+USEMODULE += location
+INCLUDES += -I$(CURDIR)/modules/location
+
+LINKFLAGS += -lgps
+# **END LOCATION MODULE***
 
 # Specify custom dependencies for your application here ...
 # APPDEPS = app_data.h config.h
@@ -48,3 +59,4 @@ include $(RIOTBASE)/Makefile.include
 # otherwise you modify the standard target):
 #proj_data.h: script.py data.tar.gz
 #	./script.py
+#LINKFLAGS += -lgps
