@@ -34,9 +34,10 @@ QUIET ?= 1
 
 # Modules to include:
 USEMODULE += shell
-USEMODULE += uart0
-USEMODULE += posix
-#USEMODULE += vtimer
+USEMODULE += vtimer
+#USEMODULE += uart0
+#USEMODULE += posix
+#USEMODULE += newlib
 
 #export INCLUDES += -Iapplication_include
 
