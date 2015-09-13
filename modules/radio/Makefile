@@ -1,3 +1,3 @@
-MODULE = location
+MODULE = radio
 
 include $(RIOTBASE)/Makefile.base
