@@ -4,7 +4,7 @@
 #include "shell.h"
 
 #ifdef MODULE_LOCATION
-    #include "location.h"
+    extern int location_demo(int argc, char **argv);
 #endif
 
 int hello_world(int argc, char **argv) {
@@ -18,7 +18,7 @@ int hello_world(int argc, char **argv) {
 const shell_command_t shell_commands[] = {
     {"hello", "prints hello world", hello_world},
 #ifdef MODULE_LOCATION
-    {"gps_get", "Gets GPS Data", get_gps_data},
+    {"location", "Gets GPS Data", location_demo},
 #endif
     { NULL, NULL, NULL }
 };
