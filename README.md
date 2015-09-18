@@ -19,8 +19,8 @@ The sections below describe how to run a virtual emulator for each available com
 ### Testing Command: "get_gps"
 1. Download "gps.log" from github repo "https://github.com/openkosmosorg/vanguard/tree/master/payload/test"
 2. In 2nd terminal window (not running kubos-core terminal), navigate to "gps.log" directory. Type: `gpsfake -u -c 0.01 -b gps.log`
-3. Type `gps_get` in primary kubos-core terminal
-4. Confirm Long, Lat, Alt, and Accuracy displayed
+3. Type `location` in primary kubos-core terminal
+4. Confirm Long, Lat, Alt, Speed and Climb are displayed
 
 ## Contributing
 1. Fork it!

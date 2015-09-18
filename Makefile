@@ -14,6 +14,7 @@ BOARD ?= native
 
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../RIOT
+RIOTBASE := $(abspath $(RIOTBASE))
 
 # Uncomment this to enable scheduler statistics for ps:
 #CFLAGS += -DSCHEDSTATISTICS
@@ -35,6 +36,7 @@ QUIET ?= 1
 # Modules to include:
 USEMODULE += shell
 USEMODULE += vtimer
+USEMODULE += xtimer
 #USEMODULE += uart0
 #USEMODULE += posix
 #USEMODULE += newlib
