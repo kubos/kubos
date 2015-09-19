@@ -15,7 +15,6 @@ See https://github.com/wb2osz/direwolf for more details
 2. `git clone https://www.github.com/wb2osz/direwolf`
 3. `make`
 4. `sudo make install`
-5. `make install-conf` ?? (needed?)
 
 ### kubos-core Installation
 1. Download kubos-core to same parent directory as RIOT (or change default Makefile): `git clone git://github.com/openkosmosorg/kubos-core.git` 
@@ -32,10 +31,12 @@ The sections below describe how to run a virtual emulator for each available com
 3. Type `location` in primary kubos-core terminal
 4. Confirm Long, Lat, Alt, Speed and Climb are displayed
 
-### Testing Command: "test_radio"
-1. Ensure Direwold is installed (See Installation Section)
+### Testing Command: "radio"
+1. Ensure Direwolf is installed (See Installation Section)
 1. Download "direwolf.conf" from "https://github.com/openkosmosorg/vanguard/tree/master/payload/config"
 2. In new terminal window, navigate to "direwolf.conf" directory. Type: `direwolf -p -t 0 -c "direwolf.conf"`
+3. Type `radio` in primary kubos-core terminal
+4. Confirm "The quick brown fox jumped over the lazy dogs" appears on the direwolf terminal
 
 ## Contributing
 1. Fork it!

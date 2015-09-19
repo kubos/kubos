@@ -2,6 +2,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 #include "kernel.h"
 
 #include <sys/types.h>
@@ -9,6 +10,7 @@
 #include <fcntl.h>
 
 #include "libkiss.h"
+#include "gpio.h"
 
 
 int set_interface_attribs (int fd, int speed, int parity)
@@ -111,6 +113,35 @@ int test_radio(int argc, char **argv) {
     (void)argv;
 
     testRadio();
+    
+    return 0;
+}
+
+int testGPIO(unsigned int gpio)
+{
+    // export and configure the pin for our usage
+    gpio_export(gpio);
+    gpio_set_dir(gpio, GPIO_DIR_OUTPUT);
+    gpio_set_value(gpio, 1);
+
+    return 0;
+}
+
+int test_gpio(int argc, char **argv) {
+
+    unsigned int gpio;
+
+    // gpio pin number
+    if (argc < 2) {
+        printf("Usage: gpio-int <gpio-pin>\n\n");
+        printf("Set pin high\n");
+        printf("See this article for beaglebone pins...http://www.armhf.com/using-beaglebone-black-gpios & http://kilobaser.com/blog/2014-07-15-beaglebone-black-gpios/\n");
+        return -1;
+    }
+
+    gpio = atoi(argv[1]);
+
+    testGPIO(gpio);
     
     return 0;
 }

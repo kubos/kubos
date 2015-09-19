@@ -8,6 +8,8 @@
  * or here:
  * http://www.ax25.net/kiss.aspx
  *
+ * ******** FROM adsllc/libkiss -- CHECK LICENSES!! ********
+ *
  */
 
 #ifdef HAVE_CONFIG_H
