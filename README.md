@@ -9,7 +9,8 @@ TODO: Write a project description
 2. gpsd: `sudo apt-get install gpsd:i386 libgps-dev:i386`
 
 ### Direwolf Installation (beacon radio)
-See https://github.com/wb2osz/direwolf for more details...
+See https://github.com/wb2osz/direwolf for more details
+
 1. `sudo apt-get install libasound2-dev`
 2. `git clone https://www.github.com/wb2osz/direwolf`
 3. `make`
