@@ -7,6 +7,10 @@
     extern int location_demo(int argc, char **argv);
 #endif
 
+#ifdef MODULE_RADIO
+    extern int test_radio(int argc, char **argv);
+#endif
+
 int hello_world(int argc, char **argv) {
     /* Suppress compiler errors */
     (void)argc;
@@ -19,6 +23,9 @@ const shell_command_t shell_commands[] = {
     {"hello", "prints hello world", hello_world},
 #ifdef MODULE_GPS
     {"gps", "Gets GPS Data", location_demo},
+#endif
+#ifdef MODULE_RADIO
+    {"radio", "Tests Radio w/ Direwolf", test_radio},
 #endif
     { NULL, NULL, NULL }
 };

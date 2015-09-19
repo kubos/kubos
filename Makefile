@@ -43,7 +43,7 @@ USEMODULE += xtimer
 #USEMODULE += posix
 #USEMODULE += newlib
 #USEMODULE += location
-#USEMODULE += radio
+USEMODULE += radio
 
 KUBOS_USEMODULES := gps
 
