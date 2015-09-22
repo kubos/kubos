@@ -25,8 +25,8 @@
   #include "cmsis-core/core_cm4.h"
 #elif defined(TARGET_LIKE_CORTEX_M0)
   #include "cmsis-core/core_cm0.h"
-#elif defined(TARGET_LIKE_CORTEX_M0P)
-  #include "cmsis-core/core_cm0p.h"
+#elif defined(TARGET_LIKE_CORTEX_M0PLUS)
+  #include "cmsis-core/core_cm0plus.h"
 #else
   #error "Unknown platform for core_generic.h"
 #endif
