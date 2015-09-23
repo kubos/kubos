@@ -18,7 +18,7 @@ TODO: Write a project description
 After running `make all term` from kubos-core root directory, a prompt ">" should appear.  Type "help" to see the list of available commands.
 
 The sections below describe how to run a virtual emulator for each available command. 
-### Testing Command: "get_gps"
+### Testing Command: "location"
 1. Download "gps.log" from github repo "https://github.com/openkosmosorg/vanguard/tree/master/payload/test"
 2. In 2nd terminal window (not running kubos-core terminal), navigate to "gps.log" directory. Type: `gpsfake -u -c 0.01 -b gps.log`
 3. Type `location` in primary kubos-core terminal

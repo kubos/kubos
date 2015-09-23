@@ -1,0 +1,12 @@
+
+#ifdef MODULES_LOCATION
+	EXTERNAL_MODULE_DIRS += $(KUBOS_MODULES)/location
+	INCLUDES += -I$(KUBOS_MODULES)/location
+	LINKFLAGS += -lgps
+#endif
+
+#ifdef MODULES_RADIO
+	EXTERNAL_MODULE_DIRS += $(KUBOS_MODULES)/radio
+	INCLUDES += -I$(KUBOS_MODULES)/radio
+#endif
+
