@@ -11,6 +11,10 @@
  */
 char location_thread_stack[THREAD_STACKSIZE_DEFAULT];
 
+/* Keep track of how many fixes we've seen.
+ */
+ int fix_count = 0;
+
 /* Create the location thread 
  */
 kernel_pid_t create_location_thread(kernel_pid_t receiver_pid, uint16_t message_type_id)
@@ -32,8 +36,15 @@ void process_gpsfix_msg_content(location_gps_fix_t* gpsfix) {
  
 /* TO DO set up compare to msg.log
  */
-    printf("testing... %d\n", gpsfix->dimensions);
- }
+    if (gpsfix->dimensions == 3)
+    {
+    printf("fix %2d: %dD lat: %g long: %g alt: %g speed: %g climb %g\n", fix_count, gpsfix->dimensions,
+        gpsfix->latitude, gpsfix->longitude, gpsfix->altitude, gpsfix->speed, gpsfix->climb);
+    } else {
+        printf("fix %2d: %dD lat: %g long: %g speed: %g\n", fix_count, gpsfix->dimensions,
+            gpsfix->latitude, gpsfix->longitude, gpsfix->speed);
+    }
+}
 
 /* Allocate a message queue for this thread. 
  */
@@ -54,6 +65,10 @@ int location_test(void) {
      */    
     location_pid = create_location_thread(thread_getpid(), LOCATION_FIX_MSG_TYPE);
 
+    printf("Start a new terminal session and run this command in the new session:\n");
+    printf("gpsfake -1 -v -u -c 0.01 location_test.dat\n\n");
+
+    printf("TO DO: See location_test.c, line 73\n\n");
 
 /* TO DO: Set up this loop so it walks the msg.log file and compares each message
  * in the log file to each received message. gpsfake should be launched with '-l'
@@ -64,19 +79,17 @@ int location_test(void) {
  * other very large number.
  */
 
-    while (1) {
+    while (fix_count < 20) {
         /* Get a msg from the queue. NOTE change to blocking version.
          */
- printf("Getting msg...");
         msg_rc = msg_receive(&msg);
- printf("get is done...msg_rc = %d...", msg_rc);
         if (msg_rc == 1)
         {
- printf("processing\n");
+            fix_count++;
             /* Process the message...
              */
             if (msg.sender_pid == location_pid) {
-            	/* this message came from location
+           	/* this message came from location
                  */
             	if (msg.type == LOCATION_FIX_MSG_TYPE) {
             		/* This is a gps fix type message
@@ -84,6 +97,9 @@ int location_test(void) {
                     process_gpsfix_msg_content((location_gps_fix_t*)msg.content.ptr);
                 }
         	}
+        } else if (msg_rc == -1)
+        {
+            printf("msg_receive reports an error.\n");
         }
     }
 
