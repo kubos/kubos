@@ -1,3 +1,4 @@
 yotta_*
 build/*
 upload.tar.gz
+.yotta.json
