@@ -33,6 +33,6 @@
 #define MBED_CMSIS_H
 
 #include "stm32f4xx.h"
-#include "cmsis_nvic.h"
+#include "cmsis-core/cmsis_nvic.h"
 
 #endif
