@@ -26,7 +26,7 @@
       "cmsis-core-stm32f429xi": "~0.0.0"
     },
     "stm32f439zi": {
-      "cmsis-core-st-stm32f439zi": "~0.0.0"
+      "cmsis-core-stm32f429xi": "~0.0.0"
     }
   }
 }
