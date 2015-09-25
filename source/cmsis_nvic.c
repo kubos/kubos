@@ -30,6 +30,13 @@
  */
 #include "cmsis-core/cmsis_nvic.h"
 
+/* Cortex-M0 cores do not have the VTOR register for vectors relocation, and
+ * some of them might implement an alternative method for that purpose; hence we
+ * require targets based on them to implement their own versions of these
+ * functions */
+/* The same applies for Cortex-M0+ targets as VTOR is not always present */
+#if !defined(TARGET_LIKE_CORTEX_M0) && !defined(TARGET_LIKE_CORTEX_M0PLUS)
+
 void NVIC_SetVector(IRQn_Type IRQn, uint32_t vector)
 {
     uint32_t *vectors = (uint32_t *) SCB->VTOR;
@@ -52,3 +59,5 @@ uint32_t NVIC_GetVector(IRQn_Type IRQn)
     uint32_t *vectors = (uint32_t *) SCB->VTOR;
     return vectors[IRQn + NVIC_USER_IRQ_OFFSET];
 }
+
+#endif /* !defined(TARGET_LIKE_CORTEX_M0) && !defined(TARGET_LIKE_CORTEX_M0PLUS) */
