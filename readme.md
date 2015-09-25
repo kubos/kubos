@@ -8,3 +8,6 @@ preprocessor definitions).
 
 You should not select this target to compile with directly (compilation will
 probably not succeed without target-specific startup code).
+
+See [CHANGELOG.md](CHANGELOG.md) for the changes associated with
+each version.
