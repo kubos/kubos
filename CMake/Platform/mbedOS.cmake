@@ -14,6 +14,9 @@ set(CMAKE_C_OUTPUT_EXTENSION ".o")
 set(CMAKE_ASM_OUTPUT_EXTENSION ".o")
 set(CMAKE_CXX_OUTPUT_EXTENSION ".o")
 
+include_directories("${CMAKE_BINARY_DIR}/generated/include")
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/generated/include")
+
 # adjust the default behaviour of the FIND_XXX() commands:
 # search headers and libraries in the target environment, search 
 # programs in the host environment
