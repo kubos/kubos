@@ -7,17 +7,17 @@
 ####
 
 # Set the name of your application:
-APPLICATION = kubos-core
+APPLICATION = kubos-test
 
 # If no BOARD is found in the environment, use this default:
 BOARD ?= native
 
 # This has to be the absolute path to the RIOT base directory:
-RIOTBASE ?= $(CURDIR)/../RIOT
+RIOTBASE ?= $(CURDIR)/../../RIOT
 RIOTBASE := $(abspath $(RIOTBASE))
 
 # Absolute path to kubos modules base
-KUBOS_MODULES ?= $(CURDIR)/modules
+KUBOS_MODULES ?= $(CURDIR)/../modules
 KUBOS_MODULES := $(abspath $(KUBOS_MODULES))
 
 # Uncomment this to enable scheduler statistics for ps:
@@ -31,13 +31,14 @@ KUBOS_MODULES := $(abspath $(KUBOS_MODULES))
 # which is not needed in a production environment but helps in the
 # development process:
 #CFLAGS += -DDEVELHELP
+#CFLAGS += -DDEBUG
 
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1
 
 # Modules to include:
-USEMODULE += shell
-USEMODULE += vtimer
+#USEMODULE += shell
+#USEMODULE += vtimer
 USEMODULE += xtimer
 #USEMODULE += posix
 #USEMODULE += newlib
