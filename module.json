@@ -30,10 +30,10 @@
       "cmsis-core-silabs": "~0.1.0"
     },
     "freescale": {
-      "cmsis-core-freescale": "~0.1.0"
+      "cmsis-core-freescale": "~0.2.0"
     },
     "st": {
-      "cmsis-core-st": "~0.3.0"
+      "cmsis-core-st": "~0.4.0"
     },
     "nordic": {
       "cmsis-core-nordic": "~0.0.1"
