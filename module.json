@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-stm32f4",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "CMSIS Core module for STM32F4xx microcontrollers",
   "keywords": [],
   "author": "Brendan Moran <brendan.moran@arm.com>",
