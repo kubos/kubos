@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-stm32f4",
-  "version": "0.2.12",
+  "version": "0.4.1",
   "description": "CMSIS Core module for STM32F4xx microcontrollers",
   "keywords": [],
   "author": "Brendan Moran <brendan.moran@arm.com>",
@@ -15,18 +15,18 @@
     "cmsis-core-stm32f4"
   ],
   "dependencies": {
-    "cmsis-core": "~0.2.0",
-    "mbed-hal-st-stm32f4": "~0.2.0"
+    "cmsis-core": "*",
+    "mbed-hal-st-stm32f4": "~0.4.0"
   },
   "targetDependencies": {
     "stm32f401xe": {
       "cmsis-core-stm32f401xe": "~0.2.0"
     },
     "stm32f429xi": {
-      "cmsis-core-stm32f429xi": "~0.0.0"
+      "cmsis-core-stm32f429xi": "~0.2.0"
     },
     "stm32f439zi": {
-      "cmsis-core-st-stm32f439zi": "~0.0.0"
+      "cmsis-core-stm32f429xi": "~0.2.0"
     }
   }
 }
