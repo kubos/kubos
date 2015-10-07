@@ -1,3 +1,7 @@
+## 0.1.2
+ * set dwarf debug info version to 3, for compatibility with the uVision
+   debugger.
+
 ## 0.1.1
  * add support for a `GLOBALLY_LINKED_TARGET_LIBS` variable that derived
    targets can set to specify libraries that should be linked into every
