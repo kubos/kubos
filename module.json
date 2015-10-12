@@ -37,6 +37,9 @@
     },
     "nordic": {
       "cmsis-core-nordic": "~0.0.1"
+    },
+    "cordio": {
+      "cmsis-core-cordio": "~0.0.1"
     }
   }
 }
