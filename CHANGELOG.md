@@ -1,3 +1,6 @@
+## 0.1.3
+ * update for compatibility with CMake 3.4
+
 ## 0.1.2
  * set dwarf debug info version to 3, for compatibility with the uVision
    debugger.
