@@ -3,7 +3,9 @@
   "version": "0.4.2",
   "description": "CMSIS-Core",
   "keywords": [
-    "cmsis"
+    "cmsis",
+    "mbed",
+    "mbed-official"
   ],
   "author": "Bogdan Marinescu <bogdan.marinescu@arm.com>",
   "repository": {
@@ -30,13 +32,13 @@
       "cmsis-core-silabs": "~0.1.0"
     },
     "freescale": {
-      "cmsis-core-freescale": "~0.2.0"
+      "cmsis-core-freescale": "^1.0.0"
     },
     "st": {
-      "cmsis-core-st": "~0.4.0"
+      "cmsis-core-st": "^1.0.0"
     },
     "nordic": {
-      "cmsis-core-nordic": "~0.0.1"
+      "cmsis-core-nordic": "^1.0.0"
     }
   }
 }
