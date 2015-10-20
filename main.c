@@ -7,8 +7,8 @@
     extern int location_demo(int argc, char **argv);
 #endif
 
-#ifdef MODULE_RADIO
-    extern int test_radio(int argc, char **argv);
+#ifdef MODULE_HAM
+#include "ham_shell.h"
 #endif
 
 int hello_world(int argc, char **argv) {
@@ -24,8 +24,8 @@ const shell_command_t shell_commands[] = {
 #ifdef MODULE_GPS
     {"gps", "Gets GPS Data", location_demo},
 #endif
-#ifdef MODULE_RADIO
-    {"radio", "Tests Radio w/ Direwolf", test_radio},
+#ifdef MODULE_HAM
+    HAM_SHELL_COMMANDS
 #endif
     { NULL, NULL, NULL }
 };
@@ -33,6 +33,10 @@ const shell_command_t shell_commands[] = {
 int main(void)
 {
     puts("Welcome to KubOS! Initializing...");
+
+#ifdef MODULE_HAM
+    ham_cmd_init();
+#endif
 
     /* start shell */
     puts("All up, running the shell now");
