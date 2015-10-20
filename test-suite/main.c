@@ -1,37 +1,23 @@
 
 #include <stdio.h>
-#include "test-suite.h"
+#include <stdlib.h>
 
+#include <embUnit.h>
+#include <embUnit/TextUIRunner.h>
+#include <embUnit/TextOutputter.h>
+#include <lpm.h>
 
-DECLARE_TEST(location);
-//DECLARE_TEST(radio);
-
-const test_command_t test_suite[] = {
-    TEST_COMMAND(location),
- //   TEST_COMMAND(radio),
-    { NULL, NULL }
-};
-
-
+#include "tests.h"
 
 int main(void)
 {
-    puts("Welcome to KubOS Test Suite!\n");
+    TextUIRunner_setOutputter(TextOutputter_outputter());
+    TextUIRunner_start();
+    TextUIRunner_runTest(aprs_suite());
+    TextUIRunner_runTest(ax25_suite());
+    TextUIRunner_runTest(kiss_suite());
+    TextUIRunner_end();
 
-    int result;
-    int test_num = 0;
-
-    while (test_suite[test_num].name != NULL)
-    {
-    	printf("Beginning test of %s\n", test_suite[test_num].name);
-    	result = (test_suite[test_num].test_func)();
-    	printf("\nCompleted test of %s. Status = %s\n", 
-    			test_suite[test_num].name,
-    			result == TEST_PASS ? "PASS" : "FAIL");
-    	test_num++;
-    }
-
-    printf("\n\nAll tests have been completed.\n");
-
+    lpm_set(LPM_POWERDOWN);
     return 0;
 }

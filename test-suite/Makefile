@@ -42,8 +42,20 @@ QUIET ?= 1
 USEMODULE += xtimer
 #USEMODULE += posix
 #USEMODULE += newlib
-USEMODULE += location
-#USEMODULE += radio
+#USEMODULE += location
+USEMODULE += radio
+USEMODULE += ham
+USEMODULE += embUnit
+USEMODULE += gnrc_pktbuf
+USEMODULE += gnrc_netif
+USEMODULE += gnrc_netapi
+USEMODULE += gnrc_netreg
+
+CFLAGS += -g
+INCLUDES += -I$(KUBOS_MODULES)/radio
+INCLUDES += -I$(KUBOS_MODULES)/ham
+INCLUDES += -I$(KUBOS_MODULES)/location
+INCLUDES += -I$(RIOTBASE)/sys/include
 
 include $(KUBOS_MODULES)/Makefile.include
 include $(RIOTBASE)/Makefile.include

@@ -38,14 +38,19 @@ QUIET ?= 1
 
 # Modules to include:
 USEMODULE += shell
+USEMODULE += shell_commands
 USEMODULE += vtimer
 USEMODULE += xtimer
+USEMODULE += auto_init
 #USEMODULE += posix
 #USEMODULE += newlib
 #USEMODULE += location
-#USEMODULE += radio
+USEMODULE += gnrc_pktbuf
+USEMODULE += gnrc_netif
+USEMODULE += gnrc_netapi
+USEMODULE += gnrc_netreg
 
-KUBOS_USEMODULES := gps
+KUBOS_USEMODULES := gps radio ham
 
 ifeq ($(BOARD),native)
 USEMODULE += native_uart
