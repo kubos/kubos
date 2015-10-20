@@ -9,7 +9,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "libkiss.h"
+#include "../ham/aprs.h"
+#include "../ham/ax25.h"
+#include "../ham/kiss.h"
 #include "gpio.h"
 
 
@@ -70,53 +72,6 @@ void set_blocking (int fd, int should_block)
                 printf ("error %d setting term attributes", errno);
 }
 
-
-
-int testRadio(void)
-{
-	int result;
-	unsigned char buf[255];
-	unsigned int packetlen;
-
-	char *portname = "/tmp/kisstnc";
-
-	int fd = open (portname, O_RDWR | O_NOCTTY | O_SYNC);
-
-	if (fd < 0)
-	{
-	        printf ("error %d opening %s: %s", errno, portname, strerror (errno));
-	        return -1;
-	}
-
-    set_interface_attribs (fd, B1200, 0);  // set speed to 115,200 bps, 8n1 (no parity) **1200**
-	set_blocking (fd, 0);                // set no blocking
-
-	result=libkiss_buildpacket(LIBKISS_FUNC_DATA, 0, "The quick brown fox jumped over the lazy dogs.", 46, buf, sizeof(buf), &packetlen);
-
-	printf("Build Packet success? %s\n", result == 0 ? "Yes" : "No");
-
-	write (fd, buf, packetlen);           // send 7 character greeting
-
-	usleep ((sizeof(buf) + 25) * 100);             // sleep enough to transmit the 7 plus
-	                                     // receive 25:  approx 100 uS per char transmit
-	char buf2 [100];
-	int n = read (fd, buf2, sizeof buf2);  // read up to 100 characters if ready to read
-
-	printf("Read %d characters\n", n);
-
-    return n;
-}
-
-int test_radio(int argc, char **argv) {
-    /* Suppress compiler errors */
-    (void)argc;
-    (void)argv;
-
-    testRadio();
-    
-    return 0;
-}
-
 int testGPIO(unsigned int gpio)
 {
     // export and configure the pin for our usage
@@ -142,7 +97,7 @@ int test_gpio(int argc, char **argv) {
     gpio = atoi(argv[1]);
 
     testGPIO(gpio);
-    
+
     return 0;
 }
 
