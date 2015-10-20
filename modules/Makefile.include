@@ -1,21 +1,12 @@
-
-#ifdef MODULES_LOCATION
-#	EXTERNAL_MODULE_DIRS += $(KUBOS_MODULES)/location
-#	INCLUDES += -I$(KUBOS_MODULES)/location
-#	LINKFLAGS += -lgps
-#endif
-
-#ifdef MODULES_RADIO
-#	EXTERNAL_MODULE_DIRS += $(KUBOS_MODULES)/radio
-#	INCLUDES += -I$(KUBOS_MODULES)/radio
-#endif
-
-#ifdef MODULES_GPS
-#	EXTERNAL_MODULE_DIRS += $(KUBOS_MODULES)/gps
-#	CFLAGS += -I$(KUBOS_MODULES)/gps
-#endif
+# Add Kubos Modules to necessary Make variables
+USEMODULE += $(KUBOS_USEMODULES)
+KUBOS_MODULE_DIRS = $(foreach module,$(KUBOS_USEMODULES),$(KUBOS_MODULES)/$(module))
+EXTERNAL_MODULE_DIRS += $(KUBOS_MODULE_DIRS)
+CFLAGS += $(foreach dir,$(KUBOS_MODULE_DIRS),-I$(dir))
+INCLUDES += $(foreach dir,$(KUBOS_MODULE_DIRS),-I$(dir))
+LINKFLAGS += -lm
 
 ifeq ($(BOARDTYPE),beaglebone)
-	CFLAGS += -DHAVE_NATIVE_PERIPH_CONF_H
-	LINKFLAGS += -lrt
+CFLAGS += -DHAVE_NATIVE_PERIPH_CONF_H
+LINKFLAGS += -lrt
 endif

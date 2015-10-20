@@ -1,12 +1,3 @@
-####
-#### Sample Makefile for building applications with the RIOT OS
-####
-#### The example file system layout is:
-#### ./application Makefile
-#### ../../RIOT
-####
-
-# Set the name of your application:
 APPLICATION = kubos-test
 
 # If no BOARD is found in the environment, use this default:
@@ -23,10 +14,6 @@ KUBOS_MODULES := $(abspath $(KUBOS_MODULES))
 # Uncomment this to enable scheduler statistics for ps:
 #CFLAGS += -DSCHEDSTATISTICS
 
-# If you want to use native with valgrind, you should recompile native
-# with the target all-valgrind instead of all:
-# make -B clean all-valgrind
-
 # Uncomment this to enable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the
 # development process:
@@ -37,31 +24,17 @@ KUBOS_MODULES := $(abspath $(KUBOS_MODULES))
 QUIET ?= 1
 
 # Modules to include:
-#USEMODULE += shell
-#USEMODULE += vtimer
 USEMODULE += xtimer
-#USEMODULE += posix
-#USEMODULE += newlib
-#USEMODULE += location
-USEMODULE += radio
-USEMODULE += ham
 USEMODULE += embUnit
 USEMODULE += gnrc_pktbuf
 USEMODULE += gnrc_netif
 USEMODULE += gnrc_netapi
 USEMODULE += gnrc_netreg
 
+KUBOS_USEMODULES := radio ham
+
 CFLAGS += -g
-INCLUDES += -I$(KUBOS_MODULES)/radio
-INCLUDES += -I$(KUBOS_MODULES)/ham
-INCLUDES += -I$(KUBOS_MODULES)/location
 INCLUDES += -I$(RIOTBASE)/sys/include
 
 include $(KUBOS_MODULES)/Makefile.include
 include $(RIOTBASE)/Makefile.include
-
-# ... and define them here (after including Makefile.include,
-# otherwise you modify the standard target):
-#proj_data.h: script.py data.tar.gz
-#	./script.py
-
