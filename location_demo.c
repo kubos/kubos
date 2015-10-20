@@ -12,21 +12,6 @@
  */
 char location_thread_stack[THREAD_STACKSIZE_DEFAULT];
 
-/* Create the location thread 
- */
-kernel_pid_t create_location_thread(kernel_pid_t receiver_pid, uint16_t message_type_id)
-{
-    location_t          location;
-
-    location.pid = receiver_pid;
-    location.type = message_type_id;
-
-    kernel_pid_t location_pid = thread_create(location_thread_stack, sizeof(location_thread_stack),
-                                                THREAD_PRIORITY_MAIN - 1, CREATE_STACKTEST,
-                                                location_proc, &location, "location");
-    return location_pid;
-}
-
 /* Do something with the gps data. Here we just print it.
  */
 void process_gpsfix_msg_content(location_gps_fix_t* gpsfix) {
@@ -80,16 +65,19 @@ int location_demo(int argc, char **argv) {
     (void)argc;
     (void)argv;
     msg_t           msg;
-    kernel_pid_t    location_pid;
     uint32_t        last_wakeup = xtimer_now();
 
 	/* Initialize the message queue for this thread 
      */
 	msg_init_queue(msg_queue, LOCATION_MSG_Q_SIZE);
 
-    /* Create the location thread.
-     */    
-    location_pid = create_location_thread(thread_getpid(), LOCATION_FIX_MSG_TYPE);
+    // Create the location thread.
+    gps_cfg_t gps_cfg;
+    gps_cfg.pid = thread_getpid();
+    gps_cfg.type = GPS_FIX_MSG_TYPE;
+    gps_cfg.uart = GPS_UART;
+    gps_cfg.baudrate = 9600;
+    gps_connect(&gps_cfg);
 
     /* Loop until you get a CTRL-C
      */
