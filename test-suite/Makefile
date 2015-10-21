@@ -2,6 +2,7 @@ APPLICATION = kubos-test
 
 # If no BOARD is found in the environment, use this default:
 BOARD ?= native
+BOARDTYPE ?= beaglebone
 
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE ?= $(CURDIR)/../../RIOT
@@ -31,7 +32,7 @@ USEMODULE += gnrc_netif
 USEMODULE += gnrc_netapi
 USEMODULE += gnrc_netreg
 
-KUBOS_USEMODULES := radio ham
+KUBOS_USEMODULES := radio ham gps
 
 CFLAGS += -g
 INCLUDES += -I$(RIOTBASE)/sys/include

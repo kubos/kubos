@@ -13,9 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * NMEA parser ported to C from Adafruit_GPS:
- *     https://github.com/adafruit/Adafruit-GPS-Library
  */
 #include <errno.h>
 #include <math.h>
@@ -42,27 +39,156 @@ static uint8_t parse_hex(char c)
     return 0;
 }
 
-int parse_nmea(char *nmea, int length, gps_fix_t *fix)
+static void parse_timestamp(char *ts, gps_fix_t *fix)
 {
-    uint8_t i;
-    int32_t degree;
-    long minutes;
-    char degreebuff[10];
+    char buf[4];
+    strncpy(buf, ts, 2);
+    buf[2] = '\0';
+    fix->hour = (uint8_t) atoi(buf);
 
-    if (!nmea || !fix || length <= 0) {
-        return -EINVAL;
+    strncpy(buf, ts + 2, 2);
+    buf[2] = '\0';
+    fix->minute = (uint8_t) atoi(buf);
+
+    strncpy(buf, ts + 4, 2);
+    buf[2] = '\0';
+    fix->seconds = (uint8_t) atoi(buf);
+
+    strncpy(buf, ts + 7, 3);
+    buf[3] = '\0';
+    fix->milliseconds = (uint16_t) atoi(buf);
+}
+
+static float parse_latlon(char *latlon)
+{
+    float coords = atof(latlon);
+    int deg = coords / 100;
+    float dec = (coords / 100.0f - deg) * 100;
+
+    dec /= 60;
+    dec += deg;
+
+    return dec;
+}
+
+#define TIMESTAMP     1
+#define GPRMC_FIXTYPE 2
+#define GPRMC_LAT     3
+#define GPRMC_LATDIR  4
+#define GPRMC_LON     5
+#define GPRMC_LONDIR  6
+#define GPRMC_SPEED   7
+#define GPRMC_ANGLE   8
+#define GPRMC_DATE    9
+
+#define GPGGA_LAT     2
+#define GPGGA_LATDIR  3
+#define GPGGA_LON     4
+#define GPGGA_LONDIR  5
+#define GPGGA_FIXQUAL 6
+#define GPGGA_SATS    7
+#define GPGGA_HDOP    8
+#define GPGGA_ALT     9
+#define GPGGA_GEOID   10
+
+static int parse_gprmc(uint8_t field, char *value, gps_fix_t *fix)
+{
+    uint32_t date;
+
+    switch (field) {
+        case TIMESTAMP:
+            parse_timestamp(value, fix);
+            break;
+
+        case GPRMC_FIXTYPE:
+            if (*value != 'A') {
+                return NMEA_ERR_INVALID_FIX;
+            }
+            break;
+
+        case GPRMC_LAT:
+            fix->latitude = parse_latlon(value);
+            break;
+
+        case GPRMC_LATDIR:
+            if (*value == 'S') fix->latitude *= -1.0;
+            break;
+
+        case GPRMC_LON:
+            fix->longitude = parse_latlon(value);
+            break;
+
+        case GPRMC_LONDIR:
+            if (*value == 'W') fix->longitude *= -1.0;
+            break;
+
+        case GPRMC_SPEED:
+            fix->speed = value ? atof(value): 0;
+            break;
+
+        case GPRMC_DATE:
+            date = atoi(value);
+            fix->day = date / 10000;
+            fix->month = (date % 10000) / 100;
+            fix->year = (date % 100);
+            break;
     }
 
-    nmea[length] = '\0';
-    // do checksum check
-    // first look if we even have one
-    if (nmea[length - 4] == '*') {
-        uint16_t sum = parse_hex(nmea[length - 3]) * 16;
-        sum += parse_hex(nmea[length - 2]);
+    return NMEA_OK;
+}
+
+static int parse_gpgga(uint8_t field, char *value, gps_fix_t *fix)
+{
+    switch (field) {
+        case TIMESTAMP:
+            parse_timestamp(value, fix);
+            break;
+
+        case GPGGA_LAT:
+            fix->latitude = parse_latlon(value);
+            break;
+
+        case GPGGA_LATDIR:
+            if (*value == 'S') fix->latitude *= -1.0;
+            break;
+
+        case GPGGA_LON:
+            fix->longitude = parse_latlon(value);
+            break;
+
+        case GPGGA_LONDIR:
+            if (*value == 'W') fix->longitude *= -1.0;
+            break;
+
+        case GPGGA_ALT:
+            fix->altitude = value ? atof(value) : 0;
+            break;
+    }
+
+    return NMEA_OK;
+}
+
+int nmea_parse(char *nmea, int len, gps_fix_t *fix)
+{
+    char str[128], *token;
+    uint8_t i = 0, type;
+
+    strncpy(str, nmea, len);
+    str[len > 127 ? 127 : len] = '\0';
+
+    // trim newlines
+    while (str[len - 1] == '\r' || str[len - 1] == '\n') {
+        str[len--] = '\0';
+    }
+
+    // validate checksum
+    if (str[len - 3] == '*') {
+        uint16_t sum = parse_hex(str[len - 2]) * 16;
+        sum += parse_hex(str[len - 1]);
 
         // check checksum
-        for (i = 1; i < length - 4; i++) {
-            sum ^= nmea[i];
+        for (i = 1; i < len - 3; i++) {
+            sum ^= str[i];
         }
         if (sum != 0) {
             // checksum mismatch
@@ -70,222 +196,38 @@ int parse_nmea(char *nmea, int length, gps_fix_t *fix)
         }
     }
 
-    // look for a few common sentences
-    if (strstr(nmea, "$GPGGA")) {
-        // found GGA
-        char *p = nmea;
-        float timef;
-        uint32_t time;
+    str[len - 3] = '\0';
+    len -= 3;
 
-        // get time
-        p = strchr(p, ',')+1;
-        timef = atof(p);
-        time = timef;
+    for (token = strtok(str, ","), i = 0;
+         token;
+         token = strtok(NULL, ","), i++) {
 
-        fix->hour = time / 10000;
-        fix->minute = (time % 10000) / 100;
-        fix->seconds = (time % 100);
-        fix->milliseconds = fmod(timef, 1.0) * 1000;
-
-        // parse out latitude
-        p = strchr(p, ',') + 1;
-        if (',' != *p)
-        {
-            strncpy(degreebuff, p, 2);
-            p += 2;
-            degreebuff[2] = '\0';
-            degree = atol(degreebuff) * 10000000;
-            strncpy(degreebuff, p, 2); // minutes
-            p += 3; // skip decimal point
-            strncpy(degreebuff + 2, p, 4);
-            degreebuff[6] = '\0';
-            minutes = 50 * atol(degreebuff) / 3;
-            //latitude_fixed = degree + minutes;
-            float latitude = degree / 100000 + minutes * 0.000006F;
-            fix->latitude = (latitude-100*(int)(latitude/100))/60.0;
-            fix->latitude += (int)(latitude/100);
+        if (i == 0) {
+            if (strncmp("$GPRMC", token, 6) == 0) {
+                type = NMEA_GPRMC;
+            } else if (strncmp("$GPGGA", token, 6) == 0) {
+                type = NMEA_GPGGA;
+            } else {
+                return NMEA_ERR_UNKNOWN;
+            }
+            continue;
         }
 
-        p = strchr(p, ',') + 1;
-        if (',' != *p)
-        {
-            if (p[0] == 'S') fix->latitude *= -1.0;
-            /*if (p[0] == 'N') lat = 'N';
-            else if (p[0] == 'S') lat = 'S';
-            else if (p[0] == ',') lat = 0;
-            else return false;*/
+        int result = NMEA_OK;
+        switch (type) {
+            case NMEA_GPRMC:
+                result = parse_gprmc(i, token, fix);
+                break;
+            case NMEA_GPGGA:
+                result = parse_gpgga(i, token, fix);
+                break;
         }
 
-        // parse out longitude
-        p = strchr(p, ',') + 1;
-        if (',' != *p)
-        {
-            strncpy(degreebuff, p, 3);
-            p += 3;
-            degreebuff[3] = '\0';
-            degree = atol(degreebuff) * 10000000;
-            strncpy(degreebuff, p, 2); // minutes
-            p += 3; // skip decimal point
-            strncpy(degreebuff + 2, p, 4);
-            degreebuff[6] = '\0';
-            minutes = 50 * atol(degreebuff) / 3;
-            //longitude_fixed = degree + minutes;
-            float longitude = degree / 100000 + minutes * 0.000006F;
-            fix->longitude = (longitude-100*(int)(longitude/100))/60.0;
-            fix->longitude += (int)(longitude/100);
+        if (result != NMEA_OK) {
+            return result;
         }
-
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            if (p[0] == 'W') fix->longitude *= -1.0;
-            /*if (p[0] == 'W') lon = 'W';
-            else if (p[0] == 'E') lon = 'E';
-            else if (p[0] == ',') lon = 0;
-            else return false;*/
-        }
-
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            //fix->fixquality = atoi(p);
-        }
-
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            //satellites = atoi(p);
-        }
-
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            //HDOP = atof(p);
-        }
-
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            fix->altitude = atof(p);
-        }
-
-        p = strchr(p, ',')+1;
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            //geoidheight = atof(p);
-        }
-        return NMEA_OK;
     }
 
-    if (strstr(nmea, "$GPRMC")) {
-        // found RMC
-        char *p = nmea;
-
-        // get time
-        p = strchr(p, ',')+1;
-        float timef = atof(p);
-        uint32_t time = timef;
-        fix->hour = time / 10000;
-        fix->minute = (time % 10000) / 100;
-        fix->seconds = (time % 100);
-        fix->milliseconds = fmod(timef, 1.0) * 1000;
-
-        p = strchr(p, ',')+1;
-        if (p[0] == 'A') {
-            //fix = true;
-        } else if (p[0] == 'V') {
-            //fix = false;
-        } else {
-            return NMEA_ERR_INVALID_FIX;
-        }
-
-        // parse out latitude
-        p = strchr(p, ',') + 1;
-        if (',' != *p)
-        {
-            strncpy(degreebuff, p, 2);
-            p += 2;
-            degreebuff[2] = '\0';
-            long degree = atol(degreebuff) * 10000000;
-            strncpy(degreebuff, p, 2); // minutes
-            p += 3; // skip decimal point
-            strncpy(degreebuff + 2, p, 4);
-            degreebuff[6] = '\0';
-            long minutes = 50 * atol(degreebuff) / 3;
-            //latitude_fixed = degree + minutes;
-            float latitude = degree / 100000 + minutes * 0.000006F;
-            fix->latitude = (latitude-100*(int)(latitude/100))/60.0;
-            fix->latitude += (int)(latitude/100);
-        }
-
-        p = strchr(p, ',') + 1;
-        if (*p != ',')
-        {
-            if (*p != 'S' && *p != 'N') {
-                return NMEA_ERR_INVALID_DIR;
-            }
-
-            if (*p == 'S') {
-                fix->latitude *= -1.0;
-            }
-        }
-
-        // parse out longitude
-        p = strchr(p, ',') + 1;
-        if (',' != *p)
-        {
-            strncpy(degreebuff, p, 3);
-            p += 3;
-            degreebuff[3] = '\0';
-            degree = atol(degreebuff) * 10000000;
-            strncpy(degreebuff, p, 2); // minutes
-            p += 3; // skip decimal point
-            strncpy(degreebuff + 2, p, 4);
-            degreebuff[6] = '\0';
-            minutes = 50 * atol(degreebuff) / 3;
-            //longitude_fixed = degree + minutes;
-            float longitude = degree / 100000 + minutes * 0.000006F;
-            fix->longitude = (longitude-100*(int)(longitude/100))/60.0;
-            fix->longitude += (int)(longitude/100);
-        }
-
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            if (p[0] == 'W') fix->longitude *= -1.0;
-            /*if (p[0] == 'W') lon = 'W';
-            else if (p[0] == 'E') lon = 'E';
-            else if (p[0] == ',') lon = 0;
-            else return false;*/
-        }
-        // speed
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            fix->speed = atof(p);
-        }
-
-        // angle
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            //fix->angle = atof(p);
-        }
-
-        p = strchr(p, ',')+1;
-        if (',' != *p)
-        {
-            uint32_t fulldate = atof(p);
-            fix->day = fulldate / 10000;
-            fix->month = (fulldate % 10000) / 100;
-            fix->year = (fulldate % 100);
-        }
-        // we dont parse the remaining, yet!
-        return NMEA_OK;
-    }
-
-    return NMEA_UNKNOWN;
+    return NMEA_OK;
 }
-
-

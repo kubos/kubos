@@ -16,6 +16,7 @@ int main(void)
     TextUIRunner_runTest(aprs_suite());
     TextUIRunner_runTest(ax25_suite());
     TextUIRunner_runTest(kiss_suite());
+    TextUIRunner_runTest(nmea_suite());
     TextUIRunner_end();
 
     lpm_set(LPM_POWERDOWN);

@@ -36,10 +36,6 @@ USEMODULE += gnrc_netreg
 
 KUBOS_USEMODULES := gps radio ham
 
-ifeq ($(BOARD),native)
-USEMODULE += native_uart
-KUBOS_USEMODULES += $(BOARDTYPE)
-endif
 
 include $(KUBOS_MODULES)/Makefile.include
 include $(RIOTBASE)/Makefile.include

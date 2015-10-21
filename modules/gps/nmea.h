@@ -21,6 +21,7 @@
 #define NMEA_ERR_CHECKSUM    -1
 #define NMEA_ERR_INVALID_FIX -2
 #define NMEA_ERR_INVALID_DIR -3
+#define NMEA_ERR_UNKNOWN     -4
 
 #define NMEA_UNKNOWN 0
 #define NMEA_GPRMC   1
@@ -28,6 +29,6 @@
 
 #include "gps.h"
 
-int parse_nmea(char *nmea, int length, gps_fix_t *fix);
+int nmea_parse(char *nmea, int length, gps_fix_t *fix);
 
 #endif // NMEA_H

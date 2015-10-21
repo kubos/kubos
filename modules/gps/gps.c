@@ -53,7 +53,7 @@ void gps_rx_cb(void *arg, char data)
     if (data == '\n') {
         gps_fix_t *fix = get_gps_fix();
         int len = gps_buf_cur + 1;
-        int result = parse_nmea(gps_buf, len, fix);
+        int result = nmea_parse(gps_buf, len, fix);
         gps_buf_cur = 0;
 
         if (result != NMEA_OK) {
