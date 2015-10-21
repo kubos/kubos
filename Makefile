@@ -34,7 +34,7 @@ USEMODULE += gnrc_netif
 USEMODULE += gnrc_netapi
 USEMODULE += gnrc_netreg
 
-KUBOS_USEMODULES := gps radio ham
+KUBOS_USEMODULES := gps radio ham klog
 
 
 include $(KUBOS_MODULES)/Makefile.include

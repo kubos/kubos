@@ -26,6 +26,9 @@ extern "C" {
 
 #define ASSERT_EQUAL_INT TEST_ASSERT_EQUAL_INT
 #define ASSERT_EQUAL_STRING(s1, s2) TEST_ASSERT_EQUAL_STRING((const char *) s1, (const char *) s2)
+#define ASSERT_STRING_STARTS_WITH(s1, prefix) do { \
+    TEST_ASSERT_MESSAGE(strstr(s1, prefix) == s1, #s1 " !startswith " #prefix); \
+} while (0)
 #define ASSERT_FUZZY_EQUAL_FLOAT(f1, f2, precision) do { \
     float diff = powf(10, -precision); \
     TEST_ASSERT_MESSAGE(fabsf(f1 - f2) <= diff, #f1 " != " #f2); \
@@ -36,6 +39,7 @@ TestRef ax25_suite(void);
 TestRef aprs_suite(void);
 TestRef kiss_suite(void);
 TestRef nmea_suite(void);
+TestRef klog_suite(void);
 
 #ifdef __cplusplus
 }
