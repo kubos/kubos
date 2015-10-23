@@ -75,14 +75,22 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority) {
     // Update the SystemCoreClock variable
     SystemCoreClockUpdate();
 
+   // Get clock configuration
+   RCC_ClkInitTypeDef RCC_ClkInitStruct;
+   uint32_t PclkFreq;
+   // Note: PclkFreq contains here the Latency (not used after)
+   HAL_RCC_GetClockConfig(&RCC_ClkInitStruct, &PclkFreq);
+   // Get TIM1 clock value
+   PclkFreq = HAL_RCC_GetPCLK1Freq();
+   // TIMxCLK = PCLKx when the APB prescaler = 1 else TIMxCLK = 2 * PCLKx
+   if (RCC_ClkInitStruct.APB1CLKDivider != RCC_HCLK_DIV1) {
+       PclkFreq *= 2;
+   }
+
     // Configure time base
-    TimMasterHandle.Instance = TIM_MST;
+    TimMasterHandle.Instance               = TIM_MST;
     TimMasterHandle.Init.Period            = 0xFFFFFFFF;
-    if (SystemCoreClock == 16000000) {
-        TimMasterHandle.Init.Prescaler     = (uint32_t)(SystemCoreClock / 1000000) - 1; // 1 µs tick
-    } else {
-        TimMasterHandle.Init.Prescaler     = (uint32_t)(SystemCoreClock / 2 / 1000000) - 1; // 1 µs tick
-    }
+    TimMasterHandle.Init.Prescaler         = (uint32_t)(PclkFreq / 1000000) - 1; // 1 us tick
     TimMasterHandle.Init.ClockDivision     = 0;
     TimMasterHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;
     TimMasterHandle.Init.RepetitionCounter = 0;
