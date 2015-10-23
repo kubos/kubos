@@ -1,15 +1,13 @@
 {
   "name": "x86-linux-native",
   "version": "0.0.6",
+  "inherits": {
+      "linux-native": "^1.0.0"
+  },
   "similarTo": [
-    "linux",
-    "native",
-    "posix",
-    "userland",
     "x86-64",
     "x86"
   ],
-  "toolchain": "CMake/toolchain.cmake",
   "description": "Build target for programs compiled natively for Linux",
   "keywords": [
     "linux",
