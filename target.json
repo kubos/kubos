@@ -1,8 +1,8 @@
 {
   "name": "x86-linux-native",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "inherits": {
-      "linux-native": "^1.0.0"
+    "linux-native": "^1.0.0"
   },
   "similarTo": [
     "x86-64",
