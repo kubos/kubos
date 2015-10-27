@@ -42,6 +42,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include "uvisor-lib/uvisor-lib.h"
 
 /** @addtogroup STM32F4xx_HAL_Driver
   * @{
@@ -384,7 +385,7 @@ void HAL_PWR_EnterSLEEPMode(uint32_t Regulator, uint8_t SLEEPEntry)
   assert_param(IS_PWR_SLEEP_ENTRY(SLEEPEntry));
 
   /* Clear SLEEPDEEP bit of Cortex System Control Register */
-  CLEAR_BIT(SCB->SCR, ((uint32_t)SCB_SCR_SLEEPDEEP_Msk));
+  uvisor_write32(&SCB->SCR, uvisor_read32(&(SCB->SCR)) & ~SCB_SCR_SLEEPDEEP_Msk);
 
   /* Select SLEEP mode entry -------------------------------------------------*/
   if(SLEEPEntry == PWR_SLEEPENTRY_WFI)
