@@ -33,6 +33,7 @@
   ******************************************************************************
   */
 #include "hal_tick.h"
+#include "uvisor-lib/override.h"
 
 TIM_HandleTypeDef TimMasterHandle;
 uint32_t PreviousVal = 0;
