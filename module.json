@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-stm32f4",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CMSIS Core module for STM32F4xx microcontrollers",
   "keywords": [
     "mbed",
