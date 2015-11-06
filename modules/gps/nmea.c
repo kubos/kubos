@@ -61,6 +61,10 @@ static void parse_timestamp(char *ts, gps_fix_t *fix)
 
 static float parse_latlon(char *latlon)
 {
+    if (!latlon) {
+        return 0;
+    }
+
     float coords = atof(latlon);
     int deg = coords / 100;
     float dec = (coords / 100.0f - deg) * 100;
@@ -127,7 +131,7 @@ static int parse_gprmc(uint8_t field, char *value, gps_fix_t *fix)
             break;
 
         case GPRMC_DATE:
-            date = atoi(value);
+            date = value ? atoi(value) : 0;
             fix->day = date / 10000;
             fix->month = (date % 10000) / 100;
             fix->year = (date % 100);
@@ -171,7 +175,7 @@ static int parse_gpgga(uint8_t field, char *value, gps_fix_t *fix)
 int nmea_parse(char *nmea, int len, gps_fix_t *fix)
 {
     char str[128], *token;
-    uint8_t i = 0, type;
+    uint8_t i = 0, type = 0;
 
     strncpy(str, nmea, len);
     str[len > 127 ? 127 : len] = '\0';

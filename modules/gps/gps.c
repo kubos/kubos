@@ -33,13 +33,18 @@
 static int next_buffer_slot = 0;
 static gps_fix_t buffer[GPS_MSG_Q_SIZE];
 
-gps_fix_t* get_gps_fix(void) {
+static gps_fix_t* gps_incr_fix(void) {
     gps_fix_t* ptr = &buffer[next_buffer_slot];
     next_buffer_slot++;
     if (next_buffer_slot >= GPS_MSG_Q_SIZE) {
         next_buffer_slot = 0;
     }
     return ptr;
+}
+
+gps_fix_t *gps_last_fix(void)
+{
+    return &buffer[next_buffer_slot];
 }
 
 static char gps_buf[GPS_BUFSIZE];
@@ -51,7 +56,7 @@ void gps_rx_cb(void *arg, char data)
     DEBUG("GPS_RX: %c\n", data);
 
     if (data == '\n') {
-        gps_fix_t *fix = get_gps_fix();
+        gps_fix_t *fix = gps_incr_fix();
         int len = gps_buf_cur + 1;
         int result = nmea_parse(gps_buf, len, fix);
         gps_buf_cur = 0;
@@ -62,11 +67,13 @@ void gps_rx_cb(void *arg, char data)
         }
 
         // Send location fix
-        DEBUG("Parsed NMEA sentence, sending message\n");
-        msg_t msg;
-        msg.type = gps_cfg->type;
-        msg.content.ptr = (char *) fix;
-        msg_send(&msg, gps_cfg->pid);
+        if (gps_cfg->pid > KERNEL_PID_UNDEF) {
+            DEBUG("Parsed NMEA sentence, sending message\n");
+            msg_t msg;
+            msg.type = gps_cfg->type;
+            msg.content.ptr = (char *) fix;
+            msg_send(&msg, gps_cfg->pid);
+        }
         return;
     }
 

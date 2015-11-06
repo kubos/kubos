@@ -34,6 +34,10 @@ extern "C" {
 #define GPS_BUFSIZE    128
 #endif
 
+#ifndef GPS_DATALOG_SIZE
+#define GPS_DATALOG_SIZE (1024 * 512)
+#endif
+
 typedef struct gps_cfg {
     kernel_pid_t pid;
     uint16_t type;
@@ -67,6 +71,7 @@ typedef struct {
 } gps_fix_t;
 
 void gps_connect(gps_cfg_t* config);
+gps_fix_t *gps_last_fix(void);
 
 #ifdef __cplusplus
 }
