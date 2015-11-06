@@ -25,6 +25,7 @@ KUBOS_MODULES := $(abspath $(KUBOS_MODULES))
 QUIET ?= 1
 
 # Modules to include:
+USEMODULE += auto_init
 USEMODULE += xtimer
 USEMODULE += embUnit
 USEMODULE += gnrc_pktbuf
@@ -32,7 +33,7 @@ USEMODULE += gnrc_netif
 USEMODULE += gnrc_netapi
 USEMODULE += gnrc_netreg
 
-KUBOS_USEMODULES := radio ham gps
+KUBOS_USEMODULES := radio ham gps klog
 
 CFLAGS += -g
 INCLUDES += -I$(RIOTBASE)/sys/include
