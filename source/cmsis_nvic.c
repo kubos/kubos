@@ -62,6 +62,6 @@ uint32_t NVIC_GetVector(IRQn_Type IRQn)
 
 #elif !defined(YOTTA_CFG_CMSIS_NVIC_HAS_CUSTOM_VTOR)
 
-#error The target should define yotta config cmsis-nvic:has-vtor, or cmsis-nvic:has-custom-vtor + implement NVIC_SetVector/NVIC_GetVector
+#error The target should define yotta config cmsis-nvic.has-vtor, or cmsis-nvic.has-custom-vtor + implement NVIC_SetVector/NVIC_GetVector
 
 #endif /* !defined(TARGET_LIKE_CORTEX_M0) && !defined(TARGET_LIKE_CORTEX_M0PLUS) */
