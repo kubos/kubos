@@ -27,7 +27,7 @@ QUIET ?= 1
 # Modules to include:
 USEMODULE += auto_init
 USEMODULE += xtimer
-USEMODULE += embUnit
+USEMODULE += embunit
 USEMODULE += gnrc_pktbuf
 USEMODULE += gnrc_netif
 USEMODULE += gnrc_netapi
