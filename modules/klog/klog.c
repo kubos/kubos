@@ -190,3 +190,12 @@ void klog_cleanup(void)
 
     _log_file = NULL;
 }
+
+#ifndef BOARD_NATIVE
+// TODO this is an empty stub until we add in non-native filesystem support
+// See issue #19
+int fsync(int fd)
+{
+    return 0;
+}
+#endif
