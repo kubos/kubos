@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include <stdint.h>
+#include <sys/unistd.h>
 
 #include <kernel.h>
 #include <msg.h>
@@ -26,7 +27,6 @@
 #if !KISS_DRIVER_UART
 #include <unistd.h>
 #endif
-
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 

@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/unistd.h>
 #include <unistd.h>
 
 #include <timex.h>
@@ -139,8 +140,9 @@ static int _klog(FILE *f, unsigned level, const char *logger,
     int written = 0;
     xtimer_now_timex(&time);
 
-    written += fprintf(f, "%010d.%03d %s:%s ", time.seconds,
-                       time.microseconds / 1000, logger, _level_str(level));
+    written += fprintf(f, "%010d.%03d %s:%s ", (int) time.seconds,
+                       (int) time.microseconds / 1000, logger,
+                       _level_str(level));
     written += vfprintf(f, format, args);
     written += fprintf(f, "\n");
     return written;
@@ -184,6 +186,7 @@ void klog_cleanup(void)
     if (_log_file) {
         fsync(fileno(_log_file));
         fclose(_log_file);
-        _log_file = NULL;
     }
+
+    _log_file = NULL;
 }

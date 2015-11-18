@@ -57,7 +57,7 @@ int aprs_position_format(char* dest, aprs_position_t *position)
         "/%02d%02d%02dh%s/%sO%03d/%03d/A=%06d",
         position->hour, position->minute, position->second,
         latitude_str, longitude_str,
-        position->course, position->speed, position->altitude);
+        position->course, position->speed, (int) position->altitude);
 }
 
 gnrc_pktsnip_t *aprs_position_build(aprs_position_t *position)
