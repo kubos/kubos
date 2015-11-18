@@ -1,6 +1,12 @@
 ifeq ($(BOARD),native)
 USEMODULE += native_uart
 KUBOS_USEMODULES += $(BOARDTYPE)
+
+ifeq ($(BOARDTYPE),beaglebone)
+CFLAGS += -DHAVE_NATIVE_PERIPH_CONF_H
+LINKFLAGS += -lrt
+endif
+
 endif
 
 # Add Kubos Modules to necessary Make variables
@@ -11,8 +17,3 @@ EXTERNAL_MODULE_DIRS += $(KUBOS_MODULE_DIRS)
 CFLAGS += $(foreach dir,$(KUBOS_MODULE_DIRS),-I$(dir))
 INCLUDES += $(foreach dir,$(KUBOS_MODULE_DIRS),-I$(dir))
 LINKFLAGS += -lm
-
-ifeq ($(BOARDTYPE),beaglebone)
-CFLAGS += -DHAVE_NATIVE_PERIPH_CONF_H
-LINKFLAGS += -lrt
-endif

@@ -34,8 +34,11 @@ USEMODULE += gnrc_netif
 USEMODULE += gnrc_netapi
 USEMODULE += gnrc_netreg
 
-KUBOS_USEMODULES := gps radio ham klog
+KUBOS_USEMODULES := gps ham klog
 
+ifneq ($(BOARD),native)
+USEMODULE += newlib
+endif
 
 include $(KUBOS_MODULES)/Makefile.include
 include $(RIOTBASE)/Makefile.include
