@@ -30,7 +30,7 @@
       "cmsis-core-stm32f429xi": "^1.0.0"
     },
     "stm32f439zi": {
-      "cmsis-core-stm32f429xi": "^1.0.0"
+      "cmsis-core-stm32f439zi": "~0.1.0"
     }
   }
 }
