@@ -29,7 +29,7 @@
   ],
   "targetDependencies": {
     "silabs": {
-      "cmsis-core-silabs": "~0.1.0"
+      "cmsis-core-silabs": "^1.0.0"
     },
     "freescale": {
       "cmsis-core-freescale": "^1.0.0"
