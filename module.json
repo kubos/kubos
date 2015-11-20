@@ -42,6 +42,9 @@
     },
     "cordio": {
       "cmsis-core-cordio": "~0.0.2"
+    },
+    "nuvoton": {
+      "cmsis-core-nuvoton": "^1.0.0"
     }
   }
 }
