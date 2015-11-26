@@ -19,6 +19,11 @@
   ],
   "config": {
     "mbed": {},
+    "mbed-os" : {
+        "stdio" : {
+            "default-baud" : 9600
+        }
+    },
     "arch": {
       "arm": {}
     },
