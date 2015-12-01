@@ -1,6 +1,6 @@
 {
   "name": "mbed-gcc",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "base mbed build target for gcc toolchain",
   "licenses": [
     {
@@ -19,10 +19,10 @@
   ],
   "config": {
     "mbed": {},
-    "mbed-os" : {
-        "stdio" : {
-            "default-baud" : 9600
-        }
+    "mbed-os": {
+      "stdio": {
+        "default-baud": 9600
+      }
     },
     "arch": {
       "arm": {}
