@@ -96,7 +96,7 @@ void gps_connect(gps_cfg_t *gps_cfg)
     while (!connected) {
         if (uart_init(gps_cfg->uart,
                       gps_cfg->baudrate,
-                      gps_rx_cb, 0, (void *) gps_cfg) == 0) {
+                      gps_rx_cb, (void *) gps_cfg) == 0) {
             DEBUG("Connected to UART%d\n", gps_cfg->uart);
             connected = true;
         } else {

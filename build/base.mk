@@ -13,5 +13,5 @@ CFLAGS += $(foreach dir,$(KUBOS_MODULE_DIRS),-I$(dir))
 INCLUDES += $(foreach dir,$(KUBOS_MODULE_DIRS),-I$(dir))
 LINKFLAGS += -lm
 
-include $(KUBOS_CORE)/Makefile.deps
--include $(KUBOS_CORE)/Makefile.$(BOARD)
+include $(KUBOS_CORE)/build/deps.mk
+-include $(KUBOS_CORE)/build/$(BOARD).mk

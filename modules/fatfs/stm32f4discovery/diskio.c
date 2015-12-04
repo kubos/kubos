@@ -20,7 +20,7 @@
 #include <stdlib.h>
 
 #include "diskio.h"
-#include "hwtimer.h"
+#include "xtimer.h"
 #include "periph_conf.h"
 #include "stm32f4_util.h"
 
@@ -36,12 +36,12 @@
 #define FATFS_CS_PIN  6
 #endif
 
-#define FATFS_CS_GPIO GPIO(FATFS_CS_PORT, FATFS_CS_PIN)
+#define FATFS_CS_GPIO GPIO_PIN(FATFS_CS_PORT, FATFS_CS_PIN)
 #define CS_LOW  gpio_clear(FATFS_CS_GPIO)
 #define CS_HIGH gpio_set(FATFS_CS_GPIO)
 
-#define DELAY_MS(ms) hwtimer_spin(HWTIMER_TICKS((ms) * 1000L))
-#define ELAPSED_MS(start) (HWTIMER_TICKS_TO_US(hwtimer_now() - start) / 1000L)
+#define DELAY_MS(ms) xtimer_spin(ms * 1000L)
+#define ELAPSED_MS(start) ((xtimer_now() - start) / 1000L)
 
 #define ENABLE_DEBUG 0
 #define ENABLE_TRACE 0
@@ -59,7 +59,7 @@ static BYTE sd_card_type;
 
 static int wait_ready(UINT wt) {
     BYTE d;
-    long start = hwtimer_now();
+    uint32_t start = xtimer_now();
 
     do {
         spi_transfer_byte(FATFS_SPI, 0xFF, (char *) &d);
@@ -123,7 +123,7 @@ static void TRACE_SECTOR(BYTE *sector) {
 
 static int rcvr_datablock(BYTE *buff, UINT btr) {
     BYTE token;
-    long start = hwtimer_now();
+    uint32_t start = xtimer_now();
 
     DEBUG("rcvr_datablock %u\n", btr);
 
@@ -198,10 +198,10 @@ static BYTE send_cmd(BYTE cmd, DWORD arg) {
 }
 
 static void init_spi(void) {
-    gpio_init(GPIO(PORT_B, 6), GPIO_DIR_OUT, GPIO_PULLUP);
+    gpio_init(FATFS_CS_GPIO, GPIO_DIR_OUT, GPIO_PULLUP);
 
     spi_init_master(FATFS_SPI, SPI_CONF_SECOND_FALLING, SPI_SPEED_400KHZ);
-    gpio_set(GPIO(PORT_B, 6));
+    gpio_set(FATFS_CS_GPIO);
 }
 
 /*-----------------------------------------------------------------------*/
@@ -222,7 +222,7 @@ DSTATUS disk_initialize (BYTE pdrv /* Physical drive nmuber (0..) */)
     }
 */
 
-    hwtimer_init();
+    xtimer_init();
     //spi_init_master(FATFS_SPI, conf, SPI_SPEED_400KHZ);
     init_spi();
 
@@ -233,7 +233,7 @@ DSTATUS disk_initialize (BYTE pdrv /* Physical drive nmuber (0..) */)
         spi_transfer_byte(FATFS_SPI, 0xFF, NULL);
     }
 
-    long start = hwtimer_now(); // timeout = 1sec
+    uint32_t start = xtimer_now(); // timeout = 1sec
     BYTE n, cmd, ty, ocr[4];
     ty = 0;
     if (send_cmd(SDC_GO_IDLE_STATE, 0) == 1) {				/* Put the card SPI/Idle state */
@@ -296,7 +296,7 @@ DRESULT disk_read (
         UINT count		/* Number of sectors to read (1..128) */
         )
 {
-    printf("disk_read sector=%lu, count=%u\n", sector, count);
+    DEBUG("disk_read sector=%lu, count=%u\n", sector, count);
 
     if (!(sd_card_type & CT_BLOCK)) {
         sector *= 512;	/* LBA ot BA conversion (byte addressing cards) */

@@ -1,4 +1,6 @@
 MODULE = fs
 
-include Makefile.include
+DIRS += syscalls
+
+include syscalls/Makefile.include
 include $(RIOTBASE)/Makefile.base

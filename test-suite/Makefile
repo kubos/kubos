@@ -27,4 +27,4 @@ endif
 CFLAGS += -g
 INCLUDES += -I$(RIOTBASE)/sys/include
 
-include $(KUBOS_CORE)/Makefile.include
+include $(KUBOS_CORE)/kubos.mk

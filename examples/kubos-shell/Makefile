@@ -1,6 +1,6 @@
-APPLICATION = kubos-core
+APPLICATION = kubos-shell
 
-KUBOS_CORE ?= $(abspath $(CURDIR))
+KUBOS_CORE ?= $(abspath $(CURDIR)/../..)
 
 # If no BOARD is found in the environment, use this default:
 BOARD     ?= native
@@ -24,4 +24,4 @@ ifneq ($(BOARD),native)
 USEMODULE += fatfs
 endif
 
-include $(KUBOS_CORE)/Makefile.include
+include $(KUBOS_CORE)/kubos.mk

@@ -1,6 +1,6 @@
-UNDEF := $(BINDIR)fs/syscalls.o $(UNDEF)
+UNDEF := $(BINDIR)newlib_syscalls_fs/syscalls.o $(UNDEF)
 
-CFLAGS += -DHAVE_NEWLIB_SYSCALLS -DHAVE_FSYNC
+CFLAGS += -DHAVE_FSYNC
 
 NEWLIB_INCLUDE_PATTERNS ?= \
   /etc/alternatives/gcc-$(TARGET_TRIPLE)-include \

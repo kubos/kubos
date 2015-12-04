@@ -12,9 +12,9 @@ ifneq ($(DEBUG),0)
   CFLAGS += -g -DSCHEDSTATISTICS -DDEVELHELP
 endif
 
-include $(KUBOS_CORE)/Makefile.base
+include $(KUBOS_CORE)/build/base.mk
 include $(RIOTBASE)/Makefile.include
 
 ifeq ($(call using_module,fs),1)
-  include $(KUBOS_MODULES)/fs/Makefile.include
+  include $(KUBOS_MODULES)/fs/syscalls/Makefile.include
 endif

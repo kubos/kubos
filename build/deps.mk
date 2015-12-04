@@ -11,6 +11,7 @@ ifeq ($(call using_module,fatfs),1)
 endif
 
 ifeq ($(call using_module,fs),1)
+  USEMODULE += newlib_syscalls_fs
   USEMODULE += uart_stdio
 endif
 

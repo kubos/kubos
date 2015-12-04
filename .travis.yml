@@ -21,4 +21,4 @@ before_install:
   - docker build -t riotbuild $RIOTBASE/dist
 
 script:
-  - ./scripts/travis.sh
+  - ./build/travis.sh
