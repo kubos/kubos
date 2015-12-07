@@ -25,7 +25,7 @@ MEMORY
    * Refer RM0090: Table 61. Vector table for STM32F405xx/07xx and STM32F415xx/17xx.
    *  4 * (16 + 82) = 392 = 0x188
    */
-  RAM (rwx)             : ORIGIN = 0x20000188, LENGTH = 192k - 0x188
+  RAM (rwx)             : ORIGIN = 0x20000188, LENGTH = 128k - 0x188
 }
 
 /* Linker script to place sections and symbol values. Should be used together
