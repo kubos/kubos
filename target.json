@@ -45,7 +45,7 @@
       }
     },
     "uvisor": {
-      "present": 1
+      "present": 0
     },
     "hardware": {
       "externalClock": "8000000",
