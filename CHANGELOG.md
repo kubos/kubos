@@ -1,3 +1,6 @@
+## 0.1.4
+ * add config for mbed default baud rate
+
 ## 0.1.3
  * update for compatibility with CMake 3.4
 
