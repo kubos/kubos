@@ -77,7 +77,7 @@ defined in linker script */
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 Reset_Handler:  
-  ldr   sp, =_estack     /* set stack pointer */
+  ldr   sp, =__stack     /* set stack pointer */
 
 /* Copy the data segment initializers from flash to SRAM */  
   movs  r1, #0
@@ -108,12 +108,21 @@ LoopFillZerobss:
   bcc  FillZerobss
 
 /* Call the clock system intitialization function.*/
-  bl  SystemInit   
+/* Call uVisor initialization function. */
+  bl SystemInitPre
+  bl HAL_InitPre
+  bl uvisor_init
+  bl SystemInit
 /* Call static constructors */
-    bl __libc_init_array
+  //bl __libc_init_array
 /* Call the application's entry point.*/
-  bl  main
-  bx  lr    
+  //bl  main
+  // Calling the crt0 'cold-start' entry point. There __libc_init_array is called
+  // and when existing hardware_init_hook() and software_init_hook() before
+  // starting main(). software_init_hook() is available and has to be called due
+  // to initializsation when using rtos.
+  bl _start
+  bx  lr
 .size  Reset_Handler, .-Reset_Handler
 
 /**
@@ -141,7 +150,7 @@ Infinite_Loop:
     
     
 g_pfnVectors:
-  .word  _estack
+  .word  __stack
   .word  Reset_Handler
   .word  NMI_Handler
   .word  HardFault_Handler
