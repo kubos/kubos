@@ -18,9 +18,14 @@
 MEMORY
 {
   VECTORS (rx)          : ORIGIN = 0x08000000, LENGTH = 0x00000400
-  FLASH (rx)            : ORIGIN = 0x08000400, LENGTH = 2048k - 0x400
+  FLASH (rx)            : ORIGIN = 0x08000400, LENGTH = 1024k - 0x400
   CCM (rwx)             : ORIGIN = 0x10000000, LENGTH = 64K
-  RAM (rwx)             : ORIGIN = 0x200001AC, LENGTH = 192k - 0x1AC
+
+  /*
+   * Refer RM0090: Table 61. Vector table for STM32F405xx/07xx and STM32F415xx/17xx.
+   *  4 * (16 + 82) = 392 = 0x188
+   */
+  RAM (rwx)             : ORIGIN = 0x20000188, LENGTH = 192k - 0x188
 }
 
 /* Linker script to place sections and symbol values. Should be used together
