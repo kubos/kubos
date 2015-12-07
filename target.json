@@ -1,0 +1,109 @@
+{
+  "name": "stm32f429i-disco-gcc",
+  "version": "0.0.17",
+  "inherits": {
+    "mbed-gcc": "*"
+  },
+  "description": "Official mbed build target for the mbed stm32f429i-disco development board.",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "mbed-target:discovery-f429zi",
+    "mbed-official",
+    "stm32f429i-disco",
+    "gcc"
+  ],
+  "similarTo": [
+    "stm32f429i-disco",
+    "f429zi",
+    "f429",
+    "discovery",
+    "stm32f429zit6",
+    "stm32f429zi",
+    "stm32f429xi",
+    "stm32f429",
+    "stm32f4",
+    "stm32",
+    "st",
+    "cortex-m4",
+    "armv7-m",
+    "arm",
+    "gcc"
+  ],
+  "config": {
+    "mbed-os": {},
+    "cmsis": {
+      "nvic": {
+        "ram_vector_address": "0x20000000",
+        "flash_vector_address": "0x08000000",
+        "user_irq_offset": 16,
+        "user_irq_number": 91
+      }
+    },
+    "uvisor": {
+      "present": 1
+    },
+    "hardware": {
+      "externalClock": "8000000",
+      "pins": {
+        "LED1": "PG_13",
+        "LED2": "PG_14",
+        "LED3": "PG_13",
+        "LED4": "PG_14",
+        "USER_BUTTON": "PA_0",
+        "SERIAL_TX": "PA_9",
+        "SERIAL_RX": "PA_10",
+        "USBTX": "PA_9",
+        "USBRX": "PA_10",
+        "I2C_SCL": "PB_8",
+        "I2C_SDA": "PB_9",
+        "SPI_MOSI": "PA_7",
+        "SPI_MISO": "PA_6",
+        "SPI_SCK": "PA_5",
+        "SPI_CS": "PA_4",
+        "PWM_OUT": "PB_3"
+      },
+      "test-pins": {
+        "spi": {
+          "mosi": "SPI_MOSI",
+          "miso": "SPI_MISO",
+          "sclk": "SPI_SCK",
+          "ssel": "SPI_CS"
+        },
+        "i2c": {
+          "sda": "I2C_SDA",
+          "scl": "I2C_SCL"
+        },
+        "serial": {
+          "tx": "PC_12",
+          "rx": "PF_6"
+        }
+      }
+    }
+  },
+  "toolchain": "CMake/toolchain.cmake",
+  "debug": [
+    "valinor",
+    "--target",
+    "stm32f429zi",
+    "$program"
+  ],
+  "scripts": {
+    "debug": [
+      "valinor",
+      "--target",
+      "stm32f429zi",
+      "$program"
+    ],
+    "test": [
+      "mbed_test_wrapper",
+      "--target",
+      "STM32F429I-DISCO",
+      "$program"
+    ]
+  }
+}
