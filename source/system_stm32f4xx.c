@@ -20,7 +20,21 @@
   *                                 be called whenever the core clock is changed
   *                                 during program execution.
   *
-  *
+  * This file configures the system clock as follows:
+  *--------------------------------------------------------------------------------------
+  * System clock source                | PLL_HSE_XTAL           | PLL_HSE_XTAL           
+  *                                    | (external 8 MHz clock) | (external 8 MHz clock) 
+  *--------------------------------------------------------------------------------------
+  * SYSCLK(MHz)                        | 168                    | 180                    
+  *--------------------------------------------------------------------------------------
+  * AHBCLK (MHz)                       | 168                    | 180                    
+  *--------------------------------------------------------------------------------------
+  * APB1CLK (MHz)                      | 42                     | 45                     
+  *--------------------------------------------------------------------------------------
+  * APB2CLK (MHz)                      | 84                     | 90                     
+  *--------------------------------------------------------------------------------------
+  * USB capable (48 MHz precise clock) | YES                    | NO                     
+  *--------------------------------------------------------------------------------------
   ******************************************************************************
   * @attention
   *
@@ -51,6 +65,17 @@
   ******************************************************************************
   */
 
+#ifndef YOTTA_CFG_HARDWARE_EXTERNALCLOCK
+  #warning A "config":{"hardware":{"externalClock":"<FREQ>"}} entry is required in either target.json or config.json
+  #if defined(HSE_VALUE)
+    #warning HSE_VALUE is deprecated.  Define hardware::externalClock with yotta config instead.
+  #endif
+#else
+  #if defined(HSE_VALUE)
+    #warning HSE_VALUE ignored, using yotta_config values instead
+  #endif
+#endif
+
 /** @addtogroup CMSIS
   * @{
   */
@@ -65,14 +90,7 @@
 
 
 #include "stm32f4xx.h"
-
-#if !defined  (HSE_VALUE) 
-  #define HSE_VALUE    ((uint32_t)25000000) /*!< Default value of the External oscillator in Hz */
-#endif /* HSE_VALUE */
-
-#if !defined  (HSI_VALUE)
-  #define HSI_VALUE    ((uint32_t)16000000) /*!< Value of the Internal oscillator in Hz*/
-#endif /* HSI_VALUE */
+#include "hal_tick.h"
 
 /**
   * @}
@@ -110,9 +128,12 @@
 
 /*!< Uncomment the following line if you need to relocate your vector Table in
      Internal SRAM. */
+/* note: if uVisor is present the definition must go in system_init_pre.c */
+#ifdef YOTTA_CFG_UVISOR_PRESENT
 /* #define VECT_TAB_SRAM */
 #define VECT_TAB_OFFSET  0x00 /*!< Vector Table base offset field. 
                                    This value must be a multiple of 0x200. */
+#endif /* ndef YOTTA_CFG_UVISOR_PRESENT */
 /******************************************************************************/
 
 /**
@@ -122,6 +143,10 @@
 /** @addtogroup STM32F4xx_System_Private_Macros
   * @{
   */
+
+/* Select the SYSCLOCK  to start with (0=OFF, 1=ON) */
+#define USE_SYSCLOCK_168 (1) /* Use external 8MHz xtal and sets SYSCLK to 168MHz */
+#define USE_SYSCLOCK_180 (0) /* Use external 8MHz xtal and sets SYSCLK to 180MHz */
 
 /**
   * @}
@@ -138,7 +163,7 @@
                is no need to call the 2 first functions listed above, since SystemCoreClock
                variable is updated automatically.
   */
-  uint32_t SystemCoreClock = 16000000;
+  uint32_t SystemCoreClock = 168000000;
 const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 
 /**
@@ -153,6 +178,7 @@ const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 
   static void SystemInit_ExtMemCtl(void); 
 #endif /* DATA_IN_ExtSRAM || DATA_IN_ExtSDRAM */
 
+void SystemClock_Config(void);
 /**
   * @}
   */
@@ -170,10 +196,11 @@ const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 
   */
 void SystemInit(void)
 {
-  /* FPU settings ------------------------------------------------------------*/
-  #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
-    SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));  /* set CP10 and CP11 Full Access */
-  #endif
+  /* Include the code that had been removed if uVisor is not present */
+#ifndef YOTTA_CFG_UVISOR_PRESENT
+  SystemInitPre();
+#endif /* ndef YOTTA_CFG_UVISOR_PRESENT */
+
   /* Reset the RCC clock configuration to the default reset state ------------*/
   /* Set HSION bit */
   RCC->CR |= (uint32_t)0x00000001;
@@ -197,12 +224,18 @@ void SystemInit(void)
   SystemInit_ExtMemCtl(); 
 #endif /* DATA_IN_ExtSRAM || DATA_IN_ExtSDRAM */
 
-  /* Configure the Vector Table location add offset address ------------------*/
-#ifdef VECT_TAB_SRAM
-  SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
-#else
-  SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
-#endif
+  /* Configure the Cube driver */
+  SystemCoreClock = 16000000; // At this stage the HSI is used as system clock
+  HAL_Init();
+
+  /* Configure the System clock source, PLL Multiplier and Divider factors,
+     AHB/APBx prescalers and Flash settings */
+  SystemClock_Config();
+  SystemCoreClockUpdate();
+  
+  /* Reset the timer to avoid issues after the RAM initialization */
+  TIM_MST_RESET_ON;
+  TIM_MST_RESET_OFF;  
 }
 
 /**
@@ -586,6 +619,82 @@ void SystemInit_ExtMemCtl(void)
   (void)(tmp); 
 }
 #endif /* DATA_IN_ExtSRAM || DATA_IN_ExtSDRAM */
+
+/** System Clock Configuration
+*/
+#if USE_SYSCLOCK_168 != 0
+/*
+ * generated code by STM32CubeMX 4.4.0 for board 32F429Discovery
+ * and SYSCLK=168MHZ
+ */
+void SystemClock_Config(void)
+{
+
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+  __PWR_CLK_ENABLE();
+
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = HSE_VALUE/1000000;
+  RCC_OscInitStruct.PLL.PLLN = (168*2);
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
+  HAL_RCC_OscConfig(&RCC_OscInitStruct);
+
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK|RCC_CLOCKTYPE_PCLK1
+                              |RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+
+}
+
+#elif USE_SYSCLOCK_180 != 0
+/*
+ * generated code by STM32CubeMX 4.4.0 for board 32F429Discovery
+ * and SYSCLK=180MHZ
+ */
+void SystemClock_Config(void)
+{
+
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+
+  __PWR_CLK_ENABLE();
+
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 360;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
+  HAL_RCC_OscConfig(&RCC_OscInitStruct);
+
+  HAL_PWREx_ActivateOverDrive();
+
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK|RCC_CLOCKTYPE_PCLK1
+                              |RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+
+}
+#endif
+
 /**
   * @}
   */
