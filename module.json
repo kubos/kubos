@@ -1,13 +1,13 @@
 {
-  "name": "mbed-hal-st-stm32f429zi",
-  "version": "1.0.5",
-  "description": "mbed HAL for stm32f429zi microcontrollers",
+  "name": "mbed-hal-st-stm32f407vg",
+  "version": "0.0.1",
+  "description": "*Unofficial mbed HAL for stm32f407vg microcontrollers",
   "keywords": [
     "mbed",
     "mbed-official"
   ],
-  "author": "Brendan Moran <brendan.moran@arm.com>",
-  "homepage": "https://github.com/ARMmbed/mbed-hal-st-stm32f429zi",
+  "author": "Max Peng <max.peng1768@gmail.com>",
+  "homepage": "https://github.com/ARMmbed/mbed-hal-st-stm32f407vg",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -19,7 +19,7 @@
     }
   ],
   "extraIncludes": [
-    "mbed-hal-st-stm32f429zi"
+    "mbed-hal-st-stm32f407vg"
   ],
   "dependencies": {
     "cmsis-core": "^1.0.0",
