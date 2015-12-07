@@ -1,0 +1,24 @@
+{
+  "name": "cmsis-core-stm32f429xi",
+  "version": "1.0.3",
+  "description": "CMSIS Core module for stm32f429xi microcontrollers",
+  "keywords": [
+    "mbed",
+    "mbed-official"
+  ],
+  "author": "Brendan Moran <brendan.moran@arm.com>",
+  "homepage": "https://github.com/ARMmbed/cmsis-core-st-stm32f429xi",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/BSD-3-Clause",
+      "type": "BSD-3-Clause"
+    }
+  ],
+  "extraIncludes": [
+    "cmsis-core-stm32f429xi"
+  ],
+  "dependencies": {
+    "cmsis-core": "*"
+  },
+  "targetDependencies": {}
+}
