@@ -4,10 +4,10 @@
   "description": "CMSIS Core module for stm32f407xg microcontrollers",
   "keywords": [
     "mbed",
-    "mbed-official"
+    "mbed-unofficial"
   ],
   "author": "Max Peng <max.peng1768@gmail.com>",
-  "homepage": "https://github.com/ARMmbed/cmsis-core-st-stm32f407xg",
+  "homepage": "https://github.com/maxpeng/cmsis-core-st-stm32f407xg",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/BSD-3-Clause",
