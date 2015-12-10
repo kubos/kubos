@@ -4,10 +4,10 @@
   "description": "*Unofficial mbed HAL for stm32f407vg microcontrollers",
   "keywords": [
     "mbed",
-    "mbed-official"
+    "mbed-unofficial"
   ],
   "author": "Max Peng <max.peng1768@gmail.com>",
-  "homepage": "https://github.com/ARMmbed/mbed-hal-st-stm32f407vg",
+  "homepage": "https://github.com/maxpeng/mbed-hal-st-stm32f407vg",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
