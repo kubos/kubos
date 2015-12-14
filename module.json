@@ -48,6 +48,9 @@
     },
     "nxp": {
       "cmsis-core-nxp": "~0.1.0"
+    },
+    "arm-ssg": {
+	"cmsis-core-arm-ssg": "^1.0.0"
     }
   }
 }
