@@ -1,3 +1,8 @@
+## 1.0.0
+ * Switch on C++11 compilation by default. This is technically a breaking
+   change, but the mbed-OS modules themselves have been patched so that they
+   continue to work correctly.
+
 ## 0.1.4
  * add config for mbed default baud rate
 
