@@ -32,7 +32,5 @@ set(CMAKE_ASM_FLAGS_RELWITHDEBINFO_INIT "-Os -g -gdwarf-3 -DNDEBUG")
 set(CMAKE_INCLUDE_SYSTEM_FLAG_ASM  "-isystem ")
 
 if(YOTTA_CFG_DEBUG_OPTIONS_COVERAGE)
-    set(CMAKE_C_FLAGS_DEBUG_INIT        "${CMAKE_C_FLAGS_DEBUG_INIT} -fprofile-arcs -ftest-coverage")
-    set(CMAKE_ASM_FLAGS_DEBUG_INIT      "${CMAKE_ASM_FLAGS_DEBUG_INIT} -fprofile-arcs -ftest-coverage")
     set(CMAKE_C_LINK_EXECUTABLE         "${CMAKE_C_LINK_EXECUTABLE} -fprofile-arcs -lgcov")
 endif()
