@@ -32,5 +32,6 @@
       "additional_event_pools_size": 100
     }
   },
-  "toolchain": "CMake/toolchain.cmake"
+  "toolchain": "CMake/toolchain.cmake",
+  "cmakeIncludes": ["coverage/coverage.cmake"]
 }
