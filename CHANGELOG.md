@@ -1,3 +1,6 @@
+## 1.1.0
+ * Add support for building individual modules with code coverage
+
 ## 1.0.0
  * Switch on C++11 compilation by default. This is technically a breaking
    change, but the mbed-OS modules themselves have been patched so that they
@@ -26,5 +29,3 @@
 ## 0.0.14
 For this and prior releases, no changes were tracked. Please see the git
 history
-
-

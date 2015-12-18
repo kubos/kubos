@@ -1,6 +1,6 @@
 {
   "name": "mbed-gcc",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "base mbed build target for gcc toolchain",
   "licenses": [
     {
@@ -33,5 +33,7 @@
     }
   },
   "toolchain": "CMake/toolchain.cmake",
-  "cmakeIncludes": ["coverage/coverage.cmake"]
+  "cmakeIncludes": [
+    "coverage/coverage.cmake"
+  ]
 }
