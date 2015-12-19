@@ -6,7 +6,7 @@
   },
   "description": "mbed build target for the mbed stm32f4-disco development board.",
   "author": "Max Peng <max.peng1768@gmail.com>",
-  "homepage": "https://github.com/maxpeng/target-arm-linux-native",
+  "homepage": "https://github.com/maxpeng/target-stm32f411e-disco-gcc",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
