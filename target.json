@@ -4,7 +4,9 @@
   "inherits": {
     "mbed-gcc": "*"
   },
-  "description": "*Unofficial mbed build target for the mbed stm32f4-disco development board.",
+  "description": "mbed build target for the mbed stm32f4-disco development board.",
+  "author": "Max Peng <max.peng1768@gmail.com>",
+  "homepage": "https://github.com/maxpeng/target-arm-linux-native",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -13,7 +15,6 @@
   ],
   "keywords": [
     "mbed-target:discovery-f407vg",
-    "mbed-official",
     "stm32f4-disco",
     "gcc"
   ],
