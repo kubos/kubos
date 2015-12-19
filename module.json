@@ -1,10 +1,9 @@
 {
   "name": "mbed-hal-st-stm32f407vg",
   "version": "0.0.1",
-  "description": "*Unofficial mbed HAL for stm32f407vg microcontrollers",
+  "description": "mbed HAL for stm32f407vg microcontrollers",
   "keywords": [
-    "mbed",
-    "mbed-unofficial"
+    "mbed"
   ],
   "author": "Max Peng <max.peng1768@gmail.com>",
   "homepage": "https://github.com/maxpeng/mbed-hal-st-stm32f407vg",
@@ -12,10 +11,6 @@
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
       "type": "Apache-2.0"
-    },
-    {
-      "url": "https://spdx.org/licenses/BSD-3-Clause",
-      "type": "BSD-3-Clause"
     }
   ],
   "extraIncludes": [
@@ -23,8 +18,7 @@
   ],
   "dependencies": {
     "cmsis-core": "^1.0.0",
-    "uvisor-lib": "^1.0.2",
-    "mbed-hal-st-stm32f4": ">=1.0.4"
+    "uvisor-lib": "^1.0.2"
   },
   "targetDependencies": {}
 }
