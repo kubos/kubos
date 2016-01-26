@@ -11,3 +11,42 @@ probably not succeed without target-specific startup code).
 
 See [CHANGELOG.md](CHANGELOG.md) for the changes associated with
 each version.
+
+## Code Coverage
+To enable code coverage for a specific module, add this config to the application's config.json:
+
+```JSON
+    "debug" : {
+        "options" : {
+            "coverage" : {
+                "modules" : {
+                    "<module name>" : true
+                }
+            }
+        }
+    }
+```
+
+For example, to add code coverage to the sockets module, use this config:
+
+```JSON
+    "debug" : {
+        "options" : {
+            "coverage" : {
+                "modules" : {
+                    "sockets" : true
+                }
+            }
+        }
+    }
+```
+
+If building tests, then this config can be passed on the command line via the ```--config``` option. For example,
+
+```
+yotta build --config testconfig.json
+```
+
+```
+yotta build --config '"debug" : { "options" : { "coverage" : { "modules" : { "sockets" : true } } } }'
+```
