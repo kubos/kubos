@@ -23,13 +23,13 @@
     "mbed-hal-st-stm32f4": ">=1.0.4"
   },
   "targetDependencies": {
-    "stm32f401xe": {
+    "stm32f401xe-no-inherit": {
       "cmsis-core-stm32f401xe": "~0.1.0"
     },
-    "stm32f429xi": {
+    "stm32f429xi-no-inherit": {
       "cmsis-core-stm32f429xi": "^1.0.0"
     },
-    "stm32f439zi": {
+    "stm32f439zi-no-inherit": {
       "cmsis-core-stm32f439zi": "~0.1.0"
     }
   }
