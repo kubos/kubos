@@ -9,8 +9,6 @@ set(TARGET_MBED_GCC_TOOLCHAIN_INCLUDED 1)
 # indirect includes still use it)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
-include(CMakeForceCompiler)
-
 set(CMAKE_SYSTEM_NAME mbedOS)
 set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_SYSTEM_PROCESSOR "armv7-m")
@@ -73,10 +71,16 @@ set(CMAKE_MODULE_LINKER_FLAGS_INIT
 set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_MODULE_LINKER_FLAGS_INIT} -Wl,-wrap,main") 
 
 # Set the compiler to ARM-GCC
-include(CMakeForceCompiler)
-
-cmake_force_c_compiler("${ARM_NONE_EABI_GCC}" GNU)
-cmake_force_cxx_compiler("${ARM_NONE_EABI_GPP}" GNU)
+if(CMAKE_VERSION VERSION_LESS "3.5.0")
+    include(CMakeForceCompiler)
+    cmake_force_c_compiler("${ARM_NONE_EABI_GCC}" GNU)
+    cmake_force_cxx_compiler("${ARM_NONE_EABI_GPP}" GNU)
+else()
+    # from 3.5 the force_compiler macro is deprecated: CMake can detect
+    # arm-none-eabi-gcc as being a GNU compiler automatically
+    set(CMAKE_C_COMPILER "${ARM_NONE_EABI_GCC}")
+    set(CMAKE_CXX_COMPILER "${ARM_NONE_EABI_GPP}")
+endif()
 
 # post-process elf files into .bin files:
 function(yotta_apply_target_rules target_type target_name)
