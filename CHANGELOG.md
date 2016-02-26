@@ -1,3 +1,8 @@
+## 1.2.0
+ * Add support for the future deprecation for `cmake_force_xxx_compiler`
+ * Enable float `printf` by default, add instructions to readme on how to
+   override this for individual targets.
+
 ## 1.1.0
  * Add support for building individual modules with code coverage
 
