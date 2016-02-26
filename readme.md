@@ -50,3 +50,27 @@ yotta build --config testconfig.json
 ```
 yotta build --config '"debug" : { "options" : { "coverage" : { "modules" : { "sockets" : true } } } }'
 ```
+
+## Configuring floating point support in `printf`
+
+Floating point support in `printf` is enabled by default by this target
+description. (Although derived targets may override this behaviour through the
+[yotta config](http://yottadocs.mbed.com/reference/config.html) system.)
+
+If you need to change the default behaviour (perhaps because the increase in
+code-size is unacceptable to you), then you can do this in the `config` section
+of a target description, or in an application's `config.json` file:
+
+```JSON
+  "gcc": {
+    "printf-float": false
+  }
+```
+
+Or:
+
+```JSON
+  "gcc": {
+    "printf-float": true
+  }
+```

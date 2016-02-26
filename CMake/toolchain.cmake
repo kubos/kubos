@@ -69,6 +69,9 @@ set(CMAKE_MODULE_LINKER_FLAGS_INIT
     "-fno-exceptions -fno-unwind-tables -Wl,--gc-sections -Wl,--sort-common -Wl,--sort-section=alignment"
 )
 set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_MODULE_LINKER_FLAGS_INIT} -Wl,-wrap,main") 
+if((NOT DEFINED YOTTA_CFG_GCC_PRINTF_FLOAT) OR (YOTTA_CFG_GCC_PRINTF_FLOAT))
+    set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT} -Wl,-u,_printf_float")
+endif()
 
 # Set the compiler to ARM-GCC
 if(CMAKE_VERSION VERSION_LESS "3.5.0")
