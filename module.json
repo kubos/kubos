@@ -1,0 +1,16 @@
+{
+  "name": "kubos-rt",
+  "version": "0.0.0",
+  "description": "Real-time OS for constrained satellite subsystems",
+  "keywords": [
+    "satellite"
+  ],
+  "author": "marshall@kubos.co",
+  "repository": {
+    "url": "ssh://git@github.com/openkosmosorg/kubos-rt",
+    "type": "git"
+  },
+  "homepage": "https://github.com/openkosmosorg/kubos-rt",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}
