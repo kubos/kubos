@@ -1,0 +1,16 @@
+{
+  "name": "csp",
+  "version": "1.4.0",
+  "description": "CubeSat Protocol",
+  "keywords": [
+      "satellite"
+  ],
+  "author": "gomspace",
+  "homepage": "https://github.com/GomSpace/libcsp",
+  "license": "LGPL 2.1",
+  "targetDependencies": {
+    "arm": {
+      "freertos": "openkosmosorg/freertos"
+    }
+  }
+}
