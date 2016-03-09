@@ -18,7 +18,7 @@
     "mbed-hal-st-stm32cubef4"
   ],
   "dependencies": {
-    "uvisor-lib": "^1.0.0",
+    "uvisor-lib": ">=1.0.0,<3.0.0",
     "mbed-hal-st-stm32f4": "^1.0.0"
   },
   "targetDependencies": {}
