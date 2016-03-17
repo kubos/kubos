@@ -51,6 +51,9 @@
     },
     "arm-ssg": {
       "cmsis-core-arm-ssg": "^1.0.0"
-    }
+    },
+    "atmel": {
+      "cmsis-core-atmel": "^1.0.0"
+    }	
   }
 }
