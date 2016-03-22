@@ -174,6 +174,8 @@ typedef struct __DMA_HandleTypeDef
 
 /* Exported constants --------------------------------------------------------*/
 
+#define USE_STM32F4XX_HAL_DMA__FIX  (1)
+
 /** @defgroup DMA_Exported_Constants DMA Exported Constants
   * @brief    DMA Exported constants 
   * @{
