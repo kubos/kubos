@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "CMSIS-Core",
   "keywords": [
     "cmsis",
@@ -54,6 +54,6 @@
     },
     "atmel": {
       "cmsis-core-atmel": "^1.0.0"
-    }	
+    }
   }
 }
