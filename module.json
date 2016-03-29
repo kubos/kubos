@@ -16,6 +16,9 @@
   "license": "Apache-2",
   "dependencies": {},
   "targetDependencies": {
+    "stm32f0": {
+      "cmsis-core-stm32f0": "*"
+    },
     "stm32f4": {
       "cmsis-core-stm32f4": "^1.0.0"
     }
