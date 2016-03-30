@@ -3,9 +3,9 @@ UNDEF := $(BINDIR)newlib_syscalls_fs/syscalls.o $(UNDEF)
 CFLAGS += -DHAVE_FSYNC
 
 NEWLIB_INCLUDE_PATTERNS ?= \
-  /etc/alternatives/gcc-$(TARGET_TRIPLE)-include \
-  /usr/$(TARGET_TRIPLE)/include \
-  /usr/local/opt/$(TARGET_TRIPLE)*/$(TARGET_TRIPLE)/include \
+  /etc/alternatives/gcc-$(TARGET_ARCH)-include \
+  /usr/$(TARGET_ARCH)/include \
+  /usr/local/opt/$(TARGET_ARCH)*/$(TARGET_ARCH)/include \
   #
 # Use the wildcard Makefile function to search for existing directories matching
 # the patterns above. We use the -isystem gcc/clang argument to add the include

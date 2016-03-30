@@ -23,6 +23,7 @@
 #endif
 
 #include "board.h"
+#include "reboot.h"
 #include "thread.h"
 #include "fs.h"
 #include "xtimer.h"
@@ -48,13 +49,13 @@ void _fini(void)
 void _exit(int n)
 {
     printf("#! exit %i: resetting\n", n);
-    reboot(n);
+    reboot();
     while(1);
 }
 
 void *_sbrk_r(struct _reent *r, ptrdiff_t incr)
 {
-    unsigned int state = disableIRQ();
+    unsigned int state = irq_disable();
     void *res = heap_top;
 
     if ((heap_top + incr > &_eheap) || (heap_top + incr < &_sheap)) {
@@ -65,7 +66,7 @@ void *_sbrk_r(struct _reent *r, ptrdiff_t incr)
         heap_top += incr;
     }
 
-    restoreIRQ(state);
+    irq_restore(state);
     return res;
 }
 

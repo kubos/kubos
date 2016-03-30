@@ -17,7 +17,7 @@
 #include "gps.h"
 #include "nmea.h"
 
-#include "kernel.h"
+#include "kernel_types.h"
 #include "xtimer.h"
 
 #define ENABLE_DEBUG 0
@@ -50,7 +50,7 @@ gps_fix_t *gps_last_fix(void)
 static char gps_buf[GPS_BUFSIZE];
 static uint8_t gps_buf_cur = 0;
 
-void gps_rx_cb(void *arg, char data)
+void gps_rx_cb(void *arg, uint8_t data)
 {
     gps_cfg_t *gps_cfg = (gps_cfg_t *) arg;
     DEBUG("GPS_RX: %c\n", data);

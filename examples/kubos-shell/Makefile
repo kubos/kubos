@@ -9,11 +9,11 @@ BOARDTYPE ?= beaglebone
 # Modules to include:
 USEMODULE += shell
 USEMODULE += shell_commands
-USEMODULE += vtimer
 USEMODULE += xtimer
 USEMODULE += auto_init
 USEMODULE += gnrc_pktbuf
 USEMODULE += gnrc_netif
+USEMODULE += gnrc_netif_hdr
 USEMODULE += gnrc_netapi
 USEMODULE += gnrc_netreg
 USEMODULE += gps

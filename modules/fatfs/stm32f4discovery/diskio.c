@@ -75,14 +75,14 @@ static int wait_ready(UINT wt) {
     }
 }
 
-static void deselect(void) {
+static void spi_deselect(void) {
     CS_HIGH;
 
     /* Dummy clock (force DO hi-z for multiple slave SPI) */
     spi_transfer_byte(FATFS_SPI, 0xFF, NULL);
 }
 
-static int select(void) {
+static int spi_select(void) {
     CS_LOW;
     /* Dummy clock (force DO enabled) */
     spi_transfer_byte(FATFS_SPI, 0xFF, NULL);
@@ -93,7 +93,7 @@ static int select(void) {
     }
 
     DEBUG("select: no\n");
-    deselect();
+    spi_deselect();
     return 0;
 }
 
@@ -163,8 +163,8 @@ static BYTE send_cmd(BYTE cmd, DWORD arg) {
 
     /* Select the card and wait for ready except to stop multiple block read */
     if (cmd != SDC_STOP_TRANSMISSION) {
-        deselect();
-        if (!select()) {
+        spi_deselect();
+        if (!spi_select()) {
             DEBUG("Failed to stop transmission\n");
             return 0xFF;
         }
@@ -198,8 +198,7 @@ static BYTE send_cmd(BYTE cmd, DWORD arg) {
 }
 
 static void init_spi(void) {
-    gpio_init(FATFS_CS_GPIO, GPIO_DIR_OUT, GPIO_PULLUP);
-
+    gpio_init(FATFS_CS_GPIO, GPIO_OD_PU);
     spi_init_master(FATFS_SPI, SPI_CONF_SECOND_FALLING, SPI_SPEED_400KHZ);
     gpio_set(FATFS_CS_GPIO);
 }
@@ -264,7 +263,7 @@ DSTATUS disk_initialize (BYTE pdrv /* Physical drive nmuber (0..) */)
     }
     sd_card_type = ty; /* Card type */
 
-    deselect();
+    spi_deselect();
     return 0;
 }
 
@@ -319,7 +318,7 @@ DRESULT disk_read (
             send_cmd(SDC_STOP_TRANSMISSION, 0);				/* STOP_TRANSMISSION */
         }
     }
-    deselect();
+    spi_deselect();
 
     return count ? RES_ERROR : RES_OK;	/* Return result */
 }
@@ -394,7 +393,7 @@ DRESULT disk_write (
             }
         }
     }
-    deselect();
+    spi_deselect();
 
     return count ? RES_ERROR : RES_OK;	/* Return result */
 }
@@ -418,9 +417,9 @@ DRESULT disk_ioctl (
 
     switch (cmd) {
         case CTRL_SYNC :		/* Wait for end of internal write process of the drive */
-            if (select()) {
+            if (spi_select()) {
                 res = RES_OK;
-                deselect();
+                spi_deselect();
             }
             break;
 
@@ -484,7 +483,7 @@ DRESULT disk_ioctl (
             res = RES_PARERR;
     }
 
-    deselect();
+    spi_deselect();
 
     return res;
 }
