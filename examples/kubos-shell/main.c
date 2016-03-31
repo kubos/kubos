@@ -16,7 +16,10 @@
  */
 #include <stdio.h>
 
+#include "board.h"
 #include "shell.h"
+#include "uart_stdio.h"
+#include "xtimer.h"
 
 #define TAG "kubos"
 #include "klog.h"
@@ -27,6 +30,15 @@
 
 #ifdef MODULE_HAM
 #include "ham_shell.h"
+#endif
+
+#ifdef MODULE_FS
+#include "fs.h"
+#include "fs_shell.h"
+#endif
+
+#ifdef MODULE_FATFS
+#include "fatfs.h"
 #endif
 
 int hello_world(int argc, char **argv) {
@@ -45,12 +57,31 @@ const shell_command_t shell_commands[] = {
 #ifdef MODULE_HAM
     HAM_SHELL_COMMANDS
 #endif
+#ifdef MODULE_FS
+    FS_SHELL_COMMANDS
+#endif
     { NULL, NULL, NULL }
 };
 
 int main(void)
 {
     KLOG_INFO(TAG, "Welcome to KubOS! Initializing...");
+
+#ifdef MODULE_FS
+    KLOG_INFO(TAG, "Initializing filesystem...");
+    fs_init();
+
+#ifdef MODULE_FATFS
+    KLOG_INFO(TAG, "Mounting SD card...");
+    fs_mount("/sd", &fatfs_dev);
+
+    KLOG_INFO(TAG, "Initializing /sd/app.log logfile...");
+    klog_init_file("/sd/applog", 11,
+                   KLOG_PART_SIZE_DEFAULT, KLOG_MAX_PARTS_DEFAULT);
+#endif // MODULE_FATFS
+
+#endif // MODULE_FS
+
 
 #ifdef MODULE_HAM
     ham_cmd_init();

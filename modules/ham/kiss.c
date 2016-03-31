@@ -17,10 +17,10 @@
 #include <stdint.h>
 #include <sys/unistd.h>
 
-#include <kernel.h>
-#include <msg.h>
-#include <ringbuffer.h>
-#include <thread.h>
+#include "kernel_types.h"
+#include "msg.h"
+#include "ringbuffer.h"
+#include "thread.h"
 
 #include "kiss.h"
 
@@ -184,7 +184,7 @@ kernel_pid_t kiss_init_native(kiss_dev_t *dev, int fd, char *stack,
 #endif
 
     DEBUG("starting kiss thread\n");
-    pid = thread_create(stack, stack_size, priority, CREATE_STACKTEST,
+    pid = thread_create(stack, stack_size, priority, THREAD_CREATE_STACKTEST,
                         _kiss_thread, dev, "KISS");
 
     if (pid < 0) {

@@ -7,7 +7,7 @@ env:
     - RIOTBASE=/tmp/kubos-build/RIOT
     - QUIET=0
   matrix:
-    - BOARD=native TESTS=1
+  # - BOARD=native TESTS=1
     - BOARD=stm32f4discovery TESTS=0
 
 services:
@@ -17,8 +17,8 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y python
   - mkdir /tmp/kubos-build
-  - git clone -b kubos-master https://github.com/openkosmosorg/RIOT $RIOTBASE
+  - git clone https://github.com/RIOT-OS/RIOT $RIOTBASE
   - docker build -t riotbuild $RIOTBASE/dist
 
 script:
-  - ./scripts/travis.sh
+  - ./build/travis.sh

@@ -70,7 +70,7 @@ def main():
     else:
         parser.error('Unknown command: "%s"' % args.command)
 
-    print '> '.join(docker_cmd)
+    print '>', ' '.join(docker_cmd)
     os.execvp('docker', docker_cmd)
 
 if __name__ == '__main__':

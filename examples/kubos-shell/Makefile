@@ -1,30 +1,27 @@
-APPLICATION = kubos-test
+APPLICATION = kubos-shell
 
-KUBOS_CORE ?= $(abspath $(CURDIR)/..)
+KUBOS_CORE ?= $(abspath $(CURDIR)/../..)
 
 # If no BOARD is found in the environment, use this default:
 BOARD     ?= native
 BOARDTYPE ?= beaglebone
 
 # Modules to include:
-USEMODULE += auto_init
+USEMODULE += shell
+USEMODULE += shell_commands
 USEMODULE += xtimer
-USEMODULE += embunit
+USEMODULE += auto_init
 USEMODULE += gnrc_pktbuf
 USEMODULE += gnrc_netif
+USEMODULE += gnrc_netif_hdr
 USEMODULE += gnrc_netapi
 USEMODULE += gnrc_netreg
-
-# Kubos modules
-USEMODULE += ham
 USEMODULE += gps
+USEMODULE += ham
 USEMODULE += klog
 
 ifneq ($(BOARD),native)
 USEMODULE += fatfs
 endif
-
-CFLAGS += -g
-INCLUDES += -I$(RIOTBASE)/sys/include
 
 include $(KUBOS_CORE)/kubos.mk
