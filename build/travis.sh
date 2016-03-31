@@ -25,7 +25,7 @@ docker_make() {
 }
 
 echo Building for $BOARD
-docker_make /data/kubos-core all
+docker_make /data/kubos-core/examples/kubos-shell all
 
 # TODO: setup infra to run unit tests on hardware
 

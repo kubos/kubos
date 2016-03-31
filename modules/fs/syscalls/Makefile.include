@@ -1,0 +1,19 @@
+UNDEF := $(BINDIR)newlib_syscalls_fs/syscalls.o $(UNDEF)
+
+CFLAGS += -DHAVE_FSYNC
+
+NEWLIB_INCLUDE_PATTERNS ?= \
+  /etc/alternatives/gcc-$(TARGET_ARCH)-include \
+  /usr/$(TARGET_ARCH)/include \
+  /usr/local/opt/$(TARGET_ARCH)*/$(TARGET_ARCH)/include \
+  #
+# Use the wildcard Makefile function to search for existing directories matching
+# the patterns above. We use the -isystem gcc/clang argument to add the include
+# directories as system include directories, which means they will not be
+# searched until after all the project specific include directories (-I/path)
+NEWLIB_INCLUDES ?= \
+    $(foreach dir, \
+        $(foreach pat, $(NEWLIB_INCLUDE_PATTERNS), $(wildcard $(pat))), \
+        -isystem $(dir))
+
+export INCLUDES += $(NEWLIB_INCLUDES)

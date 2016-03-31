@@ -1,5 +1,5 @@
 MODULE = klog
 
-LINKFLAGS += -lm
+CFLAGS += -DMODULE_FATFS
 
 include $(RIOTBASE)/Makefile.base
