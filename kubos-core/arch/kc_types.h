@@ -1,7 +1,8 @@
-#include <stdint.h>
-
 #ifndef KC_TYPES_H
 #define KC_TYPES_H
+
+#include <stdint.h>
+
 
 #define WATCH_DISABLE 0
 
