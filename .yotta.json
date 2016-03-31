@@ -1,0 +1,6 @@
+{
+  "build": {
+    "target": "x86-linux-native,*",
+    "targetSetExplicitly": true
+  }
+}

@@ -33,3 +33,6 @@
 
 # Compile Folders
 bin/
+
+# Build Folders
+build/

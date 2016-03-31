@@ -1,2 +1,0 @@
-/data/dev/openkosmosorg/kubos-core/build/x86-linux-native/CMakeFiles/all_tests.dir
-/data/dev/openkosmosorg/kubos-core/build/x86-linux-native/source/CMakeFiles/kubos-core.dir

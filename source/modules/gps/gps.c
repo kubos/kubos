@@ -16,12 +16,9 @@
  */
 #include "kubos-core/modules/gps.h"
 #include "kubos-core/modules/nmea.h"
+#include "kubos-core/arch/kc_timer.h"
 
-// #include "kernel.h"
-// #include "xtimer.h"
-//
-// #define ENABLE_DEBUG 0
-// #include "debug.h"
+#include "kubos-core/common/kc_debug.h"
 
 /* time to sleep between attempts to connect 3 seconds*/
 #define CONNECT_RETRY_INTERVAL (3000000U)
@@ -50,7 +47,7 @@ gps_fix_t *gps_last_fix(void)
 static char gps_buf[GPS_BUFSIZE];
 static uint8_t gps_buf_cur = 0;
 
-void gps_rx_cb(void *arg, char data)
+void gps_rx_cb(void *arg, uint8_t data)
 {
     gps_cfg_t *gps_cfg = (gps_cfg_t *) arg;
     DEBUG("GPS_RX: %c\n", data);
@@ -72,7 +69,7 @@ void gps_rx_cb(void *arg, char data)
             msg_t msg;
             msg.type = gps_cfg->type;
             msg.content.ptr = (char *) fix;
-            msg_send(&msg, gps_cfg->pid);
+            kc_msg_send(&msg, gps_cfg->pid);
         }
         return;
     }
@@ -90,18 +87,18 @@ void gps_rx_cb(void *arg, char data)
 */
 void gps_connect(gps_cfg_t *gps_cfg)
 {
-    // bool connected = false;
-    // uint32_t last_wakeup = xtimer_now();
-    //
-    // while (!connected) {
-    //     if (uart_init(gps_cfg->uart,
-    //                   gps_cfg->baudrate,
-    //                   gps_rx_cb, 0, (void *) gps_cfg) == 0) {
-    //         DEBUG("Connected to UART%d\n", gps_cfg->uart);
-    //         connected = true;
-    //     } else {
-    //         // Sleep for a while before trying again
-    //         xtimer_usleep_until(&last_wakeup, CONNECT_RETRY_INTERVAL);
-    //     }
-    // }
+    bool connected = false;
+    uint32_t last_wakeup = kc_timer_now();
+
+    while (!connected) {
+        if (uart_init(gps_cfg->uart,
+                      gps_cfg->baudrate,
+                      gps_rx_cb, (void *) gps_cfg) == 0) {
+            DEBUG("Connected to UART%d\n", gps_cfg->uart);
+            connected = true;
+        } else {
+            // Sleep for a while before trying again
+            kc_timer_usleep_until(&last_wakeup, CONNECT_RETRY_INTERVAL);
+        }
+    }
 }

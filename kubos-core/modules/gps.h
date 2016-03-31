@@ -22,7 +22,9 @@
 // #include "time.h"
 // #include "thread.h"
 
-#include "kubos-core/types.h"
+#include "kubos-core/arch/kc_uart.h"
+#include "kubos-core/arch/kc_types.h"
+#include "kubos-core/arch/kc_msg.h"
 
 #include <stdint.h>
 

@@ -2,9 +2,9 @@
 #include "kubos-core/modules/location.h"
 
 //#include "kernel.h"
-//#include "xtimer.h"
 
-#include "kubos-core/modules/gps.h"
+#include "kubos-core/arch/kc_gps.h"
+#include "kubos-core/arch/kc_timer.h"
 
 /* time to sleep between attempts to connect 3 seconds*/
 #define CONNECT_RETRY_INTERVAL (3000000U)
@@ -63,7 +63,7 @@ void fixup_timestamp(double dtime, time_t* time, int* milliseconds)
  */
 void gpsconnect(void){
 	bool 		not_connected = true;
-	uint32_t	last_wakeup = xtimer_now();
+	uint32_t	last_wakeup = kc_timer_now();
 
 	while (not_connected) {
 		// Open a socket connection to gpsd
@@ -73,7 +73,7 @@ void gpsconnect(void){
 			not_connected = false;
 		} else {
 			// Sleep for a while before trying again
-			xtimer_usleep_until(&last_wakeup, CONNECT_RETRY_INTERVAL);
+			kc_timer_usleep_until(&last_wakeup, CONNECT_RETRY_INTERVAL);
 		}
 	}
 }
@@ -87,7 +87,7 @@ void *location_proc(void* config) {
 	location_gps_fix_t* gpsfix;
 	kernel_pid_t 		consumer_pid = ((location_t *)config)->pid;
 	uint16_t 			msg_type = ((location_t *)config)->type;
-	uint32_t 			last_wakeup = xtimer_now();
+	uint32_t 			last_wakeup = kc_timer_now();
 	int 				bytes_read;
 
 	gpsconnect();
@@ -119,10 +119,10 @@ void *location_proc(void* config) {
 
 				gpsmsg.type = msg_type;
 				gpsmsg.content.ptr = (char*)gpsfix;
-				msg_send(&gpsmsg, consumer_pid);
+				kc_msg_send(&gpsmsg, consumer_pid);
 			}
 		} else {
-			xtimer_usleep_until(&last_wakeup, POLLING_INTERVAL);
+			kc_timer_usleep_until(&last_wakeup, POLLING_INTERVAL);
 		}
 	}
 

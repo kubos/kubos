@@ -1,5 +1,0 @@
-# ninja log v5
-0	18	0	yotta_dummy_lib_kubos_core/CMakeFiles/kubos-core.dir/dummy.c.o	a83f1015403a1cde
-19	26	0	yotta_dummy_lib_kubos_core/libkubos-core.a	3eaf9eaab5821489
-0	114	0	source/CMakeFiles/kubos-core.dir/data/dev/openkosmosorg/kubos-core/source/modules/gps/nmea.c.o	36a5f97372584087
-0	98	0	source/CMakeFiles/kubos-core.dir/data/dev/openkosmosorg/kubos-core/source/modules/gps/nmea.c.o	36a5f97372584087

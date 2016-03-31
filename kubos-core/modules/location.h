@@ -1,6 +1,8 @@
 #include "time.h"
 //#include "thread.h"
-//#include "msg.h"
+
+#include "kubos-core/arch/kc_msg.h"
+#include "kubos-core/arch/kc_types.h"
 
 #ifdef __cplusplus
 extern "C" {
