@@ -136,12 +136,12 @@ static inline char *_level_str(unsigned level)
 static int _klog(FILE *f, unsigned level, const char *logger,
                  const char *format, va_list args)
 {
-    timex_t time;
+    struct timeval time;
     int written = 0;
-    kc_timer_now_timex(&time);
+    kc_timer_now_time(&time);
 
-    written += fprintf(f, "%010d.%03d %s:%s ", (int) time.seconds,
-                       (int) time.microseconds / 1000, logger,
+    written += fprintf(f, "%010d.%03d %s:%s ", (int) time.tv_sec,
+                       (int) time.tv_usec / 1000, logger,
                        _level_str(level));
     written += vfprintf(f, format, args);
     written += fprintf(f, "\n");

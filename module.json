@@ -4,7 +4,7 @@
   "description": "KubOS - Satellite flight software platform",
   "keywords": [],
   "author": "kubos.co",
-  "homepage": "kubos.co",
+  "homepage": "https://www.kubos.co",
   "license": "Apache-2.0",
   "dependencies": {}
 }
