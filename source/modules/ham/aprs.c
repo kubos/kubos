@@ -60,9 +60,9 @@ int aprs_position_format(char* dest, aprs_position_t *position)
         position->course, position->speed, (int) position->altitude);
 }
 
-k_pktbuf_t *aprs_position_build(aprs_position_t *position)
+k_buffer_t *aprs_position_build(aprs_position_t *position)
 {
-    k_pktbuf_t *pkt = k_pktbuf_add(NULL, NULL, APRS_POSITION_LEN);
+    k_buffer_t *pkt = k_buffer_new(NULL, APRS_POSITION_LEN);
 
     aprs_position_format((char *) pkt->data, position);
     return pkt;
@@ -134,9 +134,9 @@ int aprs_telemetry_format(char* dest, aprs_telemetry_t *telemetry)
 
 }
 
-k_pktbuf_t *aprs_telemetry_build(aprs_telemetry_t *telemetry)
+k_buffer_t *aprs_telemetry_build(aprs_telemetry_t *telemetry)
 {
-    k_pktbuf_t *pkt = k_pktbuf_add(NULL, NULL, APRS_POSITION_LEN);
+    k_buffer_t *pkt = k_buffer_new(NULL, APRS_POSITION_LEN);
 
     aprs_telemetry_format((char *) pkt->data, telemetry);
     return pkt;

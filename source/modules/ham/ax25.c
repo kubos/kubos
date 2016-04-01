@@ -18,8 +18,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "kubos-core/arch/k_pktbuf.h"
-
 #include "kubos-core/modules/ax25.h"
 
 #define MAX_CALLSIGN_LEN 6
@@ -88,33 +86,34 @@ unsigned short ax25_calc_fcs(char *buf, int size)
     return fcs;
 }
 
-unsigned short ax25_calc_fcs_pkt(k_pktbuf_t *pkt)
+unsigned short ax25_calc_fcs_pkt(k_buffer_t *pkt)
 {
     unsigned short fcs = 0xFFFF;
     uint8_t e = 0, f = 0;
 
-    while (pkt) {
-        char *data = (char *) pkt->data;
-        size_t i, size = pkt->size;
-        if (!pkt->next) {
-            size -= 2;
-        }
-
-        for (i = 0; i < size; i++) {
-            e = fcs ^ data[i];
-            f = e ^ (e << 4);
-            fcs = (fcs >> 8) ^ (f << 8) ^ (f << 3) ^ (f >> 4);
-        }
-        pkt = pkt->next;
-    }
+    // @TODO: need to link the buffers
+    // while (pkt) {
+    //     char *data = (char *) pkt->data;
+    //     size_t i, size = pkt->size;
+    //     if (!pkt->next) {
+    //         size -= 2;
+    //     }
+    //
+    //     for (i = 0; i < size; i++) {
+    //         e = fcs ^ data[i];
+    //         f = e ^ (e << 4);
+    //         fcs = (fcs >> 8) ^ (f << 8) ^ (f << 3) ^ (f >> 4);
+    //     }
+    //     pkt = pkt->next;
+    // }
 
     return fcs;
 }
 
-k_pktbuf_t *ax25_pkt_build(k_pktbuf_t *info, ax25_addr_t *addrs,
+k_buffer_t *ax25_pkt_build(k_buffer_t *info, ax25_addr_t *addrs,
                                uint8_t addrs_len, uint8_t ctrl, uint8_t protocol)
 {
-    k_pktbuf_t *pkt;
+    k_buffer_t *pkt;
     unsigned short fcs = 0xFFFF;
     int i, size = (7 * addrs_len) + 2;
     char *fcs_data, *pkt_data;
@@ -125,17 +124,20 @@ k_pktbuf_t *ax25_pkt_build(k_pktbuf_t *info, ax25_addr_t *addrs,
 
     // First add an additional 2 bytes for the FCS marker
 
-    if (!info) {
-        info = k_pktbuf_add(NULL, &fcs, 2);
-    } else {
-        if (k_pktbuf_realloc_data(info, info->size + 2) != 0) {
-            return NULL;
-        }
-    }
+    // @TODO do we need to handle this?
+    // if (!info) {
+    //     info = k_pktbuf_add(NULL, &fcs, 2);
+    // } else {
+    //     if (k_pktbuf_realloc_data(info, info->size + 2) != 0) {
+    //         return NULL;
+    //     }
+    // }
+
+    info = k_buffer_new(&fcs, 2);
 
     fcs_data = ((char *) info->data) + (info->size - 2);
 
-    pkt = k_pktbuf_add(info, NULL, size);
+    pkt = k_buffer_new(NULL, size);
     pkt_data = (char *) pkt->data;
 
     for (i = 0; i < addrs_len; i++) {

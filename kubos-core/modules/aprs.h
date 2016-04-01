@@ -52,7 +52,7 @@ typedef struct aprs_position_s {
 } aprs_position_t;
 
 int aprs_position_format(char* dest, aprs_position_t *position);
-k_pktbuf_t *aprs_position_build(aprs_position_t *position);
+k_buffer_t *aprs_position_build(aprs_position_t *position);
 
 // APRS telemetry string
 // TELEMETRY = 'T#{id:03d},{r1:03d},{r2:03d},{r3:03d},{r4:03d},{r5:03d},{d:08b}'
@@ -85,7 +85,7 @@ void aprs_telemetry_add_digital(aprs_telemetry_t *telemetry, int bit,
                                 char *name, char *unit, uint8_t bit_value);
 
 int aprs_telemetry_format(char* dest, aprs_telemetry_t *telemetry);
-k_pktbuf_t *aprs_telemetry_build(aprs_telemetry_t *telemetry);
+k_buffer_t *aprs_telemetry_build(aprs_telemetry_t *telemetry);
 
 // APRS Telemetry Parameter Name message
 // :CCCCCCCCC:PARM.F1,F2,F3,F4,F5,B1,B2,B3,B4,B5,B6,B7,B8

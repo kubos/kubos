@@ -18,7 +18,7 @@
 #define AX25_H
 
 #include <stdint.h>
-#include "kubos-core/arch/k_pktbuf.h"
+#include "kubos-core/arch/k_buffer.h"
 
 #ifndef AX25_BUFFER_SIZE
 #define AX25_BUFFER_SIZE 255
@@ -53,7 +53,7 @@ ax25_addr_t ax25_addr_init(char *addr);
  */
 void ax25_print_addr(char *prefix, ax25_addr_t addr);
 
-k_pktbuf_t *ax25_pkt_build(k_pktbuf_t *info, ax25_addr_t *addrs,
+k_buffer_t *ax25_pkt_build(k_buffer_t *info, ax25_addr_t *addrs,
                                uint8_t addrs_len, uint8_t ctrl,
                                uint8_t protocol);
 
