@@ -16,4 +16,6 @@ size_t k_buffer_len(k_buffer_t * buffer);
 
 int k_buffer_realloc(k_buffer_t * buffer, size_t new_size);
 
+void k_buffer_free(k_buffer_t * buffer);
+
 #endif

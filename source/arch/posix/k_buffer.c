@@ -61,3 +61,15 @@ int k_buffer_realloc(k_buffer_t * buffer, size_t new_size)
     buffer->size = new_size;
     return 0;
 }
+
+void k_buffer_free(k_buffer_t * buffer)
+{
+    if (NULL != buffer)
+    {
+        if (NULL != buffer->data)
+        {
+            free(buffer->data);
+        }
+        free(buffer);
+    }
+}

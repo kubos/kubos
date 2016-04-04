@@ -118,6 +118,9 @@ static void test_PktBuildUiPacket(void)
     // fcs
     TEST_ASSERT_EQUAL_INT(payload_data[3], (char) 0xB8);
     TEST_ASSERT_EQUAL_INT(payload_data[4], (char) 0xE1);
+
+    k_buffer_free(pkt);
+    k_buffer_free(payload);
 }
 
 int main(void)
