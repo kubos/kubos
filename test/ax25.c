@@ -87,7 +87,7 @@ static void test_PktBuildUiPacket(void)
     k_buffer_t *pkt = ax25_ui_pkt_build(payload, addrs, 2);
 
     TEST_ASSERT_NOT_NULL(pkt);
-    TEST_ASSERT_EQUAL_INT(k_buffer_len(pkt), 21);
+    TEST_ASSERT_EQUAL_INT(k_buffer_size(pkt), 21);
 
     data = (char *) pkt->data;
     assert_ax25_chars(data, "N0CALL0");
