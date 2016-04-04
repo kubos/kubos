@@ -91,7 +91,7 @@ endif ()
 file (GLOB_RECURSE ARCH_FILES src/arch/${CSP_ARCH}/*.c)
 target_sources (csp PUBLIC ${ARCH_FILES})
 
-set (CMAKE_C_FLAGS "-Os -Wall -g -std=gnu99")
+target_compile_options(csp PUBLIC -Os -Wall -g -std=gnu99)
 
 if (LOGLEVEL STREQUAL "debug")
     set (CSP_LOG_LEVEL_DEBUG ON)
