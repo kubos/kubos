@@ -91,21 +91,20 @@ unsigned short ax25_calc_fcs_pkt(k_buffer_t *pkt)
     unsigned short fcs = 0xFFFF;
     uint8_t e = 0, f = 0;
 
-    // @TODO: need to link the buffers
-    // while (pkt) {
-    //     char *data = (char *) pkt->data;
-    //     size_t i, size = pkt->size;
-    //     if (!pkt->next) {
-    //         size -= 2;
-    //     }
-    //
-    //     for (i = 0; i < size; i++) {
-    //         e = fcs ^ data[i];
-    //         f = e ^ (e << 4);
-    //         fcs = (fcs >> 8) ^ (f << 8) ^ (f << 3) ^ (f >> 4);
-    //     }
-    //     pkt = pkt->next;
-    // }
+    while (pkt) {
+        char *data = (char *) pkt->data;
+        size_t i, size = pkt->size;
+        if (!pkt->next) {
+            size -= 2;
+        }
+
+        for (i = 0; i < size; i++) {
+            e = fcs ^ data[i];
+            f = e ^ (e << 4);
+            fcs = (fcs >> 8) ^ (f << 8) ^ (f << 3) ^ (f >> 4);
+        }
+        pkt = pkt->next;
+    }
 
     return fcs;
 }
@@ -124,20 +123,17 @@ k_buffer_t *ax25_pkt_build(k_buffer_t *info, ax25_addr_t *addrs,
 
     // First add an additional 2 bytes for the FCS marker
 
-    // @TODO do we need to handle this?
-    // if (!info) {
-    //     info = k_pktbuf_add(NULL, &fcs, 2);
-    // } else {
-    //     if (k_pktbuf_realloc_data(info, info->size + 2) != 0) {
-    //         return NULL;
-    //     }
-    // }
-
-    info = k_buffer_new(&fcs, 2);
+    if (!info) {
+        info = k_buffer_new(&fcs, 2);
+    } else {
+        if (k_buffer_realloc(info, info->size + 2) != 0) {
+            return NULL;
+        }
+    }
 
     fcs_data = ((char *) info->data) + (info->size - 2);
 
-    pkt = k_buffer_new(NULL, size);
+    pkt = k_buffer_add(info, NULL, size);
     pkt_data = (char *) pkt->data;
 
     for (i = 0; i < addrs_len; i++) {
