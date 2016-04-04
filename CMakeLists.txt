@@ -65,6 +65,7 @@ add_library (csp STATIC
              $<$<BOOL:${RDP}>:src/transport/csp_rdp.c>
              src/transport/csp_udp.c)
 
+target_compile_definitions (csp PRIVATE GIT_REV=\"${GIT_REV}\")
 target_include_directories (csp PUBLIC include ${CMAKE_CURRENT_BINARY_DIR})
 
 # TODO detect endianness
