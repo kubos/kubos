@@ -21,8 +21,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define MODULE_LOG
-#include "kubos-core/common/kc_log.h"
+//#define MODULE_LOG
+#include "kubos-core/k_log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,8 +64,6 @@ void klog_cleanup(void);
         klog_file(level, logger, __VA_ARGS__); \
     } \
 } while (0)
-
-#define log_write(level, ...) klog_write(level, "RIOT", __VA_ARGS__)
 
 #ifdef __cplusplus
 }

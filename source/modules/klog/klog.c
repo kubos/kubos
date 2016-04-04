@@ -24,8 +24,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "kubos-core/arch/kc_timer.h"
-
+#include "kubos-core/arch/k_timer.h"
 #include "kubos-core/modules/klog.h"
 
 uint8_t klog_console_level = LOG_INFO;
@@ -138,7 +137,7 @@ static int _klog(FILE *f, unsigned level, const char *logger,
 {
     struct timeval time;
     int written = 0;
-    kc_timer_now_time(&time);
+    k_timer_now_time(&time);
 
     written += fprintf(f, "%010d.%03d %s:%s ", (int) time.tv_sec,
                        (int) time.tv_usec / 1000, logger,
