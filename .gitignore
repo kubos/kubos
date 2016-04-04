@@ -36,3 +36,5 @@ bin/
 
 # Build Folders
 build/
+yotta_targets/
+yotta_modules/
