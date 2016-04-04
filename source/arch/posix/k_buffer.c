@@ -33,7 +33,7 @@ k_buffer_t *k_buffer_add(k_buffer_t * next, void * data, size_t size)
     return newbuff;
 }
 
-size_t k_buffer_len(k_buffer_t * buffer)
+size_t k_buffer_size(k_buffer_t * buffer)
 {
     size_t len = 0;
 
@@ -54,7 +54,7 @@ int k_buffer_realloc(k_buffer_t * buffer, size_t new_size)
     if (new_size > buffer->size)
     {
         void * _data = malloc(sizeof(int) * new_size);
-        memcpy(_data, buffer->data, (buffer->size < new_size) ? buffer->size : new_size);
+        memcpy(_data, buffer->data, buffer->size);
         free(buffer->data);
         buffer->data = _data;
     }
