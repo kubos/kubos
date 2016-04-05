@@ -34,7 +34,8 @@
 # Compile Folders
 bin/
 
-# Build Folders
+# Yotta
 build/
 yotta_targets/
 yotta_modules/
+.yotta.json
