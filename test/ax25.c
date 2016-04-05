@@ -20,6 +20,9 @@
 #include "kubos-core/modules/ax25.h"
 #include "kubos-core/modules/aprs.h"
 
+#include "kubos-core/arch/k_buffer.h"
+#include "csp/csp_buffer.h"
+
 #define assert_ax25_chars(s1, s2) do { \
     char *s1_ = s1; \
     char *s2_ = s2; \
@@ -80,10 +83,13 @@ static void test_PktBuildUiPacket(void)
         AX25_ADDR_NOCALL
     };
 
+    csp_buffer_init(10, 80);
+    k_buffer_init();
+
     char *info = "ABC", *data, *payload_data;
     int i = 0, j = 0;
 
-    k_buffer_t *payload = k_buffer_new(info, 3);
+    k_buffer_t *payload = K_BUFFER_NEW(NULL, info, 3);
     k_buffer_t *pkt = ax25_ui_pkt_build(payload, addrs, 2);
 
     TEST_ASSERT_NOT_NULL(pkt);
@@ -119,8 +125,8 @@ static void test_PktBuildUiPacket(void)
     TEST_ASSERT_EQUAL_INT(payload_data[3], (char) 0xB8);
     TEST_ASSERT_EQUAL_INT(payload_data[4], (char) 0xE1);
 
-    k_buffer_free(pkt);
-    k_buffer_free(payload);
+    K_BUFFER_FREE(pkt);
+    K_BUFFER_FREE(payload);
 }
 
 int main(void)
