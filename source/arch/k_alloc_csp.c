@@ -15,7 +15,6 @@ void * _csp_realloc(void * buff, size_t old_size, size_t new_size)
     memcpy(_data, buff, old_size);
     void * oldbuff = buff;
     buff = _data;
-    //csp_buffer_free(oldbuff);
 }
 
 void _csp_free(void * buff)
@@ -25,7 +24,7 @@ void _csp_free(void * buff)
 
 void k_alloc_csp_init()
 {
-    csp_buffer_init(CSP_BUFFER_SIZE, CSP_BUFFER_NUM);
+    csp_buffer_init(CSP_BUFFER_COUNT, CSP_BUFFER_SIZE);
 
     csp_alloc._new = _csp_new;
     csp_alloc._realloc = _csp_realloc;

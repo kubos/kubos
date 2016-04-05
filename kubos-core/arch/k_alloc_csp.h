@@ -4,8 +4,8 @@
 #include "kubos-core/arch/k_alloc.h"
 #include <stdlib.h>
 
-#define CSP_BUFFER_SIZE 100
-#define CSP_BUFFER_NUM 30
+#define CSP_BUFFER_SIZE 60
+#define CSP_BUFFER_COUNT 10
 
 void * _csp_new(size_t size);
 void _csp_free(void * ptr);
