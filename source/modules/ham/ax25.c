@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "kubos-core/modules/ax25.h"
+#include "kubos-core/arch/k_buffer.h"
 
 #define MAX_CALLSIGN_LEN 6
 #define MAX_ADDR_LEN     8
@@ -124,16 +125,16 @@ k_buffer_t *ax25_pkt_build(k_buffer_t *info, ax25_addr_t *addrs,
     // First add an additional 2 bytes for the FCS marker
 
     if (!info) {
-        info = k_buffer_new(&fcs, 2);
+        info = K_BUFFER_NEW(NULL, &fcs, 2);
     } else {
-        if (k_buffer_realloc(info, info->size + 2) != 0) {
+        if (K_BUFFER_REALLOC(info, info->size + 2) != 0) {
             return NULL;
         }
     }
 
     fcs_data = ((char *) info->data) + (info->size - 2);
 
-    pkt = k_buffer_add(info, NULL, size);
+    pkt = K_BUFFER_NEW(info, NULL, size);
     pkt_data = (char *) pkt->data;
 
     for (i = 0; i < addrs_len; i++) {
