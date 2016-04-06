@@ -74,7 +74,7 @@ if((NOT DEFINED YOTTA_CFG_GCC_PRINTF_FLOAT) OR (YOTTA_CFG_GCC_PRINTF_FLOAT))
 endif()
 
 # Set the compiler to ARM-GCC
-if(CMAKE_VERSION VERSION_LESS "3.5.0")
+if(CMAKE_VERSION VERSION_LESS "3.6.0")
     include(CMakeForceCompiler)
     cmake_force_c_compiler("${ARM_NONE_EABI_GCC}" GNU)
     cmake_force_cxx_compiler("${ARM_NONE_EABI_GPP}" GNU)
