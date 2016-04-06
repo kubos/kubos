@@ -17,7 +17,7 @@
 #ifndef GPS_H
 #define GPS_H
 
-//#include "msg.h"
+#include "kubos-core/k_msg.h"
 #include "kubos-core/k_uart.h"
 #include "time.h"
 #include "kubos-core/k_thread.h"
@@ -39,10 +39,9 @@ extern "C" {
 #endif
 
 typedef struct gps_cfg {
-    kernel_pid_t pid;
+    struct usart_conf * uart_conf;
+    csp_conn_t * conn;
     uint16_t type;
-    uart_t uart;
-    uint32_t baudrate;
 } gps_cfg_t;
 
 typedef struct {
