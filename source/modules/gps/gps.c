@@ -70,10 +70,12 @@ void gps_rx_cb (uint8_t *buf, int len, void *pxTaskWoken) //(void *arg, uint8_t 
         // Send location fix
         if (NULL != gps_cfg->conn) {
             DEBUG("Parsed NMEA sentence, sending message\n");
-            k_msg_t msg;
-            msg.type = gps_cfg->type;
-            msg.content = (char *) fix;
-            k_msg_send(&msg, gps_cfg->conn);
+            printf("NMEA %s\n", (char*)fix);
+            // @TODO: Who are we sending a message to??
+            // k_msg_t msg;
+            // msg.type = gps_cfg->type;
+            // msg.content = (char *) fix;
+            // k_msg_send(&msg, gps_cfg->conn);
         }
         return;
     }
@@ -94,13 +96,18 @@ void gps_connect(gps_cfg_t *gps_cfg)
     bool connected = false;
     uint32_t last_wakeup = k_timer_now();
 
-    while (!connected) {
-        if (k_uart_init(gps_cfg->uart_conf, gps_rx_cb) == 0) {
-            DEBUG("Connected to UART%s\n", gps_cfg->uart_conf->device);
-            connected = true;
-        } else {
-            // Sleep for a while before trying again
-            k_timer_usleep_until(&last_wakeup, CONNECT_RETRY_INTERVAL);
-        }
-    }
+    // while (!connected) {
+    //     if (uart_init(gps_cfg->uart_conf, gps_rx_cb) == 0) {
+    //         DEBUG("Connected to UART%s\n", gps_cfg->uart_conf->device);
+    //         connected = true;
+    //     } else {
+    //         // Sleep for a while before trying again
+    //         k_timer_usleep_until(&last_wakeup, CONNECT_RETRY_INTERVAL);
+    //     }
+    // }
+
+    uart_init(gps_cfg->uart_conf);
+    uart_set_callback(gps_rx_cb);
+    DEBUG("Connected to UART%s\n", gps_cfg->uart_conf->device);
+    connected = true;
 }
