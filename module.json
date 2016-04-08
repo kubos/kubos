@@ -1,0 +1,16 @@
+{
+  "name": "freertos-config-stm32f4",
+  "version": "0.0.1",
+  "description": "FreeRTOS config for STM32F4",
+  "keywords": [
+    "freertos",
+    "freertos-config"
+  ],
+  "author": "marshall@kubos.co",
+  "repository": {
+    "url": "ssh://git@github.com/openkosmosorg/freertos-config-stm32f4",
+    "type": "git"
+  },
+  "homepage": "https://github.com/openkosmosorg/freertos-config-stm32f4",
+  "license": "FreeRTOS Open Source License"
+}
