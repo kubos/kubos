@@ -10,7 +10,7 @@
 
 
 /* Setup callback from USART RX to KISS RS */
-void my_uart_rx(uint8_t * buf, int len, void * pxTaskWoken) {
+void my_uart_rx(void * arg, uint8_t * buf, int len, void * pxTaskWoken) {
 	printf("rx'd %s\n", buf);
 }
 
@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 
 	/* Run UART init */
 	uart_init(&conf);
-	uart_set_callback(my_uart_rx);
+	uart_set_callback(NULL, my_uart_rx);
 
     uart_putstr("ryan", 5);
 
