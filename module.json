@@ -1,7 +1,7 @@
 {
   "name": "cmsis-core-st",
   "version": "1.0.1",
-  "description": "CMSIS Core Implementation for ST MCUs",
+  "description": "CMSIS Core Implementation for ST MCUs (KubOS fork)",
   "keywords": [
     "cmsis",
     "mbed",
@@ -9,10 +9,10 @@
   ],
   "author": "Brendan Moran <brendan.moran@arm.com>",
   "repository": {
-    "url": "git@github.com:ARMmbed/cmsis-core-st.git",
+    "url": "git@github.com:openkosmosorg/cmsis-core-st.git",
     "type": "git"
   },
-  "homepage": "https://github.com/ARMmbed/cmsis-core-st",
+  "homepage": "https://github.com/openkosmosorg/cmsis-core-st",
   "license": "Apache-2",
   "dependencies": {},
   "targetDependencies": {
@@ -20,7 +20,7 @@
       "cmsis-core-stm32f0": "*"
     },
     "stm32f4": {
-      "cmsis-core-stm32f4": "^1.0.0"
+      "cmsis-core-stm32f4": "openkosmosorg/cmsis-core-stm32f4#master"
     }
   }
 }
