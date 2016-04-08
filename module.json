@@ -17,7 +17,7 @@
     "cmsis-core-stm32f407xg"
   ],
   "dependencies": {
-    "cmsis-core": "*"
+    "cmsis-core": "openkosmosorg/cmsis-core#master"
   },
   "targetDependencies": {}
 }
