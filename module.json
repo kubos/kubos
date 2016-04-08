@@ -1,13 +1,12 @@
 {
-  "name": "mbed-hal-st-stm32cubef4",
+  "name": "stm32cubef4",
   "version": "1.2.0",
   "description": "STM32Cube HAL for STM32F4 microcontrollers",
   "keywords": [
-    "mbed",
-    "mbed-official"
+    "stm32cubef4"
   ],
-  "author": "",
-  "homepage": "https://github.com/ARMmbed/mbed-hal-st-stm32cubef4",
+  "author": "Marshall Culpepper <marshall@kubos.co>",
+  "homepage": "https://github.com/openkosmosorg/stm32cubef4",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/BSD-3-Clause",
@@ -15,11 +14,14 @@
     }
   ],
   "extraIncludes": [
-    "mbed-hal-st-stm32cubef4"
+    "stm32cubef4"
   ],
-  "dependencies": {
-    "uvisor-lib": ">=1.0.0,<3.0.0",
-    "mbed-hal-st-stm32f4": "^1.0.0"
-  },
-  "targetDependencies": {}
+  "targetDependencies": {
+      "stm32f429zi-no-inherit": {
+          "stm32cubef4-stm32f429zi": "*"
+      },
+      "stm32f407vg": {
+          "stm32cubef4-stm32f407vg": "openkosmosorg/stm32cubef4-stm32f407vg#master"
+      }
+  }
 }

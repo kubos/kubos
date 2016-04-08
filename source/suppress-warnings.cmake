@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-message("suppressing warnings from mbed-hal-st-stm32cubef4")
+message("suppressing warnings from stm32cubef4")
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    set_target_properties(mbed-hal-st-stm32cubef4
+    set_target_properties(stm32cubef4
         PROPERTIES COMPILE_FLAGS "-Wno-sign-compare -Wno-unused-variable -Wno-unused-parameter"
     )
 endif()
