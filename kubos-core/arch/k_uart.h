@@ -33,8 +33,8 @@ void uart_init(struct uart_conf *conf);
  * @param handle uart[0,1,2,3]
  * @param callback function pointer
  */
-typedef void (*uart_callback_t) (uint8_t *buf, int len, void *pxTaskWoken);
-void uart_set_callback(uart_callback_t callback);
+typedef void (*uart_callback_t) (void * extra_data, uint8_t *buf, int len, void *pxTaskWoken);
+void uart_set_callback(void * arg, uart_callback_t callback);
 
 /**
  * Insert a character to the RX buffer of a uart

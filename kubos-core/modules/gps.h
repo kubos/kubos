@@ -72,6 +72,10 @@ typedef struct {
 void gps_connect(gps_cfg_t* config);
 gps_fix_t *gps_last_fix(void);
 
+void gps_rx_cb (void * arg, uint8_t *buf, int len, void *pxTaskWoken);
+
+void simple_rx(uint8_t * buf, int len, void * px);
+
 #ifdef __cplusplus
 }
 #endif

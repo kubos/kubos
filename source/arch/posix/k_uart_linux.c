@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 int uart_stdio_id = 0;
 int fd;
 uart_callback_t uart_callback = NULL;
+void * uart_callback_arg = NULL;
 
 static void *serial_rx_thread(void *vptr_args);
 
@@ -152,8 +153,9 @@ void uart_init(struct uart_conf * conf) {
 
 }
 
-void uart_set_callback(uart_callback_t callback) {
+void uart_set_callback(void * arg, uart_callback_t callback) {
 	uart_callback = callback;
+	uart_callback_arg = arg;
 }
 
 void uart_insert(char c, void * pxTaskWoken) {
@@ -199,7 +201,7 @@ static void *serial_rx_thread(void *vptr_args) {
 			exit(1);
 		}
 		if (uart_callback)
-			uart_callback(cbuf, length, NULL);
+			uart_callback(uart_callback_arg, cbuf, length, NULL);
 	}
 	return NULL;
 }
