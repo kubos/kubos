@@ -111,7 +111,6 @@ LoopFillZerobss:
 /* Call uVisor initialization function. */
   bl SystemInitPre
   bl HAL_InitPre
-  bl uvisor_init
   bl SystemInit
 /* Call static constructors */
   //bl __libc_init_array

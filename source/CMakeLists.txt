@@ -32,24 +32,23 @@ endif()
 enable_language(ASM)
 set_property(SOURCE ${STARTUP_ASM} PROPERTY LANGUAGE ASM)
 
-add_library(mbed-hal-st-stm32f407vg
+add_library(stm32cubef4-stm32f407vg
     ${STARTUP_ASM}
     ${STARTUP_SRC}
-    "PeripheralPins.c"
+    #    "PeripheralPins.c"
 )
-set_target_properties(mbed-hal-st-stm32f407vg PROPERTIES
+set_target_properties(stm32cubef4-stm32f407vg PROPERTIES
     LINKER_LANGUAGE C
 )
 
 # uvisor-lib is only a dependency if we're building for gcc
-if(TARGET_LIKE_GCC)
-    set(EXTRA_LINK_LIBS uvisor-lib)
-else()
+#if(TARGET_LIKE_GCC)
+#    set(EXTRA_LINK_LIBS uvisor-lib)
+#else()
     set(EXTRA_LINK_LIBS)
-endif()
+#endif()
 
 #TODO: target dependencies should not be set here
-target_link_libraries(mbed-hal-st-stm32f407vg
+target_link_libraries(stm32cubef4-stm32f407vg
     ${EXTRA_LINK_LIBS}
-    mbed-hal
 )

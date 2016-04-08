@@ -1,12 +1,12 @@
 {
-  "name": "mbed-hal-st-stm32f407vg",
+  "name": "stm32cubef4-stm32f407vg",
   "version": "0.0.1",
-  "description": "mbed HAL for stm32f407vg microcontrollers",
+  "description": "STM32CubeF4 HAL for stm32f407vg microcontrollers",
   "keywords": [
     "mbed"
   ],
-  "author": "Max Peng <max.peng1768@gmail.com>",
-  "homepage": "https://github.com/maxpeng/mbed-hal-st-stm32f407vg",
+  "author": "Marshall Culpepper <marshall@kubos.co>",
+  "homepage": "https://github.com/openkosmosorg/mbed-hal-st-stm32f407vg",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -14,11 +14,10 @@
     }
   ],
   "extraIncludes": [
-    "mbed-hal-st-stm32f407vg"
+    "stm32cubef4-stm32f407vg"
   ],
   "dependencies": {
-    "cmsis-core": "^1.0.0",
-    "uvisor-lib": "^1.0.2"
+    "cmsis-core": "openkosmosorg/cmsis-core#master"
   },
   "targetDependencies": {}
 }
