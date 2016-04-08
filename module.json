@@ -1,13 +1,13 @@
 {
   "name": "cmsis-core-stm32f4",
   "version": "1.2.0",
-  "description": "CMSIS Core module for STM32F4xx microcontrollers",
+  "description": "CMSIS Core module for STM32F4xx microcontrollers (KubOS fork)",
   "keywords": [
     "mbed",
     "mbed-official"
   ],
   "author": "Brendan Moran <brendan.moran@arm.com>",
-  "homepage": "https://github.com/ARMmbed/cmsis-core-stm32f4-private",
+  "homepage": "https://github.com/openkosmosorg/cmsis-core-stm32f4",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/BSD-3-Clause",
@@ -18,9 +18,8 @@
     "cmsis-core-stm32f4"
   ],
   "dependencies": {
-    "uvisor-lib": ">=1.0.0,<3.0.0",
-    "cmsis-core": "*",
-    "mbed-hal-st-stm32f4": ">=1.0.4"
+    "cmsis-core": "openkosmosorg/cmsis-core#master",
+    "stm32cubef4": "openkosmosorg/stm32cubef4#master"
   },
   "targetDependencies": {
     "stm32f401xe-no-inherit": {
@@ -31,6 +30,9 @@
     },
     "stm32f439zi-no-inherit": {
       "cmsis-core-stm32f439zi": "~0.1.0"
+    },
+    "stm32f407xg": {
+      "cmsis-core-stm32f407xg": "openkosmosorg/cmsis-core-stm32f407xg#master"
     }
   }
 }
