@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     uart_putstr("ryan", 5);
 
     while(1) {
-        sleep(1);
+        k_timer_usleep_until(NULL, 100000);
         uart_putstr("ryan", 5);
     }
 

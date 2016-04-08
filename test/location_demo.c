@@ -2,6 +2,7 @@
 #include "kubos-core/arch/k_timer.h"
 #include "kubos-core/modules/gps.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #define ENABLE_DEBUG (1)
 #include "kubos-core/k_debug.h"
@@ -23,9 +24,6 @@ void process_gpsfix_msg_content(gps_fix_t* gpsfix) {
     #define BUFF_SIZE 32
     char    time_string[BUFF_SIZE];
 
-    // printf("test print\n");
-    // printf("%s\n", (char*)gpsfix);
-
     if (NULL != gpsfix)
     {
 
@@ -43,7 +41,7 @@ void process_gpsfix_msg_content(gps_fix_t* gpsfix) {
     }
     else
     {
-        printf("received NULL gpsfix\n");
+        DEBUG("received NULL gpsfix\n");
     }
 }
 
@@ -60,7 +58,7 @@ int main(int argc, char **argv) {
     (void)argv;
     csp_conn_t *conn;
 	csp_packet_t *packet;
-    uint32_t        last_wakeup = k_timer_now();
+    uint32_t last_wakeup = k_timer_now();
 
 
     printf("Initialising CSP\r\n");
@@ -96,28 +94,12 @@ int main(int argc, char **argv) {
     gps_cfg.uart_conf = conf;
     gps_connect(&gps_cfg);
 
-    printf("Debug enabed\r\n");
-    csp_debug_toggle_level(0);
-	csp_debug_toggle_level(1);
-    csp_debug_toggle_level(2);
-	csp_debug_toggle_level(3);
-	csp_debug_toggle_level(4);
-
-	printf("Conn table\r\n");
-	csp_conn_print_table();
-
-	printf("Route table\r\n");
-	csp_route_print_table();
-
-	printf("Interfaces\r\n");
-	csp_route_print_interfaces();
-
     while (1) {
         /* Wait for connection, 10000 ms timeout */
 		if ((conn = csp_accept(sock, 10000)) == NULL)
 			continue;
 
-        // Get a msg from the queue. The blocking version is msg_receive(&msg)
+        // Get a msg from csp
         if ((packet = csp_read(conn, 100)) == NULL) {
             printf("got null packet\n");
             // Do whatever it is that you need to do. For demo purposes,
@@ -128,12 +110,6 @@ int main(int argc, char **argv) {
 
         printf("got packet\n");
 
-        // DEBUG("msg sender=%d, type=%d\n", msg.sender_pid, msg.type);
-        // switch (msg.type) {
-        //     case GPS_FIX_MSG_TYPE:
-        //         process_gpsfix_msg_content((gps_fix_t*) msg.content.ptr);
-        //         break;
-        // }
         process_gpsfix_msg_content((gps_fix_t*)packet->data);
 
         csp_close(conn);

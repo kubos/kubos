@@ -25,6 +25,7 @@
 #define DEBUG_H
 
 #include <stdio.h>
+#include <csp/csp_debug.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,6 +43,8 @@ extern "C" {
  * @{
  */
 #if ENABLE_DEBUG
+
+#define DEBUG_PRINT(...) printf(__VA_ARGS__);
 
 /**
  * @def DEBUG_FUNC

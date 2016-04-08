@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "kubos-core/arch/k_alloc_csp.h"
 #include "csp/csp_buffer.h"
+#include <string.h>
 
 void * _csp_new(size_t size)
 {
@@ -11,10 +12,9 @@ void * _csp_realloc(void * buff, size_t old_size, size_t new_size)
 {
     void * _data = csp_buffer_get(new_size);
     if (NULL == _data)
-        return -1;
+        return NULL;
     memcpy(_data, buff, old_size);
-    void * oldbuff = buff;
-    buff = _data;
+    return _data;
 }
 
 void _csp_free(void * buff)

@@ -95,7 +95,7 @@ void test_FileLog(void)
 static void test_RotateParts(void)
 {
     int result = klog_init_file(LOG_PATH, strlen(LOG_PATH), 32, 3);
-    int size;
+    int size = 0;
 
     TEST_ASSERT_EQUAL_INT(result, 0);
 
