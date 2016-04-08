@@ -1,0 +1,23 @@
+{
+  "name": "freertos",
+  "version": "9.0.0",
+  "description": "FreeRTOS Real Time Operating System",
+  "keywords": [
+    "freertos"
+  ],
+  "author": "marshall@kubos.co",
+  "repository": {
+    "url": "ssh://git@github.com/openkosmosorg/freertos",
+    "type": "git"
+  },
+  "homepage": "https://github.com/openkosmosorg/freertos",
+  "license": "FreeRTOS Open Source License",
+  "targetDependencies": {
+    "arm": {
+      "cmsis-core": "openkosmosorg/cmsis-core"
+    },
+    "stm32f4": {
+      "freertos-config-stm32f4": "openkosmosorg/freertos-config-stm32f4"
+    }
+  }
+}
