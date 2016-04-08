@@ -3,5 +3,10 @@
     "version" : "0.0.0",
     "description" : "msp430 build target",
     "license" : "Apache-2.0",
+    "similarTo" : [
+        "msp430",
+        "msp430-gcc",
+        "freertos"
+    ],
     "toolchain" : "CMake/toolchain.cmake"
 }
