@@ -1,7 +1,7 @@
 {
   "name": "cmsis-core",
   "version": "1.2.0",
-  "description": "CMSIS-Core",
+  "description": "CMSIS-Core (KubOS fork)",
   "keywords": [
     "cmsis",
     "mbed",
@@ -9,10 +9,10 @@
   ],
   "author": "Bogdan Marinescu <bogdan.marinescu@arm.com>",
   "repository": {
-    "url": "git@github.com:ARMmbed/cmsis-core.git",
+    "url": "git@github.com:openkosmosorg/cmsis-core.git",
     "type": "git"
   },
-  "homepage": "https://github.com/ARMmbed/cmsis-core",
+  "homepage": "https://github.com/openkosmosorg/cmsis-core",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -35,7 +35,7 @@
       "cmsis-core-freescale": "^1.0.0"
     },
     "st": {
-      "cmsis-core-st": "^1.0.0"
+      "cmsis-core-st": "openkosmosorg/cmsis-core-st#master"
     },
     "nordic": {
       "cmsis-core-nordic": "^1.0.0"
