@@ -10,7 +10,7 @@
   "license": "LGPL 2.1",
   "targetDependencies": {
     "arm": {
-      "freertos": "openkosmosorg/freertos"
+      "freertos": "openkosmosorg/freertos#master"
     }
   }
 }
