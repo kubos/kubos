@@ -1,0 +1,16 @@
+{
+  "name": "kubos-hal-stm32f407vg",
+  "version": "0.0.1",
+  "description": "KubOS - Satellite flight software platform",
+  "keywords": [],
+  "author": "kubos.co",
+  "homepage": "https://www.kubos.co",
+  "license": "Apache-2.0",
+  "extraIncludes": [
+    "kubos-hal-stm32f407vg"
+  ],
+  "dependencies": {
+    "kubos-hal" : "openkosmosorg/kubos-hal#master",
+    "stm32cubef4-stm32f407vg": "openkosmosorg/stm32cubef4-stm32f407vg#master"
+  }
+}
