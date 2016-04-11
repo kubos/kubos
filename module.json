@@ -1,6 +1,6 @@
 {
   "name": "kubos-rt",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Real-time OS for constrained satellite subsystems",
   "keywords": [
     "satellite"
@@ -12,5 +12,11 @@
   },
   "homepage": "https://github.com/openkosmosorg/kubos-rt",
   "license": "Apache-2.0",
-  "dependencies": {}
+  "bin": "./source",
+  "dependencies": {
+    "freertos": "openkosmosorg/freertos#master",
+    "csp": "openkosmosorg/libcsp#kubos-master",
+    "kubos-hal": "openkosmosorg/kubos-hal#master",
+    "kubos-core": "openkosmosorg/kubos-core#master"
+  }
 }
