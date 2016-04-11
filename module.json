@@ -1,0 +1,16 @@
+{
+  "name": "freertos-config-msp430f5529",
+  "version": "0.0.1",
+  "description": "FreeRTOS config for msp430f5529",
+  "keywords": [
+    "freertos",
+    "freertos-config"
+  ],
+  "author": "ryan@kubos.co",
+  "repository": {
+    "url": "ssh://git@github.com/openkosmosorg/freertos-config-msp430f5529",
+    "type": "git"
+  },
+  "homepage": "https://github.com/openkosmosorg/freertos-config-msp430f5529",
+  "license": "FreeRTOS Open Source License"
+}
