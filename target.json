@@ -1,11 +1,12 @@
 {
-    "name" : "msp430-gcc",
+    "name" : "kubos-rt-msp430-gcc",
     "version" : "0.0.0",
-    "description" : "msp430 build target",
+    "description" : "Official kubos-rt base target description for compiling with the msp430-gcc compiler",
     "license" : "Apache-2.0",
     "similarTo" : [
         "msp430",
         "msp430-gcc",
+        "gcc",
         "freertos"
     ],
     "toolchain" : "CMake/toolchain.cmake"
