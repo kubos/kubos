@@ -9,7 +9,7 @@
   "homepage": "https://github.com/GomSpace/libcsp",
   "license": "LGPL 2.1",
   "targetDependencies": {
-    "arm": {
+    "freertos": {
       "freertos": "openkosmosorg/freertos#master"
     }
   }
