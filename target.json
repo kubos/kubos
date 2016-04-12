@@ -33,7 +33,8 @@
     "cortex-m4",
     "armv7-m",
     "arm",
-    "gcc"
+    "gcc",
+    "freertos"
   ],
   "config": {
     "mbed-os": {},
