@@ -1,4 +1,0 @@
-ifeq ($(BOARDTYPE),beaglebone)
-CFLAGS += -DHAVE_NATIVE_PERIPH_CONF_H -DHAVE_FSYNC
-LINKFLAGS += -lrt
-endif

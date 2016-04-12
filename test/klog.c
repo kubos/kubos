@@ -1,6 +1,6 @@
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include "kubos-core/modules/klog.h"
 
-#include <embUnit.h>
-
-#include "klog.h"
-#include "tests.h"
+#include "kubos-core/unity/unity.h"
 
 #define LOG_PATH "/tmp/_klog"
 
-static inline bool _fstat(char *path, int *size) {
+inline bool _fstat(char *path, int *size) {
     struct stat st;
     if (stat(path, &st) != 0) {
         return false;
@@ -39,12 +37,12 @@ static inline bool _fstat(char *path, int *size) {
 
 #define remove_if_exists(p) if (_fstat(p, NULL)) remove(p)
 
-static void setUp(void)
+void setUp(void)
 {
     klog_console_level = LOG_NONE;
 }
 
-static void tearDown(void)
+void tearDown(void)
 {
     klog_console_level = LOG_INFO;
     klog_file_level = LOG_DEBUG;
@@ -57,11 +55,12 @@ static void tearDown(void)
     remove_if_exists(LOG_PATH ".004");
 }
 
-static void klog_file_log(void)
+void test_FileLog(void)
 {
-    klog_file_level = LOG_INFO;
+    klog_file_level = LOG_DEBUG;
     int result = klog_init_file(LOG_PATH, strlen(LOG_PATH), 256, 1);
     TEST_ASSERT_EQUAL_INT(result, 0);
+
 
     KLOG_INFO("test", "123:%d", 456);
     KLOG_WARN("logger", "hi");
@@ -75,25 +74,28 @@ static void klog_file_log(void)
     char buffer[256];
     char lines[4][64];
     int i = 0;
-    fread(buffer, 1, 256, log_file);
+    size_t bytes = fread(buffer, 1, 256, log_file);
+    buffer[bytes] = '\0';
 
-    for (char *token = strtok(buffer, "\n");
-         token;
-         token = strtok(NULL, "\n"), i++) {
-
-        strcpy(lines[i], token);
+    char *token = strtok(buffer, "\n");
+    while (NULL != token)
+    {
+        strcpy(lines[i++], token);
+        token = strtok(NULL, "\n");
     }
 
-    ASSERT_STRING_STARTS_WITH(&lines[0][14], " test:I 123:456");
-    ASSERT_STRING_STARTS_WITH(&lines[1][14], " logger:W hi");
-    ASSERT_STRING_STARTS_WITH(&lines[2][14], " o:E error");
+    TEST_ASSERT_EQUAL_STRING_MESSAGE(&lines[0][14], " test:I 123:456", "Info log no good");
+    TEST_ASSERT_EQUAL_STRING_MESSAGE(&lines[1][14], " logger:W hi", "Warn log no good");
+    TEST_ASSERT_EQUAL_STRING_MESSAGE(&lines[2][14], " o:E error", "Error log no good");
+    TEST_ASSERT_EQUAL_STRING_MESSAGE(&lines[3][14], " b:D debug", "Debug log no good");
     TEST_ASSERT_EQUAL_INT(i, 4);
 }
 
-static void klog_rotate_parts(void)
+
+static void test_RotateParts(void)
 {
     int result = klog_init_file(LOG_PATH, strlen(LOG_PATH), 32, 3);
-    int size;
+    int size = 0;
 
     TEST_ASSERT_EQUAL_INT(result, 0);
 
@@ -144,13 +146,16 @@ static void klog_rotate_parts(void)
     TEST_ASSERT_EQUAL_INT(size, 42);
 }
 
-TestRef klog_suite(void)
+void resetTest(void)
 {
-    EMB_UNIT_TESTFIXTURES(fixtures) {
-        new_TestFixture(klog_file_log),
-        new_TestFixture(klog_rotate_parts),
-    };
+    tearDown();
+    setUp();
+}
 
-    EMB_UNIT_TESTCALLER(klog_tests, setUp, tearDown, fixtures);
-    return (TestRef) &klog_tests;
+int main(void)
+{
+    UNITY_BEGIN();
+    RUN_TEST(test_FileLog);
+    RUN_TEST(test_RotateParts);
+    return UNITY_END();
 }

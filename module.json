@@ -1,0 +1,12 @@
+{
+  "name": "kubos-core",
+  "version": "0.0.1",
+  "description": "KubOS - Satellite flight software platform",
+  "keywords": [],
+  "author": "kubos.co",
+  "homepage": "https://www.kubos.co",
+  "license": "Apache-2.0",
+  "dependencies": {
+      "csp" : "openkosmosorg/libcsp#kubos-master"
+  }
+}

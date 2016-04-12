@@ -14,15 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <embUnit.h>
+#include "kubos-core/unity/unity.h"
 #include <string.h>
 
-#include <net/gnrc.h>
+#include "kubos-core/modules/ax25.h"
+#include "kubos-core/modules/aprs.h"
 
-#include "ax25.h"
-#include "aprs.h"
-
-#include "tests.h"
+#include "kubos-core/arch/k_buffer.h"
 
 #define assert_ax25_chars(s1, s2) do { \
     char *s1_ = s1; \
@@ -44,29 +42,29 @@
     assert_ax25_chars(addr_str, c); \
 } while (0)
 
-static void ax25_short_callsign(void)
+static void test_ShortCallsign(void)
 {
     assert_ax25_addr(ax25_addr_init("CALL"), "CALL  0");
     assert_ax25_addr(ax25_addr_init("CALL-3"), "CALL  3");
 }
 
-static void ax25_long_callsign(void)
+static void test_LongCallsign(void)
 {
     assert_ax25_addr(ax25_addr_init("ABCDEF"), "ABCDEF0");
     assert_ax25_addr(ax25_addr_init("ABCDEF-3"), "ABCDEF3");
 }
 
-static void ax25_trimmed_callsign(void)
+static void test_TrimmedCallsign(void)
 {
     assert_ax25_addr(ax25_addr_init("ABCDEFGH"), "ABCDEF0");
 }
 
-static void ax25_null_addr_nocall(void)
+static void test_NullAddrNocall(void)
 {
     assert_ax25_addr(ax25_addr_init(NULL), "N0CALL0");
 }
 
-static void ax25_pkt_build_fail_cases(void)
+static void test_PktBuildFailCases(void)
 {
     ax25_addr_t addrs[] = { AX25_ADDR_NOCALL };
 
@@ -77,21 +75,24 @@ static void ax25_pkt_build_fail_cases(void)
     TEST_ASSERT_NULL(ax25_pkt_build(NULL, addrs, 0, 0, 0));
 }
 
-static void ax25_pkt_build_ui_packet(void)
+static void test_PktBuildUiPacket(void)
 {
     ax25_addr_t addrs[] = {
         AX25_ADDR_NOCALL,
         AX25_ADDR_NOCALL
     };
 
+    k_buffer_init();
+
     char *info = "ABC", *data, *payload_data;
     int i = 0, j = 0;
 
-    gnrc_pktsnip_t *payload = gnrc_pktbuf_add(NULL, info, 3, GNRC_NETTYPE_UNDEF);
-    gnrc_pktsnip_t *pkt = ax25_ui_pkt_build(payload, addrs, 2);
+    k_buffer_t *payload = K_BUFFER_NEW(NULL, info, 3);
+    k_buffer_t *pkt = ax25_ui_pkt_build(payload, addrs, 2);
 
+    TEST_ASSERT_NOT_NULL(payload);
     TEST_ASSERT_NOT_NULL(pkt);
-    TEST_ASSERT_EQUAL_INT(gnrc_pkt_len(pkt), 21);
+    TEST_ASSERT_EQUAL_INT(k_buffer_size(pkt), 21);
 
     data = (char *) pkt->data;
     assert_ax25_chars(data, "N0CALL0");
@@ -122,19 +123,19 @@ static void ax25_pkt_build_ui_packet(void)
     // fcs
     TEST_ASSERT_EQUAL_INT(payload_data[3], (char) 0xB8);
     TEST_ASSERT_EQUAL_INT(payload_data[4], (char) 0xE1);
+
+    K_BUFFER_FREE(pkt);
+    K_BUFFER_FREE(payload);
 }
 
-TestRef ax25_suite(void)
+int main(void)
 {
-    EMB_UNIT_TESTFIXTURES(fixtures) {
-        new_TestFixture(ax25_short_callsign),
-        new_TestFixture(ax25_long_callsign),
-        new_TestFixture(ax25_trimmed_callsign),
-        new_TestFixture(ax25_null_addr_nocall),
-        new_TestFixture(ax25_pkt_build_ui_packet),
-        new_TestFixture(ax25_pkt_build_fail_cases),
-    };
-
-    EMB_UNIT_TESTCALLER(ax25_tests, NULL, NULL, fixtures);
-    return (TestRef) &ax25_tests;
+    UNITY_BEGIN();
+    RUN_TEST(test_ShortCallsign);
+    RUN_TEST(test_LongCallsign);
+    RUN_TEST(test_TrimmedCallsign);
+    RUN_TEST(test_NullAddrNocall);
+    RUN_TEST(test_PktBuildUiPacket);
+    RUN_TEST(test_PktBuildFailCases);
+    return UNITY_END();
 }

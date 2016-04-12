@@ -14,15 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <embUnit.h>
 #include <string.h>
 #include <stdio.h>
+#include "kubos-core/unity/unity.h"
+#include "kubos-core/modules/nmea.h"
 
-#include "nmea.h"
-
-#include "tests.h"
-
-static void nmea_bad_checksum(void)
+static void test_BadChecksum(void)
 {
     gps_fix_t fix;
     char *sentence = "$GPRMC,,,,,,,,,,,,B*FF";
@@ -31,7 +28,7 @@ static void nmea_bad_checksum(void)
     TEST_ASSERT_EQUAL_INT(result, NMEA_ERR_CHECKSUM);
 }
 
-static void nmea_unknown(void)
+static void test_Unknown(void)
 {
     gps_fix_t fix;
     char *sentence = "$GPXYZ,A*21";
@@ -40,7 +37,7 @@ static void nmea_unknown(void)
     TEST_ASSERT_EQUAL_INT(result, NMEA_ERR_UNKNOWN);
 }
 
-static void nmea_gprmc(void)
+static void test_Gprmc(void)
 {
     gps_fix_t fix;
     char *sentence =
@@ -53,16 +50,16 @@ static void nmea_gprmc(void)
     TEST_ASSERT_EQUAL_INT(fix.seconds, 30);
     TEST_ASSERT_EQUAL_INT(fix.milliseconds, 361);
 
-    ASSERT_FUZZY_EQUAL_FLOAT(fix.latitude, 55.672033, 5);
-    ASSERT_FUZZY_EQUAL_FLOAT(fix.longitude, 12.52143, 5);
-    ASSERT_FUZZY_EQUAL_FLOAT(fix.speed, 1.06, 2);
+    TEST_ASSERT_EQUAL_FLOAT(fix.latitude, 55.672033);
+    TEST_ASSERT_EQUAL_FLOAT(fix.longitude, 12.52143);
+    TEST_ASSERT_EQUAL_FLOAT(fix.speed, 1.06);
 
     TEST_ASSERT_EQUAL_INT(fix.day, 4);
     TEST_ASSERT_EQUAL_INT(fix.month, 11);
     TEST_ASSERT_EQUAL_INT(fix.year, 12);
 }
 
-static void nmea_gprmc_invalid_fix(void)
+static void test_GprmcInvalidFix(void)
 {
     gps_fix_t fix;
     char *sentence =
@@ -72,7 +69,7 @@ static void nmea_gprmc_invalid_fix(void)
     TEST_ASSERT_EQUAL_INT(result, NMEA_ERR_INVALID_FIX);
 }
 
-static void nmea_gpgga(void)
+static void test_Gpgga(void)
 {
     gps_fix_t fix;
     char *sentence =
@@ -85,21 +82,18 @@ static void nmea_gpgga(void)
     TEST_ASSERT_EQUAL_INT(fix.seconds, 31);
     TEST_ASSERT_EQUAL_INT(fix.milliseconds, 361);
 
-    ASSERT_FUZZY_EQUAL_FLOAT(fix.latitude, 55.672086, 5);
-    ASSERT_FUZZY_EQUAL_FLOAT(fix.longitude, 12.521576, 5);
-    ASSERT_FUZZY_EQUAL_FLOAT(fix.altitude, 36.1, 1);
+    TEST_ASSERT_EQUAL_FLOAT(fix.latitude, 55.672086);
+    TEST_ASSERT_EQUAL_FLOAT(fix.longitude, 12.521576);
+    TEST_ASSERT_EQUAL_FLOAT(fix.altitude, 36.1);
 }
 
-TestRef nmea_suite(void)
+int main(void)
 {
-    EMB_UNIT_TESTFIXTURES(fixtures) {
-        new_TestFixture(nmea_bad_checksum),
-        new_TestFixture(nmea_unknown),
-        new_TestFixture(nmea_gprmc),
-        new_TestFixture(nmea_gprmc_invalid_fix),
-        new_TestFixture(nmea_gpgga),
-    };
-
-    EMB_UNIT_TESTCALLER(nmea_tests, NULL, NULL, fixtures);
-    return (TestRef) &nmea_tests;
+    UNITY_BEGIN();
+    RUN_TEST(test_BadChecksum);
+    RUN_TEST(test_Unknown);
+    RUN_TEST(test_Gprmc);
+    RUN_TEST(test_GprmcInvalidFix);
+    RUN_TEST(test_Gpgga);
+    return UNITY_END();
 }
