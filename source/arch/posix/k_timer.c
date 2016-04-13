@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- #ifdef KUBOS_CORE_POSIX
+ #ifdef TARGET_LIKE_POSIX
 
 #include "kubos-core/arch/k_timer.h"
 
