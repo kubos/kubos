@@ -24,7 +24,7 @@ For our v1.0 release, we will be targetting these CubeSat OBCs, and associated d
 
 1. Install our custom `stm32f4-disco-gcc` target from Github:
 
-        $ yotta target stm32f4-disco-gcc,openkosmosorg/target-st-stm32f4-disco-gcc
+        $ yotta target stm32f4-disco-gcc@openkosmosorg/target-st-stm32f4-disco-gcc#master
 
 2. Build the example app included with KubOS RT
 
