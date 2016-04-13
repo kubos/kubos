@@ -26,8 +26,6 @@ if(NOT MSP430_OBJCOPY)
     gcc_program_notfound("msp430-objcopy")
 endif()
 
-
-
 # Set the compiler to msp430-gcc
 if(CMAKE_VERSION VERSION_LESS "3.6.0")
     include(CMakeForceCompiler)
@@ -39,3 +37,5 @@ else()
     set(CMAKE_C_COMPILER "${MSP430_GCC}")
     set(CMAKE_CXX_COMPILER "${MSP430_GPP}")
 endif()
+set(CMAKE_EXE_LINKER_FLAGS_INIT    " -T\"${CMAKE_CURRENT_LIST_DIR}/../ld/memory.x\"")
+
