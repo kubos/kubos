@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+ #ifdef KUBOS_CORE_POSIX
+
 #include "kubos-core/arch/k_timer.h"
 
 uint32_t k_timer_now(void)
@@ -35,3 +37,5 @@ void k_timer_usleep_until(uint32_t *last_wakeup, uint32_t usecs)
     t.tv_nsec = (usecs % 1000000) * 1000;
     nanosleep(&t, NULL);
 }
+
+#endif

@@ -15,35 +15,27 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
-#include "kubos-core/arch/k_alloc_csp.h"
-#include "csp/csp_buffer.h"
-#include <string.h>
+#include "kubos-core/k_alloc_malloc.h"
 
-void * _csp_new(size_t size)
+void * malloc_new(size_t size)
 {
-    return csp_buffer_get(size);
+    return malloc(size);
 }
 
-void * _csp_realloc(void * buff, size_t old_size, size_t new_size)
+void malloc_free(void * ptr)
 {
-    void * _data = csp_buffer_get(new_size);
-    if (NULL == _data)
-        return NULL;
-    memcpy(_data, buff, old_size);
-    return _data;
+    if (NULL != ptr)
+        free(ptr);
 }
 
-void _csp_free(void * buff)
+void * malloc_realloc(void * buff, size_t old_size, size_t new_size)
 {
-    csp_buffer_free(buff);
+    return realloc(buff, new_size);
 }
 
-void k_alloc_csp_init()
+void k_alloc_malloc_init()
 {
-    csp_buffer_init(CSP_BUFFER_COUNT, CSP_BUFFER_SIZE);
-
-    csp_alloc._new = _csp_new;
-    csp_alloc._realloc = _csp_realloc;
-    csp_alloc._free = _csp_free;
+    malloc_alloc._new = malloc_new;
+    malloc_alloc._free = malloc_free;
+    malloc_alloc._realloc = malloc_realloc;
 }

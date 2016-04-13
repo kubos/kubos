@@ -19,9 +19,9 @@
 #define K_BUFFER_H
 
 #include <stdlib.h>
-#include "kubos-core/arch/k_alloc.h"
-#include "kubos-core/arch/k_alloc_csp.h"
-#include "kubos-core/arch/k_alloc_malloc.h"
+#include "kubos-core/k_alloc.h"
+#include "kubos-core/k_alloc_csp.h"
+#include "kubos-core/k_alloc_malloc.h"
 
 #define K_ALLOC_MALLOC
 

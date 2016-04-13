@@ -18,7 +18,7 @@
 #ifndef K_ALLOC_CSP_H
 #define K_ALLOC_CSP_H
 
-#include "kubos-core/arch/k_alloc.h"
+#include "kubos-core/k_alloc.h"
 #include <stdlib.h>
 
 #define CSP_BUFFER_SIZE 60

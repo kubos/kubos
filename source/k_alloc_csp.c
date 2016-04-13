@@ -15,27 +15,35 @@
  * limitations under the License.
  */
 
-#ifndef K_ALLOC_MALLOC_H
-#define K_ALLOC_MALLOC_H
-
-#include "kubos-core/arch/k_alloc.h"
 #include <stdlib.h>
+#include "kubos-core/k_alloc_csp.h"
+#include "csp/csp_buffer.h"
+#include <string.h>
 
-void * malloc_new(size_t size);
-void malloc_free(void * ptr);
-void * malloc_realloc(void * buff, size_t old_size, size_t new_size);
-void k_alloc_malloc_init();
+void * _csp_new(size_t size)
+{
+    return csp_buffer_get(size);
+}
 
-k_alloc_t malloc_alloc;
+void * _csp_realloc(void * buff, size_t old_size, size_t new_size)
+{
+    void * _data = csp_buffer_get(new_size);
+    if (NULL == _data)
+        return NULL;
+    memcpy(_data, buff, old_size);
+    return _data;
+}
 
-#define K_BUFFER_NEW_MALLOC(n, d, s) \
-        k_buffer_alloc(n, d, s, &malloc_alloc)
+void _csp_free(void * buff)
+{
+    csp_buffer_free(buff);
+}
 
-#define K_BUFFER_FREE_MALLOC(b) \
-        k_buffer_free_new(b, &malloc_alloc)
+void k_alloc_csp_init()
+{
+    csp_buffer_init(CSP_BUFFER_COUNT, CSP_BUFFER_SIZE);
 
-#define K_BUFFER_REALLOC_MALLOC(b, s) \
-        k_buffer_realloc_new(b, s, &malloc_alloc)
-
-
-#endif
+    csp_alloc._new = _csp_new;
+    csp_alloc._realloc = _csp_realloc;
+    csp_alloc._free = _csp_free;
+}
