@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "kubos-core/modules/ax25.h"
-#include "kubos-core/arch/k_buffer.h"
+#include "kubos-core/k_buffer.h"
 
 #define MAX_CALLSIGN_LEN 6
 #define MAX_ADDR_LEN     8

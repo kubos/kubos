@@ -20,7 +20,7 @@
 #include "kubos-core/modules/ax25.h"
 #include "kubos-core/modules/aprs.h"
 
-#include "kubos-core/arch/k_buffer.h"
+#include "kubos-core/k_buffer.h"
 
 #define assert_ax25_chars(s1, s2) do { \
     char *s1_ = s1; \

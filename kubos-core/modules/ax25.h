@@ -18,7 +18,7 @@
 #define AX25_H
 
 #include <stdint.h>
-#include "kubos-core/arch/k_buffer.h"
+#include "kubos-core/k_buffer.h"
 
 #ifndef AX25_BUFFER_SIZE
 #define AX25_BUFFER_SIZE 255

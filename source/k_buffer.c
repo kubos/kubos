@@ -17,9 +17,9 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "kubos-core/arch/k_buffer.h"
-#include "kubos-core/arch/k_alloc_malloc.h"
-#include "kubos-core/arch/k_alloc_csp.h"
+#include "kubos-core/k_buffer.h"
+#include "kubos-core/k_alloc_malloc.h"
+#include "kubos-core/k_alloc_csp.h"
 #include "csp/csp_buffer.h"
 
 
