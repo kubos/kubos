@@ -1,12 +1,12 @@
 {
-  "name": "stm32f4-disco-gcc",
+  "name": "stm32f407-disco-gcc",
   "version": "0.0.3",
   "inherits": {
-    "mbed-gcc": "*"
+    "kubos-arm-none-eabi-gcc": "openkosmosorg/target-kubos-arm-none-eabi-gcc#master"
   },
-  "description": "KubOS build target for the stm32f4-discovery development board.",
+  "description": "KubOS build target for the stm32f407-discovery development board.",
   "author": "Marshall Culpepper <marshall@kubos.co>",
-  "homepage": "https://github.com/openkosmosorg/target-st-stm32f4-disco-gcc",
+  "homepage": "https://github.com/openkosmosorg/target-stm32f407-disco-gcc",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -14,12 +14,11 @@
     }
   ],
   "keywords": [
-    "mbed-target:discovery-f407vg",
-    "stm32f4-disco",
+    "stm32f407-disco",
     "gcc"
   ],
   "similarTo": [
-    "stm32f4-disco",
+    "stm32f407-disco",
     "f407vg",
     "f407",
     "discovery",
@@ -31,13 +30,9 @@
     "stm32",
     "st",
     "cortex-m4",
-    "armv7-m",
-    "arm",
-    "gcc",
-    "freertos"
+    "armv7-m"
   ],
   "config": {
-    "mbed-os": {},
     "cmsis": {
       "nvic": {
         "ram_vector_address": "0x20000000",
@@ -106,6 +101,13 @@
       "--target",
       "STM32F4-DISCO",
       "$program"
+    ],
+    "start": [
+      "openocd",
+      "-f",
+      "$PWD/yotta_targets/stm32f4-disco-gcc/openocd/stm32f407vg.cfg",
+      "-c",
+      "stm32f4_flash $program"
     ]
   }
 }
