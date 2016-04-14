@@ -1,0 +1,28 @@
+{
+  "name": "kubos-arm-none-eabi-gcc",
+  "version": "0.0.1",
+  "description": "base KubOS RT build target for the arm-none-eabi-gcc toolchain",
+  "inherits": {
+    "kubos-gcc": "openkosmosorg/target-kubos-gcc#master"
+  },
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "kubos-rt",
+    "gcc"
+  ],
+  "similarTo": [
+    "arm-none-eabi-gcc",
+    "arm"
+  ],
+  "config": {
+    "arch": {
+      "arm": {}
+    }
+  },
+  "toolchain": "CMake/toolchain.cmake"
+}
