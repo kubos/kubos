@@ -4,13 +4,14 @@
 # can't test the compiler because it cross-compiles
 set(CMAKE_CXX_COMPILER_WORKS TRUE)
 
-
 execute_process(
     COMMAND "${CMAKE_CXX_COMPILER}" "--version"
-    OUTPUT_VARIABLE _ARM_GNU_GCC_VERSION_OUTPUT
+    OUTPUT_VARIABLE _GCC_VERSION_OUTPUT
+
 )
-string(REGEX REPLACE ".* ([0-9]+[.][0-9]+[.][0-9]+) .*" "\\1" _ARM_GNU_GCC_VERSION "${_ARM_GNU_GCC_VERSION_OUTPUT}")
-message("GCC version is: ${_ARM_GNU_GCC_VERSION}")
+
+string(REGEX REPLACE ".* ([0-9]+[.][0-9]+[.][0-9]+) .*" "\\1" K_GCC_VERSION "${_GCC_VERSION_OUTPUT}")
+message("GCC version is: ${_GCC_VERSION}")
 
 set(EXPLICIT_INCLUDES "")
 if((CMAKE_VERSION VERSION_GREATER "3.4.0") OR (CMAKE_VERSION VERSION_EQUAL "3.4.0"))

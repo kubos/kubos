@@ -1,7 +1,7 @@
 {
-  "name": "mbed-gcc",
-  "version": "1.2.2",
-  "description": "base mbed build target for gcc toolchain",
+  "name": "kubos-gcc",
+  "version": "0.0.1",
+  "description": "base KubOS RT build target for the gcc toolchain",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -9,27 +9,19 @@
     }
   ],
   "keywords": [
-    "mbed-official",
+    "kubos-rt",
     "gcc"
   ],
   "similarTo": [
-    "mbed",
-    "arm",
+    "kubos-rt",
+    "freertos",
     "gcc"
   ],
   "config": {
-    "mbed": {},
-    "mbed-os": {
+    "kubos": {
       "stdio": {
         "default-baud": 9600
       }
-    },
-    "arch": {
-      "arm": {}
-    },
-    "minar": {
-      "initial_event_pool_size": 50,
-      "additional_event_pools_size": 100
     }
   },
   "toolchain": "CMake/toolchain.cmake",
