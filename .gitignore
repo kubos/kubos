@@ -1,0 +1,10 @@
+.repo
+cmsis
+examples
+freertos
+hal
+kubos-core
+kubos-linux
+kubos-rt
+libcsp
+targets
