@@ -4,11 +4,12 @@ language: c
 
 env:
   global:
-    - RIOTBASE=/tmp/kubos-build/RIOT
-    - QUIET=0
+    - BUILD_DIR=/tmp/kubos-build
+    - BASE_IMAGE=kubostech/build
+    - IMAGE=kubostech/travis-build
   matrix:
-  # - BOARD=native TESTS=1
-    - BOARD=stm32f4discovery TESTS=0
+    - TARGET=x86-linux-native TESTS=1
+    #- TARGET=stm32f407-disco-gcc@openkosmosorg/target-stm32f407-disco-gcc#master TESTS=0
 
 services:
   - docker
@@ -16,9 +17,10 @@ services:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y python
-  - mkdir /tmp/kubos-build
-  - git clone https://github.com/RIOT-OS/RIOT $RIOTBASE
-  - docker build -t riotbuild $RIOTBASE/dist
+  - mkdir $BUILD_DIR
+  - git clone https://github.com/openkosmosorg/kubos-rt $BUILD_DIR/kubos-rt
+  - docker build -t $BASE_IMAGE $BUILD_DIR/kubos-rt/dist
+  - docker build -t $IMAGE travis
 
 script:
-  - ./build/travis.sh
+  - ./travis/build.sh
