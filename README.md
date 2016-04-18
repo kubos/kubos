@@ -23,30 +23,31 @@ is initialized, you can use repo to sync the project.
 KubOS is a collection of Yotta modules and targets that can either be fetched
 remotely, or built locally using the `yotta link` and `yotta link-target`
 commands. Since KubOS has a large number of modules and targets, we use a tool
-to automate the environment setup, `tools/yotta_link.py`. Here are some example usages of the tool:
+to automate the environment setup, `tools/yotta_link.py`. Here are some example
+usages of the tool:
 
 Add module and target symlinks to the system for use by applications:
-        $ ./tools/yotta_env.py --sys
+        $ ./tools/yotta_link.py --sys
 
 Uninstall system symlinks:
 
-        $ ./tools/yotta_env.py --unlink --sys
+        $ ./tools/yotta_link.py --unlink --sys
 
 Install symlinks into a KubOS application:
 
-        $ ./tools/yotta_env.py --app <path-to-app>
+        $ ./tools/yotta_link.py --app <path-to-app>
 
 Uninstall application symlinks:
 
-        $ ./tools/yotta_env.py --unlink --app <path-to-app>
+        $ ./tools/yotta_link.py --unlink --app <path-to-app>
 
 To install system symlinks and application symlinks for all example apps in the
 KubOS distribution (this is also the default action when no arguments are used,
 and is called from `bootstrap.sh`):
 
-        $ ./tools/yotta_env.py --all
+        $ ./tools/yotta_link.py --all
 
-See the full help documentation by running `./tools/yotta_env.py --help`
+See the full help documentation by running `./tools/yotta_link.py --help`
 
 ## Synchronizing repositories
 
