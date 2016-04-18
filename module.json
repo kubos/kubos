@@ -14,7 +14,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "freertos": "openkosmosorg/freertos#master",
-    "csp": "openkosmosorg/libcsp#kubos-master",
+    "csp": "openkosmosorg/libcsp#master",
     "kubos-hal": "openkosmosorg/kubos-hal#master",
     "kubos-core": "openkosmosorg/kubos-core#master"
   }
