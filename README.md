@@ -12,9 +12,41 @@ is initialized, you can use repo to sync the project.
 
 ## Getting started
 
-To initialize repo with the top level KubOS manifest, and clone all repositories:
+1. [Install the latest stable version of yotta](http://yottadocs.mbed.com/#installing)
+2. Run the development environment bootstrap script to pull down all of the KubOS
+   repositories, and setup the yotta development environment:
 
-        $ ./init.sh
+        $ ./bootstrap.sh
+
+## KubOS development environment
+
+KubOS is a collection of Yotta modules and targets that can either be fetched
+remotely, or built locally using the `yotta link` and `yotta link-target`
+commands. Since KubOS has a large number of modules and targets, we use a tool
+to automate the environment setup, `tools/yotta_link.py`. Here are some example usages of the tool:
+
+Add module and target symlinks to the system for use by applications:
+        $ ./tools/yotta_env.py --sys
+
+Uninstall system symlinks:
+
+        $ ./tools/yotta_env.py --unlink --sys
+
+Install symlinks into a KubOS application:
+
+        $ ./tools/yotta_env.py --app <path-to-app>
+
+Uninstall application symlinks:
+
+        $ ./tools/yotta_env.py --unlink --app <path-to-app>
+
+To install system symlinks and application symlinks for all example apps in the
+KubOS distribution (this is also the default action when no arguments are used,
+and is called from `bootstrap.sh`):
+
+        $ ./tools/yotta_env.py --all
+
+See the full help documentation by running `./tools/yotta_env.py --help`
 
 ## Synchronizing repositories
 
