@@ -7,6 +7,6 @@
   "homepage": "https://www.kubos.co",
   "license": "Apache-2.0",
   "dependencies": {
-      "csp" : "openkosmosorg/libcsp#kubos-master"
+      "csp" : "openkosmosorg/libcsp#master"
   }
 }
