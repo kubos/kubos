@@ -103,10 +103,9 @@
       "$program"
     ],
     "start": [
-      "openocd",
-      "-f",
-      "$PWD/yotta_targets/stm32f4-disco-gcc/openocd/stm32f407vg.cfg",
-      "-c",
+      "bash",
+      "$PWD/yotta_targets/stm32f407-disco-gcc/openocd/flash.sh",
+      "$PWD/yotta_targets/stm32f407-disco-gcc/openocd/",
       "stm32f4_flash $program"
     ]
   }
