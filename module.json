@@ -1,0 +1,15 @@
+{
+  "name": "kubos-hal-msp430f5529",
+  "version": "0.0.0",
+  "description": "KubOS - Satellite flight software platform",
+  "keywords": [],
+  "author": "https://kubos.co",
+  "homepage": "https://kubos.co",
+  "license": "Apache-2.0",
+  "extraIncludes": [
+  	"kubos-hal-msp430f5529"
+  ],
+  "dependencies": {
+    "kubos-hal" : "openkosmosorg/kubos-hal#master"
+  }
+}
