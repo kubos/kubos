@@ -15,3 +15,8 @@ tags
 .DS_store
 *.pdf
 *.html
+
+.yotta.json
+yotta_*
+
+html/
