@@ -14,10 +14,14 @@
   "license": "FreeRTOS Open Source License",
   "targetDependencies": {
     "arm": {
-      "cmsis-core": "openkosmosorg/cmsis-core"
+      "cmsis-core": "openkosmosorg/cmsis-core#master"
     },
     "stm32f4": {
-      "freertos-config-stm32f4": "openkosmosorg/freertos-config-stm32f4"
+      "freertos-config-stm32f4": "openkosmosorg/freertos-config-stm32f4#master"
+    },
+    "kubos-rt-msp430-gcc": {
+      "freertos-config-msp430": "openkosmosorg/freertos-config-msp430#master",
+      "putchar": "openkosmosorg/msp-gcc-putchar#master"
     }
   }
 }
