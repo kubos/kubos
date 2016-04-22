@@ -20,7 +20,7 @@
       "freertos-config-stm32f4": "openkosmosorg/freertos-config-stm32f4#master"
     },
     "kubos-rt-msp430-gcc": {
-      "freertos-config-msp430": "openkosmosorg/freertos-config-msp430#master",
+      "freertos-config-msp430f5529": "openkosmosorg/freertos-config-msp430f5529#master",
       "putchar": "openkosmosorg/msp-gcc-putchar#master"
     }
   }
