@@ -4,6 +4,7 @@
   "description": "CubeSat Protocol",
   "keywords": [
       "satellite"
+
   ],
   "author": "gomspace",
   "homepage": "https://github.com/GomSpace/libcsp",
@@ -11,6 +12,9 @@
   "targetDependencies": {
     "freertos": {
       "freertos": "openkosmosorg/freertos#master"
+    },
+    "kubos-rt-msp430-gcc": {
+      "freertos-config-msp430f5529": "openkosmosorg/freertos-config-msp430f5529#master"
     }
   }
 }
