@@ -23,10 +23,6 @@
 #include "timers.h"
 #include "queue.h"
 
-#include "stm32f4xx.h"
-#include "stm32f4xx_hal.h"
-#include "stm32f4xx_hal_gpio.h"
-#include "stm32f4xx_hal_rcc.h"
 
 #include "kubos-hal/gpio.h"
 
@@ -73,13 +69,15 @@ void csp_server(void *p) {
             switch (csp_conn_dport(conn)) {
                 case MY_PORT:
                     /* Process packet here */
-                    blink(K_LED_GREEN);
+                    // blink(K_LED_GREEN);
+                    blink(K_LED_RED);
                     csp_buffer_free(packet);
                     break;
 
                 default:
                     /* Let the service handler reply pings, buffer use, etc. */
-                    blink(K_LED_BLUE);
+                    // blink(K_LED_BLUE); //MSP only has 2 led's
+                    blink(K_LED_ORANGE);
                     csp_service_handler(conn, packet);
                     break;
             }
@@ -174,10 +172,10 @@ void task_button_press(void *p) {
 }
 
 int main(void) {
-    k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
+    // k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE); msp430 launchpad only has 2 led's 
     k_gpio_init(K_LED_ORANGE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_LED_BLUE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
+    // k_gpio_init(K_LED_BLUE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_NONE);
 
     button_queue = xQueueCreate(10, sizeof(int));
