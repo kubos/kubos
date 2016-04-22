@@ -14,6 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+ /**
+   *
+   * @file       gpio.h
+   * @brief      GPIO interface
+   *
+   * @author     kubos.co
+   */
+
 #ifndef K_GPIO_H
 #define K_GPIO_H
 
