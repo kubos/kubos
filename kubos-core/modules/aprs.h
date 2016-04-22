@@ -14,6 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ /**
+  *
+  * @file       aprs.h
+  * @brief      APRS parsing module.
+  *
+  * @author     kubos.co
+  */
+
 #ifndef APRS_H
 #define APRS_H
 

@@ -15,6 +15,14 @@
  * limitations under the License.
  */
 
+ /**
+  *
+  * @file       k_msg.h
+  * @brief      Messaging layer
+  *
+  * @author     kubos.co
+  */
+
 #ifndef K_MSG_H
 #define K_MSG_H
 

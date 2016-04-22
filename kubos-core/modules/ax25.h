@@ -14,6 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ /**
+  *
+  * @file       ax25.h
+  * @brief      AX.25 module
+  *
+  * @author     kubos.co
+  */
+
 #ifndef AX25_H
 #define AX25_H
 

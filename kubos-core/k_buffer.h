@@ -15,6 +15,16 @@
  * limitations under the License.
  */
 
+
+ /**
+  *
+  * @file       k_buffer.h
+  * @brief      Messaging Buffer Wrapper
+  *
+  * @author     kubos.co
+  */
+
+
 #ifndef K_BUFFER_H
 #define K_BUFFER_H
 

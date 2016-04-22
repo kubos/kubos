@@ -10,7 +10,7 @@
  * @addtogroup  core_util
  * @{
  *
- * @file
+ * @file        k_log.h
  * @brief       System logging header
  *
  * This header offers a bunch of "LOG_*" functions that, with the default

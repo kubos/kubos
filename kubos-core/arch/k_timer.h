@@ -15,6 +15,16 @@
  * limitations under the License.
  */
 
+
+ /**
+  *
+  * @file       k_timer.h
+  * @brief      Timer interface
+  *
+  * @author     kubos.co
+  */
+
+
 #include <stdint.h>
 #include <time.h>
 #include <sys/time.h>

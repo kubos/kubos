@@ -15,6 +15,15 @@
  * limitations under the License.
  */
 
+ /**
+  *
+  * @file       k_alloc.h
+  * @brief      Buffer Allocator Wrapper
+  *
+  * @author     kubos.co
+  */
+
+
 #ifndef K_ALLOC_H
 #define K_ALLOC_H
 

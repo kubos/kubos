@@ -14,6 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ /**
+  *
+  * @file       klog.h
+  * @brief      Logging module
+  *
+  * @author     kubos.co
+  */
+
+
 #ifndef KLOG_H
 #define KLOG_H
 
