@@ -1,7 +1,7 @@
 /*
 Cubesat Space Protocol - A small network-layer protocol designed for Cubesats
 Copyright (C) 2012 Gomspace ApS (http://www.gomspace.com)
-Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk) 
+Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -35,9 +35,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 int csp_mutex_create(csp_mutex_t * mutex) {
 	*mutex = xSemaphoreCreateMutex();
 	if (*mutex) {
-		return CSP_SEMAPHORE_OK;
+		return CSP_MUTEX_OK;
 	} else {
-		return CSP_SEMAPHORE_ERROR;
+		return CSP_MUTEX_ERROR;
 	}
 }
 
@@ -93,4 +93,3 @@ int csp_bin_sem_post_isr(csp_bin_sem_handle_t * sem, CSP_BASE_TYPE * task_woken)
 		return CSP_SEMAPHORE_ERROR;
 	}
 }
-
