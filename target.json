@@ -7,7 +7,9 @@
         "msp430",
         "msp430-gcc",
         "gcc",
-        "freertos"
+        "freertos",
+        "msp430f5529",
+        "kubos-rt-msp430-gcc"
     ],
     "toolchain" : "CMake/toolchain.cmake"
 }
