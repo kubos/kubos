@@ -28,7 +28,6 @@
 
 #include "kubos-core/k_msg.h"
 #include "kubos-core/arch/k_uart.h"
-#include "time.h"
 #include "kubos-core/k_thread.h"
 
 #ifdef __cplusplus

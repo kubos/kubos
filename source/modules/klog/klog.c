@@ -14,16 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef TARGET_LIKE_MSP430
+
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <sys/unistd.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "kubos-core/arch/k_fs.h"
 #include "kubos-core/arch/k_timer.h"
 #include "kubos-core/modules/klog.h"
 
@@ -195,4 +199,6 @@ int fsync(int fd)
 {
     return 0;
 }
+#endif
+
 #endif

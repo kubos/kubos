@@ -11,7 +11,6 @@
 #include "unity_config.h"
 #endif
 
-#include <setjmp.h>
 
 // Unity Attempts to Auto-Detect Integer Types
 // Attempt 1: UINT_MAX, ULONG_MAX, etc in <stdint.h>
@@ -20,6 +19,8 @@
 #ifndef UNITY_EXCLUDE_STDINT_H
 #include <stdint.h>
 #endif
+
+#include <setjmp.h>
 
 #ifndef UNITY_EXCLUDE_LIMITS_H
 #include <limits.h>
