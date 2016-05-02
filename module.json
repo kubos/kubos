@@ -19,7 +19,7 @@
     "stm32f4": {
       "freertos-config-stm32f4": "openkosmosorg/freertos-config-stm32f4#master"
     },
-    "kubos-rt-msp430-gcc": {
+    "msp430f5529": {
       "freertos-config-msp430f5529": "openkosmosorg/freertos-config-msp430f5529#master"
     }
   }
