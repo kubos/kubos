@@ -22,4 +22,4 @@ before_install:
   - docker build -t $IMAGE travis
 
 script:
-  ./travis/build.sh
+  - ./travis/build.sh
