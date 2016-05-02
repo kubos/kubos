@@ -88,8 +88,6 @@ else()
 endif()
 
 if (TARGET_LIKE_MSP430_GCC)
-    message ("MSP430")
-    target_link_libraries(csp putchar)
     set (MAX_CONNECTIONS "2" CACHE STRING "Set maximum number of concurrent connections")
     set (CONN_QUEUE_LENGTH "10" CACHE STRING "Set maximum number of packets in queue for a connection")
     set (ROUTER_QUEUE_LENGTH "5" CACHE STRING "Set maximum number of packets to be queued at the input of the router")
@@ -98,7 +96,7 @@ endif()
 file (GLOB_RECURSE ARCH_FILES src/arch/${CSP_ARCH}/*.c)
 target_sources (csp PUBLIC ${ARCH_FILES})
 
-target_compile_options(csp PUBLIC -Os -Wall -g -std=gnu99)
+target_compile_options(csp PUBLIC -O2 -Wall -g -std=gnu99)
 
 if (LOGLEVEL STREQUAL "debug")
     set (CSP_LOG_LEVEL_DEBUG ON)
