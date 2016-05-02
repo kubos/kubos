@@ -30,7 +30,6 @@ if (TARGET_LIKE_GCC)
         list(APPEND FREERTOS_INCLUDES ${PORT_DIR})
         target_sources (freertos PRIVATE ${PORT_DIR}/port.c)
         target_include_directories (freertos PUBLIC ${PORT_DIR} ${FREERTOS_INCLUDES})
-        target_link_libraries(freertos putchar)
     endif()
 endif()
 
