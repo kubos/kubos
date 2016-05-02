@@ -17,7 +17,7 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y python
   - mkdir $BUILD_DIR
-  - git clone https://github.com/kyleparrott/kubos-rt-example $BUILD_DIR/kubos-rt-example
+  - git clone https://github.com/openkosmosorg/kubos-rt-example $BUILD_DIR/kubos-rt-example
   - docker build -t $BASE_IMAGE $BUILD_DIR/kubos-rt-example/dist
   - docker build -t $IMAGE travis
 
