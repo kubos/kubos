@@ -16,5 +16,7 @@ tags
 *.pdf
 *.html
 
-yotta_*
 .yotta.json
+yotta_*
+
+html/
