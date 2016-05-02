@@ -18,17 +18,30 @@
 #ifndef KUBOS_HAL_MSP430F5529_PINS_H
 #define KUBOS_HAL_MSP430F5529_PINS_H
 
-#include <msp430f5529.h>
 
-#define K_LED_0 BIT0
-#define K_LED_ORANGE BIT0
+#include <stdint.h>
 
-#define K_LED_1 BIT6
-#define K_LED_RED BIT6 
+#define K_LED_0 P1_0
+#define K_LED_RED P1_0
+
+#define K_LED_1 P4_7
+#define K_LED_GREEN P4_7
 
 #define K_LED_COUNT 2
 
-#define K_BUTTON_0 BIT1
+#define K_BUTTON_0 P2_1
 
- 
+
+typedef struct {
+    volatile uint8_t * dir_pin;
+    volatile uint8_t * out_pin;
+    volatile uint8_t * in_pin;
+    volatile uint8_t * pull_pin;
+    uint8_t  bit;
+} KPinDesc;
+
+typedef enum {
+    P1_0 = 0, P4_7, P2_1
+} KPin;
+
 #endif
