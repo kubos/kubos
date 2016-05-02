@@ -35,8 +35,10 @@
 
 static xQueueHandle button_queue;
 
-#undef putchar
 
+// @TODO: Move into HAL
+#ifdef TARGET_LIKE_MSP430
+#undef putchar
 int putchar(int c) {
     int tmp = c;
     tmp++;
@@ -48,27 +50,18 @@ int putchar(int c) {
 size_t strnlen(const char * str, size_t size) {
     return size;
 }
-//
-// static inline void blink(int pin) {
-//     k_gpio_write(pin, 1);
-//     vTaskDelay(BLINK_MS / portTICK_RATE_MS);
-//     k_gpio_write(pin, 0);
-// }
-//
-// static inline void blink_green() {
-//     P4OUT ^= (BIT7);
-//     vTaskDelay(BLINK_MS / portTICK_RATE_MS);
-//     P4OUT ^= (BIT7);
-// }
-//
-// static inline void blink_red() {
-//     P1OUT ^= (BIT0);
-//     vTaskDelay(BLINK_MS / portTICK_RATE_MS);
-//     P1OUT ^= (BIT0);
-// }
+#endif
 
-void red(void *p)
-{
+static inline void blink(int pin) {
+    k_gpio_write(pin, 1);
+    vTaskDelay(BLINK_MS / portTICK_RATE_MS);
+    k_gpio_write(pin, 0);
+}
+
+
+void csp_server(void *p) {
+    (void) p;
+
     /* Create socket without any socket options */
     csp_socket_t *sock = csp_socket(CSP_SO_NONE);
 
@@ -76,53 +69,36 @@ void red(void *p)
     csp_bind(sock, CSP_ANY);
 
     /* Create 10 connections backlog queue */
-    csp_listen(sock, 3);
+    csp_listen(sock, 10);
 
     /* Pointer to current connection and packet */
     csp_conn_t *conn;
     csp_packet_t *packet;
-    //
-    // while (1)
-    // {
-    //     P1OUT ^= (BIT0); // Invert P1.0
-    //     vTaskDelay(100);
-    //     // P4OUT ^= (BIT7);
-    //     // vTaskDelay(100);
-    // }
 
+    /* Process incoming connections */
+    while (1) {
 
-
-    // while (1)
-    // {
-    //     P1OUT ^= (BIT0); // Invert P1.0
-    //     vTaskDelay(100); //__delay_cycles(250000); // a ~250000uS pause
-    // }
-
-
-    while (1)
-    {
-
-        //blink_red();
         /* Wait for connection, 10000 ms timeout */
-        if ((conn = csp_accept(sock, 100)) == NULL)
-        {
+        if ((conn = csp_accept(sock, 10000)) == NULL)
             continue;
-        }
 
         /* Read packets. Timout is 100 ms */
         while ((packet = csp_read(conn, 100)) != NULL) {
             switch (csp_conn_dport(conn)) {
                 case MY_PORT:
                     /* Process packet here */
-                    P1OUT ^= (BIT0); // Invert P1.0
-                    vTaskDelay(100);
+                    blink(K_LED_GREEN);
                     csp_buffer_free(packet);
                     break;
 
                 default:
                     /* Let the service handler reply pings, buffer use, etc. */
-                    P1OUT ^= (BIT0); // Invert P1.0
-                    vTaskDelay(100);
+                    #ifdef TARGET_LIKE_MSP430
+                    blink(K_LED_GREEN);
+                    blink(K_LED_GREEN);
+                    #else
+                    blink(K_LED_BLUE);
+                    #endif
                     csp_service_handler(conn, packet);
                     break;
             }
@@ -130,74 +106,65 @@ void red(void *p)
 
         /* Close current connection, and handle next */
         csp_close(conn);
+
     }
 }
 
-void green(void *p)
-{
-
+void csp_client(void *p) {
+    (void) p;
     csp_packet_t * packet;
     csp_conn_t * conn;
     portBASE_TYPE status;
     int signal;
 
-    // while (1)
-    // {
-    //     // P1OUT ^= (BIT0); // Invert P1.0
-    //     // vTaskDelay(100);
-    //     P4OUT ^= (BIT7);
-    //     vTaskDelay(170);
-    // }
-
     /**
      * Try ping
      */
 
-    // csp_sleep_ms(200);
-    //
-    //
-    // int result = csp_ping(MY_ADDRESS, 100, 100, CSP_O_NONE);
-    // if (result) {
-    //     P4OUT ^= (BIT7); // Invert P4.7
-    //     vTaskDelay(100);
-    // }
+    csp_sleep_ms(200);
 
+    #ifdef TARGET_LIKE_MSP430
+    blink(K_LED_RED);
+    #else
+    blink(K_LED_ORANGE);
+    #endif
+    int result = csp_ping(MY_ADDRESS, 100, 100, CSP_O_NONE);
+    if (result) {
+        #ifdef TARGET_LIKE_MSP430
+        blink(K_LED_RED);
+        #else
+        blink(K_LED_ORANGE);
+        #endif
+    }
 
-    // while (1)
-    // {
-    //     P4OUT ^= (BIT7); // Invert P4.7
-    //     vTaskDelay(100);
-    // }
+    /**
+     * Try data packet to server
+     */
 
-
-
-    while(1)
-    {
-
-        P4OUT ^= (BIT7); // Invert P4.7
-        //k_gpio_write(K_LED_GREEN, 1);
-        vTaskDelay(500);
-        P4OUT ^= (BIT7); // Invert P4.7
-        //k_gpio_write(K_LED_GREEN, 0);
-        vTaskDelay(500);
+    while (1) {
+        status = xQueueReceive(button_queue, &signal, portMAX_DELAY);
+        if (status != pdTRUE) {
+            continue;
+        }
 
         /* Get packet buffer for data */
-        packet = csp_buffer_get(10);
+        packet = csp_buffer_get(100);
         if (packet == NULL) {
             /* Could not get buffer element */
-            continue;
+            return;
         }
 
         /* Connect to host HOST, port PORT with regular UDP-like protocol and 1000 ms timeout */
+        blink(K_LED_RED);
         conn = csp_connect(CSP_PRIO_NORM, MY_ADDRESS, MY_PORT, 1000, CSP_O_NONE);
         if (conn == NULL) {
             /* Connect failed */
-            //blink_red();
             /* Remember to free packet buffer */
             csp_buffer_free(packet);
-            continue;
+            return;
         }
 
+        blink(K_LED_RED);
         /* Copy dummy data to packet */
         char *msg = "Hello World";
         strcpy((char *) packet->data, msg);
@@ -207,46 +174,42 @@ void green(void *p)
 
         /* Send packet */
         if (!csp_send(conn, packet, 1000)) {
-            //blink_red();
             /* Send failed */
             csp_buffer_free(packet);
         }
 
+        blink(K_LED_RED);
         /* Close connection */
         csp_close(conn);
     }
 }
 
+void task_button_press(void *p) {
+   int signal = 1;
+
+    while (1) {
+        if (k_gpio_read(K_BUTTON_0)) {
+            while (k_gpio_read(K_BUTTON_0))
+                vTaskDelay(50 / portTICK_RATE_MS); /* Button Debounce Delay */
+            while (!k_gpio_read(K_BUTTON_0))
+                vTaskDelay(50 / portTICK_RATE_MS); /* Button Debounce Delay */
+
+            blink(K_LED_RED);
+            xQueueSendToBack(button_queue, &signal, 0); /* Send Message */
+        }
+        vTaskDelay(100 / portTICK_RATE_MS);
+    }
+}
+
 int main(void)
 {
-    // k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    // k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    // k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_NONE);
-
-
-    //taskDISABLE_INTERRUPTS();
-
+    #ifdef TARGET_LIKE_MSP430
+    k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
+    k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
+    k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_UP);
     /* Stop the watchdog. */
     WDTCTL = WDTPW + WDTHOLD;
-
-    unsigned int i = 0;
-
-    //k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-
-    // Configure LEDs
-    P1DIR |= (BIT0); // P1.0 as output (RED)
-    P4DIR |= (BIT7); // P4.7 as output (GREEN)
-
-    // Configure button P2.1run
-    P2REN |= BIT1;
-    P2OUT |= BIT1;
-
-    // Start LEDs off
-    P1OUT = 0;
-    P4OUT = 0;
-
-
-
+    #endif
 
     button_queue = xQueueCreate(10, sizeof(int));
 
@@ -255,8 +218,9 @@ int main(void)
     csp_route_start_task(500, 1);
 
 
-    xTaskCreate(red, "red", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
-    xTaskCreate(green, "green", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+    xTaskCreate(csp_server, "CSPSRV", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+    xTaskCreate(csp_client, "CSPCLI", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+    xTaskCreate(task_button_press, "BUTTON", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 
 
     vTaskStartScheduler();
