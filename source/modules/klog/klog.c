@@ -23,11 +23,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/unistd.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "kubos-core/arch/k_fs.h"
 #include "kubos-core/arch/k_timer.h"
 #include "kubos-core/modules/klog.h"
 
