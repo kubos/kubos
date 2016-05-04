@@ -217,7 +217,10 @@ int main(void)
     k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_UP);
     /* Stop the watchdog. */
     WDTCTL = WDTPW + WDTHOLD;
+
+    P2OUT = BIT1;
     #endif
+
 
     button_queue = xQueueCreate(10, sizeof(int));
 
