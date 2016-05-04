@@ -30,7 +30,15 @@ static KPinDesc pins[] = {
 
 void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 {
-    *(pins[pin].dir_pin) = pins[pin].bit;
+    if (K_GPIO_OUTPUT == mode)
+    {
+        *(pins[pin].dir_pin) = pins[pin].bit;
+    }
+    else if (K_GPIO_INPUT == mode)
+    {
+        *(pins[pin].dir_pin) = ~pins[pin].bit;
+    }
+
     if (K_GPIO_PULL_UP == pullup)
     {
         *(pins[pin].pull_pin) = pins[pin].bit;
