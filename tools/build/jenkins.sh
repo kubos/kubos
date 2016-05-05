@@ -1,4 +1,8 @@
 #!/bin/bash
 CONTAINER=kubos-inst-${TARGET%*@*}
 
-docker exec -i $CONTAINER bash -c "cd /build/$APP && yotta build -d -- -v"
+APPS=examples/kubos-rt-example
+
+for APP in $APPS; do
+    docker exec -i $CONTAINER bash -c "cd /build/$APP && yotta build -d -- -v"
+done
