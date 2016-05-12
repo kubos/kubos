@@ -25,6 +25,7 @@
 
 
 #include "kubos-hal/gpio.h"
+#include "kubos-hal/uart.h"
 
 #include <csp/csp.h>
 #include <csp/arch/csp_thread.h>
@@ -201,8 +202,19 @@ void task_button_press(void *p) {
     }
 }
 
+void task_echo(void *p) {
+    static int x = 0;
+    while (1) {
+        printf("echo, x=%d\r\n", x);
+        x++;
+        vTaskDelay(2000 / portTICK_RATE_MS);
+    }
+}
+
 int main(void)
 {
+    k_uart_console_init();
+
     #ifdef TARGET_LIKE_STM32
     k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_ORANGE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
@@ -221,18 +233,16 @@ int main(void)
     P2OUT = BIT1;
     #endif
 
-
     button_queue = xQueueCreate(10, sizeof(int));
 
     csp_buffer_init(5, 100);
     csp_init(MY_ADDRESS);
     csp_route_start_task(500, 1);
 
-
     xTaskCreate(csp_server, "CSPSRV", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
     xTaskCreate(csp_client, "CSPCLI", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
     xTaskCreate(task_button_press, "BUTTON", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
-
+    xTaskCreate(task_echo, "ECHO", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 
     vTaskStartScheduler();
 
