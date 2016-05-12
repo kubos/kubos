@@ -76,7 +76,7 @@ ssize_t _read_r(struct _reent *r, int fd, void *ptr, size_t len)
     }
 
     r->_errno = ENOSYS;
-    return 0;
+    return len;
 }
 
 
