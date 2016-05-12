@@ -29,7 +29,7 @@ static inline BaseType_t queue_push(QueueHandle_t *queue, char c,
     }
 }
 
-KUART* kprv_uart_get(int uart)
+KUART* kprv_uart_get(KUARTNum uart)
 {
     return &k_uarts[uart];
 }
@@ -46,7 +46,7 @@ KUARTConf k_uart_conf_defaults(void)
     };
 }
 
-void k_uart_init(int uart, KUARTConf *conf)
+void k_uart_init(KUARTNum uart, KUARTConf *conf)
 {
     KUART *k_uart = &k_uarts[uart];
     memcpy(&k_uart->conf, conf, sizeof(KUARTConf));
@@ -67,7 +67,7 @@ void k_uart_console_init(void)
     k_uart_init(K_UART_CONSOLE, &conf);
 }
 
-int k_uart_read(int uart, char *ptr, int len)
+int k_uart_read(KUARTNum uart, char *ptr, int len)
 {
     int i = 0;
     BaseType_t result;
@@ -82,7 +82,7 @@ int k_uart_read(int uart, char *ptr, int len)
     return i;
 }
 
-int k_uart_write(int uart, char *ptr, int len)
+int k_uart_write(KUARTNum uart, char *ptr, int len)
 {
     int i = 0;
     for (; i < len; i++, ptr++) {
@@ -95,12 +95,12 @@ int k_uart_write(int uart, char *ptr, int len)
     return i;
 }
 
-int k_uart_rx_queue_len(int uart)
+int k_uart_rx_queue_len(KUARTNum uart)
 {
     return (int) uxQueueMessagesWaiting(k_uarts[uart].rx_queue);
 }
 
-void k_uart_rx_queue_push(int uart, char c, void *task_woken)
+void k_uart_rx_queue_push(KUARTNum uart, char c, void *task_woken)
 {
     queue_push(k_uarts[uart].rx_queue, c, 0, task_woken);
 }

@@ -83,42 +83,66 @@ typedef struct {
 } KUART;
 
 KUARTConf k_uart_conf_defaults(void);
-void k_uart_init(int uart, KUARTConf *conf);
+void k_uart_init(KUARTNum uart, KUARTConf *conf);
 void k_uart_console_init(void);
 
-int k_uart_read(int uart, char *ptr, int len);
-int k_uart_write(int uart, char *ptr, int len);
-void k_uart_write_immediate(int uart, char c);
+int k_uart_read(KUARTNum uart, char *ptr, int len);
+int k_uart_write(KUARTNum uart, char *ptr, int len);
+void k_uart_write_immediate(KUARTNum uart, char c);
 
-int k_uart_rx_queue_len(int uart);
-void k_uart_rx_queue_push(int uart, char c, void *task_woken);
+int k_uart_rx_queue_len(KUARTNum uart);
+void k_uart_rx_queue_push(KUARTNum uart, char c, void *task_woken);
 
-inline int k_uart_rx_pin(int uart) {
+inline int k_uart_rx_pin(KUARTNum uart) {
     switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART1_RX
         case K_UART1: return YOTTA_CFG_HARDWARE_PINS_UART1_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART2_RX
         case K_UART2: return YOTTA_CFG_HARDWARE_PINS_UART2_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART3_RX
         case K_UART3: return YOTTA_CFG_HARDWARE_PINS_UART3_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART4_RX
         case K_UART4: return YOTTA_CFG_HARDWARE_PINS_UART4_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART5_RX
         case K_UART5: return YOTTA_CFG_HARDWARE_PINS_UART5_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART6_RX
         case K_UART6: return YOTTA_CFG_HARDWARE_PINS_UART6_RX;
+#endif
     }
     return -1;
 }
 
-inline int k_uart_tx_pin(int uart) {
+inline int k_uart_tx_pin(KUARTNum uart) {
     switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART1_TX
         case K_UART1: return YOTTA_CFG_HARDWARE_PINS_UART1_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART2_TX
         case K_UART2: return YOTTA_CFG_HARDWARE_PINS_UART2_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART3_TX
         case K_UART3: return YOTTA_CFG_HARDWARE_PINS_UART3_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART4_TX
         case K_UART4: return YOTTA_CFG_HARDWARE_PINS_UART4_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART5_TX
         case K_UART5: return YOTTA_CFG_HARDWARE_PINS_UART5_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_PINS_UART6_TX
         case K_UART6: return YOTTA_CFG_HARDWARE_PINS_UART6_TX;
+#endif
     }
     return -1;
 }
 
 // private APIs
-KUART* kprv_uart_get(int uart);
-void kprv_uart_dev_init(int uart);
-void kprv_uart_enable_tx_int(int uart);
+KUART* kprv_uart_get(KUARTNum uart);
+void kprv_uart_dev_init(KUARTNum uart);
+void kprv_uart_enable_tx_int(KUARTNum uart);
 #endif
