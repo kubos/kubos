@@ -15,104 +15,17 @@
  * limitations under the License.
  */
 #include "kubos-hal/gpio.h"
+#include "kubos-hal-stm32f407vg/stm32f4_gpio.h"
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal_gpio.h"
 #include "stm32f4xx_hal_rcc.h"
 
-static KPinDesc pins[] = {
-    {GPIOA, GPIO_PIN_0, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_1, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_2, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_3, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_4, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_5, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_6, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_7, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_8, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_9, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_10, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_11, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_12, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_13, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_14, RCC_AHB1ENR_GPIOAEN},
-    {GPIOA, GPIO_PIN_15, RCC_AHB1ENR_GPIOAEN},
-    {GPIOB, GPIO_PIN_0, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_1, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_2, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_3, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_4, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_5, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_6, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_7, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_8, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_9, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_10, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_11, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_12, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_13, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_14, RCC_AHB1ENR_GPIOBEN},
-    {GPIOB, GPIO_PIN_15, RCC_AHB1ENR_GPIOBEN},
-    {GPIOC, GPIO_PIN_0, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_1, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_2, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_3, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_4, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_5, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_6, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_7, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_8, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_9, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_10, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_11, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_12, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_13, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_14, RCC_AHB1ENR_GPIOCEN},
-    {GPIOC, GPIO_PIN_15, RCC_AHB1ENR_GPIOCEN},
-    {GPIOD, GPIO_PIN_0, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_1, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_2, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_3, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_4, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_5, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_6, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_7, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_8, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_9, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_10, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_11, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_12, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_13, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_14, RCC_AHB1ENR_GPIODEN},
-    {GPIOD, GPIO_PIN_15, RCC_AHB1ENR_GPIODEN},
-    {GPIOE, GPIO_PIN_0, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_1, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_2, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_3, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_4, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_5, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_6, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_7, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_8, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_9, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_10, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_11, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_12, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_13, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_14, RCC_AHB1ENR_GPIOEEN},
-    {GPIOE, GPIO_PIN_15, RCC_AHB1ENR_GPIOEEN}
-};
-
 void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 {
     // First enable the GPIO clock in RCC AHB1
 
-    uint32_t tmpreg = READ_BIT(RCC->AHB1ENR, pins[pin].ahb1enr_bit);
-    if (!tmpreg) {
-        SET_BIT(RCC->AHB1ENR, pins[pin].ahb1enr_bit);
-        /* Delay after an RCC peripheral clock enabling */
-        tmpreg = READ_BIT(RCC->AHB1ENR, pins[pin].ahb1enr_bit);
-    }
+    CHECK_SET_BIT(RCC->AHB1ENR, STM32F4_PIN_AHB1ENR_BIT(pin));
 
     GPIO_InitTypeDef params;
     switch (mode) {
@@ -137,18 +50,31 @@ void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
             params.Pull = GPIO_PULLDOWN; break;
     }
 
-    params.Pin = pins[pin].pin;
+    params.Pin = STM32F4_PIN_MASK(pin);
     params.Speed = GPIO_SPEED_HIGH;
-    HAL_GPIO_Init(pins[pin].gpio, &params);
+    HAL_GPIO_Init(STM32F4_PIN_GPIO(pin), &params);
 }
 
 unsigned int k_gpio_read(int pin)
 {
-    return HAL_GPIO_ReadPin(pins[pin].gpio, pins[pin].pin) == GPIO_PIN_SET ? 1 : 0;
+    return HAL_GPIO_ReadPin(STM32F4_PIN_GPIO(pin),
+                            STM32F4_PIN_MASK(pin)) == GPIO_PIN_SET ? 1 : 0;
 }
 
 void k_gpio_write(int pin, unsigned int val)
 {
-    HAL_GPIO_WritePin(pins[pin].gpio, pins[pin].pin,
+    HAL_GPIO_WritePin(STM32F4_PIN_GPIO(pin),
+                      STM32F4_PIN_MASK(pin),
                       val == 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+}
+
+void kprv_gpio_alt_config(GPIO_TypeDef* GPIOx, uint16_t GPIO_PinSource, uint8_t GPIO_AF)
+{
+    uint32_t temp = 0x00;
+    uint32_t temp_2 = 0x00;
+
+    temp = ((uint32_t)(GPIO_AF) << ((uint32_t)((uint32_t)GPIO_PinSource & (uint32_t)0x07) * 4));
+    GPIOx->AFR[GPIO_PinSource >> 0x03] &= ~((uint32_t)0xF << ((uint32_t)((uint32_t)GPIO_PinSource & (uint32_t)0x07) * 4));
+    temp_2 = GPIOx->AFR[GPIO_PinSource >> 0x03] | temp;
+    GPIOx->AFR[GPIO_PinSource >> 0x03] = temp_2;
 }
