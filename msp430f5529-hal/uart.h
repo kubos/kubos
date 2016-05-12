@@ -15,42 +15,82 @@
  * limitations under the License.
  */
 
+/**
+ * @defgroup UART
+ * @addtogroup UART
+ * @{
+ */
 
- #ifndef HAL_UART_H
- #define HAL_UART_H
+ /**
+   *
+   * @file       uart.h
+   * @brief      MSP430F5529 HAL - UART module
+   *
+   * @author     kubos.co
+   */
+#ifndef HAL_UART_H
+#define HAL_UART_H
 
 #include <stdint.h>
 
+/**
+  * @brief Type by which UART devices are numbered.
+  */
 typedef enum
 {
-    HAL_UART_A1 = 0
+    HAL_UART_A0 = 0,
+    HAL_UART_A1
 } hal_uart_device;
 
+
+/**
+  * @brief Type by which UART baudrates are referenced.
+  */
 typedef enum
 {
-    HAL_UART_9600 = 9600U,
-    HAL_UART_115200 = 115200U
+    HAL_UART_9600 = 0,
+    HAL_UART_115200
 } hal_uart_baudrate;
 
+/**
+  * @brief This type is a map of the USCI_Ax UART registers.
+  */
 typedef struct
 {
+    /** UCAxCTL1 */
     volatile uint8_t control1;
-    volatile uint8_t control2;
+    /** UCAxCTL0 */
+    volatile uint8_t control0;
     uint8_t padding1[4];
+    /** UCAxBR0 */
     volatile uint8_t baudrate0;
+    /** UCAxBR1 */
     volatile uint8_t baudrate1;
+    /** UCAxMCTL */
     volatile uint8_t modControl;
     uint8_t padding2;
+    /** UCAxSTAT */
     volatile uint8_t status;
     uint8_t padding3;
+    /** UCAxRXBUF */
     volatile uint8_t rx;
     uint8_t padding4;
+    /** UCAxTXBUF */
     volatile uint8_t tx;
-    uint8_t padding5[14];
+    /** UCAxABCTL
+        UCAxRxCTL */
+    uint8_t padding5[13];
+    /** UCAxIE */
     volatile uint8_t interruptEnable;
+    /** UCAxIFG */
     volatile uint8_t interruptFlags;
+    /** UCAxIV */
+    volatile uint8_t interruptVector;
 } hal_uart_mem_reg;
 
+/**
+  * @brief This type contains UART device config data.
+  */
 typedef struct
 {
     hal_uart_device device;
@@ -61,30 +101,97 @@ typedef struct
     uint8_t checkparity;
 } hal_uart_config;
 
+/**
+  * @brief This type contains all uart config and register details for this layer.
+  */
 typedef struct
 {
     hal_uart_config config;
     volatile hal_uart_mem_reg * reg;
     volatile uint8_t * select;
-    uint8_t * rxBuffer;
-    uint16_t rxBufferSize;
-    uint16_t rxBufferIndex;
     uint8_t selectVal;
 } hal_uart_handle;
 
+/**
+  * @brief Static array of avaiable uart handles.
+  */
+extern hal_uart_handle hal_uart_dev[];
 
-hal_uart_handle hal_uart_device_init(hal_uart_device device);
+/**
+  * @brief Creates a UART handle and fills in details associated with
+  *        the specified device.
+  * @param device Instance of hal_uart_device, specifying device to use.
+  * @retval hal_uart_handle *
+  */
+hal_uart_handle * hal_uart_device_init(hal_uart_device device);
 
-hal_uart_handle hal_uart_init(hal_uart_config config);
+/**
+  * @brief Creates a UART handle according to details specified in config.
+  * @param config Instance of hal_uart_config with init details.
+  * @retval hal_uart_handle
+  */
+hal_uart_handle * hal_uart_init(hal_uart_config config);
 
+/**
+  * @brief Low level hardware setup of UART device.
+  * @param handle Instance of initilaized hal_uart_handle containing hardware
+  *               registers and config values.
+  * @retval status
+  */
 uint8_t hal_uart_setup(hal_uart_handle * handle);
 
-void hal_uart_set_speed(hal_uart_handle * handle);
+/**
+  * @brief Low level hardware setup of UART baudrate.
+  * @param handle Instance of initilaized hal_uart_handle containing hardware
+  *               registers and config values.
+  */
+void hal_uart_set_baudrate(hal_uart_handle * handle);
 
-void hal_uart_putc(hal_uart_handle * handle, uint8_t c);
+/**
+  * @brief Reads a single character from UART.
+  * @param handle UART handle to read from
+  * @retval uint8_t character read
+  */
+uint8_t hal_uart_read_raw(hal_uart_handle * handle);
 
-void hal_uart_putstr(hal_uart_handle * handle, uint8_t * buf, uint8_t len);
+/**
+  * @brief Inserts a single character into UART TX buffer.
+  * @param handle UART handle to transmit over
+  * @param c character to transmit
+  */
+void hal_uart_write_raw(hal_uart_handle * handle, uint8_t c);
 
-uint16_t hal_uart_read(hal_uart_handle * handle, uint8_t * buf);
+/**
+  * @brief Transmits a single character over UART.
+  * @param handle UART handle to transmit over
+  * @param c character to transmit
+  */
+void hal_uart_write(hal_uart_handle * handle, uint8_t c);
 
- #endif
+/**
+  * @brief Transmits a buffer over UART.
+  * @param handle UART handle to transmit over
+  * @param buf buffer to transmit
+  * @param len number of characters to transmit
+  */
+void hal_uart_write_str(hal_uart_handle * handle, uint8_t * buf, uint8_t len);
+
+/**
+  * @brief Externally implemented interrupt processing function
+  * @param handle UART handle
+  */
+extern void hal_uart_interrupt(hal_uart_handle * handle);
+
+/**
+  * @brief Checks for existence of interrupt flag
+  */
+#define HAL_UART_INT_FLAG(handle, flag) (flag == (flag & handle->reg->interruptFlags))
+
+/**
+  * @brief Checks for existence of interrupt status
+  */
+#define HAL_UART_STAT(handle, flag) (flag == (flag & handle->reg->status))
+
+#endif
+
+/* @} */
