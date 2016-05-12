@@ -18,7 +18,7 @@
 #include "kubos-hal/uart.h"
 #include "kubos-hal-stm32f407vg/stm32f4_gpio.h"
 
-static inline USART_TypeDef *uart_dev(int uart)
+static inline USART_TypeDef *uart_dev(KUARTNum uart)
 {
     switch (uart) {
         case K_UART1: return USART1;
@@ -31,7 +31,7 @@ static inline USART_TypeDef *uart_dev(int uart)
     }
 }
 
-static inline IRQn_Type uart_irqn(int uart)
+static inline IRQn_Type uart_irqn(KUARTNum uart)
 {
     switch (uart) {
         case K_UART1: return USART1_IRQn;
@@ -44,7 +44,7 @@ static inline IRQn_Type uart_irqn(int uart)
     }
 }
 
-static inline void uart_clk_enable(int uart)
+static inline void uart_clk_enable(KUARTNum uart)
 {
     switch (uart) {
         case K_UART1: __HAL_RCC_USART1_CLK_ENABLE(); break;
@@ -56,7 +56,7 @@ static inline void uart_clk_enable(int uart)
     }
 }
 
-static inline uint8_t uart_alt(int uart)
+static inline uint8_t uart_alt(KUARTNum uart)
 {
     switch (uart) {
         case K_UART1: return GPIO_AF7_USART1;
@@ -69,7 +69,7 @@ static inline uint8_t uart_alt(int uart)
     }
 }
 
-void kprv_uart_dev_init(int uart)
+void kprv_uart_dev_init(KUARTNum uart)
 {
     // Enable peripheral clocks
     KUART *k_uart = kprv_uart_get(uart);
@@ -140,12 +140,12 @@ void kprv_uart_dev_init(int uart)
     __HAL_USART_ENABLE_IT(&u, USART_IT_RXNE);
 }
 
-void kprv_uart_enable_tx_int(int uart)
+void kprv_uart_enable_tx_int(KUARTNum uart)
 {
     uart_dev(uart)->CR1 |= USART_CR1_TXEIE;
 }
 
-void k_uart_write_immediate(int uart, char c)
+void k_uart_write_immediate(KUARTNum uart, char c)
 {
     USART_TypeDef *usart = uart_dev(uart);
 
