@@ -19,8 +19,6 @@
 #include "kubos-core/modules/gps.h"
 #include "kubos-core/modules/nmea.h"
 
-#include "kubos-core/arch/k_timer.h"
-
 #define ENABLE_DEBUG 0
 #include "kubos-core/k_debug.h"
 
