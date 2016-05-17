@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "kubos-core/unity/unity.h"
+#include "kubos-core/k_test.h"
 #include "kubos-core/modules/nmea.h"
 
 static void test_BadChecksum(void)
@@ -87,8 +88,7 @@ static void test_Gpgga(void)
     TEST_ASSERT_EQUAL_FLOAT(fix.altitude, 36.1);
 }
 
-int main(void)
-{
+K_TEST_MAIN() {
     UNITY_BEGIN();
     RUN_TEST(test_BadChecksum);
     RUN_TEST(test_Unknown);
@@ -96,4 +96,8 @@ int main(void)
     RUN_TEST(test_GprmcInvalidFix);
     RUN_TEST(test_Gpgga);
     return UNITY_END();
+}
+
+int main(void) {
+    K_TEST_RUN_MAIN();
 }

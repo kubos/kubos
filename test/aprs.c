@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include "kubos-core/unity/unity.h"
+#include "kubos-core/k_test.h"
 #include <string.h>
 
 #include "kubos-core/modules/aprs.h"
@@ -103,12 +104,15 @@ static void test_TelemetryParams(void)
     TEST_ASSERT_EQUAL_INT(result, (int) strlen(units_expected));
 }
 
-int main(void)
-{
+K_TEST_MAIN() {
     UNITY_BEGIN();
     RUN_TEST(test_Position);
     RUN_TEST(test_TelemetryValues);
     RUN_TEST(test_TelemetryFormat);
     RUN_TEST(test_TelemetryParams);
     return UNITY_END();
+}
+
+int main(void) {
+    K_TEST_RUN_MAIN();
 }
