@@ -250,7 +250,3 @@ int main(void)
 
     return 0;
 }
-
-int __wrap_main() {
-    return main();
-}
