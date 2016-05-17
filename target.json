@@ -25,7 +25,7 @@
             },
             "console": {
                 "uart": "K_UART2",
-                "baudRate": "115200"
+                "baudRate": 115200
             },
             "pins": {
                 "UART1_TX": "P33",
