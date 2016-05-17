@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 #include "kubos-core/unity/unity.h"
+#include "kubos-core/k_test.h"
 #include <string.h>
 
 #include "kubos-core/modules/ax25.h"
@@ -128,8 +129,7 @@ static void test_PktBuildUiPacket(void)
     K_BUFFER_FREE(payload);
 }
 
-int main(void)
-{
+K_TEST_MAIN() {
     UNITY_BEGIN();
     RUN_TEST(test_ShortCallsign);
     RUN_TEST(test_LongCallsign);
@@ -138,4 +138,8 @@ int main(void)
     RUN_TEST(test_PktBuildUiPacket);
     RUN_TEST(test_PktBuildFailCases);
     return UNITY_END();
+}
+
+int main(void) {
+    K_TEST_RUN_MAIN();
 }
