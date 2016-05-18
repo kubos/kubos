@@ -65,8 +65,13 @@ uint8_t hal_uart_setup(hal_uart_handle * handle)
         // Use SMCLK as the bit clock
         handle->reg->control1 |= UCSSEL__SMCLK;
 
-        // Set baudrate
         hal_uart_set_baudrate(handle);
+
+        hal_uart_set_parity(handle);
+
+        hal_uart_set_wordlen(handle);
+
+        hal_uart_set_stopbits(handle);
 
         // Configure pins as TXD/RXD
         *(handle->select) |= handle->selectVal;
@@ -96,6 +101,68 @@ void hal_uart_set_baudrate(hal_uart_handle * handle)
             handle->reg->baudrate0 = 9;
             handle->reg->baudrate1 = 0;
             handle->reg->modControl = UCBRS_0 + UCBRF_1;
+            break;
+        }
+    }
+}
+
+void hal_uart_set_parity(hal_uart_handle * handle)
+{
+    switch(handle->config.parity)
+    {
+        case HAL_UART_PARITY_NONE:
+        {
+            handle->reg->control0 &= ~UCPEN;
+            break;
+        }
+        case HAL_UART_PARITY_EVEN:
+        {
+            // enable parity
+            handle->reg->control0 |= UCPEN;
+            // set even parity
+            handle->reg->control0 |= UCPAR;
+            break;
+        }
+        case HAL_UART_PARITY_ODD:
+        {
+            // enable parity
+            handle->reg->control0 |= UCPEN;
+            // set odd parity
+            handle->reg->control0 &= ~UCPAR;
+            break;
+        }
+    }
+}
+
+void hal_uart_set_wordlen(hal_uart_handle * handle)
+{
+    switch (handle->config.wordlen)
+    {
+        case HAL_UART_WORD_LEN_7:
+        {
+            handle->reg->control0 |= UC7BIT;
+            break;
+        }
+        case HAL_UART_WORD_LEN_8:
+        {
+            handle->reg->control0 &= ~UC7BIT;
+            break;
+        }
+    }
+}
+
+void hal_uart_set_stopbits(hal_uart_handle * handle)
+{
+    switch (handle->config.stopbits)
+    {
+        case HAL_UART_STOP_BITS_1:
+        {
+            handle->reg->control0 &= ~UCSPB;
+            break;
+        }
+        case HAL_UART_STOP_BITS_2:
+        {
+            handle->reg->control0 |= UCSPB;
             break;
         }
     }

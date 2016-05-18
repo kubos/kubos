@@ -53,6 +53,35 @@ typedef enum
 } hal_uart_baudrate;
 
 /**
+  * @brief UART parity options
+  */
+typedef enum
+{
+    HAL_UART_PARITY_NONE = 0,
+    HAL_UART_PARITY_EVEN,
+    HAL_UART_PARITY_ODD
+} hal_uart_parity;
+
+/**
+  * @brief UART stop bits options
+  */
+typedef enum
+{
+    HAL_UART_STOP_BITS_1 = 0,
+    HAL_UART_STOP_BITS_1_5,
+    HAL_UART_STOP_BITS_2
+} hal_uart_stopbits;
+
+/**
+  * @brief UART wordlen options
+  */
+typedef enum
+{
+    HAL_UART_WORD_LEN_7 = 0,
+    HAL_UART_WORD_LEN_8
+} hal_uart_wordlen;
+
+/**
   * @brief This type is a map of the USCI_Ax UART registers.
   */
 typedef struct
@@ -95,10 +124,9 @@ typedef struct
 {
     hal_uart_device device;
     hal_uart_baudrate baudrate;
-    uint8_t databits;
-    uint8_t stopbits;
-    uint8_t paritysetting;
-    uint8_t checkparity;
+    hal_uart_wordlen wordlen;
+    hal_uart_stopbits stopbits;
+    hal_uart_parity parity;
 } hal_uart_config;
 
 /**
@@ -146,6 +174,29 @@ uint8_t hal_uart_setup(hal_uart_handle * handle);
   *               registers and config values.
   */
 void hal_uart_set_baudrate(hal_uart_handle * handle);
+
+/**
+  * @brief Low level hardware setup of UART parity.
+  * @param handle Instance of initilaized hal_uart_handle containing hardware
+  *               registers and config values.
+  */
+void hal_uart_set_parity(hal_uart_handle * handle);
+
+/**
+  * @brief Low level hardware setup of UART stopbits.
+  * @param handle Instance of initilaized hal_uart_handle containing hardware
+  *               registers and config values.
+  */
+void hal_uart_set_stopbits(hal_uart_handle * handle);
+
+
+/**
+  * @brief Low level hardware setup of UART word length.
+  * @param handle Instance of initilaized hal_uart_handle containing hardware
+  *               registers and config values.
+  */
+void hal_uart_set_wordlen(hal_uart_handle * handle);
+
 
 /**
   * @brief Reads a single character from UART.
