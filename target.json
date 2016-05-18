@@ -8,6 +8,7 @@
         "msp430-gcc",
         "gcc",
         "freertos",
+        "kubos-rt",
         "msp430f5529",
         "msp430f5529-gcc"
     ],
