@@ -4,4 +4,5 @@
 
 #### Modules:
 
+ - @subpage GPIO
  - @subpage UART
