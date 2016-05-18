@@ -37,7 +37,8 @@ hal_uart_handle * hal_uart_device_init(hal_uart_device device)
         handle->select = &P3SEL;
         handle->selectVal = BIT3 + BIT4;
         handle->reg = (hal_uart_mem_reg *)__MSP430_BASEADDRESS_USCI_A0__;
-    } else if (HAL_UART_A1 == device)
+    }
+    else if (HAL_UART_A1 == device)
     {
         handle->config.device = device;
         handle->select = &P4SEL;
@@ -85,7 +86,7 @@ uint8_t hal_uart_setup(hal_uart_handle * handle)
 }
 
 
-void hal_uart_set_baudrate(hal_uart_handle * handle)
+static void hal_uart_set_baudrate(hal_uart_handle * handle)
 {
     switch(handle->config.baudrate)
     {
@@ -106,7 +107,7 @@ void hal_uart_set_baudrate(hal_uart_handle * handle)
     }
 }
 
-void hal_uart_set_parity(hal_uart_handle * handle)
+static void hal_uart_set_parity(hal_uart_handle * handle)
 {
     switch(handle->config.parity)
     {
@@ -134,7 +135,7 @@ void hal_uart_set_parity(hal_uart_handle * handle)
     }
 }
 
-void hal_uart_set_wordlen(hal_uart_handle * handle)
+static void hal_uart_set_wordlen(hal_uart_handle * handle)
 {
     switch (handle->config.wordlen)
     {
@@ -151,7 +152,7 @@ void hal_uart_set_wordlen(hal_uart_handle * handle)
     }
 }
 
-void hal_uart_set_stopbits(hal_uart_handle * handle)
+static void hal_uart_set_stopbits(hal_uart_handle * handle)
 {
     switch (handle->config.stopbits)
     {
@@ -185,8 +186,7 @@ void hal_uart_write(hal_uart_handle * handle, uint8_t c)
 {
     hal_uart_write_raw(handle, c);
     // Wait until bit has been clocked out...
-    while (!(UCTXIFG == (UCTXIFG & (handle->reg->interruptFlags)))
-        && (UCBUSY == ((handle->reg->status) & UCBUSY)));
+    while (!HAL_UART_INT_FLAG(handle, UCTXIFG) && HAL_UART_STAT(handle, UCBUSY));
 }
 
 

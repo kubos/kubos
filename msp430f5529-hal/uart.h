@@ -173,21 +173,21 @@ uint8_t hal_uart_setup(hal_uart_handle * handle);
   * @param handle Instance of initilaized hal_uart_handle containing hardware
   *               registers and config values.
   */
-void hal_uart_set_baudrate(hal_uart_handle * handle);
+static void hal_uart_set_baudrate(hal_uart_handle * handle);
 
 /**
   * @brief Low level hardware setup of UART parity.
   * @param handle Instance of initilaized hal_uart_handle containing hardware
   *               registers and config values.
   */
-void hal_uart_set_parity(hal_uart_handle * handle);
+static void hal_uart_set_parity(hal_uart_handle * handle);
 
 /**
   * @brief Low level hardware setup of UART stopbits.
   * @param handle Instance of initilaized hal_uart_handle containing hardware
   *               registers and config values.
   */
-void hal_uart_set_stopbits(hal_uart_handle * handle);
+static void hal_uart_set_stopbits(hal_uart_handle * handle);
 
 
 /**
@@ -195,7 +195,7 @@ void hal_uart_set_stopbits(hal_uart_handle * handle);
   * @param handle Instance of initilaized hal_uart_handle containing hardware
   *               registers and config values.
   */
-void hal_uart_set_wordlen(hal_uart_handle * handle);
+static void hal_uart_set_wordlen(hal_uart_handle * handle);
 
 
 /**
