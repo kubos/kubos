@@ -21,8 +21,8 @@
                 "wordLen": "K_WORD_LEN_8BIT",
                 "stopBits": "K_STOP_BITS_1",
                 "parity": "K_PARITY_NONE",
-                "rxQueueLen": 128,
-                "txQueueLen": 128
+                "rxQueueLen": 32,
+                "txQueueLen": 32
             },
             "console": {
                 "uart": "K_UART2",
