@@ -14,6 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+  * @defgroup GPIO
+  * @addtogroup GPIO
+  * @{
+  */
+
+/**
+  *
+  * @file       pins.h
+  * @brief      Kubos-HAL-MSP430F5529 - GPIO pin defs
+  *
+  * @author     kubos.co
+  */
 
 #ifndef KUBOS_HAL_MSP430F5529_PINS_H
 #define KUBOS_HAL_MSP430F5529_PINS_H
@@ -32,6 +45,9 @@
 #define K_BUTTON_0 P2_1
 
 
+/**
+  * @brief Struct which contains gpio details (dir/out/in/pull pins and bit)
+  */
 typedef struct {
     volatile uint8_t * dir_pin;
     volatile uint8_t * out_pin;
@@ -40,8 +56,11 @@ typedef struct {
     uint8_t  bit;
 } KPinDesc;
 
+/**
+  * @brief Enum containing gpios currently used.
+  */
 typedef enum {
-    P1_0 = 0, P4_7, P2_1
+    P1_0 = 0, P4_7, P2_1, P33, P34, P44, P45
 } KPin;
 
 #endif
