@@ -34,33 +34,46 @@
 
 #include <stdint.h>
 
-#define K_LED_0 P1_0
-#define K_LED_RED P1_0
+#define K_LED_0 P10
+#define K_LED_RED P10
 
-#define K_LED_1 P4_7
-#define K_LED_GREEN P4_7
+#define K_LED_1 P47
+#define K_LED_GREEN P47
 
 #define K_LED_COUNT 2
 
-#define K_BUTTON_0 P2_1
+#define K_BUTTON_0 P21
 
 
 /**
   * @brief Struct which contains gpio details (dir/out/in/pull pins and bit)
   */
 typedef struct {
+    /** PxDIR */
     volatile uint8_t * dir_pin;
+    /** PxOUT */
     volatile uint8_t * out_pin;
+    /** PxIN */
     volatile uint8_t * in_pin;
+    /** PxREN */
     volatile uint8_t * pull_pin;
     uint8_t  bit;
 } KPinDesc;
 
 /**
-  * @brief Enum containing gpios currently used.
+  * @brief Enum containing gpios currently setup.
+  *
+  * Note - This describes digital pins exposed on the MSP430F5529 launchpad.
+  *
   */
 typedef enum {
-    P1_0 = 0, P4_7, P2_1, P33, P34, P44, P45
+    P10 = 0, P11, P12, P13, P14, P15, P16,
+    P20, P21, P22, P23, P24, P25, P26, P27,
+    P30, P31, P32, P33, P34, P35, P36, P37,
+    P40, P41, P42, P43, P44, P45, P47,
+    P60, P61, P62, P63, P64, P65, P66,
+    P70, P74,
+    P81, P82
 } KPin;
 
 #endif
