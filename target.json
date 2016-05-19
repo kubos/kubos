@@ -1,6 +1,6 @@
 {
     "name" : "msp430f5529-gcc",
-    "version" : "0.0.0",
+    "version" : "0.0.1",
     "description" : "Official kubos-rt base target description for compiling with the msp430-gcc compiler against the msp430f5529 mcu",
     "license" : "Apache-2.0",
     "similarTo" : [
