@@ -38,6 +38,20 @@
 
 #define K_BUTTON_0   PA0
 
+#define STM32F4_PIN_OFFSET(p) ((p) % 16)
+#define STM32F4_PIN_MASK(p) (1 << STM32F4_PIN_OFFSET(p))
+#define STM32F4_PIN_GPIO(p) ((GPIO_TypeDef *) (GPIOA_BASE + (((p) / 16) * 0x400)))
+#define STM32F4_PIN_AHB1ENR_BIT(p) (1 << ((p) / 16))
+
+#define CHECK_SET_BIT(dest, bit) do { \
+    uint32_t tmpreg = READ_BIT(dest, bit); \
+    if (!tmpreg) { \
+        SET_BIT(dest, bit); \
+        /* Delay after an RCC peripheral clock enabling */ \
+        tmpreg = READ_BIT(dest, bit);\
+    } \
+} while(0)
+
 typedef struct {
     GPIO_TypeDef *gpio;
     uint16_t pin;
@@ -45,11 +59,13 @@ typedef struct {
 } KPinDesc;
 
 typedef enum {
-    PA0 = 0, PA1,PA2, PA3, PA4, PA5, PA6, PA7, PA8, PA9, PA10, PA11, PA12, PA13, PA14, PA15,
+    PA0 = 0, PA1, PA2, PA3, PA4, PA5, PA6, PA7, PA8, PA9, PA10, PA11, PA12, PA13, PA14, PA15,
     PB0, PB1, PB2, PB3, PB4, PB5, PB6, PB7, PB8, PB9, PB10, PB11, PB12, PB13, PB14, PB15,
     PC0, PC1, PC2, PC3, PC4, PC5, PC6, PC7, PC8, PC9, PC10, PC11, PC12, PC13, PC14, PC15,
     PD0, PD1, PD2, PD3, PD4, PD5, PD6, PD7, PD8, PD9, PD10, PD11, PD12, PD13, PD14, PD15,
     PE0, PE1, PE2, PE3, PE4, PE5, PE6, PE7, PE8, PE9, PE10, PE11, PE12, PE13, PE14, PE15
 } KPin;
+
+
 
 #endif
