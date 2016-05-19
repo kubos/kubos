@@ -1,6 +1,6 @@
 /*
  * @file    uart.c
- * @brief   UART HAL module
+ * @brief   MSP430F5529 UART HAL module
  *
  *******************************************************************************
  * @attention
@@ -19,69 +19,60 @@
  * limitations under the License.
  *******************************************************************************
  */
-
-
-
 #include <msp430.h>
 #include "msp430f5529-hal/uart.h"
-
 #include <stddef.h>
+#include <stdbool.h>
 
-#define BC_RX_WAKE_THRESH 1
+hal_uart_handle hal_uart_dev[YOTTA_CFG_HARDWARE_UARTCOUNT];
 
-static hal_uart_handle hal_uart_a0;
-static hal_uart_handle hal_uart_a1;
-
-/**
-  * @brief Creates a UART handle and fills in details associated with
-  *        the specified device.
-  * @param device Instance of hal_uart_device, specifying device to use.
-  * @retval hal_uart_handle
-  */
-hal_uart_handle hal_uart_device_init(hal_uart_device device)
+hal_uart_handle * hal_uart_device_init(hal_uart_device device)
 {
-    hal_uart_handle handle;
-    if (HAL_UART_A1 == device)
+    hal_uart_handle * handle = NULL;
+
+    handle = &hal_uart_dev[device];
+    if (HAL_UART_A0 == device)
     {
-        handle.config.device = device;
-        handle.select = &P4SEL;
-        handle.selectVal = BIT4 + BIT5;
-        handle.reg = (hal_uart_mem_reg *)__MSP430_BASEADDRESS_USCI_A1__;
+        handle->config.device = device;
+        handle->select = &P3SEL;
+        handle->selectVal = BIT3 + BIT4;
+        handle->reg = (hal_uart_mem_reg *)__MSP430_BASEADDRESS_USCI_A0__;
+    }
+    else if (HAL_UART_A1 == device)
+    {
+        handle->config.device = device;
+        handle->select = &P4SEL;
+        handle->selectVal = BIT4 + BIT5;
+        handle->reg = (hal_uart_mem_reg *)__MSP430_BASEADDRESS_USCI_A1__;
     }
     return handle;
 }
 
-/**
-  * @brief Creates a UART handle according to details specified in config.
-  * @param config Instance of hal_uart_config with init details.
-  * @retval hal_uart_handle
-  */
-hal_uart_handle hal_uart_init(hal_uart_config config)
+
+hal_uart_handle * hal_uart_init(hal_uart_config config)
 {
-    hal_uart_handle handle = hal_uart_device_init(config.device);
-    handle.config = config;
+    hal_uart_handle * handle = hal_uart_device_init(config.device);
+    handle->config = config;
     return handle;
 }
 
-/**
-  * @brief Low level hardware setup of UART device.
-  * @param handle Instance of initilaized hal_uart_handle containing hardware
-  *               registers and config values.
-  * @retval status
-  */
+
 uint8_t hal_uart_setup(hal_uart_handle * handle)
 {
     if (NULL != handle)
     {
-        handle->rxBufferSize = 128;
-        handle->rxBuffer = malloc(sizeof(uint8_t)*handle->rxBufferSize);
         // Put the USCI state machine in reset
-        handle->reg->control1 = UCSWRST;
+        handle->reg->control1 |= UCSWRST;
         // Use SMCLK as the bit clock
         handle->reg->control1 |= UCSSEL__SMCLK;
 
-        // Set baudrate
-        hal_uart_set_speed(handle);
+        hal_uart_set_baudrate(handle);
+
+        hal_uart_set_parity(handle);
+
+        hal_uart_set_wordlen(handle);
+
+        hal_uart_set_stopbits(handle);
 
         // Configure pins as TXD/RXD
         *(handle->select) |= handle->selectVal;
@@ -90,16 +81,12 @@ uint8_t hal_uart_setup(hal_uart_handle * handle)
         handle->reg->control1 &= ~UCSWRST;
 
         // Enable the RX interrupt.
-        handle->reg->interruptFlags |= UCRXIE;
+        handle->reg->interruptEnable |= UCRXIE;
     }
 }
 
-/**
-  * @brief Low level hardware setup of UART baudrate.
-  * @param handle Instance of initilaized hal_uart_handle containing hardware
-  *               registers and config values.
-  */
-void hal_uart_set_speed(hal_uart_handle * handle)
+
+static void hal_uart_set_baudrate(hal_uart_handle * handle)
 {
     switch(handle->config.baudrate)
     {
@@ -120,79 +107,111 @@ void hal_uart_set_speed(hal_uart_handle * handle)
     }
 }
 
-/**
-  * @brief Transmit single character
-  * @param handle UART handle to transmit over
-  * @param c character to transmit
-  * @retval status
-  */
-void hal_uart_putc(hal_uart_handle * handle, uint8_t c)
+static void hal_uart_set_parity(hal_uart_handle * handle)
 {
-    handle->reg->tx = c;
-    // Wait until bit has been clocked out...
-    while (!(UCTXIFG == (UCTXIFG && (handle->reg->interruptFlags)))
-        && (UCBUSY == ((handle->reg->status) & UCBUSY)));
+    switch(handle->config.parity)
+    {
+        case HAL_UART_PARITY_NONE:
+        {
+            handle->reg->control0 &= ~UCPEN;
+            break;
+        }
+        case HAL_UART_PARITY_EVEN:
+        {
+            // enable parity
+            handle->reg->control0 |= UCPEN;
+            // set even parity
+            handle->reg->control0 |= UCPAR;
+            break;
+        }
+        case HAL_UART_PARITY_ODD:
+        {
+            // enable parity
+            handle->reg->control0 |= UCPEN;
+            // set odd parity
+            handle->reg->control0 &= ~UCPAR;
+            break;
+        }
+    }
 }
 
-/**
-  * @brief Transmit buffer
-  * @param handle UART handle to transmit over
-  * @param buf buffer to transmit
-  * @param len number of characters to transmit
-  * @retval status
-  */
-void hal_uart_putstr(hal_uart_handle * handle, uint8_t * buf, uint8_t len)
+static void hal_uart_set_wordlen(hal_uart_handle * handle)
+{
+    switch (handle->config.wordlen)
+    {
+        case HAL_UART_WORD_LEN_7:
+        {
+            handle->reg->control0 |= UC7BIT;
+            break;
+        }
+        case HAL_UART_WORD_LEN_8:
+        {
+            handle->reg->control0 &= ~UC7BIT;
+            break;
+        }
+    }
+}
+
+static void hal_uart_set_stopbits(hal_uart_handle * handle)
+{
+    switch (handle->config.stopbits)
+    {
+        case HAL_UART_STOP_BITS_1:
+        {
+            handle->reg->control0 &= ~UCSPB;
+            break;
+        }
+        case HAL_UART_STOP_BITS_2:
+        {
+            handle->reg->control0 |= UCSPB;
+            break;
+        }
+    }
+}
+
+
+uint8_t hal_uart_read_raw(hal_uart_handle * handle)
+{
+    return handle->reg->rx;
+}
+
+
+void hal_uart_write_raw(hal_uart_handle * handle, uint8_t c)
+{
+    handle->reg->tx = c;
+}
+
+
+void hal_uart_write(hal_uart_handle * handle, uint8_t c)
+{
+    hal_uart_write_raw(handle, c);
+    // Wait until bit has been clocked out...
+    while (!HAL_UART_INT_FLAG(handle, UCTXIFG) && HAL_UART_STAT(handle, UCBUSY));
+}
+
+
+void hal_uart_write_str(hal_uart_handle * handle, uint8_t * buf, uint8_t len)
 {
     uint8_t i = 0;
 
     for (i = 0; i < len; i++)
-        hal_uart_putc(handle, buf[i]);
-}
-
-/**
-  * @brief Receive a buffer
-  * @param handle UART handle to receieve from
-  * @param buf Buffer to receive characters into.
-  * @retval count Number of characters received
-  */
-uint16_t hal_uart_read(hal_uart_handle * handle, uint8_t * buf)
-{
-    uint16_t i, count;
-
-    handle->reg->interruptFlags &= ~UCRXIE;
-
-    for (i = 0; i < handle->rxBufferIndex; i++)
-    {
-        buf[i] = handle->rxBuffer[i];
-    }
-
-    count = handle->rxBufferIndex;
-    handle->rxBufferIndex = 0;
-
-    handle->reg->interruptFlags |= UCRXIE;
-
-    return count;
-}
-
-/**
-  * @brief This function handles UART interrut requests.
-  */
-void hal_uart_interrupt(hal_uart_handle * handle)
-{
-    handle->rxBuffer[handle->rxBufferIndex++] = (handle->reg->rx);
-
-    // // Wake main, to fetch data from the buffer.
-    // if (handle->rxBufferIndex >= BC_RX_WAKE_THRESH)
-    // {
-    //     __bic_SR_register_on_exit(LPM3_bits);
-    // }
+        hal_uart_write(handle, buf[i]);
 }
 
 
 /**
-  * @brief This function handles UART interrut requests.
+  * @brief This function is the USCI A0 interrupt handler.
   */
-__attribute__ (( interrupt ( USCI_A1_VECTOR ))) void bcUartISR(void)
+__attribute__ (( interrupt ( USCI_A0_VECTOR ))) void hal_uart_a0_interrupt(void)
 {
-    hal_uart_interrupt(&hal_uart_a1);
+    hal_uart_interrupt(&hal_uart_dev[HAL_UART_A0]);
+}
+
+
+/**
+  * @brief This function is the USCI A1 interrupt handler.
+  */
+__attribute__ (( interrupt ( USCI_A1_VECTOR ))) void hal_uart_a1_interrupt(void)
+{
+    hal_uart_interrupt(&hal_uart_dev[HAL_UART_A1]);
 }
