@@ -44,8 +44,6 @@ typedef enum {
     K_UART6
 } KUARTNum;
 
-typedef void (*KUART_RxHandler) (uint8_t *buf, int len, void *task_woken);
-
 typedef enum {
     K_WORD_LEN_8BIT = 0,
     K_WORD_LEN_9BIT
@@ -72,7 +70,6 @@ typedef struct {
 
     uint8_t rx_queue_len;
     uint8_t tx_queue_len;
-    KUART_RxHandler *rx_handler;
 } KUARTConf;
 
 typedef struct {
