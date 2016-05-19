@@ -19,6 +19,7 @@
 
 #include "stm32f4xx.h"
 #include "FreeRTOS.h"
+#include "kubos-hal/uart.h"
 
 #include <reent.h>
 #include <unistd.h>
@@ -70,17 +71,23 @@ void * _sbrk_r(struct _reent *r, ptrdiff_t size) {
 
 ssize_t _read_r(struct _reent *r, int fd, void *ptr, size_t len)
 {
+    if (fd == fileno(stdin)) {
+        return k_uart_read(K_UART_CONSOLE, (char *) ptr, (int) len);
+    }
+
     r->_errno = ENOSYS;
     return len;
-    //return k_uart_read_r(r, fd, ptr, len);
 }
 
 
 ssize_t _write_r(struct _reent *r, int fd, const void *ptr, size_t len)
 {
+    if (fd == fileno(stdout) || fd == fileno(stderr)) {
+        return k_uart_write(K_UART_CONSOLE, (char *) ptr, (int) len);
+    }
+
     r->_errno = ENOSYS;
     return len;
-    //return k_uart_write_r(r, fd, ptr, len);
 }
 
 off_t _lseek_r(struct _reent *r, int fd, _off_t ptr, int dir)
