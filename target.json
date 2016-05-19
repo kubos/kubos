@@ -18,9 +18,15 @@
     "gcc"
   ],
   "config": {
-    "kubos": {
-      "stdio": {
-        "default-baud": 9600
+    "hardware": {
+      "uartCount": 0,
+      "uartDefaults": {
+        "baudRate": 9600,
+        "wordLen": "K_WORD_LEN_8BIT",
+        "stopBits": "K_STOP_BITS_1",
+        "parity": "K_PARITY_NONE",
+        "rxQueueLen": 32,
+        "txQueueLen": 32
       }
     }
   },
