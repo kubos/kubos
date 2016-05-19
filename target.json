@@ -1,6 +1,6 @@
 {
     "name" : "msp430f5529-gcc",
-    "version" : "0.0.0",
+    "version" : "0.0.1",
     "description" : "Official kubos-rt base target description for compiling with the msp430-gcc compiler against the msp430f5529 mcu",
     "license" : "Apache-2.0",
     "similarTo" : [
@@ -8,8 +8,32 @@
         "msp430-gcc",
         "gcc",
         "freertos",
+        "kubos-rt",
         "msp430f5529",
         "msp430f5529-gcc"
     ],
-    "toolchain" : "CMake/toolchain.cmake"
+    "toolchain" : "CMake/toolchain.cmake",
+    "config": {
+        "hardware": {
+            "uartCount": 2,
+            "uartDefaults": {
+                "baudRate": 115200,
+                "wordLen": "K_WORD_LEN_8BIT",
+                "stopBits": "K_STOP_BITS_1",
+                "parity": "K_PARITY_NONE",
+                "rxQueueLen": 32,
+                "txQueueLen": 32
+            },
+            "console": {
+                "uart": "K_UART2",
+                "baudRate": 115200
+            },
+            "pins": {
+                "UART1_TX": "P33",
+                "UART1_RX": "P34",
+                "UART2_TX": "P44",
+                "UART2_RX": "P45"
+            }
+        }
+    }
 }
