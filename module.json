@@ -11,10 +11,10 @@
   },
   "targetDependencies": {
     "stm32f407vg": {
-      "kubos-hal-stm32f407vg": "openkosmosorg/kubos-hal-stm32f407vg#master"
+      "kubos-hal-stm32f407vg": "openkosmosorg/kubos-hal-stm32f407vg#~0.0.1"
     },
     "msp430f5529": {
-      "kubos-hal-msp430f5529": "openkosmosorg/kubos-hal-msp430f5529#master"
+      "kubos-hal-msp430f5529": "openkosmosorg/kubos-hal-msp430f5529#~0.0.1"
     }
   }
 }
