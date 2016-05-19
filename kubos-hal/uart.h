@@ -45,7 +45,8 @@ typedef enum {
 } KUARTNum;
 
 typedef enum {
-    K_WORD_LEN_8BIT = 0,
+    K_WORD_LEN_7BIT = 0,
+    K_WORD_LEN_8BIT,
     K_WORD_LEN_9BIT
 } KWordLen;
 
