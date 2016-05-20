@@ -28,7 +28,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "kubos-core/arch/k_timer.h"
+#include <csp/arch/csp_time.h>
 #include "kubos-core/modules/klog.h"
 
 uint8_t klog_console_level = LOG_INFO;
@@ -139,13 +139,11 @@ static inline char *_level_str(unsigned level)
 static int _klog(FILE *f, unsigned level, const char *logger,
                  const char *format, va_list args)
 {
-    struct timeval time;
     int written = 0;
-    k_timer_now_time(&time);
+    uint32_t millis = csp_get_ms();
 
-    written += fprintf(f, "%010d.%03d %s:%s ", (int) time.tv_sec,
-                       (int) time.tv_usec / 1000, logger,
-                       _level_str(level));
+    written += fprintf(f, "%010d.%03d %s:%s ", millis / 1000, millis % 1000,
+                       logger, _level_str(level));
     written += vfprintf(f, format, args);
     written += fprintf(f, "\n");
     return written;
