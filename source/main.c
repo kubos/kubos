@@ -37,22 +37,6 @@
 static xQueueHandle button_queue;
 
 
-// @TODO: Move into HAL
-#ifdef TARGET_LIKE_MSP430
-#undef putchar
-int putchar(int c) {
-    int tmp = c;
-    tmp++;
-    tmp++;
-    return 1;
-}
-
-
-size_t strnlen(const char * str, size_t size) {
-    return size;
-}
-#endif
-
 static inline void blink(int pin) {
     k_gpio_write(pin, 1);
     vTaskDelay(BLINK_MS / portTICK_RATE_MS);
@@ -229,6 +213,8 @@ int main(void)
     k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_UP);
     /* Stop the watchdog. */
     WDTCTL = WDTPW + WDTHOLD;
+
+    __enable_interrupt();
 
     P2OUT = BIT1;
     #endif
