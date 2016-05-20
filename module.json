@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-stm32f407xg",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "CMSIS Core module for stm32f407xg microcontrollers",
   "keywords": [
     "mbed"
@@ -17,7 +17,7 @@
     "cmsis-core-stm32f407xg"
   ],
   "dependencies": {
-    "cmsis-core": "openkosmosorg/cmsis-core#master"
+    "cmsis-core": "openkosmosorg/cmsis-core#~1.2.1"
   },
   "targetDependencies": {}
 }
