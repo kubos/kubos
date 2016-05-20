@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-stm32f4",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "CMSIS Core module for STM32F4xx microcontrollers (KubOS fork)",
   "keywords": [
     "mbed",
@@ -18,8 +18,8 @@
     "cmsis-core-stm32f4"
   ],
   "dependencies": {
-    "cmsis-core": "openkosmosorg/cmsis-core#master",
-    "stm32cubef4": "openkosmosorg/stm32cubef4#master"
+    "cmsis-core": "openkosmosorg/cmsis-core#~1.2.1",
+    "stm32cubef4": "openkosmosorg/stm32cubef4#~1.2.1"
   },
   "targetDependencies": {
     "stm32f401xe-no-inherit": {
@@ -32,7 +32,7 @@
       "cmsis-core-stm32f439zi": "~0.1.0"
     },
     "stm32f407xg": {
-      "cmsis-core-stm32f407xg": "openkosmosorg/cmsis-core-stm32f407xg#master"
+      "cmsis-core-stm32f407xg": "openkosmosorg/cmsis-core-stm32f407xg#~0.0.2"
     }
   }
 }
