@@ -48,6 +48,7 @@
 #define STM32F4_PIN_GPIO(p) ((GPIO_TypeDef *) (GPIOA_BASE + (((p) / 16) * 0x400)))
 #define STM32F4_PIN_AHB1ENR_BIT(p) (1 << ((p) / 16))
 
+#define CHECK_BIT(src, bit) (READ_BIT((src), (bit)) == (bit))
 #define CHECK_SET_BIT(dest, bit) do { \
     uint32_t tmpreg = READ_BIT(dest, bit); \
     if (!tmpreg) { \

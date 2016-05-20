@@ -3,7 +3,7 @@
  * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+`* you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -82,7 +82,9 @@ void kprv_uart_dev_init(KUARTNum uart)
     int rx = k_uart_rx_pin(uart);
     int tx = k_uart_tx_pin(uart);
 
-    RCC->AHB1ENR |= STM32F4_PIN_AHB1ENR_BIT(rx) | STM32F4_PIN_AHB1ENR_BIT(tx);
+    SET_BIT(RCC->AHB1ENR,
+            STM32F4_PIN_AHB1ENR_BIT(rx) | STM32F4_PIN_AHB1ENR_BIT(tx));
+
     uart_clk_enable(uart);
 
     // Initialize Serial Port
@@ -148,39 +150,42 @@ void kprv_uart_dev_init(KUARTNum uart)
 
 void kprv_uart_enable_tx_int(KUARTNum uart)
 {
-    uart_dev(uart)->CR1 |= USART_CR1_TXEIE;
+    SET_BIT(uart_dev(uart)->CR1, USART_CR1_TXEIE);
 }
 
 void k_uart_write_immediate(KUARTNum uart, char c)
 {
-    USART_TypeDef *usart = uart_dev(uart);
+    USART_TypeDef *dev = uart_dev(uart);
 
-    usart->DR |= c;
-    while (!(usart->SR & USART_FLAG_TXE));
+    dev->DR = c;
+    while (!CHECK_BIT(dev->SR, USART_FLAG_TXE));
 }
 
-void USART6_IRQHandler(void)
+static inline void uart_irq_handler(KUARTNum uart)
 {
-    static portBASE_TYPE task_woken;
-    KUART *k_uart = kprv_uart_get(K_UART6);
+    portBASE_TYPE task_woken = pdFALSE;
+    USART_TypeDef *dev = uart_dev(uart);
+    KUART *k_uart = kprv_uart_get(uart);
+    if (!dev || !uart) {
+        return;
+    }
 
-    task_woken = pdFALSE;
-    if ((USART6->SR & USART_SR_ORE) == USART_SR_ORE) {
-        uint32_t tmpreg = USART6->SR;
-        tmpreg = USART6->DR;
+    if (CHECK_BIT(dev->SR, USART_SR_ORE)) {
+        // clear out the data register on overrun
+        uint32_t tmpreg = dev->SR;
+        tmpreg = dev->DR;
         ((void)tmpreg);
     }
 
-    if ((USART6->SR & USART_SR_RXNE) == USART_SR_RXNE) {
-        char c = USART6->DR;
+    if (CHECK_BIT(dev->SR, USART_SR_RXNE)) {
+        char c = dev->DR;
         xQueueSendToBackFromISR(k_uart->rx_queue, (void *) &c, &task_woken);
         if (task_woken != pdFALSE) {
             portYIELD();
         }
     }
 
-    if ((USART6->CR1 & USART_CR1_TXEIE) == USART_CR1_TXEIE &&
-        (USART6->SR & USART_SR_TXE) == USART_SR_TXE) {
+    if (CHECK_BIT(dev->SR, USART_SR_TXE)) {
         char c;
         task_woken = pdFALSE;
         BaseType_t result = xQueueReceiveFromISR(k_uart->tx_queue,
@@ -188,18 +193,58 @@ void USART6_IRQHandler(void)
                                                  &task_woken);
         if (result == pdTRUE) {
             // send a queued byte
-            USART6->DR = c;
+            dev->DR = c;
         } else {
             // nothing to send, disable interrupt
-            USART6->CR1 &= ~USART_CR1_TXEIE;
+            CLEAR_BIT(dev->CR1, USART_CR1_TXEIE);
         }
 
         if (task_woken != pdFALSE) {
             portYIELD();
         }
     }
-
 }
 
+#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 1
+void USART1_IRQHandler(void)
+{
+    uart_irq_handler(K_UART1);
+}
+#endif
+
+#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 2
+void USART2_IRQHandler(void)
+{
+    uart_irq_handler(K_UART2);
+}
+#endif
+
+#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 3
+void USART3_IRQHandler(void)
+{
+    uart_irq_handler(K_UART3);
+}
+#endif
+
+#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 4
+void UART4_IRQHandler(void)
+{
+    uart_irq_handler(K_UART4);
+}
+#endif
+
+#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 5
+void UART5_IRQHandler(void)
+{
+    uart_irq_handler(K_UART5);
+}
+#endif
+
+#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 6
+void USART6_IRQHandler(void)
+{
+    uart_irq_handler(K_UART6);
+}
+#endif
 
 /* @} */
