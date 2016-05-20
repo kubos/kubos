@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "base KubOS RT build target for the arm-none-eabi-gcc toolchain",
   "inherits": {
-    "kubos-gcc": "openkosmosorg/target-kubos-gcc#master"
+    "kubos-gcc": "openkosmosorg/target-kubos-gcc#~0.0.1"
   },
   "licenses": [
     {
