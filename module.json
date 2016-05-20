@@ -13,9 +13,9 @@
   "homepage": "https://github.com/openkosmosorg/kubos-rt",
   "license": "Apache-2.0",
   "dependencies": {
-    "freertos": "openkosmosorg/freertos#master",
-    "csp": "openkosmosorg/libcsp#master",
-    "kubos-hal": "openkosmosorg/kubos-hal#master",
-    "kubos-core": "openkosmosorg/kubos-core#master"
+    "freertos": "openkosmosorg/freertos#~9.0.1",
+    "csp": "openkosmosorg/libcsp#~1.4.1",
+    "kubos-hal": "openkosmosorg/kubos-hal#~0.0.1",
+    "kubos-core": "openkosmosorg/kubos-core#~0.0.1"
   }
 }
