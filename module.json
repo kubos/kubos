@@ -1,6 +1,6 @@
 {
   "name": "freertos",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "FreeRTOS Real Time Operating System",
   "keywords": [
     "freertos"
@@ -14,13 +14,13 @@
   "license": "FreeRTOS Open Source License",
   "targetDependencies": {
     "arm": {
-      "cmsis-core": "openkosmosorg/cmsis-core#master"
+      "cmsis-core": "openkosmosorg/cmsis-core#~1.2.1"
     },
     "stm32f4": {
-      "freertos-config-stm32f4": "openkosmosorg/freertos-config-stm32f4#master"
+      "freertos-config-stm32f4": "openkosmosorg/freertos-config-stm32f4#~0.0.1"
     },
     "msp430f5529": {
-      "freertos-config-msp430f5529": "openkosmosorg/freertos-config-msp430f5529#master"
+      "freertos-config-msp430f5529": "openkosmosorg/freertos-config-msp430f5529#~0.0.1"
     }
   }
 }
