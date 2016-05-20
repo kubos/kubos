@@ -17,7 +17,7 @@
     "stm32cubef4-stm32f407vg"
   ],
   "dependencies": {
-    "cmsis-core": "openkosmosorg/cmsis-core#master"
+    "cmsis-core": "openkosmosorg/cmsis-core#~1.2.1"
   },
   "targetDependencies": {}
 }
