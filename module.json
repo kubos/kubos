@@ -10,7 +10,7 @@
     "kubos-hal-stm32f407vg"
   ],
   "dependencies": {
-    "kubos-hal" : "openkosmosorg/kubos-hal#master",
-    "stm32cubef4-stm32f407vg": "openkosmosorg/stm32cubef4-stm32f407vg#master"
+    "kubos-hal" : "openkosmosorg/kubos-hal#~0.0.1",
+    "stm32cubef4-stm32f407vg": "openkosmosorg/stm32cubef4-stm32f407vg#~0.0.1"
   }
 }
