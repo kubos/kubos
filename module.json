@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "CMSIS-Core (KubOS fork)",
   "keywords": [
     "cmsis",
@@ -35,7 +35,7 @@
       "cmsis-core-freescale": "^1.0.0"
     },
     "st": {
-      "cmsis-core-st": "openkosmosorg/cmsis-core-st#master"
+      "cmsis-core-st": "openkosmosorg/cmsis-core-st#~1.0.2"
     },
     "nordic": {
       "cmsis-core-nordic": "^1.0.0"
