@@ -14,6 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ /**
+   * @defgroup GPIO
+   * @addtogroup GPIO
+   * @{
+   */
 #ifndef KUBOS_HAL_STM32F407VG_PINS_H
 #define KUBOS_HAL_STM32F407VG_PINS_H
 
@@ -69,3 +74,4 @@ typedef enum {
 
 
 #endif
+/* @} */

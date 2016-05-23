@@ -14,6 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ /**
+   * @defgroup GPIO
+   * @addtogroup GPIO
+   * @{
+   */
 #include "kubos-hal/gpio.h"
 #include "kubos-hal-stm32f407vg/stm32f4_gpio.h"
 
@@ -78,3 +83,5 @@ void kprv_gpio_alt_config(GPIO_TypeDef* GPIOx, uint16_t GPIO_PinSource, uint8_t 
     temp_2 = GPIOx->AFR[GPIO_PinSource >> 0x03] | temp;
     GPIOx->AFR[GPIO_PinSource >> 0x03] = temp_2;
 }
+
+/* @} */

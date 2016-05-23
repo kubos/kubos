@@ -14,9 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+  * @defgroup GPIO
+  * @addtogroup GPIO
+  * @{
+  */
 #ifndef STM32F4_GPIO_H
 #define STM32F4_GPIO_H
 
 void kprv_gpio_alt_config(GPIO_TypeDef* GPIOx, uint16_t GPIO_PinSource, uint8_t GPIO_AF);
 
 #endif
+
+/* @} */

@@ -14,6 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ /**
+   * @defgroup UART
+   * @addtogroup UART
+   * @{
+   */
 #include "kubos-hal/gpio.h"
 #include "kubos-hal/uart.h"
 #include "kubos-hal-stm32f407vg/stm32f4_gpio.h"
@@ -194,3 +200,6 @@ void USART6_IRQHandler(void)
     }
 
 }
+
+
+/* @} */
