@@ -16,6 +16,12 @@
  */
 
  /**
+  * @defgroup Message
+  * @addtogroup Message
+  * @{
+  */
+
+ /**
   *
   * @file       k_msg.h
   * @brief      Messaging layer
@@ -37,3 +43,5 @@ typedef struct k_msg {
 int k_msg_send(k_msg_t * m, csp_conn_t * conn);
 
 #endif
+
+/* @} */

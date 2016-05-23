@@ -6,9 +6,13 @@
  * directory for more details.
  */
 
+ /**
+  * @defgroup Debug
+  * @addtogroup Debug
+  * @{
+  */
+
 /**
- * @addtogroup  core_util
- * @{
  *
  * @file
  * @brief       Debug-header

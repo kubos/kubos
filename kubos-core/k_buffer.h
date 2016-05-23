@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+ /**
+  * @defgroup Buffer
+  * @addtogroup Buffer
+  * @{
+  */
 
  /**
   *
@@ -74,3 +79,5 @@ void k_buffer_free(k_buffer_t * buffer);
 #endif
 
 #endif
+
+/* @} */

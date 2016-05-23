@@ -4,7 +4,7 @@
   <navindex>
     <tab type="mainpage" visible="yes" title=""/>
     <tab type="pages" visible="no" title="" intro=""/>
-    <tab type="modules" visible="no" title="" intro=""/>
+    <tab type="modules" visible="yes" title="" intro=""/>
     <tab type="namespaces" visible="no" title="">
       <tab type="namespacelist" visible="yes" title="" intro=""/>
       <tab type="namespacemembers" visible="yes" title="" intro=""/>
@@ -62,7 +62,7 @@
       <related title="" subtitle=""/>
       <membergroups visible="yes"/>
     </memberdecl>
-    <detaileddescription title=""/>
+    <!-- <detaileddescription title=""/> -->
     <memberdef>
       <inlineclasses title=""/>
       <typedefs title=""/>
@@ -94,7 +94,7 @@
       <variables title=""/>
       <membergroups visible="yes"/>
     </memberdecl>
-    <detaileddescription title=""/>
+    <!-- <detaileddescription title=""/> -->
     <memberdef>
       <inlineclasses title=""/>
       <typedefs title=""/>
@@ -123,7 +123,7 @@
       <variables title=""/>
       <membergroups visible="yes"/>
     </memberdecl>
-    <detaileddescription title=""/>
+    <!-- <detaileddescription title=""/> -->
     <memberdef>
       <inlineclasses title=""/>
       <defines title=""/>
@@ -160,7 +160,7 @@
       <friends title=""/>
       <membergroups visible="yes"/>
     </memberdecl>
-    <detaileddescription title=""/>
+    <!-- <detaileddescription title=""/> -->
     <memberdef>
       <pagedocs/>
       <inlineclasses title=""/>

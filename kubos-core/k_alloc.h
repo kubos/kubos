@@ -15,6 +15,12 @@
  * limitations under the License.
  */
 
+/**
+ * @defgroup Allocator
+ * @addtogroup Allocator
+ * @{
+ */
+
  /**
   *
   * @file       k_alloc.h
@@ -36,3 +42,5 @@ typedef struct k_alloc {
 } k_alloc_t;
 
 #endif
+
+/* @} */

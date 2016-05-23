@@ -16,6 +16,12 @@
  */
 
  /**
+  * @defgroup UART
+  * @addtogroup UART
+  * @{
+  */
+
+ /**
   *
   * @file       k_uart.h
   * @brief      UART interface.
@@ -97,3 +103,5 @@ static inline int uart_stdio_msgwaiting(void) {
 }
 
 #endif /* K_UART_H_ */
+
+/* @} */

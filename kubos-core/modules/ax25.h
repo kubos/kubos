@@ -16,6 +16,12 @@
  */
 
  /**
+  * @defgroup AX25
+  * @addtogroup AX25
+  * @{
+  */
+
+ /**
   *
   * @file       ax25.h
   * @brief      AX.25 module
@@ -71,3 +77,5 @@ k_buffer_t *ax25_pkt_build(k_buffer_t *info, ax25_addr_t *addrs,
         ax25_pkt_build(info, addrs, addrs_len, AX25_UI_CONTROL, \
                        AX25_UI_PROTOCOL)
 #endif
+
+/* @} */

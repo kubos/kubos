@@ -16,6 +16,12 @@
  */
 
  /**
+  * @defgroup GPS
+  * @addtogroup GPS
+  * @{
+  */
+
+ /**
   *
   * @file       gps.h
   * @brief      GPS interface module
@@ -89,3 +95,5 @@ void simple_rx(uint8_t * buf, int len, void * px);
 #endif
 
 #endif // GPS_H
+
+/* @} */

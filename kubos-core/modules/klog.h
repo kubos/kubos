@@ -16,6 +16,12 @@
  */
 
  /**
+  * @defgroup  KLOG
+  * @addtogroup  KLOG
+  * @{
+  */
+
+ /**
   *
   * @file       klog.h
   * @brief      Logging module
@@ -80,3 +86,5 @@ void klog_cleanup(void);
 #endif
 
 #endif
+
+/* @} */

@@ -6,9 +6,13 @@
  * directory for more details.
  */
 
+ /**
+  * @defgroup Log
+  * @addtogroup Log
+  * @{
+  */
+
 /**
- * @addtogroup  core_util
- * @{
  *
  * @file        k_log.h
  * @brief       System logging header

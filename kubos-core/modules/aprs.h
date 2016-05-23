@@ -16,6 +16,12 @@
  */
 
  /**
+  * @defgroup APRS
+  * @addtogroup APRS
+  * @{
+  */
+
+ /**
   *
   * @file       aprs.h
   * @brief      APRS parsing module.
@@ -104,3 +110,5 @@ int aprs_telemetry_params_format(char *dest, char *callsign,
 int aprs_telemetry_units_format(char *dest, char *callsign,
                                 aprs_telemetry_t *telemetry);
 #endif
+
+/* @} */

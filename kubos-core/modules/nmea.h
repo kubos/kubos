@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+ /**
+  * @defgroup NMEA
+  * @addtogroup NMEA
+  * @{
+  */
 
  /**
   *
@@ -43,3 +48,5 @@
 int nmea_parse(char *nmea, int length, gps_fix_t *fix);
 
 #endif // NMEA_H
+
+/* @} */
