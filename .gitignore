@@ -14,7 +14,6 @@ pdebug*
 tags
 .DS_store
 *.pdf
-*.html
 
 .yotta.json
 yotta_*
