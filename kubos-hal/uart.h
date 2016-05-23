@@ -14,6 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @defgroup UART
+ * @addtogroup UART
+ * @{
+ */
 #ifndef K_UART_H
 #define K_UART_H
 
@@ -144,3 +149,5 @@ KUART* kprv_uart_get(KUARTNum uart);
 void kprv_uart_dev_init(KUARTNum uart);
 void kprv_uart_enable_tx_int(KUARTNum uart);
 #endif
+
+/* @} */

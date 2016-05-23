@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+/**
+ * @defgroup GPIO
+ * @addtogroup GPIO
+ * @{
+ */
 
  /**
    *
@@ -50,3 +55,5 @@ void k_gpio_write(int pin, unsigned int val);
 void k_gpio_toggle(int pin);
 
 #endif
+
+/* @} */
