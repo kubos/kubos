@@ -29,10 +29,10 @@
 /**
   * Adapted from the msp430-libc implementation of strlen.
   */
-  
+
 /**
-  * @defgroup libc
-  * @addtogroup libc
+  * @defgroup syscalls
+  * @addtogroup syscalls
   * @{
   */
 
@@ -64,3 +64,5 @@ size_t strnlen(const char * str, size_t size)
     }
     return len;
 }
+
+/* @} */

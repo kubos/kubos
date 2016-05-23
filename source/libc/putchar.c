@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 /**
-  * @defgroup libc
-  * @addtogroup libc
+  * @defgroup syscalls
+  * @addtogroup syscalls
   * @{
   */
 
@@ -35,3 +35,5 @@ int putchar(int c)
 {
     return k_uart_write(K_UART_CONSOLE, &c, 1);
 }
+
+/* @} */
