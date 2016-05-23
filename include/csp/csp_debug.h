@@ -1,7 +1,7 @@
 /*
 Cubesat Space Protocol - A small network-layer protocol designed for Cubesats
 Copyright (C) 2012 Gomspace ApS (http://www.gomspace.com)
-Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk) 
+Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,6 +17,12 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
+/**
+ * @defgroup Debug
+ * @addtogroup Debug
+ * @{
+ */
 
 #ifndef _CSP_DEBUG_H_
 #define _CSP_DEBUG_H_
@@ -102,7 +108,7 @@ extern void __attribute__((weak)) csp_assert_fail_action(char *assertion, const 
 #else
 	#define csp_log_warn(...) do {} while (0)
 #endif
-	
+
 #ifdef CSP_LOG_LEVEL_INFO
 	#define csp_log_info(format, ...) csp_debug(CSP_INFO, format, ##__VA_ARGS__)
 #else
@@ -153,3 +159,5 @@ int csp_debug_get_level(csp_debug_level_t level);
 #endif
 
 #endif // _CSP_DEBUG_H_
+
+/* @} */

@@ -18,6 +18,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * @defgroup CRC32
+ * @addtogroup CRC32
+ * @{
+ */
+
 #ifndef _CSP_CRC32_H_
 #define _CSP_CRC32_H_
 
@@ -61,3 +67,5 @@ uint32_t csp_crc32_memory(const uint8_t * data, uint32_t length);
 #endif
 
 #endif /* _CSP_CRC32_H_ */
+
+/* @} */

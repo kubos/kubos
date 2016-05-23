@@ -1,7 +1,7 @@
 /*
 Cubesat Space Protocol - A small network-layer protocol designed for Cubesats
 Copyright (C) 2012 GomSpace ApS (http://www.gomspace.com)
-Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk) 
+Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,6 +17,12 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
+/**
+ * @defgroup Error
+ * @addtogroup Error
+ * @{
+ */
 
 #ifndef _CSP_ERROR_H_
 #define _CSP_ERROR_H_
@@ -48,3 +54,5 @@ extern "C" {
 #endif
 
 #endif // _CSP_ERROR_H_
+
+/* @} */

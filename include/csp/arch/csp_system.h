@@ -1,7 +1,7 @@
 /*
 Cubesat Space Protocol - A small network-layer protocol designed for Cubesats
 Copyright (C) 2012 Gomspace ApS (http://www.gomspace.com)
-Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk) 
+Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -18,6 +18,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * @defgroup System
+ * @addtogroup System
+ * @{
+ */
+
 #ifndef _CSP_SYSTEM_H_
 #define _CSP_SYSTEM_H_
 
@@ -27,9 +33,22 @@ extern "C" {
 
 #include <stdint.h>
 
+/**
+ *
+ *
+ */
 #define COLOR_MASK_COLOR 	0x0F
+
+/**
+ *
+ *
+ */
 #define COLOR_MASK_MODIFIER	0xF0
 
+/**
+ *
+ *
+ */
 typedef enum {
 	/* Colors */
 	COLOR_RESET		= 0xF0,
@@ -54,17 +73,40 @@ typedef enum {
  * use csp_sys_tasklist_size to get sizeof buffer to allocate
  * @param out pointer to output buffer
  * @return
+ *
+ *
  */
 int csp_sys_tasklist(char * out);
 
 /**
  * @return Size of tasklist buffer to allocate for the csp_sys_tasklist call
+ *
+ *
  */
 int csp_sys_tasklist_size(void);
 
+/**
+ *
+ *
+ */
 uint32_t csp_sys_memfree(void);
+
+/**
+ *
+ *
+ */
 int csp_sys_reboot(void);
+
+/**
+ *
+ *
+ */
 int csp_sys_shutdown(void);
+
+/**
+ *
+ *
+ */
 void csp_sys_set_color(csp_color_t color);
 
 #ifdef __cplusplus
@@ -72,3 +114,5 @@ void csp_sys_set_color(csp_color_t color);
 #endif
 
 #endif // _CSP_SYSTEM_H_
+
+/* @} */

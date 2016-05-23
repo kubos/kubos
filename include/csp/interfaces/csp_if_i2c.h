@@ -18,6 +18,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * @defgroup I2CInterface
+ * @addtogroup I2CInterface
+ * @{
+ */
+
 #ifndef _CSP_IF_I2C_H_
 #define _CSP_IF_I2C_H_
 
@@ -39,9 +45,14 @@ extern csp_iface_t csp_if_i2c;
  * @param handle which i2c device to use
  * @param speed interface speed in kHz (normally 100 or 400)
  * @return csp_error.h code
+ *
+ *
  */
 int csp_i2c_init(uint8_t opt_addr, int handle, int speed);
 
+/**
+ *
+ */
 void csp_i2c_rx(i2c_frame_t * frame, void * pxTaskWoken);
 
 #ifdef __cplusplus
@@ -49,3 +60,5 @@ void csp_i2c_rx(i2c_frame_t * frame, void * pxTaskWoken);
 #endif
 
 #endif /* _CSP_IF_I2C_H_ */
+
+/* @} */

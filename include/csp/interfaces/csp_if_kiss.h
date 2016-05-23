@@ -18,6 +18,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * @defgroup KISSInterface
+ * @addtogroup KISSInterface
+ * @{
+ */
+
 #ifndef _CSP_IF_KISS_H_
 #define _CSP_IF_KISS_H_
 
@@ -46,6 +52,8 @@ extern "C" {
  * @param buf pointer to incoming data
  * @param len length of incoming data
  * @param pxTaskWoken NULL if task context, pointer to variable if ISR
+ *
+ *
  */
 void csp_kiss_rx(csp_iface_t * interface, uint8_t *buf, int len, void *pxTaskWoken);
 
@@ -55,6 +63,8 @@ void csp_kiss_rx(csp_iface_t * interface, uint8_t *buf, int len, void *pxTaskWok
  * be implemented by the user, and passed to the kiss
  * interface through the kiss_init function.
  * @param buf byte to push
+ *
+ *
  */
 typedef void (*csp_kiss_putc_f)(char buf);
 
@@ -69,9 +79,14 @@ typedef void (*csp_kiss_putc_f)(char buf);
  *
  * @param c rejected character
  * @param pxTaskWoken NULL if task context, pointer to variable if ISR
+ *
+ *
  */
 typedef void (*csp_kiss_discard_f)(char c, void *pxTaskWoken);
 
+/**
+ *
+ */
 typedef enum {
 	KISS_MODE_NOT_STARTED,
 	KISS_MODE_STARTED,
@@ -83,6 +98,8 @@ typedef enum {
  * This structure should be statically allocated by the user
  * and passed to the kiss interface during the init function
  * no member information should be changed
+ *
+ *
  */
 typedef struct csp_kiss_handle_s {
 	csp_kiss_putc_f kiss_putc;
@@ -94,6 +111,10 @@ typedef struct csp_kiss_handle_s {
 	csp_packet_t * rx_packet;
 } csp_kiss_handle_t;
 
+
+/**
+ *
+ */
 void csp_kiss_init(csp_iface_t * csp_iface, csp_kiss_handle_t * csp_kiss_handle, csp_kiss_putc_f kiss_putc_f, csp_kiss_discard_f kiss_discard_f, const char * name);
 
 #ifdef __cplusplus
@@ -101,3 +122,5 @@ void csp_kiss_init(csp_iface_t * csp_iface, csp_kiss_handle_t * csp_kiss_handle,
 #endif
 
 #endif /* _CSP_IF_KISS_H_ */
+
+/* @} */

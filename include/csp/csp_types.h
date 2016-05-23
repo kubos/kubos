@@ -18,6 +18,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * @defgroup Types
+ * @addtogroup Types
+ * @{
+ */
+
 #ifndef CSP_TYPES_H_
 #define CSP_TYPES_H_
 
@@ -219,3 +225,5 @@ typedef struct csp_conn_s csp_conn_t;
 #define CSP_REBOOT_SHUTDOWN_MAGIC	0xD1E5529A
 
 #endif /* CSP_TYPES_H_ */
+
+/* @} */

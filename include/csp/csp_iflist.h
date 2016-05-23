@@ -18,6 +18,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * @defgroup InterfaceList
+ * @addtogroup InterfaceList
+ * @{
+ */
+
 #ifndef CSP_IFLIST_H_
 #define CSP_IFLIST_H_
 
@@ -40,3 +46,5 @@ csp_iface_t * csp_iflist_get_by_name(char *name);
 void csp_iflist_print(void);
 
 #endif /* CSP_IFLIST_H_ */
+
+/* @} */

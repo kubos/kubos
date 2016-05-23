@@ -1,7 +1,7 @@
 /*
 Cubesat Space Protocol - A small network-layer protocol designed for Cubesats
 Copyright (C) 2012 Gomspace ApS (http://www.gomspace.com)
-Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk) 
+Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -17,6 +17,14 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
+/**
+ * @defgroup Thread
+ *
+ * @addtogroup Thread
+ * @{
+ */
+
 
 #ifndef _CSP_THREAD_H_
 #define _CSP_THREAD_H_
@@ -58,7 +66,7 @@ typedef void * csp_thread_return_t;
 typedef HANDLE csp_thread_handle_t;
 typedef unsigned int csp_thread_return_t;
 
-#define CSP_DEFINE_TASK(task_name) csp_thread_return_t __attribute__((stdcall)) task_name(void * param) 
+#define CSP_DEFINE_TASK(task_name) csp_thread_return_t __attribute__((stdcall)) task_name(void * param)
 #define CSP_TASK_RETURN 0
 
 #define csp_sleep_ms(time_ms) Sleep(time_ms);
@@ -98,3 +106,5 @@ int csp_thread_create(csp_thread_return_t (* routine)(void *)__attribute__((stdc
 #endif
 
 #endif // _CSP_THREAD_H_
+
+/* @} */

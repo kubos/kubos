@@ -18,6 +18,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * @defgroup RoutingTable
+ * @addtogroup RoutingTable
+ * @{
+ */
+
 #ifndef CSP_RTABLE_H_
 #define CSP_RTABLE_H_
 
@@ -141,3 +147,5 @@ void csp_rtable_clear(void);
 #define csp_route_print_interfaces() csp_iflist_print();
 
 #endif /* CSP_RTABLE_H_ */
+
+/* @} */

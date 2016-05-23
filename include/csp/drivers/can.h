@@ -18,6 +18,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * @defgroup CANDriver
+ * @addtogroup CANDriver
+ * @{
+ */
+
 #ifndef _CAN_H_
 #define _CAN_H_
 
@@ -32,12 +38,17 @@ extern "C" {
 
 /* The can_frame_t and can_id_t types intentionally matches the
  * can_frame struct and can_id types in include/linux/can.h
+ *
+ *
  */
 
 /** CAN Identifier */
 typedef uint32_t can_id_t;
 
-/** CAN Frame */
+/** CAN Frame
+ *
+ *
+ */
 typedef struct {
 	/** 32 bit CAN identifier */
 	can_id_t id;
@@ -51,14 +62,31 @@ typedef struct {
 	};
 } can_frame_t;
 
+/**
+ *
+ *
+ */
 typedef enum {
 	CAN_ERROR = 0,
 	CAN_NO_ERROR = 1,
 } can_error_t;
 
+/**
+ *
+ *
+ */
 int can_init(uint32_t id, uint32_t mask, struct csp_can_config *conf);
+
+/**
+ *
+ *
+ */
 int can_send(can_id_t id, uint8_t * data, uint8_t dlc);
 
+/**
+ *
+ *
+ */
 int csp_can_rx_frame(can_frame_t *frame, CSP_BASE_TYPE *task_woken);
 
 #ifdef __cplusplus
@@ -66,3 +94,5 @@ int csp_can_rx_frame(can_frame_t *frame, CSP_BASE_TYPE *task_woken);
 #endif
 
 #endif /* _CAN_H_ */
+
+/* @} */
