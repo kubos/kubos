@@ -1,29 +1,41 @@
 #!/bin/bash
+this_dir=$(cd "`dirname "$0"`"; pwd)
+kubos_dir=$(cd "$this_dir/.."; pwd)
+out_dir=$1
 
-rm -rf kubos_docs
-maindir=`pwd`
-doxygen docs/Doxyfile && mv html kubos_docs
+if [ "$out_dir" = "" ]; then
+    echo "Error: required output directory missing"
+    exit 1
+fi
 
-cd kubos-core; doxygen docs/Doxyfile
-cd $maindir
-mv kubos-core/html kubos_docs/kubos-core
+if [ ! -d "$out_dir" ]; then
+    echo "Error: output directory does not exist"
+    exit 1
+fi
 
-cd libcsp; doxygen docs/Doxyfile
-cd $maindir
-mv libcsp/html kubos_docs/libcsp
+doxygen $kubos_dir/docs/Doxyfile
+mv $kubos_dir/html/* $out_dir
 
-cd freertos/os; doxygen docs/Doxyfile
-cd $maindir
-mv freertos/os/html kubos_docs/freertos
+cd $kubos_dir/kubos-core
+doxygen docs/Doxyfile
+mv $kubos_dir/kubos-core/html $out_dir/kubos-core
 
-cd hal/kubos-hal; doxygen docs/Doxyfile
-cd $maindir
-mv hal/kubos-hal/html kubos_docs/kubos-hal
+cd $kubos_dir/libcsp
+doxygen docs/Doxyfile
+mv $kubos_dir/libcsp/html $out_dir/libcsp
 
-cd hal/kubos-hal-stm32f407vg; doxygen docs/Doxyfile
-cd $maindir
-mv hal/kubos-hal-stm32f407vg/html kubos_docs/kubos-hal/kubos-hal-stm32f407vg
+cd $kubos_dir/freertos/os
+doxygen docs/Doxyfile
+mv $kubos_dir/freertos/os/html $out_dir/freertos
 
-cd hal/kubos-hal-msp430f5529; doxygen docs/Doxyfile
-cd $maindir
-mv hal/kubos-hal-msp430f5529/html kubos_docs/kubos-hal/kubos-hal-msp430f5529
+cd $kubos_dir/hal/kubos-hal
+doxygen docs/Doxyfile
+mv $kubos_dir/hal/kubos-hal/html $out_dir/kubos-hal
+
+cd $kubos_dir/hal/kubos-hal-stm32f407vg
+doxygen docs/Doxyfile
+mv $kubos_dir/hal/kubos-hal-stm32f407vg/html $out_dir/kubos-hal/kubos-hal-stm32f407vg
+
+cd $kubos_dir/hal/kubos-hal-msp430f5529
+doxygen docs/Doxyfile
+mv $kubos_dir/hal/kubos-hal-msp430f5529/html $out_dir/kubos-hal/kubos-hal-msp430f5529
