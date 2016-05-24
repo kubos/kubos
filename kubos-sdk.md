@@ -8,6 +8,12 @@ The KubOS-SDK is distributed using the python package system pip. You can instal
 
 KubOS-SDK is currently only supported in 64-bit OSX and Linux environments.
 
+Pull the latest Kubos-SDK docker container:
+            
+            $ kubos update
+
+If you do not have docker installed see the [docker getting started guide](https://docs.docker.com/engine/installation/).
+
 ## Creating a new project
 
 Creating a new KubOS project is a two step process:
