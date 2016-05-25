@@ -1,5 +1,41 @@
 # KubOS-SDK
 
+## Prerequisites
+
+### Install docker 
+
+If you don't already have docker installed see the docker downloads for [Mac OS X](https://www.docker.com/products/docker-toolbox) or the installation docs for [Linux](https://docs.docker.com/engine/installation/)
+
+            $ docker --version
+
+The Kubos-SDK has been tested on Docker version 1.11.1.
+
+### Install pip
+
+#### Linux
+##### Ubuntu/Debian
+            
+            $ sudo apt-get install python-pip
+            
+##### Fedora
+    
+            $ sudo yum upgrade python-setuptools
+            $ sudo yum install python-pip python-wheel
+
+
+Other Linux Dristibutions see the  [pip installation guide](http://python-packaging-user-guide.readthedocs.io/en/latest/install_requirements_linux/)
+
+##### Mac OS X 
+
+Using easy_install:
+
+                $ sudo easy_install pip
+
+Using homebrew:  
+
+                $ brew install pip
+                            
+
 ## Installing KubOS-SDK
 
 The KubOS-SDK is distributed using the python package system pip. You can install using this command:
@@ -7,6 +43,10 @@ The KubOS-SDK is distributed using the python package system pip. You can instal
             $ pip install kubos-sdk
 
 KubOS-SDK is currently only supported in 64-bit OSX and Linux environments.
+
+Pull the latest Kubos-SDK docker container:
+            
+            $ kubos update
 
 ## Creating a new project
 
