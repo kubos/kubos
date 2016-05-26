@@ -22,6 +22,9 @@
       },
       "stm32f407vg": {
           "stm32cubef4-stm32f407vg": "openkosmosorg/stm32cubef4-stm32f407vg#~0.0.1"
+      },
+      "stm32f405rg": {
+          "stm32cubef4-stm32f405rg": "openkosmosorg/stm32cubef4-stm32f405rg#master"
       }
   }
 }
