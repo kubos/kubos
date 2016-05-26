@@ -1,0 +1,1 @@
+CMSIS-CORE config for STM32F405RG
