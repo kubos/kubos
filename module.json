@@ -33,6 +33,9 @@
     },
     "stm32f407xg": {
       "cmsis-core-stm32f407xg": "openkosmosorg/cmsis-core-stm32f407xg#~0.0.2"
+    },
+    "stm32f405rg": {
+      "cmsis-core-stm32f405rg": "openkosmosorg/cmsis-core-stm32f405rg#master"
     }
   }
 }
