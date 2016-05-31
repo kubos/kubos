@@ -20,7 +20,7 @@
    * @{
    */
 #include "kubos-hal/gpio.h"
-#include "kubos-hal-stm32f407vg/stm32f4_gpio.h"
+#include "kubos-hal-stm32f4/stm32f4_gpio.h"
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal_gpio.h"
