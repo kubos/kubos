@@ -79,6 +79,10 @@ void kprv_uart_dev_init(KUARTNum uart)
 {
     // Enable peripheral clocks
     KUART *k_uart = kprv_uart_get(uart);
+    if (!k_uart) {
+        return;
+    }
+
     int rx = k_uart_rx_pin(uart);
     int tx = k_uart_tx_pin(uart);
 
@@ -150,12 +154,20 @@ void kprv_uart_dev_init(KUARTNum uart)
 
 void kprv_uart_enable_tx_int(KUARTNum uart)
 {
-    SET_BIT(uart_dev(uart)->CR1, USART_CR1_TXEIE);
+    USART_TypeDef *dev = uart_dev(uart);
+    if (!dev) {
+        return;
+    }
+
+    SET_BIT(dev->CR1, USART_CR1_TXEIE);
 }
 
 void k_uart_write_immediate(KUARTNum uart, char c)
 {
     USART_TypeDef *dev = uart_dev(uart);
+    if (!dev) {
+        return;
+    }
 
     dev->DR = c;
     while (!CHECK_BIT(dev->SR, USART_FLAG_TXE));
@@ -166,7 +178,7 @@ static inline void uart_irq_handler(KUARTNum uart)
     portBASE_TYPE task_woken = pdFALSE;
     USART_TypeDef *dev = uart_dev(uart);
     KUART *k_uart = kprv_uart_get(uart);
-    if (!dev || !uart) {
+    if (!dev || !k_uart) {
         return;
     }
 
