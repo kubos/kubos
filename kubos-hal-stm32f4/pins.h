@@ -19,29 +19,29 @@
    * @addtogroup GPIO
    * @{
    */
-#ifndef KUBOS_HAL_STM32F407VG_PINS_H
-#define KUBOS_HAL_STM32F407VG_PINS_H
+#ifndef KUBOS_HAL_STM32F4_PINS_H
+#define KUBOS_HAL_STM32F4_PINS_H
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal_gpio.h"
 
 #define K_NUM_PINS (16 * 5)
 
-#define K_LED_GREEN  PD12
-#define K_LED_0      PD12
+#define K_LED_GREEN  K_LED_0
+#define K_LED_0      YOTTA_CFG_HARDWARE_PINS_LED1
 
-#define K_LED_ORANGE PD13
-#define K_LED_1      PD13
+#define K_LED_ORANGE K_LED_1
+#define K_LED_1      YOTTA_CFG_HARDWARE_PINS_LED2
 
-#define K_LED_RED    PD14
-#define K_LED_2      PD14
+#define K_LED_RED    K_LED_2
+#define K_LED_2      YOTTA_CFG_HARDWARE_PINS_LED3
 
-#define K_LED_BLUE   PD15
-#define K_LED_3      PD15
+#define K_LED_BLUE   K_LED_3
+#define K_LED_3      YOTTA_CFG_HARDWARE_PINS_LED4
 
 #define K_LED_COUNT  4
 
-#define K_BUTTON_0   PA0
+#define K_BUTTON_0   YOTTA_CFG_HARDWARE_PINS_USER_BUTTON
 
 #define STM32F4_PIN_OFFSET(p) ((p) % 16)
 #define STM32F4_PIN_MASK(p) (1 << STM32F4_PIN_OFFSET(p))
