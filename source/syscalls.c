@@ -1,5 +1,5 @@
 /*
- * KubOS RT
+ * KubOS HAL
  * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifdef TARGET_LIKE_STM32
 
 #include "stm32f4xx.h"
 #include "FreeRTOS.h"
@@ -156,5 +154,3 @@ void __malloc_unlock(struct _reent *r)
 {
     vPortExitCritical();
 }
-
-#endif

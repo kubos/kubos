@@ -1,7 +1,7 @@
 {
   "name": "kubos-hal-stm32f4",
   "version": "0.0.1",
-  "description": "KubOS - Satellite flight software platform",
+  "description": "KubOS HAL Module for STM32F4 MCUs",
   "keywords": [],
   "author": "kubos.co",
   "homepage": "https://github.com/openkosmosorg/kubos-hal-stm32f4",
