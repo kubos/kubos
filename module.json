@@ -13,6 +13,9 @@
     "stm32f407vg": {
       "kubos-hal-stm32f407vg": "openkosmosorg/kubos-hal-stm32f407vg#~0.0.1"
     },
+    "stm32f405rg": {
+      "kubos-hal-stm32f405rg": "openkosmosorg/kubos-hal-stm32f405rg#master"
+    },
     "msp430f5529": {
       "kubos-hal-msp430f5529": "openkosmosorg/kubos-hal-msp430f5529#~0.0.1"
     }
