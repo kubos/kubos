@@ -1,4 +1,4 @@
-# Kubos-HAL-STM32F407VG
+# Kubos-HAL-STM32F4
 
 ### API Modules:
  - @subpage GPIO
