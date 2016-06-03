@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-st",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CMSIS Core Implementation for ST MCUs (KubOS fork)",
   "keywords": [
     "cmsis",
@@ -20,7 +20,7 @@
       "cmsis-core-stm32f0": "*"
     },
     "stm32f4": {
-      "cmsis-core-stm32f4": "openkosmosorg/cmsis-core-stm32f4#~1.2.1"
+      "cmsis-core-stm32f4": "openkosmosorg/cmsis-core-stm32f4#~1.2.2"
     }
   }
 }
