@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-stm32f4",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "CMSIS Core module for STM32F4xx microcontrollers (KubOS fork)",
   "keywords": [
     "mbed",
@@ -35,7 +35,7 @@
       "cmsis-core-stm32f407xg": "openkosmosorg/cmsis-core-stm32f407xg#~0.0.2"
     },
     "stm32f405rg": {
-      "cmsis-core-stm32f405rg": "openkosmosorg/cmsis-core-stm32f405rg#master"
+      "cmsis-core-stm32f405rg": "openkosmosorg/cmsis-core-stm32f405rg#~0.0.1"
     }
   }
 }
