@@ -1,6 +1,6 @@
 {
   "name": "kubos-hal-stm32f4",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "KubOS HAL Module for STM32F4 MCUs",
   "keywords": [],
   "author": "kubos.co",
@@ -17,7 +17,7 @@
       "stm32cubef4-stm32f407vg": "openkosmosorg/stm32cubef4-stm32f407vg#~0.0.1"
     },
     "stm32f405rg": {
-      "stm32cubef4-stm32f405rg": "openkosmosorg/stm32cubef4-stm32f405rg#master"
+      "stm32cubef4-stm32f405rg": "openkosmosorg/stm32cubef4-stm32f405rg#~0.0.1"
     }
   }
 }
