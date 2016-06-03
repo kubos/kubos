@@ -1,6 +1,6 @@
 {
   "name": "stm32f407-disco-gcc",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "inherits": {
     "kubos-arm-none-eabi-gcc": "openkosmosorg/target-kubos-arm-none-eabi-gcc#~0.0.1"
   },
