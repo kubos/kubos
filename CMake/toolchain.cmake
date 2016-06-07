@@ -20,3 +20,7 @@ macro(gcc_not_found)
 endmacro()
 
 gcc_load_toolchain("arm-none-eabi-")
+
+set(_C_FAMILY_FLAGS_INIT   "-std=c99 ${_C_FAMILY_FLAGS_INIT}")
+set(CMAKE_C_LINK_FLAGS   "--specs=nano.specs")
+set(CMAKE_CXX_LINK_FLAGS   "--specs=nano.specs")
