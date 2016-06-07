@@ -1,0 +1,31 @@
+{
+  "name": "kubos-msp430-gcc",
+  "version": "0.0.1",
+  "description": "base KubOS RT build target for the msp430-gcc toolchain",
+  "inherits": {
+    "kubos-gcc": "openkosmosorg/target-kubos-gcc#~0.0.1"
+  },
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "kubos-rt",
+    "gcc"
+  ],
+  "similarTo": [
+    "msp430-gcc",
+    "msp430"
+  ],
+  "config": {
+    "gcc": {
+      "printf-float": false
+    },
+    "arch": {
+      "msp430": {}
+    }
+  },
+  "toolchain": "CMake/toolchain.cmake"
+}
