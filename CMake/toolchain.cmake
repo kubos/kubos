@@ -52,7 +52,7 @@ macro(gcc_load_toolchain prefix)
 
     # set default compilation flags
     set(_C_FAMILY_FLAGS_INIT "-fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -Wall -Wextra -gstrict-dwarf")
-    set(CMAKE_C_FLAGS_INIT   "-std=c99 ${_C_FAMILY_FLAGS_INIT}")
+    set(CMAKE_C_FLAGS_INIT   "${_C_FAMILY_FLAGS_INIT}")
     set(CMAKE_ASM_FLAGS_INIT "-fno-exceptions -fno-unwind-tables -x assembler-with-cpp")
     set(CMAKE_CXX_FLAGS_INIT "--std=gnu++11 ${_C_FAMILY_FLAGS_INIT} -fno-rtti -fno-threadsafe-statics")
     set(CMAKE_MODULE_LINKER_FLAGS_INIT
@@ -86,4 +86,3 @@ function(yotta_apply_target_rules target_type target_name)
         )
     endif()
 endfunction()
-
