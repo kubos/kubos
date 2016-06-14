@@ -1,12 +1,12 @@
 {
-  "name": "stm32f405-pyboard-gcc",
-  "version": "0.0.1",
+  "name": "pyboard-gcc",
+  "version": "0.0.2",
   "inherits": {
-    "kubos-arm-none-eabi-gcc": "openkosmosorg/target-kubos-arm-none-eabi-gcc#~0.0.1"
+    "stm32f405-gcc": "openkosmosorg/target-stm32f405-gcc#~0.0.1"
   },
   "description": "KubOS build target for the stm32f405rg based PyBoard.",
   "author": "Ryan Plauche <ryan@kubos.co>",
-  "homepage": "https://github.com/openkosmosorg/target-stm32f405-pyboard-gcc",
+  "homepage": "https://github.com/openkosmosorg/target-pyboard-gcc",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -31,20 +31,8 @@
     "armv7-m"
   ],
   "config": {
-    "cmsis": {
-      "nvic": {
-        "ram_vector_address": "0x20000000",
-        "flash_vector_address": "0x08000000",
-        "user_irq_offset": 16,
-        "user_irq_number": 82
-      }
-    },
-    "uvisor": {
-      "present": 0
-    },
     "hardware": {
       "externalClock": "8000000",
-      "uartCount": "6",
       "console": {
         "uart": "K_UART6",
         "baudRate": "115200"
@@ -54,42 +42,7 @@
         "LED2": "PA15",
         "LED3": "PA13",
         "LED4": "PB4",
-        "USER_BUTTON": "PB3",
-        "UART1_TX": "PB6",
-        "UART1_RX": "PB7",
-        "UART2_TX": "PA2",
-        "UART2_RX": "PA3",
-        "UART3_TX": "PB10",
-        "UART3_RX": "PB11",
-        "UART4_TX": "PA0",
-        "UART4_RX": "PA1",
-        "UART6_TX": "PC6",
-        "UART6_RX": "PC7",
-        "USBTX": "PA_2",
-        "USBRX": "PA_3",
-        "I2C_SCL": "PB6",
-        "I2C_SDA": "PB7",
-        "SPI_MOSI": "PA7",
-        "SPI_MISO": "PA6",
-        "SPI_SCK": "PA5",
-        "SPI_CS": "PA_4",
-        "PWM_OUT": "PB_3"
-      },
-      "test-pins": {
-        "spi": {
-          "mosi": "SPI_MOSI",
-          "miso": "SPI_MISO",
-          "sclk": "SPI_SCK",
-          "ssel": "SPI_CS"
-        },
-        "i2c": {
-          "sda": "I2C_SDA",
-          "scl": "I2C_SCL"
-        },
-        "serial": {
-          "tx": "PC_12",
-          "rx": "PF_6"
-        }
+        "USER_BUTTON": "PB3"
       }
     }
   },
