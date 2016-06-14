@@ -1,12 +1,12 @@
 {
-  "name": "stm32f405-pyboard-gcc",
+  "name": "stm32f405-gcc",
   "version": "0.0.1",
   "inherits": {
     "kubos-arm-none-eabi-gcc": "openkosmosorg/target-kubos-arm-none-eabi-gcc#~0.0.1"
   },
-  "description": "KubOS build target for the stm32f405rg based PyBoard.",
+  "description": "KubOS build target for stm32f405rg based boards.",
   "author": "Ryan Plauche <ryan@kubos.co>",
-  "homepage": "https://github.com/openkosmosorg/target-stm32f405-pyboard-gcc",
+  "homepage": "https://github.com/openkosmosorg/target-stm32f405-gcc",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -21,7 +21,6 @@
     "stm32f405rg",
     "f405rg",
     "f405",
-    "pyboard",
     "stm32f405rg",
     "stm32f405",
     "stm32f4",
@@ -43,18 +42,8 @@
       "present": 0
     },
     "hardware": {
-      "externalClock": "8000000",
       "uartCount": "6",
-      "console": {
-        "uart": "K_UART6",
-        "baudRate": "115200"
-      },
       "pins": {
-        "LED1": "PA14",
-        "LED2": "PA15",
-        "LED3": "PA13",
-        "LED4": "PB4",
-        "USER_BUTTON": "PB3",
         "UART1_TX": "PB6",
         "UART1_RX": "PB7",
         "UART2_TX": "PA2",
