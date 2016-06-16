@@ -13,24 +13,7 @@
 # limitations under the License.
 #
 
-if(TARGET_STM32F405RG_GCC_TOOLCHAIN_INCLUDED)
+if(TARGET_PYBOARD_GCC_TOOLCHAIN_INCLUDED)
     return()
 endif()
-set(TARGET_STM32F405RG_GCC_TOOLCHAIN_INCLUDED 1)
-
-# provide compatibility definitions for compiling with this target: these are
-# definitions that legacy code assumes will be defined. Before adding something
-# here, think VERY CAREFULLY if you can't change anywhere that relies on the
-# definition that you're about to add to rely on the TARGET_LIKE_XXX
-# definitions that yotta provides based on the target.json file.
-#
-add_definitions("-DTARGET_STM32F405RG -DTARGET_STM32F405RG -DSTM32F405xx -DTARGET_STM32F4")
-
-set(_CPU_COMPILATION_OPTIONS "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard")
-set(_CPU_DEFINES "-D__thumb2__ ")
-
-set(CMAKE_C_FLAGS_INIT             "${CMAKE_C_FLAGS_INIT} ${_CPU_COMPILATION_OPTIONS} ${_CPU_DEFINES}")
-set(CMAKE_ASM_FLAGS_INIT           "${CMAKE_ASM_FLAGS_INIT} ${_CPU_COMPILATION_OPTIONS} ${_CPU_DEFINES}")
-set(CMAKE_CXX_FLAGS_INIT           "${CMAKE_CXX_FLAGS_INIT} ${_CPU_COMPILATION_OPTIONS} ${_CPU_DEFINES}")
-set(CMAKE_MODULE_LINKER_FLAGS_INIT "${CMAKE_MODULE_LINKER_FLAGS_INIT} ${_CPU_COMPILATION_OPTIONS}")
-set(CMAKE_EXE_LINKER_FLAGS_INIT    "${CMAKE_EXE_LINKER_FLAGS_INIT} ${_CPU_COMPILATION_OPTIONS} -T\"${CMAKE_CURRENT_LIST_DIR}/../ld/STM32F405RG.ld\"")
+set(TARGET_PYBOARD_GCC_TOOLCHAIN_INCLUDED 1)
