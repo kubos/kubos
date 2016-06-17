@@ -1,7 +1,7 @@
 #!/bin/bash
 this_dir=$(cd "`dirname "$0"`"; pwd)
 kubos_dir=$(cd "$this_dir/.."; pwd)
-out_dir=`pwd`"/"$1
+out_dir="/"$1
 
 if [ "$out_dir" = "" ]; then
     echo "Error: required output directory missing"
