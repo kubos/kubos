@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-### Install docker 
+### Install docker
 
 If you don't already have docker installed see the docker downloads for [Mac OS X](https://www.docker.com/products/docker-toolbox) or the installation docs for [Linux](https://docs.docker.com/engine/installation/)
 
@@ -14,18 +14,18 @@ The Kubos-SDK has been tested on Docker version 1.11.1.
 
 #### Linux
 ##### Ubuntu/Debian
-            
+
             $ sudo apt-get install python-pip
-            
+
 ##### Fedora
-    
+
             $ sudo yum upgrade python-setuptools
             $ sudo yum install python-pip python-wheel
 
 
 Other Linux Dristibutions see the  [pip installation guide](http://python-packaging-user-guide.readthedocs.io/en/latest/install_requirements_linux/)
 
-##### Mac OS X 
+##### Mac OS X
 
 Using easy_install:
 
@@ -34,7 +34,7 @@ Using easy_install:
 Using homebrew:  
 
                 $ brew install pip
-                            
+
 
 ## Installing KubOS-SDK
 
@@ -45,7 +45,17 @@ The KubOS-SDK is distributed using the python package system pip. You can instal
 KubOS-SDK is currently only supported in 64-bit OSX and Linux environments.
 
 Pull the latest Kubos-SDK docker container:
-            
+
+            $ kubos update
+
+## <a name="upgrading"></a>Upgrading KubOS-SDK (for v0.0.2)
+
+The KubOS-SDK can be upgraded from version 0.0.1 to 0.0.2 using this command:
+
+            $ pip install kubos-sdk==0.0.2
+
+Be sure to pull the latest Kubos-SDK docker container afterwards:
+
             $ kubos update
 
 ## Creating a new project
@@ -88,13 +98,16 @@ Building a KubOS project is also a two step process:
 Yotta needs to know which target you intend to build for so it can select the proper cross compiler. KubOS currently supports two different targets:
 
  * STM32F407 Discovery Board
+ * STM32F405 PyBoard
  * MSP430F5529 Launchpad
 
 The respective commands to select those targets are as follows.
 
-        $ kubos target stm32f407-disco-gcc@openkosmosorg/target-stm32f407-disco-gcc
+        $ kubos target stm32f407-disco-gcc
 
-        $ kubos target msp430f5529-gcc@openkosmosorg/target-msp430f5529-gcc
+        $ kubos target stm32f405-pyboard-gcc
+
+        $ kubos target msp430f5529-gcc
 
 #### 2. Build!
 
