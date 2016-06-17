@@ -1,7 +1,7 @@
 #!/bin/bash
 this_dir=$(cd "`dirname "$0"`"; pwd)
 kubos_dir=$(cd "$this_dir/.."; pwd)
-out_dir=$1
+out_dir=`pwd`"/"$1
 
 if [ "$out_dir" = "" ]; then
     echo "Error: required output directory missing"
@@ -32,9 +32,9 @@ cd $kubos_dir/hal/kubos-hal
 doxygen docs/Doxyfile
 mv $kubos_dir/hal/kubos-hal/html $out_dir/kubos-hal
 
-cd $kubos_dir/hal/kubos-hal-stm32f407vg
+cd $kubos_dir/hal/kubos-hal-stm32f4
 doxygen docs/Doxyfile
-mv $kubos_dir/hal/kubos-hal-stm32f407vg/html $out_dir/kubos-hal/kubos-hal-stm32f407vg
+mv $kubos_dir/hal/kubos-hal-stm32f4/html $out_dir/kubos-hal/kubos-hal-stm32f4
 
 cd $kubos_dir/hal/kubos-hal-msp430f5529
 doxygen docs/Doxyfile
