@@ -5,56 +5,48 @@ import os
 import subprocess
 import sys
 
+from kubos_build import KubosBuild
+
 this_dir = os.path.abspath(os.path.dirname(__file__))
 root_dir = os.path.dirname(this_dir)
 
-module_dirs = []
-target_dirs = []
-example_dirs = []
-for root, dirs, files in os.walk(root_dir):
-    if 'yotta_targets' in root or 'yotta_modules' in root:
-        continue
+class YottaLinker(object):
+    def __init__(self):
+        self.kb = KubosBuild()
 
-    for f in files:
-        if f == 'module.json':
-            if 'examples' in root:
-                example_dirs.append(root)
+    def cmd(self, *args, **kwargs):
+        cwd = kwargs.get('cwd', os.getcwd())
+        save_output = kwargs.pop('save_output', False)
+        echo = kwargs.pop('echo', True)
+
+        if echo:
+            print ' '.join(args)
+        try:
+            if save_output:
+                return subprocess.check_output(args, **kwargs)
             else:
-                module_dirs.append(root)
-        elif f == 'target.json':
-            target_dirs.append(root)
+                return subprocess.check_call(args, **kwargs)
+        except subprocess.CalledProcessError, e:
+            print >>sys.stderr, 'Error executing command, giving up'
+            sys.exit(1)
 
-def cmd(*args, **kwargs):
-    cwd = kwargs.get('cwd', os.getcwd())
-    print ' '.join(args)
-    try:
-        subprocess.check_call(args, **kwargs)
-    except subprocess.CalledProcessError, e:
-        print >>sys.stderr, 'Error executing command, giving up'
-        sys.exit(1)
+    def link_sys(self, link_cmd):
+        for module in self.kb.modules(include_bin=False):
+            print '[module %s@%s]' % (module.yotta_name(), module.path)
+            self.cmd('yotta', link_cmd, cwd=module.path)
 
-def module_name(module_dir):
-    return json.load(open(os.path.join(module_dir, 'module.json')))['name']
+        for target in self.kb.targets():
+            print '[target %s@%s]' % (target.yotta_name(), target.path)
+            self.cmd('yotta', link_cmd + '-target', cwd=target.path)
 
-def target_name(target_dir):
-    return json.load(open(os.path.join(target_dir, 'target.json')))['name']
+    def link_app(self, app_dir, link_cmd):
+        print '[app %s]' % app_dir
+        for module in self.kb.modules(include_bin=False):
+            self.cmd('yotta', link_cmd, module.yotta_name(), cwd=app_dir)
 
-def link_sys(link_cmd):
-    for module_dir in module_dirs:
-        print '[module %s@%s]' % (module_name(module_dir), module_dir)
-        cmd('yotta', link_cmd, cwd=module_dir)
-
-    for target_dir in target_dirs:
-        print '[target %s@%s]' % (target_name(target_dir), target_dir)
-        cmd('yotta', link_cmd + '-target', cwd=target_dir)
-
-def link_app(app_dir, link_cmd):
-    print '[app %s]' % app_dir
-    for module_dir in module_dirs:
-        cmd('yotta', link_cmd, module_name(module_dir), cwd=app_dir)
-
-    for target_dir in target_dirs:
-        cmd('yotta', link_cmd + '-target', target_name(target_dir), cwd=app_dir)
+        for target in self.kb.targets():
+            self.cmd('yotta', link_cmd + '-target', target.yotta_name(),
+                     cwd=app_dir)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -79,22 +71,23 @@ def main():
     if not args.sys and not args.app:
         args.all = True
 
+    linker = YottaLinker()
     if args.sys:
-        link_sys(args.link)
+        linker.link_sys(args.link)
 
     if args.app:
-        link_app(args.app, args.link)
+        linker.link_app(args.app, args.link)
 
     if args.all:
         if args.link == 'link':
-            link_sys(args.link)
-            for example_dir in example_dirs:
-                link_app(example_dir, args.link)
+            linker.link_sys(args.link)
+            for mod in linker.kb.bin_modules():
+                linker.link_app(mod.path, args.link)
         else:
             # unlink in reverse
-            for example_dir in example_dirs:
-                link_app(example_dir, args.link)
-            link_sys(args.link)
+            for mod in linker.kb.bin_modules():
+                linker.link_app(mod.path, args.link)
+            linker.link_sys(args.link)
 
 if __name__ == '__main__':
     main()
