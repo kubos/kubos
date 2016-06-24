@@ -17,73 +17,91 @@
 
 #include "kubos-hal/I2C.h"
 #include "msp430f5529-hal/I2C.h"
-#include "kubos-hal-msp430f5529/I2C.h"
 
 #include <msp430.h>
 
-int k_hal_i2c_state_machine(KI2CDevNum i2c, uint8_t *ptr, int len)
+int kprv_hal_i2c_state_machine(KI2CDevNum i2c, uint8_t *ptr, int len)
 {
 	/* get i2c struct */
 	msp_i2c *msp_i2c = kprv_msp_i2c_get(i2c);
 	/* loop variable */
 	int i = 0;
 
-	switch(UCB0IV) /* check interrupt register */
+	/* receive mode */
+	if (msp_i2c->reg->interruptFlags & UCRXIFG)
 	{
-    	case USCI_NONE:          break; /* No interrupts */
-    	case USCI_I2C_UCALIFG:   break; /* ALIFG */
+		if(ptr == 0) /* if bad pointer */
+			return -1; /* error */
 
-    	case USCI_I2C_UCNACKIFG: /* NACK */
-    		msp_i2c->reg->control1 |= UCTXSTT; /* I2C start condition */
-    		break;
+		/* put data in ptr */
+		for (; i < len; i++, ptr++)
+		{
+			/* read from rx reg */
+			*ptr = msp_i2c->reg->rxBuffer;
 
-    	case USCI_I2C_UCSTTIFG:  break;
-    	case USCI_I2C_UCSTPIFG:  break;
+			/* if not receiving only one byte */
+			if(len != 1)
+			{
+				/* wait until RXIFG to be set to receiving more data */
+				while(!(msp_i2c->reg->interruptFlags & UCRXIFG));
+			}
+		}
 
-    	case USCI_I2C_UCRXIFG: /* receive mode */
+		/* trigger a stop condition */
+		msp_i2c->reg->control1 |= UCTXSTP;
+		while (msp_i2c->reg->control1 & UCTXSTP); /* stop condition sent? */
 
-    		if(ptr == 0) /* if bad pointer */
-    			return -1; /* error */
+		msp_i2c->k_i2c->status = I2C_DATA_RECEIVED;
 
-    		/* get data from ptr */
-    		for (; i < len; i++, ptr++){
-    			*ptr = msp_i2c->reg->rxBuffer;
-    	    }
-
-    		/* trigger a stop condition */
-    		msp_i2c->reg->control1 |= UCTXSTP;
-    		msp_i2c->k_i2c->status = I2C_DATA_RECEIVED;
-
-    		break;
-
-    	case USCI_I2C_UCTXIFG: /* transmit mode */
-    	if(ptr == 0) /* if bad pointer */
-    		return -1; /* error */
+	}
+	/* transmit mode */
+	else if (msp_i2c->reg->interruptFlags & UCTXIFG)
+	{
+		if(ptr == 0) /* if bad pointer */
+			return -1; /* error */
 
 		/* get data from ptr */
-		for (; i < len; i++, ptr++){
+		for (; i < len; i++, ptr++)
+		{
+			/* write byte to buffer */
 			msp_i2c->reg->txBuffer = *ptr;
-	    }
 
-    	if(msp_i2c->k_i2c->status == I2C_READ)
-    	{
-    		/* trigger a repeat start with receiver mode */
-    		msp_i2c->reg->control1 &= ~UCTR;
-    		msp_i2c->reg->control1 |= UCTXSTT;                    /* I2C start condition */
-    	}
-    	else /* done transmitting */
-    	{
-    		/* trigger a stop condition */
-    		msp_i2c->reg->control1 |= UCTXSTP;
-    		msp_i2c->k_i2c->status = I2C_IDLE;
-    	}
-    	break;
+			if(i == 0) /* if first byte */
+			{
+				/* wait for STT to clear */
+				while (msp_i2c->reg->control1 & UCTXSTT){};
+			}
 
-    	default: break;
+			/* slave not responding? */
+			if (msp_i2c->reg->interruptFlags & UCNACKIFG)
+			{
+				/* trigger a stop condition */
+				msp_i2c->reg->control1 |= UCTXSTP;
+				while (msp_i2c->reg->control1 & UCTXSTP); /* stop condition sent? */
+
+				msp_i2c->k_i2c->status = I2C_IDLE;
+				return -1; /* error */
+			}
+
+			/* wait until TXIFG to be set */
+			while(!(msp_i2c->reg->interruptFlags & UCTXIFG));
+		}
+
+		/* trigger a stop condition */
+		msp_i2c->reg->control1 |= UCTXSTP;
+		while (msp_i2c->reg->control1 & UCTXSTP); /* stop condition sent? */
+
+		msp_i2c->k_i2c->status = I2C_IDLE;
+
 	}
+	else /* something else? */
+	{
+		/* trigger a stop condition */
+		msp_i2c->reg->control1 |= UCTXSTP;
+		while (msp_i2c->reg->control1 & UCTXSTP); /* stop condition sent? */
 
-	/* done, set to idle */
-	msp_i2c->k_i2c->status = I2C_IDLE;
+		msp_i2c->k_i2c->status = I2C_IDLE;
+	}
 
 	/* return success */
 	return 0;
