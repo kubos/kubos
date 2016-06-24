@@ -20,67 +20,62 @@
 
 #include <msp430.h>
 
-
 static msp_i2c k_msp_i2cs[K_NUM_I2CS];
 
-msp_i2c* kprv_msp_i2c_get(KI2CDevNum i2c)
+msp_i2c* kprv_msp_i2c_get(KI2CNum i2c)
 {
     return &k_msp_i2cs[i2c];
 }
 
-void kprv_i2c_dev_init(KI2CDevNum i2c)
+void kprv_i2c_dev_init(KI2CNum i2c)
 {
+	/* SMCLK FREQ constant 1 MHz */
+	const uint32_t SMCLK_FREQ = 1000000;
+	uint16_t preScalar;
+
 	/* get config structs */
 	KI2C *k_i2c = kprv_i2c_get(i2c);
 	msp_i2c *msp_i2c = &k_msp_i2cs[i2c];
-	dev_addr slave;
 
-	/* SET YOUR DEVICE ADDR HERE */
-	slave.dev1 = 0x28; // BNO055
-	slave.dev2 = 0x40; // HTU21D
-
-	/* set upper hal */
+	/* set upper hal bus struct */
 	msp_i2c->k_i2c = k_i2c;
 
 	/* init i2c bus and registers */
-	if (k_i2c->bus_num == K_I2C1)
+	if(k_i2c->bus_num == K_I2C1)
 	{
 		msp_i2c->reg = (hal_i2c_mem_reg *)__MSP430_BASEADDRESS_USCI_B0__;
-		P3SEL |= BIT1 | BIT0;
+		P3SEL |= BIT1 | BIT0; /* assign I2C pins 0 and 1 */
 	}
 	else /* HAL_I2C_B1 */
 	{
 		msp_i2c->reg = (hal_i2c_mem_reg *)__MSP430_BASEADDRESS_USCI_B1__;
-		P4SEL |= BIT2 | BIT1;  /* Assign I2C pins BIT1,2 */
+		P4SEL |= BIT2 | BIT1;  /* assign I2C pins 1 and 2 */
 	}
 
-	/* set device being used */
-	if (i2c == K_I2CDev1)
-	{
-		msp_i2c->k_i2c->conf.SlaveAddress = slave.dev1;
-	}
-	else /* other device */
-	{
-		msp_i2c->k_i2c->conf.SlaveAddress = slave.dev2;
-	}
-
-	/* initialize */
 	msp_i2c->reg->control1 |= UCSWRST; /* software reset */
-	msp_i2c->reg->control0 |= UCMODE_3 | UCMST | UCSYNC; /* I2C, Master, sync */
+
+	/* check addressing mode */
+	if(k_i2c->conf.AddressingMode == K_ADDRESSINGMODE_10BIT)
+	{
+		msp_i2c->reg->control0 |= UCSLA10; /* set 10bit */
+	}
+	/* set i2c frequency */
+	preScalar = (uint16_t)(SMCLK_FREQ/k_i2c->conf.ClockSpeed);
+
+	/* check i2c mode */
+	if(k_i2c->conf.Role == K_MASTER)
+	{
+		msp_i2c->reg->control0 |= UCMST; /* set master bit */
+	}
+
+	msp_i2c->reg->control0 |= UCMODE_3 | UCSYNC; /* I2C mode, sync */
 	msp_i2c->reg->control1 |= UCSSEL_2 | UCSWRST; /* SMCLK + keep reset */
-	msp_i2c->reg->baudrate0 = 0x80; /* prescaler divider for 8 MHz SMCLK -> 100 KHz */
-	msp_i2c->reg->baudrate1 = 0;    /* 80d = 0x50h */
-	msp_i2c->reg->slaveAddress = msp_i2c->k_i2c->conf.SlaveAddress; /* set slave addr */
+	msp_i2c->reg->baudrate0 = preScalar;
+	msp_i2c->reg->baudrate1 = 0;
 	msp_i2c->reg->control1 &= ~UCSWRST; /* enable I2C by releasing reset */
-
-	/* set address in HAL */
-	k_i2c->conf.OwnAddress1 = msp_i2c->reg->ownAddress;
-
-    /* set status idle */
-    k_i2c->status = I2C_IDLE;
 }
 
-int kprv_i2c_transmit_i2c(KI2CDevNum i2c, uint8_t *ptr, int len)
+KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
 	msp_i2c *msp_i2c = kprv_msp_i2c_get(i2c);
 
@@ -91,32 +86,26 @@ int kprv_i2c_transmit_i2c(KI2CDevNum i2c, uint8_t *ptr, int len)
 	msp_i2c->reg->interruptFlags = 0;
 
 	/* set slave address */
-	msp_i2c->reg->slaveAddress = msp_i2c->k_i2c->conf.SlaveAddress;
-	/* set write mode */
-	msp_i2c->k_i2c->status = I2C_WRITE;
+	msp_i2c->reg->slaveAddress = addr;
 
 	/* set I2C start condition and UCTR */
 	msp_i2c->reg->control1 |= UCTR;
 	msp_i2c->reg->control1 |= UCTXSTT;
 
-
-	return kprv_hal_i2c_state_machine(i2c, ptr, len);
+	return kprv_i2c_master_state_machine(i2c, ptr, len);
 }
 
-int kprv_i2c_receive_i2c(KI2CDevNum i2c, uint8_t *ptr, int len)
+KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
 	msp_i2c *msp_i2c = kprv_msp_i2c_get(i2c);
 
 	/* clear buffer */
 	msp_i2c->reg->rxBuffer = 0;
-
 	/* reset interrupt flag */
 	msp_i2c->reg->interruptFlags = 0;
 
 	/* set slave address */
-	msp_i2c->reg->slaveAddress = msp_i2c->k_i2c->conf.SlaveAddress;
-	/* set read mode */
-	msp_i2c->k_i2c->status = I2C_READ;
+	msp_i2c->reg->slaveAddress = addr;
 
 	/* set I2C start condition and clear UCTR */
 	msp_i2c->reg->control1 &= ~UCTR;
@@ -143,15 +132,14 @@ int kprv_i2c_receive_i2c(KI2CDevNum i2c, uint8_t *ptr, int len)
 			/* stop condition sent? */
 			while (msp_i2c->reg->control1 & UCTXSTP);
 		}
-		/* set idle status */
-		msp_i2c->k_i2c->status = I2C_IDLE;
-		return -1; /* error */
+
+		return I2C_ERROR; /* error */
 	}
 
 	/* wait until RXIFG to be set to begin receiving data */
 	while(!(msp_i2c->reg->interruptFlags & UCRXIFG));
 
-	return kprv_hal_i2c_state_machine(i2c, ptr, len);
+	return kprv_i2c_master_state_machine(i2c, ptr, len);
 }
 
 

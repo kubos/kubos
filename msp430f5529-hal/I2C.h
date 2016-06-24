@@ -15,63 +15,48 @@
  * limitations under the License.
  */
 
-//#include "kubos-hal/I2C.h"
-
-/* MSP I2C status */
-#define I2C_IDLE		   -1
-#define I2C_WRITE			0
-#define I2C_READ			1
-#define I2C_DATA_RECEIVED 	2
-
 typedef struct
 {    /** UCBxCTL1 */
-    volatile uint8_t control1; // 0x05E0
+    volatile uint8_t control1;
     /** UCBxCTL0 */
-    volatile uint8_t control0; // 0x05E1
-    uint8_t padding1[4]; // 0x05E2-5
+    volatile uint8_t control0;
+    uint8_t padding1[4];
     /** UCBxBR0 */
-    volatile uint8_t baudrate0; // 0x05E6
+    volatile uint8_t baudrate0;
     /** UCBxBR1 */
-    volatile uint8_t baudrate1; // 0x05E7
-    uint8_t padding2[2]; // 0x05E8-9
+    volatile uint8_t baudrate1;
+    uint8_t padding2[2];
     /** UCBxSTAT */
-    volatile uint8_t status; // 0x05EA
-    uint8_t padding3; // 0x05EB
+    volatile uint8_t status;
+    uint8_t padding3;
     /** UCBxRXBUF */
-    volatile uint8_t rxBuffer; // 0x05EC
-    uint8_t padding4; // // 0x05ED
+    volatile uint8_t rxBuffer;
+    uint8_t padding4;
     /** UCBxTXBUF */
-    volatile uint8_t txBuffer; // 0x05EE
-    uint8_t padding5; // 0x05EF
+    volatile uint8_t txBuffer;
+    uint8_t padding5;
     /** UCBxI2COA */
-    volatile uint8_t ownAddress; // 0x05F0
-    uint8_t padding6; // 0x05F1
+    volatile uint8_t ownAddress;
+    uint8_t padding6;
     /** UCBxI2CSA */
-    volatile uint8_t slaveAddress; // 0x05F2
-    uint8_t padding7[9]; // 0x05F3-B
+    volatile uint8_t slaveAddress;
+    uint8_t padding7[9];
     /** UCAxIE */
-    volatile uint8_t interruptEnable; // 0x05FC
+    volatile uint8_t interruptEnable;
     /** UCAxIFG */
-    volatile uint8_t interruptFlags; // 0x05FD
+    volatile uint8_t interruptFlags;
     /** UCAxIV */
-    volatile uint8_t interruptVector; // 0x05FE
+    volatile uint8_t interruptVector;
 } hal_i2c_mem_reg;
 
 typedef struct
-{	/* reg addr */
+{
 	hal_i2c_mem_reg* reg;
-	/* HAL I2C struct */
 	KI2C* k_i2c;
 } msp_i2c;
 
-typedef struct
-{
-	uint8_t dev1;
-	uint8_t dev2;
-} dev_addr;
-
-// private APIs
-msp_i2c* kprv_msp_i2c_get(KI2CDevNum i2c);
-int kprv_hal_i2c_state_machine(KI2CDevNum i2c, uint8_t *ptr, int len);
+/* private APIs */
+msp_i2c* kprv_msp_i2c_get(KI2CNum i2c);
+KI2CStatus kprv_i2c_master_state_machine(KI2CNum i2c, uint8_t *ptr, int len);
 
 
