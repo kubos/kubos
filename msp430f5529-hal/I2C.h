@@ -58,23 +58,11 @@ typedef struct
 } hal_i2c_mem_reg;
 
 typedef struct
-{
-    /** UCBxCTLW0 */
-    volatile uint16_t controlWord; // 0x05E0-2
-    uint8_t padding1[4]; // 0x05E2-5
-    volatile uint16_t baudWord; // 0x05E6-7
-} hal_i2c_mem_word;
-
-typedef struct
 {	/* reg addr */
 	hal_i2c_mem_reg* reg;
-	/* ctrl word */
-	hal_i2c_mem_word* word;
 	/* HAL I2C struct */
 	KI2C* k_i2c;
 } msp_i2c;
-
-
 
 typedef struct
 {
@@ -82,7 +70,8 @@ typedef struct
 	uint8_t dev2;
 } dev_addr;
 
-
 // private APIs
 msp_i2c* kprv_msp_i2c_get(KI2CDevNum i2c);
+int kprv_hal_i2c_state_machine(KI2CDevNum i2c, uint8_t *ptr, int len);
+
 
