@@ -47,9 +47,13 @@
     "hardware": {
       "externalClock": "8000000",
       "uartCount": "6",
+      "i2cCount": "2",
       "console": {
         "uart": "K_UART6",
         "baudRate": "115200"
+      },
+      "defaults": {
+        "i2c": "K_I2C1"
       },
       "pins": {
         "LED1": "PD12",
@@ -71,8 +75,10 @@
         "UART6_RX": "PC7",
         "USBTX": "PA_2",
         "USBRX": "PA_3",
-        "I2C_SCL": "PB_8",
-        "I2C_SDA": "PB_9",
+        "I2C1_SCL": "GPIO_PIN_8",
+        "I2C1_SDA": "GPIO_PIN_7",
+        "I2C2_SCL": "GPIO_PIN_10",
+        "I2C2_SDA": "GPIO_PIN_11",
         "SPI_MOSI": "PA_7",
         "SPI_MISO": "PA_6",
         "SPI_SCK": "PA_5",
