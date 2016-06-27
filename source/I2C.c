@@ -79,6 +79,10 @@ static void hal_i2c_set_addressing(hal_i2c_handle * handle)
 	{
 		handle->reg->control0 |= UCSLA10; /* set 10bit */
 	}
+	else /* 7BIT */
+	{
+		handle->reg->control0 &= ~UCSLA10; /* clear 10bit */
+	}
 }
 
 static void hal_i2c_set_clock(hal_i2c_handle * handle)
@@ -128,7 +132,7 @@ hal_i2c_status hal_i2c_master_write_state_machine(hal_i2c_handle * handle, uint1
 			if(i == 0) /* if first byte */
 			{
 				/* wait for STT to clear */
-				while (handle->reg->control1 & UCTXSTT){};
+				while (handle->reg->control1 & UCTXSTT);
 			}
 
 			/* slave not responding? */
