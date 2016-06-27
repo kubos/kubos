@@ -15,6 +15,57 @@
  * limitations under the License.
  */
 
+/**
+ * @defgroup I2C
+ * @addtogroup I2C
+ * @{
+ */
+
+ /**
+   *
+   * @file      I2C.h
+   * @brief      MSP430F5529 HAL - I2C module
+   *
+   * @author     kubos.co
+   */
+
+/**
+  * @brief Type by which i2c buses are numbered.
+  */
+typedef enum
+{
+    HAL_I2C_B0 = 0,
+    HAL_I2C_B1
+} hal_i2c_bus;
+
+/**
+ * @brief Expected addressing mode of i2c bus.
+ */
+typedef enum
+{
+    HAL_I2C_ADDRESSINGMODE_7BIT = 0,
+    HAL_I2C_ADDRESSINGMODE_10BIT
+} hal_i2c_addressing_mode;
+
+/**
+ * @brief Expected role of i2c bus.
+ */
+typedef enum {
+    HAL_I2C_MASTER = 0,
+    HAL_I2C_SLAVE
+} hal_i2c_role;
+
+/**
+ * @brief i2c function status.
+ */
+typedef enum {
+    HAL_I2C_OK = 0,
+    HAL_I2C_ERROR
+} hal_i2c_status;
+
+/**
+  * @brief This type is a map of the USCI_Bx i2c registers.
+  */
 typedef struct
 {    /** UCBxCTL1 */
     volatile uint8_t control1;
@@ -49,14 +100,90 @@ typedef struct
     volatile uint8_t interruptVector;
 } hal_i2c_mem_reg;
 
+/**
+ * @brief i2c configuration structure.
+ */
+typedef struct {
+	hal_i2c_addressing_mode AddressingMode;
+    hal_i2c_role Role;
+	uint32_t ClockSpeed;
+} hal_i2c_config;
+
+/**
+ * @brief i2c bus data structure.
+ */
+typedef struct {
+	hal_i2c_bus bus_num;
+    hal_i2c_config conf;
+    /* no need for semaphore here */
+} hal_i2c_bus_conf;
+
+/**
+  * @brief This type contains all i2c config and register details for this layer.
+  */
 typedef struct
 {
 	hal_i2c_mem_reg* reg;
-	KI2C* k_i2c;
-} msp_i2c;
+	hal_i2c_bus_conf* bus;
+	volatile uint8_t * select;
+	uint8_t selectVal;
+} hal_i2c_handle;
 
-/* private APIs */
-msp_i2c* kprv_msp_i2c_get(KI2CNum i2c);
-KI2CStatus kprv_i2c_master_state_machine(KI2CNum i2c, uint8_t *ptr, int len);
+/**
+  * @brief Static array of avaiable i2c handles.
+  */
+extern hal_i2c_handle hal_i2c_buses[];
+
+/**
+  * @brief Creates a i2c handle and fills in details associated with
+  *        the specified bus.
+  * @param i2c Instance of hal_i2c_bus, specifying bus to use.
+  * @retval hal_i2c_handle *
+  */
+hal_i2c_handle * hal_i2c_device_init(hal_i2c_bus i2c);
+
+/**
+  * @brief Creates a i2c handle according to details specified in config.
+  * @param config Instance of hal_i2c_config with init details.
+  * @param i2c Instance of hal_i2c_bus, specifying bus to use.
+  * @retval hal_i2c_handle *
+  */
+hal_i2c_handle * hal_i2c_init(hal_i2c_config config, hal_i2c_bus i2c);
+
+/**
+  * @brief Low level hardware de-init of i2c.
+  * @param handle Instance of initilized hal_i2c_handle containing hardware
+  *               registers and config values.
+  */
+void hal_i2c_dev_terminate(hal_i2c_handle * handle);
+
+/**
+  * @brief Low level hardware setup of i2c.
+  * @param handle Instance of initilaized hal_i2c_handle containing hardware
+  *               registers and config values.
+  */
+void hal_i2c_setup(hal_i2c_handle * handle);
+
+static void hal_i2c_set_addressing(hal_i2c_handle * handle);
+
+static void hal_i2c_set_clock(hal_i2c_handle * handle);
+
+/**
+  * @brief Writes a buffer to a slave device over i2c.
+  * @param handle i2c bus handle to transmit on
+  * @param addr slave address to write to
+  * @param ptr buffer pointer to write
+  * @param len number of characters to write
+  */
+hal_i2c_status hal_i2c_master_write_state_machine(hal_i2c_handle * handle, uint16_t addr, uint8_t *ptr, int len);
+
+/**
+  * @brief Reads a buffer from a slave device over i2c.
+  * @param handle i2c bus handle to read from
+  * @param addr slave address to read from
+  * @param ptr buffer pointer to read to
+  * @param len number of characters to read
+  */
+hal_i2c_status hal_i2c_master_read_state_machine(hal_i2c_handle * handle, uint16_t addr, uint8_t *ptr, int len);
 
 

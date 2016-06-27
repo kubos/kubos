@@ -20,128 +20,222 @@
 
 #include <msp430.h>
 
-static msp_i2c k_msp_i2cs[K_NUM_I2CS];
+hal_i2c_handle hal_i2c_buses[YOTTA_CFG_HARDWARE_I2CCOUNT];
 
-msp_i2c* kprv_msp_i2c_get(KI2CNum i2c)
+hal_i2c_handle * hal_i2c_device_init(hal_i2c_bus i2c)
 {
-    return &k_msp_i2cs[i2c];
+	hal_i2c_handle * handle = NULL;
+
+	handle = &hal_i2c_buses[i2c];
+    if (HAL_I2C_B0 == i2c)
+    {
+        handle->select = &P3SEL;
+        handle->selectVal = BIT1 + BIT0;
+        handle->reg = (hal_i2c_mem_reg *)__MSP430_BASEADDRESS_USCI_B0__;
+    }
+    else if (HAL_I2C_B1 == i2c)
+    {
+        handle->select = &P4SEL;
+        handle->selectVal = BIT2 + BIT1;
+        handle->reg = (hal_i2c_mem_reg *)__MSP430_BASEADDRESS_USCI_B1__;
+    }
+    return handle;
 }
 
-void kprv_i2c_dev_init(KI2CNum i2c)
+hal_i2c_handle * hal_i2c_init(hal_i2c_config config, hal_i2c_bus i2c)
 {
-	/* SMCLK FREQ constant 1 MHz */
+    hal_i2c_handle * handle = hal_i2c_device_init(i2c);
+    handle->bus->conf = config;
+    return handle;
+}
+
+void hal_i2c_dev_terminate(hal_i2c_handle * handle)
+{
+	handle->reg->control1 |= UCSWRST; /* software reset */
+    /* de-select pins */
+    *(handle->select) &= ~handle->selectVal;
+
+}
+
+void hal_i2c_setup(hal_i2c_handle * handle)
+{
+	handle->reg->control1 |= UCSWRST; /* software reset */
+	handle->reg->control0 |= UCMODE_3 | UCSYNC; /* I2C mode, sync */
+
+	hal_i2c_set_addressing(handle);
+
+	hal_i2c_set_clock(handle);
+
+    /* configure pins */
+    *(handle->select) |= handle->selectVal;
+
+	handle->reg->control1 &= ~UCSWRST; /* enable I2C by releasing reset */
+}
+
+static void hal_i2c_set_addressing(hal_i2c_handle * handle)
+{
+	/* check addressing mode */
+	if(handle->bus->conf.AddressingMode == HAL_I2C_ADDRESSINGMODE_10BIT)
+	{
+		handle->reg->control0 |= UCSLA10; /* set 10bit */
+	}
+}
+
+static void hal_i2c_set_clock(hal_i2c_handle * handle)
+{
+	/* SMCLK FREQ constant 1 MHz for F5529 */
 	const uint32_t SMCLK_FREQ = 1000000;
 	uint16_t preScalar;
+	preScalar = (uint16_t)(SMCLK_FREQ/handle->bus->conf.ClockSpeed);
 
-	/* get config structs */
-	KI2C *k_i2c = kprv_i2c_get(i2c);
-	msp_i2c *msp_i2c = &k_msp_i2cs[i2c];
-
-	/* set upper hal bus struct */
-	msp_i2c->k_i2c = k_i2c;
-
-	/* init i2c bus and registers */
-	if(k_i2c->bus_num == K_I2C1)
-	{
-		msp_i2c->reg = (hal_i2c_mem_reg *)__MSP430_BASEADDRESS_USCI_B0__;
-		P3SEL |= BIT1 | BIT0; /* assign I2C pins 0 and 1 */
-	}
-	else /* HAL_I2C_B1 */
-	{
-		msp_i2c->reg = (hal_i2c_mem_reg *)__MSP430_BASEADDRESS_USCI_B1__;
-		P4SEL |= BIT2 | BIT1;  /* assign I2C pins 1 and 2 */
-	}
-
-	msp_i2c->reg->control1 |= UCSWRST; /* software reset */
-
-	/* check addressing mode */
-	if(k_i2c->conf.AddressingMode == K_ADDRESSINGMODE_10BIT)
-	{
-		msp_i2c->reg->control0 |= UCSLA10; /* set 10bit */
-	}
-	/* set i2c frequency */
-	preScalar = (uint16_t)(SMCLK_FREQ/k_i2c->conf.ClockSpeed);
-
-	/* check i2c mode */
-	if(k_i2c->conf.Role == K_MASTER)
-	{
-		msp_i2c->reg->control0 |= UCMST; /* set master bit */
-	}
-
-	msp_i2c->reg->control0 |= UCMODE_3 | UCSYNC; /* I2C mode, sync */
-	msp_i2c->reg->control1 |= UCSSEL_2 | UCSWRST; /* SMCLK + keep reset */
-	msp_i2c->reg->baudrate0 = preScalar;
-	msp_i2c->reg->baudrate1 = 0;
-	msp_i2c->reg->control1 &= ~UCSWRST; /* enable I2C by releasing reset */
+	handle->reg->control1 |= UCSSEL_2 | UCSWRST; /* SMCLK + keep reset */
+	handle->reg->baudrate0 = preScalar;
+	handle->reg->baudrate1 = 0;
 }
 
-KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
+
+
+hal_i2c_status hal_i2c_master_write_state_machine(hal_i2c_handle * handle, uint16_t addr, uint8_t *ptr, int len)
 {
-	msp_i2c *msp_i2c = kprv_msp_i2c_get(i2c);
+	/* loop variable */
+	int i = 0;
 
 	/* clear buffer */
-	msp_i2c->reg->txBuffer = 0;
+	handle->reg->txBuffer = 0;
 
 	/* reset interrupt flag */
-	msp_i2c->reg->interruptFlags = 0;
+	handle->reg->interruptFlags = 0;
 
 	/* set slave address */
-	msp_i2c->reg->slaveAddress = addr;
+	handle->reg->slaveAddress = addr;
 
 	/* set I2C start condition and UCTR */
-	msp_i2c->reg->control1 |= UCTR;
-	msp_i2c->reg->control1 |= UCTXSTT;
+	handle->reg->control1 |= UCTR;
+	handle->reg->control1 |= UCTXSTT;
 
-	return kprv_i2c_master_state_machine(i2c, ptr, len);
+	/* transmit mode */
+	if (handle->reg->interruptFlags & UCTXIFG)
+	{
+		if(ptr == 0) /* if bad pointer */
+			return I2C_ERROR; /* error */
+
+		/* get data from ptr */
+		for (; i < len; i++, ptr++)
+		{
+			/* write byte to buffer */
+			handle->reg->txBuffer = *ptr;
+
+			if(i == 0) /* if first byte */
+			{
+				/* wait for STT to clear */
+				while (handle->reg->control1 & UCTXSTT){};
+			}
+
+			/* slave not responding? */
+			if (handle->reg->interruptFlags & UCNACKIFG)
+			{
+				/* trigger a stop condition */
+				handle->reg->control1 |= UCTXSTP;
+				while (handle->reg->control1 & UCTXSTP); /* stop condition sent? */
+
+				return I2C_ERROR; /* error */
+			}
+			/* wait until TXIFG to be set */
+			while(!(handle->reg->interruptFlags & UCTXIFG));
+		}
+		/* trigger a stop condition */
+		handle->reg->control1 |= UCTXSTP;
+		while (handle->reg->control1 & UCTXSTP); /* stop condition sent? */
+	}
+	else /* something else? */
+	{
+		/* trigger a stop condition */
+		handle->reg->control1 |= UCTXSTP;
+		while (handle->reg->control1 & UCTXSTP); /* stop condition sent? */
+	}
+
+	/* return success */
+	return I2C_OK;
+
 }
 
-KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
+
+hal_i2c_status hal_i2c_master_read_state_machine(hal_i2c_handle * handle, uint16_t addr, uint8_t *ptr, int len)
 {
-	msp_i2c *msp_i2c = kprv_msp_i2c_get(i2c);
+	/* loop variable */
+	int i = 0;
 
 	/* clear buffer */
-	msp_i2c->reg->rxBuffer = 0;
+	handle->reg->rxBuffer = 0;
 	/* reset interrupt flag */
-	msp_i2c->reg->interruptFlags = 0;
+	handle->reg->interruptFlags = 0;
 
 	/* set slave address */
-	msp_i2c->reg->slaveAddress = addr;
+	handle->reg->slaveAddress = addr;
 
 	/* set I2C start condition and clear UCTR */
-	msp_i2c->reg->control1 &= ~UCTR;
-	msp_i2c->reg->control1 |= UCTXSTT;
+	handle->reg->control1 &= ~UCTR;
+	handle->reg->control1 |= UCTXSTT;
 
 	/* wait for STT to clear (slave recevied address) */
-	while (msp_i2c->reg->control1 & UCTXSTT);
+	while (handle->reg->control1 & UCTXSTT);
 
 	/* if only sending 1 byte */
+	// TODO: test 1 byte read
 	if(len == 1)
 	{
 		/* set stop bit immediately */
-		msp_i2c->reg->control1 |= UCTXSTP;
+		handle->reg->control1 |= UCTXSTP;
 	}
 
 	/* slave not responding? */
-	if (msp_i2c->reg->interruptFlags & UCNACKIFG)
+	if (handle->reg->interruptFlags & UCNACKIFG)
 	{
 		/* if not sent already (len =/= 1) */
-		if (msp_i2c->reg->control1 & UCTXSTP)
+		if (handle->reg->control1 & UCTXSTP)
 		{
 			/* trigger a stop condition */
-			msp_i2c->reg->control1 |= UCTXSTP;
+			handle->reg->control1 |= UCTXSTP;
 			/* stop condition sent? */
-			while (msp_i2c->reg->control1 & UCTXSTP);
+			while (handle->reg->control1 & UCTXSTP);
 		}
 
 		return I2C_ERROR; /* error */
 	}
 
 	/* wait until RXIFG to be set to begin receiving data */
-	while(!(msp_i2c->reg->interruptFlags & UCRXIFG));
+	while(!(handle->reg->interruptFlags & UCRXIFG));
 
-	return kprv_i2c_master_state_machine(i2c, ptr, len);
+	/* receive mode */
+	if (handle->reg->interruptFlags & UCRXIFG)
+	{
+		if(ptr == 0) /* if bad pointer */
+			return I2C_ERROR; /* error */
+
+		/* put data in ptr */
+		for (; i < len; i++, ptr++)
+		{
+			/* read from rx reg */
+			*ptr = handle->reg->rxBuffer;
+
+			/* if not receiving only one byte */
+			if(len != 1)
+			{
+				/* wait until RXIFG to be set to receiving more data */
+				while(!(handle->reg->interruptFlags & UCRXIFG));
+			}
+		}
+		/* trigger a stop condition */
+		handle->reg->control1 |= UCTXSTP;
+		while (handle->reg->control1 & UCTXSTP); /* stop condition sent? */
+	}
+	else /* something else? */
+	{
+		/* trigger a stop condition */
+		handle->reg->control1 |= UCTXSTP;
+		while (handle->reg->control1 & UCTXSTP); /* stop condition sent? */
+	}
+
+	/* return success */
+	return I2C_OK;
 }
-
-
-
-
