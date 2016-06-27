@@ -15,94 +15,113 @@
  * limitations under the License.
  */
 
+/**
+  * @defgroup I2C
+  * @addtogroup I2C
+  * @{
+  */
+
+/**
+  *
+  * @file       I2C.c
+  * @brief      Kubos-HAL-MSP430F5529 - I2C module
+  *
+  * @author     kubos.co
+  */
+
 #include "kubos-hal/I2C.h"
 #include "msp430f5529-hal/I2C.h"
-
 #include <msp430.h>
 
-int kprv_hal_i2c_state_machine(KI2CDevNum i2c, uint8_t *ptr, int len)
+/**
+  * @brief Helper function to convert i2c bus option.
+  */
+static inline hal_i2c_bus i2c_bus(KI2CNum i2c)
 {
-	/* get i2c struct */
-	msp_i2c *msp_i2c = kprv_msp_i2c_get(i2c);
-	/* loop variable */
-	int i = 0;
-
-	/* receive mode */
-	if (msp_i2c->reg->interruptFlags & UCRXIFG)
-	{
-		if(ptr == 0) /* if bad pointer */
-			return -1; /* error */
-
-		/* put data in ptr */
-		for (; i < len; i++, ptr++)
-		{
-			/* read from rx reg */
-			*ptr = msp_i2c->reg->rxBuffer;
-
-			/* if not receiving only one byte */
-			if(len != 1)
-			{
-				/* wait until RXIFG to be set to receiving more data */
-				while(!(msp_i2c->reg->interruptFlags & UCRXIFG));
-			}
-		}
-
-		/* trigger a stop condition */
-		msp_i2c->reg->control1 |= UCTXSTP;
-		while (msp_i2c->reg->control1 & UCTXSTP); /* stop condition sent? */
-
-		msp_i2c->k_i2c->status = I2C_DATA_RECEIVED;
-
-	}
-	/* transmit mode */
-	else if (msp_i2c->reg->interruptFlags & UCTXIFG)
-	{
-		if(ptr == 0) /* if bad pointer */
-			return -1; /* error */
-
-		/* get data from ptr */
-		for (; i < len; i++, ptr++)
-		{
-			/* write byte to buffer */
-			msp_i2c->reg->txBuffer = *ptr;
-
-			if(i == 0) /* if first byte */
-			{
-				/* wait for STT to clear */
-				while (msp_i2c->reg->control1 & UCTXSTT){};
-			}
-
-			/* slave not responding? */
-			if (msp_i2c->reg->interruptFlags & UCNACKIFG)
-			{
-				/* trigger a stop condition */
-				msp_i2c->reg->control1 |= UCTXSTP;
-				while (msp_i2c->reg->control1 & UCTXSTP); /* stop condition sent? */
-
-				msp_i2c->k_i2c->status = I2C_IDLE;
-				return -1; /* error */
-			}
-
-			/* wait until TXIFG to be set */
-			while(!(msp_i2c->reg->interruptFlags & UCTXIFG));
-		}
-
-		/* trigger a stop condition */
-		msp_i2c->reg->control1 |= UCTXSTP;
-		while (msp_i2c->reg->control1 & UCTXSTP); /* stop condition sent? */
-
-		msp_i2c->k_i2c->status = I2C_IDLE;
-
-	}
-	else /* something else? */
-	{
-		/* trigger a stop condition */
-		msp_i2c->reg->control1 |= UCTXSTP;
-		while (msp_i2c->reg->control1 & UCTXSTP); /* stop condition sent? */
-
-		msp_i2c->k_i2c->status = I2C_IDLE;
-	}
-
-	/* return success */
-	return 0;
+    switch(i2c)
+    {
+        case K_I2C1: return HAL_I2C_B0;
+        case K_I2C2: return HAL_I2C_B1;
+        default: return 0;
+    }
 }
+
+/**
+  * @brief Helper function to get i2c handle.
+  */
+static inline hal_i2c_handle * i2c_handle(KI2CNum i2c)
+{
+    switch(i2c)
+    {
+        case K_I2C1: return &hal_i2c_buses[HAL_I2C_B0];
+        case K_I2C2: return &hal_i2c_buses[HAL_I2C_B1];
+        default: return NULL;
+    }
+}
+
+/**
+  * @brief Helper function to convert i2c addressing option.
+  */
+static inline hal_i2c_addressing_mode i2c_addressing(I2CAddressingMode mode)
+{
+    switch(mode)
+    {
+        case K_ADDRESSINGMODE_7BIT: return HAL_I2C_ADDRESSINGMODE_7BIT;
+        case K_ADDRESSINGMODE_10BIT: return HAL_I2C_ADDRESSINGMODE_10BIT;
+        default: return 0;
+    }
+}
+
+/**
+  * @brief Helper function to convert i2c role option.
+  */
+static inline hal_i2c_role i2c_role(I2CRole role)
+{
+    switch(role)
+    {
+        case K_MASTER: return HAL_I2C_MASTER;
+        case K_SLAVE: return HAL_I2C_SLAVE;
+        default: return 0;
+    }
+}
+
+/**
+  * @brief Creates and sets up specified i2c bus option.
+  * @param i2c Number of i2c bus to setup.
+  */
+void kprv_i2c_dev_init(KI2CNum i2c)
+{
+	KI2C *k_i2c = kprv_i2c_get(i2c);
+
+	hal_i2c_config config = {
+			.AddressingMode = i2c_addressing(k_i2c->conf.AddressingMode),
+			.ClockSpeed = k_i2c->conf.ClockSpeed,
+			.Role = i2c_role(k_i2c->conf.Role)
+	};
+
+	hal_i2c_handle * handle = hal_i2c_init(config, i2c);
+	handle->bus->bus_num = i2c_bus(i2c);
+	hal_i2c_setup(handle);
+}
+
+void kprv_i2c_dev_terminate(KI2CNum i2c)
+{
+	hal_i2c_dev_terminate(i2c_handle(i2c));
+}
+
+KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
+{
+	hal_i2c_status ret = HAL_I2C_ERROR;
+	ret = hal_i2c_master_write_state_machine(i2c_handle(i2c), addr, ptr, len);
+
+	return (KI2CStatus)ret;
+}
+
+KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
+{
+	hal_i2c_status ret = HAL_I2C_ERROR;
+	ret = hal_i2c_master_read_state_machine(i2c_handle(i2c), addr, ptr, len);
+
+	return (KI2CStatus)ret;
+}
+
