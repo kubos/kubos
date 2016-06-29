@@ -68,6 +68,7 @@ void task_i2c(void *p) {
 #ifdef YOTTA_CFG_SENSORS_HTU21D
     float temp, hum;
     htu21d_setup();
+    htu21d_reset();
 #endif
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
