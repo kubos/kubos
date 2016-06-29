@@ -36,34 +36,61 @@ void task_i2c(void *p) {
     static int x = 0;
     int ret;
 
-    printf("beginning");
+/**
+ * Example of directly using the Kubos-HAL i2c interface
+ */
+#if !defined(YOTTA_CFG_SENSORS_HTU21D) && !defined(YOTTA_CFG_SENSORS_BNO055)
+    #define I2C_DEV K_I2C1
+    #define I2C_SLAVE_ADDR 0x40
 
-    #ifdef YOTTA_CFG_SENSORS_HTU21D
+    uint8_t cmd = 0xE3;
+    uint8_t buffer[3];
+
+    KI2CConf conf = {
+        .addressing_mode = K_ADDRESSINGMODE_7BIT,
+        .role = K_MASTER,
+        .clock_speed = 10000
+    };
+    // Initialize first i2c bus with configuration
+    k_i2c_init(I2C_DEV, &conf);
+    // Send single byte command to slave
+    k_i2c_write(I2C_DEV, I2C_SLAVE_ADDR, &cmd, 1);
+    // Processing delay
+    vTaskDelay(50);
+    // Read back 3 byte response from slave
+    k_i2c_read(I2C_DEV, I2C_SLAVE_ADDR, &buffer, 3);
+
+/**
+ * If any sensors are detected then we will use those instead
+ */
+#else
+
+#ifdef YOTTA_CFG_SENSORS_HTU21D
     float temp, hum;
     htu21d_setup();
-    #endif
+#endif
 
-    #ifdef YOTTA_CFG_SENSORS_BNO055
+#ifdef YOTTA_CFG_SENSORS_BNO055
     bno055_setup();
     uint32_t raw;
-    #endif
+#endif
 
     while (1) {
-        #ifdef YOTTA_CFG_SENSORS_HTU21D
+#ifdef YOTTA_CFG_SENSORS_HTU21D
         temp = htu21d_read_temperature();
         hum = htu21d_read_humidity();
         printf("temp - %f\r\n", temp);
         printf("humidity - %f\r\n", hum);
-        #endif
+#endif
 
-        #ifdef YOTTA_CFG_SENSORS_BNO055
+#ifdef YOTTA_CFG_SENSORS_BNO055
         raw = bno055_read_raw();
         printf("raw imu %d\r\n", raw);
-        #endif
+#endif
 
         vTaskDelay(100 / portTICK_RATE_MS);
     }
-
+#endif
 }
 
 int main(void)
