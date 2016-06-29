@@ -29,8 +29,8 @@
   * @author     kubos.co
   */
 
-#include "kubos-hal/I2C.h"
-#include "msp430f5529-hal/I2C.h"
+#include "kubos-hal/i2c.h"
+#include "msp430f5529-hal/i2c.h"
 #include <msp430.h>
 
 /**
@@ -94,13 +94,13 @@ void kprv_i2c_dev_init(KI2CNum i2c)
 	KI2C *k_i2c = kprv_i2c_get(i2c);
 
 	hal_i2c_config config = {
-			.AddressingMode = i2c_addressing(k_i2c->conf.AddressingMode),
-			.ClockSpeed = k_i2c->conf.ClockSpeed,
-			.Role = i2c_role(k_i2c->conf.Role)
+			.addressing_mode = i2c_addressing(k_i2c->conf.addressing_mode),
+			.clock_speed = k_i2c->conf.clock_speed,
+			.role = i2c_role(k_i2c->conf.role)
 	};
 
 	hal_i2c_handle * handle = hal_i2c_init(config, i2c);
-	handle->bus->bus_num = i2c_bus(i2c);
+	handle->bus_num = i2c_bus(i2c);
 	hal_i2c_setup(handle);
 }
 
@@ -112,7 +112,7 @@ void kprv_i2c_dev_terminate(KI2CNum i2c)
 KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
 	hal_i2c_status ret = HAL_I2C_ERROR;
-	ret = hal_i2c_master_write_state_machine(i2c_handle(i2c), addr, ptr, len);
+	ret = hal_i2c_master_write(i2c_handle(i2c), addr, ptr, len);
 
 	return (KI2CStatus)ret;
 }
@@ -120,7 +120,7 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
 KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
 	hal_i2c_status ret = HAL_I2C_ERROR;
-	ret = hal_i2c_master_read_state_machine(i2c_handle(i2c), addr, ptr, len);
+	ret = hal_i2c_master_read(i2c_handle(i2c), addr, ptr, len);
 
 	return (KI2CStatus)ret;
 }
