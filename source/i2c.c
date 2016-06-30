@@ -188,7 +188,7 @@ hal_i2c_status hal_i2c_master_write(hal_i2c_handle * handle, uint16_t addr, uint
 	handle->reg->control1 |= UCTR;
 	handle->reg->control1 |= UCTXSTT;
 
-	/* transmit mode */
+	/* transmit mode set */
 	if (handle->reg->interruptFlags & UCTXIFG)
 	{
 		/* get data from ptr */
@@ -200,7 +200,14 @@ hal_i2c_status hal_i2c_master_write(hal_i2c_handle * handle, uint16_t addr, uint
 			if(i == 0) /* if first byte */
 			{
 				/* wait for STT to clear */
-				ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE);
+				if((ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE)) != HAL_I2C_OK)
+				{
+					/* trigger a stop condition */
+					handle->reg->control1 |= UCTXSTP;
+					hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+
+					return ret; /* error */
+				}
 			}
 
 			/* slave not responding to start? */
@@ -208,7 +215,7 @@ hal_i2c_status hal_i2c_master_write(hal_i2c_handle * handle, uint16_t addr, uint
 			{
 				/* trigger a stop condition */
 				handle->reg->control1 |= UCTXSTP;
-				ret = hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+				hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
 
 				return HAL_I2C_ERROR_NACK; /* error NACK here */
 			}
@@ -217,11 +224,19 @@ hal_i2c_status hal_i2c_master_write(hal_i2c_handle * handle, uint16_t addr, uint
 			if( i != (len-1))
 			{
 				/* wait until TXIFG to be set to transmit more data */
-				ret = hal_i2c_register_timeout(handle, UCTXIFG, SET);
+				if((ret = hal_i2c_register_timeout(handle, UCTXIFG, SET)) != HAL_I2C_OK)
+				{
+					/* trigger a stop condition */
+					handle->reg->control1 |= UCTXSTP;
+					hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+
+					return ret; /* error */
+				}
 			}
 		}
 		/* trigger a stop condition */
 		handle->reg->control1 |= UCTXSTP;
+		/* if something goes wrong here we'll catch it on function exit */
 		ret = hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
 
 	}
@@ -229,8 +244,9 @@ hal_i2c_status hal_i2c_master_write(hal_i2c_handle * handle, uint16_t addr, uint
 	{
 		/* trigger a stop condition */
 		handle->reg->control1 |= UCTXSTP;
-		/* error */
-		return hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+		hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+
+		return ret; /* error */
 	}
 
 	/* return timeout status */
@@ -263,7 +279,11 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 	handle->reg->control1 |= UCTXSTT;
 
 	/* wait for STT to clear (slave received address) */
-	ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE);
+	if((ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE)) != HAL_I2C_OK)
+	{
+		/* return error */
+		return ret;
+	}
 
 	/* slave not responding to start? */
 	if (handle->reg->interruptFlags & UCNACKIFG)
@@ -271,7 +291,7 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 		/* trigger a stop condition */
 		handle->reg->control1 |= UCTXSTP;
 		/* stop condition sent? */
-		ret = hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+		hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
 
 		return HAL_I2C_ERROR_NACK; /* error NACK here */
 	}
@@ -285,11 +305,8 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 		handle->reg->control1 |= UCTXSTP;
 	}
 
-	/* wait until RXIFG to be set to acknowledge received data */
-	ret = hal_i2c_register_timeout(handle, UCRXIFG, SET);
-
-	/* receive mode */
-	if (handle->reg->interruptFlags & UCRXIFG)
+	/* check receive mode set */
+	if ((ret = hal_i2c_register_timeout(handle, UCRXIFG, SET)) == HAL_I2C_OK)
 	{
 		/* put data in ptr */
 		for (; i < len; i++, ptr++)
@@ -301,7 +318,14 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 			if( i != (len-1))
 			{
 				/* wait until RXIFG to be set to receiving more data */
-				ret = hal_i2c_register_timeout(handle, UCRXIFG, SET);
+				if((ret = hal_i2c_register_timeout(handle, UCRXIFG, SET)) != HAL_I2C_OK)
+				{
+					/* something went wrong, send stop */
+					handle->reg->control1 |= UCTXSTP;
+					hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+
+					return ret; /* return error */
+				}
 			}
 		}
 
@@ -311,6 +335,7 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 			/* trigger a stop condition */
 			handle->reg->control1 |= UCTXSTP;
 		}
+		/* if something goes wrong here we'll catch it on function exit */
 		ret = hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
 	}
 	else /* something else? */
@@ -321,7 +346,7 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 			/* trigger a stop condition */
 			handle->reg->control1 |= UCTXSTP;
 		}
-		/* don't check stop timeout, not useful info here */
+		/* don't check stop timeout ret, not useful info here */
 		hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
 
 		return ret; /* timeout status */
