@@ -122,7 +122,7 @@ typedef struct {
  */
 typedef struct
 {
-	hal_i2c_mem_reg* reg;
+	volatile hal_i2c_mem_reg* reg;
 	hal_i2c_bus bus_num;
 	hal_i2c_config conf;
 	volatile uint8_t * select;
@@ -163,12 +163,6 @@ void hal_i2c_dev_terminate(hal_i2c_handle * handle);
  *               registers and config values.
  */
 void hal_i2c_setup(hal_i2c_handle * handle);
-
-static void hal_i2c_set_addressing(hal_i2c_handle * handle);
-
-static void hal_i2c_set_clock(hal_i2c_handle * handle);
-
-static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t flag, uint8_t mode);
 
 /**
  * @brief Writes a buffer to a slave device over i2c.

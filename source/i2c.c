@@ -26,6 +26,13 @@ hal_i2c_handle hal_i2c_buses[YOTTA_CFG_HARDWARE_I2CCOUNT];
 /* defines for register timeout mode */
 #define SET 0
 #define RELEASE 1
+#define SCLHIGH 2
+
+/* private functions */
+static void hal_i2c_set_addressing(hal_i2c_handle * handle);
+static void hal_i2c_set_clock(hal_i2c_handle * handle);
+static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t flag, uint8_t mode);
+
 
 hal_i2c_handle * hal_i2c_device_init(hal_i2c_bus i2c)
 {
@@ -120,12 +127,21 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 			timeout--; /* decrease counter */
 		}
 	}
-	else /* mode set */
+	else if(mode == SET)
 	{
 		/* while waiting for interrupt register to set */
 		while(!(handle->reg->interruptFlags & flag) && timeout > 0)
 		{
 			vTaskDelay(50); /* wait */
+			timeout--; /* decrease counter */
+		}
+	}
+	else /* clock stretching */ //TODO: finish implementation
+	{
+		/* wait for slave to release SCL */
+		while((handle->reg->status & flag) && timeout > 0)
+		{
+			vTaskDelay(100); /* wait */
 			timeout--; /* decrease counter */
 		}
 	}
@@ -143,7 +159,7 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 				default: return HAL_I2C_ERROR_TIMEOUT;
 			}
 		}
-		else /* check set flags */
+		else if(mode == SET) /* check set flags */
 		{
 			switch(flag)
 			{
@@ -151,6 +167,11 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 				case(UCRXIFG): return HAL_I2C_ERROR_BTF_TIMEOUT;
 				default: return HAL_I2C_ERROR_TIMEOUT;
 			}
+		}
+		else
+		{
+			/* only care about UCSCLLOW */
+			return HAL_I2C_ERROR_NACK; /* NACK error, not releaseing SCL */
 		}
 	}
 
