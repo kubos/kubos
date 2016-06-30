@@ -140,7 +140,7 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 			{
 				case(UCTXSTT): return HAL_I2C_ERROR_ADDR_TIMEOUT;
 				case(UCTXSTP): return HAL_I2C_ERROR_TIMEOUT;
-			default: return HAL_I2C_ERROR_TIMEOUT;
+				default: return HAL_I2C_ERROR_TIMEOUT;
 			}
 		}
 		else /* check set flags */
@@ -149,7 +149,7 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 			{
 				case(UCTXIFG): return HAL_I2C_ERROR_TXE_TIMEOUT;
 				case(UCRXIFG): return HAL_I2C_ERROR_BTF_TIMEOUT;
-			default: return HAL_I2C_ERROR_TIMEOUT;
+				default: return HAL_I2C_ERROR_TIMEOUT;
 			}
 		}
 	}
