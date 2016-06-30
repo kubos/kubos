@@ -47,9 +47,45 @@
     "hardware": {
       "externalClock": "8000000",
       "uartCount": "6",
+      "i2cCount": "2",
       "console": {
         "uart": "K_UART6",
         "baudRate": "115200"
+      },
+      "defaults": {
+        "i2c": "K_I2C1"
+      },
+      "i2c": {
+        "i2c1": {
+          "scl": {
+            "pin": "GPIO_PIN_8",
+            "mode": "GPIO_MODE_AF_PP",
+            "pullup": "GPIO_NOPULL",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "sda": {
+            "pin": "GPIO_PIN_7",
+            "mode": "GPIO_MODE_AF_OD",
+            "pullup": "GPIO_PULLUP",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "alt": "GPIO_AF4_I2C1"
+        },
+        "i2c2": {
+          "scl": {
+            "pin": "GPIO_PIN_10",
+            "mode": "GPIO_MODE_AF_PP",
+            "pullup": "GPIO_NOPULL",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "sda": {
+            "pin": "GPIO_PIN_11",
+            "mode": "GPIO_MODE_AF_OD",
+            "pullup": "GPIO_PULLUP",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "alt": "GPIO_AF4_I2C2"
+        }
       },
       "pins": {
         "LED1": "PD12",
@@ -71,8 +107,6 @@
         "UART6_RX": "PC7",
         "USBTX": "PA_2",
         "USBRX": "PA_3",
-        "I2C_SCL": "PB_8",
-        "I2C_SDA": "PB_9",
         "SPI_MOSI": "PA_7",
         "SPI_MISO": "PA_6",
         "SPI_SCK": "PA_5",
