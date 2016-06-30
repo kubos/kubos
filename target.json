@@ -18,6 +18,7 @@
     "toolchain" : "CMake/toolchain.cmake",
     "config": {
         "hardware": {
+	    "i2cCount": 2,
             "uartCount": 2,
             "uartDefaults": {
                 "baudRate": 115200,
@@ -26,6 +27,9 @@
                 "parity": "K_PARITY_NONE",
                 "rxQueueLen": 32,
                 "txQueueLen": 32
+            },
+            "defaults": {
+                "i2c": "K_I2C2"
             },
             "console": {
                 "uart": "K_UART2",
