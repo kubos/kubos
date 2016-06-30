@@ -197,7 +197,7 @@ hal_i2c_status hal_i2c_master_write(hal_i2c_handle * handle, uint16_t addr, uint
 				ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE);
 			}
 
-			/* slave not responding? */
+			/* slave not responding to start? */
 			if (handle->reg->interruptFlags & UCNACKIFG)
 			{
 				/* trigger a stop condition */
@@ -256,20 +256,30 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 	handle->reg->control1 &= ~UCTR;
 	handle->reg->control1 |= UCTXSTT;
 
-	/* wait for STT to clear (slave recevied address) */
+	/* wait for STT to clear (slave received address) */
 	ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE);
 
-	/* if only sending 1 byte */
+	/* slave not responding to start? */
+	if (handle->reg->interruptFlags & UCNACKIFG)
+	{
+		/* trigger a stop condition */
+		handle->reg->control1 |= UCTXSTP;
+		/* stop condition sent? */
+		ret = hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+
+		return HAL_I2C_ERROR_NACK; /* error NACK here */
+	}
+
+	/* if start OK and only receiving 1 byte */
 	// TODO: test 1 byte read
 	if(len == 1)
 	{
-		/* set stop bit immediately after STT is clear */
+		/* set stop bit immediately after STT is clear; during reception */
+		/* msp-slau208 1.3.4.2.2 specification */
 		handle->reg->control1 |= UCTXSTP;
-		/* wait for STP to clear */
-		//hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
 	}
 
-	/* wait until RXIFG to be set to begin receiving data */
+	/* wait until RXIFG to be set to acknowledge received data */
 	ret = hal_i2c_register_timeout(handle, UCRXIFG, SET);
 
 	/* receive mode */
@@ -281,17 +291,6 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 			/* read from rx reg */
 			*ptr = handle->reg->rxBuffer;
 
-			/* slave not responding? */
-			if (handle->reg->interruptFlags & UCNACKIFG)
-			{
-				/* trigger a stop condition */
-				handle->reg->control1 |= UCTXSTP;
-				/* stop condition sent? */
-				ret = hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
-
-				return HAL_I2C_ERROR_NACK; /* error NACK here */
-			}
-
 			/* don't wait on single byte or last byte */
 			if( i != (len-1))
 			{
@@ -299,16 +298,27 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 				ret = hal_i2c_register_timeout(handle, UCRXIFG, SET);
 			}
 		}
-		/* trigger a stop condition */
-		handle->reg->control1 |= UCTXSTP;
+
+		/* only set stop bit here if receiving more than 1 byte */
+		if(len != 1)
+		{
+			/* trigger a stop condition */
+			handle->reg->control1 |= UCTXSTP;
+		}
 		ret = hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
 	}
 	else /* something else? */
 	{
-		/* trigger a stop condition */
-		handle->reg->control1 |= UCTXSTP;
-		/* error */
-		return hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+		/* only set start bit here if receiving more than 1 byte */
+		if(len != 1)
+		{
+			/* trigger a stop condition */
+			handle->reg->control1 |= UCTXSTP;
+		}
+		/* don't check stop timeout, not useful info here */
+		hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
+
+		return ret; /* timeout status */
 	}
 
 	/* return timeout status */
