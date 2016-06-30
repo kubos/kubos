@@ -43,6 +43,42 @@
     },
     "hardware": {
       "uartCount": "6",
+      "i2cCount": "2",
+      "defaults": {
+        "i2c": "K_I2C1"
+      },
+      "i2c": {
+        "i2c1": {
+          "scl": {
+            "pin": "GPIO_PIN_6",
+            "mode": "GPIO_MODE_AF_PP",
+            "pullup": "GPIO_NOPULL",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "sda": {
+            "pin": "GPIO_PIN_7",
+            "mode": "GPIO_MODE_AF_OD",
+            "pullup": "GPIO_PULLUP",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "alt": "GPIO_AF4_I2C1"
+        },
+        "i2c2": {
+          "scl": {
+            "pin": "GPIO_PIN_10",
+            "mode": "GPIO_MODE_AF_PP",
+            "pullup": "GPIO_NOPULL",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "sda": {
+            "pin": "GPIO_PIN_11",
+            "mode": "GPIO_MODE_AF_OD",
+            "pullup": "GPIO_PULLUP",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "alt": "GPIO_AF4_I2C2"
+        }
+      },
       "pins": {
         "UART1_TX": "PB6",
         "UART1_RX": "PB7",
@@ -56,8 +92,6 @@
         "UART6_RX": "PC7",
         "USBTX": "PA_2",
         "USBRX": "PA_3",
-        "I2C_SCL": "PB6",
-        "I2C_SDA": "PB7",
         "SPI_MOSI": "PA7",
         "SPI_MISO": "PA6",
         "SPI_SCK": "PA5",
