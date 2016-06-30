@@ -14,6 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ /**
+   * @defgroup I2C
+   * @addtogroup I2C
+   * @{
+   */
 #include "kubos-hal/i2c.h"
 #include "kubos-hal-stm32f4/i2c.h"
 #include "kubos-hal/gpio.h"
@@ -768,3 +773,5 @@ static KI2CStatus hal_i2c_master_setup_write(I2C_HandleTypeDef * hal_handle, uin
 
     return ret;
 }
+
+/* @} */
