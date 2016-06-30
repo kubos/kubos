@@ -3,3 +3,4 @@
 ### API Modules:
  - @subpage GPIO
  - @subpage UART
+ - @subpage I2C
