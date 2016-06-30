@@ -6,6 +6,7 @@ KubOS-HAL is the primary hardware abstraction layer (HAL) for KubOS. One of our 
 
  - @subpage GPIO
  - @subpage UART
+ - @subpage I2C
 
 
 ### Hardware Interfaces:
