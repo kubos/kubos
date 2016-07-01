@@ -1,6 +1,6 @@
 {
     "name" : "msp430f5529-gcc",
-    "version" : "0.0.2",
+    "version" : "0.0.3",
     "inherits": {
       "kubos-msp430-gcc": "openkosmosorg/target-kubos-msp430-gcc#~0.0.1"
     },
