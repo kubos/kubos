@@ -1,7 +1,7 @@
 #!/bin/bash
 this_dir=$(cd "`dirname "$0"`"; pwd)
 kubos_dir=$(cd "$this_dir/.."; pwd)
-out_dir="/"$1
+out_dir=$1
 
 if [ "$out_dir" = "" ]; then
     echo "Error: required output directory missing"
@@ -13,29 +13,42 @@ if [ ! -d "$out_dir" ]; then
     exit 1
 fi
 
-doxygen $kubos_dir/docs/Doxyfile
-mv $kubos_dir/html/* $out_dir
+run_cmd() {
+    echo "$@"
+    $@
+}
 
-cd $kubos_dir/kubos-core
-doxygen docs/Doxyfile
-mv $kubos_dir/kubos-core/html $out_dir/kubos-core
+gendocs() {
+    dir=$1
+    doxyfile=$2
+    version=$3
 
-cd $kubos_dir/libcsp
-doxygen docs/Doxyfile
-mv $kubos_dir/libcsp/html $out_dir/libcsp
+    cd $dir
+    if [ "$version" != "" ]; then
+        echo "( cat $doxyfile ; echo \"PROJECT_NUMBER=$version\" ) | doxygen -"
+        ( cat $doxyfile ; echo "PROJECT_NUMBER=$version" ) | doxygen -
+    else
+        run_cmd doxygen $doxyfile
+    fi
+}
 
-cd $kubos_dir/freertos/os
-doxygen docs/Doxyfile
-mv $kubos_dir/freertos/os/html $out_dir/freertos
+gendocs_yt_module() {
+    module_dir=$1
+    out_relpath=$2
 
-cd $kubos_dir/hal/kubos-hal
-doxygen docs/Doxyfile
-mv $kubos_dir/hal/kubos-hal/html $out_dir/kubos-hal
+    run_cmd cd $module_dir
+    module_version=$(yt version 2>&1 | awk '{ print $2 }')
 
-cd $kubos_dir/hal/kubos-hal-stm32f4
-doxygen docs/Doxyfile
-mv $kubos_dir/hal/kubos-hal-stm32f4/html $out_dir/kubos-hal/kubos-hal-stm32f4
+    gendocs $module_dir docs/Doxyfile $module_version
+    run_cmd mv $module_dir/html $out_dir/$out_relpath
+}
 
-cd $kubos_dir/hal/kubos-hal-msp430f5529
-doxygen docs/Doxyfile
-mv $kubos_dir/hal/kubos-hal-msp430f5529/html $out_dir/kubos-hal/kubos-hal-msp430f5529
+gendocs $kubos_dir docs/Doxyfile
+run_cmd mv $kubos_dir/html/* $out_dir
+
+gendocs_yt_module $kubos_dir/kubos-core kubos-core
+gendocs_yt_module $kubos_dir/libcsp libcsp
+gendocs_yt_module $kubos_dir/freertos/os freertos
+gendocs_yt_module $kubos_dir/hal/kubos-hal kubos-hal
+gendocs_yt_module $kubos_dir/hal/kubos-hal-stm32f4 kubos-hal/kubos-hal-stm32f4
+gendocs_yt_module $kubos_dir/hal/kubos-hal-msp430f5529 kubos-hal/kubos-hal-msp430f5529

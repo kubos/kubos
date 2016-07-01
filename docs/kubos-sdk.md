@@ -183,3 +183,18 @@ Flashing your project using the kubos tool is a relatively straightforward proce
 *Note: If your current user does not have read/write permission to your hardware device you may need to run this command as root*
 
 		$ sudo kubos flash
+
+#### Debug your project
+
+A gdb server must be started to allow your gdb instance to connect and debug directly on your hardware device.
+After building your project with `kubos build` kubos can manage a gdb server and gdb instance for you.
+
+Start a gdb server and instance for you:
+Note: this may need to run as root depending on your usb device permissions
+
+		$ kubos debug
+
+Additionally you can interact directly with the gdb server:
+
+		$ kubos server <start, stop, restart, status>
+
