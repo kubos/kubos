@@ -1,6 +1,6 @@
 {
   "name": "pyboard-gcc",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "inherits": {
     "stm32f405-gcc": "openkosmosorg/target-stm32f405-gcc#~0.0.1"
   },
