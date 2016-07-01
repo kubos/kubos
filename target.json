@@ -32,7 +32,7 @@
   ],
   "config": {
     "hardware": {
-      "externalClock": "8000000",
+      "externalClock": "12000000",
       "console": {
         "uart": "K_UART6",
         "baudRate": "115200"
