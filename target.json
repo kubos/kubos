@@ -1,6 +1,6 @@
 {
   "name": "stm32f405-gcc",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "inherits": {
     "kubos-arm-none-eabi-gcc": "openkosmosorg/target-kubos-arm-none-eabi-gcc#~0.0.1"
   },
