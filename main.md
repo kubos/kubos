@@ -1,4 +1,4 @@
-### **KubOS**
+### KubOS RT
 
 KubOS RT is a real time environment designed to run on any satellite subsystem, providing out of the box integration with several well known hardware buses and software protocols used in satellites.
 
