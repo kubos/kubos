@@ -24,7 +24,18 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
+/**
+ * Return FreeRTOS's tick count
+ */
 uint32_t HAL_GetTick(void)
 {
     return xTaskGetTickCount();
+}
+
+/**
+ * Gives FreeRTOS time to increment the tick
+ */
+void HAL_IncTick(void)
+{
+    vTaskDelay(10);
 }

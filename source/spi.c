@@ -16,19 +16,136 @@
  */
 
 #include "kubos-hal-stm32f4/spi.h"
-#include "stm32cubef4/stm32f4xx_hal_spi.h"
 
-static k_spi_handle k_spi_dev[K_NUM_SPI];
-static uint32_t spi_timeout = 256;
+static hal_spi_handle * hal_spi_get_handle(KSPINum spi);
+static hal_spi_handle * hal_spi_device_init(KSPI * spi);
+static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle);
+static void hal_spi_gpio_init();
 
-k_spi_handle * k_prv_spi_get_handle(KSPINum spi)
+static hal_spi_handle hal_spi_dev[K_NUM_SPI];
+static uint32_t spi_timeout = 1000;
+
+/** Functions implemented from KubOS-HAL SPI Interface **/
+
+void kprv_spi_dev_init(KSPINum spi_num)
 {
-    return &k_spi_dev[spi];
+    KSPI * spi = kprv_spi_get(spi_num);
+    hal_spi_handle * handle = hal_spi_device_init(spi);
+    hal_spi_hw_init(handle);
 }
 
-KSPIStatus k_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
+void kprv_spi_dev_terminate(KSPINum spi)
 {
-    k_spi_handle * handle = k_prv_spi_get_handle(spi);
-    HAL_StatusTypeDef status = HAL_SPI_Transmit(handle->hal_handle, buffer, len, spi_timeout);
+    hal_spi_handle * handle = hal_spi_get_handle(spi);
+    //hal_spi_terminate(handle);
+}
 
+KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
+{
+    hal_spi_handle * handle = hal_spi_get_handle(spi);
+    HAL_StatusTypeDef status = HAL_SPI_Transmit(&(handle->hal_handle), buffer, len, spi_timeout);
+    return (KSPIStatus)status;
+}
+
+KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len)
+{
+    hal_spi_handle * handle = hal_spi_get_handle(spi);
+    HAL_StatusTypeDef status = HAL_SPI_Receive(&(handle->hal_handle), buffer, len, spi_timeout);
+    return (KSPIStatus)status;
+}
+
+KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len)
+{
+    hal_spi_handle * handle = hal_spi_get_handle(spi);
+    HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(&(handle->hal_handle), txBuffer, rxBuffer, len, spi_timeout);
+    return (KSPIStatus)status;
+}
+
+/** Private functions **/
+
+static hal_spi_handle * hal_spi_get_handle(KSPINum spi)
+{
+    return &hal_spi_dev[spi];
+}
+
+static hal_spi_handle * hal_spi_device_init(KSPI * spi)
+{
+    hal_spi_handle * handle = NULL;
+    if (spi != NULL)
+    {
+        handle = hal_spi_get_handle(spi->bus_num);
+        if (handle != NULL)
+        {
+            KSPIConf conf = spi->config;
+            handle->kspi = spi;
+            switch(spi->bus_num)
+            {
+                case K_SPI1:
+                {
+                    handle->hal_handle.Instance = SPI1;
+                    break;
+                }
+                default:
+                {
+                    handle = NULL;
+                }
+            }
+        }
+    }
+    return handle;
+}
+
+static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
+{
+    SPI_HandleTypeDef * SPIHandle = &(handle->hal_handle);
+    if (handle->kspi->bus_num == K_SPI1)
+    {
+        /* Enable SPI clock */
+    	__HAL_RCC_SPI1_CLK_ENABLE();
+
+        /* Init pins */
+		//TM_SPI1_INT_InitPins(pinspack);
+        hal_spi_gpio_init();
+
+		/* Set options */
+		SPIHandle->Init.DataSize = SPI_DATASIZE_8BIT;
+    }
+
+    /* Fill SPI settings */
+	SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+	SPIHandle->Init.FirstBit = SPI_FIRSTBIT_MSB;
+	SPIHandle->Init.Mode = SPI_MODE_MASTER;
+
+	SPIHandle->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+	SPIHandle->Init.CRCPolynomial = 7;
+	SPIHandle->Init.TIMode = SPI_TIMODE_DISABLE;
+	SPIHandle->Init.NSS = SPI_NSS_SOFT;
+	SPIHandle->Init.Direction = SPI_DIRECTION_2LINES;
+
+
+	/* Disable first */
+	__HAL_SPI_DISABLE(SPIHandle);
+
+    if (HAL_SPI_Init(SPIHandle) != HAL_OK)
+    {
+        return SPI_ERROR;
+    }
+
+	/* Enable SPI */
+	__HAL_SPI_ENABLE(SPIHandle);
+
+    return SPI_OK;
+}
+
+
+static void hal_spi_gpio_init()
+{
+    GPIO_InitTypeDef  GPIO_InitStruct;
+    /* SPI GPIO Init */
+    GPIO_InitStruct.Pin       = GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull      = GPIO_NOPULL;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }

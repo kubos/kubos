@@ -19,7 +19,12 @@
 
 #include "kubos-hal/spi.h"
 
+#include "stm32f4xx.h"
+#include "stm32f4xx_hal_spi.h"
+
 typedef struct {
+    /* KubOS-HAL structure */
+    KSPI * kspi;
     /* STM32CubeF4's special structure */
     SPI_HandleTypeDef hal_handle;
 } hal_spi_handle;
