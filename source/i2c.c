@@ -215,6 +215,12 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
     /* Generate Stop */
     hal_handle->Instance->CR1 |= I2C_CR1_STOP;
 
+    /* clock stretching? */
+    if ((ret = hal_i2c_check_flag_timeout(hal_handle, I2C_FLAG_BUSY, SET)) != I2C_OK)
+    {
+        return ret;
+    }
+
     return ret;
 }
 
@@ -238,8 +244,15 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
     {
         if (len == 1)
         {
+
             /* Wait for RXNE */
             if ((ret = hal_i2c_check_flag_timeout(hal_handle, I2C_FLAG_RXNE, SET)) != I2C_OK)
+            {
+                return ret;
+            }
+
+            /* clock stretching? */
+            if ((ret = hal_i2c_check_flag_timeout(hal_handle, I2C_FLAG_BUSY, SET)) != I2C_OK)
             {
                 return ret;
             }
@@ -307,24 +320,16 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
         }
         else
         {
-            /* Wait for RXNE to be set */
-            if ((ret = hal_i2c_check_flag_timeout(hal_handle, I2C_FLAG_RXNE, SET)) != I2C_OK)
+
+            /* Wait for BTF to be set */
+            if ((ret = hal_i2c_check_btf_timeout(hal_handle)) != I2C_OK)
             {
                 return ret;
             }
 
-            /* Read dataN */
             uint8_t val = hal_handle->Instance->DR;
             (*ptr++) = val;
             len--;
-
-            /* Read again if BTF is set */
-            if (__HAL_I2C_GET_FLAG(hal_handle, I2C_FLAG_BTF) == SET)
-            {
-                val = hal_handle->Instance->DR;
-                (*ptr++) = val;
-                len--;
-            }
         }
     }
     return ret;
