@@ -95,15 +95,18 @@ void kprv_uart_dev_init(KUARTNum uart)
     //
     HAL_GPIO_Init(STM32F4_PIN_GPIO(tx), &(GPIO_InitTypeDef) {
         .Pin   = STM32F4_PIN_MASK(tx),
-        .Speed = GPIO_SPEED_FAST,
+        .Speed = GPIO_SPEED_LOW,
+        .Pull = GPIO_NOPULL,
         .Mode  = GPIO_MODE_AF_PP,
         .Alternate = uart_alt(uart)
     });
 
     HAL_GPIO_Init(STM32F4_PIN_GPIO(rx), &(GPIO_InitTypeDef) {
         .Pin  = STM32F4_PIN_MASK(rx),
-        .Mode = GPIO_MODE_INPUT,
-        .Pull = GPIO_PULLUP
+        .Speed = GPIO_SPEED_LOW,
+        .Pull = GPIO_NOPULL,
+        .Mode  = GPIO_MODE_AF_PP,
+        .Alternate = uart_alt(uart)
     });
 
     kprv_gpio_alt_config(STM32F4_PIN_GPIO(rx), STM32F4_PIN_OFFSET(rx),
@@ -173,6 +176,9 @@ void k_uart_write_immediate(KUARTNum uart, char c)
     while (!CHECK_BIT(dev->SR, USART_FLAG_TXE));
 }
 
+#define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
+
+
 static inline void uart_irq_handler(KUARTNum uart)
 {
     portBASE_TYPE task_woken = pdFALSE;
@@ -182,14 +188,42 @@ static inline void uart_irq_handler(KUARTNum uart)
         return;
     }
 
-    if (CHECK_BIT(dev->SR, USART_SR_ORE)) {
-        // clear out the data register on overrun
-        uint32_t tmpreg = dev->SR;
+    HAL_NVIC_DisableIRQ(uart_irqn(uart));
+
+    if (__GET_FLAG(dev, USART_SR_PE))
+    {
+        // clear out the data register on parity error
+        volatile uint32_t tmpreg = dev->SR;
         tmpreg = dev->DR;
         ((void)tmpreg);
     }
 
-    if (CHECK_BIT(dev->SR, USART_SR_RXNE)) {
+    if (__GET_FLAG(dev, USART_SR_FE))
+    {
+        // clear out the data register on framing error
+        volatile uint32_t tmpreg = dev->SR;
+        tmpreg = dev->DR;
+        ((void)tmpreg);
+    }
+
+    if (__GET_FLAG(dev, USART_SR_NE))
+    {
+        // clear out the data register on noise error
+        volatile uint32_t tmpreg = dev->SR;
+        tmpreg = dev->DR;
+        ((void)tmpreg);
+    }
+
+    if (__GET_FLAG(dev, USART_SR_ORE))
+    {
+        // clear out the data register on overrun
+        volatile uint32_t tmpreg = dev->SR;
+        tmpreg = dev->DR;
+        ((void)tmpreg);
+    }
+
+    if (__GET_FLAG(dev, USART_SR_RXNE) )
+    {
         char c = dev->DR;
         xQueueSendToBackFromISR(k_uart->rx_queue, (void *) &c, &task_woken);
         if (task_woken != pdFALSE) {
@@ -197,7 +231,8 @@ static inline void uart_irq_handler(KUARTNum uart)
         }
     }
 
-    if (CHECK_BIT(dev->SR, USART_SR_TXE)) {
+    if (__GET_FLAG(dev, USART_SR_TXE) )
+    {
         char c;
         task_woken = pdFALSE;
         BaseType_t result = xQueueReceiveFromISR(k_uart->tx_queue,
@@ -209,12 +244,20 @@ static inline void uart_irq_handler(KUARTNum uart)
         } else {
             // nothing to send, disable interrupt
             CLEAR_BIT(dev->CR1, USART_CR1_TXEIE);
+            CLEAR_BIT(dev->CR1, USART_CR1_TCIE);
         }
 
         if (task_woken != pdFALSE) {
             portYIELD();
         }
     }
+
+    if (__GET_FLAG(dev, USART_SR_TC))
+    {
+        CLEAR_BIT(dev->CR1, USART_CR1_TCIE);
+    }
+
+    HAL_NVIC_EnableIRQ(uart_irqn(uart));
 }
 
 #if YOTTA_CFG_HARDWARE_UARTCOUNT >= 1
