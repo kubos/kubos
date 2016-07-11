@@ -95,16 +95,16 @@ void kprv_uart_dev_init(KUARTNum uart)
     //
     HAL_GPIO_Init(STM32F4_PIN_GPIO(tx), &(GPIO_InitTypeDef) {
         .Pin   = STM32F4_PIN_MASK(tx),
-        .Speed = GPIO_SPEED_LOW,
-        .Pull = GPIO_NOPULL,
+        .Speed = GPIO_SPEED_HIGH,
+        .Pull = GPIO_PULLUP,
         .Mode  = GPIO_MODE_AF_PP,
         .Alternate = uart_alt(uart)
     });
 
     HAL_GPIO_Init(STM32F4_PIN_GPIO(rx), &(GPIO_InitTypeDef) {
         .Pin  = STM32F4_PIN_MASK(rx),
-        .Speed = GPIO_SPEED_LOW,
-        .Pull = GPIO_NOPULL,
+        .Speed = GPIO_SPEED_HIGH,
+        .Pull = GPIO_PULLUP,
         .Mode  = GPIO_MODE_AF_PP,
         .Alternate = uart_alt(uart)
     });
@@ -112,47 +112,50 @@ void kprv_uart_dev_init(KUARTNum uart)
     kprv_gpio_alt_config(STM32F4_PIN_GPIO(rx), STM32F4_PIN_OFFSET(rx),
                          uart_alt(uart));
 
-    HAL_NVIC_SetPriority(uart_irqn(uart), 15, 0);
+    HAL_NVIC_SetPriority(uart_irqn(uart), 5, 0);
     HAL_NVIC_EnableIRQ(uart_irqn(uart));
 
-    USART_HandleTypeDef u = {
+    UART_HandleTypeDef u = {
         .Instance = uart_dev(uart),
         .Init = {
             .BaudRate = k_uart->conf.baud_rate,
-            .Mode = USART_MODE_TX_RX
+            .Mode = UART_MODE_TX | UART_MODE_RX
         }
     };
 
     switch (k_uart->conf.word_len) {
         case K_WORD_LEN_9BIT:
-            u.Init.WordLength = USART_WORDLENGTH_9B; break;
+            u.Init.WordLength = UART_WORDLENGTH_9B; break;
         case K_WORD_LEN_8BIT:
         default:
-            u.Init.WordLength = USART_WORDLENGTH_8B; break;
+            u.Init.WordLength = UART_WORDLENGTH_8B; break;
     }
 
     switch (k_uart->conf.stop_bits) {
-        case K_STOP_BITS_1_5:
-            u.Init.StopBits = USART_STOPBITS_1_5; break;
+        // case K_STOP_BITS_1_5:
+        //     u.Init.StopBits = UART_STOPBITS_1_5; break;
         case K_STOP_BITS_2:
-            u.Init.StopBits = USART_STOPBITS_2; break;
+            u.Init.StopBits = UART_STOPBITS_2; break;
         case K_STOP_BITS_1:
         default:
-            u.Init.StopBits = USART_STOPBITS_1; break;
+            u.Init.StopBits = UART_STOPBITS_1; break;
     }
 
     switch (k_uart->conf.parity) {
         case K_PARITY_EVEN:
-            u.Init.Parity = USART_PARITY_EVEN; break;
+            u.Init.Parity = UART_PARITY_EVEN; break;
         case K_PARITY_ODD:
-            u.Init.Parity = USART_PARITY_ODD; break;
+            u.Init.Parity = UART_PARITY_ODD; break;
         case K_PARITY_NONE:
         default:
-            u.Init.Parity = USART_PARITY_NONE; break;
+            u.Init.Parity = UART_PARITY_NONE; break;
     }
 
-    HAL_USART_Init(&u);
-    __HAL_USART_ENABLE_IT(&u, USART_IT_RXNE);
+    u.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    u.Init.OverSampling = UART_OVERSAMPLING_16;
+
+    HAL_UART_Init(&u);
+    __HAL_UART_ENABLE_IT(&u, USART_IT_RXNE);
 }
 
 void kprv_uart_enable_tx_int(KUARTNum uart)
