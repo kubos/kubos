@@ -23,6 +23,7 @@
 #include "kubos-hal/gpio.h"
 #include "kubos-hal/uart.h"
 #include "kubos-hal-stm32f4/stm32f4_gpio.h"
+#include "stm32cubef4/stm32f4xx_hal_uart.h"
 
 static inline USART_TypeDef *uart_dev(KUARTNum uart)
 {
@@ -155,7 +156,7 @@ void kprv_uart_dev_init(KUARTNum uart)
     u.Init.OverSampling = UART_OVERSAMPLING_16;
 
     HAL_UART_Init(&u);
-    __HAL_UART_ENABLE_IT(&u, USART_IT_RXNE);
+    __HAL_UART_ENABLE_IT(&u, UART_IT_RXNE);
 }
 
 void kprv_uart_enable_tx_int(KUARTNum uart)
@@ -176,7 +177,7 @@ void k_uart_write_immediate(KUARTNum uart, char c)
     }
 
     dev->DR = c;
-    while (!CHECK_BIT(dev->SR, USART_FLAG_TXE));
+    while (!CHECK_BIT(dev->SR, UART_FLAG_TXE));
 }
 
 #define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
