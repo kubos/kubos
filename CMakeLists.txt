@@ -6,7 +6,7 @@ set (CSP_VERSION "1.4.0" CACHE STRING "")
 option (RDP "" OFF)
 option (QOS "" OFF)
 option (PROMISC "" OFF)
-option (CRC32 "" OFF)
+option (CRC32 "" ON)
 option (HMAC "" OFF)
 option (XTEA "" OFF)
 option (BINDINGS "" OFF)
@@ -14,7 +14,7 @@ option (EXAMPLES "" OFF)
 option (DEDUP "" OFF)
 option (VERBOSE "" OFF)
 option (IF_I2C "" OFF)
-option (IF_KISS "" OFF)
+option (IF_KISS "" ON)
 option (IF_CAN "" OFF)
 option (IF_ZMQHUB "" OFF)
 option (CSP_DEBUG "" ON)
@@ -60,7 +60,10 @@ add_library (csp STATIC
              $<$<OR:$<BOOL:${HMAC}>,$<BOOL:${XTEA}>>:src/crypto/csp_sha1.c>
              $<$<BOOL:${XTEA}>:src/crypto/csp_xtea.c>
              $<$<BOOL:${CAN_SOCKETCAN}>:src/drivers/can/can_socketcan.c>
+             src/drivers/usart/usart_kubos.c
              src/interfaces/csp_if_lo.c
+             src/interfaces/csp_if_kiss.c
+             src/csp_crc32.c
              src/rtable/csp_rtable_${RTABLE}.c
              $<$<BOOL:${RDP}>:src/transport/csp_rdp.c>
              src/transport/csp_udp.c)
@@ -73,7 +76,7 @@ set (CSP_LITTLE_ENDIAN ON)
 if (TARGET_LIKE_FREERTOS)
     set (CSP_FREERTOS ON)
     set (CSP_ARCH "freertos")
-    target_include_directories (csp PUBLIC ${FREERTOS_INCLUDES})
+    target_include_directories (csp PUBLIC ${FREERTOS_INCLUDES} /home/mitch/KUBOS/hal/kubos-hal-stm32f4/kubos-hal-stm32f4)
 elseif (TARGET_LIKE_LINUX)
     set (CSP_POSIX ON)
     set (CSP_ARCH "posix")

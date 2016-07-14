@@ -24,12 +24,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string.h>
 
 #include <csp/csp.h>
+#include <csp/csp_crc32.h>
 #include <csp/csp_endian.h>
 #include <csp/csp_platform.h>
 #include <csp/csp_interface.h>
 #include <csp/interfaces/csp_if_kiss.h>
 #include <csp/arch/csp_semaphore.h>
-#include <csp/csp_crc32.h>
+
 
 #define KISS_MTU				256
 
