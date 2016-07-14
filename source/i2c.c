@@ -632,7 +632,7 @@ static KI2CStatus hal_i2c_check_flag_timeout(I2C_HandleTypeDef * handle, uint32_
             return I2C_ERROR_TIMEOUT;
         }
         count++;
-        vTaskDelay(50);
+        vTaskDelay(10);
     }
     return I2C_OK;
 }
