@@ -40,9 +40,9 @@ void usart_putstr(char *buf, int len) {
     k_uart_write(uart, buf, len);
 }
 
-char* usart_getc(void) {
-    char* buf = malloc(1);
-    k_uart_read(K_UART6, buf, 1);
+char usart_getc(void) {
+    char buf = 0;
+    k_uart_read(K_UART6, &buf, 1);
     return buf;
 }
 

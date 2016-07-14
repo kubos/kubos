@@ -107,7 +107,7 @@ void usart_putstr(char *buf, int len);
  * @return Character received
  *
  */
-char* usart_getc(void);
+char usart_getc(void);
 
 /**
  *
