@@ -37,7 +37,7 @@ uint32_t HAL_GetTick(void)
  */
 void HAL_IncTick(void)
 {
-    vTaskDelay(10);
+    vTaskDelay(1);
 }
 
 void HAL_Delay(uint32_t Delay)

@@ -27,7 +27,7 @@
 #include "stm32f4xx.h"
 
 // @TODO: This timeout value might be excessive and could be better tuned.
-#define FLAG_CHECK_TIMEOUT 100
+#define FLAG_CHECK_TIMEOUT 200
 
 /**
  * Fetches i2c bus data structure
@@ -632,7 +632,7 @@ static KI2CStatus hal_i2c_check_flag_timeout(I2C_HandleTypeDef * handle, uint32_
             return I2C_ERROR_TIMEOUT;
         }
         count++;
-        vTaskDelay(10);
+        vTaskDelay(5);
     }
     return I2C_OK;
 }
