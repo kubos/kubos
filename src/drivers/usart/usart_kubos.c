@@ -22,9 +22,14 @@
 
 KUARTNum uart;
 
+
 void usart_init(struct usart_conf *conf) {
     /* only need dev num */
     uart = (KUARTNum)*conf->device;
+}
+
+void usart_set_callback(usart_callback_t callback) {
+    usart_callback = callback;
 }
 
 void usart_insert(char c, void *pxTaskWoken) {

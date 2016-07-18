@@ -67,6 +67,7 @@ void usart_init(struct usart_conf *conf);
  */
 typedef void (*usart_callback_t) (uint8_t *buf, int len, void *pxTaskWoken);
 
+usart_callback_t usart_callback;
 /**
  *
  *
