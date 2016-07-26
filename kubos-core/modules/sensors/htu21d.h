@@ -14,13 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
- * @defgroup SENSORS
- * @addtogroup SENSORS
+ * @defgroup HTU21D HTU21D Temperature and Humidity Sensor
+ * @addtogroup HTU21D
  * @{
  */
+
 /**
- * @brief HTU21D Temperature and Humidty Sensor
+ *
+ * @file       htu21d.h
+ * @brief HTU21D Temperature and Humidity Sensor
  *
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
@@ -35,6 +39,7 @@
  *
  * This would enable the htu21d sensor code and configure it for the I2C bus K_I2C1.
  */
+
 #ifdef YOTTA_CFG_SENSORS_HTU21D
 #ifndef HTU21D_H
 #define HTU21D_H

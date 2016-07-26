@@ -26,3 +26,5 @@ KubOS Core Flight Middleware
   - @subpage GPS
  - Logging
   - @subpage KLOG
+ - Sensors
+  - @subpage HTU21D
