@@ -9,7 +9,7 @@
 #cmakedefine CSP_DEBUG
 #cmakedefine CSP_VERBOSE
 #cmakedefine CSP_USE_RDP
-#define CSP_USE_CRC32
+#cmakedefine CSP_USE_CRC32
 #cmakedefine CSP_USE_HMAC
 #cmakedefine CSP_USE_XTEA
 #cmakedefine CSP_USE_PROMISC

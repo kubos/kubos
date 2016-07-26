@@ -6,7 +6,7 @@ set (CSP_VERSION "1.4.0" CACHE STRING "")
 option (RDP "" OFF)
 option (QOS "" OFF)
 option (PROMISC "" OFF)
-option (CRC32 "" ON)
+option (CSP_USE_CRC32 "" ON)
 option (HMAC "" OFF)
 option (XTEA "" OFF)
 option (BINDINGS "" OFF)
@@ -60,10 +60,9 @@ add_library (csp STATIC
              $<$<OR:$<BOOL:${HMAC}>,$<BOOL:${XTEA}>>:src/crypto/csp_sha1.c>
              $<$<BOOL:${XTEA}>:src/crypto/csp_xtea.c>
              $<$<BOOL:${CAN_SOCKETCAN}>:src/drivers/can/can_socketcan.c>
-             src/drivers/usart/usart_kubos.c
+              $<$<BOOL:${TARGET_LIKE_KUBOS_RT}>:src/drivers/usart/usart_kubos.c>
              src/interfaces/csp_if_lo.c
-             src/interfaces/csp_if_kiss.c
-             src/csp_crc32.c
+             $<$<BOOL:${IF_KISS}>:src/interfaces/csp_if_kiss.c>
              src/rtable/csp_rtable_${RTABLE}.c
              $<$<BOOL:${RDP}>:src/transport/csp_rdp.c>
              src/transport/csp_udp.c)
@@ -76,7 +75,7 @@ set (CSP_LITTLE_ENDIAN ON)
 if (TARGET_LIKE_FREERTOS)
     set (CSP_FREERTOS ON)
     set (CSP_ARCH "freertos")
-    target_include_directories (csp PUBLIC ${FREERTOS_INCLUDES} /usr/lib/yotta_modules/kubos-hal-stm32f4/kubos-hal-stm32f4)
+    target_include_directories (csp PUBLIC ${FREERTOS_INCLUDES})
 elseif (TARGET_LIKE_LINUX)
     set (CSP_POSIX ON)
     set (CSP_ARCH "posix")
