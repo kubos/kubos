@@ -36,9 +36,25 @@
 #ifdef YOTTA_CFG_SENSORS_BNO055
 
 #include "kubos-core/modules/sensors/bno055.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
+
+/**
+ * I2C bus that the sensor is wired into. Defined in the application
+ * config.json file
+ */
+#ifndef I2C_BUS
+#define I2C_BUS YOTTA_CFG_SENSORS_BNO055_I2C_BUS
+#endif
+
+#define BNO055_ADDRESS_A (0x28)
+#define BNO055_ID (0xA0)
+
+#define NUM_BNO055_OFFSET_REGISTERS (22)
+
+/* define for crystal */
+#define EXT_CRYSTAL 1
+#define NO_CRYSTAL 0
 
 /* private functions */
 static uint8_t read_byte(bno055_reg_t reg);
@@ -47,12 +63,20 @@ static KI2CStatus write_byte( bno055_reg_t reg, uint8_t value);
 
 /* static globals */
 static bno055_opmode_t _mode;
-static uint8_t _bus_num;
 
-KI2CStatus bno055_init(uint8_t bus, bno055_opmode_t mode)
+KI2CStatus bno055_setup(bno055_opmode_t mode)
 {
-	/* set bus num for i2c */
-	_bus_num = bus;
+	KI2CConf conf = {
+		.addressing_mode = K_ADDRESSINGMODE_7BIT,
+		.role = K_MASTER,
+		.clock_speed = 10000
+	};
+	k_i2c_init(I2C_BUS, &conf);
+	return bno055_init(mode);
+}
+
+KI2CStatus bno055_init(bno055_opmode_t mode)
+{
 	/* set global mode */
 	_mode = mode;
 	/* return variable */
@@ -63,11 +87,18 @@ KI2CStatus bno055_init(uint8_t bus, bno055_opmode_t mode)
 	{
 	    return ret; /* error */
 	}
-	/* wait for boot */
-	vTaskDelay(1000);
 
-    /* id of IMU */
-    volatile uint8_t id = read_byte(BNO055_CHIP_ID_ADDR);
+	volatile uint8_t id;
+	int i = 0;
+	for (i = 0; i < 10; i++)
+	{
+		id = read_byte(BNO055_CHIP_ID_ADDR);
+		if (id == BNO055_ID)
+		{
+			break;
+		}
+		vTaskDelay(50);
+	}
 
 	/* Make sure we have the right device */
 	if(id != BNO055_ID)
@@ -217,7 +248,7 @@ void get_system_status(uint8_t *system_status, uint8_t *self_test_result, uint8_
 	if (system_error != 0)
 		*system_error = read_byte(BNO055_SYS_ERR_ADDR);
 
-	vTaskDelay(200);
+	vTaskDelay(50);
 }
 
 
@@ -271,11 +302,12 @@ uint8_t get_single_data(bno055_reg_t reg)
     return value;
 }
 
-void get_data_vector(vector_type_t type, double* vector)
+bno055_vector_data_t get_data_vector(vector_type_t type)
 {
 	/* output buffer */
 	uint8_t buffer[6];
 	uint8_t *pBuffer;
+	bno055_vector_data_t vector;
 
 	int16_t x, y, z;
 	x = y = z = 0;
@@ -295,37 +327,39 @@ void get_data_vector(vector_type_t type, double* vector)
 	switch (type) {
 	case VECTOR_MAGNETOMETER:
 		/* 1uT = 16 LSB */
-		*vector = ((double) x) / 16.0;
-		*(vector+1) = ((double) y) / 16.0;
-		*(vector+2) = ((double) z) / 16.0;
+		vector.x = ((double) x) / 16.0;
+		vector.y = ((double) y) / 16.0;
+		vector.z = ((double) z) / 16.0;
 		break;
 	case VECTOR_GYROSCOPE:
 		/* 1rps = 900 LSB */
-		*vector = ((double) x) / 900.0;
-		*(vector+1) = ((double) y) / 900.0;
-		*(vector+2) = ((double) z) / 900.0;
+		vector.x = ((double) x) / 900.0;
+		vector.y = ((double) y) / 900.0;
+		vector.z = ((double) z) / 900.0;
 		break;
 	case VECTOR_EULER:
 		/* 1 degree = 16 LSB */
-		*vector = ((double) x) / 16.0;
-		*(vector+1) = ((double) y) / 16.0;
-		*(vector+2) = ((double) z) / 16.0;
+		vector.x = ((double) x) / 16.0;
+		vector.y = ((double) y) / 16.0;
+		vector.z = ((double) z) / 16.0;
 		break;
 	case VECTOR_ACCELEROMETER:
 	case VECTOR_LINEARACCEL:
 	case VECTOR_GRAVITY:
 		/* 1m/s^2 = 100 LSB */
-		*vector = ((double) x) / 100.0;
-		*(vector+1) = ((double) y) / 100.0;
-		*(vector+2) = ((double) z) / 100.0;
+		vector.x = ((double) x) / 100.0;
+		vector.y = ((double) y) / 100.0;
+		vector.z = ((double) z) / 100.0;
 		break;
 	}
+	return vector;
 }
 
-void get_position(double *vector)
+bno055_quat_data_t get_position()
 {
 	/* data buffer */
 	uint8_t buffer[8];
+
 
 	int16_t x, y, z, w;
 	x = y = z = w = 0;
@@ -340,10 +374,14 @@ void get_position(double *vector)
 	/* Assign to Quaternion */
 	const double scale = (1.0 / (1 << 14));
 
-	*vector = scale * w;
-	*(vector+1) = scale * x;
-	*(vector+2) = scale * y;
-	*(vector+3) = scale * z;
+	bno055_quat_data_t data = {
+		.w = scale * w,
+		.x = scale * x,
+		.y = scale * y,
+		.z = scale * z
+	};
+
+	return data;
 }
 
 int get_sensor_offset_bytes(uint8_t* calibData)
@@ -485,13 +523,13 @@ static uint8_t read_byte(bno055_reg_t reg)
 	KI2CStatus ret = I2C_ERROR;
 
 	/* transmit reg */
-	if((ret = k_i2c_write(_bus_num, BNO055_ADDRESS_A, (uint8_t*)&reg, 1)) != I2C_OK)
+	if((ret = k_i2c_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)&reg, 1)) != I2C_OK)
 	{
 	    return (uint8_t)ret; /* error */
 	}
-	vTaskDelay(10);
+	vTaskDelay(5);
 	/* receive value */
-	if((ret = k_i2c_read(_bus_num, BNO055_ADDRESS_A, &value, 1)) != I2C_OK)
+	if((ret = k_i2c_read(I2C_BUS, BNO055_ADDRESS_A, &value, 1)) != I2C_OK)
 	{
 	    return (uint8_t)ret; /* error */
 	}
@@ -506,10 +544,25 @@ static KI2CStatus read_length(bno055_reg_t reg, uint8_t* buffer, uint8_t len)
     KI2CStatus ret = I2C_ERROR;
 
 	/* transmit reg */
-	ret = k_i2c_write(_bus_num, BNO055_ADDRESS_A, (uint8_t*)&reg, 1);
-	vTaskDelay(10);
+	ret = k_i2c_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)&reg, 1);
+	vTaskDelay(5);
 	/* receive array */
-	ret = k_i2c_read(_bus_num, BNO055_ADDRESS_A, buffer, len);
+	ret = k_i2c_read(I2C_BUS, BNO055_ADDRESS_A, buffer, len);
+
+	/* return status */
+	return ret;
+}
+
+static KI2CStatus just_read_length(bno055_reg_t reg, uint8_t* buffer, uint8_t len)
+{
+	/* status val */
+    KI2CStatus ret = I2C_ERROR;
+
+	/* transmit reg */
+	// ret = k_i2c_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)&reg, 1);
+	// vTaskDelay(10);
+	/* receive array */
+	ret = k_i2c_read(I2C_BUS, BNO055_ADDRESS_A, buffer, len);
 
 	/* return status */
 	return ret;
@@ -526,8 +579,8 @@ static KI2CStatus write_byte(bno055_reg_t reg, uint8_t value)
     KI2CStatus ret = I2C_ERROR;
 
 	/* transmit reg and value */
-	ret = k_i2c_write(_bus_num, BNO055_ADDRESS_A, pBuffer, 2);
-	vTaskDelay(10);
+	ret = k_i2c_write(I2C_BUS, BNO055_ADDRESS_A, pBuffer, 2);
+	vTaskDelay(5);
 
 	return ret;
 }

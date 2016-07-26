@@ -40,15 +40,6 @@
 #include <stdint.h>
 #include "kubos-hal/i2c.h"
 
-#define BNO055_ADDRESS_A (0x28)
-#define BNO055_ID (0xA0)
-
-#define NUM_BNO055_OFFSET_REGISTERS (22)
-
-/* define for crystal */
-#define EXT_CRYSTAL 1
-#define NO_CRYSTAL 0
-
 typedef enum
 {
 	/* Page id register definition */
@@ -275,8 +266,24 @@ typedef enum
 	VECTOR_GRAVITY = BNO055_GRAVITY_DATA_X_LSB_ADDR
 } vector_type_t;
 
+typedef struct
+{
+	double w;
+	double x;
+	double y;
+	double z;
+} bno055_quat_data_t;
+
+typedef struct
+{
+	double x;
+	double y;
+	double z;
+} bno055_vector_data_t;
+
 /* config functions */
-KI2CStatus bno055_init(uint8_t bus, bno055_opmode_t mode);
+KI2CStatus bno055_setup(bno055_opmode_t mode);
+KI2CStatus bno055_init(bno055_opmode_t mode);
 KI2CStatus set_mode(bno055_opmode_t mode);
 uint8_t get_mode(void);
 
@@ -289,8 +296,8 @@ void get_calibration( uint8_t* system, uint8_t* gyro, uint8_t* accel, uint8_t* m
 
 /* data functions */
 uint8_t get_single_data(bno055_reg_t reg);
-void get_data_vector(vector_type_t type, double* vector);
-void get_position(double* vector);
+bno055_vector_data_t get_data_vector(vector_type_t type);
+bno055_quat_data_t get_position();
 int8_t get_bno055_temperature(void);
 
 /* Functions to deal with raw calibration data */
