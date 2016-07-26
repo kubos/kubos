@@ -19,6 +19,14 @@
 
 #include "kubos-core/modules/sensors/htu21d.h"
 
+/**
+ * I2C bus that the sensor is wired into. Defined in the application
+ * config.json file
+ */
+#ifndef I2C_BUS
+#define I2C_BUS YOTTA_CFG_SENSORS_HTU21D_I2C_BUS
+#endif
+
 static uint8_t sensor_addr = 0x40;
 static uint8_t read_temp_cmd = 0xE3;
 static uint8_t read_hum_cmd = 0xE5;
@@ -69,7 +77,7 @@ float htu21d_read_humidity(void)
 void htu21d_reset(void)
 {
     k_i2c_write(I2C_BUS, sensor_addr, &reset_cmd, 1);
-    vTaskDelay(50);
+    vTaskDelay(10);
 }
 
 static int read_value(uint8_t cmd)
@@ -83,7 +91,7 @@ static int read_value(uint8_t cmd)
     {
         return 0;
     }
-    vTaskDelay(100);
+    vTaskDelay(30);
     if (k_i2c_read(I2C_BUS, sensor_addr, &buffer, 3) != I2C_OK)
     {
         return 0;

@@ -29,14 +29,6 @@
 #include "kubos-hal/i2c.h"
 
 /**
- * I2C bus that the sensor is wired into. Defined in the application
- * config.json file
- */
-#ifndef I2C_BUS
-#define I2C_BUS YOTTA_CFG_SENSORS_HTU21D_I2C_BUS
-#endif
-
-/**
  * Setup the I2C interface for talking with the HTU21D
  */
 void htu21d_setup(void);
