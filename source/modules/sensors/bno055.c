@@ -60,6 +60,7 @@
 static uint8_t read_byte(bno055_reg_t reg);
 static KI2CStatus read_length(bno055_reg_t reg, uint8_t* buffer, uint8_t len);
 static KI2CStatus write_byte( bno055_reg_t reg, uint8_t value);
+static KI2CStatus is_fully_calibrated(void);
 
 /* static globals */
 static bno055_opmode_t _mode;
@@ -149,7 +150,7 @@ KI2CStatus bno055_init(bno055_opmode_t mode)
     vTaskDelay(10);
 
     /* Set the requested operating mode */
-    if ((ret = set_mode(mode)) != I2C_OK)
+    if ((ret = bno055_set_mode(mode)) != I2C_OK)
     {
         return ret;
     }
@@ -159,7 +160,7 @@ KI2CStatus bno055_init(bno055_opmode_t mode)
     return ret;
 }
 
-KI2CStatus set_mode(bno055_opmode_t mode)
+KI2CStatus bno055_set_mode(bno055_opmode_t mode)
 {
     /* return variable */
     KI2CStatus ret = I2C_ERROR;
@@ -170,7 +171,7 @@ KI2CStatus set_mode(bno055_opmode_t mode)
     return ret;
 }
 
-uint8_t get_mode()
+uint8_t bno055_get_mode()
 {
     uint8_t value = 0;
     value = read_byte(BNO055_OPR_MODE_ADDR);
@@ -179,12 +180,12 @@ uint8_t get_mode()
 }
 
 
-void set_ext_crystal_use(int use)
+void bno055_set_ext_crystal_use(int use)
 {
     bno055_opmode_t modeback = _mode;
 
     /* Switch to config mode (just in case since this is the default) */
-    set_mode(OPERATION_MODE_CONFIG);
+    bno055_set_mode(OPERATION_MODE_CONFIG);
     vTaskDelay(25);
     write_byte(BNO055_PAGE_ID_ADDR, 0);
     if (use == EXT_CRYSTAL) {
@@ -196,12 +197,14 @@ void set_ext_crystal_use(int use)
     }
     vTaskDelay(10);
     /* Set the requested operating mode */
-    set_mode(modeback);
+    bno055_set_mode(modeback);
     vTaskDelay(20);
 }
 
-void get_system_status(uint8_t *system_status, uint8_t *self_test_result, uint8_t *system_error)
+bno055_system_status_t bno055_get_system_status(void)
 {
+    bno055_system_status_t system_status;
+
     write_byte(BNO055_PAGE_ID_ADDR, 0);
 
     /* System Status (see section 4.3.58)
@@ -214,8 +217,7 @@ void get_system_status(uint8_t *system_status, uint8_t *self_test_result, uint8_
      5 = Sensor fusio algorithm running
      6 = System running without fusion algorithms */
 
-    if (system_status != 0)
-        *system_status = read_byte(BNO055_SYS_STAT_ADDR);
+    system_status.status = read_byte(BNO055_SYS_STAT_ADDR);
 
     /* Self Test Results
      --------------------------------
@@ -228,8 +230,7 @@ void get_system_status(uint8_t *system_status, uint8_t *self_test_result, uint8_
 
      0x0F = all good! */
 
-    if (self_test_result != 0)
-        *self_test_result = read_byte(BNO055_SELFTEST_RESULT_ADDR);
+    system_status.self_test = read_byte(BNO055_SELFTEST_RESULT_ADDR);
 
     /* System Error
      ---------------------------------
@@ -245,56 +246,60 @@ void get_system_status(uint8_t *system_status, uint8_t *self_test_result, uint8_
      9 = Fusion algorithm configuration error
      A = Sensor configuration error */
 
-    if (system_error != 0)
-        *system_error = read_byte(BNO055_SYS_ERR_ADDR);
-
-    vTaskDelay(50);
+    system_status.error = read_byte(BNO055_SYS_ERR_ADDR);
+    //
+    // vTaskDelay(50);
+    return system_status;
 }
 
 
-void get_rev_info(bno055_rev_info_t* info)
+bno055_rev_info_t bno055_get_rev_info(void)
 {
     /* info bytes */
     uint8_t a, b;
 
+    bno055_rev_info_t info;
+
     /* Check the accelerometer revision */
-    info->accel_rev = read_byte(BNO055_ACCEL_REV_ID_ADDR);
+    info.accel_rev = read_byte(BNO055_ACCEL_REV_ID_ADDR);
 
     /* Check the magnetometer revision */
-    info->mag_rev = read_byte(BNO055_MAG_REV_ID_ADDR);
+    info.mag_rev = read_byte(BNO055_MAG_REV_ID_ADDR);
 
     /* Check the gyroscope revision */
-    info->gyro_rev = read_byte(BNO055_GYRO_REV_ID_ADDR);
+    info.gyro_rev = read_byte(BNO055_GYRO_REV_ID_ADDR);
 
     /* Check the SW revision */
-    info->bl_rev = read_byte(BNO055_BL_REV_ID_ADDR);
+    info.bl_rev = read_byte(BNO055_BL_REV_ID_ADDR);
 
     a = read_byte(BNO055_SW_REV_ID_LSB_ADDR);
     b = read_byte(BNO055_SW_REV_ID_MSB_ADDR);
-    info->sw_rev = (((uint16_t) b) << 8) | ((uint16_t) a);
+    info.sw_rev = (((uint16_t) b) << 8) | ((uint16_t) a);
+
+    return info;
 }
 
-void get_calibration(uint8_t* sys, uint8_t* gyro, uint8_t* accel, uint8_t* mag)
+bno055_calibration_data_t bno055_get_calibration(void)
 {
+    bno055_calibration_data_t calibration;
     uint8_t calData = read_byte(BNO055_CALIB_STAT_ADDR);
-    if (sys != NULL)
-        *sys = (calData >> 6) & 0x03;
-    if (gyro != NULL)
-        *gyro = (calData >> 4) & 0x03;
-    if (accel != NULL)
-        *accel = (calData >> 2) & 0x03;
-    if (mag != NULL)
-        *mag = calData & 0x03;
+
+    calibration.sys = (calData >> 6) & 0x03;
+    calibration.gyro = (calData >> 4) & 0x03;
+    calibration.accel = (calData >> 2) & 0x03;
+    calibration.mag = calData & 0x03;
+
+    return calibration;
 }
 
 
-int8_t get_bno055_temperature(void)
+int8_t bno055_get_temperature(void)
 {
   int8_t temp = read_byte(BNO055_TEMP_ADDR);
   return temp;
 }
 
-uint8_t get_single_data(bno055_reg_t reg)
+uint8_t bno055_get_single_data(bno055_reg_t reg)
 {
     uint8_t value = 0;
 
@@ -302,7 +307,7 @@ uint8_t get_single_data(bno055_reg_t reg)
     return value;
 }
 
-bno055_vector_data_t get_data_vector(vector_type_t type)
+bno055_vector_data_t bno055_get_data_vector(vector_type_t type)
 {
     /* output buffer */
     uint8_t buffer[6];
@@ -355,7 +360,7 @@ bno055_vector_data_t get_data_vector(vector_type_t type)
     return vector;
 }
 
-bno055_quat_data_t get_position()
+bno055_quat_data_t bno055_get_position()
 {
     /* data buffer */
     uint8_t buffer[8];
@@ -384,57 +389,57 @@ bno055_quat_data_t get_position()
     return data;
 }
 
-int get_sensor_offset_bytes(uint8_t* calibData)
+int bno055_get_sensor_offset_bytes(uint8_t* calibData)
 {
-    if (is_fully_calibrated() == I2C_OK)
+    if ((calibData != NULL) && (is_fully_calibrated() == I2C_OK))
     {
         bno055_opmode_t lastmode = _mode;
-        set_mode(OPERATION_MODE_CONFIG);
+        bno055_set_mode(OPERATION_MODE_CONFIG);
 
         read_length(ACCEL_OFFSET_X_LSB_ADDR, calibData,
                 NUM_BNO055_OFFSET_REGISTERS);
 
-        set_mode(lastmode);
-        return 0;
-    }
-    /* not calibrated */
-    return I2C_ERROR;
-}
-
-int get_sensor_offset_struct(bno055_offsets_t offsets_type)
-{
-    if (is_fully_calibrated() == I2C_OK)
-    {
-        bno055_opmode_t lastmode = _mode;
-        set_mode(OPERATION_MODE_CONFIG);
-        vTaskDelay(25);
-
-        offsets_type.accel_offset_x = (read_byte(ACCEL_OFFSET_X_MSB_ADDR) << 8) | (read_byte(ACCEL_OFFSET_X_LSB_ADDR));
-        offsets_type.accel_offset_y = (read_byte(ACCEL_OFFSET_Y_MSB_ADDR) << 8) | (read_byte(ACCEL_OFFSET_Y_LSB_ADDR));
-        offsets_type.accel_offset_z = (read_byte(ACCEL_OFFSET_Z_MSB_ADDR) << 8) | (read_byte(ACCEL_OFFSET_Z_LSB_ADDR));
-
-        offsets_type.gyro_offset_x = (read_byte(GYRO_OFFSET_X_MSB_ADDR) << 8) | (read_byte(GYRO_OFFSET_X_LSB_ADDR));
-        offsets_type.gyro_offset_y = (read_byte(GYRO_OFFSET_Y_MSB_ADDR) << 8) | (read_byte(GYRO_OFFSET_Y_LSB_ADDR));
-        offsets_type.gyro_offset_z = (read_byte(GYRO_OFFSET_Z_MSB_ADDR) << 8) | (read_byte(GYRO_OFFSET_Z_LSB_ADDR));
-
-        offsets_type.mag_offset_x = (read_byte(MAG_OFFSET_X_MSB_ADDR) << 8) | (read_byte(MAG_OFFSET_X_LSB_ADDR));
-        offsets_type.mag_offset_y = (read_byte(MAG_OFFSET_Y_MSB_ADDR) << 8) | (read_byte(MAG_OFFSET_Y_LSB_ADDR));
-        offsets_type.mag_offset_z = (read_byte(MAG_OFFSET_Z_MSB_ADDR) << 8) | (read_byte(MAG_OFFSET_Z_LSB_ADDR));
-
-        offsets_type.accel_radius = (read_byte(ACCEL_RADIUS_MSB_ADDR) << 8) | (read_byte(ACCEL_RADIUS_LSB_ADDR));
-        offsets_type.mag_radius = (read_byte(MAG_RADIUS_MSB_ADDR) << 8) | (read_byte(MAG_RADIUS_LSB_ADDR));
-
-        set_mode(lastmode);
+        bno055_set_mode(lastmode);
         return I2C_OK;
     }
     /* not calibrated */
     return I2C_ERROR;
 }
 
-void set_sensor_offset_bytes(const uint8_t* calibData)
+int bno055_get_sensor_offset_struct(bno055_offsets_t * offsets_type)
+{
+    if ((offsets_type != NULL) && (is_fully_calibrated() == I2C_OK))
+    {
+        bno055_opmode_t lastmode = _mode;
+        bno055_set_mode(OPERATION_MODE_CONFIG);
+        vTaskDelay(25);
+
+        offsets_type->accel_offset_x = (read_byte(ACCEL_OFFSET_X_MSB_ADDR) << 8) | (read_byte(ACCEL_OFFSET_X_LSB_ADDR));
+        offsets_type->accel_offset_y = (read_byte(ACCEL_OFFSET_Y_MSB_ADDR) << 8) | (read_byte(ACCEL_OFFSET_Y_LSB_ADDR));
+        offsets_type->accel_offset_z = (read_byte(ACCEL_OFFSET_Z_MSB_ADDR) << 8) | (read_byte(ACCEL_OFFSET_Z_LSB_ADDR));
+
+        offsets_type->gyro_offset_x = (read_byte(GYRO_OFFSET_X_MSB_ADDR) << 8) | (read_byte(GYRO_OFFSET_X_LSB_ADDR));
+        offsets_type->gyro_offset_y = (read_byte(GYRO_OFFSET_Y_MSB_ADDR) << 8) | (read_byte(GYRO_OFFSET_Y_LSB_ADDR));
+        offsets_type->gyro_offset_z = (read_byte(GYRO_OFFSET_Z_MSB_ADDR) << 8) | (read_byte(GYRO_OFFSET_Z_LSB_ADDR));
+
+        offsets_type->mag_offset_x = (read_byte(MAG_OFFSET_X_MSB_ADDR) << 8) | (read_byte(MAG_OFFSET_X_LSB_ADDR));
+        offsets_type->mag_offset_y = (read_byte(MAG_OFFSET_Y_MSB_ADDR) << 8) | (read_byte(MAG_OFFSET_Y_LSB_ADDR));
+        offsets_type->mag_offset_z = (read_byte(MAG_OFFSET_Z_MSB_ADDR) << 8) | (read_byte(MAG_OFFSET_Z_LSB_ADDR));
+
+        offsets_type->accel_radius = (read_byte(ACCEL_RADIUS_MSB_ADDR) << 8) | (read_byte(ACCEL_RADIUS_LSB_ADDR));
+        offsets_type->mag_radius = (read_byte(MAG_RADIUS_MSB_ADDR) << 8) | (read_byte(MAG_RADIUS_LSB_ADDR));
+
+        bno055_set_mode(lastmode);
+        return I2C_OK;
+    }
+    /* not calibrated */
+    return I2C_ERROR;
+}
+
+void bno055_set_sensor_offset_bytes(const uint8_t* calibData)
 {
     bno055_opmode_t lastmode = _mode;
-    set_mode(OPERATION_MODE_CONFIG);
+    bno055_set_mode(OPERATION_MODE_CONFIG);
     vTaskDelay(25);
 
     /* A writeLen() would make this much cleaner */
@@ -465,14 +470,14 @@ void set_sensor_offset_bytes(const uint8_t* calibData)
     write_byte(MAG_RADIUS_LSB_ADDR, calibData[20]);
     write_byte(MAG_RADIUS_MSB_ADDR, calibData[21]);
 
-    set_mode(lastmode);
+    bno055_set_mode(lastmode);
 }
 
 
-void set_sensor_offset_struct(bno055_offsets_t offsets_type)
+void bno055_set_sensor_offset_struct(bno055_offsets_t offsets_type)
 {
     bno055_opmode_t lastmode = _mode;
-    set_mode(OPERATION_MODE_CONFIG);
+    bno055_set_mode(OPERATION_MODE_CONFIG);
     vTaskDelay(25);
 
     write_byte(ACCEL_OFFSET_X_LSB_ADDR, (offsets_type.accel_offset_x) & 0x0FF);
@@ -502,14 +507,14 @@ void set_sensor_offset_struct(bno055_offsets_t offsets_type)
     write_byte(MAG_RADIUS_LSB_ADDR, (offsets_type.mag_radius) & 0x0FF);
     write_byte(MAG_RADIUS_MSB_ADDR, (offsets_type.mag_radius >> 8) & 0x0FF);
 
-    set_mode(lastmode);
+    bno055_set_mode(lastmode);
 }
 
-KI2CStatus is_fully_calibrated(void)
+static KI2CStatus is_fully_calibrated(void)
 {
-    uint8_t system, gyro, accel, mag;
-    get_calibration(&system, &gyro, &accel, &mag);
-    if (system < 3 || gyro < 3 || accel < 3 || mag < 3)
+    bno055_calibration_data_t calib;
+    calib = bno055_get_calibration();
+    if (calib.sys < 3 || calib.gyro < 3 || calib.accel < 3 || calib.mag < 3)
         return I2C_OK; /* success */
     return I2C_ERROR;
 }
@@ -547,21 +552,6 @@ static KI2CStatus read_length(bno055_reg_t reg, uint8_t* buffer, uint8_t len)
     /* transmit reg */
     ret = k_i2c_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)&reg, 1);
     vTaskDelay(5);
-    /* receive array */
-    ret = k_i2c_read(I2C_BUS, BNO055_ADDRESS_A, buffer, len);
-
-    /* return status */
-    return ret;
-}
-
-static KI2CStatus just_read_length(bno055_reg_t reg, uint8_t* buffer, uint8_t len)
-{
-    /* status val */
-    KI2CStatus ret = I2C_ERROR;
-
-    /* transmit reg */
-    // ret = k_i2c_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)&reg, 1);
-    // vTaskDelay(10);
     /* receive array */
     ret = k_i2c_read(I2C_BUS, BNO055_ADDRESS_A, buffer, len);
 
