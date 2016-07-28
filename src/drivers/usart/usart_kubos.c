@@ -34,7 +34,7 @@ CSP_DEFINE_TASK(task_csp)
     while(1)
     {
         len = k_uart_read(uart, &csp_buf, 1);
-        if (usart_callback != NULL)
+        if (usart_callback != NULL && len == 1)
         {
             usart_callback((uint8_t*)&csp_buf, 1, &task_woken);
         }
@@ -45,6 +45,12 @@ CSP_DEFINE_TASK(task_csp)
 
 void usart_init(struct usart_conf *conf)
 {
+    /* check if conf is valid */
+    if (conf == NULL)
+    {
+        return;
+    }
+    
     /* set dev num */
     uart = (KUARTNum)*(conf->device);
 
