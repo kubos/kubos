@@ -39,40 +39,47 @@ execute_process (COMMAND git describe --always
                  OUTPUT_STRIP_TRAILING_WHITESPACE
                  ERROR_QUIET)
 
+# check if we want KISS/USART
 if (YOTTA_CFG_CSP_USART)
+    # set flags
     set (CSP_USE_CRC32 ON)
     set (IF_KISS ON)
-    set (CSP_DEBUG ON)
+endif()
+
+# check if we want CSP enabled
+if (YOTTA_CFG_CSP_ENABLE)
+    # add csp files
+    add_library (csp STATIC
+        src/csp_bridge.c
+        src/csp_buffer.c
+        src/csp_conn.c
+        $<$<BOOL:${CSP_USE_CRC32}>:src/csp_crc32.c>
+        $<$<BOOL:${CSP_DEBUG}>:src/csp_debug.c>
+        $<$<BOOL:${DEDUP}>:src/csp_dedup.c>
+        src/csp_endian.c
+        src/csp_iflist.c
+        src/csp_io.c
+        src/csp_port.c
+        src/csp_promisc.c
+        src/csp_qfifo.c
+        src/csp_route.c
+        src/csp_service_handler.c
+        src/csp_services.c
+        src/csp_sfp.c
+        $<$<BOOL:${HMAC}>:src/crypto/csp_hmac.c>
+        $<$<OR:$<BOOL:${HMAC}>,$<BOOL:${XTEA}>>:src/crypto/csp_sha1.c>
+        $<$<BOOL:${XTEA}>:src/crypto/csp_xtea.c>
+        $<$<BOOL:${CAN_SOCKETCAN}>:src/drivers/can/can_socketcan.c>
+        $<$<BOOL:${TARGET_LIKE_KUBOS_RT}>:src/drivers/usart/usart_kubos.c>
+        src/interfaces/csp_if_lo.c
+        $<$<BOOL:${IF_KISS}>:src/interfaces/csp_if_kiss.c>
+        src/rtable/csp_rtable_${RTABLE}.c
+        $<$<BOOL:${RDP}>:src/transport/csp_rdp.c>
+        src/transport/csp_udp.c)
 endif()
 
 
-add_library (csp STATIC
-             src/csp_bridge.c
-             src/csp_buffer.c
-             src/csp_conn.c
-             $<$<BOOL:${CSP_USE_CRC32}>:src/csp_crc32.c>
-             $<$<BOOL:${CSP_DEBUG}>:src/csp_debug.c>
-             $<$<BOOL:${DEDUP}>:src/csp_dedup.c>
-             src/csp_endian.c
-             src/csp_iflist.c
-             src/csp_io.c
-             src/csp_port.c
-             src/csp_promisc.c
-             src/csp_qfifo.c
-             src/csp_route.c
-             src/csp_service_handler.c
-             src/csp_services.c
-             src/csp_sfp.c
-             $<$<BOOL:${HMAC}>:src/crypto/csp_hmac.c>
-             $<$<OR:$<BOOL:${HMAC}>,$<BOOL:${XTEA}>>:src/crypto/csp_sha1.c>
-             $<$<BOOL:${XTEA}>:src/crypto/csp_xtea.c>
-             $<$<BOOL:${CAN_SOCKETCAN}>:src/drivers/can/can_socketcan.c>
-             $<$<BOOL:${TARGET_LIKE_KUBOS_RT}>:src/drivers/usart/usart_kubos.c>
-             src/interfaces/csp_if_lo.c
-             $<$<BOOL:${IF_KISS}>:src/interfaces/csp_if_kiss.c>
-             src/rtable/csp_rtable_${RTABLE}.c
-             $<$<BOOL:${RDP}>:src/transport/csp_rdp.c>
-             src/transport/csp_udp.c)
+
 
 target_compile_definitions (csp PRIVATE GIT_REV=\"${GIT_REV}\")
 target_include_directories (csp PUBLIC include ${CMAKE_CURRENT_BINARY_DIR})
