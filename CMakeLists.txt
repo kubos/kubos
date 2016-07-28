@@ -40,11 +40,11 @@ execute_process (COMMAND git describe --always
                  ERROR_QUIET)
 
 # check if we want KISS/USART
-#if (YOTTA_CFG_CSP_USART)
+if (YOTTA_CFG_CSP_USART)
     # set flag
     set (CSP_USE_CRC32 ON)
     set (IF_KISS ON)
-#endif()
+endif()
 
 add_library (csp STATIC
     src/csp_bridge.c
