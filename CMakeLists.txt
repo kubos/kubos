@@ -6,7 +6,7 @@ set (CSP_VERSION "1.4.0" CACHE STRING "")
 option (RDP "" OFF)
 option (QOS "" OFF)
 option (PROMISC "" OFF)
-option (CSP_USE_CRC32 "" ON)
+option (CSP_USE_CRC32 "" OFF)
 option (HMAC "" OFF)
 option (XTEA "" OFF)
 option (BINDINGS "" OFF)
@@ -14,10 +14,10 @@ option (EXAMPLES "" OFF)
 option (DEDUP "" OFF)
 option (VERBOSE "" OFF)
 option (IF_I2C "" OFF)
-option (IF_KISS "" ON)
+option (IF_KISS "" OFF)
 option (IF_CAN "" OFF)
 option (IF_ZMQHUB "" OFF)
-option (CSP_DEBUG "" ON)
+option (CSP_DEBUG "" OFF)
 option (CAN_SOCKETCAN "" OFF)
 
 set (FREERTOS "" CACHE STRING "FreeRTOS root dir")
@@ -38,6 +38,13 @@ execute_process (COMMAND git describe --always
                  OUTPUT_VARIABLE GIT_REV
                  OUTPUT_STRIP_TRAILING_WHITESPACE
                  ERROR_QUIET)
+
+if (YOTTA_CFG_CSP_USART)
+    set (CSP_USE_CRC32 ON)
+    set (IF_KISS ON)
+    set (CSP_DEBUG ON)
+endif()
+
 
 add_library (csp STATIC
              src/csp_bridge.c
