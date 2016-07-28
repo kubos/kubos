@@ -43,7 +43,7 @@ add_library (csp STATIC
              src/csp_bridge.c
              src/csp_buffer.c
              src/csp_conn.c
-             $<$<BOOL:${CRC32}>:src/csp_crc32.c>
+             $<$<BOOL:${CSP_USE_CRC32}>:src/csp_crc32.c>
              $<$<BOOL:${CSP_DEBUG}>:src/csp_debug.c>
              $<$<BOOL:${DEDUP}>:src/csp_dedup.c>
              src/csp_endian.c

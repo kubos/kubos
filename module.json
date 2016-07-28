@@ -14,7 +14,7 @@
       "freertos": "openkosmosorg/freertos#~9.0.1"
     },
     "kubos-rt": {
-      "kubos-rt": "openkosmosorg/kubos-hal#master"     
+      "kubos-hal": "openkosmosorg/kubos-hal#master"
     }
   }
 }
