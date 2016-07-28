@@ -18,7 +18,7 @@
  ***************************************************************************/
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@
 
 #include <stdint.h>
 #include "kubos-hal/i2c.h"
+#include "kubos-core/modules/sensors/sensors.h"
 
 typedef enum
 {
@@ -62,61 +63,24 @@ typedef enum
 
     /* Accel data register */
     BNO055_ACCEL_DATA_X_LSB_ADDR = 0X08,
-    BNO055_ACCEL_DATA_X_MSB_ADDR = 0X09,
-    BNO055_ACCEL_DATA_Y_LSB_ADDR = 0X0A,
-    BNO055_ACCEL_DATA_Y_MSB_ADDR = 0X0B,
-    BNO055_ACCEL_DATA_Z_LSB_ADDR = 0X0C,
-    BNO055_ACCEL_DATA_Z_MSB_ADDR = 0X0D,
 
     /* Mag data register */
     BNO055_MAG_DATA_X_LSB_ADDR = 0X0E,
-    BNO055_MAG_DATA_X_MSB_ADDR = 0X0F,
-    BNO055_MAG_DATA_Y_LSB_ADDR = 0X10,
-    BNO055_MAG_DATA_Y_MSB_ADDR = 0X11,
-    BNO055_MAG_DATA_Z_LSB_ADDR = 0X12,
-    BNO055_MAG_DATA_Z_MSB_ADDR = 0X13,
 
     /* Gyro data registers */
     BNO055_GYRO_DATA_X_LSB_ADDR = 0X14,
-    BNO055_GYRO_DATA_X_MSB_ADDR = 0X15,
-    BNO055_GYRO_DATA_Y_LSB_ADDR = 0X16,
-    BNO055_GYRO_DATA_Y_MSB_ADDR = 0X17,
-    BNO055_GYRO_DATA_Z_LSB_ADDR = 0X18,
-    BNO055_GYRO_DATA_Z_MSB_ADDR = 0X19,
 
     /* Euler data registers */
     BNO055_EULER_H_LSB_ADDR = 0X1A,
-    BNO055_EULER_H_MSB_ADDR = 0X1B,
-    BNO055_EULER_R_LSB_ADDR = 0X1C,
-    BNO055_EULER_R_MSB_ADDR = 0X1D,
-    BNO055_EULER_P_LSB_ADDR = 0X1E,
-    BNO055_EULER_P_MSB_ADDR = 0X1F,
 
     /* Quaternion data registers */
     BNO055_QUATERNION_DATA_W_LSB_ADDR = 0X20,
-    BNO055_QUATERNION_DATA_W_MSB_ADDR = 0X21,
-    BNO055_QUATERNION_DATA_X_LSB_ADDR = 0X22,
-    BNO055_QUATERNION_DATA_X_MSB_ADDR = 0X23,
-    BNO055_QUATERNION_DATA_Y_LSB_ADDR = 0X24,
-    BNO055_QUATERNION_DATA_Y_MSB_ADDR = 0X25,
-    BNO055_QUATERNION_DATA_Z_LSB_ADDR = 0X26,
-    BNO055_QUATERNION_DATA_Z_MSB_ADDR = 0X27,
 
     /* Linear acceleration data registers */
     BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR = 0X28,
-    BNO055_LINEAR_ACCEL_DATA_X_MSB_ADDR = 0X29,
-    BNO055_LINEAR_ACCEL_DATA_Y_LSB_ADDR = 0X2A,
-    BNO055_LINEAR_ACCEL_DATA_Y_MSB_ADDR = 0X2B,
-    BNO055_LINEAR_ACCEL_DATA_Z_LSB_ADDR = 0X2C,
-    BNO055_LINEAR_ACCEL_DATA_Z_MSB_ADDR = 0X2D,
 
     /* Gravity data registers */
     BNO055_GRAVITY_DATA_X_LSB_ADDR = 0X2E,
-    BNO055_GRAVITY_DATA_X_MSB_ADDR = 0X2F,
-    BNO055_GRAVITY_DATA_Y_LSB_ADDR = 0X30,
-    BNO055_GRAVITY_DATA_Y_MSB_ADDR = 0X31,
-    BNO055_GRAVITY_DATA_Z_LSB_ADDR = 0X32,
-    BNO055_GRAVITY_DATA_Z_MSB_ADDR = 0X33,
 
     /* Temperature data register */
     BNO055_TEMP_ADDR = 0X34,
@@ -145,25 +109,6 @@ typedef enum
     BNO055_AXIS_MAP_CONFIG_ADDR = 0X41,
     BNO055_AXIS_MAP_SIGN_ADDR = 0X42,
 
-    /* SIC registers */
-    BNO055_SIC_MATRIX_0_LSB_ADDR = 0X43,
-    BNO055_SIC_MATRIX_0_MSB_ADDR = 0X44,
-    BNO055_SIC_MATRIX_1_LSB_ADDR = 0X45,
-    BNO055_SIC_MATRIX_1_MSB_ADDR = 0X46,
-    BNO055_SIC_MATRIX_2_LSB_ADDR = 0X47,
-    BNO055_SIC_MATRIX_2_MSB_ADDR = 0X48,
-    BNO055_SIC_MATRIX_3_LSB_ADDR = 0X49,
-    BNO055_SIC_MATRIX_3_MSB_ADDR = 0X4A,
-    BNO055_SIC_MATRIX_4_LSB_ADDR = 0X4B,
-    BNO055_SIC_MATRIX_4_MSB_ADDR = 0X4C,
-    BNO055_SIC_MATRIX_5_LSB_ADDR = 0X4D,
-    BNO055_SIC_MATRIX_5_MSB_ADDR = 0X4E,
-    BNO055_SIC_MATRIX_6_LSB_ADDR = 0X4F,
-    BNO055_SIC_MATRIX_6_MSB_ADDR = 0X50,
-    BNO055_SIC_MATRIX_7_LSB_ADDR = 0X51,
-    BNO055_SIC_MATRIX_7_MSB_ADDR = 0X52,
-    BNO055_SIC_MATRIX_8_LSB_ADDR = 0X53,
-    BNO055_SIC_MATRIX_8_MSB_ADDR = 0X54,
 
     /* Accelerometer Offset registers */
     ACCEL_OFFSET_X_LSB_ADDR = 0X55,
@@ -304,9 +249,9 @@ typedef struct
 } bno055_calibration_data_t;
 
 /* config functions */
-KI2CStatus bno055_setup(bno055_opmode_t mode);
-KI2CStatus bno055_init(bno055_opmode_t mode);
-KI2CStatus bno055_set_mode(bno055_opmode_t mode);
+KSensorStatus bno055_setup(bno055_opmode_t mode);
+KSensorStatus bno055_init(bno055_opmode_t mode);
+KSensorStatus bno055_set_mode(bno055_opmode_t mode);
 uint8_t bno055_get_mode(void);
 
 bno055_rev_info_t bno055_get_rev_info(void);
