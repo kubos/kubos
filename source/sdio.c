@@ -24,10 +24,16 @@
 static SD_HandleTypeDef sd_handle;
 
 static void sdio_msp_init(void);
+static KSDIOStatus sd_is_present(void);
 
 KSDIOStatus kprv_sdio_init()
 {
     uint8_t ret = SDIO_OK;
+
+    if (sd_is_present() != SDIO_OK)
+    {
+        return SDIO_INIT_ERROR;
+    }
 
     if (sd_handle.Instance != NULL)
     {
@@ -114,10 +120,19 @@ k_sdio_card_info_t kprv_sdio_card_info()
     return card_info;
 }
 
+static KSDIOStatus sd_is_present(void)
+{
+    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8) == 0)
+    {
+        return SDIO_OK;
+    }
+    return SDIO_ERROR;
+}
+
 static void sdio_msp_init(void)
 {
     GPIO_InitTypeDef GPIO_Init_Structure;
-    
+
 	SET_BIT(RCC->AHB1ENR,
 		STM32F4_PIN_AHB1ENR_BIT(PC6) | STM32F4_PIN_AHB1ENR_BIT(PC7));
 
@@ -130,18 +145,6 @@ static void sdio_msp_init(void)
     __GPIOD_CLK_ENABLE();
     __GPIOA_CLK_ENABLE();
     __GPIOB_CLK_ENABLE();
-
-    GPIO_InitTypeDef GPIO_InitStruct;
-
-    // Detect pin
-    // PC7 -> DETECT
-    GPIO_InitStruct.Pin = GPIO_PIN_7;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
-    GPIO_InitStruct.Alternate = GPIO_AF12_SDIO;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
 
     // 4 pins for 4-bit
     // PC8  -> D0
