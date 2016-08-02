@@ -161,7 +161,8 @@ typedef enum {
     OPERATION_MODE_COMPASS = 0X09,
     OPERATION_MODE_M4G = 0X0A,
     OPERATION_MODE_NDOF_FMC_OFF = 0X0B,
-    OPERATION_MODE_NDOF = 0X0C
+    OPERATION_MODE_NDOF = 0X0C,
+    OPERATION_MODE_INVALID = 0x99
 } bno055_opmode_t;
 
 typedef enum {
@@ -252,24 +253,22 @@ typedef struct
 KSensorStatus bno055_setup(bno055_opmode_t mode);
 KSensorStatus bno055_init(bno055_opmode_t mode);
 KSensorStatus bno055_set_mode(bno055_opmode_t mode);
-uint8_t bno055_get_mode(void);
+KSensorStatus bno055_get_mode(uint8_t * value);
 
-bno055_rev_info_t bno055_get_rev_info(void);
-void bno055_set_ext_crystal_use(int use);
-bno055_system_status_t bno055_get_system_status();
-bno055_calibration_data_t bno055_get_calibration();
+KSensorStatus bno055_get_rev_info(bno055_rev_info_t * info);
+KSensorStatus bno055_set_ext_crystal_use(int use);
+KSensorStatus bno055_get_system_status(bno055_system_status_t * status);
+KSensorStatus bno055_get_calibration(bno055_calibration_data_t * data);
 
 /* data functions */
-uint8_t bno055_get_single_data(bno055_reg_t reg);
-bno055_vector_data_t bno055_get_data_vector(vector_type_t type);
-bno055_quat_data_t bno055_get_position();
-int8_t bno055_get_temperature(void);
+KSensorStatus bno055_get_single_data(bno055_reg_t reg, uint8_t * value);
+KSensorStatus bno055_get_data_vector(vector_type_t type, bno055_vector_data_t * vector);
+KSensorStatus bno055_get_position(bno055_quat_data_t * quat);
+KSensorStatus bno055_get_temperature(int8_t * temp);
 
 /* Functions to deal with raw calibration data */
-int bno055_get_sensor_offset_bytes(uint8_t * calibData);
-int bno055_get_sensor_offset_struct(bno055_offsets_t * offsets_type);
-void bno055_set_sensor_offset_bytes(const uint8_t* calibData);
-void bno055_set_sensor_offset_struct(const bno055_offsets_t offsets_type);
+KSensorStatus bno055_get_sensor_offset_struct(bno055_offsets_t * offsets_type);
+KSensorStatus bno055_set_sensor_offset_struct(const bno055_offsets_t offsets_type);
 
 
 #endif
