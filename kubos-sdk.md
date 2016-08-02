@@ -70,7 +70,9 @@ Be sure to pull the latest Kubos-SDK docker container afterwards:
 
 ## Creating a new project
 
-	$ kubos init project-name
+Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory with your project's name and add the basic files.
+
+		$ kubos init project-name
 
 The contents of your project directory should look something like this:
 
