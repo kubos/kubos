@@ -34,30 +34,28 @@
 #include "kubos-core/modules/sensors/bme280.h"
 #include "kubos-hal/gpio.h"
 
-#ifndef I2C_BUS
-//#define SPI_BUS YOTTA_CFG_SENSORS_BME280_SPI_BUS
-#define SPI_BUS K_SPI1
+#ifndef SPI_BUS
+#define SPI_BUS YOTTA_CFG_SENSORS_BME280_SPI_BUS
 #endif
 
 #ifndef CS
-//#define CS YOTTA_CFG_SENSORS_BME280_CS
-#define CS P26
+#define CS YOTTA_CFG_SENSORS_BME280_CS
 #endif
 
 /* globals */
 bme280_calib_data _bme280_calib;
-float t_fine = 0;
+int32_t t_fine = 0;
 
 /* static functions */
 static void bme280_read_coefficients(void);
 
-static void write_byte(byte reg, byte value);
-static uint8_t read_byte(byte reg);
-static uint16_t read_16_bit(byte reg);
-static uint32_t read_24_bit(byte reg);
-static int16_t read_signed_16_bit(byte reg);
-static uint16_t read_16_bit_LE(byte reg);
-static int16_t read_signed_16_bit_LE(byte reg);
+static void write_byte(uint8_t reg, uint8_t value);
+static uint8_t read_byte(uint8_t reg);
+static uint16_t read_16_bit(uint8_t reg);
+static uint32_t read_24_bit(uint8_t reg);
+static int16_t read_signed_16_bit(uint8_t reg);
+static uint16_t read_16_bit_LE(uint8_t reg);
+static int16_t read_signed_16_bit_LE(uint8_t reg);
 
 KSensorStatus bme280_setup(void)
 {
@@ -69,7 +67,7 @@ KSensorStatus bme280_setup(void)
         .role = K_SPI_MASTER,
         .direction = K_SPI_DIRECTION_2LINES,
         .data_size = K_SPI_DATASIZE_8BIT,
-        .clock_speed = 10000
+        .speed = 10000
     };
     k_spi_init(SPI_BUS, &conf);
 
@@ -87,6 +85,7 @@ KSensorStatus bme280_setup(void)
 
     write_byte(BME280_REGISTER_CONTROL, 0xB7); /* 16x ovesampling, normal mode */
 
+    return SENSOR_OK;
 }
 
 void bme280_read_coefficients(void)
@@ -120,7 +119,7 @@ float bme280_read_temperature(void)
 {
     int32_t var1, var2;
 
-    int32_t adc_T = read24(BME280_REGISTER_TEMPDATA);
+    int32_t adc_T = read_24_bit(BME280_REGISTER_TEMPDATA);
     adc_T >>= 4;
 
     var1  = ((((adc_T>>3) - ((int32_t)_bme280_calib.dig_T1 <<1))) *
@@ -142,7 +141,7 @@ float bme280_read_pressure(void)
 
     bme280_read_temperature(); /* get up to date t_fine */
 
-    int32_t adc_P = read24(BME280_REGISTER_PRESSUREDATA);
+    int32_t adc_P = read_24_bit(BME280_REGISTER_PRESSUREDATA);
     adc_P >>= 4;
 
     var1 = ((int64_t)t_fine) - 128000;
@@ -170,7 +169,7 @@ float bme280_read_humidity(void)
 {
     bme280_read_temperature(); /* get up to date t_fine */
 
-    int32_t adc_H = read16(BME280_REGISTER_HUMIDDATA);
+    int32_t adc_H = read_16_bit(BME280_REGISTER_HUMIDDATA);
 
     int32_t v_x1_u32r;
 
@@ -208,9 +207,9 @@ float bme280_read_altitude(float seaLevel)
 }
 
 
-static void write_byte(byte reg, byte value)
+static void write_byte(uint8_t reg, uint8_t value)
 {
-    byte shift_reg = reg & ~0x80; /* write, bit 7 low */
+    uint8_t shift_reg = reg & ~0x80; /* write, bit 7 low */
 
     k_gpio_write(CS, 0); /* drive CS low */
     k_spi_write(SPI_BUS, &shift_reg, 1);
@@ -218,52 +217,54 @@ static void write_byte(byte reg, byte value)
     k_gpio_write(CS, 1); /* drive CS high */
 }
 
-static uint8_t read_byte(byte reg)
+static uint8_t read_byte(uint8_t reg)
 {
-    byte value = 0;
-    byte shift_reg = reg | 0x80; /* read, bit 7 high */
+    uint8_t value = 0;
+    uint8_t shift_reg = reg | 0x80; /* read, bit 7 high */
 
     k_gpio_write(CS, 0); /* drive CS low */
     k_spi_write(SPI_BUS, &shift_reg, 1);
     k_spi_read(SPI_BUS, &value, 1);
     k_gpio_write(CS, 1); /* drive CS high */
 
-    return (uint8_t)value;
+    return value;
 }
 
-static uint16_t read_16_bit(byte reg)
+static uint16_t read_16_bit(uint8_t reg)
 {
     uint8_t values[2]; /* 2 bytes */
-    uint8_t pValues;
+    uint8_t* pValues;
     /* set pointer */
     pValues = values;
+    uint8_t shift_reg = reg | 0x80; /* read, bit 7 high */
 
     k_gpio_write(CS, 0); /* drive CS low */
     k_spi_write(SPI_BUS, &shift_reg, 1);
-    k_spi_read(SPI_BUS, &pValues, 2); /* 2 bytes */
+    k_spi_read(SPI_BUS, pValues, 2); /* 2 bytes */
     k_gpio_write(CS, 1); /* drive CS high */
 
     /* shift bits and return as unsigned 16 */
     return (uint16_t)((values[0] << 8) | values[1]);
 }
 
-static uint32_t read_24_bit(byte reg)
+static uint32_t read_24_bit(uint8_t reg)
 {
     uint8_t values[3]; /* 3 bytes */
-    uint8_t pValues;
+    uint8_t* pValues;
     /* set pointer */
     pValues = values;
+    uint8_t shift_reg = reg | 0x80; /* read, bit 7 high */
 
     k_gpio_write(CS, 0); /* drive CS low */
     k_spi_write(SPI_BUS, &shift_reg, 1);
-    k_spi_read(SPI_BUS, &pValues, 3); /* 3 bytes */
+    k_spi_read(SPI_BUS, pValues, 3); /* 3 bytes */
     k_gpio_write(CS, 1); /* drive CS high */
 
     /* shift bits and return as unsigned 32 */
     return (uint32_t)((values[0] << 8) | values[1] << 8 | values[2]);
 }
 
-static uint16_t read_16_bit_LE(byte reg)
+static uint16_t read_16_bit_LE(uint8_t reg)
 {
     uint16_t temp;
 
@@ -272,12 +273,12 @@ static uint16_t read_16_bit_LE(byte reg)
     return (temp >> 8) | (temp << 8);
 }
 
-static int16_t read_signed_16_bit(byte reg)
+static int16_t read_signed_16_bit(uint8_t reg)
 {
     return (int16_t)read_16_bit(reg);
 }
 
-static int16_t read_signed_16_bit_LE(byte reg)
+static int16_t read_signed_16_bit_LE(uint8_t reg)
 {
     return (int16_t)read_16_bit_LE(reg);
 }
