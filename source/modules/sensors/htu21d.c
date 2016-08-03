@@ -27,11 +27,26 @@
 #define I2C_BUS YOTTA_CFG_SENSORS_HTU21D_I2C_BUS
 #endif
 
-static uint8_t sensor_addr = 0x40;
-static uint8_t read_temp_cmd = 0xE3;
-static uint8_t read_hum_cmd = 0xE5;
-static uint8_t reset_cmd = 0xFE;
-static uint8_t read_reg_cmd = 0xE7;
+#define SENSOR_ADDR 0x40
+#define READ_HUM_CMD 0xE5
+#define READ_REG_CMD 0xE7
+#define READ_TEMP_CMD 0xE3
+
+
+/**
+ * Performs crc check on raw value and crc check value
+ * @param raw raw sensor data
+ * @param crc third byte sent from sensor
+ * @return int 0 if check passed, otherwise check failed
+ */
+static int check_crc(uint16_t raw, uint8_t crc);
+
+/**
+ * Sends command, creates raw value, crc checks, returns raw
+ * @param cmd single byte command to send
+ * @return int 999 if crc err, 998 if comm err, otherwise raw sensor value
+ */
+static KSensorStatus read_value(uint8_t cmd, int * raw);
 
 void htu21d_setup(void)
 {
@@ -43,86 +58,90 @@ void htu21d_setup(void)
     k_i2c_init(I2C_BUS, &conf);
 }
 
-float htu21d_read_temperature(void)
+KSensorStatus htu21d_read_temperature(float * temp)
 {
-    float temp = 0;
+    KSensorStatus ret = SENSOR_ERROR;
     int raw;
-    raw = read_value(read_temp_cmd);
-    if (raw != 0)
+    if (temp != NULL)
     {
-        temp = raw;
-        temp *= 175.72;
-        temp /= 65536;
-        temp -= 46.85;
+        if ((ret = read_value(READ_TEMP_CMD, &raw)) == SENSOR_OK)
+        {
+            *temp = raw;
+            *temp *= 175.72;
+            *temp /= 65536;
+            *temp -= 46.85;
+        }
     }
-    return temp;
+    return ret;
 }
 
-float htu21d_read_humidity(void)
+KSensorStatus htu21d_read_humidity(float * hum)
 {
-    float hum = 0;
+    KSensorStatus ret = SENSOR_ERROR;
     int raw;
-
-    raw = read_value(read_hum_cmd);
-    if (raw != 0)
+    if (hum != NULL)
     {
-        hum = raw;
-        hum *= 125;
-        hum /= 65536;
-        hum -= 6;
+        if ((ret = read_value(READ_HUM_CMD, &raw)) == SENSOR_OK)
+        {
+            *hum = raw;
+            *hum *= 125;
+            *hum /= 65536;
+            *hum -= 6;
+        }
     }
-    return hum;
+    return ret;
 }
 
 void htu21d_reset(void)
 {
-    k_i2c_write(I2C_BUS, sensor_addr, &reset_cmd, 1);
+    int reset_cmd = 0xFE;
+    k_i2c_write(I2C_BUS, SENSOR_ADDR, &reset_cmd, 1);
     vTaskDelay(10);
 }
 
-static int read_value(uint8_t cmd)
+static KSensorStatus read_value(uint8_t cmd, int * raw)
 {
     uint8_t buffer[3];
-    int raw;
     int bit0, bit1;
     memset(buffer, '\0', 3);
-
-    if (k_i2c_write(I2C_BUS, sensor_addr, &cmd, 1) != I2C_OK)
+    if (raw == NULL)
     {
-        return 0;
+        return SENSOR_ERROR;
+    }
+    if (k_i2c_write(I2C_BUS, SENSOR_ADDR, &cmd, 1) != I2C_OK)
+    {
+        return SENSOR_WRITE_ERROR;
     }
     vTaskDelay(30);
-    if (k_i2c_read(I2C_BUS, sensor_addr, &buffer, 3) != I2C_OK)
+    if (k_i2c_read(I2C_BUS, SENSOR_ADDR, &buffer, 3) != I2C_OK)
     {
-        return 0;
+        return SENSOR_READ_ERROR;
     }
 
     bit0 = (int)buffer[0];
     bit1 = (int)buffer[1];
-    raw = (bit0 << 8) | bit1;
+    *raw = (bit0 << 8) | bit1;
 
-    if (check_crc(raw, (int)buffer[2]) != 0)
+    if (check_crc(*raw, (int)buffer[2]) != 0)
     {
-        return 0;
+        return SENSOR_ERROR;
     }
-
-    return raw;
+    return SENSOR_OK;
 }
 
 static int check_crc(uint16_t raw_temp, uint8_t crc)
 {
+    uint32_t divisor = (uint32_t)0x988000;
     uint32_t rem = (uint32_t)raw_temp << 8;
     rem |= crc;
-
-    uint32_t divsor = (uint32_t)0x988000;
 
     for (uint8_t i = 0; i < 16; i++)
     {
         if (rem & (uint32_t)1<<(23 - i))
         {
-            rem ^= divsor;
+            rem ^= divisor;
         }
-        divsor >>= 1;
+        divisor >>= 1;
     }
 
     return (int)rem;
