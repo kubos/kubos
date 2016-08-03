@@ -115,7 +115,7 @@
  } bme280_calib_data;
 
  /**
-  * Setup the SPI interface for talking with the BME280 for talking with the BME280
+  * Setup the SPI interface for talking with the BME280 and init sensor
   */
 KSensorStatus bme280_setup(void);
 
