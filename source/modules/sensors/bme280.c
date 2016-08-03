@@ -197,6 +197,9 @@ float bme280_read_humidity(void)
 
     int32_t v_x1_u32r;
 
+    #ifdef TARGET_LIKE_MSP430
+        return -1.00; /* 64 bit int not supported on MSP */
+    #else
     v_x1_u32r = (t_fine - ((int32_t)76800));
 
     v_x1_u32r = (((((adc_H << 14) - (((int32_t)_bme280_calib.dig_H4) << 20) -
@@ -213,6 +216,7 @@ float bme280_read_humidity(void)
     float h = (v_x1_u32r>>12);
 
     return  h / 1024.0;
+    #endif
 }
 
 
@@ -227,7 +231,7 @@ float bme280_read_altitude(float seaLevel)
      * http://forums.adafruit.com/viewtopic.php?f=22&t=58064
      */
     #ifdef TARGET_LIKE_MSP430
-        return SENSOR_ERROR;
+        return -1.00; /* pow not supported on MSP */
     #else
         float atmospheric = bme280_read_pressure() / 100.0F;
         return 44330.0 * (1.0 - pow(atmospheric / seaLevel, 0.1903));
