@@ -136,6 +136,7 @@ hal_spi_status hal_spi_master_write(hal_spi_handle * handle, uint8_t *buffer, in
     hal_spi_status ret = HAL_SPI_ERROR;
 
     int i = 0; /* loop variable */
+    uint8_t dummy = 0; /* dummy rx */
 
     /* send data */
     for (; i < len; i++, buffer++)
@@ -149,11 +150,14 @@ hal_spi_status hal_spi_master_write(hal_spi_handle * handle, uint8_t *buffer, in
         /* put byte into register */
         handle->reg->txBuffer = *buffer;
 
-        /* wait for TX to finish */
-        if((ret = hal_spi_register_timeout(handle, UCBUSY, RELEASE)) != HAL_SPI_OK)
+        if((ret = hal_spi_register_timeout(handle, UCRXIFG, SET)) != HAL_SPI_OK)
         {
             return ret; /* error */
         }
+        
+        /* put dummy rx'd byte into dummy var */
+        dummy = handle->reg->rxBuffer;
+
     }
 
     return HAL_SPI_OK;
