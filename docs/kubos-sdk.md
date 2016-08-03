@@ -70,19 +70,9 @@ Be sure to pull the latest Kubos-SDK docker container afterwards:
 
 ## Creating a new project
 
-Creating a new KubOS project is a two step process:
+Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory with your project's name and add the basic files.
 
-#### 1. Create your project directory
-
-		$ mkdir project-name
-
-#### 2. Initialize the project
-
-From inside of the project directory run the `kubos init` commmand
-
-		$ cd project-name
 		$ kubos init project-name
-
 
 The contents of your project directory should look something like this:
 
@@ -148,9 +138,9 @@ For instance, the kubos-rt-example depends on the libcsp module. If you want to 
 
  * By linking a module globally you are making it available to link into any of your projects. By linking the module locally you are including the linked module in your build.
 
- * To link a module globally: 
+ * To link a module globally:
 
-		$ cd .../<module-directory>/ 
+		$ cd .../<module-directory>/
 		$ kubos link
 
  * To link a module that is already globally linked into a project:
@@ -161,7 +151,7 @@ For instance, the kubos-rt-example depends on the libcsp module. If you want to 
  * To link a module directly into a project in one step:
 
 		$ cd .../<project-directory>/
-		$ kubos link /path/to/module/ 
+		$ kubos link /path/to/module/
 
  * By doing this in one step kubos automatically links the module globally and then links it into your local project for you.
 
@@ -197,4 +187,3 @@ Note: this may need to run as root depending on your usb device permissions
 Additionally you can interact directly with the gdb server:
 
 		$ kubos server <start, stop, restart, status>
-
