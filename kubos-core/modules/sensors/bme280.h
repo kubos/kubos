@@ -120,6 +120,11 @@
 KSensorStatus bme280_setup(void);
 
 /**
+ * Reset the bme280 to default conditions
+ */
+KSensorStatus bme280_soft_reset(void);
+
+/**
  * Sends temperature command and reads back temperature data
  * @return float temperature in celsius (-40.0 to 85.0)
  */
