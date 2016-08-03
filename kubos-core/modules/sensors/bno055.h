@@ -16,21 +16,8 @@
 
  MIT license, all text above must be included in any redistribution
  ***************************************************************************/
-/*
- * KubOS Core Flight Services
- * Copyright (C) 2016 Kubos Corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/**
+ * This library has been modified by Kubos to utilize the Kubos-HAL I2C interface
  */
 
 /**
@@ -50,7 +37,7 @@
 typedef enum
 {
     /* Page id register definition */
-    BNO055_PAGE_ID_ADDR = 0X07,
+    BNO055_PAGE_ID_ADDR = 0x07,
 
     /* PAGE0 REGISTER DEFINITION START*/
     BNO055_CHIP_ID_ADDR = 0x00,
@@ -59,109 +46,109 @@ typedef enum
     BNO055_GYRO_REV_ID_ADDR = 0x03,
     BNO055_SW_REV_ID_LSB_ADDR = 0x04,
     BNO055_SW_REV_ID_MSB_ADDR = 0x05,
-    BNO055_BL_REV_ID_ADDR = 0X06,
+    BNO055_BL_REV_ID_ADDR = 0x06,
 
     /* Accel data register */
-    BNO055_ACCEL_DATA_X_LSB_ADDR = 0X08,
+    BNO055_ACCEL_DATA_X_LSB_ADDR = 0x08,
 
     /* Mag data register */
-    BNO055_MAG_DATA_X_LSB_ADDR = 0X0E,
+    BNO055_MAG_DATA_X_LSB_ADDR = 0x0E,
 
     /* Gyro data registers */
-    BNO055_GYRO_DATA_X_LSB_ADDR = 0X14,
+    BNO055_GYRO_DATA_X_LSB_ADDR = 0x14,
 
     /* Euler data registers */
-    BNO055_EULER_H_LSB_ADDR = 0X1A,
+    BNO055_EULER_H_LSB_ADDR = 0x1A,
 
     /* Quaternion data registers */
-    BNO055_QUATERNION_DATA_W_LSB_ADDR = 0X20,
+    BNO055_QUATERNION_DATA_W_LSB_ADDR = 0x20,
 
     /* Linear acceleration data registers */
-    BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR = 0X28,
+    BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR = 0x28,
 
     /* Gravity data registers */
-    BNO055_GRAVITY_DATA_X_LSB_ADDR = 0X2E,
+    BNO055_GRAVITY_DATA_X_LSB_ADDR = 0x2E,
 
     /* Temperature data register */
-    BNO055_TEMP_ADDR = 0X34,
+    BNO055_TEMP_ADDR = 0x34,
 
     /* Status registers */
-    BNO055_CALIB_STAT_ADDR = 0X35,
-    BNO055_SELFTEST_RESULT_ADDR = 0X36,
-    BNO055_INTR_STAT_ADDR = 0X37,
+    BNO055_CALIB_STAT_ADDR = 0x35,
+    BNO055_SELFTEST_RESULT_ADDR = 0x36,
+    BNO055_INTR_STAT_ADDR = 0x37,
 
-    BNO055_SYS_CLK_STAT_ADDR = 0X38,
-    BNO055_SYS_STAT_ADDR = 0X39,
-    BNO055_SYS_ERR_ADDR = 0X3A,
+    BNO055_SYS_CLK_STAT_ADDR = 0x38,
+    BNO055_SYS_STAT_ADDR = 0x39,
+    BNO055_SYS_ERR_ADDR = 0x3A,
 
     /* Unit selection register */
-    BNO055_UNIT_SEL_ADDR = 0X3B,
-    BNO055_DATA_SELECT_ADDR = 0X3C,
+    BNO055_UNIT_SEL_ADDR = 0x3B,
+    BNO055_DATA_SELECT_ADDR = 0x3C,
 
     /* Mode registers */
-    BNO055_OPR_MODE_ADDR = 0X3D,
-    BNO055_PWR_MODE_ADDR = 0X3E,
+    BNO055_OPR_MODE_ADDR = 0x3D,
+    BNO055_PWR_MODE_ADDR = 0x3E,
 
-    BNO055_SYS_TRIGGER_ADDR = 0X3F,
-    BNO055_TEMP_SOURCE_ADDR = 0X40,
+    BNO055_SYS_TRIGGER_ADDR = 0x3F,
+    BNO055_TEMP_SOURCE_ADDR = 0x40,
 
     /* Axis remap registers */
-    BNO055_AXIS_MAP_CONFIG_ADDR = 0X41,
-    BNO055_AXIS_MAP_SIGN_ADDR = 0X42,
+    BNO055_AXIS_MAP_CONFIG_ADDR = 0x41,
+    BNO055_AXIS_MAP_SIGN_ADDR = 0x42,
 
 
     /* Accelerometer Offset registers */
-    ACCEL_OFFSET_X_LSB_ADDR = 0X55,
-    ACCEL_OFFSET_X_MSB_ADDR = 0X56,
-    ACCEL_OFFSET_Y_LSB_ADDR = 0X57,
-    ACCEL_OFFSET_Y_MSB_ADDR = 0X58,
-    ACCEL_OFFSET_Z_LSB_ADDR = 0X59,
-    ACCEL_OFFSET_Z_MSB_ADDR = 0X5A,
+    ACCEL_OFFSET_X_LSB_ADDR = 0x55,
+    ACCEL_OFFSET_X_MSB_ADDR = 0x56,
+    ACCEL_OFFSET_Y_LSB_ADDR = 0x57,
+    ACCEL_OFFSET_Y_MSB_ADDR = 0x58,
+    ACCEL_OFFSET_Z_LSB_ADDR = 0x59,
+    ACCEL_OFFSET_Z_MSB_ADDR = 0x5A,
 
     /* Magnetometer Offset registers */
-    MAG_OFFSET_X_LSB_ADDR = 0X5B,
-    MAG_OFFSET_X_MSB_ADDR = 0X5C,
-    MAG_OFFSET_Y_LSB_ADDR = 0X5D,
-    MAG_OFFSET_Y_MSB_ADDR = 0X5E,
-    MAG_OFFSET_Z_LSB_ADDR = 0X5F,
-    MAG_OFFSET_Z_MSB_ADDR = 0X60,
+    MAG_OFFSET_X_LSB_ADDR = 0x5B,
+    MAG_OFFSET_X_MSB_ADDR = 0x5C,
+    MAG_OFFSET_Y_LSB_ADDR = 0x5D,
+    MAG_OFFSET_Y_MSB_ADDR = 0x5E,
+    MAG_OFFSET_Z_LSB_ADDR = 0x5F,
+    MAG_OFFSET_Z_MSB_ADDR = 0x60,
 
     /* Gyroscope Offset register s*/
-    GYRO_OFFSET_X_LSB_ADDR = 0X61,
-    GYRO_OFFSET_X_MSB_ADDR = 0X62,
-    GYRO_OFFSET_Y_LSB_ADDR = 0X63,
-    GYRO_OFFSET_Y_MSB_ADDR = 0X64,
-    GYRO_OFFSET_Z_LSB_ADDR = 0X65,
-    GYRO_OFFSET_Z_MSB_ADDR = 0X66,
+    GYRO_OFFSET_X_LSB_ADDR = 0x61,
+    GYRO_OFFSET_X_MSB_ADDR = 0x62,
+    GYRO_OFFSET_Y_LSB_ADDR = 0x63,
+    GYRO_OFFSET_Y_MSB_ADDR = 0x64,
+    GYRO_OFFSET_Z_LSB_ADDR = 0x65,
+    GYRO_OFFSET_Z_MSB_ADDR = 0x66,
 
     /* Radius registers */
-    ACCEL_RADIUS_LSB_ADDR = 0X67,
-    ACCEL_RADIUS_MSB_ADDR = 0X68,
-    MAG_RADIUS_LSB_ADDR = 0X69,
-    MAG_RADIUS_MSB_ADDR = 0X6A
+    ACCEL_RADIUS_LSB_ADDR = 0x67,
+    ACCEL_RADIUS_MSB_ADDR = 0x68,
+    MAG_RADIUS_LSB_ADDR = 0x69,
+    MAG_RADIUS_MSB_ADDR = 0x6A
 } bno055_reg_t;
 
 typedef enum {
-    POWER_MODE_NORMAL = 0X00,
-    POWER_MODE_LOWPOWER = 0X01,
-    POWER_MODE_SUSPEND = 0X02
+    POWER_MODE_NORMAL = 0x00,
+    POWER_MODE_LOWPOWER = 0x01,
+    POWER_MODE_SUSPEND = 0x02
 } bno055_powermode_t;
 
 typedef enum {
     /* Operation mode settings*/
-    OPERATION_MODE_CONFIG = 0X00,
-    OPERATION_MODE_ACCONLY = 0X01,
-    OPERATION_MODE_MAGONLY = 0X02,
-    OPERATION_MODE_GYRONLY = 0X03,
-    OPERATION_MODE_ACCMAG = 0X04,
-    OPERATION_MODE_ACCGYRO = 0X05,
-    OPERATION_MODE_MAGGYRO = 0X06,
-    OPERATION_MODE_AMG = 0X07,
-    OPERATION_MODE_IMUPLUS = 0X08,
-    OPERATION_MODE_COMPASS = 0X09,
-    OPERATION_MODE_M4G = 0X0A,
-    OPERATION_MODE_NDOF_FMC_OFF = 0X0B,
-    OPERATION_MODE_NDOF = 0X0C,
+    OPERATION_MODE_CONFIG = 0x00,
+    OPERATION_MODE_ACCONLY = 0x01,
+    OPERATION_MODE_MAGONLY = 0x02,
+    OPERATION_MODE_GYRONLY = 0x03,
+    OPERATION_MODE_ACCMAG = 0x04,
+    OPERATION_MODE_ACCGYRO = 0x05,
+    OPERATION_MODE_MAGGYRO = 0x06,
+    OPERATION_MODE_AMG = 0x07,
+    OPERATION_MODE_IMUPLUS = 0x08,
+    OPERATION_MODE_COMPASS = 0x09,
+    OPERATION_MODE_M4G = 0x0A,
+    OPERATION_MODE_NDOF_FMC_OFF = 0x0B,
+    OPERATION_MODE_NDOF = 0x0C,
     OPERATION_MODE_INVALID = 0x99
 } bno055_opmode_t;
 

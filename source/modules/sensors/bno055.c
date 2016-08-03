@@ -16,22 +16,9 @@
 
   MIT license, all text above must be included in any redistribution
  ***************************************************************************/
-/*
- * KubOS Core Flight Services
- * Copyright (C) 2016 Kubos Corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ /**
+  * This library has been modified by Kubos to utilize the Kubos-HAL I2C interface
+  */
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
 
@@ -70,7 +57,7 @@ KSensorStatus bno055_setup(bno055_opmode_t mode)
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_7BIT,
         .role = K_MASTER,
-        .clock_speed = 10000
+        .clock_speed = 100000
     };
     k_i2c_init(I2C_BUS, &conf);
     return bno055_init(mode);
@@ -89,7 +76,7 @@ KSensorStatus bno055_init(bno055_opmode_t mode)
         return ret; /* error */
     }
 
-    volatile uint8_t id;
+    uint8_t id;
     int i = 0;
     for (i = 0; i < 10; i++)
     {
