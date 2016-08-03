@@ -53,7 +53,7 @@ void htu21d_setup(void)
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_7BIT,
         .role = K_MASTER,
-        .clock_speed = 10000
+        .clock_speed = 100000
     };
     k_i2c_init(I2C_BUS, &conf);
 }
