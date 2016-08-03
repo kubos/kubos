@@ -133,8 +133,6 @@ void kprv_uart_dev_init(KUARTNum uart)
     }
 
     switch (k_uart->conf.stop_bits) {
-        // case K_STOP_BITS_1_5:
-        //     u.Init.StopBits = UART_STOPBITS_1_5; break;
         case K_STOP_BITS_2:
             u.Init.StopBits = UART_STOPBITS_2; break;
         case K_STOP_BITS_1:
@@ -192,38 +190,32 @@ static inline void uart_irq_handler(KUARTNum uart)
         return;
     }
 
+    UART_HandleTypeDef u = { .Instance = uart_dev(uart) };
+
     HAL_NVIC_DisableIRQ(uart_irqn(uart));
 
     if (__GET_FLAG(dev, USART_SR_PE))
     {
         // clear out the data register on parity error
-        volatile uint32_t tmpreg = dev->SR;
-        tmpreg = dev->DR;
-        ((void)tmpreg);
+        __HAL_UART_CLEAR_PEFLAG(&u);
     }
 
     if (__GET_FLAG(dev, USART_SR_FE))
     {
         // clear out the data register on framing error
-        volatile uint32_t tmpreg = dev->SR;
-        tmpreg = dev->DR;
-        ((void)tmpreg);
+        __HAL_UART_CLEAR_PEFLAG(&u);
     }
 
     if (__GET_FLAG(dev, USART_SR_NE))
     {
         // clear out the data register on noise error
-        volatile uint32_t tmpreg = dev->SR;
-        tmpreg = dev->DR;
-        ((void)tmpreg);
+        __HAL_UART_CLEAR_PEFLAG(&u);
     }
 
     if (__GET_FLAG(dev, USART_SR_ORE))
     {
         // clear out the data register on overrun
-        volatile uint32_t tmpreg = dev->SR;
-        tmpreg = dev->DR;
-        ((void)tmpreg);
+        __HAL_UART_CLEAR_PEFLAG(&u);
     }
 
     if (__GET_FLAG(dev, USART_SR_RXNE) )

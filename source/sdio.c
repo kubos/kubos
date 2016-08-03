@@ -133,8 +133,8 @@ static void sdio_msp_init(void)
 {
     GPIO_InitTypeDef GPIO_Init_Structure;
 
-	SET_BIT(RCC->AHB1ENR,
-		STM32F4_PIN_AHB1ENR_BIT(PC6) | STM32F4_PIN_AHB1ENR_BIT(PC7));
+    SET_BIT(RCC->AHB1ENR,
+        STM32F4_PIN_AHB1ENR_BIT(PC6) | STM32F4_PIN_AHB1ENR_BIT(PC7));
 
     /* Enable SDIO clock */
     __HAL_RCC_SDIO_CLK_ENABLE();
@@ -151,7 +151,7 @@ static void sdio_msp_init(void)
     // PC9  -> D1
     // PC10 -> D2
     // PC11 -> D3
-	// PC12 -> CLK
+    // PC12 -> CLK
     GPIO_Init_Structure.Mode = GPIO_MODE_AF_PP;
     GPIO_Init_Structure.Pull = GPIO_PULLUP;
     GPIO_Init_Structure.Speed = GPIO_SPEED_HIGH;
@@ -175,7 +175,7 @@ static void sdio_msp_init(void)
     HAL_GPIO_Init(GPIOB, &GPIO_Init_Structure);
 
 
-	// Detect pin
+    // Detect pin
     // PA8 -> DETECT
     GPIO_Init_Structure.Pin = GPIO_PIN_8;
     GPIO_Init_Structure.Mode = GPIO_MODE_INPUT;
@@ -183,9 +183,9 @@ static void sdio_msp_init(void)
 
 
 
-	/* NVIC configuration for SDIO interrupts */
-	HAL_NVIC_SetPriority(SDIO_IRQn, 5, 0);
-	HAL_NVIC_EnableIRQ(SDIO_IRQn);
+    /* NVIC configuration for SDIO interrupts */
+    HAL_NVIC_SetPriority(SDIO_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(SDIO_IRQn);
 }
 
 
