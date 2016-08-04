@@ -1,6 +1,6 @@
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+{
+  "fs": {
+    "fatfs"
+  }
+}
+**/
+#ifdef YOTTA_CFG_FS_FATFS
+
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <time.h>
 
-#define ENABLE_DEBUG (0)
+#include "kubos-core/modules/fatfs/ffconf.h"
+#include "kubos-core/modules/fatfs/ff.h"
 
-#include <debug.h>
-#include <ffconf.h>
-#include <ff.h>
+#include "kubos-core/modules/fs/fs.h"
+#include "kubos-core/modules/fatfs/fatfs.h"
 
-#include "fs.h"
-#include "fatfs.h"
-
-#if ENABLE_DEBUG
+#ifdef YOTTA_CFG_DEBUG
+#include "kubos-core/k_debug.h"
 #define DEBUG_FRESULT(op__, res__) DEBUG(op__ ": %s\n", FRESULT_str[res__])
 #else
 #define DEBUG_FRESULT(...)
@@ -372,3 +379,5 @@ int fatfs_closedir(fs_dir_t *dir)
     CHECK_FRESULT_NOREENT(f_closedir((DIR *) dir->priv_data));
     return 0;
 }
+
+#endif

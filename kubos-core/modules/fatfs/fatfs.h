@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifdef YOTTA_CFG_FS_FATFS
 #ifndef FATFS_H
 #define FATFS_H
 
-#include "fs.h"
+#include "kubos-core/modules/fs/fs.h"
 
 extern fs_dev_t fatfs_dev;
 
@@ -37,4 +37,6 @@ int fatfs_unlink(struct _reent *r, char *path);
 int fatfs_opendir(fs_dir_t *out, const char *path);
 int fatfs_readdir(fs_dir_t *dir, fs_info_t *info);
 int fatfs_closedir(fs_dir_t *dir);
+
+#endif
 #endif

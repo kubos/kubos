@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
+#ifdef YOTTA_CFG_FS
+
 #include <errno.h>
 #include <string.h>
-
-#include "board.h"
-#include "fs.h"
-#include "xtimer.h"
+#include "kubos-core/modules/fs/fs.h"
 
 #define FS_FD_START (STDERR_FILENO + 1)
 
@@ -316,3 +315,5 @@ int fs_closedir(fs_dir_t *dir)
 
     return dir->dev->closedir(dir);
 }
+
+#endif

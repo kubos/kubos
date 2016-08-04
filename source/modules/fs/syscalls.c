@@ -1,6 +1,6 @@
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,86 +18,15 @@
 #include <errno.h>
 #include <string.h>
 
-#ifdef MODULE_UART_STDIO
-#include "uart_stdio.h"
-#endif
-
-#include "board.h"
-#include "reboot.h"
-#include "thread.h"
-#include "fs.h"
-#include "xtimer.h"
-
-#define IS_STDIO(fd) (fd == STDIN_FILENO || fd == STDOUT_FILENO || fd == STDERR_FILENO)
+#include "kubos-core/modules/fs/fs.h"
 
 extern char _sheap;                 /* start of the heap */
 extern char _eheap;                 /* end of the heap */
 char *heap_top = &_sheap + 4;
 
-void _init(void)
-{
-#ifdef MODULE_UART_STDIO
-    uart_stdio_init();
-#endif
-}
+#ifdef YOTTA_CFG_FS
 
-void _fini(void)
-{
-    /* nothing to do here */
-}
-
-void _exit(int n)
-{
-    printf("#! exit %i: resetting\n", n);
-    reboot();
-    while(1);
-}
-
-void *_sbrk_r(struct _reent *r, ptrdiff_t incr)
-{
-    unsigned int state = irq_disable();
-    void *res = heap_top;
-
-    if ((heap_top + incr > &_eheap) || (heap_top + incr < &_sheap)) {
-        r->_errno = ENOMEM;
-        res = (void *)-1;
-    }
-    else {
-        heap_top += incr;
-    }
-
-    irq_restore(state);
-    return res;
-}
-
-pid_t _getpid(void)
-{
-    return sched_active_pid;
-}
-
-pid_t _getpid_r(struct _reent *ptr)
-{
-    (void) ptr;
-    return sched_active_pid;
-}
-
-__attribute__ ((weak))
-int _kill_r(struct _reent *r, pid_t pid, int sig)
-{
-    (void) pid;
-    (void) sig;
-    r->_errno = ESRCH;                      /* not implemented yet */
-    return -1;
-}
-
-__attribute__ ((weak))
-int _kill(pid_t pid, int sig)
-{
-    (void) pid;
-    (void) sig;
-    errno = ESRCH;                         /* not implemented yet */
-    return -1;
-}
+#define IS_STDIO(fd) (fd == STDIN_FILENO || fd == STDOUT_FILENO || fd == STDERR_FILENO)
 
 int _open_r(struct _reent *r, const char *name, int flags, int mode)
 {
@@ -106,23 +35,11 @@ int _open_r(struct _reent *r, const char *name, int flags, int mode)
 
 int _read_r(struct _reent *r, int fd, void *buffer, unsigned int count)
 {
-#ifdef MODULE_UART_STDIO
-    if (IS_STDIO(fd)) {
-        return uart_stdio_read(buffer, count);
-    }
-#endif
-
     return fs_read(r, fd, buffer, count);
 }
 
 int _write_r(struct _reent *r, int fd, const void *data, unsigned int count)
 {
-#ifdef MODULE_UART_STDIO
-    if (IS_STDIO(fd)) {
-        return uart_stdio_write(data, count);
-    }
-#endif
-
     return fs_write(r, fd, data, count);
 }
 
@@ -190,3 +107,5 @@ int _unlink_r(struct _reent *r, char *path)
 {
     return fs_unlink(r, path);
 }
+
+#endif

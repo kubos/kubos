@@ -1,6 +1,6 @@
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifdef YOTTA_CFG_FS
 
 #ifndef FS_H
 #define FS_H
@@ -99,15 +101,6 @@ typedef struct fs_info_s {
     uint16_t name_len;
     struct stat st;
 } fs_info_t;
-/*typedef struct fs_info_s {
-    fs_dev_t *dev;
-    char name[FS_MAX_FILENAME];
-    uint16_t name_len;
-    uint32_t size;
-    uint16_t mdate;
-    uint16_t mtime;
-    uint8_t attrs;
-} fs_info_t;*/
 
 void fs_init(void);
 int fs_mount(const char *mount, fs_dev_t *dev);
@@ -126,4 +119,6 @@ int fs_next_fd(void);
 int fs_opendir(fs_dir_t *out, const char *path);
 int fs_readdir(fs_dir_t *dir, fs_info_t *info);
 int fs_closedir(fs_dir_t *dir);
+#endif
+
 #endif
