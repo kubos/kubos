@@ -18,6 +18,8 @@
   ADDED: soft reset function
  ***************************************************************************/
 
+#ifdef YOTTA_CFG_SENSORS_BME280
+
 #include "kubos-core/modules/sensors/bme280.h"
 #include "kubos-hal/gpio.h"
 #include "FreeRTOS.h"
@@ -323,3 +325,5 @@ static int16_t read_signed_16_bit_LE(uint8_t reg)
 {
     return (int16_t)read_16_bit_LE(reg);
 }
+
+#endif

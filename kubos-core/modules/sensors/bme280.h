@@ -25,8 +25,10 @@
   * @brief BME280 Temperature, Humidty and Pressure Sensor
   */
 
- #ifndef BME280_H
- #define BME280_H
+#ifdef YOTTA_CFG_SENSORS_BME280
+
+#ifndef BME280_H
+#define BME280_H
 
 #include <stdint.h>
 #include "kubos-hal/spi.h"
@@ -134,4 +136,5 @@ float bme280_read_humidity(void);
 float bme280_read_altitude(float sea_level);
 
 
+#endif
 #endif
