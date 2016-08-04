@@ -126,24 +126,18 @@ void kprv_spi_dev_terminate(KSPINum spi)
 
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t *buffer, uint32_t len)
 {
-    hal_spi_status ret = HAL_SPI_ERROR;
-    ret = hal_spi_master_write(spi_handle(spi), buffer, len);
-
+    hal_spi_status ret = hal_spi_master_write(spi_handle(spi), buffer, len);
     return (KSPIStatus)ret;
 }
 
 KSPIStatus kprv_spi_read(KSPINum spi, uint8_t *buffer, uint32_t len)
 {
-    hal_spi_status ret = HAL_SPI_ERROR;
-    ret = hal_spi_master_read(spi_handle(spi), buffer, len);
-
+    hal_spi_status ret = hal_spi_master_read(spi_handle(spi), buffer, len);
     return (KSPIStatus)ret;
 }
 
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t *txBuffer, uint8_t *rxBuffer, uint32_t len)
 {
-    hal_spi_status ret = HAL_SPI_ERROR;
-    ret = hal_spi_master_write_read(spi_handle(spi), txBuffer, rxBuffer, len);
-
+    hal_spi_status ret = hal_spi_master_write_read(spi_handle(spi), txBuffer, rxBuffer, len);
     return (KSPIStatus)ret;
 }
