@@ -21,8 +21,7 @@
 #include "task.h"
 #include <msp430.h>
 
-//hal_spi_handle hal_spi_buses[YOTTA_CFG_HARDWARE_SPICOUNT];
-hal_spi_handle hal_spi_buses[2];
+hal_spi_handle hal_spi_buses[YOTTA_CFG_HARDWARE_SPICOUNT];
 
 /* defines for register timeout mode */
 #define SET 0
@@ -41,13 +40,13 @@ hal_spi_handle * hal_spi_device_init(hal_spi_bus spi)
     if (HAL_SPI_B0 == spi)
     {
         handle->select = &P3SEL;
-        handle->selectVal = BIT0 + BIT1 + BIT2; /* somi, simo, clk */
+        handle->select_val = BIT0 + BIT1 + BIT2; /* somi, simo, clk */
         handle->reg = (hal_spi_mem_reg *)__MSP430_BASEADDRESS_USCI_B0__;
     }
     else if (HAL_SPI_B1 == spi)
     {
         handle->select = &P4SEL;
-        handle->selectVal = BIT1 + BIT2 + BIT3; /* simo, somi, clk */
+        handle->select_val = BIT1 + BIT2 + BIT3; /* simo, somi, clk */
         handle->reg = (hal_spi_mem_reg *)__MSP430_BASEADDRESS_USCI_B1__;
     }
     return handle;
@@ -75,7 +74,7 @@ static void hal_spi_set_clock(hal_spi_handle * handle)
 void hal_spi_setup(hal_spi_handle * handle)
 {
     /* configure pins */
-    *(handle->select) |= handle->selectVal;
+    *(handle->select) |= handle->select_val;
 
     handle->reg->control1 |= UCSWRST; /* software reset */
     /* Mode3 2line, 8-bit SPI master, clock polarity=1, clock phase=0 */
@@ -93,7 +92,7 @@ void hal_spi_dev_terminate(hal_spi_handle * handle)
     handle->reg->control1 &= ~UCSWRST; /* releasing reset */
 
     /* de-select pins */
-    *(handle->select) &= ~handle->selectVal;
+    *(handle->select) &= ~handle->select_val;
 }
 
 static hal_spi_status hal_spi_register_timeout(hal_spi_handle * handle, uint8_t flag, uint8_t mode)
@@ -102,10 +101,10 @@ static hal_spi_status hal_spi_register_timeout(hal_spi_handle * handle, uint8_t 
     int timeout = 50;
 
     /* set register based on mode */
-    if(mode == RELEASE)
+    if (mode == RELEASE)
     {
         /* while waiting for status register to clear */
-        while((handle->reg->status & flag) && timeout > 0)
+        while ((handle->reg->status & flag) && timeout > 0)
         {
             vTaskDelay(5); /* wait */
             timeout--; /* decrease counter */
@@ -114,7 +113,7 @@ static hal_spi_status hal_spi_register_timeout(hal_spi_handle * handle, uint8_t 
     else /* SET */
     {
         /* while waiting for interrupt register to set */
-        while(!(handle->reg->interruptFlags & flag) && timeout > 0)
+        while (!(handle->reg->interrupt_flags & flag) && timeout > 0)
         {
             vTaskDelay(5); /* wait */
             timeout--; /* decrease counter */
@@ -122,7 +121,7 @@ static hal_spi_status hal_spi_register_timeout(hal_spi_handle * handle, uint8_t 
     }
 
     /* if we timed out */
-    if(timeout <= 0)
+    if (timeout <= 0)
     {
         return HAL_SPI_ERROR_TIMEOUT;
     }
@@ -142,21 +141,22 @@ hal_spi_status hal_spi_master_write(hal_spi_handle * handle, uint8_t *buffer, in
     for (; i < len; i++, buffer++)
     {
         /* wait for TX ready to set */
-        if((ret = hal_spi_register_timeout(handle, UCTXIFG, SET)) != HAL_SPI_OK)
+        if ((ret = hal_spi_register_timeout(handle, UCTXIFG, SET)) != HAL_SPI_OK)
         {
             return ret; /* error */
         }
 
         /* put byte into register */
-        handle->reg->txBuffer = *buffer;
+        handle->reg->tx_buffer = *buffer;
 
-        if((ret = hal_spi_register_timeout(handle, UCRXIFG, SET)) != HAL_SPI_OK)
+        /* wait for RX ready to set */
+        if ((ret = hal_spi_register_timeout(handle, UCRXIFG, SET)) != HAL_SPI_OK)
         {
             return ret; /* error */
         }
-        
+
         /* put dummy rx'd byte into dummy var */
-        dummy = handle->reg->rxBuffer;
+        dummy = handle->reg->rx_buffer;
 
     }
 
@@ -174,28 +174,28 @@ hal_spi_status hal_spi_master_read(hal_spi_handle * handle, uint8_t *buffer, int
     for (; i < len; i++, buffer++)
     {
         /* wait for TX ready to set */
-        if((ret = hal_spi_register_timeout(handle, UCTXIFG, SET)) != HAL_SPI_OK)
+        if ((ret = hal_spi_register_timeout(handle, UCTXIFG, SET)) != HAL_SPI_OK)
         {
             return ret; /* error */
         }
 
         /* put dummy byte into register */
-        handle->reg->txBuffer = 0xFF;
+        handle->reg->tx_buffer = 0xFF;
 
         /* wait for RX ready to set */
-        if((ret = hal_spi_register_timeout(handle, UCRXIFG, SET)) != HAL_SPI_OK)
+        if ((ret = hal_spi_register_timeout(handle, UCRXIFG, SET)) != HAL_SPI_OK)
         {
             return ret; /* error */
         }
 
         /* put rx'd byte into buffer */
-        *buffer = handle->reg->rxBuffer;
+        *buffer = handle->reg->rx_buffer;
     }
 
     return HAL_SPI_OK;
 }
 
-hal_spi_status hal_spi_master_write_read(hal_spi_handle * handle, uint8_t *txBuffer, uint8_t *rxBuffer, int len)
+hal_spi_status hal_spi_master_write_read(hal_spi_handle * handle, uint8_t *tx_buffer, uint8_t *rx_buffer, int len)
 {
     hal_spi_status ret = HAL_SPI_ERROR;
 
@@ -203,25 +203,25 @@ hal_spi_status hal_spi_master_write_read(hal_spi_handle * handle, uint8_t *txBuf
 
 
     /* send data and receive data */
-    for (; i < len; i++, txBuffer++, rxBuffer++)
+    for (; i < len; i++, tx_buffer++, rx_buffer++)
     {
         /* wait for TX ready to set */
-        if((ret = hal_spi_register_timeout(handle, UCTXIFG, SET)) != HAL_SPI_OK)
+        if ((ret = hal_spi_register_timeout(handle, UCTXIFG, SET)) != HAL_SPI_OK)
         {
             return ret; /* error */
         }
 
         /* put data byte into register */
-        handle->reg->txBuffer = *txBuffer;
+        handle->reg->tx_buffer = *tx_buffer;
 
         /* wait for RX ready to set */
-        if((ret = hal_spi_register_timeout(handle, UCRXIFG, SET)) != HAL_SPI_OK)
+        if ((ret = hal_spi_register_timeout(handle, UCRXIFG, SET)) != HAL_SPI_OK)
         {
             return ret; /* error */
         }
 
         /* put rx'd byte into buffer */
-        *rxBuffer = handle->reg->rxBuffer;
+        *rx_buffer = handle->reg->rx_buffer;
     }
 
     return HAL_SPI_OK;

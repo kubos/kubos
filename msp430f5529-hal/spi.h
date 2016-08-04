@@ -97,23 +97,23 @@ typedef struct
     volatile uint8_t status;
     uint8_t padding3;
     /** UCBxRXBUF */
-    volatile uint8_t rxBuffer;
+    volatile uint8_t rx_buffer;
     uint8_t padding4;
     /** UCBxTXBUF */
-    volatile uint8_t txBuffer;
+    volatile uint8_t tx_buffer;
     uint8_t padding5;
     /** UCBxI2COA */
-    volatile uint8_t ownAddress;
+    volatile uint8_t own_address;
     uint8_t padding6;
     /** UCBxI2CSA */
-    volatile uint8_t slaveAddress;
+    volatile uint8_t slave_address;
     uint8_t padding7[9];
     /** UCAxIE */
-    volatile uint8_t interruptEnable;
+    volatile uint8_t interrupt_enable;
     /** UCAxIFG */
-    volatile uint8_t interruptFlags;
+    volatile uint8_t interrupt_flags;
     /** UCAxIV */
-    volatile uint8_t interruptVector;
+    volatile uint8_t interrupt_vector;
 } hal_spi_mem_reg;
 
 /**
@@ -125,7 +125,7 @@ typedef struct
     hal_spi_bus bus_num;
     hal_spi_conf conf;
     volatile uint8_t * select;
-    uint8_t selectVal;
+    uint8_t select_val;
 } hal_spi_handle;
 
 /**
@@ -182,10 +182,10 @@ hal_spi_status hal_spi_master_read(hal_spi_handle * handle, uint8_t *buffer, int
 /**
  * @brief Reads a buffer from a slave device over spi.
  * @param handle spi bus handle to read from
- * @param txBuffer buffer pointer to write
- * @param rxBuffer buffer pointer to read to
+ * @param tx_buffer buffer pointer to write
+ * @param rx_buffer buffer pointer to read to
  * @param len number of characters to read
  */
-hal_spi_status hal_spi_master_write_read(hal_spi_handle * handle, uint8_t *txBuffer, uint8_t *rxBuffer, int len);
+hal_spi_status hal_spi_master_write_read(hal_spi_handle * handle, uint8_t *tx_buffer, uint8_t *rx_buffer, int len);
 
 #endif
