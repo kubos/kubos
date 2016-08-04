@@ -12,6 +12,9 @@
   "targetDependencies": {
     "freertos": {
       "freertos": "openkosmosorg/freertos#~9.0.1"
+    },
+    "kubos-rt": {
+      "kubos-hal": "openkosmosorg/kubos-hal#master"
     }
   }
 }
