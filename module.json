@@ -1,6 +1,6 @@
 {
   "name": "kubos-rt",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Real-time OS for constrained satellite subsystems",
   "keywords": [
     "satellite"
