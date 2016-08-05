@@ -1,6 +1,6 @@
 {
   "name": "stm32cubef4",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "STM32Cube HAL for STM32F4 microcontrollers",
   "keywords": [
     "stm32cubef4"
