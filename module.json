@@ -1,6 +1,6 @@
 {
   "name": "kubos-i2c-example",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "bin": "./source",
   "description": "Example app running on kubos-rt, demonstrating i2c.",
   "repository": {
