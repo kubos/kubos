@@ -1,6 +1,6 @@
 {
   "name": "kubos-hal",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "KubOS - Satellite flight software platform",
   "keywords": [],
   "author": "kubos.co",
