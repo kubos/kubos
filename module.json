@@ -1,6 +1,6 @@
 {
   "name": "freertos-config-msp430f5529",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "FreeRTOS config for msp430f5529",
   "keywords": [
     "freertos",
