@@ -17,8 +17,8 @@
   Modified by KubOS Corporation 2016 for integration into Kubos Core
  ***************************************************************************/
  /**
-  * @defgroup SENSORS
-  * @addtogroup SENSORS
+  * @defgroup BME280
+  * @addgroup BME280
   * @{
   */
  /**
