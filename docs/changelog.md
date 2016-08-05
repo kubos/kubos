@@ -1,5 +1,21 @@
 # KubOS Changelog
 
+## v0.0.5 - Aug 05 2016
+* Added a [SPI HAL API](./kubos-hal/group__SPI.html)
+  for MSP430 based targets (STM32F4 compatibility coming soon)
+* Added a [SDIO HAL API](./kubos-hal/group__SDIO.html)
+  for STM32F4 based targets
+* Added filesystem support for FatFs based SD Cards, using SDIO (STM32F4 only)
+* Added drivers for three sensors:
+  * [HTU21D Temperature/Humidity](./kubos-core/group__HTU21D.html)
+  * [BNO055 IMU](./kubos-core/group__BNO055.html)
+  * [BME280 Temperature/Humidity/Pressure](./kubos-core/group__BME280.html)
+* Added support for CSP over the Kubos-HAL UART interface
+* A new [SPI example application](https://github.com/openkosmosorg/kubos-i2c-example)
+  using the [driver for the BME280 sensor](./kubos-core/group__BME280.html)
+* [Upgrade Instructions](docs/kubos-sdk.md)
+* [Tagged repo manifest](https://github.com/openkosmosorg/kubos-manifest/blob/v0.0.5/docker-manifest.xml)
+
 ## v0.0.4 - Jul 01 2016
 * Added a new I2C HAL API for both STM32F4 and MSP430 based targets (master mode only, slave coming soon)
 * Simplified hardware debugging with GDB using the new `kubos debug` and `kubos server` commands
