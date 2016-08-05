@@ -1,6 +1,6 @@
 {
     "name" : "msp430f5529-gcc",
-    "version" : "0.0.3",
+    "version" : "0.0.4",
     "inherits": {
       "kubos-msp430-gcc": "openkosmosorg/target-kubos-msp430-gcc#~0.0.1"
     },
@@ -18,7 +18,7 @@
     "toolchain" : "CMake/toolchain.cmake",
     "config": {
         "hardware": {
-	        "i2cCount": 2,
+	    "i2cCount": 2,
             "uartCount": 2,
             "spiCount": 2,
             "uartDefaults": {
