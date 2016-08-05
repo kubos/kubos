@@ -28,4 +28,5 @@ KubOS Core Flight Middleware
   - @subpage KLOG
  - Sensors
   - @subpage HTU21D
+  - @subpage BME280
   - @subpage BNO055
