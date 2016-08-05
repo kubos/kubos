@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-stm32f407xg",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "CMSIS Core module for stm32f407xg microcontrollers",
   "keywords": [
     "mbed"
