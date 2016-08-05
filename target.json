@@ -1,6 +1,6 @@
 {
   "name": "na-satbus-3c0-gcc",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "inherits": {
     "stm32f405-gcc": "openkosmosorg/target-stm32f405-gcc#~0.0.1"
   },
