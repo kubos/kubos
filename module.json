@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core-stm32f405rg",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "CMSIS Core module for stm32f405rg microcontrollers",
   "keywords": [
     "mbed"
