@@ -1,6 +1,6 @@
 {
   "name": "example-kubos-app",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "bin": "./source",
   "description": "Example app running on kubos-rt.",
   "repository": {
