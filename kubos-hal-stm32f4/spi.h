@@ -14,34 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @brief This file contains implementation of weak functions used by the
- * STM32Cubef4 HAL and which are not driver specific.
- * @author kubos.co
- */
+#ifndef K_SPI_HAL_H
+#define K_SPI_HAL_H
 
-#include <stm32cubef4/stm32f4xx_hal.h>
-#include <FreeRTOS.h>
-#include <task.h>
+#include "kubos-hal/spi.h"
 
-/**
- * Return FreeRTOS's tick count
- */
-uint32_t HAL_GetTick(void)
-{
-    return xTaskGetTickCount();
-}
+#include "stm32f4xx.h"
+#include "stm32f4xx_hal_spi.h"
 
-/**
- * Gives FreeRTOS time to increment the tick
- */
-void HAL_IncTick(void)
-{
-    vTaskDelay(1);
-}
+typedef struct {
+    /* KubOS-HAL structure */
+    KSPI * kspi;
+    /* STM32CubeF4's special structure */
+    SPI_HandleTypeDef hal_handle;
+} hal_spi_handle;
 
-void HAL_Delay(uint32_t Delay)
-{
-    vTaskDelay(Delay);
-    vTaskDelay(10);
-}
+
+#endif
