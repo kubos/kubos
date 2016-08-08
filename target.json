@@ -48,12 +48,14 @@
       "externalClock": "8000000",
       "uartCount": "6",
       "i2cCount": "2",
+      "spiCount": "2",
       "console": {
         "uart": "K_UART6",
         "baudRate": "115200"
       },
       "defaults": {
-        "i2c": "K_I2C1"
+        "i2c": "K_I2C1",
+        "spi": "K_SPI1"
       },
       "i2c": {
         "i2c1": {
@@ -107,11 +109,11 @@
         "UART6_RX": "PC7",
         "USBTX": "PA_2",
         "USBRX": "PA_3",
-        "SPI_MOSI": "PA_7",
-        "SPI_MISO": "PA_6",
-        "SPI_SCK": "PA_5",
-        "SPI_CS": "PA_4",
-        "PWM_OUT": "PB_3"
+        "SPI_MOSI": "PA7",
+        "SPI_MISO": "PA6",
+        "SPI_SCK": "PA5",
+        "SPI_CS": "PA4",
+        "PWM_OUT": "PB3"
       },
       "test-pins": {
         "spi": {
