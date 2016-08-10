@@ -26,14 +26,19 @@
   *
   * @author     kubos.co
   */
- #include "kubos-hal/uart.h"
+#include "kubos-hal/uart.h"
 
 /**
   * @brief uart putchar implementation using default console
   */
 int putchar(int c)
 {
+#ifdef K_UART_CONSOLE
     return k_uart_write(K_UART_CONSOLE, &c, 1);
+#else
+#warning "putchar console undefined"
+    return -1;
+#endif
 }
 
 /* @} */

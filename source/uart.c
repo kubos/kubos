@@ -27,6 +27,7 @@
   * @author     kubos.co
   */
 
+#if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include "kubos-hal/uart.h"
 #include "msp430f5529-hal/uart.h"
 #include <msp430.h>
@@ -195,5 +196,7 @@ void hal_uart_interrupt(hal_uart_handle * handle)
         portYIELD();
     }
 }
+
+#endif
 
 /* @} */
