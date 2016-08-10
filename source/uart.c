@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
  /**
    * @defgroup UART
    * @addtogroup UART
    * @{
    */
+
+#if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include "kubos-hal/gpio.h"
 #include "kubos-hal/uart.h"
 #include "kubos-hal-stm32f4/stm32f4_gpio.h"
@@ -256,46 +257,47 @@ static inline void uart_irq_handler(KUARTNum uart)
     HAL_NVIC_EnableIRQ(uart_irqn(uart));
 }
 
-#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 1
+#if YOTTA_CFG_HARDWARE_UART_COUNT >= 1
 void USART1_IRQHandler(void)
 {
     uart_irq_handler(K_UART1);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 2
+#if YOTTA_CFG_HARDWARE_UART_COUNT >= 2
 void USART2_IRQHandler(void)
 {
     uart_irq_handler(K_UART2);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 3
+#if YOTTA_CFG_HARDWARE_UART_COUNT >= 3
 void USART3_IRQHandler(void)
 {
     uart_irq_handler(K_UART3);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 4
+#if YOTTA_CFG_HARDWARE_UART_COUNT >= 4
 void UART4_IRQHandler(void)
 {
     uart_irq_handler(K_UART4);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 5
+#if YOTTA_CFG_HARDWARE_UART_COUNT >= 5
 void UART5_IRQHandler(void)
 {
     uart_irq_handler(K_UART5);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UARTCOUNT >= 6
+#if YOTTA_CFG_HARDWARE_UART_COUNT >= 6
 void USART6_IRQHandler(void)
 {
     uart_irq_handler(K_UART6);
 }
+#endif
 #endif
 
 /* @} */
