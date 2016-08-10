@@ -19,17 +19,19 @@
   ],
   "config": {
     "hardware": {
-      "uartCount": 0,
+      "uart": {
+          "count": 0,
+          "defaults": {
+              "baudRate": 9600,
+              "wordLen": "K_WORD_LEN_8BIT",
+              "stopBits": "K_STOP_BITS_1",
+              "parity": "K_PARITY_NONE",
+              "rxQueueLen": 32,
+              "txQueueLen": 32
+          }
+      },
       "i2cCount": 1,
       "spiCount": 1,
-      "uartDefaults": {
-        "baudRate": 9600,
-        "wordLen": "K_WORD_LEN_8BIT",
-        "stopBits": "K_STOP_BITS_1",
-        "parity": "K_PARITY_NONE",
-        "rxQueueLen": 32,
-        "txQueueLen": 32
-      }, 
       "defaults": {
         "i2c": "K_I2C1",
         "spi": "K_SPI1"
