@@ -29,7 +29,7 @@
                 "baudRate": 115200
             },
             "uart": {
-                "count": 0,
+                "count": 2,
                 "uart1": {
                     "tx": "P33",
                     "rx": "P34"
