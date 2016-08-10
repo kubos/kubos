@@ -19,12 +19,14 @@
  * limitations under the License.
  *******************************************************************************
  */
+
+#if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include <msp430.h>
 #include "msp430f5529-hal/uart.h"
 #include <stddef.h>
 #include <stdbool.h>
 
-hal_uart_handle hal_uart_dev[YOTTA_CFG_HARDWARE_UARTCOUNT];
+hal_uart_handle hal_uart_dev[YOTTA_CFG_HARDWARE_UART_COUNT];
 
 hal_uart_handle * hal_uart_device_init(hal_uart_device device)
 {
@@ -215,3 +217,5 @@ __attribute__ (( interrupt ( USCI_A1_VECTOR ))) void hal_uart_a1_interrupt(void)
 {
     hal_uart_interrupt(&hal_uart_dev[HAL_UART_A1]);
 }
+
+#endif

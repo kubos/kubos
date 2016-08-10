@@ -28,6 +28,8 @@
    *
    * @author     kubos.co
    */
+
+#if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #ifndef HAL_UART_H
 #define HAL_UART_H
 
@@ -244,5 +246,5 @@ extern void hal_uart_interrupt(hal_uart_handle * handle);
 #define HAL_UART_STAT(handle, flag) (flag == (flag & handle->reg->status))
 
 #endif
-
+#endif
 /* @} */
