@@ -42,7 +42,6 @@
       "present": 0
     },
     "hardware": {
-      "uartCount": "6",
       "i2cCount": "2",
       "defaults": {
         "i2c": "K_I2C1"
@@ -79,17 +78,30 @@
           "alt": "GPIO_AF4_I2C2"
         }
       },
+      "uart": {
+        "count": 6,
+        "uart1": {
+          "tx": "PB6",
+          "rx": "PB7"
+        },
+        "uart2": {
+          "tx": "PA2",
+          "rx": "PA3"
+        },
+        "uart3": {
+          "tx": "PB10",
+          "rx": "PB11"
+        },
+        "uart4": {
+          "tx": "PA0",
+          "rx": "PA1"
+        },
+        "uart6": {
+          "tx": "PC6",
+          "rx": "PC7"
+        }
+      },
       "pins": {
-        "UART1_TX": "PB6",
-        "UART1_RX": "PB7",
-        "UART2_TX": "PA2",
-        "UART2_RX": "PA3",
-        "UART3_TX": "PB10",
-        "UART3_RX": "PB11",
-        "UART4_TX": "PA0",
-        "UART4_RX": "PA1",
-        "UART6_TX": "PC6",
-        "UART6_RX": "PC7",
         "USBTX": "PA_2",
         "USBRX": "PA_3",
         "SPI_MOSI": "PA7",
