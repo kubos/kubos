@@ -46,7 +46,6 @@
     },
     "hardware": {
       "externalClock": "8000000",
-      "uartCount": "6",
       "i2cCount": "2",
       "console": {
         "uart": "K_UART6",
@@ -87,24 +86,39 @@
           "alt": "GPIO_AF4_I2C2"
         }
       },
+      "uart": {
+        "count": 6,
+        "uart1": {
+          "tx": "PA9",
+          "rx": "PA10"
+        },
+        "uart2": {
+          "tx": "PA2",
+          "rx": "PA3"
+        },
+        "uart3": {
+          "tx": "PA10",
+          "rx": "PA11"
+        },
+        "uart4": {
+          "tx": "PA0",
+          "rx": "PA1"
+        },
+        "uart5": {
+          "tx": "PC12",
+          "rx": "PD2"
+        },
+        "uart6": {
+          "tx": "PC6",
+          "rx": "PC7"
+        }
+      },
       "pins": {
         "LED1": "PD12",
         "LED2": "PD13",
         "LED3": "PD14",
         "LED4": "PD15",
         "USER_BUTTON": "PA0",
-        "UART1_TX": "PA9",
-        "UART1_RX": "PA10",
-        "UART2_TX": "PA2",
-        "UART2_RX": "PA3",
-        "UART3_TX": "PA10",
-        "UART3_RX": "PA11",
-        "UART4_TX": "PA0",
-        "UART4_RX": "PA1",
-        "UART5_TX": "PC12",
-        "UART5_RX": "PD2",
-        "UART6_TX": "PC6",
-        "UART6_RX": "PC7",
         "USBTX": "PA_2",
         "USBRX": "PA_3",
         "SPI_MOSI": "PA_7",
