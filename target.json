@@ -42,11 +42,11 @@
       "present": 0
     },
     "hardware": {
-      "i2cCount": "2",
-      "defaults": {
-        "i2c": "K_I2C1"
-      },
       "i2c": {
+        "count": 2,
+        "defaults": {
+            "bus": "K_I2C1"
+        },
         "i2c1": {
           "scl": {
             "pin": "GPIO_PIN_6",
