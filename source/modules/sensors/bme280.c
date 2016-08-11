@@ -46,12 +46,12 @@ int32_t t_fine = 0;
 static void bme280_read_coefficients(void);
 
 static KSensorStatus write_byte(uint8_t reg, uint8_t value);
-static uint8_t read_byte(uint8_t reg);
-static uint16_t read_16_bit(uint8_t reg);
-static uint32_t read_24_bit(uint8_t reg);
-static int16_t read_signed_16_bit(uint8_t reg);
-static uint16_t read_16_bit_LE(uint8_t reg);
-static int16_t read_signed_16_bit_LE(uint8_t reg);
+static KSensorStatus read_byte(uint8_t reg, uint8_t * value);
+static KSensorStatus read_16_bit(uint8_t reg, uint16_t * value);
+static KSensorStatus read_24_bit(uint8_t reg, uint32_t * value);
+static KSensorStatus read_signed_16_bit(uint8_t reg, int16_t * value);
+static KSensorStatus read_16_bit_LE(uint8_t reg, uint16_t * value);
+static KSensorStatus read_signed_16_bit_LE(uint8_t reg, int16_t * value);
 
 KSensorStatus bme280_setup(void)
 {
@@ -77,9 +77,16 @@ KSensorStatus bme280_setup(void)
 
     /* check if sensor is present */
     int timeout = 20;
-    while (read_byte(BME280_REGISTER_CHIPID) != 0x60)
+    uint8_t chip_id = 0;
+    read_byte(BME280_REGISTER_CHIPID, &chip_id);
+
+    /* not working? */
+    while (chip_id != 0x60)
     {
         vTaskDelay(50);
+
+        /* try again */
+        read_byte(BME280_REGISTER_CHIPID, &chip_id);
 
         /* timed out? */
         if (timeout <= 0)
@@ -109,35 +116,65 @@ KSensorStatus bme280_soft_reset(void)
 void bme280_read_coefficients(void)
 {
     /* load all coefficients */
-    _bme280_calib.dig_T1 = read_16_bit_LE(BME280_REGISTER_DIG_T1);
-    _bme280_calib.dig_T2 = read_signed_16_bit_LE(BME280_REGISTER_DIG_T2);
-    _bme280_calib.dig_T3 = read_signed_16_bit_LE(BME280_REGISTER_DIG_T3);
+    _bme280_calib.dig_T1 = 0;
+    read_16_bit_LE(BME280_REGISTER_DIG_T1, &_bme280_calib.dig_T1);
+    _bme280_calib.dig_T2 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_T2, &_bme280_calib.dig_T2);
+    _bme280_calib.dig_T3 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_T3, &_bme280_calib.dig_T3);
 
-    _bme280_calib.dig_P1 = read_16_bit_LE(BME280_REGISTER_DIG_P1);
-    _bme280_calib.dig_P2 = read_signed_16_bit_LE(BME280_REGISTER_DIG_P2);
-    _bme280_calib.dig_P3 = read_signed_16_bit_LE(BME280_REGISTER_DIG_P3);
-    _bme280_calib.dig_P4 = read_signed_16_bit_LE(BME280_REGISTER_DIG_P4);
-    _bme280_calib.dig_P5 = read_signed_16_bit_LE(BME280_REGISTER_DIG_P5);
-    _bme280_calib.dig_P6 = read_signed_16_bit_LE(BME280_REGISTER_DIG_P6);
-    _bme280_calib.dig_P7 = read_signed_16_bit_LE(BME280_REGISTER_DIG_P7);
-    _bme280_calib.dig_P8 = read_signed_16_bit_LE(BME280_REGISTER_DIG_P8);
-    _bme280_calib.dig_P9 = read_signed_16_bit_LE(BME280_REGISTER_DIG_P9);
+    _bme280_calib.dig_P1 = 0;
+    read_16_bit_LE(BME280_REGISTER_DIG_P1, &_bme280_calib.dig_P1);
+    _bme280_calib.dig_P2 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_P2, &_bme280_calib.dig_P2);
+    _bme280_calib.dig_P3 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_P3, &_bme280_calib.dig_P3);
+    _bme280_calib.dig_P4 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_P4, &_bme280_calib.dig_P4);
+    _bme280_calib.dig_P5 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_P5, &_bme280_calib.dig_P5);
+    _bme280_calib.dig_P6 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_P6, &_bme280_calib.dig_P6);
+    _bme280_calib.dig_P7 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_P7, &_bme280_calib.dig_P7);
+    _bme280_calib.dig_P8 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_P8, &_bme280_calib.dig_P8);
+    _bme280_calib.dig_P9 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_P9, &_bme280_calib.dig_P9);
 
-    _bme280_calib.dig_H1 = read_byte(BME280_REGISTER_DIG_H1);
-    _bme280_calib.dig_H2 = read_signed_16_bit_LE(BME280_REGISTER_DIG_H2);
-    _bme280_calib.dig_H3 = read_byte(BME280_REGISTER_DIG_H3);
-    _bme280_calib.dig_H4 = (read_byte(BME280_REGISTER_DIG_H4) << 4) |
-      (read_byte(BME280_REGISTER_DIG_H4+1) & 0xF);
-    _bme280_calib.dig_H5 = (read_byte(BME280_REGISTER_DIG_H5+1) << 4) |
-      (read_byte(BME280_REGISTER_DIG_H5) >> 4);
-    _bme280_calib.dig_H6 = (int8_t)read_byte(BME280_REGISTER_DIG_H6);
+    _bme280_calib.dig_H1 = 0;
+    read_byte(BME280_REGISTER_DIG_H1, &_bme280_calib.dig_H1);
+    _bme280_calib.dig_H2 = 0;
+    read_signed_16_bit_LE(BME280_REGISTER_DIG_H2, &_bme280_calib.dig_H2);
+    _bme280_calib.dig_H3 = 0;
+    read_byte(BME280_REGISTER_DIG_H3, &_bme280_calib.dig_H3);
+
+    uint8_t dig_H4_0 = 0;
+    uint8_t dig_H4_1 = 0;
+    read_byte(BME280_REGISTER_DIG_H4, &dig_H4_0);
+    read_byte(BME280_REGISTER_DIG_H4+1, &dig_H4_1);
+    _bme280_calib.dig_H4 = (dig_H4_0 << 4) | (dig_H4_1 & 0xF);
+
+    uint8_t dig_H5_0 = 0;
+    uint8_t dig_H5_1 = 0;
+    read_byte(BME280_REGISTER_DIG_H5+1, &dig_H5_1);
+    read_byte(BME280_REGISTER_DIG_H5, &dig_H5_0);
+    _bme280_calib.dig_H5 = (dig_H5_1 << 4) | (dig_H5_0 >> 4);
+
+    uint8_t dig_H6_0 = 0;
+    read_byte(BME280_REGISTER_DIG_H6, &dig_H6_0);
+    _bme280_calib.dig_H6 = (int8_t)dig_H6_0;
 }
 
-float bme280_read_temperature(void)
+KSensorStatus bme280_read_temperature(float * temp)
 {
     int32_t var1, var2;
 
-    int32_t adc_T = read_24_bit(BME280_REGISTER_TEMPDATA);
+    int32_t adc_T = 0;
+    if (read_24_bit(BME280_REGISTER_TEMPDATA, (uint32_t*)&adc_T) != SENSOR_OK)
+    {
+        return SENSOR_READ_ERROR;
+    }
     adc_T >>= 4;
 
     var1  = ((((adc_T >> 3) - ((int32_t)_bme280_calib.dig_T1 << 1))) *
@@ -150,16 +187,28 @@ float bme280_read_temperature(void)
     t_fine = var1 + var2;
 
     float T  = (t_fine * 5 + 128) >> 8;
-    return T/100;
+    *temp = T/100;
+
+    return SENSOR_OK;
 }
 
-float bme280_read_pressure(void)
+KSensorStatus bme280_read_pressure(float * press)
 {
     int64_t var1, var2, p;
 
-    bme280_read_temperature(); /* get up to date t_fine */
+    float temp = 0;
 
-    int32_t adc_P = read_24_bit(BME280_REGISTER_PRESSUREDATA);
+#ifdef TARGET_LIKE_MSP430
+    return SENSOR_ERROR; /* 64 bit int not supported on MSP */
+#else
+    bme280_read_temperature(&temp); /* get up to date t_fine */
+
+    uint32_t adc_temp = 0;
+    if (read_24_bit(BME280_REGISTER_PRESSUREDATA, &adc_temp) != SENSOR_OK)
+    {
+        return SENSOR_READ_ERROR;
+    }
+    int32_t adc_P = (int32_t)adc_temp;
     adc_P >>= 4;
 
     var1 = ((int64_t)t_fine) - 128000;
@@ -171,7 +220,7 @@ float bme280_read_pressure(void)
     var1 = (((((int64_t)1) << 47) + var1)) * ((int64_t)_bme280_calib.dig_P1) >> 33;
 
     if (var1 == 0) {
-        return 0;  /* avoid exception caused by division by zero */
+        return SENSOR_ERROR;  /* avoid exception caused by division by zero */
     }
 
     p = 1048576 - adc_P;
@@ -180,20 +229,26 @@ float bme280_read_pressure(void)
     var2 = (((int64_t)_bme280_calib.dig_P8) * p) >> 19;
 
     p = ((p + var1 + var2) >> 8) + (((int64_t)_bme280_calib.dig_P7)<<4);
-    return (float)p/256;
+    *press = (float)p/256;
+
+    return SENSOR_OK;
+#endif
 }
 
-float bme280_read_humidity(void)
+KSensorStatus bme280_read_humidity(float * hum)
 {
-    bme280_read_temperature(); /* get up to date t_fine */
+    float temp = 0;
+    bme280_read_temperature(&temp); /* get up to date t_fine */
 
-    int32_t adc_H = read_16_bit(BME280_REGISTER_HUMIDDATA);
+    uint16_t adc_temp = 0;
+    if (read_16_bit(BME280_REGISTER_HUMIDDATA, &adc_temp) != SENSOR_OK)
+    {
+        return SENSOR_READ_ERROR;
+    }
+    int32_t adc_H = (int32_t)adc_temp;
 
     int32_t v_x1_u32r;
 
-    #ifdef TARGET_LIKE_MSP430
-        return -1.00; /* 64 bit int not supported on MSP */
-    #else
     v_x1_u32r = (t_fine - ((int32_t)76800));
 
     v_x1_u32r = (((((adc_H << 14) - (((int32_t)_bme280_calib.dig_H4) << 20) -
@@ -208,14 +263,15 @@ float bme280_read_humidity(void)
     v_x1_u32r = (v_x1_u32r < 0) ? 0 : v_x1_u32r;
     v_x1_u32r = (v_x1_u32r > 419430400) ? 419430400 : v_x1_u32r;
     float h = (v_x1_u32r>>12);
+    *hum =  h / 1024.0;
 
-    return  h / 1024.0;
-    #endif
+    return SENSOR_OK;
 }
 
 
-float bme280_read_altitude(float seaLevel)
+KSensorStatus bme280_read_altitude(float seaLevel, float * alt)
 {
+    KSensorStatus ret;
     /*
      * Equation taken from BMP180 datasheet (page 16):
      * http://www.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
@@ -225,10 +281,14 @@ float bme280_read_altitude(float seaLevel)
      * http://forums.adafruit.com/viewtopic.php?f=22&t=58064
      */
     #ifdef TARGET_LIKE_MSP430
-        return -1.00; /* pow not supported on MSP */
+        return SENSOR_ERROR; /* pow not supported on MSP */
     #else
-        float atmospheric = bme280_read_pressure() / 100.0F;
-        return 44330.0 * (1.0 - pow(atmospheric / seaLevel, 0.1903));
+        float atmospheric = 0;
+        ret = bme280_read_pressure(&atmospheric);
+        atmospheric /= 100.0F;
+        *alt = 44330.0 * (1.0 - pow(atmospheric / seaLevel, 0.1903));
+
+        return ret;
     #endif
 }
 
@@ -251,20 +311,25 @@ static KSensorStatus write_byte(uint8_t reg, uint8_t value)
     return SENSOR_OK;
 }
 
-static uint8_t read_byte(uint8_t reg)
+static KSensorStatus read_byte(uint8_t reg, uint8_t * value)
 {
-    uint8_t value = 0;
     uint8_t shift_reg = reg | 0x80; /* read, bit 7 high */
 
     k_gpio_write(CS, 0); /* drive CS low */
-    k_spi_write(SPI_BUS, &shift_reg, 1);
-    k_spi_read(SPI_BUS, &value, 1);
+    if (k_spi_write(SPI_BUS, &shift_reg, 1) != SPI_OK)
+    {
+        return SENSOR_WRITE_ERROR;
+    }
+    if (k_spi_read(SPI_BUS, value, 1) != SPI_OK)
+    {
+        return SENSOR_READ_ERROR;
+    }
     k_gpio_write(CS, 1); /* drive CS high */
 
-    return value;
+    return SENSOR_OK;
 }
 
-static uint16_t read_16_bit(uint8_t reg)
+static KSensorStatus read_16_bit(uint8_t reg, uint16_t * value)
 {
     uint8_t values[2]; /* 2 bytes */
     uint8_t* pValues;
@@ -276,18 +341,27 @@ static uint16_t read_16_bit(uint8_t reg)
     uint8_t shift_reg = reg | 0x80; /* read, bit 7 high */
 
     k_gpio_write(CS, 0); /* drive CS low */
-    k_spi_write(SPI_BUS, &shift_reg, 1);
-    k_spi_read(SPI_BUS, pValues, 2); /* 2 bytes */
+    if (k_spi_write(SPI_BUS, &shift_reg, 1) != SPI_OK)
+    {
+        return SENSOR_WRITE_ERROR;
+    }
+    if (k_spi_read(SPI_BUS, pValues, 2) != SPI_OK) /* 2 bytes */
+    {
+        return SENSOR_READ_ERROR;
+    }
     k_gpio_write(CS, 1); /* drive CS high */
 
     /* shift bits and return as unsigned 16 */
     shifted_values = values[0];
     shifted_values <<= 8;
     shifted_values |= values[1];
-    return shifted_values;
+
+    *value = shifted_values;
+
+    return SENSOR_OK;
 }
 
-static uint32_t read_24_bit(uint8_t reg)
+static KSensorStatus read_24_bit(uint8_t reg, uint32_t * value)
 {
     uint8_t values[3]; /* 3 bytes */
     uint8_t* pValues;
@@ -299,8 +373,14 @@ static uint32_t read_24_bit(uint8_t reg)
     uint8_t shift_reg = reg | 0x80; /* read, bit 7 high */
 
     k_gpio_write(CS, 0); /* drive CS low */
-    k_spi_write(SPI_BUS, &shift_reg, 1);
-    k_spi_read(SPI_BUS, pValues, 3); /* 3 bytes */
+    if (k_spi_write(SPI_BUS, &shift_reg, 1) != SPI_OK)
+    {
+        return SENSOR_WRITE_ERROR;
+    }
+    if (k_spi_read(SPI_BUS, pValues, 3) != SPI_OK) /* 3 bytes */
+    {
+        return SENSOR_READ_ERROR;
+    }
     k_gpio_write(CS, 1); /* drive CS high */
 
     /* shift bits and return as unsigned 32 */
@@ -309,26 +389,44 @@ static uint32_t read_24_bit(uint8_t reg)
     shifted_values |= values[1];
     shifted_values <<= 8;
     shifted_values |= values[2];
-    return shifted_values;
+
+    *value = shifted_values;
+
+    return SENSOR_OK;
 }
 
-static uint16_t read_16_bit_LE(uint8_t reg)
+static KSensorStatus read_16_bit_LE(uint8_t reg, uint16_t * value)
 {
-    uint16_t temp;
+    KSensorStatus ret = SENSOR_ERROR;
+    uint16_t temp = 0;
 
-    temp = read_16_bit(reg);
+    ret = read_16_bit(reg, &temp);
     /* shift bits and return */
-    return (temp >> 8) | (temp << 8);
+    *value = (temp >> 8) | (temp << 8);
+
+    return ret;
 }
 
-static int16_t read_signed_16_bit(uint8_t reg)
+static KSensorStatus read_signed_16_bit(uint8_t reg, int16_t * value)
 {
-    return (int16_t)read_16_bit(reg);
+    KSensorStatus ret = SENSOR_ERROR;
+    uint16_t temp = 0;
+
+    ret = read_16_bit(reg, &temp);
+    *value = (int16_t)temp;
+
+    return ret;
 }
 
-static int16_t read_signed_16_bit_LE(uint8_t reg)
+static KSensorStatus read_signed_16_bit_LE(uint8_t reg, int16_t * value)
 {
-    return (int16_t)read_16_bit_LE(reg);
+    KSensorStatus ret = SENSOR_ERROR;
+    uint16_t temp = 0;
+
+    ret = read_16_bit_LE(reg, &temp);
+    *value = (int16_t)temp;
+
+    return ret;
 }
 
 #endif

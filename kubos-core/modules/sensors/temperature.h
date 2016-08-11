@@ -15,17 +15,24 @@
  * limitations under the License.
  */
 
-#ifndef SENSORS_H
-#define SENSORS_H
+#ifndef TEMPERATURE_H
+#define TEMPERATURE_H
 
-typedef enum
-{
-    SENSOR_OK = 0,
-    SENSOR_ERROR,
-    SENSOR_READ_ERROR,
-    SENSOR_WRITE_ERROR,
-    SENSOR_NOT_FOUND,
-    SENSOR_NOT_CALIBRATED
-} KSensorStatus;
+#include "kubos-core/modules/sensors/sensors.h"
+
+/**
+ * initialize KubOS temperature sensor
+ */
+KSensorStatus k_initialize_temperature_sensor(void);
+
+/**
+ * @return float temperature in celsius (-40.0 to 125.0)
+ */
+KSensorStatus k_get_temperature(float * temp);
+
+/**
+ * @return float relative humidity in percentage (0.0 - 100.0)
+ */
+KSensorStatus k_get_humidity(float * hum);
 
 #endif

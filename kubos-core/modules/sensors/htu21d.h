@@ -50,7 +50,7 @@
 /**
  * Setup the I2C interface for talking with the HTU21D
  */
-void htu21d_setup(void);
+KSensorStatus htu21d_setup(void);
 
 /**
  * Sends temperature command and reads back temperature data
@@ -67,7 +67,7 @@ KSensorStatus htu21d_read_humidity(float * hum);
 /**
  * Sends reset command which powers sensor off and on again
  */
-void htu21d_reset(void);
+KSensorStatus htu21d_reset(void);
 
 #endif
 #endif

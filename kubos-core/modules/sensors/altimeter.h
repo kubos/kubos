@@ -15,17 +15,24 @@
  * limitations under the License.
  */
 
-#ifndef SENSORS_H
-#define SENSORS_H
+#ifndef ALTIMETER_H
+#define ALTIMETER_H
 
-typedef enum
-{
-    SENSOR_OK = 0,
-    SENSOR_ERROR,
-    SENSOR_READ_ERROR,
-    SENSOR_WRITE_ERROR,
-    SENSOR_NOT_FOUND,
-    SENSOR_NOT_CALIBRATED
-} KSensorStatus;
+#include "kubos-core/modules/sensors/sensors.h"
+
+/**
+ * initialize KubOS altitude sensor
+ */
+KSensorStatus k_initialize_altitude_sensor(void);
+
+/**
+ * @return float pressure reading in hPa (300.0 - 1100.0)
+ */
+KSensorStatus k_get_pressure(float * press);
+
+/**
+ * @return absolute altitude in meters
+ */
+KSensorStatus k_get_altitude(float * alt);
 
 #endif

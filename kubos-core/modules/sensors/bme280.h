@@ -116,24 +116,24 @@ KSensorStatus bme280_soft_reset(void);
  * Sends temperature command and reads back temperature data
  * @return float temperature in celsius (-40.0 to 85.0)
  */
-float bme280_read_temperature(void);
+KSensorStatus bme280_read_temperature(float * temp);
 
 /**
  * Sends pressure command and reads back pressure data
  * @return float pressure reading in hPa (300.0 - 1100.0)
  */
-float bme280_read_pressure(void);
+KSensorStatus bme280_read_pressure(float * press);
 
 /**
  * Sends humidity command and reads back humidity data
  * @return float relative humidity in percentage (0.0 - 100.0)
  */
-float bme280_read_humidity(void);
+KSensorStatus bme280_read_humidity(float * hum);
 
 /**
  * converts pressure to absolute altitude in meters
  */
-float bme280_read_altitude(float sea_level);
+KSensorStatus bme280_read_altitude(float sea_level, float * alt);
 
 
 #endif
