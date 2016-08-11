@@ -68,6 +68,21 @@ typedef enum {
 } hal_spi_data_size;
 
 typedef enum {
+    HAL_SPI_CPOL_LOW = 0,
+    HAL_SPI_CPOL_HIGH
+} hal_spi_clock_polarity;
+
+typedef enum {
+    HAL_SPI_CPHA_1EDGE = 0,
+    HAL_SPI_CPHA_2EDGE
+} hal_spi_clock_phase;
+
+typedef enum {
+    HAL_SPI_FIRSTBIT_MSB = 0,
+    HAL_SPI_FIRSTBIT_LSB
+} hal_spi_first_bit;
+
+typedef enum {
     HAL_SPI_OK,
     HAL_SPI_ERROR,
     HAL_SPI_ERROR_TIMEOUT
@@ -77,6 +92,9 @@ typedef struct {
     hal_spi_role role;
     hal_spi_direction direction;
     hal_spi_data_size data_size;
+    hal_spi_clock_polarity clock_polarity;
+    hal_spi_clock_phase clock_phase;
+    hal_spi_first_bit first_bit;
     uint32_t speed;
 } hal_spi_conf;
 
