@@ -46,15 +46,15 @@
     },
     "hardware": {
       "externalClock": "8000000",
-      "i2cCount": "2",
       "console": {
         "uart": "K_UART6",
         "baudRate": "115200"
       },
-      "defaults": {
-        "i2c": "K_I2C1"
-      },
       "i2c": {
+        "count": 2,
+        "defaults": {
+            "bus": "K_I2C1"
+        },
         "i2c1": {
           "scl": {
             "pin": "GPIO_PIN_8",
