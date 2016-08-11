@@ -18,10 +18,6 @@
     "toolchain" : "CMake/toolchain.cmake",
     "config": {
         "hardware": {
-            "spiCount": 2,
-            "defaults": {
-                "spi": "K_SPI1"
-            },
             "console": {
                 "uart": "K_UART2",
                 "baudRate": 115200
@@ -30,6 +26,12 @@
                 "count": 2,
                 "defaults": {
                     "bus": "K_I2C2"
+                }
+            },
+            "spi": {
+                "count": 2,
+                "defaults": {
+                    "bus": "K_SPI1"
                 }
             },
             "uart": {
