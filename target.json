@@ -18,15 +18,19 @@
     "toolchain" : "CMake/toolchain.cmake",
     "config": {
         "hardware": {
-	        "i2cCount": 2,
             "spiCount": 2,
             "defaults": {
-                "i2c": "K_I2C2",
                 "spi": "K_SPI1"
             },
             "console": {
                 "uart": "K_UART2",
                 "baudRate": 115200
+            },
+            "i2c": {
+                "count": 2,
+                "defaults": {
+                    "bus": "K_I2C2"
+                }
             },
             "uart": {
                 "count": 2,
