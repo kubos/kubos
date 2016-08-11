@@ -100,6 +100,36 @@ static inline hal_spi_data_size spi_data_size(SPIDataSize spi)
     }
 }
 
+static inline hal_spi_clock_phase spi_clock_phase(SPIClockPhase phase)
+{
+    switch(phase)
+    {
+        case K_SPI_CPOL_LOW: return HAL_SPI_CPOL_LOW;
+        case K_SPI_CPOL_HIGH: return HAL_SPI_CPOL_HIGH;
+        default: return -1;
+    }
+}
+
+static inline hal_spi_clock_polarity spi_clock_polarity(SPIClockPolarity polarity)
+{
+    switch(polarity)
+    {
+        case K_SPI_CPHA_1EDGE: return HAL_SPI_CPHA_1EDGE;
+        case K_SPI_CPHA_2EDGE: return HAL_SPI_CPHA_2EDGE;
+        default: return -1;
+    }
+}
+
+static inline hal_spi_first_bit spi_first_bit(SPIFirstBit firstbit)
+{
+    switch(firstbit)
+    {
+        case K_SPI_FIRSTBIT_LSB: return HAL_SPI_FIRSTBIT_LSB;
+        case K_SPI_FIRSTBIT_MSB: return HAL_SPI_FIRSTBIT_MSB;
+        default: return -1;
+    }
+}
+
 /**
   * @brief Creates and sets up specified spi bus option.
   * @param spi Number of spi bus to setup.
@@ -112,6 +142,9 @@ void kprv_spi_dev_init(KSPINum spi)
             .role = spi_role(k_spi->config.role),
             .data_size = spi_data_size(k_spi->config.data_size),
             .direction = spi_direction(k_spi->config.direction),
+            .clock_phase = spi_clock_phase(k_spi->config.clock_phase),
+            .clock_polarity = spi_clock_polarity(k_spi->config.clock_polarity),
+            .first_bit = spi_first_bit(k_spi->config.first_bit),
             .speed = k_spi->config.speed,
     };
 
