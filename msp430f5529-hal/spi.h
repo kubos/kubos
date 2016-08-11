@@ -28,6 +28,8 @@
  *
  * @author     kubos.co
  */
+
+#if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #ifndef HAL_SPI_H
 #define HAL_SPI_H
 
@@ -188,4 +190,5 @@ hal_spi_status hal_spi_master_read(hal_spi_handle * handle, uint8_t *buffer, int
  */
 hal_spi_status hal_spi_master_write_read(hal_spi_handle * handle, uint8_t *tx_buffer, uint8_t *rx_buffer, int len);
 
+#endif
 #endif

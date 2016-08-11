@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
+#if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #include "kubos-hal/spi.h"
 #include "msp430f5529-hal/spi.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include <msp430.h>
 
-hal_spi_handle hal_spi_buses[YOTTA_CFG_HARDWARE_SPICOUNT];
+hal_spi_handle hal_spi_buses[YOTTA_CFG_HARDWARE_SPI_COUNT];
 
 /* defines for register timeout mode */
 #define SET 0
@@ -226,3 +227,5 @@ hal_spi_status hal_spi_master_write_read(hal_spi_handle * handle, uint8_t *tx_bu
 
     return HAL_SPI_OK;
 }
+
+#endif
