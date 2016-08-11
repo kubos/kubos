@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #ifndef K_I2C_STM32F4
 #define K_I2C_STM32F4
 
@@ -46,4 +48,5 @@ typedef struct
     hal_i2c_pins pins;
 } hal_i2c_handle;
 
+#endif
 #endif

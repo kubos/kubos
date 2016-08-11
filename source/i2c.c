@@ -19,6 +19,8 @@
    * @addtogroup I2C
    * @{
    */
+
+#if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
 #include "kubos-hal-stm32f4/i2c.h"
 #include "kubos-hal/gpio.h"
@@ -778,5 +780,7 @@ static KI2CStatus hal_i2c_master_setup_write(I2C_HandleTypeDef * hal_handle, uin
 
     return ret;
 }
+
+#endif
 
 /* @} */
