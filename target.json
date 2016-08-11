@@ -46,6 +46,9 @@
               "role": "K_SPI_MASTER",
               "direction": "K_SPI_DIRECTION_2LINES",
               "dataSize": "K_SPI_DATASIZE_8BIT",
+              "clockPolarity": "K_SPI_CPOL_HIGH",
+              "clockPhase": "K_SPI_CPHA_1EDGE",
+              "firstBit": "K_SPI_FIRSTBIT_LSB",
               "speed": "10000"
           }
       }
