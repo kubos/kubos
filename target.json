@@ -19,6 +19,15 @@
   ],
   "config": {
     "hardware": {
+      "i2c": {
+        "count": 1,
+        "defaults": {
+            "bus": "K_I2C1",
+            "role": "K_MASTER",
+            "clockSpeed": 100000,
+            "addressingMode": "K_ADDRESSINGMODE_7BIT"
+        }
+      },
       "uart": {
           "count": 0,
           "defaults": {
@@ -30,10 +39,8 @@
               "txQueueLen": 32
           }
       },
-      "i2cCount": 1,
       "spiCount": 1,
       "defaults": {
-        "i2c": "K_I2C1",
         "spi": "K_SPI1"
       }
     }
