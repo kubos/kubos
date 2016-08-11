@@ -25,12 +25,17 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#ifdef TARGET_LIKE_STM32
+#include <math.h> /* include math.h for pow */
+#endif
+
 #ifndef SPI_BUS
 #define SPI_BUS YOTTA_CFG_SENSORS_BME280_SPI_BUS
 #endif
 
 #ifndef CS
 #define CS YOTTA_CFG_SENSORS_BME280_CS
+//#define CS YOTTA_CFG_HARDWARE_PINS_SPI_CS
 #endif
 
 /* globals */
