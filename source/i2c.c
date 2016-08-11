@@ -356,3 +356,5 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 	/* return timeout status */
 	return ret;
 }
+
+#endif
