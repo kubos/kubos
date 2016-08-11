@@ -39,9 +39,15 @@
               "txQueueLen": 32
           }
       },
-      "spiCount": 1,
-      "defaults": {
-        "spi": "K_SPI1"
+      "spi": {
+          "count": 0,
+          "defaults": {
+              "bus": "K_SPI1",
+              "role": "K_SPI_MASTER",
+              "direction": "K_SPI_DIRECTION_2LINES",
+              "dataSize": "K_SPI_DATASIZE_8BIT",
+              "speed": "10000"
+          }
       }
     }
   },
