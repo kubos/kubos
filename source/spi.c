@@ -77,7 +77,6 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
         handle = hal_spi_get_handle(spi->bus_num);
         if (handle != NULL)
         {
-            //KSPIConf conf = spi->config;
             handle->kspi = spi;
             switch(spi->bus_num)
             {
@@ -117,21 +116,76 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
 
         /* Init pins */
         hal_spi_gpio_init();
-
-        /* Set options */
-        SPIHandle->Init.DataSize = SPI_DATASIZE_8BIT;
     }
+        /* Set options */
+        KSPIConf conf = handle->kspi->config;
 
-    /* Fill SPI settings */
+        if (conf.data_phase == K_SPI_DATASIZE_8BIT)
+        {
+            SPIHandle->Init.DataSize = SPI_DATASIZE_8BIT;
+        }
+        else /* 16 bit */
+        {
+            SPIHandle->Init.DataSize = SPI_DATASIZE_16BIT;
+        }
+
+        if (conf.clock_phase == K_SPI_CPHA_1EDGE)
+        {
+            SPIHandle->Init.CLKPhase = SPI_PHASE_1EDGE;
+        }
+        else /* 2 edge */
+        {
+            SPIHandle->Init.CLKPhase = SPI_PHASE_1EDGE;
+        }
+
+        if (conf.clock_polarity == K_SPI_CPOL_LOW)
+        {
+            SPIHandle->Init.CLKPolarity = SPI_POLARITY_LOW;
+        }
+        else /* high pol */
+        {
+            SPIHandle->Init.CLKPolarity = SPI_POLARITY_HIGH;
+        }
+
+        if (conf.first_bit == K_SPI_FIRSTBIT_MSB)
+        {
+            SPIHandle->Init.FirstBit = SPI_FIRSTBIT_MSB;
+        }
+        else /* LSB */
+        {
+            SPIHandle->Init.FirstBit = SPI_FIRSTBIT_LSB;
+        }
+
+        switch(conf.direction)
+        {
+            case K_SPI_DIRECTION_2LINES:
+            {
+                SPIHandle->Init.Direction = SPI_DIRECTION_2LINES;
+                break;
+            }
+            case K_SPI_DIRECTION_2LINES_RXONLY:
+            {
+                SPIHandle->Init.Direction = SPI_DIRECTION_2LINES_RXONLY;;
+                break;
+            }
+            case K_SPI_DIRECTION_1LINES:
+            {
+                SPIHandle->Init.Direction = SPI_DIRECTION_1LINE;
+                break;
+            }
+            default: /* default to 2line */
+            {
+                SPIHandle->Init.Direction = SPI_DIRECTION_2LINES;
+            }
+        }
+
+    /* Fill aditional SPI settings */
     SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
-    SPIHandle->Init.FirstBit = SPI_FIRSTBIT_MSB;
     SPIHandle->Init.Mode = SPI_MODE_MASTER;
-
     SPIHandle->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
     SPIHandle->Init.CRCPolynomial = 7;
     SPIHandle->Init.TIMode = SPI_TIMODE_DISABLE;
     SPIHandle->Init.NSS = SPI_NSS_SOFT;
-    SPIHandle->Init.Direction = SPI_DIRECTION_2LINES;
 
     /* Disable first */
     __HAL_SPI_DISABLE(SPIHandle);
