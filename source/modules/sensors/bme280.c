@@ -35,7 +35,6 @@
 
 #ifndef CS
 #define CS YOTTA_CFG_SENSORS_BME280_CS
-//#define CS YOTTA_CFG_HARDWARE_PINS_SPI_CS
 #endif
 
 /* globals */
@@ -171,6 +170,12 @@ KSensorStatus bme280_read_temperature(float * temp)
     int32_t var1, var2;
 
     int32_t adc_T = 0;
+
+    if (temp == NULL)
+    {
+        return SENSOR_ERROR;
+    }
+
     if (read_24_bit(BME280_REGISTER_TEMPDATA, (uint32_t*)&adc_T) != SENSOR_OK)
     {
         return SENSOR_READ_ERROR;
@@ -197,6 +202,11 @@ KSensorStatus bme280_read_pressure(float * press)
     int64_t var1, var2, p;
 
     float temp = 0;
+
+    if (press == NULL)
+    {
+        return SENSOR_ERROR;
+    }
 
 #ifdef TARGET_LIKE_MSP430
     return SENSOR_ERROR; /* 64 bit int not supported on MSP */
@@ -238,6 +248,12 @@ KSensorStatus bme280_read_pressure(float * press)
 KSensorStatus bme280_read_humidity(float * hum)
 {
     float temp = 0;
+
+    if (hum == NULL)
+    {
+        return SENSOR_ERROR;
+    }
+
     bme280_read_temperature(&temp); /* get up to date t_fine */
 
     uint16_t adc_temp = 0;
@@ -280,16 +296,22 @@ KSensorStatus bme280_read_altitude(float seaLevel, float * alt)
      * at high altitude.  See this thread for more information:
      * http://forums.adafruit.com/viewtopic.php?f=22&t=58064
      */
-    #ifdef TARGET_LIKE_MSP430
-        return SENSOR_ERROR; /* pow not supported on MSP */
-    #else
-        float atmospheric = 0;
-        ret = bme280_read_pressure(&atmospheric);
-        atmospheric /= 100.0F;
-        *alt = 44330.0 * (1.0 - pow(atmospheric / seaLevel, 0.1903));
 
-        return ret;
-    #endif
+    if (alt == NULL)
+    {
+        return SENSOR_ERROR;
+    }
+
+#ifdef TARGET_LIKE_MSP430
+    return SENSOR_ERROR; /* pow not supported on MSP */
+#else
+    float atmospheric = 0;
+    ret = bme280_read_pressure(&atmospheric);
+    atmospheric /= 100.0F;
+    *alt = 44330.0 * (1.0 - pow(atmospheric / seaLevel, 0.1903));
+
+    return ret;
+#endif
 }
 
 

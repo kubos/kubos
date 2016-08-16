@@ -104,34 +104,40 @@
 
  /**
   * Setup the SPI interface for talking with the BME280 and init sensor
+  * @return sensor status enum
   */
 KSensorStatus bme280_setup(void);
 
 /**
  * Reset the bme280 to default conditions
+ * @return sensor status enum
  */
 KSensorStatus bme280_soft_reset(void);
 
 /**
  * Sends temperature command and reads back temperature data
- * @return float temperature in celsius (-40.0 to 85.0)
+ * through pointer in celsius (-40.0 to 85.0)
+ * @return sensor status enum
  */
 KSensorStatus bme280_read_temperature(float * temp);
 
 /**
  * Sends pressure command and reads back pressure data
- * @return float pressure reading in hPa (300.0 - 1100.0)
+ * through pointer in Pa (101325.0 - 0.0)
+ * @return sensor status enum
  */
 KSensorStatus bme280_read_pressure(float * press);
 
 /**
- * Sends humidity command and reads back humidity data
- * @return float relative humidity in percentage (0.0 - 100.0)
+ * Sends humidity command and reads back humidity data through
+ * pointer in percentage (0.0 - 100.0)
+ * @return sensor status enum
  */
 KSensorStatus bme280_read_humidity(float * hum);
 
 /**
- * converts pressure to absolute altitude in meters
+ * converts pressure to absolute altitude in meters (m)
+ * @return sensor status enum
  */
 KSensorStatus bme280_read_altitude(float sea_level, float * alt);
 
