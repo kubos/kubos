@@ -34,7 +34,7 @@
 int putchar(int c)
 {
 #ifdef K_UART_CONSOLE
-    return k_uart_write(K_UART_CONSOLE, &c, 1);
+    return k_uart_write(K_UART_CONSOLE, (char*)&c, 1);
 #else
 #warning "putchar console undefined"
     return -1;

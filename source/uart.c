@@ -95,7 +95,6 @@ static inline hal_uart_stopbits uart_stopbits(KStopBits stopbits)
     switch (stopbits)
     {
         case K_STOP_BITS_1: return HAL_UART_STOP_BITS_1;
-        case K_STOP_BITS_1_5: return HAL_UART_STOP_BITS_1_5;
         case K_STOP_BITS_2:  return HAL_UART_STOP_BITS_2;
         default: return HAL_UART_STOP_BITS_1;
     }
