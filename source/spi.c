@@ -22,7 +22,7 @@ static hal_spi_handle * hal_spi_get_handle(KSPINum spi);
 static hal_spi_handle * hal_spi_device_init(KSPI * spi);
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle);
 static void hal_spi_terminate(hal_spi_handle * handle);
-static void hal_spi_gpio_init();
+static void hal_spi_gpio_init(hal_spi_handle * handle);
 
 static hal_spi_handle hal_spi_dev[K_NUM_SPI];
 static uint32_t spi_timeout = 1000;
@@ -84,6 +84,31 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
                 case K_SPI1:
                 {
                     handle->hal_handle.Instance = SPI1;
+                    handle->pins.mosi = YOTTA_CFG_HARDWARE_SPI_SPI1_MOSI;
+                    handle->pins.miso = YOTTA_CFG_HARDWARE_SPI_SPI1_MISO;
+                    handle->pins.sck = YOTTA_CFG_HARDWARE_SPI_SPI1_SCK;
+                    handle->pins.port = YOTTA_CFG_HARDWARE_SPI_SPI1_PORT;
+                    handle->pins.alt = YOTTA_CFG_HARDWARE_SPI_SPI1_ALT;
+                    break;
+                }
+                case K_SPI2:
+                {
+                    handle->hal_handle.Instance = SPI2;
+                    handle->pins.mosi = YOTTA_CFG_HARDWARE_SPI_SPI2_MOSI;
+                    handle->pins.miso = YOTTA_CFG_HARDWARE_SPI_SPI2_MISO;
+                    handle->pins.sck = YOTTA_CFG_HARDWARE_SPI_SPI2_SCK;
+                    handle->pins.port = YOTTA_CFG_HARDWARE_SPI_SPI2_PORT;
+                    handle->pins.alt = YOTTA_CFG_HARDWARE_SPI_SPI2_ALT;
+                    break;
+                }
+                case K_SPI3:
+                {
+                    handle->hal_handle.Instance = SPI3;
+                    handle->pins.mosi = YOTTA_CFG_HARDWARE_SPI_SPI3_MOSI;
+                    handle->pins.miso = YOTTA_CFG_HARDWARE_SPI_SPI3_MISO;
+                    handle->pins.sck = YOTTA_CFG_HARDWARE_SPI_SPI3_SCK;
+                    handle->pins.port = YOTTA_CFG_HARDWARE_SPI_SPI3_PORT;
+                    handle->pins.alt = YOTTA_CFG_HARDWARE_SPI_SPI3_ALT;
                     break;
                 }
                 default:
@@ -110,75 +135,93 @@ static void hal_spi_terminate(hal_spi_handle * handle)
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
 {
     SPI_HandleTypeDef * SPIHandle = &(handle->hal_handle);
-    if (handle->kspi->bus_num == K_SPI1)
+
+    switch(handle->kspi->bus_num)
     {
-        /* Enable SPI clock */
-        __HAL_RCC_SPI1_CLK_ENABLE();
-
-        /* Init pins */
-        hal_spi_gpio_init();
+        case K_SPI1:
+        {
+            __HAL_RCC_SPI1_CLK_ENABLE();
+            break;
+        }
+        case K_SPI2:
+        {
+            __HAL_RCC_SPI2_CLK_ENABLE();
+            break;
+        }
+        case K_SPI3:
+        {
+            __HAL_RCC_SPI2_CLK_ENABLE();
+            break;
+        }
+        default:
+        {
+            return SPI_ERROR; /* wrong bus num */
+        }
     }
-        /* Set options */
-        KSPIConf conf = handle->kspi->config;
+    /* Init pins */
+    hal_spi_gpio_init(handle);
 
-        if (conf.clock_phase == K_SPI_DATASIZE_8BIT)
-        {
-            SPIHandle->Init.DataSize = SPI_DATASIZE_8BIT;
-        }
-        else /* 16 bit */
-        {
-            SPIHandle->Init.DataSize = SPI_DATASIZE_16BIT;
-        }
+    /* Set options */
+    KSPIConf conf = handle->kspi->config;
 
-        if (conf.clock_phase == K_SPI_CPHA_1EDGE)
-        {
-            SPIHandle->Init.CLKPhase = SPI_PHASE_1EDGE;
-        }
-        else /* 2 edge */
-        {
-            SPIHandle->Init.CLKPhase = SPI_PHASE_1EDGE;
-        }
+    if (conf.clock_phase == K_SPI_DATASIZE_8BIT)
+    {
+        SPIHandle->Init.DataSize = SPI_DATASIZE_8BIT;
+    }
+    else /* 16 bit */
+    {
+        SPIHandle->Init.DataSize = SPI_DATASIZE_16BIT;
+    }
 
-        if (conf.clock_polarity == K_SPI_CPOL_LOW)
-        {
-            SPIHandle->Init.CLKPolarity = SPI_POLARITY_LOW;
-        }
-        else /* high pol */
-        {
-            SPIHandle->Init.CLKPolarity = SPI_POLARITY_HIGH;
-        }
+    if (conf.clock_phase == K_SPI_CPHA_1EDGE)
+    {
+        SPIHandle->Init.CLKPhase = SPI_PHASE_1EDGE;
+    }
+    else /* 2 edge */
+    {
+        SPIHandle->Init.CLKPhase = SPI_PHASE_1EDGE;
+    }
 
-        if (conf.first_bit == K_SPI_FIRSTBIT_MSB)
-        {
-            SPIHandle->Init.FirstBit = SPI_FIRSTBIT_MSB;
-        }
-        else /* LSB */
-        {
-            SPIHandle->Init.FirstBit = SPI_FIRSTBIT_LSB;
-        }
+    if (conf.clock_polarity == K_SPI_CPOL_LOW)
+    {
+        SPIHandle->Init.CLKPolarity = SPI_POLARITY_LOW;
+    }
+    else /* high pol */
+    {
+        SPIHandle->Init.CLKPolarity = SPI_POLARITY_HIGH;
+    }
 
-        switch(conf.direction)
+    if (conf.first_bit == K_SPI_FIRSTBIT_MSB)
+    {
+        SPIHandle->Init.FirstBit = SPI_FIRSTBIT_MSB;
+    }
+    else /* LSB */
+    {
+        SPIHandle->Init.FirstBit = SPI_FIRSTBIT_LSB;
+    }
+
+    switch(conf.direction)
+    {
+        case K_SPI_DIRECTION_2LINES:
         {
-            case K_SPI_DIRECTION_2LINES:
-            {
-                SPIHandle->Init.Direction = SPI_DIRECTION_2LINES;
-                break;
-            }
-            case K_SPI_DIRECTION_2LINES_RXONLY:
-            {
-                SPIHandle->Init.Direction = SPI_DIRECTION_2LINES_RXONLY;;
-                break;
-            }
-            case K_SPI_DIRECTION_1LINE:
-            {
-                SPIHandle->Init.Direction = SPI_DIRECTION_1LINE;
-                break;
-            }
-            default: /* default to 2line */
-            {
-                SPIHandle->Init.Direction = SPI_DIRECTION_2LINES;
-            }
+            SPIHandle->Init.Direction = SPI_DIRECTION_2LINES;
+            break;
         }
+        case K_SPI_DIRECTION_2LINES_RXONLY:
+        {
+            SPIHandle->Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
+            break;
+        }
+        case K_SPI_DIRECTION_1LINE:
+        {
+            SPIHandle->Init.Direction = SPI_DIRECTION_1LINE;
+            break;
+        }
+        default: /* default to 2line */
+        {
+            SPIHandle->Init.Direction = SPI_DIRECTION_2LINES;
+        }
+    }
 
     /* Fill aditional SPI settings */
     SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
@@ -203,14 +246,16 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
 }
 
 
-static void hal_spi_gpio_init()
+static void hal_spi_gpio_init(hal_spi_handle * handle)
 {
+
     GPIO_InitTypeDef  GPIO_InitStruct;
     /* SPI GPIO Init */
-    GPIO_InitStruct.Pin       = GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
+    GPIO_InitStruct.Pin       = handle->pins.mosi | handle->pins.miso | handle->pins.sck;
     GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull      = GPIO_NOPULL;
     GPIO_InitStruct.Speed     = GPIO_SPEED_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    GPIO_InitStruct.Alternate = handle->pins.alt;
+    HAL_GPIO_Init(handle->pins.port, &GPIO_InitStruct);
+
 }

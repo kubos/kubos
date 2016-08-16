@@ -43,5 +43,4 @@ void HAL_IncTick(void)
 void HAL_Delay(uint32_t Delay)
 {
     vTaskDelay(Delay);
-    vTaskDelay(10);
 }

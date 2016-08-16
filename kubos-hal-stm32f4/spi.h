@@ -22,11 +22,22 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal_spi.h"
 
+typedef struct
+{
+    uint16_t miso;
+    uint16_t mosi;
+    uint16_t sck;
+    GPIO_TypeDef * port;
+    uint16_t alt;
+} hal_spi_pins;
+
 typedef struct {
     /* KubOS-HAL structure */
     KSPI * kspi;
     /* STM32CubeF4's special structure */
     SPI_HandleTypeDef hal_handle;
+    /* spi pins struct */
+    hal_spi_pins pins;
 } hal_spi_handle;
 
 
