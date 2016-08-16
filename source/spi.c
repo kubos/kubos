@@ -123,7 +123,7 @@ static void hal_spi_set_role(hal_spi_handle * handle)
 
 static void hal_spi_set_clock_polarity(hal_spi_handle * handle)
 {
-    if (handle->conf.role == HAL_SPI_CPOL_HIGH)
+    if (handle->conf.clock_polarity == HAL_SPI_CPOL_HIGH)
     {
         handle->reg->control0 |= UCCKPL;
     }
@@ -135,7 +135,7 @@ static void hal_spi_set_clock_polarity(hal_spi_handle * handle)
 
 static void hal_spi_set_clock_phase(hal_spi_handle * handle)
 {
-    if (handle->conf.role == HAL_SPI_CPHA_1EDGE)
+    if (handle->conf.clock_phase == HAL_SPI_CPHA_1EDGE)
     {
         handle->reg->control0 |= UCCKPH;
     }
@@ -147,7 +147,7 @@ static void hal_spi_set_clock_phase(hal_spi_handle * handle)
 
 static void hal_spi_set_first_bit(hal_spi_handle * handle)
 {
-    if (handle->conf.role == HAL_SPI_FIRSTBIT_MSB)
+    if (handle->conf.first_bit == HAL_SPI_FIRSTBIT_MSB)
     {
         handle->reg->control0 |= UCMSB;
     }
@@ -197,7 +197,6 @@ hal_spi_status hal_spi_master_write(hal_spi_handle * handle, uint8_t *buffer, in
     hal_spi_status ret = HAL_SPI_ERROR;
 
     int i = 0; /* loop variable */
-    uint8_t dummy = 0; /* dummy rx */
 
     /* send data */
     for (; i < len; i++, buffer++)
@@ -217,8 +216,8 @@ hal_spi_status hal_spi_master_write(hal_spi_handle * handle, uint8_t *buffer, in
             return ret; /* error */
         }
 
-        /* put dummy rx'd byte into dummy var */
-        dummy = handle->reg->rx_buffer;
+        /* Read the rx register */
+        (void)handle->reg->rx_buffer;
 
     }
 
