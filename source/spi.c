@@ -17,6 +17,7 @@
 
 #include "kubos-hal-stm32f4/spi.h"
 
+
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi);
 static hal_spi_handle * hal_spi_device_init(KSPI * spi);
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle);
@@ -120,7 +121,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         /* Set options */
         KSPIConf conf = handle->kspi->config;
 
-        if (conf.data_phase == K_SPI_DATASIZE_8BIT)
+        if (conf.clock_phase == K_SPI_DATASIZE_8BIT)
         {
             SPIHandle->Init.DataSize = SPI_DATASIZE_8BIT;
         }
@@ -168,7 +169,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
                 SPIHandle->Init.Direction = SPI_DIRECTION_2LINES_RXONLY;;
                 break;
             }
-            case K_SPI_DIRECTION_1LINES:
+            case K_SPI_DIRECTION_1LINE:
             {
                 SPIHandle->Init.Direction = SPI_DIRECTION_1LINE;
                 break;
