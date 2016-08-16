@@ -29,12 +29,24 @@
 static inline USART_TypeDef *uart_dev(KUARTNum uart)
 {
     switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1
         case K_UART1: return USART1;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2
         case K_UART2: return USART2;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3
         case K_UART3: return USART3;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4
         case K_UART4: return UART4;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5
         case K_UART5: return UART5;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6
         case K_UART6: return USART6;
+#endif
         default: return NULL;
     }
 }
@@ -42,12 +54,24 @@ static inline USART_TypeDef *uart_dev(KUARTNum uart)
 static inline IRQn_Type uart_irqn(KUARTNum uart)
 {
     switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1
         case K_UART1: return USART1_IRQn;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2
         case K_UART2: return USART2_IRQn;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3
         case K_UART3: return USART3_IRQn;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4
         case K_UART4: return UART4_IRQn;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5
         case K_UART5: return UART5_IRQn;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6
         case K_UART6: return USART6_IRQn;
+#endif
         default: return 0;
     }
 }
@@ -55,24 +79,48 @@ static inline IRQn_Type uart_irqn(KUARTNum uart)
 static inline void uart_clk_enable(KUARTNum uart)
 {
     switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1
         case K_UART1: __HAL_RCC_USART1_CLK_ENABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2
         case K_UART2: __HAL_RCC_USART2_CLK_ENABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3
         case K_UART3: __HAL_RCC_USART3_CLK_ENABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4
         case K_UART4: __HAL_RCC_UART4_CLK_ENABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5
         case K_UART5: __HAL_RCC_UART5_CLK_ENABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6
         case K_UART6: __HAL_RCC_USART6_CLK_ENABLE(); break;
+#endif
     }
 }
 
 static inline uint8_t uart_alt(KUARTNum uart)
 {
     switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1
         case K_UART1: return GPIO_AF7_USART1;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2
         case K_UART2: return GPIO_AF7_USART2;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3
         case K_UART3: return GPIO_AF7_USART3;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4
         case K_UART4: return GPIO_AF8_UART4;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5
         case K_UART5: return GPIO_AF8_UART5;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6
         case K_UART6: return GPIO_AF8_USART6;
+#endif
         default: return 0;
     }
 }
@@ -257,42 +305,42 @@ static inline void uart_irq_handler(KUARTNum uart)
     HAL_NVIC_EnableIRQ(uart_irqn(uart));
 }
 
-#if YOTTA_CFG_HARDWARE_UART_COUNT >= 1
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1
 void USART1_IRQHandler(void)
 {
     uart_irq_handler(K_UART1);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UART_COUNT >= 2
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2
 void USART2_IRQHandler(void)
 {
     uart_irq_handler(K_UART2);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UART_COUNT >= 3
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3
 void USART3_IRQHandler(void)
 {
     uart_irq_handler(K_UART3);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UART_COUNT >= 4
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4
 void UART4_IRQHandler(void)
 {
     uart_irq_handler(K_UART4);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UART_COUNT >= 5
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5
 void UART5_IRQHandler(void)
 {
     uart_irq_handler(K_UART5);
 }
 #endif
 
-#if YOTTA_CFG_HARDWARE_UART_COUNT >= 6
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6
 void USART6_IRQHandler(void)
 {
     uart_irq_handler(K_UART6);

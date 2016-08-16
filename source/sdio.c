@@ -20,6 +20,8 @@
 #include "stm32cubef4/stm32f4xx_hal.h"
 #include "stm32cubef4/stm32f4xx_hal_sd.h"
 #include "kubos-hal/gpio.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 static SD_HandleTypeDef sd_handle;
 
@@ -113,7 +115,7 @@ k_sdio_card_info_t kprv_sdio_card_info()
     k_sdio_card_info_t card_info;
     HAL_SD_CardInfoTypedef hal_card_info;
 
-    HAL_SD_Get_CardInfo(&sd_handle, &card_info);
+    HAL_SD_Get_CardInfo(&sd_handle, &hal_card_info);
     // We can add more into this struct later, as needed
     card_info.capacity = hal_card_info.CardCapacity;
 
