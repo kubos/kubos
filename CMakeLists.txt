@@ -109,7 +109,7 @@ endif()
 file (GLOB_RECURSE ARCH_FILES src/arch/${CSP_ARCH}/*.c)
 target_sources (csp PUBLIC ${ARCH_FILES})
 
-target_compile_options(csp PUBLIC -O2 -Wall -g -std=gnu99)
+target_compile_options(csp PUBLIC -O2 -g -std=gnu99)
 
 if (LOGLEVEL STREQUAL "debug")
     set (CSP_LOG_LEVEL_DEBUG ON)
