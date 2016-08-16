@@ -150,7 +150,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         }
         case K_SPI3:
         {
-            __HAL_RCC_SPI2_CLK_ENABLE();
+            __HAL_RCC_SPI3_CLK_ENABLE();
             break;
         }
         default:
