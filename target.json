@@ -149,9 +149,9 @@
         "LED3": "PD14",
         "LED4": "PD15",
         "USER_BUTTON": "PA0",
-        "USBTX": "PA_2",
-        "USBRX": "PA_3",
-        "PWM_OUT": "PB_3"
+        "USBTX": "PA2",
+        "USBRX": "PA3",
+        "PWM_OUT": "PB3"
       },
       "test-pins": {
         "spi": {
