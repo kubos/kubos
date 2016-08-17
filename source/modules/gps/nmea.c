@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifdef YOTTA_CFG_SENSORS_GPS
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
@@ -236,3 +237,4 @@ int nmea_parse(char *nmea, int len, gps_fix_t *fix)
 
     return NMEA_OK;
 }
+#endif

@@ -272,7 +272,7 @@ KSensorStatus bno055_get_rev_info(bno055_rev_info_t * info)
 {
     /* info bytes */
     uint8_t a, b;
-    KSensorStatus ret;
+    KSensorStatus ret = SENSOR_ERROR;
     if (info != NULL)
     {
         /* Check the accelerometer revision */

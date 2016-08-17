@@ -16,6 +16,7 @@
  */
 
 #include "kubos-core/k_alloc_malloc.h"
+#include <stdlib.h>
 
 void * malloc_new(size_t size)
 {
@@ -30,7 +31,11 @@ void malloc_free(void * ptr)
 
 void * malloc_realloc(void * buff, size_t old_size, size_t new_size)
 {
+#ifdef TARGET_LIKE_MSP430
+    #warning msp430 needs a realloc implementation
+#else
     return realloc(buff, new_size);
+#endif
 }
 
 void k_alloc_malloc_init()

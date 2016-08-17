@@ -14,8 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <stdbool.h>
+#ifdef YOTTA_CFG_SENSORS_GPS
 #include "kubos-core/modules/gps.h"
 #include "kubos-core/modules/nmea.h"
 
@@ -104,3 +103,4 @@ void gps_connect(gps_cfg_t *gps_cfg)
     uart_set_callback((void*)gps_cfg, gps_rx_cb);
     DEBUG("Connected to UART%s\n", gps_cfg->uart_conf->device);
 }
+#endif

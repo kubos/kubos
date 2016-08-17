@@ -20,7 +20,6 @@
 
 #include <errno.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -142,7 +141,7 @@ static int _klog(FILE *f, unsigned level, const char *logger,
     int written = 0;
     uint32_t millis = csp_get_ms();
 
-    written += fprintf(f, "%010d.%03d %s:%s ", millis / 1000, millis % 1000,
+    written += fprintf(f, "%010ld.%03ld %s:%s ", millis / 1000, millis % 1000,
                        logger, _level_str(level));
     written += vfprintf(f, format, args);
     written += fprintf(f, "\n");
@@ -195,6 +194,7 @@ void klog_cleanup(void)
 #ifndef HAVE_FSYNC
 int fsync(int fd)
 {
+    (void)fd;
     return 0;
 }
 #endif

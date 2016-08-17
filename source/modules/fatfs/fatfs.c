@@ -34,12 +34,9 @@
 #include "kubos-core/modules/fs/fs.h"
 #include "kubos-core/modules/fatfs/fatfs.h"
 
-#ifdef YOTTA_CFG_DEBUG
 #include "kubos-core/k_debug.h"
 #define DEBUG_FRESULT(op__, res__) DEBUG(op__ ": %s\n", FRESULT_str[res__])
-#else
 #define DEBUG_FRESULT(...)
-#endif
 
 #define CHECK_FRESULT_NOREENT(op) do { \
     FRESULT res__ = op; \

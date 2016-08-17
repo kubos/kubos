@@ -25,7 +25,7 @@
 }
 **/
 
-#if YOTTA_CFG_FS_FATFS_DRIVER_SDIO
+#ifdef YOTTA_CFG_FS_FATFS_DRIVER_SDIO
 
 #include "kubos-core/modules/fatfs/diskio.h"
 #include "kubos-hal/sdio.h"

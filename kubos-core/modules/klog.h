@@ -33,9 +33,9 @@
 #ifndef KLOG_H
 #define KLOG_H
 
-#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <csp/csp_types.h>
 
 //#define MODULE_LOG
 #include "kubos-core/k_log.h"
