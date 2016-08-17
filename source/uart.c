@@ -14,8 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include "FreeRTOS.h"
 #include "kubos-hal/uart.h"
+#include <string.h>
 
 static KUART k_uarts[K_NUM_UARTS];
 
@@ -37,12 +40,12 @@ KUART* kprv_uart_get(KUARTNum uart)
 KUARTConf k_uart_conf_defaults(void)
 {
     return (KUARTConf) {
-        .baud_rate = YOTTA_CFG_HARDWARE_UARTDEFAULTS_BAUDRATE,
-        .word_len = YOTTA_CFG_HARDWARE_UARTDEFAULTS_WORDLEN,
-        .stop_bits = YOTTA_CFG_HARDWARE_UARTDEFAULTS_STOPBITS,
-        .parity = YOTTA_CFG_HARDWARE_UARTDEFAULTS_PARITY,
-        .rx_queue_len = YOTTA_CFG_HARDWARE_UARTDEFAULTS_RXQUEUELEN,
-        .tx_queue_len = YOTTA_CFG_HARDWARE_UARTDEFAULTS_TXQUEUELEN,
+        .baud_rate = YOTTA_CFG_HARDWARE_UART_DEFAULTS_BAUDRATE,
+        .word_len = YOTTA_CFG_HARDWARE_UART_DEFAULTS_WORDLEN,
+        .stop_bits = YOTTA_CFG_HARDWARE_UART_DEFAULTS_STOPBITS,
+        .parity = YOTTA_CFG_HARDWARE_UART_DEFAULTS_PARITY,
+        .rx_queue_len = YOTTA_CFG_HARDWARE_UART_DEFAULTS_RXQUEUELEN,
+        .tx_queue_len = YOTTA_CFG_HARDWARE_UART_DEFAULTS_TXQUEUELEN,
     };
 }
 
@@ -104,3 +107,5 @@ void k_uart_rx_queue_push(KUARTNum uart, char c, void *task_woken)
 {
     queue_push(k_uarts[uart].rx_queue, c, 0, task_woken);
 }
+
+#endif

@@ -1,4 +1,7 @@
+
+#if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #include "kubos-hal/spi.h"
+#include <string.h>
 
 static KSPI k_spis[K_NUM_SPI];
 
@@ -20,10 +23,13 @@ void k_spi_terminate(KSPINum spi)
 KSPIConf k_spi_conf_defaults(void)
 {
     return (KSPIConf) {
-        .role = K_SPI_MASTER,
-        .direction = K_SPI_DIRECTION_2LINES,
-        .data_size = K_SPI_DATASIZE_8BIT,
-        .speed = 10000
+        .role = YOTTA_CFG_HARDWARE_SPI_DEFAULTS_ROLE,
+        .direction = YOTTA_CFG_HARDWARE_SPI_DEFAULTS_DIRECTION,
+        .data_size = YOTTA_CFG_HARDWARE_SPI_DEFAULTS_DATASIZE,
+        .clock_phase = YOTTA_CFG_HARDWARE_SPI_DEFAULTS_CLOCKPHASE,
+        .clock_polarity = YOTTA_CFG_HARDWARE_SPI_DEFAULTS_CLOCKPOLARITY,
+        .first_bit = YOTTA_CFG_HARDWARE_SPI_DEFAULTS_FIRSTBIT,
+        .speed = YOTTA_CFG_HARDWARE_SPI_DEFAULTS_SPEED
     };
 }
 
@@ -85,3 +91,5 @@ KSPI * kprv_spi_get(KSPINum spi)
 {
     return &k_spis[spi];
 }
+
+#endif

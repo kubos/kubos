@@ -24,6 +24,7 @@
  * @author kubos.co
  */
 
+#if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #ifndef K_I2C_H
 #define K_I2C_H
 
@@ -36,27 +37,33 @@
  * @code
  * "config": {
  *   "hardware": {
- *     "i2cCount": "2"
+ *     "i2c": {
+ *       "count": 2
+ *     }
  *   }
  * }
  * @endcode
  */
 #ifndef K_NUM_I2CS
-#define K_NUM_I2CS YOTTA_CFG_HARDWARE_I2CCOUNT
+#define K_NUM_I2CS YOTTA_CFG_HARDWARE_I2C_COUNT
 #endif
 
 /**
  * Default i2c bus. Derived from value in target.json
  * @code
  * "config": {
- *   "defaults": {
- *     "i2c": "K_I2C1"
+ *   "hardware": {
+ *     "i2c": {
+ *       "defaults": {
+ *         "bus": "K_I2C1"
+ *       }
+ *     }
  *   }
  * }
  * @endcode
  */
 #ifndef DEFAULT_I2C
-#define DEFAULT_I2C YOTTA_CFG_HARDWARE_DEFAULTS_I2C
+#define DEFAULT_I2C YOTTA_CFG_HARDWARE_I2C_DEFAULTS_BUS
 #endif
 
 /**
@@ -245,5 +252,5 @@ KI2CStatus kprv_i2c_slave_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
 KI2CStatus kprv_i2c_slave_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
 
 #endif
-
+#endif
 /* @} */

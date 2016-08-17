@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
 #include <string.h>
 
@@ -41,9 +42,9 @@ void k_i2c_terminate(KI2CNum i2c)
 KI2CConf k_i2c_conf_defaults(void)
 {
     return (KI2CConf) {
-        .addressing_mode = K_ADDRESSINGMODE_7BIT,
-        .role = K_MASTER,
-        .clock_speed = 100000
+        .addressing_mode = YOTTA_CFG_HARDWARE_I2C_DEFAULTS_ADDRESSINGMODE,
+        .role = YOTTA_CFG_HARDWARE_I2C_DEFAULTS_ROLE,
+        .clock_speed = YOTTA_CFG_HARDWARE_I2C_DEFAULTS_CLOCKSPEED
     };
 }
 
@@ -95,3 +96,5 @@ KI2C* kprv_i2c_get(KI2CNum i2c)
 {
     return &k_i2cs[i2c];
 }
+
+#endif
