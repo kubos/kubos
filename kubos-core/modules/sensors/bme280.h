@@ -40,7 +40,7 @@
  *  }
  *
  * This would enable the bme280 sensor code and configure it for the SPI bus
- * K_SPI1 with chip select PA1.
+ * K_SPI1 with chip select PA4.
  */
 
 #ifdef YOTTA_CFG_SENSORS_BME280
