@@ -20,7 +20,7 @@
   "config": {
     "hardware": {
       "i2c": {
-        "count": 1,
+        "count": 0,
         "defaults": {
             "bus": "K_I2C1",
             "role": "K_MASTER",
