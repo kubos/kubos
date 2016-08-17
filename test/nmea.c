@@ -16,6 +16,7 @@
  */
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "kubos-core/unity/unity.h"
 #include "kubos-core/k_test.h"
 #include "kubos-core/modules/nmea.h"
