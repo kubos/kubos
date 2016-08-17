@@ -29,6 +29,7 @@
   * @author     kubos.co
   */
 
+#if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
 #include "msp430f5529-hal/i2c.h"
 #include <msp430.h>
@@ -125,3 +126,4 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
 	return (KI2CStatus)ret;
 }
 
+#endif

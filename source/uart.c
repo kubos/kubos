@@ -27,6 +27,7 @@
   * @author     kubos.co
   */
 
+#if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include "kubos-hal/uart.h"
 #include "msp430f5529-hal/uart.h"
 #include <msp430.h>
@@ -94,7 +95,6 @@ static inline hal_uart_stopbits uart_stopbits(KStopBits stopbits)
     switch (stopbits)
     {
         case K_STOP_BITS_1: return HAL_UART_STOP_BITS_1;
-        case K_STOP_BITS_1_5: return HAL_UART_STOP_BITS_1_5;
         case K_STOP_BITS_2:  return HAL_UART_STOP_BITS_2;
         default: return HAL_UART_STOP_BITS_1;
     }
@@ -195,5 +195,7 @@ void hal_uart_interrupt(hal_uart_handle * handle)
         portYIELD();
     }
 }
+
+#endif
 
 /* @} */
