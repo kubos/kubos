@@ -53,7 +53,7 @@
       "i2c": {
         "count": 2,
         "defaults": {
-            "bus": "K_I2C1"
+          "bus": "K_I2C1"
         },
         "i2c1": {
           "scl": {
@@ -113,6 +113,36 @@
           "rx": "PC7"
         }
       },
+      "spi": {
+        "count": 3,
+        "defaults": {
+          "bus": "K_SPI1"
+        },
+        "spi1": {
+          "mosi": "GPIO_PIN_7",
+          "miso": "GPIO_PIN_6",
+          "sck": "GPIO_PIN_5",
+          "CS": "GPIO_PIN_4",
+          "port": "GPIOA",
+          "alt": "GPIO_AF5_SPI1"
+        },
+        "spi2": {
+          "mosi": "GPIO_PIN_15",
+          "miso": "GPIO_PIN_14",
+          "sck": "GPIO_PIN_13",
+          "CS": "GPIO_PIN_12",
+          "port": "GPIOB",
+          "alt": "GPIO_AF5_SPI2"
+        },
+        "spi3": {
+          "mosi": "GPIO_PIN_12",
+          "miso": "GPIO_PIN_11",
+          "sck": "GPIO_PIN_10",
+          "CS": "GPIO_PIN_9",
+          "port": "GPIOC",
+          "alt": "GPIO_AF6_SPI3"
+        }
+      },
       "pins": {
         "LED1": "PD12",
         "LED2": "PD13",
@@ -121,18 +151,14 @@
         "USER_BUTTON": "PA0",
         "USBTX": "PA_2",
         "USBRX": "PA_3",
-        "SPI_MOSI": "PA_7",
-        "SPI_MISO": "PA_6",
-        "SPI_SCK": "PA_5",
-        "SPI_CS": "PA_4",
         "PWM_OUT": "PB_3"
       },
       "test-pins": {
         "spi": {
-          "mosi": "SPI_MOSI",
-          "miso": "SPI_MISO",
-          "sclk": "SPI_SCK",
-          "ssel": "SPI_CS"
+          "mosi": "SPI1_MOSI",
+          "miso": "SPI1_MISO",
+          "sclk": "SPI1_SCK",
+          "ssel": "SPI1_CS"
         },
         "i2c": {
           "sda": "I2C_SDA",
