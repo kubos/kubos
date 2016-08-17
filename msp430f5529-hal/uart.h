@@ -165,7 +165,6 @@ hal_uart_handle * hal_uart_init(hal_uart_config config);
   * @brief Low level hardware setup of UART device.
   * @param handle Instance of initilaized hal_uart_handle containing hardware
   *               registers and config values.
-  * @retval status
   */
 void hal_uart_setup(hal_uart_handle * handle);
 
