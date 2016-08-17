@@ -15,23 +15,57 @@
  * limitations under the License.
  */
 
+/**
+ * @defgroup ALTIMETER
+ * @addgroup ALTIMETER
+ * @{
+ */
+
+/**
+ *
+ * @file       altimeter.h
+ * @brief Sensor API for altitude and barametric pressure readings
+ *
+ * Enabling this sensor code requires certain configuration values to be present
+ * in the application's configuration json. An example is given below:
+ *
+ *  {
+ *      "sensors": {
+ *          "bme280": {
+ *              "spi_bus": "K_SPI1"
+ *          }
+ *      }
+ *  }
+ *
+ * This would enable the sensor API and the bme280 sensor code and configure
+ * it for the SPI bus K_SPI1.
+ */
+
 #ifndef ALTIMETER_H
 #define ALTIMETER_H
 
 #include "kubos-core/modules/sensors/sensors.h"
 
 /**
- * initialize KubOS altitude sensor
+ * Setup the altimeter interface and any related sensors
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_WRITE_ERROR or
+ * SENSOR_NOT_FOUND on error
  */
 KSensorStatus k_initialize_altitude_sensor(void);
 
 /**
- * @return float pressure reading in hPa (300.0 - 1100.0)
+ * Reads back pressure data from related sensor
+ * @param press pointer to pressure data in Pa (101325.0 - 0.0)
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR or
+ * SENSOR_READ_ERROR on error
  */
 KSensorStatus k_get_pressure(float * press);
 
 /**
- * @return absolute altitude in meters
+ * Reads back altitude from related sensors
+ * @param alt pointer to altitude in meters (m)
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR or
+ * SENSOR_READ_ERROR on error
  */
 KSensorStatus k_get_altitude(float * alt);
 

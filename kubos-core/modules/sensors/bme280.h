@@ -16,14 +16,30 @@
 
   Modified by KubOS Corporation 2016 for integration into Kubos Core
  ***************************************************************************/
- /**
-  * @defgroup BME280
-  * @addgroup BME280
-  * @{
-  */
- /**
-  * @brief BME280 Temperature, Humidty and Pressure Sensor
-  */
+/**
+ * @defgroup BME280
+ * @addgroup BME280
+ * @{
+ */
+
+/**
+ *
+ * @file       bme280.h
+ * @brief BME280 Temperature, Humidty and Pressure Sensor
+ *
+ * Enabling this sensor code requires certain configuration values to be present
+ * in the application's configuration json. An example is given below:
+ *
+ *  {
+ *      "sensors": {
+ *          "bme280": {
+ *              "spi_bus": "K_SPI1"
+ *          }
+ *      }
+ *  }
+ *
+ * This would enable the htu21d sensor code and configure it for the SPI bus K_SPI1.
+ */
 
 #ifdef YOTTA_CFG_SENSORS_BME280
 
@@ -102,42 +118,49 @@ typedef struct
     int8_t   dig_H6;
 } bme280_calib_data;
 
- /**
-  * Setup the SPI interface for talking with the BME280 and init sensor
-  * @return sensor status enum
-  */
+/**
+ * Setup the SPI interface for talking with the BME280 and init sensor
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_WRITE_ERROR or
+ * SENSOR_NOT_FOUND on error
+ */
 KSensorStatus bme280_setup(void);
 
 /**
  * Reset the bme280 to default conditions
- * @return sensor status enum
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus bme280_soft_reset(void);
 
 /**
  * Sends temperature command and reads back temperature data
- * through pointer in celsius (-40.0 to 85.0)
- * @return sensor status enum
+ * @param temp pointer to temperature data in celsius (-40.0 to 85.0)
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR or
+ * SENSOR_READ_ERROR on error
  */
 KSensorStatus bme280_read_temperature(float * temp);
 
 /**
  * Sends pressure command and reads back pressure data
- * through pointer in Pa (101325.0 - 0.0)
- * @return sensor status enum
+ * @param press pointer to pressure data in Pa (101325.0 - 0.0)
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR or
+ * SENSOR_READ_ERROR on error
  */
 KSensorStatus bme280_read_pressure(float * press);
 
 /**
- * Sends humidity command and reads back humidity data through
- * pointer in percentage (0.0 - 100.0)
- * @return sensor status enum
+ * Sends humidity command and reads back humidity
+ * @param hum pointer to humidity in percentage (0.0 - 100.0)
+ * @return KSensorStatus, SENSOR_OK on success,SENSOR_ERROR or
+ * SENSOR_READ_ERROR on error
  */
 KSensorStatus bme280_read_humidity(float * hum);
 
 /**
- * converts pressure to absolute altitude in meters (m)
- * @return sensor status enum
+ * converts pressure to absolute altitude
+ * @param sea_level in hPa (1013.25 recommended)
+ * @param alt pointer to altitude in meters (m)
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR or
+ * SENSOR_READ_ERROR on error
  */
 KSensorStatus bme280_read_altitude(float sea_level, float * alt);
 

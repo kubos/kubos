@@ -15,23 +15,56 @@
  * limitations under the License.
  */
 
+ /**
+ * @defgroup TEMPERATURE
+ * @addtogroup TEMPERATURE
+ * @{
+ */
+
+/**
+ *
+ * @file       temperature.h
+ * @brief Sensor API for temperature and humidity sensor readings
+ *
+ * Enabling this sensor code requires certain configuration values to be present
+ * in the application's configuration json. An example is given below:
+ *
+ *  {
+ *      "sensors": {
+ *          "htu21d": {
+ *              "i2c_bus": "K_I2C1"
+ *          }
+ *      }
+ *  }
+ *
+ * This would enable the sensor API and the htu21d sensor code and configure
+ * it for the I2C bus K_I2C1.
+ */
+
 #ifndef TEMPERATURE_H
 #define TEMPERATURE_H
 
 #include "kubos-core/modules/sensors/sensors.h"
 
 /**
- * initialize KubOS temperature sensor
+ * Setup the temperature sensor interface and any related sensors
+ * @return KSensorStatus, SENSOR_OK on success or SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_initialize_temperature_sensor(void);
 
 /**
- * @return float temperature in celsius (-40.0 to 125.0)
+ * Reads back temperature data from related sensor
+ * @param temp pointer to temperature in celsius (-40.0 to 125.0)
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR,
+ * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_get_temperature(float * temp);
 
 /**
- * @return float relative humidity in percentage (0.0 - 100.0)
+ * Reads back humidity data from related sensor
+ * @param hum pointer to relative humidity in percentage (0.0 - 100.0)
+ * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR,
+ * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_get_humidity(float * hum);
 
