@@ -17,7 +17,7 @@ set(CMAKE_SYSTEM_VERSION 1)
 set(YOTTA_FORCE_INCLUDE_FLAG "-include")
 
 # provide compatibility definitions for compiling with this target: these are
-# definitions that legacy code assumes will be defined. 
+# definitions that legacy code assumes will be defined.
 add_definitions("-DTOOLCHAIN_GCC")
 
 macro(_gcc_not_found progname)
@@ -51,7 +51,12 @@ macro(gcc_load_toolchain prefix)
     set(YOTTA_POSTPROCESS_COMMAND "\"${K_OBJCOPY}\" -O binary YOTTA_CURRENT_EXE_NAME YOTTA_CURRENT_EXE_NAME.bin")
 
     # set default compilation flags
-    set(_C_FAMILY_FLAGS_INIT "-fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -Wall -Wextra -gstrict-dwarf")
+    IF(CMAKE_BUILD_TYPE MATCHES Debug)
+        set(_C_FAMILY_FLAGS_INIT "-fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -Wall -Wextra -gstrict-dwarf")
+    ELSE()
+        set(_C_FAMILY_FLAGS_INIT "-fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -Wextra -gstrict-dwarf")
+    ENDIF()
+
     set(CMAKE_C_FLAGS_INIT   "${_C_FAMILY_FLAGS_INIT}")
     set(CMAKE_ASM_FLAGS_INIT "-fno-exceptions -fno-unwind-tables -x assembler-with-cpp")
     set(CMAKE_CXX_FLAGS_INIT "--std=gnu++11 ${_C_FAMILY_FLAGS_INIT} -fno-rtti -fno-threadsafe-statics")
