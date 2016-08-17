@@ -79,7 +79,7 @@
         }
       },
       "uart": {
-        "count": 6,
+        "count": 5,
         "uart1": {
           "tx": "PB6",
           "rx": "PB7"
