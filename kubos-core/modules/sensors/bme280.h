@@ -33,12 +33,14 @@
  *  {
  *      "sensors": {
  *          "bme280": {
- *              "spi_bus": "K_SPI1"
+ *              "spi_bus": "K_SPI1",
+ *              "CS":"PA4"
  *          }
  *      }
  *  }
  *
- * This would enable the htu21d sensor code and configure it for the SPI bus K_SPI1.
+ * This would enable the bme280 sensor code and configure it for the SPI bus
+ * K_SPI1 with chip select PA1.
  */
 
 #ifdef YOTTA_CFG_SENSORS_BME280
