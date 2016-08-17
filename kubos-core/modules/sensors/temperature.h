@@ -1,5 +1,5 @@
 /*
- * KubOS Core
+ * KubOS Core Flight Services
  * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
-/**
- * @defgroup HTU21D
- * @addtogroup HTU21D
+ /**
+ * @defgroup TEMPERATURE
+ * @addtogroup TEMPERATURE
  * @{
  */
 
 /**
  *
- * @file       htu21d.h
- * @brief HTU21D Temperature and Humidity Sensor
+ * @file       temperature.h
+ * @brief Sensor API for temperature and humidity sensor readings
  *
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
@@ -37,45 +37,35 @@
  *      }
  *  }
  *
- * This would enable the htu21d sensor code and configure it for the I2C bus K_I2C1.
+ * This would enable the sensor API and the htu21d sensor code and configure
+ * it for the I2C bus K_I2C1.
  */
 
-#ifdef YOTTA_CFG_SENSORS_HTU21D
-#ifndef HTU21D_H
-#define HTU21D_H
+#ifndef TEMPERATURE_H
+#define TEMPERATURE_H
 
-#include "kubos-hal/i2c.h"
 #include "kubos-core/modules/sensors/sensors.h"
 
 /**
- * Setup the I2C interface for talking with the HTU21D
+ * Setup the temperature sensor interface and any related sensors
  * @return KSensorStatus, SENSOR_OK on success or SENSOR_WRITE_ERROR on error
  */
-KSensorStatus htu21d_setup(void);
+KSensorStatus k_initialize_temperature_sensor(void);
 
 /**
- * Sends temperature command and reads back temperature data
+ * Reads back temperature data from related sensor
  * @param temp pointer to temperature in celsius (-40.0 to 125.0)
  * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
-KSensorStatus htu21d_read_temperature(float * temp);
+KSensorStatus k_get_temperature(float * temp);
 
 /**
- * Sends humidity command and reads back humidity data
+ * Reads back humidity data from related sensor
  * @param hum pointer to relative humidity in percentage (0.0 - 100.0)
  * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
-KSensorStatus htu21d_read_humidity(float * hum);
-
-/**
- * Sends reset command which powers sensor off and on again
- * @return KSensorStatus, SENSOR_OK on success or SENSOR_WRITE_ERROR on error
- */
-KSensorStatus htu21d_reset(void);
+KSensorStatus k_get_humidity(float * hum);
 
 #endif
-#endif
-
-/* @} */

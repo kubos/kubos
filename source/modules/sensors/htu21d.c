@@ -48,14 +48,19 @@ static int check_crc(uint16_t raw, uint8_t crc);
  */
 static KSensorStatus read_value(uint8_t cmd, int * raw);
 
-void htu21d_setup(void)
+KSensorStatus htu21d_setup(void)
 {
+    KSensorStatus ret;
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_7BIT,
         .role = K_MASTER,
         .clock_speed = 100000
     };
     k_i2c_init(I2C_BUS, &conf);
+
+    /* reset sensor */
+    ret = htu21d_reset();
+    return ret;
 }
 
 KSensorStatus htu21d_read_temperature(float * temp)
@@ -92,11 +97,16 @@ KSensorStatus htu21d_read_humidity(float * hum)
     return ret;
 }
 
-void htu21d_reset(void)
+KSensorStatus htu21d_reset(void)
 {
     int reset_cmd = 0xFE;
-    k_i2c_write(I2C_BUS, SENSOR_ADDR, &reset_cmd, 1);
+    if (k_i2c_write(I2C_BUS, SENSOR_ADDR, &reset_cmd, 1) != I2C_OK)
+    {
+        return SENSOR_WRITE_ERROR;
+    }
     vTaskDelay(10);
+    
+    return SENSOR_OK;
 }
 
 static KSensorStatus read_value(uint8_t cmd, int * raw)

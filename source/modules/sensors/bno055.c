@@ -391,7 +391,17 @@ KSensorStatus bno055_get_data_vector(vector_type_t type, bno055_vector_data_t * 
                 vector->z = ((double) z) / 16.0;
                 break;
             case VECTOR_ACCELEROMETER:
+            /* 1 m/s^2 = 16 LSB */
+                vector->x = ((double) x) / 100.0;
+                vector->y = ((double) y) / 100.0;
+                vector->z = ((double) z) / 100.0;
+                break;
             case VECTOR_LINEARACCEL:
+                /* 1 m/s^2 = 16 LSB */
+                vector->x = ((double) x) / 100.0;
+                vector->y = ((double) y) / 100.0;
+                vector->z = ((double) z) / 100.0;
+                break;
             case VECTOR_GRAVITY:
                 /* 1m/s^2 = 100 LSB */
                 vector->x = ((double) x) / 100.0;

@@ -18,7 +18,9 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-
+/**
+ * Sensor status enum
+ */
 typedef enum
 {
     SENSOR_OK = 0,
@@ -28,6 +30,5 @@ typedef enum
     SENSOR_NOT_FOUND,
     SENSOR_NOT_CALIBRATED
 } KSensorStatus;
-
 
 #endif
