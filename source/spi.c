@@ -123,13 +123,35 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
 
 static void hal_spi_terminate(hal_spi_handle * handle)
 {
-    __HAL_RCC_SPI1_FORCE_RESET();
-    __HAL_RCC_SPI1_RELEASE_RESET();
+    switch(handle->kspi->bus_num)
+    {
+        case K_SPI1:
+        {
+            __HAL_RCC_SPI1_FORCE_RESET();
+            __HAL_RCC_SPI1_RELEASE_RESET();
+            break;
+        }
+        case K_SPI2:
+        {
+            __HAL_RCC_SPI2_FORCE_RESET();
+            __HAL_RCC_SPI2_RELEASE_RESET();
+            break;
+        }
+        case K_SPI3:
+        {
+            __HAL_RCC_SPI3_FORCE_RESET();
+            __HAL_RCC_SPI3_RELEASE_RESET();
+            break;
+        }
+        default:
+        {
+        }
+    }
 
     /* de-init pins */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_5);
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_6);
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_7);
+    HAL_GPIO_DeInit(handle->pins.port, handle->pins.mosi);
+    HAL_GPIO_DeInit(handle->pins.port, handle->pins.miso);
+    HAL_GPIO_DeInit(handle->pins.port, handle->pins.sck);
 }
 
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
