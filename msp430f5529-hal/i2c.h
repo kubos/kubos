@@ -24,10 +24,12 @@
 /**
  *
  * @file      I2C.h
- * @brief      MSP430F5529 HAL - I2C module
+ * @brief     MSP430F5529 HAL - I2C module
  *
- * @author     kubos.co
+ * @author    kubos.co
  */
+
+#if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #ifndef HAL_I2C_H
 #define HAL_I2C_H
 
@@ -182,6 +184,7 @@ hal_i2c_status hal_i2c_master_write(hal_i2c_handle * handle, uint16_t addr, uint
  */
 hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8_t *ptr, int len);
 
+#endif
 #endif
 
 /* @} */

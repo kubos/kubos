@@ -15,19 +15,24 @@
  * limitations under the License.
  */
 
+#if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #include "kubos-hal/spi.h"
 #include "msp430f5529-hal/spi.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include <msp430.h>
 
-hal_spi_handle hal_spi_buses[YOTTA_CFG_HARDWARE_SPICOUNT];
+hal_spi_handle hal_spi_buses[YOTTA_CFG_HARDWARE_SPI_COUNT];
 
 /* defines for register timeout mode */
 #define SET 0
 #define RELEASE 1
 
-static void hal_spi_set_clock(hal_spi_handle * handle);
+static void hal_spi_set_role(hal_spi_handle * handle);
+static void hal_spi_set_clock_speed(hal_spi_handle * handle);
+static void hal_spi_set_clock_polarity(hal_spi_handle * handle);
+static void hal_spi_set_clock_phase(hal_spi_handle * handle);
+static void hal_spi_set_first_bit(hal_spi_handle * handle);
 static hal_spi_status hal_spi_register_timeout(hal_spi_handle * handle, uint8_t flag, uint8_t mode);
 
 
@@ -59,28 +64,25 @@ hal_spi_handle * hal_spi_init(hal_spi_conf config, hal_spi_bus spi)
     return handle;
 }
 
-static void hal_spi_set_clock(hal_spi_handle * handle)
-{
-    /* SMCLK FREQ constant 1 MHz for F5529 */
-    const uint32_t SMCLK_FREQ = 1000000;
-    uint8_t preScalar;
-    preScalar = (uint8_t)(SMCLK_FREQ/handle->conf.speed);
-
-    handle->reg->control1 |= UCSSEL_2 | UCSWRST; /* SMCLK + keep reset */
-    handle->reg->baudrate0 = preScalar;
-    handle->reg->baudrate1 = 0;
-}
-
 void hal_spi_setup(hal_spi_handle * handle)
 {
     /* configure pins */
     *(handle->select) |= handle->select_val;
 
     handle->reg->control1 |= UCSWRST; /* software reset */
-    /* Mode3 2line, 8-bit SPI master, clock polarity=1, clock phase=0 */
-    handle->reg->control0 |= UCMST | UCSYNC | UCCKPL | UCMSB;
 
-    hal_spi_set_clock(handle);
+    hal_spi_set_role(handle);
+    hal_spi_set_clock_polarity(handle);
+    hal_spi_set_clock_phase(handle);
+    hal_spi_set_clock_speed(handle);
+    hal_spi_set_first_bit(handle);
+
+    /* Bits not set are:
+        - BIT4   - UC7BIT  - Default to 8-bit character length
+        - BIT1,2 - UCMODEx - Default to 3-pin SPI
+        - BIT0   - UCSYNC  - Default to asynchronous mode
+        - See Section 1.5 of SLAU411D - USCI - SPI Mode for more details.
+    */
 
     handle->reg->control1 &= ~UCSWRST; /* enable spi by releasing reset */
 }
@@ -93,6 +95,66 @@ void hal_spi_dev_terminate(hal_spi_handle * handle)
 
     /* de-select pins */
     *(handle->select) &= ~handle->select_val;
+}
+
+static void hal_spi_set_clock_speed(hal_spi_handle * handle)
+{
+    /* SMCLK FREQ constant 1 MHz for F5529 */
+    const uint32_t SMCLK_FREQ = 1000000;
+    uint8_t preScalar;
+    preScalar = (uint8_t)(SMCLK_FREQ/handle->conf.speed);
+
+    handle->reg->control1 |= UCSSEL_2 | UCSWRST; /* SMCLK + keep reset */
+    handle->reg->baudrate0 = preScalar;
+    handle->reg->baudrate1 = 0;
+}
+
+static void hal_spi_set_role(hal_spi_handle * handle)
+{
+    if (handle->conf.role == HAL_SPI_MASTER)
+    {
+        handle->reg->control0 |= UCMST;
+    }
+    else
+    {
+        handle->reg->control0 &= ~UCMST;
+    }
+}
+
+static void hal_spi_set_clock_polarity(hal_spi_handle * handle)
+{
+    if (handle->conf.clock_polarity == HAL_SPI_CPOL_HIGH)
+    {
+        handle->reg->control0 |= UCCKPL;
+    }
+    else
+    {
+        handle->reg->control0 &= ~UCCKPL;
+    }
+}
+
+static void hal_spi_set_clock_phase(hal_spi_handle * handle)
+{
+    if (handle->conf.clock_phase == HAL_SPI_CPHA_1EDGE)
+    {
+        handle->reg->control0 |= UCCKPH;
+    }
+    else
+    {
+        handle->reg->control0 &= ~UCCKPH;
+    }
+}
+
+static void hal_spi_set_first_bit(hal_spi_handle * handle)
+{
+    if (handle->conf.first_bit == HAL_SPI_FIRSTBIT_MSB)
+    {
+        handle->reg->control0 |= UCMSB;
+    }
+    else
+    {
+        handle->reg->control0 &= ~UCMSB;
+    }
 }
 
 static hal_spi_status hal_spi_register_timeout(hal_spi_handle * handle, uint8_t flag, uint8_t mode)
@@ -135,7 +197,6 @@ hal_spi_status hal_spi_master_write(hal_spi_handle * handle, uint8_t *buffer, in
     hal_spi_status ret = HAL_SPI_ERROR;
 
     int i = 0; /* loop variable */
-    uint8_t dummy = 0; /* dummy rx */
 
     /* send data */
     for (; i < len; i++, buffer++)
@@ -155,8 +216,8 @@ hal_spi_status hal_spi_master_write(hal_spi_handle * handle, uint8_t *buffer, in
             return ret; /* error */
         }
 
-        /* put dummy rx'd byte into dummy var */
-        dummy = handle->reg->rx_buffer;
+        /* Read the rx register */
+        (void)handle->reg->rx_buffer;
 
     }
 
@@ -226,3 +287,5 @@ hal_spi_status hal_spi_master_write_read(hal_spi_handle * handle, uint8_t *tx_bu
 
     return HAL_SPI_OK;
 }
+
+#endif

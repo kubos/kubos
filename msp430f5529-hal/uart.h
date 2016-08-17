@@ -28,6 +28,8 @@
    *
    * @author     kubos.co
    */
+
+#if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #ifndef HAL_UART_H
 #define HAL_UART_H
 
@@ -68,7 +70,6 @@ typedef enum
 typedef enum
 {
     HAL_UART_STOP_BITS_1 = 0,
-    HAL_UART_STOP_BITS_1_5,
     HAL_UART_STOP_BITS_2
 } hal_uart_stopbits;
 
@@ -164,39 +165,8 @@ hal_uart_handle * hal_uart_init(hal_uart_config config);
   * @brief Low level hardware setup of UART device.
   * @param handle Instance of initilaized hal_uart_handle containing hardware
   *               registers and config values.
-  * @retval status
   */
-uint8_t hal_uart_setup(hal_uart_handle * handle);
-
-/**
-  * @brief Low level hardware setup of UART baudrate.
-  * @param handle Instance of initilaized hal_uart_handle containing hardware
-  *               registers and config values.
-  */
-static void hal_uart_set_baudrate(hal_uart_handle * handle);
-
-/**
-  * @brief Low level hardware setup of UART parity.
-  * @param handle Instance of initilaized hal_uart_handle containing hardware
-  *               registers and config values.
-  */
-static void hal_uart_set_parity(hal_uart_handle * handle);
-
-/**
-  * @brief Low level hardware setup of UART stopbits.
-  * @param handle Instance of initilaized hal_uart_handle containing hardware
-  *               registers and config values.
-  */
-static void hal_uart_set_stopbits(hal_uart_handle * handle);
-
-
-/**
-  * @brief Low level hardware setup of UART word length.
-  * @param handle Instance of initilaized hal_uart_handle containing hardware
-  *               registers and config values.
-  */
-static void hal_uart_set_wordlen(hal_uart_handle * handle);
-
+void hal_uart_setup(hal_uart_handle * handle);
 
 /**
   * @brief Reads a single character from UART.
@@ -244,5 +214,5 @@ extern void hal_uart_interrupt(hal_uart_handle * handle);
 #define HAL_UART_STAT(handle, flag) (flag == (flag & handle->reg->status))
 
 #endif
-
+#endif
 /* @} */

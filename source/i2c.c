@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
+#if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
 #include "msp430f5529-hal/i2c.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include <msp430.h>
 
-hal_i2c_handle hal_i2c_buses[YOTTA_CFG_HARDWARE_I2CCOUNT];
+hal_i2c_handle hal_i2c_buses[YOTTA_CFG_HARDWARE_I2C_COUNT];
 
 /* defines for register timeout mode */
 #define SET 0
@@ -355,3 +356,5 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 	/* return timeout status */
 	return ret;
 }
+
+#endif

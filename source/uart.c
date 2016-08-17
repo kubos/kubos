@@ -19,12 +19,43 @@
  * limitations under the License.
  *******************************************************************************
  */
+
+#if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include <msp430.h>
 #include "msp430f5529-hal/uart.h"
 #include <stddef.h>
 #include <stdbool.h>
 
-hal_uart_handle hal_uart_dev[YOTTA_CFG_HARDWARE_UARTCOUNT];
+/**
+  * @brief Low level hardware setup of UART baudrate.
+  * @param handle Instance of initilaized hal_uart_handle containing hardware
+  *               registers and config values.
+  */
+static void hal_uart_set_baudrate(hal_uart_handle * handle);
+
+/**
+  * @brief Low level hardware setup of UART parity.
+  * @param handle Instance of initilaized hal_uart_handle containing hardware
+  *               registers and config values.
+  */
+static void hal_uart_set_parity(hal_uart_handle * handle);
+
+/**
+  * @brief Low level hardware setup of UART stopbits.
+  * @param handle Instance of initilaized hal_uart_handle containing hardware
+  *               registers and config values.
+  */
+static void hal_uart_set_stopbits(hal_uart_handle * handle);
+
+
+/**
+  * @brief Low level hardware setup of UART word length.
+  * @param handle Instance of initilaized hal_uart_handle containing hardware
+  *               registers and config values.
+  */
+static void hal_uart_set_wordlen(hal_uart_handle * handle);
+
+hal_uart_handle hal_uart_dev[YOTTA_CFG_HARDWARE_UART_COUNT];
 
 hal_uart_handle * hal_uart_device_init(hal_uart_device device)
 {
@@ -57,7 +88,7 @@ hal_uart_handle * hal_uart_init(hal_uart_config config)
 }
 
 
-uint8_t hal_uart_setup(hal_uart_handle * handle)
+void hal_uart_setup(hal_uart_handle * handle)
 {
     if (NULL != handle)
     {
@@ -215,3 +246,5 @@ __attribute__ (( interrupt ( USCI_A1_VECTOR ))) void hal_uart_a1_interrupt(void)
 {
     hal_uart_interrupt(&hal_uart_dev[HAL_UART_A1]);
 }
+
+#endif
