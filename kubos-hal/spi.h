@@ -67,8 +67,15 @@
  * Available spi buses
  */
 typedef enum {
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI1
     K_SPI1 = 0,
-    K_SPI2
+#endif
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI2
+    K_SPI2,
+#endif
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI3
+    K_SPI3
+#endif
 } KSPINum;
 
 /**

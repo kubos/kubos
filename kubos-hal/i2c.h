@@ -70,8 +70,15 @@
  * Available i2c buses
  */
 typedef enum {
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C1
     K_I2C1 = 0,
-    K_I2C2 = 1
+#endif
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C2
+    K_I2C2,
+#endif
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C3
+    K_I2C3
+#endif
 } KI2CNum;
 
 /**
