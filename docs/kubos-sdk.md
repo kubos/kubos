@@ -40,15 +40,15 @@ Using homebrew:
 #### Linux
 ##### Ubuntu/Debian
 
-        $ sudo apt-get install build-essential libxml2-dev libxslt1-dev zlib1g-dev  wget python-dev  libffi-dev libssl-dev python-setuptools
+        $ sudo apt-get install build-essential libxml2-dev libxslt1-dev zlib1g-dev  wget python-dev  libffi-dev libssl-dev python-setuptools libjim-dev libdw-dev
 
 ##### Fedora
 
-        $ sudo yum install gcc redhat-rpm-config python-devel libffi-devel openssl-devel python-setuptools
+        $ sudo yum install gcc redhat-rpm-config python-devel libffi-devel openssl-devel python-setuptools jimtcl
 
 ##### OpenSuse
 
-        $ sudo zypper install gcc python-dev libffi-dev openssl-devel python-setuptools
+        $ sudo zypper install gcc python-dev libffi-dev openssl-devel python-setuptools dracut systemd-sysvinit udev
 
 ## Installing KubOS-SDK
 
