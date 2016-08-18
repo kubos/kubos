@@ -2,11 +2,11 @@
   "name": "stm32f405-gcc",
   "version": "0.0.3",
   "inherits": {
-    "kubos-arm-none-eabi-gcc": "openkosmosorg/target-kubos-arm-none-eabi-gcc#~0.0.1"
+    "kubos-arm-none-eabi-gcc": "kubostech/target-kubos-arm-none-eabi-gcc#~0.0.1"
   },
   "description": "KubOS build target for stm32f405rg based boards.",
   "author": "Ryan Plauche <ryan@kubos.co>",
-  "homepage": "https://github.com/openkosmosorg/target-stm32f405-gcc",
+  "homepage": "https://github.com/kubostech/target-stm32f405-gcc",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
