@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #include "kubos-hal-stm32f4/spi.h"
 
 
@@ -281,3 +281,5 @@ static void hal_spi_gpio_init(hal_spi_handle * handle)
     HAL_GPIO_Init(handle->pins.port, &GPIO_InitStruct);
 
 }
+
+#endif

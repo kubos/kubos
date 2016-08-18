@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #ifndef K_SPI_HAL_H
 #define K_SPI_HAL_H
 
@@ -40,5 +41,5 @@ typedef struct {
     hal_spi_pins pins;
 } hal_spi_handle;
 
-
+#endif
 #endif
