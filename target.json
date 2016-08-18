@@ -57,13 +57,13 @@
         },
         "i2c1": {
           "scl": {
-            "pin": "GPIO_PIN_8",
+            "pin": "PB6",
             "mode": "GPIO_MODE_AF_PP",
             "pullup": "GPIO_NOPULL",
             "speed": "GPIO_SPEED_MEDIUM"
           },
           "sda": {
-            "pin": "GPIO_PIN_7",
+            "pin": "PB7",
             "mode": "GPIO_MODE_AF_OD",
             "pullup": "GPIO_PULLUP",
             "speed": "GPIO_SPEED_MEDIUM"
@@ -72,13 +72,13 @@
         },
         "i2c2": {
           "scl": {
-            "pin": "GPIO_PIN_10",
+            "pin": "PB10",
             "mode": "GPIO_MODE_AF_PP",
             "pullup": "GPIO_NOPULL",
             "speed": "GPIO_SPEED_MEDIUM"
           },
           "sda": {
-            "pin": "GPIO_PIN_11",
+            "pin": "PB11",
             "mode": "GPIO_MODE_AF_OD",
             "pullup": "GPIO_PULLUP",
             "speed": "GPIO_SPEED_MEDIUM"
@@ -119,26 +119,26 @@
           "bus": "K_SPI1"
         },
         "spi1": {
-          "mosi": "GPIO_PIN_7",
-          "miso": "GPIO_PIN_6",
-          "sck": "GPIO_PIN_5",
-          "CS": "GPIO_PIN_4",
+          "mosi": "PA7",
+          "miso": "PA6",
+          "sck": "PA5",
+          "cs": "PA4",
           "port": "GPIOA",
           "alt": "GPIO_AF5_SPI1"
         },
         "spi2": {
-          "mosi": "GPIO_PIN_15",
-          "miso": "GPIO_PIN_14",
-          "sck": "GPIO_PIN_13",
-          "CS": "GPIO_PIN_12",
+          "mosi": "PB15",
+          "miso": "PB14",
+          "sck": "PB13",
+          "cs": "PB12",
           "port": "GPIOB",
           "alt": "GPIO_AF5_SPI2"
         },
         "spi3": {
-          "mosi": "GPIO_PIN_12",
-          "miso": "GPIO_PIN_11",
-          "sck": "GPIO_PIN_10",
-          "CS": "GPIO_PIN_9",
+          "mosi": "PC12",
+          "miso": "PC11",
+          "sck": "PC10",
+          "cs": "PC8",
           "port": "GPIOC",
           "alt": "GPIO_AF6_SPI3"
         }
