@@ -77,7 +77,7 @@ void task_i2c(void *p) {
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
     bno055_setup(OPERATION_MODE_NDOF);
-    bno055_quat_data_t pos;
+    bno055_quat_data_t pos = { 0, 0, 0, 0};
 #endif
 
     while (1) {
