@@ -81,6 +81,7 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
             handle->kspi = spi;
             switch(spi->bus_num)
             {
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI1
                 case K_SPI1:
                 {
                     handle->hal_handle.Instance = SPI1;
@@ -91,6 +92,8 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
                     handle->pins.alt = YOTTA_CFG_HARDWARE_SPI_SPI1_ALT;
                     break;
                 }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI2
                 case K_SPI2:
                 {
                     handle->hal_handle.Instance = SPI2;
@@ -101,6 +104,8 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
                     handle->pins.alt = YOTTA_CFG_HARDWARE_SPI_SPI2_ALT;
                     break;
                 }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI3
                 case K_SPI3:
                 {
                     handle->hal_handle.Instance = SPI3;
@@ -111,6 +116,7 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
                     handle->pins.alt = YOTTA_CFG_HARDWARE_SPI_SPI3_ALT;
                     break;
                 }
+#endif
                 default:
                 {
                     handle = NULL;
@@ -125,24 +131,30 @@ static void hal_spi_terminate(hal_spi_handle * handle)
 {
     switch(handle->kspi->bus_num)
     {
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI1
         case K_SPI1:
         {
             __HAL_RCC_SPI1_FORCE_RESET();
             __HAL_RCC_SPI1_RELEASE_RESET();
             break;
         }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI2
         case K_SPI2:
         {
             __HAL_RCC_SPI2_FORCE_RESET();
             __HAL_RCC_SPI2_RELEASE_RESET();
             break;
         }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI3
         case K_SPI3:
         {
             __HAL_RCC_SPI3_FORCE_RESET();
             __HAL_RCC_SPI3_RELEASE_RESET();
             break;
         }
+#endif
         default:
         {
         }
@@ -160,21 +172,27 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
 
     switch(handle->kspi->bus_num)
     {
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI1
         case K_SPI1:
         {
             __HAL_RCC_SPI1_CLK_ENABLE();
             break;
         }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI2
         case K_SPI2:
         {
             __HAL_RCC_SPI2_CLK_ENABLE();
             break;
         }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_SPI_SPI3
         case K_SPI3:
         {
             __HAL_RCC_SPI3_CLK_ENABLE();
             break;
         }
+#endif
         default:
         {
             return SPI_ERROR; /* wrong bus num */

@@ -500,12 +500,20 @@ static void hal_i2c_msp_init(hal_i2c_handle * handle)
     /* Enable GPIO clock */
     switch(handle->ki2c->bus_num)
     {
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C1
         case K_I2C1:
+        {
+            __HAL_RCC_GPIOB_CLK_ENABLE();
+            break;
+        }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C2
         case K_I2C2:
         {
             __HAL_RCC_GPIOB_CLK_ENABLE();
             break;
         }
+#endif
     }
 
     /*##-2- Configure peripheral GPIO ##########################################*/
@@ -528,16 +536,20 @@ static void hal_i2c_msp_init(hal_i2c_handle * handle)
     /* Enable I2C1 clock */
     switch(handle->ki2c->bus_num)
     {
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C1
         case K_I2C1:
         {
             __HAL_RCC_I2C1_CLK_ENABLE();
             break;
         }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C2
         case K_I2C2:
         {
             __HAL_RCC_I2C2_CLK_ENABLE();
             break;
         }
+#endif
     }
 
     /*##-4- Configure the NVIC for I2C #########################################*/
@@ -553,18 +565,22 @@ static void hal_i2c_terminate(hal_i2c_handle * handle)
   /*##-1- Reset peripherals ##################################################*/
   switch(handle->ki2c->bus_num)
   {
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C1
       case K_I2C1:
       {
           __HAL_RCC_I2C1_FORCE_RESET();
           __HAL_RCC_I2C1_RELEASE_RESET();
           break;
       }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C2
       case K_I2C2:
       {
           __HAL_RCC_I2C2_FORCE_RESET();
           __HAL_RCC_I2C2_RELEASE_RESET();
           break;
       }
+#endif
   }
 
   /*##-2- Disable peripherals and GPIO Clocks ################################*/
