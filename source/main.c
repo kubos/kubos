@@ -27,54 +27,50 @@
 
 #include "kubos-hal/gpio.h"
 #include "kubos-hal/uart.h"
-#include "kubos-hal/spi.h"
 #include "kubos-core/modules/klog.h"
+#include "kubos-core/modules/sensors/altimeter.h"
+#include "kubos-core/modules/sensors/temperature.h"
 
-#ifdef YOTTA_CFG_SENSORS_BME280
-#include "kubos-core/modules/sensors/bme280.h"
-#endif
+/**
+* Enabling this example code requires certain configuration values to be present
+* in the configuration json of this application. An example is given below:
+*
+*  {
+*      "sensors": {
+*        "bme280": {
+*           "spi bus":"K_SPI1",
+*           "CS":"PA4"
+*           },
+*          "htu21d": {
+*              "i2c_bus": "K_I2C1"
+*          }
+*      }
+*  }
+*
+* This would enable the sensor APIs altimeter and temperature and their related
+* sensors the bme280 and the htu21d.
+*/
 
-void task_spi(void *p) {
-
-#ifdef YOTTA_CFG_SENSORS_BME280
+void task_sensors(void *p) {
     /* store sensor values */
-    float temp, hum;
-    /* setup sensor spi interface */
-    bme280_setup();
-#else
-    /* define own bus */
-    #define SPI_BUS K_SPI1
-    /* data to send */
-    uint8_t tx = 1;
-    /* data to receive */
-    volatile uint8_t rx = 0;
-    /* create own config */
-    KSPIConf conf = {
-        .role = K_SPI_MASTER,
-        .direction = K_SPI_DIRECTION_2LINES,
-        .data_size = K_SPI_DATASIZE_8BIT,
-        .speed = 10000
-    };
-    /* Initialize spi bus with configuration */
-    k_spi_init(SPI_BUS, &conf);
-#endif
+    float press, alt, temp, hum;
+    /* setup sensor APIs */
+    k_initialize_altitude_sensor();
+    k_initialize_temperature_sensor();
 
     while (1) {
-#ifdef YOTTA_CFG_SENSORS_BME280
         /* get sensor data */
-        temp = bme280_read_temperature();
-        hum = bme280_read_humidity();
+        k_get_altitude(&alt);
+        k_get_pressure(&press);
+        k_get_temperature(&temp);
+        k_get_humidity(&hum);
+
         /* print out over console */
-        printf("temp - %f\r\n", temp);
+        printf("pressure - %f\r\n", press);
+        printf("altitude - %f\r\n", alt);
+        printf("temperature - %f\r\n", temp);
         printf("humidity - %f\r\n", hum);
-#else
-        /* Send single byte over spi and then receive it */
-        k_spi_write_read(SPI_BUS, &tx, &rx, 1);
-        /* print out over console */
-        printf("rx - %f\r\n", rx);
-        /* increment tx */
-        tx++;
-#endif
+
         /* wait */
         vTaskDelay(100 / portTICK_RATE_MS);
     }
@@ -104,8 +100,7 @@ int main(void)
     P2OUT = BIT1;
     #endif
 
-    xTaskCreate(task_spi, "SPI", configMINIMAL_STACK_SIZE * 5, NULL, 2, NULL);
-
+    xTaskCreate(task_sensors, "SENSORS", configMINIMAL_STACK_SIZE * 5, NULL, 2, NULL);
     vTaskStartScheduler();
 
     while (1);
