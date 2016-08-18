@@ -8,9 +8,9 @@
   ],
   "author": "ryan@kubos.co",
   "repository": {
-    "url": "ssh://git@github.com/openkosmosorg/freertos-config-msp430f5529",
+    "url": "ssh://git@github.com/kubostech/freertos-config-msp430f5529",
     "type": "git"
   },
-  "homepage": "https://github.com/openkosmosorg/freertos-config-msp430f5529",
+  "homepage": "https://github.com/kubostech/freertos-config-msp430f5529",
   "license": "FreeRTOS Open Source License"
 }
