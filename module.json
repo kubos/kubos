@@ -7,15 +7,15 @@
   "homepage": "https://www.kubos.co",
   "license": "Apache-2.0",
   "dependencies": {
-      "csp" : "openkosmosorg/libcsp#~1.4.1",
-      "freertos": "openkosmosorg/freertos#~9.0.1"
+      "csp" : "kubostech/libcsp#~1.4.1",
+      "freertos": "kubostech/freertos#~9.0.1"
   },
   "targetDependencies": {
     "stm32f4": {
-      "kubos-hal-stm32f4": "openkosmosorg/kubos-hal-stm32f4#~0.0.2"
+      "kubos-hal-stm32f4": "kubostech/kubos-hal-stm32f4#~0.0.2"
     },
     "msp430f5529": {
-      "kubos-hal-msp430f5529": "openkosmosorg/kubos-hal-msp430f5529#~0.0.1"
+      "kubos-hal-msp430f5529": "kubostech/kubos-hal-msp430f5529#~0.0.1"
     }
   }
 }
