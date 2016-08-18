@@ -8,9 +8,9 @@
   ],
   "author": "marshall@kubos.co",
   "repository": {
-    "url": "ssh://git@github.com/openkosmosorg/freertos-config-stm32f4",
+    "url": "ssh://git@github.com/kubostech/freertos-config-stm32f4",
     "type": "git"
   },
-  "homepage": "https://github.com/openkosmosorg/freertos-config-stm32f4",
+  "homepage": "https://github.com/kubostech/freertos-config-stm32f4",
   "license": "FreeRTOS Open Source License"
 }
