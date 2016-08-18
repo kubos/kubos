@@ -2,11 +2,11 @@
   "name": "pyboard-gcc",
   "version": "0.0.4",
   "inherits": {
-    "stm32f405-gcc": "openkosmosorg/target-stm32f405-gcc#~0.0.1"
+    "stm32f405-gcc": "kubostech/target-stm32f405-gcc#~0.0.1"
   },
   "description": "KubOS build target for the stm32f405rg based PyBoard.",
   "author": "Ryan Plauche <ryan@kubos.co>",
-  "homepage": "https://github.com/openkosmosorg/target-pyboard-gcc",
+  "homepage": "https://github.com/kubostech/target-pyboard-gcc",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
