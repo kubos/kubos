@@ -2,7 +2,7 @@
     "sensors": {
         "bme280": {
             "spi bus": "K_SPI1",
-            "CS": "P33"
+            "CS": "PA4"
         }
     }
 }
