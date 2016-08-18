@@ -1,11 +1,8 @@
 {
-    "hardware":{
-        "spicount":2
-    },
-    "sensors":{
-        "bme280":{
-            "spi bus":"K_SPI1",
-            "CS":"P26"
+    "sensors": {
+        "bme280": {
+            "spi bus": "K_SPI1",
+            "CS": "P33"
         }
     }
 }

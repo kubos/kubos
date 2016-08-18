@@ -1,1 +1,15 @@
-{"bin": "./source", "license": "Apache-2.0", "name": "kubos-spi-example", "repository": {"url": "ssh://git@github.com/kubostech/example-kubos-rt", "type": "git"}, "version": "0.0.1", "dependencies": {"kubos-rt": "kubostech/kubos-rt#~0.0.1"}, "homepage": "https://github.com/kubostech/example-kubos-rt", "description": "Example app running on kubos-rt."}
+{
+  "bin": "./source",
+  "license": "Apache-2.0",
+  "name": "kubos-spi-example",
+  "repository": {
+    "url": "ssh://git@github.com/kubostech/kubos-spi-example",
+    "type": "git"
+  },
+  "version": "0.0.1",
+  "dependencies": {
+    "kubos-rt": "kubostech/kubos-spi-example#~0.0.1"
+  },
+  "homepage": "https://github.com/kubostech/kubos-spi-example",
+  "description": "Example app demonstrating kubos-rt's spi interface"
+}

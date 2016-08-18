@@ -62,8 +62,8 @@ void task_spi(void *p) {
     while (1) {
 #ifdef YOTTA_CFG_SENSORS_BME280
         /* get sensor data */
-        temp = bme280_read_temperature();
-        hum = bme280_read_humidity();
+        bme280_read_temperature(&temp);
+        bme280_read_humidity(&hum);
         /* print out over console */
         printf("temp - %f\r\n", temp);
         printf("humidity - %f\r\n", hum);
