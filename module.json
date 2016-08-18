@@ -1,0 +1,1 @@
+{"bin": "./source", "license": "Apache-2.0", "name": "kubos-csp-example", "repository": {"url": "ssh://git@github.com/openkosmosorg/example-kubos-rt", "type": "git"}, "version": "0.0.1", "dependencies": {"kubos-rt": "openkosmosorg/kubos-rt#~0.0.1"}, "homepage": "https://github.com/openkosmosorg/example-kubos-rt", "description": "Example app running on kubos-rt."}
