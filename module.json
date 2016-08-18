@@ -7,12 +7,12 @@
   "homepage": "https://www.kubos.co",
   "license": "Apache-2.0",
   "dependencies": {
-    "csp" : "openkosmosorg/libcsp#~1.4.1",
-    "kubos-hal": "openkosmosorg/kubos-hal"
+    "csp" : "kubostech/libcsp#~1.4.1",
+    "kubos-hal": "kubostech/kubos-hal"
   },
   "testTargetDependencies": {
     "kubos-rt": {
-      "kubos-rt": "openkosmosorg/kubos-rt#~0.0.1"
+      "kubos-rt": "kubostech/kubos-rt#~0.0.1"
     }
   }
 }
