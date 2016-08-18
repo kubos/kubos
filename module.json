@@ -11,10 +11,10 @@
   "license": "LGPL 2.1",
   "targetDependencies": {
     "freertos": {
-      "freertos": "openkosmosorg/freertos#~9.0.1"
+      "freertos": "kubostech/freertos#~9.0.1"
     },
     "kubos-rt": {
-      "kubos-hal": "openkosmosorg/kubos-hal#master"
+      "kubos-hal": "kubostech/kubos-hal#master"
     }
   }
 }
