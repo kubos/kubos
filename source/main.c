@@ -32,6 +32,10 @@
 #include "kubos-core/modules/sensors/htu21d.h"
 #endif
 
+#ifdef YOTTA_CFG_SENSORS_BNO055
+#include "kubos-core/modules/sensors/bno055.h"
+#endif
+
 void task_i2c(void *p) {
     static int x = 0;
     int ret;
@@ -72,21 +76,21 @@ void task_i2c(void *p) {
 #endif
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
-    bno055_setup();
-    uint32_t raw;
+    bno055_setup(OPERATION_MODE_NDOF);
+    bno055_quat_data_t pos;
 #endif
 
     while (1) {
 #ifdef YOTTA_CFG_SENSORS_HTU21D
-        temp = htu21d_read_temperature();
-        hum = htu21d_read_humidity();
+        htu21d_read_temperature(&temp);
+        htu21d_read_humidity(&hum);
         printf("temp - %f\r\n", temp);
         printf("humidity - %f\r\n", hum);
 #endif
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
-        raw = bno055_read_raw();
-        printf("raw imu %d\r\n", raw);
+        bno055_get_position(&pos);
+        printf("imu - %d %d %d %d\r\n", pos.x, pos.y, pos.z, pos.w);
 #endif
 
         vTaskDelay(100 / portTICK_RATE_MS);
