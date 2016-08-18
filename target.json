@@ -2,11 +2,11 @@
   "name": "na-satbus-3c0-gcc",
   "version": "0.0.2",
   "inherits": {
-    "stm32f405-gcc": "openkosmosorg/target-stm32f405-gcc#~0.0.1"
+    "stm32f405-gcc": "kubostech/target-stm32f405-gcc#~0.0.1"
   },
   "description": "KubOS build target for the NanoAvionics SatBus 3C0 On-board Computer",
   "author": "Marshall Culpepper <marshall@kubos.co>",
-  "homepage": "https://github.com/openkosmosorg/target-na-satbus-3c0-gcc",
+  "homepage": "https://github.com/kubostech/target-na-satbus-3c0-gcc",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
