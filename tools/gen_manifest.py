@@ -5,9 +5,9 @@ import xml.dom.minidom as minidom
 
 from kubos_build import KubosBuild
 
-DEFAULT_REMOTE = 'openkosmosorg'
+DEFAULT_REMOTE = 'kubostech'
 DEFAULT_REVISION = 'master'
-DEFAULT_FETCH = 'https://github.com/openkosmosorg/'
+DEFAULT_FETCH = 'https://github.com/kubostech/'
 
 Remote = namedtuple('Remote', ['name', 'fetch'])
 Project = namedtuple('Project', ['name', 'path', 'remote', 'revision'])

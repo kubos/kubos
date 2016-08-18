@@ -10,7 +10,7 @@ docker images
 
 docker pull kubostech/ci-build || exit $?
 
-./repo init -u git://github.com/openkosmosorg/kubos-manifest || exit $?
+./repo init -u git://github.com/kubostech/kubos-manifest || exit $?
 ./repo sync || exit $?
 
 # make sure the container isn't still running and is deleted
