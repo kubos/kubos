@@ -4,20 +4,20 @@
   "description": "KubOS HAL Module for STM32F4 MCUs",
   "keywords": [],
   "author": "kubos.co",
-  "homepage": "https://github.com/openkosmosorg/kubos-hal-stm32f4",
+  "homepage": "https://github.com/kubostech/kubos-hal-stm32f4",
   "license": "Apache-2.0",
   "extraIncludes": [
     "kubos-hal-stm32f4"
   ],
   "dependencies": {
-    "kubos-hal" : "openkosmosorg/kubos-hal#~0.0.1"
+    "kubos-hal" : "kubostech/kubos-hal#~0.0.1"
   },
   "targetDependencies": {
     "stm32f407vg": {
-      "stm32cubef4-stm32f407vg": "openkosmosorg/stm32cubef4-stm32f407vg#~0.0.1"
+      "stm32cubef4-stm32f407vg": "kubostech/stm32cubef4-stm32f407vg#~0.0.1"
     },
     "stm32f405rg": {
-      "stm32cubef4-stm32f405rg": "openkosmosorg/stm32cubef4-stm32f405rg#~0.0.1"
+      "stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg#~0.0.1"
     }
   }
 }
