@@ -7,20 +7,20 @@
   ],
   "author": "marshall@kubos.co",
   "repository": {
-    "url": "ssh://git@github.com/openkosmosorg/freertos",
+    "url": "ssh://git@github.com/kubostech/freertos",
     "type": "git"
   },
-  "homepage": "https://github.com/openkosmosorg/freertos",
+  "homepage": "https://github.com/kubostech/freertos",
   "license": "FreeRTOS Open Source License",
   "targetDependencies": {
     "arm": {
-      "cmsis-core": "openkosmosorg/cmsis-core#~1.2.1"
+      "cmsis-core": "kubostech/cmsis-core#~1.2.1"
     },
     "stm32f4": {
-      "freertos-config-stm32f4": "openkosmosorg/freertos-config-stm32f4#~0.0.1"
+      "freertos-config-stm32f4": "kubostech/freertos-config-stm32f4#~0.0.1"
     },
     "msp430f5529": {
-      "freertos-config-msp430f5529": "openkosmosorg/freertos-config-msp430f5529#~0.0.1"
+      "freertos-config-msp430f5529": "kubostech/freertos-config-msp430f5529#~0.0.1"
     }
   }
 }
