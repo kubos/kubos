@@ -16,7 +16,7 @@
  */
 #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #include "kubos-hal-stm32f4/spi.h"
-
+#include "kubos-hal-stm32f4/pins.h"
 
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi);
 static hal_spi_handle * hal_spi_device_init(KSPI * spi);
@@ -84,9 +84,9 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
                 case K_SPI1:
                 {
                     handle->hal_handle.Instance = SPI1;
-                    handle->pins.mosi = YOTTA_CFG_HARDWARE_SPI_SPI1_MOSI;
-                    handle->pins.miso = YOTTA_CFG_HARDWARE_SPI_SPI1_MISO;
-                    handle->pins.sck = YOTTA_CFG_HARDWARE_SPI_SPI1_SCK;
+                    handle->pins.mosi = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_SPI_SPI1_MOSI);
+                    handle->pins.miso = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_SPI_SPI1_MISO);
+                    handle->pins.sck = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_SPI_SPI1_SCK);
                     handle->pins.port = YOTTA_CFG_HARDWARE_SPI_SPI1_PORT;
                     handle->pins.alt = YOTTA_CFG_HARDWARE_SPI_SPI1_ALT;
                     break;
@@ -94,9 +94,9 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
                 case K_SPI2:
                 {
                     handle->hal_handle.Instance = SPI2;
-                    handle->pins.mosi = YOTTA_CFG_HARDWARE_SPI_SPI2_MOSI;
-                    handle->pins.miso = YOTTA_CFG_HARDWARE_SPI_SPI2_MISO;
-                    handle->pins.sck = YOTTA_CFG_HARDWARE_SPI_SPI2_SCK;
+                    handle->pins.mosi = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_SPI_SPI2_MOSI);
+                    handle->pins.miso = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_SPI_SPI2_MISO);
+                    handle->pins.sck = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_SPI_SPI2_SCK);
                     handle->pins.port = YOTTA_CFG_HARDWARE_SPI_SPI2_PORT;
                     handle->pins.alt = YOTTA_CFG_HARDWARE_SPI_SPI2_ALT;
                     break;
@@ -104,9 +104,9 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi)
                 case K_SPI3:
                 {
                     handle->hal_handle.Instance = SPI3;
-                    handle->pins.mosi = YOTTA_CFG_HARDWARE_SPI_SPI3_MOSI;
-                    handle->pins.miso = YOTTA_CFG_HARDWARE_SPI_SPI3_MISO;
-                    handle->pins.sck = YOTTA_CFG_HARDWARE_SPI_SPI3_SCK;
+                    handle->pins.mosi = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_SPI_SPI3_MOSI);
+                    handle->pins.miso = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_SPI_SPI3_MISO);
+                    handle->pins.sck = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_SPI_SPI3_SCK);
                     handle->pins.port = YOTTA_CFG_HARDWARE_SPI_SPI3_PORT;
                     handle->pins.alt = YOTTA_CFG_HARDWARE_SPI_SPI3_ALT;
                     break;

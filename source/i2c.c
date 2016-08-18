@@ -370,16 +370,16 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c)
                 {
                     handle->hal_handle.Instance = I2C1;
                     /* gpio pins */
-                    handle->pins.scl = YOTTA_CFG_HARDWARE_I2C_I2C1_SCL_PIN;
+                    handle->pins.scl = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_I2C_I2C1_SCL_PIN);
                     handle->pins.scl_mode = YOTTA_CFG_HARDWARE_I2C_I2C1_SCL_MODE;
                     handle->pins.scl_pullup = YOTTA_CFG_HARDWARE_I2C_I2C1_SCL_PULLUP;
                     handle->pins.scl_speed = YOTTA_CFG_HARDWARE_I2C_I2C1_SCL_SPEED;
-                    handle->pins.sda = YOTTA_CFG_HARDWARE_I2C_I2C1_SDA_PIN;
+                    handle->pins.sda = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_I2C_I2C1_SDA_PIN);
                     handle->pins.sda_mode = YOTTA_CFG_HARDWARE_I2C_I2C1_SDA_MODE;
                     handle->pins.sda_pullup = YOTTA_CFG_HARDWARE_I2C_I2C1_SDA_PULLUP;
                     handle->pins.sda_speed = YOTTA_CFG_HARDWARE_I2C_I2C1_SDA_SPEED;
                     handle->pins.alt = YOTTA_CFG_HARDWARE_I2C_I2C1_ALT;
-                    handle->pins.gpio_port = GPIOB;
+                    handle->pins.gpio_port = STM32F4_PIN_GPIO(YOTTA_CFG_HARDWARE_I2C_I2C1_SCL_PIN);
                     handle->pins.ev_irqn = I2C1_EV_IRQn;
                     handle->pins.er_irqn = I2C1_ER_IRQn;
                     break;
@@ -390,18 +390,38 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c)
                 {
                     handle->hal_handle.Instance = I2C2;
                     /* gpio pins */
-                    handle->pins.scl = YOTTA_CFG_HARDWARE_I2C_I2C2_SCL_PIN;
+                    handle->pins.scl = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_I2C_I2C2_SCL_PIN);
                     handle->pins.scl_mode = YOTTA_CFG_HARDWARE_I2C_I2C2_SCL_MODE;
                     handle->pins.scl_pullup = YOTTA_CFG_HARDWARE_I2C_I2C2_SCL_PULLUP;
                     handle->pins.scl_speed = YOTTA_CFG_HARDWARE_I2C_I2C2_SCL_SPEED;
-                    handle->pins.sda = YOTTA_CFG_HARDWARE_I2C_I2C2_SDA_PIN;
+                    handle->pins.sda = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_I2C_I2C2_SDA_PIN);
                     handle->pins.sda_mode = YOTTA_CFG_HARDWARE_I2C_I2C2_SDA_MODE;
                     handle->pins.sda_pullup = YOTTA_CFG_HARDWARE_I2C_I2C2_SDA_PULLUP;
                     handle->pins.sda_speed = YOTTA_CFG_HARDWARE_I2C_I2C2_SDA_SPEED;
                     handle->pins.alt = YOTTA_CFG_HARDWARE_I2C_I2C2_ALT;
-                    handle->pins.gpio_port = GPIOB;
+                    handle->pins.gpio_port = STM32F4_PIN_GPIO(YOTTA_CFG_HARDWARE_I2C_I2C2_SCL_PIN);
                     handle->pins.ev_irqn = I2C2_EV_IRQn;
                     handle->pins.er_irqn = I2C2_ER_IRQn;
+                    break;
+                }
+#endif
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C3
+                case K_I2C3:
+                {
+                    handle->hal_handle.Instance = I2C3;
+                    /* gpio pins */
+                    handle->pins.scl = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_I2C_I2C3_SCL_PIN);
+                    handle->pins.scl_mode = YOTTA_CFG_HARDWARE_I2C_I2C3_SCL_MODE;
+                    handle->pins.scl_pullup = YOTTA_CFG_HARDWARE_I2C_I2C3_SCL_PULLUP;
+                    handle->pins.scl_speed = YOTTA_CFG_HARDWARE_I2C_I2C3_SCL_SPEED;
+                    handle->pins.sda = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_I2C_I2C3_SDA_PIN);
+                    handle->pins.sda_mode = YOTTA_CFG_HARDWARE_I2C_I2C3_SDA_MODE;
+                    handle->pins.sda_pullup = YOTTA_CFG_HARDWARE_I2C_I2C3_SDA_PULLUP;
+                    handle->pins.sda_speed = YOTTA_CFG_HARDWARE_I2C_I2C3_SDA_SPEED;
+                    handle->pins.alt = YOTTA_CFG_HARDWARE_I2C_I2C3_ALT;
+                    handle->pins.gpio_port = STM32F4_PIN_GPIO(YOTTA_CFG_HARDWARE_I2C_I2C3_SCL_PIN);
+                    handle->pins.ev_irqn = I2C3_EV_IRQn;
+                    handle->pins.er_irqn = I2C3_ER_IRQn;
                     break;
                 }
 #endif
