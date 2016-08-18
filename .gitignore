@@ -9,3 +9,4 @@ kubos-rt
 libcsp
 targets
 sdk
+tools/*.pyc
