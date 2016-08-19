@@ -1,8 +1,8 @@
 {
   "name": "pyboard-gcc",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "inherits": {
-    "stm32f405-gcc": "kubostech/target-stm32f405-gcc#~0.0.1"
+    "stm32f405-gcc": "kubostech/target-stm32f405-gcc#~0.1.0"
   },
   "description": "KubOS build target for the stm32f405rg based PyBoard.",
   "author": "Ryan Plauche <ryan@kubos.co>",
