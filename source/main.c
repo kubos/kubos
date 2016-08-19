@@ -41,7 +41,7 @@
 *           "my_address": "1",
 *           "target_address": "2",
 *           "port": "10",
-*           "uart_bus": "K_UART1",
+*           "uart_bus": "K_UART6",
 *           "usart": {
 *           }
 *      }
