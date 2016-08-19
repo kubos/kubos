@@ -2,14 +2,13 @@
 
 KubOS-HAL is the primary hardware abstraction layer (HAL) for KubOS. One of our goals is to simplify development when it comes to interfacing with your MCU(s). This module provides a unified set of functions for interfacing with hardware which will work the same across all of our supported MCUs.
 
-### API Modules:
+### API Documentation:
 
  - @subpage GPIO
- - @subpage I2C
+ - [I2C](docs/i2c.md)
  - @subpage SDIO
- - @subpage SPI
- - @subpage UART
-
+ - [SPI](docs/spi.md)
+ - [UART](docs/uart.md)
 
 ### Hardware Interfaces:
 
