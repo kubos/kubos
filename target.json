@@ -1,9 +1,9 @@
 {
   "name": "kubos-msp430-gcc",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "base KubOS RT build target for the msp430-gcc toolchain",
   "inherits": {
-    "kubos-gcc": "kubostech/target-kubos-gcc#~0.0.1"
+    "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
   },
   "licenses": [
     {
