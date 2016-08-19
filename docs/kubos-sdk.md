@@ -23,7 +23,7 @@ The Kubos-SDK has been tested on Docker version 1.11.1.
 		$ sudo yum install python-pip python-wheel
 
 
-Other Linux Dristibutions see the  [pip installation guide](http://python-packaging-user-guide.readthedocs.io/en/latest/install_requirements_linux/)
+Other Linux Dristibutions see the  [pip installation guide](https://pip.pypa.io/en/stable/installing/)
 
 ##### Mac OS X
 
