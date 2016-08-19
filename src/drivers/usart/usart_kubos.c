@@ -50,7 +50,7 @@ void usart_init(struct usart_conf *conf)
     {
         return;
     }
-    
+
     /* set dev num */
     uart = (KUARTNum)*(conf->device);
 
@@ -60,8 +60,8 @@ void usart_init(struct usart_conf *conf)
             .word_len = conf->databits,
             .stop_bits = conf->stopbits,
             .parity = conf->paritysetting,
-            .rx_queue_len = YOTTA_CFG_HARDWARE_UARTDEFAULTS_RXQUEUELEN,
-            .tx_queue_len = YOTTA_CFG_HARDWARE_UARTDEFAULTS_TXQUEUELEN,
+            .rx_queue_len = YOTTA_CFG_HARDWARE_UART_DEFAULTS_RXQUEUELEN,
+            .tx_queue_len = YOTTA_CFG_HARDWARE_UART_DEFAULTS_TXQUEUELEN,
         };
 
     /* initialize uart */

@@ -1,6 +1,6 @@
 {
   "name": "csp",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "description": "CubeSat Protocol",
   "keywords": [
       "satellite"
@@ -11,10 +11,10 @@
   "license": "LGPL 2.1",
   "targetDependencies": {
     "freertos": {
-      "freertos": "kubostech/freertos#~9.0.1"
+      "freertos": "kubostech/freertos#~9.0.3"
     },
     "kubos-rt": {
-      "kubos-hal": "kubostech/kubos-hal#master"
+      "kubos-hal": "kubostech/kubos-hal#~0.1.0"
     }
   }
 }
