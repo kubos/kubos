@@ -1,8 +1,8 @@
 {
   "name": "na-satbus-3c0-gcc",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "inherits": {
-    "stm32f405-gcc": "kubostech/target-stm32f405-gcc#~0.0.1"
+    "stm32f405-gcc": "kubostech/target-stm32f405-gcc#~0.1.0"
   },
   "description": "KubOS build target for the NanoAvionics SatBus 3C0 On-board Computer",
   "author": "Marshall Culpepper <marshall@kubos.co>",
