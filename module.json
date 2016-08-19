@@ -6,9 +6,9 @@
     "url": "ssh://git@github.com/kubostech/kubos-spi-example",
     "type": "git"
   },
-  "version": "0.0.1",
+  "version": "0.1.0",
   "dependencies": {
-    "kubos-rt": "kubostech/kubos-spi-example#~0.0.1"
+    "kubos-rt": "kubostech/kubos-rt#~0.1.0"
   },
   "homepage": "https://github.com/kubostech/kubos-spi-example",
   "description": "Example app demonstrating kubos-rt's spi interface"
