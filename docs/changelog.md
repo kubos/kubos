@@ -1,5 +1,15 @@
 # KubOS Changelog
 
+## v0.1.0 - Aug 19 2016
+* Implemented [SPI](./kubos-hal/group__SPI.html) for the STM32F4.
+* Added a new sensor interface:
+  * [IMU](./kubos-core/group__IMU.html)
+  * [Altimeter](./kubos-core/group__ALTIMETER.html)
+  * [Temperature](./kubos-core/group__TEMPERATURE.html)
+* A new [sensor example application](https://github.com/kubostech/kubos-sensor-example)
+* A new [example using CSP over uart](https://github.com/kubostech/kubos-csp-example)
+* Added the ability to link in local targets with KubOS-SDK
+
 ## v0.0.5 - Aug 05 2016
 * Added a [SPI HAL API](./kubos-hal/group__SPI.html)
   for MSP430 based targets (STM32F4 compatibility coming soon)
