@@ -1,6 +1,6 @@
 {
   "name": "cmsis-core",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "CMSIS-Core (KubOS fork)",
   "keywords": [
     "cmsis",
