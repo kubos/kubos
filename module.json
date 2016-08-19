@@ -1,6 +1,6 @@
 {
   "name": "stm32cubef4-stm32f405rg",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "STM32CubeF4 HAL for stm32f405rg microcontrollers",
   "keywords": [
     "mbed"
