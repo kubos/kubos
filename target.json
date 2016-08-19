@@ -1,8 +1,8 @@
 {
   "name": "stm32f407-disco-gcc",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "inherits": {
-    "kubos-arm-none-eabi-gcc": "kubostech/target-kubos-arm-none-eabi-gcc#~0.0.1"
+    "kubos-arm-none-eabi-gcc": "kubostech/target-kubos-arm-none-eabi-gcc#~0.1.0"
   },
   "description": "KubOS build target for the stm32f407-discovery development board.",
   "author": "Marshall Culpepper <marshall@kubos.co>",
