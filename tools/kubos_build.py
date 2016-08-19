@@ -24,6 +24,8 @@ class Project(object):
 
         self.commit = self.get_commit_sha()
         self.upstream = self.find_upstream_branch()
+        self.tag = self.get_last_tag()
+        self.version = self.get_version()
 
     def is_bin(self):
         if not self.yotta_data:
@@ -48,9 +50,15 @@ class Project(object):
             tag_list = subprocess.check_output(['git', 'show-ref', '--tags'],
                                                cwd=self.path)
             last_tag = tag_list.splitlines()[-1]
-            return last_tag.split(' ')[0].strip()
+            return last_tag.split(' ')[1].strip()
         except:
             return ''
+
+    def get_version(self):
+        try:
+            return self.yotta_data['version']
+        except:
+            return 'No data'
 
     def find_upstream_branch(self):
         try:

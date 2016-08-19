@@ -6,7 +6,7 @@ KubOS RT is a real time environment designed to run on any satellite subsystem, 
 
  - [Start here with KubOS-SDK](docs/kubos-sdk.md)
 
- - [Want to get into the nitty of yotta and our modules?](docs/start.md)
+ - [Want to really dig into our source tree?](docs/start.md)
 
  - [Changelog](docs/changelog.md)
 
