@@ -1,6 +1,6 @@
 {
   "name": "freertos-config-stm32f4",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "FreeRTOS config for STM32F4",
   "keywords": [
     "freertos",
