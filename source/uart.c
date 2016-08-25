@@ -125,12 +125,14 @@ static inline uint8_t uart_alt(KUARTNum uart)
     }
 }
 
-void kprv_uart_dev_init(KUARTNum uart)
+int kprv_uart_dev_init(KUARTNum uart)
 {
+	HAL_StatusTypeDef ret = 0;
+
     // Enable peripheral clocks
     KUART *k_uart = kprv_uart_get(uart);
     if (!k_uart) {
-        return;
+        return -1;
     }
 
     int rx = k_uart_rx_pin(uart);
@@ -175,10 +177,12 @@ void kprv_uart_dev_init(KUARTNum uart)
 
     switch (k_uart->conf.word_len) {
         case K_WORD_LEN_9BIT:
-            u.Init.WordLength = UART_WORDLENGTH_9B; break;
+            u.Init.WordLength = UART_WORDLENGTH_9B;
+            break;
         case K_WORD_LEN_8BIT:
         default:
-            u.Init.WordLength = UART_WORDLENGTH_8B; break;
+            u.Init.WordLength = UART_WORDLENGTH_8B;
+            break;
     }
 
     switch (k_uart->conf.stop_bits) {
@@ -202,8 +206,14 @@ void kprv_uart_dev_init(KUARTNum uart)
     u.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     u.Init.OverSampling = UART_OVERSAMPLING_16;
 
-    HAL_UART_Init(&u);
+    if((ret = HAL_UART_Init(&u)) != HAL_OK)
+    {
+    	return ret;
+    }
+
     __HAL_UART_ENABLE_IT(&u, UART_IT_RXNE);
+
+    return ret;
 }
 
 void kprv_uart_enable_tx_int(KUARTNum uart)
@@ -216,15 +226,17 @@ void kprv_uart_enable_tx_int(KUARTNum uart)
     SET_BIT(dev->CR1, USART_CR1_TXEIE);
 }
 
-void k_uart_write_immediate(KUARTNum uart, char c)
+int k_uart_write_immediate(KUARTNum uart, char c)
 {
     USART_TypeDef *dev = uart_dev(uart);
     if (!dev) {
-        return;
+        return -1;
     }
 
     dev->DR = c;
     while (!CHECK_BIT(dev->SR, UART_FLAG_TXE));
+
+    return 0;
 }
 
 #define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
