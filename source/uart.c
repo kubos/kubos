@@ -34,6 +34,12 @@ static inline BaseType_t queue_push(QueueHandle_t *queue, char c,
 
 KUART* kprv_uart_get(KUARTNum uart)
 {
+	//Validate UART number
+	if(uart < 0 || uart > (K_NUM_UARTS-1))
+	{
+		return 0;
+	}
+
     return &k_uarts[uart];
 }
 
@@ -49,7 +55,7 @@ KUARTConf k_uart_conf_defaults(void)
     };
 }
 
-void k_uart_init(KUARTNum uart, KUARTConf *conf)
+int k_uart_init(KUARTNum uart, KUARTConf *conf)
 {
     KUART *k_uart = &k_uarts[uart];
     memcpy(&k_uart->conf, conf, sizeof(KUARTConf));
@@ -58,7 +64,7 @@ void k_uart_init(KUARTNum uart, KUARTConf *conf)
     k_uart->rx_queue = xQueueCreate(k_uart->conf.rx_queue_len, sizeof(char));
     k_uart->tx_queue = xQueueCreate(k_uart->conf.tx_queue_len, sizeof(char));
 
-    kprv_uart_dev_init(uart);
+    return kprv_uart_dev_init(uart);
 }
 
 void k_uart_console_init(void)
@@ -76,7 +82,7 @@ int k_uart_read(KUARTNum uart, char *ptr, int len)
     BaseType_t result;
 
     for (; i < len; i++, ptr++) {
-        result = xQueueReceive(k_uarts[uart].rx_queue, ptr, portMAX_DELAY);
+        result = xQueueReceive(k_uarts[uart].rx_queue, ptr, 0);
         if (result != pdTRUE) {
             return i;
         }

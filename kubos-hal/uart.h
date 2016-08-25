@@ -166,7 +166,7 @@ KUARTConf k_uart_conf_defaults(void);
  * @param uart uart interface to initialize
  * @param conf config values to initialize with
  */
-void k_uart_init(KUARTNum uart, KUARTConf *conf);
+int k_uart_init(KUARTNum uart, KUARTConf *conf);
 
 /**
  * Setup and enable console uart interface
@@ -202,7 +202,7 @@ int k_uart_write(KUARTNum uart, char *ptr, int len);
  * @param uart uart interface to write to
  * @param c character to write
  */
-void k_uart_write_immediate(KUARTNum uart, char c);
+int k_uart_write_immediate(KUARTNum uart, char c);
 
 /**
  * Returns the number of characters currently in the uart rx queue
@@ -288,7 +288,7 @@ KUART* kprv_uart_get(KUARTNum uart);
  * Performs low level uart hardware initialization
  * @param uart uart interface to initialize
  */
-void kprv_uart_dev_init(KUARTNum uart);
+int kprv_uart_dev_init(KUARTNum uart);
 
 /**
  * Enables uart transmit interrupt
