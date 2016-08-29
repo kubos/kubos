@@ -202,15 +202,17 @@ KI2C* kprv_i2c_get(KI2CNum i2c);
  * Low level hal device initialization
  * This is implemented by the device specific hal
  * @param i2c i2c bus to initialize
+ * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
-void kprv_i2c_dev_init(KI2CNum i2c);
+KI2CStatus kprv_i2c_dev_init(KI2CNum i2c);
 
 /**
  * Low level hal i2c termination
  * This is implemented by the device specific hal
  * @param i2c i2c bus to terminate
+ * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
-void kprv_i2c_dev_terminate(KI2CNum i2c);
+KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c);
 
 /**
  * Low level hal i2c write (as master)
