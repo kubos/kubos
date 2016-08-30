@@ -133,6 +133,7 @@ typedef enum {
 typedef enum {
     SPI_OK,
     SPI_ERROR,
+	SPI_ERROR_BUSY,
     SPI_ERROR_TIMEOUT
 } KSPIStatus;
 
@@ -258,9 +259,9 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len);
  */
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len);
 
-void kprv_spi_dev_init(KSPINum spi);
+KSPIStatus kprv_spi_dev_init(KSPINum spi);
 
-void kprv_spi_dev_terminate(KSPINum spi);
+KSPIStatus kprv_spi_dev_terminate(KSPINum spi);
 
 #endif
 #endif
