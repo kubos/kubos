@@ -133,6 +133,17 @@ void kprv_uart_dev_init(KUARTNum uart)
     hal_uart_setup(handle);
 }
 
+/**
+ * @brief Terminates the specified UART device.
+ * @param uart Number of UART device to terminate.
+ */
+void kprv_uart_dev_terminate(KUARTNum uart)
+{
+    hal_uart_handle * handle = uart_handle(uart);
+    hal_uart_terminate(handle);
+}
+
+
 
 /**
   * @brief Enables UART TX interrupt.
@@ -143,6 +154,7 @@ void kprv_uart_enable_tx_int(KUARTNum uart)
     hal_uart_handle * handle = uart_handle(uart);
     handle->reg->interruptEnable |= UCTXIE;
 }
+
 
 
 /**
@@ -168,14 +180,14 @@ void hal_uart_interrupt(hal_uart_handle * handle)
     if (HAL_UART_INT_FLAG(handle, UCRXIFG))
     {
         char c = hal_uart_read_raw(handle);
-        xQueueSendToBackFromISR(k_uart->rx_queue, (void*) &c, &task_woken);
+        csp_queue_enqueue_isr(k_uart->rx_queue, (void*) &c, &task_woken);
     }
 
     // TX Interrupt
     if (HAL_UART_INT_FLAG(handle, UCTXIFG))
     {
         char c;
-        BaseType_t result = xQueueReceiveFromISR(k_uart->tx_queue,
+        BaseType_t result = csp_queue_dequeue_isr(k_uart->tx_queue,
                                                 (void *) &c,
                                                 &task_woken);
 
