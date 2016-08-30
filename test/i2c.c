@@ -158,10 +158,7 @@ static void test_i2c_termBad(void)
 static void test_i2c_writeMasterGood(void)
 {
     int ret;
-    uint8_t buffer[2] = {(uint8_t)61, 0x00}; //cmd (0x61): Set bno055 sensor to config mode (0x00)
-    uint8_t *pBuffer;
-    uint8_t value;
-    uint8_t reg;
+    uint8_t buffer[2] = {(uint8_t)61, 0x00}; //cmd (0x3D): Set bno055 sensor to config mode (0x00)
 
 	test_setup();
 
@@ -183,7 +180,6 @@ static void test_i2c_writeMasterBad(void)
 {
     int ret;
     uint8_t cmd = 0xE3;
-    uint8_t buffer[3];
 
     ret = kprv_i2c_dev_init(I2C_BUS);
     TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Failed to init I2C_BUS");
@@ -279,7 +275,6 @@ static void test_i2c_addrModeRead(void)
 {
     int ret;
 
-    uint8_t buffer[2] = {(uint8_t)61, 0x00};
     uint8_t value = 0;
 
     //Set up i2c master port configuration
@@ -316,9 +311,7 @@ static void test_i2c_addrModeRead(void)
 static void test_i2c_addrModeWrite(void)
 {
     int ret;
-
     uint8_t buffer[2] = {(uint8_t)61, 0x00};
-    uint8_t value = 0;
 
     //Set up i2c master port configuration
     KI2CConf conf = {
@@ -353,10 +346,6 @@ static void test_i2c_slave(void)
 {
     int ret;
 
-    uint8_t buffer[2] = {(uint8_t)61, 0x00};
-    uint8_t *pBuffer;
-    uint8_t value;
-
     //Set up i2c master port configuration
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_7BIT,
@@ -386,9 +375,7 @@ static void test_i2c_clockHigh(void)
     int ret;
 
     uint8_t buffer[2] = {(uint8_t)61, 0x00};
-    uint8_t *pBuffer;
     uint8_t value;
-    uint8_t reg;
 
     //Set up i2c master port configuration
     KI2CConf conf = {
@@ -405,9 +392,8 @@ static void test_i2c_clockHigh(void)
     ret = kprv_i2c_dev_init(I2C_BUS);
     TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Failed to init I2C_BUS");
 
-    pBuffer = buffer;
-
-    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, pBuffer, 2), "Failed to write from I2C_BUS");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, buffer, 2),
+    		"Failed to write from I2C_BUS");
 
 	vTaskDelay(5);
 
@@ -432,11 +418,8 @@ static void test_i2c_clockLow(void)
     int ret;
 
     uint8_t buffer[2] = {(uint8_t)61, 0x00};
-    uint8_t *pBuffer;
     uint8_t value;
-    uint8_t reg;
 
-    //Set up i2c master port configuration
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_7BIT,
         .role = K_MASTER,
@@ -451,13 +434,11 @@ static void test_i2c_clockLow(void)
     ret = kprv_i2c_dev_init(I2C_BUS);
     TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Failed to init I2C_BUS");
 
-    pBuffer = buffer;
-
-    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, pBuffer, 2), "Failed to write from I2C_BUS");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, buffer, 2),
+    		"Failed to write from I2C_BUS");
 
 	vTaskDelay(5);
 
-	/* receive value */
 	ret = kprv_i2c_master_read(I2C_BUS, BNO055_ADDRESS_A, &value, 1);
 
 
@@ -477,10 +458,8 @@ static void test_i2c_clockZero(void)
 {
     int ret;
 
-    uint8_t buffer[2] = {(uint8_t)61, 0x00};
-    uint8_t *pBuffer;
+    uint8_t buffer[2] = {(uint8_t)61, 0x00};;
     uint8_t value;
-    uint8_t reg;
 
     //Set up i2c master port configuration
     KI2CConf conf = {
@@ -497,10 +476,8 @@ static void test_i2c_clockZero(void)
     ret = kprv_i2c_dev_init(I2C_BUS);
     TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Failed to init I2C_BUS");
 
-    pBuffer = buffer;
-
-    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_ERROR_ADDR_TIMEOUT, kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, pBuffer, 2)
-    		, "Write returned unexpected value");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_ERROR_ADDR_TIMEOUT, kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, buffer, 2),
+    		"Write returned unexpected value");
 
     kprv_i2c_dev_terminate(I2C_BUS);
 }

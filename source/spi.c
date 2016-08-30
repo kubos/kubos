@@ -29,22 +29,39 @@ static uint32_t spi_timeout = 1000;
 
 /** Functions implemented from KubOS-HAL SPI Interface **/
 
-void kprv_spi_dev_init(KSPINum spi_num)
+KSPIStatus kprv_spi_dev_init(KSPINum spi_num)
 {
     KSPI * spi = kprv_spi_get(spi_num);
+    if(spi == NULL)
+    {
+    	return SPI_ERROR;
+    }
     hal_spi_handle * handle = hal_spi_device_init(spi);
-    hal_spi_hw_init(handle);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
+    return hal_spi_hw_init(handle);
 }
 
-void kprv_spi_dev_terminate(KSPINum spi)
+KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
     hal_spi_terminate(handle);
+    return SPI_OK;
 }
 
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
     HAL_StatusTypeDef status = HAL_SPI_Transmit(&(handle->hal_handle), buffer, len, spi_timeout);
     return (KSPIStatus)status;
 }
@@ -52,6 +69,10 @@ KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
 KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
     HAL_StatusTypeDef status = HAL_SPI_Receive(&(handle->hal_handle), buffer, len, spi_timeout);
     return (KSPIStatus)status;
 }
@@ -59,6 +80,10 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len)
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
     HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(&(handle->hal_handle), txBuffer, rxBuffer, len, spi_timeout);
     return (KSPIStatus)status;
 }
@@ -67,6 +92,10 @@ KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuff
 
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi)
 {
+	if(spi > K_NUM_SPI-1)
+	{
+		return 0;
+	}
     return &hal_spi_dev[spi];
 }
 
@@ -169,6 +198,8 @@ static void hal_spi_terminate(hal_spi_handle * handle)
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
 {
     SPI_HandleTypeDef * SPIHandle = &(handle->hal_handle);
+    uint32_t freq;
+    float prescaler;
 
     switch(handle->kspi->bus_num)
     {
@@ -176,6 +207,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         case K_SPI1:
         {
             __HAL_RCC_SPI1_CLK_ENABLE();
+            freq = HAL_RCC_GetPCLK2Freq();
             break;
         }
 #endif
@@ -183,6 +215,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         case K_SPI2:
         {
             __HAL_RCC_SPI2_CLK_ENABLE();
+            freq = HAL_RCC_GetPCLK1Freq();
             break;
         }
 #endif
@@ -190,6 +223,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         case K_SPI3:
         {
             __HAL_RCC_SPI3_CLK_ENABLE();
+            freq = HAL_RCC_GetPCLK1Freq();
             break;
         }
 #endif
@@ -204,7 +238,17 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
     /* Set options */
     KSPIConf conf = handle->kspi->config;
 
-    if (conf.clock_phase == K_SPI_DATASIZE_8BIT)
+    //For the moment the STM32F4 only supports SPI in master mode
+    if(conf.role == K_SPI_MASTER)
+    {
+    	SPIHandle->Init.Mode = SPI_MODE_MASTER;
+    }
+    else
+    {
+    	return SPI_ERROR;
+    }
+
+    if (conf.data_size == K_SPI_DATASIZE_8BIT)
     {
         SPIHandle->Init.DataSize = SPI_DATASIZE_8BIT;
     }
@@ -219,7 +263,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
     }
     else /* 2 edge */
     {
-        SPIHandle->Init.CLKPhase = SPI_PHASE_1EDGE;
+        SPIHandle->Init.CLKPhase = SPI_PHASE_2EDGE;
     }
 
     if (conf.clock_polarity == K_SPI_CPOL_LOW)
@@ -263,9 +307,48 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         }
     }
 
+    //Calculate closest prescaler value based on desired clock frequency
+    if(conf.speed == 0)
+    {
+    	return SPI_ERROR;
+    }
+
+    prescaler = (float) freq / (float) conf.speed;
+
+    if(prescaler <= 2)
+    {
+    	SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+    }
+    else if(prescaler <= 4)
+    {
+    	SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+    }
+    else if(prescaler <= 8)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+	}
+    else if(prescaler <= 16)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+	}
+    else if(prescaler <= 32)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+	}
+    else if(prescaler <= 64)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+	}
+    else if(prescaler <= 128)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+	}
+    else
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+	}
+
     /* Fill aditional SPI settings */
-    SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
-    SPIHandle->Init.Mode = SPI_MODE_MASTER;
     SPIHandle->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
     SPIHandle->Init.CRCPolynomial = 7;
     SPIHandle->Init.TIMode = SPI_TIMODE_DISABLE;
