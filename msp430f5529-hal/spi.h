@@ -33,6 +33,8 @@
 #ifndef HAL_SPI_H
 #define HAL_SPI_H
 
+#include <stdint.h>
+
 /**
   * @brief Type by which SPI devices are numbered.
   */

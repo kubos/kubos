@@ -16,7 +16,6 @@
  */
 
 #if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
-#include "kubos-hal/i2c.h"
 #include "msp430f5529-hal/i2c.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -162,7 +161,7 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 	}
 
 	/* success */
-	return I2C_OK;
+	return HAL_I2C_OK;
 }
 
 hal_i2c_status hal_i2c_master_write(hal_i2c_handle * handle, uint16_t addr, uint8_t *ptr, int len)

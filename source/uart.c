@@ -116,6 +116,18 @@ void hal_uart_setup(hal_uart_handle * handle)
     }
 }
 
+void hal_uart_terminate(hal_uart_handle * handle)
+{
+    if (NULL != handle)
+    {
+        // Disable RX and TX interrutps
+        handle->reg->interruptEnable &= ~ (UCRXIE | UCTXIE);
+
+        // Put the USCI peripheral into reset
+        handle->reg->control1 |= UCSWRST;
+    }
+}
+
 
 static void hal_uart_set_baudrate(hal_uart_handle * handle)
 {

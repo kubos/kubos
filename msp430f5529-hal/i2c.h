@@ -33,6 +33,8 @@
 #ifndef HAL_I2C_H
 #define HAL_I2C_H
 
+#include <stdint.h>
+
 /**
  * @brief Type by which i2c buses are numbered.
  */
