@@ -1,13 +1,18 @@
 {
   "name": "x86-linux-native",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "inherits": {
-    "linux-native": "^1.0.0"
+    "kubos-gcc": "kubostech/target-kubo-gcc#~0.1.0"
   },
   "similarTo": [
+    "linux",
+    "native",
+    "posix",
+    "userland",
     "x86-64",
     "x86"
   ],
+  "toolchain": "CMake/toolchain.cmake",
   "description": "Build target for programs compiled natively for Linux",
   "keywords": [
     "linux",
@@ -19,6 +24,56 @@
       "type": "Apache-2.0"
     }
   ],
+  "config": {
+      "hardware": {
+        "console": {
+          "uart": "K_UART1",
+          "baudRate": "115200"
+        },
+        "i2c": {
+          "count": 1,
+          "defaults": {
+            "bus": "K_I2C1"
+          },
+          "i2c1": {
+            "scl": {
+              "pin": "1",
+              "mode": "GPIO_MODE_AF_PP",
+              "pullup": "GPIO_NOPULL",
+              "speed": "GPIO_SPEED_MEDIUM"
+            },
+            "sda": {
+              "pin": "2",
+              "mode": "GPIO_MODE_AF_OD",
+              "pullup": "GPIO_PULLUP",
+              "speed": "GPIO_SPEED_MEDIUM"
+            },
+            "alt": "GPIO_AF4_I2C1"
+          }
+        },
+        "uart": {
+          "count": 1,
+          "uart1": {
+            "tx": "6",
+            "rx": "7"
+          }
+        },
+        "spi": {
+          "count": 1,
+          "defaults": {
+            "bus": "K_SPI1"
+          },
+          "spi1": {
+            "mosi": "7",
+            "miso": "6",
+            "sck": "5",
+            "cs": "4",
+            "port": "GPIOA",
+            "alt": "GPIO_AF5_SPI1"
+          }
+        }
+      }
+  },
   "debug": [
     "gdb",
     "$program"
