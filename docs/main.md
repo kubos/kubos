@@ -4,3 +4,4 @@
  - @subpage GPIO
  - @subpage UART
  - @subpage I2C
+ - @subpage SPI
