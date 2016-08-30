@@ -1,0 +1,15 @@
+{
+  "name": "kubos-hal-linux",
+  "version": "0.1.0",
+  "description": "KubOS HAL Module for native linux testing",
+  "keywords": [],
+  "extraIncludes": [
+      "kubos-hal-linux"
+  ],
+  "author": "kubos.co",
+  "homepage": "https://github.com/kubostech/kubos-hal-linux",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "kubos-hal" : "kubostech/kubos-hal#~0.1.0"
+  }
+}
