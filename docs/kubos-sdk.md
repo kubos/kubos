@@ -2,15 +2,36 @@
 
 ## Prerequisites
 
-### Install docker
+### Install Docker
 
-If you don't already have docker installed see the docker downloads for [Mac OS X](https://www.docker.com/products/docker-toolbox) or the installation docs for [Linux](https://docs.docker.com/engine/installation/)
+If you don't already have Docker installed see the Docker downloads for [Mac OS X](https://www.docker.com/products/docker-toolbox) or the installation docs for [Linux](https://docs.docker.com/engine/installation/). You should also read the [prerequisites](https://docs.docker.com/docker-for-mac/#/what-to-know-before-you-install).
 
 		$ docker --version
 
-The Kubos-SDK has been tested on Docker version 1.11.1.
+The Kubos-SDK has been tested on Docker version 1.11.1 and 1.12.0.
 
 ### Install pip
+
+If pip is already installed, ensure that your version is up to date with
+
+        $ pip --version
+
+and
+
+        $ pip install --upgrade pip
+
+or (you should not need to use `sudo`):
+
+        $ pip install --user python --upgrade pip
+
+if necessary. Similarly, you may need to upgrade other tools, such as `setuptools`;
+Further, Mac OS X's new security model ("System Integrity Protection") may make
+the upgrades impossible without declaring that you want to use `pip` as the 
+"python" user.
+
+        $ pip install --user python --upgrade  setuptools
+
+
 
 #### Linux
 ##### Ubuntu/Debian
@@ -23,7 +44,7 @@ The Kubos-SDK has been tested on Docker version 1.11.1.
 		$ sudo yum install python-pip python-wheel
 
 
-Other Linux Dristibutions see the  [pip installation guide](https://pip.pypa.io/en/stable/installing/)
+For other Linux distributions, see the  [pip installation guide](https://pip.pypa.io/en/stable/installing/).
 
 ##### Mac OS X
 
@@ -34,6 +55,21 @@ Using easy_install:
 Using homebrew:
 
 		$ brew install pip
+
+Using macports:
+
+        $ sudo port install py-pip pip_select
+
+You should ensure that your PATH variable includes the directory where 
+these executables are installed. Some software installers use the 
+`/Users/yourusername/Library/Python/2.7/bin` directory, which means
+you would have to include this directory in the `/etc/paths` file 
+(and note this
+file is owned by root and must therefore be edited using `sudo`).
+If `kubos update` or any other `kubos` command is not working, this 
+change may provide a solution.
+ 
+
 
 ## Installing Dependencies
 
@@ -56,11 +92,31 @@ The KubOS-SDK is distributed using the python package system pip. You can instal
 
 		$ pip install kubos-sdk
 
+or
+
+        $ pip install --user python kubos-sdk
+
+(to avoid those potential permissions errors on Mac OS X).
+
+Things should progress for a few minutes, followed by a screen that mostly looks like the following:
+
+--- <div markdown="1" align="center">![Image of completed install](images/pipinstall.png) </div> ---
+
 KubOS-SDK is currently only supported in 64-bit OSX and Linux environments.
 
-Pull the latest Kubos-SDK docker container:
+Next, start Docker's service or daemon. If you get an error that says 
+
+`Error: Unable to communicate with the Docker service. Please ensure this service is running and you have permission to access it.`
+
+you have not started the Docker service.
+
+Pull the latest Kubos-SDK Docker container:
 
 		$ kubos update
+
+And, as before, if the command fails, the `kubos` binary may not be present in your PATH variable.
+  
+
 
 ## Upgrading KubOS-SDK (v0.0.2+)
 
@@ -68,7 +124,8 @@ The KubOS-SDK can be upgraded using this pip command:
 
 		$ sudo pip install --upgrade kubos-sdk
 
-Be sure to pull the latest Kubos-SDK docker container afterwards:
+While in the Docker command line environment, pull the latest Kubos-SDK 
+Docker container afterwards:
 
 		$ kubos update
 
@@ -78,13 +135,13 @@ The KubOS-SDK can be upgraded from version 0.1 using this command:
 
 		$ sudo pip install -I kubos-sdk
 
-Be sure to pull the latest Kubos-SDK docker container afterwards:
+Be sure to pull the latest Kubos-SDK Docker container afterwards:
 
 		$ kubos update
 
 ## Creating a new project
 
-Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory with your project's name and add the basic files.
+Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory under your current working directory with your project's name and add the basic files.
 
 		$ kubos init project-name
 
@@ -95,10 +152,13 @@ The contents of your project directory should look something like this:
 
 Here is a quick rundown of the files that were generated:
 
- * project-name - This folder is where header files live
- * source - This folder is where source files live
- * test - This folder is where test source files live
- * module.json - This file is yotta's module description file.
+| File/folder   | Description  |
+| ------------- |-------------| 
+| `project-name` | This folder is where header files live |
+| `source`   | This folder is where source files live |
+| `test`    | This folder is where test source files live |
+| `module.json` | This file is yotta's module description file |
+
 
 KubOS uses the yotta build/module system, which is where this file structure comes from. You can read more about yotta [here](http://yottadocs.mbed.com/).
 
@@ -111,10 +171,13 @@ Building a KubOS project is also a two step process:
 
 Yotta needs to know which target you intend to build for so it can select the proper cross compiler. KubOS currently supports two different targets:
 
- * STM32F407 Discovery Board
- * STM32F405 PyBoard
- * NanoAvionics SatBus 3C0 OBC
- * MSP430F5529 Launchpad
+| MCU Family   | Board  |
+| ------------- |-------------| 
+| STM32F4 | STM32F407 Discovery Board |
+|    |  STM32F405 PyBoard |
+|  | STM32F405 NanoAvionics SatBus 3C0 OBC |
+| MSP430     | MSP430F5529 Launchpad |
+
 
 The respective commands to select those targets are as follows.
 
