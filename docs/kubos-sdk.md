@@ -115,29 +115,10 @@ Pull the latest Kubos-SDK Docker container:
 		$ kubos update
 
 And, as before, if the command fails, the `kubos` binary may not be present in your PATH variable.
-  
 
+## Upgrading KubOS-SDK
 
-## Upgrading KubOS-SDK (v0.0.2+)
-
-The KubOS-SDK can be upgraded using this pip command:
-
-		$ sudo pip install --upgrade kubos-sdk
-
-While in the Docker command line environment, pull the latest Kubos-SDK 
-Docker container afterwards:
-
-		$ kubos update
-
-## <a name="upgrading"></a>Upgrading KubOS-SDK (from v0.1 - initial release)
-
-The KubOS-SDK can be upgraded from version 0.1 using this command:
-
-		$ sudo pip install -I kubos-sdk
-
-Be sure to pull the latest Kubos-SDK Docker container afterwards:
-
-		$ kubos update
+Please see the [Upgrade Doc](docs/upgrade.md)
 
 ## Creating a new project
 
@@ -233,7 +214,6 @@ For instance, the kubos-rt-example depends on the libcsp module. If you want to 
  * By doing this in one step kubos automatically links the module globally and then links it into your local project for you.
 
 The next time your project is built it will use your local development module, rather than the packaged version.
-
 
 ## Flashing your project
 

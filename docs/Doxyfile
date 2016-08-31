@@ -2393,4 +2393,4 @@ GENERATE_LEGEND        = YES
 
 DOT_CLEANUP            = YES
 
-INPUT += docs/start.md docs/changelog.md
+INPUT += docs/start.md docs/changelog.md docs/upgrade.md
