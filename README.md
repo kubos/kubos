@@ -7,6 +7,8 @@ projects to help simplify development.
 Git repositories are managed with Android's ```repo``` utility, and once the workspace
 is initialized, you can use repo to sync the project.
 
+This repo is primarily intended for those wanting to dig into the internals of the Kubos source tree.
+
 ## Getting started
 
 1. [Install the latest version of Kubos SDK](docs/kubos-sdk.md)
@@ -14,16 +16,25 @@ is initialized, you can use repo to sync the project.
 
         $ git clone https://github.com/kubostech/kubos
 
-2. Run the development environment bootstrap script to pull down all of the KubOS
+3. Run the development environment bootstrap script to pull down all of the KubOS
    repositories:
 
         $ cd kubos
         $ ./bootstrap.sh
 
+    Running this script will clone the latest copy of each repo described in the [Kubos manifest file](https://github.com/kubostech/kubos-manifest/blob/master/default.xml). It will also create links between all of the local modules and targets using the `kubos link` command.
+
+    The bootstap command can take an optional parameter which will add git remotes to each repo.
+
+    Running this command:
+
+        $ ./bootstrap.sh githubuser
+
+    Will add a remote with the url `https://github.com/{githubuser}/{reponame}` for each repo.
+
 ## KubOS development environment
 
-KubOS is a collection of Yotta modules and targets which come pre-packaged with the KubOS-SDK. They can also be built locally using the `kubos link` and `kubos link-target`
-commands.
+KubOS is a collection of Yotta modules and targets which come pre-packaged with the KubOS-SDK. They can also be built locally using the `kubos link` and `kubos link-target` commands.
 
 ### Building an example application
 
