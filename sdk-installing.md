@@ -20,11 +20,12 @@ and
 
         $ pip install --upgrade pip
 
-or (you should not need to use `sudo`):
+or if you have permissions issues:
 
         $ pip install --user python --upgrade pip
 
-if necessary. Similarly, you may need to upgrade other tools, such as `setuptools`;
+You should not need to use `sudo`.
+Similarly, you may need to upgrade other tools, such as `setuptools`.
 Further, Mac OS X's new security model ("System Integrity Protection") may make
 the upgrades impossible without declaring that you want to use `pip` as the
 "python" user.
@@ -72,6 +73,8 @@ change may provide a solution.
 
 
 ## Installing Dependencies
+
+There are several different libraries that KubOS-SDK relies on. Some of these are needed just to install the SDK and some are required for running the sdk. Below are installation commands for several popular Linux distros. Those running OS X should not need to install additional libraries.
 
 #### Linux
 ##### Ubuntu/Debian

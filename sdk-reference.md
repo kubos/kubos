@@ -25,7 +25,7 @@ KubOS uses the yotta build/module system, which is where this file structure com
 
 ## Selecting a target
 
-Yotta needs to know which target you intend to build for so it can select the proper cross compiler. KubOS currently supports two different targets:
+Yotta needs to know which target you intend to build for so it can select the proper cross compiler. KubOS currently supports several different targets:
 
 | MCU Family   | Board  |
 | ------------- |-------------|
