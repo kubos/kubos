@@ -1,5 +1,4 @@
-KubOS Source Distribution
-=========
+# Developing KubOS Modules
 
 The top level [Kubos](https://github.com/kubostech/kubos) project acts as a workspace for all KubOS RT related
 projects to help simplify development.
@@ -9,7 +8,7 @@ is initialized, you can use repo to sync the project.
 
 ## Getting started
 
-1. [Install the latest version of Kubos SDK](docs/kubos-sdk.md)
+1. [Install the latest version of Kubos SDK](docs/sdk-installing.md)
 2. Clone the Kubos repo
 
         $ git clone https://github.com/kubostech/kubos
@@ -37,8 +36,6 @@ Several different example applications can be found in the examples folder. Any 
 
 Made some modifications to an existing module? Want to link in a new library? The kubos tool can help with that as well.
 
-        $ cd examples/kubos-rt-example
-        $ kubos target msp430f5529-gcc
         $ kubos link /home/kubos/super-awesome-space-library
         $ kubos build
 

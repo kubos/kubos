@@ -1,14 +1,22 @@
-### KubOS RT
+### KubOS
 
-KubOS RT is a real time environment designed to run on any satellite subsystem, providing out of the box integration with several well known hardware buses and software protocols used in satellites.
+The KubOS platform provides small satellite developers the tools and libraries necessary to quickly bring up space ready software. We leverage multiple existing open source projects like FreeRTOS and CSP, along with our own custom framework and SDK.
+
+Looking to build an application on KubOS? Check out our [quick start guide](docs/first-project.md).
 
 ## Docs
 
- - [Start here with KubOS-SDK](docs/kubos-sdk.md)
-
- - [Want to really dig into our source tree?](docs/start.md)
-
  - [Changelog](docs/changelog.md)
+
+ - [Installing KubOS-SDK](docs/sdk-installing.md)
+
+ - [Upgrading KubOS-SDK](docs/sdk-upgrading.md)
+
+ - [Creating your first project](docs/first-project.md)
+
+ - [KubOS-SDK Command Reference](docs/sdk-reference.md)
+
+ - [KubOS Module Development](docs/kubos-development.md)
 
 ## Top Level APIs
 
