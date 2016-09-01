@@ -23,17 +23,52 @@
 #include "kubos-hal-stm32f4/spi.h"
 #include "kubos-hal-stm32f4/pins.h"
 
+/**
+ * Fetches SPI bus data structure
+ * @param num SPI bus num to fetch
+ * @return hal_spi_handle* pointer to data structure
+ */
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi);
+/**
+ * Initializes SPI bus structure with data needed to setup hardware
+ * @param spi higher level hal SPI data
+ * @return hal_spi_handle* NULL if bad bus num, otherwise data ready for dev setup
+ */
 static hal_spi_handle * hal_spi_device_init(KSPI * spi);
+/**
+ * Initializes the SPI according to the specified parameters
+ * in the configuration and creates the associated handle.
+ * @param handle pointer to hal_spi_handle containing config information
+ * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
+ */
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle);
+/**
+ * SPI hardware cleanup and disabling
+ * @param handle pointer to hal_spi_handle containing config information
+ */
 static void hal_spi_terminate(hal_spi_handle * handle);
+/**
+ * Initializes the SPI bus pins.
+ * @param handle pointer to hal_spi_handle containing config information
+ */
 static void hal_spi_gpio_init(hal_spi_handle * handle);
 
+/**
+ * Static array of spi bus handles
+ */
 static hal_spi_handle hal_spi_dev[K_NUM_SPI];
+/**
+ * Default spi request timeout value
+ */
 static uint32_t spi_timeout = 1000;
 
-/** Functions implemented from KubOS-HAL SPI Interface **/
+/* Functions implemented from KubOS-HAL SPI Interface */
 
+/**
+ * Setup and enable SPI bus
+ * @param spi SPI bus to initialize
+ * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
+ */
 KSPIStatus kprv_spi_dev_init(KSPINum spi_num)
 {
     KSPI * spi = kprv_spi_get(spi_num);
@@ -49,6 +84,11 @@ KSPIStatus kprv_spi_dev_init(KSPINum spi_num)
     return hal_spi_hw_init(handle);
 }
 
+/**
+ * SPI hardware cleanup and disabling
+ * @param spi bus num to terminate
+ * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
+ */
 KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
@@ -60,6 +100,13 @@ KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
     return SPI_OK;
 }
 
+/**
+ * Write data over SPI bus
+ * @param spi SPI bus to write to
+ * @param buffer pointer to data buffer
+ * @param len length of data to write
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
@@ -71,6 +118,13 @@ KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
     return (KSPIStatus)status;
 }
 
+/**
+ * Read data over SPI bus
+ * @param spi SPI bus to read from
+ * @param buffer pointer to data buffer
+ * @param len length of data to read
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
@@ -82,6 +136,14 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len)
     return (KSPIStatus)status;
 }
 
+/**
+ * Write and read data over SPI bus
+ * @param spi SPI bus to write to
+ * @param txBuffer pointer to data buffer to write from
+ * @param rxBuffer pointer to data buffer to read into
+ * @param len length of data to write and read
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
@@ -93,7 +155,7 @@ KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuff
     return (KSPIStatus)status;
 }
 
-/** Private functions **/
+/* Private functions */
 
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi)
 {

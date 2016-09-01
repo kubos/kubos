@@ -26,6 +26,11 @@
 #include "kubos-hal-stm32f4/stm32f4_gpio.h"
 #include "stm32cubef4/stm32f4xx_hal_uart.h"
 
+/**
+ * Internal function to get appropriate USART_TypeDef based on uart num
+ * @param uart uart bus num
+ * @return USART_TypeDef
+ */
 static inline USART_TypeDef *uart_dev(KUARTNum uart)
 {
     switch (uart) {
@@ -51,6 +56,11 @@ static inline USART_TypeDef *uart_dev(KUARTNum uart)
     }
 }
 
+/**
+ * Internal function to get appropriate interrupt number based on uart num
+ * @param uart uart bus num
+ * @return IRQn_Type interrupt number
+ */
 static inline IRQn_Type uart_irqn(KUARTNum uart)
 {
     switch (uart) {
@@ -76,6 +86,10 @@ static inline IRQn_Type uart_irqn(KUARTNum uart)
     }
 }
 
+/**
+ * Internal function to enable the correct uart clock based on uart num
+ * @param uart uart bus num
+ */
 static inline void uart_clk_enable(KUARTNum uart)
 {
     switch (uart) {
@@ -100,6 +114,11 @@ static inline void uart_clk_enable(KUARTNum uart)
     }
 }
 
+/**
+ * Internal function to fetch the alternate uart pin based on uart num
+ * @param uart uart bus num
+ * @return GPIO pin
+ */
 static inline uint8_t uart_alt(KUARTNum uart)
 {
     switch (uart) {
@@ -125,6 +144,11 @@ static inline uint8_t uart_alt(KUARTNum uart)
     }
 }
 
+/**
+ * Setup and enable uart bus
+ * @param uart uart bus to initialize
+ * @return int 0 if success, otherwise a non-zero error number
+ */
 int kprv_uart_dev_init(KUARTNum uart)
 {
 	HAL_StatusTypeDef ret = 0;
@@ -216,6 +240,10 @@ int kprv_uart_dev_init(KUARTNum uart)
     return ret;
 }
 
+/**
+ * Enable uart tx interrupt
+ * @param uart uart bus to initialize
+ */
 void kprv_uart_enable_tx_int(KUARTNum uart)
 {
     USART_TypeDef *dev = uart_dev(uart);
@@ -226,6 +254,12 @@ void kprv_uart_enable_tx_int(KUARTNum uart)
     SET_BIT(dev->CR1, USART_CR1_TXEIE);
 }
 
+/**
+ * Write a character directly to the uart interface
+ * @param uart uart bus
+ * @param c character to write
+ * @return int 0 if success, otherwise a non-zero error number
+ */
 int k_uart_write_immediate(KUARTNum uart, char c)
 {
     USART_TypeDef *dev = uart_dev(uart);
@@ -241,7 +275,10 @@ int k_uart_write_immediate(KUARTNum uart, char c)
 
 #define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
 
-
+/**
+ * Internal function to process triggered interrupt
+ * @param uart uart bus num
+ */
 static inline void uart_irq_handler(KUARTNum uart)
 {
     portBASE_TYPE task_woken = pdFALSE;
@@ -318,6 +355,9 @@ static inline void uart_irq_handler(KUARTNum uart)
 }
 
 #ifdef YOTTA_CFG_HARDWARE_UART_UART1
+/**
+ * Specify interrupt routine for uart1
+ */
 void USART1_IRQHandler(void)
 {
     uart_irq_handler(K_UART1);
@@ -325,6 +365,9 @@ void USART1_IRQHandler(void)
 #endif
 
 #ifdef YOTTA_CFG_HARDWARE_UART_UART2
+/**
+ * Specify interrupt routine for uart2
+ */
 void USART2_IRQHandler(void)
 {
     uart_irq_handler(K_UART2);
@@ -332,6 +375,9 @@ void USART2_IRQHandler(void)
 #endif
 
 #ifdef YOTTA_CFG_HARDWARE_UART_UART3
+/**
+ * Specify interrupt routine for uart3
+ */
 void USART3_IRQHandler(void)
 {
     uart_irq_handler(K_UART3);
@@ -339,6 +385,9 @@ void USART3_IRQHandler(void)
 #endif
 
 #ifdef YOTTA_CFG_HARDWARE_UART_UART4
+/**
+ * Specify interrupt routine for uart4
+ */
 void UART4_IRQHandler(void)
 {
     uart_irq_handler(K_UART4);
@@ -346,6 +395,9 @@ void UART4_IRQHandler(void)
 #endif
 
 #ifdef YOTTA_CFG_HARDWARE_UART_UART5
+/**
+ * Specify interrupt routine for uart5
+ */
 void UART5_IRQHandler(void)
 {
     uart_irq_handler(K_UART5);
@@ -353,6 +405,9 @@ void UART5_IRQHandler(void)
 #endif
 
 #ifdef YOTTA_CFG_HARDWARE_UART_UART6
+/**
+ * Specify interrupt routine for uart6
+ */
 void USART6_IRQHandler(void)
 {
     uart_irq_handler(K_UART6);
