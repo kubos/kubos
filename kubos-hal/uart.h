@@ -136,12 +136,36 @@ typedef enum {
  * Uart configuration structure
  */
 typedef struct {
+    /**
+     * The path of the uart bus
+     */
     const char *dev_path;
+    /**
+     * The buad rate of the uart bus
+     */
     uint32_t baud_rate;
+    /**
+     * The number of data bits in each transmit/receive of the uart bus.
+     * Can be 7-, 8-, or 9-bits, as specified by the KWordLen enumerator
+     */
     KWordLen word_len;
+    /**
+     * The number of stop bits at the end of each transmit/receive of the uart bus.
+     * Can be 1 or 2 bits, as specified by the KStopBits enumerator
+     */
     KStopBits stop_bits;
+    /**
+     * The presence and state of the parity bit in each transmit/receive of the uart bus.
+     * Can be none, odd, or even, as specified by the KParity enumerator
+     */
     KParity parity;
+    /**
+     * The size of the queue for incoming messages
+     */
     uint8_t rx_queue_len;
+    /**
+     * The size of the queue for outgoing messages
+     */
     uint8_t tx_queue_len;
 } KUARTConf;
 
