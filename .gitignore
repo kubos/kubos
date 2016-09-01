@@ -10,3 +10,4 @@ libcsp
 targets
 sdk
 tools/*.pyc
+doxygen_warn.log
