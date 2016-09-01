@@ -80,6 +80,7 @@ typedef enum {
 
 /**
  * Expected role of spi bus
+ * @warning Only the Master role is available as of v0.1.0
  */
 typedef enum {
     K_SPI_MASTER = 0,
@@ -141,12 +142,52 @@ typedef enum {
  * Spi configuration structure
  */
 typedef struct {
+	/**
+	 * The role of the SPI bus.
+	 * Should be either master or slave, as specified by the SPIRole enumerator
+	 * @warning Only the Master role is available as of v0.1.0
+	 */
     SPIRole role;
+    /**
+     * The communication mode of the SPI bus.
+     * Can be 2-wire Rx/Tx, 2-wire Rx only, or 1-wire bidirectional, as specified by the SPIDirection enumerator
+     */
     SPIDirection direction;
+    /**
+     * The amount of data in each transmit/receive of the SPI bus.
+     * Can either send 8-bits at a time or 16-bits, as specified by the SPIDataSize enumerator
+     */
     SPIDataSize data_size;
+    /**
+     * The clock phase of the SPI bus.
+     * Can either be low (idle state = 0, active state = 1), or high (idle state = 1, active state = 0),
+     * as specified by the SPIClockPhase enumerator
+     */
     SPIClockPhase clock_phase;
+    /**
+     * The clock polarity of the SPI bus.
+     * Can either be the first edge (falling if clock phase is high, rising if clock phase is low), or
+     * second edge (rising if clock phase is high, falling if clock phase is low), as specified by the
+     * SPIClockPolarity enumerator
+     */
     SPIClockPolarity clock_polarity;
+    /**
+     * The bit ordering of the SPI bus communication.
+     * Can be either least-significant bit first, or most-significant, as specified by the SPIFirstBit enumerator
+     */
     SPIFirstBit first_bit;
+    /**
+     * The baud rate of the SPI bus
+     * @warning For the <b>STM32F4 microcontroller</b>, the speed of the SPI bus can only be defined as a factor of the
+     * peripheral clock to which it's connected (PCLK1 for SPI bus 2 and 3, PCLK2 for SPI bus 1).  For example,
+     * PCLK_speed / 2.  To make things easier, this speed field will take a normal baud rate number and then it
+     * will automatically be converted to the nearest available system speed without exceeding the original
+     * value. <br />
+     * For example:  <br />
+     * Given conf.speed = 10MHz, PCLK_speed = 84MHz <br />
+     * The closest speed without going over is 5.25Mhz (PCLK_speed / 16), so this is what the SPI bus speed will be
+     * set to.
+     */
     uint32_t speed;
 } KSPIConf;
 
@@ -259,8 +300,24 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len);
  */
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len);
 
+/**
+ * Low level spi initialization
+ *
+ * This is implemented by the hardware specific hal
+ *
+ * @param spi spi bus to initialize
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_dev_init(KSPINum spi);
 
+/**
+ * Low level spi termination
+ *
+ * This is implemented by the hardware specific hal
+ *
+ * @param spi spi bus to terminate
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_dev_terminate(KSPINum spi);
 
 #endif

@@ -22,6 +22,64 @@
 
 static KUART k_uarts[K_NUM_UARTS];
 
+/**
+ * Returns rx pin for specified uart interface
+ * @param uart uart interface number
+ * @return int rx pin
+ */
+int k_uart_rx_pin(KUARTNum uart) {
+    switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1_RX
+        case K_UART1: return YOTTA_CFG_HARDWARE_UART_UART1_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2_RX
+        case K_UART2: return YOTTA_CFG_HARDWARE_UART_UART2_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3_RX
+        case K_UART3: return YOTTA_CFG_HARDWARE_UART_UART3_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4_RX
+        case K_UART4: return YOTTA_CFG_HARDWARE_UART_UART4_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5_RX
+        case K_UART5: return YOTTA_CFG_HARDWARE_UART_UART5_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6_RX
+        case K_UART6: return YOTTA_CFG_HARDWARE_UART_UART6_RX;
+#endif
+    }
+    return -1;
+}
+
+/**
+ * Returns tx pin for specified uart interface
+ * @param uart uart interface number
+ * @return int tx pin
+ */
+int k_uart_tx_pin(KUARTNum uart) {
+    switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1_TX
+        case K_UART1: return YOTTA_CFG_HARDWARE_UART_UART1_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2_TX
+        case K_UART2: return YOTTA_CFG_HARDWARE_UART_UART2_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3_TX
+        case K_UART3: return YOTTA_CFG_HARDWARE_UART_UART3_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4_TX
+        case K_UART4: return YOTTA_CFG_HARDWARE_UART_UART4_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5_TX
+        case K_UART5: return YOTTA_CFG_HARDWARE_UART_UART5_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6_TX
+        case K_UART6: return YOTTA_CFG_HARDWARE_UART_UART6_TX;
+#endif
+    }
+    return -1;
+}
+
 static inline BaseType_t queue_push(QueueHandle_t *queue, char c,
                                     TickType_t timeout, void *task_woken)
 {
