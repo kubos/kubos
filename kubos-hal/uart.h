@@ -85,6 +85,7 @@
  * Available uart interfaces
  */
 typedef enum {
+    // @warning - need to add K_UART_NO_BUS
 #ifdef YOTTA_CFG_HARDWARE_UART_UART1
     K_UART1 = 0,
 #endif

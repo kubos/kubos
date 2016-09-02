@@ -135,7 +135,8 @@ typedef enum {
     SPI_OK,
     SPI_ERROR,
     SPI_ERROR_BUSY,
-    SPI_ERROR_TIMEOUT
+    SPI_ERROR_TIMEOUT,
+    SPI_ERROR_NULL_HANDLE
 } KSPIStatus;
 
 /**
