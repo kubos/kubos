@@ -544,7 +544,7 @@ KSensorStatus bno055_set_sensor_offset_struct(const bno055_offsets_t offsets_typ
 
 KSensorStatus bno055_check_calibration(uint8_t * count, uint8_t limit, bno055_calibration_data_t * calib)
 {
-	KSensorStatus ret;
+    KSensorStatus ret;
 
     if(is_fully_calibrated() != SENSOR_OK)
     {
