@@ -22,16 +22,18 @@
 static char buffer[1024];
 static int buffer_len;
 
-void kprv_spi_dev_init(KSPINum spi)
+KSPIStatus kprv_spi_dev_init(KSPINum spi)
 {
     buffer_len = 0;
     *buffer = 0;
+    return SPI_OK;
 }
 
-void kprv_spi_dev_terminate(KSPINum spi)
+KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
 {
     buffer_len = 0;
     *buffer = 0;
+    return SPI_OK;
 }
 
 /**

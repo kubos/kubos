@@ -28,9 +28,9 @@ static int buffer_len;
  * This is implemented by the device specific hal
  * @param i2c i2c bus to initialize
  */
-void kprv_i2c_dev_init(KI2CNum i2c)
+KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
 {
-
+    return I2C_OK;
 }
 
 /**
@@ -38,10 +38,11 @@ void kprv_i2c_dev_init(KI2CNum i2c)
  * This is implemented by the device specific hal
  * @param i2c i2c bus to terminate
  */
-void kprv_i2c_dev_terminate(KI2CNum i2c)
+KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
 {
     buffer_len = 0;
     *buffer = 0;
+    return I2C_OK;
 }
 
 /**

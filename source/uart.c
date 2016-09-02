@@ -19,9 +19,10 @@
 
 #include "kubos-hal/uart.h"
 
-void kprv_uart_dev_init(KUARTNum uart)
+int kprv_uart_dev_init(KUARTNum uart)
 {
     // init stuff
+    return 0;
 }
 
 void kprv_uart_dev_terminate(KUARTNum uart)
