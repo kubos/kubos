@@ -148,6 +148,33 @@ static void test_uart_write(void)
 }
 
 /*
+ * test_uart_writeOverflow
+ *
+ * Purpose:  Test writing more bytes than the write buffer contains
+ *
+ */
+
+static void test_uart_writeOverflow(void)
+{
+    KUARTConf conf;
+    char * testString = "test string 1";
+    char buffer[100];
+    int len = strlen(testString);
+    int returnLen = 0;
+
+    conf = k_uart_conf_defaults();
+
+    k_uart_init(uartTo, &conf);
+    k_uart_init(uartFrom, &conf);
+    returnLen = k_uart_write(uartTo, testString, 50);
+
+    TEST_ASSERT_EQUAL_INT_MESSAGE(50, returnLen, "Failed to write");
+
+    //Clean up the receive buffer
+    while(k_uart_read(uartFrom, buffer, 100) != 0);
+}
+
+/*
  * test_uart_read
  *
  * Purpose:  Test reading from each UART port
@@ -173,6 +200,39 @@ static void test_uart_read(void)
     vTaskDelay(50);
 
     returnLen = k_uart_read(uartTo, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to read");
+}
+
+/*
+ * test_uart_readOverflow
+ *
+ * Purpose:  Test reading more bytes than the read buffer contains
+ *
+ * Expectation: The read call should only read as many bytes as are available and then return
+ * 	which will be the length of testString.
+ *
+ */
+
+static void test_uart_readOverflow(void)
+{
+    KUARTConf conf;
+    KUART *k_uart;
+    char * testString = "test string 1";
+    char buffer[100] = {0};
+    int len = strlen(testString);
+    int returnLen = 0;
+
+    conf = k_uart_conf_defaults();
+
+    TEST_ASSERT_FALSE(k_uart_init(uartTo, &conf));
+    TEST_ASSERT_FALSE(k_uart_init(uartFrom, &conf));
+
+    returnLen = k_uart_write(uartFrom, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(13, returnLen, "Failed to write");
+
+    vTaskDelay(50);
+
+    returnLen = k_uart_read(uartTo, buffer, 100);
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to read");
 }
 
@@ -369,7 +429,9 @@ K_TEST_MAIN() {
     RUN_TEST(test_uart_initGood);
     RUN_TEST(test_uart_initBad);
     RUN_TEST(test_uart_write);
+    RUN_TEST(test_uart_writeOverflow);
     RUN_TEST(test_uart_read);
+    RUN_TEST(test_uart_readOverflow);
     RUN_TEST(test_uart_writeImmediate);
     RUN_TEST(test_uart_wordLen);
     RUN_TEST(test_uart_parity);

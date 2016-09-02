@@ -29,8 +29,8 @@
  * 	run with the SPI bus connected to a BME280 sensor.  Once slave mode is implemented, these tests
  * 	should be updated to keep the setup entirely contained within the STM32F4 board.
  */
-#include "kubos-hal-test/unity/unity.h"
-#include "kubos-hal-test/k_test.h"
+#include "kubos-hal/unity/unity.h"
+#include "kubos-hal/k_test.h"
 #include <string.h>
 
 #include "kubos-hal-stm32f4/spi.h"
@@ -251,6 +251,32 @@ static void test_spi_writeMasterNoninit(void)
 }
 
 /*
+ * test_spi_writeMasterOverflow
+ *
+ * Purpose:  Test writing more bytes than the write buffer contains
+ *
+ */
+
+static void test_spi_writeMasterOverflow(void)
+{
+	int ret;
+	uint8_t chipReg = 0xD0; //Chip ID register
+	chipReg |= 0x80; //Turn on high bit for read request
+
+	test_setup();
+
+	k_gpio_write(CS, 0);
+
+	ret = kprv_spi_write(SPI_BUS, &chipReg, 100);
+
+	k_gpio_write(CS, 1);
+
+	kprv_spi_dev_terminate(SPI_BUS);
+
+	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_OK, ret, "Failed to write from SPI_BUS");
+}
+
+/*
  * test_spi_readMaster
  *
  * Purpose:  Test reading from a properly initialized spi port
@@ -372,6 +398,36 @@ static void test_spi_writeReadMaster(void)
 	kprv_spi_dev_terminate(SPI_BUS);
 
 	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_OK, ret, "Write/read failed from SPI_BUS");
+}
+
+/*
+ * test_spi_readMasterOverflow
+ *
+ * Purpose:  Test reading more bytes than the read buffer contains
+ *
+ */
+
+static void test_spi_readMasterOverflow(void)
+{
+	int ret;
+	char buffer[100] = {0};
+	uint8_t chipReg = 0xD0;
+	chipReg |= 0x80;
+
+	test_setup();
+
+	k_gpio_write(CS, 0);
+
+	ret = kprv_spi_write(SPI_BUS, &chipReg, 1);
+	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_OK, ret, "Failed to write from SPI_BUS");
+
+	ret = kprv_spi_read(SPI_BUS, buffer, 100);
+
+	k_gpio_write(CS, 1);
+
+	kprv_spi_dev_terminate(SPI_BUS);
+
+	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_OK, ret, "Failed to read from SPI_BUS");
 }
 
 /*
@@ -895,9 +951,11 @@ K_TEST_MAIN() {
     RUN_TEST(test_spi_writeMaster);
     RUN_TEST(test_spi_writeMasterNoCS);
     RUN_TEST(test_spi_writeMasterNoninit);
+    RUN_TEST(test_spi_writeMasterOverflow);
     RUN_TEST(test_spi_readMaster);
     RUN_TEST(test_spi_readMasterNoCS);
     RUN_TEST(test_spi_readMasterNoWrite);
+    RUN_TEST(test_spi_readMasterOverflow);
     RUN_TEST(test_spi_writeReadMaster);
     RUN_TEST(test_spi_slave);
     RUN_TEST(test_spi_bidiMode);
