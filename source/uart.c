@@ -114,6 +114,10 @@ static inline void uart_clk_enable(KUARTNum uart)
     }
 }
 
+/**
+ * Internal function to disable the correct uart clock based on uart num
+ * @param uart uart bus num
+ */
 static inline void uart_clk_disable(KUARTNum uart)
 {
     switch (uart) {
@@ -264,6 +268,10 @@ int kprv_uart_dev_init(KUARTNum uart)
     return ret;
 }
 
+/**
+ * uart hardware cleanup and disabling
+ * @param uart bus num to terminate
+ */
 void kprv_uart_dev_terminate(KUARTNum uart)
 {
     KUART *k_uart = kprv_uart_get(uart);
