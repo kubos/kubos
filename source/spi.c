@@ -94,7 +94,7 @@ KSPI * kprv_spi_get(KSPINum spi)
 {
 	if(spi < 0 || spi > K_NUM_SPI-1)
 	{
-		return 0;
+		return NULL;
 	}
     return &k_spis[spi - 1];
 }

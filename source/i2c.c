@@ -102,7 +102,7 @@ KI2C* kprv_i2c_get(KI2CNum i2c)
 	//Validate I2C number
 	if(i2c < 0 || i2c > (K_NUM_I2CS-1))
 	{
-		return 0;
+		return NULL;
 	}
 
     return &k_i2cs[i2c - 1];

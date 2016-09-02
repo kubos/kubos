@@ -94,7 +94,7 @@ KUART* kprv_uart_get(KUARTNum uart)
 	//Validate UART number
 	if(uart < 0 || uart > (K_NUM_UARTS-1))
 	{
-		return 0;
+		return NULL;
 	}
 
     return &k_uarts[uart];
