@@ -35,7 +35,7 @@ def generate_xml(xml_projects, docker=False):
                 el.setAttribute('path', 'yotta_modules/' + project.name)
         else:
             el.setAttribute('path', project.path)
-        el.setAttribute('revision', project.tag)
+        el.setAttribute('revision', project.revision)
         root.appendChild(el)
     return doc
 

@@ -12,6 +12,8 @@ The Kubos-SDK has been tested on Docker version 1.11.1 and 1.12.0.
 
 ### Install pip
 
+`pip` is a python package installer and manager. From [Wikipedia](https://en.wikipedia.org/wiki/Pip_(package_manager)), "pip is a recursive acronym that can stand for either 'Pip Installs Packages' or 'Pip Installs Python'."
+
 If pip is already installed, ensure that your version is up to date with
 
         $ pip --version
@@ -74,7 +76,9 @@ change may provide a solution.
 
 ## Installing Dependencies
 
-There are several different libraries that KubOS-SDK relies on. Some of these are needed just to install the SDK and some are required for running the sdk. Below are installation commands for several popular Linux distros. Those running OS X should not need to install additional libraries.
+As with most software, there are several different libraries to which KubOS-SDK needs access to enable its functionality. Some of these prerequisites are needed just to _install_ the SDK and some are required for _running_ the SDK.
+
+Below are installation commands for several popular Linux distros. Those running current or very recent versions of Mac OS X should not need to install additional libraries.
 
 #### Linux
 ##### Ubuntu/Debian
@@ -91,7 +95,7 @@ There are several different libraries that KubOS-SDK relies on. Some of these ar
 
 ## Installing KubOS-SDK
 
-The KubOS-SDK is distributed using the python package system pip. You can install using this command:
+The KubOS-SDK is distributed using `pip`. You can install using this command:
 
         $ pip install kubos-sdk
 

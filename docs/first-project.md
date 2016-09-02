@@ -12,6 +12,8 @@ The simplest way to create a new Kubos project is by using the kubos sdk. The `k
 
         $ kubos init myproject
 
+Note - Inside of the build system there are several reserved words, a project cannot be named any of these words. The most common of these are `test`, `source` and `include`.
+
 We have also created several different example Kubos projects which can be used as starting points.
 
  - [Example showing basic freertos tasks and csp](https://github.com/kubostech/kubos-rt-example)
