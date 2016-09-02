@@ -1,5 +1,10 @@
 # KubOS Changelog
 
+## v0.1.1 - Sep 2 2016
+* Documentation updates
+* Added basic unit testing for Kubos-HAL, Kubos-HAL-STM32F4 and Kubos-SDK
+* Miscellaneous bug fixes
+
 ## v0.1.0 - Aug 19 2016
 * Implemented [SPI](./kubos-hal/group__SPI.html) for the STM32F4.
 * Added a new sensor interface:

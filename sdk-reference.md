@@ -6,6 +6,8 @@ Run the `kubos init` command followed by the name of your project to bootstrap y
 
         $ kubos init project-name
 
+Note - Inside of the build system there are several reserved words, a project cannot be named any of these words. These are `test`, `source`, `include`, `yotta_modules` and `yotta_targets`.
+
 The contents of your project directory should look something like this:
 
         $ ls
