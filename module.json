@@ -19,5 +19,8 @@
     "stm32f405rg": {
       "stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg#~0.0.3"
     }
+  },
+  "testDependencies": {
+  	"unity": "kubostech/unity"
   }
 }

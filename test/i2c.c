@@ -29,8 +29,8 @@
  * 	run with the I2C bus connected to a BNO055 sensor.  Once slave mode is implemented, these tests
  * 	should be updated to keep the setup entirely contained within the STM32F4 board.
  */
-#include "kubos-hal/unity/unity.h"
-#include "kubos-hal/k_test.h"
+#include "unity/unity.h"
+#include "unity/k_test.h"
 #include <string.h>
 
 #include "kubos-hal/i2c.h"

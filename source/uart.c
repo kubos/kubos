@@ -31,7 +31,7 @@
  * @param uart uart bus num
  * @return USART_TypeDef
  */
-static inline USART_TypeDef *uart_dev(KUARTNum uart)
+USART_TypeDef *uart_dev(KUARTNum uart)
 {
     switch (uart) {
 #ifdef YOTTA_CFG_HARDWARE_UART_UART1
@@ -61,7 +61,7 @@ static inline USART_TypeDef *uart_dev(KUARTNum uart)
  * @param uart uart bus num
  * @return IRQn_Type interrupt number
  */
-static inline IRQn_Type uart_irqn(KUARTNum uart)
+IRQn_Type uart_irqn(KUARTNum uart)
 {
     switch (uart) {
 #ifdef YOTTA_CFG_HARDWARE_UART_UART1

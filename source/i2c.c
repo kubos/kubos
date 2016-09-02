@@ -163,21 +163,21 @@ static hal_i2c_handle hal_i2c_bus[K_NUM_I2CS];
 KI2CStatus kprv_i2c_dev_init(KI2CNum i2c_num)
 {
     KI2C * i2c = kprv_i2c_get(i2c_num);
-    if(i2c == 0)
+    if(i2c == NULL)
     {
-    	return I2C_ERROR;
+        return I2C_ERROR;
     }
 
     //Only I2C master processing is currently supported
     if(i2c->conf.role != K_MASTER)
     {
-    	return I2C_ERROR;
+        return I2C_ERROR;
     }
 
     hal_i2c_handle * handle = hal_i2c_device_init(i2c);
-    if(handle == 0)
+    if(handle == NULL)
     {
-    	return I2C_ERROR_NULL_HANDLE;
+        return I2C_ERROR_NULL_HANDLE;
     }
 
     return hal_i2c_hw_init(handle);
@@ -394,7 +394,7 @@ static hal_i2c_handle* hal_i2c_get_handle(KI2CNum num)
 	//Validate I2C number
 	if(num < 0 || num > (K_NUM_I2CS-1))
 	{
-		return 0;
+	    return 0;
 	}
 
     return &hal_i2c_bus[num];
@@ -774,7 +774,7 @@ static KI2CStatus hal_i2c_master_request_read(I2C_HandleTypeDef * hal_handle, ui
     if(hal_handle->Init.AddressingMode == K_ADDRESSINGMODE_7BIT)
     {
         /* Send slave address */
-    	hal_handle->Instance->DR = I2C_7BIT_ADD_READ(addr);
+        hal_handle->Instance->DR = I2C_7BIT_ADD_READ(addr);
     }
 	else if(hal_handle->Init.AddressingMode == K_ADDRESSINGMODE_10BIT)
 	{
@@ -814,7 +814,7 @@ static KI2CStatus hal_i2c_master_request_read(I2C_HandleTypeDef * hal_handle, ui
 	else
 	{
 		//Bad addressing mode
-		return I2C_ERROR;
+	    return I2C_ERROR;
 	}
 
     /* Wait for ADDR */

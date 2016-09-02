@@ -29,12 +29,14 @@
  * @return hal_spi_handle* pointer to data structure
  */
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi);
+
 /**
  * Initializes SPI bus structure with data needed to setup hardware
  * @param spi higher level hal SPI data
  * @return hal_spi_handle* NULL if bad bus num, otherwise data ready for dev setup
  */
 static hal_spi_handle * hal_spi_device_init(KSPI * spi);
+
 /**
  * Initializes the SPI according to the specified parameters
  * in the configuration and creates the associated handle.
@@ -42,11 +44,13 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi);
  * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
  */
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle);
+
 /**
  * SPI hardware cleanup and disabling
  * @param handle pointer to hal_spi_handle containing config information
  */
 static void hal_spi_terminate(hal_spi_handle * handle);
+
 /**
  * Initializes the SPI bus pins.
  * @param handle pointer to hal_spi_handle containing config information
@@ -57,6 +61,7 @@ static void hal_spi_gpio_init(hal_spi_handle * handle);
  * Static array of spi bus handles
  */
 static hal_spi_handle hal_spi_dev[K_NUM_SPI];
+
 /**
  * Default spi request timeout value
  */
@@ -375,7 +380,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
     }
 
     //Calculate closest prescaler value based on desired clock frequency
-    if(conf.speed == 0)
+    if(conf.speed == NULL)
     {
     	return SPI_ERROR;
     }
