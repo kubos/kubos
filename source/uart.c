@@ -114,6 +114,30 @@ static inline void uart_clk_enable(KUARTNum uart)
     }
 }
 
+static inline void uart_clk_disable(KUARTNum uart)
+{
+    switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1
+        case K_UART1: __HAL_RCC_USART1_CLK_DISABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2
+        case K_UART2: __HAL_RCC_USART2_CLK_DISABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3
+        case K_UART3: __HAL_RCC_USART3_CLK_DISABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4
+        case K_UART4: __HAL_RCC_UART4_CLK_DISABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5
+        case K_UART5: __HAL_RCC_UART5_CLK_DISABLE(); break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6
+        case K_UART6: __HAL_RCC_USART6_CLK_DISABLE(); break;
+#endif
+    }
+}
+
 /**
  * Internal function to fetch the alternate uart pin based on uart num
  * @param uart uart bus num
@@ -240,6 +264,39 @@ int kprv_uart_dev_init(KUARTNum uart)
     return ret;
 }
 
+void kprv_uart_dev_terminate(KUARTNum uart)
+{
+    KUART *k_uart = kprv_uart_get(uart);
+    if (!k_uart) {
+        return;
+    }
+
+    int rx = k_uart_rx_pin(uart);
+    int tx = k_uart_tx_pin(uart);
+
+    UART_HandleTypeDef u = {
+        .Instance = uart_dev(uart),
+        .Init = {
+            .BaudRate = k_uart->conf.baud_rate,
+            .Mode = UART_MODE_TX | UART_MODE_RX
+        }
+    };
+
+
+    __HAL_UART_DISABLE_IT(&u, UART_IT_RXNE);
+    HAL_UART_DeInit(&u);
+
+    HAL_NVIC_DisableIRQ(uart_irqn(uart));
+
+    HAL_GPIO_DeInit(STM32F4_PIN_GPIO(tx), STM32F4_PIN_MASK(tx));
+    HAL_GPIO_DeInit(STM32F4_PIN_GPIO(rx), STM32F4_PIN_MASK(rx));
+
+    uart_clk_disable(uart);
+
+    CLEAR_BIT(RCC->AHB1ENR,
+            STM32F4_PIN_AHB1ENR_BIT(rx) | STM32F4_PIN_AHB1ENR_BIT(tx));
+}
+
 /**
  * Enable uart tx interrupt
  * @param uart uart bus to initialize
@@ -319,7 +376,7 @@ static inline void uart_irq_handler(KUARTNum uart)
     if (__GET_FLAG(dev, USART_SR_RXNE) )
     {
         char c = dev->DR;
-        xQueueSendToBackFromISR(k_uart->rx_queue, (void *) &c, &task_woken);
+        csp_queue_enqueue_isr(k_uart->rx_queue, (void *) &c, &task_woken);
         if (task_woken != pdFALSE) {
             portYIELD();
         }
@@ -329,10 +386,10 @@ static inline void uart_irq_handler(KUARTNum uart)
     {
         char c;
         task_woken = pdFALSE;
-        BaseType_t result = xQueueReceiveFromISR(k_uart->tx_queue,
+        BaseType_t result = csp_queue_dequeue_isr(k_uart->tx_queue,
                                                  (void *) &c,
                                                  &task_woken);
-        if (result == pdTRUE) {
+        if (result == CSP_QUEUE_OK) {
             // send a queued byte
             dev->DR = c;
         } else {
