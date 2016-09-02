@@ -29,8 +29,8 @@
  * 	run with the SPI bus connected to a BME280 sensor.  Once slave mode is implemented, these tests
  * 	should be updated to keep the setup entirely contained within the STM32F4 board.
  */
-#include "kubos-hal/unity/unity.h"
-#include "kubos-hal/k_test.h"
+#include "unity/unity.h"
+#include "unity/k_test.h"
 #include <string.h>
 
 #include "kubos-hal-stm32f4/spi.h"

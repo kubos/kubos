@@ -26,67 +26,15 @@
  * 	No test case was created for stop bits because no errors are thrown if the stop bit configurations differ
  * 	between the two UART ports
  */
-#include "kubos-hal/unity/unity.h"
-#include "kubos-hal/k_test.h"
+#include "unity/unity.h"
+#include "unity/k_test.h"
 #include <string.h>
 
-#include "kubos-hal/uart.h"
+#include "kubos-hal-stm32f4/uart.h"
 #include "stm32cubef4/stm32f4xx_hal_uart.h"
-
-#define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
 
 static KUARTNum uartFrom;
 static KUARTNum uartTo;
-
-static inline USART_TypeDef *uart_dev(KUARTNum uart)
-{
-    switch (uart) {
-#ifdef YOTTA_CFG_HARDWARE_UART_UART1
-        case K_UART1: return USART1;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART2
-        case K_UART2: return USART2;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART3
-        case K_UART3: return USART3;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART4
-        case K_UART4: return UART4;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART5
-        case K_UART5: return UART5;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART6
-        case K_UART6: return USART6;
-#endif
-        default: return NULL;
-    }
-}
-
-static inline IRQn_Type uart_irqn(KUARTNum uart)
-{
-    switch (uart) {
-#ifdef YOTTA_CFG_HARDWARE_UART_UART1
-        case K_UART1: return USART1_IRQn;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART2
-        case K_UART2: return USART2_IRQn;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART3
-        case K_UART3: return USART3_IRQn;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART4
-        case K_UART4: return UART4_IRQn;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART5
-        case K_UART5: return UART5_IRQn;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART6
-        case K_UART6: return USART6_IRQn;
-#endif
-        default: return 0;
-    }
-}
 
 //UART Tests
 
@@ -103,7 +51,6 @@ static void test_uart_initGood(void)
 
     ret = kprv_uart_dev_init(uartTo);
     TEST_ASSERT_EQUAL_INT_MESSAGE(0, ret, "Failed to init UART1");
-
 }
 
 /*
@@ -122,7 +69,6 @@ static void test_uart_initBad(void)
     ret = kprv_uart_dev_init(num);
 
     TEST_ASSERT_EQUAL_INT(-1, ret);
-
 }
 
 /*
@@ -246,26 +192,25 @@ static void test_uart_readOverflow(void)
 
 static void test_uart_writeImmediate(void)
 {
-	KUARTConf conf;
-	USART_TypeDef *dev2 = uart_dev(K_UART2);
-	USART_TypeDef *dev4 = uart_dev(K_UART4);
-	char recvString[100];
-	int len = 100;
-	int returnLen = 0;
+    KUARTConf conf;
+    USART_TypeDef *dev2 = uart_dev(K_UART2);
+    USART_TypeDef *dev4 = uart_dev(K_UART4);
+    char recvString[100];
+    int len = 100;
+    int returnLen = 0;
 
-	conf = k_uart_conf_defaults();
-	TEST_ASSERT_FALSE(k_uart_init(K_UART2, &conf));
-	TEST_ASSERT_FALSE(k_uart_init(K_UART4, &conf));
+    conf = k_uart_conf_defaults();
+    TEST_ASSERT_FALSE(k_uart_init(K_UART2, &conf));
+    TEST_ASSERT_FALSE(k_uart_init(K_UART4, &conf));
 
-	k_uart_write_immediate(K_UART2,'a');
+    k_uart_write_immediate(K_UART2,'a');
 
-	vTaskDelay(50);
+    vTaskDelay(50);
 
-	returnLen = k_uart_read(K_UART4, recvString, len);
+    returnLen = k_uart_read(K_UART4, recvString, len);
 
-	TEST_ASSERT_EQUAL_MEMORY("a", recvString, 1);
-	TEST_ASSERT_EQUAL_INT(1, returnLen);
-
+    TEST_ASSERT_EQUAL_MEMORY("a", recvString, 1);
+    TEST_ASSERT_EQUAL_INT(1, returnLen);
 }
 
 /*
@@ -279,28 +224,27 @@ static void test_uart_writeImmediate(void)
 
 static void test_uart_wordLen(void)
 {
-	KUARTConf conf;
-	KUART *k_uart;
-	char * testString = "test string 1";
-	int len = strlen(testString);
-	int returnLen = 0;
+    KUARTConf conf;
+    KUART *k_uart;
+    char * testString = "test string 1";
+    int len = strlen(testString);
+    int returnLen = 0;
 
-	conf = k_uart_conf_defaults();
+    conf = k_uart_conf_defaults();
 
-	conf.word_len = K_WORD_LEN_8BIT;
-	TEST_ASSERT_FALSE(k_uart_init(uartTo, &conf));
+    conf.word_len = K_WORD_LEN_8BIT;
+    TEST_ASSERT_FALSE(k_uart_init(uartTo, &conf));
 
-	conf.word_len = K_WORD_LEN_9BIT;
-	TEST_ASSERT_FALSE(k_uart_init(uartFrom, &conf));
+    conf.word_len = K_WORD_LEN_9BIT;
+    TEST_ASSERT_FALSE(k_uart_init(uartFrom, &conf));
 
-	returnLen = k_uart_write(uartFrom, testString, len);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to write");
+    returnLen = k_uart_write(uartFrom, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to write");
 
-	vTaskDelay(50);
+    vTaskDelay(50);
 
-	returnLen = k_uart_read(uartTo, testString, len);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLen, "Should have received 0 bytes");
-
+    returnLen = k_uart_read(uartTo, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLen, "Should have received 0 bytes");
 }
 
 /*
@@ -314,28 +258,27 @@ static void test_uart_wordLen(void)
  */
 static void test_uart_parity(void)
 {
-	KUARTConf conf;
-	KUART *k_uart;
-	char * testString = "test string 123456789012345678";
-	int len = strlen(testString);
-	int returnLen = 0;
+    KUARTConf conf;
+    KUART *k_uart;
+    char * testString = "test string 123456789012345678";
+    int len = strlen(testString);
+    int returnLen = 0;
 
-	conf = k_uart_conf_defaults();
+    conf = k_uart_conf_defaults();
 
-	conf.parity = K_PARITY_ODD;
-	TEST_ASSERT_FALSE(k_uart_init(uartTo, &conf));
+    conf.parity = K_PARITY_ODD;
+    TEST_ASSERT_FALSE(k_uart_init(uartTo, &conf));
 
-	conf.parity = K_PARITY_EVEN;
-	TEST_ASSERT_FALSE(k_uart_init(uartFrom, &conf));
+    conf.parity = K_PARITY_EVEN;
+    TEST_ASSERT_FALSE(k_uart_init(uartFrom, &conf));
 
-	returnLen = k_uart_write(uartFrom, testString, len);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to write");
+    returnLen = k_uart_write(uartFrom, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to write");
 
-	vTaskDelay(50);
+    vTaskDelay(50);
 
-	returnLen = k_uart_read(uartTo, testString, len);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLen, "Should have received 0 bytes");
-
+    returnLen = k_uart_read(uartTo, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLen, "Should have received 0 bytes");
 }
 
 /*
@@ -349,28 +292,27 @@ static void test_uart_parity(void)
 
 static void test_uart_baudRate(void)
 {
-	KUARTConf conf;
-	KUART *k_uart;
-	char * testString = "test string 123456789012345678";
-	int len = strlen(testString);
-	int returnLen = 0;
+    KUARTConf conf;
+    KUART *k_uart;
+    char * testString = "test string 123456789012345678";
+    int len = strlen(testString);
+    int returnLen = 0;
 
-	conf = k_uart_conf_defaults();
+    conf = k_uart_conf_defaults();
 
-	conf.baud_rate = 115200;
-	TEST_ASSERT_FALSE(k_uart_init(uartTo, &conf));
+    conf.baud_rate = 115200;
+    TEST_ASSERT_FALSE(k_uart_init(uartTo, &conf));
 
-	conf.baud_rate = 9600;
-	TEST_ASSERT_FALSE(k_uart_init(uartFrom, &conf));
+    conf.baud_rate = 9600;
+    TEST_ASSERT_FALSE(k_uart_init(uartFrom, &conf));
 
-	returnLen = k_uart_write(uartFrom, testString, len);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to write");
+    returnLen = k_uart_write(uartFrom, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to write");
 
-	vTaskDelay(50);
+    vTaskDelay(50);
 
-	returnLen = k_uart_read(uartTo, testString, len);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLen, "Should have received 0 bytes");
-
+    returnLen = k_uart_read(uartTo, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLen, "Should have received 0 bytes");
 }
 
 /*
@@ -385,34 +327,33 @@ static void test_uart_baudRate(void)
 
 static void test_uart_overrun(void)
 {
-	USART_TypeDef *dev = uart_dev(uartTo);
-	UART_HandleTypeDef u = { .Instance = uart_dev(uartTo) };
+    USART_TypeDef *dev = uart_dev(uartTo);
+    UART_HandleTypeDef u = { .Instance = uart_dev(uartTo) };
 
-	KUARTConf conf;
-	KUART *k_uart;
-	char * testString = "test string 1";
-	int len = strlen(testString);
-	int returnLen = 0;
+    KUARTConf conf;
+    KUART *k_uart;
+    char * testString = "test string 1";
+    int len = strlen(testString);
+    int returnLen = 0;
 
-	conf = k_uart_conf_defaults();
+    conf = k_uart_conf_defaults();
 
-	TEST_ASSERT_FALSE(k_uart_init(uartTo, &conf));
+    TEST_ASSERT_FALSE(k_uart_init(uartTo, &conf));
 
-	TEST_ASSERT_FALSE(k_uart_init(uartFrom, &conf));
+    TEST_ASSERT_FALSE(k_uart_init(uartFrom, &conf));
 
-	HAL_NVIC_DisableIRQ(uart_irqn(uartTo));
-	returnLen = k_uart_write(uartFrom, testString, len);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to write");
+    HAL_NVIC_DisableIRQ(uart_irqn(uartTo));
+    returnLen = k_uart_write(uartFrom, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to write");
 
-	vTaskDelay(50);
+    vTaskDelay(50);
 
-	HAL_NVIC_EnableIRQ(uart_irqn(uartTo));
+    HAL_NVIC_EnableIRQ(uart_irqn(uartTo));
 
-	vTaskDelay(50);
+    vTaskDelay(50);
 
-	returnLen = k_uart_read(uartTo, testString, len);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLen, "Should have received 0 bytes");
-
+    returnLen = k_uart_read(uartTo, testString, len);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLen, "Should have received 0 bytes");
 }
 
 
