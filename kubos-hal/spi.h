@@ -134,7 +134,7 @@ typedef enum {
 typedef enum {
     SPI_OK,
     SPI_ERROR,
-	SPI_ERROR_BUSY,
+    SPI_ERROR_BUSY,
     SPI_ERROR_TIMEOUT
 } KSPIStatus;
 
@@ -142,11 +142,11 @@ typedef enum {
  * Spi configuration structure
  */
 typedef struct {
-	/**
-	 * The role of the SPI bus.
-	 * Should be either master or slave, as specified by the SPIRole enumerator
-	 * @warning Only the Master role is available as of v0.1.0
-	 */
+    /**
+     * The role of the SPI bus.
+     * Should be either master or slave, as specified by the SPIRole enumerator
+     * @warning Only the Master role is available as of v0.1.0
+     */
     SPIRole role;
     /**
      * The communication mode of the SPI bus.
