@@ -1,9 +1,9 @@
 {
   "name": "kubos-arm-none-eabi-gcc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "base KubOS RT build target for the arm-none-eabi-gcc toolchain",
   "inherits": {
-    "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
+    "kubos-rt-gcc": "kubostech/target-kubos-rt-gcc#~0.1.0"
   },
   "licenses": [
     {
