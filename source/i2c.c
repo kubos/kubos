@@ -153,24 +153,66 @@ static KI2CStatus hal_i2c_master_setup_write(I2C_HandleTypeDef * hal_handle, uin
  */
 static hal_i2c_handle hal_i2c_bus[K_NUM_I2CS];
 
-/** Functions implemented from Kubos-HAL interface **/
+/* Functions implemented from Kubos-HAL interface */
 
-void kprv_i2c_dev_init(KI2CNum i2c_num)
+/**
+ * Setup and enable i2c bus
+ * @param i2c i2c bus to initialize
+ * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
+ */
+KI2CStatus kprv_i2c_dev_init(KI2CNum i2c_num)
 {
     KI2C * i2c = kprv_i2c_get(i2c_num);
+    if(i2c == NULL)
+    {
+        return I2C_ERROR;
+    }
+
+    //Only I2C master processing is currently supported
+    if(i2c->conf.role != K_MASTER)
+    {
+        return I2C_ERROR;
+    }
+
     hal_i2c_handle * handle = hal_i2c_device_init(i2c);
-    hal_i2c_hw_init(handle);
+    if(handle == NULL)
+    {
+        return I2C_ERROR_NULL_HANDLE;
+    }
+
+    return hal_i2c_hw_init(handle);
 }
 
-void kprv_i2c_dev_terminate(KI2CNum i2c)
+/**
+ * i2c hardware cleanup and disabling
+ * @param i2c bus num to terminate
+ * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
+ */
+KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
 {
     hal_i2c_handle * handle = hal_i2c_get_handle(i2c);
+    if (handle == NULL)
+    {
+        return I2C_ERROR_NULL_HANDLE;
+    }
+
     hal_i2c_terminate(handle);
+
+    return I2C_OK;
 }
 
+/**
+ * Write data over i2c bus as master
+ * @param i2c i2c bus to write to
+ * @param addr i2c address to write to
+ * @param ptr pointer to data buffer
+ * @param len length of data to write
+ * @return KI2CStatus I2C_OK on success, otherwise failure
+ */
 KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
     KI2CStatus ret = I2C_OK;
+
     hal_i2c_handle * handle = hal_i2c_get_handle(i2c);
     if (handle == NULL)
     {
@@ -226,6 +268,14 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
     return ret;
 }
 
+/**
+ * Read data over i2c bus as master
+ * @param i2c i2c bus to read from
+ * @param addr i2c address to write to
+ * @param ptr pointer to data buffer
+ * @param len length of data to read
+ * @return KI2CStatus I2C_OK on success, otherwise failure
+ */
 KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
     KI2CStatus ret = I2C_OK;
@@ -337,10 +387,16 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
     return ret;
 }
 
-/** Private hal functions **/
+/* Private hal functions */
 
 static hal_i2c_handle* hal_i2c_get_handle(KI2CNum num)
 {
+	//Validate I2C number
+	if(num < 0 || num > (K_NUM_I2CS-1))
+	{
+	    return 0;
+	}
+
     return &hal_i2c_bus[num];
 }
 
@@ -354,8 +410,31 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c)
         {
             KI2CConf config = i2c->conf;
             handle->ki2c = i2c;
-            handle->hal_handle.Init.AddressingMode  = config.addressing_mode;
-            handle->hal_handle.Init.ClockSpeed      = config.clock_speed;
+
+            switch(config.addressing_mode)
+            {
+            	case K_ADDRESSINGMODE_10BIT:
+            		handle->hal_handle.Init.AddressingMode = K_ADDRESSINGMODE_10BIT;
+            		break;
+            	case K_ADDRESSINGMODE_7BIT:
+            	default:
+            		handle->hal_handle.Init.AddressingMode = K_ADDRESSINGMODE_7BIT;
+            		break;
+            }
+
+            if(config.clock_speed < 0)
+            {
+            	handle->hal_handle.Init.ClockSpeed = 0;
+            }
+            else if(config.clock_speed > 400000)
+            {
+            	handle->hal_handle.Init.ClockSpeed = 400000;
+            }
+            else
+            {
+            	handle->hal_handle.Init.ClockSpeed      = config.clock_speed;
+            }
+
             handle->hal_handle.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
             handle->hal_handle.Init.DutyCycle       = I2C_DUTYCYCLE_2;
             handle->hal_handle.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
@@ -692,7 +771,51 @@ static KI2CStatus hal_i2c_master_request_read(I2C_HandleTypeDef * hal_handle, ui
         return ret;
     }
     /* Send slave address */
-    hal_handle->Instance->DR = I2C_7BIT_ADD_READ(addr);
+    if(hal_handle->Init.AddressingMode == K_ADDRESSINGMODE_7BIT)
+    {
+        /* Send slave address */
+        hal_handle->Instance->DR = I2C_7BIT_ADD_READ(addr);
+    }
+    else if(hal_handle->Init.AddressingMode == K_ADDRESSINGMODE_10BIT)
+    {
+        /* Send header of slave address */
+        hal_handle->Instance->DR = I2C_10BIT_HEADER_WRITE(addr);
+
+        /* Wait until ADD10 flag is set */
+        if((ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADD10)) != I2C_OK)
+        {
+          return ret;
+        }
+
+        /* Send slave address */
+        hal_handle->Instance->DR = I2C_10BIT_ADDRESS(addr);
+
+        /* Wait until ADDR flag is set */
+        if((ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADDR)) != I2C_OK)
+        {
+          return ret;
+        }
+
+        /* Clear ADDR flag */
+        __HAL_I2C_CLEAR_ADDRFLAG(hal_handle);
+
+        /* Generate Restart */
+        hal_handle->Instance->CR1 |= I2C_CR1_START;
+
+        /* Wait until SB flag is set */
+        if((ret = hal_i2c_check_flag_timeout(hal_handle, I2C_FLAG_SB, RESET)) != I2C_OK)
+        {
+          return ret;
+        }
+
+        /* Send header of slave address */
+        hal_handle->Instance->DR = I2C_10BIT_HEADER_READ(addr);
+    }
+    else
+    {
+        //Bad addressing mode
+        return I2C_ERROR;
+    }
 
     /* Wait for ADDR */
     ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADDR);
@@ -783,7 +906,30 @@ static KI2CStatus hal_i2c_master_request_write(I2C_HandleTypeDef * hal_handle, u
     }
 
     /* Send slave address */
-    hal_handle->Instance->DR = I2C_7BIT_ADD_WRITE(addr);
+    if(hal_handle->Init.AddressingMode == K_ADDRESSINGMODE_7BIT)
+    {
+        /* Send slave address */
+    	hal_handle->Instance->DR = I2C_7BIT_ADD_WRITE(addr);
+    }
+    else if(hal_handle->Init.AddressingMode == K_ADDRESSINGMODE_10BIT)
+    {
+        /* Send header of slave address */
+    	hal_handle->Instance->DR = I2C_10BIT_HEADER_WRITE(addr);
+
+        /* Wait until ADD10 flag is set */
+        if((ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADD10)) != HAL_OK)
+        {
+        	return ret;
+        }
+
+        /* Send slave address */
+        hal_handle->Instance->DR = I2C_10BIT_ADDRESS(addr);
+    }
+    else
+    {
+    	//Bad addressing mode
+    	return I2C_ERROR;
+    }
 
     /* Wait for ADDR */
     ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADDR);

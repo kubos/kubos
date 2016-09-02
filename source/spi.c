@@ -14,59 +14,160 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ /**
+   * @defgroup SPI
+   * @addtogroup SPI
+   * @{
+   */
 #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #include "kubos-hal-stm32f4/spi.h"
 #include "kubos-hal-stm32f4/pins.h"
 
+/**
+ * Fetches SPI bus data structure
+ * @param num SPI bus num to fetch
+ * @return hal_spi_handle* pointer to data structure
+ */
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi);
+
+/**
+ * Initializes SPI bus structure with data needed to setup hardware
+ * @param spi higher level hal SPI data
+ * @return hal_spi_handle* NULL if bad bus num, otherwise data ready for dev setup
+ */
 static hal_spi_handle * hal_spi_device_init(KSPI * spi);
+
+/**
+ * Initializes the SPI according to the specified parameters
+ * in the configuration and creates the associated handle.
+ * @param handle pointer to hal_spi_handle containing config information
+ * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
+ */
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle);
+
+/**
+ * SPI hardware cleanup and disabling
+ * @param handle pointer to hal_spi_handle containing config information
+ */
 static void hal_spi_terminate(hal_spi_handle * handle);
+
+/**
+ * Initializes the SPI bus pins.
+ * @param handle pointer to hal_spi_handle containing config information
+ */
 static void hal_spi_gpio_init(hal_spi_handle * handle);
 
+/**
+ * Static array of spi bus handles
+ */
 static hal_spi_handle hal_spi_dev[K_NUM_SPI];
+
+/**
+ * Default spi request timeout value
+ */
 static uint32_t spi_timeout = 1000;
 
-/** Functions implemented from KubOS-HAL SPI Interface **/
+/* Functions implemented from KubOS-HAL SPI Interface */
 
-void kprv_spi_dev_init(KSPINum spi_num)
+/**
+ * Setup and enable SPI bus
+ * @param spi SPI bus to initialize
+ * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
+ */
+KSPIStatus kprv_spi_dev_init(KSPINum spi_num)
 {
     KSPI * spi = kprv_spi_get(spi_num);
+    if(spi == NULL)
+    {
+    	return SPI_ERROR;
+    }
     hal_spi_handle * handle = hal_spi_device_init(spi);
-    hal_spi_hw_init(handle);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
+    return hal_spi_hw_init(handle);
 }
 
-void kprv_spi_dev_terminate(KSPINum spi)
+/**
+ * SPI hardware cleanup and disabling
+ * @param spi bus num to terminate
+ * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
+ */
+KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
     hal_spi_terminate(handle);
+    return SPI_OK;
 }
 
+/**
+ * Write data over SPI bus
+ * @param spi SPI bus to write to
+ * @param buffer pointer to data buffer
+ * @param len length of data to write
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
     HAL_StatusTypeDef status = HAL_SPI_Transmit(&(handle->hal_handle), buffer, len, spi_timeout);
     return (KSPIStatus)status;
 }
 
+/**
+ * Read data over SPI bus
+ * @param spi SPI bus to read from
+ * @param buffer pointer to data buffer
+ * @param len length of data to read
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
     HAL_StatusTypeDef status = HAL_SPI_Receive(&(handle->hal_handle), buffer, len, spi_timeout);
     return (KSPIStatus)status;
 }
 
+/**
+ * Write and read data over SPI bus
+ * @param spi SPI bus to write to
+ * @param txBuffer pointer to data buffer to write from
+ * @param rxBuffer pointer to data buffer to read into
+ * @param len length of data to write and read
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len)
 {
     hal_spi_handle * handle = hal_spi_get_handle(spi);
+    if(handle == NULL)
+    {
+    	return SPI_ERROR;
+    }
     HAL_StatusTypeDef status = HAL_SPI_TransmitReceive(&(handle->hal_handle), txBuffer, rxBuffer, len, spi_timeout);
     return (KSPIStatus)status;
 }
 
-/** Private functions **/
+/* Private functions */
 
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi)
 {
+	if(spi > K_NUM_SPI-1)
+	{
+		return 0;
+	}
     return &hal_spi_dev[spi];
 }
 
@@ -169,6 +270,8 @@ static void hal_spi_terminate(hal_spi_handle * handle)
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
 {
     SPI_HandleTypeDef * SPIHandle = &(handle->hal_handle);
+    uint32_t freq;
+    float prescaler;
 
     switch(handle->kspi->bus_num)
     {
@@ -176,6 +279,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         case K_SPI1:
         {
             __HAL_RCC_SPI1_CLK_ENABLE();
+            freq = HAL_RCC_GetPCLK2Freq();
             break;
         }
 #endif
@@ -183,6 +287,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         case K_SPI2:
         {
             __HAL_RCC_SPI2_CLK_ENABLE();
+            freq = HAL_RCC_GetPCLK1Freq();
             break;
         }
 #endif
@@ -190,6 +295,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         case K_SPI3:
         {
             __HAL_RCC_SPI3_CLK_ENABLE();
+            freq = HAL_RCC_GetPCLK1Freq();
             break;
         }
 #endif
@@ -204,7 +310,17 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
     /* Set options */
     KSPIConf conf = handle->kspi->config;
 
-    if (conf.clock_phase == K_SPI_DATASIZE_8BIT)
+    //For the moment the STM32F4 only supports SPI in master mode
+    if(conf.role == K_SPI_MASTER)
+    {
+    	SPIHandle->Init.Mode = SPI_MODE_MASTER;
+    }
+    else
+    {
+    	return SPI_ERROR;
+    }
+
+    if (conf.data_size == K_SPI_DATASIZE_8BIT)
     {
         SPIHandle->Init.DataSize = SPI_DATASIZE_8BIT;
     }
@@ -219,7 +335,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
     }
     else /* 2 edge */
     {
-        SPIHandle->Init.CLKPhase = SPI_PHASE_1EDGE;
+        SPIHandle->Init.CLKPhase = SPI_PHASE_2EDGE;
     }
 
     if (conf.clock_polarity == K_SPI_CPOL_LOW)
@@ -263,9 +379,48 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
         }
     }
 
+    //Calculate closest prescaler value based on desired clock frequency
+    if(conf.speed == NULL)
+    {
+    	return SPI_ERROR;
+    }
+
+    prescaler = (float) freq / (float) conf.speed;
+
+    if(prescaler <= 2)
+    {
+    	SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+    }
+    else if(prescaler <= 4)
+    {
+    	SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+    }
+    else if(prescaler <= 8)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+	}
+    else if(prescaler <= 16)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+	}
+    else if(prescaler <= 32)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+	}
+    else if(prescaler <= 64)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+	}
+    else if(prescaler <= 128)
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+	}
+    else
+	{
+		SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+	}
+
     /* Fill aditional SPI settings */
-    SPIHandle->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
-    SPIHandle->Init.Mode = SPI_MODE_MASTER;
     SPIHandle->Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
     SPIHandle->Init.CRCPolynomial = 7;
     SPIHandle->Init.TIMode = SPI_TIMODE_DISABLE;
@@ -301,3 +456,5 @@ static void hal_spi_gpio_init(hal_spi_handle * handle)
 }
 
 #endif
+
+/* @} */
