@@ -1,6 +1,6 @@
 {
   "name": "kubos-hal-msp430f5529",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "KubOS - Satellite flight software platform",
   "keywords": [],
   "author": "https://kubos.co",

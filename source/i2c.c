@@ -90,40 +90,55 @@ static inline hal_i2c_role i2c_role(I2CRole role)
   * @brief Creates and sets up specified i2c bus option.
   * @param i2c Number of i2c bus to setup.
   */
-void kprv_i2c_dev_init(KI2CNum i2c)
+KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
 {
-	KI2C *k_i2c = kprv_i2c_get(i2c);
+    KI2C *k_i2c = kprv_i2c_get(i2c);
+    if (k_i2c == NULL)
+    {
+        return I2C_ERROR_NULL_HANDLE;
+    }
 
-	hal_i2c_config config = {
-			.addressing_mode = i2c_addressing(k_i2c->conf.addressing_mode),
-			.clock_speed = k_i2c->conf.clock_speed,
-			.role = i2c_role(k_i2c->conf.role)
-	};
+    hal_i2c_config config = {
+            .addressing_mode = i2c_addressing(k_i2c->conf.addressing_mode),
+            .clock_speed = k_i2c->conf.clock_speed,
+            .role = i2c_role(k_i2c->conf.role)
+    };
 
-	hal_i2c_handle * handle = hal_i2c_init(config, i2c);
-	handle->bus_num = i2c_bus(i2c);
-	hal_i2c_setup(handle);
+    hal_i2c_handle * handle = hal_i2c_init(config, i2c);
+    if (handle != NULL)
+    {
+        handle->bus_num = i2c_bus(i2c);
+        hal_i2c_setup(handle);
+        return I2C_OK;
+    }
+    return I2C_ERROR_NULL_HANDLE;
 }
 
-void kprv_i2c_dev_terminate(KI2CNum i2c)
+KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
 {
-	hal_i2c_dev_terminate(i2c_handle(i2c));
+    hal_i2c_handle * handle = i2c_handle(i2c);
+    if (handle != NULL)
+    {
+        hal_i2c_dev_terminate(handle);
+        return I2C_OK;
+    }
+    return I2C_ERROR_NULL_HANDLE;
 }
 
 KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
-	hal_i2c_status ret = HAL_I2C_ERROR;
-	ret = hal_i2c_master_write(i2c_handle(i2c), addr, ptr, len);
+    hal_i2c_status ret = HAL_I2C_ERROR;
+    ret = hal_i2c_master_write(i2c_handle(i2c), addr, ptr, len);
 
-	return (KI2CStatus)ret;
+    return (KI2CStatus)ret;
 }
 
 KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
-	hal_i2c_status ret = HAL_I2C_ERROR;
-	ret = hal_i2c_master_read(i2c_handle(i2c), addr, ptr, len);
+    hal_i2c_status ret = HAL_I2C_ERROR;
+    ret = hal_i2c_master_read(i2c_handle(i2c), addr, ptr, len);
 
-	return (KI2CStatus)ret;
+    return (KI2CStatus)ret;
 }
 
 #endif

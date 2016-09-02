@@ -134,9 +134,13 @@ static inline hal_spi_first_bit spi_first_bit(SPIFirstBit firstbit)
   * @brief Creates and sets up specified spi bus option.
   * @param spi Number of spi bus to setup.
   */
-void kprv_spi_dev_init(KSPINum spi)
+KSPIStatus kprv_spi_dev_init(KSPINum spi)
 {
     KSPI *k_spi = kprv_spi_get(spi);
+    if (k_spi == NULL)
+    {
+        return SPI_ERROR_NULL_HANDLE;
+    }
 
     hal_spi_conf config = {
             .role = spi_role(k_spi->config.role),
@@ -149,13 +153,24 @@ void kprv_spi_dev_init(KSPINum spi)
     };
 
     hal_spi_handle * handle = hal_spi_init(config, spi);
-    handle->bus_num = spi_bus(spi);
-    hal_spi_setup(handle);
+    if (handle != NULL)
+    {
+        handle->bus_num = spi_bus(spi);
+        hal_spi_setup(handle);
+        return SPI_OK;
+    }
+    return SPI_ERROR_NULL_HANDLE;
 }
 
-void kprv_spi_dev_terminate(KSPINum spi)
+KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
 {
-    hal_spi_dev_terminate(spi_handle(spi));
+    hal_spi_handle * handle = spi_handle(spi);
+    if (handle != NULL)
+    {
+        hal_spi_dev_terminate(handle);
+        return SPI_OK;
+    }
+    return SPI_ERROR_NULL_HANDLE;
 }
 
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t *buffer, uint32_t len)

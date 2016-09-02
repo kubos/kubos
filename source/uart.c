@@ -117,7 +117,7 @@ static inline hal_uart_wordlen uart_wordlen(KWordLen wordlen)
   * @brief Creates and sets up specified UART device.
   * @param uart Number of UART device to setup.
   */
-void kprv_uart_dev_init(KUARTNum uart)
+int kprv_uart_dev_init(KUARTNum uart)
 {
     KUART * k_uart = kprv_uart_get(uart);
 
@@ -130,7 +130,12 @@ void kprv_uart_dev_init(KUARTNum uart)
     };
 
     hal_uart_handle * handle = hal_uart_init(config);
-    hal_uart_setup(handle);
+    if (handle != NULL)
+    {
+        hal_uart_setup(handle);
+        return 0;
+    }
+    return -1;
 }
 
 /**
