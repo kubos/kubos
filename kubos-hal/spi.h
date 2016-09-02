@@ -28,8 +28,7 @@
 #ifndef K_SPI_H
 #define K_SPI_H
 
-#include "FreeRTOS.h"
-#include "semphr.h"
+#include <csp/arch/csp_semaphore.h>
 
 /**
  * Number of spi buses available. Derived from value in target.json
@@ -67,8 +66,9 @@
  * Available spi buses
  */
 typedef enum {
+    K_SPI_NO_BUS = 0,
 #ifdef YOTTA_CFG_HARDWARE_SPI_SPI1
-    K_SPI1 = 0,
+    K_SPI1,
 #endif
 #ifdef YOTTA_CFG_HARDWARE_SPI_SPI2
     K_SPI2,
@@ -155,7 +155,7 @@ typedef struct {
 typedef struct {
     KSPIConf config;
     KSPINum bus_num;
-    SemaphoreHandle_t spi_lock;
+    csp_mutex_t spi_lock;
 } KSPI;
 
 /**
@@ -170,6 +170,8 @@ void k_spi_init(KSPINum spi, KSPIConf * conf);
  * @param spi spi bus to terminate
  */
 void k_spi_terminate(KSPINum spi);
+
+KSPIConf k_spi_conf_defaults(void);
 
 /**
  * Write data over spi bus

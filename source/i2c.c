@@ -24,19 +24,24 @@ static KI2C k_i2cs[K_NUM_I2CS];
 void k_i2c_init(KI2CNum i2c, KI2CConf *conf)
 {
     KI2C *k_i2c = kprv_i2c_get(i2c);
-    // Need to prevent re-initialization
-    memcpy(&k_i2c->conf, conf, sizeof(KI2CConf));
-
-    k_i2c->bus_num = i2c;
-
-    k_i2c->i2c_lock = xSemaphoreCreateMutex();
-
-    kprv_i2c_dev_init(i2c);
+    if (k_i2c->bus_num == K_I2C_NO_BUS)
+    {
+        memcpy(&k_i2c->conf, conf, sizeof(KI2CConf));
+        k_i2c->bus_num = i2c;
+        csp_mutex_create(&(k_i2c->i2c_lock));
+        kprv_i2c_dev_init(i2c);
+    }
 }
 
 void k_i2c_terminate(KI2CNum i2c)
 {
-    kprv_i2c_dev_terminate(i2c);
+    KI2C *k_i2c = kprv_i2c_get(i2c);
+    if (k_i2c->bus_num != K_I2C_NO_BUS)
+    {
+        kprv_i2c_dev_terminate(i2c);
+        csp_mutex_remove(&(k_i2c->i2c_lock));
+        k_i2c->bus_num = K_I2C_NO_BUS;
+    }
 }
 
 KI2CConf k_i2c_conf_defaults(void)
@@ -64,13 +69,13 @@ KI2CStatus k_i2c_write(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
 {
     KI2C * ki2c = kprv_i2c_get(i2c);
     KI2CStatus ret = I2C_ERROR;
-    if (ki2c->i2c_lock != NULL)
+    if ((ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
     {
         // Today...block indefinitely
-        if (xSemaphoreTake(ki2c->i2c_lock, (TickType_t)portMAX_DELAY) == pdTRUE)
+        if (csp_mutex_lock(&(ki2c->i2c_lock), CSP_MAX_DELAY) == CSP_SEMAPHORE_OK)
         {
             ret = kprv_i2c_master_write(i2c, addr, ptr, len);
-            xSemaphoreGive(ki2c->i2c_lock);
+            csp_mutex_unlock(&(ki2c->i2c_lock));
         }
     }
     return ret;
@@ -80,13 +85,13 @@ KI2CStatus k_i2c_read(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
 {
     KI2C * ki2c = kprv_i2c_get(i2c);
     KI2CStatus ret = I2C_ERROR;
-    if (ki2c->i2c_lock != NULL)
+    if ((ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
     {
         // Today...block indefinitely
-        if (xSemaphoreTake(ki2c->i2c_lock, (TickType_t)portMAX_DELAY) == pdTRUE)
+        if (csp_mutex_lock(&(ki2c->i2c_lock), CSP_MAX_DELAY) == CSP_SEMAPHORE_OK)
         {
             ret = kprv_i2c_master_read(i2c, addr, ptr, len);
-            xSemaphoreGive(ki2c->i2c_lock);
+            csp_mutex_unlock(&(ki2c->i2c_lock));
         }
     }
     return ret;
@@ -94,7 +99,7 @@ KI2CStatus k_i2c_read(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
 
 KI2C* kprv_i2c_get(KI2CNum i2c)
 {
-    return &k_i2cs[i2c];
+    return &k_i2cs[i2c - 1];
 }
 
 #endif

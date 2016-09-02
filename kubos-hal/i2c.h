@@ -29,8 +29,7 @@
 #define K_I2C_H
 
 #include <stdint.h>
-#include "FreeRTOS.h"
-#include "semphr.h"
+#include <csp/arch/csp_semaphore.h>
 
 /**
  * Number of i2c buses available. Derived from value in target.json
@@ -70,8 +69,9 @@
  * Available i2c buses
  */
 typedef enum {
+    K_I2C_NO_BUS = 0,
 #ifdef YOTTA_CFG_HARDWARE_I2C_I2C1
-    K_I2C1 = 0,
+    K_I2C1,
 #endif
 #ifdef YOTTA_CFG_HARDWARE_I2C_I2C2
     K_I2C2,
@@ -113,7 +113,7 @@ typedef struct {
 typedef struct {
     KI2CNum bus_num;
     KI2CConf conf;
-    SemaphoreHandle_t i2c_lock;
+    csp_mutex_t i2c_lock;
 } KI2C;
 
 /**

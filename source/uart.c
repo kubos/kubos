@@ -16,19 +16,18 @@
  */
 
 #if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
-#include "FreeRTOS.h"
 #include "kubos-hal/uart.h"
 #include <string.h>
 
 static KUART k_uarts[K_NUM_UARTS];
 
-static inline BaseType_t queue_push(QueueHandle_t *queue, char c,
-                                    TickType_t timeout, void *task_woken)
+static inline int queue_push(csp_queue_handle_t *queue, char c,
+                                    int timeout, void *task_woken)
 {
     if (!task_woken) {
-        return xQueueSendToBack(queue, &c, timeout);
+        return csp_queue_enqueue(queue, &c, timeout);
     } else {
-        return xQueueSendToBackFromISR(queue, &c, task_woken);
+        return csp_queue_enqueue_isr(queue, &c, task_woken);
     }
 }
 
@@ -55,10 +54,22 @@ void k_uart_init(KUARTNum uart, KUARTConf *conf)
     memcpy(&k_uart->conf, conf, sizeof(KUARTConf));
 
     k_uart->dev = uart;
-    k_uart->rx_queue = xQueueCreate(k_uart->conf.rx_queue_len, sizeof(char));
-    k_uart->tx_queue = xQueueCreate(k_uart->conf.tx_queue_len, sizeof(char));
+    k_uart->rx_queue = csp_queue_create(k_uart->conf.rx_queue_len, sizeof(char));
+    k_uart->tx_queue = csp_queue_create(k_uart->conf.tx_queue_len, sizeof(char));
 
     kprv_uart_dev_init(uart);
+}
+
+void k_uart_terminate(KUARTNum uart)
+{
+    KUART *k_uart = &k_uarts[uart];
+
+    kprv_uart_dev_terminate(uart);
+
+    csp_queue_remove(k_uart->rx_queue);
+    k_uart->rx_queue = NULL;
+    csp_queue_remove(k_uart->tx_queue);
+    k_uart->tx_queue = NULL;
 }
 
 void k_uart_console_init(void)
@@ -73,12 +84,14 @@ void k_uart_console_init(void)
 int k_uart_read(KUARTNum uart, char *ptr, int len)
 {
     int i = 0;
-    BaseType_t result;
-
-    for (; i < len; i++, ptr++) {
-        result = xQueueReceive(k_uarts[uart].rx_queue, ptr, portMAX_DELAY);
-        if (result != pdTRUE) {
-            return i;
+    int result;
+    if ((k_uarts[uart].rx_queue != NULL) && (ptr != NULL))
+    {
+        for (; i < len; i++, ptr++) {
+            result = csp_queue_dequeue(k_uarts[uart].rx_queue, ptr, 0);
+            if (result != CSP_QUEUE_OK) {
+                return i;
+            }
         }
     }
 
@@ -88,19 +101,26 @@ int k_uart_read(KUARTNum uart, char *ptr, int len)
 int k_uart_write(KUARTNum uart, char *ptr, int len)
 {
     int i = 0;
-    for (; i < len; i++, ptr++) {
-        BaseType_t result = queue_push(k_uarts[uart].tx_queue, *ptr, portMAX_DELAY, NULL);
-        if (result != pdTRUE) {
-            return i;
+    if ((k_uarts[uart].tx_queue != NULL) && (ptr != NULL))
+    {
+        for (; i < len; i++, ptr++) {
+            int result = queue_push(k_uarts[uart].tx_queue, *ptr, CSP_MAX_DELAY, NULL);
+            if (result != CSP_QUEUE_OK) {
+                return i;
+            }
+            kprv_uart_enable_tx_int(uart);
         }
-        kprv_uart_enable_tx_int(uart);
     }
     return i;
 }
 
 int k_uart_rx_queue_len(KUARTNum uart)
 {
-    return (int) uxQueueMessagesWaiting(k_uarts[uart].rx_queue);
+    if (k_uarts[uart].rx_queue != NULL)
+    {
+        return (int) csp_queue_size(k_uarts[uart].rx_queue);
+    }
+    return 0;
 }
 
 void k_uart_rx_queue_push(KUARTNum uart, char c, void *task_woken)
