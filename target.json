@@ -1,0 +1,23 @@
+{
+  "name": "kubos-rt-gcc",
+  "version": "0.1.0",
+  "inherits": {
+    "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
+  },
+  "similarTo": [
+    "kubos-rt",
+    "freertos"
+  ],
+  "toolchain": "CMake/toolchain.cmake",
+  "description": "base KubOS RT build target for the gcc toolchain",
+  "keywords": [
+    "kubos-rt",
+    "freertos"
+  ],
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ]
+}
