@@ -190,6 +190,27 @@ static void test_i2c_writeMasterBad(void)
 }
 
 /*
+ * test_i2c_writeMasterOverflow
+ *
+ * Purpose:  Test writing more bytes than the write buffer contains
+ *
+ */
+
+static void test_i2c_writeMasterOverflow(void)
+{
+    int ret;
+    uint8_t buffer[2] = {(uint8_t)61, 0x00}; //cmd (0x3D): Set bno055 sensor to config mode (0x00)
+
+	test_setup();
+
+    //Send request for data
+    ret = kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)buffer, 200);
+
+    kprv_i2c_dev_terminate(I2C_BUS);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Write failed");
+}
+
+/*
  * test_i2c_readMasterGood
  *
  * Purpose:  Test reading from slave address
@@ -259,6 +280,33 @@ static void test_i2c_readMasterNoWrite(void)
 
     kprv_i2c_dev_terminate(I2C_BUS);
     TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Read returned unexpected value");
+}
+
+/*
+ * test_i2c_readMasterOverflow
+ *
+ * Purpose:  Test reading more bytes than the read buffer contains
+ *
+ */
+
+static void test_i2c_readMasterOverflow(void)
+{
+	int ret;
+	char buffer[100] = {0};
+	uint8_t reg = BNO055_CHIP_ID_ADDR;
+
+	test_setup();
+
+    //Send request for data
+    ret = kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)&reg, 1);
+    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Write failed");
+
+    vTaskDelay(5);
+
+    ret = kprv_i2c_master_read(I2C_BUS, BNO055_ADDRESS_A, buffer, sizeof buffer);
+
+	TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Read failed");
+
 }
 
 /*
@@ -496,9 +544,11 @@ K_TEST_MAIN() {
     RUN_TEST(test_i2c_termBad);
     RUN_TEST(test_i2c_writeMasterGood);
     RUN_TEST(test_i2c_writeMasterBad);
+    RUN_TEST(test_i2c_writeMasterOverflow);
     RUN_TEST(test_i2c_readMasterGood);
     RUN_TEST(test_i2c_readMasterBad);
     RUN_TEST(test_i2c_readMasterNoWrite);
+    RUN_TEST(test_i2c_readMasterOverflow);
     RUN_TEST(test_i2c_addrModeWrite);
     RUN_TEST(test_i2c_addrModeRead);
     RUN_TEST(test_i2c_slave);
