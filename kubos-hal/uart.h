@@ -189,6 +189,7 @@ KUARTConf k_uart_conf_defaults(void);
  * Setup and enable uart interface
  * @param uart uart interface to initialize
  * @param conf config values to initialize with
+ * @return int 0 if OK, non-zero error code otherwise
  */
 int k_uart_init(KUARTNum uart, KUARTConf *conf);
 
