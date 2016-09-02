@@ -1,6 +1,6 @@
 {
   "name": "kubos-gcc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "base KubOS build target for the gcc toolchain",
   "licenses": [
     {
