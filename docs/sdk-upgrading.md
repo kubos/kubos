@@ -4,11 +4,11 @@
 
 The KubOS-SDK can be upgraded using this pip command:
 
-		$ sudo pip install --upgrade kubos-sdk
+        $ sudo pip install --upgrade kubos-sdk
 
 Be sure to pull the latest Kubos-SDK docker container afterwards:
 
-		$ kubos update
+        $ kubos update
 
 ## Upgrading links to Kubos-SDK v0.1.0
 
