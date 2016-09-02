@@ -4,12 +4,12 @@
 
 Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory under your current working directory with your project's name and add the basic files.
 
-		$ kubos init project-name
+        $ kubos init project-name
 
 The contents of your project directory should look something like this:
 
-		$ ls
-		module.json  project-name  source  test
+        $ ls
+        module.json  project-name  source  test
 
 Here is a quick rundown of the files that were generated:
 
@@ -37,13 +37,13 @@ Yotta needs to know which target you intend to build for so it can select the pr
 
 The respective commands to select those targets are as follows.
 
-		$ kubos target stm32f407-disco-gcc
+        $ kubos target stm32f407-disco-gcc
 
-		$ kubos target pyboard-gcc
+        $ kubos target pyboard-gcc
 
-		$ kubos target na-satbus-3c0-gcc
+        $ kubos target na-satbus-3c0-gcc
 
-		$ kubos target msp430f5529-gcc
+        $ kubos target msp430f5529-gcc
 
 If you have no target currently set, you may run the following command to see which targets are available:
 
@@ -77,18 +77,18 @@ The KubOS SDK comes with all of the latest KubOS modules and targets pre-package
 
  * To link a module globally:
 
-		$ cd .../<module-directory>/
-		$ kubos link
+        $ cd .../<module-directory>/
+        $ kubos link
 
  * To link a module that is already globally linked into a project:
 
-		$ cd .../<project-directory>/
-		$ kubos link <module name>
+        $ cd .../<project-directory>/
+        $ kubos link <module name>
 
  * To link a module directly into a project in one step:
 
-		$ cd .../<project-directory>/
-		$ kubos link /path/to/module/
+        $ cd .../<project-directory>/
+        $ kubos link /path/to/module/
 
  * By doing this in one step kubos automatically links the module globally and then links it into your local project for you.
 
@@ -104,13 +104,13 @@ The next time your project is built it will use your local development module, r
 
  * To link a target globally:
 
-		$ cd .../<target-directory>/
-		$ kubos link-target
+        $ cd .../<target-directory>/
+        $ kubos link-target
 
  * To link a target that is already globally linked into a project:
 
-		$ cd .../<project-directory>/
-		$ kubos link-target <target name>
+        $ cd .../<project-directory>/
+        $ kubos link-target <target name>
 
  * You may now use the standard target command to select the newly linked target:
 
@@ -128,11 +128,11 @@ Flashing your project using the kubos tool is a relatively straightforward proce
 
 2. Run the flash command
 
-		$ kubos flash
+        $ kubos flash
 
 *Note: If your current user does not have read/write permission to your hardware device you may need to run this command as root*
 
-		$ sudo kubos flash
+        $ sudo kubos flash
 
 #### Debug your project
 
@@ -142,8 +142,8 @@ After building your project with `kubos build` kubos can manage a gdb server and
 Start a gdb server and instance for you:
 Note: this may need to run as root depending on your usb device permissions
 
-		$ kubos debug
+        $ kubos debug
 
 Additionally you can interact directly with the gdb server:
 
-		$ kubos server <start, stop, restart, status>
+        $ kubos server <start, stop, restart, status>

@@ -6,7 +6,7 @@
 
 If you don't already have Docker installed see the Docker downloads for [Mac OS X](https://www.docker.com/products/docker-toolbox) or the installation docs for [Linux](https://docs.docker.com/engine/installation/). You should also read the [prerequisites](https://docs.docker.com/docker-for-mac/#/what-to-know-before-you-install).
 
-		$ docker --version
+        $ docker --version
 
 The Kubos-SDK has been tested on Docker version 1.11.1 and 1.12.0.
 
@@ -37,12 +37,12 @@ the upgrades impossible without declaring that you want to use `pip` as the
 #### Linux
 ##### Ubuntu/Debian
 
-		$ sudo apt-get install python-pip
+        $ sudo apt-get install python-pip
 
 ##### Fedora
 
-		$ sudo yum upgrade python-setuptools
-		$ sudo yum install python-pip python-wheel
+        $ sudo yum upgrade python-setuptools
+        $ sudo yum install python-pip python-wheel
 
 
 For other Linux distributions, see the  [pip installation guide](https://pip.pypa.io/en/stable/installing/).
@@ -51,11 +51,11 @@ For other Linux distributions, see the  [pip installation guide](https://pip.pyp
 
 Using easy_install:
 
-		$ sudo easy_install pip
+        $ sudo easy_install pip
 
 Using homebrew:
 
-		$ brew install pip
+        $ brew install pip
 
 Using macports:
 
@@ -93,7 +93,7 @@ There are several different libraries that KubOS-SDK relies on. Some of these ar
 
 The KubOS-SDK is distributed using the python package system pip. You can install using this command:
 
-		$ pip install kubos-sdk
+        $ pip install kubos-sdk
 
 or
 
@@ -115,6 +115,6 @@ you have not started the Docker service.
 
 Pull the latest Kubos-SDK Docker container:
 
-		$ kubos update
+        $ kubos update
 
 And, as before, if the command fails, the `kubos` binary may not be present in your PATH variable.
