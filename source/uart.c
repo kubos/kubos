@@ -258,6 +258,9 @@ void kprv_uart_dev_terminate(KUARTNum uart)
     HAL_GPIO_DeInit(STM32F4_PIN_GPIO(rx), STM32F4_PIN_MASK(rx));
 
     uart_clk_disable(uart);
+
+    CLEAR_BIT(RCC->AHB1ENR,
+            STM32F4_PIN_AHB1ENR_BIT(rx) | STM32F4_PIN_AHB1ENR_BIT(tx));
 }
 
 void kprv_uart_enable_tx_int(KUARTNum uart)
