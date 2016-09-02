@@ -562,9 +562,9 @@ KSensorStatus bno055_check_calibration(uint8_t * count, uint8_t limit, bno055_ca
     else
     {
     	if( *count != 0)
-		{
+    	{
     		bno055_get_sensor_offset_struct(calib);
-		}
+    	}
 
     	*count = 0;
     	ret = SENSOR_OK;
