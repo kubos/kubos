@@ -66,7 +66,7 @@ KSensorStatus bno055_setup(bno055_opmode_t mode)
 KSensorStatus bno055_init(bno055_opmode_t mode)
 {
     /* set global mode */
-    _mode = mode;
+    _mode = OPERATION_MODE_CONFIG;//mode;
     /* return variable */
     KSensorStatus ret = SENSOR_ERROR;
 
@@ -146,13 +146,8 @@ KSensorStatus bno055_init(bno055_opmode_t mode)
         return SENSOR_ERROR;
     }
 
-    if (is_fully_calibrated() != SENSOR_OK)
-    {
-        return SENSOR_NOT_CALIBRATED;
-    }
-
     /* Set the requested operating mode */
-    if ((ret = bno055_set_mode(mode)) != SENSOR_ERROR)
+    if ((ret = bno055_set_mode(mode)) != SENSOR_OK)
     {
         return ret;
     }
@@ -517,49 +512,88 @@ KSensorStatus bno055_set_sensor_offset_struct(const bno055_offsets_t offsets_typ
     vTaskDelay(25);
 
     ret = write_byte(ACCEL_OFFSET_X_LSB_ADDR, (offsets_type.accel_offset_x) & 0x0FF);
-    ret = write_byte(ACCEL_OFFSET_X_MSB_ADDR, (offsets_type.accel_offset_x >> 8) & 0x0FF);
-    ret = write_byte(ACCEL_OFFSET_Y_LSB_ADDR, (offsets_type.accel_offset_y) & 0x0FF);
-    ret = write_byte(ACCEL_OFFSET_Y_MSB_ADDR, (offsets_type.accel_offset_y >> 8) & 0x0FF);
-    ret = write_byte(ACCEL_OFFSET_Z_LSB_ADDR, (offsets_type.accel_offset_z) & 0x0FF);
-    ret = write_byte(ACCEL_OFFSET_Z_MSB_ADDR, (offsets_type.accel_offset_z >> 8) & 0x0FF);
+    ret |= write_byte(ACCEL_OFFSET_X_MSB_ADDR, (offsets_type.accel_offset_x >> 8) & 0x0FF);
+    ret |= write_byte(ACCEL_OFFSET_Y_LSB_ADDR, (offsets_type.accel_offset_y) & 0x0FF);
+    ret |= write_byte(ACCEL_OFFSET_Y_MSB_ADDR, (offsets_type.accel_offset_y >> 8) & 0x0FF);
+    ret |= write_byte(ACCEL_OFFSET_Z_LSB_ADDR, (offsets_type.accel_offset_z) & 0x0FF);
+    ret |= write_byte(ACCEL_OFFSET_Z_MSB_ADDR, (offsets_type.accel_offset_z >> 8) & 0x0FF);
 
-    ret = write_byte(GYRO_OFFSET_X_LSB_ADDR, (offsets_type.gyro_offset_x) & 0x0FF);
-    ret = write_byte(GYRO_OFFSET_X_MSB_ADDR, (offsets_type.gyro_offset_x >> 8) & 0x0FF);
-    ret = write_byte(GYRO_OFFSET_Y_LSB_ADDR, (offsets_type.gyro_offset_y) & 0x0FF);
-    ret = write_byte(GYRO_OFFSET_Y_MSB_ADDR, (offsets_type.gyro_offset_y >> 8) & 0x0FF);
-    ret = write_byte(GYRO_OFFSET_Z_LSB_ADDR, (offsets_type.gyro_offset_z) & 0x0FF);
-    ret = write_byte(GYRO_OFFSET_Z_MSB_ADDR, (offsets_type.gyro_offset_z >> 8) & 0x0FF);
+    ret |= write_byte(GYRO_OFFSET_X_LSB_ADDR, (offsets_type.gyro_offset_x) & 0x0FF);
+    ret |= write_byte(GYRO_OFFSET_X_MSB_ADDR, (offsets_type.gyro_offset_x >> 8) & 0x0FF);
+    ret |= write_byte(GYRO_OFFSET_Y_LSB_ADDR, (offsets_type.gyro_offset_y) & 0x0FF);
+    ret |= write_byte(GYRO_OFFSET_Y_MSB_ADDR, (offsets_type.gyro_offset_y >> 8) & 0x0FF);
+    ret |= write_byte(GYRO_OFFSET_Z_LSB_ADDR, (offsets_type.gyro_offset_z) & 0x0FF);
+    ret |= write_byte(GYRO_OFFSET_Z_MSB_ADDR, (offsets_type.gyro_offset_z >> 8) & 0x0FF);
 
-    ret = write_byte(MAG_OFFSET_X_LSB_ADDR, (offsets_type.mag_offset_x) & 0x0FF);
-    ret = write_byte(MAG_OFFSET_X_MSB_ADDR, (offsets_type.mag_offset_x >> 8) & 0x0FF);
-    ret = write_byte(MAG_OFFSET_Y_LSB_ADDR, (offsets_type.mag_offset_y) & 0x0FF);
-    ret = write_byte(MAG_OFFSET_Y_MSB_ADDR, (offsets_type.mag_offset_y >> 8) & 0x0FF);
-    ret = write_byte(MAG_OFFSET_Z_LSB_ADDR, (offsets_type.mag_offset_z) & 0x0FF);
-    ret = write_byte(MAG_OFFSET_Z_MSB_ADDR, (offsets_type.mag_offset_z >> 8) & 0x0FF);
+    ret |= write_byte(MAG_OFFSET_X_LSB_ADDR, (offsets_type.mag_offset_x) & 0x0FF);
+    ret |= write_byte(MAG_OFFSET_X_MSB_ADDR, (offsets_type.mag_offset_x >> 8) & 0x0FF);
+    ret |= write_byte(MAG_OFFSET_Y_LSB_ADDR, (offsets_type.mag_offset_y) & 0x0FF);
+    ret |= write_byte(MAG_OFFSET_Y_MSB_ADDR, (offsets_type.mag_offset_y >> 8) & 0x0FF);
+    ret |= write_byte(MAG_OFFSET_Z_LSB_ADDR, (offsets_type.mag_offset_z) & 0x0FF);
+    ret |= write_byte(MAG_OFFSET_Z_MSB_ADDR, (offsets_type.mag_offset_z >> 8) & 0x0FF);
 
-    ret = write_byte(ACCEL_RADIUS_LSB_ADDR, (offsets_type.accel_radius) & 0x0FF);
-    ret = write_byte(ACCEL_RADIUS_MSB_ADDR, (offsets_type.accel_radius >> 8) & 0x0FF);
+    ret |= write_byte(ACCEL_RADIUS_LSB_ADDR, (offsets_type.accel_radius) & 0x0FF);
+    ret |= write_byte(ACCEL_RADIUS_MSB_ADDR, (offsets_type.accel_radius >> 8) & 0x0FF);
 
-    ret = write_byte(MAG_RADIUS_LSB_ADDR, (offsets_type.mag_radius) & 0x0FF);
-    ret = write_byte(MAG_RADIUS_MSB_ADDR, (offsets_type.mag_radius >> 8) & 0x0FF);
+    ret |= write_byte(MAG_RADIUS_LSB_ADDR, (offsets_type.mag_radius) & 0x0FF);
+    ret |= write_byte(MAG_RADIUS_MSB_ADDR, (offsets_type.mag_radius >> 8) & 0x0FF);
 
     bno055_set_mode(lastmode);
     return ret;
 }
+
+KSensorStatus bno055_check_calibration(uint8_t * count, uint8_t limit, bno055_calibration_data_t * calib)
+{
+    KSensorStatus ret;
+
+    if(is_fully_calibrated() != SENSOR_OK)
+    {
+    	if(*count >= limit)
+    	{
+    		*count = 0;
+    		ret = SENSOR_NOT_CALIBRATED;
+    	}
+    	else
+    	{
+    		*count += 1;
+    		ret = SENSOR_NOT_CALIBRATED;
+    	}
+    }
+    else
+    {
+    	if( *count != 0)
+    	{
+    		bno055_get_sensor_offset_struct(calib);
+    	}
+
+    	*count = 0;
+    	ret = SENSOR_OK;
+    }
+
+    return ret;
+}
+
+/* private functions */
 
 static KSensorStatus is_fully_calibrated(void)
 {
     bno055_calibration_data_t calib;
     KSensorStatus ret = bno055_get_calibration(&calib);
     if ((ret == SENSOR_OK) &&
-        (calib.sys == 3) &&
+        ((calib.sys == 3) || (calib.sys == 2)) &&
         (calib.gyro == 3) &&
         (calib.accel == 3) &&
         (calib.mag == 3))
     {
         return SENSOR_OK;
     }
-    return SENSOR_ERROR;
+
+    if (ret != SENSOR_OK)
+    {
+    	return ret;
+    }
+
+    return SENSOR_NOT_CALIBRATED;
 }
 
 /* private functions */
