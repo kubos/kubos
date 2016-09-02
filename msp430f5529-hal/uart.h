@@ -168,6 +168,15 @@ hal_uart_handle * hal_uart_init(hal_uart_config config);
   */
 void hal_uart_setup(hal_uart_handle * handle);
 
+
+/**
+  * @brief Low level hardware termination of UART device.
+  * @param handle Instance of initialized hal_uart_handle containing hardware
+                  registers and config values.
+  *
+  */
+void hal_uart_terminate(hal_uart_handle * handle);
+
 /**
   * @brief Reads a single character from UART.
   * @param handle UART handle to read from

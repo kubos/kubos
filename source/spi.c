@@ -16,7 +16,6 @@
  */
 
 #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
-#include "kubos-hal/spi.h"
 #include "msp430f5529-hal/spi.h"
 #include "FreeRTOS.h"
 #include "task.h"
