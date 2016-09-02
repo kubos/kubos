@@ -47,9 +47,6 @@ macro(gcc_load_toolchain prefix)
         _gcc_not_found("${prefix}objcopy")
     endif()
 
-    # post-process elf files into .bin files (legacy backwards-compatible command):
-    set(YOTTA_POSTPROCESS_COMMAND "\"${K_OBJCOPY}\" -O binary YOTTA_CURRENT_EXE_NAME YOTTA_CURRENT_EXE_NAME.bin")
-
     # set default compilation flags
     IF(CMAKE_BUILD_TYPE MATCHES Debug)
         set(_C_FAMILY_FLAGS_INIT "-fno-exceptions -fno-unwind-tables -ffunction-sections -fdata-sections -Wall -Wextra -gstrict-dwarf")
@@ -79,15 +76,3 @@ macro(gcc_load_toolchain prefix)
         set(CMAKE_CXX_COMPILER "${K_GPP}")
     endif()
 endmacro()
-
-# post-process elf files into .bin files:
-function(yotta_apply_target_rules target_type target_name)
-    if(${target_type} STREQUAL "EXECUTABLE")
-        add_custom_command(TARGET ${target_name}
-            POST_BUILD
-            COMMAND "${K_OBJCOPY}" -O binary ${target_name} ${target_name}.bin
-            COMMENT "converting to .bin"
-            VERBATIM
-        )
-    endif()
-endfunction()
