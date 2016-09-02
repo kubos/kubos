@@ -3,3 +3,4 @@ build/
 yotta_*
 
 html/
+.kubos-link.json

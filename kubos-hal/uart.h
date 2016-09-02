@@ -28,8 +28,7 @@
 #ifndef K_UART_H
 #define K_UART_H
 
-#include "FreeRTOS.h"
-#include "queue.h"
+#include <csp/arch/csp_queue.h>
 #include <stdint.h>
 
 #include "pins.h"
@@ -175,8 +174,8 @@ typedef struct {
 typedef struct {
     int dev;
     KUARTConf conf;
-    QueueHandle_t rx_queue;
-    QueueHandle_t tx_queue;
+    csp_queue_handle_t rx_queue;
+    csp_queue_handle_t tx_queue;
 } KUART;
 
 /**
@@ -192,6 +191,13 @@ KUARTConf k_uart_conf_defaults(void);
  * @return int 0 if OK, non-zero error code otherwise
  */
 int k_uart_init(KUARTNum uart, KUARTConf *conf);
+
+
+/**
+ * Terminates uart interface
+ * @param uart uart interface to terminate
+ */
+void k_uart_terminate(KUARTNum uart);
 
 /**
  * Setup and enable console uart interface
@@ -271,6 +277,8 @@ KUART* kprv_uart_get(KUARTNum uart);
  * @return Error code
  */
 int kprv_uart_dev_init(KUARTNum uart);
+
+void kprv_uart_dev_terminate(KUARTNum uart);
 
 /**
  * Enables uart transmit interrupt
