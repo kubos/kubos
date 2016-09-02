@@ -1,6 +1,6 @@
 {
   "name": "kubos-hal-stm32f4",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "KubOS HAL Module for STM32F4 MCUs",
   "keywords": [],
   "author": "kubos.co",
@@ -21,6 +21,6 @@
     }
   },
   "testDependencies": {
-  	"unity": "kubostech/unity"
+    "unity": "kubostech/unity"
   }
 }
