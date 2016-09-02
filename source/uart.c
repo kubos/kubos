@@ -21,6 +21,64 @@
 
 static KUART k_uarts[K_NUM_UARTS];
 
+/**
+ * Returns rx pin for specified uart interface
+ * @param uart uart interface number
+ * @return int rx pin
+ */
+int k_uart_rx_pin(KUARTNum uart) {
+    switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1_RX
+        case K_UART1: return YOTTA_CFG_HARDWARE_UART_UART1_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2_RX
+        case K_UART2: return YOTTA_CFG_HARDWARE_UART_UART2_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3_RX
+        case K_UART3: return YOTTA_CFG_HARDWARE_UART_UART3_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4_RX
+        case K_UART4: return YOTTA_CFG_HARDWARE_UART_UART4_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5_RX
+        case K_UART5: return YOTTA_CFG_HARDWARE_UART_UART5_RX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6_RX
+        case K_UART6: return YOTTA_CFG_HARDWARE_UART_UART6_RX;
+#endif
+    }
+    return -1;
+}
+
+/**
+ * Returns tx pin for specified uart interface
+ * @param uart uart interface number
+ * @return int tx pin
+ */
+int k_uart_tx_pin(KUARTNum uart) {
+    switch (uart) {
+#ifdef YOTTA_CFG_HARDWARE_UART_UART1_TX
+        case K_UART1: return YOTTA_CFG_HARDWARE_UART_UART1_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART2_TX
+        case K_UART2: return YOTTA_CFG_HARDWARE_UART_UART2_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART3_TX
+        case K_UART3: return YOTTA_CFG_HARDWARE_UART_UART3_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART4_TX
+        case K_UART4: return YOTTA_CFG_HARDWARE_UART_UART4_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART5_TX
+        case K_UART5: return YOTTA_CFG_HARDWARE_UART_UART5_TX;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_UART_UART6_TX
+        case K_UART6: return YOTTA_CFG_HARDWARE_UART_UART6_TX;
+#endif
+    }
+    return -1;
+}
+
 static inline int queue_push(csp_queue_handle_t *queue, char c,
                                     int timeout, void *task_woken)
 {
@@ -33,6 +91,12 @@ static inline int queue_push(csp_queue_handle_t *queue, char c,
 
 KUART* kprv_uart_get(KUARTNum uart)
 {
+	//Validate UART number
+	if(uart < 0 || uart > (K_NUM_UARTS-1))
+	{
+		return NULL;
+	}
+
     return &k_uarts[uart];
 }
 
@@ -48,7 +112,7 @@ KUARTConf k_uart_conf_defaults(void)
     };
 }
 
-void k_uart_init(KUARTNum uart, KUARTConf *conf)
+int k_uart_init(KUARTNum uart, KUARTConf *conf)
 {
     KUART *k_uart = &k_uarts[uart];
     memcpy(&k_uart->conf, conf, sizeof(KUARTConf));
@@ -57,7 +121,7 @@ void k_uart_init(KUARTNum uart, KUARTConf *conf)
     k_uart->rx_queue = csp_queue_create(k_uart->conf.rx_queue_len, sizeof(char));
     k_uart->tx_queue = csp_queue_create(k_uart->conf.tx_queue_len, sizeof(char));
 
-    kprv_uart_dev_init(uart);
+    return kprv_uart_dev_init(uart);
 }
 
 void k_uart_terminate(KUARTNum uart)

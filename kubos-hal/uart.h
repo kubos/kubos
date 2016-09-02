@@ -135,12 +135,36 @@ typedef enum {
  * Uart configuration structure
  */
 typedef struct {
+    /**
+     * The path of the uart bus
+     */
     const char *dev_path;
+    /**
+     * The buad rate of the uart bus
+     */
     uint32_t baud_rate;
+    /**
+     * The number of data bits in each transmit/receive of the uart bus.
+     * Can be 7-, 8-, or 9-bits, as specified by the KWordLen enumerator
+     */
     KWordLen word_len;
+    /**
+     * The number of stop bits at the end of each transmit/receive of the uart bus.
+     * Can be 1 or 2 bits, as specified by the KStopBits enumerator
+     */
     KStopBits stop_bits;
+    /**
+     * The presence and state of the parity bit in each transmit/receive of the uart bus.
+     * Can be none, odd, or even, as specified by the KParity enumerator
+     */
     KParity parity;
+    /**
+     * The size of the queue for incoming messages
+     */
     uint8_t rx_queue_len;
+    /**
+     * The size of the queue for outgoing messages
+     */
     uint8_t tx_queue_len;
 } KUARTConf;
 
@@ -164,8 +188,9 @@ KUARTConf k_uart_conf_defaults(void);
  * Setup and enable uart interface
  * @param uart uart interface to initialize
  * @param conf config values to initialize with
+ * @return int 0 if OK, non-zero error code otherwise
  */
-void k_uart_init(KUARTNum uart, KUARTConf *conf);
+int k_uart_init(KUARTNum uart, KUARTConf *conf);
 
 
 /**
@@ -208,7 +233,7 @@ int k_uart_write(KUARTNum uart, char *ptr, int len);
  * @param uart uart interface to write to
  * @param c character to write
  */
-void k_uart_write_immediate(KUARTNum uart, char c);
+int k_uart_write_immediate(KUARTNum uart, char c);
 
 /**
  * Returns the number of characters currently in the uart rx queue
@@ -229,58 +254,14 @@ void k_uart_rx_queue_push(KUARTNum uart, char c, void *task_woken);
  * @param uart uart interface number
  * @return int rx pin
  */
-inline int k_uart_rx_pin(KUARTNum uart) {
-    switch (uart) {
-#ifdef YOTTA_CFG_HARDWARE_UART_UART1_RX
-        case K_UART1: return YOTTA_CFG_HARDWARE_UART_UART1_RX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART2_RX
-        case K_UART2: return YOTTA_CFG_HARDWARE_UART_UART2_RX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART3_RX
-        case K_UART3: return YOTTA_CFG_HARDWARE_UART_UART3_RX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART4_RX
-        case K_UART4: return YOTTA_CFG_HARDWARE_UART_UART4_RX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART5_RX
-        case K_UART5: return YOTTA_CFG_HARDWARE_UART_UART5_RX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART6_RX
-        case K_UART6: return YOTTA_CFG_HARDWARE_UART_UART6_RX;
-#endif
-    }
-    return -1;
-}
+int k_uart_rx_pin(KUARTNum uart);
 
 /**
  * Returns tx pin for specified uart interface
  * @param uart uart interface number
  * @return int tx pin
  */
-inline int k_uart_tx_pin(KUARTNum uart) {
-    switch (uart) {
-#ifdef YOTTA_CFG_HARDWARE_UART_UART1_TX
-        case K_UART1: return YOTTA_CFG_HARDWARE_UART_UART1_TX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART2_TX
-        case K_UART2: return YOTTA_CFG_HARDWARE_UART_UART2_TX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART3_TX
-        case K_UART3: return YOTTA_CFG_HARDWARE_UART_UART3_TX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART4_TX
-        case K_UART4: return YOTTA_CFG_HARDWARE_UART_UART4_TX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART5_TX
-        case K_UART5: return YOTTA_CFG_HARDWARE_UART_UART5_TX;
-#endif
-#ifdef YOTTA_CFG_HARDWARE_UART_UART6_TX
-        case K_UART6: return YOTTA_CFG_HARDWARE_UART_UART6_TX;
-#endif
-    }
-    return -1;
-}
+int k_uart_tx_pin(KUARTNum uart);
 
 // private APIs
 /**
@@ -293,8 +274,9 @@ KUART* kprv_uart_get(KUARTNum uart);
 /**
  * Performs low level uart hardware initialization
  * @param uart uart interface to initialize
+ * @return Error code
  */
-void kprv_uart_dev_init(KUARTNum uart);
+int kprv_uart_dev_init(KUARTNum uart);
 
 void kprv_uart_dev_terminate(KUARTNum uart);
 

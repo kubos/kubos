@@ -102,8 +102,20 @@ typedef enum {
  * i2c configuration structure
  */
 typedef struct {
+	/**
+	 * The size of the slave address.
+	 * Should be either 7-bits long or 10-bits long, as specified by the I2CAddressingMode enumerator
+	 */
     I2CAddressingMode addressing_mode;
+	/**
+	 * The role of the i2c bus.
+	 * Should be either master or slave, as specified by the I2CRole enumerator
+	 * @warning Only the Master role is available as of v0.1.0
+	 */
     I2CRole role;
+    /**
+     * The clock speed of the i2c bus
+     */
     uint32_t clock_speed;
 } KI2CConf;
 
@@ -202,15 +214,17 @@ KI2C* kprv_i2c_get(KI2CNum i2c);
  * Low level hal device initialization
  * This is implemented by the device specific hal
  * @param i2c i2c bus to initialize
+ * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
-void kprv_i2c_dev_init(KI2CNum i2c);
+KI2CStatus kprv_i2c_dev_init(KI2CNum i2c);
 
 /**
  * Low level hal i2c termination
  * This is implemented by the device specific hal
  * @param i2c i2c bus to terminate
+ * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
-void kprv_i2c_dev_terminate(KI2CNum i2c);
+KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c);
 
 /**
  * Low level hal i2c write (as master)
