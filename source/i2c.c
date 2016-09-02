@@ -776,46 +776,46 @@ static KI2CStatus hal_i2c_master_request_read(I2C_HandleTypeDef * hal_handle, ui
         /* Send slave address */
         hal_handle->Instance->DR = I2C_7BIT_ADD_READ(addr);
     }
-	else if(hal_handle->Init.AddressingMode == K_ADDRESSINGMODE_10BIT)
-	{
-	    /* Send header of slave address */
-		hal_handle->Instance->DR = I2C_10BIT_HEADER_WRITE(addr);
+    else if(hal_handle->Init.AddressingMode == K_ADDRESSINGMODE_10BIT)
+    {
+        /* Send header of slave address */
+        hal_handle->Instance->DR = I2C_10BIT_HEADER_WRITE(addr);
 
-	    /* Wait until ADD10 flag is set */
-	    if((ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADD10)) != I2C_OK)
-	    {
-	      return ret;
-	    }
+        /* Wait until ADD10 flag is set */
+        if((ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADD10)) != I2C_OK)
+        {
+          return ret;
+        }
 
-	    /* Send slave address */
-	    hal_handle->Instance->DR = I2C_10BIT_ADDRESS(addr);
+        /* Send slave address */
+        hal_handle->Instance->DR = I2C_10BIT_ADDRESS(addr);
 
-	    /* Wait until ADDR flag is set */
-	    if((ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADDR)) != I2C_OK)
-	    {
-	      return ret;
-	    }
+        /* Wait until ADDR flag is set */
+        if((ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADDR)) != I2C_OK)
+        {
+          return ret;
+        }
 
-	    /* Clear ADDR flag */
-	    __HAL_I2C_CLEAR_ADDRFLAG(hal_handle);
+        /* Clear ADDR flag */
+        __HAL_I2C_CLEAR_ADDRFLAG(hal_handle);
 
-	    /* Generate Restart */
-	    hal_handle->Instance->CR1 |= I2C_CR1_START;
+        /* Generate Restart */
+        hal_handle->Instance->CR1 |= I2C_CR1_START;
 
-	    /* Wait until SB flag is set */
-	    if((ret = hal_i2c_check_flag_timeout(hal_handle, I2C_FLAG_SB, RESET)) != I2C_OK)
-	    {
-	      return ret;
-	    }
+        /* Wait until SB flag is set */
+        if((ret = hal_i2c_check_flag_timeout(hal_handle, I2C_FLAG_SB, RESET)) != I2C_OK)
+        {
+          return ret;
+        }
 
-	    /* Send header of slave address */
-	    hal_handle->Instance->DR = I2C_10BIT_HEADER_READ(addr);
-	}
-	else
-	{
-		//Bad addressing mode
-	    return I2C_ERROR;
-	}
+        /* Send header of slave address */
+        hal_handle->Instance->DR = I2C_10BIT_HEADER_READ(addr);
+    }
+    else
+    {
+        //Bad addressing mode
+        return I2C_ERROR;
+    }
 
     /* Wait for ADDR */
     ret = hal_i2c_check_addr_timeout(hal_handle, I2C_FLAG_ADDR);
