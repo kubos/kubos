@@ -163,14 +163,11 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 			switch(flag)
 			{
 				case(UCTXSTT):
-				        //printf("UCTXSTT timed out\r\n");
-				        return HAL_I2C_ERROR_ADDR_TIMEOUT;
+				    return HAL_I2C_ERROR_ADDR_TIMEOUT;
 				case(UCTXSTP):
-                        //printf("UCTXSTP timed out\r\n");
-				        handle->reg->control1 &= ~UCTXSTP; //Go ahead and clear it manually
-				        return HAL_I2C_ERROR_TIMEOUT;
+				    handle->reg->control1 &= ~UCTXSTP; //Go ahead and clear it manually
+				    return HAL_I2C_ERROR_TIMEOUT;
 				default:
-				    //printf("default release timed out\r\n");
 				    return HAL_I2C_ERROR_TIMEOUT;
 			}
 		}
@@ -180,9 +177,7 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 			{
 				case(UCTXIFG): return HAL_I2C_ERROR_TXE_TIMEOUT;
 				case(UCRXIFG): return HAL_I2C_ERROR_BTF_TIMEOUT;
-				default:
-				    //printf("default set timed out\r\n");
-				    return HAL_I2C_ERROR_TIMEOUT;
+				default: return HAL_I2C_ERROR_TIMEOUT;
 			}
 		}
 	}
