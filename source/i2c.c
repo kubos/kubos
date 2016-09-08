@@ -98,6 +98,16 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
         return I2C_ERROR_NULL_HANDLE;
     }
 
+    /*
+     * We don't currently support slave mode.  Initialization should fail
+     * if it's specified.
+     * Remove this once slave mode is implemented.
+     */
+    if(k_i2c->conf.role == K_SLAVE)
+    {
+        return I2C_ERROR;
+    }
+
     hal_i2c_config config = {
             .addressing_mode = i2c_addressing(k_i2c->conf.addressing_mode),
             .clock_speed = k_i2c->conf.clock_speed,
