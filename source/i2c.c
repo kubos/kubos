@@ -391,13 +391,13 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
 
 static hal_i2c_handle* hal_i2c_get_handle(KI2CNum num)
 {
-	//Validate I2C number
-	if(num < 0 || num > (K_NUM_I2CS-1))
-	{
-	    return 0;
-	}
+    //Validate I2C number
+    if(num < 0 || num > (K_NUM_I2CS))
+    {
+        return 0;
+    }
 
-    return &hal_i2c_bus[num];
+    return &hal_i2c_bus[num-1];
 }
 
 static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c)
