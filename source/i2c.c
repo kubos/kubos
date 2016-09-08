@@ -83,6 +83,9 @@ void hal_i2c_setup(hal_i2c_handle * handle)
 
 	hal_i2c_set_clock(handle);
 
+	handle->reg->control1 &= ~UCTXSTT; //Make sure start flag is clear
+	handle->reg->control1 &= ~UCTXSTP; //Make sure stop flag is clear
+
 	handle->reg->control1 &= ~UCSWRST; /* enable I2C by releasing reset */
 }
 
@@ -104,7 +107,22 @@ static void hal_i2c_set_clock(hal_i2c_handle * handle)
 	/* SMCLK FREQ constant 1 MHz for F5529 */
 	const uint32_t SMCLK_FREQ = 1000000;
 	uint8_t preScalar;
+
+	if(handle->conf.clock_speed < 1)
+	{
+	    handle->conf.clock_speed = 1;
+	}
+
 	preScalar = (uint8_t)(SMCLK_FREQ/handle->conf.clock_speed);
+
+	/*
+	 * Per msp-slau208, section 38.3.5, the maximum bit clock that can be used in single
+	 * master mode is f(BRCLK)/4.
+	 */
+	if(preScalar < 4)
+	{
+	    preScalar = 4;
+	}
 
 	handle->reg->control1 |= UCSSEL_2 | UCSWRST; /* SMCLK + keep reset */
 	handle->reg->baudrate0 = preScalar;
@@ -144,9 +162,16 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 		{
 			switch(flag)
 			{
-				case(UCTXSTT): return HAL_I2C_ERROR_ADDR_TIMEOUT;
-				case(UCTXSTP): return HAL_I2C_ERROR_TIMEOUT;
-				default: return HAL_I2C_ERROR_TIMEOUT;
+				case(UCTXSTT):
+				        //printf("UCTXSTT timed out\r\n");
+				        return HAL_I2C_ERROR_ADDR_TIMEOUT;
+				case(UCTXSTP):
+                        //printf("UCTXSTP timed out\r\n");
+				        handle->reg->control1 &= ~UCTXSTP; //Go ahead and clear it manually
+				        return HAL_I2C_ERROR_TIMEOUT;
+				default:
+				    //printf("default release timed out\r\n");
+				    return HAL_I2C_ERROR_TIMEOUT;
 			}
 		}
 		else /* check set flags */
@@ -155,7 +180,9 @@ static hal_i2c_status hal_i2c_register_timeout(hal_i2c_handle * handle, uint8_t 
 			{
 				case(UCTXIFG): return HAL_I2C_ERROR_TXE_TIMEOUT;
 				case(UCRXIFG): return HAL_I2C_ERROR_BTF_TIMEOUT;
-				default: return HAL_I2C_ERROR_TIMEOUT;
+				default:
+				    //printf("default set timed out\r\n");
+				    return HAL_I2C_ERROR_TIMEOUT;
 			}
 		}
 	}
@@ -278,11 +305,24 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 	handle->reg->control1 &= ~UCTR;
 	handle->reg->control1 |= UCTXSTT;
 
-	/* wait for STT to clear (slave received address) */
-	if((ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE)) != HAL_I2C_OK)
+	/* set stop bit IMMEDIATELY after STT is clear; during reception */
+    /* msp-slau208 38.3.4.2.2 specification */
+	if(len == 1)
+    {
+	    //DO NOT convert this to hal_i2c_register_timeout.  It takes too long
+	    //and messes up the stop bit being set/received.
+	    while(handle->reg->control1 & UCTXSTT);
+	    handle->reg->control1 |= UCTXSTP;
+    }
+	else
 	{
-		/* return error */
-		return ret;
+	    /* wait for STT to clear (slave received address)*/
+	    if((ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE)) != HAL_I2C_OK)
+	    {
+	        /* return error */
+	        //printf("UCTXSTT read timeout\r\n");
+	        return ret;
+	    }
 	}
 
 	/* slave not responding to start? */
@@ -294,15 +334,6 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 		hal_i2c_register_timeout(handle, UCTXSTP, RELEASE);
 
 		return HAL_I2C_ERROR_NACK; /* error NACK here */
-	}
-
-	/* if start OK and only receiving 1 byte */
-	// TODO: test 1 byte read
-	if(len == 1)
-	{
-		/* set stop bit immediately after STT is clear; during reception */
-		/* msp-slau208 1.3.4.2.2 specification */
-		handle->reg->control1 |= UCTXSTP;
 	}
 
 	/* check receive mode set */
