@@ -104,7 +104,7 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
             .role = i2c_role(k_i2c->conf.role)
     };
 
-    hal_i2c_handle * handle = hal_i2c_init(config, i2c);
+    hal_i2c_handle * handle = hal_i2c_init(config, i2c_bus(i2c));
     if (handle != NULL)
     {
         handle->bus_num = i2c_bus(i2c);
