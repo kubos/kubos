@@ -112,9 +112,14 @@ KUARTConf k_uart_conf_defaults(void)
     };
 }
 
-int k_uart_init(KUARTNum uart, KUARTConf *conf)
+KUARTStatus k_uart_init(KUARTNum uart, KUARTConf *conf)
 {
-    KUART *k_uart = &k_uarts[uart];
+    KUART *k_uart = kprv_uart_get(uart);
+    if(k_uart == NULL)
+    {
+      return UART_ERROR_NULL_HANDLE;
+    }
+
     memcpy(&k_uart->conf, conf, sizeof(KUARTConf));
 
     k_uart->dev = uart;
@@ -126,7 +131,11 @@ int k_uart_init(KUARTNum uart, KUARTConf *conf)
 
 void k_uart_terminate(KUARTNum uart)
 {
-    KUART *k_uart = &k_uarts[uart];
+    KUART *k_uart = kprv_uart_get(uart);
+    if(k_uart == NULL)
+    {
+      return;
+    }
 
     kprv_uart_dev_terminate(uart);
 
@@ -149,10 +158,17 @@ int k_uart_read(KUARTNum uart, char *ptr, int len)
 {
     int i = 0;
     int result;
-    if ((k_uarts[uart].rx_queue != NULL) && (ptr != NULL))
+    KUART *k_uart = kprv_uart_get(uart);
+
+    if(k_uart == NULL)
+    {
+      return -1;
+    }
+
+    if ((k_uart.rx_queue != NULL) && (ptr != NULL))
     {
         for (; i < len; i++, ptr++) {
-            result = csp_queue_dequeue(k_uarts[uart].rx_queue, ptr, 0);
+            result = csp_queue_dequeue(k_uart.rx_queue, ptr, 0);
             if (result != CSP_QUEUE_OK) {
                 return i;
             }
@@ -165,10 +181,17 @@ int k_uart_read(KUARTNum uart, char *ptr, int len)
 int k_uart_write(KUARTNum uart, char *ptr, int len)
 {
     int i = 0;
-    if ((k_uarts[uart].tx_queue != NULL) && (ptr != NULL))
+    KUART *k_uart = kprv_uart_get(uart);
+
+    if(k_uart == NULL)
+    {
+      return -1;
+    }
+
+    if ((k_uart.tx_queue != NULL) && (ptr != NULL))
     {
         for (; i < len; i++, ptr++) {
-            int result = queue_push(k_uarts[uart].tx_queue, *ptr, CSP_MAX_DELAY, NULL);
+            int result = queue_push(k_uart.tx_queue, *ptr, CSP_MAX_DELAY, NULL);
             if (result != CSP_QUEUE_OK) {
                 return i;
             }
@@ -180,16 +203,29 @@ int k_uart_write(KUARTNum uart, char *ptr, int len)
 
 int k_uart_rx_queue_len(KUARTNum uart)
 {
-    if (k_uarts[uart].rx_queue != NULL)
+    KUART *k_uart = kprv_uart_get(uart);
+    if(k_uart == NULL)
     {
-        return (int) csp_queue_size(k_uarts[uart].rx_queue);
+      return -1;
+    }
+
+    if (k_uart.rx_queue != NULL)
+    {
+        return (int) csp_queue_size(k_uart.rx_queue);
     }
     return 0;
 }
 
 void k_uart_rx_queue_push(KUARTNum uart, char c, void *task_woken)
 {
-    queue_push(k_uarts[uart].rx_queue, c, 0, task_woken);
+    KUART *k_uart = kprv_uart_get(uart);
+
+    if(k_uart == NULL)
+    {
+      return;
+    }
+
+    queue_push(k_uart.rx_queue, c, 0, task_woken);
 }
 
 #endif

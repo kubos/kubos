@@ -133,6 +133,16 @@ typedef enum {
 } KParity;
 
 /**
+ * Uart status values
+ */
+typedef enum {
+    UART_OK,
+    UART_ERROR,
+    UART_ERROR_NULL_HANDLE,
+    UART_ERROR_CONFIG
+} KUARTStatus;
+
+/**
  * Uart configuration structure
  */
 typedef struct {
