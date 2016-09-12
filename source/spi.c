@@ -152,7 +152,14 @@ KSPIStatus kprv_spi_dev_init(KSPINum spi)
             .speed = k_spi->config.speed,
     };
 
-    hal_spi_handle * handle = hal_spi_init(config, spi);
+    //Reject configuration options that the MSP430F5529 doesn't support.
+    //Note: Slave mode will be supported once we implement it.
+    if(config.role == HAL_SPI_SLAVE || config.direction == K_SPI_DIRECTION_1LINE || config.data_size == K_SPI_DATASIZE_16BIT)
+    {
+        return SPI_ERROR_CONFIG;
+    }
+
+    hal_spi_handle * handle = hal_spi_init(config, spi_bus(spi));
     if (handle != NULL)
     {
         handle->bus_num = spi_bus(spi);
@@ -175,7 +182,13 @@ KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
 
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t *buffer, uint32_t len)
 {
-    hal_spi_status ret = hal_spi_master_write(spi_handle(spi), buffer, len);
+    hal_spi_handle * handle = spi_handle(spi);
+    if(handle->conf.direction == K_SPI_DIRECTION_2LINES_RXONLY)
+    {
+        return SPI_ERROR;
+    }
+
+    hal_spi_status ret = hal_spi_master_write(handle, buffer, len);
     return (KSPIStatus)ret;
 }
 
@@ -187,7 +200,13 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t *buffer, uint32_t len)
 
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t *txBuffer, uint8_t *rxBuffer, uint32_t len)
 {
-    hal_spi_status ret = hal_spi_master_write_read(spi_handle(spi), txBuffer, rxBuffer, len);
+    hal_spi_handle * handle = spi_handle(spi);
+    if(handle->conf.direction == K_SPI_DIRECTION_2LINES_RXONLY)
+    {
+        return SPI_ERROR;
+    }
+
+    hal_spi_status ret = hal_spi_master_write_read(handle, txBuffer, rxBuffer, len);
     return (KSPIStatus)ret;
 }
 
