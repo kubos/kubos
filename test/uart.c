@@ -52,7 +52,7 @@ static void test_uart_initGood(void)
     ret = kprv_uart_dev_init(uartTo);
 
     kprv_uart_dev_terminate(uartTo);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(0, ret, "Failed to init UART1");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(UART_OK, ret, "Failed to init UART1");
 }
 
 /*
@@ -70,7 +70,7 @@ static void test_uart_initBad(void)
 
     ret = kprv_uart_dev_init(num);
 
-    TEST_ASSERT_EQUAL_INT(-1, ret);
+    TEST_ASSERT_EQUAL_INT(UART_ERROR_NULL_HANDLE, ret);
 }
 
 /*
