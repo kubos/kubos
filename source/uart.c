@@ -175,16 +175,16 @@ static inline uint8_t uart_alt(KUARTNum uart)
 /**
  * Setup and enable uart bus
  * @param uart uart bus to initialize
- * @return int 0 if success, otherwise a non-zero error number
+ * @return KUARTStatus UART_OK if success, otherwise failure
  */
-int kprv_uart_dev_init(KUARTNum uart)
+KUARTStatus kprv_uart_dev_init(KUARTNum uart)
 {
 	HAL_StatusTypeDef ret = 0;
 
     // Enable peripheral clocks
     KUART *k_uart = kprv_uart_get(uart);
-    if (!k_uart) {
-        return -1;
+    if (k_uart == NULL) {
+        return UART_ERROR_NULL_HANDLE;
     }
 
     int rx = k_uart_rx_pin(uart);
@@ -323,19 +323,19 @@ void kprv_uart_enable_tx_int(KUARTNum uart)
  * Write a character directly to the uart interface
  * @param uart uart bus
  * @param c character to write
- * @return int 0 if success, otherwise a non-zero error number
+ * @return KUARTStatus UART_OK if success, otherwise failure
  */
-int k_uart_write_immediate(KUARTNum uart, char c)
+KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
 {
     USART_TypeDef *dev = uart_dev(uart);
-    if (!dev) {
-        return -1;
+    if (dev ==  NULL) {
+        return UART_ERROR_NULL_HANDLE;
     }
 
     dev->DR = c;
     while (!CHECK_BIT(dev->SR, UART_FLAG_TXE));
 
-    return 0;
+    return UART_OK;
 }
 
 #define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
