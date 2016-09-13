@@ -315,7 +315,6 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 	    if((ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE)) != HAL_I2C_OK)
 	    {
 	        /* return error */
-	        //printf("UCTXSTT read timeout\r\n");
 	        return ret;
 	    }
 	}
