@@ -51,6 +51,9 @@ typedef enum
 typedef enum
 {
     HAL_UART_9600 = 0,
+    HAL_UART_19200,
+    HAL_UART_38400,
+    HAL_UART_57600,
     HAL_UART_115200
 } hal_uart_baudrate;
 

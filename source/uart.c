@@ -93,7 +93,7 @@ void hal_uart_setup(hal_uart_handle * handle)
     if (NULL != handle)
     {
         // Put the USCI state machine in reset
-        handle->reg->control1 |= UCSWRST;
+        handle->reg->control1 = UCSWRST;
         // Use SMCLK as the bit clock
         handle->reg->control1 |= UCSSEL__SMCLK;
 
@@ -131,20 +131,43 @@ void hal_uart_terminate(hal_uart_handle * handle)
 
 static void hal_uart_set_baudrate(hal_uart_handle * handle)
 {
+
+    //Settings copied from slau208O Table 36-4 and 36-5
     switch(handle->config.baudrate)
     {
         case HAL_UART_9600:
         {
             handle->reg->baudrate0 = 6;
             handle->reg->baudrate1 = 0;
-            handle->reg->modControl = UCBRS_0 + UCBRF_13 + UCOS16;
+            handle->reg->modControl = UCBRS_0 + UCBRF_8 + UCOS16;
+            break;
+        }
+        case HAL_UART_19200:
+        {
+            handle->reg->baudrate0 = 3;
+            handle->reg->baudrate1 = 0;
+            handle->reg->modControl = UCBRS_0 + UCBRF_4 + UCOS16;
+            break;
+        }
+        case HAL_UART_38400:
+        {
+            handle->reg->baudrate0 = 26;
+            handle->reg->baudrate1 = 0;
+            handle->reg->modControl = UCBRS_0 + UCBRF_0;
+            break;
+        }
+        case HAL_UART_57600:
+        {
+            handle->reg->baudrate0 = 17;
+            handle->reg->baudrate1 = 0;
+            handle->reg->modControl = UCBRS_3 + UCBRF_0;
             break;
         }
         case HAL_UART_115200:
         {
             handle->reg->baudrate0 = 9;
             handle->reg->baudrate1 = 0;
-            handle->reg->modControl = UCBRS_0 + UCBRF_1;
+            handle->reg->modControl = UCBRS_0 + UCBRF_0;
             break;
         }
     }
