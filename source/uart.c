@@ -114,6 +114,8 @@ KUARTConf k_uart_conf_defaults(void)
 
 KUARTStatus k_uart_init(KUARTNum uart, KUARTConf *conf)
 {
+    KUARTStatus ret = UART_ERROR;
+
     KUART *k_uart = kprv_uart_get(uart);
     if(k_uart == NULL)
     {
@@ -126,7 +128,17 @@ KUARTStatus k_uart_init(KUARTNum uart, KUARTConf *conf)
     k_uart->rx_queue = csp_queue_create(k_uart->conf.rx_queue_len, sizeof(char));
     k_uart->tx_queue = csp_queue_create(k_uart->conf.tx_queue_len, sizeof(char));
 
-    return kprv_uart_dev_init(uart);
+    ret = kprv_uart_dev_init(uart);
+
+    if(ret != UART_OK)
+    {
+        csp_queue_remove(k_uart->rx_queue);
+        k_uart->rx_queue = NULL;
+        csp_queue_remove(k_uart->tx_queue);
+        k_uart->tx_queue = NULL;
+    }
+
+    return ret;
 }
 
 void k_uart_terminate(KUARTNum uart)
@@ -165,10 +177,10 @@ int k_uart_read(KUARTNum uart, char *ptr, int len)
       return -1;
     }
 
-    if ((k_uart.rx_queue != NULL) && (ptr != NULL))
+    if ((k_uart->rx_queue != NULL) && (ptr != NULL))
     {
         for (; i < len; i++, ptr++) {
-            result = csp_queue_dequeue(k_uart.rx_queue, ptr, 0);
+            result = csp_queue_dequeue(k_uart->rx_queue, ptr, 0);
             if (result != CSP_QUEUE_OK) {
                 return i;
             }
@@ -188,10 +200,10 @@ int k_uart_write(KUARTNum uart, char *ptr, int len)
       return -1;
     }
 
-    if ((k_uart.tx_queue != NULL) && (ptr != NULL))
+    if ((k_uart->tx_queue != NULL) && (ptr != NULL))
     {
         for (; i < len; i++, ptr++) {
-            int result = queue_push(k_uart.tx_queue, *ptr, CSP_MAX_DELAY, NULL);
+            int result = queue_push(k_uart->tx_queue, *ptr, CSP_MAX_DELAY, NULL);
             if (result != CSP_QUEUE_OK) {
                 return i;
             }
@@ -209,11 +221,11 @@ int k_uart_rx_queue_len(KUARTNum uart)
       return -1;
     }
 
-    if (k_uart.rx_queue != NULL)
+    if (k_uart->rx_queue != NULL)
     {
-        return (int) csp_queue_size(k_uart.rx_queue);
+        return (int) csp_queue_size(k_uart->rx_queue);
     }
-    return 0;
+    return -2;
 }
 
 void k_uart_rx_queue_push(KUARTNum uart, char c, void *task_woken)
@@ -225,7 +237,7 @@ void k_uart_rx_queue_push(KUARTNum uart, char c, void *task_woken)
       return;
     }
 
-    queue_push(k_uart.rx_queue, c, 0, task_woken);
+    queue_push(k_uart->rx_queue, c, 0, task_woken);
 }
 
 #endif

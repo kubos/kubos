@@ -199,9 +199,9 @@ KUARTConf k_uart_conf_defaults(void);
  * Setup and enable uart interface
  * @param uart uart interface to initialize
  * @param conf config values to initialize with
- * @return int 0 if OK, non-zero error code otherwise
+ * @return KUARTStatus UART_OK if OK, failure otherwise
  */
-int k_uart_init(KUARTNum uart, KUARTConf *conf);
+KUARTStatus k_uart_init(KUARTNum uart, KUARTConf *conf);
 
 
 /**
@@ -243,8 +243,18 @@ int k_uart_write(KUARTNum uart, char *ptr, int len);
  * Write data directly to a uart interface
  * @param uart uart interface to write to
  * @param c character to write
+ * @return KUARTStatus UART_OK if success, otherwise failure
  */
-int k_uart_write_immediate(KUARTNum uart, char c);
+KUARTStatus k_uart_write_immediate(KUARTNum uart, char c);
+
+/**
+ * Write data directly to a uart interface
+ * @param uart uart interface to write to
+ * @param ptr buffer to write data from
+ * @param len length of data to write
+ * @return KUARTStatus UART_OK if success, otherwise failure
+ */
+KUARTStatus k_uart_write_immediate_str(KUARTNum uart, uint8_t * ptr, uint8_t len);
 
 /**
  * Returns the number of characters currently in the uart rx queue
@@ -285,9 +295,9 @@ KUART* kprv_uart_get(KUARTNum uart);
 /**
  * Performs low level uart hardware initialization
  * @param uart uart interface to initialize
- * @return Error code
+ * @return KUARTStatus UART_OK if OK, failure otherwise
  */
-int kprv_uart_dev_init(KUARTNum uart);
+KUARTStatus kprv_uart_dev_init(KUARTNum uart);
 
 void kprv_uart_dev_terminate(KUARTNum uart);
 
