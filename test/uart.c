@@ -345,7 +345,7 @@ static void test_uart_baudRate(void)
 }
 
 /*
- * test_uart_wordLen
+ * test_uart_overrun
  *
  * Purpose:  Test UART receive processing when a character is received before the previous character has
  * 	been processed.
