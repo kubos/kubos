@@ -636,9 +636,6 @@ int main(void) {
 
     __enable_interrupt();
 
-    P2OUT = BIT1;
-
-
     K_TEST_RUN_MAIN();
 
 }
