@@ -165,9 +165,9 @@ static void hal_uart_set_baudrate(hal_uart_handle * handle)
         }
         case HAL_UART_115200:
         {
-            handle->reg->baudrate0 = 9;
+            handle->reg->baudrate0 = 8;
             handle->reg->baudrate1 = 0;
-            handle->reg->modControl = UCBRS_0 + UCBRF_0;
+            handle->reg->modControl = UCBRS_6 + UCBRF_0;
             break;
         }
     }
