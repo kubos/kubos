@@ -48,7 +48,7 @@ static inline hal_uart_device uart_dev(KUARTNum uart)
 /**
   * @brief Helper function to get uart handle.
   */
-static inline hal_uart_handle * uart_handle(KUARTNum uart)
+hal_uart_handle * uart_handle(KUARTNum uart)
 {
     switch(uart)
     {
@@ -63,13 +63,25 @@ static inline hal_uart_handle * uart_handle(KUARTNum uart)
   */
 static inline hal_uart_baudrate uart_baud(long int baud)
 {
-    switch(baud)
+    if(baud <= 9600)
     {
-        case 9600:
-            return HAL_UART_9600;
-        case 115200:
-            return HAL_UART_115200;
-        default: return HAL_UART_9600;
+        return HAL_UART_9600;
+    }
+    else if(baud <= 19200)
+    {
+        return HAL_UART_19200;
+    }
+    else if(baud <= 38400)
+    {
+        return HAL_UART_38400;
+    }
+    else if(baud <= 57600)
+    {
+        return HAL_UART_57600;
+    }
+    else
+    {
+        return HAL_UART_115200;
     }
 }
 
@@ -116,10 +128,15 @@ static inline hal_uart_wordlen uart_wordlen(KWordLen wordlen)
 /**
   * @brief Creates and sets up specified UART device.
   * @param uart Number of UART device to setup.
+  * @return KUARTStatus UART_OK on success, otherwise failure
   */
-int kprv_uart_dev_init(KUARTNum uart)
+KUARTStatus kprv_uart_dev_init(KUARTNum uart)
 {
     KUART * k_uart = kprv_uart_get(uart);
+    if (k_uart == NULL)
+    {
+        return UART_ERROR_NULL_HANDLE;
+    }
 
     hal_uart_config config = {
         .device = uart_dev(uart),
@@ -129,13 +146,19 @@ int kprv_uart_dev_init(KUARTNum uart)
         .stopbits = uart_stopbits(k_uart->conf.stop_bits)
     };
 
+    //Reject unsupported configurations
+    if(k_uart->conf.word_len == K_WORD_LEN_9BIT)
+    {
+        return UART_ERROR_CONFIG;
+    }
+
     hal_uart_handle * handle = hal_uart_init(config);
     if (handle != NULL)
     {
         hal_uart_setup(handle);
-        return 0;
+        return UART_OK;
     }
-    return -1;
+    return UART_ERROR_NULL_HANDLE;
 }
 
 /**
@@ -145,6 +168,11 @@ int kprv_uart_dev_init(KUARTNum uart)
 void kprv_uart_dev_terminate(KUARTNum uart)
 {
     hal_uart_handle * handle = uart_handle(uart);
+    if (handle == NULL)
+    {
+        return UART_ERROR_NULL_HANDLE;
+    }
+
     hal_uart_terminate(handle);
 }
 
@@ -211,6 +239,43 @@ void hal_uart_interrupt(hal_uart_handle * handle)
     {
         portYIELD();
     }
+}
+
+/**
+ * Write a character directly to the uart interface
+ * @param uart uart bus
+ * @param c character to write
+ * @return KUARTStatus UART_OK if success, otherwise failure
+ */
+KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
+{
+    hal_uart_handle *handle = uart_handle(uart);
+    if (!handle) {
+        return UART_ERROR_NULL_HANDLE;
+    }
+
+    hal_uart_write(handle, c);
+
+    return UART_OK;
+}
+
+/**
+ * Write a string directly to the uart interface
+ * @param uart uart bus
+ * @param ptr buffer to write data from
+ * @param len length of data to write
+ * @return KUARTStatus UART_OK if success, otherwise failure
+ */
+KUARTStatus k_uart_write_immediate_str(KUARTNum uart, uint8_t * ptr, uint8_t len)
+{
+    hal_uart_handle *handle = uart_handle(uart);
+    if (!handle) {
+        return UART_ERROR_NULL_HANDLE;
+    }
+
+    hal_uart_write_str(handle, ptr, len);
+
+    return UART_OK;
 }
 
 #endif
