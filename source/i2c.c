@@ -87,9 +87,10 @@ static inline hal_i2c_role i2c_role(I2CRole role)
 }
 
 /**
-  * @brief Creates and sets up specified i2c bus option.
-  * @param i2c Number of i2c bus to setup.
-  */
+ * Setup and enable i2c bus
+ * @param i2c i2c bus to initialize
+ * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
+ */
 KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
 {
     KI2C *k_i2c = kprv_i2c_get(i2c);
@@ -124,6 +125,11 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
     return I2C_ERROR_NULL_HANDLE;
 }
 
+/**
+ * i2c hardware cleanup and disabling
+ * @param i2c bus num to terminate
+ * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
+ */
 KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
 {
     hal_i2c_handle * handle = i2c_handle(i2c);
@@ -135,6 +141,14 @@ KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
     return I2C_ERROR_NULL_HANDLE;
 }
 
+/**
+ * Write data over i2c bus as master
+ * @param i2c i2c bus to write to
+ * @param addr i2c address to write to
+ * @param ptr pointer to data buffer
+ * @param len length of data to write
+ * @return KI2CStatus I2C_OK on success, otherwise failure
+ */
 KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
     hal_i2c_status ret = HAL_I2C_ERROR;
@@ -143,6 +157,14 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
     return (KI2CStatus)ret;
 }
 
+/**
+ * Read data over i2c bus as master
+ * @param i2c i2c bus to read from
+ * @param addr i2c address to write to
+ * @param ptr pointer to data buffer
+ * @param len length of data to read
+ * @return KI2CStatus I2C_OK on success, otherwise failure
+ */
 KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
 {
     hal_i2c_status ret = HAL_I2C_ERROR;
@@ -152,3 +174,5 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
 }
 
 #endif
+
+/* @} */
