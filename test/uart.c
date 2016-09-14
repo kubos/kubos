@@ -92,7 +92,7 @@ static void test_uart_write(void)
     k_uart_init(uartTo, &conf);
     returnLen = k_uart_write(uartTo, testString, len);
 
-    kprv_uart_dev_terminate(uartTo);
+    k_uart_terminate(uartTo);
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLen, "Failed to write");
 }
 
@@ -119,8 +119,8 @@ static void test_uart_writeOverflow(void)
 
     //Clean up the receive buffer
     while(k_uart_read(uartFrom, buffer, 100) != 0);
-    kprv_uart_dev_terminate(uartTo);
-    kprv_uart_dev_terminate(uartFrom);
+    k_uart_terminate(uartTo);
+    k_uart_terminate(uartFrom);
 
     TEST_ASSERT_EQUAL_INT_MESSAGE(50, returnLen, "Failed to write");
 
@@ -154,8 +154,8 @@ static void test_uart_read(void)
 
     returnLenRead = k_uart_read(uartTo, testString, len);
 
-    kprv_uart_dev_terminate(uartTo);
-    kprv_uart_dev_terminate(uartFrom);
+    k_uart_terminate(uartTo);
+    k_uart_terminate(uartFrom);
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenWrite, "Failed to write");
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenRead, "Failed to read");
 }
@@ -191,8 +191,8 @@ static void test_uart_readOverflow(void)
 
     returnLenRead = k_uart_read(uartTo, buffer, 100);
 
-    kprv_uart_dev_terminate(uartTo);
-    kprv_uart_dev_terminate(uartFrom);
+    k_uart_terminate(uartTo);
+    k_uart_terminate(uartFrom);
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenWrite, "Failed to write");
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenRead, "Failed to read");
 }
@@ -224,8 +224,8 @@ static void test_uart_writeImmediate(void)
 
     returnLen = k_uart_read(uartFrom, recvString, len);
 
-    kprv_uart_dev_terminate(uartTo);
-    kprv_uart_dev_terminate(uartFrom);
+    k_uart_terminate(uartTo);
+    k_uart_terminate(uartFrom);
     TEST_ASSERT_EQUAL_MEMORY("a", recvString, 1);
     TEST_ASSERT_EQUAL_INT(1, returnLen);
 }
@@ -262,8 +262,8 @@ static void test_uart_wordLen(void)
 
     returnLenRead = k_uart_read(uartTo, testString, len);
 
-    kprv_uart_dev_terminate(uartTo);
-    kprv_uart_dev_terminate(uartFrom);
+    k_uart_terminate(uartTo);
+    k_uart_terminate(uartFrom);
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenWrite, "Failed to write");
     TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLenRead, "Should have received 0 bytes");
 }
@@ -300,8 +300,8 @@ static void test_uart_parity(void)
 
     returnLenRead = k_uart_read(uartTo, testString, len);
 
-    kprv_uart_dev_terminate(uartTo);
-    kprv_uart_dev_terminate(uartFrom);
+    k_uart_terminate(uartTo);
+    k_uart_terminate(uartFrom);
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenWrite, "Failed to write");
     TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLenRead, "Should have received 0 bytes");
 }
@@ -338,8 +338,8 @@ static void test_uart_baudRate(void)
 
     returnLenRead = k_uart_read(uartTo, testString, len);
 
-    kprv_uart_dev_terminate(uartTo);
-    kprv_uart_dev_terminate(uartFrom);
+    k_uart_terminate(uartTo);
+    k_uart_terminate(uartFrom);
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenWrite, "Failed to write");
     TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLenRead, "Should have received 0 bytes");
 }
@@ -383,8 +383,8 @@ static void test_uart_overrun(void)
 
     returnLenRead = k_uart_read(uartTo, testString, len);
 
-    kprv_uart_dev_terminate(uartTo);
-    kprv_uart_dev_terminate(uartFrom);
+    k_uart_terminate(uartTo);
+    k_uart_terminate(uartFrom);
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenWrite, "Failed to write");
     TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLenRead, "Should have received 0 bytes");
 }
