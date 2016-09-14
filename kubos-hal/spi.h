@@ -89,6 +89,7 @@ typedef enum {
 
 /**
  * Spi direction mode
+ * @note MSP430F5 does not support 1-line mode
  */
 typedef enum {
     K_SPI_DIRECTION_2LINES = 0,
@@ -98,6 +99,7 @@ typedef enum {
 
 /**
  * Spi data size
+ * @note MSP430F5 does not support 16-bit mode
  */
 typedef enum {
     K_SPI_DATASIZE_8BIT = 0,
@@ -180,10 +182,11 @@ typedef struct {
     SPIFirstBit first_bit;
     /**
      * The baud rate of the SPI bus
-     * @warning For the <b>STM32F4 microcontroller</b>, the speed of the SPI bus can only be defined as a factor of the
-     * peripheral clock to which it's connected (PCLK1 for SPI bus 2 and 3, PCLK2 for SPI bus 1).  For example,
-     * PCLK_speed / 2.  To make things easier, this speed field will take a normal baud rate number and then it
-     * will automatically be converted to the nearest available system speed without exceeding the original
+     * @warning For the <b>STM32F4  and MSP430F5 microcontrollers</b>, the speed of the SPI bus can only be defined
+     * as a factor of the peripheral clock to which it's connected (PCLK1 for STM32F4 SPI bus 2 and 3, PCLK2 for
+     * STM32F4 SPI bus 1, SMCLK for MSP430F5 SPI buses).
+     * For example, PCLK_speed / 2.  To make things easier, this speed field will take a normal baud rate number and
+     * then it will automatically be converted to the nearest available system speed without exceeding the original
      * value. <br />
      * For example:  <br />
      * Given conf.speed = 10MHz, PCLK_speed = 84MHz <br />

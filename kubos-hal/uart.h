@@ -108,6 +108,7 @@ typedef enum {
 
 /**
  * Word length
+ * @note MSP430F5 does not support 9-bit mode
  */
 typedef enum {
     K_WORD_LEN_7BIT = 0,
@@ -152,6 +153,11 @@ typedef struct {
     const char *dev_path;
     /**
      * The buad rate of the uart bus
+     * @warning For the <b>MSP430F5 microcontroller</b>, the speed of the SPI bus can only be defined
+     * as a factor of the peripheral clock to which it's connected (SMCLK for MSP430F5 SPI buses).
+     * For example, SMCLK_speed / 2.  To make things easier, this speed field will take a normal baud rate number and
+     * then it will automatically be converted to the nearest available system speed without exceeding the original
+     * value. <br />
      */
     uint32_t baud_rate;
     /**
