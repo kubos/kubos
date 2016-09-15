@@ -1,6 +1,6 @@
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@
 #define NUM_BNO055_OFFSET_REGISTERS (22)
 
 //Establishes configuration and initialization for the tests
-void test_setup(void)
+void test_i2c_setup(void)
 {
 	int ret;
 
@@ -72,6 +72,17 @@ void test_setup(void)
 static void test_i2c_initGood(void)
 {
     int ret;
+
+    KI2CConf conf = {
+        .addressing_mode = K_ADDRESSINGMODE_7BIT,
+        .role = K_MASTER,
+        .clock_speed = 100000
+    };
+
+    KI2C *k_i2c = kprv_i2c_get(I2C_BUS);
+    memcpy(&k_i2c->conf, &conf, sizeof(KI2CConf));
+    k_i2c->bus_num = I2C_BUS;
+    k_i2c->i2c_lock = xSemaphoreCreateMutex();
 
     ret = kprv_i2c_dev_init(I2C_BUS);
     kprv_i2c_dev_terminate(I2C_BUS);
@@ -107,6 +118,17 @@ static void test_i2c_initBad(void)
 static void test_i2c_termInit(void)
 {
     int ret;
+
+    KI2CConf conf = {
+        .addressing_mode = K_ADDRESSINGMODE_7BIT,
+        .role = K_MASTER,
+        .clock_speed = 100000
+    };
+
+    KI2C *k_i2c = kprv_i2c_get(I2C_BUS);
+    memcpy(&k_i2c->conf, &conf, sizeof(KI2CConf));
+    k_i2c->bus_num = I2C_BUS;
+    k_i2c->i2c_lock = xSemaphoreCreateMutex();
 
     ret = kprv_i2c_dev_init(I2C_BUS);
     TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Failed to init I2C_BUS");
@@ -160,7 +182,7 @@ static void test_i2c_writeMasterGood(void)
     int ret;
     uint8_t buffer[2] = {(uint8_t)61, 0x00}; //cmd (0x3D): Set bno055 sensor to config mode (0x00)
 
-	test_setup();
+	test_i2c_setup();
 
     //Send request for data
     ret = kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)buffer, 2);
@@ -201,7 +223,7 @@ static void test_i2c_writeMasterOverflow(void)
     int ret;
     uint8_t buffer[2] = {(uint8_t)61, 0x00}; //cmd (0x3D): Set bno055 sensor to config mode (0x00)
 
-	test_setup();
+	test_i2c_setup();
 
     //Send request for data
     ret = kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)buffer, 200);
@@ -225,7 +247,7 @@ static void test_i2c_readMasterGood(void)
 	uint8_t id;
 	uint8_t reg = BNO055_CHIP_ID_ADDR;
 
-	test_setup();
+	test_i2c_setup();
 
     //Send request for data
     ret = kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)&reg, 1);
@@ -252,7 +274,7 @@ static void test_i2c_readMasterBad(void)
     int ret;
     uint8_t value = 0;
 
-    test_setup();
+    test_i2c_setup();
 
 	ret = kprv_i2c_master_read(I2C_BUS, 0x80, &value, 1);
 
@@ -274,7 +296,7 @@ static void test_i2c_readMasterNoWrite(void)
     int ret;
     uint8_t value = 0;
 
-    test_setup();
+    test_i2c_setup();
 
 	ret = kprv_i2c_master_read(I2C_BUS, BNO055_ADDRESS_A, &value, 1);
 
@@ -295,7 +317,7 @@ static void test_i2c_readMasterOverflow(void)
 	char buffer[100] = {0};
 	uint8_t reg = BNO055_CHIP_ID_ADDR;
 
-	test_setup();
+	test_i2c_setup();
 
     //Send request for data
     ret = kprv_i2c_master_write(I2C_BUS, BNO055_ADDRESS_A, (uint8_t*)&reg, 1);
