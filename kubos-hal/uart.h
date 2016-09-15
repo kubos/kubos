@@ -229,7 +229,7 @@ void k_uart_console_init(void);
  * @param uart uart interface to read from
  * @param ptr buffer to read data into
  * @param len length of data to read
- * @return int number of characters read
+ * @return int number of characters read or -1 to indicate a null uart handle
  */
 int k_uart_read(KUARTNum uart, char *ptr, int len);
 
@@ -241,7 +241,7 @@ int k_uart_read(KUARTNum uart, char *ptr, int len);
  * @param uart uart interface to write to
  * @param ptr buffer to write data from
  * @param len length of data to write
- * @return int number of characters written
+ * @return int number of characters written or -1 to indicate a null uart handle
  */
 int k_uart_write(KUARTNum uart, char *ptr, int len);
 
@@ -264,7 +264,8 @@ KUARTStatus k_uart_write_immediate_str(KUARTNum uart, uint8_t * ptr, uint8_t len
 
 /**
  * Returns the number of characters currently in the uart rx queue
- * @param uart uart interface number
+ * @param uart uart interface number or -1 to indicate a null uart handle or -2
+ * to indicate a null rx queue pointer
  */
 int k_uart_rx_queue_len(KUARTNum uart);
 

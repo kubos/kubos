@@ -24,7 +24,7 @@ static KUART k_uarts[K_NUM_UARTS];
 /**
  * Returns rx pin for specified uart interface
  * @param uart uart interface number
- * @return int rx pin
+ * @return int rx pin or -1 to indicate uart not found
  */
 int k_uart_rx_pin(KUARTNum uart) {
     switch (uart) {
@@ -53,7 +53,7 @@ int k_uart_rx_pin(KUARTNum uart) {
 /**
  * Returns tx pin for specified uart interface
  * @param uart uart interface number
- * @return int tx pin
+ * @return int tx pin or -1 to indicate uart not found
  */
 int k_uart_tx_pin(KUARTNum uart) {
     switch (uart) {
@@ -119,7 +119,7 @@ KUARTStatus k_uart_init(KUARTNum uart, KUARTConf *conf)
     KUART *k_uart = kprv_uart_get(uart);
     if(k_uart == NULL)
     {
-      return UART_ERROR_NULL_HANDLE;
+        return UART_ERROR_NULL_HANDLE;
     }
 
     memcpy(&k_uart->conf, conf, sizeof(KUARTConf));
