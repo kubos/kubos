@@ -255,7 +255,6 @@ static void test_uart_readOverflow(void)
     char * testString = "test string 1";
     char buffer[100] = {0};
     int len = strlen(testString);
-    int returnLenWrite = 0;
     int returnLenRead = 0;
 
     conf = (KUARTConf) {
@@ -476,7 +475,6 @@ static void test_uart_overrun(void)
     KUART *k_uart;
     char * testString = "test string 1";
     int len = strlen(testString);
-    int returnLenWrite = 0;
     int returnLenRead = 0;
 
     conf = (KUARTConf) {
