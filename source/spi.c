@@ -131,9 +131,10 @@ static inline hal_spi_first_bit spi_first_bit(SPIFirstBit firstbit)
 }
 
 /**
-  * @brief Creates and sets up specified spi bus option.
-  * @param spi Number of spi bus to setup.
-  */
+ * Setup and enable SPI bus
+ * @param spi SPI bus to initialize
+ * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
+ */
 KSPIStatus kprv_spi_dev_init(KSPINum spi)
 {
     KSPI *k_spi = kprv_spi_get(spi);
@@ -152,7 +153,14 @@ KSPIStatus kprv_spi_dev_init(KSPINum spi)
             .speed = k_spi->config.speed,
     };
 
-    hal_spi_handle * handle = hal_spi_init(config, spi);
+    //Reject configuration options that the MSP430F5529 doesn't support.
+    //Note: Slave mode will be supported once we implement it.
+    if(config.role == HAL_SPI_SLAVE || config.direction == K_SPI_DIRECTION_1LINE || config.data_size == K_SPI_DATASIZE_16BIT)
+    {
+        return SPI_ERROR_CONFIG;
+    }
+
+    hal_spi_handle * handle = hal_spi_init(config, spi_bus(spi));
     if (handle != NULL)
     {
         handle->bus_num = spi_bus(spi);
@@ -162,6 +170,11 @@ KSPIStatus kprv_spi_dev_init(KSPINum spi)
     return SPI_ERROR_NULL_HANDLE;
 }
 
+/**
+ * SPI hardware cleanup and disabling
+ * @param spi bus num to terminate
+ * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
+ */
 KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
 {
     hal_spi_handle * handle = spi_handle(spi);
@@ -173,21 +186,55 @@ KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
     return SPI_ERROR_NULL_HANDLE;
 }
 
+/**
+ * Write data over SPI bus
+ * @param spi SPI bus to write to
+ * @param buffer pointer to data buffer
+ * @param len length of data to write
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t *buffer, uint32_t len)
 {
-    hal_spi_status ret = hal_spi_master_write(spi_handle(spi), buffer, len);
+    hal_spi_handle * handle = spi_handle(spi);
+    if(handle->conf.direction == K_SPI_DIRECTION_2LINES_RXONLY)
+    {
+        return SPI_ERROR;
+    }
+
+    hal_spi_status ret = hal_spi_master_write(handle, buffer, len);
     return (KSPIStatus)ret;
 }
 
+/**
+ * Read data over SPI bus
+ * @param spi SPI bus to read from
+ * @param buffer pointer to data buffer
+ * @param len length of data to read
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_read(KSPINum spi, uint8_t *buffer, uint32_t len)
 {
     hal_spi_status ret = hal_spi_master_read(spi_handle(spi), buffer, len);
     return (KSPIStatus)ret;
 }
 
+/**
+ * Write and read data over SPI bus
+ * @param spi SPI bus to write to
+ * @param txBuffer pointer to data buffer to write from
+ * @param rxBuffer pointer to data buffer to read into
+ * @param len length of data to write and read
+ * @return KSPIStatus SPI_OK on success, otherwise failure
+ */
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t *txBuffer, uint8_t *rxBuffer, uint32_t len)
 {
-    hal_spi_status ret = hal_spi_master_write_read(spi_handle(spi), txBuffer, rxBuffer, len);
+    hal_spi_handle * handle = spi_handle(spi);
+    if(handle->conf.direction == K_SPI_DIRECTION_2LINES_RXONLY)
+    {
+        return SPI_ERROR;
+    }
+
+    hal_spi_status ret = hal_spi_master_write_read(handle, txBuffer, rxBuffer, len);
     return (KSPIStatus)ret;
 }
 
