@@ -283,41 +283,41 @@ hal_i2c_status hal_i2c_master_read(hal_i2c_handle * handle, uint16_t addr, uint8
 	if(ptr == NULL || handle == NULL)
 		return HAL_I2C_ERROR_NULL_HANDLE; /* error */
 
-	/* loop variable */
-	int i = 0;
-	/* return variable */
-	hal_i2c_status ret = HAL_I2C_ERROR;
+    /* loop variable */
+    int i = 0;
+    /* return variable */
+    hal_i2c_status ret = HAL_I2C_ERROR;
 
-	/* clear buffer */
-	handle->reg->rxBuffer = 0;
-	/* reset interrupt flag */
-	handle->reg->interruptFlags = 0;
+    /* clear buffer */
+    handle->reg->rxBuffer = 0;
+    /* reset interrupt flag */
+    handle->reg->interruptFlags = 0;
 
-	/* set slave address */
-	handle->reg->slaveAddress = addr;
+    /* set slave address */
+    handle->reg->slaveAddress = addr;
 
-	/* set I2C start condition and clear UCTR */
-	handle->reg->control1 &= ~UCTR;
-	handle->reg->control1 |= UCTXSTT;
+    /* set I2C start condition and clear UCTR */
+    handle->reg->control1 &= ~UCTR;
+    handle->reg->control1 |= UCTXSTT;
 
-	/* set stop bit IMMEDIATELY after STT is clear; during reception */
+    /* set stop bit IMMEDIATELY after STT is clear; during reception */
     /* msp-slau208 38.3.4.2.2 specification */
-	if(len == 1)
+    if(len == 1)
     {
-	    //DO NOT convert this to hal_i2c_register_timeout.  It takes too long
-	    //and messes up the stop bit being set/received.
-	    while(handle->reg->control1 & UCTXSTT);
-	    handle->reg->control1 |= UCTXSTP;
+        //DO NOT convert this to hal_i2c_register_timeout.  It takes too long
+        //and messes up the stop bit being set/received.
+        while(handle->reg->control1 & UCTXSTT);
+        handle->reg->control1 |= UCTXSTP;
     }
-	else
-	{
-	    /* wait for STT to clear (slave received address)*/
-	    if((ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE)) != HAL_I2C_OK)
-	    {
-	        /* return error */
-	        return ret;
-	    }
-	}
+    else
+    {
+        /* wait for STT to clear (slave received address)*/
+        if((ret = hal_i2c_register_timeout(handle, UCTXSTT, RELEASE)) != HAL_I2C_OK)
+        {
+            /* return error */
+            return ret;
+        }
+    }
 
 	/* slave not responding to start? */
 	if (handle->reg->interruptFlags & UCNACKIFG)
