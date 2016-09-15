@@ -1,6 +1,6 @@
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,9 +129,7 @@ static void test_i2c_initBad(void)
 /**
  * test_i2c_termInit
  *
- * Purpose:  Test terminating a port that wasn't initialized
- *
- * Expectation: Nothing is returned except for a null-handle check, but the system at least shouldn't crash
+ * Purpose:  Test terminating a port that was successfully initialized
  *
  */
 
@@ -477,7 +475,7 @@ static void test_i2c_slave(void)
     k_i2c->i2c_lock = xSemaphoreCreateMutex();
 
     ret = kprv_i2c_dev_init(I2C_BUS);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_ERROR, ret, "Successfully inititalized I2C_BUS?");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_ERROR_CONFIG, ret, "Successfully inititalized I2C_BUS?");
 }
 
 /**
