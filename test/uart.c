@@ -1,6 +1,6 @@
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,6 @@ static void test_uart_writeOverflow(void)
 static void test_uart_read(void)
 {
     KUARTConf conf;
-    KUART *k_uart;
     char * testString = "test string 1";
     int len = strlen(testString);
     int returnLenWrite = 0;

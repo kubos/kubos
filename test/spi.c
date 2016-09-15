@@ -1,6 +1,6 @@
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@
 #define CS PA4
 #define SPI_BUS K_SPI1
 
-void test_setup(void)
+void test_spi_setup(void)
 {
 	int ret = 0;
     uint8_t resetReg = 0xE0 & ~0x80; //Reset register, high bit low for write request
@@ -132,7 +132,7 @@ static void test_spi_termInit(void)
 {
 	int ret;
 
-	test_setup();
+	test_spi_setup();
 
 	ret = kprv_spi_dev_terminate(SPI_BUS);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_OK, ret, "Failed to terminate SPI_BUS");
@@ -183,7 +183,7 @@ static void test_spi_writeMaster(void)
 	uint8_t chipReg = 0xD0; //Chip ID register
 	chipReg |= 0x80; //Turn on high bit for read request
 
-	test_setup();
+	test_spi_setup();
 
 	k_gpio_write(CS, 0);
 
@@ -212,7 +212,7 @@ static void test_spi_writeMasterNoCS(void)
 	uint8_t chipReg = 0xD0;
 	chipReg |= 0x80;
 
-	test_setup();
+	test_spi_setup();
 
 	ret = kprv_spi_write(SPI_BUS, &chipReg, 1);
 
@@ -263,7 +263,7 @@ static void test_spi_writeMasterOverflow(void)
 	uint8_t chipReg = 0xD0; //Chip ID register
 	chipReg |= 0x80; //Turn on high bit for read request
 
-	test_setup();
+	test_spi_setup();
 
 	k_gpio_write(CS, 0);
 
@@ -293,7 +293,7 @@ static void test_spi_readMaster(void)
 	uint8_t chipReg = 0xD0;
 	chipReg |= 0x80;
 
-	test_setup();
+	test_spi_setup();
 
 	k_gpio_write(CS, 0);
 
@@ -328,7 +328,7 @@ static void test_spi_readMasterNoCS(void)
 	uint8_t chipReg = 0xD0;
 	chipReg |= 0x80;
 
-	test_setup();
+	test_spi_setup();
 
 	ret = kprv_spi_write(SPI_BUS, &chipReg, 1);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_OK, ret, "Failed to write from SPI_BUS");
@@ -357,7 +357,7 @@ static void test_spi_readMasterNoWrite(void)
 	int ret;
 	uint8_t id = 0;
 
-	test_setup();
+	test_spi_setup();
 
 	k_gpio_write(CS, 0);
 
@@ -387,7 +387,7 @@ static void test_spi_writeReadMaster(void)
 	uint8_t id = 0;
 	uint8_t buffer[1] = {0xD0};
 
-	test_setup();
+	test_spi_setup();
 
 	k_gpio_write(CS, 0);
 
@@ -414,7 +414,7 @@ static void test_spi_readMasterOverflow(void)
 	uint8_t chipReg = 0xD0;
 	chipReg |= 0x80;
 
-	test_setup();
+	test_spi_setup();
 
 	k_gpio_write(CS, 0);
 
