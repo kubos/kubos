@@ -1,6 +1,6 @@
 /*
  * KubOS Core Flight Services
- * Copyright (C) 2015 Kubos Corporation
+ * Copyright (C) 2016 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ static void test_spi_termNoninit(void)
 }
 
 /*
- * test_spi_termNoninit
+ * test_spi_termBad
  *
  * Purpose:  Test terminating a spi port that doesn't exist
  *
@@ -322,6 +322,8 @@ static void test_spi_readMaster(void)
     ret = kprv_spi_read(SPI_BUS, &id, sizeof id);
 
     k_gpio_write(CS, 1);
+
+    vTaskDelay(50);
 
     kprv_spi_dev_terminate(SPI_BUS);
 

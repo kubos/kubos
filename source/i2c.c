@@ -106,7 +106,7 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
      */
     if(k_i2c->conf.role == K_SLAVE)
     {
-        return I2C_ERROR;
+        return I2C_ERROR_CONFIG;
     }
 
     hal_i2c_config config = {

@@ -250,7 +250,7 @@ void hal_uart_interrupt(hal_uart_handle * handle)
 KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
 {
     hal_uart_handle *handle = uart_handle(uart);
-    if (!handle) {
+    if (handle == NULL) {
         return UART_ERROR_NULL_HANDLE;
     }
 
@@ -269,7 +269,7 @@ KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
 KUARTStatus k_uart_write_immediate_str(KUARTNum uart, uint8_t * ptr, uint8_t len)
 {
     hal_uart_handle *handle = uart_handle(uart);
-    if (!handle) {
+    if (handle == NULL) {
         return UART_ERROR_NULL_HANDLE;
     }
 
