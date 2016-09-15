@@ -101,6 +101,12 @@ static void hal_spi_set_clock_speed(hal_spi_handle * handle)
     /* SMCLK FREQ constant 1 MHz for F5529 */
     const uint32_t SMCLK_FREQ = 1000000;
     uint8_t preScalar;
+
+    if(handle->conf.speed < 1)
+    {
+        handle->conf.speed = 1;
+    }
+
     preScalar = (uint8_t)(SMCLK_FREQ/handle->conf.speed);
 
     handle->reg->control1 |= UCSSEL_2 | UCSWRST; /* SMCLK + keep reset */
