@@ -108,6 +108,7 @@ typedef enum {
 
 /**
  * Word length
+ * @note MSP430F5 does not support 9-bit mode
  */
 typedef enum {
     K_WORD_LEN_7BIT = 0,
@@ -133,6 +134,16 @@ typedef enum {
 } KParity;
 
 /**
+ * Uart status values
+ */
+typedef enum {
+    UART_OK,
+    UART_ERROR,
+    UART_ERROR_NULL_HANDLE,
+    UART_ERROR_CONFIG
+} KUARTStatus;
+
+/**
  * Uart configuration structure
  */
 typedef struct {
@@ -142,6 +153,11 @@ typedef struct {
     const char *dev_path;
     /**
      * The buad rate of the uart bus
+     * @warning For the <b>MSP430F5 microcontroller</b>, the speed of the SPI bus can only be defined
+     * as a factor of the peripheral clock to which it's connected (SMCLK for MSP430F5 SPI buses).
+     * For example, SMCLK_speed / 2.  To make things easier, this speed field will take a normal baud rate number and
+     * then it will automatically be converted to the nearest available system speed without exceeding the original
+     * value. <br />
      */
     uint32_t baud_rate;
     /**
@@ -189,9 +205,9 @@ KUARTConf k_uart_conf_defaults(void);
  * Setup and enable uart interface
  * @param uart uart interface to initialize
  * @param conf config values to initialize with
- * @return int 0 if OK, non-zero error code otherwise
+ * @return KUARTStatus UART_OK if OK, failure otherwise
  */
-int k_uart_init(KUARTNum uart, KUARTConf *conf);
+KUARTStatus k_uart_init(KUARTNum uart, KUARTConf *conf);
 
 
 /**
@@ -213,7 +229,7 @@ void k_uart_console_init(void);
  * @param uart uart interface to read from
  * @param ptr buffer to read data into
  * @param len length of data to read
- * @return int number of characters read
+ * @return int number of characters read or -1 to indicate a null uart handle
  */
 int k_uart_read(KUARTNum uart, char *ptr, int len);
 
@@ -225,7 +241,7 @@ int k_uart_read(KUARTNum uart, char *ptr, int len);
  * @param uart uart interface to write to
  * @param ptr buffer to write data from
  * @param len length of data to write
- * @return int number of characters written
+ * @return int number of characters written or -1 to indicate a null uart handle
  */
 int k_uart_write(KUARTNum uart, char *ptr, int len);
 
@@ -233,12 +249,23 @@ int k_uart_write(KUARTNum uart, char *ptr, int len);
  * Write data directly to a uart interface
  * @param uart uart interface to write to
  * @param c character to write
+ * @return KUARTStatus UART_OK if success, otherwise failure
  */
-int k_uart_write_immediate(KUARTNum uart, char c);
+KUARTStatus k_uart_write_immediate(KUARTNum uart, char c);
+
+/**
+ * Write data directly to a uart interface
+ * @param uart uart interface to write to
+ * @param ptr buffer to write data from
+ * @param len length of data to write
+ * @return KUARTStatus UART_OK if success, otherwise failure
+ */
+KUARTStatus k_uart_write_immediate_str(KUARTNum uart, uint8_t * ptr, uint8_t len);
 
 /**
  * Returns the number of characters currently in the uart rx queue
- * @param uart uart interface number
+ * @param uart uart interface number or -1 to indicate a null uart handle or -2
+ * to indicate a null rx queue pointer
  */
 int k_uart_rx_queue_len(KUARTNum uart);
 
@@ -275,9 +302,9 @@ KUART* kprv_uart_get(KUARTNum uart);
 /**
  * Performs low level uart hardware initialization
  * @param uart uart interface to initialize
- * @return Error code
+ * @return KUARTStatus UART_OK if OK, failure otherwise
  */
-int kprv_uart_dev_init(KUARTNum uart);
+KUARTStatus kprv_uart_dev_init(KUARTNum uart);
 
 void kprv_uart_dev_terminate(KUARTNum uart);
 
