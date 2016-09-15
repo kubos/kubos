@@ -596,6 +596,10 @@ static void test_i2c_clockZero(void)
     TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_OK, ret, "Write returned unexpected value");
 }
 
+/*
+ * Note:  Added vTaskDelay between each test because without them the MSP430 will sometimes lock up between
+ * passing one test and starting the next.
+ */
 K_TEST_MAIN() {
     UNITY_BEGIN();
 
@@ -604,24 +608,43 @@ K_TEST_MAIN() {
     printf("---------------------------------\r\n");
 
     RUN_TEST(test_i2c_initNoConfig);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_initGood);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_initBad);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_termInit);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_termNoninit);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_termBad);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_writeMasterGood);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_writeMasterBad);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_writeMasterOverflow);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_readMasterBad);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_readMasterGoodSingle);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_readMasterGoodMultiple);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_readMasterNoWrite);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_readMasterOverflow);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_addrModeWrite);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_addrModeRead);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_slave);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_clockHigh);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_clockLow);
+    vTaskDelay(10);
     RUN_TEST(test_i2c_clockZero);
 
     return UNITY_END();

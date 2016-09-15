@@ -500,7 +500,10 @@ static void test_uart_overrun(void)
     TEST_ASSERT_EQUAL_INT_MESSAGE(0, returnLenRead, "Should have received 0 bytes");
 }
 
-
+/*
+ * Note:  Added vTaskDelay between each test because without them the MSP430 will sometimes lock up between
+ * passing one test and starting the next.
+ */
 K_TEST_MAIN() {
     UNITY_BEGIN();
 
@@ -509,17 +512,29 @@ K_TEST_MAIN() {
     printf("---------------------------------\r\n");
 
     RUN_TEST(test_uart_initGood);
+    vTaskDelay(10);
     RUN_TEST(test_uart_initBad);
+    vTaskDelay(10);
     RUN_TEST(test_uart_write);
+    vTaskDelay(10);
     RUN_TEST(test_uart_writeOverflow);
+    vTaskDelay(10);
     RUN_TEST(test_uart_writeImmediate);
+    vTaskDelay(10);
     RUN_TEST(test_uart_writeImmediateStr);
+    vTaskDelay(10);
     RUN_TEST(test_uart_read);
+    vTaskDelay(10);
     RUN_TEST(test_uart_wordLen7);
+    vTaskDelay(10);
     RUN_TEST(test_uart_wordLen9);
+    vTaskDelay(10);
     RUN_TEST(test_uart_parity);
+    vTaskDelay(10);
     RUN_TEST(test_uart_stopbits);
+    vTaskDelay(10);
     RUN_TEST(test_uart_baudRate);
+    vTaskDelay(10);
     RUN_TEST(test_uart_overrun);
 
     return UNITY_END();
