@@ -275,7 +275,6 @@ static void test_uart_readOverflow(void)
 
     k_uart_terminate(uart_bus);
 
-    TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenWrite, "Failed to write");
     TEST_ASSERT_EQUAL_INT_MESSAGE(len, returnLenRead, "Failed to read");
 }
 
