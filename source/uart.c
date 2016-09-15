@@ -133,41 +133,42 @@ static void hal_uart_set_baudrate(hal_uart_handle * handle)
 {
 
     //Settings copied from slau208O Table 36-4 and 36-5
+    //for clock frequency = 1.05 MHz
     switch(handle->config.baudrate)
     {
         case HAL_UART_9600:
         {
             handle->reg->baudrate0 = 6;
             handle->reg->baudrate1 = 0;
-            handle->reg->modControl = UCBRS_0 + UCBRF_8 + UCOS16;
+            handle->reg->modControl = UCBRS_0 + UCBRF_13 + UCOS16;
             break;
         }
         case HAL_UART_19200:
         {
             handle->reg->baudrate0 = 3;
             handle->reg->baudrate1 = 0;
-            handle->reg->modControl = UCBRS_0 + UCBRF_4 + UCOS16;
+            handle->reg->modControl = UCBRS_1 + UCBRF_6 + UCOS16;
             break;
         }
         case HAL_UART_38400:
         {
-            handle->reg->baudrate0 = 26;
+            handle->reg->baudrate0 = 27;
             handle->reg->baudrate1 = 0;
-            handle->reg->modControl = UCBRS_0 + UCBRF_0;
+            handle->reg->modControl = UCBRS_2 + UCBRF_0;
             break;
         }
         case HAL_UART_57600:
         {
-            handle->reg->baudrate0 = 17;
+            handle->reg->baudrate0 = 18;
             handle->reg->baudrate1 = 0;
-            handle->reg->modControl = UCBRS_3 + UCBRF_0;
+            handle->reg->modControl = UCBRS_1 + UCBRF_0;
             break;
         }
         case HAL_UART_115200:
         {
-            handle->reg->baudrate0 = 8;
+            handle->reg->baudrate0 = 9;
             handle->reg->baudrate1 = 0;
-            handle->reg->modControl = UCBRS_6 + UCBRF_0;
+            handle->reg->modControl = UCBRS_1 + UCBRF_0;
             break;
         }
     }
