@@ -1,4 +1,11 @@
 #!/bin/bash
+# tools/gendocs.sh
+# This script generates the documentation for the kubos source tree
+# The script expects two parameters
+# - An absolute path to a directory to put the documentation in
+# - A version number (typcially represents the current release version)
+# usage: ./tools/gendocs.sh /absolute/path/to/output/dir x.x.x
+
 this_dir=$(cd "`dirname "$0"`"; pwd)
 kubos_dir=$(cd "$this_dir/.."; pwd)
 out_dir=$1
@@ -11,6 +18,11 @@ fi
 
 if [ ! -d "$out_dir" ]; then
     echo "Error: output directory does not exist"
+    exit 1
+fi
+
+if [ "$release_ver" = "" ]; then
+    echo "Error: required release version missing"
     exit 1
 fi
 
