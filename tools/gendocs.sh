@@ -2,6 +2,7 @@
 this_dir=$(cd "`dirname "$0"`"; pwd)
 kubos_dir=$(cd "$this_dir/.."; pwd)
 out_dir=$1
+release_ver=$2
 
 if [ "$out_dir" = "" ]; then
     echo "Error: required output directory missing"
@@ -43,7 +44,7 @@ gendocs_yt_module() {
     run_cmd mv $module_dir/html $out_dir/$out_relpath
 }
 
-gendocs $kubos_dir docs/Doxyfile
+gendocs $kubos_dir docs/Doxyfile $release_ver
 run_cmd mv $kubos_dir/html/* $out_dir
 
 gendocs_yt_module $kubos_dir/kubos-core kubos-core
