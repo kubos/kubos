@@ -1,13 +1,13 @@
 {
   "name": "kubos-hal",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "KubOS - Satellite flight software platform",
   "keywords": [],
   "author": "kubos.co",
   "homepage": "https://www.kubos.co",
   "license": "Apache-2.0",
   "dependencies": {
-      "csp": "kubostech/libcsp#~1.5.0"
+    "csp": "kubostech/libcsp#~1.5.0"
   },
   "targetDependencies": {
     "stm32f4": {
@@ -21,6 +21,6 @@
     }
   },
   "testDependencies": {
-      "unity": "kubostech/unity"
+    "unity": "kubostech/unity"
   }
 }
