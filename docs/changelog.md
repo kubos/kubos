@@ -4,7 +4,6 @@
 * [KUBOS-132](https://kubostech.atlassian.net/browse/KUBOS-132) Standardized status codes for I2C, SPI and UART HAL
 * [KUBOS-131](https://kubostech.atlassian.net/browse/KUBOS-131) Added basic unit testing for Kubos-HAL-MSP430F5529 and updated MSP430 documentation.
 * [KUBOS-62](https://kubostech.atlassian.net/browse/KUBOS-62) Added preliminary OSX analytics tracking
-* [KUBOS-69](https://kubostech.atlassian.net/browse/KUBOS-69) Eliminated the need for Kubos-SDK to chown project files in Linux
 
 ## v0.1.1 - Sep 2 2016
 * Documentation updates
