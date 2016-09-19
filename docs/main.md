@@ -17,6 +17,8 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
  - [KubOS-SDK Command Reference](docs/sdk-reference.md)
 
  - [KubOS Module Development](docs/kubos-development.md)
+ 
+ - [Contributing to the KubOS Project](docs/contribution-process.md
 
 ## Top Level APIs
 
