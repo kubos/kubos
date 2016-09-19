@@ -2,6 +2,7 @@
 
 This is the workflow you should go through in order to create a complete a task to contribute to the KubOS project
 
+0. [Sign the CLA](#sign-the-cla)
 1. [Create a JIRA Issue](#create-a-jira-issue)
 2. [Mark the Issue as 'In Progress'](#mark-the-issue-as-in-progress)
 3. [Create a Personal Copy of the Code You Want to Work On](#create-a-personal-copy-of-the-code-you-want-to-work-on)
@@ -11,6 +12,12 @@ This is the workflow you should go through in order to create a complete a task 
 7. [Wait for Pull Request Approval](#wait-for-pull-request-approval)
 8. [Mark the Issue as 'Done'](#mark-the-issue-as-done)
 
+## Sign the CLA
+
+All contributors must sign the KubOS Contributor License Agreement before their changes can be merged into the 
+main codebase.
+
+The KubOS CLA can be found [here](https://www.clahub.com/agreements/kubostech/KubOS).
 
 ## Create a JIRA Issue
 
