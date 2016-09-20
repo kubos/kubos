@@ -17,6 +17,10 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
  - [KubOS-SDK Command Reference](docs/sdk-reference.md)
 
  - [KubOS Module Development](docs/kubos-development.md)
+ 
+ - [MSP430 Launchpad Guide](docs/MSP430-launchpad-guide.md)
+ 
+ - [STM32F4 Discovery Board Guide](STM32F4-discovery-board-guide.md)
 
 ## Top Level APIs
 
