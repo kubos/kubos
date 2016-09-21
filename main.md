@@ -20,6 +20,10 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
  
  - [Contributing to the KubOS Project](docs/contribution-process.md
 
+ - [MSP430 Launchpad Guide](docs/MSP430-launchpad-guide.md)
+ 
+ - [STM32F4 Discovery Board Guide](docs/STM32F4-discovery-board-guide.md)
+
 ## Top Level APIs
 
  - [KubOS HAL](./kubos-hal/index.html)
