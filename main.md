@@ -18,7 +18,7 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
 
  - [KubOS Module Development](docs/kubos-development.md)
  
- - [Contributing to the KubOS Project](docs/contribution-process.md
+ - [Contributing to the KubOS Project](docs/contribution-process.md)
 
  - [MSP430 Launchpad Guide](docs/MSP430-launchpad-guide.md)
  
