@@ -116,7 +116,7 @@ The next time your project is built it will use your local development module, r
 
  * You may now use the standard target command to select the newly linked target:
 
-        $ cdc ../<project-directory>/
+        $ cd ../<project-directory>/
         $ kubos target <target name>
 
 The next time your project is built it will use your local development target, rather than the packaged version.
