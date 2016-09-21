@@ -1,6 +1,6 @@
 # KubOS Contribution Process
 
-This is the workflow you should go through in order to create a complete a task to contribute to the KubOS project
+This is the workflow you should go through in order to create and complete a task to contribute to the KubOS project
 
 0. [Sign the CLA](#sign-the-cla)
 1. [Create a JIRA Issue](#create-a-jira-issue)
