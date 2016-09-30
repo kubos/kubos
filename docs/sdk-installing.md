@@ -4,7 +4,7 @@
 
 ### Install Docker
 
-If you don't already have Docker installed see the Docker downloads for [Mac OS X](https://www.docker.com/products/docker-toolbox) or the installation docs for [Linux](https://docs.docker.com/engine/installation/). You should also read the [prerequisites](https://docs.docker.com/docker-for-mac/#/what-to-know-before-you-install).
+If you don't already have Docker installed see the Docker downloads for [Mac OS X](https://www.docker.com/products/docker-toolbox) or the installation docs for [Linux](https://docs.docker.com/engine/installation/). You should also read the [prerequisites](https://docs.docker.com/docker-for-mac/#/what-to-know-before-you-install) for Mac OS X or your Linux distribution specific documentation on permissions and creating a docker user group. For an example see [Create a Docker group](https://docs.docker.com/engine/installation/linux/ubuntulinux/#create-a-docker-group) for Ubuntu Linux.  
 
         $ docker --version
 
