@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-#ifdef YOTTA_CFG_FS
+/**
+ * This code is not currently compiled because
+ * 1. It is not compatible with our current msp430 libc
+ * 2. It is not used by the basic FatFs layer currently implemented 
+ */ 
+#if 0
 
 #include <errno.h>
 #include <string.h>

@@ -15,6 +15,13 @@
  * limitations under the License.
  */
 
+/**
+ * This code is not currently compiled because
+ * 1. It is not compatible with our current msp430 libc
+ * 2. It is not used by the basic FatFs layer currently implemented 
+ */ 
+#if 0
+
 #include <errno.h>
 #include <string.h>
 
@@ -23,8 +30,6 @@
 extern char _sheap;                 /* start of the heap */
 extern char _eheap;                 /* end of the heap */
 char *heap_top = &_sheap + 4;
-
-#ifdef YOTTA_CFG_FS
 
 #define IS_STDIO(fd) (fd == STDIN_FILENO || fd == STDOUT_FILENO || fd == STDERR_FILENO)
 

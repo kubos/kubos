@@ -21,7 +21,12 @@
   }
 }
 **/
-#ifdef YOTTA_CFG_FS_FATFS
+/**
+ * This code is not currently compiled because
+ * 1. It is not compatible with our current msp430 libc
+ * 2. It is not used by the basic FatFs layer currently implemented 
+ */ 
+#if 0
 
 #include <errno.h>
 #include <fcntl.h>
@@ -62,7 +67,7 @@ typedef struct {
 
 static fatfs_handle_t _fat_handles[FS_MAX_FDS];
 static FATFS _fat_fs;
-static DIR _fat_dir;
+static FAT_DIR _fat_dir;
 
 static fatfs_handle_t* first_free_handle(void)
 {
@@ -350,7 +355,7 @@ int fatfs_readdir(fs_dir_t *dir, fs_info_t *info)
     }
 
     FILINFO fat_info;
-    CHECK_FRESULT_NOREENT(f_readdir((DIR *) dir->priv_data, &fat_info));
+    CHECK_FRESULT_NOREENT(f_readdir((FAT_DIR *) dir->priv_data, &fat_info));
 
 #if _USE_LFN
     char *fn = *fat_info.lfname ? fat_info.lfname : fat_info.fname;
@@ -373,7 +378,7 @@ int fatfs_closedir(fs_dir_t *dir)
         return EINVAL;
     }
 
-    CHECK_FRESULT_NOREENT(f_closedir((DIR *) dir->priv_data));
+    CHECK_FRESULT_NOREENT(f_closedir((FAT_DIR *) dir->priv_data));
     return 0;
 }
 

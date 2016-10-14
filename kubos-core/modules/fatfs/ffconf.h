@@ -216,7 +216,8 @@
 /  Note that enabling exFAT discards C89 compatibility. */
 
 
-#define _FS_NORTC	0
+/* Kubos-RT does not currently have any RTC support */
+#define _FS_NORTC	1
 #define _NORTC_MON	3
 #define _NORTC_MDAY	1
 #define _NORTC_YEAR	2016
