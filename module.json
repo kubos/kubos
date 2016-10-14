@@ -1,13 +1,13 @@
 {
   "name": "kubos-core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "KubOS - Satellite flight software platform",
   "keywords": [],
   "author": "kubos.co",
   "homepage": "https://www.kubos.co",
   "license": "Apache-2.0",
   "dependencies": {
-    "csp" : "kubostech/libcsp#~1.5.0",
+    "csp": "kubostech/libcsp#~1.5.0",
     "kubos-hal": "kubostech/kubos-hal#~0.1.0"
   },
   "testTargetDependencies": {
