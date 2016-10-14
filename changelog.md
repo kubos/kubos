@@ -1,5 +1,9 @@
 # KubOS Changelog
 
+## v0.1.4 - Oct 14 2016
+* [KUBOS-81](https://kubostech.atlassian.net/browse/KUBOS-81) Implemented FatFs SPI SD support (Current MSP430 only)
+* A new [example using the FatFs SPI SD interface](https://github.com/kubostech/kubos-sd-example)
+
 ## v0.1.3 - Sep 16 2016
 * [KUBOS-132](https://kubostech.atlassian.net/browse/KUBOS-132) Standardized status codes for I2C, SPI and UART HAL
 * [KUBOS-131](https://kubostech.atlassian.net/browse/KUBOS-131) Added basic unit testing for Kubos-HAL-MSP430F5529 and updated MSP430 documentation.
