@@ -1,0 +1,23 @@
+{
+  "name": "stm32cubef4-stm32f407vg",
+  "version": "0.0.3",
+  "description": "STM32CubeF4 HAL for stm32f407vg microcontrollers",
+  "keywords": [
+    "mbed"
+  ],
+  "author": "Marshall Culpepper <marshall@kubos.co>",
+  "homepage": "https://github.com/kubostech/mbed-hal-st-stm32f407vg",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "extraIncludes": [
+    "stm32cubef4-stm32f407vg"
+  ],
+  "dependencies": {
+    "cmsis-core": "kubostech/cmsis-core#~1.2.1"
+  },
+  "targetDependencies": {}
+}

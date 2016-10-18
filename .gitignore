@@ -47,6 +47,7 @@ yotta_modules/
 .yotta.json
 
 html
+# yotta files
 yotta_modules
 yotta_targets
 .yotta.json
@@ -86,3 +87,7 @@ yotta_*
 .yotta*
 yotta_*
 html/
+upload.tar.gz
+
+# vim files
+.*.sw*
