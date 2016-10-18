@@ -79,3 +79,7 @@ html/
 *.swo
 *.swp
 .DS_Store
+.yotta*
+yotta_*
+.kubos-link.json
+.travis.yml
