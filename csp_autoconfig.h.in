@@ -1,0 +1,35 @@
+#ifndef CSP_AUTOCONFIG_H_CMAKE
+#define CSP_AUTOCONFIG_H_CMAKE
+
+#cmakedefine GIT_REV "@GIT_REV@"
+#cmakedefine CSP_FREERTOS
+#cmakedefine CSP_POSIX
+#cmakedefine CSP_WINDOWS
+#cmakedefine CSP_MACOSX
+#cmakedefine CSP_DEBUG
+#cmakedefine CSP_VERBOSE
+#cmakedefine CSP_USE_RDP
+#cmakedefine CSP_USE_CRC32
+#cmakedefine CSP_USE_HMAC
+#cmakedefine CSP_USE_XTEA
+#cmakedefine CSP_USE_PROMISC
+#cmakedefine CSP_USE_QOS
+#cmakedefine CSP_USE_DEDUP
+#cmakedefine CSP_USE_INIT_SHUTDOWN
+#define CSP_CONN_MAX @MAX_CONNECTIONS@
+#define CSP_CONN_QUEUE_LENGTH @CONN_QUEUE_LENGTH@
+#define CSP_FIFO_INPUT @ROUTER_QUEUE_LENGTH@
+#define CSP_MAX_BIND_PORT @MAX_BIND_PORT@
+#define CSP_RDP_MAX_WINDOW @RDP_MAX_WINDOW@
+#define CSP_PADDING_BYTES @PADDING@
+#define CSP_CONNECTION_SO @CONNECTION_SO@
+#cmakedefine CSP_LOG_LEVEL_DEBUG
+#cmakedefine CSP_LOG_LEVEL_INFO
+#cmakedefine CSP_LOG_LEVEL_WARN
+#cmakedefine CSP_LOG_LEVEL_ERROR
+#cmakedefine CSP_LITTLE_ENDIAN
+#cmakedefine CSP_BIG_ENDIAN
+#cmakedefine CSP_HAVE_STDBOOL_H
+#define LIBCSP_VERSION @CSP_VERSION@
+
+#endif /* CSP_AUTOCONFIG_H_CMAKE */
