@@ -1,0 +1,26 @@
+{
+  "name": "cmsis-core-st",
+  "version": "1.0.5",
+  "description": "CMSIS Core Implementation for ST MCUs (KubOS fork)",
+  "keywords": [
+    "cmsis",
+    "mbed",
+    "mbed-official"
+  ],
+  "author": "Brendan Moran <brendan.moran@arm.com>",
+  "repository": {
+    "url": "git@github.com:kubostech/cmsis-core-st.git",
+    "type": "git"
+  },
+  "homepage": "https://github.com/kubostech/cmsis-core-st",
+  "license": "Apache-2",
+  "dependencies": {},
+  "targetDependencies": {
+    "stm32f0": {
+      "cmsis-core-stm32f0": "*"
+    },
+    "stm32f4": {
+      "cmsis-core-stm32f4": "kubostech/cmsis-core-stm32f4#~1.2.2"
+    }
+  }
+}
