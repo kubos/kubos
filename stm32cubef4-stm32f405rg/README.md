@@ -1,0 +1,1 @@
+STM32CubeF4 config for STM32F405RG
