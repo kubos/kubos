@@ -83,3 +83,6 @@ html/
 yotta_*
 .kubos-link.json
 .travis.yml
+.yotta*
+yotta_*
+html/
