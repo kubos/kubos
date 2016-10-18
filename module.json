@@ -1,0 +1,15 @@
+{
+    "license":"Apache-2.0",
+    "name":"unity",
+    "repository":{
+        "url":"git://github.com/kubostech/unity",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "homepage":"https://github.com/kubostech/unity",
+    "targetDependencies": {
+        "freertos": {
+          "freertos": "kubostech/freertos#~9.0.3"
+        }
+    }
+}
