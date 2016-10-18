@@ -76,3 +76,5 @@ yotta_*
 html/
 *.swo
 *.swp
+*.swo
+*.swp

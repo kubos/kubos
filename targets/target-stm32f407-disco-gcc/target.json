@@ -1,0 +1,200 @@
+{
+  "name": "stm32f407-disco-gcc",
+  "version": "0.1.0",
+  "inherits": {
+    "kubos-arm-none-eabi-gcc": "kubostech/target-kubos-arm-none-eabi-gcc#~0.1.0"
+  },
+  "description": "KubOS build target for the stm32f407-discovery development board.",
+  "author": "Marshall Culpepper <marshall@kubos.co>",
+  "homepage": "https://github.com/kubostech/target-stm32f407-disco-gcc",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "stm32f407-disco",
+    "gcc"
+  ],
+  "similarTo": [
+    "stm32f407-disco",
+    "f407vg",
+    "f407",
+    "discovery",
+    "stm32f407vgt6",
+    "stm32f407vg",
+    "stm32f407xg",
+    "stm32f407",
+    "stm32f4",
+    "stm32",
+    "st",
+    "cortex-m4",
+    "armv7-m"
+  ],
+  "config": {
+    "cmsis": {
+      "nvic": {
+        "ram_vector_address": "0x20000000",
+        "flash_vector_address": "0x08000000",
+        "user_irq_offset": 16,
+        "user_irq_number": 82
+      }
+    },
+    "uvisor": {
+      "present": 0
+    },
+    "hardware": {
+      "externalClock": "8000000",
+      "console": {
+        "uart": "K_UART6",
+        "baudRate": "115200"
+      },
+      "i2c": {
+        "count": 2,
+        "defaults": {
+          "bus": "K_I2C1"
+        },
+        "i2c1": {
+          "scl": {
+            "pin": "PB6",
+            "mode": "GPIO_MODE_AF_PP",
+            "pullup": "GPIO_NOPULL",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "sda": {
+            "pin": "PB7",
+            "mode": "GPIO_MODE_AF_OD",
+            "pullup": "GPIO_PULLUP",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "alt": "GPIO_AF4_I2C1"
+        },
+        "i2c2": {
+          "scl": {
+            "pin": "PB10",
+            "mode": "GPIO_MODE_AF_PP",
+            "pullup": "GPIO_NOPULL",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "sda": {
+            "pin": "PB11",
+            "mode": "GPIO_MODE_AF_OD",
+            "pullup": "GPIO_PULLUP",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "alt": "GPIO_AF4_I2C2"
+        }
+      },
+      "uart": {
+        "count": 6,
+        "uart1": {
+          "tx": "PA9",
+          "rx": "PA10"
+        },
+        "uart2": {
+          "tx": "PA2",
+          "rx": "PA3"
+        },
+        "uart3": {
+          "tx": "PA10",
+          "rx": "PA11"
+        },
+        "uart4": {
+          "tx": "PA0",
+          "rx": "PA1"
+        },
+        "uart5": {
+          "tx": "PC12",
+          "rx": "PD2"
+        },
+        "uart6": {
+          "tx": "PC6",
+          "rx": "PC7"
+        }
+      },
+      "spi": {
+        "count": 3,
+        "defaults": {
+          "bus": "K_SPI1"
+        },
+        "spi1": {
+          "mosi": "PA7",
+          "miso": "PA6",
+          "sck": "PA5",
+          "cs": "PA4",
+          "port": "GPIOA",
+          "alt": "GPIO_AF5_SPI1"
+        },
+        "spi2": {
+          "mosi": "PB15",
+          "miso": "PB14",
+          "sck": "PB13",
+          "cs": "PB12",
+          "port": "GPIOB",
+          "alt": "GPIO_AF5_SPI2"
+        },
+        "spi3": {
+          "mosi": "PC12",
+          "miso": "PC11",
+          "sck": "PC10",
+          "cs": "PC8",
+          "port": "GPIOC",
+          "alt": "GPIO_AF6_SPI3"
+        }
+      },
+      "pins": {
+        "LED1": "PD12",
+        "LED2": "PD13",
+        "LED3": "PD14",
+        "LED4": "PD15",
+        "USER_BUTTON": "PA0",
+        "USBTX": "PA2",
+        "USBRX": "PA3",
+        "PWM_OUT": "PB3"
+      },
+      "test-pins": {
+        "spi": {
+          "mosi": "SPI1_MOSI",
+          "miso": "SPI1_MISO",
+          "sclk": "SPI1_SCK",
+          "ssel": "SPI1_CS"
+        },
+        "i2c": {
+          "sda": "I2C_SDA",
+          "scl": "I2C_SCL"
+        },
+        "serial": {
+          "tx": "PC_12",
+          "rx": "PF_6"
+        }
+      }
+    }
+  },
+  "toolchain": "CMake/toolchain.cmake",
+  "debug": [
+    "valinor",
+    "--target",
+    "stm32f407vg",
+    "$program"
+  ],
+  "scripts": {
+    "debug": [
+      "valinor",
+      "--target",
+      "stm32f407vg",
+      "$program"
+    ],
+    "test": [
+      "mbed_test_wrapper",
+      "--target",
+      "STM32F4-DISCO",
+      "$program"
+    ],
+    "start": [
+      "bash",
+      "$PWD/yotta_targets/stm32f407-disco-gcc/openocd/flash.sh",
+      "stm32f4_flash $program"
+    ]
+  }
+}
