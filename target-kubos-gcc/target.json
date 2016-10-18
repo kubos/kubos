@@ -1,0 +1,59 @@
+{
+  "name": "kubos-gcc",
+  "version": "0.1.1",
+  "description": "base KubOS build target for the gcc toolchain",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "kubos",
+    "gcc"
+  ],
+  "similarTo": [
+    "gcc"
+  ],
+  "config": {
+    "hardware": {
+      "i2c": {
+        "count": 0,
+        "defaults": {
+          "bus": "K_I2C1",
+          "role": "K_MASTER",
+          "clockSpeed": 100000,
+          "addressingMode": "K_ADDRESSINGMODE_7BIT"
+        }
+      },
+      "uart": {
+        "count": 0,
+        "defaults": {
+          "baudRate": 9600,
+          "wordLen": "K_WORD_LEN_8BIT",
+          "stopBits": "K_STOP_BITS_1",
+          "parity": "K_PARITY_NONE",
+          "rxQueueLen": 128,
+          "txQueueLen": 128
+        }
+      },
+      "spi": {
+        "count": 0,
+        "defaults": {
+          "bus": "K_SPI1",
+          "role": "K_SPI_MASTER",
+          "direction": "K_SPI_DIRECTION_2LINES",
+          "dataSize": "K_SPI_DATASIZE_8BIT",
+          "clockPolarity": "K_SPI_CPOL_HIGH",
+          "clockPhase": "K_SPI_CPHA_1EDGE",
+          "firstBit": "K_SPI_FIRSTBIT_LSB",
+          "speed": "10000"
+        }
+      }
+    }
+  },
+  "toolchain": "CMake/toolchain.cmake",
+  "cmakeIncludes": [
+    "coverage/coverage.cmake"
+  ]
+}
