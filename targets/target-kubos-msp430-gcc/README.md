@@ -1,0 +1,1 @@
+# target-kubos-msp430-gcc
