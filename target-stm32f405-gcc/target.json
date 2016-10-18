@@ -1,0 +1,174 @@
+{
+  "name": "stm32f405-gcc",
+  "version": "0.1.0",
+  "inherits": {
+    "kubos-arm-none-eabi-gcc": "kubostech/target-kubos-arm-none-eabi-gcc#~0.1.0"
+  },
+  "description": "KubOS build target for stm32f405rg based boards.",
+  "author": "Ryan Plauche <ryan@kubos.co>",
+  "homepage": "https://github.com/kubostech/target-stm32f405-gcc",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "stm32f405rg",
+    "gcc"
+  ],
+  "similarTo": [
+    "stm32f405rg",
+    "f405rg",
+    "f405",
+    "stm32f405rg",
+    "stm32f405",
+    "stm32f4",
+    "stm32",
+    "st",
+    "cortex-m4",
+    "armv7-m"
+  ],
+  "config": {
+    "cmsis": {
+      "nvic": {
+        "ram_vector_address": "0x20000000",
+        "flash_vector_address": "0x08000000",
+        "user_irq_offset": 16,
+        "user_irq_number": 82
+      }
+    },
+    "uvisor": {
+      "present": 0
+    },
+    "hardware": {
+      "i2c": {
+        "count": 2,
+        "defaults": {
+            "bus": "K_I2C1"
+        },
+        "i2c1": {
+          "scl": {
+            "pin": "PB6",
+            "mode": "GPIO_MODE_AF_PP",
+            "pullup": "GPIO_NOPULL",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "sda": {
+            "pin": "PB7",
+            "mode": "GPIO_MODE_AF_OD",
+            "pullup": "GPIO_PULLUP",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "alt": "GPIO_AF4_I2C1"
+        },
+        "i2c2": {
+          "scl": {
+            "pin": "PB10",
+            "mode": "GPIO_MODE_AF_PP",
+            "pullup": "GPIO_NOPULL",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "sda": {
+            "pin": "PB11",
+            "mode": "GPIO_MODE_AF_OD",
+            "pullup": "GPIO_PULLUP",
+            "speed": "GPIO_SPEED_MEDIUM"
+          },
+          "alt": "GPIO_AF4_I2C2"
+        }
+      },
+      "spi": {
+        "count": 2,
+        "defaults": {
+          "bus": "K_SPI1"
+        },
+        "spi1": {
+          "mosi": "PA7",
+          "miso": "PA6",
+          "sck": "PA5",
+          "cs": "PA4",
+          "port": "GPIOA",
+          "alt": "GPIO_AF5_SPI1"
+        },
+        "spi2": {
+          "mosi": "PB15",
+          "miso": "PB14",
+          "sck": "PB13",
+          "cs": "PB12",
+          "port": "GPIOB",
+          "alt": "GPIO_AF5_SPI2"
+        }
+      },
+      "uart": {
+        "count": 5,
+        "uart1": {
+          "tx": "PB6",
+          "rx": "PB7"
+        },
+        "uart2": {
+          "tx": "PA2",
+          "rx": "PA3"
+        },
+        "uart3": {
+          "tx": "PB10",
+          "rx": "PB11"
+        },
+        "uart4": {
+          "tx": "PA0",
+          "rx": "PA1"
+        },
+        "uart6": {
+          "tx": "PC6",
+          "rx": "PC7"
+        }
+      },
+      "pins": {
+        "USBTX": "PA_2",
+        "USBRX": "PA_3",
+        "SPI_MOSI": "PA7",
+        "SPI_MISO": "PA6",
+        "SPI_SCK": "PA5",
+        "SPI_CS": "PA_4",
+        "PWM_OUT": "PB_3"
+      },
+      "test-pins": {
+        "spi": {
+          "mosi": "SPI_MOSI",
+          "miso": "SPI_MISO",
+          "sclk": "SPI_SCK",
+          "ssel": "SPI_CS"
+        },
+        "i2c": {
+          "sda": "I2C_SDA",
+          "scl": "I2C_SCL"
+        },
+        "serial": {
+          "tx": "PC_12",
+          "rx": "PF_6"
+        }
+      }
+    }
+  },
+  "toolchain": "CMake/toolchain.cmake",
+  "debug": [
+    "valinor",
+    "--target",
+    "stm32f405rg",
+    "$program"
+  ],
+  "scripts": {
+    "debug": [
+      "valinor",
+      "--target",
+      "stm32f405rg",
+      "$program"
+    ],
+    "test": [
+      "mbed_test_wrapper",
+      "--target",
+      "STM32F4-DISCO",
+      "$program"
+    ]
+  }
+}
