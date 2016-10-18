@@ -1,0 +1,23 @@
+{
+  "name": "stm32cubef4-stm32f405rg",
+  "version": "0.0.3",
+  "description": "STM32CubeF4 HAL for stm32f405rg microcontrollers",
+  "keywords": [
+    "mbed"
+  ],
+  "author": "Ryan Plauche <ryan@kubos.co>",
+  "homepage": "https://github.com/kubostech/stm32cubef4-stm32f405rg",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "extraIncludes": [
+    "stm32cubef4-stm32f405rg"
+  ],
+  "dependencies": {
+    "cmsis-core": "kubostech/cmsis-core#~1.2.1"
+  },
+  "targetDependencies": {}
+}
