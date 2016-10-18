@@ -1,0 +1,30 @@
+{
+  "name": "stm32cubef4",
+  "version": "1.2.4",
+  "description": "STM32Cube HAL for STM32F4 microcontrollers",
+  "keywords": [
+    "stm32cubef4"
+  ],
+  "author": "Marshall Culpepper <marshall@kubos.co>",
+  "homepage": "https://github.com/kubostech/stm32cubef4",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/BSD-3-Clause",
+      "type": "BSD-3-Clause"
+    }
+  ],
+  "extraIncludes": [
+    "stm32cubef4"
+  ],
+  "targetDependencies": {
+      "stm32f429zi-no-inherit": {
+          "stm32cubef4-stm32f429zi": "*"
+      },
+      "stm32f407vg": {
+          "stm32cubef4-stm32f407vg": "kubostech/stm32cubef4-stm32f407vg#~0.0.1"
+      },
+      "stm32f405rg": {
+          "stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg#~0.0.1"
+      }
+  }
+}
