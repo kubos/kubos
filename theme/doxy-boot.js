@@ -102,6 +102,8 @@ $( document ).ready(function() {
     left_nav.append(navrow);
     $('#navrow' + i).remove();
   }
+
+  /*
   var right_nav = $('<div class="col-md-3"></div>').append('\
     <div id="search-box" class="input-group">\
       <div class="input-group-btn">\
@@ -114,6 +116,8 @@ $( document ).ready(function() {
       <button id="search-close" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>\
       <input id="search-field" class="form-control" accesskey="S" onkeydown="searchBox.OnSearchFieldChange(event);" placeholder="Search ..." type="text">\
     </div>');
+*/
+
   $(nav_container).append(left_nav);
   $(nav_container).append(right_nav);
 
@@ -209,7 +213,7 @@ $( document ).ready(function() {
 
 
   /* enumerations */
-  
+
   $('table.fieldtable').removeClass('fieldtable').addClass('table table-striped table-bordered').each(function(){
     $(this).prepend('<thead></thead>');
     $(this).find('tbody > tr:first').prependTo($(this).find('thead'));
