@@ -1,0 +1,23 @@
+{
+  "name": "cmsis-core-stm32f407xg",
+  "version": "0.0.4",
+  "description": "CMSIS Core module for stm32f407xg microcontrollers",
+  "keywords": [
+    "mbed"
+  ],
+  "author": "Max Peng <max.peng1768@gmail.com>",
+  "homepage": "https://github.com/maxpeng/cmsis-core-st-stm32f407xg",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/BSD-3-Clause",
+      "type": "BSD-3-Clause"
+    }
+  ],
+  "extraIncludes": [
+    "cmsis-core-stm32f407xg"
+  ],
+  "dependencies": {
+    "cmsis-core": "kubostech/cmsis-core#~1.2.1"
+  },
+  "targetDependencies": {}
+}
