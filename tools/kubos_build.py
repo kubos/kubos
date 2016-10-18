@@ -22,9 +22,9 @@ class Project(object):
             self.yotta_data = json.load(open(path + '/target.json', 'r'))
             self.type = 'yotta_target'
 
-        self.commit = self.get_commit_sha()
-        self.upstream = self.find_upstream_branch()
-        self.tag = self.get_last_tag()
+        #self.commit = self.get_commit_sha()
+        #self.upstream = self.find_upstream_branch()
+        #self.tag = self.get_last_tag()
         self.version = self.get_version()
 
     def is_bin(self):
@@ -97,11 +97,19 @@ class KubosBuild(object):
 
     def find_projects(self):
         self.projects = []
-        repos = subprocess.check_output([self.kubos_dir + '/repo', 'list',
-                                         '--fullpath'], cwd=self.kubos_dir)
-        for path in repos.splitlines():
-            path, name = path.split(':')
-            path = path.strip()
-            name = name.strip()
+        modules = subprocess.check_output(["find", ".", "-name",
+                                        "module.json"], cwd=self.kubos_dir)
+        for path in modules.splitlines():
+            path = path.replace("module.json", "").strip()
+            name = path.split("/")[-2]
             relpath = os.path.relpath(path, self.kubos_dir)
             self.projects.append(Project(name, path, relpath))
+
+        modules = subprocess.check_output(["find", ".", "-name",
+                                        "target.json"], cwd=self.kubos_dir)
+        for path in modules.splitlines():
+            path = path.replace("target.json", "").strip()
+            name = path.split("/")[-2]
+            relpath = os.path.relpath(path, self.kubos_dir)
+            self.projects.append(Project(name, path, relpath))
+
