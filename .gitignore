@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 build/
 .yotta.json
 yotta_*
@@ -47,3 +48,9 @@ yotta_modules/
 .yotta.json
 
 html
+yotta_modules
+yotta_targets
+.yotta.json
+build
+
+.gdbinit
