@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 build/
 .yotta.json
 yotta_*
@@ -54,3 +53,24 @@ yotta_targets
 build
 
 .gdbinit
+build
+*.swp
+.lock*
+.waf*
+.waf3*
+waf-*/
+*.o
+*.pyc
+.project
+.cproject
+~*
+pdebug*
+*.tar*
+tags
+.DS_store
+*.pdf
+
+.yotta.json
+yotta_*
+
+html/
