@@ -1,0 +1,23 @@
+{
+  "name": "cmsis-core-stm32f405rg",
+  "version": "0.0.4",
+  "description": "CMSIS Core module for stm32f405rg microcontrollers",
+  "keywords": [
+    "mbed"
+  ],
+  "author": "Ryan Plauche <ryan@kubos.co>",
+  "homepage": "https://github.com/kubostech/cmsis-core-stm32f405rg",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/BSD-3-Clause",
+      "type": "BSD-3-Clause"
+    }
+  ],
+  "extraIncludes": [
+    "cmsis-core-stm32f405rg"
+  ],
+  "dependencies": {
+    "cmsis-core": "kubostech/cmsis-core#~1.2.1"
+  },
+  "targetDependencies": {}
+}
