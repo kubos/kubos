@@ -1,0 +1,41 @@
+{
+  "name": "cmsis-core-stm32f4",
+  "version": "1.2.4",
+  "description": "CMSIS Core module for STM32F4xx microcontrollers (KubOS fork)",
+  "keywords": [
+    "mbed",
+    "mbed-official"
+  ],
+  "author": "Brendan Moran <brendan.moran@arm.com>",
+  "homepage": "https://github.com/kubostech/cmsis-core-stm32f4",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/BSD-3-Clause",
+      "type": "BSD-3-Clause"
+    }
+  ],
+  "extraIncludes": [
+    "cmsis-core-stm32f4"
+  ],
+  "dependencies": {
+    "cmsis-core": "kubostech/cmsis-core#~1.2.1",
+    "stm32cubef4": "kubostech/stm32cubef4#~1.2.1"
+  },
+  "targetDependencies": {
+    "stm32f401xe-no-inherit": {
+      "cmsis-core-stm32f401xe": "~0.1.0"
+    },
+    "stm32f429xi-no-inherit": {
+      "cmsis-core-stm32f429xi": "^1.0.0"
+    },
+    "stm32f439zi-no-inherit": {
+      "cmsis-core-stm32f439zi": "~0.1.0"
+    },
+    "stm32f407xg": {
+      "cmsis-core-stm32f407xg": "kubostech/cmsis-core-stm32f407xg#~0.0.2"
+    },
+    "stm32f405rg": {
+      "cmsis-core-stm32f405rg": "kubostech/cmsis-core-stm32f405rg#~0.0.1"
+    }
+  }
+}
