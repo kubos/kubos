@@ -50,5 +50,13 @@
                 }
             }
         }
+    },
+    "scripts": {
+        "start" : [
+          "mspdebug",
+          "tilib",
+          "prog $program",
+          "--allow-fw-update"
+        ]
     }
 }

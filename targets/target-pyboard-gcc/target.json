@@ -54,6 +54,17 @@
     "$program"
   ],
   "scripts": {
+    "start": [
+      "dfu-util",
+      "--alt",
+      "0",
+      "-D",
+      "$program.bin",
+      "-i",
+      "0",
+      "-s",
+      "0x08000000"
+    ],
     "debug": [
       "valinor",
       "--target",
