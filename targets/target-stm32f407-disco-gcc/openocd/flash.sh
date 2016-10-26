@@ -1,7 +1,7 @@
 #!/bin/bash
 
 this_dir=$(cd "`dirname "$0"`"; pwd)
-program=$1 # program is fist becasue for debugging there is not a command provided
+program=$1 # program is fist because for debugging there is not a command provided
            # openocd will start a gdb server by default if there's not a command provided
 cmd=$2
 if [[ ! -z $cmd ]]; then
