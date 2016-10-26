@@ -57,6 +57,11 @@
           "tilib",
           "prog $program",
           "--allow-fw-update"
+        ],
+        "debug": [
+          "bash",
+          "$PWD/yotta_targets/msp430f5529-gcc/mspdebug/debug.sh",
+          "$program"
         ]
     }
 }
