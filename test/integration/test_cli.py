@@ -1,16 +1,14 @@
 import unittest
+import re
+import subprocess
 
 class TestCLI(unittest.TestCase):
-
-    def test_kubos_installed(self):
-        self.assertEqual('foo'.upper(), 'FOO')
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
+    def test_latest_kubos_installed(self):
+        bashCommand = "vagrant ssh -c 'kubos update'"
+        process = subprocess.Popen(bashCommand.split())
+        output, error = process.communicate()
+        regex = re.compile(r"All up to date!")
+        self.assertTrue(regex.search( output ))
 
 if __name__ == '__main__':
     unittest.main()
