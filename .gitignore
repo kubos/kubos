@@ -1,7 +1,3 @@
-build/
-.yotta.json
-yotta_*
-
 html/
 .kubos-link.json
 # Object files
@@ -20,12 +16,6 @@ html/
 *.la
 *.lo
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
 # Executables
 *.exe
 *.out
@@ -36,22 +26,6 @@ html/
 
 # Debug files
 *.dSYM/
-
-# Compile Folders
-bin/
-
-# Yotta
-build/
-yotta_targets/
-yotta_modules/
-.yotta.json
-
-html
-# yotta files
-yotta_modules
-yotta_targets
-.yotta.json
-build
 
 .gdbinit
 build
@@ -69,7 +43,6 @@ pdebug*
 *.tar*
 tags
 .DS_store
-*.pdf
 
 .yotta.json
 yotta_*
@@ -80,12 +53,8 @@ html/
 *.swo
 *.swp
 .DS_Store
-.yotta*
-yotta_*
 .kubos-link.json
 .travis.yml
-.yotta*
-yotta_*
 html/
 upload.tar.gz
 
