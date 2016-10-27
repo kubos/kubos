@@ -28,7 +28,8 @@ if [[ ! -z $cfg ]]; then
         echo openocd -f $this_dir/$cfg -c \"$openocd_arg\"
         openocd -f $this_dir/$cfg -c "$openocd_arg"
     else                            #Debugging the Target
-        (openocd -f $this_dir/$cfg -c "$openocd_arg" &) #Start the gdb server in a sub-shell
+        (pgrep openocd | xargs kill; #Try to kill any running open ocd instances
+         openocd -f $this_dir/$cfg -c "$openocd_arg" | /dev/null &) #Start the gdb server in a sub-shell
         sleep 3
         arm-none-eabi-gdb -ex "target remote localhost:3333" -ex "file $program"
     fi
