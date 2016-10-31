@@ -8,20 +8,20 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
 
  - [Changelog](docs/changelog.md)
 
- - [Installing KubOS-SDK](docs/sdk-installing.md)
+ - [Installing Kubos-CLI](docs/cli-installing.md)
 
- - [Upgrading KubOS-SDK](docs/sdk-upgrading.md)
+ - [Upgrading Kubos-CLI](docs/cli-upgrading.md)
 
  - [Creating your first project](docs/first-project.md)
 
  - [KubOS-SDK Command Reference](docs/sdk-reference.md)
 
  - [KubOS Module Development](docs/kubos-development.md)
- 
+
  - [Contributing to the KubOS Project](docs/contribution-process.md)
 
  - [MSP430 Launchpad Guide](docs/MSP430-launchpad-guide.md)
- 
+
  - [STM32F4 Discovery Board Guide](docs/STM32F4-discovery-board-guide.md)
 
 ## Top Level APIs
