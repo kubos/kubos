@@ -1,48 +1,35 @@
-# Developing KubOS Modules
+# Developing Kubos Modules
 
-The top level [Kubos](https://github.com/kubostech/kubos) project acts as a workspace for all KubOS RT related
-projects to help simplify development.
+The top level [Kubos](https://github.com/kubostech/kubos) project contains all of the kubos source modules and targets.
 
-Git repositories are managed with Android's ```repo``` utility, and once the workspace
-is initialized, you can use repo to sync the project.
+## Getting started - Modifying an existing Kubos module
 
-## Getting started
-
-1. [Install the latest version of Kubos SDK](docs/sdk-installing.md)
+1. [Install the latest version of Kubos CLI](docs/sdk-installing.md)
 2. Clone the Kubos repo
 
         $ git clone https://github.com/kubostech/kubos
 
-2. Run the development environment bootstrap script to pull down all of the KubOS
-   repositories:
+## Kubos development environment
 
-        $ cd kubos
-        $ ./bootstrap.sh
-
-## KubOS development environment
-
-KubOS is a collection of Yotta modules and targets which come pre-packaged with the KubOS-SDK. They can also be built locally using the `kubos link` and `kubos link-target`
+Kubos is a collection of Yotta modules and targets which come pre-packaged with the Kubos-CLI. They can also be built locally using the `kubos link` and `kubos link-target`
 commands.
 
 ### Building an example application
 
-Several different example applications can be found in the examples folder. Any of these can be easily built using the sdk.
+Several different example applications can be found in the Kubos Example repos. Any of these can be easily built using the CLI.
 
-        $ cd examples/kubos-rt-example
+        $ kubos init <project_name> #will initialize a new project with the [kubos-rt-example project](https://github.com/kubostech/kubos-rt-example)
         $ kubos target msp430f5529-gcc
         $ kubos build
 
-### Linking in a local folder
+### Linking in a local module
 
 Made some modifications to an existing module? Want to link in a new library? The kubos tool can help with that as well.
 
-        $ kubos link /home/kubos/super-awesome-space-library
+        $ cd /home/kubos/super-awesome-space-library
+        $ sudo kubos link
+        $ cd /home/kubos/example
+        $ kubos link super-awesome-space-library
         $ kubos build
 
-After running the `kubos link` command with the absolute path of a module, `kubos build` will pick up the module and pull it into the build process.
-
-## Synchronizing repositories
-
-Want to get the latest source? This command will sync the local source tree with the kubos source in github.
-
-        $ ./repo sync
+After running the `kubos link` command from the module directory and `kubos link <module name> from the project directory, `kubos build` will pick up the module and pull it into the build process.
