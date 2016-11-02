@@ -53,7 +53,7 @@ To see all of the available targets run:
 
 ## Building a project
 
-To build a Kubos project, all we need to do is run the `kubos build` command. The KubOS cli (really `yotta` under the covers) will read the module.json file, determine what libraries are needed and build them.
+To build a KubOS project, all we need to do is run the `kubos build` command. The Kubos-cli (really `yotta` under the covers) will read the module.json file, determine what libraries are needed and build them.
 
 Basic build command:
 
@@ -89,7 +89,7 @@ The Kubos-cli comes with all of the latest KubOS modules and targets pre-package
 
 The next time your project is built it will use your local development module, rather than the packaged version.
 
-Note: To Verify where all of your targets are being loaded from `kubos list` will show you which modules are linked and which are local to your project
+Note: To verify where all of your targets are being loaded from `kubos list` will show you which modules are linked and which are local to your project
 
 ##### Linking targets:
 
