@@ -2,7 +2,7 @@
 
 ## Creating a project
 
-Run the `kubos init` command followed by the name of your project to bootstrap your KubOS projet. This will create a new directory under your current working directory with your project's name and add the source files for a basic kubos project (kubos-rt-example).
+Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory under your current working directory with your project's name and add the source files for a basic KubOS project (kubos-rt-example).
 
         $ kubos init project-name
 
@@ -53,7 +53,7 @@ To see all of the available targets run:
 
 ## Building a project
 
-To build a Kubos project, all we need to do is run the `kubos build` command. The Kubos cli (really `yotta` under the covers) will read the module.json file, determine what libraries are needed and build them.
+To build a Kubos project, all we need to do is run the `kubos build` command. The KubOS cli (really `yotta` under the covers) will read the module.json file, determine what libraries are needed and build them.
 
 Basic build command:
 
@@ -137,9 +137,9 @@ TODO: We probably want to add some info here on Virtualbox device filters and Gu
 #### Debug your project
 
 A gdb server must be started to allow your gdb instance to connect and debug directly on your hardware device.
-After building your project with `kubos build` kubos can manage a gdb server and gdb instance for you.
+After building your project with `kubos build` the kubos-cli can start a gdb server and gdb instance for you.
 
-Start a gdb server and instance for you:
+Start a gdb server and instance:
 Note: this may need to run as root depending on your usb device permissions
 
         $ kubos debug

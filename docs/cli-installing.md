@@ -4,7 +4,9 @@
 
 ### Install Vagrant
 
-If you don't already have Vagrant installed see the Vagrant [downloads](https://www.vagrantup.com/downloads.htm://www.vagrantup.com/downloads.html)
+If you don't already have Vagrant installed see the Vagrant [getting started guide](https://www.vagrantup.com/docs/getting-started/)
+
+Make sure vagrant is installed properly:
 
         $ vagrant --version
 

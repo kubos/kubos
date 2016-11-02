@@ -1,6 +1,6 @@
 # Upgrading Your Kubos Development Environment
 
-## Upgrading the Kubos-CLI
+## Upgrading Kubos-CLI
 
 The Kubos-cli can be upgraded using this pip command:
 
@@ -8,7 +8,7 @@ The Kubos-cli can be upgraded using this pip command:
 
 ## Upgrading the Kubos Source Modules
 
-To upgrade the Kubos source modules your project will be build against run the following kubos command:
+To upgrade the Kubos source modules your project will be built with run the following kubos command:
 
         $ sudo kubos update
 
