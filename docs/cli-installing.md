@@ -39,7 +39,7 @@ Un-comment the second line and change the paths to match your host directory and
 For more information on mounting volumes see the following [guide](https://www.vagrantup.com/docs/synced-folders/basic_usage.html)
 
 This initialization command may take a few minutes to run - It is provisioning a virtual machine with all of the required build, flashing and debugging
-utilities you will need to work with a Kubos project. Addiitonall it is installing the Kubos-CLI.
+utilities you will need to work with a Kubos project. Additionally it is installing the Kubos-CLI.
 
         $ vagrant ssh
 

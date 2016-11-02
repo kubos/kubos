@@ -32,4 +32,4 @@ Made some modifications to an existing module? Want to link in a new library? Th
         $ kubos link super-awesome-space-library
         $ kubos build
 
-After running the `kubos link` command from the module directory and `kubos link <module name> from the project directory, `kubos build` will pick up the module and pull it into the build process.
+After running the `kubos link` command from the module directory and `kubos link <module name>` from the project directory, `kubos build` will pick up the module and pull it into the build process.
