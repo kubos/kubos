@@ -20,12 +20,21 @@ SSH into your box
 
 ## Creating your project
 
-The simplest way to create a new Kubos project is by using the kubos sdk. The `kubos init` command takes a project name and creates the project files & folder.
-
 It is strongly recommended that you create your project in a directory on your host that is shared with your box, rather than directly inside your box. If the
 directory is located on your host, if your box is ever destroyed or re-built your project files will be completely intact.
 
+By default the directory that you run `vagrant init kubostech/kubos-sdk` in will be mounted into the box at the path `/vagrant`
+
+To mount a specific directory from your host, open the Vagrantfile and look for the following two lines:
+
+        #To mount a specific directory into your box uncomment the next line and change the following paths to match your host directory and a desired mount point in the box.
+        #config.vm.synced_folder "/path/on/host", "/path/in/vagrant/box"
+
+Un-comment the second line and change the paths to match your host directory and a desired mount point in the box. Note - These must be absolute paths.
+
 For more information on mounting volumes see the following [guide](https://www.vagrantup.com/docs/synced-folders/basic_usage.html)
+
+The simplest way to create a new Kubos project is by using the kubos-cli. The `kubos init` command takes a project name and creates the project files & folder.
 
         $ kubos init myproject
 
@@ -65,7 +74,7 @@ Now that the target is set you can begin building. This command will build the c
 
 You should see the `Build Succeeded` message! You are now ready to load your software on some hardware. Connect your hardware to your computer and run the following flash command:
 
-         $ kubos flash
+        $ kubos flash
 
 Note - You may need to run this command with `sudo` if you run into a permissions error.
 
