@@ -1,17 +1,17 @@
-# Developing Kubos Modules
+# Developing KubOS Modules
 
 The top level [Kubos](https://github.com/kubostech/kubos) project contains all of the kubos source modules and targets.
 
 ## Getting started - Modifying an existing Kubos module
 
-1. [Install the latest version of Kubos CLI](docs/sdk-installing.md)
+1. [Install the latest version of Kubos-CLI](docs/sdk-installing.md)
 2. Clone the Kubos repo
 
         $ git clone https://github.com/kubostech/kubos
 
 ## Kubos development environment
 
-Kubos is a collection of Yotta modules and targets which come pre-packaged with the Kubos-CLI. They can also be built locally using the `kubos link` and `kubos link-target`
+Kubos is a collection of Yotta modules and targets which are loaded inside the kubos-sdk Vagrant box. They can also be built locally using the `kubos link` and `kubos link-target`
 commands.
 
 ### Building an example application
@@ -24,7 +24,7 @@ Several different example applications can be found in the Kubos Example repos. 
 
 ### Linking in a local module
 
-Made some modifications to an existing module? Want to link in a new library? The kubos tool can help with that as well.
+Made some modifications to an existing module? Want to link in a new library? The kubos-cli can help with that as well.
 
         $ cd /home/kubos/super-awesome-space-library
         $ sudo kubos link
