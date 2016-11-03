@@ -2,7 +2,7 @@
 
 ## Creating a project
 
-Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory under your current working directory with your project's name and add the basic files.
+Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory under your current working directory with your project's name and add the source files for a basic KubOS project (kubos-rt-example).
 
         $ kubos init project-name
 
@@ -47,13 +47,13 @@ The respective commands to select those targets are as follows.
 
         $ kubos target msp430f5529-gcc
 
-If you have no target currently set, you may run the following command to see which targets are available:
+To see all of the available targets run:
 
-        $ kubos target
+        $ kubos target --list
 
 ## Building a project
 
-To build a KubOS project, all we need to do is run the `kubos build` command. The KubOS SDK (really `yotta` under the covers) will read the module.json file, determine what libraries are needed and build them.
+To build a KubOS project, all we need to do is run the `kubos build` command. The Kubos-cli (really `yotta` under the covers) will read the module.json file, determine what libraries are needed and build them.
 
 Basic build command:
 
@@ -69,7 +69,7 @@ Clean command:
 
 ## Linking local modules & targets
 
-The KubOS SDK comes with all of the latest KubOS modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the SDK comes with the ability to link that local module into the build process.
+The Kubos-cli comes with all of the latest KubOS modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the cli comes with the ability to link that local module into the build process.
 
 ##### Linking modules:
 
@@ -87,14 +87,9 @@ The KubOS SDK comes with all of the latest KubOS modules and targets pre-package
         $ cd .../<project-directory>/
         $ kubos link <module name>
 
- * To link a module directly into a project in one step:
-
-        $ cd .../<project-directory>/
-        $ kubos link /path/to/module/
-
- * By doing this in one step kubos automatically links the module globally and then links it into your local project for you.
-
 The next time your project is built it will use your local development module, rather than the packaged version.
+
+Note: To verify where all of your targets are being loaded from `kubos list` will show you which modules are linked and which are local to your project
 
 ##### Linking targets:
 
@@ -121,12 +116,15 @@ The next time your project is built it will use your local development module, r
 
 The next time your project is built it will use your local development target, rather than the packaged version.
 
+Note: Running `kubos target` will show you whether you are using a local or a linked copy of a target
 
 ## Flashing your project
 
 Flashing your project using the kubos tool is a relatively straightforward process:
 
 1. Ensure that your board is plugged into your computer
+
+TODO: We probably want to add some info here on Virtualbox device filters and Guest Additions issues
 
 2. Run the flash command
 
@@ -139,13 +137,9 @@ Flashing your project using the kubos tool is a relatively straightforward proce
 #### Debug your project
 
 A gdb server must be started to allow your gdb instance to connect and debug directly on your hardware device.
-After building your project with `kubos build` kubos can manage a gdb server and gdb instance for you.
+After building your project with `kubos build` the kubos-cli can start a gdb server and gdb instance for you.
 
-Start a gdb server and instance for you:
+Start a gdb server and instance:
 Note: this may need to run as root depending on your usb device permissions
 
         $ kubos debug
-
-Additionally you can interact directly with the gdb server:
-
-        $ kubos server <start, stop, restart, status>
