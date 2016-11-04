@@ -180,9 +180,8 @@
   ],
   "scripts": {
     "debug": [
-      "valinor",
-      "--target",
-      "stm32f407vg",
+      "bash",
+      "$PWD/yotta_targets/stm32f407-disco-gcc/openocd/flash.sh",
       "$program"
     ],
     "test": [
@@ -194,7 +193,8 @@
     "start": [
       "bash",
       "$PWD/yotta_targets/stm32f407-disco-gcc/openocd/flash.sh",
-      "stm32f4_flash $program"
+      "$program",
+      "stm32f4_flash"
     ]
   }
 }
