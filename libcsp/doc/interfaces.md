@@ -68,15 +68,15 @@ In order to initialize the interface, and make it available to the router, use t
 csp_route_add_if(&csp_if_fifo);
 ```
 
-This actually happens automatically if you try to call csp_route_add() with an interface that is inknown to the router. This may however be removed in the future, in order to ensure that all interfaces are initialised before configuring the routing table. The reason is, that some products released in the future may ship with an empty routing table, which is then configured by a routing protocol rather than a static configuration.
+This actually happens automatically if you try to call csp_route_add() with an interface that is unknown to the router. This may however be removed in the future, in order to ensure that all interfaces are initialized before configuring the routing table. The reason is that some products released in the future may ship with an empty routing table, which is then configured by a routing protocol rather than a static configuration.
 
-In order to setup a manual static route, use the follwing example where the default route is set to the fifo interface:
+In order to setup a manual static route, use the following example where the default route is set to the fifo interface:
 
 ``` sourceCode
 csp_route_set(CSP_DEFAULT_ROUTE, &csp_if_fifo, CSP_NODE_MAC);
 ```
 
-All outgoing traffic except loopback, is now passed to the fifo interface's nexthop function.
+All outgoing traffic, except loopback, is now passed to the fifo interface's nexthop function.
 
 Building the example
 --------------------
