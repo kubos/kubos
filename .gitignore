@@ -60,3 +60,4 @@ upload.tar.gz
 # vim files
 .*.sw*
 vm/.vagrant/
+.vscode
