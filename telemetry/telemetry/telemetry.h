@@ -48,4 +48,3 @@ typedef struct
 void telemetry_submit(telemetry_packet packet);
 
 #endif
-

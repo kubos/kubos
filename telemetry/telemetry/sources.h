@@ -24,4 +24,3 @@ static telemetry_source gps_source = { .source_id = 3,
     .data_type = TELEMETRY_TYPE_FLOAT, .dest_flag = TELEMETRY_BEACON_FLAG | TELEMETRY_HEALTH_FLAG };
 
 #endif
-
