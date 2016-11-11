@@ -19,7 +19,7 @@ typedef struct
 typedef enum {
     TELEMETRY_TYPE_INT = 0,
     TELEMETRY_TYPE_FLOAT
-} telemetry_type;
+} telemetry_data_type;
 
 /**
  * Telemetry union for data.
@@ -28,7 +28,7 @@ typedef union
 {
     int i;
     float f;
-} telem_union;
+} telemetry_union;
 
 /**
  * Basic telemetry packet structure - encapsulating routing information
@@ -37,7 +37,7 @@ typedef union
 typedef struct
 {
     telemetry_source source;
-    telem_union data;
+    telemetry_union data;
     uint16_t timestamp;
 } telemetry_packet;
 
