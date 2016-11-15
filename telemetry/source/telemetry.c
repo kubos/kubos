@@ -14,7 +14,12 @@ static void telemetry_publish_send(uint8_t port, telemetry_packet packet);
  */
 void telemetry_submit(telemetry_packet packet)
 {
-    printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data);
+    if(packet.source.data_type == TELEMETRY_TYPE_INT) {
+        printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
+    }
+    if(packet.source.data_type == TELEMETRY_TYPE_FLOAT) {
+        printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
+    }
     telemetry_publish(packet);
 }
 

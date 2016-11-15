@@ -14,9 +14,13 @@
 #define TELEMETRY_NUM_HEALTH 2
 
 /* Structures representing telemetry_source(s) currently configured */ 
-static telemetry_source pos_x_source = { .source_id = 0, .dest_flag = TELEMETRY_BEACON_FLAG };
-static telemetry_source pos_y_source = { .source_id = 1, .dest_flag = TELEMETRY_BEACON_FLAG };
-static telemetry_source temp_source = { .source_id = 2, .dest_flag = TELEMETRY_HEALTH_FLAG };
-static telemetry_source gps_source = { .source_id = 3, .dest_flag = TELEMETRY_BEACON_FLAG | TELEMETRY_HEALTH_FLAG };
+static telemetry_source pos_x_source = { .source_id = 0, 
+    .data_type = TELEMETRY_TYPE_FLOAT, .dest_flag = TELEMETRY_BEACON_FLAG };
+static telemetry_source pos_y_source = { .source_id = 1, 
+    .data_type = TELEMETRY_TYPE_FLOAT, .dest_flag = TELEMETRY_BEACON_FLAG };
+static telemetry_source temp_source = { .source_id = 2,
+    .data_type = TELEMETRY_TYPE_FLOAT, .dest_flag = TELEMETRY_HEALTH_FLAG };
+static telemetry_source gps_source = { .source_id = 3,
+    .data_type = TELEMETRY_TYPE_FLOAT, .dest_flag = TELEMETRY_BEACON_FLAG | TELEMETRY_HEALTH_FLAG };
 
 #endif
