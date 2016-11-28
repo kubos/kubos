@@ -25,7 +25,7 @@
 #include "kubos-hal/uart.h"
 #include "kubos-hal-stm32f4/stm32f4_gpio.h"
 #include "stm32cubef4/stm32f4xx_hal_uart.h"
-
+#include <csp/drivers/usart.h>
 /**
  * Internal function to get appropriate USART_TypeDef based on uart num
  * @param uart uart bus num
@@ -384,7 +384,13 @@ static inline void uart_irq_handler(KUARTNum uart)
     if (__GET_FLAG(dev, USART_SR_RXNE) )
     {
         char c = dev->DR;
-        csp_queue_enqueue_isr(k_uart->rx_queue, (void *) &c, &task_woken);
+
+        if (usart_callback != NULL) {
+            usart_callback((uint8_t*) &c, 1, &task_woken);
+        } else {
+            csp_queue_enqueue_isr(k_uart->rx_queue, (void *) &c, &task_woken);
+        }
+
         if (task_woken != pdFALSE) {
             portYIELD();
         }
