@@ -1,1 +1,3 @@
-echo 'hello from Pipeline'
+stage("test") {
+  echo 'hello from Pipeline'
+}
