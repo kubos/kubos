@@ -1,6 +1,7 @@
 #ifdef YOTTA_CFG_TELEMETRY
 
 #include "telemetry/telemetry.h"
+#include "telemetry/destinations.h"
 #include <csp/csp.h>
 
 static void telemetry_publish(telemetry_packet packet);
@@ -30,7 +31,7 @@ void telemetry_submit(telemetry_packet packet)
 static void telemetry_publish_send(uint8_t port, telemetry_packet packet)
 {
     csp_packet_t * csp_packet;
-	csp_conn_t * conn;
+    csp_conn_t * conn;
     csp_packet = csp_buffer_get(10);
     if (csp_packet == NULL) {
         /* Could not get buffer element */
@@ -48,7 +49,7 @@ static void telemetry_publish_send(uint8_t port, telemetry_packet packet)
         return;
     }
 
-    memcpy(csp_packet->packet, &packet, sizeof(telemetry_packet));
+    memcpy(csp_packet->data, &packet, sizeof(telemetry_packet));
 
     /* Set packet length */
     csp_packet->length = sizeof(telemetry_packet);

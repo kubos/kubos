@@ -7,7 +7,7 @@
  */
 
 /* Address used for the current CSP instance */
-#define TELEMETRY_CSP_ADDRESS 1
+#define TELEMETRY_CSP_ADDRESS YOTTA_CFG_TELEMETRY_CSP_ADDRESS
 
 /* Destination flags used in the telemetry_source structure */
 #define TELEMETRY_BEACON_FLAG 0x1
