@@ -1,4 +1,4 @@
 node("raspi") {
   sh 'echo "THIS IS THE BUILD"'
-  sh 'git co https://github.com/kubostech/kubos.git'
+  sh 'git checkout https://github.com/kubostech/kubos.git'
 }
