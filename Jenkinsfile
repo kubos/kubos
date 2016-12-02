@@ -1,3 +1,3 @@
-stage("test") {
-  echo 'hello from Pipeline'
+node("raspi") {
+  sh 'echo "THIS IS THE BUILD"'
 }
