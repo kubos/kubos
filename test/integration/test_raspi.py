@@ -1,0 +1,1 @@
+print "THIS IS A PYTHON SCRIPT"
