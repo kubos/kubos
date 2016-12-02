@@ -1,3 +1,3 @@
 node("raspi") {
-  sh 'echo "THIS IS THE BUILD'
+  sh 'echo "THIS IS THE BUILD"'
 }
