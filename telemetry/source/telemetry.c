@@ -1,11 +1,13 @@
 #ifdef YOTTA_CFG_TELEMETRY
 
 #include "telemetry/telemetry.h"
-#include "telemetry/destinations.h"
-#include <csp/csp.h>
+#include "telemetry/config.h"
+#include <stdio.h>
 
 static void telemetry_publish(telemetry_packet packet);
-static void telemetry_publish_send(uint8_t port, telemetry_packet packet);
+
+static telemetry_conn telemetry_subs[TELEMETRY_NUM_DESTINATIONS];
+static uint8_t num_subs = 0;
 
 /**
  * Public facing telemetry input interface. Takes a telemetry_packet packet
@@ -24,55 +26,63 @@ void telemetry_submit(telemetry_packet packet)
     telemetry_publish(packet);
 }
 
-/**
- * This function represents the telemetry output/publish interface. The destination just needs to
- * setup a csp connection on a port that telemetry connects to.
- */
-static void telemetry_publish_send(uint8_t port, telemetry_packet packet)
+CSP_DEFINE_TASK(telemetry_get_subs)
 {
-    csp_packet_t * csp_packet;
-    csp_conn_t * conn;
-    csp_packet = csp_buffer_get(10);
-    if (csp_packet == NULL) {
-        /* Could not get buffer element */
-        printf("Failed to get buffer element\n");
-        return;
-    }
-
-    /* Connect to host HOST, port PORT with regular UDP-like protocol and 1000 ms timeout */
-    conn = csp_connect(CSP_PRIO_NORM, TELEMETRY_CSP_ADDRESS, port, 1000, CSP_O_NONE);
-    if (conn == NULL) {
-        /* Connect failed */
-        printf("Connection failed\n");
-        /* Remember to free packet buffer */
-        csp_buffer_free(csp_packet);
-        return;
-    }
-
-    memcpy(csp_packet->data, &packet, sizeof(telemetry_packet));
-
-    /* Set packet length */
-    csp_packet->length = sizeof(telemetry_packet);
-
-    // /* Send packet */
-    if (!csp_send(conn, csp_packet, 1000)) {
-        /* Send failed */
-        printf("Send failed\n");
-        csp_buffer_free(csp_packet);
-    }
+    uint8_t running = 1;
     
-    csp_close(conn);
+    if (!conn_server_setup())
+    {
+        printf("failed to setup connection server\n");
+    }
+    else
+    {
+        printf("listening for subs\r\n");
+        while (num_subs < TELEMETRY_NUM_DESTINATIONS)
+        {
+            telemetry_conn conn;
+            if (conn_server_accept(&conn))
+            {
+                telemetry_request_t request = conn_server_read_request(conn);
+                conn.sources = request.sources;
+                telemetry_subs[num_subs++] = conn;
+            }
+        }
+        printf("all subs gathered\r\n");
+    }
 }
 
-/**
- * This function holds the master list of destinations interested in 
- * telemetry data. The list here will be different for each project/binary..
- */
 static void telemetry_publish(telemetry_packet packet)
 {
-    /** autogen list of ports which telem should publish to */
-    telemetry_publish_send(TELEMETRY_BEACON_PORT, packet);
-    telemetry_publish_send(TELEMETRY_HEALTH_PORT, packet);
+    printf("publish dis\r\n");
+    uint8_t i = 0;
+    for (i = 0; i < num_subs; i++)
+    {
+        printf("packet source %d telem sources %d\n", packet.source.source_id, telemetry_subs[i].sources);
+        if (packet.source.source_id & telemetry_subs[i].sources)
+        {
+            printf("publish to sub %d\r\n", i);
+            conn_send_packet(telemetry_subs[i], packet);
+        }
+    }
 }
+
+telemetry_packet telemetry_read(telemetry_conn conn, telemetry_request_t request)
+{
+    telemetry_packet telem_packet;
+
+    while (1)
+    {
+        if (conn_client_read_packet(conn, &telem_packet))
+            return telem_packet;
+    }
+}
+
+telemetry_conn telemetry_subscribe(uint8_t source_flag)
+{
+    telemetry_conn conn;
+    conn = conn_connect(source_flag);
+    return conn;
+}
+
 
 #endif

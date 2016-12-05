@@ -1,0 +1,10 @@
+#ifndef TELEMETRY_CONFIG_H
+#define TELEMETRY_CONFIG_H
+
+/* Address used for the current CSP instance */
+#define TELEMETRY_CSP_ADDRESS YOTTA_CFG_TELEMETRY_CSP_ADDRESS
+#define TELEMETRY_CSP_PORT 10
+
+#define TELEMETRY_NUM_DESTINATIONS 1
+
+#endif

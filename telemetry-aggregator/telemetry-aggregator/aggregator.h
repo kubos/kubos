@@ -16,7 +16,7 @@ CSP_DEFINE_TASK(aggregator);
 #define INIT_AGGREGATOR_THREAD                                                      \
 {                                                                                   \
     csp_thread_handle_t agg_handle;                                                 \
-    csp_thread_create(aggregator, "AGGREGATOR", 1024, NULL, 0, &agg_handle);        \
+    csp_thread_create(aggregator, "AGGREGATOR", 2048, NULL, 0, &agg_handle);        \
 }
 
 /**
