@@ -1,88 +1,63 @@
+/*
+ * Copyright (C) 2016 Kubos Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #ifndef TELEMETRY_H
 #define TELEMETRY_H
 
-#include <stdint.h>
+#include "telemetry/types.h"
 #include <csp/arch/csp_thread.h>
-#include <csp/csp.h>
 
 /**
- * Telemetry packet routing information structure.
+ * Task used to create, accept and store connections from subscribers.
  */
-typedef struct
-{
-    uint8_t source_id;
-    uint8_t dest_flag;
-    uint8_t data_type;
-} telemetry_source;
+CSP_DEFINE_TASK(telemetry_get_subs);
 
 /**
- * Telemetry data types.
+ * Macro to be used in main() for creating neccesary telemetry threads.
  */
-typedef enum {
-    TELEMETRY_TYPE_INT = 0,
-    TELEMETRY_TYPE_FLOAT
-} telemetry_data_type;
+#define TELEMETRY_THREADS   csp_thread_handle_t telem_sub_handle; \
+                            csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 0, &telem_sub_handle);
 
 /**
- * Telemetry union for data.
+ * Performs basic telemetry connection and thread initialization. 
+ * To be used in the main() prior to starting the scheduler.
  */
-typedef union
-{
-    int i;
-    float f;
-} telemetry_union;
+void telemetry_init();
 
 /**
- * Basic telemetry packet structure - encapsulating routing information
- * and data.
+ * Subscribes to the telemetry system.
+ * @param conn pointer to telemetry_conn which will be used to receive future telemetry data
+ * @param sources bitmask of sources to subscribe to
+ * @return bool true if successful, otherwise false
  */
-typedef struct
-{
-    telemetry_source source;
-    telemetry_union data;
-    uint16_t timestamp;
-} telemetry_packet;
+bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources);
 
-typedef struct
-{
-    uint8_t sources;
-    csp_conn_t * conn_handle;
-} telemetry_conn;
-
-typedef struct
-{
-    uint8_t sources;
-} telemetry_request_t;
-
-
-void telemetry_conn_init();
-
-telemetry_conn telemetry_subscribe(uint8_t source_flag);
-
-telemetry_packet telemetry_read(telemetry_conn conn, telemetry_request_t request);
+/**
+ * Reads a telemetry packet from the telemetry server.
+ * @param conn telemetry_connection to use for the request
+ * @param packet pointer to telemetry_packet to store data in.
+ * @return bool true if successful, otherwise false 
+ */
+bool telemetry_read(telemetry_conn conn, telemetry_packet * packet);
 
 /**
  * Public facing telemetry input interface. Takes a telemetry_packet packet
  * and passes it through the telemetry system.
+ * @param packet telemetry_packet to publish
+ * @return bool true if successful, otherwise false
  */
-void telemetry_submit(telemetry_packet packet);
-
-CSP_DEFINE_TASK(telemetry_get_subs);
-
-#define TELEMETRY_THREADS   csp_thread_handle_t telem_sub_handle; \
-                            csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 0, &telem_sub_handle);
-
-
-
-telemetry_conn conn_connect(uint8_t sources);
-
-void conn_send(telemetry_conn conn, telemetry_packet packet);
-
-void conn_read(telemetry_conn conn, telemetry_request_t request);
-
-telemetry_request_t conn_server_read_request(telemetry_conn conn);
-uint8_t conn_client_read_packet(telemetry_conn conn, telemetry_packet * packet);
-
-uint8_t conn_send_packet(telemetry_conn conn, telemetry_packet packet);
+bool telemetry_publish(telemetry_packet packet);
 
 #endif

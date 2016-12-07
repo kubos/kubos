@@ -1,21 +1,36 @@
-#include "telemetry/telemetry.h"
+/*
+ * Copyright (C) 2016 Kubos Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifdef YOTTA_CFG_TELEMETRY
+
+#include "communications.h"
 #include "telemetry/config.h"
 
-#define TRUE 1
-#define FALSE 0
-
+/* Private csp_socket used by the telemetry server */
 static csp_socket_t * socket;
 
-static void conn_connect_csp(telemetry_conn * conn);
+/**
+ * Wrapper function for sending data via a csp connection
+ * @param conn telemetry_conn containing a valid csp_conn_t *
+ * @param data void pointer to data to be sent
+ * @param length length of the data to be sent
+ * @return bool true if successful, otherwise false
+ */
+static bool send_csp(telemetry_conn conn, void * data, uint16_t length);
 
-
-void conn_send_request(telemetry_conn conn, telemetry_request_t request);
-static uint8_t conn_send_request_csp(telemetry_conn conn, telemetry_request_t request);
-
-// void conn_read_request(telemetry_conn conn, telemetry_request_t request);
-static telemetry_request_t conn_read_request_csp(telemetry_conn conn);
-
-void telemetry_conn_init()
+void telemetry_init()
 {
     csp_buffer_init(10, 300);
 
@@ -28,75 +43,65 @@ void telemetry_conn_init()
     TELEMETRY_THREADS;
 }
 
-uint8_t conn_server_setup()
+bool server_setup()
 {
     if ((socket = csp_socket(CSP_SO_NONE)) == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     if (csp_bind(socket, TELEMETRY_CSP_PORT) != CSP_ERR_NONE)
     {
-        return FALSE;
+        return false;
     }
 
-    if (csp_listen(socket, TELEMETRY_NUM_DESTINATIONS) != CSP_ERR_NONE)
+    if (csp_listen(socket, TELEMETRY_NUM_SUBSCRIBERS) != CSP_ERR_NONE)
     {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
-uint8_t conn_server_accept(telemetry_conn * conn)
+bool server_accept(telemetry_conn * conn)
 {
     csp_conn_t * csp_conn;
     if ((csp_conn = csp_accept(socket, 1000)) != NULL)
     {
         conn->conn_handle = csp_conn;
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
-telemetry_conn conn_connect(uint8_t sources)
-{
-    telemetry_conn conn = {
-        .conn_handle = NULL
-    };
-    
-    conn_connect_csp(&conn);
-    if (conn.conn_handle != NULL)
-    {
-        telemetry_request_t request = {
-            .sources = sources
-        };
-        conn_send_request_csp(conn, request);
-    }
-
-    return conn;
-}
-
-uint8_t conn_accept(telemetry_conn * conn)
-{
-    csp_conn_t * csp_conn = NULL;
-    if (conn != NULL)
-    {
-
-    }
-}
-
-
-static void conn_connect_csp(telemetry_conn * conn)
+bool subscriber_connect(telemetry_conn * conn)
 {
     csp_conn_t * csp_conn = NULL;
 
-    csp_ping(TELEMETRY_CSP_ADDRESS, 100, 100, CSP_O_NONE);
     csp_conn = csp_connect(CSP_PRIO_NORM, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT, 1000, CSP_O_NONE);
-    conn->conn_handle = csp_conn;
+    if (csp_conn != NULL)
+    {
+        conn->conn_handle = csp_conn;
+        return true;
+    }
+    else
+    {
+        conn->conn_handle = NULL;
+        return false;
+    }
 }
 
-uint8_t conn_send_packet(telemetry_conn conn, telemetry_packet packet)
+bool send_packet(telemetry_conn conn, telemetry_packet packet)
+{
+    return send_csp(conn, (void*)&packet, sizeof(packet));
+}
+
+bool send_request(telemetry_conn conn, telemetry_request request)
+{
+    return send_csp(conn, (void*)&request, sizeof(request));
+}
+
+static bool send_csp(telemetry_conn conn, void * data, uint16_t length)
 {
     csp_packet_t * csp_packet;
     csp_conn_t * csp_conn = conn.conn_handle;
@@ -105,47 +110,23 @@ uint8_t conn_send_packet(telemetry_conn conn, telemetry_packet packet)
         csp_packet = csp_buffer_get(20);
         if (csp_packet != NULL)
         {
-            memcpy(csp_packet->data, &packet, sizeof(packet));
-            csp_packet->length = sizeof(packet);
+            memcpy(csp_packet->data, data, length);
+            csp_packet->length = length;
             if (!csp_send(csp_conn, csp_packet, 1000))
             {
-                return FALSE;
+                return false;
             }
             else
             {
-                return TRUE;
+                return true;
             }
         }
     }
 }
 
-static uint8_t conn_send_request_csp(telemetry_conn conn, telemetry_request_t request)
+bool publisher_read_request(telemetry_conn conn, telemetry_request * request)
 {
     csp_packet_t * csp_packet;
-    csp_conn_t * csp_conn = conn.conn_handle;
-    if (csp_conn != NULL)
-    {
-        csp_packet = csp_buffer_get(20);
-        if (csp_packet != NULL)
-        {
-            memcpy(csp_packet->data, &request, sizeof(request));
-            csp_packet->length = sizeof(request);
-            if (!csp_send(csp_conn, csp_packet, 1000))
-            {
-                return FALSE;
-            }
-            else
-            {
-                return TRUE;
-            }
-        }
-    }
-}
-
-telemetry_request_t conn_server_read_request(telemetry_conn conn)
-{
-    csp_packet_t * csp_packet;
-    telemetry_request_t request;
     csp_conn_t * csp_conn = conn.conn_handle;
     if (csp_conn != NULL)
     {
@@ -154,18 +135,18 @@ telemetry_request_t conn_server_read_request(telemetry_conn conn)
             switch(csp_conn_dport(csp_conn))
             {
                 case TELEMETRY_CSP_PORT:
-                    memcpy(&request, (telemetry_request_t*)csp_packet->data, sizeof(request));
+                    memcpy(request, (telemetry_request*)csp_packet->data, sizeof(telemetry_request));
                     csp_buffer_free(csp_packet);
-                    return request;
+                    return true;
                 default:
                     csp_service_handler(csp_conn, csp_packet);
             }
         }
     }
-    return request;
+    return false;
 }
 
-uint8_t conn_client_read_packet(telemetry_conn conn, telemetry_packet * packet)
+bool subscriber_read_packet(telemetry_conn conn, telemetry_packet * packet)
 {
     csp_packet_t * csp_packet;
     csp_conn_t * csp_conn = conn.conn_handle;
@@ -178,12 +159,14 @@ uint8_t conn_client_read_packet(telemetry_conn conn, telemetry_packet * packet)
                 case TELEMETRY_CSP_PORT:
                     memcpy(packet, (telemetry_packet*)csp_packet->data, sizeof(telemetry_packet));
                     csp_buffer_free(csp_packet);
-                    return TRUE;
+                    return true;
                 default:
                     csp_service_handler(csp_conn, csp_packet);
                     break;
             }
         }
     }
-    return FALSE;
+    return false;
 }
+
+#endif
