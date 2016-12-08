@@ -45,4 +45,4 @@ utilities you will need to work with a Kubos project. Additionally it is install
 
 This will start an ssh session in the vagrant box with the kubos-cli and all of the required dependencies installed.
 
-That's it! From here see more on [creating your first project](docs/first-project.md)
+That's it! From here see more on [creating your first project](first-project.md)
