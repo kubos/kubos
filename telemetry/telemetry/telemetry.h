@@ -25,10 +25,17 @@
 CSP_DEFINE_TASK(telemetry_get_subs);
 
 /**
+ * Task used to receive incoming data from telemetry publishers.
+ */
+CSP_DEFINE_TASK(telemetry_rx_task);
+
+/**
  * Macro to be used in main() for creating neccesary telemetry threads.
  */
 #define TELEMETRY_THREADS   csp_thread_handle_t telem_sub_handle; \
-                            csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 0, &telem_sub_handle);
+                            csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 0, &telem_sub_handle); \
+                            csp_thread_handle_t telem_rx_handle; \
+                            csp_thread_create(telemetry_rx_task, "TELEM_RX", 1000, NULL, 0, &telem_rx_handle);
 
 /**
  * Performs basic telemetry connection and thread initialization. 

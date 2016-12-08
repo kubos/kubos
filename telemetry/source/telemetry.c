@@ -18,6 +18,7 @@
 #include "telemetry/telemetry.h"
 #include "telemetry/config.h"
 #include "communications.h"
+#include <csp/arch/csp_queue.h>
 #include <stdio.h>
 
 /**
@@ -33,6 +34,8 @@ static telemetry_conn telemetry_subs[TELEMETRY_NUM_SUBSCRIBERS];
 /* Current number of active telemetry subscribers */
 static uint8_t num_subs = 0;
 
+/* Queue for incoming packets from publishers */
+static csp_queue_handle_t packet_queue = NULL;
 
 CSP_DEFINE_TASK(telemetry_get_subs)
 {
@@ -52,8 +55,28 @@ CSP_DEFINE_TASK(telemetry_get_subs)
     }
 }
 
+CSP_DEFINE_TASK(telemetry_rx_task)
+{
+    telemetry_packet packet;
+    packet_queue = csp_queue_create(10, sizeof(telemetry_packet));
+    while(1)
+    {
+        if (csp_queue_dequeue(packet_queue, &packet, CSP_MAX_DELAY))
+        {
+            telemetry_send(packet);
+        }
+    }
+}
+
 static void telemetry_send(telemetry_packet packet)
 {
+    if(packet.source.data_type == TELEMETRY_TYPE_INT) {
+        printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
+    }
+    if(packet.source.data_type == TELEMETRY_TYPE_FLOAT) {
+        printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
+    }
+
     uint8_t i = 0;
     for (i = 0; i < num_subs; i++)
     {
@@ -66,14 +89,11 @@ static void telemetry_send(telemetry_packet packet)
 
 bool telemetry_publish(telemetry_packet packet)
 {
-    if(packet.source.data_type == TELEMETRY_TYPE_INT) {
-        printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
+    if ((packet_queue != NULL) && (csp_queue_enqueue(packet_queue, &packet, CSP_MAX_DELAY)))
+    {
+        return true;
     }
-    if(packet.source.data_type == TELEMETRY_TYPE_FLOAT) {
-        printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
-    }
-    telemetry_send(packet);
-    return true;
+    return false;
 }
 
 bool telemetry_read(telemetry_conn conn, telemetry_packet * packet)
