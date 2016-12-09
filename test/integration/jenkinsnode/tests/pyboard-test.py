@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+#
 # Kubos Continuous Integration
 # Copyright (C) 2016 Kubos Corporation
 #
@@ -26,17 +26,8 @@ import RPi.GPIO as GPIO
 import cistack as ci
 import subprocess
 
-pinvals = ci.pinLayout('stm32f407-disco-gcc')
-p=pinvals
-
-flashloc="/usr/local/lib/python2.7/dist-packages/kubos/flash/"
-freepinswhendone=0
-shutdownwhendone=0
-ignoreGPIOwarnings=False
-
-if (ignoreGPIOwarnings):
-    GPIO.setwarnings(False)
-
+pinvals = ci.pinLayout('pyboard-gcc')
+p = pinvals
 
 ci.setupBoard(**p)
 print ("Board setup complete.")
@@ -44,7 +35,7 @@ sleep(1)
 
 # should parse options here
 # but instead:
-binfile = "disco-ukub-sensor-node"
+binfile = "ukub-sensor-node.bin"
 binpath = "/home/kubos"
 
 ci.powerUp(**p)
@@ -52,14 +43,14 @@ print("Powering on the board")
 sleep(1)
 
 ci.setProg(**p)
-print("Programming mode not needed for this board at this moment.")
+print("Programming mode enabled")
 sleep(1)
 
-if (ci.flashBinary(binfile, binpath, flashpath=flashloc,  **p) ):
+if (ci.flashBinary(binfile, binpath, **p) ):
 
     print("Program flash completed. Reports success.")
 
-# program returns 0 here so Jenkins can see success
+# declare a program return of 1 here so Jenkins can see success
 
 else:
     print("Program flash appears to have failed.")
@@ -67,18 +58,9 @@ else:
 ci.resetBoard(**p)
 print("\nBoard reset.")
 
-sleep(1)
-
-if(shutdownwhendone):
-    print("Shutting down the board.")
-    ci.powerDown(**p)
-
 # If you want to shut the board down, this command cleans up and 
 # de-energizes the power MOSFET.
-if(freepinswhendone):
-    print("Freeing pins and exiting.") 
-    ci.allDone()
-
+# ci.allDone()
 
 
 #<EOF>
