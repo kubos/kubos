@@ -32,7 +32,8 @@ typedef union
  * Telemetry data types - each enum corresponds to a
  * a member of telemetry_union.
  */
-typedef enum {
+typedef enum
+{
     TELEMETRY_TYPE_INT = 0,
     TELEMETRY_TYPE_FLOAT
 } telemetry_data_type;
@@ -46,6 +47,8 @@ typedef struct
     uint8_t source_id;
     /* Data type identifier */    
     telemetry_data_type data_type;
+    /* Subsystem identifier */
+    uint8_t subsystem_id;
 } telemetry_source;
 
 /**
