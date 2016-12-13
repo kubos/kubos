@@ -18,6 +18,7 @@
 
 #include "telemetry/types.h"
 #include <csp/arch/csp_thread.h>
+#include <stdbool.h>
 
 /**
  * Task used to create, accept and store connections from subscribers.
