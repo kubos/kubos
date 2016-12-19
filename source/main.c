@@ -42,13 +42,15 @@
 *           "target_address": "2",
 *           "port": "10",
 *           "uart_bus": "K_UART6",
+*           "uart_baudrate": "115200",
 *           "usart": {
 *           }
 *      }
 *  }
 *
-* This would create enable CSP KISS, the address of your device and target device,
-* the listening port and UART interface. Invert the addresses when flashing the target board.
+* This would create and enable CSP KISS with the address of your device, the target device,
+* the listening port, and the UART interface and baudrate. The addresses must be inverted for 
+* the second device of the example pair.
 */
 
 #define MY_ADDRESS YOTTA_CFG_CSP_MY_ADDRESS
