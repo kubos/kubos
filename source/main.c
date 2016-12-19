@@ -239,6 +239,7 @@ int main(void)
     /* set the device in KISS / UART interface */
     char dev = (char)YOTTA_CFG_CSP_UART_BUS;
     conf.device = &dev;
+    conf.baudrate = K_UART_CONSOLE_BAUDRATE;
     usart_init(&conf);
 
     /* init kiss interface */
