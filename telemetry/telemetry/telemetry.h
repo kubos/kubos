@@ -47,7 +47,7 @@ void telemetry_init();
 /**
  * Subscribes to the telemetry system.
  * @param conn pointer to telemetry_conn which will be used to receive future telemetry data
- * @param sources bitmask of sources to subscribe to
+ * @param sources bitmask of sources to subscribe to, a value of 0 will subscribe to all
  * @return bool true if successful, otherwise false
  */
 bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources);

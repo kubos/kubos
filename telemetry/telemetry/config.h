@@ -25,4 +25,7 @@
 /* Number of telemetry subscribers */
 #define TELEMETRY_NUM_SUBSCRIBERS YOTTA_CFG_TELEMETRY_SUBSCRIBERS_NUM
 
+/* Number of subscriber read attempts */
+#define TELEMETRY_SUBSCRIBER_READ_ATTEMPTS 10
+
 #endif

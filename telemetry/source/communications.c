@@ -65,8 +65,8 @@ bool server_setup()
 
 bool server_accept(telemetry_conn * conn)
 {
-    csp_conn_t * csp_conn;
-    if ((csp_conn = csp_accept(socket, 1000)) != NULL)
+    csp_conn_t * csp_conn = NULL;
+    if ((conn != NULL) && ((csp_conn = csp_accept(socket, 1000)) != NULL))
     {
         conn->conn_handle = csp_conn;
         return true;
@@ -77,6 +77,10 @@ bool server_accept(telemetry_conn * conn)
 bool subscriber_connect(telemetry_conn * conn)
 {
     csp_conn_t * csp_conn = NULL;
+    if (conn == NULL)
+    {
+        return false;
+    }
 
     csp_conn = csp_connect(CSP_PRIO_NORM, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT, 1000, CSP_O_NONE);
     if (csp_conn != NULL)
@@ -103,9 +107,9 @@ bool send_request(telemetry_conn conn, telemetry_request request)
 
 static bool send_csp(telemetry_conn conn, void * data, uint16_t length)
 {
-    csp_packet_t * csp_packet;
+    csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = conn.conn_handle;
-    if (csp_conn != NULL)
+    if ((data != NULL) && (csp_conn != NULL))
     {
         csp_packet = csp_buffer_get(20);
         if (csp_packet != NULL)
@@ -114,6 +118,7 @@ static bool send_csp(telemetry_conn conn, void * data, uint16_t length)
             csp_packet->length = length;
             if (!csp_send(csp_conn, csp_packet, 1000))
             {
+                csp_buffer_free(csp_packet);
                 return false;
             }
             else
@@ -122,13 +127,14 @@ static bool send_csp(telemetry_conn conn, void * data, uint16_t length)
             }
         }
     }
+    return false;
 }
 
 bool publisher_read_request(telemetry_conn conn, telemetry_request * request)
 {
-    csp_packet_t * csp_packet;
+    csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = conn.conn_handle;
-    if (csp_conn != NULL)
+    if ((request != NULL) && (csp_conn != NULL))
     {
         if ((csp_packet = csp_read(csp_conn, 1000)) != NULL)
         {
@@ -148,9 +154,9 @@ bool publisher_read_request(telemetry_conn conn, telemetry_request * request)
 
 bool subscriber_read_packet(telemetry_conn conn, telemetry_packet * packet)
 {
-    csp_packet_t * csp_packet;
+    csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = conn.conn_handle;
-    if (csp_conn != NULL)
+    if ((packet != NULL) && (csp_conn != NULL))
     {
         if ((csp_packet = csp_read(csp_conn, 1000)) != NULL)
         {

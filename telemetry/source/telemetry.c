@@ -53,6 +53,7 @@ CSP_DEFINE_TASK(telemetry_get_subs)
             }
         }
     }
+    csp_thread_exit();
 }
 
 CSP_DEFINE_TASK(telemetry_rx_task)
@@ -70,16 +71,20 @@ CSP_DEFINE_TASK(telemetry_rx_task)
 
 static void telemetry_send(telemetry_packet packet)
 {
-    if(packet.source.data_type == TELEMETRY_TYPE_INT) {
+    if(packet.source.data_type == TELEMETRY_TYPE_INT)
+    {
         printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
     }
-    if(packet.source.data_type == TELEMETRY_TYPE_FLOAT) {
+    if(packet.source.data_type == TELEMETRY_TYPE_FLOAT)
+    {
         printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
     }
 
     uint8_t i = 0;
     for (i = 0; i < num_subs; i++)
     {
+        // Currently if the sources flag is set to 0
+        // the subscriber will get all data
         if ((telemetry_subs[i].sources == 0) || (packet.source.source_id & telemetry_subs[i].sources))
         {
             send_packet(telemetry_subs[i], packet);
@@ -99,17 +104,20 @@ bool telemetry_publish(telemetry_packet packet)
 bool telemetry_read(telemetry_conn conn, telemetry_packet * packet)
 {
     int tries = 0;
-    while (tries++ < 10)
+    if (packet != NULL)
     {
-        if (subscriber_read_packet(conn, packet))
-            return true;
+        while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
+        {
+            if (subscriber_read_packet(conn, packet))
+                return true;
+        }
     }
     return false;
 }
 
 bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources)
 {
-    if (subscriber_connect(conn))
+    if ((conn != NULL) && subscriber_connect(conn))
     {
         telemetry_request request = {
             .sources = sources
