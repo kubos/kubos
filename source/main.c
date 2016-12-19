@@ -54,6 +54,7 @@
 #define MY_ADDRESS YOTTA_CFG_CSP_MY_ADDRESS
 #define TARGET_ADDRESS YOTTA_CFG_CSP_TARGET_ADDRESS
 #define MY_PORT    YOTTA_CFG_CSP_PORT
+#define MY_BAUDRATE YOTTA_CFG_CSP_UART_BAUDRATE
 #define BLINK_MS 100
 
 static xQueueHandle button_queue;
@@ -239,7 +240,7 @@ int main(void)
     /* set the device in KISS / UART interface */
     char dev = (char)YOTTA_CFG_CSP_UART_BUS;
     conf.device = &dev;
-    conf.baudrate = K_UART_CONSOLE_BAUDRATE;
+    conf.baudrate = MY_BAUDRATE;
     usart_init(&conf);
 
     /* init kiss interface */
