@@ -42,18 +42,21 @@
 *           "target_address": "2",
 *           "port": "10",
 *           "uart_bus": "K_UART6",
+*           "uart_baudrate": "115200",
 *           "usart": {
 *           }
 *      }
 *  }
 *
-* This would create enable CSP KISS, the address of your device and target device,
-* the listening port and UART interface. Invert the addresses when flashing the target board.
+* This would create and enable CSP KISS with the address of your device, the target device,
+* the listening port, and the UART interface and baudrate. The addresses must be inverted for 
+* the second device of the example pair.
 */
 
 #define MY_ADDRESS YOTTA_CFG_CSP_MY_ADDRESS
 #define TARGET_ADDRESS YOTTA_CFG_CSP_TARGET_ADDRESS
 #define MY_PORT    YOTTA_CFG_CSP_PORT
+#define MY_BAUDRATE YOTTA_CFG_CSP_UART_BAUDRATE
 #define BLINK_MS 100
 
 static xQueueHandle button_queue;
@@ -239,6 +242,7 @@ int main(void)
     /* set the device in KISS / UART interface */
     char dev = (char)YOTTA_CFG_CSP_UART_BUS;
     conf.device = &dev;
+    conf.baudrate = MY_BAUDRATE;
     usart_init(&conf);
 
     /* init kiss interface */
