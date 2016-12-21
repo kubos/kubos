@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef YOTTA_CFG_TELEMETRY
+// #ifdef YOTTA_CFG_TELEMETRY
 
 #include "telemetry/telemetry.h"
 #include "telemetry/config.h"
-#include "communications.h"
+#include "ipc/communications.h"
 #include <csp/arch/csp_queue.h>
 #include <stdio.h>
 
@@ -31,23 +31,40 @@ static void telemetry_send(telemetry_packet packet);
 /* Static array for holding persistent connections to telemetry subscribers */
 static telemetry_conn telemetry_subs[TELEMETRY_NUM_SUBSCRIBERS];
 
+
 /* Current number of active telemetry subscribers */
 static uint8_t num_subs = 0;
 
 /* Queue for incoming packets from publishers */
 static csp_queue_handle_t packet_queue = NULL;
 
+void telemetry_init()
+{
+    csp_buffer_init(10, 300);
+
+    /* Init CSP with address MY_ADDRESS */
+    csp_init(TELEMETRY_CSP_ADDRESS);
+
+    /* Start router task with 500 word stack, OS task priority 1 */
+    csp_route_start_task(500, 1);
+
+    TELEMETRY_THREADS;
+}
+
 CSP_DEFINE_TASK(telemetry_get_subs)
 {
-    if (server_setup())
+    /* Private csp_socket used by the telemetry server */
+    csp_socket_t * socket = NULL;
+    // socket = NULL;
+    if (server_setup(&socket, TELEMETRY_CSP_PORT, TELEMETRY_NUM_SUBSCRIBERS))
     {
         while (num_subs < TELEMETRY_NUM_SUBSCRIBERS)
         {
             telemetry_conn conn;
-            if (server_accept(&conn))
+            if (server_accept(&socket, &conn))
             {
                 telemetry_request request;
-                publisher_read_request(conn, &request);
+                publisher_read_request(conn, &request, TELEMETRY_CSP_PORT);
                 conn.sources = request.sources;
                 telemetry_subs[num_subs++] = conn;
             }
@@ -108,7 +125,7 @@ bool telemetry_read(telemetry_conn conn, telemetry_packet * packet)
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
-            if (subscriber_read_packet(conn, packet))
+            if (subscriber_read_packet(conn, packet, TELEMETRY_CSP_PORT))
                 return true;
         }
     }
@@ -117,7 +134,7 @@ bool telemetry_read(telemetry_conn conn, telemetry_packet * packet)
 
 bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources)
 {
-    if ((conn != NULL) && subscriber_connect(conn))
+    if ((conn != NULL) && subscriber_connect(conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT))
     {
         telemetry_request request = {
             .sources = sources
@@ -127,4 +144,4 @@ bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources)
     return false;
 }
 
-#endif
+// #endif

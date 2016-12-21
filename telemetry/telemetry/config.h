@@ -17,13 +17,21 @@
 #define TELEMETRY_CONFIG_H
 
 /* Address used for the current CSP instance */
+#ifndef YOTTA_CFG_TELEMETRY_CSP_ADDRESS
+#define TELEMETRY_CSP_ADDRESS 1
+#else
 #define TELEMETRY_CSP_ADDRESS YOTTA_CFG_TELEMETRY_CSP_ADDRESS
+#endif
 
 /* Port number used for the telemetry server's CSP socket */
 #define TELEMETRY_CSP_PORT 10
 
 /* Number of telemetry subscribers */
+#ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_NUM
+#define TELEMETRY_NUM_SUBSCRIBERS 10
+#else
 #define TELEMETRY_NUM_SUBSCRIBERS YOTTA_CFG_TELEMETRY_SUBSCRIBERS_NUM
+#endif
 
 /* Number of subscriber read attempts */
 #define TELEMETRY_SUBSCRIBER_READ_ATTEMPTS 10

@@ -24,14 +24,14 @@
  * receiving subscriber connections.
  * @return bool true if successful, otherwise false
  */
-bool server_setup();
+bool server_setup(csp_socket_t ** socket, uint8_t port, uint8_t num_connections);
 
 /**
  * Attempts to accept a subscriber connection.
  * @param conn pointer to telemetry_conn where connection info will be stored 
  * @return bool true if successful, otherwise false
  */
-bool server_accept(telemetry_conn * conn);
+bool server_accept(csp_socket_t ** socket, telemetry_conn * conn);
 
 /**
  * Used by a telemetry subscriber (currently just in telemetry_subscribe)
@@ -39,7 +39,7 @@ bool server_accept(telemetry_conn * conn);
  * @param conn pointer to telemetry_conn where connection info will be stored
  * @return bool true if successful, otherwise false
  */
-bool subscriber_connect(telemetry_conn * conn);
+bool subscriber_connect(telemetry_conn * conn, uint8_t address, uint8_t port);
 
 /**
  * Attempts to receive a telemetry_request over the specified telemetry_conn
@@ -47,7 +47,7 @@ bool subscriber_connect(telemetry_conn * conn);
  * @param request pointer to telemetry_request to store data in
  * @return bool true if successful, otherwise false
  */ 
-bool publisher_read_request(telemetry_conn conn, telemetry_request * request);
+bool publisher_read_request(telemetry_conn conn, telemetry_request * request, uint8_t port);
 
 /**
  * Attempts to receive a telemetry_packet over the specified telemetry_conn
@@ -55,7 +55,7 @@ bool publisher_read_request(telemetry_conn conn, telemetry_request * request);
  * @param packet pointer telemetry_packet to store data in 
  * @return bool true if successful, otherwise false
  */ 
-bool subscriber_read_packet(telemetry_conn conn, telemetry_packet * packet);
+bool subscriber_read_packet(telemetry_conn conn, telemetry_packet * packet, uint8_t port);
 
 /**
  * Sends a telemetry_packet over the specified telemetry_conn
