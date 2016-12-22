@@ -17,7 +17,6 @@
 
 #include "telemetry/telemetry.h"
 #include "telemetry/config.h"
-#include "ipc/communications.h"
 #include <csp/arch/csp_queue.h>
 #include <stdio.h>
 
@@ -29,7 +28,7 @@
 static void telemetry_send(telemetry_packet packet);
 
 /* Static array for holding persistent connections to telemetry subscribers */
-static telemetry_conn telemetry_subs[TELEMETRY_NUM_SUBSCRIBERS];
+static pubsub_conn telemetry_subs[TELEMETRY_NUM_SUBSCRIBERS];
 
 
 /* Current number of active telemetry subscribers */
@@ -40,7 +39,7 @@ static csp_queue_handle_t packet_queue = NULL;
 
 void telemetry_init()
 {
-    csp_buffer_init(10, 300);
+    csp_buffer_init(10, 256);
 
     /* Init CSP with address MY_ADDRESS */
     csp_init(TELEMETRY_CSP_ADDRESS);
@@ -60,11 +59,11 @@ CSP_DEFINE_TASK(telemetry_get_subs)
     {
         while (num_subs < TELEMETRY_NUM_SUBSCRIBERS)
         {
-            telemetry_conn conn;
+            pubsub_conn conn;
             if (server_accept(&socket, &conn))
             {
                 telemetry_request request;
-                publisher_read_request(conn, &request, TELEMETRY_CSP_PORT);
+                publisher_read(conn, (void*)&request, sizeof(telemetry_request), TELEMETRY_CSP_PORT);
                 conn.sources = request.sources;
                 telemetry_subs[num_subs++] = conn;
             }
@@ -76,7 +75,7 @@ CSP_DEFINE_TASK(telemetry_get_subs)
 CSP_DEFINE_TASK(telemetry_rx_task)
 {
     telemetry_packet packet;
-    packet_queue = csp_queue_create(10, sizeof(telemetry_packet));
+    packet_queue = csp_queue_create(NUM_MESSAGE_QUEUE, sizeof(telemetry_packet));
     while(1)
     {
         if (csp_queue_dequeue(packet_queue, &packet, CSP_MAX_DELAY))
@@ -104,7 +103,8 @@ static void telemetry_send(telemetry_packet packet)
         // the subscriber will get all data
         if ((telemetry_subs[i].sources == 0) || (packet.source.source_id & telemetry_subs[i].sources))
         {
-            send_packet(telemetry_subs[i], packet);
+            // send_packet(telemetry_subs[i], packet);
+            send_csp(telemetry_subs[i], (void*)&packet, sizeof(telemetry_packet));
         }
     }
 }
@@ -118,28 +118,29 @@ bool telemetry_publish(telemetry_packet packet)
     return false;
 }
 
-bool telemetry_read(telemetry_conn conn, telemetry_packet * packet)
+bool telemetry_read(pubsub_conn conn, telemetry_packet * packet)
 {
     int tries = 0;
     if (packet != NULL)
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
-            if (subscriber_read_packet(conn, packet, TELEMETRY_CSP_PORT))
+            if (subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_CSP_PORT))
                 return true;
         }
     }
     return false;
 }
 
-bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources)
+bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
 {
     if ((conn != NULL) && subscriber_connect(conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT))
     {
         telemetry_request request = {
             .sources = sources
         };
-        return send_request(*conn, request);
+        // return send_request(*conn, request);
+        return send_csp(*conn, (void*)&request, sizeof(telemetry_request));
     }
     return false;
 }

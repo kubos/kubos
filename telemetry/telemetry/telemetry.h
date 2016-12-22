@@ -16,6 +16,7 @@
 #ifndef TELEMETRY_H
 #define TELEMETRY_H
 
+#include "ipc/pubsub.h"
 #include "telemetry/types.h"
 #include <csp/arch/csp_thread.h>
 #include <stdbool.h>
@@ -46,19 +47,19 @@ void telemetry_init();
 
 /**
  * Subscribes to the telemetry system.
- * @param conn pointer to telemetry_conn which will be used to receive future telemetry data
+ * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
  * @param sources bitmask of sources to subscribe to, a value of 0 will subscribe to all
  * @return bool true if successful, otherwise false
  */
-bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources);
+bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
 
 /**
  * Reads a telemetry packet from the telemetry server.
- * @param conn telemetry_connection to use for the request
+ * @param conn pubsub_connection to use for the request
  * @param packet pointer to telemetry_packet to store data in.
  * @return bool true if successful, otherwise false 
  */
-bool telemetry_read(telemetry_conn conn, telemetry_packet * packet);
+bool telemetry_read(pubsub_conn conn, telemetry_packet * packet);
 
 /**
  * Public facing telemetry input interface. Takes a telemetry_packet packet

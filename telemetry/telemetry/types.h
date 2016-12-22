@@ -63,17 +63,6 @@ typedef struct
 } telemetry_packet;
 
 /**
- * Telemetry connection structure.
- */
-typedef struct
-{
-    /* Bitmask of sources this connection is subscribed to */
-    uint8_t sources;
-    /* Actual connection handle - today this is a csp connection */
-    csp_conn_t * conn_handle;
-} telemetry_conn;
-
-/**
  * Telemetry request structure - currently used for subscribing to sources.
  */
 typedef struct

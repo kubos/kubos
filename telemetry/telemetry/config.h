@@ -24,7 +24,9 @@
 #endif
 
 /* Port number used for the telemetry server's CSP socket */
-#define TELEMETRY_CSP_PORT 10
+#define TELEMETRY_CSP_PORT 20
+
+#define NUM_MESSAGE_QUEUE 10
 
 /* Number of telemetry subscribers */
 #ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_NUM

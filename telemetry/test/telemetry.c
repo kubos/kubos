@@ -19,53 +19,78 @@
 #include <unity/k_test.h>
 #include "telemetry/telemetry.h"
 
-static void test_subscriber_read_packet_no_init(void)
+static void test_telemetry_subscribe_null_conn(void)
 {
-    telemetry_packet packet;
-    TEST_ASSERT_EQUAL_INT(telemetry_publish(packet), false);
+    TEST_ASSERT_EQUAL_INT(telemetry_subscribe(NULL, 0), false);
 }
 
-static void test_subscriber_read_packet_init(void)
+static void test_telemetry_subscribe_conn_null_handle(void)
 {
-    telemetry_packet packet;
-    // telemetry_setup();
-    TEST_ASSERT_EQUAL_INT(telemetry_publish(packet), true);
-    // telemetry_teardown();
+    pubsub_conn conn;
+    conn.conn_handle = NULL;
+    TEST_ASSERT_EQUAL_INT(telemetry_subscribe(&conn, 0), false);
 }
 
-static void test_telemetry_read_no_setup(void)
+static void test_telemetry_subscribe(void)
 {
+    pubsub_conn conn;
+    // setup conn here
+    TEST_ASSERT_EQUAL_INT(telemetry_subscribe(&conn, 0), true);
+}
+
+static void test_telemetry_read_conn_null_handle(void)
+{
+    pubsub_conn conn;
+    conn.conn_handle = NULL;
     telemetry_packet packet;
-    telemetry_conn conn;
 
     TEST_ASSERT_EQUAL_INT(telemetry_read(conn, &packet), false);
 }
 
 static void test_telemetry_read_null_packet(void)
 {
-    telemetry_packet packet;
-    telemetry_conn conn;
-
+    pubsub_conn conn;
+    // setup conn here
     TEST_ASSERT_EQUAL_INT(telemetry_read(conn, NULL), false);
 }
 
-static void test_telemetry_read_packet(void)
+static void test_telemetry_read(void)
+{
+    pubsub_conn conn;
+    telemetry_packet packet;
+    // setup conn here
+    TEST_ASSERT_EQUAL_INT(telemetry_read(conn, &packet), true);
+}
+
+static void test_telemetry_publish_no_setup(void)
 {
     telemetry_packet packet;
-    telemetry_conn conn;
+    TEST_ASSERT_EQUAL_INT(telemetry_publish(packet), false);
+}
 
-    TEST_ASSERT_EQUAL_INT(telemetry_read(conn, &packet), false);
+static void test_telemetry_publish(void)
+{
+    telemetry_packet packet;
+    // do pre-publish setup here
+    TEST_ASSERT_EQUAL_INT(telemetry_publish(packet), true);
 }
 
 
 K_TEST_MAIN()
 {
     UNITY_BEGIN();
-    RUN_TEST(test_subscriber_read_packet_no_init);
-    RUN_TEST(test_subscriber_read_packet_init);
-    RUN_TEST(test_telemetry_read_no_setup);
+    
+    RUN_TEST(test_telemetry_subscribe_null_conn);
+    RUN_TEST(test_telemetry_subscribe_conn_null_handle);
+    RUN_TEST(test_telemetry_subscribe);
+
+    RUN_TEST(test_telemetry_read_conn_null_handle);
     RUN_TEST(test_telemetry_read_null_packet);
-    RUN_TEST(test_telemetry_read_packet);
+    RUN_TEST(test_telemetry_read);
+
+    RUN_TEST(test_telemetry_publish_no_setup);
+    RUN_TEST(test_telemetry_publish);
+
     return UNITY_END();
 }
 
