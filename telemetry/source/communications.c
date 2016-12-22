@@ -32,7 +32,7 @@ static bool send_csp(telemetry_conn conn, void * data, uint16_t length);
 
 void telemetry_init()
 {
-    csp_buffer_init(10, 300);
+    csp_buffer_init(10, 256);
 
     /* Init CSP with address MY_ADDRESS */
     csp_init(TELEMETRY_CSP_ADDRESS);
