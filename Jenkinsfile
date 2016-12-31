@@ -6,3 +6,10 @@ node("raspi") {
   def workspace = pwd()
   sh "python ${workspace}/test/integration/test_raspi.py"
 }
+
+// Add comments here.
+
+node("rpi1") {
+  sh 'echo "rpi1 node test."'
+  
+}

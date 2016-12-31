@@ -18,18 +18,18 @@
 # cistack.py: a Raspberry Pi interface library specific to 
 # KubOS-supported OBC and SBC products.
 
-
-
 import sys
+# sys.path.append('/var/lib/ansible/')
 import os
 import re
 from time import sleep
 import RPi.GPIO as GPIO
 import subprocess
-import smbus
+import smbus2
 import serial
 import spidev
-
+import argparse
+import datetime
 
 def allDone():
     '''Free all the pins and exit the script.'''
@@ -40,9 +40,7 @@ def allDone():
 
 def pinSetup(key, **pinvals):
     '''Set up one GPIO pin per the pin dict values. '''
-
     thepin = pinvals[key][0]
-
     if (thepin is False):
         return 1
     if (thepin == 'board'):
@@ -197,11 +195,11 @@ def setupBoard(**pinvals):
 are assigned to your target board. This function sets the Raspberry
 Pi GPIO map to "Broadcom" and then sets up pin direction and function.'''
 
-    print("Checking for root access...")
-    if os.geteuid() != 0:
-        print("You need to have root privileges to run this script.\n")
-        sys.exit("Please try again, this time using 'sudo'. Exiting.")
-        return 0
+#    print("Checking for root access...")
+#    if os.geteuid() != 0:
+#        print("You need to have root privileges to run this script.\n")
+#        sys.exit("Please try again, this time using 'sudo'. Exiting.")
+#        return 0
 
     print("Setting pin modes for each pin:")
     GPIO.setmode(GPIO.BCM)
@@ -216,89 +214,25 @@ Pi GPIO map to "Broadcom" and then sets up pin direction and function.'''
     return 1
 
 
-# need to incorporate os.path.basename(__file__) NOTE  
-def parseOptions(scriptname):
-    if (sys.argv[0] == ""):
-        print("ERROR: you need to provide a filename for the binary \
-file and the name of the target board.")
-        sys.exit("User did not provide required arguments.")
-
-    parser = argparse.ArgumentParser(description = '''this python script 
-uploads a compiled binary file for a specific target board. 
-
-The script requires a minimum of two parameters, a filename for the binary 
-file and the specific identifier for the target board / MCU.
-
-Required parameters:
-
--f or --file       name of the binary to be flashed to the target board
--t or --target     the kubos-supported target board label (see below)
-
-Optional parameters include:
-
--u or --url        the http-accessible location to download the binary file
-
-Example:
-
-python THIS_SCRIPT -f /path/to/your/file.bin -t pyboard-gcc  \n
-
-Supported boards include:
-pyboard-gcc
-stm32f407-disco-gcc
-msp430f5529-gcc
-''')
-
-# na-satbus-3c0-gcc
-# kubos-msp430-gcc
-# kubos-arm-none-eabi-gcc
-# kubos-rt-gcc
-# kubos-gcc
-# stm32f405-gcc
-
-    parser.add_argument("-f", "--file", \
-        action = 'store', \
-        dest = "binaryfilename", \
-        default = "",
-        help = "Provide a path and filename for Kubos binary executable.", \
-            metavar = "FILE")
-
-    parser.add_argument("-t", "--target", action = 'store', \
-        dest = "target", \
-        default = "pyboard-gcc", \
-        help = "Identify the specific target board and microcontroller, \
-as specified in the Kubos documentation.", metavar = "TARGET")
-
-    parser.add_argument("-u", "--url", \
-        action = 'store', \
-        dest = "url", \
-        default = "",
-        help = "Provide an http download link for the binary.", \
-            metavar = "URL")
-
-    arguments = parser.parse_args()
-    args = vars(arguments)
-
-    return args
-
-
-def flashBinary(binfile,binpath, \
-flashpath = "/usr/local/lib/python2.7/dist-packages/kubos/flash/openocd",  \
-**pinvals):
+def flashBinary(binfile,binpath, **pinvals):
     '''This function determines which board is in use, and flashes the \
 binary using an appropriate binary executable and/or shell script(s).'''
+
     if (pinvals['board'] == "pyboard-gcc"):
         if (flashBinaryPyBoard(binfile,binpath) == 1 ):
             return 1
         else:
             return 0
     elif(pinvals['board'] == "stm32f407-disco-gcc"):
-        if (flashBinarySTM32F4DiscoveryBoard(binfile, binpath, flashpath) == 1):
+        searchpath = "/usr/local/lib/python2.7/dist-packages/kubos/flash/openocd"
+        if (flashopenocd(binfile, pinvals['board'], searchpath, binpath) == 1):
             return 1
         else:
             return 0 
 
     elif(pinvals['board'] == "msp430f5529-gcc"):
-        if (flashBinaryMSP430F5529(binfile, binpath, flashpath) == 1):
+        searchpath = "/usr/local/lib/python2.7/dist-packages/kubos/lib/linux/"
+        if (flashmspdebug(binfile, binpath, searchpath) == 1):
             return 1
         else:
             return 0 
@@ -312,7 +246,7 @@ binary using an appropriate binary executable and/or shell script(s).'''
 # dfu-util --alt 0 -D /home/username/ukub-sensor-node.bin -i 0 -s 0x08000000
 def flashBinaryPyBoard(binfile, binpath):
     '''use an external shell to push the binary file using dfu-util.'''
-    bpath = "/home/youruserid"
+    bpath = "/home/kubos"
     binpath = re.sub("/$", "", binpath)
 
     if (__pyBoardBinarySanityCheck(binfile)):
@@ -321,8 +255,16 @@ def flashBinaryPyBoard(binfile, binpath):
         sys.exit("Binary file didn't pass a sanity check. Exiting.")
         return 0
 
-    dfupath = subprocess.check_output('/usr/bin/which dfu-util', shell = True)
-    dfupath = re.sub('\n$', '', dfupath)
+    dfupath = findBin('dfu-util')
+
+# Note that the pyboard must be in programming mode for it to announce itself
+# as a DFU device. That is, the system can't even find the board until it is
+# in programming mode.
+# This script no longer requires root access to run, meaning you must implement
+# a udev rule to enable user-land access to the device, or else just remember
+# to sudo when running this script.
+# 
+# Hint: ATTRS{idVendor}==\"0483\", ATTRS{idProduct}==\"df11\"
 
     tail = str("-i 0 -s 0x08000000")
     head = str("--alt 0 -D ")
@@ -339,94 +281,6 @@ def flashBinaryPyBoard(binfile, binpath):
     except:
         print "well, crap. Try it again."
         return 0
-    sleep(0.5)
-    return 1
-
-
-def flashBinarySTM32F4DiscoveryBoard(binfile, binpath, flashpath):
-    '''use an external shell to push the ELF file using openocd.'''
-    
-    # TODO: get this value dynamically:
-    SEARCH   = "/usr/local/lib/python2.7/dist-packages/kubos/flash/openocd"
-    PYPATH   = "/usr/local/lib/python2.7/dist-packages/kubos/flash/openocd"    
-    STMFLASH = str("stm32f4_flash %s/%s" % (binpath, binfile) )
-    SCRIPT   = "flash.sh"
-    openocd  = subprocess.check_output('/usr/bin/which openocd', shell = True)
-    cmdpath  = re.sub('\n$', '', openocd)
-    
-    command  = str("%s/%s %s %s %s" % 
-        ( SEARCH, SCRIPT, cmdpath, STMFLASH, SEARCH ) )    
-    
-    print("\n** About to execute: \n\n%s\n" % command)
-
-    try:
-        print("\n** Flashing binary to the board:\n")
-        output = subprocess.check_output(command, shell = True)
-        print(str("\n\n========\n%s\n" %  output) )
-
-    except:
-        print("** ERROR: An unknown error occurred.")
-        return 0
-
-    try:
-        print ("** Checking for successful flash.")
-
-        if (re.search("\n0\n", output)):
-            print("\n** Flash reports success.\n")
-
-        else:
-            print("\n** Cannot determine output success or failure.\n")
-            return 0
-
-    except:
-        print "\n** Something went wrong with the flash. Try again.\n"
-        return 0
-
-    sleep(0.5)
-    return 1
-
-def flashBinaryMSP430F5529(binfile, binpath, flashpath):
-    '''Flash a binary file through the USB connection on an MSP430 Launchpad'''
-    PYPATH  = "/usr/local/lib/python2.7/dist-packages/kubos/flash/mspdebug"
-    SCRIPT  = "flash.sh"
-    DEBUGCOMMAND = "prog"
-
-# base command:
-# /path/to/mspdebug tilib "prog /path/to/binary" --allow-fw-update
-#
-# or, for the flash.sh:
-#
-# ./mspflash.sh /usr/local/lib/python2.7/dist-packages/kubos/bin/linux/mspdebug prog /home/kubos/kubos-rt-example 
-
-    mspdebugloc = subprocess.check_output('/usr/bin/which mspdebug', 
-        shell = True )
-    cmdpath  = re.sub('\n$', '', mspdebugloc)
-    command = str ("%s/%s %s %s %s/%s" % 
-        ( PYPATH, SCRIPT, cmdpath, DEBUGCOMMAND, binpath, binfile ) )
-
-    try:
-        print("\n** Flashing binary to the board:\n")
-        output = subprocess.check_output(command, shell = True)
-        print(str("\n\n========\n%s\n" %  output) )
-
-    except:
-        print("** ERROR: An unknown error occurred.")
-        return 0
-
-    try:
-        print ("** Checking for successful flash.")
-
-        if (re.search("\n0\n", output)):
-            print("\n** Flash reports success.\n")
-
-        else:
-            print("\n** Cannot determine output success or failure.\n")
-            return 0
-
-    except:
-        print "\n** Something went wrong with the flash. Try again.\n"
-        return 0
-
     sleep(0.5)
     return 1
 
@@ -449,7 +303,222 @@ debugging information; bin files lack that information. One problem is that \
     else:
         return 1
 
+# IMPORTANT NOTE: openocd must be version 0.9 or later.
+def flashopenocd(binfile, board, searchpath, binpath):
+    '''use an external shell to push the ELF file using openocd. It seems 
+    to be necessary to pre-declare the LIB PATH for some commands, and 
+    if the path variable is not available as declared in /etc/profile, it
+    can be fixed here with the sp1 variable, below. HOWEVER: from ansible,
+    the locally-declared and locally-requested path variables DO NOT WORK
+    and cause ERRORS. Workaround: use the ansible -shell- command and 
+    declare the library path before executing a bash -c command'''
+
+    distpath="/usr/local/lib/python2.7/dist-packages/kubos"
+    searchpath=str("%s/flash/openocd" % distpath)
+   
+    KUBOS_LIB_PATH=str("%s/lib/linux/" % distpath)
+    sp1 = os.environ['LD_LIBRARY_PATH']
+    sp1 = str(sp1 + ":" + KUBOS_LIB_PATH)
+    sp1 = str(sp1 + ":" + searchpath)
+
+    openocdloc = findBin('openocd')
+
+    unamestr = subprocess.check_output('uname')
+    unamestr = re.sub('\n$', '', unamestr)
+
+# TODO adjust the paths for OS X
+
+#    if (re.search('Linux', unamestr)):
+# /usr/bin/openocd  -f /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd/stm32f407vg.cfg   -s /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd -c "stm32f4_flash /home/kubos/kubos-rt-example"
+
+###    cfg = "stm32f407g-disc1.cfg"
+#    cfg = "stm32f407vg.cfg"
+#    cmd = "stm32f4_flash"
+
+# At present, this function only expects one board to be attached. TODO
+    boards = whichUSBboard()
+    configs = getBoardConfigs(boards)
+    cfg = configs[2] # config file to use with openocd
+    cmd = configs[3] # something like 'stm32f4_flash', an openocd command
+
+# $openocd -f $this_dir/$cfg -s $search_path -c "$cmd $file"
+    command = str("%s -f %s/%s -s %s -c \"%s %s/%s\"") % (openocdloc, 
+            searchpath, cfg, searchpath, cmd, binpath, binfile)
+    print (str(command))
+    try:
+        subprocess.check_output(command, shell=True)
+        return 1
+    except:
+        return 0
+
+    return 0
+
+def getBoardConfigs(boards):
+    for i in boards:
+        try:
+            r=parseBoardIdentifier(i['dev'])
+            if(r[1] is True): # board is supported
+                return r
+        except:
+            sys.exit("Unable to determine board type. Exiting.")
+
+    return 0
+
+
+def parseBoardIdentifier(lsusbpattern):
+    '''Parse the lsusb identifier assigned to the board. Note that some boards
+such as the PyBoard won't be enumerated by lsusb unless they are in 
+DFU programming mode. Array values are as follows:
+key: lsusb identifier
+0: name of the device
+1: Is the board supported by Kubos?
+2: the configuration file for use by the flasher, if any
+3: the command or argument specific to the board (mostly for openocd right now)
+'''
+    patterns={'0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
+              '0483:df11':['STM32F405 PyBoard', True, 'USE dfu-util!', '***'], 
+              '0451:2046':['TI MSP430F5529 Launchpad',True, 'USE mspdebug!', '***'],
+              '0451:f432':['TI MSP430G2553 Launchpad',False, 'NOT SUPPORTED', '/usr/bin/sleep 1']
+              }
+
+    try:
+        return patterns[lsusbpattern]
+    except:
+        return None
+
+# kludgy at best, but helps. TODO replace with something better
+def whichUSBboard():
+    lsusb = findBin('lsusb')
+    output = subprocess.check_output(lsusb, shell=True)
+    lines = output.rsplit('\n')
+    retarray = []
+    manlist=['Texas', 'STMicro']
+
+    for line in lines:
+        arr = line.split(' ')
+        for manuf in manlist:
+            try:
+                if (re.search(manuf, arr[6])):
+                    print "found %s device at %s" % (manuf, arr[5])
+                    retarray.append({ 'manuf':arr[6], 'dev':arr[5]})
+            except:
+                next
+
+# TODO add more board identifiers here
+    return retarray
+
+
+def findBin(command):
+    cmd = str("/usr/bin/which %s" % command)
+
+    try:    
+        retval = subprocess.check_output(cmd, shell=True)
+        retval = re.sub('\n$', '', retval)
+        return retval
+    except:
+        sys.exit("Unable to determine the path; halting.")
+        return 0
+
+def flashmspdebug(binfile, binpath, searchpath):
+    '''Flash a binary file through the USB connection on an MSP430 Launchpad'''
+    sp1 = os.environ['LD_LIBRARY_PATH']
+    sp1 = str(sp1 + ":" + searchpath)
+
+    fileloc=str("%s/%s" % (binpath, binfile))
+    print("LD_LIBRARY_PATH will be: " % str(sp1) )
+    print("File to be flashed: " % str(fileloc))
+
+    mspdebugloc = findBin('mspdebug') 
+    print("Found mspdebug at %s" % mspdebugloc)
+    cmd = "prog" 
     
+    commandstring = str("LD_LIBRARY_PATH=\"%s\"   %s tilib \"%s %s\" --allow-fw-update" % 
+        (sp1, mspdebugloc, cmd, fileloc))
+
+    try:
+        print("\n** Flashing binary to the board:\n")
+        output = subprocess.check_output(commandstring, shell = True)
+        print(str("\n\n========\n%s\n" %  output) )
+
+    except:
+        print("** ERROR: An unknown error occurred.")
+        return 0
+
+
+    return 1
+
+def readOpts():
+    args= { 'board': 'stm32f407-disco-gcc',
+            'binary': 'kubos-rt-example',
+            'path': '/var/lib/ansible/'
+            }
+
+    try:
+        print(str(sys.argv))
+        print(str( len(sys.argv) ) )
+
+    except:
+        sys.exit("couldn't execute tests. Failing out.")
+
+    try:
+        if (sys.argv[3] is True):
+            print("At least three arguments in the invocation: continuing")
+
+    except AttributeError:
+        print("WARNING: you need to provide a filename, path, and target board.")
+        sys.exit("User did not provide required arguments.")
+
+    except IndexError:
+        print("ERROR: inadequate number of program arguments.")
+        sys.exit("User did not provide required arguments.")
+
+    today=datetime.date.today()
+
+    parser=argparse.ArgumentParser(description='''cistack.py; a python library
+that provides a series of abstracted functions to interact with supported KubOS
+target boards, through the Kubos Pi Hat v0.3 interface. The library provides
+numerous functions, but chief among them is the ability to upload a compiled 
+binary executable to each board using the flashing functions in the library.
+As such, the user must provide, at a minimum, three arguments to any script that
+calls this (readOpts) function. 
+
+Example:
+
+python yourscriptname.py -f mybinfile -p /path/to/binary -b boardtype -v
+
+Supported boards include:
+pyboard-gcc
+stm32f407-disco-gcc
+msp430f5529-gcc
+\n''')
+
+# na-satbus-3c0-gcc
+# kubos-msp430-gcc
+# kubos-arm-none-eabi-gcc
+# kubos-rt-gcc
+# kubos-gcc
+# stm32f405-gcc
+
+    parser.add_argument("-f", "--file", action='store', \
+        dest="inputbinary", default="kubos-rt-example",
+        help="provide a filename for the compiled binary file to upload", metavar="FILE")
+
+    parser.add_argument("-v", "--verbose", \
+        action='store_true', dest="verbose",
+        help="provide more verbose output to STDOUT", default=0 )
+
+    parser.add_argument("-p", "--path", action='store', \
+        dest="binfilepath", default="/var/lib/ansible/",
+        help="provide a path to the binary you want to flash", metavar="PATH")
+
+    parser.add_argument("-b", "--board", action='store', \
+        dest="board", default="stm32f407-disco-gcc",
+        help="the target board (and architecture) supported by the Kubos SDK", metavar="TARGET")
+   
+    arguments = parser.parse_args()
+    args = vars(arguments)
+
+    return args
 
 #####################################################################
 # NOTE: these are placeholders at present.
@@ -460,18 +529,6 @@ def sanityChecks(): # How do we check for executables in Windows?
     '''Check for dfu-util and other stuff.'''
 
     return 0
-
-
-def scpBinary(filename, url, certificate, savepath, userid):
-    '''Go and obtain the binary for upload using SCP.'''
-
-    return 0
-
-
-def curlBinary(filename, url, savepath):
-    '''Go and obtain the binary for upload from a given url.'''
-
-    return 0 
 
 
 def uploadSerial(filename):
