@@ -313,10 +313,10 @@ def flashopenocd(binfile, board, searchpath, binpath):
     and cause ERRORS. Workaround: use the ansible -shell- command and 
     declare the library path before executing a bash -c command'''
 
-    distpath="/usr/local/lib/python2.7/dist-packages/kubos"
-    searchpath=str("%s/flash/openocd" % distpath)
+    distpath = "/usr/local/lib/python2.7/dist-packages/kubos"
+    searchpath = str("%s/flash/openocd" % distpath)
    
-    KUBOS_LIB_PATH=str("%s/lib/linux/" % distpath)
+    KUBOS_LIB_PATH = str("%s/lib/linux/" % distpath)
     sp1 = os.environ['LD_LIBRARY_PATH']
     sp1 = str(sp1 + ":" + KUBOS_LIB_PATH)
     sp1 = str(sp1 + ":" + searchpath)
@@ -346,7 +346,7 @@ def flashopenocd(binfile, board, searchpath, binpath):
             searchpath, cfg, searchpath, cmd, binpath, binfile)
     print (str(command))
     try:
-        subprocess.check_output(command, shell=True)
+        subprocess.check_output(command, shell = True)
         return 1
     except:
         return 0
@@ -356,7 +356,7 @@ def flashopenocd(binfile, board, searchpath, binpath):
 def getBoardConfigs(boards):
     for i in boards:
         try:
-            r=parseBoardIdentifier(i['dev'])
+            r = parseBoardIdentifier(i['dev'])
             if(r[1] is True): # board is supported
                 return r
         except:
@@ -375,7 +375,7 @@ key: lsusb identifier
 2: the configuration file for use by the flasher, if any
 3: the command or argument specific to the board (mostly for openocd right now)
 '''
-    patterns={'0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
+    patterns = {'0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
               '0483:df11':['STM32F405 PyBoard', True, 'USE dfu-util!', '***'], 
               '0451:2046':['TI MSP430F5529 Launchpad',True, 'USE mspdebug!', '***'],
               '0451:f432':['TI MSP430G2553 Launchpad',False, 'NOT SUPPORTED', '/usr/bin/sleep 1']
@@ -389,10 +389,10 @@ key: lsusb identifier
 # kludgy at best, but helps. TODO replace with something better
 def whichUSBboard():
     lsusb = findBin('lsusb')
-    output = subprocess.check_output(lsusb, shell=True)
+    output = subprocess.check_output(lsusb, shell = True)
     lines = output.rsplit('\n')
     retarray = []
-    manlist=['Texas', 'STMicro']
+    manlist = ['Texas', 'STMicro']
 
     for line in lines:
         arr = line.split(' ')
@@ -412,7 +412,7 @@ def findBin(command):
     cmd = str("/usr/bin/which %s" % command)
 
     try:    
-        retval = subprocess.check_output(cmd, shell=True)
+        retval = subprocess.check_output(cmd, shell = True)
         retval = re.sub('\n$', '', retval)
         return retval
     except:
@@ -424,7 +424,7 @@ def flashmspdebug(binfile, binpath, searchpath):
     sp1 = os.environ['LD_LIBRARY_PATH']
     sp1 = str(sp1 + ":" + searchpath)
 
-    fileloc=str("%s/%s" % (binpath, binfile))
+    fileloc = str("%s/%s" % (binpath, binfile))
     print("LD_LIBRARY_PATH will be: " % str(sp1) )
     print("File to be flashed: " % str(fileloc))
 
@@ -448,7 +448,7 @@ def flashmspdebug(binfile, binpath, searchpath):
     return 1
 
 def readOpts():
-    args= { 'board': 'stm32f407-disco-gcc',
+    args = { 'board': 'stm32f407-disco-gcc',
             'binary': 'kubos-rt-example',
             'path': '/var/lib/ansible/'
             }
@@ -472,9 +472,9 @@ def readOpts():
         print("ERROR: inadequate number of program arguments.")
         sys.exit("User did not provide required arguments.")
 
-    today=datetime.date.today()
+    today = datetime.date.today()
 
-    parser=argparse.ArgumentParser(description='''cistack.py; a python library
+    parser = argparse.ArgumentParser(description = '''cistack.py; a python library
 that provides a series of abstracted functions to interact with supported KubOS
 target boards, through the Kubos Pi Hat v0.3 interface. The library provides
 numerous functions, but chief among them is the ability to upload a compiled 
@@ -499,21 +499,21 @@ msp430f5529-gcc
 # kubos-gcc
 # stm32f405-gcc
 
-    parser.add_argument("-f", "--file", action='store', \
-        dest="inputbinary", default="kubos-rt-example",
-        help="provide a filename for the compiled binary file to upload", metavar="FILE")
+    parser.add_argument("-f", "--file", action = 'store', \
+        dest = "inputbinary", default = "kubos-rt-example",
+        help = "provide a filename for the compiled binary file to upload", metavar = "FILE")
 
     parser.add_argument("-v", "--verbose", \
-        action='store_true', dest="verbose",
-        help="provide more verbose output to STDOUT", default=0 )
+        action = 'store_true', dest = "verbose",
+        help = "provide more verbose output to STDOUT", default = 0 )
 
-    parser.add_argument("-p", "--path", action='store', \
-        dest="binfilepath", default="/var/lib/ansible/",
-        help="provide a path to the binary you want to flash", metavar="PATH")
+    parser.add_argument("-p", "--path", action = 'store', \
+        dest = "binfilepath", default = "/var/lib/ansible/",
+        help = "provide a path to the binary you want to flash", metavar = "PATH")
 
-    parser.add_argument("-b", "--board", action='store', \
-        dest="board", default="stm32f407-disco-gcc",
-        help="the target board (and architecture) supported by the Kubos SDK", metavar="TARGET")
+    parser.add_argument("-b", "--board", action = 'store', \
+        dest = "board", default = "stm32f407-disco-gcc",
+        help = "the target board (and architecture) supported by the Kubos SDK", metavar = "TARGET")
    
     arguments = parser.parse_args()
     args = vars(arguments)
