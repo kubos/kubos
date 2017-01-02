@@ -34,7 +34,7 @@ static void test_telemetry_subscribe_conn_null_handle(void)
 static void test_telemetry_subscribe(void)
 {
     pubsub_conn conn;
-    // setup conn here
+    telemetry_init();
     TEST_ASSERT_EQUAL_INT(telemetry_subscribe(&conn, 0), true);
 }
 
@@ -58,7 +58,15 @@ static void test_telemetry_read(void)
 {
     pubsub_conn conn;
     telemetry_packet packet;
-    // setup conn here
+    telemetry_init();
+
+    csp_sleep_ms(500);
+
+    if (!telemetry_subscribe(&conn, 0))
+        printf("subscribe failed\r\n");
+    
+    if (!telemetry_publish(packet))
+        printf("publish failed\r\n");
     TEST_ASSERT_EQUAL_INT(telemetry_read(conn, &packet), true);
 }
 
@@ -72,6 +80,7 @@ static void test_telemetry_publish(void)
 {
     telemetry_packet packet;
     // do pre-publish setup here
+    telemetry_init();
     TEST_ASSERT_EQUAL_INT(telemetry_publish(packet), true);
 }
 
@@ -79,17 +88,18 @@ static void test_telemetry_publish(void)
 K_TEST_MAIN()
 {
     UNITY_BEGIN();
-    
-    RUN_TEST(test_telemetry_subscribe_null_conn);
-    RUN_TEST(test_telemetry_subscribe_conn_null_handle);
-    RUN_TEST(test_telemetry_subscribe);
 
-    RUN_TEST(test_telemetry_read_conn_null_handle);
-    RUN_TEST(test_telemetry_read_null_packet);
+    // RUN_TEST(test_telemetry_publish_no_setup);
+    
+    // RUN_TEST(test_telemetry_subscribe_null_conn);
+    // RUN_TEST(test_telemetry_subscribe_conn_null_handle);
+    // RUN_TEST(test_telemetry_subscribe);
+
+    // RUN_TEST(test_telemetry_read_conn_null_handle);
+    // RUN_TEST(test_telemetry_read_null_packet);
     RUN_TEST(test_telemetry_read);
 
-    RUN_TEST(test_telemetry_publish_no_setup);
-    RUN_TEST(test_telemetry_publish);
+    // RUN_TEST(test_telemetry_publish);
 
     return UNITY_END();
 }

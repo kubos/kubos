@@ -62,13 +62,15 @@ CSP_DEFINE_TASK(telemetry_get_subs)
             pubsub_conn conn;
             if (server_accept(&socket, &conn))
             {
+                printf("got subscriber\r\n");
                 telemetry_request request;
                 publisher_read(conn, (void*)&request, sizeof(telemetry_request), TELEMETRY_CSP_PORT);
+                printf("added subscriber\r\n");
                 conn.sources = request.sources;
                 telemetry_subs[num_subs++] = conn;
             }
         }
-    }
+    } else { printf ("telemetry_get_subs serversetup failed\r\n"); }
     csp_thread_exit();
 }
 
@@ -97,10 +99,12 @@ static void telemetry_send(telemetry_packet packet)
     }
 
     uint8_t i = 0;
+    printf("num subs %d\r\n", num_subs);
     for (i = 0; i < num_subs; i++)
     {
         // Currently if the sources flag is set to 0
         // the subscriber will get all data
+        printf("send packet %d\r\n", i);
         if ((telemetry_subs[i].sources == 0) || (packet.source.source_id & telemetry_subs[i].sources))
         {
             // send_packet(telemetry_subs[i], packet);
@@ -125,6 +129,7 @@ bool telemetry_read(pubsub_conn conn, telemetry_packet * packet)
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
+            printf("telemetry_read %d\r\n", tries);
             if (subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_CSP_PORT))
                 return true;
         }
