@@ -18,6 +18,7 @@
 #include "stm32f4xx.h"
 #include "FreeRTOS.h"
 #include "kubos-hal/uart.h"
+#include "kubos-hal-stm32f4/config.h"
 
 #include <reent.h>
 #include <unistd.h>
@@ -145,6 +146,7 @@ int _getpid()
     return -1;
 }
 
+#if KUBOS_USE_MALLOC_LOCK
 void __malloc_lock(struct _reent *r)
 {
     vPortEnterCritical();
@@ -154,3 +156,4 @@ void __malloc_unlock(struct _reent *r)
 {
     vPortExitCritical();
 }
+#endif
