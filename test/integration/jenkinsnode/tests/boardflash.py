@@ -44,9 +44,6 @@ board = kwargs['board']
 
 target = ci.getTarget(board)
 
-
-
-flashloc = "/usr/local/lib/python2.7/dist-packages/kubos/flash/"
 freepinswhendone = 0
 shutdownwhendone = 0
 ignoreGPIOwarnings = False

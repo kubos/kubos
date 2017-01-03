@@ -32,9 +32,12 @@ import argparse
 import datetime
 import magic 
 
-errstr="*** ERROR:"
+errstr = "*** ERROR:"
 
-help=str("cistack.py; a python library that provides a series of abstracted\
+# You can set this to True, but we don't advise it:
+isrootrequired = False
+
+help = str("cistack.py; a python library that provides a series of abstracted\
 functions to interact with supported KubOS target boards, through the \
 Kubos Pi Hat v0.3 interface. The library provides numerous functions,\
 but chief among them is the ability to upload a compiled\
@@ -42,7 +45,7 @@ binary executable to each board using the flashing functions in the library.\
 As such, the user must provide, at a minimum, three arguments to any\
 script that calls this (readOpts) function.") 
 
-supportedboards=[
+supportedboards = [
 'pyboard-gcc',
 'stm32f407-disco-gcc',
 'msp430f5529-gcc'
@@ -54,6 +57,66 @@ def allDone():
     GPIO.cleanup()
     sys.exit("Pins cleared. Exiting script.")
     return True
+
+
+class Pin(object):
+    def __init__(self):
+        self.name = ""
+        self.number = ""
+        self.direction = ""
+        self.onval = ""
+        self.offval = ""
+        self.pullup = None
+        self.pulldown = None
+        self.mux = None
+
+    def setup(self):
+        '''Set up one GPIO pin per the pin dict values. '''
+        
+        if (self.number is False):
+            return True
+
+        try:
+            func = GPIO.gpio_function(self.number)
+            print("pin %s set to %s" % (str(self.number), str(func)))
+        except:
+            sys.exit("Unable to determine the function of the pin!. Exiting.") 
+
+        try:
+            GPIO.setup(self.number, self.direction)
+            print("Key %s, pin %s is set to %s " % 
+            (self.name, str(self.number), str(self.direction)))
+            sleep(0.5)
+            return True
+        except:
+            sys.exit("Unable to set the pin's function! Exiting.")
+
+        return False
+        
+
+    def on(self):
+        '''Generic "assert the GPIO pin" function.'''
+        if (self.number is None):
+            return False
+        try:
+            print("Asserting pin %s" % str(self.number))
+            GPIO.output(self.number, self.onval)
+        
+        except:
+            print("%s unable to assert pin %s" % str(errstr, self.number))
+            return False
+        return True
+
+    def off(self):
+        '''Generic "turn off the GPIO pin" function.'''
+        if (self.number is None):
+            return False
+        try:
+            GPIO.output(self.number, self.offval)
+        except:
+            return False
+
+        return True
 
 
 
@@ -130,12 +193,22 @@ class Pyboard(Target):
         }
 
     def progmode(self):
-        setupPyBoard(self.pins)
+        '''Assert two pins in sequence to enable programming mode on the 
+MicroPython board, then release them to reboot the board into
+programming mode.'''
+        pinOn('rst', **self.pins)
+        sleep(0.2)
+        pinOn('prg', **self.pins)
+        sleep(0.5)
+        pinOff('rst', **self.pins)
+        pinOff('prg', **self.pins)
+        sleep(0.1)
+        return True
 
     def flash(self, binfile, binpath):
         '''use an external shell to push the binary file using dfu-util.'''
 
-        if (__pyBoardBinarySanityCheck(binfile)):
+        if (pyBoardBinarySanityCheck(binfile,binpath)):
             pass
         else:
             sys.exit("Binary file didn't pass a sanity check. Exiting.")
@@ -172,8 +245,6 @@ class Pyboard(Target):
         return True
 
 
-
-
 class MSP430(Target):
     def __init__(self):
         self.board = "msp430f5529-gcc"
@@ -190,7 +261,7 @@ class MSP430(Target):
         sp1 = os.environ['LD_LIBRARY_PATH']
         sp1 = str(sp1 + ":" + searchpath)
 
-        fileloc=str("%s/%s" % (binpath, binfile))
+        fileloc = str("%s/%s" % (binpath, binfile))
         print("LD_LIBRARY_PATH will be: %s" % str(sp1))
         print("File to be flashed: %s" % str(fileloc))
 
@@ -235,10 +306,10 @@ class STM32F407Discovery(Target):
         and cause ERRORS. Workaround: use the ansible -shell- command and 
         declare the library path before executing a bash -c command'''
 
-        distpath="/usr/local/lib/python2.7/dist-packages/kubos"
-        searchpath=str("%s/flash/openocd" % distpath)
+        distpath = "/usr/local/lib/python2.7/dist-packages/kubos"
+        searchpath = str("%s/flash/openocd" % distpath)
    
-        KUBOS_LIB_PATH=str("%s/lib/linux/" % distpath)
+        KUBOS_LIB_PATH = str("%s/lib/linux/" % distpath)
         sp1 = os.environ['LD_LIBRARY_PATH']
         sp1 = str(sp1 + ":" + KUBOS_LIB_PATH)
         sp1 = str(sp1 + ":" + searchpath)
@@ -268,7 +339,7 @@ class STM32F407Discovery(Target):
             searchpath, cfg, searchpath, cmd, binpath, binfile)
         print (str(command))
         try:
-            subprocess.check_output(command, shell=True)
+            subprocess.check_output(command, shell = True)
             return True
         except:
             return False
@@ -397,12 +468,6 @@ def setupBoard(**pinvals):
 are assigned to your target board. This function sets the Raspberry
 Pi GPIO map to "Broadcom" and then sets up pin direction and function.'''
 
-#    print("Checking for root access...")
-#    if os.geteuid() != 0:
-#        print("You need to have root privileges to run this script.\n")
-#        sys.exit("Please try again, this time using 'sudo'. Exiting.")
-#        return False
-
 # Setting BCM mode is "Broadcom", running from GPIO2 to GPIO27
 # Meaning pin 40 in "BOARD" is pin 21 in BCM
     print("Setting pin modes for each pin:")
@@ -421,15 +486,16 @@ Pi GPIO map to "Broadcom" and then sets up pin direction and function.'''
 
 def determineFileType(binfile):
     '''Returns file type and useful info about the binary to be flashed.'''
-    d=magic.from_file("/home/kubos/kubos-rt-example")
-    d=re.sub(', ',',',d)
-    e=d.split(',')
+    d = magic.from_file(binfile)
+    d = re.sub(', ',',',d)
+    e = d.split(',')
     return e
 
-def __pyBoardBinarySanityCheck(binfile):
+def pyBoardBinarySanityCheck(binfile,binpath):
     '''Ensure that the file is not an .elf. '''
-    e=determineFileType(binfile)
-    t='data'
+    arg=str("%s/%s" % (binpath, binfile)) 
+    e = determineFileType(arg)
+    t = 'data'
     if (re.search('data$', e[0])):
         return True
     else:
@@ -443,9 +509,9 @@ debugging information; bin files lack that information. One problem is that
 .elf files usually don't have file name suffixes, meaning it cannot be 
 simply found with a regex.'''
 # ELF 32-bit LSB executable, ARM,
-    e=determineFileType(binfile)
+    e = determineFileType(binfile)
     try:
-        if (re.search("^ELF",e[0]) and (e[1]=="ARM")):
+        if (re.search("^ELF",e[0]) and (e[1] == "ARM")):
             return True
     except:
         return False
@@ -456,7 +522,7 @@ simply found with a regex.'''
 def getBoardConfigs(boards):
     for i in boards:
         try:
-            r=parseBoardIdentifier(i['dev'])
+            r = parseBoardIdentifier(i['dev'])
             if(r[1] is True): # board is supported
                 return r
         except:
@@ -478,7 +544,7 @@ key: lsusb identifier
 
 # '0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
 # But note that the STLINK-V2 could be connected to many different boards. FIXME
-    patterns={
+    patterns = {
               '0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
               '0483:374b':['STMicro ST-LINK/V2 ',True, 'stm32f407g-disc1.cfg', 'stm32f4_flash'],
               '0483:df11':['STM32F405 PyBoard', True, 'USE dfu-util!', '***'], 
@@ -497,7 +563,7 @@ def whichUSBboard():
     output = subprocess.check_output(lsusb, shell=True)
     lines = output.rsplit('\n')
     retarray = []
-    manlist=['Texas', 'STMicro']
+    manlist = ['Texas', 'STMicro']
 
     for line in lines:
         arr = line.split(' ')
@@ -517,19 +583,36 @@ def findBin(command):
     cmd = str("/usr/bin/which %s" % command)
 
     try:    
-        retval = subprocess.check_output(cmd, shell=True)
+        retval = subprocess.check_output(cmd, shell = True)
         retval = re.sub('\n$', '', retval)
         return retval
     except:
         sys.exit("Unable to determine the path; halting.")
         return False
 
+def checkRoot(yesno):
+    '''If certain udev rules have not been set, it may be simpler to \
+    only allow the script to run with elevated privileges. While this \
+    choice is discouraged, it is up to the user's discretion.'''
+
+    if (yesno is True):
+        print("Checking for root access...")
+
+        if os.geteuid() != 0:
+            print("You need to have root privileges to run this script.\n")
+            sys.exit("Please try again, this time using 'sudo'. Exiting.")
+            return False
+    else:
+        return True
 
 def readOpts():
-    args= { 'board': 'stm32f407-disco-gcc',
+    args = { 'board': 'stm32f407-disco-gcc',
             'binary': 'kubos-rt-example',
             'path': '/var/lib/ansible/'
             }
+
+    if (checkRoot(isrootrequired)):
+        pass
 
     try:
         print(str(sys.argv))
@@ -550,9 +633,9 @@ def readOpts():
         print("%s inadequate number of program arguments." % errstr)
         sys.exit("User did not provide required arguments.")
 
-    today=datetime.date.today()
+    today = datetime.date.today()
 
-    parser=argparse.ArgumentParser(description='''cistack.py; a python library
+    parser = argparse.ArgumentParser(description = '''cistack.py; a python library
 that provides a series of abstracted functions to interact with supported KubOS
 target boards, through the Kubos Pi Hat v0.3 interface. The library provides
 numerous functions, but chief among them is the ability to upload a compiled 
@@ -577,29 +660,31 @@ msp430f5529-gcc
 # kubos-gcc
 # stm32f405-gcc
 
-    parser.add_argument("-f", "--file", action='store', \
-        dest="inputbinary", default="kubos-rt-example",
-        help="provide a filename for the compiled binary file to upload", metavar="FILE")
+    parser.add_argument("-f", "--file", action = 'store', \
+        dest = "inputbinary", default="kubos-rt-example", \
+        help = "provide a filename for the compiled binary file to \
+upload", metavar = "FILE")
 
     parser.add_argument("-v", "--verbose", \
-        action='store_true', dest="verbose",
-        help="provide more verbose output to STDOUT", default=0)
+        action = 'store_true', dest="verbose",
+        help = "provide more verbose output to STDOUT", default = 0)
 
 # TODO add in support for this later.
-#    parser.add_argument("-p", "--path", action='store', \
-#        dest="binfilepath", default="/var/lib/ansible/",
-#        help="provide a path to the binary you want to flash", metavar="PATH")
+#    parser.add_argument("-p", "--path", action = 'store', \
+#        dest = "binfilepath", default = "/var/lib/ansible/",
+#        help = "provide a path to the binary you want to flash", metavar = "PATH")
 
-    parser.add_argument("-b", "--board", action='store', \
-        dest="board", default="stm32f407-disco-gcc",
-        help="the target board (and architecture) supported by the Kubos SDK", metavar="TARGET")
+    parser.add_argument("-b", "--board", action = 'store', \
+        dest = "board", default = "stm32f407-disco-gcc",
+        help = "the target board (and architecture) supported by the \
+Kubos SDK", metavar = "TARGET")
    
-    arguments=parser.parse_args()
-    args=vars(arguments)
+    arguments = parser.parse_args()
+    args = vars(arguments)
 
-    array=checkFile(args['inputbinary'])
-    args['binfilepath']=array[0]
-    args['inputbinary']=array[1]
+    array = checkFile(args['inputbinary'])
+    args['binfilepath'] = array[0]
+    args['inputbinary'] = array[1]
 #    print(args)
 
     checkBoard(args['board'])
@@ -614,7 +699,7 @@ def checkFile(binfile):
 Exiting now." % errstr)
 
 # (binpath, filename):
-    array=os.path.split(binfile)
+    array = os.path.split(binfile)
 
     if (os.path.exists(array[0]) is False):
         sys.exit("%s Unable to determine path to binary from input." % 
@@ -627,7 +712,7 @@ def checkBoard(board):
     for b in supportedboards:
         if (b == board):
             return True
-    errmsg=str("%s Board name '%s' does not match list of currently supported \
+    errmsg = str("%s Board name '%s' does not match list of currently supported \
 boards. Exiting." % (errstr, board))
     sys.exit(errmsg)
     return False
