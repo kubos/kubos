@@ -23,10 +23,14 @@
 #define TELEMETRY_CSP_ADDRESS YOTTA_CFG_TELEMETRY_CSP_ADDRESS
 #endif
 
-/* Port number used for the telemetry server's CSP socket */
-#define TELEMETRY_CSP_PORT 20
-
 #define NUM_MESSAGE_QUEUE 10
+
+/* Port number used for the telemetry server's CSP socket */
+#ifndef YOTTA_CFG_TELEMETRY_CSP_PORT
+#define TELEMETRY_CSP_PORT 20
+#else
+#define TELEMETRY_CSP_PORT YOTTA_CFG_TELEMETRY_CSP_PORT
+#endif
 
 /* Number of telemetry subscribers */
 #ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_NUM
@@ -36,6 +40,6 @@
 #endif
 
 /* Number of subscriber read attempts */
-#define TELEMETRY_SUBSCRIBER_READ_ATTEMPTS 10
+#define TELEMETRY_SUBSCRIBER_READ_ATTEMPTS YOTTA_CFG_TELEMETRY_SUBSCRIBERS_READ_ATTEMPTS
 
 #endif
