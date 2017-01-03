@@ -268,7 +268,7 @@ int csp_conn_flags(csp_conn_t *conn);
 /**
  * Set socket to listen for incoming connections
  * @param socket Socket to enable listening on
- * @param conn_queue_length Lenght of backlog connection queue
+ * @param conn_queue_length Length of backlog connection queue
  * @return 0 on success, -1 on error.
  */
 int csp_listen(csp_socket_t *socket, size_t conn_queue_length);
