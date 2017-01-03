@@ -393,7 +393,7 @@ key: lsusb identifier
 # '0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
 # But note that the STLINK-V2 could be connected to many different boards. FIXME
     patterns={
-              '0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407g-disc1.cfg', 'stm32f4_flash'],
+              '0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
               '0483:374b':['STMicro ST-LINK/V2 ',True, 'stm32f407g-disc1.cfg', 'stm32f4_flash'],
               '0483:df11':['STM32F405 PyBoard', True, 'USE dfu-util!', '***'], 
               '0451:2046':['TI MSP430F5529 Launchpad',True, 'USE mspdebug!', '***'],
