@@ -42,8 +42,8 @@ binfile = kwargs['inputbinary']
 binpath = kwargs['binfilepath']
 board = kwargs['board']
 
-pinvals = ci.pinLayout(board)
-p = pinvals
+target = ci.getTarget(board)
+
 
 
 flashloc = "/usr/local/lib/python2.7/dist-packages/kubos/flash/"
@@ -55,36 +55,38 @@ if (ignoreGPIOwarnings):
     GPIO.setwarnings(False)
 
 
-ci.setupBoard(**p)
+target.setupboard()
 print ("Board setup complete.")
 sleep(1)
 
-ci.powerUp(**p)
+target.powerup()
 print("Powering on the board")
 sleep(1)
 
-ci.setProg(**p)
-print("Programming mode not needed for this board at this moment.")
+target.progmode()
 sleep(1)
 
-if (ci.flashBinary(binfile, binpath, flashpath = flashloc,  **p) ):
+if (target.flash(binfile, binpath) is True):
     print("Program flash completed. Reports success.")
+else:
+    print("Program may have failed. Exiting")
+    sys.exit()
 
 # program returns 0 here so Jenkins can see success
 
-else:
-    print("*** ERROR: Program flash appears to have failed.")
-    sys.exit("Halting script")
+#else:
+#    print("*** ERROR: Program flash appears to have failed.")
+#    sys.exit("Halting script")
 
 
-ci.resetBoard(**p)
+target.reset()
 print("\nBoard reset.")
 
 sleep(1)
 
 if(shutdownwhendone):
     print("Shutting down the board.")
-    ci.powerDown(**p)
+    target.powerdown() 
 
 # If you want to shut the board down, this command cleans up and 
 # de-energizes the power MOSFET.

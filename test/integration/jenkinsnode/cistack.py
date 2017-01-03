@@ -56,6 +56,223 @@ def allDone():
     return True
 
 
+
+class Target(object):
+
+    def __init__(self):
+        self.board = ""
+        self.pins = {}
+
+    def getboard(self):
+        return self.board
+
+    def getpins(self):
+        return self.pins
+
+    def progmode(self):
+        return False
+
+    def flash(self, binfile, binpath):
+        return False
+
+    def reset(self):
+        '''Assert the reset pin for the board, then release it.'''
+        pinOn('rst', **self.pins)
+        sleep(0.5)
+        pinOff('rst', **self.pins)
+        sleep(0.5)
+        return True
+
+    def powerup(self):
+        '''Turn on the power MOSFET for the target board.'''
+        pinOn('pwr', **self.pins)
+        sleep(0.1)
+        return True
+
+    def powerdown(self):
+        '''Turn off the power MOSFET for the target board.'''
+        pinOff('pwr', **self.pins)
+        return True
+
+    def setupboard(self):
+        '''Run this function immediately after determining which pins
+are assigned to your target board. This function sets the Raspberry
+Pi GPIO map to "Broadcom" and then sets up pin direction and function.'''
+
+#    print("Checking for root access...")
+#    if os.geteuid() != 0:
+#        print("You need to have root privileges to run this script.\n")
+#        sys.exit("Please try again, this time using 'sudo'. Exiting.")
+#        return False
+
+# Setting BCM mode is "Broadcom", running from GPIO2 to GPIO27
+# Meaning pin 40 in "BOARD" is pin 21 in BCM
+        print("Setting pin modes for each pin:")
+        GPIO.setmode(GPIO.BCM)
+
+        for pin in self.pins.keys():
+            pinSetup(pin, **self.pins)
+
+        print("Setup successful.")
+        sleep(0.1)
+        return True
+
+
+
+class Pyboard(Target):
+    def __init__(self):
+        self.board = "pyboard-gcc"
+        self.pins = {
+            'rst':[17, True, False, GPIO.OUT], 
+            'prg':[18, True, False, GPIO.OUT],
+            'pwr':[27, True, False, GPIO.OUT],
+            'opt':[22, True, False, GPIO.OUT]
+        }
+
+    def progmode(self):
+        setupPyBoard(self.pins)
+
+    def flash(self, binfile, binpath):
+        '''use an external shell to push the binary file using dfu-util.'''
+
+        if (__pyBoardBinarySanityCheck(binfile)):
+            pass
+        else:
+            sys.exit("Binary file didn't pass a sanity check. Exiting.")
+            return False
+
+        dfupath = findBin('dfu-util')
+
+# Note that the pyboard must be in programming mode for it to announce itself
+# as a DFU device. That is, the system can't even find the board until it is
+# in programming mode.
+# This script no longer requires root access to run, meaning you must implement
+# a udev rule to enable user-land access to the device, or else just remember
+# to sudo when running this script.
+# 
+# Hint: ATTRS{idVendor}==\"0483\", ATTRS{idProduct}==\"df11\"
+
+        tail = str("-i 0 -s 0x08000000")
+        head = str("--alt 0 -D ")
+        command = str("%s %s %s/%s %s " % 
+            (dfupath, head, binpath, binfile, tail))
+        print(command)
+        try:
+            output = subprocess.check_output(command , shell = True)
+            print(output)
+
+            if (re.search("File downloaded successfully.*$", output)):
+                print("Looks like things went well!")
+
+        except:
+            print "NOPE. Try it again."
+            return False
+
+        sleep(0.5)
+        return True
+
+
+
+
+class MSP430(Target):
+    def __init__(self):
+        self.board = "msp430f5529-gcc"
+        self.pins = {
+            'rst':[17, True, False, GPIO.OUT], # SWD connector, pull NRST to GND 
+            'prg':[18, True, False, GPIO.OUT], # none needed?
+            'pwr':[27, True, False, GPIO.OUT], # same as the rest of the hats
+            'opt':[22, True, False, GPIO.OUT]  # optional
+        }
+    
+    def flash(self,binfile,binpath):
+        '''Flash a binary file through the USB connection on an MSP430 Launchpad'''
+        searchpath = "/usr/local/lib/python2.7/dist-packages/kubos/lib/linux/"
+        sp1 = os.environ['LD_LIBRARY_PATH']
+        sp1 = str(sp1 + ":" + searchpath)
+
+        fileloc=str("%s/%s" % (binpath, binfile))
+        print("LD_LIBRARY_PATH will be: %s" % str(sp1))
+        print("File to be flashed: %s" % str(fileloc))
+
+        mspdebugloc = findBin('mspdebug') 
+        print("Found mspdebug at %s" % mspdebugloc)
+        cmd = "prog" 
+    
+        commandstring = str("LD_LIBRARY_PATH=\"%s\"   %s tilib \"%s %s\" --allow-fw-update" % 
+            (sp1, mspdebugloc, cmd, fileloc))
+
+        print "About to execute the following command:\n%s" % str(commandstring)
+
+        try:
+            print("\n** Flashing binary to the board:\n")
+            output = subprocess.check_output(commandstring, shell = True)
+            print(str("\n\n========\n%s\n" %  output))
+
+        except:
+            print ("%s An unknown error occurred." % errstr)
+            return False
+
+        return True 
+
+
+class STM32F407Discovery(Target):
+    def __init__(self):
+        self.board = "stm32f407-disco-gcc"
+        self.pins = {
+            'rst':[17, True, False, GPIO.OUT], # SWD connector, pull NRST to GND 
+            'prg':[18, True, False, GPIO.OUT], # none needed?
+            'pwr':[27, True, False, GPIO.OUT], # same as the rest of the hats
+            'opt':[22, True, False, GPIO.OUT]  # optional
+        }
+
+# IMPORTANT NOTE: openocd must be version 0.9 or later.
+    def flash(self, binfile, binpath):
+        '''use an external shell to push the ELF file using openocd. It seems 
+        to be necessary to pre-declare the LIB PATH for some commands, and 
+        if the path variable is not available as declared in /etc/profile, it
+        can be fixed here with the sp1 variable, below. HOWEVER: from ansible,
+        the locally-declared and locally-requested path variables DO NOT WORK
+        and cause ERRORS. Workaround: use the ansible -shell- command and 
+        declare the library path before executing a bash -c command'''
+
+        distpath="/usr/local/lib/python2.7/dist-packages/kubos"
+        searchpath=str("%s/flash/openocd" % distpath)
+   
+        KUBOS_LIB_PATH=str("%s/lib/linux/" % distpath)
+        sp1 = os.environ['LD_LIBRARY_PATH']
+        sp1 = str(sp1 + ":" + KUBOS_LIB_PATH)
+        sp1 = str(sp1 + ":" + searchpath)
+
+        openocdloc = findBin('openocd')
+
+        unamestr = subprocess.check_output('uname')
+        unamestr = re.sub('\n$', '', unamestr)
+
+# TODO adjust the paths for OS X
+
+#    if (re.search('Linux', unamestr)):
+# /usr/bin/openocd  -f /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd/stm32f407vg.cfg   -s /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd -c "stm32f4_flash /home/kubos/kubos-rt-example"
+
+###    cfg = "stm32f407g-disc1.cfg"
+#    cfg = "stm32f407vg.cfg"
+#    cmd = "stm32f4_flash"
+
+# At present, this function only expects one board to be attached. TODO
+        boards = whichUSBboard()
+        configs = getBoardConfigs(boards)
+        cfg = configs[2] # config file to use with openocd
+        cmd = configs[3] # something like 'stm32f4_flash', an openocd command
+
+# $openocd -f $this_dir/$cfg -s $search_path -c "$cmd $file"
+        command = str("%s -f %s/%s -s %s -c \"%s %s/%s\"") % (openocdloc, 
+            searchpath, cfg, searchpath, cmd, binpath, binfile)
+        print (str(command))
+        try:
+            subprocess.check_output(command, shell=True)
+            return True
+        except:
+            return False
+
 def pinSetup(key, **pinvals):
     '''Set up one GPIO pin per the pin dict values. '''
     thepin = pinvals[key][0]
@@ -81,54 +298,29 @@ def pinSetup(key, **pinvals):
 
     return False
 
-
-def pinLayout(target):
+def getTarget(target):
     ''' Configure the board-specific pin addresses and directions '''
     if (target == "pyboard-gcc"):
-        pinvals = {
-        'board':target,
-        'rst':[17, True, False, GPIO.OUT], 
-        'prg':[18, True, False, GPIO.OUT],
-        'pwr':[27, True, False, GPIO.OUT],
-        'opt':[22, True, False, GPIO.OUT]
-        }
-        return pinvals
+        return Pyboard()
 
     elif (target == "stm32f407-disco-gcc"):
-        pinvals = {
-        'board':target,
-        'rst':[17, True, False, GPIO.OUT], # SWD connector, pull NRST to GND 
-        'prg':[18, True, False, GPIO.OUT], # none needed?
-        'pwr':[27, True, False, GPIO.OUT], # same as the rest of the hats
-        'opt':[22, True, False, GPIO.OUT]  # optional
-        }
-        return pinvals
+        return STM32F407Discovery() 
 
     elif (target == "msp430f5529-gcc"):
-        pinvals = {
-        'board':target,
-        'rst':[17, True, False, GPIO.OUT], # SWD connector, pull NRST to GND 
-        'prg':[18, True, False, GPIO.OUT], # none needed?
-        'pwr':[27, True, False, GPIO.OUT], # same as the rest of the hats
-        'opt':[22, True, False, GPIO.OUT]  # optional
-        }
-        return pinvals
+        return MSP430()
+
     else:
         sys.exit("Unsupported board -- no pins available.")
 
-    return False
+    return None
 
 
-def resetBoard(**pinvals):
-    '''Assert the reset pin for the board, then release it.'''
-    pinOn('rst', **pinvals)
-    sleep(0.5)
-    pinOff('rst', **pinvals)
-    sleep(0.5)
-    return True
 
 def setProg(**pinvals):
-    '''Determine which board is in use, and then set programming mode, if applicable, for that specific board. Boards not requiring a specific logical or physical assertion will do nothing but return success from the function.'''
+    '''Determine which board is in use, and then set programming mode, 
+if applicable, for that specific board. Boards not requiring a specific 
+logical or physical assertion will do nothing but return success from 
+the function.'''
 
     if (pinvals['board'] == "pyboard-gcc"):
         setProgPyBoard(**pinvals)
@@ -167,12 +359,6 @@ programming mode.'''
     sleep(0.1)
     return True
 
-
-def powerUp(**pinvals):
-    '''Turn on the power MOSFET for the target board.'''
-    pinOn('pwr', **pinvals)
-    sleep(0.1)
-    return True
 
 
 def powerDown(**pinvals):
@@ -221,6 +407,7 @@ Pi GPIO map to "Broadcom" and then sets up pin direction and function.'''
 # Meaning pin 40 in "BOARD" is pin 21 in BCM
     print("Setting pin modes for each pin:")
     GPIO.setmode(GPIO.BCM)
+
     for pin in pinvals.keys():
         if (pin == 'board'):
             pass
@@ -231,76 +418,6 @@ Pi GPIO map to "Broadcom" and then sets up pin direction and function.'''
     sleep(0.1)
     return True
 
-
-def flashBinary(binfile,binpath, **pinvals):
-    '''This function determines which board is in use, and flashes the \
-binary using an appropriate binary executable and/or shell script(s).'''
-
-    if (pinvals['board'] == "pyboard-gcc"):
-        if (flashBinaryPyBoard(binfile,binpath) is True):
-            return True
-        else:
-            return False
-    elif(pinvals['board'] == "stm32f407-disco-gcc"):
-        searchpath = "/usr/local/lib/python2.7/dist-packages/kubos/flash/openocd"
-        if (flashopenocd(binfile, pinvals['board'], searchpath, binpath) is True):
-            return True
-        else:
-            return False
-
-    elif(pinvals['board'] == "msp430f5529-gcc"):
-        searchpath = "/usr/local/lib/python2.7/dist-packages/kubos/lib/linux/"
-        if (flashmspdebug(binfile, binpath, searchpath) is True):
-            return True
-        else:
-            return False
-
-    else:
-        sys.exit("Unknown or unsupported board.")
-        return False
-    return False
-
-
-# dfu-util --alt 0 -D /home/username/ukub-sensor-node.bin -i 0 -s 0x08000000
-def flashBinaryPyBoard(binfile, binpath):
-    '''use an external shell to push the binary file using dfu-util.'''
-    bpath = "/home/kubos"
-    binpath = re.sub("/$", "", binpath)
-
-    if (__pyBoardBinarySanityCheck(binfile)):
-        pass
-    else:
-        sys.exit("Binary file didn't pass a sanity check. Exiting.")
-        return False
-
-    dfupath = findBin('dfu-util')
-
-# Note that the pyboard must be in programming mode for it to announce itself
-# as a DFU device. That is, the system can't even find the board until it is
-# in programming mode.
-# This script no longer requires root access to run, meaning you must implement
-# a udev rule to enable user-land access to the device, or else just remember
-# to sudo when running this script.
-# 
-# Hint: ATTRS{idVendor}==\"0483\", ATTRS{idProduct}==\"df11\"
-
-    tail = str("-i 0 -s 0x08000000")
-    head = str("--alt 0 -D ")
-    command = str("%s %s %s/%s %s " % 
-            (dfupath, head, binpath, binfile, tail))
-    print(command)
-    try:
-        output = subprocess.check_output(command , shell = True)
-        print(output)
-
-        if (re.search("File downloaded successfully.*$", output)):
-            print("Looks like things went well!")
-
-    except:
-        print "well, crap. Try it again."
-        return False
-    sleep(0.5)
-    return True
 
 def determineFileType(binfile):
     '''Returns file type and useful info about the binary to be flashed.'''
@@ -320,10 +437,11 @@ def __pyBoardBinarySanityCheck(binfile):
 
 
 def __discoBoardBinarySanityCheck(binfile):
-    '''Ensure that -- for now -- the binary file to be flashed is an .elf, \
-not a .bin file. It seems that .elf files know where to go, because of the \
-debugging information; bin files lack that information. One problem is that \
-.elf files usually don't have file name suffixes, meaning it cannot be regexed.'''
+    '''Ensure that -- for now -- the binary file to be flashed is an .elf,
+not a .bin file. It seems that .elf files know where to go, because of the 
+debugging information; bin files lack that information. One problem is that 
+.elf files usually don't have file name suffixes, meaning it cannot be 
+simply found with a regex.'''
 # ELF 32-bit LSB executable, ARM,
     e=determineFileType(binfile)
     try:
@@ -334,55 +452,6 @@ debugging information; bin files lack that information. One problem is that \
 
     return False
 
-# IMPORTANT NOTE: openocd must be version 0.9 or later.
-def flashopenocd(binfile, board, searchpath, binpath):
-    '''use an external shell to push the ELF file using openocd. It seems 
-    to be necessary to pre-declare the LIB PATH for some commands, and 
-    if the path variable is not available as declared in /etc/profile, it
-    can be fixed here with the sp1 variable, below. HOWEVER: from ansible,
-    the locally-declared and locally-requested path variables DO NOT WORK
-    and cause ERRORS. Workaround: use the ansible -shell- command and 
-    declare the library path before executing a bash -c command'''
-
-    distpath="/usr/local/lib/python2.7/dist-packages/kubos"
-    searchpath=str("%s/flash/openocd" % distpath)
-   
-    KUBOS_LIB_PATH=str("%s/lib/linux/" % distpath)
-    sp1 = os.environ['LD_LIBRARY_PATH']
-    sp1 = str(sp1 + ":" + KUBOS_LIB_PATH)
-    sp1 = str(sp1 + ":" + searchpath)
-
-    openocdloc = findBin('openocd')
-
-    unamestr = subprocess.check_output('uname')
-    unamestr = re.sub('\n$', '', unamestr)
-
-# TODO adjust the paths for OS X
-
-#    if (re.search('Linux', unamestr)):
-# /usr/bin/openocd  -f /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd/stm32f407vg.cfg   -s /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd -c "stm32f4_flash /home/kubos/kubos-rt-example"
-
-###    cfg = "stm32f407g-disc1.cfg"
-#    cfg = "stm32f407vg.cfg"
-#    cmd = "stm32f4_flash"
-
-# At present, this function only expects one board to be attached. TODO
-    boards = whichUSBboard()
-    configs = getBoardConfigs(boards)
-    cfg = configs[2] # config file to use with openocd
-    cmd = configs[3] # something like 'stm32f4_flash', an openocd command
-
-# $openocd -f $this_dir/$cfg -s $search_path -c "$cmd $file"
-    command = str("%s -f %s/%s -s %s -c \"%s %s/%s\"") % (openocdloc, 
-            searchpath, cfg, searchpath, cmd, binpath, binfile)
-    print (str(command))
-    try:
-        subprocess.check_output(command, shell=True)
-        return True
-    except:
-        return False
-
-    return False
 
 def getBoardConfigs(boards):
     for i in boards:
@@ -454,35 +523,6 @@ def findBin(command):
     except:
         sys.exit("Unable to determine the path; halting.")
         return False
-
-def flashmspdebug(binfile, binpath, searchpath):
-    '''Flash a binary file through the USB connection on an MSP430 Launchpad'''
-    sp1 = os.environ['LD_LIBRARY_PATH']
-    sp1 = str(sp1 + ":" + searchpath)
-
-    fileloc=str("%s/%s" % (binpath, binfile))
-    print("LD_LIBRARY_PATH will be: %s" % str(sp1))
-    print("File to be flashed: %s" % str(fileloc))
-
-    mspdebugloc = findBin('mspdebug') 
-    print("Found mspdebug at %s" % mspdebugloc)
-    cmd = "prog" 
-    
-    commandstring = str("LD_LIBRARY_PATH=\"%s\"   %s tilib \"%s %s\" --allow-fw-update" % 
-        (sp1, mspdebugloc, cmd, fileloc))
-
-    print "About to execute the following command:\n%s" % str(commandstring)
-
-    try:
-        print("\n** Flashing binary to the board:\n")
-        output = subprocess.check_output(commandstring, shell = True)
-        print(str("\n\n========\n%s\n" %  output))
-
-    except:
-        print ("%s An unknown error occurred." % errstr)
-        return False
-
-    return True
 
 
 def readOpts():
