@@ -42,6 +42,12 @@ binary executable to each board using the flashing functions in the library.\
 As such, the user must provide, at a minimum, three arguments to any\
 script that calls this (readOpts) function.") 
 
+supportedboards=[
+'pyboard-gcc',
+'stm32f407-disco-gcc',
+'msp430f5529-gcc'
+]
+
 
 def allDone():
     '''Free all the pins and exit the script.'''
@@ -556,22 +562,35 @@ msp430f5529-gcc
     args['inputbinary']=array[1]
 #    print(args)
 
+    checkBoard(args['board'])
+
     return args
 
 
 def checkFile(binfile):
+    '''Check input filename; split from absolute path if necessary.'''
     if (os.path.isfile(binfile) is False):
         sys.exit("%s Specified binary file doesn't appear to be a file.\n\
 Exiting now." % errstr)
 
 # (binpath, filename):
-    array = os.path.split(binfile)
+    array=os.path.split(binfile)
 
     if (os.path.exists(array[0]) is False):
         sys.exit("%s Unable to determine path to binary from input." % 
                 errstr)
 
     return array
+
+def checkBoard(board):
+    '''Compare board name to list of currently supported boards.'''
+    for b in supportedboards:
+        if (b == board):
+            return True
+    errmsg=str("%s Board name '%s' does not match list of currently supported \
+boards. Exiting." % (errstr, board))
+    sys.exit(errmsg)
+    return False
 
 #####################################################################
 # NOTE: these are placeholders at present.
