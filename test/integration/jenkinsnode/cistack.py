@@ -32,37 +32,48 @@ import argparse
 import datetime
 import magic 
 
+errstr="*** ERROR:"
+
+help=str("cistack.py; a python library that provides a series of abstracted\
+functions to interact with supported KubOS target boards, through the \
+Kubos Pi Hat v0.3 interface. The library provides numerous functions,\
+but chief among them is the ability to upload a compiled\
+binary executable to each board using the flashing functions in the library.\
+As such, the user must provide, at a minimum, three arguments to any\
+script that calls this (readOpts) function.") 
+
+
 def allDone():
     '''Free all the pins and exit the script.'''
     GPIO.cleanup()
     sys.exit("Pins cleared. Exiting script.")
-    return 1
+    return True
 
 
 def pinSetup(key, **pinvals):
     '''Set up one GPIO pin per the pin dict values. '''
     thepin = pinvals[key][0]
     if (thepin is False):
-        return 1
+        return True
     if (thepin == 'board'):
-        return 1
+        return True
 
     try:
         func = GPIO.gpio_function(thepin)
-        print("pin %s set to %s" % (str(thepin), str(func) ) )
+        print("pin %s set to %s" % (str(thepin), str(func)))
     except:
-        sys.exit("Unable to determine the function of the pin!. Exiting.")        
+        sys.exit("Unable to determine the function of the pin!. Exiting.") 
 
     try:
         GPIO.setup(thepin, pinvals[key][3])
         print("Key %s, pin %s is set to %s " % 
-            (str(key), str(thepin), str(pinvals[key][3] ) ) )
+            (str(key), str(thepin), str(pinvals[key][3])))
         sleep(0.5)
-        return 1
+        return True
     except:
         sys.exit("Unable to set the pin's function! Exiting.")
 
-    return 0
+    return False
 
 
 def pinLayout(target):
@@ -73,7 +84,7 @@ def pinLayout(target):
         'rst':[17, True, False, GPIO.OUT], 
         'prg':[18, True, False, GPIO.OUT],
         'pwr':[27, True, False, GPIO.OUT],
-	    'opt':[22, True, False, GPIO.OUT]
+        'opt':[22, True, False, GPIO.OUT]
         }
         return pinvals
 
@@ -83,7 +94,7 @@ def pinLayout(target):
         'rst':[17, True, False, GPIO.OUT], # SWD connector, pull NRST to GND 
         'prg':[18, True, False, GPIO.OUT], # none needed?
         'pwr':[27, True, False, GPIO.OUT], # same as the rest of the hats
-	    'opt':[22, True, False, GPIO.OUT]  # optional
+        'opt':[22, True, False, GPIO.OUT]  # optional
         }
         return pinvals
 
@@ -93,13 +104,13 @@ def pinLayout(target):
         'rst':[17, True, False, GPIO.OUT], # SWD connector, pull NRST to GND 
         'prg':[18, True, False, GPIO.OUT], # none needed?
         'pwr':[27, True, False, GPIO.OUT], # same as the rest of the hats
-	    'opt':[22, True, False, GPIO.OUT]  # optional
+        'opt':[22, True, False, GPIO.OUT]  # optional
         }
         return pinvals
     else:
         sys.exit("Unsupported board -- no pins available.")
 
-    return 0
+    return False
 
 
 def resetBoard(**pinvals):
@@ -108,7 +119,7 @@ def resetBoard(**pinvals):
     sleep(0.5)
     pinOff('rst', **pinvals)
     sleep(0.5)
-    return 1
+    return True
 
 def setProg(**pinvals):
     '''Determine which board is in use, and then set programming mode, if applicable, for that specific board. Boards not requiring a specific logical or physical assertion will do nothing but return success from the function.'''
@@ -122,18 +133,18 @@ def setProg(**pinvals):
     ### makes any pin asserts here unnecessary. However, the bootloader will
     ### eventually require pin asserts when we program over USART or other
     ### serial interfaces.   
-        return 1
+        return True
 
     elif (pinvals['board'] == "msp430f5529-gcc"):
     ### similarly, the MSP430 launchpad doesn't need any external pins because
     ### of the onboard programmer. However , in the future, TODO we will add
     ### support for JTAG or Spy-Bi-Wire programming
-        return 1
+        return True
 
     else:
         sys.exit("Unknown or unsupported board.")
-        return 0
-    return 1
+        return False
+    return True
 
 
 # For the Micropython board specifically:
@@ -148,49 +159,47 @@ programming mode.'''
     pinOff('rst', **pinvals)
     pinOff('prg', **pinvals)
     sleep(0.1)
-    return 1
+    return True
 
 
 def powerUp(**pinvals):
     '''Turn on the power MOSFET for the target board.'''
     pinOn('pwr', **pinvals)
     sleep(0.1)
-    return 1
+    return True
 
 
 def powerDown(**pinvals):
     '''Turn off the power MOSFET for the target board.'''
     pinOff('pwr', **pinvals)
-    return 1
+    return True
 
 
 def pinOn(key, **pinvals):
     '''Generic "assert the GPIO pin" function.'''
     if (pinvals[key][0] is False):
-        return 1
+        return True
     try:
-        print("Asserting pin %s" % str(pinvals[key][0])   )
+        print("Asserting pin %s" % str(pinvals[key][0]))
         GPIO.output(pinvals[key][0], pinvals[key][1])
         
     except:
-        print("ERROR: unable to assert pin %s" % str(pinvals[key][0])  )
-        return 0
-    return 1
+        print("%s unable to assert pin %s" % str(errstr, pinvals[key][0]))
+        return False
+    return True
 
 
 def pinOff(key, **pinvals):
     '''Generic "turn off the GPIO pin" function.'''
     if (pinvals[key][0] is False):
-        return 1
+        return True
     try:
         GPIO.output(pinvals[key][0], pinvals[key][2])
     except:
-        return 0
-    return 1
+        return False
+    return True
 
 
-# Setting BCM mode is "Broadcom", running from GPIO2 to GPIO27
-# Meaning pin 40 in "BOARD" is pin 21 in BCM
 def setupBoard(**pinvals):
     '''Run this function immediately after determining which pins
 are assigned to your target board. This function sets the Raspberry
@@ -200,8 +209,10 @@ Pi GPIO map to "Broadcom" and then sets up pin direction and function.'''
 #    if os.geteuid() != 0:
 #        print("You need to have root privileges to run this script.\n")
 #        sys.exit("Please try again, this time using 'sudo'. Exiting.")
-#        return 0
+#        return False
 
+# Setting BCM mode is "Broadcom", running from GPIO2 to GPIO27
+# Meaning pin 40 in "BOARD" is pin 21 in BCM
     print("Setting pin modes for each pin:")
     GPIO.setmode(GPIO.BCM)
     for pin in pinvals.keys():
@@ -212,7 +223,7 @@ Pi GPIO map to "Broadcom" and then sets up pin direction and function.'''
 
     print("Setup successful.")
     sleep(0.1)
-    return 1
+    return True
 
 
 def flashBinary(binfile,binpath, **pinvals):
@@ -220,28 +231,28 @@ def flashBinary(binfile,binpath, **pinvals):
 binary using an appropriate binary executable and/or shell script(s).'''
 
     if (pinvals['board'] == "pyboard-gcc"):
-        if (flashBinaryPyBoard(binfile,binpath) == 1 ):
-            return 1
+        if (flashBinaryPyBoard(binfile,binpath) is True):
+            return True
         else:
-            return 0
+            return False
     elif(pinvals['board'] == "stm32f407-disco-gcc"):
         searchpath = "/usr/local/lib/python2.7/dist-packages/kubos/flash/openocd"
-        if (flashopenocd(binfile, pinvals['board'], searchpath, binpath) == 1):
-            return 1
+        if (flashopenocd(binfile, pinvals['board'], searchpath, binpath) is True):
+            return True
         else:
-            return 0 
+            return False
 
     elif(pinvals['board'] == "msp430f5529-gcc"):
         searchpath = "/usr/local/lib/python2.7/dist-packages/kubos/lib/linux/"
-        if (flashmspdebug(binfile, binpath, searchpath) == 1):
-            return 1
+        if (flashmspdebug(binfile, binpath, searchpath) is True):
+            return True
         else:
-            return 0 
+            return False
 
     else:
         sys.exit("Unknown or unsupported board.")
-        return 0
-    return 0
+        return False
+    return False
 
 
 # dfu-util --alt 0 -D /home/username/ukub-sensor-node.bin -i 0 -s 0x08000000
@@ -254,7 +265,7 @@ def flashBinaryPyBoard(binfile, binpath):
         pass
     else:
         sys.exit("Binary file didn't pass a sanity check. Exiting.")
-        return 0
+        return False
 
     dfupath = findBin('dfu-util')
 
@@ -270,20 +281,20 @@ def flashBinaryPyBoard(binfile, binpath):
     tail = str("-i 0 -s 0x08000000")
     head = str("--alt 0 -D ")
     command = str("%s %s %s/%s %s " % 
-            (dfupath, head, binpath, binfile, tail) )
+            (dfupath, head, binpath, binfile, tail))
     print(command)
     try:
-        output = subprocess.check_output(command , shell = True )
+        output = subprocess.check_output(command , shell = True)
         print(output)
 
-        if (re.search("File downloaded successfully.*$", output ) ):
+        if (re.search("File downloaded successfully.*$", output)):
             print("Looks like things went well!")
 
     except:
         print "well, crap. Try it again."
-        return 0
+        return False
     sleep(0.5)
-    return 1
+    return True
 
 def determineFileType(binfile):
     '''Returns file type and useful info about the binary to be flashed.'''
@@ -297,9 +308,9 @@ def __pyBoardBinarySanityCheck(binfile):
     e=determineFileType(binfile)
     t='data'
     if (re.search('data$', e[0])):
-        return 1
+        return True
     else:
-        return 0
+        return False
 
 
 def __discoBoardBinarySanityCheck(binfile):
@@ -311,11 +322,11 @@ debugging information; bin files lack that information. One problem is that \
     e=determineFileType(binfile)
     try:
         if (re.search("^ELF",e[0]) and (e[1]=="ARM")):
-            return 1
+            return True
     except:
-        return 0
+        return False
 
-    return 0
+    return False
 
 # IMPORTANT NOTE: openocd must be version 0.9 or later.
 def flashopenocd(binfile, board, searchpath, binpath):
@@ -361,11 +372,11 @@ def flashopenocd(binfile, board, searchpath, binpath):
     print (str(command))
     try:
         subprocess.check_output(command, shell=True)
-        return 1
+        return True
     except:
-        return 0
+        return False
 
-    return 0
+    return False
 
 def getBoardConfigs(boards):
     for i in boards:
@@ -376,7 +387,7 @@ def getBoardConfigs(boards):
         except:
             sys.exit("Unable to determine board type. Exiting.")
 
-    return 0
+    return False
 
 
 def parseBoardIdentifier(lsusbpattern):
@@ -436,7 +447,7 @@ def findBin(command):
         return retval
     except:
         sys.exit("Unable to determine the path; halting.")
-        return 0
+        return False
 
 def flashmspdebug(binfile, binpath, searchpath):
     '''Flash a binary file through the USB connection on an MSP430 Launchpad'''
@@ -444,7 +455,7 @@ def flashmspdebug(binfile, binpath, searchpath):
     sp1 = str(sp1 + ":" + searchpath)
 
     fileloc=str("%s/%s" % (binpath, binfile))
-    print("LD_LIBRARY_PATH will be: %s" % str(sp1) )
+    print("LD_LIBRARY_PATH will be: %s" % str(sp1))
     print("File to be flashed: %s" % str(fileloc))
 
     mspdebugloc = findBin('mspdebug') 
@@ -459,14 +470,14 @@ def flashmspdebug(binfile, binpath, searchpath):
     try:
         print("\n** Flashing binary to the board:\n")
         output = subprocess.check_output(commandstring, shell = True)
-        print(str("\n\n========\n%s\n" %  output) )
+        print(str("\n\n========\n%s\n" %  output))
 
     except:
-        print("** ERROR: An unknown error occurred.")
-        return 0
+        print ("%s An unknown error occurred." % errstr)
+        return False
 
+    return True
 
-    return 1
 
 def readOpts():
     args= { 'board': 'stm32f407-disco-gcc',
@@ -476,7 +487,7 @@ def readOpts():
 
     try:
         print(str(sys.argv))
-        print(str( len(sys.argv) ) )
+        print(str( len(sys.argv)))
 
     except:
         sys.exit("couldn't execute tests. Failing out.")
@@ -486,11 +497,11 @@ def readOpts():
             print("At least three arguments in the invocation: continuing")
 
     except AttributeError:
-        print("WARNING: you need to provide a filename, path, and target board.")
+        print("WARNING: you must provide a path/filename and target board.")
         sys.exit("User did not provide required arguments.")
 
     except IndexError:
-        print("ERROR: inadequate number of program arguments.")
+        print("%s inadequate number of program arguments." % errstr)
         sys.exit("User did not provide required arguments.")
 
     today=datetime.date.today()
@@ -509,7 +520,7 @@ python yourscriptname.py -f mybinfile -p /path/to/binary -b boardtype -v
 
 Supported boards include:
 pyboard-gcc
-stm32f407-disco-gcc
+stm32f407-disco-gcc (new-type boards)
 msp430f5529-gcc
 \n''')
 
@@ -526,20 +537,41 @@ msp430f5529-gcc
 
     parser.add_argument("-v", "--verbose", \
         action='store_true', dest="verbose",
-        help="provide more verbose output to STDOUT", default=0 )
+        help="provide more verbose output to STDOUT", default=0)
 
-    parser.add_argument("-p", "--path", action='store', \
-        dest="binfilepath", default="/var/lib/ansible/",
-        help="provide a path to the binary you want to flash", metavar="PATH")
+# TODO add in support for this later.
+#    parser.add_argument("-p", "--path", action='store', \
+#        dest="binfilepath", default="/var/lib/ansible/",
+#        help="provide a path to the binary you want to flash", metavar="PATH")
 
     parser.add_argument("-b", "--board", action='store', \
         dest="board", default="stm32f407-disco-gcc",
         help="the target board (and architecture) supported by the Kubos SDK", metavar="TARGET")
    
-    arguments = parser.parse_args()
-    args = vars(arguments)
+    arguments=parser.parse_args()
+    args=vars(arguments)
+
+    array=checkFile(args['inputbinary'])
+    args['binfilepath']=array[0]
+    args['inputbinary']=array[1]
+#    print(args)
 
     return args
+
+
+def checkFile(binfile):
+    if (os.path.isfile(binfile) is False):
+        sys.exit("%s Specified binary file doesn't appear to be a file.\n\
+Exiting now." % errstr)
+
+# (binpath, filename):
+    array = os.path.split(binfile)
+
+    if (os.path.exists(array[0]) is False):
+        sys.exit("%s Unable to determine path to binary from input." % 
+                errstr)
+
+    return array
 
 #####################################################################
 # NOTE: these are placeholders at present.
@@ -549,13 +581,13 @@ msp430f5529-gcc
 def sanityChecks(): # How do we check for executables in Windows?
     '''Check for dfu-util and other stuff.'''
 
-    return 0
+    return False
 
 
 def uploadSerial(filename):
     '''Send a binary file over the RPi UART.'''
 
-    return 0
+    return False
 
 
 #<EOF>

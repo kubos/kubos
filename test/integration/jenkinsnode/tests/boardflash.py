@@ -21,8 +21,7 @@
 #
 
 # Should execute this script with three command line arguments:
-# -f compiled_binary_file_to_upload
-# -p /path/to/compiled/binary/file
+# -f compiled binary file to upload, including path if needed
 # -b typeofboard ( that is, stm32f407-disco-gcc, pyboard-gcc, or msp430f5529-gcc ) 
 #
 
@@ -74,10 +73,8 @@ if (ci.flashBinary(binfile, binpath, flashpath = flashloc,  **p) ):
 # program returns 0 here so Jenkins can see success
 
 else:
-    print("Program flash appears to have failed.")
-
-# New flash subroutine:
-
+    print("*** ERROR: Program flash appears to have failed.")
+    sys.exit("Halting script")
 
 
 ci.resetBoard(**p)
