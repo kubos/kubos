@@ -1,78 +1,130 @@
+/*
+ * Copyright (C) 2016 Kubos Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #ifdef YOTTA_CFG_TELEMETRY
 
 #include "telemetry/telemetry.h"
-#include "telemetry/destinations.h"
-#include <csp/csp.h>
-
-static void telemetry_publish(telemetry_packet packet);
-static void telemetry_publish_send(uint8_t port, telemetry_packet packet);
+#include "telemetry/config.h"
+#include "communications.h"
+#include <csp/arch/csp_queue.h>
+#include <stdio.h>
 
 /**
- * Public facing telemetry input interface. Takes a telemetry_packet packet
- * and passes it through the telemetry system.
- *
- * Currently just prints out the data passed in and passes it along to the publish interface. Start simple right?
+ * Iterates though all open telemetry connections and
+ * publishes the packet IF the connection is interested/subscribed
+ * @param packet telemetry_packet to publish
  */
-void telemetry_submit(telemetry_packet packet)
+static void telemetry_send(telemetry_packet packet);
+
+/* Static array for holding persistent connections to telemetry subscribers */
+static telemetry_conn telemetry_subs[TELEMETRY_NUM_SUBSCRIBERS];
+
+/* Current number of active telemetry subscribers */
+static uint8_t num_subs = 0;
+
+/* Queue for incoming packets from publishers */
+static csp_queue_handle_t packet_queue = NULL;
+
+CSP_DEFINE_TASK(telemetry_get_subs)
 {
-    if(packet.source.data_type == TELEMETRY_TYPE_INT) {
+    if (server_setup())
+    {
+        while (num_subs < TELEMETRY_NUM_SUBSCRIBERS)
+        {
+            telemetry_conn conn;
+            if (server_accept(&conn))
+            {
+                telemetry_request request;
+                publisher_read_request(conn, &request);
+                conn.sources = request.sources;
+                telemetry_subs[num_subs++] = conn;
+            }
+        }
+    }
+    csp_thread_exit();
+}
+
+CSP_DEFINE_TASK(telemetry_rx_task)
+{
+    telemetry_packet packet;
+    packet_queue = csp_queue_create(10, sizeof(telemetry_packet));
+    while(1)
+    {
+        if (csp_queue_dequeue(packet_queue, &packet, CSP_MAX_DELAY))
+        {
+            telemetry_send(packet);
+        }
+    }
+}
+
+static void telemetry_send(telemetry_packet packet)
+{
+    if(packet.source.data_type == TELEMETRY_TYPE_INT)
+    {
         printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
     }
-    if(packet.source.data_type == TELEMETRY_TYPE_FLOAT) {
+    if(packet.source.data_type == TELEMETRY_TYPE_FLOAT)
+    {
         printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
     }
-    telemetry_publish(packet);
+
+    uint8_t i = 0;
+    for (i = 0; i < num_subs; i++)
+    {
+        // Currently if the sources flag is set to 0
+        // the subscriber will get all data
+        if ((telemetry_subs[i].sources == 0) || (packet.source.source_id & telemetry_subs[i].sources))
+        {
+            send_packet(telemetry_subs[i], packet);
+        }
+    }
 }
 
-/**
- * This function represents the telemetry output/publish interface. The destination just needs to
- * setup a csp connection on a port that telemetry connects to.
- */
-static void telemetry_publish_send(uint8_t port, telemetry_packet packet)
+bool telemetry_publish(telemetry_packet packet)
 {
-    csp_packet_t * csp_packet;
-    csp_conn_t * conn;
-    csp_packet = csp_buffer_get(10);
-    if (csp_packet == NULL) {
-        /* Could not get buffer element */
-        printf("Failed to get buffer element\n");
-        return;
+    if ((packet_queue != NULL) && (csp_queue_enqueue(packet_queue, &packet, CSP_MAX_DELAY)))
+    {
+        return true;
     }
-
-    /* Connect to host HOST, port PORT with regular UDP-like protocol and 1000 ms timeout */
-    conn = csp_connect(CSP_PRIO_NORM, TELEMETRY_CSP_ADDRESS, port, 1000, CSP_O_NONE);
-    if (conn == NULL) {
-        /* Connect failed */
-        printf("Connection failed\n");
-        /* Remember to free packet buffer */
-        csp_buffer_free(csp_packet);
-        return;
-    }
-
-    memcpy(csp_packet->data, &packet, sizeof(telemetry_packet));
-
-    /* Set packet length */
-    csp_packet->length = sizeof(telemetry_packet);
-
-    // /* Send packet */
-    if (!csp_send(conn, csp_packet, 1000)) {
-        /* Send failed */
-        printf("Send failed\n");
-        csp_buffer_free(csp_packet);
-    }
-    
-    csp_close(conn);
+    return false;
 }
 
-/**
- * This function holds the master list of destinations interested in 
- * telemetry data. The list here will be different for each project/binary..
- */
-static void telemetry_publish(telemetry_packet packet)
+bool telemetry_read(telemetry_conn conn, telemetry_packet * packet)
 {
-    /** autogen list of ports which telem should publish to */
-    telemetry_publish_send(TELEMETRY_BEACON_PORT, packet);
-    telemetry_publish_send(TELEMETRY_HEALTH_PORT, packet);
+    int tries = 0;
+    if (packet != NULL)
+    {
+        while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
+        {
+            if (subscriber_read_packet(conn, packet))
+                return true;
+        }
+    }
+    return false;
+}
+
+bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources)
+{
+    if ((conn != NULL) && subscriber_connect(conn))
+    {
+        telemetry_request request = {
+            .sources = sources
+        };
+        return send_request(*conn, request);
+    }
+    return false;
 }
 
 #endif

@@ -15,7 +15,7 @@ CSP_DEFINE_TASK(aggregator)
 
 void aggregator_submit(telemetry_source source, uint16_t data)
 {
-    telemetry_submit((telemetry_packet){
+    telemetry_publish((telemetry_packet){
         .data = data,
         .timestamp = csp_get_ms(),
         .source = source
