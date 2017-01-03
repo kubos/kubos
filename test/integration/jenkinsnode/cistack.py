@@ -30,6 +30,7 @@ import serial
 import spidev
 import argparse
 import datetime
+import magic 
 
 def allDone():
     '''Free all the pins and exit the script.'''
@@ -284,10 +285,18 @@ def flashBinaryPyBoard(binfile, binpath):
     sleep(0.5)
     return 1
 
+def determineFileType(binfile):
+    '''Returns file type and useful info about the binary to be flashed.'''
+    d=magic.from_file("/home/kubos/kubos-rt-example")
+    d=re.sub(', ',',',d)
+    e=d.split(',')
+    return e
 
 def __pyBoardBinarySanityCheck(binfile):
-    '''Ensure that the file ends in .bin, and not .elf. '''
-    if (re.search("\.bin$", binfile)):
+    '''Ensure that the file is not an .elf. '''
+    e=determineFileType(binfile)
+    t='data'
+    if (re.search('data$', e[0])):
         return 1
     else:
         return 0
@@ -298,10 +307,15 @@ def __discoBoardBinarySanityCheck(binfile):
 not a .bin file. It seems that .elf files know where to go, because of the \
 debugging information; bin files lack that information. One problem is that \
 .elf files usually don't have file name suffixes, meaning it cannot be regexed.'''
-    if (re.search("\.bin$", binfile)):
+# ELF 32-bit LSB executable, ARM,
+    e=determineFileType(binfile)
+    try:
+        if (re.search("^ELF",e[0]) and (e[1]=="ARM")):
+            return 1
+    except:
         return 0
-    else:
-        return 1
+
+    return 0
 
 # IMPORTANT NOTE: openocd must be version 0.9 or later.
 def flashopenocd(binfile, board, searchpath, binpath):
@@ -375,7 +389,12 @@ key: lsusb identifier
 2: the configuration file for use by the flasher, if any
 3: the command or argument specific to the board (mostly for openocd right now)
 '''
-    patterns={'0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
+
+# '0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
+# But note that the STLINK-V2 could be connected to many different boards. FIXME
+    patterns={
+              '0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407g-disc1.cfg', 'stm32f4_flash'],
+              '0483:374b':['STMicro ST-LINK/V2 ',True, 'stm32f407g-disc1.cfg', 'stm32f4_flash'],
               '0483:df11':['STM32F405 PyBoard', True, 'USE dfu-util!', '***'], 
               '0451:2046':['TI MSP430F5529 Launchpad',True, 'USE mspdebug!', '***'],
               '0451:f432':['TI MSP430G2553 Launchpad',False, 'NOT SUPPORTED', '/usr/bin/sleep 1']
