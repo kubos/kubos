@@ -37,6 +37,9 @@ static uint8_t num_subs = 0;
 /* Queue for incoming packets from publishers */
 static csp_queue_handle_t packet_queue = NULL;
 
+static csp_thread_handle_t telem_sub_handle;
+static csp_thread_handle_t telem_rx_handle;
+
 void telemetry_init()
 {
     csp_buffer_init(10, 256);
@@ -47,7 +50,8 @@ void telemetry_init()
     /* Start router task with 500 word stack, OS task priority 1 */
     csp_route_start_task(500, 1);
 
-    TELEMETRY_THREADS;
+    csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 0, &telem_sub_handle);
+    csp_thread_create(telemetry_rx_task, "TELEM_RX", 1000, NULL, 0, &telem_rx_handle);
 }
 
 CSP_DEFINE_TASK(telemetry_get_subs)
@@ -62,15 +66,13 @@ CSP_DEFINE_TASK(telemetry_get_subs)
             pubsub_conn conn;
             if (server_accept(&socket, &conn))
             {
-                printf("got subscriber\r\n");
                 telemetry_request request;
                 publisher_read(conn, (void*)&request, sizeof(telemetry_request), TELEMETRY_CSP_PORT);
-                printf("added subscriber\r\n");
                 conn.sources = request.sources;
                 telemetry_subs[num_subs++] = conn;
             }
         }
-    } else { printf ("telemetry_get_subs serversetup failed\r\n"); }
+    }
     csp_thread_exit();
 }
 
@@ -91,20 +93,18 @@ static void telemetry_send(telemetry_packet packet)
 {
     if(packet.source.data_type == TELEMETRY_TYPE_INT)
     {
-        printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
+        // printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
     }
     if(packet.source.data_type == TELEMETRY_TYPE_FLOAT)
     {
-        printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
+        // printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
     }
 
     uint8_t i = 0;
-    printf("num subs %d\r\n", num_subs);
     for (i = 0; i < num_subs; i++)
     {
         // Currently if the sources flag is set to 0
         // the subscriber will get all data
-        printf("send packet %d\r\n", i);
         if ((telemetry_subs[i].sources == 0) || (packet.source.source_id & telemetry_subs[i].sources))
         {
             // send_packet(telemetry_subs[i], packet);
@@ -129,7 +129,6 @@ bool telemetry_read(pubsub_conn conn, telemetry_packet * packet)
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
-            printf("telemetry_read %d\r\n", tries);
             if (subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_CSP_PORT))
                 return true;
         }
@@ -144,7 +143,6 @@ bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
         telemetry_request request = {
             .sources = sources
         };
-        // return send_request(*conn, request);
         return send_csp(*conn, (void*)&request, sizeof(telemetry_request));
     }
     return false;
