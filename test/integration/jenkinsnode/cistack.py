@@ -60,15 +60,18 @@ def allDone():
 
 
 class Pin(object):
-    def __init__(self):
-        self.name = ""
-        self.number = ""
-        self.direction = ""
-        self.onval = ""
-        self.offval = ""
-        self.pullup = None
-        self.pulldown = None
-        self.mux = None
+    def __init__(self, name = "", number = "", \
+        direction = "GPIO.OUT", onval = True, offval = False, \
+        pullup = None, pulldown = None, mux = None):
+        
+        self.name = name
+        self.number = number
+        self.direction = direction
+        self.onval = onval
+        self.offval = offval
+        self.pullup = pullup
+        self.pulldown = pulldown
+        self.mux = mux
 
     def setup(self):
         '''Set up one GPIO pin per the pin dict values. '''
@@ -87,6 +90,8 @@ class Pin(object):
             print("Key %s, pin %s is set to %s " % 
             (self.name, str(self.number), str(self.direction)))
             sleep(0.5)
+            l
+
             return True
         except:
             sys.exit("Unable to set the pin's function! Exiting.")
@@ -614,25 +619,6 @@ def readOpts():
     if (checkRoot(isrootrequired)):
         pass
 
-    try:
-        print(str(sys.argv))
-        print(str( len(sys.argv)))
-
-    except:
-        sys.exit("couldn't execute tests. Failing out.")
-
-    try:
-        if (sys.argv[3] is True):
-            print("At least three arguments in the invocation: continuing")
-
-    except AttributeError:
-        print("WARNING: you must provide a path/filename and target board.")
-        sys.exit("User did not provide required arguments.")
-
-    except IndexError:
-        print("%s inadequate number of program arguments." % errstr)
-        sys.exit("User did not provide required arguments.")
-
     today = datetime.date.today()
 
     parser = argparse.ArgumentParser(description = '''cistack.py; a python library
@@ -663,21 +649,23 @@ msp430f5529-gcc
     parser.add_argument("-f", "--file", action = 'store', \
         dest = "inputbinary", default="kubos-rt-example", \
         help = "provide a filename for the compiled binary file to \
-upload", metavar = "FILE")
+upload", metavar = "FILE", required=True)
 
     parser.add_argument("-v", "--verbose", \
         action = 'store_true', dest="verbose",
-        help = "provide more verbose output to STDOUT", default = 0)
+        help = "provide more verbose output to STDOUT", default = 0, \
+        required=False)
 
 # TODO add in support for this later.
-#    parser.add_argument("-p", "--path", action = 'store', \
-#        dest = "binfilepath", default = "/var/lib/ansible/",
-#        help = "provide a path to the binary you want to flash", metavar = "PATH")
+    parser.add_argument("-p", "--path", action = 'store', \
+        dest = "binfilepath", default = "/var/lib/ansible/",
+        help = "provide a path to the binary you want to flash", \
+        metavar = "PATH", required=False)
 
     parser.add_argument("-b", "--board", action = 'store', \
         dest = "board", default = "stm32f407-disco-gcc",
         help = "the target board (and architecture) supported by the \
-Kubos SDK", metavar = "TARGET")
+Kubos SDK", metavar = "TARGET", required=True)
    
     arguments = parser.parse_args()
     args = vars(arguments)
