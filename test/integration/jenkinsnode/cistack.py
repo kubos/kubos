@@ -60,8 +60,9 @@ def allDone():
 
 
 class Pin(object):
+
     def __init__(self, name = "", number = "", \
-        direction = "GPIO.OUT", onval = True, offval = False, \
+        direction = GPIO.OUT, onval = True, offval = False, \
         pullup = None, pulldown = None, mux = None):
         
         self.name = name
@@ -78,46 +79,51 @@ class Pin(object):
         
         if (self.number is False):
             return True
-
-        try:
-            func = GPIO.gpio_function(self.number)
-            print("pin %s set to %s" % (str(self.number), str(func)))
-        except:
+        if (self.number is None):
+            return False
+        
+        func = GPIO.gpio_function(self.number)
+        print("pin %s set to %s" % (str(self.number), str(func)))
+        if (func == GPIO.UNKNOWN):
             sys.exit("Unable to determine the function of the pin!. Exiting.") 
 
-        try:
-            GPIO.setup(self.number, self.direction)
-            print("Key %s, pin %s is set to %s " % 
-            (self.name, str(self.number), str(self.direction)))
-            sleep(0.5)
-            l
-
-            return True
-        except:
-            sys.exit("Unable to set the pin's function! Exiting.")
-
-        return False
-        
+        GPIO.setup(self.number, self.direction)
+        print("Key %s, pin %s is set to %s " % 
+        (self.name, str(self.number), str(self.direction)))
+        sleep(0.5)
+        return True
 
     def on(self):
         '''Generic "assert the GPIO pin" function.'''
+
         if (self.number is None):
             return False
         try:
             print("Asserting pin %s" % str(self.number))
             GPIO.output(self.number, self.onval)
         
-        except:
+        except RuntimeError:
             print("%s unable to assert pin %s" % str(errstr, self.number))
             return False
+
+        except:
+            return False
+
         return True
+
 
     def off(self):
         '''Generic "turn off the GPIO pin" function.'''
+    
         if (self.number is None):
             return False
         try:
             GPIO.output(self.number, self.offval)
+
+        except RuntimeError:
+            print("%s unable to change pin %s" % str(errstr, self.number))
+            return False
+
         except:
             return False
 
