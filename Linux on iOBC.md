@@ -15,7 +15,7 @@ needed for the ISIS customers' missions.
 
 ###ISIS Bootloader
 
-The ISIS bootloader lives in the very beginning of the NOR flash.  It should come pre-loaded on the board and should not need to be modified.  It 
+The ISIS bootloader lives in the very beginning of the NOR flash. It should come pre-loaded on the board and should not need to be modified. It 
 initializes the memory hardware and then copies U-Boot into the SDRAM and starts its execution.
 
 ###U-Boot
@@ -24,14 +24,14 @@ initializes the memory hardware and then copies U-Boot into the SDRAM and starts
 
 [Site Page](http://www.denx.de/wiki/U-Boot)
 
-U-Boot, at the most basic level, is responsible for loading the kernel from the SD card into the SDRAM.  However, it also provides a basic OS and CLI
+U-Boot, at the most basic level, is responsible for loading the kernel from the SD card into the SDRAM. However, it also provides a basic OS and CLI
 which can be used to configure and debug the kernel before it's loaded.
 
 ###Kernel
 
 ####Linux
 
-We're using Linux 4.4.  This is the current long-term support version (LTS) and will be supported until early 2018.
+We're using Linux 4.4. This is the current long-term support version (LTS) and will be supported until early 2018.
 
 ####uClibc
 
