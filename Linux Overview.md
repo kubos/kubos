@@ -23,7 +23,7 @@ Boot-up with storage flow:
 
 ### Bootloader #0
 
-Each OBC should have an initial bootloader preloaded in ROM.  It's job is to load the next bootloader from wherever it's living into SDRAM to execute.
+Each OBC should have an initial bootloader preloaded in ROM.  Its job is to load the next bootloader from wherever it's living into SDRAM to execute.
 We shouldn't have to interact directly with this much.
 
 ### Bootloader #1
