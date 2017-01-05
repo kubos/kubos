@@ -6,10 +6,10 @@ This is intended as a higher-level overview of the Linux OS configuration, insta
 
 The high level components of every system will be:
 - Low-level bootloader/s
-- U-Boot (mid-level bootloader.  Loads linux)
+- U-Boot (mid-level bootloader. Loads linux)
 - Linux
 
-Ideally, all the files will be delivered to the customer as a pre-baked OBC.  They'll just need to upload their user app files onto the board.
+Ideally, all the files will be delivered to the customer as a pre-baked OBC. They'll just need to upload their user app files onto the board.
 
 Boot-up UML diagram:
 
@@ -23,16 +23,16 @@ Boot-up with storage flow:
 
 ### Bootloader #0
 
-Each OBC should have an initial bootloader preloaded in ROM.  Its job is to load the next bootloader from wherever it's living into SDRAM to execute.
+Each OBC should have an initial bootloader preloaded in ROM. Its job is to load the next bootloader from wherever it's living into SDRAM to execute.
 We shouldn't have to interact directly with this much.
 
 ### Bootloader #1
 
-This will be **highly non-portable**.  The customer will either need to provide one, or we'll need to create a custom bootloader for each board that
-we come across.  The main purpose of this bootloader is to load U-Boot from wherever it is located in storage (NOR|NAND|DataFlash|SD @ address) into
+This will be **highly non-portable**. The customer will either need to provide one, or we'll need to create a custom bootloader for each board that
+we come across. The main purpose of this bootloader is to load U-Boot from wherever it is located in storage (NOR|NAND|DataFlash|SD @ address) into
 some location in SDRAM (probably by default, the very beginning of SDRAM)
 
-Final Distribution:  Custom bootloader.bin to be loaded into whatever persistent storage is available.
+Final Distribution: Custom bootloader.bin to be loaded into whatever persistent storage is available.
 
 ### U-Boot
 
@@ -40,7 +40,7 @@ Final Distribution:  Custom bootloader.bin to be loaded into whatever persistent
 
 [Site Page](http://www.denx.de/wiki/U-Boot)
 
-U-Boot, at the most basic level, is responsible for loading the kernel (zImage) from persistent storage into the SDRAM.  However, it also provides a 
+U-Boot, at the most basic level, is responsible for loading the kernel (zImage) from persistent storage into the SDRAM. However, it also provides a 
 basic OS and CLI which can be used to configure and debug the kernel before it's loaded.
 
 Final distribution: uboot.bin
