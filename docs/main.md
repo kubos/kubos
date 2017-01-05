@@ -30,9 +30,9 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
  
 ### KubOS Linux
  
- - [KubOS Linux Overview](docs/Linux%20Overview.md)
+ - [KubOS Linux Overview](docs/Linux_Overview.md)
  
- - [KubOS Linux on iOBC](docs/Linux%20on%20iOBC.md)
+ - [KubOS Linux on iOBC](docs/Linux_on_iOBC.md)
 
 
 ## Top Level APIs
