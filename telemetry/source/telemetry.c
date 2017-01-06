@@ -20,6 +20,7 @@
 #include <csp/arch/csp_queue.h>
 #include <stdio.h>
 
+
 /**
  * Iterates though all open telemetry connections and
  * publishes the packet IF the connection is interested/subscribed
@@ -29,7 +30,6 @@ static void telemetry_send(telemetry_packet packet);
 
 /* Static array for holding persistent connections to telemetry subscribers */
 static pubsub_conn telemetry_subs[TELEMETRY_NUM_SUBSCRIBERS];
-
 
 /* Current number of active telemetry subscribers */
 static uint8_t num_subs = 0;
@@ -50,15 +50,26 @@ void telemetry_init()
     /* Start router task with 500 word stack, OS task priority 1 */
     csp_route_start_task(500, 1);
 
+    init_telemetry_queue();
+
     csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 0, &telem_sub_handle);
     csp_thread_create(telemetry_rx_task, "TELEM_RX", 1000, NULL, 0, &telem_rx_handle);
+}
+
+void init_telemetry_queue()
+{
+    packet_queue = csp_queue_create(NUM_MESSAGE_QUEUE, sizeof(telemetry_packet));
+}
+
+void free_telemetry_queue()
+{
+    csp_queue_remove(packet_queue);
 }
 
 CSP_DEFINE_TASK(telemetry_get_subs)
 {
     /* Private csp_socket used by the telemetry server */
     csp_socket_t * socket = NULL;
-    // socket = NULL;
     if (server_setup(&socket, TELEMETRY_CSP_PORT, TELEMETRY_NUM_SUBSCRIBERS))
     {
         while (num_subs < TELEMETRY_NUM_SUBSCRIBERS)
@@ -79,7 +90,6 @@ CSP_DEFINE_TASK(telemetry_get_subs)
 CSP_DEFINE_TASK(telemetry_rx_task)
 {
     telemetry_packet packet;
-    packet_queue = csp_queue_create(NUM_MESSAGE_QUEUE, sizeof(telemetry_packet));
     while(1)
     {
         if (csp_queue_dequeue(packet_queue, &packet, CSP_MAX_DELAY))

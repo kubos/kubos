@@ -17,6 +17,7 @@
 #define TELEMETRY_H
 
 #include "ipc/pubsub.h"
+#include "telemetry/config.h"
 #include "telemetry/types.h"
 #include <csp/arch/csp_thread.h>
 #include <stdbool.h>

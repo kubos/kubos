@@ -34,7 +34,6 @@ static void test_telemetry_subscribe_conn_null_handle(void)
 static void test_telemetry_subscribe(void)
 {
     pubsub_conn conn;
-    telemetry_init();
     TEST_ASSERT_EQUAL_INT(telemetry_subscribe(&conn, 0), true);
 }
 
@@ -51,13 +50,6 @@ static void test_telemetry_read_null_packet(void)
 {
     pubsub_conn conn;
     telemetry_packet packet;
-    telemetry_init();
-
-    telemetry_subscribe(&conn, 0);
-    
-    csp_sleep_ms(100);
-
-    telemetry_publish(packet);
     TEST_ASSERT_EQUAL_INT(telemetry_read(conn, NULL), false);
 }
 
@@ -65,13 +57,8 @@ static void test_telemetry_read(void)
 {
     pubsub_conn conn;
     telemetry_packet packet;
-    telemetry_init();
-
-    telemetry_subscribe(&conn, 0);
-    
-    csp_sleep_ms(100);
-
-    telemetry_publish(packet);
+    // set to non-null addr
+    conn.conn_handle = 0xFFF;
     TEST_ASSERT_EQUAL_INT(telemetry_read(conn, &packet), true);
 }
 
@@ -84,9 +71,9 @@ static void test_telemetry_publish_no_setup(void)
 static void test_telemetry_publish(void)
 {
     telemetry_packet packet;
-    // do pre-publish setup here
-    telemetry_init();
+    init_telemetry_queue();
     TEST_ASSERT_EQUAL_INT(telemetry_publish(packet), true);
+    free_telemetry_queue();
 }
 
 
