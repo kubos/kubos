@@ -1,0 +1,15 @@
+{
+    "license":"Apache-2.0",
+    "name":"cmocka",
+    "repository":{
+        "url":"git://github.com/kubostech/cmocka",
+        "type":"git"
+    },
+    "version":"1.1.0",
+    "homepage":"https://github.com/kubostech/cmocka",
+    "targetDependencies": {
+        "freertos": {
+          "freertos": "kubostech/freertos#~9.0.3"
+        }
+    }
+}
