@@ -55,10 +55,8 @@ bool server_setup(csp_socket_t ** socket, uint8_t port, uint8_t num_connections)
 bool server_accept(csp_socket_t ** socket, pubsub_conn * conn)
 {
     csp_conn_t * csp_conn = NULL;
-    // printf("test server_accept\n");
     if ((socket != NULL) && (*socket != NULL) && (conn != NULL))
     {
-        // printf("try csp_accept\n");
         if ((csp_conn = csp_accept(*socket, 1000)) != NULL)
         {
             conn->conn_handle = csp_conn;

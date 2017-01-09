@@ -23,43 +23,6 @@
 #define TEST_ADDRESS 11
 #define TEST_PORT 12
 
-static void csp_test_setup(void)
-{
-    csp_buffer_init(10, 300);
-
-    /* Init CSP with address MY_ADDRESS */
-    csp_init(TEST_ADDRESS);
-
-    /* Start router task with 500 word stack, OS task priority 1 */
-    csp_route_start_task(500, 1);
-}
-
-CSP_DEFINE_TASK(subscriber_task)
-{
-    pubsub_conn conn;
-    char buffer;
-    if (subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT))
-    {
-        send_csp(conn, (void*)&buffer, sizeof(buffer));
-    }
-    csp_thread_exit();
-}
-
-CSP_DEFINE_TASK(publisher_task)
-{
-    pubsub_conn conn;
-    csp_socket_t * socket = NULL;
-    char buffer;
-
-    if (server_setup(&socket, TEST_PORT, 1))
-    {
-        if (server_accept(&socket, &conn))
-        {
-            send_csp(conn, (void*)&buffer, sizeof(buffer));
-        }
-    }
-    csp_thread_exit();
-}
 
 static void test_server_setup_null_socket(void)
 {
@@ -69,8 +32,10 @@ static void test_server_setup_null_socket(void)
 static void test_server_setup(void)
 {
     csp_socket_t * socket = NULL;
-    csp_test_setup();
+    
     TEST_ASSERT_EQUAL_INT(server_setup(&socket, TEST_PORT, 1), true);
+
+    csp_buffer_free(socket);
 }
 
 static void test_server_accept_null_socket(void)
@@ -82,22 +47,24 @@ static void test_server_accept_null_socket(void)
 static void test_server_accept_null_conn(void)
 {
     csp_socket_t * socket = NULL;
+    
     server_setup(&socket, TEST_PORT, 1);
+
     TEST_ASSERT_EQUAL_INT(server_accept(&socket, NULL), false);
+
+    csp_buffer_free(socket);
 }
 
 static void test_server_accept(void)
 {
     pubsub_conn conn;
     csp_socket_t * socket = NULL;
-    csp_test_setup();
     server_setup(&socket, TEST_PORT, 1);
 
-    csp_thread_handle_t subscriber_handle;
-    csp_thread_create(subscriber_task, "SUBSCRIBE", 1000, NULL, 0, &subscriber_handle);
-
-
     TEST_ASSERT_EQUAL_INT(server_accept(&socket, &conn), true);
+
+    csp_buffer_free(conn.conn_handle);
+    csp_buffer_free(socket);
 }
 
 static void test_subscriber_connect_null_conn(void)
@@ -108,8 +75,11 @@ static void test_subscriber_connect_null_conn(void)
 static void test_subscriber_connect(void)
 {
     pubsub_conn conn;
-    // setup conn here
+
     TEST_ASSERT_EQUAL_INT(subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT), true);
+    TEST_ASSERT_EQUAL_INT(true, (conn.conn_handle != NULL));
+
+    csp_buffer_free(conn.conn_handle);
 }
 
 static void test_send_null_data(void)
@@ -136,15 +106,15 @@ static void test_send(void)
 {
     pubsub_conn conn;
     int data = 10;
-    // setup conn here
-
-    csp_test_setup();
     csp_socket_t * socket = NULL;
+    
     server_setup(&socket, TEST_PORT, 1);
+    server_accept(&socket, &conn);
 
-    subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT);
+    TEST_ASSERT_EQUAL_INT(true, send_csp(conn, (void*)&data, sizeof(data)));
 
-    TEST_ASSERT_EQUAL_INT(send_csp(conn, (void*)&data, sizeof(data)), true);
+    csp_buffer_free(conn.conn_handle);
+    csp_buffer_free(socket);
 }
 
 static void test_publisher_read_null_conn(void)
@@ -158,25 +128,30 @@ static void test_publisher_read_null_conn(void)
 static void test_publisher_read_null_buffer(void)
 {
     pubsub_conn conn;
-    conn.conn_handle = (csp_conn_t*)0xFFFFFF;
+    csp_socket_t * socket = NULL;
+    
+    server_setup(&socket, TEST_PORT, 1);
+    server_accept(&socket, &conn);
+
     TEST_ASSERT_EQUAL_INT(publisher_read(conn, NULL, 1, TEST_PORT), false);
+
+    csp_buffer_free(conn.conn_handle);
+    csp_buffer_free(socket);
 }
 
 static void test_publisher_read(void)
 {
     pubsub_conn conn;
     char buffer;
-
-    csp_test_setup();
     csp_socket_t * socket = NULL;
+    
     server_setup(&socket, TEST_PORT, 1);
-
-    csp_thread_handle_t subscriber_handle;
-    csp_thread_create(subscriber_task, "SUBSCRIBE", 1000, NULL, 0, &subscriber_handle);
-
     server_accept(&socket, &conn);
 
-    TEST_ASSERT_EQUAL_INT(publisher_read(conn, &buffer, 1, TEST_PORT), true);
+    TEST_ASSERT_EQUAL_INT(true, publisher_read(conn, &buffer, 1, TEST_PORT));
+
+    csp_buffer_free(conn.conn_handle);
+    csp_buffer_free(socket);
 }
 
 static void test_subscriber_read_null_conn(void)
@@ -190,8 +165,12 @@ static void test_subscriber_read_null_conn(void)
 static void test_subscriber_read_null_buffer(void)
 {
     pubsub_conn conn;
-    conn.conn_handle = (csp_conn_t*)0xFFFFFF;
+
+    subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT);
+    
     TEST_ASSERT_EQUAL_INT(subscriber_read(conn, NULL, 1, TEST_PORT), false);
+
+    csp_buffer_free(conn.conn_handle);
 }
 
 static void test_subscriber_read(void)
@@ -199,15 +178,11 @@ static void test_subscriber_read(void)
     pubsub_conn conn;
     char buffer;
 
-    csp_test_setup();
-
-    csp_thread_handle_t publisher_handle;
-    csp_thread_create(publisher_task, "PUBLISH", 1000, NULL, 0, &publisher_handle);
-
     subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT);
-    send_csp(conn, (void*)&buffer, sizeof(buffer));
     
     TEST_ASSERT_EQUAL_INT(subscriber_read(conn, &buffer, 1, TEST_PORT), true);
+
+    csp_buffer_free(conn.conn_handle);
 }
 
 K_TEST_MAIN()
