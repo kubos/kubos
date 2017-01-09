@@ -1,6 +1,5 @@
 /*
- * KubOS HAL
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +14,23 @@
  * limitations under the License.
  */
 
-#include <unity/unity.h>
-#include <unity/k_test.h>
+#include <cmocka/cmocka.h>
 #include "telemetry/telemetry.h"
 
 static void test_telemetry_subscribe_null_conn(void)
 {
-    TEST_ASSERT_EQUAL_INT(telemetry_subscribe(NULL, 0), false);
-}
-
-static void test_telemetry_subscribe_conn_null_handle(void)
-{
-    pubsub_conn conn;
-    conn.conn_handle = NULL;
-    TEST_ASSERT_EQUAL_INT(telemetry_subscribe(&conn, 0), false);
+    assert_false(telemetry_subscribe(NULL, 0));
 }
 
 static void test_telemetry_subscribe(void)
 {
     pubsub_conn conn;
-    TEST_ASSERT_EQUAL_INT(telemetry_subscribe(&conn, 0), true);
+
+    expect_value(__wrap_subscriber_connect, conn, &conn);
+    will_return(__wrap_subscriber_connect, "");
+    will_return(__wrap_subscriber_connect, true);
+
+    assert_true(telemetry_subscribe(&conn, 0));
 }
 
 static void test_telemetry_read_conn_null_handle(void)
@@ -43,60 +39,61 @@ static void test_telemetry_read_conn_null_handle(void)
     conn.conn_handle = NULL;
     telemetry_packet packet;
 
-    TEST_ASSERT_EQUAL_INT(telemetry_read(conn, &packet), false);
+    expect_value_count(__wrap_subscriber_read, conn.conn_handle, NULL, TELEMETRY_SUBSCRIBER_READ_ATTEMPTS);
+    expect_value_count(__wrap_subscriber_read, buffer, &packet, TELEMETRY_SUBSCRIBER_READ_ATTEMPTS);
+
+    will_return_count(__wrap_subscriber_read, false, TELEMETRY_SUBSCRIBER_READ_ATTEMPTS);
+
+    assert_false(telemetry_read(conn, &packet));
 }
 
 static void test_telemetry_read_null_packet(void)
 {
     pubsub_conn conn;
     telemetry_packet packet;
-    TEST_ASSERT_EQUAL_INT(telemetry_read(conn, NULL), false);
+
+    assert_false(telemetry_read(conn, NULL));
 }
 
 static void test_telemetry_read(void)
 {
     pubsub_conn conn;
     telemetry_packet packet;
-    // set to non-null addr
-    conn.conn_handle = 0xFFF;
-    TEST_ASSERT_EQUAL_INT(telemetry_read(conn, &packet), true);
+
+    expect_value(__wrap_subscriber_connect, conn, &conn);
+    will_return(__wrap_subscriber_connect, "");
+    will_return(__wrap_subscriber_connect, true);
+    
+    telemetry_subscribe(&conn, 0);
+
+    expect_value(__wrap_subscriber_read, conn.conn_handle, conn.conn_handle);
+    expect_value(__wrap_subscriber_read, buffer, &packet);
+    will_return(__wrap_subscriber_read, true);
+
+    assert_true(telemetry_read(conn, &packet));
 }
 
 static void test_telemetry_publish_no_setup(void)
 {
     telemetry_packet packet;
-    TEST_ASSERT_EQUAL_INT(telemetry_publish(packet), false);
+    assert_false(telemetry_publish(packet));
 }
 
-static void test_telemetry_publish(void)
-{
-    telemetry_packet packet;
-    init_telemetry_queue();
-    TEST_ASSERT_EQUAL_INT(telemetry_publish(packet), true);
-    free_telemetry_queue();
-}
-
-
-K_TEST_MAIN()
-{
-    UNITY_BEGIN();
-
-    RUN_TEST(test_telemetry_publish_no_setup);
-    
-    RUN_TEST(test_telemetry_subscribe_null_conn);
-    RUN_TEST(test_telemetry_subscribe_conn_null_handle);
-    RUN_TEST(test_telemetry_subscribe);
-
-    RUN_TEST(test_telemetry_read_conn_null_handle);
-    RUN_TEST(test_telemetry_read_null_packet);
-    RUN_TEST(test_telemetry_read);
-
-    RUN_TEST(test_telemetry_publish);
-
-    return UNITY_END();
-}
+/* Removed the telemetry_publish success unit test 
+   because it literally just puts something into a queue.
+   This case is probably better exercised in an integration test.
+*/
 
 int main(void)
 {
-    K_TEST_RUN_MAIN();
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_telemetry_subscribe_null_conn),
+        cmocka_unit_test(test_telemetry_subscribe),
+        cmocka_unit_test(test_telemetry_read_conn_null_handle),
+        cmocka_unit_test(test_telemetry_read_null_packet),
+        cmocka_unit_test(test_telemetry_read),
+        cmocka_unit_test(test_telemetry_publish_no_setup),
+    };
+
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
