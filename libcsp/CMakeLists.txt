@@ -50,6 +50,16 @@ if (YOTTA_CFG_CSP_RDP)
     set (CSP_USE_RDP ON)
 endif()
 
+#MESSAGE( STATUS "CSP CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS} )
+#get_cmake_property(_variableNames VARIABLES)
+#foreach (_variableName ${_variableNames})
+#    message(STATUS "CSP ${_variableName}=${${_variableName}}")
+#endforeach()
+
+
+message(STATUS "CSP TESTING ENABLED $ENV{KUBOS_TESTING_ENABLED}")
+
+
 add_library (csp STATIC
     src/csp_bridge.c
     src/csp_buffer.c
@@ -111,9 +121,9 @@ if (TARGET_LIKE_MSP430_GCC)
 endif()
 
 file (GLOB_RECURSE ARCH_FILES src/arch/${CSP_ARCH}/*.c)
-target_sources (csp PUBLIC ${ARCH_FILES})
+target_sources (csp PRIVATE ${ARCH_FILES})
 
-target_compile_options(csp PUBLIC -std=gnu99)
+target_compile_options(csp PRIVATE -std=gnu99)
 
 if (LOGLEVEL STREQUAL "debug")
     set (CSP_LOG_LEVEL_DEBUG ON)
