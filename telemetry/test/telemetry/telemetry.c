@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <cmocka/cmocka.h>
+#include <cmocka.h>
 #include "telemetry/telemetry.h"
 
 static void test_telemetry_subscribe_null_conn(void)

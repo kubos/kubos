@@ -16,7 +16,7 @@
  */
 
 #include <csp/arch/csp_thread.h>
-#include <cmocka/cmocka.h>
+#include <cmocka.h>
 #include "ipc/pubsub.h"
 
 #define TEST_ADDRESS 11

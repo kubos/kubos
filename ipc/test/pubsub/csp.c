@@ -1,4 +1,4 @@
-#include <cmocka/cmocka.h>
+#include <cmocka.h>
 #include <csp/csp.h>
 
 csp_packet_t * __wrap_csp_read(csp_conn_t * conn, uint32_t timeout)

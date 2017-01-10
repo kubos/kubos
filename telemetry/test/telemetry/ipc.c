@@ -1,5 +1,5 @@
 #include <ipc/pubsub.h>
-#include <cmocka/cmocka.h>
+#include <cmocka.h>
 
 bool __wrap_subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
 {
