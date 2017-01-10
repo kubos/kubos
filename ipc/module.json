@@ -11,6 +11,6 @@
       }
     },
     "testDependencies": {
-        "unity": "kubostech/unity"
+        "cmocka": "kubostech/cmocka"
     }
 }

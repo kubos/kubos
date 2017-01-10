@@ -21,11 +21,8 @@ bool __wrap_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port
 
 bool __wrap_send_csp(pubsub_conn conn, void * data, uint16_t length)
 {
-    csp_packet_t * csp_packet = NULL;
-    csp_conn_t * csp_conn = conn.conn_handle;
-    if ((data != NULL) && (length > 0) && (csp_conn != NULL))
-    {
-        return true;
-    }
-    return false;
+    check_expected(conn.conn_handle);
+    check_expected(data);
+    
+    return mock_type(bool);
 }

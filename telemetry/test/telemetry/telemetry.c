@@ -26,6 +26,10 @@ static void test_telemetry_subscribe(void)
 {
     pubsub_conn conn;
 
+    expect_not_value(__wrap_send_csp, conn.conn_handle, NULL);
+    expect_not_value(__wrap_send_csp, data, NULL);
+    will_return(__wrap_send_csp, true);
+
     expect_value(__wrap_subscriber_connect, conn, &conn);
     will_return(__wrap_subscriber_connect, "");
     will_return(__wrap_subscriber_connect, true);
@@ -63,6 +67,10 @@ static void test_telemetry_read(void)
     expect_value(__wrap_subscriber_connect, conn, &conn);
     will_return(__wrap_subscriber_connect, "");
     will_return(__wrap_subscriber_connect, true);
+
+    expect_not_value(__wrap_send_csp, conn.conn_handle, NULL);
+    expect_not_value(__wrap_send_csp, data, NULL);
+    will_return(__wrap_send_csp, true);
     
     telemetry_subscribe(&conn, 0);
 

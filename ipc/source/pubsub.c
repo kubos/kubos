@@ -17,16 +17,6 @@
 
 #include "ipc/pubsub.h"
 
-/**
- * Wrapper function for sending data via a csp connection
- * @param conn pubsub_conn containing a valid csp_conn_t *
- * @param data void pointer to data to be sent
- * @param length length of the data to be sent
- * @return bool true if successful, otherwise false
- */
-bool send_csp(pubsub_conn conn, void * data, uint16_t length);
-
-
 bool server_setup(csp_socket_t ** socket, uint8_t port, uint8_t num_connections)
 {
     if (socket == NULL)

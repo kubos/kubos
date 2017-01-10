@@ -78,5 +78,4 @@ bool subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t p
  */
 bool send_csp(pubsub_conn conn, void * data, uint16_t length);
 
-
 #endif
