@@ -15,11 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#define HAVE_SIGNAL_H 1
-#define HAVE_MALLOC_H 1
-#define HAVE_STRINGS_H 1
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -63,8 +58,8 @@
 # include "cmocka_platform.h"
 #endif /* CMOCKA_PLATFORM_INCLUDE */
 
-#include <cmocka/cmocka.h>
-#include <cmocka_private.h>
+#include "cmocka.h"
+#include "cmocka_private.h"
 
 /* Size of guard bytes around dynamically allocated blocks. */
 #define MALLOC_GUARD_SIZE 16
