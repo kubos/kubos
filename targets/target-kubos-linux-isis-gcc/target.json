@@ -1,0 +1,33 @@
+{
+  "name": "kubos-linux-isis-gcc",
+  "version": "0.1.1",
+  "description": "base KubOS Linux build target for the isis arm-linux toolchain",
+  "inherits": {
+    "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
+  },
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "kubos-linux",
+    "linux",
+    "isis",
+    "arm",
+    "gcc"
+  ],
+  "similarTo": [
+    "linux",
+    "isis",
+    "arm-linux-gcc",
+    "arm"
+  ],
+  "config": {
+    "arch": {
+      "arm": {}
+    }
+  },
+  "toolchain": "CMake/toolchain.cmake"
+}
