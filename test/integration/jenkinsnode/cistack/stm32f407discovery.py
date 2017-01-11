@@ -41,7 +41,6 @@ class STM32F407Discovery(Target):
 
 # TODO set all of these via Ansible, and get these vars from os.environ
         distpath = os.environ['KUBOS_LIB_PATH']
-
         configfiles = "../../flash/openocd"
         searchpath = str("%s/%s" % (distpath, configfiles))
         sp1 = os.environ['LD_LIBRARY_PATH']

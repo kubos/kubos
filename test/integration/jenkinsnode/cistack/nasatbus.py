@@ -5,7 +5,7 @@ import re
 import subprocess
 from time import sleep
 import RPi.GPIO as GPIO
-from utils import *
+from utils import findBin, whichUSBboard, getBoardConfigs
 from target import Target
 from pin import Pin
 
@@ -34,7 +34,7 @@ class NAsatbus(Target):
 
 
 # IMPORTANT NOTE: openocd must be version 0.9 or later.
-    def flash(self, binfile, binpath):
+    def flash(self, binobj):
         """use an external shell to push the ELF file using openocd. It seems 
         to be necessary to pre-declare the LIB PATH for some commands, and 
         if the path variable is not available as declared in /etc/profile, it
@@ -43,16 +43,19 @@ class NAsatbus(Target):
         and cause ERRORS. Workaround: use the ansible -shell- command and 
         declare the library path before executing a bash -c command"""
 
+        if not self.sanitycheck(binobj):
+            sys.exit("Binary file didn't pass a sanity check. Exiting.")
+            return False
+
 # TODO set all of these via Ansible, and get these vars from os.environ
-        distpath = "/usr/local/lib/python2.7/dist-packages/kubos"
-        searchpath = str("%s/flash/openocd" % distpath)
-        KUBOS_LIB_PATH = str("%s/lib/linux/" % distpath)
+        distpath = os.environ['KUBOS_LIB_PATH']
+        configfiles = "../../flash/openocd"
+        searchpath = str("%s/%s" % (distpath, configfiles))
         sp1 = os.environ['LD_LIBRARY_PATH']
-        sp1 = str(sp1 + ":" + KUBOS_LIB_PATH)
+        sp1 = str(sp1 + ":" + distpath)
         sp1 = str(sp1 + ":" + searchpath)
 
         openocdloc = findBin('openocd')
-
         unamestr = subprocess.check_output('uname')
         unamestr = re.sub('\n$', '', unamestr)
 
@@ -71,9 +74,10 @@ class NAsatbus(Target):
         cfg = configs[2] # config file to use with openocd
         cmd = configs[3] # something like 'stm32f4_flash', an openocd command
 
+        fileloc = binobj.abspath()
 # $openocd -f $this_dir/$cfg -s $search_path -c "$cmd $file"
-        command = str("%s -f %s/%s -s %s -c \"%s %s/%s\"") % (openocdloc, 
-            searchpath, cfg, searchpath, cmd, binpath, binfile)
+        command = str("%s -f %s/%s -s %s -c \"%s %s\"") % (openocdloc, 
+            searchpath, cfg, searchpath, cmd, fileloc)
         print (str(command))
         try:
             subprocess.check_output(command, shell = True)
@@ -82,3 +86,25 @@ class NAsatbus(Target):
             return False
 
 
+    def sanitycheck(self, binobj):
+        """Ensure that -- for now -- the binary file to be flashed is an .elf,
+not a .bin file. It seems that .elf files know where to go, because of the 
+debugging information; bin files lack that information. One problem is that 
+.elf files usually don't have file name suffixes, meaning it cannot be 
+simply found with a regex."""
+        filetypematch = "ELF"
+        archmatch = "ARM"
+        binobj.validate()
+
+        binpath = binobj.path
+        binfile = binobj.name
+        abspath = binobj.abspath()
+        arch = binobj.arch
+        filetype = binobj.filetype
+
+        if (filetype == filetypematch) and (arch == archmatch):
+            return True
+        else:
+            return False
+
+#<EOF>

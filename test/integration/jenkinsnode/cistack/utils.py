@@ -256,11 +256,6 @@ unnecessary.",
     arguments = parser.parse_args()
     args = vars(arguments)
 
-    array = checkFile(args['inputbinary'])
-    args['binfilepath'] = array[0]
-    args['inputbinary'] = array[1]
-#    print(args)
-
     checkBoard(args['board'])
 
     if (checkRoot(args['root'])):
