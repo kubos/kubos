@@ -1,0 +1,8 @@
+{
+    "license":"Apache-2.0",
+    "name":"telemetry-storage",
+    "version":"0.1.0",
+    "dependencies":{
+      "telemetry":"kubostech/telemetry"
+    }
+}
