@@ -15,25 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-
-#ifdef HAVE_MALLOC_H
 #include <malloc.h>
-#endif
-
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
-
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
-
-#ifdef HAVE_STRINGS_H
 #include <strings.h>
-#endif
 
 #include <stdint.h>
 #include <setjmp.h>

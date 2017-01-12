@@ -17,21 +17,10 @@
 #define CMOCKA_H_
 
 /** Added in these includes for now - Can't seem to pick these up from cmocka.c **/
-#ifdef HAVE_MALLOC_H
 #include <malloc.h>
-#endif
-
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
-
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
-
-#ifdef HAVE_STRINGS_H
 #include <strings.h>
-#endif
 
 #include <stdint.h>
 #include <setjmp.h>
