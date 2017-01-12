@@ -35,7 +35,7 @@ class Target(object):
 
     def reset(self):
         """Assert the reset pin for the board, then release it."""
-        self.pins['rst'].on() 
+        self.pins['rst'].on()
         sleep(0.5)
         self.pins['rst'].off()
         sleep(0.5)

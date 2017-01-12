@@ -56,6 +56,8 @@ class NAsatbus(Target):
         sp1 = str(sp1 + ":" + distpath)
         sp1 = str(sp1 + ":" + searchpath)
 
+# will dfu-util work instead?
+
         openocdloc = findBin('openocd')
         unamestr = subprocess.check_output('uname')
         unamestr = re.sub('\n$', '', unamestr)

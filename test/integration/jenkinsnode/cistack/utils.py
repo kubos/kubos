@@ -33,7 +33,9 @@ def boardList():
 
 
 def requiredUtils():
-    """Which command line utilities are required for this package."""
+    """
+    Return a list of the command line utilities required for this package.
+    """
     requiredutils = [
     'dfu-util',
     'openocd',
@@ -47,7 +49,10 @@ def requiredUtils():
 
 
 def requiredPaths():
-    """Which paths must be set/exported for this package."""
+    """
+    Return a list of the paths that must be set/exported for this package
+    to do the work required of it.
+    """
     requiredpaths = [ 
     "KUBOS_LIB_PATH", 
     "LD_LIBRARY_PATH", 
@@ -77,7 +82,7 @@ def getTarget(target):
         return Pyboard()
 
     elif target == "stm32f407-disco-gcc":
-        return STM32F407Discovery() 
+        return STM32F407Discovery()
 
     elif target == "msp430f5529-gcc":
         return MSP430()
@@ -92,6 +97,7 @@ def getTarget(target):
 
 
 def getBoardConfigs(boards):
+    """Ensure that the board identifier is supported."""
     for i in boards:
         try:
             r = parseBoardIdentifier(i['dev'])
@@ -104,22 +110,23 @@ def getBoardConfigs(boards):
 
 
 def parseBoardIdentifier(lsusbpattern):
-    """Parse the lsusb identifier assigned to the board. Note that some boards
-such as the PyBoard won't be enumerated by lsusb unless they are in 
-DFU programming mode. Array values are as follows:
-key: lsusb identifier
-0: name of the device
-1: Is the board supported by Kubos?
-2: the configuration file for use by the flasher, if any
-3: the command or argument specific to the board (mostly for openocd right now)
-"""
+    """
+    Parse the lsusb identifier assigned to the board. Note that some 
+    boards such as the PyBoard won't be enumerated by lsusb unless they 
+    are in DFU programming mode. Array values are as follows:
+    key: lsusb identifier
+    0: name of the device
+    1: Is the board supported by Kubos?
+    2: the configuration file for use by the flasher, if any
+    3: the command or argument specific to the board (mostly for openocd)
+    """
 
-# '0483:3748':['STMicro ST-LINK/V2 ',True, 'stm32f407vg.cfg', 'stm32f4_flash'],
-# But note that the STLINK-V2 could be connected to many different boards. FIXME
-# Also note: there's a v2 and a v2-1 config file for the STLINK programmer
+# FIXME
+# But note that the STLINK-V2 could be connected to many different boards.
+# Also: there's a v2 and a v2-1 config file for the STLINK programmer
     patterns = {
               '0483:3748':['STMicro ST-LINK/V2 (old type)', True, 'stm32f407vg.cfg', 'stm32f4_flash'],
-              '0483:374b':['STMicro ST-LINK/V2 (new type)', True, 'stm32f407g-disc1.cfg', 'stm32f4_flash'],
+              '0483:374b':['STMicro ST-LINK/V2-1 (new type)', True, 'stm32f407g-disc1.cfg', 'stm32f4_flash'],
               '0483:df11':['STM32F405 PyBoard', True, 'USE dfu-util!', '***'], 
               '0451:2046':['TI MSP430F5529 Launchpad', True, 'USE mspdebug!', '***'],
               '0451:f432':['TI MSP430G2553 Launchpad', False, 'NOT SUPPORTED', '/usr/bin/sleep 1']
@@ -166,9 +173,11 @@ def findBin(command):
         return False
 
 def checkRoot(yesno):
-    """If certain udev rules have not been set, it may be simpler to \
-    only allow the script to run with elevated privileges. While this \
-    choice is discouraged, it is up to the user's discretion."""
+    """
+    If certain udev rules have not been set, it may be simpler to
+    only allow the script to run with elevated privileges. While this
+    choice is discouraged, it is up to the user's discretion.
+    """
 
     if yesno:
         print("Checking for root access...")
@@ -285,7 +294,8 @@ def allDone():
 def sanityChecks(*findit):
     """
     Check for dfu-util, openocd, mspdebug, portions of the Kubos SDK,
-    and other stuff."""
+    and other stuff.
+    """
 
     for i in findit:
 # At present, findBin actually raises a system exit exception if it 

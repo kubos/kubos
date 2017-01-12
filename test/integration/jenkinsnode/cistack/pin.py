@@ -51,7 +51,7 @@ class Pin(object):
         func = GPIO.gpio_function(self.number)
         print("pin %s set to %s" % (str(self.number), str(func)))
         if func == GPIO.UNKNOWN:
-            sys.exit("Unable to determine the function of the pin! Exiting.") 
+            sys.exit("Unable to determine the function of the pin! Exiting.")
 
 # Can attempt to set this using incorrect options, but otherwise it isn't
 # particularly interactive

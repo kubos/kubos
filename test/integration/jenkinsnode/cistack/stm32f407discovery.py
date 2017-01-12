@@ -37,7 +37,7 @@ class STM32F407Discovery(Target):
             sys.exit("Binary file didn't pass a sanity check. Exiting.")
             return False
 
-# TODO set all of these via Ansible, and get these vars from os.environ
+# TODO set all of these via Ansible on the target machines
         distpath = os.environ['KUBOS_LIB_PATH']
         configfiles = "../../flash/openocd"
         searchpath = str("%s/%s" % (distpath, configfiles))
@@ -68,14 +68,15 @@ class STM32F407Discovery(Target):
         except:
             return False
 
-#<EOF>
 
     def sanitycheck(self, binobj):
-        """Ensure that -- for now -- the binary file to be flashed is an .elf,
-not a .bin file. It seems that .elf files know where to go, because of the 
-debugging information; bin files lack that information. One problem is that 
-.elf files usually don't have file name suffixes, meaning it cannot be 
-simply found with a regex."""
+        """
+        Ensure that the binary file to be flashed is an .elf, not a .bin 
+        file. It seems that .elf files know where to go, because of the 
+        debugging information; bin files lack that information. One 
+        problem is that .elf files usually don't have file name suffixes, 
+        meaning it cannot be simply found with a regex.
+        """
         filetypematch = "ELF"
         archmatch = "ARM"
         binobj.validate()
@@ -90,3 +91,5 @@ simply found with a regex."""
             return True
         else:
             return False
+
+#<EOF>
