@@ -23,12 +23,12 @@
 #define TEST_PORT 12
 
 
-static void test_server_setup_null_socket(void)
+static void test_server_setup_null_socket(void ** arg)
 {
     assert_false(server_setup(NULL, TEST_PORT, 1));
 }
 
-static void test_server_setup(void)
+static void test_server_setup(void ** arg)
 {
     csp_socket_t * socket = NULL;
 
@@ -43,13 +43,13 @@ static void test_server_setup(void)
     assert_true(server_setup(&socket, TEST_PORT, 1));
 }
 
-static void test_server_accept_null_socket(void)
+static void test_server_accept_null_socket(void ** arg)
 {
     pubsub_conn conn;
     assert_false(server_accept(NULL, &conn));
 }
 
-static void test_server_accept_null_conn(void)
+static void test_server_accept_null_conn(void ** arg)
 {
     csp_socket_t * socket = NULL;
     
@@ -66,7 +66,7 @@ static void test_server_accept_null_conn(void)
     assert_false(server_accept(&socket, NULL));
 }
 
-static void test_server_accept(void)
+static void test_server_accept(void ** arg)
 {
     pubsub_conn conn;
     csp_socket_t * socket = NULL;
@@ -87,12 +87,12 @@ static void test_server_accept(void)
     assert_true(server_accept(&socket, &conn));
 }
 
-static void test_subscriber_connect_null_conn(void)
+static void test_subscriber_connect_null_conn(void ** arg)
 {
     assert_false(subscriber_connect(NULL, TEST_ADDRESS, TEST_PORT));
 }
 
-static void test_subscriber_connect(void)
+static void test_subscriber_connect(void ** arg)
 {
     pubsub_conn conn;
 
@@ -102,27 +102,27 @@ static void test_subscriber_connect(void)
     assert_true(conn.conn_handle != NULL);
 }
 
-static void test_send_null_data(void)
+static void test_send_null_data(void ** arg)
 {
     pubsub_conn conn;
     assert_false(send_csp(conn, NULL, 0));
 }
 
-static void test_send_bad_length(void)
+static void test_send_bad_length(void ** arg)
 {
     pubsub_conn conn;
     int data = 10;
     assert_false(send_csp(conn, &data, -1));
 }
 
-static void test_send_null_conn_handle(void)
+static void test_send_null_conn_handle(void ** arg)
 {
     pubsub_conn conn;
     int data = 10;
     assert_false(send_csp(conn, &data, sizeof(int)));
 }
 
-static void test_send(void)
+static void test_send(void ** arg)
 {
     pubsub_conn conn;
     char data = 'A';
@@ -150,7 +150,7 @@ static void test_send(void)
     assert_true(send_csp(conn, (void*)&data, sizeof(data)));
 }
 
-static void test_publisher_read_null_conn(void)
+static void test_publisher_read_null_conn(void ** arg)
 {
     pubsub_conn conn;
     conn.conn_handle = NULL;
@@ -158,7 +158,7 @@ static void test_publisher_read_null_conn(void)
     assert_false(publisher_read(conn, &data, 1, TEST_PORT));
 }
 
-static void test_publisher_read_null_buffer(void)
+static void test_publisher_read_null_buffer(void ** arg)
 {
     pubsub_conn conn;
     csp_socket_t * socket = NULL;
@@ -181,7 +181,7 @@ static void test_publisher_read_null_buffer(void)
     assert_false(publisher_read(conn, NULL, 1, TEST_PORT));
 }
 
-static void test_publisher_read(void)
+static void test_publisher_read(void ** arg)
 {
     pubsub_conn conn;
     char buffer;
@@ -209,7 +209,7 @@ static void test_publisher_read(void)
     assert_true(publisher_read(conn, &buffer, 1, TEST_PORT));
 }
 
-static void test_subscriber_read_null_conn(void)
+static void test_subscriber_read_null_conn(void ** arg)
 {
     pubsub_conn conn;
     conn.conn_handle = NULL;
@@ -217,7 +217,7 @@ static void test_subscriber_read_null_conn(void)
     assert_false(subscriber_read(conn, &data, 1, TEST_PORT));
 }
 
-static void test_subscriber_read_null_buffer(void)
+static void test_subscriber_read_null_buffer(void ** arg)
 {
     pubsub_conn conn;
 
@@ -228,7 +228,7 @@ static void test_subscriber_read_null_buffer(void)
     assert_false(subscriber_read(conn, NULL, 1, TEST_PORT));
 }
 
-static void test_subscriber_read(void)
+static void test_subscriber_read(void ** arg)
 {
     pubsub_conn conn;
     char buffer;

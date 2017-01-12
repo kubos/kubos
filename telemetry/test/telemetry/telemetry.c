@@ -17,12 +17,12 @@
 #include <cmocka.h>
 #include "telemetry/telemetry.h"
 
-static void test_telemetry_subscribe_null_conn(void)
+static void test_telemetry_subscribe_null_conn(void ** arg)
 {
     assert_false(telemetry_subscribe(NULL, 0));
 }
 
-static void test_telemetry_subscribe(void)
+static void test_telemetry_subscribe(void ** arg)
 {
     pubsub_conn conn;
 
@@ -37,7 +37,7 @@ static void test_telemetry_subscribe(void)
     assert_true(telemetry_subscribe(&conn, 0));
 }
 
-static void test_telemetry_read_conn_null_handle(void)
+static void test_telemetry_read_conn_null_handle(void ** arg)
 {
     pubsub_conn conn;
     conn.conn_handle = NULL;
@@ -51,7 +51,7 @@ static void test_telemetry_read_conn_null_handle(void)
     assert_false(telemetry_read(conn, &packet));
 }
 
-static void test_telemetry_read_null_packet(void)
+static void test_telemetry_read_null_packet(void ** arg)
 {
     pubsub_conn conn;
     telemetry_packet packet;
@@ -59,7 +59,7 @@ static void test_telemetry_read_null_packet(void)
     assert_false(telemetry_read(conn, NULL));
 }
 
-static void test_telemetry_read(void)
+static void test_telemetry_read(void ** arg)
 {
     pubsub_conn conn;
     telemetry_packet packet;
@@ -81,7 +81,7 @@ static void test_telemetry_read(void)
     assert_true(telemetry_read(conn, &packet));
 }
 
-static void test_telemetry_publish_no_setup(void)
+static void test_telemetry_publish_no_setup(void ** arg)
 {
     telemetry_packet packet;
     assert_false(telemetry_publish(packet));
