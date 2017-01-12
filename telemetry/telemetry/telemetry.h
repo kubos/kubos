@@ -62,4 +62,6 @@ bool telemetry_read(pubsub_conn conn, telemetry_packet * packet);
  */
 bool telemetry_publish(telemetry_packet packet);
 
+int telemetry_num_subscribers();
+
 #endif
