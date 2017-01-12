@@ -61,7 +61,7 @@ def getBinfile(name, path, board):
     from binfile import Binfile
     from basicbinfile import Basicbinfile
     """Create an instance of Binfile."""
-    return Basicbinfile(name=name, path=path, board=board)
+    return Basicbinfile(name = name, path = path, board = board)
 
 
 def getTarget(target):
@@ -73,16 +73,16 @@ def getTarget(target):
     """ Configure the board-specific pin addresses and directions """
     print("Checking on the availability of the %s Target class" % target)
 
-    if (target == "pyboard-gcc"):
+    if target == "pyboard-gcc":
         return Pyboard()
 
-    elif (target == "stm32f407-disco-gcc"):
+    elif target == "stm32f407-disco-gcc":
         return STM32F407Discovery() 
 
-    elif (target == "msp430f5529-gcc"):
+    elif target == "msp430f5529-gcc":
         return MSP430()
 
-    elif (target == "na-satbus-3c0-gcc"):
+    elif target == "na-satbus-3c0-gcc":
         return NAsatbus()
 
     else:
@@ -133,7 +133,7 @@ key: lsusb identifier
 # kludgy at best, but helps. TODO replace with something better
 def whichUSBboard():
     lsusb = findBin('lsusb')
-    output = subprocess.check_output(lsusb, shell=True)
+    output = subprocess.check_output(lsusb, shell = True)
     lines = output.rsplit('\n')
     retarray = []
     manlist = ['Texas', 'STMicro']
@@ -142,7 +142,7 @@ def whichUSBboard():
         arr = line.split(' ')
         for manuf in manlist:
             try:
-                if (re.search(manuf, arr[6])):
+                if re.search(manuf, arr[6]):
                     print "found %s device at %s" % (manuf, arr[5])
                     retarray.append({ 'manuf':arr[6], 'dev':arr[5]})
             except:
@@ -170,7 +170,7 @@ def checkRoot(yesno):
     only allow the script to run with elevated privileges. While this \
     choice is discouraged, it is up to the user's discretion."""
 
-    if (yesno is True):
+    if yesno:
         print("Checking for root access...")
 
         if os.geteuid() != 0:
@@ -207,7 +207,7 @@ Therefore, you can set this to True, but we don't advise it.", \
         metavar = "ROOT", required = False)
 
     parser.add_argument("-f", "--file", action = 'store', \
-        dest = "inputbinary", default="kubos-rt-example", \
+        dest = "inputbinary", default = "kubos-rt-example", \
         help = "provide a filename for the compiled binary file to \
 upload", metavar = "FILE", required = True)
 
@@ -231,22 +231,22 @@ Kubos SDK", metavar = "TARGET", required = True)
         dest = 'ignoreGPIOwarnings', default = False, \
         help = "Ignore any warnings from the RPi.GPIO module. Not \
 recommended.",
-        metavar = "IGNORE", required = False)
+        metavar = "IGNOREWARNINGS", required = False)
 
     parser.add_argument("--free-pins", action = 'store', \
         dest = 'freepins', default = False, \
         help = "Use RPi.GPIO module to Free GPIO pins when done. Usually \
 unnecessary.",
-        metavar = "FREEPINS", required = False)
+        metavar = "FREEPINSWHENDONE", required = False)
 
     parser.add_argument("--shutdown", action = 'store', \
         dest = 'shutdown', default = False, \
         help = "Shut off the board when done. Usually unnecessary.",
-        metavar = "SHUTDOWN", required = False)
+        metavar = "SHUTDOWNWHENDONE", required = False)
 
     parser.add_argument("-c", "--command", action = 'store', \
-        dest = 'command', default = "flash", type=str, \
-        nargs='?', const='flash', \
+        dest = 'command', default = "flash", type = str, \
+        nargs = '?', const = 'flash', \
         help = "Assign a functionality to the current session. \n\
         - 'flash' is default; \n\
         - 'lib' imports the file as a library; \n\
@@ -258,7 +258,8 @@ unnecessary.",
 
     checkBoard(args['board'])
 
-    if (checkRoot(args['root'])):
+# Silently pass if it's not necessary to have elevated privileges
+    if checkRoot(args['root']):
         pass
 
     return args
@@ -268,7 +269,7 @@ def checkBoard(board):
     """Compare board name to list of currently supported boards."""
     supportedboards = supportedBoards()
     for b in supportedboards:
-        if (b == board):
+        if b == board:
             return True
     errmsg = str("%s Board name '%s' does not match list of currently supported \
 boards. Exiting." % (errstr, board))
@@ -282,26 +283,28 @@ def allDone():
     return True
 
 def sanityChecks(*findit):
-    """Check for dfu-util, openocd, mspdebug, portions of the Kubos SDK, \
-and other stuff."""
+    """
+    Check for dfu-util, openocd, mspdebug, portions of the Kubos SDK,
+    and other stuff."""
 
     for i in findit:
 # At present, findBin actually raises a system exit exception if it 
 # doesn't find the command in the argument, so this is redundant and
 # pro forma, but more graceful implementations may be pursued. TODO
-        if (findBin(i) is False):
-            sys.exit(str("ERROR: Unable to determine the path to %s; halting." % 
-            command))
+        if not findBin(i):
+            sys.exit(str("ERROR: Unknown path to %s; halting." % command))
             return False
 
     return True
 
 
 def pathChecks(**paths):
-    """ Check for the presence of system environment variables as submitted,\
-but doesn't confirm anything is actually in the right place."""
+    """
+    Check for the presence of system environment variables as submitted,
+    but doesn't confirm anything is actually in the right place.
+    """
     for i in paths.keys():
-        p=os.environ[i]
+        p = os.environ[i]
         try:
             print("Checking: %s  = %s" % (i,p))
             if ((p is None) or (p == "")):
@@ -324,7 +327,8 @@ execution of the functionality in this library."""
         except KeyError:
             edict[i] = ""
         except:
-            sys.exit(str("Problem while retrieving system environment variable %s" % str(i)))
+            sys.exit(str("Problem while retrieving system environment \
+variable %s" % str(i)))
 
     return edict
 

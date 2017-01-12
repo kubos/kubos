@@ -10,14 +10,16 @@ from target import Target
 from pin import Pin
 
 class NAsatbus(Target):
-# the NanoAvionics Satbus board actually requires a physical programmer,
-# as it lacks a USB interface to an integrated programmer. As such, it is 
-# quite different physically from the other boards, but once hooked up to
-# a physical programming interface like some variant of the ST-LINK v2 
-# it should behave well. 
-# 
-# At present, it works only when hooked up to an STM32f407 discovery 
-# ST-Link V2 or V2-1 and not to an actual discrete ST-link v2 dongle
+    """ Return an instance of Target specific to the NanoAvionics Satbus
+    board actually requires a physical programmer, as it lacks a USB 
+    interface to an integrated programmer. As such, it is quite different 
+    physically from the other boards, but once hooked up to a physical 
+    programming interface like some variant of the ST-LINK v2, it should 
+    behave well. 
+    Of note, the board can be programmed with any of the STM32F4 Discovery 
+    board programmers (They are ST-Link V2-compatible).
+    """
+
     def __init__(self):
         self.board = "na-satbus-3c0-gcc"
         self.arch = "ARM"
@@ -25,23 +27,22 @@ class NAsatbus(Target):
         self.pins = {
             'rst' : Pin(name = 'rst', number = 17),
             'pwr' : Pin(name = 'pwr', number = 27)
-#            'rst':[17, True, False, GPIO.OUT], # SWD connector, pull NRST to GND 
-#            'prg':[18, True, False, GPIO.OUT], # none needed?
-#            'pwr':[27, True, False, GPIO.OUT], # same as the rest of the hats
-#            'opt':[22, True, False, GPIO.OUT]  # optional
         }
 
 
-
-# IMPORTANT NOTE: openocd must be version 0.9 or later.
+    IMPORTANT NOTE: openocd must be version 0.9 or later.
     def flash(self, binobj):
-        """use an external shell to push the ELF file using openocd. It seems 
+        """
+        Use an external shell to push the ELF file using openocd. It seems 
         to be necessary to pre-declare the LIB PATH for some commands, and 
         if the path variable is not available as declared in /etc/profile, it
         can be fixed here with the sp1 variable, below. HOWEVER: from ansible,
         the locally-declared and locally-requested path variables DO NOT WORK
         and cause ERRORS. Workaround: use the ansible -shell- command and 
-        declare the library path before executing a bash -c command"""
+        declare the library path before executing a bash -c command.
+        
+        IMPORTANT NOTE: openocd must be version 0.9 or later.
+        """
 
         if not self.sanitycheck(binobj):
             sys.exit("Binary file didn't pass a sanity check. Exiting.")
@@ -60,13 +61,6 @@ class NAsatbus(Target):
         unamestr = re.sub('\n$', '', unamestr)
 
 # TODO adjust the paths for OS X
-
-#    if (re.search('Linux', unamestr)):
-# /usr/bin/openocd  -f /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd/stm32f407vg.cfg   -s /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd -c "stm32f4_flash /home/kubos/kubos-rt-example"
-
-###    cfg = "stm32f407g-disc1.cfg"
-#    cfg = "stm32f407vg.cfg"
-#    cmd = "stm32f4_flash"
 
 # At present, this function only expects one board to be attached. TODO
         boards = whichUSBboard()
@@ -87,11 +81,14 @@ class NAsatbus(Target):
 
 
     def sanitycheck(self, binobj):
-        """Ensure that -- for now -- the binary file to be flashed is an .elf,
-not a .bin file. It seems that .elf files know where to go, because of the 
-debugging information; bin files lack that information. One problem is that 
-.elf files usually don't have file name suffixes, meaning it cannot be 
-simply found with a regex."""
+        """
+        Ensure that -- for now -- the binary file to be flashed is an 
+        .elf, not a .bin file. It seems that .elf files know where to 
+        go, because of the debugging information; bin files lack that 
+        information. One problem is that .elf files usually don't have 
+        file name suffixes, meaning it cannot be simply found with a 
+        regex.
+        """
         filetypematch = "ELF"
         archmatch = "ARM"
         binobj.validate()
@@ -102,7 +99,7 @@ simply found with a regex."""
         arch = binobj.arch
         filetype = binobj.filetype
 
-        if (filetype == filetypematch) and (arch == archmatch):
+        if (filetype == filetypematch and arch == archmatch):
             return True
         else:
             return False

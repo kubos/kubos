@@ -18,22 +18,20 @@ class STM32F407Discovery(Target):
         self.pins = {
             'rst' : Pin(name = 'rst', number = 17),
             'pwr' : Pin(name = 'pwr', number = 27)
-#            'rst':[17, True, False, GPIO.OUT], # SWD connector, pull NRST to GND 
-#            'prg':[18, True, False, GPIO.OUT], # none needed?
-#            'pwr':[27, True, False, GPIO.OUT], # same as the rest of the hats
-#            'opt':[22, True, False, GPIO.OUT]  # optional
         }
 
 # IMPORTANT NOTE: openocd must be version 0.9 or later.
     def flash(self, binobj):
         from utils import findBin, whichUSBboard, getBoardConfigs
-        """use an external shell to push the ELF file using openocd. It seems 
+        """
+        Use an external shell to push the ELF file using openocd. It seems 
         to be necessary to pre-declare the LIB PATH for some commands, and 
         if the path variable is not available as declared in /etc/profile, it
         can be fixed here with the sp1 variable, below. HOWEVER: from ansible,
         the locally-declared and locally-requested path variables DO NOT WORK
         and cause ERRORS. Workaround: use the ansible -shell- command and 
-        declare the library path before executing a bash -c command"""
+        declare the library path before executing a bash -c command.
+        """
 
         if not self.sanitycheck(binobj):
             sys.exit("Binary file didn't pass a sanity check. Exiting.")
@@ -53,13 +51,6 @@ class STM32F407Discovery(Target):
 
 # TODO adjust the paths for OS X
 
-#    if (re.search('Linux', unamestr)):
-# /usr/bin/openocd  -f /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd/stm32f407vg.cfg   -s /usr/local/lib/python2.7/dist-packages/kubos/flash/openocd -c "stm32f4_flash /home/kubos/kubos-rt-example"
-
-###    cfg = "stm32f407g-disc1.cfg"
-#    cfg = "stm32f407vg.cfg"
-#    cmd = "stm32f4_flash"
-
 # At present, this function only expects one board to be attached. TODO
         boards = whichUSBboard()
         configs = getBoardConfigs(boards)
@@ -77,6 +68,7 @@ class STM32F407Discovery(Target):
         except:
             return False
 
+#<EOF>
 
     def sanitycheck(self, binobj):
         """Ensure that -- for now -- the binary file to be flashed is an .elf,
@@ -94,7 +86,7 @@ simply found with a regex."""
         arch = binobj.arch
         filetype = binobj.filetype
 
-        if (filetype == filetypematch) and (arch == archmatch):
+        if (filetype == filetypematch and arch == archmatch):
             return True
         else:
             return False

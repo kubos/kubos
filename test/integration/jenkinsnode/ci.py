@@ -67,7 +67,7 @@ def main():
 
 
 # instantiate some Binfile class object:
-    b = ci.getBinfile(name=binfile, path=binpath, board=board)
+    b = ci.getBinfile(name = binfile, path = binpath, board = board)
     b.validate()
     b.getInfo()
 

@@ -58,7 +58,7 @@ class MSP430(Target):
         return True
 
     def sanitycheck(self, binobj):
-        """Ensure that the file is for this MSP430F5529."""
+        """Ensure that the binary upload file is for the MSP430 board."""
         filetypematch = "ELF"
         archmatch = "MSP430"
         binobj.validate()
@@ -69,9 +69,9 @@ class MSP430(Target):
         arch = binobj.arch
         filetype = binobj.filetype
 
-        if (filetype == filetypematch) and (arch == archmatch):
+        if (filetype == filetypematch and arch == archmatch):
             return True
         else:
             return False
 
-
+#<EOF>

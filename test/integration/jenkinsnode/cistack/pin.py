@@ -64,7 +64,7 @@ class Pin(object):
     def on(self):
         """Generic "assert the GPIO pin" function."""
 
-        if (self.number is None):
+        if self.number is None:
             return False
 
 # GPIO.output *will* throw exceptions but so far just the RuntimeError.
@@ -92,7 +92,7 @@ class Pin(object):
     def off(self):
         """Generic "turn off the GPIO pin" function."""
     
-        if (self.number is None):
+        if self.number is None:
             return False
         try:
             GPIO.output(self.number, self.offval)
@@ -106,3 +106,4 @@ class Pin(object):
 
         return True
 
+#<EOF>

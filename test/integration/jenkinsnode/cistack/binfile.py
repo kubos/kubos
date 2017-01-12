@@ -24,7 +24,7 @@ class Binfile(object):
         if self.board == "": 
             sys.exit("Unknown board type. Exiting.")
 
-        supportedboards=supportedBoards()
+        supportedboards = supportedBoards()
 #        print(supportedboards)
 
         if not self.board in supportedboards:
@@ -39,7 +39,7 @@ class Binfile(object):
 
 # try moderately hard to figure out binary file type / arch
         array = self.getfiletype()
-        if ((array[0] is False) or (array[1] is False)):
+        if not (array[0] or array[1]):
             raise IOError
 
         self.arch = array[0]
@@ -70,6 +70,7 @@ class Binfile(object):
 
 # Big effort to find path to binary:
     def getpath(self):
+        """Try to determine the correct path and name of the binary"""
         cwd = os.getcwd()
 
 # if there's neither a name nor a path, puke
@@ -77,35 +78,35 @@ class Binfile(object):
             sys.exit("Missing name and missing path. Exiting.")
 
 # if the path is specified but isn't a directory, puke
-        if (os.path.isdir(self.path) is False):
+        if not os.path.isdir(self.path):
             sys.exit("%s unable to verify path %s" % (errstr, self.path))
 
 # if there's no file at the specified path and binfile name, puke
-        if (os.path.isfile(os.path.join(self.path, self.name)) is False):
+        if not os.path.isfile(os.path.join(self.path, self.name)):
             sys.exit("%s unable to locate binary file in path %s" % 
             (errstr, self.path))
 
 # if self.path is defined and seems to be a real path, start checking
-        if (os.path.isdir(self.path) is True):
-            if (os.path.isfile(os.path.join(self.path, self.name)) is True):
+        if os.path.isdir(self.path):
+            if os.path.isfile(os.path.join(self.path, self.name)):
                 return True
 
 # If self.path is not present, check if binfile includes a path --
 # if it does but no path is specified, it should have a path attached,
 # or else binfile must be in the current working directory.
-        if ((os.path.isfile(self.name) is True) and (self.path == "")):
+        if (os.path.isfile(self.name) and (self.path == "")):
             array = os.path.split(self.name)
 
 # if it exists but the os.path.split gives nothing in the first array element,
 # check to see if it's in the current working directory.
-            if (os.path.exists(array[0]) is False):
+            if not os.path.exists(array[0]):
                 print("Unable to determine path to binary from \
                 input path %s." % array[0])
                 self.path = cwd
 
 # if there isn't anything preceding self.name, either it's in the cwd or
 # else it's an error condition.
-                if (os.path.isfile(os.path.join(self.path, array[1])) is True):
+                if os.path.isfile(os.path.join(self.path, array[1])):
                     self.path = cwd
                     self.name = array[1]
                     return True
@@ -113,7 +114,7 @@ class Binfile(object):
                     return False
 
 # if, on the other hand, splitting the name gives a usable path--good!
-            if (os.path.exists(array[0]) is True):
+            if os.path.exists(array[0]):
                 self.path = array[0]
                 self.name = array[1]
                 return True
@@ -142,20 +143,21 @@ class Binfile(object):
 # Pyboard .bin: 'data'
 
     def getfiletype(self):
+        """Use [magic] to get some information about the binary upload file."""
         d = magic.from_file(os.path.join(self.path,self.name))
         d = re.sub(', ',',',d)
         e = d.split(',')
         filetype = e[0]
         array = [False,False]
-        if (filetype == 'data'):
+        if filetype == 'data':
             array = ['ARM','BIN']
-        elif (filetype == 'HIT archive data'):
+        elif filetype == 'HIT archive data':
             array = ['MSP430', 'BIN']
-        elif (re.search('ELF',filetype)):
+        elif re.search('ELF',filetype):
             arch = e[1]
-            if (arch == 'ARM'):
+            if arch == 'ARM':
                 array = ['ARM','ELF']
-            elif (arch == 'TI msp430'):
+            elif arch == 'TI msp430':
                 array = ['MSP430','ELF']
             else:
                 pass
@@ -165,7 +167,7 @@ class Binfile(object):
         return array
 
     def getInfo(self):
-   
+        """Write information about the binary to stdout."""   
         print("\n---------------------------------")
         print("Info found about the binary file submitted for upload:")
         print("Name: %s" % self.name) 
@@ -177,4 +179,4 @@ class Binfile(object):
         print("---------------------------------")
         return True
 
-
+#<EOF>

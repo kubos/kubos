@@ -22,9 +22,11 @@ class Pyboard(Target):
         } 
 
     def progmode(self):
-        """Assert two pins in sequence to enable programming mode on the 
-MicroPython board, then release them to reboot the board into
-programming mode."""
+        """
+        Assert two pins in sequence to enable programming mode on the 
+        MicroPython board, then release them to reboot the board into
+        programming mode.
+        """
         self.pins['rst'].on()
         sleep(0.2)
         self.pins['prg'].on()
@@ -46,6 +48,8 @@ programming mode."""
 # Note that the pyboard must be in programming mode for it to announce itself
 # as a DFU device. That is, the system can't even find the board until it is
 # in programming mode.
+# Further, the USB interface requires 5VDC, even if the board does not.
+
         binfile = binobj.abspath()
         tail = str("-i 0 -s 0x08000000")
         head = str("--alt 0 -D ")
@@ -55,11 +59,11 @@ programming mode."""
             output = subprocess.check_output(command , shell = True)
             print(output)
 
-            if (re.search("File downloaded successfully.*$", output)):
+            if re.search("File downloaded successfully.*$", output):
                 print("Looks like things went well!")
 
         except:
-            print "NOPE. Try it again."
+            print "Flash seems to have failed."
             return False
 
         sleep(0.5)
@@ -78,10 +82,10 @@ programming mode."""
         arch = binobj.arch
         filetype = binobj.filetype
 
-        if (filetype == filetypematch) and (arch == archmatch):
+        if (filetype == filetypematch and arch == archmatch):
             return True
         else:
             return False
 
 
-
+#<EOF>
