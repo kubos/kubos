@@ -1,6 +1,17 @@
 #!/bin/bash
 # Copyright (C) 2016 Kubos Corporation
 
+spinner() {
+    local i sp n
+    sp='/-\|'
+    n=${#sp}
+    while sleep 0.15; do
+        printf "%s\b" "${sp:i++%n:1}"
+    done
+}
+
+start=$(date +%s.%N)
+
 this_dir=$(cd "`dirname "$0"`"; pwd)
 program=$1
 name=$(echo $1 | cut -d '/' -f 2)
@@ -14,21 +25,14 @@ fi
 
 if [[ "$device" =~ "6001" ]]; then
     echo "Compatible FTDI device found"
+    echo "Sending file to board..."
+    spinner &
+    spinner_pid=$!
+    disown
 else
     echo "No compatible FTDI device found"
     exit 0
 fi
-
-# Setup serial connection configuration file
-# To-Do: Detect name of USB device to use (in case it's not USB0)
-cat > /etc/minicom/minirc.kubos <<-EOF
-pu port         /dev/ttyUSB0
-pu baudrate     115200
-pu bits         8
-pu parity       N
-pu stopbits     1
-pu rtscts       no
-EOF
 
 # Minicom doesn't allow any pass-through arguments, so instead we need to 
 # generate a script for it to run.
@@ -48,13 +52,19 @@ send "rm $name"
 send "rz -bZ"
 ! sz -b --zmodem $1
 send "exit"
-! killall -9 minicom
+! killall minicom -q
 EOF
 
 # Run the transfer script
-minicom kubos -o -S send.tmp
+minicom kubos -o -S send.tmp > /dev/null
+echo "Transfer completed successfully"
 
 # Cleanup
 rm send.tmp
-rm /etc/minicom/minirc.kubos
 stty sane
+kill $spinner_pid
+
+# Print exec time
+end=$(date +%s.%N)
+runtime=$(python -c "print(${end} - ${start})")
+echo "Execution time: $runtime seconds"
