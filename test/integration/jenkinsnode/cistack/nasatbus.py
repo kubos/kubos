@@ -30,7 +30,7 @@ class NAsatbus(Target):
         }
 
 
-    IMPORTANT NOTE: openocd must be version 0.9 or later.
+# IMPORTANT NOTE: openocd must be version 0.9 or later.
     def flash(self, binobj):
         """
         Use an external shell to push the ELF file using openocd. It seems 
