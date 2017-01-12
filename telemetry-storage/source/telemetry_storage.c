@@ -21,6 +21,34 @@
 #include "telemetry-storage/disk.h"
 
 
+CSP_DEFINE_TASK(telemetry_store_rx)
+{
+    telemetry_packet packet;
+    telemetry_conn connection;
+
+    /* Subscribe to all telemetry publishers */
+    while (!telemetry_subscribe(&connection, 0x0))
+    {
+        /* Retry subscribing every 50 ms */
+        csp_sleep_ms(50);
+    }
+
+    while (1)
+    {
+        if (telemetry_read(connection, &packet))
+        {
+            /* Store telemetry packets from the telemetry system */
+            telemetry_store(packet);
+        }
+    }
+}
+
+void telemetry_storage_init()
+{
+    TELEMETRY_STORE_THREAD;
+}
+
+
 /**
  * @brief creates a filename that corresponds to the telemetry packet source_id and 
  *        the csp packet address.
@@ -30,7 +58,7 @@
  * @param file_extension. 
  * @retval The length of the filename written.
  */
-static int create_filename(char *filename_buf_ptr, uint8_t source_id, unsigned int address, const char *file_extension)
+static uint16_t create_filename(char *filename_buf_ptr, uint8_t source_id, unsigned int address, const char *file_extension)
 {
     int len;
 
@@ -56,9 +84,9 @@ static int create_filename(char *filename_buf_ptr, uint8_t source_id, unsigned i
  * @param packet a telemetry packet to create a log entry from.
  * @retval The length of the log entry written.
  */
-static int format_log_entry_csv(char *data_buf_ptr, telemetry_packet packet) 
+static uint16_t format_log_entry_csv(char *data_buf_ptr, telemetry_packet packet) 
 {
-    int len;
+    int len = 0;
 
     if (data_buf_ptr == NULL) 
     {
@@ -92,7 +120,7 @@ static int format_log_entry_csv(char *data_buf_ptr, telemetry_packet packet)
  * @brief print telemetry packet data.
  * @param packet a telemetry packet with data to print.
  */
-void print_to_console(telemetry_packet packet)
+static void print_to_console(telemetry_packet packet)
 {
     if(packet.source.data_type == TELEMETRY_TYPE_INT) 
     {
@@ -105,7 +133,6 @@ void print_to_console(telemetry_packet packet)
     }
 }
 
-
 void telemetry_store(telemetry_packet packet)
 {
     static char filename_buffer[FILE_NAME_BUFFER_SIZE];
@@ -115,19 +142,34 @@ void telemetry_store(telemetry_packet packet)
 
     uint16_t data_len;
     uint16_t filename_len;
+    uint16_t sd_stat;
 
     filename_buf_ptr = filename_buffer;
     data_buf_ptr = data_buffer;
     
     #if (DATA_OUTPUT_FORMAT == FORMAT_TYPE_CSV) 
+    
     filename_len = create_filename(filename_buf_ptr, packet.source.source_id, packet.source.subsystem_id, FILE_EXTENSION_CSV);
     data_len = format_log_entry_csv(data_buf_ptr, packet);
+    
     /* Save log entry */
-    disk_save_string(filename_buf_ptr, data_buf_ptr, data_len);
+    if (filename_len > 0 && data_len > 0)
+    {
+        sd_stat = disk_save_string(filename_buf_ptr, data_buf_ptr, data_len);
+        if (sd_stat != 0)
+        {
+            printf("Error saving telemetry log entry. Code %u \r\n", sd_stat);
+        }
+    }
+    else 
+    {
+        printf("Error, decoded log entry or filename are blank \r\n");
+    }
+    
     #elif (DATA_OUTPUT_FORMAT == FORMAT_TYPE_HEX) 
     /* Placeholder for hexidecimal format */
     #else
-    printf("Format type not found\r\n");
+    printf("Telemetry storage format type not found\r\n");
     #endif
 
     //printf("Log Entry = %s\n", data_buf_ptr);

@@ -31,7 +31,7 @@
 #endif
 
 
-/* If there is not a configuration present use defaults */
+/* If there is not a configuration present use defaults... */
 #ifndef YOTTA_CFG_TELEMETRY_STORAGE
 
 /* Set at FatFs LFN max length */

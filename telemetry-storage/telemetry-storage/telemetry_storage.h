@@ -30,18 +30,33 @@ typedef enum
 
 
 /**
- * @brief store a telemetry packet in a particular format specified by
- *        the configuration for logging.
- * @param packet the telemetry packet to store.
+ * Task used to subscribe to, receive, and store all telemetry packets.
  */
-void telemetry_store(telemetry_packet packet);
+CSP_DEFINE_TASK(telemetry_store_rx);
 
 
 /**
- * @brief print telemetry packet data.
- * @param packet a telemetry packet with data to print.
+ * Macro to be used for creating a telemetry storage receiving thread.
  */
-void print_to_console(telemetry_packet data);
+#define TELEMETRY_STORE_THREAD   csp_thread_handle_t telem_store_rx_handle; \
+                                 csp_thread_create(telemetry_store_rx, "TELEM_STORE_RX", 1000, NULL, 0, &telem_store_rx_handle); 
+
+
+/**
+ * Subscribes to all telemetry sources and stores them as specified
+ * in the configuration. 
+ * To be used in the main() prior to starting the scheduler and after
+ * the telemetry system has been initialized.
+ */
+void telemetry_storage_init();
+
+
+/**
+ * @brief store a telemetry packet in a particular format specified by
+ *        the configuration.
+ * @param packet the telemetry packet to store.
+ */
+void telemetry_store(telemetry_packet packet);
 
 
 #endif
