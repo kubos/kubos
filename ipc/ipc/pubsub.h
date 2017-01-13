@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef COMMUNICATIONS_H
-#define COMMUNICATIONS_H
+#ifndef PUBSUB_H
+#define PUBSUB_H
 
 #include <csp/csp.h>
 #include <stdint.h>
@@ -36,14 +36,14 @@ typedef struct
  * receiving subscriber connections.
  * @return bool true if successful, otherwise false
  */
-bool server_setup(csp_socket_t ** socket, uint8_t port, uint8_t num_connections);
+csp_socket_t * server_setup(uint8_t port, uint8_t num_connections);
 
 /**
  * Attempts to accept a subscriber connection.
  * @param conn pointer to pubsub_conn where connection info will be stored 
  * @return bool true if successful, otherwise false
  */
-bool server_accept(csp_socket_t ** socket, pubsub_conn * conn);
+bool server_accept(csp_socket_t * socket, pubsub_conn * conn);
 
 /**
  * Used by a telemetry subscriber (currently just in telemetry_subscribe)

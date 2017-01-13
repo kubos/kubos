@@ -1,6 +1,5 @@
 /*
- * KubOS HAL
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +21,6 @@
 #define TEST_ADDRESS 11
 #define TEST_PORT 12
 
-
-static void test_server_setup_null_socket(void ** arg)
-{
-    assert_false(server_setup(NULL, TEST_PORT, 1));
-}
-
 static void test_server_setup(void ** arg)
 {
     csp_socket_t * socket = NULL;
@@ -40,7 +33,7 @@ static void test_server_setup(void ** arg)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
     
-    assert_true(server_setup(&socket, TEST_PORT, 1));
+    assert_true(socket = server_setup(TEST_PORT, 1));
 }
 
 static void test_server_accept_null_socket(void ** arg)
@@ -61,9 +54,9 @@ static void test_server_accept_null_conn(void ** arg)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = server_setup(TEST_PORT, 1);
 
-    assert_false(server_accept(&socket, NULL));
+    assert_false(server_accept(socket, NULL));
 }
 
 static void test_server_accept(void ** arg)
@@ -79,12 +72,12 @@ static void test_server_accept(void ** arg)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = server_setup(TEST_PORT, 1);
 
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
 
-    assert_true(server_accept(&socket, &conn));
+    assert_true(server_accept(socket, &conn));
 }
 
 static void test_subscriber_connect_null_conn(void ** arg)
@@ -136,12 +129,12 @@ static void test_send(void ** arg)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = server_setup(TEST_PORT, 1);
     
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
     
-    server_accept(&socket, &conn);
+    server_accept(socket, &conn);
 
     expect_value(__wrap_csp_send, conn, conn.conn_handle);
     expect_not_value(__wrap_csp_send, packet, NULL);
@@ -171,12 +164,12 @@ static void test_publisher_read_null_buffer(void ** arg)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = server_setup(TEST_PORT, 1);
     
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
     
-    server_accept(&socket, &conn);
+    server_accept(socket, &conn);
 
     assert_false(publisher_read(conn, NULL, 1, TEST_PORT));
 }
@@ -195,12 +188,12 @@ static void test_publisher_read(void ** arg)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = server_setup(TEST_PORT, 1);
     
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
     
-    server_accept(&socket, &conn);
+    server_accept(socket, &conn);
 
     expect_value(__wrap_csp_read, conn, conn.conn_handle);
 
@@ -246,7 +239,6 @@ static void test_subscriber_read(void ** arg)
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_server_setup_null_socket),
         cmocka_unit_test(test_server_setup),
         cmocka_unit_test(test_server_accept_null_socket),
         cmocka_unit_test(test_server_accept_null_conn),

@@ -50,16 +50,6 @@ if (YOTTA_CFG_CSP_RDP)
     set (CSP_USE_RDP ON)
 endif()
 
-#MESSAGE( STATUS "CSP CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS} )
-#get_cmake_property(_variableNames VARIABLES)
-#foreach (_variableName ${_variableNames})
-#    message(STATUS "CSP ${_variableName}=${${_variableName}}")
-#endforeach()
-
-
-message(STATUS "CSP TESTING ENABLED $ENV{KUBOS_TESTING_ENABLED}")
-
-
 add_library (csp STATIC
     src/csp_bridge.c
     src/csp_buffer.c
