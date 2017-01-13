@@ -30,7 +30,7 @@
     },
     "system": {
       "password": "Kubos123"
-      }
+    }
   },
   "toolchain": "CMake/toolchain.cmake",
   "scripts": {

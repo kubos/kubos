@@ -27,7 +27,7 @@ start=$(date +%s)
 
 this_dir=$(cd "`dirname "$0"`"; pwd)
 program=$1
-name=$(echo $1 | cut -d '/' -f 2)
+name=$(basename $1)
 
 password=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["password"]')
 
@@ -43,7 +43,7 @@ if [[ "$device" =~ "6001" ]]; then
     spinner_pid=$!
     disown
 else
-    echo "No compatible FTDI device found"
+    echo "No compatible FTDI device found" 1>&2
     exit 0
 fi
 
@@ -80,13 +80,13 @@ minicom kubos -o -S send.tmp > flash.log
 
 # Check transfer result
 if grep -q incomplete flash.log; then
-    echo "Transfer Failed"
+    echo "Transfer Failed" 1>&2
 elif grep -q complete flash.log; then
     echo "Transfer Successful"
 elif grep -q incorrect flash.log; then
-    echo "Transfer Failed: Invalid password"
+    echo "Transfer Failed: Invalid password" 1>&2
 else
-    echo "Transfer Failed: Connection failed"
+    echo "Transfer Failed: Connection failed" 1>&2
 fi
 
 # Cleanup
