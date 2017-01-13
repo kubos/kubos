@@ -5,6 +5,7 @@ import subprocess
 import magic
 import datetime
 import argparse
+import logging
 from time import sleep
 import RPi.GPIO as GPIO
 
@@ -101,7 +102,7 @@ def getBoardConfigs(boards):
     for i in boards:
         try:
             r = parseBoardIdentifier(i['dev'])
-            if(r[1] is True): # board is supported
+            if r[1]: # board is supported
                 return r
         except:
             sys.exit("Unable to determine board type. Exiting.")
@@ -132,10 +133,11 @@ def parseBoardIdentifier(lsusbpattern):
               '0451:f432':['TI MSP430G2553 Launchpad', False, 'NOT SUPPORTED', '/usr/bin/sleep 1']
               }
 
-    try:
+    if lsusbpattern in patterns:
         return patterns[lsusbpattern]
-    except:
-        return None
+
+    return None
+
 
 # kludgy at best, but helps. TODO replace with something better
 def whichUSBboard():
@@ -160,8 +162,9 @@ def whichUSBboard():
 
 
 def findBin(command):
+    log = logging.getLogger('logfoo')
     cmd = str("/usr/bin/which %s" % command)
-    print("Looking for %s in system binary PATHs." % command)
+    log.debug("Looking for %s in system binary PATHs." % command)
 
     try:    
         retval = subprocess.check_output(cmd, shell = True)
@@ -172,40 +175,30 @@ def findBin(command):
             command))
         return False
 
-def checkRoot(yesno):
+def checkRoot():
     """
     If certain udev rules have not been set, it may be simpler to
     only allow the script to run with elevated privileges. While this
     choice is discouraged, it is up to the user's discretion.
     """
+    log = logging.getLogger('logfoo')
+    log.debug("Checking for root access...")
 
-    if yesno:
-        print("Checking for root access...")
-
-        if os.geteuid() != 0:
-            print("You need to have root privileges to run this script.\n")
-            sys.exit("Please try again, this time using 'sudo'. Exiting.")
-            return False
+    if os.geteuid() != 0:
+        print("You need to have root privileges to run this script.\n")
+        sys.exit("Please try again, this time using 'sudo'. Exiting.")
+        return False
     else:
         return True
 
-def readOpts():
-    args = { 'board' : 'stm32f407-disco-gcc',
-            'binary' : 'kubos-rt-example',
-            'path' : '/var/lib/ansible/',
-            'verbose' : False,
-            'root'  : False,
-            'freepins' : False,
-            'shutdown' : False,
-            'ignoreGPIOwarnings' : False,
-            'command' : 'flash'
-            }
 
+def readOpts():
+    """Read command line arguments and return Namespace object."""
     today = datetime.date.today()
     parser = argparse.ArgumentParser(description = helpstring)
 
     parser.add_argument("-r", "--root", action = 'store', \
-        dest = "root", default = False, help = "This script no longer \
+        dest = "requireroot", default = False, help = "This script no longer \
 requires root access to run, meaning you must implement \
 a udev rule to enable user-land access to the device, or else just \
 remember to sudo when running this script. \n\
@@ -216,7 +209,7 @@ Therefore, you can set this to True, but we don't advise it.", \
         metavar = "ROOT", required = False)
 
     parser.add_argument("-f", "--file", action = 'store', \
-        dest = "inputbinary", default = "kubos-rt-example", \
+        dest = "inputbinary", default="kubos-rt-example", \
         help = "provide a filename for the compiled binary file to \
 upload", metavar = "FILE", required = True)
 
@@ -225,7 +218,10 @@ upload", metavar = "FILE", required = True)
         help = "provide more verbose output to STDOUT", default = 0, \
         required = False)
 
-# TODO add in support for this later.
+    parser.add_argument("--debug", action = 'store_true', \
+        dest = "debug", help="set debug log level", default = 0, \
+        required = False)
+
     parser.add_argument("-p", "--path", action = 'store', \
         dest = "binfilepath", default = "/var/lib/ansible/",
         help = "provide a path to the binary you want to flash", \
@@ -240,22 +236,22 @@ Kubos SDK", metavar = "TARGET", required = True)
         dest = 'ignoreGPIOwarnings', default = False, \
         help = "Ignore any warnings from the RPi.GPIO module. Not \
 recommended.",
-        metavar = "IGNOREWARNINGS", required = False)
+        metavar = "IGNORE", required = False)
 
     parser.add_argument("--free-pins", action = 'store', \
         dest = 'freepins', default = False, \
         help = "Use RPi.GPIO module to Free GPIO pins when done. Usually \
 unnecessary.",
-        metavar = "FREEPINSWHENDONE", required = False)
+        metavar = "FREEPINS", required = False)
 
     parser.add_argument("--shutdown", action = 'store', \
         dest = 'shutdown', default = False, \
         help = "Shut off the board when done. Usually unnecessary.",
-        metavar = "SHUTDOWNWHENDONE", required = False)
+        metavar = "SHUTDOWN", required = False)
 
     parser.add_argument("-c", "--command", action = 'store', \
-        dest = 'command', default = "flash", type = str, \
-        nargs = '?', const = 'flash', \
+        dest = 'command', default = "flash", type=str, \
+        nargs='?', const='flash', \
         help = "Assign a functionality to the current session. \n\
         - 'flash' is default; \n\
         - 'lib' imports the file as a library; \n\
@@ -263,23 +259,24 @@ unnecessary.",
         metavar = "COMMAND", required = False)
 
     arguments = parser.parse_args()
-    args = vars(arguments)
 
-    checkBoard(args['board'])
+    checkBoard(arguments.board)
 
-# Silently pass if it's not necessary to have elevated privileges
-    if checkRoot(args['root']):
-        pass
+    if arguments.requireroot:
+        checkRoot()
 
-    return args
+# These are globals:
+    shutdown = arguments.shutdown
+    freepins = arguments.freepins
+
+    return arguments
 
 
 def checkBoard(board):
     """Compare board name to list of currently supported boards."""
     supportedboards = supportedBoards()
-    for b in supportedboards:
-        if b == board:
-            return True
+    if board in supportedboards:
+        return True
     errmsg = str("%s Board name '%s' does not match list of currently supported \
 boards. Exiting." % (errstr, board))
     sys.exit(errmsg)
@@ -308,20 +305,21 @@ def sanityChecks(*findit):
     return True
 
 
-def pathChecks(**paths):
+def pathChecks(*paths):
     """
     Check for the presence of system environment variables as submitted,
     but doesn't confirm anything is actually in the right place.
     """
-    for i in paths.keys():
+    log = logging.getLogger('logfoo')
+    for i in paths:
         p = os.environ[i]
         try:
-            print("Checking: %s  = %s" % (i,p))
+            log.debug("Checking: %s  = %s" % (i,p))
             if ((p is None) or (p == "")):
-                print str("No environment variable %s" % i)
+                log.error(str("No environment variable %s" % i))
                 return False
         except:
-            print str("No environment variable %s" % i)
+            log.error(str("No environment variable %s" % i))
             return False
 
     return True
@@ -330,6 +328,8 @@ def pathChecks(**paths):
 def getEnvironmentVariables(*requiredpaths):
     """Retrieve system environment variables required for successful \
 execution of the functionality in this library."""
+    log = logging.getLogger('logfoo')
+
     edict = {}
     for i in requiredpaths:
         try:
@@ -337,10 +337,27 @@ execution of the functionality in this library."""
         except KeyError:
             edict[i] = ""
         except:
-            sys.exit(str("Problem while retrieving system environment \
+            log.error(str("Problem while retrieving system environment \
 variable %s" % str(i)))
+            return False
 
     return edict
+
+def cleanUp(target):
+    log = logging.getLogger('logfoo') 
+# If you want to shut the board down, this command cleans up and 
+# de-energizes the power MOSFET.
+    if(shutdown):
+        log.info("Shutting down the board.")
+        target.powerdown() 
+
+# If the args said to free the pins when done, do that.
+    if(freepins):
+        allDone()
+    
+    return True
+
+
 
 # Here's a global text variable.
 boardlist = boardList()

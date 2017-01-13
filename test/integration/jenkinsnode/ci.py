@@ -31,61 +31,67 @@ import spidev
 import argparse
 import datetime
 import magic 
+import logging
 import cistack as ci
+
+global shutdown
+global freepins
 
 def main():
 
-    kwargs = ci.readOpts()
-    print(str(kwargs))
+    log = logging.getLogger('logfoo')
+    dt = datetime.datetime
+    NOW = dt.isoformat(dt.now(), '-')
+    log.debug("Script started %s." % str(NOW))
 
-    global binfile, binpath, board, isrootrequired
-    binfile = kwargs['inputbinary']
-    binpath = kwargs['binfilepath']
-    board = kwargs['board']
-    isrootrequired = kwargs['root']
-    shutdownwhendone = kwargs['shutdown']
-    freepinswhendone = kwargs['freepins']
-    ignoreGPIOwarnings = kwargs['ignoreGPIOwarnings']
-    command = kwargs['command']
-    
+    args = ci.readOpts()
+    log.debug("Command line arguments are: %s " % str(args))
+
+
+    log.debug("Checking for required system utilities.")
     requiredutils = ci.requiredUtils()
 
     if ci.sanityChecks(*requiredutils):
-        print("Located required system utilities. Continuing.")
+        log.info("Located required system utilities. Continuing.")
     else:
-        sys.exit("Unable to locate required utilites. Exiting.")
+        log.exception("Unable to locate required utilites. Exiting.")
 
-    pathkeys = ci.requiredPaths()
-    pathdict = dict.fromkeys(pathkeys, "")
-    if ci.pathChecks(**pathdict):
-        print("Located required system environment variables. Continuing.")
+    paths = ci.requiredPaths()
+    if ci.pathChecks(*paths):
+        log.info("Located required system environment variables. Continuing.")
     else:
-        sys.exit("Unable to locate required environment variables. Exiting.")
+        log.error("Unable to locate required environment variables. Exiting.")
+        sys.exit() # haven't even created a target yet, so this is the way out.
 
 # instantiate some Target class object:
-    target = ci.getTarget(board)
+    target = ci.getTarget(args.board)
 
+    if args.command == "lib":
+        pass
 
-# instantiate some Binfile class object:
-    b = ci.getBinfile(name = binfile, path = binpath, board = board)
-    b.validate()
-    b.getInfo()
-
-    if (ignoreGPIOwarnings):
+    if args.ignoreGPIOwarnings:
         GPIO.setwarnings(False)
 
 
-    if command == "flash":
+    if args.command == "flash":
+
+# instantiate some Binfile class object:
+        log.info("Creating a binfile object")
+        b = ci.getBinfile(name = args.inputbinary, 
+                path = args.binfilepath,
+                board = args.board)
+        b.validate()
+        b.getInfo()
 
         target.setupboard()
-        print ("Board setup complete.")
+        log.info("Board setup complete.")
         sleep(1)
 
         pins = target.getpins()
         print (str(pins))
 
         target.powerup()
-        print("Powering on the board")
+        log.debug("Powering on the board")
         sleep(1)
 
         target.reset()
@@ -95,24 +101,27 @@ def main():
         sleep(1)
 
         if (target.flash(b) is True):
-            print("Program flash completed. Reports success.")
+            log.info("Program flash completed. Reports success.")
         else:
-            sys.exit("Program may have failed. Exiting.")
+            log.error("Program flash may have failed.")
+            cleanUp(target)
 
         target.reset()
-        print("\nBoard reset.")
+        log.info("\nBoard reset.")
 
         sleep(1)
 
-        if(shutdownwhendone):
-            print("Shutting down the board.")
+        if(args.shutdown):
+            log.info("Shutting down the board.")
             target.powerdown() 
 
 # If you want to shut the board down, this command cleans up and 
 # de-energizes the power MOSFET.
-        if(freepinswhendone):
-            print("Freeing pins and exiting.") 
+        if(args.freepins):
+            log.info("Freeing pins and exiting.") 
             allDone()
+
+        logging.shutdown()
 
     else:
         pass

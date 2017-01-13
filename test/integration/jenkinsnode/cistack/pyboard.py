@@ -14,6 +14,7 @@ class Pyboard(Target):
         self.board = "pyboard-gcc"
         self.arch = "ARM"
         self.cpu = "stm32f405"
+        self.binfiletype = "BIN"
         self.pins = {
             'rst' : Pin(name = 'rst', number = 17),
             'pwr' : Pin(name = 'pwr', number = 27),
@@ -69,23 +70,6 @@ class Pyboard(Target):
         sleep(0.5)
         return True
 
-
-    def sanitycheck(self, binobj):
-        """Ensure that the file is not an .elf. """
-        filetypematch = "BIN"
-        archmatch = "ARM"
-        binobj.validate()
-
-        binpath = binobj.path
-        binfile = binobj.name
-        abspath = binobj.abspath()
-        arch = binobj.arch
-        filetype = binobj.filetype
-
-        if (filetype == filetypematch and arch == archmatch):
-            return True
-        else:
-            return False
 
 
 #<EOF>

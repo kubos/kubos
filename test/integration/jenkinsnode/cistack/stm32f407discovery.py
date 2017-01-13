@@ -15,9 +15,11 @@ class STM32F407Discovery(Target):
         self.board = "stm32f407-disco-gcc"
         self.arch = "ARM"
         self.cpu = "stm32f407"
+        self.binfiletype = "ELF"
         self.pins = {
             'rst' : Pin(name = 'rst', number = 17),
-            'pwr' : Pin(name = 'pwr', number = 27)
+            'pwr' : Pin(name = 'pwr', number = 27),
+            'opt' : Pin(name = 'opt', number = 22)  # optional
         }
 
 # IMPORTANT NOTE: openocd must be version 0.9 or later.
@@ -33,6 +35,7 @@ class STM32F407Discovery(Target):
         declare the library path before executing a bash -c command.
         """
 
+# Sanity check the arch and bin file type:
         if not self.sanitycheck(binobj):
             sys.exit("Binary file didn't pass a sanity check. Exiting.")
             return False
@@ -69,27 +72,5 @@ class STM32F407Discovery(Target):
             return False
 
 
-    def sanitycheck(self, binobj):
-        """
-        Ensure that the binary file to be flashed is an .elf, not a .bin 
-        file. It seems that .elf files know where to go, because of the 
-        debugging information; bin files lack that information. One 
-        problem is that .elf files usually don't have file name suffixes, 
-        meaning it cannot be simply found with a regex.
-        """
-        filetypematch = "ELF"
-        archmatch = "ARM"
-        binobj.validate()
-
-        binpath = binobj.path
-        binfile = binobj.name
-        abspath = binobj.abspath()
-        arch = binobj.arch
-        filetype = binobj.filetype
-
-        if (filetype == filetypematch and arch == archmatch):
-            return True
-        else:
-            return False
 
 #<EOF>

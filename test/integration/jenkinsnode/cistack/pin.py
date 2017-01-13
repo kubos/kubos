@@ -45,7 +45,7 @@ class Pin(object):
             return False
         if self.number is None:
             return False
-        if not self.direction == GPIO.OUT:
+        if self.direction != GPIO.OUT:
             return False
 
         func = GPIO.gpio_function(self.number)

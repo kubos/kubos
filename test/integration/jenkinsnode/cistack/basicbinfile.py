@@ -13,4 +13,4 @@ class Basicbinfile(Binfile):
         self.path = path
         self.board = board
 
-    
+#<EOF>    

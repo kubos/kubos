@@ -13,8 +13,9 @@ errstr = "*** ERROR (msp430 target) "
 class MSP430(Target):
     def __init__(self):
         self.board = "msp430f5529-gcc"
-        self.arch = "msp430"
+        self.arch = "MSP430"
         self.cpu = "msp430f5529"
+        self.binfiletype = "ELF"
         self.pins = {
             'rst' : Pin(name = 'rst', number = 17),
             'pwr' : Pin(name = 'pwr', number = 27),
@@ -57,21 +58,5 @@ class MSP430(Target):
 
         return True
 
-    def sanitycheck(self, binobj):
-        """Ensure that the binary upload file is for the MSP430 board."""
-        filetypematch = "ELF"
-        archmatch = "MSP430"
-        binobj.validate()
-
-        binpath = binobj.path
-        binfile = binobj.name
-        abspath = binobj.abspath()
-        arch = binobj.arch
-        filetype = binobj.filetype
-
-        if (filetype == filetypematch and arch == archmatch):
-            return True
-        else:
-            return False
 
 #<EOF>

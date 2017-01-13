@@ -24,6 +24,7 @@ class NAsatbus(Target):
         self.board = "na-satbus-3c0-gcc"
         self.arch = "ARM"
         self.cpu = "stm32f405"
+        self.binfiletype = "ELF"
         self.pins = {
             'rst' : Pin(name = 'rst', number = 17),
             'pwr' : Pin(name = 'pwr', number = 27)
@@ -82,28 +83,5 @@ class NAsatbus(Target):
             return False
 
 
-    def sanitycheck(self, binobj):
-        """
-        Ensure that -- for now -- the binary file to be flashed is an 
-        .elf, not a .bin file. It seems that .elf files know where to 
-        go, because of the debugging information; bin files lack that 
-        information. One problem is that .elf files usually don't have 
-        file name suffixes, meaning it cannot be simply found with a 
-        regex.
-        """
-        filetypematch = "ELF"
-        archmatch = "ARM"
-        binobj.validate()
-
-        binpath = binobj.path
-        binfile = binobj.name
-        abspath = binobj.abspath()
-        arch = binobj.arch
-        filetype = binobj.filetype
-
-        if (filetype == filetypematch and arch == archmatch):
-            return True
-        else:
-            return False
 
 #<EOF>

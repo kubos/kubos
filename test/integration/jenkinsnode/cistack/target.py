@@ -7,6 +7,7 @@ class Target(object):
         self.board = ""
         self.arch = ""
         self.cpu = ""
+        self.binfiletype = ""
         self.pins = {}
 
     def getboard(self):
@@ -72,5 +73,27 @@ class Target(object):
         print("Setup successful.")
         sleep(0.1)
         return True
+
+
+    def sanitycheck(self, binobj):
+        """
+        Ensure that the binary file to be flashed matches the filetype 
+        specified for each board type. It seems that .elf files know 
+        where to go, because of the debugging information; bin files 
+        lack that information and have to be told, among other things,
+        where in the memory space to start putting the binary. One 
+        problem is that .elf files usually don't have file name suffixes, 
+        meaning it cannot be simply found with a regex.
+        """
+
+# do self.binfiletype & self.arch match returns from binfile.validate()?
+
+        binobj.validate()
+        if (binobj.filetype == self.binfiletype and 
+            binobj.arch == self.arch):
+            return True
+        else:
+            return False
+
 
 #<EOF>

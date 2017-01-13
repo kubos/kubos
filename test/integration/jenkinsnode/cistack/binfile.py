@@ -7,7 +7,14 @@ from utils import supportedBoards
 
 
 class Binfile(object):
-# instantiate from argparse
+    """
+    A binary file object that contains the name, file type, path, 
+    target architecture, and target board type. Internal methods 
+    include file and path validation, attempts to determine target
+    architecture and file type, and a series of variable return
+    methods.
+    """
+
     def __init__(self, name = '', path = '', board = ''):
         self.board = board
         self.name = name
@@ -25,7 +32,6 @@ class Binfile(object):
             sys.exit("Unknown board type. Exiting.")
 
         supportedboards = supportedBoards()
-#        print(supportedboards)
 
         if not self.board in supportedboards:
             sys.exit("Board %s is not supported." % self.board)
@@ -40,7 +46,7 @@ class Binfile(object):
 # try moderately hard to figure out binary file type / arch
         array = self.getfiletype()
         if not (array[0] or array[1]):
-            raise IOError
+            return False
 
         self.arch = array[0]
         self.filetype = array[1]
@@ -54,9 +60,6 @@ class Binfile(object):
         return self.board
 
     def name(self):
-        return self.name
-
-    def file(self):
         return self.name
 
     def abspath(self):
