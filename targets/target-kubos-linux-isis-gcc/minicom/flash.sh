@@ -2,7 +2,7 @@
 # Copyright (C) 2016 Kubos Corporation
 
 spinner() {
-    local i sp n
+    local sp i n
     sp='/-\|'
     n=${#sp}
     while sleep 0.15; do
@@ -10,12 +10,13 @@ spinner() {
     done
 }
 
-start=$(date +%s.%N)
+start=$(date +%s)
 
 this_dir=$(cd "`dirname "$0"`"; pwd)
 program=$1
 name=$(echo $1 | cut -d '/' -f 2)
-cmd=$2
+
+password=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["password"]')
 
 unamestr=`uname`
 
@@ -25,7 +26,6 @@ fi
 
 if [[ "$device" =~ "6001" ]]; then
     echo "Compatible FTDI device found"
-    echo "Sending file to board..."
     spinner &
     spinner_pid=$!
     disown
@@ -34,11 +34,12 @@ else
     exit 0
 fi
 
+if [ "$password" == "Kubos123" ]; then
+    echo "Using default password"
+fi
+
 # Minicom doesn't allow any pass-through arguments, so instead we need to 
 # generate a script for it to run.
-# To-Do: Pass-through the root password.  There should be an update to 
-# make it more secure than 'password' at some point, likely to be set by
-# the user.
 cat > send.tmp <<-EOF
 verbose on
 send root
@@ -46,18 +47,34 @@ expect {
     "Password:" break
     timeout 1 break
 }
-send password
+send $password
+expect {
+    "~ #" break
+    timeout 5 goto end
+}
 send "cd /usr/bin"
 send "rm $name"
 send "rz -bZ"
 ! sz -b --zmodem $1
 send "exit"
+end:
 ! killall minicom -q
 EOF
 
 # Run the transfer script
-minicom kubos -o -S send.tmp > /dev/null
-echo "Transfer completed successfully"
+echo "Sending file to board..."
+minicom kubos -o -S send.tmp > flash.log
+
+# Check transfer result
+if grep -q incomplete flash.log; then
+    echo "Transfer Failed"
+elif grep -q complete flash.log; then
+    echo "Transfer Successful"
+elif grep -q incorrect flash.log; then
+    echo "Transfer Failed: Invalid password"
+else
+    echo "Transfer Failed: Connection failed"
+fi
 
 # Cleanup
 rm send.tmp
@@ -65,6 +82,6 @@ stty sane
 kill $spinner_pid
 
 # Print exec time
-end=$(date +%s.%N)
-runtime=$(python -c "print(${end} - ${start})")
+end=$(date +%s)
+runtime=$(expr ${end} - ${start})
 echo "Execution time: $runtime seconds"
