@@ -19,8 +19,8 @@
 #include "telemetry/config.h"
 #include <csp/arch/csp_queue.h>
 #include <csp/arch/csp_semaphore.h>
+#include <kubos-core/utlist.h>
 #include <stdio.h>
-
 
 /**
  * Iterates though all open telemetry connections and
@@ -30,7 +30,7 @@
 static void telemetry_send(telemetry_packet packet);
 
 /* Static array for holding persistent connections to telemetry subscribers */
-static pubsub_conn telemetry_subs[TELEMETRY_NUM_SUBSCRIBERS];
+static pubsub_conn subscriber;
 
 /* Current number of active telemetry subscribers */
 static uint8_t num_subs = 0;
@@ -41,11 +41,12 @@ static csp_queue_handle_t packet_queue = NULL;
 static csp_thread_handle_t telem_sub_handle;
 static csp_thread_handle_t telem_rx_handle;
 
-static csp_mutex_t subscribe_done_lock;
+static csp_mutex_t subscribing_lock;
+static csp_bin_sem_handle_t subscribing_done_signal;
 
-static csp_bin_sem_handle_t telemetry_ready_lock;
-static csp_bin_sem_handle_t telemetry_done_lock;
-static bool telemetry_started = false;
+static bool telemetry_running = true;
+static bool subscribing_done = false;
+static telemetry_subscriber * subscriber_list_head = NULL;
 
 void telemetry_init()
 {
@@ -59,50 +60,82 @@ void telemetry_init()
 
     packet_queue = csp_queue_create(NUM_MESSAGE_QUEUE, sizeof(telemetry_packet));
 
-    csp_mutex_create(&subscribe_done_lock);
+    csp_mutex_create(&subscribing_lock);
+    csp_bin_sem_create(&subscribing_done_signal);
+    csp_bin_sem_wait(&subscribing_done_signal, 0);
 
+#ifdef DEBUG
+    csp_debug_toggle_level(CSP_ERROR);
+    csp_debug_toggle_level(CSP_WARN);
+    csp_debug_toggle_level(CSP_INFO);
+    csp_debug_toggle_level(CSP_BUFFER);
+    csp_debug_toggle_level(CSP_PACKET);
+    csp_debug_toggle_level(CSP_PROTOCOL);
+    csp_debug_toggle_level(CSP_LOCK);
+#endif
 
-    if (csp_bin_sem_create(&telemetry_ready_lock) != CSP_SEMAPHORE_OK) {
-		printf("Error creating lock\r\n");
-	}
-
-    csp_bin_sem_create(&telemetry_done_lock);
-
-    csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 0, &telem_sub_handle);
-    csp_thread_create(telemetry_rx_task, "TELEM_RX", 1000, NULL, 0, &telem_rx_handle);
+    csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 2, &telem_sub_handle);
+    csp_thread_create(telemetry_rx_task, "TELEM_RX", 1000, NULL, 2, &telem_rx_handle);
 }
 
-void init_telemetry_queue()
+void telemetry_cleanup()
 {
-    packet_queue = csp_queue_create(NUM_MESSAGE_QUEUE, sizeof(telemetry_packet));
-}
+    telemetry_subscriber * temp_sub, * next_sub;
 
-void free_telemetry_queue()
-{
+    telemetry_running = false;
+    csp_thread_kill(telem_sub_handle);
+    csp_thread_kill(telem_rx_handle);
+
+    csp_route_end_task();
+
+    LL_FOREACH_SAFE(subscriber_list_head, temp_sub, next_sub)
+    {
+        LL_DELETE(subscriber_list_head, temp_sub);
+        csp_close(temp_sub->conn.conn_handle);
+        free(temp_sub);
+    }
+
+    csp_mutex_remove(&subscribing_lock);
+    csp_bin_sem_remove(&subscribing_done_signal);
     csp_queue_remove(packet_queue);
+}
+
+void telemetry_add_subscriber(pubsub_conn conn)
+{
+    telemetry_subscriber * new_sub = NULL;
+    if ((new_sub = malloc(sizeof(telemetry_subscriber))) != NULL)
+    {
+        memcpy(&(new_sub->conn), &conn, sizeof(pubsub_conn));
+        LL_APPEND(subscriber_list_head, new_sub);
+    }
 }
 
 CSP_DEFINE_TASK(telemetry_get_subs)
 {
     /* Private csp_socket used by the telemetry server */
     csp_socket_t * socket = NULL;
-    csp_bin_sem_wait(&telemetry_ready_lock, CSP_INFINITY);
-    if (server_setup(&socket, TELEMETRY_CSP_PORT, TELEMETRY_NUM_SUBSCRIBERS))
+    //printf("get_subs server setup\r\n");
+    if (server_setup(&socket, TELEMETRY_CSP_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM))
     {
-        telemetry_started = true;
-        csp_bin_sem_post(&telemetry_ready_lock);
-        while (num_subs < TELEMETRY_NUM_SUBSCRIBERS)
+        while (telemetry_running)
         {
             pubsub_conn conn;
-            csp_mutex_lock(&subscribe_done_lock, CSP_INFINITY);
+            //printf("get_subs server_accept\r\n");
+            // csp_bin_sem_post(&subscribing_done_signal);
             if (server_accept(&socket, &conn))
             {
+                subscribing_done = false;
+                // csp_sleep_ms(500);
                 telemetry_request request;
+                //printf("get_subs pub_read\r\n");
                 publisher_read(conn, (void*)&request, sizeof(telemetry_request), TELEMETRY_CSP_PORT);
                 conn.sources = request.sources;
-                telemetry_subs[num_subs++] = conn;
-                csp_mutex_unlock(&subscribe_done_lock);
-            } else { csp_mutex_unlock(&subscribe_done_lock); }
+                //printf("get_subs add_sub\r\n");
+                telemetry_add_subscriber(conn);
+                // csp_bin_sem_post(&subscribing_done_signal);
+                csp_bin_sem_post(&subscribing_done_signal);
+                subscribing_done = true;
+            }
         }
     }
     csp_thread_exit();
@@ -111,35 +144,33 @@ CSP_DEFINE_TASK(telemetry_get_subs)
 CSP_DEFINE_TASK(telemetry_rx_task)
 {
     telemetry_packet packet;
-    while(1)
+    while(telemetry_running)
     {
         if (csp_queue_dequeue(packet_queue, &packet, CSP_MAX_DELAY))
         {
             telemetry_send(packet);
         }
     }
+    csp_thread_exit();
 }
 
 static void telemetry_send(telemetry_packet packet)
 {
     if(packet.source.data_type == TELEMETRY_TYPE_INT)
     {
-        // printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
+        // //printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
     }
     if(packet.source.data_type == TELEMETRY_TYPE_FLOAT)
     {
-        // printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
+        // //printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
     }
 
-    uint8_t i = 0;
-    for (i = 0; i < num_subs; i++)
-    {
-        // Currently if the sources flag is set to 0
-        // the subscriber will get all data
-        if ((telemetry_subs[i].sources == 0) || (packet.source.source_id & telemetry_subs[i].sources))
+    telemetry_subscriber * current, * next;
+    LL_FOREACH_SAFE(subscriber_list_head, current, next) {
+        pubsub_conn subscriber = current->conn;
+        if ((subscriber.sources == 0) || (packet.source.source_id & subscriber.sources))
         {
-            // send_packet(telemetry_subs[i], packet);
-            send_csp(telemetry_subs[i], (void*)&packet, sizeof(telemetry_packet));
+            send_csp(subscriber, (void*)&packet, sizeof(telemetry_packet));
         }
     }
 }
@@ -167,25 +198,40 @@ bool telemetry_read(pubsub_conn conn, telemetry_packet * packet)
     return false;
 }
 
-bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
+bool __telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
 {
-    if (csp_bin_sem_wait(&telemetry_ready_lock, CSP_INFINITY) != CSP_SEMAPHORE_OK)
-    {
-
-    }
+    bool ret = false;
     if ((conn != NULL) && subscriber_connect(conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT))
     {
         telemetry_request request = {
             .sources = sources
         };
+
+        ret = send_csp(*conn, (void*)&request, sizeof(telemetry_request));
+        //printf("telem_subscribe wait\r\n");
         
-        bool ret = send_csp(*conn, (void*)&request, sizeof(telemetry_request));
-        csp_mutex_lock(&subscribe_done_lock, CSP_INFINITY);
-        csp_mutex_unlock(&subscribe_done_lock);
-        return ret;
+        //printf("telem_subscribe done %d\r\n", telemetry_num_subscribers());
     }
-    return false;
+    return ret;
 }
 
-int telemetry_num_subscribers() { return num_subs; }
+bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
+{
+    bool ret = false;
+    csp_mutex_lock(&subscribing_lock, CSP_INFINITY);
+    //printf("telem_subscribe begin\r\n");
+    //printf("telem_subscribe post_lock begin\r\n");
+    ret = __telemetry_subscribe(conn, sources);
+    csp_bin_sem_wait(&subscribing_done_signal, CSP_INFINITY);
+    csp_mutex_unlock(&subscribing_lock);
+    return ret;
+}
+
+int telemetry_num_subscribers()
+{
+    telemetry_subscriber * temp;
+    int count;
+    LL_COUNT(subscriber_list_head, temp, count);
+    return count;
+}
 // #endif

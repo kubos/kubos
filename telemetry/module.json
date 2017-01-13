@@ -3,7 +3,8 @@
     "name":"telemetry",
     "version":"0.1.0",
     "dependencies":{
-      "ipc":"kubostech/ipc"
+      "ipc":"kubostech/ipc",
+      "kubos-core":"kubostech/kubos-core"
     },
     "targetDependencies":{
       "kubos-rt":{

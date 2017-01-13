@@ -21,28 +21,42 @@
 static void test_subscriber(void)
 {
     pubsub_conn conn;
+    pubsub_conn conn2;
     telemetry_packet in_packet;
+    telemetry_packet in_packet2;
     telemetry_packet out_packet;
 
     out_packet.data.i = 10;
     
     telemetry_init();
-
-    csp_sleep_ms(100);
     
-    assert_true(telemetry_subscribe(&conn, 0));
+    assert_true(telemetry_subscribe(&conn2, 0));
 
-    csp_sleep_ms(100);
+    bool subscribed = telemetry_subscribe(&conn, 0);
+
+    int num_subs = telemetry_num_subscribers();
+
+    bool published = telemetry_publish(out_packet);
     
-    // assert_true(telemetry_num_subscribers() == 1);
+    bool read = telemetry_read(conn, &in_packet);
 
-    assert_true(telemetry_publish(out_packet));
-    
-    assert_true(telemetry_read(conn, &in_packet));
+    bool read2 = (telemetry_read(conn2, &in_packet2));
 
-    assert_true(in_packet.data.i == out_packet.data.i);
+    int num_subs_pre_clean = telemetry_num_subscribers();
 
-    assert_true(telemetry_num_subscribers() == 1);
+    telemetry_cleanup();
+
+    csp_close(conn.conn_handle);
+
+    int num_subs_post_clean = telemetry_num_subscribers();
+
+    assert_true(subscribed);
+    assert_true(published);
+    assert_true(read);
+    assert_true(out_packet.data.i == in_packet.data.i);
+    assert_true(out_packet.data.i == in_packet2.data.i);
+    assert_true(num_subs_pre_clean == 2);
+    assert_true(num_subs_post_clean == 0);
 }
 
 int main(void)

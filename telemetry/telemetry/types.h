@@ -70,4 +70,10 @@ typedef struct
     uint8_t sources;
 } telemetry_request;
 
+typedef struct telemetry_subscriber
+{
+    pubsub_conn conn;
+    struct telemetry_subscriber * next;
+} telemetry_subscriber;
+
 #endif
