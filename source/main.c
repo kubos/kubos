@@ -1,205 +1,164 @@
 /*
-Cubesat Space Protocol - A small network-layer protocol designed for Cubesats
-Copyright (C) 2012 GomSpace ApS (http://www.gomspace.com)
-Copyright (C) 2012 AAUSAT3 Project (http://aausat3.space.aau.dk)
+ * KubOS Linux
+ * Copyright (C) 2017 Kubos Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
+#include <errno.h>
+#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include <unistd.h>
 
 #include <csp/csp.h>
-
-/* Using un-exported header file.
- * This is allowed since we are still in libcsp */
 #include <csp/arch/csp_thread.h>
 
-/** Example defines */
-#define MY_ADDRESS  1			// Address of local CSP node
-#define MY_PORT		10			// Port to send test traffic to
+/* Example Interface */
+#define MY_ADDRESS 1
+#define MY_PORT    10
 
-CSP_DEFINE_TASK(task_server) {
+CSP_DEFINE_TASK(csp_server) {
 
-	/* Create socket without any socket options */
-	csp_socket_t *sock = csp_socket(CSP_SO_NONE);
+    csp_conn_t *conn;
+    csp_packet_t *packet;
 
-	/* Bind all ports to socket */
-	csp_bind(sock, CSP_ANY);
+    /* Create socket without any socket options */
+    csp_socket_t *sock = csp_socket(CSP_SO_NONE);
 
-	/* Create 10 connections backlog queue */
-	csp_listen(sock, 10);
+    /* Bind all ports to socket */
+    csp_bind(sock, CSP_ANY);
 
-	/* Pointer to current connection and packet */
-	csp_conn_t *conn;
-	csp_packet_t *packet;
+    /* Create 10 connections backlog queue */
+    csp_listen(sock, 10);
 
-	/* Process incoming connections */
-	while (1) {
+    /* Process incoming connections */
+    while (1) {
 
-		/* Wait for connection, 10000 ms timeout */
-		if ((conn = csp_accept(sock, 10000)) == NULL)
-			continue;
+        /* Wait for connection, 100 ms timeout */
+        if ((conn = csp_accept(sock, 100)) == NULL)
+            continue;
 
-		/* Read packets. Timeout is 100 ms */
-		while ((packet = csp_read(conn, 100)) != NULL) {
-			switch (csp_conn_dport(conn)) {
-			case MY_PORT:
-				/* Process packet here */
-				printf("Packet received on MY_PORT: %s\r\n", (char *) packet->data);
-				csp_buffer_free(packet);
-				break;
+        /* Read packets. Timeout is 100 ms */
+        while ((packet = csp_read(conn, 100)) != NULL) {
+            switch (csp_conn_dport(conn)) {
+                case MY_PORT:
+                    /* Process packet here */
+                	printf("Packet received on MY_PORT: %s\r\n", (char *) packet->data);
+                    csp_buffer_free(packet);
+                    break;
 
-			default:
-				/* Let the service handler reply pings, buffer use, etc. */
-				csp_service_handler(conn, packet);
-				break;
-			}
-		}
+                default:
+                    /* Let the service handler reply pings, buffer use, etc. */
+                    csp_service_handler(conn, packet);
+                    break;
+            }
+        }
 
-		/* Close current connection, and handle next */
-		csp_close(conn);
+        /* Close current connection, and handle next */
+        csp_close(conn);
 
-	}
+    }
 
-	return CSP_TASK_RETURN;
-
+    return CSP_TASK_RETURN;
 }
 
-CSP_DEFINE_TASK(task_client) {
+CSP_DEFINE_TASK(csp_client) {
 
-	csp_packet_t * packet;
-	csp_conn_t * conn;
+    csp_packet_t * packet;
+    csp_conn_t * conn;
+    int result = 0;
 
-	while (1) {
+    while (1) {
 
-		/**
-		 * Try ping
-		 */
+        /**
+         * Try ping
+         */
+        csp_sleep_ms(200);
 
-		csp_sleep_ms(1000);
+        result = csp_ping(MY_ADDRESS, 100, 100, CSP_O_NONE);
 
-		int result = csp_ping(MY_ADDRESS, 100, 100, CSP_O_NONE);
-		printf("Ping result %d [ms]\r\n", result);
+        printf("Ping result %d [ms]\n", result);
 
-		csp_sleep_ms(1000);
+        csp_sleep_ms(1000);
 
-		/**
-		 * Try data packet to server
-		 */
+        /**
+          * Try data packet to server
+          */
 
-		/* Get packet buffer for data */
-		packet = csp_buffer_get(100);
-		if (packet == NULL) {
-			/* Could not get buffer element */
-			printf("Failed to get buffer element\n");
-			return CSP_TASK_RETURN;
-		}
+        /* Get packet buffer for data */
+        packet = csp_buffer_get(100);
+        if (packet == NULL) {
+            /* Could not get buffer element */
+        	printf("Failed to get buffer element\n");
+            return CSP_TASK_RETURN;
+        }
 
-		/* Connect to host HOST, port PORT with regular UDP-like protocol and 1000 ms timeout */
-		conn = csp_connect(CSP_PRIO_NORM, MY_ADDRESS, MY_PORT, 1000, CSP_O_NONE);
-		if (conn == NULL) {
-			/* Connect failed */
-			printf("Connection failed\n");
-			/* Remember to free packet buffer */
-			csp_buffer_free(packet);
-			return CSP_TASK_RETURN;
-		}
+        /* Connect to host HOST, port PORT with regular UDP-like protocol and 1000 ms timeout */
+        conn = csp_connect(CSP_PRIO_NORM, MY_ADDRESS, MY_PORT, 100, CSP_O_NONE);
+        if (conn == NULL) {
+            /* Connect failed */
+        	printf("Connection failed\n");
+            /* Remember to free packet buffer */
+            csp_buffer_free(packet);
+            return CSP_TASK_RETURN;
+        }
 
-		/* Copy dummy data to packet */
-		char *msg = "Hello World";
-		strcpy((char *) packet->data, msg);
+        /* Copy dummy data to packet */
+        char *msg = "Hello World";
+        strcpy((char *) packet->data, msg);
 
-		/* Set packet length */
-		packet->length = strlen(msg);
+        /* Set packet length */
+        packet->length = strlen(msg);
 
-		/* Send packet */
-		if (!csp_send(conn, packet, 1000)) {
-			/* Send failed */
-			printf("Send failed\n");
-			csp_buffer_free(packet);
-		}
+        /* Send packet */
+        if (!csp_send(conn, packet, 100)) {
+            /* Send failed */
+        	printf("Send failed\n");
+            csp_buffer_free(packet);
+        }
 
-		/* Close connection */
-		csp_close(conn);
+        /* Close connection */
+        csp_close(conn);
+    }
 
-	}
-
-	return CSP_TASK_RETURN;
+    return CSP_TASK_RETURN;
 }
 
-int main(int argc, char * argv[]) {
+int main(void)
+{
 
-	/**
-	 * Initialize CSP,
-	 * No physical interfaces are initialized in this example,
-	 * so only the loopback interface is registered.
-	 */
+	/* Initialize CSP
+     * Not interfacing to any external devices, so we don't need to register
+     * a route
+     */
+	printf("Initializing CSP\n");
 
-	/* Init buffer system with 10 packets of maximum 300 bytes each */
-	printf("Initialising CSP\r\n");
-	csp_buffer_init(5, 300);
+    csp_buffer_init(5, 256);
+    csp_init(MY_ADDRESS);
+    csp_route_start_task(500, 1);
 
-	/* Init CSP with address MY_ADDRESS */
-	csp_init(MY_ADDRESS);
+    /* Initialize example threads */
+    printf("Starting example tasks\n");
 
-	/* Start router task with 500 word stack, OS task priority 1 */
-	csp_route_start_task(500, 1);
+    csp_thread_handle_t handle_server;
+    csp_thread_handle_t handle_client;
 
-	/* Enable debug output from CSP */
-	if ((argc > 1) && (strcmp(argv[1], "-v") == 0)) {
+    csp_thread_create(csp_server, "CSPSRV", 1000, NULL, 0, &handle_server);
+    csp_thread_create(csp_client, "CSPCLI", 1000, NULL, 0, &handle_client);
 
-#ifdef CSP_DEBUG
-		printf("Debug enabled\r\n");
-		csp_debug_toggle_level(3);
-		csp_debug_toggle_level(4);
+    while (1)
+    {
+    	csp_sleep_ms(100000);
+    }
 
-		printf("Conn table\r\n");
-		csp_conn_print_table();
-
-		printf("Route table\r\n");
-		csp_route_print_table();
-
-		printf("Interfaces\r\n");
-		csp_route_print_interfaces();
-#else
-		printf("Debug not enabled\r\n");
-#endif
-
-	}
-
-	/**
-	 * Initialize example threads
-	 */
-
-	/* Server */
-	printf("Starting Server task\r\n");
-	csp_thread_handle_t handle_server;
-	csp_thread_create(task_server, "SERVER", 1000, NULL, 0, &handle_server);
-
-	/* Client */
-	printf("Starting Client task\r\n");
-	csp_thread_handle_t handle_client;
-	csp_thread_create(task_client, "SERVER", 1000, NULL, 0, &handle_client);
-
-	/* Wait for execution to end (ctrl+c) */
-	while(1) {
-		csp_sleep_ms(100000);
-	}
-
-	return 0;
-
+    return 0;
 }
