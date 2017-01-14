@@ -3,6 +3,7 @@ import sys
 import magic
 import re
 import subprocess
+import logging
 from time import sleep
 import RPi.GPIO as GPIO
 from target import Target
@@ -40,8 +41,10 @@ class Pyboard(Target):
     def flash(self, binobj):
         """use an external shell to push the binary file using dfu-util."""
 
+        log = logging.getLogger('logfoo')
+
         if not self.sanitycheck(binobj):
-            sys.exit("Binary file didn't pass a sanity check. Exiting.")
+            log.error("Binary file didn't pass a sanity check. Exiting.")
             return False
 
         dfupath = findBin('dfu-util')
@@ -55,16 +58,16 @@ class Pyboard(Target):
         tail = str("-i 0 -s 0x08000000")
         head = str("--alt 0 -D ")
         command = str("%s %s %s %s " % (dfupath, head, binfile, tail))
-        print(command)
+        log.info(command)
         try:
             output = subprocess.check_output(command , shell = True)
-            print(output)
+            log.debug(output)
 
             if re.search("File downloaded successfully.*$", output):
-                print("Looks like things went well!")
+                log.info("Looks like things went well!")
 
         except:
-            print "Flash seems to have failed."
+            log.error("Flash seems to have failed.")
             return False
 
         sleep(0.5)

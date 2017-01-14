@@ -3,6 +3,7 @@ import sys
 import magic
 import re
 import subprocess
+import logging
 from time import sleep
 import RPi.GPIO as GPIO
 from utils import findBin, whichUSBboard, getBoardConfigs
@@ -35,9 +36,10 @@ class STM32F407Discovery(Target):
         declare the library path before executing a bash -c command.
         """
 
+        log = logging.getLogger('logfoo')
 # Sanity check the arch and bin file type:
         if not self.sanitycheck(binobj):
-            sys.exit("Binary file didn't pass a sanity check. Exiting.")
+            log.error("Binary file didn't pass a sanity check. Exiting.")
             return False
 
 # TODO set all of these via Ansible on the target machines
@@ -64,7 +66,7 @@ class STM32F407Discovery(Target):
 # $openocd -f $this_dir/$cfg -s $search_path -c "$cmd $file"
         command = str("%s -f %s/%s -s %s -c \"%s %s\"") % (openocdloc, 
             searchpath, cfg, searchpath, cmd, fileloc)
-        print (str(command))
+        log.info(str(command))
         try:
             subprocess.check_output(command, shell = True)
             return True

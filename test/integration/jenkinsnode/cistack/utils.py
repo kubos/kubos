@@ -76,38 +76,47 @@ def getTarget(target):
     from stm32f407discovery import STM32F407Discovery
     from msp430f5529 import MSP430
 
+    log = logging.getLogger('logfoo') 
+
     """ Configure the board-specific pin addresses and directions """
-    print("Checking on the availability of the %s Target class" % target)
+    log.info("Checking on the availability of the %s Target class" % target)
 
     if target == "pyboard-gcc":
+        log.debug("Matched STM32F405  pyboard")
         return Pyboard()
 
     elif target == "stm32f407-disco-gcc":
+        log.debug("Matched STM32F407 discovery board")
         return STM32F407Discovery()
 
     elif target == "msp430f5529-gcc":
+        log.debug("Matched MSP430F5529 launchpad")
         return MSP430()
 
     elif target == "na-satbus-3c0-gcc":
+        log.debug("Matched STM32F405 NanoAvionics SatBus 3c0")
         return NAsatbus()
 
     else:
-        sys.exit("Unsupported board -- no 'Target' class available.")
+        log.error("Unsupported board -- no 'Target' class available.")
+        return None
 
     return None
 
 
 def getBoardConfigs(boards):
     """Ensure that the board identifier is supported."""
+    log = logging.getLogger('logfoo') 
     for i in boards:
         try:
             r = parseBoardIdentifier(i['dev'])
             if r[1]: # board is supported
                 return r
         except:
-            sys.exit("Unable to determine board type. Exiting.")
+            log.error("Unable to determine board type. Exiting.")
+            return None
 
-    return False
+    return None
 
 
 def parseBoardIdentifier(lsusbpattern):
@@ -126,12 +135,17 @@ def parseBoardIdentifier(lsusbpattern):
 # But note that the STLINK-V2 could be connected to many different boards.
 # Also: there's a v2 and a v2-1 config file for the STLINK programmer
     patterns = {
-              '0483:3748':['STMicro ST-LINK/V2 (old type)', True, 'stm32f407vg.cfg', 'stm32f4_flash'],
-              '0483:374b':['STMicro ST-LINK/V2-1 (new type)', True, 'stm32f407g-disc1.cfg', 'stm32f4_flash'],
-              '0483:df11':['STM32F405 PyBoard', True, 'USE dfu-util!', '***'], 
-              '0451:2046':['TI MSP430F5529 Launchpad', True, 'USE mspdebug!', '***'],
-              '0451:f432':['TI MSP430G2553 Launchpad', False, 'NOT SUPPORTED', '/usr/bin/sleep 1']
-              }
+        '0483:3748': ['STMicro ST-LINK/V2 (old type)', 
+            True, 'stm32f407vg.cfg', 'stm32f4_flash'],
+        '0483:374b': ['STMicro ST-LINK/V2-1 (new type)', 
+            True, 'stm32f407g-disc1.cfg', 'stm32f4_flash'],
+        '0483:df11': ['STM32F405 PyBoard', 
+            True, 'USE dfu-util!', '***'], 
+        '0451:2046': ['TI MSP430F5529 Launchpad', 
+            True, 'USE mspdebug!', '***'],
+        '0451:f432': ['TI MSP430G2553 Launchpad', 
+            False, 'NOT SUPPORTED', '/usr/bin/sleep 1']
+    }
 
     if lsusbpattern in patterns:
         return patterns[lsusbpattern]
@@ -141,7 +155,11 @@ def parseBoardIdentifier(lsusbpattern):
 
 # kludgy at best, but helps. TODO replace with something better
 def whichUSBboard():
+    log = logging.getLogger('logfoo') 
     lsusb = findBin('lsusb')
+    if not lsusb:
+        log.error("Unable to find lsusb utility. Exiting.")
+        return None
     output = subprocess.check_output(lsusb, shell = True)
     lines = output.rsplit('\n')
     retarray = []
@@ -152,7 +170,7 @@ def whichUSBboard():
         for manuf in manlist:
             try:
                 if re.search(manuf, arr[6]):
-                    print "found %s device at %s" % (manuf, arr[5])
+                    log.info(str("found %s device at %s" % (manuf, arr[5])))
                     retarray.append({ 'manuf':arr[6], 'dev':arr[5]})
             except:
                 next
@@ -173,7 +191,7 @@ def findBin(command):
     except:
         sys.exit(str("Unable to determine the path to %s; halting." % 
             command))
-        return False
+        return None
 
 def checkRoot():
     """
@@ -260,11 +278,6 @@ unnecessary.",
 
     arguments = parser.parse_args()
 
-    checkBoard(arguments.board)
-
-    if arguments.requireroot:
-        checkRoot()
-
 # These are globals:
     shutdown = arguments.shutdown
     freepins = arguments.freepins
@@ -274,12 +287,12 @@ unnecessary.",
 
 def checkBoard(board):
     """Compare board name to list of currently supported boards."""
+    log = logging.getLogger('logfoo') 
     supportedboards = supportedBoards()
     if board in supportedboards:
         return True
-    errmsg = str("%s Board name '%s' does not match list of currently supported \
-boards. Exiting." % (errstr, board))
-    sys.exit(errmsg)
+    log.error(str("%s Board name '%s' does not match list of currently supported \
+boards. Exiting." % (errstr, board)))
     return False
 
 def allDone():
@@ -288,24 +301,59 @@ def allDone():
     sys.exit("Pins cleared. Exiting script.")
     return True
 
-def sanityChecks(*findit):
+def binaryChecks(findit):
     """
     Check for dfu-util, openocd, mspdebug, portions of the Kubos SDK,
     and other stuff.
     """
+    log = logging.getLogger('logfoo') 
 
     for i in findit:
-# At present, findBin actually raises a system exit exception if it 
-# doesn't find the command in the argument, so this is redundant and
-# pro forma, but more graceful implementations may be pursued. TODO
         if not findBin(i):
-            sys.exit(str("ERROR: Unknown path to %s; halting." % command))
+            log.error(str("ERROR: Unknown path to %s; halting." % command))
             return False
 
     return True
 
+def startupChecks(args):
+    """
+    Check for dfu-util, openocd, mspdebug, portions of the Kubos SDK,
+    and other stuff.
+    """
+    log = logging.getLogger('logfoo') 
+    
 
-def pathChecks(*paths):
+    log.debug("Command line arguments are: %s " % str(args))
+    if not args:
+        log.error("Command line arguments returned None. Exiting.")
+        return None
+
+    if not checkBoard(args.board):
+        log.error("Unable to verify or determine board. Exiting.")
+        return None
+
+    if args.requireroot:
+        checkRoot()
+
+    log.debug("Checking for required system utilities.")
+    requiredutils = requiredUtils()
+
+    if binaryChecks(requiredutils):
+        log.info("Located required system utilities. Continuing.")
+    else:
+        log.error("Unable to locate required utilites. Exiting.")
+        return None
+
+    paths = requiredPaths()
+    if pathChecks(paths):
+        log.info("Located required system environment variables. Continuing.")
+    else:
+        log.error("Unable to locate required environment variables. Exiting.")
+        return None
+
+    return True
+
+def pathChecks(paths):
     """
     Check for the presence of system environment variables as submitted,
     but doesn't confirm anything is actually in the right place.
@@ -325,7 +373,7 @@ def pathChecks(*paths):
     return True
 
 
-def getEnvironmentVariables(*requiredpaths):
+def getEnvironmentVariables(requiredpaths):
     """Retrieve system environment variables required for successful \
 execution of the functionality in this library."""
     log = logging.getLogger('logfoo')
@@ -354,8 +402,13 @@ def cleanUp(target):
 # If the args said to free the pins when done, do that.
     if(freepins):
         allDone()
-    
-    return True
+   
+# close up shop:
+    dt = datetime.datetime
+    NOW = dt.isoformat(dt.now(), '-')
+    log.debug("Script stopped at  %s." % str(NOW))
+    sys.exit()
+    return True # unnecessary but included pro forma
 
 
 

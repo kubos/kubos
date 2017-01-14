@@ -35,15 +35,13 @@ class Binfile(object):
 
         if not self.board in supportedboards:
             sys.exit("Board %s is not supported." % self.board)
+            return False
 
-
-# try very hard to find the binary
         if not self.getpath():        
             sys.exit("%s unable to find binary file to upload in \
             specified path or current working directory %s. \
             Exiting now." % (errstr, str(array[0])))
 
-# try moderately hard to figure out binary file type / arch
         array = self.getfiletype()
         if not (array[0] or array[1]):
             return False

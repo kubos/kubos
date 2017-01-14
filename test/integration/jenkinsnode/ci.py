@@ -44,89 +44,73 @@ def main():
     NOW = dt.isoformat(dt.now(), '-')
     log.debug("Script started %s." % str(NOW))
 
-    args = ci.readOpts()
+    args = ci.readOpts(
     log.debug("Command line arguments are: %s " % str(args))
 
+    if not ci.startupChecks(args):
+        log.error("Startup checks failed.")
+        sys.exit()
 
-    log.debug("Checking for required system utilities.")
-    requiredutils = ci.requiredUtils()
-
-    if ci.sanityChecks(*requiredutils):
-        log.info("Located required system utilities. Continuing.")
-    else:
-        log.exception("Unable to locate required utilites. Exiting.")
-
-    paths = ci.requiredPaths()
-    if ci.pathChecks(*paths):
-        log.info("Located required system environment variables. Continuing.")
-    else:
-        log.error("Unable to locate required environment variables. Exiting.")
-        sys.exit() # haven't even created a target yet, so this is the way out.
-
-# instantiate some Target class object:
+    log.info("Creating a target object.")
     target = ci.getTarget(args.board)
-
-    if args.command == "lib":
-        pass
+    if not target:
+        log.error("Unable to determine board, or board is unsupported.")
+        sys.exit()
 
     if args.ignoreGPIOwarnings:
         GPIO.setwarnings(False)
 
-
+# the "get to work" part of the function
     if args.command == "flash":
 
-# instantiate some Binfile class object:
+# make a Binfile class object:
         log.info("Creating a binfile object")
         b = ci.getBinfile(name = args.inputbinary, 
                 path = args.binfilepath,
                 board = args.board)
-        b.validate()
+        if not b.validate():
+            log.error("Unable to validate binfile. Exiting.")
+            ci.cleanUp()
         b.getInfo()
 
+
         target.setupboard()
-        log.info("Board setup complete.")
         sleep(1)
 
         pins = target.getpins()
-        print (str(pins))
+        log.debug(str(pins))
 
         target.powerup()
-        log.debug("Powering on the board")
-        sleep(1)
+        sleep(0.5)
 
         target.reset()
-        sleep(1)
+        sleep(0.5)
 
         target.progmode()
-        sleep(1)
+        sleep(0.5)
 
         if (target.flash(b) is True):
             log.info("Program flash completed. Reports success.")
         else:
             log.error("Program flash may have failed.")
-            cleanUp(target)
+            ci.cleanUp(target)
 
         target.reset()
         log.info("\nBoard reset.")
 
         sleep(1)
 
-        if(args.shutdown):
-            log.info("Shutting down the board.")
-            target.powerdown() 
-
 # If you want to shut the board down, this command cleans up and 
-# de-energizes the power MOSFET.
-        if(args.freepins):
-            log.info("Freeing pins and exiting.") 
-            allDone()
+# de-energizes the power MOSFET, and frees the GPIO pins, if flagged
+# to do so.
+        ci.cleanUp(target)
 
-        logging.shutdown()
-
-    else:
+    elif args.command == "lib":
         pass
 
-
+#TODO add more behaviors
+    else:
+        pass
 
 if __name__ == '__main__':
    main()
