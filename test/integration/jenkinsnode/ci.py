@@ -18,6 +18,11 @@
 # cistack.py: a Raspberry Pi interface library specific to 
 # KubOS-supported OBC and SBC products.
 
+import logging
+logging.basicConfig(filename='/tmp/cistack.log',
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(threadName)-10s %(message)s',)
+
 import sys
 # sys.path.append('/var/lib/ansible/')
 import os
@@ -31,30 +36,38 @@ import spidev
 import argparse
 import datetime
 import magic 
-import logging
 import cistack as ci
-
-global shutdown
-global freepins
 
 def main():
 
+    args = ci.readOpts()
+
     log = logging.getLogger('logfoo')
+    hdlr = logging.FileHandler('/tmp/cistack.log')
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+
+    log.addHandler(hdlr) 
+    log.setLevel(ci.logLevel(args))
+
     dt = datetime.datetime
     NOW = dt.isoformat(dt.now(), '-')
-    log.debug("Script started %s." % str(NOW))
+    logging.debug("Script started %s." % str(NOW))
+    logging.info("Arguments have been parsed.")
 
-    args = ci.readOpts(
-    log.debug("Command line arguments are: %s " % str(args))
+    args = ci.readOpts()
+    logging.debug("Command line arguments are: %s " % str(args))
+    
 
+# Target undeclared; no way to call cleanUp at this point.
     if not ci.startupChecks(args):
-        log.error("Startup checks failed.")
+        logging.error("Startup checks failed.")
         sys.exit()
 
-    log.info("Creating a target object.")
+    logging.info("Creating a target object.")
     target = ci.getTarget(args.board)
     if not target:
-        log.error("Unable to determine board, or board is unsupported.")
+        logging.error("Unable to determine board, or board is unsupported.")
         sys.exit()
 
     if args.ignoreGPIOwarnings:
@@ -64,13 +77,13 @@ def main():
     if args.command == "flash":
 
 # make a Binfile class object:
-        log.info("Creating a binfile object")
+        logging.info("Creating a binfile object")
         b = ci.getBinfile(name = args.inputbinary, 
                 path = args.binfilepath,
                 board = args.board)
         if not b.validate():
-            log.error("Unable to validate binfile. Exiting.")
-            ci.cleanUp()
+            logging.error("Unable to validate binfile. Exiting.")
+            ci.cleanUp(target, args)
         b.getInfo()
 
 
@@ -78,7 +91,7 @@ def main():
         sleep(1)
 
         pins = target.getpins()
-        log.debug(str(pins))
+        logging.debug(str(pins))
 
         target.powerup()
         sleep(0.5)
@@ -90,20 +103,20 @@ def main():
         sleep(0.5)
 
         if (target.flash(b) is True):
-            log.info("Program flash completed. Reports success.")
+            logging.info("Program flash completed. Reports success.")
         else:
-            log.error("Program flash may have failed.")
-            ci.cleanUp(target)
+            logging.error("Program flash may have failed.")
+            ci.cleanUp(target, args)
 
         target.reset()
-        log.info("\nBoard reset.")
+        logging.info("\nBoard reset.")
 
         sleep(1)
 
 # If you want to shut the board down, this command cleans up and 
 # de-energizes the power MOSFET, and frees the GPIO pins, if flagged
 # to do so.
-        ci.cleanUp(target)
+        ci.cleanUp(target, args)
 
     elif args.command == "lib":
         pass

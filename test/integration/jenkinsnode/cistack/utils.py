@@ -224,7 +224,7 @@ remember to sudo when running this script. \n\
 Hint: ATTRS{idVendor}==\"0483\", ATTRS{idProduct}==\"df11\" \n\
 \n\
 Therefore, you can set this to True, but we don't advise it.", \
-        metavar = "ROOT", required = False)
+        required = False)
 
     parser.add_argument("-f", "--file", action = 'store', \
         dest = "inputbinary", default="kubos-rt-example", \
@@ -233,11 +233,15 @@ upload", metavar = "FILE", required = True)
 
     parser.add_argument("-v", "--verbose", \
         action = 'store_true', dest = "verbose",
-        help = "provide more verbose output to STDOUT", default = 0, \
+        help = "set INFO log level", default = 0, \
         required = False)
 
     parser.add_argument("--debug", action = 'store_true', \
-        dest = "debug", help="set debug log level", default = 0, \
+        dest = "debug", help="set DEBUG log level", default = 0, \
+        required = False)
+
+    parser.add_argument("--quiet", action = 'store_true', \
+        dest = "quiet", help="set ERROR log level", default = 0, \
         required = False)
 
     parser.add_argument("-p", "--path", action = 'store', \
@@ -253,19 +257,17 @@ Kubos SDK", metavar = "TARGET", required = True)
     parser.add_argument("-i", "--ignore-warnings", action = 'store', \
         dest = 'ignoreGPIOwarnings', default = False, \
         help = "Ignore any warnings from the RPi.GPIO module. Not \
-recommended.",
-        metavar = "IGNORE", required = False)
+recommended.", required = False)
 
     parser.add_argument("--free-pins", action = 'store', \
         dest = 'freepins', default = False, \
         help = "Use RPi.GPIO module to Free GPIO pins when done. Usually \
-unnecessary.",
-        metavar = "FREEPINS", required = False)
+unnecessary.", required = False)
 
     parser.add_argument("--shutdown", action = 'store', \
         dest = 'shutdown', default = False, \
         help = "Shut off the board when done. Usually unnecessary.",
-        metavar = "SHUTDOWN", required = False)
+        required = False)
 
     parser.add_argument("-c", "--command", action = 'store', \
         dest = 'command', default = "flash", type=str, \
@@ -278,12 +280,18 @@ unnecessary.",
 
     arguments = parser.parse_args()
 
-# These are globals:
-    shutdown = arguments.shutdown
-    freepins = arguments.freepins
-
     return arguments
 
+def logLevel(args):
+    """Parse the command line arguments for log verbosity level."""
+    if args.debug:
+        return logging.DEBUG
+    elif args.verbose:
+        return logging.INFO
+    elif args.quiet:
+        return logging.ERROR
+    else:
+        return logging.WARNING
 
 def checkBoard(board):
     """Compare board name to list of currently supported boards."""
@@ -391,16 +399,17 @@ variable %s" % str(i)))
 
     return edict
 
-def cleanUp(target):
+def cleanUp(target, args):
     log = logging.getLogger('logfoo') 
 # If you want to shut the board down, this command cleans up and 
 # de-energizes the power MOSFET.
-    if(shutdown):
+    if args.shutdown:
         log.info("Shutting down the board.")
         target.powerdown() 
 
 # If the args said to free the pins when done, do that.
-    if(freepins):
+    if args.freepins:
+        log.info("Freeing GPIO pins.")
         allDone()
    
 # close up shop:
@@ -417,7 +426,7 @@ boardlist = boardList()
 global helpstring
 helpstring = str("cistack.py; a python utility that provides a series \
 of abstracted functions to interact with supported KubOS \
-target boards, through the Kubos Pi Hat v0.3 interface. The library \
+target boards, through the Kubos CISTACK Pi Hat interface. The library \
 provides numerous functions, but chief among them is the ability to  \
 upload a compiled binary executable to each board using the flashing \
 functions in the library. As such, the user must provide, at a minimum, \
