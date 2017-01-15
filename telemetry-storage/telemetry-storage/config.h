@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,19 @@
 /* Output format (CSV (0), HEX (1), etc) */
 #define DATA_OUTPUT_FORMAT YOTTA_CFG_TELEMETRY_STORAGE_DATA_OUTPUT_FORMAT
 
+/* The telemetry publishers for storage to subscribe to and store  */
+#define STORAGE_SUBSCRIPTIONS YOTTA_CFG_TELEMETRY_STORAGE_SUBSCRIPTIONS
+
+/* The interval to wait between subscribe attempts*/
+#define STORAGE_SUBSCRIBE_RETRY_INTERVAL YOTTA_CFG_TELEMETRY_STORAGE_SUBSCRIBE_RETRY_INTERVAL
+
+/* Telemetry storage receive task stack depth */
+#define STORAGE_TASK_STACK_DEPTH YOTTA_CFG_TELEMETRY_STORAGE_STACK_DEPTH
+
+/* Telemetry storage receive task priority*/
+#define STORAGE_TASK_PRIORITY YOTTA_CFG_TELEMETRY_STORAGE_TASK_PRIORITY
+
+
 #endif
 
 
@@ -41,6 +54,18 @@
 
 /* CSV default */
 #define DATA_OUTPUT_FORMAT FORMAT_TYPE_CSV
+
+/* Subscribe to all telemetry publishers by default  */
+#define STORAGE_SUBSCRIPTIONS 0x0
+
+/* Retry interval 50 ms by default*/
+#define STORAGE_SUBSCRIBE_RETRY_INTERVAL 50
+
+/* Storage recieve stack depth to 1000 by default */
+#define STORAGE_TASK_STACK_DEPTH 1000
+
+/* Storage receive task priority to 0 by default*/
+#define STORAGE_TASK_PRIORITY 0
 
 #endif
 

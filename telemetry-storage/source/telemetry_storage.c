@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ CSP_DEFINE_TASK(telemetry_store_rx)
     telemetry_packet packet;
     telemetry_conn connection;
 
-    /* Subscribe to all telemetry publishers */
-    while (!telemetry_subscribe(&connection, 0x0))
+    /* Subscribe to telemetry publishers as specified in the configuration */
+    while (!telemetry_subscribe(&connection, STORAGE_SUBSCRIPTIONS))
     {
-        /* Retry subscribing every 50 ms */
-        csp_sleep_ms(50);
+        /* Retry subscribing at the interval specified in the configuration*/
+        csp_sleep_ms(STORAGE_SUBSCRIBE_RETRY_INTERVAL);
     }
 
     while (1)
@@ -42,6 +42,7 @@ CSP_DEFINE_TASK(telemetry_store_rx)
         }
     }
 }
+
 
 void telemetry_storage_init()
 {
@@ -132,6 +133,7 @@ static void print_to_console(telemetry_packet packet)
         printf("%f\r\n", packet.data.f);
     }
 }
+
 
 void telemetry_store(telemetry_packet packet)
 {

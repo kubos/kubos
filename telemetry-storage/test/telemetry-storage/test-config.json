@@ -1,0 +1,13 @@
+{
+    "telemetry": {
+        "storage": {
+            "file_name_buffer_size": 8,
+            "data_buffer_size": 8,
+            "data_output_format": 0,
+            "subscriptions": "0x0",
+            "subscribe_retry_interval": 50,
+            "stack_depth": 1000,
+            "task_priority": 0
+        }
+    }
+}

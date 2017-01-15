@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 #define TELEMETRY_STORAGE_H
 
 #include <telemetry/telemetry.h>
+#include "telemetry-storage/config.h"
 
 #define FILE_EXTENSION_CSV ".csv"
 #define FILE_EXTENSION_HEX ".hex"
@@ -39,7 +40,8 @@ CSP_DEFINE_TASK(telemetry_store_rx);
  * Macro to be used for creating a telemetry storage receiving thread.
  */
 #define TELEMETRY_STORE_THREAD   csp_thread_handle_t telem_store_rx_handle; \
-                                 csp_thread_create(telemetry_store_rx, "TELEM_STORE_RX", 1000, NULL, 0, &telem_store_rx_handle); 
+                                 csp_thread_create(telemetry_store_rx, "TELEM_STORE_RX", \
+                                 STORAGE_TASK_STACK_DEPTH, NULL, STORAGE_TASK_PRIORITY, &telem_store_rx_handle); 
 
 
 /**
