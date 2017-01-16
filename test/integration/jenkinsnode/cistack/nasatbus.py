@@ -46,11 +46,11 @@ class NAsatbus(Target):
         IMPORTANT NOTE: openocd must be version 0.9 or later.
         """
 
-        log = logging.getLogger('logfoo')
-        log.info("Initiating binary file flash.")
+      #  log = logging.getLogger('logfoo')
+        logging.info("Initiating binary file flash.")
 
         if not self.sanitycheck(binobj):
-            log.error("Binary file didn't pass a sanity check.")
+            logging.error("Binary file didn't pass a sanity check.")
             return False
 
 # TODO set all of these via Ansible, and get these vars from os.environ
@@ -79,8 +79,8 @@ class NAsatbus(Target):
 # $openocd -f $this_dir/$cfg -s $search_path -c "$cmd $file"
         command = str("%s -f %s/%s -s %s -c \"%s %s\"") % (openocdloc, 
             searchpath, cfg, searchpath, cmd, fileloc)
-        log.info("Attempting to flash the binary file to the target board.")
-        log.debug("Flashing the binary with:\n\n%s" % str(command))
+        logging.info("Attempting to flash the binary file to the target board.")
+        logging.debug("Flashing the binary with:\n\n%s" % str(command))
         try:
             subprocess.check_output(command, shell = True)
             return True

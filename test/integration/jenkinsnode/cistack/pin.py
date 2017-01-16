@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import RPi.GPIO as GPIO
+import logging
 from time import sleep
 
 errstr="*** ERROR (pin) "
@@ -49,14 +50,14 @@ class Pin(object):
             return False
 
         func = GPIO.gpio_function(self.number)
-        print("pin %s set to %s" % (str(self.number), str(func)))
+        logging.debug("pin %s set to %s" % (str(self.number), str(func)))
         if func == GPIO.UNKNOWN:
             sys.exit("Unable to determine the function of the pin! Exiting.")
 
 # Can attempt to set this using incorrect options, but otherwise it isn't
 # particularly interactive
         GPIO.setup(self.number, self.direction)
-        print("Key %s, pin %s is set to %s " % 
+        logging.info("Key %s, pin %s is set to %s " % 
         (self.name, str(self.number), str(self.direction)))
         sleep(0.5)
         return True
@@ -71,14 +72,14 @@ class Pin(object):
 # It is possible to check beforehand and avoid the Error, but that might do
 # things the user didn't intend.
         try:
-            print("Asserting pin %s" % str(self.number))
+            logging.debug("Asserting pin %s" % str(self.number))
             GPIO.output(self.number, self.onval)
         
         except RuntimeError:
-            print("%s in pin %s:" % (errstr, str(self.number)))
-            print("onval: %s" % str(self.onval))
-            print("offval: %s" % str(self.offval))
-            print("direction: %s " % str(self.direction))
+            logging.error("%s in pin %s:" % (errstr, str(self.number)))
+            logging.error("onval: %s" % str(self.onval))
+            logging.error("offval: %s" % str(self.offval))
+            logging.error("direction: %s " % str(self.direction))
 
             sys.exit("%s unable to assert pin %s" % (errstr, str(self.number)))
             return False

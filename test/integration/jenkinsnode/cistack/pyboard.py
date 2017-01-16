@@ -41,10 +41,10 @@ class Pyboard(Target):
     def flash(self, binobj):
         """use an external shell to push the binary file using dfu-util."""
 
-        log = logging.getLogger('logfoo')
+    #    log = logging.getLogger('logfoo')
 
         if not self.sanitycheck(binobj):
-            log.error("Binary file didn't pass a sanity check. Exiting.")
+            logging.error("Binary file didn't pass a sanity check. Exiting.")
             return False
 
         dfupath = findBin('dfu-util')
@@ -58,16 +58,16 @@ class Pyboard(Target):
         tail = str("-i 0 -s 0x08000000")
         head = str("--alt 0 -D ")
         command = str("%s %s %s %s " % (dfupath, head, binfile, tail))
-        log.info(command)
+        logging.info(command)
         try:
             output = subprocess.check_output(command , shell = True)
-            log.debug(output)
+            logging.debug(output)
 
             if re.search("File downloaded successfully.*$", output):
-                log.info("Looks like things went well!")
+                logging.info("Looks like things went well!")
 
         except:
-            log.error("Flash seems to have failed.")
+            logging.error("Flash seems to have failed.")
             return False
 
         sleep(0.5)

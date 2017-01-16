@@ -76,29 +76,29 @@ def getTarget(target):
     from stm32f407discovery import STM32F407Discovery
     from msp430f5529 import MSP430
 
-    log = logging.getLogger('logfoo') 
+#     log = logging.getLogger('logfoo') 
 
     """ Configure the board-specific pin addresses and directions """
-    log.info("Checking on the availability of the %s Target class" % target)
+    logging.info("Checking on the availability of the %s Target class" % target)
 
     if target == "pyboard-gcc":
-        log.debug("Matched STM32F405  pyboard")
+        logging.debug("Matched STM32F405  pyboard")
         return Pyboard()
 
     elif target == "stm32f407-disco-gcc":
-        log.debug("Matched STM32F407 discovery board")
+        logging.debug("Matched STM32F407 discovery board")
         return STM32F407Discovery()
 
     elif target == "msp430f5529-gcc":
-        log.debug("Matched MSP430F5529 launchpad")
+        logging.debug("Matched MSP430F5529 launchpad")
         return MSP430()
 
     elif target == "na-satbus-3c0-gcc":
-        log.debug("Matched STM32F405 NanoAvionics SatBus 3c0")
+        logging.debug("Matched STM32F405 NanoAvionics SatBus 3c0")
         return NAsatbus()
 
     else:
-        log.error("Unsupported board -- no 'Target' class available.")
+        logging.error("Unsupported board -- no 'Target' class available.")
         return None
 
     return None
@@ -106,14 +106,14 @@ def getTarget(target):
 
 def getBoardConfigs(boards):
     """Ensure that the board identifier is supported."""
-    log = logging.getLogger('logfoo') 
+#    log = logging.getLogger('logfoo') 
     for i in boards:
         try:
             r = parseBoardIdentifier(i['dev'])
             if r[1]: # board is supported
                 return r
         except:
-            log.error("Unable to determine board type. Exiting.")
+            logging.error("Unable to determine board type. Exiting.")
             return None
 
     return None
@@ -155,10 +155,10 @@ def parseBoardIdentifier(lsusbpattern):
 
 # kludgy at best, but helps. TODO replace with something better
 def whichUSBboard():
-    log = logging.getLogger('logfoo') 
+#    log = logging.getLogger('logfoo') 
     lsusb = findBin('lsusb')
     if not lsusb:
-        log.error("Unable to find lsusb utility. Exiting.")
+        logging.error("Unable to find lsusb utility. Exiting.")
         return None
     output = subprocess.check_output(lsusb, shell = True)
     lines = output.rsplit('\n')
@@ -170,7 +170,7 @@ def whichUSBboard():
         for manuf in manlist:
             try:
                 if re.search(manuf, arr[6]):
-                    log.info(str("found %s device at %s" % (manuf, arr[5])))
+                    logging.info(str("found %s device at %s" % (manuf, arr[5])))
                     retarray.append({ 'manuf':arr[6], 'dev':arr[5]})
             except:
                 next
@@ -180,9 +180,9 @@ def whichUSBboard():
 
 
 def findBin(command):
-    log = logging.getLogger('logfoo')
+#    log = logging.getLogger('logfoo')
     cmd = str("/usr/bin/which %s" % command)
-    log.debug("Looking for %s in system binary PATHs." % command)
+    logging.debug("Looking for %s in system binary PATHs." % command)
 
     try:    
         retval = subprocess.check_output(cmd, shell = True)
@@ -199,8 +199,8 @@ def checkRoot():
     only allow the script to run with elevated privileges. While this
     choice is discouraged, it is up to the user's discretion.
     """
-    log = logging.getLogger('logfoo')
-    log.debug("Checking for root access...")
+#    log = logging.getLogger('logfoo')
+    logging.debug("Checking for root access...")
 
     if os.geteuid() != 0:
         print("You need to have root privileges to run this script.\n")
@@ -295,11 +295,11 @@ def logLevel(args):
 
 def checkBoard(board):
     """Compare board name to list of currently supported boards."""
-    log = logging.getLogger('logfoo') 
+#    log = logging.getLogger('logfoo') 
     supportedboards = supportedBoards()
     if board in supportedboards:
         return True
-    log.error(str("%s Board name '%s' does not match list of currently supported \
+    logging.error(str("%s Board name '%s' does not match list of currently supported \
 boards. Exiting." % (errstr, board)))
     return False
 
@@ -314,11 +314,11 @@ def binaryChecks(findit):
     Check for dfu-util, openocd, mspdebug, portions of the Kubos SDK,
     and other stuff.
     """
-    log = logging.getLogger('logfoo') 
+#    log = logging.getLogger('logfoo') 
 
     for i in findit:
         if not findBin(i):
-            log.error(str("ERROR: Unknown path to %s; halting." % command))
+            logging.error(str("ERROR: Unknown path to %s; halting." % command))
             return False
 
     return True
@@ -328,35 +328,35 @@ def startupChecks(args):
     Check for dfu-util, openocd, mspdebug, portions of the Kubos SDK,
     and other stuff.
     """
-    log = logging.getLogger('logfoo') 
+#    log = logging.getLogger('logfoo') 
     
 
-    log.debug("Command line arguments are: %s " % str(args))
+    logging.debug("Command line arguments are: %s " % str(args))
     if not args:
-        log.error("Command line arguments returned None. Exiting.")
+        logging.error("Command line arguments returned None. Exiting.")
         return None
 
     if not checkBoard(args.board):
-        log.error("Unable to verify or determine board. Exiting.")
+        logging.error("Unable to verify or determine board. Exiting.")
         return None
 
     if args.requireroot:
         checkRoot()
 
-    log.debug("Checking for required system utilities.")
+    logging.debug("Checking for required system utilities.")
     requiredutils = requiredUtils()
 
     if binaryChecks(requiredutils):
-        log.info("Located required system utilities. Continuing.")
+        logging.info("Located required system utilities. Continuing.")
     else:
-        log.error("Unable to locate required utilites. Exiting.")
+        logging.error("Unable to locate required utilites. Exiting.")
         return None
 
     paths = requiredPaths()
     if pathChecks(paths):
-        log.info("Located required system environment variables. Continuing.")
+        logging.info("Located required system environment variables. Continuing.")
     else:
-        log.error("Unable to locate required environment variables. Exiting.")
+        logging.error("Unable to locate required environment variables. Exiting.")
         return None
 
     return True
@@ -366,16 +366,16 @@ def pathChecks(paths):
     Check for the presence of system environment variables as submitted,
     but doesn't confirm anything is actually in the right place.
     """
-    log = logging.getLogger('logfoo')
+#    log = logging.getLogger('logfoo')
     for i in paths:
         p = os.environ[i]
         try:
-            log.debug("Checking: %s  = %s" % (i,p))
+            logging.debug("Checking: %s  = %s" % (i,p))
             if ((p is None) or (p == "")):
-                log.error(str("No environment variable %s" % i))
+                logging.error(str("No environment variable %s" % i))
                 return False
         except:
-            log.error(str("No environment variable %s" % i))
+            logging.error(str("No environment variable %s" % i))
             return False
 
     return True
@@ -384,7 +384,7 @@ def pathChecks(paths):
 def getEnvironmentVariables(requiredpaths):
     """Retrieve system environment variables required for successful \
 execution of the functionality in this library."""
-    log = logging.getLogger('logfoo')
+#    log = logging.getLogger('logfoo')
 
     edict = {}
     for i in requiredpaths:
@@ -393,29 +393,29 @@ execution of the functionality in this library."""
         except KeyError:
             edict[i] = ""
         except:
-            log.error(str("Problem while retrieving system environment \
+            logging.error(str("Problem while retrieving system environment \
 variable %s" % str(i)))
             return False
 
     return edict
 
 def cleanUp(target, args):
-    log = logging.getLogger('logfoo') 
+#    log = logging.getLogger('logfoo') 
 # If you want to shut the board down, this command cleans up and 
 # de-energizes the power MOSFET.
     if args.shutdown:
-        log.info("Shutting down the board.")
+        logging.info("Shutting down the board.")
         target.powerdown() 
 
 # If the args said to free the pins when done, do that.
     if args.freepins:
-        log.info("Freeing GPIO pins.")
+        logging.info("Freeing GPIO pins.")
         allDone()
    
 # close up shop:
     dt = datetime.datetime
     NOW = dt.isoformat(dt.now(), '-')
-    log.debug("Script stopped at  %s." % str(NOW))
+    logging.debug("Script stopped at  %s." % str(NOW))
     sys.exit()
     return True # unnecessary but included pro forma
 

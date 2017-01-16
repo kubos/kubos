@@ -36,10 +36,10 @@ class STM32F407Discovery(Target):
         declare the library path before executing a bash -c command.
         """
 
-        log = logging.getLogger('logfoo')
+  #      log = logging.getLogger('logfoo')
 # Sanity check the arch and bin file type:
         if not self.sanitycheck(binobj):
-            log.error("Binary file didn't pass a sanity check. Exiting.")
+            logging.error("Binary file didn't pass a sanity check. Exiting.")
             return False
 
 # TODO set all of these via Ansible on the target machines
@@ -66,7 +66,7 @@ class STM32F407Discovery(Target):
 # $openocd -f $this_dir/$cfg -s $search_path -c "$cmd $file"
         command = str("%s -f %s/%s -s %s -c \"%s %s\"") % (openocdloc, 
             searchpath, cfg, searchpath, cmd, fileloc)
-        log.info(str(command))
+        logging.info(str(command))
         try:
             subprocess.check_output(command, shell = True)
             return True

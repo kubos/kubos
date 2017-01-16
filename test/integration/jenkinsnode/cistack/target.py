@@ -34,8 +34,8 @@ class Target(object):
         Assert the pin(s) in whatever sequence is required to
         put the board into programming mode, if this is required.
         """
-        log = logging.getLogger('logfoo') 
-        log.debug("Setting programming mode, if any is needed.")
+#        log = logging.getLogger('logfoo') 
+        logging.debug("Setting programming mode, if any is needed.")
         return False
 
     def flash(self, binfile, binpath):
@@ -43,8 +43,8 @@ class Target(object):
 
     def reset(self):
         """Assert the reset pin for the board, then release it."""
-        log = logging.getLogger('logfoo') 
-        log.debug("Resetting the board.")
+#        log = logging.getLogger('logfoo') 
+        logging.debug("Resetting the board.")
         self.pins['rst'].on()
         sleep(0.5)
         self.pins['rst'].off()
@@ -53,16 +53,16 @@ class Target(object):
 
     def powerup(self):
         """Turn on the power MOSFET for the target board."""
-        log = logging.getLogger('logfoo') 
-        log.debug("Turning on the board with pin %s" % str(self.pins['pwr'].number))
+#        log = logging.getLogger('logfoo') 
+        logging.debug("Turning on the board with pin %s" % str(self.pins['pwr'].number))
         self.pins['pwr'].on()
         sleep(0.1)
         return True
 
     def powerdown(self):
         """Turn off the power MOSFET for the target board."""
-        log = logging.getLogger('logfoo')
-        log.debug("Turning off the board's power")
+#        log = logging.getLogger('logfoo')
+        logging.debug("Turning off the board's power")
         self.pins['pwr'].off()
         return True
 
@@ -73,17 +73,17 @@ class Target(object):
         direction and function.
         """
 
-        log = logging.getLogger('logfoo') 
+#        log = logging.getLogger('logfoo') 
 # Setting BCM mode is "Broadcom", running from GPIO2 to GPIO27
 # Meaning pin 40 in "BOARD" is pin 21 in BCM
-        log.info("Setting pin modes for each pin:")
+        logging.info("Setting pin modes for each pin:")
         GPIO.setmode(GPIO.BCM)
 
         for pin in self.pins.keys():
-            log.debug("Setting up pin %s." % pin)
+            logging.debug("Setting up pin %s." % pin)
             self.pins[pin].setup()
 
-        log.info("Setup complete.")
+        logging.info("Setup complete.")
         sleep(0.1)
         return True
 
@@ -99,12 +99,12 @@ class Target(object):
         meaning it cannot be simply found with a regex.
         """
 
-        log = logging.getLogger('logfoo') 
+#        log = logging.getLogger('logfoo') 
 # do self.binfiletype & self.arch match returns from binfile.validate()?
-        log.debug("Validating the binary file object")
+        logging.debug("Validating the binary file object")
         binobj.validate()
         
-        log.debug("comparing %s to %s and %s to %s" % 
+        logging.debug("comparing %s to %s and %s to %s" % 
                 (str(binobj.filetype), str(self.binfiletype), 
                     str(binobj.arch), str(self.arch)))
         if (binobj.filetype == self.binfiletype and 

@@ -19,9 +19,9 @@
 # KubOS-supported OBC and SBC products.
 
 import logging
-logging.basicConfig(filename='/tmp/cistack.log',
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)s %(threadName)-10s %(message)s',)
+logging.basicConfig(filename = '/tmp/cistack.log',
+    level = logging.INFO,
+    format = '%(asctime)s %(levelname)s %(threadName)-10s %(message)s',)
 
 import sys
 # sys.path.append('/var/lib/ansible/')
@@ -42,13 +42,13 @@ def main():
 
     args = ci.readOpts()
 
-    log = logging.getLogger('logfoo')
-    hdlr = logging.FileHandler('/tmp/cistack.log')
-    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    hdlr.setFormatter(formatter)
+#    log = logging.getLogger('logfoo')
+#    hdlr = logging.FileHandler('/tmp/cistack.log')
+#    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+#    hdlr.setFormatter(formatter)
 
-    log.addHandler(hdlr) 
-    log.setLevel(ci.logLevel(args))
+#    log.addHandler(hdlr) 
+    logging.setLevel(ci.logLevel(args))
 
     dt = datetime.datetime
     NOW = dt.isoformat(dt.now(), '-')
@@ -86,10 +86,11 @@ def main():
             ci.cleanUp(target, args)
         b.getInfo()
 
-
+# set up the GPIO pins as requested
         target.setupboard()
         sleep(1)
 
+# create a dict of Pin objects:
         pins = target.getpins()
         logging.debug(str(pins))
 
