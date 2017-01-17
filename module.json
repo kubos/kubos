@@ -1,0 +1,16 @@
+{
+  "name": "kubos-linux-example",
+  "version": "0.1.0",
+  "bin": "./source",
+  "description": "Example app running on KubOS Linux.",
+  "repository": {
+    "url": "ssh://git@github.com/kubostech/kubos-linux-example",
+    "type": "git"
+  },
+  "homepage": "https://github.com/kubostech/kubos-linux-example",
+  "license": "Apache-2.0",
+  "bin" : "./source",
+  "dependencies": {
+      "csp" : "kubostech/libcsp#~1.5.0"
+  }
+}
