@@ -64,30 +64,30 @@ Assuming you've successfully built a Kubos-SDK project for the ISIS-OBC board, w
 
 "No compatible FTDI device found"
 
-    - Check that the iOBC is turned on and connected to your computer
-    - Check that no other vagrant images are running.  Only one VM can have control of the USB, so it may be that another instance
-    currently has control of the device.  You can shutdown a vagrant image with the command 'vagrant halt'
-    - Verify that the USB is showing up within the vagrant environment with the 'lsusb' command.  You should see an FTDI device
-    - Verify that the USB has been mapped to a linux device.  Issue the command 'ls /dev'.  You should see a /dev/ttyUSB* device. 
-    If you don't, try rebooting your vagrant image ('vagrant halt', 'vagrant up')
+- Check that the iOBC is turned on and connected to your computer
+- Check that no other vagrant images are running.  Only one VM can have control of the USB, so it may be that another instance
+currently has control of the device.  You can shutdown a vagrant image with the command 'vagrant halt'
+- Verify that the USB is showing up within the vagrant environment with the 'lsusb' command.  You should see an FTDI device
+- Verify that the USB has been mapped to a linux device.  Issue the command 'ls /dev'.  You should see a /dev/ttyUSB* device. 
+If you don't, try rebooting your vagrant image ('vagrant halt', 'vagrant up')
     
 "Transfer Failed: Connection Failed"
 
-    - The SDK was unable to connect to the iOBC
-    - Verify that the USB has been mapped to a linux device.  Issue the command 'ls /dev'.  You should see a /dev/ttyUSB* device. 
-    If you don't, try rebooting your vagrant image ('vagrant halt', 'vagrant up')
-    - If this error occurs after the transfer process has started, then the SDK likely lost connection to the iOBC.  Verify that
-    the board is still correctly connected and powered and try the flash command again.
+- The SDK was unable to connect to the iOBC
+- Verify that the USB has been mapped to a linux device.  Issue the command 'ls /dev'.  You should see a /dev/ttyUSB* device. 
+If you don't, try rebooting your vagrant image ('vagrant halt', 'vagrant up')
+- If this error occurs after the transfer process has started, then the SDK likely lost connection to the iOBC.  Verify that
+the board is still correctly connected and powered and try the flash command again.
 
 "Transfer Failed: Invalid Password"
 
-    - The SDK was unable to log into the iOBC.  Verify that the password is correctly defined in your config.json file by issuing
-    the 'kubos config' command.
+- The SDK was unable to log into the iOBC.  Verify that the password is correctly defined in your config.json file by issuing
+the 'kubos config' command.
     
 System appears to have hung
 
-    - If for some reason file transfer fails, it can take a couple minutes for the connection to time out and return control.
-    - If you've waited a couple minutes and the system still appears hung, please let us know so that we can open a bug report.
+- If for some reason file transfer fails, it can take a couple minutes for the connection to time out and return control.
+- If you've waited a couple minutes and the system still appears hung, please let us know so that we can open a bug report.
 
 
 ##Debug Console
