@@ -27,7 +27,17 @@
   "config": {
     "arch": {
       "arm": {}
+    },
+    "system": {
+      "password": "Kubos123"
     }
   },
-  "toolchain": "CMake/toolchain.cmake"
+  "toolchain": "CMake/toolchain.cmake",
+  "scripts": {
+    "start": [
+      "bash",
+      "$PWD/yotta_targets/kubos-linux-isis-gcc/minicom/flash.sh",
+      "$program"
+    ]
+  }
 }
