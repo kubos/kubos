@@ -1,4 +1,4 @@
-#Linux on the ISIS iOBC
+#KubOS Linux on the ISIS iOBC
 
 [Overview](#overview)
 
@@ -8,7 +8,7 @@
 
 ##Overview
 
-The goal of this document is to create a Linux installation for the iOBC that can then run the satellite services (telemetry, payload communication, etc) 
+The goal of this document is to create a KubOS Linux installation for the iOBC that can then run the satellite services (telemetry, payload communication, etc) 
 needed for the ISIS customers' missions.
 
 ##Software Components
