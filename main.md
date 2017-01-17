@@ -33,6 +33,8 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
  - [KubOS Linux Overview](docs/Linux_Overview.md)
  
  - [KubOS Linux on iOBC](docs/Linux_on_iOBC.md)
+ 
+ - [User Applications on iOBC](docs/User_App_on_iOBC.md)
 
 
 ## Top Level APIs
