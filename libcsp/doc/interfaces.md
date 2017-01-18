@@ -55,4 +55,40 @@ A new CSP buffer is preallocated with csp\_buffer\_get(). When data is received,
 void csp_new_packet(csp_packet_t *packet, csp_iface_t *interface, CSP_BASE_TYPE *pxTaskWoken);
 ```
 
-The calling interface must be passed in interface to avoid routing loops. Furthermore, pxTaskWoken must be set to a non-NULL value if the packet is received in an interrupt service routine. If the packet is received in task context, NULL must be passed. ‘pxTaskWoken’ only applies to
+The calling interface must be passed in interface to avoid routing loops. Furthermore, pxTaskWoken must be set to a non-NULL value if the packet is received in an interrupt service routine. If the packet is received in task context, NULL must be passed. 'pxTaskWoken' only applies to FreeRTOS systems, and POSIX system should always set the value to NULL.
+
+csp_new_packet will either accept the packet or free the packet buffer, so the interface must never free the packet after passing it to CSP.
+
+Initialization
+--------------
+
+In order to initialize the interface, and make it available to the router, use the following function found in csp/csp_interface.h:
+
+``` sourceCode
+csp_route_add_if(&csp_if_fifo);
+```
+
+This actually happens automatically if you try to call csp_route_add() with an interface that is unknown to the router. This may however be removed in the future, in order to ensure that all interfaces are initialized before configuring the routing table. The reason is that some products released in the future may ship with an empty routing table, which is then configured by a routing protocol rather than a static configuration.
+
+In order to setup a manual static route, use the following example where the default route is set to the fifo interface:
+
+``` sourceCode
+csp_route_set(CSP_DEFAULT_ROUTE, &csp_if_fifo, CSP_NODE_MAC);
+```
+
+All outgoing traffic, except loopback, is now passed to the fifo interface's nexthop function.
+
+Building the example
+--------------------
+
+The fifo examples can be compiled with:
+
+``` sourceCode
+% gcc csp_if_fifo.c -o csp_if_fifo -I<CSP PATH>/include -L<CSP PATH>/build -lcsp -lpthread -lrt
+```
+
+The two named pipes are created with:
+
+``` sourceCode
+% mkfifo server_to_client client_to_server
+```
