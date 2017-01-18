@@ -18,45 +18,55 @@
 #include <cmocka.h>
 #include "telemetry/telemetry.h"
 
+#define NUM_SUBS 5
+
 static void test_subscriber(void)
 {
-    pubsub_conn conn;
-    pubsub_conn conn2;
-    telemetry_packet in_packet;
-    telemetry_packet in_packet2;
-    telemetry_packet out_packet;
+    pubsub_conn connections[NUM_SUBS];
+    telemetry_packet incoming_packets[NUM_SUBS];
+    telemetry_packet outgoing_packet;
+    bool subscribe_status[NUM_SUBS] = {false};
+    bool read_status[NUM_SUBS] = {false};
+    int i = 0;
 
-    out_packet.data.i = 10;
+    outgoing_packet.data.i = 10;
     
     telemetry_init();
     
-    assert_true(telemetry_subscribe(&conn2, 0));
+    for (i = 0; i < NUM_SUBS; i++)
+    {
+        subscribe_status[i] = telemetry_subscribe(&connections[i], 0);
+    }
 
-    bool subscribed = telemetry_subscribe(&conn, 0);
+    int total_subs = telemetry_num_subscribers();
 
-    int num_subs = telemetry_num_subscribers();
+    bool packet_published = telemetry_publish(outgoing_packet);
 
-    bool published = telemetry_publish(out_packet);
-    
-    bool read = telemetry_read(conn, &in_packet);
-
-    bool read2 = (telemetry_read(conn2, &in_packet2));
-
-    int num_subs_pre_clean = telemetry_num_subscribers();
+    for (i = 0; i < NUM_SUBS; i++)
+    {
+        read_status[i] = telemetry_read(connections[i], &incoming_packets[i]);
+    }
 
     telemetry_cleanup();
+    
+    for (i = 0; i < NUM_SUBS; i++)
+    {
+        csp_close(connections[i].conn_handle);
+    }
 
-    csp_close(conn.conn_handle);
+    int end_total_subs = telemetry_num_subscribers();
 
-    int num_subs_post_clean = telemetry_num_subscribers();
+    for (i = 0; i < NUM_SUBS; i++)
+        assert_true(subscribe_status[i]);
+    
+    assert_int_equal(total_subs, NUM_SUBS);
 
-    assert_true(subscribed);
-    assert_true(published);
-    assert_true(read);
-    assert_true(out_packet.data.i == in_packet.data.i);
-    assert_true(out_packet.data.i == in_packet2.data.i);
-    assert_true(num_subs_pre_clean == 2);
-    assert_true(num_subs_post_clean == 0);
+    assert_true(packet_published);
+
+    for (i = 0; i < NUM_SUBS; i++)
+        assert_true(read_status[i]);
+
+    assert_int_equal(end_total_subs, 0);
 }
 
 int main(void)

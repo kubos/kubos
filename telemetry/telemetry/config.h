@@ -32,6 +32,9 @@
 #define TELEMETRY_CSP_PORT YOTTA_CFG_TELEMETRY_CSP_PORT
 #endif
 
+
+/** NOTE this value needs to be validated against the CSP_CONN_MAX value
+    from inside of CSP **/
 /* Max number of subscribers supported */
 #ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_MAX_NUM
 #define TELEMETRY_SUBSCRIBERS_MAX_NUM 10
