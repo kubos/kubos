@@ -15,15 +15,8 @@
  */
 #include <cmocka.h>
 #include <telemetry/telemetry.h>
-#include "telemetry-storage/telemetry_storage.c"
+#include "source/telemetry_storage.c"
 #include "telemetry-storage/config.h"
-
-/* Test requires the following configuration:
- * #define FILE_NAME_BUFFER_SIZE 8 
- * #define DATA_BUFFER_SIZE 8
- * When running test the following argument should be called:
- * kubos test --config="path/to/test-config.json"
- * */
  
 static void test_create_filename_null_pointers(void **state)
 {
@@ -44,11 +37,14 @@ static void test_create_filename(void **state)
     static char filename_buffer[FILE_NAME_BUFFER_SIZE];
     static char *filename_buf_ptr;
     filename_buf_ptr = filename_buffer;
-    
-    /* Test catching partial writes from snprintf by passing 8 chars 
-     * given a buffer size of 8 (no room for null terminator)
+    char test_string_file_ext[FILE_NAME_BUFFER_SIZE - 2];
+    memset(test_string_file_ext, 't', sizeof(test_string_file_ext));
+
+    /* Test catching partial writes from snprintf by passing 128 chars 
+     * given a file extension size of 126 and a address and source id of 
+     * one char each (no room for null terminator)
      */
-    assert_int_equal(create_filename(filename_buf_ptr,255,1,"test"),0);
+    assert_int_equal(create_filename(filename_buf_ptr,1,1,test_string_file_ext),0);
 }
 
 
@@ -56,22 +52,38 @@ static void test_format_log_entry_csv(void **state)
 {
     static char data_buffer[DATA_BUFFER_SIZE];
     static char *data_buf_ptr;
-    telemetry_packet packet = { .data.i = 1234, .timestamp = 0, \
-        .source.subsystem_id = 0x0, .source.data_type = TELEMETRY_TYPE_INT, \
-        .source.source_id = 0x1};
+    telemetry_packet packet = { .data.f = FLT_MAX, .timestamp = 65535, \
+         .source.data_type = TELEMETRY_TYPE_FLOAT };
     
     data_buf_ptr = data_buffer;
     
-    /* Test catching partial writes from snprintf by passing a telemetry
-     * packet with 7 digits given a buffer size of 8 (no room for comma,
-     * carriage return, new line, and null terminator)
+    /* Test the maximum length of a log entry. Currently a max float 
+     * plus a max timestamp 
      */
-     assert_int_equal(format_log_entry_csv(data_buf_ptr, packet),0);
+     assert_int_equal(format_log_entry_csv(data_buf_ptr, packet), 54);
      
      packet.source.data_type = 2;
      
     /* Pass an unknown telemetry type */
      assert_int_equal(format_log_entry_csv(data_buf_ptr, packet),0);
+}
+
+
+static void test_telemetry_store(void **state)
+{
+    telemetry_packet packet = { .data.i = 1, .timestamp = 0, \
+        .source.subsystem_id = 0, .source.data_type = TELEMETRY_TYPE_INT, \
+        .source.source_id = 1};
+        
+    expect_not_value_count(__wrap_disk_save_string, file_path, NULL,2);
+    expect_not_value_count(__wrap_disk_save_string, data_buffer, NULL,2);
+    expect_not_value_count(__wrap_disk_save_string, data_len, 0,2);
+    will_return(__wrap_disk_save_string,0);
+    assert_true(telemetry_store(packet));
+    
+    will_return(__wrap_disk_save_string,1);
+    assert_false(telemetry_store(packet));
+
 }
 
 
@@ -82,6 +94,7 @@ int main(void)
         cmocka_unit_test(test_format_log_entry_csv_null_pointers),
         cmocka_unit_test(test_create_filename),
         cmocka_unit_test(test_format_log_entry_csv),
+        cmocka_unit_test(test_telemetry_store),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

@@ -17,57 +17,55 @@
 #define TELEMETRY_STORAGE_CONFIG_H
 
 
-/* If there is a configuration present... */
-#ifdef YOTTA_CFG_TELEMETRY_STORAGE
 /* Maximum size/length of the filename buffer */
+#ifndef YOTTA_CFG_TELEMETRY_STORAGE_FILE_NAME_BUFFER_SIZE
+#define FILE_NAME_BUFFER_SIZE 128
+#else
 #define FILE_NAME_BUFFER_SIZE YOTTA_CFG_TELEMETRY_STORAGE_FILE_NAME_BUFFER_SIZE
+#endif
 
 /* Maximum size/length of the storage buffer */
+#ifndef YOTTA_CFG_TELEMETRY_STORAGE_DATA_BUFFER_SIZE
+#define DATA_BUFFER_SIZE 64
+#else
 #define DATA_BUFFER_SIZE YOTTA_CFG_TELEMETRY_STORAGE_DATA_BUFFER_SIZE
+#endif
 
 /* Output format (CSV (0), HEX (1), etc) */
+#ifndef YOTTA_CFG_TELEMETRY_STORAGE_DATA_OUTPUT_FORMAT
+#define DATA_OUTPUT_FORMAT FORMAT_TYPE_CSV
+#else
 #define DATA_OUTPUT_FORMAT YOTTA_CFG_TELEMETRY_STORAGE_DATA_OUTPUT_FORMAT
+#endif
 
-/* The telemetry publishers for storage to subscribe to and store  */
+/* The telemetry publishers for storage to subscribe to and store */
+#ifndef YOTTA_CFG_TELEMETRY_STORAGE_SUBSCRIPTIONS
+#define STORAGE_SUBSCRIPTIONS 0x0
+#else
 #define STORAGE_SUBSCRIPTIONS YOTTA_CFG_TELEMETRY_STORAGE_SUBSCRIPTIONS
+#endif
 
-/* The interval to wait between subscribe attempts*/
+/* The interval to wait between subscribe attempts */
+#ifndef YOTTA_CFG_TELEMETRY_STORAGE_SUBSCRIBE_RETRY_INTERVAL
+#define STORAGE_SUBSCRIBE_RETRY_INTERVAL 50
+#else
 #define STORAGE_SUBSCRIBE_RETRY_INTERVAL YOTTA_CFG_TELEMETRY_STORAGE_SUBSCRIBE_RETRY_INTERVAL
+#endif
 
 /* Telemetry storage receive task stack depth */
-#define STORAGE_TASK_STACK_DEPTH YOTTA_CFG_TELEMETRY_STORAGE_STACK_DEPTH
-
-/* Telemetry storage receive task priority*/
-#define STORAGE_TASK_PRIORITY YOTTA_CFG_TELEMETRY_STORAGE_TASK_PRIORITY
-
-
-#endif
-
-
-/* If there is not a configuration present use defaults... */
-#ifndef YOTTA_CFG_TELEMETRY_STORAGE
-
-/* Set at FatFs LFN max length */
-#define FILE_NAME_BUFFER_SIZE 255
-
-#define DATA_BUFFER_SIZE 128
-
-/* CSV default */
-#define DATA_OUTPUT_FORMAT FORMAT_TYPE_CSV
-
-/* Subscribe to all telemetry publishers by default  */
-#define STORAGE_SUBSCRIPTIONS 0x0
-
-/* Retry interval 50 ms by default*/
-#define STORAGE_SUBSCRIBE_RETRY_INTERVAL 50
-
-/* Storage recieve stack depth to 1000 by default */
+#ifndef YOTTA_CFG_TELEMETRY_STORAGE_STACK_DEPTH
 #define STORAGE_TASK_STACK_DEPTH 1000
+#else
+#define STORAGE_TASK_STACK_DEPTH YOTTA_CFG_TELEMETRY_STORAGE_STACK_DEPTH
+#endif
 
-/* Storage receive task priority to 0 by default*/
+/* Telemetry storage receive task priority */
+#ifndef YOTTA_CFG_TELEMETRY_STORAGE_TASK_PRIORITY
 #define STORAGE_TASK_PRIORITY 0
-
+#else
+#define STORAGE_TASK_PRIORITY YOTTA_CFG_TELEMETRY_STORAGE_TASK_PRIORITY
 #endif
 
 
 #endif
+

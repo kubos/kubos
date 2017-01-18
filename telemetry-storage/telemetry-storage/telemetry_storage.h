@@ -16,6 +16,7 @@
 #ifndef TELEMETRY_STORAGE_H
 #define TELEMETRY_STORAGE_H
 
+#include <stdbool.h>
 #include <telemetry/telemetry.h>
 #include "telemetry-storage/config.h"
 
@@ -57,8 +58,9 @@ void telemetry_storage_init();
  * @brief store a telemetry packet in a particular format specified by
  *        the configuration.
  * @param packet the telemetry packet to store.
+ * @retval true if successful, otherwise false
  */
-void telemetry_store(telemetry_packet packet);
+bool telemetry_store(telemetry_packet packet);
 
 
 #endif

@@ -135,7 +135,7 @@ static void print_to_console(telemetry_packet packet)
 }
 
 
-void telemetry_store(telemetry_packet packet)
+bool telemetry_store(telemetry_packet packet)
 {
     static char filename_buffer[FILE_NAME_BUFFER_SIZE];
     static char *filename_buf_ptr;
@@ -149,33 +149,37 @@ void telemetry_store(telemetry_packet packet)
     filename_buf_ptr = filename_buffer;
     data_buf_ptr = data_buffer;
     
-    #if (DATA_OUTPUT_FORMAT == FORMAT_TYPE_CSV) 
+    if(DATA_OUTPUT_FORMAT == FORMAT_TYPE_CSV)
+    { 
+        filename_len = create_filename(filename_buf_ptr, packet.source.source_id, packet.source.subsystem_id, FILE_EXTENSION_CSV);
+        data_len = format_log_entry_csv(data_buf_ptr, packet);
     
-    filename_len = create_filename(filename_buf_ptr, packet.source.source_id, packet.source.subsystem_id, FILE_EXTENSION_CSV);
-    data_len = format_log_entry_csv(data_buf_ptr, packet);
-    
-    /* Save log entry */
-    if (filename_len > 0 && data_len > 0)
-    {
-        sd_stat = disk_save_string(filename_buf_ptr, data_buf_ptr, data_len);
-        if (sd_stat != 0)
+        /* Save log entry */
+        if (filename_len > 0 && data_len > 0)
         {
-            printf("Error saving telemetry log entry. Code %u \r\n", sd_stat);
+            sd_stat = disk_save_string(filename_buf_ptr, data_buf_ptr, data_len);
+            if (sd_stat != 0)
+            {
+                printf("Error saving telemetry log entry. Code %u \r\n", sd_stat);
+                return false;
+            }
+            //printf("Log Entry = %s\n", data_buf_ptr);
+            //printf("Filename = %s\n", filename_buf_ptr);
+            //printf("The data length %u\r\n", data_len);
+            return true;
+        }
+        else 
+        {
+            printf("Error, decoding log entry or filename are blank \r\n");
+            return false;
         }
     }
-    else 
-    {
-        printf("Error, decoded log entry or filename are blank \r\n");
+    else if(DATA_OUTPUT_FORMAT == FORMAT_TYPE_HEX)
+    { 
+        /* Placeholder for hexidecimal format */
     }
-    
-    #elif (DATA_OUTPUT_FORMAT == FORMAT_TYPE_HEX) 
-    /* Placeholder for hexidecimal format */
-    #else
-    printf("Telemetry storage format type not found\r\n");
-    #endif
-
-    //printf("Log Entry = %s\n", data_buf_ptr);
-    //printf("Filename = %s\n", filename_buf_ptr);
-    //printf("The data length %u\r\n", data_len);
-
+    else
+    {
+        printf("Telemetry storage format type not found\r\n");
+    }
 }
