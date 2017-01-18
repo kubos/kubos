@@ -19,15 +19,15 @@ connect them, and what drivers need to be installed to support them.
 
 ###KubOS Documentation
 
-- [Installing the KubOS-SDK](docs/cli-installing.md) - Basics of setting up the Kubos-SDK environment
-- [Creating your first project](docs/first-project.md) - Steps to create and build a Kubos-SDK project (Note: Written for a KubOS RT end-target)
-- [SDK Command Reference](docs/cli-reference.md) - Overview of the common Kubos-SDK commands
-- [Kubos Linux Overview](docs/Linux_Overview.md) - Overview of the KubOS Linux components
-- [Kubos Linux on iOBC](docs/Linux_on_iOBC.md) - Steps to build and load KubOS Linux for the iOBC
+- [Installing the Kubos SDK](docs/cli-installing.md) - Basics of setting up the Kubos SDK environment
+- [Creating your first project](docs/first-project.md) - Steps to create and build a Kubos SDK project (Note: Written for a KubOS RT end-target)
+- [SDK Command Reference](docs/cli-reference.md) - Overview of the common Kubos SDK commands
+- [KubOS Linux Overview](docs/Linux_Overview.md) - Overview of the KubOS Linux components
+- [KubOS Linux on iOBC](docs/Linux_on_iOBC.md) - Steps to build and load KubOS Linux for the iOBC
 
 ##Building a Project
 
-In order to build a project for the ISIS-OBC, you'll need to create a Kubos-SDK project for KubOS Linux, set the correct target, and then build it.
+In order to build a project for the ISIS-OBC, you'll need to create a Kubos SDK project for KubOS Linux, set the correct target, and then build it.
 
     $ kubos init -l newproj
     $ kubos target kubos-linux-isis-gcc
@@ -36,7 +36,10 @@ In order to build a project for the ISIS-OBC, you'll need to create a Kubos-SDK 
 ##Updating Credentials
 
 Ideally, you should not be using the default root user password.  If you've changed it, you'll need to pass the new password to the Kubos flash utility
-through the config.json file.  Update the config>system>password parameter with the password to use.
+through the config.json file, which should be located in the top-level directory of your project.  You'll need to create the file if it doesn't already
+exist.  Update the system>password parameter with the password to use.
+
+If you're creating a brand new config.json file, you can just copy and paste the text below (*newpass* should be your desired password):
 
     {
         "system" : {
@@ -122,7 +125,7 @@ You can test the changes by issuing the 'minicom kubos' command.  If you success
 
 The USB-to-serial cable should be connected to the iOBC and the board should be fully powered.
 
-Assuming you've successfully built a Kubos-SDK project for the ISIS-OBC board, when you issue the 'kubos flash' the output should look like this:
+Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, when you issue the 'kubos flash' the output should look like this:
 
     info: found newproj at source/newproj
     Compatible FTDI device found
@@ -252,7 +255,9 @@ Select zmodem
     
                    [Goto]  [Prev]  [Show]   [Tag]  [Untag] [Okay]
 
-Select the file to send (Press 'g' to open the Goto dialog and Enter to open the file selector dialog)
+Select the file to send
+* Press `g` to open the Goto dialog and navigate to the desired folder (full pathname required)
+* Press enter to open the file selector dialog and specify the file you want within the current folder
 
     +-------------------[Select one or more files for upload]-------------------+
     |Directory: /home/vagrant/linux/build/kubos-linux-isis-gcc/source           |
