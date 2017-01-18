@@ -3,6 +3,7 @@
 - [Reference Documents](#reference-documents)
 - [Building a Project](#building-a-project)
 - [Updating Credentials](#updating-credentials)
+- [Updating the USB Connection](#updating-the-usb-connection)
 - [Flashing the Board](#flashing-the-board)
 - [Troubleshooting](#troubleshooting)
 - [Debug Console](#debug-console)
@@ -42,14 +43,84 @@ through the config.json file.  Update the config>system>password parameter with 
             "password" : "newpass"
         }
     }
-
-##Flashing the Board
+    
+##Update the USB Connection
 
 The iOBC should be shipped with an FTDI cable.  This cable should be connected to the programming adapter, which should then be connected to the iOBC, to create the
 debug UART connection.  User file transfer will take place using this connection.
 
-** Note ** The Kubos flashing utility was configured with the assumption that an FTDI cable would be used.  If you have a different USB-to-serial cable type, you'll
-either need to manually transfer the files, or contact me at catherine@kubos.co to request support for the new cable.
+The Kubos flashing utility was configured with the assumption that an FTDI cable would be used.  If you have a different USB-to-serial cable type, you'll
+need to pass through the USB connection, and then update the minicom configuration to tell the flashing utility which USB to flash over.
+
+You can either pass through the USB via VirtualBox or by updating the vagrant's Vagrantfile.
+
+###VirtualBox
+
+Open the VirtualBox Manager
+
+![VirtualBox Manager](images/virtualbox.png)
+
+Right-click on your vagrant VM and select Settings.  Click the USB tab.
+
+![VM USB Options](images/usb_options.png)
+
+Click the USB icon with the plus symbol to add a new USB filter.  Select the device you want to add and press OK.
+
+![VM USB Devices](images/usb_devices.png)
+
+###Updating the Vagrantfile
+
+Navigate to you vagrant installation directory on your host machine.
+
+Open the Vagrantfile.
+
+You should see a section labeled 'usb_devs'.  You want to add a new entry for your USB device to the bottom of this list.
+
+The format is
+
+    ['vendor_id', 'product_id', 'Description']
+    
+The description can be whatever you want, but the vendor and product IDs will need to be found from the connection on your host computer.
+
+Once you've updated Vagrantfile, issue the command 'vagrant reload' to cause the VM to pick up the new definition.  Once you've logged in to the VM, you 
+should be able to see the passed-through connection with the 'lsusb' command.
+
+####On Windows
+
+1. Go to the "Start" Menu.
+2. Select "Devices and Printers"
+3. Double-click your USB Scale.
+4. Select the "Hardware" Tab.
+5. Select "Properties"
+6. Select the "Details" Tab.
+7. From the "Device description" Menu select "Hardware Ids"
+8. Copy the numbers next to "VID_" and "PID_"
+
+####On Mac
+
+Issue the 'system_profiler SPUSBDataType' command.  
+
+Copy the values in the values in the 'Product ID' and 'Vendor ID' fields
+
+####On Linux
+
+Issue the 'lsusb' command.
+
+Copy the values in the 'ID' field.  The value in front of the colon should be the vendor ID and the value after should be the product ID.
+
+###Updating the minicom configuration
+
+Navigate to /etc/minicom, you should see a file call minirc.kubos.  This is the preset minicom serial connection configuration file for KubOS Linux.
+
+Edit the file and update the 'pu baudrate' field and change '/dev/FTDI' to the '/dev/*' device name your USB connection has.
+
+* You can find this device by issuing 'ls /dev/'.  The connection will likely be one of the /dev/ttyUSB* devices.
+
+You can test the changes by issuing the 'minicom kubos' command.  If you successfully connect to your board, then the changes have been successful.
+
+##Flashing the Board
+
+The USB-to-serial cable should be connected to the iOBC and the board should be fully powered.
 
 Assuming you've successfully built a Kubos-SDK project for the ISIS-OBC board, when you issue the 'kubos flash' the output should look like this:
 
