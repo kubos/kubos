@@ -3,7 +3,7 @@ project (csp)
 include (CheckIncludeFiles)
 set (CSP_VERSION "1.4.0" CACHE STRING "")
 
-option (RDP "" OFF)
+option (CSP_USE_RDP "" OFF)
 option (QOS "" OFF)
 option (PROMISC "" OFF)
 option (CSP_USE_CRC32 "" OFF)
@@ -46,6 +46,10 @@ if (YOTTA_CFG_CSP_USART)
     set (IF_KISS ON)
 endif()
 
+if (YOTTA_CFG_CSP_RDP)
+    set (CSP_USE_RDP ON)
+endif()
+
 add_library (csp STATIC
     src/csp_bridge.c
     src/csp_buffer.c
@@ -71,7 +75,7 @@ add_library (csp STATIC
     src/interfaces/csp_if_lo.c
     $<$<BOOL:${IF_KISS}>:src/interfaces/csp_if_kiss.c>
     src/rtable/csp_rtable_${RTABLE}.c
-    $<$<BOOL:${RDP}>:src/transport/csp_rdp.c>
+    $<$<BOOL:${CSP_USE_RDP}>:src/transport/csp_rdp.c>
     src/transport/csp_udp.c
 )
 
