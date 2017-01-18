@@ -85,8 +85,8 @@ The format is
     
 The description can be whatever you want, but the vendor and product IDs will need to be found from the connection on your host computer.
 
-Once you've updated Vagrantfile, issue the command 'vagrant reload' to cause the VM to pick up the new definition.  Once you've logged in to the VM, you 
-should be able to see the passed-through connection with the 'lsusb' command.
+Once you've updated Vagrantfile, issue the command `vagrant reload` to cause the VM to pick up the new definition.  Once you've logged in to the VM, you 
+should be able to see the passed-through connection with the `lsusb` command.
 
 ####On Windows
 
@@ -101,13 +101,13 @@ should be able to see the passed-through connection with the 'lsusb' command.
 
 ####On Mac
 
-Issue the 'system_profiler SPUSBDataType' command.  
+Issue the `system_profiler SPUSBDataType` command.  
 
 Copy the values in the values in the 'Product ID' and 'Vendor ID' fields
 
 ####On Linux
 
-Issue the 'lsusb' command.
+Issue the `lsusb` command.
 
 Copy the values in the 'ID' field.  The value in front of the colon should be the vendor ID and the value after should be the product ID.
 
@@ -117,15 +117,15 @@ Navigate to /etc/minicom, you should see a file call minirc.kubos.  This is the 
 
 Edit the file and update the 'pu baudrate' field and change '/dev/FTDI' to the '/dev/*' device name your USB connection has.
 
-* You can find this device by issuing 'ls /dev/'.  The connection will likely be one of the /dev/ttyUSB* devices.
+* You can find this device by issuing `ls /dev/`.  The connection will likely be one of the /dev/ttyUSB* devices.
 
-You can test the changes by issuing the 'minicom kubos' command.  If you successfully connect to your board, then the changes have been successful.
+You can test the changes by issuing the `minicom kubos` command.  If you successfully connect to your board, then the changes have been successful.
 
 ##Flashing the Board
 
 The USB-to-serial cable should be connected to the iOBC and the board should be fully powered.
 
-Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, when you issue the 'kubos flash' the output should look like this:
+Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, when you issue the `kubos flash` the output should look like this:
 
     info: found newproj at source/newproj
     Compatible FTDI device found
@@ -140,23 +140,23 @@ Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, w
 
 - Check that the iOBC is turned on and connected to your computer
 - Check that no other vagrant images are running.  Only one VM can have control of the USB, so it may be that another instance
-currently has control of the device.  You can shutdown a vagrant image with the command 'vagrant halt'
-- Verify that the USB is showing up within the vagrant environment with the 'lsusb' command.  You should see an FTDI device
-- Verify that the USB has been mapped to a linux device.  Issue the command 'ls /dev'.  You should see a /dev/ttyUSB* device. 
-If you don't, try rebooting your vagrant image ('vagrant halt', 'vagrant up')
+currently has control of the device.  You can shutdown a vagrant image with the command `vagrant halt`
+- Verify that the USB is showing up within the vagrant environment with the `lsusb` command.  You should see an FTDI device
+- Verify that the USB has been mapped to a linux device.  Issue the command `ls /dev`.  You should see a /dev/ttyUSB* device. 
+If you don't, try rebooting your vagrant image (`vagrant halt`, `vagrant up`)
     
 "Transfer Failed: Connection Failed"
 
 - The SDK was unable to connect to the iOBC
-- Verify that the USB has been mapped to a linux device.  Issue the command 'ls /dev'.  You should see a /dev/ttyUSB* device. 
-If you don't, try rebooting your vagrant image ('vagrant halt', 'vagrant up')
+- Verify that the USB has been mapped to a linux device.  Issue the command `ls /dev`.  You should see a /dev/ttyUSB* device. 
+If you don't, try rebooting your vagrant image (`vagrant halt`, `vagrant up`)
 - If this error occurs after the transfer process has started, then the SDK likely lost connection to the iOBC.  Verify that
 the board is still correctly connected and powered and try the flash command again.
 
 "Transfer Failed: Invalid Password"
 
 - The SDK was unable to log into the iOBC.  Verify that the password is correctly defined in your config.json file by issuing
-the 'kubos config' command.
+the `kubos config` command.
     
 System appears to have hung
 
