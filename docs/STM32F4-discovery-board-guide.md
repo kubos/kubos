@@ -20,9 +20,9 @@ These are the two most useful documents to have while working with the STM32F4
 - [Main HAL API documentation](http://docs.kubos.co/latest/kubos-hal/index.html) - Overview of the high-level HAL.  Useful for things like k\_uart\_write.
 - [STM32F4 Specific HAL API documentation](http://docs.kubos.co/latest/kubos-hal/kubos-hal-stm32f4/index.html) - Specifics for the STM32F4 version of the HAL.
 Useful for things like the configuration options.
-- [Installing the KubOS-SDK](http://docs.kubos.co/latest/md_docs_cli-installing.html) - Basics of setting up the Kubos-SDK environment
-- [Creating your first project](http://docs.kubos.co/latest/md_docs_first-project.html) - Steps to create and build a Kubos-SDK project
-- [SDK Command Reference](http://docs.kubos.co/latest/md_docs_cli-reference.html) - Overview of the common KubOS-SDK commands
+- [Installing the Kubos SDK](http://docs.kubos.co/latest/md_docs_cli-installing.html) - Basics of setting up the Kubos SDK environment
+- [Creating your first project](http://docs.kubos.co/latest/md_docs_first-project.html) - Steps to create and build a Kubos SDK project
+- [SDK Command Reference](http://docs.kubos.co/latest/md_docs_cli-reference.html) - Overview of the common Kubos SDK commands
 
 ## Pin Definitions
 
@@ -50,7 +50,7 @@ Look at:
 	
 Look for the i2c, spi, or uart section to find the pin definitions
 	
-#### Within the Kubos-sdk
+#### Within the Kubos SDK
 
 **Note:** You must have built your project in order for these files to be available.
 
@@ -64,14 +64,14 @@ Alternatively, you can manually look at the yotta config files.
  
 Look at:
 
-	{Kubos-SDK folder}/build/stm32f407-disco-gcc/yotta_config.h
+	{Kubos SDK folder}/build/stm32f407-disco-gcc/yotta_config.h
 	
 To see the YOTTA\_CFG\_* defines.
 Look for YOTTA\_CFG\_HARDWARE\_{I2C|SPI|UART} to find the pin definitions
 
 Or, look at:
 
-	{Kubos-SDK folder}/build/stm32f407-disco-gcc/yotta_config.json
+	{Kubos SDK folder}/build/stm32f407-disco-gcc/yotta_config.json
 	
 To see the configuration of the project.  
 Look for the i2c, spi, or uart section to find the pin definitions
