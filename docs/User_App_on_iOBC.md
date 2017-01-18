@@ -44,7 +44,7 @@ through the config.json file.  Update the config>system>password parameter with 
         }
     }
     
-##Update the USB Connection
+##Updating the USB Connection
 
 The iOBC should be shipped with an FTDI cable.  This cable should be connected to the programming adapter, which should then be connected to the iOBC, to create the
 debug UART connection.  User file transfer will take place using this connection.
