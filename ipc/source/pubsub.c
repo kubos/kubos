@@ -16,12 +16,13 @@
 
 #include "ipc/pubsub.h"
 
-csp_socket_t * server_setup(uint8_t port, uint8_t num_connections)
+csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections)
 {
     csp_socket_t * socket = NULL;
 
     if ((socket = csp_socket(CSP_SO_NONE)) == NULL)
     {
+
         return NULL;
     }
 
@@ -38,7 +39,7 @@ csp_socket_t * server_setup(uint8_t port, uint8_t num_connections)
     return socket;
 }
 
-bool server_accept(csp_socket_t * socket, pubsub_conn * conn)
+bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn)
 {
     csp_conn_t * csp_conn = NULL;
     if ((socket != NULL) && (conn != NULL))
@@ -52,7 +53,7 @@ bool server_accept(csp_socket_t * socket, pubsub_conn * conn)
     return false;
 }
 
-bool subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
+bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
 {
     csp_conn_t * csp_conn = NULL;
     if (conn == NULL)
@@ -73,7 +74,7 @@ bool subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
     }
 }
 
-bool send_csp(pubsub_conn conn, void * data, uint16_t length)
+bool kprv_send_csp(pubsub_conn conn, void * data, uint16_t length)
 {
     csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = conn.conn_handle;
@@ -98,7 +99,7 @@ bool send_csp(pubsub_conn conn, void * data, uint16_t length)
     return false;
 }
 
-bool publisher_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
+bool kprv_publisher_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
 {
     csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = conn.conn_handle;
@@ -118,7 +119,7 @@ bool publisher_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t po
     return false;
 }
 
-bool subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
+bool kprv_subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
 {
     csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = conn.conn_handle;
