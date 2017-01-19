@@ -11,13 +11,13 @@ option (HMAC "" OFF)
 option (XTEA "" OFF)
 option (BINDINGS "" OFF)
 option (EXAMPLES "" OFF)
-option (DEBUG "" ON)
-option (VERBOSE "" ON)
+option (DEBUG "" OFF)
+option (VERBOSE "" OFF)
 option (IF_I2C "" OFF)
 option (IF_KISS "" OFF)
 option (IF_CAN "" OFF)
 option (IF_ZMQHUB "" OFF)
-option (CSP_DEBUG "" ON)
+option (CSP_DEBUG "" OFF)
 option (CAN_SOCKETCAN "" OFF)
 
 set (FREERTOS "" CACHE STRING "FreeRTOS root dir")
@@ -26,7 +26,7 @@ option (INIT_SHUTDOWN "" OFF)
 #TODO FREERTOS
 set (RDP_MAX_WINDOW "20" CACHE STRING "Set maximum window size for RDP")
 set (MAX_BIND_PORT "31" CACHE STRING "Set maximum bindable port")
-set (MAX_CONNECTIONS "20" CACHE STRING "Set maximum number of concurrent connections")
+set (MAX_CONNECTIONS "10" CACHE STRING "Set maximum number of concurrent connections")
 set (CONN_QUEUE_LENGTH "100" CACHE STRING "Set maximum number of packets in queue for a connection")
 set (ROUTER_QUEUE_LENGTH "10" CACHE STRING "Set maximum number of packets to be queued at the input of the router")
 set (PADDING "8" CACHE STRING "Set padding bytes before packet length field")
@@ -49,15 +49,6 @@ endif()
 if (YOTTA_CFG_CSP_RDP)
     set (CSP_USE_RDP ON)
 endif()
-
-#MESSAGE( STATUS "CSP CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS} )
-#get_cmake_property(_variableNames VARIABLES)
-#foreach (_variableName ${_variableNames})
-#    message(STATUS "CSP ${_variableName}=${${_variableName}}")
-#endforeach()
-
-
-message(STATUS "CSP TESTING ENABLED $ENV{KUBOS_TESTING_ENABLED}")
 
 
 add_library (csp STATIC
