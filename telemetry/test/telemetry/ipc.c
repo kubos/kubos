@@ -1,7 +1,7 @@
 #include <ipc/pubsub.h>
 #include <cmocka.h>
 
-bool __wrap_subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
+bool __wrap_kprv_subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
 {
     check_expected(conn.conn_handle);
     check_expected(buffer);
@@ -9,7 +9,7 @@ bool __wrap_subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, ui
     return mock_type(bool);
 }
 
-bool __wrap_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
+bool __wrap_kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
 {
     check_expected(conn);
     if (conn != NULL)
@@ -19,7 +19,7 @@ bool __wrap_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port
     return mock_type(bool);
 }
 
-bool __wrap_send_csp(pubsub_conn conn, void * data, uint16_t length)
+bool __wrap_kprv_send_csp(pubsub_conn conn, void * data, uint16_t length)
 {
     check_expected(conn.conn_handle);
     check_expected(data);

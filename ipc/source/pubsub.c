@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,42 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// #ifdef YOTTA_CFG_TELEMETRY
 
 #include "ipc/pubsub.h"
 
-bool server_setup(csp_socket_t ** socket, uint8_t port, uint8_t num_connections)
+csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections)
 {
-    if (socket == NULL)
+    csp_socket_t * socket = NULL;
+
+    if ((socket = csp_socket(CSP_SO_NONE)) == NULL)
     {
-        return false;
+
+        return NULL;
     }
 
-    if ((*socket = csp_socket(CSP_SO_NONE)) == NULL)
+    if (csp_bind(socket, port) != CSP_ERR_NONE)
     {
-        return false;
+        return NULL;
     }
 
-    if (csp_bind(*socket, port) != CSP_ERR_NONE)
+    if (csp_listen(socket, num_connections) != CSP_ERR_NONE)
     {
-        return false;
+        return NULL;
     }
 
-    if (csp_listen(*socket, num_connections) != CSP_ERR_NONE)
-    {
-        return false;
-    }
-
-    return true;
+    return socket;
 }
 
-bool server_accept(csp_socket_t ** socket, pubsub_conn * conn)
+bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn)
 {
     csp_conn_t * csp_conn = NULL;
-    if ((socket != NULL) && (*socket != NULL) && (conn != NULL))
+    if ((socket != NULL) && (conn != NULL))
     {
         //printf("server_accept csp_accept\r\n");
-        if ((csp_conn = csp_accept(*socket, 1000)) != NULL)
+        if ((csp_conn = csp_accept(socket, 1000)) != NULL)
         {
             //printf("server_accept got conn\r\n");
             conn->conn_handle = csp_conn;
@@ -58,7 +55,7 @@ bool server_accept(csp_socket_t ** socket, pubsub_conn * conn)
     return false;
 }
 
-bool subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
+bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
 {
     csp_conn_t * csp_conn = NULL;
     if (conn == NULL)
@@ -81,7 +78,7 @@ bool subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
     }
 }
 
-bool send_csp(pubsub_conn conn, void * data, uint16_t length)
+bool kprv_send_csp(pubsub_conn conn, void * data, uint16_t length)
 {
     csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = conn.conn_handle;
@@ -106,7 +103,7 @@ bool send_csp(pubsub_conn conn, void * data, uint16_t length)
     return false;
 }
 
-bool publisher_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
+bool kprv_publisher_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
 {
     csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = conn.conn_handle;
@@ -126,7 +123,7 @@ bool publisher_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t po
     return false;
 }
 
-bool subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
+bool kprv_subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port)
 {
     csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = conn.conn_handle;
@@ -145,5 +142,3 @@ bool subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t p
     }
     return false;
 }
-
-// #endif

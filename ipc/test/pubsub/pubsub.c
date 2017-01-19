@@ -1,6 +1,5 @@
 /*
- * KubOS HAL
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +21,7 @@
 #define TEST_ADDRESS 11
 #define TEST_PORT 12
 
-
-static void test_server_setup_null_socket(void)
-{
-    assert_false(server_setup(NULL, TEST_PORT, 1));
-}
-
-static void test_server_setup(void)
+static void test_server_setup(void ** arg)
 {
     csp_socket_t * socket = NULL;
 
@@ -40,16 +33,16 @@ static void test_server_setup(void)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
     
-    assert_true(server_setup(&socket, TEST_PORT, 1));
+    assert_true(socket = kprv_server_setup(TEST_PORT, 1));
 }
 
-static void test_server_accept_null_socket(void)
+static void test_server_accept_null_socket(void ** arg)
 {
     pubsub_conn conn;
-    assert_false(server_accept(NULL, &conn));
+    assert_false(kprv_server_accept(NULL, &conn));
 }
 
-static void test_server_accept_null_conn(void)
+static void test_server_accept_null_conn(void ** arg)
 {
     csp_socket_t * socket = NULL;
     
@@ -61,12 +54,12 @@ static void test_server_accept_null_conn(void)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = kprv_server_setup(TEST_PORT, 1);
 
-    assert_false(server_accept(&socket, NULL));
+    assert_false(kprv_server_accept(socket, NULL));
 }
 
-static void test_server_accept(void)
+static void test_server_accept(void ** arg)
 {
     pubsub_conn conn;
     csp_socket_t * socket = NULL;
@@ -79,50 +72,50 @@ static void test_server_accept(void)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = kprv_server_setup(TEST_PORT, 1);
 
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
 
-    assert_true(server_accept(&socket, &conn));
+    assert_true(kprv_server_accept(socket, &conn));
 }
 
-static void test_subscriber_connect_null_conn(void)
+static void test_subscriber_connect_null_conn(void ** arg)
 {
-    assert_false(subscriber_connect(NULL, TEST_ADDRESS, TEST_PORT));
+    assert_false(kprv_subscriber_connect(NULL, TEST_ADDRESS, TEST_PORT));
 }
 
-static void test_subscriber_connect(void)
+static void test_subscriber_connect(void ** arg)
 {
     pubsub_conn conn;
 
     will_return(__wrap_csp_connect, "");
 
-    assert_true(subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT));
+    assert_true(kprv_subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT));
     assert_true(conn.conn_handle != NULL);
 }
 
-static void test_send_null_data(void)
+static void test_send_null_data(void ** arg)
 {
     pubsub_conn conn;
-    assert_false(send_csp(conn, NULL, 0));
+    assert_false(kprv_send_csp(conn, NULL, 0));
 }
 
-static void test_send_bad_length(void)
-{
-    pubsub_conn conn;
-    int data = 10;
-    assert_false(send_csp(conn, &data, -1));
-}
-
-static void test_send_null_conn_handle(void)
+static void test_send_bad_length(void ** arg)
 {
     pubsub_conn conn;
     int data = 10;
-    assert_false(send_csp(conn, &data, sizeof(int)));
+    assert_false(kprv_send_csp(conn, &data, -1));
 }
 
-static void test_send(void)
+static void test_send_null_conn_handle(void ** arg)
+{
+    pubsub_conn conn;
+    int data = 10;
+    assert_false(kprv_send_csp(conn, &data, sizeof(int)));
+}
+
+static void test_send(void ** arg)
 {
     pubsub_conn conn;
     char data = 'A';
@@ -136,29 +129,29 @@ static void test_send(void)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = kprv_server_setup(TEST_PORT, 1);
     
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
     
-    server_accept(&socket, &conn);
+    kprv_server_accept(socket, &conn);
 
     expect_value(__wrap_csp_send, conn, conn.conn_handle);
     expect_not_value(__wrap_csp_send, packet, NULL);
     will_return(__wrap_csp_send, 1);
 
-    assert_true(send_csp(conn, (void*)&data, sizeof(data)));
+    assert_true(kprv_send_csp(conn, (void*)&data, sizeof(data)));
 }
 
-static void test_publisher_read_null_conn(void)
+static void test_publisher_read_null_conn(void ** arg)
 {
     pubsub_conn conn;
     conn.conn_handle = NULL;
     int data = 10;
-    assert_false(publisher_read(conn, &data, 1, TEST_PORT));
+    assert_false(kprv_publisher_read(conn, &data, 1, TEST_PORT));
 }
 
-static void test_publisher_read_null_buffer(void)
+static void test_publisher_read_null_buffer(void ** arg)
 {
     pubsub_conn conn;
     csp_socket_t * socket = NULL;
@@ -171,17 +164,17 @@ static void test_publisher_read_null_buffer(void)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = kprv_server_setup(TEST_PORT, 1);
     
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
     
-    server_accept(&socket, &conn);
+    kprv_server_accept(socket, &conn);
 
-    assert_false(publisher_read(conn, NULL, 1, TEST_PORT));
+    assert_false(kprv_publisher_read(conn, NULL, 1, TEST_PORT));
 }
 
-static void test_publisher_read(void)
+static void test_publisher_read(void ** arg)
 {
     pubsub_conn conn;
     char buffer;
@@ -195,58 +188,57 @@ static void test_publisher_read(void)
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
-    server_setup(&socket, TEST_PORT, 1);
+    socket = kprv_server_setup(TEST_PORT, 1);
     
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
     
-    server_accept(&socket, &conn);
+    kprv_server_accept(socket, &conn);
 
     expect_value(__wrap_csp_read, conn, conn.conn_handle);
 
     will_return(__wrap_csp_conn_dport, TEST_PORT);
 
-    assert_true(publisher_read(conn, &buffer, 1, TEST_PORT));
+    assert_true(kprv_publisher_read(conn, &buffer, 1, TEST_PORT));
 }
 
-static void test_subscriber_read_null_conn(void)
+static void test_subscriber_read_null_conn(void ** arg)
 {
     pubsub_conn conn;
     conn.conn_handle = NULL;
     int data = 10;
-    assert_false(subscriber_read(conn, &data, 1, TEST_PORT));
+    assert_false(kprv_subscriber_read(conn, &data, 1, TEST_PORT));
 }
 
-static void test_subscriber_read_null_buffer(void)
+static void test_subscriber_read_null_buffer(void ** arg)
 {
     pubsub_conn conn;
 
     will_return(__wrap_csp_connect, "");
 
-    subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT);
+    kprv_subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT);
     
-    assert_false(subscriber_read(conn, NULL, 1, TEST_PORT));
+    assert_false(kprv_subscriber_read(conn, NULL, 1, TEST_PORT));
 }
 
-static void test_subscriber_read(void)
+static void test_subscriber_read(void ** arg)
 {
     pubsub_conn conn;
     char buffer;
 
     will_return(__wrap_csp_connect, "");
 
-    subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT);
+    kprv_subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT);
 
     expect_value(__wrap_csp_read, conn, conn.conn_handle);
     will_return(__wrap_csp_conn_sport, TEST_PORT);
     
-    assert_true(subscriber_read(conn, &buffer, 1, TEST_PORT));
+    assert_true(kprv_subscriber_read(conn, &buffer, 1, TEST_PORT));
 }
 
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_server_setup_null_socket),
         cmocka_unit_test(test_server_setup),
         cmocka_unit_test(test_server_accept_null_socket),
         cmocka_unit_test(test_server_accept_null_conn),

@@ -57,7 +57,7 @@
 /* #undef HAVE_STRINGS_H */
 
 /* Define to 1 if you have the <string.h> header file. */
-/* #undef HAVE_STRING_H */
+#define HAVE_STRING_H 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 /* #undef HAVE_SYS_STAT_H */

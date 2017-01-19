@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,12 @@
 #define TELEMETRY_CSP_ADDRESS YOTTA_CFG_TELEMETRY_CSP_ADDRESS
 #endif
 
-#define NUM_MESSAGE_QUEUE 10
+/* Size of incoming telemetry message queue */
+#ifndef YOTTA_CFG_TELEMETRY_MESSAGE_QUEUE_SIZE
+#define MESSAGE_QUEUE_SIZE 10
+#else
+#define MESSAGE_QUEUE_SIZE YOTTA_CFG_TELEMETRY_MESSAGE_QUEUE_SIZE
+#endif
 
 /* Port number used for the telemetry server's CSP socket */
 #ifndef YOTTA_CFG_TELEMETRY_CSP_PORT
@@ -55,6 +60,20 @@
 #define TELEMETRY_SUBSCRIBER_READ_ATTEMPTS 10
 #else
 #define TELEMETRY_SUBSCRIBER_READ_ATTEMPTS YOTTA_CFG_TELEMETRY_SUBSCRIBERS_READ_ATTEMPTS
+#endif
+
+/* Stack size of thread for accepting subscribers */
+#ifndef YOTTA_CFG_TELEMETRY_SUBS_THREAD_STACK_SIZE
+#define TELEMETRY_SUBS_THREAD_STACK_SIZE 1000
+#else
+#define TELEMETRY_SUBS_THREAD_STACK_SIZE YOTTA_CFG_TELEMETRY_SUBS_THREAD_STACK_SIZE
+#endif
+
+/* Stack size of thread for receiving incoming messages */
+#ifndef YOTTA_CFG_TELEMETRY_RX_THREAD_STACK_SIZE
+#define TELEMETRY_RX_THREAD_STACK_SIZE 1000
+#else
+#define TELEMETRY_RX_THREAD_STACK_SIZE YOTTA_CFG_TELEMETRY_RX_THREAD_STACK_SIZE
 #endif
 
 #endif

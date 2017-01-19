@@ -50,7 +50,6 @@ if (YOTTA_CFG_CSP_RDP)
     set (CSP_USE_RDP ON)
 endif()
 
-
 add_library (csp STATIC
     src/csp_bridge.c
     src/csp_buffer.c
