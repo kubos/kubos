@@ -18,7 +18,7 @@
 #include <cmocka.h>
 #include "telemetry/telemetry.h"
 
-#define NUM_SUBS 5
+#define NUM_SUBS TELEMETRY_SUBSCRIBERS_MAX_NUM
 
 static void test_subscriber(void)
 {
@@ -65,6 +65,9 @@ static void test_subscriber(void)
 
     for (i = 0; i < NUM_SUBS; i++)
         assert_true(read_status[i]);
+
+    for (i = 0; i < NUM_SUBS; i++)
+        assert_int_equal(outgoing_packet.data.i, incoming_packets[i].data.i);
 
     assert_int_equal(end_total_subs, 0);
 }

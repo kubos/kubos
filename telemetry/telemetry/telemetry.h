@@ -46,7 +46,7 @@ void telemetry_init();
  */
 bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
 
-bool __telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
+bool kprv_telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
 
 /**
  * Reads a telemetry packet from the telemetry server.

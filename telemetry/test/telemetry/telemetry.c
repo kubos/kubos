@@ -19,7 +19,7 @@
 
 static void test_telemetry_subscribe_null_conn(void)
 {
-    assert_false(__telemetry_subscribe(NULL, 0));
+    assert_false(kprv_telemetry_subscribe(NULL, 0));
 }
 
 static void test_telemetry_subscribe(void)
@@ -34,7 +34,7 @@ static void test_telemetry_subscribe(void)
     will_return(__wrap_subscriber_connect, "");
     will_return(__wrap_subscriber_connect, true);
 
-    assert_true(__telemetry_subscribe(&conn, 0));
+    assert_true(kprv_telemetry_subscribe(&conn, 0));
 }
 
 static void test_telemetry_read_conn_null_handle(void)
@@ -72,7 +72,7 @@ static void test_telemetry_read(void)
     expect_not_value(__wrap_send_csp, data, NULL);
     will_return(__wrap_send_csp, true);
     
-    __telemetry_subscribe(&conn, 0);
+    kprv_telemetry_subscribe(&conn, 0);
 
     expect_value(__wrap_subscriber_read, conn.conn_handle, conn.conn_handle);
     expect_value(__wrap_subscriber_read, buffer, &packet);

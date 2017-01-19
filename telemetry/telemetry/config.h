@@ -16,6 +16,8 @@
 #ifndef TELEMETRY_CONFIG_H
 #define TELEMETRY_CONFIG_H
 
+#include <csp/csp_autoconfig.h>
+
 /* Address used for the current CSP instance */
 #ifndef YOTTA_CFG_TELEMETRY_CSP_ADDRESS
 #define TELEMETRY_CSP_ADDRESS 1
@@ -33,13 +35,19 @@
 #endif
 
 
-/** NOTE this value needs to be validated against the CSP_CONN_MAX value
-    from inside of CSP **/
 /* Max number of subscribers supported */
 #ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_MAX_NUM
-#define TELEMETRY_SUBSCRIBERS_MAX_NUM 10
+#define TELEMETRY_SUBSCRIBERS_MAX_NUM ((CSP_CONN_MAX / 2) - 1)
 #else
 #define TELEMETRY_SUBSCRIBERS_MAX_NUM YOTTA_CFG_TELEMETRY_SUBSCRIBERS_MAX_NUM
+#endif
+
+/* Check to ensure the configured number of subscribers is even possible
+   based on how many connections CSP has allocated. This should eventually get
+   migrated into a higher level CSP manager.
+*/
+#if ((TELEMETRY_SUBSCRIBERS_MAX_NUM * 2) + 1) > CSP_CONN_MAX
+#warning "Number of telemetry subscribers exceeds number of available CSP connections"
 #endif
 
 /* Number of subscriber read attempts */

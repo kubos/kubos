@@ -22,6 +22,13 @@
 #include <kubos-core/utlist.h>
 #include <stdio.h>
 
+typedef struct telemetry_subscriber
+{
+    pubsub_conn conn;
+    struct telemetry_subscriber * next;
+} telemetry_subscriber;
+
+
 /**
  * Iterates though all open telemetry connections and
  * publishes the packet IF the connection is interested/subscribed
@@ -68,7 +75,7 @@ void telemetry_init()
     csp_bin_sem_create(&telemetry_ready_signal);
     csp_bin_sem_wait(&telemetry_ready_signal, 0);
 
-// #ifdef DEBUG
+#ifdef DEBUG
     csp_debug_toggle_level(CSP_ERROR);
     csp_debug_toggle_level(CSP_WARN);
     csp_debug_toggle_level(CSP_INFO);
@@ -76,7 +83,7 @@ void telemetry_init()
     csp_debug_toggle_level(CSP_PACKET);
     csp_debug_toggle_level(CSP_PROTOCOL);
     csp_debug_toggle_level(CSP_LOCK);
-// #endif
+#endif
 
     csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 2, &telem_sub_handle);
     csp_thread_create(telemetry_rx_task, "TELEM_RX", 1000, NULL, 2, &telem_rx_handle);
@@ -118,13 +125,13 @@ CSP_DEFINE_TASK(telemetry_get_subs)
 {
     /* Private csp_socket used by the telemetry server */
     csp_socket_t * socket = NULL;
-    printf("get_subs server setup\r\n");
+    // printf("get_subs server setup\r\n");
     if (server_setup(&socket, TELEMETRY_CSP_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM))
     {
         while (telemetry_running)
         {
             pubsub_conn conn;
-            printf("get_subs server_accept\r\n");
+            // printf("get_subs server_accept\r\n");
             // csp_bin_sem_post(&subscribing_done_signal);
             csp_bin_sem_post(&telemetry_ready_signal);
             if (server_accept(&socket, &conn))
@@ -132,13 +139,13 @@ CSP_DEFINE_TASK(telemetry_get_subs)
                 subscribing_done = false;
                 // csp_sleep_ms(500);
                 telemetry_request request;
-                printf("get_subs pub_read\r\n");
+                // printf("get_subs pub_read\r\n");
                 publisher_read(conn, (void*)&request, sizeof(telemetry_request), TELEMETRY_CSP_PORT);
                 conn.sources = request.sources;
-                printf("get_subs add_sub\r\n");
+                // printf("get_subs add_sub\r\n");
                 telemetry_add_subscriber(conn);
                 // csp_bin_sem_post(&subscribing_done_signal);
-                printf("get_subs post done\r\n");
+                // printf("get_subs post done\r\n");
                 csp_bin_sem_post(&subscribing_done_signal);
                 subscribing_done = true;
             }
@@ -205,7 +212,7 @@ bool telemetry_read(pubsub_conn conn, telemetry_packet * packet)
     return false;
 }
 
-bool __telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
+bool kprv_telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
 {
     bool ret = false;
     if ((conn != NULL) && subscriber_connect(conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT))
@@ -215,9 +222,6 @@ bool __telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
         };
 
         ret = send_csp(*conn, (void*)&request, sizeof(telemetry_request));
-        //printf("telem_subscribe wait\r\n");
-        
-        //printf("telem_subscribe done %d\r\n", telemetry_num_subscribers());
     }
     return ret;
 }
@@ -225,16 +229,10 @@ bool __telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
 bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
 {
     bool ret = false;
-    printf("telem_subscribe begin\r\n");
     csp_mutex_lock(&subscribing_lock, CSP_INFINITY);
-    printf("telem_subscribe lock\r\n");
-    printf("check if telem ready\r\n");
-    csp_bin_sem_wait(&telemetry_ready_signal, CSP_INFINITY);
-    printf("telem_subscribe call __\r\n");
-    ret = __telemetry_subscribe(conn, sources);
+    ret = kprv_telemetry_subscribe(conn, sources);
     if (ret)
     {
-        printf("telem_subcribe wait on done %d\r\n", ret);
         /* 
            It is possible for CSP to run out of connections in the
            middle of the subscription process. In this case the subscriber
@@ -245,17 +243,11 @@ bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
         */
         if (csp_bin_sem_wait(&subscribing_done_signal, 100) != CSP_SEMAPHORE_OK)
         {
-            printf("failed to get subscribe done signal...so we fail\r\n");
             csp_close(conn->conn_handle);
             conn->conn_handle = NULL;
             ret = false;
         }
     } 
-    else 
-    { 
-        printf("telem_subscribe failed\r\n"); 
-    }
-    printf("telem_subscrib unlock\r\n");
     csp_mutex_unlock(&subscribing_lock);
     return ret;
 }
