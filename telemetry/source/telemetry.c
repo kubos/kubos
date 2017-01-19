@@ -19,6 +19,7 @@
 #include <csp/arch/csp_semaphore.h>
 #include <kubos-core/utlist.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef struct telemetry_subscriber
 {
@@ -249,6 +250,26 @@ bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
     } 
     csp_mutex_unlock(&subscribing_lock);
     return ret;
+}
+
+void telemetry_unsubscribe(pubsub_conn * conn)
+{
+    if (conn != NULL)
+    {
+        csp_close(conn->conn_handle);
+
+        telemetry_subscriber * current, * next;
+        LL_FOREACH_SAFE(subscriber_list_head, current, next)
+        {
+            pubsub_conn subscriber = current->conn;
+            if (csp_conn_check(subscriber.conn_handle) != CSP_ERR_NONE)
+            {
+                LL_DELETE(subscriber_list_head, current);
+                csp_close(subscriber.conn_handle);
+                free(current);
+            }
+        }
+    }
 }
 
 int telemetry_num_subscribers()

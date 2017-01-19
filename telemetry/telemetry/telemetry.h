@@ -38,6 +38,8 @@ CSP_DEFINE_TASK(telemetry_rx_task);
  */
 void telemetry_init();
 
+void telemetry_cleanup();
+
 /**
  * Subscribes to the telemetry system.
  * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
@@ -45,6 +47,8 @@ void telemetry_init();
  * @return bool true if successful, otherwise false
  */
 bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
+
+void telemetry_unsubscribe(pubsub_conn * conn);
 
 bool kprv_telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
 

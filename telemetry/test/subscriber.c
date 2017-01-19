@@ -20,7 +20,7 @@
 
 #define NUM_SUBS TELEMETRY_SUBSCRIBERS_MAX_NUM
 
-static void test_subscriber(void)
+static void test_subscriber(void ** arg)
 {
     pubsub_conn connections[NUM_SUBS];
     telemetry_packet incoming_packets[NUM_SUBS];
@@ -47,12 +47,18 @@ static void test_subscriber(void)
         read_status[i] = telemetry_read(connections[i], &incoming_packets[i]);
     }
 
-    telemetry_cleanup();
-    
+    telemetry_unsubscribe(&connections[0]);
+
+    int total_subs_minus_one = telemetry_num_subscribers();
+
+    bool resubscribe_status = telemetry_subscribe(&connections[0], 0);
+
     for (i = 0; i < NUM_SUBS; i++)
     {
-        csp_close(connections[i].conn_handle);
+        telemetry_unsubscribe(&connections[i]);
     }
+
+    telemetry_cleanup();
 
     int end_total_subs = telemetry_num_subscribers();
 
@@ -68,6 +74,10 @@ static void test_subscriber(void)
 
     for (i = 0; i < NUM_SUBS; i++)
         assert_int_equal(outgoing_packet.data.i, incoming_packets[i].data.i);
+
+    assert_int_equal(total_subs_minus_one, (NUM_SUBS - 1));
+
+    assert_true(resubscribe_status);
 
     assert_int_equal(end_total_subs, 0);
 }
