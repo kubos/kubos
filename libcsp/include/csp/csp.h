@@ -266,6 +266,12 @@ int csp_conn_src(csp_conn_t *conn);
 int csp_conn_flags(csp_conn_t *conn);
 
 /**
+ * @param conn pointer to connection structure
+ * @return CSP_ERR_NONE if connection is still valid. Otherwise, an err code is returned.
+ */
+int csp_conn_check(csp_conn_t *conn);
+
+/**
  * Set socket to listen for incoming connections
  * @param socket Socket to enable listening on
  * @param conn_queue_length Length of backlog connection queue

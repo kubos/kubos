@@ -58,6 +58,19 @@ void csp_conn_check_timeouts(void) {
 #endif
 }
 
+int csp_conn_check(csp_conn_t * conn) {
+    csp_conn_t * new_conn = NULL;
+    new_conn = csp_conn_find(conn->idout.ext, CSP_ID_CONN_MASK);
+    if (new_conn != NULL)
+    {
+        return CSP_ERR_NONE;
+    }
+    else
+    {
+        return CSP_ERR_RESET;
+    }
+}
+
 int csp_conn_get_rxq(int prio) {
 
 #ifdef CSP_USE_QOS
