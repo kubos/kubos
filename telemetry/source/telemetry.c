@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef YOTTA_CFG_TELEMETRY
-
 #include "telemetry/telemetry.h"
 #include "telemetry/config.h"
-#include "communications.h"
 #include <csp/arch/csp_queue.h>
 #include <stdio.h>
 
@@ -29,7 +26,7 @@
 static void telemetry_send(telemetry_packet packet);
 
 /* Static array for holding persistent connections to telemetry subscribers */
-static telemetry_conn telemetry_subs[TELEMETRY_NUM_SUBSCRIBERS];
+static pubsub_conn telemetry_subs[TELEMETRY_NUM_SUBSCRIBERS];
 
 /* Current number of active telemetry subscribers */
 static uint8_t num_subs = 0;
@@ -37,17 +34,38 @@ static uint8_t num_subs = 0;
 /* Queue for incoming packets from publishers */
 static csp_queue_handle_t packet_queue = NULL;
 
+static csp_thread_handle_t telem_sub_handle;
+static csp_thread_handle_t telem_rx_handle;
+
+void telemetry_init()
+{
+    csp_buffer_init(10, 256);
+
+    /* Init CSP with address MY_ADDRESS */
+    csp_init(TELEMETRY_CSP_ADDRESS);
+
+    /* Start router task with 500 word stack, OS task priority 1 */
+    csp_route_start_task(500, 1);
+
+    packet_queue = csp_queue_create(MESSAGE_QUEUE_SIZE, sizeof(telemetry_packet));
+
+    csp_thread_create(telemetry_get_subs, "TELEM_SUBS", TELEMETRY_SUBS_THREAD_STACK_SIZE, NULL, 0, &telem_sub_handle);
+    csp_thread_create(telemetry_rx_task, "TELEM_RX", TELEMETRY_RX_THREAD_STACK_SIZE, NULL, 0, &telem_rx_handle);
+}
+
 CSP_DEFINE_TASK(telemetry_get_subs)
 {
-    if (server_setup())
+    /* Private csp_socket used by the telemetry server */
+    csp_socket_t * socket = NULL;
+    if ((socket = kprv_server_setup(TELEMETRY_CSP_PORT, TELEMETRY_NUM_SUBSCRIBERS)) != NULL)
     {
         while (num_subs < TELEMETRY_NUM_SUBSCRIBERS)
         {
-            telemetry_conn conn;
-            if (server_accept(&conn))
+            pubsub_conn conn;
+            if (kprv_server_accept(socket, &conn))
             {
                 telemetry_request request;
-                publisher_read_request(conn, &request);
+                kprv_publisher_read(conn, (void*)&request, sizeof(telemetry_request), TELEMETRY_CSP_PORT);
                 conn.sources = request.sources;
                 telemetry_subs[num_subs++] = conn;
             }
@@ -59,7 +77,6 @@ CSP_DEFINE_TASK(telemetry_get_subs)
 CSP_DEFINE_TASK(telemetry_rx_task)
 {
     telemetry_packet packet;
-    packet_queue = csp_queue_create(10, sizeof(telemetry_packet));
     while(1)
     {
         if (csp_queue_dequeue(packet_queue, &packet, CSP_MAX_DELAY))
@@ -71,6 +88,8 @@ CSP_DEFINE_TASK(telemetry_rx_task)
 
 static void telemetry_send(telemetry_packet packet)
 {
+    // These print statements should be converted to debug logging
+    // Once we have a logging system in place :)
     if(packet.source.data_type == TELEMETRY_TYPE_INT)
     {
         printf("TELEM:%d:%d:%d\r\n", packet.source.source_id, packet.timestamp, packet.data.i);
@@ -87,7 +106,8 @@ static void telemetry_send(telemetry_packet packet)
         // the subscriber will get all data
         if ((telemetry_subs[i].sources == 0) || (packet.source.source_id & telemetry_subs[i].sources))
         {
-            send_packet(telemetry_subs[i], packet);
+            // send_packet(telemetry_subs[i], packet);
+            kprv_send_csp(telemetry_subs[i], (void*)&packet, sizeof(telemetry_packet));
         }
     }
 }
@@ -101,30 +121,28 @@ bool telemetry_publish(telemetry_packet packet)
     return false;
 }
 
-bool telemetry_read(telemetry_conn conn, telemetry_packet * packet)
+bool telemetry_read(pubsub_conn conn, telemetry_packet * packet)
 {
     int tries = 0;
     if (packet != NULL)
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
-            if (subscriber_read_packet(conn, packet))
+            if (kprv_subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_CSP_PORT))
                 return true;
         }
     }
     return false;
 }
 
-bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources)
+bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
 {
-    if ((conn != NULL) && subscriber_connect(conn))
+    if ((conn != NULL) && kprv_subscriber_connect(conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT))
     {
         telemetry_request request = {
             .sources = sources
         };
-        return send_request(*conn, request);
+        return kprv_send_csp(*conn, (void*)&request, sizeof(telemetry_request));
     }
     return false;
 }
-
-#endif

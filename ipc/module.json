@@ -1,9 +1,9 @@
 {
     "license":"Apache-2.0",
-    "name":"telemetry",
+    "name":"ipc",
     "version":"0.1.0",
     "dependencies":{
-      "ipc":"kubostech/ipc"
+      "csp":"kubostech/libcsp"
     },
     "targetDependencies":{
       "kubos-rt":{
