@@ -23,11 +23,6 @@
 #include <stdbool.h>
 
 /**
- * Task used to create, accept and store connections from subscribers.
- */
-CSP_DEFINE_TASK(telemetry_get_subs);
-
-/**
  * Task used to receive incoming data from telemetry publishers.
  */
 CSP_DEFINE_TASK(telemetry_rx_task);

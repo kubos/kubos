@@ -38,26 +38,20 @@ static void telemetry_send(telemetry_packet packet);
 /* Queue for incoming packets from publishers */
 static csp_queue_handle_t packet_queue = NULL;
 
-/* Handle for telemetry subscriber/server thread*/
-static csp_thread_handle_t telem_sub_handle;
-
 /* Handle for telemetry packet receiving thread */
 static csp_thread_handle_t telem_rx_handle;
 
 /* Mutex to lock subscribing process */
 static csp_mutex_t subscribing_lock;
 
-/* Semaphore to signal when server is done with subscribing process */
-static csp_bin_sem_handle_t subscribing_done_signal;
-
-/* Semaphore to signal when server is ready for next subscriber */
-static csp_bin_sem_handle_t telemetry_ready_signal;
-
 /* Bool flag used to indicate telemetry up/down, used to start cleanup process */
 static bool telemetry_running = true;
 
 /* Initial element in list of telemetry subscribers */
 static telemetry_subscriber * subscriber_list_head = NULL;
+
+/* Private CSP socket used for telemetry connections */
+static csp_socket_t * socket = NULL;
 
 void telemetry_init()
 {
@@ -72,11 +66,6 @@ void telemetry_init()
     packet_queue = csp_queue_create(MESSAGE_QUEUE_SIZE, sizeof(telemetry_packet));
 
     csp_mutex_create(&subscribing_lock);
-    csp_bin_sem_create(&subscribing_done_signal);
-    csp_bin_sem_wait(&subscribing_done_signal, 0);
-
-    csp_bin_sem_create(&telemetry_ready_signal);
-    csp_bin_sem_wait(&telemetry_ready_signal, 0);
 
 #ifdef DEBUG
     csp_debug_toggle_level(CSP_ERROR);
@@ -88,16 +77,16 @@ void telemetry_init()
     csp_debug_toggle_level(CSP_LOCK);
 #endif
 
-    csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 2, &telem_sub_handle);
     csp_thread_create(telemetry_rx_task, "TELEM_RX", 1000, NULL, 2, &telem_rx_handle);
+
+    socket = kprv_server_setup(TELEMETRY_CSP_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
 }
 
 void telemetry_cleanup()
 {
     telemetry_subscriber * temp_sub, * next_sub;
 
-    telemetry_running = false;
-    csp_thread_kill(telem_sub_handle);
+    telemetry_running = false;;
     csp_thread_kill(telem_rx_handle);
 
     csp_route_end_task();
@@ -110,7 +99,6 @@ void telemetry_cleanup()
     }
 
     csp_mutex_remove(&subscribing_lock);
-    csp_bin_sem_remove(&subscribing_done_signal);
     csp_queue_remove(packet_queue);
 }
 
@@ -122,37 +110,6 @@ void telemetry_add_subscriber(pubsub_conn conn)
         memcpy(&(new_sub->conn), &conn, sizeof(pubsub_conn));
         LL_APPEND(subscriber_list_head, new_sub);
     }
-}
-
-CSP_DEFINE_TASK(telemetry_get_subs)
-{
-    /* Private csp_socket used by the telemetry server */
-    csp_socket_t * socket = NULL;
-    // printf("get_subs server setup\r\n");
-    if ((socket = kprv_server_setup(TELEMETRY_CSP_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM)) != NULL)
-    {
-        while (telemetry_running)
-        {
-            pubsub_conn conn;
-            // printf("get_subs server_accept\r\n");
-            // csp_bin_sem_post(&subscribing_done_signal);
-            csp_bin_sem_post(&telemetry_ready_signal);
-            if (kprv_server_accept(socket, &conn))
-            {
-                // csp_sleep_ms(500);
-                telemetry_request request;
-                // printf("get_subs pub_read\r\n");
-                kprv_publisher_read(conn, (void*)&request, sizeof(telemetry_request), TELEMETRY_CSP_PORT);
-                conn.sources = request.sources;
-                // printf("get_subs add_sub\r\n");
-                telemetry_add_subscriber(conn);
-                // csp_bin_sem_post(&subscribing_done_signal);
-                // printf("get_subs post done\r\n");
-                csp_bin_sem_post(&subscribing_done_signal);
-            }
-        }
-    }
-    csp_thread_exit();
 }
 
 CSP_DEFINE_TASK(telemetry_rx_task)
@@ -215,43 +172,50 @@ bool telemetry_read(pubsub_conn conn, telemetry_packet * packet)
     return false;
 }
 
-bool kprv_telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
+bool kprv_telemetry_subscribe(pubsub_conn * client_conn, uint8_t sources)
 {
     bool ret = false;
-    if ((conn != NULL) && kprv_subscriber_connect(conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT))
+    if ((client_conn != NULL) && kprv_subscriber_connect(client_conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT))
     {
         telemetry_request request = {
             .sources = sources
         };
 
-        ret = kprv_send_csp(*conn, (void*)&request, sizeof(telemetry_request));
+        ret = kprv_send_csp(*client_conn, (void*)&request, sizeof(telemetry_request));
+    }
+    if (ret)
+    {
+        pubsub_conn server_conn;
+        if (kprv_server_accept(socket, &server_conn))
+        {
+            telemetry_request request;
+            kprv_publisher_read(server_conn, (void*)&request, sizeof(telemetry_request), TELEMETRY_CSP_PORT);
+            server_conn.sources = request.sources;
+            telemetry_add_subscriber(server_conn);
+        }
+        else
+        {
+            /* 
+                It is possible for CSP to run out of connections in the
+                middle of the subscription process. In this case the subscriber
+                will get a connection but the server will not get a corresponding one.
+                If the server never sends the subscribing_done_signal then
+                we know it failed to get a connection. In this case
+                we should cleanup and return an error.
+            */
+            csp_close(client_conn->conn_handle);
+            client_conn->conn_handle = NULL;
+            ret = false;
+        }
     }
     return ret;
 }
 
-bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
+bool telemetry_subscribe(pubsub_conn * client_conn, uint8_t sources)
 {
     bool ret = false;
     csp_mutex_lock(&subscribing_lock, CSP_INFINITY);
-    csp_bin_sem_wait(&telemetry_ready_signal, CSP_INFINITY);
-    ret = kprv_telemetry_subscribe(conn, sources);
-    if (ret)
-    {
-        /* 
-           It is possible for CSP to run out of connections in the
-           middle of the subscription process. In this case the subscriber
-           will get a connection but the server will not get a corresponding one.
-           If the server never sends the subscribing_done_signal then
-           we know it failed to get a connection. In this case
-           we should cleanup and return an error.
-        */
-        if (csp_bin_sem_wait(&subscribing_done_signal, 100) != CSP_SEMAPHORE_OK)
-        {
-            csp_close(conn->conn_handle);
-            conn->conn_handle = NULL;
-            ret = false;
-        }
-    } 
+    ret = kprv_telemetry_subscribe(client_conn, sources);
     csp_mutex_unlock(&subscribing_lock);
     return ret;
 }
