@@ -267,9 +267,9 @@ int csp_conn_flags(csp_conn_t *conn);
 
 /**
  * @param conn pointer to connection structure
- * @return CSP_ERR_NONE if connection is still valid. Otherwise, an err code is returned.
+ * @return CSP_ERR_NONE if connection is still active & valid. Otherwise, an err code is returned.
  */
-int csp_conn_check(csp_conn_t *conn);
+int csp_conn_check_alive(csp_conn_t *conn);
 
 /**
  * Set socket to listen for incoming connections
