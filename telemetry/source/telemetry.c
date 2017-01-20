@@ -44,6 +44,9 @@ static csp_thread_handle_t telem_rx_handle;
 /* Mutex to lock subscribing process */
 static csp_mutex_t subscribing_lock;
 
+/* Mutex to lock unsubscribing process */
+static csp_mutex_t unsubscribing_lock;
+
 /* Bool flag used to indicate telemetry up/down, used to start cleanup process */
 static bool telemetry_running = true;
 
@@ -66,6 +69,7 @@ void telemetry_init()
     packet_queue = csp_queue_create(MESSAGE_QUEUE_SIZE, sizeof(telemetry_packet));
 
     csp_mutex_create(&subscribing_lock);
+    csp_mutex_create(&unsubscribing_lock);
 
 #ifdef DEBUG
     csp_debug_toggle_level(CSP_ERROR);
@@ -222,6 +226,7 @@ bool telemetry_subscribe(pubsub_conn * client_conn, uint8_t sources)
 
 void telemetry_unsubscribe(pubsub_conn * conn)
 {
+    csp_mutex_lock(&unsubscribing_lock, CSP_INFINITY);
     if (conn != NULL)
     {
         csp_close(conn->conn_handle);
@@ -238,6 +243,7 @@ void telemetry_unsubscribe(pubsub_conn * conn)
             }
         }
     }
+    csp_mutex_unlock(&unsubscribing_lock);
 }
 
 int telemetry_num_subscribers()
