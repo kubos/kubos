@@ -44,10 +44,8 @@ bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn)
     csp_conn_t * csp_conn = NULL;
     if ((socket != NULL) && (conn != NULL))
     {
-        //printf("server_accept csp_accept\r\n");
         if ((csp_conn = csp_accept(socket, 1000)) != NULL)
         {
-            //printf("server_accept got conn\r\n");
             conn->conn_handle = csp_conn;
             return true;
         }
@@ -63,11 +61,9 @@ bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
         return false;
     }
 
-    //printf("sub_connect csp_connect\r\n");
     csp_conn = csp_connect(CSP_PRIO_NORM, address, port, 1000, CSP_O_NONE);
     if (csp_conn != NULL)
     {
-        //printf("sub_connect got conn\r\n");
         conn->conn_handle = csp_conn;
         return true;
     }

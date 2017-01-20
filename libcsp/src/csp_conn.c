@@ -58,17 +58,27 @@ void csp_conn_check_timeouts(void) {
 #endif
 }
 
-int csp_conn_check(csp_conn_t * conn) {
+int csp_conn_check_alive(csp_conn_t * conn) {
     csp_conn_t * new_conn = NULL;
-    new_conn = csp_conn_find(conn->idout.ext, CSP_ID_CONN_MASK);
-    if (new_conn != NULL)
+
+    if (conn == NULL)
     {
-        return CSP_ERR_NONE;
+        return CSP_ERR_INVAL;
     }
-    else
+
+    if (conn->state != CONN_OPEN)
     {
         return CSP_ERR_RESET;
     }
+
+    // Check if there is a valid connection on the other side
+    new_conn = csp_conn_find(conn->idout.ext, CSP_ID_CONN_MASK);
+    if (new_conn == NULL)
+    {
+        return CSP_ERR_RESET;
+    }
+
+    return CSP_ERR_NONE;
 }
 
 int csp_conn_get_rxq(int prio) {

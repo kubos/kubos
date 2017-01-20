@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* Structure for storing telemetry subscribers in a list */
 typedef struct telemetry_subscriber
 {
     pubsub_conn conn;
@@ -34,24 +35,28 @@ typedef struct telemetry_subscriber
  */
 static void telemetry_send(telemetry_packet packet);
 
-/* Static array for holding persistent connections to telemetry subscribers */
-static pubsub_conn subscriber;
-
-/* Current number of active telemetry subscribers */
-static uint8_t num_subs = 0;
-
 /* Queue for incoming packets from publishers */
 static csp_queue_handle_t packet_queue = NULL;
 
+/* Handle for telemetry subscriber/server thread*/
 static csp_thread_handle_t telem_sub_handle;
+
+/* Handle for telemetry packet receiving thread */
 static csp_thread_handle_t telem_rx_handle;
 
+/* Mutex to lock subscribing process */
 static csp_mutex_t subscribing_lock;
+
+/* Semaphore to signal when server is done with subscribing process */
 static csp_bin_sem_handle_t subscribing_done_signal;
+
+/* Semaphore to signal when server is ready for next subscriber */
 static csp_bin_sem_handle_t telemetry_ready_signal;
 
+/* Bool flag used to indicate telemetry up/down, used to start cleanup process */
 static bool telemetry_running = true;
-static bool subscribing_done = false;
+
+/* Initial element in list of telemetry subscribers */
 static telemetry_subscriber * subscriber_list_head = NULL;
 
 void telemetry_init()
@@ -134,7 +139,6 @@ CSP_DEFINE_TASK(telemetry_get_subs)
             csp_bin_sem_post(&telemetry_ready_signal);
             if (kprv_server_accept(socket, &conn))
             {
-                subscribing_done = false;
                 // csp_sleep_ms(500);
                 telemetry_request request;
                 // printf("get_subs pub_read\r\n");
@@ -145,7 +149,6 @@ CSP_DEFINE_TASK(telemetry_get_subs)
                 // csp_bin_sem_post(&subscribing_done_signal);
                 // printf("get_subs post done\r\n");
                 csp_bin_sem_post(&subscribing_done_signal);
-                subscribing_done = true;
             }
         }
     }
@@ -230,6 +233,7 @@ bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources)
 {
     bool ret = false;
     csp_mutex_lock(&subscribing_lock, CSP_INFINITY);
+    csp_bin_sem_wait(&telemetry_ready_signal, CSP_INFINITY);
     ret = kprv_telemetry_subscribe(conn, sources);
     if (ret)
     {
@@ -262,7 +266,7 @@ void telemetry_unsubscribe(pubsub_conn * conn)
         LL_FOREACH_SAFE(subscriber_list_head, current, next)
         {
             pubsub_conn subscriber = current->conn;
-            if (csp_conn_check(subscriber.conn_handle) != CSP_ERR_NONE)
+            if (csp_conn_check_alive(subscriber.conn_handle) != CSP_ERR_NONE)
             {
                 LL_DELETE(subscriber_list_head, current);
                 csp_close(subscriber.conn_handle);
