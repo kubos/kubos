@@ -294,6 +294,9 @@ int csp_bind(csp_socket_t *socket, uint8_t port);
  */
 int csp_route_start_task(unsigned int task_stack_size, unsigned int priority);
 
+/**
+ * Ends the router task.
+ */
 void csp_route_end_task();
 
 /**

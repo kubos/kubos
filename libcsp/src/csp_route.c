@@ -41,6 +41,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "csp_dedup.h"
 #include "transport/csp_transport.h"
 
+/* Static handle for router task */
+static csp_thread_handle_t handle_router;
+
 /**
  * Check supported packet options
  * @param interface pointer to incoming interface
@@ -321,8 +324,6 @@ CSP_DEFINE_TASK(csp_task_router) {
 	}
 
 }
-
-static csp_thread_handle_t handle_router;
 
 int csp_route_start_task(unsigned int task_stack_size, unsigned int priority) {
 
