@@ -42,6 +42,10 @@ class STM32F407Discovery(Target):
             logging.error("Binary file didn't pass a sanity check. Exiting.")
             return False
 
+        if not self.checkflasher():
+            logging.error("Binary file was not current enough. Exiting.")
+            return False
+
 # TODO set all of these via Ansible on the target machines
         distpath = os.environ['KUBOS_LIB_PATH']
         configfiles = "../../flash/openocd"
@@ -73,6 +77,16 @@ class STM32F407Discovery(Target):
         except:
             return False
 
-
+    def checkflasher(self):
+        openocdloc = findBin('openocd')
+        command = str("%s --version " % openocdloc)
+        versionlines = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT) 
+        logging.debug(str("%s" % versionlines))
+        for i in versionlines:
+            if re.search("Open On-Chip Debugger\s+0\.[12345678]", i):
+                logging.critical("OpenOCD must be version 0.9 or higher.")
+                return False
+        logging.info("OpenOCD seems to be version 0.9 or higher.")
+        return True
 
 #<EOF>

@@ -42,14 +42,6 @@ def main():
 
     args = ci.readOpts()
 
-#    log = logging.getLogger('logfoo')
-#    hdlr = logging.FileHandler('/tmp/cistack.log')
-#    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-#    hdlr.setFormatter(formatter)
-
-#    log.addHandler(hdlr) 
-    logging.setLevel(ci.logLevel(args))
-
     dt = datetime.datetime
     NOW = dt.isoformat(dt.now(), '-')
     logging.debug("Script started %s." % str(NOW))
