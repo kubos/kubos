@@ -33,6 +33,7 @@ bool __wrap_kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn)
     // because it is a private variable and is initialized in a init function
     // that is not desirable to run around our tests
     check_expected(conn);
+    conn->conn_handle = mock_type(csp_conn_t *);
 
     return mock_type(bool);
 }

@@ -39,27 +39,41 @@ void telemetry_init();
 void telemetry_cleanup();
 
 /**
- * Subscribes to the telemetry system - thread safe version.
- * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
- * @param sources bitmask of sources to subscribe to, a value of 0 will subscribe to all
+ * Connects to the telemetry system - thread safe version.
+ * @param conn pointer to pubsub_conn which will be used to receive future telemetry data.
  * @return bool true if successful, otherwise false
  */
-bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
+bool telemetry_connect(pubsub_conn * conn);
 
 /**
- * Unsubscribes a connection from the telemetry system.
+ * Internal connect function - not thread safe.
+ * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
+ * @return bool true if successful, otherwise false
+ */
+bool kprv_telemetry_connect(pubsub_conn * conn);
+
+/**
+ * Subscribes the pubsub_conn to the specified topic.
+ * @param conn pointer to pubsub_conn
+ * @param topic_id topic to subscribe to
+ * @return bool true if successful, otherwise false
+ */
+bool telemetry_subscribe(pubsub_conn * conn, uint16_t topic_id);
+
+/**
+ * Disconnects from the telemetry system.
+ * @param conn pointer to pubsub_conn which is to be disconnected
+ * @return bool true if successful, otherwise false
+ */
+bool telemetry_disconnect(pubsub_conn * conn);
+
+/**
+ * Unsubscribes a connection from a specific topic.
  * @param conn pointer to pubsub_conn which is to be unsubscribed
+ * @param topic_id topic to remove subscription from
  * @return bool true if successful, otherwise false
  */
-bool telemetry_unsubscribe(pubsub_conn * conn);
-
-/**
- * Internal subscribe function - not thread safe.
- * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
- * @param sources bitmask of sources to subscribe to, a value of 0 will subscribe to all
- * @return bool true if successful, otherwise false
- */
-bool kprv_telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
+bool telemetry_unsubscribe(pubsub_conn * conn, uint16_t topic_id);
 
 /**
  * Reads a telemetry packet from the telemetry server.

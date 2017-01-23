@@ -35,7 +35,7 @@ static void test_subscriber(void ** arg)
     
     for (i = 0; i < NUM_SUBS; i++)
     {
-        subscribe_status[i] = telemetry_subscribe(&connections[i], 0);
+        subscribe_status[i] = telemetry_connect(&connections[i]);
     }
 
     int total_subs = telemetry_num_subscribers();
@@ -47,15 +47,15 @@ static void test_subscriber(void ** arg)
         read_status[i] = telemetry_read(connections[i], &incoming_packets[i]);
     }
 
-    bool unsubscribe_status = telemetry_unsubscribe(&connections[0]);
+    bool unsubscribe_status = telemetry_disconnect(&connections[0]);
 
     int total_subs_minus_one = telemetry_num_subscribers();
 
-    bool resubscribe_status = telemetry_subscribe(&connections[0], 0);
+    bool resubscribe_status = telemetry_connect(&connections[0]);
 
     for (i = 0; i < NUM_SUBS; i++)
     {
-        telemetry_unsubscribe(&connections[i]);
+        telemetry_disconnect(&connections[i]);
     }
 
     telemetry_cleanup();

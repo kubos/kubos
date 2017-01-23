@@ -21,12 +21,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* Structure for storing a list of telemetry sources */
+typedef struct source_list_item
+{
+    telemetry_source source;
+    struct source_list_item * next;
+} source_list_item;
+
 /* Structure for storing telemetry subscribers in a list */
-typedef struct telemetry_subscriber
+typedef struct subscriber_list_item
 {
     pubsub_conn conn;
-    struct telemetry_subscriber * next;
-} telemetry_subscriber;
+    source_list_item * subscriptions;
+    struct subscriber_list_item * next;
+} subscriber_list_item;
+
 
 /**
  * Iterates though all open telemetry connections and
@@ -51,7 +60,7 @@ static csp_mutex_t unsubscribing_lock;
 static bool telemetry_running = true;
 
 /* Initial element in list of telemetry subscribers */
-static telemetry_subscriber * subscriber_list_head = NULL;
+static subscriber_list_item * subscribers = NULL;
 
 /* Private CSP socket used for telemetry connections */
 static csp_socket_t * socket = NULL;
@@ -88,16 +97,16 @@ void telemetry_init()
 
 void telemetry_cleanup()
 {
-    telemetry_subscriber * temp_sub, * next_sub;
+    subscriber_list_item * temp_sub, * next_sub;
 
     telemetry_running = false;
     csp_thread_kill(telem_rx_handle);
 
     csp_route_end_task();
 
-    LL_FOREACH_SAFE(subscriber_list_head, temp_sub, next_sub)
+    LL_FOREACH_SAFE(subscribers, temp_sub, next_sub)
     {
-        LL_DELETE(subscriber_list_head, temp_sub);
+        LL_DELETE(subscribers, temp_sub);
         csp_close(temp_sub->conn.conn_handle);
         free(temp_sub);
     }
@@ -109,11 +118,11 @@ void telemetry_cleanup()
 bool telemetry_add_subscriber(pubsub_conn conn)
 {
     bool ret = false;
-    telemetry_subscriber * new_sub = NULL;
-    if ((new_sub = malloc(sizeof(telemetry_subscriber))) != NULL)
+    subscriber_list_item * new_sub = NULL;
+    if ((new_sub = malloc(sizeof(subscriber_list_item))) != NULL)
     {
         memcpy(&(new_sub->conn), &conn, sizeof(pubsub_conn));
-        LL_APPEND(subscriber_list_head, new_sub);
+        LL_APPEND(subscribers, new_sub);
         ret = true;
     }
     return ret;
@@ -145,8 +154,8 @@ static void telemetry_send(telemetry_packet packet)
         printf("TELEM:%d:%d:%f\r\n", packet.source.source_id, packet.timestamp, packet.data.f);
     }
 
-    telemetry_subscriber * current, * next;
-    LL_FOREACH_SAFE(subscriber_list_head, current, next)
+    subscriber_list_item * current, * next;
+    LL_FOREACH_SAFE(subscribers, current, next)
     {
         pubsub_conn subscriber = current->conn;
         if ((subscriber.sources == 0) || (packet.source.source_id & subscriber.sources))
@@ -179,13 +188,13 @@ bool telemetry_read(pubsub_conn conn, telemetry_packet * packet)
     return false;
 }
 
-bool kprv_telemetry_subscribe(pubsub_conn * client_conn, uint8_t sources)
+bool kprv_telemetry_connect(pubsub_conn * client_conn)
 {
     bool ret = false;
     if ((client_conn != NULL) && kprv_subscriber_connect(client_conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT))
     {
         telemetry_request request = {
-            .sources = sources
+            
         };
 
         ret = kprv_send_csp(*client_conn, (void*)&request, sizeof(telemetry_request));
@@ -221,30 +230,30 @@ bool kprv_telemetry_subscribe(pubsub_conn * client_conn, uint8_t sources)
     return ret;
 }
 
-bool telemetry_subscribe(pubsub_conn * client_conn, uint8_t sources)
+bool telemetry_connect(pubsub_conn * client_conn)
 {
     bool ret = false;
     csp_mutex_lock(&subscribing_lock, CSP_INFINITY);
-    ret = kprv_telemetry_subscribe(client_conn, sources);
+    ret = kprv_telemetry_connect(client_conn);
     csp_mutex_unlock(&subscribing_lock);
     return ret;
 }
 
-bool telemetry_unsubscribe(pubsub_conn * conn)
+bool telemetry_disconnect(pubsub_conn * conn)
 {
     bool ret = false;
     csp_mutex_lock(&unsubscribing_lock, CSP_INFINITY);
     if ((conn != NULL) && (csp_close(conn->conn_handle) == CSP_ERR_NONE))
     {
-        telemetry_subscriber * current, * next;
-        LL_FOREACH_SAFE(subscriber_list_head, current, next)
+        subscriber_list_item * current, * next;
+        LL_FOREACH_SAFE(subscribers, current, next)
         {
             pubsub_conn subscriber = current->conn;
             if (csp_conn_check_alive(subscriber.conn_handle) != CSP_ERR_NONE)
             {
                 if (csp_close(subscriber.conn_handle) == CSP_ERR_NONE)
                 {
-                    LL_DELETE(subscriber_list_head, current);
+                    LL_DELETE(subscribers, current);
                     free(current);
                     ret = true;
                 }
@@ -256,10 +265,20 @@ bool telemetry_unsubscribe(pubsub_conn * conn)
     return ret;
 }
 
+bool telemetry_subscribe(pubsub_conn * client_conn, uint16_t topic_id)
+{
+    return false;
+}
+
+bool telemetry_unsubscribe(pubsub_conn * client_conn, uint16_t topic_id)
+{
+    return false;
+}
+
 int telemetry_num_subscribers()
 {
-    telemetry_subscriber * temp;
+    subscriber_list_item * temp;
     int count;
-    LL_COUNT(subscriber_list_head, temp, count);
+    LL_COUNT(subscribers, temp, count);
     return count;
 }
