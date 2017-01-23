@@ -33,18 +33,32 @@ CSP_DEFINE_TASK(telemetry_rx_task);
  */
 void telemetry_init();
 
+/**
+ * Performs cleanup on telemetry resources & threads.
+ */
 void telemetry_cleanup();
 
 /**
- * Subscribes to the telemetry system.
+ * Subscribes to the telemetry system - thread safe version.
  * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
  * @param sources bitmask of sources to subscribe to, a value of 0 will subscribe to all
  * @return bool true if successful, otherwise false
  */
 bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
 
-void telemetry_unsubscribe(pubsub_conn * conn);
+/**
+ * Unsubscribes a connection from the telemetry system.
+ * @param conn pointer to pubsub_conn which is to be unsubscribed
+ * @return bool true if successful, otherwise false
+ */
+bool telemetry_unsubscribe(pubsub_conn * conn);
 
+/**
+ * Internal subscribe function - not thread safe.
+ * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
+ * @param sources bitmask of sources to subscribe to, a value of 0 will subscribe to all
+ * @return bool true if successful, otherwise false
+ */
 bool kprv_telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
 
 /**
@@ -63,6 +77,9 @@ bool telemetry_read(pubsub_conn conn, telemetry_packet * packet);
  */
 bool telemetry_publish(telemetry_packet packet);
 
+/**
+ * @return int number of active telemetry subscribers
+ */
 int telemetry_num_subscribers();
 
 #endif

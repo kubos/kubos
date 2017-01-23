@@ -47,7 +47,7 @@ static void test_subscriber(void ** arg)
         read_status[i] = telemetry_read(connections[i], &incoming_packets[i]);
     }
 
-    telemetry_unsubscribe(&connections[0]);
+    bool unsubscribe_status = telemetry_unsubscribe(&connections[0]);
 
     int total_subs_minus_one = telemetry_num_subscribers();
 
@@ -75,9 +75,11 @@ static void test_subscriber(void ** arg)
     for (i = 0; i < NUM_SUBS; i++)
         assert_int_equal(outgoing_packet.data.i, incoming_packets[i].data.i);
 
+    assert_true(unsubscribe_status);
+    
     assert_int_equal(total_subs_minus_one, (NUM_SUBS - 1));
 
-    assert_true(resubscribe_status);
+    assert_true(resubscribe_status);    
 
     assert_int_equal(end_total_subs, 0);
 }
