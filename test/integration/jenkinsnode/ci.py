@@ -111,10 +111,6 @@ def main():
 # to do so.
         ci.cleanUp(target, args)
 
-    elif args.command == "lib":
-        pass
-
-#TODO add more behaviors
     else:
         pass
 

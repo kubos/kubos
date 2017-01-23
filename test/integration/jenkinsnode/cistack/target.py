@@ -20,12 +20,6 @@ class Target(object):
     def arch(self):
         return self.arch
 
-    def processor(self):
-        return self.cpu
-
-    def proc(self):
-        return self.cpu
-
     def cpu(self):
         return self.cpu
 
@@ -34,7 +28,6 @@ class Target(object):
         Assert the pin(s) in whatever sequence is required to
         put the board into programming mode, if this is required.
         """
-#        log = logging.getLogger('logfoo') 
         logging.debug("Setting programming mode, if any is needed.")
         return False
 
@@ -43,28 +36,22 @@ class Target(object):
 
     def reset(self):
         """Assert the reset pin for the board, then release it."""
-#        log = logging.getLogger('logfoo') 
         logging.debug("Resetting the board.")
         self.pins['rst'].on()
         sleep(0.5)
         self.pins['rst'].off()
         sleep(0.5)
-        return True
+        return self.pins['rst'].off()
 
     def powerup(self):
         """Turn on the power MOSFET for the target board."""
-#        log = logging.getLogger('logfoo') 
         logging.debug("Turning on the board with pin %s" % str(self.pins['pwr'].number))
-        self.pins['pwr'].on()
-        sleep(0.1)
-        return True
+        return self.pins['pwr'].on()
 
     def powerdown(self):
         """Turn off the power MOSFET for the target board."""
-#        log = logging.getLogger('logfoo')
         logging.debug("Turning off the board's power")
-        self.pins['pwr'].off()
-        return True
+        return self.pins['pwr'].off()
 
     def setupboard(self):
         """Run this function immediately after determining which pins
@@ -73,7 +60,6 @@ class Target(object):
         direction and function.
         """
 
-#        log = logging.getLogger('logfoo') 
 # Setting BCM mode is "Broadcom", running from GPIO2 to GPIO27
 # Meaning pin 40 in "BOARD" is pin 21 in BCM
         logging.info("Setting pin modes for each pin:")
@@ -99,7 +85,6 @@ class Target(object):
         meaning it cannot be simply found with a regex.
         """
 
-#        log = logging.getLogger('logfoo') 
 # do self.binfiletype & self.arch match returns from binfile.validate()?
         logging.debug("Validating the binary file object")
         binobj.validate()

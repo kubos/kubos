@@ -186,7 +186,7 @@ def findBin(command):
 
     try:    
         retval = subprocess.check_output(cmd, shell = True)
-        retval = re.sub('\n$', '', retval)
+        retval = retval.rstrip()
         return retval
     except:
         sys.exit(str("Unable to determine the path to %s; halting." % 
@@ -212,7 +212,6 @@ def checkRoot():
 
 def readOpts():
     """Read command line arguments and return Namespace object."""
-    today = datetime.date.today()
     parser = argparse.ArgumentParser(description = helpstring)
 
     parser.add_argument("-r", "--root", action = 'store', \
@@ -304,9 +303,8 @@ boards. Exiting." % (errstr, board)))
     return False
 
 def allDone():
-    """Free all the pins and exit the script."""
+    """Free all the pins."""
     GPIO.cleanup()
-    sys.exit("Pins cleared. Exiting script.")
     return True
 
 def binaryChecks(findit):
@@ -334,7 +332,7 @@ def startupChecks(args):
     logging.debug("Command line arguments are: %s " % str(args))
     if not args:
         logging.error("Command line arguments returned None. Exiting.")
-        return None
+        return False
 
     if not checkBoard(args.board):
         logging.error("Unable to verify or determine board. Exiting.")
@@ -366,7 +364,6 @@ def pathChecks(paths):
     Check for the presence of system environment variables as submitted,
     but doesn't confirm anything is actually in the right place.
     """
-#    log = logging.getLogger('logfoo')
     for i in paths:
         p = os.environ[i]
         try:
@@ -381,28 +378,11 @@ def pathChecks(paths):
     return True
 
 
-def getEnvironmentVariables(requiredpaths):
-    """Retrieve system environment variables required for successful \
-execution of the functionality in this library."""
-#    log = logging.getLogger('logfoo')
-
-    edict = {}
-    for i in requiredpaths:
-        try:
-            edict[i] = os.environ[i]
-        except KeyError:
-            edict[i] = ""
-        except:
-            logging.error(str("Problem while retrieving system environment \
-variable %s" % str(i)))
-            return False
-
-    return edict
-
 def cleanUp(target, args):
-#    log = logging.getLogger('logfoo') 
-# If you want to shut the board down, this command cleans up and 
-# de-energizes the power MOSFET.
+    """
+    When shutting the board down, this command cleans up and 
+    de-energizes the power MOSFET.
+    """
     if args.shutdown:
         logging.info("Shutting down the board.")
         target.powerdown() 
