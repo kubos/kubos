@@ -28,6 +28,8 @@
 #include "kubos-hal/led.h"
 #include "kubos-hal/uart.h"
 
+#include YOTTA_BUILD_INFO_HEADER
+
 #include <csp/csp.h>
 #include <csp/arch/csp_thread.h>
 #include <slash/slash.h>
@@ -36,9 +38,9 @@
 #include "./config.h"
 
 static inline void blink(int pin) {
-    K_LED_ON(pin);
+    k_led_on(pin);
     vTaskDelay(BLINK_MS / portTICK_RATE_MS);
-    K_LED_OFF(pin);
+    k_led_off(pin);
 }
 
 void csp_server(void *p) {
@@ -101,7 +103,7 @@ slash_command_group(led, "Control LEDs");
 
 static inline int led_pin(const char *name) {
     for (int i = 0; i < K_LED_COUNT; i++) {
-        int pin = K_LED_AT(i);
+        int pin = k_led_at(i);
         const char *led_desc = k_led_get_desc(pin);
 
         if (strncasecmp(name, led_desc, strlen(led_desc)) == 0) {
@@ -110,13 +112,13 @@ static inline int led_pin(const char *name) {
     }
 
     int index = atoi(name); // Will return 0 if undefined, which is good for us
-    return K_LED_AT(index);
+    return k_led_at(index);
 }
 
 static int led_info(struct slash *slash)
 {
     for (int i = 0; i < K_LED_COUNT; i++) {
-        int led_pin = K_LED_AT(i);
+        int led_pin = k_led_at(i);
         slash_println(slash, "LED %d: pin=%d, color=%s", i, led_pin,
                       k_led_get_desc(led_pin));
     }
@@ -136,7 +138,7 @@ static int led_on(struct slash *slash)
         return SLASH_EUSAGE;
     }
 
-    K_LED_ON(pin);
+    k_led_on(pin);
     return SLASH_SUCCESS;
 }
 slash_command_sub(led, on, led_on, "<led>", "turn LED on");
@@ -153,7 +155,7 @@ static int led_off(struct slash *slash)
         return SLASH_EUSAGE;
     }
 
-    K_LED_OFF(pin);
+    k_led_off(pin);
     return SLASH_SUCCESS;
 }
 slash_command_sub(led, off, led_off, "<led>", "turn LED off");
@@ -239,6 +241,27 @@ static int tasks(struct slash *slash)
 }
 slash_command(tasks, tasks, NULL, "display FreeRTOS tasks");
 
+static int build_info(struct slash *slash)
+{
+    slash_println(slash, "Timestamp: %04d-%02d-%02d %02d:%02d:%02d UTC",
+                  YOTTA_BUILD_YEAR, YOTTA_BUILD_MONTH, YOTTA_BUILD_DAY,
+                  YOTTA_BUILD_HOUR, YOTTA_BUILD_MINUTE, YOTTA_BUILD_SECOND);
+
+    // macro trick to stringify the generated constants
+    #define _TO_STR(x) _UNWRAP(x)
+    #define _UNWRAP(x) #x
+
+    slash_println(slash, "UUID: " _TO_STR(YOTTA_BUILD_UUID));
+
+    #ifdef YOTTA_BUILD_VCS_ID
+    slash_println(slash, "VCS ID: " _TO_STR(YOTTA_BUILD_VCS_ID) ", Clean: %d",
+                  YOTTA_BUILD_VCS_CLEAN);
+    #endif
+
+    return SLASH_SUCCESS;
+}
+slash_command(build_info, build_info, NULL, "print info about this build");
+
 int main(void)
 {
     k_uart_console_init();
@@ -263,8 +286,8 @@ int main(void)
     vTaskStartScheduler();
 
     // Should never get here
-    K_LED_ON(K_LED_0);
-    K_LED_ON(K_LED_1);
+    k_led_on(K_LED_0);
+    k_led_on(K_LED_1);
 
     while (1);
 
