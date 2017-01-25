@@ -174,6 +174,10 @@ bool telemetry_store(telemetry_packet packet)
             return false;
         }
     }
+    else if(DATA_OUPUT_FORMAT == FORMAT_TYPE_NONE)
+    {
+        /* Placeholder for no file extension */
+    }
     else if(DATA_OUTPUT_FORMAT == FORMAT_TYPE_HEX)
     { 
         /* Placeholder for hexidecimal format */

@@ -22,12 +22,14 @@
 
 #define FILE_EXTENSION_CSV ".csv"
 #define FILE_EXTENSION_HEX ".hex"
+#define FILE_EXTENSION_NONE ""
 
 
 typedef enum 
 {
     FORMAT_TYPE_CSV = 0,        /* (0) CSV */
     FORMAT_TYPE_HEX             /* (1) HEX */
+    FORMAT_TYPE_NONE            /* (2) No file extension */
 } output_data_format;
 
 

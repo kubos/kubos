@@ -20,15 +20,15 @@
  
 static void test_create_filename_null_pointers(void **state)
 {
-    assert_int_equal(create_filename(NULL,0,0,"test"),0);
-    assert_int_equal(create_filename("test",0,0,NULL),0);
+    assert_int_equal(create_filename(NULL, 0, 0, "test"), 0);
+    assert_int_equal(create_filename("test", 0, 0, NULL), 0);
 }
 
 
 static void test_format_log_entry_csv_null_pointers(void **state)
 {
     telemetry_packet packet;
-    assert_int_equal(format_log_entry_csv(NULL,packet),0);
+    assert_int_equal(format_log_entry_csv(NULL, packet), 0);
 }
 
 
@@ -38,13 +38,19 @@ static void test_create_filename(void **state)
     static char *filename_buf_ptr;
     filename_buf_ptr = filename_buffer;
     char test_string_file_ext[FILE_NAME_BUFFER_SIZE - 2];
+    char test_compare_string[] = "11.tst";
     memset(test_string_file_ext, 't', sizeof(test_string_file_ext));
 
     /* Test catching partial writes from snprintf by passing 128 chars 
      * given a file extension size of 126 and a address and source id of 
      * one char each (no room for null terminator)
      */
-    assert_int_equal(create_filename(filename_buf_ptr,1,1,test_string_file_ext),0);
+    assert_int_equal(create_filename(filename_buf_ptr, 1, 1, test_string_file_ext), 0);
+    
+    create_filename(filename_buf_ptr, 1, 1, ".tst");
+    
+    /* Test string comparison with expected output */
+    assert_string_equal(filename_buffer, test_compare_string);
 }
 
 
@@ -52,20 +58,30 @@ static void test_format_log_entry_csv(void **state)
 {
     static char data_buffer[DATA_BUFFER_SIZE];
     static char *data_buf_ptr;
+    char test_compare_string[] = "1,1\r\n";
+    
     telemetry_packet packet = { .data.f = FLT_MAX, .timestamp = 65535, \
          .source.data_type = TELEMETRY_TYPE_FLOAT };
+         
+    telemetry_packet test_packet = { .data.i = 1, .timestamp = 1, \
+         .source.data_type = TELEMETRY_TYPE_INT};
     
     data_buf_ptr = data_buffer;
     
     /* Test the maximum length of a log entry. Currently a max float 
-     * plus a max timestamp 
+     * plus a max timestamp. 
      */
      assert_int_equal(format_log_entry_csv(data_buf_ptr, packet), 54);
      
-     packet.source.data_type = 2;
+     packet.source.data_type = 3;
      
     /* Pass an unknown telemetry type */
-     assert_int_equal(format_log_entry_csv(data_buf_ptr, packet),0);
+     assert_int_equal(format_log_entry_csv(data_buf_ptr, packet), 0);
+     
+     format_log_entry_csv(data_buf_ptr, test_packet);
+     
+    /* Test string comparison with expected output */
+    assert_string_equal(data_buffer, test_compare_string);
 }
 
 
