@@ -158,7 +158,6 @@ static int _klog_telemetry(FILE *f, unsigned level, const char *logger,
     written += fprintf(f, "%010ld.%03ld%s%s,", millis / 1000, millis % 1000,
                         logger, _level_str(level));
     written += vfprintf(f, format, args);
-    //written += fprintf(f, "\n");
     return written;
 }
 
