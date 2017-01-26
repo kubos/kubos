@@ -127,6 +127,7 @@ static inline char *_level_str(unsigned level)
     switch (level) {
         case LOG_ERROR: return "E";
         case LOG_WARNING: return "W";
+        case LOG_TELEMETRY: return "T";
         case LOG_INFO: return "I";
         case LOG_DEBUG: return "D";
         case LOG_NONE:
@@ -145,6 +146,19 @@ static int _klog(FILE *f, unsigned level, const char *logger,
                        logger, _level_str(level));
     written += vfprintf(f, format, args);
     written += fprintf(f, "\n");
+    return written;
+}
+
+static int _klog_telemetry(FILE *f, unsigned level, const char *logger,
+                 const char *format, va_list args)
+{
+    int written = 0;
+    uint32_t millis = csp_get_ms();
+
+    written += fprintf(f, "%010ld.%03ld%s%s,", millis / 1000, millis % 1000,
+                        logger, _level_str(level));
+    written += vfprintf(f, format, args);
+    //written += fprintf(f, "\n");
     return written;
 }
 
@@ -170,8 +184,13 @@ void klog_file(unsigned level, const char *logger, const char *format, ...)
             return;
         }
     }
-
-    _current_part_size += _klog(_log_file, level, logger, format, args);
+    
+    if (level == LOG_TELEMETRY) {
+        _current_part_size += _klog_telemetry(_log_file, level, logger, format, args);
+    }
+    else {    
+        _current_part_size += _klog(_log_file, level, logger, format, args);
+    }
 
     va_end(args);
     fsync(fileno(_log_file));

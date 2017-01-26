@@ -3,7 +3,8 @@
     "name":"telemetry-storage",
     "version":"0.1.0",
     "dependencies":{
-        "telemetry":"kubostech/telemetry"
+        "telemetry":"kubostech/telemetry",
+	"kubos-core": "kubostech/kubos-core"
     },
     "targetDependencies":{
       "kubos-rt":{

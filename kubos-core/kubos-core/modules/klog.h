@@ -48,11 +48,13 @@ extern "C" {
 #define KLOG_MAX_LINE 255
 #endif
 
-#define KLOG(level, logger, ...)  klog_write(level, logger, __VA_ARGS__)
-#define KLOG_ERR(logger, ...)     KLOG(LOG_ERROR, logger, __VA_ARGS__)
-#define KLOG_WARN(logger, ...)    KLOG(LOG_WARNING, logger, __VA_ARGS__)
-#define KLOG_INFO(logger, ...)    KLOG(LOG_INFO, logger, __VA_ARGS__)
-#define KLOG_DEBUG(logger, ...)   KLOG(LOG_DEBUG, logger, __VA_ARGS__)
+#define KLOG(level, logger, ...)    klog_write(level, logger, __VA_ARGS__)
+#define KLOG_ERR(logger, ...)       KLOG(LOG_ERROR, logger, __VA_ARGS__)
+#define KLOG_WARN(logger, ...)      KLOG(LOG_WARNING, logger, __VA_ARGS__)
+#define KLOG_TELEMETRY(logger, ...) KLOG(LOG_TELEMETRY, logger, __VA_ARGS__)
+#define KLOG_INFO(logger, ...)      KLOG(LOG_INFO, logger, __VA_ARGS__)
+#define KLOG_DEBUG(logger, ...)     KLOG(LOG_DEBUG, logger, __VA_ARGS__)
+
 
 #define KLOG_SUFFIX_LEN 4
 #define KLOG_PATH_LEN   255

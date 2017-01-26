@@ -18,7 +18,6 @@
 
 #include "telemetry-storage/telemetry_storage.h"
 #include "telemetry-storage/config.h"
-#include "telemetry-storage/disk.h"
 
 
 CSP_DEFINE_TASK(telemetry_store_rx)
@@ -137,6 +136,10 @@ static void print_to_console(telemetry_packet packet)
 
 bool telemetry_store(telemetry_packet packet)
 {
+    klog_console_level = LOG_NONE;
+    klog_file_level = LOG_TELEMETRY;
+    klog_file_logging = true;
+    
     static char filename_buffer[FILE_NAME_BUFFER_SIZE];
     static char *filename_buf_ptr;
     static char data_buffer[DATA_BUFFER_SIZE];
@@ -144,39 +147,33 @@ bool telemetry_store(telemetry_packet packet)
 
     uint16_t data_len;
     uint16_t filename_len;
-    uint16_t sd_stat;
+    int init_ret;
 
     filename_buf_ptr = filename_buffer;
     data_buf_ptr = data_buffer;
     
     if(DATA_OUTPUT_FORMAT == FORMAT_TYPE_CSV)
     { 
-        filename_len = create_filename(filename_buf_ptr, packet.source.source_id, packet.source.subsystem_id, FILE_EXTENSION_CSV);
+        filename_len = create_filename(filename_buf_ptr, packet.source.source_id, packet.source.subsystem_id, FILE_EXTENSION_NONE);
         data_len = format_log_entry_csv(data_buf_ptr, packet);
-    
+        
         /* Save log entry */
         if (filename_len > 0 && data_len > 0)
         {
-            sd_stat = disk_save_string(filename_buf_ptr, data_buf_ptr, data_len);
-            if (sd_stat != 0)
+            //klog_console(LOG_DEBUG, "Log Entry", "%s", data_buf_ptr);
+            //klog_console(LOG_DEBUG, "Filename", "%s", filename_buf_ptr);
+            init_ret = klog_init_file(filename_buf_ptr, filename_len, DATA_PART_SIZE, DATA_MAX_PARTS);
+            if(init_ret == 0)
             {
-                printf("Error saving telemetry log entry. Code %u \r\n", sd_stat);
-                return false;
+                KLOG_TELEMETRY("",data_buf_ptr);
+                klog_cleanup();
+                return true;
             }
-            //printf("Log Entry = %s\n", data_buf_ptr);
-            //printf("Filename = %s\n", filename_buf_ptr);
-            //printf("The data length %u\r\n", data_len);
-            return true;
         }
         else 
         {
-            printf("Error, decoding log entry or filename are blank \r\n");
-            return false;
+            printf("Error, decoding log entry or filename is blank \r\n");
         }
-    }
-    else if(DATA_OUPUT_FORMAT == FORMAT_TYPE_NONE)
-    {
-        /* Placeholder for no file extension */
     }
     else if(DATA_OUTPUT_FORMAT == FORMAT_TYPE_HEX)
     { 
@@ -186,4 +183,5 @@ bool telemetry_store(telemetry_packet packet)
     {
         printf("Telemetry storage format type not found\r\n");
     }
+    return false;
 }
