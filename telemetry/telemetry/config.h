@@ -16,6 +16,8 @@
 #ifndef TELEMETRY_CONFIG_H
 #define TELEMETRY_CONFIG_H
 
+#include <csp/csp_autoconfig.h>
+
 /* Address used for the current CSP instance */
 #ifndef YOTTA_CFG_TELEMETRY_CSP_ADDRESS
 #define TELEMETRY_CSP_ADDRESS 1
@@ -37,11 +39,20 @@
 #define TELEMETRY_CSP_PORT YOTTA_CFG_TELEMETRY_CSP_PORT
 #endif
 
-/* Number of telemetry subscribers */
-#ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_NUM
-#define TELEMETRY_NUM_SUBSCRIBERS 10
+
+/* Max number of subscribers supported */
+#ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_MAX_NUM
+#define TELEMETRY_SUBSCRIBERS_MAX_NUM ((CSP_CONN_MAX / 2) - 1)
 #else
-#define TELEMETRY_NUM_SUBSCRIBERS YOTTA_CFG_TELEMETRY_SUBSCRIBERS_NUM
+#define TELEMETRY_SUBSCRIBERS_MAX_NUM YOTTA_CFG_TELEMETRY_SUBSCRIBERS_MAX_NUM
+#endif
+
+/* Check to ensure the configured number of subscribers is even possible
+   based on how many connections CSP has allocated. This should eventually get
+   migrated into a higher level CSP manager.
+*/
+#if ((TELEMETRY_SUBSCRIBERS_MAX_NUM * 2) + 1) > CSP_CONN_MAX
+#warning "Number of telemetry subscribers exceeds number of available CSP connections"
 #endif
 
 /* Number of subscriber read attempts */
@@ -51,18 +62,18 @@
 #define TELEMETRY_SUBSCRIBER_READ_ATTEMPTS YOTTA_CFG_TELEMETRY_SUBSCRIBERS_READ_ATTEMPTS
 #endif
 
-/* Stack size of thread for accepting subscribers */
-#ifndef YOTTA_CFG_TELEMETRY_SUBS_THREAD_STACK_SIZE
-#define TELEMETRY_SUBS_THREAD_STACK_SIZE 1000
-#else
-#define TELEMETRY_SUBS_THREAD_STACK_SIZE YOTTA_CFG_TELEMETRY_SUBS_THREAD_STACK_SIZE
-#endif
-
 /* Stack size of thread for receiving incoming messages */
 #ifndef YOTTA_CFG_TELEMETRY_RX_THREAD_STACK_SIZE
 #define TELEMETRY_RX_THREAD_STACK_SIZE 1000
 #else
 #define TELEMETRY_RX_THREAD_STACK_SIZE YOTTA_CFG_TELEMETRY_RX_THREAD_STACK_SIZE
+#endif
+
+/* Priority of thread for receiving incoming messages */
+#ifndef YOTTA_CFG_TELEMETRY_RX_THREAD_PRIORITY
+#define TELEMETRY_RX_THREAD_PRIORITY 2
+#else
+#define TELEMETRY_RX_THREAD_PRIORITY YOTTA_CFG_TELEMETRY_RX_THREAD_PRIORITY
 #endif
 
 #endif
