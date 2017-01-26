@@ -43,14 +43,14 @@ void telemetry_cleanup();
  * @param conn pointer to pubsub_conn which will be used to receive future telemetry data.
  * @return bool true if successful, otherwise false
  */
-bool telemetry_connect(pubsub_conn * conn);
+pubsub_conn * telemetry_connect();
 
 /**
  * Internal connect function - not thread safe.
  * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
  * @return bool true if successful, otherwise false
  */
-bool kprv_telemetry_connect(pubsub_conn * conn);
+pubsub_conn * kprv_telemetry_connect();
 
 /**
  * Subscribes the pubsub_conn to the specified topic.
@@ -95,5 +95,7 @@ bool telemetry_publish(telemetry_packet packet);
  * @return int number of active telemetry subscribers
  */
 int telemetry_num_subscribers();
+
+bool telemetry_is_subscribed(pubsub_conn * client_conn, uint16_t topic_id);
 
 #endif

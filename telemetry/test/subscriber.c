@@ -22,64 +22,78 @@
 
 static void test_subscriber(void ** arg)
 {
-    pubsub_conn connections[NUM_SUBS];
+    pubsub_conn * connections[NUM_SUBS];
     telemetry_packet incoming_packets[NUM_SUBS];
-    telemetry_packet outgoing_packet;
+    
     bool subscribe_status[NUM_SUBS] = {false};
     bool read_status[NUM_SUBS] = {false};
     int i = 0;
+    uint16_t topic_id = 18;
+    telemetry_packet outgoing_packet = {
+        .data.i = 16,
+        .source.topic_id = topic_id,
+        .source.data_type = TELEMETRY_TYPE_INT,
+        .source.subsystem_id = 1
+    };
 
-    outgoing_packet.data.i = 10;
-    
     telemetry_init();
     
     for (i = 0; i < NUM_SUBS; i++)
     {
-        subscribe_status[i] = telemetry_connect(&connections[i]);
+        // subscribe_status[i] = telemetry_connect(&connections[i]);
+        connections[i] = telemetry_connect();
+        assert_non_null(connections[i]);
+    }
+
+    for (i = 0; i < NUM_SUBS; i++)
+    {
+        subscribe_status[i] = telemetry_subscribe(connections[i], topic_id);
     }
 
     int total_subs = telemetry_num_subscribers();
 
     bool packet_published = telemetry_publish(outgoing_packet);
 
-    for (i = 0; i < NUM_SUBS; i++)
+    for (i = 0; i < NUM_SUBS-1; i++)
     {
-        read_status[i] = telemetry_read(connections[i], &incoming_packets[i]);
+        read_status[i] = telemetry_read(*(connections[i]), &incoming_packets[i]);
     }
 
-    bool unsubscribe_status = telemetry_disconnect(&connections[0]);
+    bool unsubscribe_status = telemetry_disconnect(connections[0]);
 
     int total_subs_minus_one = telemetry_num_subscribers();
 
-    bool resubscribe_status = telemetry_connect(&connections[0]);
+    connections[0] = telemetry_connect();
 
     for (i = 0; i < NUM_SUBS; i++)
     {
-        telemetry_disconnect(&connections[i]);
+        telemetry_disconnect(connections[i]);
     }
 
     telemetry_cleanup();
 
     int end_total_subs = telemetry_num_subscribers();
-
-    for (i = 0; i < NUM_SUBS; i++)
-        assert_true(subscribe_status[i]);
     
     assert_int_equal(total_subs, NUM_SUBS);
 
+    for (i = 0; i < NUM_SUBS; i++)
+        assert_true(subscribe_status[i]);
+
     assert_true(packet_published);
 
-    for (i = 0; i < NUM_SUBS; i++)
+    for (i = 0; i < NUM_SUBS-1; i++)
         assert_true(read_status[i]);
 
-    for (i = 0; i < NUM_SUBS; i++)
+    assert_false(read_status[NUM_SUBS]);
+
+    for (i = 0; i < NUM_SUBS-1; i++)
         assert_int_equal(outgoing_packet.data.i, incoming_packets[i].data.i);
+
+    assert_int_not_equal(outgoing_packet.data.i, incoming_packets[NUM_SUBS].data.i);
 
     assert_true(unsubscribe_status);
     
     assert_int_equal(total_subs_minus_one, (NUM_SUBS - 1));
-
-    assert_true(resubscribe_status);    
 
     assert_int_equal(end_total_subs, 0);
 }

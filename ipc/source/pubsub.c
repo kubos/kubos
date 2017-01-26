@@ -105,7 +105,7 @@ bool kprv_publisher_read(pubsub_conn conn, void * buffer, int buffer_size, uint8
     csp_conn_t * csp_conn = conn.conn_handle;
     if ((buffer != NULL) && (csp_conn != NULL))
     {
-        if ((csp_packet = csp_read(csp_conn, 1000)) != NULL)
+        if ((csp_packet = csp_read(csp_conn, 50)) != NULL)
         {
             if (csp_conn_dport(csp_conn) == port)
             {
@@ -125,7 +125,7 @@ bool kprv_subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint
     csp_conn_t * csp_conn = conn.conn_handle;
     if ((buffer != NULL) && (csp_conn != NULL))
     {
-        if ((csp_packet = csp_read(csp_conn, 1000)) != NULL)
+        if ((csp_packet = csp_read(csp_conn, 50)) != NULL)
         {
             if (csp_conn_sport(csp_conn) == port)
             {

@@ -25,8 +25,6 @@
  */
 typedef struct
 {
-    /* Bitmask of sources this connection is subscribed to */
-    uint8_t sources;
     /* Raw network connection handle - today this is a csp connection */
     csp_conn_t * conn_handle;
 } pubsub_conn;
