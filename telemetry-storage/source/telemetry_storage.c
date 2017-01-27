@@ -172,7 +172,7 @@ bool telemetry_store(telemetry_packet packet)
         }
         else 
         {
-            printf("Error, decoding log entry or filename is blank \r\n");
+            printf("Error decoding telemetry packet. Log entry or filename is blank \r\n");
         }
     }
     else if(DATA_OUTPUT_FORMAT == FORMAT_TYPE_HEX)

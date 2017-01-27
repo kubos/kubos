@@ -13,15 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "telemetry-storage/disk.h"
+#include <kubos-core/modules/klog.h>
 #include <cmocka.h>
 
-uint16_t __wrap_disk_save_string(const char *file_path, char *data_buffer, uint16_t data_len)
+int __wrap_klog_init_file(char *file_path, uint8_t file_path_len, uint32_t part_size, uint8_t max_parts)
 {
     check_expected(file_path);
-    check_expected(data_buffer);
-    check_expected(data_len);
-    return mock_type(uint16_t);
+    check_expected(file_path_len);
+    check_expected(part_size);
+    check_expected(max_parts);
+    return mock_type(int);
 }
 
+void __wrap_KLOG_TELEMETRY(unsigned level, const char *logger, const char *format, ...)
+{
+    /* Do nothing */
+}
+
+void __wrap_klog_cleanup(void)
+{
+    /* Do nothing */
+}
 

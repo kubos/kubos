@@ -91,13 +91,15 @@ static void test_telemetry_store(void **state)
         .source.subsystem_id = 0, .source.data_type = TELEMETRY_TYPE_INT, \
         .source.source_id = 1};
         
-    expect_not_value_count(__wrap_disk_save_string, file_path, NULL,2);
-    expect_not_value_count(__wrap_disk_save_string, data_buffer, NULL,2);
-    expect_not_value_count(__wrap_disk_save_string, data_len, 0,2);
-    will_return(__wrap_disk_save_string,0);
+    expect_not_value_count(__wrap_klog_init_file, file_path, NULL, 2);
+    expect_not_value_count(__wrap_klog_init_file, file_path_len, 0, 2);
+    expect_not_value_count(__wrap_klog_init_file, part_size, 0, 2);
+    expect_not_value_count(__wrap_klog_init_file, max_parts, 0, 2);
+    
+    will_return(__wrap_klog_init_file, 0);
     assert_true(telemetry_store(packet));
     
-    will_return(__wrap_disk_save_string,1);
+    will_return(__wrap_klog_init_file,-1);
     assert_false(telemetry_store(packet));
 
 }
