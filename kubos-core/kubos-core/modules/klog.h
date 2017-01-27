@@ -75,10 +75,10 @@ void klog_file(unsigned level, const char *logger, const char *format, ...);
 void klog_cleanup(void);
 
 #define klog_write(level, logger, ...) do { \
-    if (level <= klog_console_level) { \
+    if ((level <= klog_console_level) && (level != LOG_TELEMETRY)) { \
         klog_console(level, logger, __VA_ARGS__); \
     } \
-    if (level <= klog_file_level && klog_file_logging) { \
+    if ((level <= klog_file_level && klog_file_logging) || (level == LOG_TELEMETRY && klog_file_logging)) { \
         klog_file(level, logger, __VA_ARGS__); \
     } \
 } while (0)

@@ -35,12 +35,14 @@ uint8_t klog_file_level = LOG_DEBUG;
 bool klog_file_logging = false;
 
 static FILE *_log_file = NULL;
+
 static char *_file_path = NULL;
 static uint8_t _file_path_len = 0;
 static uint8_t _current_part = 0;
 static uint32_t _current_part_size = 0;
 static uint32_t _part_size;
 static uint8_t _max_parts;
+
 
 static void _next_log_file(void)
 {
@@ -155,8 +157,7 @@ static int _klog_telemetry(FILE *f, unsigned level, const char *logger,
     int written = 0;
     uint32_t millis = csp_get_ms();
 
-    written += fprintf(f, "%010ld.%03ld%s%s,", millis / 1000, millis % 1000,
-                        logger, _level_str(level));
+    written += fprintf(f, "%010ld.%03ld,", millis / 1000, millis % 1000);
     written += vfprintf(f, format, args);
     return written;
 }

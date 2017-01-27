@@ -136,8 +136,8 @@ static void print_to_console(telemetry_packet packet)
 
 bool telemetry_store(telemetry_packet packet)
 {
-    klog_console_level = LOG_NONE;
-    klog_file_level = LOG_TELEMETRY;
+    //klog_console_level = LOG_NONE;
+    //klog_file_level = LOG_TELEMETRY;
     klog_file_logging = true;
     
     static char filename_buffer[FILE_NAME_BUFFER_SIZE];
