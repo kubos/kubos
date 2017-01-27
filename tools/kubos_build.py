@@ -100,16 +100,18 @@ class KubosBuild(object):
         modules = subprocess.check_output(["find", ".", "-name",
                                         "module.json"], cwd=self.kubos_dir)
         for path in modules.splitlines():
-            path = path.replace("module.json", "").strip()
-            name = path.split("/")[-2]
-            relpath = os.path.relpath(path, self.kubos_dir)
-            self.projects.append(Project(name, path, relpath))
+            if "yotta_modules" not in path:
+                path = path.replace("module.json", "").strip()
+                name = path.split("/")[-2]
+                relpath = os.path.relpath(path, self.kubos_dir)
+                self.projects.append(Project(name, path, relpath))
 
         modules = subprocess.check_output(["find", ".", "-name",
                                         "target.json"], cwd=self.kubos_dir)
         for path in modules.splitlines():
-            path = path.replace("target.json", "").strip()
-            name = path.split("/")[-2]
-            relpath = os.path.relpath(path, self.kubos_dir)
-            self.projects.append(Project(name, path, relpath))
+            if "yotta_targets" not in path:
+                path = path.replace("target.json", "").strip()
+                name = path.split("/")[-2]
+                relpath = os.path.relpath(path, self.kubos_dir)
+                self.projects.append(Project(name, path, relpath))
 
