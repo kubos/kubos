@@ -66,6 +66,10 @@ def main():
     parser.add_argument('--all', action='store_true', default=False,
                         help='install/uninstall system symlinks and app ' \
                              'symlinks for local example apps (default)')
+    parser.add_argument('--everything', action='store_true', default=False,
+                        help='install/uninstall target/modulesystem symlinks ' \
+                             'for all modules (not just binaries)')
+                        
 
     args = parser.parse_args()
     if not args.sys and not args.app:
@@ -86,6 +90,17 @@ def main():
         else:
             # unlink in reverse
             for mod in linker.kb.bin_modules():
+                linker.link_app(mod.path, args.link)
+            linker.link_sys(args.link)
+
+    if args.everything:
+        if args.link == 'link':
+            linker.link_sys(args.link)
+            for mod in linker.kb.modules():
+                linker.link_app(mod.path, args.link)
+        else:
+            # unlink in reverse
+            for mod in linker.kb.modules():
                 linker.link_app(mod.path, args.link)
             linker.link_sys(args.link)
 
