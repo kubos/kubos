@@ -37,7 +37,7 @@ static void test_create_filename(void **state)
     static char filename_buffer[FILE_NAME_BUFFER_SIZE];
     static char *filename_buf_ptr;
     filename_buf_ptr = filename_buffer;
-    char test_string_file_ext[FILE_NAME_BUFFER_SIZE - 2];
+    char test_string_file_ext[FILE_NAME_BUFFER_SIZE];
     char test_compare_string[] = "11.tst";
     memset(test_string_file_ext, 't', sizeof(test_string_file_ext));
 
@@ -58,7 +58,7 @@ static void test_format_log_entry_csv(void **state)
 {
     static char data_buffer[DATA_BUFFER_SIZE];
     static char *data_buf_ptr;
-    char test_compare_string[] = "1,1\r\n";
+    char test_compare_string[] = "1,1";
     
     telemetry_packet packet = { .data.f = FLT_MAX, .timestamp = 65535, \
          .source.data_type = TELEMETRY_TYPE_FLOAT };
@@ -71,7 +71,7 @@ static void test_format_log_entry_csv(void **state)
     /* Test the maximum length of a log entry. Currently a max float 
      * plus a max timestamp. 
      */
-     assert_int_equal(format_log_entry_csv(data_buf_ptr, packet), 54);
+     assert_int_equal(format_log_entry_csv(data_buf_ptr, packet), 52);
      
      packet.source.data_type = 3;
      
@@ -91,17 +91,16 @@ static void test_telemetry_store(void **state)
         .source.subsystem_id = 0, .source.data_type = TELEMETRY_TYPE_INT, \
         .source.source_id = 1};
         
-    expect_not_value_count(__wrap_klog_init_file, file_path, NULL, 2);
-    expect_not_value_count(__wrap_klog_init_file, file_path_len, 0, 2);
-    expect_not_value_count(__wrap_klog_init_file, part_size, 0, 2);
-    expect_not_value_count(__wrap_klog_init_file, max_parts, 0, 2);
+    expect_not_value(__wrap_klog_init_file, config.file_path, NULL);
+    expect_not_value(__wrap_klog_init_file, config.file_path_len, 0);
+    expect_not_value(__wrap_klog_init_file, config.part_size, 0);
+    expect_not_value(__wrap_klog_init_file, config.max_parts, 0);
+    expect_in_range(__wrap_klog_init_file, config.klog_console_level, 0, LOG_ALL+1);
+    expect_in_range(__wrap_klog_init_file, config.klog_file_level, 0, LOG_ALL+1);
+    expect_not_value(__wrap_klog_init_file, config.klog_file_logging, 0);
     
-    will_return(__wrap_klog_init_file, 0);
-    assert_true(telemetry_store(packet));
-    
-    will_return(__wrap_klog_init_file,-1);
+    /* Test catching null pointer returned from klog_init_file */
     assert_false(telemetry_store(packet));
-
 }
 
 

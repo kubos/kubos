@@ -95,7 +95,7 @@ static uint16_t format_log_entry_csv(char *data_buf_ptr, telemetry_packet packet
 
     if(packet.source.data_type == TELEMETRY_TYPE_INT) 
     {
-        len = snprintf(data_buf_ptr, DATA_BUFFER_SIZE, "%u,%d\r\n", packet.timestamp, packet.data.i);
+        len = snprintf(data_buf_ptr, DATA_BUFFER_SIZE, "%u,%d", packet.timestamp, packet.data.i);
         if(len < 0 || len >= DATA_BUFFER_SIZE) 
         {
             printf("Data char limit exceeded for int packet. Have %d, need %d + \\0\n", DATA_BUFFER_SIZE, len);
@@ -105,7 +105,7 @@ static uint16_t format_log_entry_csv(char *data_buf_ptr, telemetry_packet packet
 
     if(packet.source.data_type == TELEMETRY_TYPE_FLOAT) 
     {
-        len = snprintf(data_buf_ptr, DATA_BUFFER_SIZE, "%u,%f\r\n", packet.timestamp, packet.data.f);
+        len = snprintf(data_buf_ptr, DATA_BUFFER_SIZE, "%u,%f", packet.timestamp, packet.data.f);
         if(len < 0 || len >= DATA_BUFFER_SIZE) 
         {
             printf("Data char limit exceeded for float packet. Have %d, need %d + \\0\n", DATA_BUFFER_SIZE, len);
@@ -136,10 +136,11 @@ static void print_to_console(telemetry_packet packet)
 
 bool telemetry_store(telemetry_packet packet)
 {
-    //klog_console_level = LOG_NONE;
-    //klog_file_level = LOG_TELEMETRY;
-    klog_file_logging = true;
-    
+    static klog_config telemetry_log_config = { .file_path = filename_buf_ptr, .file_path_len = filename_len, \
+                                                .part_size = DATA_PART_SIZE, .max_parts = DATA_MAX_PARTS, \
+                                                .klog_console_level = LOG_NONE, .klog_file_level = LOG_TELEMETRY, \
+                                                .klog_file_logging = true };
+    static klog_handle telemetry_log_handle;
     static char filename_buffer[FILE_NAME_BUFFER_SIZE];
     static char *filename_buf_ptr;
     static char data_buffer[DATA_BUFFER_SIZE];
@@ -147,7 +148,6 @@ bool telemetry_store(telemetry_packet packet)
 
     uint16_t data_len;
     uint16_t filename_len;
-    int init_ret;
 
     filename_buf_ptr = filename_buffer;
     data_buf_ptr = data_buffer;
@@ -160,13 +160,11 @@ bool telemetry_store(telemetry_packet packet)
         /* Save log entry */
         if (filename_len > 0 && data_len > 0)
         {
-            //klog_console(LOG_DEBUG, "Log Entry", "%s", data_buf_ptr);
-            //klog_console(LOG_DEBUG, "Filename", "%s", filename_buf_ptr);
-            init_ret = klog_init_file(filename_buf_ptr, filename_len, DATA_PART_SIZE, DATA_MAX_PARTS);
-            if(init_ret == 0)
+            telemetry_log_handle = klog_init_file(telemetry_log_config);
+            if(telemetry_log_handle.log_file != NULL)
             {
-                KLOG_TELEMETRY("",data_buf_ptr);
-                klog_cleanup();
+                KLOG_TELEMETRY(&telemetry_log_handle, telemetry_log_config, "", data_buf_ptr);
+                klog_cleanup(&telemetry_log_handle);
                 return true;
             }
         }

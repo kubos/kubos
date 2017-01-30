@@ -16,21 +16,27 @@
 #include <kubos-core/modules/klog.h>
 #include <cmocka.h>
 
-int __wrap_klog_init_file(char *file_path, uint8_t file_path_len, uint32_t part_size, uint8_t max_parts)
+klog_handle __wrap_klog_init_file(klog_config config)
 {
-    check_expected(file_path);
-    check_expected(file_path_len);
-    check_expected(part_size);
-    check_expected(max_parts);
-    return mock_type(int);
+    klog_handle ret_handle = { .log_file = NULL, .current_part = 1, \
+                               .current_part_size = 0 };
+                               
+    check_expected(config.file_path);
+    check_expected(config.file_path_len);
+    check_expected(config.part_size);
+    check_expected(config.max_parts);
+    check_expected(config.klog_console_level);
+    check_expected(config.klog_file_level);
+    check_expected(config.klog_file_logging);
+    return ret_handle;
 }
 
-void __wrap_KLOG_TELEMETRY(unsigned level, const char *logger, const char *format, ...)
+void __wrap_KLOG_TELEMETRY(klog_handle *handle, klog_config config, const char *logger, const char *format)
 {
     /* Do nothing */
 }
 
-void __wrap_klog_cleanup(void)
+void __wrap_klog_cleanup(klog_handle *handle,)
 {
     /* Do nothing */
 }
