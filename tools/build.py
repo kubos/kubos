@@ -51,6 +51,47 @@ class KubosBuilder(object):
                 print("Target %s was not found" % target_name)
             return 1
 
+    def list_targets(self):
+        for target in self.kb.targets():
+            print(target.yotta_name())
+
+    def list_modules(self):
+        for module in self.kb.modules():
+            print(module.yotta_name())
+
+    def find_modules(self, path):
+        path_list = path.split("/")
+        modules = set()
+        # Pop off file name for first directory
+        path_list.pop()
+        while len(path_list):
+            new_path = "" + "/".join(path_list)
+            kubos_build = KubosBuild(kubos_dir=new_path)
+            for p in kubos_build.projects:
+                if p.type != "unknown":
+                    modules.add(p.yotta_name())
+            if len(modules):
+                break
+
+            path_list.pop()
+        return modules
+
+    def list_changed_modules(self):
+        try:
+            git_output = subprocess.check_output(["git", "diff", "--numstat", "HEAD^!"])
+            git_lines = [l for l in git_output.splitlines()]
+            file_paths = [l.split()[2] for l in git_lines]
+            modules = set()
+            for path in file_paths:
+                modules = modules | (self.find_modules(path))
+            
+            if len(modules):
+                print("Modules changed in last commit:")
+            for m in modules:
+                print(m)
+        except subprocess.CalledProcessError:
+            print("Error getting changed modules")
+
     def build_all_targets(self, module_name=""):
         module = next((m for m in self.kb.modules() if m.yotta_name() == module_name), None)
         if module:
@@ -80,6 +121,9 @@ def main():
                         help='Builds module for all targets')
     parser.add_argument('--all_modules', action='store_true', default=False,
                         help='Builds all modules for target')
+    parser.add_argument('--list_targets', action='store_true', default=False)
+    parser.add_argument('--list_modules', action='store_true', default=False)
+    parser.add_argument('--list_changed_modules', action='store_true', default=False)
         
 
     args = parser.parse_args()
@@ -88,6 +132,12 @@ def main():
 
     ret = 0
 
+    if args.list_targets:
+        builder.list_targets()
+    if args.list_modules:
+        builder.list_modules()
+    if args.list_changed_modules:
+        builder.list_changed_modules()
     if args.target and args.module:
         ret = builder.build(module_name=args.module, target_name=args.target)
     elif args.module and args.all_targets:

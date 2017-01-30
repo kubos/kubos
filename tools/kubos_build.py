@@ -9,11 +9,11 @@ this_dir = os.path.abspath(os.path.dirname(__file__))
 kubos_dir = os.path.dirname(this_dir)
 
 class Project(object):
-    def __init__(self, name, path, relpath):
+    def __init__(self, name, path):
         self.name = name
         self.path = path
-        self.relpath = relpath
         self.type = 'unknown'
+        self.yotta_data = None
 
         if os.path.isfile(path + '/module.json'):
             self.yotta_data = json.load(open(path + '/module.json', 'r'))
@@ -103,8 +103,8 @@ class KubosBuild(object):
             if "yotta_modules" not in path:
                 path = path.replace("module.json", "").strip()
                 name = path.split("/")[-2]
-                relpath = os.path.relpath(path, self.kubos_dir)
-                self.projects.append(Project(name, path, relpath))
+                path = os.path.abspath(self.kubos_dir + "/" + path)
+                self.projects.append(Project(name, path))
 
         modules = subprocess.check_output(["find", ".", "-name",
                                         "target.json"], cwd=self.kubos_dir)
@@ -112,6 +112,6 @@ class KubosBuild(object):
             if "yotta_targets" not in path:
                 path = path.replace("target.json", "").strip()
                 name = path.split("/")[-2]
-                relpath = os.path.relpath(path, self.kubos_dir)
-                self.projects.append(Project(name, path, relpath))
+                path = os.path.abspath(self.kubos_dir + "/" + path)
+                self.projects.append(Project(name, path))
 
