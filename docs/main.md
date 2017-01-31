@@ -7,6 +7,8 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
 ## Docs
 
  - [Changelog](docs/changelog.md)
+ - [Contributing to the KubOS Project](docs/contribution-process.md)
+ - [Kubos Naming and Coding Standards](docs/kubos-standards.md)
  
 ### KubOS SDK
 
@@ -20,7 +22,6 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
 
  - [KubOS Module Development](docs/kubos-development.md)
 
- - [Contributing to the KubOS Project](docs/contribution-process.md)
  
 ### KubOS RT
 
