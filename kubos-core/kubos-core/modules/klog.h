@@ -48,12 +48,12 @@ extern "C" {
 #define KLOG_MAX_LINE 255
 #endif
 
-#define KLOG(handle, config, level, logger, ...)    klog_write(handle, config, level, logger, __VA_ARGS__)
-#define KLOG_ERR(handle, config, logger, ...)       KLOG(handle, config, LOG_ERROR, logger, __VA_ARGS__)
-#define KLOG_WARN(handle, config, logger, ...)      KLOG(handle, config, LOG_WARNING, logger, __VA_ARGS__)
-#define KLOG_TELEMETRY(handle, config, logger, ...) KLOG(handle, config, LOG_TELEMETRY, logger, __VA_ARGS__)
-#define KLOG_INFO(handle, config, logger, ...)      KLOG(handle, config, LOG_INFO, logger, __VA_ARGS__)
-#define KLOG_DEBUG(handle, config, logger, ...)     KLOG(handle, config, LOG_DEBUG, logger, __VA_ARGS__)
+#define KLOG(handle, level, logger, ...)    klog_write(handle, level, logger, __VA_ARGS__)
+#define KLOG_ERR(handle, logger, ...)       KLOG(handle, LOG_ERROR, logger, __VA_ARGS__)
+#define KLOG_WARN(handle, logger, ...)      KLOG(handle, LOG_WARNING, logger, __VA_ARGS__)
+#define KLOG_TELEMETRY(handle, logger, ...) KLOG(handle, LOG_TELEMETRY, logger, __VA_ARGS__)
+#define KLOG_INFO(handle, logger, ...)      KLOG(handle, LOG_INFO, logger, __VA_ARGS__)
+#define KLOG_DEBUG(handle, logger, ...)     KLOG(handle, LOG_DEBUG, logger, __VA_ARGS__)
 
 
 #define KLOG_SUFFIX_LEN 4
@@ -79,19 +79,20 @@ typedef struct
     FILE *log_file;
     uint8_t current_part;
     uint32_t current_part_size;
+    klog_config config;
 } klog_handle;
 
-klog_handle klog_init_file(klog_config config);
+int klog_init_file(klog_handle *handle);
 void klog_console(unsigned level, const char *logger, const char *format, ...);
-void klog_file(klog_handle *handle, klog_config config, unsigned level, const char *logger, const char *format, ...);
+void klog_file(klog_handle *handle, unsigned level, const char *logger, const char *format, ...);
 void klog_cleanup(klog_handle *handle);
 
-#define klog_write(handle, config, level, logger, ...) do { \
-    if (level <= config.klog_console_level) { \
+#define klog_write(handle, level, logger, ...) do { \
+    if (level <= *(handle.config.klog_console_level)) { \
         klog_console(level, logger, __VA_ARGS__); \
     } \
-    if (level <= config.klog_file_level && config.klog_file_logging) { \
-        klog_file(handle, config, level, logger, __VA_ARGS__); \
+    if (level <= *(handle.config.klog_file_level) && *(handle.config.klog_file_logging)) { \
+        klog_file(handle, level, logger, __VA_ARGS__); \
     } \
 } while (0)
 

@@ -30,7 +30,7 @@
 #include <csp/arch/csp_time.h>
 #include "kubos-core/modules/klog.h"
 
-static void _next_log_file(klog_handle *handle, klog_config config)
+static void _next_log_file(klog_handle *handle)
 {
     char buf[KLOG_PATH_LEN];
     char *tail;
@@ -38,14 +38,14 @@ static void _next_log_file(klog_handle *handle, klog_config config)
     struct stat st;
 
     klog_cleanup(handle);
-    if (!config.file_path) {
+    if (!handle->config.file_path) {
         return;
     }
 
-    strncpy(buf, config.file_path, config.file_path_len);
-    tail = buf + config.file_path_len;
+    strncpy(buf, handle->config.file_path, handle->config.file_path_len);
+    tail = buf + handle->config.file_path_len;
 
-    for (uint8_t i = 0; i < config.max_parts; i++) {
+    for (uint8_t i = 0; i < handle->config.max_parts; i++) {
         sprintf(tail, ".%03d", i);
 
         if (stat(buf, &st) == -1) {
@@ -59,7 +59,7 @@ static void _next_log_file(klog_handle *handle, klog_config config)
             continue;
         }
 
-        if (st.st_size < (off_t) config.part_size) {
+        if (st.st_size < (off_t) handle->config.part_size) {
             handle->log_file = fopen(buf, "r+");
             handle->current_part = i;
             pos = st.st_size - 1;
@@ -71,7 +71,7 @@ static void _next_log_file(klog_handle *handle, klog_config config)
     if (!handle->log_file) {
         // no empty or partial log file found, rotate
         handle->current_part++;
-        if (handle->current_part > config.max_parts) {
+        if (handle->current_part > handle->config.max_parts) {
             handle->current_part = 0;
         }
 
@@ -90,17 +90,19 @@ static void _next_log_file(klog_handle *handle, klog_config config)
     }
 }
 
-klog_handle klog_init_file(klog_config config)
+int klog_init_file(klog_handle *handle)
 {
-    klog_handle ret_handle = { .log_file = NULL, .current_part = -1, \
-                               .current_part_size = 0 };
     
-    if (!config.file_path || config.file_path_len > KLOG_MAX_PATH) {
-        errno = -EINVAL;
-        return ret_handle;
+    if (!handle->config.file_path || handle->config.file_path_len > KLOG_MAX_PATH) {
+        return -EINVAL;
     }
-    _next_log_file(&ret_handle, config);
-    return ret_handle;
+    
+    handle->log_file = NULL;
+    handle->current_part = -1;
+    handle->current_part_size = 0;
+    
+    _next_log_file(handle);
+    return handle->config.klog_file_logging ? 0 : -1;
 }
 
 static inline char *_level_str(unsigned level)
@@ -140,13 +142,13 @@ void klog_console(unsigned level, const char *logger, const char *format, ...)
     va_end(args);
 }
 
-void klog_file(klog_handle *handle, klog_config config, unsigned level, const char *logger, const char *format, ...)
+void klog_file(klog_handle *handle, unsigned level, const char *logger, const char *format, ...)
 {
     va_list args;
 
     va_start(args, format);
     if (!handle->log_file) {
-        _next_log_file(handle, config);
+        _next_log_file(handle);
         if (!handle->log_file) {
             va_end(args);
             return;
@@ -157,8 +159,8 @@ void klog_file(klog_handle *handle, klog_config config, unsigned level, const ch
     va_end(args);
     fsync(fileno(handle->log_file));
 
-    if (handle->current_part_size >= config.part_size) {
-        _next_log_file(handle, config);
+    if (handle->current_part_size >= handle->config.part_size) {
+        _next_log_file(handle);
     }
 }
 
