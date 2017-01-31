@@ -11,13 +11,13 @@ option (HMAC "" OFF)
 option (XTEA "" OFF)
 option (BINDINGS "" OFF)
 option (EXAMPLES "" OFF)
-option (DEBUG "" OFF)
+option (DEDUP "" OFF)
 option (VERBOSE "" OFF)
 option (IF_I2C "" OFF)
 option (IF_KISS "" OFF)
 option (IF_CAN "" OFF)
 option (IF_ZMQHUB "" OFF)
-option (CSP_DEBUG "" OFF)
+option (CSP_DEBUG "" ON)
 option (CAN_SOCKETCAN "" OFF)
 
 set (FREERTOS "" CACHE STRING "FreeRTOS root dir")
@@ -74,6 +74,7 @@ add_library (csp STATIC
     $<$<AND:$<BOOL:${TARGET_LIKE_KUBOS_RT}>,$<BOOL:${YOTTA_CFG_CSP_USART}>>:src/drivers/usart/usart_kubos.c>
     src/interfaces/csp_if_lo.c
     $<$<BOOL:${IF_KISS}>:src/interfaces/csp_if_kiss.c>
+    src/interfaces/csp_if_socket.c
     src/rtable/csp_rtable_${RTABLE}.c
     $<$<BOOL:${CSP_USE_RDP}>:src/transport/csp_rdp.c>
     src/transport/csp_udp.c
