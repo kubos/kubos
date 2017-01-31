@@ -165,7 +165,7 @@ bool telemetry_store(telemetry_packet packet)
                                                  .config.klog_file_logging = true };
                                                 
             init_ret = klog_init_file(&telemetry_log_handle);
-            if(telemetry_log_handle.log_file != NULL && init_ret == 0)
+            if(init_ret == 0)
             {
                 KLOG_TELEMETRY(&telemetry_log_handle, "", data_buf_ptr);
                 klog_cleanup(&telemetry_log_handle);

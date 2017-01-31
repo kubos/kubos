@@ -91,15 +91,18 @@ static void test_telemetry_store(void **state)
         .source.subsystem_id = 0, .source.data_type = TELEMETRY_TYPE_INT, \
         .source.source_id = 1};
         
-    expect_not_value(__wrap_klog_init_file, config.file_path, NULL);
-    expect_not_value(__wrap_klog_init_file, config.file_path_len, 0);
-    expect_not_value(__wrap_klog_init_file, config.part_size, 0);
-    expect_not_value(__wrap_klog_init_file, config.max_parts, 0);
-    expect_in_range(__wrap_klog_init_file, config.klog_console_level, 0, LOG_ALL+1);
-    expect_in_range(__wrap_klog_init_file, config.klog_file_level, 0, LOG_ALL+1);
-    expect_not_value(__wrap_klog_init_file, config.klog_file_logging, 0);
+    expect_not_value_count(__wrap_klog_init_file, handle->config.file_path, NULL, 2);
+    expect_not_value_count(__wrap_klog_init_file, handle->config.file_path_len, 0, 2);
+    expect_not_value_count(__wrap_klog_init_file, handle->config.part_size, 0, 2);
+    expect_not_value_count(__wrap_klog_init_file, handle->config.max_parts, 0, 2);
+    expect_in_range_count(__wrap_klog_init_file, handle->config.klog_console_level, 0, LOG_ALL+1, 2);
+    expect_in_range_count(__wrap_klog_init_file, handle->config.klog_file_level, 0, LOG_ALL+1, 2);
+    expect_not_value_count(__wrap_klog_init_file, handle->config.klog_file_logging, 0, 2);
     
-    /* Test catching null pointer returned from klog_init_file */
+    will_return(__wrap_klog_init_file, 0);
+    assert_true(telemetry_store(packet));
+    
+    will_return(__wrap_klog_init_file,-1);
     assert_false(telemetry_store(packet));
 }
 

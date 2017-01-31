@@ -102,6 +102,12 @@ int klog_init_file(klog_handle *handle)
     handle->current_part_size = 0;
     
     _next_log_file(handle);
+    
+    if (handle->log_file == NULL)
+    {
+        return -1;
+    }
+    
     return handle->config.klog_file_logging ? 0 : -1;
 }
 
