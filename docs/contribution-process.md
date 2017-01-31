@@ -5,7 +5,7 @@ This is the workflow you should go through in order to create and complete a tas
 0. [Sign the CLA](#sign-the-cla)
 1. [Create a JIRA Issue](#create-a-jira-issue)
 2. [Mark the Issue as 'In Progress'](#mark-the-issue-as-in-progress)
-3. [Create a Personal Copy of the Code You Want to Work On](#create-a-personal-copy-of-the-code-you-want-to-work-on)
+3. [Create a Branch of the Code You Want to Work On](#create-a-branch-of-the-code-you-want-to-work-on)
 4. [Make Your Changes](#make-your-changes)
 5. [Create a Pull Request](#create-a-pull-request)
 6. [Merge in New Changes From Master](#merge-in-new-changes-from-master)
@@ -33,6 +33,7 @@ If one doesn't exist, you should create it:
 - The 'Component/s' field should be updated, if possible, to list the related area/s affected by this issue.
 - The description should go into more detail about what the problem/feature is and what needs to be done in order
 to complete the task.
+    * If you are creating a story, the description should follow the [Agile user story template](https://www.mountaingoatsoftware.com/agile/user-stories)
 - If you're creating a bug, update the 'Affects Version/s' field to document the oldest affected version of the project
 
 If you want to create an issue but not immediately work on it, the description field should be an in-depth summary of the problem/feature
@@ -51,25 +52,21 @@ In order to track what's being worked on and by whom, for every issue you work y
 	* From the full issue description page, click the 'In Progress' button
 	* From the 'Active Sprints' page, drag the issue from the 'To-Do' column into the 'In Progress' column
 	
-## Create a Personal Copy of the Code You Want to Work On
+## Create a Branch of the Code You Want to Work On
 
-All code changes should initially be made in your own personal repo and then be submitted against the main code repo as a pull request.
-
-To create your own repo:
-- Navigate to the github page of the main code that you want to work on.  For example, https://github.com/kubostech/kubos-sdk.
-- Click the 'Fork' button in the upper right-hand corner.
-- If you see a dialog 'Where should we fork this repository?', click the icon with your username.
-- Within your development environment, create a link to your new remote repository:
-
-	$ git remote add {repo name you create} {personal repo url}
+All code changes should initially be made in a branch of the relavent Kubos repo and then be submitted against the master branch as a pull request:
 	
-You'll also want to create a local branch to work on inside of your development environment.
+Clone the repo that you want to modify onto your local machine
+        
+    $ git clone http://github.com/kubostech/kubos
+    
+Move into the repo folder
 
-From the project folder where you'll be making changes:
+    $ cd kubos
+    
+Create a local branch to make your changes
 
-	$ git checkout -b {local branch name you create}
-
-You will need to fork each repository where you will be making changes.
+    $ git checkout -b {local branch name you create}
 
 ## Make Your Changes
 
@@ -96,11 +93,11 @@ for a certain board type, you would edit kubos-hal/kubos-hal/uart.h in the appro
 Add or update any unit tests that are affected by your changes.  For instance, if support for i2c slave mode is added for the STM32F4 board, then the
 kubos-hal-stm32f4/test/i2c.c file's test\_i2c\_slave test case should be updated to test the successful execution of the board in slave mode.
 
-Commit your changes and push to your remote repository:
+Commit your changes and push to your remote branch (the branch will be created automatically if it doesn't exist):
 
 	$ git add {files you changed}
 	$ git commit -m "Descriptive message about the changes you made"
-	$ git push {repo name} {local branch name}
+	$ git push origin {local branch name}
 	
 [Commit early, commit often](http://www.databasically.com/2011/03/14/git-commit-early-commit-often/)
 
@@ -109,7 +106,7 @@ Commit your changes and push to your remote repository:
 Once all of your changes for an issue have been completed, you should create a pull request in order to bring the changes into the main code's
 master branch.  You will need to create a pull request for each repository you are making changes to.
 
-From the github page for your personal repository that contains the changes you want to merge:
+From the github page for the repository that contains the changes you want to merge:
 - Click the 'Branch:' dropdown on the left-hand side and select the local branch containing your changes
 - Click the 'New pull request' button
 - The title of the pull request should be the JIRA issue number followed by a descriptive title
@@ -119,6 +116,8 @@ but it's also good to mention things like documentation updates and any miscella
 that you ran into while working on your code changes).
 - Click 'Create pull request'
 
+If you'd like specific people to review your code, you can either mention them in the description with an '@{name}' tag, or by adding them 
+to the 'Assignees' list.
 
 ## Merge in New Changes From Master
 
@@ -130,10 +129,10 @@ In order to resolve the conflict, execute the following steps within your develo
 
 Merge the master branch into your local branch
 
-	$ git checkout kubostech/master
-	$ git pull kubostech master
+	$ git checkout origin/master
+	$ git pull origin master
 	$ git checkout {local branch where your changes are}
-	$ git merge kubostech/master
+	$ git merge origin/master
 
 Git will edit any files with conflicts.  Conflicts will look like this:
 	
@@ -148,17 +147,19 @@ Push the resolved changed to your remote repo
 
 	$ git add {fixed files}
 	$ git commit
-	$ git push {repo name} {local branch name}
+	$ git push origin {local branch name}
 
 If you navigate to your pull request, you should now see that github says "This branch has no conflicts with the base branch", indicating that
 the changes okay to merge (pending pull request approval).
 
 ## Wait for Pull Request Approval
 
+Move the JIRA issue to 'Reviewing' to indicate that the work is done, pending approval.
+
 Once your pull request has been submitted, it must be approved by at least one person before the request can be merged into the master branch.
 Once it has been approved, you can go to your pull request page and then click the 'Merge' button.
 - Note:  If your changes have been approved, but you don't see a 'Merge' button, you likely don't have permission to merge for that project. 
-Talk to Ryan Plauche.
+Talk to Ryan Plauche (ryan@kubos.co).
 
 In all likelyhood, you'll need to make changes to your code before your pull request can be merged.  Make the changes in your local development 
 environment and then commit and push them into your remote repo.  As long as you're still using the same local branch, these new changes will
@@ -176,5 +177,5 @@ Before you mark the issue as done, verify the following:
 Update the issue's 'Fix version' field to reflect the version that these changes are being implemented in.
 
 Once all of the work for the issue has been completed, you can mark the issue as Done in one of two ways:
-- From the full issue description page, click the 'In Progress' button
-- From the 'Active Sprints' page, drag the issue from the 'To-Do' column into the 'In Progress' column
+- From the full issue description page, click the 'Done' button
+- From the 'Kanban Board' page, drag the issue from the 'Reviewing' column into the 'Done' column
