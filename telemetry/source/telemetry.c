@@ -84,8 +84,6 @@ void telemetry_init()
     csp_mutex_create(&unsubscribing_lock);
 
 #ifdef DEBUG
-    csp_debug_toggle_level(CSP_ERROR);
-    csp_debug_toggle_level(CSP_WARN);
     csp_debug_toggle_level(CSP_INFO);
     csp_debug_toggle_level(CSP_BUFFER);
     csp_debug_toggle_level(CSP_PACKET);
