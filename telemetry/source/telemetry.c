@@ -110,6 +110,17 @@ void telemetry_cleanup()
         LL_DELETE(subscribers, temp_sub);
         csp_close(temp_sub->server_conn.conn_handle);
         csp_close(temp_sub->client_conn.conn_handle);
+
+        if (temp_sub->topics != NULL)
+        {
+            topic_list_item * temp_topic, * next_topic;
+            LL_FOREACH_SAFE(temp_sub->topics, temp_topic, next_topic)
+            {
+                LL_DELETE(temp_sub->topics, temp_topic);
+                free(temp_topic);
+            }
+        }
+
         free(temp_sub);
     }
 
@@ -258,6 +269,15 @@ bool telemetry_disconnect(pubsub_conn * client_conn)
                 if (csp_close(server_conn.conn_handle) == CSP_ERR_NONE)
                 {
                     LL_DELETE(subscribers, current);
+                    if (current->topics != NULL)
+                    {
+                        topic_list_item * temp_topic, * next_topic;
+                        LL_FOREACH_SAFE(current->topics, temp_topic, next_topic)
+                        {
+                            LL_DELETE(current->topics, temp_topic);
+                            free(temp_topic);
+                        }
+                    }
                     free(current);
                     ret = true;
                 }
@@ -330,6 +350,7 @@ bool kprv_remove_topic(subscriber_list_item * sub, uint16_t topic_id)
         if (temp != NULL)
         {
             LL_DELETE(sub->topics, temp);
+            free(temp);
             ret = true;
         }
     }
