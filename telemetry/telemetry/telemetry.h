@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,16 @@
 #ifndef TELEMETRY_H
 #define TELEMETRY_H
 
+#include "ipc/pubsub.h"
+#include "telemetry/config.h"
 #include "telemetry/types.h"
 #include <csp/arch/csp_thread.h>
 #include <stdbool.h>
 
 /**
- * Task used to create, accept and store connections from subscribers.
- */
-CSP_DEFINE_TASK(telemetry_get_subs);
-
-/**
  * Task used to receive incoming data from telemetry publishers.
  */
 CSP_DEFINE_TASK(telemetry_rx_task);
-
-/**
- * Macro to be used in main() for creating neccesary telemetry threads.
- */
-#define TELEMETRY_THREADS   csp_thread_handle_t telem_sub_handle; \
-                            csp_thread_create(telemetry_get_subs, "TELEM_SUBS", 1000, NULL, 0, &telem_sub_handle); \
-                            csp_thread_handle_t telem_rx_handle; \
-                            csp_thread_create(telemetry_rx_task, "TELEM_RX", 1000, NULL, 0, &telem_rx_handle);
 
 /**
  * Performs basic telemetry connection and thread initialization. 
@@ -45,20 +34,40 @@ CSP_DEFINE_TASK(telemetry_rx_task);
 void telemetry_init();
 
 /**
- * Subscribes to the telemetry system.
- * @param conn pointer to telemetry_conn which will be used to receive future telemetry data
+ * Performs cleanup on telemetry resources & threads.
+ */
+void telemetry_cleanup();
+
+/**
+ * Subscribes to the telemetry system - thread safe version.
+ * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
  * @param sources bitmask of sources to subscribe to, a value of 0 will subscribe to all
  * @return bool true if successful, otherwise false
  */
-bool telemetry_subscribe(telemetry_conn * conn, uint8_t sources);
+bool telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
+
+/**
+ * Unsubscribes a connection from the telemetry system.
+ * @param conn pointer to pubsub_conn which is to be unsubscribed
+ * @return bool true if successful, otherwise false
+ */
+bool telemetry_unsubscribe(pubsub_conn * conn);
+
+/**
+ * Internal subscribe function - not thread safe.
+ * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
+ * @param sources bitmask of sources to subscribe to, a value of 0 will subscribe to all
+ * @return bool true if successful, otherwise false
+ */
+bool kprv_telemetry_subscribe(pubsub_conn * conn, uint8_t sources);
 
 /**
  * Reads a telemetry packet from the telemetry server.
- * @param conn telemetry_connection to use for the request
+ * @param conn pubsub_connection to use for the request
  * @param packet pointer to telemetry_packet to store data in.
  * @return bool true if successful, otherwise false 
  */
-bool telemetry_read(telemetry_conn conn, telemetry_packet * packet);
+bool telemetry_read(pubsub_conn conn, telemetry_packet * packet);
 
 /**
  * Public facing telemetry input interface. Takes a telemetry_packet packet
@@ -67,5 +76,10 @@ bool telemetry_read(telemetry_conn conn, telemetry_packet * packet);
  * @return bool true if successful, otherwise false
  */
 bool telemetry_publish(telemetry_packet packet);
+
+/**
+ * @return int number of active telemetry subscribers
+ */
+int telemetry_num_subscribers();
 
 #endif
