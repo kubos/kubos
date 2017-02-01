@@ -1,4 +1,4 @@
-# KubOS-SDK Command Reference
+# Kubos CLI Command Reference
 
 ## Creating a project
 
@@ -47,7 +47,7 @@ The respective commands to select those targets are as follows.
         $ kubos target na-satbus-3c0-gcc
 
         $ kubos target msp430f5529-gcc
-        
+
         $ kubos target kubos-linux-isis-gcc
 
 To see all of the available targets run:
