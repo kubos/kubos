@@ -29,17 +29,29 @@ extern "C" {
 
 #include <stdint.h>
 
+/* CSP includes */
 #include <csp/csp.h>
 #include <csp/csp_interface.h>
 
-extern csp_iface_t csp_if_socket;
+typedef struct {
+    int socket_handle;
+} csp_socket_handle_t;
 
+/**
+ * Enum for csp socket mode
+ */
 typedef enum {
     CSP_SOCKET_SERVER = 0,
     CSP_SOCKET_CLIENT
 } csp_if_socket_modes;
 
-int csp_socket_init(uint8_t mode, uint16_t port, char * addr);
+/**
+ * Init function for CSP socket interface
+ * @param socket_iface
+ * @param socket_driver
+ * @return int CSP_ERR_NONE if success, otherwise error
+ */
+int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver);
 
 #ifdef __cplusplus
 } /* extern "C" */

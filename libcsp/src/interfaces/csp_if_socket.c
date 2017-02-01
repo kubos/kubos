@@ -18,6 +18,7 @@
 #include <csp/csp_interface.h>
 #include <csp/csp_error.h>
 #include <csp/interfaces/csp_if_socket.h>
+#include <csp/drivers/socket.h>
 #include <csp/arch/csp_thread.h>
 
 #include <inttypes.h>
@@ -28,16 +29,30 @@
 
 #define BUF_SIZE 250
 
-/* Currently handling a single socket connection per csp instance */
-static int csp_socket_handle = 0;
-static int server_socket, c;
-static struct sockaddr_in server, client;
+/**
+ *
+ */
+static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout);
 
-int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
+
+/**
+ *
+ */
+CSP_DEFINE_TASK(csp_socket_rx);
+
+static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
+    csp_log_info("csp_socket_tx\r\n");
+    if ((ifc == NULL) || (ifc->driver == NULL)) {
+        csp_log_error("Null pointer for interface or driver\r\n");
+        return CSP_ERR_DRIVER;
+    }
+
+    csp_socket_handle_t * socket_driver = ifc->driver;
+
+    csp_log_info("now we write\r\n");
     /* Write packet to socket */
-    int result = write(csp_socket_handle, &packet->length, packet->length + sizeof(uint32_t) + sizeof(uint16_t)); 
-    if ( result < 0)
-    {
+    int result = write(socket_driver->socket_handle, &packet->length, packet->length + sizeof(uint32_t) + sizeof(uint16_t)); 
+    if ( result < 0) {
         csp_log_error("Socket write error: %u %s\r\n", result, strerror(result));
     }
     csp_buffer_free(packet);
@@ -45,10 +60,25 @@ int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
 }
 
 CSP_DEFINE_TASK(csp_socket_rx) {
+    csp_iface_t socket_interface;
+    csp_socket_handle_t * socket_driver;
     csp_packet_t * packet = csp_buffer_get(BUF_SIZE);
+
+    if (param == NULL) {
+        csp_log_error("No socket param found\r\n");
+        return CSP_TASK_RETURN;
+    }
+    socket_interface = *((csp_iface_t*)param);
+
+    if (socket_interface.driver == NULL) {
+        csp_log_error("No socket driver found\r\n");
+        return CSP_TASK_RETURN;
+    }
+
+    socket_driver = socket_interface.driver;
         
-    while(recv(csp_socket_handle, &packet->length, BUF_SIZE, 0) > 0) {
-        csp_new_packet(packet, &csp_if_socket, NULL);
+    while(recv(socket_driver->socket_handle, &packet->length, BUF_SIZE, 0) > 0) {
+        csp_new_packet(packet, &socket_interface, NULL);
 
         packet = csp_buffer_get(BUF_SIZE);
         if (packet == NULL) {
@@ -59,69 +89,22 @@ CSP_DEFINE_TASK(csp_socket_rx) {
     return CSP_TASK_RETURN;
 }
 
-int csp_socket_init(uint8_t mode, uint16_t port, char * addr) {
-    /* Init actual socket */
-    if (mode == CSP_SOCKET_SERVER) {
-        server_socket = socket(AF_INET, SOCK_STREAM, 0);
-        if (server_socket == -1) {
-            csp_log_error("Failed to init socket\n");
-            return CSP_ERR_DRIVER;
-        }
-        server.sin_addr.s_addr = inet_addr("127.0.0.1");
-        server.sin_family = AF_INET;
-        server.sin_port = htons(port);
-        if (bind(server_socket, (struct sockaddr*)&server, sizeof(server)) < 0) {
-            csp_log_error("Failed to bind\n");
-            return CSP_ERR_DRIVER;
-        }
+int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver) {
+    if ((socket_iface == NULL) || (socket_driver == NULL))
+        return CSP_ERR_DRIVER;
 
-        listen(server_socket, 3);
-        c = sizeof(struct sockaddr_in);
-
-        csp_log_info("Wait to accept\n");
-        csp_socket_handle = accept(server_socket, (struct sockaddr *)&client, (socklen_t*)&c);
-        if (csp_socket_handle < 0) {
-            csp_log_error("Accept failed\n");
-            return CSP_ERR_DRIVER;
-        }
-        csp_log_info("Accepted!\n");
-    }
-    else if (mode == CSP_SOCKET_CLIENT) {
-        //Create socket
-        csp_socket_handle = socket(AF_INET, SOCK_STREAM, 0);
-        if (csp_socket_handle == -1) {
-            csp_log_error("Could not create socket");
-            return CSP_ERR_DRIVER;
-        }
-        csp_log_info("Socket created");
-        
-        server.sin_addr.s_addr = inet_addr(addr);
-        server.sin_family = AF_INET;
-        server.sin_port = htons(port);
-    
-        //Connect to remote server
-        if (connect(csp_socket_handle, (struct sockaddr *)&server , sizeof(server)) < 0) {
-            csp_log_error("connect failed. Error");
-            return CSP_ERR_DRIVER;
-        }
-        
-        csp_log_info("Connected\n");
-    }
+    socket_iface->driver = socket_driver;
+    socket_iface->nexthop = csp_socket_tx;
+    socket_iface->name = "socket";
+    socket_iface->mtu = BUF_SIZE;
 
     /* Start RX thread */
 	static csp_thread_handle_t handle_rx;
-	int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, NULL, 0, &handle_rx);
+	int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &handle_rx);
 	csp_log_info("Task start %d\r\n", ret);
 
     /* Register interface */
-    csp_iflist_add(&csp_if_socket);
+    csp_iflist_add(socket_iface);
 
     return CSP_ERR_NONE;
 }
-
-/** Interface definition **/
-csp_iface_t csp_if_socket = {
-    .name = "socket",
-    .nexthop = csp_socket_tx,
-    .mtu = 250
-};
