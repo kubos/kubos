@@ -17,13 +17,13 @@
 The ISIS-OBC Quickstart Guide should have been packaged with the iOBC and is a useful document for learning what each of the hardware components are, how to 
 connect them, and what drivers need to be installed to support them.
 
-###KubOS Documentation
+###Kubos Documentation
 
 - [Installing the Kubos SDK](docs/cli-installing.md) - Basics of setting up the Kubos SDK environment
 - [Creating your first project](docs/first-project.md) - Steps to create and build a Kubos SDK project (Note: Written for a KubOS RT end-target)
 - [SDK Command Reference](docs/cli-reference.md) - Overview of the common Kubos SDK commands
-- [KubOS Linux Overview](docs/Linux_Overview.md) - Overview of the KubOS Linux components
-- [KubOS Linux on iOBC](docs/Linux_on_iOBC.md) - Steps to build and load KubOS Linux for the iOBC
+- [KubOS Linux Overview](docs/kubos-linux-Overview.md) - Overview of the KubOS Linux components
+- [KubOS Linux on iOBC](docs/kubos-linux-on-iobc.md) - Steps to build and load KubOS Linux for the iOBC
 
 ##Building a Project
 
@@ -259,6 +259,7 @@ Select the file to send
 * Press `g` to open the Goto dialog and navigate to the desired folder (full pathname required)
 * Press enter to open the file selector dialog and specify the file you want within the current folder
 
+
     +-------------------[Select one or more files for upload]-------------------+
     |Directory: /home/vagrant/linux/build/kubos-linux-isis-gcc/source           |
     | [..]                                                                      |
@@ -354,3 +355,5 @@ Output should look like this:
     Packet received on MY_PORT: Hello World
     
 Press **Ctrl+C** to exit execution.
+
+Press **Ctrl+A**, then **Q** to exit minicom.
