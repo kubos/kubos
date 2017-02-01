@@ -15,14 +15,14 @@ These are the two most useful documents to have while working with the STM32F4
 
 -	[STM32F4 Discovery Board User Manual](http://www.st.com/content/ccc/resource/technical/document/user_manual/70/fe/4a/3f/e7/e1/4f/7d/DM00039084.pdf/files/DM00039084.pdf/jcr:content/translations/en.DM00039084.pdf) Useful for the pin layouts.
 
-**KubOS Documentation:**
+**Kubos Documentation:**
 
-- [Main HAL API documentation](http://docs.kubos.co/latest/kubos-hal/index.html) - Overview of the high-level HAL.  Useful for things like k\_uart\_write.
-- [STM32F4 Specific HAL API documentation](http://docs.kubos.co/latest/kubos-hal/kubos-hal-stm32f4/index.html) - Specifics for the STM32F4 version of the HAL.
+- [Main HAL API documentation](./kubos-hal/index.html) - Overview of the high-level HAL.  Useful for things like k\_uart\_write.
+- [STM32F4 Specific HAL API documentation](./kubos-hal/kubos-hal-stm32f4/index.html) - Specifics for the STM32F4 version of the HAL.
 Useful for things like the configuration options.
-- [Installing the Kubos SDK](http://docs.kubos.co/latest/md_docs_cli-installing.html) - Basics of setting up the Kubos SDK environment
-- [Creating your first project](http://docs.kubos.co/latest/md_docs_first-project.html) - Steps to create and build a Kubos SDK project
-- [SDK Command Reference](http://docs.kubos.co/latest/md_docs_cli-reference.html) - Overview of the common Kubos SDK commands
+- [Installing the Kubos SDK](docs/cli-installing.md) - Basics of setting up the Kubos SDK environment
+- [Creating your first project](docs/first-project.md) - Steps to create and build a Kubos SDK project
+- [SDK Command Reference](docs/sdk-reference.md) - Overview of the common Kubos SDK commands
 
 ## Pin Definitions
 
@@ -46,7 +46,7 @@ Look at section 6.11 (Extension connectors)
 
 Look at:
 
-	KubOS/targets/target-stm32f407-disco-gcc/target.json
+	kubos/targets/target-stm32f407-disco-gcc/target.json
 	
 Look for the i2c, spi, or uart section to find the pin definitions
 	
@@ -190,7 +190,7 @@ Create the program in main.c:
 ~~~~c
 /*
  * KubOS RT
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,6 +300,6 @@ Build the program
 	
 Flash the program
 
-	$ sudo kubos flash
+	$ kubos flash
 	
 Connect to the debug console (UART6).  Should see a "Received: ping" message every second.
