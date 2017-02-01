@@ -27,7 +27,7 @@ KubOS uses the yotta build/module system, which is where this file structure com
 
 ## Selecting a target
 
-Yotta needs to know which target you intend to build for so it can select the proper cross compiler. KubOS currently supports several different targets:
+The Kubos CLI needs to know which target you intend to build for so it can select the proper cross compiler. KubOS currently supports several different targets:
 
 | MCU Family   | Board  |
 | ------------- |-------------|
@@ -56,7 +56,7 @@ To see all of the available targets run:
 
 ## Building a project
 
-To build a KubOS project, all we need to do is run the `kubos build` command. The Kubos-cli (really `yotta` under the covers) will read the module.json file, determine what libraries are needed and build them.
+To build a KubOS project, all we need to do is run the `kubos build` command. The Kubos CLI will read the module.json file, determine what libraries are needed and build them.
 
 Basic build command:
 
@@ -66,13 +66,15 @@ Build with verbose output:
 
         $ kubos build -- -v
 
+Note: The Kubos CLI commands have their own specific arguments that can be used. There are also global arguments (like `--verbose` or `-v`) a double hyphen `--` separates the command specific arguments from the global arguments
+
 Clean command:
 
         $ kubos clean
 
 ## Linking local modules & targets
 
-The Kubos-cli comes with all of the latest KubOS modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the cli comes with the ability to link that local module into the build process.
+The Kubos CLI comes with all of the latest KubOS modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the cli comes with the ability to link that local module into the build process.
 
 ##### Linking modules:
 
@@ -125,9 +127,9 @@ Note: Running `kubos target` will show you whether you are using a local or a li
 
 Flashing your project using the kubos tool is a relatively straightforward process:
 
-1. Ensure that your board is plugged into your computer
+1. Ensure that your board is plugged into your computer. Running the following command will list all of the available devices in your Kubos SDK box.
 
-TODO: We probably want to add some info here on Virtualbox device filters and Guest Additions issues
+        $ lsusb
 
 2. Run the flash command
 
@@ -146,3 +148,4 @@ Start a gdb server and instance:
 Note: this may need to run as root depending on your usb device permissions
 
         $ kubos debug
+
