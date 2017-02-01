@@ -6,8 +6,8 @@ This is intended as a higher-level overview of the KubOS Linux configuration, in
 
 The high level components of every system will be:
 - Low-level bootloader/s
-- U-Boot (mid-level bootloader. Loads linux)
-- Linux
+- U-Boot (mid-level bootloader. Loads KubOS Linux)
+- KubOS Linux
 
 Ideally, all the files will be delivered to the customer as a pre-baked OBC. They'll just need to upload their user app files onto the board.
 
@@ -45,7 +45,7 @@ basic OS and CLI which can be used to configure and debug the kernel before it's
 
 Final distribution: uboot.bin
 
-### Linux Kernel
+### KubOS Linux Kernel
 
 The kernel can be built to support many boards at a time.  It is usually only constrained by high-level hardware things like CPU architecture (ex. ARM).
 Some systems may need non-standard kernel because of size or other constraints.
