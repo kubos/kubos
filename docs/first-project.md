@@ -1,6 +1,6 @@
-# Getting started with KubOS-SDK
+# Getting started with Kubos SDK
 
-This is intended to be a quick guide to creating a new project on top of the Kubos framework.
+This is intended to be a quick guide to creating a new project on top of the KubOS framework.
 
 ## Prerequisites
 
@@ -8,7 +8,7 @@ This is intended to be a quick guide to creating a new project on top of the Kub
 
 Create an instance of the Kubos Vagrant box
 
-        $ vagrant init kubostech/kubos-sdk
+        $ vagrant init kubostech/kubos-dev
 
 Start the box
 
@@ -23,18 +23,22 @@ SSH into your box
 It is strongly recommended that you create your project in a directory on your host that is shared with your box, rather than directly inside your box. If the
 directory is located on your host, if your box is ever destroyed or re-built your project files will be completely intact.
 
-By default the directory that you run `vagrant init kubostech/kubos-sdk` in will be mounted into the box at the path `/vagrant`
+To mount a specific directory from your host, open the Vagrantfile that was in the kubos-vagrant directory you clone in the above step and look for the following lines:
 
-To mount a specific directory from your host, open the Vagrantfile and look for the following two lines:
+        # Share an additional folder to the guest VM. The first argument is
+        # the path on the host to the actual folder. The second argument is
+        # the path on the guest to mount the folder. And the optional third
+        # argument is a set of non-required options.
+        # config.vm.synced_folder "../data", "/vagrant_data"
 
-        #To mount a specific directory into your box uncomment the next line and change the following paths to match your host directory and a desired mount point in the box.
-        #config.vm.synced_folder "/path/on/host", "/path/in/vagrant/box"
+Uncomment the last line in this block and change the paths to match your host directory and a desired mount point in the box. Note - The path in the box must be an absolute path
 
-Un-comment the second line and change the paths to match your host directory and a desired mount point in the box. Note - These must be absolute paths.
+After a volume is mounted into the box all of the data from the host path will be available at the path specified for the box. In the above example the host path (`../data`) would be exposed at `/vagrant_data` inside of the box.
+This allows you to use the text editor of your choosing to edit the project files from your host machine at the host directory path.
 
 For more information on mounting volumes see the following [guide](https://www.vagrantup.com/docs/synced-folders/basic_usage.html)
 
-The simplest way to create a new Kubos project is by using the kubos-cli. The `kubos init` command takes a project name and creates the project files & folder.
+The simplest way to create a new KubOS RT project is by using the Kubos CLI. The `kubos init` command takes a project name and creates the project files & folder.
 
         $ kubos init myproject
 
@@ -53,6 +57,14 @@ We have also created several different example Kubos projects which can be used 
 If you would prefer to use one of our other examples as a starting point all you need to do is run:
 
         $ git clone https://github.com/kubos-rt-example myproject
+
+If you created your project from a clone there's some additional setup needed to satisfy all of the projects depedencies for KubOS source modules.
+
+Running the following commands will clone a project and link all of the KubOS modules needed to build it:
+
+        $ git clone <url of the project you want>
+        $ cd <project name>
+        $ kubos link --all
 
 ## Choosing a target
 
