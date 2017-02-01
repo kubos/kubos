@@ -255,10 +255,11 @@ Select zmodem
     
                    [Goto]  [Prev]  [Show]   [Tag]  [Untag] [Okay]
 
-Select the file to send
-* Press `g` to open the Goto dialog and navigate to the desired folder (full pathname required)
-* Press enter to open the file selector dialog and specify the file you want within the current folder
+Select the file to send:
 
+Press `g` to open the Goto dialog and navigate to the desired folder (full pathname required).
+
+Press enter to open the file selector dialog and specify the file you want within the current folder.
 
     +-------------------[Select one or more files for upload]-------------------+
     |Directory: /home/vagrant/linux/build/kubos-linux-isis-gcc/source           |
