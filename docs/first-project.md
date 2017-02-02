@@ -1,10 +1,10 @@
 # Getting started with Kubos SDK
 
-This is intended to be a quick guide to creating a new project on top of the KubOS framework.
+This is intended to be a quick guide to creating a new project on top of the Kubos framework.
 
 ## Prerequisites
 
-[Install the KubOS-CLI](docs/cli-installing.md)
+[Install the Kubos CLI](docs/cli-installing.md)
 
 Create an instance of the Kubos Vagrant box
 
@@ -31,7 +31,9 @@ To mount a specific directory from your host, open the Vagrantfile that was in t
         # argument is a set of non-required options.
         # config.vm.synced_folder "../data", "/vagrant_data"
 
-Uncomment the last line in this block and change the paths to match your host directory and a desired mount point in the box. Note - The path in the box must be an absolute path
+Uncomment the last line in this block and change the paths to match your host directory and a desired mount point in the box.
+
+Note - The path in the box must be an absolute path. In the kubos-dev vagrant box the home directory is `/home/vagrant`
 
 After a volume is mounted into the box all of the data from the host path will be available at the path specified for the box. In the above example the host path (`../data`) would be exposed at `/vagrant_data` inside of the box.
 This allows you to use the text editor of your choosing to edit the project files from your host machine at the host directory path.
@@ -58,9 +60,9 @@ If you would prefer to use one of our other examples as a starting point all you
 
         $ git clone https://github.com/kubos-rt-example myproject
 
-If you created your project from a clone there's some additional setup needed to satisfy all of the projects depedencies for KubOS source modules.
+If you created your project from a clone there's some additional setup needed to satisfy all of the projects depedencies for Kubos source modules.
 
-Running the following commands will clone a project and link all of the KubOS modules needed to build it:
+Running the following commands will clone a project and link all of the Kubos modules needed to build it:
 
         $ git clone <url of the project you want>
         $ cd <project name>

@@ -319,5 +319,3 @@ defined by targets they inherit from.
 The config data displayed is identical to the data that will be available to
 modules when they are built.
 
-See the config system reference for more details.
-
