@@ -95,9 +95,10 @@ static void test_telemetry_store(void **state)
     expect_not_value_count(__wrap_klog_init_file, handle->config.file_path_len, 0, 2);
     expect_not_value_count(__wrap_klog_init_file, handle->config.part_size, 0, 2);
     expect_not_value_count(__wrap_klog_init_file, handle->config.max_parts, 0, 2);
+    expect_not_value_count(__wrap_klog_init_file, handle->config.klog_file_logging, 0, 2);
+    
     expect_in_range_count(__wrap_klog_init_file, handle->config.klog_console_level, 0, LOG_ALL+1, 2);
     expect_in_range_count(__wrap_klog_init_file, handle->config.klog_file_level, 0, LOG_ALL+1, 2);
-    expect_not_value_count(__wrap_klog_init_file, handle->config.klog_file_logging, 0, 2);
     
     will_return(__wrap_klog_init_file, 0);
     assert_true(telemetry_store(packet));

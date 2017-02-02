@@ -17,7 +17,6 @@
 
 #ifndef TARGET_LIKE_MSP430
 
-
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -109,7 +108,7 @@ int klog_init_file(klog_handle *handle)
     
     if (handle->log_file == NULL)
     {
-        return -1;
+        return -ENOENT;
     }
     
     return handle->config.klog_file_logging ? 0 : -1;

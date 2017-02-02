@@ -60,7 +60,6 @@ enum {
     LOG_WARNING,    /**< Warning log level, will print warning messages for
                          temporary errors */
     LOG_TELEMETRY,  /**< special level for telemetry */
-    
     LOG_INFO,       /**< Informational log level, will print purely
                          informational messages like successful system bootup,
                          network link state, ...*/

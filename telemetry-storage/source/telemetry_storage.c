@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <telemetry/telemetry.h>
 #include "telemetry-storage/telemetry_storage.h"
 #include "telemetry-storage/config.h"
 
@@ -23,7 +24,7 @@
 CSP_DEFINE_TASK(telemetry_store_rx)
 {
     telemetry_packet packet;
-    telemetry_conn connection;
+    pubsub_conn connection;
 
     /* Subscribe to telemetry publishers as specified in the configuration */
     while (!telemetry_subscribe(&connection, STORAGE_SUBSCRIPTIONS))
@@ -34,7 +35,7 @@ CSP_DEFINE_TASK(telemetry_store_rx)
 
     while (1)
     {
-        if (telemetry_read(connection, &packet))
+        if (telemetry_read(&connection, &packet))
         {
             /* Store telemetry packets from the telemetry system */
             telemetry_store(packet);
@@ -45,7 +46,8 @@ CSP_DEFINE_TASK(telemetry_store_rx)
 
 void telemetry_storage_init()
 {
-    TELEMETRY_STORE_THREAD;
+    csp_thread_handle_t telem_store_rx_handle;
+    csp_thread_create(telemetry_store_rx, "TELEM_STORE_RX", STORAGE_TASK_STACK_DEPTH, NULL, STORAGE_TASK_PRIORITY, &telem_store_rx_handle);
 }
 
 

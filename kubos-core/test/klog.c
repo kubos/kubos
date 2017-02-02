@@ -37,11 +37,6 @@ inline bool _fstat(char *path, int *size) {
 
 #define remove_if_exists(p) if (_fstat(p, NULL)) remove(p)
 
-void setUp(void)
-{
-    
-}
-
 void tearDown(void)
 {
     remove_if_exists(LOG_PATH ".000");
@@ -164,7 +159,6 @@ static void test_RotateParts(void)
 void resetTest(void)
 {
     tearDown();
-    setUp();
 }
 
 int main(void)
