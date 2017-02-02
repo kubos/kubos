@@ -15,6 +15,7 @@
  */
 #include <cmocka.h>
 #include <telemetry/telemetry.h>
+#include <float.h>
 #include "source/telemetry_storage.c"
 #include "telemetry-storage/config.h"
  
@@ -89,7 +90,7 @@ static void test_telemetry_store(void **state)
 {
     telemetry_packet packet = { .data.i = 1, .timestamp = 0, \
         .source.subsystem_id = 0, .source.data_type = TELEMETRY_TYPE_INT, \
-        .source.source_id = 1};
+        .source.topic_id = 1};
         
     expect_not_value_count(__wrap_klog_init_file, handle->config.file_path, NULL, 2);
     expect_not_value_count(__wrap_klog_init_file, handle->config.file_path_len, 0, 2);

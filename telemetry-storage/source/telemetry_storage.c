@@ -52,15 +52,15 @@ void telemetry_storage_init()
 
 
 /**
- * @brief creates a filename that corresponds to the telemetry packet source_id and 
+ * @brief creates a filename that corresponds to the telemetry packet topic_id and 
  *        the csp packet address.
  * @param filename_buf_ptr a pointer to the char[] to write to.
- * @param source_id the telemetry packet source_id from packet.source.source_id.
+ * @param topic_id the telemetry packet topic_id from packet.source.topic_id.
  * @param address the csp packet address from packet->id.src. 
  * @param file_extension. 
  * @retval The length of the filename written.
  */
-static uint16_t create_filename(char *filename_buf_ptr, uint8_t source_id, unsigned int address, const char *file_extension)
+static uint16_t create_filename(char *filename_buf_ptr, uint8_t topic_id, unsigned int address, const char *file_extension)
 {
     int len;
 
@@ -69,7 +69,7 @@ static uint16_t create_filename(char *filename_buf_ptr, uint8_t source_id, unsig
         return 0;
     }
 
-    len = snprintf(filename_buf_ptr, FILE_NAME_BUFFER_SIZE, "%u%u%s", source_id, address, file_extension);
+    len = snprintf(filename_buf_ptr, FILE_NAME_BUFFER_SIZE, "%u%u%s", topic_id, address, file_extension);
 
     if(len < 0 || len >= FILE_NAME_BUFFER_SIZE) 
     {
@@ -152,7 +152,7 @@ bool telemetry_store(telemetry_packet packet)
     
     if(DATA_OUTPUT_FORMAT == FORMAT_TYPE_CSV)
     { 
-        filename_len = create_filename(filename_buf_ptr, packet.source.source_id, packet.source.subsystem_id, FILE_EXTENSION_NONE);
+        filename_len = create_filename(filename_buf_ptr, packet.source.topic_id, packet.source.subsystem_id, FILE_EXTENSION_NONE);
         data_len = format_log_entry_csv(data_buf_ptr, packet);
         
         /* Save log entry */
