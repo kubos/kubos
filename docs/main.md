@@ -7,7 +7,7 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
 ## Docs
 
  - [Changelog](docs/changelog.md)
- 
+
 ### KubOS SDK
 
  - [Installing Kubos-CLI](docs/cli-installing.md)
@@ -16,24 +16,26 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
 
  - [Creating your first project](docs/first-project.md)
 
+ - [KubOS-SDK Cheat Sheet](docs/sdk-cheatsheet.md)
+
  - [KubOS-SDK Command Reference](docs/sdk-reference.md)
 
  - [KubOS Module Development](docs/kubos-development.md)
 
  - [Contributing to the KubOS Project](docs/contribution-process.md)
- 
+
 ### KubOS RT
 
  - [MSP430 Launchpad Guide](docs/MSP430-launchpad-guide.md)
 
  - [STM32F4 Discovery Board Guide](docs/STM32F4-discovery-board-guide.md)
- 
+
 ### KubOS Linux
- 
+
  - [KubOS Linux Overview](docs/Linux_Overview.md)
- 
+
  - [KubOS Linux on iOBC](docs/Linux_on_iOBC.md)
- 
+
  - [User Applications on iOBC](docs/User_App_on_iOBC.md)
 
 
