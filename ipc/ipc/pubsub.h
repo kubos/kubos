@@ -57,7 +57,7 @@ bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port);
  * @param request pointer to telemetry_request to store data in
  * @return bool true if successful, otherwise false
  */ 
-bool kprv_publisher_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port);
+bool kprv_publisher_read(pubsub_conn * conn, void * buffer, int buffer_size, uint8_t port);
 
 /**
  * Attempts to receive a telemetry_packet over the specified pubsub_conn
@@ -65,7 +65,7 @@ bool kprv_publisher_read(pubsub_conn conn, void * buffer, int buffer_size, uint8
  * @param packet pointer telemetry_packet to store data in 
  * @return bool true if successful, otherwise false
  */ 
-bool kprv_subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint8_t port);
+bool kprv_subscriber_read(pubsub_conn * conn, void * buffer, int buffer_size, uint8_t port);
 
 /**
  * Wrapper function for sending data via a csp connection
@@ -74,6 +74,6 @@ bool kprv_subscriber_read(pubsub_conn conn, void * buffer, int buffer_size, uint
  * @param length length of the data to be sent
  * @return bool true if successful, otherwise false
  */
-bool kprv_send_csp(pubsub_conn conn, void * data, uint16_t length);
+bool kprv_send_csp(pubsub_conn * conn, void * data, uint16_t length);
 
 #endif
