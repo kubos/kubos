@@ -11,7 +11,6 @@ bool __wrap_kprv_subscriber_read(pubsub_conn * conn, void * buffer, int buffer_s
 
 bool __wrap_kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
 {
-    // check_expected(conn);
     if (conn != NULL)
     {
         conn->conn_handle = mock_type(csp_conn_t *);

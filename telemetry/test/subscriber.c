@@ -1,6 +1,5 @@
 /*
- * KubOS HAL
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,18 +50,16 @@ static void test_subscriber(void ** arg)
 
     int total_subs = telemetry_num_subscribers();
 
-    bool packet_published = telemetry_publish(outgoing_packet);
-
-    for (i = 0; i < NUM_SUBS-1; i++)
-    {
-        read_status[i] = telemetry_read((connections[i]), &incoming_packets[i]);
-    }
-
-    bool unsubscribe_status = telemetry_disconnect(connections[0]);
+    bool disconnect_status = telemetry_disconnect(connections[0]);
 
     int total_subs_minus_one = telemetry_num_subscribers();
 
-    connections[0] = telemetry_connect();
+    bool packet_published = telemetry_publish(outgoing_packet);
+
+    for (i = 0; i < NUM_SUBS; i++)
+    {
+        read_status[i] = telemetry_read((connections[i]), &incoming_packets[i]);
+    }
 
     for (i = 0; i < NUM_SUBS; i++)
     {
@@ -80,17 +77,17 @@ static void test_subscriber(void ** arg)
 
     assert_true(packet_published);
 
-    for (i = 0; i < NUM_SUBS-1; i++)
+    for (i = 1; i < NUM_SUBS; i++)
         assert_true(read_status[i]);
 
-    assert_false(read_status[NUM_SUBS]);
+    assert_false(read_status[0]);
 
-    for (i = 0; i < NUM_SUBS-1; i++)
+    for (i = 1; i < NUM_SUBS; i++)
         assert_int_equal(outgoing_packet.data.i, incoming_packets[i].data.i);
 
-    assert_int_not_equal(outgoing_packet.data.i, incoming_packets[NUM_SUBS].data.i);
+    assert_int_not_equal(outgoing_packet.data.i, incoming_packets[0].data.i);
 
-    assert_true(unsubscribe_status);
+    assert_true(disconnect_status);
     
     assert_int_equal(total_subs_minus_one, (NUM_SUBS - 1));
 

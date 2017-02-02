@@ -96,6 +96,12 @@ bool telemetry_publish(telemetry_packet packet);
  */
 int telemetry_num_subscribers();
 
+/**
+ * Checks if a telemetry client is subscribed to a topic
+ * @param client_conn telemetry client
+ * @param topic_id topic to check for
+ * @return bool true if subscribed, otherwise false
+ */
 bool telemetry_is_subscribed(pubsub_conn * client_conn, uint16_t topic_id);
 
 #endif

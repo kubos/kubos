@@ -25,7 +25,6 @@ static void test_telemetry_connect_server_accept_fail(void ** arg)
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
     will_return(__wrap_kprv_send_csp, true);
 
-    // expect_value(__wrap_kprv_subscriber_connect, conn, &conn);
     will_return(__wrap_kprv_subscriber_connect, "");
     will_return(__wrap_kprv_subscriber_connect, true);
 
@@ -45,7 +44,6 @@ static void test_telemetry_connect(void ** arg)
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
     will_return(__wrap_kprv_send_csp, true);
 
-    // expect_value(__wrap_kprv_subscriber_connect, conn, &conn);
     will_return(__wrap_kprv_subscriber_connect, "");
     will_return(__wrap_kprv_subscriber_connect, true);
 
@@ -71,7 +69,6 @@ static void test_telemetry_subscribe(void ** arg)
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
     will_return(__wrap_kprv_send_csp, true);
 
-    // expect_value(__wrap_kprv_subscriber_connect, conn, &conn);
     will_return(__wrap_kprv_subscriber_connect, "");
     will_return(__wrap_kprv_subscriber_connect, true);
 

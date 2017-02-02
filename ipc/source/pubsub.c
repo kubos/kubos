@@ -15,6 +15,7 @@
  */
 
 #include "ipc/pubsub.h"
+#include "ipc/config.h"
 
 csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections)
 {
@@ -85,7 +86,7 @@ bool kprv_send_csp(pubsub_conn * conn, void * data, uint16_t length)
         {
             memcpy(csp_packet->data, data, length);
             csp_packet->length = length;
-            if (!csp_send(csp_conn, csp_packet, 1000))
+            if (!csp_send(csp_conn, csp_packet, IPC_SEND_TIMEOUT))
             {
                 csp_buffer_free(csp_packet);
                 return false;
@@ -106,7 +107,7 @@ bool kprv_publisher_read(pubsub_conn * conn, void * buffer, int buffer_size, uin
     if ((conn != NULL) && (conn->conn_handle != NULL) && (buffer != NULL))
     {
         csp_conn = conn->conn_handle;
-        if ((csp_packet = csp_read(csp_conn, 50)) != NULL)
+        if ((csp_packet = csp_read(csp_conn, IPC_READ_TIMEOUT)) != NULL)
         {
             if (csp_conn_dport(csp_conn) == port)
             {
@@ -127,7 +128,7 @@ bool kprv_subscriber_read(pubsub_conn * conn, void * buffer, int buffer_size, ui
     if ((conn != NULL) && (conn->conn_handle != NULL) && (buffer != NULL))
     {
         csp_conn = conn->conn_handle;
-        if ((csp_packet = csp_read(csp_conn, 50)) != NULL)
+        if ((csp_packet = csp_read(csp_conn, IPC_READ_TIMEOUT)) != NULL)
         {
             if (csp_conn_sport(csp_conn) == port)
             {

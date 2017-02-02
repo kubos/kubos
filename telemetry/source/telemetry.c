@@ -158,7 +158,6 @@ static void telemetry_send(telemetry_packet packet)
     LL_FOREACH_SAFE(subscribers, current, next)
     {
         pubsub_conn subscriber = current->server_conn;
-        // if ((subscriber.sources == 0) || (packet.source.topic_id & subscriber.sources))
         if (kprv_has_topic(current, packet.source.topic_id))
         {
             kprv_send_csp(&subscriber, (void*)&packet, sizeof(telemetry_packet));
@@ -315,7 +314,7 @@ bool kprv_add_topic(subscriber_list_item * sub, uint16_t topic_id)
     return ret;
 }
 
-int topiccmp(topic_list_item * a, topic_list_item * b)
+int topic_cmp(topic_list_item * a, topic_list_item * b)
 {
     return (a->topic_id != b->topic_id);
 }
@@ -329,7 +328,7 @@ bool kprv_has_topic(subscriber_list_item * sub, uint16_t topic_id)
             .topic_id = topic_id
         };
         topic_list_item * temp;
-        LL_SEARCH(sub->topics, temp, &topic, topiccmp);
+        LL_SEARCH(sub->topics, temp, &topic, topic_cmp);
         if (temp != NULL)
             ret = true;
     }
@@ -345,7 +344,7 @@ bool kprv_remove_topic(subscriber_list_item * sub, uint16_t topic_id)
             .topic_id = topic_id
         };
         topic_list_item * temp;
-        LL_SEARCH(sub->topics, temp, &topic, topiccmp);
+        LL_SEARCH(sub->topics, temp, &topic, topic_cmp);
         if (temp != NULL)
         {
             LL_DELETE(sub->topics, temp);
