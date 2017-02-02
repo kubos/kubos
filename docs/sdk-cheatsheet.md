@@ -27,7 +27,7 @@ KubOS uses the yotta build/module system, which is where this file structure com
 
 ## Selecting a target
 
-The Kubos CLI needs to know which target you intend to build for so it can select the proper cross compiler. KubOS currently supports several different targets:
+Kubos needs to know which target you intend to build for so it can select the proper cross compiler. Kubos currently supports several different targets:
 
 | MCU Family   | Board  |
 | ------------- |-------------|
@@ -72,9 +72,11 @@ Clean command:
 
         $ kubos clean
 
+To build a project from scratch run `kubos clean` to remove all remaing files generated for previous builds followed by `kubos build`.
+
 ## Linking local modules & targets
 
-The Kubos CLI comes with all of the latest KubOS modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the cli comes with the ability to link that local module into the build process.
+Kubos comes with all of the latest KubOS modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the cli comes with the ability to link that local module into the build process.
 
 ##### Linking modules:
 

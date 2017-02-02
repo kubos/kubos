@@ -1,27 +1,29 @@
 # Upgrading Your Kubos Development Environment
 
+New updates will be announced on the Kubos website. There will be instructions depending on the specifc release details of all the steps needed to upgrade for the newest release.
+
 ## Upgrading Kubos CLI
 
-Inside of a vagrant box lives the Kubos CLI. Upon new KubOS releases there may be update for the Kubos CLI.
+Inside of a vagrant box lives the Kubos CLI. Upon new Kubos releases there may be updates for the Kubos CLI.
 
 First SSH into your kubos-dev box:
 
-       $ cd <The path containing your kubos-dev Vagrant file>
+       $ cd <The path containing your kubos-dev Vagrantfile>
        $ vagrant ssh
 
 The Kubos CLI can be upgraded using this pip command:
 
         $ sudo pip install --upgrade kubos-cli
 
-## Upgrading the KubOS Source Modules
+## Upgrading the Kubos Source Modules
 
 To update the KubOS source modules your project will be built with run the following command:
 
         $ kubos update
 
-To check which version of cli, use `kubos version`
+To check which version of the CLI you're using, use `kubos version`
 
-To list all of the available versions of the KubOS source modules run:
+To list all of the available versions of the KubOS s4ource modules run:
 
         $ kubos versions
 
@@ -37,3 +39,7 @@ If the new release holds new modules or has removed existing modules it may be n
 To relink all of the kubos source modules simply run:
 
         $ kubos link --all
+
+## Downgrading the Kubos Source Modules
+
+In the event you want to downgrade to an older version of the Kubos source modules simply use the `kubos use <version>` command with the older version number you want to downgrade to.
