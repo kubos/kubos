@@ -21,7 +21,7 @@ static void test_telemetry_connect_server_accept_fail(void ** arg)
 {
     pubsub_conn * conn = NULL;
 
-    expect_not_value(__wrap_kprv_send_csp, conn.conn_handle, NULL);
+    expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
     will_return(__wrap_kprv_send_csp, true);
 
@@ -41,7 +41,7 @@ static void test_telemetry_connect(void ** arg)
 {
     pubsub_conn * conn = NULL;
 
-    expect_not_value(__wrap_kprv_send_csp, conn.conn_handle, NULL);
+    expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
     will_return(__wrap_kprv_send_csp, true);
 
@@ -53,7 +53,7 @@ static void test_telemetry_connect(void ** arg)
     will_return(__wrap_kprv_server_accept, "");
     will_return(__wrap_kprv_server_accept, true);
 
-    expect_not_value(__wrap_kprv_publisher_read, conn.conn_handle, NULL);
+    expect_not_value(__wrap_kprv_publisher_read, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_publisher_read, buffer, NULL);
     will_return(__wrap_kprv_publisher_read, true);
 
@@ -67,7 +67,7 @@ static void test_telemetry_subscribe(void ** arg)
     pubsub_conn * conn = NULL;
     uint16_t topic_id = 16;
 
-    expect_not_value(__wrap_kprv_send_csp, conn.conn_handle, NULL);
+    expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
     will_return(__wrap_kprv_send_csp, true);
 
@@ -79,7 +79,7 @@ static void test_telemetry_subscribe(void ** arg)
     will_return(__wrap_kprv_server_accept, "");
     will_return(__wrap_kprv_server_accept, true);
 
-    expect_not_value(__wrap_kprv_publisher_read, conn.conn_handle, NULL);
+    expect_not_value(__wrap_kprv_publisher_read, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_publisher_read, buffer, NULL);
     will_return(__wrap_kprv_publisher_read, true);
 
@@ -97,11 +97,10 @@ static void test_telemetry_is_not_subscribed(void ** arg)
     pubsub_conn * conn = NULL;
     uint16_t topic_id = 16;
 
-    expect_not_value(__wrap_kprv_send_csp, conn.conn_handle, NULL);
+    expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
     will_return(__wrap_kprv_send_csp, true);
 
-    // expect_value(__wrap_kprv_subscriber_connect, conn, &conn);
     will_return(__wrap_kprv_subscriber_connect, "");
     will_return(__wrap_kprv_subscriber_connect, true);
 
@@ -109,7 +108,7 @@ static void test_telemetry_is_not_subscribed(void ** arg)
     will_return(__wrap_kprv_server_accept, "");
     will_return(__wrap_kprv_server_accept, true);
 
-    expect_not_value(__wrap_kprv_publisher_read, conn.conn_handle, NULL);
+    expect_not_value(__wrap_kprv_publisher_read, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_publisher_read, buffer, NULL);
     will_return(__wrap_kprv_publisher_read, true);
 
@@ -126,12 +125,12 @@ static void test_telemetry_read_conn_null_handle(void ** arg)
     conn.conn_handle = NULL;
     telemetry_packet packet;
 
-    expect_value_count(__wrap_kprv_subscriber_read, conn.conn_handle, NULL, TELEMETRY_SUBSCRIBER_READ_ATTEMPTS);
+    expect_value_count(__wrap_kprv_subscriber_read, conn->conn_handle, NULL, TELEMETRY_SUBSCRIBER_READ_ATTEMPTS);
     expect_value_count(__wrap_kprv_subscriber_read, buffer, &packet, TELEMETRY_SUBSCRIBER_READ_ATTEMPTS);
 
     will_return_count(__wrap_kprv_subscriber_read, false, TELEMETRY_SUBSCRIBER_READ_ATTEMPTS);
 
-    assert_false(telemetry_read(conn, &packet));
+    assert_false(telemetry_read(&conn, &packet));
 }
 
 static void test_telemetry_read_null_packet(void ** arg)
@@ -139,7 +138,7 @@ static void test_telemetry_read_null_packet(void ** arg)
     pubsub_conn conn;
     telemetry_packet packet;
 
-    assert_false(telemetry_read(conn, NULL));
+    assert_false(telemetry_read(&conn, NULL));
 }
 
 static void test_telemetry_read(void ** arg)
@@ -147,11 +146,10 @@ static void test_telemetry_read(void ** arg)
     pubsub_conn conn;
     telemetry_packet packet;
 
-    expect_value(__wrap_kprv_subscriber_connect, conn, &conn);
     will_return(__wrap_kprv_subscriber_connect, "");
     will_return(__wrap_kprv_subscriber_connect, true);
 
-    expect_not_value(__wrap_kprv_send_csp, conn.conn_handle, NULL);
+    expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
     will_return(__wrap_kprv_send_csp, true);
 
@@ -159,17 +157,17 @@ static void test_telemetry_read(void ** arg)
     will_return(__wrap_kprv_server_accept, "");
     will_return(__wrap_kprv_server_accept, true);
 
-    expect_not_value(__wrap_kprv_publisher_read, conn.conn_handle, NULL);
+    expect_not_value(__wrap_kprv_publisher_read, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_publisher_read, buffer, NULL);
     will_return(__wrap_kprv_publisher_read, true);
     
     kprv_telemetry_connect(&conn);
 
-    expect_value(__wrap_kprv_subscriber_read, conn.conn_handle, conn.conn_handle);
+    expect_value(__wrap_kprv_subscriber_read, conn->conn_handle, conn.conn_handle);
     expect_value(__wrap_kprv_subscriber_read, buffer, &packet);
     will_return(__wrap_kprv_subscriber_read, true);
 
-    assert_true(telemetry_read(conn, &packet));
+    assert_true(telemetry_read(&conn, &packet));
 }
 
 static void test_telemetry_publish_no_setup(void ** arg)
@@ -192,7 +190,7 @@ int main(void)
         cmocka_unit_test(test_telemetry_is_not_subscribed),
         cmocka_unit_test(test_telemetry_read_conn_null_handle),
         cmocka_unit_test(test_telemetry_read_null_packet),
-        // cmocka_unit_test(test_telemetry_read),
+        cmocka_unit_test(test_telemetry_read),
         cmocka_unit_test(test_telemetry_publish_no_setup),
     };
 

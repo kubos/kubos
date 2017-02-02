@@ -161,7 +161,7 @@ static void telemetry_send(telemetry_packet packet)
         // if ((subscriber.sources == 0) || (packet.source.topic_id & subscriber.sources))
         if (kprv_has_topic(current, packet.source.topic_id))
         {
-            kprv_send_csp(subscriber, (void*)&packet, sizeof(telemetry_packet));
+            kprv_send_csp(&subscriber, (void*)&packet, sizeof(telemetry_packet));
         }
     }
 }
@@ -175,7 +175,7 @@ bool telemetry_publish(telemetry_packet packet)
     return false;
 }
 
-bool telemetry_read(pubsub_conn conn, telemetry_packet * packet)
+bool telemetry_read(pubsub_conn * conn, telemetry_packet * packet)
 {
     int tries = 0;
     if (packet != NULL)
@@ -211,8 +211,7 @@ pubsub_conn * kprv_telemetry_connect()
     {
         char msg;
 
-        ret = kprv_send_csp(client_conn, (void*)&msg, sizeof(msg));
-        // csp_ping(TELEMETRY_CSP_ADDRESS, 1000, 100, CSP_O_NONE);    
+        ret = kprv_send_csp(&client_conn, (void*)&msg, sizeof(msg));    
     }
     if (ret)
     {
@@ -220,7 +219,7 @@ pubsub_conn * kprv_telemetry_connect()
         if (kprv_server_accept(socket, &server_conn))
         {
             char msg;
-            ret = kprv_publisher_read(server_conn, (void*)&msg, sizeof(msg), TELEMETRY_CSP_PORT);
+            ret = kprv_publisher_read(&server_conn, (void*)&msg, sizeof(msg), TELEMETRY_CSP_PORT);
             if (ret)
             {
                 subscriber_list_item * sub = telemetry_add_subscriber(server_conn, client_conn);

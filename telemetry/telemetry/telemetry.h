@@ -81,7 +81,7 @@ bool telemetry_unsubscribe(pubsub_conn * conn, uint16_t topic_id);
  * @param packet pointer to telemetry_packet to store data in.
  * @return bool true if successful, otherwise false 
  */
-bool telemetry_read(pubsub_conn conn, telemetry_packet * packet);
+bool telemetry_read(pubsub_conn * conn, telemetry_packet * packet);
 
 /**
  * Public facing telemetry input interface. Takes a telemetry_packet packet

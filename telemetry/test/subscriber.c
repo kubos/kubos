@@ -40,7 +40,6 @@ static void test_subscriber(void ** arg)
     
     for (i = 0; i < NUM_SUBS; i++)
     {
-        // subscribe_status[i] = telemetry_connect(&connections[i]);
         connections[i] = telemetry_connect();
         assert_non_null(connections[i]);
     }
@@ -56,7 +55,7 @@ static void test_subscriber(void ** arg)
 
     for (i = 0; i < NUM_SUBS-1; i++)
     {
-        read_status[i] = telemetry_read(*(connections[i]), &incoming_packets[i]);
+        read_status[i] = telemetry_read((connections[i]), &incoming_packets[i]);
     }
 
     bool unsubscribe_status = telemetry_disconnect(connections[0]);

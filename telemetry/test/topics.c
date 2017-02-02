@@ -44,13 +44,13 @@ static void test_subscriber(void ** arg)
 
     assert_true(telemetry_publish(outgoing_packet));
 
-    assert_true(telemetry_read(*connection, &incoming_packet));
+    assert_true(telemetry_read(connection, &incoming_packet));
 
     assert_true(telemetry_unsubscribe(connection, topic_id));
 
     assert_true(telemetry_publish(outgoing_packet));
 
-    assert_false(telemetry_read(*connection, &incoming_packet));
+    assert_false(telemetry_read(connection, &incoming_packet));
 
     assert_true(telemetry_disconnect(connection));
 
