@@ -37,6 +37,10 @@
 // See config.json for stack sizes etc
 #include "./config.h"
 
+// macro trick to stringify build-time #defines
+#define TO_STR(x) UNWRAP(x)
+#define UNWRAP(x) #x
+
 static inline void blink(int pin) {
     k_led_on(pin);
     vTaskDelay(BLINK_MS / portTICK_RATE_MS);
@@ -247,14 +251,11 @@ static int build_info(struct slash *slash)
                   YOTTA_BUILD_YEAR, YOTTA_BUILD_MONTH, YOTTA_BUILD_DAY,
                   YOTTA_BUILD_HOUR, YOTTA_BUILD_MINUTE, YOTTA_BUILD_SECOND);
 
-    // macro trick to stringify the generated constants
-    #define _TO_STR(x) _UNWRAP(x)
-    #define _UNWRAP(x) #x
 
-    slash_println(slash, "UUID: " _TO_STR(YOTTA_BUILD_UUID));
+    slash_println(slash, "UUID: " TO_STR(YOTTA_BUILD_UUID));
 
     #ifdef YOTTA_BUILD_VCS_ID
-    slash_println(slash, "VCS ID: " _TO_STR(YOTTA_BUILD_VCS_ID) ", Clean: %d",
+    slash_println(slash, "VCS ID: " TO_STR(YOTTA_BUILD_VCS_ID) ", Clean: %d",
                   YOTTA_BUILD_VCS_CLEAN);
     #endif
 
