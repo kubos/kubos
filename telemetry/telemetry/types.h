@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,17 +61,6 @@ typedef struct
     telemetry_union data;
     uint16_t timestamp;
 } telemetry_packet;
-
-/**
- * Telemetry connection structure.
- */
-typedef struct
-{
-    /* Bitmask of sources this connection is subscribed to */
-    uint8_t sources;
-    /* Actual connection handle - today this is a csp connection */
-    csp_conn_t * conn_handle;
-} telemetry_conn;
 
 /**
  * Telemetry request structure - currently used for subscribing to sources.

@@ -35,6 +35,7 @@ Yotta needs to know which target you intend to build for so it can select the pr
 |    |  STM32F405 PyBoard |
 |  | STM32F405 NanoAvionics SatBus 3C0 OBC |
 | MSP430     | MSP430F5529 Launchpad |
+| ISIS       | ISIS-OBC |
 
 
 The respective commands to select those targets are as follows.
@@ -46,6 +47,8 @@ The respective commands to select those targets are as follows.
         $ kubos target na-satbus-3c0-gcc
 
         $ kubos target msp430f5529-gcc
+        
+        $ kubos target kubos-linux-isis-gcc
 
 To see all of the available targets run:
 

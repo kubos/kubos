@@ -1,8 +1,8 @@
-#Linux Overview
+#KubOS Linux Overview
 
 ##Introduction
 
-This is intended as a higher-level overview of the Linux OS configuration, installation, and distribution for the KubOS clients' embedded systems.
+This is intended as a higher-level overview of the KubOS Linux configuration, installation, and distribution for the KubOS clients' embedded systems.
 
 The high level components of every system will be:
 - Low-level bootloader/s
