@@ -1,0 +1,17 @@
+{
+    "license":"Apache-2.0",
+    "name":"telemetry-storage",
+    "version":"0.1.0",
+    "dependencies":{
+        "telemetry":"kubostech/telemetry",
+	"kubos-core": "kubostech/kubos-core"
+    },
+    "targetDependencies":{
+      "kubos-rt":{
+        "kubos-rt":"kubostech/kubos-rt"
+      }
+    },
+    "testDependencies": {
+        "cmocka": "kubostech/cmocka"
+    }
+}

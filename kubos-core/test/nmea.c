@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifdef YOTTA_CFG_SENSORS_GPS
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,3 +103,8 @@ K_TEST_MAIN() {
 int main(void) {
     K_TEST_RUN_MAIN();
 }
+#else
+int main(void) {
+    return 0;
+}
+#endif
