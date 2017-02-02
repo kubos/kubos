@@ -1,6 +1,5 @@
 /*
- * KubOS HAL
- * Copyright (C) 2016 Kubos Corporation
+ * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,64 +21,75 @@
 
 static void test_subscriber(void ** arg)
 {
-    pubsub_conn connections[NUM_SUBS];
+    pubsub_conn * connections[NUM_SUBS];
     telemetry_packet incoming_packets[NUM_SUBS];
-    telemetry_packet outgoing_packet;
+    
     bool subscribe_status[NUM_SUBS] = {false};
     bool read_status[NUM_SUBS] = {false};
     int i = 0;
+    uint16_t topic_id = 18;
+    telemetry_packet outgoing_packet = {
+        .data.i = 16,
+        .source.topic_id = topic_id,
+        .source.data_type = TELEMETRY_TYPE_INT,
+        .source.subsystem_id = 1
+    };
 
-    outgoing_packet.data.i = 10;
-    
     telemetry_init();
     
     for (i = 0; i < NUM_SUBS; i++)
     {
-        subscribe_status[i] = telemetry_subscribe(&connections[i], 0);
+        connections[i] = telemetry_connect();
+        assert_non_null(connections[i]);
+    }
+
+    for (i = 0; i < NUM_SUBS; i++)
+    {
+        subscribe_status[i] = telemetry_subscribe(connections[i], topic_id);
     }
 
     int total_subs = telemetry_num_subscribers();
+
+    bool disconnect_status = telemetry_disconnect(connections[0]);
+
+    int total_subs_minus_one = telemetry_num_subscribers();
 
     bool packet_published = telemetry_publish(outgoing_packet);
 
     for (i = 0; i < NUM_SUBS; i++)
     {
-        read_status[i] = telemetry_read(connections[i], &incoming_packets[i]);
+        read_status[i] = telemetry_read((connections[i]), &incoming_packets[i]);
     }
-
-    bool unsubscribe_status = telemetry_unsubscribe(&connections[0]);
-
-    int total_subs_minus_one = telemetry_num_subscribers();
-
-    bool resubscribe_status = telemetry_subscribe(&connections[0], 0);
 
     for (i = 0; i < NUM_SUBS; i++)
     {
-        telemetry_unsubscribe(&connections[i]);
+        telemetry_disconnect(connections[i]);
     }
 
     telemetry_cleanup();
 
     int end_total_subs = telemetry_num_subscribers();
-
-    for (i = 0; i < NUM_SUBS; i++)
-        assert_true(subscribe_status[i]);
     
     assert_int_equal(total_subs, NUM_SUBS);
 
+    for (i = 0; i < NUM_SUBS; i++)
+        assert_true(subscribe_status[i]);
+
     assert_true(packet_published);
 
-    for (i = 0; i < NUM_SUBS; i++)
+    for (i = 1; i < NUM_SUBS; i++)
         assert_true(read_status[i]);
 
-    for (i = 0; i < NUM_SUBS; i++)
+    assert_false(read_status[0]);
+
+    for (i = 1; i < NUM_SUBS; i++)
         assert_int_equal(outgoing_packet.data.i, incoming_packets[i].data.i);
 
-    assert_true(unsubscribe_status);
+    assert_int_not_equal(outgoing_packet.data.i, incoming_packets[0].data.i);
+
+    assert_true(disconnect_status);
     
     assert_int_equal(total_subs_minus_one, (NUM_SUBS - 1));
-
-    assert_true(resubscribe_status);    
 
     assert_int_equal(end_total_subs, 0);
 }
