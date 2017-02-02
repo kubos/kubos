@@ -88,10 +88,10 @@ void klog_file(klog_handle *handle, unsigned level, const char *logger, const ch
 void klog_cleanup(klog_handle *handle);
 
 #define klog_write(handle, level, logger, ...) do { \
-    if (level <= *(handle.config.klog_console_level)) { \
+    if (level <= ((handle)->config.klog_console_level)) { \
         klog_console(level, logger, __VA_ARGS__); \
     } \
-    if (level <= *(handle.config.klog_file_level) && *(handle.config.klog_file_logging)) { \
+    if (level <= ((handle)->config.klog_file_level) && ((handle)->config.klog_file_logging)) { \
         klog_file(handle, level, logger, __VA_ARGS__); \
     } \
 } while (0)

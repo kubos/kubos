@@ -37,6 +37,10 @@ static void _next_log_file(klog_handle *handle)
     uint32_t pos = 0;
     struct stat st;
 
+    if (handle == NULL) {
+        return;
+    }
+
     klog_cleanup(handle);
     if (!handle->config.file_path) {
         return;
@@ -92,8 +96,8 @@ static void _next_log_file(klog_handle *handle)
 
 int klog_init_file(klog_handle *handle)
 {
-    
-    if (!handle->config.file_path || handle->config.file_path_len > KLOG_MAX_PATH) {
+    if ((handle == NULL) || (handle->config.file_path == NULL) || (handle->config.file_path_len > KLOG_MAX_PATH))
+    {
         return -EINVAL;
     }
     
@@ -129,55 +133,66 @@ static int _klog(FILE *f, unsigned level, const char *logger,
                  const char *format, va_list args)
 {
     int written = 0;
-    uint32_t millis = csp_get_ms();
+    if ((f != NULL) && (logger != NULL) && (format != NULL))
+    {
+        uint32_t millis = csp_get_ms();
 
-    written += fprintf(f, "%010ld.%03ld %s:%s ", millis / 1000, millis % 1000,
-                       logger, _level_str(level));
-    written += vfprintf(f, format, args);
-    written += fprintf(f, "\n");
+        written += fprintf(f, "%010ld.%03ld %s:%s ", millis / 1000, millis % 1000,
+                        logger, _level_str(level));
+        written += vfprintf(f, format, args);
+        written += fprintf(f, "\n");
+    }
     return written;
 }
 
 void klog_console(unsigned level, const char *logger, const char *format, ...)
 {
     va_list args;
-    va_start(args, format);
+    if ((logger != NULL) && (format != NULL))
+    {
+        va_start(args, format);
 
-    _klog(level == LOG_ERROR ? stderr : stdout, level, logger, format, args);
+        _klog(level == LOG_ERROR ? stderr : stdout, level, logger, format, args);
 
-    va_end(args);
+        va_end(args);
+    }
 }
 
 void klog_file(klog_handle *handle, unsigned level, const char *logger, const char *format, ...)
 {
     va_list args;
-
-    va_start(args, format);
-    if (!handle->log_file) {
-        _next_log_file(handle);
+    if ((handle != NULL) && (logger != NULL) && (format != NULL))
+    {
+        va_start(args, format);
         if (!handle->log_file) {
-            va_end(args);
-            return;
+            _next_log_file(handle);
+            if (!handle->log_file) {
+                va_end(args);
+                return;
+            }
         }
-    }
-    handle->current_part_size += _klog(handle->log_file, level, logger, format, args);
+        handle->current_part_size += _klog(handle->log_file, level, logger, format, args);
 
-    va_end(args);
-    fsync(fileno(handle->log_file));
+        va_end(args);
+        fsync(fileno(handle->log_file));
 
-    if (handle->current_part_size >= handle->config.part_size) {
-        _next_log_file(handle);
+        if (handle->current_part_size >= handle->config.part_size) {
+            _next_log_file(handle);
+        }
     }
 }
 
 void klog_cleanup(klog_handle *handle)
 {
-    if (handle->log_file) {
-        fsync(fileno(handle->log_file));
-        fclose(handle->log_file);
-    }
+    if (handle != NULL)
+    {
+        if (handle->log_file) {
+            fsync(fileno(handle->log_file));
+            fclose(handle->log_file);
+        }
 
-    handle->log_file = NULL;
+        handle->log_file = NULL;
+    }
 }
 
 #ifndef HAVE_FSYNC
