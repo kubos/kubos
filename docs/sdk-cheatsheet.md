@@ -1,6 +1,16 @@
 # SDK Cheatsheet
 
-## Creating a project
+This document provides some helpful tips on working with a Kubos project. Some general project development steps include:
+
+* [Creating A Project](#creating-a-project)
+* [Selecting A Target](#selecting-a-target)
+* [Building A Project](#building-a-project)
+* [Linking Modules and Targets](#linking-local-modules-and-targets)
+* [Flashing Your Project](#flashing-your-project)
+* [Debugging Your Project](#debugging-your-project)
+
+
+## Creating a Project
 
 Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory under your current working directory with your project's name and add the source files for a basic KubOS project (kubos-rt-example).
 
@@ -74,7 +84,7 @@ Clean command:
 
 To build a project from scratch run `kubos clean` to remove all remaing files generated for previous builds followed by `kubos build`.
 
-## Linking local modules & targets
+## Linking Local Modules and Targets
 
 Kubos comes with all of the latest KubOS modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the cli comes with the ability to link that local module into the build process.
 
@@ -141,7 +151,7 @@ Flashing your project using the kubos tool is a relatively straightforward proce
 
         $ sudo kubos flash
 
-#### Debug your project
+#### Debugging your project
 
 A gdb server must be started to allow your gdb instance to connect and debug directly on your hardware device.
 After building your project with `kubos build` the kubos-cli can start a gdb server and gdb instance for you.
