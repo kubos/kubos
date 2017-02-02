@@ -30,18 +30,21 @@
 #define BUF_SIZE 250
 
 /**
- *
+ * Callback function used by CSP to transmit packets
+ * @param ifc csp socket interface
+ * @param packet packet to send
+ * @param timeout currently not used
+ * @return int currently always returns CSP_ERR_NONE
  */
 static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout);
 
 
 /**
- *
+ * Task spawned for each new csp_if_socket for handling receiving data
  */
 CSP_DEFINE_TASK(csp_socket_rx);
 
 static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
-    csp_log_info("csp_socket_tx\r\n");
     if ((ifc == NULL) || (ifc->driver == NULL)) {
         csp_log_error("Null pointer for interface or driver\r\n");
         return CSP_ERR_DRIVER;
@@ -49,7 +52,6 @@ static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeou
 
     csp_socket_handle_t * socket_driver = ifc->driver;
 
-    csp_log_info("now we write\r\n");
     /* Write packet to socket */
     int result = write(socket_driver->socket_handle, &packet->length, packet->length + sizeof(uint32_t) + sizeof(uint16_t)); 
     if ( result < 0) {
@@ -101,7 +103,6 @@ int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dri
     /* Start RX thread */
 	static csp_thread_handle_t handle_rx;
 	int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &handle_rx);
-	csp_log_info("Task start %d\r\n", ret);
 
     /* Register interface */
     csp_iflist_add(socket_iface);
