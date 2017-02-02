@@ -11,11 +11,12 @@ option (HMAC "" OFF)
 option (XTEA "" OFF)
 option (BINDINGS "" OFF)
 option (EXAMPLES "" OFF)
-option (DEBUG "" OFF)
+option (DEDUP "" OFF)
 option (VERBOSE "" OFF)
 option (IF_I2C "" OFF)
 option (IF_KISS "" OFF)
 option (IF_CAN "" OFF)
+option (IF_SOCKET "" OFF)
 option (IF_ZMQHUB "" OFF)
 option (CSP_DEBUG "" OFF)
 option (CAN_SOCKETCAN "" OFF)
@@ -39,11 +40,19 @@ execute_process (COMMAND git describe --always
                  OUTPUT_STRIP_TRAILING_WHITESPACE
                  ERROR_QUIET)
 
+if (YOTTA_CFG_CSP_DEBUG)
+    set (CSP_DEBUG ON)
+endif()
+
 # check if we want KISS/USART
 if (YOTTA_CFG_CSP_USART)
     # set flag
     set (CSP_USE_CRC32 ON)
     set (IF_KISS ON)
+endif()
+
+if (YOTTA_CFG_CSP_SOCKET)
+    set (IF_SOCKET ON)
 endif()
 
 if (YOTTA_CFG_CSP_RDP)
@@ -74,6 +83,8 @@ add_library (csp STATIC
     $<$<AND:$<BOOL:${TARGET_LIKE_KUBOS_RT}>,$<BOOL:${YOTTA_CFG_CSP_USART}>>:src/drivers/usart/usart_kubos.c>
     src/interfaces/csp_if_lo.c
     $<$<BOOL:${IF_KISS}>:src/interfaces/csp_if_kiss.c>
+    $<$<BOOL:${IF_SOCKET}>:src/interfaces/csp_if_socket.c>
+    $<$<BOOL:${IF_SOCKET}>:src/drivers/socket/socket_linux.c>
     src/rtable/csp_rtable_${RTABLE}.c
     $<$<BOOL:${CSP_USE_RDP}>:src/transport/csp_rdp.c>
     src/transport/csp_udp.c
