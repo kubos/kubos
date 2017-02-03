@@ -1,4 +1,4 @@
-#KubOS Linux on the ISIS iOBC
+# KubOS Linux on the ISIS iOBC
 
 [Overview](#overview)
 

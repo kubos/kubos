@@ -1,4 +1,4 @@
-#STM32F4 Discovery Board Guide
+# STM32F4 Discovery Board Guide
 
 - [Reference Documents](#reference-documents)
 - [Pin Definitions](#pin-definitions)
