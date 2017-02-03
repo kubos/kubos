@@ -16,25 +16,19 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
  - [Installing Kubos SDK](docs/sdk-installing.md)
 
- - [Contributing to the Kubos Project](docs/contribution-process.md)
-
- - [Kubos Naming and Coding Standards](docs/kubos-standards.md)
-
- - [Upgrading Kubos SDK](docs/sdk-upgrading.md)
-
  - [Creating your first project](docs/first-project.md)
 
  - [Kubos SDK Cheat Sheet](docs/sdk-cheatsheet.md)
 
- - [Kubos SDK Command Reference](docs/sdk-reference.md)
-
- - [Kubos Module Development](docs/kubos-development.md)
-
- - [Contributing to the Kubos Project](docs/contribution-process.md)
-
  - [Kubos CLI Command Reference](docs/sdk-reference.md)
 
  - [Kubos Module Development](docs/kubos-development.md)
+
+ - [Upgrading Kubos SDK](docs/sdk-upgrading.md)
+
+ - [Kubos Naming and Coding Standards](docs/kubos-standards.md)
+
+ - [Contributing to the Kubos Project](docs/contribution-process.md)
 
 
 ### KubOS RT
@@ -50,15 +44,6 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
  - [KubOS Linux on iOBC](docs/Linux_on_iOBC.md)
 
  - [User Applications on iOBC](docs/User_App_on_iOBC.md)
-
-
-### KubOS Linux
-
- - [KubOS Linux Overview](docs/kubos-linux-overview.md)
-
- - [KubOS Linux on iOBC](docs/kubos-linux-on-iobc.md)
-
- - [User Applications on iOBC](docs/user-app-on-iobc.md)
 
 
 ## Top Level APIs
