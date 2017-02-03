@@ -161,3 +161,5 @@ Note: this may need to run as root depending on your USB device permissions
 
         $ kubos debug
 
+If the debug command is successful you will be prompted with a gdb instance attached to your device and ready to debug!
+
