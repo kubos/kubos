@@ -8,21 +8,21 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
 
  - [Changelog](docs/changelog.md)
 
-### KubOS SDK
+### Kubos SDK
 
- - [Installing Kubos-CLI](docs/cli-installing.md)
+ - [Installing Kubos CLI](docs/cli-installing.md)
 
- - [Upgrading Kubos-CLI](docs/cli-upgrading.md)
+ - [Upgrading Kubos CLI](docs/cli-upgrading.md)
 
  - [Creating your first project](docs/first-project.md)
 
- - [KubOS-SDK Cheat Sheet](docs/sdk-cheatsheet.md)
+ - [Kubos SDK Cheat Sheet](docs/sdk-cheatsheet.md)
 
- - [KubOS-SDK Command Reference](docs/sdk-reference.md)
+ - [Kubos SDK Command Reference](docs/sdk-reference.md)
 
- - [KubOS Module Development](docs/kubos-development.md)
+ - [Kubos Module Development](docs/kubos-development.md)
 
- - [Contributing to the KubOS Project](docs/contribution-process.md)
+ - [Contributing to the Kubos Project](docs/contribution-process.md)
 
 ### KubOS RT
 
