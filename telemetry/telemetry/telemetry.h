@@ -13,6 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @defgroup Telemetry
+ * @addtogroup Telemetry
+ * @brief Telemetry Public telemetry interface
+ * @{
+ */
+
 #ifndef TELEMETRY_H
 #define TELEMETRY_H
 
@@ -31,26 +39,24 @@ CSP_DEFINE_TASK(telemetry_rx_task);
  * Performs basic telemetry connection and thread initialization. 
  * To be used in the main() prior to starting the scheduler.
  */
-void telemetry_init();
+void telemetry_init(void);
 
 /**
  * Performs cleanup on telemetry resources & threads.
  */
-void telemetry_cleanup();
+void telemetry_cleanup(void);
 
 /**
  * Connects to the telemetry system - thread safe version.
- * @param conn pointer to pubsub_conn which will be used to receive future telemetry data.
- * @return bool true if successful, otherwise false
+ * @return pubsub_conn* to pubsub_conn which will be used to receive future telemetry data.
  */
-pubsub_conn * telemetry_connect();
+pubsub_conn * telemetry_connect(void);
 
 /**
  * Internal connect function - not thread safe.
- * @param conn pointer to pubsub_conn which will be used to receive future telemetry data
- * @return bool true if successful, otherwise false
+ * @return pubsub_conn* to pubsub_conn which will be used to receive future telemetry data
  */
-pubsub_conn * kprv_telemetry_connect();
+pubsub_conn * kprv_telemetry_connect(void);
 
 /**
  * Subscribes the pubsub_conn to the specified topic.
@@ -58,7 +64,7 @@ pubsub_conn * kprv_telemetry_connect();
  * @param topic_id topic to subscribe to
  * @return bool true if successful, otherwise false
  */
-bool telemetry_subscribe(pubsub_conn * conn, uint16_t topic_id);
+bool telemetry_subscribe(const pubsub_conn * conn, uint16_t topic_id);
 
 /**
  * Disconnects from the telemetry system.
@@ -73,7 +79,7 @@ bool telemetry_disconnect(pubsub_conn * conn);
  * @param topic_id topic to remove subscription from
  * @return bool true if successful, otherwise false
  */
-bool telemetry_unsubscribe(pubsub_conn * conn, uint16_t topic_id);
+bool telemetry_unsubscribe(const pubsub_conn * conn, uint16_t topic_id);
 
 /**
  * Reads a telemetry packet from the telemetry server.
@@ -81,7 +87,7 @@ bool telemetry_unsubscribe(pubsub_conn * conn, uint16_t topic_id);
  * @param packet pointer to telemetry_packet to store data in.
  * @return bool true if successful, otherwise false 
  */
-bool telemetry_read(pubsub_conn * conn, telemetry_packet * packet);
+bool telemetry_read(const pubsub_conn * conn, telemetry_packet * packet);
 
 /**
  * Public facing telemetry input interface. Takes a telemetry_packet packet
@@ -94,7 +100,7 @@ bool telemetry_publish(telemetry_packet packet);
 /**
  * @return int number of active telemetry subscribers
  */
-int telemetry_num_subscribers();
+int telemetry_num_subscribers(void);
 
 /**
  * Checks if a telemetry client is subscribed to a topic
@@ -102,6 +108,8 @@ int telemetry_num_subscribers();
  * @param topic_id topic to check for
  * @return bool true if subscribed, otherwise false
  */
-bool telemetry_is_subscribed(pubsub_conn * client_conn, uint16_t topic_id);
+bool telemetry_is_subscribed(const pubsub_conn * client_conn, uint16_t topic_id);
 
 #endif
+
+/* @} */

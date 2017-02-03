@@ -24,10 +24,15 @@
 CSP_DEFINE_TASK(telemetry_store_rx)
 {
     telemetry_packet packet;
-    pubsub_conn connection;
+    pubsub_conn * connection;
+
+    while((connection = telemetry_connect()) == NULL)
+    {
+        csp_sleep_ms(STORAGE_SUBSCRIBE_RETRY_INTERVAL);
+    }
 
     /* Subscribe to telemetry publishers as specified in the configuration */
-    while (!telemetry_subscribe(&connection, STORAGE_SUBSCRIPTIONS))
+    while (!telemetry_subscribe(connection, STORAGE_SUBSCRIPTIONS))
     {
         /* Retry subscribing at the interval specified in the configuration*/
         csp_sleep_ms(STORAGE_SUBSCRIBE_RETRY_INTERVAL);
@@ -35,7 +40,7 @@ CSP_DEFINE_TASK(telemetry_store_rx)
 
     while (1)
     {
-        if (telemetry_read(&connection, &packet))
+        if (telemetry_read(connection, &packet))
         {
             /* Store telemetry packets from the telemetry system */
             telemetry_store(packet);
@@ -44,7 +49,7 @@ CSP_DEFINE_TASK(telemetry_store_rx)
 }
 
 
-void telemetry_storage_init()
+void telemetry_storage_init(void)
 {
     csp_thread_handle_t telem_store_rx_handle;
     csp_thread_create(telemetry_store_rx, "TELEM_STORE_RX", STORAGE_TASK_STACK_DEPTH, NULL, STORAGE_TASK_PRIORITY, &telem_store_rx_handle);
