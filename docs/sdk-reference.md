@@ -22,13 +22,7 @@ The `kubos` command is always run with a subcommand in order to do something, `k
 
 [list](#kubos-list)                List the dependencies of the current module, or the inherited targets of the current target.
 
-[outdated](#kubos-outdated)            Display information about dependencies which have newer versions available.
-
-[remove](#kubos-remove)              Remove or unlink a dependency without removing it from module.json.
-
-[shrinkwrap](#kubos-shrinkwrap)          Create a yotta-shrinkwrap.json file to freeze dependency versions.
-
-[start](#kubos-start)               Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.
+[flash](#kubos-flash)               Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.
 
 [target](#kubos-target)              Set or display the target device.
 
@@ -172,6 +166,19 @@ A target must define a CMake Toolchain file describing all of the rules that `ku
         $ kubos target stm32f407-disco-gcc
 
 
+### kubos flash
+Synonyms: `kubos start`
+
+#### Synopsis
+
+        $ kubos flash
+
+#### Description
+Flash the build of the current target to the target board.
+
+Note: This requires target support.
+
+
 ### kubos update
 
 #### Synopsis
@@ -183,7 +190,7 @@ A target must define a CMake Toolchain file describing all of the rules that `ku
 Pull and update all of the current Kubos modules. By default if no `<version number>`
 
 #### Arguments
-`<version number>` If a version number is specified then kubos will try to checkout the provided version number after pulling the latest updates
+`<version number>` Is optional. If a version number is specified then kubos will try to checkout the provided version number after pulling the latest updates
 
 
 ### kubos version
@@ -194,6 +201,30 @@ Pull and update all of the current Kubos modules. By default if no `<version num
 
 #### Description
 Display the current version of the Kubos CLI, and the Kubos modules
+
+
+### kubos versions
+
+#### Synopsis
+
+        $ kubos versions
+
+#### Description
+Display all of the available versions of the Kubos modules.
+
+
+### kubos use
+
+#### Synopsis
+
+        $ kubos use <version number>
+
+#### Description
+Pull and update all of the current Kubos modules. By default if no `<version number>`
+
+#### Arguments
+`<version number>` Kubos will try to checkout the provided version number.
+
 
 
 ### kubos link
