@@ -82,7 +82,7 @@ To create your own repo:
 - If you see a dialog 'Where should we fork this repository?', click the icon with your username.
 - Within your development environment, create a link to your new remote repository:
 
-    $ git remote add {repo name you create} {personal repo url} 
+    $ git remote add {remote name you create} {personal repo url} 
 	
 Clone the repo that you want to modify onto your local machine
         
@@ -125,9 +125,9 @@ Commit your changes and push to your remote branch (the branch will be created a
 
 	$ git add {files you changed}
 	$ git commit -m "Descriptive message about the changes you made"
-	$ git push {repo name} {local branch name}
+	$ git push {remote name} {local branch name}
 	
-If you're committing against a kubostech repo, then the repo name will likely be "origin".  If you're committing against your personal fork, then the repo name
+If you're committing against a kubostech repo, then the remote name will likely be "origin".  If you're committing against your personal fork, then the remote name
 will match what you specified in the `git remote add` command.
 	
 [Commit early, commit often](http://www.databasically.com/2011/03/14/git-commit-early-commit-often/)
@@ -178,7 +178,7 @@ Push the resolved changed to your remote repo
 
 	$ git add {fixed files}
 	$ git commit
-	$ git push origin {local branch name}
+	$ git push {remote name} {local branch name}
 
 If you navigate to your pull request, you should now see that github says "This branch has no conflicts with the base branch", indicating that
 the changes okay to merge (pending pull request approval).

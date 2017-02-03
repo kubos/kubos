@@ -12,9 +12,9 @@ Looking to build an application on Kubos? Check out our [quick start guide](docs
  
 ### Kubos SDK
 
- - [Installing Kubos SDK](docs/cli-installing.md)
+ - [Installing Kubos SDK](docs/sdk-installing.md)
 
- - [Upgrading Kubos SDK](docs/cli-upgrading.md)
+ - [Upgrading Kubos SDK](docs/sdk-upgrading.md)
 
  - [Creating your first project](docs/first-project.md)
 
@@ -31,9 +31,9 @@ Looking to build an application on Kubos? Check out our [quick start guide](docs
  
 ### KubOS Linux
  
- - [KubOS Linux Overview](docs/linux-overview.md)
+ - [KubOS Linux Overview](docs/kubos-linux-overview.md)
  
- - [KubOS Linux on iOBC](docs/linux-on-iobc.md)
+ - [KubOS Linux on iOBC](docs/kubos-linux-on-iobc.md)
  
  - [User Applications on iOBC](docs/user-app-on-iobc.md)
 
@@ -48,4 +48,8 @@ Looking to build an application on Kubos? Check out our [quick start guide](docs
 
  - [CSP](./libcsp/index.html)
  
- - [Telemetry](./telemetry.html)
+ - [Telemetry](./telemetry/index.html)
+ 
+ - [Telemetry Aggregator](./telemetry-aggregator/index.html)
+ 
+ - [IPC](./ipc/index.html)
