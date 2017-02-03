@@ -4,26 +4,43 @@ The `kubos` command is always run with a subcommand in order to do something, `k
 
 ## Command Overview
 
-    [build](#kubos-build)               Build the current module.
-    [clean](#kubos-clean)              Remove files created by kubos and the build.
-    [config](#kubos-config)              Display the target configuration info.
-    [debug](#kubos-debug)               Attach a debugger to the current target.  Requires target support.
-    [init](#kubos-init)                Create a new module.
-    [licenses](#kubos-licenses)            List the licenses of the current module and its dependencies.
-    [link](#kubos-link)                Symlink a module
-    [link-target](#kubos-link-target)         Symlink a target
-    [list](#kubos-list)                List the dependencies of the current module, or the inherited targets of the current target.
-    [outdated](#kubos-outdated)            Display information about dependencies which have newer versions available.
-    [remove](#kubos-remove)              Remove or unlink a dependency without removing it from module.json.
-    [shrinkwrap](#kubos-shrinkwrap)          Create a yotta-shrinkwrap.json file to freeze dependency versions.
-    [start](#kubos-start)               Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.
-    [target](#kubos-target)              Set or display the target device.
-    [test](#kubos-test)                Run the tests for the current module on the current target. Requires target support for cross-compiling targets.
-    [version](#kubos-version)             Display the current active version of the cli and KubOS source repo.
-    [versions](#kubos-versions)            Display the available versions of the KubOS source.
-    [update](#kubos-update)              Download newer versions of the KubOS Modules
-    [use](#kubos-use)                 Set a new version of the KubOS modules to build your projects against.
+[build](#kubos-build)               Build the current module.
 
+[clean](#kubos-clean)              Remove files created by kubos and the build.
+
+[config](#kubos-config)              Display the target configuration info.
+
+[debug](#kubos-debug)               Attach a debugger to the current target.  Requires target support.
+
+[init](#kubos-init)                Create a new module.
+
+[licenses](#kubos-licenses)            List the licenses of the current module and its dependencies.
+
+[link](#kubos-link)                Symlink a module
+
+[link-target](#kubos-link-target)         Symlink a target
+
+[list](#kubos-list)                List the dependencies of the current module, or the inherited targets of the current target.
+
+[outdated](#kubos-outdated)            Display information about dependencies which have newer versions available.
+
+[remove](#kubos-remove)              Remove or unlink a dependency without removing it from module.json.
+
+[shrinkwrap](#kubos-shrinkwrap)          Create a yotta-shrinkwrap.json file to freeze dependency versions.
+
+[start](#kubos-start)               Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.
+
+[target](#kubos-target)              Set or display the target device.
+
+[test](#kubos-test)                Run the tests for the current module on the current target. Requires target support for cross-compiling targets.
+
+[version](#kubos-version)             Display the current active version of the cli and KubOS source repo.
+
+[versions](#kubos-versions)            Display the available versions of the KubOS source.
+
+[update](#kubos-update)              Download newer versions of the KubOS Modules
+
+[use](#kubos-use)                 Set a new version of the KubOS modules to build your projects against.
 
 
 ### kubos build

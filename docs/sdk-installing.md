@@ -46,15 +46,15 @@ To create an instance of the SDK box follow these steps:
        $ vagrant init kubostech/kubos-dev
        $ vagrant up
 
-This will create a vagrantfile in your current directory. Vagrantfiles are important as they contain the configuration details for specific boxes.
-Vagrantfiles are dependant on your working directory. To interact with this box in the future you will need to `cd` back to this same directory you have initialized the box in.
+This will create a Vagrantfile in your current directory. Vagrantfiles are important as they contain the configuration details for specific boxes.
+Vagrantfiles are dependent on your working directory. To interact with this box in the future you will need to `cd` back to this same directory you have initialized the box in.
 
 
 ### Mounting a host directory:
 
 It is strongly recommended that you create your project in a directory on your host that is shared with your box. By keeping your project on your host it will protect them in the event your box is destroyed or re-built.
 
-To mount a specific directory from your host, open the Vagrantfile located in the directory you ran `vagrant init` insdie of in the above step and look for the following lines:
+To mount a specific directory from your host, open the Vagrantfile located in the directory you ran `vagrant init` inside of in the above step and look for the following lines:
 
         # Share an additional folder to the guest VM. The first argument is
         # the path on the host to the actual folder. The second argument is
@@ -62,14 +62,14 @@ To mount a specific directory from your host, open the Vagrantfile located in th
         # argument is a set of non-required options.
         # config.vm.synced_folder "../data", "/vagrant_data"
 
-Un-comment the last line in this block and change the paths to match your host directory and a desired mount point in the box. 
+Uncomment the last line in this block and change the paths to match your host directory and a desired mount point in the box. 
 
 Note: The path in the box must be an absolute path
 
 After a volume is mounted into the box all of the data from the host path will be available at the path specified for the box. In the above example the host path (`../data`) would be exposed at `/vagrant_data` inside of the box.
 This allows you to use the text editor of your choosing to edit the project files from your host machine at the host directory path.
 
-Note: If you make changes to the vagrant file after the box has been started you will need to run `vagrant reload` for these changes to take effect in the box.
+Note: If you make changes to the Vagrantfile after the box has been started you will need to run `vagrant reload` for these changes to take effect in the box.
 
 #####For more information on mounting volumes see the following [guide](https://www.vagrantup.com/docs/synced-folders/basic_usage.html)
 
@@ -83,7 +83,7 @@ After the box has started you need to "ssh" into the machine to work with your p
 
         $ vagrant ssh
 
-This will start an ssh session in the vagrant box with the kubos-cli and all of the required dependencies installed.
+This will start an ssh session in the vagrant box with the Kubos CLI and all of the required dependencies installed.
 
 That's it! From here see more on [creating your first project](docs/first-project.md)
 

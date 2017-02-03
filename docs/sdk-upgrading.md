@@ -23,7 +23,7 @@ To update the KubOS source modules your project will be built with run the follo
 
 To check which version of the CLI you're using, use `kubos version`
 
-To list all of the available versions of the KubOS s4ource modules run:
+To list all of the available versions of the KubOS source modules run:
 
         $ kubos versions
 

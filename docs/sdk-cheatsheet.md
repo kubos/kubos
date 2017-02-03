@@ -82,11 +82,11 @@ Clean command:
 
         $ kubos clean
 
-To build a project from scratch run `kubos clean` to remove all remaing files generated for previous builds followed by `kubos build`.
+To build a project from scratch run `kubos clean` to remove all remaining files generated for previous builds followed by `kubos build`.
 
 ## Linking Local Modules and Targets
 
-Kubos comes with all of the latest KubOS modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the cli comes with the ability to link that local module into the build process.
+Kubos comes with all of the latest Kubos modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the CLI comes with the ability to link that local module into the build process.
 
 ##### Linking modules:
 
@@ -157,7 +157,7 @@ A gdb server must be started to allow your gdb instance to connect and debug dir
 After building your project with `kubos build` the kubos-cli can start a gdb server and gdb instance for you.
 
 Start a gdb server and instance:
-Note: this may need to run as root depending on your usb device permissions
+Note: this may need to run as root depending on your USB device permissions
 
         $ kubos debug
 
