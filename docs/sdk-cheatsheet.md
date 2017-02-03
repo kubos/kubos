@@ -1,8 +1,18 @@
-# KubOS-SDK Command Reference
+# SDK Cheatsheet
 
-## Creating a project
+This document provides some helpful tips on working with a Kubos project. Some general project development steps include:
 
-Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory under your current working directory with your project's name and add the source files for a basic KubOS project (kubos-rt-example).
+* [Creating A Project](#creating-a-project)
+* [Selecting A Target](#selecting-a-target)
+* [Building A Project](#building-a-project)
+* [Linking Modules and Targets](#linking-local-modules-and-targets)
+* [Flashing Your Project](#flashing-your-project)
+* [Debugging Your Project](#debugging-your-project)
+
+
+## Creating a Project
+
+Run the `kubos init` command followed by the name of your project to bootstrap your Kubos project. This will create a new directory under your current working directory with your project's name and add the source files for a basic Kubos project (kubos-rt-example).
 
         $ kubos init project-name
 
@@ -23,11 +33,11 @@ Here is a quick rundown of the files that were generated:
 | `module.json` | This file is yotta's module description file |
 
 
-KubOS uses the yotta build/module system, which is where this file structure comes from. You can read more about yotta [here](http://yottadocs.mbed.com/).
+Kubos uses the yotta build/module system, which is where this file structure comes from. You can read more about yotta [here](http://yottadocs.mbed.com/).
 
 ## Selecting a target
 
-Yotta needs to know which target you intend to build for so it can select the proper cross compiler. KubOS currently supports several different targets:
+Kubos needs to know which target you intend to build for so it can select the proper cross compiler. Kubos currently supports several different targets:
 
 | MCU Family   | Board  |
 | ------------- |-------------|
@@ -47,7 +57,7 @@ The respective commands to select those targets are as follows.
         $ kubos target na-satbus-3c0-gcc
 
         $ kubos target msp430f5529-gcc
-        
+
         $ kubos target kubos-linux-isis-gcc
 
 To see all of the available targets run:
@@ -56,7 +66,7 @@ To see all of the available targets run:
 
 ## Building a project
 
-To build a KubOS project, all we need to do is run the `kubos build` command. The Kubos-cli (really `yotta` under the covers) will read the module.json file, determine what libraries are needed and build them.
+To build a KubOS project, all we need to do is run the `kubos build` command. The Kubos CLI will read the module.json file, determine what libraries are needed and build them.
 
 Basic build command:
 
@@ -66,13 +76,17 @@ Build with verbose output:
 
         $ kubos build -- -v
 
+Note: The Kubos CLI commands have their own specific arguments that can be used. There are also global arguments (like `--verbose` or `-v`) a double hyphen `--` separates the command specific arguments from the global arguments
+
 Clean command:
 
         $ kubos clean
 
-## Linking local modules & targets
+To build a project from scratch run `kubos clean` to remove all remaining files generated for previous builds followed by `kubos build`.
 
-The Kubos-cli comes with all of the latest KubOS modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the cli comes with the ability to link that local module into the build process.
+## Linking Local Modules and Targets
+
+Kubos comes with all of the latest Kubos modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the CLI comes with the ability to link that local module into the build process.
 
 ##### Linking modules:
 
@@ -125,9 +139,9 @@ Note: Running `kubos target` will show you whether you are using a local or a li
 
 Flashing your project using the kubos tool is a relatively straightforward process:
 
-1. Ensure that your board is plugged into your computer
+1. Ensure that your board is plugged into your computer. Running the following command will list all of the available devices in your Kubos SDK box.
 
-TODO: We probably want to add some info here on Virtualbox device filters and Guest Additions issues
+        $ lsusb
 
 2. Run the flash command
 
@@ -137,12 +151,15 @@ TODO: We probably want to add some info here on Virtualbox device filters and Gu
 
         $ sudo kubos flash
 
-#### Debug your project
+#### Debugging your project
 
 A gdb server must be started to allow your gdb instance to connect and debug directly on your hardware device.
 After building your project with `kubos build` the kubos-cli can start a gdb server and gdb instance for you.
 
 Start a gdb server and instance:
-Note: this may need to run as root depending on your usb device permissions
+Note: this may need to run as root depending on your USB device permissions
 
         $ kubos debug
+
+If the debug command is successful you will be prompted with a gdb instance attached to your device and ready to debug!
+
