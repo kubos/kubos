@@ -18,7 +18,7 @@ Looking to build an application on Kubos? Check out our [quick start guide](docs
 
  - [Creating your first project](docs/first-project.md)
 
- - [Kubos SDK Command Reference](docs/sdk-reference.md)
+ - [Kubos CLI Command Reference](docs/sdk-reference.md)
 
  - [Kubos Module Development](docs/kubos-development.md)
 
