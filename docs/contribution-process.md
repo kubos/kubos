@@ -1,9 +1,9 @@
-# KubOS Contribution Process
+# Kubos Contribution Process
 
 This is the workflow you should go through in order to create and complete a task to contribute to the KubOS project
 
 0. [Sign the CLA](#sign-the-cla)
-1. [Create a JIRA Issue](#create-a-jira-issue)
+1. [Create an Issue](#create-an-issue)
 2. [Mark the Issue as 'In Progress'](#mark-the-issue-as-in-progress)
 3. [Create a Branch of the Code You Want to Work On](#create-a-branch-of-the-code-you-want-to-work-on)
 4. [Make Your Changes](#make-your-changes)
@@ -19,11 +19,19 @@ main codebase.
 
 The KubOS CLA can be found [here](https://www.clahub.com/agreements/kubostech/KubOS).
 
-## Create a JIRA Issue
+## Create an Issue
 
-Everything you work on should have a corresponding JIRA issue.  
+Everything you work on should have a corresponding JIRA issue.  Community members might not have access to JIRA and should then create a Github issue instead.  
 
-If one doesn't exist, you should create it:
+If one doesn't exist, you should create it.
+
+If you want to create an issue but not immediately work on it, the description field should be an in-depth summary of the problem/feature
+and what needs to be changed.  Ideally, you, or whoever works the issue, should be able to read the description and understand what work 
+needs to be done without talking to whoever created the issue (though talking to the creator is still recommended in order to make sure that
+the requirements are well understood and haven't changed since the issue was created).
+
+### JIRA
+
 - Click the 'Create' button at the top of the JIRA page
 - Project should be 'KubOS'
 - Issue type should be 'Story' or 'Bug'
@@ -36,25 +44,45 @@ to complete the task.
     * If you are creating a story, the description should follow the [Agile user story template](https://www.mountaingoatsoftware.com/agile/user-stories)
 - If you're creating a bug, update the 'Affects Version/s' field to document the oldest affected version of the project
 
-If you want to create an issue but not immediately work on it, the description field should be an in-depth summary of the problem/feature
-and what needs to be changed.  Ideally, you, or whoever works the issue, should be able to read the description and understand what work 
-needs to be done without talking to whoever created the issue (though talking to the creator is still recommended in order to make sure that
-the requirements are well understood and haven't changed since the issue was created).
+### Github
+
+- Navigate to the repo you'd like to open an issue against (most likely kubostech/kubos)
+- Click the 'Issues' tab
+- Click the 'New Issue' button
+- The title should be a descriptive overview of the problem
+- The description should go into more detail about what the problem/feature is and what needs to be done in order
+to complete the task.
+    * If you are creating a story, the description should follow the [Agile user story template](https://www.mountaingoatsoftware.com/agile/user-stories)
+- Click the 'Labels' link and add a tag for 'Bug' or 'Enhancement' depending on what kind of work should be done
+
 
 ## Mark the Issue as 'In Progress'
 
 In order to track what's being worked on and by whom, for every issue you work you should:
-- Drag the issue from the backlog into the sprint (if it's not already present)
+- JIRA: Drag the issue from the backlog into the sprint (if it's not already present)
 - Assign it to yourself
-	* Click the issue
-	* Under 'People'>'Assignee', click 'Assign to me'
-- Mark the issue as 'In Progress'.  There are two ways:
-	* From the full issue description page, click the 'In Progress' button
-	* From the 'Active Sprints' page, drag the issue from the 'To-Do' column into the 'In Progress' column
+    * Click the issue
+    * JIRA: Under 'People'>'Assignee', click 'Assign to me'
+    * Github: Click the 'Assignees' link and select yourself
+- Mark the issue as 'In Progress'.  
+    * JIRA: There are two ways
+        + From the full issue description page, click the 'In Progress' button
+        + From the 'Active Sprints' page, drag the issue from the 'To-Do' column into the 'In Progress' column
+    * Github: Edit the title of the project and add "[WIP]"
 	
 ## Create a Branch of the Code You Want to Work On
 
-All code changes should initially be made in a branch of the relavent Kubos repo and then be submitted against the master branch as a pull request:
+All code changes should initially be made in a branch of the relavent Kubos repo either in the main repo, or in a personal copy (if you don't have access)
+ and then be submitted against the master branch as a pull request:
+ 
+To create your own repo:
+
+- Navigate to the github page of the main code that you want to work on.  For example, https://github.com/kubostech/kubos.
+- Click the 'Fork' button in the upper right-hand corner.
+- If you see a dialog 'Where should we fork this repository?', click the icon with your username.
+- Within your development environment, create a link to your new remote repository:
+
+    $ git remote add {repo name you create} {personal repo url} 
 	
 Clone the repo that you want to modify onto your local machine
         
@@ -97,7 +125,10 @@ Commit your changes and push to your remote branch (the branch will be created a
 
 	$ git add {files you changed}
 	$ git commit -m "Descriptive message about the changes you made"
-	$ git push origin {local branch name}
+	$ git push {repo name} {local branch name}
+	
+If you're committing against a kubostech repo, then the repo name will likely be "origin".  If you're committing against your personal fork, then the repo name
+will match what you specified in the `git remote add` command.
 	
 [Commit early, commit often](http://www.databasically.com/2011/03/14/git-commit-early-commit-often/)
 
