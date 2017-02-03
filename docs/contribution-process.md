@@ -148,7 +148,7 @@ that you ran into while working on your code changes).
 - Click 'Create pull request'
 
 If you'd like specific people to review your code, you can either mention them in the description with an '@{name}' tag, or by adding them 
-to the 'Assignees' list.
+to the 'Reviewers' list.
 
 ## Merge in New Changes From Master
 
