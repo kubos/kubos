@@ -2,7 +2,7 @@
 
 ## What is the Kubos SDK?
 
-The Kubos SDK is a term used to describe the all of the components used that make up a KubOS operating system and software project as well as the tools used to build this project.
+The Kubos SDK is a term used to describe the all of the components used that make up a KubOS operating system and the tools used to build this project.
 The Kubos SDK components are made up of:
 
  * Kubos source modules - the individual components of the operating systems, hardware abstraction layers, and APIs

@@ -4,7 +4,7 @@ This is intended to be a quick guide to creating a new project on top of the Kub
 
 ## Prerequisites
 
-[Install the Kubos CLI](docs/cli-installing.md)
+[Install the Kubos SDK](docs/sdk-installing.md)
 
 Create an instance of the Kubos Vagrant box
 
