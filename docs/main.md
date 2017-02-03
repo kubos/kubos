@@ -4,6 +4,10 @@ The Kubos platform provides small satellite developers the tools and libraries n
 
 Looking to build an application on Kubos? Check out our [quick start guide](docs/first-project.md).
 
+Having issues? Want a new feature? [Come talk to us!](https://slack.kubos.co/)
+
+If for some reason Slack won't work for you, feel free to email us at info@kubos.co.
+
 ## Docs
 
  - [Changelog](docs/changelog.md)
