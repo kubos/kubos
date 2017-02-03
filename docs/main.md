@@ -12,6 +12,10 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
  - [Changelog](docs/changelog.md)
 
+ - [Kubos Naming and Coding Standards](docs/kubos-standards.md)
+
+ - [Contributing to the Kubos Project](docs/contribution-process.md)
+
 ### Kubos SDK
 
  - [Installing Kubos SDK](docs/sdk-installing.md)
@@ -25,11 +29,6 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
  - [Kubos Module Development](docs/kubos-development.md)
 
  - [Upgrading Kubos SDK](docs/sdk-upgrading.md)
-
- - [Kubos Naming and Coding Standards](docs/kubos-standards.md)
-
- - [Contributing to the Kubos Project](docs/contribution-process.md)
-
 
 ### KubOS RT
 
