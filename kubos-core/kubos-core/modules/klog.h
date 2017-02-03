@@ -48,11 +48,13 @@ extern "C" {
 #define KLOG_MAX_LINE 255
 #endif
 
-#define KLOG(level, logger, ...)  klog_write(level, logger, __VA_ARGS__)
-#define KLOG_ERR(logger, ...)     KLOG(LOG_ERROR, logger, __VA_ARGS__)
-#define KLOG_WARN(logger, ...)    KLOG(LOG_WARNING, logger, __VA_ARGS__)
-#define KLOG_INFO(logger, ...)    KLOG(LOG_INFO, logger, __VA_ARGS__)
-#define KLOG_DEBUG(logger, ...)   KLOG(LOG_DEBUG, logger, __VA_ARGS__)
+#define KLOG(handle, level, logger, ...)    klog_write(handle, level, logger, __VA_ARGS__)
+#define KLOG_ERR(handle, logger, ...)       KLOG(handle, LOG_ERROR, logger, __VA_ARGS__)
+#define KLOG_WARN(handle, logger, ...)      KLOG(handle, LOG_WARNING, logger, __VA_ARGS__)
+#define KLOG_TELEMETRY(handle, logger, ...) KLOG(handle, LOG_TELEMETRY, logger, __VA_ARGS__)
+#define KLOG_INFO(handle, logger, ...)      KLOG(handle, LOG_INFO, logger, __VA_ARGS__)
+#define KLOG_DEBUG(handle, logger, ...)     KLOG(handle, LOG_DEBUG, logger, __VA_ARGS__)
+
 
 #define KLOG_SUFFIX_LEN 4
 #define KLOG_PATH_LEN   255
@@ -61,23 +63,36 @@ extern "C" {
 #define KLOG_PART_SIZE_DEFAULT (1024 * 512)
 #define KLOG_MAX_PARTS_DEFAULT 4
 
-extern uint8_t klog_console_level;
-extern uint8_t klog_file_level;
-extern bool klog_file_logging;
+typedef struct
+{
+    char *file_path;
+    uint8_t file_path_len;
+    uint32_t part_size;
+    uint8_t max_parts;
+    uint8_t klog_console_level;
+    uint8_t klog_file_level;
+    bool klog_file_logging;
+} klog_config;
 
-int klog_init_file(char *file_path, uint8_t file_path_len,
-                   uint32_t part_size, uint8_t max_parts);
+typedef struct
+{
+    FILE *log_file;
+    uint8_t current_part;
+    uint32_t current_part_size;
+    klog_config config;
+} klog_handle;
 
+int klog_init_file(klog_handle *handle);
 void klog_console(unsigned level, const char *logger, const char *format, ...);
-void klog_file(unsigned level, const char *logger, const char *format, ...);
-void klog_cleanup(void);
+void klog_file(klog_handle *handle, unsigned level, const char *logger, const char *format, ...);
+void klog_cleanup(klog_handle *handle);
 
-#define klog_write(level, logger, ...) do { \
-    if (level <= klog_console_level) { \
+#define klog_write(handle, level, logger, ...) do { \
+    if (level <= ((handle)->config.klog_console_level)) { \
         klog_console(level, logger, __VA_ARGS__); \
     } \
-    if (level <= klog_file_level && klog_file_logging) { \
-        klog_file(level, logger, __VA_ARGS__); \
+    if (level <= ((handle)->config.klog_file_level) && ((handle)->config.klog_file_logging)) { \
+        klog_file(handle, level, logger, __VA_ARGS__); \
     } \
 } while (0)
 

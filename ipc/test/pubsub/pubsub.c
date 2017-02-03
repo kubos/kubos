@@ -98,21 +98,23 @@ static void test_subscriber_connect(void ** arg)
 static void test_send_null_data(void ** arg)
 {
     pubsub_conn conn;
-    assert_false(kprv_send_csp(conn, NULL, 0));
+    assert_false(kprv_send_csp(&conn, NULL, 0));
 }
 
 static void test_send_bad_length(void ** arg)
 {
     pubsub_conn conn;
+    conn.conn_handle = NULL;
     int data = 10;
-    assert_false(kprv_send_csp(conn, &data, -1));
+    assert_false(kprv_send_csp(&conn, &data, -1));
 }
 
 static void test_send_null_conn_handle(void ** arg)
 {
     pubsub_conn conn;
+    conn.conn_handle = NULL;
     int data = 10;
-    assert_false(kprv_send_csp(conn, &data, sizeof(int)));
+    assert_false(kprv_send_csp(&conn, &data, sizeof(int)));
 }
 
 static void test_send(void ** arg)
@@ -140,7 +142,7 @@ static void test_send(void ** arg)
     expect_not_value(__wrap_csp_send, packet, NULL);
     will_return(__wrap_csp_send, 1);
 
-    assert_true(kprv_send_csp(conn, (void*)&data, sizeof(data)));
+    assert_true(kprv_send_csp(&conn, (void*)&data, sizeof(data)));
 }
 
 static void test_publisher_read_null_conn(void ** arg)
@@ -148,7 +150,7 @@ static void test_publisher_read_null_conn(void ** arg)
     pubsub_conn conn;
     conn.conn_handle = NULL;
     int data = 10;
-    assert_false(kprv_publisher_read(conn, &data, 1, TEST_PORT));
+    assert_false(kprv_publisher_read(&conn, &data, 1, TEST_PORT));
 }
 
 static void test_publisher_read_null_buffer(void ** arg)
@@ -171,7 +173,7 @@ static void test_publisher_read_null_buffer(void ** arg)
     
     kprv_server_accept(socket, &conn);
 
-    assert_false(kprv_publisher_read(conn, NULL, 1, TEST_PORT));
+    assert_false(kprv_publisher_read(&conn, NULL, 1, TEST_PORT));
 }
 
 static void test_publisher_read(void ** arg)
@@ -199,7 +201,7 @@ static void test_publisher_read(void ** arg)
 
     will_return(__wrap_csp_conn_dport, TEST_PORT);
 
-    assert_true(kprv_publisher_read(conn, &buffer, 1, TEST_PORT));
+    assert_true(kprv_publisher_read(&conn, &buffer, 1, TEST_PORT));
 }
 
 static void test_subscriber_read_null_conn(void ** arg)
@@ -207,7 +209,7 @@ static void test_subscriber_read_null_conn(void ** arg)
     pubsub_conn conn;
     conn.conn_handle = NULL;
     int data = 10;
-    assert_false(kprv_subscriber_read(conn, &data, 1, TEST_PORT));
+    assert_false(kprv_subscriber_read(&conn, &data, 1, TEST_PORT));
 }
 
 static void test_subscriber_read_null_buffer(void ** arg)
@@ -218,7 +220,7 @@ static void test_subscriber_read_null_buffer(void ** arg)
 
     kprv_subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT);
     
-    assert_false(kprv_subscriber_read(conn, NULL, 1, TEST_PORT));
+    assert_false(kprv_subscriber_read(&conn, NULL, 1, TEST_PORT));
 }
 
 static void test_subscriber_read(void ** arg)
@@ -233,7 +235,7 @@ static void test_subscriber_read(void ** arg)
     expect_value(__wrap_csp_read, conn, conn.conn_handle);
     will_return(__wrap_csp_conn_sport, TEST_PORT);
     
-    assert_true(kprv_subscriber_read(conn, &buffer, 1, TEST_PORT));
+    assert_true(kprv_subscriber_read(&conn, &buffer, 1, TEST_PORT));
 }
 
 int main(void)

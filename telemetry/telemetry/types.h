@@ -44,7 +44,7 @@ typedef enum
 typedef struct
 {
     /* Source identifier - used for subscribing */
-    uint8_t source_id;
+    uint8_t topic_id;
     /* Data type identifier */    
     telemetry_data_type data_type;
     /* Subsystem identifier */
@@ -62,12 +62,9 @@ typedef struct
     uint16_t timestamp;
 } telemetry_packet;
 
-/**
- * Telemetry request structure - currently used for subscribing to sources.
- */
 typedef struct
 {
-    uint8_t sources;
-} telemetry_request;
+    
+} telemetry_connection;
 
 #endif
