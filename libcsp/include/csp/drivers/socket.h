@@ -30,7 +30,6 @@
  * @param socket_iface socket interface to store handle in
  * @param mode CSP_SOCKET_CLIENT or CSP_SOCKET_SERVER, which type of connection is created
  * @param port socket interface port number
- * @param addr socket interface network address
  * @return int CSP_ERR_NONE if successful, otherwise CSP_ERR_DRIVER
  */
 int socket_init(csp_socket_handle_t * socket_iface, uint8_t mode, uint16_t port);
