@@ -1,6 +1,6 @@
 # Getting started with Kubos SDK
 
-This is intended to be a quick guide to creating a new project on top of the Kubos framework.
+This is intended to be a quick guide to creating a new KubOS RT project on top of the Kubos framework.
 
 ## Prerequisites
 
@@ -48,11 +48,12 @@ At this point you will have a new terminal prompt inside your kubos-dev box.
 
 The simplest way to create a new KubOS RT project is by using the Kubos CLI. The `kubos init` command takes a project name and creates the project files & folder.
 
+**Note:** Inside of the build system there are several reserved words, a project cannot be named any of these words. The most common of these are `test`, `source` and `include`.
+
         $ kubos init myproject
 
 The `init` command creates a new directory with the kubos-rt-example included so you can get started right away.
 
-Note - Inside of the build system there are several reserved words, a project cannot be named any of these words. The most common of these are `test`, `source` and `include`.
 
 We have also created several different example Kubos projects which can be used as starting points.
 
@@ -61,10 +62,13 @@ We have also created several different example Kubos projects which can be used 
  - [Example showing the spi HAL and sensors](https://github.com/kubostech/kubos-spi-example)
  - [Example showing the sensor interface](https://github.com/kubostech/kubos-sensor-example)
  - [Example showing csp over uart](https://github.com/kubostech/kubos-csp-example)
+ - [Example KubOS Linux project](https://github.com/kubostech/kubos-linux-example)
 
 If you would prefer to use one of our other examples as a starting point all you need to do is run:
 
-        $ git clone https://github.com/kubos-rt-example myproject
+        $ git clone https://github.com/kubos-spi-example myproject
+
+It is unnecessary to run the `kubos init` command in this case.
 
 If you created your project from a clone there's some additional setup needed to satisfy all of the projects dependencies for Kubos source modules.
 
