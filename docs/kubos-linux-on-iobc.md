@@ -1,4 +1,4 @@
-#KubOS Linux on the ISIS iOBC
+# KubOS Linux on the ISIS iOBC
 
 [Overview](#overview)
 
@@ -10,6 +10,10 @@
 
 The goal of this document is to create a KubOS Linux installation for the iOBC that can then run the satellite services (telemetry, payload communication, etc) 
 needed for the ISIS customers' missions.
+
+The [User Applications on the ISIS iOBC](docs/user-app-on-iobc.md) doc can then be used to create and load a user application on top of the new KubOS Linux install.
+
+**Note:** Ideally, the user should never have to mess with the kernel themselves.  It should be pre-loaded onto the iOBC.
 
 ##Software Components
 
