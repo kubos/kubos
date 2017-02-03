@@ -12,7 +12,7 @@ This document provides some helpful tips on working with a Kubos project. Some g
 
 ## Creating a Project
 
-Run the `kubos init` command followed by the name of your project to bootstrap your KubOS project. This will create a new directory under your current working directory with your project's name and add the source files for a basic KubOS project (kubos-rt-example).
+Run the `kubos init` command followed by the name of your project to bootstrap your Kubos project. This will create a new directory under your current working directory with your project's name and add the source files for a basic Kubos project (kubos-rt-example).
 
         $ kubos init project-name
 
@@ -33,7 +33,7 @@ Here is a quick rundown of the files that were generated:
 | `module.json` | This file is yotta's module description file |
 
 
-KubOS uses the yotta build/module system, which is where this file structure comes from. You can read more about yotta [here](http://yottadocs.mbed.com/).
+Kubos uses the yotta build/module system, which is where this file structure comes from. You can read more about yotta [here](http://yottadocs.mbed.com/).
 
 ## Selecting a target
 
