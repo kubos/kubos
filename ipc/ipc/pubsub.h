@@ -93,3 +93,5 @@ bool kprv_subscriber_read(const pubsub_conn * conn, void * buffer, int buffer_si
 bool kprv_send_csp(const pubsub_conn * conn, const void * data, uint16_t length);
 
 #endif
+
+/* @} */
