@@ -41,8 +41,10 @@ Cubesat Space Protocol (CSP) is a small protocol stack written in C. CSP is desi
  - @subpage I2CInterface
  - @subpage KISSInterface
  - @subpage LOInterface
+ - @subpage SocketInterface
 
 ### Drivers
  - @subpage CANDriver
  - @subpage I2CDriver
  - @subpage USARTDriver
+ - @subpage SocketDriver

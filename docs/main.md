@@ -34,15 +34,15 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
  - [MSP430 Launchpad Guide](docs/msp430-launchpad-guide.md)
 
- - [STM32F4 Discovery Board Guide](docs/STM32F4-discovery-board-guide.md)
+ - [STM32F4 Discovery Board Guide](docs/stm32f4-discovery-board-guide.md)
 
 ### KubOS Linux
 
- - [KubOS Linux Overview](docs/Linux_Overview.md)
+ - [KubOS Linux Overview](docs/kubos-linux-overview.md)
 
- - [KubOS Linux on iOBC](docs/Linux_on_iOBC.md)
+ - [KubOS Linux on iOBC](docs/kubos-linux-on-iobc.md)
 
- - [User Applications on iOBC](docs/User_App_on_iOBC.md)
+ - [User Applications on iOBC](docs/user-app-on-iobc.md)
 
 
 ## Top Level APIs
@@ -58,5 +58,7 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
  - [Telemetry](./telemetry/index.html)
 
  - [Telemetry Aggregator](./telemetry-aggregator/index.html)
+
+ - [Telemetry Storage](./telemetry-storage/index.html)
 
  - [IPC](./ipc/index.html)

@@ -13,6 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @defgroup Telemetry-Storage
+ * @addtogroup Telemetry-Storage
+ * @brief Public interface for telemetry storage
+ * @{
+ */
+
 #ifndef TELEMETRY_STORAGE_H
 #define TELEMETRY_STORAGE_H
 
@@ -25,11 +33,15 @@
 #define FILE_EXTENSION_HEX ".hex"
 #define FILE_EXTENSION_NONE ""
 
-
+/**
+ * Defines the output file format
+ */
 typedef enum 
 {
-    FORMAT_TYPE_CSV = 0,        /* (0) CSV */
-    FORMAT_TYPE_HEX             /* (1) HEX */
+    /*! CSV File */
+    FORMAT_TYPE_CSV = 0,
+    /*! Hex File */
+    FORMAT_TYPE_HEX
 } output_data_format;
 
 
@@ -44,7 +56,7 @@ CSP_DEFINE_TASK(telemetry_store_rx);
  * To be used in the main() prior to starting the scheduler and after
  * the telemetry system has been initialized.
  */
-void telemetry_storage_init();
+void telemetry_storage_init(void);
 
 
 /**
@@ -55,5 +67,6 @@ void telemetry_storage_init();
  */
 bool telemetry_store(telemetry_packet packet);
 
-
 #endif
+
+/* @} */
