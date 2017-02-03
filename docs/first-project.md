@@ -10,18 +10,10 @@ Create an instance of the Kubos Vagrant box
 
         $ vagrant init kubostech/kubos-dev
 
-Start the box
+This will create a Vagrantfile in your current directory. This Vagrantfile contains information about the configuration of your kubos-dev Vagrant box.
 
-        $ vagrant up
-
-SSH into your box
-
-        $ vagrant ssh
-
-## Creating your project
-
-It is strongly recommended that you create your project in a directory on your host that is shared with your box, rather than directly inside your box. If the
-directory is located on your host, if your box is ever destroyed or re-built your project files will be completely intact.
+It is strongly recommended that you create your kubos projects in a directory that is shared with your box from your host, rather than a directory that is only available inside your box. If the
+directory is located on your host your projects will be protected in the event your box is ever damaged or destroyed.
 
 To mount a specific directory from your host, open the Vagrantfile that was in the kubos-vagrant directory you clone in the above step and look for the following lines:
 
@@ -38,7 +30,21 @@ Note - The path in the box must be an absolute path. In the kubos-dev vagrant bo
 After a volume is mounted into the box all of the data from the host path will be available at the path specified for the box. In the above example the host path (`../data`) would be exposed at `/vagrant_data` inside of the box.
 This allows you to use the text editor of your choosing to edit the project files from your host machine at the host directory path.
 
+Following the example if you create a kubos project in the box at `/vagrant_data/kubos_project` it would be accessible on your host at the relative path `../data/kubos_project` from your Vagrantfile
+
 For more information on mounting volumes see the following [guide](https://www.vagrantup.com/docs/synced-folders/basic_usage.html)
+
+Start the box
+
+        $ vagrant up
+
+SSH into your box
+
+        $ vagrant ssh
+
+At this point you will have a new terminal prompt inside your kubos-dev box.
+
+## Creating your project
 
 The simplest way to create a new KubOS RT project is by using the Kubos CLI. The `kubos init` command takes a project name and creates the project files & folder.
 
