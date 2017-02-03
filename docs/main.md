@@ -10,9 +10,9 @@ Looking to build an application on KubOS? Check out our [quick start guide](docs
 
 ### Kubos SDK
 
- - [Installing Kubos CLI](docs/cli-installing.md)
+ - [Installing Kubos SDK](docs/sdk-installing.md)
 
- - [Upgrading Kubos CLI](docs/cli-upgrading.md)
+ - [Upgrading Kubos SDK](docs/sdk-upgrading.md)
 
  - [Creating your first project](docs/first-project.md)
 
