@@ -17,6 +17,10 @@
 #include "ipc/pubsub.h"
 #include "ipc/config.h"
 
+#include <csp/drivers/socket.h>
+#include <csp/interfaces/csp_if_socket.h>
+
+
 csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections)
 {
     csp_socket_t * socket = NULL;
@@ -54,6 +58,27 @@ bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn)
     return false;
 }
 
+bool kprv_server_socket_accept(csp_socket_t * socket, pubsub_conn * conn)
+{
+    csp_conn_t * csp_conn = NULL;
+    if ((socket != NULL) && (conn != NULL))
+    {
+        csp_iface_t csp_socket_if;
+        csp_socket_handle_t socket_driver;
+        if (socket_init(&socket_driver, CSP_SOCKET_SERVER, IPC_SOCKET_PORT) != CSP_ERR_NONE)
+        {
+            csp_socket_init(&csp_socket_if, &socket_driver);
+            csp_route_set(CSP_DEFAULT_ROUTE, &csp_socket_if, CSP_NODE_MAC);
+            if ((csp_conn = csp_accept(socket, 1000)) != NULL)
+            {
+                conn->conn_handle = csp_conn;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
 {
     csp_conn_t * csp_conn = NULL;
@@ -61,6 +86,32 @@ bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
     {
         return false;
     }
+
+    csp_conn = csp_connect(CSP_PRIO_NORM, address, port, 1000, CSP_O_NONE);
+    if (csp_conn != NULL)
+    {
+        conn->conn_handle = csp_conn;
+        return true;
+    }
+    else
+    {
+        conn->conn_handle = NULL;
+        return false;
+    }
+}
+
+bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
+{
+    csp_conn_t * csp_conn = NULL;
+    if (conn == NULL)
+    {
+        return false;
+    }
+
+    csp_iface_t csp_socket_if;
+    csp_socket_handle_t socket_driver;
+    socket_init(&socket_driver, CSP_SOCKET_CLIENT, IPC_SOCKET_PORT);
+    csp_route_set(address, &csp_socket_if, CSP_NODE_MAC);
 
     csp_conn = csp_connect(CSP_PRIO_NORM, address, port, 1000, CSP_O_NONE);
     if (csp_conn != NULL)
