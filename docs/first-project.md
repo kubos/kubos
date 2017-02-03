@@ -44,7 +44,7 @@ The simplest way to create a new KubOS RT project is by using the Kubos CLI. The
 
         $ kubos init myproject
 
-The init command creates a new directory with the kubos-rt-example included so you can get started right away.
+The `init` command creates a new directory with the kubos-rt-example included so you can get started right away.
 
 Note - Inside of the build system there are several reserved words, a project cannot be named any of these words. The most common of these are `test`, `source` and `include`.
 
@@ -60,7 +60,7 @@ If you would prefer to use one of our other examples as a starting point all you
 
         $ git clone https://github.com/kubos-rt-example myproject
 
-If you created your project from a clone there's some additional setup needed to satisfy all of the projects depedencies for Kubos source modules.
+If you created your project from a clone there's some additional setup needed to satisfy all of the projects dependencies for Kubos source modules.
 
 Running the following commands will clone a project and link all of the Kubos modules needed to build it:
 
@@ -94,4 +94,4 @@ Note - You may need to run this command with `sudo` if you run into a permission
 
         $ sudo kubos flash
 
-Congratulations! You have just created a basic KubOS project, built it and (hopefully) flashed it onto some hardware.
+Congratulations! You have just created a basic Kubos project, built it and (hopefully) flashed it onto some hardware.
