@@ -1,4 +1,15 @@
-# KubOS Changelog
+# Kubos Changelog
+
+## v0.2 - Feb 3 2017
+* Created KubOS Linux
+* Major documentation updates
+* [KUBOS-170](https://kubostech.atlassian.net/browse/KUBOS-170) Created Kubos CLI as primary Kubos SDK command tool
+* [KUBOS-175](https://kubostech.atlassian.net/browse/KUBOS-175) Migrated from Docker to Vagrant for the Kubos SDK distribution system
+* [KUBOS-329](https://kubostech.atlassian.net/browse/KUBOS-329) Added KubOS Linux support to Kubos SDK
+* [KUBOS-361](https://kubostech.atlassian.net/browse/KUBOS-361) Added ability to use branched versions of Kubos code to Kubos CLI
+* [KUOBS-267](https://kubostech.atlassian.net/browse/KUBOS-267) Added telemetry service libraries for both KubOS RT and KubOS Linux
+* [KUBOS-213](https://kubostech.atlassian.net/browse/KUBOS-213) Added telemetry aggregation service libraries
+* [KUBOS-201](https://kubostech.atlassian.net/browse/KUBOS-201) Added inter-subsystem communication libraries
 
 ## v0.1.4 - Oct 14 2016
 * [KUBOS-81](https://kubostech.atlassian.net/browse/KUBOS-81) Implemented FatFs SPI SD support (Current MSP430 only)
