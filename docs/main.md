@@ -38,9 +38,9 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
 ### KubOS Linux
 
- - [KubOS Linux Overview](docs/linux-overview.md)
+ - [KubOS Linux Overview](docs/kubos-linux-overview.md)
 
- - [KubOS Linux on iOBC](docs/linux-on-iobc.md)
+ - [KubOS Linux on iOBC](docs/kubos-linux-on-iobc.md)
 
  - [User Applications on iOBC](docs/user-app-on-iobc.md)
 
