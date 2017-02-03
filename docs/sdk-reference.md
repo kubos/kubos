@@ -34,16 +34,18 @@ The `kubos` command is always run with a subcommand in order to do something, `k
 
 [test](#kubos-test)                Run the tests for the current module on the current target. Requires target support for cross-compiling targets.
 
-[version](#kubos-version)             Display the current active version of the cli and KubOS source repo.
+[version](#kubos-version)             Display the current active version of the CLI and Kubos source repo.
 
 [versions](#kubos-versions)            Display the available versions of the KubOS source.
 
-[update](#kubos-update)              Download newer versions of the KubOS Modules
+[update](#kubos-update)              Download newer versions of the Kubos Modules
 
-[use](#kubos-use)                 Set a new version of the KubOS modules to build your projects against.
+[use](#kubos-use)                 Set a new version of the Kubos modules to build your projects against.
 
 
 ### kubos build
+
+#### Synopsis
 
         $ kubos build [--generate-only] [--debug-build] [--cmake-generator <cmake-generator-name>] [name ... ]
         $ kubos build [ ... ] -- [ build-tool arguments ]
@@ -74,6 +76,7 @@ The effects depend on the target (this selects CMake build type RelWithDebInfo).
 
 * `-- ...`: any options specified after -- are passed unmodified on to the tool being used for building (e.g. Ninja, or make)
 
+
 ### kubos init
 
 #### Synopsis
@@ -89,7 +92,19 @@ Create a new subdirectory containing a new project named the same as the argumen
 * `--linux`, `-l` Create the new project as a linux application for KubOS Linux
 * `--rt`, `-r`    Create the new project as a KubOS RT project
 
+
+### kubos clean
+
+#### Synopsis
+
+        $ kubos clean
+
+#### Description
+
+Delete the 'build' subdirectory of a project. This will remove all remaining artifacts and generated files from previous builds.
+
 ### kubos test
+
 #### Synopsis
 
         $ kubos test [--list] [--no-build] [ build-arguments ] [tests-to-run ...]
@@ -122,12 +137,12 @@ Options:
         $ kubos test -n my-test
         $ kubos test --config="path/to/test-config.json"
 
+
 # kubos debug
+
 #### Synopsis
 
-
         $ kubos debug
-
 
 #### Description
 
@@ -135,6 +150,7 @@ If the target description supports it, launch a debugger attached to the specifi
 
 
 ### kubos target
+
 #### Synopsis
 
         $ kubos target
@@ -149,36 +165,40 @@ Targets define the options and commands that `kubos` uses to compile modules and
 A target must define a CMake Toolchain file describing all of the rules that `kubos` uses to build software, it may also define commands to launch a debugger (used by `kubos debug`).
 
 #### Arguments
-* `--list`, `-l` List all of the available KubOS targets.
+* `--list`, `-l` List all of the available Kubos targets.
 
 #### Examples
 
         $ kubos target stm32f407-disco-gcc
 
+
 ### kubos update
+
 #### Synopsis
 
         $ kubos update
         $ kubos update <version number>
 
 #### Description
-Pull and update all of the current KubOS modules. By default if no `<version number>`
+Pull and update all of the current Kubos modules. By default if no `<version number>`
 
 #### Arguments
 `<version number>` If a version number is specified then kubos will try to checkout the provided version number after pulling the latest updates
 
 
 ### kubos version
+
 #### Synopsis
 
         $ kubos version
 
 #### Description
-Display the current version of the Kubos CLI, and the KubOS modules
+Display the current version of the Kubos CLI, and the Kubos modules
 
 
 ### kubos link
 Synonyms: `kubos ln`
+
 #### Synopsis
 
         $ kubos link (in a module directory)
@@ -188,7 +208,7 @@ Synonyms: `kubos ln`
 #### Description
 Module linking allows you to use local versions of modules when building other modules – it's useful when fixing a bug in a dependency that is most easily reproduced when that dependency is used by another module.
 
-By default all of the KubOS modules are linked into all new projects.
+By default all of the Kubos modules are linked into all new projects.
 
 To link a module there are two steps. First, in the directory of the dependency:
 
@@ -208,7 +228,7 @@ The variant of the command which takes a path to an existing module (e.g. `kubos
 
 #### Arguments
 
-`--all`, `-a` Link all of the default KubOS modules and targets into a project in the current directory
+`--all`, `-a` Link all of the default Kubos modules and targets into a project in the current directory
 
 #### Directories
 When you run `kubos link`, links are created in a system-wide directory under
@@ -217,6 +237,7 @@ subsequent `kubos link <modulename>` commands.
 
 
 ###  kubos link-target
+
 #### Synopsis
 
         $ kubos link-target (in a target directory)
@@ -226,7 +247,7 @@ subsequent `kubos link <modulename>` commands.
 #### Description
 Like module linking, target linking allows you to use local versions of targets when building modules – it's useful when developing and testing target descriptions.
 
-By default all of the KubOS targets will be linked into all new projects.
+By default all of the Kubos targets will be linked into all new projects.
 
 To link a target you need to perform two steps. First, in the directory of the target:
 
@@ -247,6 +268,7 @@ See also [kubos link](#kubos-link).
 
 ### kubos list
 Synonyms: `kubos ls`
+
 #### Synopsis
 
         $ kubos list [--all]
@@ -300,12 +322,12 @@ example:
 }
 ```
 
+
 ###  kubos licenses
+
 #### Synopsis
 
-
         $ kubos licenses [--all]
-
 
 #### Description
 List the licenses of all of the modules that the current module depends on. If
@@ -316,12 +338,12 @@ occurs in, instead of just once.
 `module.json` files, it can make no warranties about whether modules contain
 code under other licenses that have not been declared.
 
+
 ### kubos config
+
 #### Synopsis
 
-
         $ kubos config
-
 
 #### Description
 Display the merged config data for the current target
