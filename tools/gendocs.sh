@@ -65,3 +65,7 @@ gendocs_yt_module $kubos_dir/freertos/os freertos
 gendocs_yt_module $kubos_dir/hal/kubos-hal kubos-hal
 gendocs_yt_module $kubos_dir/hal/kubos-hal-stm32f4 kubos-hal/kubos-hal-stm32f4
 gendocs_yt_module $kubos_dir/hal/kubos-hal-msp430f5529 kubos-hal/kubos-hal-msp430f5529
+gendocs_yt_module $kubos_dir/telemetry telemetry
+gendocs_yt_module $kubos_dir/telemetry-aggregator telemetry-aggregator
+gendocs_yt_module $kubos_dir/telemetry-storage telemetry-storage
+gendocs_yt_module $kubos_dir/ipc ipc
