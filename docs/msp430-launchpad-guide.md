@@ -1,4 +1,4 @@
-#MSP430 Discovery Board Guide
+# MSP430 Discovery Board Guide
 
 - [Reference Documents](#reference-documents)
 - [Pin Definitions](#pin-definitions)
