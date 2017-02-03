@@ -21,6 +21,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <csp/interfaces/csp_if_socket.h>
+#include <csp/drivers/socket.h>
+
 /* Structure for storing a list of telemetry sources */
 typedef struct topic_list_item
 {
@@ -68,7 +71,7 @@ static subscriber_list_item * subscribers = NULL;
 /* Private CSP socket used for telemetry connections */
 static csp_socket_t * socket = NULL;
 
-void telemetry_init()
+void telemetry_init(void)
 {
     csp_buffer_init(20, 256);
 
@@ -96,7 +99,7 @@ void telemetry_init()
     socket = kprv_server_setup(TELEMETRY_CSP_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
 }
 
-void telemetry_cleanup()
+void telemetry_cleanup(void)
 {
     subscriber_list_item * temp_sub, * next_sub;
 
@@ -165,6 +168,7 @@ static void telemetry_send(telemetry_packet packet)
     }
 }
 
+#ifdef TARGET_LIKE_KUBOS_RT
 bool telemetry_publish(telemetry_packet packet)
 {
     if ((packet_queue != NULL) && (csp_queue_enqueue(packet_queue, &packet, CSP_MAX_DELAY)))
@@ -173,6 +177,50 @@ bool telemetry_publish(telemetry_packet packet)
     }
     return false;
 }
+#else
+bool telemetry_publish(telemetry_packet pkt)
+{
+    csp_iface_t csp_socket_if;
+    csp_socket_handle_t socket_driver;
+    csp_conn_t *conn;
+    csp_packet_t *packet;
+
+    socket_init(&socket_driver, CSP_SOCKET_CLIENT, 8888);
+
+    // csp_socket_init(CSP_SOCKET_SERVER, 8888, NULL);
+    csp_socket_init(&csp_socket_if, &socket_driver);
+
+
+    /* Set default route and start router */
+    // csp_route_set(CSP_DEFAULT_ROUTE, &csp_socket_if, CSP_NODE_MAC);
+    csp_route_set(CSP_DEFAULT_ROUTE, &csp_socket_if, CSP_NODE_MAC);
+
+    packet = csp_buffer_get(sizeof(telemetry_packet));
+    if (packet) {
+        // strcpy((char *) packet->data, message);
+        memcpy(&packet->data, &pkt, sizeof(telemetry_packet));
+        // packet->length = strlen(message);
+        packet->length = sizeof(telemetry_packet);
+
+        // conn = csp_connect(CSP_PRIO_NORM, other, PORT, 1000, CSP_O_NONE);
+        conn = csp_connect(CSP_PRIO_NORM, 1, 10, 1000, CSP_O_NONE);
+        // printf("Sending: %s\r\n", message);
+        if (!conn) {
+            printf("conn err\r\n");
+            return -1;
+        } 
+        
+        if (!csp_send(conn, packet, 1000))
+        {
+            printf("send err\r\n");
+            return -1;
+        }
+        csp_close(conn);
+        printf("sent!\r\n");
+    }
+    // socket_close(&socket_driver);
+}
+#endif
 
 bool telemetry_read(pubsub_conn * conn, telemetry_packet * packet)
 {
@@ -201,7 +249,7 @@ subscriber_list_item * telemetry_add_subscriber(pubsub_conn server_conn, pubsub_
     return new_sub;
 }
 
-pubsub_conn * kprv_telemetry_connect()
+pubsub_conn * kprv_telemetry_connect(void)
 {
     pubsub_conn * conn = NULL;
     pubsub_conn client_conn;
@@ -243,11 +291,11 @@ pubsub_conn * kprv_telemetry_connect()
     return conn;
 }
 
-pubsub_conn * telemetry_connect()
+pubsub_conn * telemetry_connect(void)
 {
     pubsub_conn * client_conn = NULL;
     csp_mutex_lock(&subscribing_lock, CSP_INFINITY);
-    client_conn = kprv_telemetry_connect(client_conn);
+    client_conn = kprv_telemetry_connect();
     csp_mutex_unlock(&subscribing_lock);
     return client_conn;
 }
@@ -324,6 +372,10 @@ bool kprv_has_topic(subscriber_list_item * sub, uint16_t topic_id)
     bool ret = false;
     if (sub != NULL)
     {
+        // horrible subscribe all hack!
+        if (sub->topics == NULL)
+            return true;
+
         topic_list_item topic = {
             .topic_id = topic_id
         };
@@ -397,7 +449,7 @@ bool telemetry_unsubscribe(pubsub_conn * client_conn, uint16_t topic_id)
     return ret;
 }
 
-int telemetry_num_subscribers()
+int telemetry_num_subscribers(void)
 {
     subscriber_list_item * temp;
     int count;
