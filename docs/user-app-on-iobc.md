@@ -1,16 +1,10 @@
 # User Applications on the ISIS iOBC
 
-- [Reference Documents](#reference-documents)
-- [Building a Project](#building-a-project)
-- [Updating Credentials](#updating-credentials)
-- [Updating the USB Connection](#updating-the-usb-connection)
-- [Flashing the Board](#flashing-the-board)
-- [Troubleshooting](#troubleshooting)
-- [Debug Console](#debug-console)
-- [Manual File Transfer](#manual-file-transfer)
-- [Example Program](#example-program)
+[TOC]
 
-## Reference Documents
+# User Applications on the ISIS iOBC {#user-applications-on-the-isis-iobc}
+
+## Reference Documents {#reference-documents}
 
 ### iOBC Documentation
 
@@ -25,7 +19,7 @@ connect them, and what drivers need to be installed to support them.
 - [KubOS Linux Overview](docs/kubos-linux-overview.md) - Overview of the KubOS Linux components
 - [KubOS Linux on iOBC](docs/kubos-linux-on-iobc.md) - Steps to build and load KubOS Linux for the iOBC
 
-## Building a Project
+## Building a Project {#building-a-project}
 
 In order to build a project for the ISIS-OBC, you'll need to create a Kubos SDK project for KubOS Linux, set the correct target, and then build it.
 
@@ -33,7 +27,7 @@ In order to build a project for the ISIS-OBC, you'll need to create a Kubos SDK 
     $ kubos target kubos-linux-isis-gcc
     $ kubos build
     
-## Updating Credentials
+## Updating Credentials {#updating-credentials}
 
 Ideally, you should not be using the default root user password.  If you've changed it, you'll need to pass the new password to the Kubos flash utility
 through the config.json file, which should be located in the top-level directory of your project.  You'll need to create the file if it doesn't already
@@ -47,7 +41,7 @@ If you're creating a brand new config.json file, you can just copy and paste the
         }
     }
     
-## Updating the USB Connection
+## Updating the USB Connection {#updating-the-usb-connection}
 
 The iOBC should be shipped with an FTDI cable.  This cable should be connected to the programming adapter, which should then be connected to the iOBC, to create the
 debug UART connection.  User file transfer will take place using this connection.
@@ -121,7 +115,7 @@ Edit the file and update the 'pu baudrate' field and change '/dev/FTDI' to the '
 
 You can test the changes by issuing the `minicom kubos` command.  If you successfully connect to your board, then the changes have been successful.
 
-## Flashing the Board
+## Flashing the Board {#flashing-the-board}
 
 The USB-to-serial cable should be connected to the iOBC and the board should be fully powered.
 
@@ -134,7 +128,7 @@ Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, w
     Transfer Successful
     Execution time: 21 seconds
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 "No compatible FTDI device found"
 
@@ -164,7 +158,7 @@ System appears to have hung
 - If you've waited a couple minutes and the system still appears hung, please let us know so that we can open a bug report.
 
 
-## Debug Console
+## Debug Console {#debug-console}
 
 If the iOBC is correctly connected to your host computer, you should see a /dev/ttyUSB* device in your vagrant VM.  The VM is set up to automatically forward any
 FTDI cables that connect to a /dev/FTDI device for ease-of-use.
@@ -194,7 +188,7 @@ Fully logged in, the console should look like this:
     Jan  1 00:00:16 login[212]: root login on 'ttyS0'
     ~ # 
 
-## Manual File Transfer
+## Manual File Transfer {#manual-file-transfer}
 
 If for some reason you want to manual transfer a specific file onto the iOBC, for example a custom script, you'll need to do the following:
 
@@ -307,7 +301,7 @@ Once file transfer is complete, you should be able to press enter and use your n
 Press **Ctrl+a**, then **q** to bring up the dialog to exit minicom.  Hit enter to quit without reset.
 
 
-##Example Program
+## Example Program {#walkthrough}
 
 Let's walk through the steps to create the example KubOS Linux project.
 

@@ -1,12 +1,10 @@
 # KubOS Linux on the ISIS iOBC
 
-[Overview](#overview)
+[TOC]
 
-[Software Components](#software-components)
+# KubOS Linux on the ISIS iOBC {#kubos-linux-on-the-iobs}
 
-[Installation Process](#installation-process)
-
-##Overview
+##Overview {#overview}
 
 The goal of this document is to create a KubOS Linux installation for the iOBC that can then run the satellite services (telemetry, payload communication, etc) 
 needed for the ISIS customers' missions.
@@ -15,7 +13,7 @@ The [User Applications on the ISIS iOBC](docs/user-app-on-iobc.md) doc can then 
 
 **Note:** Ideally, the user should never have to mess with the kernel themselves.  It should be pre-loaded onto the iOBC.
 
-##Software Components
+##Software Components {#software-components}
 
 ###ISIS Bootloader
 
@@ -57,9 +55,9 @@ The current development tool for building all of the components required for run
 
 The software tool used to flash the kernel and components onto the iOBC.
 
-##Installation Process
+##Installation Process {#installation-process}
 
-###Build the OS Files
+###Build the OS Files {#build-the-os-files}
 
 Create new folder
 
@@ -102,7 +100,7 @@ The generated files will be located in buildroot-2016.11/output/images.  They ar
 - {board}.dtb - The Device Tree Binary that Linux uses to configure itself for your board
 - rootfs.tar  - The root file system.  Contains BusyBox and other libraries
 
-###Install the SD Card Files
+###Install the SD Card Files {#install-the-sd-card-files}
 
 Due to their size, the zImage and rootfs files live on the SD card.
 
@@ -172,7 +170,7 @@ Unmount the partitions
     
 Remove the SD card and insert it into iOBC SD card slot 0
 
-###Install the NOR Flash Files
+###Install the NOR Flash Files {#install-the-nor-flash-files}
 
 ####Pre-Requisites
 
@@ -231,7 +229,7 @@ Click 'Send File'
 --- <div markdown="1" align="center">![SAM-BA Send DTB](images/iOBC/samba_send_dtb.png) </div> ---s
 
 
-###Boot the System
+###Boot the System {#boot-the-system}
 
 You should now be able to set up a serial connection to your board and boot it into Linux.
 

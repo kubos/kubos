@@ -1,5 +1,9 @@
 # SDK Cheatsheet
 
+[TOC]
+
+# SDK Cheatsheet {#sdk-cheatsheet}
+
 This document provides some helpful tips on working with a Kubos project. Some general project development steps include:
 
 * [Creating A Project](#creating-a-project)
@@ -10,7 +14,7 @@ This document provides some helpful tips on working with a Kubos project. Some g
 * [Debugging Your Project](#debugging-your-project)
 
 
-## Creating a Project
+## Creating a Project {#creating-a-project}
 
 Run the `kubos init` command followed by the name of your project to bootstrap your Kubos project. This will create a new directory under your current working directory with your project's name and add the source files for a basic Kubos project (kubos-rt-example).
 
@@ -35,7 +39,7 @@ Here is a quick rundown of the files that were generated:
 
 Kubos uses the yotta build/module system, which is where this file structure comes from. You can read more about yotta [here](http://yottadocs.mbed.com/).
 
-## Selecting a target
+## Selecting a target {#selecting-a-target}
 
 Kubos needs to know which target you intend to build for so it can select the proper cross compiler. Kubos currently supports several different targets:
 
@@ -64,7 +68,7 @@ To see all of the available targets run:
 
         $ kubos target --list
 
-## Building a project
+## Building a project {#building-a-project}
 
 To build a KubOS project, all we need to do is run the `kubos build` command. The Kubos CLI will read the module.json file, determine what libraries are needed and build them.
 
@@ -84,7 +88,7 @@ Clean command:
 
 To build a project from scratch run `kubos clean` to remove all remaining files generated for previous builds followed by `kubos build`.
 
-## Linking Local Modules and Targets
+## Linking Local Modules and Targets {#linking-local-modules-and-targets}
 
 Kubos comes with all of the latest Kubos modules and targets pre-packaged and pre-linked. If a module or target needs to be modified locally, the CLI comes with the ability to link that local module into the build process.
 
@@ -135,7 +139,7 @@ The next time your project is built it will use your local development target, r
 
 Note: Running `kubos target` will show you whether you are using a local or a linked copy of a target
 
-## Flashing your project
+## Flashing your project {#flashing-your-project}
 
 Flashing your project using the kubos tool is a relatively straightforward process:
 
@@ -151,7 +155,7 @@ Flashing your project using the kubos tool is a relatively straightforward proce
 
         $ sudo kubos flash
 
-#### Debugging your project
+## Debugging your project {#debugging-your-project}
 
 A gdb server must be started to allow your gdb instance to connect and debug directly on your hardware device.
 After building your project with `kubos build` the kubos-cli can start a gdb server and gdb instance for you.

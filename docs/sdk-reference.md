@@ -1,5 +1,7 @@
 # Kubos CLI Command Reference
 
+# Kubos CLI Command Reference {#kubos-cli-command-reference}
+
 The `kubos` command is always run with a subcommand in order to do something, `kubos` with no subcommand will only display help information.
 
 ## Command Overview
@@ -37,14 +39,14 @@ The `kubos` command is always run with a subcommand in order to do something, `k
 [use](#kubos-use)                 Set a new version of the Kubos modules to build your projects against.
 
 
-### kubos build
+## kubos build {#kubos-build}
 
-#### Synopsis
+### Synopsis
 
         $ kubos build [--generate-only] [--debug-build] [--cmake-generator <cmake-generator-name>] [name ... ]
         $ kubos build [ ... ] -- [ build-tool arguments ]
 
-#### Description
+### Description
 
 Build the current module and its dependencies.
 
@@ -54,7 +56,7 @@ Kubos uses CMake to control the build, the basic process is:
 * kubos instructs CMake to generate the make files / ninja files / IDE project file (depending on --cmake-generator)
 * kubos instructs CMake to execute the build. The compiler used depends on the CMake Toolchain file provided by the active kubos target.
 
-#### Options
+### Options
 
 * `--generate-only`, `-g`: only generate the CMakeLists, don't build
 
@@ -71,39 +73,39 @@ The effects depend on the target (this selects CMake build type RelWithDebInfo).
 * `-- ...`: any options specified after -- are passed unmodified on to the tool being used for building (e.g. Ninja, or make)
 
 
-### kubos init
+## kubos init {#kubos-init}
 
-#### Synopsis
+### Synopsis
 
         $ kubos init <project name> [--linux] [--rt]
 
-#### Description
+### Description
 
 Create a new subdirectory containing a new project named the same as the argument provided. If a subdirectory already exists, the command will abort and not delete or overwrite any files.
 
-#### Options
+### Options
 
 * `--linux`, `-l` Create the new project as a linux application for KubOS Linux
 * `--rt`, `-r`    Create the new project as a KubOS RT project
 
 
-### kubos clean
+## kubos clean {#kubos-clean}
 
-#### Synopsis
+### Synopsis
 
         $ kubos clean
 
-#### Description
+### Description
 
 Delete the 'build' subdirectory of a project. This will remove all remaining artifacts and generated files from previous builds.
 
-### kubos test
+## kubos test {#kubos-test}
 
-#### Synopsis
+### Synopsis
 
         $ kubos test [--list] [--no-build] [ build-arguments ] [tests-to-run ...]
 
-#### Description
+### Description
 
 Run tests. If no arguments are specified, then the tests for the current module
 will be run, use `kubos test all` to run the tests for all modules.
@@ -124,7 +126,7 @@ Options:
  * This command also accepts the options to `kubos_build`,
    which are used if building.
 
-#### Examples
+### Examples
 
         $ kubos test
         $ kubos test --list all
@@ -132,111 +134,111 @@ Options:
         $ kubos test --config="path/to/test-config.json"
 
 
-# kubos debug
+## kubos debug {#kubos-debug}
 
-#### Synopsis
+### Synopsis
 
         $ kubos debug
 
-#### Description
+### Description
 
 If the target description supports it, launch a debugger attached to the specified executable.
 
 
-### kubos target
+## kubos target
 
-#### Synopsis
+### Synopsis
 
         $ kubos target
         $ kubos target <targetname>
         $ kubos target --list, -l
 
-#### Description
+### Description
 Display or set the current target.
 
 Targets define the options and commands that `kubos` uses to compile modules and executables.
 
 A target must define a CMake Toolchain file describing all of the rules that `kubos` uses to build software, it may also define commands to launch a debugger (used by `kubos debug`).
 
-#### Arguments
+### Arguments
 * `--list`, `-l` List all of the available Kubos targets.
 
-#### Examples
+### Examples
 
         $ kubos target stm32f407-disco-gcc
 
 
-### kubos flash
+## kubos flash {#kubos-flash}
 Synonyms: `kubos start`
 
-#### Synopsis
+### Synopsis
 
         $ kubos flash
 
-#### Description
+### Description
 Flash the build of the current target to the target board.
 
 Note: This requires target support.
 
 
-### kubos update
+## kubos update {#kubos-update}
 
-#### Synopsis
+### Synopsis
 
         $ kubos update
         $ kubos update <version number>
 
-#### Description
+### Description
 Pull and update all of the current Kubos modules. By default if no `<version number>`
 
-#### Arguments
+### Arguments
 `<version number>` Is optional. If a version number is specified then kubos will try to checkout the provided version number after pulling the latest updates
 
 
-### kubos version
+## kubos version {#kubos-version}
 
-#### Synopsis
+### Synopsis
 
         $ kubos version
 
-#### Description
+### Description
 Display the current version of the Kubos CLI, and the Kubos modules
 
 
-### kubos versions
+## kubos versions {#kubos-versions}
 
-#### Synopsis
+### Synopsis
 
         $ kubos versions
 
-#### Description
+### Description
 Display all of the available versions of the Kubos modules.
 
 
-### kubos use
+## kubos use {#kubos-use}
 
-#### Synopsis
+### Synopsis
 
         $ kubos use <version number>
 
-#### Description
+### Description
 Pull and update all of the current Kubos modules. By default if no `<version number>`
 
-#### Arguments
+### Arguments
 `<version number>` Kubos will try to checkout the provided version number.
 
 
 
-### kubos link
+## kubos link {#kubos-link}
 Synonyms: `kubos ln`
 
-#### Synopsis
+### Synopsis
 
         $ kubos link (in a module directory)
         $ kubos link <modulename>
         $ kubos link /path/to/a/module
 
-#### Description
+### Description
 Module linking allows you to use local versions of modules when building other modules – it's useful when fixing a bug in a dependency that is most easily reproduced when that dependency is used by another module.
 
 By default all of the Kubos modules are linked into all new projects.
@@ -257,25 +259,25 @@ This works for direct and indirect dependencies: you can link to a module that y
 
 The variant of the command which takes a path to an existing module (e.g. `kubos link ../path/to/a/module`) performs both steps in sequence, for convenience.
 
-#### Arguments
+### Arguments
 
 `--all`, `-a` Link all of the default Kubos modules and targets into a project in the current directory
 
-#### Directories
+### Directories
 When you run `kubos link`, links are created in a system-wide directory under
 `yotta_PREFIX`, and the links in that directory are then picked up by
 subsequent `kubos link <modulename>` commands.
 
 
-###  kubos link-target
+##  kubos link-target {#kubos-link-target}
 
-#### Synopsis
+### Synopsis
 
         $ kubos link-target (in a target directory)
         $ kubos link-target <targetename>
         $ kubos link-target /path/to/a/target
 
-#### Description
+### Description
 Like module linking, target linking allows you to use local versions of targets when building modules – it's useful when developing and testing target descriptions.
 
 By default all of the Kubos targets will be linked into all new projects.
@@ -297,15 +299,15 @@ The variant of the command which takes a path to an existing module (e.g. `kubos
 See also [kubos link](#kubos-link).
 
 
-### kubos list
+## kubos list {#kubos-list}
 Synonyms: `kubos ls`
 
-#### Synopsis
+### Synopsis
 
         $ kubos list [--all]
         $ kubos list [--json]
 
-#### Description
+### Description
 List the installed dependencies of the current module, including information on
 the installed versions. Unless `--all` is specified, dependencies are only
 listed under the modules that first use them, with `--all` dependencies that
@@ -354,13 +356,13 @@ example:
 ```
 
 
-###  kubos licenses
+## kubos licenses {#kubos-licenses}
 
-#### Synopsis
+### Synopsis
 
         $ kubos licenses [--all]
 
-#### Description
+### Description
 List the licenses of all of the modules that the current module depends on. If
 `--all` is specified, then each unique license is listed for each module it
 occurs in, instead of just once.
@@ -370,13 +372,13 @@ occurs in, instead of just once.
 code under other licenses that have not been declared.
 
 
-### kubos config
+## kubos config {#kubos-config}
 
-#### Synopsis
+### Synopsis
 
         $ kubos config
 
-#### Description
+### Description
 Display the merged config data for the current target
 (and application, if the current module defines an executable application).
 
