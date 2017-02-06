@@ -25,7 +25,7 @@
 - [Main HAL API documentation](./kubos-hal/index.html) - Overview of the high-level HAL.  Useful for things like k\_uart\_write.
 - [MSP430F5 Specific HAL API documentation](./kubos-hal/kubos-hal-msp430f5529/index.html) - Specifics for the MSP430 version of the HAL.
 Useful for things like the configuration options.
-- [Installing the Kubos SDK](docs/cli-installing.md) - Basics of setting up the Kubos SDK environment
+- [Installing the Kubos SDK](docs/sdk-installing.md) - Basics of setting up the Kubos SDK environment
 - [Creating your first project](docs/first-project.md) - Steps to create and build a Kubos SDK project
 - [SDK Command Reference](docs/sdk-reference.md) - Overview of the common Kubos SDK commands
 
@@ -38,7 +38,7 @@ console output.
 
 ### Finding the pin definitions for a board
 
-<b><u>Quick Launch Guide:</u></b>
+#### Quick Launch Guide:
 
 The first page has the pins.  The primary I2C, SPI, and UART buses are color-coded.
 
@@ -46,7 +46,7 @@ The first page has the pins.  The primary I2C, SPI, and UART buses are color-cod
 - SPI pins  -  UC_cn_\_{SIMO|SOMI|CLK}
 - UART pins -  UCA0_{TXD|RXD}
 
-<b><u>Launchpad User's Guide:</u></b>
+#### Launchpad User's Guide:
 
 The full pinout schematic of the processor can be found in section 2.2.1 of the launchpad's user's guide.
 
@@ -248,7 +248,7 @@ The goal is to create a program that will output a message once a second.  Addit
 Note: This is more simple than the STM32F4 example program because there are no inter-device pins that can be connected to each other.  UART2
 is dedicated to the debug console and slave mode hasn't been implemented for I2C or SPI.
 
-<b><u>The Walkthrough:</u></b>
+#### The Walkthrough:
 
 Create the project
 

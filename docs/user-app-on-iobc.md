@@ -19,10 +19,10 @@ connect them, and what drivers need to be installed to support them.
 
 ### Kubos Documentation
 
-- [Installing the Kubos SDK](docs/cli-installing.md) - Basics of setting up the Kubos SDK environment
+- [Installing the Kubos SDK](docs/sdk-installing.md) - Basics of setting up the Kubos SDK environment
 - [Creating your first project](docs/first-project.md) - Steps to create and build a Kubos SDK project (Note: Written for a KubOS RT end-target)
-- [SDK Command Reference](docs/cli-reference.md) - Overview of the common Kubos SDK commands
-- [KubOS Linux Overview](docs/kubos-linux-Overview.md) - Overview of the KubOS Linux components
+- [SDK Command Reference](docs/sdk-reference.md) - Overview of the common Kubos SDK commands
+- [KubOS Linux Overview](docs/kubos-linux-overview.md) - Overview of the KubOS Linux components
 - [KubOS Linux on iOBC](docs/kubos-linux-on-iobc.md) - Steps to build and load KubOS Linux for the iOBC
 
 ## Building a Project
