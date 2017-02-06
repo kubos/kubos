@@ -195,22 +195,22 @@ flash the board.
 You'll need to establish a serial connection with the board in order to connect to the console.  Set up a serial connection to the board at a 
 baudrate of 115200.
 
---- <div markdown="1" align="center">![PuTTY Connection](images/iOBC/putty_connection.png) </div> ---s
+![PuTTY Connection](images/iOBC/putty_connection.png)
 
 Once the serial connection is open, boot (or reboot) the board.  Hold down any key while the board is starting up.  This will exit out of the 
 auto-boot and bring up the CLI.
 
---- <div markdown="1" align="center">![U-Boot Console](images/iOBC/uboot_console.png) </div> ---s
+![U-Boot Console](images/iOBC/uboot_console.png)
 
 ####Flash the Files
 
 Start up SAM-BA.  You'll want to select the at91sam9g20-ISISOBC option from the 'Select your board' drop-down.
 
---- <div markdown="1" align="center">![SAM-BA Connection Selection](images/iOBC/samba_connection_select.png) </div> ---s
+![SAM-BA Connection Selection](images/iOBC/samba_connection_select.png)
 
 Execute the 'Enable NorFlash' script.  This will prep the board to enable flashing.
 
---- <div markdown="1" align="center">![SAM-BA Enable NorFlash](images/iOBC/samba_enable_norflash.png) </div> ---s
+![SAM-BA Enable NorFlash](images/iOBC/samba_enable_norflash.png)
 
 Select the uboot.bin file in the 'Send File Name' field.
 
@@ -218,7 +218,7 @@ Make sure that 'Address' is set to 0xA000.
 
 Click 'Send File'
 
---- <div markdown="1" align="center">![SAM-BA Send U-Boot](images/iOBC/samba_send_uboot.png) </div> ---s
+![SAM-BA Send U-Boot](images/iOBC/samba_send_uboot.png)
 
 Select the at91sam9g20isis.dtb file in the 'Send File Name' field (you'll need to view all file types in order to see the .dtb file)
 
@@ -226,7 +226,7 @@ Set 'Address' to 0x60000.
 
 Click 'Send File'
 
---- <div markdown="1" align="center">![SAM-BA Send DTB](images/iOBC/samba_send_dtb.png) </div> ---s
+![SAM-BA Send DTB](images/iOBC/samba_send_dtb.png)
 
 
 ###Boot the System {#boot-the-system}
@@ -236,8 +236,8 @@ You should now be able to set up a serial connection to your board and boot it i
 You'll need to establish a serial connection with the board in order to connect to the console.  Set up a serial connection to the board at a 
 baudrate of 115200.
 
---- <div markdown="1" align="center">![PuTTY Connection](images/iOBC/putty_connection.png) </div> ---s
+![PuTTY Connection](images/iOBC/putty_connection.png)
 
 You should see the console boot into Linux like this:
 
---- <div markdown="1" align="center">![Linux Console](images/iOBC/linux_console.png) </div> ---s
+![Linux Console](images/iOBC/linux_console.png)
