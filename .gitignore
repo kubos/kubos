@@ -46,6 +46,7 @@ tags
 .yotta.json
 yotta_*
 
+doxygen_warn.log
 html/
 *.swo
 *.swp

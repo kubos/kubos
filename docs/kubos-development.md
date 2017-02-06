@@ -1,8 +1,12 @@
 # Developing Kubos Modules
 
+[TOC]
+
+# Developing Kubos Modules {#developing-kubos-modules}
+
 The top level [Kubos](https://github.com/kubostech/kubos) project contains all of the Kubos source modules and targets.
 
-## Getting Started
+## Getting Started {#getting-started}
 
 If you want to make changes to the Kubos code, perhaps for debugging purposes or to support a new peripheral, you'll first need to clone the kubos 
 repo and then pass the folder through to your VM:
@@ -29,14 +33,14 @@ Log in to your vagrant image
 your host machine and pass it through.  This way if the image becomes corrupted, or if you want to pass the modified code through to another VM, it's
 still available.
 
-## Kubos Development Environment
+## Kubos Development Environment {#kubos-developmenet-environment}
 
 The kubos repository is a collection of [Yotta](http://yottadocs.mbed.com/) modules and targets which are loaded inside the Kubos Vagrant box. They can also be built 
 locally using the `kubos link` and `kubos link-target` commands.
 
 See the [quick start guide](docs/first-project.md) for instructions on setting up and building Kubos SDK projects.
 
-### Linking in a Local Module
+### Linking in a Local Module {#linking-in-a-local-module}
 
 Once you've made changes to your local kubos repo, you'll want to link them into your project.
 
@@ -56,7 +60,7 @@ After running the `kubos link` command from the module directory and `kubos link
 
 **Note:** The module name is taken from the "name" definition in the module.json file, not from the folder name.  For example, to link in the CSP module, you would do `kubos link csp`, not `kubos link libcsp`. 
 
-### Linking in a Local Target
+### Linking in a Local Target {#linking-in-a-local-target}
 
 If you want to add or update a Kubos target, you'll follow a similar process.  For example:
 
@@ -68,7 +72,7 @@ If you want to add or update a Kubos target, you'll follow a similar process.  F
     
 **Note:** The target name is taken from the "name" definition in the target.json file, not from the folder name.
     
-### Unlinking Modules and Targets
+### Unlinking Modules and Targets {#unlinking}
 
 If you'd like to unlink your local changes and revert to using the official Kubos version, use the `kubos unlink` and `kubos unlink-target` commands from within your project
 
@@ -76,7 +80,7 @@ If you'd like to unlink your local changes and revert to using the official Kubo
     $ kubos unlink telemetry
     $ kubos unlink stm32f407-disco-gcc
     
-### Listing Linked Resources
+### Listing Linked Resources {#listing}
 
 To see what the dependencies of your project are and which folders are currently being used to build, use the `kubos ls` command.  
 
