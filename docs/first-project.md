@@ -66,7 +66,7 @@ We have also created several different example Kubos projects which can be used 
 
 If you would prefer to use one of our other examples as a starting point all you need to do is run:
 
-        $ git clone https://github.com/kubos-spi-example myproject
+        $ git clone https://github.com/kubostech/kubos-spi-example myproject
 
 It is unnecessary to run the `kubos init` command in this case.
 
