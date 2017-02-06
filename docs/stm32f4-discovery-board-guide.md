@@ -20,7 +20,7 @@ These are the two most useful documents to have while working with the STM32F4
 - [Main HAL API documentation](./kubos-hal/index.html) - Overview of the high-level HAL.  Useful for things like k\_uart\_write.
 - [STM32F4 Specific HAL API documentation](./kubos-hal/kubos-hal-stm32f4/index.html) - Specifics for the STM32F4 version of the HAL.
 Useful for things like the configuration options.
-- [Installing the Kubos SDK](docs/cli-installing.md) - Basics of setting up the Kubos SDK environment
+- [Installing the Kubos SDK](docs/sdk-installing.md) - Basics of setting up the Kubos SDK environment
 - [Creating your first project](docs/first-project.md) - Steps to create and build a Kubos SDK project
 - [SDK Command Reference](docs/sdk-reference.md) - Overview of the common Kubos SDK commands
 

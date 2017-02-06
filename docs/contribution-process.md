@@ -14,10 +14,10 @@ This is the workflow you should go through in order to create and complete a tas
 
 ## Sign the CLA
 
-All contributors must sign the KubOS Contributor License Agreement before their changes can be merged into the 
+All contributors must sign the Kubos Contributor License Agreement before their changes can be merged into the 
 main codebase.
 
-The KubOS CLA can be found [here](https://www.clahub.com/agreements/kubostech/KubOS).
+The Kubos CLA can be found [here](https://www.clahub.com/agreements/kubostech/KubOS).
 
 ## Create an Issue
 
@@ -33,7 +33,7 @@ the requirements are well understood and haven't changed since the issue was cre
 ### JIRA
 
 - Click the 'Create' button at the top of the JIRA page
-- Project should be 'KubOS'
+- Project should be 'Kubos'
 - Issue type should be 'Story' or 'Bug'
     * A story is something to be added or updated within the project
     * A bug is something that is broken within the project
