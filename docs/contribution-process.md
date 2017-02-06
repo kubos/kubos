@@ -1,25 +1,20 @@
 # Kubos Contribution Process
 
+[TOC]
+
+Kubos Contribution Process {#KubosContributionProcess}
+==========================
+
 This is the workflow you should go through in order to create and complete a task to contribute to the KubOS project
 
-0. [Sign the CLA](#sign-the-cla)
-1. [Create an Issue](#create-an-issue)
-2. [Mark the Issue as 'In Progress'](#mark-the-issue-as-in-progress)
-3. [Create a Branch of the Code You Want to Work On](#create-a-branch-of-the-code-you-want-to-work-on)
-4. [Make Your Changes](#make-your-changes)
-5. [Create a Pull Request](#create-a-pull-request)
-6. [Merge in New Changes From Master](#merge-in-new-changes-from-master)
-7. [Wait for Pull Request Approval](#wait-for-pull-request-approval)
-8. [Mark the Issue as 'Done'](#mark-the-issue-as-done)
-
-## Sign the CLA
+## Sign the CLA {#sign-the-cla}
 
 All contributors must sign the Kubos Contributor License Agreement before their changes can be merged into the 
 main codebase.
 
 The Kubos CLA can be found [here](https://www.clahub.com/agreements/kubostech/KubOS).
 
-## Create an Issue
+## Create an Issue {#create-an-issue}
 
 Everything you work on should have a corresponding JIRA issue.  Community members might not have access to JIRA and should then create a Github issue instead.  
 
@@ -56,7 +51,7 @@ to complete the task.
 - Click the 'Labels' link and add a tag for 'Bug' or 'Enhancement' depending on what kind of work should be done
 
 
-## Mark the Issue as 'In Progress'
+## Mark the Issue as 'In Progress' {#mark-the-issue}
 
 In order to track what's being worked on and by whom, for every issue you work you should:
 - JIRA: Drag the issue from the backlog into the sprint (if it's not already present)
@@ -69,8 +64,8 @@ In order to track what's being worked on and by whom, for every issue you work y
         + From the full issue description page, click the 'In Progress' button
         + From the 'Active Sprints' page, drag the issue from the 'To-Do' column into the 'In Progress' column
     * Github: Edit the title of the project and add "[WIP]"
-	
-## Create a Branch of the Code You Want to Work On
+    
+## Create a Branch of the Code You Want to Work On {#create-a-branch}
 
 All code changes should initially be made in a branch of the relavent Kubos repo either in the main repo, or in a personal copy (if you don't have access)
  and then be submitted against the master branch as a pull request:
@@ -83,7 +78,7 @@ To create your own repo:
 - Within your development environment, create a link to your new remote repository:
 
     $ git remote add {remote name you create} {personal repo url} 
-	
+    
 Clone the repo that you want to modify onto your local machine
         
     $ git clone http://github.com/kubostech/kubos
@@ -96,7 +91,7 @@ Create a local branch to make your changes
 
     $ git checkout -b {local branch name you create}
 
-## Make Your Changes
+## Make Your Changes {#make-your-changes}
 
 The code.  Write it.  Test it.  
 
@@ -107,32 +102,32 @@ At that point, this document should be updated with links to:
 
 For now, the code should be well structured:
 - There should be appropriate documentation for new methods and variables.
-	+ Use the doxygen comment format of '/** _comments_ */' for the method documentation so that it can be picked up during doc generation
+    + Use the doxygen comment format of '/** _comments_ */' for the method documentation so that it can be picked up during doc generation
 - Use descriptive names for methods and variables.
 - Try to match the styling of the surrounding code.
 
 Update any documentation areas that are affected by your changes.  For instance, if you found that a uart configuration option was not available
 for a certain board type, you would edit kubos-hal/kubos-hal/uart.h in the appropriate comment section with a new note about the unsupported option.
 - If you want to test your documentation changes:
-	+ Run the command 'doxygen docs/Doxyfile' from the project folder with the new documentation to regenerate the html documentation
-	+ Open up {project}/html/index.html in a web browser
-	+ Browse to your doc updates to verify
+    + Run the command 'doxygen docs/Doxyfile' from the project folder with the new documentation to regenerate the html documentation
+    + Open up {project}/html/index.html in a web browser
+    + Browse to your doc updates to verify
 
 Add or update any unit tests that are affected by your changes.  For instance, if support for i2c slave mode is added for the STM32F4 board, then the
 kubos-hal-stm32f4/test/i2c.c file's test\_i2c\_slave test case should be updated to test the successful execution of the board in slave mode.
 
 Commit your changes and push to your remote branch (the branch will be created automatically if it doesn't exist):
 
-	$ git add {files you changed}
-	$ git commit -m "Descriptive message about the changes you made"
-	$ git push {remote name} {local branch name}
-	
+    $ git add {files you changed}
+    $ git commit -m "Descriptive message about the changes you made"
+    $ git push {remote name} {local branch name}
+    
 If you're committing against a kubostech repo, then the remote name will likely be "origin".  If you're committing against your personal fork, then the remote name
 will match what you specified in the `git remote add` command.
-	
+    
 [Commit early, commit often](http://www.databasically.com/2011/03/14/git-commit-early-commit-often/)
 
-## Create a Pull Request
+## Create a Pull Request {#create-a-pull-request}
 
 Once all of your changes for an issue have been completed, you should create a pull request in order to bring the changes into the main code's
 master branch.  You will need to create a pull request for each repository you are making changes to.
@@ -141,7 +136,7 @@ From the github page for the repository that contains the changes you want to me
 - Click the 'Branch:' dropdown on the left-hand side and select the local branch containing your changes
 - Click the 'New pull request' button
 - The title of the pull request should be the JIRA issue number followed by a descriptive title
-	+ Ex. JIRA-111 Adding i2c slave mode for STM32F4
+    + Ex. JIRA-111 Adding i2c slave mode for STM32F4
 - In the description field, add a small summary of the changes you made.  The title should have indicated the bulk of the changes you made,
 but it's also good to mention things like documentation updates and any miscellaneous changes that were made (for example, fixing any bugs
 that you ran into while working on your code changes).
@@ -150,7 +145,7 @@ that you ran into while working on your code changes).
 If you'd like specific people to review your code, you can either mention them in the description with an '@{name}' tag, or by adding them 
 to the 'Reviewers' list.
 
-## Merge in New Changes From Master
+## Merge in New Changes From Master {#merge-in-new-changes}
 
 After submitting your pull request, you may find that github has flagged one or more files as being in conflict with the current version of the file
 in the master branch.  This means that someone else has committed code in the same file and similar area as you and your changes can't be 
@@ -160,30 +155,30 @@ In order to resolve the conflict, execute the following steps within your develo
 
 Merge the master branch into your local branch
 
-	$ git checkout origin/master
-	$ git pull origin master
-	$ git checkout {local branch where your changes are}
-	$ git merge origin/master
+    $ git checkout origin/master
+    $ git pull origin master
+    $ git checkout {local branch where your changes are}
+    $ git merge origin/master
 
 Git will edit any files with conflicts.  Conflicts will look like this:
-	
-		>>>Head
-			New local changes
-		==========
-			New master changes
-		<<<kubostech
-		
+    
+        >>>Head
+            New local changes
+        ==========
+            New master changes
+        <<<kubostech
+        
 Edit the files to resolve the conflicts.
 Push the resolved changed to your remote repo
 
-	$ git add {fixed files}
-	$ git commit
-	$ git push {remote name} {local branch name}
+    $ git add {fixed files}
+    $ git commit
+    $ git push {remote name} {local branch name}
 
 If you navigate to your pull request, you should now see that github says "This branch has no conflicts with the base branch", indicating that
 the changes okay to merge (pending pull request approval).
 
-## Wait for Pull Request Approval
+## Wait for Pull Request Approval {#wait-for-pull-request-approval}
 
 Move the JIRA issue to 'Reviewing' to indicate that the work is done, pending approval.
 
@@ -196,7 +191,7 @@ In all likelyhood, you'll need to make changes to your code before your pull req
 environment and then commit and push them into your remote repo.  As long as you're still using the same local branch, these new changes will
 be automatically added to your existing pull request.
 
-## Mark the Issue as 'Done'
+## Mark the Issue as 'Done' {#mark-the-issue-as-done}
 
 Before you mark the issue as done, verify the following:
 - All features listed in the issue have been completed

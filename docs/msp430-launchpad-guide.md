@@ -1,14 +1,10 @@
 # MSP430 Discovery Board Guide
 
-- [Reference Documents](#reference-documents)
-- [Pin Definitions](#pin-definitions)
-- [Startup Code](#startup-code)
-- [Configuration Notes](#configuration-notes)
-- [Flashing the board](#flashing-the-board)
-- [Debug Console](#debug-console)
-- [Example Program](#example-program)
+[TOC]
 
-## Reference Documents
+# MSP430 Discovery Board Guide {#msp430-discovery-board-guide}
+
+## Reference Documents {#reference-docs}
 
 **MSP430 Documentation:**
 
@@ -29,7 +25,7 @@ Useful for things like the configuration options.
 - [Creating your first project](docs/first-project.md) - Steps to create and build a Kubos SDK project
 - [SDK Command Reference](docs/sdk-reference.md) - Overview of the common Kubos SDK commands
 
-## Pin Definitions
+## Pin Definitions {#pin-definitions}
 
 Unlike the STM32F4, there is only a single set of pin definitions for each communication bus.
 
@@ -50,7 +46,7 @@ The first page has the pins.  The primary I2C, SPI, and UART buses are color-cod
 
 The full pinout schematic of the processor can be found in section 2.2.1 of the launchpad's user's guide.
 
-## Startup Code
+## Startup Code {#startup-code}
 
 ***
 **SUPER IMPORTANT**
@@ -78,7 +74,7 @@ Your main() should look something like this:
 		return 0;
 	}
 	
-## Configuration Notes
+## Configuration Notes {#configuration-notes}
 
 The MSP430's inter-device communication methods do not support all of the same options as the STM32F4.  For example, the MSP430 does not support
 1-wire half-duplex SPI communication.  Please refer to the User's Guide or the [MSP430's HAL Documentation](./kubos-hal/kubos-hal-msp430f5529/index.html) for all of the supported options.
@@ -93,7 +89,7 @@ The MSP430's inter-device communication methods do not support all of the same o
 - Direction - Does not support 1-line mode
 - Data Size - Does not support 16-bit mode
 
-## Flashing the board
+## Flashing the board {#flashing-the-board}
 
 You'll flash the firmware onto your board through the micro-USB port.  You might need to install drivers in order for the board
 to be properly detected by your computer.  If you're using Windows, the drivers can be found [here](http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430_FET_Drivers/latest/index_FDS.html).
@@ -227,7 +223,7 @@ upload messages, followed by your program being flashed to the board.
 	MSP430_Close
 
 
-## Debug Console
+## Debug Console {#debug-console}
 
 You can view the MSP430's console output by creating a serial connection to the micro-USB port.  If you're using Windows, the connection
 will appear in Device Manager as "MSP Application UART1".  The default connection speed is 115200.
@@ -238,7 +234,7 @@ You can change the settings of the console with the hardware:console section of 
 **NOTE:** If your MSP430 board loses power while you have a debug console connection open, you might need to close the current console and
 turn the board off and back on again in order to create a new successful console session.
 
-## Example Program
+## Example Program {#example-program}
 
 Let's create a basic MSP430 program.
 
