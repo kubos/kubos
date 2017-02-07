@@ -24,6 +24,7 @@
     "arm-linux-gcc",
     "arm"
   ],
+  "buildTarget": true,
   "config": {
     "arch": {
       "arm": {}
