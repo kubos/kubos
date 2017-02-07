@@ -8,4 +8,4 @@ dependencies:
 
 test:
   override:
-    - docker run -t --rm kubostech/kubos-dev:latest /root/.kubos/kubos/tools/build.py --module telemetry --target stm32f407-disco-gcc
+    - docker run -t kubostech/kubos-dev:latest /root/.kubos/kubos/tools/build.py --module telemetry --target stm32f407-disco-gcc
