@@ -63,7 +63,7 @@ int __wrap_csp_send(csp_conn_t *conn, csp_packet_t *packet, uint32_t timeout)
     return ret;
 }
 
-void * __wrap_csp_buffer_get(size)
+void * __wrap_csp_buffer_get(size_t size)
 {
     return test_malloc(size + CSP_BUFFER_PACKET_OVERHEAD);
 }

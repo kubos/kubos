@@ -59,6 +59,7 @@ enum {
                          failures */
     LOG_WARNING,    /**< Warning log level, will print warning messages for
                          temporary errors */
+    LOG_TELEMETRY,  /**< special level for telemetry */
     LOG_INFO,       /**< Informational log level, will print purely
                          informational messages like successful system bootup,
                          network link state, ...*/
@@ -85,6 +86,7 @@ enum {
  */
 #define LOG_ERROR(...) LOG(LOG_ERROR, __VA_ARGS__)
 #define LOG_WARNING(...) LOG(LOG_WARNING, __VA_ARGS__)
+#define LOG_TELEMETRY(...) LOG(LOG_TELEMETRY, __VA_ARGS__)
 #define LOG_INFO(...) LOG(LOG_INFO, __VA_ARGS__)
 #define LOG_DEBUG(...) LOG(LOG_DEBUG, __VA_ARGS__)
 /** @} */
