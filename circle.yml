@@ -1,0 +1,11 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker pull kubostech/kubos-dev:latest
+
+test:
+  override:
+    - docker run -t --rm kubostech/kubos-dev:latest /root/.kubos/kubos/tools/build.py --module telemetry --target stm32f407-disco-gcc
