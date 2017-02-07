@@ -17,23 +17,6 @@ class KubosBuilder(object):
         self.modules = self.kb.modules()
         self.targets = self.kb.targets()
 
-    def build(self, module_name="", target_name=""):
-        module = next((m for m in self.kb.modules() if m.yotta_name() == module_name), None)
-        target = next((t for t in self.kb.targets() if t.yotta_name() == target_name), None)
-        if module and target:
-            print('Building [module %s@%s] for [target %s] - ' % (module.yotta_name(), module.path, target_name), end="")
-            utils.cmd('kubos', 'target', target_name, cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            utils.cmd('kubos', 'clean', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            ret = utils.cmd('yt', 'build', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print('Result %d' % ret)
-            return ret
-        else:
-            if module is None:
-                print("Module %s was not found" % module_name)
-            if target is None:
-                print("Target %s was not found" % target_name)
-            return 1
-
     def list_targets(self):
         for target in self.kb.targets():
             if 'buildTarget' in target.yotta_data:
@@ -73,31 +56,62 @@ class KubosBuilder(object):
                 print("Modules changed:")
             for m in modules:
                 print(m)
+            return 0
         except subprocess.CalledProcessError:
             print("Error getting changed modules")
+            return 1
+
+    def build(self, module_name="", target_name=""):
+        module = next((m for m in self.kb.modules() if m.yotta_name() == module_name), None)
+        target = next((t for t in self.kb.targets() if t.yotta_name() == target_name), None)
+        if module and target:
+            print('Building [module %s@%s] for [target %s] - ' % (module.yotta_name(), module.path, target_name), end="")
+            utils.cmd('kubos', 'target', target_name, cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            utils.cmd('kubos', 'clean', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ret = utils.cmd('yt', 'build', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print('Result %d' % ret)
+            return ret
+        else:
+            if module is None:
+                print("Module %s was not found" % module_name)
+            if target is None:
+                print("Target %s was not found" % target_name)
+            return 1
 
     def build_all_targets(self, module_name=""):
+        ret = 0
         module = next((m for m in self.kb.modules() if m.yotta_name() == module_name), None)
         if module:
             for target in self.kb.build_targets():
-                self.build(module.yotta_name(), target.yotta_name())
+                build_ret = self.build(module.yotta_name(), target.yotta_name())
+                if build_ret != 0:
+                    ret = build_ret
+            return ret
         else:
             print("Module %s was not found" % module_name)
             return 1
 
     def build_all_modules(self, target_name=""):
+        ret = 0
         target = next((t for t in self.kb.targets() if t.yotta_name() == target_name), None)
         if target:
             for module in self.kb.modules():
-                self.build(module.yotta_name(), target.yotta_name())
+                build_ret = self.build(module.yotta_name(), target.yotta_name())
+                if build_ret != 0:
+                    ret = build_ret
+            return ret
         else:
             print("Target %s was not found" % target_name)
             return 1
     
     def build_all_combinations(self):
+        ret = 0
         for target in self.kb.targets():
             for module in self.kb.modules():
-                self.build(module.yotta_name(), target.yotta_name())
+                build_ret = self.build(module.yotta_name(), target.yotta_name())
+                if build_ret != 0:
+                    ret = build_ret
+        return ret
 
 def main():
     parser = argparse.ArgumentParser(
