@@ -16,6 +16,7 @@
         "msp430f5529-gcc"
     ],
     "toolchain" : "CMake/toolchain.cmake",
+    "buildTarget": true,
     "config": {
         "hardware": {
             "console": {
