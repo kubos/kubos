@@ -1,14 +1,10 @@
-#MSP430 Discovery Board Guide
+# MSP430 Discovery Board Guide
 
-- [Reference Documents](#reference-documents)
-- [Pin Definitions](#pin-definitions)
-- [Startup Code](#startup-code)
-- [Configuration Notes](#configuration-notes)
-- [Flashing the board](#flashing-the-board)
-- [Debug Console](#debug-console)
-- [Example Program](#example-program)
+[TOC]
 
-## Reference Documents
+# MSP430 Discovery Board Guide {#msp430-discovery-board-guide}
+
+## Reference Documents {#reference-docs}
 
 **MSP430 Documentation:**
 
@@ -20,16 +16,16 @@
 
 -	[MSP430F5529 Header File](http://ece.wpi.edu/courses/ece2049smj/msp430f5529.h)  Contains many of the pin and register constants
 
-**KubOS Documentation:**
+**Kubos Documentation:**
 
-- [Main HAL API documentation](http://docs.kubos.co/latest/kubos-hal/index.html) - Overview of the high-level HAL.  Useful for things like k\_uart\_write.
-- [MSP430F5 Specific HAL API documentation](http://docs.kubos.co/latest/kubos-hal/kubos-hal-msp430f5529/) - Specifics for the MSP430 version of the HAL.
+- [Main HAL API documentation](./kubos-hal/index.html) - Overview of the high-level HAL.  Useful for things like k\_uart\_write.
+- [MSP430F5 Specific HAL API documentation](./kubos-hal/kubos-hal-msp430f5529/index.html) - Specifics for the MSP430 version of the HAL.
 Useful for things like the configuration options.
-- [Installing the Kubos SDK](http://docs.kubos.co/latest/md_docs_cli-installing.html) - Basics of setting up the Kubos SDK environment
-- [Creating your first project](http://docs.kubos.co/latest/md_docs_first-project.html) - Steps to create and build a Kubos SDK project
-- [SDK Command Reference](http://docs.kubos.co/latest/md_docs_cli-reference.html) - Overview of the common Kubos SDK commands
+- [Installing the Kubos SDK](docs/sdk-installing.md) - Basics of setting up the Kubos SDK environment
+- [Creating your first project](docs/first-project.md) - Steps to create and build a Kubos SDK project
+- [SDK Command Reference](docs/sdk-reference.md) - Overview of the common Kubos SDK commands
 
-## Pin Definitions
+## Pin Definitions {#pin-definitions}
 
 Unlike the STM32F4, there is only a single set of pin definitions for each communication bus.
 
@@ -38,7 +34,7 @@ console output.
 
 ### Finding the pin definitions for a board
 
-<b><u>Quick Launch Guide:</u></b>
+#### Quick Launch Guide:
 
 The first page has the pins.  The primary I2C, SPI, and UART buses are color-coded.
 
@@ -46,11 +42,11 @@ The first page has the pins.  The primary I2C, SPI, and UART buses are color-cod
 - SPI pins  -  UC_cn_\_{SIMO|SOMI|CLK}
 - UART pins -  UCA0_{TXD|RXD}
 
-<b><u>Launchpad User's Guide:</u></b>
+#### Launchpad User's Guide:
 
 The full pinout schematic of the processor can be found in section 2.2.1 of the launchpad's user's guide.
 
-## Startup Code
+## Startup Code {#startup-code}
 
 ***
 **SUPER IMPORTANT**
@@ -78,34 +74,31 @@ Your main() should look something like this:
 		return 0;
 	}
 	
-## Configuration Notes
+## Configuration Notes {#configuration-notes}
 
 The MSP430's inter-device communication methods do not support all of the same options as the STM32F4.  For example, the MSP430 does not support
-1-wire half-duplex SPI communication.  Please refer to the User's Guide or the [MSP430's HAL Documentation](http://docs.kubos.co/latest/kubos-hal/kubos-hal-msp430f5529/index.html) for all of the supported options.
+1-wire half-duplex SPI communication.  Please refer to the User's Guide or the [MSP430's HAL Documentation](./kubos-hal/kubos-hal-msp430f5529/index.html) for all of the supported options.
 
-[UART](http://docs.kubos.co/latest/kubos-hal/structKUARTConf.html)
+[UART](./kubos-hal/structKUARTConf.html)
 - Word length - Does not support 9-bit mode
 
-[I2C](http://docs.kubos.co/latest/kubos-hal/structKI2CConf.html)
+[I2C](./kubos-hal/structKI2CConf.html)
 - Currently has all the same capabilities as the STM32F4
 
-[SPI](http://docs.kubos.co/latest/kubos-hal/structKSPIConf.html)
+[SPI](./kubos-hal/structKSPIConf.html)
 - Direction - Does not support 1-line mode
 - Data Size - Does not support 16-bit mode
 
-## Flashing the board
+## Flashing the board {#flashing-the-board}
 
 You'll flash the firmware onto your board through the micro-USB port.  You might need to install drivers in order for the board
 to be properly detected by your computer.  If you're using Windows, the drivers can be found [here](http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430_FET_Drivers/latest/index_FDS.html).
 
-If you're using a VM, you'll need to pass the USB through to the VM in order to flash.  The board should appear as the 
-"Texas Instruments MSP Tools Driver" device.  Do not set up auto-forwarding for the USB port if you want to open the debug console locally.
-If you want to open the debug console on your VM, then auto-forwarding should be fine.
-
+If you have a Kubos vagrant image running, the USB connection should be automatically passed through to the VM.  The board should appear as the 
+"Texas Instruments" device if you issue the `lsusb` command.
 Run 'kubos flash' in order to start the flash process.
 
-If you see a "*No unused FET found*" message, the board either isn't plugged into your computer or you haven't passed the USB 
-through to your VM.
+If you see a "*No unused FET found*" message, the board either isn't plugged into your computer or some other VM has control of the USB (only one VM can have control of the USB at a time).
 
 If you see any other error messages, like "*device initialization failed*" re-run the flash command.
 
@@ -230,7 +223,7 @@ upload messages, followed by your program being flashed to the board.
 	MSP430_Close
 
 
-## Debug Console
+## Debug Console {#debug-console}
 
 You can view the MSP430's console output by creating a serial connection to the micro-USB port.  If you're using Windows, the connection
 will appear in Device Manager as "MSP Application UART1".  The default connection speed is 115200.
@@ -241,7 +234,7 @@ You can change the settings of the console with the hardware:console section of 
 **NOTE:** If your MSP430 board loses power while you have a debug console connection open, you might need to close the current console and
 turn the board off and back on again in order to create a new successful console session.
 
-## Example Program
+## Example Program {#example-program}
 
 Let's create a basic MSP430 program.
 
@@ -251,7 +244,7 @@ The goal is to create a program that will output a message once a second.  Addit
 Note: This is more simple than the STM32F4 example program because there are no inter-device pins that can be connected to each other.  UART2
 is dedicated to the debug console and slave mode hasn't been implemented for I2C or SPI.
 
-<b><u>The Walkthrough:</u></b>
+#### The Walkthrough:
 
 Create the project
 
@@ -357,7 +350,7 @@ Build the program
 	
 Flash the program
 
-	$ sudo kubos flash
+	$ kubos flash
 	
 Connect to the debug console.  Should see an "echo, x=_n_" message every second.  If you press the P2.1 button, you should see
 "Button_0 pressed".

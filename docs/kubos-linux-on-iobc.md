@@ -1,17 +1,19 @@
-#KubOS Linux on the ISIS iOBC
+# KubOS Linux on the ISIS iOBC
 
-[Overview](#overview)
+[TOC]
 
-[Software Components](#software-components)
+# KubOS Linux on the ISIS iOBC {#kubos-linux-on-the-iobs}
 
-[Installation Process](#installation-process)
-
-##Overview
+##Overview {#overview}
 
 The goal of this document is to create a KubOS Linux installation for the iOBC that can then run the satellite services (telemetry, payload communication, etc) 
 needed for the ISIS customers' missions.
 
-##Software Components
+The [User Applications on the ISIS iOBC](docs/user-app-on-iobc.md) doc can then be used to create and load a user application on top of the new KubOS Linux install.
+
+**Note:** Ideally, the user should never have to mess with the kernel themselves.  It should be pre-loaded onto the iOBC.
+
+##Software Components {#software-components}
 
 ###ISIS Bootloader
 
@@ -53,9 +55,9 @@ The current development tool for building all of the components required for run
 
 The software tool used to flash the kernel and components onto the iOBC.
 
-##Installation Process
+##Installation Process {#installation-process}
 
-###Build the OS Files
+###Build the OS Files {#build-the-os-files}
 
 Create new folder
 
@@ -98,7 +100,7 @@ The generated files will be located in buildroot-2016.11/output/images.  They ar
 - {board}.dtb - The Device Tree Binary that Linux uses to configure itself for your board
 - rootfs.tar  - The root file system.  Contains BusyBox and other libraries
 
-###Install the SD Card Files
+###Install the SD Card Files {#install-the-sd-card-files}
 
 Due to their size, the zImage and rootfs files live on the SD card.
 
@@ -168,7 +170,7 @@ Unmount the partitions
     
 Remove the SD card and insert it into iOBC SD card slot 0
 
-###Install the NOR Flash Files
+###Install the NOR Flash Files {#install-the-nor-flash-files}
 
 ####Pre-Requisites
 
@@ -193,22 +195,22 @@ flash the board.
 You'll need to establish a serial connection with the board in order to connect to the console.  Set up a serial connection to the board at a 
 baudrate of 115200.
 
---- <div markdown="1" align="center">![PuTTY Connection](images/iOBC/putty_connection.png) </div> ---s
+![PuTTY Connection](images/iOBC/putty_connection.png)
 
 Once the serial connection is open, boot (or reboot) the board.  Hold down any key while the board is starting up.  This will exit out of the 
 auto-boot and bring up the CLI.
 
---- <div markdown="1" align="center">![U-Boot Console](images/iOBC/uboot_console.png) </div> ---s
+![U-Boot Console](images/iOBC/uboot_console.png)
 
 ####Flash the Files
 
 Start up SAM-BA.  You'll want to select the at91sam9g20-ISISOBC option from the 'Select your board' drop-down.
 
---- <div markdown="1" align="center">![SAM-BA Connection Selection](images/iOBC/samba_connection_select.png) </div> ---s
+![SAM-BA Connection Selection](images/iOBC/samba_connection_select.png)
 
 Execute the 'Enable NorFlash' script.  This will prep the board to enable flashing.
 
---- <div markdown="1" align="center">![SAM-BA Enable NorFlash](images/iOBC/samba_enable_norflash.png) </div> ---s
+![SAM-BA Enable NorFlash](images/iOBC/samba_enable_norflash.png)
 
 Select the uboot.bin file in the 'Send File Name' field.
 
@@ -216,7 +218,7 @@ Make sure that 'Address' is set to 0xA000.
 
 Click 'Send File'
 
---- <div markdown="1" align="center">![SAM-BA Send U-Boot](images/iOBC/samba_send_uboot.png) </div> ---s
+![SAM-BA Send U-Boot](images/iOBC/samba_send_uboot.png)
 
 Select the at91sam9g20isis.dtb file in the 'Send File Name' field (you'll need to view all file types in order to see the .dtb file)
 
@@ -224,18 +226,18 @@ Set 'Address' to 0x60000.
 
 Click 'Send File'
 
---- <div markdown="1" align="center">![SAM-BA Send DTB](images/iOBC/samba_send_dtb.png) </div> ---s
+![SAM-BA Send DTB](images/iOBC/samba_send_dtb.png)
 
 
-###Boot the System
+###Boot the System {#boot-the-system}
 
 You should now be able to set up a serial connection to your board and boot it into Linux.
 
 You'll need to establish a serial connection with the board in order to connect to the console.  Set up a serial connection to the board at a 
 baudrate of 115200.
 
---- <div markdown="1" align="center">![PuTTY Connection](images/iOBC/putty_connection.png) </div> ---s
+![PuTTY Connection](images/iOBC/putty_connection.png)
 
 You should see the console boot into Linux like this:
 
---- <div markdown="1" align="center">![Linux Console](images/iOBC/linux_console.png) </div> ---s
+![Linux Console](images/iOBC/linux_console.png)
