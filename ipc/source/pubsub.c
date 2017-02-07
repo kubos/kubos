@@ -126,7 +126,7 @@ bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t
     }
 }
 
-bool kprv_send_csp(pubsub_conn * conn, void * data, uint16_t length)
+bool kprv_send_csp(const pubsub_conn * conn, const void * data, uint16_t length)
 {
     csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = NULL;
@@ -151,7 +151,7 @@ bool kprv_send_csp(pubsub_conn * conn, void * data, uint16_t length)
     return false;
 }
 
-bool kprv_publisher_read(pubsub_conn * conn, void * buffer, int buffer_size, uint8_t port)
+bool kprv_publisher_read(const pubsub_conn * conn, void * buffer, int buffer_size, uint8_t port)
 {
     csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = NULL;
@@ -172,7 +172,7 @@ bool kprv_publisher_read(pubsub_conn * conn, void * buffer, int buffer_size, uin
     return false;
 }
 
-bool kprv_subscriber_read(pubsub_conn * conn, void * buffer, int buffer_size, uint8_t port)
+bool kprv_subscriber_read(const pubsub_conn * conn, void * buffer, int buffer_size, uint8_t port)
 {
     csp_packet_t * csp_packet = NULL;
     csp_conn_t * csp_conn = NULL;

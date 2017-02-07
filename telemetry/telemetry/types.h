@@ -13,6 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @defgroup Types
+ * @addtogroup Types
+ * @brief Public telemetry types
+ * @{
+ */
+
 #ifndef TYPES_H
 #define TYPES_H
 
@@ -24,7 +32,9 @@
  */
 typedef union
 {
+    /*! Storage for integer data */
     int i;
+    /*! Storage for float data */
     float f;
 } telemetry_union;
 
@@ -34,7 +44,9 @@ typedef union
  */
 typedef enum
 {
+    /*! Indicates stored integer data */
     TELEMETRY_TYPE_INT = 0,
+    /*! Indicates stored float data */
     TELEMETRY_TYPE_FLOAT
 } telemetry_data_type;
 
@@ -43,11 +55,11 @@ typedef enum
  */
 typedef struct
 {
-    /* Source identifier - used for subscribing */
+    /*! Source identifier - used for subscribing */
     uint8_t topic_id;
-    /* Data type identifier */    
+    /*! Data type identifier */    
     telemetry_data_type data_type;
-    /* Subsystem identifier */
+    /*! Subsystem identifier */
     uint8_t subsystem_id;
 } telemetry_source;
 
@@ -57,14 +69,14 @@ typedef struct
  */
 typedef struct
 {
+    /*! Telemetry source structure */
     telemetry_source source;
+    /*! Data payload */
     telemetry_union data;
+    /*! Timestamp indicating packet creation time */
     uint16_t timestamp;
 } telemetry_packet;
 
-typedef struct
-{
-    
-} telemetry_connection;
-
 #endif
+
+/* @} */

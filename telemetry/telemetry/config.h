@@ -13,26 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @defgroup Config
+ * @addtogroup Config
+ * @brief Configuration settings for Telemetry
+ * @{
+ */
+
 #ifndef TELEMETRY_CONFIG_H
 #define TELEMETRY_CONFIG_H
 
 #include <csp/csp_autoconfig.h>
 
-/* Address used for the current CSP instance */
+/*! Address used for the current CSP instance */
 #ifndef YOTTA_CFG_TELEMETRY_CSP_ADDRESS
 #define TELEMETRY_CSP_ADDRESS 1
 #else
 #define TELEMETRY_CSP_ADDRESS YOTTA_CFG_TELEMETRY_CSP_ADDRESS
 #endif
 
-/* Size of incoming telemetry message queue */
+/*! Size of incoming telemetry message queue */
 #ifndef YOTTA_CFG_TELEMETRY_MESSAGE_QUEUE_SIZE
 #define MESSAGE_QUEUE_SIZE 10
 #else
 #define MESSAGE_QUEUE_SIZE YOTTA_CFG_TELEMETRY_MESSAGE_QUEUE_SIZE
 #endif
 
-/* Port number used for the telemetry server's CSP socket */
+/*! Port number used for the telemetry server's CSP socket */
 #ifndef YOTTA_CFG_TELEMETRY_CSP_PORT
 #define TELEMETRY_CSP_PORT 20
 #else
@@ -40,7 +48,7 @@
 #endif
 
 
-/* Max number of subscribers supported */
+/*! Max number of subscribers supported */
 #ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_MAX_NUM
 #define TELEMETRY_SUBSCRIBERS_MAX_NUM ((CSP_CONN_MAX / 2) - 1)
 #else
@@ -55,21 +63,21 @@
 #warning "Number of telemetry subscribers exceeds number of available CSP connections"
 #endif
 
-/* Number of subscriber read attempts */
+/*! Number of subscriber read attempts */
 #ifndef YOTTA_CFG_TELEMETERY_SUBSCRIBERS_READ_ATTEPMTS
 #define TELEMETRY_SUBSCRIBER_READ_ATTEMPTS 10
 #else
 #define TELEMETRY_SUBSCRIBER_READ_ATTEMPTS YOTTA_CFG_TELEMETRY_SUBSCRIBERS_READ_ATTEMPTS
 #endif
 
-/* Stack size of thread for receiving incoming messages */
+/*! Stack size of thread for receiving incoming messages */
 #ifndef YOTTA_CFG_TELEMETRY_RX_THREAD_STACK_SIZE
 #define TELEMETRY_RX_THREAD_STACK_SIZE 1000
 #else
 #define TELEMETRY_RX_THREAD_STACK_SIZE YOTTA_CFG_TELEMETRY_RX_THREAD_STACK_SIZE
 #endif
 
-/* Priority of thread for receiving incoming messages */
+/*! Priority of thread for receiving incoming messages */
 #ifndef YOTTA_CFG_TELEMETRY_RX_THREAD_PRIORITY
 #define TELEMETRY_RX_THREAD_PRIORITY 2
 #else
@@ -77,3 +85,5 @@
 #endif
 
 #endif
+
+/* @} */

@@ -41,7 +41,7 @@ typedef struct subscriber_list_item
     struct subscriber_list_item * next;
 } subscriber_list_item;
 
-bool kprv_has_topic(subscriber_list_item * sub, uint16_t topic_id);
+bool kprv_has_topic(const subscriber_list_item * sub, uint16_t topic_id);
 
 /**
  * Iterates though all open telemetry connections and
@@ -222,7 +222,7 @@ bool telemetry_publish(telemetry_packet pkt)
 }
 #endif
 
-bool telemetry_read(pubsub_conn * conn, telemetry_packet * packet)
+bool telemetry_read(const pubsub_conn * conn, telemetry_packet * packet)
 {
     int tries = 0;
     if (packet != NULL)
@@ -335,7 +335,7 @@ bool telemetry_disconnect(pubsub_conn * client_conn)
     return ret;
 }
 
-subscriber_list_item * kprv_get_subscriber(pubsub_conn * client_conn)
+subscriber_list_item * kprv_get_subscriber(const pubsub_conn * client_conn)
 {
     subscriber_list_item * current, * next;
     LL_FOREACH_SAFE(subscribers, current, next)
@@ -362,12 +362,12 @@ bool kprv_add_topic(subscriber_list_item * sub, uint16_t topic_id)
     return ret;
 }
 
-int topic_cmp(topic_list_item * a, topic_list_item * b)
+int topic_cmp(const topic_list_item * a, const topic_list_item * b)
 {
     return (a->topic_id != b->topic_id);
 }
 
-bool kprv_has_topic(subscriber_list_item * sub, uint16_t topic_id)
+bool kprv_has_topic(const subscriber_list_item * sub, uint16_t topic_id)
 {
     bool ret = false;
     if (sub != NULL)
@@ -407,7 +407,7 @@ bool kprv_remove_topic(subscriber_list_item * sub, uint16_t topic_id)
     return ret;
 }
 
-bool telemetry_is_subscribed(pubsub_conn * client_conn, uint16_t topic_id)
+bool telemetry_is_subscribed(const pubsub_conn * client_conn, uint16_t topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
@@ -421,7 +421,7 @@ bool telemetry_is_subscribed(pubsub_conn * client_conn, uint16_t topic_id)
     return ret;
 }
 
-bool telemetry_subscribe(pubsub_conn * client_conn, uint16_t topic_id)
+bool telemetry_subscribe(const pubsub_conn * client_conn, uint16_t topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
@@ -435,7 +435,7 @@ bool telemetry_subscribe(pubsub_conn * client_conn, uint16_t topic_id)
     return ret;
 }
 
-bool telemetry_unsubscribe(pubsub_conn * client_conn, uint16_t topic_id)
+bool telemetry_unsubscribe(const pubsub_conn * client_conn, uint16_t topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)

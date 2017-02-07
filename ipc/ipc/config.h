@@ -14,21 +14,31 @@
  * limitations under the License.
  */
 
+/**
+ * @defgroup Config
+ * @addtogroup Config
+ * @brief Configuration settings for IPC API
+ * @{
+ */
+
 #ifndef IPC_CONFIG_H
 #define IPC_CONFIG_H
 
+/*! Timeout for read calls */
 #ifdef YOTTA_CFG_IPC_READ_TIMEOUT
 #define IPC_READ_TIMEOUT YOTTA_CFG_IPC_READ_TIMEOUT
 #else
 #define IPC_READ_TIMEOUT 50
 #endif
 
+/*! Timeout for send/write calls */
 #ifdef YOTTA_CFG_IPC_SEND_TIMEOUT
 #define IPC_SEND_TIMEOUT YOTTA_CFG_IPC_SEND_TIMEOUT
 #else
 #define IPC_SEND_TIMEOUT 1000
 #endif
 
+/*! Port for IPC sockets to listen/connect on */
 #ifdef YOTTA_CFG_IPC_SOCKET_PORT
 #define IPC_SOCKET_PORT YOTTA_CFG_IPC_SOCKET_PORT
 #else
@@ -36,3 +46,5 @@
 #endif
 
 #endif
+
+/* @} */

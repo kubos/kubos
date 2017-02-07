@@ -140,7 +140,7 @@ static void test_telemetry_read_null_packet(void ** arg)
 
 static void test_telemetry_read(void ** arg)
 {
-    pubsub_conn conn;
+    pubsub_conn * conn;
     telemetry_packet packet;
 
     will_return(__wrap_kprv_subscriber_connect, "");
@@ -158,13 +158,13 @@ static void test_telemetry_read(void ** arg)
     expect_not_value(__wrap_kprv_publisher_read, buffer, NULL);
     will_return(__wrap_kprv_publisher_read, true);
     
-    kprv_telemetry_connect(&conn);
+    conn = kprv_telemetry_connect();
 
-    expect_value(__wrap_kprv_subscriber_read, conn->conn_handle, conn.conn_handle);
+    expect_value(__wrap_kprv_subscriber_read, conn->conn_handle, conn->conn_handle);
     expect_value(__wrap_kprv_subscriber_read, buffer, &packet);
     will_return(__wrap_kprv_subscriber_read, true);
 
-    assert_true(telemetry_read(&conn, &packet));
+    assert_true(telemetry_read(conn, &packet));
 }
 
 static void test_telemetry_publish_no_setup(void ** arg)

@@ -33,7 +33,11 @@ extern "C" {
 #include <csp/csp.h>
 #include <csp/csp_interface.h>
 
+/**
+ * Unix socket driver handle
+ */
 typedef struct {
+    /*! Low level socket handle */
     int socket_handle;
 } csp_socket_handle_t;
 
@@ -41,7 +45,9 @@ typedef struct {
  * Enum for csp socket mode
  */
 typedef enum {
+    /*! Indicates a server socket */
     CSP_SOCKET_SERVER = 0,
+    /*! Indicates a client socket */
     CSP_SOCKET_CLIENT
 } csp_if_socket_modes;
 

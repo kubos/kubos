@@ -14,30 +14,23 @@
  * limitations under the License.
  */
 
-#ifdef YOTTA_CFG_TELEMETRY_AGGREGATOR
+/**
+ * @defgroup Config
+ * @addtogroup Config
+ * @brief Configuration values
+ * @{
+ */
 
-#include "telemetry-aggregator/aggregator.h"
-#include "telemetry-aggregator/config.h"
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include <csp/csp.h>
-
-CSP_DEFINE_TASK(aggregator)
-{
-    while(1)
-    {
-        user_aggregator();
-        csp_sleep_ms(TELEMETRY_AGGREGATOR_INTERVAL);
-    }
-}
-
-
-void aggregator_submit(telemetry_source source, uint16_t data)
-{
-    telemetry_publish((telemetry_packet){
-        .data = data,
-        .timestamp = csp_get_ms(),
-        .source = source
-    });
-}
+/*! Time interval between calls to user_aggerator (in ms) */
+#ifdef YOTTA_CFG_TELEMETRY_AGGREGATOR_INTERVAL
+#define TELEMETRY_AGGREGATOR_INTERVAL YOTTA_CFG_TELEMETRY_AGGREGATOR_INTERVAL
+#else
+#define TELEMETRY_AGGREGATOR_INTERVAL 1000
+#endif
 
 #endif
+
+/* @} */
