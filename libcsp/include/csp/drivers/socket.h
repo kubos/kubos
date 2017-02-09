@@ -34,6 +34,8 @@
  */
 int socket_init(csp_socket_handle_t * socket_iface, uint8_t mode, uint16_t port);
 
+int socket_close(csp_socket_handle_t * socket_driver);
+
 /**
  * Attempts to check open/closed status of socket
  * @param socket_iface socket interface containing socket handle

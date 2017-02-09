@@ -32,6 +32,7 @@ extern "C" {
 /* CSP includes */
 #include <csp/csp.h>
 #include <csp/csp_interface.h>
+#include <csp/arch/csp_thread.h>
 
 /**
  * Unix socket driver handle
@@ -39,6 +40,8 @@ extern "C" {
 typedef struct {
     /*! Low level socket handle */
     int socket_handle;
+    /*! Handle for RX thread */
+    csp_thread_handle_t rx_thread_handle;
 } csp_socket_handle_t;
 
 /**
@@ -58,6 +61,8 @@ typedef enum {
  * @return int CSP_ERR_NONE if success, otherwise error
  */
 int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver);
+
+int csp_socket_close(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver);
 
 #ifdef __cplusplus
 } /* extern "C" */

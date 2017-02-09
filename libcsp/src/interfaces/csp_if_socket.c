@@ -101,11 +101,21 @@ int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dri
     socket_iface->mtu = BUF_SIZE;
 
     /* Start RX thread */
-	static csp_thread_handle_t handle_rx;
-	int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &handle_rx);
+	int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &socket_driver->rx_thread_handle);
 
     /* Register interface */
     csp_iflist_add(socket_iface);
 
+    return CSP_ERR_NONE;
+}
+
+int csp_socket_close(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver) {
+    if ((socket_iface == NULL) || (socket_driver == NULL))
+        return CSP_ERR_DRIVER;
+
+    socket_close(socket_driver);
+
+    csp_thread_kill(&socket_driver->rx_thread_handle);
+    
     return CSP_ERR_NONE;
 }
