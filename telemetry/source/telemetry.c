@@ -86,17 +86,35 @@ void telemetry_init(void)
     csp_mutex_create(&subscribing_lock);
     csp_mutex_create(&unsubscribing_lock);
 
-#ifdef DEBUG
-    csp_debug_toggle_level(CSP_INFO);
-    csp_debug_toggle_level(CSP_BUFFER);
-    csp_debug_toggle_level(CSP_PACKET);
-    csp_debug_toggle_level(CSP_PROTOCOL);
-    csp_debug_toggle_level(CSP_LOCK);
-#endif
+    csp_debug_set_level(CSP_ERROR, true);
+    csp_debug_set_level(CSP_WARN, true);
+    csp_debug_set_level(CSP_INFO, true);
+    csp_debug_set_level(CSP_BUFFER, true);
+    csp_debug_set_level(CSP_PACKET, true);
+    csp_debug_set_level(CSP_PROTOCOL, true);
+    csp_debug_set_level(CSP_LOCK, true);
 
     csp_thread_create(telemetry_rx_task, "TELEM_RX", TELEMETRY_RX_THREAD_STACK_SIZE, NULL, TELEMETRY_RX_THREAD_PRIORITY, &telem_rx_handle);
 
-    socket = kprv_server_setup(TELEMETRY_CSP_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
+    socket = kprv_server_setup(TELEMETRY_INTERNAL_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
+}
+
+void telemetry_client_init(void)
+{
+    csp_buffer_init(20, 256);
+
+    /* Init CSP with client address */
+    csp_init(TELEMETRY_CSP_CLIENT_ADDRESS);
+
+    csp_route_start_task(500, 1);
+
+    csp_debug_set_level(CSP_ERROR, true);
+    csp_debug_set_level(CSP_WARN, true);
+    csp_debug_set_level(CSP_INFO, true);
+    csp_debug_set_level(CSP_BUFFER, true);
+    csp_debug_set_level(CSP_PACKET, true);
+    csp_debug_set_level(CSP_PROTOCOL, true);
+    csp_debug_set_level(CSP_LOCK, true);
 }
 
 void telemetry_cleanup(void)
@@ -185,14 +203,18 @@ bool telemetry_publish(telemetry_packet pkt)
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-    socket_init(&socket_driver, CSP_SOCKET_CLIENT, 8888);
+    if (socket_init(&socket_driver, CSP_SOCKET_CLIENT, 8888) != CSP_ERR_NONE)
+    {
+        return false;
+    }
 
-    // csp_socket_init(CSP_SOCKET_SERVER, 8888, NULL);
-    csp_socket_init(&csp_socket_if, &socket_driver);
+    if (csp_socket_init(&csp_socket_if, &socket_driver) != CSP_ERR_NONE)
+    {
+        return false;
+    }
 
 
     /* Set default route and start router */
-    // csp_route_set(CSP_DEFAULT_ROUTE, &csp_socket_if, CSP_NODE_MAC);
     csp_route_set(CSP_DEFAULT_ROUTE, &csp_socket_if, CSP_NODE_MAC);
 
     packet = csp_buffer_get(sizeof(telemetry_packet));
@@ -202,23 +224,25 @@ bool telemetry_publish(telemetry_packet pkt)
         // packet->length = strlen(message);
         packet->length = sizeof(telemetry_packet);
 
-        // conn = csp_connect(CSP_PRIO_NORM, other, PORT, 1000, CSP_O_NONE);
-        conn = csp_connect(CSP_PRIO_NORM, 1, 10, 1000, CSP_O_NONE);
+        conn = csp_connect(CSP_PRIO_NORM, TELEMETRY_CSP_ADDRESS, TELEMETRY_EXTERNAL_PORT, 1000, CSP_O_NONE);
         // printf("Sending: %s\r\n", message);
         if (!conn) {
+            csp_buffer_free(packet);
             printf("conn err\r\n");
             return -1;
         } 
         
         if (!csp_send(conn, packet, 1000))
         {
+            csp_buffer_free(packet);
             printf("send err\r\n");
             return -1;
         }
         csp_close(conn);
         printf("sent!\r\n");
     }
-    // socket_close(&socket_driver);
+
+    csp_socket_close(&csp_socket_if, &socket_driver);
 }
 #endif
 
@@ -229,7 +253,7 @@ bool telemetry_read(const pubsub_conn * conn, telemetry_packet * packet)
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
-            if (kprv_subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_CSP_PORT))
+            if (kprv_subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_INTERNAL_PORT))
                 return true;
         }
     }
@@ -254,7 +278,7 @@ pubsub_conn * kprv_telemetry_connect(void)
     pubsub_conn * conn = NULL;
     pubsub_conn client_conn;
     bool ret = false;
-    if (kprv_subscriber_connect(&client_conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_CSP_PORT))
+    if (kprv_subscriber_connect(&client_conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_INTERNAL_PORT))
     {
         char msg;
 
@@ -266,7 +290,7 @@ pubsub_conn * kprv_telemetry_connect(void)
         if (kprv_server_accept(socket, &server_conn))
         {
             char msg;
-            ret = kprv_publisher_read(&server_conn, (void*)&msg, sizeof(msg), TELEMETRY_CSP_PORT);
+            ret = kprv_publisher_read(&server_conn, (void*)&msg, sizeof(msg), TELEMETRY_INTERNAL_PORT);
             if (ret)
             {
                 subscriber_list_item * sub = telemetry_add_subscriber(server_conn, client_conn);
