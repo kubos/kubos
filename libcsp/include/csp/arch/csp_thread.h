@@ -44,6 +44,8 @@ extern "C" {
 
 #define csp_thread_exit() pthread_exit(NULL)
 
+#define csp_thread_kill(thread) pthread_cancel(thread); pthread_join(thread, NULL);
+
 typedef pthread_t csp_thread_handle_t;
 typedef void * csp_thread_return_t;
 
@@ -83,6 +85,12 @@ typedef unsigned int csp_thread_return_t;
 #define csp_thread_exit() vTaskDelete(NULL)
 #else
 #define csp_thread_exit()
+#endif
+
+#if INCLUDE_vTaskDelete
+#define csp_thread_kill(thread) vTaskDelete(NULL)
+#else
+#define csp_thread_kill()
 #endif
 
 typedef xTaskHandle csp_thread_handle_t;

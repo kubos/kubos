@@ -17,7 +17,6 @@
 
 #ifndef TARGET_LIKE_MSP430
 
-
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -30,96 +29,89 @@
 #include <csp/arch/csp_time.h>
 #include "kubos-core/modules/klog.h"
 
-uint8_t klog_console_level = LOG_INFO;
-uint8_t klog_file_level = LOG_DEBUG;
-bool klog_file_logging = false;
-
-static FILE *_log_file = NULL;
-static char *_file_path = NULL;
-static uint8_t _file_path_len = 0;
-static uint8_t _current_part = 0;
-static uint32_t _current_part_size = 0;
-static uint32_t _part_size;
-static uint8_t _max_parts;
-
-static void _next_log_file(void)
+static void _next_log_file(klog_handle *handle)
 {
     char buf[KLOG_PATH_LEN];
     char *tail;
     uint32_t pos = 0;
     struct stat st;
 
-    klog_cleanup();
-    if (!_file_path) {
+    if (handle == NULL) {
         return;
     }
 
-    _current_part = -1;
-    _current_part_size = 0;
+    klog_cleanup(handle);
+    if (!handle->config.file_path) {
+        return;
+    }
 
-    strncpy(buf, _file_path, _file_path_len);
-    tail = buf + _file_path_len;
+    strncpy(buf, handle->config.file_path, handle->config.file_path_len);
+    tail = buf + handle->config.file_path_len;
 
-    for (uint8_t i = 0; i < _max_parts; i++) {
+    for (uint8_t i = 0; i < handle->config.max_parts; i++) {
         sprintf(tail, ".%03d", i);
 
         if (stat(buf, &st) == -1) {
             if (errno == ENOENT) {
                 klog_console(LOG_DEBUG, "klog", "creating %s", buf);
-                _log_file = fopen(buf, "w+");
-                _current_part = i;
-                _current_part_size = 0;
+                handle->log_file = fopen(buf, "w+");
+                handle->current_part = i;
+                handle->current_part_size = 0;
                 break;
             }
             continue;
         }
 
-        if (st.st_size < (off_t) _part_size) {
-            _log_file = fopen(buf, "r+");
-            _current_part = i;
+        if (st.st_size < (off_t) handle->config.part_size) {
+            handle->log_file = fopen(buf, "r+");
+            handle->current_part = i;
             pos = st.st_size - 1;
-            _current_part_size = st.st_size;
+            handle->current_part_size = st.st_size;
             break;
         }
     }
 
-    if (!_log_file) {
+    if (!handle->log_file) {
         // no empty or partial log file found, rotate
-        _current_part++;
-        if (_current_part > _max_parts) {
-            _current_part = 0;
+        handle->current_part++;
+        if (handle->current_part > handle->config.max_parts) {
+            handle->current_part = 0;
         }
 
-        sprintf(tail, ".%03d", _current_part);
+        sprintf(tail, ".%03d", handle->current_part);
         remove(buf);
 
         klog_console(LOG_DEBUG, "klog", "rotating to %s", buf);
-        _log_file = fopen(buf, "w+");
+        handle->log_file = fopen(buf, "w+");
     }
 
-    if (_log_file) {
+    if (handle->log_file) {
         klog_console(LOG_INFO, "klog", "logging to %s", buf);
-        klog_file_logging = true;
         if (pos > 0) {
-            fseek(_log_file, 0, SEEK_END);
+            fseek(handle->log_file, 0, SEEK_END);
         }
     }
 }
 
-int klog_init_file(char *file_path, uint8_t file_path_len,
-                   uint32_t part_size, uint8_t max_parts)
+int klog_init_file(klog_handle *handle)
 {
-    if (!file_path || file_path_len > KLOG_MAX_PATH) {
+    if ((handle == NULL) || (handle->config.file_path == NULL) || (handle->config.file_path_len > KLOG_MAX_PATH))
+    {
         return -EINVAL;
     }
-
-    _file_path = file_path;
-    _file_path_len = file_path_len;
-    _part_size = part_size;
-    _max_parts = max_parts;
-
-    _next_log_file();
-    return klog_file_logging ? 0 : -1;
+    
+    handle->log_file = NULL;
+    handle->current_part = -1;
+    handle->current_part_size = 0;
+    
+    _next_log_file(handle);
+    
+    if (handle->log_file == NULL)
+    {
+        return -ENOENT;
+    }
+    
+    return handle->config.klog_file_logging ? 0 : -1;
 }
 
 static inline char *_level_str(unsigned level)
@@ -127,6 +119,7 @@ static inline char *_level_str(unsigned level)
     switch (level) {
         case LOG_ERROR: return "E";
         case LOG_WARNING: return "W";
+        case LOG_TELEMETRY: return "T";
         case LOG_INFO: return "I";
         case LOG_DEBUG: return "D";
         case LOG_NONE:
@@ -139,56 +132,66 @@ static int _klog(FILE *f, unsigned level, const char *logger,
                  const char *format, va_list args)
 {
     int written = 0;
-    uint32_t millis = csp_get_ms();
+    if ((f != NULL) && (logger != NULL) && (format != NULL))
+    {
+        uint32_t millis = csp_get_ms();
 
-    written += fprintf(f, "%010ld.%03ld %s:%s ", millis / 1000, millis % 1000,
-                       logger, _level_str(level));
-    written += vfprintf(f, format, args);
-    written += fprintf(f, "\n");
+        written += fprintf(f, "%010ld.%03ld %s:%s ", millis / 1000, millis % 1000,
+                        logger, _level_str(level));
+        written += vfprintf(f, format, args);
+        written += fprintf(f, "\n");
+    }
     return written;
 }
 
 void klog_console(unsigned level, const char *logger, const char *format, ...)
 {
     va_list args;
-    va_start(args, format);
+    if ((logger != NULL) && (format != NULL))
+    {
+        va_start(args, format);
 
-    _klog(level == LOG_ERROR ? stderr : stdout, level, logger, format, args);
+        _klog(level == LOG_ERROR ? stderr : stdout, level, logger, format, args);
 
-    va_end(args);
+        va_end(args);
+    }
 }
 
-void klog_file(unsigned level, const char *logger, const char *format, ...)
+void klog_file(klog_handle *handle, unsigned level, const char *logger, const char *format, ...)
 {
     va_list args;
-
-    va_start(args, format);
-    if (!_log_file) {
-        _next_log_file();
-        if (!_log_file) {
-            va_end(args);
-            return;
+    if ((handle != NULL) && (logger != NULL) && (format != NULL))
+    {
+        va_start(args, format);
+        if (!handle->log_file) {
+            _next_log_file(handle);
+            if (!handle->log_file) {
+                va_end(args);
+                return;
+            }
         }
-    }
+        handle->current_part_size += _klog(handle->log_file, level, logger, format, args);
 
-    _current_part_size += _klog(_log_file, level, logger, format, args);
+        va_end(args);
+        fsync(fileno(handle->log_file));
 
-    va_end(args);
-    fsync(fileno(_log_file));
-
-    if (_current_part_size >= _part_size) {
-        _next_log_file();
+        if (handle->current_part_size >= handle->config.part_size) {
+            _next_log_file(handle);
+        }
     }
 }
 
-void klog_cleanup(void)
+void klog_cleanup(klog_handle *handle)
 {
-    if (_log_file) {
-        fsync(fileno(_log_file));
-        fclose(_log_file);
-    }
+    if (handle != NULL)
+    {
+        if (handle->log_file) {
+            fsync(fileno(handle->log_file));
+            fclose(handle->log_file);
+        }
 
-    _log_file = NULL;
+        handle->log_file = NULL;
+    }
 }
 
 #ifndef HAVE_FSYNC

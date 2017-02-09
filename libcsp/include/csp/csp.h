@@ -266,9 +266,15 @@ int csp_conn_src(csp_conn_t *conn);
 int csp_conn_flags(csp_conn_t *conn);
 
 /**
+ * @param conn pointer to connection structure
+ * @return CSP_ERR_NONE if connection is still active & valid. Otherwise, an err code is returned.
+ */
+int csp_conn_check_alive(csp_conn_t *conn);
+
+/**
  * Set socket to listen for incoming connections
  * @param socket Socket to enable listening on
- * @param conn_queue_length Lenght of backlog connection queue
+ * @param conn_queue_length Length of backlog connection queue
  * @return 0 on success, -1 on error.
  */
 int csp_listen(csp_socket_t *socket, size_t conn_queue_length);
@@ -287,6 +293,11 @@ int csp_bind(csp_socket_t *socket, uint8_t port);
  * @param priority The OS task priority of the router
  */
 int csp_route_start_task(unsigned int task_stack_size, unsigned int priority);
+
+/**
+ * Ends the router task.
+ */
+void csp_route_end_task();
 
 /**
  * Call the router worker function manually (without the router task)

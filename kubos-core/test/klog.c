@@ -37,17 +37,8 @@ inline bool _fstat(char *path, int *size) {
 
 #define remove_if_exists(p) if (_fstat(p, NULL)) remove(p)
 
-void setUp(void)
-{
-    klog_console_level = LOG_NONE;
-}
-
 void tearDown(void)
 {
-    klog_console_level = LOG_INFO;
-    klog_file_level = LOG_DEBUG;
-
-    klog_cleanup();
     remove_if_exists(LOG_PATH ".000");
     remove_if_exists(LOG_PATH ".001");
     remove_if_exists(LOG_PATH ".002");
@@ -57,16 +48,25 @@ void tearDown(void)
 
 void test_FileLog(void)
 {
-    klog_file_level = LOG_DEBUG;
-    int result = klog_init_file(LOG_PATH, strlen(LOG_PATH), 256, 1);
+    klog_handle log_handle = {
+        .config.file_path = LOG_PATH,
+        .config.file_path_len = strlen(LOG_PATH),
+        .config.part_size = 256,
+        .config.max_parts = 1,
+        .config.klog_console_level = LOG_NONE,
+        .config.klog_file_level = LOG_DEBUG,
+        .config.klog_file_logging = true
+    };
+
+    int result = klog_init_file(&log_handle);
     TEST_ASSERT_EQUAL_INT(result, 0);
 
 
-    KLOG_INFO("test", "123:%d", 456);
-    KLOG_WARN("logger", "hi");
-    KLOG_ERR("o", "error");
-    KLOG_DEBUG("b", "debug");
-    klog_cleanup();
+    KLOG_INFO(&log_handle, "test", "123:%d", 456);
+    KLOG_WARN(&log_handle, "logger", "hi");
+    KLOG_ERR(&log_handle, "o", "error");
+    KLOG_DEBUG(&log_handle, "b", "debug");
+    klog_cleanup(&log_handle);
 
     FILE *log_file = fopen(LOG_PATH ".000", "r");
     TEST_ASSERT_NOT_NULL(log_file);
@@ -94,29 +94,39 @@ void test_FileLog(void)
 
 static void test_RotateParts(void)
 {
-    int result = klog_init_file(LOG_PATH, strlen(LOG_PATH), 32, 3);
+    klog_handle log_handle = {
+        .config.file_path = LOG_PATH,
+        .config.file_path_len = strlen(LOG_PATH),
+        .config.part_size = 42,
+        .config.max_parts = 3,
+        .config.klog_console_level = LOG_NONE,
+        .config.klog_file_level = LOG_DEBUG,
+        .config.klog_file_logging = true
+    };
+
+    int result = klog_init_file(&log_handle);
     int size = 0;
 
     TEST_ASSERT_EQUAL_INT(result, 0);
 
     // This should be a line length of 21
-    KLOG_WARN("a", "b");
-    KLOG_WARN("a", "b");
-    klog_cleanup();
+    KLOG_WARN(&log_handle, "a", "b");
+    KLOG_WARN(&log_handle, "a", "b");
+    klog_cleanup(&log_handle);
 
     TEST_ASSERT(_fstat(LOG_PATH ".000", &size));
     TEST_ASSERT_EQUAL_INT(size, 42);
 
-    KLOG_WARN("a", "b");
-    klog_cleanup();
+    KLOG_WARN(&log_handle, "a", "b");
+    klog_cleanup(&log_handle);
 
     TEST_ASSERT(_fstat(LOG_PATH ".000", &size));
     TEST_ASSERT_EQUAL_INT(size, 42);
     TEST_ASSERT(_fstat(LOG_PATH ".001", &size));
     TEST_ASSERT_EQUAL_INT(size, 21);
 
-    KLOG_WARN("a", "b");
-    klog_cleanup();
+    KLOG_WARN(&log_handle, "a", "b");
+    klog_cleanup(&log_handle);
 
     TEST_ASSERT(_fstat(LOG_PATH ".000", &size));
     TEST_ASSERT_EQUAL_INT(size, 42);
@@ -124,19 +134,19 @@ static void test_RotateParts(void)
     TEST_ASSERT_EQUAL_INT(size, 42);
 
     // force rotation
-    KLOG_WARN("a", "b");
-    KLOG_WARN("a", "b");
-    klog_cleanup();
+    KLOG_WARN(&log_handle, "a", "b");
+    KLOG_WARN(&log_handle, "a", "b");
+    klog_cleanup(&log_handle);
 
     TEST_ASSERT(_fstat(LOG_PATH ".000", &size));
-    TEST_ASSERT_EQUAL_INT(size, 0);
+    TEST_ASSERT_EQUAL_INT(size, 42);
     TEST_ASSERT(_fstat(LOG_PATH ".001", &size));
     TEST_ASSERT_EQUAL_INT(size, 42);
     TEST_ASSERT(_fstat(LOG_PATH ".002", &size));
     TEST_ASSERT_EQUAL_INT(size, 42);
 
-    KLOG_WARN("aa", "bb");
-    klog_cleanup();
+    KLOG_WARN(&log_handle, "aa", "bb");
+    klog_cleanup(&log_handle);
 
     TEST_ASSERT(_fstat(LOG_PATH ".000", &size));
     TEST_ASSERT_EQUAL_INT(size, 23);
@@ -149,7 +159,6 @@ static void test_RotateParts(void)
 void resetTest(void)
 {
     tearDown();
-    setUp();
 }
 
 int main(void)

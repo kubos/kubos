@@ -58,6 +58,29 @@ void csp_conn_check_timeouts(void) {
 #endif
 }
 
+int csp_conn_check_alive(csp_conn_t * conn) {
+    csp_conn_t * new_conn = NULL;
+
+    if (conn == NULL)
+    {
+        return CSP_ERR_INVAL;
+    }
+
+    if (conn->state != CONN_OPEN)
+    {
+        return CSP_ERR_RESET;
+    }
+
+    // Check if there is a valid connection on the other side
+    new_conn = csp_conn_find(conn->idout.ext, CSP_ID_CONN_MASK);
+    if (new_conn == NULL)
+    {
+        return CSP_ERR_RESET;
+    }
+
+    return CSP_ERR_NONE;
+}
+
 int csp_conn_get_rxq(int prio) {
 
 #ifdef CSP_USE_QOS
@@ -296,8 +319,13 @@ int csp_close(csp_conn_t * conn) {
 	return CSP_ERR_NONE;
 }
 
+#ifdef UNIT_TEST
 csp_conn_t * csp_connect(uint8_t prio, uint8_t dest, uint8_t dport, uint32_t timeout, uint32_t opts) {
-
+    csp_conn_t * conn;
+    return conn;
+}
+#else
+csp_conn_t * csp_connect(uint8_t prio, uint8_t dest, uint8_t dport, uint32_t timeout, uint32_t opts) {
 	/* Force options on all connections */
 	opts |= CSP_CONNECTION_SO;
 
@@ -409,6 +437,7 @@ csp_conn_t * csp_connect(uint8_t prio, uint8_t dest, uint8_t dport, uint32_t tim
 	return conn;
 
 }
+#endif
 
 inline int csp_conn_dport(csp_conn_t * conn) {
 
