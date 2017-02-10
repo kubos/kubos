@@ -24,6 +24,7 @@
       "type": "Apache-2.0"
     }
   ],
+  "buildTarget": true,
   "config": {
       "hardware": {
         "console": {
