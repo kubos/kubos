@@ -95,27 +95,9 @@ void telemetry_init(void)
     csp_debug_set_level(CSP_PROTOCOL, true);
     csp_debug_set_level(CSP_LOCK, true);
 
-    csp_thread_create(telemetry_rx_task, "TELEM_RX", TELEMETRY_RX_THREAD_STACK_SIZE, NULL, TELEMETRY_RX_THREAD_PRIORITY, &telem_rx_handle);
+    // csp_thread_create(telemetry_rx_task, "TELEM_RX", TELEMETRY_RX_THREAD_STACK_SIZE, NULL, TELEMETRY_RX_THREAD_PRIORITY, &telem_rx_handle);
 
     socket = kprv_server_setup(TELEMETRY_INTERNAL_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
-}
-
-void telemetry_client_init(void)
-{
-    csp_buffer_init(20, 256);
-
-    /* Init CSP with client address */
-    csp_init(TELEMETRY_CSP_CLIENT_ADDRESS);
-
-    csp_route_start_task(500, 1);
-
-    csp_debug_set_level(CSP_ERROR, true);
-    csp_debug_set_level(CSP_WARN, true);
-    csp_debug_set_level(CSP_INFO, true);
-    csp_debug_set_level(CSP_BUFFER, true);
-    csp_debug_set_level(CSP_PACKET, true);
-    csp_debug_set_level(CSP_PROTOCOL, true);
-    csp_debug_set_level(CSP_LOCK, true);
 }
 
 void telemetry_cleanup(void)
@@ -187,80 +169,6 @@ static void telemetry_send(telemetry_packet packet)
     }
 }
 
-#ifdef TARGET_LIKE_KUBOS_RT
-bool telemetry_publish(telemetry_packet packet)
-{
-    if ((packet_queue != NULL) && (csp_queue_enqueue(packet_queue, &packet, CSP_MAX_DELAY)))
-    {
-        return true;
-    }
-    return false;
-}
-#else
-bool telemetry_publish(telemetry_packet pkt)
-{
-    csp_iface_t csp_socket_if;
-    csp_socket_handle_t socket_driver;
-    csp_conn_t *conn;
-    csp_packet_t *packet;
-
-    if (socket_init(&socket_driver, CSP_SOCKET_CLIENT, 8888) != CSP_ERR_NONE)
-    {
-        return false;
-    }
-
-    if (csp_socket_init(&csp_socket_if, &socket_driver) != CSP_ERR_NONE)
-    {
-        return false;
-    }
-
-
-    /* Set default route and start router */
-    csp_route_set(CSP_DEFAULT_ROUTE, &csp_socket_if, CSP_NODE_MAC);
-
-    packet = csp_buffer_get(sizeof(telemetry_packet));
-    if (packet) {
-        // strcpy((char *) packet->data, message);
-        memcpy(&packet->data, &pkt, sizeof(telemetry_packet));
-        // packet->length = strlen(message);
-        packet->length = sizeof(telemetry_packet);
-
-        conn = csp_connect(CSP_PRIO_NORM, TELEMETRY_CSP_ADDRESS, TELEMETRY_EXTERNAL_PORT, 1000, CSP_O_NONE);
-        // printf("Sending: %s\r\n", message);
-        if (!conn) {
-            csp_buffer_free(packet);
-            printf("conn err\r\n");
-            return false;
-        } 
-        
-        if (!csp_send(conn, packet, 1000))
-        {
-            csp_buffer_free(packet);
-            printf("send err\r\n");
-            return false;
-        }
-        csp_close(conn);
-        printf("sent!\r\n");
-    }
-
-    // csp_socket_close(&csp_socket_if, &socket_driver);
-    return true;
-}
-#endif
-
-bool telemetry_read(const pubsub_conn * conn, telemetry_packet * packet)
-{
-    int tries = 0;
-    if (packet != NULL)
-    {
-        while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
-        {
-            if (kprv_subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_INTERNAL_PORT))
-                return true;
-        }
-    }
-    return false;
-}
 
 subscriber_list_item * telemetry_add_subscriber(pubsub_conn server_conn, pubsub_conn client_conn)
 {
@@ -273,92 +181,6 @@ subscriber_list_item * telemetry_add_subscriber(pubsub_conn server_conn, pubsub_
         LL_APPEND(subscribers, new_sub);
     }
     return new_sub;
-}
-
-pubsub_conn * kprv_telemetry_connect(void)
-{
-    pubsub_conn * conn = NULL;
-    pubsub_conn client_conn;
-    bool ret = false;
-    if (kprv_subscriber_connect(&client_conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_INTERNAL_PORT))
-    {
-        char msg;
-
-        ret = kprv_send_csp(&client_conn, (void*)&msg, sizeof(msg));    
-    }
-    if (ret)
-    {
-        pubsub_conn server_conn;
-        if (kprv_server_accept(socket, &server_conn))
-        {
-            char msg;
-            ret = kprv_publisher_read(&server_conn, (void*)&msg, sizeof(msg), TELEMETRY_INTERNAL_PORT);
-            if (ret)
-            {
-                subscriber_list_item * sub = telemetry_add_subscriber(server_conn, client_conn);
-                conn = &(sub->client_conn);
-            }
-        }
-        else
-        {
-            /* 
-                It is possible for CSP to run out of connections in the
-                middle of the subscription process. In this case the subscriber
-                will get a connection but the server will not get a corresponding one.
-                If the server never sends the subscribing_done_signal then
-                we know it failed to get a connection. In this case
-                we should cleanup and return an error.
-            */
-            csp_close(client_conn.conn_handle);
-            client_conn.conn_handle = NULL;
-            ret = false;
-        }
-    }
-    return conn;
-}
-
-pubsub_conn * telemetry_connect(void)
-{
-    pubsub_conn * client_conn = NULL;
-    csp_mutex_lock(&subscribing_lock, CSP_INFINITY);
-    client_conn = kprv_telemetry_connect();
-    csp_mutex_unlock(&subscribing_lock);
-    return client_conn;
-}
-
-bool telemetry_disconnect(pubsub_conn * client_conn)
-{
-    bool ret = false;
-    csp_mutex_lock(&unsubscribing_lock, CSP_INFINITY);
-    if ((client_conn != NULL) && (csp_close(client_conn->conn_handle) == CSP_ERR_NONE))
-    {
-        subscriber_list_item * current, * next;
-        LL_FOREACH_SAFE(subscribers, current, next)
-        {
-            pubsub_conn server_conn = current->server_conn;
-            if (csp_conn_check_alive(server_conn.conn_handle) != CSP_ERR_NONE)
-            {
-                if (csp_close(server_conn.conn_handle) == CSP_ERR_NONE)
-                {
-                    LL_DELETE(subscribers, current);
-                    if (current->topics != NULL)
-                    {
-                        topic_list_item * temp_topic, * next_topic;
-                        LL_FOREACH_SAFE(current->topics, temp_topic, next_topic)
-                        {
-                            LL_DELETE(current->topics, temp_topic);
-                            free(temp_topic);
-                        }
-                    }
-                    free(current);
-                    ret = true;
-                }
-                break;
-            }
-        }
-    }
-    csp_mutex_unlock(&unsubscribing_lock);
-    return ret;
 }
 
 subscriber_list_item * kprv_get_subscriber(const pubsub_conn * client_conn)
@@ -433,21 +255,7 @@ bool kprv_remove_topic(subscriber_list_item * sub, uint16_t topic_id)
     return ret;
 }
 
-bool telemetry_is_subscribed(const pubsub_conn * client_conn, uint16_t topic_id)
-{
-    bool ret = false;
-    if (client_conn != NULL)
-    {
-        subscriber_list_item * sub = kprv_get_subscriber(client_conn);
-        if (sub != NULL)
-        {
-            ret = kprv_has_topic(sub, topic_id);
-        }
-    }
-    return ret;
-}
-
-bool telemetry_subscribe(const pubsub_conn * client_conn, uint16_t topic_id)
+bool kprv_telemetry_subscribe(const pubsub_conn * client_conn, uint16_t topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
@@ -461,7 +269,7 @@ bool telemetry_subscribe(const pubsub_conn * client_conn, uint16_t topic_id)
     return ret;
 }
 
-bool telemetry_unsubscribe(const pubsub_conn * client_conn, uint16_t topic_id)
+bool kprv_telemetry_unsubscribe(const pubsub_conn * client_conn, uint16_t topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
