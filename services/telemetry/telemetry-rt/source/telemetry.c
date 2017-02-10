@@ -24,6 +24,11 @@
 #include <csp/interfaces/csp_if_socket.h>
 #include <csp/drivers/socket.h>
 
+/**
+ * Task used to receive incoming data from telemetry publishers.
+ */
+CSP_DEFINE_TASK(telemetry_rx_task);
+
 /* Structure for storing a list of telemetry sources */
 typedef struct topic_list_item
 {
