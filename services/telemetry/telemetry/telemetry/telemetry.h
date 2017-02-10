@@ -31,11 +31,6 @@
 #include <stdbool.h>
 
 /**
- * Task used to receive incoming data from telemetry publishers.
- */
-CSP_DEFINE_TASK(telemetry_rx_task);
-
-/**
  * Performs basic telemetry connection and thread initialization. 
  * To be used in the main() prior to starting the scheduler.
  */
@@ -52,13 +47,13 @@ void telemetry_cleanup(void);
  * Connects to the telemetry system - thread safe version.
  * @return pubsub_conn* to pubsub_conn which will be used to receive future telemetry data.
  */
-pubsub_conn * telemetry_connect(void);
+bool telemetry_connect(pubsub_conn * conn);
 
 /**
  * Internal connect function - not thread safe.
  * @return pubsub_conn* to pubsub_conn which will be used to receive future telemetry data
  */
-pubsub_conn * kprv_telemetry_connect(void);
+bool kprv_telemetry_connect(pubsub_conn * conn);
 
 /**
  * Subscribes the pubsub_conn to the specified topic.

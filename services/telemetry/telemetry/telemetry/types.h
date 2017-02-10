@@ -77,6 +77,21 @@ typedef struct
     uint16_t timestamp;
 } telemetry_packet;
 
+typedef enum
+{
+    MESSAGE_TYPE_PACKET = 0,
+    MESSAGE_TYPE_SUBSCRIBE,
+    MESSAGE_TYPE_UNSUBSCRIBE,
+    MESSAGE_TYPE_DISCONNECT
+} telemetry_message_type;
+
+typedef struct
+{
+    telemetry_message_type type;
+    void * payload;
+    uint16_t payload_size;
+} telemetry_message;
+
 #endif
 
 /* @} */
