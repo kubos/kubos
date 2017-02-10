@@ -25,6 +25,7 @@
 #define PUBSUB_H
 
 #include <csp/csp.h>
+#include <csp/interfaces/csp_if_socket.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -35,6 +36,8 @@ typedef struct
 {
     /*! Raw network connection handle - today this is a csp connection */
     csp_conn_t * conn_handle;
+    csp_iface_t csp_socket_if;
+    csp_socket_handle_t socket_driver;
 } pubsub_conn;
 
 /**

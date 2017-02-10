@@ -108,10 +108,23 @@ bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t
         return false;
     }
 
-    csp_iface_t csp_socket_if;
-    csp_socket_handle_t socket_driver;
-    socket_init(&socket_driver, CSP_SOCKET_CLIENT, IPC_SOCKET_PORT);
-    csp_route_set(address, &csp_socket_if, CSP_NODE_MAC);
+    // csp_iface_t csp_socket_if;
+    // csp_socket_handle_t socket_driver;
+    if (socket_init(&(conn->socket_driver), CSP_SOCKET_CLIENT, 8888) != CSP_ERR_NONE)
+    {
+        printf("socket_init failed\r\n");
+        return false;
+    }
+
+    if (csp_socket_init(&(conn->csp_socket_if), &(conn->socket_driver)) != CSP_ERR_NONE)
+    {
+        printf("csp_socket_init failed\r\n");
+        return false;
+    }
+
+
+    /* Set default route and start router */
+    csp_route_set(CSP_DEFAULT_ROUTE, &(conn->csp_socket_if), CSP_NODE_MAC);
 
     csp_conn = csp_connect(CSP_PRIO_NORM, address, port, 1000, CSP_O_NONE);
     if (csp_conn != NULL)
