@@ -1,6 +1,8 @@
 #ifndef CNC_H
 #define CNC_H
 
+#include <stdint.h>
+
 typedef enum
 {
     execute = 0,
@@ -10,10 +12,12 @@ typedef enum
 } cnc_action;
 
 
-typedef struct
+typedef struct arguments
 {
+    int arg_count;
     cnc_action action;
-    char args[4]; //TODO: Make Dynamic
+    char * cmd_name;
+    char *args[10];
 } cnc_cmd_packet;
 
 
@@ -23,7 +27,6 @@ typedef struct
     double  execution_time;
     char output[10]; //TODO: Make Dynamic
 } cnc_res_packet;
-
 
 
 #endif

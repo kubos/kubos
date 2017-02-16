@@ -1,15 +1,16 @@
+#include <argp.h>
+#include <csp/csp.h>
+#include <csp/csp_interface.h>
+#include <dlfcn.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <dlfcn.h>
-#include "command-and-control/types.h"
 
-#include <csp/csp.h>
-#include <csp/csp_interface.h>
+#include "command-and-control/types.h"
 
 #define PORT        10
 #define BUF_SIZE    250
@@ -99,7 +100,6 @@ void send_response() {
     csp_packet_t *packet;
 
     while (1) {
-       /* Send a new packet */
         packet = csp_buffer_get(strlen(message));
         if (packet) {
             strcpy((char *) packet->data, message);
@@ -118,8 +118,8 @@ void send_response() {
 char* get_command(csp_socket_t* sock) {
     csp_conn_t *conn;
     csp_packet_t *packet;
-    /*cnc_cmd_packet* command = malloc(sizeof(cnc_cmd_packet));*/
     char* command = NULL;
+
     while (1) {
         /* Process incoming packet */
         conn = csp_accept(sock, 1000);
@@ -136,28 +136,33 @@ char* get_command(csp_socket_t* sock) {
     }
 }
 
+cnc_action parse_command(char * command) {
+    cnc_action action;
+    action = execute;
+    return action;
+}
 
-
-int run_command(cnc_cmd_packet * command){
-    /* Do all the command things here */
-    /*printf("Running Command: %s", command);*/
+cnc_res_packet * run_command(cnc_cmd_packet * command){
+    int return_code;
+    cnc_res_packet* res_ptr = malloc(sizeof(cnc_res_packet));
     void     *handle  = NULL;
     lib_func  func    = NULL;
     char * home_dir = "/home/vagrant/lib%s.so";
 
-    int str_len = strlen(home_dir) + strlen(command->args) - 1;
+    int len = strlen(home_dir) + strlen(command->cmd_name) - 1;
 
-    char * so_path = malloc(str_len);
+    char * so_path = malloc(len);
 
-    snprintf(so_path, str_len, home_dir, command->args);
+    snprintf(so_path, len, home_dir, command->cmd_name);
 
     handle = dlopen(so_path, RTLD_NOW | RTLD_GLOBAL);
-    free(so_path);
-     if (handle == NULL)
+
+    if (handle == NULL)
     {
         fprintf(stderr, "Unable to open lib: %s\n", dlerror());
         return -1;
     }
+
     switch (command->action){
         case execute:
             printf("Running Command Execute\n");
@@ -177,24 +182,24 @@ int run_command(cnc_cmd_packet * command){
             break;
         default:
             printf ("Error the requested command doesn't exist\n");
-            return -1;
     }
 
     if (func == NULL) {
         fprintf(stderr, "Unable to get symbol\n");
-       return -1;
     }
-
-
-    func();
-    return 0;
+    printf("Calling fucntion with argc: %i, argv: %s\n", command->arg_count, command->args);
+    func(command->arg_count, command->args);
+    free(so_path);
+    return res_ptr;
 }
-
 
 int main(int argc, char **argv) {
     int my_address = 1;
     char *message = "Testing CSP";
     csp_socket_t *sock;
+    cnc_action action;
+    cnc_cmd_packet* cmd_ptr = NULL;
+    cnc_res_packet* res_ptr = NULL;
 
     csp_init_things(my_address);
     sock = csp_socket(CSP_SO_NONE);
@@ -205,13 +210,23 @@ int main(int argc, char **argv) {
 
     while (1) {
         command = get_command(sock);
-        run_command(command);
+        cmd_ptr = parse(command);
+        res_ptr = run_command(cmd_ptr);
         send_response();
         free(command);
     }
 
     close(rx_channel);
     close(tx_channel);
+
+    //Free all the allocated things.
+    int i;
+    for (i = 0; i < my_arguments.arg_count-3; i++){
+        free(my_arguments.args[i]);
+    }
+    free(my_arguments.cmd_name);
+    free(result);
+
 
     return 0;
 }

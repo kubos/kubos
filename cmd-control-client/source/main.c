@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
     //terrible name for starting all the tedious csp stuff
     csp_init_everything();
 
-    char* args = "foo";
+    char* args = "exec foo";
 
     /*cnc_cmd_packet packet;*/
     /*packet.action = execute;*/
