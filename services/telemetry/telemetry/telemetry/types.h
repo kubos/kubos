@@ -56,11 +56,11 @@ typedef enum
 typedef struct
 {
     /*! Source identifier - used for subscribing */
-    uint8_t topic_id;
+    int topic_id;
     /*! Data type identifier */    
     telemetry_data_type data_type;
     /*! Subsystem identifier */
-    uint8_t subsystem_id;
+    int subsystem_id;
 } telemetry_source;
 
 /**
@@ -74,7 +74,7 @@ typedef struct
     /*! Data payload */
     telemetry_union data;
     /*! Timestamp indicating packet creation time */
-    uint16_t timestamp;
+    int timestamp;
 } telemetry_packet;
 
 typedef enum
@@ -85,12 +85,11 @@ typedef enum
     MESSAGE_TYPE_DISCONNECT
 } telemetry_message_type;
 
-typedef struct
+typedef enum
 {
-    telemetry_message_type type;
-    void * payload;
-    uint16_t payload_size;
-} telemetry_message;
+    RESPONSE_OK = 0,
+    RESPONSE_ERR
+} telemetry_response_type;
 
 #endif
 

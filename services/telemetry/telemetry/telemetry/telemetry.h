@@ -107,6 +107,15 @@ int telemetry_num_subscribers(void);
  */
 bool telemetry_is_subscribed(const pubsub_conn * client_conn, uint16_t topic_id);
 
+bool telemetry_parse_packet_msg(uint8_t * buffer, int buffer_size, telemetry_packet * packet);
+
+int telemetry_encode_packet_msg(uint8_t * buffer, telemetry_packet * pkt);
+
+bool telemetry_parse_msg_type(uint8_t * buffer, int buffer_size, telemetry_message_type * req);
+
+int telemetry_encode_subscribe_msg(uint8_t * buffer, int * topic_id);
+int telemetry_encode_unsubscribe_msg(uint8_t * buffer, int * topic_id);
+
 #endif
 
 /* @} */
