@@ -4,16 +4,18 @@ import json
 import os
 import subprocess
 import sys
+import glob
+import utils
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
 kubos_dir = os.path.dirname(this_dir)
 
 class Project(object):
-    def __init__(self, name, path, relpath):
+    def __init__(self, name, path):
         self.name = name
         self.path = path
-        self.relpath = relpath
         self.type = 'unknown'
+        self.yotta_data = None
 
         if os.path.isfile(path + '/module.json'):
             self.yotta_data = json.load(open(path + '/module.json', 'r'))
@@ -22,9 +24,6 @@ class Project(object):
             self.yotta_data = json.load(open(path + '/target.json', 'r'))
             self.type = 'yotta_target'
 
-        #self.commit = self.get_commit_sha()
-        #self.upstream = self.find_upstream_branch()
-        #self.tag = self.get_last_tag()
         self.version = self.get_version()
 
     def is_bin(self):
@@ -94,22 +93,30 @@ class KubosBuild(object):
 
     def targets(self):
         return filter(lambda c: c.type == 'yotta_target', self.projects)
+    
+    def build_targets(self):
+        return filter(lambda c: 'buildTarget' in c.yotta_data, self.targets())
 
     def find_projects(self):
         self.projects = []
-        modules = subprocess.check_output(["find", ".", "-name",
-                                        "module.json"], cwd=self.kubos_dir)
-        for path in modules.splitlines():
-            path = path.replace("module.json", "").strip()
-            name = path.split("/")[-2]
-            relpath = os.path.relpath(path, self.kubos_dir)
-            self.projects.append(Project(name, path, relpath))
+        try:
+            modules = subprocess.check_output(["find", ".", "-name",
+                                            "module.json"], cwd=self.kubos_dir)
+            for path in modules.splitlines():
+                if "yotta_modules" not in path:
+                    path = path.replace("module.json", "").strip()
+                    name = path.split("/")[-2]
+                    path = os.path.abspath(self.kubos_dir + "/" + path)
+                    self.projects.append(Project(name, path))
 
-        modules = subprocess.check_output(["find", ".", "-name",
-                                        "target.json"], cwd=self.kubos_dir)
-        for path in modules.splitlines():
-            path = path.replace("target.json", "").strip()
-            name = path.split("/")[-2]
-            relpath = os.path.relpath(path, self.kubos_dir)
-            self.projects.append(Project(name, path, relpath))
+            modules = subprocess.check_output(["find", ".", "-name",
+                                            "target.json"], cwd=self.kubos_dir)
+            for path in modules.splitlines():
+                if "yotta_targets" not in path:
+                    path = path.replace("target.json", "").strip()
+                    name = path.split("/")[-2]
+                    path = os.path.abspath(self.kubos_dir + "/" + path)
+                    self.projects.append(Project(name, path))
+        except OSError:
+            pass
 
