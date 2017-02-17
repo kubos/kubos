@@ -1,19 +1,12 @@
 #include <argp.h>
+#include <csp/csp.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "command-and-control/types.h"
-
-/*struct arguments*/
-/*{*/
-    /*int arg_count;*/
-    /*cnc_action action;*/
-    /*char * cmd_name;*/
-    /*char *args[10];*/
-/*};*/
-
+#include "cmd-control-daemon/daemon.h"
 
 static struct argp_option options[] =
 {
@@ -70,7 +63,7 @@ int get_num_args(char* string){
     return count + 1;
 }
 
-
+//TODO: Make all the parsing help more helpful and semi-accurate
 static char args_doc[] = "action";
 static char doc[] = "The doc for this command";
 
@@ -83,7 +76,7 @@ cnc_cmd_packet * parse (char * args)
     int idx = 0;
     char * pch;
 
-    cnc_cmd_packet * my_arguments = malloc (sizeof(cnc_cmd_packet));
+    cnc_cmd_packet * my_arguments = malloc(sizeof(cnc_cmd_packet));
     my_arguments->arg_count = 0;
 
     int my_argc = get_num_args(args);
