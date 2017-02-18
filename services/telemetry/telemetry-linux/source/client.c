@@ -59,6 +59,33 @@ void telemetry_client_init(void)
 //     return ret;
 // }
 
+bool telemetry_connect(pubsub_conn * conn)
+{
+    bool ret = false;
+    if (kprv_subscriber_socket_connect(conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_EXTERNAL_PORT))
+    {
+        ret = true;
+    }
+    return ret;
+}
+
+bool telemetry_disconnect(pubsub_conn * client_conn)
+{
+    bool ret = false;
+    // csp_mutex_lock(&unsubscribing_lock, CSP_INFINITY);
+    if (client_conn != NULL)
+    {
+        telemetry_message_type req = MESSAGE_TYPE_DISCONNECT;
+        ret = kprv_send_csp(client_conn, &req, sizeof(telemetry_message_type));
+
+        csp_close(client_conn->conn_handle);
+        client_conn->conn_handle = NULL;
+        ret = true;
+    }
+    // csp_mutex_unlock(&unsubscribing_lock);
+    return ret;
+}
+
 bool telemetry_subscribe(const pubsub_conn * client_conn, uint16_t topic_id)
 {
     bool ret = false;
@@ -66,7 +93,6 @@ bool telemetry_subscribe(const pubsub_conn * client_conn, uint16_t topic_id)
     {
         uint8_t buffer[256] = {0};
         int msg_size = telemetry_encode_subscribe_msg(buffer, &topic_id);
-
         if (msg_size > 0)
         {
             ret = kprv_send_csp(client_conn, buffer, msg_size);
@@ -87,38 +113,6 @@ bool telemetry_unsubscribe(const pubsub_conn * client_conn, uint16_t topic_id)
         {
             ret = kprv_send_csp(client_conn, buffer, msg_size);
         }
-    }
-    return ret;
-}
-
-
-
-bool telemetry_disconnect(pubsub_conn * client_conn)
-{
-    bool ret = false;
-    // csp_mutex_lock(&unsubscribing_lock, CSP_INFINITY);
-    if (client_conn != NULL)
-    {
-        telemetry_message_type req = MESSAGE_TYPE_DISCONNECT;
-        ret = kprv_send_csp(client_conn, &req, sizeof(telemetry_message_type));
-
-        csp_close(client_conn->conn_handle);
-        ret = true;
-    }
-    // csp_mutex_unlock(&unsubscribing_lock);
-    return ret;
-}
-
-bool telemetry_connect(pubsub_conn * conn)
-{
-    bool ret = false;
-    printf("telemetry_connect\r\n");
-    if (kprv_subscriber_socket_connect(conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_EXTERNAL_PORT))
-    {
-        printf("subscriber_connected\r\n");
-        ret = true;
-    } else {
-        printf("subscriber_connect failed\r\n");
     }
     return ret;
 }

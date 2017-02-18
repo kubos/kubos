@@ -97,14 +97,22 @@ static void test_disconnect_msg(void ** arg)
     assert_int_equal(msg_type, MESSAGE_TYPE_DISCONNECT);
 }
 
+static void test_start_encode_msg(void ** arg)
+{
+    char buffer[100];
+    CborEncoder encoder, container;
+
+    assert_int_equal(start_encode_msg(&encoder, &container, buffer, 100, 1, MESSAGE_TYPE_PACKET), 0);
+}
+
 static void test_end_encode_msg(void ** arg)
 {
     char buffer[100];
     CborEncoder encoder, container;
 
-    int msg_size = end_encode_msg(buffer, &encoder, &container);
+    start_encode_msg(&encoder, &container, buffer, 100, 1, MESSAGE_TYPE_PACKET);
 
-    assert_true(msg < 0);
+    assert_true(end_encode_msg(buffer, &encoder, &container) > 0);
 }
 
 int main(void)
@@ -114,6 +122,7 @@ int main(void)
         cmocka_unit_test(test_subscribe_msg),
         cmocka_unit_test(test_unsubscribe_msg),
         cmocka_unit_test(test_disconnect_msg),
+        cmocka_unit_test(test_start_encode_msg),
         cmocka_unit_test(test_end_encode_msg),
     };
 

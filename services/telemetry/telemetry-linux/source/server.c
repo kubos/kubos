@@ -36,26 +36,79 @@ static csp_thread_handle_t telem_rx_handle;
 /* Private CSP socket used for telemetry connections */
 static csp_socket_t * socket = NULL;
 
-/* Structure for storing a list of telemetry sources */
-typedef struct topic_list_item
-{
-    uint16_t topic_id;
-    struct topic_list_item * next;
-} topic_list_item;
-
-/* Structure for storing telemetry subscribers in a list */
-typedef struct subscriber_list_item
-{
-    pubsub_conn conn;
-    topic_list_item * topics;
-    csp_queue_handle_t packet_queue;
-    struct subscriber_list_item * next;
-} subscriber_list_item;
-
 /* Initial element in list of telemetry subscribers */
 static subscriber_list_item * subscribers = NULL;
 
 CSP_DEFINE_TASK(client_rx_task);
+
+subscriber_list_item * create_subscriber(pubsub_conn conn)
+{
+    subscriber_list_item * sub = NULL;
+    if ((sub = malloc(sizeof(subscriber_list_item))) != NULL)
+    {
+        sub->topics = NULL;
+        memcpy(&(sub->conn), &conn, sizeof(pubsub_conn));
+        sub->packet_queue = csp_queue_create(MESSAGE_QUEUE_SIZE, sizeof(telemetry_packet));
+    }
+    return sub;
+}
+
+int topic_cmp(const topic_list_item * a, const topic_list_item * b)
+{
+    return (a->topic_id != b->topic_id);
+}
+
+bool kprv_add_topic(subscriber_list_item * sub, int topic_id)
+{
+    bool ret = false;
+    if (sub != NULL)
+    {
+        topic_list_item * new_topic = NULL;
+        if ((new_topic = malloc(sizeof(topic_list_item))) != NULL)
+        {
+            new_topic->topic_id = topic_id;
+            LL_APPEND(sub->topics, new_topic);
+            ret = true;
+        }
+    }
+    return ret;
+}
+
+bool kprv_remove_topic(subscriber_list_item * sub, int topic_id)
+{
+    bool ret = false;
+    if (sub != NULL)
+    {
+        topic_list_item topic = {
+            .topic_id = topic_id
+        };
+        topic_list_item * temp;
+        LL_SEARCH(sub->topics, temp, &topic, topic_cmp);
+        if (temp != NULL)
+        {
+            LL_DELETE(sub->topics, temp);
+            free(temp);
+            ret = true;
+        }
+    }
+    return ret;
+}
+
+bool kprv_has_topic(const subscriber_list_item * sub, uint16_t topic_id)
+{
+    bool ret = false;
+    if (sub != NULL)
+    {
+        topic_list_item topic = {
+            .topic_id = topic_id
+        };
+        topic_list_item * temp;
+        LL_SEARCH(sub->topics, temp, &topic, topic_cmp);
+        if (temp != NULL)
+            ret = true;
+    }
+    return ret;
+}
 
 
 static void kprv_add_subscriber(pubsub_conn conn)
@@ -89,6 +142,25 @@ bool kprv_cbor_read(const pubsub_conn * conn, void * buffer, int max_buffer_size
         }
     }
     return false;
+}
+
+bool telemetry_publish_packet(subscriber_list_item * sub, telemetry_packet packet)
+{
+    if (!csp_queue_enqueue(sub->packet_queue, (void*)&packet, 1000))
+        return false;
+    return true;
+}
+
+bool telemetry_get_packet(subscriber_list_item * sub, telemetry_packet * packet)
+{
+    if (!csp_queue_dequeue(sub->packet_queue, (void*)packet, 1000))
+        return false;
+    return true;
+}
+
+int telemetry_get_num_packets(subscriber_list_item * sub)
+{
+    return csp_queue_size(sub->packet_queue);
 }
 
 void telemetry_process_message(void * buffer, int buffer_size)
