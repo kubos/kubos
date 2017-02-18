@@ -105,6 +105,20 @@ static void test_server_publish_multiple_packets(void ** arg)
     assert_int_equal(telemetry_get_num_packets(sub), 0);
 }
 
+static void test_server_get_subscribe_msg(void ** arg)
+{
+    uint8_t buffer[100];
+    int subscribe_topic = 12;
+    int msg_size;
+    subscriber_list_item * sub = NULL;
+
+    msg_size = telemetry_encode_subscribe_msg(buffer, &subscribe_topic);
+
+    assert_true(telemetry_process_message(buffer, msg_size));
+
+    assert_true(kprv_has_topic(sub, subscribe_topic));
+}
+
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -113,6 +127,7 @@ int main(void)
         cmocka_unit_test(test_server_create_subscriber),
         cmocka_unit_test(test_server_publish_packet),
         cmocka_unit_test(test_server_publish_multiple_packets),
+        cmocka_unit_test(test_server_get_subscribe_msg)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

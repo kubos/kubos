@@ -51,7 +51,7 @@ static void test_subscribe_msg(void ** arg)
 {
     char buffer[100];
     telemetry_message_type msg_type;
-    int topic_in, topic_out;
+    int topic_in = 10, topic_out;
 
     int msg_size = telemetry_encode_subscribe_msg(buffer, &topic_in);
     bool parsed_type = telemetry_parse_msg_type(buffer, msg_size, &msg_type);
@@ -69,7 +69,7 @@ static void test_unsubscribe_msg(void ** arg)
 {
     char buffer[100];
     telemetry_message_type msg_type;
-    int topic_in, topic_out;
+    int topic_in = 11, topic_out;
 
     int msg_size = telemetry_encode_unsubscribe_msg(buffer, &topic_in);
     bool parsed_type = telemetry_parse_msg_type(buffer, msg_size, &msg_type);

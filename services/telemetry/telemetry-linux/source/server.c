@@ -163,8 +163,9 @@ int telemetry_get_num_packets(subscriber_list_item * sub)
     return csp_queue_size(sub->packet_queue);
 }
 
-void telemetry_process_message(void * buffer, int buffer_size)
+bool telemetry_process_message(void * buffer, int buffer_size)
 {
+    bool ret = false;
     telemetry_message_type req;
     telemetry_packet packet;
     int topic_id;
@@ -183,6 +184,7 @@ void telemetry_process_message(void * buffer, int buffer_size)
                 if (telemetry_parse_subscribe_msg(buffer, buffer_size, &topic_id))
                 {
                     printf("Got subscribe request for %d\r\n", topic_id);
+                    ret = true;
                 }
                 break;
             case MESSAGE_TYPE_UNSUBSCRIBE:
@@ -199,6 +201,7 @@ void telemetry_process_message(void * buffer, int buffer_size)
                 break;
         }
     }
+    return ret;
 }
 
 CSP_DEFINE_TASK(client_rx_task)
@@ -239,13 +242,6 @@ CSP_DEFINE_TASK(telemetry_rx_task)
     sock = csp_socket(CSP_SO_NONE);
     csp_bind(sock, TELEMETRY_EXTERNAL_PORT);
     csp_listen(sock, 10);
-
-    // telemetry_message_type request;
-    // telemetry_response_type response;
-
-    // // pubsub_conn conn;
-    // telemetry_packet pkt;
-    // uint16_t topic_id;
 
     csp_thread_handle_t rx_thread_handle;
     pubsub_conn conn;
