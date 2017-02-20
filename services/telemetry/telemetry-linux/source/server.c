@@ -49,8 +49,19 @@ subscriber_list_item * create_subscriber(pubsub_conn conn)
         sub->topics = NULL;
         memcpy(&(sub->conn), &conn, sizeof(pubsub_conn));
         sub->packet_queue = csp_queue_create(MESSAGE_QUEUE_SIZE, sizeof(telemetry_packet));
+        sub->active = true;
+        LL_APPEND(subscribers, sub);
     }
     return sub;
+}
+
+void destroy_subscriber(subscriber_list_item ** sub)
+{
+    csp_close((*sub)->conn.conn_handle);
+    (*sub)->conn.conn_handle = NULL;
+
+    free(*sub);
+    *sub = NULL;
 }
 
 int topic_cmp(const topic_list_item * a, const topic_list_item * b)
@@ -163,7 +174,25 @@ int telemetry_get_num_packets(subscriber_list_item * sub)
     return csp_queue_size(sub->packet_queue);
 }
 
-bool telemetry_process_message(void * buffer, int buffer_size)
+bool kprv_publish_packet(telemetry_packet packet)
+{
+    bool ret = true;
+    subscriber_list_item * current, * next;
+    LL_FOREACH_SAFE(subscribers, current, next)
+    {
+        if (kprv_has_topic(current, packet.source.topic_id))
+        {
+            if (!telemetry_publish_packet(current, packet))
+            {
+                ret = false;
+                break;
+            }
+        }
+    }
+    return ret;
+}
+
+bool telemetry_process_message(subscriber_list_item * sub, void * buffer, int buffer_size)
 {
     bool ret = false;
     telemetry_message_type req;
@@ -176,25 +205,27 @@ bool telemetry_process_message(void * buffer, int buffer_size)
             case MESSAGE_TYPE_PACKET:
                 if (telemetry_parse_packet_msg(buffer, buffer_size, &packet))
                 {
-                    printf("Got telemetry packet\r\n");
-                    printf("Topic %d Data %d\r\n", packet.source.topic_id, packet.data.i);
+                    printf("Got packet %d %d\r\n", packet.source.topic_id, packet.data.i);
+                    ret = kprv_publish_packet(packet);
                 }
                 break;
             case MESSAGE_TYPE_SUBSCRIBE:
                 if (telemetry_parse_subscribe_msg(buffer, buffer_size, &topic_id))
                 {
-                    printf("Got subscribe request for %d\r\n", topic_id);
-                    ret = true;
+                    printf("Got subscribe %d\r\n", topic_id);
+                    ret = kprv_add_topic(sub, topic_id);
                 }
                 break;
             case MESSAGE_TYPE_UNSUBSCRIBE:
                 if (telemetry_parse_unsubscribe_msg(buffer, buffer_size, &topic_id))
                 {
-                    printf("Got UNsubscribe request for %d\r\n", topic_id);
+                    ret = kprv_remove_topic(sub, topic_id);
                 }
                 break;
             case MESSAGE_TYPE_DISCONNECT:
-                printf("Got disconnect request\r\n");
+                printf("Got disconnect\r\n");
+                sub->active = false;
+                ret = true;
                 break;
             default:
                 printf("Got other msg type\r\n");
@@ -207,26 +238,32 @@ bool telemetry_process_message(void * buffer, int buffer_size)
 CSP_DEFINE_TASK(client_rx_task)
 {
     pubsub_conn conn;
-
+    subscriber_list_item * sub = NULL;
     if (param == NULL)
     {
         printf("No conn found\r\n");
         return CSP_TASK_RETURN;
     }
     conn = *((pubsub_conn*)param);
+    sub = create_subscriber(conn);
 
     uint8_t message[256];
     uint16_t msg_size;
 
-    while (1)
+    while (sub->active == true)
     {
+        while (telemetry_get_num_packets(sub) > 0)
+        {
+            telemetry_packet packet;
+            telemetry_get_packet(sub, &packet);
+        }
         if (!kprv_cbor_read(&conn, (void*)message, 256, TELEMETRY_EXTERNAL_PORT, &msg_size))
             continue;
 
-        telemetry_process_message((void*)message, msg_size);
+        telemetry_process_message(sub, (void*)message, msg_size);
     }
 
-    csp_close(conn.conn_handle);
+    destroy_subscriber(&sub);
 
     return CSP_TASK_RETURN;
 }
@@ -255,10 +292,8 @@ CSP_DEFINE_TASK(telemetry_rx_task)
 
         printf("Got csp socket - spawning thread\r\n");
         
-        
         csp_thread_create(client_rx_task, NULL, 1000, &conn, 0, &rx_thread_handle);
         csp_sleep_ms(1000);
-        // free(conn);
     }
 }
 

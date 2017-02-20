@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <csp/csp.h>
+#include <csp/arch/csp_queue.h>
 
 /**
  * Telemetry union for storing data.
@@ -90,6 +91,24 @@ typedef enum
     RESPONSE_OK = 0,
     RESPONSE_ERR
 } telemetry_response_type;
+
+/* Structure for storing a list of telemetry sources */
+typedef struct topic_list_item
+{
+    uint16_t topic_id;
+    struct topic_list_item * next;
+} topic_list_item;
+
+/* Structure for storing telemetry subscribers in a list */
+typedef struct subscriber_list_item
+{
+    bool active;
+    pubsub_conn conn;
+    csp_queue_handle_t packet_queue;
+    topic_list_item * topics;
+    struct subscriber_list_item * next;
+} subscriber_list_item;
+
 
 #endif
 

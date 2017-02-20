@@ -51,6 +51,29 @@ static void test_server_create_subscriber(void ** arg)
     sub = create_subscriber(conn);
 
     assert_non_null(sub);
+
+    assert_true(sub->active);
+}
+
+static void test_server_destroy_subscriber(void ** arg)
+{
+    pubsub_conn conn;
+    subscriber_list_item * sub = NULL;
+
+    conn.conn_handle = "";
+
+    assert_null(sub);
+
+    sub = create_subscriber(conn);
+
+    assert_non_null(sub);
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+
+    destroy_subscriber(&sub);
+
+    assert_null(sub);
 }
 
 static void test_server_publish_packet(void ** arg)
@@ -110,13 +133,85 @@ static void test_server_get_subscribe_msg(void ** arg)
     uint8_t buffer[100];
     int subscribe_topic = 12;
     int msg_size;
+    pubsub_conn conn;
     subscriber_list_item * sub = NULL;
+
+    sub = create_subscriber(conn);
 
     msg_size = telemetry_encode_subscribe_msg(buffer, &subscribe_topic);
 
-    assert_true(telemetry_process_message(buffer, msg_size));
+    assert_true(telemetry_process_message(sub, buffer, msg_size));
 
     assert_true(kprv_has_topic(sub, subscribe_topic));
+}
+
+static void test_server_get_unsubscribe_msg(void ** arg)
+{
+    uint8_t buffer[100];
+    int subscribe_topic = 12;
+    int msg_size;
+    pubsub_conn conn;
+    subscriber_list_item * sub = NULL;
+
+    sub = create_subscriber(conn);
+
+    msg_size = telemetry_encode_subscribe_msg(buffer, &subscribe_topic);
+
+    telemetry_process_message(sub, buffer, msg_size);
+
+    assert_true(kprv_has_topic(sub, subscribe_topic));
+
+    msg_size = telemetry_encode_unsubscribe_msg(buffer, &subscribe_topic);
+
+    telemetry_process_message(sub, buffer, msg_size);
+
+    assert_false(kprv_has_topic(sub, subscribe_topic));
+}
+
+static void test_server_get_disconnect_msg(void ** arg)
+{
+    uint8_t buffer[100];
+    int subscribe_topic = 12;
+    int msg_size;
+    pubsub_conn conn;
+    subscriber_list_item * sub = NULL;
+
+    sub = create_subscriber(conn);
+
+    assert_true(sub->active);
+
+    msg_size = telemetry_encode_disconnect_msg(buffer);
+
+    assert_true(telemetry_process_message(sub, buffer, msg_size));
+
+    assert_false(sub->active);
+}
+
+static void test_server_get_packet_msg(void ** arg)
+{
+    uint8_t buffer[100];
+    telemetry_packet packet;
+    int msg_size;
+    pubsub_conn conn;
+    subscriber_list_item * sub = NULL;
+
+    sub = create_subscriber(conn);
+
+    msg_size = telemetry_encode_packet_msg(buffer, &packet);
+
+    assert_true(telemetry_process_message(sub, buffer, msg_size));
+}
+
+static void test_server_get_bad_msg(void ** arg)
+{
+    uint8_t buffer[100] = {0};
+    int msg_size = 0;
+    pubsub_conn conn;
+    subscriber_list_item * sub = NULL;
+
+    sub = create_subscriber(conn);
+
+    assert_false(telemetry_process_message(sub, buffer, msg_size));
 }
 
 int main(void)
@@ -127,7 +222,12 @@ int main(void)
         cmocka_unit_test(test_server_create_subscriber),
         cmocka_unit_test(test_server_publish_packet),
         cmocka_unit_test(test_server_publish_multiple_packets),
-        cmocka_unit_test(test_server_get_subscribe_msg)
+        cmocka_unit_test(test_server_get_subscribe_msg),
+        cmocka_unit_test(test_server_get_unsubscribe_msg),
+        cmocka_unit_test(test_server_get_disconnect_msg),
+        cmocka_unit_test(test_server_get_packet_msg),
+        cmocka_unit_test(test_server_get_bad_msg),
+        cmocka_unit_test(test_server_destroy_subscriber)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
