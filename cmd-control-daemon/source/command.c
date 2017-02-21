@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 
 typedef int (*lib_func)(int, char**);
 
@@ -30,16 +31,17 @@ char* get_command(csp_socket_t* sock) {
 
 
 cnc_res_packet * run_command(cnc_cmd_packet * command){
-
     int return_code;
     cnc_res_packet* res_ptr = malloc(sizeof(cnc_res_packet));
+    memset(res_ptr, 0, sizeof(cnc_res_packet));
     void     *handle  = NULL;
     lib_func  func    = NULL;
+    char log_path [35] = {0};
     char * home_dir = "/home/vagrant/lib%s.so";
 
-    int len = strlen(home_dir) + strlen(command->cmd_name) - 1;
-    char * so_path = malloc(len);
-    snprintf(so_path, len, home_dir, command->cmd_name);
+    int so_len = strlen(home_dir) + strlen(command->cmd_name) - 1;
+    char * so_path = malloc(so_len);
+    snprintf(so_path, so_len, home_dir, command->cmd_name);
 
     handle = dlopen(so_path, RTLD_NOW | RTLD_GLOBAL);
 
@@ -71,17 +73,28 @@ cnc_res_packet * run_command(cnc_cmd_packet * command){
             break;
         default:
             printf ("Error the requested command doesn't exist\n");
+            return NULL;
     }
 
     if (func == NULL) {
         fprintf(stderr, "Unable to get symbol\n");
+        return NULL;
     }
-
-    printf("Calling fucntion with argc: %i, argv: %s\n", command->arg_count, *command->args);
+    //Redirect stdout to the response output field.
+    int original_stdout, buf;
+    fflush(stdout);
+    original_stdout = dup(STDOUT_FILENO);
+    freopen("/dev/null", "a", stdout);
+    setbuf(stdout, res_ptr->output);
 
     clock_t start_time = clock();
     res_ptr->return_code = func(command->arg_count, command->args);
     clock_t finish_time = clock();
+
+    //Redirect stdout back to the terminal.
+    freopen("/dev/null", "a", stdout);
+    dup2(original_stdout, STDOUT_FILENO); //restore the previous state of stdout
+    setbuf(stdout, NULL);
 
     res_ptr->execution_time = (double)(finish_time - start_time)/(CLOCKS_PER_SEC/1000); //execution time in milliseconds
     printf("Return code: %i exection time %f\n", res_ptr->return_code, res_ptr->execution_time);

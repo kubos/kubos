@@ -25,7 +25,7 @@ typedef struct
 {
     uint8_t return_code;
     double  execution_time;
-    char    output[10]; //TODO: Make Dynamic
+    char    output[240]; //TODO: Figure out optimal size
 } cnc_res_packet;
 
 
