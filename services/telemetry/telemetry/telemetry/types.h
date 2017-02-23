@@ -106,6 +106,7 @@ typedef struct subscriber_list_item
     pubsub_conn conn;
     csp_queue_handle_t packet_queue;
     topic_list_item * topics;
+    csp_thread_handle_t rx_thread;
     struct subscriber_list_item * next;
 } subscriber_list_item;
 

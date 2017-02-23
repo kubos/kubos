@@ -36,13 +36,18 @@ void telemetry_client_init(void)
 
     csp_route_start_task(500, 1);
 
-    // csp_debug_set_level(CSP_ERROR, true);
-    // csp_debug_set_level(CSP_WARN, true);
-    // csp_debug_set_level(CSP_INFO, true);
-    // csp_debug_set_level(CSP_BUFFER, true);
-    // csp_debug_set_level(CSP_PACKET, true);
-    // csp_debug_set_level(CSP_PROTOCOL, true);
-    // csp_debug_set_level(CSP_LOCK, true);
+    csp_debug_set_level(CSP_ERROR, true);
+    csp_debug_set_level(CSP_WARN, true);
+    csp_debug_set_level(CSP_INFO, true);
+    csp_debug_set_level(CSP_BUFFER, true);
+    csp_debug_set_level(CSP_PACKET, true);
+    csp_debug_set_level(CSP_PROTOCOL, true);
+    csp_debug_set_level(CSP_LOCK, true);
+}
+
+void telemetry_client_shutdown(void)
+{
+    csp_route_end_task();
 }
 
 // bool telemetry_is_subscribed(const pubsub_conn * client_conn, uint16_t topic_id)
@@ -75,18 +80,21 @@ bool telemetry_disconnect(pubsub_conn * client_conn)
     // csp_mutex_lock(&unsubscribing_lock, CSP_INFINITY);
     if (client_conn != NULL)
     {
-        telemetry_message_type req = MESSAGE_TYPE_DISCONNECT;
-        ret = kprv_send_csp(client_conn, &req, sizeof(telemetry_message_type));
-
-        csp_close(client_conn->conn_handle);
-        client_conn->conn_handle = NULL;
-        ret = true;
+        printf("Send disconnect\r\n");
+        uint8_t buffer[256] = {0};
+        int msg_size = telemetry_encode_disconnect_msg(buffer);
+        if (msg_size > 0)
+        {
+            ret = kprv_send_csp(client_conn, buffer, msg_size);
+            printf("Sent dis %d\r\n", msg_size);
+        }
+        kprv_subscriber_socket_close(client_conn);
     }
     // csp_mutex_unlock(&unsubscribing_lock);
     return ret;
 }
 
-bool telemetry_subscribe(const pubsub_conn * client_conn, uint16_t topic_id)
+bool telemetry_subscribe(const pubsub_conn * client_conn, int topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
@@ -101,7 +109,7 @@ bool telemetry_subscribe(const pubsub_conn * client_conn, uint16_t topic_id)
     return ret;
 }
 
-bool telemetry_unsubscribe(const pubsub_conn * client_conn, uint16_t topic_id)
+bool telemetry_unsubscribe(const pubsub_conn * client_conn, int topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
@@ -136,7 +144,6 @@ bool telemetry_publish(telemetry_packet pkt)
 {
     pubsub_conn conn;
     bool ret = false;
-
     if ((ret = telemetry_connect(&conn)) == true)
     {
         uint8_t buffer[256] = {0};
@@ -145,10 +152,10 @@ bool telemetry_publish(telemetry_packet pkt)
         if (msg_size > 0)
         {
             ret = kprv_send_csp(&conn, buffer, msg_size);
+            printf("Published %d\r\n", msg_size);
         }
+        // telemetry_disconnect(&conn);
     }
-
-    telemetry_disconnect(&conn);
 
     return ret;
 }

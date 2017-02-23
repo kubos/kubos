@@ -33,28 +33,28 @@ bool telemetry_parse_packet_msg(uint8_t * buffer, int buffer_size, telemetry_pac
     if (err)
         return false;
 
-    if (cbor_value_get_int(&element, &packet->source.topic_id))
+    if (cbor_value_get_int(&element, &(packet->source.topic_id)))
         return false;
 
     err = cbor_value_map_find_value(&map, "SUBSYSTEM_ID", &element);
-    if (err || cbor_value_get_int(&element, &packet->source.subsystem_id))
+    if (err || cbor_value_get_int(&element, &(packet->source.subsystem_id)))
         return false;
 
     err = cbor_value_map_find_value(&map, "DATA_TYPE", &element);
-    if (err || cbor_value_get_int(&element, &packet->source.data_type))
+    if (err || cbor_value_get_int(&element, (int*)&(packet->source.data_type)))
         return false;
 
     err = cbor_value_map_find_value(&map, "DATA", &element);
     if (!err)
     {
         if (packet->source.data_type == TELEMETRY_TYPE_INT)
-            cbor_value_get_int(&element, &packet->data.i);
+            cbor_value_get_int(&element, &(packet->data.i));
         else if (packet->source.data_type == TELEMETRY_TYPE_FLOAT)
-            cbor_value_get_float(&element, &packet->data.f);
+            cbor_value_get_float(&element, &(packet->data.f));
     }
 
     err = cbor_value_map_find_value(&map, "TIMESTAMP", &element);
-    if (err || cbor_value_get_int(&element, &packet->timestamp))
+    if (err || cbor_value_get_int(&element, &(packet->timestamp)))
         return false;
 
     return true;
@@ -77,7 +77,7 @@ bool telemetry_parse_msg_type(uint8_t * buffer, int buffer_size, telemetry_messa
     if (err)
         return false;
 
-    if (cbor_value_get_int(&element, req))
+    if (cbor_value_get_int(&element, (int*)req))
         return false;
 
     return true;
