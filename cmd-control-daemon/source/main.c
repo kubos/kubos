@@ -14,10 +14,11 @@
 #include "tinycbor/cbor.h"
 
 #define PORT        10
-#define BUF_SIZE    250
+#define MTU         YOTTA_CFG_CSP_MTU
+#define BUF_SIZE    MTU
 
 /*
- * IMPORTANT: For review ignore everything before line #90
+ * IMPORTANT: For review ignore everything before line #91
  * We won't be using named pipes and everything before that is all csp code to
  * set up a named pipe connection.
  */
@@ -30,7 +31,7 @@ int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout);
 csp_iface_t csp_if_fifo = {
     .name = "fifo",
     .nexthop = csp_fifo_tx,
-    .mtu = BUF_SIZE,
+    .mtu = MTU,
 };
 
 
@@ -103,14 +104,22 @@ bool encode_packet(csp_packet_t * packet, cnc_res_packet * result) {
     uint8_t data[BUF_SIZE];
 
     cbor_encoder_init(&encoder, data, BUF_SIZE, 0);
-    /*TODO: Error checking*/
-    cbor_encoder_create_map(&encoder, &container, 3);
-    cbor_encode_text_stringz(&container, "RETURN_CODE");
-    cbor_encode_simple_value(&container, result->return_code);
-    cbor_encode_text_stringz(&container, "EXEC_TIME");
-    cbor_encode_double(&container, result->execution_time);
+    err = cbor_encoder_create_map(&encoder, &container, 3);
+    if (err)
+        return false;
+
+    err = cbor_encode_text_stringz(&container, "RETURN_CODE");
+    if (err || cbor_encode_simple_value(&container, result->return_code))
+        return false;
+
+    err = cbor_encode_text_stringz(&container, "EXEC_TIME");
+    if (err || cbor_encode_double(&container, result->execution_time))
+        return false;
+
     err = cbor_encode_text_stringz(&container, "OUTPUT");
-    err = cbor_encode_text_stringz(&container, result->output);
+    if (err || cbor_encode_text_stringz(&container, result->output))
+        return false;
+
     cbor_encoder_close_container(&encoder, &container);
     memcpy(packet->data, data, BUF_SIZE); //TODO: Make more efficient
     packet->length = BUF_SIZE;
@@ -118,7 +127,7 @@ bool encode_packet(csp_packet_t * packet, cnc_res_packet * result) {
 }
 
 
-void send_response(cnc_res_packet* response) { //TODO: Make this send an actual response packet
+void send_response(cnc_res_packet* response) {
     int my_address = 1, client_address = 2;
     char *rx_channel_name, *tx_channel_name;
     uint8_t buffer[BUF_SIZE];
@@ -130,10 +139,10 @@ void send_response(cnc_res_packet* response) { //TODO: Make this send an actual 
     while (1) {
         packet = csp_buffer_get(BUF_SIZE);
         if (packet) {
-            encode_packet(packet, response);
-            /*strcpy((char *) packet->data, message);*/
-            /*packet->length = strlen(message);*/
-
+            if (!encode_packet(packet, response)) {
+                fprintf(stderr, "There was an issue encoding the run output into the response packet.\n");
+                return;
+            }
             conn = csp_connect(CSP_PRIO_NORM, client_address, PORT, 1000, CSP_O_NONE);
             send_packet(conn, packet);
             csp_buffer_free(packet);
@@ -143,7 +152,7 @@ void send_response(cnc_res_packet* response) { //TODO: Make this send an actual 
     }
 }
 
-bool zero_vars(char * command_str, cnc_cmd_packet * command, cnc_res_packet * response)
+void zero_vars(char * command_str, cnc_cmd_packet * command, cnc_res_packet * response)
 {
     memset(command_str, 0, sizeof(command_str) * sizeof(char));
     memset(command, 0, sizeof(cnc_cmd_packet));

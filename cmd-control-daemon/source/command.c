@@ -5,28 +5,28 @@
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
-
 #include "tinycbor/cbor.h"
-#define CBOR_BUF_SIZE 64
-typedef int (*lib_func)(int, char**);
 
+#define CBOR_BUF_SIZE YOTTA_CFG_CSP_MTU
+
+typedef int (*lib_func)(int, char**);
 bool parse_command_cbor(csp_packet_t * packet, char * command);
 
 bool get_command(csp_socket_t* sock, char * command) {
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-
     while (1) {
-        /* Process incoming packet */
         conn = csp_accept(sock, 1000);
         if (conn) {
             packet = csp_read(conn, 0);
             if (packet)
             {
-                parse_command_cbor(packet, command);
+                if (!parse_command_cbor(packet, command)){
+                    fprintf(stderr, "There was an error parsing the command packet\n");
+                    return false;
+                }
             }
-            printf("Received Command: %s\r\n", command);
             csp_buffer_free(packet);
             csp_close(conn);
             return true;
@@ -34,16 +34,20 @@ bool get_command(csp_socket_t* sock, char * command) {
     }
 }
 
+
 bool parse_command_cbor(csp_packet_t * packet, char * command) {
     CborParser parser;
     CborValue map, element;
     size_t len;
 
     CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
-    //TODO: Error checking..
+    if (err)
+        return false;
+
     err = cbor_value_map_find_value(&map, "ARGS", &element);
-    err = cbor_value_get_string_length(&element, &len);
-    err = cbor_value_copy_text_string(&element, command, &len, NULL);
+    if (err || cbor_value_copy_text_string(&element, command, &len, NULL))
+        return false;
+    return true;
 }
 
 
@@ -85,20 +89,24 @@ bool run_command(cnc_cmd_packet * command, cnc_res_packet * response) {
             break;
         default:
             printf ("Error the requested command doesn't exist\n");
-            return NULL;
+            return false;
     }
 
     if (func == NULL) {
         fprintf(stderr, "Unable to get symbol\n");
         return false;
     }
+
     //Redirect stdout to the response output field.
-    int original_stdout, buf;
+    //TODO: Redirect STDERR
+
+    int original_stdout;
     fflush(stdout);
     original_stdout = dup(STDOUT_FILENO);
     freopen("/dev/null", "a", stdout);
     setbuf(stdout, response->output);
 
+    //Measure the clock before and after the function has run
     clock_t start_time = clock();
     response->return_code = func(command->arg_count, command->args);
     clock_t finish_time = clock();
@@ -108,10 +116,11 @@ bool run_command(cnc_cmd_packet * command, cnc_res_packet * response) {
     dup2(original_stdout, STDOUT_FILENO); //restore the previous state of stdout
     setbuf(stdout, NULL);
 
+    //Calculate the runtime
     response->execution_time = (double)(finish_time - start_time)/(CLOCKS_PER_SEC/1000); //execution time in milliseconds
     printf("Return code: %i exection time %f\n", response->return_code, response->execution_time);
 
-    //TODO: "unload" the library and other clean up
+    //TODO: Unload the library
     return true;
 }
 

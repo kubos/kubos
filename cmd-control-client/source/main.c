@@ -12,8 +12,8 @@
 #include "tinycbor/cbor.h"
 
 #define PORT        10
-#define BUF_SIZE    250
-#define CBOR_BUF_SIZE BUF_SIZE
+#define BUF_SIZE    YOTTA_CFG_CSP_MTU
+#define MTU         YOTTA_CFG_CSP_MTU
 
 pthread_t rx_thread, my_thread;
 int rx_channel, tx_channel;
@@ -23,7 +23,7 @@ int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout);
 csp_iface_t csp_if_fifo = {
     .name = "fifo",
     .nexthop = csp_fifo_tx,
-    .mtu = BUF_SIZE,
+    .mtu = MTU,
 };
 
 int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
@@ -53,7 +53,7 @@ int send_packet(csp_conn_t* conn, csp_packet_t* packet) {
 }
 
 
-void csp_init_everything(){
+bool csp_init_everything(){
 
     int my_address = 2;
     char *message = "Testing CSP", *rx_channel_name, *tx_channel_name;
@@ -65,19 +65,19 @@ void csp_init_everything(){
     /* Init CSP and CSP buffer system */
     if (csp_init(my_address) != CSP_ERR_NONE || csp_buffer_init(10, 300) != CSP_ERR_NONE) {
         printf("Failed to init CSP\r\n");
-        return -1;
+        return false;
     }
 
     tx_channel = open(tx_channel_name, O_RDWR);
     if (tx_channel < 0) {
         printf("Failed to open TX channel\r\n");
-        return -1;
+        return false;
     }
 
     rx_channel = open(rx_channel_name, O_RDWR);
     if (rx_channel < 0) {
         printf("Failed to open RX channel\r\n");
-        return -1;
+        return false;
     }
 
     /* Start fifo RX task */
@@ -86,10 +86,11 @@ void csp_init_everything(){
     /* Set default route and start router */
     csp_route_set(CSP_DEFAULT_ROUTE, &csp_if_fifo, CSP_NODE_MAC);
     csp_route_start_task(0, 0);
+    return true;
 }
 
 
-void send_msg(uint32_t* data, size_t length) {
+void send_msg(uint8_t* data, size_t length) {
     int server_address = 1;
     csp_conn_t *conn;
     csp_packet_t *packet;
@@ -109,11 +110,12 @@ void send_msg(uint32_t* data, size_t length) {
     }
 }
 
+
 bool parse_response(csp_packet_t * packet) {
     size_t len;
     uint8_t return_code;
     double execution_time;
-    char output[CBOR_BUF_SIZE];
+    char output[BUF_SIZE];
 
     CborParser parser;
     CborValue map, element;
@@ -128,12 +130,13 @@ bool parse_response(csp_packet_t * packet) {
     printf("Return Code: %i\n", return_code);
 
     err = cbor_value_map_find_value(&map, "EXEC_TIME", &element);
-    err = cbor_value_get_double(&element, &execution_time);
-    if (err)
+    if (err || cbor_value_get_double(&element, &execution_time))
         return false;
-    err = cbor_value_map_find_value(&map, "OUTPUT", &element);
-    err = cbor_value_copy_text_string(&element, output, &len, NULL);
     printf("Exectuion Time %f\n", execution_time);
+
+    err = cbor_value_map_find_value(&map, "OUTPUT", &element);
+    if (err || cbor_value_copy_text_string(&element, output, &len, NULL))
+        return false;
     printf("Output: %s\n", output);
 }
 
@@ -152,7 +155,6 @@ void get_response() {
             packet = csp_read(conn, 0);
             if (packet)
                 parse_response(packet);
-                /*printf("Received Response: %s\r\n", packet->data);*/
             csp_buffer_free(packet);
             csp_close(conn);
             return;
@@ -163,7 +165,10 @@ void get_response() {
 
 int main(int argc, char **argv) {
     //terrible name for starting all the tedious csp stuff
-    csp_init_everything();
+    if (!csp_init_everything()) {
+        fprintf(stderr, "There was an error initializing the csp configuration\n");
+        return 1;
+    }
 
     char* args = "exec foo";
     uint8_t data[CBOR_BUF_SIZE];
@@ -172,10 +177,15 @@ int main(int argc, char **argv) {
 
     CborError err;
     cbor_encoder_init(&encoder, data, CBOR_BUF_SIZE, 0);
-    /*[>TODO: Error checking on all of this..<]*/
     err = cbor_encoder_create_map(&encoder, &container, 1);
+    if (err) {
+        fprintf(stderr, "There was an error creating the map. CBOR Error code: %i\n", err);
+        return 0;
+    }
     err = cbor_encode_text_stringz(&container, "ARGS");
-    err = cbor_encode_text_stringz(&container, args);
+    if (err || cbor_encode_text_stringz(&container, args)) {
+        fprintf(stderr, "There was an error encoding the commands into the CBOR message\n");
+    }
 
     send_msg(data, CBOR_BUF_SIZE);
     get_response();
