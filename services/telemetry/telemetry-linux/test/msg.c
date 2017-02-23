@@ -112,7 +112,7 @@ static void test_end_encode_msg(void ** arg)
 
     start_encode_msg(&encoder, &container, buffer, 100, 1, MESSAGE_TYPE_PACKET);
 
-    assert_true(end_encode_msg(buffer, &encoder, &container) > 0);
+    assert(end_encode_msg(buffer, &encoder, &container) > 0);
 }
 
 int main(void)

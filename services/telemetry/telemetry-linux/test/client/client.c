@@ -55,7 +55,10 @@ static void test_client_disconnect(void ** arg)
 static void test_client_subscribe(void ** arg)
 {
     pubsub_conn conn;
-    conn.conn_handle = "";
+    
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
 
     expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
@@ -67,7 +70,10 @@ static void test_client_subscribe(void ** arg)
 static void test_client_unsubscribe(void ** arg)
 {
     pubsub_conn conn;
-    conn.conn_handle = "";
+    
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
 
     expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
@@ -80,6 +86,10 @@ static void test_client_read(void ** arg)
 {
     pubsub_conn conn;
     telemetry_packet packet;
+
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
 
     expect_not_value(__wrap_kprv_subscriber_read, conn->conn_handle, NULL);
     expect_not_value(__wrap_kprv_subscriber_read, buffer, NULL);

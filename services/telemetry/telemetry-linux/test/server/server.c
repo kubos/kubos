@@ -28,6 +28,8 @@ static void test_server_add_subscription(void ** arg)
     assert_true(kprv_add_topic(&sub, 5));
 
     assert_true(kprv_has_topic(&sub, 5));
+
+    kprv_remove_topic(&sub, 5);
 }
 
 static void test_server_remove_subscription(void ** arg)
@@ -48,11 +50,20 @@ static void test_server_create_subscriber(void ** arg)
     pubsub_conn conn;
     subscriber_list_item * sub = NULL;
 
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
+
     sub = create_subscriber(conn);
 
     assert_non_null(sub);
 
     assert_true(sub->active);
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+
+    destroy_subscriber(&sub);
 }
 
 static void test_server_destroy_subscriber(void ** arg)
@@ -60,7 +71,9 @@ static void test_server_destroy_subscriber(void ** arg)
     pubsub_conn conn;
     subscriber_list_item * sub = NULL;
 
-    conn.conn_handle = "";
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
 
     assert_null(sub);
 
@@ -70,7 +83,6 @@ static void test_server_destroy_subscriber(void ** arg)
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
-
     destroy_subscriber(&sub);
 
     assert_null(sub);
@@ -87,7 +99,13 @@ static void test_server_publish_packet(void ** arg)
     telemetry_packet out_packet;
     subscriber_list_item * sub = NULL;
 
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
+
     sub = create_subscriber(conn);
+
+    kprv_add_topic(sub, in_packet.source.topic_id);
 
     assert_true(telemetry_publish_packet(sub, in_packet));
     assert_int_equal(telemetry_get_num_packets(sub), 1);
@@ -96,6 +114,10 @@ static void test_server_publish_packet(void ** arg)
     assert_int_equal(in_packet.data.i, out_packet.data.i);
 
     assert_int_equal(telemetry_get_num_packets(sub), 0);
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_publish_multiple_packets(void ** arg)
@@ -109,7 +131,13 @@ static void test_server_publish_multiple_packets(void ** arg)
     telemetry_packet out_packet;
     subscriber_list_item * sub = NULL;
 
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
+
     sub = create_subscriber(conn);
+
+    kprv_add_topic(sub, in_packet.source.topic_id);
 
     for (i = 0; i < 5; i++)
     {
@@ -126,6 +154,10 @@ static void test_server_publish_multiple_packets(void ** arg)
     }
     
     assert_int_equal(telemetry_get_num_packets(sub), 0);
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_subscribe_msg(void ** arg)
@@ -136,6 +168,10 @@ static void test_server_get_subscribe_msg(void ** arg)
     pubsub_conn conn;
     subscriber_list_item * sub = NULL;
 
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
+
     sub = create_subscriber(conn);
 
     msg_size = telemetry_encode_subscribe_msg(buffer, &subscribe_topic);
@@ -143,6 +179,10 @@ static void test_server_get_subscribe_msg(void ** arg)
     assert_true(telemetry_process_message(sub, buffer, msg_size));
 
     assert_true(kprv_has_topic(sub, subscribe_topic));
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_unsubscribe_msg(void ** arg)
@@ -152,6 +192,10 @@ static void test_server_get_unsubscribe_msg(void ** arg)
     int msg_size;
     pubsub_conn conn;
     subscriber_list_item * sub = NULL;
+
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
 
     sub = create_subscriber(conn);
 
@@ -166,6 +210,10 @@ static void test_server_get_unsubscribe_msg(void ** arg)
     telemetry_process_message(sub, buffer, msg_size);
 
     assert_false(kprv_has_topic(sub, subscribe_topic));
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_disconnect_msg(void ** arg)
@@ -176,6 +224,10 @@ static void test_server_get_disconnect_msg(void ** arg)
     pubsub_conn conn;
     subscriber_list_item * sub = NULL;
 
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
+
     sub = create_subscriber(conn);
 
     assert_true(sub->active);
@@ -185,21 +237,36 @@ static void test_server_get_disconnect_msg(void ** arg)
     assert_true(telemetry_process_message(sub, buffer, msg_size));
 
     assert_false(sub->active);
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_packet_msg(void ** arg)
 {
     uint8_t buffer[100];
-    telemetry_packet packet;
+    telemetry_packet packet = {
+        .source.topic_id = 5,
+        .data.i = 5
+    };
     int msg_size;
     pubsub_conn conn;
     subscriber_list_item * sub = NULL;
+
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
 
     sub = create_subscriber(conn);
 
     msg_size = telemetry_encode_packet_msg(buffer, &packet);
 
     assert_true(telemetry_process_message(sub, buffer, msg_size));
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_bad_msg(void ** arg)
@@ -209,9 +276,17 @@ static void test_server_get_bad_msg(void ** arg)
     pubsub_conn conn;
     subscriber_list_item * sub = NULL;
 
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
+
     sub = create_subscriber(conn);
 
     assert_false(telemetry_process_message(sub, buffer, msg_size));
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+    destroy_subscriber(&sub);
 }
 
 int main(void)
