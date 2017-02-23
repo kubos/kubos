@@ -139,6 +139,16 @@ bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t
     }
 }
 
+void kprv_subscriber_socket_close(pubsub_conn * conn)
+{
+    if (conn != NULL)
+    {
+        csp_close(conn->conn_handle);
+        conn->conn_handle = NULL;
+        csp_socket_close(&(conn->csp_socket_if), &(conn->socket_driver)); 
+    }
+}
+
 bool kprv_send_csp(const pubsub_conn * conn, const void * data, uint16_t length)
 {
     csp_packet_t * csp_packet = NULL;
@@ -152,11 +162,13 @@ bool kprv_send_csp(const pubsub_conn * conn, const void * data, uint16_t length)
             csp_packet->length = length;
             if (!csp_send(csp_conn, csp_packet, IPC_SEND_TIMEOUT))
             {
+                printf("csp_send fail\r\n");
                 csp_buffer_free(csp_packet);
                 return false;
             }
             else
             {
+                printf("csp_send true\r\n");
                 return true;
             }
         }

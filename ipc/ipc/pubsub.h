@@ -66,6 +66,8 @@ bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn);
  */
 bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port);
 
+bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t port);
+
 /**
  * Attempts to receive data over the specified pubsub_conn
  * @param conn pubsub_conn to receive from
