@@ -8,6 +8,9 @@
   "author": "gomspace",
   "homepage": "https://github.com/GomSpace/libcsp",
   "license": "LGPL 2.1",
+  "dependencies": {
+    "tinycbor": "kubostech/tinycbor"
+  },
   "targetDependencies": {
     "freertos": {
       "freertos": "kubostech/freertos#~9.0.3"
