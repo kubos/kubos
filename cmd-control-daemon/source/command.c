@@ -6,12 +6,16 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "tinycbor/cbor.h"
+#define CBOR_BUF_SIZE 64
 typedef int (*lib_func)(int, char**);
 
-char* get_command(csp_socket_t* sock) {
+bool parse_command_cbor(csp_packet_t * packet, char * command);
+
+bool get_command(csp_socket_t* sock, char * command) {
     csp_conn_t *conn;
     csp_packet_t *packet;
-    char* command = NULL;
+
 
     while (1) {
         /* Process incoming packet */
@@ -19,39 +23,47 @@ char* get_command(csp_socket_t* sock) {
         if (conn) {
             packet = csp_read(conn, 0);
             if (packet)
-                command = malloc(packet->length);
-                memcpy(command, packet->data, packet->length);
-                printf("Received Command: %s\r\n", command);
+            {
+                parse_command_cbor(packet, command);
+            }
+            printf("Received Command: %s\r\n", command);
             csp_buffer_free(packet);
             csp_close(conn);
-            return command;
-       }
+            return true;
+        }
     }
 }
 
+bool parse_command_cbor(csp_packet_t * packet, char * command) {
+    CborParser parser;
+    CborValue map, element;
+    size_t len;
 
-cnc_res_packet * run_command(cnc_cmd_packet * command){
+    CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
+    //TODO: Error checking..
+    err = cbor_value_map_find_value(&map, "ARGS", &element);
+    err = cbor_value_get_string_length(&element, &len);
+    err = cbor_value_copy_text_string(&element, command, &len, NULL);
+}
+
+
+bool run_command(cnc_cmd_packet * command, cnc_res_packet * response) {
     int return_code;
-    cnc_res_packet* res_ptr = malloc(sizeof(cnc_res_packet));
-    memset(res_ptr, 0, sizeof(cnc_res_packet));
     void     *handle  = NULL;
     lib_func  func    = NULL;
-    char log_path [35] = {0};
+    char so_path[75];      //TODO: Define some constant and some macro for overflow checking.
     char * home_dir = "/home/vagrant/lib%s.so";
 
+
     int so_len = strlen(home_dir) + strlen(command->cmd_name) - 1;
-    char * so_path = malloc(so_len);
     snprintf(so_path, so_len, home_dir, command->cmd_name);
 
     handle = dlopen(so_path, RTLD_NOW | RTLD_GLOBAL);
 
-    free(so_path);
-
     if (handle == NULL)
     {
         fprintf(stderr, "Unable to open lib: %s\n", dlerror());
-        res_ptr->return_code = -1;
-        return res_ptr;
+        return false;
     }
 
     switch (command->action){
@@ -78,17 +90,17 @@ cnc_res_packet * run_command(cnc_cmd_packet * command){
 
     if (func == NULL) {
         fprintf(stderr, "Unable to get symbol\n");
-        return NULL;
+        return false;
     }
     //Redirect stdout to the response output field.
     int original_stdout, buf;
     fflush(stdout);
     original_stdout = dup(STDOUT_FILENO);
     freopen("/dev/null", "a", stdout);
-    setbuf(stdout, res_ptr->output);
+    setbuf(stdout, response->output);
 
     clock_t start_time = clock();
-    res_ptr->return_code = func(command->arg_count, command->args);
+    response->return_code = func(command->arg_count, command->args);
     clock_t finish_time = clock();
 
     //Redirect stdout back to the terminal.
@@ -96,11 +108,10 @@ cnc_res_packet * run_command(cnc_cmd_packet * command){
     dup2(original_stdout, STDOUT_FILENO); //restore the previous state of stdout
     setbuf(stdout, NULL);
 
-    res_ptr->execution_time = (double)(finish_time - start_time)/(CLOCKS_PER_SEC/1000); //execution time in milliseconds
-    printf("Return code: %i exection time %f\n", res_ptr->return_code, res_ptr->execution_time);
+    response->execution_time = (double)(finish_time - start_time)/(CLOCKS_PER_SEC/1000); //execution time in milliseconds
+    printf("Return code: %i exection time %f\n", response->return_code, response->execution_time);
 
     //TODO: "unload" the library and other clean up
-    return res_ptr;
+    return true;
 }
-
 

@@ -11,6 +11,7 @@
 
 #include "command-and-control/types.h"
 #include "cmd-control-daemon/daemon.h"
+#include "tinycbor/cbor.h"
 
 #define PORT        10
 #define BUF_SIZE    250
@@ -96,19 +97,42 @@ int send_packet(csp_conn_t* conn, csp_packet_t* packet) {
     return 0;
 }
 
+bool encode_packet(csp_packet_t * packet, cnc_res_packet * result) {
+    CborEncoder encoder, container;
+    CborError err;
+    uint8_t data[BUF_SIZE];
+
+    cbor_encoder_init(&encoder, data, BUF_SIZE, 0);
+    /*TODO: Error checking*/
+    cbor_encoder_create_map(&encoder, &container, 3);
+    cbor_encode_text_stringz(&container, "RETURN_CODE");
+    cbor_encode_simple_value(&container, result->return_code);
+    cbor_encode_text_stringz(&container, "EXEC_TIME");
+    cbor_encode_double(&container, result->execution_time);
+    err = cbor_encode_text_stringz(&container, "OUTPUT");
+    err = cbor_encode_text_stringz(&container, result->output);
+    cbor_encoder_close_container(&encoder, &container);
+    memcpy(packet->data, data, BUF_SIZE); //TODO: Make more efficient
+    packet->length = BUF_SIZE;
+    return true;
+}
+
 
 void send_response(cnc_res_packet* response) { //TODO: Make this send an actual response packet
     int my_address = 1, client_address = 2;
-    char *message = "Return MSG", *rx_channel_name, *tx_channel_name;
+    char *rx_channel_name, *tx_channel_name;
+    uint8_t buffer[BUF_SIZE];
+
     csp_socket_t *sock;
     csp_conn_t *conn;
     csp_packet_t *packet;
 
     while (1) {
-        packet = csp_buffer_get(strlen(message));
+        packet = csp_buffer_get(BUF_SIZE);
         if (packet) {
-            strcpy((char *) packet->data, message);
-            packet->length = strlen(message);
+            encode_packet(packet, response);
+            /*strcpy((char *) packet->data, message);*/
+            /*packet->length = strlen(message);*/
 
             conn = csp_connect(CSP_PRIO_NORM, client_address, PORT, 1000, CSP_O_NONE);
             send_packet(conn, packet);
@@ -119,38 +143,37 @@ void send_response(cnc_res_packet* response) { //TODO: Make this send an actual 
     }
 }
 
+bool zero_vars(char * command_str, cnc_cmd_packet * command, cnc_res_packet * response)
+{
+    memset(command_str, 0, sizeof(command_str) * sizeof(char));
+    memset(command, 0, sizeof(cnc_cmd_packet));
+    memset(response, 0, sizeof(cnc_res_packet));
+
+}
+
 
 int main(int argc, char **argv) {
     int my_address = 1;
     csp_socket_t *sock;
-    cnc_action action;
-    cnc_cmd_packet* cmd_ptr = NULL;
-    cnc_res_packet* res_ptr = NULL;
+    char command_str[75];
+    cnc_cmd_packet command;
+    cnc_res_packet response;
 
     csp_init_things(my_address);
     sock = csp_socket(CSP_SO_NONE);
     csp_bind(sock, PORT);
     csp_listen(sock, 5);
 
-    char * command = NULL;
-
     while (1) {
-        command = get_command(sock);
-        cmd_ptr = parse(command);
-        res_ptr = run_command(cmd_ptr);
-        send_response(res_ptr);
-        free(command);
+        get_command(sock, command_str);
+        parse(command_str, &command);
+        run_command(&command, &response);
+        send_response(&response);
+        zero_vars(command_str, &command, &response);
     }
 
     close(rx_channel);
     close(tx_channel);
-
-    //Free all the allocated things.
-    int i;
-    for (i = 0; i < cmd_ptr->arg_count; i++){
-        free(cmd_ptr->args[i]);
-    }
-    free(cmd_ptr->cmd_name);
 
     return 0;
 }

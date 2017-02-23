@@ -69,14 +69,13 @@ static char doc[] = "The doc for this command";
 
 static struct argp argp = { options, parse_opt, "WORD[WORD]"};
 
-cnc_cmd_packet * parse (char * args)
+bool parse (char * args, cnc_cmd_packet * my_arguments)
 {
     int res, argsc;
     char * tok = " ";
     int idx = 0;
     char * pch;
 
-    cnc_cmd_packet * my_arguments = malloc(sizeof(cnc_cmd_packet));
     my_arguments->arg_count = 0;
 
     int my_argc = get_num_args(args);
@@ -95,6 +94,6 @@ cnc_cmd_packet * parse (char * args)
 
     argp_parse (&argp, my_argc, result, flags, 0, my_arguments);
     //All the allocated memory is freed at the end of main()
-    return my_arguments;
+    return true;
 }
 

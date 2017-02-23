@@ -3,10 +3,10 @@
 #include <csp/csp.h>
 #include <command-and-control/types.h>
 
-char* get_command(csp_socket_t* sock);
+bool get_command(csp_socket_t* sock, char * command);
 
-cnc_res_packet * run_command(cnc_cmd_packet * command);
+bool run_command(cnc_cmd_packet * command, cnc_res_packet * response); 
 
-cnc_cmd_packet * parse (char * args);
+bool parse (char * args, cnc_cmd_packet * my_arguments);
 
 #endif

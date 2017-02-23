@@ -9,7 +9,8 @@
     "version":"0.1.0",
     "dependencies":{
         "csp":"kubostech/libcsp#~1.5.0",
-    "command-and-control":"kubostech/command-and-control"
+	"command-and-control":"kubostech/command-and-control",
+    	"tinycbor":"kubostech/tinycbor"
     },
     "homepage":"https://<homepage>",
     "description":"Example app running on KubOS Linux."

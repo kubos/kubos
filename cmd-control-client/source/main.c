@@ -9,9 +9,11 @@
 #include <csp/csp_interface.h>
 
 #include "command-and-control/types.h"
+#include "tinycbor/cbor.h"
 
 #define PORT        10
 #define BUF_SIZE    250
+#define CBOR_BUF_SIZE BUF_SIZE
 
 pthread_t rx_thread, my_thread;
 int rx_channel, tx_channel;
@@ -87,16 +89,16 @@ void csp_init_everything(){
 }
 
 
-void send_msg(char* message) {
+void send_msg(uint32_t* data, size_t length) {
     int server_address = 1;
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-    int size = strlen(message) + 1;
-    while(packet = csp_buffer_get(size)) {
+    /*int size = strlen(message) + 1;*/
+    while(packet = csp_buffer_get(length)) {
         if (packet) {
-            memcpy(packet->data, message, size);
-            packet->length = size;
+            memcpy(packet->data, data, length);
+            packet->length = length;
 
             conn = csp_connect(CSP_PRIO_NORM, server_address, PORT, 1000, CSP_O_NONE);
             send_packet(conn, packet);
@@ -105,6 +107,34 @@ void send_msg(char* message) {
             return;
         }
     }
+}
+
+bool parse_response(csp_packet_t * packet) {
+    size_t len;
+    uint8_t return_code;
+    double execution_time;
+    char output[CBOR_BUF_SIZE];
+
+    CborParser parser;
+    CborValue map, element;
+
+    CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
+    if (err)
+        return false;
+
+    err = cbor_value_map_find_value(&map, "RETURN_CODE", &element);
+    if (err || cbor_value_get_simple_type(&element, &return_code))
+        return false;
+    printf("Return Code: %i\n", return_code);
+
+    err = cbor_value_map_find_value(&map, "EXEC_TIME", &element);
+    err = cbor_value_get_double(&element, &execution_time);
+    if (err)
+        return false;
+    err = cbor_value_map_find_value(&map, "OUTPUT", &element);
+    err = cbor_value_copy_text_string(&element, output, &len, NULL);
+    printf("Exectuion Time %f\n", execution_time);
+    printf("Output: %s\n", output);
 }
 
 
@@ -121,7 +151,8 @@ void get_response() {
         if (conn) {
             packet = csp_read(conn, 0);
             if (packet)
-                printf("Received Response: %s\r\n", packet->data);
+                parse_response(packet);
+                /*printf("Received Response: %s\r\n", packet->data);*/
             csp_buffer_free(packet);
             csp_close(conn);
             return;
@@ -135,17 +166,20 @@ int main(int argc, char **argv) {
     csp_init_everything();
 
     char* args = "exec foo";
+    uint8_t data[CBOR_BUF_SIZE];
 
-    /*cnc_cmd_packet packet;*/
-    /*packet.action = execute;*/
+    CborEncoder encoder, container;
 
-    /*packet.args = malloc(sizeof(args));*/
-    /*memcpy(packet.args, args, 4);*/
+    CborError err;
+    cbor_encoder_init(&encoder, data, CBOR_BUF_SIZE, 0);
+    /*[>TODO: Error checking on all of this..<]*/
+    err = cbor_encoder_create_map(&encoder, &container, 1);
+    err = cbor_encode_text_stringz(&container, "ARGS");
+    err = cbor_encode_text_stringz(&container, args);
 
-    send_msg(args);
+    send_msg(data, CBOR_BUF_SIZE);
     get_response();
 
-    /*free(packet.args);*/
     close(rx_channel);
     close(tx_channel);
 
