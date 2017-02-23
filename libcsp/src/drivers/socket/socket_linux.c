@@ -52,9 +52,13 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
     static bool server_init = false;
 
     if (server_init == false) {
-        server_socket = socket(AF_INET, SOCK_STREAM, 0);
+        server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
         if (server_socket == -1) {
             csp_log_error("Failed to init socket\n");
+            return CSP_ERR_DRIVER;
+        }
+        if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) < 0) {
+            csp_log_error("setsockopt(SO_REUSEADDR) failed");
             return CSP_ERR_DRIVER;
         }
         // For now we will only accept local socket connections
@@ -72,9 +76,10 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
     }
 
     csp_log_info("Wait to accept\n");
-    socket_handle = accept(server_socket, (struct sockaddr *)&client, (socklen_t*)&c);
+    // socket_handle = accept(server_socket, (struct sockaddr *)&client, (socklen_t*)&c);
+    socket_handle = accept(server_socket, NULL, NULL);
     if (socket_handle < 0) {
-        csp_log_error("Accept failed\n");
+        csp_log_error("Accept failed %d\n", socket_handle);
         return CSP_ERR_DRIVER;
     }
     csp_log_info("Accepted!\n");
@@ -87,7 +92,7 @@ static int socket_client_init(csp_socket_handle_t * socket_iface, uint16_t port)
     struct sockaddr_in server;
 
     //Create socket
-    socket_handle = socket(AF_INET, SOCK_STREAM, 0);
+    socket_handle = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
     if (socket_handle == -1) {
         csp_log_error("Could not create socket");
         return CSP_ERR_DRIVER;
