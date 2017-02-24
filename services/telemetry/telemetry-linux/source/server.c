@@ -329,7 +329,6 @@ CSP_DEFINE_TASK(telemetry_rx_task)
         
         if (!kprv_server_accept(sock, &conn))
         {
-            // printf("server accept failed\r\n");
             continue;
         }
 
@@ -342,9 +341,6 @@ CSP_DEFINE_TASK(telemetry_rx_task)
         }
     }
 
-    // while (1) {
-    //     csp_sleep_ms(100);
-    // }
     
     // if (kprv_server_accept(sock, &conn))
     // {

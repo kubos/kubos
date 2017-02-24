@@ -88,7 +88,7 @@ bool telemetry_disconnect(pubsub_conn * client_conn)
             ret = kprv_send_csp(client_conn, buffer, msg_size);
             printf("Sent dis %d\r\n", msg_size);
         }
-        // kprv_subscriber_socket_close(client_conn);
+        kprv_subscriber_socket_close(client_conn);
     }
     // csp_mutex_unlock(&unsubscribing_lock);
     return ret;
