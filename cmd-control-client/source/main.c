@@ -55,10 +55,10 @@ int send_packet(csp_conn_t* conn, csp_packet_t* packet) {
 bool csp_init_everything(){
 
     int my_address = 2;
-    char *message = "Testing CSP", *rx_channel_name, *tx_channel_name;
+    char *rx_channel_name, *tx_channel_name;
 
-        tx_channel_name = "/home/vagrant/client_to_server";
-        rx_channel_name = "/home/vagrant/server_to_client";
+    tx_channel_name = "/home/vagrant/client_to_server";
+    rx_channel_name = "/home/vagrant/server_to_client";
 
 
     /* Init CSP and CSP buffer system */
@@ -94,7 +94,6 @@ void send_msg(uint8_t* data, size_t length) {
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-    /*int size = strlen(message) + 1;*/
     while(packet = csp_buffer_get(length)) {
         if (packet) {
             memcpy(packet->data, data, length);
@@ -169,12 +168,20 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    char* args = "exec foo";
-    uint8_t data[BUF_SIZE];
+    char* separator = " ";
+    char args[BUF_SIZE] = {0};
+    uint8_t data[BUF_SIZE] = {0};
 
     CborEncoder encoder, container;
-
     CborError err;
+
+    int i;
+    for (i = 1; i < argc; i++) {
+        strcat(args, argv[i]);
+        if (i != argc -1) //Skip the final separator
+            strcat(args, separator);
+    }
+
     cbor_encoder_init(&encoder, data, BUF_SIZE, 0);
     err = cbor_encoder_create_map(&encoder, &container, 1);
     if (err) {

@@ -1,5 +1,5 @@
-#ifndef CNC_H
-#define CNC_H
+#ifndef CNC_TYPES_H
+#define CNC_TYPES_H
 
 #include <stdint.h>
 
@@ -46,8 +46,9 @@ typedef enum
 {
     execute = 0,
     status,
-    version,
-    help
+    output,
+    help,
+    noop
 } cnc_action;
 
 

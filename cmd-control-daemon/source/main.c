@@ -120,13 +120,18 @@ bool encode_packet(csp_packet_t * packet, cnc_response_packet * result) {
         return false;
 
     cbor_encoder_close_container(&encoder, &container);
-    memcpy(packet->data, data, BUF_SIZE); //TODO: Make more efficient
+    memcpy(packet->data, data, BUF_SIZE); //TODO: Make more efficient - Dont bloat the csp packet size
     packet->length = BUF_SIZE;
     return true;
 }
 
+void send_usage_error(cnc_command_packet * command) 
+{
+    printf("Sending usage error\n");
+}
 
-void send_response(cnc_response_packet* response) {
+void send_response(cnc_response_packet* response) 
+{
     int my_address = 1, client_address = 2;
     char *rx_channel_name, *tx_channel_name;
     uint8_t buffer[BUF_SIZE];

@@ -80,9 +80,9 @@ bool run_command(cnc_command_packet * command, cnc_response_packet * response) {
             printf("Running Command status\n");
             func = dlsym(handle, "status");
             break;
-        case version:
-            printf("Running Command version\n");
-            func = dlsym(handle, "version");
+        case output:
+            printf("Running Command output\n");
+            func = dlsym(handle, "output");
             break;
         case help:
             printf("Running Command help\n");
@@ -99,7 +99,7 @@ bool run_command(cnc_command_packet * command, cnc_response_packet * response) {
     }
 
     //Redirect stdout to the response output field.
-    //TODO: Redirect STDERR
+    //TODO: Redirect or figure out what to do with STDERR
 
     int original_stdout;
     fflush(stdout);
@@ -121,7 +121,10 @@ bool run_command(cnc_command_packet * command, cnc_response_packet * response) {
     response->execution_time = (double)(finish_time - start_time)/(CLOCKS_PER_SEC/1000); //execution time in milliseconds
     printf("Return code: %i exection time %f\n", response->return_code, response->execution_time);
 
-    //TODO: Unload the library
+    //Unload the library
+    func = NULL;
+    dlclose(handle);
+
     return true;
 }
 
