@@ -11,14 +11,14 @@
 static struct argp_option options[] =
 {
     {"action",   'f', "act", 0,
-        "specify the action for something..."}, //TODO: Fix help message
+        "Specify the action to execute. Allows values are [execute, status, version, help]"},
     {0}
 };
 
 
 static int parse_opt (int key, char *arg, struct argp_state *state)
 {
-    cnc_cmd_packet *arguments = state->input;
+    cnc_command_packet *arguments = state->input;
     int idx;
     switch (key)
     {
@@ -31,13 +31,10 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
                         arguments->action = execute;
                         break;
                     case 1:
-                        arguments->cmd_name = malloc(sizeof(char) * strlen(arg) +1);
-
                         strcpy(arguments->cmd_name, arg);
                         break;
                     default:
                         idx = arguments->arg_count - 3; //3 because of the increment
-                        arguments->args[idx] = malloc(sizeof(char) * (strlen(arg) + 1));
                         strcpy(arguments->args[idx], arg);
                 }
             }
@@ -63,30 +60,32 @@ int get_num_args(char* string){
     return count + 1;
 }
 
-//TODO: Make all the parsing help more helpful and semi-accurate
-static char args_doc[] = "action";
-static char doc[] = "The doc for this command";
+
+//TODO: Make all the parsing help more helpful and more accurate
+static char args_doc[] = "action group-name [following args]";
+static char doc[] = "Command Doc";
 
 static struct argp argp = { options, parse_opt, "WORD[WORD]"};
 
-bool parse (char * args, cnc_cmd_packet * my_arguments)
+bool parse (char * args, cnc_command_packet * my_arguments)
 {
     int res, argsc;
+    char * sub_str;
     char * tok = " ";
     int idx = 0;
-    char * pch;
 
     my_arguments->arg_count = 0;
 
     int my_argc = get_num_args(args);
+    //TODO: statically allocate and make it play nicely with argp
     char ** result = malloc(sizeof(char*) * my_argc);
 
     //Splitting string to gernerate an "argc, **argv" to pass into the argument parser.
-    pch = strtok (args, tok);
-    while (pch != NULL)
+    sub_str = strtok (args, tok);
+    while (sub_str != NULL)
     {
-        result[idx++] = pch;
-        pch = strtok (NULL, tok);
+        result[idx++] = sub_str;
+        sub_str = strtok (NULL, tok);
     }
 
     int flags = ARGP_PARSE_ARGV0 | ARGP_NO_ERRS;

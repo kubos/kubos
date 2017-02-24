@@ -14,7 +14,6 @@
 #include "tinycbor/cbor.h"
 
 #define PORT        10
-#define MTU         YOTTA_CFG_CSP_MTU
 #define BUF_SIZE    MTU
 
 /*
@@ -91,14 +90,14 @@ int csp_init_things(int my_address){
 
 //Where the magic happens - Bascially ignore everything above this line
 
-int send_packet(csp_conn_t* conn, csp_packet_t* packet) {
+bool send_packet(csp_conn_t* conn, csp_packet_t* packet) {
     printf("Sending: %s\r\n", packet->data);
     if (!conn || !csp_send(conn, packet, 1000))
-        return -1;
-    return 0;
+        return false;
+    return true;
 }
 
-bool encode_packet(csp_packet_t * packet, cnc_res_packet * result) {
+bool encode_packet(csp_packet_t * packet, cnc_response_packet * result) {
     CborEncoder encoder, container;
     CborError err;
     uint8_t data[BUF_SIZE];
@@ -127,7 +126,7 @@ bool encode_packet(csp_packet_t * packet, cnc_res_packet * result) {
 }
 
 
-void send_response(cnc_res_packet* response) {
+void send_response(cnc_response_packet* response) {
     int my_address = 1, client_address = 2;
     char *rx_channel_name, *tx_channel_name;
     uint8_t buffer[BUF_SIZE];
@@ -152,12 +151,11 @@ void send_response(cnc_res_packet* response) {
     }
 }
 
-void zero_vars(char * command_str, cnc_cmd_packet * command, cnc_res_packet * response)
+void zero_vars(char * command_str, cnc_command_packet * command, cnc_response_packet * response)
 {
     memset(command_str, 0, sizeof(command_str) * sizeof(char));
-    memset(command, 0, sizeof(cnc_cmd_packet));
-    memset(response, 0, sizeof(cnc_res_packet));
-
+    memset(command, 0, sizeof(cnc_command_packet));
+    memset(response, 0, sizeof(cnc_response_packet));
 }
 
 
@@ -165,8 +163,8 @@ int main(int argc, char **argv) {
     int my_address = 1;
     csp_socket_t *sock;
     char command_str[75];
-    cnc_cmd_packet command;
-    cnc_res_packet response;
+    cnc_command_packet command;
+    cnc_response_packet response;
 
     csp_init_things(my_address);
     sock = csp_socket(CSP_SO_NONE);
@@ -174,11 +172,11 @@ int main(int argc, char **argv) {
     csp_listen(sock, 5);
 
     while (1) {
+        zero_vars(command_str, &command, &response);
         get_command(sock, command_str);
         parse(command_str, &command);
         run_command(&command, &response);
         send_response(&response);
-        zero_vars(command_str, &command, &response);
     }
 
     close(rx_channel);

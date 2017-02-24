@@ -8,6 +8,7 @@
 #include "tinycbor/cbor.h"
 
 #define CBOR_BUF_SIZE YOTTA_CFG_CSP_MTU
+#define SO_PATH_LENGTH 75
 
 typedef int (*lib_func)(int, char**);
 bool parse_command_cbor(csp_packet_t * packet, char * command);
@@ -51,14 +52,14 @@ bool parse_command_cbor(csp_packet_t * packet, char * command) {
 }
 
 
-bool run_command(cnc_cmd_packet * command, cnc_res_packet * response) {
+bool run_command(cnc_command_packet * command, cnc_response_packet * response) {
     int return_code;
     void     *handle  = NULL;
     lib_func  func    = NULL;
-    char so_path[75];      //TODO: Define some constant and some macro for overflow checking.
+    char so_path[SO_PATH_LENGTH];
     char * home_dir = "/home/vagrant/lib%s.so";
 
-
+    // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
     int so_len = strlen(home_dir) + strlen(command->cmd_name) - 1;
     snprintf(so_path, so_len, home_dir, command->cmd_name);
 

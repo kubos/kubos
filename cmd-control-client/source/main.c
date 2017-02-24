@@ -12,8 +12,7 @@
 #include "tinycbor/cbor.h"
 
 #define PORT        10
-#define BUF_SIZE    YOTTA_CFG_CSP_MTU
-#define MTU         YOTTA_CFG_CSP_MTU
+#define BUF_SIZE    MTU
 
 pthread_t rx_thread, my_thread;
 int rx_channel, tx_channel;
@@ -171,12 +170,12 @@ int main(int argc, char **argv) {
     }
 
     char* args = "exec foo";
-    uint8_t data[CBOR_BUF_SIZE];
+    uint8_t data[BUF_SIZE];
 
     CborEncoder encoder, container;
 
     CborError err;
-    cbor_encoder_init(&encoder, data, CBOR_BUF_SIZE, 0);
+    cbor_encoder_init(&encoder, data, BUF_SIZE, 0);
     err = cbor_encoder_create_map(&encoder, &container, 1);
     if (err) {
         fprintf(stderr, "There was an error creating the map. CBOR Error code: %i\n", err);
@@ -187,7 +186,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "There was an error encoding the commands into the CBOR message\n");
     }
 
-    send_msg(data, CBOR_BUF_SIZE);
+    send_msg(data, BUF_SIZE);
     get_response();
 
     close(rx_channel);

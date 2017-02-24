@@ -5,8 +5,8 @@
 
 bool get_command(csp_socket_t* sock, char * command);
 
-bool run_command(cnc_cmd_packet * command, cnc_res_packet * response); 
+bool run_command(cnc_command_packet * command, cnc_response_packet * response); 
 
-bool parse (char * args, cnc_cmd_packet * my_arguments);
+bool parse (char * args, cnc_command_packet * my_arguments);
 
 #endif
