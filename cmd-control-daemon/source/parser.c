@@ -25,25 +25,26 @@ unsigned long get_hash(char *str) //Should this function be in some higher level
 }
 
 
-bool set_action(char* arg, cnc_command_packet * command)
+bool set_action(char* arg, cnc_command_wrapper * wrapper)
 {
     unsigned long hash = get_hash(arg);
     switch (hash)
     {
         case EXEC:
-            command->action = execute;
+            wrapper->command_packet->action = execute;
             break;
         case HELP:
-            command->action = help;
+            wrapper->command_packet->action = help;
             break;
         case OUTPUT:
-            command->action = output;
+            wrapper->command_packet->action = output;
             break;
         case STATUS:
-            command->action = status;
+            wrapper->command_packet->action = status;
             break;
         default:
-            fprintf(stderr, "Requested action: %s, with hash %lu is not available\n", arg, hash);
+            fprintf(wrapper->output, "Requested action: %s, with hash %lu is not available\n", arg, hash);
+            wrapper->err = true;
             return false;
     }
     return true;
@@ -60,40 +61,40 @@ static struct argp_option options[] =
 
 static int parse_opt (int key, char *arg, struct argp_state *state)
 {
-    cnc_command_packet *arguments = state->input;
+    cnc_command_wrapper *arguments = state->input;
     int idx;
     switch (key)
     {
         case ARGP_KEY_ARG:
             {
                 printf("ARG: %s\n", arg);
-                switch(arguments->arg_count++)
+                switch(arguments->command_packet->arg_count++)
                 {
                     case 0:
                         if (!set_action(arg, arguments)) {
                             state->next = state->argc; //Abort parsing the remaining args
-                            //Send some error response
+
                             return;
                         }
                         break;
                     case 1:
-                        strcpy(arguments->cmd_name, arg);
+                        strcpy(arguments->command_packet->cmd_name, arg);
                         break;
                     default:
-                        idx = arguments->arg_count - 3; //3 because of the increment
-                        strcpy(arguments->args[idx], arg);
+                        idx = arguments->command_packet->arg_count - 3; //3 because of the increment
+                        strcpy(arguments->command_packet->args[idx], arg);
                 }
             }
             break;
         case ARGP_KEY_END:
             {
                 //Do some validation to make sure we have a minimum number of arguments
-                if (strlen(arguments->cmd_name) == 0 || !arguments->action)
+                if (strlen(arguments->command_packet->cmd_name) == 0 || !arguments->command_packet->action)
                 {
                     send_usage_error(arguments);
                     fprintf(stderr, "received incorrect command or action argument\n");
                 }
-                arguments->arg_count = arguments->arg_count - 2;
+                arguments->command_packet->arg_count = arguments->command_packet->arg_count - 2;
                 printf("End of parsing\n");
                 return -1;
             }
@@ -119,14 +120,14 @@ static char doc[] = "Command Doc";
 
 static struct argp argp = { options, parse_opt, "WORD[WORD]"};
 
-bool parse (char * args, cnc_command_packet * my_arguments)
+bool parse (char * args, cnc_command_wrapper * wrapper)
 {
     int res, argsc;
     char * sub_str;
     char * tok = " ";
     int idx = 0;
 
-    my_arguments->arg_count = 0;
+    wrapper->command_packet->arg_count = 0;
 
     int my_argc = get_num_args(args);
     //TODO: statically allocate and make it play nicely with argp
@@ -143,8 +144,10 @@ bool parse (char * args, cnc_command_packet * my_arguments)
     int flags = ARGP_PARSE_ARGV0 | ARGP_NO_ERRS;
     printf("Parsing args\n");
 
-    argp_parse (&argp, my_argc, result, flags, 0, my_arguments);
+    argp_parse (&argp, my_argc, result, flags, 0, wrapper);
     free(result);
+    if (wrapper->err)
+        return false;
     return true;
 }
 

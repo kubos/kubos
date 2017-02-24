@@ -52,7 +52,7 @@ bool parse_command_cbor(csp_packet_t * packet, char * command) {
 }
 
 
-bool run_command(cnc_command_packet * command, cnc_response_packet * response) {
+bool run_command(cnc_command_wrapper * wrapper, cnc_response_packet * response) {
     int return_code;
     void     *handle  = NULL;
     lib_func  func    = NULL;
@@ -60,8 +60,8 @@ bool run_command(cnc_command_packet * command, cnc_response_packet * response) {
     char * home_dir = "/home/vagrant/lib%s.so";
 
     // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
-    int so_len = strlen(home_dir) + strlen(command->cmd_name) - 1;
-    snprintf(so_path, so_len, home_dir, command->cmd_name);
+    int so_len = strlen(home_dir) + strlen(wrapper->command_packet->cmd_name) - 1;
+    snprintf(so_path, so_len, home_dir, wrapper->command_packet->cmd_name);
 
     handle = dlopen(so_path, RTLD_NOW | RTLD_GLOBAL);
 
@@ -71,7 +71,7 @@ bool run_command(cnc_command_packet * command, cnc_response_packet * response) {
         return false;
     }
 
-    switch (command->action){
+    switch (wrapper->command_packet->action){
         case execute:
             printf("Running Command Execute\n");
             func = dlsym(handle, "execute");
@@ -109,7 +109,7 @@ bool run_command(cnc_command_packet * command, cnc_response_packet * response) {
 
     //Measure the clock before and after the function has run
     clock_t start_time = clock();
-    response->return_code = func(command->arg_count, command->args);
+    response->return_code = func(wrapper->command_packet->arg_count, wrapper->command_packet->args);
     clock_t finish_time = clock();
 
     //Redirect stdout back to the terminal.

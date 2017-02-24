@@ -125,12 +125,12 @@ bool encode_packet(csp_packet_t * packet, cnc_response_packet * result) {
     return true;
 }
 
-void send_usage_error(cnc_command_packet * command) 
+void send_usage_error(cnc_command_wrapper * command)
 {
     printf("Sending usage error\n");
 }
 
-void send_response(cnc_response_packet* response) 
+void send_response(cnc_response_packet* response)
 {
     int my_address = 1, client_address = 2;
     char *rx_channel_name, *tx_channel_name;
@@ -170,7 +170,9 @@ int main(int argc, char **argv) {
     char command_str[75];
     cnc_command_packet command;
     cnc_response_packet response;
+    cnc_command_wrapper wrapper;
 
+    wrapper.command_packet = &command;
     csp_init_things(my_address);
     sock = csp_socket(CSP_SO_NONE);
     csp_bind(sock, PORT);
@@ -179,8 +181,8 @@ int main(int argc, char **argv) {
     while (1) {
         zero_vars(command_str, &command, &response);
         get_command(sock, command_str);
-        parse(command_str, &command);
-        run_command(&command, &response);
+        parse(command_str, &wrapper);
+        run_command(&wrapper, &response);
         send_response(&response);
     }
 
