@@ -43,6 +43,10 @@ int socket_close(csp_socket_handle_t * socket_driver);
  */
 int socket_status(const csp_socket_handle_t * socket_iface);
 
+bool cbor_parse_csp_packet(csp_packet_t * packet, void * buffer, int buffer_size);
+
+int cbor_encode_csp_packet(csp_packet_t * packet, uint8_t * buffer);
+
 #endif /* SOCKET_H_ */
 
 /* @} */

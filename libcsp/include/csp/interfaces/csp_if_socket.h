@@ -64,6 +64,8 @@ int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dri
 
 int csp_socket_close(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver);
 
+#define SOCKET_BUFFER_SIZE 256
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

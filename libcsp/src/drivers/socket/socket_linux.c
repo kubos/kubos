@@ -24,7 +24,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#define LOCAL_ADDRESS "127.0.01"
+#define LOCAL_ADDRESS "127.0.0.1"
 #define SERVER_MAX_CONNECTIONS 5
 
 /**

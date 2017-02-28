@@ -20,7 +20,7 @@
 #include <csp/interfaces/csp_if_socket.h>
 #include <csp/drivers/socket.h>
 #include <csp/arch/csp_thread.h>
-
+#include <stdlib.h>
 #include <inttypes.h>
 #include <stdint.h>
 
@@ -28,8 +28,6 @@
 #include <arpa/inet.h>
 
 #include <tinycbor/cbor.h>
-
-#define BUF_SIZE 256
 
 /**
  * Callback function used by CSP to transmit packets
@@ -45,118 +43,6 @@ static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeou
  */
 CSP_DEFINE_TASK(csp_socket_rx);
 
-static void print_buf(uint8_t * buff, int buff_size)
-{
-    int i = 0;
-    for (i = 0; i < buff_size; i++)
-        printf("%02X", buff[i]);
-    printf("\r\n");
-}
-
-
-
-static int cbor_encode_csp_packet(csp_packet_t * packet, uint8_t * buffer)
-{
-    CborEncoder encoder, container;
-    CborError err;
-
-    if (buffer == NULL)
-        return -1;
-    cbor_encoder_init(&encoder, buffer, BUF_SIZE, 0);
-    err = cbor_encoder_create_map(&encoder, &container, 3);
-    if (err > 0)
-        return - err;
-
-    err = cbor_encode_text_stringz(&container, "LENGTH");
-    if (err > 0)
-        return -err;
-    err = cbor_encode_half_float(&container, (void*)&(packet->length));
-    if (err > 0)
-        return -err;
-
-    err = cbor_encode_text_stringz(&container, "ID");
-    if (err > 0)
-        return -err;
-    err = cbor_encode_uint(&container, (packet->id.ext));
-    if (err > 0)
-        return -err;
-
-    err = cbor_encode_text_stringz(&container, "DATA");
-    if (err > 0)
-        return -err;
-    err = cbor_encode_text_string(&container, (packet->data), packet->length);
-    if (err > 0)
-        return -err;
-
-    err = cbor_encoder_close_container_checked(&encoder, &container);
-    if (err > 0)
-        return -err;
-
-    return cbor_encoder_get_buffer_size(&encoder, buffer);
-}
-
-static bool cbor_parse_csp_packet(csp_packet_t * packet, void * buffer, int buffer_size)
-{
-    CborParser parser;
-    CborValue map, element;
-    int length = 0;
-    char * buf = NULL;
-
-    if ((buffer == NULL) || (packet == NULL))
-        return false;
-
-    CborError err = cbor_parser_init(buffer, buffer_size, 0, &parser, &map);
-    if (err || !cbor_value_is_map(&map)) {
-        return false;
-    }
-
-    csp_log_info("parse_csp_packet remaining %d extra %d\r\n", map.remaining, map.extra);
-
-    err = cbor_value_map_find_value(&map, "LENGTH", &element);
-    if (err)
-        return false;
-
-    if (cbor_value_get_half_float(&element, &(packet->length)))
-        return false;
-
-    err = cbor_value_map_find_value(&map, "ID", &element);
-    if (err)
-        return false;
-
-    if (cbor_value_get_float(&element, &(packet->id.ext)))
-        return false;
-
-    err = cbor_value_map_find_value(&map, "DATA", &element);
-    if (err)
-        return false;
-
-    if(cbor_value_is_text_string(&element)) {
-        csp_log_info("found text string\r\n");
-    } else {
-        csp_log_error("no text string\r\n");
-    }
-
-    size_t len = 0;
-    cbor_value_calculate_string_length(&element, &len);
-    printf("Parsing text string len %d\r\n", len);
-
-    size_t byte_size;
-    err = cbor_value_dup_text_string(&element, &buf, &byte_size, &element);
-    if (err) {
-        csp_log_error("Error parsing text string %d\r\n", err);
-    } else {
-        csp_log_info("Got dat text string %d %d\r\n", byte_size, packet->length);
-        memcpy((packet->data), buf, packet->length);
-    }
-
-    print_buf(buf, len);
-    // free(buf);
-    // if (cbor_value_copy_byte_string(&element, buf, packet->length, &element))
-    //     return false;
-
-    return true;
-}
-
 
 static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
     if ((ifc == NULL) || (ifc->driver == NULL)) {
@@ -168,37 +54,17 @@ static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeou
 
     csp_socket_handle_t * socket_driver = ifc->driver;
 
-    /* Write packet to socket */
-    // int result = write(socket_driver->socket_handle, &packet->length, packet->length + sizeof(uint32_t) + sizeof(uint16_t)); 
-    // if ( result < 0) {
-    //     csp_log_error("Socket write error: %u %s\r\n", result, strerror(result));
-    // }
-    // csp_buffer_free(packet);
-
-
-    struct iovec iov;
-    uint8_t write_buffer[BUF_SIZE];
+    uint8_t write_buffer[SOCKET_BUFFER_SIZE];
     int write_size = cbor_encode_csp_packet(packet, write_buffer);
     if (write_size > 0) {
         csp_log_info("about to write csp packet %d - %d\r\n", write_size, packet->length);
-        // int result = write(socket_driver->socket_handle, write_buffer, write_size); 
         int result = send(socket_driver->socket_handle, write_buffer, write_size, MSG_CONFIRM);
-        // iov.iov_base = write_buffer;
-        // iov.iov_len = write_size;
-        // int result = writev(socket_driver->socket_handle, &iov, 1);
         csp_log_info("csp_socket_tx write %d\r\n", result);
-        printf("cbor buffer sent\r\n");
-        print_buf(write_buffer, write_size);
-        printf("csp packet encoded\r\n");
-        print_buf(packet->data, packet->length);
         if ( result < 0) {
             csp_log_error("Socket write error: %u %s\r\n", result, strerror(result));
         }
         csp_buffer_free(packet);
     } else { csp_log_error("encode csp packet failed\r\n"); }
-
-
-    // csp_sleep_ms(100);
  
     return CSP_ERR_NONE;
 }
@@ -206,50 +72,39 @@ static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeou
 CSP_DEFINE_TASK(csp_socket_rx) {
     csp_iface_t socket_interface;
     csp_socket_handle_t * socket_driver;
-    csp_packet_t * packet = csp_buffer_get(BUF_SIZE);
+    csp_packet_t * packet = csp_buffer_get(SOCKET_BUFFER_SIZE);
 
     csp_log_info("Starting socket rx thread\r\n");
 
     if (param == NULL) {
         csp_log_error("No socket param found\r\n");
-        return CSP_TASK_RETURN;
+        csp_thread_exit();
     }
     socket_interface = *((csp_iface_t*)param);
 
     if (socket_interface.driver == NULL) {
         csp_log_error("No socket driver found\r\n");
-        return CSP_TASK_RETURN;
+        csp_thread_exit();
     }
 
     socket_driver = socket_interface.driver;
 
-    // while(recv(socket_driver->socket_handle, &packet->length, BUF_SIZE, 0) > 0) {
-    //     csp_new_packet(packet, &socket_interface, NULL);
-
-    //     packet = csp_buffer_get(BUF_SIZE);
-    //     if (packet == NULL) {
-    //         break;
-    //     }
-    // }
-
-    uint8_t buffer[BUF_SIZE];
+    uint8_t buffer[SOCKET_BUFFER_SIZE];
     while (1)
     {
-        memset(buffer, '\0', BUF_SIZE);
-        int recv_size = recv(socket_driver->socket_handle, buffer, BUF_SIZE, 0);
+        memset(buffer, '\0', SOCKET_BUFFER_SIZE);
+        int recv_size = recv(socket_driver->socket_handle, buffer, SOCKET_BUFFER_SIZE, 0);
         if (recv_size > 0)
         {
             csp_log_info("csp_socket_rx recv'd packet %d\r\n", recv_size);
-            print_buf(buffer, recv_size);
             
             csp_log_info("csp_socket_rx new packet length %d\r\n", packet->length);
             if (cbor_parse_csp_packet(packet, buffer, recv_size))
             {
-                print_buf(packet->data, packet->length);
                 csp_log_info("Got valid csp packet\r\n");
                 csp_log_info("csp_socket_rx got packet length %d\r\n", packet->length);
                 csp_new_packet(packet, &socket_interface, NULL);
-                packet = csp_buffer_get(BUF_SIZE);
+                packet = csp_buffer_get(SOCKET_BUFFER_SIZE);
                 if (packet == NULL) {
                     csp_log_error("Out of packet buffers\r\n");
                     break;
@@ -260,7 +115,7 @@ CSP_DEFINE_TASK(csp_socket_rx) {
 
     csp_log_info("Socket rx thread done\r\n");
 
-    return CSP_TASK_RETURN;
+    csp_thread_exit();
 }
 
 int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver) {
@@ -270,7 +125,7 @@ int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dri
     socket_iface->driver = socket_driver;
     socket_iface->nexthop = csp_socket_tx;
     socket_iface->name = "socket";
-    socket_iface->mtu = BUF_SIZE;
+    socket_iface->mtu = SOCKET_BUFFER_SIZE;
 
     /* Start RX thread */
 	int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &(socket_driver->rx_thread_handle));
@@ -287,8 +142,7 @@ int csp_socket_close(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dr
 
     socket_close(socket_driver);
 
-    printf("Destroying csp rx thread\r\n");
-    csp_thread_kill(&socket_driver->rx_thread_handle);
+    csp_thread_kill(&(socket_driver->rx_thread_handle));
     
     return CSP_ERR_NONE;
 }
