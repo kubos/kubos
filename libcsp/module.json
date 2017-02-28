@@ -8,6 +8,7 @@
   "author": "gomspace",
   "homepage": "https://github.com/GomSpace/libcsp",
   "license": "LGPL 2.1",
+  "lib":"./src",
   "dependencies": {
     "tinycbor": "kubostech/tinycbor"
   },
@@ -18,5 +19,8 @@
     "kubos-rt": {
       "kubos-hal": "kubostech/kubos-hal#~0.1.0"
     }
+  },  
+  "testDependencies": {
+    "cmocka": "kubostech/cmocka"
   }
 }
