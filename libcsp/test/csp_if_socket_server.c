@@ -43,6 +43,7 @@ CSP_DEFINE_TASK(client_task)
 
         if (csp_socket_init(&csp_socket_if, &socket_driver))
         {
+            csp_socket_close(&csp_socket_if, &socket_driver);
             continue;
         }
 
@@ -69,15 +70,19 @@ static void test_server(void ** arg)
 {
     csp_socket_t * socket = NULL;
     csp_conn_t * conn = NULL;
-    csp_iface_t csp_socket_if;
+    csp_iface_t csp_socket_if = {
+        .next = NULL
+    };
     csp_socket_handle_t socket_driver;
     csp_thread_handle_t client_task_handle;
     csp_socket_t * ext_socket = NULL;
+    csp_packet_t * packet = NULL;
+    char buffer[100];
 
     csp_buffer_init(20, 256);
 
     /* Init CSP with address MY_ADDRESS */
-    csp_init(TEST_ADDRESS);
+    assert_int_equal(csp_init(TEST_ADDRESS), CSP_ERR_NONE);
 
     /* Start router task with 500 word stack, OS task priority 1 */
     csp_route_start_task(500, 1);
@@ -97,13 +102,25 @@ static void test_server(void ** arg)
     conn = csp_accept(ext_socket, 500);
     assert_non_null(conn);
 
+    packet = csp_read(conn, 1000);
+    assert_non_null(packet);
+    memcpy(buffer, (void*)packet->data, packet->length);
+    assert_string_equal(buffer, msg);
+    csp_buffer_free(packet);
+
     test_running = false;
+
+    csp_close_socket(ext_socket);
 
     csp_thread_kill(client_task_handle);
 
     csp_socket_close(&csp_socket_if, &socket_driver);
 
     csp_route_end_task();
+
+    csp_terminate();
+
+    csp_buffer_cleanup();
 }
 
 int main(void)

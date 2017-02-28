@@ -84,6 +84,7 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
     }
     csp_log_info("Accepted!\n");
     socket_iface->socket_handle = socket_handle;
+    socket_iface->is_active = true;
     return CSP_ERR_NONE;
 }
 
@@ -110,6 +111,7 @@ static int socket_client_init(csp_socket_handle_t * socket_iface, uint16_t port)
     }
     csp_log_info("Connected\n");
     socket_iface->socket_handle = socket_handle;
+    socket_iface->is_active = true;
     return CSP_ERR_NONE;
 }
 
@@ -129,6 +131,8 @@ int socket_close(csp_socket_handle_t * socket_driver) {
     if (socket_driver == NULL) {
         return CSP_ERR_DRIVER;
     }
+
+    socket_driver->is_active = false;
     
     if (shutdown(socket_driver->socket_handle, SHUT_RDWR) != 0) {
         return CSP_ERR_DRIVER;

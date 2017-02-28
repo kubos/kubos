@@ -51,6 +51,8 @@ extern "C" {
  */
 int csp_init(uint8_t my_node_address);
 
+void csp_terminate(void);
+
 /** csp_set_address
  * Set the systems own address
  * @param addr The new address of the system

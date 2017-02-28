@@ -42,6 +42,7 @@ typedef struct {
     int socket_handle;
     /*! Handle for RX thread */
     csp_thread_handle_t rx_thread_handle;
+    bool is_active;
 } csp_socket_handle_t;
 
 /**

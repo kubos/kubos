@@ -95,6 +95,14 @@ fail_malloc:
 
 }
 
+void csp_buffer_cleanup(void) {
+
+	csp_queue_remove(csp_buffers);
+
+	csp_free(csp_buffer_pool);
+
+}
+
 void *csp_buffer_get_isr(size_t buf_size) {
 
 	csp_skbf_t * buffer = NULL;
