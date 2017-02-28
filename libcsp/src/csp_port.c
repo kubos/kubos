@@ -100,4 +100,12 @@ int csp_bind(csp_socket_t * socket, uint8_t port) {
 
 }
 
+void csp_close_socket(csp_socket_t * socket) {
+    if (socket == NULL)
+        return;
+
+    if (socket->socket != NULL)
+        csp_queue_remove(socket->socket);
+}
+
 

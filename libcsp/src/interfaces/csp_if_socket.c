@@ -80,7 +80,8 @@ CSP_DEFINE_TASK(csp_socket_rx) {
         csp_log_error("No socket param found\r\n");
         csp_thread_exit();
     }
-    socket_interface = *((csp_iface_t*)param);
+    // socket_interface = *((csp_iface_t*)param);
+    memcpy(&socket_interface, (csp_iface_t*)param, sizeof(csp_iface_t));
 
     if (socket_interface.driver == NULL) {
         csp_log_error("No socket driver found\r\n");
@@ -89,11 +90,11 @@ CSP_DEFINE_TASK(csp_socket_rx) {
 
     socket_driver = socket_interface.driver;
 
-    uint8_t buffer[SOCKET_BUFFER_SIZE];
-    while (1)
+    char buffer[SOCKET_BUFFER_SIZE];
+    while (socket_driver->is_active)
     {
         memset(buffer, '\0', SOCKET_BUFFER_SIZE);
-        int recv_size = recv(socket_driver->socket_handle, buffer, SOCKET_BUFFER_SIZE, 0);
+        int recv_size = recv(socket_driver->socket_handle, (void*)buffer, SOCKET_BUFFER_SIZE, 0);
         if (recv_size > 0)
         {
             csp_log_info("csp_socket_rx recv'd packet %d\r\n", recv_size);
@@ -115,6 +116,8 @@ CSP_DEFINE_TASK(csp_socket_rx) {
 
     csp_log_info("Socket rx thread done\r\n");
 
+    csp_buffer_free(packet);
+
     csp_thread_exit();
 }
 
@@ -128,7 +131,7 @@ int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dri
     socket_iface->mtu = SOCKET_BUFFER_SIZE;
 
     /* Start RX thread */
-	int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &(socket_driver->rx_thread_handle));
+    int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &(socket_driver->rx_thread_handle));
 
     /* Register interface */
     csp_iflist_add(socket_iface);

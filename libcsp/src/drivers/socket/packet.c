@@ -94,7 +94,7 @@ bool cbor_parse_csp_packet(csp_packet_t * packet, void * buffer, int buffer_size
     if (err)
         return false;
 
-    if (cbor_value_get_float(&element, &(packet->id.ext)))
+    if (cbor_value_get_int(&element, &(packet->id.ext)))
         return false;
 
     err = cbor_value_map_find_value(&map, "DATA", &element);
@@ -115,14 +115,14 @@ bool cbor_parse_csp_packet(csp_packet_t * packet, void * buffer, int buffer_size
     err = cbor_value_dup_text_string(&element, &buf, &byte_size, &element);
     if (err) {
         csp_log_error("Error parsing text string %d\r\n", err);
-//        free(buf);
+       free(buf);
         return false;
     } else {
         csp_log_info("Got dat text string %d %d\r\n", byte_size, packet->length);
         memcpy((packet->data), buf, packet->length);
     }
 
-  //  free(buf);
+   free(buf);
 
     return true;
 }

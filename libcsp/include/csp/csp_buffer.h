@@ -43,6 +43,8 @@ extern "C" {
  */
 int csp_buffer_init(int count, int size);
 
+void csp_buffer_terminate(void);
+
 /**
  * Get a reference to a free buffer. This function can only be called
  * from task context.
