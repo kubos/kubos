@@ -49,6 +49,12 @@ bool parse_command_cbor(csp_packet_t * packet, char * command) {
     return true;
 }
 
+bool file_exists(char * path){ //Should this live in a higher level module utility?
+    if ( access(path, F_OK) != -1)
+        return true;
+    return false;
+}
+
 
 bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * func) {
     int return_code;
@@ -59,12 +65,18 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
     int so_len = strlen(home_dir) + strlen(wrapper->command_packet->cmd_name) - 1;
     snprintf(so_path, so_len, home_dir, wrapper->command_packet->cmd_name);
 
+    if (!file_exists(so_path)){
+        wrapper->err = true;
+        snprintf(wrapper->output, sizeof(wrapper->output) - 1,"The command library %s, does not exist\n", so_path);
+        return false;
+    }
+
     *handle = dlopen(so_path, RTLD_NOW | RTLD_GLOBAL);
 
     if (*handle == NULL)
     {
         wrapper->err = true;
-        sprintf(wrapper->output, "Unable to open lib: %s\n", dlerror());
+        snprintf(wrapper->output, sizeof(wrapper->output) - 1, "Unable to open lib: %s\n", dlerror());
         return false;
     }
 
@@ -86,12 +98,12 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
             func = dlsym(*handle, "help");
             break;
         default:
-            sprintf(wrapper->output, "Unable to open lib: %s\n", dlerror());
+            snprintf(wrapper->output, sizeof(wrapper->output) - 1, "Unable to open lib: %s\n", dlerror());
             return false;
     }
 
     if (func == NULL) {
-        sprintf(wrapper->output, "The requested Symbol doesn't exist\n");
+        snprintf(wrapper->output, sizeof(wrapper->output) - 1, "The requested Symbol doesn't exist\n");
         return false;
     }
     return true;
@@ -133,11 +145,6 @@ bool run_command(cnc_command_wrapper * wrapper, void ** handle, lib_function fun
 bool process_and_run_command(cnc_command_wrapper * wrapper) {
     lib_function func = NULL;
     void * handle;
-
-    /*if (wrapper == NULL)*/
-        /*wrapper->err = true;*/
-        /*//TODO:Generate a usefule error message for this case*/
-        /*return false;*/
 
     if (!load_command(wrapper, &handle, &func)) {
         printf("Failed to load command\n");

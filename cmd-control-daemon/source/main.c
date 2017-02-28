@@ -98,8 +98,6 @@ bool send_packet(csp_conn_t* conn, csp_packet_t* packet) {
 }
 
 
-
-
 bool send_response(uint8_t * data, size_t data_len)
 {
     int my_address = 1, client_address = 2;
@@ -125,11 +123,13 @@ bool send_response(uint8_t * data, size_t data_len)
 }
 
 
-void zero_vars(char * command_str, cnc_command_packet * command, cnc_response_packet * response)
+void zero_vars(char * command_str, cnc_command_packet * command, cnc_response_packet * response, cnc_command_wrapper * wrapper)
 {
     memset(command_str, 0, sizeof(command_str) * sizeof(char));
     memset(command, 0, sizeof(cnc_command_packet));
     memset(response, 0, sizeof(cnc_response_packet));
+    memset(wrapper->output, 0, sizeof(wrapper->output));
+    wrapper->err = false;
 }
 
 
@@ -144,7 +144,6 @@ int main(int argc, char **argv) {
 
     wrapper.command_packet  = &command;
     wrapper.response_packet = &response;
-    wrapper.err = false;
 
     csp_init_things(my_address);
     sock = csp_socket(CSP_SO_NONE);
@@ -152,10 +151,10 @@ int main(int argc, char **argv) {
     csp_listen(sock, 5);
 
     while (1) {
-        zero_vars(command_str, &command, &response);
+        zero_vars(command_str, &command, &response, &wrapper);
         get_command(sock, command_str);
         parse(command_str, &wrapper);
-        process_and_run_command(&wrapper, &response);
+        process_and_run_command(&wrapper);
     }
 
     close(rx_channel);
