@@ -28,6 +28,7 @@ start=$(date +%s)
 this_dir=$(cd "`dirname "$0"`"; pwd)
 program=$1
 name=$(basename $1)
+is_upgrade=0
 
 password=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["password"]')
 
@@ -51,6 +52,13 @@ if [ "$password" == "Kubos123" ]; then
     echo "Using default password"
 fi
 
+if [[ "$name" = *.itb ]]; then
+    path="/upgrade"
+    is_upgrade=1
+else
+    path="/home/usr/bin"
+fi
+
 # Minicom doesn't allow any pass-through arguments, so instead we need to 
 # generate a script for it to run.
 cat > send.tmp <<-EOF
@@ -65,17 +73,18 @@ expect {
     "~ #" break
     timeout 5 goto end
 }
-send "cd /usr/bin"
+send "cd $path"
 send "rm $name"
 send "rz -bZ"
 ! sz -b --zmodem $1
+if $is_upgrade = 1 send "fw_setenv kubos_updatefile $name"
 send "exit"
 end:
 ! killall minicom -q
 EOF
 
 # Run the transfer script
-echo "Sending file to board..."
+echo "Sending $name to $path on board..."
 minicom kubos -o -S send.tmp > flash.log
 
 # Check transfer result
