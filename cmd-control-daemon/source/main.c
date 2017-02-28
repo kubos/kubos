@@ -91,50 +91,19 @@ int csp_init_things(int my_address){
 //Where the magic happens - Bascially ignore everything above this line
 
 bool send_packet(csp_conn_t* conn, csp_packet_t* packet) {
-    printf("Sending: %s\r\n", packet->data);
+    printf("Sending Packet\n");
     if (!conn || !csp_send(conn, packet, 1000))
         return false;
     return true;
 }
 
-bool encode_packet(csp_packet_t * packet, cnc_response_packet * result) {
-    CborEncoder encoder, container;
-    CborError err;
-    uint8_t data[BUF_SIZE];
 
-    cbor_encoder_init(&encoder, data, BUF_SIZE, 0);
-    err = cbor_encoder_create_map(&encoder, &container, 3);
-    if (err)
-        return false;
 
-    err = cbor_encode_text_stringz(&container, "RETURN_CODE");
-    if (err || cbor_encode_simple_value(&container, result->return_code))
-        return false;
 
-    err = cbor_encode_text_stringz(&container, "EXEC_TIME");
-    if (err || cbor_encode_double(&container, result->execution_time))
-        return false;
-
-    err = cbor_encode_text_stringz(&container, "OUTPUT");
-    if (err || cbor_encode_text_stringz(&container, result->output))
-        return false;
-
-    cbor_encoder_close_container(&encoder, &container);
-    memcpy(packet->data, data, BUF_SIZE); //TODO: Make more efficient - Dont bloat the csp packet size
-    packet->length = BUF_SIZE;
-    return true;
-}
-
-void send_usage_error(cnc_command_wrapper * command)
-{
-    printf("Sending usage error\n");
-}
-
-void send_response(cnc_response_packet* response)
+bool send_response(uint8_t * data, size_t data_len)
 {
     int my_address = 1, client_address = 2;
     char *rx_channel_name, *tx_channel_name;
-    uint8_t buffer[BUF_SIZE];
 
     csp_socket_t *sock;
     csp_conn_t *conn;
@@ -143,18 +112,18 @@ void send_response(cnc_response_packet* response)
     while (1) {
         packet = csp_buffer_get(BUF_SIZE);
         if (packet) {
-            if (!encode_packet(packet, response)) {
-                fprintf(stderr, "There was an issue encoding the run output into the response packet.\n");
-                return;
-            }
+            memcpy(packet->data, data, data_len);
+            packet->length = data_len;
+
             conn = csp_connect(CSP_PRIO_NORM, client_address, PORT, 1000, CSP_O_NONE);
             send_packet(conn, packet);
             csp_buffer_free(packet);
             csp_close(conn);
-            return;
+            return true;
         }
     }
 }
+
 
 void zero_vars(char * command_str, cnc_command_packet * command, cnc_response_packet * response)
 {
@@ -170,9 +139,13 @@ int main(int argc, char **argv) {
     char command_str[75];
     cnc_command_packet command;
     cnc_response_packet response;
+    //The wrapper keeps track of a command input, it's result and any pre-run processing error messages that may occur
     cnc_command_wrapper wrapper;
 
-    wrapper.command_packet = &command;
+    wrapper.command_packet  = &command;
+    wrapper.response_packet = &response;
+    wrapper.err = false;
+
     csp_init_things(my_address);
     sock = csp_socket(CSP_SO_NONE);
     csp_bind(sock, PORT);
@@ -182,8 +155,7 @@ int main(int argc, char **argv) {
         zero_vars(command_str, &command, &response);
         get_command(sock, command_str);
         parse(command_str, &wrapper);
-        run_command(&wrapper, &response);
-        send_response(&response);
+        process_and_run_command(&wrapper, &response);
     }
 
     close(rx_channel);

@@ -43,7 +43,7 @@ bool set_action(char* arg, cnc_command_wrapper * wrapper)
             wrapper->command_packet->action = status;
             break;
         default:
-            fprintf(wrapper->output, "Requested action: %s, with hash %lu is not available\n", arg, hash);
+            fprintf(stderr, "Requested action: %s, with hash %lu is not available\n", arg, hash);
             wrapper->err = true;
             return false;
     }
@@ -74,7 +74,7 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
                         if (!set_action(arg, arguments)) {
                             state->next = state->argc; //Abort parsing the remaining args
 
-                            return;
+                            return 0;
                         }
                         break;
                     case 1:
@@ -89,9 +89,9 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
         case ARGP_KEY_END:
             {
                 //Do some validation to make sure we have a minimum number of arguments
-                if (strlen(arguments->command_packet->cmd_name) == 0 || !arguments->command_packet->action)
+                if (strlen(arguments->command_packet->cmd_name) == 0) //TODO: Effectively validate the action
                 {
-                    send_usage_error(arguments);
+                    /*send_processing_error(arguments, NULL); //TODO: FIX THIS*/
                     fprintf(stderr, "received incorrect command or action argument\n");
                 }
                 arguments->command_packet->arg_count = arguments->command_packet->arg_count - 2;
@@ -143,8 +143,11 @@ bool parse (char * args, cnc_command_wrapper * wrapper)
 
     int flags = ARGP_PARSE_ARGV0 | ARGP_NO_ERRS;
     printf("Parsing args\n");
-
-    argp_parse (&argp, my_argc, result, flags, 0, wrapper);
+    if (my_argc >= 2) { //TODO: move this into argp
+        argp_parse (&argp, my_argc, result, flags, 0, wrapper);
+    } else {
+        return false;
+    }
     free(result);
     if (wrapper->err)
         return false;

@@ -41,6 +41,9 @@
 #define RES_PACKET_STDOUT_LEN     MTU - 33 //TODO: define constant for response packet overhead
 #endif
 
+#define RESPONSE_TYPE_COMMAND_RESULT 0
+#define RESPONSE_TYPE_PROCESSING_ERROR 1
+
 
 typedef enum
 {
@@ -61,20 +64,22 @@ typedef struct arguments
 } cnc_command_packet;
 
 
-// Used inside the daemon to track and provide error messages back to the client
-typedef struct
-{
-    cnc_command_packet * command_packet;
-    bool err;
-    char output[RES_PACKET_STDOUT_LEN];
-} cnc_command_wrapper;
-
-
 typedef struct
 {
     uint8_t return_code;
     double  execution_time;
     char    output[RES_PACKET_STDOUT_LEN]; //TODO: Figure out optimal size
 } cnc_response_packet;
+
+
+// Used inside the daemon to track and provide error messages back to the client
+typedef struct
+{
+    cnc_command_packet  * command_packet;
+    cnc_response_packet * response_packet;
+    bool err;
+    char output[RES_PACKET_STDOUT_LEN];
+} cnc_command_wrapper;
+
 
 #endif
