@@ -47,3 +47,9 @@ bool __wrap_kprv_subscriber_read(pubsub_conn * conn, void * buffer, int buffer_s
 
     return mock_type(bool);
 }
+
+void __wrap_kprv_subscriber_socket_close(pubsub_conn * conn)
+{
+    check_expected(conn);
+    conn->conn_handle = NULL;
+}

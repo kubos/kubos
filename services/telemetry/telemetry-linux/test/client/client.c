@@ -45,11 +45,13 @@ static void test_client_disconnect(void ** arg)
     expect_not_value(__wrap_kprv_send_csp, data, NULL);
     will_return(__wrap_kprv_send_csp, true);
 
-    expect_not_value(__wrap_csp_close, conn, NULL);
-    will_return(__wrap_csp_close, CSP_ERR_NONE);
+    // expect_not_value(__wrap_csp_close, conn, NULL);
+    // will_return(__wrap_csp_close, CSP_ERR_NONE);
+
+    expect_not_value(__wrap_kprv_subscriber_socket_close, conn, NULL);
 
     assert_true(telemetry_disconnect(&conn));
-    assert_null(conn.conn_handle); 
+    assert_null(conn.conn_handle);
 }
 
 static void test_client_subscribe(void ** arg)

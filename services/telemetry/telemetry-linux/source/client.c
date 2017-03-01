@@ -80,13 +80,11 @@ bool telemetry_disconnect(pubsub_conn * client_conn)
     // csp_mutex_lock(&unsubscribing_lock, CSP_INFINITY);
     if (client_conn != NULL)
     {
-        printf("Send disconnect\r\n");
         uint8_t buffer[256] = {0};
         int msg_size = telemetry_encode_disconnect_msg(buffer);
         if (msg_size > 0)
         {
             ret = kprv_send_csp(client_conn, buffer, msg_size);
-            printf("Sent dis %d\r\n", msg_size);
         }
         kprv_subscriber_socket_close(client_conn);
     }
@@ -152,7 +150,6 @@ bool telemetry_publish(telemetry_packet pkt)
         if (msg_size > 0)
         {
             ret = kprv_send_csp(&conn, buffer, msg_size);
-            printf("Published %d\r\n", msg_size);
         }
         telemetry_disconnect(&conn);
     }

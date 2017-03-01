@@ -235,19 +235,16 @@ bool telemetry_process_message(subscriber_list_item * sub, void * buffer, int bu
 
     if (telemetry_parse_msg_type(buffer, buffer_size, &req))
     {
-        printf("Got msg %d\r\n", req);
         switch (req) {
             case MESSAGE_TYPE_PACKET:
                 if (telemetry_parse_packet_msg(buffer, buffer_size, &packet))
                 {
-                    printf("Got packet %d %d\r\n", packet.source.topic_id, packet.data.i);
                     ret = kprv_publish_packet(packet);
                 }
                 break;
             case MESSAGE_TYPE_SUBSCRIBE:
                 if (telemetry_parse_subscribe_msg(buffer, buffer_size, &topic_id))
                 {
-                    printf("Got subscribe %d\r\n", topic_id);
                     ret = kprv_add_topic(sub, topic_id);
                 }
                 break;
@@ -258,12 +255,10 @@ bool telemetry_process_message(subscriber_list_item * sub, void * buffer, int bu
                 }
                 break;
             case MESSAGE_TYPE_DISCONNECT:
-                printf("Got disconnect\r\n");
                 sub->active = false;
                 ret = true;
                 break;
             default:
-                printf("Got other msg type\r\n");
                 break;
         }
     }
@@ -362,27 +357,6 @@ CSP_DEFINE_TASK(telemetry_rx_task)
 
 void telemetry_server_init(void)
 {
-    csp_buffer_init(20, 256);
-
-    /* Init CSP with address MY_ADDRESS */
-    csp_init(TELEMETRY_CSP_ADDRESS);
-
-    /* Start router task with 500 word stack, OS task priority 1 */
-    csp_route_start_task(500, 1);
-
-    // packet_queue = csp_queue_create(MESSAGE_QUEUE_SIZE, sizeof(telemetry_packet));
-
-    // csp_mutex_create(&subscribing_lock);
-    // csp_mutex_create(&unsubscribing_lock);
-
-    csp_debug_set_level(CSP_ERROR, true);
-    csp_debug_set_level(CSP_WARN, true);
-    csp_debug_set_level(CSP_INFO, true);
-    csp_debug_set_level(CSP_BUFFER, true);
-    csp_debug_set_level(CSP_PACKET, true);
-    csp_debug_set_level(CSP_PROTOCOL, true);
-    csp_debug_set_level(CSP_LOCK, true);
-
     csp_thread_create(telemetry_rx_task, "TELEM_RX", TELEMETRY_RX_THREAD_STACK_SIZE, NULL, TELEMETRY_RX_THREAD_PRIORITY, &telem_rx_handle);
 
     socket = kprv_server_setup(TELEMETRY_INTERNAL_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
@@ -394,5 +368,5 @@ void telemetry_server_cleanup(void)
 
     kprv_delete_subscribers();
 
-    csp_route_end_task();
+    telemetry_csp_terminate();
 }
