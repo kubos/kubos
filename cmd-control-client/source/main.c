@@ -17,6 +17,12 @@
 bool parse_processing_error(CborParser * parser, CborValue * map);
 bool parse_command_result( CborParser * parser, CborValue * map);
 
+/*
+ * IMPORTANT: For review ignore everything before line #91
+ * We won't be using named pipes and everything before that is all csp code to
+ * set up a named pipe connection.
+ */
+
 pthread_t rx_thread, my_thread;
 int rx_channel, tx_channel;
 

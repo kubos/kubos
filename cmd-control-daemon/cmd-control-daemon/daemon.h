@@ -12,7 +12,7 @@ bool encode_response(uint8_t * data, cnc_command_wrapper * wrapper, CborEncoder 
 
 bool finish_encode_response_and_send(uint8_t * data, CborEncoder *encoder, CborEncoder * container);
 
-bool get_command(csp_socket_t* sock, char * command);
+void get_command(csp_socket_t* sock, char * command);
 
 bool parse (char * args, cnc_command_wrapper * my_arguments);
 

@@ -80,21 +80,18 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
         return false;
     }
 
-    switch (wrapper->command_packet->action){
+    switch (wrapper->command_packet->action)
+    {
         case execute:
-            printf("Running Command Execute\n");
             *func = dlsym(*handle, "execute");
             break;
         case status:
-            printf("Running Command status\n");
             func = dlsym(*handle, "status");
             break;
         case output:
-            printf("Running Command output\n");
             func = dlsym(*handle, "output");
             break;
         case help:
-            printf("Running Command help\n");
             func = dlsym(*handle, "help");
             break;
         default:
@@ -132,7 +129,7 @@ bool run_command(cnc_command_wrapper * wrapper, void ** handle, lib_function fun
 
     //Calculate the runtime
     wrapper->response_packet->execution_time = (double)(finish_time - start_time) / (CLOCKS_PER_SEC/1000); //execution time in milliseconds
-    printf("Return code: %i exection time %f\n", wrapper->response_packet->return_code, wrapper->response_packet->execution_time);
+    /*printf("Return code: %i exection time %f\n", wrapper->response_packet->return_code, wrapper->response_packet->execution_time);*/
 
     //Unload the library
     func = NULL;

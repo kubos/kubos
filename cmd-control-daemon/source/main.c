@@ -141,6 +141,7 @@ int main(int argc, char **argv) {
     //The wrapper keeps track of a command input, it's result and
     //any pre-run processing error messages that may occur
     cnc_command_wrapper wrapper;
+    bool exit = false;
 
     wrapper.command_packet  = &command;
     wrapper.response_packet = &response;
@@ -150,16 +151,28 @@ int main(int argc, char **argv) {
     csp_bind(sock, PORT);
     csp_listen(sock, 5);
 
-    while (1) {
+    while (!exit)
+    {
         zero_vars(command_str, &command, &response, &wrapper);
         get_command(sock, command_str);
-        parse(command_str, &wrapper);
-        process_and_run_command(&wrapper);
+
+        if (!parse(command_str, &wrapper))
+        {
+            //Do some error handling
+            continue;
+        }
+
+        if(!process_and_run_command(&wrapper))
+        {
+            //Do some error handling
+            continue;
+        }
     }
 
     close(rx_channel);
     close(tx_channel);
 
     return 0;
+
 }
 
