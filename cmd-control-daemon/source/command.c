@@ -11,30 +11,35 @@
 #define SO_PATH_LENGTH 75
 
 
-bool get_command(csp_socket_t* sock, char * command) {
+void get_command(csp_socket_t* sock, char * command)
+{
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-    while (1) {
+    while (1)
+    {
         conn = csp_accept(sock, 1000);
-        if (conn) {
+        if (conn)
+        {
             packet = csp_read(conn, 0);
             if (packet)
             {
-                if (!parse_command_cbor(packet, command)){
+                if (!parse_command_cbor(packet, command))
+                {
                     fprintf(stderr, "There was an error parsing the command packet\n");
                     return false;
                 }
+                csp_buffer_free(packet);
             }
-            csp_buffer_free(packet);
             csp_close(conn);
-            return true;
+            return;
         }
     }
 }
 
 
-bool parse_command_cbor(csp_packet_t * packet, char * command) {
+bool parse_command_cbor(csp_packet_t * packet, char * command)
+{
     CborParser parser;
     CborValue map, element;
     size_t len;
@@ -49,17 +54,19 @@ bool parse_command_cbor(csp_packet_t * packet, char * command) {
     return true;
 }
 
-bool file_exists(char * path){ //Should this live in a higher level module utility?
+bool file_exists(char * path) //Should this live in a higher level module utility?
+{
     if ( access(path, F_OK) != -1)
         return true;
     return false;
 }
 
 
-bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * func) {
+bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * func)
+{
     int return_code;
     char so_path[SO_PATH_LENGTH];
-    char * home_dir = "/home/vagrant/lib%s.so";
+    char * home_dir = "/home/vagrant/lib%s.so"; //Just a dev path for now.
 
     // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
     int so_len = strlen(home_dir) + strlen(wrapper->command_packet->cmd_name) - 1;
@@ -99,7 +106,8 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
             return false;
     }
 
-    if (func == NULL) {
+    if (func == NULL)
+    {
         snprintf(wrapper->output, sizeof(wrapper->output) - 1, "The requested Symbol doesn't exist\n");
         return false;
     }
@@ -107,7 +115,8 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
 }
 
 
-bool run_command(cnc_command_wrapper * wrapper, void ** handle, lib_function func) {
+bool run_command(cnc_command_wrapper * wrapper, void ** handle, lib_function func)
+{
     //Redirect stdout to the response output field.
     //TODO: Redirect or figure out what to do with STDERR
 
@@ -139,17 +148,20 @@ bool run_command(cnc_command_wrapper * wrapper, void ** handle, lib_function fun
 }
 
 
-bool process_and_run_command(cnc_command_wrapper * wrapper) {
+bool process_and_run_command(cnc_command_wrapper * wrapper)
+{
     lib_function func = NULL;
     void * handle;
 
-    if (!load_command(wrapper, &handle, &func)) {
+    if (!load_command(wrapper, &handle, &func))
+    {
         printf("Failed to load command\n");
         wrapper->err = true;
         send_result(wrapper);
         return false;
     }
-    if (!run_command(wrapper, &handle, func)) {
+    if (!run_command(wrapper, &handle, func))
+    {
         printf("Failed to run command\n");
         wrapper->err = true;
         send_result(wrapper);

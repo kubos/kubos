@@ -69,7 +69,8 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
             switch(arguments->command_packet->arg_count++)
             {
                 case 0:
-                    if (!set_action(arg, arguments)) {
+                    if (!set_action(arg, arguments)) 
+                    {
                         state->next = state->argc; //Abort parsing the remaining args
                         send_result(arguments);
                     }
@@ -95,7 +96,8 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
 }
 
 
-int get_num_args(char* string){
+int get_num_args(char* string)
+{
     int count = 0, i = 1;
     while (string[i++])
     {

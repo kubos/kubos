@@ -53,7 +53,8 @@ void * fifo_rx(void * parameters) {
     return NULL;
 }
 
-bool init(){
+bool init()
+{
 
     int my_address = 2;
     char *rx_channel_name, *tx_channel_name;
@@ -89,15 +90,18 @@ bool init(){
     return true;
 }
 
+//Where the magic happens - Bascially ignore everything above this line - The initialization is going to change a lot.
 
-int send_packet(csp_conn_t* conn, csp_packet_t* packet) {
+int send_packet(csp_conn_t* conn, csp_packet_t* packet)
+{
     if (!conn || !csp_send(conn, packet, 1000))
         return -1;
     return 0;
 }
 
 
-void send_msg(uint8_t* data, size_t length) {
+void send_msg(uint8_t* data, size_t length)
+{
     int server_address = 1;
     csp_conn_t *conn;
     csp_packet_t *packet;
@@ -115,7 +119,8 @@ void send_msg(uint8_t* data, size_t length) {
 }
 
 
-bool parse_response(csp_packet_t * packet) {
+bool parse_response(csp_packet_t * packet)
+{
     CborParser parser;
     CborValue map, element;
     int message_type;
@@ -139,7 +144,8 @@ bool parse_response(csp_packet_t * packet) {
    }
 }
 
-bool parse_command_result( CborParser * parser, CborValue * map) {
+bool parse_command_result( CborParser * parser, CborValue * map)
+{
     size_t len;
     uint8_t return_code;
     double execution_time;
@@ -167,7 +173,8 @@ bool parse_command_result( CborParser * parser, CborValue * map) {
 }
 
 
-bool parse_processing_error(CborParser * parser, CborValue * map) {
+bool parse_processing_error(CborParser * parser, CborValue * map)
+{
     size_t len;
     char error_message[BUF_SIZE];
     CborValue element;
@@ -182,7 +189,8 @@ bool parse_processing_error(CborParser * parser, CborValue * map) {
 }
 
 
-void get_response() {
+void get_response()
+{
     csp_socket_t *sock;
     csp_conn_t *conn;
     csp_packet_t *packet;
@@ -204,9 +212,11 @@ void get_response() {
 }
 
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     //terrible name for starting all the tedious csp stuff
-    if (!init()) {
+    if (!init())
+    {
         fprintf(stderr, "There was an error initializing the csp configuration\n");
         return 1;
     }
@@ -219,7 +229,8 @@ int main(int argc, char **argv) {
     CborError err;
 
     int i;
-    for (i = 1; i < argc; i++) {
+    for (i = 1; i < argc; i++)
+    {
         strcat(args, argv[i]);
         if (i != argc -1) //Skip the final separator
             strcat(args, separator);
@@ -227,12 +238,14 @@ int main(int argc, char **argv) {
 
     cbor_encoder_init(&encoder, data, BUF_SIZE, 0);
     err = cbor_encoder_create_map(&encoder, &container, 1);
-    if (err) {
+    if (err)
+    {
         fprintf(stderr, "There was an error creating the map. CBOR Error code: %i\n", err);
         return 0;
     }
     err = cbor_encode_text_stringz(&container, "ARGS");
-    if (err || cbor_encode_text_stringz(&container, args)) {
+    if (err || cbor_encode_text_stringz(&container, args))
+    {
         fprintf(stderr, "There was an error encoding the commands into the CBOR message\n");
     }
 

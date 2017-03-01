@@ -55,7 +55,8 @@ void * fifo_rx(void * parameters) {
 }
 
 
-int init(int my_address){
+int init(int my_address)
+{
     char *rx_channel_name, *tx_channel_name;
     /* Set type */
     tx_channel_name = "/home/vagrant/server_to_client";
@@ -90,7 +91,8 @@ int init(int my_address){
 
 //Where the magic happens - Bascially ignore everything above this line - The initialization is going to change a lot.
 
-bool send_packet(csp_conn_t* conn, csp_packet_t* packet) {
+bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
+{
     if (!conn || !csp_send(conn, packet, 1000))
         return false;
     return true;
@@ -132,7 +134,8 @@ void zero_vars(char * command_str, cnc_command_packet * command, cnc_response_pa
 }
 
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     int my_address = 1;
     csp_socket_t *sock;
     char command_str[75];
