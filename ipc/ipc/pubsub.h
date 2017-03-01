@@ -57,6 +57,10 @@ csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections);
  */
 bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn);
 
+bool kprv_server_socket_accept(csp_socket_t * socket, pubsub_conn * conn);
+
+void kprv_subscriber_socket_close(pubsub_conn * conn);
+
 /**
  * Used by a telemetry subscriber to connect to the publishing server.
  * @param conn pointer to pubsub_conn where connection info will be stored

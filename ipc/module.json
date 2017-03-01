@@ -3,7 +3,8 @@
     "name":"ipc",
     "version":"0.1.0",
     "dependencies":{
-      "csp":"kubostech/libcsp"
+      "csp":"kubostech/libcsp",
+      "tinycbor":"kubostech/tinycbor"
     },
     "targetDependencies":{
       "kubos-rt":{
