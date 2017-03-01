@@ -145,7 +145,7 @@ int csp_socket_close(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dr
 
     socket_close(socket_driver);
 
-    csp_thread_kill(&(socket_driver->rx_thread_handle));
+    csp_thread_kill((socket_driver->rx_thread_handle));
     
     return CSP_ERR_NONE;
 }
