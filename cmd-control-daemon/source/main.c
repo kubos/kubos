@@ -55,7 +55,7 @@ void * fifo_rx(void * parameters) {
 }
 
 
-int csp_init_things(int my_address){
+int init(int my_address){
     char *rx_channel_name, *tx_channel_name;
     /* Set type */
     tx_channel_name = "/home/vagrant/server_to_client";
@@ -88,17 +88,16 @@ int csp_init_things(int my_address){
     return 0;
 }
 
-//Where the magic happens - Bascially ignore everything above this line
+//Where the magic happens - Bascially ignore everything above this line - The initialization is going to change a lot.
 
 bool send_packet(csp_conn_t* conn, csp_packet_t* packet) {
-    printf("Sending Packet\n");
     if (!conn || !csp_send(conn, packet, 1000))
         return false;
     return true;
 }
 
 
-bool send_response(uint8_t * data, size_t data_len)
+bool send_buffer(uint8_t * data, size_t data_len)
 {
     int my_address = 1, client_address = 2;
     char *rx_channel_name, *tx_channel_name;
@@ -139,13 +138,14 @@ int main(int argc, char **argv) {
     char command_str[75];
     cnc_command_packet command;
     cnc_response_packet response;
-    //The wrapper keeps track of a command input, it's result and any pre-run processing error messages that may occur
+    //The wrapper keeps track of a command input, it's result and
+    //any pre-run processing error messages that may occur
     cnc_command_wrapper wrapper;
 
     wrapper.command_packet  = &command;
     wrapper.response_packet = &response;
 
-    csp_init_things(my_address);
+    init(my_address);
     sock = csp_socket(CSP_SO_NONE);
     csp_bind(sock, PORT);
     csp_listen(sock, 5);

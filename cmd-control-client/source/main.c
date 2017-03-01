@@ -97,16 +97,14 @@ void send_msg(uint8_t* data, size_t length) {
     csp_packet_t *packet;
 
     while(packet = csp_buffer_get(length)) {
-        if (packet) {
-            memcpy(packet->data, data, length);
-            packet->length = length;
+        memcpy(packet->data, data, length);
+        packet->length = length;
 
-            conn = csp_connect(CSP_PRIO_NORM, server_address, PORT, 1000, CSP_O_NONE);
-            send_packet(conn, packet);
-            csp_buffer_free(packet);
-            csp_close(conn);
-            return;
-        }
+        conn = csp_connect(CSP_PRIO_NORM, server_address, PORT, 1000, CSP_O_NONE);
+        send_packet(conn, packet);
+        csp_buffer_free(packet);
+        csp_close(conn);
+        return;
     }
 }
 

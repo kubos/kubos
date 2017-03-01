@@ -20,7 +20,7 @@ bool parse_command_cbor(csp_packet_t * packet, char * command);
 
 bool process_and_run_command(cnc_command_wrapper * wrapper);
 
-bool send_response(uint8_t * data, size_t data_len);
+bool send_buffer(uint8_t * data, size_t data_len);
 
 bool start_encode_response(int message_type, cnc_command_wrapper * wrapper);
 
