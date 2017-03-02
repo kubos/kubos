@@ -130,7 +130,7 @@ bool telemetry_read(const pubsub_conn * conn, telemetry_packet * packet)
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
-            if (kprv_subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_INTERNAL_PORT))
+            if (kprv_subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_EXTERNAL_PORT))
                 return true;
         }
     }

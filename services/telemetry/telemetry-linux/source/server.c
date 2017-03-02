@@ -50,8 +50,20 @@ subscriber_list_item * create_subscriber(pubsub_conn conn)
         memcpy(&(sub->conn), &conn, sizeof(pubsub_conn));
         sub->packet_queue = csp_queue_create(MESSAGE_QUEUE_SIZE, sizeof(telemetry_packet));
         sub->active = true;
+        LL_APPEND(subscribers, sub);
     }
     return sub;
+}
+
+static void kprv_add_subscriber(pubsub_conn conn)
+{
+    subscriber_list_item * new_sub = NULL;
+    if ((new_sub = malloc(sizeof(subscriber_list_item))) != NULL)
+    {
+        memcpy(&(new_sub->conn), &conn, sizeof(pubsub_conn));
+        new_sub->topics = NULL;
+        LL_APPEND(subscribers, new_sub);
+    }
 }
 
 void destroy_subscriber(subscriber_list_item ** sub)
@@ -153,16 +165,7 @@ bool kprv_has_topic(const subscriber_list_item * sub, uint16_t topic_id)
 }
 
 
-static void kprv_add_subscriber(pubsub_conn conn)
-{
-    subscriber_list_item * new_sub = NULL;
-    if ((new_sub = malloc(sizeof(subscriber_list_item))) != NULL)
-    {
-        memcpy(&(new_sub->conn), &conn, sizeof(pubsub_conn));
-        new_sub->topics = NULL;
-        LL_APPEND(subscribers, new_sub);
-    }
-}
+
 
 bool kprv_cbor_read(const pubsub_conn * conn, void * buffer, int max_buffer_size, uint8_t port, uint16_t * size_received)
 {
@@ -212,10 +215,13 @@ bool kprv_publish_packet(telemetry_packet packet)
 {
     bool ret = true;
     subscriber_list_item * current, * next;
+    printf("pub packet\r\n");
     LL_FOREACH_SAFE(subscribers, current, next)
     {
+        printf("pub loop\r\n");
         if (kprv_has_topic(current, packet.source.topic_id))
         {
+            printf("found pub\r\n");
             if (!telemetry_publish_packet(current, packet))
             {
                 ret = false;
@@ -239,22 +245,26 @@ bool telemetry_process_message(subscriber_list_item * sub, void * buffer, int bu
             case MESSAGE_TYPE_PACKET:
                 if (telemetry_parse_packet_msg(buffer, buffer_size, &packet))
                 {
+                    printf("got packet msg\r\n");
                     ret = kprv_publish_packet(packet);
                 }
                 break;
             case MESSAGE_TYPE_SUBSCRIBE:
                 if (telemetry_parse_subscribe_msg(buffer, buffer_size, &topic_id))
                 {
+                    printf("got subscribe msg\r\n");
                     ret = kprv_add_topic(sub, topic_id);
                 }
                 break;
             case MESSAGE_TYPE_UNSUBSCRIBE:
                 if (telemetry_parse_unsubscribe_msg(buffer, buffer_size, &topic_id))
                 {
+                    printf("got unsubscriber msg\r\n");
                     ret = kprv_remove_topic(sub, topic_id);
                 }
                 break;
             case MESSAGE_TYPE_DISCONNECT:
+                printf("got disco msg\r\n");
                 sub->active = false;
                 ret = true;
                 break;
@@ -262,6 +272,31 @@ bool telemetry_process_message(subscriber_list_item * sub, void * buffer, int bu
                 break;
         }
     }
+    return ret;
+}
+
+bool client_rx_work(subscriber_list_item * sub)
+{
+    telemetry_packet packet;
+    uint8_t msg[256];
+    uint16_t msg_size;
+    bool ret = false;
+
+    printf("Check for client packets %d\r\n", telemetry_get_num_packets(sub));
+    while (telemetry_get_packet(sub, &packet))
+    {
+        ret = kprv_send_csp(&(sub->conn), (void*)&packet, sizeof(telemetry_packet));
+        if (!ret)
+            break;
+    }
+
+    if (kprv_cbor_read(&(sub->conn), (void*)msg, 256, TELEMETRY_EXTERNAL_PORT, &msg_size))
+    {
+        ret = telemetry_process_message(sub, (void*)msg, msg_size);
+    }
+
+    
+
     return ret;
 }
 
@@ -277,24 +312,11 @@ CSP_DEFINE_TASK(client_rx_task)
     printf("client rx thread start\r\n");
 
     sub = (subscriber_list_item*)param;
-    telemetry_packet packet;
-    uint8_t message[256];
-    uint16_t msg_size;
 
     while (sub->active == true)
     {
-        printf("client rx thread loop\r\n");
-        // while (telemetry_get_packet(sub, &packet))
-        // {
-        //     printf("Found packet, sending\r\n");
-        //     kprv_send_csp(&(sub->conn), (void*)&packet, sizeof(telemetry_packet));
-        // }
-        
-        if (kprv_cbor_read(&(sub->conn), (void*)message, 256, TELEMETRY_EXTERNAL_PORT, &msg_size))
-        {
-            printf("Got message, processing\r\n");
-            telemetry_process_message(sub, (void*)message, msg_size);
-        }
+        if (!client_rx_work(sub))
+            break;
     }
 
     destroy_subscriber(&sub);
@@ -368,5 +390,5 @@ void telemetry_server_cleanup(void)
 
     kprv_delete_subscribers();
 
-    telemetry_csp_terminate();
+    // telemetry_csp_terminate();
 }

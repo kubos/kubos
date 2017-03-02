@@ -51,7 +51,7 @@ CSP_DEFINE_TASK(client_task)
 }
 
 
-static void test_socket_server(void ** arg)
+static void test_server(void ** arg)
 {
     static csp_socket_t *sock;
     csp_packet_t *packet;
@@ -90,7 +90,7 @@ static void test_socket_server(void ** arg)
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_socket_server),
+        cmocka_unit_test(test_server),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
