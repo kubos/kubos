@@ -1,0 +1,20 @@
+{
+    "license":"Apache-2.0",
+    "name":"telemetry",
+    "version":"0.1.0",
+    "dependencies":{
+      "ipc":"kubostech/ipc",
+      "kubos-core":"kubostech/kubos-core"
+    },
+    "targetDependencies":{
+      "kubos-rt":{
+        "telemetry-rt":"kubostech/telemetry-rt"
+      },
+      "kubos-linux":{
+        "telemetry-linux":"kubostech/telemetry-linux"
+      }
+    },
+    "testDependencies": {
+        "cmocka": "kubostech/cmocka"
+    }
+}

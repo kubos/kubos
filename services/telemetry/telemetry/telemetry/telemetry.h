@@ -29,17 +29,15 @@
 #include "telemetry/types.h"
 #include <csp/arch/csp_thread.h>
 #include <stdbool.h>
-
-/**
- * Task used to receive incoming data from telemetry publishers.
- */
-CSP_DEFINE_TASK(telemetry_rx_task);
+#include <tinycbor/cbor.h>
 
 /**
  * Performs basic telemetry connection and thread initialization. 
  * To be used in the main() prior to starting the scheduler.
  */
 void telemetry_init(void);
+
+void telemetry_client_init(void);
 
 /**
  * Performs cleanup on telemetry resources & threads.
@@ -50,13 +48,13 @@ void telemetry_cleanup(void);
  * Connects to the telemetry system - thread safe version.
  * @return pubsub_conn* to pubsub_conn which will be used to receive future telemetry data.
  */
-pubsub_conn * telemetry_connect(void);
+bool telemetry_connect(pubsub_conn * conn);
 
 /**
  * Internal connect function - not thread safe.
  * @return pubsub_conn* to pubsub_conn which will be used to receive future telemetry data
  */
-pubsub_conn * kprv_telemetry_connect(void);
+bool kprv_telemetry_connect(pubsub_conn * conn);
 
 /**
  * Subscribes the pubsub_conn to the specified topic.
@@ -64,7 +62,7 @@ pubsub_conn * kprv_telemetry_connect(void);
  * @param topic_id topic to subscribe to
  * @return bool true if successful, otherwise false
  */
-bool telemetry_subscribe(const pubsub_conn * conn, uint16_t topic_id);
+bool telemetry_subscribe(const pubsub_conn * conn, int topic_id);
 
 /**
  * Disconnects from the telemetry system.
@@ -79,7 +77,7 @@ bool telemetry_disconnect(pubsub_conn * conn);
  * @param topic_id topic to remove subscription from
  * @return bool true if successful, otherwise false
  */
-bool telemetry_unsubscribe(const pubsub_conn * conn, uint16_t topic_id);
+bool telemetry_unsubscribe(const pubsub_conn * conn, int topic_id);
 
 /**
  * Reads a telemetry packet from the telemetry server.
@@ -108,7 +106,34 @@ int telemetry_num_subscribers(void);
  * @param topic_id topic to check for
  * @return bool true if subscribed, otherwise false
  */
-bool telemetry_is_subscribed(const pubsub_conn * client_conn, uint16_t topic_id);
+bool telemetry_is_subscribed(const pubsub_conn * client_conn, int topic_id);
+
+bool telemetry_parse_packet_msg(uint8_t * buffer, int buffer_size, telemetry_packet * packet);
+int telemetry_encode_packet_msg(uint8_t * buffer, telemetry_packet * pkt);
+
+int telemetry_encode_subscribe_msg(uint8_t * buffer, int * topic_id);
+bool telemetry_parse_subscribe_msg(uint8_t * buffer, int buffer_size, int * topic_id);
+
+int telemetry_encode_unsubscribe_msg(uint8_t * buffer, int * topic_id);
+bool telemetry_parse_unsubscribe_msg(uint8_t * buffer, int buffer_size, int * topic_id);
+
+int telemetry_encode_disconnect_msg(uint8_t * buffer);
+
+int start_encode_msg(CborEncoder * encoder, CborEncoder * container, uint8_t * buffer, int buffer_size, int num_elements, int message_type);
+int end_encode_msg(uint8_t * buffer, CborEncoder * encoder, CborEncoder * container);
+bool telemetry_parse_msg_type(uint8_t * buffer, int buffer_size, telemetry_message_type * req);
+
+subscriber_list_item * create_subscriber(pubsub_conn conn);
+void destroy_subscriber(subscriber_list_item ** sub);
+bool telemetry_get_packet(subscriber_list_item * sub, telemetry_packet * packet);
+int telemetry_get_num_packets(subscriber_list_item * sub);
+bool telemetry_publish_packet(subscriber_list_item * sub, telemetry_packet packet);
+bool telemetry_process_message(subscriber_list_item * sub, void * buffer, int buffer_size);
+bool kprv_has_topic(const subscriber_list_item * sub, uint16_t topic_id);
+bool kprv_remove_topic(subscriber_list_item * sub, int topic_id);
+bool kprv_add_topic(subscriber_list_item * sub, int topic_id);
+
+void kprv_delete_topics(subscriber_list_item * sub);
 
 #endif
 

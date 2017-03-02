@@ -33,6 +33,13 @@
 #define TELEMETRY_CSP_ADDRESS YOTTA_CFG_TELEMETRY_CSP_ADDRESS
 #endif
 
+/*! Address used for the current CSP instance */
+#ifndef YOTTA_CFG_TELEMETRY_CSP_CLIENT_ADDRESS
+#define TELEMETRY_CSP_CLIENT_ADDRESS 2
+#else
+#define TELEMETRY_CSP_CLIENT_ADDRESS YOTTA_CFG_TELEMETRY_CSP_ADDRESS
+#endif
+
 /*! Size of incoming telemetry message queue */
 #ifndef YOTTA_CFG_TELEMETRY_MESSAGE_QUEUE_SIZE
 #define MESSAGE_QUEUE_SIZE 10
@@ -40,11 +47,18 @@
 #define MESSAGE_QUEUE_SIZE YOTTA_CFG_TELEMETRY_MESSAGE_QUEUE_SIZE
 #endif
 
-/*! Port number used for the telemetry server's CSP socket */
-#ifndef YOTTA_CFG_TELEMETRY_CSP_PORT
-#define TELEMETRY_CSP_PORT 20
+/*! Port number used for the telemetry server's internal connections */
+#ifndef YOTTA_CFG_TELEMETRY_INTERNAL_PORT
+#define TELEMETRY_INTERNAL_PORT 20
 #else
-#define TELEMETRY_CSP_PORT YOTTA_CFG_TELEMETRY_CSP_PORT
+#define TELEMETRY_INTERNAL_PORT YOTTA_CFG_TELEMETRY_INTERNAL_PORT
+#endif
+
+/*! Port number used for telemetry's external socket connections */
+#ifndef YOTTA_CFG_TELEMETRY_EXTERNAL_PORT
+#define TELEMETRY_EXTERNAL_PORT 10
+#else
+#define TELEMETRY_EXTERNAL_PORT YOTTA_CFG_TELEMETRY_EXTERNAL_PORT
 #endif
 
 
