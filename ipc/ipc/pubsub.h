@@ -25,7 +25,6 @@
 #define PUBSUB_H
 
 #include <csp/csp.h>
-#include <csp/interfaces/csp_if_socket.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -36,8 +35,6 @@ typedef struct
 {
     /*! Raw network connection handle - today this is a csp connection */
     csp_conn_t * conn_handle;
-    csp_iface_t csp_socket_if;
-    csp_socket_handle_t socket_driver;
 } pubsub_conn;
 
 /**
@@ -57,10 +54,6 @@ csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections);
  */
 bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn);
 
-bool kprv_server_socket_accept(csp_socket_t * socket, pubsub_conn * conn);
-
-void kprv_subscriber_socket_close(pubsub_conn * conn);
-
 /**
  * Used by a telemetry subscriber to connect to the publishing server.
  * @param conn pointer to pubsub_conn where connection info will be stored
@@ -69,8 +62,6 @@ void kprv_subscriber_socket_close(pubsub_conn * conn);
  * @return bool true if successful, otherwise false
  */
 bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port);
-
-bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t port);
 
 /**
  * Attempts to receive data over the specified pubsub_conn

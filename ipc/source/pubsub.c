@@ -17,16 +17,13 @@
 #include "ipc/pubsub.h"
 #include "ipc/config.h"
 
-#include <csp/drivers/socket.h>
-#include <csp/interfaces/csp_if_socket.h>
-
-
 csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections)
 {
     csp_socket_t * socket = NULL;
 
     if ((socket = csp_socket(CSP_SO_NONE)) == NULL)
     {
+
         return NULL;
     }
 
@@ -46,41 +43,14 @@ csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections)
 bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn)
 {
     csp_conn_t * csp_conn = NULL;
-    if ((socket == NULL) || (conn == NULL))
+    if ((socket != NULL) && (conn != NULL))
     {
-        return false;
+        if ((csp_conn = csp_accept(socket, 1000)) != NULL)
+        {
+            conn->conn_handle = csp_conn;
+            return true;
+        }
     }
-    if ((csp_conn = csp_accept(socket, 1000)) != NULL)
-    {
-        conn->conn_handle = csp_conn;
-        return true;
-    }
-    return false;
-}
-
-bool kprv_server_socket_accept(csp_socket_t * socket, pubsub_conn * conn)
-{
-    csp_conn_t * csp_conn = NULL;
-    if ((socket == NULL) || (conn == NULL))
-    {
-        return false;
-    }
-
-    if (socket_init(&(conn->socket_driver), CSP_SOCKET_SERVER, IPC_SOCKET_PORT) != CSP_ERR_NONE)
-    {
-        return false;
-    }
-    if (csp_socket_init(&(conn->csp_socket_if), &(conn->socket_driver)) != CSP_ERR_NONE)
-    {
-        return false;
-    }
-    csp_route_set(CSP_DEFAULT_ROUTE, &(conn->csp_socket_if), CSP_NODE_MAC);
-    if ((csp_conn = csp_accept(socket, 1000)) != NULL)
-    {
-        conn->conn_handle = csp_conn;
-        return true;
-    }
-
     return false;
 }
 
@@ -102,47 +72,6 @@ bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
     {
         conn->conn_handle = NULL;
         return false;
-    }
-}
-
-bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
-{
-    csp_conn_t * csp_conn = NULL;
-    if (conn == NULL)
-    {
-        return false;
-    }
-
-    if (socket_init(&(conn->socket_driver), CSP_SOCKET_CLIENT, IPC_SOCKET_PORT) != CSP_ERR_NONE)
-    {
-        return false;
-    }
-
-    if (csp_socket_init(&(conn->csp_socket_if), &(conn->socket_driver)) != CSP_ERR_NONE)
-    {
-        return false;
-    }
-
-    csp_route_set(address, &(conn->csp_socket_if), CSP_NODE_MAC);
-
-    csp_conn = csp_connect(CSP_PRIO_NORM, address, port, 1000, CSP_O_NONE);
-    if (csp_conn != NULL)
-    {
-        conn->conn_handle = csp_conn;
-        return true;
-    }
-
-    conn->conn_handle = NULL;
-    return false;
-}
-
-void kprv_subscriber_socket_close(pubsub_conn * conn)
-{
-    if (conn != NULL)
-    {
-        csp_close(conn->conn_handle);
-        conn->conn_handle = NULL;
-        csp_socket_close(&(conn->csp_socket_if), &(conn->socket_driver)); 
     }
 }
 
