@@ -66,11 +66,10 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
 {
     int return_code;
     char so_path[SO_PATH_LENGTH];
-    char * home_dir = "/home/vagrant/lib%s.so"; //Just a dev path for now.
 
     // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
-    int so_len = strlen(home_dir) + strlen(wrapper->command_packet->cmd_name) - 1;
-    snprintf(so_path, so_len, home_dir, wrapper->command_packet->cmd_name);
+    int so_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
+    snprintf(so_path, so_len, MODULE_REGISTRY_DIR, wrapper->command_packet->cmd_name);
 
     if (!file_exists(so_path)){
         wrapper->err = true;
