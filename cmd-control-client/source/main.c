@@ -28,24 +28,30 @@ int rx_channel, tx_channel;
 
 int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout);
 
-csp_iface_t csp_if_fifo = {
+csp_iface_t csp_if_fifo =
+{
     .name = "fifo",
     .nexthop = csp_fifo_tx,
     .mtu = MTU,
 };
 
-int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
+int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout)
+{
     /* Write packet to fifo */
     if (write(tx_channel, &packet->length, packet->length + sizeof(uint32_t) + sizeof(uint16_t)) < 0)
+    {
         printf("Failed to write frame\r\n");
+    }
     csp_buffer_free(packet);
     return CSP_ERR_NONE;
 }
 
-void * fifo_rx(void * parameters) {
+void * fifo_rx(void * parameters)
+{
     csp_packet_t *buf = csp_buffer_get(BUF_SIZE);
     /* Wait for packet on fifo */
-    while (read(rx_channel, &buf->length, BUF_SIZE) > 0) {
+    while (read(rx_channel, &buf->length, BUF_SIZE) > 0)
+    {
         csp_new_packet(buf, &csp_if_fifo, NULL);
         buf = csp_buffer_get(BUF_SIZE);
     }
@@ -64,19 +70,22 @@ bool init()
 
 
     /* Init CSP and CSP buffer system */
-    if (csp_init(my_address) != CSP_ERR_NONE || csp_buffer_init(10, 300) != CSP_ERR_NONE) {
+    if (csp_init(my_address) != CSP_ERR_NONE || csp_buffer_init(10, 300) != CSP_ERR_NONE)
+    {
         printf("Failed to init CSP\r\n");
         return false;
     }
 
     tx_channel = open(tx_channel_name, O_RDWR);
-    if (tx_channel < 0) {
+    if (tx_channel < 0)
+    {
         printf("Failed to open TX channel\r\n");
         return false;
     }
 
     rx_channel = open(rx_channel_name, O_RDWR);
-    if (rx_channel < 0) {
+    if (rx_channel < 0)
+    {
         printf("Failed to open RX channel\r\n");
         return false;
     }
@@ -147,7 +156,8 @@ bool parse_response(csp_packet_t * packet)
         return false;
     }
 
-    switch (message_type) {
+    switch (message_type)
+    {
         case RESPONSE_TYPE_COMMAND_RESULT:
             return parse_command_result(&parser, &map);
             break;

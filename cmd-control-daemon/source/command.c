@@ -46,18 +46,24 @@ bool parse_command_cbor(csp_packet_t * packet, char * command)
 
     CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
     if (err)
+    {
         return false;
+    }
 
     err = cbor_value_map_find_value(&map, "ARGS", &element);
     if (err || cbor_value_copy_text_string(&element, command, &len, NULL))
+    {
         return false;
+    }
     return true;
 }
 
 bool file_exists(char * path) //Should this live in a higher level module utility?
 {
     if ( access(path, F_OK) != -1)
+    {
         return true;
+    }
     return false;
 }
 
@@ -71,7 +77,8 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
     int so_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
     snprintf(so_path, so_len, MODULE_REGISTRY_DIR, wrapper->command_packet->cmd_name);
 
-    if (!file_exists(so_path)){
+    if (!file_exists(so_path))
+    {
         wrapper->err = true;
         snprintf(wrapper->output, sizeof(wrapper->output) - 1,"The command library %s, does not exist\n", so_path);
         return false;

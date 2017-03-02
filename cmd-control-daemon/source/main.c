@@ -37,7 +37,9 @@ csp_iface_t csp_if_fifo = {
 int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
     /* Write packet to fifo */
     if (write(tx_channel, &packet->length, packet->length + sizeof(uint32_t) + sizeof(uint16_t)) < 0)
+    {
         printf("Failed to write frame\r\n");
+    }
     csp_buffer_free(packet);
     return CSP_ERR_NONE;
 }
@@ -64,19 +66,22 @@ int init(int my_address)
     rx_channel_name = "/home/vagrant/client_to_server";
 
     /* Init CSP and CSP buffer system */
-    if (csp_init(my_address) != CSP_ERR_NONE || csp_buffer_init(10, 300) != CSP_ERR_NONE) {
+    if (csp_init(my_address) != CSP_ERR_NONE || csp_buffer_init(10, 300) != CSP_ERR_NONE)
+    {
         printf("Failed to init CSP\r\n");
         return -1;
     }
 
     tx_channel = open(tx_channel_name, O_RDWR);
-    if (tx_channel < 0) {
+    if (tx_channel < 0)
+    {
         printf("Failed to open TX channel\r\n");
         return -1;
     }
 
     rx_channel = open(rx_channel_name, O_RDWR);
-    if (rx_channel < 0) {
+    if (rx_channel < 0)
+    {
         printf("Failed to open RX channel\r\n");
         return -1;
     }

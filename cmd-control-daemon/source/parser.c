@@ -76,7 +76,7 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
             switch(arguments->command_packet->arg_count++)
             {
                 case 0:
-                    if (!set_action(arg, arguments)) 
+                    if (!set_action(arg, arguments))
                     {
                         state->next = state->argc; //Abort parsing the remaining args
                         send_result(arguments);
@@ -109,7 +109,10 @@ int get_num_args(char* string)
     int count = 0, i = 1;
     while (string[i++])
     {
-        if (string[i] == ' ') count++;
+        if (string[i] == ' ')
+        {
+            count++;
+        }
     }
     return count + 1;
 }
@@ -142,7 +145,9 @@ bool parse (char * args, cnc_command_wrapper * wrapper)
     argp_parse (&argp, my_argc, result, flags, 0, wrapper);
     free(result);
     if (wrapper->err)
+    {
         return false;
+    }
     return true;
 }
 
