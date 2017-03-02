@@ -38,7 +38,7 @@
 
 //The size of all the members of the command packet, except the output field
 //The packet must fit into the CSP MTU or bad things will happen
-#define CMD_PACKET_MEMBER_SIZE sizeof(int) + sizeof(cnc_action) + sizeof(char) * CMD_PACKET_CMD_NAME_LEN
+#define CMD_PACKET_MEMBER_SIZE sizeof(int) + sizeof(cnc_action) + CMD_PACKET_CMD_NAME_LEN
 
 #ifdef YOTTA_CFG_CNC_RES_PACKET_STDOUT_LEN
 #define RES_PACKET_STDOUT_LEN        YOTTA_CFG_CNC_CMD_PACKET_ARG_LEN

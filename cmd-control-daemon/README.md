@@ -1,6 +1,6 @@
-# KubOS Linux Example App
+# Kubos Command and Control Daemon
 
-This is a simple application built on top of the [KubOS Linux Platform](https://github.com/kubostech/kubos-linux-build) 
-demonstrating some basic functionality from KubOS Linux (CSP). 
+This is the Daemon that receives command and control messages from clients. It processes and returns any output or error messages from the command.
 
-The easiest way to get started building this is with the [KubOS SDK](http://docs.kubos.co/latest/md_docs_kubos-sdk.html).
+For more information on the command and control system see the following <Link to C&C docs when they exist>
+

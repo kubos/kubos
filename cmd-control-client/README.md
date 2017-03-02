@@ -1,6 +1,6 @@
-# KubOS Linux Example App
+# Kubos Command and Control Command Line Client
 
-This is a simple application built on top of the [KubOS Linux Platform](https://github.com/kubostech/kubos-linux-build) 
-demonstrating some basic functionality from KubOS Linux (CSP). 
+This is a command line client for issuing commands to and receiving responses from the command and control daemon.
 
-The easiest way to get started building this is with the [KubOS SDK](http://docs.kubos.co/latest/md_docs_kubos-sdk.html).
+For more information on the command and control system see the following <Link to C&C docs when they exist>
+

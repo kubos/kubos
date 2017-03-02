@@ -92,29 +92,39 @@ bool init()
 
 //Where the magic happens - Bascially ignore everything above this line - The initialization is going to change a lot.
 
-int send_packet(csp_conn_t* conn, csp_packet_t* packet)
+bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
     if (!conn || !csp_send(conn, packet, 1000))
-        return -1;
-    return 0;
+    {
+        return false;
+    }
+    return true;
 }
 
 
-void send_msg(uint8_t* data, size_t length)
+bool send_msg(uint8_t* data, size_t length)
 {
     int server_address = 1;
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-    while(packet = csp_buffer_get(length)) {
+    if (packet = csp_buffer_get(length)) 
+    {
         memcpy(packet->data, data, length);
         packet->length = length;
 
         conn = csp_connect(CSP_PRIO_NORM, server_address, PORT, 1000, CSP_O_NONE);
-        send_packet(conn, packet);
+        if (!send_packet(conn, packet))
+        {
+            return false;
+        }
         csp_buffer_free(packet);
         csp_close(conn);
-        return;
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -127,19 +137,25 @@ bool parse_response(csp_packet_t * packet)
 
     CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
     if (err)
+    {
         return false;
+    }
 
     err = cbor_value_map_find_value(&map, "MSG_TYPE", &element);
     if (err || cbor_value_get_int(&element, &message_type))
+    {
         return false;
+    }
 
     switch (message_type) {
         case RESPONSE_TYPE_COMMAND_RESULT:
             return parse_command_result(&parser, &map);
+            break;
         case RESPONSE_TYPE_PROCESSING_ERROR:
             return parse_processing_error(&parser, &map);
+            break;
         default:
-            fprintf(stderr, "Recevied unknown message type: %i\n", message_type);
+            fprintf(stderr, "Received unknown message type: %i\n", message_type);
             return false;
    }
 }
@@ -156,17 +172,23 @@ bool parse_command_result( CborParser * parser, CborValue * map)
 
     err = cbor_value_map_find_value(map, "RETURN_CODE", &element);
     if (err || cbor_value_get_simple_type(&element, &return_code))
+    {
         return false;
+    }
     printf("Return Code: %i\n", return_code);
 
     err = cbor_value_map_find_value(map, "EXEC_TIME", &element);
     if (err || cbor_value_get_double(&element, &execution_time))
+    {
         return false;
+    }
     printf("Exectuion Time %f\n", execution_time);
 
     err = cbor_value_map_find_value(map, "OUTPUT", &element);
     if (err || cbor_value_copy_text_string(&element, output, &len, NULL))
+    {
         return false;
+    }
     printf("Output: %s\n", output);
     return true;
 
@@ -182,7 +204,9 @@ bool parse_processing_error(CborParser * parser, CborValue * map)
 
     err = cbor_value_map_find_value(map, "ERROR_MSG", &element);
     if (err || cbor_value_copy_text_string(&element, error_message, &len, NULL))
+    {
         return false;
+    }
 
     printf("Error Message: %s\n", error_message);
     return true;
@@ -199,11 +223,15 @@ void get_response()
     csp_bind(sock, PORT);
     csp_listen(sock, 5);
 
-    while (conn = csp_accept(sock, 1000)) {
-        if (conn) {
+    while (conn = csp_accept(sock, 1000))
+    {
+        if (conn)
+        {
             packet = csp_read(conn, 0);
             if (packet)
+            {
                 parse_response(packet);
+            }
             csp_buffer_free(packet);
             csp_close(conn);
             return;
@@ -214,13 +242,7 @@ void get_response()
 
 int main(int argc, char **argv)
 {
-    //terrible name for starting all the tedious csp stuff
-    if (!init())
-    {
-        fprintf(stderr, "There was an error initializing the csp configuration\n");
-        return 1;
-    }
-
+    int i;
     char* separator = " ";
     char args[BUF_SIZE] = {0};
     uint8_t data[BUF_SIZE] = {0};
@@ -228,12 +250,19 @@ int main(int argc, char **argv)
     CborEncoder encoder, container;
     CborError err;
 
-    int i;
+    if (!init())
+    {
+        fprintf(stderr, "There was an error initializing the csp configuration\n");
+        return 1;
+    }
+
     for (i = 1; i < argc; i++)
     {
         strcat(args, argv[i]);
-        if (i != argc -1) //Skip the final separator
+        if (i != argc-1) //Skip the final separator
+        {
             strcat(args, separator);
+        }
     }
 
     cbor_encoder_init(&encoder, data, BUF_SIZE, 0);

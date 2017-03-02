@@ -11,7 +11,7 @@
 #define SO_PATH_LENGTH 75
 
 
-void get_command(csp_socket_t* sock, char * command)
+bool get_command(csp_socket_t* sock, char * command)
 {
     csp_conn_t *conn;
     csp_packet_t *packet;
@@ -32,7 +32,7 @@ void get_command(csp_socket_t* sock, char * command)
                 csp_buffer_free(packet);
             }
             csp_close(conn);
-            return;
+            return true;
         }
     }
 }
@@ -93,13 +93,13 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
             *func = dlsym(*handle, "execute");
             break;
         case status:
-            func = dlsym(*handle, "status");
+            *func = dlsym(*handle, "status");
             break;
         case output:
-            func = dlsym(*handle, "output");
+            *func = dlsym(*handle, "output");
             break;
         case help:
-            func = dlsym(*handle, "help");
+            *func = dlsym(*handle, "help");
             break;
         default:
             snprintf(wrapper->output, sizeof(wrapper->output) - 1, "Unable to open lib: %s\n", dlerror());
@@ -108,7 +108,7 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
 
     if (func == NULL)
     {
-        snprintf(wrapper->output, sizeof(wrapper->output) - 1, "The requested Symbol doesn't exist\n");
+        snprintf(wrapper->output, sizeof(wrapper->output) - 1, "The requested symbol doesn't exist\n");
         return false;
     }
     return true;
@@ -138,10 +138,8 @@ bool run_command(cnc_command_wrapper * wrapper, void ** handle, lib_function fun
 
     //Calculate the runtime
     wrapper->response_packet->execution_time = (double)(finish_time - start_time) / (CLOCKS_PER_SEC/1000); //execution time in milliseconds
-    /*printf("Return code: %i exection time %f\n", wrapper->response_packet->return_code, wrapper->response_packet->execution_time);*/
 
     //Unload the library
-    func = NULL;
     dlclose(*handle);
 
     return true;

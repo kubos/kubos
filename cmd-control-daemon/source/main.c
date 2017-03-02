@@ -46,7 +46,8 @@ int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
 void * fifo_rx(void * parameters) {
     csp_packet_t *buf = csp_buffer_get(BUF_SIZE);
     /* Wait for packet on fifo */
-    while (read(rx_channel, &buf->length, BUF_SIZE) > 0) {
+    while (read(rx_channel, &buf->length, BUF_SIZE) > 0) 
+    {
         csp_new_packet(buf, &csp_if_fifo, NULL);
         buf = csp_buffer_get(BUF_SIZE);
     }
@@ -94,7 +95,9 @@ int init(int my_address)
 bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
     if (!conn || !csp_send(conn, packet, 1000))
+    {
         return false;
+    }
     return true;
 }
 
@@ -108,14 +111,19 @@ bool send_buffer(uint8_t * data, size_t data_len)
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-    while (1) {
+    while (1)
+    {
         packet = csp_buffer_get(BUF_SIZE);
-        if (packet) {
+        if (packet)
+        {
             memcpy(packet->data, data, data_len);
             packet->length = data_len;
 
             conn = csp_connect(CSP_PRIO_NORM, client_address, PORT, 1000, CSP_O_NONE);
-            send_packet(conn, packet);
+            if (!send_packet(conn, packet))
+            {
+                return false;
+            }
             csp_buffer_free(packet);
             csp_close(conn);
             return true;
@@ -141,7 +149,7 @@ int main(int argc, char **argv)
     char command_str[75];
     cnc_command_packet command;
     cnc_response_packet response;
-    //The wrapper keeps track of a command input, it's result and
+    //The wrapper keeps track of a command input, its result and
     //any pre-run processing error messages that may occur
     cnc_command_wrapper wrapper;
     bool exit = false;
@@ -157,7 +165,11 @@ int main(int argc, char **argv)
     while (!exit)
     {
         zero_vars(command_str, &command, &response, &wrapper);
-        get_command(sock, command_str);
+        if (!get_command(sock, command_str))
+        {
+            //Do some error handling
+            continue;
+        }
 
         if (!parse(command_str, &wrapper))
         {

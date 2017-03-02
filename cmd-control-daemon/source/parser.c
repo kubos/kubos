@@ -14,6 +14,20 @@
 #define OUTPUT_HASH  6953876217206
 #define STATUS_HASH  6954030894409
 
+static int parse_opt (int key, char *arg, struct argp_state *state);
+
+//This is required by argp and will be useful if we add options to the daemon.
+//An example option could be run a command but do not send the output or something like that.
+static struct argp_option options[] =
+{
+    {0}
+};
+
+static char args_doc[] = "Action Group-Name [following args]";
+static char doc[] = "CNC Daemon - Execute commands through the Kubos command and control framework";
+static struct argp argp = { options, parse_opt, args_doc, doc};
+
+
 //djb2 string hash function
 unsigned long get_hash(char *str)
 {
@@ -51,13 +65,6 @@ bool set_action(char* arg, cnc_command_wrapper * wrapper)
     return true;
 }
 
-//This is required by argp and will be useful if we add options to the daemon.
-//An example option could be run a command but do not send the output or something like that.
-static struct argp_option options[] =
-{
-    {0}
-};
-
 
 static int parse_opt (int key, char *arg, struct argp_state *state)
 {
@@ -91,6 +98,7 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
                 send_result(arguments);
             }
             arguments->command_packet->arg_count = arguments->command_packet->arg_count - 2;
+            break;
     }
     return 0;
 }
@@ -107,10 +115,6 @@ int get_num_args(char* string)
 }
 
 
-static char args_doc[] = "Action Group-Name [following args]";
-static char doc[] = "CNC Daemon - Execute commands through the Kubos command and control framework";
-
-static struct argp argp = { options, parse_opt, args_doc, doc};
 
 bool parse (char * args, cnc_command_wrapper * wrapper)
 {
