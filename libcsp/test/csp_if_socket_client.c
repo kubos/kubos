@@ -90,8 +90,6 @@ static void test_client(void ** arg) {
 	}
 
 	csp_thread_kill(server_task_handle);
-
-	return CSP_TASK_RETURN;
 }
 
 int main(void) {

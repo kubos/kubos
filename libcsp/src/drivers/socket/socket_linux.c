@@ -76,7 +76,6 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
 	}
 
 	csp_log_info("Wait to accept\n");
-	// socket_handle = accept(server_socket, (struct sockaddr *)&client, (socklen_t*)&c);
 	socket_handle = accept(server_socket, NULL, NULL);
 	if (socket_handle < 0) {
 		csp_log_error("Accept failed %d\n", socket_handle);
@@ -130,6 +129,10 @@ int socket_init(csp_socket_handle_t * socket_iface, uint8_t mode, uint16_t port)
 int socket_close(csp_socket_handle_t * socket_driver) {
 	if (socket_driver == NULL) {
 		return CSP_ERR_DRIVER;
+	}
+
+	if (!socket_driver->is_active) {
+		return CSP_ERR_NONE;
 	}
 
 	socket_driver->is_active = false;

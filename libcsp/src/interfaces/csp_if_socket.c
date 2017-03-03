@@ -81,7 +81,7 @@ CSP_DEFINE_TASK(csp_socket_rx) {
 		csp_log_error("No socket param found\r\n");
 		csp_thread_exit();
 	}
-	// socket_interface = *((csp_iface_t*)param);
+
 	memcpy(&socket_interface, (csp_iface_t *)param, sizeof(csp_iface_t));
 
 	if (socket_interface.driver == NULL) {
@@ -108,6 +108,8 @@ CSP_DEFINE_TASK(csp_socket_rx) {
 					csp_log_error("Out of packet buffers\r\n");
 					break;
 				}
+			} else {
+				csp_log_error("Could not parse out csp packet");
 			}
 		}
 	}
