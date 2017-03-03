@@ -238,6 +238,12 @@ csp_conn_t *csp_connect(uint8_t prio, uint8_t dest, uint8_t dport, uint32_t time
 int csp_close(csp_conn_t *conn);
 
 /**
+ * Closes a given socket and frees queue used.
+ * @param socket pointer to socket structure
+ */
+void csp_close_socket(csp_socket_t * socket);
+
+/**
  * @param conn pointer to connection structure
  * @return destination port of an incoming connection
  */
