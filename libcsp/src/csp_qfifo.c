@@ -50,6 +50,23 @@ int csp_qfifo_init(void) {
 
 }
 
+void csp_qfifo_terminate(void) {
+    int prio;
+
+	/* Create router fifos for each priority */
+	for (prio = 0; prio < CSP_ROUTE_FIFOS; prio++) {
+		if (qfifo[prio] != NULL) {
+			csp_queue_remove(qfifo[prio]);
+		}
+	}
+
+#ifdef CSP_USE_QOS
+	/* Create QoS fifo notification queue */
+	csp_queue_remove(qfifo_events);
+#endif
+
+}
+
 int csp_qfifo_read(csp_qfifo_t * input) {
 
 #ifdef CSP_USE_QOS
