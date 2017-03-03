@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 int csp_qfifo_init(void);
 
+void csp_qfifo_terminate(void);
+
 typedef struct {
 	csp_iface_t * interface;
 	csp_packet_t * packet;

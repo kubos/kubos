@@ -179,6 +179,27 @@ int csp_conn_init(void) {
 
 }
 
+void csp_conn_terminate(void) {
+
+    if (csp_bin_sem_remove(&sport_lock) != CSP_SEMAPHORE_OK) {
+		csp_log_error("Failed to remove sport semaphore");
+	}
+
+	int i, prio;
+	for (i = 0; i < CSP_CONN_MAX; i++) {
+		for (prio = 0; prio < CSP_RX_QUEUES; prio++)
+			csp_queue_remove(arr_conn[i].rx_queue[prio]);
+            
+		if (csp_mutex_remove(&arr_conn[i].lock) != CSP_MUTEX_OK) {
+			csp_log_error("Failed to remove connection lock");
+		}
+	}
+
+	if (csp_bin_sem_remove(&conn_lock) != CSP_SEMAPHORE_OK) {
+		csp_log_error("Failed to remove conn semaphore");
+	}
+}
+
 csp_conn_t * csp_conn_find(uint32_t id, uint32_t mask) {
 
 	/* Search for matching connection */

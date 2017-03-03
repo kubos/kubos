@@ -44,7 +44,7 @@ extern "C" {
 
 #define csp_thread_exit() pthread_exit(NULL)
 
-#define csp_thread_kill(thread) pthread_cancel(thread); pthread_join(thread, NULL);
+#define csp_thread_kill(thread) pthread_cancel((pthread_t)thread); pthread_join((pthread_t)thread, NULL);
 
 typedef pthread_t csp_thread_handle_t;
 typedef void * csp_thread_return_t;
