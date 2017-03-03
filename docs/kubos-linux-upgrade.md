@@ -67,7 +67,7 @@ Create or navigate to a Kubos SDK project.  The content of the project does not 
 
 Set the target with `kubos target kubos-linux-isis-gcc`
 
-Use the kubos flash command to load the package onto your board. Note: You might need to upgrade your config.json file with the appropriate login information to access your board.  See the 'Updating Credentials' section of [this document](docs/user-app-on-iobc.md)
+Use the kubos flash command to load the package onto your board. Note: You might need to update your config.json file with the appropriate login information to access your board.  See the 'Updating Credentials' section of [this document](docs/user-app-on-iobc.md)
     for more information. 
     
     kubos flash /home/vagrant/shared/kpack-{version}.itb
