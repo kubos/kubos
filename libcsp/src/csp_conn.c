@@ -191,7 +191,7 @@ void csp_conn_terminate(void) {
 			csp_queue_remove(arr_conn[i].rx_queue[prio]);
             
 		if (csp_mutex_remove(&arr_conn[i].lock) != CSP_MUTEX_OK) {
-			csp_log_error("Failed to remove connection lock");
+			csp_log_error("Failed to remove connection lock %d", i);
 		}
 	}
 
