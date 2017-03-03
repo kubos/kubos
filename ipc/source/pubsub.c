@@ -59,7 +59,6 @@ bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn)
 
 bool kprv_server_socket_accept(csp_socket_t * socket, pubsub_conn * conn)
 {
-    csp_conn_t * csp_conn = NULL;
     if ((socket == NULL) || (conn == NULL))
     {
         return false;
@@ -74,13 +73,8 @@ bool kprv_server_socket_accept(csp_socket_t * socket, pubsub_conn * conn)
         return false;
     }
     csp_route_set(CSP_DEFAULT_ROUTE, &(conn->csp_socket_if), CSP_NODE_MAC);
-    if ((csp_conn = csp_accept(socket, 1000)) != NULL)
-    {
-        conn->conn_handle = csp_conn;
-        return true;
-    }
 
-    return false;
+    return kprv_server_accept(socket, conn);
 }
 
 bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
@@ -106,7 +100,6 @@ bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
 
 bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
 {
-    csp_conn_t * csp_conn = NULL;
     if (conn == NULL)
     {
         return false;
@@ -124,15 +117,7 @@ bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t
 
     csp_route_set(address, &(conn->csp_socket_if), CSP_NODE_MAC);
 
-    csp_conn = csp_connect(CSP_PRIO_NORM, address, port, 1000, CSP_O_NONE);
-    if (csp_conn != NULL)
-    {
-        conn->conn_handle = csp_conn;
-        return true;
-    }
-
-    conn->conn_handle = NULL;
-    return false;
+    return kprv_subscriber_connect(conn, address, port);
 }
 
 void kprv_subscriber_socket_close(pubsub_conn * conn)
