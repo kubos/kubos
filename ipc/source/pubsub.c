@@ -20,7 +20,6 @@
 #include <csp/drivers/socket.h>
 #include <csp/interfaces/csp_if_socket.h>
 
-
 csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections)
 {
     csp_socket_t * socket = NULL;
@@ -142,7 +141,7 @@ void kprv_subscriber_socket_close(pubsub_conn * conn)
     {
         csp_close(conn->conn_handle);
         conn->conn_handle = NULL;
-        csp_socket_close(&(conn->csp_socket_if), &(conn->socket_driver)); 
+        csp_socket_close(&(conn->csp_socket_if), &(conn->socket_driver));
     }
 }
 
@@ -182,7 +181,7 @@ bool kprv_publisher_read(const pubsub_conn * conn, void * buffer, int buffer_siz
         {
             if (csp_conn_dport(csp_conn) == port)
             {
-                memcpy(buffer, (void*)csp_packet->data, buffer_size);
+                memcpy(buffer, (void *)csp_packet->data, buffer_size);
                 csp_buffer_free(csp_packet);
                 return true;
             }
@@ -203,7 +202,7 @@ bool kprv_subscriber_read(const pubsub_conn * conn, void * buffer, int buffer_si
         {
             if (csp_conn_sport(csp_conn) == port)
             {
-                memcpy(buffer, (void*)csp_packet->data, buffer_size);
+                memcpy(buffer, (void *)csp_packet->data, buffer_size);
                 csp_buffer_free(csp_packet);
                 return true;
             }
