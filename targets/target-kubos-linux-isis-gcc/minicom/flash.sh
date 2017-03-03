@@ -26,6 +26,8 @@ spinner() {
 start=$(date +%s)
 
 this_dir=$(cd "`dirname "$0"`"; pwd)
+project=$(cd "../.."; pwd)
+project=$(basename $project)
 program=$1
 name=$(basename $1)
 is_upgrade=0
@@ -55,6 +57,8 @@ fi
 if [[ "$name" = *.itb ]]; then
     path="/upgrade"
     is_upgrade=1
+else if [[ "$name" != "$project" ]]; then
+    path="/home/usr/local/bin"
 else
     path="/home/usr/bin"
 fi
