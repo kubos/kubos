@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include <csp/csp.h>
 #include <csp/drivers/socket.h>
 #include <csp/interfaces/csp_if_socket.h>
@@ -21,8 +21,8 @@
 #include <inttypes.h>
 #include <stdint.h>
 
-#include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #define LOCAL_ADDRESS "127.0.0.1"
 #define SERVER_MAX_CONNECTIONS 5
@@ -45,115 +45,118 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
 static int socket_client_init(csp_socket_handle_t * socket_iface, uint16_t port);
 
 static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port) {
-    int socket_handle;
-    struct sockaddr_in client;
-    static int server_socket, c;
-    static struct sockaddr_in server;
-    static bool server_init = false;
+	int socket_handle;
+	struct sockaddr_in client;
+	static int server_socket, c;
+	static struct sockaddr_in server;
+	static bool server_init = false;
 
-    if (server_init == false) {
-        server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
-        if (server_socket == -1) {
-            csp_log_error("Failed to init socket\n");
-            return CSP_ERR_DRIVER;
-        }
-        if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) < 0) {
-            csp_log_error("setsockopt(SO_REUSEADDR) failed");
-            return CSP_ERR_DRIVER;
-        }
-        // For now we will only accept local socket connections
-        server.sin_addr.s_addr = inet_addr(LOCAL_ADDRESS);
-        server.sin_family = AF_INET;
-        server.sin_port = htons(port);
-        if (bind(server_socket, (struct sockaddr*)&server, sizeof(server)) < 0) {
-            csp_log_error("Failed to bind\n");
-            return CSP_ERR_DRIVER;
-        }
+	if (server_init == false) {
+		server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+		if (server_socket == -1) {
+			csp_log_error("Failed to init socket\n");
+			return CSP_ERR_DRIVER;
+		}
+		if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) < 0) {
+			csp_log_error("setsockopt(SO_REUSEADDR) failed");
+			return CSP_ERR_DRIVER;
+		}
+		// For now we will only accept local socket connections
+		server.sin_addr.s_addr = inet_addr(LOCAL_ADDRESS);
+		server.sin_family = AF_INET;
+		server.sin_port = htons(port);
+		if (bind(server_socket, (struct sockaddr *)&server, sizeof(server)) < 0) {
+			csp_log_error("Failed to bind\n");
+			return CSP_ERR_DRIVER;
+		}
 
-        listen(server_socket, SERVER_MAX_CONNECTIONS);
-        c = sizeof(struct sockaddr_in);
-        server_init = true;
-    }
+		listen(server_socket, SERVER_MAX_CONNECTIONS);
+		c = sizeof(struct sockaddr_in);
+		server_init = true;
+	}
 
-    csp_log_info("Wait to accept\n");
-    // socket_handle = accept(server_socket, (struct sockaddr *)&client, (socklen_t*)&c);
-    socket_handle = accept(server_socket, NULL, NULL);
-    if (socket_handle < 0) {
-        csp_log_error("Accept failed %d\n", socket_handle);
-        return CSP_ERR_DRIVER;
-    }
-    csp_log_info("Accepted!\n");
-    socket_iface->socket_handle = socket_handle;
-    socket_iface->is_active = true;
-    return CSP_ERR_NONE;
+	csp_log_info("Wait to accept\n");
+	socket_handle = accept(server_socket, NULL, NULL);
+	if (socket_handle < 0) {
+		csp_log_error("Accept failed %d\n", socket_handle);
+		return CSP_ERR_DRIVER;
+	}
+	csp_log_info("Accepted!\n");
+	socket_iface->socket_handle = socket_handle;
+	socket_iface->is_active = true;
+	return CSP_ERR_NONE;
 }
 
 static int socket_client_init(csp_socket_handle_t * socket_iface, uint16_t port) {
-    int socket_handle;
-    struct sockaddr_in server;
+	int socket_handle;
+	struct sockaddr_in server;
 
-    //Create socket
-    socket_handle = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
-    if (socket_handle == -1) {
-        csp_log_error("Could not create socket");
-        return CSP_ERR_DRIVER;
-    }
-    csp_log_info("Socket created");
-    
-    server.sin_addr.s_addr = inet_addr(LOCAL_ADDRESS);
-    server.sin_family = AF_INET;
-    server.sin_port = htons(port);
+	//Create socket
+	socket_handle = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+	if (socket_handle == -1) {
+		csp_log_error("Could not create socket");
+		return CSP_ERR_DRIVER;
+	}
+	csp_log_info("Socket created");
 
-    //Connect to remote server
-    if (connect(socket_handle, (struct sockaddr *)&server , sizeof(server)) != 0) {
-        csp_log_error("Connect failed. Error");
-        return CSP_ERR_DRIVER;
-    }
-    csp_log_info("Connected\n");
-    socket_iface->socket_handle = socket_handle;
-    socket_iface->is_active = true;
-    return CSP_ERR_NONE;
+	server.sin_addr.s_addr = inet_addr(LOCAL_ADDRESS);
+	server.sin_family = AF_INET;
+	server.sin_port = htons(port);
+
+	//Connect to remote server
+	if (connect(socket_handle, (struct sockaddr *)&server, sizeof(server)) != 0) {
+		csp_log_error("Connect failed. Error");
+		return CSP_ERR_DRIVER;
+	}
+	csp_log_info("Connected\n");
+	socket_iface->socket_handle = socket_handle;
+	socket_iface->is_active = true;
+	return CSP_ERR_NONE;
 }
 
 int socket_init(csp_socket_handle_t * socket_iface, uint8_t mode, uint16_t port) {
-    if (socket_iface == NULL) {
-        return CSP_ERR_DRIVER;
-    }
+	if (socket_iface == NULL) {
+		return CSP_ERR_DRIVER;
+	}
 
-    if (mode == CSP_SOCKET_SERVER) {
-        return socket_server_init(socket_iface, port);
-    } else if (mode == CSP_SOCKET_CLIENT) {
-        return socket_client_init(socket_iface, port);
-    }
+	if (mode == CSP_SOCKET_SERVER) {
+		return socket_server_init(socket_iface, port);
+	} else if (mode == CSP_SOCKET_CLIENT) {
+		return socket_client_init(socket_iface, port);
+	}
 }
 
 int socket_close(csp_socket_handle_t * socket_driver) {
-    if (socket_driver == NULL) {
-        return CSP_ERR_DRIVER;
-    }
+	if (socket_driver == NULL) {
+		return CSP_ERR_DRIVER;
+	}
 
-    socket_driver->is_active = false;
-    
-    if (shutdown(socket_driver->socket_handle, SHUT_RDWR) != 0) {
-        return CSP_ERR_DRIVER;
-    }
+	if (!socket_driver->is_active) {
+		return CSP_ERR_NONE;
+	}
 
-    if (close(socket_driver->socket_handle) != 0) {
-        return CSP_ERR_DRIVER;
-    }
+	socket_driver->is_active = false;
 
-    return CSP_ERR_NONE;
+	if (shutdown(socket_driver->socket_handle, SHUT_RDWR) != 0) {
+		return CSP_ERR_DRIVER;
+	}
+
+	if (close(socket_driver->socket_handle) != 0) {
+		return CSP_ERR_DRIVER;
+	}
+
+	return CSP_ERR_NONE;
 }
 
 int socket_status(const csp_socket_handle_t * socket_iface) {
-    int error;
-    int retval;
-    socklen_t len;
+	int error;
+	int retval;
+	socklen_t len;
 
-    retval = getsockopt(socket_iface->socket_handle, SOL_SOCKET, SO_ERROR, &error, &len);
-    if ((retval != 0) || (error != 0)) {
-        csp_log_error("Socket status ret %d error %d", retval, error);
-        return CSP_ERR_DRIVER;
-    }
-    return CSP_ERR_NONE;
+	retval = getsockopt(socket_iface->socket_handle, SOL_SOCKET, SO_ERROR, &error, &len);
+	if ((retval != 0) || (error != 0)) {
+		csp_log_error("Socket status ret %d error %d", retval, error);
+		return CSP_ERR_DRIVER;
+	}
+	return CSP_ERR_NONE;
 }
