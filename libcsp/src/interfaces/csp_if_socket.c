@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#include <csp/csp.h>
-#include <csp/csp_interface.h>
-#include <csp/csp_error.h>
-#include <csp/interfaces/csp_if_socket.h>
-#include <csp/drivers/socket.h>
 #include <csp/arch/csp_thread.h>
-#include <stdlib.h>
+#include <csp/csp.h>
+#include <csp/csp_error.h>
+#include <csp/csp_interface.h>
+#include <csp/drivers/socket.h>
+#include <csp/interfaces/csp_if_socket.h>
 #include <inttypes.h>
 #include <stdint.h>
+#include <stdlib.h>
 
-#include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 
 #include <tinycbor/cbor.h>
 
@@ -36,116 +36,114 @@
  * @param timeout currently not used
  * @return int currently always returns CSP_ERR_NONE
  */
-static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout);
+static int csp_socket_tx(csp_iface_t * ifc, csp_packet_t * packet, uint32_t timeout);
 
 /**
  * Task spawned for each new csp_if_socket for handling receiving data
  */
 CSP_DEFINE_TASK(csp_socket_rx);
 
+static int csp_socket_tx(csp_iface_t * ifc, csp_packet_t * packet, uint32_t timeout) {
+	if ((ifc == NULL) || (ifc->driver == NULL)) {
+		csp_log_error("Null pointer for interface or driver\r\n");
+		return CSP_ERR_DRIVER;
+	}
 
-static int csp_socket_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout) {
-    if ((ifc == NULL) || (ifc->driver == NULL)) {
-        csp_log_error("Null pointer for interface or driver\r\n");
-        return CSP_ERR_DRIVER;
-    }
+	csp_log_info("csp_socket_tx go\r\n");
 
-    csp_log_info("csp_socket_tx go\r\n");
+	csp_socket_handle_t * socket_driver = ifc->driver;
 
-    csp_socket_handle_t * socket_driver = ifc->driver;
+	uint8_t write_buffer[SOCKET_BUFFER_SIZE];
+	int write_size = cbor_encode_csp_packet(packet, write_buffer);
+	if (write_size > 0) {
+		csp_log_info("about to write csp packet %d - %d\r\n", write_size, packet->length);
+		int result = send(socket_driver->socket_handle, write_buffer, write_size, MSG_CONFIRM);
+		csp_log_info("csp_socket_tx write %d\r\n", result);
+		if (result < 0) {
+			csp_log_error("Socket write error: %u %s\r\n", result, strerror(result));
+		}
+		csp_buffer_free(packet);
+	} else {
+		csp_log_error("encode csp packet failed\r\n");
+	}
 
-    uint8_t write_buffer[SOCKET_BUFFER_SIZE];
-    int write_size = cbor_encode_csp_packet(packet, write_buffer);
-    if (write_size > 0) {
-        csp_log_info("about to write csp packet %d - %d\r\n", write_size, packet->length);
-        int result = send(socket_driver->socket_handle, write_buffer, write_size, MSG_CONFIRM);
-        csp_log_info("csp_socket_tx write %d\r\n", result);
-        if ( result < 0) {
-            csp_log_error("Socket write error: %u %s\r\n", result, strerror(result));
-        }
-        csp_buffer_free(packet);
-    } else { csp_log_error("encode csp packet failed\r\n"); }
- 
-    return CSP_ERR_NONE;
+	return CSP_ERR_NONE;
 }
 
 CSP_DEFINE_TASK(csp_socket_rx) {
-    csp_iface_t socket_interface;
-    csp_socket_handle_t * socket_driver;
-    csp_packet_t * packet = csp_buffer_get(SOCKET_BUFFER_SIZE);
+	csp_iface_t socket_interface;
+	csp_socket_handle_t * socket_driver;
+	csp_packet_t * packet = csp_buffer_get(SOCKET_BUFFER_SIZE);
 
-    csp_log_info("Starting socket rx thread\r\n");
+	csp_log_info("Starting socket rx thread\r\n");
 
-    if (param == NULL) {
-        csp_log_error("No socket param found\r\n");
-        csp_thread_exit();
-    }
-    // socket_interface = *((csp_iface_t*)param);
-    memcpy(&socket_interface, (csp_iface_t*)param, sizeof(csp_iface_t));
+	if (param == NULL) {
+		csp_log_error("No socket param found\r\n");
+		csp_thread_exit();
+	}
+	// socket_interface = *((csp_iface_t*)param);
+	memcpy(&socket_interface, (csp_iface_t *)param, sizeof(csp_iface_t));
 
-    if (socket_interface.driver == NULL) {
-        csp_log_error("No socket driver found\r\n");
-        csp_thread_exit();
-    }
+	if (socket_interface.driver == NULL) {
+		csp_log_error("No socket driver found\r\n");
+		csp_thread_exit();
+	}
 
-    socket_driver = socket_interface.driver;
+	socket_driver = socket_interface.driver;
 
-    char buffer[SOCKET_BUFFER_SIZE];
-    while (socket_driver->is_active)
-    {
-        memset(buffer, '\0', SOCKET_BUFFER_SIZE);
-        int recv_size = recv(socket_driver->socket_handle, (void*)buffer, SOCKET_BUFFER_SIZE, 0);
-        if (recv_size > 0)
-        {
-            csp_log_info("csp_socket_rx recv'd packet %d\r\n", recv_size);
-            
-            csp_log_info("csp_socket_rx new packet length %d\r\n", packet->length);
-            if (cbor_parse_csp_packet(packet, buffer, recv_size))
-            {
-                csp_log_info("Got valid csp packet\r\n");
-                csp_log_info("csp_socket_rx got packet length %d\r\n", packet->length);
-                csp_new_packet(packet, &socket_interface, NULL);
-                packet = csp_buffer_get(SOCKET_BUFFER_SIZE);
-                if (packet == NULL) {
-                    csp_log_error("Out of packet buffers\r\n");
-                    break;
-                }
-            }
-        }
-    }
+	char buffer[SOCKET_BUFFER_SIZE];
+	while (socket_driver->is_active) {
+		memset(buffer, '\0', SOCKET_BUFFER_SIZE);
+		int recv_size = recv(socket_driver->socket_handle, (void *)buffer, SOCKET_BUFFER_SIZE, 0);
+		if (recv_size > 0) {
+			csp_log_info("csp_socket_rx recv'd packet %d\r\n", recv_size);
 
-    csp_log_info("Socket rx thread done\r\n");
+			csp_log_info("csp_socket_rx new packet length %d\r\n", packet->length);
+			if (cbor_parse_csp_packet(packet, buffer, recv_size)) {
+				csp_log_info("Got valid csp packet\r\n");
+				csp_log_info("csp_socket_rx got packet length %d\r\n", packet->length);
+				csp_new_packet(packet, &socket_interface, NULL);
+				packet = csp_buffer_get(SOCKET_BUFFER_SIZE);
+				if (packet == NULL) {
+					csp_log_error("Out of packet buffers\r\n");
+					break;
+				}
+			}
+		}
+	}
 
-    csp_buffer_free(packet);
+	csp_log_info("Socket rx thread done\r\n");
 
-    csp_thread_exit();
+	csp_buffer_free(packet);
+
+	csp_thread_exit();
 }
 
 int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver) {
-    if ((socket_iface == NULL) || (socket_driver == NULL))
-        return CSP_ERR_DRIVER;
+	if ((socket_iface == NULL) || (socket_driver == NULL))
+		return CSP_ERR_DRIVER;
 
-    socket_iface->driver = socket_driver;
-    socket_iface->nexthop = csp_socket_tx;
-    socket_iface->name = "socket";
-    socket_iface->mtu = SOCKET_BUFFER_SIZE;
+	socket_iface->driver = socket_driver;
+	socket_iface->nexthop = csp_socket_tx;
+	socket_iface->name = "socket";
+	socket_iface->mtu = SOCKET_BUFFER_SIZE;
 
-    /* Start RX thread */
-    int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &(socket_driver->rx_thread_handle));
+	/* Start RX thread */
+	int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &(socket_driver->rx_thread_handle));
 
-    /* Register interface */
-    csp_iflist_add(socket_iface);
+	/* Register interface */
+	csp_iflist_add(socket_iface);
 
-    return CSP_ERR_NONE;
+	return CSP_ERR_NONE;
 }
 
 int csp_socket_close(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver) {
-    if ((socket_iface == NULL) || (socket_driver == NULL))
-        return CSP_ERR_DRIVER;
+	if ((socket_iface == NULL) || (socket_driver == NULL))
+		return CSP_ERR_DRIVER;
 
-    socket_close(socket_driver);
+	socket_close(socket_driver);
 
-    csp_thread_kill((socket_driver->rx_thread_handle));
-    
-    return CSP_ERR_NONE;
+	csp_thread_kill((socket_driver->rx_thread_handle));
+
+	return CSP_ERR_NONE;
 }
