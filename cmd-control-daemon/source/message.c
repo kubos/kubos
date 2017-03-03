@@ -3,7 +3,7 @@
 
 #include "cmd-control-daemon/daemon.h"
 
-bool send_result(cnc_command_wrapper * wrapper)
+bool send_result(CNCWrapper * wrapper)
 {
     if (wrapper->err) //Thinking of changing the err flag to a state enum or similar multi-state member type
     {
@@ -16,7 +16,7 @@ bool send_result(cnc_command_wrapper * wrapper)
 }
 
 
-bool start_encode_response(int message_type, cnc_command_wrapper * wrapper)
+bool start_encode_response(int message_type, CNCWrapper * wrapper)
 {
     CborEncoder encoder, container;
     CborError err;
@@ -45,7 +45,7 @@ bool start_encode_response(int message_type, cnc_command_wrapper * wrapper)
 }
 
 
-bool encode_response(uint8_t * data, cnc_command_wrapper * wrapper, CborEncoder * encoder, CborEncoder * container)
+bool encode_response(uint8_t * data, CNCWrapper * wrapper, CborEncoder * encoder, CborEncoder * container)
 {
     CborError err;
     err = cbor_encode_text_stringz(container, "RETURN_CODE");
@@ -70,7 +70,7 @@ bool encode_response(uint8_t * data, cnc_command_wrapper * wrapper, CborEncoder 
 }
 
 
-bool encode_processing_error(uint8_t * data, cnc_command_wrapper * result, CborEncoder * encoder, CborEncoder * container)
+bool encode_processing_error(uint8_t * data, CNCWrapper * result, CborEncoder * encoder, CborEncoder * container)
 {
     CborError err;
     err = cbor_encode_text_stringz(container, "ERROR_MSG");

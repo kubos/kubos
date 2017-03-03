@@ -40,22 +40,22 @@ unsigned long get_hash(char *str)
 }
 
 
-bool set_action(char* arg, cnc_command_wrapper * wrapper)
+bool set_action(char* arg, CNCWrapper * wrapper)
 {
     unsigned long hash = get_hash(arg);
     switch (hash)
     {
         case EXEC_HASH:
-            wrapper->command_packet->action = execute;
+            wrapper->command_packet->action = EXECUTE;
             break;
         case HELP_HASH:
-            wrapper->command_packet->action = help;
+            wrapper->command_packet->action = HELP;
             break;
         case OUTPUT_HASH:
-            wrapper->command_packet->action = output;
+            wrapper->command_packet->action = OUTPUT;
             break;
         case STATUS_HASH:
-            wrapper->command_packet->action = status;
+            wrapper->command_packet->action = STATUS;
             break;
         default:
             snprintf(wrapper->output, sizeof(wrapper->output) - 1, "Requested action: %s, is not available\n", arg);
@@ -68,7 +68,7 @@ bool set_action(char* arg, cnc_command_wrapper * wrapper)
 
 static int parse_opt (int key, char *arg, struct argp_state *state)
 {
-    cnc_command_wrapper *arguments = state->input;
+    CNCWrapper *arguments = state->input;
     int idx;
     switch (key)
     {
@@ -119,7 +119,7 @@ int get_num_args(char* string)
 
 
 
-bool parse (char * args, cnc_command_wrapper * wrapper)
+bool parse (char * args, CNCWrapper * wrapper)
 {
     int res, argsc;
     char * sub_str;

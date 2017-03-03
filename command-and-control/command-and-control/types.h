@@ -42,7 +42,7 @@
 
 //The size of all the members of the command packet, except the output field
 //The packet must fit into the CSP MTU or bad things will happen
-#define CMD_PACKET_MEMBER_SIZE sizeof(int) + sizeof(cnc_action) + CMD_PACKET_CMD_NAME_LEN
+#define CMD_PACKET_MEMBER_SIZE sizeof(int) + sizeof(CNCAction) + CMD_PACKET_CMD_NAME_LEN
 
 #ifdef YOTTA_CFG_CNC_RES_PACKET_STDOUT_LEN
 #define RES_PACKET_STDOUT_LEN        YOTTA_CFG_CNC_CMD_PACKET_ARG_LEN
@@ -56,21 +56,20 @@
 
 typedef enum
 {
-    execute = 0,
-    status,
-    output,
-    help,
-    noop
-} cnc_action;
+    EXECUTE = 0,
+    STATUS,
+    OUTPUT,
+    HELP
+} CNCAction;
 
 
 typedef struct arguments
 {
     int arg_count;
-    cnc_action action;
+    CNCAction action;
     char cmd_name[CMD_PACKET_CMD_NAME_LEN];
     char * args[CMD_PACKET_ARG_LEN];
-} cnc_command_packet;
+} CNCCommandPacket;
 
 
 typedef struct
@@ -78,17 +77,16 @@ typedef struct
     uint8_t return_code;
     double  execution_time;
     char    output[RES_PACKET_STDOUT_LEN]; //TODO: Figure out optimal size
-} cnc_response_packet;
+} CNCResponsePacket;
 
 
 // Used inside the daemon to track and provide error messages back to the client
 typedef struct
 {
-    cnc_command_packet  * command_packet;
-    cnc_response_packet * response_packet;
+    CNCCommandPacket  * command_packet;
+    CNCResponsePacket * response_packet;
     bool err;
     char output[RES_PACKET_STDOUT_LEN];
-} cnc_command_wrapper;
-
+} CNCWrapper;
 
 #endif

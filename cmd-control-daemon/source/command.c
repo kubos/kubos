@@ -58,6 +58,7 @@ bool parse_command_cbor(csp_packet_t * packet, char * command)
     return true;
 }
 
+
 bool file_exists(char * path) //Should this live in a higher level module utility?
 {
     if ( access(path, F_OK) != -1)
@@ -68,7 +69,7 @@ bool file_exists(char * path) //Should this live in a higher level module utilit
 }
 
 
-bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * func)
+bool load_command(CNCWrapper * wrapper, void ** handle, lib_function * func)
 {
     int return_code;
     char so_path[SO_PATH_LENGTH];
@@ -95,16 +96,16 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
 
     switch (wrapper->command_packet->action)
     {
-        case execute:
+        case EXECUTE:
             *func = dlsym(*handle, "execute");
             break;
-        case status:
+        case STATUS:
             *func = dlsym(*handle, "status");
             break;
-        case output:
+        case OUTPUT:
             *func = dlsym(*handle, "output");
             break;
-        case help:
+        case HELP:
             *func = dlsym(*handle, "help");
             break;
         default:
@@ -121,7 +122,7 @@ bool load_command(cnc_command_wrapper * wrapper, void ** handle, lib_function * 
 }
 
 
-bool run_command(cnc_command_wrapper * wrapper, void ** handle, lib_function func)
+bool run_command(CNCWrapper * wrapper, void ** handle, lib_function func)
 {
     //Redirect stdout to the response output field.
     //TODO: Redirect or figure out what to do with STDERR
@@ -152,7 +153,7 @@ bool run_command(cnc_command_wrapper * wrapper, void ** handle, lib_function fun
 }
 
 
-bool process_and_run_command(cnc_command_wrapper * wrapper)
+bool process_and_run_command(CNCWrapper * wrapper)
 {
     lib_function func = NULL;
     void * handle;
@@ -176,5 +177,4 @@ bool process_and_run_command(cnc_command_wrapper * wrapper)
     printf("Command succeeded - Sending Result\n");
     return send_result(wrapper);
 }
-
 

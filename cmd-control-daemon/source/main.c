@@ -137,11 +137,11 @@ bool send_buffer(uint8_t * data, size_t data_len)
 }
 
 
-void zero_vars(char * command_str, cnc_command_packet * command, cnc_response_packet * response, cnc_command_wrapper * wrapper)
+void zero_vars(char * command_str, CNCCommandPacket * command, CNCResponsePacket * response, CNCWrapper * wrapper)
 {
     memset(command_str, 0, sizeof(command_str) * sizeof(char));
-    memset(command, 0, sizeof(cnc_command_packet));
-    memset(response, 0, sizeof(cnc_response_packet));
+    memset(command, 0, sizeof(CNCCommandPacket));
+    memset(response, 0, sizeof(CNCResponsePacket));
     memset(wrapper->output, 0, sizeof(wrapper->output));
     wrapper->err = false;
 }
@@ -152,11 +152,11 @@ int main(int argc, char **argv)
     int my_address = 1;
     csp_socket_t *sock;
     char command_str[75];
-    cnc_command_packet command;
-    cnc_response_packet response;
+    CNCCommandPacket command;
+    CNCResponsePacket response;
     //The wrapper keeps track of a command input, its result and
     //any pre-run processing error messages that may occur
-    cnc_command_wrapper wrapper;
+    CNCWrapper wrapper;
     bool exit = false;
 
     wrapper.command_packet  = &command;
