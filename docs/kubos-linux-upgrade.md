@@ -2,7 +2,7 @@
 
 [TOC]
 
-# Updating KubOS Linux {#kubos-linux-upgrade}
+# Upgrading KubOS Linux {#kubos-linux-upgrade}
 
 ## Overview {#overview}
 
