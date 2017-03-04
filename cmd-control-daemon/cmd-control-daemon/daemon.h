@@ -20,12 +20,6 @@
 #include <command-and-control/types.h>
 #include <tinycbor/cbor.h>
 
-#ifdef YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
-#define CMD_STR_LEN YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
-#else
-#define CMD_STR_LEN 75
-#endif
-
 typedef int (*lib_function)(int, char**);
 
 bool encode_processing_error(uint8_t * data, CNCWrapper * result, CborEncoder * encoder, CborEncoder * container);
@@ -47,5 +41,19 @@ bool send_buffer(uint8_t * data, size_t data_len);
 bool start_encode_response(int message_type, CNCWrapper * wrapper);
 
 bool send_result(CNCWrapper * wrapper);
+
+
+#ifdef YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
+#define CMD_STR_LEN YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
+#else
+#define CMD_STR_LEN 75
+#endif
+
+#ifdef YOTTA_CFG_CNC_DAEMON_SO_PATH_LENGTH
+#define SO_PATH_LENGTH YOTTA_CFG_CNC_DAEMON_SO_PATH_LENGTH
+#else
+#define SO_PATH_LENGTH 75
+#endif
+
 
 #endif

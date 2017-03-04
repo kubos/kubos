@@ -22,107 +22,80 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <csp/csp.h>
-#include <csp/csp_interface.h>
+#include <csp/drivers/socket.h>
+#include <csp/interfaces/csp_if_socket.h>
 
 #include "command-and-control/types.h"
 #include "tinycbor/cbor.h"
 
-#define PORT        10
-#define BUF_SIZE    MTU
+#define ADDRESS            2
+#define SOCKET_PORT        5250
+#define CSP_PORT           10
+#define SERVER_ADDRESS     1
+#define BUF_SIZE           MTU
+#define CLI_CLIENT_ADDRESS 2
+#define TEST_INT_PORT 10
+#define TEST_EXT_PORT 11
+#define TEST_NUM_CON 5
+#define TEST_ADDRESS 1
+#define TEST_SOCKET_PORT 8189
+static char msg[] = "test123test";
 
 bool parse_processing_error(CborParser * parser, CborValue * map);
 bool parse_command_result( CborParser * parser, CborValue * map);
 
-/*
- * IMPORTANT: For review ignore everything before line #91
- * We won't be using named pipes and everything before that is all csp code to
- * set up a named pipe connection.
- */
+csp_iface_t csp_socket_if;
+csp_socket_handle_t socket_driver;
 
-pthread_t rx_thread, my_thread;
-int rx_channel, tx_channel;
-
-int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout);
-
-csp_iface_t csp_if_fifo =
+bool init(int address)
 {
-    .name = "fifo",
-    .nexthop = csp_fifo_tx,
-    .mtu = MTU,
-};
+    csp_conn_t * conn = NULL;
+    csp_socket_handle_t socket_driver;
 
-int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout)
-{
-    /* Write packet to fifo */
-    if (write(tx_channel, &packet->length, packet->length + sizeof(uint32_t) + sizeof(uint16_t)) < 0)
-    {
-        printf("Failed to write frame\r\n");
-    }
-    csp_buffer_free(packet);
-    return CSP_ERR_NONE;
-}
+    csp_buffer_init(20, 256);
 
-void * fifo_rx(void * parameters)
-{
-    csp_packet_t *buf = csp_buffer_get(BUF_SIZE);
-    /* Wait for packet on fifo */
-    while (read(rx_channel, &buf->length, BUF_SIZE) > 0)
-    {
-        csp_new_packet(buf, &csp_if_fifo, NULL);
-        buf = csp_buffer_get(BUF_SIZE);
-    }
+    /* Init CSP with address MY_ADDRESS */
+    csp_init(2);
 
-    return NULL;
-}
+    /* Start router task with 500 word stack, OS task priority 1 */
+    csp_route_start_task(500, 1);
 
-bool init()
-{
+    csp_route_set(TEST_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
 
-    int my_address = 2;
-    char *rx_channel_name, *tx_channel_name;
-
-    tx_channel_name = "/home/vagrant/client_to_server";
-    rx_channel_name = "/home/vagrant/server_to_client";
-
-
-    /* Init CSP and CSP buffer system */
-    if (csp_init(my_address) != CSP_ERR_NONE || csp_buffer_init(10, 300) != CSP_ERR_NONE)
-    {
-        printf("Failed to init CSP\r\n");
-        return false;
-    }
-
-    tx_channel = open(tx_channel_name, O_RDWR);
-    if (tx_channel < 0)
-    {
-        printf("Failed to open TX channel\r\n");
-        return false;
-    }
-
-    rx_channel = open(rx_channel_name, O_RDWR);
-    if (rx_channel < 0)
-    {
-        printf("Failed to open RX channel\r\n");
-        return false;
-    }
-
-    /* Start fifo RX task */
-    pthread_create(&rx_thread, NULL, fifo_rx, NULL);
-
-    /* Set default route and start router */
-    csp_route_set(CSP_DEFAULT_ROUTE, &csp_if_fifo, CSP_NODE_MAC);
-    csp_route_start_task(0, 0);
     return true;
+
 }
 
-//Where the magic happens - Bascially ignore everything above this line - The initialization is going to change a lot.
 
-bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
+bool send_packet(csp_packet_t* packet)
 {
-    if (!conn || !csp_send(conn, packet, 1000))
-    {
-        return false;
+    csp_conn_t *conn;
+
+    if (packet) {
+        /*conn = csp_connect(CSP_PRIO_NORM, CLI_CLIENT_ADDRESS, CSP_PORT, 1000, CSP_O_NONE);*/
+        socket_init(&socket_driver, CSP_SOCKET_CLIENT, TEST_SOCKET_PORT);
+        csp_socket_init(&csp_socket_if, &socket_driver);
+
+        conn = csp_connect(CSP_PRIO_NORM, TEST_ADDRESS, TEST_EXT_PORT, 1000, CSP_O_NONE);
+        printf("Sending: \n");
+        if (!conn) {
+            csp_buffer_free(packet);
+            printf("conn err\r\n");
+            return false;
+        }
+
+        if (!csp_send(conn, packet, 1000))
+        {
+            csp_buffer_free(packet);
+            printf("send err\r\n");
+            return false;
+        }
+        csp_close(conn);
+        /*csp_socket_close(&csp_socket_if, &socket_driver);*/
+        printf("sent!\r\n");
     }
+
+    csp_socket_close(&csp_socket_if, &socket_driver);
     return true;
 }
 
@@ -133,18 +106,18 @@ bool send_msg(uint8_t* data, size_t length)
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-    if (packet = csp_buffer_get(length)) 
+    if (packet = csp_buffer_get(length))
     {
         memcpy(packet->data, data, length);
         packet->length = length;
 
-        conn = csp_connect(CSP_PRIO_NORM, server_address, PORT, 1000, CSP_O_NONE);
-        if (!send_packet(conn, packet))
+        /*conn = csp_connect(CSP_PRIO_NORM, server_address, PORT, 1000, CSP_O_NONE);*/
+        if (!send_packet(packet))
         {
             return false;
         }
-        csp_buffer_free(packet);
-        csp_close(conn);
+        /*csp_buffer_free(packet);*/
+        /*csp_close(conn);*/
         return true;
     }
     else
@@ -246,7 +219,7 @@ void get_response()
     csp_packet_t *packet;
 
     sock = csp_socket(CSP_SO_NONE);
-    csp_bind(sock, PORT);
+    csp_bind(sock, TEST_EXT_PORT);
     csp_listen(sock, 5);
 
     while (conn = csp_accept(sock, 1000))
@@ -259,6 +232,7 @@ void get_response()
                 parse_response(packet);
             }
             csp_buffer_free(packet);
+            csp_close_socket(sock);
             csp_close(conn);
             return;
         }
@@ -275,8 +249,14 @@ int main(int argc, char **argv)
 
     CborEncoder encoder, container;
     CborError err;
-
-    if (!init())
+    csp_debug_set_level(CSP_ERROR, true);
+    csp_debug_set_level(CSP_WARN, true);
+    csp_debug_set_level(CSP_INFO, true);
+    csp_debug_set_level(CSP_BUFFER, true);
+    csp_debug_set_level(CSP_PACKET, true);
+    csp_debug_set_level(CSP_PROTOCOL, true);
+    csp_debug_set_level(CSP_LOCK, true);
+    if (!init(ADDRESS))
     {
         fprintf(stderr, "There was an error initializing the csp configuration\n");
         return 1;
@@ -307,8 +287,8 @@ int main(int argc, char **argv)
     send_msg(data, BUF_SIZE);
     get_response();
 
-    close(rx_channel);
-    close(tx_channel);
+    /*close(rx_channel);*/
+    /*close(tx_channel);*/
 
     return 0;
 }

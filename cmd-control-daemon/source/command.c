@@ -14,44 +14,17 @@
 * limitations under the License.
 */
 
-#include "cmd-control-daemon/daemon.h"
 #include <csp/csp.h>
 #include <dlfcn.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+
+#include "cmd-control-daemon/daemon.h"
 #include "tinycbor/cbor.h"
 
 #define CBOR_BUF_SIZE YOTTA_CFG_CSP_MTU
-#define SO_PATH_LENGTH 75
-
-
-bool get_command(csp_socket_t* sock, char * command)
-{
-    csp_conn_t *conn;
-    csp_packet_t *packet;
-
-    while (1)
-    {
-        conn = csp_accept(sock, 1000);
-        if (conn)
-        {
-            packet = csp_read(conn, 0);
-            if (packet)
-            {
-                if (!parse_command_cbor(packet, command))
-                {
-                    fprintf(stderr, "There was an error parsing the command packet\n");
-                    return false;
-                }
-                csp_buffer_free(packet);
-            }
-            csp_close(conn);
-            return true;
-        }
-    }
-}
 
 
 bool parse_command_cbor(csp_packet_t * packet, char * command)

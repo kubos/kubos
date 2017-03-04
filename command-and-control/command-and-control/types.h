@@ -92,7 +92,7 @@ typedef struct
 {
     uint8_t return_code;
     double  execution_time;
-    char    output[RES_PACKET_STDOUT_LEN]; //TODO: Figure out optimal size
+    char    output[RES_PACKET_STDOUT_LEN];
 } CNCResponsePacket;
 
 
