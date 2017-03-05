@@ -33,13 +33,13 @@ csp_socket_t * __wrap_csp_socket(uint32_t opts)
     return mock_type(csp_socket_t *);
 }
 
-int __wrap_csp_bind(csp_socket_t *socket, uint8_t port)
+int __wrap_csp_bind(csp_socket_t * socket, uint8_t port)
 {
     check_expected(socket);
     return mock_type(int);
 }
 
-int __wrap_csp_listen(csp_socket_t *socket, size_t conn_queue_length)
+int __wrap_csp_listen(csp_socket_t * socket, size_t conn_queue_length)
 {
     check_expected(socket);
     return mock_type(int);
@@ -50,7 +50,7 @@ csp_conn_t * __wrap_csp_connect(uint8_t prio, uint8_t dest, uint8_t dport, uint3
     return mock_type(csp_conn_t *);
 }
 
-int __wrap_csp_send(csp_conn_t *conn, csp_packet_t *packet, uint32_t timeout)
+int __wrap_csp_send(csp_conn_t * conn, csp_packet_t * packet, uint32_t timeout)
 {
     int ret;
     check_expected(conn);
@@ -70,7 +70,7 @@ void * __wrap_csp_buffer_get(size_t size)
 
 void __wrap_csp_buffer_free(void * buffer)
 {
-    if(buffer != NULL)
+    if (buffer != NULL)
     {
         return test_free(buffer);
     }

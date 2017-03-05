@@ -26,8 +26,8 @@
 
 #include <csp/csp.h>
 #include <csp/interfaces/csp_if_socket.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 /**
  * PubSub connection structure.
@@ -79,7 +79,7 @@ bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t
  * @param buffer_size expected size of buffer
  * @param port expected port for data to come in on
  * @return bool true if successful, otherwise false
- */ 
+ */
 bool kprv_publisher_read(const pubsub_conn * conn, void * buffer, int buffer_size, uint8_t port);
 
 /**
@@ -89,7 +89,7 @@ bool kprv_publisher_read(const pubsub_conn * conn, void * buffer, int buffer_siz
  * @param buffer_size expected size of buffer
  * @param port expected port for data to come in on
  * @return bool true if successful, otherwise false
- */ 
+ */
 bool kprv_subscriber_read(const pubsub_conn * conn, void * buffer, int buffer_size, uint8_t port);
 
 /**

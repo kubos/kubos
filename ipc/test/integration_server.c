@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-#include <ipc/pubsub.h>
+#include <cmocka.h>
 #include <csp/csp.h>
 #include <csp/drivers/socket.h>
 #include <csp/interfaces/csp_if_socket.h>
+#include <ipc/csp.h>
+#include <ipc/pubsub.h>
 #include <tinycbor/cbor.h>
-#include <cmocka.h>
 
 #define TEST_INT_PORT 10
 #define TEST_EXT_PORT 20
@@ -34,7 +35,8 @@ CSP_DEFINE_TASK(client_task)
 {
     pubsub_conn conn;
 
-    while (!kprv_subscriber_socket_connect(&conn, TEST_ADDRESS, TEST_EXT_PORT)) {
+    while (!kprv_subscriber_socket_connect(&conn, TEST_ADDRESS, TEST_EXT_PORT))
+    {
         csp_sleep_ms(10);
     }
 
@@ -44,7 +46,6 @@ CSP_DEFINE_TASK(client_task)
 
     return CSP_TASK_RETURN;
 }
-
 
 static void test_socket_server(void ** arg)
 {
@@ -56,15 +57,9 @@ static void test_socket_server(void ** arg)
     };
     char buffer[10];
 
-    csp_buffer_init(20, 256);
+    kubos_csp_init(TEST_ADDRESS);
 
-    /* Init CSP with address MY_ADDRESS */
-    csp_init(TEST_ADDRESS);
-
-    /* Start router task with 500 word stack, OS task priority 1 */
-    csp_route_start_task(0, 0);
-
-    csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);   
+    csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);
 
     ext_socket = kprv_server_setup(TEST_EXT_PORT, 20);
     assert_non_null(ext_socket);
@@ -81,13 +76,8 @@ static void test_socket_server(void ** arg)
 
     csp_thread_kill(client_task_handle);
 
-    csp_route_end_task();
-
-    csp_terminate();
-
-    csp_buffer_cleanup();
+    kubos_csp_terminate();
 }
-
 
 int main(void)
 {
