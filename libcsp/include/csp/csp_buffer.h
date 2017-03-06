@@ -43,6 +43,11 @@ extern "C" {
  */
 int csp_buffer_init(int count, int size);
 
+/** 
+ * Shutdown the buffer handling system and free all buffers.
+ */
+void csp_buffer_cleanup(void);
+
 /**
  * Get a reference to a free buffer. This function can only be called
  * from task context.

@@ -51,6 +51,8 @@ extern "C" {
  */
 int csp_init(uint8_t my_node_address);
 
+void csp_terminate(void);
+
 /** csp_set_address
  * Set the systems own address
  * @param addr The new address of the system
@@ -234,6 +236,12 @@ csp_conn_t *csp_connect(uint8_t prio, uint8_t dest, uint8_t dport, uint32_t time
  * @return CSP_ERR_NONE if connection was closed. Otherwise, an err code is returned.
  */
 int csp_close(csp_conn_t *conn);
+
+/**
+ * Closes a given socket and frees queue used.
+ * @param socket pointer to socket structure
+ */
+void csp_close_socket(csp_socket_t * socket);
 
 /**
  * @param conn pointer to connection structure
