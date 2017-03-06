@@ -67,7 +67,6 @@ Create or navigate to a Kubos SDK project.  The content of the project does not 
     
     $ kubos init -l fakeproj
     $ cd fakeproj
-    $ kubos build
 
 Set the target to the iOBC.
 
