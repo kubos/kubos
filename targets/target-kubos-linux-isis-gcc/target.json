@@ -30,6 +30,7 @@
       "arm": {}
     },
     "system": {
+      "destDir": "/home/usr/local/bin1",
       "password": "Kubos123"
     }
   },

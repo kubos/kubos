@@ -33,6 +33,7 @@ name=$(basename $1)
 is_upgrade=0
 
 password=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["password"]')
+dest_dir=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["destDir"]')
 
 unamestr=`uname`
 
@@ -58,7 +59,7 @@ if [[ "$name" = *.itb ]]; then
     path="/upgrade"
     is_upgrade=1
 else if [[ "$name" != "$project" ]]; then
-    path="/home/usr/local/bin"
+    path="$destDir"
 else
     path="/home/usr/bin"
 fi
@@ -77,6 +78,7 @@ expect {
     "~ #" break
     timeout 5 goto end
 }
+send "mkdir $path"
 send "cd $path"
 send "rm $name"
 send "rz -bZ"
