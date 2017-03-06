@@ -58,8 +58,8 @@ fi
 if [[ "$name" = *.itb ]]; then
     path="/upgrade"
     is_upgrade=1
-else if [[ "$name" != "$project" ]]; then
-    path="$destDir"
+elif [[ "$name" != "$project" ]]; then
+    path="$dest_dir"
 else
     path="/home/usr/bin"
 fi
@@ -78,7 +78,7 @@ expect {
     "~ #" break
     timeout 5 goto end
 }
-send "mkdir $path"
+send "mkdir -p $path"
 send "cd $path"
 send "rm $name"
 send "rz -bZ"
