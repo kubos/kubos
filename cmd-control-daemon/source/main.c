@@ -34,18 +34,10 @@
 #define PORT        10
 #define BUF_SIZE    MTU
 
-#define ADDRESS            2
-#define SOCKET_PORT        5250
-#define CSP_PORT           10
-#define SERVER_ADDRESS     1
-#define BUF_SIZE           MTU
+#define SERVER_CSP_ADDRESS 1
+#define CSP_PORT           11
 #define CLI_CLIENT_ADDRESS 2
-#define CLI_CLIENT_ADDRESS 2
-#define TEST_INT_PORT 10
-#define TEST_EXT_PORT 11
-#define TEST_NUM_CON 5
-#define TEST_ADDRESS 2
-#define TEST_SOCKET_PORT 8189
+#define SOCKET_PORT        8189
 
 csp_iface_t csp_socket_if;
 csp_socket_handle_t socket_driver;
@@ -61,12 +53,13 @@ bool init()
     csp_buffer_init(20, 256);
 
     /* Init CSP with address MY_ADDRESS */
-    csp_init(1);
+    csp_init(SERVER_CSP_ADDRESS);
 
     /* Start router task with 500 word stack, OS task priority 1 */
     csp_route_start_task(500, 1);
 
-    csp_route_set(TEST_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
+    csp_route_set(CLI_CLIENT_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
+    csp_socket_init(&csp_socket_if, &socket_driver);
 }
 
 
@@ -97,9 +90,7 @@ bool send_buffer(uint8_t * data, size_t data_len)
             memcpy(packet->data, data, data_len);
             packet->length = data_len;
 
-            csp_socket_init(&csp_socket_if, &socket_driver);
-            conn = csp_connect(CSP_PRIO_NORM, TEST_ADDRESS, TEST_EXT_PORT, 1000, CSP_O_NONE);
-            /*conn = csp_connect(CSP_PRIO_NORM, client_address, PORT, 1000, CSP_O_NONE);*/
+            conn = csp_connect(CSP_PRIO_NORM, CLI_CLIENT_ADDRESS, CSP_PORT, 1000, CSP_O_NONE);
             if (!send_packet(conn, packet))
             {
                 return false;
@@ -126,12 +117,8 @@ bool get_command(csp_socket_t* sock, char * command)
     csp_conn_t *conn;
     csp_packet_t *packet;
     printf("GETTING COMMAND\n");
-    socket_init(&socket_driver, CSP_SOCKET_SERVER, TEST_SOCKET_PORT);
+    socket_init(&socket_driver, CSP_SOCKET_SERVER, SOCKET_PORT);
     csp_socket_init(&csp_socket_if, &socket_driver);
-
-    /*packet = csp_read(conn, 6000);*/
-
-    /*csp_buffer_free(packet);*/
 
     while (1)
     {
@@ -158,14 +145,6 @@ bool get_command(csp_socket_t* sock, char * command)
 
 int main(int argc, char **argv)
 {
-    csp_debug_set_level(CSP_ERROR, true);
-    csp_debug_set_level(CSP_WARN, true);
-    csp_debug_set_level(CSP_INFO, true);
-    csp_debug_set_level(CSP_BUFFER, true);
-    csp_debug_set_level(CSP_PACKET, true);
-    csp_debug_set_level(CSP_PROTOCOL, true);
-    csp_debug_set_level(CSP_LOCK, true);
-
     int my_address = 1;
     csp_socket_t *sock;
     char command_str[CMD_STR_LEN];
@@ -181,7 +160,7 @@ int main(int argc, char **argv)
 
     init(my_address);
     sock = csp_socket(CSP_SO_NONE);
-    csp_bind(sock, TEST_EXT_PORT);
+    csp_bind(sock, CSP_PORT);
     csp_listen(sock, 5);
 
     while (!exit)
@@ -206,10 +185,6 @@ int main(int argc, char **argv)
         }
     }
 
-    /*close(rx_channel);*/
-    /*close(tx_channel);*/
-
     return 0;
-
 }
 
