@@ -64,13 +64,23 @@ this document will be upgraded with the new procedure.
 Load the package into a shared folder accessible by your Kubos SDK VM.
 
 Create or navigate to a Kubos SDK project.  The content of the project does not matter; it will only be used to flash the package correctly onto the target.
+    
+    $ kubos init -l fakeproj
+    $ cd fakeproj
+    $ kubos build
 
-Set the target with `kubos target kubos-linux-isis-gcc`
+Set the target to the iOBC.
+
+    $ kubos target kubos-linux-isis-gcc
+    
+Build the project. This does not need to complete successfully. The build process just brings in some files and settings that are required in order to flash files to the board.
+
+    $ kubos build
 
 Use the kubos flash command to load the package onto your board. Note: You might need to update your config.json file with the appropriate login information to access your board.  See the 'Updating Credentials' section of [this document](docs/user-app-on-iobc.md)
     for more information. 
     
-    kubos flash /home/vagrant/shared/kpack-{version}.itb
+    $ kubos flash /home/vagrant/shared/kpack-{version}.itb
     
 Wait for the transfer to complete. This can take roughly 30 minutes. The transfer rate via serial connection is slow because a) the upgrade packages are large and b) it runs some CRC functions during
 transfer to ensure that the package does not become corrupted. You should see a progress bar indicating the time remaining for the transfer.
