@@ -78,8 +78,8 @@ timeout 3600
 send "mkdir -p $path"
 send "cd $path"
 send "rm $name"
-send "rz -bZ"
-! sz -b --zmodem $1
+send "rz -w 8192"
+! sz -w 8192 $1
 if $is_upgrade = 1 send "fw_setenv kubos_updatefile $name"
 send "exit"
 end:
