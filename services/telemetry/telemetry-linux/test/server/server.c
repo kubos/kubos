@@ -63,7 +63,7 @@ static void test_server_create_subscriber(void ** arg)
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
 
-    destroy_subscriber(&sub);
+    kprv_delete_subscribers();
 }
 
 static void test_server_destroy_subscriber(void ** arg)
@@ -83,6 +83,7 @@ static void test_server_destroy_subscriber(void ** arg)
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
+    
     destroy_subscriber(&sub);
 
     assert_null(sub);
@@ -117,7 +118,7 @@ static void test_server_publish_packet(void ** arg)
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
-    destroy_subscriber(&sub);
+    kprv_delete_subscribers();
 }
 
 static void test_server_publish_multiple_packets(void ** arg)
@@ -157,7 +158,7 @@ static void test_server_publish_multiple_packets(void ** arg)
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
-    destroy_subscriber(&sub);
+    kprv_delete_subscribers();
 }
 
 static void test_server_get_subscribe_msg(void ** arg)
@@ -182,7 +183,7 @@ static void test_server_get_subscribe_msg(void ** arg)
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
-    destroy_subscriber(&sub);
+    kprv_delete_subscribers();
 }
 
 static void test_server_get_unsubscribe_msg(void ** arg)
@@ -213,7 +214,7 @@ static void test_server_get_unsubscribe_msg(void ** arg)
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
-    destroy_subscriber(&sub);
+    kprv_delete_subscribers();
 }
 
 static void test_server_get_disconnect_msg(void ** arg)
@@ -240,7 +241,7 @@ static void test_server_get_disconnect_msg(void ** arg)
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
-    destroy_subscriber(&sub);
+    kprv_delete_subscribers();
 }
 
 static void test_server_get_packet_msg(void ** arg)
@@ -266,7 +267,7 @@ static void test_server_get_packet_msg(void ** arg)
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
-    destroy_subscriber(&sub);
+    kprv_delete_subscribers();
 }
 
 static void test_server_get_bad_msg(void ** arg)
@@ -286,7 +287,7 @@ static void test_server_get_bad_msg(void ** arg)
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
-    destroy_subscriber(&sub);
+    kprv_delete_subscribers();
 }
 
 int main(void)

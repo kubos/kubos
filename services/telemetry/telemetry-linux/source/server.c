@@ -245,21 +245,21 @@ bool telemetry_process_message(subscriber_list_item * sub, void * buffer, int bu
             case MESSAGE_TYPE_PACKET:
                 if (telemetry_parse_packet_msg(buffer, buffer_size, &packet))
                 {
-                    printf("got packet msg\r\n");
+                    printf("got packet msg %d\r\n", packet.source.topic_id);
                     ret = kprv_publish_packet(packet);
                 }
                 break;
             case MESSAGE_TYPE_SUBSCRIBE:
                 if (telemetry_parse_subscribe_msg(buffer, buffer_size, &topic_id))
                 {
-                    printf("got subscribe msg\r\n");
+                    printf("got subscribe msg %d\r\n", topic_id);
                     ret = kprv_add_topic(sub, topic_id);
                 }
                 break;
             case MESSAGE_TYPE_UNSUBSCRIBE:
                 if (telemetry_parse_unsubscribe_msg(buffer, buffer_size, &topic_id))
                 {
-                    printf("got unsubscriber msg\r\n");
+                    printf("got unsubscriber msg %d\r\n", topic_id);
                     ret = kprv_remove_topic(sub, topic_id);
                 }
                 break;
@@ -294,8 +294,6 @@ bool client_rx_work(subscriber_list_item * sub)
     {
         ret = telemetry_process_message(sub, (void*)msg, msg_size);
     }
-
-    
 
     return ret;
 }
@@ -358,22 +356,6 @@ CSP_DEFINE_TASK(telemetry_rx_task)
         }
     }
 
-    
-    // if (kprv_server_accept(sock, &conn))
-    // {
-    //     printf("Got csp socket - spawning thread\r\n");
-    //     subscriber_list_item * sub = create_subscriber(conn);
-    //     if (sub != NULL)
-    //     {
-    //         LL_APPEND(subscribers, sub);
-    //         csp_thread_create(client_rx_task, NULL, 1000, sub, 0, &(sub->rx_thread));
-    //     }
-    // }
-
-    // while (1) {
-    //     csp_sleep_ms(100);
-    // }
-
     return CSP_TASK_RETURN;
 }
 
@@ -389,6 +371,4 @@ void telemetry_server_cleanup(void)
     csp_thread_kill(telem_rx_handle);
 
     kprv_delete_subscribers();
-
-    // telemetry_csp_terminate();
 }

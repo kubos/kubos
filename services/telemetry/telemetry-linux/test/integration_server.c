@@ -15,6 +15,7 @@
  */
 
 #include <ipc/pubsub.h>
+#include <ipc/csp.h>
 #include <csp/csp.h>
 #include <csp/drivers/socket.h>
 #include <csp/interfaces/csp_if_socket.h>
@@ -62,7 +63,7 @@ static void test_server(void ** arg)
     uint8_t message[256];
     uint16_t msg_size;
 
-    telemetry_csp_init();
+    kubos_csp_init(TEST_ADDRESS);
 
     csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);
 
@@ -79,11 +80,11 @@ static void test_server(void ** arg)
 
     assert_true(telemetry_process_message(sub, (void*)message, msg_size));
 
-    destroy_subscriber(&sub);
-
     telemetry_server_cleanup();
 
     csp_thread_kill(client_task_handle);
+
+    kubos_csp_terminate();
 }
 
 

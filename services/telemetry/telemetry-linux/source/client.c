@@ -18,6 +18,8 @@
 
 #include <csp/arch/csp_queue.h>
 #include <csp/arch/csp_semaphore.h>
+#include <csp/csp.h>
+
 #include <kubos-core/utlist.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,42 +29,6 @@
 #include <csp/interfaces/csp_if_socket.h>
 #include <csp/drivers/socket.h>
 
-void telemetry_client_init(void)
-{
-    csp_buffer_init(20, 256);
-
-    /* Init CSP with client address */
-    csp_init(TELEMETRY_CSP_CLIENT_ADDRESS);
-
-    csp_route_start_task(500, 1);
-
-    csp_debug_set_level(CSP_ERROR, true);
-    csp_debug_set_level(CSP_WARN, true);
-    csp_debug_set_level(CSP_INFO, true);
-    csp_debug_set_level(CSP_BUFFER, true);
-    csp_debug_set_level(CSP_PACKET, true);
-    csp_debug_set_level(CSP_PROTOCOL, true);
-    csp_debug_set_level(CSP_LOCK, true);
-}
-
-void telemetry_client_shutdown(void)
-{
-    csp_route_end_task();
-}
-
-// bool telemetry_is_subscribed(const pubsub_conn * client_conn, uint16_t topic_id)
-// {
-//     bool ret = false;
-//     if (client_conn != NULL)
-//     {
-//         subscriber_list_item * sub = kprv_get_subscriber(client_conn);
-//         if (sub != NULL)
-//         {
-//             ret = kprv_has_topic(sub, topic_id);
-//         }
-//     }
-//     return ret;
-// }
 
 bool telemetry_connect(pubsub_conn * conn)
 {

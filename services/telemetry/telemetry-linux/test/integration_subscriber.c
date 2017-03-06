@@ -15,6 +15,7 @@
  */
 
 #include <ipc/pubsub.h>
+#include <ipc/csp.h>
 #include <csp/csp.h>
 #include <csp/drivers/socket.h>
 #include <csp/interfaces/csp_if_socket.h>
@@ -76,7 +77,7 @@ CSP_DEFINE_TASK(server_task)
 
     kprv_subscriber_socket_close(&conn);
 
-    telemetry_server_cleanup();
+    // telemetry_server_cleanup();
 
     csp_thread_exit();
 }
@@ -85,7 +86,7 @@ static int setup(void ** arg)
 {
     test_running = true;
     
-    telemetry_csp_init();
+    kubos_csp_init(TEST_ADDRESS);
 
     csp_thread_create(server_task, "SERVER", 1024, NULL, 0, &server_task_handle);
 
@@ -101,7 +102,7 @@ static int teardown(void ** arg)
 
     csp_thread_kill(server_task_handle);
 
-    telemetry_csp_terminate();
+    kubos_csp_terminate();
 
     return 0;
 }
