@@ -122,9 +122,21 @@ bool run_command(CNCWrapper * wrapper, void ** handle, lib_function func)
     freopen("/dev/null", "a", stdout);
     setbuf(stdout, wrapper->response_packet->output);
 
+    //This block is not good. This is generating a Char** from a Char[][]
+    //After discussion today it seems all parsing should move to the client
+    //side. Doing so would eliminate this and all parsing from the service
+    //side of the C&C framework. In the next release all parsing will be moved
+    //into the client.
+    char *argv[CMD_PACKET_NUM_ARGS];
+    int i = 0;
+    for (; i < wrapper->command_packet->arg_count; i++)
+    {
+        argv[i] = wrapper->command_packet->args[i];
+    }
+
     //Measure the clock before and after the function has run
     clock_t start_time = clock();
-    wrapper->response_packet->return_code = func(wrapper->command_packet->arg_count, wrapper->command_packet->args);
+    wrapper->response_packet->return_code = func(wrapper->command_packet->arg_count, (char**)argv);
     clock_t finish_time = clock();
 
     //Redirect stdout back to the terminal.
