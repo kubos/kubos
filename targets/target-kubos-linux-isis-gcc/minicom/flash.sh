@@ -16,7 +16,7 @@
 
 progress() {
     while sleep 1; do
-        line=$(tac flash.log | grep -m 1 "Bytes Sent")
+        line=$(cat flash.log | grep "Bytes Sent")
         printf "$line\r"
     done   
 }
