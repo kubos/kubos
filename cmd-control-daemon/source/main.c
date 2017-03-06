@@ -52,7 +52,6 @@ bool init()
 
     csp_buffer_init(20, 256);
 
-    /* Init CSP with address MY_ADDRESS */
     csp_init(SERVER_CSP_ADDRESS);
 
     /* Start router task with 500 word stack, OS task priority 1 */
@@ -75,9 +74,6 @@ bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
 
 bool send_buffer(uint8_t * data, size_t data_len)
 {
-    int my_address = 1, client_address = 2;
-    char *rx_channel_name, *tx_channel_name;
-
     csp_socket_t *sock;
     csp_conn_t *conn;
     csp_packet_t *packet;
