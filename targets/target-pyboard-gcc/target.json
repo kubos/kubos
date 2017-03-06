@@ -30,6 +30,7 @@
     "cortex-m4",
     "armv7-m"
   ],
+  "buildTarget": true,
   "config": {
     "hardware": {
       "externalClock": "12000000",
