@@ -54,7 +54,7 @@ of the [KubOS Linux on the ISIS iOBC](docs/kubos-linux-on-iobc.md) doc.
 
 The host computer should be connected to the board and the iOBC should be on and running KubOS Linux. 
 
-A Kubos SDK VM should be installed on your host computer and atleast one shared folder should be set up.  Installation instructions can be found [here](docs/sdk-installing.md).
+A Kubos SDK VM should be installed on your host computer and at least one shared folder should be set up.  Installation instructions can be found [here](docs/sdk-installing.md).
 
 ### Installation
 
