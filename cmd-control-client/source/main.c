@@ -48,7 +48,6 @@ bool init()
 
     csp_buffer_init(20, 256);
 
-    /* Init CSP with address MY_ADDRESS */
     csp_init(CLI_CLIENT_ADDRESS);
 
     /* Start router task with 500 word stack, OS task priority 1 */
@@ -69,17 +68,15 @@ bool send_packet(csp_packet_t* packet)
         csp_socket_init(&csp_socket_if, &socket_driver);
 
         conn = csp_connect(CSP_PRIO_NORM, SERVER_CSP_ADDRESS, CSP_PORT, 1000, CSP_O_NONE);
-        printf("Sending: \n");
+
         if (!conn) {
             csp_buffer_free(packet);
-            printf("conn err\r\n");
             return false;
         }
 
         if (!csp_send(conn, packet, 1000))
         {
             csp_buffer_free(packet);
-            printf("send err\r\n");
             return false;
         }
         csp_close(conn);
@@ -90,7 +87,6 @@ bool send_packet(csp_packet_t* packet)
 
 bool send_msg(uint8_t* data, size_t length)
 {
-    int server_address = 1;
     csp_conn_t *conn;
     csp_packet_t *packet;
 

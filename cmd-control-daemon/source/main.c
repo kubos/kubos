@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2017 Kubos Corporation
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2017 Kubos Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <argp.h>
 #include <csp/csp.h>
@@ -82,24 +82,21 @@ bool send_buffer(uint8_t * data, size_t data_len)
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-    while (1)
+    if(packet = csp_buffer_get(BUF_SIZE))
     {
-        packet = csp_buffer_get(BUF_SIZE);
-        if (packet)
-        {
-            memcpy(packet->data, data, data_len);
-            packet->length = data_len;
+        memcpy(packet->data, data, data_len);
+        packet->length = data_len;
 
-            conn = csp_connect(CSP_PRIO_NORM, CLI_CLIENT_ADDRESS, CSP_PORT, 1000, CSP_O_NONE);
-            if (!send_packet(conn, packet))
-            {
-                return false;
-            }
-            csp_buffer_free(packet);
-            csp_close(conn);
-            return true;
+        conn = csp_connect(CSP_PRIO_NORM, CLI_CLIENT_ADDRESS, CSP_PORT, 1000, CSP_O_NONE);
+        if (!send_packet(conn, packet))
+        {
+            return false;
         }
+        csp_buffer_free(packet);
+        csp_close(conn);
+        return true;
     }
+    return false;
 }
 
 
@@ -116,7 +113,6 @@ bool get_command(csp_socket_t* sock, char * command)
 {
     csp_conn_t *conn;
     csp_packet_t *packet;
-    printf("GETTING COMMAND\n");
     socket_init(&socket_driver, CSP_SOCKET_SERVER, SOCKET_PORT);
     csp_socket_init(&csp_socket_if, &socket_driver);
 
