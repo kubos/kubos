@@ -57,8 +57,18 @@ csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections);
  */
 bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn);
 
+/**
+ * Attempts to accept a subscriber connection over a tcp socket.
+ * @param socket pointer to csp socket handle.
+ * @param conn pointer to pubsub_conn where connection info will be stored
+ * @return bool true if successful, otherwise false
+ */
 bool kprv_server_socket_accept(csp_socket_t * socket, pubsub_conn * conn);
 
+/**
+ * Performs shutdown and cleanup of tcp socket based connections.
+ * @param conn pointer to pubsub_conn where connection info is stored
+ */
 void kprv_subscriber_socket_close(pubsub_conn * conn);
 
 /**
@@ -70,6 +80,13 @@ void kprv_subscriber_socket_close(pubsub_conn * conn);
  */
 bool kprv_subscriber_connect(pubsub_conn * conn, uint8_t address, uint8_t port);
 
+/**
+ * Used by a client to connect to a server using a tcp socket.
+ * @param conn pointer to pubsub_conn where connection info will be stored
+ * @param address address of server
+ * @param port port of server
+ * @return bool true if successful, otherwise false
+ */
 bool kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t port);
 
 /**
