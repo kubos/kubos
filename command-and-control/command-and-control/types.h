@@ -56,6 +56,13 @@
 #define CMD_PACKET_ARG_LEN        DEFAULT_STR_LEN
 #endif
 
+#ifdef YOTTA_CFG_CNC_CMD_PACKET_NUM_ARGS
+#define CMD_PACKET_NUM_ARGS        YOTTA_CFG_CNC_CMD_PACKET_ARG_LEN
+#else
+#define CMD_PACKET_NUM_ARGS        5
+#endif
+
+
 //The size of all the members of the command packet, except the output field
 //The packet must fit into the CSP MTU or bad things will happen
 #define CMD_PACKET_MEMBER_SIZE sizeof(int) + sizeof(CNCAction) + CMD_PACKET_CMD_NAME_LEN
@@ -84,7 +91,7 @@ typedef struct arguments
     int arg_count;
     CNCAction action;
     char cmd_name[CMD_PACKET_CMD_NAME_LEN];
-    char * args[CMD_PACKET_ARG_LEN];
+    char args[CMD_PACKET_NUM_ARGS][CMD_PACKET_ARG_LEN];
 } CNCCommandPacket;
 
 

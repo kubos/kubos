@@ -142,7 +142,7 @@ bool run_command(CNCWrapper * wrapper, void ** handle, lib_function func)
 }
 
 
-bool process_and_run_command(CNCWrapper * wrapper)
+bool load_and_run_command(CNCWrapper * wrapper)
 {
     lib_function func = NULL;
     void * handle;

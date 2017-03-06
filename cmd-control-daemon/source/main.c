@@ -109,8 +109,15 @@ bool get_command(csp_socket_t* sock, char * command)
 {
     csp_conn_t *conn;
     csp_packet_t *packet;
-    socket_init(&socket_driver, CSP_SOCKET_SERVER, SOCKET_PORT);
-    csp_socket_init(&csp_socket_if, &socket_driver);
+    if (socket_init(&socket_driver, CSP_SOCKET_SERVER, SOCKET_PORT) != CSP_ERR_NONE)
+    {
+        return false;
+    }
+
+    if (csp_socket_init(&csp_socket_if, &socket_driver) != CSP_ERR_NONE)
+    {
+        return false;
+    }
 
     while (1)
     {
@@ -170,7 +177,7 @@ int main(int argc, char **argv)
             continue;
         }
 
-        if(!process_and_run_command(&wrapper))
+        if(!load_and_run_command(&wrapper))
         {
             //Do some error handling
             continue;

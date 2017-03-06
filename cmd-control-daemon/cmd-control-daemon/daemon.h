@@ -34,7 +34,7 @@ bool parse (char * args, CNCWrapper * my_arguments);
 
 bool parse_command_cbor(csp_packet_t * packet, char * command);
 
-bool process_and_run_command(CNCWrapper * wrapper);
+bool load_and_run_command(CNCWrapper * wrapper);
 
 bool send_buffer(uint8_t * data, size_t data_len);
 
