@@ -10,6 +10,7 @@
     "dependencies":{
         "csp":"kubostech/libcsp#~1.5.0",
         "command-and-control":"kubostech/command-and-control",
+        "ipc":"kubostech/ipc",
         "tinycbor": "kubostech/tinycbor"
     },
     "description":"Command line client for interfacing with the Kubos command and control daemon."

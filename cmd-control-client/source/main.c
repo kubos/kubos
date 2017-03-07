@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include "command-and-control/types.h"
+#include <ipc/csp.h>
 #include "tinycbor/cbor.h"
 
 #define BUF_SIZE           MTU
@@ -43,15 +44,10 @@ csp_socket_handle_t socket_driver;
 
 bool init()
 {
-    csp_conn_t * conn = NULL;
-    csp_socket_handle_t socket_driver;
-
-    csp_buffer_init(20, 256);
-
-    csp_init(CLI_CLIENT_ADDRESS);
-
-    /* Start router task with 500 word stack, OS task priority 1 */
-    csp_route_start_task(500, 1);
+    if (!kubos_csp_init(CLI_CLIENT_ADDRESS))
+    {
+        return false;
+    }
 
     csp_route_set(SERVER_CSP_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
 

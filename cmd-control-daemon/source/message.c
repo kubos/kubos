@@ -21,6 +21,11 @@
 
 bool send_result(CNCWrapper * wrapper)
 {
+    if (wrapper == NULL)
+    {
+        return false;
+    }
+
     if (wrapper->err) //Thinking of changing the err flag to a state enum or similar multi-state member type
     {
         start_encode_response(RESPONSE_TYPE_PROCESSING_ERROR, wrapper);
@@ -37,6 +42,11 @@ bool start_encode_response(int message_type, CNCWrapper * wrapper)
     CborEncoder encoder, container;
     CborError err;
     uint8_t data[MTU] = {0};
+
+    if (wrapper == NULL)
+    {
+        return false;
+    }
 
     cbor_encoder_init(&encoder, data, MTU, 0);
     err = cbor_encoder_create_map(&encoder, &container, 4); //TODO: Dynamically assign map size
@@ -64,6 +74,12 @@ bool start_encode_response(int message_type, CNCWrapper * wrapper)
 bool encode_response(uint8_t * data, CNCWrapper * wrapper, CborEncoder * encoder, CborEncoder * container)
 {
     CborError err;
+
+    if(data == NULL || wrapper == NULL)
+    {
+        return false;
+    }
+
     err = cbor_encode_text_stringz(container, "RETURN_CODE");
     if (err || cbor_encode_simple_value(container, wrapper->response_packet->return_code))
     {
@@ -89,6 +105,12 @@ bool encode_response(uint8_t * data, CNCWrapper * wrapper, CborEncoder * encoder
 bool encode_processing_error(uint8_t * data, CNCWrapper * result, CborEncoder * encoder, CborEncoder * container)
 {
     CborError err;
+
+    if (data == NULL || result == NULL)
+    {
+        return false;
+    }
+
     err = cbor_encode_text_stringz(container, "ERROR_MSG");
     if (err || cbor_encode_text_stringz(container, result->output))
     {
@@ -101,6 +123,11 @@ bool encode_processing_error(uint8_t * data, CNCWrapper * result, CborEncoder * 
 
 bool finish_encode_response_and_send(uint8_t * data, CborEncoder *encoder, CborEncoder * container)
 {
+    if (data == NULL)
+    {
+        return false;
+    }
+
     cbor_encoder_close_container(encoder, container);
     size_t data_len = cbor_encoder_get_buffer_size(encoder, data);
     return send_buffer(data, data_len);

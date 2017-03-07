@@ -29,6 +29,7 @@
 
 #include "command-and-control/types.h"
 #include "cmd-control-daemon/daemon.h"
+#include <ipc/csp.h>
 #include "tinycbor/cbor.h"
 
 #define PORT        10
@@ -44,18 +45,10 @@ csp_socket_handle_t socket_driver;
 
 bool init()
 {
-    csp_socket_t * socket = NULL;
-    csp_conn_t * conn = NULL;
-    csp_socket_t * ext_socket = NULL;
-    csp_packet_t * packet = NULL;
-    char buffer[100];
-
-    csp_buffer_init(20, 256);
-
-    csp_init(SERVER_CSP_ADDRESS);
-
-    /* Start router task with 500 word stack, OS task priority 1 */
-    csp_route_start_task(500, 1);
+    if(!kubos_csp_init(SERVER_CSP_ADDRESS))
+    {
+        return false;
+    }
 
     csp_route_set(CLI_CLIENT_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
     csp_socket_init(&csp_socket_if, &socket_driver);
@@ -64,10 +57,16 @@ bool init()
 
 bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
-    if (!conn || !csp_send(conn, packet, 1000))
+    if (conn == NULL || packet == NULL)
     {
         return false;
     }
+
+    if (!csp_send(conn, packet, 1000))
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -77,6 +76,11 @@ bool send_buffer(uint8_t * data, size_t data_len)
     csp_socket_t *sock;
     csp_conn_t *conn;
     csp_packet_t *packet;
+
+    if (data == NULL)
+    {
+        return false;
+    }
 
     if(packet = csp_buffer_get(BUF_SIZE))
     {
@@ -111,6 +115,12 @@ bool get_command(csp_socket_t* sock, char * command)
 {
     csp_conn_t *conn;
     csp_packet_t *packet;
+
+    if (sock == NULL || command == NULL)
+    {
+        return false;
+    }
+
     if (socket_init(&socket_driver, CSP_SOCKET_SERVER, SOCKET_PORT) != CSP_ERR_NONE)
     {
         return false;
