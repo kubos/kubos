@@ -17,12 +17,10 @@
 #include <stdio.h>
 
 #define PING_HASH   6385583923
-#define NUM_ARGS    5   //In the future these values will be inherited from the command
-#define ARG_LEN     20  //and control framework configuration. With this build config that's not simple to do.
 
 int parse_and_run(char * arg);
 
-int execute(int argc, char argv[NUM_ARGS][ARG_LEN])
+int execute(int argc, char **argv)
 {
     switch (argc)
     {
