@@ -130,6 +130,8 @@ bool get_command(csp_socket_t* sock, char * command)
                 if (!parse_command_cbor(packet, command))
                 {
                     fprintf(stderr, "There was an error parsing the command packet\n");
+                    csp_buffer_free(packet);
+                    csp_close(conn);
                     return false;
                 }
                 csp_buffer_free(packet);
