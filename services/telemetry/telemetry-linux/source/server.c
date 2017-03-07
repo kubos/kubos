@@ -352,7 +352,6 @@ CSP_DEFINE_TASK(telemetry_rx_task)
         if (sub != NULL)
         {
             csp_thread_create(client_rx_task, NULL, 1000, sub, 0, &(sub->rx_thread));
-            LL_APPEND(subscribers, sub);
         }
     }
 
