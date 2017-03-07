@@ -1,5 +1,13 @@
 # Kubos Changelog
 
+## v0.2.1 - Mar 7 2017
+* [KUBOS-388](https://kubostech.atlassian.net/browse/KUBOS-388) Created initial Command & Control framework
+* [KUBOS-350](https://kubostech.atlassian.net/browse/KUBOS-350) Added support for inter-process communication between Kubos services
+* [KUBOS-313](https://kubostech.atlassian.net/browse/KUBOS-313) Updated Kubos SDK to allow flashing of non-application files to iOBC
+* [KUBOS-321](https://kubostech.atlassian.net/browse/KUBOS-321) Added ability to flash and install new KubOS Linux upgrade packages 
+* [KUBOS-360](https://kubostech.atlassian.net/browse/KUBOS-360) Added Kubos CLI integration testing
+* [KUBOS-363](https://kubostech.atlassian.net/browse/KUBOS-363) Fixed Kubos CLI error reporting
+
 ## v0.2 - Feb 3 2017
 * Created KubOS Linux
 * Major documentation updates
