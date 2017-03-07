@@ -16,8 +16,6 @@ manually copying the package into the upgrade partition.
 Once the board is rebooted, U-Boot will take the package and then install each component into the appropriate partition (kernel/rootfs). If installation completes successfully, then
 the board will be rebooted and then boot into the new version of KubOS Linux.
 
-Note: User files should not be impacted by upgrade installation as long as they remain under the /home directory. This directory maps to the userspace partition.
-
 The overall flow looks like this:
 
                                      +--------------------------+
@@ -44,6 +42,12 @@ The overall flow looks like this:
                                      |                          |
                                      +--------------------------+
 
+
+**Note**: 
+
+User files should not be impacted by upgrade installation as long as they remain under the /home directory. This directory maps to the userspace partition.
+
+However, some future releases may cause the Kubos libraries to undergo significant changes. In this case, backwards compatilibity is not guaranteed and user applications may need to be rebuilt.
 
 ## Upgrade Installation {#upgrade-installation}
 
