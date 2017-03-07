@@ -132,6 +132,13 @@ int csp_init(unsigned char address) {
 
 }
 
+
+void csp_terminate() {
+    csp_qfifo_terminate();
+    
+    csp_conn_terminate();
+}
+
 csp_socket_t * csp_socket(uint32_t opts) {
 	
 	/* Validate socket options */
