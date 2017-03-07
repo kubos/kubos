@@ -1,4 +1,7 @@
 # Command And Control
+[TOC]
+# Command And Control
+
 ## Architecture Overview {#command-and-control-overview}
 
 ```
@@ -38,13 +41,13 @@
 ```
 
 
-The command line client is a binary exposed on the KubOS Linux command line.
+The command line client is a binary exposed to the KubOS Linux command line.
 
-Commands entered into this client will be encoded into a CBOR (Concise Binary Object Representation)[http://cbor.io/] message format and packed into a CSP packet and sent to the command service.
+Commands entered into this client will be encoded into a CBOR [Concise Binary Object Representation](http://cbor.io/) message format and packed into a CSP packet and sent to the command service.
 
 Existing functionality in the Kubos platform will be exposed in groups in a series of libraries.
 
-The command service will first parse and look for an action argument, a group (library) name, and a set of optional arguments. These will be used as the following:
+The command service will first parse and look for an action argument, a group (library) name, and a set of optional arguments. These will be used as follows:
 
 * Action argument - The corresponding member function of the service interface that will be called (ie. exec, status, help, output).
 * Group name - The base name of the library containing the desired functionality (Core, Telemetry, CSP, HAL, IPC, etc.).
@@ -54,13 +57,13 @@ The command service will look to load a corresponding library from a fixed path 
 
 The appropriate function of the service interface will be called with the remaining arguments.
 
-Once the API call returns, a CBOR-encoded message containing the execution time, the return code and stdout will be returned to the client.
+Once the API call returns, a CBOR-encoded message containing the execution time, the return code and any stdout messages from the command will be returned to the client.
 
 
 ## Module Design {#module-design}
 
 
-Modules will need to implement to service interface and be compiled into a shared library in order to be compatible with this command and control system.
+Modules will need to implement the service interface and be compiled into a shared library in order to be compatible with this command and control system.
 
 These functions will need to accept and parse arguments and handle routing the arguments to the desired functionality in that library.
 
@@ -86,9 +89,9 @@ These functions will need to accept and parse arguments and handle routing the a
 
 Libraries exposed through the command and control framework will need to implement the Service Interface.
 
-Note: Currently on the stdout from the library execution is returned to the client after running a command.
+Note: Currently only the stdout from the library execution is returned to the client after running a command.
 
 Currently only the core library (core commands for the "core" command and control commands) is implemented. Future releases will have further examples of shared libraries.
 
-See the (core library)[<link to library code when #63 is merged>] for an example of a library following this format.
+See the [core library](<link to library code when #63 is merged>) for an example of a library following this format.
 
