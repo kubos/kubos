@@ -1,6 +1,6 @@
 # Command And Control
 [TOC]
-# Command And Control
+# Command And Control {#command-and-control}
 
 ## Architecture Overview {#command-and-control-overview}
 
