@@ -14,6 +14,10 @@ The `kubos` command is always run with a subcommand in order to do something, `k
 
 [debug](#kubos-debug)               Attach a debugger to the current target.  Requires target support.
 
+[flash](#kubos-flash)               Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.
+
+[flash](#kubos-flash-linux) (KubOS Linux) Load files onto target.
+
 [init](#kubos-init)                Create a new module.
 
 [licenses](#kubos-licenses)            List the licenses of the current module and its dependencies.
@@ -23,8 +27,6 @@ The `kubos` command is always run with a subcommand in order to do something, `k
 [link-target](#kubos-link-target)         Symlink a target
 
 [list](#kubos-list)                List the dependencies of the current module, or the inherited targets of the current target.
-
-[flash](#kubos-flash)               Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.
 
 [target](#kubos-target)              Set or display the target device.
 
@@ -180,6 +182,28 @@ Flash the build of the current target to the target board.
 
 Note: This requires target support.
 
+## kubos flash (KubOS Linux) {#kubos-flash-linux}
+Synonyms: `kubos start`
+
+### Synopsis
+
+        $ kubos flash [file]
+
+### Description
+Flash a file to the target board.
+
+If the name of the file matches the name of the application, as specified in the module.json file, then the file is assumed to be the application binary and
+will be loaded into /home/usr/bin on the target board.
+
+If the name of the file ends in *.itb, the file is a KubOS Linux upgrade package and will be loaded into the upgrade partition of the target board. An internal
+variable will be set so that the upgrade package will be installed during the next reboot of the target board.
+
+All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/usr/local/bin.
+
+### Arguments
+* `file` File to flash.
+
+Note: This requires target support.
 
 ## kubos update {#kubos-update}
 
