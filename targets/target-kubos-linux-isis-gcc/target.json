@@ -30,6 +30,8 @@
       "arm": {}
     },
     "system": {
+      "initAtBoot": true,
+      "runLevel": 90,
       "destDir": "/home/usr/local/bin",
       "password": "Kubos123"
     }

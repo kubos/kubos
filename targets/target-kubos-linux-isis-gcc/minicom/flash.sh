@@ -21,6 +21,80 @@ progress() {
     done   
 }
 
+# Minicom doesn't allow any pass-through arguments, so instead we need to 
+# generate a script for it to run.
+create_send_script() {
+    cat > send.tmp <<-EOF
+    verbose on
+    send root
+    expect {
+        "Password:" break
+        timeout 1 break
+    }
+    send $password
+    expect {
+        "~ #" break
+        timeout 5 goto end
+    }
+    timeout 3600
+    send "mkdir -p $path"
+    send "cd $path"
+    send "rm $name"
+    send "rz -w 8192"
+    ! sz -w 8192 $1
+    if $is_upgrade = 1 send "fw_setenv kubos_updatefile $name"
+    send "exit"
+    end:
+    ! killall minicom -q
+    EOF
+}
+
+create_init_script() {
+    cat > S$1$2 <<-EOF
+    #!/bin/sh
+
+    NAME=$2
+    PROG=/usr/sbin/${NAME}
+    PID=/var/run/${NAME}.pid
+    
+    case "$1" in
+        start)
+        echo "Starting ${NAME}: "
+        start-stop-daemon -S -q -m -b -p ${PID} --exec ${PROG}
+        rc=$?
+        if [ $rc -eq 0 ]
+        then
+            echo "OK"
+        else
+            echo "FAIL" >&2
+        fi
+        ;;
+        stop)
+        echo "Stopping ${NAME}: "
+        start-stop-daemon -K -q -p ${PID}
+        rc=$?
+        if [ $rc -eq 0 ]
+        then
+            echo "OK"
+        else
+            echo "FAIL" >&2
+        fi
+        ;;
+        restart)
+        "$0" stop
+        "$0" start
+        ;;
+        *)
+        echo "Usage: $0 {start|stop|restart}"
+        ;;
+    esac
+    
+    exit $rc
+    EOF
+}
+
+# ------ Start of actual script ---------
+
 start=$(date +%s)
 
 this_dir=$(cd "`dirname "$0"`"; pwd)
@@ -29,6 +103,7 @@ is_upgrade=0
 
 password=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["password"]')
 dest_dir=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["destDir"]')
+init=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["initAtBoot"]')
 app_name=$(cat ../../module.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["name"]')
 
 unamestr=`uname`
@@ -60,31 +135,7 @@ else
     path="/home/usr/bin"
 fi
 
-# Minicom doesn't allow any pass-through arguments, so instead we need to 
-# generate a script for it to run.
-cat > send.tmp <<-EOF
-verbose on
-send root
-expect {
-    "Password:" break
-    timeout 1 break
-}
-send $password
-expect {
-    "~ #" break
-    timeout 5 goto end
-}
-timeout 3600
-send "mkdir -p $path"
-send "cd $path"
-send "rm $name"
-send "rz -w 8192"
-! sz -w 8192 $1
-if $is_upgrade = 1 send "fw_setenv kubos_updatefile $name"
-send "exit"
-end:
-! killall minicom -q
-EOF
+create_send_script
 
 # Run the transfer script
 echo "Sending $name to $path on board..."
