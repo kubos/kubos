@@ -1,5 +1,5 @@
 # Command And Control
-## Architecture Overview
+## Architecture Overview {#command-and-control-overview}
 
 ```
 
@@ -57,7 +57,7 @@ The appropriate function of the service interface will be called with the remain
 Once the API call returns, a CBOR-encoded message containing the execution time, the return code and stdout will be returned to the client.
 
 
-## Module Design
+## Module Design {#module-design}
 
 
 Modules will need to implement to service interface and be compiled into a shared library in order to be compatible with this command and control system.
@@ -82,7 +82,7 @@ These functions will need to accept and parse arguments and handle routing the a
 ```
 
 
-## Library Implementation
+## Library Implementation {#library-implementation}
 
 Libraries exposed through the command and control framework will need to implement the Service Interface.
 
