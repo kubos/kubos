@@ -29,8 +29,6 @@
 #define TEST_ADDRESS 1
 #define TEST_SOCKET_PORT 8888
 
-static char send_msg[] = "test123test";
-static char recv_msg[12];
 static bool test_running = true;
 static csp_thread_handle_t server_task_handle;
 static telemetry_packet out_pkt = {
@@ -43,12 +41,9 @@ static telemetry_packet out_pkt = {
 CSP_DEFINE_TASK(server_task)
 {
     static csp_socket_t *sock;
-    
     pubsub_conn conn = {
         .conn_handle = NULL
     };
-    uint8_t message[256];
-    uint16_t msg_size;
 
     sock = kprv_server_setup(TELEMETRY_EXTERNAL_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
 
@@ -76,8 +71,6 @@ CSP_DEFINE_TASK(server_task)
     csp_close_socket(sock);
 
     kprv_subscriber_socket_close(&conn);
-
-    // telemetry_server_cleanup();
 
     csp_thread_exit();
 }
@@ -110,7 +103,6 @@ static int teardown(void ** arg)
 
 static void test_subscriber(void ** arg)
 {
-    int data = 121212;
     pubsub_conn conn;
     telemetry_packet in_packet;
 

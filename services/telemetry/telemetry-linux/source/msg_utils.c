@@ -153,7 +153,6 @@ bool telemetry_parse_unsubscribe_msg(uint8_t * buffer, int buffer_size, int * to
 int telemetry_encode_disconnect_msg(uint8_t * buffer)
 {
     CborEncoder encoder, container;
-    CborError err;
 
     if (buffer == NULL)
         return -1;

@@ -135,6 +135,16 @@ bool kprv_add_topic(subscriber_list_item * sub, int topic_id);
 
 void kprv_delete_topics(subscriber_list_item * sub);
 
+void telemetry_server_init(void);
+void telemetry_server_cleanup(void);
+bool client_rx_work(subscriber_list_item * sub);
+
+void kprv_delete_subscribers();
+
+bool kprv_publish_packet(telemetry_packet packet);
+
+bool kprv_cbor_read(const pubsub_conn * conn, void * buffer, int max_buffer_size, uint8_t port, uint16_t * size_received);
+
 #endif
 
 /* @} */

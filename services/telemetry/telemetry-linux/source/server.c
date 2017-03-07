@@ -55,17 +55,6 @@ subscriber_list_item * create_subscriber(pubsub_conn conn)
     return sub;
 }
 
-static void kprv_add_subscriber(pubsub_conn conn)
-{
-    subscriber_list_item * new_sub = NULL;
-    if ((new_sub = malloc(sizeof(subscriber_list_item))) != NULL)
-    {
-        memcpy(&(new_sub->conn), &conn, sizeof(pubsub_conn));
-        new_sub->topics = NULL;
-        LL_APPEND(subscribers, new_sub);
-    }
-}
-
 void destroy_subscriber(subscriber_list_item ** sub)
 {
     csp_thread_kill((*sub)->rx_thread);
@@ -300,7 +289,6 @@ bool client_rx_work(subscriber_list_item * sub)
 
 CSP_DEFINE_TASK(client_rx_task)
 {
-    pubsub_conn conn;
     subscriber_list_item * sub = NULL;
     if (param == NULL)
     {
@@ -329,7 +317,6 @@ CSP_DEFINE_TASK(telemetry_rx_task)
 {
     printf("begin socket comms\r\n");
     static csp_socket_t *sock;
-    csp_packet_t *packet;
 
     /* Create socket and listen for incoming connections */
     sock = csp_socket(CSP_SO_NONE);

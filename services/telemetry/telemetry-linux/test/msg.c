@@ -29,7 +29,7 @@ static void test_packet_msg(void ** arg)
     };
     telemetry_message_type msg_type;
     telemetry_packet out;
-    char buffer[100];
+    uint8_t buffer[100];
 
     int msg_size = telemetry_encode_packet_msg(buffer, &in);
     bool parsed_type = telemetry_parse_msg_type(buffer, msg_size, &msg_type);
@@ -49,7 +49,7 @@ static void test_packet_msg(void ** arg)
 
 static void test_subscribe_msg(void ** arg)
 {
-    char buffer[100];
+    uint8_t buffer[100];
     telemetry_message_type msg_type;
     int topic_in = 10, topic_out;
 
@@ -67,7 +67,7 @@ static void test_subscribe_msg(void ** arg)
 
 static void test_unsubscribe_msg(void ** arg)
 {
-    char buffer[100];
+    uint8_t buffer[100];
     telemetry_message_type msg_type;
     int topic_in = 11, topic_out;
 
@@ -85,7 +85,7 @@ static void test_unsubscribe_msg(void ** arg)
 
 static void test_disconnect_msg(void ** arg)
 {
-    char buffer[100];
+    uint8_t buffer[100];
     telemetry_message_type msg_type;
 
     int msg_size = telemetry_encode_disconnect_msg(buffer);
@@ -99,7 +99,7 @@ static void test_disconnect_msg(void ** arg)
 
 static void test_start_encode_msg(void ** arg)
 {
-    char buffer[100];
+    uint8_t buffer[100];
     CborEncoder encoder, container;
 
     assert_int_equal(start_encode_msg(&encoder, &container, buffer, 100, 1, MESSAGE_TYPE_PACKET), 0);
@@ -107,7 +107,7 @@ static void test_start_encode_msg(void ** arg)
 
 static void test_end_encode_msg(void ** arg)
 {
-    char buffer[100];
+    uint8_t buffer[100];
     CborEncoder encoder, container;
 
     start_encode_msg(&encoder, &container, buffer, 100, 1, MESSAGE_TYPE_PACKET);

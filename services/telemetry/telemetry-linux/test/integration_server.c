@@ -19,6 +19,7 @@
 #include <csp/csp.h>
 #include <csp/drivers/socket.h>
 #include <csp/interfaces/csp_if_socket.h>
+#include <csp/arch/csp_thread.h>
 #include <tinycbor/cbor.h>
 #include <telemetry/telemetry.h>
 #include <cmocka.h>
@@ -28,9 +29,6 @@
 #define TEST_NUM_CON 5
 #define TEST_ADDRESS 1
 #define TEST_SOCKET_PORT 8888
-
-static char send_msg[] = "test123test";
-static char recv_msg[12];
 
 CSP_DEFINE_TASK(client_task)
 {
@@ -55,7 +53,6 @@ CSP_DEFINE_TASK(client_task)
 static void test_server(void ** arg)
 {
     static csp_socket_t *sock;
-    csp_packet_t *packet;
     csp_thread_handle_t client_task_handle;
     pubsub_conn conn = {
         .conn_handle = NULL
