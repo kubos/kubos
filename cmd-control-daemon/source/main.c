@@ -86,6 +86,8 @@ bool send_buffer(uint8_t * data, size_t data_len)
         conn = csp_connect(CSP_PRIO_NORM, CLI_CLIENT_ADDRESS, CSP_PORT, 1000, CSP_O_NONE);
         if (!send_packet(conn, packet))
         {
+            csp_buffer_free(packet);
+            csp_close(conn);
             return false;
         }
         csp_buffer_free(packet);
