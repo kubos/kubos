@@ -14,22 +14,22 @@
 # limitations under the License.
 #
 
-spinner() {
-    local sp i n
-    sp='/-\|'
-    n=${#sp}
-    while sleep 0.15; do
-        printf "%s\b" "${sp:i++%n:1}"
-    done
+progress() {
+    while sleep 1; do
+        line=$(cat flash.log | grep "Bytes Sent")
+        printf "$line\r"
+    done   
 }
 
 start=$(date +%s)
 
 this_dir=$(cd "`dirname "$0"`"; pwd)
-program=$1
 name=$(basename $1)
+is_upgrade=0
 
 password=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["password"]')
+dest_dir=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["destDir"]')
+app_name=$(cat ../../module.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["name"]')
 
 unamestr=`uname`
 
@@ -39,8 +39,8 @@ fi
 
 if [[ "$device" =~ "6001" ]]; then
     echo "Compatible FTDI device found"
-    spinner &
-    spinner_pid=$!
+    progress &
+    progress_pid=$!
     disown
 else
     echo "No compatible FTDI device found" 1>&2
@@ -49,6 +49,15 @@ fi
 
 if [ "$password" == "Kubos123" ]; then
     echo "Using default password"
+fi
+
+if [[ "$name" = *.itb ]]; then
+    path="/upgrade"
+    is_upgrade=1
+elif [[ "$name" != "$app_name" ]]; then
+    path="$dest_dir"
+else
+    path="/home/usr/bin"
 fi
 
 # Minicom doesn't allow any pass-through arguments, so instead we need to 
@@ -65,17 +74,20 @@ expect {
     "~ #" break
     timeout 5 goto end
 }
-send "cd /usr/bin"
+timeout 3600
+send "mkdir -p $path"
+send "cd $path"
 send "rm $name"
-send "rz -bZ"
-! sz -b --zmodem $1
+send "rz -w 8192"
+! sz -w 8192 $1
+if $is_upgrade = 1 send "fw_setenv kubos_updatefile $name"
 send "exit"
 end:
 ! killall minicom -q
 EOF
 
 # Run the transfer script
-echo "Sending file to board..."
+echo "Sending $name to $path on board..."
 minicom kubos -o -S send.tmp > flash.log
 
 # Check transfer result
@@ -92,7 +104,7 @@ fi
 # Cleanup
 rm send.tmp
 stty sane
-kill $spinner_pid
+kill $progress_pid
 
 # Print exec time
 end=$(date +%s)

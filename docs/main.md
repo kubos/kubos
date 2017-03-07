@@ -43,6 +43,8 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
  - [KubOS Linux on iOBC](docs/kubos-linux-on-iobc.md)
 
  - [User Applications on iOBC](docs/user-app-on-iobc.md)
+ 
+ - [Upgrade KubOS Linux](docs/kubos-linux-upgrade.md)
 
 
 ## Top Level APIs

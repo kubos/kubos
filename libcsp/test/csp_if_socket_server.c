@@ -29,105 +29,98 @@ static char msg[] = "test123test";
 
 static bool test_running = true;
 
-CSP_DEFINE_TASK(client_task)
-{
-    csp_conn_t * conn = NULL;
-    csp_socket_handle_t socket_driver;
-    csp_iface_t csp_socket_if;
+CSP_DEFINE_TASK(client_task) {
+	csp_conn_t * conn = NULL;
+	csp_socket_handle_t socket_driver;
+	csp_iface_t csp_socket_if;
 
-    while (test_running) {
-        if (socket_init(&socket_driver, CSP_SOCKET_CLIENT, TEST_SOCKET_PORT) != CSP_ERR_NONE)
-        {
-            continue;
-        }
+	while (test_running) {
+		if (socket_init(&socket_driver, CSP_SOCKET_CLIENT, TEST_SOCKET_PORT) != CSP_ERR_NONE) {
+			continue;
+		}
 
-        if (csp_socket_init(&csp_socket_if, &socket_driver))
-        {
-            csp_socket_close(&csp_socket_if, &socket_driver);
-            continue;
-        }
+		if (csp_socket_init(&csp_socket_if, &socket_driver)) {
+			csp_socket_close(&csp_socket_if, &socket_driver);
+			continue;
+		}
 
-        csp_route_set(TEST_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
-        if ((conn = csp_connect(CSP_PRIO_NORM, TEST_ADDRESS, TEST_EXT_PORT, 1000, CSP_O_NONE)) != NULL)
-        {
-            break;
-        }
-    }
+		csp_route_set(TEST_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
+		if ((conn = csp_connect(CSP_PRIO_NORM, TEST_ADDRESS, TEST_EXT_PORT, 1000, CSP_O_NONE)) != NULL) {
+			break;
+		}
+	}
 
-    if (conn != NULL)
-    {
-        csp_packet_t * csp_packet = csp_buffer_get(strlen(msg));
-        memcpy(csp_packet->data, msg, strlen(msg));
-        csp_packet->length = strlen(msg);
-        if (!csp_send(conn, csp_packet, 1000))
-            csp_buffer_free(csp_packet);
-    }
+	if (conn != NULL) {
+		csp_packet_t * csp_packet = csp_buffer_get(strlen(msg));
+		memcpy(csp_packet->data, msg, strlen(msg));
+		csp_packet->length = strlen(msg);
+		if (!csp_send(conn, csp_packet, 1000))
+			csp_buffer_free(csp_packet);
+	}
 
-    csp_thread_exit();
+	csp_thread_exit();
 }
 
-static void test_server(void ** arg)
-{
-    csp_socket_t * socket = NULL;
-    csp_conn_t * conn = NULL;
-    csp_iface_t csp_socket_if = {
-        .next = NULL
-    };
-    csp_socket_handle_t socket_driver;
-    csp_thread_handle_t client_task_handle;
-    csp_socket_t * ext_socket = NULL;
-    csp_packet_t * packet = NULL;
-    char buffer[100];
+static void test_server(void ** arg) {
+	csp_socket_t * socket = NULL;
+	csp_conn_t * conn = NULL;
+	csp_iface_t csp_socket_if = {
+		.next = NULL
+	};
+	csp_socket_handle_t socket_driver;
+	csp_thread_handle_t client_task_handle;
+	csp_socket_t * ext_socket = NULL;
+	csp_packet_t * packet = NULL;
+	char buffer[100];
 
-    csp_buffer_init(20, 256);
+	csp_buffer_init(20, 256);
 
-    /* Init CSP with address MY_ADDRESS */
-    assert_int_equal(csp_init(TEST_ADDRESS), CSP_ERR_NONE);
+	/* Init CSP with address MY_ADDRESS */
+	assert_int_equal(csp_init(TEST_ADDRESS), CSP_ERR_NONE);
 
-    /* Start router task with 500 word stack, OS task priority 1 */
-    csp_route_start_task(500, 1);
+	/* Start router task with 500 word stack, OS task priority 1 */
+	csp_route_start_task(500, 1);
 
-    csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);   
+	csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);
 
-    assert_int_equal(socket_init(&socket_driver, CSP_SOCKET_SERVER, TEST_SOCKET_PORT), CSP_ERR_NONE);
-    
-    assert_int_equal(csp_socket_init(&csp_socket_if, &socket_driver), CSP_ERR_NONE);
-    csp_route_set(TEST_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
+	assert_int_equal(socket_init(&socket_driver, CSP_SOCKET_SERVER, TEST_SOCKET_PORT), CSP_ERR_NONE);
 
-    ext_socket = csp_socket(CSP_SO_NONE);
-    assert_non_null(ext_socket);
-    assert_int_equal(csp_bind(ext_socket, TEST_EXT_PORT), CSP_ERR_NONE);
-    assert_int_equal(csp_listen(ext_socket, 20), CSP_ERR_NONE);
+	assert_int_equal(csp_socket_init(&csp_socket_if, &socket_driver), CSP_ERR_NONE);
+	csp_route_set(TEST_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
 
-    conn = csp_accept(ext_socket, 500);
-    assert_non_null(conn);
+	ext_socket = csp_socket(CSP_SO_NONE);
+	assert_non_null(ext_socket);
+	assert_int_equal(csp_bind(ext_socket, TEST_EXT_PORT), CSP_ERR_NONE);
+	assert_int_equal(csp_listen(ext_socket, 20), CSP_ERR_NONE);
 
-    packet = csp_read(conn, 1000);
-    assert_non_null(packet);
-    memcpy(buffer, (void*)packet->data, packet->length);
-    assert_string_equal(buffer, msg);
-    csp_buffer_free(packet);
+	conn = csp_accept(ext_socket, 500);
+	assert_non_null(conn);
 
-    test_running = false;
+	packet = csp_read(conn, 1000);
+	assert_non_null(packet);
+	memcpy(buffer, (void *)packet->data, packet->length);
+	assert_string_equal(buffer, msg);
+	csp_buffer_free(packet);
 
-    csp_close_socket(ext_socket);
+	test_running = false;
 
-    csp_thread_kill(client_task_handle);
+	csp_close_socket(ext_socket);
 
-    csp_socket_close(&csp_socket_if, &socket_driver);
+	csp_thread_kill(client_task_handle);
 
-    csp_route_end_task();
+	csp_socket_close(&csp_socket_if, &socket_driver);
 
-    csp_terminate();
+	csp_route_end_task();
 
-    csp_buffer_cleanup();
+	csp_terminate();
+
+	csp_buffer_cleanup();
 }
 
-int main(void)
-{
-    const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_server),
-    };
+int main(void) {
+	const struct CMUnitTest tests[] = {
+		cmocka_unit_test(test_server),
+	};
 
-    return cmocka_run_group_tests(tests, NULL, NULL);
+	return cmocka_run_group_tests(tests, NULL, NULL);
 }
