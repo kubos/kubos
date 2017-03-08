@@ -82,7 +82,6 @@ class CLIIntegrationTest(KubosTestCase):
 
         #run the command
         return_code = kubos.main()
-        print "return code: %i" % return_code
         self.assertEqual(return_code, 0)
         logging.error.assert_not_called() #secondary safeguard for detecting runtime errorsa
         # logging.error.reset()
