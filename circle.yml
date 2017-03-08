@@ -8,4 +8,4 @@ dependencies:
 
 test:
   override:
-    - docker run -t kubostech/kubos-dev:latest /root/.kubos/kubos/tools/build.py --module telemetry --target stm32f407-disco-gcc
+      - docker run -t --env CIRCLE_BRANCH='$CIRCLE_BRANCH' -v $PWD:$PWD kubostech/kubos-dev:latest python $PWD/kubos/test/integration/intergration_test.py
