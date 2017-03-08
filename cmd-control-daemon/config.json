@@ -1,0 +1,8 @@
+{
+    "cnc": {
+        "registry_dir": "\"~\""
+    },
+    "csp": {
+        "socket": true
+    }
+}
