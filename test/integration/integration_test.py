@@ -2,10 +2,9 @@
 
 import json
 import kubos
-import logging
-import mock
 import os
 import sys
+import subprocess
 import unittest
 
 from sets import Set
@@ -24,7 +23,6 @@ class CLIIntegrationTest(KubosTestCase):
         self.branch_name = self.get_branch_name()
         self.first_arg = sys.argv[0]
         sys.argv = [self.first_arg] #clear any excess command line arguhements
-        logging.error = mock.MagicMock()
 
 
     def get_branch_name(self):
@@ -73,21 +71,12 @@ class CLIIntegrationTest(KubosTestCase):
 
 
     def run_command(self, subcommand_name, *args):
-        arg_list = [subcommand_name] + list(args)
-        #store the current command line arguments so we can restore them later
-        starting_args = sys.argv
-        #set up new command line args
-        sys.argv = sys.argv + arg_list
+        arg_list = ['kubos', subcommand_name] + list(args)
         print '\nRunning command %s %s' % (subcommand_name, ' '.join(args))
 
         #run the command
-        return_code = kubos.main()
+        return_code = subprocess.call(arg_list)
         self.assertEqual(return_code, 0)
-        logging.error.assert_not_called() #secondary safeguard for detecting runtime errorsa
-        # logging.error.reset()
-
-        #reset the command line arguments that we added during this command run
-        sys.argv = starting_args
 
 
     def get_target_lists(self):
