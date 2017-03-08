@@ -1,0 +1,20 @@
+{
+    "name":"command-and-control",
+    "repository":{
+        "url":"git://<repository_url>",
+        "type":"git"
+    },
+    "author":"Someone Somewhere <someone.somewhere@yottabuild.org>",
+    "targetDependencies":{},
+    "licenses":[
+        {
+            "url":"https://spdx.org/licenses/Apache-2.0",
+            "type":"Apache-2.0"
+        }
+    ],
+    "version":"0.0.0",
+    "dependencies":{},
+    "keywords":[],
+    "homepage":"https://<homepage>",
+    "description":"a test module"
+}

@@ -97,6 +97,7 @@ int csp_conn_lock(csp_conn_t * conn, uint32_t timeout);
 int csp_conn_unlock(csp_conn_t * conn);
 int csp_conn_enqueue_packet(csp_conn_t * conn, csp_packet_t * packet);
 int csp_conn_init(void);
+void csp_conn_terminate(void);
 csp_conn_t * csp_conn_allocate(csp_conn_type_t type);
 csp_conn_t * csp_conn_find(uint32_t id, uint32_t mask);
 csp_conn_t * csp_conn_new(csp_id_t idin, csp_id_t idout);

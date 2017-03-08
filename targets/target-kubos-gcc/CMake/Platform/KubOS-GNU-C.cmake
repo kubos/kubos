@@ -15,7 +15,7 @@ set(CMAKE_C_CREATE_STATIC_LIBRARY "<CMAKE_AR> -cr <LINK_FLAGS> <TARGET> <OBJECTS
 set(CMAKE_C_COMPILE_OBJECT        "<CMAKE_C_COMPILER> <DEFINES> ${EXPLICIT_INCLUDES}<FLAGS> -o <OBJECT> -c <SOURCE>")
 # <LINK_LIBRARIES> is grouped with system libraries so that system library
 # functions (e.g. malloc) can be overridden by symbols in <LINK_LIBRARIES>
-set(CMAKE_C_LINK_EXECUTABLE       "<CMAKE_C_COMPILER> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> -Wl,-Map,<TARGET>.map -Wl,--start-group <OBJECTS> <LINK_LIBRARIES> ${GLOBALLY_LINKED_TARGET_LIBS} -lm -lc -lgcc -lm -lc -lgcc -Wl,--end-group -o <TARGET>")
+set(CMAKE_C_LINK_EXECUTABLE       "<CMAKE_C_COMPILER> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> -Wl,-Map,<TARGET>.map -Wl,--start-group <OBJECTS> <LINK_LIBRARIES> ${GLOBALLY_LINKED_TARGET_LIBS} -lm -lc -ldl -lgcc -lm -lc -lgcc -Wl,--end-group -o <TARGET>")
 
 
 set(CMAKE_C_FLAGS_DEBUG_INIT          "-g -gdwarf-3")

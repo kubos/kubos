@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <csp/arch/csp_thread.h>
-#include <cmocka.h>
 #include "ipc/pubsub.h"
+#include <cmocka.h>
+#include <csp/arch/csp_thread.h>
 
 #define TEST_ADDRESS 11
 #define TEST_PORT 12
@@ -32,7 +32,7 @@ static void test_server_setup(void ** arg)
 
     expect_not_value(__wrap_csp_listen, socket, NULL);
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
-    
+
     assert_true(socket = kprv_server_setup(TEST_PORT, 1));
 }
 
@@ -45,7 +45,7 @@ static void test_server_accept_null_socket(void ** arg)
 static void test_server_accept_null_conn(void ** arg)
 {
     csp_socket_t * socket = NULL;
-    
+
     will_return(__wrap_csp_socket, "");
 
     expect_not_value(__wrap_csp_bind, socket, NULL);
@@ -132,17 +132,17 @@ static void test_send(void ** arg)
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
     socket = kprv_server_setup(TEST_PORT, 1);
-    
+
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
-    
+
     kprv_server_accept(socket, &conn);
 
     expect_value(__wrap_csp_send, conn, conn.conn_handle);
     expect_not_value(__wrap_csp_send, packet, NULL);
     will_return(__wrap_csp_send, 1);
 
-    assert_true(kprv_send_csp(&conn, (void*)&data, sizeof(data)));
+    assert_true(kprv_send_csp(&conn, (void *)&data, sizeof(data)));
 }
 
 static void test_publisher_read_null_conn(void ** arg)
@@ -157,7 +157,7 @@ static void test_publisher_read_null_buffer(void ** arg)
 {
     pubsub_conn conn;
     csp_socket_t * socket = NULL;
-    
+
     will_return(__wrap_csp_socket, "");
 
     expect_not_value(__wrap_csp_bind, socket, NULL);
@@ -167,10 +167,10 @@ static void test_publisher_read_null_buffer(void ** arg)
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
     socket = kprv_server_setup(TEST_PORT, 1);
-    
+
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
-    
+
     kprv_server_accept(socket, &conn);
 
     assert_false(kprv_publisher_read(&conn, NULL, 1, TEST_PORT));
@@ -181,7 +181,7 @@ static void test_publisher_read(void ** arg)
     pubsub_conn conn;
     char buffer;
     csp_socket_t * socket = NULL;
-    
+
     will_return(__wrap_csp_socket, "");
 
     expect_not_value(__wrap_csp_bind, socket, NULL);
@@ -191,10 +191,10 @@ static void test_publisher_read(void ** arg)
     will_return(__wrap_csp_listen, CSP_ERR_NONE);
 
     socket = kprv_server_setup(TEST_PORT, 1);
-    
+
     expect_value(__wrap_csp_accept, socket, socket);
     will_return(__wrap_csp_accept, "");
-    
+
     kprv_server_accept(socket, &conn);
 
     expect_value(__wrap_csp_read, conn, conn.conn_handle);
@@ -219,7 +219,7 @@ static void test_subscriber_read_null_buffer(void ** arg)
     will_return(__wrap_csp_connect, "");
 
     kprv_subscriber_connect(&conn, TEST_ADDRESS, TEST_PORT);
-    
+
     assert_false(kprv_subscriber_read(&conn, NULL, 1, TEST_PORT));
 }
 
@@ -234,7 +234,7 @@ static void test_subscriber_read(void ** arg)
 
     expect_value(__wrap_csp_read, conn, conn.conn_handle);
     will_return(__wrap_csp_conn_sport, TEST_PORT);
-    
+
     assert_true(kprv_subscriber_read(&conn, &buffer, 1, TEST_PORT));
 }
 

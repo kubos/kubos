@@ -38,6 +38,13 @@
 #define IPC_SEND_TIMEOUT 1000
 #endif
 
+/*! Port for IPC sockets to listen/connect on */
+#ifdef YOTTA_CFG_IPC_SOCKET_PORT
+#define IPC_SOCKET_PORT YOTTA_CFG_IPC_SOCKET_PORT
+#else
+#define IPC_SOCKET_PORT 8888
+#endif
+
 #endif
 
 /* @} */
