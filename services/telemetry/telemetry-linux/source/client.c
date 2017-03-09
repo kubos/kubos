@@ -24,41 +24,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <ipc/pubsub_socket.h>
+
 #include <tinycbor/cbor.h>
 
-#include <csp/interfaces/csp_if_socket.h>
-#include <csp/drivers/socket.h>
 
-
-bool telemetry_connect(pubsub_conn * conn)
+bool telemetry_connect(socket_conn * conn)
 {
     bool ret = false;
-    if (kprv_subscriber_socket_connect(conn, TELEMETRY_CSP_ADDRESS, TELEMETRY_EXTERNAL_PORT))
+    if (kprv_socket_client_connect(conn, TELEMETRY_SOCKET_PORT))
     {
         ret = true;
     }
     return ret;
 }
 
-bool telemetry_disconnect(pubsub_conn * client_conn)
+bool telemetry_disconnect(socket_conn * client_conn)
 {
     bool ret = false;
-    // csp_mutex_lock(&unsubscribing_lock, CSP_INFINITY);
     if (client_conn != NULL)
     {
         uint8_t buffer[256] = {0};
         int msg_size = telemetry_encode_disconnect_msg(buffer);
         if (msg_size > 0)
         {
-            ret = kprv_send_csp(client_conn, buffer, msg_size);
+            ret = kprv_socket_send(client_conn, buffer, msg_size);
         }
-        kprv_subscriber_socket_close(client_conn);
+        kprv_socket_close(client_conn);
     }
-    // csp_mutex_unlock(&unsubscribing_lock);
     return ret;
 }
 
-bool telemetry_subscribe(const pubsub_conn * client_conn, int topic_id)
+bool telemetry_subscribe(const socket_conn * client_conn, int topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
@@ -67,13 +64,13 @@ bool telemetry_subscribe(const pubsub_conn * client_conn, int topic_id)
         int msg_size = telemetry_encode_subscribe_msg(buffer, &topic_id);
         if (msg_size > 0)
         {
-            ret = kprv_send_csp(client_conn, buffer, msg_size);
+            ret = kprv_socket_send(client_conn, buffer, msg_size);
         }
     }
     return ret;
 }
 
-bool telemetry_unsubscribe(const pubsub_conn * client_conn, int topic_id)
+bool telemetry_unsubscribe(const socket_conn * client_conn, int topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
@@ -83,20 +80,21 @@ bool telemetry_unsubscribe(const pubsub_conn * client_conn, int topic_id)
 
         if (msg_size > 0)
         {
-            ret = kprv_send_csp(client_conn, buffer, msg_size);
+            ret = kprv_socket_send(client_conn, buffer, msg_size);
         }
     }
     return ret;
 }
 
-bool telemetry_read(const pubsub_conn * conn, telemetry_packet * packet)
+bool telemetry_read(const socket_conn * conn, telemetry_packet * packet)
 {
     int tries = 0;
+    uint32_t msg_size;
     if (packet != NULL)
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
-            if (kprv_subscriber_read(conn, (void*)packet, sizeof(telemetry_packet), TELEMETRY_EXTERNAL_PORT))
+            if (kprv_socket_recv(conn, (void*)packet, sizeof(telemetry_packet), &msg_size))
                 return true;
         }
     }
@@ -106,7 +104,7 @@ bool telemetry_read(const pubsub_conn * conn, telemetry_packet * packet)
 
 bool telemetry_publish(telemetry_packet pkt)
 {
-    pubsub_conn conn;
+    socket_conn conn;
     bool ret = false;
     if ((ret = telemetry_connect(&conn)) == true)
     {
@@ -115,7 +113,7 @@ bool telemetry_publish(telemetry_packet pkt)
 
         if (msg_size > 0)
         {
-            ret = kprv_send_csp(&conn, buffer, msg_size);
+            ret = kprv_socket_send(&conn, buffer, msg_size);
         }
         telemetry_disconnect(&conn);
     }

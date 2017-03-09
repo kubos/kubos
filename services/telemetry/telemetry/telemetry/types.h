@@ -28,6 +28,8 @@
 #include <csp/csp.h>
 #include <csp/arch/csp_queue.h>
 
+#include <ipc/pubsub_socket.h>
+
 /**
  * Telemetry union for storing data.
  */
@@ -104,7 +106,7 @@ typedef struct subscriber_list_item
 {
     bool active;
     uint16_t id;
-    pubsub_conn conn;
+    socket_conn conn;
     csp_queue_handle_t packet_queue;
     topic_list_item * topics;
     csp_thread_handle_t rx_thread;

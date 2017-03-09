@@ -21,11 +21,9 @@
 #include <kubos-core/utlist.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <ipc/pubsub_socket.h>
 #include <tinycbor/cbor.h>
 
-#include <csp/interfaces/csp_if_socket.h>
-#include <csp/drivers/socket.h>
 
 /* Queue for incoming packets from publishers */
 // static csp_queue_handle_t packet_queue = NULL;
@@ -43,13 +41,13 @@ CSP_DEFINE_TASK(client_rx_task);
 
 static uint16_t sub_id = 0;
 
-subscriber_list_item * create_subscriber(pubsub_conn conn)
+subscriber_list_item * create_subscriber(socket_conn conn)
 {
     subscriber_list_item * sub = NULL;
     if ((sub = malloc(sizeof(subscriber_list_item))) != NULL)
     {
         sub->topics = NULL;
-        memcpy(&(sub->conn), &conn, sizeof(pubsub_conn));
+        memcpy(&(sub->conn), &conn, sizeof(socket_conn));
         sub->packet_queue = csp_queue_create(MESSAGE_QUEUE_SIZE, sizeof(telemetry_packet));
         sub->active = true;
         sub->id = sub_id++;
@@ -64,7 +62,7 @@ void destroy_subscriber(subscriber_list_item ** sub)
 
     kprv_delete_topics(*sub);
 
-    kprv_subscriber_socket_close(&((*sub)->conn));
+    // kprv_subscriber_socket_close(&((*sub)->conn));
 
     csp_queue_remove((*sub)->packet_queue);
 
@@ -158,33 +156,34 @@ bool kprv_has_topic(const subscriber_list_item * sub, uint16_t topic_id)
 
 
 
-bool kprv_cbor_read(const pubsub_conn * conn, void * buffer, int max_buffer_size, uint8_t port, uint16_t * size_received)
-{
-    csp_packet_t * csp_packet = NULL;
-    csp_conn_t * csp_conn = NULL;
-    if ((conn != NULL) && (conn->conn_handle != NULL) && (buffer != NULL) && (size_received != NULL))
-    {
-        csp_conn = conn->conn_handle;
-        if ((csp_packet = csp_read(csp_conn, 1000)) != NULL)
-        {
-            if (csp_conn_dport(csp_conn) == port)
-            {
-                memcpy(buffer, &csp_packet->data, csp_packet->length);
-                *size_received = csp_packet->length;
-                csp_buffer_free(csp_packet);
-                return true;
-            }
-            csp_service_handler(csp_conn, csp_packet);
-        }
-    }
-    return false;
-}
+// bool kprv_cbor_read(const socket_conn * conn, void * buffer, int max_buffer_size, uint8_t port, uint16_t * size_received)
+// {
+//     csp_packet_t * csp_packet = NULL;
+//     csp_conn_t * csp_conn = NULL;
+//     if ((conn != NULL) && (conn->is_active) && (buffer != NULL) && (size_received != NULL))
+//     {
+//         csp_conn = conn->conn_handle;
+//         if ((csp_packet = csp_read(csp_conn, 1000)) != NULL)
+//         {
+//             if (csp_conn_dport(csp_conn) == port)
+//             {
+//                 memcpy(buffer, &csp_packet->data, csp_packet->length);
+//                 *size_received = csp_packet->length;
+//                 csp_buffer_free(csp_packet);
+//                 return true;
+//             }
+//             csp_service_handler(csp_conn, csp_packet);
+//         }
+//     }
+//     return false;
+// }
 
 bool telemetry_publish_packet(subscriber_list_item * sub, telemetry_packet packet)
 {
     if (kprv_has_topic(sub, packet.source.topic_id))
     {
-        if (!csp_queue_enqueue(sub->packet_queue, (void*)&packet, 1000))
+        // if (!csp_queue_enqueue(sub->packet_queue, (void*)&packet, 1000))
+        if (!kprv_socket_send(&(sub->conn), (void*)&packet, sizeof(telemetry_packet)))
             return false;
     }
     return true;
@@ -192,7 +191,9 @@ bool telemetry_publish_packet(subscriber_list_item * sub, telemetry_packet packe
 
 bool telemetry_get_packet(subscriber_list_item * sub, telemetry_packet * packet)
 {
-    if (!csp_queue_dequeue(sub->packet_queue, (void*)packet, 1000))
+    uint32_t size_read;
+    // if (!csp_queue_dequeue(sub->packet_queue, (void*)packet, 1000))
+    if (!kprv_socket_recv(&(sub->conn), (void*)packet, sizeof(telemetry_packet), &size_read))
         return false;
     return true;
 }
@@ -282,18 +283,16 @@ bool client_rx_work(subscriber_list_item * sub)
         {
             if (telemetry_get_packet(sub, &packet))
             {
-                ret = kprv_send_csp(&(sub->conn), (void*)&packet, sizeof(telemetry_packet));
+                ret = kprv_socket_send(&(sub->conn), (void*)&packet, sizeof(telemetry_packet));
                 if (!ret)
                     break;
             }
         }
 
-        if (kprv_cbor_read(&(sub->conn), (void*)msg, 256, TELEMETRY_EXTERNAL_PORT, &msg_size))
+        if (kprv_socket_recv(&(sub->conn), (void*)msg, 256, &msg_size))
         {
             ret = telemetry_process_message(sub, (void*)msg, msg_size);
         }
-
-        // kprv_send_csp(&(sub->conn), (void*)test_msg, 5);
     }
 
     return ret;
@@ -337,7 +336,7 @@ bool client_rx_work(subscriber_list_item * sub)
 
 //     printf("Listening for conn\r\n");
 
-//     pubsub_conn conn;
+//     socket_conn conn;
 //      /* Super loop */
 //     while (1) {
         
@@ -366,7 +365,7 @@ void telemetry_server_init(void)
 
 void telemetry_server_cleanup(void)
 {
-    csp_thread_kill(telem_rx_handle);
+    // csp_thread_kill(telem_rx_handle);
 
     kprv_delete_subscribers();
 }

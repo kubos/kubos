@@ -46,46 +46,46 @@ void telemetry_cleanup(void);
 
 /**
  * Connects to the telemetry system - thread safe version.
- * @return pubsub_conn* to pubsub_conn which will be used to receive future telemetry data.
+ * @return socket_conn* to socket_conn which will be used to receive future telemetry data.
  */
-bool telemetry_connect(pubsub_conn * conn);
+bool telemetry_connect(socket_conn * conn);
 
 /**
  * Internal connect function - not thread safe.
- * @return pubsub_conn* to pubsub_conn which will be used to receive future telemetry data
+ * @return socket_conn* to socket_conn which will be used to receive future telemetry data
  */
-bool kprv_telemetry_connect(pubsub_conn * conn);
+bool kprv_telemetry_connect(socket_conn * conn);
 
 /**
- * Subscribes the pubsub_conn to the specified topic.
- * @param conn pointer to pubsub_conn
+ * Subscribes the socket_conn to the specified topic.
+ * @param conn pointer to socket_conn
  * @param topic_id topic to subscribe to
  * @return bool true if successful, otherwise false
  */
-bool telemetry_subscribe(const pubsub_conn * conn, int topic_id);
+bool telemetry_subscribe(const socket_conn * conn, int topic_id);
 
 /**
  * Disconnects from the telemetry system.
- * @param conn pointer to pubsub_conn which is to be disconnected
+ * @param conn pointer to socket_conn which is to be disconnected
  * @return bool true if successful, otherwise false
  */
-bool telemetry_disconnect(pubsub_conn * conn);
+bool telemetry_disconnect(socket_conn * conn);
 
 /**
  * Unsubscribes a connection from a specific topic.
- * @param conn pointer to pubsub_conn which is to be unsubscribed
+ * @param conn pointer to socket_conn which is to be unsubscribed
  * @param topic_id topic to remove subscription from
  * @return bool true if successful, otherwise false
  */
-bool telemetry_unsubscribe(const pubsub_conn * conn, int topic_id);
+bool telemetry_unsubscribe(const socket_conn * conn, int topic_id);
 
 /**
  * Reads a telemetry packet from the telemetry server.
- * @param conn pubsub_connection to use for the request
+ * @param conn socket_connection to use for the request
  * @param packet pointer to telemetry_packet to store data in.
  * @return bool true if successful, otherwise false 
  */
-bool telemetry_read(const pubsub_conn * conn, telemetry_packet * packet);
+bool telemetry_read(const socket_conn * conn, telemetry_packet * packet);
 
 /**
  * Public facing telemetry input interface. Takes a telemetry_packet packet
@@ -106,7 +106,7 @@ int telemetry_num_subscribers(void);
  * @param topic_id topic to check for
  * @return bool true if subscribed, otherwise false
  */
-bool telemetry_is_subscribed(const pubsub_conn * client_conn, int topic_id);
+bool telemetry_is_subscribed(const socket_conn * client_conn, int topic_id);
 
 bool telemetry_parse_packet_msg(uint8_t * buffer, int buffer_size, telemetry_packet * packet);
 int telemetry_encode_packet_msg(uint8_t * buffer, telemetry_packet * pkt);
@@ -123,7 +123,7 @@ int start_encode_msg(CborEncoder * encoder, CborEncoder * container, uint8_t * b
 int end_encode_msg(uint8_t * buffer, CborEncoder * encoder, CborEncoder * container);
 bool telemetry_parse_msg_type(uint8_t * buffer, int buffer_size, telemetry_message_type * req);
 
-subscriber_list_item * create_subscriber(pubsub_conn conn);
+subscriber_list_item * create_subscriber(socket_conn conn);
 void destroy_subscriber(subscriber_list_item ** sub);
 bool telemetry_get_packet(subscriber_list_item * sub, telemetry_packet * packet);
 int telemetry_get_num_packets(subscriber_list_item * sub);
@@ -143,7 +143,7 @@ void kprv_delete_subscribers();
 
 bool kprv_publish_packet(telemetry_packet packet);
 
-bool kprv_cbor_read(const pubsub_conn * conn, void * buffer, int max_buffer_size, uint8_t port, uint16_t * size_received);
+bool kprv_cbor_read(const socket_conn * conn, void * buffer, int max_buffer_size, uint8_t port, uint16_t * size_received);
 
 #endif
 

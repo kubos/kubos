@@ -38,6 +38,32 @@ static telemetry_packet out_pkt = {
     .data.i = 99
 };
 
+CSP_DEFINE_TASK(client_handler)
+{
+    subscriber_list_item * sub = NULL;
+    if (param == NULL)
+    {
+        printf("No conn found\r\n");
+        return CSP_TASK_RETURN;
+    }
+    
+
+    sub = (subscriber_list_item*)param;
+
+    printf("client rx thread start %d\r\n", sub->id);
+
+    while (sub->active == true)
+    {
+        client_rx_work(sub);
+    }
+
+    destroy_subscriber(&sub);
+
+    printf("client rx thread end %d\r\n", sub->id);
+
+    csp_thread_exit();
+}
+
 CSP_DEFINE_TASK(server_task)
 {
     socket_conn conn;
@@ -57,14 +83,7 @@ CSP_DEFINE_TASK(server_task)
         subscriber_list_item * sub = create_subscriber(conn);
         if (sub != NULL)
         {
-            while (sub->active)
-            {
-                if (!client_rx_work(sub))
-                    break;
-                // Hardcoded publish for test purposes
-                kprv_publish_packet(out_pkt);
-            }
-            destroy_subscriber(&sub);
+            csp_thread_create(client_handler, NULL, 1000, sub, 0, &(sub->rx_thread));
         }
     }
 
@@ -109,11 +128,16 @@ static void test_subscriber(void ** arg)
     assert_true(telemetry_connect(&conn));
     assert_true(telemetry_subscribe(&conn, out_pkt.source.topic_id));
 
-    csp_sleep_ms(1000);
+    csp_sleep_ms(10);
+
+    assert_true(telemetry_publish(out_pkt));
+
+    csp_sleep_ms(10);
     
     assert_true(telemetry_read(&conn, &in_packet));
 
-    csp_sleep_ms(1000);
+    assert_int_equal(in_packet.source.topic_id, out_pkt.source.topic_id);
+    assert_int_equal(in_packet.data.i, out_pkt.data.i);
 
     assert_true(telemetry_disconnect(&conn));
 }

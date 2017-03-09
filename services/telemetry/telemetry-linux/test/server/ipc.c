@@ -14,36 +14,33 @@
  * limitations under the License.
  */
 
-#include <ipc/pubsub.h>
+#include <ipc/pubsub_socket.h>
 #include <cmocka.h>
 
-bool __wrap_kprv_subscriber_socket_connect(pubsub_conn * conn, uint8_t address, uint8_t port)
+bool __wrap_kprv_socket_client_connect(socket_conn * conn, uint8_t port)
 {
     if (conn != NULL)
     {
-        conn->conn_handle = mock_type(csp_conn_t *);
+        conn->socket_handle = 10;
+        conn->is_active = true;
     }
     return mock_type(bool);
 }
 
-bool __wrap_kprv_send_csp(pubsub_conn * conn, void * data, uint16_t length)
+bool __wrap_kprv_socket_send(socket_conn * conn, void * buffer, uint16_t length)
 {
-    check_expected(conn->conn_handle);
-    check_expected(data);
+    check_expected(conn->is_active);
+    check_expected(buffer);
     
     return mock_type(bool);
 }
 
-int __wrap_csp_close(csp_conn_t * conn)
+bool __wrap_kprv_socket_recv(socket_conn * conn, void * buffer, int buffer_size, uint32_t * size_read)
 {
-    check_expected(conn);
-    return mock_type(int);
-}
-
-bool __wrap_kprv_subscriber_read(pubsub_conn * conn, void * buffer, int buffer_size, uint8_t port)
-{
-    check_expected(conn->conn_handle);
+    check_expected(conn->is_active);
     check_expected(buffer);
+
+    buffer = mock_type(void*);
 
     return mock_type(bool);
 }

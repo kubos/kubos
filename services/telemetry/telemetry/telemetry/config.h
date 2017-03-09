@@ -61,6 +61,8 @@
 #define TELEMETRY_EXTERNAL_PORT YOTTA_CFG_TELEMETRY_EXTERNAL_PORT
 #endif
 
+#define TELEMETRY_SOCKET_PORT 8199
+
 
 /*! Max number of subscribers supported */
 #ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_MAX_NUM

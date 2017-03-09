@@ -44,44 +44,36 @@ CSP_DEFINE_TASK(client_task)
     csp_sleep_ms(100);
 
     pkt.data.i = data;
-    telemetry_publish(pkt);
+    assert_true(telemetry_publish(pkt));
 
-    return CSP_TASK_RETURN;
+    csp_thread_exit();
 }
 
 
 static void test_server(void ** arg)
 {
-    static csp_socket_t *sock;
     csp_thread_handle_t client_task_handle;
-    pubsub_conn conn = {
-        .conn_handle = NULL
-    };
+    socket_conn conn;
     uint8_t message[256];
-    uint16_t msg_size;
-
-    kubos_csp_init(TEST_ADDRESS);
+    uint32_t msg_size;
 
     csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);
 
-    sock = kprv_server_setup(TELEMETRY_EXTERNAL_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
-    assert_non_null(sock);
-
-    assert_true(kprv_server_socket_accept(sock, &conn));
-    assert_non_null(conn.conn_handle);
+    assert_true(kprv_socket_server_setup(TELEMETRY_SOCKET_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM));
+    assert_true(kprv_socket_server_accept(&conn));
+    assert_true(conn.socket_handle > 0);
+    assert_true(conn.is_active);
 
     subscriber_list_item * sub = create_subscriber(conn);
     assert_non_null(sub);
 
-    assert_true(kprv_cbor_read(&(sub->conn), (void*)message, 256, TELEMETRY_EXTERNAL_PORT, &msg_size));
+    assert_true(kprv_socket_recv(&(sub->conn), message, 256, &msg_size));
 
     assert_true(telemetry_process_message(sub, (void*)message, msg_size));
 
     telemetry_server_cleanup();
 
     csp_thread_kill(client_task_handle);
-
-    kubos_csp_terminate();
 }
 
 

@@ -20,82 +20,73 @@
 
 static void test_client_connect(void ** arg)
 {
-    pubsub_conn conn;
+    socket_conn conn;
 
-    conn.conn_handle = NULL;
-
-    will_return(__wrap_kprv_subscriber_socket_connect, "");
-    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    will_return(__wrap_kprv_socket_client_connect, true);
 
     assert_true(telemetry_connect(&conn));
-    assert_non_null(conn.conn_handle);
+    assert_true(conn.socket_handle > 0);
+    assert_true(conn.is_active);
 }
 
 static void test_client_disconnect(void ** arg)
 {
-    pubsub_conn conn;
-    conn.conn_handle = NULL;
+    socket_conn conn;
 
-    will_return(__wrap_kprv_subscriber_socket_connect, "");
-    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    will_return(__wrap_kprv_socket_client_connect, true);
 
     telemetry_connect(&conn);
 
-    expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
-    expect_not_value(__wrap_kprv_send_csp, data, NULL);
-    will_return(__wrap_kprv_send_csp, true);
+    expect_not_value(__wrap_kprv_socket_send, conn->is_active, false);
+    expect_not_value(__wrap_kprv_socket_send, data, NULL);
+    will_return(__wrap_kprv_socket_send, true);
 
-    // expect_not_value(__wrap_csp_close, conn, NULL);
-    // will_return(__wrap_csp_close, CSP_ERR_NONE);
-
-    expect_not_value(__wrap_kprv_subscriber_socket_close, conn, NULL);
+    // will_return(__wrap_kprv_socket_close, true);
 
     assert_true(telemetry_disconnect(&conn));
-    assert_null(conn.conn_handle);
+    assert_false(conn.is_active);
 }
 
 static void test_client_subscribe(void ** arg)
 {
-    pubsub_conn conn;
+    socket_conn conn;
     
-    will_return(__wrap_kprv_subscriber_socket_connect, "");
-    will_return(__wrap_kprv_subscriber_socket_connect, true);
-    kprv_subscriber_socket_connect(&conn, 0, 0);
+    will_return(__wrap_kprv_socket_client_connect, true);
+    kprv_socket_client_connect(&conn, 0);
 
-    expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
-    expect_not_value(__wrap_kprv_send_csp, data, NULL);
-    will_return(__wrap_kprv_send_csp, true);
+    expect_not_value(__wrap_kprv_socket_send, conn->is_active, false);
+    expect_not_value(__wrap_kprv_socket_send, data, NULL);
+    will_return(__wrap_kprv_socket_send, true);
 
     assert_true(telemetry_subscribe(&conn, 0));
 }
 
 static void test_client_unsubscribe(void ** arg)
 {
-    pubsub_conn conn;
+    socket_conn conn;
     
-    will_return(__wrap_kprv_subscriber_socket_connect, "");
-    will_return(__wrap_kprv_subscriber_socket_connect, true);
-    kprv_subscriber_socket_connect(&conn, 0, 0);
+    will_return(__wrap_kprv_socket_client_connect, true);
+    kprv_socket_client_connect(&conn, 0);
 
-    expect_not_value(__wrap_kprv_send_csp, conn->conn_handle, NULL);
-    expect_not_value(__wrap_kprv_send_csp, data, NULL);
-    will_return(__wrap_kprv_send_csp, true);
+    expect_not_value(__wrap_kprv_socket_send, conn->is_active, false);
+    expect_not_value(__wrap_kprv_socket_send, data, NULL);
+    will_return(__wrap_kprv_socket_send, true);
 
     assert_true(telemetry_unsubscribe(&conn, 0));
 }
 
 static void test_client_read(void ** arg)
 {
-    pubsub_conn conn;
+    socket_conn conn;
     telemetry_packet packet;
 
-    will_return(__wrap_kprv_subscriber_socket_connect, "");
-    will_return(__wrap_kprv_subscriber_socket_connect, true);
-    kprv_subscriber_socket_connect(&conn, 0, 0);
+    will_return(__wrap_kprv_socket_client_connect, true);
+    kprv_socket_client_connect(&conn, 0);
 
-    expect_not_value(__wrap_kprv_subscriber_read, conn->conn_handle, NULL);
-    expect_not_value(__wrap_kprv_subscriber_read, buffer, NULL);
-    will_return(__wrap_kprv_subscriber_read, true);
+    expect_value(__wrap_kprv_socket_recv, conn->is_active, true);
+    expect_not_value(__wrap_kprv_socket_recv, buffer, NULL);
+    will_return(__wrap_kprv_socket_recv, "");
+    will_return(__wrap_kprv_socket_recv, true);
 
     assert_true(telemetry_read(&conn, &packet));
 }
