@@ -215,6 +215,10 @@ main() {
     else
         path="/home/usr/bin"
         is_app=1
+        if [[ "${run_level}" > 99 || "${run_level}" < 10 ]]; then
+            echo "Run level of ${run_level} outside of range (10-99). Setting to default."
+            run_level=50
+        fi
     fi
     
     # Send the file
