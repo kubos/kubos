@@ -51,6 +51,10 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
 	static struct sockaddr_in server;
 	static bool server_init = false;
 
+    if (socket_iface == NULL) {
+        return CSP_ERR_DRIVER;
+    }
+
 	if (server_init == false) {
 		server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
 		if (server_socket == -1) {
@@ -70,18 +74,19 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
 			return CSP_ERR_DRIVER;
 		}
 
-		listen(server_socket, SERVER_MAX_CONNECTIONS);
+		if (listen(server_socket, SERVER_MAX_CONNECTIONS) < 0) {
+            csp_log_error("Failed to listen\n");
+            return CSP_ERR_DRIVER;
+        }
 		c = sizeof(struct sockaddr_in);
 		server_init = true;
 	}
 
-	csp_log_info("Wait to accept\n");
 	socket_handle = accept(server_socket, NULL, NULL);
 	if (socket_handle < 0) {
 		csp_log_error("Accept failed %d\n", socket_handle);
 		return CSP_ERR_DRIVER;
 	}
-	csp_log_info("Accepted!\n");
 	socket_iface->socket_handle = socket_handle;
 	socket_iface->is_active = true;
 	return CSP_ERR_NONE;
@@ -91,13 +96,15 @@ static int socket_client_init(csp_socket_handle_t * socket_iface, uint16_t port)
 	int socket_handle;
 	struct sockaddr_in server;
 
+    if (socket_iface == NULL)
+        return CSP_ERR_DRIVER;
+
 	//Create socket
 	socket_handle = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
 	if (socket_handle == -1) {
 		csp_log_error("Could not create socket");
 		return CSP_ERR_DRIVER;
 	}
-	csp_log_info("Socket created");
 
 	server.sin_addr.s_addr = inet_addr(LOCAL_ADDRESS);
 	server.sin_family = AF_INET;
@@ -108,7 +115,6 @@ static int socket_client_init(csp_socket_handle_t * socket_iface, uint16_t port)
 		csp_log_error("Connect failed. Error");
 		return CSP_ERR_DRIVER;
 	}
-	csp_log_info("Connected\n");
 	socket_iface->socket_handle = socket_handle;
 	socket_iface->is_active = true;
 	return CSP_ERR_NONE;

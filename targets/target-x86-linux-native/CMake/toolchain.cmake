@@ -3,7 +3,8 @@
 cmake_minimum_required(VERSION 2.8)
 
 # default to C99
-set(CMAKE_C_FLAGS "-std=c99" CACHE STRING "")
+# set(CMAKE_C_FLAGS "-std=c99 -Wall -Wextra -pedantic -Wshadow  -Wstrict-overflow -fno-strict-aliasing" CACHE STRING "")
+set(CMAKE_C_FLAGS "-std=gnu99 -Wall -Wextra -Wshadow  -Wstrict-overflow -fno-strict-aliasing -Wno-unused-parameter" CACHE STRING "")
 set(CMAKE_CXX_FLAGS "-std=gnu++11" CACHE STRING "")
 
 # check that we are actually running on Linux, if we're not then we may pull in
