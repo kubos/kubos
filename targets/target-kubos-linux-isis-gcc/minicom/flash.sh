@@ -21,10 +21,9 @@
 # "Bytes Sent: 693248/1769379 BPS:8343 ETA 02:08"
 ##########################################################################
 progress() {
-    local line
     while sleep 1; do
-        line=$(cat flash.log | grep "Bytes Sent")
-        printf "${line}\r"
+        line=$(grep -m 1 -o -e "Bytes Sent.*\e" -e "Bytes Sent.*     " flash.log)
+        printf "\033[2K${line}\r"
     done   
 }
 
@@ -36,13 +35,15 @@ progress() {
 #   password
 #   is_upgrade
 # Arguments:
-#   name of file
+#   path of file to flash
 #   path to flash to
 # Returns:
 #   none
 ##########################################################################
 create_send_script() {
-    echo "Sending $1 to $2 on board..."
+    local path=$1
+    local name=$(basename ${path})
+    echo "Sending ${name} to $2 on board..."
     cat > send.tmp <<-EOF
 verbose on
 send root
@@ -58,10 +59,11 @@ expect {
 timeout 3600
 send "mkdir -p $2"
 send "cd $2"
-send "rm $1"
+send "rm -f ${name}"
+if ${is_app} = 1 send "rm -f /home/etc/init.d/S*${app_name}"
 send "rz -w 8192"
-! sz -w 8192 $1
-if ${is_upgrade} = 1 send "fw_setenv kubos_updatefile $1"
+! sz -w 8192 ${path}
+if ${is_upgrade} = 1 send "fw_setenv kubos_updatefile ${name}"
 send "exit"
 end:
 ! killall minicom -q
@@ -71,6 +73,7 @@ EOF
 ##########################################################################
 # Generate a default init script for the new application. 
 # File name will be 'S{run_level}{app_name}'
+# ex. S90MyProj
 #
 # Globals:
 #   app_name
@@ -91,7 +94,7 @@ create_init_script() {
 #!/bin/sh
 
 NAME=${app_name}
-PROG=/usr/sbin/\${NAME}
+PROG=/home/usr/bin/\${NAME}
 PID=/var/run/\${NAME}.pid
 
 case "\$1" in
@@ -128,6 +131,8 @@ esac
 
 exit \${rc}
 EOF
+
+    chmod 0755 ${init_script}
 }
 
 ##########################################################################
@@ -141,7 +146,7 @@ EOF
 #   0 - Transfer successful
 #   1 - Transfer failed
 ##########################################################################
-send_file {
+send_file() {
     # Run the transfer script
     minicom kubos -o -S send.tmp > flash.log
     
@@ -169,6 +174,7 @@ main() {
     start=$(date +%s)
     
     this_dir=$(cd "`dirname "$0"`"; pwd)
+    file=$1
     name=$(basename $1)
     is_upgrade=0
     is_app=0
@@ -185,14 +191,6 @@ main() {
     
     if [[ "${unamestr}" =~ "Linux" ]]; then
         device=`lsusb -d '0403:'`
-    fi
-    
-    # Test block. Remove before push
-    if [[ "${init}" == "True" ]]; then
-        echo "Creating init script"
-        #create_init_script
-    else
-        echo "Not creating init script. ${init}"
     fi
     
     if [[ "${device}" =~ "6001" ]]; then
@@ -220,7 +218,7 @@ main() {
     fi
     
     # Send the file
-    create_send_script ${name} ${path}
+    create_send_script ${file} ${path}
     send_file
     retval=$?
     
