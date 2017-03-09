@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+#include "telemetry-linux/telemetry.h"
 #include <cmocka.h>
 #include <tinycbor/cbor.h>
-#include "telemetry/telemetry.h"
-
 
 static void test_server_add_subscription(void ** arg)
 {
@@ -47,7 +46,7 @@ static void test_server_remove_subscription(void ** arg)
 
 static void test_server_create_subscriber(void ** arg)
 {
-    socket_conn conn;
+    socket_conn conn = { 0 };
     subscriber_list_item * sub = NULL;
 
     will_return(__wrap_kprv_socket_client_connect, true);
@@ -59,7 +58,8 @@ static void test_server_create_subscriber(void ** arg)
 
     assert_true(sub->active);
 
-    kprv_delete_subscribers();
+    will_return(__wrap_kprv_socket_close, true);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_destroy_subscriber(void ** arg)
@@ -75,7 +75,8 @@ static void test_server_destroy_subscriber(void ** arg)
     sub = create_subscriber(conn);
 
     assert_non_null(sub);
-    
+
+    will_return(__wrap_kprv_socket_close, true);
     destroy_subscriber(&sub);
 
     assert_null(sub);
@@ -107,7 +108,8 @@ static void test_server_no_client_packet(void ** arg)
     will_return(__wrap_kprv_socket_recv, false);
     assert_false(telemetry_get_packet(sub, &out_packet));
 
-    kprv_delete_subscribers();
+    will_return(__wrap_kprv_socket_close, true);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_publish_packet(void ** arg)
@@ -118,7 +120,6 @@ static void test_server_publish_packet(void ** arg)
         .data.i = 12
     };
     socket_conn conn;
-    telemetry_packet out_packet;
     subscriber_list_item * sub = NULL;
 
     will_return(__wrap_kprv_socket_client_connect, true);
@@ -133,7 +134,8 @@ static void test_server_publish_packet(void ** arg)
     will_return(__wrap_kprv_socket_send, true);
     assert_true(telemetry_publish_packet(sub, in_packet));
 
-    kprv_delete_subscribers();
+    will_return(__wrap_kprv_socket_close, true);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_publish_multiple_packets(void ** arg)
@@ -144,7 +146,6 @@ static void test_server_publish_multiple_packets(void ** arg)
     };
     int i = 0;
     socket_conn conn;
-    telemetry_packet out_packet;
     subscriber_list_item * sub = NULL;
 
     will_return(__wrap_kprv_socket_client_connect, true);
@@ -163,7 +164,8 @@ static void test_server_publish_multiple_packets(void ** arg)
         assert_true(telemetry_publish_packet(sub, in_packet));
     }
 
-    kprv_delete_subscribers();
+    will_return(__wrap_kprv_socket_close, true);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_subscribe_msg(void ** arg)
@@ -185,7 +187,8 @@ static void test_server_get_subscribe_msg(void ** arg)
 
     assert_true(kprv_has_topic(sub, subscribe_topic));
 
-    kprv_delete_subscribers();
+    will_return(__wrap_kprv_socket_close, true);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_unsubscribe_msg(void ** arg)
@@ -213,7 +216,8 @@ static void test_server_get_unsubscribe_msg(void ** arg)
 
     assert_false(kprv_has_topic(sub, subscribe_topic));
 
-    kprv_delete_subscribers();
+    will_return(__wrap_kprv_socket_close, true);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_disconnect_msg(void ** arg)
@@ -236,7 +240,8 @@ static void test_server_get_disconnect_msg(void ** arg)
 
     assert_false(sub->active);
 
-    kprv_delete_subscribers();
+    will_return(__wrap_kprv_socket_close, true);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_packet_msg(void ** arg)
@@ -259,12 +264,13 @@ static void test_server_get_packet_msg(void ** arg)
 
     assert_true(telemetry_process_message(sub, buffer, msg_size));
 
-    kprv_delete_subscribers();
+    will_return(__wrap_kprv_socket_close, true);
+    destroy_subscriber(&sub);
 }
 
 static void test_server_get_bad_msg(void ** arg)
 {
-    uint8_t buffer[100] = {0};
+    uint8_t buffer[100] = { 0 };
     int msg_size = 0;
     socket_conn conn;
     subscriber_list_item * sub = NULL;
@@ -276,7 +282,8 @@ static void test_server_get_bad_msg(void ** arg)
 
     assert_false(telemetry_process_message(sub, buffer, msg_size));
 
-    kprv_delete_subscribers();
+    will_return(__wrap_kprv_socket_close, true);
+    destroy_subscriber(&sub);
 }
 
 int main(void)
@@ -285,6 +292,7 @@ int main(void)
         cmocka_unit_test(test_server_add_subscription),
         cmocka_unit_test(test_server_remove_subscription),
         cmocka_unit_test(test_server_create_subscriber),
+        cmocka_unit_test(test_server_destroy_subscriber),
         cmocka_unit_test(test_server_no_client_packet),
         cmocka_unit_test(test_server_publish_packet),
         cmocka_unit_test(test_server_publish_multiple_packets),
@@ -293,7 +301,6 @@ int main(void)
         cmocka_unit_test(test_server_get_disconnect_msg),
         cmocka_unit_test(test_server_get_packet_msg),
         cmocka_unit_test(test_server_get_bad_msg),
-        cmocka_unit_test(test_server_destroy_subscriber)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

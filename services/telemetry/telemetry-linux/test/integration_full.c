@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-#include <ipc/pubsub.h>
-#include <ipc/csp.h>
-#include <csp/csp.h>
-#include <csp/drivers/socket.h>
-#include <csp/interfaces/csp_if_socket.h>
-#include <tinycbor/cbor.h>
-#include <telemetry/telemetry.h>
 #include <cmocka.h>
+#include <csp/csp.h>
+#include <ipc/csp.h>
+#include <ipc/pubsub_socket.h>
+#include <telemetry/telemetry.h>
+#include <telemetry-linux/telemetry.h>
+#include <tinycbor/cbor.h>
 
 #define TEST_INT_PORT 10
 #define TEST_EXT_PORT 20
@@ -38,32 +37,6 @@ static telemetry_packet out_pkt = {
     .data.i = 99
 };
 
-CSP_DEFINE_TASK(client_handler)
-{
-    subscriber_list_item * sub = NULL;
-    if (param == NULL)
-    {
-        printf("No conn found\r\n");
-        return CSP_TASK_RETURN;
-    }
-    
-
-    sub = (subscriber_list_item*)param;
-
-    printf("client rx thread start %d\r\n", sub->id);
-
-    while (sub->active == true)
-    {
-        client_rx_work(sub);
-    }
-
-    destroy_subscriber(&sub);
-
-    printf("client rx thread end %d\r\n", sub->id);
-
-    csp_thread_exit();
-}
-
 CSP_DEFINE_TASK(server_task)
 {
     socket_conn server_conn;
@@ -71,7 +44,7 @@ CSP_DEFINE_TASK(server_task)
 
     assert_true(kprv_socket_server_setup(&server_conn, TELEMETRY_SOCKET_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM));
 
-    while (test_running)
+    while (test_running && server_conn.is_active)
     {
         while (!kprv_socket_server_accept(&server_conn, &conn))
         {
@@ -85,10 +58,9 @@ CSP_DEFINE_TASK(server_task)
         if (sub != NULL)
         {
             csp_thread_create(client_handler, NULL, 1000, sub, 0, &(sub->rx_thread));
+            add_subscriber(sub);
         }
     }
-
-    // kprv_subscriber_socket_close(&conn);
 
     csp_thread_exit();
 }
@@ -96,8 +68,6 @@ CSP_DEFINE_TASK(server_task)
 static int setup(void ** arg)
 {
     test_running = true;
-    
-    kubos_csp_init(TEST_ADDRESS);
 
     csp_thread_create(server_task, "SERVER", 1024, NULL, 0, &server_task_handle);
 
@@ -113,11 +83,10 @@ static int teardown(void ** arg)
 
     csp_thread_kill(server_task_handle);
 
-    kubos_csp_terminate();
+    kprv_delete_subscribers();
 
     return 0;
 }
-
 
 static void test_subscriber(void ** arg)
 {
@@ -134,7 +103,7 @@ static void test_subscriber(void ** arg)
     assert_true(telemetry_publish(out_pkt));
 
     csp_sleep_ms(10);
-    
+
     assert_true(telemetry_read(&conn, &in_packet));
 
     assert_int_equal(in_packet.source.topic_id, out_pkt.source.topic_id);
@@ -142,7 +111,6 @@ static void test_subscriber(void ** arg)
 
     assert_true(telemetry_disconnect(&conn));
 }
-
 
 int main(void)
 {
