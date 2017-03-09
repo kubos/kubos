@@ -41,6 +41,8 @@ static subscriber_list_item * subscribers = NULL;
 
 CSP_DEFINE_TASK(client_rx_task);
 
+static uint16_t sub_id = 0;
+
 subscriber_list_item * create_subscriber(pubsub_conn conn)
 {
     subscriber_list_item * sub = NULL;
@@ -50,6 +52,7 @@ subscriber_list_item * create_subscriber(pubsub_conn conn)
         memcpy(&(sub->conn), &conn, sizeof(pubsub_conn));
         sub->packet_queue = csp_queue_create(MESSAGE_QUEUE_SIZE, sizeof(telemetry_packet));
         sub->active = true;
+        sub->id = sub_id++;
         LL_APPEND(subscribers, sub);
     }
     return sub;
@@ -61,8 +64,7 @@ void destroy_subscriber(subscriber_list_item ** sub)
 
     kprv_delete_topics(*sub);
 
-    csp_close((*sub)->conn.conn_handle);
-    (*sub)->conn.conn_handle = NULL;
+    kprv_subscriber_socket_close(&((*sub)->conn));
 
     csp_queue_remove((*sub)->packet_queue);
 
@@ -253,7 +255,7 @@ bool telemetry_process_message(subscriber_list_item * sub, void * buffer, int bu
                 }
                 break;
             case MESSAGE_TYPE_DISCONNECT:
-                printf("got disco msg\r\n");
+                printf("got disco msg %d\r\n", sub->id);
                 sub->active = false;
                 ret = true;
                 break;
@@ -269,87 +271,97 @@ bool client_rx_work(subscriber_list_item * sub)
     telemetry_packet packet;
     uint8_t msg[256];
     uint16_t msg_size;
+    uint8_t test_msg[] = "ryan";
     bool ret = false;
 
-    printf("Check for client packets %d\r\n", telemetry_get_num_packets(sub));
-    while (telemetry_get_packet(sub, &packet))
+    if (sub != NULL)
     {
-        ret = kprv_send_csp(&(sub->conn), (void*)&packet, sizeof(telemetry_packet));
-        if (!ret)
-            break;
-    }
+        printf("Check for client packets %d on %d\r\n", telemetry_get_num_packets(sub), sub->id);
+        // while (telemetry_get_packet(sub, &packet))
+        while (telemetry_get_num_packets(sub) > 0)
+        {
+            if (telemetry_get_packet(sub, &packet))
+            {
+                ret = kprv_send_csp(&(sub->conn), (void*)&packet, sizeof(telemetry_packet));
+                if (!ret)
+                    break;
+            }
+        }
 
-    if (kprv_cbor_read(&(sub->conn), (void*)msg, 256, TELEMETRY_EXTERNAL_PORT, &msg_size))
-    {
-        ret = telemetry_process_message(sub, (void*)msg, msg_size);
+        if (kprv_cbor_read(&(sub->conn), (void*)msg, 256, TELEMETRY_EXTERNAL_PORT, &msg_size))
+        {
+            ret = telemetry_process_message(sub, (void*)msg, msg_size);
+        }
+
+        // kprv_send_csp(&(sub->conn), (void*)test_msg, 5);
     }
 
     return ret;
 }
 
-CSP_DEFINE_TASK(client_rx_task)
-{
-    subscriber_list_item * sub = NULL;
-    if (param == NULL)
-    {
-        printf("No conn found\r\n");
-        return CSP_TASK_RETURN;
-    }
-    printf("client rx thread start\r\n");
+// CSP_DEFINE_TASK(client_rx_task)
+// {
+//     subscriber_list_item * sub = NULL;
+//     if (param == NULL)
+//     {
+//         printf("No conn found\r\n");
+//         return CSP_TASK_RETURN;
+//     }
+//     printf("client rx thread start\r\n");
 
-    sub = (subscriber_list_item*)param;
+//     sub = (subscriber_list_item*)param;
 
-    while (sub->active == true)
-    {
-        if (!client_rx_work(sub))
-            break;
-    }
+//     while (sub->active == true)
+//     {
+//         if (!client_rx_work(sub))
+//             break;
+//     }
 
-    destroy_subscriber(&sub);
+//     destroy_subscriber(&sub);
 
-    printf("client rx thread end\r\n");
+//     printf("client rx thread end\r\n");
 
-    return CSP_TASK_RETURN;
-}
+//     return CSP_TASK_RETURN;
+// }
 
 
-CSP_DEFINE_TASK(telemetry_rx_task)
-{
-    printf("begin socket comms\r\n");
-    static csp_socket_t *sock;
+// CSP_DEFINE_TASK(telemetry_rx_task)
+// {
+//     printf("begin socket comms\r\n");
+//     static csp_socket_t *sock;
 
-    /* Create socket and listen for incoming connections */
-    sock = csp_socket(CSP_SO_NONE);
-    csp_bind(sock, TELEMETRY_EXTERNAL_PORT);
-    csp_listen(sock, 20);
+//     /* Create socket and listen for incoming connections */
+//     sock = csp_socket(CSP_SO_NONE);
+//     csp_bind(sock, TELEMETRY_EXTERNAL_PORT);
+//     csp_listen(sock, 20);
 
-    printf("Listening for conn\r\n");
+//     printf("Listening for conn\r\n");
 
-    pubsub_conn conn;
-     /* Super loop */
-    while (1) {
+//     pubsub_conn conn;
+//      /* Super loop */
+//     while (1) {
         
-        if (!kprv_server_accept(sock, &conn))
-        {
-            continue;
-        }
+//         if (!kprv_server_accept(sock, &conn))
+//         {
+//             continue;
+//         }
 
-        printf("Got csp socket - spawning thread\r\n");
-        subscriber_list_item * sub = create_subscriber(conn);
-        if (sub != NULL)
-        {
-            csp_thread_create(client_rx_task, NULL, 1000, sub, 0, &(sub->rx_thread));
-        }
-    }
+//         printf("Got csp socket - spawning thread\r\n");
+//         subscriber_list_item * sub = create_subscriber(conn);
+//         if (sub != NULL)
+//         {
+//             csp_thread_create(client_rx_task, NULL, 1000, sub, 0, &(sub->rx_thread));
+//         }
+//     }
 
-    return CSP_TASK_RETURN;
-}
+//     return CSP_TASK_RETURN;
+// }
 
 void telemetry_server_init(void)
 {
-    csp_thread_create(telemetry_rx_task, "TELEM_RX", TELEMETRY_RX_THREAD_STACK_SIZE, NULL, TELEMETRY_RX_THREAD_PRIORITY, &telem_rx_handle);
+    // csp_thread_create(telemetry_rx_task, "TELEM_RX", TELEMETRY_RX_THREAD_STACK_SIZE, NULL, TELEMETRY_RX_THREAD_PRIORITY, &telem_rx_handle);
 
-    socket = kprv_server_setup(TELEMETRY_INTERNAL_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
+    // socket = kprv_server_setup(TELEMETRY_INTERNAL_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM);
 }
 
 void telemetry_server_cleanup(void)

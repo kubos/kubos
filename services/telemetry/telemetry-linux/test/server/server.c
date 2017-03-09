@@ -89,6 +89,33 @@ static void test_server_destroy_subscriber(void ** arg)
     assert_null(sub);
 }
 
+static void test_server_no_client_packet(void ** arg)
+{
+    telemetry_packet in_packet = {
+        .source.topic_id = 5,
+        .source.data_type = TELEMETRY_TYPE_INT,
+        .data.i = 12
+    };
+    pubsub_conn conn;
+    telemetry_packet out_packet;
+    subscriber_list_item * sub = NULL;
+
+    will_return(__wrap_kprv_subscriber_socket_connect, "");
+    will_return(__wrap_kprv_subscriber_socket_connect, true);
+    kprv_subscriber_socket_connect(&conn, 0, 0);
+
+    sub = create_subscriber(conn);
+
+    kprv_add_topic(sub, in_packet.source.topic_id);
+
+    assert_int_equal(telemetry_get_num_packets(sub), 0);
+    assert_false(telemetry_get_packet(sub, &out_packet));
+
+    expect_not_value(__wrap_csp_close, conn, NULL);
+    will_return(__wrap_csp_close, CSP_ERR_NONE);
+    kprv_delete_subscribers();
+}
+
 static void test_server_publish_packet(void ** arg)
 {
     telemetry_packet in_packet = {
@@ -115,6 +142,7 @@ static void test_server_publish_packet(void ** arg)
     assert_int_equal(in_packet.data.i, out_packet.data.i);
 
     assert_int_equal(telemetry_get_num_packets(sub), 0);
+    assert_false(telemetry_get_packet(sub, &out_packet));
 
     expect_not_value(__wrap_csp_close, conn, NULL);
     will_return(__wrap_csp_close, CSP_ERR_NONE);
@@ -295,6 +323,7 @@ int main(void)
         cmocka_unit_test(test_server_add_subscription),
         cmocka_unit_test(test_server_remove_subscription),
         cmocka_unit_test(test_server_create_subscriber),
+        cmocka_unit_test(test_server_no_client_packet),
         cmocka_unit_test(test_server_publish_packet),
         cmocka_unit_test(test_server_publish_multiple_packets),
         cmocka_unit_test(test_server_get_subscribe_msg),

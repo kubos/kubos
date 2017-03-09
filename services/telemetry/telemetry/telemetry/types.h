@@ -103,6 +103,7 @@ typedef struct topic_list_item
 typedef struct subscriber_list_item
 {
     bool active;
+    uint16_t id;
     pubsub_conn conn;
     csp_queue_handle_t packet_queue;
     topic_list_item * topics;
