@@ -21,8 +21,8 @@
  * @{
  */
 
-#ifndef PUBSUB_H
-#define PUBSUB_H
+#ifndef PUBSUB_SOCKET_H
+#define PUBSUB_SOCKET_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -43,9 +43,11 @@ bool kprv_socket_server_accept(socket_conn * conn);
 
 bool kprv_socket_client_connect(socket_conn * conn, uint16_t port);
 
+bool kprv_socket_close(socket_conn * conn);
+
 bool kprv_socket_send(socket_conn * conn, uint8_t * data_buffer, uint32_t data_length);
 
-bool kprv_socket_recv(socket_conn * conn, uint8_t * data_buffer, uint32_t data_length);
+bool kprv_socket_recv(socket_conn * conn, uint8_t * data_buffer, uint32_t data_length, uint32_t * length_read);
 
 #endif
 

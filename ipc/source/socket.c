@@ -122,15 +122,39 @@ bool kprv_socket_send(socket_conn * conn, uint8_t * data_buffer, uint32_t data_l
 }
 
 
-bool kprv_socket_recv(socket_conn * conn, uint8_t * data_buffer, uint32_t data_length)
+bool kprv_socket_recv(socket_conn * conn, uint8_t * data_buffer, uint32_t data_length, uint32_t * length_read)
 {
-    if ((conn == NULL) || (data_buffer == NULL) || (conn->is_active == false))
+    if ((conn == NULL) || (length_read == NULL) || (data_buffer == NULL) || (conn->is_active == false))
     {
         return false;
     }
 
     int recv_size = recv(conn->socket_handle, (void *)data_buffer, data_length, 0);
     if (recv_size < 0) {
+        return false;
+    }
+
+    *length_read = recv_size;
+
+    return true;
+}
+
+bool kprv_socket_close(socket_conn * conn)
+{
+    if (conn == NULL)
+    {
+        return false;
+    }
+
+    conn->is_active = false;
+
+    if (shutdown(conn->socket_handle, SHUT_RDWR) != 0)
+    {
+        return false;
+    }
+
+    if (close(conn->socket_handle) != 0)
+    {
         return false;
     }
 
