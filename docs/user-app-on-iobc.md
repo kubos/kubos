@@ -31,7 +31,7 @@ In order to build a project for the ISIS-OBC, you'll need to create a Kubos SDK 
 
 Ideally, you should not be using the default root user password.  If you've changed it, you'll need to pass the new password to the Kubos flash utility
 through the config.json file, which should be located in the top-level directory of your project.  You'll need to create the file if it doesn't already
-exist.  Update the system>password parameter with the password to use.
+exist.  Update the system.password parameter with the password to use.
 
 If you're creating a brand new config.json file, you can just copy and paste the text below (*newpass* should be your desired password):
 
@@ -40,6 +40,16 @@ If you're creating a brand new config.json file, you can just copy and paste the
             "password" : "newpass"
         }
     }
+
+## Setting Initialization Configuration {#init-config}
+
+By default, an initialization script will be generated and installed during the flashing process. This script will follow the naming convention of "S{runLevel}{applicationName}",
+where "runLevel" is the initialization priority order of the script. All user application init scripts will be run after all of the Kubos init scripts, but within the user
+scripts, the scripts with the lowest run level will be executed first. So an application with a run level of 10 will be initialized before an application with a run level of 50.
+
+To control this there are two config.json options:
+* system.initAtBoot - (Default: True) Tells the Kubos SDK whether to generate and install an initialization script.
+* system.runLevel - (Default: 50. Range: 10-99) Sets priority of initialization script.
     
 ## Updating the USB Connection {#updating-the-usb-connection}
 
