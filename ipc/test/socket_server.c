@@ -23,7 +23,8 @@
 
 static void test_server_setup(void ** arg)
 {
-    assert_true(kprv_socket_server_setup(TEST_PORT, 1));
+    socket_conn conn;
+    assert_true(kprv_socket_server_setup(&conn, TEST_PORT, 1));
 }
 
 int main(void)

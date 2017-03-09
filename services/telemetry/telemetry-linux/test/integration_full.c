@@ -66,13 +66,14 @@ CSP_DEFINE_TASK(client_handler)
 
 CSP_DEFINE_TASK(server_task)
 {
+    socket_conn server_conn;
     socket_conn conn;
 
-    assert_true(kprv_socket_server_setup(TELEMETRY_SOCKET_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM));
+    assert_true(kprv_socket_server_setup(&server_conn, TELEMETRY_SOCKET_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM));
 
     while (test_running)
     {
-        while (!kprv_socket_server_accept(&conn))
+        while (!kprv_socket_server_accept(&server_conn, &conn))
         {
             continue;
         }

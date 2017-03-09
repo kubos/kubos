@@ -53,14 +53,15 @@ CSP_DEFINE_TASK(client_task)
 static void test_server(void ** arg)
 {
     csp_thread_handle_t client_task_handle;
+    socket_conn server_conn;
     socket_conn conn;
     uint8_t message[256];
     uint32_t msg_size;
 
     csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);
 
-    assert_true(kprv_socket_server_setup(TELEMETRY_SOCKET_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM));
-    assert_true(kprv_socket_server_accept(&conn));
+    assert_true(kprv_socket_server_setup(&server_conn, TELEMETRY_SOCKET_PORT, TELEMETRY_SUBSCRIBERS_MAX_NUM));
+    assert_true(kprv_socket_server_accept(&server_conn, &conn));
     assert_true(conn.socket_handle > 0);
     assert_true(conn.is_active);
 

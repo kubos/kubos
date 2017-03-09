@@ -26,20 +26,25 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 /**
  * PubSub connection structure.
  */
 typedef struct
 {
+    /*! Status flag */
+    bool is_active;
     /*! Raw network connection handle - today this is a csp connection */
     int socket_handle;
-    bool is_active;
+    /*! Socket address info structure */
+    struct sockaddr_in socket_addr;
 } socket_conn;
 
-bool kprv_socket_server_setup(uint16_t port, uint8_t num_connections);
+bool kprv_socket_server_setup(socket_conn * conn, uint16_t port, uint8_t num_connections);
 
-bool kprv_socket_server_accept(socket_conn * conn);
+bool kprv_socket_server_accept(socket_conn * server_conn, socket_conn * client_conn);
 
 bool kprv_socket_client_connect(socket_conn * conn, uint16_t port);
 

@@ -23,50 +23,54 @@
 
 #define LOCAL_ADDRESS "127.0.0.1"
 
-static int server_socket;
-static struct sockaddr_in server;
-
-bool kprv_socket_server_setup(uint16_t port, uint8_t num_connections)
-{
-    server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
-    if (server_socket == -1)
-    {
-        return false;
-    }
-
-    server.sin_addr.s_addr = inet_addr(LOCAL_ADDRESS);
-    server.sin_family = AF_INET;
-    server.sin_port = htons(port);
-    if (bind(server_socket, (struct sockaddr *)&server, sizeof(server)) < 0)
-    {
-        return false;
-    }
-
-    if (listen(server_socket, num_connections) < 0)
-    {
-        return false;
-    }
-    
-    return true;
-}
-
-bool kprv_socket_server_accept(socket_conn * conn)
+bool kprv_socket_server_setup(socket_conn * conn, uint16_t port, uint8_t num_connections)
 {
     if (conn == NULL)
     {
         return false;
     }
 
-    int socket_handle = accept(server_socket, NULL, NULL);
-    if (socket_handle < 0)
+    if ((conn->socket_handle = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)) == -1)
     {
-        conn->is_active = false;
         return false;
     }
 
-    conn->socket_handle = socket_handle;
+    conn->socket_addr.sin_addr.s_addr = inet_addr(LOCAL_ADDRESS);
+    conn->socket_addr.sin_family = AF_INET;
+    conn->socket_addr.sin_port = htons(port);
+
+    if (bind(conn->socket_handle, (struct sockaddr *)&(conn->socket_addr), sizeof(struct sockaddr_in)) < 0)
+    {
+        return false;
+    }
+
+    if (listen(conn->socket_handle, num_connections) < 0)
+    {
+        return false;
+    }
 
     conn->is_active = true;
+    
+    return true;
+}
+
+bool kprv_socket_server_accept(socket_conn * server_conn, socket_conn * client_conn)
+{
+    if ((server_conn == NULL) || (client_conn == NULL))
+    {
+        return false;
+    }
+
+    int socket_handle = accept(server_conn->socket_handle, NULL, NULL);
+    if (socket_handle < 0)
+    {
+        client_conn->is_active = false;
+        return false;
+    }
+
+    client_conn->socket_handle = socket_handle;
+
+    client_conn->is_active = true;
 
     return true;
 }

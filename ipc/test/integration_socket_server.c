@@ -55,27 +55,27 @@ CSP_DEFINE_TASK(client_task)
 static void test_socket_server(void ** arg)
 {
     csp_thread_handle_t client_task_handle;
-    socket_conn conn;
+    socket_conn server_conn, client_conn;
     uint32_t bytes_recv = 0;
 
     csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);
 
-    assert_true(kprv_socket_server_setup(TEST_SOCKET_PORT, 20));
+    assert_true(kprv_socket_server_setup(&server_conn, TEST_SOCKET_PORT, 20));
 
-    assert_true(kprv_socket_server_accept(&conn));
-    assert_true(conn.socket_handle > 0);
-    assert_true(conn.is_active);
+    assert_true(kprv_socket_server_accept(&server_conn, &client_conn));
+    assert_true(client_conn.socket_handle > 0);
+    assert_true(client_conn.is_active);
 
-    assert_true(kprv_socket_recv(&conn, recv_msg, 12, &bytes_recv));
+    assert_true(kprv_socket_recv(&client_conn, recv_msg, 12, &bytes_recv));
 
     assert_int_equal(bytes_recv, 12);
 
     assert_string_equal(send_msg, recv_msg);
 
-    assert_true(kprv_socket_close(&conn));
-    assert_false(conn.is_active);
+    assert_true(kprv_socket_close(&client_conn));
+    assert_false(client_conn.is_active);
 
-    assert_false(kprv_socket_recv(&conn, recv_msg, 12, &bytes_recv));
+    assert_false(kprv_socket_recv(&client_conn, recv_msg, 12, &bytes_recv));
 
     csp_thread_kill(client_task_handle);
 }

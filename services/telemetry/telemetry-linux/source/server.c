@@ -31,8 +31,6 @@
 /* Handle for telemetry packet receiving thread */
 static csp_thread_handle_t telem_rx_handle;
 
-/* Private CSP socket used for telemetry connections */
-static csp_socket_t * socket = NULL;
 
 /* Initial element in list of telemetry subscribers */
 static subscriber_list_item * subscribers = NULL;
