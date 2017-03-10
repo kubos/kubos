@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <csp/csp.h>
 #include <csp/arch/csp_queue.h>
-
+#include <csp/arch/csp_thread.h>
 #include <ipc/socket.h>
 
 /**

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "telemetry-linux/telemetry.h"
-#include "telemetry/telemetry.h"
+#include "telemetry-linux/msg.h"
+#include "telemetry/types.h"
 #include <cmocka.h>
 #include <tinycbor/cbor.h>
 

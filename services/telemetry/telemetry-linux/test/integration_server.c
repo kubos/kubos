@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "telemetry-linux/telemetry.h"
 #include <cmocka.h>
 #include <csp/arch/csp_thread.h>
 #include <csp/csp.h>
@@ -22,6 +21,7 @@
 #include <csp/interfaces/csp_if_socket.h>
 #include <ipc/csp.h>
 #include <ipc/pubsub.h>
+#include <telemetry-linux/server.h>
 #include <telemetry/telemetry.h>
 #include <tinycbor/cbor.h>
 
@@ -65,14 +65,14 @@ static void test_server(void ** arg)
     assert_true(conn.socket_handle > 0);
     assert_true(conn.is_active);
 
-    subscriber_list_item * sub = create_subscriber(conn);
+    subscriber_list_item * sub = kprv_subscriber_init(conn);
     assert_non_null(sub);
 
     assert_true(kprv_socket_recv(&(sub->conn), message, 256, &msg_size));
 
     assert_true(telemetry_process_message(sub, (void *)message, msg_size));
 
-    destroy_subscriber(&sub);
+    kprv_subscriber_destroy(&sub);
 
     telemetry_server_cleanup();
 

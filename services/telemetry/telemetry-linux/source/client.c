@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "telemetry-linux/telemetry.h"
+#include <telemetry-linux/msg.h>
 #include <telemetry/config.h>
 #include <telemetry/telemetry.h>
 

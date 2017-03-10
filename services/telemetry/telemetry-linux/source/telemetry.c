@@ -25,7 +25,7 @@
 // #include <csp/interfaces/csp_if_socket.h>
 // #include <csp/drivers/socket.h>
 
-// bool kprv_has_topic(const subscriber_list_item * sub, uint16_t topic_id);
+// bool kprv_subscriber_has_topic(const subscriber_list_item * sub, uint16_t topic_id);
 
 // /**
 //  * Iterates though all open telemetry connections and
@@ -145,14 +145,14 @@
 //     LL_FOREACH_SAFE(subscribers, current, next)
 //     {
 //         pubsub_conn subscriber = current->server_conn;
-//         if (kprv_has_topic(current, packet.source.topic_id))
+//         if (kprv_subscriber_has_topic(current, packet.source.topic_id))
 //         {
 //             kprv_send_csp(&subscriber, (void*)&packet, sizeof(telemetry_packet));
 //         }
 //     }
 // }
 
-// subscriber_list_item * telemetry_add_subscriber(pubsub_conn server_conn, pubsub_conn client_conn)
+// subscriber_list_item * telemetry_kprv_subscriber_add(pubsub_conn server_conn, pubsub_conn client_conn)
 // {
 //     subscriber_list_item * new_sub = NULL;
 //     if ((new_sub = malloc(sizeof(subscriber_list_item))) != NULL)
@@ -176,7 +176,7 @@
 //     return NULL;
 // }
 
-// bool kprv_add_topic(subscriber_list_item * sub, uint16_t topic_id)
+// bool kprv_subscriber_add_topic(subscriber_list_item * sub, uint16_t topic_id)
 // {
 //     bool ret = false;
 //     if (sub != NULL)
@@ -197,7 +197,7 @@
 //     return (a->topic_id != b->topic_id);
 // }
 
-// bool kprv_has_topic(const subscriber_list_item * sub, uint16_t topic_id)
+// bool kprv_subscriber_has_topic(const subscriber_list_item * sub, uint16_t topic_id)
 // {
 //     bool ret = false;
 //     if (sub != NULL)
@@ -217,7 +217,7 @@
 //     return ret;
 // }
 
-// bool kprv_remove_topic(subscriber_list_item * sub, uint16_t topic_id)
+// bool kprv_subscriber_remove_topic(subscriber_list_item * sub, uint16_t topic_id)
 // {
 //     bool ret = false;
 //     if (sub != NULL)
@@ -245,7 +245,7 @@
 //         subscriber_list_item * sub = kprv_get_subscriber(client_conn);
 //         if (sub != NULL)
 //         {
-//             ret = kprv_add_topic(sub, topic_id);
+//             ret = kprv_subscriber_add_topic(sub, topic_id);
 //         }
 //     }
 //     return ret;
@@ -259,7 +259,7 @@
 //         subscriber_list_item * sub = kprv_get_subscriber(client_conn);
 //         if (sub != NULL)
 //         {
-//             ret = kprv_remove_topic(sub, topic_id);
+//             ret = kprv_subscriber_remove_topic(sub, topic_id);
 //         }
 //     }
 //     return ret;

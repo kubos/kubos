@@ -18,7 +18,7 @@
 #include <csp/csp.h>
 #include <ipc/csp.h>
 #include <ipc/socket.h>
-#include <telemetry-linux/telemetry.h>
+#include <telemetry-linux/server.h>
 #include <telemetry/telemetry.h>
 #include <tinycbor/cbor.h>
 
@@ -54,11 +54,11 @@ CSP_DEFINE_TASK(server_task)
         assert_true(conn.socket_handle > 0);
         assert_true(conn.is_active);
 
-        subscriber_list_item * sub = create_subscriber(conn);
+        subscriber_list_item * sub = kprv_subscriber_init(conn);
         if (sub != NULL)
         {
             csp_thread_create(client_handler, NULL, 1000, sub, 0, &(sub->rx_thread));
-            add_subscriber(sub);
+            kprv_subscriber_add(sub);
         }
     }
 
@@ -83,7 +83,7 @@ static int teardown(void ** arg)
 
     csp_thread_kill(server_task_handle);
 
-    kprv_delete_subscribers();
+    kprv_delete_all_subscribers();
 
     return 0;
 }
