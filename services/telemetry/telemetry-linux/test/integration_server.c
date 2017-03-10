@@ -22,6 +22,7 @@
 #include <csp/arch/csp_thread.h>
 #include <tinycbor/cbor.h>
 #include <telemetry/telemetry.h>
+#include "telemetry-linux/telemetry.h"
 #include <cmocka.h>
 
 #define TEST_INT_PORT 10

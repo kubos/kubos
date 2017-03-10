@@ -44,15 +44,15 @@ typedef struct
 
 bool kprv_socket_server_setup(socket_conn * conn, uint16_t port, uint8_t num_connections);
 
-bool kprv_socket_server_accept(socket_conn * server_conn, socket_conn * client_conn);
+bool kprv_socket_server_accept(const socket_conn * server_conn, socket_conn * client_conn);
 
 bool kprv_socket_client_connect(socket_conn * conn, uint16_t port);
 
 bool kprv_socket_close(socket_conn * conn);
 
-bool kprv_socket_send(socket_conn * conn, uint8_t * data_buffer, uint32_t data_length);
+bool kprv_socket_send(const socket_conn * conn, const uint8_t * data_buffer, uint32_t data_length);
 
-bool kprv_socket_recv(socket_conn * conn, uint8_t * data_buffer, uint32_t data_length, uint32_t * length_read);
+bool kprv_socket_recv(const socket_conn * conn, uint8_t * data_buffer, uint32_t data_length, uint32_t * length_read);
 
 #endif
 

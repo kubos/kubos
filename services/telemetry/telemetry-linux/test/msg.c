@@ -17,6 +17,7 @@
 #include <cmocka.h>
 #include <tinycbor/cbor.h>
 #include "telemetry/telemetry.h"
+#include "telemetry-linux/telemetry.h"
 
 static void test_packet_msg(void ** arg)
 {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <telemetry/telemetry.h>
+#include "telemetry-linux/telemetry.h"
 #include <tinycbor/cbor.h>
 
 bool telemetry_parse_packet_msg(uint8_t * buffer, int buffer_size, telemetry_packet * packet)

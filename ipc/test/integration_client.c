@@ -32,7 +32,6 @@ static char send_msg[] = "test123test";
 
 CSP_DEFINE_TASK(server_task)
 {
-    csp_socket_t * int_socket = NULL;
     csp_socket_t * ext_socket = NULL;
     char server_recv_msg[12];
     pubsub_conn conn = {

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-#include "ipc/pubsub_socket.h"
 #include "ipc/config.h"
+#include "ipc/pubsub_socket.h"
 
 #include <arpa/inet.h>
-#include <sys/socket.h>
 #include <stddef.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 #define LOCAL_ADDRESS "127.0.0.1"
 
@@ -50,11 +51,11 @@ bool kprv_socket_server_setup(socket_conn * conn, uint16_t port, uint8_t num_con
     }
 
     conn->is_active = true;
-    
+
     return true;
 }
 
-bool kprv_socket_server_accept(socket_conn * server_conn, socket_conn * client_conn)
+bool kprv_socket_server_accept(const socket_conn * server_conn, socket_conn * client_conn)
 {
     if ((server_conn == NULL) || (client_conn == NULL))
     {
@@ -93,23 +94,23 @@ bool kprv_socket_client_connect(socket_conn * conn, uint16_t port)
     }
 
     server.sin_addr.s_addr = inet_addr(LOCAL_ADDRESS);
-	server.sin_family = AF_INET;
-	server.sin_port = htons(port);
+    server.sin_family = AF_INET;
+    server.sin_port = htons(port);
 
-	//Connect to remote server
-	if (connect(socket_handle, (struct sockaddr *)&server, sizeof(server)) != 0)
+    //Connect to remote server
+    if (connect(socket_handle, (struct sockaddr *)&server, sizeof(server)) != 0)
     {
-		conn->is_active = false;
+        conn->is_active = false;
         return false;
-	}
+    }
 
     conn->socket_handle = socket_handle;
     conn->is_active = true;
-    
+
     return true;
 }
 
-bool kprv_socket_send(socket_conn * conn, uint8_t * data_buffer, uint32_t data_length)
+bool kprv_socket_send(const socket_conn * conn, const uint8_t * data_buffer, uint32_t data_length)
 {
     if ((conn == NULL) || (data_buffer == NULL) || (conn->is_active == false))
     {
@@ -125,8 +126,7 @@ bool kprv_socket_send(socket_conn * conn, uint8_t * data_buffer, uint32_t data_l
     return true;
 }
 
-
-bool kprv_socket_recv(socket_conn * conn, uint8_t * data_buffer, uint32_t data_length, uint32_t * length_read)
+bool kprv_socket_recv(const socket_conn * conn, uint8_t * data_buffer, uint32_t data_length, uint32_t * length_read)
 {
     if ((conn == NULL) || (length_read == NULL) || (data_buffer == NULL) || (conn->is_active == false))
     {
@@ -164,5 +164,3 @@ bool kprv_socket_close(socket_conn * conn)
 
     return true;
 }
-
-

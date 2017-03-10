@@ -134,7 +134,8 @@ int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dri
 	socket_iface->mtu = SOCKET_BUFFER_SIZE;
 
 	/* Start RX thread */
-	int ret = csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &(socket_driver->rx_thread_handle));
+	if (csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &(socket_driver->rx_thread_handle)) != 0)
+        return CSP_ERR_DRIVER;
 
 	/* Register interface */
 	csp_iflist_add(socket_iface);

@@ -275,8 +275,7 @@ bool client_rx_work(subscriber_list_item * sub)
 {
     telemetry_packet packet;
     uint8_t msg[256];
-    uint16_t msg_size;
-    uint8_t test_msg[] = "ryan";
+    uint32_t msg_size;
     bool ret = false;
 
     if (sub != NULL)

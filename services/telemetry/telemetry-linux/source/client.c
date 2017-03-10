@@ -15,6 +15,7 @@
  */
 #include <telemetry/telemetry.h>
 #include <telemetry/config.h>
+#include "telemetry-linux/telemetry.h"
 
 #include <csp/arch/csp_queue.h>
 #include <csp/arch/csp_semaphore.h>

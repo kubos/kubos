@@ -49,13 +49,11 @@ CSP_DEFINE_TASK(client_task)
 
 static void test_socket_server(void ** arg)
 {
-    csp_socket_t * int_socket = NULL;
     csp_socket_t * ext_socket = NULL;
     csp_thread_handle_t client_task_handle;
     pubsub_conn conn = {
         .conn_handle = NULL
     };
-    char buffer[10];
 
     kubos_csp_init(TEST_ADDRESS);
 

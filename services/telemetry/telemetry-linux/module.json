@@ -8,11 +8,6 @@
       "telemetry":"kubostech/telemetry",
       "tinycbor":"kubostech/tinycbor"
     },
-    "targetDependencies":{
-      "kubos-rt":{
-        "kubos-rt":"kubostech/kubos-rt"
-      }
-    },
     "testDependencies": {
         "cmocka": "kubostech/cmocka"
     }

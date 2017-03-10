@@ -44,6 +44,7 @@ int start_encode_msg(CborEncoder * encoder, CborEncoder * container, uint8_t * b
 int end_encode_msg(uint8_t * buffer, CborEncoder * encoder, CborEncoder * container);
 bool telemetry_parse_msg_type(uint8_t * buffer, int buffer_size, telemetry_message_type * req);
 
+bool add_subscriber(subscriber_list_item * sub);
 subscriber_list_item * create_subscriber(socket_conn conn);
 void destroy_subscriber(subscriber_list_item ** sub);
 bool telemetry_get_packet(subscriber_list_item * sub, telemetry_packet * packet);
