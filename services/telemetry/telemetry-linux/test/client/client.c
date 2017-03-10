@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include "telemetry/telemetry.h"
 #include <cmocka.h>
 #include <tinycbor/cbor.h>
-#include "telemetry/telemetry.h"
 
 static void test_client_connect(void ** arg)
 {
@@ -50,7 +50,7 @@ static void test_client_disconnect(void ** arg)
 static void test_client_subscribe(void ** arg)
 {
     socket_conn conn;
-    
+
     will_return(__wrap_kprv_socket_client_connect, true);
     kprv_socket_client_connect(&conn, 0);
 
@@ -64,7 +64,7 @@ static void test_client_subscribe(void ** arg)
 static void test_client_unsubscribe(void ** arg)
 {
     socket_conn conn;
-    
+
     will_return(__wrap_kprv_socket_client_connect, true);
     kprv_socket_client_connect(&conn, 0);
 

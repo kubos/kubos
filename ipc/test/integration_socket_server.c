@@ -15,8 +15,8 @@
  */
 
 #include <cmocka.h>
-#include <csp/csp.h>
 #include <csp/arch/csp_thread.h>
+#include <csp/csp.h>
 #include <ipc/pubsub_socket.h>
 #include <tinycbor/cbor.h>
 

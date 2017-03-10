@@ -24,9 +24,9 @@
 #ifndef PUBSUB_SOCKET_H
 #define PUBSUB_SOCKET_H
 
+#include <arpa/inet.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <arpa/inet.h>
 #include <sys/socket.h>
 
 /**

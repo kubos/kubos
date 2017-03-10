@@ -24,8 +24,8 @@
 #ifndef TELEMETRY_LINUX_H
 #define TELEMETRY_LINUX_H
 
-#include <telemetry/telemetry.h>
 #include <ipc/pubsub_socket.h>
+#include <telemetry/telemetry.h>
 
 CSP_DEFINE_TASK(client_handler);
 
@@ -66,7 +66,6 @@ void kprv_delete_subscribers();
 bool kprv_publish_packet(telemetry_packet packet);
 
 bool kprv_cbor_read(const socket_conn * conn, void * buffer, int max_buffer_size, uint8_t port, uint16_t * size_received);
-
 
 #endif
 

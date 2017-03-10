@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <telemetry/telemetry.h>
-#include <telemetry/config.h>
 #include "telemetry-linux/telemetry.h"
+#include <telemetry/config.h>
+#include <telemetry/telemetry.h>
 
 #include <csp/arch/csp_queue.h>
 #include <csp/arch/csp_semaphore.h>
@@ -28,7 +28,6 @@
 #include <ipc/pubsub_socket.h>
 
 #include <tinycbor/cbor.h>
-
 
 bool telemetry_connect(socket_conn * conn)
 {
@@ -45,7 +44,7 @@ bool telemetry_disconnect(socket_conn * client_conn)
     bool ret = false;
     if (client_conn != NULL)
     {
-        uint8_t buffer[256] = {0};
+        uint8_t buffer[256] = { 0 };
         int msg_size = telemetry_encode_disconnect_msg(buffer);
         if (msg_size > 0)
         {
@@ -61,7 +60,7 @@ bool telemetry_subscribe(const socket_conn * client_conn, int topic_id)
     bool ret = false;
     if (client_conn != NULL)
     {
-        uint8_t buffer[256] = {0};
+        uint8_t buffer[256] = { 0 };
         int msg_size = telemetry_encode_subscribe_msg(buffer, &topic_id);
         if (msg_size > 0)
         {
@@ -76,7 +75,7 @@ bool telemetry_unsubscribe(const socket_conn * client_conn, int topic_id)
     bool ret = false;
     if (client_conn != NULL)
     {
-        uint8_t buffer[256] = {0};
+        uint8_t buffer[256] = { 0 };
         int msg_size = telemetry_encode_unsubscribe_msg(buffer, &topic_id);
 
         if (msg_size > 0)
@@ -95,13 +94,12 @@ bool telemetry_read(const socket_conn * conn, telemetry_packet * packet)
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
-            if (kprv_socket_recv(conn, (void*)packet, sizeof(telemetry_packet), &msg_size))
+            if (kprv_socket_recv(conn, (void *)packet, sizeof(telemetry_packet), &msg_size))
                 return true;
         }
     }
     return false;
 }
-
 
 bool telemetry_publish(telemetry_packet pkt)
 {
@@ -109,7 +107,7 @@ bool telemetry_publish(telemetry_packet pkt)
     bool ret = false;
     if ((ret = telemetry_connect(&conn)) == true)
     {
-        uint8_t buffer[256] = {0};
+        uint8_t buffer[256] = { 0 };
         int msg_size = telemetry_encode_packet_msg(buffer, &pkt);
 
         if (msg_size > 0)

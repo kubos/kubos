@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <telemetry/telemetry.h>
 #include "telemetry-linux/telemetry.h"
+#include <telemetry/telemetry.h>
 #include <tinycbor/cbor.h>
 
 bool telemetry_parse_packet_msg(uint8_t * buffer, int buffer_size, telemetry_packet * packet)
@@ -42,7 +42,7 @@ bool telemetry_parse_packet_msg(uint8_t * buffer, int buffer_size, telemetry_pac
         return false;
 
     err = cbor_value_map_find_value(&map, "DATA_TYPE", &element);
-    if (err || cbor_value_get_int(&element, (int*)&(packet->source.data_type)))
+    if (err || cbor_value_get_int(&element, (int *)&(packet->source.data_type)))
         return false;
 
     err = cbor_value_map_find_value(&map, "DATA", &element);
@@ -78,7 +78,7 @@ bool telemetry_parse_msg_type(uint8_t * buffer, int buffer_size, telemetry_messa
     if (err)
         return false;
 
-    if (cbor_value_get_int(&element, (int*)req))
+    if (cbor_value_get_int(&element, (int *)req))
         return false;
 
     return true;
@@ -194,7 +194,7 @@ int start_encode_msg(CborEncoder * encoder, CborEncoder * container, uint8_t * b
     cbor_encoder_init(encoder, buffer, buffer_size, 0);
     err = cbor_encoder_create_map(encoder, container, num_elements);
     if (err > 0)
-        return - err;
+        return -err;
     err = cbor_encode_text_stringz(container, "MESSAGE_TYPE");
     if (err > 0)
         return -err;
@@ -246,9 +246,9 @@ int telemetry_encode_packet_msg(uint8_t * buffer, telemetry_packet * pkt)
     if (err > 0)
         return -err;
     if (pkt->source.data_type == TELEMETRY_TYPE_INT)
-    {   
+    {
         err = cbor_encode_int(&container, pkt->data.i);
-    } 
+    }
     else if (pkt->source.data_type == TELEMETRY_TYPE_FLOAT)
     {
         err = cbor_encode_float(&container, pkt->data.f);
@@ -265,6 +265,6 @@ int telemetry_encode_packet_msg(uint8_t * buffer, telemetry_packet * pkt)
     err = cbor_encode_int(&container, pkt->timestamp);
     if (err > 0)
         return -err;
-    
+
     return end_encode_msg(buffer, &encoder, &container);
 }

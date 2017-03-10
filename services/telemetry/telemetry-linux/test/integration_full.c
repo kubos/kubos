@@ -18,8 +18,8 @@
 #include <csp/csp.h>
 #include <ipc/csp.h>
 #include <ipc/pubsub_socket.h>
-#include <telemetry/telemetry.h>
 #include <telemetry-linux/telemetry.h>
+#include <telemetry/telemetry.h>
 #include <tinycbor/cbor.h>
 
 #define TEST_INT_PORT 10

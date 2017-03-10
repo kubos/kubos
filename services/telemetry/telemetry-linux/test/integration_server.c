@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include <ipc/pubsub.h>
-#include <ipc/csp.h>
+#include "telemetry-linux/telemetry.h"
+#include <cmocka.h>
+#include <csp/arch/csp_thread.h>
 #include <csp/csp.h>
 #include <csp/drivers/socket.h>
 #include <csp/interfaces/csp_if_socket.h>
-#include <csp/arch/csp_thread.h>
-#include <tinycbor/cbor.h>
+#include <ipc/csp.h>
+#include <ipc/pubsub.h>
 #include <telemetry/telemetry.h>
-#include "telemetry-linux/telemetry.h"
-#include <cmocka.h>
+#include <tinycbor/cbor.h>
 
 #define TEST_INT_PORT 10
 #define TEST_EXT_PORT 20
@@ -50,7 +50,6 @@ CSP_DEFINE_TASK(client_task)
     csp_thread_exit();
 }
 
-
 static void test_server(void ** arg)
 {
     csp_thread_handle_t client_task_handle;
@@ -71,7 +70,7 @@ static void test_server(void ** arg)
 
     assert_true(kprv_socket_recv(&(sub->conn), message, 256, &msg_size));
 
-    assert_true(telemetry_process_message(sub, (void*)message, msg_size));
+    assert_true(telemetry_process_message(sub, (void *)message, msg_size));
 
     destroy_subscriber(&sub);
 
@@ -79,7 +78,6 @@ static void test_server(void ** arg)
 
     csp_thread_kill(client_task_handle);
 }
-
 
 int main(void)
 {

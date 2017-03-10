@@ -25,7 +25,6 @@
 // #include <csp/interfaces/csp_if_socket.h>
 // #include <csp/drivers/socket.h>
 
-
 // bool kprv_has_topic(const subscriber_list_item * sub, uint16_t topic_id);
 
 // /**
@@ -152,7 +151,6 @@
 //         }
 //     }
 // }
-
 
 // subscriber_list_item * telemetry_add_subscriber(pubsub_conn server_conn, pubsub_conn client_conn)
 // {
