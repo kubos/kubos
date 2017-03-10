@@ -43,12 +43,15 @@ If you're creating a brand new config.json file, you can just copy and paste the
 
 ## Setting Initialization Configuration {#init-config}
 
+If you would like your application to be automatically started as a background daemon after being flashed to the board, turn on the system.initAfterFlash option.
+
 By default, an initialization script will be generated and installed during the flashing process. This script will follow the naming convention of "S{runLevel}{applicationName}",
 where "runLevel" is the initialization priority order of the script. All user application init scripts will be run after all of the Kubos init scripts, but within the user
 scripts, the scripts with the lowest run level will be executed first. So an application with a run level of 10 will be initialized before an application with a run level of 50.
 
-To control this there are two config.json options:
-* system.initAtBoot - (Default: True) Tells the Kubos SDK whether to generate and install an initialization script.
+The relevant config.json options:
+* system.initAfterFlash - (Default: false) Tells the Kubos SDK whether to start the application as a background daemon after flashing it to the board.
+* system.initAtBoot - (Default: true) Tells the Kubos SDK whether to generate and install an initialization script.
 * system.runLevel - (Default: 50. Range: 10-99) Sets priority of initialization script.
     
 ## Updating the USB Connection {#updating-the-usb-connection}
