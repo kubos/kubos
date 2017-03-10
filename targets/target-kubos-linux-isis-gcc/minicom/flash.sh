@@ -30,10 +30,19 @@ progress() {
 ##########################################################################
 # Minicom doesn't allow any pass-through arguments, so instead we need to 
 # generate a script for it to run.
+# The generate script will:
+#   Navigate to the correct path
+#   Delete any previous versions of the file
+#   Delete any previous init scripts (if flashing application)
+#   Flash the file
+#   Update the kubos_updatefile variable (if flashing upgrade package)
+#   Re/start the application (if flashing application and boot desired)
 #
 # Globals:
 #   password
 #   is_upgrade
+#   is_app
+#   is_run
 # Arguments:
 #   path of file to flash
 #   path to flash to
@@ -60,10 +69,14 @@ timeout 3600
 send "mkdir -p $2"
 send "cd $2"
 send "rm -f ${name}"
-if ${is_app} = 1 send "rm -f /home/etc/init.d/S*${app_name}"
+if ${is_app} = 1 send "rm -f /home/etc/init.d/S*${name}"
 send "rz -w 8192"
 ! sz -w 8192 ${path}
 if ${is_upgrade} = 1 send "fw_setenv kubos_updatefile ${name}"
+if ${is_run} = 0 goto exit
+send "start-stop-daemon -K -v -p /var/run/${name}.pid"
+send "start-stop-daemon -S -v -m -b -p /var/run/${name}.pid --exec $2/${name}"
+exit:
 send "exit"
 end:
 ! killall minicom -q
@@ -178,11 +191,13 @@ main() {
   name=$(basename $1)
   is_upgrade=0
   is_app=0
+  is_run=0
   
   password=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["password"]')
   dest_dir=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["destDir"]')
-  init=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["initAtBoot"]')
+  init_boot=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["initAtBoot"]')
   run_level=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["runLevel"]')
+  init_flash=$(cat yotta_config.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["system"]["initAfterFlash"]')
   app_name=$(cat ../../module.json | python -c 'import sys,json; x=json.load(sys.stdin); print x["name"]')
   
   init_script="S${run_level}${app_name}"
@@ -219,6 +234,10 @@ main() {
       echo "Run level of ${run_level} outside of range (10-99). Setting to default."
       run_level=50
     fi
+    if [[ "${init_flash}" = "True" ]]; then
+      echo "Will start application after flash"
+      is_run=1
+    fi
   fi
   
   # Send the file
@@ -227,7 +246,9 @@ main() {
   retval=$?
   
   # If necessary, send init script
-  if [[ "${retval}" = 0 && "${is_app}" = 1 && "${init}" = "True" ]]; then
+  if [[ "${retval}" = 0 && "${is_app}" = 1 && "${init_boot}" = "True" ]]; then
+    is_app=0
+    is_run=0
     rm send.tmp
     create_init_script
     create_send_script ${init_script} /home/etc/init.d
