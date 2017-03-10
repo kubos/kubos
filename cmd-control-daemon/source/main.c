@@ -24,8 +24,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <csp/csp_debug.h>
 #include <csp/drivers/socket.h>
-#include <csp/interfaces/csp_if_socket.h>
 
 #include "command-and-control/types.h"
 #include "cmd-control-daemon/daemon.h"
@@ -43,16 +43,99 @@
 csp_iface_t csp_socket_if;
 csp_socket_handle_t socket_driver;
 
+
+/*
+ * IMPORTANT: For review ignore everything before line #91
+ * We won't be using named pipes and everything before that is all csp code to
+ * set up a named pipe connection.
+ */
+
+pthread_t rx_thread, my_thread;
+int rx_channel, tx_channel;
+
+int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout);
+
+csp_iface_t csp_if_fifo =
+{
+    .name = "fifo",
+    .nexthop = csp_fifo_tx,
+    .mtu = MTU,
+};
+
+int csp_fifo_tx(csp_iface_t *ifc, csp_packet_t *packet, uint32_t timeout)
+{
+    /* Write packet to fifo */
+    if (write(tx_channel, &packet->length, packet->length + sizeof(uint32_t) + sizeof(uint16_t)) < 0)
+    {
+        printf("Failed to write frame\r\n");
+    }
+    csp_buffer_free(packet);
+    return CSP_ERR_NONE;
+}
+
+void * fifo_rx(void * parameters)
+{
+    csp_packet_t *buf = csp_buffer_get(BUF_SIZE);
+    /* Wait for packet on fifo */
+    while (read(rx_channel, &buf->length, BUF_SIZE) > 0)
+    {
+        csp_new_packet(buf, &csp_if_fifo, NULL);
+        buf = csp_buffer_get(BUF_SIZE);
+    }
+
+    return NULL;
+}
+
 bool init()
 {
-    if(!kubos_csp_init(SERVER_CSP_ADDRESS))
+
+    char *rx_channel_name, *tx_channel_name;
+
+    rx_channel_name = "/home/vagrant/client_to_server";
+    tx_channel_name = "/home/vagrant/server_to_client";
+
+
+    /* Init CSP and CSP buffer system */
+    if (csp_init(SERVER_CSP_ADDRESS) != CSP_ERR_NONE || csp_buffer_init(10, 300) != CSP_ERR_NONE)
     {
+        printf("Failed to init CSP\r\n");
         return false;
     }
 
-    csp_route_set(CLI_CLIENT_ADDRESS, &csp_socket_if, CSP_NODE_MAC);
-    csp_socket_init(&csp_socket_if, &socket_driver);
+    tx_channel = open(tx_channel_name, O_RDWR);
+    if (tx_channel < 0)
+    {
+        printf("Failed to open TX channel\r\n");
+        return false;
+    }
+
+    rx_channel = open(rx_channel_name, O_RDWR);
+    if (rx_channel < 0)
+    {
+        printf("Failed to open RX channel\r\n");
+        return false;
+    }
+
+    /* Start fifo RX task */
+    pthread_create(&rx_thread, NULL, fifo_rx, NULL);
+
+    /* Set default route and start router */
+    csp_route_set(CSP_DEFAULT_ROUTE, &csp_if_fifo, CSP_NODE_MAC);
+    csp_route_start_task(256, 1);
+    return true;
 }
+
+//Where the magic happens - Bascially ignore everything above this line - The initialization is going to change a lot.
+/*bool init()*/
+/*{*/
+    /*if(!kubos_csp_init(SERVER_CSP_ADDRESS))*/
+    /*{*/
+        /*return false;*/
+    /*}*/
+
+    /*csp_route_set(CLI_CLIENT_ADDRESS, &csp_socket_if, CSP_NODE_MAC);*/
+    /*csp_socket_init(&csp_socket_if, &socket_driver);*/
+/*}*/
 
 
 bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
@@ -111,35 +194,37 @@ void zero_vars(char * command_str, CNCCommandPacket * command, CNCResponsePacket
     wrapper->err = false;
 }
 
-bool get_command(csp_socket_t* sock, char * command)
+bool get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
 {
     csp_conn_t *conn;
     csp_packet_t *packet;
 
-    if (sock == NULL || command == NULL)
+    if (sock == NULL || data_wrapper == NULL)
     {
         return false;
     }
 
-    if (socket_init(&socket_driver, CSP_SOCKET_SERVER, SOCKET_PORT) != CSP_ERR_NONE)
-    {
-        return false;
-    }
+    /*if (socket_init(&socket_driver, CSP_SOCKET_SERVER, SOCKET_PORT) != CSP_ERR_NONE)*/
+    /*{*/
+        /*return false;*/
+    /*}*/
 
-    if (csp_socket_init(&csp_socket_if, &socket_driver) != CSP_ERR_NONE)
-    {
-        return false;
-    }
+    /*if (csp_socket_init(&csp_socket_if, &socket_driver) != CSP_ERR_NONE)*/
+    /*{*/
+        /*return false;*/
+    /*}*/
 
     while (1)
     {
         conn = csp_accept(sock, 1000);
         if (conn)
         {
+            printf("Reading packet\n");
             packet = csp_read(conn, 0);
             if (packet)
             {
-                if (!parse_command_cbor(packet, command))
+                printf("parsing packet\n");
+                if (!parse_buffer_from_packet(packet, data_wrapper))
                 {
                     fprintf(stderr, "There was an error parsing the command packet\n");
                     csp_buffer_free(packet);
@@ -155,10 +240,8 @@ bool get_command(csp_socket_t* sock, char * command)
 }
 
 
-
 int main(int argc, char **argv)
 {
-    int my_address = 1;
     csp_socket_t *sock;
     char command_str[CMD_STR_LEN];
     CNCCommandPacket command;
@@ -167,11 +250,13 @@ int main(int argc, char **argv)
     //any pre-run processing error messages that may occur
     CNCWrapper wrapper;
     bool exit = false;
-
+    uint8_t buffer[CMD_STR_LEN];
+    CborDataWrapper data_wrapper;
+    data_wrapper.data = buffer;
     wrapper.command_packet  = &command;
     wrapper.response_packet = &response;
 
-    init(my_address);
+    init();
     sock = csp_socket(CSP_SO_NONE);
     csp_bind(sock, CSP_PORT);
     csp_listen(sock, 5);
@@ -179,13 +264,15 @@ int main(int argc, char **argv)
     while (!exit)
     {
         zero_vars(command_str, &command, &response, &wrapper);
-        if (!get_command(sock, command_str))
+        printf("Getting buffer\n");
+        if (!get_buffer(sock, &data_wrapper))
         {
             //Do some error handling
             continue;
         }
 
-        if (!parse(command_str, &wrapper))
+        printf("Parsing Buffer\n");
+        if (!parse_buffer(&wrapper, &data_wrapper))
         {
             //Do some error handling
             continue;
