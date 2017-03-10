@@ -46,8 +46,7 @@ static int socket_client_init(csp_socket_handle_t * socket_iface, uint16_t port)
 
 static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port) {
 	int socket_handle;
-	struct sockaddr_in client;
-	static int server_socket, c;
+	static int server_socket;
 	static struct sockaddr_in server;
 	static bool server_init = false;
 
@@ -78,7 +77,6 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
             csp_log_error("Failed to listen\n");
             return CSP_ERR_DRIVER;
         }
-		c = sizeof(struct sockaddr_in);
 		server_init = true;
 	}
 
@@ -130,6 +128,7 @@ int socket_init(csp_socket_handle_t * socket_iface, uint8_t mode, uint16_t port)
 	} else if (mode == CSP_SOCKET_CLIENT) {
 		return socket_client_init(socket_iface, port);
 	}
+    return CSP_ERR_DRIVER;
 }
 
 int socket_close(csp_socket_handle_t * socket_driver) {

@@ -19,8 +19,8 @@
 #include "kubos-hal/spi.h"
 #include <stdio.h>
 
-static char buffer[1024];
-static int buffer_len;
+static uint8_t buffer[1024];
+static uint32_t buffer_len;
 
 KSPIStatus kprv_spi_dev_init(KSPINum spi)
 {
@@ -48,7 +48,7 @@ KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
  */
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * ptr, uint32_t len)
 {
-    int i = 0;
+    uint32_t i = 0;
     for (i = 0; i < len; i++)
     {
         buffer[i] = *ptr++;
@@ -71,7 +71,7 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * ptr, uint32_t len)
 {
     if (buffer_len != 0)
     {
-        int i = 0;
+        uint32_t i = 0;
         for (i = 0; i < len; i++)
         {
             *ptr++ = buffer[i];
@@ -95,7 +95,7 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * ptr, uint32_t len)
  */
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len)
 {
-    sprintf(rxBuffer, txBuffer, len);
+    memcpy(rxBuffer, txBuffer, len);
     return SPI_OK;
 }
 

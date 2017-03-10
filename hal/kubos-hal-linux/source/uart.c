@@ -33,7 +33,6 @@ void kprv_uart_dev_terminate(KUARTNum uart)
 void kprv_uart_enable_tx_int(KUARTNum uart)
 {
     char data;
-    int result;
     KUART * k_uart = kprv_uart_get(uart);
 
     if (k_uart != NULL)

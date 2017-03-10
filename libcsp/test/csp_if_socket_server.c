@@ -62,7 +62,6 @@ CSP_DEFINE_TASK(client_task) {
 }
 
 static void test_server(void ** arg) {
-	csp_socket_t * socket = NULL;
 	csp_conn_t * conn = NULL;
 	csp_iface_t csp_socket_if = {
 		.next = NULL
