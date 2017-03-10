@@ -73,6 +73,8 @@ static void test_server(void ** arg)
 
     assert_true(telemetry_process_message(sub, (void*)message, msg_size));
 
+    destroy_subscriber(&sub);
+
     telemetry_server_cleanup();
 
     csp_thread_kill(client_task_handle);
