@@ -28,7 +28,7 @@
 #include <csp/csp.h>
 #include <csp/arch/csp_queue.h>
 
-#include <ipc/pubsub_socket.h>
+#include <ipc/socket.h>
 
 /**
  * Telemetry union for storing data.

@@ -15,7 +15,7 @@
  */
 
 #include <cmocka.h>
-#include <ipc/pubsub_socket.h>
+#include <ipc/socket.h>
 
 bool __wrap_kprv_socket_client_connect(socket_conn * conn, uint8_t port)
 {

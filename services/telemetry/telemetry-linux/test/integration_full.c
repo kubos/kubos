@@ -17,7 +17,7 @@
 #include <cmocka.h>
 #include <csp/csp.h>
 #include <ipc/csp.h>
-#include <ipc/pubsub_socket.h>
+#include <ipc/socket.h>
 #include <telemetry-linux/telemetry.h>
 #include <telemetry/telemetry.h>
 #include <tinycbor/cbor.h>

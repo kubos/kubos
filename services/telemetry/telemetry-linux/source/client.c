@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <ipc/pubsub_socket.h>
+#include <ipc/socket.h>
 
 #include <tinycbor/cbor.h>
 

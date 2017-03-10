@@ -24,7 +24,7 @@
 #ifndef TELEMETRY_LINUX_H
 #define TELEMETRY_LINUX_H
 
-#include <ipc/pubsub_socket.h>
+#include <ipc/socket.h>
 #include <telemetry/telemetry.h>
 
 CSP_DEFINE_TASK(client_handler);

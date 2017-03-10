@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#include "ipc/config.h"
-#include "ipc/pubsub_socket.h"
-
+#include "ipc/socket.h"
 #include <arpa/inet.h>
 #include <stddef.h>
 #include <sys/socket.h>

@@ -17,7 +17,7 @@
 #include <cmocka.h>
 #include <csp/arch/csp_thread.h>
 #include <csp/csp.h>
-#include <ipc/pubsub_socket.h>
+#include <ipc/socket.h>
 #include <tinycbor/cbor.h>
 
 #define TEST_INT_PORT 10

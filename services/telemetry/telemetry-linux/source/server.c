@@ -19,7 +19,7 @@
 
 #include <csp/arch/csp_queue.h>
 #include <csp/arch/csp_semaphore.h>
-#include <ipc/pubsub_socket.h>
+#include <ipc/socket.h>
 #include <kubos-core/utlist.h>
 #include <stdio.h>
 #include <stdlib.h>
