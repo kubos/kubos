@@ -35,7 +35,7 @@ bool start_encode_response(int message_type, CborDataWrapper * data_wrapper, CNC
     CborEncoder encoder, container;
     CborError err;
 
-    if (packet == NULL)
+    if (data_wrapper == NULL || packet == NULL)
     {
         return false;
     }

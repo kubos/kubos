@@ -96,8 +96,8 @@ bool init()
     int my_address = 2;
     char *rx_channel_name, *tx_channel_name;
 
-    tx_channel_name = "/home/vagrant/client_to_server";
-    rx_channel_name = "/home/vagrant/server_to_client";
+    tx_channel_name = "/home/vagrant/client-to-server";
+    rx_channel_name = "/home/vagrant/server-to-client";
 
 
     /* Init CSP and CSP buffer system */
@@ -130,27 +130,13 @@ bool init()
     return true;
 }
 
-//Where the magic happens - Bascially ignore everything above this line - The initialization is going to change a lot.
-/*bool init()*/
-/*{*/
-    /*if (!kubos_csp_init(CLI_CLIENT_ADDRESS))*/
-    /*{*/
-        /*return false;*/
-    /*}*/
-
-    /*csp_route_set(SERVER_CSP_ADDRESS, &csp_socket_if, CSP_NODE_MAC);*/
-
-    /*return true;*/
-/*}*/
-
+//Where the magic happens - End of the CSP FIFO setup code
 
 bool send_packet(csp_packet_t* packet)
 {
     csp_conn_t *conn;
 
     if (packet) {
-        /*socket_init(&socket_driver, CSP_SOCKET_CLIENT, SOCKET_PORT);*/
-        /*csp_socket_init(&csp_socket_if, &socket_driver);*/
 
         conn = csp_connect(CSP_PRIO_NORM, SERVER_CSP_ADDRESS, CSP_PORT, 1000, CSP_O_NONE);
 
@@ -175,6 +161,10 @@ bool send_msg(CborDataWrapper * data_wrapper)
 {
     csp_conn_t *conn;
     csp_packet_t *packet;
+    if (data_wrapper == NULL)
+    {
+        return false;
+    }
 
     if (packet = csp_buffer_get(data_wrapper->length))
     {
@@ -199,6 +189,11 @@ bool parse_response(csp_packet_t * packet)
     CborParser parser;
     CborValue map, element;
     int message_type;
+
+    if (packet == NULL)
+    {
+        return false;
+    }
 
     CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
     if (err)
@@ -228,10 +223,10 @@ bool parse_response(csp_packet_t * packet)
 
 bool parse_command_result( CborParser * parser, CborValue * map)
 {
-    size_t len;
     uint8_t return_code;
     double execution_time;
     char output[BUF_SIZE];
+    size_t len = BUF_SIZE;
 
     CborValue element;
     CborError err;
@@ -263,8 +258,8 @@ bool parse_command_result( CborParser * parser, CborValue * map)
 
 bool parse_processing_error(CborParser * parser, CborValue * map)
 {
-    size_t len;
-    char error_message[BUF_SIZE];
+    size_t len = BUF_SIZE;
+    char error_message[BUF_SIZE] = {0};
     CborValue element;
     CborError err;
 

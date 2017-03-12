@@ -63,6 +63,11 @@ bool load_command(CNCWrapper * wrapper, void ** handle, lib_function * func)
     int return_code;
     char so_path[SO_PATH_LENGTH];
 
+    if (wrapper == NULL || handle == NULL || func == NULL)
+    {
+        return false;
+    }
+
     // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
     int so_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
     snprintf(so_path, so_len, MODULE_REGISTRY_DIR, wrapper->command_packet->cmd_name);
@@ -113,10 +118,15 @@ bool load_command(CNCWrapper * wrapper, void ** handle, lib_function * func)
 
 bool run_command(CNCWrapper * wrapper, void ** handle, lib_function func)
 {
+    int original_stdout;
     //Redirect stdout to the response output field.
     //TODO: Redirect or figure out what to do with STDERR
 
-    int original_stdout;
+    if (wrapper == NULL || handle == NULL)
+    {
+        return false;
+    }
+
     fflush(stdout);
     original_stdout = dup(STDOUT_FILENO);
     freopen("/dev/null", "a", stdout);
@@ -156,8 +166,14 @@ bool run_command(CNCWrapper * wrapper, void ** handle, lib_function func)
 
 bool load_and_run_command(CNCWrapper * wrapper)
 {
-    lib_function func = NULL;
     void * handle;
+
+    if (wrapper == NULL)
+    {
+        return false;
+    }
+
+    lib_function func = NULL;
 
     if (!load_command(wrapper, &handle, &func))
     {

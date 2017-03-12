@@ -91,8 +91,8 @@ bool init()
 
     char *rx_channel_name, *tx_channel_name;
 
-    rx_channel_name = "/home/vagrant/client_to_server";
-    tx_channel_name = "/home/vagrant/server_to_client";
+    rx_channel_name = "/home/vagrant/client-to-server";
+    tx_channel_name = "/home/vagrant/server-to-client";
 
 
     /* Init CSP and CSP buffer system */
@@ -126,17 +126,6 @@ bool init()
 }
 
 //Where the magic happens - Bascially ignore everything above this line - The initialization is going to change a lot.
-/*bool init()*/
-/*{*/
-    /*if(!kubos_csp_init(SERVER_CSP_ADDRESS))*/
-    /*{*/
-        /*return false;*/
-    /*}*/
-
-    /*csp_route_set(CLI_CLIENT_ADDRESS, &csp_socket_if, CSP_NODE_MAC);*/
-    /*csp_socket_init(&csp_socket_if, &socket_driver);*/
-/*}*/
-
 
 bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
@@ -204,26 +193,14 @@ bool get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
         return false;
     }
 
-    /*if (socket_init(&socket_driver, CSP_SOCKET_SERVER, SOCKET_PORT) != CSP_ERR_NONE)*/
-    /*{*/
-        /*return false;*/
-    /*}*/
-
-    /*if (csp_socket_init(&csp_socket_if, &socket_driver) != CSP_ERR_NONE)*/
-    /*{*/
-        /*return false;*/
-    /*}*/
-
     while (1)
     {
         conn = csp_accept(sock, 1000);
         if (conn)
         {
-            printf("Reading packet\n");
             packet = csp_read(conn, 0);
             if (packet)
             {
-                printf("parsing packet\n");
                 if (!parse_buffer_from_packet(packet, data_wrapper))
                 {
                     fprintf(stderr, "There was an error parsing the command packet\n");
@@ -264,14 +241,13 @@ int main(int argc, char **argv)
     while (!exit)
     {
         zero_vars(command_str, &command, &response, &wrapper);
-        printf("Getting buffer\n");
+
         if (!get_buffer(sock, &data_wrapper))
         {
             //Do some error handling
             continue;
         }
 
-        printf("Parsing Buffer\n");
         if (!parse_buffer(&wrapper, &data_wrapper))
         {
             //Do some error handling

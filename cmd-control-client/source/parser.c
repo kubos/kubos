@@ -57,7 +57,15 @@ unsigned long get_hash(char *str)
 
 bool set_action(char* arg, CNCCommandPacket * command_packet)
 {
-    unsigned long hash = get_hash(arg);
+    unsigned long hash;
+
+    if (command_packet == NULL)
+    {
+        return false;
+    }
+
+    hash = get_hash(arg);
+
     switch (hash)
     {
         case EXEC_HASH:
@@ -118,9 +126,11 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
 bool parse (CNCCommandPacket * command_packet, int argc, char ** argv)
 {
     int res, argsc;
-
-    /*int flags = ARGP_PARSE_ARGV0 | ARGP_NO_ERRS;*/
     int flags = 0;
+    if (command_packet == NULL || argv == NULL)
+    {
+        return false;
+    }
 
     argp_parse (&argp, argc, argv, flags, 0, command_packet);
 
