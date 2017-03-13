@@ -1,0 +1,13 @@
+{
+    "bin":"./source",
+    "license":"Apache-2.0",
+    "name":"linux-telemetry-service",
+    "repository":{
+        "url":"git://github.com/kubostech/kubos",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "dependencies":{
+        "telemetry":"kubostech/telemetry"
+    }
+}
