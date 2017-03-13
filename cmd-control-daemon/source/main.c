@@ -45,9 +45,9 @@ csp_socket_handle_t socket_driver;
 
 
 /*
- * IMPORTANT: For review ignore everything before line #91
- * We won't be using named pipes and everything before that is all csp code to
- * set up a named pipe connection.
+ * IMPORTANT: CSP FIFO example setup code. The long term intetion is to move
+ * away from named pipes to the newer tcp communication mechanism. This is a
+ * temporary measure that will be removed once the new system is ready.
  */
 
 pthread_t rx_thread, my_thread;
@@ -125,7 +125,7 @@ bool init()
     return true;
 }
 
-//Where the magic happens - Bascially ignore everything above this line - The initialization is going to change a lot.
+//Where the magic happens - End of the CSP FIFO setup code
 
 bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
@@ -228,6 +228,8 @@ int main(int argc, char **argv)
     CNCWrapper wrapper;
     bool exit = false;
     uint8_t buffer[CMD_STR_LEN];
+    //The CborDataWrapper keeps a reference to a buffer and the length of the
+    //buffer tied together and simplifies passing both pieces of data between functions
     CborDataWrapper data_wrapper;
     data_wrapper.data = buffer;
     wrapper.command_packet  = &command;

@@ -40,18 +40,14 @@
 #define SERVER_CSP_ADDRESS 1
 #define SOCKET_PORT        8189
 
-bool parse_processing_error(CborParser * parser, CborValue * map);
-bool parse_command_result( CborParser * parser, CborValue * map);
-bool parse (CNCCommandPacket * command_packet, int argc, char ** argv);
-
 csp_iface_t csp_socket_if;
 csp_socket_handle_t socket_driver;
 
 
 /*
- * IMPORTANT: For review ignore everything before line #91
- * We won't be using named pipes and everything before that is all csp code to
- * set up a named pipe connection.
+ * IMPORTANT: CSP FIFO example setup code. The long term intetion is to move
+ * away from named pipes to the newer tcp communication mechanism. This is a
+ * temporary measure that will be removed once the new system is ready.
  */
 
 pthread_t rx_thread, my_thread;
@@ -145,12 +141,13 @@ bool send_packet(csp_packet_t* packet)
             csp_buffer_free(packet);
             return false;
         }
-        printf("Sending Packet:%s\n", packet);
+
         if (!csp_send(conn, packet, 1000))
         {
             csp_buffer_free(packet);
             return false;
         }
+
         csp_close(conn);
     }
     return true;
@@ -309,6 +306,8 @@ int main(int argc, char **argv)
     char args[BUF_SIZE] = {0};
     uint8_t data[BUF_SIZE] = {0};
 
+    //The CborDataWrapper keeps a reference to a buffer and the length of the
+    //buffer tied together and simplifies passing both pieces of data between functions
     CborDataWrapper data_wrapper;
     data_wrapper.length = 0;
     data_wrapper.data = data;
