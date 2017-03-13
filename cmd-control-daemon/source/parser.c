@@ -18,7 +18,7 @@
 #include <tinycbor/cbor.h>
 #include "cmd-control-daemon/daemon.h"
 
-bool parse_buffer_from_packet(csp_packet_t * packet, CborDataWrapper * data_wrapper)
+bool cnc_daemon_parse_buffer_from_packet(csp_packet_t * packet, CborDataWrapper * data_wrapper)
 {
     if (packet == NULL || data_wrapper == NULL)
     {
@@ -29,7 +29,7 @@ bool parse_buffer_from_packet(csp_packet_t * packet, CborDataWrapper * data_wrap
     return true;
 }
 
-bool parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrapper)
+bool cnc_daemon_parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrapper)
 {
     CborParser parser;
     CborValue map, element;
@@ -50,7 +50,7 @@ bool parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrapper)
     switch (message_type)
     {
         case MESSAGE_TYPE_COMMAND_INPUT:
-            return parse_command(&parser, &map, wrapper);
+            return cnc_daemon_parse_command(&parser, &map, wrapper);
             break;
         default:
             fprintf(stderr, "Received unknown message type: %i\n", message_type);
@@ -59,7 +59,7 @@ bool parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrapper)
 }
 
 
-bool parse_command(CborParser * parser, CborValue * map, CNCWrapper * wrapper)
+bool cnc_daemon_parse_command(CborParser * parser, CborValue * map, CNCWrapper * wrapper)
 {
     size_t len;
     uint8_t return_code;

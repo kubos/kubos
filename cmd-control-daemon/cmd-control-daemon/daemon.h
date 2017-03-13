@@ -22,29 +22,29 @@
 
 typedef int (*lib_function)(int, char**);
 
-bool encode_processing_error(uint8_t * data, CNCWrapper * result, CborEncoder * encoder, CborEncoder * container);
+bool cnc_daemon_encode_processing_error(uint8_t * data, CNCWrapper * result, CborEncoder * encoder, CborEncoder * container);
 
-bool encode_response(uint8_t * data, CNCWrapper * wrapper, CborEncoder * encoder, CborEncoder * container);
+bool cnc_daemon_encode_response(uint8_t * data, CNCWrapper * wrapper, CborEncoder * encoder, CborEncoder * container);
 
-bool finish_encode_response_and_send(uint8_t * data, CborEncoder *encoder, CborEncoder * container);
+bool cnc_daemon_finish_encode_response_and_send(uint8_t * data, CborEncoder *encoder, CborEncoder * container);
 
-bool get_command(csp_socket_t* sock, char * command);
+bool cnc_daemon_get_command(csp_socket_t* sock, char * command);
 
-bool parse (char * args, CNCWrapper * my_arguments);
+bool cnc_daemon_parse (char * args, CNCWrapper * my_arguments);
 
-bool parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrapper);
+bool cnc_daemon_parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrapper);
 
-bool parse_buffer_from_packet(csp_packet_t * packet, CborDataWrapper * data_wrapper);
+bool cnc_daemon_parse_buffer_from_packet(csp_packet_t * packet, CborDataWrapper * data_wrapper);
 
-bool parse_command(CborParser * parser, CborValue * map, CNCWrapper * wrapper);
+bool cnc_daemon_parse_command(CborParser * parser, CborValue * map, CNCWrapper * wrapper);
 
-bool load_and_run_command(CNCWrapper * wrapper);
+bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper);
 
-bool send_buffer(uint8_t * data, size_t data_len);
+bool cnc_daemon_send_buffer(uint8_t * data, size_t data_len);
 
-bool start_encode_response(int message_type, CNCWrapper * wrapper);
+bool cnc_daemon_start_encode_response(int message_type, CNCWrapper * wrapper);
 
-bool send_result(CNCWrapper * wrapper);
+bool cnc_daemon_send_result(CNCWrapper * wrapper);
 
 
 #ifdef YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN

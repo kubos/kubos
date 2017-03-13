@@ -19,7 +19,7 @@
 
 #include "cmd-control-daemon/daemon.h"
 
-bool send_result(CNCWrapper * wrapper)
+bool cnc_daemon_send_result(CNCWrapper * wrapper)
 {
     if (wrapper == NULL)
     {
@@ -28,16 +28,16 @@ bool send_result(CNCWrapper * wrapper)
 
     if (wrapper->err) //Thinking of changing the err flag to a state enum or similar multi-state member type
     {
-        start_encode_response(RESPONSE_TYPE_PROCESSING_ERROR, wrapper);
+        cnc_daemon_start_encode_response(RESPONSE_TYPE_PROCESSING_ERROR, wrapper);
     }
     else
     {
-        start_encode_response(RESPONSE_TYPE_COMMAND_RESULT, wrapper);
+        cnc_daemon_start_encode_response(RESPONSE_TYPE_COMMAND_RESULT, wrapper);
     }
 }
 
 
-bool start_encode_response(int message_type, CNCWrapper * wrapper)
+bool cnc_daemon_start_encode_response(int message_type, CNCWrapper * wrapper)
 {
     CborEncoder encoder, container;
     CborError err;
@@ -64,14 +64,14 @@ bool start_encode_response(int message_type, CNCWrapper * wrapper)
     switch (message_type)
     {
         case RESPONSE_TYPE_COMMAND_RESULT:
-            return encode_response(data, wrapper, &encoder, &container);
+            return cnc_daemon_encode_response(data, wrapper, &encoder, &container);
         case RESPONSE_TYPE_PROCESSING_ERROR:
-            return encode_processing_error(data, wrapper, &encoder, &container);
+            return cnc_daemon_encode_processing_error(data, wrapper, &encoder, &container);
     }
 }
 
 
-bool encode_response(uint8_t * data, CNCWrapper * wrapper, CborEncoder * encoder, CborEncoder * container)
+bool cnc_daemon_encode_response(uint8_t * data, CNCWrapper * wrapper, CborEncoder * encoder, CborEncoder * container)
 {
     CborError err;
 
@@ -98,11 +98,11 @@ bool encode_response(uint8_t * data, CNCWrapper * wrapper, CborEncoder * encoder
         return false;
     }
 
-    return finish_encode_response_and_send(data, encoder, container);
+    return cnc_daemon_finish_encode_response_and_send(data, encoder, container);
 }
 
 
-bool encode_processing_error(uint8_t * data, CNCWrapper * result, CborEncoder * encoder, CborEncoder * container)
+bool cnc_daemon_encode_processing_error(uint8_t * data, CNCWrapper * result, CborEncoder * encoder, CborEncoder * container)
 {
     CborError err;
 
@@ -117,11 +117,11 @@ bool encode_processing_error(uint8_t * data, CNCWrapper * result, CborEncoder * 
         return false;
     }
 
-    return finish_encode_response_and_send(data, encoder, container);
+    return cnc_daemon_finish_encode_response_and_send(data, encoder, container);
 }
 
 
-bool finish_encode_response_and_send(uint8_t * data, CborEncoder *encoder, CborEncoder * container)
+bool cnc_daemon_finish_encode_response_and_send(uint8_t * data, CborEncoder *encoder, CborEncoder * container)
 {
     if (data == NULL)
     {
@@ -130,6 +130,6 @@ bool finish_encode_response_and_send(uint8_t * data, CborEncoder *encoder, CborE
 
     cbor_encoder_close_container(encoder, container);
     size_t data_len = cbor_encoder_get_buffer_size(encoder, data);
-    return send_buffer(data, data_len);
+    return cnc_daemon_send_buffer(data, data_len);
 }
 

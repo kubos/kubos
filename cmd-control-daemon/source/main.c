@@ -127,7 +127,7 @@ bool init()
 
 //Where the magic happens - End of the CSP FIFO setup code
 
-bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
+bool cnc_daemon_send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
     if (conn == NULL || packet == NULL)
     {
@@ -143,7 +143,7 @@ bool send_packet(csp_conn_t* conn, csp_packet_t* packet)
 }
 
 
-bool send_buffer(uint8_t * data, size_t data_len)
+bool cnc_daemon_send_buffer(uint8_t * data, size_t data_len)
 {
     csp_socket_t *sock;
     csp_conn_t *conn;
@@ -160,7 +160,7 @@ bool send_buffer(uint8_t * data, size_t data_len)
         packet->length = data_len;
 
         conn = csp_connect(CSP_PRIO_NORM, CLI_CLIENT_ADDRESS, CSP_PORT, 1000, CSP_O_NONE);
-        if (!send_packet(conn, packet))
+        if (!cnc_daemon_send_packet(conn, packet))
         {
             csp_buffer_free(packet);
             csp_close(conn);
@@ -183,7 +183,7 @@ void zero_vars(char * command_str, CNCCommandPacket * command, CNCResponsePacket
     wrapper->err = false;
 }
 
-bool get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
+bool cnc_daemon_get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
 {
     csp_conn_t *conn;
     csp_packet_t *packet;
@@ -201,7 +201,7 @@ bool get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
             packet = csp_read(conn, 0);
             if (packet)
             {
-                if (!parse_buffer_from_packet(packet, data_wrapper))
+                if (!cnc_daemon_parse_buffer_from_packet(packet, data_wrapper))
                 {
                     fprintf(stderr, "There was an error parsing the command packet\n");
                     csp_buffer_free(packet);
@@ -244,19 +244,19 @@ int main(int argc, char **argv)
     {
         zero_vars(command_str, &command, &response, &wrapper);
 
-        if (!get_buffer(sock, &data_wrapper))
+        if (!cnc_daemon_get_buffer(sock, &data_wrapper))
         {
             //Do some error handling
             continue;
         }
 
-        if (!parse_buffer(&wrapper, &data_wrapper))
+        if (!cnc_daemon_parse_buffer(&wrapper, &data_wrapper))
         {
             //Do some error handling
             continue;
         }
 
-        if(!load_and_run_command(&wrapper))
+        if(!cnc_daemon_load_and_run_command(&wrapper))
         {
             //Do some error handling
             continue;
