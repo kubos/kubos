@@ -51,7 +51,7 @@ typedef struct
 bool kprv_socket_server_setup(socket_conn * conn, uint16_t port, uint8_t num_connections);
 
 /**
- * Attepmts to accept a new socket connection - currently blocking.
+ * Attempts to accept a new socket connection - currently blocking.
  * @param [in] server_conn pointer to socket_conn with listening socket info
  * @param [out] client_conn pointer to socket_conn where accepted connection info is stored
  * @return bool true if successful, otherwise false

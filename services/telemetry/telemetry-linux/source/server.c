@@ -43,7 +43,7 @@ static int topic_cmp(const topic_list_item * a, const topic_list_item * b)
 subscriber_list_item * kprv_subscriber_init(socket_conn conn)
 {
     subscriber_list_item * sub = NULL;
-    if ((sub = malloc(sizeof(subscriber_list_item))) != NULL)
+    if ((sub = calloc(1, sizeof(subscriber_list_item))) != NULL)
     {
         sub->topics = NULL;
         memcpy(&(sub->conn), &conn, sizeof(socket_conn));
@@ -85,13 +85,13 @@ void kprv_subscriber_destroy(subscriber_list_item ** sub)
     }
 }
 
-bool kprv_subscriber_add_topic(subscriber_list_item * sub, int topic_id)
+bool kprv_subscriber_add_topic(subscriber_list_item * sub, uint16_t topic_id)
 {
     bool ret = false;
     if (sub != NULL)
     {
         topic_list_item * new_topic = NULL;
-        if ((new_topic = malloc(sizeof(topic_list_item))) != NULL)
+        if ((new_topic = calloc(1, sizeof(topic_list_item))) != NULL)
         {
             new_topic->topic_id = topic_id;
             LL_APPEND(sub->topics, new_topic);
@@ -101,7 +101,7 @@ bool kprv_subscriber_add_topic(subscriber_list_item * sub, int topic_id)
     return ret;
 }
 
-bool kprv_subscriber_remove_topic(subscriber_list_item * sub, int topic_id)
+bool kprv_subscriber_remove_topic(subscriber_list_item * sub, uint16_t topic_id)
 {
     bool ret = false;
     if (sub != NULL)
@@ -145,7 +145,9 @@ bool kprv_subscriber_has_topic(const subscriber_list_item * sub, uint16_t topic_
         topic_list_item * temp;
         LL_SEARCH(sub->topics, temp, &topic, topic_cmp);
         if (temp != NULL)
+        {
             ret = true;
+        }
     }
     return ret;
 }
@@ -173,6 +175,7 @@ bool kprv_publish_packet(telemetry_packet packet)
         {
             if (!kprv_socket_send(&(current->conn), (void *)&packet, sizeof(telemetry_packet)))
             {
+                printf("Failed to publish to %d\r\n", current->id);
                 ret = false;
                 break;
             }
@@ -186,36 +189,36 @@ bool telemetry_process_message(subscriber_list_item * sub, const void * buffer, 
     bool ret = false;
     telemetry_message_type req;
     telemetry_packet packet;
-    int topic_id;
+    uint16_t topic_id;
 
     if (telemetry_parse_msg_type(buffer, buffer_size, &req))
     {
         switch (req)
         {
-        case MESSAGE_TYPE_PACKET:
-            if (telemetry_parse_packet_msg(buffer, buffer_size, &packet))
-            {
-                ret = kprv_publish_packet(packet);
-            }
-            break;
-        case MESSAGE_TYPE_SUBSCRIBE:
-            if (telemetry_parse_subscribe_msg(buffer, buffer_size, &topic_id))
-            {
-                ret = kprv_subscriber_add_topic(sub, topic_id);
-            }
-            break;
-        case MESSAGE_TYPE_UNSUBSCRIBE:
-            if (telemetry_parse_unsubscribe_msg(buffer, buffer_size, &topic_id))
-            {
-                ret = kprv_subscriber_remove_topic(sub, topic_id);
-            }
-            break;
-        case MESSAGE_TYPE_DISCONNECT:
-            sub->active = false;
-            ret = true;
-            break;
-        default:
-            break;
+            case MESSAGE_TYPE_PACKET:
+                if (telemetry_parse_packet_msg(buffer, buffer_size, &packet))
+                {
+                    ret = kprv_publish_packet(packet);
+                }
+                break;
+            case MESSAGE_TYPE_SUBSCRIBE:
+                if (telemetry_parse_subscribe_msg(buffer, buffer_size, &topic_id))
+                {
+                    ret = kprv_subscriber_add_topic(sub, topic_id);
+                }
+                break;
+            case MESSAGE_TYPE_UNSUBSCRIBE:
+                if (telemetry_parse_unsubscribe_msg(buffer, buffer_size, &topic_id))
+                {
+                    ret = kprv_subscriber_remove_topic(sub, topic_id);
+                }
+                break;
+            case MESSAGE_TYPE_DISCONNECT:
+                sub->active = false;
+                ret = true;
+                break;
+            default:
+                break;
         }
     }
     return ret;
@@ -243,13 +246,13 @@ CSP_DEFINE_TASK(client_handler)
 
 bool client_rx_work(subscriber_list_item * sub)
 {
-    uint8_t msg[256];
+    uint8_t msg[TELEMETRY_BUFFER_SIZE];
     uint32_t msg_size;
     bool ret = false;
 
     if (sub != NULL)
     {
-        if (kprv_socket_recv(&(sub->conn), (void *)msg, 256, &msg_size))
+        if (kprv_socket_recv(&(sub->conn), (void *)msg, TELEMETRY_BUFFER_SIZE, &msg_size))
         {
             ret = telemetry_process_message(sub, (void *)msg, msg_size);
         }

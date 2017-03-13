@@ -54,7 +54,7 @@ void kprv_subscriber_destroy(subscriber_list_item ** sub);
  * @pram [in] topic_id topic id to add
  * @return bool true if successful, false otherwise
  */
-bool kprv_subscriber_add_topic(subscriber_list_item * sub, int topic_id);
+bool kprv_subscriber_add_topic(subscriber_list_item * sub, uint16_t topic_id);
 
 /**
  * Removes a topic id from a subscribers list of topics
@@ -62,7 +62,7 @@ bool kprv_subscriber_add_topic(subscriber_list_item * sub, int topic_id);
  * @pram [in] topic_id topic id to remove
  * @return bool true if successful, false otherwise
  */
-bool kprv_subscriber_remove_topic(subscriber_list_item * sub, int topic_id);
+bool kprv_subscriber_remove_topic(subscriber_list_item * sub, uint16_t topic_id);
 
 /**
  * Removes all topics from a subscriber
@@ -88,7 +88,7 @@ void kprv_delete_all_subscribers();
  * @param [in,out] sub subscriber to process message with
  * @param [in] buffer buffer to read message from
  * @param [in] buffer_size size of buffer
- * @return bool true if sucessful, otherwise false
+ * @return bool true if successful, otherwise false
  */
 bool telemetry_process_message(subscriber_list_item * sub, const void * buffer, int buffer_size);
 
@@ -105,7 +105,7 @@ CSP_DEFINE_TASK(client_handler);
 /**
  * Performs work of receiving and processing packets from subscribers
  * @param [in] sub subscriber to process data from
- * @return bool true if sucessful, otherwise false
+ * @return bool true if successful, otherwise false
  */
 bool client_rx_work(subscriber_list_item * sub);
 

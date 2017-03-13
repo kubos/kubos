@@ -31,6 +31,7 @@ bool kprv_socket_server_setup(socket_conn * conn, uint16_t port, uint8_t num_con
 
     if ((conn->socket_handle = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)) == -1)
     {
+        printf("Failed to create socket\r\n");
         return false;
     }
 
@@ -40,11 +41,13 @@ bool kprv_socket_server_setup(socket_conn * conn, uint16_t port, uint8_t num_con
 
     if (bind(conn->socket_handle, (struct sockaddr *)&(conn->socket_addr), sizeof(struct sockaddr_in)) < 0)
     {
+        printf("Failed to bind socket\r\n");
         return false;
     }
 
     if (listen(conn->socket_handle, num_connections) < 0)
     {
+        printf("Failed to listen to socket\r\n");
         return false;
     }
 

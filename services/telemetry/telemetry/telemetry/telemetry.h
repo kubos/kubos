@@ -62,7 +62,7 @@ bool kprv_telemetry_connect(socket_conn * conn);
  * @param topic_id topic to subscribe to
  * @return bool true if successful, otherwise false
  */
-bool telemetry_subscribe(const socket_conn * conn, int topic_id);
+bool telemetry_subscribe(const socket_conn * conn, uint16_t topic_id);
 
 /**
  * Disconnects from the telemetry system.
@@ -77,7 +77,7 @@ bool telemetry_disconnect(socket_conn * conn);
  * @param topic_id topic to remove subscription from
  * @return bool true if successful, otherwise false
  */
-bool telemetry_unsubscribe(const socket_conn * conn, int topic_id);
+bool telemetry_unsubscribe(const socket_conn * conn, uint16_t topic_id);
 
 /**
  * Reads a telemetry packet from the telemetry server.

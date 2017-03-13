@@ -41,8 +41,6 @@ static void test_client_disconnect(void ** arg)
     expect_not_value(__wrap_kprv_socket_send, data, NULL);
     will_return(__wrap_kprv_socket_send, true);
 
-    // will_return(__wrap_kprv_socket_close, true);
-
     assert_true(telemetry_disconnect(&conn));
     assert_false(conn.is_active);
 }

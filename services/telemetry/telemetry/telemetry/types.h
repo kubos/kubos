@@ -59,7 +59,7 @@ typedef enum
 typedef struct
 {
     /*! Source identifier - used for subscribing */
-    int topic_id;
+    uint16_t topic_id;
     /*! Data type identifier */    
     telemetry_data_type data_type;
     /*! Subsystem identifier */

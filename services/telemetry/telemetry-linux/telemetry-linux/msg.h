@@ -33,13 +33,13 @@
  * @param [out] msg_type parsed out type of message
  * @return bool true if successful, otherwise false
  */
-bool telemetry_parse_msg_type(const uint8_t * buffer, int buffer_size, telemetry_message_type * msg_type);
+bool telemetry_parse_msg_type(const uint8_t * buffer, uint32_t buffer_size, telemetry_message_type * msg_type);
 
 /**
  * Attempts to encode a telemetry_packet
  * @param [out] buffer buffer to store encoded packet in
  * @param [in] pkt telemetry_packet to encode
- * @return int 0 if sucessful, otherwise negative error code
+ * @return int 0 if successful, otherwise negative error code
  */
 int telemetry_encode_packet_msg(uint8_t * buffer, const telemetry_packet * pkt);
 
@@ -50,15 +50,15 @@ int telemetry_encode_packet_msg(uint8_t * buffer, const telemetry_packet * pkt);
  * @param [out] packet telemetry_packet to store data in
  * @return bool true if successful, otherwise false
  */
-bool telemetry_parse_packet_msg(const uint8_t * buffer, int buffer_size, telemetry_packet * packet);
+bool telemetry_parse_packet_msg(const uint8_t * buffer, uint32_t buffer_size, telemetry_packet * packet);
 
 /**
  * Attempts to encode a subscribe message
  * @param [out] buffer buffer to store encoded packet in
  * @param [in] topic_id topic id for subscribing
- * @return int 0 if sucessful, otherwise negative error code
+ * @return int 0 if successful, otherwise negative error code
  */
-int telemetry_encode_subscribe_msg(uint8_t * buffer, const int * topic_id);
+int telemetry_encode_subscribe_msg(uint8_t * buffer, const uint16_t * topic_id);
 
 /**
  * Attempt to parse a subscribe message
@@ -67,15 +67,15 @@ int telemetry_encode_subscribe_msg(uint8_t * buffer, const int * topic_id);
  * @param [out] topic_id topic id read from message
  * @return bool true if successful, otherwise false
  */
-bool telemetry_parse_subscribe_msg(const uint8_t * buffer, int buffer_size, int * topic_id);
+bool telemetry_parse_subscribe_msg(const uint8_t * buffer, uint32_t buffer_size, uint16_t * topic_id);
 
 /**
  * Attempts to encode an unsubscribe message
  * @param [out] buffer buffer to store encoded packet in
  * @param [in] pkt telemetry_packet to encode
- * @return int 0 if sucessful, otherwise negative error code
+ * @return int 0 if successful, otherwise negative error code
  */
-int telemetry_encode_unsubscribe_msg(uint8_t * buffer, const int * topic_id);
+int telemetry_encode_unsubscribe_msg(uint8_t * buffer, const uint16_t * topic_id);
 
 /**
  * Attempt to parse an unsubscribe message
@@ -84,12 +84,12 @@ int telemetry_encode_unsubscribe_msg(uint8_t * buffer, const int * topic_id);
  * @param [out] topic_id topic id read from message
  * @return bool true if successful, otherwise false
  */
-bool telemetry_parse_unsubscribe_msg(const uint8_t * buffer, int buffer_size, int * topic_id);
+bool telemetry_parse_unsubscribe_msg(const uint8_t * buffer, uint32_t buffer_size, uint16_t * topic_id);
 
 /**
  * Attempts to encode disconnect message
  * @param [out] buffer buffer to store encoded packet in
- * @return int 0 if sucessful, otherwise negative error code
+ * @return int 0 if successful, otherwise negative error code
  */
 int telemetry_encode_disconnect_msg(uint8_t * buffer);
 
@@ -103,14 +103,14 @@ int telemetry_encode_disconnect_msg(uint8_t * buffer);
  * @param [in] message_type message type to be encoded
  * @return int 0 if successful, otherwise negative error
  */
-int start_encode_msg(CborEncoder * encoder, CborEncoder * container, uint8_t * buffer, int buffer_size, int num_elements, telemetry_message_type message_type);
+int start_encode_msg(CborEncoder * encoder, CborEncoder * container, uint8_t * buffer, uint32_t buffer_size, uint8_t num_elements, telemetry_message_type message_type);
 
 /**
  * Finishing the cbor encoding process
  * @param [in,out] buffer buffer for storing serialized data
  * @param [in,out] encoder cbor encoder
  * @param [in,out] container cbor map container
- * @return int 0 if sucessful, otherwise negative error code
+ * @return int 0 if successful, otherwise negative error code
  */
 int end_encode_msg(uint8_t * buffer, CborEncoder * encoder, CborEncoder * container);
 

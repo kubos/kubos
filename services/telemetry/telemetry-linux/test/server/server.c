@@ -167,7 +167,7 @@ static void test_server_publish_multiple_packets(void ** arg)
 static void test_server_get_subscribe_msg(void ** arg)
 {
     uint8_t buffer[100];
-    int subscribe_topic = 12;
+    uint16_t subscribe_topic = 12;
     int msg_size;
     socket_conn conn;
     subscriber_list_item * sub = NULL;
@@ -190,7 +190,7 @@ static void test_server_get_subscribe_msg(void ** arg)
 static void test_server_get_unsubscribe_msg(void ** arg)
 {
     uint8_t buffer[100];
-    int subscribe_topic = 12;
+    uint16_t subscribe_topic = 12;
     int msg_size;
     socket_conn conn;
     subscriber_list_item * sub = NULL;

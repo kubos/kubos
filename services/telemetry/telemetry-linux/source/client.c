@@ -44,7 +44,7 @@ bool telemetry_disconnect(socket_conn * client_conn)
     bool ret = false;
     if (client_conn != NULL)
     {
-        uint8_t buffer[256] = { 0 };
+        uint8_t buffer[TELEMETRY_BUFFER_SIZE] = { 0 };
         int msg_size = telemetry_encode_disconnect_msg(buffer);
         if (msg_size > 0)
         {
@@ -55,12 +55,12 @@ bool telemetry_disconnect(socket_conn * client_conn)
     return ret;
 }
 
-bool telemetry_subscribe(const socket_conn * client_conn, int topic_id)
+bool telemetry_subscribe(const socket_conn * client_conn, uint16_t topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
     {
-        uint8_t buffer[256] = { 0 };
+        uint8_t buffer[TELEMETRY_BUFFER_SIZE] = { 0 };
         int msg_size = telemetry_encode_subscribe_msg(buffer, &topic_id);
         if (msg_size > 0)
         {
@@ -70,12 +70,12 @@ bool telemetry_subscribe(const socket_conn * client_conn, int topic_id)
     return ret;
 }
 
-bool telemetry_unsubscribe(const socket_conn * client_conn, int topic_id)
+bool telemetry_unsubscribe(const socket_conn * client_conn, uint16_t topic_id)
 {
     bool ret = false;
     if (client_conn != NULL)
     {
-        uint8_t buffer[256] = { 0 };
+        uint8_t buffer[TELEMETRY_BUFFER_SIZE] = { 0 };
         int msg_size = telemetry_encode_unsubscribe_msg(buffer, &topic_id);
 
         if (msg_size > 0)
@@ -90,12 +90,14 @@ bool telemetry_read(const socket_conn * conn, telemetry_packet * packet)
 {
     int tries = 0;
     uint32_t msg_size;
-    if (packet != NULL)
+    if ((packet != NULL) && (packet != NULL))
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {
             if (kprv_socket_recv(conn, (void *)packet, sizeof(telemetry_packet), &msg_size))
+            {
                 return true;
+            }
         }
     }
     return false;
@@ -105,9 +107,9 @@ bool telemetry_publish(telemetry_packet pkt)
 {
     socket_conn conn;
     bool ret = false;
-    if ((ret = telemetry_connect(&conn)) == true)
+    if (telemetry_connect(&conn) == true)
     {
-        uint8_t buffer[256] = { 0 };
+        uint8_t buffer[TELEMETRY_BUFFER_SIZE] = { 0 };
         int msg_size = telemetry_encode_packet_msg(buffer, &pkt);
 
         if (msg_size > 0)

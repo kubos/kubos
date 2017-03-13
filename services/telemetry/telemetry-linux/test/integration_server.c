@@ -55,7 +55,7 @@ static void test_server(void ** arg)
     csp_thread_handle_t client_task_handle;
     socket_conn server_conn;
     socket_conn conn;
-    uint8_t message[256];
+    uint8_t message[TELEMETRY_BUFFER_SIZE];
     uint32_t msg_size;
 
     csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);
@@ -68,7 +68,7 @@ static void test_server(void ** arg)
     subscriber_list_item * sub = kprv_subscriber_init(conn);
     assert_non_null(sub);
 
-    assert_true(kprv_socket_recv(&(sub->conn), message, 256, &msg_size));
+    assert_true(kprv_socket_recv(&(sub->conn), message, TELEMETRY_BUFFER_SIZE, &msg_size));
 
     assert_true(telemetry_process_message(sub, (void *)message, msg_size));
 

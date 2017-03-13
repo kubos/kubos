@@ -40,13 +40,15 @@ bool kubos_csp_init(int csp_address)
         return false;
     }
 
-    // csp_debug_set_level(CSP_ERROR, true);
-    // csp_debug_set_level(CSP_WARN, true);
-    // csp_debug_set_level(CSP_INFO, true);
-    // csp_debug_set_level(CSP_BUFFER, true);
-    // csp_debug_set_level(CSP_PACKET, true);
-    // csp_debug_set_level(CSP_PROTOCOL, true);
-    // csp_debug_set_level(CSP_LOCK, true);
+#ifdef YOTTA_CFG_CSP_DEBUG
+    csp_debug_set_level(CSP_ERROR, true);
+    csp_debug_set_level(CSP_WARN, true);
+    csp_debug_set_level(CSP_INFO, true);
+    csp_debug_set_level(CSP_BUFFER, true);
+    csp_debug_set_level(CSP_PACKET, true);
+    csp_debug_set_level(CSP_PROTOCOL, true);
+    csp_debug_set_level(CSP_LOCK, true);
+#endif
 
     csp_active = true;
 
