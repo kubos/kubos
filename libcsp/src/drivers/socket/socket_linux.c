@@ -50,9 +50,9 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
 	static struct sockaddr_in server;
 	static bool server_init = false;
 
-    if (socket_iface == NULL) {
-        return CSP_ERR_DRIVER;
-    }
+	if (socket_iface == NULL) {
+		return CSP_ERR_DRIVER;
+	}
 
 	if (server_init == false) {
 		server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
@@ -74,9 +74,9 @@ static int socket_server_init(csp_socket_handle_t * socket_iface, uint16_t port)
 		}
 
 		if (listen(server_socket, SERVER_MAX_CONNECTIONS) < 0) {
-            csp_log_error("Failed to listen\n");
-            return CSP_ERR_DRIVER;
-        }
+			csp_log_error("Failed to listen\n");
+			return CSP_ERR_DRIVER;
+		}
 		server_init = true;
 	}
 
@@ -94,8 +94,8 @@ static int socket_client_init(csp_socket_handle_t * socket_iface, uint16_t port)
 	int socket_handle;
 	struct sockaddr_in server;
 
-    if (socket_iface == NULL)
-        return CSP_ERR_DRIVER;
+	if (socket_iface == NULL)
+		return CSP_ERR_DRIVER;
 
 	//Create socket
 	socket_handle = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
@@ -128,7 +128,7 @@ int socket_init(csp_socket_handle_t * socket_iface, uint8_t mode, uint16_t port)
 	} else if (mode == CSP_SOCKET_CLIENT) {
 		return socket_client_init(socket_iface, port);
 	}
-    return CSP_ERR_DRIVER;
+	return CSP_ERR_DRIVER;
 }
 
 int socket_close(csp_socket_handle_t * socket_driver) {
