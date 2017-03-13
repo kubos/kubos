@@ -91,7 +91,6 @@ static void test_server_no_client_packet(void ** arg)
         .data.i = 12
     };
     socket_conn conn;
-    telemetry_packet out_packet;
     subscriber_list_item * sub = NULL;
 
     will_return(__wrap_kprv_socket_client_connect, true);

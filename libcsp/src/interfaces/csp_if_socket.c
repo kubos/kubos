@@ -42,18 +42,17 @@
  */
 CSP_DEFINE_TASK(csp_socket_rx);
 
-int csp_socket_tx(struct csp_iface_s * ifc, csp_packet_t *packet, uint32_t timeout) {
+int csp_socket_tx(struct csp_iface_s * ifc, csp_packet_t * packet, uint32_t timeout) {
 	if ((ifc == NULL) || (ifc->driver == NULL)) {
 		csp_log_error("Null pointer for interface or driver\r\n");
 		return CSP_ERR_DRIVER;
 	}
 
 	csp_log_info("csp_socket_tx go\r\n");
-    
 
 	csp_socket_handle_t * socket_driver = ifc->driver;
 
-    csp_log_info("Is active? %d", socket_driver->is_active);
+	csp_log_info("Is active? %d", socket_driver->is_active);
 
 	uint8_t write_buffer[SOCKET_BUFFER_SIZE];
 	int write_size = cbor_encode_csp_packet(packet, write_buffer);
@@ -63,7 +62,7 @@ int csp_socket_tx(struct csp_iface_s * ifc, csp_packet_t *packet, uint32_t timeo
 		csp_log_info("csp_socket_tx write %d\r\n", result);
 		if (result < 0) {
 			csp_log_error("Socket write error: %u %s\r\n", result, strerror(result));
-            return CSP_ERR_DRIVER;
+			return CSP_ERR_DRIVER;
 		}
 		csp_buffer_free(packet);
 	} else {
@@ -135,7 +134,7 @@ int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dri
 
 	/* Start RX thread */
 	if (csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &(socket_driver->rx_thread_handle)) != 0)
-        return CSP_ERR_DRIVER;
+		return CSP_ERR_DRIVER;
 
 	/* Register interface */
 	csp_iflist_add(socket_iface);
