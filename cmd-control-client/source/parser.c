@@ -128,15 +128,22 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
 
 bool cnc_client_parse_cl_args(CNCCommandPacket * command_packet, int argc, char ** argv)
 {
-    int res, argsc;
+    int result;
     int flags = 0;
     if (command_packet == NULL || argv == NULL)
     {
         return false;
     }
 
-    argp_parse (&argp, argc, argv, flags, 0, command_packet);
-
-    return true;
+    result = argp_parse (&argp, argc, argv, flags, 0, command_packet);
+    if (result == 0)
+    {
+        return true;
+    }
+    else
+    {
+        //Do some error handling
+        return false;
+    }
 }
 
