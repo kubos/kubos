@@ -37,7 +37,6 @@ bool parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrapper);
 bool parse_buffer_from_packet(csp_packet_t * packet, CborDataWrapper * data_wrapper);
 
 bool parse_command(CborParser * parser, CborValue * map, CNCWrapper * wrapper);
-//bool parse_command_cbor(csp_packet_t * packet, char * command);
 
 bool load_and_run_command(CNCWrapper * wrapper);
 

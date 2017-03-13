@@ -24,13 +24,13 @@
 #include "tinycbor/cbor.h"
 
 
-bool encode_packet(CborDataWrapper * data_wrapper, CNCCommandPacket * packet)
+bool cnc_client_encode_packet(CborDataWrapper * data_wrapper, CNCCommandPacket * packet)
 {
-    start_encode_response(MESSAGE_TYPE_COMMAND_INPUT, data_wrapper, packet);
+    cnc_client_start_encode_response(MESSAGE_TYPE_COMMAND_INPUT, data_wrapper, packet);
 }
 
 
-bool start_encode_response(int message_type, CborDataWrapper * data_wrapper, CNCCommandPacket * packet)
+bool cnc_client_start_encode_response(int message_type, CborDataWrapper * data_wrapper, CNCCommandPacket * packet)
 {
     CborEncoder encoder, container;
     CborError err;
@@ -56,13 +56,16 @@ bool start_encode_response(int message_type, CborDataWrapper * data_wrapper, CNC
     switch (message_type)
     {
         case MESSAGE_TYPE_COMMAND_INPUT:
-            return encode_command(data_wrapper, packet, &encoder, &container);
+            return cnc_client_encode_command(data_wrapper, packet, &encoder, &container);
+            break;
+        default:
+            fprintf(stderr, "Message type %i, Not found", message_type);
             break;
     }
 }
 
 
-bool encode_command(CborDataWrapper * data_wrapper, CNCCommandPacket * packet, CborEncoder * encoder, CborEncoder * container)
+bool cnc_client_encode_command(CborDataWrapper * data_wrapper, CNCCommandPacket * packet, CborEncoder * encoder, CborEncoder * container)
 {
     CborError err;
 
@@ -96,11 +99,11 @@ bool encode_command(CborDataWrapper * data_wrapper, CNCCommandPacket * packet, C
         return false;
     }
 
-    return finish_encode_response_and_send(data_wrapper, encoder, container);
+    return cnc_client_finish_encode_response_and_send(data_wrapper, encoder, container);
 }
 
 
-bool finish_encode_response_and_send(CborDataWrapper * data_wrapper, CborEncoder *encoder, CborEncoder * container)
+bool cnc_client_finish_encode_response_and_send(CborDataWrapper * data_wrapper, CborEncoder *encoder, CborEncoder * container)
 {
     if (data_wrapper == NULL)
     {
@@ -109,7 +112,7 @@ bool finish_encode_response_and_send(CborDataWrapper * data_wrapper, CborEncoder
 
     cbor_encoder_close_container(encoder, container);
     data_wrapper->length = cbor_encoder_get_buffer_size(encoder, data_wrapper->data);
-    /*printf("Data: %s\n", data_wrapper->data);*/
+
     return true;
 }
 

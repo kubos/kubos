@@ -24,6 +24,7 @@
 #include "command-and-control/types.h"
 
 //Action string hash values
+#define BASE_HASH    5381
 #define EXEC_HASH    6385204650
 #define HELP_HASH    6385292014
 #define OUTPUT_HASH  6953876217206
@@ -46,10 +47,12 @@ static struct argp argp = { options, parse_opt, args_doc, doc};
 //djb2 string hash function
 unsigned long get_hash(char *str)
 {
-    unsigned long hash = 5381;
+    unsigned long hash = BASE_HASH;
     int c;
     while (c = *str++)
+    {
         hash = ((hash << 5) + hash) + c;
+    }
 
     return hash;
 }
@@ -88,7 +91,7 @@ bool set_action(char* arg, CNCCommandPacket * command_packet)
 }
 
 
-static int parse_opt (int key, char *arg, struct argp_state *state)
+static int parse_opt(int key, char *arg, struct argp_state *state)
 {
     CNCCommandPacket * command_packet = state->input;
     int idx;
@@ -123,7 +126,7 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
 }
 
 
-bool parse (CNCCommandPacket * command_packet, int argc, char ** argv)
+bool cnc_client_parse_cl_args(CNCCommandPacket * command_packet, int argc, char ** argv)
 {
     int res, argsc;
     int flags = 0;

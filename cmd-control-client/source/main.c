@@ -181,7 +181,7 @@ bool send_msg(CborDataWrapper * data_wrapper)
 }
 
 
-bool parse_response(csp_packet_t * packet)
+bool cnc_client_parse_response(csp_packet_t * packet)
 {
     CborParser parser;
     CborValue map, element;
@@ -207,10 +207,10 @@ bool parse_response(csp_packet_t * packet)
     switch (message_type)
     {
         case RESPONSE_TYPE_COMMAND_RESULT:
-            return parse_command_result(&parser, &map);
+            return cnc_client_parse_command_result(&parser, &map);
             break;
         case RESPONSE_TYPE_PROCESSING_ERROR:
-            return parse_processing_error(&parser, &map);
+            return cnc_client_parse_processing_error(&parser, &map);
             break;
         default:
             fprintf(stderr, "Received unknown message type: %i\n", message_type);
@@ -218,7 +218,7 @@ bool parse_response(csp_packet_t * packet)
     }
 }
 
-bool parse_command_result( CborParser * parser, CborValue * map)
+bool cnc_client_parse_command_result( CborParser * parser, CborValue * map)
 {
     uint8_t return_code;
     double execution_time;
@@ -240,7 +240,7 @@ bool parse_command_result( CborParser * parser, CborValue * map)
     {
         return false;
     }
-    printf("Exectuion Time %f\n", execution_time);
+    printf("Execution Time %f\n", execution_time);
 
     err = cbor_value_map_find_value(map, "OUTPUT", &element);
     if (err || cbor_value_copy_text_string(&element, output, &len, NULL))
@@ -253,7 +253,7 @@ bool parse_command_result( CborParser * parser, CborValue * map)
 }
 
 
-bool parse_processing_error(CborParser * parser, CborValue * map)
+bool cnc_client_parse_processing_error(CborParser * parser, CborValue * map)
 {
     size_t len = BUF_SIZE;
     char error_message[BUF_SIZE] = {0};
@@ -271,7 +271,7 @@ bool parse_processing_error(CborParser * parser, CborValue * map)
 }
 
 
-void get_response()
+void cnc_client_get_response()
 {
     csp_socket_t *sock;
     csp_conn_t *conn;
@@ -288,7 +288,7 @@ void get_response()
             packet = csp_read(conn, 0);
             if (packet)
             {
-                parse_response(packet);
+                cnc_client_parse_response(packet);
             }
             csp_buffer_free(packet);
             csp_close_socket(sock);
@@ -316,16 +316,13 @@ int main(int argc, char **argv)
     CborEncoder encoder, container;
     CborError err;
 
+    cmd_packet = (CNCCommandPacket){0};
 
-    cmd_packet.arg_count = 0;
-    cmd_packet.action = 0;
-    memset(&cmd_packet.cmd_name, sizeof(cmd_packet.cmd_name), 0);
-    for (i = 0; i < CMD_PACKET_NUM_ARGS; i++)
+    if (!cnc_client_parse_cl_args(&cmd_packet, argc, argv))
     {
-        memset(&cmd_packet.args[i], CMD_PACKET_ARG_LEN, 0);
+        fprintf(stderr, "There was an error parsing the command line arguments\n");
+        return 1;
     }
-
-    parse(&cmd_packet, argc, argv);
 
     if (!init())
     {
@@ -333,14 +330,14 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (!encode_packet(&data_wrapper, &cmd_packet))
+    if (!cnc_client_encode_packet(&data_wrapper, &cmd_packet))
     {
         fprintf(stderr, "Error encoding command packet\n");
         return 1;
     }
 
     send_msg(&data_wrapper);
-    get_response();
+    cnc_client_get_response();
 
     return 0;
 }

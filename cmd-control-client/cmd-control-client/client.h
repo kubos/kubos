@@ -20,16 +20,16 @@
 #include "tinycbor/cbor.h"
 
 
-bool encode_packet(CborDataWrapper *data_wrapper, CNCCommandPacket * packet);
+bool cnc_client_encode_packet(CborDataWrapper *data_wrapper, CNCCommandPacket * packet);
 
-bool encode_command(CborDataWrapper * data_wrapper, CNCCommandPacket * packet, CborEncoder * encoder, CborEncoder * container);
+bool cnc_client_encode_command(CborDataWrapper * data_wrapper, CNCCommandPacket * packet, CborEncoder * encoder, CborEncoder * container);
 
-bool start_encode_response(int message_type, CborDataWrapper * data_wrapper, CNCCommandPacket * packet);
+bool cnc_client_start_encode_response(int message_type, CborDataWrapper * data_wrapper, CNCCommandPacket * packet);
 
-bool finish_encode_response_and_send(CborDataWrapper * data_wrapper, CborEncoder *encoder, CborEncoder * container);
+bool cnc_client_finish_encode_response_and_send(CborDataWrapper * data_wrapper, CborEncoder *encoder, CborEncoder * container);
 
-bool parse_processing_error(CborParser * parser, CborValue * map);
+bool cnc_client_parse_processing_error(CborParser * parser, CborValue * map);
 
-bool parse_command_result( CborParser * parser, CborValue * map);
+bool cnc_client_parse_command_result( CborParser * parser, CborValue * map);
 
-bool parse (CNCCommandPacket * command_packet, int argc, char ** argv);
+bool cnc_client_parse (CNCCommandPacket * command_packet, int argc, char ** argv);
