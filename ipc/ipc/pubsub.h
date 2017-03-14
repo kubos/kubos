@@ -15,6 +15,10 @@
  */
 
 /**
+ * @TODO: Split this file into csp and csp-socket files?
+ */
+
+/**
  * @defgroup PubSub
  * @addtogroup PubSub
  * @brief Internal PubSub API

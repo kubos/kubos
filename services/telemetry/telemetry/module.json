@@ -8,7 +8,10 @@
     },
     "targetDependencies":{
       "kubos-rt":{
-        "kubos-rt":"kubostech/kubos-rt"
+        "telemetry-rt":"kubostech/telemetry-rt"
+      },
+      "kubos-linux":{
+        "telemetry-linux":"kubostech/telemetry-linux"
       }
     },
     "testDependencies": {
