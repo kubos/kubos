@@ -90,7 +90,7 @@ bool telemetry_read(const socket_conn * conn, telemetry_packet * packet)
 {
     int tries = 0;
     uint32_t msg_size;
-    if ((packet != NULL) && (packet != NULL))
+    if ((conn != NULL) && (packet != NULL))
     {
         while (tries++ < TELEMETRY_SUBSCRIBER_READ_ATTEMPTS)
         {

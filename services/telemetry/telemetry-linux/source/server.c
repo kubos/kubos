@@ -191,6 +191,11 @@ bool telemetry_process_message(subscriber_list_item * sub, const void * buffer, 
     telemetry_packet packet;
     uint16_t topic_id;
 
+    if ((sub == NULL) || (buffer == NULL))
+    {
+        return false;
+    }
+
     if (telemetry_parse_msg_type(buffer, buffer_size, &req))
     {
         switch (req)

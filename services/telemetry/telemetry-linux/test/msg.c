@@ -48,6 +48,30 @@ static void test_packet_msg(void ** arg)
     assert_int_equal(in.timestamp, out.timestamp);
 }
 
+
+
+static void test_packet_bad_type(void ** arg)
+{
+    telemetry_packet in = {
+        .source.topic_id = 1,
+        .source.subsystem_id = 2,
+        .source.data_type = -100,
+        .data.i = 11,
+        .timestamp = 1010101
+    };
+    telemetry_message_type msg_type;
+    telemetry_packet out;
+    uint8_t buffer[100];
+
+    int msg_size = telemetry_encode_packet_msg(buffer, &in);
+    // bool parsed_type = telemetry_parse_msg_type(buffer, msg_size, &msg_type);
+    bool parsed = telemetry_parse_packet_msg(buffer, msg_size, &out);
+
+    assert_true(msg_size < 0);
+    // assert_false(parsed_type);
+    assert_false(parsed);
+}
+
 static void test_subscribe_msg(void ** arg)
 {
     uint8_t buffer[100];
@@ -98,6 +122,31 @@ static void test_disconnect_msg(void ** arg)
     assert_int_equal(msg_type, MESSAGE_TYPE_DISCONNECT);
 }
 
+static void test_parse_no_msg(void ** arg)
+{
+    uint8_t buffer[100] = {1};
+    telemetry_message_type msg_type;
+    uint32_t msg_size = 100;
+
+    bool parsed_type = telemetry_parse_msg_type(buffer, msg_size, &msg_type);
+    assert_false(parsed_type);
+}
+
+static void test_bad_length_msg(void ** arg)
+{
+    uint8_t buffer[100];
+    telemetry_message_type msg_type;
+
+    int msg_size = telemetry_encode_disconnect_msg(buffer);
+    msg_size = 0;
+
+    bool parsed_type = telemetry_parse_msg_type(buffer, msg_size, &msg_type);
+
+    assert_false(parsed_type);
+
+    assert_int_not_equal(msg_type, MESSAGE_TYPE_DISCONNECT);
+}
+
 static void test_start_encode_msg(void ** arg)
 {
     uint8_t buffer[100];
@@ -120,10 +169,13 @@ int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_packet_msg),
+        cmocka_unit_test(test_packet_bad_type),
         cmocka_unit_test(test_subscribe_msg),
         cmocka_unit_test(test_unsubscribe_msg),
         cmocka_unit_test(test_disconnect_msg),
         cmocka_unit_test(test_start_encode_msg),
+        cmocka_unit_test(test_parse_no_msg),
+        cmocka_unit_test(test_bad_length_msg),
         cmocka_unit_test(test_end_encode_msg),
     };
 

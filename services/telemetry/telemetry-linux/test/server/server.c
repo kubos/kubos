@@ -83,87 +83,6 @@ static void test_server_kprv_subscriber_destroy(void ** arg)
     assert_null(sub);
 }
 
-static void test_server_no_client_packet(void ** arg)
-{
-    telemetry_packet in_packet = {
-        .source.topic_id = 5,
-        .source.data_type = TELEMETRY_TYPE_INT,
-        .data.i = 12
-    };
-    socket_conn conn;
-    subscriber_list_item * sub = NULL;
-
-    will_return(__wrap_kprv_socket_client_connect, true);
-    kprv_socket_client_connect(&conn, 0);
-
-    sub = kprv_subscriber_init(conn);
-
-    kprv_subscriber_add_topic(sub, in_packet.source.topic_id);
-
-    will_return(__wrap_kprv_socket_close, true);
-    kprv_subscriber_destroy(&sub);
-}
-
-static void test_server_publish_packet(void ** arg)
-{
-    // @TODO This test needs work
-    telemetry_packet in_packet = {
-        .source.topic_id = 5,
-        .source.data_type = TELEMETRY_TYPE_INT,
-        .data.i = 12
-    };
-    socket_conn conn;
-    subscriber_list_item * sub = NULL;
-
-    will_return(__wrap_kprv_socket_client_connect, true);
-    kprv_socket_client_connect(&conn, 0);
-
-    sub = kprv_subscriber_init(conn);
-
-    kprv_subscriber_add_topic(sub, in_packet.source.topic_id);
-
-    assert_true(kprv_subscriber_has_topic(sub, in_packet.source.topic_id));
-
-    // expect_value(__wrap_kprv_socket_send, conn->is_active, true);
-    // expect_not_value(__wrap_kprv_socket_send, buffer, NULL);
-    // will_return(__wrap_kprv_socket_send, true);
-    // assert_true(telemetry_publish_packet(sub, in_packet));
-
-    will_return(__wrap_kprv_socket_close, true);
-    kprv_subscriber_destroy(&sub);
-}
-
-static void test_server_publish_multiple_packets(void ** arg)
-{
-    // @TODO This test needs work
-    telemetry_packet in_packet = {
-        .source.topic_id = 5,
-        .source.data_type = TELEMETRY_TYPE_INT
-    };
-    int i = 0;
-    socket_conn conn;
-    subscriber_list_item * sub = NULL;
-
-    will_return(__wrap_kprv_socket_client_connect, true);
-    kprv_socket_client_connect(&conn, 0);
-
-    sub = kprv_subscriber_init(conn);
-
-    kprv_subscriber_add_topic(sub, in_packet.source.topic_id);
-
-    // for (i = 0; i < 5; i++)
-    // {
-    //     in_packet.data.i = i;
-    //     expect_value(__wrap_kprv_socket_send, conn->is_active, true);
-    //     expect_not_value(__wrap_kprv_socket_send, buffer, NULL);
-    //     will_return(__wrap_kprv_socket_send, true);
-    //     assert_true(telemetry_publish_packet(sub, in_packet));
-    // }
-
-    will_return(__wrap_kprv_socket_close, true);
-    kprv_subscriber_destroy(&sub);
-}
-
 static void test_server_get_subscribe_msg(void ** arg)
 {
     uint8_t buffer[100];
@@ -289,9 +208,6 @@ int main(void)
         cmocka_unit_test(test_server_remove_subscription),
         cmocka_unit_test(test_server_kprv_subscriber_init),
         cmocka_unit_test(test_server_kprv_subscriber_destroy),
-        cmocka_unit_test(test_server_no_client_packet),
-        cmocka_unit_test(test_server_publish_packet),
-        cmocka_unit_test(test_server_publish_multiple_packets),
         cmocka_unit_test(test_server_get_subscribe_msg),
         cmocka_unit_test(test_server_get_unsubscribe_msg),
         cmocka_unit_test(test_server_get_disconnect_msg),
