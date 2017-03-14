@@ -26,7 +26,7 @@ int ping();
 
 int build_info();
 
-int reboot();
+int exec_reboot();
 
 typedef struct
 {
