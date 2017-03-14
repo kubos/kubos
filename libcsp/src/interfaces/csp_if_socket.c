@@ -115,8 +115,9 @@ CSP_DEFINE_TASK(csp_socket_rx) {
 }
 
 int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver) {
-	if ((socket_iface == NULL) || (socket_driver == NULL))
+	if ((socket_iface == NULL) || (socket_driver == NULL)) {
 		return CSP_ERR_DRIVER;
+    }
 
 	socket_iface->driver = socket_driver;
 	socket_iface->nexthop = csp_socket_tx;
@@ -126,7 +127,7 @@ int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dri
 	/* Start RX thread */
 	if (csp_thread_create(csp_socket_rx, "SOCKET_RX", 1000, socket_iface, 0, &(socket_driver->rx_thread_handle)) != 0) {
 		return CSP_ERR_DRIVER;
-    }
+	}
 
 	/* Register interface */
 	csp_iflist_add(socket_iface);
@@ -137,7 +138,7 @@ int csp_socket_init(csp_iface_t * socket_iface, csp_socket_handle_t * socket_dri
 int csp_socket_close(csp_iface_t * socket_iface, csp_socket_handle_t * socket_driver) {
 	if ((socket_iface == NULL) || (socket_driver == NULL)) {
 		return CSP_ERR_DRIVER;
-    }
+	}
 
 	socket_close(socket_driver);
 
