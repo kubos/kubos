@@ -2,7 +2,6 @@
 
 CC = gcc # C compiler
 INCLUDE := -Iinclude #include directories
-BUILD_DIR := build
 CFLAGS = -fPIC -Wall -Wextra -g $(INCLUDE) # C flags
 LDFLAGS = -shared  # linking flags
 RM = rm -f  # rm command
@@ -17,9 +16,8 @@ all: ${TARGET_LIB} install
 $(TARGET_LIB): $(OBJS)
 	$(CC) ${LDFLAGS} -o $@ $^
 
-$(BUILD_DIR)/%.o: %.c
-	$(CC) $(CFLAGS) -o $@ $^
-#include $(SRCS:.c=.o)
+source/%.o: %.c
+	$(CC)  $(CFLAGS) -o $@ $^
 
 install: ${TARGET_LIB}
 	cp ${TARGET_LIB} ~
