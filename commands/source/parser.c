@@ -54,7 +54,6 @@ unsigned long get_hash(char *str)
 static int parse_opt (int key, char *arg, struct argp_state *state)
 {
     char * cmd_string = state->input;
-    int idx;
     switch (key)
     {
         case ARGP_KEY_ARG:
@@ -98,7 +97,7 @@ int get_and_run_command(char * command_name)
             return build_info();
             break;
         default:
-            printf("Recevied unknown hash %lu\n", hash);
+            printf("Recevied unknown command: %s\n", command_name);
             return 1;
             break;
     }
