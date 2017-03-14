@@ -32,6 +32,7 @@
     "cortex-m4",
     "armv7-m"
   ],
+  "buildTarget": true,
   "config": {
     "cmsis": {
       "nvic": {

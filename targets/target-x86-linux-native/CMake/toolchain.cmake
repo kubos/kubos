@@ -13,4 +13,3 @@ set(CMAKE_CXX_FLAGS "-std=gnu++11" CACHE STRING "")
 if(NOT (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Linux"))
     message(FATAL_ERROR "This Linux native target will not work on non-Linux platforms (your platform is ${CMAKE_HOST_SYSTEM_NAME}), use `yotta target` to set the target.")
 endif()
-

@@ -1,0 +1,17 @@
+{
+    "bin":"./source",
+    "license":"Apache-2.0",
+    "name":"cmd-control-daemon",
+    "repository":{
+        "url":"git://github.com/kubostech/kubos",
+        "type":"git"
+    },
+    "version":"0.0.0",
+    "dependencies":{
+        "csp":"kubostech/libcsp#~1.5.0",
+        "command-and-control":"kubostech/command-and-control",
+        "ipc":"kubostech/ipc",
+        "tinycbor":"kubostech/tinycbor"
+    },
+    "description":"The Kubos command and control daemon."
+}

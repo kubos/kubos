@@ -121,7 +121,7 @@ In this example '/dev/sdb' is the name of the SD card.  You might also see '/dev
 
 ####Partition the SD Card
 
-First, you'll need to set up the partitions on the SD card:
+First, you'll need to set up the partitions on the SD card ({name} is the name of the disk device. Ex. /dev/sdb):
 
 Create a partition table
 
@@ -130,14 +130,19 @@ Create a partition table
 Create the partitions 
 
     $ sudo parted {name} mkpart primary linux-swap 1M 513M
-    $ sudo parted {name} mkpart primary fat16 513M 534M
-    $ sudo parted {name} mkpart primary ext4 534M 4000M
+    $ sudo parted {name} mkpart extended 513M 4000M
+    $ sudo parted {name} mkpart logical fat16 513M 534M
+    $ sudo parted {name} mkpart logical ext4 534M 555M
+    $ sudo parted {name} mkpart logical ext4 555M 606M
+    $ sudo parted {name} mkpart logical ext4 606M 4000M
     
 Configure the partitions (ex. /dev/sdb1) 
 
     $ sudo mkswap {name}{partition1}
-    $ sudo mkfs.fat {name}{partition2}
-    $ sudo mkfs.ext4 {name}{partition3}
+    $ sudo mkfs.fat {name}{partition5}
+    $ sudo mkfs.ext4 {name}{partition6}
+    $ sudo mkfs.ext4 {name}{partition7}
+    $ sudo mkfs.ext4 {name}{partition8}
 
 ####Copy the files
 
@@ -152,8 +157,8 @@ Create mount folders
     
 Mount the partitions
 
-    $ sudo mount {name}{partition2} boot
-    $ sudo mount {name}{partition3} rootfs
+    $ sudo mount {name}{partition5} boot
+    $ sudo mount {name}{partition6} rootfs
     
 Copy the zImage file into partition 2
 
@@ -165,8 +170,8 @@ Untar the rootfs into partition 3
     
 Unmount the partitions
 
-    $ sudo umount {name}{partition2}
-    $ sudo umount {name}{partition3}
+    $ sudo umount {name}{partition5}
+    $ sudo umount {name}{partition6}
     
 Remove the SD card and insert it into iOBC SD card slot 0
 
