@@ -107,22 +107,3 @@ int get_and_run_command(char * command_name)
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

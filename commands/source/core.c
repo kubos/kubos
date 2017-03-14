@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/reboot.h>
+#include <sys/utsname.h>
 
 #include "parser.h"
 int parse_and_run(char * arg);
@@ -66,19 +67,9 @@ int ping()
 
 int build_info()
 {
-    char output [256];
-    char * version_command = "uname --kernel-version";
-    FILE * fp = popen(version_command, "r");
-
-    if (fp == NULL)
-    {
-        printf("There was an error running the info command\n");
-        return 1;
-    }
-
-    fgets(output, sizeof(output), fp);
-
-    printf("%s", output);
+    struct utsname uname_data;
+    uname(&uname_data);
+    printf("Version: %s\n", uname_data.version);
     return 0;
 }
 
