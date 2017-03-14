@@ -15,23 +15,24 @@
  */
 
 #include <stdio.h>
-
-#define PING_HASH   6385583923
+#include "parser.h"
 
 int parse_and_run(char * arg);
 
 int execute(int argc, char **argv)
 {
-    switch (argc)
+    char command_string[DEFAULT_COMMAND_STR_LENGTH] = {0};
+
+    if (!core_parse_args(argc, argv, command_string))
     {
-        case 1:
-            return parse_and_run(argv[0]);
-        default:
-            printf("Error: incorrect number of arguments.\n");
-            return 1;
+        printf("An error occurred parsing arguments\n");
+        return 1;
     }
-    return 0;
+
+    return get_and_run_command(command_string);
+
 }
+
 
 int status(int argc, char **argv)
 {
@@ -54,32 +55,27 @@ int help(int argc, char **argv)
 }
 
 
-//djb2 string hash function
-unsigned long get_hash(char *str)
+int ping()
 {
-    unsigned long hash = 5381;
-    int c;
-    while (c = *str++)
-    {
-        hash = ((hash << 5) + hash) + c;
-    }
-
-    return hash;
+    printf("Pong!\n");
+    return 0;
 }
 
 
-int parse_and_run(char* arg)
+int build_info()
 {
-    unsigned long hash = get_hash(arg);
-    switch (hash)
-    {
-        case PING_HASH:
-            printf("PONG!\n");
-            return 0;
-            break;
-        default:
-            printf("Received unknown command: %s\n", arg);
-            return 1;
-    }
-}
+    char output [256];
+    char * version_command = "uname --kernel-version"; 
+    FILE * fp = popen(version_command, "r");
 
+    if (fp == NULL)
+    {
+        printf("There was an error running the info command\n");
+        return 1;
+    }
+
+    fgets(output, sizeof(output), fp);
+
+    printf("%s", output);
+    return 0;
+}

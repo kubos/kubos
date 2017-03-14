@@ -6,7 +6,7 @@ LDFLAGS = -shared  # linking flags
 RM = rm -f  # rm command
 TARGET_LIB = libcore.so # target lib
 
-SRCS = core.c # source files
+SRCS = core.c parser.c # source files
 OBJS = $(SRCS:.c=.o)
 
 .PHONY: all
