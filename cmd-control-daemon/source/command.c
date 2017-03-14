@@ -33,6 +33,11 @@ bool cnc_daemon_parse_command_cbor(csp_packet_t * packet, char * command)
     CborValue map, element;
     size_t len;
 
+    if (packet == NULL || command == NULL)
+    {
+        return false;
+    }
+
     CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
     if (err)
     {

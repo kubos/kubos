@@ -26,7 +26,7 @@ bool cnc_client_encode_command(CborDataWrapper * data_wrapper, CNCCommandPacket 
 
 bool cnc_client_start_encode_response(int message_type, CborDataWrapper * data_wrapper, CNCCommandPacket * packet);
 
-bool cnc_client_finish_encode_response_and_send(CborDataWrapper * data_wrapper, CborEncoder *encoder, CborEncoder * container);
+bool cnc_client_finish_encode_response(CborDataWrapper * data_wrapper, CborEncoder *encoder, CborEncoder * container);
 
 bool cnc_client_parse_processing_error(CborParser * parser, CborValue * map);
 

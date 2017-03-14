@@ -41,7 +41,7 @@ bool cnc_client_start_encode_response(int message_type, CborDataWrapper * data_w
     }
 
     cbor_encoder_init(&encoder, data_wrapper->data, MTU, 0);
-    err = cbor_encoder_create_map(&encoder, &container, 6); //TODO: Dynamically assign map size
+    err = cbor_encoder_create_map(&encoder, &container, 5); //TODO: Dynamically assign map size
     if (err)
     {
         return false;
@@ -69,7 +69,7 @@ bool cnc_client_encode_command(CborDataWrapper * data_wrapper, CNCCommandPacket 
 {
     CborError err;
 
-    if(data_wrapper == NULL || packet == NULL)
+    if(data_wrapper == NULL || packet == NULL || encoder == NULL || container == NULL)
     {
         return false;
     }
@@ -99,13 +99,13 @@ bool cnc_client_encode_command(CborDataWrapper * data_wrapper, CNCCommandPacket 
         return false;
     }
 
-    return cnc_client_finish_encode_response_and_send(data_wrapper, encoder, container);
+    return cnc_client_finish_encode_response(data_wrapper, encoder, container);
 }
 
 
-bool cnc_client_finish_encode_response_and_send(CborDataWrapper * data_wrapper, CborEncoder *encoder, CborEncoder * container)
+bool cnc_client_finish_encode_response(CborDataWrapper * data_wrapper, CborEncoder * encoder, CborEncoder * container)
 {
-    if (data_wrapper == NULL)
+    if (data_wrapper == NULL || encoder == NULL || container == NULL)
     {
         return false;
     }
