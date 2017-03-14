@@ -65,7 +65,7 @@ int ping()
 int build_info()
 {
     char output [256];
-    char * version_command = "uname --kernel-version"; 
+    char * version_command = "uname --kernel-version";
     FILE * fp = popen(version_command, "r");
 
     if (fp == NULL)
