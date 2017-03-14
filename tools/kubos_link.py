@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+import utils
 
 from kubos_build import KubosBuild
 
@@ -14,38 +15,22 @@ class KubosLinker(object):
     def __init__(self):
         self.kb = KubosBuild()
 
-    def cmd(self, *args, **kwargs):
-        cwd = kwargs.get('cwd', os.getcwd())
-        save_output = kwargs.pop('save_output', False)
-        echo = kwargs.pop('echo', True)
-
-        if echo:
-            print ' '.join(args)
-        try:
-            if save_output:
-                return subprocess.check_output(args, **kwargs)
-            else:
-                return subprocess.check_call(args, **kwargs)
-        except subprocess.CalledProcessError, e:
-            print >>sys.stderr, 'Error executing command, giving up'
-            sys.exit(1)
-
     def link_sys(self, link_cmd):
         for module in self.kb.modules(include_bin=False):
             print '[module %s@%s]' % (module.yotta_name(), module.path)
-            self.cmd('kubos', link_cmd, cwd=module.path)
+            utils.cmd('kubos', link_cmd, cwd=module.path)
 
         for target in self.kb.targets():
             print '[target %s@%s]' % (target.yotta_name(), target.path)
-            self.cmd('kubos', link_cmd + '-target', cwd=target.path)
+            utils.cmd('kubos', link_cmd + '-target', cwd=target.path)
 
     def link_app(self, app_dir, link_cmd):
         print '[app %s]' % app_dir
         for module in self.kb.modules(include_bin=False):
-            self.cmd('kubos', link_cmd, module.yotta_name(), cwd=app_dir)
+            utils.cmd('kubos', link_cmd, module.yotta_name(), cwd=app_dir)
 
         for target in self.kb.targets():
-            self.cmd('kubos', link_cmd + '-target', target.yotta_name(),
+            utils.cmd('kubos', link_cmd + '-target', target.yotta_name(),
                      cwd=app_dir)
 
 def main():
@@ -66,6 +51,10 @@ def main():
     parser.add_argument('--all', action='store_true', default=False,
                         help='install/uninstall system symlinks and app ' \
                              'symlinks for local example apps (default)')
+    parser.add_argument('--modules', action='store_true', default=False,
+                        help='install/uninstall target/modulesystem symlinks ' \
+                             'for all modules within the kubos tree')
+                        
 
     args = parser.parse_args()
     if not args.sys and not args.app:
@@ -86,6 +75,17 @@ def main():
         else:
             # unlink in reverse
             for mod in linker.kb.bin_modules():
+                linker.link_app(mod.path, args.link)
+            linker.link_sys(args.link)
+
+    if args.modules:
+        if args.link == 'link':
+            linker.link_sys(args.link)
+            for mod in linker.kb.modules():
+                linker.link_app(mod.path, args.link)
+        else:
+            # unlink in reverse
+            for mod in linker.kb.modules():
                 linker.link_app(mod.path, args.link)
             linker.link_sys(args.link)
 
