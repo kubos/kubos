@@ -42,8 +42,8 @@ static void test_parse_packet(void ** arg) {
 	out_packet = csp_buffer_get(100);
 	assert_non_null(out_packet);
 
-	sprintf(in_packet->data, "test1234test");
-	in_packet->length = strlen(in_packet->data);
+	sprintf((char*)in_packet->data, "test1234test");
+	in_packet->length = strlen((char*)in_packet->data);
 
 	buffer_size = cbor_encode_csp_packet(in_packet, buffer);
 	assert_true(buffer_size > 0);
