@@ -93,11 +93,27 @@ bool set_action(char* arg, CNCCommandPacket * command_packet)
 
 static int parse_opt(int key, char *arg, struct argp_state *state)
 {
-    CNCCommandPacket * command_packet = state->input;
+    CNCCommandPacket * command_packet;
     int idx;
+
+    //Delay NULL checking arg. This function is run a large number of times, some of which
+    //arg is NULL and it should be (ie. when the parser is initializing, finishing, etc).
+
+    if (state == NULL || state->input == NULL)
+    {
+        return 1;
+    }
+
+    command_packet = state->input;
+
     switch (key)
     {
         case ARGP_KEY_ARG:
+            if (arg == NULL)
+            {
+                return 1;
+            }
+
             switch(command_packet->arg_count++)
             {
                 case 0:
