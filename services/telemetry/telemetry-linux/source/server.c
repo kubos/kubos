@@ -177,7 +177,6 @@ bool kprv_publish_packet(telemetry_packet packet)
             {
                 printf("Failed to publish to %d\r\n", current->id);
                 ret = false;
-                break;
             }
         }
     }
