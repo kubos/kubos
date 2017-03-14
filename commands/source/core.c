@@ -15,8 +15,10 @@
  */
 
 #include <stdio.h>
-#include "parser.h"
+#include <unistd.h>
+#include <sys/reboot.h>
 
+#include "parser.h"
 int parse_and_run(char * arg);
 
 int execute(int argc, char **argv)
@@ -78,4 +80,16 @@ int build_info()
 
     printf("%s", output);
     return 0;
+}
+
+int exec_reboot()
+{
+    int res;
+    printf("Rebooting System\n");
+    sync(); //Sync all pending filesystem changes (Logging)
+    if (res = reboot(RB_AUTOBOOT) != 0)
+    {
+        printf("There was an error rebooting the system.\n");
+        return res;
+    }
 }
