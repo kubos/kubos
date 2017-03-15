@@ -4,5 +4,12 @@ node("raspi") {
   print env.JOB_NAME.replaceFirst('.+/', '')
   sh 'git checkout ' + env.JOB_NAME.replaceFirst('.+/', '')
   def workspace = pwd()
-  sh "python ${workspace}/test/integration/test_raspi.py"
+  sh "python ${workspace}/test/integration/jenkinsnode/tests/msp430f5529-test.py"
+}
+
+// Add comments here.
+
+node("rpi1") {
+  sh 'echo "rpi1 node test."'
+  
 }

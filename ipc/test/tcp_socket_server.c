@@ -15,68 +15,69 @@
  */
 
 #include <cmocka.h>
+#include <csp/arch/csp_thread.h>
 #include <csp/csp.h>
-#include <csp/drivers/socket.h>
-#include <csp/interfaces/csp_if_socket.h>
-#include <ipc/csp.h>
-#include <ipc/pubsub.h>
+#include <ipc/socket.h>
 #include <tinycbor/cbor.h>
 
 #define TEST_INT_PORT 10
 #define TEST_EXT_PORT 20
 #define TEST_NUM_CON 5
 #define TEST_ADDRESS 1
-#define TEST_SOCKET_PORT 8888
+#define TEST_SOCKET_PORT 8181
 
-static char send_msg[] = "test123test";
-static char recv_msg[12];
+static uint8_t send_msg[] = "test123test";
+static uint8_t recv_msg[12];
 
 CSP_DEFINE_TASK(client_task)
 {
-    pubsub_conn conn;
+    socket_conn conn;
+    int tries = 0;
 
-    while (!kprv_subscriber_socket_connect(&conn, TEST_ADDRESS, TEST_EXT_PORT))
+    while ((tries++ < 5) && !kprv_socket_client_connect(&conn, TEST_SOCKET_PORT))
     {
         csp_sleep_ms(10);
     }
 
-    kprv_send_csp(&conn, send_msg, 12);
+    assert_true(conn.is_active);
+    assert_true(conn.socket_handle > 0);
 
-    kprv_subscriber_socket_close(&conn);
+    assert_true(kprv_socket_send(&conn, send_msg, 12));
 
-    return CSP_TASK_RETURN;
+    assert_true(kprv_socket_close(&conn));
+    assert_false(conn.is_active);
+
+    assert_false(kprv_socket_send(&conn, send_msg, 12));
+
+    csp_thread_exit();
 }
 
 static void test_socket_server(void ** arg)
 {
-    csp_socket_t * int_socket = NULL;
-    csp_socket_t * ext_socket = NULL;
     csp_thread_handle_t client_task_handle;
-    pubsub_conn conn = {
-        .conn_handle = NULL
-    };
-    char buffer[10];
-
-    kubos_csp_init(TEST_ADDRESS);
+    socket_conn server_conn, client_conn;
+    uint32_t bytes_recv = 0;
 
     csp_thread_create(client_task, "CLIENT", 1024, NULL, 0, &client_task_handle);
 
-    ext_socket = kprv_server_setup(TEST_EXT_PORT, 20);
-    assert_non_null(ext_socket);
+    assert_true(kprv_socket_server_setup(&server_conn, TEST_SOCKET_PORT, 20));
 
-    assert_true(kprv_server_socket_accept(ext_socket, &conn));
-    assert_non_null(conn.conn_handle);
+    assert_true(kprv_socket_server_accept(&server_conn, &client_conn));
+    assert_true(client_conn.socket_handle > 0);
+    assert_true(client_conn.is_active);
 
-    assert_true(kprv_publisher_read(&conn, recv_msg, 12, TEST_EXT_PORT));
+    assert_true(kprv_socket_recv(&client_conn, recv_msg, 12, &bytes_recv));
+
+    assert_int_equal(bytes_recv, 12);
+
     assert_string_equal(send_msg, recv_msg);
 
-    csp_close_socket(ext_socket);
+    assert_true(kprv_socket_close(&client_conn));
+    assert_false(client_conn.is_active);
 
-    kprv_subscriber_socket_close(&conn);
+    assert_false(kprv_socket_recv(&client_conn, recv_msg, 12, &bytes_recv));
 
     csp_thread_kill(client_task_handle);
-
-    kubos_csp_terminate();
 }
 
 int main(void)

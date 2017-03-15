@@ -1,0 +1,15 @@
+{
+    "telemetry": {
+        "csp_address": 1,
+        "aggregator": {
+            "interval": 300
+        },
+        "subscribers": {
+            "max_num": 10 
+        }
+    },
+    "csp": {
+        "socket": true,
+        "debug": true
+    }
+}
