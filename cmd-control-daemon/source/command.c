@@ -27,11 +27,16 @@
 #define CBOR_BUF_SIZE YOTTA_CFG_CSP_MTU
 
 
-bool parse_command_cbor(csp_packet_t * packet, char * command)
+bool cnc_daemon_parse_command_cbor(csp_packet_t * packet, char * command)
 {
     CborParser parser;
     CborValue map, element;
     size_t len;
+
+    if (packet == NULL || command == NULL)
+    {
+        return false;
+    }
 
     CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
     if (err)
@@ -58,10 +63,15 @@ bool file_exists(char * path) //Should this live in a higher level module utilit
 }
 
 
-bool load_command(CNCWrapper * wrapper, void ** handle, lib_function * func)
+bool cnc_daemon_load_command(CNCWrapper * wrapper, void ** handle, lib_function * func)
 {
     int return_code;
     char so_path[SO_PATH_LENGTH];
+
+    if (wrapper == NULL || handle == NULL || func == NULL)
+    {
+        return false;
+    }
 
     // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
     int so_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
@@ -111,12 +121,17 @@ bool load_command(CNCWrapper * wrapper, void ** handle, lib_function * func)
 }
 
 
-bool run_command(CNCWrapper * wrapper, void ** handle, lib_function func)
+bool cnc_daemon_run_command(CNCWrapper * wrapper, void ** handle, lib_function func)
 {
+    int original_stdout;
     //Redirect stdout to the response output field.
     //TODO: Redirect or figure out what to do with STDERR
 
-    int original_stdout;
+    if (wrapper == NULL || handle == NULL)
+    {
+        return false;
+    }
+
     fflush(stdout);
     original_stdout = dup(STDOUT_FILENO);
     freopen("/dev/null", "a", stdout);
@@ -154,28 +169,34 @@ bool run_command(CNCWrapper * wrapper, void ** handle, lib_function func)
 }
 
 
-bool load_and_run_command(CNCWrapper * wrapper)
+bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 {
-    lib_function func = NULL;
     void * handle;
 
-    if (!load_command(wrapper, &handle, &func))
+    if (wrapper == NULL)
+    {
+        return false;
+    }
+
+    lib_function func = NULL;
+
+    if (!cnc_daemon_load_command(wrapper, &handle, &func))
     {
         printf("Failed to load command\n");
         wrapper->err = true;
-        send_result(wrapper);
+        cnc_daemon_send_result(wrapper);
         return false;
     }
-    if (!run_command(wrapper, &handle, func))
+    if (!cnc_daemon_run_command(wrapper, &handle, func))
     {
         printf("Failed to run command\n");
         wrapper->err = true;
-        send_result(wrapper);
+        cnc_daemon_send_result(wrapper);
         return false;
     }
 
     //Running the command succeeded
     printf("Command succeeded - Sending Result\n");
-    return send_result(wrapper);
+    return cnc_daemon_send_result(wrapper);
 }
 

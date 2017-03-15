@@ -14,11 +14,11 @@
 * limitations under the License.
 */
 
-#ifndef CNC_TYPES_H
-#define CNC_TYPES_H
+#pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define LIB_FORMAT_STR "/lib%s.so"
 
@@ -79,8 +79,9 @@
 #define RES_PACKET_STDOUT_LEN     MTU - CMD_PACKET_MEMBER_SIZE
 #endif
 
-#define RESPONSE_TYPE_COMMAND_RESULT 0
-#define RESPONSE_TYPE_PROCESSING_ERROR 1
+#define MESSAGE_TYPE_COMMAND_INPUT      0
+#define RESPONSE_TYPE_COMMAND_RESULT    1
+#define RESPONSE_TYPE_PROCESSING_ERROR  2
 
 
 typedef enum
@@ -118,4 +119,10 @@ typedef struct
     char output[RES_PACKET_STDOUT_LEN];
 } CNCWrapper;
 
-#endif
+//The CborDataWrapper keeps the length and buffer data together.
+typedef struct
+{
+    size_t    length;
+    uint8_t * data;
+} CborDataWrapper;
+
