@@ -30,8 +30,6 @@ static char msg[] = "test123test";
 static bool server_running = false;
 
 CSP_DEFINE_TASK(server_task) {
-	csp_socket_t * socket = NULL;
-	csp_conn_t * conn = NULL;
 	csp_iface_t csp_socket_if;
 	csp_socket_handle_t socket_driver;
 
@@ -48,9 +46,11 @@ CSP_DEFINE_TASK(server_task) {
 	csp_bind(ext_socket, TEST_EXT_PORT);
 	csp_listen(ext_socket, 20);
 
-	conn = csp_accept(ext_socket, 500);
+	csp_accept(ext_socket, 500);
 
 	csp_route_end_task();
+
+	csp_thread_exit();
 }
 
 static void test_client(void ** arg) {

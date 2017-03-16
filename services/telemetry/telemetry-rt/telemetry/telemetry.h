@@ -41,6 +41,8 @@ CSP_DEFINE_TASK(telemetry_rx_task);
  */
 void telemetry_init(void);
 
+void telemetry_client_init(void);
+
 /**
  * Performs cleanup on telemetry resources & threads.
  */

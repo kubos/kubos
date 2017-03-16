@@ -111,7 +111,7 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
         case ARGP_KEY_ARG:
             if (arg == NULL)
             {
-                return 1;
+                return ARGP_ERR_UNKNOWN;
             }
 
             switch(command_packet->arg_count++)

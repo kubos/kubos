@@ -5,6 +5,7 @@
     "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
   },
   "similarTo": [
+    "kubos-linux",
     "linux",
     "native",
     "posix",

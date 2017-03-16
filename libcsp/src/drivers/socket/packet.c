@@ -61,7 +61,7 @@ int cbor_encode_csp_packet(csp_packet_t * packet, uint8_t * buffer) {
 	if (err > 0) {
 		return -err;
 	}
-	err = cbor_encode_text_string(&container, (packet->data), packet->length);
+	err = cbor_encode_text_string(&container, (char*)(packet->data), packet->length);
 	if (err > 0) {
 		return -err;
 	}
@@ -77,7 +77,6 @@ int cbor_encode_csp_packet(csp_packet_t * packet, uint8_t * buffer) {
 bool cbor_parse_csp_packet(csp_packet_t * packet, void * buffer, int buffer_size) {
 	CborParser parser;
 	CborValue map, element;
-	int length = 0;
 	char * buf = NULL;
 
 	if ((buffer == NULL) || (packet == NULL)) {
@@ -88,9 +87,6 @@ bool cbor_parse_csp_packet(csp_packet_t * packet, void * buffer, int buffer_size
 	if (err || !cbor_value_is_map(&map)) {
 		return false;
 	}
-
-	csp_log_info("parse_csp_packet remaining %d extra %d\r\n", map.remaining, map.extra);
-
 	err = cbor_value_map_find_value(&map, "LENGTH", &element);
 	if (err) {
 		return false;
@@ -105,7 +101,7 @@ bool cbor_parse_csp_packet(csp_packet_t * packet, void * buffer, int buffer_size
 		return false;
 	}
 
-	if (cbor_value_get_int(&element, &(packet->id.ext))) {
+	if (cbor_value_get_int(&element, (int*)&(packet->id.ext))) {
 		return false;
 	}
 
@@ -114,9 +110,7 @@ bool cbor_parse_csp_packet(csp_packet_t * packet, void * buffer, int buffer_size
 		return false;
 	}
 
-	if (cbor_value_is_text_string(&element)) {
-		csp_log_info("found text string\r\n");
-	} else {
+	if (!cbor_value_is_text_string(&element)) {
 		csp_log_error("no text string\r\n");
 		return false;
 	}
