@@ -35,12 +35,14 @@ bool cnc_daemon_parse_command_cbor(csp_packet_t * packet, char * command)
 
     if (packet == NULL || command == NULL)
     {
+        KLOG_ERR(&log_handle, "Daemon-cbor-parser", "Received a NULL pointer while decoding cbor message\n");
         return false;
     }
 
     CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
     if (err)
     {
+
         return false;
     }
 

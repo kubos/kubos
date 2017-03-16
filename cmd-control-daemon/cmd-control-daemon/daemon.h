@@ -14,11 +14,12 @@
 * limitations under the License.
 */
 
-#ifndef DAEMON_H
-#define DAEMON_H
+#pragma once
+
 #include <csp/csp.h>
 #include <command-and-control/types.h>
 #include <tinycbor/cbor.h>
+#include <kubos-core/modules/klog.h>
 
 typedef int (*lib_function)(int, char**);
 
@@ -46,6 +47,8 @@ bool cnc_daemon_start_encode_response(int message_type, CNCWrapper * wrapper);
 
 bool cnc_daemon_send_result(CNCWrapper * wrapper);
 
+/* Global log handle */
+klog_handle log_handle;
 
 #ifdef YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
 #define CMD_STR_LEN YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
@@ -59,5 +62,9 @@ bool cnc_daemon_send_result(CNCWrapper * wrapper);
 #define SO_PATH_LENGTH 75
 #endif
 
-
+#ifdef YOTTA_CFG_CNC_DAEMON_LOG_PATH
+#define DAEMON_LOG_PATH YOTTA_CFG_CNC_DAEMON_LOG_PATH
+#else
+#define DAEMON_LOG_PATH "/home/vagrant/daemon.log" //Only a dev path for now
 #endif
+

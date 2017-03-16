@@ -127,6 +127,31 @@ bool init()
 
 //Where the magic happens - End of the CSP FIFO setup code
 
+bool init_logging()
+{
+    int res;
+    log_handle.config.file_path = DAEMON_LOG_PATH;
+    log_handle.config.file_path_len = strlen(DAEMON_LOG_PATH);
+    log_handle.config.part_size = 1024;
+    log_handle.config.max_parts = 128;
+    log_handle.config.klog_console_level = LOG_ALL;
+    log_handle.config.klog_file_level = LOG_ALL;
+    log_handle.config.klog_file_logging = true;
+
+    res = klog_init_file(&log_handle);
+    if (res == 0)
+    {
+        printf("Loggin initialized");
+        KLOG_INFO(&log_handle, "", "Logging initialized\n");
+        return true;
+    }
+    else
+    {
+        fprintf(stderr, "Unable to Initialize Logging\n");
+        return false;
+    }
+}
+
 bool cnc_daemon_send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
     if (conn == NULL || packet == NULL)
@@ -235,6 +260,8 @@ int main(int argc, char **argv)
     wrapper.command_packet  = &command;
     wrapper.response_packet = &response;
 
+    init_logging();
+
     init();
     sock = csp_socket(CSP_SO_NONE);
     csp_bind(sock, CSP_PORT);
@@ -243,26 +270,28 @@ int main(int argc, char **argv)
     while (!exit)
     {
         zero_vars(command_str, &command, &response, &wrapper);
-
+        KLOG_ERR(&log_handle, "Daemon", "Getting Command\n");
         if (!cnc_daemon_get_buffer(sock, &data_wrapper))
         {
-            //Do some error handling
+            KLOG_ERR(&log_handle, "Daemon", "There was an error getting a command\n");
             continue;
         }
 
         if (!cnc_daemon_parse_buffer(&wrapper, &data_wrapper))
         {
-            //Do some error handling
+            KLOG_ERR(&log_handle, "Daemon", "There was an error decoding the received command\n");
             continue;
         }
 
         if(!cnc_daemon_load_and_run_command(&wrapper))
         {
-            //Do some error handling
+            KLOG_ERR(&log_handle, "Daemon", "There was an error parsing the received command\n");
             continue;
         }
+
     }
 
+    klog_cleanup(&log_handle);
     return 0;
 }
 
