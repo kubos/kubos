@@ -22,6 +22,7 @@
 #define BASE_HASH         5381
 #define PING_HASH         6385583923
 #define INFO_HASH         6385337553
+#define REBOOT_HASH       6953974000496
 
 static char args_doc[] = "Usage: [ping, info]";
 static char doc[] = "Core Command Library - The basic core commands of KubOS";
@@ -95,6 +96,9 @@ int get_and_run_command(char * command_name)
             break;
         case INFO_HASH:
             return build_info();
+            break;
+        case REBOOT_HASH:
+            return exec_reboot();
             break;
         default:
             printf("Recevied unknown command: %s\n", command_name);

@@ -22,6 +22,12 @@ bool core_parse_args(int argc, char ** argv, char * command_name);
 
 unsigned long get_hash(char *str);
 
+int ping();
+
+int build_info();
+
+int exec_reboot();
+
 typedef struct
 {
     int ping;

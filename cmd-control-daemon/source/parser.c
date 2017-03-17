@@ -82,12 +82,14 @@ bool cnc_daemon_parse_command(CborParser * parser, CborValue * map, CNCWrapper *
         return false;
     }
 
+    len = CMD_PACKET_CMD_NAME_LEN;
     err = cbor_value_map_find_value(map, "COMMAND_NAME", &element);
     if (err || cbor_value_copy_text_string(&element, &(wrapper->command_packet->cmd_name), &len, NULL))
     {
         return false;
     }
 
+    len = CMD_PACKET_ARG_LEN;
     err = cbor_value_map_find_value(map, "ARGS", &element);
     if (err || cbor_value_copy_text_string(&element, &(wrapper->command_packet->args[0]), &len, NULL))
     {

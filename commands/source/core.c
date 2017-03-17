@@ -15,10 +15,11 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/reboot.h>
 #include <sys/utsname.h>
 
 #include "parser.h"
-
 int parse_and_run(char * arg);
 
 int execute(int argc, char **argv)
@@ -70,4 +71,16 @@ int build_info()
     uname(&uname_data);
     printf("Version: %s\n", uname_data.version);
     return 0;
+}
+
+int exec_reboot()
+{
+    int res;
+    //TODO: Log (once logging is a thing): Reboot triggered by C&C at time..
+    sync(); //Sync all pending filesystem changes (Logging)
+    if (res = reboot(RB_AUTOBOOT) != 0)
+    {
+        printf("There was an error rebooting the system. Received error code: %i\n", res);
+        return res;
+    }
 }
