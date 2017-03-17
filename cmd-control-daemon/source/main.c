@@ -29,6 +29,7 @@
 
 #include "command-and-control/types.h"
 #include "cmd-control-daemon/daemon.h"
+#include <cmd-control-daemon/logging.h>
 #include <ipc/csp.h>
 #include "tinycbor/cbor.h"
 
@@ -132,8 +133,8 @@ bool init_logging()
     int res;
     log_handle.config.file_path = DAEMON_LOG_PATH;
     log_handle.config.file_path_len = strlen(DAEMON_LOG_PATH);
-    log_handle.config.part_size = 1024;
-    log_handle.config.max_parts = 128;
+    log_handle.config.part_size = LOG_PART_SIZE;
+    log_handle.config.max_parts = LOG_MAX_PARTS;
     log_handle.config.klog_console_level = LOG_ALL;
     log_handle.config.klog_file_level = LOG_ALL;
     log_handle.config.klog_file_logging = true;
@@ -142,7 +143,7 @@ bool init_logging()
     if (res == 0)
     {
         printf("Loggin initialized");
-        KLOG_INFO(&log_handle, "", "Logging initialized\n");
+        KLOG_INFO(&log_handle, "Daemon", "Logging initialized\n");
         return true;
     }
     else
@@ -156,11 +157,14 @@ bool cnc_daemon_send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
     if (conn == NULL || packet == NULL)
     {
+        KLOG_ERR(&log_handle, "Daemon", "Received a NULL pointer while sending packet\n");
         return false;
     }
 
     if (!csp_send(conn, packet, 1000))
     {
+        /* log packet id when we implement it */
+        KLOG_ERR(&log_handle, "Daemon", "Sending csp packet failed\n");
         return false;
     }
 
@@ -176,6 +180,7 @@ bool cnc_daemon_send_buffer(uint8_t * data, size_t data_len)
 
     if (data == NULL)
     {
+        KLOG_ERR(&log_handle, "Daemon", "Called with a NULL pointer while sending packet\n");
         return false;
     }
 
@@ -215,6 +220,7 @@ bool cnc_daemon_get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
 
     if (sock == NULL || data_wrapper == NULL)
     {
+        KLOG_ERR(&log_handle, "Daemon", "Called with NULL Pointer in cnc_daemon_get_buffer\n");
         return false;
     }
 
@@ -228,7 +234,7 @@ bool cnc_daemon_get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
             {
                 if (!cnc_daemon_parse_buffer_from_packet(packet, data_wrapper))
                 {
-                    fprintf(stderr, "There was an error parsing the command packet\n");
+                    KLOG_ERR(&log_handle, "Daemon", "There was an error parsing the command packet\n");
                     csp_buffer_free(packet);
                     csp_close(conn);
                     return false;
@@ -261,8 +267,8 @@ int main(int argc, char **argv)
     wrapper.response_packet = &response;
 
     init_logging();
-
     init();
+
     sock = csp_socket(CSP_SO_NONE);
     csp_bind(sock, CSP_PORT);
     csp_listen(sock, 5);
