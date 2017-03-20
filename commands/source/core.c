@@ -76,11 +76,11 @@ int build_info()
 int exec_reboot()
 {
     int res;
-    printf("Rebooting System\n");
+    //TODO: Log (once logging is a thing): Reboot triggered by C&C at time..
     sync(); //Sync all pending filesystem changes (Logging)
     if (res = reboot(RB_AUTOBOOT) != 0)
     {
-        printf("There was an error rebooting the system.\n");
+        printf("There was an error rebooting the system. Received error code: %i\n", res);
         return res;
     }
 }
