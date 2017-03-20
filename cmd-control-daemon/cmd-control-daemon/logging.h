@@ -30,5 +30,11 @@
 #define LOG_MAX_PARTS 128 //This is totally random too
 #endif
 
+#ifdef YOTTA_CFG_LOG_COMPONENT_NAME
+#define LOG_COMPONENT_NAME YOTTA_CFG_LOG_COMPONENT_NAME
+#else
+#define LOG_COMPONENT_NAME "CNC-DAEMON"
+#endif
+
 /* Global log handle */
 klog_handle log_handle;

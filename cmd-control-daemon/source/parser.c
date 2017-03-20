@@ -16,12 +16,16 @@
 
 #include <command-and-control/types.h>
 #include <tinycbor/cbor.h>
+
 #include "cmd-control-daemon/daemon.h"
+#include "cmd-control-daemon/logging.h"
 
 bool cnc_daemon_parse_buffer_from_packet(csp_packet_t * packet, CborDataWrapper * data_wrapper)
 {
     if (packet == NULL || data_wrapper == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer internally. Aborting encoding..\n");
+        KLOG_DEBUG(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_parse_buffer_from_packet called with a null pointer\n");
         return false;
     }
     data_wrapper->length = packet->length;
@@ -38,22 +42,30 @@ bool cnc_daemon_parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrappe
     CborError err = cbor_parser_init(data_wrapper->data, data_wrapper->length, 0, &parser, &map);
     if (err)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to initialize Cbor parser. Error code: %i\n", err);
         return false;
     }
 
-    err = cbor_value_map_find_value(&map, "MSG_TYPE", &element);
-    if (err || cbor_value_get_int(&element, &message_type))
+    if (err = cbor_value_map_find_value(&map, "MSG_TYPE", &element))
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse key MSG_TYPE. Error code: %i\n", err);
+        return false;
+    }
+
+    if (err = cbor_value_get_int(&element, &message_type))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse value for key MSG_TYPE. Error code: %i\n", err);
         return false;
     }
 
     switch (message_type)
     {
         case MESSAGE_TYPE_COMMAND_INPUT:
+            KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Received message of type: Command Input\n");
             return cnc_daemon_parse_command(&parser, &map, wrapper);
             break;
         default:
-            fprintf(stderr, "Received unknown message type: %i\n", message_type);
+            KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received message of unknown type: %i\n", message_type);
             return false;
    }
 }
@@ -69,30 +81,64 @@ bool cnc_daemon_parse_command(CborParser * parser, CborValue * map, CNCWrapper *
     CborValue element;
     CborError err;
     int i;
-    err = cbor_value_map_find_value(map, "ACTION", &element);
-    if (err || cbor_value_get_int(&element, &i))
+
+    if (parser == NULL || map == NULL || wrapper == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer internally. Aborting encoding..\n");
+        KLOG_DEBUG(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_parse_command called with a null pointer\n");
+    }
+
+    if (err = cbor_value_map_find_value(map, "ACTION", &element))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse key ACTION. Error code: %i\n", err);
         return false;
     }
+
+    if (err = cbor_value_get_int(&element, &i))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse value for key ACTION. Error code: %i\n", err);
+        return false;
+    }
+
     wrapper->command_packet->action = (CNCAction) i;
 
-    err = cbor_value_map_find_value(map, "ARG_COUNT", &element);
-    if (err || cbor_value_get_int(&element, &(wrapper->command_packet->arg_count)))
+    if (err = cbor_value_map_find_value(map, "ARG_COUNT", &element))
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to find key ARG_COUNT. Error code: %i\n", err);
+        return false;
+
+    }
+    if (err = cbor_value_get_int(&element, &(wrapper->command_packet->arg_count)))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse value for key ARG_COUNT. Error code: %i\n", err);
         return false;
     }
 
     len = CMD_PACKET_CMD_NAME_LEN;
-    err = cbor_value_map_find_value(map, "COMMAND_NAME", &element);
-    if (err || cbor_value_copy_text_string(&element, &(wrapper->command_packet->cmd_name), &len, NULL))
+
+    if (err = cbor_value_map_find_value(map, "COMMAND_NAME", &element))
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to find key COMMAND_NAME Error code: %i\n", err);
+        return false;
+    }
+
+    if (err = cbor_value_copy_text_string(&element, &(wrapper->command_packet->cmd_name), &len, NULL))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse value for key COMMAND_NAME. Error code: %i\n", err);
         return false;
     }
 
     len = CMD_PACKET_ARG_LEN;
-    err = cbor_value_map_find_value(map, "ARGS", &element);
-    if (err || cbor_value_copy_text_string(&element, &(wrapper->command_packet->args[0]), &len, NULL))
+
+    if (err = cbor_value_map_find_value(map, "ARGS", &element))
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to find key ARGS Error code: %i\n", err);
+        return false;
+    }
+
+    if (err = cbor_value_copy_text_string(&element, &(wrapper->command_packet->args[0]), &len, NULL))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse value for key COMMAND_NAME. Error code: %i\n", err);
         return false;
     }
     return true;

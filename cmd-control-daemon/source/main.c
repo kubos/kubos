@@ -46,7 +46,7 @@ csp_socket_handle_t socket_driver;
 
 
 /*
- * IMPORTANT: CSP FIFO example setup code. The long term intetion is to move
+ * IMPORTANT: CSP FIFO example setup code. The long term intention is to move
  * away from named pipes to the newer tcp communication mechanism. This is a
  * temporary measure that will be removed once the new system is ready.
  */
@@ -142,8 +142,7 @@ bool init_logging()
     res = klog_init_file(&log_handle);
     if (res == 0)
     {
-        printf("Loggin initialized");
-        KLOG_INFO(&log_handle, "Daemon", "Logging initialized\n");
+        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Logging initialized\n");
         return true;
     }
     else
@@ -157,14 +156,14 @@ bool cnc_daemon_send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
     if (conn == NULL || packet == NULL)
     {
-        KLOG_ERR(&log_handle, "Daemon", "Received a NULL pointer while sending packet\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer while sending packet\n");
         return false;
     }
 
     if (!csp_send(conn, packet, 1000))
     {
         /* log packet id when we implement it */
-        KLOG_ERR(&log_handle, "Daemon", "Sending csp packet failed\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Sending csp packet failed\n");
         return false;
     }
 
@@ -180,7 +179,7 @@ bool cnc_daemon_send_buffer(uint8_t * data, size_t data_len)
 
     if (data == NULL)
     {
-        KLOG_ERR(&log_handle, "Daemon", "Called with a NULL pointer while sending packet\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Called with a NULL pointer while sending packet\n");
         return false;
     }
 
@@ -220,7 +219,7 @@ bool cnc_daemon_get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
 
     if (sock == NULL || data_wrapper == NULL)
     {
-        KLOG_ERR(&log_handle, "Daemon", "Called with NULL Pointer in cnc_daemon_get_buffer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Called with NULL Pointer in cnc_daemon_get_buffer\n");
         return false;
     }
 
@@ -234,7 +233,7 @@ bool cnc_daemon_get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
             {
                 if (!cnc_daemon_parse_buffer_from_packet(packet, data_wrapper))
                 {
-                    KLOG_ERR(&log_handle, "Daemon", "There was an error parsing the command packet\n");
+                    KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error parsing the command packet\n");
                     csp_buffer_free(packet);
                     csp_close(conn);
                     return false;
@@ -276,27 +275,25 @@ int main(int argc, char **argv)
     while (!exit)
     {
         zero_vars(command_str, &command, &response, &wrapper);
-        KLOG_ERR(&log_handle, "Daemon", "Getting Command\n");
+        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Getting Command\n");
         if (!cnc_daemon_get_buffer(sock, &data_wrapper))
         {
-            KLOG_ERR(&log_handle, "Daemon", "There was an error getting a command\n");
+            KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error getting a command\n");
             continue;
         }
 
         if (!cnc_daemon_parse_buffer(&wrapper, &data_wrapper))
         {
-            KLOG_ERR(&log_handle, "Daemon", "There was an error decoding the received command\n");
+            KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error decoding the received command\n");
             continue;
         }
 
         if(!cnc_daemon_load_and_run_command(&wrapper))
         {
-            KLOG_ERR(&log_handle, "Daemon", "There was an error parsing the received command\n");
+            KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error parsing the received command\n");
             continue;
         }
-
     }
-
     klog_cleanup(&log_handle);
     return 0;
 }

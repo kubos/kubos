@@ -19,7 +19,6 @@
 #include <csp/csp.h>
 #include <command-and-control/types.h>
 #include <tinycbor/cbor.h>
-#include <kubos-core/modules/klog.h>
 
 typedef int (*lib_function)(int, char**);
 
@@ -47,8 +46,6 @@ bool cnc_daemon_start_encode_response(int message_type, CNCWrapper * wrapper);
 
 bool cnc_daemon_send_result(CNCWrapper * wrapper);
 
-/* Global log handle */
-klog_handle log_handle;
 
 #ifdef YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
 #define CMD_STR_LEN YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
