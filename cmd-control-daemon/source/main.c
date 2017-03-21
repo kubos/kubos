@@ -147,7 +147,7 @@ bool init_logging()
     }
     else
     {
-        fprintf(stderr, "Unable to Initialize Logging\n");
+        fprintf(stderr, "Unable to Initialize Logging. Error code: %i\n", res);
         return false;
     }
 }
@@ -156,7 +156,7 @@ bool cnc_daemon_send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
     if (conn == NULL || packet == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer while sending packet\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -179,7 +179,7 @@ bool cnc_daemon_send_buffer(uint8_t * data, size_t data_len)
 
     if (data == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Called with a NULL pointer while sending packet\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -219,7 +219,7 @@ bool cnc_daemon_get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
 
     if (sock == NULL || data_wrapper == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Called with NULL Pointer in cnc_daemon_get_buffer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 

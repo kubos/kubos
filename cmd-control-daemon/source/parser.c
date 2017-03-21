@@ -24,8 +24,7 @@ bool cnc_daemon_parse_buffer_from_packet(csp_packet_t * packet, CborDataWrapper 
 {
     if (packet == NULL || data_wrapper == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer internally. Aborting encoding..\n");
-        KLOG_DEBUG(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_parse_buffer_from_packet called with a null pointer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
     data_wrapper->length = packet->length;
@@ -42,7 +41,7 @@ bool cnc_daemon_parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrappe
     CborError err = cbor_parser_init(data_wrapper->data, data_wrapper->length, 0, &parser, &map);
     if (err)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to initialize Cbor parser. Error code: %i\n", err);
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -84,8 +83,8 @@ bool cnc_daemon_parse_command(CborParser * parser, CborValue * map, CNCWrapper *
 
     if (parser == NULL || map == NULL || wrapper == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer internally. Aborting encoding..\n");
-        KLOG_DEBUG(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_parse_command called with a null pointer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
+        return false;
     }
 
     if (err = cbor_value_map_find_value(map, "ACTION", &element))

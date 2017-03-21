@@ -24,8 +24,7 @@ bool cnc_daemon_send_result(CNCWrapper * wrapper)
 {
     if (wrapper == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer internally. Aborting encoding..\n");
-        KLOG_DEBUG(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_send_result called with a null wrapper pointer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -50,8 +49,7 @@ bool cnc_daemon_start_encode_response(int message_type, CNCWrapper * wrapper)
 
     if (wrapper == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer internally. Aborting encoding..\n");
-        KLOG_DEBUG(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_start_encode_response called with a null wrapper pointer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -91,8 +89,7 @@ bool cnc_daemon_encode_response(uint8_t * data, CNCWrapper * wrapper, CborEncode
 
     if(data == NULL || wrapper == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer internally. Aborting encoding..\n");
-        KLOG_DEBUG(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_encode_response called with a null pointer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -142,8 +139,7 @@ bool cnc_daemon_encode_processing_error(uint8_t * data, CNCWrapper * result, Cbo
 
     if (data == NULL || result == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Called with NULL pointer. Aborting encoding\n");
-        KLOG_DEBUG(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_encode_processing_error called with a null pointer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -167,8 +163,7 @@ bool cnc_daemon_finish_encode_response_and_send(uint8_t * data, CborEncoder *enc
 {
     if (data == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Called with NULL pointer. Aborting encoding..\n");
-        KLOG_DEBUG(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_encode_processing_error called with a data pointer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 

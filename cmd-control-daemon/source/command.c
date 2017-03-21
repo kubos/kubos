@@ -36,7 +36,7 @@ bool cnc_daemon_parse_command_cbor(csp_packet_t * packet, char * command)
 
     if (packet == NULL || command == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Received a NULL pointer while decoding cbor message\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -78,7 +78,7 @@ bool cnc_daemon_load_command(CNCWrapper * wrapper, void ** handle, lib_function 
 
     if (wrapper == NULL || handle == NULL || func == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_load_command Called with a NULL pointer\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -141,7 +141,7 @@ bool cnc_daemon_run_command(CNCWrapper * wrapper, void ** handle, lib_function f
 
     if (wrapper == NULL || handle == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_run_command Called with a NULL pointer. Aborting.\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -192,7 +192,7 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 
     if (wrapper == NULL)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "cnc_daemon_load_and_run_command called with a NULL Pointer. Aborting...\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
