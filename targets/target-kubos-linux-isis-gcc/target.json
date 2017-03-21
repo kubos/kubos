@@ -20,6 +20,7 @@
   ],
   "similarTo": [
     "linux",
+    "kubos-linux",
     "isis",
     "arm-linux-gcc",
     "arm"
