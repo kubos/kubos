@@ -1,6 +1,6 @@
 {
     "cnc": {
-        "registry_dir": "\"~\""
+        "registry_dir": "\"/home/vagrant\""
     },
     "csp": {
         "socket": true

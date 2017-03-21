@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include "cmd-control-daemon/daemon.h"
+#include "cmd-control-daemon/logging.h"
 #include "tinycbor/cbor.h"
 
 #define CBOR_BUF_SIZE YOTTA_CFG_CSP_MTU
@@ -35,18 +36,25 @@ bool cnc_daemon_parse_command_cbor(csp_packet_t * packet, char * command)
 
     if (packet == NULL || command == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
     CborError err = cbor_parser_init((uint8_t*) packet->data, packet->length, 0, &parser, &map);
     if (err)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to initialize Cbor parser. Error: %i\n", err);
         return false;
     }
 
-    err = cbor_value_map_find_value(&map, "ARGS", &element);
-    if (err || cbor_value_copy_text_string(&element, command, &len, NULL))
+    if(err = cbor_value_map_find_value(&map, "ARGS", &element))
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to find key \"ARGS\" from buffer: %i\n", err);
+    }
+
+    if (err = cbor_value_copy_text_string(&element, command, &len, NULL))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Copying string value key \"ARGS\" from buffer error code: %i\n", err);
         return false;
     }
     return true;
@@ -70,6 +78,7 @@ bool cnc_daemon_load_command(CNCWrapper * wrapper, void ** handle, lib_function 
 
     if (wrapper == NULL || handle == NULL || func == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -79,6 +88,7 @@ bool cnc_daemon_load_command(CNCWrapper * wrapper, void ** handle, lib_function 
 
     if (!file_exists(so_path))
     {
+        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Requested library %s does not exist\n", so_path);
         wrapper->err = true;
         snprintf(wrapper->output, sizeof(wrapper->output) - 1,"The command library %s, does not exist\n", so_path);
         return false;
@@ -88,6 +98,7 @@ bool cnc_daemon_load_command(CNCWrapper * wrapper, void ** handle, lib_function 
 
     if (*handle == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Handle to shared library is NULL... aborting command\n");
         wrapper->err = true;
         snprintf(wrapper->output, sizeof(wrapper->output) - 1, "Unable to open lib: %s\n", dlerror());
         return false;
@@ -114,6 +125,7 @@ bool cnc_daemon_load_command(CNCWrapper * wrapper, void ** handle, lib_function 
 
     if (func == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "The function loaded is NULL, aborting command.\n");
         snprintf(wrapper->output, sizeof(wrapper->output) - 1, "The requested symbol doesn't exist\n");
         return false;
     }
@@ -129,8 +141,11 @@ bool cnc_daemon_run_command(CNCWrapper * wrapper, void ** handle, lib_function f
 
     if (wrapper == NULL || handle == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
+
+    KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Redirecting STDOUT and running command.\n");
 
     fflush(stdout);
     original_stdout = dup(STDOUT_FILENO);
@@ -159,8 +174,10 @@ bool cnc_daemon_run_command(CNCWrapper * wrapper, void ** handle, lib_function f
     dup2(original_stdout, STDOUT_FILENO); //restore the previous state of stdout
     setbuf(stdout, NULL);
 
+    KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "STDOUT set back after running command\n");
     //Calculate the runtime
     wrapper->response_packet->execution_time = (double)(finish_time - start_time) / (CLOCKS_PER_SEC/1000); //execution time in milliseconds
+    KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Command execution time %f\n", wrapper->response_packet->execution_time);
 
     //Unload the library
     dlclose(*handle);
@@ -175,6 +192,7 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 
     if (wrapper == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -182,21 +200,21 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 
     if (!cnc_daemon_load_command(wrapper, &handle, &func))
     {
-        printf("Failed to load command\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Failed to load command.\n");
         wrapper->err = true;
         cnc_daemon_send_result(wrapper);
         return false;
     }
     if (!cnc_daemon_run_command(wrapper, &handle, func))
     {
-        printf("Failed to run command\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Failed to run command\n");
         wrapper->err = true;
         cnc_daemon_send_result(wrapper);
         return false;
     }
 
     //Running the command succeeded
-    printf("Command succeeded - Sending Result\n");
+    KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Command Succeeded. Sending Output...\n");
     return cnc_daemon_send_result(wrapper);
 }
 

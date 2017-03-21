@@ -11,7 +11,8 @@
         "csp":"kubostech/libcsp#~1.5.0",
         "command-and-control":"kubostech/command-and-control",
         "ipc":"kubostech/ipc",
-        "tinycbor":"kubostech/tinycbor"
+        "tinycbor":"kubostech/tinycbor",
+        "kubos-core":"kubostech/kubos-core"
     },
     "description":"The Kubos command and control daemon."
 }

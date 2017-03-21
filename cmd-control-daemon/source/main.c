@@ -29,6 +29,7 @@
 
 #include "command-and-control/types.h"
 #include "cmd-control-daemon/daemon.h"
+#include <cmd-control-daemon/logging.h>
 #include <ipc/csp.h>
 #include "tinycbor/cbor.h"
 
@@ -45,7 +46,7 @@ csp_socket_handle_t socket_driver;
 
 
 /*
- * IMPORTANT: CSP FIFO example setup code. The long term intetion is to move
+ * IMPORTANT: CSP FIFO example setup code. The long term intention is to move
  * away from named pipes to the newer tcp communication mechanism. This is a
  * temporary measure that will be removed once the new system is ready.
  */
@@ -127,15 +128,42 @@ bool init()
 
 //Where the magic happens - End of the CSP FIFO setup code
 
+bool init_logging()
+{
+    int res;
+    log_handle.config.file_path = DAEMON_LOG_PATH;
+    log_handle.config.file_path_len = strlen(DAEMON_LOG_PATH);
+    log_handle.config.part_size = LOG_PART_SIZE;
+    log_handle.config.max_parts = LOG_MAX_PARTS;
+    log_handle.config.klog_console_level = LOG_ALL;
+    log_handle.config.klog_file_level = LOG_ALL;
+    log_handle.config.klog_file_logging = true;
+
+    res = klog_init_file(&log_handle);
+    if (res == 0)
+    {
+        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Logging initialized\n");
+        return true;
+    }
+    else
+    {
+        fprintf(stderr, "Unable to Initialize Logging. Error code: %i\n", res);
+        return false;
+    }
+}
+
 bool cnc_daemon_send_packet(csp_conn_t* conn, csp_packet_t* packet)
 {
     if (conn == NULL || packet == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
     if (!csp_send(conn, packet, 1000))
     {
+        /* log packet id when we implement it */
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Sending csp packet failed\n");
         return false;
     }
 
@@ -151,6 +179,7 @@ bool cnc_daemon_send_buffer(uint8_t * data, size_t data_len)
 
     if (data == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -190,6 +219,7 @@ bool cnc_daemon_get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
 
     if (sock == NULL || data_wrapper == NULL)
     {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
         return false;
     }
 
@@ -203,7 +233,7 @@ bool cnc_daemon_get_buffer(csp_socket_t* sock, CborDataWrapper * data_wrapper)
             {
                 if (!cnc_daemon_parse_buffer_from_packet(packet, data_wrapper))
                 {
-                    fprintf(stderr, "There was an error parsing the command packet\n");
+                    KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error parsing the command packet\n");
                     csp_buffer_free(packet);
                     csp_close(conn);
                     return false;
@@ -235,7 +265,9 @@ int main(int argc, char **argv)
     wrapper.command_packet  = &command;
     wrapper.response_packet = &response;
 
+    init_logging();
     init();
+
     sock = csp_socket(CSP_SO_NONE);
     csp_bind(sock, CSP_PORT);
     csp_listen(sock, 5);
@@ -243,26 +275,26 @@ int main(int argc, char **argv)
     while (!exit)
     {
         zero_vars(command_str, &command, &response, &wrapper);
-
+        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Getting Command\n");
         if (!cnc_daemon_get_buffer(sock, &data_wrapper))
         {
-            //Do some error handling
+            KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error getting a command\n");
             continue;
         }
 
         if (!cnc_daemon_parse_buffer(&wrapper, &data_wrapper))
         {
-            //Do some error handling
+            KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error decoding the received command\n");
             continue;
         }
 
         if(!cnc_daemon_load_and_run_command(&wrapper))
         {
-            //Do some error handling
+            KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error parsing the received command\n");
             continue;
         }
     }
-
+    klog_cleanup(&log_handle);
     return 0;
 }
 
