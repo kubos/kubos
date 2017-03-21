@@ -47,13 +47,13 @@ bool cnc_daemon_parse_buffer(CNCWrapper * wrapper, CborDataWrapper * data_wrappe
 
     if (err = cbor_value_map_find_value(&map, "MSG_TYPE", &element))
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse key MSG_TYPE. Error code: %i\n", err);
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse key \"MSG_TYPE\". Error code: %i\n", err);
         return false;
     }
 
     if (err = cbor_value_get_int(&element, &message_type))
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse value for key MSG_TYPE. Error code: %i\n", err);
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse value for key \"MSG_TYPE\". Error code: %i\n", err);
         return false;
     }
 

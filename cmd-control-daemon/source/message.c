@@ -63,7 +63,7 @@ bool cnc_daemon_start_encode_response(int message_type, CNCWrapper * wrapper)
 
     if (err = cbor_encode_text_stringz(&container, "MSG_TYPE"))
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to encode key MSG_TYPE. Error code: %i\n", err);
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to encode key \"MSG_TYPE\". Error code: %i\n", err);
         return false;
     }
 
