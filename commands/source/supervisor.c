@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-#pragma once
 
-#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 
-#define DEFAULT_COMMAND_STR_LENGTH 75
+#include <errors.h>
+#include <supervisor.h>
 
-bool core_parse_args(int argc, char ** argv, char * command_name);
 
-unsigned long get_hash(char *str);
-
-int ping();
-
-int build_info();
-
-int exec_reboot();
-
-typedef struct
+int supervisor_init()
 {
-    int ping;
-    int build_info;
-} Arguments;
+    printf("Stubbed out supervisor init\n");
+    return NO_ERR;
+}
 
+int supervisor_get_version(supervisor_version_configuration_t* versionReply)
+{
+    printf("Stubbed out supervisor get_version\n");
+    return NO_ERR;
+}
+
+
+int supervisor_power_cycle_iobc(supervisor_generic_reply_t* reply)
+{
+    printf("Stubbed out iOBC powercycle\n");
+    return NO_ERR;
+}

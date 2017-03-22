@@ -1,15 +1,10 @@
 # Makefile template for shared library
-# Run `make target="iobc" to build for the iboc
 
-ifeq ($(target),iobc)
-	CC:=arm-linux-gcc
-else
-	CC:=gcc # C compiler
-endif
+CC:=arm-linux-gcc #This only builds for the iOBC now
 
 INCLUDE := -Iinclude #include directories
 CFLAGS = -fPIC -Wall -Wextra -g $(INCLUDE) # C flags
-LDFLAGS = -shared  # linking flags
+LDFLAGS = -L. -shared # linking flags
 RM = rm -f  # rm command
 TARGET_LIB = libcore.so # target lib
 

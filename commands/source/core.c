@@ -16,10 +16,14 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/reboot.h>
 #include <sys/utsname.h>
 
-#include "parser.h"
+#include <errors.h>
+#include <supervisor.h>
+#include <parser.h>
+
 int parse_and_run(char * arg);
 
 int execute(int argc, char **argv)
@@ -67,20 +71,43 @@ int ping()
 
 int build_info()
 {
-    struct utsname uname_data;
-    uname(&uname_data);
-    printf("Version: %s\n", uname_data.version);
-    return 0;
+    int result;
+    supervisor_version_configuration_t version_config = {0};
+
+    result = supervisor_init();
+    if (result != NO_ERR)
+    {
+        printf("There was an error initializing the supervisor. Error: %i\n", result);
+        return result;
+    }
+
+    result = supervisor_get_version(&version_config);
+    if (result != NO_ERR)
+    {
+        printf("There was an error getting the supervisor version information. Error: %i\n", result);
+        return result;
+    }
+    return result;
 }
+
 
 int exec_reboot()
 {
-    int res;
-    //TODO: Log (once logging is a thing): Reboot triggered by C&C at time..
-    sync(); //Sync all pending filesystem changes (Logging)
-    if (res = reboot(RB_AUTOBOOT) != 0)
+    int result;
+    supervisor_generic_reply_t generic_reply = {0};
+
+    result = supervisor_init(0, 0);
+    if (result != NO_ERR)
     {
-        printf("There was an error rebooting the system. Received error code: %i\n", res);
-        return res;
+        printf("There was an error initializing the supervisor. Error: %i\n", result);
+        return result;
     }
+
+    result = supervisor_power_cycle_iobc(&generic_reply);
+    if (result != NO_ERR)
+    {
+        printf("There was an error requesting the iOBC power cycle. Error: %i\n", result);
+        return result;
+    }
+    return result;
 }
