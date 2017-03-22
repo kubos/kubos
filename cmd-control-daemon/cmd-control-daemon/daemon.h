@@ -47,6 +47,16 @@ bool cnc_daemon_start_encode_response(int message_type, CNCWrapper * wrapper);
 bool cnc_daemon_send_result(CNCWrapper * wrapper);
 
 
+#define LIB_FORMAT_STR "/lib%s.so"
+
+#ifndef YOTTA_CFG_CNC_REGISTRY_DIR
+#define CNC_REGISTRY_DIR "/root"
+#else
+#define CNC_REGISTRY_DIR YOTTA_CFG_CNC_REGISTRY_DIR
+#endif
+
+#define MODULE_REGISTRY_DIR CNC_REGISTRY_DIR LIB_FORMAT_STR
+
 #ifdef YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
 #define CMD_STR_LEN YOTTA_CFG_CNC_DAEMON_CMD_STR_LEN
 #else
@@ -62,6 +72,6 @@ bool cnc_daemon_send_result(CNCWrapper * wrapper);
 #ifdef YOTTA_CFG_CNC_DAEMON_LOG_PATH
 #define DAEMON_LOG_PATH YOTTA_CFG_CNC_DAEMON_LOG_PATH
 #else
-#define DAEMON_LOG_PATH "/home/vagrant/daemon.log" //Only a dev path for now
+#define DAEMON_LOG_PATH "/var/log/daemon.log"
 #endif
 

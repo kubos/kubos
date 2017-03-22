@@ -1,6 +1,9 @@
 {
     "cnc": {
-        "registry_dir": "\"/home/vagrant\""
+        "daemon_log_path": "\"/var/log.daemon.log\"",
+        "registry_dir": "\"/usr/local/kubos\"",
+        "daemon_rx_pipe": "\"/home/vagrant/client-to-server\"",
+        "daemon_tx_pipe": "\"/home/vagrant/server-to-client\""
     },
     "csp": {
         "socket": true
