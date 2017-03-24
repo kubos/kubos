@@ -1,4 +1,8 @@
 {
+    "cnc": {
+        "client_tx_pipe": "\"/usr/local/kubos/client-to-server\"",
+        "client_rx_pipe": "\"/usr/local/kubos/server-to-client\""
+    },
     "csp": {
         "socket": true
     }

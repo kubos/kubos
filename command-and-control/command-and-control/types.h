@@ -20,16 +20,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define LIB_FORMAT_STR "/lib%s.so"
-
-#ifndef YOTTA_CFG_CNC_REGISTRY_DIR
-#define CNC_REGISTRY_DIR "~"
-#else
-#define CNC_REGISTRY_DIR YOTTA_CFG_CNC_REGISTRY_DIR
-#endif
-
-#define MODULE_REGISTRY_DIR CNC_REGISTRY_DIR LIB_FORMAT_STR
-
 #define DEFAULT_STR_LEN 20
 
 #ifdef YOTTA_CFG_CSP_MTU

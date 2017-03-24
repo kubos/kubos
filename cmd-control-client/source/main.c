@@ -40,6 +40,9 @@
 #define SERVER_CSP_ADDRESS 1
 #define SOCKET_PORT        8189
 
+#define CNC_CLIENT_RX_PIPE YOTTA_CFG_CNC_CLIENT_RX_PIPE
+#define CNC_CLIENT_TX_PIPE YOTTA_CFG_CNC_CLIENT_TX_PIPE
+
 csp_iface_t csp_socket_if;
 csp_socket_handle_t socket_driver;
 
@@ -92,8 +95,8 @@ bool init()
     int my_address = 2;
     char *rx_channel_name, *tx_channel_name;
 
-    tx_channel_name = "/home/vagrant/client-to-server";
-    rx_channel_name = "/home/vagrant/server-to-client";
+    tx_channel_name = CNC_CLIENT_TX_PIPE;
+    rx_channel_name = CNC_CLIENT_RX_PIPE;
 
 
     /* Init CSP and CSP buffer system */

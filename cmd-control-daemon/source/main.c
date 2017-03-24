@@ -41,6 +41,9 @@
 #define CLI_CLIENT_ADDRESS 2
 #define SOCKET_PORT        8189
 
+#define CNC_DAEMON_RX_PIPE YOTTA_CFG_CNC_DAEMON_RX_PIPE
+#define CNC_DAEMON_TX_PIPE YOTTA_CFG_CNC_DAEMON_TX_PIPE
+
 csp_iface_t csp_socket_if;
 csp_socket_handle_t socket_driver;
 
@@ -92,8 +95,8 @@ bool init()
 
     char *rx_channel_name, *tx_channel_name;
 
-    rx_channel_name = "/home/vagrant/client-to-server";
-    tx_channel_name = "/home/vagrant/server-to-client";
+    rx_channel_name = CNC_DAEMON_RX_PIPE;
+    tx_channel_name = CNC_DAEMON_TX_PIPE;
 
 
     /* Init CSP and CSP buffer system */
