@@ -23,7 +23,6 @@ then
     v_patch=${version_list[2]}
     v_build=${version_list[3]}
     ((v_build+=1))
-    echo "BUild number is $v_build"
     new_tag="$v_major.$v_minor.$v_patch.$v_build"
 fi
 
@@ -31,4 +30,4 @@ echo "Tagging new verson: $new_tag"
 git tag $new_tag
 
 echo "Pushing new tag..."
-#git push origin --tags
+git push origin --tags
