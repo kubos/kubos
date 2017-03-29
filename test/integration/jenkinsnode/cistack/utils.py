@@ -10,7 +10,6 @@ from time import sleep
 import RPi.GPIO as GPIO
 
 
-global errstr
 errstr = "*** ERROR (functions):"
 
 def supportedBoards():
