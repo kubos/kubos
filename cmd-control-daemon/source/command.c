@@ -21,11 +21,14 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <command-and-control/types.h>
+
 #include "cmd-control-daemon/daemon.h"
 #include "cmd-control-daemon/logging.h"
 #include "tinycbor/cbor.h"
 
 #define CBOR_BUF_SIZE YOTTA_CFG_CSP_MTU
+#define CMD_STR_LEN 150
 
 
 bool cnc_daemon_parse_command_cbor(csp_packet_t * packet, char * command)
@@ -189,6 +192,13 @@ bool cnc_daemon_run_command(CNCWrapper * wrapper, void ** handle, lib_function f
 bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 {
     void * handle;
+    int return_code;
+    int size = 0;
+    int i;
+    char exe_path[SO_PATH_LENGTH]   = {0};
+    char cmd_str[CMD_STR_LEN]       = {0};
+    char buf[RES_PACKET_STDOUT_LEN] = {0};
+    FILE * fptr;
 
     if (wrapper == NULL)
     {
@@ -196,25 +206,46 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
         return false;
     }
 
-    lib_function func = NULL;
+    // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
+    int exe_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
+    snprintf(exe_path, exe_len, MODULE_REGISTRY_DIR, wrapper->command_packet->cmd_name);
 
-    if (!cnc_daemon_load_command(wrapper, &handle, &func))
+    if (!file_exists(exe_path))
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Failed to load command.\n");
+        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Requested library %s does not exist\n", exe_path);
         wrapper->err = true;
-        cnc_daemon_send_result(wrapper);
-        return false;
-    }
-    if (!cnc_daemon_run_command(wrapper, &handle, func))
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Failed to run command\n");
-        wrapper->err = true;
+        snprintf(wrapper->output, sizeof(wrapper->output) - 1,"The command library %s, does not exist\n", exe_path);
         cnc_daemon_send_result(wrapper);
         return false;
     }
 
-    //Running the command succeeded
-    KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Command Succeeded. Sending Output...\n");
-    return cnc_daemon_send_result(wrapper);
+    //TODO: use snprintf, check return values
+    size = sprintf(cmd_str, exe_path);
+    size += sprintf(cmd_str + size, " ");
+    /*size += sprintf(cmd_str + size, wrapper->command_packet->cmd_name);*/
+    for (i = 0; i < wrapper->command_packet->arg_count; i++)
+    {
+        size += sprintf(cmd_str + size, " ");
+        size += sprintf(cmd_str + size, wrapper->command_packet->args[i]);
+    }
+
+    KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Running command: '%s'\n", cmd_str);
+    fptr = popen(cmd_str, "r");
+    if (fptr == NULL)
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an issue starting the command process %i\n", fptr);
+        snprintf(wrapper->response_packet->output + size, RES_PACKET_STDOUT_LEN - 1, "There was an issue starting the command process\n");
+        return false;
+    }
+
+    size = 0;
+
+    while (fgets(buf, RES_PACKET_STDOUT_LEN, fptr) != NULL) {
+        size += snprintf(wrapper->response_packet->output + size, RES_PACKET_STDOUT_LEN - size - 1, "%s", buf);
+    }
+
+    wrapper->response_packet->return_code = pclose(fptr);
+    cnc_daemon_send_result(wrapper);
+    return true;
+
 }
-

@@ -20,13 +20,13 @@
 #include <sys/reboot.h>
 #include <sys/utsname.h>
 
-#include <errors.h>
-#include <supervisor.h>
-#include <parser.h>
+#include <commands/errors.h>
+#include <commands/supervisor.h>
+#include <commands/parser.h>
 
 int parse_and_run(char * arg);
 
-int execute(int argc, char **argv)
+int main(int argc, char **argv)
 {
     char command_string[DEFAULT_COMMAND_STR_LENGTH] = {0};
 

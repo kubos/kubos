@@ -18,8 +18,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <errors.h>
-#include <supervisor.h>
+#include <commands/errors.h>
+#include <commands/supervisor.h>
 
 
 int supervisor_init()

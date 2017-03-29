@@ -17,7 +17,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <argp.h>
-#include "parser.h"
+
+#include <commands/parser.h>
 
 #define BASE_HASH         5381
 #define PING_HASH         6385583923
@@ -58,7 +59,7 @@ static int parse_opt (int key, char *arg, struct argp_state *state)
     switch (key)
     {
         case ARGP_KEY_ARG:
-            snprintf(cmd_string, DEFAULT_COMMAND_STR_LENGTH, arg);
+            snprintf(cmd_string, DEFAULT_COMMAND_STR_LENGTH, "%s", arg);
             break;
         case ARGP_KEY_END:
             break;
@@ -76,7 +77,8 @@ bool core_parse_args(int argc, char ** argv, char * cmd_string)
         return false;
     }
 
-    flags = ARGP_PARSE_ARGV0 | ARGP_NO_ERRS;
+    /*flags = ARGP_PARSE_ARGV0 | ARGP_NO_ERRS;*/
+    flags = 0;
 
     if (argp_parse (&argp, argc, argv, flags, 0, cmd_string) != 0)
     {
