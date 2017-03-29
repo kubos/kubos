@@ -189,16 +189,63 @@ bool cnc_daemon_run_command(CNCWrapper * wrapper, void ** handle, lib_function f
 }
 
 
+bool append_str(char * str, int * size, char * new_str)
+{
+    int result;
+
+    if (str == NULL || size == NULL || new_str == NULL)
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
+        return false;
+    }
+
+
+
+    result = snprintf(str + *size, CMD_STR_LEN - *size - 1, new_str);
+
+    if (result < 0)
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error appending string: %s to buffer: %s\nerror: %i\n", new_str, str, result);
+        return false;
+    }
+
+    *size += result;
+    return true;
+}
+
+bool assemble_cmd_string(char * cmd_str, char * exe_path, CNCWrapper * wrapper)
+{
+    int i, used_size;
+    int size = 0;
+
+    if (cmd_str == NULL || exe_path == NULL || wrapper == NULL)
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
+        return false;
+    }
+
+    if (!append_str(cmd_str, &size, exe_path))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error processing the command\n");
+        return false;
+    }
+
+    for (i = 0; i < wrapper->command_packet->arg_count; i++)
+    {
+        append_str(cmd_str, &size, " ");
+        append_str(cmd_str, &size, wrapper->command_packet->args[i]);
+    }
+}
+
 bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 {
-    void * handle;
-    int return_code;
-    int size = 0;
-    int i;
     char exe_path[SO_PATH_LENGTH]   = {0};
     char cmd_str[CMD_STR_LEN]       = {0};
     char buf[RES_PACKET_STDOUT_LEN] = {0};
+    clock_t start_time, end_time;
     FILE * fptr;
+    int  exe_len, return_code;
+    int  size = 0;
 
     if (wrapper == NULL)
     {
@@ -206,8 +253,8 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
         return false;
     }
 
-    // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
-    int exe_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
+    // exe_len - the format specifier length (-2) + the null character (+1) leading to the -1
+    exe_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
     snprintf(exe_path, exe_len, MODULE_REGISTRY_DIR, wrapper->command_packet->cmd_name);
 
     if (!file_exists(exe_path))
@@ -219,17 +266,16 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
         return false;
     }
 
-    //TODO: use snprintf, check return values
-    size = sprintf(cmd_str, exe_path);
-    size += sprintf(cmd_str + size, " ");
-    /*size += sprintf(cmd_str + size, wrapper->command_packet->cmd_name);*/
-    for (i = 0; i < wrapper->command_packet->arg_count; i++)
+    if (!assemble_cmd_string(cmd_str, exe_path, wrapper))
     {
-        size += sprintf(cmd_str + size, " ");
-        size += sprintf(cmd_str + size, wrapper->command_packet->args[i]);
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an issue procesing the command string.\n");
+        snprintf(wrapper->response_packet->output + size, RES_PACKET_STDOUT_LEN - 1, "There was an issue procesing the command string.\n");
+        return false;
     }
 
     KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Running command: '%s'\n", cmd_str);
+
+    start_time = clock();
     fptr = popen(cmd_str, "r");
     if (fptr == NULL)
     {
@@ -238,13 +284,13 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
         return false;
     }
 
-    size = 0;
-
     while (fgets(buf, RES_PACKET_STDOUT_LEN, fptr) != NULL) {
         size += snprintf(wrapper->response_packet->output + size, RES_PACKET_STDOUT_LEN - size - 1, "%s", buf);
     }
 
     wrapper->response_packet->return_code = pclose(fptr);
+    end_time = clock();
+    wrapper->response_packet->execution_time = (double)(end_time - start_time) / (CLOCKS_PER_SEC/1000); //execution time in milliseconds
     cnc_daemon_send_result(wrapper);
     return true;
 
