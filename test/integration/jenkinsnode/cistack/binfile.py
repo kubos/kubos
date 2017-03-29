@@ -4,7 +4,7 @@ import re
 import magic
 from utils import supportedBoards
 
-
+errstr = "*** ERROR (binfile)"
 
 class Binfile(object):
     """
