@@ -1,5 +1,4 @@
 # Kubos CLI Command Reference
-[TOC]
 # Kubos CLI Command Reference {#kubos-cli-command-reference}
 
 The `kubos` command is always run with a subcommand in order to do something, `kubos` with no subcommand will only display help information.
