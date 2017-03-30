@@ -2,7 +2,7 @@
 
 New updates will be announced on the [Kubos website](http://docs.kubos.co/). There will be instructions depending on the specific release details of all the steps needed to upgrade for the newest release.
 
-## Upgrading Kubos CLI
+## Upgrading Kubos CLI {#upgrade-kubos-cli}
 
 Inside of a vagrant box lives the Kubos CLI. Upon new Kubos releases there may be updates for the Kubos CLI.
 
@@ -15,7 +15,7 @@ The Kubos CLI can be upgraded using this pip command:
 
         $ sudo pip install --upgrade kubos-cli
 
-## Upgrading the Kubos Source Modules
+## Upgrading the Kubos Source Modules {#upgrade-kubos-source-modules}
 
 To update the Kubos source modules your project will be built with run the following command:
 
@@ -40,6 +40,6 @@ To relink all of the Kubos source modules simply run:
 
         $ kubos link --all
 
-## Downgrading the Kubos Source Modules
+## Downgrading the Kubos Source Modules {#downgrade-kubos-modules}
 
 In the event you want to downgrade to an older version of the Kubos source modules simply use the `kubos use <version>` command with the older version number you want to downgrade to.

@@ -1,6 +1,6 @@
 # Installing Kubos SDK
 
-## What is the Kubos SDK?
+## What is the Kubos SDK? {#what-is-kubos-sdk}
 
 The Kubos SDK is a term used to describe the all of the components used that make up a KubOS operating system and the tools used to build this project.
 The Kubos SDK components are made up of:
@@ -9,19 +9,19 @@ The Kubos SDK components are made up of:
  * Kubos CLI - The command line tool used to create, configure, build and debug KubOS projects
 
 
-## How Does The SDK Work?
+## How Does The SDK Work? {#how-sdk-works}
 
 The Kubos SDK is distributed through a vagrant box. A vagrant box (referred to simply as a "box") is a command-line based virtual machine. This virtual machine contains all of the Kubos source code, compiler toolchains,
 debugging utilities and miscellaneous tools the Kubos CLI. The box, when started, is already pre-configured with all of the required tools for the CLI you will need. This minimizes the set-up process
 so you can work on your project rather than setting up tooling.
 
 [Vagrant](https://www.vagrantup.com/docs/) is a nice interface that abstracts the virtualization provider into a simple to use interface. Vagrant supports a variety of providers (VirtualBox, VmWare, Parallels, etc.) but
-right now the Kubos SDK only supports VirtualBox.
+right now the Kubos SDK only supports the VirtualBox provider.
 
 
 ## Prerequisites
 
-### Install VirtualBox
+### Install VirtualBox {#install-virtualbox}
 
 Vagrant requires a virtualization "provider". Currently the only provider that Kubos officially supports is VirtualBox.
 
@@ -29,7 +29,7 @@ See the VirtualBox [downloads](https://www.virtualbox.org/wiki/Downloads) for mo
 
 Passing USB devices into a virtual machine also requires the VirtualBox Extension Pack which is also available from VirtualBox's [downloads](https://www.virtualbox.org/wiki/Downloads)
 
-### Install Vagrant
+### Install Vagrant {#install-vagrant}
 
 If you don't already have Vagrant installed see the Vagrant [installation documentation.](https://www.vagrantup.com/docs/installation)
 
@@ -39,7 +39,7 @@ Make sure vagrant installation is set up properly:
 
 ## Set-Up
 
-### Create your Kubos SDK Vagrant Box:
+### Create your Kubos SDK Vagrant Box: {#create-sdk-box}
 
 To create an instance of the SDK box follow these steps:
 
@@ -50,7 +50,7 @@ This will create a Vagrantfile in your current directory. Vagrantfiles are impor
 Vagrantfiles are dependent on your working directory. To interact with this box in the future you will need to `cd` back to this same directory you have initialized the box in.
 
 
-### Mounting a host directory:
+### Mounting a host directory: {#mount-directory}
 
 It is strongly recommended that you create your project in a directory on your host that is shared with your box. By keeping your project on your host it will protect them in the event your box is destroyed or re-built.
 
@@ -73,7 +73,7 @@ Note: If you make changes to the Vagrantfile after the box has been started you 
 
 #####For more information on mounting volumes see the following [guide](https://www.vagrantup.com/docs/synced-folders/basic_usage.html)
 
-### Start the vagrant box:
+### Start the vagrant box: {#start-sdk-box}
 
 To start the box after modifying your Vagrantfile run:
 
