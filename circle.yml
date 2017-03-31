@@ -9,3 +9,9 @@ dependencies:
 test:
   override:
       - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH -v $PWD:$PWD kubostech/kubos-dev:latest python $PWD/test/integration/integration_test.py
+
+deployment:
+  production:
+    branch: master
+    commands:
+      - ./deploy.sh
