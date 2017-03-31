@@ -15,28 +15,10 @@
  */
 
 
-#include <stdint.h>
-#include <stdio.h>
+#pragma once
 
-#include <commands/errors.h>
-#include <commands/supervisor.h>
-
-
-int supervisor_init()
-{
-    printf("Stubbed out supervisor init\n");
-    return NO_ERR;
-}
-
-int supervisor_get_version(supervisor_version_configuration_t* versionReply)
-{
-    printf("Stubbed out supervisor get_version\n");
-    return NO_ERR;
-}
-
-
-int supervisor_power_cycle_iobc(supervisor_generic_reply_t* reply)
-{
-    printf("Stubbed out iOBC powercycle\n");
-    return NO_ERR;
-}
+#ifdef YOTTA_CFG_COMMANDS_DEFAULT_COMMAND_STR_LEN
+#define DEFAULT_COMMAND_STR_LEN YOTTA_CFG_COMMANDS_DEFAULT_COMMAND_STR_LEN
+#else
+#define DEFAULT_COMMAND_STR_LEN 75
+#endif

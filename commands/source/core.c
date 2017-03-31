@@ -17,18 +17,17 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
-#include <sys/reboot.h>
-#include <sys/utsname.h>
+
+#include <isis-iobc-hal/supervisor.h>
 
 #include <commands/errors.h>
-#include <commands/supervisor.h>
-#include <commands/parser.h>
+#include <commands/commands.h>
 
 int parse_and_run(char * arg);
 
 int main(int argc, char **argv)
 {
-    char command_string[DEFAULT_COMMAND_STR_LENGTH] = {0};
+    char command_string[DEFAULT_COMMAND_STR_LEN] = {0};
 
     if (!core_parse_args(argc, argv, command_string))
     {
@@ -71,18 +70,11 @@ int ping()
 
 int build_info()
 {
-    int result;
+    bool result = true;
     supervisor_version_configuration_t version_config = {0};
 
-    result = supervisor_init();
-    if (result != NO_ERR)
-    {
-        printf("There was an error initializing the supervisor. Error: %i\n", result);
-        return result;
-    }
-
-    result = supervisor_get_version(&version_config);
-    if (result != NO_ERR)
+    /*result = supervisor_get_version(&version_config);*/
+    if (!result)
     {
         printf("There was an error getting the supervisor version information. Error: %i\n", result);
         return result;
@@ -90,24 +82,48 @@ int build_info()
     return result;
 }
 
-
-int exec_reboot()
+//TODO: I don't like having 3 nearly identical functions. I'm working on implementing the reboot type as an option
+//Theres an issue in the client that is preventing that implementation at the moment.
+int reboot()
 {
-    int result;
-    supervisor_generic_reply_t generic_reply = {0};
+    bool result = true;
 
-    result = supervisor_init(0, 0);
-    if (result != NO_ERR)
+    /*result = supervisor_power_cycle();*/
+    if (!result)
     {
-        printf("There was an error initializing the supervisor. Error: %i\n", result);
-        return result;
+        printf("There was an error requesting the iOBC power cycle.\n");
+        return GENERIC_ERR;
     }
 
-    result = supervisor_power_cycle_iobc(&generic_reply);
-    if (result != NO_ERR)
+    return NO_ERR;
+}
+
+
+int reset()
+{
+    bool result = true;
+
+    /*result = supervisor_reset();*/
+    if (!result)
     {
-        printf("There was an error requesting the iOBC power cycle. Error: %i\n", result);
-        return result;
+        printf("There was an error requesting the iOBC power cycle.\n");
+        return GENERIC_ERR;
     }
-    return result;
+
+    return NO_ERR;
+}
+
+
+int emergency_reset()
+{
+    bool result = true;
+
+    /*result = supervisor_emergency_reset();*/
+    if (!result)
+    {
+        printf("There was an error requesting the iOBC power cycle.\n");
+        return GENERIC_ERR;
+    }
+
+    return NO_ERR;
 }

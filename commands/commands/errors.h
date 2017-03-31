@@ -17,6 +17,7 @@
 
 #pragma once
 
-#define NO_ERR 0
+#define NO_ERR      0
+#define GENERIC_ERR 1
 
 //New Error codes will be added as needed.
