@@ -183,7 +183,7 @@ static bool spi_comms(uint8_t * tx_buffer, uint32_t tx_length, uint8_t * rx_buff
     return true;
 }
 
-bool supervisor_get_version(supervisor_version_configuration_t * versionReply, uint8_t index)
+bool supervisor_get_version(supervisor_version_configuration_t * versionReply)
 {
     uint8_t bytesToSendSampleVersion[LENGTH_TELEMETRY_SAMPLE_VERSION] = { CMD_SUPERVISOR_OBTAIN_VERSION_CONFIG, 0x00, 0x00 };
     uint8_t bytesToReceiveSampleVersion[LENGTH_TELEMETRY_SAMPLE_VERSION] = { CMD_SUPERVISOR_OBTAIN_VERSION_CONFIG, 0x00, 0x00 };
@@ -207,7 +207,7 @@ bool supervisor_get_version(supervisor_version_configuration_t * versionReply, u
     return true;
 }
 
-bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply, uint8_t index)
+bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply)
 {
     uint8_t bytesToSendSampleHousekeepingTelemetry[LENGTH_TELEMETRY_SAMPLE_HOUSEKEEPING] = { CMD_SUPERVISOR_OBTAIN_HK_TELEMETRY, 0x00, 0x00 };
     uint8_t bytesToReceiveSampleHousekeepingTelemetry[LENGTH_TELEMETRY_SAMPLE_HOUSEKEEPING] = { CMD_SUPERVISOR_OBTAIN_HK_TELEMETRY, 0x00, 0x00 };
@@ -231,7 +231,7 @@ bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply, uint8
     return true;
 }
 
-bool supervisor_powercycle(supervisor_generic_reply_t * reply, uint8_t index)
+bool supervisor_powercycle()
 {
     uint8_t bytesToSendPowerCycleIobc[LENGTH_POWER_CYCLE_IOBC] = { CMD_SUPERVISOR_POWER_CYCLE_IOBC, 0x00, 0x00 };
     uint8_t bytesToReceivePowerCycleIobc[LENGTH_POWER_CYCLE_IOBC] = { 0 };
@@ -255,7 +255,7 @@ bool supervisor_powercycle(supervisor_generic_reply_t * reply, uint8_t index)
     return true;
 }
 
-bool supervisor_reset(supervisor_generic_reply_t * reply, uint8_t index)
+bool supervisor_reset()
 {
     uint8_t bytesToSendReset[LENGTH_RESET] = { CMD_SUPERVISOR_RESET, 0x00, 0x00 };
     uint8_t bytesToReceiveReset[LENGTH_RESET] = { 0 };
@@ -279,7 +279,7 @@ bool supervisor_reset(supervisor_generic_reply_t * reply, uint8_t index)
     return true;
 }
 
-bool supervisor_emergency_reset(supervisor_generic_reply_t * reply, uint8_t index)
+bool supervisor_emergency_reset()
 {
     uint8_t bytesToSendEmergencyReset[LENGTH_EMERGENCY_RESET] = { CMD_SUPERVISOR_EMERGENCY_RESET, 'M', 'E', 'R', 'G', 'E', 'N', 'C', 'Y', 0x00 };
     uint8_t bytesToReceiveEmergencyReset[LENGTH_EMERGENCY_RESET] = { 0 };
