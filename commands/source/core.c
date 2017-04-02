@@ -15,6 +15,7 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <stdint.h>
 
@@ -89,6 +90,7 @@ int reboot()
     bool result = true;
 
     /*result = supervisor_power_cycle();*/
+    printf("Rebooting..\n");
     if (!result)
     {
         printf("There was an error requesting the iOBC power cycle.\n");
@@ -103,6 +105,7 @@ int reset()
 {
     bool result = true;
 
+    printf("Resetting..\n");
     /*result = supervisor_reset();*/
     if (!result)
     {
@@ -118,6 +121,7 @@ int emergency_reset()
 {
     bool result = true;
 
+    printf("Emergency Resetting..\n");
     /*result = supervisor_emergency_reset();*/
     if (!result)
     {

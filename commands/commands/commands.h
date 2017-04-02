@@ -22,3 +22,12 @@
 #else
 #define DEFAULT_COMMAND_STR_LEN 75
 #endif
+
+int reboot(); //Power cylce the iOBC
+
+int reset(); //Supervisor reset
+
+int emergency_reset(); //emergency reset
+
+
+bool core_parse_args(int argc, char ** argv, char * cmd_string);
