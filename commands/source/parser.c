@@ -26,9 +26,9 @@
 #define INFO_HASH             6385337553
 #define RESET_HASH            210726503048         //reset
 #define REBOOT_HASH           6953974000496        //power cycle
-#define E_RESET_HASH          5359270898672569524  //emergency reset
+#define E_RESET_HASH          5359270898672569524  //emergency-reset
 
-static char args_doc[] = "Usage: [ping, info]";
+static char args_doc[] = "Usage: [ping, info, reboot, reset, emergency-reset]";
 static char doc[] = "Core Command Library - The basic core commands of KubOS";
 static int parse_opt (int key, char *arg, struct argp_state *state);
 
