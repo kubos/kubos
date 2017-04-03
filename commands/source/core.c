@@ -74,7 +74,7 @@ int build_info()
     bool result = true;
     supervisor_version_configuration_t version_config = {0};
 
-    /*result = supervisor_get_version(&version_config);*/
+    result = supervisor_get_version(&version_config);
     if (!result)
     {
         printf("There was an error getting the supervisor version information. Error: %i\n", result);
@@ -89,8 +89,7 @@ int reboot()
 {
     bool result = true;
 
-    /*result = supervisor_power_cycle();*/
-    printf("Rebooting..\n");
+    result = supervisor_power_cycle();
     if (!result)
     {
         printf("There was an error requesting the iOBC power cycle.\n");
@@ -105,8 +104,7 @@ int reset()
 {
     bool result = true;
 
-    printf("Resetting..\n");
-    /*result = supervisor_reset();*/
+    result = supervisor_reset();
     if (!result)
     {
         printf("There was an error requesting the iOBC power cycle.\n");
@@ -121,8 +119,7 @@ int emergency_reset()
 {
     bool result = true;
 
-    printf("Emergency Resetting..\n");
-    /*result = supervisor_emergency_reset();*/
+    result = supervisor_emergency_reset();
     if (!result)
     {
         printf("There was an error requesting the iOBC power cycle.\n");

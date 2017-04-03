@@ -199,8 +199,6 @@ bool append_str(char * str, int * size, char * new_str)
         return false;
     }
 
-
-
     result = snprintf(str + *size, CMD_STR_LEN - *size - 1, new_str);
 
     if (result < 0)
@@ -269,7 +267,7 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
     if (!assemble_cmd_string(cmd_str, exe_path, wrapper))
     {
         KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an issue procesing the command string.\n");
-        snprintf(wrapper->response_packet->output + size, RES_PACKET_STDOUT_LEN - 1, "There was an issue procesing the command string.\n");
+        snprintf(wrapper->response_packet->output, RES_PACKET_STDOUT_LEN - 1, "There was an issue procesing the command string.\n");
         return false;
     }
 
@@ -280,7 +278,7 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
     if (fptr == NULL)
     {
         KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an issue starting the command process %i\n", fptr);
-        snprintf(wrapper->response_packet->output + size, RES_PACKET_STDOUT_LEN - 1, "There was an issue starting the command process\n");
+        snprintf(wrapper->response_packet->output, RES_PACKET_STDOUT_LEN - 1, "There was an issue starting the command process\n");
         return false;
     }
 

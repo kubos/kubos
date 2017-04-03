@@ -80,7 +80,6 @@ bool core_parse_args(int argc, char ** argv, char * cmd_string)
         return false;
     }
 
-    /*flags = ARGP_PARSE_ARGV0 | ARGP_NO_ERRS;*/
     flags = 0;
 
     if (argp_parse (&argp, argc, argv, flags, 0, cmd_string) != 0)
