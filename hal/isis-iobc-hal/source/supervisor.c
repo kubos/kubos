@@ -27,7 +27,7 @@ static bool spi_comms(uint8_t * tx_buffer, uint32_t tx_length, uint8_t * rx_buff
     uint16_t i;
     static uint8_t mode = SPI_MODE_0;
     static uint8_t bits = 8;
-    static uint32_t speed = 1000000;
+    static uint32_t speed = 600000; //1000000;
     static uint32_t order;
     static uint32_t mode2;
     // static uint32_t delay = 100000;
@@ -39,9 +39,6 @@ static bool spi_comms(uint8_t * tx_buffer, uint32_t tx_length, uint8_t * rx_buff
         return false;
     }
 
-    // char checksum = checksum_calculateCRC8(tx_buffer, tx_length - 1, CRC8_POLYNOMIAL, CRC8_DEFAULT_STARTREMAINDER, true);
-    // tx_buffer[tx_length - 1] = checksum;
-
     char checksum = supervisor_calculate_CRC(tx_buffer, tx_length - 1);
     tx_buffer[tx_length - 1] = checksum;
 
@@ -51,44 +48,15 @@ static bool spi_comms(uint8_t * tx_buffer, uint32_t tx_length, uint8_t * rx_buff
         return false;
     }
 
-    // /*
-    //  * spi mode
-    //  */
-    // ret = ioctl(fd, SPI_IOC_WR_MODE, &mode);
-    // if (ret == -1) {
-    //     perror("can't set spi mode");
-    //     return false;
-    // }
+    /*
+     * max speed hz
+     */
 
-    ret = ioctl(fd, SPI_IOC_RD_MODE, &mode);
+    ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
     if (ret == -1) {
-        perror("can't get spi mode");
+        perror("can't set max speed hz");
         return false;
     }
-
-    // /*
-    //  * bits per word
-    //  */
-    // ret = ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
-    // if (ret == -1) {
-    // 	perror("can't set bits per word");
-    //     return false;
-    // }
-
-    ret = ioctl(fd, SPI_IOC_RD_BITS_PER_WORD, &bits);
-    if (ret == -1) {
-        perror("can't get bits per word");
-        return false;
-    }
-
-    // /*
-    //  * max speed hz
-    //  */
-    // ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
-    // if (ret == -1) {
-    // 	perror("can't set max speed hz");
-    //     return false;
-    // }
 
     ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
     if (ret == -1) {
@@ -96,78 +64,27 @@ static bool spi_comms(uint8_t * tx_buffer, uint32_t tx_length, uint8_t * rx_buff
         return false;
     }
 
-    ret = ioctl(fd, SPI_IOC_RD_LSB_FIRST, &order);
-    ret = ioctl(fd, SPI_IOC_RD_MODE32, &mode2);
-
-    usleep(10);
-
-    printf("spi mode: %d\n", mode);
-    printf("spi mode2: %d\n", mode2);
-    printf("bits per word: %d\n", bits);
-    printf("lsb first: %d\n", order);
-    printf("max speed: %d Hz (%d KHz)\n", speed, speed / 1000);
-
-    // printf("normal command\r\n");
-    // for (i = 0; i < tx_length; i++) {
-    //     printf("0x%02X ", tx_buffer[i]);
-    //     if (i % 2)
-    //         printf("\n");
-    // }
-    // printf("\r\n");
-
-    printf("command with checksum\r\n");
-    for (i = 0; i < tx_length; i++) {
-        printf("0x%02X ", tx_buffer[i]);
-        if (i % 2)
-            printf("\n");
+    // Messages are sent across one byte per ioct call
+    // This is to introduce inter-byte delays, as per 
+    // discussion with ISIS on 3/31. They suggested
+    // at least 1 ms between bytes. Breaking up bytes into
+    // separate ioctl calls seems ok at 600000 hz
+    for (uint16_t i = 0; i < tx_length; i++)
+    {
+        struct spi_ioc_transfer tr = {
+            .tx_buf = (unsigned long)&tx_buffer[i],
+            .rx_buf = (unsigned long)&rx_buffer[i],
+            .len = 1,
+            .delay_usecs = 0,
+            .cs_change = 1
+        };
+        ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+        if (ret < 1)
+        {
+            printf("Can't send spi message %d\r\n", ret);
+            return false;
+        }
     }
-
-    printf("\r\n");
-
-    struct spi_ioc_transfer tr = {
-        .tx_buf = (unsigned long)tx_buffer,
-        .rx_buf = (unsigned long)rx_buffer,
-        .len = tx_length,
-        .delay_usecs = 1,
-        .speed_hz = 1000000,
-        .tx_nbits = 0,
-        .rx_nbits = 0,
-        .pad = 0,
-        .cs_change = 1
-    };
-
-    ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-    printf("Spi ret %d\r\n", ret);
-    if (ret < 1) {
-        printf("Can't send spi message\n");
-        return false;
-    }
-
-    // struct spi_ioc_transfer tr_tx = {
-    //     .tx_buf = (unsigned long)tx_buffer,
-    //     .rx_buf = (unsigned long)NULL,
-    //     .len = tx_length
-    // };
-
-    // struct spi_ioc_transfer tr_rx = {
-    //     .tx_buf = (unsigned long)NULL,
-    //     .rx_buf = (unsigned long)rx_buffer,
-    //     .len = tx_length
-    // };
-
-    // ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr_tx);
-    // printf("Spi ret %d\r\n", ret);
-    // if (ret < 1) {
-    //     printf("Can't send spi message\n");
-    //     return false;
-    // }
-
-    // ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr_rx);
-    // printf("Spi ret %d\r\n", ret);
-    // if (ret < 1) {
-    //     printf("Can't send spi message\n");
-    //     return false;
-    // }
 
     printf("response\r\n");
     for (i = 0; i < rx_length; i++) {
@@ -176,11 +93,16 @@ static bool spi_comms(uint8_t * tx_buffer, uint32_t tx_length, uint8_t * rx_buff
             printf("\n");
     }
 
-    printf("\r\n");
-
     close(fd);
 
     return true;
+}
+
+static bool verify_checksum(unsigned char * buffer, int buffer_length)
+{
+    unsigned char checksum = supervisor_calculate_CRC(buffer + 1, buffer_length - 2);
+    printf("Checksum 0x%02X\n", checksum);
+    return true ? (checksum == buffer[buffer_length - 1]) : false;
 }
 
 bool supervisor_get_version(supervisor_version_configuration_t * versionReply)
@@ -203,6 +125,19 @@ bool supervisor_get_version(supervisor_version_configuration_t * versionReply)
         printf("Failed to obtain version\n");
         return false;
     }
+
+    printf("Checking checksum...\n");
+    if (verify_checksum(bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION))
+    {
+        printf("Checksum passed!\n");
+    }
+    else
+    {
+        printf("Checksum failed\n");
+        // return false;
+    }
+
+    memcpy(versionReply, bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION);
 
     return true;
 }
@@ -227,6 +162,19 @@ bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply)
         printf("Failed to obtain housekeeping\n");
         return false;
     }
+
+    printf("Checking checksum...\n");
+    if (verify_checksum(bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING))
+    {
+        printf("Checksum passed!\n");
+    }
+    else
+    {
+        printf("Checksum failed\n");
+        // return false;
+    }
+
+    memcpy(versionReply, bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING);
 
     return true;
 }
