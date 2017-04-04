@@ -11,7 +11,7 @@ The `kubos` command is always run with a subcommand in order to do something, `k
 |[config](#kubos-config)           | Display the target configuration info.                |
 |[debug](#kubos-debug)             | Attach a debugger to the current target.  Requires target support.       |
 |[flash](#kubos-flash)             | Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets. |
-|[flash](#kubos-flash-linux)       | (KubOS Linux) Load files onto target.                 |
+|[flash](#kubos-flash-linux)       | (KubOS Linux Targets) Load files onto target.         |
 |[init](#kubos-init)               | Create a new module.                                  |
 |[licenses](#kubos-licenses)       | List the licenses of the current module and its dependencies.            |
 |[link](#kubos-link)               | Symlink a module                                      |
@@ -107,7 +107,7 @@ Options:
 
  * `--list`, `-l` List the tests that would be run, rather than running them.
    Implies `--no-build`.
- * `--no-build`, `-n` Don't build anything, Try to run already-built tests.
+ * `--no-build`, `-n` Don't build anything. Try to run already-built tests.
    Things will fail if all the specified tests are not built!
  * This command also accepts the options to `kubos_build`,
    which are used if building.
@@ -146,7 +146,7 @@ Targets define the options and commands that `kubos` uses to compile modules and
 
 A target must define a CMake Toolchain file describing all of the rules that `kubos` uses to build software, it may also define commands to launch a debugger (used by `kubos debug`).
 
-### Arguments
+### Options
 * `--list`, `-l` List all of the available Kubos targets.
 
 ### Examples
@@ -184,7 +184,7 @@ variable will be set so that the upgrade package will be installed during the ne
 
 All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/usr/local/bin.
 
-### Arguments
+### Options
 * `file` File to flash.
 
 Note: This requires target support.
@@ -197,9 +197,9 @@ Note: This requires target support.
         $ kubos update <version number>
 
 ### Description
-Pull and update all of the current Kubos modules. By default if no `<version number>`
+Pull and update all of the current Kubos modules. If a version number is specified the CLI will attempt to checkout that version after downloading newer releases.
 
-### Arguments
+### Options
 * `<version number>` Is optional. If a version number is specified then kubos will try to checkout the provided version number after pulling the latest updates
 * `--latest`, `-l` Checkout the latest release during the update process.
 
@@ -213,7 +213,7 @@ Pull and update all of the current Kubos modules. By default if no `<version num
 ### Description
 Display the current version of the Kubos CLI, and the Kubos modules
 
-### Arguments
+### Options
 * `--list`, `-l` List the available Kubos source versions
 
 
@@ -226,7 +226,7 @@ Display the current version of the Kubos CLI, and the Kubos modules
 ### Description
 Display all of the available versions of the Kubos modules. By default only major releases are shown.
 
-### Arguments
+### Options
 * `--all-versions`, `-a` Show every available release including minor releases.
 
 
@@ -240,7 +240,7 @@ Display all of the available versions of the Kubos modules. By default only majo
 ### Description
 Pull and update all of the current Kubos modules. By default if no `<version number>`
 
-### Arguments
+### Options
 * `<version number>` Kubos will try to checkout the provided version number.
 * `--branch`, `-b` Specify a specific branch of the Kubos source to use.
 
@@ -275,7 +275,7 @@ This works for direct and indirect dependencies: you can link to a module that y
 
 The variant of the command which takes a path to an existing module (e.g. `kubos link ../path/to/a/module`) performs both steps in sequence, for convenience.
 
-### Arguments
+### Options
 
 `--all`, `-a` Link all of the default Kubos modules and targets into a project in the current directory
 
