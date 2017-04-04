@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
@@ -103,7 +104,7 @@ static bool spi_comms(uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_leng
     }
 
     printf("response\r\n");
-    for (i = 0; i < rx_length; i++) {
+    for (i = 0; i < tx_length; i++) {
         printf("0x%02X ", rx_buffer[i]);
         if (i % 2)
             printf("\n");
@@ -232,7 +233,7 @@ bool supervisor_emergency_reset()
     uint8_t bytesToSendDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
     uint8_t bytesToReceiveDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
 
-    if (!spi_comms(bytesToSendEmergencyReset, LENGTH_EMERGENCY_RESET, bytesToReceiveEmergencyReset, LENGTH_EMERGENCY_RESET))
+    if (!spi_comms(bytesToSendEmergencyReset, bytesToReceiveEmergencyReset, LENGTH_EMERGENCY_RESET))
     {
         printf("Failed to send emergency reset\n");
         return false;
