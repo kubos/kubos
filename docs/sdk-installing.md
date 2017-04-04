@@ -1,4 +1,5 @@
 # Installing Kubos SDK
+# Installing Kubos SDK {#installing-kubos-sdk}
 
 ## What is the Kubos SDK? {#what-is-kubos-sdk}
 
