@@ -1,7 +1,25 @@
+/*
+ * Copyright (C) 2014 Innovative Solution In Space B.V.
+ * Copyright (C) 2017 Kubos Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /**
- *      @file       supervisor.h
- *      @date       2013/6/10
- *      @brief      Supervisor Controller interface.
+ * @defgroup iOBC-Supervisor
+ * @addtogroup iOBC-Supervisor
+ * @brief Interface for iOBC supervisor functionality
+ * @{
  */
 
 #pragma once
@@ -93,9 +111,9 @@ typedef union __attribute__((__packed__)) _supervisor_generic_reply_t {
 /**
  * Supervisor version and configuration bytes.
  */
-typedef union __attribute__((__packed__)) _supervisor_version_configuration_t {
+typedef union __attribute__((__packed__)) _supervisor_version_t {
     uint8_t rawValue[LENGTH_TELEMETRY_GET_VERSION]; //!< Raw value of the version configuration bytes..
-    struct __attribute__((__packed__)) _fields_supervisor_version_configuration_t
+    struct __attribute__((__packed__)) _fields_supervisor_version_t
     {
         uint8_t dummy; //!< The first as always is a dummy byte.
         uint8_t spiCommandStatus; //!< The second is a SPI Command Status.
@@ -110,7 +128,7 @@ typedef union __attribute__((__packed__)) _supervisor_version_configuration_t {
         int8_t codeType; //!< Code type. Whether flight or test.
         uint8_t crc8; //!< CRC byte.
     } fields;
-} supervisor_version_configuration_t;
+} supervisor_version_t;
 
 /*
             ____________________________________________
@@ -230,7 +248,7 @@ bool supervisor_powercycle();
  *                  An index value of 255 is for communicating to the supervisor on the same board over SPI.
  *		@return		Error code as specified in errors.h
  */
-bool supervisor_get_version(supervisor_version_configuration_t * versionReply);
+bool supervisor_get_version(supervisor_version_t * versionReply);
 
 /**
  *      @brief      Getting Housekeeping from Supervisor Controller.
@@ -240,3 +258,5 @@ bool supervisor_get_version(supervisor_version_configuration_t * versionReply);
  *		@return		Error code as specified in errors.h
  */
 bool supervisor_get_housekeeping(supervisor_housekeeping_t * housekeepingReply);
+
+/* @} */

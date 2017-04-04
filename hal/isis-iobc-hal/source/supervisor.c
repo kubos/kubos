@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2017 Kubos Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "isis-iobc-hal/supervisor.h"
 #include "isis-iobc-hal/checksum.h"
 #include <fcntl.h>
@@ -21,7 +37,7 @@
 /** Obtain Version and Configuration Command in hexadecimal. */
 #define CMD_SUPERVISOR_OBTAIN_VERSION_CONFIG 0x55
 
-static bool spi_comms(uint8_t * tx_buffer, uint32_t tx_length, uint8_t * rx_buffer, uint8_t rx_length)
+static bool spi_comms(uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_length)
 {
     int fd, ret;
     uint16_t i;
@@ -65,7 +81,7 @@ static bool spi_comms(uint8_t * tx_buffer, uint32_t tx_length, uint8_t * rx_buff
     }
 
     // Messages are sent across one byte per ioct call
-    // This is to introduce inter-byte delays, as per 
+    // This is to introduce inter-byte delays, as per
     // discussion with ISIS on 3/31. They suggested
     // at least 1 ms between bytes. Breaking up bytes into
     // separate ioctl calls seems ok at 600000 hz
@@ -105,14 +121,14 @@ static bool verify_checksum(unsigned char * buffer, int buffer_length)
     return true ? (checksum == buffer[buffer_length - 1]) : false;
 }
 
-bool supervisor_get_version(supervisor_version_configuration_t * versionReply)
+bool supervisor_get_version(supervisor_version_t * versionReply)
 {
     uint8_t bytesToSendSampleVersion[LENGTH_TELEMETRY_SAMPLE_VERSION] = { CMD_SUPERVISOR_OBTAIN_VERSION_CONFIG, 0x00, 0x00 };
     uint8_t bytesToReceiveSampleVersion[LENGTH_TELEMETRY_SAMPLE_VERSION] = { CMD_SUPERVISOR_OBTAIN_VERSION_CONFIG, 0x00, 0x00 };
     uint8_t bytesToSendObtainVersion[LENGTH_TELEMETRY_GET_VERSION] = { 0 };
     uint8_t bytesToReceiveObtainVersion[LENGTH_TELEMETRY_GET_VERSION] = { 0 };
 
-    if (!spi_comms(bytesToSendSampleVersion, LENGTH_TELEMETRY_SAMPLE_VERSION, bytesToReceiveSampleVersion, LENGTH_TELEMETRY_SAMPLE_VERSION))
+    if (!spi_comms(bytesToSendSampleVersion, bytesToReceiveSampleVersion, LENGTH_TELEMETRY_SAMPLE_VERSION))
     {
         printf("Failed to sample version\n");
         return false;
@@ -120,7 +136,7 @@ bool supervisor_get_version(supervisor_version_configuration_t * versionReply)
 
     usleep(10000);
 
-    if (!spi_comms(bytesToSendObtainVersion, LENGTH_TELEMETRY_GET_VERSION, bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION))
+    if (!spi_comms(bytesToSendObtainVersion, bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION))
     {
         printf("Failed to obtain version\n");
         return false;
@@ -149,7 +165,7 @@ bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply)
     uint8_t bytesToSendObtainHousekeepingTelemetry[LENGTH_TELEMETRY_HOUSEKEEPING] = { 0 };
     uint8_t bytesToReceiveObtainHousekeepingTelemetry[LENGTH_TELEMETRY_HOUSEKEEPING] = { 0 };
 
-    if (!spi_comms(bytesToSendSampleHousekeepingTelemetry, LENGTH_TELEMETRY_SAMPLE_HOUSEKEEPING, bytesToReceiveSampleHousekeepingTelemetry, LENGTH_TELEMETRY_SAMPLE_HOUSEKEEPING))
+    if (!spi_comms(bytesToSendSampleHousekeepingTelemetry, bytesToReceiveSampleHousekeepingTelemetry, LENGTH_TELEMETRY_SAMPLE_HOUSEKEEPING))
     {
         printf("Failed to sample housekeeping\n");
         return false;
@@ -157,7 +173,7 @@ bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply)
 
     usleep(10000);
 
-    if (!spi_comms(bytesToSendObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING, bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING))
+    if (!spi_comms(bytesToSendObtainHousekeepingTelemetry, bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING))
     {
         printf("Failed to obtain housekeeping\n");
         return false;
@@ -186,20 +202,11 @@ bool supervisor_powercycle()
     uint8_t bytesToSendDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
     uint8_t bytesToReceiveDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
 
-    if (!spi_comms(bytesToSendPowerCycleIobc, LENGTH_POWER_CYCLE_IOBC, bytesToReceivePowerCycleIobc, LENGTH_POWER_CYCLE_IOBC))
+    if (!spi_comms(bytesToSendPowerCycleIobc, bytesToReceivePowerCycleIobc, LENGTH_POWER_CYCLE_IOBC))
     {
         printf("Failed to send power cycle\n");
         return false;
     }
-
-    usleep(10000);
-
-    if (!spi_comms(bytesToSendDummyByte, LENGTH_TELEMETRY_DUMMY, bytesToReceiveDummyByte, LENGTH_TELEMETRY_DUMMY))
-    {
-        printf("Failed to get dummy bytes\n");
-        return false;
-    }
-
     return true;
 }
 
@@ -210,20 +217,11 @@ bool supervisor_reset()
     uint8_t bytesToSendDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
     uint8_t bytesToReceiveDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
 
-    if (!spi_comms(bytesToSendReset, LENGTH_RESET, bytesToReceiveReset, LENGTH_RESET))
+    if (!spi_comms(bytesToSendReset, bytesToReceiveReset, LENGTH_RESET))
     {
         printf("Failed to send reset\n");
         return false;
     }
-
-    usleep(10000);
-
-    if (!spi_comms(bytesToSendDummyByte, LENGTH_TELEMETRY_DUMMY, bytesToReceiveDummyByte, LENGTH_TELEMETRY_DUMMY))
-    {
-        printf("Failed to get dummy bytes\n");
-        return false;
-    }
-
     return true;
 }
 
@@ -239,14 +237,5 @@ bool supervisor_emergency_reset()
         printf("Failed to send emergency reset\n");
         return false;
     }
-
-    usleep(10000);
-
-    if (!spi_comms(bytesToSendDummyByte, LENGTH_TELEMETRY_DUMMY, bytesToReceiveDummyByte, LENGTH_TELEMETRY_DUMMY))
-    {
-        printf("Failed to get dummy bytes\n");
-        return false;
-    }
-
     return true;
 }
