@@ -199,7 +199,7 @@ bool append_str(char * str, int * size, char * new_str)
         return false;
     }
 
-    result = snprintf(str + *size, CMD_STR_LEN - *size - 1, new_str);
+    result = snprintf(str + *size, CMD_STR_LEN - *size, new_str);
 
     if (result < 0)
     {
@@ -253,13 +253,23 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 
     // exe_len - the format specifier length (-2) + the null character (+1) leading to the -1
     exe_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
+
+    if (exe_len > CMD_STR_LEN)
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "The path the executable is too long to fit into the command string\n");
+        wrapper->err = true;
+        snprintf(wrapper->output, sizeof(wrapper->output), "The path to the executable is too long to fit into the command string\n");
+        cnc_daemon_send_result(wrapper);
+        return false;
+    }
+
     snprintf(exe_path, exe_len, MODULE_REGISTRY_DIR, wrapper->command_packet->cmd_name);
 
     if (!file_exists(exe_path))
     {
         KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Requested library %s does not exist\n", exe_path);
         wrapper->err = true;
-        snprintf(wrapper->output, sizeof(wrapper->output) - 1,"The command library %s, does not exist\n", exe_path);
+        snprintf(wrapper->output, sizeof(wrapper->output),"The command library %s, does not exist\n", exe_path);
         cnc_daemon_send_result(wrapper);
         return false;
     }
@@ -267,7 +277,7 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
     if (!assemble_cmd_string(cmd_str, exe_path, wrapper))
     {
         KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an issue procesing the command string.\n");
-        snprintf(wrapper->response_packet->output, RES_PACKET_STDOUT_LEN - 1, "There was an issue procesing the command string.\n");
+        snprintf(wrapper->response_packet->output, RES_PACKET_STDOUT_LEN, "There was an issue procesing the command string.\n");
         return false;
     }
 
@@ -278,12 +288,12 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
     if (fptr == NULL)
     {
         KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an issue starting the command process %i\n", fptr);
-        snprintf(wrapper->response_packet->output, RES_PACKET_STDOUT_LEN - 1, "There was an issue starting the command process\n");
+        snprintf(wrapper->response_packet->output, RES_PACKET_STDOUT_LEN, "There was an issue starting the command process\n");
         return false;
     }
 
     while (fgets(buf, RES_PACKET_STDOUT_LEN, fptr) != NULL) {
-        size += snprintf(wrapper->response_packet->output + size, RES_PACKET_STDOUT_LEN - size - 1, "%s", buf);
+        size += snprintf(wrapper->response_packet->output + size, RES_PACKET_STDOUT_LEN - size, "%s", buf);
     }
 
     wrapper->response_packet->return_code = pclose(fptr);
