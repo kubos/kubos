@@ -1,4 +1,5 @@
 # Upgrading Your Kubos Development Environment
+# Upgrading Your Kubos Development Environment {#upgrading-development-environment}
 
 New updates will be announced on the [Kubos website](http://docs.kubos.co/). There will be instructions depending on the specific release details of all the steps needed to upgrade for the newest release.
 
