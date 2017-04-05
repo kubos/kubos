@@ -9,5 +9,10 @@
     "version":"0.1.0",
     "dependencies":{
         "telemetry":"kubostech/telemetry"
+    },
+    "targetDependencies":{
+        "isis":{
+            "isis-iobc-hal":"kubostech/isis-iobc-hal"
+        }
     }
 }

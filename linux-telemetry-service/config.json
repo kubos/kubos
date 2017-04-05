@@ -6,6 +6,10 @@
         },
         "subscribers": {
             "max_num": 10 
+        },
+        "publishers": {
+            "supervisor_uptime" : 100,
+            "supervisor_reset_count" : 101
         }
     },
     "csp": {
