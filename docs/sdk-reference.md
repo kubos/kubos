@@ -1,44 +1,28 @@
 # Kubos CLI Command Reference
-
 # Kubos CLI Command Reference {#kubos-cli-command-reference}
 
 The `kubos` command is always run with a subcommand in order to do something, `kubos` with no subcommand will only display help information.
 
 ## Command Overview
-
-[build](#kubos-build)               Build the current module.
-
-[clean](#kubos-clean)              Remove files created by kubos and the build.
-
-[config](#kubos-config)              Display the target configuration info.
-
-[debug](#kubos-debug)               Attach a debugger to the current target.  Requires target support.
-
-[flash](#kubos-flash)               Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.
-
-[flash](#kubos-flash-linux) (KubOS Linux) Load files onto target.
-
-[init](#kubos-init)                Create a new module.
-
-[licenses](#kubos-licenses)            List the licenses of the current module and its dependencies.
-
-[link](#kubos-link)                Symlink a module
-
-[link-target](#kubos-link-target)         Symlink a target
-
-[list](#kubos-list)                List the dependencies of the current module, or the inherited targets of the current target.
-
-[target](#kubos-target)              Set or display the target device.
-
-[test](#kubos-test)                Run the tests for the current module on the current target. Requires target support for cross-compiling targets.
-
-[version](#kubos-version)             Display the current active version of the CLI and Kubos source repo.
-
-[versions](#kubos-versions)            Display the available versions of the KubOS source.
-
-[update](#kubos-update)              Download newer versions of the Kubos Modules
-
-[use](#kubos-use)                 Set a new version of the Kubos modules to build your projects against.
+| Command                          | Function                                              |
+| ------------------------------   | ----------------------------------------------        |
+|[build](#kubos-build)             | Build the current module.                             |
+|[clean](#kubos-clean)             | Remove files created by kubos and the build.          |
+|[config](#kubos-config)           | Display the target configuration info.                |
+|[debug](#kubos-debug)             | Attach a debugger to the current target.  Requires target support.       |
+|[flash](#kubos-flash)             | Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets. |
+|[flash](#kubos-flash-linux)       | (KubOS Linux Targets) Load files onto target.         |
+|[init](#kubos-init)               | Create a new module.                                  |
+|[licenses](#kubos-licenses)       | List the licenses of the current module and its dependencies.            |
+|[link](#kubos-link)               | Symlink a module                                      |
+|[link-target](#kubos-link-target) | Symlink a target                                      |
+|[list](#kubos-list)               | List the dependencies of the current module, or the inherited targets of the current target. |
+|[target](#kubos-target)           | Set or display the target device.                     |
+|[test](#kubos-test)               | Run the tests for the current module on the current target. Requires target support for cross-compiling targets  |
+|[version](#kubos-version)         | Display the current active version of the CLI and Kubos source repo.     |
+|[versions](#kubos-versions)       | Display the available versions of the KubOS source.   |
+|[update](#kubos-update)           | Download newer versions of the Kubos Modules          |
+|[use](#kubos-use)                 | Set a new version of the Kubos modules to build your projects against.   |
 
 
 ## kubos build {#kubos-build}
@@ -62,10 +46,10 @@ Kubos uses CMake to control the build, the basic process is:
 
 * `--generate-only`, `-g`: only generate the CMakeLists, don't build
 
-* `--debug-build`, `-d`: build a debug (less-optimised) build.
-The effects depend on the target (this selects CMake build type Debug), but generally this means no optimisation, and NDEBUG is not defined.
+* `--debug-build`, `-d`: build a debug (less-optimized) build.
+The effects depend on the target (this selects CMake build type Debug), but generally this means no optimization, and NDEBUG is not defined.
 
-* `--release-build`, `-r`: build a release (optimised) build. deprecated
+* `--release-build`, `-r`: build a release (optimized) build. deprecated
 The effects depend on the target (this selects CMake build type RelWithDebInfo). This option is deprecated because it is now the default, unless --debug-build is specified.
 
 * `--cmake-generator`, `-G`: specify the CMake Generator. CMake can generate project files for various editors and IDEs.
@@ -121,9 +105,9 @@ and prints output on standard output.
 
 Options:
 
- * `--list`, `-l`: List the tests that would be run, rather than running them.
+ * `--list`, `-l` List the tests that would be run, rather than running them.
    Implies `--no-build`.
- * `--no-build`, `-n`: Don't build anything, try to run already-built tests.
+ * `--no-build`, `-n` Don't build anything. Try to run already-built tests.
    Things will fail if all the specified tests are not built!
  * This command also accepts the options to `kubos_build`,
    which are used if building.
@@ -162,7 +146,7 @@ Targets define the options and commands that `kubos` uses to compile modules and
 
 A target must define a CMake Toolchain file describing all of the rules that `kubos` uses to build software, it may also define commands to launch a debugger (used by `kubos debug`).
 
-### Arguments
+### Options
 * `--list`, `-l` List all of the available Kubos targets.
 
 ### Examples
@@ -182,7 +166,7 @@ Flash the build of the current target to the target board.
 
 Note: This requires target support.
 
-## kubos flash (KubOS Linux) {#kubos-flash-linux}
+## kubos flash (KubOS Linux targets) {#kubos-flash-linux}
 Synonyms: `kubos start`
 
 ### Synopsis
@@ -200,7 +184,7 @@ variable will be set so that the upgrade package will be installed during the ne
 
 All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/usr/local/bin.
 
-### Arguments
+### Options
 * `file` File to flash.
 
 Note: This requires target support.
@@ -213,30 +197,37 @@ Note: This requires target support.
         $ kubos update <version number>
 
 ### Description
-Pull and update all of the current Kubos modules. By default if no `<version number>`
+Pull and update all of the current Kubos modules. If a version number is specified the CLI will attempt to checkout that version after downloading newer releases.
 
-### Arguments
-`<version number>` Is optional. If a version number is specified then kubos will try to checkout the provided version number after pulling the latest updates
+### Options
+* `<version number>` Is optional. If a version number is specified then kubos will try to checkout the provided version number after pulling the latest updates
+* `--latest`, `-l` Checkout the latest release during the update process.
 
 
 ## kubos version {#kubos-version}
 
 ### Synopsis
 
-        $ kubos version
+        $ kubos version [--list]
 
 ### Description
 Display the current version of the Kubos CLI, and the Kubos modules
+
+### Options
+* `--list`, `-l` List the available Kubos source versions
 
 
 ## kubos versions {#kubos-versions}
 
 ### Synopsis
 
-        $ kubos versions
+        $ kubos versions [--all-versions]
 
 ### Description
-Display all of the available versions of the Kubos modules.
+Display all of the available versions of the Kubos modules. By default only major releases are shown.
+
+### Options
+* `--all-versions`, `-a` Show every available release including minor releases.
 
 
 ## kubos use {#kubos-use}
@@ -244,13 +235,14 @@ Display all of the available versions of the Kubos modules.
 ### Synopsis
 
         $ kubos use <version number>
+        $ kubos use --branch <branch_name>
 
 ### Description
 Pull and update all of the current Kubos modules. By default if no `<version number>`
 
-### Arguments
-`<version number>` Kubos will try to checkout the provided version number.
-
+### Options
+* `<version number>` Kubos will try to checkout the provided version number.
+* `--branch`, `-b` Specify a specific branch of the Kubos source to use.
 
 
 ## kubos link {#kubos-link}
@@ -283,7 +275,7 @@ This works for direct and indirect dependencies: you can link to a module that y
 
 The variant of the command which takes a path to an existing module (e.g. `kubos link ../path/to/a/module`) performs both steps in sequence, for convenience.
 
-### Arguments
+### Options
 
 `--all`, `-a` Link all of the default Kubos modules and targets into a project in the current directory
 
