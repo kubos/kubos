@@ -4,7 +4,7 @@
 
 # KubOS Linux on the ISIS iOBC {#kubos-linux-on-the-iobs}
 
-##Overview {#overview}
+## Overview {#overview}
 
 The goal of this document is to create a KubOS Linux installation for the iOBC that can then run the satellite services (telemetry, payload communication, etc) 
 needed for the ISIS customers' missions.
@@ -13,14 +13,14 @@ The [User Applications on the ISIS iOBC](docs/user-app-on-iobc.md) doc can then 
 
 **Note:** Ideally, the user should never have to mess with the kernel themselves.  It should be pre-loaded onto the iOBC.
 
-##Software Components {#software-components}
+## Software Components {#software-components}
 
-###ISIS Bootloader
+### ISIS Bootloader
 
 The ISIS bootloader lives in the very beginning of the NOR flash. It should come pre-loaded on the board and should not need to be modified. It 
 initializes the memory hardware and then copies U-Boot into the SDRAM and starts its execution.
 
-###U-Boot
+### U-Boot
 
 [Wiki](https://en.wikipedia.org/wiki/Das_U-Boot)
 
@@ -33,27 +33,27 @@ which can be used to configure and debug the kernel before it's loaded.
 
 Additionally, we've made some changes to allow us to use it as a kernel upgrade and recovery system. At boot time it will check for available upgrade packages or a corrupted Linux kernel and will then upgrade or rollback the kernel and rootfs as necessary.
 
-###Kernel
+### Kernel
 
-####Linux
+#### Linux
 
 [Version Overview](https://kernelnewbies.org/Linux_4.4)
 
 We're using Linux 4.4. This is the current long-term support version (LTS) and will be supported until early 2018.
 
-####Glibc
+#### Glibc
 
 [Overview](https://www.gnu.org/software/libc/)
 
 We use the standard GNU C library to build our toolchains. We are currently building using v2.23.
 
-####BusyBox
+#### BusyBox
 
 [Overview](https://busybox.net/about.html)
 
 BusyBox provides many of the common Linux console and shell commands, but in a smaller package.
 
-###BuildRoot
+### BuildRoot
 
 [Overview](https://buildroot.uclibc.org/)
 
@@ -61,15 +61,15 @@ The current development tool for building all of the components required for run
 pass in a basic configuration file and then have all of the required packages and options brought in and compiled automatically.
 This reduces the amount of time to configure KubOS Linux for a new board.
 
-###SAM-BA
+### SAM-BA
 
 [Product Page](http://www.atmel.com/tools/atmelsam-bain-systemprogrammer.aspx)
 
 The software tool used to flash the kernel and components onto the iOBC.
 
-##Installation Process {#installation-process}
+## Installation Process {#installation-process}
 
-###Build the OS Files {#build-the-os-files}
+### Build the OS Files {#build-the-os-files}
 
 Create new folder
 
@@ -112,9 +112,23 @@ The generated files will be located in buildroot-2016.11/output/images.  They ar
 - {board}.dtb - The Device Tree Binary that Linux uses to configure itself for your board
 - rootfs.tar  - The root file system.  Contains BusyBox and other libraries
 
-###Install the SD Card Files {#install-the-sd-card-files}
+### Install the SD Card Files {#install-the-sd-card-files}
 
-Due to their size, the zImage and rootfs files live on the SD card.
+Due to their size, the kernel and rootfs files live on the SD card.
+
+#### Pre-Requisites
+
+In order to write the files to the SD card your build system needs be able to a) see the SD card device and b) read/write to multiple partitions.
+
+If you're running Mac OS or Windows, you'll need to pass the SD card through to your Vagrant box.
+
+* [Mac OS X Instructions](https://www.geekytidbits.com/mount-sd-card-virtualbox-from-mac-osx/)
+* [Windows Instructions](http://rizwanansari.net/access-sd-card-on-linux-from-windows-using-virtualbox/)
+
+If you're running Linux, you can either pass through the SD card to your Vagrant box via the VirtualBox Manager, or run the whole build process
+natively.
+
+#### Get the Device Name
 
 To start, find the name of your SD card in your system:
 
@@ -131,7 +145,32 @@ You should see a device that looks like this:
     
 In this example '/dev/sdb' is the name of the SD card.  You might also see '/dev/mmcblk0'.  You'll need to use this name in all future commands.
 
-####Partition the SD Card
+#### Run the Formatting/Flashing Script
+
+Navigate to your 'kubos-linux-build' folder and open the 'tools' directory.
+
+Run the `format-sd.sh` script. You might need to run as root to get permissions for certain steps.
+
+The script has optional parameters:
+* `-d {device}` - Specify the name of the SD card device. The default is '/dev/sdb'
+* `-s {size}` - Size, in MB, of the SD card. The default is 4000 (4GB).
+* `-w` - Specify that the SD card should be wiped before formatting. Useful if there was any data previously on the card. ** Note ** Wiping a 4GB SD card takes about 10 minutes.
+* `-p` - Specify that existing kpack-base.itb and kernel files should be copied into the appropriate partitions
+* `-pp` - Specify that the kpack-base.itb and kernel files should be built and then copied to their partitions
+* `-ppp` - Specify that the SD card should not be formatted. Only build and copy the kpack and kernel files.
+* `-b {branch}` - Specify the branch name of U-Boot that has been built. The default is 'master'. This option should not need to be used outside of development.
+
+So if I wanted to wipe my SD card and then build and load the new kernel files, I would run:
+
+    $ ./format-sd.sh -wpp
+    
+Once the script has finished successfully, the SD card is ready to be inserted into the iOBC's SD Card 0 slot.
+
+#### Manual Format/Flash Process
+
+If for some reason you'd like to format the SD card and load the bare minimum files onto it manually, follow this process.
+
+##### Partition the SD Card
 
 First, you'll need to set up the partitions on the SD card ({name} is the name of the disk device. Ex. /dev/sdb):
 
@@ -155,10 +194,24 @@ Configure the partitions (ex. /dev/sdb1)
     $ sudo mkfs.ext4 {name}{partition6}
     $ sudo mkfs.ext4 {name}{partition7}
     $ sudo mkfs.ext4 {name}{partition8}
+    
+##### Create the Kernel File
 
-####Copy the files
+The BuildRoot build process creates the zImage file, which is a self-extracting kernel image. In order to help detect corruption, we package that into an *.itb file, which includes a checksum value that can be validated during boot time.
 
-Next, you'll need to copy the zImage file into the boot partition and the rootfs into the rootfs partition
+Navigate to your 'kubos-linux-build' folder and open the 'tools' directory.
+
+Run the `kubos-kernel.sh` script.
+
+The script has optional parameters (which are unlikely to be needed):
+* `-i {input-file}` - Specify the name of the *.its file to use. This file describes the files that will be packaged and their usage configuration options. The default is `kubos-kernel.its`, which should also be located in the 'tools' directory.
+* `-b {branch}` - Specify the branch name of U-Boot that has been built. The default is 'master'. This option should not need to be used outside of development.
+
+The script will create the 'kubos-kernel.itb' file.
+
+##### Copy the files
+
+Next, you'll need to copy the kernel file into the boot partition and the rootfs into the rootfs partition
 
 From your project folder:
 
@@ -172,11 +225,11 @@ Mount the partitions
     $ sudo mount {name}{partition5} boot
     $ sudo mount {name}{partition6} rootfs
     
-Copy the zImage file into partition 2
+Copy the kubos-kernel.itb file into partition 5. It will need to be renamed to 'kernel'.
 
-    $ sudo cp buildroot-2016.11/output/images/zImage boot
+    $ sudo cp buildroot-2016.11/output/images/kubos-kernel.itb boot/kernel
     
-Untar the rootfs into partition 3
+Untar the rootfs into partition 6
 
     $ sudo tar -xvf buildroot-2016.11/output/images/rootfs.tar -C rootfs
     
@@ -185,11 +238,11 @@ Unmount the partitions
     $ sudo umount {name}{partition5}
     $ sudo umount {name}{partition6}
     
-Remove the SD card and insert it into iOBC SD card slot 0
+Remove the SD card and insert it into iOBC SD card slot 0.
 
-###Install the NOR Flash Files {#install-the-nor-flash-files}
+### Install the NOR Flash Files {#install-the-nor-flash-files}
 
-####Pre-Requisites
+#### Pre-Requisites
 
 1. Obtain a SEGGER SAM-ICE programmer/debugger
 2. Install programming drivers from [https://www.segger.com/jlink-software.html](https://www.segger.com/jlink-software.html)
@@ -202,7 +255,7 @@ Remove the SD card and insert it into iOBC SD card slot 0
 Note:  Make sure the red jumper on the programming board is in place; it bypasses the watchdog.  If you don't, the board will
 continually reboot and you won't be able to flash anything.
 
-####Boot into U-Boot (Optional)
+#### Boot into U-Boot (Optional)
 
 (Skip this section if you've never put Linux on your board before)
 
@@ -219,7 +272,7 @@ auto-boot and bring up the CLI.
 
 ![U-Boot Console](images/iOBC/uboot_console.png)
 
-####Flash the Files
+#### Flash the Files
 
 Start up SAM-BA.  You'll want to select the at91sam9g20-ISISOBC option from the 'Select your board' drop-down.
 
@@ -246,7 +299,7 @@ Click 'Send File'
 ![SAM-BA Send DTB](images/iOBC/samba_send_dtb.png)
 
 
-###Boot the System {#boot-the-system}
+### Boot the System {#boot-the-system}
 
 You should now be able to set up a serial connection to your board and boot it into Linux.
 
