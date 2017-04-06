@@ -26,20 +26,26 @@ initializes the memory hardware and then copies U-Boot into the SDRAM and starts
 
 [Site Page](http://www.denx.de/wiki/U-Boot)
 
+[Kubos U-Boot Repo](https://github.com/kubostech/uboot)
+
 U-Boot, at the most basic level, is responsible for loading the kernel from the SD card into the SDRAM. However, it also provides a basic OS and CLI
 which can be used to configure and debug the kernel before it's loaded.
+
+Additionally, we've made some changes to allow us to use it as a kernel upgrade and recovery system. At boot time it will check for available upgrade packages or a corrupted Linux kernel and will then upgrade or rollback the kernel and rootfs as necessary.
 
 ###Kernel
 
 ####Linux
 
+[Version Overview](https://kernelnewbies.org/Linux_4.4)
+
 We're using Linux 4.4. This is the current long-term support version (LTS) and will be supported until early 2018.
 
-####uClibc
+####Glibc
 
-[Overview](https://uclibc.org/about.html)
+[Overview](https://www.gnu.org/software/libc/)
 
-uClibc is the smaller version of the GNU C library that has been built with embedded Linux systems in mind.
+We use the standard GNU C library to build our toolchains. We are currently building using v2.23.
 
 ####BusyBox
 
@@ -49,9 +55,15 @@ BusyBox provides many of the common Linux console and shell commands, but in a s
 
 ###BuildRoot
 
-The current development tool for building all of the components required for running embedded Linux.
+[Overview](https://buildroot.uclibc.org/)
+
+The current development tool for building all of the components required for running embedded Linux.  Using this allows us to 
+pass in a basic configuration file and then have all of the required packages and options brought in and compiled automatically.
+This reduces the amount of time to configure KubOS Linux for a new board.
 
 ###SAM-BA
+
+[Product Page](http://www.atmel.com/tools/atmelsam-bain-systemprogrammer.aspx)
 
 The software tool used to flash the kernel and components onto the iOBC.
 
@@ -246,3 +258,23 @@ baudrate of 115200.
 You should see the console boot into Linux like this:
 
 ![Linux Console](images/iOBC/linux_console.png)
+
+
+## Upgrade Process {#upgrade-process}
+
+If you already have KubOS Linux installed on your system, but would like to upgrade to the latest version, check out the 'Upgrade Installation' section of the [KubOS Linux Upgrade doc](docs/kubos-linux-upgrade.md). Alternatively, if you would like to rollback to a previously installed version, refer to the 'Upgrade Rollback' section of the same document.
+
+## Recovery Process {#recovery-process}
+
+Should your KubOS Linux kernel become corrupted (as indicated by failing to successfully boot into Linux several times), the system will automatically try to recover during the next boot.  
+
+It will go through the following steps, if each is present:
+
+1. Reload the current version of KubOS Linux from the kpack*.itb file in the upgrade partition
+2. Reload the previous version of KubOS Linux from the kpack*.itb file in the upgrade partition
+3. Reload the base version of KubOS Linux from the kpack-base.itb file in the upgrade partition
+4. Boot into the alternate OS
+
+If none of these steps work, then the system will boot into the U-Boot CLI. From here, some basic troubleshooting and debugging abilities should be available.
+
+More information about the recovery process and architecture can be found in the [KubOS Linux Recovery doc](docs/kubos-linux-recovery.md)
