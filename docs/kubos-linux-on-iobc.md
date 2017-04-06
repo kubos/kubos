@@ -154,7 +154,7 @@ Run the `format-sd.sh` script. You might need to run as root to get permissions 
 The script has optional parameters:
 * `-d {device}` - Specify the name of the SD card device. The default is '/dev/sdb'
 * `-s {size}` - Size, in MB, of the SD card. The default is 4000 (4GB).
-* `-w` - Specify that the SD card should be wiped before formatting. Useful if there was any data previously on the card. ** Note ** Wiping a 4GB SD card takes about 10 minutes.
+* `-w` - Specify that the SD card should be wiped before formatting. Useful if there was any data previously on the card. **Note** Wiping a 4GB SD card takes about 10 minutes.
 * `-p` - Specify that existing kpack-base.itb and kernel files should be copied into the appropriate partitions
 * `-pp` - Specify that the kpack-base.itb and kernel files should be built and then copied to their partitions
 * `-ppp` - Specify that the SD card should not be formatted. Only build and copy the kpack and kernel files.
@@ -170,7 +170,7 @@ Once the script has finished successfully, the SD card is ready to be inserted i
 
 If for some reason you'd like to format the SD card and load the bare minimum files onto it manually, follow this process.
 
-##### Partition the SD Card
+**Partition the SD Card**
 
 First, you'll need to set up the partitions on the SD card ({name} is the name of the disk device. Ex. /dev/sdb):
 
@@ -195,21 +195,23 @@ Configure the partitions (ex. /dev/sdb1)
     $ sudo mkfs.ext4 {name}{partition7}
     $ sudo mkfs.ext4 {name}{partition8}
     
-##### Create the Kernel File
 
-The BuildRoot build process creates the zImage file, which is a self-extracting kernel image. In order to help detect corruption, we package that into an *.itb file, which includes a checksum value that can be validated during boot time.
+
+**Create the Kernel File**
+
+The BuildRoot build process creates the zImage file, which is a self-extracting kernel image. In order to help detect corruption, we package that into an \*.itb file, which includes a checksum value that can be validated during boot time.
 
 Navigate to your 'kubos-linux-build' folder and open the 'tools' directory.
 
 Run the `kubos-kernel.sh` script.
 
 The script has optional parameters (which are unlikely to be needed):
-* `-i {input-file}` - Specify the name of the *.its file to use. This file describes the files that will be packaged and their usage configuration options. The default is `kubos-kernel.its`, which should also be located in the 'tools' directory.
+* `-i {input-file}` - Specify the name of the \*.its file to use. This file describes the files that will be packaged and their usage configuration options. The default is 'kubos-kernel.its', which should also be located in the 'tools' directory.
 * `-b {branch}` - Specify the branch name of U-Boot that has been built. The default is 'master'. This option should not need to be used outside of development.
 
 The script will create the 'kubos-kernel.itb' file.
 
-##### Copy the files
+**Copy the files**
 
 Next, you'll need to copy the kernel file into the boot partition and the rootfs into the rootfs partition
 
