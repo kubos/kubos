@@ -54,13 +54,11 @@ The kernel is actually composed of multiple components: the main linux kernel, t
 
 Mostly we should be able to create and distribute one main kernel that all the boards can use.
 
-Using BuildRoot allows us to include tools like BusyBox and uClibc with the kernel and rootfs at build time.
-
-Final distribution: zImage
+Using BuildRoot allows us to include tools like BusyBox and glibc with the kernel and rootfs at build time.
 
 ####zImage
 
-The zImage file is loaded into SDRAM by U-Boot and contains a compressed version of the Linux kernel.  The first few hundred bytes of the
+The zImage file is unpacked from the kernel file (which contains headers for checksum validation) and then loaded into SDRAM by U-Boot and contains a compressed version of the Linux kernel.  The first few hundred bytes of the
 file are not compressed and are responsible for uncompressing the rest of the kernel and then kicking off the main kernel execution.
 
 ####Linux
@@ -69,13 +67,11 @@ file are not compressed and are responsible for uncompressing the rest of the ke
 
 We're using Linux 4.4.  This is the current long-term support version (LTS) and will be supported until early 2018.
 
-####uClibc
+####Glibc
 
-[Overview](https://uclibc.org/about.html)
+[Overview](https://www.gnu.org/software/libc/)
 
-We're currently using v1.0.19.
-
-uClibc is the smaller version of the GNU C library that has been built with embedded Linux systems in mind.
+We use the standard GNU C library to build our toolchains. We are currently building using v2.23.
 
 ####BusyBox
 
