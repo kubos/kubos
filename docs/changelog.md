@@ -6,6 +6,7 @@
 * [KUBOS-391](https://kubostech.atlassian.net/browse/KUBOS-391) Created a background C&C service
 * [KUBOS-409](https://kubostech.atlassian.net/browse/KUBOS-409) Added logging to C&C
 * [KUBOS-376](https://kubostech.atlassian.net/browse/KUBOS-376) Added C&C 'build info' command
+* [KUBOS-372](https://kubostech.atlassian.net/browse/KUBOS-372) Added C&C 'reboot' command
 * [KUBOS-338](https://kubostech.atlassian.net/browse/KUBOS-338) Added KubOS Linux kernel rollback and recovery
 * [KUBOS-340](https://kubostech.atlassian.net/browse/KUBOS-340) Added init script generation and flashing for KubOS Linux projects
 
