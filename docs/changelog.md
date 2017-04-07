@@ -1,5 +1,15 @@
 # Kubos Changelog
 
+## v0.2.2 - April 7 2017
+* [KUBOS-350](https://kubostech.atlassian.net/browse/KUBOS-350) Added multi-process communication support to telemetry library
+* [KUBOS-283](https://kubostech.atlassian.net/browse/KUBOS-283) Created a background telemetry management service
+* [KUBOS-391](https://kubostech.atlassian.net/browse/KUBOS-391) Created a background C&C service
+* [KUBOS-409](https://kubostech.atlassian.net/browse/KUBOS-409) Added logging to C&C
+* [KUBOS-376](https://kubostech.atlassian.net/browse/KUBOS-376) Added C&C 'build info' command
+* [KUBOS-338](https://kubostech.atlassian.net/browse/KUBOS-338) Added KubOS Linux kernel rollback and recovery
+* [KUBOS-340](https://kubostech.atlassian.net/browse/KUBOS-340) Added init script generation and flashing for KubOS Linux projects
+
+
 ## v0.2.1 - Mar 7 2017
 * [KUBOS-388](https://kubostech.atlassian.net/browse/KUBOS-388) Created initial Command & Control framework
 * [KUBOS-350](https://kubostech.atlassian.net/browse/KUBOS-350) Added support for inter-process communication between Kubos services
