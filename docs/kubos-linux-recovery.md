@@ -57,7 +57,7 @@ After the second system upgrade:
     kubos_prev_version = kpack-upgrade1.itb
 
 Rolling back to a previous version of KubOS Linux uses the same mechanism as [upgrading to a new version](docs/kubos-linux-upgrade.md). A kpack*.itb file
-is broken into its components, and then the kernel image is written to the boot partition and the rootfs image is written to the rootfs partition.
+is broken into its components and then the kernel image is written to the boot partition and the rootfs image is written to the rootfs partition.
 
 **Note** This process will wipe out everything that was previously in the rootfs partition. As a result, all user files should be stored in the userspace partition, which is mapped to the '/home' directory. This userspace partition should not be affected by the Kubos recovery process.
 
@@ -73,7 +73,7 @@ From the KubOS Linux shell:
 
 ## Boot into the Alternate OS
 
-If the system has failed to boot more than times than the 'bootlimit' value allows, then the system will attempt to boot using the 'altbootcmd' environment variable.  This variable contains all of the commands required to boot into an alternate operating system. Due to the low-portability of any commands that deal with memory, the exact format will change between boards (and potentially between customers), but should follow this rough format:
+If the system has failed to boot more times than the 'bootlimit' value allows, then the system will attempt to boot using the 'altbootcmd' environment variable.  This variable contains all of the commands required to boot into an alternate operating system. Due to the low-portability of any commands that deal with memory, the exact format will change between boards (and potentially between customers), but should follow this rough format:
 
 * Set the 'upgrade_available' variable to 0. If we succesfully boot into the alternate OS, it should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep attempting.
 * Clear the 'bootcmd' variable. If 'upgrade_available' is 0 and 'bootcmd' is NULL, then the system won't attempt to boot into anything and will instead just go to the U-Boot CLI. The hope is that from here some manual troubleshooting and recovery can occur.
