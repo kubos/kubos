@@ -9,7 +9,6 @@
 * [KUBOS-338](https://kubostech.atlassian.net/browse/KUBOS-338) Added KubOS Linux kernel rollback and recovery
 * [KUBOS-340](https://kubostech.atlassian.net/browse/KUBOS-340) Added init script generation and flashing for KubOS Linux projects
 
-
 ## v0.2.1 - Mar 7 2017
 * [KUBOS-388](https://kubostech.atlassian.net/browse/KUBOS-388) Created initial Command & Control framework
 * [KUBOS-350](https://kubostech.atlassian.net/browse/KUBOS-350) Added support for inter-process communication between Kubos services
