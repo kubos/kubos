@@ -44,8 +44,9 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
  - [User Applications on iOBC](docs/user-app-on-iobc.md)
  
- - [Upgrade KubOS Linux](docs/kubos-linux-upgrade.md)
-
+ - [KubOS Linux Upgrades](docs/kubos-linux-upgrade.md)
+  
+ - [KubOS Linux Recovery](docs/kubos-linux-recovery.md)v
  - [Command and Control](docs/command-and-control.md)
 
 
