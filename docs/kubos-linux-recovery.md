@@ -2,6 +2,10 @@
 
 # KubOS Linux Recovery Architecture
 
+Ideally, a space mission using KubOS Linux will run successfully until the end of its natural lifespan. However, space is unpredictable and systems can become corrupted. As a result, we've implemented a basic mechanism to help detect and recover from these random errors.
+
+## Overview
+
 Each time the system attempts to boot, an internal counter is increased. If the KubOS Linux kernel successfully boots, it will reset this internal counter.
 
 If the system has failed to boot twice already, then the custom Kubos recovery code is attempted. If the Kubos recovery steps fail, then the system attempts to boot into an alternate operating system instead. If that fails, then the system will stop attempting to load an OS and will instead just present the U-Boot CLI.
