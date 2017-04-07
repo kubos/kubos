@@ -18,7 +18,9 @@ echo "OUTPUT_DIRECTORY={2}";
 echo "GENERATE_HTML=YES";
 echo "TAGFILES={3}";
 echo "HTML_OUTPUT=.";
-echo "EXCLUDE=source test";) | doxygen -"""
+echo "EXCLUDE=source test";
+echo "EXTERNAL_GROUPS=NO";
+echo "EXTERNAL_PAGES=NO";) | doxygen -"""
 
 DOC_TAG_DIR = """
 {0}/output.tag={1}
