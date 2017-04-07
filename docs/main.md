@@ -51,18 +51,18 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
 ## Top Level APIs
 
- - [Kubos HAL](./kubos-hal/index.html)
+ - [Kubos HAL](@ref kubos-hal-main)
 
- - [Kubos Core](./kubos-core/index.html)
+ - [Kubos Core](@ref kubos-core-main)
 
- - [FreeRTOS](./freertos/index.html)
+ - [FreeRTOS](@ref freertos-main)
 
- - [CSP](./libcsp/index.html)
+ - [CSP](@ref csp-main)
 
- - [Telemetry](./telemetry/index.html)
+ - [Telemetry](@ref telemetry-main)
 
- - [Telemetry Aggregator](./telemetry-aggregator/index.html)
+ - [Telemetry Aggregator](@ref telemetry-aggregator-main)
 
- - [Telemetry Storage](./telemetry-storage/index.html)
+ - [Telemetry Storage](@ref telemetry-storage-main)
 
- - [IPC](./ipc/index.html)
+ - [IPC](@ref ipc-main)
