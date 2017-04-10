@@ -41,12 +41,22 @@ DOCS_DIRS = [
 "telemetry-storage",
 "ipc"]
 
-def gendocs_plain(dir, doxyfile, version, doc_dir):
-    doxycmd = GENERATE_TAGS.format(doxyfile, version, doc_dir, doc_dir)
+def make_tags_str(dir, doc_tags):
+    tags_str = ""
+    for _dir, _tag in doc_tags.iteritems():
+        if _dir != dir:
+            tags_str += _tag + " \\\n"
+    return tags_str.strip("\\\n")
+        
+
+def gendocs_html(dir, doxyfile, version, doc_dir, doc_tags):
+    tags_str = make_tags_str(dir, doc_tags)
+    print tags_str
+    doxycmd = GENERATE_HTML.format(doxyfile, version, doc_dir, tags_str)
     subprocess.call((doxycmd), shell=True, cwd=dir)
 
-def gendocs_tags(dir, doxyfile, version, doc_dir, tags_str):
-    doxycmd = GENERATE_HTML.format(doxyfile, version, doc_dir, tags_str)
+def gendocs_tags(dir, doxyfile, version, doc_dir):
+    doxycmd = GENERATE_TAGS.format(doxyfile, version, doc_dir, doc_dir)
     subprocess.call((doxycmd), shell=True, cwd=dir)
 
 def main():
@@ -58,21 +68,20 @@ def main():
 
     args = parser.parse_args()
 
-    doc_tags = []
+    doc_tags = {}
 
     for dir in DOCS_DIRS:
         doc_dir = os.path.join(os.getcwd(), args.output, dir)
         if not os.path.isdir(doc_dir):
             os.makedirs(doc_dir)
-        gendocs_plain(dir, "docs/Doxyfile", args.version, doc_dir)
-        doc_tags.append(DOC_TAG_DIR.format(doc_dir, doc_dir).strip())
+        gendocs_tags(dir, "docs/Doxyfile", args.version, doc_dir)
+        doc_tags[dir] = DOC_TAG_DIR.format(doc_dir, doc_dir).strip()
 
-    doc_tags_str = " \\\n".join(doc_tags)
     for dir in DOCS_DIRS:
         doc_dir = os.path.join(os.getcwd(), args.output, dir)
         if not os.path.isdir(doc_dir):
             os.makedirs(doc_dir)
-        gendocs_tags(dir, "docs/Doxyfile", args.version, doc_dir, doc_tags_str)
+        gendocs_html(dir, "docs/Doxyfile", args.version, doc_dir, doc_tags)
 
 
 if __name__ == '__main__':
