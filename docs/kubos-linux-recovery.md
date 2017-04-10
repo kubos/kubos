@@ -15,7 +15,7 @@ If the system has failed to boot twice already, then the custom Kubos recovery c
 There are several U-Boot environment variables that are used to track the state of a KubOS Linux system:
 * bootcmd - The usual set of commands that are used to boot into KubOS Linux
 * altbootcmd - The alternate set of commands that are used if the system cannot successfully boot into KubOS Linux. They will be set up to attempt to boot into an alternate OS.
-* upgrade_available - Indicates that recovery actions are available and should be taken, if necessary
+* recovery_available - Indicates that recovery actions are available and should be taken, if necessary
 * bootlimit - The number of bad boots allowed before the system attempts to use altbootcmd instead of bootcmd to boot. 
 * bootcount - The number of boots that have been attempted.
 * kubos\_curr\_version - The name of the kpack*.itb file that the current KubOS Linux kernel and rootfs were loaded from.
@@ -75,8 +75,8 @@ From the KubOS Linux shell:
 
 If the system has failed to boot more times than the 'bootlimit' value allows, then the system will attempt to boot using the 'altbootcmd' environment variable.  This variable contains all of the commands required to boot into an alternate operating system. Due to the low-portability of any commands that deal with memory, the exact format will change between boards (and potentially between customers), but should follow this rough format:
 
-* Set the 'upgrade_available' variable to 0. If we succesfully boot into the alternate OS, it should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep attempting.
-* Clear the 'bootcmd' variable. If 'upgrade_available' is 0 and 'bootcmd' is NULL, then the system won't attempt to boot into anything and will instead just go to the U-Boot CLI. The hope is that from here some manual troubleshooting and recovery can occur.
+* Set the 'recovery_available' variable to 0. If we succesfully boot into the alternate OS, it should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep attempting.
+* Clear the 'bootcmd' variable. If 'recovery_available' is 0 and 'bootcmd' is NULL, then the system won't attempt to boot into anything and will instead just go to the U-Boot CLI. The hope is that from here some manual troubleshooting and recovery can occur.
 * Save the U-Boot envars. The 'saveenv' command saves any local environment variables changes to persistent storage.
 * Copy the alternate OS from persistent storage into SDRAM.
 * Run the alternate OS from SDRAM.
