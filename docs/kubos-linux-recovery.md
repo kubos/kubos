@@ -13,9 +13,9 @@ If the system has failed to boot twice already, then the custom Kubos recovery c
 ## Environment Variables
 
 There are several U-Boot environment variables that are used to track the state of a KubOS Linux system:
-* bootcmd - The usual set of commands that are used to boot into KubOS Linux
+* bootcmd - The usual set of commands that are used to boot into KubOS Linux.
 * altbootcmd - The alternate set of commands that are used if the system cannot successfully boot into KubOS Linux. They will be set up to attempt to boot into an alternate OS.
-* recovery_available - Indicates that recovery actions are available and should be taken, if necessary
+* recovery_available - Indicates that recovery actions are available and should be taken, if necessary.
 * bootlimit - The number of bad boots allowed before the system attempts to use altbootcmd instead of bootcmd to boot. 
 * bootcount - The number of boots that have been attempted.
 * kubos\_curr\_version - The name of the kpack*.itb file that the current KubOS Linux kernel and rootfs were loaded from.
@@ -63,10 +63,12 @@ is broken into its components and then the kernel image is written to the boot p
 
 ### Manual Recovery
 
-If for some reason your KubOS Linux system boots after an upgrade but has introduced some non-critical issue (like an incompatibility with a user application), you can manually rollback to a previously installed version. Previous packages are not deleted once they have been loaded. As a result, you can simply specify which package you would like to boot into and then restart your system.
+If for some reason your KubOS Linux system boots after an upgrade but has introduced some non-critical issue (like an incompatibility with a user application), you can manually rollback to a previously installed version. Previous packages are not deleted once they have been loaded. As a result, you can simply specify which package you would like to boot into and then restart your system. List the contents of the '/upgrade' directory to see what files are available.
 
 From the KubOS Linux shell:
 
+    $ ls /upgrade
+        kpack-2017.02.20.itb    kpack-2017.03.21.itb    kpack-2017.04.11.itb
     $ fw_printenv kubos_updatefile kpack-{desired version}.itb
     $ reboot
 
@@ -81,7 +83,14 @@ If the system has failed to boot more times than the 'bootlimit' value allows, t
 * Copy the alternate OS from persistent storage into SDRAM.
 * Run the alternate OS from SDRAM.
 
-Initially, this alternate OS will be provided by the client. However, the endgoal is to utilize KubOS RT as the alternate OS for all KubOS Linux implementations.
+Initially, this alternate OS will be provided by the client. However, the end goal is to utilize KubOS RT as the alternate OS for all KubOS Linux implementations.
+
+### Generic Alternate OS Setup
+
+The basic process for creating an alternate OS and loading it onto a board should be:
+* Build an application that is capable of running on the board. Pay attention to the SDRAM address that the application is configured to run from. Frequently, this is a static address (likely the very beginning of SDRAM), so the application must end up running from this location.
+* Load it into the appropriate persistent storage (NOR/NAND flash, SD card, etc)
+* Update the altbootcmd variable, if necessary, with the address to copy the application from, the address to copy the application to, and the length of the application. This can be done from the U-Boot CLI with the `setenv` and `saveenv` commands, or from KubOS Linux with the `fw_setenv` command.
 
 ## U-Boot CLI
 
