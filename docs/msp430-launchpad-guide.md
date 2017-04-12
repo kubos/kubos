@@ -93,8 +93,7 @@ The MSP430's inter-device communication methods do not support all of the same o
 
 ## Flashing the Board {#flashing-the-board}
 
-You'll flash the firmware onto your board through the micro-USB port.  You might need to install drivers in order for the board
-to be properly detected by your computer.  If you're using Windows, the drivers can be found [here](http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430_FET_Drivers/latest/index_FDS.html).
+Once you've built your project, you'll flash it onto your board using the micro-USB port.  You might need to install drivers in order for the board to be properly detected by your computer.  If you're using Windows, the drivers can be found [here](http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430_FET_Drivers/latest/index_FDS.html).
 
 If you have a Kubos vagrant image running, the USB connection should be automatically passed through to the VM.  The board should appear as the 
 "Texas Instruments" device if you issue the `lsusb` command.
