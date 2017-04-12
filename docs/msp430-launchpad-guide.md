@@ -8,13 +8,13 @@
 
 **MSP430 Documentation:**
 
--	[MSP430x5xx User's Guide](http://www.ti.com/lit/ug/slau208o/slau208o.pdf) Main manual.  Describes the setup and configuration for the whole microcontroller.
+-	[MSP430x5xx User's Guide](http://www.ti.com/lit/ug/slau208p/slau208p.pdf) - Main manual.  Describes the setup and configuration for the whole microcontroller.
 
--	[MSPEXP430F5529LP Quick Launch Guide](http://www.ti.com/lit/ml/slau536/slau536.pdf) Useful for the pin layouts.
+-	[MSPEXP430F5529LP Quick Launch Guide](http://www.ti.com/lit/ml/slau536/slau536.pdf) - Useful for the pin layouts.
 
--	[MSP430F5529 LaunchPad User's Guide](http://www.ti.com/lit/ug/slau533c/slau533c.pdf) Contains the full pinout schematics
+-	[MSP430F5529 LaunchPad User's Guide](http://www.ti.com/lit/ug/slau533d/slau533d.pdf) - Contains the full pinout schematics
 
--	[MSP430F5529 Header File](http://ece.wpi.edu/courses/ece2049smj/msp430f5529.h)  Contains many of the pin and register constants
+-	[MSP430F5529 Header File](http://ece.wpi.edu/courses/ece2049smj/msp430f5529.h) - Contains many of the pin and register constants
 
 **Kubos Documentation:**
 
@@ -32,19 +32,21 @@ Unlike the STM32F4, there is only a single set of pin definitions for each commu
 **Note:** There are two UART buses present in the launchpad.  However, UART2 is piped through to the micro-USB port and is reserved for
 console output.
 
-### Finding the pin definitions for a board
+### Finding the Pin Definitions for a Board
 
-#### Quick Launch Guide:
+In order to location the pin assignments for the MSP430 launchpad, please refer to the following documents.
 
-The first page has the pins.  The primary I2C, SPI, and UART buses are color-coded.
+#### MSPEXP430F5529LP Quick Launch Guide:
+
+The first page of the [MSPEXP430F5529LP Quick Launch Guide](http://www.ti.com/lit/ml/slau536/slau536.pdf) has a pin diagram for the board.  The primary I2C, SPI, and UART buses are color-coded.
 
 - I2C pins  -  UCB_n_\_{SCL|SDA}
 - SPI pins  -  UC_cn_\_{SIMO|SOMI|CLK}
 - UART pins -  UCA0_{TXD|RXD}
 
-#### Launchpad User's Guide:
+#### MSP430F5529 Launchpad User's Guide:
 
-The full pinout schematic of the processor can be found in section 2.2.1 of the launchpad's user's guide.
+The full pinout schematic of the processor can be found in section 2.2.1 of the [MSP430F5529 LaunchPad User's Guide](http://www.ti.com/lit/ug/slau533d/slau533d.pdf).
 
 ## Startup Code {#startup-code}
 
@@ -89,14 +91,14 @@ The MSP430's inter-device communication methods do not support all of the same o
 - Direction - Does not support 1-line mode
 - Data Size - Does not support 16-bit mode
 
-## Flashing the board {#flashing-the-board}
+## Flashing the Board {#flashing-the-board}
 
 You'll flash the firmware onto your board through the micro-USB port.  You might need to install drivers in order for the board
 to be properly detected by your computer.  If you're using Windows, the drivers can be found [here](http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430_FET_Drivers/latest/index_FDS.html).
 
 If you have a Kubos vagrant image running, the USB connection should be automatically passed through to the VM.  The board should appear as the 
 "Texas Instruments" device if you issue the `lsusb` command.
-Run 'kubos flash' in order to start the flash process.
+Run `kubos flash` in order to start the flash process.
 
 If you see a "*No unused FET found*" message, the board either isn't plugged into your computer or some other VM has control of the USB (only one VM can have control of the USB at a time).
 
@@ -144,7 +146,7 @@ The output of a successful flash should look like this:
 ### If something happens to the board's flashing firmware
 
 It's possible for the version of the board's internal firmware to be out-of-date from what the flash application is looking for.
-In this case, the 'kubos flash' command will automatically kick off the firmware updater.
+In this case, the `kubos flash` command will automatically kick off the firmware updater.
 
 (This is guaranteed to happen if you change the OS of the computer that the board is connected to.)
 
@@ -174,7 +176,7 @@ It will look something like this:
 
 If you're using a VM, the "Texas Instruments MSP Tools Driver" device name might no longer be present after running the command. 
 
-If that occurs, try selecting the "Unknown device" devices and re-running the 'kubos flash' command.  The command should cause some
+If that occurs, try selecting the "Unknown device" devices and re-running the `kubos flash` command.  The command should cause some
 additional firmware to be loaded and the usual device name should appear once it completes.
 
 Select the  "Texas Instruments MSP Tools Driver" device again and rerun the flash command one more time.  You should see firmware 
