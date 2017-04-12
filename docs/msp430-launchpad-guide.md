@@ -34,7 +34,7 @@ console output.
 
 ### Finding the Pin Definitions for a Board
 
-In order to location the pin assignments for the MSP430 launchpad, please refer to the following documents.
+In order to locate the pin assignments for the MSP430 launchpad, please refer to the following documents.
 
 #### MSPEXP430F5529LP Quick Launch Guide:
 
