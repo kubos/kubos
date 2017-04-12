@@ -132,7 +132,7 @@ All built-in Kubos services will reside in the /usr/sbin directory. This covers 
 
 #### /home
 
-All user-created files should reside under the /home directory. This directory maps to a separate partition from the root file system. As a result, all file here will remain unchanged if the system goes through a kernel upgrade or downgrade.
+All user-created files should reside under the /home directory. This directory maps to a separate partition from the root file system. As a result, all files here will remain unchanged if the system goes through a kernel upgrade or downgrade.
 
 ***
 **Any files not residing under the /home directory will be destroyed during an upgrade/downgrade**
@@ -140,7 +140,7 @@ All user-created files should reside under the /home directory. This directory m
 
 ##### /home/usr/bin
 
-All user-created applications will be loaded into this folder during the `kubos flash` process. The directory is included in the system's PATH, so applications can then be called directly from anywhere, without needing to know the full file name.
+All user-created applications will be loaded into this folder during the `kubos flash` process. The directory is included in the system's PATH, so applications can then be called directly from anywhere, without needing to know the full file path.
 
 ##### /home/usr/local/bin
 
