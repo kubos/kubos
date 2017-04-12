@@ -172,28 +172,28 @@ If for some reason you'd like to format the SD card and load the bare minimum fi
 
 **Partition the SD Card**
 
-First, you'll need to set up the partitions on the SD card ({name} is the name of the disk device. Ex. /dev/sdb):
+First, you'll need to set up the partitions on the SD card (for readability, we'll be using device name '/dev/sdb'. Be sure to replace with the device name of your SD card):
 
 Create a partition table
 
-    $ sudo parted {name} mklabel msdos y
+    $ sudo parted /dev/sdb mklabel msdos y
     
 Create the partitions 
 
-    $ sudo parted {name} mkpart primary linux-swap 1M 513M
-    $ sudo parted {name} mkpart extended 513M 4000M
-    $ sudo parted {name} mkpart logical fat16 513M 534M
-    $ sudo parted {name} mkpart logical ext4 534M 555M
-    $ sudo parted {name} mkpart logical ext4 555M 606M
-    $ sudo parted {name} mkpart logical ext4 606M 4000M
+    $ sudo parted /dev/sdb mkpart primary linux-swap 1M 513M
+    $ sudo parted /dev/sdb mkpart extended 513M 4000M
+    $ sudo parted /dev/sdb mkpart logical fat16 513M 534M
+    $ sudo parted /dev/sdb mkpart logical ext4 534M 555M
+    $ sudo parted /dev/sdb mkpart logical ext4 555M 606M
+    $ sudo parted /dev/sdb mkpart logical ext4 606M 4000M
     
 Configure the partitions (ex. /dev/sdb1) 
 
-    $ sudo mkswap {name}{partition1}
-    $ sudo mkfs.fat {name}{partition5}
-    $ sudo mkfs.ext4 {name}{partition6}
-    $ sudo mkfs.ext4 {name}{partition7}
-    $ sudo mkfs.ext4 {name}{partition8}
+    $ sudo mkswap /dev/sdb1
+    $ sudo mkfs.fat /dev/sdb5
+    $ sudo mkfs.ext4 /dev/sdb6
+    $ sudo mkfs.ext4 /dev/sdb7
+    $ sudo mkfs.ext4 /dev/sdb8
     
 
 
@@ -222,10 +222,10 @@ Create mount folders
     $ mkdir boot
     $ mkdir rootfs
     
-Mount the partitions
+Mount the partitions (replace '/dev/sdb' with the name of your SD card device)
 
-    $ sudo mount {name}{partition5} boot
-    $ sudo mount {name}{partition6} rootfs
+    $ sudo mount /dev/sdb5 boot
+    $ sudo mount /dev/sdb6 rootfs
     
 Copy the kubos-kernel.itb file into partition 5. It will need to be renamed to 'kernel'.
 
@@ -237,8 +237,8 @@ Untar the rootfs into partition 6
     
 Unmount the partitions
 
-    $ sudo umount {name}{partition5}
-    $ sudo umount {name}{partition6}
+    $ sudo umount /dev/sdb5
+    $ sudo umount /dev/sdb6
     
 Remove the SD card and insert it into iOBC SD card slot 0.
 
