@@ -1,14 +1,16 @@
-# User Applications on the ISIS iOBC
+# Working with the ISIS IOBC
 
 [TOC]
 
-# User Applications on the ISIS iOBC {#user-applications-on-the-isis-iobc}
+# Working with the ISIS IOBC {#working-with-the-isis-iobc}
+
+This document is intended as an introductory guide for creating, loading, and using Kubos projects and other files within the user space of KubOS Linux on the ISIS iOBC.
 
 ## Reference Documents {#reference-documents}
 
 ### iOBC Documentation
 
-The ISIS-OBC Quickstart Guide should have been packaged with the iOBC and is a useful document for learning what each of the hardware components are, how to 
+The *ISIS-OBC Quickstart Guide* should have been packaged with the iOBC and is a useful document for learning what each of the hardware components are, how to 
 connect them, and what drivers need to be installed to support them.
 
 ### Kubos Documentation
@@ -43,26 +45,29 @@ If you're creating a brand new config.json file, you can just copy and paste the
 
 ## Setting Initialization Configuration {#init-config}
 
-If you would like your application to be automatically started as a background daemon after being flashed to the board, turn on the system.initAfterFlash option.
+There are several config.json options available which customize how and when a user application is started:
 
-By default, an initialization script will be generated and installed during the flashing process. This script will follow the naming convention of "S{runLevel}{applicationName}",
-where "runLevel" is the initialization priority order of the script. All user application init scripts will be run after all of the Kubos init scripts, but within the user
-scripts, the scripts with the lowest run level will be executed first. So an application with a run level of 10 will be initialized before an application with a run level of 50.
-
-The relevant config.json options:
 * system.initAfterFlash - (Default: false) Tells the Kubos SDK whether to start the application as a background daemon after flashing it to the board.
 * system.initAtBoot - (Default: true) Tells the Kubos SDK whether to generate and install an initialization script.
 * system.runLevel - (Default: 50. Range: 10-99) Sets priority of initialization script.
+
+When the `system.initAfterFlash` option is turned on, the user application will be started as a background daemon at the end of the `kubos flash` process. This is done using Linux's `start-stop-daemon` command. By default this feature is turned off, so the value of the option will need to be set to "true" by the user in order to turn it on.
+
+By default, an initialization script will be generated and installed during the flashing process. This script will follow the naming convention of "S{runLevel}{applicationName}", where "runLevel" is the initialization priority order of the script. All user application init scripts will be run after all of the Kubos init scripts, but within the user scripts, the scripts with the lowest run level will be executed first. So an application with a run level of 10 will be initialized before an application with a run level of 50.
+
+To turn this feature off, set the `system.initAfterBoot` option to "false".
+
+The run level of an initialization script can be changed after initially flashing the script to the board. Simply change the `system.runLevel` value, rebuild the project, and then reflash it to the board. The old script will be removed as part of the flash process.
     
 ## Updating the USB Connection {#updating-the-usb-connection}
 
-The iOBC should be shipped with an FTDI cable.  This cable should be connected to the programming adapter, which should then be connected to the iOBC, to create the
-debug UART connection.  User file transfer will take place using this connection.
+The iOBC should be shipped with an FTDI cable.  This cable should be connected to the programming adapter, which should then be connected to the iOBC, to create the debug UART connection.  User file transfer will take place using this connection.
 
-The Kubos flashing utility was configured with the assumption that an FTDI cable would be used.  If you have a different USB-to-serial cable type, you'll
-need to pass through the USB connection, and then update the minicom configuration to tell the flashing utility which USB to flash over.
+The Kubos flashing utility was configured with the assumption that an FTDI cable would be used.  If you have a different USB-to-serial cable type, you'll need to pass through the USB connection, and then update the minicom configuration to tell the flashing utility which USB to flash over.
 
 You can either pass through the USB via VirtualBox or by updating the vagrant's Vagrantfile.
+
+**Note:** While it doesn't need to be passed through, a SAM-ICE JTAG might also need to be connected to both the iOBC and the host computer in order to create a successful connection.
 
 ### VirtualBox
 
@@ -130,18 +135,22 @@ You can test the changes by issuing the `minicom kubos` command.  If you success
 
 ## Flashing the Board {#flashing-the-board}
 
-The USB-to-serial cable should be connected to the iOBC and the board should be fully powered.
+The USB-to-serial cable and SAM-ICE JTAG should be connected to the iOBC and the board should be fully powered.
 
 Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, when you issue the `kubos flash` the output should look like this:
 
     info: found newproj at source/newproj
     Compatible FTDI device found
     Sending file to board...
-    /
+    Bytes Sent: 693248/1769379 BPS:8343 ETA 02:08
     Transfer Successful
     Execution time: 21 seconds
 
 ## Troubleshooting {#troubleshooting}
+
+Flashing a file to the board can fail for various reasons. Sometimes simply reattempting the command can correct the problem.
+
+If retrying doesn't work, here is a list of some of the error you might see after running the `kubos flash` command and the recovery actions you can take:
 
 "No compatible FTDI device found"
 
@@ -203,7 +212,7 @@ Fully logged in, the console should look like this:
 
 ## Manual File Transfer {#manual-file-transfer}
 
-If for some reason you want to manual transfer a specific file onto the iOBC, for example a custom script, you'll need to do the following:
+If for some reason you want to manually transfer a specific file onto the iOBC, for example a custom script, you'll need to do the following:
 
 Connect to the board through minicom (the file transfer protocol is not guaranteed to work with any other terminal program)
 
@@ -365,3 +374,47 @@ Output should look like this:
 Press **Ctrl+C** to exit execution.
 
 Press **Ctrl+A**, then **Q** to exit minicom.
+
+## User Accounts {#user-accounts}
+
+In general, it is preferred to use a non-root user account to interact with a Linux system. A default user account 'kubos' is included with KubOS Linux. Other user accounts can be created using the standard Linux commands (`adduser`, `useradd`, etc).
+
+All user accounts should have a home directory in the format '/home/{username}'.
+
+## KubOS Linux File System {#file-system}
+
+There are a few key directories residing within the KubOS Linux user space.
+
+#### /home
+
+All user-created files should reside under the /home directory. This directory maps to a separate partition from the root file system. As a result, all files here will remain unchanged if the system goes through a kernel upgrade or downgrade.
+
+The home directories of all user accounts, except root, should live under this directory. 
+
+***
+**Any files not residing under the /home directory will be destroyed during an upgrade/downgrade**
+***
+
+#### /home/usr/bin
+
+All user-created applications will be loaded into this folder during the `kubos flash` process. The directory is included in the system's PATH, so applications can then be called directly from anywhere, without needing to know the full file path.
+
+#### /home/usr/local/bin
+
+All user-created non-application files will be loaded into this folder during the `kubos flash` process. There is currently not a way to set a destination folder for the `kubos flash` command, so if a different endpoint directory is desired, the files will need to be manually moved.
+
+#### /home/etc/init.d
+
+All user-application initialization scripts live under this directory. The naming format is 'S{run-level}{application}'.
+
+## Non-Application Files {#non-app-files}
+
+Non-application files (such as custom scripts) can be also be flashed onto a KubOS Linux system. They will be loaded into the '/home/usr/local/bin' directory by the `kubos flash` command. After the command has completed, the files can be manually moved to a preferred directory using the standard Linux `cp` or `mv` commands.
+
+In order to flash a non-application file, add the full path of the file to the end of the `kubos flash` command. 
+
+**Note:** The file does not need to reside within a Kubos SDK project, but the `kubos flash` command must still be run from the project, since that is where the target configuration information is stored.
+
+For example:
+
+    $ kubos flash /home/vagrant/not-my-project/test-util.sh
