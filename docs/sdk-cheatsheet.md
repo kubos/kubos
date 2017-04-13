@@ -8,11 +8,11 @@
 
 Run the `kubos init` command followed by the name of your project to bootstrap your Kubos project. This will create a new directory under your current working directory with your project's name and add the source files for a basic Kubos project (kubos-rt-example).
 
-        $ kubos init project-name #creates a KubOS RT project
+        $ kubos init project-name # creates a KubOS RT project
 
         $ kubos init -l linux-project-name # creates a KubOS Linux project
 
-**Note:** - Inside of the build system there are several reserved words, which cannot be used as the name of the project. These are `test`, `source`, `include`, `yotta_modules` and `yotta_targets`.
+**Note:** Inside of the build system there are several reserved words, which cannot be used as the name of the project. These are `test`, `source`, `include`, `yotta_modules` and `yotta_targets`.
 
 The contents of your project directory should look something like this:
 
@@ -27,6 +27,11 @@ Here is a quick rundown of the files that were generated:
 | `source`   | This folder is where source files live |
 | `test`    | This folder is where test source files live |
 | `module.json` | This file is yotta's module description file |
+| `yotta_modules` | This directory holds the symlinks for the project's module dependencies|
+| `yotta_targets` | This directory holds the symlinks for the available Kubos targets|
+| `CONTRIBUTING.md` | The doc outlining the process of contributing to a Kubos project|
+| `LICENSE.txt` | The software license associated with the example project|
+| `README.md` | The readme for the example project that outlines some of the basic details of the example|
 
 
 Kubos uses the yotta build/module system, which is where this file structure comes from. You can read more about yotta [here](http://yottadocs.mbed.com/).
@@ -72,7 +77,7 @@ Build with verbose output:
 
         $ kubos build -- -v
 
-Note: The Kubos CLI commands have their own specific arguments that can be used. There are also global arguments (like `--verbose` or `-v`) a double hyphen `--` separates the command specific arguments from the global arguments
+**Note:** The Kubos CLI commands have their own specific arguments that can be used. There are also global arguments (like `--verbose` or `-v`) a double hyphen `--` separates the command specific arguments from the global arguments
 
 Clean command:
 
@@ -86,7 +91,7 @@ The Kubos SDK comes with all of the latest Kubos modules and targets pre-package
 
 #### Modules and Targets {#modules-and-targets}
 
-Modules are groups of source code that implement a feature or unit of functionality. Kubos operating systems are split into a number of modules. An example of a Kubos module is the [Kubos-HAL](https://github.com/kubostech/kubos/tree/master/hal/kubos-hal)
+Modules are groups of source code that implement a feature or unit of functionality. Kubos operating systems are split into a number of modules. An example of a Kubos module is the [Kubos HAL](https://github.com/kubostech/kubos/tree/master/hal/kubos-hal)
 
 Targets are groups of configuration files that allow toolchains to build and cross-compile modules for specific hardware targets. One example of a Kubos target is the [STM32F407 Discovery Target](https://github.com/kubostech/kubos/tree/master/targets/target-stm32f407-disco-gcc)
 
@@ -108,7 +113,7 @@ Targets are groups of configuration files that allow toolchains to build and cro
 
 The next time your project is built it will use your local development module, rather than the packaged version.
 
-Note: To verify where all of your targets are being loaded from `kubos list` will show you which modules are linked and which are local to your project
+**Note:** To verify where all of your targets are being loaded from `kubos list` will show you which modules are linked and which are local to your project
 
 #### Linking Targets: {#linking-targets}
 
@@ -135,7 +140,7 @@ Note: To verify where all of your targets are being loaded from `kubos list` wil
 
 The next time your project is built it will use your local development target, rather than the packaged version.
 
-Note: Running `kubos target` will show you whether you are using a local or a linked copy of a target
+**Note:** Running `kubos target` will show you whether you are using a local or a linked copy of a target
 
 ## Flashing your Project {#flashing-your-project}
 
@@ -159,7 +164,7 @@ A gdb server must be started to allow your gdb instance to connect and debug dir
 After building your project with `kubos build` the kubos-cli can start a gdb server and gdb instance for you.
 
 Start a gdb server and instance:
-Note: this may need to run as root depending on your USB device permissions
+**Note:** this may need to run as root depending on your USB device permissions
 
         $ kubos debug
 
