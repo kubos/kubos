@@ -58,7 +58,7 @@ The command service will first parse and look for a service (executable) name, a
 * Service name - The base name of the service containing the desired functionality (Core, Telemetry, CSP, HAL, IPC, etc.).
 * Optional arguments - The remaining arguments provided will be passed through to the service to parse and handle as it pleases.
 
-The command service will look to a corresponding executable from a fixed path (`/usr/local/kubos`) containing all of the service executables.
+The command service will look for a corresponding executable from a fixed path (`/usr/local/kubos`) containing all of the service executables.
 
 Once the API call returns, a CBOR-encoded message containing the execution time, the return code and any output from the command will be returned to the client.
 
@@ -66,13 +66,10 @@ Once the API call returns, a CBOR-encoded message containing the execution time,
 
 ## Service Design {#service-design}
 
-Services will need to be compiled as binaries and have the appropriate argument parsing abilities to expose their desired functionality. See the Kubos [Core Command Service](https://github.com/kubostech/kubos/tree/master/commands) for an example of how this is implemented.
+Services will need to be compiled as binaries and have the appropriate argument parsing abilities to expose their desired functionality. See the [Kubos Core Command Service](https://github.com/kubostech/kubos/tree/master/commands) for an example of how this is implemented.
 
-## Service Implementation {#service-implementation}
 
-Currently only the core library (core commands for the "core" command and control commands) is implemented. Future releases will have further examples of service implementations.
-
-## Existing Services
+## Existing Services {#existing-services}
 
 Currently only the "core" commands service is implemented for the ISIS iOBC. This library implements the following commands:
 
