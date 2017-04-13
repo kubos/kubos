@@ -136,7 +136,7 @@ If you'd like specific people to review your code, you can either mention them i
 to the 'Reviewers' list.
 
 You a welcome to create a pull request before your changes are entirely complete. Creating a pull request early in the code-creation process allows others to see what changes are being made and answer questions or offer architectural suggestions.
-If you do create a pull request before you are done making changes, add "[WIP]" to the pull request's title.
+If you do create a pull request before you are done making changes, add "[WIP]" to the pull request's title. Remove the "[WIP]" once all code changes have been completed and the PR is officially ready for review.
 
 ## Merge in New Changes From Master {#merge-in-new-changes}
 
