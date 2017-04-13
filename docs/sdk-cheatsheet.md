@@ -164,7 +164,7 @@ A gdb server must be started to allow your gdb instance to connect and debug dir
 After building your project with `kubos build` the kubos-cli can start a gdb server and gdb instance for you.
 
 Start a gdb server and instance:
-**Note:** this may need to run as root depending on your USB device permissions
+**Note:** This may need to run as root depending on your USB device permissions
 
         $ kubos debug
 
