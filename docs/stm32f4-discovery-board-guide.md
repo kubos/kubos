@@ -105,17 +105,14 @@ The project will need to be rebuilt (`kubos build`) in order to incorporate any 
 
 ## Flashing the Board {#Flashing}
 
-Once you've built your project, you'll flash it onto your board using the mini-USB port.  You'll need to install the [STM32F4 drivers](http://www.st.com/content/st_com/en/products/embedded-software/development-tool-software/stsw-link009.html) in order for the board
+Once you've built your project, you'll flash it onto your board using the mini-USB port.  If your host machine is running Windows, you may need to install the [STM32F4 drivers](http://www.st.com/content/st_com/en/products/embedded-software/development-tool-software/stsw-link009.html) in order for the board
 to be properly detected by your computer.
 
-If you're using a VM, you'll need to pass the USB through to the VM in order to flash.  The board should appear as the 
-"STMicroelectronics STM32 STLink" device.  If you're using VirtualBox, you can automatically forward the USB using the 
-'Devices > USB > USB Settings > USB > USB Device Filters' menu.
+If you're using a Kubos SDK box, the USB connection should be automatically passed through to the box and available for use.
 
 Run `kubos flash` in order to start the flash process.
 
-If you see a "No compatible ST-Link device found" message, the board either isn't plugged into your computer, or you haven't passed the USB 
-through to your VM.
+If you see a "No compatible ST-Link device found" message, the board either isn't plugged into your computer, or the USB hasn't been passed through to the Kubos SDK box. Only one box can have possession of a USB device at a time, so make sure that no other boxes are running.
 
 If you see any other error messages, like "error writing to flash at address 0x08000000 at offset 0x00000000" or "reset device failed", re-run the flash command.
 
@@ -164,6 +161,8 @@ to the board's console UART bus (default is UART6, baud rate @ 115200).
 
 All of your program's printf statements will be routed through here.
 You can change the settings of the console with the hardware:console section of the config.json file.
+
+FDTI connections are also automatically passed through to the Kubos SDK box and will be available as the '/dev/FTDI' device. Minicom is pre-installed and can be used to connect to the board with the `minicom kubos` command.
 
 ## Example Program {#example}
 
