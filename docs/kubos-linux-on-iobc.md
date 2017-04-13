@@ -148,7 +148,7 @@ In this example '/dev/sdb' is the name of the SD card.  You might also see '/dev
 
 #### Run the Formatting/Flashing Script
 
-Navigate to your 'kubos-linux-build' folder and open the 'tools' directory.
+Navigate to the 'kubos-linux-build/tools' directory.
 
 Run the `format-sd.sh` script. You might need to run as root to get permissions for certain steps.
 
