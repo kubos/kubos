@@ -39,59 +39,47 @@
              |                                                                                          |
              +------------------------------------------------------------------------------------------+
 ```
+## Overview {#overview}
 
+Command and control is the system by which commands are received and executed on the satellite. Commands can be received from external (a radio) or internal (the command line client) sources. The received commands are routed to the appropriate service.
 
-The command line client is a binary exposed to the KubOS Linux command line.
+Services can expose or implement any desired functionality that is needed for a specific hardware interaction, future job scheduling or mission requirements. 
+
+## System Design {#system-design}
+
+The command line client is exposed in the KubOS Linux shell as the <Command name... like `kubos-cnc` or something similar> command.
 
 Commands entered into this client will be encoded into a CBOR [Concise Binary Object Representation](http://cbor.io/) message format and packed into a CSP packet and sent to the command service.
 
-Existing functionality in the Kubos platform will be exposed in groups in a series of libraries.
+Existing functionality in the Kubos platform will be exposed in groups bundled into unique services.
 
-The command service will first parse and look for an action argument, a group (library) name, and a set of optional arguments. These will be used as follows:
+The command service will first parse and look for a service (executable) name, and a set of optional arguments. These will be used as follows:
 
-* Action argument - The corresponding member function of the service interface that will be called (ie. exec, status, help, output).
-* Group name - The base name of the library containing the desired functionality (Core, Telemetry, CSP, HAL, IPC, etc.).
-* Optional arguments - Passed through to the service implementation to perform more specific tasks.
+* Service name - The base name of the service containing the desired functionality (Core, Telemetry, CSP, HAL, IPC, etc.).
+* Optional arguments - The remaining arguments provided will be passed through to the service to parse and handle as it pleases.
 
-The command service will look to load a corresponding library from a fixed path containing all of the Kubos and user defined libraries. Libraries will follow the lib<group_name>.so naming convention.
+The command service will look to a corresponding executable from a fixed path (`/usr/local/kubos`) containing all of the service executables.
 
-The appropriate function of the service interface will be called with the remaining arguments.
+Once the API call returns, a CBOR-encoded message containing the execution time, the return code and any output from the command will be returned to the client.
 
-Once the API call returns, a CBOR-encoded message containing the execution time, the return code and any stdout messages from the command will be returned to the client.
+**Note:** Currently only the stdout from the service execution is returned to the client after running a command.
 
+## Service Design {#service-design}
 
-## Module Design {#module-design}
+Services will need to be compiled as binaries and have the appropriate argument parsing abilities to expose their desired functionality. See the Kubos [Core Command Service](https://github.com/kubostech/kubos/tree/master/commands) for an example of how this is implemented.
 
+## Service Implementation {#service-implementation}
 
-Modules will need to implement the service interface and be compiled into a shared library in order to be compatible with this command and control system.
+Currently only the core library (core commands for the "core" command and control commands) is implemented. Future releases will have further examples of service implementations.
 
-These functions will need to accept and parse arguments and handle routing the arguments to the desired functionality in that library.
+## Existing Services
 
+Currently only the "core" commands service is implemented for the ISIS iOBC. This library implements the following commands:
 
-```
-     +--------------------------------------+
-     |          Service Interface           |
-     +--------------------------------------|
-     |                                      |
-     | int execute(int argc, char **argv)   |
-     |                                      |
-     | int status(int argc, char **argv)    |
-     |                                      |
-     | int help(int argc, char **argv)      |
-     |                                      |
-     | int output(int argc, char **argv)    |
-     |                                      |
-     +--------------------------------------+
-```
-
-
-## Library Implementation {#library-implementation}
-
-Libraries exposed through the command and control framework will need to implement the Service Interface.
-
-Note: Currently only the stdout from the library execution is returned to the client after running a command.
-
-Currently only the core library (core commands for the "core" command and control commands) is implemented. Future releases will have further examples of shared libraries.
-
-See the [core library](<link to library code when #63 is merged>) for an example of a library following this format.
-
+| Command   | Function |
+| -------   | -------- |
+| ping      | Run a "no-op" command through the system to ensure it is active and configured correctly |
+| info      | Returns the "build info" or version information from the iOBC supervisor |
+| reboot    | Power cycles the iOBC for several seconds. |
+| reset     | Performs a full software reset of the iOBC supervisor and iOBC |
+| emergency-reset | Performs an immediate reset of the iOBC and supervisor. This command can be damaging to the supervisor. Reset should be used instead |
