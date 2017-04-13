@@ -165,3 +165,4 @@ Note: this may need to run as root depending on your USB device permissions
 
 If the debug command is successful you will be prompted with a gdb instance attached to your device and ready to debug!
 
+**Note:** The `kubos debug` command is not yet implemented for KubOS Linux projects.
