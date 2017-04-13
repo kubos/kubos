@@ -7,8 +7,8 @@ The Kubos SDK is a term used to describe the all of the components used that mak
 The Kubos SDK components are made up of:
 
  * Kubos source modules - the individual components of the operating systems, hardware abstraction layers, and APIs
- * Kubos CLI - The command line tool used to create, configure, build and debug KubOS projects
- * Vagrant box - A command line based VM that contains a "ready to run" kubos development environment
+ * Kubos CLI - The command-line tool used to create, configure, build and debug KubOS projects
+ * Vagrant box - A command-line based VM that contains a "ready to run" kubos development environment
 
 
 ## How Does The SDK Work? {#how-sdk-works}
@@ -17,7 +17,7 @@ The Kubos SDK is distributed through a Vagrant box. A Vagrant box (referred to s
 debugging utilities and miscellaneous tools the Kubos CLI. The box, when started, is already pre-configured with all of the required tools for the CLI you will need. This minimizes the set-up process
 so you can work on your project rather than setting up tooling.
 
-[Vagrant](https://www.vagrantup.com/docs/) is a command line based tool that abstracts the virtualization provider into a simple-to-use interface. Vagrant supports a variety of providers (VirtualBox, VmWare, Parallels, etc.) but
+[Vagrant](https://www.vagrantup.com/docs/) is a command-line based tool that abstracts the virtualization provider into a simple-to-use interface. Vagrant supports a variety of providers (VirtualBox, VmWare, Parallels, etc.) but
 right now the Kubos SDK only supports VirtualBox.
 
 
@@ -27,7 +27,7 @@ right now the Kubos SDK only supports VirtualBox.
 
 Vagrant requires a virtualization "provider". Currently the only provider that Kubos officially supports is VirtualBox.
 
- * [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads) first. Their download for more information on installing VirtualBox.
+ * [Download VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
  * [Download](https://www.virtualbox.org/wiki/Downloads) the VirtualBox Extension Pack to enable passing USB devices into a virtual machine.
 
@@ -35,7 +35,7 @@ Vagrant requires a virtualization "provider". Currently the only provider that K
 
 If you don't already have Vagrant installed see the Vagrant [installation documentation.](https://www.vagrantup.com/docs/installation)
 
-If you vagrant installation is set up correctly, running the following command should print something similar to the following output:
+If your vagrant installation is set up correctly, running the following command should print something similar to the following output:
 
         $ vagrant --version
         Vagrant 1.9.1 
@@ -59,11 +59,13 @@ If the output of `vagrant up` mentions there's a new version of the kubos-dev bo
 
 
 
-### Mounting a host directory: {#mount-directory}
+### Mounting a Host Directory: {#mount-directory}
 
-In the context of these documents as well as virtual machines in general the physical "main" computer is referred to as the "host". The virtual machine inside of the host is referred to as the "guest".
+In the context of these documents, as well as virtual machines in general, the physical "main" computer is referred to as the "host". The virtual machine inside of the host is referred to as the "guest".
 
-It is strongly recommended that you create your project in a directory on your host that is shared with your box when using a linux host. Currently there is not a supported way to accomplish this on a Windows host. By keeping your project on your host it will protect them in the event your box is destroyed or re-built.
+It is strongly recommended that you create your project in a directory on your host that is shared with your box when using a Linux or Mac OS host. By keeping your project on your host it will protect them in the event your box is destroyed or re-built.
+
+**Note:** There is not a supported method of this for Windows hosts at this time, as Windows does not support Linux symlinks.
 
 To mount a specific directory from your host, open the Vagrantfile located in the directory from the previous step and look for the following lines:
 
@@ -86,9 +88,9 @@ This allows you to use the text editor of your choosing to edit the project file
 
 #####For more information on mounting volumes see the following [guide](https://www.vagrantup.com/docs/synced-folders/basic_usage.html)
 
-### Start the vagrant box: {#start-sdk-box}
+### Start the Vagrant Box: {#start-sdk-box}
 
-To start the box run:
+To start the box, run:
 
         $ vagrant up
 
