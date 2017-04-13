@@ -145,6 +145,19 @@ Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, w
     Bytes Sent: 693248/1769379 BPS:8343 ETA 02:08
     Transfer Successful
     Execution time: 21 seconds
+    
+    
+### Non-Application Files {#non-app-files}
+
+Non-application files (such as custom scripts) can be also be flashed onto a KubOS Linux system. They will be loaded into the '/home/usr/local/bin' directory by the `kubos flash` command. After the command has completed, the files can be manually moved to a preferred directory using the standard Linux `cp` or `mv` commands.
+
+In order to flash a non-application file, add the full path of the file to the end of the `kubos flash` command. 
+
+**Note:** The file does not need to reside within a Kubos SDK project, but the `kubos flash` command must still be run from the project, since that is where the target configuration information is stored.
+
+For example:
+
+    $ kubos flash /home/vagrant/not-my-project/test-util.sh
 
 ## Troubleshooting {#troubleshooting}
 
@@ -407,14 +420,3 @@ All user-created non-application files will be loaded into this folder during th
 
 All user-application initialization scripts live under this directory. The naming format is 'S{run-level}{application}'.
 
-## Non-Application Files {#non-app-files}
-
-Non-application files (such as custom scripts) can be also be flashed onto a KubOS Linux system. They will be loaded into the '/home/usr/local/bin' directory by the `kubos flash` command. After the command has completed, the files can be manually moved to a preferred directory using the standard Linux `cp` or `mv` commands.
-
-In order to flash a non-application file, add the full path of the file to the end of the `kubos flash` command. 
-
-**Note:** The file does not need to reside within a Kubos SDK project, but the `kubos flash` command must still be run from the project, since that is where the target configuration information is stored.
-
-For example:
-
-    $ kubos flash /home/vagrant/not-my-project/test-util.sh
