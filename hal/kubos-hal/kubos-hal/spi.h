@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
- * @defgroup SPI
+ * @defgroup SPI HAL SPI Interface
  * @addtogroup SPI
  * @{
  */
@@ -200,8 +200,17 @@ typedef struct {
  * Spi bus data structure
  */
 typedef struct {
+    /**
+     * SPI interface configuration values
+     */
     KSPIConf config;
+    /**
+     * Number of SPI interface
+     */
     KSPINum bus_num;
+    /**
+     * Mutex used to lock access to SPI device
+     */
     csp_mutex_t spi_lock;
 } KSPI;
 
@@ -218,6 +227,10 @@ void k_spi_init(KSPINum spi, KSPIConf * conf);
  */
 void k_spi_terminate(KSPINum spi);
 
+/**
+ * Returns a copy of the default SPI configuration
+ * @return KSPIConf structure containing default config
+ */
 KSPIConf k_spi_conf_defaults(void);
 
 /**

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
- * @defgroup UART
+ * @defgroup UART HAL UART Interface
  * @addtogroup UART
  * @{
  */
@@ -28,10 +28,9 @@
 #ifndef K_UART_H
 #define K_UART_H
 
+#include "pins.h"
 #include <csp/arch/csp_queue.h>
 #include <stdint.h>
-
-#include "pins.h"
 
 /**
  * Number of uart interfaces available. Derived from value in target.json
@@ -85,7 +84,7 @@
  * Available uart interfaces
  */
 typedef enum {
-    // @warning - need to add K_UART_NO_BUS
+// @warning - need to add K_UART_NO_BUS
 #ifdef YOTTA_CFG_HARDWARE_UART_UART1
     K_UART1 = 0,
 #endif
@@ -146,11 +145,12 @@ typedef enum {
 /**
  * Uart configuration structure
  */
-typedef struct {
+typedef struct
+{
     /**
      * The path of the uart bus
      */
-    const char *dev_path;
+    const char * dev_path;
     /**
      * The buad rate of the uart bus
      * @warning For the <b>MSP430F5 microcontroller</b>, the speed of the SPI bus can only be defined
@@ -188,10 +188,23 @@ typedef struct {
 /**
  * Uart interface data structure
  */
-typedef struct {
+typedef struct
+{
+    /**
+     * UART device number
+     */
     int dev;
+    /**
+     * Copy of UART configuration options
+     */
     KUARTConf conf;
+    /**
+     * Queue filled with received uart data
+     */
     csp_queue_handle_t rx_queue;
+    /**
+     * Queue filled with data to be sent
+     */
     csp_queue_handle_t tx_queue;
 } KUART;
 
@@ -207,8 +220,7 @@ KUARTConf k_uart_conf_defaults(void);
  * @param conf config values to initialize with
  * @return KUARTStatus UART_OK if OK, failure otherwise
  */
-KUARTStatus k_uart_init(KUARTNum uart, KUARTConf *conf);
-
+KUARTStatus k_uart_init(KUARTNum uart, KUARTConf * conf);
 
 /**
  * Terminates uart interface
@@ -231,7 +243,7 @@ void k_uart_console_init(void);
  * @param len length of data to read
  * @return int number of characters read or -1 to indicate a null uart handle
  */
-int k_uart_read(KUARTNum uart, char *ptr, int len);
+int k_uart_read(KUARTNum uart, char * ptr, int len);
 
 /**
  * Interrupt driven function for writing data to a uart interface.
@@ -243,7 +255,7 @@ int k_uart_read(KUARTNum uart, char *ptr, int len);
  * @param len length of data to write
  * @return int number of characters written or -1 to indicate a null uart handle
  */
-int k_uart_write(KUARTNum uart, char *ptr, int len);
+int k_uart_write(KUARTNum uart, char * ptr, int len);
 
 /**
  * Write data directly to a uart interface
@@ -266,6 +278,7 @@ KUARTStatus k_uart_write_immediate_str(KUARTNum uart, uint8_t * ptr, uint8_t len
  * Returns the number of characters currently in the uart rx queue
  * @param uart uart interface number or -1 to indicate a null uart handle or -2
  * to indicate a null rx queue pointer
+ * @return int length of uart's rx_queue
  */
 int k_uart_rx_queue_len(KUARTNum uart);
 
@@ -275,7 +288,7 @@ int k_uart_rx_queue_len(KUARTNum uart);
  * @param c character to push
  * @param task_woken used by FreeRTOS to determine task blocking
  */
-void k_uart_rx_queue_push(KUARTNum uart, char c, void *task_woken);
+void k_uart_rx_queue_push(KUARTNum uart, char c, void * task_woken);
 
 /**
  * Returns rx pin for specified uart interface
@@ -297,7 +310,7 @@ int k_uart_tx_pin(KUARTNum uart);
  * @param uart uart interface number
  * @return KUART* pointer to uart data structure
  */
-KUART* kprv_uart_get(KUARTNum uart);
+KUART * kprv_uart_get(KUARTNum uart);
 
 /**
  * Performs low level uart hardware initialization
@@ -306,6 +319,10 @@ KUART* kprv_uart_get(KUARTNum uart);
  */
 KUARTStatus kprv_uart_dev_init(KUARTNum uart);
 
+/**
+ * Performs low level uart hardware termination
+ * @param uart uart interface to initialize
+ */
 void kprv_uart_dev_terminate(KUARTNum uart);
 
 /**
@@ -313,6 +330,7 @@ void kprv_uart_dev_terminate(KUARTNum uart);
  * @param uart uart interface number
  */
 void kprv_uart_enable_tx_int(KUARTNum uart);
+
 #endif // #ifndef K_UART_H
 #endif // #ifdef YOTTA_CFG_HARDWARE_UART && YOTTA_CFG_HARDE_UART_COUNT > 0
 /* @} */

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
- * @defgroup I2C
+ * @defgroup I2C HAL I2C Interface
  * @addtogroup I2C
  * @{
  */
@@ -123,8 +123,17 @@ typedef struct {
  * i2c bus data structure
  */
 typedef struct {
+    /**
+     * I2C device number
+     */
     KI2CNum bus_num;
+    /**
+     * I2C device configuration values
+     */
     KI2CConf conf;
+    /**
+     * Mutex for guarding device access
+     */
     csp_mutex_t i2c_lock;
 } KI2C;
 
@@ -275,4 +284,5 @@ KI2CStatus kprv_i2c_slave_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len
 
 #endif
 #endif
+
 /* @} */
