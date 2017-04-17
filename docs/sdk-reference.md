@@ -177,12 +177,12 @@ Synonyms: `kubos start`
 Flash a file to the target board.
 
 If the name of the file matches the name of the application, as specified in the module.json file, then the file is assumed to be the application binary and
-will be loaded into /home/usr/bin on the target board.
+will be loaded into /home/system/usr/bin on the target board.
 
 If the name of the file ends in *.itb, the file is a KubOS Linux upgrade package and will be loaded into the upgrade partition of the target board. An internal
 variable will be set so that the upgrade package will be installed during the next reboot of the target board.
 
-All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/usr/local/bin.
+All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/system/usr/local/bin.
 
 ### Options
 * `file` File to flash.
