@@ -133,7 +133,7 @@ Edit the file and update the 'pu baudrate' field and change '/dev/FTDI' to the '
 
 You can test the changes by issuing the `minicom kubos` command.  If you successfully connect to your board, then the changes have been successful.
 
-## Flashing the Board {#flashing-the-board}
+## Flashing the Board {#flash-the-board}
 
 The USB-to-serial cable and SAM-ICE JTAG should be connected to the iOBC and the board should be fully powered.
 
@@ -388,11 +388,11 @@ Press **Ctrl+C** to exit execution.
 
 Press **Ctrl+A**, then **Q** to exit minicom.
 
-## Using the Peripherals {#using-peripherals}
+## Using Peripherals {#using-peripherals}
 
 The iOBC has several different ports available for interacting with peripheral devices. Currently, users should interact with these devices using the standard Linux functions. A Kubos HAL will be added in the future for the iOBC.
 
-### I<sup>2</sup>C {#i2c}
+### I2C {#i2c}
 
 [I2C Standards Doc](http://www.nxp.com/documents/user_manual/UM10204.pdf)
 
@@ -472,7 +472,7 @@ For example, to interact with the iOBC's GPIO5 pin, which has a Linux GPIO value
 
     $ echo 53 > /sys/class/gpio/export
     
-Once this command has been issued, the pin will be defined to the system as '/sys/class/gpio/gpio_n_'. The user can then set and check the pins direction and value.
+Once this command has been issued, the pin will be defined to the system as '/sys/class/gpio/gpio{pin}'. The user can then set and check the pins direction and value.
 
     Set GPIO5 as output:
     $ echo out > /sys/class/gpio/gpio53/direction
