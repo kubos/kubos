@@ -69,7 +69,7 @@ timeout 3600
 send "mkdir -p $2"
 send "cd $2"
 send "rm -f ${name}"
-if ${is_app} = 1 send "rm -f /home/etc/init.d/S*${name}"
+if ${is_app} = 1 send "rm -f /home/system/etc/init.d/S*${name}"
 send "rz -w 8192"
 ! sz -w 8192 ${path}
 if ${is_upgrade} = 1 send "fw_setenv kubos_updatefile ${name}"
@@ -107,7 +107,7 @@ create_init_script() {
 #!/bin/sh
 
 NAME=${app_name}
-PROG=/home/usr/bin/\${NAME}
+PROG=/home/system/usr/bin/\${NAME}
 PID=/var/run/\${NAME}.pid
 
 case "\$1" in
@@ -228,7 +228,7 @@ main() {
   elif [[ "${name}" != "${app_name}" ]]; then
     path="${dest_dir}"
   else
-    path="/home/usr/bin"
+    path="/home/system/usr/bin"
     is_app=1
     if [[ "${run_level}" -gt 99 || "${run_level}" -lt 10 ]]; then
       echo "Run level of ${run_level} outside of range (10-99). Setting to default."
@@ -251,7 +251,7 @@ main() {
     is_run=0
     rm send.tmp
     create_init_script
-    create_send_script ${init_script} /home/etc/init.d
+    create_send_script ${init_script} /home/system/etc/init.d
     send_file
     retval=$?
   fi
