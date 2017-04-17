@@ -23,6 +23,10 @@ right now the Kubos SDK only supports VirtualBox.
 
 ## Prerequisites
 
+### System Requirements {#system-requirements}
+
+The Kubos-SDK requires a 64-bit processor with the respective manufacturers virtualization extensions (AMD (AMD-V) and Intel (VT-x)) enabled. It is recommended that you use a host computer with at least 8 gb of RAM.
+
 ### Install VirtualBox {#install-virtualbox}
 
 Vagrant requires a virtualization "provider". Currently the only provider that Kubos officially supports is VirtualBox.
