@@ -159,7 +159,7 @@ For example:
 
     $ kubos flash /home/vagrant/not-my-project/test-util.sh
 
-## Troubleshooting {#troubleshooting}
+## Flash Troubleshooting {#flash-troubleshooting}
 
 Flashing a file to the board can fail for various reasons. Sometimes simply reattempting the command can correct the problem.
 
