@@ -141,9 +141,9 @@ Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, w
     Transfer Successful
     Execution time: 21 seconds
     
-The application binary will be loaded into the /home/usr/bin directory on the target board.
+The application binary will be loaded into the /home/system/usr/bin directory on the target board.
 
-If the 'system.initAtBoot' option has been turned on, then a standard initialization script will be generated and flashed into the /home/etc/init.d directory automatically during the application flashing process.
+If the 'system.initAtBoot' option has been turned on, then a standard initialization script will be generated and flashed into the /home/system/etc/init.d directory automatically during the application flashing process.
 
 If the 'system.initAfterFlash' option has been turned on, then the application will be started as a background service as the last step in the application flashing process.
     
@@ -153,11 +153,11 @@ If you would like to flash a file other than the application binary onto your bo
 
     $ kubos flash {absolute-path-of-file}
 
-If the name of the file matches the name of the application, as specified in the module.json file, then the file is assumed to be the application binary and will be loaded into /home/usr/bin on the target board.
+If the name of the file matches the name of the application, as specified in the module.json file, then the file is assumed to be the application binary and will be loaded into /home/system/usr/bin on the target board.
 
 If the name of the file ends in *.itb, the file is a KubOS Linux upgrade package and will be loaded into the upgrade partition of the target board. An internal variable will be set so that the upgrade package will be installed during the next reboot of the target board.
 
-All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/usr/local/bin.
+All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/system/usr/local/bin.
 
 ## Troubleshooting {#troubleshooting}
 
