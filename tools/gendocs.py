@@ -31,7 +31,6 @@ DOCS_DIRS = [
 "kubos-core", 
 "libcsp", 
 "freertos/os", 
-"hal/isis-iobc-hal", 
 "hal/kubos-hal-msp430f5529", 
 "hal/kubos-hal", 
 "hal/kubos-hal-stm32f4",
@@ -70,14 +69,16 @@ def main():
 
     doc_tags = {}
 
-    for dir in DOCS_DIRS:
+    doc_dirs = [d for d in DOCS_DIRS if os.path.isdir(d)]
+
+    for dir in doc_dirs:
         doc_dir = os.path.join(os.getcwd(), args.output, dir)
         if not os.path.isdir(doc_dir):
             os.makedirs(doc_dir)
         gendocs_tags(dir, "docs/Doxyfile", args.version, doc_dir)
         doc_tags[dir] = DOC_TAG_DIR.format(doc_dir, doc_dir).strip()
 
-    for dir in DOCS_DIRS:
+    for dir in doc_dirs:
         doc_dir = os.path.join(os.getcwd(), args.output, dir)
         if not os.path.isdir(doc_dir):
             os.makedirs(doc_dir)
