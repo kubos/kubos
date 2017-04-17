@@ -1,6 +1,6 @@
-# Command And Control
+# Command and Control
 [TOC]
-# Command And Control {#command-and-control}
+# Command and Control {#command-and-control}
 
 ## Architecture Overview {#command-and-control-overview}
 
@@ -47,7 +47,7 @@ Services can expose or implement any desired functionality that is needed for a 
 
 ## System Design {#system-design}
 
-The command line client is exposed in the KubOS Linux shell as the <Command name... like `kubos-cnc` or something similar> command.
+The command line client is exposed in the KubOS Linux shell as the `kubos-cnc` command.
 
 Commands entered into this client will be encoded into a CBOR [Concise Binary Object Representation](http://cbor.io/) message format and packed into a CSP packet and sent to the command service.
 
