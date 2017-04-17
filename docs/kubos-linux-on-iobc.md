@@ -147,7 +147,7 @@ In this example '/dev/sdb' is the name of the SD card.  You might also see '/dev
 
 #### Run the Formatting/Flashing Script
 
-Navigate to your 'kubos-linux-build' folder and open the 'tools' directory.
+Navigate to the 'kubos-linux-build/tools' directory.
 
 Run the `format-sd.sh` script. You might need to run as root to get permissions for certain steps.
 
@@ -323,7 +323,7 @@ If you already have KubOS Linux installed on your system, but would like to upgr
 
 Should your KubOS Linux kernel become corrupted (as indicated by failing to successfully boot into Linux several times), the system will automatically try to recover during the next boot.  
 
-It will go through the following steps, if each is present:
+It will go through the following steps, if each is present (system will reboot after attempting each step):
 
 1. Reload the current version of KubOS Linux from the kpack*.itb file in the upgrade partition
 2. Reload the previous version of KubOS Linux from the kpack*.itb file in the upgrade partition
