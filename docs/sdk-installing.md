@@ -25,7 +25,12 @@ right now the Kubos SDK only supports VirtualBox.
 
 ### System Requirements {#system-requirements}
 
-The Kubos-SDK requires a 64-bit processor with the respective manufacturers virtualization extensions (AMD (AMD-V) and Intel (VT-x)) enabled. It is recommended that you use a host computer with at least 8 gb of RAM.
+The Kubos SDK has several hardware requirements, including:
+
+* 64-bit processor with AMD-V or Intel VT-x virtualization support
+* Mac OS (10.9 +), Windows Vista SP1 (or more recent), or a mainstream Linux distribution (see the [full list](https://www.virtualbox.org/manual/ch01.html#hostossupport) of supported host OSes)
+* 8 GB RAM
+* 10 GB of free HDD space
 
 ### Install VirtualBox {#install-virtualbox}
 
