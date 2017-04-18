@@ -16,7 +16,7 @@
  */
 
 /**
-  * @defgroup SPI
+  * @defgroup SPI MSP430F5529 HAL SPI Interface
   * @addtogroup SPI
   * @{
   */
@@ -36,6 +36,8 @@
 
 /**
   * @brief Helper function to convert spi bus option.
+  * @param spi [in] spi bus number
+  * @return hal_spi_bus hal specific spi bus number
   */
 static inline hal_spi_bus spi_bus(KSPINum spi)
 {
@@ -49,6 +51,8 @@ static inline hal_spi_bus spi_bus(KSPINum spi)
 
 /**
   * @brief Helper function to convert spi roles
+  * @param spi [in] spi bus role
+  * @return hal_spi_role hal specific spi role option
   */
 static inline hal_spi_role spi_role(SPIRole spi)
 {
@@ -62,6 +66,8 @@ static inline hal_spi_role spi_role(SPIRole spi)
 
 /**
   * @brief Helper function to get spi handle.
+  * @param spi [in] spi bus number
+  * @return hal_spi_handle* pointer to spi hardware handle
   */
 static inline hal_spi_handle * spi_handle(KSPINum spi)
 {
@@ -75,6 +81,8 @@ static inline hal_spi_handle * spi_handle(KSPINum spi)
 
 /**
   * @brief Helper function to convert spi direction
+  * @param spi [in] spi bus direction option
+  * @return hal_spi_direction hal specific spi bus direction option
   */
 static inline hal_spi_direction spi_direction(SPIDirection spi)
 {
@@ -89,6 +97,8 @@ static inline hal_spi_direction spi_direction(SPIDirection spi)
 
 /**
   * @brief Helper function to convert spi data size
+  * @param spi [in] spi bus data size (width) option
+  * @return hal_spi_data_size hal specific data size (width) option
   */
 static inline hal_spi_data_size spi_data_size(SPIDataSize spi)
 {
@@ -100,6 +110,11 @@ static inline hal_spi_data_size spi_data_size(SPIDataSize spi)
     }
 }
 
+/**
+ * Helper function to convert spi clock phase
+ * @param phase [in] spi bus clock phase option
+ * @return hal_spi_clock_phase hal specific spi bus clock phase option
+ */
 static inline hal_spi_clock_phase spi_clock_phase(SPIClockPhase phase)
 {
     switch(phase)
@@ -110,6 +125,11 @@ static inline hal_spi_clock_phase spi_clock_phase(SPIClockPhase phase)
     }
 }
 
+/**
+ * Helper function to convert spi clock polarity option
+ * @param polarity [in] spi clock polarity option
+ * @return hal_spi_clock_polarity hal specific clock polarity option
+ */
 static inline hal_spi_clock_polarity spi_clock_polarity(SPIClockPolarity polarity)
 {
     switch(polarity)
@@ -120,6 +140,11 @@ static inline hal_spi_clock_polarity spi_clock_polarity(SPIClockPolarity polarit
     }
 }
 
+/**
+ * Helper function to convert spi first bit option
+ * @param firstbit [in] spi bus first bit option
+ * @return hal_spi_first_bit hal specific spi first bit option
+ */
 static inline hal_spi_first_bit spi_first_bit(SPIFirstBit firstbit)
 {
     switch(firstbit)
@@ -132,7 +157,7 @@ static inline hal_spi_first_bit spi_first_bit(SPIFirstBit firstbit)
 
 /**
  * Setup and enable SPI bus
- * @param spi SPI bus to initialize
+ * @param spi [in] SPI bus to initialize
  * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
  */
 KSPIStatus kprv_spi_dev_init(KSPINum spi)
@@ -172,7 +197,7 @@ KSPIStatus kprv_spi_dev_init(KSPINum spi)
 
 /**
  * SPI hardware cleanup and disabling
- * @param spi bus num to terminate
+ * @param spi [in] bus num to terminate
  * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
  */
 KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
@@ -188,9 +213,9 @@ KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
 
 /**
  * Write data over SPI bus
- * @param spi SPI bus to write to
- * @param buffer pointer to data buffer
- * @param len length of data to write
+ * @param spi [in] SPI bus to write to
+ * @param buffer [in] pointer to data buffer
+ * @param len [in] length of data to write
  * @return KSPIStatus SPI_OK on success, otherwise failure
  */
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t *buffer, uint32_t len)
@@ -207,9 +232,9 @@ KSPIStatus kprv_spi_write(KSPINum spi, uint8_t *buffer, uint32_t len)
 
 /**
  * Read data over SPI bus
- * @param spi SPI bus to read from
- * @param buffer pointer to data buffer
- * @param len length of data to read
+ * @param spi [in] SPI bus to read from
+ * @param buffer [out] pointer to data buffer
+ * @param len [in] length of data to read
  * @return KSPIStatus SPI_OK on success, otherwise failure
  */
 KSPIStatus kprv_spi_read(KSPINum spi, uint8_t *buffer, uint32_t len)
@@ -220,10 +245,10 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t *buffer, uint32_t len)
 
 /**
  * Write and read data over SPI bus
- * @param spi SPI bus to write to
- * @param txBuffer pointer to data buffer to write from
- * @param rxBuffer pointer to data buffer to read into
- * @param len length of data to write and read
+ * @param spi [in] SPI bus to write to
+ * @param txBuffer [in] pointer to data buffer to write from
+ * @param rxBuffer [out] pointer to data buffer to read into
+ * @param len [in] length of data to write and read
  * @return KSPIStatus SPI_OK on success, otherwise failure
  */
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t *txBuffer, uint8_t *rxBuffer, uint32_t len)
@@ -239,3 +264,5 @@ KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t *txBuffer, uint8_t *rxBuffer
 }
 
 #endif
+
+/* @} */

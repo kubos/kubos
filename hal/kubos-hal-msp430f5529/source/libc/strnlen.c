@@ -31,7 +31,6 @@
   */
 
 /**
-  * @defgroup syscalls
   * @addtogroup syscalls
   * @{
   */

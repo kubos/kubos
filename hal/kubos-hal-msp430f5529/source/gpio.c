@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
-  * @defgroup GPIO
+  * @defgroup GPIO MSP430F5529 HAL GPIO Interface
   * @addtogroup GPIO
   * @{
   */
@@ -95,9 +95,9 @@ static KPinDesc pins[] = {
   *
   * I/O pin configuration described in MSP430x5xx Family Guide Section 12.2.4
   *
-  * @param pin
-  * @param mode
-  * @param pullup
+  * @param pin [in] number of pin to initialize
+  * @param mode [in] pin mode to set
+  * @param pullup [in] pin pullup value to set
   */
 void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 {
@@ -124,8 +124,8 @@ void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 
 /**
   * @brief Read in gpio pin.
-  * @param pin
-  * @return unsigned int value
+  * @param pin [in] number of pin to read from
+  * @return unsigned int value read from pin
   */
 unsigned int k_gpio_read(int pin)
 {
@@ -134,8 +134,8 @@ unsigned int k_gpio_read(int pin)
 
 /**
   * @brief Write to gpio pin.
-  * @param pin
-  * @param val
+  * @param pin [in] number of pin to write to
+  * @param val [in] value to write
   */
 void k_gpio_write(int pin, unsigned int val)
 {

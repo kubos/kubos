@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
-  * @defgroup syscalls
+  * @defgroup syscalls MSP430F5529 HAL Supplemental Syscall Functions
   * @addtogroup syscalls
   * @{
   */

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
-  * @defgroup UART
+  * @defgroup UART MSP430F5529 HAL UART Interface
   * @addtogroup UART
   * @{
   */
@@ -34,6 +34,8 @@
 
 /**
   * @brief Helper function to convert uart device option.
+  * @param uart [a] uart device number
+  * @return hal_uart_device handle for uart device
   */
 static inline hal_uart_device uart_dev(KUARTNum uart)
 {

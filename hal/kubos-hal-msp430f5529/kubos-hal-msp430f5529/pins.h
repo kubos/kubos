@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 /**
-  * @defgroup GPIO
   * @addtogroup GPIO
   * @{
   */
@@ -34,14 +33,20 @@
 
 #include <stdint.h>
 
+/** Led 0 pin */
 #define K_LED_0 P10
+/** Red led pin */
 #define K_LED_RED P10
 
+/** Led 1 pin */
 #define K_LED_1 P47
+/** Green led pin */
 #define K_LED_GREEN P47
 
+/** Number of leds available */
 #define K_LED_COUNT 2
 
+/** User button pin */
 #define K_BUTTON_0 P21
 
 
@@ -57,6 +62,7 @@ typedef struct {
     volatile uint8_t * in_pin;
     /** PxREN */
     volatile uint8_t * pull_pin;
+    /** Specific bit to read/write from */
     uint8_t  bit;
 } KPinDesc;
 
@@ -77,3 +83,5 @@ typedef enum {
 } KPin;
 
 #endif
+
+/* @} */

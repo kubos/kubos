@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 #if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #ifndef K_UART_H
 #define K_UART_H
@@ -22,7 +24,7 @@
 
 /**
  * Internal function to get appropriate uart handle based on uart num
- * @param uart uart bus num
+ * @param uart [in] uart bus num
  * @return hal_uart_handle pointer
  */
 hal_uart_handle * uart_handle(KUARTNum uart)
