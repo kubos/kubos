@@ -15,7 +15,7 @@
  * limitations under the License.
  */
  /**
-   * @defgroup SPI
+   * @defgroup SPI STM32F4 HAL SPI Interface
    * @addtogroup SPI
    * @{
    */
@@ -25,7 +25,7 @@
 
 /**
  * Fetches SPI bus data structure
- * @param num SPI bus num to fetch
+ * @param spi SPI bus num to fetch
  * @return hal_spi_handle* pointer to data structure
  */
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi);
@@ -71,7 +71,7 @@ static uint32_t spi_timeout = 1000;
 
 /**
  * Setup and enable SPI bus
- * @param spi SPI bus to initialize
+ * @param spi_num SPI bus to initialize
  * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
  */
 KSPIStatus kprv_spi_dev_init(KSPINum spi_num)

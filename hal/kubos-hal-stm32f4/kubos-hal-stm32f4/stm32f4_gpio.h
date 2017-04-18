@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
-  * @defgroup GPIO
+  * @defgroup GPIO STM32F4 HAL GPIO Interface
   * @addtogroup GPIO
   * @{
   */

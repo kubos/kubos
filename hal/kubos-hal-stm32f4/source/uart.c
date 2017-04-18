@@ -15,7 +15,7 @@
  * limitations under the License.
  */
  /**
-   * @defgroup UART
+   * @defgroup UART STM32F4 HAL UART interface
    * @addtogroup UART
    * @{
    */
@@ -26,9 +26,12 @@
 #include "kubos-hal-stm32f4/stm32f4_gpio.h"
 #include "stm32cubef4/stm32f4xx_hal_uart.h"
 
+/** Checks if flag is set on uart registers */
+#define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
+
 /**
  * Internal function to get appropriate USART_TypeDef based on uart num
- * @param uart uart bus num
+ * @param uart [in] uart bus num
  * @return USART_TypeDef
  */
 USART_TypeDef *uart_dev(KUARTNum uart)
@@ -338,7 +341,7 @@ KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
     return UART_OK;
 }
 
-#define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
+
 
 /**
  * Internal function to process triggered interrupt
