@@ -100,7 +100,7 @@ Some items to remember:
 * Single space after periods and colons 
 * All commands which are not in a code block should be encased in backticks (\`command\`), rather than single or double quotes.
 * Use things like bullet points, bold or italicized text, and images to breakup and highlight your content (no one likes a giant blob of text)
-* Oxford commas should always be used
+* Oxford commas should **always** be used
 
 # Coding Standards {#coding-standards}
 
@@ -151,11 +151,11 @@ Example:
     
 Loop and conditional statements (`if`, `for`, `while`) should always have brace enclosed sub-statements. The code looks more consistent if all conditional and loop statements have braces. Even if there is only a single statement after the condition or loop statement today, there might be a need for more code in the future.
 
-Braces without any contents may be placed on the same line.
+Braces without any content may be placed on the same line.
 
     while (...) {//do nothing};
 
-Each statement should be placed on a line on its own. There is no need to make code compact. Putting several statements on the same line only makes the code cryptic to read.
+Each statement should be placed on its own line. There is no need to make code compact. Putting several statements on the same line only makes the code cryptic to read.
 
 Declare each variable in a separate declaration.
 This makes it easier to see all variables. It also avoids the problem of knowing which variables are pointers.
