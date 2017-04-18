@@ -54,7 +54,7 @@ Using BuildRoot allows us to include tools like BusyBox and glibc with the kerne
 
 #### zImage
 
-The zImage file is unpacked from the kernel file (which contains headers for checksum validation) and then loaded into SDRAM by U-Boot and contains a compressed version of the Linux kernel.  The first few hundred bytes of the file are not compressed and are responsible for uncompressing the rest of the kernel and then kicking off the main kernel execution.
+The zImage file is unpacked from the kernel file (which contains headers for checksum validation) and then loaded into SDRAM by U-Boot and contains a compressed version of the Linux kernel. The first few hundred bytes of the file are not compressed and are responsible for uncompressing the rest of the kernel and then kicking off the main kernel execution.
 
 #### Linux
 

@@ -58,8 +58,7 @@ BusyBox provides many of the common Linux console and shell commands, but in a s
 
 [Overview](https://buildroot.uclibc.org/)
 
-The current development tool for building all of the components required for running embedded Linux. Using this allows us to 
-pass in a basic configuration file and then have all of the required packages and options brought in and compiled automatically.
+The current development tool for building all of the components required for running embedded Linux. Using this allows us to pass in a basic configuration file and then have all of the required packages and options brought in and compiled automatically.
 This reduces the amount of time to configure KubOS Linux for a new board.
 
 ### SAM-BA
@@ -332,9 +331,9 @@ If you already have KubOS Linux installed on your system, but would like to upgr
 
 ## Recovery Process {#recovery-process}
 
-Should your KubOS Linux kernel become corrupted (as indicated by failing to successfully boot into Linux several times), the system will automatically try to recover during the next boot. 
+Should your KubOS Linux kernel become corrupted (as indicated by failing to successfully boot into Linux several times), the system will automatically try to recover during the next boot.  
 
-It will go through the following steps, if each is present:
+It will go through the following steps, if each is present (system will reboot after attempting each step):
 
 1. Reload the current version of KubOS Linux from the kpack*.itb file in the upgrade partition
 2. Reload the previous version of KubOS Linux from the kpack*.itb file in the upgrade partition
