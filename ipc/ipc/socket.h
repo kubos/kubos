@@ -15,7 +15,7 @@
  */
 
 /**
- * @defgroup Socket
+ * @defgroup Socket TCP Socket Interface
  * @addtogroup Socket
  * @brief IPC Socket API
  * @{
