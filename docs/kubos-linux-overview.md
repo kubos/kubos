@@ -108,4 +108,54 @@ If we're unlucky, we'll have to write the dts\* files from scratch, which will b
 
 Unfortunately, there isn't one great tutorial for writing and updating device tree files.  It's very much trial-and-error.  I recommend looking at the files for boards with similar processors and peripherals to see examples for the various component definitions.
 
-Note:  There is also an option to bake the data from the \*.dtb file directly into the zImage file.  However, this capability is largely implemented as a support option for older boards and isn't something that we should need to use. 
+Note:  There is also an option to bake the data from the \*.dtb file directly into the zImage file.  However, this capability
+is largely implemented as a support option for older boards and isn't something that we should need to use. 
+
+## User Space
+
+### File System
+
+There are a few key directories residing within the KubOS Linux user space
+
+#### /usr/sbin
+
+All built-in Kubos services will reside in the /usr/sbin directory. This covers things like the telemetry and command and control services.
+
+#### /home
+
+All user-created files should reside under the /home directory. This directory maps to a separate partition from the root file system. As a result, all files here will remain unchanged if the system goes through a kernel upgrade or downgrade.
+
+The home directories of all user accounts, except root, should live under this directory. 
+
+A special user 'system' exists to hold all user application binaries, initialization scripts, and general flash transfer files.
+
+***
+**Any files not residing under the /home directory will be destroyed during an upgrade/downgrade**
+***
+
+#### /home/system/usr/bin
+
+All user-created applications will be loaded into this folder during the `kubos flash` process. The directory is included in the system's PATH, so applications can then be called directly from anywhere, without needing to know the full file path.
+
+#### /home/system/usr/local/bin
+
+All user-created non-application files will be loaded into this folder during the `kubos flash` process. There is currently not a way to set a destination folder for the `kubos flash` command, so if a different endpoint directory is desired, the files will need to be manually moved.
+
+#### /home/system/etc/init.d
+
+All user-application initialization scripts live under this directory. The naming format is 'S{run-level}{application}'.
+
+#### /upgrade
+
+All \*.itb files will reside in this directory. These files are used to upgrade the KubOS Linux kernel and root file system.
+
+
+### Users
+
+By default, there are only two users defined to the KubOS Linux system: 'root' and 'kubos'. To add more users, the Linux `adduser` or `useradd` commands should be used. Other common Linux commands related to setting passwords and changing permissions are also available.
+
+User home directories should be created as '/home/{username}'.
+
+Base user permissions are determined by the default user profile and the default device table, which can be found in the BuildRoot repository in the system/device_table.txt file.
+
+**NOTE:** User definitions are stored in the /etc directory, which is part of the root file system. As a result, any user definitions that are added or changed will need to be re-added or changed after a system upgrade or downgrade. This behavior will be changed in the future.

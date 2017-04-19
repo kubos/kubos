@@ -133,7 +133,7 @@ Edit the file and update the 'pu baudrate' field and change '/dev/FTDI' to the '
 
 You can test the changes by issuing the `minicom kubos` command.  If you successfully connect to your board, then the changes have been successful.
 
-## Flashing the Board {#flash-the-board}
+## Flashing the Application {#flashing-the-app}
 
 The USB-to-serial cable and SAM-ICE JTAG should be connected to the iOBC and the board should be fully powered.
 
@@ -146,12 +146,23 @@ Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, w
     Transfer Successful
     Execution time: 21 seconds
     
+The application binary will be loaded into the /home/system/usr/bin directory on the target board.
+
+If the 'system.initAtBoot' option has been turned on, then a standard initialization script will be generated and flashed into the /home/system/etc/init.d directory automatically during the application flashing process.
+
+If the 'system.initAfterFlash' option has been turned on, then the application will be started as a background service as the last step in the application flashing process.
     
-### Non-Application Files {#non-app-files}
+## Flashing Non-Application Files {#flashing-other-files}
 
-Non-application files (such as custom scripts) can be also be flashed onto a KubOS Linux system. They will be loaded into the '/home/usr/local/bin' directory by the `kubos flash` command. After the command has completed, the files can be manually moved to a preferred directory using the standard Linux `cp` or `mv` commands.
+If you would like to flash a file other than the application binary onto your board, you can add an additional parameter to the usual flash commad:
 
-In order to flash a non-application file, add the full path of the file to the end of the `kubos flash` command. 
+    $ kubos flash {absolute-path-of-file}
+
+If the name of the file matches the name of the application, as specified in the module.json file, then the file is assumed to be the application binary and will be loaded into /home/system/usr/bin on the target board.
+
+If the name of the file ends in *.itb, the file is a KubOS Linux upgrade package and will be loaded into the upgrade partition of the target board. An internal variable will be set so that the upgrade package will be installed during the next reboot of the target board.
+
+All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/system/usr/local/bin. Once they have been flashed, these files can then be manually moved to another location.
 
 **Note:** The file does not need to reside within a Kubos SDK project, but the `kubos flash` command must still be run from the project, since that is where the target configuration information is stored.
 
