@@ -60,7 +60,7 @@ If there's a new version of the box available you will see something similar to 
         ==> default: `vagrant box update` to update.
         ...
 
-To manually check if your box is up to date you can run:
+To manually check if your box is up-to-date you can run:
 
         $ vagrant box outdated
 
