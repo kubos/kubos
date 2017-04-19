@@ -303,11 +303,20 @@ For example, 'csp\_buffer\_free' indicates that the function belongs to the CSP 
 
 ## Python {#python-standards}
 
-[Pylint](https://pylint.readthedocs.io/en/latest/) is a great tool which can be used to check the style and validity of your python files.
+[Python's PEP8 Style Guide](https://www.python.org/dev/peps/pep-0008/) is our preferred Python styling.
+
+[PyLint](https://pylint.readthedocs.io/en/latest/) is a great tool which can be used to check the style and validity of your python files.
 It has support for a variety of [editors and IDEs](https://pylint.readthedocs.io/en/latest/user_guide/ide-integration.html).
 
-Refer to [Python's Python Style Guide](https://www.python.org/dev/peps/pep-0008/) for our preferred Python styling.
+* [PyLint via PyDev for Eclipse](http://www.pydev.org/manual_adv_pylint.html)
+* [PyLint for Atom](https://atom.io/packages/linter-pylint)
+* [PyLint for Visual Studio](https://www.mantidproject.org/How_to_run_Pylint)
 
+[Autopep8](https://pypi.python.org/pypi/autopep8) can be used to automatically format your code to conform with the Python PEP8 standard.
+
+* [Autopep8 via PyDev for Eclipse](https://marketplace.eclipse.org/content/pydev-python-ide-eclipse)
+* [Autopep8 for Atom](https://atom.io/packages/python-autopep8)
+* [Autopep8 for Visual Studio](https://marketplace.visualstudio.com/items?itemName=himanoa.Python-autopep8)
 
 ## Working with External Projects {#external-projects}
 
