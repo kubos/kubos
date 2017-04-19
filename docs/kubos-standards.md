@@ -108,22 +108,17 @@ This section covers the styling and standards for the various languages and tool
 
 ## C {#c-standards}
 
-[ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) is a series of tools that can be used to automatically correct any C coding inconsistencies. You can find an example which we've used in the '.clang-format' file in the [Kubos repo](https://github.com/kubostech/kubos/blob/master/.clang-format)
+[ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) is a series of tools that can be used to automatically correct any C coding inconsistencies. 
+A stand-alone tool is available, which can then be used with a variety of IDEs. 
+We have created a '.clang-format' file in the [Kubos repo](https://github.com/kubostech/kubos/blob/master/.clang-format) which can be used to automatically correct C code files to conform with our styling.
+
+- [Clang-format with Eclipse](https://github.com/wangzw/CppStyle)
+- [Clang-format with Atom](https://atom.io/packages/clang-format)
+- [Clang-format with Visual Studio](https://marketplace.visualstudio.com/items?itemName=xaver.clang-format)
+
+
 
 *The following subsections are based on a doc generated 2017-04-18 by Coding Standard Generator version 1.13.*
-
-### Names {#c-names}
-
-- Constants, enumerators, and macros should be all upper case.
-- All other names should be all lower case.
-- Words should be separated by underscore (_).
-
-Use sensible, descriptive names.
-Do not use short cryptic names or names based on internal jokes. It should be easy to type a name without looking up how it is spelt.
-Exception: Scratch variables used for temporary storage or indices are best kept short. A programmer reading such variables should be able to assume that its value is not used outside a few lines of code. Common scratch variables for integers are i, j, k, m, n and for characters c and d.
-
-Use name prefixes for identifiers declared in different modules.
-For example, 'csp\_buffer\_free' indicates that the function belongs to the CSP directory.
 
 ### Indentation and Spacing {#c-spacing}
 
@@ -292,6 +287,19 @@ Do not rely on implicit conversion to bool in conditions.
 
     if (ptr)         // wrong
     if (ptr != NULL) // ok
+
+### Names {#c-names}
+
+- Constants, enumerators, and macros should be all upper case.
+- All other names should be all lower case.
+- Words should be separated by underscore (_).
+
+Use sensible, descriptive names.
+Do not use short cryptic names or names based on internal jokes. It should be easy to type a name without looking up how it is spelt.
+Exception: Scratch variables used for temporary storage or indices are best kept short. A programmer reading such variables should be able to assume that its value is not used outside a few lines of code. Common scratch variables for integers are i, j, k, m, n and for characters c and d.
+
+Use name prefixes for identifiers declared in different modules.
+For example, 'csp\_buffer\_free' indicates that the function belongs to the CSP directory.
 
 ## Python {#python-standards}
 
