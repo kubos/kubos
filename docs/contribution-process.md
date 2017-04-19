@@ -95,16 +95,7 @@ Create a local branch to make your changes
 
 The code.  Write it.  Test it.  
 
-At some point, there will be coding standards.
-At that point, this document should be updated with links to:
-- The C standard
-- The python standard
-
-For now, the code should be well structured:
-- There should be appropriate documentation for new methods and variables.
-    + Use the doxygen comment format of '/** _comments_ */' for the method documentation so that it can be picked up during doc generation
-- Use descriptive names for methods and variables.
-- Try to match the styling of the surrounding code.
+The [Kubos Standards](docs/kubos-standards.md) doc has some basic naming and coding standards that should be adhered to. When in doubt, try to match the styling of the surrounding code.
 
 Update any documentation areas that are affected by your changes.  For instance, if you found that a uart configuration option was not available
 for a certain board type, you would edit kubos-hal/kubos-hal/uart.h in the appropriate comment section with a new note about the unsupported option.
@@ -129,21 +120,23 @@ will match what you specified in the `git remote add` command.
 
 ## Create a Pull Request {#create-a-pull-request}
 
-Once all of your changes for an issue have been completed, you should create a pull request in order to bring the changes into the main code's
-master branch.  You will need to create a pull request for each repository you are making changes to.
+At some point, you'll want to create a pull request so that your changes can be merged into the main repo's master branch. You will need to create a pull request for each repository you are making changes to.
 
 From the github page for the repository that contains the changes you want to merge:
 - Click the 'Branch:' dropdown on the left-hand side and select the local branch containing your changes
 - Click the 'New pull request' button
 - The title of the pull request should be the JIRA issue number followed by a descriptive title
-    + Ex. JIRA-111 Adding i2c slave mode for STM32F4
+    + Ex. KUBOS-111 Adding i2c slave mode for STM32F4
 - In the description field, add a small summary of the changes you made.  The title should have indicated the bulk of the changes you made,
 but it's also good to mention things like documentation updates and any miscellaneous changes that were made (for example, fixing any bugs
 that you ran into while working on your code changes).
 - Click 'Create pull request'
 
-If you'd like specific people to review your code, you can either mention them in the description with an '@{name}' tag, or by adding them 
+If you'd like specific people to review your code, you can either mention them in the description with an '\@{name}' tag, or by adding them 
 to the 'Reviewers' list.
+
+You a welcome to create a pull request before your changes are entirely complete. Creating a pull request early in the code-creation process allows others to see what changes are being made and answer questions or offer architectural suggestions.
+If you do create a pull request before you are done making changes, add "[WIP]" to the pull request's title. Remove the "[WIP]" once all code changes have been completed and the PR is officially ready for review.
 
 ## Merge in New Changes From Master {#merge-in-new-changes}
 
