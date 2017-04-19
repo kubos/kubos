@@ -1,14 +1,16 @@
-# User Applications on the ISIS iOBC
+# Working with the ISIS IOBC
 
 [TOC]
 
-# User Applications on the ISIS iOBC {#user-applications-on-the-isis-iobc}
+# Working with the ISIS IOBC {#working-with-the-isis-iobc}
+
+This document is intended as an introductory guide for creating, loading, and using Kubos projects and other files within the user space of KubOS Linux on the ISIS iOBC.
 
 ## Reference Documents {#reference-documents}
 
 ### iOBC Documentation
 
-The ISIS-OBC Quickstart Guide should have been packaged with the iOBC and is a useful document for learning what each of the hardware components are, how to 
+The *ISIS-OBC Quickstart Guide* should have been packaged with the iOBC and is a useful document for learning what each of the hardware components are, how to 
 connect them, and what drivers need to be installed to support them.
 
 ### Kubos Documentation
@@ -43,26 +45,29 @@ If you're creating a brand new config.json file, you can just copy and paste the
 
 ## Setting Initialization Configuration {#init-config}
 
-If you would like your application to be automatically started as a background daemon after being flashed to the board, turn on the system.initAfterFlash option.
+There are several config.json options available which customize how and when a user application is started:
 
-By default, an initialization script will be generated and installed during the flashing process. This script will follow the naming convention of "S{runLevel}{applicationName}",
-where "runLevel" is the initialization priority order of the script. All user application init scripts will be run after all of the Kubos init scripts, but within the user
-scripts, the scripts with the lowest run level will be executed first. So an application with a run level of 10 will be initialized before an application with a run level of 50.
-
-The relevant config.json options:
 * system.initAfterFlash - (Default: false) Tells the Kubos SDK whether to start the application as a background daemon after flashing it to the board.
 * system.initAtBoot - (Default: true) Tells the Kubos SDK whether to generate and install an initialization script.
 * system.runLevel - (Default: 50. Range: 10-99) Sets priority of initialization script.
+
+When the `system.initAfterFlash` option is turned on, the user application will be started as a background daemon at the end of the `kubos flash` process. This is done using Linux's `start-stop-daemon` command. By default this feature is turned off, so the value of the option will need to be set to "true" by the user in order to turn it on.
+
+By default, an initialization script will be generated and installed during the flashing process. This script will follow the naming convention of "S{runLevel}{applicationName}", where "runLevel" is the initialization priority order of the script. All user application init scripts will be run after all of the Kubos init scripts, but within the user scripts, the scripts with the lowest run level will be executed first. So an application with a run level of 10 will be initialized before an application with a run level of 50.
+
+To turn this feature off, set the `system.initAfterBoot` option to "false".
+
+The run level of an initialization script can be changed after initially flashing the script to the board. Simply change the `system.runLevel` value, rebuild the project, and then reflash it to the board. The old script will be removed as part of the flash process.
     
 ## Updating the USB Connection {#updating-the-usb-connection}
 
-The iOBC should be shipped with an FTDI cable.  This cable should be connected to the programming adapter, which should then be connected to the iOBC, to create the
-debug UART connection.  User file transfer will take place using this connection.
+The iOBC should be shipped with an FTDI cable.  This cable should be connected to the programming adapter, which should then be connected to the iOBC, to create the debug UART connection.  User file transfer will take place using this connection.
 
-The Kubos flashing utility was configured with the assumption that an FTDI cable would be used.  If you have a different USB-to-serial cable type, you'll
-need to pass through the USB connection, and then update the minicom configuration to tell the flashing utility which USB to flash over.
+The Kubos flashing utility was configured with the assumption that an FTDI cable would be used.  If you have a different USB-to-serial cable type, you'll need to pass through the USB connection, and then update the minicom configuration to tell the flashing utility which USB to flash over.
 
 You can either pass through the USB via VirtualBox or by updating the vagrant's Vagrantfile.
+
+**Note:** While it doesn't need to be passed through, a SAM-ICE JTAG might also need to be connected to both the iOBC and the host computer in order to create a successful connection.
 
 ### VirtualBox
 
@@ -128,16 +133,16 @@ Edit the file and update the 'pu baudrate' field and change '/dev/FTDI' to the '
 
 You can test the changes by issuing the `minicom kubos` command.  If you successfully connect to your board, then the changes have been successful.
 
-## Flashing the Application {#flashing-the-board}
+## Flashing the Application {#flashing-the-app}
 
-The USB-to-serial cable should be connected to the iOBC and the board should be fully powered.
+The USB-to-serial cable and SAM-ICE JTAG should be connected to the iOBC and the board should be fully powered.
 
 Assuming you've successfully built a Kubos SDK project for the ISIS-OBC board, when you issue the `kubos flash` the output should look like this:
 
     info: found newproj at source/newproj
     Compatible FTDI device found
     Sending file to board...
-    /
+    Bytes Sent: 693248/1769379 BPS:8343 ETA 02:08
     Transfer Successful
     Execution time: 21 seconds
     
@@ -157,9 +162,19 @@ If the name of the file matches the name of the application, as specified in the
 
 If the name of the file ends in *.itb, the file is a KubOS Linux upgrade package and will be loaded into the upgrade partition of the target board. An internal variable will be set so that the upgrade package will be installed during the next reboot of the target board.
 
-All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/system/usr/local/bin.
+All other files are assumed to be non-application files (ex. custom shell scripts) and will be loaded into /home/system/usr/local/bin. Once they have been flashed, these files can then be manually moved to another location.
 
-## Troubleshooting {#troubleshooting}
+**Note:** The file does not need to reside within a Kubos SDK project, but the `kubos flash` command must still be run from the project, since that is where the target configuration information is stored.
+
+For example:
+
+    $ kubos flash /home/vagrant/not-my-project/test-util.sh
+
+## Flash Troubleshooting {#flash-troubleshooting}
+
+Flashing a file to the board can fail for various reasons. Sometimes simply reattempting the command can correct the problem.
+
+If retrying doesn't work, here is a list of some of the error you might see after running the `kubos flash` command and the recovery actions you can take:
 
 "No compatible FTDI device found"
 
@@ -221,7 +236,7 @@ Fully logged in, the console should look like this:
 
 ## Manual File Transfer {#manual-file-transfer}
 
-If for some reason you want to manual transfer a specific file onto the iOBC, for example a custom script, you'll need to do the following:
+If for some reason you want to manually transfer a specific file onto the iOBC, for example a custom script, you'll need to do the following:
 
 Connect to the board through minicom (the file transfer protocol is not guaranteed to work with any other terminal program)
 
@@ -383,3 +398,136 @@ Output should look like this:
 Press **Ctrl+C** to exit execution.
 
 Press **Ctrl+A**, then **Q** to exit minicom.
+
+## Using Peripherals {#using-peripherals}
+
+The iOBC has several different ports available for interacting with peripheral devices. Currently, users should interact with these devices using the standard Linux functions. A Kubos HAL will be added in the future for the iOBC.
+
+### I2C {#i2c}
+
+[I2C Standards Doc](http://www.nxp.com/documents/user_manual/UM10204.pdf)
+
+KubOS Linux is currently configured to support the I<sup>2</sup>C standard-mode speed of 100kHz.
+
+The I<sup>2</sup>C bus is available to the userspace as the '/dev/i2c-0' device. Users will need to add their peripheral device to the system and then open the bus in order to communicate. Once communication is complete, the bus should be closed and the device definition should be removed.
+
+Since the peripheral devices will be different for each client, they will need to be [dynamically added in the userspace (method 4)](https://www.kernel.org/doc/Documentation/i2c/instantiating-devices).
+
+The bus is then opened using the standard Linux `open` function and used for communication with the standard `write` and `read` functions. These functions are described in the [Linux I2C dev-interface doc](https://www.kernel.org/doc/Documentation/i2c/dev-interface). The buffer used in the `write` and `read` functions will most likely follow the common I<sup>2</sup>C structure of "{register, value}"
+
+The user program should look something like this:
+
+    /* Add device to system */
+    system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-0/new_device);
+    
+    /* Open I2C bus */
+    file = open("/dev/i2c-0");
+    
+    /* Configure I2C bus to point to desired slave */
+    ioctl(file, I2C_SLAVE, 0x20);
+    
+    /* Start of communication logic */
+    buffer = {0x10, 0x34};
+    write(file, buffer, sizeof(buffer));
+    
+    read(file, buffer, lengthToRead); 
+    /* End of communication logic */
+    
+    /* Close I2C bus */
+    close(file);
+    
+    /* Remove device */
+    system("echo 0x20 > /sys/bus/i2c/devices/i2c-0/delete_device);
+
+### GPIO {#gpio}
+
+The iOBC has 27 GPIO pins available. These pins can be dynamically controlled via the [Linux GPIO Sysfs Interface for Userspace](https://www.kernel.org/doc/Documentation/gpio/sysfs.txt) as long as they have not already been assigned to another peripheral.
+
+To interact with a pin, the user will first need to generate the pin's device name:
+
+    $ echo {pin} > /sys/class/gpio/export
+    
+The {pin} value can be found in the below chart:
+
+| iOBC GPIO # | Linux GPIO Value |
+|-------------|------------------|
+| 0           | 42               |
+| 1           | 43               |
+| 2           | 44               |
+| 3           | 45               |
+| 4           | 52               |
+| 5           | 53               |
+| 6           | 54               |
+| 7           | 55               |
+| 8           | 56               |
+| 9           | 57               |
+| 10          | 58               |
+| 11          | 59               |
+| 12          | 60               |
+| 13          | 61               |
+| 14          | 62               |
+| 15          | 63               |
+| 16          | 12               |
+| 17          | 13               |
+| 18          | 14               |
+| 19          | 15               |
+| 20          | 16               |
+| 21          | 17               |
+| 22          | 18               |
+| 23          | 19               |
+| 24          | 20               |
+| 25          | 21               |
+| 26          | 22               |
+
+For example, to interact with the iOBC's GPIO5 pin, which has a Linux GPIO value of 53, the user will use:
+
+    $ echo 53 > /sys/class/gpio/export
+    
+Once this command has been issued, the pin will be defined to the system as '/sys/class/gpio/gpio{pin}'. The user can then set and check the pins direction and value.
+
+    Set GPIO5 as output:
+    $ echo out > /sys/class/gpio/gpio53/direction
+    
+    Set GPIO23's value to 1:
+    $ echo 1 > /sys/class/gpio/gpio19/value
+    
+    Get GPIO10's value:
+    $ cat /sys/class/gpio/gpio58/value
+
+### SPI {#spi}
+
+The external SPI bus is not currently available to the userspace. It will be added in a future release.
+
+
+## User Accounts {#user-accounts}
+
+In general, it is preferred to use a non-root user account to interact with a Linux system. A default user account 'kubos' is included with KubOS Linux. Other user accounts can be created using the standard Linux commands (`adduser`, `useradd`, etc).
+
+All user accounts should have a home directory in the format '/home/{username}'.
+
+## KubOS Linux File System {#file-system}
+
+There are a few key directories residing within the KubOS Linux user space.
+
+#### /home
+
+All user-created files should reside under the /home directory. This directory maps to a separate partition from the root file system. As a result, all files here will remain unchanged if the system goes through a kernel upgrade or downgrade.
+
+The home directories of all user accounts, except root, should live under this directory. 
+
+***
+**Any files not residing under the /home directory will be destroyed during an upgrade/downgrade**
+***
+
+#### /home/usr/bin
+
+All user-created applications will be loaded into this folder during the `kubos flash` process. The directory is included in the system's PATH, so applications can then be called directly from anywhere, without needing to know the full file path.
+
+#### /home/usr/local/bin
+
+All user-created non-application files will be loaded into this folder during the `kubos flash` process. There is currently not a way to set a destination folder for the `kubos flash` command, so if a different endpoint directory is desired, the files will need to be manually moved.
+
+#### /home/etc/init.d
+
+All user-application initialization scripts live under this directory. The naming format is 'S{run-level}{application}'.
+

@@ -30,23 +30,15 @@ For example, I2C bus 1 can use pins PB6 and PB7, pins PB8 and PB9, or some combi
 
 In order to see which pins are actually being used you'll need to refer to the source code's target.json file or your project's yotta_config.* files.
 
-### Finding the pin definitions for a board
+### Finding the Pin Definitions for a Board
 
-#### Within the user manual
+#### Within the User Manual
 
-Look at section 6.11 (Extension connectors)
+The [STM32F4 Discovery Board User Manual](http://www.st.com/content/ccc/resource/technical/document/user_manual/70/fe/4a/3f/e7/e1/4f/7d/DM00039084.pdf/files/DM00039084.pdf/jcr:content/translations/en.DM00039084.pdf) lists all pin definitions in section 6.11 (Extension connectors)
 
 - I2C pins - I2C_n_\_{SCL|SDA}
 - SPI pins -  SPI_n_\_{MISO|MOSI|SCK}
 - UART pins - USART_n_\_{TX|RX} or UART_n_\_{TX|RX}
-    
-#### Within the source code
-
-Look at:
-
-    kubos/targets/target-stm32f407-disco-gcc/target.json
-    
-Look for the i2c, spi, or uart section to find the pin definitions
     
 #### Within the Kubos SDK
 
@@ -62,16 +54,26 @@ Alternatively, you can manually look at the yotta config files.
  
 Look at:
 
-    {Kubos SDK folder}/build/stm32f407-disco-gcc/yotta_config.h
+    {Kubos SDK project}/build/stm32f407-disco-gcc/yotta_config.h
     
 To see the YOTTA\_CFG\_* defines.
 Look for YOTTA\_CFG\_HARDWARE\_{I2C|SPI|UART} to find the pin definitions
 
 Or, look at:
 
-    {Kubos SDK folder}/build/stm32f407-disco-gcc/yotta_config.json
+    {Kubos SDK project}/build/stm32f407-disco-gcc/yotta_config.json
     
 To see the configuration of the project.  
+Look for the i2c, spi, or uart section to find the pin definitions
+
+#### Within the Source Code
+
+The target.json file for the STM32F4 contains the default pin configuration.
+
+Look at:
+
+    kubos/targets/target-stm32f407-disco-gcc/target.json
+    
 Look for the i2c, spi, or uart section to find the pin definitions
 
 ### Changing the pin definitions for a board
@@ -99,19 +101,18 @@ Let's say you want to use the alternate pins for I2C bus 1.  Your config.json fi
     
 **Note**: Any parameters that aren't explicitly specified will default to the value in the target.json file.
 
-## Flashing the board {#flashing}
+The project will need to be rebuilt (`kubos build`) in order to incorporate any new configuration changes.
 
-You'll flash the firmware onto your board through the mini-USB port.  You'll need to install the [STM32F4 drivers](http://www.st.com/content/st_com/en/products/embedded-software/development-tool-software/stsw-link009.html) in order for the board
+## Flashing the Board {#Flashing}
+
+Once you've built your project, you'll flash it onto your board using the mini-USB port.  If your host machine is running Windows, you may need to install the [STM32F4 drivers](http://www.st.com/content/st_com/en/products/embedded-software/development-tool-software/stsw-link009.html) in order for the board
 to be properly detected by your computer.
 
-If you're using a VM, you'll need to pass the USB through to the VM in order to flash.  The board should appear as the 
-"STMicroelectronics STM32 STLink" device.  If you're using VirtualBox, you can automatically forward the USB using the 
-'Devices > USB > USB Settings > USB > USB Device Filters' menu.
+If you're using a Kubos SDK box, the USB connection should be automatically passed through to the box and available for use.
 
-Run 'kubos flash' in order to start the flash process.
+Run `kubos flash` in order to start the flash process.
 
-If you see a "No compatible ST-Link device found" message, the board either isn't plugged into your computer, or you haven't passed the USB 
-through to your VM.
+If you see a "No compatible ST-Link device found" message, the board either isn't plugged into your computer, or the USB hasn't been passed through to the Kubos SDK box. Only one box can have possession of a USB device at a time, so make sure that no other boxes are running.
 
 If you see any other error messages, like "error writing to flash at address 0x08000000 at offset 0x00000000" or "reset device failed", re-run the flash command.
 
@@ -161,6 +162,8 @@ to the board's console UART bus (default is UART6, baud rate @ 115200).
 All of your program's printf statements will be routed through here.
 You can change the settings of the console with the hardware:console section of the config.json file.
 
+FDTI connections are also automatically passed through to the Kubos SDK box and will be available as the '/dev/FTDI' device. Minicom is pre-installed and can be used to connect to the board with the `minicom kubos` command.
+
 ## Example Program {#example}
 
 Let's create a basic STM32F4 program.
@@ -172,7 +175,7 @@ We'll be using default everything, so there is no need to create a config.json f
 
 (Why UART2 and UART4? Because their pins are right next to each other)
 
-<b><u>The Walkthrough:</u></b>
+### The Walkthrough:
 
 Connect UART2 and UART4
     
