@@ -60,8 +60,12 @@ If there's a new version of the box available you will see something similar to 
         ==> default: `vagrant box update` to update.
         ...
 
+To manually check if your box is up to date you can run:
+
+        $ vagrant box outdated
+
 #### Beware - Updating your box will overwrite the filesystem inside the environment.
-Moving projects into shared folders prevents projects of boxes from being overwritten. For more information on setting up shared folders see the following **[guide](docs/sdk-installing#mount-directory)**
+Moving projects into synced folders prevents them from being overwritten since their actual location is external to the box. For more information on setting up synced folders see the following **[guide](docs/sdk-installing#mount-directory)**.
 
 To update the box run:
 
