@@ -2,7 +2,7 @@
 
 [TOC]
 
-# KubOS Linux on the ISIS iOBC {#kubos-linux-on-the-iobs}
+# KubOS Linux on the ISIS iOBC {#kubos-linux-on-the-iobc}
 
 ## Overview {#overview}
 
@@ -11,14 +11,15 @@ needed for the ISIS customers' missions.
 
 The [User Applications on the ISIS iOBC](docs/user-app-on-iobc.md) doc can then be used to create and load a user application on top of the new KubOS Linux install.
 
-**Note:** Ideally, the user should never have to mess with the kernel themselves.  It should be pre-loaded onto the iOBC.
+**Note:** Ideally, the user should never have to mess with the kernel themselves. It should be pre-loaded onto the iOBC.
 
 ## Software Components {#software-components}
 
 ### ISIS Bootloader
 
-The ISIS bootloader lives in the very beginning of the NOR flash. It should come pre-loaded on the board and should not need to be modified. It 
-initializes the memory hardware and then copies U-Boot into the SDRAM and starts its execution.
+The ISIS bootloader lives in the very beginning of the NOR flash. It should come pre-loaded on the board and should not need to be modified. It initializes the memory hardware and then copies U-Boot into the SDRAM and starts its execution.
+
+If for some reason this bootloader needs to be reloaded, the relevant instructions can be found in section 8.1 of the *ISIS-OBC Quickstart Guide*.
 
 ### U-Boot
 
@@ -57,8 +58,7 @@ BusyBox provides many of the common Linux console and shell commands, but in a s
 
 [Overview](https://buildroot.uclibc.org/)
 
-The current development tool for building all of the components required for running embedded Linux.  Using this allows us to 
-pass in a basic configuration file and then have all of the required packages and options brought in and compiled automatically.
+The current development tool for building all of the components required for running embedded Linux. Using this allows us to pass in a basic configuration file and then have all of the required packages and options brought in and compiled automatically.
 This reduces the amount of time to configure KubOS Linux for a new board.
 
 ### SAM-BA
@@ -99,18 +99,18 @@ Build everything
 
     $ make
   
-The full build process will take a while.  Running on a Linux VM, it took about an hour.  Running in native Linux, it took about
-ten minutes.  Once this build process has completed once, you can run other BuildRoot commands to rebuild only certain sections
+The full build process will take a while. Running on a Linux VM, it took about an hour. Running in native Linux, it took about
+ten minutes. Once this build process has completed once, you can run other BuildRoot commands to rebuild only certain sections
 and it will go much more quickly (\<5 min).
 
 BuildRoot documentation can be found [**here**](https://buildroot.org/docs.html)
 
-The generated files will be located in buildroot-2016.11/output/images.  They are:
+The generated files will be located in buildroot-2016.11/output/images. They are:
 
-- uboot.bin   - The U-Boot binary
-- zImage      - The compressed Linux kernel file
+- uboot.bin  - The U-Boot binary
+- zImage   - The compressed Linux kernel file
 - {board}.dtb - The Device Tree Binary that Linux uses to configure itself for your board
-- rootfs.tar  - The root file system.  Contains BusyBox and other libraries
+- rootfs.tar - The root file system. Contains BusyBox and other libraries
 
 ### Install the SD Card Files {#install-the-sd-card-files}
 
@@ -254,7 +254,7 @@ Remove the SD card and insert it into iOBC SD card slot 0.
 5. Connect the programming and serial connection cables to your computer.
 6. Power the board.
 
-Note:  Make sure the red jumper on the programming board is in place; it bypasses the watchdog.  If you don't, the board will
+Note: Make sure the red jumper on the programming board is in place; it bypasses the watchdog. If you don't, the board will
 continually reboot and you won't be able to flash anything.
 
 #### Boot into U-Boot (Optional)
@@ -264,23 +264,23 @@ continually reboot and you won't be able to flash anything.
 If you already have Linux running on your board, you'll need to boot into the U-Boot console rather than the Linux console in order to be able to
 flash the board.
 
-You'll need to establish a serial connection with the board in order to connect to the console.  Set up a serial connection to the board at a 
+You'll need to establish a serial connection with the board in order to connect to the console. Set up a serial connection to the board at a 
 baudrate of 115200.
 
 ![PuTTY Connection](images/iOBC/putty_connection.png)
 
-Once the serial connection is open, boot (or reboot) the board.  Hold down any key while the board is starting up.  This will exit out of the 
+Once the serial connection is open, boot (or reboot) the board. Hold down any key while the board is starting up. This will exit out of the 
 auto-boot and bring up the CLI.
 
 ![U-Boot Console](images/iOBC/uboot_console.png)
 
 #### Flash the Files
 
-Start up SAM-BA.  You'll want to select the at91sam9g20-ISISOBC option from the 'Select your board' drop-down.
+Start up SAM-BA. You'll want to select the at91sam9g20-ISISOBC option from the 'Select your board' drop-down.
 
 ![SAM-BA Connection Selection](images/iOBC/samba_connection_select.png)
 
-Execute the 'Enable NorFlash' script.  This will prep the board to enable flashing.
+Execute the 'Enable NorFlash' script. This will prep the board to enable flashing.
 
 ![SAM-BA Enable NorFlash](images/iOBC/samba_enable_norflash.png)
 
@@ -300,12 +300,22 @@ Click 'Send File'
 
 ![SAM-BA Send DTB](images/iOBC/samba_send_dtb.png)
 
+#### Reboot the System
 
-### Boot the System {#boot-the-system}
+After new files have been loaded, the board will need to be powered off and back on again in order to go through the normal boot process.
 
-You should now be able to set up a serial connection to your board and boot it into Linux.
+## Status LEDs
 
-You'll need to establish a serial connection with the board in order to connect to the console.  Set up a serial connection to the board at a 
+There are four LEDs present on the iOBC which give some indication of what state the board is in:
+
+* Three LEDS (solid) - The system is currently running U-Boot
+* Two LEDs (blinking) - The system is currently running KubOS Linux
+
+## Connect to the System {#connect-to-the-system}
+
+You should now be able to set up a serial connection to your board and interact with the KubOS Linux environment.
+
+You'll need to establish a serial connection with the board in order to connect to the console. Set up a serial connection to the board at a 
 baudrate of 115200.
 
 ![PuTTY Connection](images/iOBC/putty_connection.png)
