@@ -6,16 +6,6 @@
 
 This is a doc to maintain the current naming and coding standards when working with the Kubos products.
 
-# Them's Fightin' Words {#fightin-words}
-
-A few of the more _controversial_ rules:
-
-* Spaces, not tabs
-* No if/for/while statements without brackets
-* All brackets on their own line
-* Use oxford commas
-* Single space after periods and colons
-
 # Product Names {#product-names}
 
 The general naming scheme is "Kub[OS|os] {component}". Note that there is a space separating the two words.
@@ -60,6 +50,16 @@ For example:
 The CONTRIUBUTING, LICENSE, and README files should all be uppercased.
 
 'Vagrantfile', 'Makefile', 'CMake', and other similar files should all be cased to match industry standards.
+
+# Them's Fightin' Words {#fightin-words}
+
+A few of the more _controversial_ rules:
+
+* Spaces, not tabs
+* No if/for/while statements without brackets
+* All brackets on their own line
+* Use oxford commas
+* Single space after periods and colons
 
 # Documentation Standards {#doc-standards}
 
@@ -116,9 +116,92 @@ We have created a '.clang-format' file in the [Kubos repo](https://github.com/ku
 - [Clang-format with Atom](https://atom.io/packages/clang-format)
 - [Clang-format with Visual Studio](https://marketplace.visualstudio.com/items?itemName=xaver.clang-format)
 
-
-
 *The following subsections are based on a doc generated 2017-04-18 by Coding Standard Generator version 1.13.*
+
+### Files {#c-files}
+
+Each file must start with a copyright notice.
+
+Header files must have a `#pragma once` statement. This causes the file to be included only once. 
+If for some reason you encounter a scenario where the pragma statements are not supported, use include guards instead.
+The name used in the include guard should be the same name as the file (excluding the extension) followed by the suffix "_H".
+
+Example:
+
+    #pragma once
+    
+    OR
+
+    #ifndef FILE_H
+    #define FILE_H
+    ...
+    #endif
+    
+System header files should be included with <> and project headers with "".
+
+Put all #include directives at the top of files. Having all #include directives in one place makes it easy to find them.
+Do not use absolute directory names in #include directives.
+
+Put all #define statements immediately after any #include statements.
+
+Put all function prototypes after any #define statements.
+
+
+### Comments {#c-comments}
+
+All functions should be fully documented in the header file that they belong to. Use the '/** ... */' comment style so that Doxygen can add the function to the generated API documenation. 
+
+The function comment block should include:
+- A brief description of the function
+- The name, type, and purpose of all input variables
+- The name, type, and purpose of the returned value/s
+
+For example:
+
+    /**
+     * Read data over i2c bus from specified address
+     *
+     * In order to ensure safe i2c sharing, this function is semaphore locked.
+     * There is one semaphore per bus. This function will block indefinitely
+     * while waiting for the semaphore.
+     *
+     * @param i2c i2c bus to read from
+     * @param addr address of target i2c device
+     * @param ptr pointer to data buffer
+     * @param len length of data to read
+     * @return int I2C_OK on success, I2C_ERROR on error
+     */
+    KI2CStatus k_i2c_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
+
+For large and/or complex functions, it is helpful to also include the function comment block just above where the function is actually implemented.
+This way the developer can quickly review what the function is and how it's supposed to work. The regular '/* ... */' comment styling is acceptable in this case.
+
+All code comments should be placed above the line the comment describes, indented identically, as opposed to allowing in-line comments.
+
+    /* comment here */
+    call_function(do, stuff) /* instead of here */
+    
+Code comments should cover the 'what' and 'why' of the following code, rather than the 'how'.
+    
+Use #ifdef instead of /* ... */ to comment out blocks of code.
+The code that is commented out may already contain comments which then terminate the block comment and causes lots of compile errors or other harder to find errors. 
+
+**However**, code should not be left permanently commented out; "#ifdef 0" is fine when creating and testing code, but has no place in the final product. Make sure to remove all dead code before merging changes into the master branch.
+
+**Do not leave comments like 'TODO' or 'FIX ME' in your final code changes unless absolutely necessary.** Just do whatever it is that you're trying to procrastinate on. If you must leave a to-do, THERE BETTER BE A STORY FOR IT IN JIRA AND IT BETTER BE AT THE TOP OF THE BACKLOG. "Oh, I'll create a story for it later". NO, YOU WON'T. DO IT NOW.
+
+### Names {#c-names}
+
+- Constants, enumerators, and macros should be all upper case.
+- All other names should be all lower case.
+- Words should be separated by underscore (_).
+
+Use sensible, descriptive names.
+Do not use short cryptic names or names based on internal jokes. It should be easy to type a name without looking up how it is spelt.
+Exception: Scratch variables used for temporary storage or indices are best kept short. A programmer reading such variables should be able to assume that its value is not used outside a few lines of code. Common scratch variables for integers are i, j, k, m, n and for characters c and d.
+
+Use name prefixes for identifiers declared in different modules.
+For example, 'csp\_buffer\_free' indicates that the function belongs to the CSP directory.
 
 ### Indentation and Spacing {#c-spacing}
 
@@ -166,58 +249,6 @@ Loop and conditional statements should have a single space preceding the conditi
 
 Lines should not exceed 78 characters.
 Even if your editor handles long lines, other people may have set up their editors differently. Long lines in the code may also cause problems for other programs and printers.
-
-### Comments {#c-comments}
-
-All functions should be fully documented in the header file that they belong to. Use the '/** ... */' comment style so that Doxygen can add the function to the generated API documenation. 
-
-The function comment block should include:
-- The function name
-- A brief description of the function
-- The name, type, and purpose of all input variables
-- The name, type, and purpose of the returned value/s
-
-All code comments should be placed above the line the comment describes, indented identically, as opposed to allowing in-line comments.
-
-    /* comment here */
-    call_function(do, stuff) /* instead of here */
-    
-Code comments should cover the 'what' and 'why' of the following code, rather than the 'how'.
-    
-Use #ifdef instead of /* ... */ to comment out blocks of code.
-The code that is commented out may already contain comments which then terminate the block comment and causes lots of compile errors or other harder to find errors. 
-
-**However**, code should not be left permanently commented out; "#ifdef 0" is fine when creating and testing code, but has no place in the final product. Make sure to remove all dead code before merging changes into the master branch.
-
-**Do not leave comments like 'TODO' or 'FIX ME' in your final code changes unless absolutely necessary.** Just do whatever it is that you're trying to procrastinate on. If you must leave a to-do, THERE BETTER BE A STORY FOR IT IN JIRA AND IT BETTER BE AT THE TOP OF THE BACKLOG. "Oh, I'll create a story for it later". NO, YOU WON'T. DO IT NOW.
-
-### Files {#c-files}
-
-Each file must start with a copyright notice.
-
-Header files must have a `#pragma once` statement. This causes the file to be included only once. 
-If for some reason you encounter a scenario where the pragma statements are not supported, use include guards instead.
-The name used in the include guard should be the same name as the file (excluding the extension) followed by the suffix "_H".
-
-Example:
-
-    #pragma once
-    
-    OR
-
-    #ifndef FILE_H
-    #define FILE_H
-    ...
-    #endif
-    
-System header files should be included with <> and project headers with "".
-
-Put all #include directives at the top of files. Having all #include directives in one place makes it easy to find them.
-Do not use absolute directory names in #include directives.
-
-Put all #define statements immediately after any #include statements.
-
-Put all function prototypes after any #define statements.
 
 ### Declarations {#c-declarations}
 
@@ -288,18 +319,6 @@ Do not rely on implicit conversion to bool in conditions.
     if (ptr)         // wrong
     if (ptr != NULL) // ok
 
-### Names {#c-names}
-
-- Constants, enumerators, and macros should be all upper case.
-- All other names should be all lower case.
-- Words should be separated by underscore (_).
-
-Use sensible, descriptive names.
-Do not use short cryptic names or names based on internal jokes. It should be easy to type a name without looking up how it is spelt.
-Exception: Scratch variables used for temporary storage or indices are best kept short. A programmer reading such variables should be able to assume that its value is not used outside a few lines of code. Common scratch variables for integers are i, j, k, m, n and for characters c and d.
-
-Use name prefixes for identifiers declared in different modules.
-For example, 'csp\_buffer\_free' indicates that the function belongs to the CSP directory.
 
 ## Python {#python-standards}
 
