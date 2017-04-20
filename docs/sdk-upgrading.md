@@ -10,6 +10,7 @@ Inside of a vagrant box lives the Kubos CLI. Upon new Kubos releases there may b
 First SSH into your kubos-dev box:
 
        $ cd <The path containing your kubos-dev Vagrantfile>
+       $ vagrant up
        $ vagrant ssh
 
 The Kubos CLI can be upgraded using this pip command:
@@ -44,3 +45,33 @@ To relink all of the Kubos source modules simply run:
 ## Downgrading the Kubos Source Modules {#downgrade-kubos-modules}
 
 In the event you want to downgrade to an older version of the Kubos source modules simply use the `kubos use <version>` command with the older version number you want to downgrade to.
+
+
+## Upgrading Kubos-dev Vagrant Box
+
+Occasionally there will be an update or addition to one of the components of the kubos-dev Vagrant environment. When any of these components is changes we will package and release a new version of the kubos-dev box.
+
+If there's a new version of the box available you will see something similar to the following when you start the box:
+
+        $ vagrant up
+        ...
+        ==> default: A newer version of the box 'kubostech/kubos-dev' is available! You currently
+        ==> default: have version '0.2.2'. The latest is version '0.2.3'. Run
+        ==> default: `vagrant box update` to update.
+        ...
+
+To manually check if your box is up-to-date you can run:
+
+        $ vagrant box outdated
+
+#### Beware - Updating your box will overwrite the filesystem inside the environment.
+Moving projects into synced folders prevents them from being overwritten since their actual location is external to the box. For more information on setting up synced folders see the following **[guide](docs/sdk-installing#mount-directory)**.
+
+To update the box run:
+
+        $ vagrant box update
+        $ vagrant destroy
+        $ vagrant up
+
+Unfortunately the `vagrant box update` only downloads the changes but does not apply them to your local environment. It's required to destroy and re-create a new instance of the kubos-dev box.
+
