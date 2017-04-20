@@ -21,8 +21,8 @@
 # "Bytes Sent: 693248/1769379 BPS:8343 ETA 02:08"
 ##########################################################################
 progress() {
-	
-	local line
+    
+    local line
 
     while sleep 1; do
         line=$(grep -m 1 -o -e "Bytes Sent.*\e" -e "Bytes Sent.*     " flash.log)
@@ -61,9 +61,9 @@ create_send_script() {
     local size
     
     name=$(basename ${path})
-	size=$(du ${path} | cut -f1) 
-	
-	echo "Sending ${name} (${size} 1k blocks) to $2 on board..."
+    size=$(du ${path} | cut -f1) 
+    
+    echo "Sending ${name} (${size} 1k blocks) to $2 on board..."
    
     # The script code here must ignore the current indentation level and 
     # instead starts from a plain left-alignment. Script is made up of 
@@ -186,12 +186,12 @@ send_file() {
     # Run the transfer script
     minicom kubos -o -S send.tmp > flash.log
      
-	# Check if we attempted to transfer
-	if [[ "${MINICOM_RC}" -eq -1 ]]; then
-		echo "Destination is out of space. Please remove files and retry"
-		return -1
-	fi
-	
+    # Check if we attempted to transfer
+    if [[ "${MINICOM_RC}" -eq -1 ]]; then
+        echo "Destination is out of space. Please remove files and retry"
+        return -1
+    fi
+    
     local retval=1
     
     # Check transfer result
@@ -214,8 +214,8 @@ send_file() {
 # Main Script
 ##########################################################################
 main() {
-	
-	# Declaring the global variables so that they're more obviously globals
+    
+    # Declaring the global variables so that they're more obviously globals
     app_name
     init_script
     is_app=0
@@ -223,7 +223,7 @@ main() {
     is_upgrade=0
     password
 
-	# Protect all the local-only variables (per google style)
+    # Protect all the local-only variables (per google style)
     local dest_dir
     local device
     local end
@@ -316,7 +316,7 @@ main() {
     # Print exec time
     end=$(date +%s)
     runtime=$(expr ${end} - ${start})
-	echo "Execution time: ${runtime} seconds"
+    echo "Execution time: ${runtime} seconds"
     
     exit ${retval}
     
