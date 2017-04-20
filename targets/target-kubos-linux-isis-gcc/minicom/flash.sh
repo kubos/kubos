@@ -34,10 +34,11 @@ progress() {
 ##########################################################################
 # Minicom doesn't allow any pass-through arguments, so instead we need to 
 # generate a script for it to run.
-# The generate script will:
+# The generated script will:
 #     Navigate to the correct path
 #     Delete any previous versions of the file
 #     Delete any previous init scripts (if flashing application)
+#     Check that there is enough room for the file at the destination
 #     Flash the file
 #     Update the kubos_updatefile variable (if flashing upgrade package)
 #     Re/start the application (if flashing application and boot desired)
@@ -57,9 +58,16 @@ create_send_script() {
 
     local path=$1
     local name
-    name=$(basename ${path})
-    echo "Sending ${name} to $2 on board..."
+    local size
     
+    name=$(basename ${path})
+	size=$(du ${path} | cut -f1) 
+	
+	echo "Sending ${name} (${size} 1k blocks) to $2 on board..."
+   
+    # The script code here must ignore the current indentation level and 
+    # instead starts from a plain left-alignment. Script is made up of 
+    # 'runscript' commands
     cat > send.tmp <<-EOF
 verbose on
 send root
@@ -77,6 +85,12 @@ send "mkdir -p $2"
 send "cd $2"
 send "rm -f ${name}"
 if ${is_app} = 1 send "rm -f /home/system/etc/init.d/S*${name}"
+send "df $2 --output=avail | tail -n1"
+! "test ${size} -lt $(tail flash.log -n2 | grep -o '[0-9]*' | tail -n1)"
+if $? = 0 goto send_file
+! MINICOM_RC=-1
+goto exit
+send_file:
 send "rz -w 8192"
 ! sz -w 8192 ${path}
 if ${is_upgrade} = 1 send "fw_setenv kubos_updatefile ${name}"
@@ -171,7 +185,13 @@ send_file() {
 
     # Run the transfer script
     minicom kubos -o -S send.tmp > flash.log
-    
+     
+	# Check if we attempted to transfer
+	if [[ "${MINICOM_RC}" -eq -1 ]]; then
+		echo "Destination is out of space. Please remove files and retry"
+		return -1
+	fi
+	
     local retval=1
     
     # Check transfer result
