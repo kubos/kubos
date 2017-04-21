@@ -179,7 +179,7 @@ void k_i2c_init(KI2CNum i2c, KI2CConf *conf);
  * @brief Terminates an I2C bus
  *
  * This fuction is used to terminate an active I2C bus. It takes the bus number of an active I2C bus.
- * After calling this function the bus number used will *not* be available for usage in the reading/calling functions.
+ * After calling this function the bus number used will *not* be available for usage in the reading/writing functions.
  *
  * Example usage:
  * @code
@@ -199,10 +199,10 @@ void k_i2c_terminate(KI2CNum i2c);
  *
  * This function returns a KI2CConf structure with the default I2C values already set.
  * These default values are derived from the target.json file of the selected hardware target.
- * New default values can easily be set by created a config.json file in the project directory.
+ * New default values can easily be set by creating a config.json file in the project directory.
  *
  * Example contents of config.json overriding defaults:
- * @code{.yml}
+ * @code{.json}
 "hardware": {
   "i2c": {
     "defaults": {
