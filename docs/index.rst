@@ -1,9 +1,4 @@
-.. Kubos-HAL documentation master file, created by
-   sphinx-quickstart on Fri Apr 21 15:23:32 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to Kubos-HAL's documentation!
+Welcome to Kubos' documentation!
 =====================================
 
 .. toctree::
@@ -19,9 +14,11 @@ Welcome to Kubos-HAL's documentation!
    :name: apis
 
    gpio
+   gpio_api_stm
    i2c_api
    sdio
    spi_api
+   spi_api_stm
    uart_api
 
 
