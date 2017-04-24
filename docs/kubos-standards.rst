@@ -1,5 +1,5 @@
 Kubos Standards
-===============
+---------------
 
 This is a doc to maintain the current naming and coding standards when
 working with the Kubos project.
@@ -35,7 +35,7 @@ Code (\*.c, \*.h, scripts, etc)
 -  All lowercase
 
 Docs (\*)
-~~~~~~~~~~~~
+~~~~~~~~~
 
 -  No spaces
 -  Use hyphens to separate words

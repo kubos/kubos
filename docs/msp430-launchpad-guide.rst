@@ -1,10 +1,5 @@
 MSP430 Discovery Board Guide
-============================
-
-[TOC]
-
-MSP430 Discovery Board Guide
-============================
+----------------------------
 
 Reference Documents
 -------------------
@@ -30,17 +25,17 @@ Reference Documents
 
 **Kubos Documentation:**
 
--  `Main HAL API documentation <./kubos-hal/index.html>`__ - Overview of
+-  FIXME: `Main HAL API documentation <index>`__ - Overview of
    the high-level HAL. Useful for things like k\_uart\_write.
--  `MSP430F5 Specific HAL API
+-  FIXME: `MSP430F5 Specific HAL API
    documentation <./kubos-hal/kubos-hal-msp430f5529/index.html>`__ -
    Specifics for the MSP430 version of the HAL. Useful for things like
    the configuration options.
--  `Installing the Kubos SDK <sdk-installing>`__ - Basics of
+-  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
    setting up the Kubos SDK environment
--  `Creating your first project <first-project>`__ - Steps to
+-  :doc:`Creating your first project <first-project>` - Steps to
    create and build a Kubos SDK project
--  `SDK Command Reference <sdk-reference>`__ - Overview of the
+-  :doc:`SDK Command Reference <sdk-reference>` - Overview of the
    common Kubos SDK commands
 
 Pin Definitions
@@ -83,10 +78,12 @@ Startup Code
 
 --------------
 
-**SUPER IMPORTANT** *** The MSP430's watchdog is on by default. It must
+**SUPER IMPORTANT** The MSP430's watchdog is on by default. It must
 be manually turned off at the start of your program or you must create a
 task to feed the watchdog. If you don't, the watchdog will continually
-be starved and reboot your board. ***
+be starved and reboot your board.
+
+--------------
 
 You should also make a call to enable interrupts at startup.
 
@@ -114,17 +111,17 @@ Configuration Notes
 The MSP430's inter-device communication methods do not support all of
 the same options as the STM32F4. For example, the MSP430 does not
 support 1-wire half-duplex SPI communication. Please refer to the User's
-Guide or the `MSP430's HAL
+Guide or the FIXME: `MSP430's HAL
 Documentation <./kubos-hal/kubos-hal-msp430f5529/index.html>`__ for all
 of the supported options.
 
-`UART <./kubos-hal/structKUARTConf.html>`__ - Word length - Does not
+FIXME: `UART <./kubos-hal/structKUARTConf.html>`__ - Word length - Does not
 support 9-bit mode
 
-`I2C <./kubos-hal/structKI2CConf.html>`__ - Currently has all the same
+FIXME: `I2C <./kubos-hal/structKI2CConf.html>`__ - Currently has all the same
 capabilities as the STM32F4
 
-`SPI <./kubos-hal/structKSPIConf.html>`__ - Direction - Does not support
+FIXME: `SPI <./kubos-hal/structKSPIConf.html>`__ - Direction - Does not support
 1-line mode - Data Size - Does not support 16-bit mode
 
 Flashing the Board

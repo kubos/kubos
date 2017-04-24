@@ -1,10 +1,5 @@
 SDK Cheatsheet
-==============
-
-[TOC]
-
-SDK Cheatsheet
-==============
+--------------
 
 Creating a Project
 ------------------
@@ -33,62 +28,27 @@ The contents of your project directory should look something like this:
 
 Here is a quick rundown of the files that were generated:
 
-+----------------+----------------+
-| File/folder    | Description    |
-+================+================+
-| ``project-name | This folder is |
-| ``             | where header   |
-|                | files live     |
-+----------------+----------------+
-| ``source``     | This folder is |
-|                | where source   |
-|                | files live     |
-+----------------+----------------+
-| ``test``       | This folder is |
-|                | where test     |
-|                | source files   |
-|                | live           |
-+----------------+----------------+
-| ``module.json` | This file is   |
-| `              | yotta's module |
-|                | description    |
-|                | file           |
-+----------------+----------------+
-| ``yotta_module | This directory |
-| s``            | holds the      |
-|                | symlinks for   |
-|                | the project's  |
-|                | module         |
-|                | dependencies   |
-+----------------+----------------+
-| ``yotta_target | This directory |
-| s``            | holds the      |
-|                | symlinks for   |
-|                | the available  |
-|                | Kubos targets  |
-+----------------+----------------+
-| ``CONTRIBUTING | The doc        |
-| ``          | outlining the  |
-|                | process of     |
-|                | contributing   |
-|                | to a Kubos     |
-|                | project        |
-+----------------+----------------+
-| ``LICENSE.txt` | The software   |
-| `              | license        |
-|                | associated     |
-|                | with the       |
-|                | example        |
-|                | project        |
-+----------------+----------------+
-| ``README``  | The readme for |
-|                | the example    |
-|                | project that   |
-|                | outlines some  |
-|                | of the basic   |
-|                | details of the |
-|                | example        |
-+----------------+----------------+
++-------------------+-------------------------------------------------------------------------------------------+
+| File/folder       | Description                                                                               |
++===================+===========================================================================================+
+| `project-name`    | This folder is where header files live                                                    |
++-------------------+-------------------------------------------------------------------------------------------+
+| `source`          | This folder is where source files live                                                    |
++-------------------+-------------------------------------------------------------------------------------------+
+| `test`            | This folder is where test source files live                                               |
++-------------------+-------------------------------------------------------------------------------------------+
+| `module.json`     | This file is yotta's module description file                                              |
++-------------------+-------------------------------------------------------------------------------------------+
+| `yotta_modules`   | This directory holds the symlinks for the project's module dependencies                   |
++-------------------+-------------------------------------------------------------------------------------------+
+| `yotta_targets`   | This directory holds the symlinks for the available Kubos targets                         |
++-------------------+-------------------------------------------------------------------------------------------+
+| `CONTRIBUTING.md` | The doc outlining the process of contributing to a Kubos project                          |
++-------------------+-------------------------------------------------------------------------------------------+
+| `LICENSE.txt`     | The software license associated with the example project                                  |
++-------------------+-------------------------------------------------------------------------------------------+
+| `README.md`       | The readme for the example project that outlines some of the basic details of the example |
++-------------------+-------------------------------------------------------------------------------------------+
 
 Kubos uses the yotta build/module system, which is where this file
 structure comes from. You can read more about yotta
