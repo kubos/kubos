@@ -1,5 +1,5 @@
 Getting Started With Kubos SDK
-==============================
+------------------------------
 
 This is intended to be a quick guide to creating a new KubOS RT project
 on top of the Kubos framework.
@@ -7,7 +7,7 @@ on top of the Kubos framework.
 Prerequisites
 -------------
 
-`Install the Kubos SDK <docs/sdk-installing.md>`__
+:doc:`Install the Kubos SDK <sdk-installing>`
 
 Create an instance of the Kubos Vagrant box
 
@@ -107,7 +107,7 @@ For this example we will set the msp430f5529 target:
         $ kubos target msp430f5529-gcc
 
 For more information on all of the available Kubos targets and selecting
-a target see the following **`guide <docs/sdk-cheatsheet.md>`__**
+a target see the following **`guide <sdk-cheatsheet>`__**
 
 Building and Flashing
 ---------------------

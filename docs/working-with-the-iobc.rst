@@ -24,16 +24,16 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  `Installing the Kubos SDK <docs/sdk-installing.md>`__ - Basics of
+-  `Installing the Kubos SDK <sdk-installing>`__ - Basics of
    setting up the Kubos SDK environment
--  `Creating your first project <docs/first-project.md>`__ - Steps to
+-  `Creating your first project <first-project>`__ - Steps to
    create and build a Kubos SDK project (Note: Written for a KubOS RT
    end-target)
--  `SDK Command Reference <docs/sdk-reference.md>`__ - Overview of the
+-  `SDK Command Reference <sdk-reference>`__ - Overview of the
    common Kubos SDK commands
--  `KubOS Linux Overview <docs/kubos-linux-overview.md>`__ - Overview of
+-  `KubOS Linux Overview <kubos-linux-overview>`__ - Overview of
    the KubOS Linux components
--  `KubOS Linux on iOBC <docs/kubos-linux-on-iobc.md>`__ - Steps to
+-  `KubOS Linux on iOBC <kubos-linux-on-iobc>`__ - Steps to
    build and load KubOS Linux for the iOBC
 
 Building a Project

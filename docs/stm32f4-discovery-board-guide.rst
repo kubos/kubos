@@ -29,11 +29,11 @@ have while working with the STM32F4
    documentation <./kubos-hal/kubos-hal-stm32f4/index.html>`__ -
    Specifics for the STM32F4 version of the HAL. Useful for things like
    the configuration options.
--  `Installing the Kubos SDK <docs/sdk-installing.md>`__ - Basics of
+-  `Installing the Kubos SDK <sdk-installing>`__ - Basics of
    setting up the Kubos SDK environment
--  `Creating your first project <docs/first-project.md>`__ - Steps to
+-  `Creating your first project <first-project>`__ - Steps to
    create and build a Kubos SDK project
--  `SDK Command Reference <docs/sdk-reference.md>`__ - Overview of the
+-  `SDK Command Reference <sdk-reference>`__ - Overview of the
    common Kubos SDK commands
 
 Pin Definitions

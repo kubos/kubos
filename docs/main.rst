@@ -7,7 +7,7 @@ leverage multiple existing open source projects like FreeRTOS and CSP,
 along with our own custom framework and SDK.
 
 Looking to build an application on Kubos? Check out our `quick start
-guide <docs/first-project.md>`__.
+guide <first-project>`__.
 
 Having issues? Want a new feature? `Come talk to
 us! <https://slack.kubos.co/>`__
@@ -18,52 +18,52 @@ info@kubos.co.
 Docs
 ----
 
--  `Changelog <docs/changelog.md>`__
+-  `Changelog <changelog>`__
 
 Kubos SDK
 ~~~~~~~~~
 
--  `Installing Kubos SDK <docs/sdk-installing.md>`__
+-  `Installing Kubos SDK <sdk-installing>`__
 
--  `Creating your first project <docs/first-project.md>`__
+-  `Creating your first project <first-project>`__
 
--  `Kubos SDK Cheat Sheet <docs/sdk-cheatsheet.md>`__
+-  `Kubos SDK Cheat Sheet <sdk-cheatsheet>`__
 
--  `Kubos CLI Command Reference <docs/sdk-reference.md>`__
+-  `Kubos CLI Command Reference <sdk-reference>`__
 
--  `Upgrading Kubos SDK <docs/sdk-upgrading.md>`__
+-  `Upgrading Kubos SDK <sdk-upgrading>`__
 
 KubOS RT
 ~~~~~~~~
 
--  `MSP430 Launchpad Guide <docs/msp430-launchpad-guide.md>`__
+-  `MSP430 Launchpad Guide <msp430-launchpad-guide>`__
 
 -  `STM32F4 Discovery Board
-   Guide <docs/stm32f4-discovery-board-guide.md>`__
+   Guide <stm32f4-discovery-board-guide>`__
 
 KubOS Linux
 ~~~~~~~~~~~
 
--  `Working with the iOBC <docs/working-with-the-iobc.md>`__
+-  `Working with the iOBC <working-with-the-iobc>`__
 
--  `Command and Control <docs/command-and-control.md>`__
+-  `Command and Control <command-and-control>`__
 
 Developer and SysAdmin Docs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  `Contributing to the Kubos Project <docs/contribution-process.md>`__
+-  `Contributing to the Kubos Project <contribution-process>`__
 
--  `Kubos Naming and Coding Standards <docs/kubos-standards.md>`__
+-  `Kubos Naming and Coding Standards <kubos-standards>`__
 
--  `Kubos Module Development <docs/kubos-development.md>`__
+-  `Kubos Module Development <kubos-development>`__
 
--  `KubOS Linux Overview <docs/kubos-linux-overview.md>`__
+-  `KubOS Linux Overview <kubos-linux-overview>`__
 
--  `KubOS Linux on iOBC <docs/kubos-linux-on-iobc.md>`__
+-  `KubOS Linux on iOBC <kubos-linux-on-iobc>`__
 
--  `KubOS Linux Upgrades <docs/kubos-linux-upgrade.md>`__
+-  `KubOS Linux Upgrades <kubos-linux-upgrade>`__
 
--  `KubOS Linux Recovery <docs/kubos-linux-recovery.md>`__
+-  `KubOS Linux Recovery <kubos-linux-recovery>`__
 
 Top Level APIs
 --------------

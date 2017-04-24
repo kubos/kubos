@@ -29,7 +29,7 @@ The box, when started, is already pre-configured with all of the
 required tools for the CLI you will need. This minimizes the set-up
 process so you can work on your project rather than setting up tooling.
 
-`Vagrant <https://www.vagrantup.com/docs/>`__ is a command-line based
+`Vagrant <https://www.vagrantup.com/>`__ is a command-line based
 tool that abstracts the virtualization provider into a simple-to-use
 interface. Vagrant supports a variety of providers (VirtualBox, VmWare,
 Parallels, etc.) but right now the Kubos SDK only supports VirtualBox.
@@ -67,7 +67,7 @@ Install Vagrant
 
 If you don't already have Vagrant installed see the Vagrant
 `installation
-documentation. <https://www.vagrantup.com/docs/installation>`__
+documentation. <https://www.vagrantup.com/installation>`__
 
 If your vagrant installation is set up correctly, running the following
 command should print something similar to the following output:
@@ -153,7 +153,7 @@ at the host directory path.
 started you will need to run ``vagrant reload`` for these changes to
 take effect in the box.
 
-For more information on mounting volumes see the following `guide <https://www.vagrantup.com/docs/synced-folders/basic_usage.html>`__
+For more information on mounting volumes see the following `guide <https://www.vagrantup.com/synced-folders/basic_usage.html>`__
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Start the Vagrant Box:
@@ -176,7 +176,7 @@ This will start an ssh session in the vagrant box with the Kubos CLI and
 all of the required dependencies installed.
 
 That's it! From here see more on `creating your first
-project <docs/first-project.md>`__
+project <first-project>`__
 
 After a little bit of usage you may want to look at `how to upgrade the
-Kubos SDK <docs/sdk-upgrading.md>`__
+Kubos SDK <sdk-upgrading>`__

@@ -52,14 +52,14 @@ Pre-requisites
 The SD card should have been formatted with the correct partitions. If
 not, refer to the 'Installation Process->Install the SD Card Files'
 section of the `KubOS Linux on the ISIS
-iOBC <docs/kubos-linux-on-iobc.md>`__ doc.
+iOBC <kubos-linux-on-iobc>`__ doc.
 
 The host computer should be connected to the board and the iOBC should
 be on and running KubOS Linux.
 
 A Kubos SDK VM should be installed on your host computer and at least
 one shared folder should be set up. Installation instructions can be
-found `here <docs/sdk-installing.md>`__.
+found `here <sdk-installing>`__.
 
 Installation
 ~~~~~~~~~~~~
@@ -96,7 +96,7 @@ in order to flash files to the board.
 Use the kubos flash command to load the package onto your board. Note:
 You might need to update your config.json file with the appropriate
 login information to access your board. See the 'Updating Credentials'
-section of `this document <docs/user-app-on-iobc.md>`__ for more
+section of `this document <user-app-on-iobc>`__ for more
 information.
 
 ::
@@ -114,7 +114,7 @@ progress bar indicating the time remaining for the transfer.
     Bytes Sent: 693248/1769379 BPS:8343 ETA 02:08
 
 Refer to the Troubleshooting section of the `Working with the ISIS
-iOBC <docs/working-with-the-iobc.md>`__ document if anything goes wrong
+iOBC <working-with-the-iobc>`__ document if anything goes wrong
 with the transfer.
 
 Once the transfer has completed successfully, trigger a reboot of the
@@ -169,7 +169,7 @@ Pre-requisite
 
 Build the new OS. Refer to the 'Installation Process->Build the OS
 Files' section of the `KubOS Linux on the ISIS
-iOBC <docs/kubos-linux-on-iobc.md>`__ doc.
+iOBC <kubos-linux-on-iobc>`__ doc.
 
 Make sure '/usr/bin/iobc\_toolchain' is in your PATH. If you're building
 from a Kubos SDK VM, it should have been automatically added. Otherwise,

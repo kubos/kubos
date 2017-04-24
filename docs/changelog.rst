@@ -117,7 +117,7 @@ v0.0.5 - Aug 05 2016
    application <https://github.com/openkosmosorg/kubos-i2c-example>`__
    using the `driver for the BME280
    sensor <./kubos-core/group__BME280.html>`__
--  `Upgrade Instructions <docs/sdk-upgrading.md>`__
+-  `Upgrade Instructions <sdk-upgrading>`__
 -  `Tagged repo
    manifest <https://github.com/openkosmosorg/kubos-manifest/blob/v0.0.5/docker-manifest.xml>`__
 
@@ -132,7 +132,7 @@ v0.0.4 - Jul 01 2016
    application <https://github.com/openkosmosorg/kubos-i2c-example>`__
    with a `WIP driver for the H2U1D temperature
    sensor <https://github.com/rplauche/kubos-core/blob/1ca0d601e33ea0e0c85caa9d53b7f84a78d9c24a/source/modules/sensors/htu21d.c>`__
--  `Upgrade Instructions <docs/sdk-upgrading.md>`__
+-  `Upgrade Instructions <sdk-upgrading>`__
 -  `Tagged repo
    manifest <https://github.com/openkosmosorg/kubos-manifest/blob/v0.0.4/docker-manifest.xml>`__
 
@@ -143,7 +143,7 @@ v0.0.3 - Jun 17 2016
 -  Implemented link support in KubOS-SDK for local development modules
 -  New KubOS-SDK projects are now based off our latest kubos-rt-example
    source
--  `Upgrade Instructions <docs/sdk-upgrading.md>`__
+-  `Upgrade Instructions <sdk-upgrading>`__
 -  `Tagged repo
    manifest <https://github.com/openkosmosorg/kubos-manifest/blob/v0.0.3/docker-manifest.xml>`__
 
@@ -153,6 +153,6 @@ v0.0.2 - Jun 03 2016
 -  Added support for STM32F405RG based PyBoard
 -  Improved support for yotta commands in KubOS-SDK
 -  Improved error handling in KubOS-SDK
--  `Upgrade Instructions <docs/sdk-upgrading.md>`__
+-  `Upgrade Instructions <sdk-upgrading>`__
 -  `Tagged repo
    manifest <https://github.com/openkosmosorg/kubos-manifest/blob/v0.0.2/docker-manifest.xml>`__

@@ -1,10 +1,5 @@
 Kubos Contribution Process
-==========================
-
-[TOC]
-
-Kubos Contribution Process
-==========================
+--------------------------
 
 This is the workflow you should go through in order to create and
 complete a task to contribute to the KubOS project
@@ -136,7 +131,7 @@ Make Your Changes
 
 The code. Write it. Test it.
 
-The `Kubos Standards <docs/kubos-standards.md>`__ doc has some basic
+The :doc:`Kubos Standards <kubos-standards>` doc has some basic
 naming and coding standards that should be adhered to. When in doubt,
 try to match the styling of the surrounding code.
 
@@ -145,7 +140,7 @@ instance, if you found that a uart configuration option was not
 available for a certain board type, you would edit
 kubos-hal/kubos-hal/uart.h in the appropriate comment section with a new
 note about the unsupported option. - If you want to test your
-documentation changes: + Run the command 'doxygen docs/Doxyfile' from
+documentation changes: + Run the command 'doxygen Doxyfile' from
 the project folder with the new documentation to regenerate the html
 documentation + Open up {project}/html/index.html in a web browser +
 Browse to your doc updates to verify
@@ -193,7 +188,7 @@ example, fixing any bugs that you ran into while working on your code
 changes). - Click 'Create pull request'
 
 If you'd like specific people to review your code, you can either
-mention them in the description with an '@{name}' tag, or by adding them
+mention them in the description with an ``@{name}`` tag, or by adding them
 to the 'Reviewers' list.
 
 You a welcome to create a pull request before your changes are entirely

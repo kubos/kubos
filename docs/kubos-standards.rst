@@ -34,7 +34,7 @@ Code (\*.c, \*.h, scripts, etc)
 -  Use underscores to separate words
 -  All lowercase
 
-Docs (\*.md)
+Docs (\*)
 ~~~~~~~~~~~~
 
 -  No spaces

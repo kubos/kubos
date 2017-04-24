@@ -1,7 +1,6 @@
+===================
 Command and Control
 ===================
-
-[TOC] # Command and Control {#command-and-control}
 
 Architecture Overview
 ---------------------
@@ -101,67 +100,18 @@ Existing Services
 Currently only the "core" commands service is implemented for the ISIS
 iOBC. This library implements the following commands:
 
-+---------+-----------+
-| Command | Function  |
-+=========+===========+
-| ping    | Run a     |
-|         | "no-op"   |
-|         | command   |
-|         | through   |
-|         | the       |
-|         | system to |
-|         | ensure it |
-|         | is active |
-|         | and       |
-|         | configure |
-|         | d         |
-|         | correctly |
-+---------+-----------+
-| info    | Returns   |
-|         | the       |
-|         | "build    |
-|         | info" or  |
-|         | version   |
-|         | informati |
-|         | on        |
-|         | from the  |
-|         | iOBC      |
-|         | superviso |
-|         | r         |
-+---------+-----------+
-| reboot  | Power     |
-|         | cycles    |
-|         | the iOBC  |
-|         | for       |
-|         | several   |
-|         | seconds.  |
-+---------+-----------+
-| reset   | Performs  |
-|         | a full    |
-|         | software  |
-|         | reset of  |
-|         | the iOBC  |
-|         | superviso |
-|         | r         |
-|         | and iOBC  |
-+---------+-----------+
-| emergen | Performs  |
-| cy-rese | an        |
-| t       | immediate |
-|         | reset of  |
-|         | the iOBC  |
-|         | and       |
-|         | superviso |
-|         | r.        |
-|         | This      |
-|         | command   |
-|         | can be    |
-|         | damaging  |
-|         | to the    |
-|         | superviso |
-|         | r.        |
-|         | Reset     |
-|         | should be |
-|         | used      |
-|         | instead   |
-+---------+-----------+
++-----------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| Command         | Function                                                                                                                             |
++=================+======================================================================================================================================+
+| ping            | Run a "no-op" command through the system to ensure it is active and configured correctly                                             |
++-----------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| info            | Returns the "build info" or version information from the iOBC supervisor                                                             |
++-----------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| reboot          | Power cycles the iOBC for several seconds.                                                                                           |
++-----------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| reset           | Performs a full software reset of the iOBC supervisor and iOBC                                                                       |
++-----------------+--------------------------------------------------------------------------------------------------------------------------------------+
+| emergency-reset | Performs an immediate reset of the iOBC and supervisor. This command can be damaging to the supervisor. Reset should be used instead |
++-----------------+--------------------------------------------------------------------------------------------------------------------------------------+
+
+
