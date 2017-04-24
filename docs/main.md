@@ -12,9 +12,6 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
  - [Changelog](docs/changelog.md)
 
- - [Kubos Naming and Coding Standards](docs/kubos-standards.md)
-
- - [Contributing to the Kubos Project](docs/contribution-process.md)
 
 ### Kubos SDK
 
@@ -26,8 +23,6 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
  - [Kubos CLI Command Reference](docs/sdk-reference.md)
 
- - [Kubos Module Development](docs/kubos-development.md)
-
  - [Upgrading Kubos SDK](docs/sdk-upgrading.md)
 
 ### KubOS RT
@@ -38,17 +33,25 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
 ### KubOS Linux
 
+ - [Working with the iOBC](docs/working-with-the-iobc.md)
+
+ - [Command and Control](docs/command-and-control.md)
+ 
+### Developer and SysAdmin Docs
+
+ - [Contributing to the Kubos Project](docs/contribution-process.md)
+ 
+ - [Kubos Naming and Coding Standards](docs/kubos-standards.md)
+ 
+ - [Kubos Module Development](docs/kubos-development.md)
+ 
  - [KubOS Linux Overview](docs/kubos-linux-overview.md)
 
  - [KubOS Linux on iOBC](docs/kubos-linux-on-iobc.md)
-
- - [Working with the iOBC](docs/working-with-the-iobc.md)
  
  - [KubOS Linux Upgrades](docs/kubos-linux-upgrade.md)
   
  - [KubOS Linux Recovery](docs/kubos-linux-recovery.md)
- 
- - [Command and Control](docs/command-and-control.md)
 
 
 ## Top Level APIs
