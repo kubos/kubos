@@ -1,14 +1,25 @@
-.. Kubos documentation master file, created by
-   sphinx-quickstart on Mon Apr 24 12:33:16 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to Kubos's documentation!
-=================================
+Welcome to Kubos' documentation!
+================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :caption: Guides
+   :name: guides
+
+   i2c
+   spi
+   uart
+
+.. toctree::
+   :caption: APIs
+   :name: apis
+
+   gpio
+   gpio_api_stm
+   i2c_api
+   sdio
+   spi_api
+   spi_api_stm
+   uart_api
 
 
 
