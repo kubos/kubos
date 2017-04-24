@@ -87,20 +87,6 @@ bool cnc_daemon_parse_command(CborParser * parser, CborValue * map, CNCWrapper *
         return false;
     }
 
-    if (err = cbor_value_map_find_value(map, "ACTION", &element))
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse key ACTION. Error code: %i\n", err);
-        return false;
-    }
-
-    if (err = cbor_value_get_int(&element, &i))
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to parse value for key ACTION. Error code: %i\n", err);
-        return false;
-    }
-
-    wrapper->command_packet->action = (CNCAction) i;
-
     if (err = cbor_value_map_find_value(map, "ARG_COUNT", &element))
     {
         KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Unable to find key ARG_COUNT. Error code: %i\n", err);

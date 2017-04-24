@@ -74,68 +74,6 @@ bool file_exists(char * path) //Should this live in a higher level module utilit
 }
 
 
-bool cnc_daemon_load_command(CNCWrapper * wrapper, void ** handle, lib_function * func)
-{
-    int return_code;
-    char so_path[SO_PATH_LENGTH];
-
-    if (wrapper == NULL || handle == NULL || func == NULL)
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
-        return false;
-    }
-
-    // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
-    int so_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
-    snprintf(so_path, so_len, MODULE_REGISTRY_DIR, wrapper->command_packet->cmd_name);
-
-    if (!file_exists(so_path))
-    {
-        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Requested library %s does not exist\n", so_path);
-        wrapper->err = true;
-        snprintf(wrapper->output, sizeof(wrapper->output) - 1,"The command library %s, does not exist\n", so_path);
-        return false;
-    }
-
-    *handle = dlopen(so_path, RTLD_NOW | RTLD_GLOBAL);
-
-    if (*handle == NULL)
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Handle to shared library is NULL... aborting command\n");
-        wrapper->err = true;
-        snprintf(wrapper->output, sizeof(wrapper->output) - 1, "Unable to open lib: %s\n", dlerror());
-        return false;
-    }
-
-    switch (wrapper->command_packet->action)
-    {
-        case EXECUTE:
-            *func = dlsym(*handle, "execute");
-            break;
-        case STATUS:
-            *func = dlsym(*handle, "status");
-            break;
-        case OUTPUT:
-            *func = dlsym(*handle, "output");
-            break;
-        case HELP:
-            *func = dlsym(*handle, "help");
-            break;
-        default:
-            snprintf(wrapper->output, sizeof(wrapper->output) - 1, "Unable to open lib: %s\n", dlerror());
-            return false;
-    }
-
-    if (func == NULL)
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "The function loaded is NULL, aborting command.\n");
-        snprintf(wrapper->output, sizeof(wrapper->output) - 1, "The requested symbol doesn't exist\n");
-        return false;
-    }
-    return true;
-}
-
-
 bool cnc_daemon_run_command(CNCWrapper * wrapper, void ** handle, lib_function func)
 {
     int original_stdout;
@@ -211,6 +149,7 @@ bool append_str(char * str, int * size, char * new_str)
     return true;
 }
 
+
 bool assemble_cmd_string(char * cmd_str, char * exe_path, CNCWrapper * wrapper)
 {
     int i, used_size;
@@ -234,6 +173,7 @@ bool assemble_cmd_string(char * cmd_str, char * exe_path, CNCWrapper * wrapper)
         append_str(cmd_str, &size, wrapper->command_packet->args[i]);
     }
 }
+
 
 bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 {
@@ -267,9 +207,9 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 
     if (!file_exists(exe_path))
     {
-        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Requested library %s does not exist\n", exe_path);
+        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Requested binary %s does not exist\n", exe_path);
         wrapper->err = true;
-        snprintf(wrapper->output, sizeof(wrapper->output),"The command library %s, does not exist\n", exe_path);
+        snprintf(wrapper->output, sizeof(wrapper->output),"The command binary %s, does not exist\n", exe_path);
         cnc_daemon_send_result(wrapper);
         return false;
     }
