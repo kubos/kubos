@@ -1,5 +1,5 @@
 KubOS Linux Overview
-====================
+--------------------
 
 Introduction
 ------------
@@ -198,7 +198,9 @@ initialization scripts, and general flash transfer files.
 --------------
 
 **Any files not residing under the /home directory will be destroyed
-during an upgrade/downgrade** \*\*\*
+during an upgrade/downgrade**
+
+--------------
 
 /home/system/usr/bin
 ^^^^^^^^^^^^^^^^^^^^
