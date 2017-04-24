@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Kubos-HAL documentation build configuration file, created by
+# Kubos documentation build configuration file, created by
 # sphinx-quickstart on Fri Apr 21 15:23:32 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -46,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Kubos-HAL'
+project = u'Kubos'
 copyright = u'2017, kubos.co'
 author = u'kubos.co'
 
@@ -101,7 +101,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Kubos-HALdoc'
+htmlhelp_basename = 'Kubosdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -128,7 +128,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Kubos-HAL.tex', u'Kubos-HAL Documentation',
+    (master_doc, 'Kubos.tex', u'Kubos Documentation',
      u'kubos.co', 'manual'),
 ]
 
@@ -138,7 +138,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'kubos-hal', u'Kubos-HAL Documentation',
+    (master_doc, 'kubos', u'Kubos Documentation',
      [author], 1)
 ]
 
@@ -149,14 +149,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Kubos-HAL', u'Kubos-HAL Documentation',
-     author, 'Kubos-HAL', 'One line description of project.',
+    (master_doc, 'Kubos', u'Kubos Documentation',
+     author, 'Kubos', 'One line description of project.',
      'Miscellaneous'),
 ]
 
 
 breathe_projects = {
-    "kubos-hal" : "../xml/"
+    "kubos-hal" : "../xml/hal/kubos-hal/xml",
+    "kubos-hal-stm32f4" : "../xml/hal/kubos-hal-stm32f4"
 }
 
 extensions += ['breathe']
