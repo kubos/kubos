@@ -94,7 +94,7 @@ After the second system upgrade:
 
 Rolling back to a previous version of KubOS Linux uses the same
 mechanism as `upgrading to a new
-version <docs/kubos-linux-upgrade.md>`__. A kpack\*.itb file is broken
+version <kubos-linux-upgrade>`__. A kpack\*.itb file is broken
 into its components and then the kernel image is written to the boot
 partition and the rootfs image is written to the rootfs partition.
 

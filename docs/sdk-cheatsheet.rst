@@ -29,7 +29,7 @@ The contents of your project directory should look something like this:
 ::
 
         $ ls
-        CONTRIBUTING.md LICENSE.txt module.json README.md source yotta_modules yotta_targets
+        CONTRIBUTING LICENSE.txt module.json README source yotta_modules yotta_targets
 
 Here is a quick rundown of the files that were generated:
 
@@ -68,7 +68,7 @@ Here is a quick rundown of the files that were generated:
 |                | Kubos targets  |
 +----------------+----------------+
 | ``CONTRIBUTING | The doc        |
-| .md``          | outlining the  |
+| ``          | outlining the  |
 |                | process of     |
 |                | contributing   |
 |                | to a Kubos     |
@@ -81,7 +81,7 @@ Here is a quick rundown of the files that were generated:
 |                | example        |
 |                | project        |
 +----------------+----------------+
-| ``README.md``  | The readme for |
+| ``README``  | The readme for |
 |                | the example    |
 |                | project that   |
 |                | outlines some  |
