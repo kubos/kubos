@@ -1,8 +1,5 @@
 Kubos CLI Command Reference
-===========================
-
-Kubos CLI Command Reference
-===========================
+---------------------------
 
 The ``kubos`` command is always run with a subcommand in order to do
 something, ``kubos`` with no subcommand will only display help
@@ -11,58 +8,43 @@ information.
 Command Overview
 ----------------
 
-+------------------------------+---------------------------------------------+
-| Command                      | Function                                    |
-+==============================+=============================================+
-| `build <#kubos-build>`__     | Build the current module.                   |
-+------------------------------+---------------------------------------------+
-| `clean <#kubos-clean>`__     | Remove files created by kubos and the       |
-|                              | build.                                      |
-+------------------------------+---------------------------------------------+
-| `config <#kubos-config>`__   | Display the target configuration info.      |
-+------------------------------+---------------------------------------------+
-| `debug <#kubos-debug>`__     | Attach a debugger to the current target.    |
-|                              | Requires target support.                    |
-+------------------------------+---------------------------------------------+
-| `flash <#kubos-flash>`__     | Launch the compiled program (available for  |
-|                              | executable modules only). Requires target   |
-|                              | support for cross-compiling targets.        |
-+------------------------------+---------------------------------------------+
-| `flash <#kubos-flash-linux>` | (KubOS Linux Targets) Load files onto       |
-| __                           | target.                                     |
-+------------------------------+---------------------------------------------+
-| `init <#kubos-init>`__       | Create a new module.                        |
-+------------------------------+---------------------------------------------+
-| `licenses <#kubos-licenses>` | List the licenses of the current module and |
-| __                           | its dependencies.                           |
-+------------------------------+---------------------------------------------+
-| `link <#kubos-link>`__       | Symlink a module                            |
-+------------------------------+---------------------------------------------+
-| `link-target <#kubos-link-ta | Symlink a target                            |
-| rget>`__                     |                                             |
-+------------------------------+---------------------------------------------+
-| `list <#kubos-list>`__       | List the dependencies of the current        |
-|                              | module, or the inherited targets of the     |
-|                              | current target.                             |
-+------------------------------+---------------------------------------------+
-| `target <#kubos-target>`__   | Set or display the target device.           |
-+------------------------------+---------------------------------------------+
-| `test <#kubos-test>`__       | Run the tests for the current module on the |
-|                              | current target. Requires target support for |
-|                              | cross-compiling targets                     |
-+------------------------------+---------------------------------------------+
-| `version <#kubos-version>`__ | Display the current active version of the   |
-|                              | CLI and Kubos source repo.                  |
-+------------------------------+---------------------------------------------+
-| `versions <#kubos-versions>` | Display the available versions of the KubOS |
-| __                           | source.                                     |
-+------------------------------+---------------------------------------------+
-| `update <#kubos-update>`__   | Download newer versions of the Kubos        |
-|                              | Modules                                     |
-+------------------------------+---------------------------------------------+
-| `use <#kubos-use>`__         | Set a new version of the Kubos modules to   |
-|                              | build your projects against.                |
-+------------------------------+---------------------------------------------+
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| Command                              | Function                                                                                                                     |
++======================================+==============================================================================================================================+
+| `build <#kubos-build>`__             | Build the current module.                                                                                                    |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `clean <#kubos-clean>`__             | Remove files created by kubos and the build.                                                                                 |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `config <#kubos-config>`__           | Display the target configuration info.                                                                                       |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `debug <#kubos-debug>`__             | Attach a debugger to the current target.  Requires target support.                                                           |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `flash <#kubos-flash>`__             | Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.    |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `flash <#kubos-flash-linux>`__       | (KubOS Linux Targets) Load files onto target.                                                                                |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `init <#kubos-init>`__               | Create a new module.                                                                                                         |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `licenses <#kubos-licenses>`__       | List the licenses of the current module and its dependencies.                                                                |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `link <#kubos-link>`__               | Symlink a module                                                                                                             |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `link-target <#kubos-link-target>`__ | Symlink a target                                                                                                             |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `list <#kubos-list>`__               | List the dependencies of the current module, or the inherited targets of the current target.                                 |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `target <#kubos-target>`__           | Set or display the target device.                                                                                            |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `test <#kubos-test>`__               | Run the tests for the current module on the current target. Requires target support for cross-compiling targets              |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `version <#kubos-version>`__         | Display the current active version of the CLI and Kubos source repo.                                                         |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `versions <#kubos-versions>`__       | Display the available versions of the KubOS source.                                                                          |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `update <#kubos-update>`__           | Download newer versions of the Kubos Modules                                                                                 |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
+| `use <#kubos-use>`__                 | Set a new version of the Kubos modules to build your projects against.                                                       |
++--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 
 kubos build
 -----------

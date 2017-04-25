@@ -1,16 +1,12 @@
 STM32F4 Discovery Board Guide
-=============================
-
-[TOC]
-
-STM32F4 Discovery Board Guide
-=============================
+-----------------------------
 
 Reference Documents
 -------------------
 
-**STM32F4 Documentation:** These are the two most useful documents to
-have while working with the STM32F4
+**STM32F4 Documentation:** 
+
+These are the two most useful documents to have while working with the STM32F4:
 
 -  `STM32F4 Reference
    Manual <http://www.st.com/content/ccc/resource/technical/document/reference_manual/3d/6d/5a/66/b4/99/40/d4/DM00031020.pdf/files/DM00031020.pdf/jcr:content/translations/en.DM00031020.pdf>`__
@@ -23,17 +19,17 @@ have while working with the STM32F4
 
 **Kubos Documentation:**
 
--  `Main HAL API documentation <./kubos-hal/index.html>`__ - Overview of
+-  FIXME:`Main HAL API documentation <./kubos-hal/index.html>`__ - Overview of
    the high-level HAL. Useful for things like k\_uart\_write.
--  `STM32F4 Specific HAL API
+-  FIXME:`STM32F4 Specific HAL API
    documentation <./kubos-hal/kubos-hal-stm32f4/index.html>`__ -
    Specifics for the STM32F4 version of the HAL. Useful for things like
    the configuration options.
--  `Installing the Kubos SDK <sdk-installing>`__ - Basics of
+-  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
    setting up the Kubos SDK environment
--  `Creating your first project <first-project>`__ - Steps to
+-  :doc:`Creating your first project <first-project>` - Steps to
    create and build a Kubos SDK project
--  `SDK Command Reference <sdk-reference>`__ - Overview of the
+-  :doc:`SDK Command Reference <sdk-reference>` - Overview of the
    common Kubos SDK commands
 
 Pin Definitions
@@ -76,7 +72,7 @@ Run the config command:
 
     kubos config
 
-Look for the i2c, spi, or uart section to find the pin definitions.
+Look for the I2C, SPI, or UART section to find the pin definitions.
 
 Alternatively, you can manually look at the yotta config files.
 
@@ -95,8 +91,8 @@ Or, look at:
 
     {Kubos SDK project}/build/stm32f407-disco-gcc/yotta_config.json
 
-| To see the configuration of the project.
-| Look for the i2c, spi, or uart section to find the pin definitions
+To see the configuration of the project.
+Look for the I2C, SPI, or UART section to find the pin definitions
 
 Within the Source Code
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -110,7 +106,7 @@ Look at:
 
     kubos/targets/target-stm32f407-disco-gcc/target.json
 
-Look for the i2c, spi, or uart section to find the pin definitions
+Look for the I2C, SPI, or UART section to find the pin definitions
 
 Changing the pin definitions for a board
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

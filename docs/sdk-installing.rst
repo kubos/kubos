@@ -1,8 +1,5 @@
-Installing Kubos SDK
-====================
-
-Installing Kubos SDK
-====================
+Installing the Kubos SDK
+------------------------
 
 What is the Kubos SDK?
 ----------------------
@@ -67,7 +64,7 @@ Install Vagrant
 
 If you don't already have Vagrant installed see the Vagrant
 `installation
-documentation. <https://www.vagrantup.com/installation>`__
+documentation. <https://www.vagrantup.com/docs/installation>`__
 
 If your vagrant installation is set up correctly, running the following
 command should print something similar to the following output:
@@ -154,7 +151,7 @@ started you will need to run ``vagrant reload`` for these changes to
 take effect in the box.
 
 For more information on mounting volumes see the following `guide <https://www.vagrantup.com/synced-folders/basic_usage.html>`__
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Start the Vagrant Box:
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -175,8 +172,8 @@ with your projects.
 This will start an ssh session in the vagrant box with the Kubos CLI and
 all of the required dependencies installed.
 
-That's it! From here see more on `creating your first
-project <first-project>`__
+That's it! From here see more on :doc:`creating your first
+project <first-project>`
 
-After a little bit of usage you may want to look at `how to upgrade the
-Kubos SDK <sdk-upgrading>`__
+After a little bit of usage you may want to look at :doc:`how to upgrade the
+Kubos SDK <sdk-upgrading>`
