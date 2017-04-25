@@ -1,5 +1,5 @@
 Kubos Contribution Process
---------------------------
+==========================
 
 This is the workflow you should go through in order to create and
 complete a task to contribute to the KubOS project

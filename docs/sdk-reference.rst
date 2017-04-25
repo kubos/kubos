@@ -1,5 +1,5 @@
 Kubos CLI Command Reference
----------------------------
+===========================
 
 The ``kubos`` command is always run with a subcommand in order to do
 something, ``kubos`` with no subcommand will only display help

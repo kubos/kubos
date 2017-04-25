@@ -1,5 +1,5 @@
 Installing the Kubos SDK
-------------------------
+========================
 
 What is the Kubos SDK?
 ----------------------
@@ -150,8 +150,11 @@ at the host directory path.
 started you will need to run ``vagrant reload`` for these changes to
 take effect in the box.
 
+--------------
+
 For more information on mounting volumes see the following `guide <https://www.vagrantup.com/synced-folders/basic_usage.html>`__
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+--------------
 
 Start the Vagrant Box:
 ~~~~~~~~~~~~~~~~~~~~~~

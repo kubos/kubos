@@ -1,5 +1,5 @@
 KubOS Linux Recovery Architecture
----------------------------------
+=================================
 
 Ideally, a space mission using KubOS Linux will run successfully until the end of its natural lifespan. However, space is unpredictable and systems can become corrupted. As a result, we've implemented a basic mechanism to help detect and recover from these random errors.
 

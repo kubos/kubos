@@ -1,5 +1,5 @@
-Welcome to Kubos' documentation!
-================================
+Kubos HAL Documenation
+======================
 
 .. toctree::
    :caption: Guides
@@ -20,12 +20,3 @@ Welcome to Kubos' documentation!
    spi_api
    spi_api_stm
    uart_api
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
