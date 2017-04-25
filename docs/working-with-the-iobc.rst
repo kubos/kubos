@@ -1,10 +1,5 @@
 Working with the ISIS IOBC
-==========================
-
-[TOC]
-
-Working with the ISIS IOBC
-==========================
+--------------------------
 
 This document is intended as an introductory guide for creating,
 loading, and using Kubos projects and other files within the user space
@@ -16,7 +11,7 @@ Reference Documents
 iOBC Documentation
 ~~~~~~~~~~~~~~~~~~
 
-The *ISIS-OBC Quickstart Guide* should have been packaged with the iOBC
+The :title:`ISIS-OBC Quickstart Guide` should have been packaged with the iOBC
 and is a useful document for learning what each of the hardware
 components are, how to connect them, and what drivers need to be
 installed to support them.
@@ -24,16 +19,16 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  `Installing the Kubos SDK <sdk-installing>`__ - Basics of
+-  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
    setting up the Kubos SDK environment
--  `Creating your first project <first-project>`__ - Steps to
+-  :doc:`Creating your first project <first-project>` - Steps to
    create and build a Kubos SDK project (Note: Written for a KubOS RT
    end-target)
--  `SDK Command Reference <sdk-reference>`__ - Overview of the
+-  :doc:`SDK Command Reference <sdk-reference>` - Overview of the
    common Kubos SDK commands
--  `KubOS Linux Overview <kubos-linux-overview>`__ - Overview of
+-  :doc:`KubOS Linux Overview <kubos-linux-overview>` - Overview of
    the KubOS Linux components
--  `KubOS Linux on iOBC <kubos-linux-on-iobc>`__ - Steps to
+-  :doc:`KubOS Linux on iOBC <kubos-linux-on-iobc>` - Steps to
    build and load KubOS Linux for the iOBC
 
 Building a Project
@@ -783,7 +778,9 @@ under this directory.
 --------------
 
 **Any files not residing under the /home directory will be destroyed
-during an upgrade/downgrade** \*\*\*
+during an upgrade/downgrade** 
+
+--------------
 
 /home/usr/bin
 ^^^^^^^^^^^^^
