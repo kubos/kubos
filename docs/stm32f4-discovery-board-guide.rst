@@ -1,5 +1,5 @@
 STM32F4 Discovery Board Guide
------------------------------
+=============================
 
 Reference Documents
 -------------------

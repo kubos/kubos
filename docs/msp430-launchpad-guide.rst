@@ -1,5 +1,5 @@
 MSP430 Discovery Board Guide
-----------------------------
+============================
 
 Reference Documents
 -------------------

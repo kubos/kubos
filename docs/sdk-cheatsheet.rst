@@ -1,5 +1,5 @@
 SDK Cheatsheet
---------------
+==============
 
 Creating a Project
 ------------------

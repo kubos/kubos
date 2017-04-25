@@ -1,5 +1,8 @@
 Working with the ISIS IOBC
---------------------------
+==========================
+
+Overview
+--------
 
 This document is intended as an introductory guide for creating,
 loading, and using Kubos projects and other files within the user space
@@ -765,7 +768,7 @@ There are a few key directories residing within the KubOS Linux user
 space.
 
 /home
-^^^^^
+~~~~~
 
 All user-created files should reside under the /home directory. This
 directory maps to a separate partition from the root file system. As a
