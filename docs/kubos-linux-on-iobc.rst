@@ -93,6 +93,8 @@ The software tool used to flash the kernel and components onto the iOBC.
 Installation Process
 --------------------
 
+.. _build-os:
+
 Build the OS Files
 ~~~~~~~~~~~~~~~~~~
 
@@ -155,6 +157,8 @@ The generated files will be located in buildroot-2016.11/output/images. They are
 -  {board}.dtb - The Device Tree Binary that Linux uses to configure itself
    for your board
 -  rootfs.tar - The root file system. Contains BusyBox and other libraries
+
+.. _install-sd:
 
 Install the SD Card Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -467,10 +471,9 @@ Upgrade Process
 ---------------
 
 If you already have KubOS Linux installed on your system, but would like to
-upgrade to the latest version, check out the 'Upgrade Installation' section of
-the :doc:`KubOS Linux Upgrade doc <kubos-linux-upgrade>`. Alternatively, if you
-would like to rollback to a previously installed version, refer to the 'Upgrade
-Rollback' section of the same document.
+upgrade to the latest version, check out the :ref:`upgrade-installation` section. 
+Alternatively, if you would like to rollback to a previously installed version, 
+refer to the :ref:`upgrade-rollback` section.
 
 Recovery Process
 ----------------

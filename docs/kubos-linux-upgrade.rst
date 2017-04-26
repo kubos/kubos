@@ -38,6 +38,8 @@ However, some future releases may cause the Kubos libraries to undergo
 significant changes. In this case, backwards compatilibity is not
 guaranteed and user applications may need to be rebuilt.
 
+.. _upgrade-installation:
+
 Upgrade Installation
 --------------------
 
@@ -45,8 +47,7 @@ Pre-requisites
 ~~~~~~~~~~~~~~
 
 The SD card should have been formatted with the correct partitions. If
-not, refer to the 'Installation Process->Install the SD Card Files'
-section of the :doc:`KubOS Linux on the ISIS iOBC <kubos-linux-on-iobc>` doc.
+not, refer to the :ref:`install-sd` instructions.
 
 The host computer should be connected to the board and the iOBC should
 be on and running KubOS Linux.
@@ -89,9 +90,8 @@ in order to flash files to the board.
 
 Use the kubos flash command to load the package onto your board. Note:
 You might need to update your config.json file with the appropriate
-login information to access your board. See the FIXME: add ref 'Updating Credentials'
-section of :doc:`this document <working-with-the-iobc>` for more
-information.
+login information to access your board. See the section :ref:`updating-credentials`
+for more information.
 
 ::
 
@@ -107,8 +107,7 @@ progress bar indicating the time remaining for the transfer.
 
     Bytes Sent: 693248/1769379 BPS:8343 ETA 02:08
 
-Refer to the Troubleshooting section of the :doc:`Working with the ISIS
-iOBC <working-with-the-iobc>` document if anything goes wrong
+Refer to the :ref:`flash-troubleshooting` section if anything goes wrong
 with the transfer.
 
 Once the transfer has completed successfully, trigger a reboot of the
@@ -135,6 +134,8 @@ similar to this:
     Protected 1 sectors
     resetting ...
     reset_cpu
+    
+.. _upgrade-rollback:
 
 Upgrade Rollback
 ----------------
@@ -161,9 +162,7 @@ want to generate an upgrade package.
 Pre-requisite
 ~~~~~~~~~~~~~
 
-Build the new OS. Refer to the 'Installation Process->Build the OS
-Files' section of the :doc:`KubOS Linux on the ISIS
-iOBC <kubos-linux-on-iobc>` doc.
+Build the new OS. Refer to the :ref:`build-os` instructions.
 
 Make sure '/usr/bin/iobc\_toolchain' is in your PATH. If you're building
 from a Kubos SDK VM, it should have been automatically added. Otherwise,
