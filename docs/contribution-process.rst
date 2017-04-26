@@ -77,16 +77,23 @@ Github
 Mark the Issue as 'In Progress'
 -------------------------------
 
-| In order to track what's being worked on and by whom, for every issue
-  you work you should: - JIRA: Drag the issue from the backlog into the
-  sprint (if it's not already present) - Assign it to yourself \* Click
-  the issue \* JIRA: Under 'People'>'Assignee', click 'Assign to me' \*
-  Github: Click the 'Assignees' link and select yourself - Mark the
-  issue as 'In Progress'.
-| \* JIRA: There are two ways + From the full issue description page,
-  click the 'In Progress' button + From the 'Active Sprints' page, drag
-  the issue from the 'To-Do' column into the 'In Progress' column \*
-  Github: Edit the title of the project and add "[WIP]"
+In order to track what's being worked on and by whom, for every issue you work you should:
+ 
+- JIRA: Drag the issue from the backlog into the sprint (if it's not already present) 
+- Assign it to yourself 
+
+  -  Click the issue 
+  -  JIRA: Under 'People'>'Assignee', click 'Assign to me' 
+  -  Github: Click the 'Assignees' link and select yourself 
+  
+- Mark the issue as 'In Progress'.
+
+  -  JIRA: There are two ways 
+  
+    - From the full issue description page, click the 'In Progress' button 
+    - From the 'Active Sprints' page, drag the issue from the 'To-Do' column into the 'In Progress' column 
+     
+  -  Github: Edit the title of the project and add "[WIP]"
 
 Create a Branch of the Code You Want to Work On
 -----------------------------------------------
@@ -139,11 +146,13 @@ Update any documentation areas that are affected by your changes. For
 instance, if you found that a uart configuration option was not
 available for a certain board type, you would edit
 kubos-hal/kubos-hal/uart.h in the appropriate comment section with a new
-note about the unsupported option. - If you want to test your
-documentation changes: + Run the command 'doxygen Doxyfile' from
-the project folder with the new documentation to regenerate the html
-documentation + Open up {project}/html/index.html in a web browser +
-Browse to your doc updates to verify
+note about the unsupported option. 
+
+- If you want to test your documentation changes: 
+
+  - Run the command 'doxygen Doxyfile' from the project folder with the new documentation to regenerate the html documentation 
+  - Open up {project}/html/index.html in a web browser 
+  - Browse to your doc updates to verify
 
 Add or update any unit tests that are affected by your changes. For
 instance, if support for i2c slave mode is added for the STM32F4 board,
@@ -176,16 +185,16 @@ can be merged into the main repo's master branch. You will need to
 create a pull request for each repository you are making changes to.
 
 From the github page for the repository that contains the changes you
-want to merge: - Click the 'Branch:' dropdown on the left-hand side and
-select the local branch containing your changes - Click the 'New pull
-request' button - The title of the pull request should be the JIRA issue
-number followed by a descriptive title + Ex. KUBOS-111 Adding i2c slave
-mode for STM32F4 - In the description field, add a small summary of the
-changes you made. The title should have indicated the bulk of the
-changes you made, but it's also good to mention things like
-documentation updates and any miscellaneous changes that were made (for
-example, fixing any bugs that you ran into while working on your code
-changes). - Click 'Create pull request'
+want to merge: 
+
+- Click the 'Branch:' dropdown on the left-hand side and select the local branch containing your changes 
+- Click the 'New pull request' button 
+- The title of the pull request should be the JIRA issue number followed by a descriptive title 
+
+  - Ex. KUBOS-111 Adding i2c slave mode for STM32F4 
+
+- In the description field, add a small summary of the changes you made. The title should have indicated the bulk of the changes you made, but it's also good to mention things like documentation updates and any miscellaneous changes that were made (for example, fixing any bugs that you ran into while working on your code changes). 
+- Click 'Create pull request'
 
 If you'd like specific people to review your code, you can either
 mention them in the description with an ``@{name}`` tag, or by adding them
@@ -253,7 +262,9 @@ pending approval.
 Once your pull request has been submitted, it must be approved by at
 least one person before the request can be merged into the master
 branch. Once it has been approved, you can go to your pull request page
-and then click the 'Merge' button. - Note: If your changes have been
+and then click the 'Merge' button. 
+
+**Note:** If your changes have been
 approved, but you don't see a 'Merge' button, you likely don't have
 permission to merge for that project. Talk to Ryan Plauche
 (ryan@kubos.co).
@@ -267,11 +278,13 @@ automatically added to your existing pull request.
 Mark the Issue as 'Done'
 ------------------------
 
-Before you mark the issue as done, verify the following: - All features
-listed in the issue have been completed - All relevant documentation
-changes have been made - All relevant unit tests have been created or
-updated - All code changes and related code have been tested - All pull
-requests related to the issue have been approved and merged
+Before you mark the issue as done, verify the following: 
+
+- All features listed in the issue have been completed 
+- All relevant documentation changes have been made 
+- All relevant unit tests have been created or updated 
+- All code changes and related code have been tested 
+- All pull requests related to the issue have been approved and merged
 
 Update the issue's 'Fix version' field to reflect the version that these
 changes are being implemented in.

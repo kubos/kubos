@@ -15,14 +15,14 @@ Environment Variables
 
 There are several U-Boot environment variables that are used to track the state of a KubOS Linux system: 
 
-* bootcmd - The usual set of commands that are used to boot into KubOS Linux. 
-* altbootcmd - The alternate set of commands that are used if the system cannot successfully boot into KubOS Linux. They will be set up to attempt to boot into an alternate OS. 
-* recovery\_available - Indicates that recovery actions are available and should be taken, if necessary. 
-* bootlimit - The number of bad boots allowed before the system attempts to use altbootcmd instead of bootcmd to boot. 
-* bootcount - The number of boots that have been attempted. 
-* kubos\_curr\_version - The name of the kpack \*.itb file that the current KubOS Linux kernel and rootfs were loaded from. 
-* kubos\_prev\_version - The name of the kpack \*.itb file that was previously used to load the KubOS Linux kernel and rootfs.
-* kubos\_curr\_tried - Indicates that reloading the current version has been attempted.
+* `bootcmd` - The usual set of commands that are used to boot into KubOS Linux. 
+* `altbootcmd` - The alternate set of commands that are used if the system cannot successfully boot into KubOS Linux. They will be set up to attempt to boot into an alternate OS. 
+* `recovery_available` - Indicates that recovery actions are available and should be taken, if necessary. 
+* `bootlimit` - The number of bad boots allowed before the system attempts to use altbootcmd instead of bootcmd to boot. 
+* `bootcount` - The number of boots that have been attempted. 
+* `kubos_curr_version` - The name of the kpack \*.itb file that the current KubOS Linux kernel and rootfs were loaded from. 
+* `kubos_prev_version` - The name of the kpack \*.itb file that was previously used to load the KubOS Linux kernel and rootfs.
+* `kubos_curr_tried` - Indicates that reloading the current version has been attempted.
 
 The default values for these variables can be found in the configuration header file for each board located in the `U-Boot repo <https://github.com/kubostech/uboot>`__ under the 'include/configs' directory.
 
