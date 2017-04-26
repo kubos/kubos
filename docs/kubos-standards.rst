@@ -74,7 +74,7 @@ A few of the more *controversial* rules:
 -  Single space after periods and colons
 
 Documentation Standards
----------------------==
+-----------------------
 
 While creating clean and maintainable code is a high priority for our
 organization, writing successful documentation can be considered even
@@ -132,13 +132,13 @@ Some items to remember:
 -  Oxford commas should **always** be used
 
 Coding Standards
----------------=
+----------------
 
 This section covers the styling and standards for the various languages
 and tools that we use.
 
-C
--
+C Standards
+-----------
 
 `ClangFormat <https://clang.llvm.org/docs/ClangFormat.html>`__ is a
 series of tools that can be used to automatically correct any C coding
@@ -449,8 +449,8 @@ Do not rely on implicit conversion to bool in conditions.
     if (ptr)         // wrong
     if (ptr != NULL) // ok
 
-Python
-------
+Python Standards
+----------------
 
 `Python's PEP8 Style
 Guide <https://www.python.org/dev/peps/pep-0008/>`__ is our preferred
