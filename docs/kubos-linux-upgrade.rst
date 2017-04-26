@@ -89,8 +89,8 @@ in order to flash files to the board.
 
 Use the kubos flash command to load the package onto your board. Note:
 You might need to update your config.json file with the appropriate
-login information to access your board. See the 'Updating Credentials'
-section of :doc:`this document <user-app-on-iobc>` for more
+login information to access your board. See the FIXME: add ref 'Updating Credentials'
+section of :doc:`this document <working-with-the-iobc>` for more
 information.
 
 ::

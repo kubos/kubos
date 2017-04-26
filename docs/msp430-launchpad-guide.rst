@@ -25,7 +25,7 @@ Reference Documents
 
 **Kubos Documentation:**
 
--  FIXME: `Main HAL API documentation <index>`__ - Overview of
+-  :doc:`Main HAL API documentation <kubos-hal/index>` - Overview of
    the high-level HAL. Useful for things like k\_uart\_write.
 -  FIXME: `MSP430F5 Specific HAL API
    documentation <./kubos-hal/kubos-hal-msp430f5529/index.html>`__ -
@@ -76,6 +76,8 @@ Guide <http://www.ti.com/lit/ug/slau533d/slau533d.pdf>`__.
 Startup Code
 ------------
 
+Each project will contain a main() function.
+
 --------------
 
 **SUPER IMPORTANT** The MSP430's watchdog is on by default. It must
@@ -115,13 +117,13 @@ Guide or the FIXME: `MSP430's HAL
 Documentation <./kubos-hal/kubos-hal-msp430f5529/index.html>`__ for all
 of the supported options.
 
-FIXME: `UART <./kubos-hal/structKUARTConf.html>`__ - Word length - Does not
+`UART <kubos-hal/uart_api.html#_CPPv29KUARTConf>`__ - Word length - Does not
 support 9-bit mode
 
-FIXME: `I2C <./kubos-hal/structKI2CConf.html>`__ - Currently has all the same
+`I2C <kubos-hal/i2c_api.html#_CPPv28KI2CConf>`__ - Currently has all the same
 capabilities as the STM32F4
 
-FIXME: `SPI <./kubos-hal/structKSPIConf.html>`__ - Direction - Does not support
+`SPI <kubos-hal/spi_api.html#_CPPv28KSPIConf>`__ - Direction - Does not support
 1-line mode - Data Size - Does not support 16-bit mode
 
 Flashing the Board
@@ -311,7 +313,7 @@ dedicated to the debug console and slave mode hasn't been implemented
 for I2C or SPI.
 
 The Walkthrough:
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 
 Create the project
 

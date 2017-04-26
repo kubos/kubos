@@ -20,8 +20,8 @@ There are several U-Boot environment variables that are used to track the state 
 * recovery\_available - Indicates that recovery actions are available and should be taken, if necessary. 
 * bootlimit - The number of bad boots allowed before the system attempts to use altbootcmd instead of bootcmd to boot. 
 * bootcount - The number of boots that have been attempted. 
-* kubos\_curr\_version - The name of the kpack\ *.itb file that the current KubOS Linux kernel and rootfs were loaded from. 
-* kubos\_prev\_version - The name of the kpack\ *.itb file that was previously used to load the KubOS Linux kernel and rootfs.
+* kubos\_curr\_version - The name of the kpack \*.itb file that the current KubOS Linux kernel and rootfs were loaded from. 
+* kubos\_prev\_version - The name of the kpack \*.itb file that was previously used to load the KubOS Linux kernel and rootfs.
 * kubos\_curr\_tried - Indicates that reloading the current version has been attempted.
 
 The default values for these variables can be found in the configuration header file for each board located in the `U-Boot repo <https://github.com/kubostech/uboot>`__ under the 'include/configs' directory.

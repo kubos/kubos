@@ -1,7 +1,7 @@
 Developing Kubos Modules
 ========================
 
-The top level :doc:`Kubos <https://github.com/kubostech/kubos>` project
+The top level `Kubos <https://github.com/kubostech/kubos>`__ project
 contains all of the Kubos source modules and targets.
 
 Getting Started

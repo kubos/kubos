@@ -65,7 +65,7 @@ info@kubos.co.
    
     Kubos HAL <kubos-hal/index>
 
-TODO:
+.. todo::
     Kubos Core <@ref%20kubos-core-main>
     FreeRTOS <@ref%20freertos-main>
     CSP <@ref%20csp-main>
@@ -78,5 +78,5 @@ TODO:
 Indices and tables
 ==================
 
-* :ref:genindex
-* :ref:search
+* :ref:`genindex`
+* :ref:`search`
