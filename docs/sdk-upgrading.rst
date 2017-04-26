@@ -103,7 +103,7 @@ Beware - Updating your box will overwrite the filesystem inside the environment.
 Moving projects into synced folders prevents them from being overwritten
 since their actual location is external to the box. For more information
 on setting up synced folders see the following
-TODO: MAKE REF**:doc:`guide <sdk-installing#mount-directory>`**.
+FIXME: :ref:`guide <mount directory>`.
 
 To update the box run:
 

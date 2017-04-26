@@ -47,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Kubos'
-copyright = u'2017, kubos.co'
+copyright = u'2017, Kubos Corporation'
 author = u'kubos.co'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -160,4 +160,4 @@ breathe_projects = {
     "kubos-hal-stm32f4" : "../xml/hal/kubos-hal-stm32f4"
 }
 
-extensions += ['breathe']
+extensions += ['breathe', 'sphinx.ext.todo']
