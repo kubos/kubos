@@ -47,6 +47,8 @@ build it.
     $ kubos target kubos-linux-isis-gcc
     $ kubos build
 
+.. _updating-credentials:
+
 Updating Credentials
 --------------------
 
@@ -286,6 +288,8 @@ For example:
 ::
 
     $ kubos flash /home/vagrant/not-my-project/test-util.sh
+    
+.. _flash-troubleshooting:
 
 Flash Troubleshooting
 ---------------------

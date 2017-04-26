@@ -103,9 +103,11 @@ WARNING: THIS WILL OVERWRITE ALL FILES IN YOUR EXISTING BOX
 ::
 
         $ vagrant box update
+        
+.. _mount-directory:
 
-Mounting a Host Directory:
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Mounting a Host Directory
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the context of these documents, as well as virtual machines in
 general, the physical "main" computer is referred to as the "host". The
@@ -156,8 +158,8 @@ For more information on mounting volumes see the following `guide <https://www.v
 
 --------------
 
-Start the Vagrant Box:
-~~~~~~~~~~~~~~~~~~~~~~
+Start the Vagrant Box
+~~~~~~~~~~~~~~~~~~~~~
 
 To start the box, run:
 
