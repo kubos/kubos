@@ -1,0 +1,25 @@
+sudo: required
+
+language: c
+
+env:
+  global:
+    - BUILD_DIR=/tmp/kubos-build
+    - IMAGE=kubostech/travis-build
+  matrix:
+    - TARGET=stm32f407-disco-gcc@openkosmosorg/target-stm32f407-disco-gcc#master TESTS=0
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y python
+  - mkdir $BUILD_DIR
+  - git clone https://github.com/openkosmosorg/kubos-rt-example $BUILD_DIR/kubos-rt-example
+  - git clone https://github.com/openkosmosorg/kubos-core $BUILD_DIR/kubos-core
+  - cp -r $BUILD_DIR/kubos-core/travis $BUILD_DIR/kubos-rt-example/
+  - docker pull $IMAGE
+
+script:
+  - sh $BUILD_DIR/kubos-rt-example/travis/build.sh
