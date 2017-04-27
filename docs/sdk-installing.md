@@ -40,6 +40,12 @@ Vagrant requires a virtualization "provider". Currently the only provider that K
 
  * [Download](https://www.virtualbox.org/wiki/Downloads) the VirtualBox Extension Pack to enable passing USB devices into a virtual machine.
 
+If you're using Linux as your host operating system you will need to add yourself to the `vboxusers` group with the following command:
+
+    sudo usermod -aG vboxusers <username>
+
+You will need to logout and log back in to your host computer or passing usb devices through to your vagrant development environment will not work correctly.
+
 ### Install Vagrant {#install-vagrant}
 
 If you don't already have Vagrant installed see the Vagrant [installation documentation.](https://www.vagrantup.com/docs/installation)
