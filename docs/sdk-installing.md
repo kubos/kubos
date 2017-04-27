@@ -44,7 +44,7 @@ If you're using Linux as your host operating system you will need to add yoursel
 
     sudo usermod -aG vboxusers <username>
 
-You will need to logout and log back in to your host computer or passing usb devices through to your vagrant development environment will not work correctly.
+You will need to logout and log back in to your host computer, otherwise passing usb devices through to your vagrant development environment will not work correctly.
 
 ### Install Vagrant {#install-vagrant}
 
