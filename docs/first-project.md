@@ -21,7 +21,8 @@ At this point you will have a new terminal prompt inside your kubos-dev box.
 The simplest way to create a new KubOS RT project is by using the Kubos CLI. The `kubos init` command takes a project name and creates the project files and folders.
 
 **Note:** Inside of the build system there are several reserved words, which cannot be used as the name of the project. The most common of these are `test`, `source` and `include`.
-**Note:** Yotta, the build system the Kubos-CLI is based upon, requries project names to by hypen-delimitated or underscore_delimitated. CamelCased project names will cause warnings.
+
+**Note:** Yotta, the build system the Kubos CLI is based upon, requires project names to by hyphen-delimited or underscore-delimited. CamelCased project names will cause warnings.
 
         $ kubos init myproject
 
