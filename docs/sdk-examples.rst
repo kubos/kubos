@@ -29,11 +29,11 @@ KubOS RT Example
 +----------------------+-----------------+
 | High-level Component | Specific Area   |
 +======================+=================+
-| Kubos HAL            | GPIO            |
+| Kubos HAL [3]_       | GPIO            |
 +----------------------+-----------------+
-| CSP                  | Sockets, ping   |
+| CSP [4]_             | Sockets, ping   |
 +----------------------+-----------------+
-| FreeRTOS             | Threads, queues |
+| FreeRTOS [5]_        | Threads, queues |
 +----------------------+-----------------+
 
 This is the default application included when the ``kubos init`` command is executed. 
@@ -66,7 +66,7 @@ KubOS Linux Example
 +----------------------+------------------------+
 | High-level Component | Specific Area          |
 +======================+========================+
-| Kubos CSP            | sockets, ping, threads |
+| Kubos CSP [4]_       | sockets, ping, threads |
 +----------------------+------------------------+
 
 This is the default application included when the ``kubos init --linux`` command is executed.
@@ -88,11 +88,11 @@ Kubos Sensor Example
 +----------------------+------------------------+
 | High-level Component | Specific Area          |
 +======================+========================+
-| config.json          | Sensors                |
+| config.json [1]_     | Sensors                |
 +----------------------+------------------------+
-| Kubos Core           | altimeter, temperature |
+| Kubos Core [2]_      | altimeter, temperature |
 +----------------------+------------------------+
-| FreeRTOS             | Threads                |
+| FreeRTOS [5]_        | Threads                |
 +----------------------+------------------------+
 
 This application provides a streamlined approach to using the BME280 humidity/pressure sensor and the HTU21D temperature/humidity sensor.
@@ -107,11 +107,11 @@ Kubos CSP Example
 +----------------------+-----------------+
 | High-level Component | Specific Area   |
 +======================+=================+
-| Kubos HAL            | GPIO            |
+| Kubos HAL [3]_       | GPIO            |
 +----------------------+-----------------+
-| CSP                  | Sockets, ping   |
+| CSP [4]_             | Sockets, ping   |
 +----------------------+-----------------+
-| FreeRTOS             | Threads, queues |
+| FreeRTOS [5]_        | Threads, queues |
 +----------------------+-----------------+
 
 This application shows an example CSP interaction between client and server tasks.
@@ -140,13 +140,13 @@ Kubos I2C Example
 +----------------------+------------------------------+
 | High-level Component | Specific Area                |
 +======================+==============================+
-| config.json          | Sensors                      |
+| config.json [1]_     | Sensors                      |
 +----------------------+------------------------------+
-| Kubos Core           | HTU21D sensor, BNO055 sensor |
+| Kubos Core [2]_      | HTU21D sensor, BNO055 sensor |
 +----------------------+------------------------------+
-| Kubos HAL            | I2C, GPIO                    |
+| Kubos HAL [3]_       | I2C, GPIO                    |
 +----------------------+------------------------------+
-| FreeRTOS             | Threads                      |
+| FreeRTOS [5]_        | Threads                      |
 +----------------------+------------------------------+
 
 This application gives several examples of how to interact with I2C devices in a Kubos project:
@@ -175,13 +175,13 @@ Kubos SPI Example
 +----------------------+---------------+
 | High-level Component | Specific Area |
 +======================+===============+
-| config.json          | Sensors       |
+| config.json [1]_     | Sensors       |
 +----------------------+---------------+
-| Kubos Core           | BME280 sensor |
+| Kubos Core [2]_      | BME280 sensor |
 +----------------------+---------------+
-| Kubos HAL            | SPI, GPIO     |
+| Kubos HAL [3]_       | SPI, GPIO     |
 +----------------------+---------------+
-| FreeRTOS             | Threads       |
+| FreeRTOS [5]_        | Threads       |
 +----------------------+---------------+
 
 This application gives two examples of how to interact with SPI devices in a Kubos project:
@@ -206,11 +206,11 @@ Kubos SD Example
 +----------------------+---------------+
 | High-level Component | Specific Area |
 +======================+===============+
-| config.json          | FS            |
+| config.json [1]_     | FS            |
 +----------------------+---------------+
-| Kubos Core           | FatFS         |
+| Kubos Core [2]_      | FatFS         |
 +----------------------+---------------+
-| FreeRTOS             | Threads       |
+| FreeRTOS [5]_        | Threads       |
 +----------------------+---------------+
 
 This application runs a series of commands against an SD card connected to SPI bus 1 using the FatFS library.
@@ -245,13 +245,13 @@ The application covers how to:
     +----------------------+-------------------------------------------------+
     | High-level Component | Specific Area                                   |
     +======================+=================================================+
-    | Kubos SDK            | config.json                                     |
+    | config.json [1]_     | ?                                               |
     +----------------------+-------------------------------------------------+
-    | Kubos Slash          | Shell init, custom commands, custom subcommands |
+    | Kubos Slash [*]_     | Shell init, custom commands, custom subcommands |
     +----------------------+-------------------------------------------------+
-    | Kubos HAL            | LED                                             |
+    | Kubos HAL [3]_       | LED                                             |
     +----------------------+-------------------------------------------------+
-    | FreeRTOS             | Threads                                         |
+    | FreeRTOS [5]_        | Threads                                         |
     +----------------------+-------------------------------------------------+
     
     This application gives an example of how to initialize and interact with the Slash shell library.
@@ -269,4 +269,15 @@ The application covers how to:
     - ``led off <pin>`` - Turns off the specified LED
     - ``led blink <pin> [n=1]`` - Turns the LED on and off the specified number of times (default: 1 time)
     
-    
+References
+----------
+
+.. [1] :doc:`config.json <sdk-project-config>` - Kubos project file for custom configuration options
+.. [2] :doc:`Kubos Core <kubos-core/index>` - Kubos built-in peripheral device support
+.. [3] :doc:`Kubos HAL <kubos-hal/index>` - Kubos hardware abstraction for interfacing with peripheral devices
+.. [4] :doc:`CSP <libcsp/index>` - (Cubesat Space Protocol) Lightweight communication protocol
+.. [5] `FreeRTOS <http://www.freertos.org/>`__ - The RTOS which KubOS RT is built on
+
+.. todo::
+
+    .. [*] `Kubos Slash`
