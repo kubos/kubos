@@ -15,8 +15,8 @@
  * limitations under the License.
  */
  /**
-   * @defgroup GPIO
-   * @addtogroup GPIO
+   * @defgroup STM32F4_GPIO
+   * @addtogroup STM32F4_GPIO
    * @{
    */
 #ifndef KUBOS_HAL_STM32F4_PINS_H

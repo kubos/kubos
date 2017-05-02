@@ -41,8 +41,9 @@ DOC_TAG_DIR = """
 # "ipc"]
 
 DOCS_DIRS = [
-"hal/kubos-hal", 
-"hal/kubos-hal-stm32f4"]
+"hal/kubos-hal",
+"hal/kubos-hal-stm32f4"
+]
 
 def make_tags_str(dir, doc_tags):
     tags_str = ""
