@@ -1,5 +1,5 @@
 STM32F4 GPIO API
 -----------------
 
-.. doxygengroup:: GPIO
+.. doxygengroup:: STM32F4_GPIO
     :project: kubos-hal-stm32f4
