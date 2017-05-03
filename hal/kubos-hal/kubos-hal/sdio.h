@@ -54,13 +54,13 @@ typedef struct
 // Public HAL interface
 
 /**
- * Performs low level SDIO hardware initialization
+ * Performs low-level SDIO hardware initialization
  * @return KSDIOStatus SDIO_OK if successful, otherwise error
  */
 KSDIOStatus k_sdio_init();
 
 /**
- * Performs low level SDIO hardware termination
+ * Performs low-level SDIO hardware termination
  */
 void k_sdio_terminate();
 
@@ -78,8 +78,8 @@ KSDIOStatus k_sdio_write_blocks(uint32_t * buffer, uint64_t addr, uint32_t block
  * Reads blocks of data via SDIO
  * @param buffer [out] data buffer to read data into
  * @param addr [in] address on sdcard to read from
- * @param block_size [in] size of each block to write
- * @param count [in] number of blocks to write
+ * @param block_size [in] size of each block to read
+ * @param count [in] number of blocks to read
  * @return KSDIOStatus SDIO_OK if successful, otherwise error code
  */
 KSDIOStatus k_sdio_read_blocks(uint32_t * buffer, uint64_t addr, uint32_t block_size, uint32_t count);
@@ -99,13 +99,13 @@ k_sdio_card_info_t k_sdio_card_info();
 // Private hardware specific interfaces
 
 /**
- * Performs low level SDIO hardware initialization - *Private interface for platform specific implementation*
+ * Performs low-level SDIO hardware initialization - *Private interface for platform specific implementation*
  * @return KSDIOStatus SDIO_OK if successful, otherwise error
  */
 KSDIOStatus kprv_sdio_init();
 
 /**
- * Performs low level SDIO hardware termination - *Private interface for platform specific implementation*
+ * Performs low-level SDIO hardware termination - *Private interface for platform specific implementation*
  */
 void kprv_sdio_terminate();
 

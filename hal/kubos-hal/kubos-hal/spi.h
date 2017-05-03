@@ -232,7 +232,7 @@ typedef struct {
  * @brief Configures and enables a SPI bus
  *
  * This function is used to configure and enable SPI buses for further usage (reading/writing).
- * Calling this function is always the first step before using any SPI perpherial. This function
+ * Calling this function is always the first step before using any SPI peripheral. This function
  * takes a SPI bus number (KSPINum) and SPI configuration structure (KSPIConf). The SPI bus number
  * *must* be a valid value from the KSPINum enum. The configuration can either be created manually or
  * k_spi_conf_defaults can be used to retreive the default configuration.
@@ -254,7 +254,7 @@ KSPIConf conf = {
 k_spi_init(K_SPI1, &conf);
  * @endcode
  *
- * @note This function delegates the low level initialization to the platform specific @ref kprv_spi_dev_init
+ * @note This function delegates the low-level initialization to the platform specific @ref kprv_spi_dev_init
  *
  * @param spi number spi bus to initialize
  * @param conf config values to initialize with
@@ -264,7 +264,7 @@ void k_spi_init(KSPINum spi, KSPIConf * conf);
 /**
  * @brief Terminates a SPI bus
  *
- * This function is used to terminate a active SPI bus. After calling this function, the bus number
+ * This function is used to terminate an active SPI bus. After calling this function, the bus number
  * used will *not* be available for usage in reading/writing functions.
  *
  * Example usage:
@@ -279,7 +279,7 @@ k_spi_read(K_SPI1, buffer, length);
 k_spi_terminate(K_SPI1);
  * @endcode
  *
- * @note This function delegates the low level termination to the platform specific @ref kprv_spi_dev_terminate
+ * @note This function delegates the low-level termination to the platform specific @ref kprv_spi_dev_terminate
  *
  * @param spi spi bus to terminate
  */
@@ -341,7 +341,7 @@ write_status = k_spi_write(K_SPI1, buffer, 10);
 chip_deselect(SPI_CS1);
  * @endcode
  *
- * @note This function delegates the low level actions to the platform specific @ref kprv_spi_write.
+ * @note This function delegates the low-level actions to the platform specific @ref kprv_spi_write.
  *
  * @param spi spi bus to write to
  * @param buffer pointer to data buffer
@@ -375,7 +375,7 @@ read_status = k_spi_read(K_SPI1, buffer, 10);
 chip_deselect(SPI_CS1);
  * @endcode
  *
- * @note This function delegates the low level actions to the platform specific @ref kprv_spi_read.
+ * @note This function delegates the low-level actions to the platform specific @ref kprv_spi_read.
  *
  * @param spi spi bus to read from
  * @param buffer pointer to data buffer
@@ -410,7 +410,7 @@ read_status = k_spi_write_read(K_SPI1, write_buffer, read_buffer, 10);
 chip_deselect(SPI_CS1);
  * @endcode
  *
- * @note This function delegates the low level actions to the platform specific kprv_spi_write_read.
+ * @note This function delegates the low-level actions to the platform specific kprv_spi_write_read.
  *
  * @param spi spi bus to write to
  * @param txBuffer pointer to data buffer to write from
@@ -432,12 +432,12 @@ KSPIStatus k_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer,
 KSPI * kprv_spi_get(KSPINum spi);
 
 /**
- * @brief Low level SPI write
+ * @brief Low-level SPI write
  *
  * This function is called by k_spi_write and is intended to perform the necessary low-level
  * actions for a SPI write.
  *
- * @note This function must be implemented by each platform specific hal
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to write to
  * @param buffer pointer to data buffer
@@ -447,12 +447,12 @@ KSPI * kprv_spi_get(KSPINum spi);
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len);
 
 /**
- * @brief Low level SPI read
+ * @brief Low-level SPI read
  *
  * This function is called by k_spi_read and is intended to perform the necessary low-level
  * actions for a SPI read.
  *
- * @note This function must be implemented by each platform specific hal
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to read from
  * @param buffer pointer to data buffer
@@ -462,12 +462,12 @@ KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len);
 KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len);
 
 /**
- * @brief Low level SPI write and read
+ * @brief Low-level SPI write and read
  *
  * This function is called by k_spi_write_read and is intended to perform the necessary low-level
  * actions for a SPI write and read.
  *
- * @note This function must be implemented by each platform specific hal
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to write to
  * @param txBuffer pointer to data buffer to write from
@@ -478,12 +478,12 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len);
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len);
 
 /**
- * @brief Low level SPI bus initialization
+ * @brief Low-level SPI bus initialization
  *
  * This function is called by k_spi_init and is intended to perform the necessary low-level
  * initialization and configuration of a SPI bus.
  *
- * @note This function must be implemented by each platform specific hal
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to initialize
  * @return KSPIStatus SPI_OK on success, otherwise failure
@@ -491,12 +491,12 @@ KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuff
 KSPIStatus kprv_spi_dev_init(KSPINum spi);
 
 /**
- * @brief Low level SPI bus termination
+ * @brief Low-level SPI bus termination
  *
  * This function is called by k_spi_terminate and is intended to perform the necessary low-level
  * actios to power-down and disable a SPI bus.
  *
- * @note This function must be implemented by each platform specific hal
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to terminate
  * @return KSPIStatus SPI_OK on success, otherwise failure
