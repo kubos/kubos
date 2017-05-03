@@ -1,0 +1,6 @@
+{
+    "sensors": {
+	"htu21d": { "i2c_bus": "K_I2C1" },
+	"bno055": { "i2c_bus": "K_I2C1" }        
+    }
+}
