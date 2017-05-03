@@ -4,10 +4,10 @@ Using UART
 Configuration
 ^^^^^^^^^^^^^
 
-The first step in using uart is to configure and bring up the interface.
-The uart hal provides a configuration structure with the standard uart
+The first step in using UART is to configure and bring up the interface.
+The UART HAL provides a configuration structure with the standard UART
 options. This structure should be filled out according to the project's
-uart configuration and then it may be used to initialize the interface
+UART configuration and then it may be used to initialize the interface
 in use.
 
 .. code-block:: c
@@ -22,9 +22,9 @@ in use.
     };
     k_uart_init(K_UART1, &conf);
 
-Another option for configuration is to use our uart defaults. The
+Another option for configuration is to use our UART defaults. The
 k_uart_conf_defaults function will give you an already filled out
-configuration struct with the standard uart parameters (8 bit words, 1
+configuration struct with the standard UART parameters (8 bit words, 1
 stop bit, no parity). The only thing that needs to be specified is the
 interface in use.
 
@@ -37,7 +37,7 @@ interface in use.
 Reading
 ^^^^^^^
 
-Reading from uart is a pretty simple operation, a buffer and length is
+Reading from UART is a pretty simple operation, a buffer and length is
 passed in. The buffer is filled and the number of characters read are
 passed back.
 
@@ -51,7 +51,7 @@ passed back.
 Writing
 ^^^^^^^
 
-Writing to uart is also a simple operation, a buffer and length are
+Writing to UART is also a simple operation, a buffer and length are
 passed in. The buffer is read from and the number of characters written
 are passed back.
 

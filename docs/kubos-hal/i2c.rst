@@ -4,10 +4,10 @@ Using I2C
 Configuration
 ^^^^^^^^^^^^^
 
-The first step in using i2c is to configure and bring up the interface.
-The i2c hal provides a configuration structure with the standard i2c
+The first step in using I2C is to configure and bring up the interface.
+The I2C HAL provides a configuration structure with the standard I2C
 options. This structure should be filled out according to the project's
-i2c configuration and then it may be used to initialize the interface in
+I2C configuration and then it may be used to initialize the interface in
 use.
 
 .. code-block:: c
@@ -20,7 +20,7 @@ use.
 
     k_i2c_init(K_I2C1, &conf);
 
-Another option for configuration is to use our i2c defaults. The
+Another option for configuration is to use our I2C defaults. The
 k_i2c_default_dev_init function will initialize the specified
 interface with the default configuration values.
 
@@ -31,7 +31,7 @@ interface with the default configuration values.
 Reading
 ^^^^^^^
 
-Reading from i2c is a pretty simple operation, the slave address, a
+Reading from I2C is a pretty simple operation, the slave address, a
 buffer and length is passed in. The buffer is filled and the number of
 characters read are passed back.
 
@@ -46,7 +46,7 @@ characters read are passed back.
 Writing
 ^^^^^^^
 
-Writing to i2c is also a simple operation, the slave address, a buffer
+Writing to I2C is also a simple operation, the slave address, a buffer
 and length are passed in. The buffer is read from and the number of
 characters written are passed back.
 

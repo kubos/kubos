@@ -61,7 +61,6 @@ info@kubos.co.
 .. toctree::
    :caption: Top-Level APIs
    :hidden:
-   :maxdepth: 1
    
     Kubos HAL <kubos-hal/index>
 
