@@ -11,12 +11,16 @@ Kubos HAL Documenation
 
 .. toctree::
    :caption: APIs
-   :name: apis
+   :name: hal-apis
 
    gpio
-   gpio_api_stm
    i2c_api
    sdio
    spi_api
-   spi_api_stm
    uart_api
+
+.. toctree::
+   :caption: Platform HALs
+   :name:  platform-hals
+
+   STM32F4 <kubos-hal-stm32f4/index>
