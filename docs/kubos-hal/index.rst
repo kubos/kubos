@@ -1,9 +1,9 @@
-Kubos HAL Documenation
-======================
+Kubos HAL Documentation
+=======================
 
 .. toctree::
    :caption: Guides
-   :name: guides
+   :name: hal-guides
 
    i2c
    spi
@@ -21,6 +21,6 @@ Kubos HAL Documenation
 
 .. toctree::
    :caption: Platform HALs
-   :name:  platform-hals
+   :name:  hal-platforms
 
    STM32F4 <kubos-hal-stm32f4/index>
