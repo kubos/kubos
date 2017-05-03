@@ -28,7 +28,7 @@
 #include <csp/arch/csp_semaphore.h>
 
 /**
- * Number of i2c buses available. Derived from value in target.json
+ * Number of I2C buses available. Derived from value in target.json
  * @code
  * "config": {
  *   "hardware": {
@@ -44,7 +44,7 @@
 #endif
 
 /**
- * Default i2c bus. Derived from value in target.json
+ * Default I2C bus. Derived from value in target.json
  * @code
  * "config": {
  *   "hardware": {
@@ -62,7 +62,7 @@
 #endif
 
 /**
- * Available i2c buses
+ * Available I2C buses
  */
 typedef enum {
     K_I2C_NO_BUS = 0,
@@ -78,7 +78,7 @@ typedef enum {
 } KI2CNum;
 
 /**
- * Expected addressing mode of i2c bus
+ * Expected addressing mode of I2C bus
  */
 typedef enum {
     K_ADDRESSINGMODE_7BIT = 0,
@@ -86,7 +86,7 @@ typedef enum {
 } I2CAddressingMode;
 
 /**
- * Expected role of i2c bus
+ * Expected role of I2C bus
  * @warning Only the Master role is available as of v0.0.4
  */
 typedef enum {
@@ -104,19 +104,19 @@ typedef struct {
 	 */
     I2CAddressingMode addressing_mode;
 	/**
-	 * The role of the i2c bus.
+	 * The role of the I2C bus.
 	 * Should be either master or slave, as specified by the @ref I2CRole enumerator
 	 * @warning Only the Master role is available as of v0.1.0
 	 */
     I2CRole role;
     /**
-     * The clock speed of the i2c bus
+     * The clock speed of the I2C bus
      */
     uint32_t clock_speed;
 } KI2CConf;
 
 /**
- * Structure used to hold I2C bus description/configuration information
+ * Structure used to store I2C bus description/configuration information
  */
 typedef struct {
     /**
@@ -134,7 +134,7 @@ typedef struct {
 } KI2C;
 
 /**
- * i2c function status
+ * I2C function status
  */
 typedef enum {
     I2C_OK = 0,
@@ -154,7 +154,7 @@ typedef enum {
  * 
  * This function is used to configure and enable I2C buses for further usage (reading/writing).
  * It is always the first required step before using any I2C peripheral. The k_i2c_init function
- * takes an i2c bus number (KI2CNum) and i2c configuration structure (KI2CConf). The i2c bus number *must* be a valid
+ * takes an I2C bus number (KI2CNum) and I2C configuration structure (KI2CConf). The I2C bus number *must* be a valid
  * value of the KI2CNum enum. The configuration can either be manually created or k_i2c_conf_defaults
  * can be used to retreive the default configuration. 
  
@@ -170,7 +170,10 @@ typedef enum {
  k_i2c_init(K_I2C1, &conf);
  * @endcode
  *
- * @param i2c i2c bus to initialize
+ * @note The functions k_i2c_default_init or k_i2c_default_dev_init can also be used to initialize an
+ * I2C device. They provide nice convience wrappers around k_i2c_init.
+ *
+ * @param i2c I2C bus to initialize
  * @param conf config values to initialize with
  */
 void k_i2c_init(KI2CNum i2c, KI2CConf *conf);
@@ -190,7 +193,7 @@ k_i2c_read(K_I2C1, addr, buffer, 10);
 // shut down bus
 k_i2C_terminate(K_I2C1);
  * @endcode
- * @param i2c i2c bus to terminate
+ * @param i2c I2C bus to terminate
  */
 void k_i2c_terminate(KI2CNum i2c);
 
@@ -277,12 +280,12 @@ KI2CStatus write_status;
 write_status = k_i2c_write(K_I2C1, slave_addr, &cmd, 1);
  * @endcode
  *
- * In order to ensure safe i2c sharing, this function is semaphore locked.
+ * In order to ensure safe I2C sharing, this function is semaphore locked.
  * There is one semaphore per bus. This function will block indefinitely
  * while waiting for the semaphore.
  *
- * @param i2c i2c bus to transmit over
- * @param addr address of target i2c device
+ * @param i2c I2C bus to transmit over
+ * @param addr address of target I2C device
  * @param ptr pointer to data buffer
  * @param len length of data in buffer
  * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
@@ -305,12 +308,12 @@ KI2CStatus read_status;
 read_status = k_i2c_read(K_I2C1, slave_addr, buffer, read_len);
  * @endcode
  *
- * In order to ensure safe i2c sharing, this function is semaphore locked.
+ * In order to ensure safe I2C sharing, this function is semaphore locked.
  * There is one semaphore per bus. This function will block indefinitely
  * while waiting for the semaphore.
  *
- * @param i2c i2c bus to read from
- * @param addr address of target i2c device
+ * @param i2c I2C bus to read from
+ * @param addr address of target I2C device
  * @param ptr pointer to data buffer
  * @param len length of data to read
  * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
@@ -318,38 +321,38 @@ read_status = k_i2c_read(K_I2C1, slave_addr, buffer, read_len);
 KI2CStatus k_i2c_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
 
 /**
- * Fetches i2c bus data structure
- * @param i2c number of i2c bus to fetch
+ * Fetches I2C bus data structure
+ * @param i2c number of I2C bus to fetch
  * @return KI2C* pointer to data structure
  */
 KI2C* kprv_i2c_get(KI2CNum i2c);
 
 /**
- * Low level hal device initialization
- * This is implemented by the device specific hal
- * @param i2c i2c bus to initialize
+ * Low-level HAL device initialization
+ * This is implemented by the device specific HAL
+ * @param i2c I2C bus to initialize
  * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
 KI2CStatus kprv_i2c_dev_init(KI2CNum i2c);
 
 /**
- * Low level hal i2c termination
- * This is implemented by the device specific hal
- * @param i2c i2c bus to terminate
+ * Low-level HAL I2C termination
+ * This is implemented by the device specific HAL
+ * @param i2c I2C bus to terminate
  * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
 KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c);
 
 /**
- * @brief Low level hal I2C write (as master)
+ * @brief Low-level HAL I2C write (as master)
  *
  * This function is called by k_i2c_write and is intended to perform the neccesary low-level
  * actions for an I2C write (as a master).
  *
  * ** This function must be implemented for each platform specific HAL. **
  *
- * @param i2c i2c bus to write from
- * @param addr i2c addr to write to
+ * @param i2c I2C bus to write from
+ * @param addr I2C addr to write to
  * @param ptr data buffer
  * @param len length of data in buffer
  * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
@@ -357,15 +360,15 @@ KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c);
 KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
 
 /**
- * @brief Low level hal I2C read (as master)
+ * @brief Low-level HAL I2C read (as master)
  *
  * This function is called by k_i2c_read and is intended to perform the neccesary low-level
  * actions for an I2C read (as a master).
  *
  * ** This function must be implemented for each platform specific HAL. **
  *
- * @param i2c i2c bus to read from
- * @param addr i2c addr to read from
+ * @param i2c I2C bus to read from
+ * @param addr I2C addr to read from
  * @param ptr data buffer
  * @param len length of data expected to read
  * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
@@ -373,7 +376,7 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
 KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
 
 /**
- * @brief Low level hal I2C write (as slave)
+ * @brief Low-level HAL I2C write (as slave)
  *
  * This function will be called by k_i2c_write and is intended to perform the neccesary low-level
  * actions for an I2C write (as a slave).
@@ -382,8 +385,8 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
  *
  * @warning I2C slave functionality is not implemented as of v0.0.4
  *
- * @param i2c i2c bus to write from
- * @param addr i2c addr to write to
+ * @param i2c I2C bus to write from
+ * @param addr I2C addr to write to
  * @param ptr data buffer
  * @param len length of data in buffer
  * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
@@ -391,7 +394,7 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
 KI2CStatus kprv_i2c_slave_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
 
 /**
- * @brief Low level hal I2C read (as slave)
+ * @brief Low-level HAL I2C read (as slave)
  *
  * This function will be called by k_i2c_read and is intended to perform the neccesary low-level
  * actions for an I2C read (as a slave). 
@@ -400,8 +403,8 @@ KI2CStatus kprv_i2c_slave_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
  *
  * @warning I2C slave functionality is not implemented as of v0.0.4
  *
- * @param i2c i2c bus to read from
- * @param addr i2c addr to read from
+ * @param i2c I2C bus to read from
+ * @param addr I2C addr to read from
  * @param ptr data buffer
  * @param len length of data expected to read
  * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
