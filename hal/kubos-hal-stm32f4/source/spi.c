@@ -15,8 +15,8 @@
  * limitations under the License.
  */
  /**
-   * @defgroup SPI
-   * @addtogroup SPI
+   * @defgroup STM32F4_HAL_SPI
+   * @addtogroup STM32F4_HAL_SPI
    * @{
    */
 #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)

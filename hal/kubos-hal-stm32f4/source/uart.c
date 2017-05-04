@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-   * @defgroup UART
-   * @addtogroup UART
-   * @{
-   */
+/**
+  * @defgroup STM32F4_HAL_UART
+  * @addtogroup STM32F4_HAL_UART
+  * @{
+  */
 
 #if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include "kubos-hal/gpio.h"
