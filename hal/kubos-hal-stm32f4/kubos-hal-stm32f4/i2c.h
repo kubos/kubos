@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-  * @defgroup STM32F4_HAL_I2C
-  * @addtogroup STM32F4_HAL_I2C
-  * @{
-  */
+/**
+ * @defgroup STM32F4_HAL_I2C STM32F4 HAL I2C Interface
+ * @addtogroup STM32F4_HAL_I2C
+ * @{
+ */
 #if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #ifndef K_I2C_STM32F4
 #define K_I2C_STM32F4
@@ -29,7 +29,9 @@
 /** Structure defining pins + config for I2C device */
 typedef struct
 {
-    /** SCL pin number */
+    /** 
+     * SCL pin number
+     */
     uint16_t scl;
     /** SCL pin mode */
     uint16_t scl_mode;

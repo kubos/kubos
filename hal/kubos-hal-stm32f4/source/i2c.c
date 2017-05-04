@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 /**
- * @defgroup STM32F4_HAL_I2C STM32F4 HAL I2C Interface
  * @addtogroup STM32F4_HAL_I2C
  * @{
  */
