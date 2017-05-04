@@ -342,6 +342,25 @@ Each of the objects in more detail:
     
 .. json:object:: uart-defaults
 
+    Default connection settings for all UART buses
+    
+    :property integer baudRate: Default bus speed
+    :property wordLen: Default word length
+    :proptype wordLen: :cpp:enum:`KWordLen`
+    :property stopBits: Default number of stop bits
+    :proptype stopBits: :cpp:enum:`KStopBits`
+    :property parity: Default parity setting
+    :proptype parity: :cpp:enum:`KParity`
+    :property integer rxQueueLen: Default size of bus' RX queue
+    :property integer txQueueLen: Default size of bus' TX queue
+    
+.. json:object:: uart-bus
+
+    UART bus definition
+    
+    :property pin tx: Bus transmit pin
+    :property pin rx: Bus receive pin
+    
 .. json:object:: spi
 
     Availability and properties of SPI on the target device
@@ -351,6 +370,37 @@ Each of the objects in more detail:
     :proptype defaults: :json:object:`spi-defaults`
     :property spi{n}: The `n`th SPI bus
     :proptype spi{n}: :json:object:`spi-bus`
+    
+.. json:object:: spi-defaults
+
+    Default connection settings for all SPI buses
+    
+    :property bus: Default SPI bus
+    :proptype bus: :cpp:enum:`KSPINum`
+    :property role: Default bus role
+    :proptype role: :cpp:enum:`SPIRole`
+    :property direction: Default SPI bus direction/s
+    :proptype direction: :cpp:enum:`SPIDirection`
+    :property dataSize: Default data size
+    :proptype dataSize: :cpp:enum:`SPIDataSize`
+    :property clockPolarity: Default clock polarity
+    :proptype clockPolarity: :cpp:enum:`SPIClockPolarity`
+    :property clockPhase: Defaut clock phase
+    :proptype clockPase: :cpp:enum:`SPIClockPhase`
+    :property firstBit: Default endianness
+    :property firstBit: :cpp:enum:`SPIFirstBit`
+    :property speed: Default bus speed
+    
+.. json:object:: spi-bus
+
+    SPI bus definition
+    
+    :property pin mosi: Master-out pin
+    :property pin miso: Master-in pin
+    :property pin sck: Clock pin
+    :property pin cs: Chip-select pin
+    :property pin port: GPIO port that the SPI pins belong to
+    :property string alt: todo
     
 .. json:object:: cmsis
 
