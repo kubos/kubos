@@ -14,10 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-   * @addtogroup GPIO
-   * @{
-   */
+
+/**
+ * @addtogroup STM32F4_HAL_GPIO
+ * @{
+ */
 #include "kubos-hal/gpio.h"
 #include "kubos-hal-stm32f4/stm32f4_gpio.h"
 

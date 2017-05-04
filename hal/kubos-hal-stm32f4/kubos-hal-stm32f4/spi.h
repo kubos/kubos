@@ -14,6 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @defgroup STM32F4_HAL_SPI
+ * @addtogroup STM32F4_HAL_SPI
+ * @{
+ */
 #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #ifndef K_SPI_HAL_H
 #define K_SPI_HAL_H
@@ -50,3 +55,5 @@ typedef struct
 
 #endif
 #endif
+
+/* @} */

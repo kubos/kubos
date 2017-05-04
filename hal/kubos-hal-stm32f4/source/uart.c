@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-   * @defgroup UART STM32F4 HAL UART interface
-   * @addtogroup UART
-   * @{
-   */
+/**
+ * @defgroup STM32F4_HAL_UART STM32F4 HAL UART interface
+ * @addtogroup STM32F4_HAL_UART
+ * @{
+ */
 
 #if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include "kubos-hal/gpio.h"
@@ -340,8 +340,6 @@ KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
 
     return UART_OK;
 }
-
-
 
 /**
  * Internal function to process triggered interrupt

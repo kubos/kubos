@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-   * @defgroup SPI STM32F4 HAL SPI Interface
-   * @addtogroup SPI
-   * @{
-   */
+/**
+ * @defgroup STM32F4_HAL_SPI STM32F4 HAL SPI Interface
+ * @addtogroup STM32F4_HAL_SPI
+ * @{
+ */
 #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #include "kubos-hal-stm32f4/spi.h"
 #include "kubos-hal-stm32f4/pins.h"

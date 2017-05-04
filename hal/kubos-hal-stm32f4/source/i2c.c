@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-   * @defgroup I2C STM32F4 HAL I2C Interface
-   * @addtogroup I2C
-   * @{
-   */
+/**
+ * @defgroup STM32F4_HAL_I2C STM32F4 HAL I2C Interface
+ * @addtogroup STM32F4_HAL_I2C
+ * @{
+ */
 
 #if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
