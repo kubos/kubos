@@ -207,105 +207,173 @@ Each of the objects in more detail:
 
 .. json:object:: hardware
 
-    Description of board's hardware peripherals
+    Description of target board's hardware peripherals
     
     :property console: Debug console
-    :proptype console: :json:object:`console`
+    :proptype console: :json:object:`console <hardware.console>`
     :property integer externalClock: Clock rate of external clock
-    :property pins: todo
-    :proptype pins: :json:object:`pins`
+    :property pins: Custom name -> pin mapping
+    :proptype pins: :json:object:`pins <hardware.pins>`
     :property test-pins: todo
-    :proptype test-pins: :json:object:`test-pins`
-    :property i2c: todo
-    :proptype i2c: :json:object:`i2c`
-    :property uart: todo
-    :proptype uart: :json:object:`uart`
-    :property spi: todo
-    :proptype spi: :json:object:`spi`
+    :proptype test-pins: :json:object:`test-pins <hardware.test-pins>`
+    :property i2c: Availability and properties of I2C
+    :proptype i2c: :json:object:`i2c <hardware.i2c>`
+    :property uart: Availability and properties of UART
+    :proptype uart: :json:object:`uart <hardware.uart>`
+    :property spi: Availability and properites of SPI
+    :proptype spi: :json:object:`spi <hardware.spi>`
     
-.. json:object:: console
+.. json:object:: hardware.console
 
     The debug UART console
 
-    :property string uart: UART bus to connect to. Will be in the 
-      form ``K_UART{n}``, where `n` matches a defined :json:object:`uart-bus`
-    :property string baudRate: Connection speed
-    :options baudRate: default 115200
+    :property uart: UART bus to connect to
+    :proptype uart: :cpp:enum:`KUARTNum`
+    :property string baudRate: `(Default: "115200")` Connection speed
     
-.. json:object:: pins
+    **Example**::
+    
+        {
+            "hardware": {
+                "console": {
+                    "uart": "K_UART1",
+                    "baudRate": "9600"
+                }
+            }
+        }
+    
+.. json:object:: hardware.pins
 
-    todo
+    Custom name -> pin mapping. Allows more readable pin names to be used in Kubos projects.
     
     :property pin {pin-name}: Pin name/value pair
     
-.. json:object:: test-pins
+    **Example**::
+     
+        {
+            "hardware": {
+                "pins": {
+                    "LED1": "PA1",
+                    "LED2": "PA2",
+                    "USER_BUTTON": "PA3"
+                }
+            }
+        }
+    
+.. json:object:: hardware.test-pins
 
     todo
     
     :property spi:
-    :proptype spi: :json:object:`test-pins/spi`
+    :proptype spi: :json:object:`spi <hardware.test-pins.spi>`
     :property i2c:
-    :proptype i2c: :json:object:`test-pins/i2c`
+    :proptype i2c: :json:object:`i2c <hardware.test-pins.i2c>`
     :property serial:
-    :proptype serial: :json:object:`test-pins/serial`
+    :proptype serial: :json:object:`serial <hardware.test-pins.serial>`
     
-.. json:object:: test-pins/spi
+.. json:object:: hardware.test-pins.spi
 
-    SPI connection pins
+    SPI connection test pins
     
     :property pin mosi: Master-out pin
     :property pin miso: Master-in pin
     :property pin sclk: Slave clock pin
     :property pin ssel: Slave-select pin
 
-.. json:object:: test-pins/i2c
+.. json:object:: hardware.test-pins.i2c
 
-    I2C connection pins
+    I2C connection test pins
 
     :property pin sda: Data pin
     :property pin scl: Clock pin
 
-.. json:object:: test-pins/serial
+.. json:object:: hardware.test-pins.serial
 
-    Serial connection pins
+    Serial connection test pins
     
     :property pin tx: Transmit pin
     :property pin rx: Receive pin
     
-.. json:object:: i2c
+.. json:object:: hardware.i2c
 
     Availability and properties of I2C on the target device
     
     :property integer count: Number of I2C buses available
-    :property defaults: Default setting for all I2C buses
-    :proptype defaults: :json:object:`i2c-defaults`
+    :property defaults: Default I2C connection settings
+    :proptype defaults: :json:object:`defaults <hardware.i2c.defaults>`
     :property i2c{n}: I2C bus definitions
-    :proptype i2c{n}: :json:object:`i2c-bus`
+    :proptype i2c{n}: :json:object:`bus <hardware.i2c.bus>`
     
-.. json:object:: i2c-defaults
+    **Example**::
+    
+        {
+            "hardware": {
+              "i2c": {
+                "count": 2,
+                "defaults": {
+                  "bus": "K_I2C1",
+                  "role": "K_MASTER",
+                  "clockSpeed": 100000,
+                  "addressingMode": "K_ADDRESSINGMODE_7BIT"
+                },
+                "i2c1": {
+                  "scl": {
+                    "pin": "PB6",
+                    "mode": "GPIO_MODE_AF_PP",
+                    "pullup": "GPIO_NOPULL",
+                    "speed": "GPIO_SPEED_MEDIUM"
+                  },
+                  "sda": {
+                    "pin": "PB7",
+                    "mode": "GPIO_MODE_AF_OD",
+                    "pullup": "GPIO_PULLUP",
+                    "speed": "GPIO_SPEED_MEDIUM"
+                  },
+                  "alt": "GPIO_AF4_I2C1"
+                },
+                "i2c2": {
+                  "scl": {
+                    "pin": "PB10",
+                    "mode": "GPIO_MODE_AF_PP",
+                    "pullup": "GPIO_NOPULL",
+                    "speed": "GPIO_SPEED_MEDIUM"
+                  },
+                  "sda": {
+                    "pin": "PB11",
+                    "mode": "GPIO_MODE_AF_OD",
+                    "pullup": "GPIO_PULLUP",
+                    "speed": "GPIO_SPEED_MEDIUM"
+                  },
+                  "alt": "GPIO_AF4_I2C2"
+                }
+              }
+            }
+        }
+    
+.. json:object:: hardware.i2c.defaults
 
-    Default connection settings for all I2C buses
+    Default I2C connection settings
     
     :property bus: The default I2C bus
     :proptype bus: :cpp:enum:`KI2CNum`
-    :property role: Default master/slave role
+    :property role: Default communication role
     :proptype role: :cpp:enum:`I2CRole`
-    :proptype role:  
     :property integer clockSpeed: Default bus speed
     :property addressingMode: I2C addressing mode
     :proptype addressingMode: :cpp:enum:`I2CAddressingMode`
     
-.. json:object:: i2c-bus
+.. json:object:: hardware.i2c.bus
 
     I2C bus definition
     
     :property scl: Clock line settings
-    :proptype scl: :json:object:`scl`
+    :proptype scl: :json:object:`scl <hardware.i2c.bus.scl>`
     :property sda: Data line settings
-    :proptype sda: :json:object:`sda`
-    :property alt: todo
+    :proptype sda: :json:object:`sda <hardware.i2c.bus.sda>`
+    :property string alt: `(STM32F4* only)` GPIO alternate function mapping
+    :options alt: GPIO_AFx_I2Cy
     
-.. json:object:: scl
+.. json:object:: hardware.i2c.bus.scl
 
     I2C bus clock line settings
     
@@ -317,7 +385,7 @@ Each of the objects in more detail:
     :property enum speed: Clock line speed
     :options speed: GPIO_SPEED_[LOW, MEDIUM, FAST, HIGH]
 
-.. json:object:: sda
+.. json:object:: hardware.i2c.bus.sda
 
     I2C bus data line settings
     
@@ -326,23 +394,49 @@ Each of the objects in more detail:
     :proptype mode: :cpp:enum:`KGPIOMode`
     :property pullup: Pin pullup/pulldown setting
     :proptype pullup: :cpp:enum:`KGPIOPullup`
-    :property enum speed: Data line speed
-    :options speed: GPIO_SPEED_[LOW, MEDIUM, FAST, HIGH] TODO is this defined anywhere that we can reference instead?
+    :property string speed: Data line speed
+    :options speed: GPIO_SPEED_[LOW, MEDIUM, FAST, HIGH]
     
 
-.. json:object:: uart
+.. json:object:: hardware.uart
 
     Availability and properties of UART on the target device
     
     :property integer count: Number of UART buses available
-    :property defaults: Default setting for all UART buses
-    :proptype defaults: :json:object:`uart-defaults`
+    :property defaults: Default UART connection settings
+    :proptype defaults: :json:object:`defaults <hardware.uart.defaults>`
     :property uart{n}: UART bus definitions
-    :proptype uart{n}: :json:object:`uart-bus`
+    :proptype uart{n}: :json:object:`bus <hardware.uart.bus>`
     
-.. json:object:: uart-defaults
+    **Example**::
+    
+        {
+            "hardware": {
+              "uart": {
+                "count": 2,
+                "defaults": {
+                  "baudRate": 9600,
+                  "wordLen": "K_WORD_LEN_8BIT",
+                  "stopBits": "K_STOP_BITS_1",
+                  "parity": "K_PARITY_NONE",
+                  "rxQueueLen": 128,
+                  "txQueueLen": 128
+                },
+                "uart1": {
+                    "tx": "P33",
+                    "rx": "P34"
+                },
+                "uart2": {
+                    "tx": "P44",
+                    "rx": "P45"
+                }
+              }
+            }
+        }
+    
+.. json:object:: hardware.uart.defaults
 
-    Default connection settings for all UART buses
+    Default UART connection settings
     
     :property integer baudRate: Default bus speed
     :property wordLen: Default word length
@@ -351,47 +445,91 @@ Each of the objects in more detail:
     :proptype stopBits: :cpp:enum:`KStopBits`
     :property parity: Default parity setting
     :proptype parity: :cpp:enum:`KParity`
-    :property integer rxQueueLen: Default size of bus' RX queue
-    :property integer txQueueLen: Default size of bus' TX queue
+    :property integer rxQueueLen: Default size of RX queue
+    :property integer txQueueLen: Default size of TX queue
     
-.. json:object:: uart-bus
+.. json:object:: hardware.uart.bus
 
     UART bus definition
     
     :property pin tx: Bus transmit pin
     :property pin rx: Bus receive pin
     
-.. json:object:: spi
+.. json:object:: hardware.spi
 
     Availability and properties of SPI on the target device
     
     :property integer count: Number of SPI buses available
-    :property defaults: Default setting for all SPI buses
-    :proptype defaults: :json:object:`spi-defaults`
-    :property spi{n}: The `n`th SPI bus
-    :proptype spi{n}: :json:object:`spi-bus`
+    :property defaults: Default SPI connection settings
+    :proptype defaults: :json:object:`defaults <hardware.spi.defaults>`
+    :property spi{n}: SPI bus definitions
+    :proptype spi{n}: :json:object:`bus <hardware.spi.bus>`
     
-.. json:object:: spi-defaults
+    **Example**::
+    
+        {
+            "hardware": {
+              "spi": {
+                "count": 3,
+                "defaults": {
+                  "bus": "K_SPI1",
+                  "role": "K_SPI_MASTER",
+                  "direction": "K_SPI_DIRECTION_2LINES",
+                  "dataSize": "K_SPI_DATASIZE_8BIT",
+                  "clockPolarity": "K_SPI_CPOL_HIGH",
+                  "clockPhase": "K_SPI_CPHA_1EDGE",
+                  "firstBit": "K_SPI_FIRSTBIT_LSB",
+                  "speed": "10000"
+                },
+                "spi1": {
+                  "mosi": "PA7",
+                  "miso": "PA6",
+                  "sck": "PA5",
+                  "cs": "PA4",
+                  "port": "GPIOA",
+                  "alt": "GPIO_AF5_SPI1"
+                },
+                "spi2": {
+                  "mosi": "PB15",
+                  "miso": "PB14",
+                  "sck": "PB13",
+                  "cs": "PB12",
+                  "port": "GPIOB",
+                  "alt": "GPIO_AF5_SPI2"
+                },
+                "spi3": {
+                  "mosi": "PC12",
+                  "miso": "PC11",
+                  "sck": "PC10",
+                  "cs": "PC8",
+                  "port": "GPIOC",
+                  "alt": "GPIO_AF6_SPI3"
+                }
+              }
+            }
+        }
+    
+.. json:object:: hardware.spi.defaults
 
-    Default connection settings for all SPI buses
+    Default SPI connection settings
     
     :property bus: Default SPI bus
     :proptype bus: :cpp:enum:`KSPINum`
-    :property role: Default bus role
+    :property role: Default communication role
     :proptype role: :cpp:enum:`SPIRole`
-    :property direction: Default SPI bus direction/s
+    :property direction: Default SPI communication direction/s
     :proptype direction: :cpp:enum:`SPIDirection`
     :property dataSize: Default data size
     :proptype dataSize: :cpp:enum:`SPIDataSize`
     :property clockPolarity: Default clock polarity
     :proptype clockPolarity: :cpp:enum:`SPIClockPolarity`
     :property clockPhase: Defaut clock phase
-    :proptype clockPase: :cpp:enum:`SPIClockPhase`
+    :proptype clockPhase: :cpp:enum:`SPIClockPhase`
     :property firstBit: Default endianness
-    :property firstBit: :cpp:enum:`SPIFirstBit`
-    :property speed: Default bus speed
+    :proptype firstBit: :cpp:enum:`SPIFirstBit`
+    :property integer speed: Default bus speed
     
-.. json:object:: spi-bus
+.. json:object:: hardware.spi.bus
 
     SPI bus definition
     
@@ -400,37 +538,39 @@ Each of the objects in more detail:
     :property pin sck: Clock pin
     :property pin cs: Chip-select pin
     :property pin port: GPIO port that the SPI pins belong to
-    :property string alt: todo
+    :property string alt: `(STM32F4* only)` GPIO alternate function mapping
+    :options alt: GPIO_AFx_I2Cy
     
 .. json:object:: cmsis
 
-    TODO: What is this thing...
+    Cortex Microcontroller Software Interface Standard
     
-    :property nvic: todo
-    :proptype nvic: :json:object:`nvic`
+    Settings specific to targets with Cortex processors
     
-.. json:object:: nvic
+    :property nvic: "Nester Vector Interrupt Controller"
+    :proptype nvic: :json:object:`nvic <cmsis.nvic>`
+    
+.. json:object:: cmsis.nvic
 
-    TODO
+    Nested Vector Interupt Controller
     
-    :property string ram_vector_address: Hex address of TODO
-    :property string flash_vector_address: Hex address of TODO
-    :property integer user_irq_offset: Offset of
-    :options user_irq_offset: todo. max/min?
-    :property integer user_irq_number: todo
+    :property string ram_vector_address: Location of vectors in RAM
+    :property string flash_vector_address: Initial vector position in flash
+    :property integer user_irq_offset: `(Default: 16)` Number of ARM core vectors (HardFault handler, SysTick, etc)
+    :property integer user_irq_number: `(Default: 82)` Number of manufacturer vectors
     
 
 .. json:object:: uvisor
 
-    TODO
+    `uVisor <https://github.com/ARMmbed/uvisor>`__ RTOS security settings
     
-    :property integer present: TODO
+    :property integer present: `(Default: 0. Values: 0, 1)` Specifies whether uVisor is present on the target device
     
 .. json:object:: gcc
 
-    TODO
+    Project compiler options
     
-    :property boolean printf-float: todo
+    :property boolean printf-float: `(Default: False)` Enables floating point support in ``printf`` commands
 
 .. json:object:: arch
 
@@ -441,21 +581,17 @@ Each of the objects in more detail:
 
 .. json:object:: system
     
-    :property boolean initAfterFlash: Specifies whether the 
+    :property boolean initAfterFlash: `(Default: false)` Specifies whether the 
       application should be started as a background daemon on the target 
       device immediately after being flashed
-    :options initAfterFlash: Default false
-    :property boolean initAtBoot: Specifies whether the application should 
-      be started on the target device during system initialization
-    :options initAtBoot: Default true. An init script will be generated with the 
-      run level specified by ``runLevel`` 
-    :property number runLevel: The priority of the generated init script. 
+    :property boolean initAtBoot: `(Default: true)` Specifies whether the application should 
+      be started on the target device during system initialization.vAn init script will be 
+      generated with the run level specified by ``runLevel`` 
+    :property number runLevel: `(Default: 50. Range: 10-99)` The priority of the generated init script. 
       Scripts with lower values will be run first
-    :options runLevel: Default: 50. Range: 10-99
-    :property string destDir: Specifies flashing destination directory for all 
+    :property string destDir: `(Default: "/home/usr/local/bin")` Specifies flashing destination directory for all 
       non-application files
-    :options destDir: Default /home/usr/local/bin
-    :property string password: Specifies the root password to be used by 
+    :property string password: `(Default: "Kubos123") Specifies the root password to be used by 
       ``kubos flash`` to successfully connect to the target device
     
 
