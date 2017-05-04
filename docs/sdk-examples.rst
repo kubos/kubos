@@ -83,7 +83,7 @@ Kubos Sensor Example
 
 `kubos-sensor-example <http://github.com/kubostech/kubos/examples/kubos-sensor-example>`__
 
-**Compatible Targets: MSP430F5529, STM32F407 Discovery, STM32F405**
+**Compatible Targets: MSP430F5529, STM32F407 Discovery**
 
 +----------------------+------------------------+
 | High-level Component | Specific Area          |
@@ -135,7 +135,7 @@ Kubos I2C Example
 
 `kubos-i2c-example <http://github.com/kubostech/kubos/examples/kubos-i2c-example>`__
 
-**Compatible Targets: MSP430F5529, STM32F407 Discovery, STM32F405**
+**Compatible Targets: MSP430F5529, STM32F407 Discovery**
 
 +----------------------+------------------------------+
 | High-level Component | Specific Area                |
@@ -170,7 +170,7 @@ Kubos SPI Example
 
 `kubos-spi-example <http://github.com/kubostech/kubos/examples/kubos-spi-example>`__
 
-**Compatible Targets: MSP430F5529, STM32F407 Discovery, STM32F405**
+**Compatible Targets: MSP430F5529, STM32F407 Discovery**
 
 +----------------------+---------------+
 | High-level Component | Specific Area |
@@ -201,7 +201,7 @@ Kubos SD Example
 
 `kubos-sd-example <http://github.com/kubostech/kubos/examples/kubos-sd-example>`__
 
-**Compatible Targets: MSP430F5529, STM32F407 Discovery, STM32F405**
+**Compatible Targets: MSP430F5529, STM32F407 Discovery**
 
 +----------------------+---------------+
 | High-level Component | Specific Area |
