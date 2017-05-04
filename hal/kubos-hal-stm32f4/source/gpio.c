@@ -27,10 +27,10 @@
 #include "stm32f4xx_hal_rcc.h"
 
 /**
- * Performs low level gpio pin configuration and setup
- * @param pin [in] gpio pin number
- * @param mode [in] pin mode
- * @param pullup [in] pin pullup setting
+ * Performs low level GPIO pin configuration and setup
+ * @param[in] pin gpio pin number
+ * @param[in] mode pin mode
+ * @param[in] pullup pin pullup setting
  */
 void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 {
@@ -68,7 +68,7 @@ void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 
 /**
  * Reads value off gpio pin
- * @param pin [in] gpio pin to read from
+ * @param[in] pin gpio pin to read from
  * @return int value read from pin
  */
 unsigned int k_gpio_read(int pin)
@@ -79,8 +79,8 @@ unsigned int k_gpio_read(int pin)
 
 /**
  * Writes value to pin pin
- * @param pin [in] gpio pin to write to
- * @param val [in] value to write to pin
+ * @param[in] pin gpio pin to write to
+ * @param[in] val value to write to pin
  */
 void k_gpio_write(int pin, unsigned int val)
 {
@@ -90,10 +90,10 @@ void k_gpio_write(int pin, unsigned int val)
 }
 
 /**
- * Performs alternate gpio configuration
- * @param GPIOx [in] STM32CubeF4 gpio definition
- * @param GPIO_PinSource [in] pin port number
- * @param GPIO_AF [in] alternate pin number
+ * Performs alternate GPIO configuration
+ * @param[in] GPIOx STM32CubeF4 GPIO definition
+ * @param[in] GPIO_PinSource pin port number
+ * @param[in] GPIO_AF alternate pin number
  */
 void kprv_gpio_alt_config(GPIO_TypeDef* GPIOx, uint16_t GPIO_PinSource, uint8_t GPIO_AF)
 {

@@ -29,9 +29,7 @@
 /** Structure defining pins + config for I2C device */
 typedef struct
 {
-    /** 
-     * SCL pin number
-     */
+    /** SCL pin number */
     uint16_t scl;
     /** SCL pin mode */
     uint16_t scl_mode;
@@ -53,11 +51,11 @@ typedef struct
     uint16_t ev_irqn;
     /** ER IRQ number */
     uint16_t er_irqn;
-    /** STM32CubeF4 defined gpio port */
+    /** STM32CubeF4 defined GPIO port */
     GPIO_TypeDef * gpio_port;
 } hal_i2c_pins;
 
-/** HAL structure for i2c device definition/configuration */
+/** HAL structure for I2C device definition/configuration */
 typedef struct
 {
     /** Kubos-HAL structure */

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
- * @defgroup STM32F4_HAL_SPI
+ * @defgroup STM32F4_HAL_SPI STM32F4 HAL SPI Interface
  * @addtogroup STM32F4_HAL_SPI
  * @{
  */
@@ -49,7 +49,7 @@ typedef struct
     KSPI * kspi;
     /** STM32CubeF4's special structure */
     SPI_HandleTypeDef hal_handle;
-    /** spi pins struct */
+    /** SPI pins struct */
     hal_spi_pins pins;
 } hal_spi_handle;
 

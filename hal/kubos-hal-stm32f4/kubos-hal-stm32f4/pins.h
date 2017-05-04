@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
- * @defgroup STM32F4_HAL_GPIO
+ * @defgroup STM32F4_HAL_GPIO STM32F4 HAL GPIO Interface
  * @addtogroup STM32F4_HAL_GPIO
  * @{
  */
@@ -25,7 +25,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal_gpio.h"
 
-/** Number of available gpio pins */
+/** Number of available GPIO pins */
 #define K_NUM_PINS (16 * 5)
 
 /** Green led pin */
@@ -54,13 +54,13 @@
 /** User button pin */
 #define K_BUTTON_0   YOTTA_CFG_HARDWARE_PINS_USER_BUTTON
 
-/** Derives gpio pin offset (within respective port) */
+/** Derives GPIO pin offset (within respective port) */
 #define STM32F4_PIN_OFFSET(p) ((p) % 16)
 
-/** Derives bit mask for gpio pin */
+/** Derives bit mask for GPIO pin */
 #define STM32F4_PIN_MASK(p) (1 << STM32F4_PIN_OFFSET(p))
 
-/** Derives gpio port from pin number */
+/** Derives GPIO port from pin number */
 #define STM32F4_PIN_GPIO(p) ((GPIO_TypeDef *) (GPIOA_BASE + (((p) / 16) * 0x400)))
 
 /** Derives AHB (hardware clock) bit from pin number */
@@ -80,7 +80,7 @@
 } while(0)
 
 /**
- * Structure describing gpio pin
+ * Structure describing GPIO pin
  */
 typedef struct {
     /**
