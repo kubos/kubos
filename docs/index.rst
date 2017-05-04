@@ -28,6 +28,7 @@ info@kubos.co.
    
     Installing Kubos SDK <sdk-installing>
     Creating your first project <first-project>
+    Kubos Project Configuration <sdk-project-config>
     Kubos SDK Cheat Sheet <sdk-cheatsheet>
     Kubos CLI Command Reference <sdk-reference>
     Upgrading Kubos SDK <sdk-upgrading>

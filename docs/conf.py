@@ -160,4 +160,4 @@ breathe_projects = {
     "kubos-hal-stm32f4" : "../xml/hal/kubos-hal-stm32f4"
 }
 
-extensions += ['breathe', 'sphinx.ext.todo']
+extensions += ['breathe', 'sphinx.ext.todo', 'sphinxjsondomain']
