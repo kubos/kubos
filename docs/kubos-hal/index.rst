@@ -26,3 +26,4 @@ Kubos HAL Documentation
    :name:  hal-platforms
 
    STM32F4 <kubos-hal-stm32f4/index>
+   MSP430F5529 <kubos-hal-msp430f5529/index>

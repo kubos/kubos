@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 /**
-  * @defgroup UART MSP430F5529 HAL UART Interface
-  * @addtogroup UART
-  * @{
-  */
-
-/**
-  *
-  * @file       uart.c
-  * @brief      Kubos-HAL-MSP430F5529 - UART module
-  *
-  * @author     kubos.co
-  */
+ * @defgroup MSP430F5529_HAL_UART MSP430F5529 HAL UART Interface
+ * @addtogroup MSP430F5529_HAL_UART
+ * @{
+ */
 
 #if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include "kubos-hal/uart.h"
@@ -33,9 +25,9 @@
 #include <msp430.h>
 
 /**
-  * @brief Helper function to convert uart device option.
-  * @param uart [a] uart device number
-  * @return hal_uart_device handle for uart device
+  * Helper function to convert UART device option.
+  * @param[in] uart UART device number
+  * @return hal_uart_device handle for UART device
   */
 static inline hal_uart_device uart_dev(KUARTNum uart)
 {
@@ -48,7 +40,7 @@ static inline hal_uart_device uart_dev(KUARTNum uart)
 }
 
 /**
-  * @brief Helper function to get uart handle.
+  * Helper function to get UART handle.
   */
 hal_uart_handle * uart_handle(KUARTNum uart)
 {
@@ -61,7 +53,7 @@ hal_uart_handle * uart_handle(KUARTNum uart)
 }
 
 /**
-  * @brief Helper function to convert baud option.
+  * Helper function to convert baud option.
   */
 static inline hal_uart_baudrate uart_baud(long int baud)
 {
@@ -88,7 +80,7 @@ static inline hal_uart_baudrate uart_baud(long int baud)
 }
 
 /**
-  * @brief Helper function to convert parity option.
+  * Helper function to convert parity option.
   */
 static inline hal_uart_parity uart_parity(KParity parity)
 {
@@ -102,7 +94,7 @@ static inline hal_uart_parity uart_parity(KParity parity)
 }
 
 /**
-  * @brief Helper function to convert stop bits option.
+  * Helper function to convert stop bits option.
   */
 static inline hal_uart_stopbits uart_stopbits(KStopBits stopbits)
 {
@@ -115,7 +107,7 @@ static inline hal_uart_stopbits uart_stopbits(KStopBits stopbits)
 }
 
 /**
-  * @brief Helper function to convert word len option.
+  * Helper function to convert word len option.
   */
 static inline hal_uart_wordlen uart_wordlen(KWordLen wordlen)
 {
@@ -128,8 +120,8 @@ static inline hal_uart_wordlen uart_wordlen(KWordLen wordlen)
 }
 
 /**
-  * @brief Creates and sets up specified UART device.
-  * @param uart Number of UART device to setup.
+  * Creates and sets up specified UART device.
+  * @param[in] uart Number of UART device to setup.
   * @return KUARTStatus UART_OK on success, otherwise failure
   */
 KUARTStatus kprv_uart_dev_init(KUARTNum uart)
@@ -164,8 +156,8 @@ KUARTStatus kprv_uart_dev_init(KUARTNum uart)
 }
 
 /**
- * @brief Terminates the specified UART device.
- * @param uart Number of UART device to terminate.
+ * Terminates the specified UART device.
+ * @param[in] uart Number of UART device to terminate.
  */
 void kprv_uart_dev_terminate(KUARTNum uart)
 {
@@ -181,8 +173,8 @@ void kprv_uart_dev_terminate(KUARTNum uart)
 
 
 /**
-  * @brief Enables UART TX interrupt.
-  * @param uart Number of UART device.
+  * Enables UART TX interrupt.
+  * @param[in] uart Number of UART device.
   */
 void kprv_uart_enable_tx_int(KUARTNum uart)
 {
@@ -193,8 +185,8 @@ void kprv_uart_enable_tx_int(KUARTNum uart)
 
 
 /**
-  * @brief This function handles the rx/tx interrupts using FreeRTOS queues.
-  * @param handle UART handle
+  * This function handles the rx/tx interrupts using FreeRTOS queues.
+  * @param[in] handle UART handle
   */
 void hal_uart_interrupt(hal_uart_handle * handle)
 {
@@ -245,8 +237,8 @@ void hal_uart_interrupt(hal_uart_handle * handle)
 
 /**
  * Write a character directly to the uart interface
- * @param uart uart bus
- * @param c character to write
+ * @param[in] uart UART bus
+ * @param[in] c character to write
  * @return KUARTStatus UART_OK if success, otherwise failure
  */
 KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
@@ -262,10 +254,10 @@ KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
 }
 
 /**
- * Write a string directly to the uart interface
- * @param uart uart bus
- * @param ptr buffer to write data from
- * @param len length of data to write
+ * Write a string directly to the UART interface
+ * @param[in] uart UART bus
+ * @param[in] ptr buffer to write data from
+ * @param[in] len length of data to write
  * @return KUARTStatus UART_OK if success, otherwise failure
  */
 KUARTStatus k_uart_write_immediate_str(KUARTNum uart, uint8_t * ptr, uint8_t len)

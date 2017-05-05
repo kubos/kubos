@@ -15,21 +15,12 @@
  * limitations under the License.
  */
 /**
-  * @addtogroup GPIO
-  * @{
-  */
-
-/**
-  *
-  * @file       pins.h
-  * @brief      Kubos-HAL-MSP430F5529 - GPIO pin defs
-  *
-  * @author     kubos.co
-  */
+ * @addtogroup MSP430F5529_HAL_GPIO
+ * @{
+ */
 
 #ifndef KUBOS_HAL_MSP430F5529_PINS_H
 #define KUBOS_HAL_MSP430F5529_PINS_H
-
 
 #include <stdint.h>
 
@@ -51,7 +42,7 @@
 
 
 /**
-  * @brief Struct which contains gpio details (dir/out/in/pull pins and bit)
+  * Struct which contains gpio details (dir/out/in/pull pins and bit)
   */
 typedef struct {
     /** PxDIR */
@@ -67,7 +58,7 @@ typedef struct {
 } KPinDesc;
 
 /**
-  * @brief Enum containing gpios currently setup.
+  * Enum containing gpios currently setup.
   *
   * Note - This describes digital pins exposed on the MSP430F5529 launchpad.
   *

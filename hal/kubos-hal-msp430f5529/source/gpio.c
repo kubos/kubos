@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 /**
-  * @defgroup GPIO MSP430F5529 HAL GPIO Interface
-  * @addtogroup GPIO
-  * @{
-  */
+ * @defgroup MSP430F5529_HAL_GPIO MSP430F5529 HAL GPIO Interface
+ * @addtogroup MSP430F5529_HAL_GPIO
+ * @{
+ */
 
-/**
-  *
-  * @file       gpio.c
-  * @brief      Kubos-HAL-MSP430F5529 - GPIO module
-  *
-  * @author     kubos.co
-  */
 #include "kubos-hal/gpio.h"
 #include "msp430f5529-hal/gpio.h"
 
@@ -35,7 +28,7 @@
 
 
 /**
-  * @brief Static array of gpio setup (dir, out, in pins, specific bit).
+  * Static array of gpio setup (dir, out, in pins, specific bit).
   *
   * Note - This (only) describes digital pins exposed on the MSP430F5529 launchpad.
   *
@@ -91,13 +84,13 @@ static KPinDesc pins[] = {
 };
 
 /**
-  * @brief Initialize gpio pin to specified mode.
+  * Initialize gpio pin to specified mode.
   *
   * I/O pin configuration described in MSP430x5xx Family Guide Section 12.2.4
   *
-  * @param pin [in] number of pin to initialize
-  * @param mode [in] pin mode to set
-  * @param pullup [in] pin pullup value to set
+  * @param[in] pin number of pin to initialize
+  * @param[in] mode pin mode to set
+  * @param[in] pullup pin pullup value to set
   */
 void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 {
@@ -123,8 +116,8 @@ void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 }
 
 /**
-  * @brief Read in gpio pin.
-  * @param pin [in] number of pin to read from
+  * Read in gpio pin.
+  * @param[in] pin number of pin to read from
   * @return unsigned int value read from pin
   */
 unsigned int k_gpio_read(int pin)
@@ -133,9 +126,9 @@ unsigned int k_gpio_read(int pin)
 }
 
 /**
-  * @brief Write to gpio pin.
-  * @param pin [in] number of pin to write to
-  * @param val [in] value to write
+  * Write to gpio pin.
+  * @param[in] pin number of pin to write to
+  * @param[in] val value to write
   */
 void k_gpio_write(int pin, unsigned int val)
 {

@@ -14,20 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
-  * @defgroup I2C MSP430F5529 HAL I2C Interface
-  * @addtogroup I2C
-  * @{
-  */
-
-/**
-  *
-  * @file       i2c.c
-  * @brief      Kubos-HAL-MSP430F5529 - I2C module
-  *
-  * @author     kubos.co
-  */
+ * @defgroup MSP430F5529_HAL_I2C MSP430F5529 HAL I2C Interface
+ * @addtogroup MSP430F5529_HAL_I2C
+ * @{
+ */
 
 #if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
@@ -35,8 +26,8 @@
 #include <msp430.h>
 
 /**
-  * @brief Helper function to convert i2c bus option.
-  * @param i2c [in] number of i2c bus
+  * Helper function to convert i2c bus option.
+  * @param[in] i2c number of i2c bus
   * @return hal_i2c_bus hal i2c bus number
   */
 static inline hal_i2c_bus i2c_bus(KI2CNum i2c)
@@ -50,8 +41,8 @@ static inline hal_i2c_bus i2c_bus(KI2CNum i2c)
 }
 
 /**
-  * @brief Helper function to get i2c handle
-  * @param i2c [in] number of i2c bus
+  * Helper function to get i2c handle
+  * @param[in] i2c number of i2c bus
   * @return hal_i2c_handle* pointer to i2c handle, NULL if number is invalid
   */
 static inline hal_i2c_handle * i2c_handle(KI2CNum i2c)
@@ -65,8 +56,8 @@ static inline hal_i2c_handle * i2c_handle(KI2CNum i2c)
 }
 
 /**
-  * @brief Helper function to convert i2c addressing option.
-  * @param mode [in] i2c addressing mode option
+  * Helper function to convert i2c addressing option.
+  * @param[in] mode i2c addressing mode option
   * @return hal_i2c_addressing_mode hal specific i2c addressing mode option
   */
 static inline hal_i2c_addressing_mode i2c_addressing(I2CAddressingMode mode)
@@ -80,8 +71,8 @@ static inline hal_i2c_addressing_mode i2c_addressing(I2CAddressingMode mode)
 }
 
 /**
-  * @brief Helper function to convert i2c role option.
-  * @param role [in] i2c bus role
+  * Helper function to convert i2c role option.
+  * @param[in] role i2c bus role
   * @return hal_i2c_role hal specific i2c role option
   */
 static inline hal_i2c_role i2c_role(I2CRole role)
@@ -96,7 +87,7 @@ static inline hal_i2c_role i2c_role(I2CRole role)
 
 /**
  * Setup and enable i2c bus
- * @param i2c [in] i2c bus to initialize
+ * @param[in] i2c i2c bus to initialize
  * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
  */
 KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
@@ -135,7 +126,7 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
 
 /**
  * i2c hardware cleanup and disabling
- * @param i2c [in] bus num to terminate
+ * @param[in] i2c bus num to terminate
  * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
  */
 KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
@@ -151,10 +142,10 @@ KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
 
 /**
  * Write data over i2c bus as master
- * @param i2c [in] i2c bus to write to
- * @param addr [in] i2c address to write to
- * @param ptr [in] pointer to data buffer
- * @param len [in] length of data to write
+ * @param[in] i2c i2c bus to write to
+ * @param[in] addr i2c address to write to
+ * @param[in] ptr pointer to data buffer
+ * @param[in] len length of data to write
  * @return KI2CStatus I2C_OK on success, otherwise failure
  */
 KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
@@ -167,10 +158,10 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
 
 /**
  * Read data over i2c bus as master
- * @param i2c [in] i2c bus to read from
- * @param addr [in] i2c address to write to
- * @param ptr [out] pointer to data buffer
- * @param len [in] length of data to read
+ * @param[in] i2c i2c bus to read from
+ * @param[in] addr i2c address to write to
+ * @param[out] ptr pointer to data buffer
+ * @param[in] len length of data to read
  * @return KI2CStatus I2C_OK on success, otherwise failure
  */
 KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
