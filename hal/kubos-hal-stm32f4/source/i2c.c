@@ -15,10 +15,10 @@
  * limitations under the License.
  */
  /**
-   * @defgroup I2C
-   * @addtogroup I2C
-   * @{
-   */
+  * @defgroup STM32F4_HAL_I2C
+  * @addtogroup STM32F4_HAL_I2C
+  * @{
+  */
 
 #if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
