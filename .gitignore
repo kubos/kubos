@@ -48,6 +48,8 @@ yotta_*
 
 doxygen_warn.log
 html/
+xml/
+doctrees/
 *.swo
 *.swp
 *.swo
@@ -55,7 +57,6 @@ html/
 .DS_Store
 .kubos-link.json
 .travis.yml
-html/
 upload.tar.gz
 
 # vim files

@@ -1,0 +1,8 @@
+{
+    "sensors": {
+        "bme280": {
+            "spi bus": "K_SPI1",
+            "CS": "PA4"
+        }
+    }
+}
