@@ -1,5 +1,5 @@
 STM32F4 SPI API
 -----------------
 
-.. doxygenfile:: spi.h
+.. doxygengroup:: STM32F4_HAL_SPI
     :project: kubos-hal-stm32f4
