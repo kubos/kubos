@@ -1,10 +1,24 @@
 Kubos Project Configuration
 ===========================
 
+Kubos project configuration is derived from Yotta's `configuration system <http://docs.yottabuild.org/reference/config.html>`__ 
+and `module.json <http://docs.yottabuild.org/reference/module.html>`__ files.
    
 
 config.json
 -----------
+    
+Overview
+^^^^^^^^
+
+Each Kubos target comes with a set of default configuration options. These options describe things
+like hardware bus availability and communication settings.
+The `config.json` file, which lives in the top level directory of a Kubos project, allows users to 
+override any of these options with a custom value.
+
+Under the covers, the `target.json` and `config.json` files are used to generate a `yotta_config.h` file,
+which contains ``#define YOTTA_CFG_{option}`` statements for each defined option. These ``YOTTA_CFG_*``
+variables can then be referenced within the Kubos project's source code.
 
 The current configuration of a project can be seen using the ``kubos config`` command. 
 Each configuration option in the output will have a comment showing the origin of the value.
@@ -79,131 +93,268 @@ For example:
       }
     }
     
-Overview
-^^^^^^^^
+Custom Settings
+^^^^^^^^^^^^^^^
 
-Here is a high-level overview of all of the currently available options:
+Users can add new settings to a `config.json` file which can then be used within their project.
+These settings will be generated as ``#define YOTTA_CFG_{user_option} {value}`` statements
+during project compilation time.
 
-.. code-block:: json
+For example::
 
     {
-        "cmsis": {
-            "nvic": {
-                "ram_vector_address": "hex address",
-                "flash_vector_address": "hex address",
-                "user_irq_offset": "number",
-                "user_irq_number": "number"
-            }
-        },
-        "uvisor": {
-            "present": "number"
-        },
-        "gcc": {
-            "printf-float": "boolean"
-        },
-        "arch": {
-            "arm": {},
-            "msp430": {}
-        },
-        "system": {
-            "initAfterFlash": "boolean",
-            "initAtBoot": "boolean",
-            "runLevel": "number",
-            "destDir": "file location",
-            "password": "string"
-        },
-        "hardware": {
-            "externalClock": "number as string",
-            "console": {
-                "uart": "UART bus",
-                "baudRate": "number as string"
-            },
-            "pins": {
-                "{name}": "pin"
-            },
-            "test-pins": {
-                "spi": {
-                    "mosi": "pin",
-                    "miso": "pin",
-                    "sclk": "pin",
-                    "ssel": "pin"
-                },
-                "i2c": {
-                    "sda": "pin",
-                    "scl": "pin"
-                },
-                "serial": {
-                    "tx": "pin",
-                    "rx": "pin"
-                }
-            },
-            "i2c": {
-                "count": "number",
-                "defaults": {
-                    "bus": "pin",
-                    "role": "enum",
-                    "clockSpeed": "number",
-                    "addressingMode": "enum"
-                },
-                "i2c{n}": {
-                    "scl": {
-                        "pin": "pin",
-                        "mode": "enum",
-                        "pullup": "enum",
-                        "speed": "enum"
-                    },
-                    "sda": {
-                        "pin": "pin",
-                        "mode": "enum",
-                        "pullup": "enum",
-                        "speed": "enum"
-                    },
-                    "alt": "string"
-                }
-            },
-            "uart": {
-                "count": "number",
-                "defaults": {
-                    "baudRate": "number",
-                    "wordLen": "enum",
-                    "stopBits": "enum",
-                    "parity": "enum",
-                    "rxQueueLen": "number",
-                    "txQueueLen": "number"
-                },
-                "uart{n}": {
-                    "tx": "pin",
-                    "rx": "pin"
-                }
-            },
-            "spi": {
-                "count": "number",
-                "defaults": {
-                    "bus": "enum",
-                    "role": "enum",
-                    "direction": "enum",
-                    "dataSize": "enum",
-                    "clockPolarity": "enum",
-                    "clockPhase": "enum",
-                    "firstBit": "enum",
-                    "speed": "number as string"
-                },
-                "spi{n}": {
-                    "mosi": "pin",
-                    "miso": "pin",
-                    "sck": "pin",
-                    "cs": "pin",
-                    "port": "string",
-                    "alt": "string"
+      "CSP": {
+        "my_address": "1",
+        "target_address": "2",
+        "port": "10",
+        "uart_bus": "K_UART6",
+        "uart_baudrate": "115200",
+        "usart": {}
+      }
+    }
+
+Will generate the following statements:
+
+
+.. code-block:: c
+
+    #define YOTTA_CFG_CSP_MY_ADDRESS 1
+    #define YOTTA_CFG_CSP_TARGET_ADDRESS 2
+    #define YOTTA_CFG_CSP_PORT 10
+    #define YOTTA_CFG_CSP_UART_BUS K_UART6
+    #define YOTTA_CFG_CSP_UART_BAUDRATE 115200
+    #define YOTTA_CFG_CSP_USART
+    
+
+    
+Non-Default Settings
+^^^^^^^^^^^^^^^^^^^^
+
+These are settings which are not included by default as part of any target device, so must
+be explicitly provided in a `config.json` file in order to be made available to the project.
+
+File System
+###########
+
+If present, the ``fs`` file system structure enables support for accessing storage on a peripheral device.
+
+**Note:** `This structure was created for KubOS RT. KubOS Linux has native support for various file systems.`
+
+.. json:object:: fs
+
+    File system support
+    
+    :property fatfs: FatFS settings
+    :proptype fatfs: :json:object:`fatfs`
+        
+.. json:object:: fs.fatfs
+
+    `FatFS <http://elm-chan.org/fsw/ff/00index_e.html>`__ support
+       
+    :property driver: Device connection settings
+    :proptype driver: :json:object:`driver`
+    
+.. json:object:: fs.fatfs.driver
+
+    Driver settings for the device the FatFS file system is on.
+    
+    **Note:** `Only one driver property may be specified`
+    
+    :property sdio: An SDIO device is available
+    :proptype sdio: :json:object:`sdio_dev <fs.fatfs.driver.sdio>`
+    :property spi: A SPI device is available
+    :proptype spi: :json:object:`spi_dev <fs.fatfs.driver.spi>`
+    
+.. json:object:: fs.fatfs.driver.sdio
+
+    SDIO device settings
+    
+    **WARNING:** :json:object:`SDIO HAL support <hardware.sdio>` **must be turned on for this feature to work.**
+    
+    SDIO is currently supported by:
+
+    - STM32F407 (daughter board)
+    - PyBoard
+    
+    `There are no configuration properties for SDIO. It is assumed that only
+    one port is available and will have predetermined settings` 
+    
+    **Example**:: 
+
+        {
+            "fs": {
+                "fatfs": {
+                    "driver": "sdio"
                 }
             }
         }
-    }
-    
-Descriptions
-^^^^^^^^^^^^
+        
+.. json:object:: fs.fatfs.driver.spi
 
-Each of the objects in more detail:
+    SPI device settings
+    
+    **Note:** `While FatFS over SPI will work for any target with a SPI bus, we recommend
+    using FatFS over SDIO if it is available on your target.`
+    
+    :property dev: SPI bus the device is connected to
+    :proptype dev: :cpp:enum:`KSPINum`
+    :property pin cs: Chip select pin assigned to the device
+    
+    **Example**:: 
+
+        {
+            "fs": {
+                "fatfs": {
+                    "driver": {
+                        "spi": {
+                            "dev": "K_SPI1",
+                            "cs": "P37" 
+                        }
+                    }
+                }
+            }
+        }
+        
+SDIO
+####
+
+General SDIO support is turned on via the ``hardware.sdio`` object. This support is not 
+automatically included with any target device.
+
+.. json:object:: hardware.sdio
+
+    SDIO support
+    
+    `There are no configuration properties for this object. It simply enable the use
+    of the HAL SDIO library`
+    
+    **Example**:: 
+
+        {
+            "hardware": {
+                "sdio": {}
+            }
+        }
+    
+                
+Built-in Peripheral Support
+###########################
+
+Kubos Core supports a variety of end-point peripherals. In order to turn on support for these
+devices within a Kubos project, they should be added to the ``sensors`` structure of the `config.json` 
+file.
+
+.. json:object:: sensors
+
+    TODO: One of the sensors supports SPI and I2C, see if both are availabe through config.json
+
+    **Example**::
+    
+        {
+            "sensors": {
+                "htu21d": { 
+                    "i2c_bus": "K_I2C1" 
+                },
+                "bno055": { 
+                    "i2c_bus": "K_I2C1" 
+                },      
+                "bme280": {
+                    "spi bus":"K_SPI1",
+                    "CS":"PA4"
+                }
+            }
+        }
+        
+    
+User-Configurable Included Settings
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These are settings which may be changed by the user without compromising the target device,
+but which will automatically be included in the project without a `config.json` file present.
+
+Command and Control
+###################
+
+.. json:object:: cnc
+
+    **Example**::
+    
+        {
+            "cnc": {
+                "daemon_log_path": "\"/home/var/log.daemon.log\"",
+                "registry_dir": "\"/usr/local/kubos\"",
+                "client_tx_pipe": "\"/usr/local/kubos/client-to-server\"",
+                "client_rx_pipe": "\"/usr/local/kubos/server-to-client\""
+            }
+        }
+
+Telemetry
+#########
+
+.. json:object:: telemetry
+
+    **Example**::
+    
+        {
+            "telemetry": {
+                "csp_address": 1,
+                "aggregator": {
+                    "interval": 300
+                },
+                "subscribers": {
+                    "max_num": 10 
+                }
+            }
+        }
+        
+CSP
+###
+
+.. json:object:: csp
+
+    **Example**::
+    
+        {
+            "csp": {
+                "socket": true,
+                "debug": true
+            }
+        }
+
+System
+######
+
+.. json:object:: system
+
+    KubOS Linux file system properties related to Kubos applications
+    
+    :property boolean initAfterFlash: `(Default: false)` Specifies whether the 
+      application should be started as a background daemon on the target 
+      device immediately after being flashed
+    :property boolean initAtBoot: `(Default: true)` Specifies whether the application should 
+      be started on the target device during system initialization. An init script will be 
+      generated with the run level specified by ``runLevel`` 
+    :property number runLevel: `(Default: 50. Range: 10-99)` The priority of the generated init script. 
+      Scripts with lower values will be run first
+    :property string destDir: `(Default: "/home/usr/local/bin")` Specifies flashing destination directory for all 
+      non-application files
+    :property string password: `(Default: "Kubos123") Specifies the root password to be used by 
+      ``kubos flash`` to successfully connect to the target device
+    
+    **Example**::
+    
+        {
+            "system": {
+              "initAfterFlash": true,
+              "initAtBoot": true,
+              "runLevel": 40,
+              "destDir": "/home/myUser/storage",
+              "password": "password"
+            }
+        }
+
+Hardware
+########
 
 .. json:object:: hardware
 
@@ -214,14 +365,14 @@ Each of the objects in more detail:
     :property integer externalClock: Clock rate of external clock
     :property pins: Custom name -> pin mapping
     :proptype pins: :json:object:`pins <hardware.pins>`
-    :property test-pins: todo
-    :proptype test-pins: :json:object:`test-pins <hardware.test-pins>`
     :property i2c: Availability and properties of I2C
     :proptype i2c: :json:object:`i2c <hardware.i2c>`
     :property uart: Availability and properties of UART
     :proptype uart: :json:object:`uart <hardware.uart>`
     :property spi: Availability and properites of SPI
     :proptype spi: :json:object:`spi <hardware.spi>`
+    :proptype sdio: Availability of SDIO
+    :proptype sdio: :json:object:`sdio <hardware.sdio>`
     
 .. json:object:: hardware.console
 
@@ -260,40 +411,6 @@ Each of the objects in more detail:
             }
         }
     
-.. json:object:: hardware.test-pins
-
-    todo
-    
-    :property spi:
-    :proptype spi: :json:object:`spi <hardware.test-pins.spi>`
-    :property i2c:
-    :proptype i2c: :json:object:`i2c <hardware.test-pins.i2c>`
-    :property serial:
-    :proptype serial: :json:object:`serial <hardware.test-pins.serial>`
-    
-.. json:object:: hardware.test-pins.spi
-
-    SPI connection test pins
-    
-    :property pin mosi: Master-out pin
-    :property pin miso: Master-in pin
-    :property pin sclk: Slave clock pin
-    :property pin ssel: Slave-select pin
-
-.. json:object:: hardware.test-pins.i2c
-
-    I2C connection test pins
-
-    :property pin sda: Data pin
-    :property pin scl: Clock pin
-
-.. json:object:: hardware.test-pins.serial
-
-    Serial connection test pins
-    
-    :property pin tx: Transmit pin
-    :property pin rx: Receive pin
-    
 .. json:object:: hardware.i2c
 
     Availability and properties of I2C on the target device
@@ -302,7 +419,7 @@ Each of the objects in more detail:
     :property defaults: Default I2C connection settings
     :proptype defaults: :json:object:`defaults <hardware.i2c.defaults>`
     :property i2c{n}: I2C bus definitions
-    :proptype i2c{n}: :json:object:`bus <hardware.i2c.bus>`
+    :proptype i2c{n}: :json:object:`bus <hardware.i2c.i2c{n}>`
     
     **Example**::
     
@@ -362,18 +479,18 @@ Each of the objects in more detail:
     :property addressingMode: I2C addressing mode
     :proptype addressingMode: :cpp:enum:`I2CAddressingMode`
     
-.. json:object:: hardware.i2c.bus
+.. json:object:: hardware.i2c.i2c{n}
 
     I2C bus definition
     
     :property scl: Clock line settings
-    :proptype scl: :json:object:`scl <hardware.i2c.bus.scl>`
+    :proptype scl: :json:object:`scl <hardware.i2c.i2c{n}.scl>`
     :property sda: Data line settings
-    :proptype sda: :json:object:`sda <hardware.i2c.bus.sda>`
+    :proptype sda: :json:object:`sda <hardware.i2c.i2c{n}.sda>`
     :property string alt: `(STM32F4* only)` GPIO alternate function mapping
     :options alt: GPIO_AFx_I2Cy
     
-.. json:object:: hardware.i2c.bus.scl
+.. json:object:: hardware.i2c.i2c{n}.scl
 
     I2C bus clock line settings
     
@@ -385,7 +502,7 @@ Each of the objects in more detail:
     :property enum speed: Clock line speed
     :options speed: GPIO_SPEED_[LOW, MEDIUM, FAST, HIGH]
 
-.. json:object:: hardware.i2c.bus.sda
+.. json:object:: hardware.i2c.i2c{n}.sda
 
     I2C bus data line settings
     
@@ -406,7 +523,7 @@ Each of the objects in more detail:
     :property defaults: Default UART connection settings
     :proptype defaults: :json:object:`defaults <hardware.uart.defaults>`
     :property uart{n}: UART bus definitions
-    :proptype uart{n}: :json:object:`bus <hardware.uart.bus>`
+    :proptype uart{n}: :json:object:`bus <hardware.uart.uart{n}>`
     
     **Example**::
     
@@ -448,7 +565,7 @@ Each of the objects in more detail:
     :property integer rxQueueLen: Default size of RX queue
     :property integer txQueueLen: Default size of TX queue
     
-.. json:object:: hardware.uart.bus
+.. json:object:: hardware.uart.uart{n}
 
     UART bus definition
     
@@ -463,7 +580,7 @@ Each of the objects in more detail:
     :property defaults: Default SPI connection settings
     :proptype defaults: :json:object:`defaults <hardware.spi.defaults>`
     :property spi{n}: SPI bus definitions
-    :proptype spi{n}: :json:object:`bus <hardware.spi.bus>`
+    :proptype spi{n}: :json:object:`bus <hardware.spi.spi{n}>`
     
     **Example**::
     
@@ -529,7 +646,7 @@ Each of the objects in more detail:
     :proptype firstBit: :cpp:enum:`SPIFirstBit`
     :property integer speed: Default bus speed
     
-.. json:object:: hardware.spi.bus
+.. json:object:: hardware.spi.spi{n}
 
     SPI bus definition
     
@@ -540,15 +657,56 @@ Each of the objects in more detail:
     :property pin port: GPIO port that the SPI pins belong to
     :property string alt: `(STM32F4* only)` GPIO alternate function mapping
     :options alt: GPIO_AFx_I2Cy
+
+Target-Required Settings
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+These are configuration options that are required by a specific target which should not be changed by the user.
+    
+    
+Architecture
+############
+
+.. json:object:: arch
+
+    Architecture of the target's processor
+
+    :property object arm: Specifies that the target has an ARM architecture
+    :property object msp430: Specifies that the target has an MSP430 architecture
+    
+    **Example**::
+    
+        {
+            "arch": {
+              "msp430": {}
+            }
+        }
+    
+CMSIS
+#####
     
 .. json:object:: cmsis
 
     Cortex Microcontroller Software Interface Standard
     
-    Settings specific to targets with Cortex processors
+    *Settings specific to targets with Cortex processors*
     
     :property nvic: "Nester Vector Interrupt Controller"
     :proptype nvic: :json:object:`nvic <cmsis.nvic>`
+    
+    **Example**::
+    
+        {
+            "cmsis": {
+              "nvic": {
+                "ram_vector_address": "0x20000000",
+                "flash_vector_address": "0x08000000",
+                "user_irq_offset": 16,
+                "user_irq_number": 82
+              }
+            }
+        }
+    
     
 .. json:object:: cmsis.nvic
 
@@ -558,42 +716,44 @@ Each of the objects in more detail:
     :property string flash_vector_address: Initial vector position in flash
     :property integer user_irq_offset: `(Default: 16)` Number of ARM core vectors (HardFault handler, SysTick, etc)
     :property integer user_irq_number: `(Default: 82)` Number of manufacturer vectors
+    :property boolean has_vtor: `(Default: false)` Specifies whether a Vector Table Offset Register exists on the target
+    :property boolean has_custom_vtor: `(Default: false)` Specifies whether a non-default VTOR exists on the target
     
+UVisor
+######
 
 .. json:object:: uvisor
 
     `uVisor <https://github.com/ARMmbed/uvisor>`__ RTOS security settings
     
+    *Specific to STM32F4* targets*
+    
     :property integer present: `(Default: 0. Values: 0, 1)` Specifies whether uVisor is present on the target device
+    
+    **Example**::
+    
+        {
+            "uvisor": {
+              "present": 0
+            }
+        }
+    
+GCC
+###
     
 .. json:object:: gcc
 
     Project compiler options
     
-    :property boolean printf-float: `(Default: False)` Enables floating point support in ``printf`` commands
-
-.. json:object:: arch
-
-    Architecture of the target's processor
-
-    :property object arm: Specifies that the target has an ARM architecture
-    :property object msp430: Specifies that the target has an MSP430 architecture
-
-.. json:object:: system
+    :property boolean printf-float: Enables floating point support in ``printf`` commands. **Note:** Must be ``false`` for MSP430* targets
     
-    :property boolean initAfterFlash: `(Default: false)` Specifies whether the 
-      application should be started as a background daemon on the target 
-      device immediately after being flashed
-    :property boolean initAtBoot: `(Default: true)` Specifies whether the application should 
-      be started on the target device during system initialization.vAn init script will be 
-      generated with the run level specified by ``runLevel`` 
-    :property number runLevel: `(Default: 50. Range: 10-99)` The priority of the generated init script. 
-      Scripts with lower values will be run first
-    :property string destDir: `(Default: "/home/usr/local/bin")` Specifies flashing destination directory for all 
-      non-application files
-    :property string password: `(Default: "Kubos123") Specifies the root password to be used by 
-      ``kubos flash`` to successfully connect to the target device
+    **Example**::
     
+        {
+            "gcc": {
+              "printf-float": false
+            }
+        }
 
 module.json
 -----------
