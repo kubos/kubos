@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
-  * @defgroup STM32F4_HAL_UART
+  * @defgroup STM32F4_HAL_UART STM32F4 HAL UART Interface
   * @addtogroup STM32F4_HAL_UART
   * @{
   */
@@ -26,15 +26,15 @@
 #include "kubos-hal/uart.h"
 
 /**
- * Internal function to get appropriate USART_TypeDef based on uart num
- * @param uart uart bus num
+ * Internal function to get appropriate USART_TypeDef based on UART num
+ * @param[in] uart UART bus num
  * @return USART_TypeDef
  */
 USART_TypeDef *uart_dev(KUARTNum uart);
 
 /**
- * Internal function to get appropriate interrupt number based on uart num
- * @param uart uart bus num
+ * Internal function to get appropriate interrupt number based on UART num
+ * @param[in] uart UART bus num
  * @return IRQn_Type interrupt number
  */
 IRQn_Type uart_irqn(KUARTNum uart);
