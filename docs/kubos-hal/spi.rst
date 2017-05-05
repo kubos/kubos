@@ -4,10 +4,10 @@ Using SPI
 Configuration
 ^^^^^^^^^^^^^
 
-The first step in using spi is to configure and bring up the interface.
-The spi hal provides a configuration structure with the standard spi
+The first step in using SPI is to configure and bring up the interface.
+The SPI HAL provides a configuration structure with the standard SPI
 options. This structure should be filled out according to the project's
-spi configuration and then it may be used to initialize the interface in
+SPI configuration and then it may be used to initialize the interface in
 use.
 
 .. code-block:: c
@@ -27,7 +27,7 @@ use.
 Reading
 ^^^^^^^
 
-Reading from spi is a pretty simple operation, a buffer and length is
+Reading from SPI is a pretty simple operation, a buffer and length is
 passed in. The buffer is filled and the number of characters read are
 passed back.
 
@@ -49,7 +49,7 @@ pin before reading.
 Writing
 ^^^^^^^
 
-Writing to spi is also a simple operation, a buffer and length are
+Writing to SPI is also a simple operation, a buffer and length are
 passed in. The buffer is read from and the number of characters written
 are passed back.
 
