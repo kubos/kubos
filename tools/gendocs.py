@@ -25,7 +25,8 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 
 DOCS_DIRS = [
 "hal/kubos-hal",
-"hal/kubos-hal-stm32f4"
+"hal/kubos-hal-stm32f4",
+"hal/kubos-hal-msp430f5529"
 ]
 
 def gendocs_xml(dir, doxyfile, version, doc_dir):
