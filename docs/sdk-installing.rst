@@ -59,6 +59,16 @@ provider that Kubos officially supports is VirtualBox.
    VirtualBox Extension Pack to enable passing USB devices into a
    virtual machine.
 
+If you're using Linux as your host operating system you will need to add 
+yourself to the ``vboxusers`` group with the following command:
+
+::
+
+        sudo usermod -aG vboxusers <username>
+
+You will need to logout and log back in to your host computer, otherwise 
+passing usb devices through to your vagrant development environment will not work correctly.
+
 Install Vagrant
 ~~~~~~~~~~~~~~~
 
