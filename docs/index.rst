@@ -28,9 +28,10 @@ info@kubos.co.
    
     Installing Kubos SDK <sdk-installing>
     Creating your first project <first-project>
-    Kubos Project Configuration <sdk-project-config>
+    Kubos SDK Example Applications <sdk-examples>
     Kubos SDK Cheat Sheet <sdk-cheatsheet>
     Kubos CLI Command Reference <sdk-reference>
+    Kubos Project Configuration <sdk-project-config>
     Upgrading Kubos SDK <sdk-upgrading>
     
 .. toctree::
@@ -62,7 +63,6 @@ info@kubos.co.
 .. toctree::
    :caption: Top-Level APIs
    :hidden:
-   :maxdepth: 1
    
     Kubos HAL <kubos-hal/index>
 
