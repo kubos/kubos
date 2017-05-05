@@ -30,7 +30,7 @@
 
 /**
  * Internal function to get appropriate USART_TypeDef based on UART num
- * @param[in] uart UARTs bus num
+ * @param[in] uart UART bus num
  * @return USART_TypeDef
  */
 USART_TypeDef *uart_dev(KUARTNum uart)
@@ -323,6 +323,11 @@ void kprv_uart_enable_tx_int(KUARTNum uart)
 
 /**
  * Write a character directly to the UART interface
+ *
+ * The function k_uart_write queues up characters in an internal write buffer
+ * which is read by the UART interrupt. This function skips the write buffer
+ * and writes the character directly to the UART hardware.
+ *
  * @param[in] uart UART bus
  * @param[in] c character to write
  * @return KUARTStatus UART_OK if success, otherwise failure

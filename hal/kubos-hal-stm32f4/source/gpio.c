@@ -27,8 +27,8 @@
 #include "stm32f4xx_hal_rcc.h"
 
 /**
- * Performs low level GPIO pin configuration and setup
- * @param[in] pin gpio pin number
+ * Performs low-level GPIO pin configuration and setup
+ * @param[in] pin GPIO pin number
  * @param[in] mode pin mode
  * @param[in] pullup pin pullup setting
  */
@@ -67,8 +67,8 @@ void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 }
 
 /**
- * Reads value off gpio pin
- * @param[in] pin gpio pin to read from
+ * Reads value off GPIO pin
+ * @param[in] pin GPIO pin to read from
  * @return int value read from pin
  */
 unsigned int k_gpio_read(int pin)
@@ -78,8 +78,8 @@ unsigned int k_gpio_read(int pin)
 }
 
 /**
- * Writes value to pin pin
- * @param[in] pin gpio pin to write to
+ * Writes value to GPIO pin
+ * @param[in] pin GPIO pin to write to
  * @param[in] val value to write to pin
  */
 void k_gpio_write(int pin, unsigned int val)

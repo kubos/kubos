@@ -49,7 +49,7 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c);
  * in the I2C_InitTypeDef and create the associated handle.
  *
  * @note Derived from STM32CubeF4's HAL_I2C_INIT
- * @param[out] handle pointer to hal_i2c_handle containing config information
+ * @param[in,out] handle pointer to hal_i2c_handle containing config information
  * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
  */
 static KI2CStatus hal_i2c_hw_init(hal_i2c_handle * handle);
@@ -79,7 +79,7 @@ static KI2CStatus hal_i2c_check_addr_timeout(I2C_HandleTypeDef * handle, uint32_
 /**
  * Checks for special conditions based on the flag
  * @param[in] handle Pointer to STM32CubeF4 HAL defined structure for I2C data
- * @param[out] flag I2C Flag that should be checked
+ * @param[in] flag I2C Flag that should be checked
  * @return KI2CStatus I2C_OK if no special conditions found, specific error otherwise
  */
 static KI2CStatus hal_i2c_check_flag_special(I2C_HandleTypeDef * handle, uint32_t flag);
@@ -202,7 +202,7 @@ KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
 
 /**
  * Write data over I2C bus as master
- * @param[in] i2c i2c bus to write to
+ * @param[in] i2c I2C bus to write to
  * @param[in] addr I2C address to write to
  * @param[in] ptr pointer to data buffer
  * @param[in] len length of data to write
@@ -269,7 +269,7 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
 
 /**
  * Read data over I2C bus as master
- * @param[in] i2c i2c bus to read from
+ * @param[in] i2c I2C bus to read from
  * @param[in] addr I2C address to write to
  * @param[out] ptr pointer to data buffer
  * @param[in] len length of data to read
@@ -528,7 +528,7 @@ static KI2CStatus hal_i2c_hw_init(hal_i2c_handle * handle)
 
     /* Allocate lock resource and initialize it */
     hi2c->Lock = HAL_UNLOCKED;
-    /* Init the low level hardware : GPIO, CLOCK, NVIC */
+    /* Init the low-level hardware : GPIO, CLOCK, NVIC */
     hal_i2c_msp_init(handle);
 
     /* Disable the selected I2C peripheral */
