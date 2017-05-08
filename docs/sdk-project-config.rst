@@ -3,6 +3,8 @@ Kubos Project Configuration
 
 Kubos project configuration is derived from Yotta's `configuration system <http://docs.yottabuild.org/reference/config.html>`__ 
 and `module.json <http://docs.yottabuild.org/reference/module.html>`__ files.
+
+If a project's configuration is changed, the new settings will be incorporated during the next execution of ``kubos build``.
    
 
 config.json
@@ -240,7 +242,7 @@ automatically included with any target device.
 Built-in Peripheral Support
 ###########################
 
-`Kubos Core <todo: Kubos Core doc link>` supports a variety of end-point peripherals. In order to turn on support for these
+Kubos Core supports a variety of end-point peripherals. In order to turn on support for these
 devices within a Kubos project, they should be added to the ``sensors`` structure of the `config.json` 
 file.
 
@@ -250,28 +252,27 @@ file.
     
     By default, including the ``sensors`` object turns on the following APIs:
     
-    - Altimeter
-    - IMU
-    - Temperature
-    - TODO: Turn these into reference links to their API docs
+    - :doc:`Altimeter <kubos-core/altimeter>`
+    - :doc:`IMU <kubos-core/IMU>`
+    - :doc:`Temperature <kubos-core/temperature>`
     
     Without including a corresponding sensor device (ex. HTU21D), these APIs serve only as code stubs.
     
     :property htu21d: HTU21D humidity sensor support
-    :proptype htu21d: :json:object:`htu21d`
+    :proptype htu21d: :json:object:`htu21d <sensors.htu21d>`
     :property bno055: BNO055 absolute orientation sensor support
-    :proptype bno055: :json:object:`bno055`
+    :proptype bno055: :json:object:`bno055 <sensors.bno055>`
     :property bme280: BME280 humidity and pressure sensor support
-    :proptype bme280: :json:object:`bme280`
+    :proptype bme280: :json:object:`bme280 <sensors.bme280>`
     :property gps: GPS (NMEA) support
-    :proptype gps: :json:object:`gps`
+    :proptype gps: :json:object:`gps <sensors.gps>`
         
-.. json:object:: htu21d
+.. json:object:: sensors.htu21d
 
     `HTU21D humidity sensor <https://cdn-shop.adafruit.com/datasheets/1899_HTU21D.pdf>`__ configuration
     
     :property i2c_bus: The I2C bus connected to the sensor
-    :proptype bus: :cpp:enum:`KI2CNum`
+    :proptype i2c_bus: :cpp:enum:`KI2CNum`
     
     **Example**::
     
@@ -284,14 +285,14 @@ file.
         }
         
         
-.. json:object:: bno055
+.. json:object:: sensors.bno055
 
     `BNO055 absolute orientation sensor <https://cdn-shop.adafruit.com/datasheets/BST_BNO055_DS000_12.pdf>`__ configuration
     
     **Note:** *The sensor supports interfacing with both I2C and UART, but only I2C support has been implemented in Kubos Core*
     
     :property i2c_bus: The I2C bus connected to the sensor
-    :proptype bus: :cpp:enum:`KI2CNum`
+    :proptype i2c_bus: :cpp:enum:`KI2CNum`
     
     **Example**::
     
@@ -303,14 +304,14 @@ file.
             }
         }
     
-.. json:object:: bme280
+.. json:object:: sensors.bme280
 
     `BME280 humidity and pressure sensor <https://cdn-shop.adafruit.com/datasheets/BST-BME280_DS001-10.pdf>`__ configuration
     
     **Note:** *The sensor supports interfacing with both SPI and I2C, but only SPI support has been implemented in Kubos Core*
     
     :property spi_bus: The SPI bus connected to the sensor
-    :proptype bus: :cpp:enum:`KSPINum`
+    :proptype spi_bus: :cpp:enum:`KSPINum`
     :property pin CS: The chip select pin connected to the sensor
     
     **Example**::
@@ -318,13 +319,13 @@ file.
         {
             "sensors": {     
                 "bme280": {
-                    "spi bus":"K_SPI1",
-                    "CS":"PA4"
+                    "spi bus": "K_SPI1",
+                    "CS": "PA4"
                 } 
             }
         }
     
-.. json:object:: gps
+.. json:object:: sensors.gps
 
     `NMEA-formatted GPS data <http://www.gpsinformation.org/dale/nmea.htm>`__ support
     
@@ -345,92 +346,6 @@ User-Configurable Included Settings
 
 These are settings which may be changed by the user without compromising the target device,
 but which will automatically be included in the project without a `config.json` file present.
-
-Command and Control
-###################
-
-.. json:object:: cnc
-
-    **Example**::
-    
-        {
-            "cnc": {
-                "daemon_log_path": "\"/home/var/log.daemon.log\"",
-                "registry_dir": "\"/usr/local/kubos\"",
-                "client_tx_pipe": "\"/usr/local/kubos/client-to-server\"",
-                "client_rx_pipe": "\"/usr/local/kubos/server-to-client\""
-            }
-        }
-
-Telemetry
-#########
-
-.. json:object:: telemetry
-
-    **Example**::
-    
-        {
-            "telemetry": {
-                "csp_address": 1,
-                "csp_client_address": 2,
-                "aggregator": {
-                    "interval": 300
-                },
-                "subscribers": {
-                    "max_num": 10,
-                    "read_attempts": 10
-                }
-                "message_queue_size": 10,
-                "internal_port": 20,
-                "external_port": 10,
-                "rx_thread_stack_size": 1000,
-                "rx_thread_priority": 2,
-                "buffer_size": 256,
-                "storage": {                
-                    "file_name_buffer_size": 128,
-                    "data": {
-                        "buffer_size": 64,
-                        "part_size": 51200,
-                        "max_parts": 10,
-                        "output_format": "FORMAT_TYPE_CSV"
-                    },
-                    "subscriptions": "0x0",
-                    "subscribe_retry_interval": 50,
-                    "stack_depth": 1000,
-                    "task_priority": 0
-                    }
-                }
-            }
-        }
-        
-CSP
-###
-
-.. json:object:: csp
-
-    **Example**::
-    
-        {
-            "csp": {
-                "socket": true,
-                "debug": true
-            }
-        }
-        
-IPC
-###
-
-.. json:object:: ipc
-
-    **Example**::
-    
-        {
-            "ipc": {
-                "read_timeout": 50,
-                "send_timeout": 1000,
-                "socket_port": 8888
-            }
-        }
 
 System
 ######
@@ -769,6 +684,252 @@ Hardware
     :property string alt: `(STM32F4* only)` GPIO alternate function mapping
     :options alt: GPIO_AFx_I2Cy
 
+Command and Control
+###################
+
+.. json:object:: cnc
+
+    :doc:`Kubos Command and Control <command-and-control>` configuration
+    
+    **Note:** `Kubos C2 is currently only supported by KubOS Linux`
+    
+    :property path daemon_log_path: Absolute path for daemon log file
+    :property path registry_dir: Absolute path to C2 executables
+    :property client: C2 client pipe configuration
+    :proptype client: :json:object:`client <cnc.client>`
+    :property daemon: C2 daemon pipe configuration
+    :proptype daemon: :json:object:`daemon <cnc.daemon>`
+
+    **Example**::
+    
+        {
+            "cnc": {
+                "daemon_log_path": "\"/home/var/log.daemon.log\"",
+                "registry_dir": "\"/usr/local/kubos\""
+            }
+        }
+
+.. json:object:: cnc.client
+
+    Kubos Command and Control client configuration
+    
+    **Note:** `In the future, multiple clients will be able to connect to the single
+    C2 daemon. Currently only the command line client is supported`
+    
+    :property path tx_pipe: Client transmit pipe absolute path
+    :property path rx_pipe: Client receive pipe aboslute path
+    
+    **Example**::
+    
+        {
+           "cnc": {
+               "client": {
+                   "tx_pipe": "\"/usr/local/kubos/client-to-daemon\"",
+                   "rx_pipe": "\"/usr/local/kubos/daemon-to-client\""
+               }
+           }
+        }
+        
+.. json:object:: cnc.daemon
+
+    Kubos Command and Control daemon configuration
+    
+    :property path tx_pipe: Daemon transmit pipe absolute path
+    :property path rx_pipe: Daemon receive pipe aboslute path
+    
+    **Example**::
+    
+        {
+           "cnc": {
+               "daemon": {
+                   "tx_pipe": "\"/usr/local/kubos/daemon-to-client\"",
+                   "rx_pipe": "\"/usr/local/kubos/client-to-daemon\""
+               }
+           }
+        }
+
+Telemetry
+#########
+
+.. json:object:: telemetry
+
+    Kubos Telemetry configuration
+    
+    :property csp: CSP connection configuration
+    :proptype csp: :json:object:`csp <telemetry.csp>`
+    :property aggregator: Aggregator configuration
+    :proptype aggregator: :json:object:`aggregator <telemetry.aggregator>`
+    :property subscribers: Subscriber configuration
+    :proptype subscribers: :json:object:`subscribers <telemetry.subscribers>`
+    :property integer message_queue_size: `(Default: 10)` Max number of messages allowed in telemetry queue
+    :property integer internal_port: `(Default: 20)` Port number used for the telemetry server's internal connections
+    :property integer external_port: `(Default: 10)` Port number used for telemetry's external socket connections
+    :property rx_thread: Receive thread configuration
+    :proptype rx_thread: :json:object:`rx_thread <telemetry.rx_thread>`
+    :property integer buffer_size: `(Default: 256) KubOS Linux only.` Max size of a message which can be sent/processed by the telemetry system
+    :property storage: Telemetry storage configuration
+    :proptype storage: :json:object:`storage <telemetry.storage>`
+
+    **Example**::
+    
+        {
+            "telemetry": {
+                "message_queue_size": 10,
+                "internal_port": 20,
+                "external_port": 10,
+                "buffer_size": 256,
+            }
+        }
+        
+.. json:object:: telemetry.csp
+
+    Kubos Telemetry server's CSP configuration
+    
+    :property integer address: `KubOS RT only.` CSP address used by telemetry server 
+    :property integer client_address: `KubOS RT only.` CSP address for a telemetry client thread/process
+    
+    **Example**::
+    
+        {
+            "telemetry": {
+                "csp": {
+                    "address": 1,
+                    "client_address": 2
+                }
+            }
+        }
+        
+.. json:object:: telemetry.aggregator
+
+    Kubos Telemetry aggregator configuration
+    
+    :property integer interval: `(Default: 300)` Time interval (in ms) between calls to the user-defined telemetry aggregator 
+    
+    **Example**::
+    
+        {
+            "telemetry": {
+                "aggregator": {
+                    "interval": 300
+                }
+            }
+        }
+    
+.. json:object:: telemetry.subscribers
+
+    Kubos Telemetry subscribers configuration
+    
+    :property integer max_num: `(Default: 10)` Maximum number of subscribers allowed by the telemetry server
+    :property integer read_attempts: `(Default: 10)` Number of attempts allowed for a subscriber to read a message from the telemetry server
+    
+    **Example**::
+    
+        {
+            "telemetry": {
+                "subscribers": {
+                    "max_num": 10,
+                    "read_attempts": 10
+                }
+            }
+        }
+    
+.. json:object:: telemetry.rx_thread
+
+    Kubos Telemetry server receive thread configuration
+    
+    :property integer stack_size: `(Default: 1000)` Stack size of the thread
+    :property integer priority: `(Default: 2)` Priority level of the thread
+    
+    **Example**::
+    
+        {
+            "telemetry": {
+                "rx_thread": {
+                    "stack_size": 1000,
+                    "priority": 2
+                }
+            }
+        }
+    
+.. json:object:: telemetry.storage
+
+    Kubos Telemetry storage configuration
+    
+    :property integer file_name_buffer_size: `(Default: 128)` Maximum file name length of telemetry storage files
+    :property data: Telemetry data storage configuration
+    :proptype data: :json:object:`data <telemetry.storage.data>`
+    :property string subscriptions: `(Default: "0x0")` Hex flag value indicating topics which telemetry storage should subscribe to and capture in files
+    :property integer stack_depth: `(Default: 1000)` Telemetry storage receive task stack depth
+    :property integer task_priority: `(Default: 0)` Telemetry storage receive task priority
+    
+    **Example**::
+    
+        {
+             "telemetry": {
+                 "storage": {                
+                    "file_name_buffer_size": 128,
+                    "data": {
+                        "buffer_size": 64,
+                        "part_size": 51200,
+                        "max_parts": 10,
+                        "output_format": "FORMAT_TYPE_CSV"
+                    },
+                    "subscriptions": "0x0",
+                    "subscribe_retry_interval": 50,
+                    "stack_depth": 1000,
+                    "task_priority": 0
+                }
+            }
+        }
+    
+.. json:object:: telemetry.storage.data
+
+    Kubos Telemetry data storage configuration
+
+    :property integer buffer_size: `(Default: 64)` Maximum size/length of the storage buffer
+    :property integer part_size: `(Default: 51200)` Maximum file size before file rotation is triggered
+    :property integer max_parts: `(Default: 10)` Maximum number of files before file rotation in triggered
+    :property output_format: `(Default: "FORMAT_TYPE_CSV")` Output format of telemetry storage files
+    :proptype output_format: :cpp:enum:`output_data_format`
+
+CSP
+###
+
+.. json:object:: csp
+
+    Kubos CSP (CubeSat Protocol) configuration
+    
+    :property boolean debug: Turn on CSP debug messages
+
+    **Example**::
+    
+        {
+            "csp": {
+                "debug": true
+            }
+        }
+        
+IPC
+###
+
+.. json:object:: ipc
+
+    Kubos IPC (Inter-Process Communication) configuration
+    
+    :property integer read_timeout: `(Default: 50)` Timeout value for reading
+    :property integer send_timeout: `(Default: 1000)` Timeout value for sending
+    :property integer socket_port: `(Default:8888)` Port for IPC sockets to listen/connect on
+
+    **Example**::
+    
+        {
+            "ipc": {
+                "read_timeout": 50,
+                "send_timeout": 1000,
+                "socket_port": 8888
+            }
+        }
+
 Target-Required Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -869,3 +1030,212 @@ GCC
 
 module.json
 -----------
+
+The Kubos project's `module.json` file is originally based on `Yotta's module.json file <http://docs.yottabuild.org/reference/module.html>`__
+
+Default Configurations
+^^^^^^^^^^^^^^^^^^^^^^
+
+When you run ``kubos init``, a `module.json` file is created for you with some default values.
+
+KubOS RT Default File::
+
+    {
+        "bin": "./source",
+        "license": "Apache-2.0",
+        "name": "{your-project-name}",
+        "repository":{
+            "url": "git://<repository_url>",
+            "type": "git"
+        },
+        "version": "0.1.0",
+        "dependencies":{
+            "kubos-rt": "kubostech/kubos-rt#~0.1.0"
+        },
+        "homepage": "https://<homepage>",
+        "description": "Example app running on kubos-rt."
+    }
+    
+
+KubOS Linux Default File::
+
+    {
+        "bin": "./source",
+        "license": "Apache-2.0",
+        "name": "{your-project-name}",
+        "repository":{
+            "url": "git://<repository_url>",
+            "type": "git"
+        },
+        "version": "0.1.0",
+        "dependencies":{
+            "csp": "kubostech/libcsp#~1.5.0"
+        },
+        "homepage": "https://<homepage>",
+        "description": "Example app running on KubOS Linux."
+    }
+
+Relevant Configuration Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These are the configuration options which are most likely to be changed for a project.
+(For all other options, refer to `Yotta's documentation <http://docs.yottabuild.org/reference/module.html>`__.)
+
+.. json:object:: name
+
+    The module name, which is also used as the file name of the compiled application binary.
+    
+    By default, this is the project name, however, it can be changed to anything.
+    
+    Naming rules:
+    
+    - Must start with a letter
+    - No uppercase letters
+    - Numbers are allowed
+    - Hyphens are allowed
+    
+.. json:object:: bin
+    
+    Relative path to the project's source code.
+    
+.. json:object:: dependencies
+
+    Project library dependencies.
+
+    To keep Kubos project binaries small, ``kubos build`` will only include libraries which have been specified in this object.
+    As a result, if you want to use a Kubos library, it **must** be specified here, or must be included with another library
+    you specify.
+    
+    **WARNING: "kubos-rt" is a required dependency for all KubOS RT projects**
+    
+    :property string {component}: Project dependency location and/or version
+    
+    Available dependency name/value pairs (hierarchy denotes included dependecies. Italics denotes Yotta targetDependencies):
+    
+    - "cmd-control-client": "kubostech/cmd-control-client"
+    
+        - "csp": "kubostech/libcsp"
+        - "command-and-control": "kubostech/command-and-control"
+        - "ipc": "kubostech/ipc"
+        - "tinycbor": "kubostech/tinycbor"
+        
+    - "cmd-control-daemon": "kubostech/cmd-control-daemon"
+    
+        - "csp": "kubostech/libcsp"
+        - "command-and-control": "kubostech/command-and-control"
+        - "ipc": "kubostech/ipc"
+        - "tinycbor": "kubostech/tinycbor"
+        - "kubos-core": "kubostech/kubos-core"
+        
+    - "cmsis-core": "kubostech/cmsis-core"
+    
+        - `"cmsis-core-st": "kubostech/cmsis-core-st"`
+        
+            - `"cmsis-core-stm32f4": "kubostech/cmsis-core-stm32f4"`
+            
+                - "cmsis-core": "kubostech/cmsis-core"
+                - "stm32cubef4": "kubostech/stm32cubef4"
+                - `"cmsis-core-stm32f405rg": "kubostech/cmsis-core-stm32f405rg"`
+                
+                    - "cmsis-core": "kubostech/cmsis-core"
+                    
+                - `"cmsis-core-stm32f407xg": "kubostech/cmsis-core-stm32f407xg"`
+                
+                    - "cmsis-core": "kubostech/cmsis-core"
+                    
+    - "command-and-control": "kubostech/command-and-control"
+    - "csp": "kubostech/libcsp"
+    
+        - `"freertos": "kubostech/freertos"`
+        - `"kubos-hal": "kubostech/kubos-hal"`
+        - `"tinycbor": "kubostech/tinycbor"`
+        
+    - "freertos": "kubostech/freertos"
+    
+        - `"cmsis-core": "kubostech/cmsis-core"`
+        - `"freertos-config-stm32f4": "kubostech/freertos-config-stm32f4"`
+        - `"freertos-config-msp430f5529": "kubostech/freertos-config-msp430f5529"`
+        
+    - "ipc": "kubostech/ipc"
+    
+        - "csp": "kubostech/libcsp"
+        - "tinycbor": "kubostech/tinycbor"
+        - `"kubos-rt": "kubostech/kubos-rt"`
+        
+    - "kubos-core": "kubostech/kubos-core"
+    
+        - "csp": "kubostech/libcsp"
+        - "kubos-hal": "kubostech/kubos-hal"
+        
+    - "kubos-hal": "kubostech/kubos-hal"
+    
+        - "csp": "kubostech/libcsp"
+        - `"kubos-hal-linux": "kubostech/kubos-hal-linux"`
+        
+            - "kubos-hal" : "kubostech/kubos-hal"
+            
+        - `"kubos-hal-msp430f5529": "kubostech/kubos-hal-msp430f5529"`
+        
+            - "kubos-hal" : "kubostech/kubos-hal"
+            - "msp430f5529-hal": "kubostech/msp430f5529-hal"
+            
+        - `"kubos-hal-stm32f4": "kubostech/kubos-hal-stm32f4"`
+        
+            - "kubos-hal": "kubostech/kubos-hal"
+            - `"stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg"`
+            
+                - "cmsis-core": "kubostech/cmsis-core"
+                
+            - `"stm32cubef4-stm32f407vg": "kubostech/stm32cubef4-stm32f407vg"`
+            
+                - "cmsis-core": "kubostech/cmsis-core#"
+                
+    - "kubos-rt": "kubostech/kubos-rt"
+    
+        - "freertos": "kubostech/freertos"
+        - "csp": "kubostech/libcsp"
+        - "kubos-hal": "kubostech/kubos-hal"
+        - "kubos-core": "kubostech/kubos-core"
+
+    - "stm32cubef4": "kubostech/stm32cubef4"
+    
+        - `"stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg"`
+        
+            - "cmsis-core": "kubostech/cmsis-core"
+            
+        - `"stm32cubef4-stm32f407vg": "kubostech/stm32cubef4-stm32f407vg"`
+        
+            - "cmsis-core": "kubostech/cmsis-core"
+
+    - "telemetry": "kubostech/telemetry"
+    
+        - "ipc": "kubostech/ipc"
+        - "kubos-core": "kubostech/kubos-core"
+        - `"telemetry-linux": "kubostech/telemetry-linux"`
+        
+              - "ipc": "kubostech/ipc"
+              - "kubos-core": "kubostech/kubos-core"
+              - "telemetry": "kubostech/telemetry"
+              - "tinycbor": "kubostech/tinycbor"
+              
+        - `"telemetry-rt": "kubostech/telemetry-rt"`
+        
+              - "ipc": "kubostech/ipc"
+              - "kubos-core": "kubostech/kubos-core"
+              - `"kubos-rt": "kubostech/kubos-rt"`
+              
+    - "telemetry-aggregator": "kubostech/telemetry-aggregator"
+    
+        - "telemetry": "kubostech/telemetry"
+        
+    - "telemetry-storage": "kubostech/telemetry-storage"
+    
+        - "kubos-core": "kubostech/kubos-core"
+        - "telemetry": "kubostech/telemetry"
+        - `"kubos-rt": "kubostech/kubos-rt"`
+        
+    - "tinycbor": "kubostech/tinycbor"
+    
+    
+    
+    
