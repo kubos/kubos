@@ -290,7 +290,7 @@ appear in Device Manager as "MSP Application UART1". The default
 connection speed is 115200.
 
 All of your program's printf statements will be routed through here. You
-can change the settings of the console with the hardware:console section
+can change the settings of the console with the :json:object:`hardware.console` section
 of the config.json file.
 
 **NOTE:** If your MSP430 board loses power while you have a debug
