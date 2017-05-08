@@ -105,7 +105,7 @@ htmlhelp_basename = 'Kubosdoc'
 
 
 breathe_projects = {
-    "kubos-hal" : "../xml/hal/kubos-hal/xml",
+    "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-stm32f4" : "../xml/hal/kubos-hal-stm32f4"
 }
 
