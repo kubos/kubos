@@ -110,4 +110,8 @@ breathe_projects = {
     "kubos-hal-msp430f5529" : "../xml/hal/kubos-hal-msp430f5529"
 }
 
-extensions += ['breathe', 'sphinx.ext.todo']
+extensions += [
+    'breathe',
+    'sphinx.ext.todo',
+    'sphinxcontrib.plantuml'
+]
