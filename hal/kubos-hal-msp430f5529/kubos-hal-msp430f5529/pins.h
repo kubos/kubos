@@ -42,7 +42,7 @@
 
 
 /**
-  * Struct which contains gpio details (dir/out/in/pull pins and bit)
+  * Struct which contains GPIO details (dir/out/in/pull pins and bit)
   */
 typedef struct {
     /** PxDIR */

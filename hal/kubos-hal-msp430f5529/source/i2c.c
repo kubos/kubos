@@ -26,9 +26,9 @@
 #include <msp430.h>
 
 /**
-  * Helper function to convert i2c bus option.
-  * @param[in] i2c number of i2c bus
-  * @return hal_i2c_bus hal i2c bus number
+  * Helper function to convert I2C bus option.
+  * @param[in] i2c number of I2C bus
+  * @return hal_i2c_bus HAL I2C bus number
   */
 static inline hal_i2c_bus i2c_bus(KI2CNum i2c)
 {
@@ -41,9 +41,9 @@ static inline hal_i2c_bus i2c_bus(KI2CNum i2c)
 }
 
 /**
-  * Helper function to get i2c handle
-  * @param[in] i2c number of i2c bus
-  * @return hal_i2c_handle* pointer to i2c handle, NULL if number is invalid
+  * Helper function to get I2C handle
+  * @param[in] i2c number of I2C bus
+  * @return hal_i2c_handle* pointer to I2C handle, NULL if number is invalid
   */
 static inline hal_i2c_handle * i2c_handle(KI2CNum i2c)
 {
@@ -56,9 +56,9 @@ static inline hal_i2c_handle * i2c_handle(KI2CNum i2c)
 }
 
 /**
-  * Helper function to convert i2c addressing option.
+  * Helper function to convert I2C addressing option.
   * @param[in] mode i2c addressing mode option
-  * @return hal_i2c_addressing_mode hal specific i2c addressing mode option
+  * @return hal_i2c_addressing_mode HAL specific I2C addressing mode option
   */
 static inline hal_i2c_addressing_mode i2c_addressing(I2CAddressingMode mode)
 {
@@ -71,9 +71,9 @@ static inline hal_i2c_addressing_mode i2c_addressing(I2CAddressingMode mode)
 }
 
 /**
-  * Helper function to convert i2c role option.
+  * Helper function to convert I2C role option.
   * @param[in] role i2c bus role
-  * @return hal_i2c_role hal specific i2c role option
+  * @return hal_i2c_role HAL specific I2C role option
   */
 static inline hal_i2c_role i2c_role(I2CRole role)
 {
@@ -86,8 +86,8 @@ static inline hal_i2c_role i2c_role(I2CRole role)
 }
 
 /**
- * Setup and enable i2c bus
- * @param[in] i2c i2c bus to initialize
+ * Setup and enable I2C bus
+ * @param[in] i2c I2C bus to initialize
  * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
  */
 KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
@@ -125,7 +125,7 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
 }
 
 /**
- * i2c hardware cleanup and disabling
+ * I2C hardware cleanup and disabling
  * @param[in] i2c bus num to terminate
  * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
  */
@@ -141,9 +141,9 @@ KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
 }
 
 /**
- * Write data over i2c bus as master
- * @param[in] i2c i2c bus to write to
- * @param[in] addr i2c address to write to
+ * Write data over I2C bus as master
+ * @param[in] i2c I2C bus to write to
+ * @param[in] addr I2C address to write to
  * @param[in] ptr pointer to data buffer
  * @param[in] len length of data to write
  * @return KI2CStatus I2C_OK on success, otherwise failure
@@ -157,9 +157,9 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
 }
 
 /**
- * Read data over i2c bus as master
- * @param[in] i2c i2c bus to read from
- * @param[in] addr i2c address to write to
+ * Read data over I2C bus as master
+ * @param[in] i2c I2C bus to read from
+ * @param[in] addr I2C address to write to
  * @param[out] ptr pointer to data buffer
  * @param[in] len length of data to read
  * @return KI2CStatus I2C_OK on success, otherwise failure

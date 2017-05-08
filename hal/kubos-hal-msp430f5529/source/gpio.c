@@ -28,7 +28,7 @@
 
 
 /**
-  * Static array of gpio setup (dir, out, in pins, specific bit).
+  * Static array of GPIO setup (dir, out, in pins, specific bit).
   *
   * Note - This (only) describes digital pins exposed on the MSP430F5529 launchpad.
   *
@@ -84,7 +84,7 @@ static KPinDesc pins[] = {
 };
 
 /**
-  * Initialize gpio pin to specified mode.
+  * Initialize GPIO pin to specified mode.
   *
   * I/O pin configuration described in MSP430x5xx Family Guide Section 12.2.4
   *
@@ -116,7 +116,7 @@ void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 }
 
 /**
-  * Read in gpio pin.
+  * Read in GPIO pin.
   * @param[in] pin number of pin to read from
   * @return unsigned int value read from pin
   */
@@ -126,7 +126,7 @@ unsigned int k_gpio_read(int pin)
 }
 
 /**
-  * Write to gpio pin.
+  * Write to GPIO pin.
   * @param[in] pin number of pin to write to
   * @param[in] val value to write
   */

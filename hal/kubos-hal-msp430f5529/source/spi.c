@@ -27,8 +27,8 @@
 
 /**
   * Helper function to convert SPI bus option.
-  * @param[in] spi spi bus number
-  * @return hal_spi_bus hal specific SPI bus number
+  * @param[in] spi SPI bus number
+  * @return hal_spi_bus HAL specific SPI bus number
   */
 static inline hal_spi_bus spi_bus(KSPINum spi)
 {
@@ -42,8 +42,8 @@ static inline hal_spi_bus spi_bus(KSPINum spi)
 
 /**
   * Helper function to convert SPI roles
-  * @param[in] spi spi bus role
-  * @return hal_spi_role hal specific SPI role option
+  * @param[in] spi SPI bus role
+  * @return hal_spi_role HAL specific SPI role option
   */
 static inline hal_spi_role spi_role(SPIRole spi)
 {
@@ -57,7 +57,7 @@ static inline hal_spi_role spi_role(SPIRole spi)
 
 /**
   * Helper function to get SPI handle.
-  * @param[in] spi spi bus number
+  * @param[in] spi SPI bus number
   * @return hal_spi_handle* pointer to SPI hardware handle
   */
 static inline hal_spi_handle * spi_handle(KSPINum spi)
@@ -72,8 +72,8 @@ static inline hal_spi_handle * spi_handle(KSPINum spi)
 
 /**
   * Helper function to convert SPI direction
-  * @param[in] spi spi bus direction option
-  * @return hal_spi_direction hal specific SPI bus direction option
+  * @param[in] spi SPI bus direction option
+  * @return hal_spi_direction HAL specific SPI bus direction option
   */
 static inline hal_spi_direction spi_direction(SPIDirection spi)
 {
@@ -88,8 +88,8 @@ static inline hal_spi_direction spi_direction(SPIDirection spi)
 
 /**
   * Helper function to convert SPI data size
-  * @param[in] spi spi bus data size (width) option
-  * @return hal_spi_data_size hal specific data size (width) option
+  * @param[in] spi SPI bus data size (width) option
+  * @return hal_spi_data_size HAL specific data size (width) option
   */
 static inline hal_spi_data_size spi_data_size(SPIDataSize spi)
 {
@@ -104,7 +104,7 @@ static inline hal_spi_data_size spi_data_size(SPIDataSize spi)
 /**
  * Helper function to convert SPI clock phase
  * @param[in] phase SPI bus clock phase option
- * @return hal_spi_clock_phase hal specific SPI bus clock phase option
+ * @return hal_spi_clock_phase HAL specific SPI bus clock phase option
  */
 static inline hal_spi_clock_phase spi_clock_phase(SPIClockPhase phase)
 {
@@ -119,7 +119,7 @@ static inline hal_spi_clock_phase spi_clock_phase(SPIClockPhase phase)
 /**
  * Helper function to convert SPI clock polarity option
  * @param[in] polarity SPI clock polarity option
- * @return hal_spi_clock_polarity hal specific clock polarity option
+ * @return hal_spi_clock_polarity HAL specific clock polarity option
  */
 static inline hal_spi_clock_polarity spi_clock_polarity(SPIClockPolarity polarity)
 {
@@ -134,7 +134,7 @@ static inline hal_spi_clock_polarity spi_clock_polarity(SPIClockPolarity polarit
 /**
  * Helper function to convert SPI first bit option
  * @param[in] firstbit SPI bus first bit option
- * @return hal_spi_first_bit hal specific SPI first bit option
+ * @return hal_spi_first_bit HAL specific SPI first bit option
  */
 static inline hal_spi_first_bit spi_first_bit(SPIFirstBit firstbit)
 {
