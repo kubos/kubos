@@ -225,7 +225,7 @@ automatically included with any target device.
 
     SDIO support
     
-    `There are no configuration properties for this object. It simply enable the use
+    `There are no configuration properties for this object. It simply enables the use
     of the HAL SDIO library`
     
     **Example**:: 
@@ -240,31 +240,105 @@ automatically included with any target device.
 Built-in Peripheral Support
 ###########################
 
-Kubos Core supports a variety of end-point peripherals. In order to turn on support for these
+`Kubos Core <todo: Kubos Core doc link>` supports a variety of end-point peripherals. In order to turn on support for these
 devices within a Kubos project, they should be added to the ``sensors`` structure of the `config.json` 
 file.
 
 .. json:object:: sensors
 
-    TODO: One of the sensors supports SPI and I2C, see if both are availabe through config.json
+    Kubos Core sensor APIs
+    
+    By default, including the ``sensors`` object turns on the following APIs:
+    
+    - Altimeter
+    - IMU
+    - Temperature
+    - TODO: Turn these into reference links to their API docs
+    
+    Without including a corresponding sensor device (ex. HTU21D), these APIs serve only as code stubs.
+    
+    :property htu21d: HTU21D humidity sensor support
+    :proptype htu21d: :json:object:`htu21d`
+    :property bno055: BNO055 absolute orientation sensor support
+    :proptype bno055: :json:object:`bno055`
+    :property bme280: BME280 humidity and pressure sensor support
+    :proptype bme280: :json:object:`bme280`
+    :property gps: GPS (NMEA) support
+    :proptype gps: :json:object:`gps`
+        
+.. json:object:: htu21d
 
+    `HTU21D humidity sensor <https://cdn-shop.adafruit.com/datasheets/1899_HTU21D.pdf>`__ configuration
+    
+    :property i2c_bus: The I2C bus connected to the sensor
+    :proptype bus: :cpp:enum:`KI2CNum`
+    
     **Example**::
     
         {
             "sensors": {
                 "htu21d": { 
                     "i2c_bus": "K_I2C1" 
-                },
-                "bno055": { 
-                    "i2c_bus": "K_I2C1" 
-                },      
-                "bme280": {
-                    "spi bus":"K_SPI1",
-                    "CS":"PA4"
-                }
+                }                
             }
         }
         
+        
+.. json:object:: bno055
+
+    `BNO055 absolute orientation sensor <https://cdn-shop.adafruit.com/datasheets/BST_BNO055_DS000_12.pdf>`__ configuration
+    
+    **Note:** *The sensor supports interfacing with both I2C and UART, but only I2C support has been implemented in Kubos Core*
+    
+    :property i2c_bus: The I2C bus connected to the sensor
+    :proptype bus: :cpp:enum:`KI2CNum`
+    
+    **Example**::
+    
+        {
+            "sensors": {
+                "bno055": { 
+                    "i2c_bus": "K_I2C1" 
+                } 
+            }
+        }
+    
+.. json:object:: bme280
+
+    `BME280 humidity and pressure sensor <https://cdn-shop.adafruit.com/datasheets/BST-BME280_DS001-10.pdf>`__ configuration
+    
+    **Note:** *The sensor supports interfacing with both SPI and I2C, but only SPI support has been implemented in Kubos Core*
+    
+    :property spi_bus: The SPI bus connected to the sensor
+    :proptype bus: :cpp:enum:`KSPINum`
+    :property pin CS: The chip select pin connected to the sensor
+    
+    **Example**::
+    
+        {
+            "sensors": {     
+                "bme280": {
+                    "spi bus":"K_SPI1",
+                    "CS":"PA4"
+                } 
+            }
+        }
+    
+.. json:object:: gps
+
+    `NMEA-formatted GPS data <http://www.gpsinformation.org/dale/nmea.htm>`__ support
+    
+    **Note:** `There are no configuration properties for GPS within the config.json file. All configuration will be done
+    within the Kubos application's code`
+    
+    **Example**::
+    
+        {
+            "sensors": {
+                "gps": {}          
+            }
+        }
+    
     
 User-Configurable Included Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -298,11 +372,33 @@ Telemetry
         {
             "telemetry": {
                 "csp_address": 1,
+                "csp_client_address": 2,
                 "aggregator": {
                     "interval": 300
                 },
                 "subscribers": {
-                    "max_num": 10 
+                    "max_num": 10,
+                    "read_attempts": 10
+                }
+                "message_queue_size": 10,
+                "internal_port": 20,
+                "external_port": 10,
+                "rx_thread_stack_size": 1000,
+                "rx_thread_priority": 2,
+                "buffer_size": 256,
+                "storage": {                
+                    "file_name_buffer_size": 128,
+                    "data": {
+                        "buffer_size": 64,
+                        "part_size": 51200,
+                        "max_parts": 10,
+                        "output_format": "FORMAT_TYPE_CSV"
+                    },
+                    "subscriptions": "0x0",
+                    "subscribe_retry_interval": 50,
+                    "stack_depth": 1000,
+                    "task_priority": 0
+                    }
                 }
             }
         }
@@ -318,6 +414,21 @@ CSP
             "csp": {
                 "socket": true,
                 "debug": true
+            }
+        }
+        
+IPC
+###
+
+.. json:object:: ipc
+
+    **Example**::
+    
+        {
+            "ipc": {
+                "read_timeout": 50,
+                "send_timeout": 1000,
+                "socket_port": 8888
             }
         }
 
@@ -661,7 +772,8 @@ Hardware
 Target-Required Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-These are configuration options that are required by a specific target which should not be changed by the user.
+These are configuration options that are required by a specific target which **should not be changed** by the user.
+They are documented here only for reference.
     
     
 Architecture
