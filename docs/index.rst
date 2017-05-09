@@ -64,6 +64,7 @@ info@kubos.co.
    :hidden:
    
     Kubos HAL <kubos-hal/index>
+    CSP <libcsp/index>
 
 .. todo::
     Kubos Core <@ref%20kubos-core-main>
