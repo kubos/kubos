@@ -1,6 +1,8 @@
 Kubos HAL Documentation
 =======================
 
+.. warning:: The Kubos-HAL functionality is currently only available on Kubos-RT.
+
 .. toctree::
    :caption: Guides
    :name: hal-guides

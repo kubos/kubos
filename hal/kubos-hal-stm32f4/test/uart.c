@@ -41,7 +41,7 @@ static KUARTNum uartTo;
 /*
  * test_uart_initGood
  *
- * Purpose:  Test the base level uart port initialization
+ * Purpose:  Test the base level UART port initialization
  *
  */
 
@@ -66,7 +66,7 @@ static void test_uart_initBad(void)
     KUARTNum num;
     int ret;
 
-    num = K_NUM_UARTS; //Load invalid uart number
+    num = K_NUM_UARTS; //Load invalid UART number
 
     ret = kprv_uart_dev_init(num);
 
