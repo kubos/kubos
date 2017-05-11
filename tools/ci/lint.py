@@ -29,7 +29,7 @@ import subprocess
 
 class KubosLintTest(object):
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    project_file = os.path.join(base_dir, 'projects.json')
+    project_file = os.path.join(base_dir, 'lint-projects.json')
     lint_output_dir = os.environ['CIRCLE_ARTIFACTS'] if 'CIRCLE_ARTIFACTS' in os.environ else base_dir
 
     def __init__(self):
@@ -74,6 +74,8 @@ class KubosLintTest(object):
         output_dir = os.path.join(self.lint_output_dir, proj + '-lint-output')
         if os.path.isdir(build_dir):
             self.utils.run_cmd('kubos', 'clean', cwd=proj_dir) #If the project's built we need to clean and rebuild it
+        self.utils.run_cmd('kubos', 'link', '-a', cwd=proj_dir)
+        #scan build tinkers with the build config some so we need to rebuild the project from scratch
         ret_code = self.utils.run_cmd('scan-build', '-o', output_dir, 'kubos', '--target', self.default_target, 'build', cwd=proj_dir, echo=True)
 
 
