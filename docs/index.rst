@@ -65,11 +65,10 @@ info@kubos.co.
    
     Kubos HAL <kubos-hal/index>
     CSP <libcsp/index>
+    FreeRTOS <freertos/index>
 
 .. todo::
     Kubos Core <@ref%20kubos-core-main>
-    FreeRTOS <@ref%20freertos-main>
-    CSP <@ref%20csp-main>
     Telemetry <@ref%20telemetry-main>
     Telemetry Aggregator <@ref%20telemetry-aggregator-main>
     Telemetry Storage <@ref%20telemetry-storage-main>
