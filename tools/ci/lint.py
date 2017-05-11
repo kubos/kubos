@@ -49,6 +49,7 @@ class KubosLintTest(object):
             self.utils.run_cmd('kubos', 'update')
         self.utils.run_cmd('kubos', 'use', '-b', os.environ['CIRCLE_BRANCH'])
 
+
     def load_lint_projects(self):
         if os.path.isfile(self.project_file):
             with open(self.project_file, 'r') as _fil:
@@ -60,13 +61,21 @@ class KubosLintTest(object):
 
 
     def run_lint_tests(self):
+        failed_projects = []
         for proj in self.lint_projects:
             if proj in self.module_index:
-                proj_dir =  self.module_index[proj]
-                self.lint_proj(proj, proj_dir)
+                proj_dir = self.module_index[proj]
+                ret_code = self.lint_proj(proj, proj_dir)
+                if ret_code != 0:
+                    failed_projects.append(proj)
             else:
                 print 'Unable to find project: %s' % proj
                 sys.exit(1)
+        if len(failed_projects) != 0:
+            print 'Some projects failed to build:'
+            for project in failed_projects:
+                print project
+            sys.exit(1)
 
 
     def lint_proj(self, proj, proj_dir):
@@ -76,7 +85,7 @@ class KubosLintTest(object):
             self.utils.run_cmd('kubos', 'clean', cwd=proj_dir) #If the project's built we need to clean and rebuild it
         self.utils.run_cmd('kubos', 'link', '-a', cwd=proj_dir)
         #scan build tinkers with the build config some so we need to rebuild the project from scratch
-        ret_code = self.utils.run_cmd('scan-build', '-o', output_dir, 'kubos', '--target', self.default_target, 'build', cwd=proj_dir, echo=True)
+        return self.utils.run_cmd('scan-build', '-o', output_dir, 'kubos', '--target', self.default_target, 'build', cwd=proj_dir, echo=True)
 
 
 if __name__ == '__main__':
