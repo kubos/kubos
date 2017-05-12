@@ -35,7 +35,8 @@ RUN rm ./iobc_toolchain.tar.gz
 
 RUN pip install pysocks
 RUN pip install mock
-RUN pip install kubos-cli
+RUN pip install --upgrade setuptools
+RUN pip install git+https://github.com/kubostech/kubos-cli
 
 RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
