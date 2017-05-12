@@ -16,7 +16,7 @@
  */
 
 /*
- * Unit tests for the STM32F4 spi bus
+ * Unit tests for the STM32F4 SPI bus
  *
  * Wiring:
  * 	- PA7 to SDI
@@ -79,7 +79,7 @@ void test_spi_setup(void)
 /*
  * test_spi_initGood
  *
- * Purpose:  Test the base level spi port initialization
+ * Purpose:  Test the base level SPI port initialization
  *
  */
 
@@ -109,7 +109,7 @@ static void test_spi_initGood(void)
 /*
  * test_spi_initBad
  *
- * Purpose:  Try initializing a non-existent spi port
+ * Purpose:  Try initializing a non-existent SPI port
  *
  */
 
@@ -118,13 +118,13 @@ static void test_spi_initBad(void)
 	int ret;
 
 	ret = kprv_spi_dev_init(K_NUM_SPI+1);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_ERROR, ret, "Successfully initialized fake spi port?");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_ERROR, ret, "Successfully initialized fake SPI port?");
 }
 
 /*
  * test_spi_termInit
  *
- * Purpose:  Test terminating a properly initialized spi port
+ * Purpose:  Test terminating a properly initialized SPI port
  *
  */
 
@@ -141,7 +141,7 @@ static void test_spi_termInit(void)
 /*
  * test_spi_termNoninit
  *
- * Purpose:  Test terminating a spi port that wasn't initialized
+ * Purpose:  Test terminating a SPI port that wasn't initialized
  *
  * Expectation: Should return a successful value
  *
@@ -158,7 +158,7 @@ static void test_spi_termNoninit(void)
 /*
  * test_spi_termNoninit
  *
- * Purpose:  Test terminating a spi port that doesn't exist
+ * Purpose:  Test terminating a SPI port that doesn't exist
  *
  */
 
@@ -167,13 +167,13 @@ static void test_spi_termBad(void)
 	int ret;
 
 	ret = kprv_spi_dev_terminate(K_NUM_SPI+1);
-	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_ERROR, ret, "Successfully terminated fake spi port?");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(SPI_ERROR, ret, "Successfully terminated fake SPI port?");
 }
 
 /*
  * test_spi_writeMaster
  *
- * Purpose:  Test writing from a properly initialized spi port
+ * Purpose:  Test writing from a properly initialized SPI port
  *
  */
 
@@ -199,7 +199,7 @@ static void test_spi_writeMaster(void)
 /*
  * test_spi_writeMasterNoCS
  *
- * Purpose:  Test writing from a properly initialized spi port without driving chip select
+ * Purpose:  Test writing from a properly initialized SPI port without driving chip select
  *  low to select a slave device
  *
  * Expectation: Should complete successfully
@@ -224,7 +224,7 @@ static void test_spi_writeMasterNoCS(void)
 /*
  * test_spi_writeMasterNoninit
  *
- * Purpose:  Test writing from a spi port without initializing it first
+ * Purpose:  Test writing from a SPI port without initializing it first
  *
  */
 
@@ -279,7 +279,7 @@ static void test_spi_writeMasterOverflow(void)
 /*
  * test_spi_readMaster
  *
- * Purpose:  Test reading from a properly initialized spi port
+ * Purpose:  Test reading from a properly initialized SPI port
  *
  * Expectation:  This test currently requests the chip ID number from the BME280 sensor. The returned
  * 	value should be 0x60.
@@ -313,7 +313,7 @@ static void test_spi_readMaster(void)
 /*
  * test_spi_readMasterNoCS
  *
- * Purpose:  Test reading from a properly initialized spi port without driving chip select
+ * Purpose:  Test reading from a properly initialized SPI port without driving chip select
  *  low to select a slave device
  *
  * Expectation: The read call should complete, but the slave should only give a value of 0xFF
@@ -344,7 +344,7 @@ static void test_spi_readMasterNoCS(void)
 /*
  * test_spi_readMasterNoWrite
  *
- * Purpose:  Test reading from a properly initialized spi port without writing which register to
+ * Purpose:  Test reading from a properly initialized SPI port without writing which register to
  *  read from first
  *
  * Expectation: The read call should complete, but the slave should only give a value of 0xFF
@@ -374,7 +374,7 @@ static void test_spi_readMasterNoWrite(void)
 /*
  * test_spi_writeReadMaster
  *
- * Purpose:  Test the write_read function from a properly initialized spi port
+ * Purpose:  Test the write_read function from a properly initialized SPI port
  *
  * Note:  Once slave mode has been implemented on the STM32F4, create a more robust test of the
  *   write_read function. For now we just want to know that it won't crash the system if we try
@@ -433,7 +433,7 @@ static void test_spi_readMasterOverflow(void)
 /*
  * test_spi_slave
  *
- * Purpose:  Test running spi connection in slave mode
+ * Purpose:  Test running SPI connection in slave mode
  *
  * Expectation: This should fail since slave mode isn't currently supported by Kubos-HAL
  */
@@ -464,7 +464,7 @@ static void test_spi_slave(void)
 /*
  * test_spi_bidiMode
  *
- * Purpose:  Test spi communication using the bidirectional mode (communicates only over MOSI line)
+ * Purpose:  Test SPI communication using the bidirectional mode (communicates only over MOSI line)
  *
  */
 
@@ -539,7 +539,7 @@ static void test_spi_bidiMode(void)
 /*
  * test_spi_rxOnly
  *
- * Purpose:  Test spi communication in RX-only mode
+ * Purpose:  Test SPI communication in RX-only mode
  *
  * Expectation:  Initialization should be successful, but writing should timeout
  *
@@ -585,7 +585,7 @@ static void test_spi_rxOnly(void)
 /*
  * test_spi_clock
  *
- * Purpose:  Test spi communication with non-default clock phase and clock polarity
+ * Purpose:  Test SPI communication with non-default clock phase and clock polarity
  *
  * Note:  BME280 sensor only supports 1edge/low and 2edge/high for clock phase/polarity.
  *   Expand to other two cases once slave mode has been implemented
@@ -649,7 +649,7 @@ static void test_spi_clock(void)
 /*
  * test_spi_LSBFirst
  *
- * Purpose:  Test spi communication sending the LSB first
+ * Purpose:  Test SPI communication sending the LSB first
  *
  */
 
@@ -710,7 +710,7 @@ static void test_spi_LSBFirst(void)
 /*
  * test_spi_16bitMode
  *
- * Purpose:  Test spi communication using 16-bit mode
+ * Purpose:  Test SPI communication using 16-bit mode
  *
  */
 
@@ -771,7 +771,7 @@ static void test_spi_16bitMode(void)
 /*
  * test_spi_clockSpeedHigh
  *
- * Purpose:  Test spi communication using the highest clock speed possible
+ * Purpose:  Test SPI communication using the highest clock speed possible
  *
  * Note: This is currently limited to the BME280's max speed, 10MHz. Test
  *   absolute max frequency (42MHz using SPI1) once slave mode has been implemented
@@ -835,7 +835,7 @@ static void test_spi_clockSpeedHigh(void)
 /*
  * test_spi_clockSpeedLow
  *
- * Purpose:  Test spi communication using the lowest clock speed possible
+ * Purpose:  Test SPI communication using the lowest clock speed possible
  *
  * Note: This will try to set the speed to 1Hz, but the prescaler calculation will
  *   actually end up setting it to PCLK/256 since we cannot directly set the SPI clock
@@ -901,7 +901,7 @@ static void test_spi_clockSpeedLow(void)
 /*
  * test_spi_clockSpeedZero
  *
- * Purpose:  Test spi communication a clock speed of zero
+ * Purpose:  Test SPI communication a clock speed of zero
  *
  * Expectation:  The initialization should fail
  */

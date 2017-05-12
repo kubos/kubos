@@ -30,4 +30,4 @@ echo "Tagging new verson: $new_tag"
 git tag $new_tag
 
 echo "Pushing new tag..."
-git push origin --tags
+git push origin $new_tag
