@@ -101,13 +101,7 @@ static bool spi_comms(uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_leng
             printf("Can't send spi message %d\r\n", ret);
             return false;
         }
-    }
-
-    printf("response\r\n");
-    for (i = 0; i < tx_length; i++) {
-        printf("0x%02X ", rx_buffer[i]);
-        if (i % 2)
-            printf("\n");
+        usleep(100);
     }
 
     close(fd);
@@ -135,7 +129,7 @@ bool supervisor_get_version(supervisor_version_t * versionReply)
         return false;
     }
 
-    usleep(10000);
+    usleep(1000);
 
     if (!spi_comms(bytesToSendObtainVersion, bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION))
     {
@@ -151,7 +145,7 @@ bool supervisor_get_version(supervisor_version_t * versionReply)
     else
     {
         printf("Checksum failed\n");
-        // return false;
+        return false;
     }
 
     memcpy(versionReply, bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION);
@@ -172,7 +166,7 @@ bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply)
         return false;
     }
 
-    usleep(10000);
+    usleep(1000);
 
     if (!spi_comms(bytesToSendObtainHousekeepingTelemetry, bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING))
     {
@@ -188,7 +182,7 @@ bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply)
     else
     {
         printf("Checksum failed\n");
-        // return false;
+        return false;
     }
 
     memcpy(versionReply, bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING);
