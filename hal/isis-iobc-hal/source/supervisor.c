@@ -44,10 +44,9 @@ static bool spi_comms(uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_leng
     uint16_t i;
     static uint8_t mode = SPI_MODE_0;
     static uint8_t bits = 8;
-    static uint32_t speed = 600000; //1000000;
+    static uint32_t speed = 600000;
     static uint32_t order;
     static uint32_t mode2;
-    // static uint32_t delay = 100000;
     static uint32_t delay = 100000;
     uint8_t receive[64];
 
@@ -68,7 +67,6 @@ static bool spi_comms(uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_leng
     /*
      * max speed hz
      */
-
     ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
     if (ret == -1) {
         perror("can't set max speed hz");
@@ -116,7 +114,7 @@ static bool verify_checksum(unsigned char * buffer, int buffer_length)
     return true ? (checksum == buffer[buffer_length - 1]) : false;
 }
 
-bool supervisor_get_version(supervisor_version_t * versionReply)
+bool supervisor_get_version(supervisor_version_t * version)
 {
     uint8_t bytesToSendSampleVersion[LENGTH_TELEMETRY_SAMPLE_VERSION] = { CMD_SUPERVISOR_OBTAIN_VERSION_CONFIG, 0x00, 0x00 };
     uint8_t bytesToReceiveSampleVersion[LENGTH_TELEMETRY_SAMPLE_VERSION] = { CMD_SUPERVISOR_OBTAIN_VERSION_CONFIG, 0x00, 0x00 };
@@ -148,12 +146,12 @@ bool supervisor_get_version(supervisor_version_t * versionReply)
         return false;
     }
 
-    memcpy(versionReply, bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION);
+    memcpy(version, bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION);
 
     return true;
 }
 
-bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply)
+bool supervisor_get_housekeeping(supervisor_housekeeping_t * housekeeping)
 {
     uint8_t bytesToSendSampleHousekeepingTelemetry[LENGTH_TELEMETRY_SAMPLE_HOUSEKEEPING] = { CMD_SUPERVISOR_OBTAIN_HK_TELEMETRY, 0x00, 0x00 };
     uint8_t bytesToReceiveSampleHousekeepingTelemetry[LENGTH_TELEMETRY_SAMPLE_HOUSEKEEPING] = { CMD_SUPERVISOR_OBTAIN_HK_TELEMETRY, 0x00, 0x00 };
@@ -185,7 +183,7 @@ bool supervisor_get_housekeeping(supervisor_housekeeping_t * versionReply)
         return false;
     }
 
-    memcpy(versionReply, bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING);
+    memcpy(housekeeping, bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING);
 
     return true;
 }

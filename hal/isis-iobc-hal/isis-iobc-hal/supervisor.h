@@ -16,9 +16,8 @@
  */
 
 /**
- * @defgroup iOBC-Supervisor
+ * @defgroup iOBC-Supervisor iOBC Supervisor Interface
  * @addtogroup iOBC-Supervisor
- * @brief Interface for iOBC supervisor functionality
  * @{
  */
 
@@ -31,8 +30,6 @@
 #define LENGTH_EMERGENCY_RESET 10
 /** Length of reset the IOBC PCU. */
 #define LENGTH_RESET 3
-/** Length of set output pins. */
-#define LENGTH_SET_OUTPUT 3
 /** Length of reset the IOBC PCU. */
 #define LENGTH_POWER_CYCLE_IOBC 3
 /** Length of the telemetry housekeeping request. */
@@ -215,48 +212,35 @@ typedef union __attribute__((__packed__)) _supervisor_housekeeping_t {
 /**
  *      @brief      Performs a software reset of the microcontroller directly without shutting down its components.
  *      As this command is considered unsafe for the hardware and the software of the IOBC-S, use supervisor_reset() instead.
- *      @param[out] reply Generic reply read back from the Supervisor Controller.
- *      @param[in]  index Index of the Supervisor Controller. Values >=0 are for I2C communication.
- *                  An index value of 255 is for communicating to the supervisor on the same board over SPI.
- *      @return		Error code as specified in errors.h
+ *      @return		true if command is sent successfully, otherwise false
  */
 bool supervisor_emergency_reset();
 
 /**
- *      @brief      Assert a reset to the IOBC-S and making sure that the conditions prior to reset operations are met.
- *      @param[out] reply Generic reply read back from the Supervisor Controller.
- *      @param[in]  index Index of the Supervisor Controller. Values >=0 are for I2C communication.
- *                  An index value of 255 is for communicating to the supervisor on the same board over SPI.
- *		@return		Error code as specified in errors.h
+ *      @brief      Assert a reset to the IOBC-S and make sure that the conditions prior to reset operations are met.
+ *      @return		true if command is sent successfully, otherwise false
  */
 bool supervisor_reset();
 
 /**
  *      @brief      Let the IOBC be power-cycled for around 4-5 seconds.
  *                  Supervisor Controller power is not affected by this command.
- *      @param[out] reply Generic reply read back from the Supervisor Controller.
- *      @param[in]  index Index of the Supervisor Controller. Values >=0 are for I2C communication.
- *                  An index value of 255 is for communicating to the supervisor on the same board over SPI.
- *		@return		Error code as specified in errors.h
+ *      @return		true if command is sent successfully, otherwise false
  */
 bool supervisor_powercycle();
 
 /**
  *      @brief      Getting Version from Supervisor Controller.
- *      @param[out] versionReply Version and configuration read back from the Supervisor Controller.
- *      @param[in]  index Index of the Supervisor Controller. Values >=0 are for I2C communication.
- *                  An index value of 255 is for communicating to the supervisor on the same board over SPI.
- *		@return		Error code as specified in errors.h
+ *      @param[out] version Version and configuration read back from the Supervisor Controller.
+ *      @return		true if command is sent and response has valid CRC, otherwise false
  */
-bool supervisor_get_version(supervisor_version_t * versionReply);
+bool supervisor_get_version(supervisor_version_t * version);
 
 /**
  *      @brief      Getting Housekeeping from Supervisor Controller.
- *      @param[out] housekeepingReply Housekeeping read back from the Supervisor Controller.
- *      @param[in]  index Index of the Supervisor Controller. Values >=0 are for I2C communication.
- *      Negative values are for communicating to the supervisor on the same board over SPI.
- *		@return		Error code as specified in errors.h
+ *      @param[out] housekeeping Housekeeping read back from the Supervisor Controller.
+ *      @return		true if command is sent and response has valid CRC, otherwise false
  */
-bool supervisor_get_housekeeping(supervisor_housekeeping_t * housekeepingReply);
+bool supervisor_get_housekeeping(supervisor_housekeeping_t * housekeeping);
 
 /* @} */
