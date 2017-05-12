@@ -15,13 +15,9 @@
  * limitations under the License.
  */
 /**
- * @defgroup SPI
+ * @defgroup SPI HAL SPI Interface
  * @addtogroup SPI
  * @{
- */
-/**
- * @brief KubOS-HAL SPI Interface
- * @author kubos.co
  */
 
 #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
@@ -31,8 +27,12 @@
 #include <csp/arch/csp_semaphore.h>
 
 /**
- * Number of spi buses available. Derived from value in target.json
- * @code
+ * @brief Number of SPI buses available. 
+ * 
+ * This value is derived from the platform specific target.json file.
+ *
+ * Snippet from target.json:
+ * @code{.json}
  * "config": {
  *   "hardware": {
  *     "spi": {
@@ -47,15 +47,18 @@
 #endif
 
 /**
- * Default spi bus. Derived from value in target.json
- * @code
- * "config": {
- *   "hardware": {
- *     "spi": {
- *       "defaults": {
- *          "bus": "K_SPI1"
- *        }
- *     }
+ * @brief Default SPI bus. 
+ * 
+ * This value is derived from the platform specific target.json file. It is possible to override it
+ * in a project's config.json.
+ *
+ * Example of overriding via config.json:
+ * @code{.json}
+ * "hardware": {
+ *   "spi": {
+ *     "defaults": {
+ *        "bus": "K_SPI1"
+ *      }
  *   }
  * }
  * @endcode
@@ -63,7 +66,10 @@
 #define DEFAULT_SPI YOTTA_CFG_HARDWARE_SPI_DEFAULTS_BUS
 
 /**
- * Available spi buses
+ * @brief Available SPI buses
+ *
+ * The number of buses defined in this enumeration is controlled by the number of SPI buses
+ * defined in the platform's target.json file.
  */
 typedef enum {
     K_SPI_NO_BUS = 0,
@@ -79,7 +85,8 @@ typedef enum {
 } KSPINum;
 
 /**
- * Expected role of spi bus
+ * @brief SPI bus roles
+ * 
  * @warning Only the Master role is available as of v0.1.0
  */
 typedef enum {
@@ -88,7 +95,8 @@ typedef enum {
 } SPIRole;
 
 /**
- * Spi direction mode
+ * @brief SPI bus direction modes
+ *
  * @note MSP430F5 does not support 1-line mode
  */
 typedef enum {
@@ -98,7 +106,8 @@ typedef enum {
 } SPIDirection;
 
 /**
- * Spi data size
+ * @brief SPI bus data sizes
+ *
  * @note MSP430F5 does not support 16-bit mode
  */
 typedef enum {
@@ -107,7 +116,7 @@ typedef enum {
 } SPIDataSize;
 
 /**
- * Spi clock polarity
+ * @brief SPI bus clock polarities
  */
 typedef enum {
     K_SPI_CPOL_LOW = 0,
@@ -115,7 +124,7 @@ typedef enum {
 } SPIClockPolarity;
 
 /**
- * Spi clock phase
+ * @brief SPI bus clock phases
  */
 typedef enum {
     K_SPI_CPHA_1EDGE = 0,
@@ -123,7 +132,7 @@ typedef enum {
 } SPIClockPhase;
 
 /**
- * Spi first bit order/endianess
+ * @brief SPI bus first bit order/endianess
  */
 typedef enum {
     K_SPI_FIRSTBIT_MSB = 0,
@@ -131,7 +140,9 @@ typedef enum {
 } SPIFirstBit;
 
 /**
- * Spi status values
+ * @brief SPI return status values
+ *
+ * This enumeration is intended to be the primary return status of the functions in this SPI interface.
  */
 typedef enum {
     SPI_OK,
@@ -143,7 +154,7 @@ typedef enum {
 } KSPIStatus;
 
 /**
- * Spi configuration structure
+ * @brief SPI configuration structure
  */
 typedef struct {
     /**
@@ -197,35 +208,140 @@ typedef struct {
 } KSPIConf;
 
 /**
- * Spi bus data structure
+ * @brief SPI bus data structure
+ *
+ * The SPI interface holds a static array of these structures, one for each
+ * possible SPI bus.
  */
 typedef struct {
+    /**
+     * SPI interface configuration values
+     */
     KSPIConf config;
+    /**
+     * Number of SPI interface
+     */
     KSPINum bus_num;
+    /**
+     * Mutex used to lock access to SPI device
+     */
     csp_mutex_t spi_lock;
 } KSPI;
 
 /**
- * Setup and enable spi bus
- * @param spi spi bus to initialize
+ * @brief Configures and enables a SPI bus
+ *
+ * This function is used to configure and enable SPI buses for further usage (reading/writing).
+ * Calling this function is always the first step before using any SPI peripheral. This function
+ * takes a SPI bus number (KSPINum) and SPI configuration structure (KSPIConf). The SPI bus number
+ * *must* be a valid value from the KSPINum enum. The configuration can either be created manually or
+ * k_spi_conf_defaults can be used to retreive the default configuration.
+ *
+ * After calling k_spi_init, the initalized bus can be used with the k_spi_read/k_spi_write/k_spi_terminate functions.
+ *
+ * Example usage:
+ * @code
+KSPIConf conf = {
+    .role = K_SPI_MASTER,
+    .direction = K_SPI_DIRECTION_2LINES,
+    .data_size = K_SPI_DATASIZE_8BIT,
+    .clock_polarity = K_SPI_CPOL_HIGH,
+    .clock_phase = K_SPI_CPHA_1EDGE,
+    .first_bit = K_SPI_FIRSTBIT_LSB,
+    .speed = 100000
+};
+
+k_spi_init(K_SPI1, &conf);
+ * @endcode
+ *
+ * @note This function delegates the low-level initialization to the platform specific @ref kprv_spi_dev_init
+ *
+ * @param spi number spi bus to initialize
  * @param conf config values to initialize with
  */
 void k_spi_init(KSPINum spi, KSPIConf * conf);
 
 /**
- * Terminate spi bus
+ * @brief Terminates a SPI bus
+ *
+ * This function is used to terminate an active SPI bus. After calling this function, the bus number
+ * used will *not* be available for usage in reading/writing functions.
+ *
+ * Example usage:
+ * @code
+// init bus
+k_spi_init(K_SPI1, &conf);
+
+// read some data
+k_spi_read(K_SPI1, buffer, length);
+
+// shut down bus
+k_spi_terminate(K_SPI1);
+ * @endcode
+ *
+ * @note This function delegates the low-level termination to the platform specific @ref kprv_spi_dev_terminate
+ *
  * @param spi spi bus to terminate
  */
 void k_spi_terminate(KSPINum spi);
 
+/**
+ * @brief Returns a copy of the default SPI configuration
+ *
+ * This function returns a SPIConf structure with the default SPI configuration values already set.
+ * These default values are derived from the platform's target.json. New default values can easily be
+ * set by creating a config.json in the project directory.
+ *
+ * Example contents of config.json overriding defaults:
+ * @code{.json}
+ "hardware": {
+    "spi": {
+      "defaults": {
+        "bus": "K_SPI1",
+        "role": "K_SPI_MASTER",
+        "direction": "K_SPI_DIRECTION_2LINES",
+        "dataSize": "K_SPI_DATASIZE_8BIT",
+        "clockPolarity": "K_SPI_CPOL_HIGH",
+        "clockPhase": "K_SPI_CPHA_1EDGE",
+        "firstBit": "K_SPI_FIRSTBIT_LSB",
+        "speed": "10000"
+      }
+    }
+ }
+ * @endcode
+ *
+ * @return KSPIConf structure containing default config
+ */
 KSPIConf k_spi_conf_defaults(void);
 
 /**
- * Write data over spi bus
+ * @brief Write data over specified SPI bus
  *
- * In order to ensure safe spi sharing, this function is semaphore locked.
- * There is one semaphore per bus. This function will block indefinitely
- * while waiting for the semaphore.
+ * This function writes data over the specified SPI bus. 
+ *
+ * @warning This function does not handle the chip select line. The user is responsible for selecting the correct line.
+ *
+ * @note In order to ensure safe spi sharing, this function is semaphore locked.
+ * There is one semaphore per bus. This function will block indefinitely while waiting for the semaphore.
+ *
+ * Example usage:
+ * @code{.c}
+uint8_t buffer[10];
+KSPIStatus write_status;
+
+// init SPI bus
+k_spi_init(K_SPI1, &conf);
+
+// custom chip select function
+chip_select(SPI_CS1);
+
+write_status = k_spi_write(K_SPI1, buffer, 10);
+
+// custom chip select function
+chip_deselect(SPI_CS1);
+ * @endcode
+ *
+ * @note This function delegates the low-level actions to the platform specific @ref kprv_spi_write.
  *
  * @param spi spi bus to write to
  * @param buffer pointer to data buffer
@@ -235,11 +351,31 @@ KSPIConf k_spi_conf_defaults(void);
 KSPIStatus k_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len);
 
 /**
- * Read data over spi bus
+ * @brief Reads data over specified SPI bus
  *
- * In order to ensure safe spi sharing, this function is semaphore locked.
- * There is one semaphore per bus. This function will block indefinitely
- * while waiting for the semaphore.
+ * @warning This function does not handle the chip select line. The user is responsible for selecting the correct line.
+ *
+ * @note In order to ensure safe spi sharing, this function is semaphore locked.
+ * There is one semaphore per bus. This function will block indefinitely while waiting for the semaphore.
+ *
+ * Example usage:
+ * @code{.c}
+uint8_t buffer[10];
+KSPIStatus read_status;
+
+// init SPI bus
+k_spi_init(K_SPI1, &conf);
+
+// custom chip select function
+chip_select(SPI_CS1);
+
+read_status = k_spi_read(K_SPI1, buffer, 10);
+
+// custom chip select function
+chip_deselect(SPI_CS1);
+ * @endcode
+ *
+ * @note This function delegates the low-level actions to the platform specific @ref kprv_spi_read.
  *
  * @param spi spi bus to read from
  * @param buffer pointer to data buffer
@@ -249,11 +385,32 @@ KSPIStatus k_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len);
 KSPIStatus k_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len);
 
 /**
- * Write and read data over spi bus
+ * @brief Writes and reads data over SPI bus
  *
- * In order to ensure safe spi sharing, this function is semaphore locked.
- * There is one semaphore per bus. This function will block indefinitely
- * while waiting for the semaphore.
+ * @warning This function does not handle the chip select line. The user is responsible for selecting the correct line.
+ *
+ * @note In order to ensure safe spi sharing, this function is semaphore locked.
+ * There is one semaphore per bus. This function will block indefinitely while waiting for the semaphore.
+ *
+ * Example usage:
+ * @code{.c}
+uint8_t read_buffer[10];
+uint8_t write_buffer[10];
+KSPIStatus read_status;
+
+// init SPI bus
+k_spi_init(K_SPI1, &conf);
+
+// custom chip select function
+chip_select(SPI_CS1);
+
+read_status = k_spi_write_read(K_SPI1, write_buffer, read_buffer, 10);
+
+// custom chip select function
+chip_deselect(SPI_CS1);
+ * @endcode
+ *
+ * @note This function delegates the low-level actions to the platform specific kprv_spi_write_read.
  *
  * @param spi spi bus to write to
  * @param txBuffer pointer to data buffer to write from
@@ -264,16 +421,23 @@ KSPIStatus k_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len);
 KSPIStatus k_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len);
 
 /**
- * Fetches spi bus data structure
+ * @brief Fetches SPI bus data structure
+ *
+ * This function takes a SPI bus number and retrieves the bus data/config structure from the 
+ * HAL's internal static array.
+ *
  * @param spi number of spi bus to fetch
  * @return KSPI* pointer to data structure
  */
 KSPI * kprv_spi_get(KSPINum spi);
 
 /**
- * Low level hal spi write
+ * @brief Low-level SPI write
  *
- * This is implemented by the hardware specific hal
+ * This function is called by k_spi_write and is intended to perform the necessary low-level
+ * actions for a SPI write.
+ *
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to write to
  * @param buffer pointer to data buffer
@@ -283,9 +447,12 @@ KSPI * kprv_spi_get(KSPINum spi);
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len);
 
 /**
- * Low level hal spi read
+ * @brief Low-level SPI read
  *
- * This is implemented by the hardware specific hal
+ * This function is called by k_spi_read and is intended to perform the necessary low-level
+ * actions for a SPI read.
+ *
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to read from
  * @param buffer pointer to data buffer
@@ -295,9 +462,12 @@ KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len);
 KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len);
 
 /**
- * Low level spi write & read
+ * @brief Low-level SPI write and read
  *
- * This is implemented by the hardware specific hal
+ * This function is called by k_spi_write_read and is intended to perform the necessary low-level
+ * actions for a SPI write and read.
+ *
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to write to
  * @param txBuffer pointer to data buffer to write from
@@ -308,9 +478,12 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len);
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len);
 
 /**
- * Low level spi initialization
+ * @brief Low-level SPI bus initialization
  *
- * This is implemented by the hardware specific hal
+ * This function is called by k_spi_init and is intended to perform the necessary low-level
+ * initialization and configuration of a SPI bus.
+ *
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to initialize
  * @return KSPIStatus SPI_OK on success, otherwise failure
@@ -318,9 +491,12 @@ KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuff
 KSPIStatus kprv_spi_dev_init(KSPINum spi);
 
 /**
- * Low level spi termination
+ * @brief Low-level SPI bus termination
  *
- * This is implemented by the hardware specific hal
+ * This function is called by k_spi_terminate and is intended to perform the necessary low-level
+ * actios to power-down and disable a SPI bus.
+ *
+ * @note This function must be implemented by each platform specific HAL
  *
  * @param spi spi bus to terminate
  * @return KSPIStatus SPI_OK on success, otherwise failure
