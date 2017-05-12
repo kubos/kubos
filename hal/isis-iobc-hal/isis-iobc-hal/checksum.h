@@ -16,9 +16,8 @@
  */
 
 /**
- * @defgroup iOBC-Checksum
+ * @defgroup iOBC-Checksum iOBC Supervisor CRC functions
  * @addtogroup iOBC-Checksum
- * @brief Checksum functions for Supervisor comms
  * @{
  */
 
