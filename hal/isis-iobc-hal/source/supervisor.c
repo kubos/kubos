@@ -38,16 +38,11 @@
 /** Obtain Version and Configuration Command in hexadecimal. */
 #define CMD_SUPERVISOR_OBTAIN_VERSION_CONFIG 0x55
 
-static bool spi_comms(uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_length)
+static bool spi_comms(const uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_length)
 {
     int fd, ret;
     uint16_t i;
-    static uint8_t mode = SPI_MODE_0;
-    static uint8_t bits = 8;
-    static uint32_t speed = 600000;
-    static uint32_t order;
-    static uint32_t mode2;
-    static uint32_t delay = 100000;
+    static uint32_t speed = 1000000;
     uint8_t receive[64];
 
     if ((tx_buffer == NULL) || (rx_buffer == NULL))
@@ -56,7 +51,6 @@ static bool spi_comms(uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_leng
     }
 
     char checksum = supervisor_calculate_CRC(tx_buffer, tx_length - 1);
-    tx_buffer[tx_length - 1] = checksum;
 
     fd = open(SPI_DEV, O_RDWR);
     if (fd < 0) {
@@ -79,12 +73,12 @@ static bool spi_comms(uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_leng
         return false;
     }
 
-    // Messages are sent across one byte per ioct call
+    // Messages are sent across one byte per ioctl call
     // This is to introduce inter-byte delays, as per
     // discussion with ISIS on 3/31. They suggested
     // at least 1 ms between bytes. Breaking up bytes into
-    // separate ioctl calls seems ok at 600000 hz
-    for (uint16_t i = 0; i < tx_length; i++)
+    // separate ioctl calls with 0.1ms inter-byte delay.
+    for (uint16_t i = 0; i < tx_length - 1; i++)
     {
         struct spi_ioc_transfer tr = {
             .tx_buf = (unsigned long)&tx_buffer[i],
@@ -102,15 +96,29 @@ static bool spi_comms(uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_leng
         usleep(100);
     }
 
+    // Send checksum last
+    struct spi_ioc_transfer tr = {
+        .tx_buf = (unsigned long)&checksum,
+        .rx_buf = (unsigned long)&rx_buffer[tx_length - 1],
+        .len = 1,
+        .delay_usecs = 0,
+        .cs_change = 1
+    };
+    ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+    if (ret < 1)
+    {
+        printf("Can't send spi message %d\r\n", ret);
+        return false;
+    }
+
     close(fd);
 
     return true;
 }
 
-static bool verify_checksum(unsigned char * buffer, int buffer_length)
+static bool verify_checksum(unsigned const char * buffer, int buffer_length)
 {
     unsigned char checksum = supervisor_calculate_CRC(buffer + 1, buffer_length - 2);
-    printf("Checksum 0x%02X\n", checksum);
     return true ? (checksum == buffer[buffer_length - 1]) : false;
 }
 
@@ -135,12 +143,7 @@ bool supervisor_get_version(supervisor_version_t * version)
         return false;
     }
 
-    printf("Checking checksum...\n");
-    if (verify_checksum(bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION))
-    {
-        printf("Checksum passed!\n");
-    }
-    else
+    if (!verify_checksum(bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION))
     {
         printf("Checksum failed\n");
         return false;
@@ -172,12 +175,7 @@ bool supervisor_get_housekeeping(supervisor_housekeeping_t * housekeeping)
         return false;
     }
 
-    printf("Checking checksum...\n");
-    if (verify_checksum(bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING))
-    {
-        printf("Checksum passed!\n");
-    }
-    else
+    if (!verify_checksum(bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING))
     {
         printf("Checksum failed\n");
         return false;
