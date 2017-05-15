@@ -31,7 +31,7 @@ void checksum_prepare_LUTCRC8(unsigned char polynomial, unsigned char * LUT)
     }
 }
 
-unsigned char checksum_calculate_CRC8LUT(unsigned char * data, unsigned int length, unsigned char * LUT, unsigned char start_remainder, bool endofdata)
+unsigned char checksum_calculate_CRC8LUT(unsigned const char * data, unsigned int length, unsigned const char * LUT, unsigned char start_remainder, bool endofdata)
 {
     unsigned int i;
 
@@ -48,7 +48,7 @@ unsigned char checksum_calculate_CRC8LUT(unsigned char * data, unsigned int leng
     return start_remainder;
 }
 
-unsigned char checksum_calculate_CRC8(unsigned char * data, unsigned int length, unsigned char polynomial, unsigned char start_remainder, bool endofdata)
+unsigned char checksum_calculate_CRC8(unsigned const char * data, unsigned int length, unsigned char polynomial, unsigned char start_remainder, bool endofdata)
 {
     unsigned char bit_mask, byte; // bit counter, XOR flag, bit mask, current byte
     unsigned char xor_flag;
@@ -105,7 +105,7 @@ unsigned char checksum_calculate_CRC8(unsigned char * data, unsigned int length,
     return start_remainder;
 }
 
-unsigned char supervisor_calculate_CRC(unsigned char * data, unsigned int length)
+unsigned char supervisor_calculate_CRC(unsigned const char * data, unsigned int length)
 {
     unsigned int i = 0;
     unsigned char crcvalue = 0;

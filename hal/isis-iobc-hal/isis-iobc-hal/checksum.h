@@ -47,7 +47,7 @@ void checksum_prepare_LUTCRC8(unsigned char polynomial, unsigned char * LUT);
  * @param[in] endofdata Indicates whether this is the end of larger datablock (TRUE) or not yet (FALSE)
  * @return 8-bit CRC checksum.
  */
-unsigned char checksum_calculate_CRC8LUT(unsigned char * data, unsigned int length, unsigned char * LUT, unsigned char start_remainder, bool endofdata);
+unsigned char checksum_calculate_CRC8LUT(unsigned const char * data, unsigned int length, unsigned const char * LUT, unsigned char start_remainder, bool endofdata);
 
 /**
  * Calculates a CRC 8 checksum according to CRC-8 CCITT, using bitwise calculation
@@ -59,7 +59,7 @@ unsigned char checksum_calculate_CRC8LUT(unsigned char * data, unsigned int leng
  * @param[in] endofdata Indicates whether this is the end of larger datablock (TRUE) or not yet (FALSE)
  * @return 8-bit CRC checksum.
  */
-unsigned char checksum_calculate_CRC8(unsigned char * data, unsigned int length, unsigned char polynomial, unsigned char start_remainder, bool endofdata);
+unsigned char checksum_calculate_CRC8(unsigned const char * data, unsigned int length, unsigned char polynomial, unsigned char start_remainder, bool endofdata);
 
 /**
  * Calculates a CRC checksum according to the algorithm used in the iOBC supervisor.
@@ -67,6 +67,6 @@ unsigned char checksum_calculate_CRC8(unsigned char * data, unsigned int length,
  * @param[in] length Length of the data in bytes
  * @return 8-bit CRC checksum.
  */
-unsigned char supervisor_calculate_CRC(unsigned char * data, unsigned int length);
+unsigned char supervisor_calculate_CRC(unsigned const char * data, unsigned int length);
 
 /* @} */
