@@ -41,9 +41,7 @@
 static bool spi_comms(const uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t tx_length)
 {
     int fd, ret;
-    uint16_t i;
     static uint32_t speed = 1000000;
-    uint8_t receive[64];
 
     if ((tx_buffer == NULL) || (rx_buffer == NULL))
     {
@@ -116,9 +114,9 @@ static bool spi_comms(const uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t t
     return true;
 }
 
-static bool verify_checksum(unsigned const char * buffer, int buffer_length)
+static bool verify_checksum(const uint8_t * buffer, int buffer_length)
 {
-    unsigned char checksum = supervisor_calculate_CRC(buffer + 1, buffer_length - 2);
+    uint8_t checksum = supervisor_calculate_CRC(buffer + 1, buffer_length - 2);
     return true ? (checksum == buffer[buffer_length - 1]) : false;
 }
 
@@ -190,8 +188,6 @@ bool supervisor_powercycle()
 {
     uint8_t bytesToSendPowerCycleIobc[LENGTH_POWER_CYCLE_IOBC] = { CMD_SUPERVISOR_POWER_CYCLE_IOBC, 0x00, 0x00 };
     uint8_t bytesToReceivePowerCycleIobc[LENGTH_POWER_CYCLE_IOBC] = { 0 };
-    uint8_t bytesToSendDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
-    uint8_t bytesToReceiveDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
 
     if (!spi_comms(bytesToSendPowerCycleIobc, bytesToReceivePowerCycleIobc, LENGTH_POWER_CYCLE_IOBC))
     {
@@ -205,8 +201,6 @@ bool supervisor_reset()
 {
     uint8_t bytesToSendReset[LENGTH_RESET] = { CMD_SUPERVISOR_RESET, 0x00, 0x00 };
     uint8_t bytesToReceiveReset[LENGTH_RESET] = { 0 };
-    uint8_t bytesToSendDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
-    uint8_t bytesToReceiveDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
 
     if (!spi_comms(bytesToSendReset, bytesToReceiveReset, LENGTH_RESET))
     {
@@ -220,8 +214,6 @@ bool supervisor_emergency_reset()
 {
     uint8_t bytesToSendEmergencyReset[LENGTH_EMERGENCY_RESET] = { CMD_SUPERVISOR_EMERGENCY_RESET, 'M', 'E', 'R', 'G', 'E', 'N', 'C', 'Y', 0x00 };
     uint8_t bytesToReceiveEmergencyReset[LENGTH_EMERGENCY_RESET] = { 0 };
-    uint8_t bytesToSendDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
-    uint8_t bytesToReceiveDummyByte[LENGTH_TELEMETRY_DUMMY] = { 0x00, 0x00, 0x00 };
 
     if (!spi_comms(bytesToSendEmergencyReset, bytesToReceiveEmergencyReset, LENGTH_EMERGENCY_RESET))
     {
