@@ -17,12 +17,14 @@
 
 #include "isis-iobc-hal/checksum.h"
 
-static unsigned char supervisor_crctable[256];
+#define CRC8_POLYNOMIAL 0x07
 
-void checksum_prepare_LUTCRC8(unsigned char polynomial, unsigned char * LUT)
+static uint8_t supervisor_crctable[256];
+
+void checksum_prepare_LUTCRC8(uint8_t polynomial, uint8_t * LUT)
 {
     unsigned short i;
-    unsigned char data;
+    uint8_t data;
 
     for (i = 0; i < 256; i++)
     {
@@ -31,7 +33,7 @@ void checksum_prepare_LUTCRC8(unsigned char polynomial, unsigned char * LUT)
     }
 }
 
-unsigned char checksum_calculate_CRC8LUT(unsigned char * data, unsigned int length, unsigned char * LUT, unsigned char start_remainder, bool endofdata)
+uint8_t checksum_calculate_CRC8LUT(const uint8_t * data, unsigned int length, const uint8_t * LUT, uint8_t start_remainder, bool endofdata)
 {
     unsigned int i;
 
@@ -48,10 +50,10 @@ unsigned char checksum_calculate_CRC8LUT(unsigned char * data, unsigned int leng
     return start_remainder;
 }
 
-unsigned char checksum_calculate_CRC8(unsigned char * data, unsigned int length, unsigned char polynomial, unsigned char start_remainder, bool endofdata)
+uint8_t checksum_calculate_CRC8(const uint8_t * data, unsigned int length, uint8_t polynomial, uint8_t start_remainder, bool endofdata)
 {
-    unsigned char bit_mask, byte; // bit counter, XOR flag, bit mask, current byte
-    unsigned char xor_flag;
+    uint8_t bit_mask, byte; // bit counter, XOR flag, bit mask, current byte
+    uint8_t xor_flag;
     unsigned int i; // byte counter
     unsigned int total_length = length; // original length + one 0x00 bytes for end of data
 
@@ -105,10 +107,10 @@ unsigned char checksum_calculate_CRC8(unsigned char * data, unsigned int length,
     return start_remainder;
 }
 
-unsigned char supervisor_calculate_CRC(unsigned char * data, unsigned int length)
+uint8_t supervisor_calculate_CRC(const uint8_t * data, unsigned int length)
 {
     unsigned int i = 0;
-    unsigned char crcvalue = 0;
+    uint8_t crcvalue = 0;
     checksum_prepare_LUTCRC8(CRC8_POLYNOMIAL, supervisor_crctable);
 
     for (i = 0; i < length; i++)

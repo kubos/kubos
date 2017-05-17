@@ -1,0 +1,16 @@
+{
+  "name": "kubos-i2c-example",
+  "version": "0.1.0",
+  "bin": "./source",
+  "description": "Example app running on kubos-rt, demonstrating i2c.",
+  "repository": {
+    "url": "ssh://git@github.com/kubostech/kubos-i2c-example",
+    "type": "git"
+  },
+  "homepage": "https://github.com/kubostech/kubos-i2c-example",
+  "license": "Apache-2.0",
+  "bin" : "./source",
+  "dependencies": {
+      "kubos-rt" : "kubostech/kubos-rt#~0.1.0"
+  }
+}

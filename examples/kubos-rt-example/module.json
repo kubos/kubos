@@ -1,0 +1,16 @@
+{
+  "name": "kubos-rt-example",
+  "version": "0.1.0",
+  "bin": "./source",
+  "description": "Example app running on kubos-rt.",
+  "repository": {
+    "url": "ssh://git@github.com/kubostech/kubos-rt-example",
+    "type": "git"
+  },
+  "homepage": "https://github.com/kubostech/kubos-rt-example",
+  "license": "Apache-2.0",
+  "bin" : "./source",
+  "dependencies": {
+      "kubos-rt" : "kubostech/kubos-rt#~0.1.0"
+  }
+}
