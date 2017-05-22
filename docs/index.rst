@@ -15,6 +15,24 @@ us! <https://slack.kubos.co/>`__
 If for some reason Slack won't work for you, feel free to email us at
 info@kubos.co.
 
+Quick Start Tutorial
+--------------------
+  
+.. raw:: html
+    
+    <video width="640" height="480" controls>
+      <source src="_static/kubos-quickstart-tutorial.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+    
+This video is intended to help you set up your Kubos SDK development 
+environment and get your first project built and running on an end-point
+device.
+It covers the following tutorial documents:
+
+  - :doc:`Installing the Kubos SDK <sdk-installing>`
+  - :doc:`Creating Your First Project <first-project>`
+
 .. toctree::
    :caption: Docs
    :hidden:
