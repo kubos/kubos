@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-   * @defgroup GPIO
-   * @addtogroup GPIO
-   * @{
-   */
+
+/**
+ * @addtogroup STM32F4_HAL_GPIO
+ * @{
+ */
 #include "kubos-hal/gpio.h"
 #include "kubos-hal-stm32f4/stm32f4_gpio.h"
 
@@ -26,6 +26,12 @@
 #include "stm32f4xx_hal_gpio.h"
 #include "stm32f4xx_hal_rcc.h"
 
+/**
+ * Performs low-level GPIO pin configuration and setup
+ * @param[in] pin GPIO pin number
+ * @param[in] mode pin mode
+ * @param[in] pullup pin pullup setting
+ */
 void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
 {
     // First enable the GPIO clock in RCC AHB1
@@ -60,12 +66,22 @@ void k_gpio_init(int pin, KGPIOMode mode, KGPIOPullup pullup)
     HAL_GPIO_Init(STM32F4_PIN_GPIO(pin), &params);
 }
 
+/**
+ * Reads value off GPIO pin
+ * @param[in] pin GPIO pin to read from
+ * @return int value read from pin
+ */
 unsigned int k_gpio_read(int pin)
 {
     return HAL_GPIO_ReadPin(STM32F4_PIN_GPIO(pin),
                             STM32F4_PIN_MASK(pin)) == GPIO_PIN_SET ? 1 : 0;
 }
 
+/**
+ * Writes value to GPIO pin
+ * @param[in] pin GPIO pin to write to
+ * @param[in] val value to write to pin
+ */
 void k_gpio_write(int pin, unsigned int val)
 {
     HAL_GPIO_WritePin(STM32F4_PIN_GPIO(pin),
@@ -73,6 +89,12 @@ void k_gpio_write(int pin, unsigned int val)
                       val == 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
 }
 
+/**
+ * Performs alternate GPIO configuration
+ * @param[in] GPIOx STM32CubeF4 GPIO definition
+ * @param[in] GPIO_PinSource pin port number
+ * @param[in] GPIO_AF alternate pin number
+ */
 void kprv_gpio_alt_config(GPIO_TypeDef* GPIOx, uint16_t GPIO_PinSource, uint8_t GPIO_AF)
 {
     uint32_t temp = 0x00;

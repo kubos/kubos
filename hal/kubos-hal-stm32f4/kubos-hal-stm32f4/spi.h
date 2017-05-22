@@ -14,32 +14,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
+/**
+ * @defgroup STM32F4_HAL_SPI STM32F4 HAL SPI Interface
+ * @addtogroup STM32F4_HAL_SPI
+ * @{
+ */
+#if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #ifndef K_SPI_HAL_H
 #define K_SPI_HAL_H
 
 #include "kubos-hal/spi.h"
-
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal_spi.h"
 
+/** Structure defining pins for SPI device */
 typedef struct
 {
+    /** Master-In Slave-Out */
     uint16_t miso;
+    /** Master-Out Slave-In */
     uint16_t mosi;
+    /** Clock */
     uint16_t sck;
+    /** STM32CubeF4 GPIO port */
     GPIO_TypeDef * port;
+    /** Alternate pin setting */
     uint16_t alt;
 } hal_spi_pins;
 
-typedef struct {
-    /* KubOS-HAL structure */
+/** Structure for SPI device */
+typedef struct
+{
+    /** KubOS-HAL structure */
     KSPI * kspi;
-    /* STM32CubeF4's special structure */
+    /** STM32CubeF4's special structure */
     SPI_HandleTypeDef hal_handle;
-    /* spi pins struct */
+    /** SPI pins struct */
     hal_spi_pins pins;
 } hal_spi_handle;
 
 #endif
 #endif
+
+/* @} */

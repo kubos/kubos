@@ -14,11 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-   * @defgroup UART
-   * @addtogroup UART
-   * @{
-   */
+/**
+ * @addtogroup STM32F4_HAL_UART
+ * @{
+ */
 
 #if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
 #include "kubos-hal/gpio.h"
@@ -26,9 +25,12 @@
 #include "kubos-hal-stm32f4/stm32f4_gpio.h"
 #include "stm32cubef4/stm32f4xx_hal_uart.h"
 
+/** Checks if flag is set on UART registers */
+#define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
+
 /**
- * Internal function to get appropriate USART_TypeDef based on uart num
- * @param uart uart bus num
+ * Internal function to get appropriate USART_TypeDef based on UART num
+ * @param[in] uart UART bus num
  * @return USART_TypeDef
  */
 USART_TypeDef *uart_dev(KUARTNum uart)
@@ -57,8 +59,8 @@ USART_TypeDef *uart_dev(KUARTNum uart)
 }
 
 /**
- * Internal function to get appropriate interrupt number based on uart num
- * @param uart uart bus num
+ * Internal function to get appropriate interrupt number based on UART num
+ * @param[in] uart UART bus num
  * @return IRQn_Type interrupt number
  */
 IRQn_Type uart_irqn(KUARTNum uart)
@@ -87,8 +89,8 @@ IRQn_Type uart_irqn(KUARTNum uart)
 }
 
 /**
- * Internal function to enable the correct uart clock based on uart num
- * @param uart uart bus num
+ * Internal function to enable the correct UART clock based on UART num
+ * @param[in] uart UART bus num
  */
 static inline void uart_clk_enable(KUARTNum uart)
 {
@@ -115,8 +117,8 @@ static inline void uart_clk_enable(KUARTNum uart)
 }
 
 /**
- * Internal function to disable the correct uart clock based on uart num
- * @param uart uart bus num
+ * Internal function to disable the correct UART clock based on UART num
+ * @param[in] uart UART bus num
  */
 static inline void uart_clk_disable(KUARTNum uart)
 {
@@ -143,8 +145,8 @@ static inline void uart_clk_disable(KUARTNum uart)
 }
 
 /**
- * Internal function to fetch the alternate uart pin based on uart num
- * @param uart uart bus num
+ * Internal function to fetch the alternate UART pin based on UART num
+ * @param[in] uart UART bus num
  * @return GPIO pin
  */
 static inline uint8_t uart_alt(KUARTNum uart)
@@ -173,8 +175,8 @@ static inline uint8_t uart_alt(KUARTNum uart)
 }
 
 /**
- * Setup and enable uart bus
- * @param uart uart bus to initialize
+ * Setup and enable UART bus
+ * @param[in] uart UART bus to initialize
  * @return KUARTStatus UART_OK if success, otherwise failure
  */
 KUARTStatus kprv_uart_dev_init(KUARTNum uart)
@@ -269,8 +271,8 @@ KUARTStatus kprv_uart_dev_init(KUARTNum uart)
 }
 
 /**
- * uart hardware cleanup and disabling
- * @param uart bus num to terminate
+ * UART hardware cleanup and disabling
+ * @param[in] uart bus num to terminate
  */
 void kprv_uart_dev_terminate(KUARTNum uart)
 {
@@ -306,8 +308,8 @@ void kprv_uart_dev_terminate(KUARTNum uart)
 }
 
 /**
- * Enable uart tx interrupt
- * @param uart uart bus to initialize
+ * Enable UART tx interrupt
+ * @param[in] uart UART bus to initialize
  */
 void kprv_uart_enable_tx_int(KUARTNum uart)
 {
@@ -320,9 +322,14 @@ void kprv_uart_enable_tx_int(KUARTNum uart)
 }
 
 /**
- * Write a character directly to the uart interface
- * @param uart uart bus
- * @param c character to write
+ * Write a character directly to the UART interface
+ *
+ * The function k_uart_write queues up characters in an internal write buffer
+ * which is read by the UART interrupt. This function skips the write buffer
+ * and writes the character directly to the UART hardware.
+ *
+ * @param[in] uart UART bus
+ * @param[in] c character to write
  * @return KUARTStatus UART_OK if success, otherwise failure
  */
 KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
@@ -338,11 +345,9 @@ KUARTStatus k_uart_write_immediate(KUARTNum uart, char c)
     return UART_OK;
 }
 
-#define __GET_FLAG(__HANDLE__, __FLAG__) (((__HANDLE__)->SR & (__FLAG__)) == (__FLAG__))
-
 /**
  * Internal function to process triggered interrupt
- * @param uart uart bus num
+ * @param[in] uart UART bus num
  */
 static inline void uart_irq_handler(KUARTNum uart)
 {
