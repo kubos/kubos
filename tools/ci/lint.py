@@ -28,6 +28,9 @@ from .. import utils
 import subprocess
 
 class KubosLintTest(object):
+    GREEN  = '\033[92m'
+    RED    = '\033[91m'
+    NORMAL = '\033[0m'
     base_dir = os.path.dirname(os.path.abspath(__file__))
     project_file = os.path.join(base_dir, 'lint-projects.json')
     lint_output_dir = os.environ['CIRCLE_ARTIFACTS'] if 'CIRCLE_ARTIFACTS' in os.environ else base_dir
@@ -52,30 +55,43 @@ class KubosLintTest(object):
 
     def load_lint_projects(self):
         if os.path.isfile(self.project_file):
-            with open(self.project_file, 'r') as _fil:
-                data = json.loads(_fil.read())
+            with open(self.project_file, 'r') as _file:
+                data = json.loads(_file.read())
             return data['lint-projects']
         else:
-            print 'The projects.json file was not found. Unable to continue the static analysis.'
+            print 'The lint-projects.json file was not found. Unable to continue the static analysis.'
             sys.exit(1)
 
 
     def run_lint_tests(self):
         failed_projects = []
+        passed_projects = []
         for proj in self.lint_projects:
             if proj in self.module_index:
                 proj_dir = self.module_index[proj]
                 ret_code = self.lint_proj(proj, proj_dir)
-                if ret_code != 0:
+                if ret_code == 0:
+                    passed_projects.append(proj)
+                else:
                     failed_projects.append(proj)
             else:
                 print 'Unable to find project: %s' % proj
-                sys.exit(1)
+                failed_projects.append('%s - Not Found' % proj)
+        #Print the successful projects
+        if len(passed_projects) != 0:
+            print 'Successful Project builds:'
+            for project in passed_projects:
+                print self.GREEN + 'Passed: %s' % project + self.NORMAL
+
         if len(failed_projects) != 0:
             print 'Some projects failed to build:'
             for project in failed_projects:
-                print project
+                print self.RED + project + self.NORMAL
             sys.exit(1)
+        passed_len = len(passed_projects)
+        failed_len = len(failed_projects)
+        total_len  = passed_len + failed_len
+        print '\nSummary: Total %s projects attempted. %s test passed. %s test failed.' % (total_len, passed_len, failed_len)
 
 
     def lint_proj(self, proj, proj_dir):

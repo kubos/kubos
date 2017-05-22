@@ -65,7 +65,7 @@ class KubosUtils(object):
 
 def get_kubos_modules():
     '''
-    Returns a dictionary of the kubos module names and their absolute paths
+    Returns a dictionary of the Kubos module names and their absolute paths
     '''
     kubos_util = utils.KubosUtils()
     return kubos_util.discover_kubos_modules
