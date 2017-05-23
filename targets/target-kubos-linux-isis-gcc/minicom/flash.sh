@@ -61,7 +61,7 @@ create_send_script() {
     local size
     
     name=$(basename ${path})
-    size=$(du ${path} | cut -f1) 
+	size=$(du --apparent-size ${path} | cut -f1) 
     
     echo "Sending ${name} (${size} 1k blocks) to $2 on board..."
    
@@ -85,10 +85,18 @@ send "mkdir -p $2"
 send "cd $2"
 send "rm -f ${name}"
 if ${is_app} = 1 send "rm -f /home/system/etc/init.d/S*${name}"
-send "df $2 --output=avail | tail -n1"
-! "test ${size} -lt $(tail flash.log -n2 | grep -o '[0-9]*' | tail -n1)"
-if $? = 0 goto send_file
-! MINICOM_RC=-1
+expect {
+	"$2 #" break
+	timeout 5
+}
+send "df $2 | grep -o '/.*%' | grep -Eo '[0-9]+ *[0-9]+%' | grep -Eo '\^[0-9]+'"
+expect {
+	"$2 #" break
+	timeout 5
+}
+! /usr/bin/test ${size} -lt \$(tail flash.log -n2 | grep -m 1 -o '[0-9]*')
+if \$? = 0 goto send_file
+! echo "Not enough room for file transfer, aborting" >&2
 goto exit
 send_file:
 send "rz -w 8192"
@@ -186,12 +194,6 @@ send_file() {
     # Run the transfer script
     minicom kubos -o -S send.tmp > flash.log
      
-    # Check if we attempted to transfer
-    if [[ "${MINICOM_RC}" -eq -1 ]]; then
-        echo "Destination is out of space. Please remove files and retry"
-        return -1
-    fi
-    
     local retval=1
     
     # Check transfer result
@@ -201,7 +203,9 @@ send_file() {
         echo "Transfer Successful"
         retval=0
     elif grep -q incorrect flash.log; then
-        echo "Transfer Failed: Invalid password" 1>&2
+        echo "Transfer Failed: Invalid password" 1>&2 
+    elif grep -q "Not enough room" flash.log; then
+        echo "Destination is out of space. Please remove files and retry" 1>&2
     else
         echo "Transfer Failed: Connection failed" 1>&2
     fi
@@ -214,14 +218,6 @@ send_file() {
 # Main Script
 ##########################################################################
 main() {
-    
-    # Declaring the global variables so that they're more obviously globals
-    app_name
-    init_script
-    is_app=0
-    is_run=0
-    is_upgrade=0
-    password
 
     # Protect all the local-only variables (per google style)
     local dest_dir
@@ -239,6 +235,10 @@ main() {
     local start
     local this_dir
     local unamestr
+    
+    is_app=0
+    is_run=0
+    is_upgrade=0
     
     start=$(date +%s)
     this_dir=$(cd "`dirname "$0"`"; pwd)
