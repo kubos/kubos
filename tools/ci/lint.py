@@ -79,19 +79,19 @@ class KubosLintTest(object):
                 failed_projects.append('%s - Not Found' % proj)
         #Print the successful projects
         if len(passed_projects) != 0:
-            print 'Successful Project builds:'
+            print 'Successful project builds:'
             for project in passed_projects:
                 print self.GREEN + 'Passed: %s' % project + self.NORMAL
 
         if len(failed_projects) != 0:
-            print 'Some projects failed to build:'
+            print 'Failed project builds:'
             for project in failed_projects:
                 print self.RED + project + self.NORMAL
             sys.exit(1)
         passed_len = len(passed_projects)
         failed_len = len(failed_projects)
         total_len  = passed_len + failed_len
-        print '\nSummary: Total %s projects attempted. %s test passed. %s test failed.' % (total_len, passed_len, failed_len)
+        print '\nSummary: Total %s projects attempted. %s projects passed. %s projects failed.' % (total_len, passed_len, failed_len)
 
 
     def lint_proj(self, proj, proj_dir):
