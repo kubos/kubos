@@ -20,14 +20,17 @@ First SSH into your kubos-dev box:
        $ vagrant up
        $ vagrant ssh
 
-The Kubos CLI can be upgraded using this kubos command:
+Then, upgrade the Kubos CLI:
 
 ::
 
         $ kubos update --cli
 
 New releases of the Kubos CLI may add or remove specific commands or command options.
-To update the tab completion options in your Kubos Vagrant box run the following command:
+Tab completion is a feature that allows partially typed commands to be fully completed.
+Tab completion can also suggest possible arguments by pressing the <tab> key while
+typing a command. To keep tab completion synchronized with the Kubos CLI,
+run the following command:
 
 ::
 
