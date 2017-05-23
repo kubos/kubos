@@ -31,6 +31,7 @@ info@kubos.co.
     Kubos SDK Example Applications <sdk-examples>
     Kubos SDK Cheat Sheet <sdk-cheatsheet>
     Kubos CLI Command Reference <sdk-reference>
+    Kubos Project Configuration <sdk-project-config>
     Upgrading Kubos SDK <sdk-upgrading>
     
 .. toctree::
