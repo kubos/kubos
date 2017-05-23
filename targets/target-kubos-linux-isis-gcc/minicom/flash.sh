@@ -61,7 +61,7 @@ create_send_script() {
     local size
     
     name=$(basename ${path})
-	size=$(du --apparent-size ${path} | cut -f1) 
+    size=$(du --apparent-size ${path} | cut -f1) 
     
     echo "Sending ${name} (${size} 1k blocks) to $2 on board..."
    
@@ -78,7 +78,7 @@ expect {
 send ${password}
 expect {
     "~ #" break
-    timeout 5 goto end
+    timeout 1 goto end
 }
 timeout 3600
 send "mkdir -p $2"
@@ -86,13 +86,13 @@ send "cd $2"
 send "rm -f ${name}"
 if ${is_app} = 1 send "rm -f /home/system/etc/init.d/S*${name}"
 expect {
-	"$2 #" break
-	timeout 5
+    "$2 #" break
+    timeout 1
 }
 send "df $2 | grep -o '/.*%' | grep -Eo '[0-9]+ *[0-9]+%' | grep -Eo '\^[0-9]+'"
 expect {
-	"$2 #" break
-	timeout 5
+    "$2 #" break
+    timeout 1
 }
 ! /usr/bin/test ${size} -lt \$(tail flash.log -n2 | grep -m 1 -o '[0-9]*')
 if \$? = 0 goto send_file
