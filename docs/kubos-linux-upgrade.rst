@@ -150,7 +150,7 @@ From the KubOS Linux shell:
 
 ::
 
-    $ fw_printenv kubos_updatefile kpack-{desired version}.itb
+    $ fw_setenv kubos_updatefile kpack-{desired version}.itb
     $ reboot
 
 Upgrade Creation
