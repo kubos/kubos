@@ -13,22 +13,40 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Kubos CSP Example Project
+ *
+ * UART Bus: K_UART1
+ *
+ * STM32F407 Discovery:
+ *   TX - PA9
+ *   RX - PA10
+ *
+ * MSP430F5529 Launchpad
+ *   TX - P3.3
+ *   RX - P3.4
+ *
+ * Notes:
+ * 1.  To successfully run this project, two boards must be used.
+ *     One should use this project with the included config.json file.
+ *     The other should use this project, but should have config.json
+ *     file edited to reverse the "my_address" and "target_address"
+ *     values.
+ * 2.  Due to a current peculiarity with the debouncing logic, the button
+ *     must be pressed twice in order for the 'send message' event to
+ *     occur.
  */
 
-#include <errno.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 #include "FreeRTOS.h"
-#include "task.h"
-#include "timers.h"
-#include "queue.h"
 
 #include "kubos-hal/gpio.h"
 #include "kubos-hal/uart.h"
 
 #include <csp/csp.h>
 #include <csp/arch/csp_thread.h>
+#include <csp/arch/csp_queue.h>
 #include <csp/drivers/usart.h>
 #include <csp/interfaces/csp_if_kiss.h>
 
@@ -59,7 +77,7 @@
 #define MY_BAUDRATE YOTTA_CFG_CSP_UART_BAUDRATE
 #define BLINK_MS 100
 
-static xQueueHandle button_queue;
+static csp_queue_handle_t button_queue;
 
 /* kiss interfaces */
 static csp_iface_t csp_if_kiss;
@@ -71,8 +89,7 @@ static inline void blink(int pin) {
     k_gpio_write(pin, 0);
 }
 
-void csp_server(void *p) {
-    (void) p;
+CSP_DEFINE_TASK(csp_server) {
 
     portBASE_TYPE task_woken = pdFALSE;
     /* Create socket without any socket options */
@@ -121,10 +138,12 @@ void csp_server(void *p) {
         csp_close(conn);
 
     }
+
+    return CSP_TASK_RETURN;
 }
 
-void csp_client(void *p) {
-    (void) p;
+CSP_DEFINE_TASK(csp_client) {
+
     csp_packet_t * packet;
     csp_conn_t * conn;
     portBASE_TYPE status;
@@ -154,7 +173,7 @@ void csp_client(void *p) {
      * Try data packet to server
      */
     while (1) {
-        status = xQueueReceive(button_queue, &signal, portMAX_DELAY);
+        status = csp_queue_dequeue(button_queue, &signal, CSP_MAX_DELAY);
         if (status != pdTRUE) {
             continue;
         }
@@ -192,23 +211,29 @@ void csp_client(void *p) {
         /* Close connection */
         csp_close(conn);
     }
+
+    return CSP_TASK_RETURN;
 }
 
-void task_button_press(void *p) {
+CSP_DEFINE_TASK(csp_button_press) {
    int signal = 1;
 
     while (1) {
         if (k_gpio_read(K_BUTTON_0)) {
-            while (k_gpio_read(K_BUTTON_0))
+            while (k_gpio_read(K_BUTTON_0)) {
                 vTaskDelay(50 / portTICK_RATE_MS); /* Button Debounce Delay */
-            while (!k_gpio_read(K_BUTTON_0))
+            }
+            while (!k_gpio_read(K_BUTTON_0)) {
                 vTaskDelay(50 / portTICK_RATE_MS); /* Button Debounce Delay */
+            }
 
             blink(K_LED_RED);
-            xQueueSendToBack(button_queue, &signal, 0); /* Send Message */
+            csp_queue_enqueue(button_queue, &signal, 0); /* Send Message */
         }
         vTaskDelay(100 / portTICK_RATE_MS);
     }
+
+    return CSP_TASK_RETURN;
 }
 
 int main(void)
@@ -235,7 +260,7 @@ int main(void)
     P2OUT = BIT1;
     #endif
 
-    button_queue = xQueueCreate(10, sizeof(int));
+    button_queue = csp_queue_create(10, sizeof(int));
 
     struct usart_conf conf;
 
@@ -261,9 +286,13 @@ int main(void)
     csp_route_set(TARGET_ADDRESS, &csp_if_kiss, CSP_NODE_MAC);
     csp_route_start_task(500, 1);
 
-    xTaskCreate(csp_server, "CSPSRV", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
-    xTaskCreate(csp_client, "CSPCLI", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
-    xTaskCreate(task_button_press, "BUTTON", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
+    csp_thread_handle_t handle_server;
+    csp_thread_handle_t handle_client;
+    csp_thread_handle_t handle_button_press;
+
+    csp_thread_create(csp_server, "CSPSRV", configMINIMAL_STACK_SIZE, NULL, 2, &handle_server);
+    csp_thread_create(csp_client, "CSPCLI", configMINIMAL_STACK_SIZE, NULL, 2, &handle_client);
+    csp_thread_create(csp_button_press, "BUTTON", configMINIMAL_STACK_SIZE, NULL, 3, &handle_button_press);
 
     vTaskStartScheduler();
 

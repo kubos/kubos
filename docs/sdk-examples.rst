@@ -104,15 +104,13 @@ Kubos CSP Example
 
 **Compatible Targets: All KubOS RT compatible targets**
 
-+----------------------+-----------------+
-| High-level Component | Specific Area   |
-+======================+=================+
-| Kubos HAL [3]_       | GPIO            |
-+----------------------+-----------------+
-| CSP [4]_             | Sockets, ping   |
-+----------------------+-----------------+
-| FreeRTOS [5]_        | Threads, queues |
-+----------------------+-----------------+
++----------------------+--------------------------------+
+| High-level Component | Specific Area                  |
++======================+================================+
+| Kubos HAL [3]_       | GPIO                           |
++----------------------+--------------------------------+
+| CSP [4]_             | Sockets, ping, threads, queues |
++----------------------+--------------------------------+
 
 This application shows an example CSP interaction between client and server tasks.
 
