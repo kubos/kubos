@@ -13,20 +13,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Kubos HAL I2C Example Project
+ *
+ * I2C bus: K_I2C1
+ *
+ * STM32F407 Discovery:
+ *   SDA - PB7
+ *   SCL - PB6
+ *
+ * MSP430F5529 Launchpad
+ *   SDA - P3.0
+ *   SCL - P3.1
+ *
  */
-#include <errno.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include "timers.h"
-#include "queue.h"
 
 #include "kubos-hal/gpio.h"
 #include "kubos-hal/uart.h"
 #include "kubos-hal/i2c.h"
-#include "kubos-core/modules/klog.h"
 
 #ifdef YOTTA_CFG_SENSORS_HTU21D
 #include "kubos-core/modules/sensors/htu21d.h"
@@ -84,6 +92,7 @@ void task_i2c(void *p) {
 #ifdef YOTTA_CFG_SENSORS_HTU21D
         htu21d_read_temperature(&temp);
         htu21d_read_humidity(&hum);
+        /* NOTE: Float print support is not currently available for the MSP430 target */
         printf("temp - %f\r\n", temp);
         printf("humidity - %f\r\n", hum);
 #endif
