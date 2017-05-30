@@ -98,6 +98,10 @@ Installation Process
 Build the OS Files
 ~~~~~~~~~~~~~~~~~~
 
+**WARNING:** The OS files cannot be built using a synced folder in a Vagrant box (or regular VM).
+VirtualBox does not support hard links in shared folders, which are crucial in order to complete
+the build.
+
 Create new folder
 
 ::
@@ -130,11 +134,15 @@ Move into the buildroot directory
     $ cd buildroot-2016.11
 
 Point BuildRoot to the external kubos-linux-build folder and tell it to build
-the iOBC
+the iOBC.
+
+**Note:** You will need to build with ``sudo`` if you are using the default iOBC
+configuration, since it points the output toolchain to "/usr/bin/iobc_toolchain",
+which is a protected directory.
 
 ::
 
-    $ make BR2_EXTERNAL=../kubos-linux-build at91sam9g20isis_defconfig
+    $ sudo make BR2_EXTERNAL=../kubos-linux-build at91sam9g20isis_defconfig
 
 Build everything
 
@@ -157,6 +165,17 @@ The generated files will be located in buildroot-2016.11/output/images. They are
 -  {board}.dtb - The Device Tree Binary that Linux uses to configure itself
    for your board
 -  rootfs.tar - The root file system. Contains BusyBox and other libraries
+
+Changing the Output Toolchain Directory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you would like to build your toolchain in somewhere other than the
+"/usr/bin/iobc_toolchain" directory, update the ``BR2_HOST_DIR`` variable in the
+"configs/at91sam9g20isis_defconfig" file.
+
+If you would like BuildRoot to just build the toolchain locally, you may remove
+the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
+main "buildroot-2016.11" directory in a new "output/host" folder.
 
 .. _install-sd:
 
