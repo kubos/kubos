@@ -50,14 +50,14 @@
  */
 typedef union __attribute__((__packed__)) {
     /** Raw value of the generic reply bytes */
-    uint8_t rawValue[LENGTH_GENERIC_REPLY];
+    uint8_t raw_value[LENGTH_GENERIC_REPLY];
     /** Individual reply fields */
     struct __attribute__((__packed__)) supervisor_generic_reply_fields_t
     {
         /** The first as always is a dummy byte */
         uint8_t dummy;
         /** The second is a SPI command status */
-        uint8_t spiCommandStatus;
+        uint8_t spi_command_status;
         /** CRC byte */
         uint8_t crc8;
     } /** Individual reply fields */ fields;
@@ -117,32 +117,32 @@ typedef union __attribute__((__packed__)) {
  */
 typedef union __attribute__((__packed__)) {
     /** Raw value of the version configuration bytes */
-    uint8_t rawValue[LENGTH_TELEMETRY_GET_VERSION];
+    uint8_t raw_value[LENGTH_TELEMETRY_GET_VERSION];
     /** Individual version fields */
     struct __attribute__((__packed__)) supervisor_version_fields_t
     {
         /** The first as always is a dummy byte. */
         uint8_t dummy;
         /** The second is a SPI Command Status. */
-        uint8_t spiCommandStatus;
+        uint8_t spi_command_status;
         /** Index of ISIS Subsystem. */
-        uint8_t indexOfSubsystem;
+        uint8_t index_of_subsystem;
         /** Software major version. */
-        uint8_t majorVersion;
+        uint8_t major_version;
         /** Software minor version. */
-        uint8_t minorVersion;
+        uint8_t minor_version;
         /** Software patch version. */
-        uint8_t patchVersion;
+        uint8_t patch_version;
         /** Software git head version. */
-        uint32_t gitHeadVersion;
+        uint32_t git_head_version;
         /** Serial number. */
-        uint16_t serialNumber;
+        uint16_t serial_number;
         /** Compile information (time and date). */
-        int8_t compileInformation[LENGTH_COMPILE_INFORMATION];
+        int8_t compile_information[LENGTH_COMPILE_INFORMATION];
         /** Clock speed of the Supervisor Controller (in MHz). */
-        uint8_t clockSpeed;
+        uint8_t clock_speed;
         /** Code type. Whether flight or test. */
-        int8_t codeType;
+        int8_t code_type;
         /** CRC byte. */
         uint8_t crc8;
     } /** Individual version fields */ fields;
@@ -197,23 +197,23 @@ typedef union __attribute__((__packed__)) {
  */
 typedef union __attribute__((__packed__)) {
     /** Raw value of the version configuration bytes. */
-    uint8_t rawValue;
+    uint8_t raw_value;
     /** Individual enable status fields */
     struct __attribute__((__packed__)) supervisor_enable_status_fields_t
     {
                 
         uint8_t
                 /** OBC Power. */
-                powerObc : 1, 
+                power_obc : 1, 
                 /** Output power to the RTC. */
-                powerRtc : 1,
+                power_rtc : 1,
                 /** Supervisor mode. */
-                isInSupervisorMode : 1, 
+                is_in_supervisor_mode : 1, 
                 : 1, : 1,
                 /** RTC is busy. */
-                busyRtc : 1,
+                busy_rtc : 1,
                 /** RTC is doing power off. */
-                poweroffRtc : 1,
+                power_off_rtc : 1,
                 : 1;
     } /** Individual enable status fields */ fields;
 } supervisor_enable_status_t;
@@ -226,26 +226,26 @@ typedef union __attribute__((__packed__)) {
  */
 typedef union __attribute__((__packed__))  {
     /** Raw value of the version configuration bytes */
-    uint8_t rawValue[LENGTH_TELEMETRY_HOUSEKEEPING];
+    uint8_t raw_value[LENGTH_TELEMETRY_HOUSEKEEPING];
     /** Individual housekeeping fields */
     struct __attribute__((__packed__)) supervisor_housekeeping_fields_t
     {
         /** The first as always is a dummy byte. */
         uint8_t dummy;
         /** The second is a SPI Command Status. */
-        uint8_t spiCommandStatus;
+        uint8_t spi_command_status;
         /** Enable status of the Supervisor Controller. */
-        supervisor_enable_status_t enableStatus;
+        supervisor_enable_status_t enable_status;
         /** Supervisor Controller Uptime. */
-        uint32_t supervisorUptime;
+        uint32_t supervisor_uptime;
         /** IOBC Uptime as measured by Supervisor Controller. */
-        uint32_t iobcUptime;
+        uint32_t iobc_uptime;
         /** IOBC Reset Count. */
-        uint32_t iobcResetCount; 
+        uint32_t iobc_reset_count; 
         /** ADC Data. */
-        uint16_t adcData[SUPERVISOR_NUMBER_OF_ADC_CHANNELS];
+        uint16_t adc_data[SUPERVISOR_NUMBER_OF_ADC_CHANNELS];
         /** ADC Update Flag. */
-        uint8_t adcUpdateFlag;
+        uint8_t adc_update_flag;
         /** CRC byte. */
         uint8_t crc8;
     } /** Individual housekeeping fields */ fields;
