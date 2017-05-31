@@ -1,7 +1,7 @@
 {
-  "name": "isis-iobc-hal",
+  "name": "kubos-hal-iobc",
   "version": "0.1.0",
-  "description": "KubOS HAL for iOBC peripherals",
+  "description": "Kubos HAL for iOBC peripherals",
   "keywords": [],
   "author": "kubos.co",
   "homepage": "https://www.kubos.co",

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "isis-iobc-hal/supervisor.h"
-#include "isis-iobc-hal/checksum.h"
+#include "kubos-hal-iobc/supervisor.h"
+#include "kubos-hal-iobc/checksum.h"
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
 #include <stdio.h>
@@ -52,30 +52,25 @@ static bool spi_comms(const uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t t
 
     fd = open(SPI_DEV, O_RDWR);
     if (fd < 0) {
-        printf("can't open device\n");
+        printf("Can't open device %d\n", fd);
         return false;
     }
 
     /*
-     * max speed hz
+     * Setting
      */
     ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
     if (ret == -1) {
-        perror("can't set max speed hz");
+        perror("Can't set max speed hz");
         return false;
     }
 
-    ret = ioctl(fd, SPI_IOC_RD_MAX_SPEED_HZ, &speed);
-    if (ret == -1) {
-        perror("can't get max speed hz");
-        return false;
-    }
-
-    // Messages are sent across one byte per ioctl call
-    // This is to introduce inter-byte delays, as per
-    // discussion with ISIS on 3/31. They suggested
-    // at least 1 ms between bytes. Breaking up bytes into
-    // separate ioctl calls with 0.1ms inter-byte delay.
+    /**
+     * Messages are sent across one byte per ioctl call
+     * This is to introduce inter-byte delays, as per
+     * discussion with ISIS on 3/31. They suggested
+     * at least 1 ms between bytes.
+     */
     for (uint16_t i = 0; i < tx_length - 1; i++)
     {
         struct spi_ioc_transfer tr = {
@@ -91,7 +86,7 @@ static bool spi_comms(const uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t t
             printf("Can't send spi message %d\r\n", ret);
             return false;
         }
-        usleep(100);
+        usleep(1000);
     }
 
     // Send checksum last
@@ -133,7 +128,7 @@ bool supervisor_get_version(supervisor_version_t * version)
         return false;
     }
 
-    usleep(1000);
+    usleep(10000);
 
     if (!spi_comms(bytesToSendObtainVersion, bytesToReceiveObtainVersion, LENGTH_TELEMETRY_GET_VERSION))
     {
@@ -165,7 +160,7 @@ bool supervisor_get_housekeeping(supervisor_housekeeping_t * housekeeping)
         return false;
     }
 
-    usleep(1000);
+    usleep(10000);
 
     if (!spi_comms(bytesToSendObtainHousekeepingTelemetry, bytesToReceiveObtainHousekeepingTelemetry, LENGTH_TELEMETRY_HOUSEKEEPING))
     {

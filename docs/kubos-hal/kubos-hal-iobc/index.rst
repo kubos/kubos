@@ -3,7 +3,7 @@ ISIS iOBC HAL Documentation
 
 .. toctree::
    :caption: APIs
-   :name: isis-iobc-hal-apis
+   :name: kubos-hal-iobc-apis
 
    supervisor
    checksum
