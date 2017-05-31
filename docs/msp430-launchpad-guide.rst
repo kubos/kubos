@@ -288,7 +288,7 @@ You can view the MSP430's console output by creating a serial connection
 to the micro-USB port.
 
 All of your program's printf statements will be routed through here. You
-can change the settings of the console with the hardware:console section
+can change the settings of the console with the :json:object:`hardware.console` section
 of the config.json file.
 
 **NOTE:** If your MSP430 board loses power while you have a debug
