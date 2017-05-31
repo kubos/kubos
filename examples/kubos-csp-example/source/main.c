@@ -44,14 +44,15 @@
 #include "kubos-hal/gpio.h"
 #include "kubos-hal/uart.h"
 
-#include <csp/csp.h>
-#include <csp/arch/csp_thread.h>
 #include <csp/arch/csp_queue.h>
+#include <csp/arch/csp_thread.h>
+#include <csp/csp.h>
 #include <csp/drivers/usart.h>
 #include <csp/interfaces/csp_if_kiss.h>
 
 /**
-* Enabling this example code requires certain configuration values to be present
+* Enabling this example code requires certain configuration values to be
+* present
 * in the configuration json of this application. An example is given below:
 *
 *  {
@@ -66,34 +67,38 @@
 *      }
 *  }
 *
-* This would create and enable CSP KISS with the address of your device, the target device,
-* the listening port, and the UART interface and baudrate. The addresses must be inverted for 
+* This would create and enable CSP KISS with the address of your device, the
+* target device,
+* the listening port, and the UART interface and baudrate. The addresses must
+* be inverted for
 * the second device of the example pair.
 */
 
 #define MY_ADDRESS YOTTA_CFG_CSP_MY_ADDRESS
 #define TARGET_ADDRESS YOTTA_CFG_CSP_TARGET_ADDRESS
-#define MY_PORT    YOTTA_CFG_CSP_PORT
+#define MY_PORT YOTTA_CFG_CSP_PORT
 #define MY_BAUDRATE YOTTA_CFG_CSP_UART_BAUDRATE
 #define BLINK_MS 100
 
 static csp_queue_handle_t button_queue;
 
 /* kiss interfaces */
-static csp_iface_t csp_if_kiss;
+static csp_iface_t       csp_if_kiss;
 static csp_kiss_handle_t csp_kiss_driver;
 
-static inline void blink(int pin) {
+static inline void blink(int pin)
+{
     k_gpio_write(pin, 1);
     vTaskDelay(BLINK_MS / portTICK_RATE_MS);
     k_gpio_write(pin, 0);
 }
 
-CSP_DEFINE_TASK(csp_server) {
+CSP_DEFINE_TASK(csp_server)
+{
 
     portBASE_TYPE task_woken = pdFALSE;
     /* Create socket without any socket options */
-    csp_socket_t *sock = csp_socket(CSP_SO_NONE);
+    csp_socket_t * sock = csp_socket(CSP_SO_NONE);
 
     /* Bind all ports to socket */
     csp_bind(sock, CSP_ANY);
@@ -102,19 +107,19 @@ CSP_DEFINE_TASK(csp_server) {
     csp_listen(sock, 10);
 
     /* Pointer to current connection and packet */
-    csp_conn_t *conn;
-    csp_packet_t *packet;
+    csp_conn_t   * conn;
+    csp_packet_t * packet;
 
     /* Process incoming connections */
     while (1) {
 
         /* Wait for connection, 100 ms timeout */
-        if ((conn = csp_accept(sock, 100)) == NULL)
-            continue;
+        if ((conn = csp_accept(sock, 100)) == NULL) continue;
 
         /* Read packets. Timout is 100 ms */
         while ((packet = csp_read(conn, 100)) != NULL) {
-            switch (csp_conn_dport(conn)) {
+            switch (csp_conn_dport(conn))
+            {
                 case MY_PORT:
                     /* Process packet here */
                     blink(K_LED_GREEN);
@@ -122,13 +127,13 @@ CSP_DEFINE_TASK(csp_server) {
                     break;
 
                 default:
-                    /* Let the service handler reply pings, buffer use, etc. */
-                    #ifdef TARGET_LIKE_MSP430
+/* Let the service handler reply pings, buffer use, etc. */
+#ifdef TARGET_LIKE_MSP430
                     blink(K_LED_GREEN);
                     blink(K_LED_RED);
-                    #else
+#else
                     blink(K_LED_BLUE);
-                    #endif
+#endif
                     csp_service_handler(conn, packet);
                     break;
             }
@@ -136,18 +141,18 @@ CSP_DEFINE_TASK(csp_server) {
 
         /* Close current connection, and handle next */
         csp_close(conn);
-
     }
 
     return CSP_TASK_RETURN;
 }
 
-CSP_DEFINE_TASK(csp_client) {
+CSP_DEFINE_TASK(csp_client)
+{
 
     csp_packet_t * packet;
-    csp_conn_t * conn;
-    portBASE_TYPE status;
-    int signal;
+    csp_conn_t   * conn;
+    portBASE_TYPE  status;
+    int            signal;
 
     /**
      * Try ping
@@ -185,8 +190,10 @@ CSP_DEFINE_TASK(csp_client) {
             return;
         }
 
-        /* Connect to host HOST, port PORT with regular UDP-like protocol and 1000 ms timeout */
-        conn = csp_connect(CSP_PRIO_NORM, TARGET_ADDRESS, MY_PORT, 100, CSP_O_NONE);
+        /* Connect to host HOST, port PORT with regular UDP-like protocol and
+         * 1000 ms timeout */
+        conn = csp_connect(CSP_PRIO_NORM, TARGET_ADDRESS, MY_PORT, 100,
+                           CSP_O_NONE);
         if (conn == NULL) {
             /* Connect failed */
             /* Remember to free packet buffer */
@@ -195,7 +202,7 @@ CSP_DEFINE_TASK(csp_client) {
         }
 
         /* Copy dummy data to packet */
-        char *msg = "Hello World";
+        char * msg = "Hello World";
         strcpy((char *) packet->data, msg);
 
         /* Set packet length */
@@ -215,8 +222,9 @@ CSP_DEFINE_TASK(csp_client) {
     return CSP_TASK_RETURN;
 }
 
-CSP_DEFINE_TASK(csp_button_press) {
-   int signal = 1;
+CSP_DEFINE_TASK(csp_button_press)
+{
+    int signal = 1;
 
     while (1) {
         if (k_gpio_read(K_BUTTON_0)) {
@@ -240,15 +248,15 @@ int main(void)
 {
     k_uart_console_init();
 
-    #ifdef TARGET_LIKE_STM32
+#ifdef TARGET_LIKE_STM32
     k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_ORANGE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_BLUE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_NONE);
-    #endif
+#endif
 
-    #ifdef TARGET_LIKE_MSP430
+#ifdef TARGET_LIKE_MSP430
     k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_UP);
@@ -258,23 +266,25 @@ int main(void)
     __enable_interrupt();
 
     P2OUT = BIT1;
-    #endif
+#endif
 
     button_queue = csp_queue_create(10, sizeof(int));
 
     struct usart_conf conf;
 
     /* set the device in KISS / UART interface */
-    char dev = (char)YOTTA_CFG_CSP_UART_BUS;
-    conf.device = &dev;
+    char dev      = (char) YOTTA_CFG_CSP_UART_BUS;
+    conf.device   = &dev;
     conf.baudrate = MY_BAUDRATE;
     usart_init(&conf);
 
     /* init kiss interface */
-    csp_kiss_init(&csp_if_kiss, &csp_kiss_driver, usart_putc, usart_insert, "KISS");
+    csp_kiss_init(&csp_if_kiss, &csp_kiss_driver, usart_putc, usart_insert,
+                  "KISS");
 
     /* Setup callback from USART RX to KISS RS */
-    void my_usart_rx(uint8_t * buf, int len, void * pxTaskWoken) {
+    void my_usart_rx(uint8_t * buf, int len, void * pxTaskWoken)
+    {
         csp_kiss_rx(&csp_if_kiss, buf, len, pxTaskWoken);
     }
     usart_set_callback(my_usart_rx);
@@ -290,9 +300,12 @@ int main(void)
     csp_thread_handle_t handle_client;
     csp_thread_handle_t handle_button_press;
 
-    csp_thread_create(csp_server, "CSPSRV", configMINIMAL_STACK_SIZE, NULL, 2, &handle_server);
-    csp_thread_create(csp_client, "CSPCLI", configMINIMAL_STACK_SIZE, NULL, 2, &handle_client);
-    csp_thread_create(csp_button_press, "BUTTON", configMINIMAL_STACK_SIZE, NULL, 3, &handle_button_press);
+    csp_thread_create(csp_server, "CSPSRV", configMINIMAL_STACK_SIZE, NULL, 2,
+                      &handle_server);
+    csp_thread_create(csp_client, "CSPCLI", configMINIMAL_STACK_SIZE, NULL, 2,
+                      &handle_client);
+    csp_thread_create(csp_button_press, "BUTTON", configMINIMAL_STACK_SIZE,
+                      NULL, 3, &handle_button_press);
 
     vTaskStartScheduler();
 
