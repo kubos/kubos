@@ -52,12 +52,12 @@ static bool spi_comms(const uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t t
 
     fd = open(SPI_DEV, O_RDWR);
     if (fd < 0) {
-        printf("Can't open device %d\n", fd);
+        perror("Can't open device ");
         return false;
     }
 
     /*
-     * Setting
+     * Setting SPI bus speed
      */
     ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
     if (ret == -1) {
@@ -83,13 +83,15 @@ static bool spi_comms(const uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t t
         ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
         if (ret < 1)
         {
-            printf("Can't send spi message %d\r\n", ret);
+            perror("Can't send spi message ");
             return false;
         }
         usleep(1000);
     }
 
-    // Send checksum last
+    /**
+     * Send checksum last
+     */
     struct spi_ioc_transfer tr = {
         .tx_buf = (unsigned long)&checksum,
         .rx_buf = (unsigned long)&rx_buffer[tx_length - 1],
@@ -100,7 +102,7 @@ static bool spi_comms(const uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t t
     ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
     if (ret < 1)
     {
-        printf("Can't send spi message %d\r\n", ret);
+        perror("Can't send spi message ");
         return false;
     }
 
