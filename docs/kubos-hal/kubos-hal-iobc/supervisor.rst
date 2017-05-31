@@ -2,5 +2,5 @@ iOBC Supervisor API
 -------------------
 
 .. doxygengroup:: iOBC-Supervisor
-    :project: isis-iobc-hal
+    :project: kubos-hal-iobc
     :members:

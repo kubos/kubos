@@ -31,4 +31,4 @@ Kubos HAL Documentation
    :caption: Bus HALs
    :name: hal-buses
 
-   ISIS iOBC <isis-iobc-hal/index>
+   ISIS iOBC <kubos-hal-iobc/index>
