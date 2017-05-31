@@ -65,10 +65,12 @@ static bool spi_comms(const uint8_t * tx_buffer, uint8_t * rx_buffer, uint16_t t
         return false;
     }
 
-    // Messages are sent across one byte per ioctl call
-    // This is to introduce inter-byte delays, as per
-    // discussion with ISIS on 3/31. They suggested
-    // at least 1 ms between bytes.
+    /**
+     * Messages are sent across one byte per ioctl call
+     * This is to introduce inter-byte delays, as per
+     * discussion with ISIS on 3/31. They suggested
+     * at least 1 ms between bytes.
+     */
     for (uint16_t i = 0; i < tx_length - 1; i++)
     {
         struct spi_ioc_transfer tr = {
