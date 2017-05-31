@@ -16,4 +16,6 @@
 
 #include <csp/csp.h>
 
+#ifdef TARGET_LIKE_ISIS
 CSP_DEFINE_TASK(supervisor_publisher);
+#endif

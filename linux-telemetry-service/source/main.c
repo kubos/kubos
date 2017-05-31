@@ -69,8 +69,10 @@ int main(int argc, char ** argv)
 
     csp_thread_create(main_thread, NULL, 1000, NULL, 0, &thread_handle);
 
+    #ifdef TARGET_LIKE_ISIS
     csp_thread_handle_t supervisor_handle;
     csp_thread_create(supervisor_publisher, NULL, 1000, NULL, 0, &supervisor_handle);
+    #endif
 
     while (running)
     {
@@ -78,7 +80,10 @@ int main(int argc, char ** argv)
     }
 
     csp_thread_kill(&thread_handle);
+    
+    #ifdef TARGET_LIKE_ISIS
     csp_thread_kill(&supervisor_handle);
+    #endif
 
     telemetry_server_cleanup();
 

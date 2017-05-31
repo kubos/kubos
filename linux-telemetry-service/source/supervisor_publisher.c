@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifdef TARGET_LIKE_ISIS
+
 #include <kubos-hal-iobc/supervisor.h>
 #include <telemetry/telemetry.h>
 #include <csp/arch/csp_time.h>
@@ -50,3 +52,5 @@ CSP_DEFINE_TASK(supervisor_publisher)
         sleep(SUPERVISOR_TELEMETRY_INTERVAL);
     }
 }
+
+#endif
