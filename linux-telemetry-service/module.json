@@ -12,7 +12,7 @@
     },
     "targetDependencies":{
         "isis":{
-            "isis-iobc-hal":"kubostech/isis-iobc-hal"
+            "kubos-hal-iobc":"kubostech/kubos-hal-iobc"
         }
     }
 }

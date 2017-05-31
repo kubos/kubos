@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <isis-iobc-hal/supervisor.h>
+#include <kubos-hal-iobc/supervisor.h>
 #include <telemetry/telemetry.h>
 #include <csp/arch/csp_time.h>
 
@@ -30,19 +30,19 @@ CSP_DEFINE_TASK(supervisor_publisher)
         if (supervisor_get_housekeeping(&info))
         {
             telemetry_publish((telemetry_packet) {
-                .data = info.fields.iobcUptime,
+                .data = info.fields.iobc_uptime,
                 .timestamp = csp_get_ms(),
                 .source = YOTTA_CFG_TELEMETRY_PUBLISHERS_IOBC_UPTIME
             });
 
             telemetry_publish((telemetry_packet) {
-                .data = info.fields.supervisorUptime,
+                .data = info.fields.supervisor_uptime,
                 .timestamp = csp_get_ms(),
                 .source = YOTTA_CFG_TELEMETRY_PUBLISHERS_SUPERVISOR_UPTIME
             });
 
             telemetry_publish((telemetry_packet) {
-                .data = info.fields.iobcResetCount,
+                .data = info.fields.iobc_reset_count,
                 .timestamp = csp_get_ms(),
                 .source = YOTTA_CFG_TELEMETRY_PUBLISHERS_IOBC_RESET_COUNT
             });

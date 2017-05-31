@@ -10,8 +10,7 @@
         "publishers": {
             "iobc_uptime": 100,
             "supervisor_uptime" : 101,
-            "iobc_reset_count" : 102,
-            "iobc_serial": 103
+            "iobc_reset_count" : 102
         }
     },
     "csp": {
