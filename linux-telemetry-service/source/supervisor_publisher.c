@@ -47,17 +47,6 @@ CSP_DEFINE_TASK(supervisor_publisher)
                 .source = YOTTA_CFG_TELEMETRY_PUBLISHERS_IOBC_RESET_COUNT
             });
         }
-
-        supervisor_version_t version_info;
-        if (supervisor_get_version(&version_info))
-        {
-            telemetry_publish((telemetry_packet) {
-                .data = version_info.fields.serialNumber,
-                .timestamp = csp_get_ms(),
-                .source = YOTTA_CFG_TELEMETRY_PUBLISHERS_IOBC_SERIAL
-            });
-        }
-
         sleep(SUPERVISOR_TELEMETRY_INTERVAL);
     }
 }
