@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "isis-iobc-hal/checksum.h"
+#include "kubos-hal-iobc/checksum.h"
 
 #define CRC8_POLYNOMIAL 0x07
 

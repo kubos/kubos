@@ -18,7 +18,7 @@ WARN_IF_DOC_ERROR      = YES
 
 WARN_NO_PARAMDOC       = YES
 
-INPUT                  = isis-iobc-hal
+INPUT                  = kubos-hal-iobc
 
 GENERATE_HTML          = YES
 

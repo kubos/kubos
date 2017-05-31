@@ -252,36 +252,41 @@ typedef union __attribute__((__packed__))  {
 } supervisor_housekeeping_t;
 
 /**
- *      @brief      Performs a software reset of the microcontroller directly without shutting down its components.
- *      As this command is considered unsafe for the hardware and the software of the IOBC-S, use supervisor_reset() instead.
- *      @return		true if command is sent successfully, otherwise false
+ * @brief Performs a software reset of the microcontroller directly without shutting down its components.
+ * As this command is considered unsafe for the hardware and the software of the IOBC-S, use supervisor_reset() instead.
+ *
+ * @return true if command is sent successfully, otherwise false
  */
 bool supervisor_emergency_reset();
 
 /**
- *      @brief      Assert a reset to the IOBC-S and make sure that the conditions prior to reset operations are met.
- *      @return		true if command is sent successfully, otherwise false
+ * @brief Assert a reset to the IOBC-S and make sure that the conditions prior to reset operations are met.
+ *
+ * @return true if command is sent successfully, otherwise false
  */
 bool supervisor_reset();
 
 /**
- *      @brief      Let the IOBC be power-cycled for around 4-5 seconds.
- *                  Supervisor Controller power is not affected by this command.
- *      @return		true if command is sent successfully, otherwise false
+ * @brief Let the IOBC be power-cycled for around 4-5 seconds.
+ * Supervisor Controller power is not affected by this command.
+ *
+ * @return true if command is sent successfully, otherwise false
  */
 bool supervisor_powercycle();
 
 /**
- *      @brief      Getting Version from Supervisor Controller.
- *      @param[out] version Version and configuration read back from the Supervisor Controller.
- *      @return		true if command is sent and response has valid CRC, otherwise false
+ * @brief Getting Version from Supervisor Controller.
+ *
+ * @param[out] version Version and configuration read back from the Supervisor Controller.
+ * @return true if command is sent and response has valid CRC, otherwise false
  */
 bool supervisor_get_version(supervisor_version_t * version);
 
 /**
- *      @brief      Getting Housekeeping from Supervisor Controller.
- *      @param[out] housekeeping Housekeeping read back from the Supervisor Controller.
- *      @return		true if command is sent and response has valid CRC, otherwise false
+ * @brief Getting Housekeeping from Supervisor Controller.
+ *
+ * @param[out] housekeeping Housekeeping read back from the Supervisor Controller.
+ * @return true if command is sent and response has valid CRC, otherwise false
  */
 bool supervisor_get_housekeeping(supervisor_housekeeping_t * housekeeping);
 
