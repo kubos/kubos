@@ -33,8 +33,8 @@
 #include "task.h"
 
 #include "kubos-hal/gpio.h"
-#include "kubos-hal/uart.h"
 #include "kubos-hal/i2c.h"
+#include "kubos-hal/uart.h"
 
 #ifdef YOTTA_CFG_SENSORS_HTU21D
 #include "kubos-core/modules/sensors/htu21d.h"
@@ -44,25 +44,24 @@
 #include "kubos-core/modules/sensors/bno055.h"
 #endif
 
-void task_i2c(void *p) {
+void task_i2c(void * p)
+{
     static int x = 0;
-    int ret;
+    int        ret;
 
 /**
  * Example of directly using the Kubos-HAL i2c interface
  */
 #if !defined(YOTTA_CFG_SENSORS_HTU21D) && !defined(YOTTA_CFG_SENSORS_BNO055)
-    #define I2C_DEV K_I2C1
-    #define I2C_SLAVE_ADDR 0x40
+#define I2C_DEV K_I2C1
+#define I2C_SLAVE_ADDR 0x40
 
     uint8_t cmd = 0xE3;
     uint8_t buffer[3];
 
-    KI2CConf conf = {
-        .addressing_mode = K_ADDRESSINGMODE_7BIT,
-        .role = K_MASTER,
-        .clock_speed = 10000
-    };
+    KI2CConf conf = {.addressing_mode = K_ADDRESSINGMODE_7BIT,
+                     .role            = K_MASTER,
+                     .clock_speed     = 10000 };
     // Initialize first i2c bus with configuration
     k_i2c_init(I2C_DEV, &conf);
     // Send single byte command to slave
@@ -85,14 +84,15 @@ void task_i2c(void *p) {
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
     bno055_setup(OPERATION_MODE_NDOF);
-    bno055_quat_data_t pos = { 0, 0, 0, 0};
+    bno055_quat_data_t pos = { 0, 0, 0, 0 };
 #endif
 
     while (1) {
 #ifdef YOTTA_CFG_SENSORS_HTU21D
         htu21d_read_temperature(&temp);
         htu21d_read_humidity(&hum);
-        /* NOTE: Float print support is not currently available for the MSP430 target */
+        /* NOTE: Float print support is not currently available for the MSP430
+         * target */
         printf("temp - %f\r\n", temp);
         printf("humidity - %f\r\n", hum);
 #endif
@@ -111,15 +111,15 @@ int main(void)
 {
     k_uart_console_init();
 
-    #ifdef TARGET_LIKE_STM32
+#ifdef TARGET_LIKE_STM32
     k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_ORANGE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_BLUE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_NONE);
-    #endif
+#endif
 
-    #ifdef TARGET_LIKE_MSP430
+#ifdef TARGET_LIKE_MSP430
     k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
     k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_UP);
@@ -129,8 +129,7 @@ int main(void)
     __enable_interrupt();
 
     P2OUT = BIT1;
-    #endif
-
+#endif
 
     xTaskCreate(task_i2c, "I2C", configMINIMAL_STACK_SIZE * 2, NULL, 2, NULL);
 
