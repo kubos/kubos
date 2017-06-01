@@ -184,6 +184,28 @@ If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
 main "buildroot-2016.11" directory in a new "output/host" folder.
 
+Resetting the Global Links
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you run a full build, the links to all the Kubos SDK modules will be changed to
+point at modules within the buildroot directory. As a result, you will be unable
+to build any future Kubos SDK projects as a non-privileged user.
+
+To fix this, run these commands:
+
+::
+
+    $ cd $HOME/.kubos/kubos/tools
+    $ ./kubos_link.py
+    
+Depending on the state of your Kubos SDK project, you might also need to change the
+module links locally:
+
+::
+
+    $ cd {project folder}
+    $ kubos link -a
+
 Create an SD Card Image
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -529,7 +551,7 @@ The flashing script can be called from the standard command prompt using this co
 ::
 
     $ {path to SAM-BA}/sam-ba.exe \jlink\ARM0 at91sam9g20-ISISOBC
-          kubos-nor-flash.tcl {input arguments} [> {logfile}]
+          {path to SAM-BA}/kubos-nor-flash.tcl {input arguments} [> {logfile}]
     
 Where the input arguments are as follows:
 
@@ -637,7 +659,7 @@ You should see the console boot into Linux like this:
    :alt: Linux Console
 
    Linux Console
-
+   
 Upgrade Process
 ---------------
 
@@ -669,3 +691,28 @@ here, some basic troubleshooting and debugging abilities should be available.
 
 More information about the recovery process and architecture can be found in the
 :doc:`KubOS Linux Recovery doc <kubos-linux-recovery>`
+
+Resetting the Environment
+-------------------------
+
+If the system goes through the full recovery process, you will need to reset the environment
+in order to resume the normal boot process.
+
+From the U-Boot CLI:
+
+::
+
+    $ env default bootcmd
+    $ env default bootcount
+    $ env default recovery_available
+    $ saveenv
+    $ reset
+    
+These commands will:
+
+  - Restore the relevant environment variables to their default values
+  - Save the new values to persistent storage
+  - Reboot the system
+  
+As long as a valid kernel and rootfs are available, your system should now successfully boot
+into KubOS Linux.
