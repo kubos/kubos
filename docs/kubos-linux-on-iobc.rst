@@ -155,7 +155,7 @@ Build everything
 
 ::
 
-    $ make
+    $ sudo make
 
 The full build process will take a while. Running on a Linux VM, it took about
 an hour. Running in native Linux, it took about ten minutes. Once this build
