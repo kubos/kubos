@@ -16,6 +16,22 @@
  *
  * Kubos CSP Example Project
  *
+ * This application shows an example CSP interaction between client and server tasks.
+ *
+ * Three threads are created:
+ *   - A CSP server
+ *   - A CSP client
+ *   - A button poll
+ *
+ * The button poll thread continually polls the board’s button to see if it has been pressed.
+ * If it has, a notification is added to a dedicated queue.
+ *
+ * The CSP client thread checks for messages on the button queue. '
+ * If found, it connects to the CSP server’s port and sends a message “Hello World”.
+ *
+ * The CSP server thread checks for connections on the CSP port and then blinks the green LED
+ * if any messages are received.
+ *
  * UART Bus: K_UART1
  *
  * STM32F407 Discovery:
