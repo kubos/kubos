@@ -1,4 +1,3 @@
-
 /*
  * KubOS RT
  * Copyright (C) 2016 Kubos Corporation
@@ -14,21 +13,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Kubos SPI Example Project
+ *
+ * NOTE: This project is intended for the STM32F407 target only.
+ * The MSP430 does not currently have support for floating point
+ * variables, so this example project will compile but not successfully run
+ * on the MSP430 target.
+ *
+ * SPI bus: K_SPI1
+ *   SDI - PA7
+ *   SDO - PA6
+ *   SCK - PA5
+ *   CS  - PA4
  */
 
-#include <errno.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include "timers.h"
-#include "queue.h"
 
-#include "kubos-hal/gpio.h"
 #include "kubos-hal/uart.h"
 #include "kubos-hal/spi.h"
-#include "kubos-core/modules/klog.h"
 
 #ifdef YOTTA_CFG_SENSORS_BME280
 #include "kubos-core/modules/sensors/bme280.h"
@@ -84,18 +90,7 @@ int main(void)
 {
     k_uart_console_init();
 
-    #ifdef TARGET_LIKE_STM32
-    k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_LED_ORANGE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_LED_BLUE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_NONE);
-    #endif
-
     #ifdef TARGET_LIKE_MSP430
-    k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_UP);
     /* Stop the watchdog. */
     WDTCTL = WDTPW + WDTHOLD;
 
