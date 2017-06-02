@@ -90,9 +90,11 @@ SAM-BA
 
 The software tool used to flash the kernel and components onto the iOBC.
 
-**NOTE:** The ISIS-OBC SDK includes the SAM-BA application. You should install this version,
-rather than the default Atmel version, since it is packaged with several iOBC configuration
-files which are required to successfully connect to the board.
+.. note:: 
+
+    The ISIS-OBC SDK includes the SAM-BA application. You should install this version,
+    rather than the default Atmel version, since it is packaged with several iOBC configuration
+    files which are required to successfully connect to the board.
 
 KubOS Linux Build Process
 -------------------------
@@ -105,9 +107,11 @@ the steps in this section.
 Build the OS Files
 ~~~~~~~~~~~~~~~~~~
 
-**WARNING:** The OS files cannot be built using a synced folder in a Vagrant box (or regular VM).
-VirtualBox does not support hard links in shared folders, which are crucial in order to complete
-the build.
+.. warning::
+
+    The OS files cannot be built using a synced folder in a Vagrant box (or regular VM).
+    VirtualBox does not support hard links in shared folders, which are crucial in order to complete
+    the build.
 
 Create new folder
 
@@ -143,9 +147,11 @@ Move into the buildroot directory
 Point BuildRoot to the external kubos-linux-build folder and tell it to build
 the iOBC.
 
-**Note:** You will need to build with ``sudo`` if you are using the default iOBC
-configuration, since it points the output toolchain to "/usr/bin/iobc_toolchain",
-which is a protected directory.
+.. note::
+
+    You will need to build with ``sudo`` if you are using the default iOBC
+    configuration, since it points the output toolchain to "/usr/bin/iobc_toolchain",
+    which is a protected directory.
 
 ::
 
@@ -209,9 +215,44 @@ module links locally:
 Create an SD Card Image
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-From the 'kubos-linux-build/tools' folder, run the `create-image.sh`
-script. This will create a new SD card image containing the correct partitions
-and the new kernel and root filesystem files.
+.. note::
+
+    The image script will use 4GB of system RAM during execution. By default,
+    the Kubos Vagrant box only provides 2GB. As a result, you'll either need to `increase
+    the amount of RAM provided to your box 
+    <https://askubuntu.com/questions/510134/how-to-increase-vm-hdd-and-ram-sizes>`__,
+    or run the script natively.
+
+A script is available to create an SD card image with the latest
+KubOS Linux kernel and root filesystem.
+
+Navigate to the 'kubos-linux-build/tools' directory.
+
+Run the ``format-image.sh`` script. You might need to run as root to get
+permissions for certain steps.
+
+The script has optional parameters: 
+
+- ``-d {device}`` - Sets the SD card device name to flash the newly created image to
+  (does not flash by default)
+- ``-i {name}`` - Specifies the output file name of the image file to be created.
+  (default: "kubos-linux.img")
+- ``-p`` - Specify that existing kpack-base.itb and kernel files should be
+  copied into the appropriate partitions 
+- ``-pp`` - Specify that the kpack-base.itb and kernel files should be built
+  and then copied to their partitions 
+- ``-ppp`` - Only build and copy the kpack and kernel files. Skip all other steps. 
+- ``-s {size}`` - Size, in MB, of the SD card. The default is 3800 (~4GB). 
+- ``-b {branch}`` - Specify the branch name of U-Boot that has been built. The
+  default is 'master'. This option should not need to be used outside of
+  development.
+
+So if I wanted to create a custom-named image with brand new kernel files,
+I would run:
+
+::
+
+    $ ./format-image.sh -i kubos-linux-v1.0.img -pp
 
 Create an Upgrade Package
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -493,9 +534,11 @@ Pre-Requisites
    computer.
 7. Power the board.
 
-Note: Make sure the red jumper on the programming board is in place; it bypasses
-the watchdog. If you don't, the board will continually reboot and you won't be
-able to flash anything.
+.. warning::
+
+    Make sure the red jumper on the programming board is in place; it bypasses
+    the watchdog. If you don't, the board will continually reboot and you won't be
+    able to flash anything.
 
 **If you are using the command line script, follow these additional steps:**
 
@@ -659,7 +702,7 @@ You should see the console boot into Linux like this:
    :alt: Linux Console
 
    Linux Console
-   
+
 Upgrade Process
 ---------------
 
