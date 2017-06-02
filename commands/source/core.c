@@ -15,16 +15,20 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <unistd.h>
-#include <sys/reboot.h>
-#include <sys/utsname.h>
+#include <stdint.h>
 
-#include "parser.h"
+#include <isis-iobc-hal/supervisor.h>
+
+#include <commands/errors.h>
+#include <commands/commands.h>
+
 int parse_and_run(char * arg);
 
-int execute(int argc, char **argv)
+int main(int argc, char **argv)
 {
-    char command_string[DEFAULT_COMMAND_STR_LENGTH] = {0};
+    char command_string[DEFAULT_COMMAND_STR_LEN] = {0};
 
     if (!core_parse_args(argc, argv, command_string))
     {
@@ -67,20 +71,60 @@ int ping()
 
 int build_info()
 {
-    struct utsname uname_data;
-    uname(&uname_data);
-    printf("Version: %s\n", uname_data.version);
-    return 0;
+    bool result = true;
+    supervisor_version_configuration_t version_config = {0};
+
+    result = supervisor_get_version(&version_config);
+    if (!result)
+    {
+        printf("There was an error getting the supervisor version information. Error: %i\n", result);
+        return result;
+    }
+    return result;
 }
 
-int exec_reboot()
+//TODO: I don't like having 3 nearly identical functions. I'm working on implementing the reboot type as an option
+//Theres an issue in the client that is preventing that implementation at the moment.
+int reboot()
 {
-    int res;
-    //TODO: Log (once logging is a thing): Reboot triggered by C&C at time..
-    sync(); //Sync all pending filesystem changes (Logging)
-    if (res = reboot(RB_AUTOBOOT) != 0)
+    bool result = true;
+
+    result = supervisor_power_cycle();
+    if (!result)
     {
-        printf("There was an error rebooting the system. Received error code: %i\n", res);
-        return res;
+        printf("There was an error requesting the iOBC power cycle.\n");
+        return GENERIC_ERR;
     }
+
+    return NO_ERR;
+}
+
+
+int reset()
+{
+    bool result = true;
+
+    result = supervisor_reset();
+    if (!result)
+    {
+        printf("There was an error requesting the iOBC power cycle.\n");
+        return GENERIC_ERR;
+    }
+
+    return NO_ERR;
+}
+
+
+int emergency_reset()
+{
+    bool result = true;
+
+    result = supervisor_emergency_reset();
+    if (!result)
+    {
+        printf("There was an error requesting the iOBC power cycle.\n");
+        return GENERIC_ERR;
+    }
+
+    return NO_ERR;
 }
