@@ -16,20 +16,24 @@
  *
  * Kubos CSP Example Project
  *
- * This application shows an example CSP interaction between client and server tasks.
+ * This application shows an example CSP interaction between client and server
+ * tasks.
  *
  * Three threads are created:
  *   - A CSP server
  *   - A CSP client
  *   - A button poll
  *
- * The button poll thread continually polls the board’s button to see if it has been pressed.
+ * The button poll thread continually polls the board’s button to see if it
+ * has been pressed.
  * If it has, a notification is added to a dedicated queue.
  *
  * The CSP client thread checks for messages on the button queue. '
- * If found, it connects to the CSP server’s port and sends a message “Hello World”.
+ * If found, it connects to the CSP server’s port and sends a message “Hello
+ * World”.
  *
- * The CSP server thread checks for connections on the CSP port and then blinks the green LED
+ * The CSP server thread checks for connections on the CSP port and then
+ * blinks the green LED
  * if any messages are received.
  *
  * UART Bus: K_UART1
@@ -66,30 +70,6 @@
 #include <csp/drivers/usart.h>
 #include <csp/interfaces/csp_if_kiss.h>
 
-/**
-* Enabling this example code requires certain configuration values to be
-* present
-* in the configuration json of this application. An example is given below:
-*
-*  {
-*      "CSP": {
-*           "my_address": "1",
-*           "target_address": "2",
-*           "port": "10",
-*           "uart_bus": "K_UART6",
-*           "uart_baudrate": "115200",
-*           "usart": {
-*           }
-*      }
-*  }
-*
-* This would create and enable CSP KISS with the address of your device, the
-* target device,
-* the listening port, and the UART interface and baudrate. The addresses must
-* be inverted for
-* the second device of the example pair.
-*/
-
 #define MY_ADDRESS YOTTA_CFG_CSP_MY_ADDRESS
 #define TARGET_ADDRESS YOTTA_CFG_CSP_TARGET_ADDRESS
 #define MY_PORT YOTTA_CFG_CSP_PORT
@@ -123,17 +103,19 @@ CSP_DEFINE_TASK(csp_server)
     csp_listen(sock, 10);
 
     /* Pointer to current connection and packet */
-    csp_conn_t   * conn;
+    csp_conn_t *   conn;
     csp_packet_t * packet;
 
     /* Process incoming connections */
-    while (1) {
+    while (1)
+    {
 
         /* Wait for connection, 100 ms timeout */
         if ((conn = csp_accept(sock, 100)) == NULL) continue;
 
         /* Read packets. Timout is 100 ms */
-        while ((packet = csp_read(conn, 100)) != NULL) {
+        while ((packet = csp_read(conn, 100)) != NULL)
+        {
             switch (csp_conn_dport(conn))
             {
                 case MY_PORT:
@@ -166,7 +148,7 @@ CSP_DEFINE_TASK(csp_client)
 {
 
     csp_packet_t * packet;
-    csp_conn_t   * conn;
+    csp_conn_t *   conn;
     portBASE_TYPE  status;
     int            signal;
 
@@ -182,7 +164,8 @@ CSP_DEFINE_TASK(csp_client)
 #endif
     int result = csp_ping(TARGET_ADDRESS, 100, 100, CSP_O_NONE);
     /* if successful ping */
-    if (result) {
+    if (result)
+    {
 #ifdef TARGET_LIKE_MSP430
         blink(K_LED_RED);
 #else
@@ -193,15 +176,18 @@ CSP_DEFINE_TASK(csp_client)
     /**
      * Try data packet to server
      */
-    while (1) {
+    while (1)
+    {
         status = csp_queue_dequeue(button_queue, &signal, CSP_MAX_DELAY);
-        if (status != pdTRUE) {
+        if (status != pdTRUE)
+        {
             continue;
         }
 
         /* Get packet buffer for data */
         packet = csp_buffer_get(100);
-        if (packet == NULL) {
+        if (packet == NULL)
+        {
             /* Could not get buffer element */
             return;
         }
@@ -210,7 +196,8 @@ CSP_DEFINE_TASK(csp_client)
          * 1000 ms timeout */
         conn = csp_connect(CSP_PRIO_NORM, TARGET_ADDRESS, MY_PORT, 100,
                            CSP_O_NONE);
-        if (conn == NULL) {
+        if (conn == NULL)
+        {
             /* Connect failed */
             /* Remember to free packet buffer */
             csp_buffer_free(packet);
@@ -225,7 +212,8 @@ CSP_DEFINE_TASK(csp_client)
         packet->length = strlen(msg);
 
         /* Send packet */
-        if (!csp_send(conn, packet, 100)) {
+        if (!csp_send(conn, packet, 100))
+        {
             /* Send failed */
             csp_buffer_free(packet);
         }
@@ -242,12 +230,16 @@ CSP_DEFINE_TASK(csp_button_press)
 {
     int signal = 1;
 
-    while (1) {
-        if (k_gpio_read(K_BUTTON_0)) {
-            while (k_gpio_read(K_BUTTON_0)) {
+    while (1)
+    {
+        if (k_gpio_read(K_BUTTON_0))
+        {
+            while (k_gpio_read(K_BUTTON_0))
+            {
                 vTaskDelay(50 / portTICK_RATE_MS); /* Button Debounce Delay */
             }
-            while (!k_gpio_read(K_BUTTON_0)) {
+            while (!k_gpio_read(K_BUTTON_0))
+            {
                 vTaskDelay(50 / portTICK_RATE_MS); /* Button Debounce Delay */
             }
 
