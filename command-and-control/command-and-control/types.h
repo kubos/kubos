@@ -61,7 +61,7 @@
 
 //The size of all the members of the command packet, except the output field
 //The packet must fit into the CSP MTU or bad things will happen
-#define CMD_PACKET_MEMBER_SIZE sizeof(int) + sizeof(CNCAction) + CMD_PACKET_CMD_NAME_LEN
+#define CMD_PACKET_MEMBER_SIZE sizeof(int) + CMD_PACKET_CMD_NAME_LEN
 
 #ifdef YOTTA_CFG_CNC_RES_PACKET_STDOUT_LEN
 #define RES_PACKET_STDOUT_LEN        YOTTA_CFG_CNC_CMD_PACKET_ARG_LEN
@@ -73,20 +73,9 @@
 #define RESPONSE_TYPE_COMMAND_RESULT    1
 #define RESPONSE_TYPE_PROCESSING_ERROR  2
 
-
-typedef enum
-{
-    EXECUTE = 0,
-    STATUS,
-    OUTPUT,
-    HELP
-} CNCAction;
-
-
 typedef struct arguments
 {
     int arg_count;
-    CNCAction action;
     char cmd_name[CMD_PACKET_CMD_NAME_LEN];
     char args[CMD_PACKET_NUM_ARGS][CMD_PACKET_ARG_LEN];
 } CNCCommandPacket;

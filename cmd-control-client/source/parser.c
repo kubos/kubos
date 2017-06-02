@@ -23,13 +23,6 @@
 
 #include "command-and-control/types.h"
 
-//Action string hash values
-#define BASE_HASH    5381
-#define EXEC_HASH    6385204650
-#define HELP_HASH    6385292014
-#define OUTPUT_HASH  6953876217206
-#define STATUS_HASH  6954030894409
-
 static int parse_opt (int key, char *arg, struct argp_state *state);
 
 //This is required by argp and will be useful if we add options to the daemon.
@@ -39,57 +32,9 @@ static struct argp_option options[] =
     {0}
 };
 
-static char args_doc[] = "Action Group-Name [following args]";
+static char args_doc[] = "Executable-Name [following args]";
 static char doc[] = "CNC - Execute commands through the Kubos command and control framework";
 static struct argp argp = { options, parse_opt, args_doc, doc};
-
-
-//djb2 string hash function
-unsigned long get_hash(char *str)
-{
-    unsigned long hash = BASE_HASH;
-    int c;
-    while (c = *str++)
-    {
-        hash = ((hash << 5) + hash) + c;
-    }
-
-    return hash;
-}
-
-
-bool set_action(char* arg, CNCCommandPacket * command_packet)
-{
-    unsigned long hash;
-
-    if (command_packet == NULL)
-    {
-        return false;
-    }
-
-    hash = get_hash(arg);
-
-    switch (hash)
-    {
-        case EXEC_HASH:
-            command_packet->action = EXECUTE;
-            break;
-        case HELP_HASH:
-            command_packet->action = HELP;
-            break;
-        case OUTPUT_HASH:
-            command_packet->action = OUTPUT;
-            break;
-        case STATUS_HASH:
-            command_packet->action = STATUS;
-            break;
-        default:
-            fprintf(stderr, "Requested action: %s, is not available\n", arg);
-            return false;
-    }
-    return true;
-}
-
 
 static int parse_opt(int key, char *arg, struct argp_state *state)
 {
@@ -117,25 +62,20 @@ static int parse_opt(int key, char *arg, struct argp_state *state)
             switch(command_packet->arg_count++)
             {
                 case 0:
-                    if (!set_action(arg, command_packet))
-                    {
-                        state->next = state->argc; //Abort parsing the remaining args
-                    }
-                    break;
-                case 1:
                     strcpy(command_packet->cmd_name, arg);
                     break;
                 default:
-                    idx = command_packet->arg_count - 3; //3 because of the increment
+                    //The array index is arg_count-2 because of the first cmd_name value and the increment
+                    idx = command_packet->arg_count - 2;
                     strcpy(command_packet->args[idx], arg);
             }
             break;
         case ARGP_KEY_END:
-            if (strlen(command_packet->cmd_name) == 0) //TODO: Effectively validate the action
+            if (strlen(command_packet->cmd_name) == 0)
             {
-                fprintf(stderr, "received incorrect command or action argument\n"); //Would be helpful to give the help message here..
+                fprintf(stderr, "received incorrect command or action argument\n");
             }
-            command_packet->arg_count = command_packet->arg_count - 2;
+            command_packet->arg_count = command_packet->arg_count - 1;
             break;
     }
     return 0;
