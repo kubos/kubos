@@ -4,6 +4,8 @@ KubOS Linux on the ISIS iOBC
 Overview
 --------
 
+.. note:: Just looking to install KubOS Linux onto an iOBC? Skip ahead to the :ref:`installation_process`.
+
 The goal of this document is to create a KubOS Linux installation for the iOBC
 that can then run the satellite services (telemetry, payload communication,
 etc) needed for the ISIS customers' missions.
@@ -11,8 +13,10 @@ etc) needed for the ISIS customers' missions.
 The :doc:`Working with the iOBC <working-with-the-iobc>` doc can then be used to
 create and load a user application on top of the new KubOS Linux install.
 
-**Note:** Ideally, the user should never have to mess with the kernel
-themselves. It should be pre-loaded onto the iOBC.
+Ideally, the user should never have to mess with the kernel themselves. 
+It should be pre-loaded onto the iOBC.
+
+
 
 Software Components
 -------------------
@@ -260,17 +264,27 @@ Create an Upgrade Package
 If you would like to distribute your changes as a Kubos upgrade package instead,
 please refer to the :ref:`upgrade-creation` instructions.
 
+.. _installation_process:
+
 Installation Process
 --------------------
 
-The files required to run KubOS Linux on the iOBC are split among two permanent storage locations:
+The KubOS Linux installation process is composed of two high-level steps:
 
- - SD card
-    - Kernel
-    - Root filesystem
- - NOR flash
-    - U-Boot
-    - Device tree
+  - Flashing the SD card
+  - Flashing the on-board NOR flash
+    
+To perform a default installation, three files are needed:
+
+  - A KubOS Linux SD card image
+  - u-boot.bin
+  - at91sam9g20isis.dtb
+  
+All of these files should be obtained from Kubos.
+
+.. todo::
+
+    Add file distribution/aquisition instructions
 
 .. _install-sd:
 
@@ -504,17 +518,15 @@ This can be done using the SAM-BA GUI or by using a command line script.
 
 The SD card does not need to be inserted into the iOBC in order for this step to work.
 
---------------------
+.. warning::
 
-**The SAM-BA software currently only supports using the SAM-ICE JTAG with host machines
-running Windows. This means that you must use a Windows OS in order to initially flash
-the iOBC.**
-
-Once KubOS Linux has been installed, the device tree, which is located in the NOR flash,
-can be updated using the standard :ref:`upgrade-installation` process with a `kpack-nor-*.itb`
-file.
-
---------------------
+    **The SAM-BA software currently only supports using the SAM-ICE JTAG with host machines
+    running Windows. This means that you must use a Windows OS in order to initially flash
+    the iOBC.**
+    
+    Once KubOS Linux has been installed, the device tree, which is located in the NOR flash,
+    can be updated using the standard :ref:`upgrade-installation` process with a `kpack-nor-*.itb`
+    file.
 
 Pre-Requisites
 ^^^^^^^^^^^^^^
