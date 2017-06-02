@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#include <isis-iobc-hal/supervisor.h>
+#include <kubos-hal-iobc/supervisor.h>
 
 #include <commands/errors.h>
 #include <commands/commands.h>
@@ -72,14 +72,15 @@ int ping()
 int build_info()
 {
     bool result = true;
-    supervisor_version_configuration_t version_config = {0};
+    supervisor_version_t version = {0};
 
-    result = supervisor_get_version(&version_config);
+    result = supervisor_get_version(&version);
     if (!result)
     {
         printf("There was an error getting the supervisor version information. Error: %i\n", result);
         return result;
     }
+    printf("iOBC Supervisor Version: %u.%u.%u\n", version.fields.major_version, version.fields.minor_version, version.fields.patch_version);
     return result;
 }
 
@@ -89,7 +90,7 @@ int reboot()
 {
     bool result = true;
 
-    result = supervisor_power_cycle();
+    result = supervisor_powercycle();
     if (!result)
     {
         printf("There was an error requesting the iOBC power cycle.\n");
