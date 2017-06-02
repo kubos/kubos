@@ -85,13 +85,15 @@ void csp_server(void * p)
     csp_packet_t * packet;
 
     /* Process incoming connections */
-    while (1) {
+    while (1)
+    {
 
         /* Wait for connection, 10000 ms timeout */
         if ((conn = csp_accept(sock, 10000)) == NULL) continue;
 
         /* Read packets. Timout is 100 ms */
-        while ((packet = csp_read(conn, 100)) != NULL) {
+        while ((packet = csp_read(conn, 100)) != NULL)
+        {
             switch (csp_conn_dport(conn))
             {
                 case MY_PORT:
@@ -138,7 +140,8 @@ void csp_client(void * p)
     blink(K_LED_ORANGE);
 #endif
     int result = csp_ping(MY_ADDRESS, 100, 100, CSP_O_NONE);
-    if (result) {
+    if (result)
+    {
 #ifdef TARGET_LIKE_MSP430
         blink(K_LED_RED);
 #else
@@ -150,15 +153,18 @@ void csp_client(void * p)
      * Try data packet to server
      */
 
-    while (1) {
+    while (1)
+    {
         status = xQueueReceive(button_queue, &signal, portMAX_DELAY);
-        if (status != pdTRUE) {
+        if (status != pdTRUE)
+        {
             continue;
         }
 
         /* Get packet buffer for data */
         packet = csp_buffer_get(100);
-        if (packet == NULL) {
+        if (packet == NULL)
+        {
             /* Could not get buffer element */
             return;
         }
@@ -168,7 +174,8 @@ void csp_client(void * p)
         blink(K_LED_RED);
         conn = csp_connect(CSP_PRIO_NORM, MY_ADDRESS, MY_PORT, 1000,
                            CSP_O_NONE);
-        if (conn == NULL) {
+        if (conn == NULL)
+        {
             /* Connect failed */
             /* Remember to free packet buffer */
             csp_buffer_free(packet);
@@ -184,7 +191,8 @@ void csp_client(void * p)
         packet->length = strlen(msg);
 
         /* Send packet */
-        if (!csp_send(conn, packet, 1000)) {
+        if (!csp_send(conn, packet, 1000))
+        {
             /* Send failed */
             csp_buffer_free(packet);
         }
@@ -199,8 +207,10 @@ void task_button_press(void * p)
 {
     int signal = 1;
 
-    while (1) {
-        if (k_gpio_read(K_BUTTON_0)) {
+    while (1)
+    {
+        if (k_gpio_read(K_BUTTON_0))
+        {
             while (k_gpio_read(K_BUTTON_0))
                 vTaskDelay(50 / portTICK_RATE_MS); /* Button Debounce Delay */
             while (!k_gpio_read(K_BUTTON_0))
@@ -216,7 +226,8 @@ void task_button_press(void * p)
 void task_echo(void * p)
 {
     static int x = 0;
-    while (1) {
+    while (1)
+    {
         printf("echo, x=%d\r\n", x);
         x++;
         vTaskDelay(2000 / portTICK_RATE_MS);

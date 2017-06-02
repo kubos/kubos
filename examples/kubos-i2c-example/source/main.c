@@ -20,22 +20,22 @@
  * in a Kubos project:
  *
  *   1. If no sensor has been defined in the project’s config.json file, then
- *      this application will initialize a generic I2C connection over I2C bus 1
- *      to a slave device with an address of ‘0x40’.
+ *      this application will initialize a generic I2C connection over I2C bus
+ *      1 to a slave device with an address of ‘0x40’.
  *      It will then write a single byte command of ‘0xE3’ to the slave and
  *      attempt to read back a three byte response.
  *      After this attempt, the application will end.
  *   2. If the HTU21D sensor has been defined in the project’s config.json
  *      file, the appropriate initialization calls will be made and then the
  *      application will enter a loop.
- *      In each iteration of the loop, the application will fetch and print the
- *      current temperature and humidity data from the sensor to the default UART
- *      port.
- *   3. If the BNO055 sensor has been defined in the project’s config.json file,
- *      the sensor will be initialized in NDOF (Nine Degrees Of Freedom) mode and then
- *      the application will enter a loop.
- *      In each iteration of the loop, the application will fetch and print the
- *      current position data from the sensor to the default UART port.
+ *      In each iteration of the loop, the application will fetch and print
+ *      the current temperature and humidity data from the sensor to the
+ *      default UART port.
+ *   3. If the BNO055 sensor has been defined in the project’s config.json
+ *      file, the sensor will be initialized in NDOF (Nine Degrees Of Freedom)
+ *      mode and then the application will enter a loop.
+ *      In each iteration of the loop, the application will fetch and print
+ *      the current position data from the sensor to the default UART port.
  *
  * I2C bus: K_I2C1
  *
@@ -108,7 +108,8 @@ void task_i2c(void * p)
     bno055_quat_data_t pos = { 0, 0, 0, 0 };
 #endif
 
-    while (1) {
+    while (1)
+    {
 #ifdef YOTTA_CFG_SENSORS_HTU21D
         htu21d_read_temperature(&temp);
         htu21d_read_humidity(&hum);

@@ -33,14 +33,15 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "kubos-hal/uart.h"
 #include "kubos-hal/spi.h"
+#include "kubos-hal/uart.h"
 
 #ifdef YOTTA_CFG_SENSORS_BME280
 #include "kubos-core/modules/sensors/bme280.h"
 #endif
 
-void task_spi(void *p) {
+void task_spi(void * p)
+{
 
 #ifdef YOTTA_CFG_SENSORS_BME280
     /* store sensor values */
@@ -48,24 +49,23 @@ void task_spi(void *p) {
     /* setup sensor spi interface */
     bme280_setup();
 #else
-    /* define own bus */
-    #define SPI_BUS K_SPI1
+/* define own bus */
+#define SPI_BUS K_SPI1
     /* data to send */
     uint8_t tx = 1;
     /* data to receive */
     volatile uint8_t rx = 0;
     /* create own config */
-    KSPIConf conf = {
-        .role = K_SPI_MASTER,
-        .direction = K_SPI_DIRECTION_2LINES,
-        .data_size = K_SPI_DATASIZE_8BIT,
-        .speed = 10000
-    };
+    KSPIConf conf = {.role      = K_SPI_MASTER,
+                     .direction = K_SPI_DIRECTION_2LINES,
+                     .data_size = K_SPI_DATASIZE_8BIT,
+                     .speed     = 10000 };
     /* Initialize spi bus with configuration */
     k_spi_init(SPI_BUS, &conf);
 #endif
 
-    while (1) {
+    while (1)
+    {
 #ifdef YOTTA_CFG_SENSORS_BME280
         /* get sensor data */
         bme280_read_temperature(&temp);
@@ -90,14 +90,14 @@ int main(void)
 {
     k_uart_console_init();
 
-    #ifdef TARGET_LIKE_MSP430
+#ifdef TARGET_LIKE_MSP430
     /* Stop the watchdog. */
     WDTCTL = WDTPW + WDTHOLD;
 
     __enable_interrupt();
 
     P2OUT = BIT1;
-    #endif
+#endif
 
     xTaskCreate(task_spi, "SPI", configMINIMAL_STACK_SIZE * 5, NULL, 2, NULL);
 

@@ -75,7 +75,8 @@ void task_sensors(void * p)
     k_initialize_altitude_sensor();
     k_initialize_temperature_sensor();
 
-    while (1) {
+    while (1)
+    {
         /* get sensor data */
         k_get_altitude(&alt);
         k_get_pressure(&press);
