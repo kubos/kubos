@@ -505,7 +505,7 @@ DSTATUS disk_initialize (BYTE pdrv)
     
     if (sd_card_type == TYPE_NONE)
     {
-        status = STA_NODISK;
+        status |= STA_NODISK;
     }
     else
     {
