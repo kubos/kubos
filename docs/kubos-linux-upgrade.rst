@@ -153,6 +153,8 @@ From the KubOS Linux shell:
     $ fw_setenv kubos_updatefile kpack-{desired version}.itb
     $ reboot
 
+.. _upgrade-creation:
+
 Upgrade Creation
 ----------------
 
