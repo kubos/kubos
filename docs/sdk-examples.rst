@@ -168,7 +168,7 @@ Kubos SPI Example
 
 `kubos-spi-example <http://github.com/kubostech/kubos/examples/kubos-spi-example>`__
 
-**Compatible Targets: MSP430F5529, STM32F407 Discovery**
+**Compatible Targets: STM32F407 Discovery**
 
 +----------------------+---------------+
 | High-level Component | Specific Area |

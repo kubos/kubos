@@ -16,6 +16,27 @@
  *
  * Kubos SPI Example Project
  *
+ * This application gives two examples of how to interact with SPI devices in
+ * a Kubos project:
+ *
+ * 1. If no sensor has been defined in the project’s config.json file, then
+ *    this application will initialize a generic SPI connection over SPI
+ *    bus 1.
+ *    The application will then enter a loop and attempt to send and receive a
+ *    dummy byte.
+ *
+ *    Note: This case is not a complete example, because it omits the manual
+ *    manipulation of a chip select pin that is required for SPI
+ *    communication.
+ *
+ * 2. If the BME280 sensor has been defined in the project’s config.json file,
+ *    the appropriate initialization calls will be made and then the
+ *    application will enter a loop.
+ *
+ *    In each iteration of the loop, the application will fetch and print the
+ *    current temperature and humidity data from the sensor to the default
+ *    UART port.
+ *
  * NOTE: This project is intended for the STM32F407 target only.
  * The MSP430 does not currently have support for floating point
  * variables, so this example project will compile but not successfully run
