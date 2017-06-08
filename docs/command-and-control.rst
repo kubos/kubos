@@ -116,7 +116,8 @@ iOBC. This library implements the following commands:
 Examples
 --------
 
-Running one of the above commands from the core command library would look like the following:
+Running one of the above commands from the core command library
+would look like the following:
 
 Ping:
 
@@ -129,3 +130,5 @@ Info:
 ::
         $ c2 core info
 
+Congratulations! You have now run your first commands through the command
+and control system
