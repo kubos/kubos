@@ -666,7 +666,7 @@ Click 'Send File'
 Select the at91sam9g20isis.dtb file in the 'Send File Name' field (you'll need
 to view all file types in order to see the .dtb file)
 
-Set 'Address' to 0x80000.
+Set 'Address' to 0x70000.
 
 Click 'Send File'
 
