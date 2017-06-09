@@ -74,12 +74,6 @@ bool cnc_client_encode_command(CborDataWrapper * data_wrapper, CNCCommandPacket 
         return false;
     }
 
-    err = cbor_encode_text_stringz(container, "ACTION");
-    if (err || cbor_encode_int(container, (int)packet->action))
-    {
-        return false;
-    }
-
     err = cbor_encode_text_stringz(container, "ARG_COUNT");
     if (err || cbor_encode_int(container, packet->arg_count))
     {

@@ -67,7 +67,7 @@ def get_kubos_modules():
     '''
     Returns a dictionary of the Kubos module names and their absolute paths
     '''
-    kubos_util = utils.KubosUtils()
+    kubos_util = KubosUtils()
     return kubos_util.discover_kubos_modules
 
 
@@ -75,7 +75,7 @@ def cmd(*args, **kwargs):
     '''
     Maintains compatibility with existing python utilities.
     '''
-    kubos_util = utils.KubosUtils()
+    kubos_util = KubosUtils()
     return kubos_util.run_cmd(*args, **kwargs)
 
 

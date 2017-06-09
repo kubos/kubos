@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-#include <stdbool.h>
 
-#define DEFAULT_COMMAND_STR_LENGTH 75
+#pragma once
 
-bool core_parse_args(int argc, char ** argv, char * command_name);
+#ifdef YOTTA_CFG_COMMANDS_DEFAULT_COMMAND_STR_LEN
+#define DEFAULT_COMMAND_STR_LEN YOTTA_CFG_COMMANDS_DEFAULT_COMMAND_STR_LEN
+#else
+#define DEFAULT_COMMAND_STR_LEN 75
+#endif
 
-unsigned long get_hash(char *str);
+int reboot(); //Power cylce the iOBC
 
-int ping();
+int reset(); //Supervisor reset
 
-int build_info();
+int emergency_reset(); //emergency reset
 
-int exec_reboot();
 
-typedef struct
-{
-    int ping;
-    int build_info;
-} Arguments;
-
+bool core_parse_args(int argc, char ** argv, char * cmd_string);
