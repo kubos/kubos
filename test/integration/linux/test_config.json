@@ -1,4 +1,9 @@
 {
+    "device": {
+        "baudrate": 115200,
+        "prompt": "~ #",
+        "target": "kubos-linux-isis-gcc"
+    },
     "login": {
         "username": "root",
         "password": "Kubos123"
@@ -6,12 +11,11 @@
     "tests": [
         {
             "name": "Command and Control Ping Test",
-            "executable": "/usr/bin/c2",
-            "args": [
-                "core",
-                "ping"
-            ],
-            "expected": "Return Code: 0\nExecution Time 0.000000\nOutput: Pong!"
+            "pre_test": "",
+            "build": "",
+            "test_command" : "/usr/bin/c2 core ping",
+            "post_test": "",
+            "expected_test_output": "Return Code: 0\nExecution Time 0.000000\nOutput: Pong!"
         }
     ]
 }
