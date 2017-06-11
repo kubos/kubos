@@ -1,0 +1,17 @@
+{
+    "login": {
+        "username": "root",
+        "password": "Kubos123"
+    },
+    "tests": [
+        {
+            "name": "Command and Control Ping Test",
+            "executable": "/usr/bin/c2",
+            "args": [
+                "core",
+                "ping"
+            ],
+            "expected": "Return Code: 0\nExecution Time 0.000000\nOutput: Pong!"
+        }
+    ]
+}
