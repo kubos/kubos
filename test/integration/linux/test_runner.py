@@ -19,6 +19,7 @@ class TestUtils(object):
     GREEN  = '\033[92m'
     RED    = '\033[91m'
     NORMAL = '\033[0m'
+    #TODO: Replace this class with the /tools/utils.py implementation
 
     def get_resource_type(self, obj):
         if urlparse.urlparse(obj).scheme != "":
@@ -32,7 +33,12 @@ class TestUtils(object):
 
 
     def clone_repo(self, url):
-        pass
+        temp_dir = tempfile.mkdtemp()
+        os.chdir(temp_dir)
+        self.run_cmd('git', 'clone', url)
+        subdir = os.listdir(temp_dir)
+        cloned_dir = os.path.join(temp_dir, subdir[0]) #there's only one sub-directory
+        return cloned_dir
 
 
     def run_cmd(self, *args, **kwargs):
