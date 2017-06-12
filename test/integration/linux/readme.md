@@ -2,9 +2,15 @@
 
 This script runs a series of test described in the `test_config.json` file.
 
+## Usage
+
+        $ ./test_runner.py <Path-to-config-file> <device-path>
+
+*NOTE* device-path defaults to `/dev/FTDI` if not provided
+
 The JSON schema is as follows:
 
-## Example Test Config:
+### Example Test Config:
 ```
 {
     "device": {
@@ -32,7 +38,7 @@ The JSON schema is as follows:
 
 ```
 
-## Device
+### Device
 
 The device description that will be used during the test. This is a required section
 
@@ -42,14 +48,14 @@ The device description that will be used during the test. This is a required sec
 * timeout - The maximum time to wait for reading serial output from the board. Defaults to 10 seconds if not provided
 
 
-## Login
+### Login
 
 This section's options should be self descriptive
 
 This is not a required section. If it's not provided no login will be attempted.
 It's assumed that your device is already logged into and has an active shell running.
 
-## Tests
+### Tests
 
 This section is an array of test descriptions. The tests are run in the order they are listes in the array.
 
@@ -62,4 +68,3 @@ This section is an array of test descriptions. The tests are run in the order th
 * expected_test_output - A string, or regex that will be checked against the shell output from the target device
 
 
-### TODO: Find and document missing things.
