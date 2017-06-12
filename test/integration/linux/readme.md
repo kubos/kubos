@@ -28,6 +28,7 @@ The JSON schema is as follows:
             "name": "Command and Control Ping Test",
             "pre_test": "ls",
             "build_source": "https://github.com/kubostech/kubos-linux-example",
+            "flash_source": "Path to some file",
             "test_command" : "/usr/bin/c2 exec core ping",
             "post_test": "pwd",
             "expected_regex": true,
@@ -62,9 +63,9 @@ This section is an array of test descriptions. The tests are run in the order th
 * name - The name of the test. For user recognition only. This has no effect on the test.
 * pre_test - A shell command that will be executed before cloning, building, or running any tests. This attribute is not required
 * build_source - A description of where the test source is located. This can be a local directory or a git repo url. This section is not required. If not provided, no binaries will be built.
+* flash_source - The path to what should be flashed to the target. If you have a build source specified this attribute is not necessary. It is intended to be used to upload non-built resources (like shell scripts)
 * test_command - The acutal command that will be executed on the board to start the test on the target device.
 * post_test - A shell command that will be run on the Host after all the tests and assertions have been made.  This attribute is not required.
 * exepected_regex - A boolean that tells the test runner if the expected text is a python regex or not. If not provided, it is assumed false.
 * expected_test_output - A string, or regex that will be checked against the shell output from the target device
-
 
