@@ -115,11 +115,11 @@ class TestRunner(TestUtils):
             self.run_cmd(test_data.pre_test)
 
         #build the project
-        if test_data.build:
-            resource_type = get_resource_type(test_data.build)
+        if test_data.build_source:
+            resource_type = self.get_resource_type(test_data.build_source)
             logging.info("Test %s has type: %s" % (test, resource_type))
             if resource_type == 'url':
-                proj_dir = self.clone_repo(url)
+                proj_dir = self.clone_repo(test_data.build_source)
             elif resource_type == 'path':
                 proj_dir = os.path.join(self.get_kubos_repo_root(), path)
             self.build_project(proj_dir)
@@ -139,7 +139,10 @@ class TestRunner(TestUtils):
         self.logger.info('Building Project: %s' % proj_dir)
         start_dir = os.getcwd()
         os.chdir(proj_dir)
-        ret_code = self.run_cmd('kubos', 'clean', '&&', 'kubos', 'build', '-t', self.config.device['target'])
+
+        self.run_cmd('kubos', 'clean')
+        self.run_cmd('kubos', 'link', '--all')
+        ret_code = self.run_cmd('kubos', '-t', self.config.device['target'], 'build')
         if ret_code != 0:
             self.abort('Building project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
         os.chdir(start_dir)
@@ -149,7 +152,7 @@ class TestRunner(TestUtils):
         self.logger.info('Flashing Project: %s' % proj_dir)
         start_dir = os.getcwd()
         os.chdir(proj_dir)
-        ret_code = self.run_cmd('kubos', 'flash', '-t', self.config.device['target'])
+        ret_code = self.run_cmd('kubos', '-t', self.config.device['target'], 'flash')
         if ret_code != 0:
             self.abort('Flashing project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
         os.chdir(start_dir)
@@ -171,9 +174,9 @@ class TestRunner(TestUtils):
 
     def verify_test_output(self, test_data, actual):
         test_data = self.dict_to_named_tuple(test_data)
-        if test_data.expected_re:
-            expected_re = re.compile(test_data.expected_test_output)
-            if expected_re.match(actual):
+        if test_data.expected_regex:
+            expected_regex = re.compile(test_data.expected_test_output)
+            if expected_regex.match(actual):
                 passed = True
         else:
             if actual == test_data.expected_test_output:
