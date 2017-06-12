@@ -4,14 +4,19 @@ import argparse
 import logging
 import json
 import os
+import re
 import serial
 import sys
+import time
 import urlparse
 
 from collections import namedtuple
 
 
 class TestUtils(object):
+    GREEN  = '\033[92m'
+    RED    = '\033[91m'
+    NORMAL = '\033[0m'
 
     def get_resource_type(self, obj):
         if urlparse.urlparse(obj).scheme != "":
@@ -19,12 +24,14 @@ class TestUtils(object):
         elif os.path.exists(obj):
             return 'path'
 
+
     def get_kubos_repo_root(self):
         return os.path.normpath(os.path.abspath(__file__), '..', '..', '..')
 
 
     def clone_repo(self, url):
         pass
+
 
     def run_cmd(self, *args, **kwargs):
         cwd = kwargs.get('cwd', os.getcwd())
@@ -46,11 +53,20 @@ class TestUtils(object):
 
 
 class TestRunner(TestUtils):
+    MAX_SERIAL_READ_LEN = 500
+
     def __init__(self, config_file):
         self.setup_logger()
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
         self.load_config(config_file)
+        self.test_summary = []
+
+
+    def setup_serial_connection(self):
+        self.device_path = '/dev/tty.usbserial-AH03B41R'
+        self.serial_connection = serial.Serial(self.device_path, self.config.device['baudrate'])
+        self.serial_connection.timeout = self.config.device['timeout'] if 'timeout' in self.config.device else 10
 
 
     def setup_logger(self):
@@ -63,11 +79,10 @@ class TestRunner(TestUtils):
 
     def load_config(self, config_file):
         if not os.path.isfile(config_file):
-            self.abort('The specified config file: %s does not exist.')
+            self.abort('The specified config file: %s does not exist.' % config_file)
         else:
             with open(config_file, 'r') as _file:
                 data = json.loads(_file.read())
-                self.logger.info("Loaded config: %s" % data)
             self.config = self.dict_to_named_tuple(data)
 
 
@@ -86,6 +101,7 @@ class TestRunner(TestUtils):
             self.login()
         for test in self.config.tests:
             self.run_test(test)
+        self.print_test_summary()
 
 
     def run_test(self, test):
@@ -104,18 +120,16 @@ class TestRunner(TestUtils):
             #Flash the project
             self.flash_project(proj_dir)
 
-        if test_data.test_command:
-            output = self.run_serial_command(test_data.test_command)
-            
-
-
+        #run the test command
+        output = self.run_serial_command(test_data.test_command)
+        self.verify_test_output(test, output)
 
 
     def build_project(self, proj_dir):
         self.logger.info('Building Project: %s' % proj_dir)
         start_dir = os.getcwd()
         os.chdir(proj_dir)
-        ret_code = self.run_cmd('kubos', 'clean', '&&', 'kubos', 'build', '-t', self.config.device['target']])
+        ret_code = self.run_cmd('kubos', 'clean', '&&', 'kubos', 'build', '-t', self.config.device['target'])
         if ret_code != 0:
             self.abort('Building project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
         os.chdir(start_dir)
@@ -125,9 +139,9 @@ class TestRunner(TestUtils):
         self.logger.info('Flashing Project: %s' % proj_dir)
         start_dir = os.getcwd()
         os.chdir(proj_dir)
-        ret_code = self.run_cmd('kubos', 'flash', '-t', self.config.device['target']])
+        ret_code = self.run_cmd('kubos', 'flash', '-t', self.config.device['target'])
         if ret_code != 0:
-            self.abort('Building project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
+            self.abort('Flashing project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
         os.chdir(start_dir)
 
 
@@ -136,12 +150,51 @@ class TestRunner(TestUtils):
         sends a command string (command) over the serial device and reads the
         output until the next prompt (self.serial.promt) is read.
         '''
-        pass
-        #finish this
+        self.serial_connection.write('%s\n' % str(command))
+        output = self.serial_connection.read(self.MAX_SERIAL_READ_LEN).replace('\r', '')
+        # parse the output
+        command_len = len(command) + 1
+        prompt_len = len(self.config.device['prompt']) + 1
+        cmd_output = output[command_len : -prompt_len]
+        return cmd_output
+
+
+    def verify_test_output(self, test_data, actual):
+        test_data = self.dict_to_named_tuple(test_data)
+        if test_data.expected_re:
+            expected_re = re.compile(test_data.expected_test_output)
+            if expected_re.match(actual):
+                passed = True
+        else:
+            if actual == test_data.expected_test_output:
+                passed = True
+
+        if passed == True:
+            self.add_test_success("Test %s passed" % test_data.name)
+        else:
+            self.abort('Test: %s Failed:\n Expected "%s" Did not match actual "%s"' % (test_data.name, test_data.expected_test_output, actual))
+
+
+    def add_test_success(self, message):
+        self.logger.info(message)
+        self.test_summary.append('%s%s%s' % (self.GREEN, message, self.NORMAL))
+
+
+    def add_test_failure(self, message):
+        self.test_summary.append('%s%s%s' % (self.RED, message, self.NORMAL))
+
 
     def login(self):
         self.logger.info('logging in')
-        #finish this
+        # self.serial_connection.write('%s\n' % str(self.config.login['username']))
+        # time.sleep(3)
+        # self.serial_connection.write('%s\n' % str(self.config.login['password']))
+
+
+    def print_test_summary(self):
+        self.logger.info('\n\nTest Summary:\n\n')
+        for line in self.test_summary:
+            self.logger.info(line)
 
 
     def abort(self, message):
@@ -152,6 +205,7 @@ class TestRunner(TestUtils):
 def main():
     config = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_config.json')
     runner = TestRunner(config)
+    runner.setup_serial_connection()
     runner.run_tests()
 
 
