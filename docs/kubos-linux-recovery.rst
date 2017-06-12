@@ -124,11 +124,11 @@ The updated altbootcmd might look something like this:
 
 ::
 
-    altbootcmd=setenv recovery_available 0; setenv bootcmd; saveenv; cp.b 0x10090000 0x20000000 0x70000; go 0x20000000
+    altbootcmd=setenv recovery_available 0; setenv bootcmd; saveenv; cp.b 0x10080000 0x20000000 0x70000; go 0x20000000
 
 This command will go through the default alternate boot commands and then:
 
-  - Copy 0x7000 bytes from address 0x10090000 (a permanent storage location) to address 0x20000000 (the beginning of SDRAM)
+  - Copy 0x7000 bytes from address 0x10080000 (a permanent storage location) to address 0x20000000 (the beginning of SDRAM)
   - Use the ``go`` command to attempt to boot from address 0x20000000 (``go`` is used for generic executables)
   
 U-Boot CLI
