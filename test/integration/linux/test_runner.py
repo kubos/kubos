@@ -6,8 +6,10 @@ import json
 import os
 import re
 import serial
+import subprocess
 import sys
 import time
+import tempfile
 import urlparse
 
 from collections import namedtuple
@@ -108,6 +110,10 @@ class TestRunner(TestUtils):
         test_data = self.dict_to_named_tuple(test)
         self.logger.info("Running test: %s" % test_data.name)
 
+        if test_data.pre_test:
+            self.logger.info("Test: %s Running pre-test command: %s\n" % (test_data.name, test_data.pre_test))
+            self.run_cmd(test_data.pre_test)
+
         #build the project
         if test_data.build:
             resource_type = get_resource_type(test_data.build)
@@ -123,6 +129,10 @@ class TestRunner(TestUtils):
         #run the test command
         output = self.run_serial_command(test_data.test_command)
         self.verify_test_output(test, output)
+
+        if test_data.post_test:
+            self.logger.info("Test: %s Running post-test command: %s\n" % (test_data.name, test_data.post_test))
+            self.run_cmd(test_data.post_test)
 
 
     def build_project(self, proj_dir):
@@ -169,7 +179,7 @@ class TestRunner(TestUtils):
             if actual == test_data.expected_test_output:
                 passed = True
 
-        if passed == True:
+        if passed:
             self.add_test_success("Test %s passed" % test_data.name)
         else:
             self.abort('Test: %s Failed:\n Expected "%s" Did not match actual "%s"' % (test_data.name, test_data.expected_test_output, actual))
@@ -178,10 +188,6 @@ class TestRunner(TestUtils):
     def add_test_success(self, message):
         self.logger.info(message)
         self.test_summary.append('%s%s%s' % (self.GREEN, message, self.NORMAL))
-
-
-    def add_test_failure(self, message):
-        self.test_summary.append('%s%s%s' % (self.RED, message, self.NORMAL))
 
 
     def login(self):

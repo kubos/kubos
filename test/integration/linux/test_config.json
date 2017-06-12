@@ -12,10 +12,10 @@
     "tests": [
         {
             "name": "Command and Control Ping Test",
-            "pre_test": "",
+            "pre_test": "ls",
             "build": "",
             "test_command" : "/usr/bin/c2 exec core ping",
-            "post_test": "",
+            "post_test": "pwd",
             "expected_re": true,
             "expected_test_output": "Return Code: 0\nExecution Time \\d\\.\\d{6}\nOutput: Pong!"
         }
