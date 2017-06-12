@@ -16,8 +16,8 @@
  *
  * Kubos CSP Example Project
  *
- * This application shows an example CSP interaction between client and server
- * tasks.
+ * This application shows an example CSP (Cubesat Space Protocol) interaction
+ * between client and server tasks.
  *
  * Three threads are created:
  *   - A CSP server
@@ -28,7 +28,7 @@
  * has been pressed.
  * If it has, a notification is added to a dedicated queue.
  *
- * The CSP client thread checks for messages on the button queue. '
+ * The CSP client thread checks for messages on the button queue.
  * If found, it connects to the CSP server’s port and sends a message “Hello
  * World”.
  *
