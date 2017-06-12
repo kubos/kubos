@@ -5,12 +5,20 @@
         "target": "kubos-linux-isis-gcc",
         "timeout": 2
     },
-    "tests": [
+    "tests": 
+    [
         {
             "name": "Command and Control Ping Test",
-            "test_command" : "/usr/bin/c2 exec core ping",
+            "test_command": "/usr/bin/c2 exec core ping",
             "expected_regex": true,
             "expected_test_output": "Return Code: 0\nExecution Time \\d\\.\\d{6}\nOutput: Pong!"
+        },
+        {
+            "name": "LSM303DLHC I2C Test",
+            "build_source": "/home/vagrant/.kubos/kubos/test/integration/linux/lsm303dlhc-i2c",
+            "test_command": "lsm303dlhc-i2c",
+            "expected_regex": true,
+            "expected_test_output": "LSM303DLHC I2C test completed successfully!"
         }
     ]
 }
