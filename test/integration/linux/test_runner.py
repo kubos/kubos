@@ -71,8 +71,8 @@ class TestRunner(TestUtils):
         self.test_summary = []
 
 
-    def setup_serial_connection(self):
-        self.device_path = '/dev/tty.usbserial-AH03B41R'
+    def setup_serial_connection(self, dev):
+        self.device_path = dev
         self.serial_connection = serial.Serial(self.device_path, self.config.device['baudrate'])
         self.serial_connection.timeout = self.config.device['timeout'] if 'timeout' in self.config.device else 10
 
@@ -105,7 +105,7 @@ class TestRunner(TestUtils):
 
 
     def run_tests(self):
-        if self.config.login:
+        if hasattr(self.config, 'login'):
             self.login()
         for test in self.config.tests:
             self.run_test(test)
@@ -116,12 +116,12 @@ class TestRunner(TestUtils):
         test_data = self.dict_to_named_tuple(test)
         self.logger.info("Running test: %s" % test_data.name)
 
-        if test_data.pre_test:
+        if hasattr(test_data, 'pre_test'):
             self.logger.info("Test: %s Running pre-test command: %s\n" % (test_data.name, test_data.pre_test))
             self.run_cmd(test_data.pre_test)
 
         #build the project
-        if test_data.build_source:
+        if hasattr(test_data, 'build_source'):
             resource_type = self.get_resource_type(test_data.build_source)
             logging.info("Test %s has type: %s" % (test, resource_type))
             if resource_type == 'url':
@@ -136,7 +136,7 @@ class TestRunner(TestUtils):
         output = self.run_serial_command(test_data.test_command)
         self.verify_test_output(test, output)
 
-        if test_data.post_test:
+        if hasattr(test_data, 'post_test'):
             self.logger.info("Test: %s Running post-test command: %s\n" % (test_data.name, test_data.post_test))
             self.run_cmd(test_data.post_test)
 
@@ -180,7 +180,8 @@ class TestRunner(TestUtils):
 
     def verify_test_output(self, test_data, actual):
         test_data = self.dict_to_named_tuple(test_data)
-        if test_data.expected_regex:
+        passed = False
+        if hasattr(test_data, 'expected_regex'):
             expected_regex = re.compile(test_data.expected_test_output)
             if expected_regex.match(actual):
                 passed = True
@@ -201,10 +202,11 @@ class TestRunner(TestUtils):
 
     def login(self):
         self.logger.info('logging in')
-        # self.serial_connection.write('%s\n' % str(self.config.login['username']))
-        # time.sleep(3)
-        # self.serial_connection.write('%s\n' % str(self.config.login['password']))
-
+        self.serial_connection.write('%s\n' % str(self.config.login['username']))
+        time.sleep(3)
+        self.serial_connection.write('%s\n' % str(self.config.login['password']))
+        time.sleep(2)
+        self.serial_connection.flush()
 
     def print_test_summary(self):
         self.logger.info('\n\nTest Summary:\n\n')
@@ -218,9 +220,14 @@ class TestRunner(TestUtils):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Integration Test Runner')
+    parser.add_argument('device_path', help='The path to your serial device')
+
     config = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_config.json')
+
+    args = parser.parse_args()
     runner = TestRunner(config)
-    runner.setup_serial_connection()
+    runner.setup_serial_connection(args.device_path)
     runner.run_tests()
 
 

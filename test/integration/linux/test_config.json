@@ -5,17 +5,10 @@
         "target": "kubos-linux-isis-gcc",
         "timeout": 2
     },
-    "login": {
-        "username": "root",
-        "password": "Kubos123"
-    },
     "tests": [
         {
             "name": "Command and Control Ping Test",
-            "pre_test": "ls",
-            "build_source": "https://github.com/kubostech/kubos-linux-example",
             "test_command" : "/usr/bin/c2 exec core ping",
-            "post_test": "pwd",
             "expected_regex": true,
             "expected_test_output": "Return Code: 0\nExecution Time \\d\\.\\d{6}\nOutput: Pong!"
         }
