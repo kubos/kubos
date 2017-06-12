@@ -12,7 +12,7 @@ import time
 import tempfile
 import urlparse
 
-from collections import namedtuple
+import config as kubos_config
 
 
 class TestUtils(object):
@@ -63,45 +63,32 @@ class TestRunner(TestUtils):
         self.setup_logger()
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
-        self.load_config(config_file)
+        self.load_configuration(config_file)
         self.test_summary = []
 
 
     def setup_serial_connection(self, dev):
         self.device_path = dev
-        self.serial_connection = serial.Serial(self.device_path, self.config.device['baudrate'])
-        self.serial_connection.timeout = self.config.device['timeout'] if 'timeout' in self.config.device else 10
+        self.serial_connection = serial.Serial(self.device_path, self.config.device.baudrate)
+        self.serial_connection.timeout = self.config.device.timeout
 
 
     def setup_logger(self):
         logger = logging.getLogger()
+        #TODO: Make the log file more configurable
         fileHandler = logging.FileHandler("kubos_linux_test.log")
         logger.addHandler(fileHandler)
         consoleHandler = logging.StreamHandler()
         logger.addHandler(consoleHandler)
 
 
-    def load_config(self, config_file):
-        if not os.path.isfile(config_file):
-            self.abort('The specified config file: %s does not exist.' % config_file)
-        else:
-            with open(config_file, 'r') as _file:
-                data = json.loads(_file.read())
-            self.config = self.dict_to_named_tuple(data)
-
-
-    def dict_to_named_tuple(self, dictionary):
-        '''
-        This allows dictionaries to be accessed via dot notation
-        example:
-
-        dictionary['key'] -> dictionary.key
-        '''
-        return namedtuple("Config", dictionary.keys())(*dictionary.values())
+    def load_configuration(self, config_file):
+        self.config = kubos_config.KubosTestConfig()
+        self.config.load_config(config_file)
 
 
     def run_tests(self):
-        if hasattr(self.config, 'login'):
+        if self.config.login.username:
             self.login()
         for test in self.config.tests:
             self.run_test(test)
@@ -109,32 +96,35 @@ class TestRunner(TestUtils):
 
 
     def run_test(self, test):
-        test_data = self.dict_to_named_tuple(test)
-        self.logger.info("Running test: %s" % test_data.name)
+        self.logger.info("Running test: %s" % test.name)
 
-        if hasattr(test_data, 'pre_test'):
-            self.logger.info("Test: %s Running pre-test command: %s\n" % (test_data.name, test_data.pre_test))
-            self.run_cmd(test_data.pre_test)
+        if test.pre_test:
+            self.logger.info("Test: %s Running pre-test command: %s\n" % (test.name, test.pre_test))
+            self.run_cmd(test.pre_test)
 
         #build the project
-        if hasattr(test_data, 'build_source'):
-            resource_type = self.get_resource_type(test_data.build_source)
+        if test.build_source:
+            resource_type = self.get_resource_type(test.build_source)
             logging.info("Test %s has type: %s" % (test, resource_type))
             if resource_type == 'url':
-                proj_dir = self.clone_repo(test_data.build_source)
+                proj_dir = self.clone_repo(test.build_source)
             elif resource_type == 'path':
-                proj_dir = test_data.build_source
+                proj_dir = test.build_source
             self.build_project(proj_dir)
             #Flash the project
-            self.flash_project(proj_dir)
+            if not test.flash_source:
+                test.flash_source = proj_dir
+
+        if test.flash_source:
+            self.flash_project(test.flash_source)
 
         #run the test command
-        output = self.run_serial_command(test_data.test_command)
+        output = self.run_serial_command(test.test_command)
         self.verify_test_output(test, output)
 
-        if hasattr(test_data, 'post_test'):
-            self.logger.info("Test: %s Running post-test command: %s\n" % (test_data.name, test_data.post_test))
-            self.run_cmd(test_data.post_test)
+        if test.post_test:
+            self.logger.info("Test: %s Running post-test command: %s\n" % (test.name, test.post_test))
+            self.run_cmd(test.post_test)
 
 
     def build_project(self, proj_dir):
@@ -144,7 +134,7 @@ class TestRunner(TestUtils):
 
         self.run_cmd('kubos', 'clean')
         self.run_cmd('kubos', 'link', '--all')
-        ret_code = self.run_cmd('kubos', '-t', self.config.device['target'], 'build')
+        ret_code = self.run_cmd('kubos', '-t', self.config.device.target, 'build')
         if ret_code != 0:
             self.abort('Building project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
         os.chdir(start_dir)
@@ -154,9 +144,9 @@ class TestRunner(TestUtils):
         self.logger.info('Flashing Project: %s' % proj_dir)
         start_dir = os.getcwd()
         os.chdir(proj_dir)
-        os.environ["PWD"] =  proj_dir #The flash script depends on this environment variable
+        os.environ["PWD"] = proj_dir #The flash script depends on this environment variable
 
-        ret_code = self.run_cmd('kubos', '-t', self.config.device['target'], 'flash', cwd=proj_dir)
+        ret_code = self.run_cmd('kubos', '-t', self.config.device.target, 'flash', cwd=proj_dir)
         if ret_code != 0:
             self.abort('Flashing project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
         #flashing a binary to the board logs out on the board
@@ -173,15 +163,14 @@ class TestRunner(TestUtils):
         output = self.serial_connection.read(self.MAX_SERIAL_READ_LEN).replace('\r', '')
         # parse the output
         command_len = len(command) + 1
-        prompt_len = len(self.config.device['prompt']) + 1
+        prompt_len = len(self.config.device.prompt) + 1
         cmd_output = output[command_len : -prompt_len]
         return cmd_output
 
 
     def verify_test_output(self, test_data, actual):
-        test_data = self.dict_to_named_tuple(test_data)
         passed = False
-        if hasattr(test_data, 'expected_regex'):
+        if test_data.expected_is_regex:
             expected_regex = re.compile(test_data.expected_test_output)
             if expected_regex.match(actual):
                 passed = True
@@ -192,7 +181,7 @@ class TestRunner(TestUtils):
         if passed:
             self.add_test_success("Test %s passed" % test_data.name)
         else:
-            self.abort('Test: %s Failed:\n Expected "%s" Did not match actual "%s"' % (test_data.name, test_data.expected_test_output, actual))
+            self.abort('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
 
 
     def add_test_success(self, message):
@@ -202,9 +191,9 @@ class TestRunner(TestUtils):
 
     def login(self):
         self.logger.info('logging in')
-        self.serial_connection.write('%s\n' % str(self.config.login['username']))
+        self.serial_connection.write('%s\n' % str(self.config.login.username))
         time.sleep(3)
-        self.serial_connection.write('%s\n' % str(self.config.login['password']))
+        self.serial_connection.write('%s\n' % str(self.config.login.password))
         time.sleep(2)
         self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
 
@@ -228,12 +217,11 @@ class TestRunner(TestUtils):
 
 def main():
     parser = argparse.ArgumentParser(description='Integration Test Runner')
-    parser.add_argument('device_path', help='The path to your serial device')
-
-    config = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_config.json')
+    parser.add_argument('config_file', help='The path to the test specific config file you want to test.')
+    parser.add_argument('device_path', default='/dev/FTDI', help='The path to your serial device')
 
     args = parser.parse_args()
-    runner = TestRunner(config)
+    runner = TestRunner(args.config_file)
     runner.setup_serial_connection(args.device_path)
     runner.run_tests()
 
