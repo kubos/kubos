@@ -28,10 +28,6 @@ class TestUtils(object):
             return 'path'
 
 
-    def get_kubos_repo_root(self):
-        return os.path.normpath(os.path.abspath(__file__), '..', '..', '..')
-
-
     def clone_repo(self, url):
         temp_dir = tempfile.mkdtemp()
         os.chdir(temp_dir)
@@ -127,7 +123,7 @@ class TestRunner(TestUtils):
             if resource_type == 'url':
                 proj_dir = self.clone_repo(test_data.build_source)
             elif resource_type == 'path':
-                proj_dir = os.path.join(self.get_kubos_repo_root(), path)
+                proj_dir = test_data.build_source
             self.build_project(proj_dir)
             #Flash the project
             self.flash_project(proj_dir)
@@ -154,13 +150,17 @@ class TestRunner(TestUtils):
         os.chdir(start_dir)
 
 
-    def flash_project(self, project_dir):
+    def flash_project(self, proj_dir):
         self.logger.info('Flashing Project: %s' % proj_dir)
         start_dir = os.getcwd()
         os.chdir(proj_dir)
-        ret_code = self.run_cmd('kubos', '-t', self.config.device['target'], 'flash')
+        os.environ["PWD"] =  proj_dir #The flash script depends on this environment variable
+
+        ret_code = self.run_cmd('kubos', '-t', self.config.device['target'], 'flash', cwd=proj_dir)
         if ret_code != 0:
             self.abort('Flashing project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
+        #flashing a binary to the board logs out on the board
+        self.login()
         os.chdir(start_dir)
 
 
@@ -206,17 +206,24 @@ class TestRunner(TestUtils):
         time.sleep(3)
         self.serial_connection.write('%s\n' % str(self.config.login['password']))
         time.sleep(2)
-        self.serial_connection.flush()
+        self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
+
 
     def print_test_summary(self):
         self.logger.info('\n\nTest Summary:\n\n')
         for line in self.test_summary:
             self.logger.info(line)
+        self.close_serial()
 
 
     def abort(self, message):
         self.logger.error(message)
+        self.close_serial()
         sys.exit(1)
+
+
+    def close_serial(self):
+        self.serial_connection.close()
 
 
 def main():
