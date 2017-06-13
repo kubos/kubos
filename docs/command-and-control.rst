@@ -56,7 +56,7 @@ System Design
 -------------
 
 The command line client is exposed in the KubOS Linux shell as the
-``kubos-cnc`` command.
+``c2`` command.
 
 Commands entered into this client will be encoded into a CBOR `Concise
 Binary Object Representation <http://cbor.io/>`__ message format and
@@ -113,4 +113,22 @@ iOBC. This library implements the following commands:
 | emergency-reset | Performs an immediate reset of the iOBC and supervisor. This command can be damaging to the supervisor. Reset should be used instead |
 +-----------------+--------------------------------------------------------------------------------------------------------------------------------------+
 
+Examples
+--------
 
+Running one of the above commands from the core command library
+would look like the following:
+
+Ping:
+
+::
+
+        $ c2 core ping
+
+Info:
+
+::
+        $ c2 core info
+
+Congratulations! You have now run your first commands through the command
+and control system
