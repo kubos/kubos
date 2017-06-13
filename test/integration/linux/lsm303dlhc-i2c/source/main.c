@@ -26,14 +26,8 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#define LSM303DLHC_ADDRESS_A (0x19)
+#define LSM303DLHC_ADDRESS_A 0x19
 #define LSM303DLHC_NAME "LSM303DLHC"
-
-#define TO_STR(x) UNWRAP(x)
-#define UNWRAP(x) #x
-
-#define CREATE_CMD "echo " LSM303DLHC_NAME " " TO_STR(LSM303DLHC_ADDRESS_A) " > /sys/bus/i2c/devices/i2c-0/new_device"
-#define DESTROY_CMD "echo " TO_STR(LSM303DLHC_ADDRESS_A) " > /sys/bus/i2c/devices/i2c-0/delete_device"
 
 #define msleep(time_ms) usleep(time_ms * 1000);
 
@@ -128,9 +122,6 @@ int main(void)
 
     int file;
     char filename[20];
-	
-	//Define the peripheral to the system
-	system(CREATE_CMD);
 
     /*
      * The iOBC only has one i2c bus, so this will always be i2c-0
@@ -143,7 +134,6 @@ int main(void)
 	
 	if (file < 0) {
 		printf("Couldn't open /dev/i2c-0. RC=%s\n", strerror(errno));
-		system(DESTROY_CMD);
 		exit(1);
 	}
 	
@@ -151,7 +141,6 @@ int main(void)
 	if (ioctl(file, I2C_SLAVE, LSM303DLHC_ADDRESS_A) < 0) {
 		printf("Couldn't reach address %x. RC=%s\n", LSM303DLHC_ADDRESS_A, strerror(errno));
 		close(file);
-		system(DESTROY_CMD);
 		exit(-1);
 	}
 	
@@ -159,13 +148,11 @@ int main(void)
 	{
 		printf("Something went wrong\n");
 		close(file);
-		system(DESTROY_CMD);
 		exit(1);
 	}
 	
 	printf("LSM303DLHC I2C test completed successfully!\n");
 	close(file);
-	system(DESTROY_CMD);
 
     return 0;
 }
