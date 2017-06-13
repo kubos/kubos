@@ -21,11 +21,10 @@ class TestUtils(object):
     NORMAL = '\033[0m'
     #TODO: Replace this class with the /tools/utils.py implementation
 
-    def get_resource_type(self, obj):
-        if urlparse.urlparse(obj).scheme != "":
-            return 'url'
-        elif os.path.exists(obj):
-            return 'path'
+    def get_abs_path(self, base_dir, path):
+        abs_path = os.path.normpath(os.path.join(base_dir, path))
+        self.logger.info('Interperating provided path as relative. Using %s' % abs_path)
+        return abs_path
 
 
     def clone_repo(self, url):
@@ -46,8 +45,6 @@ class TestUtils(object):
 
         Which must be executed from a linux project directory.
         '''
-
-
         proj_name = 'dummy-project'
         temp_dir = tempfile.mkdtemp()
         os.chdir(temp_dir)
@@ -77,10 +74,10 @@ class TestRunner(TestUtils):
     MAX_SERIAL_READ_LEN = 500
 
     def __init__(self, config_file):
+        self.load_configuration(config_file)
         self.setup_logger()
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
-        self.load_configuration(config_file)
         self.test_summary = []
 
 
@@ -125,7 +122,7 @@ class TestRunner(TestUtils):
         #build the project
         if test.build_source:
             resource_type = self.get_resource_type(test.build_source)
-            logging.info("Test %s has type: %s" % (test, resource_type))
+
             if resource_type == 'url':
                 proj_dir = self.clone_repo(test.build_source)
             elif resource_type == 'path':
@@ -149,14 +146,20 @@ class TestRunner(TestUtils):
 
     def build_project(self, proj_dir):
         self.logger.info('Building Project: %s' % proj_dir)
+
+        if not os.path.isabs(proj):
+            path = self.get_abs_path(start_dir, proj)
+
         start_dir = os.getcwd()
         os.chdir(proj_dir)
 
         self.run_cmd('kubos', 'clean')
         self.run_cmd('kubos', 'link', '--all')
         ret_code = self.run_cmd('kubos', '-t', self.config.device.target, 'build')
+
         if ret_code != 0:
-            self.abort('Building project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
+            self.abort('Building project %s resulted in a non-zero exit code: %d.' % (proj_dir, ret_code))
+
         os.chdir(start_dir)
 
 
@@ -166,8 +169,7 @@ class TestRunner(TestUtils):
         flash_args = ['kubos', '-t', self.config.device.target, 'flash']
 
         if not os.path.isabs(proj):
-            proj = os.path.normpath(os.path.join(start_dir, proj))
-            self.logger.info('Interperating provided path as relative. Using %s' % proj)
+            proj = self.get_abs_path(start_dir, proj)
 
         if os.path.isfile(proj):
             # flash the project as a standalone file
@@ -175,16 +177,20 @@ class TestRunner(TestUtils):
             proj_dir = self.create_dummy_project()
         elif os.path.isdir(proj):
             # flash it like a regular kubos project - no additional args are needed
-            pass
+            proj_dir = proj
         else:
             abort('Unable to flash unknown type of resource: %s' % proj)
 
         os.chdir(proj_dir)
         os.environ["PWD"] = proj_dir #The flash script depends on this environment variable
 
-        ret_code = self.run_cmd(*flash_args, cwd=proj_dir)
+        try:
+            ret_code = self.run_cmd(*flash_args, cwd=proj_dir)
+        except:
+            print 'excepted!'
+
         if ret_code != 0:
-            self.abort('Flashing project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
+            self.abort('Flashing project %s resulted in a non-zero exit code: %d.' % (proj_dir, ret_code))
 
         # flashing a file to a linux board logs us out..
         self.login()
@@ -242,6 +248,15 @@ class TestRunner(TestUtils):
         self.close_serial()
 
 
+    def get_resource_type(self, obj):
+        if urlparse.urlparse(obj).scheme != "":
+            return 'url'
+        elif os.path.exists(obj):
+            return 'path'
+        else:
+            self.abort('unknown type of entity %s. This should be a path (relative or absolute) or a URL' % obj)
+
+
     def abort(self, message, close_serial=True):
         self.logger.error(message)
         if close_serial:
@@ -256,7 +271,7 @@ class TestRunner(TestUtils):
 def main():
     parser = argparse.ArgumentParser(description='Integration Test Runner')
     parser.add_argument('config_file', help='The path to the test specific config file you want to test.')
-    parser.add_argument('device_path', default='/dev/FTDI', help='The path to your serial device')
+    parser.add_argument('device_path', nargs='?', default='/dev/FTDI', help='The path to your serial device')
 
     args = parser.parse_args()
     runner = TestRunner(args.config_file)
