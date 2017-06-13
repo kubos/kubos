@@ -86,8 +86,11 @@ class TestRunner(TestUtils):
 
     def setup_serial_connection(self, dev):
         self.device_path = dev
-        self.serial_connection = serial.Serial(self.device_path, self.config.device.baudrate)
-        self.serial_connection.timeout = self.config.device.timeout
+        try:
+            self.serial_connection = serial.Serial(self.device_path, self.config.device.baudrate)
+            self.serial_connection.timeout = self.config.device.timeout
+        except serial.serialutil.SerialException as e:
+            self.abort('Unable to open serial connection to device: %s\nError: %s' % (dev, e.strerror), close_serial=False)
 
 
     def setup_logger(self):
@@ -239,9 +242,10 @@ class TestRunner(TestUtils):
         self.close_serial()
 
 
-    def abort(self, message):
+    def abort(self, message, close_serial=True):
         self.logger.error(message)
-        self.close_serial()
+        if close_serial:
+            self.close_serial()
         sys.exit(1)
 
 
