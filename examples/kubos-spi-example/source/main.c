@@ -38,9 +38,9 @@
  *    UART port.
  *
  * NOTE: This project is intended for the STM32F407 target only.
- * The MSP430 does not currently have support for floating point
- * variables, so this example project will compile but not successfully run
- * on the MSP430 target.
+ * The MSP430 does not currently have support for floating point variables, so
+ * this example project will compile but not successfully run on the MSP430
+ * target.
  *
  * SPI bus: K_SPI1
  *   SDI - PA7

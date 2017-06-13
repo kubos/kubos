@@ -34,6 +34,10 @@
  *   SDO - PA6
  *   SCK - PA5
  *   CS  - PA4
+ *
+ * A config.json file has been included with this project which enables the
+ * sensor APIs (altimeter and temperature) and the related sensors (the bme280
+ * and the htu21d).
  */
 
 #include <stdio.h>
@@ -44,28 +48,6 @@
 #include "kubos-core/modules/sensors/altimeter.h"
 #include "kubos-core/modules/sensors/temperature.h"
 #include "kubos-hal/uart.h"
-
-/**
-* Enabling this example code requires certain configuration values to be
-* present
-* in the configuration json of this application. An example is given below:
-*
-*  {
-*      "sensors": {
-*        "bme280": {
-*           "spi bus":"K_SPI1",
-*           "CS":"PA4"
-*           },
-*          "htu21d": {
-*              "i2c_bus": "K_I2C1"
-*          }
-*      }
-*  }
-*
-* This would enable the sensor APIs altimeter and temperature and their
-* related
-* sensors the bme280 and the htu21d.
-*/
 
 void task_sensors(void * p)
 {
