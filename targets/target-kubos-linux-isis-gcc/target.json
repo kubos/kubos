@@ -1,49 +1,55 @@
 {
-  "name": "kubos-linux-isis-gcc",
-  "version": "0.1.1",
-  "description": "base KubOS Linux build target for the isis arm-linux toolchain",
-  "inherits": {
-    "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
-  },
-  "licenses": [
-    {
-      "url": "https://spdx.org/licenses/Apache-2.0",
-      "type": "Apache-2.0"
-    }
-  ],
-  "keywords": [
-    "kubos-linux",
-    "linux",
-    "isis",
-    "arm",
-    "gcc"
-  ],
-  "similarTo": [
-    "linux",
-    "kubos-linux",
-    "isis",
-    "arm-linux-gcc",
-    "arm"
-  ],
-  "buildTarget": true,
-  "config": {
-    "arch": {
-      "arm": {}
+    "name": "kubos-linux-isis-gcc",
+    "version": "0.1.1",
+    "description": "base KubOS Linux build target for the isis arm-linux toolchain",
+    "inherits": {
+        "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
     },
-    "system": {
-      "initAfterFlash": false,
-      "initAtBoot": true,
-      "runLevel": 50,
-      "destDir": "/home/usr/local/bin",
-      "password": "Kubos123"
+    "licenses": 
+    [
+        {
+            "url": "https://spdx.org/licenses/Apache-2.0",
+            "type": "Apache-2.0"
+        }
+    ],
+    "keywords": 
+    [
+        "kubos-linux",
+        "linux",
+        "isis",
+        "arm",
+        "gcc"
+    ],
+    "similarTo": 
+    [
+        "linux",
+        "kubos-linux",
+        "isis",
+        "arm-linux-gcc",
+        "arm"
+    ],
+    "buildTarget": true,
+    "config": {
+        "arch": {
+            "arm": {
+                
+            }
+        },
+        "system": {
+            "initAfterFlash": false,
+            "initAtBoot": false,
+            "runLevel": 50,
+            "destDir": "/home/system/usr/local/bin",
+            "password": "Kubos123"
+        }
+    },
+    "toolchain": "CMake/toolchain.cmake",
+    "scripts": {
+        "start": 
+        [
+            "bash",
+            "$PWD/yotta_targets/kubos-linux-isis-gcc/minicom/flash.sh",
+            "$program"
+        ]
     }
-  },
-  "toolchain": "CMake/toolchain.cmake",
-  "scripts": {
-    "start": [
-      "bash",
-      "$PWD/yotta_targets/kubos-linux-isis-gcc/minicom/flash.sh",
-      "$program"
-    ]
-  }
 }
