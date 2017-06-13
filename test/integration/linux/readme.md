@@ -43,18 +43,20 @@ The JSON schema is as follows:
 
 The device description that will be used during the test. This is a required section
 
-* baudrate - The baudrate for the serial connection the target device is using
-* prompt - The command line prompt that the target device uses. This is needed for response parsing purposes
+* baudrate - The baudrate for the serial connection the target device is using. Defaults to `115200` if not provided.
+* prompt - The command line prompt that the target device uses. This is needed for response parsing purposes.
 * target - The Kubos CLI Target name for building projects.
-* timeout - The maximum time to wait for reading serial output from the board. Defaults to 10 seconds if not provided
+* timeout - The maximum time to wait for reading serial output from the board. Defaults to 10 seconds if not provided.
 
 
 ### Login
 
 This section's options should be self descriptive
 
-This is not a required section. If it's not provided no login will be attempted.
-It's assumed that your device is already logged into and has an active shell running.
+* username - defaults to "root" if not provided
+* password - defaults to "Kubos123" if not provided
+
+This is not a required section. If it's not provided no login will be attempted.  It's assumed that your device is already logged into and has an active shell running.
 
 ### Tests
 
