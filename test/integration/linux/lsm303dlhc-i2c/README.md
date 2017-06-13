@@ -9,6 +9,10 @@ This integration test:
 - Gets the operation mode of the sensor
 - Checks that what was sent and gotten match
 
+Test Shell Command:
+
+    $ lsm303dlhc-i2c
+
 Expected Output:
 
     LSM303DLHC I2C test completed successfully!
