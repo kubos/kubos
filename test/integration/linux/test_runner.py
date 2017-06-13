@@ -37,6 +37,24 @@ class TestUtils(object):
         return cloned_dir
 
 
+    def create_dummy_project(self):
+        '''
+        This function creates a dummy linux project specifically for flashing
+        non-project files to the target devices. Currently this is done by:
+
+        $ kubos flash <path-to-file>
+
+        Which must be executed from a linux project directory.
+        '''
+
+
+        proj_name = 'dummy-project'
+        temp_dir = tempfile.mkdtemp()
+        os.chdir(temp_dir)
+        self.run_cmd('kubos', 'init', '-l', proj_name)
+        return os.path.join(temp_dir, proj_name)
+
+
     def run_cmd(self, *args, **kwargs):
         cwd = kwargs.get('cwd', os.getcwd())
         save_output = kwargs.pop('save_output', False)
@@ -53,7 +71,6 @@ class TestUtils(object):
             if echo:
                 print >>sys.stderr, 'Error executing command, giving up'
             return 1
-
 
 
 class TestRunner(TestUtils):
@@ -140,16 +157,33 @@ class TestRunner(TestUtils):
         os.chdir(start_dir)
 
 
-    def flash_project(self, proj_dir):
-        self.logger.info('Flashing Project: %s' % proj_dir)
+    def flash_project(self, proj):
+        self.logger.info('Flashing Project: %s' % proj)
         start_dir = os.getcwd()
+        flash_args = ['kubos', '-t', self.config.device.target, 'flash']
+
+        if not os.path.isabs(proj):
+            proj = os.path.normpath(os.path.join(start_dir, proj))
+            self.logger.info('Interperating provided path as relative. Using %s' % proj)
+
+        if os.path.isfile(proj):
+            # flash the project as a standalone file
+            flash_args.append(proj)
+            proj_dir = self.create_dummy_project()
+        elif os.path.isdir(proj):
+            # flash it like a regular kubos project - no additional args are needed
+            pass
+        else:
+            abort('Unable to flash unknown type of resource: %s' % proj)
+
         os.chdir(proj_dir)
         os.environ["PWD"] = proj_dir #The flash script depends on this environment variable
 
-        ret_code = self.run_cmd('kubos', '-t', self.config.device.target, 'flash', cwd=proj_dir)
+        ret_code = self.run_cmd(*flash_args, cwd=proj_dir)
         if ret_code != 0:
             self.abort('Flashing project %s resulted in a non-zero exit code: %i.' % (proj_dir, ret_code))
-        #flashing a binary to the board logs out on the board
+
+        # flashing a file to a linux board logs us out..
         self.login()
         os.chdir(start_dir)
 
