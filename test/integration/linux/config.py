@@ -6,15 +6,17 @@ class KubosTestConfig(object):
     tests = []
     class Device(object):
         def __init__(self):
-            self.buadrate = None
+            self.buadrate = 115200
             self.prompt = None
             self.target = None
             self.timeout = 10
 
+
     class Login(object):
         def __init__(self):
-            self.username = None
-            self.password = None
+            self.username = 'root'
+            self.password = 'Kubos123'
+
 
     class Test(object):
         def __init__(self):
@@ -23,7 +25,7 @@ class KubosTestConfig(object):
             self.build_source = None
             self.flash_source = None
             self.post_test = None
-            self.expected_regex = None
+            self.expected_is_regex = None
             self.expected_test_output = None
 
 
