@@ -33,8 +33,7 @@
  * World”.
  *
  * The CSP server thread checks for connections on the CSP port and then
- * blinks the green LED
- * if any messages are received.
+ * blinks the green LED if any messages are received.
  *
  * UART Bus: K_UART1
  *
