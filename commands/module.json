@@ -1,0 +1,16 @@
+{
+    "bin":"./source",
+    "license":"Apache-2.0",
+    "name":"commands",
+    "repository":{
+        "url":"git://<repository_url>",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "dependencies":{
+        "csp":"kubostech/libcsp#~1.5.0",
+        "kubos-hal":"kubostech/kubos-hal"
+    },
+    "homepage":"https://<homepage>",
+    "description":"Example app running on KubOS Linux."
+}

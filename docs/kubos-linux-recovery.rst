@@ -86,18 +86,28 @@ From the KubOS Linux shell:
     $ fw_printenv kubos_updatefile kpack-{desired version}.itb
     $ reboot
 
-Boot into the Alternate OS
---------------------------
+Alternate Boot
+--------------
 
-If the system has failed to boot more times than the 'bootlimit' value allows, then the system will attempt to boot using the 'altbootcmd' environment variable. This variable contains all of the commands required to boot into an alternate operating system. Due to the low-portability of any commands that deal with memory, the exact format will change between boards (and potentially between customers), but should follow this rough format:
+If the system has failed to boot more times than the 'bootlimit' value allows, the system will attempt to boot using the 'altbootcmd' environment variable. 
+This variable contains all of the commands required to sanitize the current boot environment and then, if it has been set up, boot into an alternate operating system. 
+Due to the low-portability of any commands that deal with memory, the exact format will change between boards (and potentially between customers), but should follow this rough format:
 
--  Set the 'recovery\_available' variable to 0. If we succesfully boot into the alternate OS, it should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep attempting.
+-  Set the 'recovery\_available' variable to 0 (if we succesfully boot into an alternate OS, it should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep attempting.)
 -  Clear the 'bootcmd' variable. If 'recovery\_available' is 0 and 'bootcmd' is NULL, then the system won't attempt to boot into anything and will instead just go to the U-Boot CLI. The hope is that from here some manual troubleshooting and recovery can occur.
--  Save the U-Boot envars. The 'saveenv' command saves any local environment variables changes to persistent storage.
--  Copy the alternate OS from persistent storage into SDRAM.
--  Run the alternate OS from SDRAM.
+-  Save the U-Boot envars. The ``saveenv`` command saves any local environment variables changes to persistent storage.
+-  If an alternate OS has been setup on the board:
 
-Initially, this alternate OS will be provided by the client. However, the end goal is to utilize KubOS RT as the alternate OS for all KubOS Linux implementations.
+  -  Copy the alternate OS from persistent storage into SDRAM.
+  -  Run the alternate OS from SDRAM.
+
+-  Otherwise, continue to the U-Boot CLI
+
+This is the default alternate boot value:
+
+::
+
+    altbootcmd=setenv recovery_available 0; setenv bootcmd; saveenv
 
 Generic Alternate OS Setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,8 +117,20 @@ should be:
 
 * Build an application that is capable of running on the board. Pay attention to the SDRAM address that the application is configured to run from. Frequently, this is a static address (likely the very beginning of SDRAM), so the application must end up running from this location. 
 * Load it into the appropriate persistent storage (NOR/NAND flash, SD card, etc) 
-* Update the altbootcmd variable, if necessary, with the address to copy the application from, the address to copy the application to, and the length of the application. This can be done from the U-Boot CLI with the ``setenv`` and ``saveenv`` commands, or from KubOS Linux with the ``fw_setenv`` command.
+* Update the altbootcmd variable with the address to copy the application from, the address to copy the application to, and the length of the application. 
+  Then add a command to trigger the boot process. This can be done from the U-Boot CLI with the ``setenv`` and ``saveenv`` commands, or from KubOS Linux with the ``fw_setenv`` command.
 
+The updated altbootcmd might look something like this:
+
+::
+
+    altbootcmd=setenv recovery_available 0; setenv bootcmd; saveenv; cp.b 0x10080000 0x20000000 0x70000; go 0x20000000
+
+This command will go through the default alternate boot commands and then:
+
+  - Copy 0x7000 bytes from address 0x10080000 (a permanent storage location) to address 0x20000000 (the beginning of SDRAM)
+  - Use the ``go`` command to attempt to boot from address 0x20000000 (``go`` is used for generic executables)
+  
 U-Boot CLI
 ----------
 
