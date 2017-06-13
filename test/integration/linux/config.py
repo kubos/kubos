@@ -4,18 +4,25 @@ import sys
 
 class KubosTestConfig(object):
     tests = []
+
     class Device(object):
+        DEFAULT_BAUDRATE = 115200
+        DEFAULT_TIMEOUT  = 10
+
         def __init__(self):
-            self.buadrate = 115200
+            self.baudrate = self.DEFAULT_BAUDRATE
             self.prompt = None
             self.target = None
-            self.timeout = 10
+            self.timeout = self.DEFAULT_TIMEOUT
 
 
     class Login(object):
+        DEFAULT_USERNAME = 'root'
+        DEFAULT_PASSWORD = 'Kubos123'
+
         def __init__(self):
-            self.username = 'root'
-            self.password = 'Kubos123'
+            self.username = self.DEFAULT_USERNAME
+            self.password = self.DEFAULT_PASSWORD
 
 
     class Test(object):
@@ -38,7 +45,7 @@ class KubosTestConfig(object):
     def load_config(self, config_file):
         if not os.path.isfile(config_file):
             #TODO: clean this up
-            print >>sys.stderr, 'The config file %s does not exist. Aborting.'
+            print >>sys.stderr, 'The config file %s does not exist. Aborting.' % config_file
             sys.exit(1)
 
         with open(config_file, 'r') as _file:
