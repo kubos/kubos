@@ -32,9 +32,9 @@
     },
     "system": {
       "initAfterFlash": false,
-      "initAtBoot": true,
+      "initAtBoot": false,
       "runLevel": 50,
-      "destDir": "/home/usr/local/bin",
+      "destDir": "/home/system/usr/local/bin",
       "password": "Kubos123"
     }
   },
