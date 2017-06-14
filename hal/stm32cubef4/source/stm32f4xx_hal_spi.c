@@ -517,8 +517,21 @@ HAL_StatusTypeDef HAL_SPI_Receive(SPI_HandleTypeDef *hspi, uint8_t *pData, uint1
       /* Process Unlocked */
       __HAL_UNLOCK(hspi);
 
+      uint8_t *txData = (uint8_t *) malloc(Size);
+
+      if(txData==NULL)
+      {
+          txData = pData;
+      }
+
+      memset(txData, 255, Size);
+
       /* Call transmit-receive function to send Dummy data on Tx line and generate clock on CLK line */
-      return HAL_SPI_TransmitReceive(hspi, pData, pData, Size, Timeout);
+      HAL_StatusTypeDef result = HAL_SPI_TransmitReceive(hspi, txData, pData, Size, Timeout);
+
+      free(txData);
+
+      return result;
     }
 
     /* Check if the SPI is already enabled */ 
