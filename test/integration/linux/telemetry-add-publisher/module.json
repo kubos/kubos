@@ -1,0 +1,17 @@
+
+{
+    "bin": "./source",
+    "license": "Apache-2.0",
+    "name": "telemetry-add-subscriber",
+    "repository": {
+        "url": "git://<repository_url>",
+        "type": "git"
+    },
+    "version": "0.1.0",
+    "dependencies": {
+        "csp":"kubostech/libcsp",
+        "telemetry":"kubostech/telemetry"
+    },
+    "homepage": "https://<homepage>",
+    "description": "QA app exercising creating a telemetry subscriber"
+}
