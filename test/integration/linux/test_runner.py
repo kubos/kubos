@@ -65,12 +65,14 @@ class TestUtils(object):
 class TestRunner(TestUtils):
     MAX_SERIAL_READ_LEN = 500
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, specified_tests):
         self.load_configuration(config_file)
         self.setup_logger()
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
         self.test_summary = []
+        if specified_tests is not None:
+            self.remove_non_specified_tests(specified_tests)
 
 
     def setup_serial_connection(self, dev):
@@ -94,6 +96,17 @@ class TestRunner(TestUtils):
     def load_configuration(self, config_file):
         self.config = kubos_config.KubosTestConfig()
         self.config.load_config(config_file)
+
+
+    def remove_non_specified_tests(self, specified_tests):
+        new_list = []
+        for test in self.config.tests:
+            if test.name in specified_tests:
+                self.logger.info('Leaving in test "%s" as it was specified' % test.name)
+                new_list.append(test)
+            else:
+                self.logger.info('Excluding test "%s" in' % test.name)
+        self.config.tests = new_list
 
 
     def run_tests(self):
@@ -260,9 +273,10 @@ def main():
     parser = argparse.ArgumentParser(description='Integration Test Runner')
     parser.add_argument('config_file', help='The path to the test specific config file you want to test.')
     parser.add_argument('device_path', nargs='?', default='/dev/FTDI', help='The path to your serial device')
+    parser.add_argument('--tests', nargs='*', default=None, help='A list of tests to run. If provided only the listed tests will be run.')
 
     args = parser.parse_args()
-    runner = TestRunner(args.config_file)
+    runner = TestRunner(args.config_file, args.tests)
     runner.setup_serial_connection(args.device_path)
     runner.run_tests()
 
