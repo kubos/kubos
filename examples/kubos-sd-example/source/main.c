@@ -24,6 +24,9 @@
  *   - Read data from the file
  *   - Verify that the read contents match was was written
  *
+ * The SD over SPI feature is turned on and configured with the included
+ * config.json file.
+ *
  * SPI Bus: K_SPI1
  *
  * MSP430F5529 Launchpad:

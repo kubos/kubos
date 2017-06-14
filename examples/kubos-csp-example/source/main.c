@@ -35,6 +35,8 @@
  * The CSP server thread checks for connections on the CSP port and then
  * blinks the green LED if any messages are received.
  *
+ * The CSP connection configuration is set using the included config.json file.
+ *
  * UART Bus: K_UART1
  *
  * STM32F407 Discovery:

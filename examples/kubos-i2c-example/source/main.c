@@ -37,6 +37,9 @@
  *      In each iteration of the loop, the application will fetch and print
  *      the current position data from the sensor to the default UART port.
  *
+ * Support for each sensor is turned on by including the appropriate sensor
+ * fields in the included config.json file.
+ *
  * I2C bus: K_I2C1
  *
  * STM32F407 Discovery:

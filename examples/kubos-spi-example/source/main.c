@@ -37,6 +37,9 @@
  *    current temperature and humidity data from the sensor to the default
  *    UART port.
  *
+ * Support and configuration for the sensor is established with the included
+ * config.json file.
+ *
  * NOTE: This project is intended for the STM32F407 target only.
  * The MSP430 does not currently have support for floating point variables, so
  * this example project will compile but not successfully run on the MSP430
