@@ -12,14 +12,14 @@
     "tests": [
         {
             "name": "Hello World Script Upload Test",
-            "test_command" : "/home/system/usr/local/bin/hello_world.sh",
+            "test_command" : "/home/system/usr/bin/hello_world.sh",
             "flash_source": "./hello-world/script/hello_world.sh",
             "expected_test_output": "Hello World!"
         },
         {
             "name": "Hello world Compilation Test",
-            "test_command" : "/home/system/usr/bin/hello_world",
-            "build_source": "./linux/hello-world",
+            "test_command" : "/home/system/usr/bin/hello-world",
+            "build_source": "./hello-world",
             "expected_test_output": "Hello World!"
         },
         {
