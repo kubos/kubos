@@ -36,20 +36,12 @@ class TestUtils(object):
         return cloned_dir
 
 
-    def create_dummy_project(self):
+    def get_flash_project_dir(self):
         '''
-        This function creates a dummy linux project specifically for flashing
-        non-project files to the target devices. Currently this is done by:
-
-        $ kubos flash <path-to-file>
-
-        Which must be executed from a linux project directory.
+        Instead of creating a project to flash non-project files, just use the hello-world project
         '''
-        proj_name = 'dummy-project'
-        temp_dir = tempfile.mkdtemp()
-        os.chdir(temp_dir)
-        self.run_cmd('kubos', 'init', '-l', proj_name)
-        return os.path.join(temp_dir, proj_name)
+        this_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(this_dir, 'hello-world')
 
 
     def run_cmd(self, *args, **kwargs):
@@ -144,14 +136,13 @@ class TestRunner(TestUtils):
             self.run_cmd(test.post_test)
 
 
-    def build_project(self, proj_dir):
-        self.logger.info('Building Project: %s' % proj_dir)
-
-        if not os.path.isabs(proj):
-            path = self.get_abs_path(start_dir, proj)
-
+    def build_project(self, src):
+        self.logger.info('Building Project: %s' % src)
         start_dir = os.getcwd()
-        os.chdir(proj_dir)
+
+        if not os.path.isabs(src):
+            src = self.get_abs_path(start_dir, src)
+        os.chdir(src)
 
         self.run_cmd('kubos', 'clean')
         self.run_cmd('kubos', 'link', '--all')
@@ -174,7 +165,7 @@ class TestRunner(TestUtils):
         if os.path.isfile(proj):
             # flash the project as a standalone file
             flash_args.append(proj)
-            proj_dir = self.create_dummy_project()
+            proj_dir = self.get_flash_project_dir()
         elif os.path.isdir(proj):
             # flash it like a regular kubos project - no additional args are needed
             proj_dir = proj
@@ -184,13 +175,10 @@ class TestRunner(TestUtils):
         os.chdir(proj_dir)
         os.environ["PWD"] = proj_dir #The flash script depends on this environment variable
 
-        try:
-            ret_code = self.run_cmd(*flash_args, cwd=proj_dir)
-        except:
-            print 'excepted!'
+        ret_code = self.run_cmd(*flash_args, cwd=proj_dir)
 
         if ret_code != 0:
-            self.abort('Flashing project %s resulted in a non-zero exit code: %d.' % (proj_dir, ret_code))
+            self.abort('Flashing project %s resulted in a non-zero exit code, output: %d.' % (proj_dir, ret_code))
 
         # flashing a file to a linux board logs us out..
         self.login()
