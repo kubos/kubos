@@ -1,4 +1,3 @@
-
 /*
  * KubOS RT
  * Copyright (C) 2016 Kubos Corporation
@@ -14,51 +13,52 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Kubos Sensor Example Project
+ *
+ * This application provides a streamlined approach to using the BME280
+ * humidity/pressure sensor and the HTU21D temperature/humidity sensor via
+ * the Kubos Core sensors API.
+ *
+ * NOTE: This project is intended for the STM32F407 target only.
+ * The MSP430 does not currently have support for floating point
+ * variables, so this example project will compile but not successfully run
+ * on the MSP430 target.
+ *
+ * I2C bus: K_I2C1
+ *   SDA - PB11
+ *   SCL - PB10
+ *
+ * SPI bus: K_SPI1
+ *   SDI - PA7
+ *   SDO - PA6
+ *   SCK - PA5
+ *   CS  - PA4
+ *
+ * A config.json file has been included with this project which enables the
+ * sensor APIs (altimeter and temperature) and the related sensors (the bme280
+ * and the htu21d).
  */
 
-#include <errno.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include "timers.h"
-#include "queue.h"
 
-#include "kubos-hal/gpio.h"
-#include "kubos-hal/uart.h"
-#include "kubos-core/modules/klog.h"
 #include "kubos-core/modules/sensors/altimeter.h"
 #include "kubos-core/modules/sensors/temperature.h"
+#include "kubos-hal/uart.h"
 
-/**
-* Enabling this example code requires certain configuration values to be present
-* in the configuration json of this application. An example is given below:
-*
-*  {
-*      "sensors": {
-*        "bme280": {
-*           "spi bus":"K_SPI1",
-*           "CS":"PA4"
-*           },
-*          "htu21d": {
-*              "i2c_bus": "K_I2C1"
-*          }
-*      }
-*  }
-*
-* This would enable the sensor APIs altimeter and temperature and their related
-* sensors the bme280 and the htu21d.
-*/
-
-void task_sensors(void *p) {
+void task_sensors(void * p)
+{
     /* store sensor values */
     float press, alt, temp, hum;
     /* setup sensor APIs */
     k_initialize_altitude_sensor();
     k_initialize_temperature_sensor();
 
-    while (1) {
+    while (1)
+    {
         /* get sensor data */
         k_get_altitude(&alt);
         k_get_pressure(&press);
@@ -80,27 +80,17 @@ int main(void)
 {
     k_uart_console_init();
 
-    #ifdef TARGET_LIKE_STM32
-    k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_LED_ORANGE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_LED_BLUE, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_NONE);
-    #endif
-
-    #ifdef TARGET_LIKE_MSP430
-    k_gpio_init(K_LED_GREEN, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_LED_RED, K_GPIO_OUTPUT, K_GPIO_PULL_NONE);
-    k_gpio_init(K_BUTTON_0, K_GPIO_INPUT, K_GPIO_PULL_UP);
+#ifdef TARGET_LIKE_MSP430
     /* Stop the watchdog. */
     WDTCTL = WDTPW + WDTHOLD;
 
     __enable_interrupt();
 
     P2OUT = BIT1;
-    #endif
+#endif
 
-    xTaskCreate(task_sensors, "SENSORS", configMINIMAL_STACK_SIZE * 5, NULL, 2, NULL);
+    xTaskCreate(task_sensors, "SENSORS", configMINIMAL_STACK_SIZE * 5, NULL,
+                2, NULL);
     vTaskStartScheduler();
 
     while (1);
