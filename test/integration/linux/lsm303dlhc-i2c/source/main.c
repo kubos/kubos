@@ -112,8 +112,14 @@ int init_sensor(int file) {
     {
         return ret;
     }
-    msleep(20);
 
+    if (mode != (SPEED_100Hz + NORMAL_POWER + X_AXIS_ENABLE + Y_AXIS_ENABLE + Z_AXIS_ENABLE))
+    {
+        printf("Incorrect mode received: %x\n", mode);
+        return -1;
+    }
+
+    printf("Mode: %x\n", mode);
     return ret;
 }
 
