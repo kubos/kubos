@@ -28,6 +28,7 @@ class KubosTestConfig(object):
     class Test(object):
         def __init__(self):
             self.name = None
+            self.abort_on_failure = False
             self.pre_test  = None
             self.build_source = None
             self.flash_source = None

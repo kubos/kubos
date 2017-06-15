@@ -227,12 +227,20 @@ class TestRunner(TestUtils):
         if passed:
             self.add_test_success("Test %s passed" % test_data.name)
         else:
-            self.abort('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
+            if test_data.abort_on_failure:
+                self.abort('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
+            else:
+                self.add_test_failure('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
 
 
     def add_test_success(self, message):
         self.logger.info(message)
         self.test_summary.append('%s%s%s' % (self.GREEN, message, self.NORMAL))
+
+
+    def add_test_failure(self, message):
+        self.logger.error(message)
+        self.test_summary.append('%s%s%s' % (self.RED, message, self.NORMAL))
 
 
     def login(self):
