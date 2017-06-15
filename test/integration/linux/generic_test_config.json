@@ -12,6 +12,7 @@
     "tests": [
         {
             "name": "Hello World Script Test",
+            "abort_on_failure": true,
             "test_command" : "/home/system/usr/local/bin/hello_world.sh",
             "flash_source": "./hello-world/script/hello_world.sh",
             "expected_test_output": "Hello World!"
