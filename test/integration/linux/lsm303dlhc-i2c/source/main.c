@@ -15,16 +15,15 @@
  * limitations under the License.
  */
 #include <errno.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <linux/i2c-dev.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <fcntl.h>
+#include <linux/i2c-dev.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define LSM303DLHC_ADDRESS_A 0x19
 #define LSM303DLHC_NAME "LSM303DLHC"
@@ -49,37 +48,33 @@
 #define Y_AXIS_ENABLE 0x02
 #define Z_AXIS_ENABLE 0x04
 
-
-typedef enum
-{
-    CTRL_REG1_A = 0x20
-} LSM303DLHC_reg_t;
+typedef enum { CTRL_REG1_A = 0x20 } LSM303DLHC_reg_t;
 
 static int write_byte(int file, LSM303DLHC_reg_t reg, uint8_t value)
 {
     /* Write buffer: reg and write value */
-    uint8_t buffer[2] = {(uint8_t)reg, value};
+    uint8_t buffer[2] = { (uint8_t) reg, value };
 
     /* Transmit reg and value */
     if (write(file, buffer, sizeof(buffer)) != sizeof(buffer))
     {
-		printf("Write failed. RC=%s\n", strerror(errno));
+        printf("Write failed. RC=%s\n", strerror(errno));
         return -1;
     }
 
     return 0;
 }
 
-static int read_byte(int file, LSM303DLHC_reg_t reg, uint8_t* value)
+static int read_byte(int file, LSM303DLHC_reg_t reg, uint8_t * value)
 {
     if (value == NULL)
     {
         return -1;
     }
     /* Transmit reg */
-    if (write(file, (uint8_t*)&reg, 1) != 1)
+    if (write(file, (uint8_t *) &reg, 1) != 1)
     {
-		printf("Write (read) failed. RC=%s\n", strerror(errno));
+        printf("Write (read) failed. RC=%s\n", strerror(errno));
         return -1;
     }
     msleep(5);
@@ -87,17 +82,19 @@ static int read_byte(int file, LSM303DLHC_reg_t reg, uint8_t* value)
     /* Receive value */
     if (read(file, value, 1) != 1)
     {
-		printf("Read failed. RC=%s\n", strerror(errno));
+        printf("Read failed. RC=%s\n", strerror(errno));
         return -1;
     }
     return 0;
 }
 
-int init_sensor(int file) {
-	
+int init_sensor(int file)
+{
+
     /* Prep power/frequency mode */
-    uint8_t mode = SPEED_100Hz + NORMAL_POWER + X_AXIS_ENABLE + Y_AXIS_ENABLE + Z_AXIS_ENABLE;
-	
+    uint8_t mode = SPEED_100Hz + NORMAL_POWER + X_AXIS_ENABLE + Y_AXIS_ENABLE
+                   + Z_AXIS_ENABLE;
+
     int ret = -1;
 
     /* Set the requested operating mode */
@@ -106,14 +103,16 @@ int init_sensor(int file) {
         return ret;
     }
     msleep(20);
-	
-	/* Fetch the operating mode */
+
+    /* Fetch the operating mode */
     if ((ret = read_byte(file, CTRL_REG1_A, &mode)) != 0)
     {
         return ret;
     }
 
-    if (mode != (SPEED_100Hz + NORMAL_POWER + X_AXIS_ENABLE + Y_AXIS_ENABLE + Z_AXIS_ENABLE))
+    /* Verify that the mode received matches the mode sent */
+    if (mode != (SPEED_100Hz + NORMAL_POWER + X_AXIS_ENABLE + Y_AXIS_ENABLE
+                 + Z_AXIS_ENABLE))
     {
         printf("Incorrect mode received: %x\n", mode);
         return -1;
@@ -126,7 +125,7 @@ int init_sensor(int file) {
 int main(void)
 {
 
-    int file;
+    int  file;
     char filename[20];
 
     /*
@@ -134,31 +133,34 @@ int main(void)
      * If a future board has more than one i2c bus, change this to take
      * an input parameter
      */
-	snprintf(filename, 19, "/dev/i2c-0");
-	
-	file = open(filename, O_RDWR);
-	
-	if (file < 0) {
-		printf("Couldn't open /dev/i2c-0. RC=%s\n", strerror(errno));
-		exit(1);
-	}
-	
-	/* Set the desired slave's address */
-	if (ioctl(file, I2C_SLAVE, LSM303DLHC_ADDRESS_A) < 0) {
-		printf("Couldn't reach address %x. RC=%s\n", LSM303DLHC_ADDRESS_A, strerror(errno));
-		close(file);
-		exit(-1);
-	}
-	
-	if (init_sensor(file) != 0)
-	{
-		printf("Something went wrong\n");
-		close(file);
-		exit(1);
-	}
-	
-	printf("LSM303DLHC I2C test completed successfully!\n");
-	close(file);
+    snprintf(filename, 19, "/dev/i2c-0");
+
+    file = open(filename, O_RDWR);
+
+    if (file < 0)
+    {
+        printf("Couldn't open /dev/i2c-0. RC=%s\n", strerror(errno));
+        exit(1);
+    }
+
+    /* Set the desired slave's address */
+    if (ioctl(file, I2C_SLAVE, LSM303DLHC_ADDRESS_A) < 0)
+    {
+        printf("Couldn't reach address %x. RC=%s\n", LSM303DLHC_ADDRESS_A,
+               strerror(errno));
+        close(file);
+        exit(-1);
+    }
+
+    if (init_sensor(file) != 0)
+    {
+        printf("Something went wrong\n");
+        close(file);
+        exit(1);
+    }
+
+    printf("LSM303DLHC I2C test completed successfully!\n");
+    close(file);
 
     return 0;
 }
