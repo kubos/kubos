@@ -37,14 +37,14 @@ All tests will be run on an ISIS-OBC.
 Out of Scope
 ^^^^^^^^^^^^
 
-- KubOS Linux build process. It's not something user's are expected
-  to do, so doesn't need to be verified.
+- KubOS Linux build process. CircleCI will regularly verify the build process,
+  so it is not necessary to duplicate the effort here.
 
 Testing Environment Setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Files and projects required to run QA tests should be located in the
-Kubos repo under the `test/integration/linux' folder.
+Kubos repo under the `test/integration/linux` folder.
 
 The release-candidate Kubos Vagrant image should include all these files
 and should be used to run the tests.
@@ -80,6 +80,10 @@ QA Management
 Testing Process
 ~~~~~~~~~~~~~~~
 
+Before running tests, verify that the master branch of the Kubos repo has passed all CircleCI
+tests. This can be done by checking the badge displayed in the Readme section of the repo's
+`main page<https://github.com/kubostech/kubos>`__. It should show a green "PASSED" icon.
+
 All automatable tests will be executed by running the ``test_runner.py`` script against the
 iOBC's test configuration file.
 
@@ -87,6 +91,8 @@ TODO: Add full script execution command example
 
 The script will connect to the iOBC, run each test, confirm the results passed back through STDOUT,
 and then return the overall pass/fail results.
+
+All remaining tests should then be manually tested.
 
 Role Expectations
 ~~~~~~~~~~~~~~~~~
@@ -121,7 +127,8 @@ Defect Management
 
 Kubers should add any bugs to the appropriate Kubos Trello board and mark them with the "Bug" label.
 
-ISIS members should send any bugs found to Kubos via Slack or email.
+ISIS members should open `GitHub issues within the main Kubos repo<https://github.com/kubostech/kubos/issues`__
+for any bugs found.
 
 Testing Plan
 ------------
@@ -261,11 +268,14 @@ Q: Create a test that will hit as many simultaneous areas as possible.
 OS Upgrade
 ~~~~~~~~~~
 
+**Note:** This is not an automated test
+
 - Flash upgrade package to board
 - Reboot board
 - Verify that board is now running new version
 
-Q: How to check version?
+    - Issue `fw_printenv kubos_curr_version` and check that the value matches
+      the name of the upgrade package.
 
 Watchdog
 ~~~~~~~~
