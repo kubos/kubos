@@ -41,7 +41,9 @@ class TestUtils(object):
         Instead of creating a project to flash non-project files, just use the hello-world project
         '''
         this_dir = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(this_dir, 'hello-world')
+        flash_proj_dir = os.path.join(this_dir, 'hello-world')
+        self.build_flash_proj(flash_proj_dir)
+        return flash_proj_dir
 
 
     def run_cmd(self, *args, **kwargs):
@@ -247,6 +249,18 @@ class TestRunner(TestUtils):
         for line in self.test_summary:
             self.logger.info(line)
         self.close_serial()
+
+
+    def build_flash_proj(self, proxy_proj_path):
+        '''
+        With the current limitations of the CLI flashing and the requirements,
+        the hello-world project is used as the "proxy project" for flashing.
+
+        An additional requirement of having a ../build/<target_name> directory
+        is satisfied by building this project for the current target
+        '''
+        self.logger.info('Building the linux flash proxy project')
+        self.build_project(proxy_proj_path)
 
 
     def get_resource_type(self, obj):
