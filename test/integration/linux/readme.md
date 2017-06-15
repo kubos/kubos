@@ -60,7 +60,7 @@ This is not a required section. If it's not provided no login will be attempted.
 
 ### Tests
 
-This section is an array of test descriptions. The tests are run in the order they are listes in the array.
+This section is an array of test descriptions. The tests are run in the order they are listed in the array.
 
 * name - The name of the test. For user recognition only. This has no effect on the test.
 * pre_test - A shell command that will be executed before cloning, building, or running any tests. This attribute is not required

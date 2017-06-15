@@ -1,11 +1,12 @@
 {
-  "CSP": {
-    "my_address": "1",
-    "target_address": "2",
-    "port": "10",
-    "uart_bus": "K_UART6",
-    "uart_baudrate": "115200",
-    "usart": {
+    "CSP": {
+        "my_address": "1",
+        "target_address": "2",
+        "port": "10",
+        "uart_bus": "K_UART1",
+        "uart_baudrate": "115200",
+        "usart": {
+            
+        }
     }
-  }
 }
