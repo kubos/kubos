@@ -18,7 +18,8 @@
             "expected_test_output": "Hello World!"
         },
         {
-            "name": "Hello world Compilation Test",
+            "name": "Hello World Compilation Test",
+            "abort_on_failure": true,
             "test_command" : "/home/system/usr/bin/hello-world",
             "build_source": "./hello-world",
             "expected_test_output": "Hello World!"
