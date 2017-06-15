@@ -83,7 +83,7 @@ Kubos Sensor Example
 
 `kubos-sensor-example <http://github.com/kubostech/kubos/examples/kubos-sensor-example>`__
 
-**Compatible Targets: MSP430F5529, STM32F407 Discovery**
+**Compatible Targets: STM32F407 Discovery**
 
 +----------------------+------------------------+
 | High-level Component | Specific Area          |
@@ -104,15 +104,13 @@ Kubos CSP Example
 
 **Compatible Targets: All KubOS RT compatible targets**
 
-+----------------------+-----------------+
-| High-level Component | Specific Area   |
-+======================+=================+
-| Kubos HAL [3]_       | GPIO            |
-+----------------------+-----------------+
-| CSP [4]_             | Sockets, ping   |
-+----------------------+-----------------+
-| FreeRTOS [5]_        | Threads, queues |
-+----------------------+-----------------+
++----------------------+--------------------------------+
+| High-level Component | Specific Area                  |
++======================+================================+
+| Kubos HAL [3]_       | GPIO                           |
++----------------------+--------------------------------+
+| CSP [4]_             | Sockets, ping, threads, queues |
++----------------------+--------------------------------+
 
 This application shows an example CSP interaction between client and server tasks.
 
@@ -170,7 +168,7 @@ Kubos SPI Example
 
 `kubos-spi-example <http://github.com/kubostech/kubos/examples/kubos-spi-example>`__
 
-**Compatible Targets: MSP430F5529, STM32F407 Discovery**
+**Compatible Targets: STM32F407 Discovery**
 
 +----------------------+---------------+
 | High-level Component | Specific Area |
