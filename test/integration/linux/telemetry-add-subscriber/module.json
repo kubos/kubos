@@ -2,7 +2,7 @@
 {
     "bin": "./source",
     "license": "Apache-2.0",
-    "name": "telemetry-add-publisher",
+    "name": "telemetry-add-subscriber",
     "repository": {
         "url": "git://<repository_url>",
         "type": "git"
@@ -13,5 +13,5 @@
         "telemetry":"kubostech/telemetry"
     },
     "homepage": "https://<homepage>",
-    "description": "QA app exercising creating a telemetry publisher"
+    "description": "QA app exercising creating a telemetry subscriber"
 }

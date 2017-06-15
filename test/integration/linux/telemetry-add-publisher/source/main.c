@@ -1,5 +1,6 @@
 #include <telemetry/telemetry.h>
-#include <csp/csp.h>
+#include <csp/arch/csp_time.h>
+#include <stdio.h>
 
 #define QA_TEST_TOPIC 999
 
@@ -15,11 +16,11 @@ int main(void)
 
     if (telemetry_publish(data))
     {
-        printf("Telemetry publisher created\n");
+        printf("Telemetry publish success\n");
     }
     else
     {
-        printf("Telemetry publisher failed\n");
+        printf("Telemetry publish failed\n");
     }
 
     return 0;

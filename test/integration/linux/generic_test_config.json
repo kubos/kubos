@@ -30,9 +30,15 @@
         },
         {
             "name": "Telemetry Add Publisher",
+            "test_command": "/home/system/usr/bin/telemetry-add-publisher",
+            "build_source": "./telemetry-add-publisher",
+            "expected_test_output": "Telemetry publish success"
+        },
+        {
+            "name": "Telemetry Add Subscriber",
             "test_command": "/home/system/usr/bin/telemetry-add-subscriber",
             "build_source": "./telemetry-add-subscriber",
-            "expected_test_output": "Telemetry publisher created\n"
+            "expected_test_output": "Telemetry subscribe success"
         }
     ]
 }
