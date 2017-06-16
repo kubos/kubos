@@ -48,6 +48,9 @@
 #define Y_AXIS_ENABLE 0x02
 #define Z_AXIS_ENABLE 0x04
 
+#define TEST_MODE \
+    SPEED_100Hz + NORMAL_POWER + X_AXIS_ENABLE + Y_AXIS_ENABLE + Z_AXIS_ENABLE
+
 typedef enum { CTRL_REG1_A = 0x20 } LSM303DLHC_reg_t;
 
 static int write_byte(int file, LSM303DLHC_reg_t reg, uint8_t value)
@@ -92,8 +95,7 @@ int init_sensor(int file)
 {
 
     /* Prep power/frequency mode */
-    uint8_t mode = SPEED_100Hz + NORMAL_POWER + X_AXIS_ENABLE + Y_AXIS_ENABLE
-                   + Z_AXIS_ENABLE;
+    uint8_t mode = TEST_MODE;
 
     int ret = -1;
 
@@ -111,8 +113,7 @@ int init_sensor(int file)
     }
 
     /* Verify that the mode received matches the mode sent */
-    if (mode != (SPEED_100Hz + NORMAL_POWER + X_AXIS_ENABLE + Y_AXIS_ENABLE
-                 + Z_AXIS_ENABLE))
+    if (mode != TEST_MODE)
     {
         printf("Incorrect mode received: %x\n", mode);
         return -1;
