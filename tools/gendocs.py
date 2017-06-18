@@ -5,17 +5,17 @@ import os
 
 GENERATE_XML = """
 (cat {0};
-echo ""; 
+echo "";
 echo "PROJECT_NUMBER={1}";
 echo "OUTPUT_DIRECTORY={2}";
 echo "XML_OUTPUT=.";) | doxygen -"""
 
 # DOCS_DIRS = [
-# "kubos-core", 
-# "libcsp", 
-# "freertos/os", 
-# "hal/kubos-hal-msp430f5529", 
-# "hal/kubos-hal", 
+# "kubos-core",
+# "libcsp",
+# "freertos/os",
+# "hal/kubos-hal-msp430f5529",
+# "hal/kubos-hal",
 # "hal/kubos-hal-stm32f4",
 # "services/telemetry/telemetry",
 # "services/telemetry/telemetry-linux",
@@ -26,7 +26,8 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 DOCS_DIRS = [
 "hal/kubos-hal",
 "hal/kubos-hal-stm32f4",
-"hal/kubos-hal-iobc"
+"hal/kubos-hal-iobc",
+"ipc"
 ]
 
 def gendocs_xml(dir, doxyfile, version, doc_dir):
