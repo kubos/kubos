@@ -107,7 +107,8 @@ htmlhelp_basename = 'Kubosdoc'
 breathe_projects = {
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-stm32f4" : "../xml/hal/kubos-hal-stm32f4",
-    "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc"
+    "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",
+    "ipc" : "../xml/ipc"
 }
 
 extensions += ['breathe', 'sphinx.ext.todo', 'sphinxjsondomain']

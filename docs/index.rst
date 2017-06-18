@@ -17,14 +17,14 @@ info@kubos.co.
 
 Quick Start Tutorial
 --------------------
-  
+
 .. raw:: html
 
     <iframe width="640" height="480" allowfullscreen
     src="https://www.youtube.com/embed/WYthDHETmBU">
     </iframe>
-    
-This video is intended to help you set up your Kubos SDK development 
+
+This video is intended to help you set up your Kubos SDK development
 environment and get your first project built and running on an end-point
 device.
 It covers the following tutorial documents:
@@ -35,14 +35,14 @@ It covers the following tutorial documents:
 .. toctree::
    :caption: Docs
    :hidden:
-   
+
     Changelog <changelog>
     Kubos Architecture <kubos-architecture>
-    
+
 .. toctree::
    :caption: Kubos SDK
    :hidden:
-   
+
     Installing Kubos SDK <sdk-installing>
     Creating your first project <first-project>
     Kubos SDK Example Applications <sdk-examples>
@@ -50,25 +50,25 @@ It covers the following tutorial documents:
     Kubos CLI Command Reference <sdk-reference>
     Kubos Project Configuration <sdk-project-config>
     Upgrading Kubos SDK <sdk-upgrading>
-    
+
 .. toctree::
    :caption: Kubos RT
    :hidden:
-   
+
     MSP430 Launchpad Guide <msp430-launchpad-guide>
     STM32F4 Discovery Board Guide <stm32f4-discovery-board-guide>
 
 .. toctree::
    :caption: Kubos Linux
    :hidden:
-   
+
     Working with the iOBC <working-with-the-iobc>
     Command and Control <command-and-control>
 
 .. toctree::
    :caption: Developer and SysAdmin Docs
    :hidden:
-   
+
     Contributing to the Kubos Project <contribution-process>
     Kubos Naming and Coding Standards <kubos-standards>
     Kubos Module Development <kubos-development>
@@ -80,8 +80,10 @@ It covers the following tutorial documents:
 .. toctree::
    :caption: Top-Level APIs
    :hidden:
-   
+
     Kubos HAL <kubos-hal/index>
+    IPC <ipc/index>
+
 
 .. todo::
     Kubos Core <@ref%20kubos-core-main>
@@ -90,7 +92,6 @@ It covers the following tutorial documents:
     Telemetry <@ref%20telemetry-main>
     Telemetry Aggregator <@ref%20telemetry-aggregator-main>
     Telemetry Storage <@ref%20telemetry-storage-main>
-    IPC <@ref%20ipc-main>
 
 
 Indices and tables
