@@ -32,13 +32,13 @@
         },
         {
             "name": "Telemetry Add Publisher",
-            "test_command": "/home/system/usr/bin/telemetry-add-publisher",
+            "test_command": "telemetry-add-publisher",
             "build_source": "./telemetry-add-publisher",
             "expected_test_output": "Telemetry publish success"
         },
         {
             "name": "Telemetry Add Subscriber",
-            "test_command": "/home/system/usr/bin/telemetry-add-subscriber",
+            "test_command": "telemetry-add-subscriber",
             "build_source": "./telemetry-add-subscriber",
             "expected_test_output": "Telemetry subscribe success"
         }
