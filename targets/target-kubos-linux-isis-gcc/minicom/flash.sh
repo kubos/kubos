@@ -83,8 +83,10 @@ expect {
 timeout 3600
 send "mkdir -p $2"
 send "cd $2"
+if ${is_upgrade} = 1 goto check_space
 send "rm -f ${name}"
 if ${is_app} = 1 send "rm -f /home/system/etc/init.d/S*${name}"
+check_space:
 expect {
     "$2 #" break
     timeout 1
@@ -99,8 +101,8 @@ if \$? = 0 goto send_file
 ! echo "Not enough room for file transfer, aborting" >&2
 goto exit
 send_file:
-send "rz -w 8192"
-! sz -w 8192 ${path}
+send "rz -brU -w 8192"
+! sz -brU -w 8192 ${path}
 if ${is_upgrade} = 1 send "fw_setenv kubos_updatefile ${name}"
 if ${is_run} = 0 goto exit
 send "start-stop-daemon -K -v -p /var/run/${name}.pid"
