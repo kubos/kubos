@@ -19,7 +19,7 @@ class TestUtils(object):
     GREEN  = '\033[92m'
     RED    = '\033[91m'
     NORMAL = '\033[0m'
-    #TODO: Replace this class with the /tools/utils.py implementation
+    # TODO: Replace this class with the /tools/utils.py implementation
 
     def get_abs_path(self, base_dir, path):
         abs_path = os.path.normpath(os.path.join(base_dir, path))
@@ -32,7 +32,7 @@ class TestUtils(object):
         os.chdir(temp_dir)
         self.run_cmd('git', 'clone', url)
         subdir = os.listdir(temp_dir)
-        cloned_dir = os.path.join(temp_dir, subdir[0]) #there's only one sub-directory
+        cloned_dir = os.path.join(temp_dir, subdir[0]) # There's only one sub-directory
         return cloned_dir
 
 
@@ -88,7 +88,7 @@ class TestRunner(TestUtils):
 
     def setup_logger(self):
         logger = logging.getLogger()
-        #TODO: Make the log file more configurable
+        # TODO: Make the log file more configurable
         fileHandler = logging.FileHandler("kubos_linux_test.log")
         logger.addHandler(fileHandler)
         consoleHandler = logging.StreamHandler()
@@ -126,7 +126,7 @@ class TestRunner(TestUtils):
             self.logger.info("Test: %s Running pre-test command: %s\n" % (test.name, test.pre_test))
             self.run_cmd(test.pre_test)
 
-        #build the project
+        # Build the project
         if test.build_source:
             resource_type = self.get_resource_type(test.build_source)
 
@@ -135,14 +135,14 @@ class TestRunner(TestUtils):
             elif resource_type == 'path':
                 proj_dir = test.build_source
             self.build_project(proj_dir)
-            #Flash the project
+            # Flash the project
             if not test.flash_source:
                 test.flash_source = proj_dir
 
         if test.flash_source:
             self.flash_project(test.flash_source)
 
-        #run the test command
+        # Run the test command
         output = self.run_serial_command(test.test_command)
         self.verify_test_output(test, output)
 
@@ -178,24 +178,24 @@ class TestRunner(TestUtils):
             proj = self.get_abs_path(start_dir, proj)
 
         if os.path.isfile(proj):
-            # flash the project as a standalone file
+            # Flash the project as a standalone file
             flash_args.append(proj)
             proj_dir = self.get_flash_project_dir()
         elif os.path.isdir(proj):
-            # flash it like a regular kubos project - no additional args are needed
+            # Flash it like a regular kubos project - no additional args are needed
             proj_dir = proj
         else:
             abort('Unable to flash unknown type of resource: %s' % proj)
 
         os.chdir(proj_dir)
-        os.environ["PWD"] = proj_dir #The flash script depends on this environment variable
+        os.environ["PWD"] = proj_dir # The flash script depends on this environment variable
 
         ret_code = self.run_cmd(*flash_args, cwd=proj_dir)
 
         if ret_code != 0:
             self.abort('Flashing project %s resulted in a non-zero exit code, output: %d.' % (proj_dir, ret_code))
 
-        # flashing a file to a linux board logs us out..
+        # Flashing a file to a linux board logs us out..
         self.login()
         os.chdir(start_dir)
 
@@ -207,7 +207,7 @@ class TestRunner(TestUtils):
         '''
         self.serial_connection.write('%s\n' % str(command))
         output = self.serial_connection.read(self.MAX_SERIAL_READ_LEN).replace('\r', '')
-        # parse the output
+        # Parse the output
         command_len = len(command) + 1
         prompt_len = len(self.config.device.prompt) + 1
         cmd_output = output[command_len : -prompt_len]
@@ -227,12 +227,20 @@ class TestRunner(TestUtils):
         if passed:
             self.add_test_success("Test %s passed" % test_data.name)
         else:
-            self.abort('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
+            if test_data.abort_on_failure:
+                self.abort('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
+            else:
+                self.add_test_failure('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
 
 
     def add_test_success(self, message):
         self.logger.info(message)
         self.test_summary.append('%s%s%s' % (self.GREEN, message, self.NORMAL))
+
+
+    def add_test_failure(self, message):
+        self.logger.error(message)
+        self.test_summary.append('%s%s%s' % (self.RED, message, self.NORMAL))
 
 
     def login(self):
