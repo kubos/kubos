@@ -49,11 +49,11 @@ int ping()
 
 int build_info()
 {
-    int retries = 0;
+    int retries;
     bool result = false;
     supervisor_version_t version = {0};
 
-    while (retries < SUPERVISOR_MAX_REQUEST_RETRIES)
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
     {
         result = supervisor_get_version(&version);
         if (result)
@@ -61,7 +61,6 @@ int build_info()
             printf("iOBC Supervisor Version: %c.%c.%c\n", version.fields.major_version, version.fields.minor_version, version.fields.patch_version);
             return NO_ERR;
         }
-        retries++;
     }
 
     printf("Error: Exceeded the maximum number of supervisor retries. Aborting the info command.\n");
@@ -71,17 +70,16 @@ int build_info()
 
 int reboot()
 {
-    int retries = 0;
+    int retries;
     bool result = false;
 
-    while (retries < SUPERVISOR_MAX_REQUEST_RETRIES)
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
     {
         result = supervisor_powercycle();
         if (result)
         {
             return NO_ERR;
         }
-        retries++;
     }
 
     printf("Error: Exceeded the maximum number of supervisor retries. Aborting the power cycle.\n");
@@ -91,17 +89,16 @@ int reboot()
 
 int reset()
 {
-    int retries = 0;
+    int retries;
     bool result = false;
 
-    while (retries < SUPERVISOR_MAX_REQUEST_RETRIES)
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
     {
         result = supervisor_reset();
         if (result)
         {
             return NO_ERR;
         }
-        retries++;
     }
 
     printf("Error: Exceeded the maximum number of supervisor retries. Aborting the reset\n");
@@ -111,17 +108,16 @@ int reset()
 
 int emergency_reset()
 {
-    int retries = 0;
+    int retries;
     bool result = false;
 
-    while (retries < SUPERVISOR_MAX_REQUEST_RETRIES)
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
     {
         result = supervisor_emergency_reset();
         if (result)
         {
             return NO_ERR;
         }
-        retries++;
     }
 
     printf("Error: Exceeded the maximum number of supervisor retries. Aborting the emergency reset\n");
