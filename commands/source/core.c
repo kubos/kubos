@@ -41,27 +41,6 @@ int main(int argc, char **argv)
 }
 
 
-int status(int argc, char **argv)
-{
-    printf("Status is not implemented for the core commands\n");
-    return 0;
-}
-
-
-int output(int argc, char **argv)
-{
-    printf("Output is not implemented for the core commands\n");
-    return 0;
-}
-
-
-int help(int argc, char **argv)
-{
-    printf("Core C&C Commands.\nUsage '<action> <subcommand name>'\n");
-    return 0;
-}
-
-
 int ping()
 {
     printf("Pong!\n");
