@@ -1,0 +1,15 @@
+{
+    "bin":"./source",
+    "license":"Apache-2.0",
+    "name":"iobc-supervisor-test",
+    "repository":{
+        "url":"git://<repository_url>",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "homepage":"https://<homepage>",
+    "description":"QA test for iobc supervisor",
+    "dependencies": {
+        "kubos-hal-iobc": "kubostech/kubos-hal-iobc#~0.1.0"
+    }
+}
