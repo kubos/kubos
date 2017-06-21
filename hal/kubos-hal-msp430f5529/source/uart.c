@@ -41,6 +41,8 @@ static inline hal_uart_device uart_dev(KUARTNum uart)
 
 /**
   * Helper function to get UART handle.
+  * @param[in] uart UART device number
+  * @return hal_uart_handle* pointer to UART device structure
   */
 hal_uart_handle * uart_handle(KUARTNum uart)
 {
@@ -54,6 +56,8 @@ hal_uart_handle * uart_handle(KUARTNum uart)
 
 /**
   * Helper function to convert baud option.
+  * @param[in] baud UART baud rate
+  * @return hal_uart_baudrate converted baud rate
   */
 static inline hal_uart_baudrate uart_baud(long int baud)
 {
@@ -81,6 +85,8 @@ static inline hal_uart_baudrate uart_baud(long int baud)
 
 /**
   * Helper function to convert parity option.
+  * @param[in] parity UART parity setting
+  * @return hal_uart_parity converted party value
   */
 static inline hal_uart_parity uart_parity(KParity parity)
 {
@@ -95,6 +101,8 @@ static inline hal_uart_parity uart_parity(KParity parity)
 
 /**
   * Helper function to convert stop bits option.
+  * @param[in] stopbits UART stop bits setting
+  * @return hal_uart_stopbits converted stop bits value
   */
 static inline hal_uart_stopbits uart_stopbits(KStopBits stopbits)
 {
@@ -108,6 +116,8 @@ static inline hal_uart_stopbits uart_stopbits(KStopBits stopbits)
 
 /**
   * Helper function to convert word len option.
+  * @param[in] wordlen UART word length setting
+  * @return hal_uart_wordlen converted word length value
   */
 static inline hal_uart_wordlen uart_wordlen(KWordLen wordlen)
 {
