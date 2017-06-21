@@ -6,6 +6,11 @@
         },
         "subscribers": {
             "max_num": 10 
+        },
+        "publishers": {
+            "iobc_uptime": 100,
+            "supervisor_uptime" : 101,
+            "iobc_reset_count" : 102
         }
     },
     "csp": {

@@ -285,18 +285,68 @@ Debug Console
 -------------
 
 You can view the MSP430's console output by creating a serial connection
-to the micro-USB port. If you're using Windows, the connection will
-appear in Device Manager as "MSP Application UART1". The default
-connection speed is 115200.
+to the micro-USB port.
 
 All of your program's printf statements will be routed through here. You
-can change the settings of the console with the hardware:console section
+can change the settings of the console with the :json:object:`hardware.console` section
 of the config.json file.
 
 **NOTE:** If your MSP430 board loses power while you have a debug
 console connection open, you might need to close the current console and
 turn the board off and back on again in order to create a new successful
 console session.
+
+Default SDK Connection
+~~~~~~~~~~~~~~~~~~~~~~
+
++-----------+---------+
+| Option    | Setting |
++===========+=========+
+| Baud rate | 115200  |
++-----------+---------+
+| Bits      | 8       |
++-----------+---------+
+| Parity    | N       |
++-----------+---------+
+| Stop bits | 1       |
++-----------+---------+
+
+If you are using the default communication settings, you can bring up
+a serial connection in your SDK box using the ``minicom msp430`` command.
+This opens a minicom session with the MSP430.
+
+Non-Default SDK Connection
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you have non-default communication settings, you can create a custom
+minicom configuration.
+
+1. Execute the ``minicom -s`` command to bring up the minicom settings menu.
+   **Note:** If you would like to save this configuration in a new configuration 
+   file, use ``sudo minicom -s`` instead.
+2. Select the 'Serial port setup' option and press enter to open the serial port 
+   setup menu.
+3. Press the key that corresponds to the option you want to change.
+    a. If the option is a text field, the cursor will appear in that field. 
+       Update the option and then hit 'Enter' in order for the changes to be applied.
+    b. If the option is a boolean, pressing the option key will toggle the setting 
+       value (no need to hit 'Enter').
+4. When all of the needed options have been updated, hit 'Enter' to save and return 
+   to the previous menu.
+5. If you would like to save your configuration:
+    a. Select the 'Save setup as..' option and hit 'Enter'.
+    b. Type in your desired configuration name and hit 'Enter'. This will create
+       a new configuration file in */etc/minicom/minirc.{name}`*.
+6. Select 'Exit' and hit 'Enter' to enter the serial connection session.
+
+Exitting the SDK Connection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To exit a minicom session:
+
+- Press Ctrl+A.
+- Press 'Q' (quit with no reset) or 'X' (exit and reset). A confirmation dialog will appear.
+- Hit 'Enter' to exit the session.
 
 Example Program
 ---------------

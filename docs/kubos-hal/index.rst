@@ -41,3 +41,9 @@ Each platform-specific HAL implements the same set of functions provided by the 
 
    STM32F4 <kubos-hal-stm32f4/index>
    MSP430F5529 <kubos-hal-msp430f5529/index>
+
+.. toctree::
+   :caption: OBC HALs
+   :name: hal-obcs
+
+   ISIS iOBC <kubos-hal-iobc/index>

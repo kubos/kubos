@@ -47,7 +47,7 @@ bool cnc_daemon_start_encode_response(int message_type, CNCWrapper * wrapper);
 bool cnc_daemon_send_result(CNCWrapper * wrapper);
 
 
-#define LIB_FORMAT_STR "/lib%s.so"
+#define LIB_FORMAT_STR "/%s"
 
 #ifndef YOTTA_CFG_CNC_REGISTRY_DIR
 #define CNC_REGISTRY_DIR "/root"

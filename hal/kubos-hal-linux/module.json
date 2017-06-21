@@ -11,5 +11,10 @@
   "license": "Apache-2.0",
   "dependencies": {
     "kubos-hal" : "kubostech/kubos-hal#~0.1.0"
+  },
+  "targetDependencies": {
+      "kubos-linux-isis-gcc": {
+          "kubos-hal-iobc": "kubostech/kubos-hal-iobc"
+      }
   }
 }
