@@ -110,8 +110,7 @@ For this example we will set the msp430f5529 target:
 
         $ kubos target msp430f5529-gcc
 
-For more information on all of the available Kubos targets and selecting
-a target see the following **`guide <sdk-cheatsheet>`__**
+For more information, see our documentation on :ref:`selecting-a-target`
 
 Building and Flashing
 ---------------------
