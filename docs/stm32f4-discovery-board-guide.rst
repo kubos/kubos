@@ -111,8 +111,8 @@ Look for the I2C, SPI, or UART section to find the pin definitions
 Changing the pin definitions for a board
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In order to use non-default pins, you'll need to update the config.json
-file for your project.
+In order to use non-default pins, you'll need to update the :json:object:`hardware`
+section of your config.json file for your project.
 
 The format of the file will mirror the organization in the
 target-stm32f407-disco-gcc/target.json file.
@@ -212,7 +212,7 @@ board's console UART bus (default is UART6, baud rate @ 115200).
 -  The orange wire is the RX wire (default pin PC7).
 
 All of your program's printf statements will be routed through here. You
-can change the settings of the console with the hardware:console section
+can change the settings of the console with the :json:object:`hardware.console` section
 of the config.json file.
 
 FDTI connections are also automatically passed through to the Kubos SDK

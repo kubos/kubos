@@ -13,26 +13,41 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * KubOS Linux Example Project
+ *
+ * This is the default application included when the `kubos init --linux`
+ * command is executed.
+ * It is intended as a basic example of how an application could be written to
+ * run on a KubOS Linux system.
+ *
+ * The application contains a CSP interaction between client and server tasks.
+ *
+ * Every 200ms, the CSP client thread pings the CSP server’s address to see if
+ * it is available, and then connects and sends a CSP packet containing the
+ * message “Hello World”.
+ *
+ * The CSP server thread checks for connections on the CSP port and then
+ * prints any received messages to STDOUT.
  */
 
-#include <errno.h>
-#include <stdlib.h>
 #include <stdio.h>
 
-#include <csp/csp.h>
 #include <csp/arch/csp_thread.h>
+#include <csp/csp.h>
 
 /* Example Interface */
 #define MY_ADDRESS 1
-#define MY_PORT    10
+#define MY_PORT 10
 
-CSP_DEFINE_TASK(csp_server) {
+CSP_DEFINE_TASK(csp_server)
+{
 
-    csp_conn_t *conn;
-    csp_packet_t *packet;
+    csp_conn_t *   conn;
+    csp_packet_t * packet;
 
     /* Create socket without any socket options */
-    csp_socket_t *sock = csp_socket(CSP_SO_NONE);
+    csp_socket_t * sock = csp_socket(CSP_SO_NONE);
 
     /* Bind all ports to socket */
     csp_bind(sock, CSP_ANY);
@@ -41,23 +56,27 @@ CSP_DEFINE_TASK(csp_server) {
     csp_listen(sock, 10);
 
     /* Process incoming connections */
-    while (1) {
+    while (1)
+    {
 
         /* Wait for connection, 100 ms timeout */
-        if ((conn = csp_accept(sock, 100)) == NULL)
-            continue;
+        if ((conn = csp_accept(sock, 100)) == NULL) continue;
 
         /* Read packets. Timeout is 100 ms */
-        while ((packet = csp_read(conn, 100)) != NULL) {
-            switch (csp_conn_dport(conn)) {
+        while ((packet = csp_read(conn, 100)) != NULL)
+        {
+            switch (csp_conn_dport(conn))
+            {
                 case MY_PORT:
                     /* Process packet here */
-                	printf("Packet received on MY_PORT: %s\r\n", (char *) packet->data);
+                    printf("Packet received on MY_PORT: %s\r\n",
+                           (char *) packet->data);
                     csp_buffer_free(packet);
                     break;
 
                 default:
-                    /* Let the service handler reply pings, buffer use, etc. */
+                    /* Let the service handler reply pings, buffer use, etc.
+                     */
                     csp_service_handler(conn, packet);
                     break;
             }
@@ -65,19 +84,20 @@ CSP_DEFINE_TASK(csp_server) {
 
         /* Close current connection, and handle next */
         csp_close(conn);
-
     }
 
     return CSP_TASK_RETURN;
 }
 
-CSP_DEFINE_TASK(csp_client) {
+CSP_DEFINE_TASK(csp_client)
+{
 
     csp_packet_t * packet;
-    csp_conn_t * conn;
-    int result = 0;
+    csp_conn_t *   conn;
+    int            result = 0;
 
-    while (1) {
+    while (1)
+    {
 
         /**
          * Try ping
@@ -96,33 +116,37 @@ CSP_DEFINE_TASK(csp_client) {
 
         /* Get packet buffer for data */
         packet = csp_buffer_get(100);
-        if (packet == NULL) {
+        if (packet == NULL)
+        {
             /* Could not get buffer element */
-        	printf("Failed to get buffer element\n");
+            printf("Failed to get buffer element\n");
             return CSP_TASK_RETURN;
         }
 
-        /* Connect to host HOST, port PORT with regular UDP-like protocol and 1000 ms timeout */
+        /* Connect to host HOST, port PORT with regular UDP-like protocol and
+         * 1000 ms timeout */
         conn = csp_connect(CSP_PRIO_NORM, MY_ADDRESS, MY_PORT, 100, CSP_O_NONE);
-        if (conn == NULL) {
+        if (conn == NULL)
+        {
             /* Connect failed */
-        	printf("Connection failed\n");
+            printf("Connection failed\n");
             /* Remember to free packet buffer */
             csp_buffer_free(packet);
             return CSP_TASK_RETURN;
         }
 
         /* Copy dummy data to packet */
-        char *msg = "Hello World";
+        char * msg = "Hello World";
         strcpy((char *) packet->data, msg);
 
         /* Set packet length */
         packet->length = strlen(msg);
 
         /* Send packet */
-        if (!csp_send(conn, packet, 100)) {
+        if (!csp_send(conn, packet, 100))
+        {
             /* Send failed */
-        	printf("Send failed\n");
+            printf("Send failed\n");
             csp_buffer_free(packet);
         }
 
@@ -136,11 +160,11 @@ CSP_DEFINE_TASK(csp_client) {
 int main(void)
 {
 
-	/* Initialize CSP
+    /* Initialize CSP
      * Not interfacing to any external devices, so we don't need to register
      * a route
      */
-	printf("Initializing CSP\n");
+    printf("Initializing CSP\n");
 
     csp_buffer_init(5, 256);
     csp_init(MY_ADDRESS);
@@ -157,7 +181,7 @@ int main(void)
 
     while (1)
     {
-    	csp_sleep_ms(100000);
+        csp_sleep_ms(100000);
     }
 
     return 0;

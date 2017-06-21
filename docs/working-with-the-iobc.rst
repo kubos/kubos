@@ -56,7 +56,7 @@ Ideally, you should not be using the default root user password. If
 you've changed it, you'll need to pass the new password to the Kubos
 flash utility through the config.json file, which should be located in
 the top-level directory of your project. You'll need to create the file
-if it doesn't already exist. Update the system.password parameter with
+if it doesn't already exist. Update the :json:object:`system.password <system>` parameter with
 the password to use.
 
 If you're creating a brand new config.json file, you can just copy and
@@ -73,7 +73,7 @@ paste the text below (*newpass* should be your desired password):
 Setting Initialization Configuration
 ------------------------------------
 
-There are several config.json options available which customize how and
+There are several :json:object:`config.json <system>` options available which customize how and
 when a user application is started:
 
 -  system.initAfterFlash - (Default: false) Tells the Kubos SDK whether
@@ -84,7 +84,7 @@ when a user application is started:
 -  system.runLevel - (Default: 50. Range: 10-99) Sets priority of
    initialization script.
 
-When the ``system.initAfterFlash`` option is turned on, the user
+When the :json:object:`system.initAfterFlash <system>` option is turned on, the user
 application will be started as a background daemon at the end of the
 ``kubos flash`` process. This is done using Linux's
 ``start-stop-daemon`` command. By default this feature is turned off, so
@@ -100,11 +100,11 @@ user scripts, the scripts with the lowest run level will be executed
 first. So an application with a run level of 10 will be initialized
 before an application with a run level of 50.
 
-To turn this feature off, set the ``system.initAfterBoot`` option to
+To turn this feature off, set the :json:object:`system.initAfterBoot <system>` option to
 "false".
 
 The run level of an initialization script can be changed after initially
-flashing the script to the board. Simply change the ``system.runLevel``
+flashing the script to the board. Simply change the :json:object:`system.runLevel <system>`
 value, rebuild the project, and then reflash it to the board. The old
 script will be removed as part of the flash process.
 
