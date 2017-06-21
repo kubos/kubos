@@ -2,6 +2,13 @@ FreeRTOS Documentation
 =======================
 
 .. toctree::
-    :caption: Modules
+    :caption: Module APIs
 
+    eventgroup
+    queuemgmt
+    scheduler
+    semaphores
+    tasks
+    taskctrl
+    tasknotifications
     taskutils
