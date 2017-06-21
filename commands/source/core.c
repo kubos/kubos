@@ -21,8 +21,8 @@
 
 #include <kubos-hal-iobc/supervisor.h>
 
-#include <commands/errors.h>
-#include <commands/commands.h>
+#include "commands/errors.h"
+#include "commands/commands.h"
 
 int parse_and_run(char * arg);
 
@@ -37,28 +37,6 @@ int main(int argc, char **argv)
     }
 
     return get_and_run_command(command_string);
-
-}
-
-
-int status(int argc, char **argv)
-{
-    printf("Status is not implemented for the core commands\n");
-    return 0;
-}
-
-
-int output(int argc, char **argv)
-{
-    printf("Output is not implemented for the core commands\n");
-    return 0;
-}
-
-
-int help(int argc, char **argv)
-{
-    printf("Core C&C Commands.\nUsage '<action> <subcommand name>'\n");
-    return 0;
 }
 
 
@@ -71,61 +49,78 @@ int ping()
 
 int build_info()
 {
-    bool result = true;
+    int retries;
+    bool result = false;
     supervisor_version_t version = {0};
 
-    result = supervisor_get_version(&version);
-    if (!result)
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
     {
-        printf("There was an error getting the supervisor version information. Error: %i\n", result);
-        return result;
+        result = supervisor_get_version(&version);
+        if (result)
+        {
+            printf("iOBC Supervisor Version: %c.%c.%c\n", version.fields.major_version, version.fields.minor_version, version.fields.patch_version);
+            return NO_ERR;
+        }
     }
-    printf("iOBC Supervisor Version: %u.%u.%u\n", version.fields.major_version, version.fields.minor_version, version.fields.patch_version);
-    return result;
+
+    printf("Error: Exceeded the maximum number of supervisor retries. Aborting the info command.\n");
+    return GENERIC_ERR;
 }
 
-//TODO: I don't like having 3 nearly identical functions. I'm working on implementing the reboot type as an option
-//Theres an issue in the client that is preventing that implementation at the moment.
+
 int reboot()
 {
-    bool result = true;
+    int retries;
+    bool result = false;
 
-    result = supervisor_powercycle();
-    if (!result)
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
     {
-        printf("There was an error requesting the iOBC power cycle.\n");
-        return GENERIC_ERR;
+        result = supervisor_powercycle();
+        if (result)
+        {
+            return NO_ERR;
+        }
     }
 
-    return NO_ERR;
+    printf("Error: Exceeded the maximum number of supervisor retries. Aborting the power cycle.\n");
+    return GENERIC_ERR;
 }
 
 
 int reset()
 {
-    bool result = true;
+    int retries;
+    bool result = false;
 
-    result = supervisor_reset();
-    if (!result)
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
     {
-        printf("There was an error requesting the iOBC power cycle.\n");
-        return GENERIC_ERR;
+        result = supervisor_reset();
+        if (result)
+        {
+            return NO_ERR;
+        }
     }
 
-    return NO_ERR;
+    printf("Error: Exceeded the maximum number of supervisor retries. Aborting the reset\n");
+    return GENERIC_ERR;
 }
 
 
 int emergency_reset()
 {
-    bool result = true;
+    int retries;
+    bool result = false;
 
-    result = supervisor_emergency_reset();
-    if (!result)
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
     {
-        printf("There was an error requesting the iOBC power cycle.\n");
-        return GENERIC_ERR;
+        result = supervisor_emergency_reset();
+        if (result)
+        {
+            return NO_ERR;
+        }
     }
 
-    return NO_ERR;
+    printf("Error: Exceeded the maximum number of supervisor retries. Aborting the emergency reset\n");
+    return GENERIC_ERR;
 }
+
