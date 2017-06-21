@@ -1,6 +1,11 @@
 IPC
 -----------------
 
-.. doxygengroup:: IPC
-  :project: ipc
-  :members:
+.. toctree::
+  :caption: APIs
+  :name: ipc-apis
+
+  config
+  socket
+  csp
+  pubsub
