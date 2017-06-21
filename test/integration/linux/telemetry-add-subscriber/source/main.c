@@ -34,6 +34,8 @@ int main(void)
         if (telemetry_read(&conn, &packet))
         {
             printf("Telemetry subscribe success\n");
+            telemetry_unsubscribe(&conn, QA_TEST_TOPIC);
+            telemetry_disconnect(&conn);
             return 1;
         }
         sleep(1);
