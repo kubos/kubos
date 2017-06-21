@@ -8,7 +8,7 @@ echo "Latest tag: $latest_tag"
 #Stable releases follow major.minor.patch version format
 major_regex='^[0-9]+\.[0-9]+\.[0-9]$'
 #Unstable (CD) releases follow major.minor.patch.build version format
-build_regex='^[0-9]+\.[0-9]+\.[0-9]\.[0-9]$'
+build_regex='^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'
 
 if [[ $latest_tag =~ $major_regex ]];
 then

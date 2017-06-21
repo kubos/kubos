@@ -1,0 +1,9 @@
+{
+    "lint-projects": [
+        "kubos-linux-example",
+        "linux-telemetry-service",
+        "cmd-control-client",
+        "cmd-control-daemon",
+        "telemetry-aggregator"
+    ]
+}

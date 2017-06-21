@@ -310,9 +310,12 @@ Options
 
 -  ``<version number>`` Is optional. If a version number is specified
    then kubos will try to checkout the provided version number after
-   pulling the latest updates
--  ``--latest``, ``-l`` Checkout the latest release during the update
-   process.
+   pulling the latest updates.
+- ``--all``, ``-a`` Update the Kubos source modules and the Kubos CLI python module.
+- ``--cli``, ``-c`` Download and update the Kubos CLI python module only.
+- ``--latest``, ``-l`` Checkout the latest release during the update process.
+- ``--source``, ``-s`` Only update the source modules. This is the default if no other options are specified.
+- ``--tab-completion``, ``-t`` Update the tab completion definitions. This option is only necessary after updating the CLI.
 
 kubos version
 -------------

@@ -6,7 +6,7 @@ This is a doc to maintain the current naming and coding standards when
 working with the Kubos products.
 
 Product Names
--------------
+#############
 
 The general naming scheme is "Kub[OS\|os] {component}". Note that there
 is a space separating the two words.
@@ -31,7 +31,7 @@ For example:
 - Kubos Core
 
 File Naming
------------
+###########
 
 Code (\*.c, \*.h, scripts, etc)
 -------------------------------
@@ -63,8 +63,7 @@ The CONTRIUBUTING, LICENSE, and README files should all be uppercased.
 be cased to match industry standards.
 
 Them's Fightin' Words
----------------------
-
+#####################
 A few of the more *controversial* rules:
 
 -  Spaces, not tabs
@@ -74,7 +73,7 @@ A few of the more *controversial* rules:
 -  Single space after periods and colons
 
 Documentation Standards
------------------------
+#######################
 
 While creating clean and maintainable code is a high priority for our
 organization, writing successful documentation can be considered even
@@ -132,7 +131,7 @@ Some items to remember:
 -  Oxford commas should **always** be used
 
 Coding Standards
-----------------
+################
 
 This section covers the styling and standards for the various languages
 and tools that we use.
@@ -516,7 +515,7 @@ Use 4 spaces, since that's what we do in all of our other languages.
 `KConfig <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`__
 
 CONSISTENCY
------------
+###########
 
 BE CONSISTENT. I DON'T CARE IF YOU IGNORE EVERY OTHER RULE IN THIS DOC
 (okay, I do care, but I'm trying to make a point), JUST MAKE SURE THAT

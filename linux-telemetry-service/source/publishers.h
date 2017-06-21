@@ -14,23 +14,8 @@
  * limitations under the License.
  */
 
-#include <stdbool.h>
+#include <csp/csp.h>
 
-#define DEFAULT_COMMAND_STR_LENGTH 75
-
-bool core_parse_args(int argc, char ** argv, char * command_name);
-
-unsigned long get_hash(char *str);
-
-int ping();
-
-int build_info();
-
-int exec_reboot();
-
-typedef struct
-{
-    int ping;
-    int build_info;
-} Arguments;
-
+#ifdef TARGET_LIKE_ISIS
+CSP_DEFINE_TASK(supervisor_publisher);
+#endif
