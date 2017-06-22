@@ -23,11 +23,18 @@
 #define DEFAULT_COMMAND_STR_LEN 75
 #endif
 
+#ifdef YOTTA_CFG_COMMANDS_SUPERVISOR_MAX_REQUEST_RETRIES
+#define SUPERVISOR_MAX_REQUEST_RETRIES YOTTA_CFG_COMMANDS_SUPERVISOR_MAX_REQUEST_RETRIES
+#else
+#define SUPERVISOR_MAX_REQUEST_RETRIES 3
+#endif
+
 int reboot(); //Power cylce the iOBC
 
 int reset(); //Supervisor reset
 
 int emergency_reset(); //emergency reset
 
+int get_and_run_command(char * command_name);
 
 bool core_parse_args(int argc, char ** argv, char * cmd_string);
