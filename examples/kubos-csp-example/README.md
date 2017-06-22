@@ -72,14 +72,14 @@ Now we'll set up the second board. Edit the *config.json* file in this directory
 It should end up looking like this:
 
     {
-    "CSP": {
-        "my_address": "2",
-        "target_address": "1",
-        "port": "10",
-        "uart_bus": "K_UART1",
-        "uart_baudrate": "115200",
-        "usart": {            
-            }
+        "CSP": {
+            "my_address": "2",
+            "target_address": "1",
+            "port": "10",
+            "uart_bus": "K_UART1",
+            "uart_baudrate": "115200",
+            "usart": {            
+                }
         }
     }
     
