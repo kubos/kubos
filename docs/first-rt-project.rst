@@ -1,5 +1,5 @@
-Getting Started With Kubos SDK
-==============================
+Getting Started with KubOS RT and the Kubos SDK
+===============================================
 
 This is intended to be a quick guide to creating a new KubOS RT project
 on top of the Kubos framework.
