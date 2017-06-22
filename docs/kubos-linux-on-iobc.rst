@@ -665,11 +665,11 @@ Create the partitions TODO: Fix partition sizes
 
 ::
 
-    $ sudo parted /dev/sdb mkpart primary ext4 1M 3917M
-    $ sudo parted /dev/sdb mkpart extended 3917M 4000M
-    $ sudo parted /dev/sdb mkpart logical fat16 3917M 3938M
-    $ sudo parted /dev/sdb mkpart logical ext4 3938M 3949M
-    $ sudo parted /dev/sdb mkpart logical ext4 3949M 4000M
+    $ sudo parted /dev/sdb mkpart primary ext4 4M 3856M
+    $ sudo parted /dev/sdb mkpart extended 3856M 3996M
+    $ sudo parted /dev/sdb mkpart logical fat16 3856M 3876M
+    $ sudo parted /dev/sdb mkpart logical ext4 3876M 3896M
+    $ sudo parted /dev/sdb mkpart logical ext4 3896M 3996M
 
 Configure the partitions (ex. /dev/sdb1)
 
