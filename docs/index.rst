@@ -39,6 +39,7 @@ It covers the following tutorial documents:
    
     Changelog <changelog>
     Kubos Architecture <kubos-architecture>
+    FAQs and Troubleshooting Tips <faq-troubleshooting>
     
 .. toctree::
    :caption: Kubos SDK
