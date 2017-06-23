@@ -90,6 +90,11 @@ Troubleshooting
 Kubos SDK
 ~~~~~~~~~
 
+I've tried other steps here, but my Kubos Vagrant image is still behaving weirdly.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Try logging out and restarting the VM using the ``vagrant reload`` command.
+
 I got some weird errors while running a kubos command (``kubos build``, ``kubos target``, etc)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -142,11 +147,6 @@ only. Change the project file permissions to allow the local vagrant user to hav
 :: 
     
     sudo chown vagrant:vagrant . -R
-
-I've tried other steps here, but my Kubos Vagrant image is still behaving weirdly.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Try logging out and restarting the VM using the ``vagrant reload`` command.
 
 KubOS RT
 ~~~~~~~~
