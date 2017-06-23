@@ -79,6 +79,11 @@ The KubOS Linux version will be the *n.n.n* number after "KubOS".
     uname -r    
     4.4.23-KubOS-1.0.0
 
+What's the default KubOS Linux login?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+kubos/Kubos123
+
 Troubleshooting
 ---------------
 
@@ -177,13 +182,6 @@ Make sure that you are connected to the defined debug UART port.
 
 Run the ``kubos config`` command to see which port is currently configured. The :json:object:`hardware.console` settings define this
 connection.
-
-My ``kubos flash`` command is failing and saying that it can't find my board.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    - Make sure the board is connected to your computer
-    - Make sure the board is powered
-    - Verify that no other instances of Kubos Vagrant are running using the ``vagrant global-status`` command from your host machine
 
 KubOS Linux
 ~~~~~~~~~~~
