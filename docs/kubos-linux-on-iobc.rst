@@ -298,10 +298,19 @@ flashing a complete KubOS Linux image onto an SD card or :ref:`by alternate mean
 Pre-Requisites
 ^^^^^^^^^^^^^^
 
-1. Install `Etcher <https://etcher.io/>`__. Other software programs to flash SD cards do exist,
-   but Etcher is the Kubos program of choice.
+1. Obtain an SD card that is at least 4GB.
 
-2. Obtain a KubOS Linux image
+.. note:: 
+
+    The KubOS Linux SD images are created for a 4GB SD card. The image can be applied to a larger SD card, but the
+    resulting system will still only have 4GB of space available to it.
+
+ 
+2. Install `Etcher <https://etcher.io/>`__. Other software to flash SD cards does exist,
+   but Etcher is the Kubos software of choice.
+
+3. Obtain a KubOS Linux image
+
 
 Flash the SD Card
 ^^^^^^^^^^^^^^^^^
@@ -455,14 +464,15 @@ slot while the board is **not powered**.
 After new files have been loaded, the board will need to be powered off and back
 on again in order to go through the normal boot process.
 
+
 Status LEDs
 -----------
 
-There are four LEDs present on the iOBC which give some indication of what state
-the board is in:
+There are four yellow LEDs present on the iOBC which give some indication of what state
+the board is in, along with one red LED which is lit when the system is powered:
 
 -  Three LEDS (solid) - The system is currently running U-Boot
--  Two LEDs (blinking) - The system is currently running KubOS Linux
+-  One LED (blinking) - The system is currently running KubOS Linux
 
 Connect to the System
 ---------------------
@@ -473,17 +483,51 @@ with the KubOS Linux environment.
 You'll need to establish a serial connection with the board in order to connect
 to the console. Set up a serial connection to the board at a baudrate of 115200.
 
-.. figure:: images/iOBC/putty_connection.png
-   :alt: PuTTY Connection
+If you have a Kubos Vagrant image currently running, the FTDI connection will
+be automatically passed through. You can use the included minicom configuration
+to quickly connect to the iOBC via the ``minicom kubos`` command in the VM's
+command console.
 
-   PuTTY Connection
+.. note:: 
 
-You should see the console boot into Linux like this:
+    If a Kubos Vagrant image is running, you will be unable to establish a serial
+    connection on your host machine. You must instead connect to the device 
+    through the VM.
 
-.. figure:: images/iOBC/linux_console.png
-   :alt: Linux Console
+::
 
-   Linux Console
+    $ minicom kubos
+    
+If the board is already powered, hit the ``Enter`` key to display the login dialog.
+
+If you power the board after starting the minicom session, the end of the boot
+messages will look like this:
+
+::
+
+    ...
+    EXT4-fs (mmcblk0p1): mounted filesystem with ordered data mode. Opts: (null)
+    EXT4-fs (mmcblk0p7): recovery complete
+    EXT4-fs (mmcblk0p7): mounted filesystem with ordered data mode. Opts: (null)
+    Initializing random number generator... random: dd: uninitialized urandom read (512 bytes read, 25 bits of entropy available)
+    done.
+    Starting network: OK
+    Starting kubos-c2-daemon:
+    OK
+    Starting linux-telemetry-service:
+    OK
+    
+    Welcome to KubOS Linux
+    Kubos login: 
+    
+By default, there are two user accounts available: "root" (the superuser), and "kubos" (a normal user).
+Both have a default password of "Kubos123". For more information, see the :ref:`user-accounts` section.
+
+Using KubOS Linux
+-----------------
+
+For information on how to create and run applications on your new KubOS Linux system, see the
+:doc:`working-with-the-iobc` guide.
 
 Upgrade Process
 ---------------
@@ -541,7 +585,6 @@ These commands will:
   
 As long as a valid kernel and rootfs are available, your system should now successfully boot
 into KubOS Linux.
-
 
 Non-Default Installation Process
 --------------------------------
@@ -661,7 +704,7 @@ Create a partition table
 
     $ sudo parted /dev/sdb mklabel msdos y
 
-Create the partitions TODO: Fix partition sizes
+Create the partitions
 
 ::
 
@@ -816,6 +859,9 @@ The board is now ready to be flashed.
 Installation
 ^^^^^^^^^^^^
 
+Start SAM-BA
+************
+
 Start up SAM-BA. You'll want to select the at91sam9g20-ISISOBC option from the
 'Select your board' drop-down.
 
@@ -824,6 +870,9 @@ Start up SAM-BA. You'll want to select the at91sam9g20-ISISOBC option from the
 
    SAM-BA Connection Selection
 
+Enable Flashing
+***************
+
 Execute the 'Enable NorFlash' script. This will prep the board to enable
 flashing.
 
@@ -831,6 +880,9 @@ flashing.
    :alt: SAM-BA Enable NorFlash
 
    SAM-BA Enable NorFlash
+
+Flash U-Boot
+************
 
 Select the uboot.bin file in the 'Send File Name' field.
 
@@ -842,6 +894,12 @@ Click 'Send File'
    :alt: SAM-BA Send U-Boot
 
    SAM-BA Send U-Boot
+   
+Click 'Compare sent file with memory' after the file transfer has completed to confirm
+that all data was sent successfully.
+
+Flash Device Tree
+*****************
 
 Select the at91sam9g20isis.dtb file in the 'Send File Name' field (you'll need
 to view all file types in order to see the .dtb file)
@@ -854,10 +912,12 @@ Click 'Send File'
    :alt: SAM-BA Send DTB
 
    SAM-BA Send DTB
+   
+Click 'Compare sent file with memory' after the file transfer has completed to confirm
+that all data was sent successfully.
 
 Reboot the System
 ~~~~~~~~~~~~~~~~~
 
 After new files have been loaded, the board will need to be powered off and back
 on again in order to go through the normal boot process.
-
