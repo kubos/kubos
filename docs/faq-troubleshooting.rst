@@ -175,7 +175,7 @@ Flash Troubleshooting
 Flashing a file to the board can fail for various reasons. Sometimes
 simply reattempting the command can correct the problem.
 
-If retrying doesn't work, here is a list of some of the error you might
+If retrying doesn't work, here is a list of some of the errors you might
 see after running the ``kubos flash`` command and the recovery actions
 you can take:
 
@@ -195,7 +195,7 @@ you can take:
    ``vagrant up``)
 
 "Transfer Failed: Connection Failed"
-************************************
+####################################
 
 The SDK was unable to connect to the iOBC
 
@@ -209,15 +209,24 @@ The SDK was unable to connect to the iOBC
    again.
 
 "Transfer Failed: Invalid Password"
-***********************************
+###################################
 
 The SDK was unable to log into the iOBC. Verify that the password is
 correctly defined in your config.json file by issuing the ``kubos config`` command.
 
 System appears to have hung
-***************************
+###########################
 
 -  If for some reason file transfer fails, it can take a couple minutes
    for the connection to time out and return control.
 -  If you've waited a couple minutes and the system still appears hung,
    please let us know so that we can open a bug report.
+   
+My flash failed for some other reason
+#####################################
+
+It's possible that the transfer timed out. Check the `build/{target}/flash.log` file
+in your project for more information about why the flash failed.
+
+If you were trying to flash an upgrade file, simply re-enter the ``kubos flash``
+command to resume the transfer.
