@@ -128,6 +128,7 @@ Ping:
 Info:
 
 ::
+
         $ c2 core info
 
 Congratulations! You have now run your first commands through the command
