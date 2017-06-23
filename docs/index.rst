@@ -64,7 +64,6 @@ It covers the following tutorial documents:
 
     Working with the iOBC <working-with-the-iobc>
     Command and Control <command-and-control>
-    Command and Control Internal Protcol <c2-daemon>
 
 .. toctree::
    :caption: Developer and SysAdmin Docs
@@ -77,6 +76,7 @@ It covers the following tutorial documents:
     KubOS Linux on iOBC <kubos-linux-on-iobc>
     KubOS Linux Upgrades <kubos-linux-upgrade>
     KubOS Linux Recovery <kubos-linux-recovery>
+    Command and Control Internal Protcol <c2-daemon>
 
 .. toctree::
    :caption: Top-Level APIs
