@@ -54,6 +54,8 @@ Kubos uses the yotta build/module system, which is where this file
 structure comes from. You can read more about yotta
 `here <http://yottadocs.mbed.com/>`__.
 
+.. _selecting-a-target:
+
 Selecting a Target
 ------------------
 
