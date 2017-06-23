@@ -64,6 +64,7 @@ It covers the following tutorial documents:
    
     Working with the iOBC <working-with-the-iobc>
     Command and Control <command-and-control>
+    Command and Control Internal Protcol <c2-daemon>
 
 .. toctree::
    :caption: Developer and SysAdmin Docs
