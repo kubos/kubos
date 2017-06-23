@@ -138,5 +138,13 @@ Using Hardware
 --------------
 
 If you would like to run this project on a physical board, you'll follow this same process,
-except the target board will need to be connected to your computer and powered before
-running the ``kubos flash`` command.
+except you'll select a different hardware target and the target board will need to be 
+connected to your computer and powered before running the ``kubos flash`` command.
+
+More information about the available targets can be found in the :ref:`SDK Cheatsheet <selecting-a-target>`.
+
+.. note::
+
+    If you build a project and then change its target, you will need to rebuild the project
+    for the new target with the ``kubos build`` command in order to create a new compatible
+    binary to use with ``kubos flash``
