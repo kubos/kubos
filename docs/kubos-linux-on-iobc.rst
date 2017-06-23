@@ -860,7 +860,7 @@ Installation
 ^^^^^^^^^^^^
 
 Start SAM-BA
-************
+############
 
 Start up SAM-BA. You'll want to select the at91sam9g20-ISISOBC option from the
 'Select your board' drop-down.
@@ -871,7 +871,7 @@ Start up SAM-BA. You'll want to select the at91sam9g20-ISISOBC option from the
    SAM-BA Connection Selection
 
 Enable Flashing
-***************
+###############
 
 Execute the 'Enable NorFlash' script. This will prep the board to enable
 flashing.
@@ -882,7 +882,7 @@ flashing.
    SAM-BA Enable NorFlash
 
 Flash U-Boot
-************
+############
 
 Select the uboot.bin file in the 'Send File Name' field.
 
@@ -899,7 +899,7 @@ Click 'Compare sent file with memory' after the file transfer has completed to c
 that all data was sent successfully.
 
 Flash Device Tree
-*****************
+#################
 
 Select the at91sam9g20isis.dtb file in the 'Send File Name' field (you'll need
 to view all file types in order to see the .dtb file)
