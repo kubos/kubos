@@ -119,6 +119,25 @@ in a shared folder.
 
 Windows does not support symlinks, so you cannot build Kubos projects within a shared folder on a Windows machine.
 
+"ERROR: the gcc program "arm-linux-gcc" could not be found"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The iOBC toolchain is not currently in your path. Run this command to add it:
+
+::
+
+    $ export PATH=$PATH:/usr/bin/iobc_toolchain/usr/bin
+
+I can't build my project. I keep getting "Permission denied" errors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you copied your project from another location, it's possible that the files are set up with root permissions
+only. Change the project file permissions to allow the local vagrant user to have access.
+
+:: 
+    
+    sudo chown vagrant:vagrant . -R
+
 I've tried other steps here, but my Kubos Vagrant image is still behaving weirdly.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -168,6 +187,12 @@ My ``kubos flash`` command is failing and saying that it can't find my board.
 
 KubOS Linux
 ~~~~~~~~~~~
+
+I transferred a script, but it won't run
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``kubos flash`` preserves the file permissions of everything you transfer. Check that your file has the appropriate execute
+permissions turned on.
     
 Flash Troubleshooting
 ^^^^^^^^^^^^^^^^^^^^^
