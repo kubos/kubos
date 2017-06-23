@@ -1,8 +1,8 @@
 Getting Started with KubOS Linux and the Kubos SDK
 ==================================================
 
-This is intended to be a quick guide to creating a new KubOS Linux project on
-top of the Kubos framework.
+This is intended to be a quick guide to creating a new KubOS Linux project 
+using the Kubos SDK.
 
 Prerequisites
 -------------
@@ -26,6 +26,9 @@ At this point you will have a new terminal prompt inside your kubos-dev box.
 Creating your Project
 ---------------------
 
+Method 1: Kubos Init
+~~~~~~~~~~~~~~~~~~~~
+
 The simplest way to create a new KubOS Linux project is by using the Kubos CLI.
 The ``kubos init --linux`` command takes a project name and creates the project
 files and folders.
@@ -48,8 +51,8 @@ included so you can get started right away. The ``-l`` or ``--linux`` command
 tells the CLI that a KubOS Linux project should be created, rather than a KubOS
 RT project.
 
-Cloning a Project
------------------
+Method 2: Cloning a Project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you would like to copy an existing Kubos project from the internet, you will
 need to clone and link the necessary files. For example:
