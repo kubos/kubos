@@ -298,8 +298,8 @@ flashing a complete KubOS Linux image onto an SD card or :ref:`by alternate mean
 Pre-Requisites
 ^^^^^^^^^^^^^^
 
-1. Install `Etcher <https://etcher.io/>`__. Other software to flash SD cards does exist,
-   but Etcher is the Kubos software of choice.
+1. Install `Etcher <https://etcher.io/>`__. Other software programs to flash SD cards do exist,
+   but Etcher is the Kubos program of choice.
 
 2. Obtain a KubOS Linux image
 
@@ -365,12 +365,12 @@ Pre-Requisites
     the watchdog. If you don't, the board will continually reboot and you won't be
     able to flash anything.
     
-7. Power the board.
+7. Turn on the board.
 
 8. Copy the `kubos-nor-flash.tcl` script from the `tools/at91sam9g20isis` folder in
    the `kubos-linux-build <https://github.com/kubostech/kubos-linux-build>`__ repo
    into the SAM-BA application folder.
-9. Update the `{path to SAM-BA}/tcl_lib/boards.tcl` file to change this line:
+9. Change line 44 in `{path to SAM-BA}/tcl_lib/boards.tcl` from this:
 
    ``"at91sam9g20-ISISOBC"    "at91sam9g20-ISISOBC/at91sam9g20-ISISOBC.tcl"``
    
@@ -378,7 +378,7 @@ Pre-Requisites
    
    ``"at91sam9g20-isisobc"    "at91sam9g20-ISISOBC/at91sam9g20-ISISOBC.tcl"``
    
-   (the command line converts everything to lower case, which will lead to 
+   (the SAM-BA application converts everything to lower case, which will lead to 
    a "board not found" error if you don't change this file)
 
 
@@ -777,7 +777,7 @@ Pre-Requisites
     the watchdog. If you don't, the board will continually reboot and you won't be
     able to flash anything.
 
-7. Power the board.
+7. Turn on the board.
     
 8. Obtain the NOR flash files either from Kubos, or from your own :ref:`local build <build-os>`:
     
