@@ -16,19 +16,10 @@
  */
 
 /**
- * @defgroup Allocator
- * @addtogroup Allocator
+ * @defgroup KUBOS_CORE_ALLOCATOR Kubos Core Buffer Allocator Wrapper
+ * @addtogroup KUBOS_CORE_ALLOCATOR
  * @{
  */
-
- /**
-  *
-  * @file       k_alloc.h
-  * @brief      Buffer Allocator Wrapper
-  *
-  * @author     kubos.co
-  */
-
 
 #ifndef K_ALLOC_H
 #define K_ALLOC_H

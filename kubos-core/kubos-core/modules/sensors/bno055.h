@@ -21,8 +21,8 @@
  */
 
 /**
- * @defgroup BNO055 BNO055 IMU Sensor
- * @addgroup BNO055
+ * @defgroup KUBOS_CORE_BNO055 Kubos Core BNO055 Sensor Interface
+ * @addtogroup KUBOS_CORE_BNO055
  * @{
  */
 

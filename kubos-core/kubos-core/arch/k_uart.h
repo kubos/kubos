@@ -16,21 +16,10 @@
  */
 
  /**
-  * @defgroup UART
-  * @addtogroup UART
+  * @defgroup KUBOS_CORE_UART Kubos Core UART Interface
+  * @addtogroup KUBOS_CORE_UART
   * @{
   */
-
- /**
-  *
-  * @file       k_uart.h
-  * @brief      UART interface.
-  *
-  * @description Derived from the libcsp USART driver.
-  *
-  * @author     kubos.co
-  */
-
 
 #ifndef K_UART_H
 #define K_UART_H

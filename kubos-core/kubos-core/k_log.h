@@ -7,15 +7,12 @@
  */
 
  /**
-  * @defgroup Log
-  * @addtogroup Log
+  * @defgroup KUBOS_CORE_LOG Kubos Core System Logging Interface
+  * @addtogroup KUBOS_CORE_LOG
   * @{
   */
 
 /**
- *
- * @file        k_log.h
- * @brief       System logging header
  *
  * This header offers a bunch of "LOG_*" functions that, with the default
  * implementation, just use printf, but honour a verbosity level.

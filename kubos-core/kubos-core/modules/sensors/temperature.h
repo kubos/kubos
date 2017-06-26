@@ -16,15 +16,12 @@
  */
 
  /**
- * @defgroup TEMPERATURE
- * @addtogroup TEMPERATURE
+ * @defgroup KUBOS_CORE_TEMPERATURE Kubos Core Temperature Sensor Interface
+ * @addtogroup KUBOS_CORE_TEMPERATURE
  * @{
  */
 
 /**
- *
- * @file       temperature.h
- * @brief Sensor API for temperature and humidity sensor readings
  *
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
@@ -69,3 +66,5 @@ KSensorStatus k_get_temperature(float * temp);
 KSensorStatus k_get_humidity(float * hum);
 
 #endif
+
+/* @} */

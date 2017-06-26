@@ -16,17 +16,9 @@
  */
 
  /**
-  * @defgroup Message
-  * @addtogroup Message
+  * @defgroup KUBOS_CORE_MESSAGE Kubos Core Messaging Interface
+  * @addtogroup KUBOS_CORE_MESSAGE
   * @{
-  */
-
- /**
-  *
-  * @file       k_msg.h
-  * @brief      Messaging layer
-  *
-  * @author     kubos.co
   */
 
 #ifndef K_MSG_H

@@ -1,0 +1,6 @@
+Kubos Core AX25 API
+===================
+
+.. doxygengroup:: KUBOS_CORE_AX25
+    :project: kubos-core
+    :members:

@@ -16,15 +16,12 @@
  */
 
 /**
- * @defgroup HTU21D
- * @addtogroup HTU21D
+ * @defgroup KUBOS_CORE_HTU21D Kubos Core HTU21D Sensor Interface
+ * @addtogroup KUBOS_CORE_HTU21D
  * @{
  */
 
 /**
- *
- * @file       htu21d.h
- * @brief HTU21D Temperature and Humidity Sensor
  *
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:

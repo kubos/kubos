@@ -16,16 +16,12 @@
  */
 
 /**
- * @defgroup ALTIMETER
- * @addgroup ALTIMETER
+ * @defgroup KUBOS_CORE_ALTIMETER Kubos Core Altimeter SesnorInterface
+ * @addtogroup KUBOS_CORE_ALTIMETER
  * @{
  */
 
 /**
- *
- * @file       altimeter.h
- * @brief Sensor API for altitude and barametric pressure readings
- *
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
  *
@@ -70,3 +66,5 @@ KSensorStatus k_get_pressure(float * press);
 KSensorStatus k_get_altitude(float * alt);
 
 #endif
+
+/* @} */

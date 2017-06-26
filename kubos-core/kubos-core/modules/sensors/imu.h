@@ -15,16 +15,12 @@
  * limitations under the License.
  */
 /**
- * @defgroup IMU
- * @addgroup IMU
+ * @defgroup KUBOS_CORE_IMU Kubos Core IMU Sensor Interface
+ * @addtogroup KUBOS_CORE_IMU
  * @{
  */
 
 /**
- *
- * @file       imu.h
- * @brief Sensor API for inertial measurement unit (IMU) readings
- *
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
  *
@@ -105,3 +101,5 @@ KSensorStatus k_get_acceleration(k_sensor_vector_t * accel);
 KSensorStatus k_get_absolute_position(k_position_vector_t * pos);
 
 #endif
+
+/* @} */

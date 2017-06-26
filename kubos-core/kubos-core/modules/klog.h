@@ -16,19 +16,12 @@
  */
 
  /**
-  * @defgroup  KLOG
-  * @addtogroup  KLOG
+  * @defgroup  KUBOS_CORE_KLOG Kubos Core KLog Interface
+  * @addtogroup  KUBOS_CORE_KLOG
   * @{
   */
 
- /**
-  *
-  * @file       klog.h
-  * @brief      Logging module
-  *
-  * @author     kubos.co
-  */
-
+//TODO: add note. this is not the same thing as klogd (linux's kernel logging daemon)
 
 #ifndef KLOG_H
 #define KLOG_H

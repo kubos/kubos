@@ -17,16 +17,12 @@
   Modified by KubOS Corporation 2016 for integration into Kubos Core
  ***************************************************************************/
 /**
- * @defgroup BME280
- * @addgroup BME280
+ * @defgroup KUBOS_CORE_BME280 Kubos Core BME280 Sensor Interface
+ * @addtogroup KUBOS_CORE_BME280
  * @{
  */
 
 /**
- *
- * @file       bme280.h
- * @brief BME280 Temperature, Humidty and Pressure Sensor
- *
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
  *
@@ -169,3 +165,5 @@ KSensorStatus bme280_read_altitude(float sea_level, float * alt);
 
 #endif
 #endif
+
+/* @} */
