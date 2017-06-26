@@ -6,8 +6,9 @@ libraries necessary to quickly bring up space ready software. We
 leverage multiple existing open source projects like FreeRTOS and CSP,
 along with our own custom framework and SDK.
 
-Looking to build an application on Kubos? Check out our :doc:`quick start
-guide <first-project>`.
+Looking to build an application on Kubos? Check out our :doc:`KubOS RT 
+quick start guide <first-rt-project>` or our :doc:`KubOS Linux quick 
+start guide <first-linux-project>`
 
 Having issues? Want a new feature? `Come talk to
 us! <https://slack.kubos.co/>`__
@@ -30,7 +31,7 @@ device.
 It covers the following tutorial documents:
 
   - :doc:`Installing the Kubos SDK <sdk-installing>`
-  - :doc:`Creating Your First Project <first-project>`
+  - :doc:`Creating Your First KubOS RT Project <first-rt-project>`
 
 .. toctree::
    :caption: Docs
@@ -45,7 +46,8 @@ It covers the following tutorial documents:
    :hidden:
 
     Installing Kubos SDK <sdk-installing>
-    Creating your first project <first-project>
+    Creating Your First KubOS RT Project <first-rt-project>
+    Creating Your First KubOS Linux Project <first-linux-project>
     Kubos SDK Example Applications <sdk-examples>
     Kubos SDK Cheat Sheet <sdk-cheatsheet>
     Kubos CLI Command Reference <sdk-reference>

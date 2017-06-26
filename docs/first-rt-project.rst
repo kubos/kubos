@@ -1,8 +1,8 @@
-Getting Started With Kubos SDK
-==============================
+Getting Started with KubOS RT and the Kubos SDK
+===============================================
 
 This is intended to be a quick guide to creating a new KubOS RT project
-on top of the Kubos framework.
+using the Kubos SDK.
 
 Prerequisites
 -------------
@@ -27,6 +27,9 @@ box.
 Creating your Project
 ---------------------
 
+Method 1: Kubos Init
+~~~~~~~~~~~~~~~~~~~~
+
 The simplest way to create a new KubOS RT project is by using the Kubos
 CLI. The ``kubos init`` command takes a project name and creates the
 project files and folders.
@@ -47,8 +50,8 @@ The ``init`` command creates a new directory with the
 `kubos-rt-example <https://github.com/kubostech/kubos/tree/master/kubos-rt-example>`__
 included so you can get started right away.
 
-Cloning a Project
------------------
+Method 2: Cloning a Project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We have also created several different example Kubos projects which can
 be used as starting points.
