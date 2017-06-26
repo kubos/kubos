@@ -24,6 +24,7 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 # "ipc"]
 
 DOCS_DIRS = [
+"kubos-core",
 "hal/kubos-hal",
 "hal/kubos-hal-stm32f4",
 "hal/kubos-hal-iobc"

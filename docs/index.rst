@@ -85,6 +85,7 @@ It covers the following tutorial documents:
    :caption: Top-Level APIs
    :hidden:
 
+    Kubos Core <kubos-core/index>
     Kubos HAL <kubos-hal/index>
 
 .. todo::
