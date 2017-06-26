@@ -56,7 +56,7 @@ static inline hal_i2c_handle * i2c_handle(KI2CNum i2c)
 }
 
 /**
-  * Helper function to convert I2C addressing option.
+  * Helper function to convert I2C addressing option from msp-specific hal to generic hal.
   * @param[in] mode i2c addressing mode option
   * @return hal_i2c_addressing_mode HAL specific I2C addressing mode option
   */
@@ -71,7 +71,7 @@ static inline hal_i2c_addressing_mode i2c_addressing(I2CAddressingMode mode)
 }
 
 /**
-  * Helper function to convert I2C role option.
+  * Helper function to convert I2C role option from msp-specific hal to generic hal.
   * @param[in] role i2c bus role
   * @return hal_i2c_role HAL specific I2C role option
   */

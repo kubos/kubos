@@ -24,17 +24,17 @@
 
 #include <stdint.h>
 
-/** Led 0 pin */
+/** LED 0 pin */
 #define K_LED_0 P10
-/** Red led pin */
+/** Red LED pin */
 #define K_LED_RED P10
 
-/** Led 1 pin */
+/** LED 1 pin */
 #define K_LED_1 P47
-/** Green led pin */
+/** Green LED pin */
 #define K_LED_GREEN P47
 
-/** Number of leds available */
+/** Number of LEDs available */
 #define K_LED_COUNT 2
 
 /** User button pin */
@@ -58,7 +58,7 @@ typedef struct {
 } KPinDesc;
 
 /**
-  * Enum containing gpios currently setup.
+  * Enum containing GPIOs currently setup.
   *
   * Note - This describes digital pins exposed on the MSP430F5529 launchpad.
   *
