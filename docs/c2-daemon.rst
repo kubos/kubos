@@ -5,8 +5,7 @@ Overview
 --------
 
 The C2 daemon is a service that listens to the command line client on a pair of
-named pipes. In a future release of KubOS Linux this will be migrated to using
-TCP sockets. The client submits a command and its arguments to be run. The daemon
+named pipes. The client submits a command and its arguments to be run. The daemon
 executes the command and returns the output.
 
 
