@@ -59,7 +59,7 @@ need to clone and link the necessary files. For example:
 
 ::
 
-        $ git clone https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example myproject
+        $ git clone https://github.com/kubostech/kubos myproject
         $ cd myproject/examples/kubos-linux-example
         $ kubos link --all
 
