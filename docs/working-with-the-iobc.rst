@@ -24,9 +24,8 @@ Kubos Documentation
 
 -  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
    setting up the Kubos SDK environment
--  :doc:`Creating your first project <first-project>` - Steps to
-   create and build a Kubos SDK project (Note: Written for a KubOS RT
-   end-target)
+-  :doc:`Creating your first KubOS Linux project <first-linux-project>` - Steps to
+   create and build a Kubos SDK project
 -  :doc:`SDK Command Reference <sdk-reference>` - Overview of the
    common Kubos SDK commands
 -  :doc:`KubOS Linux Overview <kubos-linux-overview>` - Overview of
