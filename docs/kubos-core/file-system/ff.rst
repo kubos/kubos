@@ -1,7 +1,7 @@
-Kubos Core Debug API
+Kubos Core FatFS API
 ====================
 
-.. doxygengroup:: KUBOS_CORE_DEBUG
+.. doxygengroup:: KUBOS_CORE_FF
     :project: kubos-core
     :members:
     :content-only: 

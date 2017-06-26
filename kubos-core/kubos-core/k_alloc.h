@@ -26,6 +26,9 @@
 
 #include <stdlib.h>
 
+/**
+ * Buffer allocation structure
+ */
 typedef struct k_alloc {
     void * (* _new)(size_t size);
     void * (* _realloc)(void * buff, size_t old_size, size_t new_size);

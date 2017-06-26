@@ -28,7 +28,6 @@ extern "C" {
  *          @ref DEBUG() will generate output only if ENABLE_DEBUG is non-zero.
  */
 
-
 /**
  *
  * @{
@@ -62,6 +61,16 @@ extern "C" {
  */
 #define DEBUG(...) DEBUG_PRINT(__VA_ARGS__)
 #else
+/**
+ * @def DEBUG
+ *
+ * @brief Print debug information
+ *
+ * If ``#define ENABLE_DEBUG 1`` has been specified, this will
+ * print debug information to stdout. Otherwise, it will do nothing.
+ *
+ * @note Another name for ``DEBUG_PRINT``
+ */
 #define DEBUG(...)
 #endif
 /** @} */

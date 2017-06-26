@@ -22,6 +22,7 @@
   */
 
 //TODO: add note. this is not the same thing as klogd (linux's kernel logging daemon)
+//TODO: these descriptions
 
 #ifndef KLOG_H
 #define KLOG_H

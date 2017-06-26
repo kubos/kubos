@@ -15,11 +15,9 @@
  * limitations under the License.
  */
 
- /**
-  * @defgroup KUBOS_CORE_UART Kubos Core UART Interface
-  * @addtogroup KUBOS_CORE_UART
-  * @{
-  */
+/**
+ * DEPRECATED. Research needed. This file appears to have been replaced by the Kubos HAL UART interface
+ */
 
 #ifndef K_UART_H
 #define K_UART_H
@@ -39,31 +37,38 @@ struct uart_conf {
 };
 
 /**
- * Initialise UART with the uart_conf data structure
- * @param uart_conf full configuration structure
+ * Initialize UART with the uart_conf data structure
+ * @param conf full uart configuration structure
  */
 void uart_init(struct uart_conf *conf);
 
 /**
- * In order to catch incoming chars use the callback.
- * Only one callback per interface.
- * @param handle uart[0,1,2,3]
- * @param callback function pointer
+ * UART callback function components
+ * @param[in] extra_data Extra input arguments
+ * @param[out] buf Pointer to data buffer
+ * @param[out] len Currently unused
+ * @param pxTaskWoken NULL if task context, pointer to variable if ISR
  */
 typedef void (*uart_callback_t) (void * extra_data, uint8_t *buf, int len, void *pxTaskWoken);
+
+/**
+ * Set callback function to be used when characters are received
+ * Note: Only one callback allowed per interface.
+ * @param arg Pointer to arguments to passthrough to callback function
+ * @param callback Pointer to callback function
+ */
 void uart_set_callback(void * arg, uart_callback_t callback);
 
 /**
  * Insert a character to the RX buffer of a uart
- * @param handle uart[0,1,2,3]
  * @param c Character to insert
+ * @param pxTaskWoken NULL if task context, pointer to variable if ISR
  */
 void uart_insert(char c, void *pxTaskWoken);
 
 /**
  * Polling putchar
  *
- * @param handle uart[0,1,2,3]
  * @param c Character to transmit
  */
 void uart_putc(char c);
@@ -71,7 +76,6 @@ void uart_putc(char c);
 /**
  * Send char buffer on UART
  *
- * @param handle uart[0,1,2,3]
  * @param buf Pointer to data
  * @param len Length of data
  */
@@ -80,7 +84,6 @@ void uart_putstr(char *buf, int len);
 /**
  * Buffered getchar
  *
- * @param handle uart[0,1,2,3]
  * @return Character received
  */
 char uart_getc(void);

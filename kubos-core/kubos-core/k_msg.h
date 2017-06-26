@@ -15,10 +15,8 @@
  * limitations under the License.
  */
 
- /**
-  * @defgroup KUBOS_CORE_MESSAGE Kubos Core Messaging Interface
-  * @addtogroup KUBOS_CORE_MESSAGE
-  * @{
+ /*
+  * DEPRECATED. This file doesn't appear to be used by anything
   */
 
 #ifndef K_MSG_H
@@ -35,5 +33,3 @@ typedef struct k_msg {
 int k_msg_send(k_msg_t * m, csp_conn_t * conn);
 
 #endif
-
-/* @} */

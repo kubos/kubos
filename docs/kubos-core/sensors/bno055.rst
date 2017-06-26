@@ -4,3 +4,4 @@ Kubos Core BNO055 Sensor API
 .. doxygengroup:: KUBOS_CORE_BNO055
     :project: kubos-core
     :members:
+    :content-only: 

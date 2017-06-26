@@ -1,4 +1,4 @@
-Kubos Core Sesnor APIs
+Kubos Core Sensor APIs
 ======================
 
 .. toctree::

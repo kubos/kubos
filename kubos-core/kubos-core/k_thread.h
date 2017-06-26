@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+/*
+ * DEPRECATED. This file doesn't appear to be used by anything.
+ */
+
 #include <stdint.h>
 
 typedef int16_t kernel_pid_t;
