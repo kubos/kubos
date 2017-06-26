@@ -40,7 +40,7 @@ KSensorStatus k_get_gyro(k_sensor_vector_t * gyro)
     KSensorStatus ret;
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
-    ret = bno055_get_data_vector(VECTOR_GYROSCOPE, gyro);
+    ret = bno055_get_data_vector(VECTOR_GYROSCOPE, (bno055_vector_data_t *) gyro);
 #else
     ret = SENSOR_NOT_FOUND;
 #endif
@@ -53,7 +53,7 @@ KSensorStatus k_get_compass(k_sensor_vector_t * mag)
     KSensorStatus ret;
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
-    ret = bno055_get_data_vector(VECTOR_MAGNETOMETER, mag);
+    ret = bno055_get_data_vector(VECTOR_MAGNETOMETER, (bno055_vector_data_t *) mag);
 #else
     ret = SENSOR_NOT_FOUND;
 #endif
@@ -66,7 +66,7 @@ KSensorStatus k_get_acceleration(k_sensor_vector_t * accel)
     KSensorStatus ret;
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
-    ret = bno055_get_data_vector(VECTOR_ACCELEROMETER, accel);
+    ret = bno055_get_data_vector(VECTOR_ACCELEROMETER, (bno055_vector_data_t *) accel);
 #else
     ret = SENSOR_NOT_FOUND;
 #endif
@@ -79,7 +79,7 @@ KSensorStatus k_get_absolute_position(k_position_vector_t * pos)
     KSensorStatus ret;
 
 #ifdef YOTTA_CFG_SENSORS_BNO055
-    ret = bno055_get_position(pos);
+    ret = bno055_get_position((bno055_quat_data_t *) pos);
 #else
     ret = SENSOR_NOT_FOUND;
 #endif
