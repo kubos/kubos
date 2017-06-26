@@ -1,50 +1,97 @@
 Queue Management
 -----------------------
 
-.. doxygengroup:: QueueManagement
+.. doxygendefine:: xQueueCreate
    :project: freertos
-   :members:
 
-.. doxygengroup:: xQueueCreate
-   :project: freertos
-   :members:
 
-.. doxygengroup:: xQueueCreateStatic
+.. doxygendefine:: xQueueCreateStatic
    :project: freertos
-   :members:
 
-.. doxygengroup::  xQueueSend
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xQueueOverwrite
+.. doxygenfunction:: vQueueDelete
    :project: freertos
-   :members:
 
-.. doxygengroup::  xQueueReceive
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xQueuePeekFromISR
+.. doxygendefine:: xQueueSend
    :project: freertos
-   :members:
 
-.. doxygengroup::  uxQueueMessagesWaiting
-   :project: freertos
-   :members:
 
-.. doxygengroup::  vQueueDelete
+.. doxygendefine:: xQueueSendFromISR
    :project: freertos
-   :members:
 
-.. doxygengroup::  xQueueSendFromISR
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xQueueOverwriteFromISR
+.. doxygendefine:: xQueueSendToBack
    :project: freertos
-   :members:
 
-.. doxygengroup::  xQueueReceiveFromISR
+
+.. doxygendefine:: xQueueSendToBackFromISR
    :project: freertos
-   :members:
+
+
+.. doxygendefine:: xQueueSendToFront
+   :project: freertos
+
+
+.. doxygendefine:: xQueueSendToFrontFromISR
+   :project: freertos
+
+
+.. doxygendefine:: xQueueReceive
+   :project: freertos
+
+
+.. doxygenfunction:: xQueueReceiveFromISR
+   :project: freertos
+
+
+.. doxygenfunction:: uxQueueMessagesWaiting
+   :project: freertos
+
+
+.. doxygenfunction:: uxQueueMessagesWaitingFromISR
+   :project: freertos
+
+
+.. doxygenfunction:: uxQueueSpacesAvailable
+   :project: freertos
+
+
+.. doxygendefine:: xQueueReset
+   :project: freertos
+
+
+.. doxygendefine:: xQueuePeek
+   :project: freertos
+
+
+.. doxygenfunction:: xQueuePeekFromISR
+   :project: freertos
+
+
+.. doxygenfunction:: vQueueAddToRegistry
+   :project: freertos
+
+
+.. doxygenfunction:: pcQueueGetName
+   :project: freertos
+
+
+.. doxygenfunction:: vQueueUnregisterQueue
+   :project: freertos
+
+
+.. doxygenfunction:: xQueueIsQueueEmptyFromISR
+   :project: freertos
+
+
+.. doxygenfunction:: xQueueIsQueueFullFromISR
+   :project: freertos
+
+
+.. doxygendefine:: xQueueOverwrite
+   :project: freertos
+
+
+.. doxygendefine:: xQueueOverwriteFromISR
+   :project: freertos

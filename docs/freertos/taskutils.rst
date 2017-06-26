@@ -1,34 +1,71 @@
-Task Utils
+Task Utilities
 -----------------------
 
-.. doxygengroup:: TaskUtils
+.. doxygenfunction:: uxTaskGetSystemState
    :project: freertos
-   :members:
 
-.. doxygengroup::  xTaskGetTickCount
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xTaskGetTickCountFromISR
+.. doxygenfunction:: xTaskGetCurrentTaskHandle
    :project: freertos
-   :members:
 
-.. doxygengroup::  uxTaskGetNumberOfTasks
-   :project: freertos
-   :members:
 
-.. doxygengroup::  pcTaskGetName
+.. doxygenfunction:: xTaskGetIdleTaskHandle
    :project: freertos
-   :members:
 
-.. doxygengroup::  pcTaskGetTaskHandle
-   :project: freertos
-   :members:
 
-.. doxygengroup::  vTaskList
+.. doxygenfunction:: uxTaskGetStackHighWaterMark
    :project: freertos
-   :members:
 
-.. doxygengroup::  vTaskGetRunTimeStats
+
+.. doxygenfunction:: eTaskGetState
    :project: freertos
-   :members:
+
+
+.. doxygenfunction:: pcTaskGetName
+   :project: freertos
+
+
+.. doxygenfunction:: xTaskGetTickCount
+   :project: freertos
+
+
+.. doxygenfunction:: xTaskGetTickCountFromISR
+   :project: freertos
+
+
+.. doxygenfunction:: xTaskGetSchedulerState
+   :project: freertos
+
+
+.. doxygenfunction:: uxTaskGetNumberOfTasks
+   :project: freertos
+
+
+.. doxygenfunction:: vTaskList
+   :project: freertos
+
+
+.. doxygenfunction:: vTaskGetRunTimeStats
+   :project: freertos
+
+
+.. doxygenfunction:: xTaskCallApplicationTaskHook
+   :project: freertos
+
+
+.. doxygenfunction:: pvTaskGetThreadLocalStoragePointer
+   :project: freertos
+
+
+.. doxygenfunction:: vTaskSetThreadLocalStoragePointer
+   :project: freertos
+
+
+.. doxygenfunction:: vTaskSetTimeOutState
+   :project: freertos
+
+
+.. doxygenfunction:: xTaskCheckForTimeOut
+   :project: freertos
+
+

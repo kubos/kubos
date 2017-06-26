@@ -1,26 +1,29 @@
-Task Notifications
+RTOS Task Notifications
 -----------------------
 
-.. doxygengroup:: TaskNotifications
+.. doxygendefine::  xTaskNotifyGive
    :project: freertos
-   :members:
 
-.. doxygengroup:: xTaskNotify
+.. doxygenfunction::  vTaskNotifyGiveFromISR
    :project: freertos
-   :members:
 
-.. doxygengroup:: xTaskNotifyWait
+.. doxygenfunction::  ulTaskNotifyTake
    :project: freertos
-   :members:
 
-.. doxygengroup::  xTaskNotifyGive
+.. doxygendefine:: xTaskNotify
    :project: freertos
-   :members:
 
-.. doxygengroup::  ulTaskNotifyTake
+.. doxygendefine:: xTaskNotifyAndQuery
    :project: freertos
-   :members:
 
-.. doxygengroup::  xTaskNotifyStateClear
+.. doxygendefine:: xTaskNotifyAndQueryFromISR
    :project: freertos
-   :members:
+
+.. doxygendefine:: xTaskNotifyFromISR
+   :project: freertos
+
+.. doxygenfunction:: xTaskNotifyWait
+   :project: freertos
+
+.. doxygenfunction:: xTaskNotifyStateClear
+   :project: freertos

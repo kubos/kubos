@@ -1,46 +1,48 @@
-Event Group
+Event Groups
 -----------------------
 
 .. doxygengroup:: EventGroup
    :project: freertos
-   :members:
 
-.. doxygengroup:: EventGroupHandle_t
+.. doxygenfunction:: xEventGroupCreate
    :project: freertos
-   :members:
 
-.. doxygengroup:: xEventGroupCreate
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xEventGroupWaitBits
+.. doxygenfunction:: xEventGroupCreateStatic
    :project: freertos
-   :members:
 
-.. doxygengroup::  xEventGroupClearBits
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xEventGroupClearBitsFromISR
+.. doxygenfunction:: xEventGroupWaitBits
    :project: freertos
-   :members:
 
-.. doxygengroup::  xEventGroupSetBits
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xEventGroupSetBitsFromISR
+.. doxygenfunction:: xEventGroupSetBits
    :project: freertos
-   :members:
 
-.. doxygengroup::  xEventGroupSync
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xEventGroupGetBits
+.. doxygendefine:: xEventGroupSetBitsFromISR
    :project: freertos
-   :members:
 
-.. doxygengroup::  xEventGroupGetBitsFromISR
+
+.. doxygenfunction:: xEventGroupClearBits
    :project: freertos
-   :members:
+
+
+.. doxygendefine:: xEventGroupClearBitsFromISR
+   :project: freertos
+
+
+.. doxygendefine:: xEventGroupGetBits
+   :project: freertos
+
+
+.. doxygenfunction:: xEventGroupGetBitsFromISR
+   :project: freertos
+
+
+.. doxygenfunction:: xEventGroupSync
+   :project: freertos
+
+
+.. doxygenfunction:: vEventGroupDelete
+   :project: freertos
