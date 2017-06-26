@@ -1,62 +1,71 @@
 Sempahores
 -----------------------
 
-.. doxygengroup:: Semaphores
+.. doxygendefine:: xSemaphoreCreateBinary
    :project: freertos
-   :members:
 
-.. doxygengroup:: vSemaphoreCreateBinary
-   :project: freertos
-   :members:
 
-.. doxygengroup:: xSemaphoreCreateBinary
+.. doxygendefine:: xSemaphoreCreateBinaryStatic
    :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreTake
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreTakeRecursive
+.. doxygendefine:: xSemaphoreCreateBinary
    :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreGive
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreGiveRecursive
+.. doxygendefine:: xSemaphoreCreateCounting
    :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreGiveFromISR
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreCreateMutex
+.. doxygendefine:: xSemaphoreCreateCountingStatic
    :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreCreateMutexStatic
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreCreateRecursiveMutex
+.. doxygendefine:: xSemaphoreCreateMutex
    :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreCreateRecursiveMutexStatic
-   :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreCreateCounting
+.. doxygendefine:: xSemaphoreCreateMutexStatic
    :project: freertos
-   :members:
 
-.. doxygengroup::  xSemaphoreCreateCountingStatic
-   :project: freertos
-   :members:
 
-.. doxygengroup::  vSemaphoreDelete
+.. doxygendefine:: xSemaphoreCreateRecursiveMutex
    :project: freertos
-   :members:
+
+
+.. doxygendefine:: xSemaphoreCreateRecursiveMutexStatic
+   :project: freertos
+
+
+.. doxygendefine:: vSemaphoreDelete
+   :project: freertos
+
+
+.. doxygendefine:: xSemaphoreGetMutexHolder
+   :project: freertos
+
+
+.. doxygendefine:: xSemaphoreTake
+   :project: freertos
+
+
+.. doxygendefine:: xSemaphoreTakeFromISR
+   :project: freertos
+
+
+.. doxygendefine:: xSemaphoreTakeRecursive
+   :project: freertos
+
+
+.. doxygendefine:: xSemaphoreGive
+   :project: freertos
+
+
+.. doxygendefine:: xSemaphoreGiveRecursive
+   :project: freertos
+
+.. doxygendefine:: xSemaphoreGiveFromISR
+   :project: freertos
+
+.. doxygendefine:: uxSemaphoreGetCount
+   :project: freertos
