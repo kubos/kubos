@@ -4,3 +4,4 @@ Kubos Core BME280 Sensor API
 .. doxygengroup:: KUBOS_CORE_BME280
     :project: kubos-core
     :members:
+    :content-only: 
