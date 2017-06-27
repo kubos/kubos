@@ -1,5 +1,7 @@
-Kubos Core BME280 Sensor API
-============================
+BME280 Sensor API
+=================
+
+API for the `BME280 humidity and pressure sensor <https://cdn-shop.adafruit.com/datasheets/BST-BME280_DS001-10.pdf>`__
 
 Enabling this sensor code requires certain configuration values to be present
 in the application's configuration json. An example is given below:
