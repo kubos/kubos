@@ -27,6 +27,8 @@ DOCS_DIRS = [
     "hal/kubos-hal-iobc",
     "hal/kubos-hal-msp430f5529",
     "hal/kubos-hal-stm32f4"
+    "services/telemetry/telemetry",
+    "services/telemetry/telemetry-linux"
 ]
 
 def gendocs_xml(dir, doxyfile, version, doc_dir):

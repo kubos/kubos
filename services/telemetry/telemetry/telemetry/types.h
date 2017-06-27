@@ -15,7 +15,7 @@
  */
 
 /**
- * @defgroup Types
+ * @defgroup Types Telemetry Types
  * @addtogroup Types
  * @brief Public telemetry types
  * @{
@@ -80,36 +80,61 @@ typedef struct
     int timestamp;
 } telemetry_packet;
 
+/**
+ * Telemetry message types. Used for serializing/deserializing messages
+ */
 typedef enum
 {
+    /*! Message containing data */
     MESSAGE_TYPE_PACKET = 0,
+    /*! Message containing subscribe request */
     MESSAGE_TYPE_SUBSCRIBE,
+    /*! Message containing unsubscribe request */
     MESSAGE_TYPE_UNSUBSCRIBE,
+    /*! Message containing disconnect request */
     MESSAGE_TYPE_DISCONNECT
 } telemetry_message_type;
 
+/**
+ * Telemetry response status
+ */
 typedef enum
 {
+    /*! Indicates valid response */
     RESPONSE_OK = 0,
+    /*! Indicates erroneous respnose */
     RESPONSE_ERR
 } telemetry_response_type;
 
-/* Structure for storing a list of telemetry sources */
+/**
+ * Structure for storing a list of telemetry sources 
+ */
 typedef struct topic_list_item
 {
+    /*! Topic id */
     uint16_t topic_id;
+    /*! Next topic list item */
     struct topic_list_item * next;
 } topic_list_item;
 
-/* Structure for storing telemetry subscribers in a list */
+/**
+ * Structure for storing telemetry subscribers in a list
+ */
 typedef struct subscriber_list_item
 {
+    /*! Subscriber active flag */
     bool active;
+    /*! Subscriber id */
     uint16_t id;
+    /*! Handle for tcp socket connection */
     socket_conn conn;
+    /*! Internal packet queue */
     csp_queue_handle_t packet_queue;
+    /*! Pointer to list of subscribed topics */
     topic_list_item * topics;
+    /*! Handle for subscriber's message receive thread */
     csp_thread_handle_t rx_thread;
+    /*! Next subscriber in list */
     struct subscriber_list_item * next;
 } subscriber_list_item;
 
