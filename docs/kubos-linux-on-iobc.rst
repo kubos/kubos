@@ -282,7 +282,7 @@ To perform a default installation, three files are needed:
   
 All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubostech/kubos-linux-build/releases>`__
 
-Download the latest KubOS_Linux.zip file and then unzip the files for the iOBC. They're located in the "KubOS_Linux/_{version}_/iOBC" folder.
+Download the latest `KubOS_Linux.zip` file and then unzip the files for the iOBC. They're located in the `KubOS_Linux/{version}/iOBC` folder.
 
 .. _install-sd:
 
