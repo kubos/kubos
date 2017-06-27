@@ -186,7 +186,9 @@ If present, the ``fs`` file system structure enables support for accessing stora
         {
             "fs": {
                 "fatfs": {
-                    "driver": "sdio"
+                    "driver": {
+                        "sdio": {}
+                    }
                 }
             }
         }
