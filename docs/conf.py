@@ -105,7 +105,9 @@ htmlhelp_basename = 'Kubosdoc'
 
 
 breathe_projects = {
-    "ipc" : "../xml/ipc"  
+    "freertos" : "../xml/freertos/os",
+    "ipc" : "../xml/ipc",
+    "libcsp" : "../xml/libcsp",
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",
     "kubos-hal-msp430f5529" : "../xml/hal/kubos-hal-msp430f5529",
