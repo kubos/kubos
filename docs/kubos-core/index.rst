@@ -11,6 +11,12 @@ TODO: Something descriptive
     core/*
 
 .. toctree::
+    :caption: File System
+    :name: file-system
+    
+    File System <file-system/index>
+
+.. toctree::
     :caption: Modules
     :name: modules
     
