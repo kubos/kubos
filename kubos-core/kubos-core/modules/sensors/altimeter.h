@@ -21,7 +21,7 @@
  * @{
  */
 
-/**
+/*
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
  *
@@ -44,24 +44,21 @@
 
 /**
  * Setup the altimeter interface and any related sensors
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_WRITE_ERROR or
- * SENSOR_NOT_FOUND on error
+ * @return KSensorStatus SENSOR_OK on success, SENSOR_WRITE_ERROR or SENSOR_NOT_FOUND on error
  */
 KSensorStatus k_initialize_altitude_sensor(void);
 
 /**
  * Reads back pressure data from related sensor
- * @param press pointer to pressure data in Pa (101325.0 - 0.0)
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR or
- * SENSOR_READ_ERROR on error
+ * @param press Pointer to pressure data in Pa (101325.0 - 0.0)
+ * @return KSensorStatus SENSOR_OK on success, SENSOR_ERROR or SENSOR_READ_ERROR on error
  */
 KSensorStatus k_get_pressure(float * press);
 
 /**
  * Reads back altitude from related sensors
- * @param alt pointer to altitude in meters (m)
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR or
- * SENSOR_READ_ERROR on error
+ * @param alt Pointer to altitude in meters (m)
+ * @return KSensorStatus SENSOR_OK on success, SENSOR_ERROR or SENSOR_READ_ERROR on error
  */
 KSensorStatus k_get_altitude(float * alt);
 

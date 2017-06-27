@@ -1,6 +1,26 @@
 Kubos Core BME280 Sensor API
 ============================
 
+Enabling this sensor code requires certain configuration values to be present
+in the application's configuration json. An example is given below:
+
+::
+
+     {
+         "sensors": {
+             "bme280": {
+                 "spi_bus": "K_SPI1",
+                 "CS":"PA4"
+             }
+         }
+     }
+ 
+This would enable the bme280 sensor code and configure it for the SPI bus
+K_SPI1 with chip select PA4.
+
+.. todo:: Add overview of how to use sensor in a program 
+
+
 .. doxygengroup:: KUBOS_CORE_BME280
     :project: kubos-core
     :members:

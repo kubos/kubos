@@ -1,6 +1,21 @@
 Kubos Core BNO055 Sensor API
 ============================
 
+Enabling this sensor code requires certain configuration values to be present
+in the application's configuration json. An example is given below:
+
+::
+
+     {
+         "sensors": {
+             "bno055": {
+                 "i2c_bus": "K_I2C1"
+             }
+         }
+     }
+     
+.. todo:: Add overview of how to use sensor in a program 
+
 .. doxygengroup:: KUBOS_CORE_BNO055
     :project: kubos-core
     :members:

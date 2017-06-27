@@ -77,16 +77,11 @@ typedef enum {
  */
 #define LOG(level, ...) if (level <= LOG_LEVEL) log_write(level, __VA_ARGS__)
 
-/**
- * @brief Logging convenience defines
- * @{
- */
-#define LOG_ERROR(...) LOG(LOG_ERROR, __VA_ARGS__)
-#define LOG_WARNING(...) LOG(LOG_WARNING, __VA_ARGS__)
-#define LOG_TELEMETRY(...) LOG(LOG_TELEMETRY, __VA_ARGS__)
-#define LOG_INFO(...) LOG(LOG_INFO, __VA_ARGS__)
-#define LOG_DEBUG(...) LOG(LOG_DEBUG, __VA_ARGS__)
-/** @} */
+#define LOG_ERROR(...) LOG(LOG_ERROR, __VA_ARGS__) /**< Error logging define for convenience */
+#define LOG_WARNING(...) LOG(LOG_WARNING, __VA_ARGS__) /**< Warning logging define for convenience */
+#define LOG_TELEMETRY(...) LOG(LOG_TELEMETRY, __VA_ARGS__) /**< Telemetry logging define for convenience */
+#define LOG_INFO(...) LOG(LOG_INFO, __VA_ARGS__) /**< Info logging define for convenience */
+#define LOG_DEBUG(...) LOG(LOG_DEBUG, __VA_ARGS__) /**< Debug logging define for convenience */
 
 #ifdef MODULE_LOG
 #include "kubos-core/common/log_module.h"
