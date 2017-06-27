@@ -262,7 +262,7 @@ static uint8_t transmit_datablock(const uint8_t * buffer, uint8_t token)
     k_spi_write(SPI_DEV, &token, 1);
     if (token != 0xFD)
     {
-        k_spi_write(SPI_DEV, buffer, SD_BLOCK_SIZE);
+        k_spi_write(SPI_DEV, (uint8_t *) buffer, SD_BLOCK_SIZE);
         k_spi_write(SPI_DEV, &dummy, 1);
         k_spi_write(SPI_DEV, &dummy, 1);
         k_spi_read(SPI_DEV, &response, 1);

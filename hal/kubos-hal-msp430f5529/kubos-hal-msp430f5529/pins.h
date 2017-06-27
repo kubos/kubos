@@ -15,38 +15,34 @@
  * limitations under the License.
  */
 /**
-  * @defgroup GPIO
-  * @addtogroup GPIO
-  * @{
-  */
-
-/**
-  *
-  * @file       pins.h
-  * @brief      Kubos-HAL-MSP430F5529 - GPIO pin defs
-  *
-  * @author     kubos.co
-  */
+ * @addtogroup MSP430F5529_HAL_GPIO
+ * @{
+ */
 
 #ifndef KUBOS_HAL_MSP430F5529_PINS_H
 #define KUBOS_HAL_MSP430F5529_PINS_H
 
-
 #include <stdint.h>
 
+/** LED 0 pin */
 #define K_LED_0 P10
+/** Red LED pin */
 #define K_LED_RED P10
 
+/** LED 1 pin */
 #define K_LED_1 P47
+/** Green LED pin */
 #define K_LED_GREEN P47
 
+/** Number of LEDs available */
 #define K_LED_COUNT 2
 
+/** User button pin */
 #define K_BUTTON_0 P21
 
 
 /**
-  * @brief Struct which contains gpio details (dir/out/in/pull pins and bit)
+  * Struct which contains GPIO details (dir/out/in/pull pins and bit)
   */
 typedef struct {
     /** PxDIR */
@@ -57,11 +53,12 @@ typedef struct {
     volatile uint8_t * in_pin;
     /** PxREN */
     volatile uint8_t * pull_pin;
+    /** Specific bit to read/write from */
     uint8_t  bit;
 } KPinDesc;
 
 /**
-  * @brief Enum containing gpios currently setup.
+  * Enum containing GPIOs currently setup.
   *
   * Note - This describes digital pins exposed on the MSP430F5529 launchpad.
   *
@@ -77,3 +74,5 @@ typedef enum {
 } KPin;
 
 #endif
+
+/* @} */
