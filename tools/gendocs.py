@@ -21,6 +21,8 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 # "ipc"]
 
 DOCS_DIRS = [
+    "freertos/os",
+    "libcsp",
     "hal/kubos-hal",
     "hal/kubos-hal-iobc",
     "hal/kubos-hal-msp430f5529",
