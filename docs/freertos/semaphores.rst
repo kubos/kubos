@@ -1,5 +1,5 @@
 Sempahores
------------------------
+----------
 
 .. doxygendefine:: xSemaphoreCreateBinary
    :project: freertos
