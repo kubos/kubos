@@ -56,7 +56,7 @@ csp_socket_t * kprv_server_setup(uint8_t port, uint8_t num_connections);
 /**
  * Attempts to accept a subscriber connection.
  * @param socket pointer to socket handle
- * @param conn pointer to pubsub_conn where connection info will be stored 
+ * @param conn pointer to pubsub_conn where connection info will be stored
  * @return bool true if successful, otherwise false
  */
 bool kprv_server_accept(csp_socket_t * socket, pubsub_conn * conn);
