@@ -391,7 +391,7 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
 static hal_i2c_handle* hal_i2c_get_handle(KI2CNum num)
 {
     //Validate I2C number
-    if(num < 0 || num > K_NUM_I2CS)
+    if(num > K_NUM_I2CS)
     {
         return 0;
     }
@@ -421,11 +421,7 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c)
             		break;
             }
 
-            if(config.clock_speed < 0)
-            {
-            	handle->hal_handle.Init.ClockSpeed = 0;
-            }
-            else if(config.clock_speed > 400000)
+            if(config.clock_speed > 400000)
             {
             	handle->hal_handle.Init.ClockSpeed = 400000;
             }
