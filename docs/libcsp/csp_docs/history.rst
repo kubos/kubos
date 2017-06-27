@@ -6,7 +6,7 @@ The idea was developed by a group of students from Aalborg University in 2008. I
 Satellites using CSP
 --------------------
 
-This is the known list of satellites or organisations that uses CSP.
+This is the known list of satellites or organizations that uses CSP.
 
  * GomSpace GATOSS GOMX-1
  * AAUSAT-3

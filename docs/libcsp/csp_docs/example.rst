@@ -1,4 +1,4 @@
-Client and server example
+Client and Server Example
 =========================
 
 The following examples show the initialization of the protocol stack and examples of client/server code.
