@@ -82,18 +82,23 @@ It covers the following tutorial documents:
     Command and Control Internal Protcol <c2-daemon>
 
 .. toctree::
-   :caption: Top-Level APIs
+   :caption: Kubos APIs
    :hidden:
-  
-    CSP <libcsp/index>
-    FreeRTOS <freertos/index>
-    IPC <ipc/index>
+   
     Kubos Core <kubos-core/index>
     Kubos HAL <kubos-hal/index>
-    Telemetry <telemetry/index>
+    Kubos IPC <ipc/index>
+    Kubos Telemetry <telemetry/index>
+    
+  
+.. toctree::
+   :caption: Third-Party APIs
+   :hidden:
+   
+    CSP <libcsp/index>
+    FreeRTOS <freertos/index>
 
 .. todo::
-    Kubos Core <@ref%20kubos-core-main>
     Telemetry <@ref%20telemetry-main>
     Telemetry Aggregator <@ref%20telemetry-aggregator-main>
     Telemetry Storage <@ref%20telemetry-storage-main>
