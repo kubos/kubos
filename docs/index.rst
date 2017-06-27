@@ -84,14 +84,14 @@ It covers the following tutorial documents:
 .. toctree::
    :caption: Top-Level APIs
    :hidden:
-
+   
+    CSP <libcsp/index>
+    FreeRTOS <freertos/index>
     Kubos HAL <kubos-hal/index>
     Telemetry <telemetry/index>
 
 .. todo::
     Kubos Core <@ref%20kubos-core-main>
-    FreeRTOS <@ref%20freertos-main>
-    CSP <@ref%20csp-main>
     Telemetry <@ref%20telemetry-main>
     Telemetry Aggregator <@ref%20telemetry-aggregator-main>
     Telemetry Storage <@ref%20telemetry-storage-main>
