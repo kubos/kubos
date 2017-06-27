@@ -16,17 +16,9 @@
  */
 
  /**
-  * @defgroup APRS
-  * @addtogroup APRS
+  * @defgroup KUBOS_CORE_APRS Kubos Core APRS Parsing Interface
+  * @addtogroup KUBOS_CORE_APRS
   * @{
-  */
-
- /**
-  *
-  * @file       aprs.h
-  * @brief      APRS parsing module.
-  *
-  * @author     kubos.co
   */
 
 #ifndef APRS_H

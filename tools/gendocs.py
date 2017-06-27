@@ -23,6 +23,7 @@ DOCS_DIRS = [
     "ipc",
     "freertos/os",
     "libcsp",
+    "kubos-core",
     "hal/kubos-hal",
     "hal/kubos-hal-iobc",
     "hal/kubos-hal-msp430f5529",

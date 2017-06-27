@@ -16,17 +16,9 @@
  */
 
  /**
-  * @defgroup GPS
-  * @addtogroup GPS
+  * @defgroup KUBOS_CORE_GPS Kubos Core GPS Interface
+  * @addtogroup KUBOS_CORE_GPS
   * @{
-  */
-
- /**
-  *
-  * @file       gps.h
-  * @brief      GPS interface module
-  *
-  * @author     kubos.co
   */
 
 #ifndef GPS_H

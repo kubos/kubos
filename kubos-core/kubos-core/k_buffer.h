@@ -16,8 +16,8 @@
  */
 
  /**
-  * @defgroup Buffer
-  * @addtogroup Buffer
+  * @defgroup KUBOS_CORE_BUFFER Kubos Core Messaging Buffer Wrapper
+  * @addtogroup KUBOS_CORE_BUFFER
   * @{
   */
 

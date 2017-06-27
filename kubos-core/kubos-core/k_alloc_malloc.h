@@ -15,14 +15,10 @@
  * limitations under the License.
  */
 
- /**
-  *
-  * @file       k_alloc_malloc.h
-  * @brief      Stdlib Allocator Implementation
-  *
-  * @author     kubos.co
-  */
-
+/**
+ * @addtogroup KUBOS_CORE_ALLOCATOR
+ * @{
+ */
 
 #ifndef K_ALLOC_MALLOC_H
 #define K_ALLOC_MALLOC_H
@@ -48,3 +44,5 @@ k_alloc_t malloc_alloc;
 
 
 #endif
+
+/* @} */

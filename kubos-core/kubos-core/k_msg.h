@@ -15,18 +15,8 @@
  * limitations under the License.
  */
 
- /**
-  * @defgroup Message
-  * @addtogroup Message
-  * @{
-  */
-
- /**
-  *
-  * @file       k_msg.h
-  * @brief      Messaging layer
-  *
-  * @author     kubos.co
+ /*
+  * DEPRECATED. This file doesn't appear to be used by anything
   */
 
 #ifndef K_MSG_H
@@ -43,5 +33,3 @@ typedef struct k_msg {
 int k_msg_send(k_msg_t * m, csp_conn_t * conn);
 
 #endif
-
-/* @} */

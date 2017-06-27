@@ -16,17 +16,9 @@
  */
 
  /**
-  * @defgroup AX25
-  * @addtogroup AX25
+  * @defgroup KUBOS_CORE_AX25 Kubos Core AX.25 Interface
+  * @addtogroup KUBOS_CORE_AX25
   * @{
-  */
-
- /**
-  *
-  * @file       ax25.h
-  * @brief      AX.25 module
-  *
-  * @author     kubos.co
   */
 
 #ifndef AX25_H
