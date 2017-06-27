@@ -87,6 +87,7 @@ It covers the following tutorial documents:
    
     CSP <libcsp/index>
     FreeRTOS <freertos/index>
+    IPC <ipc/index>
     Kubos HAL <kubos-hal/index>
     Telemetry <telemetry/index>
 
@@ -95,7 +96,6 @@ It covers the following tutorial documents:
     Telemetry <@ref%20telemetry-main>
     Telemetry Aggregator <@ref%20telemetry-aggregator-main>
     Telemetry Storage <@ref%20telemetry-storage-main>
-    IPC <@ref%20ipc-main>
 
 
 Indices and tables
