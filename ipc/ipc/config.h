@@ -15,7 +15,7 @@
  */
 
 /**
- * @defgroup Config
+ * @defgroup Config IPC Configuration
  * @addtogroup Config
  * @brief Configuration settings for IPC API
  * @{
