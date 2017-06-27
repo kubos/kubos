@@ -86,6 +86,7 @@ It covers the following tutorial documents:
    :hidden:
 
     Kubos HAL <kubos-hal/index>
+    Telemetry <telemetry/index>
 
 .. todo::
     Kubos Core <@ref%20kubos-core-main>
