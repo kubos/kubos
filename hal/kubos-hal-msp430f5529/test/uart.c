@@ -41,7 +41,7 @@
 /**
  * test_uart_initGood
  *
- * Purpose:  Test the base level uart port initialization
+ * Purpose:  Test the base level UART port initialization
  *
  */
 

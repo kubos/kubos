@@ -379,7 +379,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
     }
 
     //Calculate closest prescaler value based on desired clock frequency
-    if(conf.speed == NULL)
+    if(conf.speed == 0)
     {
     	return SPI_ERROR;
     }

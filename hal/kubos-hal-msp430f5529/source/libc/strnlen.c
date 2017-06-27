@@ -27,26 +27,14 @@
  * SUCH DAMAGE.
  */
 /**
-  * Adapted from the msp430-libc implementation of strlen.
-  */
+ * Adapted from the msp430-libc implementation of strlen.
+ */
 
-/**
-  * @defgroup syscalls
-  * @addtogroup syscalls
-  * @{
-  */
-
-/**
-  *
-  * @file       strnlen.c
-  * @brief      Kubos-HAL-MSP430F5529 - strnlen
-  *
-  */
 #include <sys/cdefs.h>
 #include <string.h>
 
 /**
-  * @brief strnlen implementation.
+  * strnlen implementation.
   */
 size_t strnlen(const char * str, size_t size)
 {
@@ -64,5 +52,3 @@ size_t strnlen(const char * str, size_t size)
     }
     return len;
 }
-
-/* @} */
