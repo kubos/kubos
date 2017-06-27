@@ -32,6 +32,10 @@ It covers the following tutorial documents:
 
   - :doc:`Installing the Kubos SDK <sdk-installing>`
   - :doc:`Creating Your First KubOS RT Project <first-rt-project>`
+  
+.. note::
+
+    This video is intended for 100% from scratch users and covers KubOS RT only.
 
 .. toctree::
    :caption: Docs
@@ -82,17 +86,23 @@ It covers the following tutorial documents:
     Command and Control Internal Protcol <c2-daemon>
 
 .. toctree::
-   :caption: Top-Level APIs
+   :caption: Kubos APIs
+   :hidden:
+   
+    Kubos Core <kubos-core/index>
+    Kubos HAL <kubos-hal/index>
+    Kubos IPC <ipc/index>
+    Kubos Telemetry <telemetry/index>
+    
+  
+.. toctree::
+   :caption: Third-Party APIs
    :hidden:
    
     CSP <libcsp/index>
     FreeRTOS <freertos/index>
-    IPC <ipc/index>
-    Kubos HAL <kubos-hal/index>
-    Telemetry <telemetry/index>
 
 .. todo::
-    Kubos Core <@ref%20kubos-core-main>
     Telemetry <@ref%20telemetry-main>
     Telemetry Aggregator <@ref%20telemetry-aggregator-main>
     Telemetry Storage <@ref%20telemetry-storage-main>
