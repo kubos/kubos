@@ -1,8 +1,11 @@
-Kubos Core Altimeter API
-========================
+Altimeter API
+=============
 
-Enabling this sensor code requires certain configuration values to be present
-in the application's configuration json. An example is given below:
+The altimeter API abstracts away the need to specify a specific sensor's init/read/write/etc functions
+in order to gather pressure and altitude data.
+
+In order to use this API, the :json:object:`sensors` object must be present in the project's `config.json` file,
+along with one of the supported child sensors. An example is given below:
 
 ::
 
@@ -14,7 +17,7 @@ in the application's configuration json. An example is given below:
          }
      }
 
-This would enable the sensor API and the bme280 sensor code and configure
+This would enable the sensor API and the BME280 sensor code and configure
 it for the SPI bus K_SPI1.
 
 See the :ref:`sensor-example` for an example of how to use this interface.

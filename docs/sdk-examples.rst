@@ -200,6 +200,8 @@ This application gives two examples of how to interact with SPI devices in a Kub
    
    In each iteration of the loop, the application will fetch and print the current temperature and humidity data from the sensor to the default UART port.
    
+.. _sd-example:
+   
 Kubos SD Example
 ----------------
 

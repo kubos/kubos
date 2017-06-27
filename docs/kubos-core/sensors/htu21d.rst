@@ -1,5 +1,7 @@
-Kubos Core HTU21D Sensor API
-============================
+HTU21D Sensor API
+=================
+
+`HTU21D humidity sensor <https://cdn-shop.adafruit.com/datasheets/1899_HTU21D.pdf>`__
 
 Enabling this sensor code requires certain configuration values to be present
 in the application's configuration json. An example is given below:

@@ -1,9 +1,11 @@
-Kubos Core IMU API
-==================
+IMU API
+=======
 
+The IMU API abstracts away the need to specify a specific sensor's init/read/write/etc functions
+in order to gather positional data.
 
-Enabling this sensor code requires certain configuration values to be present
-in the application's configuration json. An example is given below:
+In order to use this API, the :json:object:`sensors` object must be present in the project's `config.json` file,
+along with one of the supported child sensors. An example is given below:
 
 ::
 
@@ -15,7 +17,7 @@ in the application's configuration json. An example is given below:
          }
      }
  
-This would enable the sensor API and the bno055 sensor code and configure
+This would enable the sensor API and the BNO055 sensor code and configure
 it for the I2C bus K_I2C1.
 
 .. doxygengroup:: KUBOS_CORE_IMU
