@@ -3,7 +3,7 @@
         "baudrate": 115200,
         "prompt": "~ # ",
         "target": "kubos-linux-isis-gcc",
-        "timeout": 2
+        "timeout": 15
     },
     "login": {
         "username": "root",

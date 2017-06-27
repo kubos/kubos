@@ -89,6 +89,7 @@ It covers the following tutorial documents:
     FreeRTOS <freertos/index>
     IPC <ipc/index>
     Kubos HAL <kubos-hal/index>
+    Telemetry <telemetry/index>
 
 .. todo::
     Kubos Core <@ref%20kubos-core-main>
