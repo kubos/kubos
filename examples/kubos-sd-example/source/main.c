@@ -74,7 +74,7 @@ void task_sd(void * p)
     static int x = 0;
     FATFS      FatFs;
     FIL        Fil;
-    uint16_t   bw;
+    UINT   bw;
     uint16_t   ret;
     int        c;
     FILINFO    fno;
