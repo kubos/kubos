@@ -106,10 +106,16 @@ htmlhelp_basename = 'Kubosdoc'
 
 breathe_projects = {
     "kubos-hal" : "../xml/hal/kubos-hal",
-    "kubos-hal-stm32f4" : "../xml/hal/kubos-hal-stm32f4",
     "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",
+    "kubos-hal-msp430f5529" : "../xml/hal/kubos-hal-msp430f5529",
+    "kubos-hal-stm32f4" : "../xml/hal/kubos-hal-stm32f4"
     "telemetry" : "../xml/services/telemetry/telemetry",
     "telemetry-linux" : "../xml/services/telemetry/telemetry-linux"
 }
 
-extensions += ['breathe', 'sphinx.ext.todo', 'sphinxjsondomain']
+extensions += [
+    'breathe',
+    'sphinx.ext.todo',
+    'sphinxjsondomain',
+    'sphinxcontrib.plantuml'
+]
