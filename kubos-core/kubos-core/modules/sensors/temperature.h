@@ -44,22 +44,22 @@
 
 /**
  * Setup the temperature sensor interface and any related sensors
- * @return KSensorStatus, SENSOR_OK on success or SENSOR_WRITE_ERROR on error
+ * @return KSensorStatus - SENSOR_OK on success or SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_initialize_temperature_sensor(void);
 
 /**
  * Reads back temperature data from related sensor
- * @param temp pointer to temperature in celsius (-40.0 to 125.0)
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR,
+ * @param[out] temp pointer to temperature in celsius (-40.0 to 125.0)
+ * @return KSensorStatus - SENSOR_OK on success, SENSOR_ERROR,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_get_temperature(float * temp);
 
 /**
  * Reads back humidity data from related sensor
- * @param hum pointer to relative humidity in percentage (0.0 - 100.0)
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR,
+ * @param[out] hum pointer to relative humidity in percentage (0.0 - 100.0)
+ * @return KSensorStatus - SENSOR_OK on success, SENSOR_ERROR,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_get_humidity(float * hum);

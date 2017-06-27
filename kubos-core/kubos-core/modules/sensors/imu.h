@@ -20,7 +20,7 @@
  * @{
  */
 
-/**
+/*
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
  *
@@ -63,39 +63,39 @@ typedef struct
 
 /**
  * Setup the IMU interface and any related sensors
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_WRITE_ERROR,
+ * @return KSensorStatus - SENSOR_OK on success, SENSOR_WRITE_ERROR,
  * SENSOR_NOT_FOUND or SENSOR_NOT_CALIBRATED on error
  */
 KSensorStatus k_initialize_imu_sensor(void);
 
 /**
  * Reads gyroscope data from the related sensor
- * @param gyro pointer to 3D IMU vector struct
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_NOT_FOUND,
+ * @param[out] gyro pointer to 3D IMU vector struct
+ * @return KSensorStatus - SENSOR_OK on success, SENSOR_NOT_FOUND,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_get_gyro(k_sensor_vector_t * gyro);
 
 /**
  * Reads magnetometer data from the related sensor
- * @param mag pointer to 3D IMU vector struct
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_NOT_FOUND,
+ * @param[out] mag pointer to 3D IMU vector struct
+ * @return KSensorStatus - SENSOR_OK on success, SENSOR_NOT_FOUND,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_get_compass(k_sensor_vector_t * mag);
 
 /**
  * Reads accelerometer data from the related sensor
- * @param accel pointer to 3D IMU vector struct
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_NOT_FOUND,
+ * @param[out] accel pointer to 3D IMU vector struct
+ * @return KSensorStatus - SENSOR_OK on success, SENSOR_NOT_FOUND,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_get_acceleration(k_sensor_vector_t * accel);
 
 /**
  * Computes absolute position in a quaternion vector using sensor fusion
- * @param pos pointer to quaternion position struct
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_NOT_FOUND,
+ * @param[out] pos pointer to quaternion position struct
+ * @return KSensorStatus - SENSOR_OK on success, SENSOR_NOT_FOUND,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus k_get_absolute_position(k_position_vector_t * pos);

@@ -526,7 +526,7 @@ SHOW_INCLUDE_FILES     = YES
 # which file to include in order to use the member.
 # The default value is: NO.
 
-SHOW_GROUPED_MEMB_INC  = NO
+SHOW_GROUPED_MEMB_INC  = YES
 
 # If the FORCE_LOCAL_INCLUDES tag is set to YES then doxygen will list include
 # files with double quotes in the documentation rather than with sharp brackets.
@@ -634,7 +634,7 @@ ENABLED_SECTIONS       =
 # documentation regardless of this setting.
 # Minimum value: 0, maximum value: 10000, default value: 30.
 
-MAX_INITIALIZER_LINES  = 30
+MAX_INITIALIZER_LINES  = 10
 
 # Set the SHOW_USED_FILES tag to NO to disable the list of files generated at
 # the bottom of the documentation of classes and structs. If set to YES, the
@@ -2000,7 +2000,8 @@ INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = YOTTA_CFG_SENSORS_HTU21D \
                          YOTTA_CFG_SENSORS_BNO055 \
-                         YOTTA_CFG_SENSORS_BME280
+                         YOTTA_CFG_SENSORS_BME280 \
+                         YOTTA_CFG_FS_FATFS
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

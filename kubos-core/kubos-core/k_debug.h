@@ -23,12 +23,6 @@ extern "C" {
 #endif
 
 /**
- * @def ENABLE_DEBUG
- * @brief   This macro can be defined as 0 or other on a file-based level.
- *          @ref DEBUG() will generate output only if ENABLE_DEBUG is non-zero.
- */
-
-/**
  *
  * @{
  */
@@ -53,20 +47,16 @@ extern "C" {
 # endif
 
 /**
- * @def DEBUG
- *
  * @brief Print debug information to stdout
  *
- * @note Another name for ::DEBUG_PRINT
+ * @note Another name for ``DEBUG_PRINT``
  */
 #define DEBUG(...) DEBUG_PRINT(__VA_ARGS__)
 #else
 /**
- * @def DEBUG
- *
  * @brief Print debug information
  *
- * If ``#define ENABLE_DEBUG 1`` has been specified, this will
+ * If ``ENABLE_DEBUG 1`` has been specified, this will
  * print debug information to stdout. Otherwise, it will do nothing.
  *
  * @note Another name for ``DEBUG_PRINT``
