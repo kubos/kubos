@@ -57,10 +57,6 @@ Timers
    :project: freertos
 
 
-.. doxygenfunction:: pvTimerGetTimerID
-   :project: freertos
-
-
 .. doxygenfunction:: vTimerSetTimerID
    :project: freertos
 
@@ -74,9 +70,6 @@ Timers
 
 
 .. doxygenfunction:: xTimerPendFunctionCallFromISR
-   :project: freertos
-
-.. doxygenfunction:: pcTimerGetName
    :project: freertos
 
 .. doxygenfunction:: xTimerGetPeriod
