@@ -84,17 +84,17 @@ It covers the following tutorial documents:
 .. toctree::
    :caption: Top-Level APIs
    :hidden:
-
-    Kubos HAL <kubos-hal/index>
+   
     CSP <libcsp/index>
     FreeRTOS <freertos/index>
+    IPC <ipc/index>
+    Kubos HAL <kubos-hal/index>
 
 .. todo::
     Kubos Core <@ref%20kubos-core-main>
     Telemetry <@ref%20telemetry-main>
     Telemetry Aggregator <@ref%20telemetry-aggregator-main>
     Telemetry Storage <@ref%20telemetry-storage-main>
-    IPC <@ref%20ipc-main>
 
 
 Indices and tables
