@@ -20,7 +20,7 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 # "telemetry-storage"]
 
 DOCS_DIRS = [
-    "ipc"
+    "ipc",
     "freertos/os",
     "libcsp",
     "hal/kubos-hal",

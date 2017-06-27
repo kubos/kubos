@@ -29,7 +29,7 @@
 /**
  * Performs routine csp setup tasks (buffer, init, route_task) and
  * manages global init state.
- * @param csp_address [in] address to init csp instance with
+ * @param[in] csp_address address to init csp instance with
  * @return bool true if init is successful
  */
 bool kubos_csp_init(int csp_address);
