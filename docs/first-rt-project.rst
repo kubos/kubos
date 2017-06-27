@@ -1,8 +1,8 @@
-Getting Started With Kubos SDK
-==============================
+Getting Started with KubOS RT and the Kubos SDK
+===============================================
 
 This is intended to be a quick guide to creating a new KubOS RT project
-on top of the Kubos framework.
+using the Kubos SDK.
 
 Prerequisites
 -------------
@@ -27,6 +27,9 @@ box.
 Creating your Project
 ---------------------
 
+Method 1: Kubos Init
+~~~~~~~~~~~~~~~~~~~~
+
 The simplest way to create a new KubOS RT project is by using the Kubos
 CLI. The ``kubos init`` command takes a project name and creates the
 project files and folders.
@@ -44,35 +47,35 @@ project names will cause warnings.
         $ kubos init myproject
 
 The ``init`` command creates a new directory with the
-`kubos-rt-example <https://github.com/kubostech/kubos-rt-example>`__
+`kubos-rt-example <https://github.com/kubostech/kubos/tree/master/kubos-rt-example>`__
 included so you can get started right away.
 
-Cloning a Project
------------------
+Method 2: Cloning a Project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We have also created several different example Kubos projects which can
 be used as starting points.
 
 -  `Example showing basic FreeRTOS tasks and
-   CSP <https://github.com/kubostech/kubos-rt-example>`__
+   CSP <https://github.com/kubostech/kubos/tree/master/kubos-rt-example>`__
 -  `Example showing the I2C HAL and
-   sensors <https://github.com/kubostech/kubos-i2c-example>`__
+   sensors <https://github.com/kubostech/kubos/tree/master/kubos-i2c-example>`__
 -  `Example showing the SPI HAL and
-   sensors <https://github.com/kubostech/kubos-spi-example>`__
+   sensors <https://github.com/kubostech/kubos/tree/master/kubos-spi-example>`__
 -  `Example showing the sensor
-   interface <https://github.com/kubostech/kubos-sensor-example>`__
+   interface <https://github.com/kubostech/kubos/tree/master/kubos-sensor-example>`__
 -  `Example showing CSP over
-   UART <https://github.com/kubostech/kubos-csp-example>`__
+   UART <https://github.com/kubostech/kubos/tree/master/kubos-csp-example>`__
 -  `Example KubOS Linux
-   project <https://github.com/kubostech/kubos-linux-example>`__
+   project <https://github.com/kubostech/kubos/tree/master/kubos-linux-example>`__
 
-If you would like to use one of our projects, you will need to clone and
-link the necessary files. For example:
+If you would like to use one of our projects, you will need to clone the main repo and
+then link the necessary files. For example:
 
 ::
 
-        $ git clone https://github.com/kubostech/kubos-spi-example myproject
-        $ cd myproject
+        $ git clone https://github.com/kubostech/kubos myproject
+        $ cd myproject/examples/kubos-spi-example
         $ kubos link --all
 
 **Note:** It is unnecessary to run the ``kubos init`` command in this
@@ -110,8 +113,7 @@ For this example we will set the msp430f5529 target:
 
         $ kubos target msp430f5529-gcc
 
-For more information on all of the available Kubos targets and selecting
-a target see the following **`guide <sdk-cheatsheet>`__**
+For more information, see our documentation on :ref:`selecting-a-target`
 
 Building and Flashing
 ---------------------

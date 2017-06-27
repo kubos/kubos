@@ -187,8 +187,8 @@ with your projects.
 This will start an ssh session in the vagrant box with the Kubos CLI and
 all of the required dependencies installed.
 
-That's it! From here see more on :doc:`creating your first
-project <first-project>`
+That's it! From here see more on :doc:`creating your first KubOS RT project <first-rt-project>` 
+or :doc:`creating your first KubOS Linux project <first-linux-project>`
 
 After a little bit of usage you may want to look at :doc:`how to upgrade the
 Kubos SDK <sdk-upgrading>`

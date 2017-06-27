@@ -174,7 +174,7 @@ void kprv_uart_dev_terminate(KUARTNum uart)
     hal_uart_handle * handle = uart_handle(uart);
     if (handle == NULL)
     {
-        return UART_ERROR_NULL_HANDLE;
+        return;
     }
 
     hal_uart_terminate(handle);
