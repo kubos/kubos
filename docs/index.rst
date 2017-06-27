@@ -90,6 +90,7 @@ It covers the following tutorial documents:
     IPC <ipc/index>
     Kubos Core <kubos-core/index>
     Kubos HAL <kubos-hal/index>
+    Telemetry <telemetry/index>
 
 .. todo::
     Kubos Core <@ref%20kubos-core-main>
