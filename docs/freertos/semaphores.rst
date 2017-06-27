@@ -7,11 +7,7 @@ Sempahores
 
 .. doxygendefine:: xSemaphoreCreateBinaryStatic
    :project: freertos
-
-
-.. doxygendefine:: xSemaphoreCreateBinary
-   :project: freertos
-
+   
 
 .. doxygendefine:: xSemaphoreCreateCounting
    :project: freertos
