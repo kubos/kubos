@@ -128,6 +128,8 @@ If found, it connects to the CSP server's port and sends a message "Hello World"
 
 The CSP server thread checks for connections on the CSP port and then blinks the green LED if any messages are received.
 
+.. _i2c-example:
+
 Kubos I2C Example
 -----------------
 
@@ -162,6 +164,8 @@ This application gives several examples of how to interact with I2C devices in a
 3. If the `BNO055 sensor <https://cdn-shop.adafruit.com/datasheets/BST_BNO055_DS000_12.pdf>`__ has been defined in the project's config.json file, the sensor will be initialized in NDOF (Nine Degrees Of Freedom) mode and then the application will enter a loop.
    
    In each iteration of the loop, the application will fetch and print the current position data from the sensor to the default UART port.
+   
+.. _spi-example:
 
 Kubos SPI Example
 -----------------
