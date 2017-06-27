@@ -32,6 +32,10 @@ It covers the following tutorial documents:
 
   - :doc:`Installing the Kubos SDK <sdk-installing>`
   - :doc:`Creating Your First KubOS RT Project <first-rt-project>`
+  
+.. note::
+
+    This video is intended for 100% from scratch users and covers KubOS RT only.
 
 .. toctree::
    :caption: Docs
