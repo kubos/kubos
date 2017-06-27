@@ -21,8 +21,7 @@
  * @{
  */
 
-/**
- *
+/*
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
  *

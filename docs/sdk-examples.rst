@@ -78,6 +78,8 @@ Every 200ms, the CSP client thread pings the CSP server's address to see if it i
 
 The CSP server thread checks for connections on the CSP port and then prints any received messages to STDOUT.
 
+.. _sensor-example:
+
 Kubos Sensor Example
 --------------------
 

@@ -17,6 +17,8 @@ in the application's configuration json. An example is given below:
 This would enable the sensor API and the bme280 sensor code and configure
 it for the SPI bus K_SPI1.
 
+See the :ref:`sensor-example` for an example of how to use this interface.
+
 .. doxygengroup:: KUBOS_CORE_ALTIMETER
     :project: kubos-core
     :members:

@@ -21,7 +21,7 @@
  * @{
  */
 
-/**
+/*
  *
  * Enabling this sensor code requires certain configuration values to be present
  * in the application's configuration json. An example is given below:
@@ -46,21 +46,21 @@
 
 /**
  * Setup the I2C interface for talking with the HTU21D
- * @return KSensorStatus, SENSOR_OK on success or SENSOR_WRITE_ERROR on error
+ * @return KSensorStatus - SENSOR_OK on success or SENSOR_WRITE_ERROR on error
  */
 KSensorStatus htu21d_setup(void);
 
 /**
  * Sends temperature command and reads back temperature data
- * @param temp pointer to temperature in celsius (-40.0 to 125.0)
- * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR,
+ * @param[out] temp pointer to temperature in celsius (-40.0 to 125.0)
+ * @return KSensorStatus - SENSOR_OK on success, SENSOR_ERROR,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
 KSensorStatus htu21d_read_temperature(float * temp);
 
 /**
  * Sends humidity command and reads back humidity data
- * @param hum pointer to relative humidity in percentage (0.0 - 100.0)
+ * @param[out] hum pointer to relative humidity in percentage (0.0 - 100.0)
  * @return KSensorStatus, SENSOR_OK on success, SENSOR_ERROR,
  * SENSOR_READ_ERROR, SENSOR_WRITE_ERROR on error
  */
@@ -68,7 +68,7 @@ KSensorStatus htu21d_read_humidity(float * hum);
 
 /**
  * Sends reset command which powers sensor off and on again
- * @return KSensorStatus, SENSOR_OK on success or SENSOR_WRITE_ERROR on error
+ * @return KSensorStatus - SENSOR_OK on success or SENSOR_WRITE_ERROR on error
  */
 KSensorStatus htu21d_reset(void);
 
