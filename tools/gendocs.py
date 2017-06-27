@@ -14,9 +14,6 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 # "kubos-core", 
 # "libcsp", 
 # "freertos/os", 
-# "hal/kubos-hal-msp430f5529", 
-# "hal/kubos-hal", 
-# "hal/kubos-hal-stm32f4",
 # "services/telemetry/telemetry",
 # "services/telemetry/telemetry-linux",
 # "telemetry-aggregator",
@@ -28,6 +25,7 @@ DOCS_DIRS = [
     "libcsp",
     "hal/kubos-hal",
     "hal/kubos-hal-iobc",
+    "hal/kubos-hal-msp430f5529",
     "hal/kubos-hal-stm32f4"
 ]
 
