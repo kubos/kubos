@@ -53,7 +53,6 @@
  */
 typedef enum
 {
-    /** @cond */
     BME280_REGISTER_DIG_T1              = 0x88,
     BME280_REGISTER_DIG_T2              = 0x8A,
     BME280_REGISTER_DIG_T3              = 0x8C,

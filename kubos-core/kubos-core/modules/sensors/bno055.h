@@ -341,7 +341,7 @@ typedef struct
  * Set up default BNO055 connection
  *
  * Starts I2C bus connection with default configuration and then
- * calls ::<bno055_init>
+ * calls bno055_init
  *
  * @param[in] mode Operation mode to set sensor to after initialization completes
  * @returns KSensorStatus SENSOR_OK if successful, otherwise indicates appropriate error
@@ -367,7 +367,7 @@ KSensorStatus bno055_set_mode(bno055_opmode_t mode);
 /**
  * Get BNO055 operating mode
  *
- * @param[out] mode Sensor's current operating mode
+ * @param[out] value Sensor's current operating mode
  * @returns KSensorStatus SENSOR_OK if successful, otherwise indicates appropriate error
  */
 KSensorStatus bno055_get_mode(uint8_t * value);

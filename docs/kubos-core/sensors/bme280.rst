@@ -18,8 +18,7 @@ in the application's configuration json. An example is given below:
 This would enable the bme280 sensor code and configure it for the SPI bus
 K_SPI1 with chip select PA4.
 
-.. todo:: Add overview of how to use sensor in a program 
-
+See the :ref:`spi-example` for an example of how to use this sensor.
 
 .. doxygengroup:: KUBOS_CORE_BME280
     :project: kubos-core
