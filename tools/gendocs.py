@@ -5,7 +5,7 @@ import os
 
 GENERATE_XML = """
 (cat {0};
-echo ""; 
+echo "";
 echo "PROJECT_NUMBER={1}";
 echo "OUTPUT_DIRECTORY={2}";
 echo "XML_OUTPUT=.";) | doxygen -"""
@@ -17,10 +17,12 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 # "services/telemetry/telemetry",
 # "services/telemetry/telemetry-linux",
 # "telemetry-aggregator",
-# "telemetry-storage",
-# "ipc"]
+# "telemetry-storage"]
 
 DOCS_DIRS = [
+    "ipc"
+    "freertos/os",
+    "libcsp",
     "kubos-core",
     "hal/kubos-hal",
     "hal/kubos-hal-iobc",
