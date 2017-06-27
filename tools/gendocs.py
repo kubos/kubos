@@ -11,23 +11,20 @@ echo "OUTPUT_DIRECTORY={2}";
 echo "XML_OUTPUT=.";) | doxygen -"""
 
 # DOCS_DIRS = [
-# "kubos-core",
-# "libcsp",
-# "freertos/os",
-# "hal/kubos-hal-msp430f5529",
-# "hal/kubos-hal",
-# "hal/kubos-hal-stm32f4",
+# "kubos-core", 
+# "libcsp", 
+# "freertos/os", 
 # "services/telemetry/telemetry",
 # "services/telemetry/telemetry-linux",
 # "telemetry-aggregator",
-# "telemetry-storage",
-# "ipc"]
+# "telemetry-storage"]
 
 DOCS_DIRS = [
-"hal/kubos-hal",
-"hal/kubos-hal-stm32f4",
-"hal/kubos-hal-iobc",
-"ipc"
+    "ipc"
+    "hal/kubos-hal",
+    "hal/kubos-hal-iobc",
+    "hal/kubos-hal-msp430f5529",
+    "hal/kubos-hal-stm32f4"
 ]
 
 def gendocs_xml(dir, doxyfile, version, doc_dir):

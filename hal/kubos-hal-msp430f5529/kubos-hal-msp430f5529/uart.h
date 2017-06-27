@@ -14,18 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @addtogroup MSP430F5529_HAL_UART
+ * @{
+ */
+
 #if (defined YOTTA_CFG_HARDWARE_UART) && (YOTTA_CFG_HARDWARE_UART_COUNT > 0)
-#ifndef K_UART_H
-#define K_UART_H
+#ifndef KUBOS_HAL_MSP430F5529_UART_H
+#define KUBOS_HAL_MSP430F5529_UART_H
 
 #include "kubos-hal/uart.h"
 
 /**
- * Internal function to get appropriate uart handle based on uart num
- * @param uart uart bus num
+ * Internal function to get appropriate UART handle based on UART num
+ * @param[in] uart UART bus num
  * @return hal_uart_handle pointer
  */
-hal_uart_handle * uart_handle(KUARTNum uart)
+hal_uart_handle *uart_handle(KUARTNum uart);
 
 #endif
 #endif
+
+/* @} */

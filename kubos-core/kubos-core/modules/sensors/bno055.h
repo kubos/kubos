@@ -257,7 +257,7 @@ KSensorStatus bno055_get_temperature(int8_t * temp);
 KSensorStatus bno055_get_sensor_offset_struct(bno055_offsets_t * offsets_type);
 KSensorStatus bno055_set_sensor_offset_struct(const bno055_offsets_t offsets_type);
 
-KSensorStatus bno055_check_calibration(uint8_t * count, uint8_t limit, bno055_calibration_data_t * calib);
+KSensorStatus bno055_check_calibration(uint8_t * count, uint8_t limit, bno055_offsets_t * calib);
 
 #endif
 #endif

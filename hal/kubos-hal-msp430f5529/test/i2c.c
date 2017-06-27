@@ -67,7 +67,7 @@ void test_i2c_setup(void)
 /**
  * test_i2c_initNoConfig
  *
- * Purpose:  Test the base level i2c port initialization without giving a
+ * Purpose:  Test the base level I2C port initialization without giving a
  *  configuration profile.
  *
  */
@@ -85,7 +85,7 @@ static void test_i2c_initNoConfig(void)
 /**
  * test_i2c_initGood
  *
- * Purpose:  Test the base level i2c port initialization
+ * Purpose:  Test the base level I2C port initialization
  *
  */
 
@@ -122,7 +122,7 @@ static void test_i2c_initBad(void)
     int ret;
 
     ret = kprv_i2c_dev_init(K_NUM_I2CS+1);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_ERROR_NULL_HANDLE, ret, "Successfully initialized fake i2c port?");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_ERROR_NULL_HANDLE, ret, "Successfully initialized fake I2C port?");
 
 }
 
@@ -173,7 +173,7 @@ static void test_i2c_termBad(void)
     int ret;
 
     ret = kprv_i2c_dev_terminate(K_NUM_I2CS+1);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_ERROR_NULL_HANDLE, ret, "Successfully terminated fake i2c port?");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(I2C_ERROR_NULL_HANDLE, ret, "Successfully terminated fake I2C port?");
 
 }
 
@@ -393,7 +393,7 @@ static void test_i2c_addrModeRead(void)
 
     uint8_t value = 0;
 
-    //Set up i2c master port configuration
+    //Set up I2C master port configuration
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_10BIT,
         .role = K_MASTER,
@@ -429,7 +429,7 @@ static void test_i2c_addrModeWrite(void)
     int ret;
     uint8_t buffer[2] = {(uint8_t)61, 0x00};
 
-    //Set up i2c master port configuration
+    //Set up I2C master port configuration
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_10BIT,
         .role = K_MASTER,
@@ -462,7 +462,7 @@ static void test_i2c_slave(void)
 {
     int ret;
 
-    //Set up i2c master port configuration
+    //Set up I2C master port configuration
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_7BIT,
         .role = K_SLAVE,
@@ -493,7 +493,7 @@ static void test_i2c_clockHigh(void)
     uint8_t buffer[2] = {(uint8_t)61, 0x00};
     uint8_t value;
 
-    //Set up i2c master port configuration
+    //Set up I2C master port configuration
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_7BIT,
         .role = K_MASTER,
@@ -575,7 +575,7 @@ static void test_i2c_clockZero(void)
     uint8_t buffer[2] = {(uint8_t)61, 0x00};;
     uint8_t value;
 
-    //Set up i2c master port configuration
+    //Set up I2C master port configuration
     KI2CConf conf = {
         .addressing_mode = K_ADDRESSINGMODE_7BIT,
         .role = K_MASTER,

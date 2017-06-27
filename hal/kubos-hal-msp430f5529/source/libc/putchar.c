@@ -13,23 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
-  * @defgroup syscalls
-  * @addtogroup syscalls
-  * @{
-  */
 
-/**
-  *
-  * @file       putchar.c
-  * @brief      Kubos-HAL-MSP430F5529 - putchar
-  *
-  * @author     kubos.co
-  */
 #include "kubos-hal/uart.h"
 
 /**
-  * @brief uart putchar implementation using default console
+  * UART putchar implementation using default console
   */
 int putchar(int c)
 {
@@ -40,5 +28,3 @@ int putchar(int c)
     return -1;
 #endif
 }
-
-/* @} */
