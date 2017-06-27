@@ -54,6 +54,8 @@ Kubos uses the yotta build/module system, which is where this file
 structure comes from. You can read more about yotta
 `here <http://yottadocs.mbed.com/>`__.
 
+.. _selecting-a-target:
+
 Selecting a Target
 ------------------
 
@@ -61,33 +63,30 @@ Kubos needs to know which target you intend to build for so it can
 select the proper cross compiler. Kubos currently supports several
 different targets:
 
-+--------------+-----------------------------------------+
-| MCU Family   | Board                                   |
-+==============+=========================================+
-| STM32F4      | STM32F407 Discovery Board               |
-+--------------+-----------------------------------------+
-|              | STM32F405 PyBoard                       |
-+--------------+-----------------------------------------+
-|              | STM32F405 NanoAvionics SatBus 3C0 OBC   |
-+--------------+-----------------------------------------+
-| MSP430       | MSP430F5529 Launchpad                   |
-+--------------+-----------------------------------------+
-| ISIS         | ISIS-OBC                                |
-+--------------+-----------------------------------------+
++------------+----------------------+-------------------------------------------+--------------+
+| MCU Family | Kubos Target         | Description                               | Supported OS |
++============+======================+===========================================+==============+
+| STM32F4    | stm32f407-disco-gcc  | STM32F407 Discovery Board                 | KubOS RT     |
++------------+----------------------+-------------------------------------------+--------------+
+|            | pyboard-gcc          | STM32F405 PyBoard                         | KubOS RT     |
++------------+----------------------+-------------------------------------------+--------------+
+|            | na-satbus-3c0-gcc    | STM32F405 NanoAvionics SatBus 3c0 OBC     | KubOS RT     |
++------------+----------------------+-------------------------------------------+--------------+
+| MSP430     | msp430f5529-gcc      | MSP430F5529 Launchpad                     | KubOS RT     |
++------------+----------------------+-------------------------------------------+--------------+
+| ISIS       | kubos-linux-isis-gcc | ISIS-OBC                                  | KubOS Linux  |
++------------+----------------------+-------------------------------------------+--------------+
+| (Vagrant)  | x86-linux-native     | Native target for the Kubos Vagrant image | KubOS Linux  |
++------------+----------------------+-------------------------------------------+--------------+
 
-The respective commands to select those targets are as follows.
+To select a target, use the ``kubos target`` command with the appropriate value from the
+"Kubos Target" column. 
+
+For example
 
 ::
 
         $ kubos target stm32f407-disco-gcc
-
-        $ kubos target pyboard-gcc
-
-        $ kubos target na-satbus-3c0-gcc
-
-        $ kubos target msp430f5529-gcc
-
-        $ kubos target kubos-linux-isis-gcc
 
 To see all of the available targets run:
 
