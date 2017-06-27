@@ -1,0 +1,58 @@
+{
+    "device": {
+        "baudrate": 115200,
+        "prompt": "~ # ",
+        "target": "kubos-linux-isis-gcc",
+        "timeout": 15
+    },
+    "login": {
+        "username": "root",
+        "password": "Kubos123"
+    },
+    "tests": [
+        {
+            "name": "Hello World Script Test",
+            "abort_on_failure": true,
+            "test_command" : "/home/system/usr/local/bin/hello_world.sh",
+            "flash_source": "./hello-world/script/hello_world.sh",
+            "expected_test_output": "Hello World!"
+        },
+        {
+            "name": "Hello World Compilation Test",
+            "abort_on_failure": true,
+            "test_command" : "/home/system/usr/bin/hello-world",
+            "build_source": "./hello-world",
+            "expected_test_output": "Hello World!"
+        },
+        {
+            "name": "C2 Ping Test",
+            "test_command" : "c2 core ping",
+            "expected_is_regex": true,
+            "expected_test_output": "Return Code: 0\nExecution Time \\d\\.\\d{6}\nOutput: Pong!"
+        },
+        {
+            "name": "iOBC Supervisor Test",
+            "test_command": "/home/system/usr/bin/iobc-supervisor-test",
+            "build_source": "./iobc-supervisor-test",
+            "expected_test_output": "Supervisor Communication Successful!"
+        },
+        {
+            "name": "Telemetry Add Publisher",
+            "test_command": "telemetry-add-publisher",
+            "build_source": "./telemetry-add-publisher",
+            "expected_test_output": "Telemetry publish success"
+        },
+        {
+            "name": "Telemetry Add Subscriber",
+            "test_command": "telemetry-add-subscriber",
+            "build_source": "./telemetry-add-subscriber",
+            "expected_test_output": "Telemetry subscribe success"
+        },
+        {
+            "name": "LSM303DLHC I2C Test",
+            "build_source": "lsm303dlhc-i2c",
+            "test_command": "lsm303dlhc-i2c",
+            "expected_test_output": "LSM303DLHC I2C test completed successfully!"
+        }
+    ]
+}

@@ -90,6 +90,7 @@ bool core_parse_args(int argc, char ** argv, char * cmd_string)
     return true;
 }
 
+
 int get_and_run_command(char * command_name)
 {
     unsigned long hash = get_hash(command_name);
