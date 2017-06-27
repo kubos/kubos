@@ -1,0 +1,24 @@
+BNO055 Sensor API
+=================
+
+API for the `BNO055 absolute orientation sensor <https://cdn-shop.adafruit.com/datasheets/BST_BNO055_DS000_12.pdf>`__
+
+Enabling this sensor code requires certain configuration values to be present
+in the application's configuration json. An example is given below:
+
+::
+
+     {
+         "sensors": {
+             "bno055": {
+                 "i2c_bus": "K_I2C1"
+             }
+         }
+     }
+     
+See the :ref:`i2c-example` for an example of how to use this sensor.
+
+.. doxygengroup:: KUBOS_CORE_BNO055
+    :project: kubos-core
+    :members:
+    :content-only: 

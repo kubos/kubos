@@ -78,6 +78,8 @@ Every 200ms, the CSP client thread pings the CSP server's address to see if it i
 
 The CSP server thread checks for connections on the CSP port and then prints any received messages to STDOUT.
 
+.. _sensor-example:
+
 Kubos Sensor Example
 --------------------
 
@@ -128,6 +130,8 @@ If found, it connects to the CSP server's port and sends a message "Hello World"
 
 The CSP server thread checks for connections on the CSP port and then blinks the green LED if any messages are received.
 
+.. _i2c-example:
+
 Kubos I2C Example
 -----------------
 
@@ -162,6 +166,8 @@ This application gives several examples of how to interact with I2C devices in a
 3. If the `BNO055 sensor <https://cdn-shop.adafruit.com/datasheets/BST_BNO055_DS000_12.pdf>`__ has been defined in the project's config.json file, the sensor will be initialized in NDOF (Nine Degrees Of Freedom) mode and then the application will enter a loop.
    
    In each iteration of the loop, the application will fetch and print the current position data from the sensor to the default UART port.
+   
+.. _spi-example:
 
 Kubos SPI Example
 -----------------
@@ -193,6 +199,8 @@ This application gives two examples of how to interact with SPI devices in a Kub
 2. If the `BME280 sensor <https://cdn-shop.adafruit.com/datasheets/1899_HTU21D.pdf>`__ has been defined in the project's config.json file, the appropriate initialization calls will be made and then the application will enter a loop.
    
    In each iteration of the loop, the application will fetch and print the current temperature and humidity data from the sensor to the default UART port.
+   
+.. _sd-example:
    
 Kubos SD Example
 ----------------
