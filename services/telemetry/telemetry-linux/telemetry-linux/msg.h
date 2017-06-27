@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <telemetry/types.h>
-#include <tinycbor/CBOR.h>
+#include <tinycbor/cbor.h>
 
 /**
  * Parses out the message type from an encoded message
