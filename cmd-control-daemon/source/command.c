@@ -21,11 +21,14 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <command-and-control/types.h>
+
 #include "cmd-control-daemon/daemon.h"
 #include "cmd-control-daemon/logging.h"
 #include "tinycbor/cbor.h"
 
 #define CBOR_BUF_SIZE YOTTA_CFG_CSP_MTU
+#define CMD_STR_LEN 150
 
 
 bool cnc_daemon_parse_command_cbor(csp_packet_t * packet, char * command)
@@ -68,68 +71,6 @@ bool file_exists(char * path) //Should this live in a higher level module utilit
         return true;
     }
     return false;
-}
-
-
-bool cnc_daemon_load_command(CNCWrapper * wrapper, void ** handle, lib_function * func)
-{
-    int return_code;
-    char so_path[SO_PATH_LENGTH];
-
-    if (wrapper == NULL || handle == NULL || func == NULL)
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
-        return false;
-    }
-
-    // so_len - the format specifier length (-2) + the null character (+1) leading to the -1
-    int so_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
-    snprintf(so_path, so_len, MODULE_REGISTRY_DIR, wrapper->command_packet->cmd_name);
-
-    if (!file_exists(so_path))
-    {
-        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Requested library %s does not exist\n", so_path);
-        wrapper->err = true;
-        snprintf(wrapper->output, sizeof(wrapper->output) - 1,"The command library %s, does not exist\n", so_path);
-        return false;
-    }
-
-    *handle = dlopen(so_path, RTLD_NOW | RTLD_GLOBAL);
-
-    if (*handle == NULL)
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Handle to shared library is NULL... aborting command\n");
-        wrapper->err = true;
-        snprintf(wrapper->output, sizeof(wrapper->output) - 1, "Unable to open lib: %s\n", dlerror());
-        return false;
-    }
-
-    switch (wrapper->command_packet->action)
-    {
-        case EXECUTE:
-            *func = dlsym(*handle, "execute");
-            break;
-        case STATUS:
-            *func = dlsym(*handle, "status");
-            break;
-        case OUTPUT:
-            *func = dlsym(*handle, "output");
-            break;
-        case HELP:
-            *func = dlsym(*handle, "help");
-            break;
-        default:
-            snprintf(wrapper->output, sizeof(wrapper->output) - 1, "Unable to open lib: %s\n", dlerror());
-            return false;
-    }
-
-    if (func == NULL)
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "The function loaded is NULL, aborting command.\n");
-        snprintf(wrapper->output, sizeof(wrapper->output) - 1, "The requested symbol doesn't exist\n");
-        return false;
-    }
-    return true;
 }
 
 
@@ -186,9 +127,63 @@ bool cnc_daemon_run_command(CNCWrapper * wrapper, void ** handle, lib_function f
 }
 
 
+bool append_str(char * str, int * size, char * new_str)
+{
+    int result;
+
+    if (str == NULL || size == NULL || new_str == NULL)
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
+        return false;
+    }
+
+    result = snprintf(str + *size, CMD_STR_LEN - *size, new_str);
+
+    if (result < 0)
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error appending string: %s to buffer: %s\nerror: %i\n", new_str, str, result);
+        return false;
+    }
+
+    *size += result;
+    return true;
+}
+
+
+bool assemble_cmd_string(char * cmd_str, char * exe_path, CNCWrapper * wrapper)
+{
+    int i, used_size;
+    int size = 0;
+
+    if (cmd_str == NULL || exe_path == NULL || wrapper == NULL)
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "%s called with a NULL pointer\n", __func__);
+        return false;
+    }
+
+    if (!append_str(cmd_str, &size, exe_path))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an error processing the command\n");
+        return false;
+    }
+
+    for (i = 0; i < wrapper->command_packet->arg_count; i++)
+    {
+        append_str(cmd_str, &size, " ");
+        append_str(cmd_str, &size, wrapper->command_packet->args[i]);
+    }
+}
+
+
 bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
 {
-    void * handle;
+    char exe_path[SO_PATH_LENGTH]   = {0};
+    char cmd_str[CMD_STR_LEN]       = {0};
+    char buf[RES_PACKET_STDOUT_LEN] = {0};
+    clock_t start_time, end_time;
+    FILE * fptr;
+    int  exe_len, return_code;
+    int  size = 0;
 
     if (wrapper == NULL)
     {
@@ -196,25 +191,55 @@ bool cnc_daemon_load_and_run_command(CNCWrapper * wrapper)
         return false;
     }
 
-    lib_function func = NULL;
+    // exe_len - the format specifier length (-2) + the null character (+1) leading to the -1
+    exe_len = strlen(MODULE_REGISTRY_DIR) + strlen(wrapper->command_packet->cmd_name) - 1;
 
-    if (!cnc_daemon_load_command(wrapper, &handle, &func))
+    if (exe_len > CMD_STR_LEN)
     {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Failed to load command.\n");
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "The path the executable is too long to fit into the command string\n");
         wrapper->err = true;
-        cnc_daemon_send_result(wrapper);
-        return false;
-    }
-    if (!cnc_daemon_run_command(wrapper, &handle, func))
-    {
-        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Failed to run command\n");
-        wrapper->err = true;
+        snprintf(wrapper->output, sizeof(wrapper->output), "The path to the executable is too long to fit into the command string\n");
         cnc_daemon_send_result(wrapper);
         return false;
     }
 
-    //Running the command succeeded
-    KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "Command Succeeded. Sending Output...\n");
-    return cnc_daemon_send_result(wrapper);
+    snprintf(exe_path, exe_len, MODULE_REGISTRY_DIR, wrapper->command_packet->cmd_name);
+
+    if (!file_exists(exe_path))
+    {
+        KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Requested binary %s does not exist\n", exe_path);
+        wrapper->err = true;
+        snprintf(wrapper->output, sizeof(wrapper->output),"The command binary %s, does not exist\n", exe_path);
+        cnc_daemon_send_result(wrapper);
+        return false;
+    }
+
+    if (!assemble_cmd_string(cmd_str, exe_path, wrapper))
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an issue procesing the command string.\n");
+        snprintf(wrapper->response_packet->output, RES_PACKET_STDOUT_LEN, "There was an issue procesing the command string.\n");
+        return false;
+    }
+
+    KLOG_INFO(&log_handle, LOG_COMPONENT_NAME, "Running command: '%s'\n", cmd_str);
+
+    start_time = clock();
+    fptr = popen(cmd_str, "r");
+    if (fptr == NULL)
+    {
+        KLOG_ERR(&log_handle, LOG_COMPONENT_NAME, "There was an issue starting the command process %i\n", fptr);
+        snprintf(wrapper->response_packet->output, RES_PACKET_STDOUT_LEN, "There was an issue starting the command process\n");
+        return false;
+    }
+
+    while (fgets(buf, RES_PACKET_STDOUT_LEN, fptr) != NULL) {
+        size += snprintf(wrapper->response_packet->output + size, RES_PACKET_STDOUT_LEN - size, "%s", buf);
+    }
+
+    wrapper->response_packet->return_code = pclose(fptr);
+    end_time = clock();
+    wrapper->response_packet->execution_time = (double)(end_time - start_time) / (CLOCKS_PER_SEC/1000); //execution time in milliseconds
+    cnc_daemon_send_result(wrapper);
+    return true;
+
 }
-

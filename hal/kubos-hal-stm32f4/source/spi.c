@@ -14,25 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-   * @defgroup SPI
-   * @addtogroup SPI
-   * @{
-   */
+/**
+ * @addtogroup STM32F4_HAL_SPI
+ * @{
+ */
 #if (defined YOTTA_CFG_HARDWARE_SPI) && (YOTTA_CFG_HARDWARE_SPI_COUNT > 0)
 #include "kubos-hal-stm32f4/spi.h"
 #include "kubos-hal-stm32f4/pins.h"
 
 /**
  * Fetches SPI bus data structure
- * @param num SPI bus num to fetch
+ * @param[in] spi SPI bus num to fetch
  * @return hal_spi_handle* pointer to data structure
  */
 static hal_spi_handle * hal_spi_get_handle(KSPINum spi);
 
 /**
  * Initializes SPI bus structure with data needed to setup hardware
- * @param spi higher level hal SPI data
+ * @param[in] spi higher level HAL SPI data
  * @return hal_spi_handle* NULL if bad bus num, otherwise data ready for dev setup
  */
 static hal_spi_handle * hal_spi_device_init(KSPI * spi);
@@ -40,30 +39,30 @@ static hal_spi_handle * hal_spi_device_init(KSPI * spi);
 /**
  * Initializes the SPI according to the specified parameters
  * in the configuration and creates the associated handle.
- * @param handle pointer to hal_spi_handle containing config information
+ * @param[in,out] handle pointer to hal_spi_handle containing config information
  * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
  */
 static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle);
 
 /**
  * SPI hardware cleanup and disabling
- * @param handle pointer to hal_spi_handle containing config information
+ * @param[in] handle pointer to hal_spi_handle containing config information
  */
 static void hal_spi_terminate(hal_spi_handle * handle);
 
 /**
  * Initializes the SPI bus pins.
- * @param handle pointer to hal_spi_handle containing config information
+ * @param[in] handle pointer to hal_spi_handle containing config information
  */
 static void hal_spi_gpio_init(hal_spi_handle * handle);
 
 /**
- * Static array of spi bus handles
+ * Static array of SPI bus handles
  */
 static hal_spi_handle hal_spi_dev[K_NUM_SPI];
 
 /**
- * Default spi request timeout value
+ * Default SPI request timeout value
  */
 static uint32_t spi_timeout = 1000;
 
@@ -71,7 +70,7 @@ static uint32_t spi_timeout = 1000;
 
 /**
  * Setup and enable SPI bus
- * @param spi SPI bus to initialize
+ * @param[in] spi_num SPI bus to initialize
  * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
  */
 KSPIStatus kprv_spi_dev_init(KSPINum spi_num)
@@ -91,7 +90,7 @@ KSPIStatus kprv_spi_dev_init(KSPINum spi_num)
 
 /**
  * SPI hardware cleanup and disabling
- * @param spi bus num to terminate
+ * @param[in] spi bus num to terminate
  * @return KSPIStatus SPI_OK if success, otherwise a specific error flag
  */
 KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
@@ -107,9 +106,9 @@ KSPIStatus kprv_spi_dev_terminate(KSPINum spi)
 
 /**
  * Write data over SPI bus
- * @param spi SPI bus to write to
- * @param buffer pointer to data buffer
- * @param len length of data to write
+ * @param[in] spi SPI bus to write to
+ * @param[in] buffer pointer to data buffer
+ * @param[in] len length of data to write
  * @return KSPIStatus SPI_OK on success, otherwise failure
  */
 KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
@@ -125,9 +124,9 @@ KSPIStatus kprv_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
 
 /**
  * Read data over SPI bus
- * @param spi SPI bus to read from
- * @param buffer pointer to data buffer
- * @param len length of data to read
+ * @param[in] spi SPI bus to read from
+ * @param[out] buffer pointer to data buffer
+ * @param[in] len length of data to read
  * @return KSPIStatus SPI_OK on success, otherwise failure
  */
 KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len)
@@ -143,10 +142,10 @@ KSPIStatus kprv_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len)
 
 /**
  * Write and read data over SPI bus
- * @param spi SPI bus to write to
- * @param txBuffer pointer to data buffer to write from
- * @param rxBuffer pointer to data buffer to read into
- * @param len length of data to write and read
+ * @param[in] spi SPI bus to write to
+ * @param[in] txBuffer pointer to data buffer to write from
+ * @param[out] rxBuffer pointer to data buffer to read into
+ * @param[in] len length of data to write and read
  * @return KSPIStatus SPI_OK on success, otherwise failure
  */
 KSPIStatus kprv_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer, uint32_t len)
@@ -380,7 +379,7 @@ static KSPIStatus hal_spi_hw_init(hal_spi_handle * handle)
     }
 
     //Calculate closest prescaler value based on desired clock frequency
-    if(conf.speed == NULL)
+    if(conf.speed == 0)
     {
     	return SPI_ERROR;
     }

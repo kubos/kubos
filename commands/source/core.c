@@ -15,16 +15,20 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <unistd.h>
-#include <sys/reboot.h>
-#include <sys/utsname.h>
+#include <stdint.h>
 
-#include "parser.h"
+#include <kubos-hal-iobc/supervisor.h>
+
+#include "commands/errors.h"
+#include "commands/commands.h"
+
 int parse_and_run(char * arg);
 
-int execute(int argc, char **argv)
+int main(int argc, char **argv)
 {
-    char command_string[DEFAULT_COMMAND_STR_LENGTH] = {0};
+    char command_string[DEFAULT_COMMAND_STR_LEN] = {0};
 
     if (!core_parse_args(argc, argv, command_string))
     {
@@ -33,28 +37,6 @@ int execute(int argc, char **argv)
     }
 
     return get_and_run_command(command_string);
-
-}
-
-
-int status(int argc, char **argv)
-{
-    printf("Status is not implemented for the core commands\n");
-    return 0;
-}
-
-
-int output(int argc, char **argv)
-{
-    printf("Output is not implemented for the core commands\n");
-    return 0;
-}
-
-
-int help(int argc, char **argv)
-{
-    printf("Core C&C Commands.\nUsage '<action> <subcommand name>'\n");
-    return 0;
 }
 
 
@@ -67,20 +49,78 @@ int ping()
 
 int build_info()
 {
-    struct utsname uname_data;
-    uname(&uname_data);
-    printf("Version: %s\n", uname_data.version);
-    return 0;
+    int retries;
+    bool result = false;
+    supervisor_version_t version = {0};
+
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
+    {
+        result = supervisor_get_version(&version);
+        if (result)
+        {
+            printf("iOBC Supervisor Version: %c.%c.%c\n", version.fields.major_version, version.fields.minor_version, version.fields.patch_version);
+            return NO_ERR;
+        }
+    }
+
+    printf("Error: Exceeded the maximum number of supervisor retries. Aborting the info command.\n");
+    return GENERIC_ERR;
 }
 
-int exec_reboot()
+
+int reboot()
 {
-    int res;
-    //TODO: Log (once logging is a thing): Reboot triggered by C&C at time..
-    sync(); //Sync all pending filesystem changes (Logging)
-    if (res = reboot(RB_AUTOBOOT) != 0)
+    int retries;
+    bool result = false;
+
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
     {
-        printf("There was an error rebooting the system. Received error code: %i\n", res);
-        return res;
+        result = supervisor_powercycle();
+        if (result)
+        {
+            return NO_ERR;
+        }
     }
+
+    printf("Error: Exceeded the maximum number of supervisor retries. Aborting the power cycle.\n");
+    return GENERIC_ERR;
 }
+
+
+int reset()
+{
+    int retries;
+    bool result = false;
+
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
+    {
+        result = supervisor_reset();
+        if (result)
+        {
+            return NO_ERR;
+        }
+    }
+
+    printf("Error: Exceeded the maximum number of supervisor retries. Aborting the reset\n");
+    return GENERIC_ERR;
+}
+
+
+int emergency_reset()
+{
+    int retries;
+    bool result = false;
+
+    for (retries = 0; retries < SUPERVISOR_MAX_REQUEST_RETRIES; retries++)
+    {
+        result = supervisor_emergency_reset();
+        if (result)
+        {
+            return NO_ERR;
+        }
+    }
+
+    printf("Error: Exceeded the maximum number of supervisor retries. Aborting the emergency reset\n");
+    return GENERIC_ERR;
+}
+

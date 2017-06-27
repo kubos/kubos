@@ -14,11 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- /**
-   * @defgroup I2C
-   * @addtogroup I2C
-   * @{
-   */
+/**
+ * @addtogroup STM32F4_HAL_I2C
+ * @{
+ */
 
 #if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
@@ -28,19 +27,19 @@
 #include "task.h"
 #include "stm32f4xx.h"
 
-// @TODO: This timeout value might be excessive and could be better tuned.
+/** Time out value used when checking if bit flags are set */
 #define FLAG_CHECK_TIMEOUT 200
 
 /**
- * Fetches i2c bus data structure
- * @param num i2c bus num to fetch
+ * Fetches I2C bus data structure
+ * @param[in] num I2C bus num to fetch
  * @return hal_i2c_handle* pointer to data structure
  */
 static hal_i2c_handle * hal_i2c_get_handle(KI2CNum num);
 
 /**
- * Initializes i2c bus structure with data needed to setup hardware
- * @param i2c higher level hal i2c data
+ * Initializes I2C bus structure with data needed to setup hardware
+ * @param[in] i2c higher level HAL I2C data
  * @return hal_i2c_handle* NULL if bad bus num, otherwise data ready for dev setup
  */
 static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c);
@@ -50,7 +49,7 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c);
  * in the I2C_InitTypeDef and create the associated handle.
  *
  * @note Derived from STM32CubeF4's HAL_I2C_INIT
- * @param handle pointer to hal_i2c_handle containing config information
+ * @param[in,out] handle pointer to hal_i2c_handle containing config information
  * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
  */
 static KI2CStatus hal_i2c_hw_init(hal_i2c_handle * handle);
@@ -58,29 +57,29 @@ static KI2CStatus hal_i2c_hw_init(hal_i2c_handle * handle);
 /**
  * Low level I2C hardware setup
  * @note Derived from STM32CubeF4's HAL_I2C_MspInit
- * @param handle pointer to hal_i2c_handle containing config information
+ * @param[in] handle pointer to hal_i2c_handle containing config information
  */
 static void hal_i2c_msp_init(hal_i2c_handle * handle);
 
 /**
  * I2C hardware cleanup and disabling
- * @param handle pointer to hal_i2c_handle containing config information
+ * @param[in] handle pointer to hal_i2c_handle containing config information
  */
 static void hal_i2c_terminate(hal_i2c_handle * handle);
 
 /**
  * Checks for the addr flag to be set, with builtin timeout
  * @note Derived from STM32CubeF4's I2C_WaitOnMasterAddressFlagUntilTimeout
- * @param handle Pointer to STM32CubeF4 HAL defined structure for I2C data
- * @param flag I2C flag to check
+ * @param[in] handle Pointer to STM32CubeF4 HAL defined structure for I2C data
+ * @param[in] flag I2C flag to check
  * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
  */
 static KI2CStatus hal_i2c_check_addr_timeout(I2C_HandleTypeDef * handle, uint32_t flag);
 
 /**
  * Checks for special conditions based on the flag
- * @param handle Pointer to STM32CubeF4 HAL defined structure for I2C data
- * @param flag I2C Flag that should be checked
+ * @param[in] handle Pointer to STM32CubeF4 HAL defined structure for I2C data
+ * @param[in] flag I2C Flag that should be checked
  * @return KI2CStatus I2C_OK if no special conditions found, specific error otherwise
  */
 static KI2CStatus hal_i2c_check_flag_special(I2C_HandleTypeDef * handle, uint32_t flag);
@@ -88,9 +87,9 @@ static KI2CStatus hal_i2c_check_flag_special(I2C_HandleTypeDef * handle, uint32_
 /**
  * Checks specified flag for desired state, with builtin timeout
  * @note Derived from STM32CubeF4's I2C_WaitOnFlagUntilTimeout
- * @param handle Pointer to STM32CubeF4 HAL defined structure for I2C data
- * @param flag I2C Flag that should be checked
- * @param status Indicates whether to check for flag state of SET or RESET
+ * @param[in] handle Pointer to STM32CubeF4 HAL defined structure for I2C data
+ * @param[in] flag I2C Flag that should be checked
+ * @param[in] status Indicates whether to check for flag state of SET or RESET
  * @return KI2CStatus I2C_OK if flag is set to desired value within timout, otherwise I2C_TIMEOUT
  */
 static KI2CStatus hal_i2c_check_flag_timeout(I2C_HandleTypeDef * handle, uint32_t flag, uint16_t status);
@@ -98,7 +97,7 @@ static KI2CStatus hal_i2c_check_flag_timeout(I2C_HandleTypeDef * handle, uint32_
 /**
  * Checks for btf flag to reset, with builtin timeout
  * @note Derived from STM32CubeF4's I2C_WaitOnBTFFlagUntilTimeout
- * @param handle Pointer to STM32CubeF4 HAL defined structure for I2C data
+ * @param[in] handle Pointer to STM32CubeF4 HAL defined structure for I2C data
  * @return KI2CStatus I2C_OK if btf is reset within timeout, otherwise specific error
  */
 static KI2CStatus hal_i2c_check_btf_timeout(I2C_HandleTypeDef * handle);
@@ -106,7 +105,7 @@ static KI2CStatus hal_i2c_check_btf_timeout(I2C_HandleTypeDef * handle);
 /**
  * Checks for txe flag to reset, with builtin timeout
  * @note Derived from STM32CubeF4's I2C_WaitOnBTFFlagUntilTimeout
- * @param handle Pointer to STM32CubeF4 HAL defined structure for I2C data
+ * @param[in] handle Pointer to STM32CubeF4 HAL defined structure for I2C data
  * @return KI2CStatus I2C_OK if txe is reset within timeout, otherwise specific error
  */
 static KI2CStatus hal_i2c_check_txe_timeout(I2C_HandleTypeDef * handle);
@@ -114,8 +113,8 @@ static KI2CStatus hal_i2c_check_txe_timeout(I2C_HandleTypeDef * handle);
 /**
  * Master sends slave address for read request
  * @note Derived from STM32CubeF4's I2C_MasterRequestRead
- * @param handle Pointer to STM32CubeF4 HAL defined structure for I2C data
- * @param addr target slave address
+ * @param[in] hal_handle Pointer to STM32CubeF4 HAL defined structure for I2C data
+ * @param[in] addr target slave address
  * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
 static KI2CStatus hal_i2c_master_request_read(I2C_HandleTypeDef * hal_handle, uint16_t addr);
@@ -123,9 +122,9 @@ static KI2CStatus hal_i2c_master_request_read(I2C_HandleTypeDef * hal_handle, ui
 /**
  * Sends initial receive sequence based on length of data expected
  * @note Partly derived from STM32CubeF4's HAL_I2C_Master_Receive
- * @param handle Pointer to STM32CubeF4 HAL defined structure for I2C data
- * @param addr target slave address
- * @param len length of data expected to be received
+ * @param[in] hal_handle Pointer to STM32CubeF4 HAL defined structure for I2C data
+ * @param[in] addr target slave address
+ * @param[in] len length of data expected to be received
  * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
 static KI2CStatus hal_i2c_master_setup_read(I2C_HandleTypeDef * hal_handle, uint16_t addr, int len);
@@ -133,8 +132,8 @@ static KI2CStatus hal_i2c_master_setup_read(I2C_HandleTypeDef * hal_handle, uint
 /**
  * Master sends slave address for write request
  * @note Derived from STM32CubeF4's I2C_MasterRequestWrite
- * @param handle Pointer to STM32CubeF4 HAL defined structure for I2C data
- * @param addr target slave address
+ * @param[in] hal_handle Pointer to STM32CubeF4 HAL defined structure for I2C data
+ * @param[in] addr target slave address
  * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
 static KI2CStatus hal_i2c_master_request_write(I2C_HandleTypeDef * hal_handle, uint16_t addr);
@@ -142,22 +141,22 @@ static KI2CStatus hal_i2c_master_request_write(I2C_HandleTypeDef * hal_handle, u
 /**
  * Sends initial transmit sequence
  * @note Derived from STM32CubeF4's HAL_I2C_Master_Transmit
- * @param handle Pointer to STM32CubeF4 HAL defined structure for I2C data
- * @param addr target slave address
+ * @param[in] hal_handle Pointer to STM32CubeF4 HAL defined structure for I2C data
+ * @param[in] addr target slave address
  * @return KI2CStatus I2C_OK if success, otherwise specific error
  */
 static KI2CStatus hal_i2c_master_setup_write(I2C_HandleTypeDef * hal_handle, uint16_t addr);
 
 /**
- * Static array of i2c bus handles
+ * Static array of I2C bus handles
  */
 static hal_i2c_handle hal_i2c_bus[K_NUM_I2CS];
 
 /* Functions implemented from Kubos-HAL interface */
 
 /**
- * Setup and enable i2c bus
- * @param i2c i2c bus to initialize
+ * Setup and enable I2C bus
+ * @param[in] i2c_num I2C bus to initialize
  * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
  */
 KI2CStatus kprv_i2c_dev_init(KI2CNum i2c_num)
@@ -184,8 +183,8 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c_num)
 }
 
 /**
- * i2c hardware cleanup and disabling
- * @param i2c bus num to terminate
+ * I2C hardware cleanup and disabling
+ * @param[in] i2c bus num to terminate
  * @return KI2CStatus I2C_OK if success, otherwise a specific error flag
  */
 KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
@@ -202,11 +201,11 @@ KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
 }
 
 /**
- * Write data over i2c bus as master
- * @param i2c i2c bus to write to
- * @param addr i2c address to write to
- * @param ptr pointer to data buffer
- * @param len length of data to write
+ * Write data over I2C bus as master
+ * @param[in] i2c I2C bus to write to
+ * @param[in] addr I2C address to write to
+ * @param[in] ptr pointer to data buffer
+ * @param[in] len length of data to write
  * @return KI2CStatus I2C_OK on success, otherwise failure
  */
 KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
@@ -269,11 +268,11 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
 }
 
 /**
- * Read data over i2c bus as master
- * @param i2c i2c bus to read from
- * @param addr i2c address to write to
- * @param ptr pointer to data buffer
- * @param len length of data to read
+ * Read data over I2C bus as master
+ * @param[in] i2c I2C bus to read from
+ * @param[in] addr I2C address to write to
+ * @param[out] ptr pointer to data buffer
+ * @param[in] len length of data to read
  * @return KI2CStatus I2C_OK on success, otherwise failure
  */
 KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len)
@@ -387,12 +386,12 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int le
     return ret;
 }
 
-/* Private hal functions */
+/* Private HAL functions */
 
 static hal_i2c_handle* hal_i2c_get_handle(KI2CNum num)
 {
     //Validate I2C number
-    if(num < 0 || num > K_NUM_I2CS)
+    if(num > K_NUM_I2CS)
     {
         return 0;
     }
@@ -422,11 +421,7 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c)
             		break;
             }
 
-            if(config.clock_speed < 0)
-            {
-            	handle->hal_handle.Init.ClockSpeed = 0;
-            }
-            else if(config.clock_speed > 400000)
+            if(config.clock_speed > 400000)
             {
             	handle->hal_handle.Init.ClockSpeed = 400000;
             }
@@ -448,7 +443,7 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c)
                 case K_I2C1:
                 {
                     handle->hal_handle.Instance = I2C1;
-                    /* gpio pins */
+                    /* GPIO pins */
                     handle->pins.scl = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_I2C_I2C1_SCL_PIN);
                     handle->pins.scl_mode = YOTTA_CFG_HARDWARE_I2C_I2C1_SCL_MODE;
                     handle->pins.scl_pullup = YOTTA_CFG_HARDWARE_I2C_I2C1_SCL_PULLUP;
@@ -468,7 +463,7 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c)
                 case K_I2C2:
                 {
                     handle->hal_handle.Instance = I2C2;
-                    /* gpio pins */
+                    /* GPIO pins */
                     handle->pins.scl = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_I2C_I2C2_SCL_PIN);
                     handle->pins.scl_mode = YOTTA_CFG_HARDWARE_I2C_I2C2_SCL_MODE;
                     handle->pins.scl_pullup = YOTTA_CFG_HARDWARE_I2C_I2C2_SCL_PULLUP;
@@ -488,7 +483,7 @@ static hal_i2c_handle * hal_i2c_device_init(KI2C * i2c)
                 case K_I2C3:
                 {
                     handle->hal_handle.Instance = I2C3;
-                    /* gpio pins */
+                    /* GPIO pins */
                     handle->pins.scl = STM32F4_PIN_MASK(YOTTA_CFG_HARDWARE_I2C_I2C3_SCL_PIN);
                     handle->pins.scl_mode = YOTTA_CFG_HARDWARE_I2C_I2C3_SCL_MODE;
                     handle->pins.scl_pullup = YOTTA_CFG_HARDWARE_I2C_I2C3_SCL_PULLUP;
@@ -529,7 +524,7 @@ static KI2CStatus hal_i2c_hw_init(hal_i2c_handle * handle)
 
     /* Allocate lock resource and initialize it */
     hi2c->Lock = HAL_UNLOCKED;
-    /* Init the low level hardware : GPIO, CLOCK, NVIC */
+    /* Init the low-level hardware : GPIO, CLOCK, NVIC */
     hal_i2c_msp_init(handle);
 
     /* Disable the selected I2C peripheral */

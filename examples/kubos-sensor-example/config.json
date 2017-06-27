@@ -1,0 +1,11 @@
+{
+    "sensors": {
+        "bme280": {
+            "spi bus": "K_SPI1",
+            "CS": "PA4"
+        },
+        "htu21d": {
+            "i2c_bus": "K_I2C1"
+        }
+    }
+}
