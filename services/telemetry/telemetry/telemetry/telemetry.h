@@ -15,7 +15,7 @@
  */
 
 /**
- * @defgroup Telemetry
+ * @defgroup Telemetry General Telemetry API
  * @addtogroup Telemetry
  * @brief Telemetry Public telemetry interface
  * @{
@@ -37,6 +37,10 @@
  */
 void telemetry_init(void);
 
+/**
+ * Performs basic telemetry client connection and thread initialization
+ * @note This function is only used by telemetry under Kubos RT
+ */
 void telemetry_client_init(void);
 
 /**

@@ -15,7 +15,7 @@
  */
 
 /**
- * @defgroup Config
+ * @defgroup Config Telemetry Configuration
  * @addtogroup Config
  * @brief Configuration settings for Telemetry
  * @{
@@ -61,8 +61,8 @@
 #define TELEMETRY_EXTERNAL_PORT YOTTA_CFG_TELEMETRY_EXTERNAL_PORT
 #endif
 
+/*! TCP socket port number used by telemetry server under Linux */
 #define TELEMETRY_SOCKET_PORT 8199
-
 
 /*! Max number of subscribers supported */
 #ifndef YOTTA_CFG_TELEMETRY_SUBSCRIBERS_MAX_NUM

@@ -245,11 +245,29 @@ class TestRunner(TestUtils):
 
     def login(self):
         self.logger.info('logging in')
-        self.serial_connection.write('%s\n' % str(self.config.login.username))
-        time.sleep(3)
-        self.serial_connection.write('%s\n' % str(self.config.login.password))
-        time.sleep(2)
-        self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
+        old_timeout = self.serial_connection.timeout
+        self.serial_connection.timeout = 1
+        self.serial_connection.flush()
+        self.serial_connection.reset_input_buffer()
+        self.serial_connection.write('\n\n')
+        data = self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
+        if self.config.device.prompt in data:
+            # already logged in
+            pass
+        elif "login:" in data:
+            self.serial_connection.write('%s\n' % str(self.config.login.username))
+            time.sleep(3)
+            self.serial_connection.write('%s\n' % str(self.config.login.password))
+            time.sleep(2)
+            self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
+        else:
+            self.logger.info('executable may own terminal..attempting to close')
+            self.serial_connection.write('\x03')
+            self.serial_connection.write('\n\n')
+            data = self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
+            if self.config.device.prompt not in data:
+                self.logger.error('debug terminal may not be accessible')
+        self.serial_connection.timeout = old_timeout
 
 
     def print_test_summary(self):
