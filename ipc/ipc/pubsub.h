@@ -27,7 +27,24 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
+/**
+ * PubSub connection structure ...
+ */
+typedef struct
+{
+    /**
+     * Raw network connection handle - today this is a csp connection 
+     */
+    csp_conn_t * conn_handle;
+    /**
+     * CSP socket interface
+     */
+    csp_iface_t csp_socket_if;
+    /**
+     * CSP socket handle
+     */
+    csp_socket_handle_t socket_driver;
+} pubsub_conn;
 
 /**
  * Performs the necessary setup for the telemetry server to begin
@@ -106,25 +123,6 @@ bool kprv_subscriber_read(const pubsub_conn * conn, void * buffer, int buffer_si
  * @return bool true if successful, otherwise false
  */
 bool kprv_send_csp(const pubsub_conn * conn, const void * data, uint16_t length);
-
-/**
- * PubSub connection structure ...
- */
-typedef struct
-{
-    /**
-     * Raw network connection handle - today this is a csp connection 
-     */
-    csp_conn_t * conn_handle;
-    /**
-     * CSP socket interface
-     */
-    csp_iface_t csp_socket_if;
-    /**
-     * CSP socket handle
-     */
-    csp_socket_handle_t socket_driver;
-} pubsub_conn;
 
 #endif
 
