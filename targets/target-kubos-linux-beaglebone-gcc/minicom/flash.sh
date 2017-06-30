@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Flash files to ISIS OBC board
+# Flash files to BeagleBone board
 #
 
 ##########################################################################
@@ -24,7 +24,7 @@ progress() {
   while sleep 1; do
     line=$(grep -m 1 -o -e "Bytes Sent.*\e" -e "Bytes Sent.*   " flash.log)
     printf "\033[2K${line}\r"
-  done   
+  done
 }
 
 ##########################################################################
