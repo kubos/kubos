@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # encoding: utf-8
 
 # Cubesat Space Protocol - A small network-layer protocol designed for Cubesats

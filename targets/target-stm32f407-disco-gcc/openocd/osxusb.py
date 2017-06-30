@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # poor man's "lsusb -d" for Mac OS X
 import argparse
 import plistlib

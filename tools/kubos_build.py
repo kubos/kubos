@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # common code for dealing with KubOS repo/git and yotta metadata
 import json
 import os

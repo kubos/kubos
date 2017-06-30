@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
 # KubOS Core Flight Services
 # Copyright (C) 2015 Kubos Corporation
