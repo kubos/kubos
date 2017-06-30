@@ -24,9 +24,8 @@ Kubos Documentation
 
 -  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
    setting up the Kubos SDK environment
--  :doc:`Creating your first project <first-project>` - Steps to
-   create and build a Kubos SDK project (Note: Written for a KubOS RT
-   end-target)
+-  :doc:`Creating your first KubOS Linux project <first-linux-project>` - Steps to
+   create and build a Kubos SDK project
 -  :doc:`SDK Command Reference <sdk-reference>` - Overview of the
    common Kubos SDK commands
 -  :doc:`KubOS Linux Overview <kubos-linux-overview>` - Overview of
@@ -381,7 +380,7 @@ Fully logged in, the console should look like this:
 
     Welcome to KubOS Linux
 
-    (none) login: root
+    Kubos login: root
     Password: 
     Jan  1 00:00:16 login[212]: root login on 'ttyS0'
     ~ # 
@@ -754,6 +753,8 @@ SPI
 The external SPI bus is not currently available to the userspace. It
 will be added in a future release.
 
+.. _user-accounts:
+
 User Accounts
 -------------
 
@@ -764,6 +765,12 @@ commands (``adduser``, ``useradd``, etc).
 
 All user accounts should have a home directory in the format
 '/home/{username}'.
+
+The ``passwd`` command can be used to change the password of existing user
+accounts.
+
+If you change the root user's password, be sure to also update the password in
+any :ref:`Kubos SDK project configurations <updating-credentials>`.
 
 KubOS Linux File System
 -----------------------

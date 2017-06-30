@@ -28,6 +28,7 @@ class KubosTestConfig(object):
     class Test(object):
         def __init__(self):
             self.name = None
+            self.abort_on_failure = False
             self.pre_test  = None
             self.build_source = None
             self.flash_source = None
@@ -44,7 +45,7 @@ class KubosTestConfig(object):
 
     def load_config(self, config_file):
         if not os.path.isfile(config_file):
-            #TODO: clean this up
+            # TODO: clean this up
             print >>sys.stderr, 'The config file %s does not exist. Aborting.' % config_file
             sys.exit(1)
 

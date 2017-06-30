@@ -92,7 +92,7 @@ static inline int queue_push(csp_queue_handle_t *queue, char c,
 KUART* kprv_uart_get(KUARTNum uart)
 {
 	//Validate UART number
-	if(uart < 0 || uart > (K_NUM_UARTS-1))
+	if(uart > (K_NUM_UARTS-1))
 	{
 		return NULL;
 	}

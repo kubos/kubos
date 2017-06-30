@@ -11,22 +11,30 @@
     },
     "tests": [
         {
-            "name": "Hello World Script Upload Test",
+            "name": "Hello World Script Test",
+            "abort_on_failure": true,
             "test_command" : "/home/system/usr/local/bin/hello_world.sh",
             "flash_source": "./hello-world/script/hello_world.sh",
             "expected_test_output": "Hello World!"
         },
         {
-            "name": "Hello world Compilation Test",
-            "test_command" : "/home/system/usr/bin/hello_world",
-            "build_source": "./linux/hello-world",
+            "name": "Hello World Compilation Test",
+            "abort_on_failure": true,
+            "test_command" : "/home/system/usr/bin/hello-world",
+            "build_source": "./hello-world",
             "expected_test_output": "Hello World!"
         },
         {
-            "name": "Command and Control Ping Test",
+            "name": "C2 Ping Test",
             "test_command" : "c2 core ping",
             "expected_is_regex": true,
             "expected_test_output": "Return Code: 0\nExecution Time \\d\\.\\d{6}\nOutput: Pong!"
+        },
+        {
+            "name": "Telemetry Add Publisher",
+            "test_command": "telemetry-add-publisher",
+            "build_source": "./telemetry-add-publisher",
+            "expected_test_output": "Telemetry publish success"
         }
     ]
 }

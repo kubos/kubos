@@ -2,7 +2,7 @@ Kubos SDK Example Applications
 ==============================
 
 We have provided a variety of example applications to help you get started with your Kubos project.
-These examples are located in the 'Examples' folder of the `Kubos repo <http://github.com/kubostech/kubos/examples>`__, 
+These examples are located in the 'Examples' folder of the `Kubos repo <http://github.com/kubostech/kubos/tree/master/examples>`__, 
 as well as within the `/home/vagrant/.kubos/kubos/examples` folder of the Kubos SDK box.
 
 Using an Example Application
@@ -22,7 +22,7 @@ Since the ``stm32f407-disco-gcc`` target does not support KubOS Linux, this appl
 KubOS RT Example
 ----------------
 
-`kubos-rt-example <http://github.com/kubostech/kubos/examples/kubos-rt-example>`__
+`kubos-rt-example <http://github.com/kubostech/kubos/tree/master/examples/kubos-rt-example>`__
 
 **Compatible Targets: All KubOS RT compatible targets**
 
@@ -59,7 +59,7 @@ The CSP server thread checks for connections on the CSP port and then blinks the
 KubOS Linux Example
 -------------------
 
-`kubos-linux-example <http://github.com/kubostech/kubos/examples/kubos-linux-example>`__
+`kubos-linux-example <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example>`__
 
 **Compatible Targets: All KubOS Linux compatible targets**
 
@@ -78,12 +78,14 @@ Every 200ms, the CSP client thread pings the CSP server's address to see if it i
 
 The CSP server thread checks for connections on the CSP port and then prints any received messages to STDOUT.
 
+.. _sensor-example:
+
 Kubos Sensor Example
 --------------------
 
-`kubos-sensor-example <http://github.com/kubostech/kubos/examples/kubos-sensor-example>`__
+`kubos-sensor-example <http://github.com/kubostech/kubos/tree/master/examples/kubos-sensor-example>`__
 
-**Compatible Targets: MSP430F5529, STM32F407 Discovery**
+**Compatible Targets: STM32F407 Discovery**
 
 +----------------------+------------------------+
 | High-level Component | Specific Area          |
@@ -100,19 +102,17 @@ This application provides a streamlined approach to using the BME280 humidity/pr
 Kubos CSP Example
 -----------------
 
-`kubos-csp-example <http://github.com/kubostech/kubos/examples/kubos-csp-example>`__
+`kubos-csp-example <http://github.com/kubostech/kubos/tree/master/examples/kubos-csp-example>`__
 
 **Compatible Targets: All KubOS RT compatible targets**
 
-+----------------------+-----------------+
-| High-level Component | Specific Area   |
-+======================+=================+
-| Kubos HAL [3]_       | GPIO            |
-+----------------------+-----------------+
-| CSP [4]_             | Sockets, ping   |
-+----------------------+-----------------+
-| FreeRTOS [5]_        | Threads, queues |
-+----------------------+-----------------+
++----------------------+--------------------------------+
+| High-level Component | Specific Area                  |
++======================+================================+
+| Kubos HAL [3]_       | GPIO                           |
++----------------------+--------------------------------+
+| CSP [4]_             | Sockets, ping, threads, queues |
++----------------------+--------------------------------+
 
 This application shows an example CSP interaction between client and server tasks.
 
@@ -130,10 +130,12 @@ If found, it connects to the CSP server's port and sends a message "Hello World"
 
 The CSP server thread checks for connections on the CSP port and then blinks the green LED if any messages are received.
 
+.. _i2c-example:
+
 Kubos I2C Example
 -----------------
 
-`kubos-i2c-example <http://github.com/kubostech/kubos/examples/kubos-i2c-example>`__
+`kubos-i2c-example <http://github.com/kubostech/kubos/tree/master/examples/kubos-i2c-example>`__
 
 **Compatible Targets: MSP430F5529, STM32F407 Discovery**
 
@@ -164,13 +166,15 @@ This application gives several examples of how to interact with I2C devices in a
 3. If the `BNO055 sensor <https://cdn-shop.adafruit.com/datasheets/BST_BNO055_DS000_12.pdf>`__ has been defined in the project's config.json file, the sensor will be initialized in NDOF (Nine Degrees Of Freedom) mode and then the application will enter a loop.
    
    In each iteration of the loop, the application will fetch and print the current position data from the sensor to the default UART port.
+   
+.. _spi-example:
 
 Kubos SPI Example
 -----------------
 
-`kubos-spi-example <http://github.com/kubostech/kubos/examples/kubos-spi-example>`__
+`kubos-spi-example <http://github.com/kubostech/kubos/tree/master/examples/kubos-spi-example>`__
 
-**Compatible Targets: MSP430F5529, STM32F407 Discovery**
+**Compatible Targets: STM32F407 Discovery**
 
 +----------------------+---------------+
 | High-level Component | Specific Area |
@@ -196,10 +200,12 @@ This application gives two examples of how to interact with SPI devices in a Kub
    
    In each iteration of the loop, the application will fetch and print the current temperature and humidity data from the sensor to the default UART port.
    
+.. _sd-example:
+   
 Kubos SD Example
 ----------------
 
-`kubos-sd-example <http://github.com/kubostech/kubos/examples/kubos-sd-example>`__
+`kubos-sd-example <http://github.com/kubostech/kubos/tree/master/examples/kubos-sd-example>`__
 
 **Compatible Targets: MSP430F5529, STM32F407 Discovery**
 
@@ -238,7 +244,7 @@ The application covers how to:
     **FIXME: What's the purpose of the CSP server? Anything?**
     **FIXME: Where's the Slash documentation?**
     
-    `kubos-shell-example <http://github.com/kubostech/kubos/examples/kubos-shell-example>`__
+    `kubos-shell-example <http://github.com/kubostech/kubos/tree/master/examples/kubos-shell-example>`__
     
     **Compatible Targets: All KubOS RT compatible targets** 
     

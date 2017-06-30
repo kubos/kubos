@@ -1,0 +1,28 @@
+BME280 Sensor API
+=================
+
+API for the `BME280 humidity and pressure sensor <https://cdn-shop.adafruit.com/datasheets/BST-BME280_DS001-10.pdf>`__
+
+Enabling this sensor code requires certain configuration values to be present
+in the application's configuration json. An example is given below:
+
+::
+
+     {
+         "sensors": {
+             "bme280": {
+                 "spi_bus": "K_SPI1",
+                 "CS":"PA4"
+             }
+         }
+     }
+ 
+This would enable the bme280 sensor code and configure it for the SPI bus
+K_SPI1 with chip select PA4.
+
+See the :ref:`spi-example` for an example of how to use this sensor.
+
+.. doxygengroup:: KUBOS_CORE_BME280
+    :project: kubos-core
+    :members:
+    :content-only: 
