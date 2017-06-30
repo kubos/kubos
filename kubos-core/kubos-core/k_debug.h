@@ -7,23 +7,10 @@
  */
 
  /**
-  * @defgroup Debug
-  * @addtogroup Debug
+  * @defgroup KUBOS_CORE_DEBUG Kubos Core Debugging
+  * @addtogroup KUBOS_CORE_DEBUG
   * @{
   */
-
-/**
- *
- * @file
- * @brief       Debug-header
- *
- * @details     If *ENABLE_DEBUG* is defined inside an implementation file, all
- *              calls to ::DEBUG will work the same as *printf* and output the
- *              given information to stdout. If *ENABLE_DEBUG* is not defined,
- *              all calls to ::DEBUG will be ignored.
- *
- * @author      Kaspar Schleiser <kaspar@schleiser.de>
- */
 
 #ifndef DEBUG_H
 #define DEBUG_H
@@ -34,13 +21,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * @def ENABLE_DEBUG
- * @brief   This macro can be defined as 0 or other on a file-based level.
- *          @ref DEBUG() will generate output only if ENABLE_DEBUG is non-zero.
- */
-
 
 /**
  *
@@ -67,14 +47,20 @@ extern "C" {
 # endif
 
 /**
- * @def DEBUG
- *
  * @brief Print debug information to stdout
  *
- * @note Another name for ::DEBUG_PRINT
+ * @note Another name for ``DEBUG_PRINT``
  */
 #define DEBUG(...) DEBUG_PRINT(__VA_ARGS__)
 #else
+/**
+ * @brief Print debug information
+ *
+ * If ``ENABLE_DEBUG 1`` has been specified, this will
+ * print debug information to stdout. Otherwise, it will do nothing.
+ *
+ * @note Another name for ``DEBUG_PRINT``
+ */
 #define DEBUG(...)
 #endif
 /** @} */

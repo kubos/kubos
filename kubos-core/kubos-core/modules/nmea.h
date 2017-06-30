@@ -16,19 +16,10 @@
  */
 
  /**
-  * @defgroup NMEA
-  * @addtogroup NMEA
+  * @defgroup KUBOS_CORE_NMEA Kubos Core NMEA Parsing Interface
+  * @addtogroup KUBOS_CORE_NMEA
   * @{
   */
-
- /**
-  *
-  * @file       nmea.h
-  * @brief      NMEA parsing module
-  *
-  * @author     kubos.co
-  */
-
 
 #ifndef NMEA_H
 #define NMEA_H

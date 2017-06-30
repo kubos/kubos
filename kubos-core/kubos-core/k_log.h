@@ -7,15 +7,12 @@
  */
 
  /**
-  * @defgroup Log
-  * @addtogroup Log
+  * @defgroup KUBOS_CORE_LOG Kubos Core System Logging Interface
+  * @addtogroup KUBOS_CORE_LOG
   * @{
   */
 
-/**
- *
- * @file        k_log.h
- * @brief       System logging header
+/*
  *
  * This header offers a bunch of "LOG_*" functions that, with the default
  * implementation, just use printf, but honour a verbosity level.
@@ -41,7 +38,7 @@
 #endif
 
 /**
- * @brief defined log levels
+ * @brief Defined log levels
  *
  * These are the logging levels a user can choose.
  * The idea is to set LOG_LEVEL to one of these values in the application's Makefile.
@@ -52,21 +49,21 @@
  * The log function calls of filtered messages will be optimized out at compile
  * time, so a lower log level might result in smaller code size.
  */
-enum {
+typedef enum {
     LOG_NONE,       /**< Lowest log level, will output nothing */
     LOG_ERROR,      /**< Error log level, will print only critical,
                          non-recoverable errors like hardware initialization
                          failures */
     LOG_WARNING,    /**< Warning log level, will print warning messages for
                          temporary errors */
-    LOG_TELEMETRY,  /**< special level for telemetry */
+    LOG_TELEMETRY,  /**< Special level for telemetry */
     LOG_INFO,       /**< Informational log level, will print purely
                          informational messages like successful system bootup,
                          network link state, ...*/
     LOG_DEBUG,      /**< Debug log level, printing developer stuff considered
                          too verbose for production use */
-    LOG_ALL         /**< print everything */
-};
+    LOG_ALL         /**< Print everything */
+} KLogLevel;
 
 #ifndef LOG_LEVEL
 /**
@@ -80,16 +77,11 @@ enum {
  */
 #define LOG(level, ...) if (level <= LOG_LEVEL) log_write(level, __VA_ARGS__)
 
-/**
- * @brief logging convenience defines
- * @{
- */
-#define LOG_ERROR(...) LOG(LOG_ERROR, __VA_ARGS__)
-#define LOG_WARNING(...) LOG(LOG_WARNING, __VA_ARGS__)
-#define LOG_TELEMETRY(...) LOG(LOG_TELEMETRY, __VA_ARGS__)
-#define LOG_INFO(...) LOG(LOG_INFO, __VA_ARGS__)
-#define LOG_DEBUG(...) LOG(LOG_DEBUG, __VA_ARGS__)
-/** @} */
+#define LOG_ERROR(...) LOG(LOG_ERROR, __VA_ARGS__) /**< Error logging define for convenience */
+#define LOG_WARNING(...) LOG(LOG_WARNING, __VA_ARGS__) /**< Warning logging define for convenience */
+#define LOG_TELEMETRY(...) LOG(LOG_TELEMETRY, __VA_ARGS__) /**< Telemetry logging define for convenience */
+#define LOG_INFO(...) LOG(LOG_INFO, __VA_ARGS__) /**< Info logging define for convenience */
+#define LOG_DEBUG(...) LOG(LOG_DEBUG, __VA_ARGS__) /**< Debug logging define for convenience */
 
 #ifdef MODULE_LOG
 #include "kubos-core/common/log_module.h"

@@ -19,7 +19,7 @@ class TestUtils(object):
     GREEN  = '\033[92m'
     RED    = '\033[91m'
     NORMAL = '\033[0m'
-    #TODO: Replace this class with the /tools/utils.py implementation
+    # TODO: Replace this class with the /tools/utils.py implementation
 
     def get_abs_path(self, base_dir, path):
         abs_path = os.path.normpath(os.path.join(base_dir, path))
@@ -32,24 +32,18 @@ class TestUtils(object):
         os.chdir(temp_dir)
         self.run_cmd('git', 'clone', url)
         subdir = os.listdir(temp_dir)
-        cloned_dir = os.path.join(temp_dir, subdir[0]) #there's only one sub-directory
+        cloned_dir = os.path.join(temp_dir, subdir[0]) # There's only one sub-directory
         return cloned_dir
 
 
-    def create_dummy_project(self):
+    def get_flash_project_dir(self):
         '''
-        This function creates a dummy linux project specifically for flashing
-        non-project files to the target devices. Currently this is done by:
-
-        $ kubos flash <path-to-file>
-
-        Which must be executed from a linux project directory.
+        Instead of creating a project to flash non-project files, just use the hello-world project
         '''
-        proj_name = 'dummy-project'
-        temp_dir = tempfile.mkdtemp()
-        os.chdir(temp_dir)
-        self.run_cmd('kubos', 'init', '-l', proj_name)
-        return os.path.join(temp_dir, proj_name)
+        this_dir = os.path.dirname(os.path.abspath(__file__))
+        flash_proj_dir = os.path.join(this_dir, 'hello-world')
+        self.build_flash_proj(flash_proj_dir)
+        return flash_proj_dir
 
 
     def run_cmd(self, *args, **kwargs):
@@ -73,12 +67,14 @@ class TestUtils(object):
 class TestRunner(TestUtils):
     MAX_SERIAL_READ_LEN = 500
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, specified_tests):
         self.load_configuration(config_file)
         self.setup_logger()
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
         self.test_summary = []
+        if specified_tests is not None:
+            self.remove_non_specified_tests(specified_tests)
 
 
     def setup_serial_connection(self, dev):
@@ -92,7 +88,7 @@ class TestRunner(TestUtils):
 
     def setup_logger(self):
         logger = logging.getLogger()
-        #TODO: Make the log file more configurable
+        # TODO: Make the log file more configurable
         fileHandler = logging.FileHandler("kubos_linux_test.log")
         logger.addHandler(fileHandler)
         consoleHandler = logging.StreamHandler()
@@ -102,6 +98,17 @@ class TestRunner(TestUtils):
     def load_configuration(self, config_file):
         self.config = kubos_config.KubosTestConfig()
         self.config.load_config(config_file)
+
+
+    def remove_non_specified_tests(self, specified_tests):
+        new_list = []
+        for test in self.config.tests:
+            if test.name in specified_tests:
+                self.logger.info('Leaving in test "%s" as it was specified' % test.name)
+                new_list.append(test)
+            else:
+                self.logger.info('Excluding test "%s" in' % test.name)
+        self.config.tests = new_list
 
 
     def run_tests(self):
@@ -119,7 +126,7 @@ class TestRunner(TestUtils):
             self.logger.info("Test: %s Running pre-test command: %s\n" % (test.name, test.pre_test))
             self.run_cmd(test.pre_test)
 
-        #build the project
+        # Build the project
         if test.build_source:
             resource_type = self.get_resource_type(test.build_source)
 
@@ -128,14 +135,14 @@ class TestRunner(TestUtils):
             elif resource_type == 'path':
                 proj_dir = test.build_source
             self.build_project(proj_dir)
-            #Flash the project
+            # Flash the project
             if not test.flash_source:
                 test.flash_source = proj_dir
 
         if test.flash_source:
             self.flash_project(test.flash_source)
 
-        #run the test command
+        # Run the test command
         output = self.run_serial_command(test.test_command)
         self.verify_test_output(test, output)
 
@@ -144,14 +151,13 @@ class TestRunner(TestUtils):
             self.run_cmd(test.post_test)
 
 
-    def build_project(self, proj_dir):
-        self.logger.info('Building Project: %s' % proj_dir)
-
-        if not os.path.isabs(proj):
-            path = self.get_abs_path(start_dir, proj)
-
+    def build_project(self, src):
+        self.logger.info('Building Project: %s' % src)
         start_dir = os.getcwd()
-        os.chdir(proj_dir)
+
+        if not os.path.isabs(src):
+            src = self.get_abs_path(start_dir, src)
+        os.chdir(src)
 
         self.run_cmd('kubos', 'clean')
         self.run_cmd('kubos', 'link', '--all')
@@ -172,27 +178,24 @@ class TestRunner(TestUtils):
             proj = self.get_abs_path(start_dir, proj)
 
         if os.path.isfile(proj):
-            # flash the project as a standalone file
+            # Flash the project as a standalone file
             flash_args.append(proj)
-            proj_dir = self.create_dummy_project()
+            proj_dir = self.get_flash_project_dir()
         elif os.path.isdir(proj):
-            # flash it like a regular kubos project - no additional args are needed
+            # Flash it like a regular kubos project - no additional args are needed
             proj_dir = proj
         else:
             abort('Unable to flash unknown type of resource: %s' % proj)
 
         os.chdir(proj_dir)
-        os.environ["PWD"] = proj_dir #The flash script depends on this environment variable
+        os.environ["PWD"] = proj_dir # The flash script depends on this environment variable
 
-        try:
-            ret_code = self.run_cmd(*flash_args, cwd=proj_dir)
-        except:
-            print 'excepted!'
+        ret_code = self.run_cmd(*flash_args, cwd=proj_dir)
 
         if ret_code != 0:
-            self.abort('Flashing project %s resulted in a non-zero exit code: %d.' % (proj_dir, ret_code))
+            self.abort('Flashing project %s resulted in a non-zero exit code, output: %d.' % (proj_dir, ret_code))
 
-        # flashing a file to a linux board logs us out..
+        # Flashing a file to a linux board logs us out..
         self.login()
         os.chdir(start_dir)
 
@@ -204,7 +207,7 @@ class TestRunner(TestUtils):
         '''
         self.serial_connection.write('%s\n' % str(command))
         output = self.serial_connection.read(self.MAX_SERIAL_READ_LEN).replace('\r', '')
-        # parse the output
+        # Parse the output
         command_len = len(command) + 1
         prompt_len = len(self.config.device.prompt) + 1
         cmd_output = output[command_len : -prompt_len]
@@ -224,7 +227,10 @@ class TestRunner(TestUtils):
         if passed:
             self.add_test_success("Test %s passed" % test_data.name)
         else:
-            self.abort('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
+            if test_data.abort_on_failure:
+                self.abort('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
+            else:
+                self.add_test_failure('Test: %s Failed:\n Expected:\n"%s"\n\n Did not match actual:\n"%s"' % (test_data.name, test_data.expected_test_output, actual))
 
 
     def add_test_success(self, message):
@@ -232,13 +238,36 @@ class TestRunner(TestUtils):
         self.test_summary.append('%s%s%s' % (self.GREEN, message, self.NORMAL))
 
 
+    def add_test_failure(self, message):
+        self.logger.error(message)
+        self.test_summary.append('%s%s%s' % (self.RED, message, self.NORMAL))
+
+
     def login(self):
         self.logger.info('logging in')
-        self.serial_connection.write('%s\n' % str(self.config.login.username))
-        time.sleep(3)
-        self.serial_connection.write('%s\n' % str(self.config.login.password))
-        time.sleep(2)
-        self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
+        old_timeout = self.serial_connection.timeout
+        self.serial_connection.timeout = 1
+        self.serial_connection.flush()
+        self.serial_connection.reset_input_buffer()
+        self.serial_connection.write('\n\n')
+        data = self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
+        if self.config.device.prompt in data:
+            # already logged in
+            pass
+        elif "login:" in data:
+            self.serial_connection.write('%s\n' % str(self.config.login.username))
+            time.sleep(3)
+            self.serial_connection.write('%s\n' % str(self.config.login.password))
+            time.sleep(2)
+            self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
+        else:
+            self.logger.info('executable may own terminal..attempting to close')
+            self.serial_connection.write('\x03')
+            self.serial_connection.write('\n\n')
+            data = self.serial_connection.read(self.MAX_SERIAL_READ_LEN)
+            if self.config.device.prompt not in data:
+                self.logger.error('debug terminal may not be accessible')
+        self.serial_connection.timeout = old_timeout
 
 
     def print_test_summary(self):
@@ -246,6 +275,18 @@ class TestRunner(TestUtils):
         for line in self.test_summary:
             self.logger.info(line)
         self.close_serial()
+
+
+    def build_flash_proj(self, proxy_proj_path):
+        '''
+        With the current limitations of the CLI flashing and the requirements,
+        the hello-world project is used as the "proxy project" for flashing.
+
+        An additional requirement of having a ../build/<target_name> directory
+        is satisfied by building this project for the current target
+        '''
+        self.logger.info('Building the linux flash proxy project')
+        self.build_project(proxy_proj_path)
 
 
     def get_resource_type(self, obj):
@@ -272,9 +313,10 @@ def main():
     parser = argparse.ArgumentParser(description='Integration Test Runner')
     parser.add_argument('config_file', help='The path to the test specific config file you want to test.')
     parser.add_argument('device_path', nargs='?', default='/dev/FTDI', help='The path to your serial device')
+    parser.add_argument('--tests', nargs='*', default=None, help='A list of tests to run. If provided only the listed tests will be run.')
 
     args = parser.parse_args()
-    runner = TestRunner(args.config_file)
+    runner = TestRunner(args.config_file, args.tests)
     runner.setup_serial_connection(args.device_path)
     runner.run_tests()
 

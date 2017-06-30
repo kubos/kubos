@@ -15,15 +15,10 @@
  * limitations under the License.
  */
 
-
- /**
-  *
-  * @file       k_alloc_csp.h
-  * @brief      CSP Allocator Implementation
-  *
-  * @author     kubos.co
-  */
-
+/**
+ * @addtogroup KUBOS_CORE_ALLOCATOR
+ * @{
+ */
 
 #ifndef K_ALLOC_CSP_H
 #define K_ALLOC_CSP_H
@@ -51,3 +46,5 @@ k_alloc_t csp_alloc;
         k_buffer_realloc_new(b, s, &csp_alloc)
 
 #endif
+
+/* @} */

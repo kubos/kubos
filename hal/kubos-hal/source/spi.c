@@ -92,7 +92,7 @@ KSPIStatus k_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer,
 
 KSPI * kprv_spi_get(KSPINum spi)
 {
-	if(spi < 0 || spi > K_NUM_SPI)
+	if(spi > K_NUM_SPI)
 	{
 		return NULL;
 	}

@@ -60,9 +60,10 @@ This is not a required section. If it's not provided no login will be attempted.
 
 ### Tests
 
-This section is an array of test descriptions. The tests are run in the order they are listes in the array.
+This section is an array of test descriptions. The tests are run in the order they are listed in the array.
 
 * name - The name of the test. For user recognition only. This has no effect on the test.
+* abort_on_failure - If true and this test fails, the runner will quit and not run any following tests. If not provided, it defaults to false.
 * pre_test - A shell command that will be executed before cloning, building, or running any tests. This attribute is not required
 * build_source - A description of where the test source is located. This can be a local directory or a git repo url. This section is not required. If not provided, no binaries will be built.
 * flash_source - The path to what should be flashed to the target. If you have a build source specified this attribute is not necessary. It is intended to be used to upload non-built resources (like shell scripts)

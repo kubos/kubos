@@ -207,13 +207,13 @@ static uint8_t receive_datablock(uint8_t * buffer, uint16_t block_length)
 
     /**
      * Section 7.2.3 - SD Card will respond to a valid read command
-     * with a response folled by a data token.
+     * with a response followed by a data token.
      */
     do 
     {
         k_spi_read(SPI_DEV, &token, 1);
     } 
-    while ((token == 0xFF) && (count++ < 10));
+    while ((token == 0xFF) && (count++ < 254));
 
     /**
      * Section 7.3.3.2 - For single block read and multiple block read the data token is:
@@ -262,7 +262,7 @@ static uint8_t transmit_datablock(const uint8_t * buffer, uint8_t token)
     k_spi_write(SPI_DEV, &token, 1);
     if (token != 0xFD)
     {
-        k_spi_write(SPI_DEV, buffer, SD_BLOCK_SIZE);
+        k_spi_write(SPI_DEV, (uint8_t *) buffer, SD_BLOCK_SIZE);
         k_spi_write(SPI_DEV, &dummy, 1);
         k_spi_write(SPI_DEV, &dummy, 1);
         k_spi_read(SPI_DEV, &response, 1);
@@ -505,7 +505,7 @@ DSTATUS disk_initialize (BYTE pdrv)
     
     if (sd_card_type == TYPE_NONE)
     {
-        status = STA_NODISK;
+        status |= STA_NODISK;
     }
     else
     {
@@ -522,7 +522,7 @@ DSTATUS disk_status (BYTE pdrv)
     DSTATUS status = STA_OK;
     if (sd_card_type == TYPE_NONE)
     {
-        status = STA_NODISK;
+        status = STA_NODISK + STA_NOINIT;
     }
     return status;
 }

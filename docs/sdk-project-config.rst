@@ -186,7 +186,9 @@ If present, the ``fs`` file system structure enables support for accessing stora
         {
             "fs": {
                 "fatfs": {
-                    "driver": "sdio"
+                    "driver": {
+                        "sdio": {}
+                    }
                 }
             }
         }
@@ -252,9 +254,9 @@ file.
     
     By default, including the ``sensors`` object turns on the following APIs:
     
-    - :doc:`Altimeter <kubos-core/altimeter>`
-    - :doc:`IMU <kubos-core/IMU>`
-    - :doc:`Temperature <kubos-core/temperature>`
+    - :doc:`Altimeter <kubos-core/sensors/altimeter>`
+    - :doc:`IMU <kubos-core/sensors/imu>`
+    - :doc:`Temperature <kubos-core/sensors/temperature>`
     
     Without including a corresponding sensor device (ex. HTU21D), these APIs serve only as code stubs.
     

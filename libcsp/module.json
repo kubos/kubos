@@ -8,7 +8,7 @@
   "author": "gomspace",
   "homepage": "https://github.com/GomSpace/libcsp",
   "license": "LGPL 2.1",
-  "lib":"./src",
+  "lib":"./source",
   "dependencies": {
   },
   "targetDependencies": {

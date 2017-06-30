@@ -33,7 +33,7 @@ Reference Documents
    the configuration options.
 -  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
    setting up the Kubos SDK environment
--  :doc:`Creating your first project <first-project>` - Steps to
+-  :doc:`Creating your first KubOS RT project <first-rt-project>` - Steps to
    create and build a Kubos SDK project
 -  :doc:`SDK Command Reference <sdk-reference>` - Overview of the
    common Kubos SDK commands

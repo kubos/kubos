@@ -16,25 +16,19 @@
  */
 
 /**
- * @defgroup Allocator
- * @addtogroup Allocator
+ * @defgroup KUBOS_CORE_ALLOCATOR Kubos Core Buffer Allocator Wrapper
+ * @addtogroup KUBOS_CORE_ALLOCATOR
  * @{
  */
-
- /**
-  *
-  * @file       k_alloc.h
-  * @brief      Buffer Allocator Wrapper
-  *
-  * @author     kubos.co
-  */
-
 
 #ifndef K_ALLOC_H
 #define K_ALLOC_H
 
 #include <stdlib.h>
 
+/**
+ * Buffer allocation structure
+ */
 typedef struct k_alloc {
     void * (* _new)(size_t size);
     void * (* _realloc)(void * buff, size_t old_size, size_t new_size);
