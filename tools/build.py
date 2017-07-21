@@ -26,6 +26,10 @@ class KubosBuilder(object):
         for module in self.kb.modules():
             print(module.yotta_name())
 
+    def list_testable_modules(self):
+        for module in self.kb.test_modules():
+            print(module.yotta_name())
+
     def find_modules(self, path):
         path_list = path.split("/")
         modules = set()
@@ -51,7 +55,7 @@ class KubosBuilder(object):
             modules = set()
             for path in file_paths:
                 modules = modules | (self.find_modules(path))
-            
+
             if len(modules):
                 print("Modules changed:")
             for m in modules:
@@ -61,6 +65,39 @@ class KubosBuilder(object):
             print("Error getting changed modules")
             return 1
 
+    def test(self, module_name="", target_name=""):
+        module = next((m for m in self.kb.modules() if m.yotta_name() == module_name), None)
+        target = next((t for t in self.kb.targets() if t.yotta_name() == target_name), None)
+        if module and target:
+            print('Testing %s' % module.yotta_name())
+            print('Building [module %s@%s] for [target %s] - ' % (module.yotta_name(), module.path, target_name), end="")
+            utils.cmd('kubos', 'target', target_name, cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            utils.cmd('kubos', 'clean', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            utils.cmd('kubos', 'link', '--all', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            utils.cmd('kubos', 'build', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ret = utils.cmd('kubos', 'test', cwd=module.path, echo=False)
+            print('Result %d' % ret)
+            return ret
+        else:
+            if module is None:
+                print("Module %s was not found" % module_name)
+            if target is None:
+                print("Target %s was not found" % target_name)
+            return 1
+
+    def test_all_modules(self, target_name=""):
+        ret = 0
+        target = next((t for t in self.kb.targets() if t.yotta_name() == target_name), None)
+        if target:
+            for module in self.kb.test_modules():
+                test_ret = self.test(module.yotta_name(), target.yotta_name())
+                if test_ret != 0:
+                    ret = test_ret
+            return ret
+        else:
+            print("Target %s was not found" % target_name)
+            return 1
+
     def build(self, module_name="", target_name=""):
         module = next((m for m in self.kb.modules() if m.yotta_name() == module_name), None)
         target = next((t for t in self.kb.targets() if t.yotta_name() == target_name), None)
@@ -68,7 +105,8 @@ class KubosBuilder(object):
             print('Building [module %s@%s] for [target %s] - ' % (module.yotta_name(), module.path, target_name), end="")
             utils.cmd('kubos', 'target', target_name, cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             utils.cmd('kubos', 'clean', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            ret = utils.cmd('yt', 'build', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            utils.cmd('kubos', 'link', '--all', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ret = utils.cmd('kubos', 'build', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print('Result %d' % ret)
             return ret
         else:
@@ -103,7 +141,7 @@ class KubosBuilder(object):
         else:
             print("Target %s was not found" % target_name)
             return 1
-    
+
     def build_all_combinations(self):
         ret = 0
         for target in self.kb.targets():
@@ -121,6 +159,10 @@ def main():
                         help='Specifies target to build modules for')
     parser.add_argument('--module', metavar='module',
                         help='Specifies modules to build')
+    parser.add_argument('--test', action='store_true', default=False,
+                        help='Runs modules unit tests')
+    parser.add_argument('--all-tests', action='store_true', default=False,
+                        help='Builds and runs native tests for modules with tests')
     parser.add_argument('--all-targets', action='store_true', default=False,
                         help='Builds module for all targets')
     parser.add_argument('--all-modules', action='store_true', default=False,
@@ -129,11 +171,13 @@ def main():
                         help='Lists all targets available for building')
     parser.add_argument('--list-modules', action='store_true', default=False,
                         help='Lists all modules found')
-    parser.add_argument('--list-changed-modules', action="store", nargs="?", 
+    parser.add_argument('--list-testable-modules', action='store_true', default=False,
+                        help='Lists all modules with defined tests')
+    parser.add_argument('--list-changed-modules', action="store", nargs="?",
                         dest="list_changed_modules", const="HEAD^!",
                         help='Lists modules that have changed. By default will diff against '
                         'the last commit. The git diff path desired can also be passed in')
-        
+
 
     args = parser.parse_args()
 
@@ -145,8 +189,14 @@ def main():
         ret = builder.list_targets()
     elif args.list_modules:
         ret = builder.list_modules()
+    elif args.list_testable_modules:
+        ret = builder.list_testable_modules()
     elif args.list_changed_modules:
         ret = builder.list_changed_modules(args.list_changed_modules)
+    elif args.test:
+        retu = builder.test(module_name=args.module, target_name='x86-linux-native')
+    elif args.all_tests:
+        ret = builder.test_all_modules(target_name='x86-linux-native')
     elif args.target and args.module:
         ret = builder.build(module_name=args.module, target_name=args.target)
     elif args.module and args.all_targets:
