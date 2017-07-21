@@ -49,7 +49,7 @@ Pre-requisites
 The SD card should have been formatted with the correct partitions. If
 not, refer to the :ref:`install-sd` instructions.
 
-The host computer should be connected to the board and the iOBC should
+The host computer should be connected to the target board, which should
 be on and running KubOS Linux.
 
 A Kubos SDK VM should be installed on your host computer and at least
@@ -74,9 +74,9 @@ onto the target.
     $ kubos init -l fakeproj
     $ cd fakeproj
 
-Set the target to the iOBC.
+Set the target to the desired KubOS Linux target type. 
 
-::
+For example::
 
     $ kubos target kubos-linux-isis-gcc
 
@@ -111,7 +111,7 @@ Refer to the :ref:`flash-troubleshooting` section if anything goes wrong
 with the transfer.
 
 Once the transfer has completed successfully, trigger a reboot of the
-iOBC. This can be done with the Linux ``reboot`` command. Once job
+board. This can be done with the Linux ``reboot`` command. Once job
 scheduling has been implemented, you will be able to schedule the
 desired reboot time.
 
@@ -122,8 +122,8 @@ similar to this:
 
 ::
 
-    Processing upgrade 'zImage@1' :crc32+ sha1+ 
-    ###writing zImage
+    Processing upgrade 'kernel@1' :crc32+ sha1+ 
+    ###writing kernel
     1154936 bytes written
     Processing upgrade 'rootfs@1' :crc32+ sha1+ 
     ##########################Un-Protected 1 sectors
@@ -165,11 +165,6 @@ Pre-requisite
 ~~~~~~~~~~~~~
 
 Build the new OS. Refer to the :ref:`build-os` instructions.
-
-Make sure '/usr/bin/iobc\_toolchain' is in your PATH. If you're building
-from a Kubos SDK VM, it should have been automatically added. Otherwise,
-you may need to manually add it. The U-Boot ``mkimage`` tool requires
-``dtc`` which is built into the toolchain.
 
 Run the Packaging Script
 ~~~~~~~~~~~~~~~~~~~~~~~~
