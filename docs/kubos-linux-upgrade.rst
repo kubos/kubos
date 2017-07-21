@@ -184,10 +184,15 @@ Custom Packages
 If you'd like to customize the package, there are a few different
 options available through the script:
 
+-  -t {target} : **Required** Specifies the name of the target board,
+   as named in the corresponding `kubos-linux-build/board/kubos/{target}`
+   directory.
 -  -s : Sets the size of the rootfs.img file, specified in KB. The
    default is 13000 (13MB).
 -  -i : Sets the name and location of the input \*.its file. Use if you
    want to create a custom package. The default is *kpack.its*.
+-  -o {folder} : Specifies the name of the buildroot output folder. The
+   default is 'output'
 -  -v : Sets the version information for the package. The output file
    will be kpack-{version}.itb.
 -  -b {branch} : Specifies the branch name of U-Boot that has been
