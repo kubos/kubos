@@ -71,9 +71,9 @@ class KubosBuilder(object):
         if module and target:
             print('Testing %s' % module.yotta_name())
             print('Building [module %s@%s] for [target %s] - ' % (module.yotta_name(), module.path, target_name), end="")
+            utils.cmd('kubos', 'link', '--all', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             utils.cmd('kubos', 'target', target_name, cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             utils.cmd('kubos', 'clean', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            utils.cmd('kubos', 'link', '--all', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             utils.cmd('kubos', 'build', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             ret = utils.cmd('kubos', 'test', cwd=module.path, echo=False)
             print('Result %d' % ret)
@@ -194,7 +194,7 @@ def main():
     elif args.list_changed_modules:
         ret = builder.list_changed_modules(args.list_changed_modules)
     elif args.test:
-        retu = builder.test(module_name=args.module, target_name='x86-linux-native')
+        ret = builder.test(module_name=args.module, target_name='x86-linux-native')
     elif args.all_tests:
         ret = builder.test_all_modules(target_name='x86-linux-native')
     elif args.target and args.module:
