@@ -183,6 +183,34 @@ If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
 main "buildroot-2016.11" directory in a new "output/host" folder.
 
+Create auxilliary SD Card Image
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, the build process will create a bootable SD card image. This will be flashed
+onto the eMMC. In order to create a full KubOS Linux setup, you'll want to also create
+an auxiliary image for the microSD card containing the upgrade partition and an additional
+user data partition.
+
+Follow the :ref:`upgrade-creation` instructions in order to create a Kubos Package file
+(kpack-*.itb) to be used for recovery.
+
+Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.img`` script. 
+This will create a new SD card image, `aux-sd.img`, with two partitions:
+- An upgrade partition containing `kpack-base.itb`
+- A user data partition
+
+There are two parameters which may be specified:
+
+-  -s : Sets the size of the aux-sd.img file, specified in MB. The default is 3800 (3.8GB)
+-  -i : Specifies the name and location of the kpack-*.itb file to use as kpack-base.itb
+
+For example:
+
+::
+
+    $ ./format-aux.sh -i ../kpack-2017.07.21.itb
+
+
 Reset the Global Links
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -204,22 +232,6 @@ module links locally:
 
     $ cd {project folder}
     $ kubos link -a
-
-Create auxilliary SD Card Image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-By default, the build process will create a bootable SD card image. This will be flashed
-onto the eMMC. In order to create a full KubOS Linux setup, you'll want to also create
-an auxiliary image for the microSD card containing the upgrade partition and an additional
-user data partition.
-
-TODO: instructions
-
-Create an Upgrade Package
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you would like to distribute your changes as a Kubos upgrade package,
-please refer to the :ref:`upgrade-creation` instructions.
 
 .. _installation-process-mbm2:
 
