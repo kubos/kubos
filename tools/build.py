@@ -188,8 +188,12 @@ def main():
 
     builder = KubosBuilder()
 
-    ret = 0
+    ret = 0 
 
+
+    print("Running kubos update..")
+    utils.cmd('kubos', 'update', echo=False)
+    print("Runnig kubos use...")
     utils.cmd('kubos', 'use', '--branch', get_branch_name(), echo=False)
 
     if args.list_targets:
