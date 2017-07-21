@@ -103,10 +103,10 @@ class KubosBuilder(object):
         target = next((t for t in self.kb.targets() if t.yotta_name() == target_name), None)
         if module and target:
             print('Building [module %s@%s] for [target %s] - ' % (module.yotta_name(), module.path, target_name), end="")
-            utils.cmd('kubos', 'target', target_name, cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            utils.cmd('kubos', 'clean', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            utils.cmd('kubos', 'link', '--all', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            ret = utils.cmd('kubos', 'build', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            utils.cmd('kubos', 'link', '--all', cwd=module.path, echo=False)
+            utils.cmd('kubos', 'target', target_name, cwd=module.path, echo=False)
+            utils.cmd('kubos', 'clean', cwd=module.path, echo=False)
+            ret = utils.cmd('kubos', 'build', cwd=module.path, echo=False)
             print('Result %d' % ret)
             return ret
         else:
