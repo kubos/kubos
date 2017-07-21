@@ -10,7 +10,7 @@ test:
   override:
       - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH -v $PWD:$PWD kubostech/kubos-dev:latest python $PWD/test/integration/integration_test.py
       - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH --env CIRCLE_ARTIFACTS=$CIRCLE_ARTIFACTS -v $PWD:$PWD -v $CIRCLE_ARTIFACTS:$CIRCLE_ARTIFACTS --workdir $PWD kubostech/kubos-dev:latest python -m tools.ci.lint
-      - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH -v $PWD:$PWD kubostech/kubos-dev:latest python $PWD/tools/build.py --module command-and-control --target x86-linux-native
+      - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH -v $PWD:$PWD kubostech/kubos-dev:latest python $PWD/tools/build.py --test --module telemetry-linux --target x86-linux-native
 
 deployment:
   production:
