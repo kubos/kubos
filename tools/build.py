@@ -151,6 +151,11 @@ class KubosBuilder(object):
                     ret = build_ret
         return ret
 
+def get_branch_name():
+    branch_key = 'CIRCLE_BRANCH'
+    default_branch = 'master'
+    return os.environ[branch_key] if branch_key in os.environ else default_branch
+
 def main():
     parser = argparse.ArgumentParser(
         description='Builds Kubos modules')
@@ -184,6 +189,8 @@ def main():
     builder = KubosBuilder()
 
     ret = 0
+
+    utils.cmd('kubos', 'use', '--branch', get_branch_name(), echo=False)
 
     if args.list_targets:
         ret = builder.list_targets()
