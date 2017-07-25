@@ -11,14 +11,6 @@ of KubOS Linux on the Pumpkin Motherboard Module 2.
 Reference Documents
 -------------------
 
-Pumpkin Documentation
-~~~~~~~~~~~~~~~~~~~~~
-
-- `Beaglebone Black Hardware Documentation <http://beagleboard.org/Support/bone101/#hardware>`__ - Expansion header pinout images
-
-Kubos Documentation
-~~~~~~~~~~~~~~~~~~~
-
 -  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
    setting up the Kubos SDK environment
 -  :doc:`Creating your first KubOS Linux project <first-linux-project>` - Steps to
@@ -583,113 +575,10 @@ Press **Ctrl+C** to exit execution.
 
 Press **Ctrl+A**, then **Q** to exit minicom.
 
-Using Peripherals
------------------
+.. todo:: 
 
-The Pumpkin MBM2 has several different ports available for interacting 
-with peripheral devices. Currently, users should interact with these 
-devices using the standard Linux functions. A Kubos HAL will be added 
-in the future to abstract this process.
-
-I2C
-~~~
-
-The Pumpkin MBM2 has one user-accessible I2C bus, **/dev/i2c-2**.
-Users can connect a new device to it via pins P9.19 (SCL) and P9.20 (SDA)
-on the Beaglebone Black expansion headers.
-
-`I2C Standards
-Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
-
-KubOS Linux is currently configured to support the I2C standard-mode
-speed of 100kHz.
-
-The I2C bus is available to the userspace as the '/dev/i2c-0' device.
-Users will need to add their peripheral device to the system and then
-open the bus in order to communicate. Once communication is complete,
-the bus should be closed and the device definition should be removed.
-
-Since the peripheral devices will be different for each client, they
-will need to be `dynamically added in the userspace (method
-4) <https://www.kernel.org/doc/Documentation/i2c/instantiating-devices>`__.
-
-The bus is then opened using the standard Linux ``open`` function and
-used for communication with the standard ``write`` and ``read``
-functions. These functions are described in the `Linux I2C dev-interface
-doc <https://www.kernel.org/doc/Documentation/i2c/dev-interface>`__. The
-buffer used in the ``write`` and ``read`` functions will most likely
-follow the common I2C structure of "{register, value}"
-
-The user program should look something like this:
-
-::
-
-    /* Add device to system */
-    system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-2/new_device);
-
-    /* Open I2C bus */
-    file = open("/dev/i2c-2");
-
-    /* Configure I2C bus to point to desired slave */
-    ioctl(file, I2C_SLAVE, 0x20);
-
-    /* Start of communication logic */
-    buffer = {0x10, 0x34};
-    write(file, buffer, sizeof(buffer));
-
-    read(file, buffer, lengthToRead); 
-    /* End of communication logic */
-
-    /* Close I2C bus */
-    close(file);
-
-    /* Remove device */
-    system("echo 0x20 > /sys/bus/i2c/devices/i2c-2/delete_device);
-
-GPIO
-~~~~
-
-The Beaglebone Black expansion headers have 27 GPIO pins available. 
-These pins can be dynamically controlled via the `Linux GPIO Sysfs 
-Interface for Userspace <https://www.kernel.org/doc/Documentation/gpio/sysfs.txt>`__
-as long as they have not already been assigned to another peripheral.
-
-To interact with a pin, the user will first need to generate the pin's
-device name:
-
-::
-
-    $ echo {pin} > /sys/class/gpio/export
-
-For example, to interact with pin 11 of the P9 expansion header, which corresponds with
-GPIO_30, the user will use:
-
-::
-
-    $ echo 30 > /sys/class/gpio/export
-
-Once this command has been issued, the pin will be defined to the system
-as '/sys/class/gpio/gpio{pin}'. The user can then set and check the pins
-direction and value.
-
-::
-
-    Set GPIO_30 as output:
-    $ echo out > /sys/class/gpio/gpio30/direction
-
-    Set GPIO_30's value to 1:
-    $ echo 1 > /sys/class/gpio/gpio30/value
-
-    Get GPIO_30's value:
-    $ cat /sys/class/gpio/gpio30/value
-
-SPI
-~~~
-
-The external SPI buses are not currently available to the userspace. They
-will be added in a future release.
-
-.. _user-accounts:
+    Using Peripherals
+    <--------------->
 
 User Accounts
 -------------
