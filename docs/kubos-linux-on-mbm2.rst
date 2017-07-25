@@ -13,7 +13,7 @@ communication, etc) needed for the Pumpkin customers' missions.
 The :doc:`Working with the Pumpkin MBM2 <working-with-the-mbm2>` doc can then be used to
 create and load a user application on top of the new KubOS Linux install.
 
-Ideally, the user should never have to mess with the kernel themselves. 
+Ideally, the user should never have to mess with the kernel. 
 It should be pre-loaded onto the Pumpkin MBM2.
 
 Software Components
@@ -154,7 +154,7 @@ Build everything
 
     $ sudo make
 
-The full build process will take a while. Running on a Linux VM, it took about
+The full build process will take a while. Running on a Linux VM, it takes about
 an hour. Running in native Linux, it took about ten minutes. Once this build
 process has completed once, you can run other BuildRoot commands to rebuild
 only certain sections and it will go much more quickly (<5 min).
@@ -294,11 +294,8 @@ into the Pumpkin MBM2's microSD slot.
 Boot into U-Boot
 ^^^^^^^^^^^^^^^^
 
-**(Skip this section if you've never put KubOS Linux on your board before)**
-
-If you already have Linux running on your board, you'll need to boot into the
-U-Boot console rather than the Linux console in order to be able to flash the
-board.
+KubOS Linux normally runs on the eMMC. Since we now want to overwrite the eMMC,
+we'll need to change some settings to boot from the SD card instead.
 
 You'll need to establish a serial connection with the board in order to connect
 to the console. 
