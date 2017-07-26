@@ -176,7 +176,7 @@ Changing the Output Toolchain Directory (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you would like to build your toolchain in somewhere other than the
-"/usr/bin/pumpkin-mbm2_toolchain" directory, update the ``BR2_HOST_DIR`` variable in the
+"/usr/bin/bbb_toolchain" directory, update the ``BR2_HOST_DIR`` variable in the
 "configs/pumpkin-mbm2_defconfig" file.
 
 If you would like BuildRoot to just build the toolchain locally, you may remove
