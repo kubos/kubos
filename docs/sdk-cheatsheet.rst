@@ -63,21 +63,27 @@ Kubos needs to know which target you intend to build for so it can
 select the proper cross compiler. Kubos currently supports several
 different targets:
 
-+------------+----------------------+-------------------------------------------+--------------+
-| MCU Family | Kubos Target         | Description                               | Supported OS |
-+============+======================+===========================================+==============+
-| STM32F4    | stm32f407-disco-gcc  | STM32F407 Discovery Board                 | KubOS RT     |
-+------------+----------------------+-------------------------------------------+--------------+
-|            | pyboard-gcc          | STM32F405 PyBoard                         | KubOS RT     |
-+------------+----------------------+-------------------------------------------+--------------+
-|            | na-satbus-3c0-gcc    | STM32F405 NanoAvionics SatBus 3c0 OBC     | KubOS RT     |
-+------------+----------------------+-------------------------------------------+--------------+
-| MSP430     | msp430f5529-gcc      | MSP430F5529 Launchpad                     | KubOS RT     |
-+------------+----------------------+-------------------------------------------+--------------+
-| ISIS       | kubos-linux-isis-gcc | ISIS-OBC                                  | KubOS Linux  |
-+------------+----------------------+-------------------------------------------+--------------+
-| (Vagrant)  | x86-linux-native     | Native target for the Kubos Vagrant image | KubOS Linux  |
-+------------+----------------------+-------------------------------------------+--------------+
++------------+------------------------------+---------------------------------------------------+--------------+
+| MCU Family | Kubos Target                 | Description                                       | Supported OS |
++============+==============================+===================================================+==============+
+| STM32F4    | stm32f407-disco-gcc          | STM32F407 Discovery Board                         | KubOS RT     |
++------------+------------------------------+---------------------------------------------------+--------------+
+|            | pyboard-gcc                  | STM32F405 PyBoard                                 | KubOS RT     |
++------------+------------------------------+---------------------------------------------------+--------------+
+|            | na-satbus-3c0-gcc            | STM32F405 NanoAvionics SatBus 3c0 OBC             | KubOS RT     |
++------------+------------------------------+---------------------------------------------------+--------------+
+| MSP430     | msp430f5529-gcc              | MSP430F5529 Launchpad                             | KubOS RT     |
++------------+------------------------------+---------------------------------------------------+--------------+
+| ISIS       | kubos-linux-isis-gcc         | ISIS-OBC                                          | KubOS Linux  |
++------------+------------------------------+---------------------------------------------------+--------------+
+| Pumpkin    | kubos-linux-pumpkin-mbm2-gcc | Pumpkin Motherboard Module 2                      | KubOS Linux  |
++------------+------------------------------+---------------------------------------------------+--------------+  
+| Beaglebone | kubos-linux-beaglebone-gcc   | Beaglebone Black, Rev. C                          | KubOS Linux  |
++------------+------------------------------+---------------------------------------------------+--------------+
+|            | legacy-linux-beaglebone-gcc  | Beaglebone Black running a non-Kubos Linux distro | Debian       |
++------------+------------------------------+---------------------------------------------------+--------------+
+| (Vagrant)  | x86-linux-native             | Native target for the Kubos Vagrant image         | KubOS Linux  |
++------------+------------------------------+---------------------------------------------------+--------------+
 
 To select a target, use the ``kubos target`` command with the appropriate value from the
 "Kubos Target" column. 

@@ -1,7 +1,7 @@
 {
-  "name": "kubos-linux-beaglebone-gcc",
+  "name": "legacy-linux-beaglebone-gcc",
   "version": "0.1.1",
-  "description": "Base KubOS Linux build target for the Beaglebone Black arm-linux toolchain",
+  "description": "base KubOS Linux build target for the beaglebone black arm-linux-gueabihf toolchain",
   "inherits": {
     "kubos-linux-gcc": "kubostech/target-kubos-linux-gcc#~0.1.0"
   },
@@ -14,19 +14,15 @@
   "keywords": [
     "kubos-linux",
     "linux",
-    "beaglebone-black",
-    "pumpkin",
     "arm",
     "gcc"
   ],
-  "buildTarget": true,
   "similarTo": [
     "linux",
     "kubos-linux",
     "arm-linux-gcc",
-    "arm",
-    "beaglebone-black",
-    "pumpkin"
+    "arm"
   ],
+  "buildTarget": true,
   "toolchain": "CMake/toolchain.cmake"
 }
