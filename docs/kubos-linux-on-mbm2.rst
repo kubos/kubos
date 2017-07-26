@@ -337,7 +337,7 @@ To flash the eMMC, log into the board and then run these commands:
 
 ::
 
-    $ umount /dev/mmcblk1p3
+    $ umount /dev/mmcblk*
     $ dd if=/dev/mmcblk0 of=/dev/mmcblk1
     
 The four status LEDs on the board should start flashing in a random pattern. This indicates
