@@ -325,10 +325,7 @@ Copy/paste these commands:
 
 ::
     
-    setenv bootargs console=ttyS0,115200 root=/dev/mmcblk0p2 ext4 rootwait; \
-    fatload mmc 0:1 ${fdtaddr} /pumpkin-mbm2.dtb; \
-    fatload mmc 0:1 ${loadaddr} /kernel; \
-    bootm ${loadaddr} - ${fdtaddr}
+    setenv bootargs console=ttyS0,115200 root=/dev/mmcblk0p2 ext4 rootwait; fatload mmc 0:1 ${fdtaddr} /pumpkin-mbm2.dtb; fatload mmc 0:1 ${loadaddr} /kernel; bootm ${loadaddr} - ${fdtaddr}
     
 This will cause the board to load KubOS Linux off of the microSD card, allowing us to flash
 the eMMC.
@@ -339,6 +336,7 @@ Flash the eMMC
 To flash the eMMC, log into the board and then run these commands:
 
 ::
+
     $ umount /dev/mmcblk1p3
     $ dd if=/dev/mmcblk0 of=/dev/mmcblk1
     
