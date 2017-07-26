@@ -11,6 +11,17 @@ of KubOS Linux on the Pumpkin Motherboard Module 2.
 Reference Documents
 -------------------
 
+
+Pumpkin Documentation
+~~~~~~~~~~~~~~~~~~~~~
+
+The :title:`CubeSat Kit Motherboard Module (MBM) 2` reference document
+is available from Pumpkin and is a useful document for learning what 
+each of the hardware components are and how they are connected.
+
+Kubos Documentation
+~~~~~~~~~~~~~~~~~~~
+
 -  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
    setting up the Kubos SDK environment
 -  :doc:`Creating your first KubOS Linux project <first-linux-project>` - Steps to
@@ -67,7 +78,7 @@ when a user application is started:
 -  system.initAfterFlash - (Default: false) Tells the Kubos SDK whether
    to start the application as a background daemon after flashing it to
    the board.
--  system.initAtBoot - (Default: true) Tells the Kubos SDK whether to
+-  system.initAtBoot - (Default: false) Tells the Kubos SDK whether to
    generate and install an initialization script.
 -  system.runLevel - (Default: 50. Range: 10-99) Sets priority of
    initialization script.
@@ -79,7 +90,7 @@ application will be started as a background daemon at the end of the
 the value of the option will need to be set to "true" by the user in
 order to turn it on.
 
-By default, an initialization script will be generated and installed
+If enabled, an initialization script will be generated and installed
 during the flashing process. This script will follow the naming
 convention of "S{runLevel}{applicationName}", where "runLevel" is the
 initialization priority order of the script. All user application init
@@ -88,128 +99,26 @@ user scripts, the scripts with the lowest run level will be executed
 first. So an application with a run level of 10 will be initialized
 before an application with a run level of 50.
 
-To turn this feature off, set the :json:object:`system.initAfterBoot <system>` option to
-"false".
-
 The run level of an initialization script can be changed after initially
 flashing the script to the board. Simply change the :json:object:`system.runLevel <system>`
 value, rebuild the project, and then reflash it to the board. The old
 script will be removed as part of the flash process.
 
-Updating the USB Connection
----------------------------
+USB Connection
+--------------
 
-The board should be shipped with an FTDI cable. This cable should be
-connected to the programming adapter, which should then be connected to
-the board, to create the debug UART connection. User file transfer will
-take place using this connection.
+The Pumpkin MBM2 should be shipped with a USB Debug Adapter board.
 
-The Kubos flashing utility was configured with the assumption that an
-FTDI cable would be used. If you have a different USB-to-serial cable
-type, you'll need to pass through the USB connection, and then update
-the minicom configuration to tell the flashing utility which USB to
-flash over.
+The white connection cable should be plugged into the labeled "UART0"
+port on the edge of the board, with the exposed pins facing up.
 
-You can either pass through the USB via VirtualBox or by updating the
-vagrant's Vagrantfile.
-
-VirtualBox
-~~~~~~~~~~
-
-Open the VirtualBox Manager
-
-.. figure:: images/virtualbox.png
-   :alt: VirtualBox Manager
-
-   VirtualBox Manager
-
-Right-click on your vagrant VM and select Settings. Click the USB tab.
-
-.. figure:: images/usb_options.png
-   :alt: VM USB Options
-
-   VM USB Options
-
-Click the USB icon with the plus symbol to add a new USB filter. Select
-the device you want to add and press OK.
-
-.. figure:: images/usb_devices.png
-   :alt: VM USB Devices
-
-   VM USB Devices
-
-Updating the Vagrantfile
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Navigate to you vagrant installation directory on your host machine.
-
-Open the Vagrantfile.
-
-You should see a section labeled 'usb\_devs'. You want to add a new
-entry for your USB device to the bottom of this list.
-
-The format is
-
-::
-
-    ['vendor_id', 'product_id', 'Description']
-
-The description can be whatever you want, but the vendor and product IDs
-will need to be found from the connection on your host computer.
-
-Once you've updated Vagrantfile, issue the command ``vagrant reload`` to
-cause the VM to pick up the new definition. Once you've logged in to the
-VM, you should be able to see the passed-through connection with the
-``lsusb`` command.
-
-On Windows
-^^^^^^^^^^
-
-1. Go to the "Start" Menu.
-2. Select "Devices and Printers"
-3. Double-click your USB Scale.
-4. Select the "Hardware" Tab.
-5. Select "Properties"
-6. Select the "Details" Tab.
-7. From the "Device description" Menu select "Hardware Ids"
-8. Copy the numbers next to "VID\_" and "PID\_"
-
-On Mac
-^^^^^^
-
-Issue the ``system_profiler SPUSBDataType`` command.
-
-Copy the values in the values in the 'Product ID' and 'Vendor ID' fields
-
-On Linux
-^^^^^^^^
-
-Issue the ``lsusb`` command.
-
-Copy the values in the 'ID' field. The value in front of the colon
-should be the vendor ID and the value after should be the product ID.
-
-Updating the minicom configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Navigate to /etc/minicom, you should see a file call minirc.kubos. This
-is the preset minicom serial connection configuration file for KubOS
-Linux.
-
-Edit the file and update the 'pu baudrate' field and change '/dev/FTDI'
-to the '/dev/\*' device name your USB connection has.
-
--  You can find this device by issuing ``ls /dev/``. The connection will
-   likely be one of the /dev/ttyUSB\* devices.
-
-You can test the changes by issuing the ``minicom kubos`` command. If
-you successfully connect to your board, then the changes have been
-successful.
+The USB cable can then be plugged into your computer. Any required
+drivers should be automatically installed.
 
 Flashing the Application
 ------------------------
 
-The USB-to-serial cable should be connected to the MBM2 and the board 
+The debugging cable should be connected to the MBM2 and the board 
 should be fully powered.
 
 Assuming you've successfully built a Kubos SDK project for the board, 
@@ -575,10 +484,148 @@ Press **Ctrl+C** to exit execution.
 
 Press **Ctrl+A**, then **Q** to exit minicom.
 
-.. todo:: 
+Using Peripherals
+-----------------
 
-    Using Peripherals
-    <--------------->
+The Pumpkin MBM2 has several different ports available for interacting 
+with peripheral devices. Currently, users should interact with these 
+devices using the standard Linux functions. A Kubos HAL will be added 
+in the future to abstract this process.
+
+UART
+~~~~
+
+The Pumpkin MBM2 has 5 UART ports available for use in varying capacities:
+
++--------------+--------+--------+---------+---------+
+| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
++==============+========+========+=========+=========+
+| /dev/ttyS1   | H1.18  | H1.17  | H1.10   | H1.9    |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS2   | H1.8   | H1.7   |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS3   | H1.5   |        |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS4   | H1.16  | H1.15  |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS5   | H1.20  | H1.19  | H1.12   | H1.11   |
++--------------+--------+--------+---------+---------+
+
+Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
+
+`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
+
+I2C
+~~~
+
+The Pumpkin MBM2 has one user-accessible I2C bus.
+Users can connect a new device to it via pins H1.43 (SCL) and H1.41 (SDA)
+of the CubeSat Kit Bus connectors.
+
+`I2C Standards
+Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
+
+KubOS Linux is currently configured to support the I2C standard-mode
+speed of 100kHz.
+
+The I2C bus is available to the userspace as the '/dev/i2c-1' device.
+Users will need to add their peripheral device to the system and then
+open the bus in order to communicate. Once communication is complete,
+the bus should be closed and the device definition should be removed.
+
+Since the peripheral devices will be different for each client, they
+will need to be `dynamically added in the userspace (method
+4) <https://www.kernel.org/doc/Documentation/i2c/instantiating-devices>`__.
+
+The bus is then opened using the standard Linux ``open`` function and
+used for communication with the standard ``write`` and ``read``
+functions. These functions are described in the `Linux I2C dev-interface
+doc <https://www.kernel.org/doc/Documentation/i2c/dev-interface>`__. The
+buffer used in the ``write`` and ``read`` functions will most likely
+follow the common I2C structure of "{register, value}"
+
+The user program should look something like this:
+
+::
+
+    /* Add device to system */
+    system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-1/new_device);
+
+    /* Open I2C bus */
+    file = open("/dev/i2c-1");
+
+    /* Configure I2C bus to point to desired slave */
+    ioctl(file, I2C_SLAVE, 0x20);
+
+    /* Start of communication logic */
+    buffer = {0x10, 0x34};
+    write(file, buffer, sizeof(buffer));
+
+    read(file, buffer, lengthToRead); 
+    /* End of communication logic */
+
+    /* Close I2C bus */
+    close(file);
+
+    /* Remove device */
+    system("echo 0x20 > /sys/bus/i2c/devices/i2c-1/delete_device);
+
+GPIO
+~~~~
+
+The CSK headers have 6 GPIO pins available for use.
+These pins can be dynamically controlled via the `Linux GPIO Sysfs 
+Interface for Userspace <https://www.kernel.org/doc/Documentation/gpio/sysfs.txt>`__
+as long as they have not already been assigned to another peripheral.
+
++---------+------------------+-----------+
+| CSK Pin | Linux GPIO Value | Direction |
++=========+==================+===========+
+| H1.6    | 65               | Input     |
++---------+------------------+-----------+
+| H2.18   | 61               | Output    |
++---------+------------------+-----------+
+| H2.21   | 89               | Output    |
++---------+------------------+-----------+
+| H2.22   | 87               | Output    |
++---------+------------------+-----------+
+| H2.23   | 86               | Output    |
++---------+------------------+-----------+
+| H2.24   | 85               | Output    |
++---------+------------------+-----------+
+
+To interact with a pin, the user will first need to generate the pin's
+device name:
+
+::
+
+    $ echo {pin} > /sys/class/gpio/export
+
+For example, to interact with pin H2.23 of the CSK header, which corresponds with
+GPIO_86, the user will use:
+
+::
+
+    $ echo 86 > /sys/class/gpio/export
+
+Once this command has been issued, the pin will be defined to the system
+as '/sys/class/gpio/gpio{pin}'. The user can then set and check the pins
+direction and value.
+
+::
+
+    Set H2.23 as output:
+    $ echo out > /sys/class/gpio/gpio86/direction
+
+    Set GPIO_86's value to 1:
+    $ echo 1 > /sys/class/gpio/gpio86/value
+
+    Get GPIO_386's value:
+    $ cat /sys/class/gpio/gpio86/value
+
+.. note:: The GPIO direction should match the value in the above table
+
+.. _user-accounts:
 
 User Accounts
 -------------

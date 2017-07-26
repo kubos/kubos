@@ -310,17 +310,22 @@ Issue the ``reboot`` command in order to restart the system.
 Hold down any key while the board is restarting. This will exit out of the auto-boot and
 bring up the CLI.
 
-.. figure:: images/iOBC/uboot_console.png
-   :alt: U-Boot Console
+::
 
-   U-Boot Console
+    U-Boot 2016.09 (Jul 17 2017 - 11:43:29 -0500)
+
+    I2C:   ready
+    DRAM:  512 MiB
+    MMC:   OMAP SD/MMC: 0, OMAP SD/MMC: 1
+    Net:   cpsw, usb_ether
+    Hit any key to stop autoboot:  0 
+    U-Boot>
    
-Run these commands:
+Copy/paste these commands:
 
 ::
     
-    U-Boot> setenv boot_dev 0
-    U-Boot> run bootcmd
+    setenv bootargs console=ttyS0,115200 root=/dev/mmcblk0p2 ext4 rootwait; fatload mmc 0:1 ${fdtaddr} /pumpkin-mbm2.dtb; fatload mmc 0:1 ${loadaddr} /kernel; bootm ${loadaddr} - ${fdtaddr}
     
 This will cause the board to load KubOS Linux off of the microSD card, allowing us to flash
 the eMMC.
@@ -331,7 +336,8 @@ Flash the eMMC
 To flash the eMMC, log into the board and then run these commands:
 
 ::
-    $ umount /dev/mmcblk1p3
+
+    $ umount /dev/mmcblk*
     $ dd if=/dev/mmcblk0 of=/dev/mmcblk1
     
 The four status LEDs on the board should start flashing in a random pattern. This indicates
