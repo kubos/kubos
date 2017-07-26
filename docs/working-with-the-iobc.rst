@@ -78,7 +78,7 @@ when a user application is started:
 -  system.initAfterFlash - (Default: false) Tells the Kubos SDK whether
    to start the application as a background daemon after flashing it to
    the board.
--  system.initAtBoot - (Default: true) Tells the Kubos SDK whether to
+-  system.initAtBoot - (Default: false) Tells the Kubos SDK whether to
    generate and install an initialization script.
 -  system.runLevel - (Default: 50. Range: 10-99) Sets priority of
    initialization script.
@@ -90,7 +90,7 @@ application will be started as a background daemon at the end of the
 the value of the option will need to be set to "true" by the user in
 order to turn it on.
 
-By default, an initialization script will be generated and installed
+If enabled, an initialization script will be generated and installed
 during the flashing process. This script will follow the naming
 convention of "S{runLevel}{applicationName}", where "runLevel" is the
 initialization priority order of the script. All user application init
@@ -99,127 +99,18 @@ user scripts, the scripts with the lowest run level will be executed
 first. So an application with a run level of 10 will be initialized
 before an application with a run level of 50.
 
-To turn this feature off, set the :json:object:`system.initAfterBoot <system>` option to
-"false".
-
 The run level of an initialization script can be changed after initially
 flashing the script to the board. Simply change the :json:object:`system.runLevel <system>`
 value, rebuild the project, and then reflash it to the board. The old
 script will be removed as part of the flash process.
 
-Updating the USB Connection
----------------------------
+USB Connection
+--------------
 
 The iOBC should be shipped with an FTDI cable. This cable should be
 connected to the programming adapter, which should then be connected to
 the iOBC, to create the debug UART connection. User file transfer will
 take place using this connection.
-
-The Kubos flashing utility was configured with the assumption that an
-FTDI cable would be used. If you have a different USB-to-serial cable
-type, you'll need to pass through the USB connection, and then update
-the minicom configuration to tell the flashing utility which USB to
-flash over.
-
-You can either pass through the USB via VirtualBox or by updating the
-vagrant's Vagrantfile.
-
-**Note:** While it doesn't need to be passed through, a SAM-ICE JTAG
-might also need to be connected to both the iOBC and the host computer
-in order to create a successful connection.
-
-VirtualBox
-~~~~~~~~~~
-
-Open the VirtualBox Manager
-
-.. figure:: images/virtualbox.png
-   :alt: VirtualBox Manager
-
-   VirtualBox Manager
-
-Right-click on your vagrant VM and select Settings. Click the USB tab.
-
-.. figure:: images/usb_options.png
-   :alt: VM USB Options
-
-   VM USB Options
-
-Click the USB icon with the plus symbol to add a new USB filter. Select
-the device you want to add and press OK.
-
-.. figure:: images/usb_devices.png
-   :alt: VM USB Devices
-
-   VM USB Devices
-
-Updating the Vagrantfile
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Navigate to you vagrant installation directory on your host machine.
-
-Open the Vagrantfile.
-
-You should see a section labeled 'usb\_devs'. You want to add a new
-entry for your USB device to the bottom of this list.
-
-The format is
-
-::
-
-    ['vendor_id', 'product_id', 'Description']
-
-The description can be whatever you want, but the vendor and product IDs
-will need to be found from the connection on your host computer.
-
-Once you've updated Vagrantfile, issue the command ``vagrant reload`` to
-cause the VM to pick up the new definition. Once you've logged in to the
-VM, you should be able to see the passed-through connection with the
-``lsusb`` command.
-
-On Windows
-^^^^^^^^^^
-
-1. Go to the "Start" Menu.
-2. Select "Devices and Printers"
-3. Double-click your USB Scale.
-4. Select the "Hardware" Tab.
-5. Select "Properties"
-6. Select the "Details" Tab.
-7. From the "Device description" Menu select "Hardware Ids"
-8. Copy the numbers next to "VID\_" and "PID\_"
-
-On Mac
-^^^^^^
-
-Issue the ``system_profiler SPUSBDataType`` command.
-
-Copy the values in the values in the 'Product ID' and 'Vendor ID' fields
-
-On Linux
-^^^^^^^^
-
-Issue the ``lsusb`` command.
-
-Copy the values in the 'ID' field. The value in front of the colon
-should be the vendor ID and the value after should be the product ID.
-
-Updating the minicom configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Navigate to /etc/minicom, you should see a file call minirc.kubos. This
-is the preset minicom serial connection configuration file for KubOS
-Linux.
-
-Edit the file and update the 'pu baudrate' field and change '/dev/FTDI'
-to the '/dev/\*' device name your USB connection has.
-
--  You can find this device by issuing ``ls /dev/``. The connection will
-   likely be one of the /dev/ttyUSB\* devices.
-
-You can test the changes by issuing the ``minicom kubos`` command. If
-you successfully connect to your board, then the changes have been
-successful.
 
 Flashing the Application
 ------------------------
