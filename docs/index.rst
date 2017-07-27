@@ -66,9 +66,10 @@ It covers the following tutorial documents:
     STM32F4 Discovery Board Guide <stm32f4-discovery-board-guide>
 
 .. toctree::
-   :caption: Kubos Linux
+   :caption: KubOS Linux
    :hidden:
 
+    Using KubOS Linux <using-kubos-linux>
     Working with the Beaglebone Black <working-with-the-bbb>
     Working with the iOBC <working-with-the-iobc>
     Working with the Pumpkin MBM2 <working-with-the-mbm2>
