@@ -417,7 +417,7 @@ messages will look like this:
     Kubos login: 
     
 By default, there are two user accounts available: "root" (the superuser), and "kubos" (a normal user).
-Both have a default password of "Kubos123". For more information, see the :ref:`user-accounts` section.
+Both have a default password of "Kubos123". For more information, see the :ref:`user-accounts-mbm2` section.
 
 Using KubOS Linux
 -----------------
