@@ -55,7 +55,7 @@ The Beaglebone Black has 5 UART ports available for use:
 +==============+========+========+=========+=========+
 | /dev/ttyS1   | P9.24  | P9.26  | P9.19   | P9.20   |
 +--------------+--------+--------+---------+---------+
-| /dev/ttyS2   | P9.21  | P9.22  | P9.38   | P9.37   |
+| /dev/ttyS2   | P9.21  | P9.22  | P8.38   | P8.37   |
 +--------------+--------+--------+---------+---------+
 | /dev/ttyS3   | P9.42  |        | P8.34   | P8.36   |
 +--------------+--------+--------+---------+---------+
@@ -133,7 +133,23 @@ The user program should look something like this:
 SPI
 ~~~
 
-The Beaglebone has two SPI buses available with one pre-allocated chipselect pin.
+The Beaglebone has two SPI buses available with pre-allocated chipselect pins.
+
+**SPI Bus 0**
+
++------+-------+
+| Name | Pin   |
++======+=======+
+| MOSI | P9.21 |
++------+-------+
+| MISO | P9.18 |
++------+-------+
+| SCLK | P9.22 |
++------+-------+
+| CS0  | P9.17 |
++------+-------+
+
+**SPI Bus 1**
 
 +------+-------+
 | Name | Pin   |
@@ -144,11 +160,14 @@ The Beaglebone has two SPI buses available with one pre-allocated chipselect pin
 +------+-------+
 | SCLK | P9.31 |
 +------+-------+
-| CS   | P9.28 |
+| CS0  | P9.28 |
++------+-------+
+| CS1  | P9.42 |
 +------+-------+
 
 Users can interact a device on this bus using Linux's `spidev interface <https://www.kernel.org/doc/Documentation/spi/spidev>`__
-The device name will be ``/dev/spidev1.0``.
+The device name will be ``/dev/spidev{bus_number}.{CS_number}``. For example, a device connected to the first chip select pin
+of SPI bus 1 would be ``/dev/spidev1.0``.
 
 An example user program to read a value might look like this:
 
