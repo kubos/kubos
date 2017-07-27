@@ -178,8 +178,6 @@ For example:
 ::
 
     $ kubos flash /home/vagrant/not-my-project/test-util.sh
-    
-.. _flash-troubleshooting:
 
 Flash Troubleshooting
 ---------------------
@@ -517,7 +515,7 @@ follow the common I2C structure of "{register, value}"
 
 The user program should look something like this:
 
-::
+.. code-block:: c
 
     /* Add device to system */
     system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-0/new_device);
@@ -644,7 +642,7 @@ SPI
 The external SPI bus is not currently available to the userspace. It
 will be added in a future release.
 
-.. _user-accounts:
+.. _user-accounts-iobc:
 
 User Accounts
 -------------

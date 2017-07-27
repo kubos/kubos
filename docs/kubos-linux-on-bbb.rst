@@ -189,7 +189,7 @@ an auxiliary image for the microSD card containing the upgrade partition and an 
 user data partition.
 
 Follow the :ref:`upgrade-creation` instructions in order to create a Kubos Package file
-(kpack-*.itb) to be used for recovery.
+(kpack-\*.itb) to be used for recovery.
 
 Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.img`` script. 
 This will create a new SD card image, `aux-sd.img`, with two partitions:
@@ -199,7 +199,7 @@ This will create a new SD card image, `aux-sd.img`, with two partitions:
 There are two parameters which may be specified:
 
 -  -s : Sets the size of the aux-sd.img file, specified in MB. The default is 3800 (3.8GB)
--  -i : Specifies the name and location of the kpack-*.itb file to use as kpack-base.itb
+-  -i : Specifies the name and location of the kpack-\*.itb file to use as kpack-base.itb
 
 For example:
 
@@ -414,7 +414,7 @@ messages will look like this:
     Kubos login: 
     
 By default, there are two user accounts available: "root" (the superuser), and "kubos" (a normal user).
-Both have a default password of "Kubos123". For more information, see the :ref:`user-accounts` section.
+Both have a default password of "Kubos123". For more information, see the :ref:`user-accounts-bbb` section.
 
 Using KubOS Linux
 -----------------

@@ -16,6 +16,7 @@ Beaglebone Documentation
 
 - `Beaglebone Black Web Page <https://beagleboard.org/black>`__
 - `Beaglebone Black Wiki <http://elinux.org/Beagleboard:BeagleBoneBlack>`__
+- `Beaglebone Black Hardware Diagrams <http://beagleboard.org/Support/bone101/#hardware>`__
 - `Beaglebone Black System Reference Manual Rev C <http://static6.arrow.com/aropdfconversion/8fff89aa85f5c451318cbdee2facd9c9fac36872/bbb_srm.pdf>`__
 
 Kubos Documentation
@@ -174,8 +175,6 @@ For example:
 ::
 
     $ kubos flash /home/vagrant/not-my-project/test-util.sh
-    
-.. _flash-troubleshooting:
 
 Flash Troubleshooting
 ---------------------
@@ -505,6 +504,8 @@ The Beaglebone Black has 5 UART ports available for use:
 | /dev/ttyS5   | P8.37  | P8.38  | P8.32   | P8.31   |
 +--------------+--------+--------+---------+---------+
 
+.. note:: /dev/ttyS3 (UART3) is TX-only
+
 Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
 
 `A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
@@ -545,7 +546,7 @@ follow the common I2C structure of "{register, value}"
 
 The user program should look something like this:
 
-::
+.. code-block:: c
 
     /* Add device to system */
     system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-1/new_device);
@@ -572,7 +573,7 @@ The user program should look something like this:
 SPI
 ~~~
 
-The Beaglebone has one SPI bus available with one pre-allocated chipselect pin.
+The Beaglebone has two SPI buses available with one pre-allocated chipselect pin.
 
 +------+-------+
 | Name | Pin   |
@@ -591,7 +592,7 @@ The device name will be ``/dev/spidev1.0``.
 
 An example user program to read a value might look like this:
 
-:: 
+.. code-block:: c
 
     #include <fcntl.h>
     #include <unistd.h>
@@ -640,40 +641,26 @@ An example user program to read a value might look like this:
 GPIO
 ~~~~
 
-The CSK headers have 6 GPIO pins available for use.
-These pins can be dynamically controlled via the `Linux GPIO Sysfs 
-Interface for Userspace <https://www.kernel.org/doc/Documentation/gpio/sysfs.txt>`__
-as long as they have not already been assigned to another peripheral.
+The Beaglebone Black has many GPIO pins available for general use. Pinout diagrams
+are available on the `Beaglebone website <http://beagleboard.org/Support/bone101/#hardware>`__.
 
-+---------+------------------+-----------+
-| CSK Pin | Linux GPIO Value | Direction |
-+=========+==================+===========+
-| H1.6    | 65               | Input     |
-+---------+------------------+-----------+
-| H2.18   | 61               | Output    |
-+---------+------------------+-----------+
-| H2.21   | 89               | Output    |
-+---------+------------------+-----------+
-| H2.22   | 87               | Output    |
-+---------+------------------+-----------+
-| H2.23   | 86               | Output    |
-+---------+------------------+-----------+
-| H2.24   | 85               | Output    |
-+---------+------------------+-----------+
+Any pin that is not dedicated to a previously mentioned peripheral is available for use.
 
-To interact with a pin, the user will first need to generate the pin's
-device name:
+CLI and Script Interface
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+To interact with a pin from the command line or from a script, the user will first need to 
+generate the pin's device name:
 
 ::
 
     $ echo {pin} > /sys/class/gpio/export
 
-For example, to interact with pin H2.23 of the CSK header, which corresponds with
-GPIO_86, the user will use:
+For example, to interact with pin P8.11, which corresponds with GPIO_45, the user will use:
 
 ::
 
-    $ echo 86 > /sys/class/gpio/export
+    $ echo 45 > /sys/class/gpio/export
 
 Once this command has been issued, the pin will be defined to the system
 as '/sys/class/gpio/gpio{pin}'. The user can then set and check the pins
@@ -681,18 +668,70 @@ direction and value.
 
 ::
 
-    Set H2.23 as output:
-    $ echo out > /sys/class/gpio/gpio86/direction
+    Set pin as output:
+    $ echo out > /sys/class/gpio/gpio45/direction
 
-    Set GPIO_86's value to 1:
-    $ echo 1 > /sys/class/gpio/gpio86/value
+    Set pin's value to 1:
+    $ echo 1 > /sys/class/gpio/gpio45/value
 
-    Get GPIO_386's value:
-    $ cat /sys/class/gpio/gpio86/value
+    Get pins's value:
+    $ cat /sys/class/gpio/gpio45/value
 
-.. note:: The GPIO direction should match the value in the above table
+Once finished, the pin can be released:
 
-.. _user-accounts:
+::
+
+    $ echo {pin} > /sys/class/gpio/unexport
+
+Application Interface
+^^^^^^^^^^^^^^^^^^^^^
+    
+This functionality can also be used from a user's application with Linux's sysfs
+interface.
+
+An example program might look like this:
+
+.. code-block:: c
+    
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <fcntl.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+    
+    int fd;
+    int pin = 45;
+    int value = 1;
+    
+    /* Define the pin to the system */
+    fd = open("/sys/class/gpio/export", O_WRONLY);
+    write(fd, &pin, sizeof(pin)); 
+    close(fd);
+    
+    /* Set the pin's direction */
+    fd = open("/sys/class/gpio/gpio45/direction", O_WRONLY);
+    write(fd, "out", 3);
+    close(fd);
+    
+    /* Set the pin's value */
+    fd = open("/sys/class/gpio/gpio45/value", O_WRONLY);
+    write(fd, &value, 1);
+    close(fd);
+    
+    /* Read the value back */
+    fd = open("/sys/class/gpio/gpio45/value", O_RDONLY);
+    char strValue[3];
+    write(fd, strValue, 1);
+    value = atoi(strValue);
+    close(fd);
+    
+    /* Release the pin */
+    fd = open("/sys/class/gpio/unexport", O_WRONLY);
+    write(fd, &pin, sizeof(pin)); 
+    close(fd);
+
+.. _user-accounts-bbb:
 
 User Accounts
 -------------

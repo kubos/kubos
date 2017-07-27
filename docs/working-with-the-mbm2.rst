@@ -282,8 +282,6 @@ For example:
 ::
 
     $ kubos flash /home/vagrant/not-my-project/test-util.sh
-    
-.. _flash-troubleshooting:
 
 Flash Troubleshooting
 ---------------------
@@ -354,17 +352,17 @@ Alternatively, you can manually create a serial connection with minicom
 (or other terminal application) using the following connection
 configuration:
 
-+-------------+----------+
-| Setting     | Value    |
-+=============+==========+
-| Baudrate    | 115200   |
-+-------------+----------+
-| Bits        | 8        |
-+-------------+----------+
-| Parity      | N        |
-+-------------+----------+
-| Stop Bits   | 1        |
-+-------------+----------+
++-----------+--------+
+| Setting   | Value  |
++===========+========+
+| Baudrate  | 115200 |
++-----------+--------+
+| Bits      | 8      |
++-----------+--------+
+| Parity    | N      |
++-----------+--------+
+| Stop Bits | 1      |
++-----------+--------+
 
 Once connected, you can log in using either a user that you've created,
 or root, which has a default password of 'Kubos123'.
@@ -648,7 +646,7 @@ follow the common I2C structure of "{register, value}"
 
 The user program should look something like this:
 
-::
+.. code-block:: c
 
     /* Add device to system */
     system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-1/new_device);
@@ -722,12 +720,12 @@ direction and value.
     Set GPIO_86's value to 1:
     $ echo 1 > /sys/class/gpio/gpio86/value
 
-    Get GPIO_386's value:
+    Get GPIO_86's value:
     $ cat /sys/class/gpio/gpio86/value
 
 .. note:: The GPIO direction should match the value in the above table
 
-.. _user-accounts:
+.. _user-accounts-mbm2:
 
 User Accounts
 -------------
