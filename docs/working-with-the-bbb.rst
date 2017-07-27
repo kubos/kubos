@@ -45,6 +45,11 @@ with peripheral devices. Currently, users should interact with these
 devices using the standard Linux functions. A Kubos HAL will be added 
 in the future to abstract this process.
 
+.. warning::
+
+    Some pins are re-used by multiple buses. As a result, you will not be
+    able to use all buses simultaneously.
+
 UART
 ~~~~
 
@@ -109,7 +114,7 @@ The user program should look something like this:
 .. code-block:: c
 
     /* Add device to system */
-    system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-1/new_device);
+    system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-1/new_device");
 
     /* Open I2C bus */
     file = open("/dev/i2c-1");
@@ -133,7 +138,7 @@ The user program should look something like this:
 SPI
 ~~~
 
-The Beaglebone has two SPI buses available with pre-allocated chipselect pins.
+The Beaglebone has two SPI buses available with pre-allocated chip select pins.
 
 **SPI Bus 0**
 
