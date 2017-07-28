@@ -182,6 +182,8 @@ I transferred a script, but it won't run
 
 ``kubos flash`` preserves the file permissions of everything you transfer. Check that your file has the appropriate execute
 permissions turned on.
+
+.. _flash-troubleshooting:
     
 Flash Troubleshooting
 ^^^^^^^^^^^^^^^^^^^^^

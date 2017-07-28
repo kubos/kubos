@@ -66,9 +66,11 @@ It covers the following tutorial documents:
     STM32F4 Discovery Board Guide <stm32f4-discovery-board-guide>
 
 .. toctree::
-   :caption: Kubos Linux
+   :caption: KubOS Linux
    :hidden:
 
+    Using KubOS Linux <using-kubos-linux>
+    Working with the Beaglebone Black <working-with-the-bbb>
     Working with the iOBC <working-with-the-iobc>
     Working with the Pumpkin MBM2 <working-with-the-mbm2>
     Command and Control <command-and-control>
@@ -81,6 +83,7 @@ It covers the following tutorial documents:
     Kubos Naming and Coding Standards <kubos-standards>
     Kubos Module Development <kubos-development>
     KubOS Linux Overview <kubos-linux-overview>
+    KubOS Linux on Beaglebone Black <kubos-linux-on-bbb>
     KubOS Linux on iOBC <kubos-linux-on-iobc>
     KubOS Linux on Pumpkin MBM2 <kubos-linux-on-mbm2>
     KubOS Linux Upgrades <kubos-linux-upgrade>

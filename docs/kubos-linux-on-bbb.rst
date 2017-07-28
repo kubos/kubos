@@ -1,20 +1,17 @@
-KubOS Linux on the Pumpkin MBM2
-===============================
+KubOS Linux on the Beaglebone Black
+===================================
 
 Overview
 --------
 
-.. note:: Just looking to install KubOS Linux onto a Pumpkin MBM2? Skip ahead to the :ref:`installation-process-mbm2`.
+.. note:: Just looking to install KubOS Linux onto a Beaglebone Black? Skip ahead to the :ref:`installation-process-bbb`.
 
-The goal of this document is to create a KubOS Linux installation for the Pumpkin
-Motherboard Module 2 that can then run the satellite services (telemetry, payload 
-communication, etc) needed for the Pumpkin customers' missions.
+The goal of this document is to create a KubOS Linux installation for the 
+Beaglebone Black that can then run the satellite services (telemetry, payload 
+communication, etc) needed for customers' missions.
 
-The :doc:`Working with the Pumpkin MBM2 <working-with-the-mbm2>` doc can then be used to
+The :doc:`Working with the Beaglebone Black <working-with-the-bbb>` doc can then be used to
 create and load a user application on top of the new KubOS Linux install.
-
-Ideally, the user should never have to mess with the kernel. 
-It should be pre-loaded onto the Pumpkin MBM2.
 
 Software Components
 -------------------
@@ -93,7 +90,7 @@ KubOS Linux Build Process
 If for some reason you want or need to modify and rebuild the KubOS Linux components, follow
 the steps in this section.
 
-.. _build-os-mbm2:
+.. _build-os-bbb:
 
 Build the OS Files
 ~~~~~~~~~~~~~~~~~~
@@ -136,7 +133,7 @@ Move into the buildroot directory
     $ cd buildroot-2016.11
 
 Point BuildRoot to the external kubos-linux-build folder and tell it to build
-for the Pumpkin MBM2.
+for the Beaglebone Black.
 
 .. note::
 
@@ -146,7 +143,7 @@ for the Pumpkin MBM2.
 
 ::
 
-    $ sudo make BR2_EXTERNAL=../kubos-linux-build pumpkin-mbm2_defconfig
+    $ sudo make BR2_EXTERNAL=../kubos-linux-build bbb_defconfig
 
 Build everything
 
@@ -167,8 +164,8 @@ The relevant files are:
 
 -  uboot.bin - The U-Boot binary
 -  kernel - The compressed Linux kernel file
--  pumpkin-mbm2.dtb - The Device Tree Binary that Linux uses to configure itself
-   for the Pumpkin MBM2 board
+-  beaglebone-black.dtb - The Device Tree Binary that Linux uses to configure itself
+   for the Beaglebone Black board
 -  rootfs.tar - The root file system. Contains BusyBox and other libraries
 -  kubos-linux.img - The complete KubOS Linux SD card image
 
@@ -177,7 +174,7 @@ Changing the Output Toolchain Directory (optional)
 
 If you would like to build your toolchain in somewhere other than the
 "/usr/bin/bbb_toolchain" directory, update the ``BR2_HOST_DIR`` variable in the
-"configs/pumpkin-mbm2_defconfig" file.
+"configs/bbb_defconfig" file.
 
 If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
@@ -233,7 +230,7 @@ module links locally:
     $ cd {project folder}
     $ kubos link -a
 
-.. _installation-process-mbm2:
+.. _installation-process-bbb:
 
 Default Installation Process
 ----------------------------
@@ -250,7 +247,7 @@ To perform a full default installation, two files are needed:
   
 All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubostech/kubos-linux-build/releases>`__
 
-Download the latest `KubOS_Linux.zip` file and then unzip the files for the Pumpkin MBM2. They're located in the `KubOS_Linux/{version}/Pumpin-MBM2` folder.
+Download the latest `KubOS_Linux.zip` file and then unzip the files for the Beaglebone Black. They're located in the `KubOS_Linux/{version}/Beaglebone-Black` folder.
 
 Pre-Requisites
 ~~~~~~~~~~~~~~
@@ -289,7 +286,7 @@ Using `Etcher <https://etcher.io/>`__:
 It should take roughly 10 minutes for a 4GB image to be loaded onto an SD card.
 
 Once the program has finished successfully, the SD card is ready to be inserted
-into the Pumpkin MBM2's microSD slot.
+into the Beaglebone Black's microSD slot.
 
 Boot into U-Boot
 ^^^^^^^^^^^^^^^^
@@ -325,7 +322,7 @@ Copy/paste these commands:
 
 ::
     
-    setenv bootargs console=ttyS0,115200 root=/dev/mmcblk0p2 ext4 rootwait; fatload mmc 0:1 ${fdtaddr} /pumpkin-mbm2.dtb; fatload mmc 0:1 ${loadaddr} /kernel; bootm ${loadaddr} - ${fdtaddr}
+    setenv bootargs console=ttyS0,115200 root=/dev/mmcblk0p2 ext4 rootwait; fatload mmc 0:1 ${fdtaddr} /beaglebone-black.dtb; fatload mmc 0:1 ${loadaddr} /kernel; bootm ${loadaddr} - ${fdtaddr}
     
 This will cause the board to load KubOS Linux off of the microSD card, allowing us to flash
 the eMMC.
@@ -364,7 +361,7 @@ The installation process is now complete.
 Status LEDs
 -----------
 
-There are four LEDs present on the Pumpkin MBM2 which give some indication of what state
+There are four LEDs present on the Beaglebone Black which give some indication of what state
 the board is in. When there is only one blinking LED, the board is running KubOS Linux and
 the system is currently idle. The LEDs will blink in correspondence with CPU and MMC activity.
 If all LEDs are solid, then the system has reached some kind of locked error state.
@@ -423,7 +420,7 @@ Using KubOS Linux
 -----------------
 
 For information on how to create and run applications on your new KubOS Linux system, see the
-:doc:`working-with-the-mbm2` guide.
+:doc:`working-with-the-bbb` guide.
 
 Upgrade Process
 ---------------
