@@ -68,7 +68,7 @@ Go to the install location of the Kubos SDK, and bring up your Vagrant. As it in
 		==> default: Machine already provisioned. Run `vagrant provision` or use the `--provision`
 		==> default: flag to force provisioning. Provisioners marked to run always will still run.
 
-Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant)
+Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant).
 
 **Note:** If you update your vagrant box, you should recheck this information. 
 
@@ -86,7 +86,7 @@ Configure NppFTP to access the SDK:
   + Initial remote directory: "/home/vagrant/"
   + Connection type: SFTP
 
-.. image:: images/NppFTP-config.*
+.. image:: images/NppFTP-config.png
 
 Usage:
 ------
