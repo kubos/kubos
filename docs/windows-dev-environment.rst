@@ -42,15 +42,8 @@ Find the vagrant configuration parameters:
 Go to the install location of the Kubos SDK, and bring up your Vagrant. As it initializes, it will output it's configuration (only pertinent lines shown):
 
 ::
-	$ vagrant up
-	
-	Bringing machine 'default' up with 'virtualbox' provider...
-	
-	default: SSH address: 127.0.0.1:2222
-	
-	default: SSH username: vagrant
-	
-	default: Machine booted and ready!
+	$ default: SSH address: 127.0.0.1:2222
+	$ default: SSH username: vagrant
 
 Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant)
 
@@ -70,7 +63,7 @@ Configure NppFTP to access the SDK:
   + Initial remote directory: "/home/vagrant/"
   + Connection type: SFTP
 
-.. image:: images/NppFTP-config.*
+.. image:: images/NppFTP-config.png
 
 Usage:
 ------
