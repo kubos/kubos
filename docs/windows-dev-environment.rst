@@ -43,9 +43,13 @@ Go to the install location of the Kubos SDK, and bring up your Vagrant. As it in
 
 ::
 	$ vagrant up
+	
 	Bringing machine 'default' up with 'virtualbox' provider...
+	
 	default: SSH address: 127.0.0.1:2222
+	
 	default: SSH username: vagrant
+	
 	default: Machine booted and ready!
 
 Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant)
