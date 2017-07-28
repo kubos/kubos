@@ -74,9 +74,9 @@ Create a minicom session in order to connect to your board and see the project o
 For more information about the SDK, see our docs:
 
 - [Kubos Docs](http://docs.kubos.co)
-- [Installing the Kubos SDK](http://docs.kubos.co/1.0.0/sdk-installing.html)
-- [Kubos SDK Cheatsheet](http://docs.kubos.co/1.0.0/sdk-cheatsheet.html) 
-- [Kubos CLI Command Reference](http://docs.kubos.co/1.0.0/sdk-reference.html) 
-- [Kubos Project Configuration](http://docs.kubos.co/1.0.0/sdk-project-config.html)
-- [Kubos HAL SPI Guide](http://http://docs.kubos.co/1.0.0/kubos-hal/spi.html)
-- [STM32F4 Discovery Board Guide](http://docs.kubos.co/1.0.0/stm32f4-discovery-board-guide.html)
+- [Installing the Kubos SDK](http://docs.kubos.co/latest/sdk-installing.html)
+- [Kubos SDK Cheatsheet](http://docs.kubos.co/latest/sdk-cheatsheet.html) 
+- [Kubos CLI Command Reference](http://docs.kubos.co/latest/sdk-reference.html) 
+- [Kubos Project Configuration](http://docs.kubos.co/latest/sdk-project-config.html)
+- [Kubos HAL SPI Guide](http://http://docs.kubos.co/latest/kubos-hal/spi.html)
+- [STM32F4 Discovery Board Guide](http://docs.kubos.co/latest/stm32f4-discovery-board-guide.html)
