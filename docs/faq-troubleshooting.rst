@@ -129,15 +129,6 @@ in a shared folder.
 
 Windows does not support symlinks, so you cannot build Kubos projects within a shared folder on a Windows machine.
 
-"ERROR: the gcc program "arm-linux-gcc" could not be found"
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The iOBC toolchain is not currently in your path. Run this command to add it:
-
-::
-
-    $ export PATH=$PATH:/usr/bin/iobc_toolchain/usr/bin
-
 I can't build my project. I keep getting "Permission denied" errors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -191,6 +182,8 @@ I transferred a script, but it won't run
 
 ``kubos flash`` preserves the file permissions of everything you transfer. Check that your file has the appropriate execute
 permissions turned on.
+
+.. _flash-troubleshooting:
     
 Flash Troubleshooting
 ^^^^^^^^^^^^^^^^^^^^^
@@ -205,7 +198,8 @@ you can take:
 "No compatible FTDI device found"
 #################################
 
--  Check that the iOBC is turned on and connected to your computer
+-  Check that the KubOS Linux target is turned on and connected to your 
+   computer
 -  Check that no other vagrant images are running. Only one VM can have
    control of the USB, so it may be that another instance currently has
    control of the device. You can shutdown a vagrant image with the
@@ -220,21 +214,21 @@ you can take:
 "Transfer Failed: Connection Failed"
 ####################################
 
-The SDK was unable to connect to the iOBC
+The SDK was unable to connect to the KubOS Linux target
 
 -  Verify that the USB has been mapped to a linux device. Issue the
    command ``ls /dev``. You should see a /dev/ttyUSB\* device. If you
    don't, try rebooting your vagrant image (``vagrant halt``,
    ``vagrant up``)
 -  If this error occurs after the transfer process has started, then the
-   SDK likely lost connection to the iOBC. Verify that the board is
+   SDK likely lost connection to the board. Verify that the board is
    still correctly connected and powered and try the flash command
    again.
 
 "Transfer Failed: Invalid Password"
 ###################################
 
-The SDK was unable to log into the iOBC. Verify that the password is
+The SDK was unable to log into the KubOS Linux target. Verify that the password is
 correctly defined in your config.json file by issuing the ``kubos config`` command.
 
 System appears to have hung
