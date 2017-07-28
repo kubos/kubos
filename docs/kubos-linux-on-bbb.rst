@@ -243,11 +243,17 @@ The KubOS Linux installation process is composed of two high-level steps:
 To perform a full default installation, two files are needed:
 
   - A KubOS Linux SD card image
-  - An aux_sd1 image
+  - An aux_sd image
   
 All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubostech/kubos-linux-build/releases>`__
 
 Download the latest `KubOS_Linux.zip` file and then unzip the files for the Beaglebone Black. They're located in the `KubOS_Linux/{version}/Beaglebone-Black` folder.
+
+.. note::
+
+    The Beaglebone Black can also be used as a development board for the Pumpkin MBM2.
+    If you would like to use it for this purpose, please follow the
+    :ref:`installation instructions for the MBM2 <installation-process-mbm2>` instead.
 
 Pre-Requisites
 ~~~~~~~~~~~~~~
@@ -355,6 +361,10 @@ Now flash the micro SD card with the auxiliary SD card image. This image contain
 KubOS Linux upgrade partition and the second user data partition.
 
 Once the flash process has completed, put the card back into the microSD slot.
+
+.. warning::
+
+    If you do not have a microSD card in the board, the system will not boot.
 
 The installation process is now complete.
 
