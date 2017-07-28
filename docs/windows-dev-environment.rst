@@ -42,8 +42,10 @@ Find the vagrant configuration parameters:
 Go to the install location of the Kubos SDK, and bring up your Vagrant. As it initializes, it will output it's configuration (only pertinent lines shown):
 
 ::
-	$ default: SSH address: 127.0.0.1:2222
-	$ default: SSH username: vagrant
+
+		$ vagrant up
+		default: SSH address: 127.0.0.1:2222
+		default: SSH username: vagrant
 
 Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant)
 
