@@ -25,12 +25,11 @@ Install Notepad++ `here. <https://notepad-plus-plus.org/download/v7.4.2.html>`_ 
 
 Install the NppFTP plugin using the Plugin Manager.
 
- - Go to "Plugins" -> "Plugin Manager" -> "Show Plugin Manager"
- - Under "Available", find "NppFTP". Click the box next to it to select it, then select "Install". 
+- Go to "Plugins" -> "Plugin Manager" -> "Show Plugin Manager"
+- Under "Available", find "NppFTP". Click the box next to it to select it, then select "Install". 
+	+ It might prompt you to update the Plugin Manager before installing. I would recommend doing this once. It will require a restart of Notepad++, and you will have to repeat the above steps. If it prompts again after the first time, select "No" and it should install normally. 
 
-     + It might prompt you to update the Plugin Manager before installing. I would recommend doing this once. It will require a restart of Notepad++, and you will have to repeat the above steps. If it prompts again after the first time, select "No" and it should install normally. 
-
- - It should restart Notepad++, and under "Plugins", you should now see "NppFTP" as one of the options. 
+- It should restart Notepad++, and under "Plugins", you should now see "NppFTP" as one of the options. 
 
 
 Setup:
@@ -39,7 +38,8 @@ Setup:
 Find the vagrant configuration parameters: 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- - Go to the install location of the Kubos SDK, and bring up your Vagrant. As it initializes, it will output it's configuration: 
+- Go to the install location of the Kubos SDK, and bring up your Vagrant. As it initializes, it will output it's configuration:
+
 ::
 	$ vagrant up
 	Bringing machine 'default' up with 'virtualbox' provider...
@@ -66,23 +66,23 @@ Find the vagrant configuration parameters:
 	==> default: Machine already provisioned. Run `vagrant provision` or use the `--provision`
 	==> default: flag to force provisioning. Provisioners marked to run always will still run.
 
- - Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant)
+- Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant)
 
 **Note:** If you update your vagrant box, you should recheck this information. 
 
 Configure NppFTP to access the SDK:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- - Go to "Plugins" -> "NppFTP" -> "Show NppFTP Window". This should bring up the NppFTP windown on the right side. 
- - In the NppFTP window, go to "Settings" (the gear) -> "Profile Settings"
- - Select "Add New" in the bottom left, and name it "Kubos SDK".
- - Edit the settings to match the picture below. You'll need to input: 
+- Go to "Plugins" -> "NppFTP" -> "Show NppFTP Window". This should bring up the NppFTP windown on the right side. 
+- In the NppFTP window, go to "Settings" (the gear) -> "Profile Settings"
+- Select "Add New" in the bottom left, and name it "Kubos SDK".
+- Edit the settings to match the picture below. You'll need to input: 
 
-     + Hostname and Port from the SSH address recorded previously
-     + Username: "vagrant"  
-     + Password: "vagrant"
-     + Initial remote directory: "/home/vagrant/"
-     + Connection type: SFTP
+    + Hostname and Port from the SSH address recorded previously
+    + Username: "vagrant"  
+    + Password: "vagrant"
+    + Initial remote directory: "/home/vagrant/"
+    + Connection type: SFTP
 
 .. image:: images/NppFTP-config.*
 
