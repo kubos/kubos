@@ -27,7 +27,8 @@ Install the NppFTP plugin using the Plugin Manager.
 
 - Go to "Plugins" -> "Plugin Manager" -> "Show Plugin Manager"
 - Under "Available", find "NppFTP". Click the box next to it to select it, then select "Install". 
-	+ It might prompt you to update the Plugin Manager before installing. I would recommend doing this once. It will require a restart of Notepad++, and you will have to repeat the above steps. If it prompts again after the first time, select "No" and it should install normally. 
+
+**Note:** It might prompt you to update the Plugin Manager before installing. I would recommend doing this once. It will require a restart of Notepad++, and you will have to repeat all the steps. If it prompts again after the first time, select "No" and it should install normally. 
 
 - It should restart Notepad++, and under "Plugins", you should now see "NppFTP" as one of the options. 
 
@@ -38,30 +39,55 @@ Setup:
 Find the vagrant configuration parameters: 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Go to the install location of the Kubos SDK, and bring up your Vagrant. As it initializes, it will output it's configuration::
+Go to the install location of the Kubos SDK, and bring up your Vagrant. As it initializes, it will output it's configuration
+
+::
 	$ vagrant up
+	
 	Bringing machine 'default' up with 'virtualbox' provider...
+	
 	==> default: Checking if box 'kubostech/kubos-dev' is up to date...
+	
 	==> default: A newer version of the box 'kubostech/kubos-dev' is available! You currently
+	
 	==> default: have version '0.2.3'. The latest is version '1.0.1'. Run
+	
 	==> default: `vagrant box update` to update.
+	
 	==> default: Clearing any previously set forwarded ports...
+	
 	==> default: Clearing any previously set network interfaces...
+	
 	==> default: Preparing network interfaces based on configuration...
+	    
 	    default: Adapter 1: nat
+	
 	==> default: Forwarding ports...
+	    
 	    default: 22 (guest) => 2222 (host) (adapter 1)
+	
 	==> default: Booting VM...
+	
 	==> default: Waiting for machine to boot. This may take a few minutes...
-	    default: SSH address: 127.0.0.1:2222
-	    default: SSH username: vagrant
-	    default: SSH auth method: private key
+	
+		default: SSH address: 127.0.0.1:2222
+	
+		default: SSH username: vagrant
+	
+		default: SSH auth method: private key
+	
 	==> default: Machine booted and ready!
+	
 	==> default: Checking for guest additions in VM...
+	
 	==> default: Mounting shared folders...
-	    default: /vagrant => C:/Users/jacof/Documents/git/kubos
-	    default: /vagrant_data => C:/Users/jacof/Documents/git/kubos
+		
+		default: /vagrant => C:/Users/jacof/Documents/git/kubos
+		
+		default: /vagrant_data => C:/Users/jacof/Documents/git/kubos
+	
 	==> default: Machine already provisioned. Run `vagrant provision` or use the `--provision`
+	
 	==> default: flag to force provisioning. Provisioners marked to run always will still run.
 
 Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant)
