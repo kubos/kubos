@@ -60,11 +60,11 @@ indicate a message has been received.
 
 For more information about the SDK, see our docs:
 
-- [Kubos Docs](docs.kubos.co)
-- [Installing the Kubos SDK](docs.kubos.co/sdk-installing.html)
-- [Kubos SDK Cheatsheet](docs.kubos.co/sdk-cheatsheet.html) 
-- [Kubos CLI Command Reference](docs.kubos.co/sdk-reference.html) 
-- [Kubos Project Configuration](docs.kubos.co/sdk-project-config.html)
-- [Kubos HAL I2C Guide](http://docs.kubos.co/kubos-hal/i2c.html)
-- [STM32F4 Discovery Board Guide](docs.kubos.co/stm32f4-discovery-board-guide.html) 
-- [MSP430 Launchpad Guide](docs.kubos.co/msp430-launchpad-guide.html) 
+- [Kubos Docs](http://docs.kubos.co)
+- [Installing the Kubos SDK](http://docs.kubos.co/1.0.0/sdk-installing.html)
+- [Kubos SDK Cheatsheet](http://docs.kubos.co/1.0.0/sdk-cheatsheet.html) 
+- [Kubos CLI Command Reference](http://docs.kubos.co/1.0.0/sdk-reference.html) 
+- [Kubos Project Configuration](http://docs.kubos.co/1.0.0/sdk-project-config.html)
+- [Kubos HAL I2C Guide](http://docs.kubos.co/1.0.0/kubos-hal/i2c.html)
+- [STM32F4 Discovery Board Guide](http://docs.kubos.co/1.0.0/stm32f4-discovery-board-guide.html) 
+- [MSP430 Launchpad Guide](http://docs.kubos.co/1.0.0/msp430-launchpad-guide.html) 
