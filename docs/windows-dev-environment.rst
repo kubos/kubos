@@ -38,9 +38,7 @@ Setup:
 Find the vagrant configuration parameters: 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Go to the install location of the Kubos SDK, and bring up your Vagrant. As it initializes, it will output it's configuration:
-
-::
+Go to the install location of the Kubos SDK, and bring up your Vagrant. As it initializes, it will output it's configuration::
 	$ vagrant up
 	Bringing machine 'default' up with 'virtualbox' provider...
 	==> default: Checking if box 'kubostech/kubos-dev' is up to date...
@@ -66,7 +64,7 @@ Find the vagrant configuration parameters:
 	==> default: Machine already provisioned. Run `vagrant provision` or use the `--provision`
 	==> default: flag to force provisioning. Provisioners marked to run always will still run.
 
-- Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant)
+Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant)
 
 **Note:** If you update your vagrant box, you should recheck this information. 
 
@@ -78,11 +76,11 @@ Configure NppFTP to access the SDK:
 - Select "Add New" in the bottom left, and name it "Kubos SDK".
 - Edit the settings to match the picture below. You'll need to input: 
 
-    + Hostname and Port from the SSH address recorded previously
-    + Username: "vagrant"  
-    + Password: "vagrant"
-    + Initial remote directory: "/home/vagrant/"
-    + Connection type: SFTP
+  + Hostname and Port from the SSH address recorded previously
+  + Username: "vagrant"  
+  + Password: "vagrant"
+  + Initial remote directory: "/home/vagrant/"
+  + Connection type: SFTP
 
 .. image:: images/NppFTP-config.*
 
