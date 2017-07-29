@@ -57,17 +57,17 @@ We have also created several different example Kubos projects which can
 be used as starting points.
 
 -  `Example showing basic FreeRTOS tasks and
-   CSP <https://github.com/kubostech/kubos/tree/master/kubos-rt-example>`__
+   CSP <https://github.com/kubostech/kubos/tree/master/examples/kubos-rt-example>`__
 -  `Example showing the I2C HAL and
-   sensors <https://github.com/kubostech/kubos/tree/master/kubos-i2c-example>`__
+   sensors <https://github.com/kubostech/kubos/tree/master/examples/kubos-i2c-example>`__
 -  `Example showing the SPI HAL and
-   sensors <https://github.com/kubostech/kubos/tree/master/kubos-spi-example>`__
+   sensors <https://github.com/kubostech/kubos/tree/master/examples/kubos-spi-example>`__
 -  `Example showing the sensor
-   interface <https://github.com/kubostech/kubos/tree/master/kubos-sensor-example>`__
+   interface <https://github.com/kubostech/kubos/tree/master/examples/kubos-sensor-example>`__
 -  `Example showing CSP over
-   UART <https://github.com/kubostech/kubos/tree/master/kubos-csp-example>`__
+   UART <https://github.com/kubostech/kubos/tree/master/examples/kubos-csp-example>`__
 -  `Example KubOS Linux
-   project <https://github.com/kubostech/kubos/tree/master/kubos-linux-example>`__
+   project <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example>`__
 
 If you would like to use one of our projects, you will need to clone the main repo and
 then link the necessary files. For example:
