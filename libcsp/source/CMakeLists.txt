@@ -16,11 +16,7 @@ option (CSP_VERBOSE "" OFF)
 option (IF_I2C "" OFF)
 option (IF_KISS "" OFF)
 option (IF_CAN "" OFF)
-# IF_SOCKET was set to OFF
-# but it is required for building/testing the linux
-# IPC module. We can re-examine the default value
-# once RT is revisited.
-option (IF_SOCKET "" ON)
+option (IF_SOCKET "" OFF)
 option (IF_ZMQHUB "" OFF)
 option (CSP_DEBUG "" OFF)
 option (CAN_SOCKETCAN "" OFF)
@@ -61,6 +57,14 @@ endif()
 
 if (YOTTA_CFG_CSP_RDP)
     set (CSP_USE_RDP ON)
+endif()
+
+if (TARGET_LIKE_LINUX)
+    # IF_SOCKET was set to OFF
+    # but it is required for building/testing the linux
+    # IPC module. We can re-examine the default value
+    # once RT is revisited.
+    set (IF_SOCKET ON)
 endif()
 
 add_library (csp STATIC
