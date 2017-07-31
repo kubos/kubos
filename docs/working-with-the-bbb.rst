@@ -48,8 +48,10 @@ in the future to abstract this process.
 .. note::
 
     KubOS Linux for the Pumpkin MBM2 can be used instead of KubOS Linux
-    for the Beaglebone Black. In this case, some peripherals won't be
-    available. See the :ref:`peripherals-mbm2` section for more information.
+    for the Beaglebone Black. In this case, some buses and pins won't be
+    available, since they aren't exposed in the MBM2's CSK headers, or are
+    dedicated to other uses. See the :ref:`peripherals-mbm2` section for 
+    more information.
     
 UART
 ~~~~
@@ -146,9 +148,9 @@ The Beaglebone has one SPI bus available with two pre-allocated chip select pins
 +------+-------+
 | Name | Pin   |
 +======+=======+
-| MOSI | P9.29 |
+| MOSI | P9.30 |
 +------+-------+
-| MISO | P9.30 |
+| MISO | P9.29 |
 +------+-------+
 | SCLK | P9.31 |
 +------+-------+
