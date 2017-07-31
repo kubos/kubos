@@ -16,7 +16,11 @@ option (CSP_VERBOSE "" OFF)
 option (IF_I2C "" OFF)
 option (IF_KISS "" OFF)
 option (IF_CAN "" OFF)
-option (IF_SOCKET "" OFF)
+# IF_SOCKET was set to OFF
+# but it is required for building/testing the linux
+# IPC module. We can re-examine the default value
+# once RT is revisited.
+option (IF_SOCKET "" ON)
 option (IF_ZMQHUB "" OFF)
 option (CSP_DEBUG "" OFF)
 option (CAN_SOCKETCAN "" OFF)
