@@ -59,12 +59,12 @@ Press `CTRL+C` to stop execution
 
 For more information about the SDK, see our docs:
 
-- [Kubos Docs](docs.kubos.co)
-- [Installing the Kubos SDK](docs.kubos.co/sdk-installing.html)
-- [Kubos SDK Cheatsheet](docs.kubos.co/sdk-cheatsheet.html) 
-- [Kubos CLI Command Reference](docs.kubos.co/sdk-reference.html) 
-- [Kubos Project Configuration](docs.kubos.co/sdk-project-config.html)
-- [ISIS-OBC Guide](docs.kubos.co/working-with-the-iobc.html)
+- [Kubos Docs](http://docs.kubos.co)
+- [Installing the Kubos SDK](http://docs.kubos.co/latest/sdk-installing.html)
+- [Kubos SDK Cheatsheet](http://docs.kubos.co/latest/sdk-cheatsheet.html) 
+- [Kubos CLI Command Reference](http://docs.kubos.co/latest/sdk-reference.html) 
+- [Kubos Project Configuration](http://docs.kubos.co/latest/sdk-project-config.html)
+- [ISIS-OBC Guide](http://docs.kubos.co/latest/working-with-the-iobc.html)
 
     
     
