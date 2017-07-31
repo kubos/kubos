@@ -1,7 +1,7 @@
 {
-  "name": "kubos-linux-beaglebone-gcc",
+  "name": "kubos-linux-pumpkin-mbm2-gcc",
   "version": "0.1.1",
-  "description": "Base KubOS Linux build target for the Beaglebone Black arm-linux toolchain",
+  "description": "Base KubOS Linux build target for the Pumpkin MBM2 arm-linux toolchain",
   "inherits": {
     "kubos-linux-gcc": "kubostech/target-kubos-linux-gcc#~0.1.0"
   },

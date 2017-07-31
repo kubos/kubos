@@ -164,7 +164,7 @@ take effect in the box.
 
 --------------
 
-For more information on mounting volumes see the following `guide <https://www.vagrantup.com/synced-folders/basic_usage.html>`__
+For more information on mounting volumes see the following `guide <https://www.vagrantup.com/docs/synced-folders/basic_usage.html>`__
 
 --------------
 
