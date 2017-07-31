@@ -11,6 +11,9 @@
         "kubos-rt":"kubostech/kubos-rt"
       }
     },
+    "testTargets": [
+        "x86-linux-native"
+    ],
     "testDependencies": {
         "cmocka": "kubostech/cmocka"
     }
