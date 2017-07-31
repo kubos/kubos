@@ -24,10 +24,7 @@
     "x86-linux-native": {
       "tinycbor": "kubostech/tinycbor"
     },
-    "kubos-linux-beaglebone-gcc": {
-      "tinycbor": "kubostech/tinycbor"
-    },
-    "legacy-linux-beaglebone-gcc": {
+    "kubos-linux": {
       "tinycbor": "kubostech/tinycbor"
     }
   },
