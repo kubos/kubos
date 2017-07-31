@@ -13,8 +13,5 @@
       "kubos-linux":{
         "telemetry-linux":"kubostech/telemetry-linux"
       }
-    },
-    "testDependencies": {
-        "cmocka": "kubostech/cmocka"
     }
 }
