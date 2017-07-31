@@ -68,7 +68,9 @@ class KubosBuilder(object):
     def test(self, module_name="", target_name=""):
         module = next((m for m in self.kb.modules() if m.yotta_name() == module_name), None)
         target = next((t for t in self.kb.targets() if t.yotta_name() == target_name), None)
-        if module and target and target.yotta_name() in module.yotta_data['testTargets']:
+        if module and target:
+            if target.yotta_name() not in module.yotta_data['testTargets']:
+                return 0
             print('Testing %s' % module.yotta_name())
             print('Building [module %s@%s] for [target %s] - ' % (module.yotta_name(), module.path, target_name), end="")
             utils.cmd('kubos', 'link', '--all', cwd=module.path, echo=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
