@@ -27,5 +27,8 @@
   },
   "testDependencies": {
     "cmocka": "kubostech/cmocka"
-  }
+  },
+  "testTargets": [
+    "x86-linux-native"
+  ]
 }
