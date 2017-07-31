@@ -22,5 +22,8 @@
   },
   "testDependencies": {
     "unity": "kubostech/unity"
-  }
+  },
+  "testTargets": [
+    "x86-linux-native"
+  ]
 }

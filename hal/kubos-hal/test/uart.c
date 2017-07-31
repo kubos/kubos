@@ -157,11 +157,12 @@ static void test_init_term_write_read(void)
     char data = 'A';
     char read;
 
-    k_uart_init(TEST_UART, &conf);
     k_uart_terminate(TEST_UART);
 
     TEST_ASSERT_EQUAL_INT(k_uart_write(TEST_UART, &data, 1), 0);
-    TEST_ASSERT_EQUAL_INT(k_uart_rx_queue_len(TEST_UART), 0);
+    // Return of -2 from k_uart_rx_queue_len indicates no queue
+    // which is appropriate after running k_uart_terminate
+    TEST_ASSERT_EQUAL_INT(k_uart_rx_queue_len(TEST_UART), -2);
     TEST_ASSERT_EQUAL_INT(k_uart_read(TEST_UART, &read, 1), 0);
 }
 
