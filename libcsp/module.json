@@ -26,6 +26,9 @@
     },
     "kubos-linux-beaglebone-gcc": {
       "tinycbor": "kubostech/tinycbor"
+    },
+    "legacy-linux-beaglebone-gcc": {
+      "tinycbor": "kubostech/tinycbor"
     }
   },
   "testDependencies": {
