@@ -246,7 +246,7 @@ The KubOS Linux installation process is composed of two high-level steps:
 To perform a full default installation, two files are needed:
 
   - A KubOS Linux SD card image
-  - An aux_sd1 image
+  - An aux_sd image
   
 All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubostech/kubos-linux-build/releases>`__
 
@@ -358,6 +358,10 @@ Now flash the micro SD card with the auxiliary SD card image. This image contain
 KubOS Linux upgrade partition and the second user data partition.
 
 Once the flash process has completed, put the card back into the microSD slot.
+
+.. warning::
+
+    If you do not have a microSD card in the board, the system will not boot.
 
 The installation process is now complete.
 

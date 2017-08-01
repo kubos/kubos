@@ -45,11 +45,14 @@ with peripheral devices. Currently, users should interact with these
 devices using the standard Linux functions. A Kubos HAL will be added 
 in the future to abstract this process.
 
-.. warning::
+.. note::
 
-    Some pins are re-used by multiple buses. As a result, you will not be
-    able to use all buses simultaneously.
-
+    KubOS Linux for the Pumpkin MBM2 can be used instead of KubOS Linux
+    for the Beaglebone Black. In this case, some buses and pins won't be
+    available, since they aren't exposed in the MBM2's CSK headers, or are
+    dedicated to other uses. See the :ref:`peripherals-mbm2` section for 
+    more information.
+    
 UART
 ~~~~
 
@@ -138,30 +141,16 @@ The user program should look something like this:
 SPI
 ~~~
 
-The Beaglebone has two SPI buses available with pre-allocated chip select pins.
-
-**SPI Bus 0**
-
-+------+-------+
-| Name | Pin   |
-+======+=======+
-| MOSI | P9.21 |
-+------+-------+
-| MISO | P9.18 |
-+------+-------+
-| SCLK | P9.22 |
-+------+-------+
-| CS0  | P9.17 |
-+------+-------+
+The Beaglebone has one SPI bus available with two pre-allocated chip select pins.
 
 **SPI Bus 1**
 
 +------+-------+
 | Name | Pin   |
 +======+=======+
-| MOSI | P9.29 |
+| MOSI | P9.30 |
 +------+-------+
-| MISO | P9.30 |
+| MISO | P9.29 |
 +------+-------+
 | SCLK | P9.31 |
 +------+-------+
@@ -171,8 +160,8 @@ The Beaglebone has two SPI buses available with pre-allocated chip select pins.
 +------+-------+
 
 Users can interact a device on this bus using Linux's `spidev interface <https://www.kernel.org/doc/Documentation/spi/spidev>`__
-The device name will be ``/dev/spidev{bus_number}.{CS_number}``. For example, a device connected to the first chip select pin
-of SPI bus 1 would be ``/dev/spidev1.0``.
+The device name will be ``/dev/spidev1.{CS_number}``. For example, a device 
+connected to the first chip select pin would be ``/dev/spidev1.0``.
 
 An example user program to read a value might look like this:
 
