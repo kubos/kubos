@@ -34,7 +34,7 @@ Install the NppFTP plugin using the Plugin Manager.
 .. Note:: 
 	It might prompt you to update the Plugin Manager before installing. I would recommend doing this once. It will require a restart of Notepad++, and you will have to repeat all the steps. If it prompts again after the first time, select "No" and it should install normally. 
 
-- It should restart Notepad++, you should now see "NppFTP" as one of the options under "Plugins". 
+- After Notepad++ has restarted, you should now see "NppFTP" as one of the options under "Plugins". 
 
 
 Setup
@@ -77,7 +77,7 @@ Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant).
 If the VM is already up, you can also issue ``vagrant ssh-config`` to get the hostname and port info. 
 
 .. Note:: 
-	If you update your Vagrant box, this could change. 
+	If you update your Vagrant box, this information could change. 
 
 Configure NppFTP to access the SDK
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
