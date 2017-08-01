@@ -1,0 +1,44 @@
+{
+    "name": "kubos-linux-gcc",
+    "version": "0.1.1",
+    "description": "parent build target for KubOS Linux devices",
+    "inherits": {
+        "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
+    },
+    "licenses": 
+    [
+        {
+            "url": "https://spdx.org/licenses/Apache-2.0",
+            "type": "Apache-2.0"
+        }
+    ],
+    "keywords": 
+    [
+        "kubos-linux",
+        "linux",
+        "gcc"
+    ],
+    "similarTo": 
+    [
+        "linux",
+        "kubos-linux"
+    ],
+    "config": {
+        "system": {
+            "initAfterFlash": false,
+            "initAtBoot": false,
+            "runLevel": 50,
+            "destDir": "/home/system/usr/local/bin",
+            "password": "Kubos123"
+        }
+    },
+    "toolchain": "CMake/toolchain.cmake",
+    "scripts": {
+        "start": 
+        [
+            "bash",
+            "$PWD/yotta_targets/kubos-linux-gcc/minicom/flash.sh",
+            "$program"
+        ]
+    }
+}
