@@ -40,6 +40,8 @@ drivers should be automatically installed.
 This connection will be passed through to a Kubos Vagrant image as
 `/dev/FTDI` and will be used for the serial console.
 
+.. _peripherals-mbm2:
+
 Peripherals
 -----------
 
