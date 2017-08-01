@@ -294,20 +294,16 @@ into the Pumpkin MBM2's microSD slot.
 Boot into U-Boot
 ^^^^^^^^^^^^^^^^
 
-KubOS Linux normally runs on the eMMC. Since we now want to overwrite the eMMC,
-we'll need to change some settings to boot from the SD card instead.
+.. note:: These instructions should work whether you're currently running KubOS Linux
+    or some other Linux distribution.
+
+We now want to overwrite the eMMC, so we'll need to use U-Boot in order to boot
+KubOS Linux from the SD card.
 
 You'll need to establish a serial connection with the board in order to connect
 to the console. 
 
-You can do this via a Kubos Vagrant image with the ``minicom kubos`` command
-after booting the board.
-
-The default login account is kubos/Kubos123.
-
-Issue the ``reboot`` command in order to restart the system.
-
-Hold down any key while the board is restarting. This will exit out of the auto-boot and
+Hold down any key while the board is booting. This will exit out of the auto-boot and
 bring up the CLI.
 
 ::
