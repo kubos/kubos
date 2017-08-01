@@ -123,9 +123,9 @@ In the context of these documents, as well as virtual machines in
 general, the physical "main" computer is referred to as the "host". The
 virtual machine inside of the host is referred to as the "guest".
 
-**Note:** There is not a supported method of this for Windows hosts at
-this time, as Windows does not support Linux symlinks. There is an 
-alternate method for editing files on the SDK listed :doc:`here. <windows-dev-environment>`
+.. Note:: There is not a supported method of this for Windows hosts at
+  this time, as Windows does not support Linux symlinks. There is an 
+  alternate method for editing files on the SDK listed :doc:`here. <windows-dev-environment>`
 
 It is strongly recommended that you create your project in a directory
 on your host that is shared with your box when using a Linux or Mac OS
@@ -144,13 +144,14 @@ following lines:
         # argument is a set of non-required options.
         # config.vm.synced_folder "../data", "/vagrant_data"
 
-**Note:** The default home directory in the Kubos Vagrant boxes is
-``/home/vagrant``
+.. Note:: 
+  The default home directory in the Kubos Vagrant boxes is ``/home/vagrant`` 
 
 Uncomment the last line in this block and change the paths to match your
 host directory and a desired mount point in the box.
 
-**Note:** The path in the box must be an absolute path
+.. Note:: 
+  The path in the box must be an absolute path
 
 After a volume is mounted into the box all of the data from the host
 path will be available at the path specified for the box. In the above
@@ -159,9 +160,10 @@ example the host path (``../data``) would be exposed at
 editor of your choosing to edit the project files from your host machine
 at the host directory path.
 
-**Note:** If you make changes to the Vagrantfile after the box has been
-started you will need to run ``vagrant reload`` for these changes to
-take effect in the box.
+.. Note:: 
+  If you make changes to the Vagrantfile after the box has been
+  started you will need to run ``vagrant reload`` for these changes to
+  take effect in the box.
 
 --------------
 
