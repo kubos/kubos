@@ -23,7 +23,7 @@ This same method can be used with many common IDEs that have FTP packages for wo
   
 Installation
 ------------
-  
+
 Install Notepad++ `here. <https://notepad-plus-plus.org/download/v7.4.2.html>`_ Unless you know what you're doing and want to use something else, choose the first option of the installer: "Notepad++ Installer 32-bit x86". Choose all the default options in the installer (unless, as it states, you know what you're doing).
 
 Install the NppFTP plugin using the Plugin Manager.
@@ -31,7 +31,8 @@ Install the NppFTP plugin using the Plugin Manager.
 - Go to "Plugins" -> "Plugin Manager" -> "Show Plugin Manager"
 - Under "Available", find "NppFTP". Click the box next to it to select it, then select "Install". 
 
-**Note:** It might prompt you to update the Plugin Manager before installing. I would recommend doing this once. It will require a restart of Notepad++, and you will have to repeat all the steps. If it prompts again after the first time, select "No" and it should install normally. 
+.. Note:: 
+	It might prompt you to update the Plugin Manager before installing. I would recommend doing this once. It will require a restart of Notepad++, and you will have to repeat all the steps. If it prompts again after the first time, select "No" and it should install normally. 
 
 - It should restart Notepad++, you should now see "NppFTP" as one of the options under "Plugins". 
 
