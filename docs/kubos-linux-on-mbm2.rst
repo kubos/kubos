@@ -246,7 +246,7 @@ The KubOS Linux installation process is composed of two high-level steps:
 To perform a full default installation, two files are needed:
 
   - A KubOS Linux SD card image
-  - An aux_sd1 image
+  - An aux_sd image
   
 All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubostech/kubos-linux-build/releases>`__
 
@@ -294,20 +294,16 @@ into the Pumpkin MBM2's microSD slot.
 Boot into U-Boot
 ^^^^^^^^^^^^^^^^
 
-KubOS Linux normally runs on the eMMC. Since we now want to overwrite the eMMC,
-we'll need to change some settings to boot from the SD card instead.
+.. note:: These instructions should work whether you're currently running KubOS Linux
+    or some other Linux distribution.
+
+We now want to overwrite the eMMC, so we'll need to use U-Boot in order to boot
+KubOS Linux from the SD card.
 
 You'll need to establish a serial connection with the board in order to connect
 to the console. 
 
-You can do this via a Kubos Vagrant image with the ``minicom kubos`` command
-after booting the board.
-
-The default login account is kubos/Kubos123.
-
-Issue the ``reboot`` command in order to restart the system.
-
-Hold down any key while the board is restarting. This will exit out of the auto-boot and
+Hold down any key while the board is booting. This will exit out of the auto-boot and
 bring up the CLI.
 
 ::
@@ -358,6 +354,10 @@ Now flash the micro SD card with the auxiliary SD card image. This image contain
 KubOS Linux upgrade partition and the second user data partition.
 
 Once the flash process has completed, put the card back into the microSD slot.
+
+.. warning::
+
+    If you do not have a microSD card in the board, the system will not boot.
 
 The installation process is now complete.
 
