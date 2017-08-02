@@ -61,9 +61,9 @@ The Beaglebone Black has 5 UART ports available for use:
 +--------------+--------+--------+---------+---------+
 | Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
 +==============+========+========+=========+=========+
-| /dev/ttyS1   | P9.24  | P9.26  | P9.19   | P9.20   |
+| /dev/ttyS1   | P9.24  | P9.26  |         |         |
 +--------------+--------+--------+---------+---------+
-| /dev/ttyS2   | P9.21  | P9.22  | P8.38   | P8.37   |
+| /dev/ttyS2   | P9.21  | P9.22  |         |         |
 +--------------+--------+--------+---------+---------+
 | /dev/ttyS3   | P9.42  |        | P8.34   | P8.36   |
 +--------------+--------+--------+---------+---------+
@@ -72,11 +72,31 @@ The Beaglebone Black has 5 UART ports available for use:
 | /dev/ttyS5   | P8.37  | P8.38  | P8.32   | P8.31   |
 +--------------+--------+--------+---------+---------+
 
-.. note:: /dev/ttyS3 (UART3) is TX-only
+.. note:: /dev/ttyS3 (UART3) is TX-only. /dev/ttyS1 and /dev/ttyS2 do not 
+    have RTS/CTS due to a pin conflicts with other buses.
 
-Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
+Users can interact with these ports in their applications using Linux's 
+`termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
 
 `A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
+
+Additionally, the ports can be used from the command line:
+
+The ``stty -F {device} [parameters]`` command can be used to 
+configure the port. For example, this command will set the
+baud rate of `/dev/ttyS1` to 4800::
+
+    $ stty -F /dev/ttyS1 4800
+    
+The ``echo`` command can be used to transmit basic data out of
+the TX pin. For example::
+
+    $ echo "Hello!" > /dev/ttyS1
+    
+The ``cat`` command can be used to read any data from the RX
+pin. For example::
+
+    $ cat < /dev/ttyS1
 
 I2C
 ~~~
@@ -141,7 +161,7 @@ The user program should look something like this:
 SPI
 ~~~
 
-The Beaglebone has one SPI bus available with two pre-allocated chip select pins.
+The Beaglebone has one SPI bus available with a pre-allocated chip select pin.
 
 **SPI Bus 1**
 
@@ -156,12 +176,9 @@ The Beaglebone has one SPI bus available with two pre-allocated chip select pins
 +------+-------+
 | CS0  | P9.28 |
 +------+-------+
-| CS1  | P9.42 |
-+------+-------+
 
 Users can interact a device on this bus using Linux's `spidev interface <https://www.kernel.org/doc/Documentation/spi/spidev>`__
-The device name will be ``/dev/spidev1.{CS_number}``. For example, a device 
-connected to the first chip select pin would be ``/dev/spidev1.0``.
+The device name will be ``/dev/spidev1.0``.
 
 An example user program to read a value might look like this:
 
