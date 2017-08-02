@@ -57,6 +57,7 @@ It covers the following tutorial documents:
     Kubos CLI Command Reference <sdk-reference>
     Kubos Project Configuration <sdk-project-config>
     Upgrading Kubos SDK <sdk-upgrading>
+    Windows Development Environment Example <windows-dev-environment>
 
 .. toctree::
    :caption: Kubos RT
