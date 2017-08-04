@@ -227,6 +227,57 @@ An example user program to read a value might look like this:
     ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
 
     close(fd);
+    
+ADC
+~~~
+
+The Beaglebone Black has seven analog input pins available:
+
++------+-------+
+| Name | Pin   |
++======+=======+
+| AIN0 | P9.39 |
++------+-------+
+| AIN1 | P9.40 |
++------+-------+
+| AIN2 | P9.37 |
++------+-------+
+| AIN3 | P9.38 |
++------+-------+
+| AIN4 | P9.33 |
++------+-------+
+| AIN5 | P9.36 |
++------+-------+
+| AIN6 | P9.35 |
++------+-------+
+
+The pins are available through the Linux device ``/sys/bus/iio/devices/iio\:device0/``.
+
+A single raw output value can be read from each of the pins via
+``/sys/bus/iio/devices/iio\:device0/in_voltage{n}_raw``, where `{n}` corresponds to the
+AIN number of the pin.
+
+Information about setting up continuous data gathering can be found in
+`this guide from TI <http://processors.wiki.ti.com/index.php/Linux_Core_ADC_Users_Guide>`__.
+
+To convert the raw ADC value to a voltage, use this equation:
+
+.. math::
+    
+    V_{in} = \frac{D * (2^n - 1)}{V_{ref}}
+
+Where:
+
+    - :math:`D` = Raw ADC value
+    - :math:`n` = Number of ADC resolution bits 
+    - :math:`V_{ref}` =  Reference voltage
+    
+The Beaglebone Black uses 12 resolution bits and a reference voltage of 1.8V, so the
+resulting equation is
+
+.. math::
+
+    V_{in} = \frac{D * (4095)}{1.8}
 
 GPIO
 ~~~~
