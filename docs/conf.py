@@ -120,6 +120,7 @@ breathe_projects = {
 extensions += [
     'breathe',
     'sphinx.ext.todo',
+    'sphinx.ext.mathjax',
     'sphinxjsondomain',
     'sphinxcontrib.plantuml'
 ]
