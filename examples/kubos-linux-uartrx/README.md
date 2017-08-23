@@ -1,4 +1,6 @@
-# UART RX
+# UART RX with KubOS Linux
+
+**NOTE: EXPERIMENTAL (Work in Progress)**
 
 This is a demo program to test receiving UART data in non-blocking mode as an interrupt. It expects to read the incrementing message "Test message nnn" every 5 seconds from `/dev/ttyS1`.
 
