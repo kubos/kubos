@@ -23,12 +23,15 @@
 DBusHandlerResult message_handler(DBusConnection * connection,
                                   DBusMessage * message, void * user_data);
 
+tECP_Error status_handler(eps_power_status status);
+
 #define MY_NAME "org.KubOS.client"
+
+static tECP_Context context;
 
 int main(int argc, char * argv[])
 {
     tECP_Error   err;
-    tECP_Context context;
 
     do
     {
@@ -40,12 +43,11 @@ int main(int argc, char * argv[])
         }
         printf("00BASIC: Successfully called ECP_Init()\n");
 
-        if (ECP_E_NOERR != (err = ECP_Listen(&context, POWER_MANAGER_INTERFACE)))
+        if (ECP_E_NOERR != (err = on_power_status(&context, &status_handler)))
         {
-            printf("Error calling ECP_Listen\n");
+            printf("Error calling on_power_status\n");
             break;
         }
-        printf("Called ECP_Listen\n");
 
         for (int i = 0; i < 15; i++)
         {
@@ -68,15 +70,15 @@ int main(int argc, char * argv[])
 DBusHandlerResult message_handler(DBusConnection * connection,
                                   DBusMessage * message, void * user_data)
 {
-    const char * interface_name = dbus_message_get_interface(message);
-    const char * member_name    = dbus_message_get_member(message);
-    eps_power_status status;
-    if (ECP_E_NOERR == check_message(message, POWER_MANAGER_INTERFACE, POWER_MANAGER_STATUS))
+    if (ECP_E_NOERR == ECP_Handle_Message(&context, message))
     {
-        parse_power_status_message(&status, message);
-        printf("Got EPS Status\nLine 1 %d\nLine 2 %d\n", status.line_one, status.line_two);
         return DBUS_HANDLER_RESULT_HANDLED;
     }
 
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+}
+
+tECP_Error status_handler(eps_power_status status)
+{
+    printf("Got status %d:%d\n", status.line_one, status.line_two);
 }

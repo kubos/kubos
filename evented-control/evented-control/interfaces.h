@@ -23,6 +23,9 @@
 #define POWER_MANAGER_PATH          "/org/KubOS/PowerManager"
 #define POWER_MANAGER_STATUS        "PowerStatus"
 
+typedef tECP_Error (*power_status_cb)(eps_power_status status);
+
 tECP_Error check_message(DBusMessage * message, const char * interface, const char * member);
 tECP_Error parse_power_status_message(eps_power_status * status, DBusMessage * message);
 tECP_Error format_power_status_message(eps_power_status status, DBusMessage ** message);
+tECP_Error on_power_status(tECP_Context * context, power_status_cb cb);

@@ -126,6 +126,17 @@ typedef struct {
   } content;
 } tECP_Message;
 
+typedef tECP_Error (*message_parser)(DBusMessage * message, void * handler);
+
+typedef struct _tECP_MessageHandler {
+    struct _tECP_MessageHandler * next;
+    char * interface;
+    char * member;
+    message_parser parser;
+    void * cb;
+} tECP_MessageHandler;
+
+
 /* Channel ID type */
 typedef uint16_t tECP_Channel;
 
@@ -140,7 +151,7 @@ typedef struct _tECP_Context {
   int listen;
   int talk_id;
   int listen_id;
-  tECP_ChannelAction * callbacks;
+  tECP_MessageHandler * callbacks;
   DBusConnection * connection;
   DBusObjectPathVTable vtable;
 } tECP_Context;
@@ -155,3 +166,5 @@ tECP_Error ECP_Listen(tECP_Context * context, const char * channel);
 tECP_Error ECP_Broadcast( tECP_Context * context, DBusMessage * message );
 tECP_Error ECP_Loop( tECP_Context * context, unsigned int timeout );
 tECP_Error ECP_Destroy( tECP_Context * context );
+tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message);
+tECP_Error ECP_Add_Message_Handler(tECP_Context * context, tECP_MessageHandler handler);

@@ -145,3 +145,52 @@ tECP_Error ECP_Broadcast( tECP_Context * context, DBusMessage * message ) {
 
   return( err );
 }
+
+tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message)
+{
+    tECP_MessageHandler * current = NULL;
+    const char * message_interface = dbus_message_get_interface(message);
+    const char * message_member = dbus_message_get_member(message);
+
+    current = context->callbacks;
+    while (current != NULL)
+    {
+        if ((0 == strcmp(message_interface, current->interface)) &&
+            (0 == strcmp(message_member, current->member)))
+        {
+            printf("Handling %s.%s\n", current->interface, current->member);
+            current->parser(message, current->cb);
+            return ECP_E_NOERR;
+        }
+        current = current->next;
+    }
+    if (NULL == current)
+    {
+        return ECP_E_GENERIC;
+    }
+}
+
+tECP_Error ECP_Add_Message_Handler(tECP_Context * context, tECP_MessageHandler handler)
+{
+    tECP_MessageHandler * current = NULL;
+    tECP_MessageHandler * new_handler = malloc(sizeof(tECP_MessageHandler));
+    tECP_Error err = ECP_E_NOERR;
+
+    memcpy(new_handler, &handler, sizeof(tECP_MessageHandler));
+
+    if (NULL == context->callbacks)
+    {
+        context->callbacks = new_handler;
+    }
+    else
+    {
+        current = context->callbacks;
+        while (NULL != current->next)
+        {
+            current = current->next;
+        }
+        current->next = new_handler;
+    }
+
+    return err;
+}
