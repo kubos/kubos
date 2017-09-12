@@ -15,7 +15,7 @@
  */
 
 #include <evented-control/ecp.h>
-#include <evented-control/interfaces.h>
+#include <evented-control/messages.h>
 #include <eps-api/eps.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
             break;
         }
 
-        if (ECP_E_NOERR != (err = ECP_Call(&context, POWER_MANAGER_INTERFACE, POWER_MANAGER_PATH, POWER_MANAGER_ENABLE_LINE)))
+        if (ECP_E_NOERR != (err = enable_line(&context, 1)))
         {
             printf("Error calling enable line\n");
             break;

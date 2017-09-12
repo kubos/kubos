@@ -13,27 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * Functions for publishing/subscribing/parsing the PowerStatus signal exposed
+ * by the Power Manager.
+ *
+ * org.KubOS.PowerManager.PowerStatus
+ */
 #include <dbus/dbus.h>
-#include <eps-api/eps.h>
-#include <stdio.h>
-#include <string.h>
 #include "evented-control/ecp.h"
-#include "evented-control/interfaces.h"
-
-tECP_Error check_message(DBusMessage * message, const char * interface,
-                         const char * member)
-{
-    const char * msg_interface = dbus_message_get_interface(message);
-    const char * msg_member    = dbus_message_get_member(message);
-
-    if ((0 == strcmp(msg_interface, interface))
-        && (0 == strcmp(msg_member, member)))
-    {
-        return ECP_E_NOERR;
-    }
-    return ECP_E_GENERIC;
-}
+#include "evented-control/messages.h"
 
 tECP_Error format_power_status_message(eps_power_status status,
                                        DBusMessage **   message)
@@ -69,47 +57,25 @@ tECP_Error parse_power_status_message(eps_power_status * status,
     return ECP_E_NOERR;
 }
 
-tECP_Error on_power_status_parser(tECP_Context * context, DBusMessage * message, void * handler)
+tECP_Error on_power_status_parser(tECP_Context * context,
+                                  DBusMessage * message, void * handler)
 {
     eps_power_status status;
     if (ECP_E_NOERR == parse_power_status_message(&status, message))
     {
-        ((power_status_cb)handler)(status);
+        ((power_status_cb) handler)(status);
     }
 }
 
 tECP_Error on_power_status(tECP_Context * context, power_status_cb cb)
 {
-    tECP_MessageHandler power_status_handler = 
-    {
-        .interface = POWER_MANAGER_INTERFACE,
-        .member    = POWER_MANAGER_STATUS,
-        .parser = &on_power_status_parser,
-        .cb = (void*) cb
-    };
+    tECP_MessageHandler power_status_handler
+        = {.interface = POWER_MANAGER_INTERFACE,
+           .member    = POWER_MANAGER_STATUS,
+           .parser    = &on_power_status_parser,
+           .cb        = (void *) cb };
 
     ECP_Add_Message_Handler(context, power_status_handler);
 
     return ECP_Listen(context, POWER_MANAGER_INTERFACE);
-}
-
-tECP_Error on_enable_line_parser(tECP_Context * context, DBusMessage * message, void * handler)
-{
-    DBusMessage * reply = NULL;
-
-    reply = dbus_message_new_method_return(message);
-    dbus_connection_send(context->connection, reply, NULL);
-    dbus_message_unref(reply);
-}
-
-tECP_Error on_enable_line(tECP_Context * context, void * cb)
-{
-    tECP_MessageHandler enable_line_handler = {
-        .interface = POWER_MANAGER_INTERFACE,
-        .member = POWER_MANAGER_ENABLE_LINE,
-        .parser = &on_enable_line_parser,
-        .cb = (void*)cb
-    };
-
-    return ECP_Add_Message_Handler(context, enable_line_handler);
 }

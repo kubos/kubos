@@ -21,17 +21,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* This is the endpoint used by nanomsg for pub/sub broadcast messages.
-** Eventually we'll want to read this from a configuration file, but
-** hardcoding it is fine for the near term.
-*/
-char * broadcast_endpoint = "tcp://127.0.0.1:25901";
 
 /**
  * Initialize an ECP Context
  *
 */
-
 tECP_Error ECP_Init(tECP_Context * context, const char * name,
                     tECP_Callback callback)
 {
@@ -154,14 +148,12 @@ tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message)
     const char * message_interface = dbus_message_get_interface(message);
     const char * message_member    = dbus_message_get_member(message);
 
-    printf("Handling %s.%s\n", message_interface, message_member);
     current = context->callbacks;
     while (current != NULL)
     {
         if ((0 == strcmp(message_interface, current->interface))
             && (0 == strcmp(message_member, current->member)))
         {
-            printf("Handling %s.%s\n", current->interface, current->member);
             current->parser(context, message, current->cb);
             return ECP_E_NOERR;
         }

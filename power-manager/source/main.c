@@ -16,7 +16,7 @@
 
 #include <eps-api/eps.h>
 #include <evented-control/ecp.h>
-#include <evented-control/interfaces.h>
+#include <evented-control/messages.h>
 #include <stdio.h>
 
 tECP_Error enable_line_handler(void);
@@ -44,12 +44,10 @@ int main()
 
         initialized = 1;
 
-        // if (ECP_E_NOERR != (err = ECP_Register_Method(&context, POWER_MANAGER_ENABLE_LINE, message_handler)))
-        // {
-
-        // }
-
-        on_enable_line(&context, &enable_line_handler);
+        if (ECP_E_NOERR != on_enable_line(&context, &enable_line_handler))
+        {
+            printf("Error registering enable line callback\n");
+        }
 
         /* Now loop for (at most) 15 seconds, looking for a message */
         for (i = 0; (i < 15) && (err == ECP_E_NOERR); i++)
