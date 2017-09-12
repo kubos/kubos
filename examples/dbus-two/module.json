@@ -1,0 +1,15 @@
+{
+    "bin":"./source",
+    "license":"MIT",
+    "name":"hello-nnmsg",
+    "description":"Pubsub demo from nanomsg source",
+    "repository":{
+        "url":"git://github.com/kubostech/hello-nnmsg",
+        "type":"git"
+    },
+    "version":"4.2.2",
+    "homepage":"https://github.com/kubostech/hello-nnmsg",
+    "dependencies":{
+        "nanomsg" : "kubostech/nanomsg"
+    }
+}

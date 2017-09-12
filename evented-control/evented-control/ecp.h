@@ -126,7 +126,9 @@ typedef struct {
   } content;
 } tECP_Message;
 
-typedef tECP_Error (*message_parser)(DBusMessage * message, void * handler);
+struct _tECP_Context;
+
+typedef tECP_Error (*message_parser)(struct _tECP_Context * context, DBusMessage * message, void * handler);
 
 typedef struct _tECP_MessageHandler {
     struct _tECP_MessageHandler * next;
@@ -157,7 +159,7 @@ typedef struct _tECP_Context {
 } tECP_Context;
 
 /* Callback type for ECP_Listen callbacks */
-typedef DBusHandlerResult (*tECP_Callback)( DBusConnection * connection, DBusMessage * message, void * data );
+typedef DBusHandlerResult (*tECP_Callback)(DBusConnection * connection, DBusMessage * message, void * data );
 
 /* Function Prototypes */
 
@@ -168,3 +170,5 @@ tECP_Error ECP_Loop( tECP_Context * context, unsigned int timeout );
 tECP_Error ECP_Destroy( tECP_Context * context );
 tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message);
 tECP_Error ECP_Add_Message_Handler(tECP_Context * context, tECP_MessageHandler handler);
+tECP_Error ECP_Call(tECP_Context * context, const char * interface, const char * path, const char * method);
+tECP_Error ECP_Register_Method(tECP_Context * context, const char * method, tECP_Callback callback);

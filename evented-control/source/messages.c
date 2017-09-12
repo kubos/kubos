@@ -69,7 +69,7 @@ tECP_Error parse_power_status_message(eps_power_status * status,
     return ECP_E_NOERR;
 }
 
-tECP_Error on_power_status_parser(DBusMessage * message, void * handler)
+tECP_Error on_power_status_parser(tECP_Context * context, DBusMessage * message, void * handler)
 {
     eps_power_status status;
     if (ECP_E_NOERR == parse_power_status_message(&status, message))
@@ -91,4 +91,25 @@ tECP_Error on_power_status(tECP_Context * context, power_status_cb cb)
     ECP_Add_Message_Handler(context, power_status_handler);
 
     return ECP_Listen(context, POWER_MANAGER_INTERFACE);
+}
+
+tECP_Error on_enable_line_parser(tECP_Context * context, DBusMessage * message, void * handler)
+{
+    DBusMessage * reply = NULL;
+
+    reply = dbus_message_new_method_return(message);
+    dbus_connection_send(context->connection, reply, NULL);
+    dbus_message_unref(reply);
+}
+
+tECP_Error on_enable_line(tECP_Context * context, void * cb)
+{
+    tECP_MessageHandler enable_line_handler = {
+        .interface = POWER_MANAGER_INTERFACE,
+        .member = POWER_MANAGER_ENABLE_LINE,
+        .parser = &on_enable_line_parser,
+        .cb = (void*)cb
+    };
+
+    return ECP_Add_Message_Handler(context, enable_line_handler);
 }

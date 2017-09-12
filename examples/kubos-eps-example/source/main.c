@@ -49,6 +49,12 @@ int main(int argc, char * argv[])
             break;
         }
 
+        if (ECP_E_NOERR != (err = ECP_Call(&context, POWER_MANAGER_INTERFACE, POWER_MANAGER_PATH, POWER_MANAGER_ENABLE_LINE)))
+        {
+            printf("Error calling enable line\n");
+            break;
+        }
+
         for (int i = 0; i < 15; i++)
         {
             ECP_Loop(&context, 1000);
@@ -59,8 +65,6 @@ int main(int argc, char * argv[])
             printf("00BASIC: Error calling ECP_Destroy(): %d\n", err);
             break;
         }
-
-        printf("00BASIC: Successfully called ECP_Destroy()\n");
 
     } while (0);
 

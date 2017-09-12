@@ -32,7 +32,8 @@ char * broadcast_endpoint = "tcp://127.0.0.1:25901";
  *
 */
 
-tECP_Error ECP_Init(tECP_Context * context, const char * name, tECP_Callback callback)
+tECP_Error ECP_Init(tECP_Context * context, const char * name,
+                    tECP_Callback callback)
 {
     tECP_Error err = ECP_E_NOERR;
     DBusError  error;
@@ -62,7 +63,8 @@ tECP_Error ECP_Init(tECP_Context * context, const char * name, tECP_Callback cal
             break;
         }
 
-        if (!dbus_connection_add_filter(context->connection, callback, NULL, NULL))
+        if (!dbus_connection_add_filter(context->connection, callback, NULL,
+                                        NULL))
         {
             err = ECP_E_GENERIC;
             break;
@@ -105,7 +107,8 @@ tECP_Error ECP_Listen(tECP_Context * context, const char * channel)
  ** Block until a message is received or the timeout (in microseconds)
  expires
  */
-tECP_Error ECP_Loop( tECP_Context * context, unsigned int timeout ) {
+tECP_Error ECP_Loop(tECP_Context * context, unsigned int timeout)
+{
     tECP_Error err = ECP_E_NOERR;
 
     dbus_connection_read_write_dispatch(context->connection, timeout);
@@ -116,50 +119,50 @@ tECP_Error ECP_Loop( tECP_Context * context, unsigned int timeout ) {
 /**
  ** Release resources allocated by ECP_Init()
  */
-tECP_Error ECP_Destroy( tECP_Context * context ) {
-  tECP_Error err = ECP_E_NOERR;
+tECP_Error ECP_Destroy(tECP_Context * context)
+{
+    tECP_Error err = ECP_E_NOERR;
 
-  /** Need to figure out what d-bus wants us to clean up...
-    * It looks like dbus_connection_close isn't needed since
-    * we are using dbus_bus_get
-    */
+    /** Need to figure out what d-bus wants us to clean up...
+      * It looks like dbus_connection_close isn't needed since
+      * we are using dbus_bus_get
+      */
 
-  return( err );
+    return (err);
 }
 
 /**
  ** Send a broadcast message on a pub-sub channel. Note: messages are
  ** broadcast immediately and don't wait for a call to ECP_Loop().
  */
+tECP_Error ECP_Broadcast(tECP_Context * context, DBusMessage * message)
+{
+    tECP_Error    err    = ECP_E_NOERR;
+    dbus_uint32_t serial = 0;
 
-#define BUFFER_SIZE ( sizeof( uint16_t ) + sizeof( tECP_Message ) )
+    if (!dbus_connection_send(context->connection, message, &serial))
+    {
+        err = ECP_E_GENERIC;
+    }
 
-tECP_Error ECP_Broadcast( tECP_Context * context, DBusMessage * message ) {
-  tECP_Error err = ECP_E_NOERR;
-  dbus_uint32_t serial = 0;
-
-  if (!dbus_connection_send(context->connection, message, &serial))
-  {
-      err = ECP_E_GENERIC;
-  }
-
-  return( err );
+    return (err);
 }
 
 tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message)
 {
-    tECP_MessageHandler * current = NULL;
+    tECP_MessageHandler * current  = NULL;
     const char * message_interface = dbus_message_get_interface(message);
-    const char * message_member = dbus_message_get_member(message);
+    const char * message_member    = dbus_message_get_member(message);
 
+    printf("Handling %s.%s\n", message_interface, message_member);
     current = context->callbacks;
     while (current != NULL)
     {
-        if ((0 == strcmp(message_interface, current->interface)) &&
-            (0 == strcmp(message_member, current->member)))
+        if ((0 == strcmp(message_interface, current->interface))
+            && (0 == strcmp(message_member, current->member)))
         {
             printf("Handling %s.%s\n", current->interface, current->member);
-            current->parser(message, current->cb);
+            current->parser(context, message, current->cb);
             return ECP_E_NOERR;
         }
         current = current->next;
@@ -170,11 +173,32 @@ tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message)
     }
 }
 
-tECP_Error ECP_Add_Message_Handler(tECP_Context * context, tECP_MessageHandler handler)
+tECP_Error ECP_Call(tECP_Context * context, const char * interface,
+                    const char * path, const char * method)
 {
-    tECP_MessageHandler * current = NULL;
-    tECP_MessageHandler * new_handler = malloc(sizeof(tECP_MessageHandler));
+    DBusMessage * message = NULL, * reply = NULL;
     tECP_Error err = ECP_E_NOERR;
+
+    message = dbus_message_new_method_call(interface, path, interface, method);
+    if (NULL != message)
+    {
+        reply = dbus_connection_send_with_reply_and_block(context->connection, message, 1000, NULL);
+        if (reply == NULL)
+        {
+            err = ECP_E_GENERIC;
+        }
+        dbus_message_unref(message);
+    }
+
+    return err;
+}
+
+tECP_Error ECP_Add_Message_Handler(tECP_Context *      context,
+                                   tECP_MessageHandler handler)
+{
+    tECP_MessageHandler * current     = NULL;
+    tECP_MessageHandler * new_handler = malloc(sizeof(tECP_MessageHandler));
+    tECP_Error            err         = ECP_E_NOERR;
 
     memcpy(new_handler, &handler, sizeof(tECP_MessageHandler));
 

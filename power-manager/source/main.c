@@ -19,16 +19,18 @@
 #include <evented-control/interfaces.h>
 #include <stdio.h>
 
+tECP_Error enable_line_handler(void);
+
 DBusHandlerResult message_handler(DBusConnection * connection,
                                   DBusMessage * message, void * user_data);
+static tECP_Context context;
 
 int main()
 {
-    tECP_Context context;
-    tECP_Error   err = ECP_E_NOERR;
-    tECP_Message msg;
-    int          i;
-    int          initialized = 0;
+    tECP_Error       err = ECP_E_NOERR;
+    tECP_Message     msg;
+    int              i;
+    int              initialized = 0;
     eps_power_status status;
 
     do
@@ -41,6 +43,13 @@ int main()
         }
 
         initialized = 1;
+
+        // if (ECP_E_NOERR != (err = ECP_Register_Method(&context, POWER_MANAGER_ENABLE_LINE, message_handler)))
+        // {
+
+        // }
+
+        on_enable_line(&context, &enable_line_handler);
 
         /* Now loop for (at most) 15 seconds, looking for a message */
         for (i = 0; (i < 15) && (err == ECP_E_NOERR); i++)
@@ -81,24 +90,16 @@ int main()
 DBusHandlerResult message_handler(DBusConnection * connection,
                                   DBusMessage * message, void * user_data)
 {
-    tECP_Error            err = ECP_E_NOERR;
-    tECP_Message          msg;
-    tECP_Message_EPS_Line eps_line;
+    if (ECP_E_NOERR == ECP_Handle_Message(&context, message))
+    {
+        return DBUS_HANDLER_RESULT_HANDLED;
+    }
 
-    // {
-    //     switch (message->id)
-    //     {
-    //         case ECP_M_EPS_ON:
-    //             printf("Turning EPS power line on\n");
-    //             eps_line = message->content.line;
+    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+}
 
-    //             eps_enable_power_line(eps_line.line);
-
-    //             msg.id = ECP_M_EPS_ON_ACK;
-    //             err = ECP_Broadcast(context, ECP_C_EPS, &msg);
-    //             break;
-    //     }
-    // }
-
-    return (err);
+tECP_Error enable_line_handler(void)
+{
+    uint8_t line_num = 1;
+    printf("Enabling line %d\n", line_num);
 }

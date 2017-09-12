@@ -22,6 +22,7 @@
 #define POWER_MANAGER_INTERFACE     "org.KubOS.PowerManager"
 #define POWER_MANAGER_PATH          "/org/KubOS/PowerManager"
 #define POWER_MANAGER_STATUS        "PowerStatus"
+#define POWER_MANAGER_ENABLE_LINE   "EnableLine"
 
 typedef tECP_Error (*power_status_cb)(eps_power_status status);
 
