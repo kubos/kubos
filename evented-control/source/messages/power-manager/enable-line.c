@@ -29,6 +29,8 @@ tECP_Error on_enable_line_parser(tECP_Context * context,
 {
     DBusMessage * reply = NULL;
 
+    // Need to call the callback here...
+
     reply = dbus_message_new_method_return(message);
     dbus_connection_send(context->connection, reply, NULL);
     dbus_message_unref(reply);

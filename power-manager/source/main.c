@@ -28,7 +28,6 @@ static tECP_Context context;
 int main()
 {
     tECP_Error       err = ECP_E_NOERR;
-    tECP_Message     msg;
     int              i;
     int              initialized = 0;
     eps_power_status status;
@@ -99,5 +98,6 @@ DBusHandlerResult message_handler(DBusConnection * connection,
 tECP_Error enable_line_handler(void)
 {
     uint8_t line_num = 1;
-    printf("Enabling line %d\n", line_num);
+    printf("Enable line..\n");
+    eps_enable_power_line(line_num);
 }

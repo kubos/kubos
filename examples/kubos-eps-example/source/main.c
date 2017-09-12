@@ -55,6 +55,8 @@ int main(int argc, char * argv[])
             break;
         }
 
+        printf("Successfully enabled line 1\n");
+
         for (int i = 0; i < 15; i++)
         {
             ECP_Loop(&context, 1000);
