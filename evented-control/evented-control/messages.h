@@ -18,5 +18,8 @@
 
 #include "evented-control/power-manager-messages.h"
 
+/**
+ * Checks to see if the message matches the specified interface and member.
+ */
 tECP_Error check_message(DBusMessage * message, const char * interface,
                          const char * member);

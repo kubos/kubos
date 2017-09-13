@@ -20,6 +20,7 @@
 
 typedef enum {
     EPS_NO_ERR = 0,
+    EPS_GENERIC_ERR,
 } eps_err;
 
 typedef struct {

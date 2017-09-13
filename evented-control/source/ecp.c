@@ -21,11 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-/**
- * Initialize an ECP Context
- *
-*/
 tECP_Error ECP_Init(tECP_Context * context, const char * name,
                     tECP_Callback callback)
 {
@@ -34,10 +29,6 @@ tECP_Error ECP_Init(tECP_Context * context, const char * name,
     int        i = 0;
 
     /* Initialize context to known state */
-    context->talk       = -1;
-    context->listen     = -1;
-    context->talk_id    = -1;
-    context->listen_id  = -1;
     context->callbacks  = NULL;
     context->connection = NULL;
 
@@ -97,10 +88,6 @@ tECP_Error ECP_Listen(tECP_Context * context, const char * channel)
     return err;
 }
 
-/**
- ** Block until a message is received or the timeout (in microseconds)
- expires
- */
 tECP_Error ECP_Loop(tECP_Context * context, unsigned int timeout)
 {
     tECP_Error err = ECP_E_NOERR;
@@ -110,9 +97,6 @@ tECP_Error ECP_Loop(tECP_Context * context, unsigned int timeout)
     return err;
 }
 
-/**
- ** Release resources allocated by ECP_Init()
- */
 tECP_Error ECP_Destroy(tECP_Context * context)
 {
     tECP_Error err = ECP_E_NOERR;
@@ -121,14 +105,9 @@ tECP_Error ECP_Destroy(tECP_Context * context)
       * It looks like dbus_connection_close isn't needed since
       * we are using dbus_bus_get
       */
-
     return (err);
 }
 
-/**
- ** Send a broadcast message on a pub-sub channel. Note: messages are
- ** broadcast immediately and don't wait for a call to ECP_Loop().
- */
 tECP_Error ECP_Broadcast(tECP_Context * context, DBusMessage * message)
 {
     tECP_Error    err    = ECP_E_NOERR;

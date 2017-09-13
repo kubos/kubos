@@ -29,7 +29,8 @@ eps_err eps_get_power_status(eps_power_status * status)
     if (status != NULL)
     {
         status->line_one = 1;
-        status->line_two = 0;
+	status->line_two = 0;
+	return EPS_NO_ERR;
     }
-    return EPS_NO_ERR;
+    return EPS_GENERIC_ERR;
 }
