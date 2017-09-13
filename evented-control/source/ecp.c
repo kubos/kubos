@@ -154,7 +154,7 @@ tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message)
         if ((0 == strcmp(message_interface, current->interface))
             && (0 == strcmp(message_member, current->member)))
         {
-            current->parser(context, message, current->cb);
+            current->parser(context, message, current);
             return ECP_E_NOERR;
         }
         current = current->next;
@@ -165,13 +165,11 @@ tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message)
     }
 }
 
-tECP_Error ECP_Call(tECP_Context * context, const char * interface,
-                    const char * path, const char * method)
+tECP_Error ECP_Call(tECP_Context * context, DBusMessage * message)
 {
-    DBusMessage * message = NULL, * reply = NULL;
+    DBusMessage * reply = NULL;
     tECP_Error err = ECP_E_NOERR;
 
-    message = dbus_message_new_method_call(interface, path, interface, method);
     if (NULL != message)
     {
         reply = dbus_connection_send_with_reply_and_block(context->connection, message, 1000, NULL);
@@ -186,13 +184,10 @@ tECP_Error ECP_Call(tECP_Context * context, const char * interface,
 }
 
 tECP_Error ECP_Add_Message_Handler(tECP_Context *      context,
-                                   tECP_MessageHandler handler)
+                                   tECP_MessageHandler * new_handler)
 {
     tECP_MessageHandler * current     = NULL;
-    tECP_MessageHandler * new_handler = malloc(sizeof(tECP_MessageHandler));
     tECP_Error            err         = ECP_E_NOERR;
-
-    memcpy(new_handler, &handler, sizeof(tECP_MessageHandler));
 
     if (NULL == context->callbacks)
     {

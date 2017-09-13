@@ -19,7 +19,7 @@
 #include <evented-control/messages.h>
 #include <stdio.h>
 
-tECP_Error enable_line_handler(void);
+tECP_Error enable_line_handler(uint8_t line);
 
 DBusHandlerResult message_handler(DBusConnection * connection,
                                   DBusMessage * message, void * user_data);
@@ -95,9 +95,8 @@ DBusHandlerResult message_handler(DBusConnection * connection,
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 }
 
-tECP_Error enable_line_handler(void)
+tECP_Error enable_line_handler(uint8_t line)
 {
-    uint8_t line_num = 1;
     printf("Enable line..\n");
-    eps_enable_power_line(line_num);
+    eps_enable_power_line(line);
 }

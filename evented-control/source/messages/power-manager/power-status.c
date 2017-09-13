@@ -20,6 +20,7 @@
  * org.KubOS.PowerManager.PowerStatus
  */
 #include <dbus/dbus.h>
+#include <stdlib.h>
 #include "evented-control/ecp.h"
 #include "evented-control/messages.h"
 
@@ -58,24 +59,26 @@ tECP_Error parse_power_status_message(eps_power_status * status,
 }
 
 tECP_Error on_power_status_parser(tECP_Context * context,
-                                  DBusMessage * message, void * handler)
+                                  DBusMessage * message, struct _tECP_MessageHandler * handler)
 {
     eps_power_status status;
+    tECP_PowerStatus_MessageHandler * status_handler = (tECP_PowerStatus_MessageHandler*)handler;
     if (ECP_E_NOERR == parse_power_status_message(&status, message))
     {
-        ((power_status_cb) handler)(status);
+        status_handler->cb(status);
     }
 }
 
 tECP_Error on_power_status(tECP_Context * context, power_status_cb cb)
 {
-    tECP_MessageHandler power_status_handler
-        = {.interface = POWER_MANAGER_INTERFACE,
-           .member    = POWER_MANAGER_STATUS,
-           .parser    = &on_power_status_parser,
-           .cb        = (void *) cb };
+    tECP_PowerStatus_MessageHandler * handler = malloc(sizeof(*handler));
+    handler->super.next = NULL;
+    handler->super.interface = POWER_MANAGER_INTERFACE;
+    handler->super.member = POWER_MANAGER_STATUS;
+    handler->super.parser = &on_power_status_parser;
+    handler->cb = cb;
 
-    ECP_Add_Message_Handler(context, power_status_handler);
+    ECP_Add_Message_Handler(context, &handler->super);
 
     return ECP_Listen(context, POWER_MANAGER_INTERFACE);
 }

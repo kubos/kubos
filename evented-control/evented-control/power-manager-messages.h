@@ -31,20 +31,27 @@
  */
 #define POWER_MANAGER_ENABLE_LINE "EnableLine"
 
+typedef tECP_Error (*enable_line_cb)(uint8_t line);
+
+typedef struct {
+    tECP_MessageHandler super;
+    enable_line_cb cb;
+} tECP_EnableLine_MessageHandler;
+
 /**
  * Intermediate function used by ECP_Handle_Message
  * to parse out the DBusMessage into native data structures
  * and then hand off to the message specific callback
  */
 tECP_Error on_enable_line_parser(tECP_Context * context,
-                                 DBusMessage * message, void * handler);
+    DBusMessage * message, struct _tECP_MessageHandler * handler);
 
 /**
  * Creates and listener + registers callback for the
  * EnableLine method. This function should be used by the
  * process which is hosting the method
  */
-tECP_Error on_enable_line(tECP_Context * context, void * cb);
+tECP_Error on_enable_line(tECP_Context * context, enable_line_cb cb);
 
 /**
  * Calls out to the EnableLine method
@@ -57,6 +64,11 @@ tECP_Error enable_line(tECP_Context * context, uint8_t line);
 #define POWER_MANAGER_STATUS "PowerStatus"
 
 typedef tECP_Error (*power_status_cb)(eps_power_status status);
+
+typedef struct {
+    tECP_MessageHandler super;
+    power_status_cb cb;
+} tECP_PowerStatus_MessageHandler;
 
 /**
  * Parses out a PowerStatus signal into an eps_power_status struct.
@@ -76,7 +88,7 @@ tECP_Error format_power_status_message(eps_power_status status,
  * and then hand off to the message specific callback
  */
 tECP_Error on_power_status_parser(tECP_Context * context,
-                                  DBusMessage * message, void * handler);
+    DBusMessage * message, struct _tECP_MessageHandler * handler);
 
 /**
  * Creates a listener + registers callback for the PowerStatus signal.
