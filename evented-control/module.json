@@ -9,5 +9,9 @@
     "homepage":"https://github.com/kubostech/evented-control",
     "dependencies":{
       "eps-api" : "kubostech/eps-api~0.1.0"
+    },
+    "testDependencies":{
+        "cmocka":"kubostech/cmocka",
+        "csp":"kubostech/libcsp"
     }
 }
