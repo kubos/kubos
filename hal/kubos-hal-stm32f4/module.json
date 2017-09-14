@@ -20,10 +20,10 @@
       "stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg#~0.0.3"
     }
   },
-  "testTargets": [
-    "stm32f407-disco-gcc"
-  ],
   "testDependencies": {
     "unity": "kubostech/unity"
-  }
+  },
+  "testTargets": [
+    "stm32f407-disco-gcc"
+  ]
 }
