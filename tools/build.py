@@ -185,6 +185,8 @@ def main():
                         help='Lists modules that have changed. By default will diff against '
                         'the last commit. The git diff path desired can also be passed in')
 
+    parser.add_argument('--local', action='store_true', default=False,
+                        help='Builds against local source')
 
     args = parser.parse_args()
 
@@ -193,10 +195,11 @@ def main():
     ret = 0 
 
 
-    print("Running kubos update..")
-    utils.cmd('kubos', 'update', echo=False)
-    print("Runnig kubos use...")
-    utils.cmd('kubos', 'use', '--branch', get_branch_name(), echo=False)
+    if not args.local:
+        print("Running kubos update..")
+        utils.cmd('kubos', 'update', echo=False)
+        print("Runnig kubos use...")
+        utils.cmd('kubos', 'use', '--branch', get_branch_name(), echo=False)
 
     if args.list_targets:
         ret = builder.list_targets()
