@@ -40,6 +40,8 @@ drivers should be automatically installed.
 This connection will be passed through to a Kubos Vagrant image as
 `/dev/FTDI` and will be used for the serial console.
 
+.. _peripherals-mbm2:
+
 Peripherals
 -----------
 
@@ -125,6 +127,58 @@ The user program should look something like this:
 
     /* Remove device */
     system("echo 0x20 > /sys/bus/i2c/devices/i2c-1/delete_device);
+
+ADC
+~~~
+
+The Pumpkin MBM2 has seven analog input pins available:
+
++------+------+
+| Name | Pin  |
++======+======+
+| AIN0 | H2.8 |
++------+------+
+| AIN1 | H2.7 |
++------+------+
+| AIN2 | H2.6 |
++------+------+
+| AIN3 | H2.5 |
++------+------+
+| AIN4 | H2.4 |
++------+------+
+| AIN5 | H2.3 |
++------+------+
+| AIN6 | H2.2 |
++------+------+
+
+The pins are available through the Linux device ``/sys/bus/iio/devices/iio\:device0/``.
+
+A single raw output value can be read from each of the pins via
+``/sys/bus/iio/devices/iio\:device0/in_voltage{n}_raw``, where `{n}` corresponds to the
+AIN number of the pin.
+
+Information about setting up continuous data gathering can be found in
+`this guide from TI <http://processors.wiki.ti.com/index.php/Linux_Core_ADC_Users_Guide>`__.
+
+To convert the raw ADC value to a voltage, use this equation:
+
+.. math::
+    
+    V_{in} = \frac{D * (2^n - 1)}{V_{ref}}
+
+Where:
+
+    - :math:`D` = Raw ADC value
+    - :math:`n` = Number of ADC resolution bits 
+    - :math:`V_{ref}` =  Reference voltage
+    
+The Pumpkin MBM2 uses 12 resolution bits and a reference voltage of 1.8V, so the
+resulting equation is
+
+.. math::
+
+    V_{in} = \frac{D * (4095)}{1.8}
+
 
 GPIO
 ~~~~

@@ -46,6 +46,23 @@ peripheral devices. Currently, users should interact with these devices
 using the standard Linux functions. A Kubos HAL will be added in the
 future for the iOBC.
 
+UART
+~~~~
+
+The iOBC has 2 UART ports available for use in varying capacities:
+
++--------------+--------+--------+---------+---------+
+| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
++==============+========+========+=========+=========+
+| /dev/ttyS1   | TX0    | RX0    |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS3   | TX2    | RX2    | RTS2    | CTS2    |
++--------------+--------+--------+---------+---------+
+
+Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
+
+`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
+
 I2C
 ~~~
 
