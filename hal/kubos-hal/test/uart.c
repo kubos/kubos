@@ -157,6 +157,7 @@ static void test_init_term_write_read(void)
     char data = 'A';
     char read;
 
+    k_uart_init(TEST_UART, &conf);
     k_uart_terminate(TEST_UART);
 
     TEST_ASSERT_EQUAL_INT(k_uart_write(TEST_UART, &data, 1), 0);
