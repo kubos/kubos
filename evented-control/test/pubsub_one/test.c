@@ -40,7 +40,9 @@ CSP_DEFINE_TASK(pub_task)
 {
     ECP_Init(&pub_context, TEST_PUB_INTERFACE, &pub_handler);
 
-    for (int i = 0; i < 10; i++)
+    usleep(100);
+
+    for (int i = 0; i < 50; i++)
     {
         DBusMessage * message;
         format_test_signal_message(pub_num, &message);
@@ -61,9 +63,11 @@ static void test_ecp_subscriber(void ** arg)
 
     assert_int_equal(on_test_signal(&sub_context, &sub_cb), ECP_E_NOERR);
 
-    for (int i = 0; i < 15; i++)
+    for (int i = 0; i < 50; i++)
     {
         assert_int_equal(ECP_Loop(&sub_context, 100), ECP_E_NOERR);
+        if (pub_num == sub_num)
+            break;
     }
 
     assert_int_equal(ECP_Destroy(&sub_context), ECP_E_NOERR);
