@@ -16,7 +16,7 @@ RUN apt-get install -y gcc-arm-embedded
 RUN apt-get install -y git
 RUN apt-get install -y cmake
 RUN apt-get install -y gcc-msp430 gdb-msp430 msp430-libc
-
+RUN apt-get install -y libdbus-1-dev
 RUN apt-get install -y unzip wget
 
 #do the pip setup and installation things
