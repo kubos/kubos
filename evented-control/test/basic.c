@@ -20,17 +20,13 @@
 #define TEST_NAME "org.KubOS.test"
 #define TEST_LISTEN "org.KubOS.server"
 
-DBusHandlerResult test_cb(DBusConnection * connection, DBusMessage * message, void * data)
-{
-  return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-}
 
 static void test_ecp_init(void ** arg)
 {
   tECP_Context context;
   tECP_Error err;
 
-  err = ECP_Init(&context, TEST_NAME, &test_cb);
+  err = ECP_Init(&context, TEST_NAME);
 
   assert_int_equal(err, ECP_E_NOERR);
 }
@@ -40,7 +36,7 @@ static void test_ecp_init_listen(void ** arg)
   tECP_Context context;
   tECP_Error err;
 
-  err = ECP_Init(&context, TEST_NAME, &test_cb);
+  err = ECP_Init(&context, TEST_NAME);
 
   assert_int_equal(err, ECP_E_NOERR);
 

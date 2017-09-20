@@ -6,30 +6,8 @@
 
 #define TEST_SUB "org.KubOS.subscriber"
 
-static tECP_Context sub_context;
-static tECP_Context pub_context;
 static int          pub_num = 10;
 static int          sub_num = 0;
-
-DBusHandlerResult sub_handler(DBusConnection * connection, DBusMessage * msg,
-                              void * user_data)
-{
-    if (ECP_E_NOERR == ECP_Handle_Message(&sub_context, msg))
-    {
-        return DBUS_HANDLER_RESULT_HANDLED;
-    }
-    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-}
-
-DBusHandlerResult pub_handler(DBusConnection * connection, DBusMessage * msg,
-                              void * user_data)
-{
-    if (ECP_E_NOERR == ECP_Handle_Message(&pub_context, msg))
-    {
-        return DBUS_HANDLER_RESULT_HANDLED;
-    }
-    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-}
 
 static tECP_Error sub_cb(int16_t num)
 {
@@ -38,7 +16,8 @@ static tECP_Error sub_cb(int16_t num)
 
 CSP_DEFINE_TASK(pub_task)
 {
-    ECP_Init(&pub_context, TEST_PUB_INTERFACE, &pub_handler);
+    tECP_Context pub_context;
+    ECP_Init(&pub_context, TEST_PUB_INTERFACE);
 
     usleep(100);
 
@@ -54,11 +33,12 @@ CSP_DEFINE_TASK(pub_task)
 
 static void test_ecp_subscriber(void ** arg)
 {
+    tECP_Context sub_context;
     csp_thread_handle_t pub_task_handle;
 
     csp_thread_create(pub_task, "PUB", 1024, NULL, 0, &pub_task_handle);
 
-    assert_int_equal(ECP_Init(&sub_context, TEST_SUB, &sub_handler),
+    assert_int_equal(ECP_Init(&sub_context, TEST_SUB),
                      ECP_E_NOERR);
 
     assert_int_equal(on_test_signal(&sub_context, &sub_cb), ECP_E_NOERR);

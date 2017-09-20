@@ -67,7 +67,7 @@ typedef DBusHandlerResult (*tECP_Callback)(DBusConnection * connection, DBusMess
 /**
  * Initializes data structures for ECP and connection.
  */
-tECP_Error ECP_Init( tECP_Context * context, const char * name, tECP_Callback callback);
+tECP_Error ECP_Init( tECP_Context * context, const char * name);
 
 /**
  * Creates a subscription for the specified channel.

@@ -21,8 +21,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-tECP_Error ECP_Init(tECP_Context * context, const char * name,
-                    tECP_Callback callback)
+
+DBusHandlerResult _tECP_MessageHandler(DBusConnection * connection,
+                                              DBusMessage * message, void * user_data);
+
+tECP_Error ECP_Init(tECP_Context * context, const char * name)
 {
     tECP_Error err = ECP_E_NOERR;
     DBusError  error;
@@ -48,7 +51,7 @@ tECP_Error ECP_Init(tECP_Context * context, const char * name,
             break;
         }
 
-        if (!dbus_connection_add_filter(context->connection, callback, NULL,
+        if (!dbus_connection_add_filter(context->connection, _tECP_MessageHandler, (void*)context,
                                         NULL))
         {
             err = ECP_E_GENERIC;
@@ -183,4 +186,21 @@ tECP_Error ECP_Add_Message_Handler(tECP_Context *      context,
     }
 
     return err;
+}
+
+
+DBusHandlerResult _tECP_MessageHandler(DBusConnection * connection,
+                                  DBusMessage * message, void * user_data)
+{
+    tECP_Context * context = NULL;
+    if (NULL != user_data)
+    {
+      context = (tECP_Context*)user_data;
+        if (ECP_E_NOERR == ECP_Handle_Message(context, message))
+        {
+            return DBUS_HANDLER_RESULT_HANDLED;
+        }
+    }
+
+    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 }

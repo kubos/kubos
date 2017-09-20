@@ -6,23 +6,10 @@
 
 #define TEST_SUB "org.KubOS.subscriber"
 
-static tECP_Context sub_context;
-static tECP_Context pub_one_context;
 static int          pub_one_num = 10;
-static tECP_Context pub_two_context;
 static int          pub_two_num = 99;
 static int          sub_one_num = 0;
 static int          sub_two_num = 0;
-
-DBusHandlerResult sub_handler(DBusConnection * connection, DBusMessage * msg,
-                              void * user_data)
-{
-    if (ECP_E_NOERR == ECP_Handle_Message(&sub_context, msg))
-    {
-        return DBUS_HANDLER_RESULT_HANDLED;
-    }
-    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-}
 
 static tECP_Error sub_one_cb(int16_t num)
 {
@@ -34,19 +21,10 @@ static tECP_Error sub_two_cb(int16_t num)
     sub_two_num = pub_two_num;
 }
 
-DBusHandlerResult pub_one_handler(DBusConnection * connection,
-                                  DBusMessage * msg, void * user_data)
-{
-    if (ECP_E_NOERR == ECP_Handle_Message(&pub_one_context, msg))
-    {
-        return DBUS_HANDLER_RESULT_HANDLED;
-    }
-    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-}
-
 CSP_DEFINE_TASK(pub_one_task)
 {
-    ECP_Init(&pub_one_context, TEST_PUB_ONE_INTERFACE, &pub_one_handler);
+    tECP_Context pub_one_context;
+    ECP_Init(&pub_one_context, TEST_PUB_ONE_INTERFACE);
 
     usleep(100);
 
@@ -61,19 +39,10 @@ CSP_DEFINE_TASK(pub_one_task)
     ECP_Destroy(&pub_one_context);
 }
 
-DBusHandlerResult pub_two_handler(DBusConnection * connection,
-                                  DBusMessage * msg, void * user_data)
-{
-    if (ECP_E_NOERR == ECP_Handle_Message(&pub_two_context, msg))
-    {
-        return DBUS_HANDLER_RESULT_HANDLED;
-    }
-    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-}
-
 CSP_DEFINE_TASK(pub_two_task)
 {
-    ECP_Init(&pub_two_context, TEST_PUB_TWO_INTERFACE, &pub_two_handler);
+    tECP_Context pub_two_context;
+    ECP_Init(&pub_two_context, TEST_PUB_TWO_INTERFACE);
 
     usleep(100);
 
@@ -90,9 +59,10 @@ CSP_DEFINE_TASK(pub_two_task)
 
 static void test_ecp_subscriber_two_pubs(void ** arg)
 {
+    tECP_Context sub_context;
     csp_thread_handle_t pub_one_task_handle, pub_two_task_handle;
 
-    assert_int_equal(ECP_Init(&sub_context, TEST_SUB, &sub_handler),
+    assert_int_equal(ECP_Init(&sub_context, TEST_SUB),
                      ECP_E_NOERR);
 
     assert_int_equal(on_test_signal_one(&sub_context, &sub_one_cb),
