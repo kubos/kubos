@@ -26,10 +26,10 @@
 
 typedef tECP_Error (*test_method_cb)(int16_t num);
 
-typedef struct {
+typedef struct
+{
     tECP_MessageHandler super;
-    test_method_cb cb;
+    test_method_cb      cb;
 } tECP_TestMethod_MessageHandler;
-
 
 tECP_Error on_test_method(tECP_Context * context, test_method_cb cb);

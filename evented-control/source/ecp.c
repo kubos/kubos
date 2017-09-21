@@ -21,9 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 DBusHandlerResult _tECP_MessageHandler(DBusConnection * connection,
-                                              DBusMessage * message, void * user_data);
+                                       DBusMessage * message, void * user_data);
 
 tECP_Error ECP_Init(tECP_Context * context, const char * name)
 {
@@ -51,8 +50,9 @@ tECP_Error ECP_Init(tECP_Context * context, const char * name)
             break;
         }
 
-        if (!dbus_connection_add_filter(context->connection, _tECP_MessageHandler, (void*)context,
-                                        NULL))
+        if (!dbus_connection_add_filter(context->connection,
+                                        _tECP_MessageHandler,
+                                        (void *) context, NULL))
         {
             err = ECP_GENERIC;
             break;
@@ -150,11 +150,12 @@ tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message)
 tECP_Error ECP_Call(tECP_Context * context, DBusMessage * message)
 {
     DBusMessage * reply = NULL;
-    tECP_Error err = ECP_NOERR;
+    tECP_Error    err   = ECP_NOERR;
 
     if (NULL != message)
     {
-        reply = dbus_connection_send_with_reply_and_block(context->connection, message, 1000, NULL);
+        reply = dbus_connection_send_with_reply_and_block(context->connection,
+                                                          message, 1000, NULL);
         if (reply == NULL)
         {
             err = ECP_GENERIC;
@@ -165,11 +166,11 @@ tECP_Error ECP_Call(tECP_Context * context, DBusMessage * message)
     return err;
 }
 
-tECP_Error ECP_Add_Message_Handler(tECP_Context *      context,
+tECP_Error ECP_Add_Message_Handler(tECP_Context *        context,
                                    tECP_MessageHandler * new_handler)
 {
-    tECP_MessageHandler * current     = NULL;
-    tECP_Error            err         = ECP_NOERR;
+    tECP_MessageHandler * current = NULL;
+    tECP_Error            err     = ECP_NOERR;
 
     if (NULL == context->callbacks)
     {
@@ -188,14 +189,13 @@ tECP_Error ECP_Add_Message_Handler(tECP_Context *      context,
     return err;
 }
 
-
 DBusHandlerResult _tECP_MessageHandler(DBusConnection * connection,
-                                  DBusMessage * message, void * user_data)
+                                       DBusMessage * message, void * user_data)
 {
     tECP_Context * context = NULL;
     if (NULL != user_data)
     {
-      context = (tECP_Context*)user_data;
+        context = (tECP_Context *) user_data;
         if (ECP_NOERR == ECP_Handle_Message(context, message))
         {
             return DBUS_HANDLER_RESULT_HANDLED;

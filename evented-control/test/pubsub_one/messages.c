@@ -20,11 +20,11 @@
  * org.KubOS.TestPublisher.TestSignal
  */
 
+#include "messages.h"
 #include <dbus/dbus.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include "evented-control/ecp.h"
-#include "messages.h"
 
 tECP_Error format_test_signal_message(int16_t num, DBusMessage ** message)
 {
@@ -56,9 +56,9 @@ tECP_Error parse_test_signal_message(int16_t * num, DBusMessage * message)
 }
 
 tECP_Error on_test_signal_parser(tECP_Context * context, DBusMessage * message,
-                                  struct _tECP_MessageHandler * handler)
+                                 struct _tECP_MessageHandler * handler)
 {
-    int16_t num;
+    int16_t                          num;
     tECP_TestSignal_MessageHandler * status_handler
         = (tECP_TestSignal_MessageHandler *) handler;
 

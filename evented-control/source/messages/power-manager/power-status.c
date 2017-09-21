@@ -58,11 +58,12 @@ tECP_Error parse_power_status_message(eps_power_status * status,
     return ECP_NOERR;
 }
 
-tECP_Error on_power_status_parser(tECP_Context * context,
-                                  DBusMessage * message, struct _tECP_MessageHandler * handler)
+tECP_Error on_power_status_parser(tECP_Context * context, DBusMessage * message,
+                                  struct _tECP_MessageHandler * handler)
 {
-    eps_power_status status;
-    tECP_PowerStatus_MessageHandler * status_handler = (tECP_PowerStatus_MessageHandler*)handler;
+    eps_power_status                  status;
+    tECP_PowerStatus_MessageHandler * status_handler
+        = (tECP_PowerStatus_MessageHandler *) handler;
     if (ECP_NOERR == parse_power_status_message(&status, message))
     {
         status_handler->cb(status);
@@ -72,11 +73,11 @@ tECP_Error on_power_status_parser(tECP_Context * context,
 tECP_Error on_power_status(tECP_Context * context, power_status_cb cb)
 {
     tECP_PowerStatus_MessageHandler * handler = malloc(sizeof(*handler));
-    handler->super.next = NULL;
-    handler->super.interface = POWER_MANAGER_INTERFACE;
-    handler->super.member = POWER_MANAGER_STATUS;
-    handler->super.parser = &on_power_status_parser;
-    handler->cb = cb;
+    handler->super.next                       = NULL;
+    handler->super.interface                  = POWER_MANAGER_INTERFACE;
+    handler->super.member                     = POWER_MANAGER_STATUS;
+    handler->super.parser                     = &on_power_status_parser;
+    handler->cb                               = cb;
 
     ECP_Add_Message_Handler(context, &handler->super);
 

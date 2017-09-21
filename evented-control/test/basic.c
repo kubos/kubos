@@ -14,43 +14,41 @@
  * limitations under the License.
  */
 
-#include "evented-control/ecp.h"
 #include <cmocka.h>
+#include "evented-control/ecp.h"
 
 #define TEST_NAME "org.KubOS.test"
 #define TEST_LISTEN "org.KubOS.server"
 
-
 static void test_ecp_init(void ** arg)
 {
-  tECP_Context context;
-  tECP_Error err;
+    tECP_Context context;
+    tECP_Error   err;
 
-  err = ECP_Init(&context, TEST_NAME);
+    err = ECP_Init(&context, TEST_NAME);
 
-  assert_int_equal(err, ECP_NOERR);
+    assert_int_equal(err, ECP_NOERR);
 }
 
 static void test_ecp_init_listen(void ** arg)
 {
-  tECP_Context context;
-  tECP_Error err;
+    tECP_Context context;
+    tECP_Error   err;
 
-  err = ECP_Init(&context, TEST_NAME);
+    err = ECP_Init(&context, TEST_NAME);
 
-  assert_int_equal(err, ECP_NOERR);
+    assert_int_equal(err, ECP_NOERR);
 
-  err = ECP_Listen(&context, TEST_LISTEN);
+    err = ECP_Listen(&context, TEST_LISTEN);
 
-  assert_int_equal(err, ECP_NOERR);
+    assert_int_equal(err, ECP_NOERR);
 }
 
 int main(void)
 {
-    const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_ecp_init),
-        cmocka_unit_test(test_ecp_init_listen)
-    };
+    const struct CMUnitTest tests[]
+        = { cmocka_unit_test(test_ecp_init),
+            cmocka_unit_test(test_ecp_init_listen) };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

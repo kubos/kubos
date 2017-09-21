@@ -20,53 +20,52 @@
  * org.KubOS.TestPublisher.TestSignal
  */
 
+#include "messages.h"
 #include <dbus/dbus.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include "evented-control/ecp.h"
-#include "messages.h"
 
-tECP_Error on_test_method_parser(tECP_Context * context, DBusMessage * message, struct _tECP_MessageHandler * handler)
+tECP_Error on_test_method_parser(tECP_Context * context, DBusMessage * message,
+                                 struct _tECP_MessageHandler * handler)
 {
-  DBusMessage * reply = NULL;
-  tECP_TestMethod_MessageHandler * method_handler = (tECP_TestMethod_MessageHandler*)handler;
-  int16_t value = 0;
+    DBusMessage *                    reply = NULL;
+    tECP_TestMethod_MessageHandler * method_handler
+        = (tECP_TestMethod_MessageHandler *) handler;
+    int16_t value = 0;
 
-  dbus_message_get_args(message, NULL, DBUS_TYPE_INT16, &value);
-  
-  method_handler->cb(value);
+    dbus_message_get_args(message, NULL, DBUS_TYPE_INT16, &value);
 
-  reply = dbus_message_new_method_return(message);
-  dbus_message_append_args(reply, DBUS_TYPE_INVALID);
-  dbus_connection_send(context->connection, reply, NULL);
-  dbus_message_unref(reply);
+    method_handler->cb(value);
+
+    reply = dbus_message_new_method_return(message);
+    dbus_message_append_args(reply, DBUS_TYPE_INVALID);
+    dbus_connection_send(context->connection, reply, NULL);
+    dbus_message_unref(reply);
 }
-
 
 tECP_Error on_test_method(tECP_Context * context, test_method_cb cb)
 {
-  tECP_TestMethod_MessageHandler * test_method_handler = malloc(sizeof(*test_method_handler));
-  test_method_handler->super.interface = TEST_SERVER_INTERFACE;
-  test_method_handler->super.member = TEST_SERVER_METHOD;
-  test_method_handler->super.parser = &on_test_method_parser;
-  test_method_handler->super.next = NULL;
-  test_method_handler->cb = cb;
+    tECP_TestMethod_MessageHandler * test_method_handler
+        = malloc(sizeof(*test_method_handler));
+    test_method_handler->super.interface = TEST_SERVER_INTERFACE;
+    test_method_handler->super.member    = TEST_SERVER_METHOD;
+    test_method_handler->super.parser    = &on_test_method_parser;
+    test_method_handler->super.next      = NULL;
+    test_method_handler->cb              = cb;
 
-  return ECP_Add_Message_Handler(context, &test_method_handler->super);
+    return ECP_Add_Message_Handler(context, &test_method_handler->super);
 }
 
 tECP_Error call_test_method(tECP_Context * context, uint8_t value)
-{    
+{
     DBusMessage * message = NULL;
 
     message = dbus_message_new_method_call(
-                                           TEST_SERVER_INTERFACE,
-                                           TEST_SERVER_PATH,
-                                           TEST_SERVER_INTERFACE,
-                                           TEST_SERVER_METHOD);
+        TEST_SERVER_INTERFACE, TEST_SERVER_PATH, TEST_SERVER_INTERFACE,
+        TEST_SERVER_METHOD);
 
-    dbus_message_append_args(message,
-                             DBUS_TYPE_INT16, &value,
+    dbus_message_append_args(message, DBUS_TYPE_INT16, &value,
                              DBUS_TYPE_INVALID);
 
     return ECP_Call(context, message);

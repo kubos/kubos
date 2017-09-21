@@ -20,18 +20,18 @@
  * org.KubOS.TestPublisher.TestSignal
  */
 
+#include "messages.h"
 #include <dbus/dbus.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include "evented-control/ecp.h"
-#include "messages.h"
 
 tECP_Error format_test_signal_one_message(int16_t num, DBusMessage ** message)
 {
     DBusMessageIter iter;
 
-    *message = dbus_message_new_signal(TEST_PUB_ONE_PATH, TEST_PUB_ONE_INTERFACE,
-                                       TEST_PUB_ONE_SIGNAL);
+    *message = dbus_message_new_signal(
+        TEST_PUB_ONE_PATH, TEST_PUB_ONE_INTERFACE, TEST_PUB_ONE_SIGNAL);
     dbus_message_append_args(*message, DBUS_TYPE_INT16, &num,
                              DBUS_TYPE_INVALID);
 
@@ -42,8 +42,8 @@ tECP_Error format_test_signal_two_message(int16_t num, DBusMessage ** message)
 {
     DBusMessageIter iter;
 
-    *message = dbus_message_new_signal(TEST_PUB_TWO_PATH, TEST_PUB_TWO_INTERFACE,
-                                       TEST_PUB_TWO_SIGNAL);
+    *message = dbus_message_new_signal(
+        TEST_PUB_TWO_PATH, TEST_PUB_TWO_INTERFACE, TEST_PUB_TWO_SIGNAL);
     dbus_message_append_args(*message, DBUS_TYPE_INT16, &num,
                              DBUS_TYPE_INVALID);
 
@@ -68,9 +68,9 @@ tECP_Error parse_test_signal_message(int16_t * num, DBusMessage * message)
 }
 
 tECP_Error on_test_signal_parser(tECP_Context * context, DBusMessage * message,
-                                  struct _tECP_MessageHandler * handler)
+                                 struct _tECP_MessageHandler * handler)
 {
-    int16_t num;
+    int16_t                          num;
     tECP_TestSignal_MessageHandler * status_handler
         = (tECP_TestSignal_MessageHandler *) handler;
 

@@ -6,8 +6,8 @@
 
 #define TEST_SUB "org.KubOS.subscriber"
 
-static int          pub_num = 10;
-static int          sub_num = 0;
+static int pub_num = 10;
+static int sub_num = 0;
 
 static tECP_Error sub_cb(int16_t num)
 {
@@ -33,21 +33,19 @@ CSP_DEFINE_TASK(pub_task)
 
 static void test_ecp_subscriber(void ** arg)
 {
-    tECP_Context sub_context;
+    tECP_Context        sub_context;
     csp_thread_handle_t pub_task_handle;
 
     csp_thread_create(pub_task, "PUB", 1024, NULL, 0, &pub_task_handle);
 
-    assert_int_equal(ECP_Init(&sub_context, TEST_SUB),
-                     ECP_NOERR);
+    assert_int_equal(ECP_Init(&sub_context, TEST_SUB), ECP_NOERR);
 
     assert_int_equal(on_test_signal(&sub_context, &sub_cb), ECP_NOERR);
 
     for (int i = 0; i < 50; i++)
     {
         assert_int_equal(ECP_Loop(&sub_context, 100), ECP_NOERR);
-        if (pub_num == sub_num)
-            break;
+        if (pub_num == sub_num) break;
     }
 
     assert_int_equal(ECP_Destroy(&sub_context), ECP_NOERR);

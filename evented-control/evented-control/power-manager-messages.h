@@ -33,9 +33,10 @@
 
 typedef tECP_Error (*enable_line_cb)(uint8_t line);
 
-typedef struct {
+typedef struct
+{
     tECP_MessageHandler super;
-    enable_line_cb cb;
+    enable_line_cb      cb;
 } tECP_EnableLine_MessageHandler;
 
 /**
@@ -43,8 +44,8 @@ typedef struct {
  * to parse out the DBusMessage into native data structures
  * and then hand off to the message specific callback
  */
-tECP_Error on_enable_line_parser(tECP_Context * context,
-    DBusMessage * message, struct _tECP_MessageHandler * handler);
+tECP_Error on_enable_line_parser(tECP_Context * context, DBusMessage * message,
+                                 struct _tECP_MessageHandler * handler);
 
 /**
  * Creates and listener + registers callback for the
@@ -65,9 +66,10 @@ tECP_Error enable_line(tECP_Context * context, uint8_t line);
 
 typedef tECP_Error (*power_status_cb)(eps_power_status status);
 
-typedef struct {
+typedef struct
+{
     tECP_MessageHandler super;
-    power_status_cb cb;
+    power_status_cb     cb;
 } tECP_PowerStatus_MessageHandler;
 
 /**
@@ -78,7 +80,7 @@ tECP_Error parse_power_status_message(eps_power_status * status,
 
 /**
  * Takes a eps_power_status struct and creates a PowerStatus signal.
- */                                      
+ */
 tECP_Error format_power_status_message(eps_power_status status,
                                        DBusMessage **   message);
 
@@ -87,8 +89,8 @@ tECP_Error format_power_status_message(eps_power_status status,
  * to parse out the DBusMessage into native data structures
  * and then hand off to the message specific callback
  */
-tECP_Error on_power_status_parser(tECP_Context * context,
-    DBusMessage * message, struct _tECP_MessageHandler * handler);
+tECP_Error on_power_status_parser(tECP_Context * context, DBusMessage * message,
+                                  struct _tECP_MessageHandler * handler);
 
 /**
  * Creates a listener + registers callback for the PowerStatus signal.

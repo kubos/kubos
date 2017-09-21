@@ -15,7 +15,8 @@
  */
 /**
  * This API defines a top level interface for interacting with EPS subsystems.
- * Implementations will be found in modules specific to individual EPS hardware.
+ * Implementations will be found in modules specific to individual EPS
+ * hardware.
  */
 
 #pragma once
@@ -34,7 +35,8 @@ typedef enum {
  * Struct for holding EPS power line status information.
  * This struct may have to change on a per-EPS basis?
  */
-typedef struct {
+typedef struct
+{
     uint16_t line_one;
     uint16_t line_two;
 } eps_power_status;
