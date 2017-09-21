@@ -35,7 +35,7 @@ tECP_Error format_power_status_message(eps_power_status status,
                              DBUS_TYPE_INT16, &(status.line_two),
                              DBUS_TYPE_INVALID);
 
-    return ECP_E_NOERR;
+    return ECP_NOERR;
 }
 
 tECP_Error parse_power_status_message(eps_power_status * status,
@@ -52,10 +52,10 @@ tECP_Error parse_power_status_message(eps_power_status * status,
                                &(status->line_two), DBUS_TYPE_INVALID))
     {
         printf("Had issuing parsing args\n%s\n", derror.message);
-        return ECP_E_GENERIC;
+        return ECP_GENERIC;
     }
 
-    return ECP_E_NOERR;
+    return ECP_NOERR;
 }
 
 tECP_Error on_power_status_parser(tECP_Context * context,
@@ -63,7 +63,7 @@ tECP_Error on_power_status_parser(tECP_Context * context,
 {
     eps_power_status status;
     tECP_PowerStatus_MessageHandler * status_handler = (tECP_PowerStatus_MessageHandler*)handler;
-    if (ECP_E_NOERR == parse_power_status_message(&status, message))
+    if (ECP_NOERR == parse_power_status_message(&status, message))
     {
         status_handler->cb(status);
     }

@@ -38,14 +38,14 @@ static void test_ecp_method_call(void ** arg)
     csp_thread_create(server_task, "SERVER", 1024, NULL, 0, &server_task_handle);
 
     assert_int_equal(ECP_Init(&client_context, TEST_CLIENT),
-                     ECP_E_NOERR);
+                     ECP_NOERR);
 
     // Give the server task time to get setup...we need some better testing tools
     // or methods which allo synchronizing inside of integration tests
     usleep(100);
     call_test_method(&client_context, client_num);
 
-    assert_int_equal(ECP_Destroy(&client_context), ECP_E_NOERR);
+    assert_int_equal(ECP_Destroy(&client_context), ECP_NOERR);
 
     assert_int_equal(server_num, client_num);
 

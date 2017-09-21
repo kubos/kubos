@@ -20,17 +20,19 @@
 
 eps_err eps_enable_power_line(uint16_t line)
 {
+    // Place holder implementation to enable integration
     printf("EPS enable line %d\n", line);
-    return EPS_NO_ERR;
+    return EPS_OK;
 }
 
 eps_err eps_get_power_status(eps_power_status * status)
 {
+    // Place holder implementation to enable integration
     if (status != NULL)
     {
         status->line_one = 1;
 	status->line_two = 0;
-	return EPS_NO_ERR;
+	return EPS_OK;
     }
-    return EPS_GENERIC_ERR;
+    return EPS_ERROR;
 }

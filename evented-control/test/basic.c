@@ -28,7 +28,7 @@ static void test_ecp_init(void ** arg)
 
   err = ECP_Init(&context, TEST_NAME);
 
-  assert_int_equal(err, ECP_E_NOERR);
+  assert_int_equal(err, ECP_NOERR);
 }
 
 static void test_ecp_init_listen(void ** arg)
@@ -38,11 +38,11 @@ static void test_ecp_init_listen(void ** arg)
 
   err = ECP_Init(&context, TEST_NAME);
 
-  assert_int_equal(err, ECP_E_NOERR);
+  assert_int_equal(err, ECP_NOERR);
 
   err = ECP_Listen(&context, TEST_LISTEN);
 
-  assert_int_equal(err, ECP_E_NOERR);
+  assert_int_equal(err, ECP_NOERR);
 }
 
 int main(void)

@@ -39,18 +39,18 @@ static void test_ecp_subscriber(void ** arg)
     csp_thread_create(pub_task, "PUB", 1024, NULL, 0, &pub_task_handle);
 
     assert_int_equal(ECP_Init(&sub_context, TEST_SUB),
-                     ECP_E_NOERR);
+                     ECP_NOERR);
 
-    assert_int_equal(on_test_signal(&sub_context, &sub_cb), ECP_E_NOERR);
+    assert_int_equal(on_test_signal(&sub_context, &sub_cb), ECP_NOERR);
 
     for (int i = 0; i < 50; i++)
     {
-        assert_int_equal(ECP_Loop(&sub_context, 100), ECP_E_NOERR);
+        assert_int_equal(ECP_Loop(&sub_context, 100), ECP_NOERR);
         if (pub_num == sub_num)
             break;
     }
 
-    assert_int_equal(ECP_Destroy(&sub_context), ECP_E_NOERR);
+    assert_int_equal(ECP_Destroy(&sub_context), ECP_NOERR);
 
     assert_int_equal(pub_num, sub_num);
 

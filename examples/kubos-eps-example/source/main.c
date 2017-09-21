@@ -14,34 +14,30 @@
  * limitations under the License.
  */
 
+#include <eps-api/eps.h>
 #include <evented-control/ecp.h>
 #include <evented-control/messages.h>
-#include <eps-api/eps.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-DBusHandlerResult message_handler(DBusConnection * connection,
-                                  DBusMessage * message, void * user_data);
 
 tECP_Error status_handler(eps_power_status status);
 
 #define MY_NAME "org.KubOS.client"
 
-static tECP_Context context;
-
 int main(int argc, char * argv[])
 {
     tECP_Error   err;
+    tECP_Context context;
 
     do
     {
 
-        if (ECP_E_NOERR != (err = ECP_Init(&context, MY_NAME, message_handler)))
+        if (ECP_E_NOERR != (err = ECP_Init(&context, MY_NAME)))
         {
-            printf("00BASIC: Error calling ECP_Init(): %d\n", err);
+            printf("Error calling ECP_Init(): %d\n", err);
             break;
         }
-        printf("00BASIC: Successfully called ECP_Init()\n");
+        printf("Successfully called ECP_Init()\n");
 
         if (ECP_E_NOERR != (err = on_power_status(&context, &status_handler)))
         {
@@ -64,24 +60,13 @@ int main(int argc, char * argv[])
 
         if (ECP_E_NOERR != (err = ECP_Destroy(&context)))
         {
-            printf("00BASIC: Error calling ECP_Destroy(): %d\n", err);
+            printf("Error calling ECP_Destroy(): %d\n", err);
             break;
         }
 
     } while (0);
 
     return (err);
-}
-
-DBusHandlerResult message_handler(DBusConnection * connection,
-                                  DBusMessage * message, void * user_data)
-{
-    if (ECP_E_NOERR == ECP_Handle_Message(&context, message))
-    {
-        return DBUS_HANDLER_RESULT_HANDLED;
-    }
-
-    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 }
 
 tECP_Error status_handler(eps_power_status status)

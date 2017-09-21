@@ -27,7 +27,7 @@ int main()
     int              i;
     int              initialized = 0;
     eps_power_status status;
-    tECP_Context context;
+    tECP_Context     context;
 
     do
     {
@@ -40,6 +40,7 @@ int main()
         if (ECP_E_NOERR != on_enable_line(&context, &enable_line_handler))
         {
             printf("Error registering enable line callback\n");
+            break;
         }
 
         /* Now loop for (at most) 15 seconds, looking for a message */
@@ -53,21 +54,18 @@ int main()
             err = ECP_Loop(&context, 1000);
         }
 
-        
         if (err != ECP_E_NOERR)
         {
             printf("Error %d calling ECP_Loop()\n", err);
-            break;
         }
     } while (0);
 
+    if (ECP_E_NOERR != (err = ECP_Destroy(&context)))
+    {
+        printf("Error %d calling ECP_Destroy()\n", err);
+    }
 
-     if (ECP_E_NOERR != (err = ECP_Destroy(&context)))
-     {
-         printf("Error %d calling ECP_Destroy()\n", err);
-     }
-
-     return err;
+    return err;
 }
 
 tECP_Error enable_line_handler(uint8_t line)

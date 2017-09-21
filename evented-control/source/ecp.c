@@ -27,7 +27,7 @@ DBusHandlerResult _tECP_MessageHandler(DBusConnection * connection,
 
 tECP_Error ECP_Init(tECP_Context * context, const char * name)
 {
-    tECP_Error err = ECP_E_NOERR;
+    tECP_Error err = ECP_NOERR;
     DBusError  error;
     int        i = 0;
 
@@ -41,20 +41,20 @@ tECP_Error ECP_Init(tECP_Context * context, const char * name)
         context->connection = dbus_bus_get(DBUS_BUS_SESSION, &error);
         if (NULL == context->connection)
         {
-            err = ECP_E_GENERIC;
+            err = ECP_GENERIC;
             break;
         }
 
         if (0 > dbus_bus_request_name(context->connection, name, 0, &error))
         {
-            err = ECP_E_GENERIC;
+            err = ECP_GENERIC;
             break;
         }
 
         if (!dbus_connection_add_filter(context->connection, _tECP_MessageHandler, (void*)context,
                                         NULL))
         {
-            err = ECP_E_GENERIC;
+            err = ECP_GENERIC;
             break;
         }
     } while (0);
@@ -66,7 +66,7 @@ tECP_Error ECP_Init(tECP_Context * context, const char * name)
 
 tECP_Error ECP_Listen(tECP_Context * context, const char * channel)
 {
-    tECP_Error err = ECP_E_NOERR;
+    tECP_Error err = ECP_NOERR;
     DBusError  error;
     char       sig_match_str[100];
 
@@ -81,7 +81,7 @@ tECP_Error ECP_Listen(tECP_Context * context, const char * channel)
         {
             fprintf(stderr, "Name Error (%s)\n", error.message);
             dbus_error_free(&error);
-            err = ECP_E_GENERIC;
+            err = ECP_GENERIC;
             break;
         }
 
@@ -93,7 +93,7 @@ tECP_Error ECP_Listen(tECP_Context * context, const char * channel)
 
 tECP_Error ECP_Loop(tECP_Context * context, unsigned int timeout)
 {
-    tECP_Error err = ECP_E_NOERR;
+    tECP_Error err = ECP_NOERR;
 
     dbus_connection_read_write_dispatch(context->connection, timeout);
 
@@ -102,7 +102,7 @@ tECP_Error ECP_Loop(tECP_Context * context, unsigned int timeout)
 
 tECP_Error ECP_Destroy(tECP_Context * context)
 {
-    tECP_Error err = ECP_E_NOERR;
+    tECP_Error err = ECP_NOERR;
 
     /** Need to figure out what d-bus wants us to clean up...
       * It looks like dbus_connection_close isn't needed since
@@ -113,12 +113,12 @@ tECP_Error ECP_Destroy(tECP_Context * context)
 
 tECP_Error ECP_Broadcast(tECP_Context * context, DBusMessage * message)
 {
-    tECP_Error    err    = ECP_E_NOERR;
+    tECP_Error    err    = ECP_NOERR;
     dbus_uint32_t serial = 0;
 
     if (!dbus_connection_send(context->connection, message, &serial))
     {
-        err = ECP_E_GENERIC;
+        err = ECP_GENERIC;
     }
 
     return (err);
@@ -137,27 +137,27 @@ tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message)
             && (0 == strcmp(message_member, current->member)))
         {
             current->parser(context, message, current);
-            return ECP_E_NOERR;
+            return ECP_NOERR;
         }
         current = current->next;
     }
     if (NULL == current)
     {
-        return ECP_E_GENERIC;
+        return ECP_GENERIC;
     }
 }
 
 tECP_Error ECP_Call(tECP_Context * context, DBusMessage * message)
 {
     DBusMessage * reply = NULL;
-    tECP_Error err = ECP_E_NOERR;
+    tECP_Error err = ECP_NOERR;
 
     if (NULL != message)
     {
         reply = dbus_connection_send_with_reply_and_block(context->connection, message, 1000, NULL);
         if (reply == NULL)
         {
-            err = ECP_E_GENERIC;
+            err = ECP_GENERIC;
         }
         dbus_message_unref(message);
     }
@@ -169,7 +169,7 @@ tECP_Error ECP_Add_Message_Handler(tECP_Context *      context,
                                    tECP_MessageHandler * new_handler)
 {
     tECP_MessageHandler * current     = NULL;
-    tECP_Error            err         = ECP_E_NOERR;
+    tECP_Error            err         = ECP_NOERR;
 
     if (NULL == context->callbacks)
     {
@@ -196,7 +196,7 @@ DBusHandlerResult _tECP_MessageHandler(DBusConnection * connection,
     if (NULL != user_data)
     {
       context = (tECP_Context*)user_data;
-        if (ECP_E_NOERR == ECP_Handle_Message(context, message))
+        if (ECP_NOERR == ECP_Handle_Message(context, message))
         {
             return DBUS_HANDLER_RESULT_HANDLED;
         }

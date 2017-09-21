@@ -31,7 +31,7 @@ tECP_Error check_message(DBusMessage * message, const char * interface,
     if ((0 == strcmp(msg_interface, interface))
         && (0 == strcmp(msg_member, member)))
     {
-        return ECP_E_NOERR;
+        return ECP_NOERR;
     }
-    return ECP_E_GENERIC;
+    return ECP_GENERIC;
 }

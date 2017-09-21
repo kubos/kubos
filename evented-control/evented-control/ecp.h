@@ -23,8 +23,8 @@
  * ECP error codes
  */
 typedef enum {
-    ECP_E_NOERR = 0,
-    ECP_E_GENERIC,
+    ECP_NOERR = 0,
+    ECP_GENERIC,
 } tECP_Error;
 
 /**
@@ -44,9 +44,13 @@ typedef tECP_Error (*message_parser)(struct _tECP_Context * context, DBusMessage
  * messages are received.
  */
 typedef struct _tECP_MessageHandler {
+    /** Next MessageHandler in list */
     struct _tECP_MessageHandler * next;
+    /** Interface of DBus object that owns the method/signal */
     char * interface;
+    /** Name of DBus signal/method producing messages */
     char * member;
+    /** Function pointer to parser for handling messages */
     message_parser parser;
 } tECP_MessageHandler;
 
@@ -55,7 +59,9 @@ typedef struct _tECP_MessageHandler {
  * and MessageHandler list.
  */
 typedef struct _tECP_Context {
+    /** List of message handlers */
     tECP_MessageHandler * callbacks;
+    /** DBus connection object */
     DBusConnection * connection;
 } tECP_Context;
 
