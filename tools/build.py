@@ -184,16 +184,12 @@ def main():
                         dest="list_changed_modules", const="HEAD^!",
                         help='Lists modules that have changed. By default will diff against '
                         'the last commit. The git diff path desired can also be passed in')
-
     parser.add_argument('--local', action='store_true', default=False,
                         help='Builds against local source')
 
     args = parser.parse_args()
-
     builder = KubosBuilder()
-
     ret = 0 
-
 
     if not args.local:
         print("Running kubos update..")
