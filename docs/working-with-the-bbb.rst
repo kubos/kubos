@@ -398,7 +398,7 @@ Resources
 Configuration
 ^^^^^^^^^^^^^
 
-The static IP address can be updated by editting the `/etc/network/interfaces` file.
+The static IP address can be updated by editing the `/etc/network/interfaces` file.
 By default the address is ``168.168.2.20``.
 
 Examples
