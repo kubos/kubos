@@ -375,8 +375,8 @@ An example program might look like this:
 Ethernet
 ~~~~~~~~
 
-The Pumpkin MBM2, via the embedded Beaglebone Black, provides an ethernet
-port which can be used for things like inter-system communication.
+The Beaglebone Black provides an ethernet port which can be used for things 
+like inter-system communication.
 
 The ethernet port is configured to have support for static IPv4 addressing and
 can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
