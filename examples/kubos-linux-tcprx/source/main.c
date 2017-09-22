@@ -12,7 +12,7 @@ uint8_t quit;
 int main(int argc, char * argv[])
 {
     struct sockaddr_in server, client;
-    int server_fd, client_fd, int len;
+    int server_fd, client_fd, len;
     int status = 0;
 
     char buffer[256];
