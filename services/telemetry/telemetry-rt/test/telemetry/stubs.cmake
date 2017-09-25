@@ -1,4 +1,4 @@
-set_target_properties(telemetry-test-telemetry
+set_target_properties(telemetry-rt-test-telemetry
         PROPERTIES
         LINK_FLAGS  
         "-Wl,--wrap=kprv_subscriber_read \

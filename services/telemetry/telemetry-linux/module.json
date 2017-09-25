@@ -9,6 +9,9 @@
       "tinycbor":"kubostech/tinycbor"
     },
     "testDependencies": {
-        "cmocka": "kubostech/cmocka"
-    }
+      "cmocka": "kubostech/cmocka"
+    },
+    "testTargets": [
+      "x86-linux-native"
+    ]
 }
