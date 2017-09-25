@@ -1,6 +1,13 @@
 Kubos Changelog
 ===============
 
+v1.0.1 - Aug 4 2017
+-------------------
+
+- Adding support for Beaglebone Black
+- Adding support for Pumpkin MBM2
+- Adding Windows Dev Environment guide
+
 v1.0.0 - June 27 2017
 ---------------------
 
