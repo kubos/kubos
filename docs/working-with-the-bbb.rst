@@ -363,7 +363,7 @@ An example program might look like this:
     /* Read the value back */
     fd = open("/sys/class/gpio/gpio45/value", O_RDONLY);
     char strValue[3];
-    write(fd, strValue, 1);
+    read(fd, strValue, 3);
     value = atoi(strValue);
     close(fd);
     
