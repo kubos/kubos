@@ -175,8 +175,9 @@ typedef enum {
  *
  * @param i2c I2C bus to initialize
  * @param conf config values to initialize with
+ * @return KI2CStatus I2C_OK on success, otherwise return I2C_ERROR_*
  */
-void k_i2c_init(KI2CNum i2c, KI2CConf *conf);
+KI2CStatus k_i2c_init(KI2CNum i2c, KI2CConf *conf);
 
 /**
  * @brief Terminates an I2C bus
