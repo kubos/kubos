@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # Cubesat Space Protocol - A small network-layer protocol designed for Cubesats
 # Copyright (C) 2012 GomSpace ApS (http://www.gomspace.com)
