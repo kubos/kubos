@@ -1,9 +1,9 @@
 {
   "name": "kubos-linux-beaglebone-gcc",
   "version": "0.1.1",
-  "description": "base KubOS Linux build target for the beaglebone black arm-linux-gueabihf toolchain",
+  "description": "Base KubOS Linux build target for the Beaglebone Black arm-linux toolchain",
   "inherits": {
-    "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
+    "kubos-linux-gcc": "kubostech/target-kubos-linux-gcc#~0.1.0"
   },
   "licenses": [
     {
@@ -14,34 +14,19 @@
   "keywords": [
     "kubos-linux",
     "linux",
+    "beaglebone-black",
+    "pumpkin",
     "arm",
     "gcc"
   ],
+  "buildTarget": true,
   "similarTo": [
     "linux",
     "kubos-linux",
     "arm-linux-gcc",
-    "arm"
+    "arm",
+    "beaglebone-black",
+    "pumpkin"
   ],
-  "buildTarget": true,
-  "config": {
-    "arch": {
-      "arm": {}
-    },
-    "system": {
-      "initAfterFlash": false,
-      "initAtBoot": true,
-      "runLevel": 50,
-      "destDir": "/home/usr/local/bin",
-      "password": "Kubos123"
-    }
-  },
-  "toolchain": "CMake/toolchain.cmake",
-  "scripts": {
-    "start": [
-      "bash",
-      "$PWD/yotta_targets/kubos-linux-beaglebone-gcc/minicom/flash.sh",
-      "$program"
-    ]
-  }
+  "toolchain": "CMake/toolchain.cmake"
 }

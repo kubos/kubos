@@ -1,12 +1,14 @@
-# Copyright (C) 2016 Kubos Corporation
+# Copyright (C) 2017 Kubos Corporation
 if (TARGET_KUBOS_LINUX_BEAGLEBONE_GCC_TOOLCHAIN_INCLUDED)
     return()
 endif()
 set(TARGET_KUBOS_LINUX_BEAGLEBONE_GCC_TOOLCHAIN_INCLUDED 1)
 
-add_definitions("-DTOOLCHAIN_GCC_ARM")
+set(CMAKE_SYSTEM_PROCESSOR "am335x")
 
-gcc_load_toolchain("arm-linux-gnueabihf-")
+macro(gcc_not_found)
+    message("/usr/bin/bbb_toolchain has not been found.  It can be installed by building Linux")
+    message("with the BR2_HOST_DIR option set to '/usr/bin/bbb_toolchain'")
+endmacro()
 
-set(_C_FAMILY_FLAGS_INIT "-std=c99 ${_C_FAMILY_FLAGS_INIT}")
-set(CMAKE_C_LINK_FLAGS   "-static")
+gcc_load_toolchain("bbb_toolchain/usr/bin/arm-linux-")

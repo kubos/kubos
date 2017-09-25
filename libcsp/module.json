@@ -18,14 +18,17 @@
     "kubos-rt": {
       "kubos-hal": "kubostech/kubos-hal#~0.1.0"
     },
-    "kubos-linux-isis-gcc": {
-       "tinycbor": "kubostech/tinycbor"
-    },
     "x86-linux-native": {
-       "tinycbor": "kubostech/tinycbor"
+      "tinycbor": "kubostech/tinycbor"
+    },
+    "kubos-linux-gcc": {
+      "tinycbor": "kubostech/tinycbor"
     }
   },
   "testDependencies": {
     "cmocka": "kubostech/cmocka"
-  }
+  },
+  "testTargets": [
+    "x86-linux-native"
+  ]
 }

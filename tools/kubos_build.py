@@ -88,6 +88,10 @@ class KubosBuild(object):
         mod_filter = lambda c: c.type == 'yotta_module' and (include_bin or not c.is_bin())
         return filter(mod_filter, self.projects)
 
+    def test_modules(self):
+        mod_filter = lambda c: c.type == 'yotta_module' and 'testDependencies' in c.yotta_data
+        return filter(mod_filter, self.projects)
+
     def bin_modules(self):
         return filter(lambda c: c.type == 'yotta_module' and c.is_bin(), self.projects)
 

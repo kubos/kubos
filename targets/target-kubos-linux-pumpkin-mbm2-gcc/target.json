@@ -1,0 +1,32 @@
+{
+  "name": "kubos-linux-pumpkin-mbm2-gcc",
+  "version": "0.1.1",
+  "description": "Base KubOS Linux build target for the Pumpkin MBM2 arm-linux toolchain",
+  "inherits": {
+    "kubos-linux-gcc": "kubostech/target-kubos-linux-gcc#~0.1.0"
+  },
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "kubos-linux",
+    "linux",
+    "beaglebone-black",
+    "pumpkin",
+    "arm",
+    "gcc"
+  ],
+  "buildTarget": true,
+  "similarTo": [
+    "linux",
+    "kubos-linux",
+    "arm-linux-gcc",
+    "arm",
+    "beaglebone-black",
+    "pumpkin"
+  ],
+  "toolchain": "CMake/toolchain.cmake"
+}
