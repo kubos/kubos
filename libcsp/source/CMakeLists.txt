@@ -59,6 +59,14 @@ if (YOTTA_CFG_CSP_RDP)
     set (CSP_USE_RDP ON)
 endif()
 
+if (TARGET_LIKE_LINUX)
+    # IF_SOCKET was set to OFF
+    # but it is required for building/testing the linux
+    # IPC module. We can re-examine the default value
+    # once RT is revisited.
+    set (IF_SOCKET ON)
+endif()
+
 add_library (csp STATIC
     csp_bridge.c
     csp_buffer.c
