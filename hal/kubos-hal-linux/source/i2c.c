@@ -14,6 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @defgroup LINUX_HAL_I2C KubOS Linux HAL I2C Interface
+ * @addtogroup LINUX_HAL_I2C
+ * @{
+ */
 
 #if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 
@@ -184,3 +189,6 @@ KI2CStatus kprv_i2c_slave_read(KI2CNum i2c, uint16_t addr, uint8_t * ptr,
 }
 
 #endif
+
+/* @} */
+

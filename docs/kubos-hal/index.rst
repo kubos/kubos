@@ -1,9 +1,10 @@
 Kubos HAL Documentation
 =======================
 
-.. warning:: The Kubos HAL functionality is currently only available on KubOS RT.
+.. warning:: 
 
-.. note:: The KubOS Linux platform currently exposes HAL-like functionality through the Linux device files
+    The Kubos HAL functionality for KubOS Linux is still a work in progress. The available features can be seen
+    in the :doc:`KubOS Linux HAL <kubos-hal-linux/index>` page.
 
 The Kubos HAL module provides a hardware abstraction layer for the common hardware interfaces
 found on cubesats. The interfaces provided span across the different hardware platforms
@@ -42,6 +43,7 @@ Each platform-specific HAL implements the same set of functions provided by the 
    :caption: Platform HALs
    :name:  hal-platforms
 
+   KubOS Linux Devices <kubos-hal-linux/index>
    STM32F4 <kubos-hal-stm32f4/index>
    MSP430F5529 <kubos-hal-msp430f5529/index>
 
