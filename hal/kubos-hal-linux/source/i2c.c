@@ -35,6 +35,9 @@
 
 #include "kubos-hal/i2c.h"
 
+ #define STRINGIFY(s) TOSTRING(s)
+ #define TOSTRING(s) #s
+
 /**
  * Static array of I2C bus file descriptors
  */
@@ -59,7 +62,28 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
     }
 
     char filename[] = "/dev/i2c-n";
-    sprintf(filename, "/dev/i2c-%d", i2c - 1);
+
+    switch(i2c)
+    {
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C1
+        case K_I2C1:
+            sprintf(filename, STRINGIFY(YOTTA_CFG_HARDWARE_I2C_I2C1_DEVICE));
+            break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C2
+        case K_I2C2:
+            sprintf(filename, STRINGIFY(YOTTA_CFG_HARDWARE_I2C_I2C2_DEVICE));
+            break;
+#endif
+#ifdef YOTTA_CFG_HARDWARE_I2C_I2C3
+        case K_I2C3:
+            sprintf(filename, STRINGIFY(YOTTA_CFG_HARDWARE_I2C_I2C3_DEVICE));
+            break;
+#endif
+        default:
+            fprintf(stderr, "Error: Bus number unknown\n");
+            return I2C_ERROR_CONFIG;
+    }
 
     hal_i2c_bus[i2c - 1] = open(filename, O_RDWR);
 

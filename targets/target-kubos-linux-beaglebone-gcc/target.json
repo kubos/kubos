@@ -28,5 +28,21 @@
     "beaglebone-black",
     "pumpkin"
   ],
+  "config": {
+	"hardware": {
+	  "i2c": {
+	    "count": 2,
+	    "defaults": {
+	      "bus": "K_I2C1"
+	    },
+	    "i2c1": {
+		  "device": "/dev/i2c-1"
+	    },
+	    "i2c2": {
+		  "device": "/dev/i2c-2"
+	    }
+	  }
+	}
+  },
   "toolchain": "CMake/toolchain.cmake"
 }
