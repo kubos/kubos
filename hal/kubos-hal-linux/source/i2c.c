@@ -43,6 +43,7 @@ static int hal_i2c_bus[K_NUM_I2CS];
 /**
  * Low level hal device initialization
  * @param i2c I2C bus to initialize
+ * @return KI2CStatus I2C_OK on success, I2C_ERROR_* on error
  */
 KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
 {
@@ -75,6 +76,7 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
 /**
  * Low level HAL I2C termination
  * @param i2c I2C bus to terminate
+ * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
  */
 KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c)
 {
