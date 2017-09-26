@@ -116,7 +116,6 @@ int init_sensor(void)
         return -1;
     }
 
-    printf("Mode: %x\n", mode);
     return ret;
 }
 
@@ -144,6 +143,11 @@ int main(void)
     }
 
     k_i2c_terminate(I2C_BUS);
+
+    if (status == 0)
+    {
+        printf("LSM303DLHC I2C test completed successfully!\n");
+    }
 
     return status;
 }
