@@ -36,7 +36,9 @@
 	        "defaults": {
 	          "bus": "K_I2C1"
 	        },
-	        "i2c1": {}
+	        "i2c1": {
+	          "device": "/dev/i2c-0"	
+	        }
 	      }
 	    }
     },
