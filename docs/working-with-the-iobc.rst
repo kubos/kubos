@@ -72,47 +72,10 @@ Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 KubOS Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
-The I2C bus is available to the userspace as the '/dev/i2c-0' device.
-Users will need to add their peripheral device to the system and then
-open the bus in order to communicate. Once communication is complete,
-the bus should be closed and the device definition should be removed.
+The I2C bus is available through the Kubos HAL as ``K_I2C1``.
 
-Since the peripheral devices will be different for each client, they
-will need to be `dynamically added in the userspace (method
-4) <https://www.kernel.org/doc/Documentation/i2c/instantiating-devices>`__.
-
-The bus is then opened using the standard Linux ``open`` function and
-used for communication with the standard ``write`` and ``read``
-functions. These functions are described in the `Linux I2C dev-interface
-doc <https://www.kernel.org/doc/Documentation/i2c/dev-interface>`__. The
-buffer used in the ``write`` and ``read`` functions will most likely
-follow the common I2C structure of "{register, value}"
-
-The user program should look something like this:
-
-.. code-block:: c
-
-    /* Add device to system */
-    system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-0/new_device);
-
-    /* Open I2C bus */
-    file = open("/dev/i2c-0");
-
-    /* Configure I2C bus to point to desired slave */
-    ioctl(file, I2C_SLAVE, 0x20);
-
-    /* Start of communication logic */
-    buffer = {0x10, 0x34};
-    write(file, buffer, sizeof(buffer));
-
-    read(file, buffer, lengthToRead); 
-    /* End of communication logic */
-
-    /* Close I2C bus */
-    close(file);
-
-    /* Remove device */
-    system("echo 0x20 > /sys/bus/i2c/devices/i2c-0/delete_device);
+For examples and instructions, see the :doc:`kubos-hal/i2c` and
+:doc:`kubos-hal/i2c_api` documents.
 
 GPIO
 ~~~~
