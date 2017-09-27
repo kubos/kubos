@@ -67,17 +67,17 @@ KI2CStatus kprv_i2c_dev_init(KI2CNum i2c)
     {
 #ifdef YOTTA_CFG_HARDWARE_I2C_I2C1
         case K_I2C1:
-            sprintf(filename, STRINGIFY(YOTTA_CFG_HARDWARE_I2C_I2C1_DEVICE));
+            snprintf(filename, sizeof(filename), STRINGIFY(YOTTA_CFG_HARDWARE_I2C_I2C1_DEVICE));
             break;
 #endif
 #ifdef YOTTA_CFG_HARDWARE_I2C_I2C2
         case K_I2C2:
-            sprintf(filename, STRINGIFY(YOTTA_CFG_HARDWARE_I2C_I2C2_DEVICE));
+            snprintf(filename, sizeof(filename), STRINGIFY(YOTTA_CFG_HARDWARE_I2C_I2C2_DEVICE));
             break;
 #endif
 #ifdef YOTTA_CFG_HARDWARE_I2C_I2C3
         case K_I2C3:
-            sprintf(filename, STRINGIFY(YOTTA_CFG_HARDWARE_I2C_I2C3_DEVICE));
+            snprintf(filename, sizeof(filename), STRINGIFY(YOTTA_CFG_HARDWARE_I2C_I2C3_DEVICE));
             break;
 #endif
         default:
