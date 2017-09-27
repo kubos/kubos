@@ -26,23 +26,12 @@ typedef enum {
     RADIO_ERROR
 } KRadioStatus;
 
-/**
- * Structure used to store radio configuration options
- */
-typedef struct {
-    /**
-     * The size of the slave address.
-     * Should be either 7-bits long or 10-bits long, as specified by the @ref I2CAddressingMode enumerator
-     */
-    int addressing_mode;
-    /**
-     * The role of the I2C bus.
-     * Should be either master or slave, as specified by the @ref I2CRole enumerator
-     * @warning Only the Master role is available as of v0.1.0
-     */
-    int role;
-    /**
-     * The clock speed of the I2C bus
-     */
-    uint32_t clock_speed;
-} KRadioConf;
+KRadioStatus radio_tx_init(void);
+KRadioStatus radio_tx_configure(uint8_t * conf);
+
+KRadioStatus radio_tx_watchdog_kick(void);
+KRadioStatus radio_tx_reset(int hard);
+
+uint8_t radio_tx_send(char * buffer, int len);
+
+KRadioStatus radio_tx_get_telemetry(uint8_t * buffer, uint8_t type);
