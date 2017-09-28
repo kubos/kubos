@@ -33,14 +33,15 @@ tECP_Error on_enable_line_parser(tECP_Context * context, DBusMessage * message,
     tECP_EnableLine_MessageHandler * line_handler
         = (tECP_EnableLine_MessageHandler *) handler;
 
-    dbus_message_get_args(message, NULL, DBUS_TYPE_INT16, &line);
-    printf("on_enable_line_parser line %d\n", line);
+    dbus_message_get_args(message, NULL, DBUS_TYPE_BYTE, &line,
+                          DBUS_TYPE_INVALID);
 
     line_handler->cb(line);
 
     reply = dbus_message_new_method_return(message);
     dbus_connection_send(context->connection, reply, NULL);
     dbus_message_unref(reply);
+    return ECP_NOERR;
 }
 
 tECP_Error on_enable_line(tECP_Context * context, enable_line_cb cb)
@@ -59,13 +60,13 @@ tECP_Error on_enable_line(tECP_Context * context, enable_line_cb cb)
 tECP_Error enable_line(tECP_Context * context, uint8_t line)
 {
     DBusMessage * message = NULL;
+    tECP_Error    err     = ECP_NOERR;
 
     message = dbus_message_new_method_call(
         POWER_MANAGER_INTERFACE, POWER_MANAGER_PATH, POWER_MANAGER_INTERFACE,
         POWER_MANAGER_ENABLE_LINE);
 
-    dbus_message_append_args(message, DBUS_TYPE_INT16, &line,
-                             DBUS_TYPE_INVALID);
+    dbus_message_append_args(message, DBUS_TYPE_BYTE, &line, DBUS_TYPE_INVALID);
 
     return ECP_Call(context, message);
 }

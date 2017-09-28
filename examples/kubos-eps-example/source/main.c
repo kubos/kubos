@@ -32,20 +32,20 @@ int main(int argc, char * argv[])
     do
     {
 
-        if (ECP_E_NOERR != (err = ECP_Init(&context, MY_NAME)))
+        if (ECP_NOERR != (err = ECP_Init(&context, MY_NAME)))
         {
             printf("Error calling ECP_Init(): %d\n", err);
             break;
         }
         printf("Successfully called ECP_Init()\n");
 
-        if (ECP_E_NOERR != (err = on_power_status(&context, &status_handler)))
+        if (ECP_NOERR != (err = on_power_status(&context, &status_handler)))
         {
             printf("Error calling on_power_status\n");
             break;
         }
 
-        if (ECP_E_NOERR != (err = enable_line(&context, 1)))
+        if (ECP_NOERR != (err = enable_line(&context, 1)))
         {
             printf("Error calling enable line\n");
             break;
@@ -53,18 +53,16 @@ int main(int argc, char * argv[])
 
         printf("Successfully enabled line 1\n");
 
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 10; i++)
         {
-            ECP_Loop(&context, 1000);
+            ECP_Loop(&context, 100);
         }
-
-        if (ECP_E_NOERR != (err = ECP_Destroy(&context)))
-        {
-            printf("Error calling ECP_Destroy(): %d\n", err);
-            break;
-        }
-
     } while (0);
+
+    if (ECP_NOERR != (err = ECP_Destroy(&context)))
+    {
+        printf("Error calling ECP_Destroy(): %d\n", err);
+    }
 
     return (err);
 }

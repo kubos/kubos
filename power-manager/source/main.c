@@ -23,7 +23,7 @@ tECP_Error enable_line_handler(uint8_t line);
 
 int main()
 {
-    tECP_Error       err = ECP_E_NOERR;
+    tECP_Error       err = ECP_NOERR;
     int              i;
     int              initialized = 0;
     eps_power_status status;
@@ -31,20 +31,20 @@ int main()
 
     do
     {
-        if (ECP_E_NOERR != (err = ECP_Init(&context, POWER_MANAGER_INTERFACE)))
+        if (ECP_NOERR != (err = ECP_Init(&context, POWER_MANAGER_INTERFACE)))
         {
             printf("Error %d calling ECP_Init()\n", err);
             break;
         }
 
-        if (ECP_E_NOERR != on_enable_line(&context, &enable_line_handler))
+        if (ECP_NOERR != on_enable_line(&context, &enable_line_handler))
         {
             printf("Error registering enable line callback\n");
             break;
         }
 
         /* Now loop for (at most) 15 seconds, looking for a message */
-        for (i = 0; (i < 15) && (err == ECP_E_NOERR); i++)
+        for (i = 0; (i < 15) && (err == ECP_NOERR); i++)
         {
             printf("Sending power status\n");
             DBusMessage * message;
@@ -54,13 +54,13 @@ int main()
             err = ECP_Loop(&context, 1000);
         }
 
-        if (err != ECP_E_NOERR)
+        if (err != ECP_NOERR)
         {
             printf("Error %d calling ECP_Loop()\n", err);
         }
     } while (0);
 
-    if (ECP_E_NOERR != (err = ECP_Destroy(&context)))
+    if (ECP_NOERR != (err = ECP_Destroy(&context)))
     {
         printf("Error %d calling ECP_Destroy()\n", err);
     }

@@ -104,10 +104,22 @@ tECP_Error ECP_Destroy(tECP_Context * context)
 {
     tECP_Error err = ECP_NOERR;
 
+    tECP_MessageHandler * current = NULL;
+    tECP_MessageHandler * next    = NULL;
+
+    current = context->callbacks;
+    while (current != NULL)
+    {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+
     /** Need to figure out what d-bus wants us to clean up...
       * It looks like dbus_connection_close isn't needed since
       * we are using dbus_bus_get
       */
+
     return (err);
 }
 
@@ -120,6 +132,8 @@ tECP_Error ECP_Broadcast(tECP_Context * context, DBusMessage * message)
     {
         err = ECP_GENERIC;
     }
+
+    dbus_message_unref(message);
 
     return (err);
 }
@@ -145,23 +159,34 @@ tECP_Error ECP_Handle_Message(tECP_Context * context, DBusMessage * message)
     {
         return ECP_GENERIC;
     }
+
+    return ECP_NOERR;
 }
 
 tECP_Error ECP_Call(tECP_Context * context, DBusMessage * message)
 {
     DBusMessage * reply = NULL;
     tECP_Error    err   = ECP_NOERR;
+    DBusError     derr;
 
-    if (NULL != message)
+    dbus_error_init(&derr);
+
+    if ((NULL != message) && (NULL != context->connection))
     {
-        reply = dbus_connection_send_with_reply_and_block(context->connection,
-                                                          message, 1000, NULL);
+        reply = dbus_connection_send_with_reply_and_block(
+            context->connection, message, 1000, &derr);
         if (reply == NULL)
         {
             err = ECP_GENERIC;
         }
+        else
+        {
+            dbus_message_unref(reply);
+        }
         dbus_message_unref(message);
     }
+
+    dbus_error_free(&derr);
 
     return err;
 }
