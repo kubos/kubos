@@ -26,12 +26,18 @@ typedef enum {
     RADIO_ERROR
 } KRadioStatus;
 
-KRadioStatus radio_tx_init(void);
-KRadioStatus radio_tx_configure(uint8_t * conf);
+typedef struct
+{
+    uint8_t ascii[6];
+    uint8_t ssid;
+} ax25_callsign;
 
-KRadioStatus radio_tx_watchdog_kick(void);
-KRadioStatus radio_tx_reset(int hard);
+KRadioStatus k_radio_tx_init(void);
+KRadioStatus k_radio_tx_configure(uint8_t * conf);
 
-uint8_t radio_tx_send(char * buffer, int len);
+KRadioStatus k_radio_tx_watchdog_kick(void);
+KRadioStatus k_radio_tx_reset(uint8_t type);
 
-KRadioStatus radio_tx_get_telemetry(uint8_t * buffer, uint8_t type);
+uint8_t k_radio_tx_send(char * buffer, int len);
+
+KRadioStatus k_radio_tx_get_telemetry(uint8_t * buffer, uint8_t type);
