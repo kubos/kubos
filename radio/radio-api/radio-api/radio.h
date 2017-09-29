@@ -23,9 +23,15 @@
  */
 typedef enum {
     RADIO_OK = 0,
+    RADIO_RX_EMPTY,
     RADIO_ERROR,
-    RADIO_ERROR_RX_EMPTY
+    RADIO_ERROR_CONFIG
 } KRadioStatus;
+
+typedef enum {
+    RADIO_HARD_RESET,
+    RADIO_SOFT_RESET
+} radio_reset;
 
 typedef struct
 {
@@ -41,6 +47,6 @@ KRadioStatus k_radio_tx_watchdog_kick(void);
 KRadioStatus k_radio_tx_reset(uint8_t type);
 
 uint8_t k_radio_send(char * buffer, int len);
-uint8_t k_radio_recv(char * buffer, int len);
+KRadioStatus k_radio_recv(char * buffer, int len);
 
 KRadioStatus k_radio_tx_get_telemetry(uint8_t * buffer, uint8_t type);
