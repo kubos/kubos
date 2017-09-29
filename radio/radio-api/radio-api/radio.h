@@ -33,7 +33,8 @@ typedef struct
 } ax25_callsign;
 
 KRadioStatus k_radio_tx_init(void);
-KRadioStatus k_radio_tx_configure(uint8_t * conf);
+void k_radio_tx_terminate(void);
+KRadioStatus k_radio_tx_configure(uint8_t * radio_config);
 
 KRadioStatus k_radio_tx_watchdog_kick(void);
 KRadioStatus k_radio_tx_reset(uint8_t type);
