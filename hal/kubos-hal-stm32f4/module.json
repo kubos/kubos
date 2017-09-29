@@ -22,5 +22,8 @@
   },
   "testDependencies": {
     "unity": "kubostech/unity"
-  }
+  },
+  "testTargets": [
+    "stm32f407-disco-gcc"
+  ]
 }
