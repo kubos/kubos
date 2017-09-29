@@ -136,7 +136,7 @@ typedef enum {
  * Uart status values
  */
 typedef enum {
-    UART_OK,
+    UART_OK = 0,
     UART_ERROR,
     UART_ERROR_NULL_HANDLE,
     UART_ERROR_CONFIG

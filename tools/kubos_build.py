@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # common code for dealing with KubOS repo/git and yotta metadata
 import json
 import os
@@ -86,6 +86,10 @@ class KubosBuild(object):
 
     def modules(self, include_bin=True):
         mod_filter = lambda c: c.type == 'yotta_module' and (include_bin or not c.is_bin())
+        return filter(mod_filter, self.projects)
+
+    def test_modules(self):
+        mod_filter = lambda c: c.type == 'yotta_module' and 'testDependencies' in c.yotta_data
         return filter(mod_filter, self.projects)
 
     def bin_modules(self):
