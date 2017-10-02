@@ -47,6 +47,6 @@ KRadioStatus k_radio_watchdog_kick(void);
 KRadioStatus k_radio_reset(uint8_t type);
 
 uint8_t k_radio_send(char * buffer, int len);
-KRadioStatus k_radio_recv(char * buffer, int * len);
+KRadioStatus k_radio_recv(char * buffer, uint8_t * len);
 
 KRadioStatus k_radio_get_telemetry(uint8_t * buffer, uint8_t type);
