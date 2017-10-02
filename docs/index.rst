@@ -95,6 +95,7 @@ It covers the following tutorial documents:
    :caption: Kubos APIs
    :hidden:
    
+    Device Interfaces <device-api/index>
     Kubos Core <kubos-core/index>
     Kubos HAL <kubos-hal/index>
     Kubos IPC <ipc/index>
