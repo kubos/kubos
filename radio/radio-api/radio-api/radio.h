@@ -39,14 +39,14 @@ typedef struct
     uint8_t ssid;
 } ax25_callsign;
 
-KRadioStatus k_radio_tx_init(void);
-void k_radio_tx_terminate(void);
-KRadioStatus k_radio_tx_configure(uint8_t * radio_config);
+KRadioStatus k_radio_init(void);
+void k_radio_terminate(void);
+KRadioStatus k_radio_configure(uint8_t * radio_config);
 
-KRadioStatus k_radio_tx_watchdog_kick(void);
-KRadioStatus k_radio_tx_reset(uint8_t type);
+KRadioStatus k_radio_watchdog_kick(void);
+KRadioStatus k_radio_reset(uint8_t type);
 
 uint8_t k_radio_send(char * buffer, int len);
-KRadioStatus k_radio_recv(char * buffer, int len);
+KRadioStatus k_radio_recv(char * buffer, int * len);
 
-KRadioStatus k_radio_tx_get_telemetry(uint8_t * buffer, uint8_t type);
+KRadioStatus k_radio_get_telemetry(uint8_t * buffer, uint8_t type);
