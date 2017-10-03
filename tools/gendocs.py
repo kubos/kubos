@@ -26,6 +26,7 @@ DOCS_DIRS = [
     "kubos-core",
     "hal/kubos-hal",
     "hal/kubos-hal-iobc",
+    "hal/kubos-hal-linux",
     "hal/kubos-hal-msp430f5529",
     "hal/kubos-hal-stm32f4",
     "services/telemetry/telemetry",
