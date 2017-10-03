@@ -22,26 +22,26 @@
 
 static void test_ecp_init(void ** arg)
 {
-    tECP_Context context;
-    tECP_Error   err;
+    ECPContext context;
+    ECPStatus   err;
 
     err = ECP_Init(&context, TEST_NAME);
 
-    assert_int_equal(err, ECP_NOERR);
+    assert_int_equal(err, ECP_OK);
 }
 
 static void test_ecp_init_listen(void ** arg)
 {
-    tECP_Context context;
-    tECP_Error   err;
+    ECPContext context;
+    ECPStatus   err;
 
     err = ECP_Init(&context, TEST_NAME);
 
-    assert_int_equal(err, ECP_NOERR);
+    assert_int_equal(err, ECP_OK);
 
     err = ECP_Listen(&context, TEST_LISTEN);
 
-    assert_int_equal(err, ECP_NOERR);
+    assert_int_equal(err, ECP_OK);
 }
 
 int main(void)

@@ -25,13 +25,13 @@
 #include "evented-control/ecp.h"
 #include "evented-control/messages.h"
 
-tECP_Error on_enable_line_parser(tECP_Context * context, DBusMessage * message,
-                                 struct _tECP_MessageHandler * handler)
+ECPStatus on_enable_line_parser(ECPContext * context, DBusMessage * message,
+                                 struct _ECPMessageHandler * handler)
 {
     DBusMessage *                    reply = NULL;
     uint8_t                          line  = -1;
-    tECP_EnableLine_MessageHandler * line_handler
-        = (tECP_EnableLine_MessageHandler *) handler;
+    ECPEnableLineMessageHandler * line_handler
+        = (ECPEnableLineMessageHandler *) handler;
 
     dbus_message_get_args(message, NULL, DBUS_TYPE_BYTE, &line,
                           DBUS_TYPE_INVALID);
@@ -41,12 +41,12 @@ tECP_Error on_enable_line_parser(tECP_Context * context, DBusMessage * message,
     reply = dbus_message_new_method_return(message);
     dbus_connection_send(context->connection, reply, NULL);
     dbus_message_unref(reply);
-    return ECP_NOERR;
+    return ECP_OK;
 }
 
-tECP_Error on_enable_line(tECP_Context * context, enable_line_cb cb)
+ECPStatus on_enable_line(ECPContext * context, EnableLineCb cb)
 {
-    tECP_EnableLine_MessageHandler * enable_line_handler
+    ECPEnableLineMessageHandler * enable_line_handler
         = malloc(sizeof(*enable_line_handler));
     enable_line_handler->super.interface = POWER_MANAGER_INTERFACE;
     enable_line_handler->super.member    = POWER_MANAGER_ENABLE_LINE;
@@ -57,10 +57,10 @@ tECP_Error on_enable_line(tECP_Context * context, enable_line_cb cb)
     return ECP_Add_Message_Handler(context, &enable_line_handler->super);
 }
 
-tECP_Error enable_line(tECP_Context * context, uint8_t line)
+ECPStatus enable_line(ECPContext * context, uint8_t line)
 {
     DBusMessage * message = NULL;
-    tECP_Error    err     = ECP_NOERR;
+    ECPStatus    err     = ECP_OK;
 
     message = dbus_message_new_method_call(
         POWER_MANAGER_INTERFACE, POWER_MANAGER_PATH, POWER_MANAGER_INTERFACE,

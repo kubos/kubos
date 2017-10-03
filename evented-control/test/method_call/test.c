@@ -9,7 +9,7 @@
 static int server_num = 10;
 static int client_num = 0;
 
-static tECP_Error server_cb(int16_t num)
+static ECPStatus server_cb(int16_t num)
 {
     printf("server cb %d %d\n", server_num, client_num);
     server_num = client_num;
@@ -18,7 +18,7 @@ static tECP_Error server_cb(int16_t num)
 
 CSP_DEFINE_TASK(server_task)
 {
-    tECP_Context server_context;
+    ECPContext server_context;
     ECP_Init(&server_context, TEST_SERVER_INTERFACE);
     on_test_method(&server_context, server_cb);
 
@@ -32,13 +32,13 @@ CSP_DEFINE_TASK(server_task)
 
 static void test_ecp_method_call(void ** arg)
 {
-    tECP_Context        client_context;
+    ECPContext        client_context;
     csp_thread_handle_t server_task_handle;
 
     csp_thread_create(server_task, "SERVER", 1024, NULL, 0,
                       &server_task_handle);
 
-    assert_int_equal(ECP_Init(&client_context, TEST_CLIENT), ECP_NOERR);
+    assert_int_equal(ECP_Init(&client_context, TEST_CLIENT), ECP_OK);
 
     // Give the server task time to get setup...we need some better testing
     // tools
@@ -46,7 +46,7 @@ static void test_ecp_method_call(void ** arg)
     usleep(100);
     call_test_method(&client_context, client_num);
 
-    assert_int_equal(ECP_Destroy(&client_context), ECP_NOERR);
+    assert_int_equal(ECP_Destroy(&client_context), ECP_OK);
 
     assert_int_equal(server_num, client_num);
 

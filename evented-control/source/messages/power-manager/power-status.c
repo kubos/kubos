@@ -24,7 +24,7 @@
 #include "evented-control/ecp.h"
 #include "evented-control/messages.h"
 
-tECP_Error format_power_status_message(eps_power_status status,
+ECPStatus format_power_status_message(eps_power_status status,
                                        DBusMessage **   message)
 {
     DBusMessageIter iter;
@@ -35,13 +35,13 @@ tECP_Error format_power_status_message(eps_power_status status,
                              DBUS_TYPE_INT16, &(status.line_two),
                              DBUS_TYPE_INVALID);
 
-    return ECP_NOERR;
+    return ECP_OK;
 }
 
-tECP_Error parse_power_status_message(eps_power_status * status,
+ECPStatus parse_power_status_message(eps_power_status * status,
                                       DBusMessage *      message)
 {
-    tECP_Error      err = ECP_NOERR;
+    ECPStatus      err = ECP_OK;
     DBusMessageIter iter;
     DBusError       derror;
     uint16_t        line_one, line_two;
@@ -61,23 +61,23 @@ tECP_Error parse_power_status_message(eps_power_status * status,
     return err;
 }
 
-tECP_Error on_power_status_parser(tECP_Context * context, DBusMessage * message,
-                                  struct _tECP_MessageHandler * handler)
+ECPStatus on_power_status_parser(ECPContext * context, DBusMessage * message,
+                                  struct _ECPMessageHandler * handler)
 {
     eps_power_status                  status;
-    tECP_PowerStatus_MessageHandler * status_handler
-        = (tECP_PowerStatus_MessageHandler *) handler;
-    if (ECP_NOERR == parse_power_status_message(&status, message))
+    ECPPowerStatusMessageHandler * status_handler
+        = (ECPPowerStatusMessageHandler *) handler;
+    if (ECP_OK == parse_power_status_message(&status, message))
     {
         status_handler->cb(status);
         return ECP_GENERIC;
     }
-    return ECP_NOERR;
+    return ECP_OK;
 }
 
-tECP_Error on_power_status(tECP_Context * context, power_status_cb cb)
+ECPStatus on_power_status(ECPContext * context, PowerStatusCb cb)
 {
-    tECP_PowerStatus_MessageHandler * handler = malloc(sizeof(*handler));
+    ECPPowerStatusMessageHandler * handler = malloc(sizeof(*handler));
     handler->super.next                       = NULL;
     handler->super.interface                  = POWER_MANAGER_INTERFACE;
     handler->super.member                     = POWER_MANAGER_STATUS;

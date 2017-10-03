@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include "evented-control/ecp.h"
 
-tECP_Error format_test_signal_message(int16_t num, DBusMessage ** message)
+ECPStatus format_test_signal_message(int16_t num, DBusMessage ** message)
 {
     DBusMessageIter iter;
 
@@ -35,10 +35,10 @@ tECP_Error format_test_signal_message(int16_t num, DBusMessage ** message)
     dbus_message_append_args(*message, DBUS_TYPE_INT16, &num,
                              DBUS_TYPE_INVALID);
 
-    return ECP_NOERR;
+    return ECP_OK;
 }
 
-tECP_Error parse_test_signal_message(int16_t * num, DBusMessage * message)
+ECPStatus parse_test_signal_message(int16_t * num, DBusMessage * message)
 {
     DBusMessageIter iter;
     DBusError       derror;
@@ -52,25 +52,25 @@ tECP_Error parse_test_signal_message(int16_t * num, DBusMessage * message)
         return ECP_GENERIC;
     }
 
-    return ECP_NOERR;
+    return ECP_OK;
 }
 
-tECP_Error on_test_signal_parser(tECP_Context * context, DBusMessage * message,
-                                 struct _tECP_MessageHandler * handler)
+ECPStatus on_test_signal_parser(ECPContext * context, DBusMessage * message,
+                                 struct _ECPMessageHandler * handler)
 {
     int16_t                          num;
-    tECP_TestSignal_MessageHandler * status_handler
-        = (tECP_TestSignal_MessageHandler *) handler;
+    ECPTestSignalMessageHandler * status_handler
+        = (ECPTestSignalMessageHandler *) handler;
 
-    if (ECP_NOERR == parse_test_signal_message(&num, message))
+    if (ECP_OK == parse_test_signal_message(&num, message))
     {
         status_handler->cb(num);
     }
 }
 
-tECP_Error on_test_signal(tECP_Context * context, test_signal_cb cb)
+ECPStatus on_test_signal(ECPContext * context, test_signal_cb cb)
 {
-    tECP_TestSignal_MessageHandler * handler = malloc(sizeof(*handler));
+    ECPTestSignalMessageHandler * handler = malloc(sizeof(*handler));
     handler->super.next                      = NULL;
     handler->super.interface                 = TEST_PUB_INTERFACE;
     handler->super.member                    = TEST_PUB_SIGNAL;

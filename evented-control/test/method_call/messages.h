@@ -24,12 +24,12 @@
 
 #define TEST_SERVER_METHOD "TestMethod"
 
-typedef tECP_Error (*test_method_cb)(int16_t num);
+typedef ECPStatus (*test_method_cb)(int16_t num);
 
 typedef struct
 {
-    tECP_MessageHandler super;
+    ECPMessageHandler super;
     test_method_cb      cb;
 } tECP_TestMethod_MessageHandler;
 
-tECP_Error on_test_method(tECP_Context * context, test_method_cb cb);
+ECPStatus on_test_method(ECPContext * context, test_method_cb cb);
