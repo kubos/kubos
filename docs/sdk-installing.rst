@@ -40,12 +40,50 @@ System Requirements
 The Kubos SDK has several hardware requirements, including:
 
 -  64-bit processor with AMD-V or Intel VT-x virtualization support
--  Mac OS (10.9 +), Windows Vista SP1 (or more recent), or a mainstream
+-  Mac OS (10.9 +), Windows 7 SP1 (or more recent), or a mainstream
    Linux distribution (see the `full
    list <https://www.virtualbox.org/manual/ch01.html#hostossupport>`__
    of supported host OSes)
 -  8 GB RAM
 -  10 GB of free HDD space
+
+.. _powershell:
+
+Install Windows PowerShell v3+ (Windows 7 SP1 Only)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are running Windows 7 SP1, you **must** upgrade your version of
+Windows PowerShell to atleast v3.0.
+ 
+You can verify your current version by opening Windows Command Prompt
+and running the following commands::
+
+    $>powershell
+    Windows PowerShell
+    Copyright (C) 2016 Microsoft Corporation. All rights reserved.
+    
+    PS $> $PSVersionTable.PSVersion
+    
+    Major  Minor  Build  Revision
+    -----  -----  -----  --------
+    2      0      -1     -1
+  
+    
+    PS $> exit
+
+The ``Major`` field should have a value of atleast ``3``.
+
+Currently, the latest stable release of Windows PowerShell is available
+as part of `Windows Management Framework 5.1 <https://www.microsoft.com/en-us/download/details.aspx?id=54616>`__.
+
+Click the above link and then click the "Download" button. You'll want
+to download the "Win7AndW2K8R2-KB3191566-x64.zip" file.
+
+Unzip the file and then run the "Win7AndW2K8R2-KB3191566-x64.msu" update
+file inside the folder.
+
+This is an official Windows Update, so it will require a system reboot
+and will take several minutes to fully install.
 
 Install VirtualBox
 ~~~~~~~~~~~~~~~~~~
@@ -82,7 +120,7 @@ command should print something similar to the following output:
 ::
 
         $ vagrant --version
-        Vagrant 1.9.1 
+        Vagrant 2.0.0
 
 Setup
 -----
