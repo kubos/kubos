@@ -13,5 +13,6 @@ KubOS-HAL is the primary hardware abstraction layer (HAL) for KubOS. One of our 
 
 ### Hardware Interfaces:
 
+ - [KubOS Linux Devices](@ref kubos-hal-linux-main)
  - [STM32F4](@ref kubos-hal-stm32f4-main)
  - [MSP430F5529](@ref kubos-hal-msp430f5529-main)

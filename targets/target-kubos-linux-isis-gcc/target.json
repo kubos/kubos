@@ -29,5 +29,18 @@
         "arm"
     ],
     "buildTarget": true,
+    "config": {
+	    "hardware": {
+	      "i2c": {
+	        "count": 1,
+	        "defaults": {
+	          "bus": "K_I2C1"
+	        },
+	        "i2c1": {
+	          "device": "/dev/i2c-0"	
+	        }
+	      }
+	    }
+    },
     "toolchain": "CMake/toolchain.cmake"
 }

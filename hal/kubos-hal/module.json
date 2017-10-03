@@ -21,7 +21,8 @@
     }
   },
   "testDependencies": {
-    "unity": "kubostech/unity"
+    "unity": "kubostech/unity",
+    "cmocka": "kubostech/cmocka"
   },
   "testTargets": [
     "x86-linux-native"
