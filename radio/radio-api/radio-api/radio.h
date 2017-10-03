@@ -45,7 +45,7 @@ typedef enum {
     RADIO_HARD_RESET,
     /** Perform software radio reset */
     RADIO_SOFT_RESET
-} radio_reset;
+} KRadioReset;
 
 /**
  * AX.25 call-sign structure
@@ -78,12 +78,6 @@ void k_radio_terminate(void);
  * @return KRadioStatus RADIO_OK if OK, error otherwise
  */
 KRadioStatus k_radio_configure(uint8_t * radio_config);
-/**
- * Kick the radio's watchdog
- * @note This function might not be implemented for all radios
- * @return KRadioStatus RADIO_OK if OK, error otherwise
- */
-KRadioStatus k_radio_watchdog_kick(void);
 /**
  * Reset the radio
  * @note This function might not be implemented for all radios
