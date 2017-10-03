@@ -9,20 +9,6 @@ Prerequisites
 
 :doc:`Install the Kubos SDK <sdk-installing>`
 
-Create an instance of the Kubos Vagrant box
-
-::
-
-        $ vagrant init kubostech/kubos-dev
-
-SSH into your box
-
-::
-
-        $ vagrant ssh
-
-At this point you will have a new terminal prompt inside your kubos-dev box.
-
 Creating your Project
 ---------------------
 
