@@ -1,0 +1,35 @@
+# Doxyfile 1.8.10
+
+PROJECT_NAME           = "kubos-hal-linux"
+
+JAVADOC_AUTOBRIEF      = YES
+
+OPTIMIZE_OUTPUT_FOR_C  = YES
+
+CASE_SENSE_NAMES       = YES
+
+QUIET                  = YES
+
+WARNINGS               = YES
+
+WARN_IF_UNDOCUMENTED   = YES
+
+WARN_IF_DOC_ERROR      = YES
+
+WARN_NO_PARAMDOC       = YES
+
+INPUT                  = kubos-hal-linux source
+
+GENERATE_HTML          = YES
+
+GENERATE_LATEX         = NO
+
+GENERATE_XML           = YES
+
+ENABLE_PREPROCESSING   = YES
+
+MACRO_EXPANSION        = YES
+
+EXPAND_ONLY_PREDEF     = YES
+
+PREDEFINED             = __attribute__(x)= YOTTA_CFG_HARDWARE_I2C YOTTA_CFG_HARDWARE_I2C_COUNT

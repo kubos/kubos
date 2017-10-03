@@ -21,7 +21,7 @@
 
 static KI2C k_i2cs[K_NUM_I2CS];
 
-void k_i2c_init(KI2CNum i2c, KI2CConf *conf)
+KI2CStatus k_i2c_init(KI2CNum i2c, KI2CConf *conf)
 {
     KI2C *k_i2c = kprv_i2c_get(i2c);
     if (k_i2c->bus_num == K_I2C_NO_BUS)
@@ -29,8 +29,10 @@ void k_i2c_init(KI2CNum i2c, KI2CConf *conf)
         memcpy(&k_i2c->conf, conf, sizeof(KI2CConf));
         k_i2c->bus_num = i2c;
         csp_mutex_create(&(k_i2c->i2c_lock));
-        kprv_i2c_dev_init(i2c);
+        return kprv_i2c_dev_init(i2c);
     }
+
+    return I2C_OK;
 }
 
 void k_i2c_terminate(KI2CNum i2c)
