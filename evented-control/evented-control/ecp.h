@@ -33,9 +33,13 @@ typedef enum {
 } ECPStatus;
 
 /**
- * Forward declarations - needed for following function pointer typedef
+ * ECPContext forward declaration
  */
 struct _ECPContext;
+
+/**
+ * ECPMessageHandler forward declaration
+ */
 struct _ECPMessageHandler;
 
 /**

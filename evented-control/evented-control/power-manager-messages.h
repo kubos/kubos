@@ -26,17 +26,19 @@
 #include <eps-api/eps.h>
 
 /**
- * D-Bus interface and path that all PowerManager signals and methods are
- * scoped under.
+ * D-Bus interface for PowerManager object
  */
 #define POWER_MANAGER_INTERFACE "org.KubOS.PowerManager"
+
+/**
+ * D-Bus path for PowerManager object
+ */
 #define POWER_MANAGER_PATH "/org/KubOS/PowerManager"
 
 /**
  * EnableLine method name
  */
 #define POWER_MANAGER_ENABLE_LINE "EnableLine"
-
 
 /**
  * Fuction pointer for EnableLine callback

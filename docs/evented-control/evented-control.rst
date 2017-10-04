@@ -1,4 +1,4 @@
-Evented Control
+ECP Low Level API
 -----------------
 
 .. doxygengroup:: ECP_API
