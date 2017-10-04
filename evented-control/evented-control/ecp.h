@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 /**
- * @defgroup Evented-Control-Plane Evented Control Plane API
- * @addtogroup Evented-Control-Plane
+ * @defgroup ECP_API Evented Control Plane API
+ * @addtogroup ECP_API
  * @{
  */
 

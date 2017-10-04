@@ -105,6 +105,7 @@ htmlhelp_basename = 'Kubosdoc'
 
 
 breathe_projects = {
+    "evented-control" : "../xml/evented-control",
     "freertos" : "../xml/freertos/os",
     "ipc" : "../xml/ipc",
     "libcsp" : "../xml/libcsp",
