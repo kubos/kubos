@@ -104,11 +104,11 @@ I2C
 The Beaglebone Black has two user-accessible I2C buses.
 
 +--------------+---------+---------+
-| Linux Device | SCL Pin | SDA Pin |
+| Kubos Device | SCL Pin | SDA Pin |
 +==============+=========+=========+
-| /dev/i2c-1   | P9.17   | P9.18   |
+| K_I2C1       | P9.17   | P9.18   |
 +--------------+---------+---------+
-| /dev/i2c-2   | P9.19   | P9.20   |
+| K_I2C2       | P9.19   | P9.20   |
 +--------------+---------+---------+
 
 `I2C Standards
@@ -117,46 +117,8 @@ Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 KubOS Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
-Users will need to add their peripheral device to the system and then
-open the bus in order to communicate. Once communication is complete,
-the bus should be closed and the device definition should be removed.
-
-Since the peripheral devices will be different for each client, they
-will need to be `dynamically added in the userspace (method
-4) <https://www.kernel.org/doc/Documentation/i2c/instantiating-devices>`__.
-
-The bus is then opened using the standard Linux ``open`` function and
-used for communication with the standard ``write`` and ``read``
-functions. These functions are described in the `Linux I2C dev-interface
-doc <https://www.kernel.org/doc/Documentation/i2c/dev-interface>`__. The
-buffer used in the ``write`` and ``read`` functions will most likely
-follow the common I2C structure of "{register, value}"
-
-The user program should look something like this:
-
-.. code-block:: c
-
-    /* Add device to system */
-    system("echo i2cdevice 0x20 > /sys/bus/i2c/devices/i2c-1/new_device");
-
-    /* Open I2C bus */
-    file = open("/dev/i2c-1");
-
-    /* Configure I2C bus to point to desired slave */
-    ioctl(file, I2C_SLAVE, 0x20);
-
-    /* Start of communication logic */
-    buffer = {0x10, 0x34};
-    write(file, buffer, sizeof(buffer));
-
-    read(file, buffer, lengthToRead); 
-    /* End of communication logic */
-
-    /* Close I2C bus */
-    close(file);
-
-    /* Remove device */
-    system("echo 0x20 > /sys/bus/i2c/devices/i2c-1/delete_device);
+For examples and instructions, see the :doc:`kubos-hal/i2c` and
+:doc:`kubos-hal/i2c_api` documents.
 
 SPI
 ~~~
@@ -371,6 +333,43 @@ An example program might look like this:
     fd = open("/sys/class/gpio/unexport", O_WRONLY);
     write(fd, &pin, sizeof(pin)); 
     close(fd);
+     
+Ethernet
+~~~~~~~~
+
+The Beaglebone Black provides an ethernet port which can be used for things 
+like inter-system communication.
+
+The ethernet port is configured to have support for static IPv4 addressing and
+can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
+package.
+
+KubOS Linux currently guarantees support for TCP, UDP, and SCTP.
+Other protocols might be supported by default, but have not been verified.
+
+Resources
+^^^^^^^^^
+
+- `TCP tutorial <http://www.linuxhowtos.org/C_C++/socket.htm>`__
+- `UDP tutorial <https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html>`__
+- `SCTP tutorial <http://petanode.com/blog/posts/introduction-to-the-sctp-socket-api-in-linux.html>`__
+- `Packet Sender <https://packetsender.com/>`__ - A tool to send test packets between an OBC and a host computer
+
+.. note:: By default, Windows Firewall will block many incoming packet types. This may impact testing.
+
+Configuration
+^^^^^^^^^^^^^
+
+The static IP address can be updated by editing the `/etc/network/interfaces` file.
+By default the address is ``168.168.2.20``.
+
+Examples
+^^^^^^^^
+
+A couple example programs using the ethernet port can be found in the `examples` folder of the `kubos repo <https://github.com/kubostech/kubos/tree/master/examples>`__:
+
+- `kubos-linux-tcprx <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__ - Receive TCP packets and then reply to the sender
+- `kubos-linux-tcptx <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcptx>`__ - Send TCP packets to specified IP address and port
 
 User Data Partitions
 --------------------
