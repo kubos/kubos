@@ -1,5 +1,5 @@
-Evented Control Messages
--------------------------
+Evented Control Messages API
+----------------------------
 
 .. doxygengroup:: ECPMessages
   :project: evented-control
