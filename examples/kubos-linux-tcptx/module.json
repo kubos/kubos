@@ -1,0 +1,12 @@
+{
+    "bin":"./source",
+    "license":"Apache-2.0",
+    "name":"kubos-linux-tcptx",
+    "repository":{
+        "url":"git://<repository_url>",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "homepage":"https://<homepage>",
+    "description":"Example app running on KubOS Linux."
+}
