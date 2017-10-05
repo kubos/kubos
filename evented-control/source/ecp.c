@@ -22,13 +22,13 @@
 #include <string.h>
 
 DBusHandlerResult _ECPMessageHandler(DBusConnection * connection,
-                                       DBusMessage * message, void * user_data);
+                                     DBusMessage * message, void * user_data);
 
 ECPStatus ECP_Init(ECPContext * context, const char * name)
 {
     ECPStatus err = ECP_OK;
-    DBusError  error;
-    int        i = 0;
+    DBusError error;
+    int       i = 0;
 
     /* Initialize context to known state */
     context->callbacks  = NULL;
@@ -50,8 +50,7 @@ ECPStatus ECP_Init(ECPContext * context, const char * name)
             break;
         }
 
-        if (!dbus_connection_add_filter(context->connection,
-                                        _ECPMessageHandler,
+        if (!dbus_connection_add_filter(context->connection, _ECPMessageHandler,
                                         (void *) context, NULL))
         {
             err = ECP_GENERIC;
@@ -67,8 +66,8 @@ ECPStatus ECP_Init(ECPContext * context, const char * name)
 ECPStatus ECP_Listen(ECPContext * context, const char * channel)
 {
     ECPStatus err = ECP_OK;
-    DBusError  error;
-    char       sig_match_str[100];
+    DBusError error;
+    char      sig_match_str[100];
 
     sprintf(sig_match_str, "type='signal',interface='%s'", channel);
 
@@ -125,7 +124,7 @@ ECPStatus ECP_Destroy(ECPContext * context)
 
 ECPStatus ECP_Broadcast(ECPContext * context, DBusMessage * message)
 {
-    ECPStatus    err    = ECP_OK;
+    ECPStatus     err    = ECP_OK;
     dbus_uint32_t serial = 0;
 
     if (!dbus_connection_send(context->connection, message, &serial))
@@ -140,7 +139,7 @@ ECPStatus ECP_Broadcast(ECPContext * context, DBusMessage * message)
 
 ECPStatus ECP_Handle_Message(ECPContext * context, DBusMessage * message)
 {
-    ECPMessageHandler * current  = NULL;
+    ECPMessageHandler * current    = NULL;
     const char * message_interface = dbus_message_get_interface(message);
     const char * message_member    = dbus_message_get_member(message);
 
@@ -166,7 +165,7 @@ ECPStatus ECP_Handle_Message(ECPContext * context, DBusMessage * message)
 ECPStatus ECP_Call(ECPContext * context, DBusMessage * message)
 {
     DBusMessage * reply = NULL;
-    ECPStatus    err   = ECP_OK;
+    ECPStatus     err   = ECP_OK;
     DBusError     derr;
 
     dbus_error_init(&derr);
@@ -192,10 +191,10 @@ ECPStatus ECP_Call(ECPContext * context, DBusMessage * message)
 }
 
 ECPStatus ECP_Add_Message_Handler(ECPContext *        context,
-                                   ECPMessageHandler * new_handler)
+                                  ECPMessageHandler * new_handler)
 {
     ECPMessageHandler * current = NULL;
-    ECPStatus            err     = ECP_OK;
+    ECPStatus           err     = ECP_OK;
 
     if (NULL == context->callbacks)
     {
@@ -215,7 +214,7 @@ ECPStatus ECP_Add_Message_Handler(ECPContext *        context,
 }
 
 DBusHandlerResult _ECPMessageHandler(DBusConnection * connection,
-                                       DBusMessage * message, void * user_data)
+                                     DBusMessage * message, void * user_data)
 {
     ECPContext * context = NULL;
     if (NULL != user_data)

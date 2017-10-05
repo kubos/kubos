@@ -53,7 +53,7 @@ typedef struct
     /** Pointer back to generic message handler */
     ECPMessageHandler super;
     /** Pointer to enable line callback */
-    EnableLineCb      cb;
+    EnableLineCb cb;
 } ECPEnableLineMessageHandler;
 
 /**
@@ -66,7 +66,7 @@ typedef struct
  * @return ECPStatus
  */
 ECPStatus on_enable_line_parser(ECPContext * context, DBusMessage * message,
-                                 struct _ECPMessageHandler * handler);
+                                struct _ECPMessageHandler * handler);
 
 /**
  * Creates and listener + registers callback for the
@@ -104,7 +104,7 @@ typedef struct
     /** Pointer back to generic message handler */
     ECPMessageHandler super;
     /** Pointer to power status callback */
-    PowerStatusCb     cb;
+    PowerStatusCb cb;
 } ECPPowerStatusMessageHandler;
 
 /**
@@ -114,7 +114,7 @@ typedef struct
  * @return ECPStatus
  */
 ECPStatus parse_power_status_message(eps_power_status * status,
-                                      DBusMessage *      message);
+                                     DBusMessage *      message);
 
 /**
  * Takes a eps_power_status struct and creates a PowerStatus signal.
@@ -123,7 +123,7 @@ ECPStatus parse_power_status_message(eps_power_status * status,
  * @return ECPStatus
  */
 ECPStatus format_power_status_message(eps_power_status status,
-                                       DBusMessage **   message);
+                                      DBusMessage **   message);
 
 /**
  * Intermediate function used by ECP_Handle_Message
@@ -135,7 +135,7 @@ ECPStatus format_power_status_message(eps_power_status status,
  * @return ECPStatus
  */
 ECPStatus on_power_status_parser(ECPContext * context, DBusMessage * message,
-                                  struct _ECPMessageHandler * handler);
+                                 struct _ECPMessageHandler * handler);
 
 /**
  * Creates a listener + registers callback for the PowerStatus signal.

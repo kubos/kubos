@@ -59,7 +59,7 @@ CSP_DEFINE_TASK(pub_two_task)
 
 static void test_ecp_subscriber_two_pubs(void ** arg)
 {
-    ECPContext        sub_context;
+    ECPContext          sub_context;
     csp_thread_handle_t pub_one_task_handle, pub_two_task_handle;
 
     assert_int_equal(ECP_Init(&sub_context, TEST_SUB), ECP_OK);

@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * A dummy EPS implementation used for native/VM integration testing.
+ */
+
 #include "eps-api/eps.h"
 #include <stddef.h>
 #include <stdio.h>

@@ -33,7 +33,7 @@ CSP_DEFINE_TASK(pub_task)
 
 static void test_ecp_subscriber(void ** arg)
 {
-    ECPContext        sub_context;
+    ECPContext          sub_context;
     csp_thread_handle_t pub_task_handle;
 
     csp_thread_create(pub_task, "PUB", 1024, NULL, 0, &pub_task_handle);

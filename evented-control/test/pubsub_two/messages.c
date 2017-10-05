@@ -68,9 +68,9 @@ ECPStatus parse_test_signal_message(int16_t * num, DBusMessage * message)
 }
 
 ECPStatus on_test_signal_parser(ECPContext * context, DBusMessage * message,
-                                 struct _ECPMessageHandler * handler)
+                                struct _ECPMessageHandler * handler)
 {
-    int16_t                          num;
+    int16_t                       num;
     ECPTestSignalMessageHandler * status_handler
         = (ECPTestSignalMessageHandler *) handler;
 
@@ -83,11 +83,11 @@ ECPStatus on_test_signal_parser(ECPContext * context, DBusMessage * message,
 ECPStatus on_test_signal_one(ECPContext * context, test_signal_cb cb)
 {
     ECPTestSignalMessageHandler * handler = malloc(sizeof(*handler));
-    handler->super.next                      = NULL;
-    handler->super.interface                 = TEST_PUB_ONE_INTERFACE;
-    handler->super.member                    = TEST_PUB_ONE_SIGNAL;
-    handler->super.parser                    = &on_test_signal_parser;
-    handler->cb                              = cb;
+    handler->super.next                   = NULL;
+    handler->super.interface              = TEST_PUB_ONE_INTERFACE;
+    handler->super.member                 = TEST_PUB_ONE_SIGNAL;
+    handler->super.parser                 = &on_test_signal_parser;
+    handler->cb                           = cb;
 
     ECP_Add_Message_Handler(context, &handler->super);
 
@@ -97,11 +97,11 @@ ECPStatus on_test_signal_one(ECPContext * context, test_signal_cb cb)
 ECPStatus on_test_signal_two(ECPContext * context, test_signal_cb cb)
 {
     ECPTestSignalMessageHandler * handler = malloc(sizeof(*handler));
-    handler->super.next                      = NULL;
-    handler->super.interface                 = TEST_PUB_TWO_INTERFACE;
-    handler->super.member                    = TEST_PUB_TWO_SIGNAL;
-    handler->super.parser                    = &on_test_signal_parser;
-    handler->cb                              = cb;
+    handler->super.next                   = NULL;
+    handler->super.interface              = TEST_PUB_TWO_INTERFACE;
+    handler->super.member                 = TEST_PUB_TWO_SIGNAL;
+    handler->super.parser                 = &on_test_signal_parser;
+    handler->cb                           = cb;
 
     ECP_Add_Message_Handler(context, &handler->super);
 

@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 /**
+ * @defgroup EPS_API
+ * @addtogroup EPS_API
+ * @{
+ */
+/**
  * This API defines a top level interface for interacting with EPS subsystems.
  * Implementations will be found in modules specific to individual EPS
  * hardware.
@@ -34,20 +39,31 @@ typedef enum {
 /**
  * Struct for holding EPS power line status information.
  * This struct may have to change on a per-EPS basis?
+ * For now the lines are represented as uint16_t but
+ * this will likely change once we get more into
+ * actual EPS integration.
  */
 typedef struct
 {
+    /** Power line one */
     uint16_t line_one;
+    /** Power line two */
     uint16_t line_two;
 } eps_power_status;
 
 /**
  * Enables the specified power line.
+ * @param[in] line power line to enable
+ * @return eps_err EPS_OK if successful, otherwise error
  */
 eps_err eps_enable_power_line(uint16_t line);
 
 /**
  * Queries the EPS for the status of all available
  * power lines.
+ * @param[in] status power status structure
+ * @return eps_err EPS_OK if successful, otherwise error
  */
 eps_err eps_get_power_status(eps_power_status * status);
+
+/* @} */

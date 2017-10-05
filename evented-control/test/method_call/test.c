@@ -32,7 +32,7 @@ CSP_DEFINE_TASK(server_task)
 
 static void test_ecp_method_call(void ** arg)
 {
-    ECPContext        client_context;
+    ECPContext          client_context;
     csp_thread_handle_t server_task_handle;
 
     csp_thread_create(server_task, "SERVER", 1024, NULL, 0,

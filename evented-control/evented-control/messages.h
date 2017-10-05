@@ -32,6 +32,6 @@
  * @return ECPStatus ECP_OK if successful, otherwise error message
  */
 ECPStatus check_message(DBusMessage * message, const char * interface,
-                         const char * member);
+                        const char * member);
 
 /* @} */

@@ -46,8 +46,8 @@ struct _ECPMessageHandler;
  * Function pointer typedef for message parser functions
  */
 typedef ECPStatus (*ECPMessageParser)(struct _ECPContext *        context,
-                                     DBusMessage *                 message,
-                                     struct _ECPMessageHandler * handler);
+                                      DBusMessage *               message,
+                                      struct _ECPMessageHandler * handler);
 
 /**
  * Structure for MessageHandlers. These structures are
@@ -81,8 +81,8 @@ typedef struct _ECPContext
 /**
  * Callback type for ECP_Listen callbacks
  */
-typedef DBusHandlerResult (*tECP_Callback)(DBusConnection * connection,
-                                           DBusMessage * message, void * data);
+typedef DBusHandlerResult (*ECPCallback)(DBusConnection * connection,
+                                         DBusMessage * message, void * data);
 
 /**
  * Initializes data structures for ECP and connection.
@@ -142,7 +142,7 @@ ECPStatus ECP_Handle_Message(ECPContext * context, DBusMessage * message);
  * @return ECPStatus ECP_OK if successful, otherwise an error
  */
 ECPStatus ECP_Add_Message_Handler(ECPContext *        context,
-                                   ECPMessageHandler * handler);
+                                  ECPMessageHandler * handler);
 
 /**
  * Sends a method call message over ECP. Expects a reply from the message
@@ -152,6 +152,5 @@ ECPStatus ECP_Add_Message_Handler(ECPContext *        context,
  * @return ECPStatus ECP_OK if successful, otherwise an error
  */
 ECPStatus ECP_Call(ECPContext * context, DBusMessage * message);
-
 
 /* @} */

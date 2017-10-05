@@ -1,12 +1,12 @@
 {
     "license":"Apache-2.0",
-    "name":"gom-eps-api",
+    "name":"dummy-eps-api",
     "repository":{
-        "url":"git://github.com/kubostech/gom-eps-api",
+        "url":"git://github.com/kubostech/dummy-eps-api",
         "type":"git"
     },
     "version":"0.1.0",
-    "homepage":"https://github.com/kubostech/gom-eps-api",
+    "homepage":"https://github.com/kubostech/dummy-eps-api",
     "dependencies":{
         "eps-api":"kubostech/eps-api#~0.1.0"
     }

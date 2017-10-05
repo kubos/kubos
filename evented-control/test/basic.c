@@ -23,7 +23,7 @@
 static void test_ecp_init(void ** arg)
 {
     ECPContext context;
-    ECPStatus   err;
+    ECPStatus  err;
 
     err = ECP_Init(&context, TEST_NAME);
 
@@ -33,7 +33,7 @@ static void test_ecp_init(void ** arg)
 static void test_ecp_init_listen(void ** arg)
 {
     ECPContext context;
-    ECPStatus   err;
+    ECPStatus  err;
 
     err = ECP_Init(&context, TEST_NAME);
 

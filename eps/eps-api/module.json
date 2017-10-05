@@ -1,13 +1,14 @@
 {
-    "license":"Apache-2.0",
-    "name":"eps-api",
-    "repository":{
-        "url":"git://github.com/kubostech/eps-api",
-        "type":"git"
-    },
-    "version":"0.1.0",
-    "homepage":"https://github.com/kubostech/eps-api",
-    "dependencies":{
-        "gom-eps-api":"kubostech/gom-eps-api#~0.1.0"
+    "license"
+        : "Apache-2.0",
+          "name"
+          : "eps-api",
+            "repository"
+            : { "url": "git://github.com/kubostech/eps-api", "type": "git" },
+              "version" : "0.1.0",
+                          "homepage" : "https://github.com/kubostech/eps-api",
+                                       "dependencies":
+    {
+        "dummy-eps-api" : "kubostech/dummy-eps-api#~0.1.0"
     }
 }

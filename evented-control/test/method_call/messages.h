@@ -29,7 +29,7 @@ typedef ECPStatus (*test_method_cb)(int16_t num);
 typedef struct
 {
     ECPMessageHandler super;
-    test_method_cb      cb;
-} tECP_TestMethod_MessageHandler;
+    test_method_cb    cb;
+} ECPTestMethod_MessageHandler;
 
 ECPStatus on_test_method(ECPContext * context, test_method_cb cb);

@@ -32,7 +32,7 @@ typedef ECPStatus (*test_signal_cb)(int16_t num);
 typedef struct
 {
     ECPMessageHandler super;
-    test_signal_cb      cb;
+    test_signal_cb    cb;
 } ECPTestSignalMessageHandler;
 
 ECPStatus on_test_signal(ECPContext * context, test_signal_cb cb);

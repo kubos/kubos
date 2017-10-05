@@ -25,7 +25,7 @@
 #include "evented-control/messages.h"
 
 ECPStatus format_power_status_message(eps_power_status status,
-                                       DBusMessage **   message)
+                                      DBusMessage **   message)
 {
     DBusMessageIter iter;
 
@@ -39,9 +39,9 @@ ECPStatus format_power_status_message(eps_power_status status,
 }
 
 ECPStatus parse_power_status_message(eps_power_status * status,
-                                      DBusMessage *      message)
+                                     DBusMessage *      message)
 {
-    ECPStatus      err = ECP_OK;
+    ECPStatus       err = ECP_OK;
     DBusMessageIter iter;
     DBusError       derror;
     uint16_t        line_one, line_two;
@@ -62,9 +62,9 @@ ECPStatus parse_power_status_message(eps_power_status * status,
 }
 
 ECPStatus on_power_status_parser(ECPContext * context, DBusMessage * message,
-                                  struct _ECPMessageHandler * handler)
+                                 struct _ECPMessageHandler * handler)
 {
-    eps_power_status                  status;
+    eps_power_status               status;
     ECPPowerStatusMessageHandler * status_handler
         = (ECPPowerStatusMessageHandler *) handler;
     if (ECP_OK == parse_power_status_message(&status, message))
@@ -78,11 +78,11 @@ ECPStatus on_power_status_parser(ECPContext * context, DBusMessage * message,
 ECPStatus on_power_status(ECPContext * context, PowerStatusCb cb)
 {
     ECPPowerStatusMessageHandler * handler = malloc(sizeof(*handler));
-    handler->super.next                       = NULL;
-    handler->super.interface                  = POWER_MANAGER_INTERFACE;
-    handler->super.member                     = POWER_MANAGER_STATUS;
-    handler->super.parser                     = &on_power_status_parser;
-    handler->cb                               = cb;
+    handler->super.next                    = NULL;
+    handler->super.interface               = POWER_MANAGER_INTERFACE;
+    handler->super.member                  = POWER_MANAGER_STATUS;
+    handler->super.parser                  = &on_power_status_parser;
+    handler->cb                            = cb;
 
     ECP_Add_Message_Handler(context, &handler->super);
 

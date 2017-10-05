@@ -203,7 +203,7 @@ Here is an example of the init-listen-loop/send-destroy pattern:
        return (err);
    }
 
-   tECP_Error status_handler(eps_power_status status)
+   ECPStatus status_handler(eps_power_status status)
    {
        printf("Got status %d:%d\n", status.line_one, status.line_two);
    }

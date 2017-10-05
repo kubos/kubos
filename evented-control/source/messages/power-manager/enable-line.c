@@ -26,10 +26,10 @@
 #include "evented-control/messages.h"
 
 ECPStatus on_enable_line_parser(ECPContext * context, DBusMessage * message,
-                                 struct _ECPMessageHandler * handler)
+                                struct _ECPMessageHandler * handler)
 {
-    DBusMessage *                    reply = NULL;
-    uint8_t                          line  = -1;
+    DBusMessage *                 reply = NULL;
+    uint8_t                       line  = -1;
     ECPEnableLineMessageHandler * line_handler
         = (ECPEnableLineMessageHandler *) handler;
 
@@ -60,7 +60,7 @@ ECPStatus on_enable_line(ECPContext * context, EnableLineCb cb)
 ECPStatus enable_line(ECPContext * context, uint8_t line)
 {
     DBusMessage * message = NULL;
-    ECPStatus    err     = ECP_OK;
+    ECPStatus     err     = ECP_OK;
 
     message = dbus_message_new_method_call(
         POWER_MANAGER_INTERFACE, POWER_MANAGER_PATH, POWER_MANAGER_INTERFACE,
