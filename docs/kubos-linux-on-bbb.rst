@@ -143,7 +143,7 @@ for the Beaglebone Black.
 
 ::
 
-    $ sudo make BR2_EXTERNAL=../kubos-linux-build bbb_defconfig
+    $ sudo make BR2_EXTERNAL=../kubos-linux-build beaglebone-black_defconfig
 
 Build everything
 
