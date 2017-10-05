@@ -73,17 +73,7 @@ and running the following commands::
 
 The ``Major`` field should have a value of atleast ``3``.
 
-Currently, the latest stable release of Windows PowerShell is available
-as part of `Windows Management Framework 5.1 <https://www.microsoft.com/en-us/download/details.aspx?id=54616>`__.
-
-Click the above link and then click the "Download" button. You'll want
-to download the "Win7AndW2K8R2-KB3191566-x64.zip" file.
-
-Unzip the file and then run the "Win7AndW2K8R2-KB3191566-x64.msu" update
-file inside the folder.
-
-This is an official Windows Update, so it will require a system reboot
-and will take several minutes to fully install.
+`Click here for instructions about upgrading PowerShell <https://docs.microsoft.com/en-us/powershell/scripting/setup/installing-windows-powershell?view=powershell-5.1>`__
 
 Install VirtualBox
 ~~~~~~~~~~~~~~~~~~
