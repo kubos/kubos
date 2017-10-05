@@ -333,6 +333,43 @@ An example program might look like this:
     fd = open("/sys/class/gpio/unexport", O_WRONLY);
     write(fd, &pin, sizeof(pin)); 
     close(fd);
+     
+Ethernet
+~~~~~~~~
+
+The Beaglebone Black provides an ethernet port which can be used for things 
+like inter-system communication.
+
+The ethernet port is configured to have support for static IPv4 addressing and
+can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
+package.
+
+KubOS Linux currently guarantees support for TCP, UDP, and SCTP.
+Other protocols might be supported by default, but have not been verified.
+
+Resources
+^^^^^^^^^
+
+- `TCP tutorial <http://www.linuxhowtos.org/C_C++/socket.htm>`__
+- `UDP tutorial <https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html>`__
+- `SCTP tutorial <http://petanode.com/blog/posts/introduction-to-the-sctp-socket-api-in-linux.html>`__
+- `Packet Sender <https://packetsender.com/>`__ - A tool to send test packets between an OBC and a host computer
+
+.. note:: By default, Windows Firewall will block many incoming packet types. This may impact testing.
+
+Configuration
+^^^^^^^^^^^^^
+
+The static IP address can be updated by editing the `/etc/network/interfaces` file.
+By default the address is ``168.168.2.20``.
+
+Examples
+^^^^^^^^
+
+A couple example programs using the ethernet port can be found in the `examples` folder of the `kubos repo <https://github.com/kubostech/kubos/tree/master/examples>`__:
+
+- `kubos-linux-tcprx <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__ - Receive TCP packets and then reply to the sender
+- `kubos-linux-tcptx <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcptx>`__ - Send TCP packets to specified IP address and port
 
 User Data Partitions
 --------------------
