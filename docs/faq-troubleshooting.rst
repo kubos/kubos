@@ -90,6 +90,12 @@ Troubleshooting
 Kubos SDK
 ~~~~~~~~~
 
+The ``vagrant up`` command just hangs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you're using Windows 7 SP1, make sure you are using the :ref:`correct version of
+Windows PowerShell <powershell>`.
+
 I've tried other steps here, but my Kubos Vagrant image is still behaving weirdly.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
