@@ -25,7 +25,7 @@ variables can then be referenced within the Kubos project's source code.
 The current configuration of a project can be seen using the ``kubos config`` command. 
 Each configuration option in the output will have a comment showing the origin of the value.
 Anything marked with "application's config.json" will have been taken from the project's `config.json` file.
-All other comments will have "*-gcc", which indicates that that option is a default value taken from
+All other comments will have "\*-gcc", which indicates that that option is a default value taken from
 the corresponding `target.json` file.
 
 For example:
@@ -201,7 +201,7 @@ If present, the ``fs`` file system structure enables support for accessing stora
     using FatFS over SDIO if it is available on your target.`
     
     :property dev: SPI bus the device is connected to
-    :proptype dev: :cpp:enum:`KSPINum`
+    :proptype dev: :cpp:type:`KSPINum`
     :property pin cs: Chip select pin assigned to the device
     
     **Example**:: 
@@ -274,7 +274,7 @@ file.
     `HTU21D humidity sensor <https://cdn-shop.adafruit.com/datasheets/1899_HTU21D.pdf>`__ configuration
     
     :property i2c_bus: The I2C bus connected to the sensor
-    :proptype i2c_bus: :cpp:enum:`KI2CNum`
+    :proptype i2c_bus: :cpp:type:`KI2CNum`
     
     **Example**::
     
@@ -294,7 +294,7 @@ file.
     **Note:** *The sensor supports interfacing with both I2C and UART, but only I2C support has been implemented in Kubos Core*
     
     :property i2c_bus: The I2C bus connected to the sensor
-    :proptype i2c_bus: :cpp:enum:`KI2CNum`
+    :proptype i2c_bus: :cpp:type:`KI2CNum`
     
     **Example**::
     
@@ -313,7 +313,7 @@ file.
     **Note:** *The sensor supports interfacing with both SPI and I2C, but only SPI support has been implemented in Kubos Core*
     
     :property spi_bus: The SPI bus connected to the sensor
-    :proptype spi_bus: :cpp:enum:`KSPINum`
+    :proptype spi_bus: :cpp:type:`KSPINum`
     :property pin CS: The chip select pin connected to the sensor
     
     **Example**::
@@ -407,7 +407,7 @@ Hardware
     The debug UART console
 
     :property uart: UART bus to connect to
-    :proptype uart: :cpp:enum:`KUARTNum`
+    :proptype uart: :cpp:type:`KUARTNum`
     :property string baudRate: `(Default: "115200")` Connection speed
     
     **Example**::
@@ -500,12 +500,12 @@ Hardware
     Default I2C connection settings
     
     :property bus: The default I2C bus
-    :proptype bus: :cpp:enum:`KI2CNum`
+    :proptype bus: :cpp:type:`KI2CNum`
     :property role: Default communication role
-    :proptype role: :cpp:enum:`I2CRole`
+    :proptype role: :cpp:type:`I2CRole`
     :property integer clockSpeed: Default bus speed
     :property addressingMode: I2C addressing mode
-    :proptype addressingMode: :cpp:enum:`I2CAddressingMode`
+    :proptype addressingMode: :cpp:type:`I2CAddressingMode`
     
 .. json:object:: hardware.i2c.i2c{n}
 
@@ -524,10 +524,10 @@ Hardware
     
     :property pin pin: Clock line pin
     :property mode: Pin GPIO mode
-    :proptype mode: :cpp:enum:`KGPIOMode`
+    :proptype mode: :cpp:type:`KGPIOMode`
     :property pullup: Pin pullup/pulldown setting
-    :proptype pullup: :cpp:enum:`KGPIOPullup`
-    :property enum speed: Clock line speed
+    :proptype pullup: :cpp:type:`KGPIOPullup`
+    :property type speed: Clock line speed
     :options speed: GPIO_SPEED_[LOW, MEDIUM, FAST, HIGH]
 
 .. json:object:: hardware.i2c.i2c{n}.sda
@@ -536,9 +536,9 @@ Hardware
     
     :property pin pin: Data line pin
     :property mode: Pin GPIO mode
-    :proptype mode: :cpp:enum:`KGPIOMode`
+    :proptype mode: :cpp:type:`KGPIOMode`
     :property pullup: Pin pullup/pulldown setting
-    :proptype pullup: :cpp:enum:`KGPIOPullup`
+    :proptype pullup: :cpp:type:`KGPIOPullup`
     :property string speed: Data line speed
     :options speed: GPIO_SPEED_[LOW, MEDIUM, FAST, HIGH]
     
@@ -585,11 +585,11 @@ Hardware
     
     :property integer baudRate: Default bus speed
     :property wordLen: Default word length
-    :proptype wordLen: :cpp:enum:`KWordLen`
+    :proptype wordLen: :cpp:type:`KWordLen`
     :property stopBits: Default number of stop bits
-    :proptype stopBits: :cpp:enum:`KStopBits`
+    :proptype stopBits: :cpp:type:`KStopBits`
     :property parity: Default parity setting
-    :proptype parity: :cpp:enum:`KParity`
+    :proptype parity: :cpp:type:`KParity`
     :property integer rxQueueLen: Default size of RX queue
     :property integer txQueueLen: Default size of TX queue
     
@@ -659,19 +659,19 @@ Hardware
     Default SPI connection settings
     
     :property bus: Default SPI bus
-    :proptype bus: :cpp:enum:`KSPINum`
+    :proptype bus: :cpp:type:`KSPINum`
     :property role: Default communication role
-    :proptype role: :cpp:enum:`SPIRole`
+    :proptype role: :cpp:type:`SPIRole`
     :property direction: Default SPI communication direction/s
-    :proptype direction: :cpp:enum:`SPIDirection`
+    :proptype direction: :cpp:type:`SPIDirection`
     :property dataSize: Default data size
-    :proptype dataSize: :cpp:enum:`SPIDataSize`
+    :proptype dataSize: :cpp:type:`SPIDataSize`
     :property clockPolarity: Default clock polarity
-    :proptype clockPolarity: :cpp:enum:`SPIClockPolarity`
+    :proptype clockPolarity: :cpp:type:`SPIClockPolarity`
     :property clockPhase: Defaut clock phase
-    :proptype clockPhase: :cpp:enum:`SPIClockPhase`
+    :proptype clockPhase: :cpp:type:`SPIClockPhase`
     :property firstBit: Default endianness
-    :proptype firstBit: :cpp:enum:`SPIFirstBit`
+    :proptype firstBit: :cpp:type:`SPIFirstBit`
     :property integer speed: Default bus speed
     
 .. json:object:: hardware.spi.spi{n}
@@ -892,7 +892,7 @@ Telemetry
     :property integer part_size: `(Default: 51200)` Maximum file size before file rotation is triggered
     :property integer max_parts: `(Default: 10)` Maximum number of files before file rotation in triggered
     :property output_format: `(Default: "FORMAT_TYPE_CSV")` Output format of telemetry storage files
-    :proptype output_format: :cpp:enum:`output_data_format`
+    :proptype output_format: :cpp:type:`output_data_format`
 
 CSP
 ###
