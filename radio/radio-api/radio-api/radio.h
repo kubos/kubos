@@ -89,9 +89,10 @@ KRadioStatus k_radio_reset(uint8_t type);
  * Send a message to the radio's transmit buffer
  * @param [in] buffer Pointer to the message to send
  * @param [in] len Length of the message to send
- * @return uint8_t See specific radio API documentation for return code documentation
+ * @param [out] response Response value from radio (if supported)
+ * @return KRadioStatus RADIO_OK if OK, error otherwise
  */
-uint8_t k_radio_send(char * buffer, int len);
+KRadioStatus k_radio_send(char * buffer, int len, uint8_t * response);
 /**
  * Receive a message from the radio's receive buffer
  * @param [in] buffer Pointer where the message should be copied to
