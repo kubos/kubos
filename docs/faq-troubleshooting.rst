@@ -9,7 +9,7 @@ FAQs
 How do I contact y'all?
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Our community Slack: slack.kubos.co
+Our community Slack: `slack.kubos.co <http://slack.kubos.co>`__
 
 Our email: info@kubos.co
 

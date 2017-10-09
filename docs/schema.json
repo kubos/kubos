@@ -1,0 +1,117 @@
+{
+    "cmsis": {
+        "nvic": {
+            "ram_vector_address": "hex address",
+            "flash_vector_address": "hex address",
+            "user_irq_offset": "number",
+            "user_irq_number": "number"
+        }
+    },
+    "uvisor": {
+        "present": "number"
+    },
+    "gcc": {
+        "printf-float": "boolean"
+    },
+    "arch": {
+        "arm": {
+            
+        },
+        "msp430": {
+            
+        }
+    },
+    "system": {
+        "initAfterFlash": "boolean",
+        "initAtBoot": "boolean",
+        "runLevel": "number",
+        "destDir": "file location",
+        "password": "string"
+    },
+    "hardware": {
+        "externalClock": "number as string",
+        "console": {
+            "uart": "UART bus",
+            "baudRate": "number as string"
+        },
+        "pins": {
+            "{name}": "pin"
+        },
+        "test-pins": {
+            "spi": {
+                "mosi": "pin",
+                "miso": "pin",
+                "sclk": "pin",
+                "ssel": "pin"
+            },
+            "i2c": {
+                "sda": "pin",
+                "scl": "pin"
+            },
+            "serial": {
+                "tx": "pin",
+                "rx": "pin"
+            }
+        },
+        "i2c": {
+            "count": "number",
+            "defaults": {
+                "bus": "pin",
+                "role": "enum",
+                "clockSpeed": "number",
+                "addressingMode": "enum"
+            },
+            "i2c{n}": {
+                "scl": {
+                    "pin": "pin",
+                    "mode": "enum",
+                    "pullup": "enum",
+                    "speed": "enum"
+                },
+                "sda": {
+                    "pin": "pin",
+                    "mode": "enum",
+                    "pullup": "enum",
+                    "speed": "enum"
+                },
+                "alt": "string"
+            }
+        },
+        "uart": {
+            "count": "number",
+            "defaults": {
+                "baudRate": "number",
+                "wordLen": "enum",
+                "stopBits": "enum",
+                "parity": "enum",
+                "rxQueueLen": "number",
+                "txQueueLen": "number"
+            },
+            "uart{n}": {
+                "tx": "pin",
+                "rx": "pin"
+            }
+        },
+        "spi": {
+            "count": "number",
+            "defaults": {
+                "bus": "enum",
+                "role": "enum",
+                "direction": "enum",
+                "dataSize": "enum",
+                "clockPolarity": "enum",
+                "clockPhase": "enum",
+                "firstBit": "enum",
+                "speed": "number as string"
+            },
+            "spi{n}": {
+                "mosi": "pin",
+                "miso": "pin",
+                "sck": "pin",
+                "cs": "pin",
+                "port": "string",
+                "alt": "string"
+            }
+        }
+    }
+}
