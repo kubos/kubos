@@ -73,11 +73,14 @@ Sending a Message
 -----------------
 In order to write a message to the radio's transmit buffer, call the ``k_radio_send`` function.
 
-The function takes two parameters:
+The function takes three parameters:
 - A pointer to the message to be sent
 - The length of the message
+- A pointer to a response byte (varies by radio. For example, returning the number of bytes written)
 
-The returned value will vary depending on the specific radio being used.
+The function will return one of two values:
+- RADIO_OK - Indicating a message was successfully received
+- RADIO_ERROR - Indicating that something went wrong during the send process
 
 For example:
 
@@ -85,11 +88,12 @@ For example:
 
     #include "radio-api/radio.h"
     
-    uint8_t status;
+    KRadioStatus status;
     uint8_t message[] = "Radio Test Message";
     uint8_t len = sizeof(message);
+    uint8_t response;
 
-    status = k_radio_send(message, len);
+    status = k_radio_send(message, len, &response);
     
 Receiving a Message
 -------------------
