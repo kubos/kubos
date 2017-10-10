@@ -75,7 +75,7 @@ The EPC middleware exports a "Stock C" interface in ecp.h and a library
 (libecp) which implements its functionality. The middleware assumes an
 "Init, Use, Clean Up" pattern.
 
-* The ECP_Init() function initializes an opaque data structure and
+* The ecp_init() function initializes an opaque data structure and
   initializes the processes' link with the message bus.
 
 * The ECP_Listen() function allows the process to register a callback
@@ -83,10 +83,10 @@ The EPC middleware exports a "Stock C" interface in ecp.h and a library
   ECP_Unlisten() function de-registers a callback registered with the
   ECP_Listen() function.
 
-* The ECP_Broadcast() function is used to broadcast a message to all
+* The ecp_broadcast() function is used to broadcast a message to all
   processes listening on a particular channel.
 
-* The ECP_Loop() function iterates through the event loop for a fixed
+* The ecp_loop() function iterates through the event loop for a fixed
   amount of time or following the execution of a listen callback.
 
 * The ECP_Destroy() function unregisters callbacks, deallocates memory
@@ -102,36 +102,36 @@ responsible for sending messages.
 Clients of the ECP middleware are expected to produce or consume messages
 broadcast on a channel; clients may both send and receive messages.
 Sending a message is simple, and requires a single call to the
-ECP_Broadcast() function. Receiving messages requires the client to
+ecp_broadcast() function. Receiving messages requires the client to
 register a callback with the ECP_Listen() function.
 
 The ECP middleware functions each return an integer status code, cast as
-a ECPStatus type. They all return a zero upon successful completion. For
+a KECPStatus type. They all return a zero upon successful completion. For
 example, this is a typical call sequence:
 
 .. code-block:: c
 
-    ECPStatus err = ECP_OK;
+    KECPStatus err = ECP_OK;
     const char * my_interface = "org.KubOS.Client";
 
-    if(ECP_OK != (err = ECP_Init(&context, my_interface)))
+    if(ECP_OK != (err = ecp_init(&context, my_interface)))
     {
         /* Perform error recovery here */
-        printf( "Error %d when calling ECP_Init()\n", err );
+        printf( "Error %d when calling ecp_init()\n", err );
         break;
     }
 
     /* Continue execution here */
 
 The general pattern of use is init-listen-loop/send-destroy. Don't call
-ECP_Listen() or ECP_Broadcast() before calling ECP_Init() or after
+ECP_Listen() or ecp_broadcast() before calling ecp_init() or after
 calling ECP_Destroy(). Though the operating system will likely deallocate
-memory allocated by the ECP_Init() function, there's no guarantee the
+memory allocated by the ecp_init() function, there's no guarantee the
 underlying messaging system will properly disconnect from an message
 endpoint without the ECP_Destroy() call. Always call the ECP_Destroy()
 function before exiting a process.
 
-Practically speaking calls to ECP_Listen, ECP_Call and ECP_Broadcast
+Practically speaking calls to ECP_Listen, ECP_Call and ecp_broadcast
 will be hidden behind higher level, service specific messaging APIs.
 The lower level ECP functions will be used to create these higher
 level APIs, but most likely they will not be used directly
@@ -147,24 +147,24 @@ Here is an example of the init-listen-loop/send-destroy pattern:
    #include <stdio.h>
    #include <stdlib.h>
 
-   ECPStatus status_handler(eps_power_status status);
+   KECPStatus status_handler(EPSPowerState status);
 
    #define MY_NAME "org.KubOS.client"
 
    int main(int argc, char * argv[])
    {
-       ECPStatus   err;
+       KECPStatus   err;
        ECPContext context;
 
        do
        {
 
-           if (ECP_OK != (err = ECP_Init(&context, MY_NAME)))
+           if (ECP_OK != (err = ecp_init(&context, MY_NAME)))
            {
-               printf("Error calling ECP_Init(): %d\n", err);
+               printf("Error calling ecp_init(): %d\n", err);
                break;
            }
-           printf("Successfully called ECP_Init()\n");
+           printf("Successfully called ecp_init()\n");
 
            /**
             * Hidden behind on_power_status is code which creates a
@@ -191,7 +191,7 @@ Here is an example of the init-listen-loop/send-destroy pattern:
 
            for (int i = 0; i < 10; i++)
            {
-               ECP_Loop(&context, 100);
+               ecp_loop(&context, 100);
            }
        } while (0);
 
@@ -203,7 +203,7 @@ Here is an example of the init-listen-loop/send-destroy pattern:
        return (err);
    }
 
-   ECPStatus status_handler(eps_power_status status)
+   KECPStatus status_handler(EPSPowerState status)
    {
        printf("Got status %d:%d\n", status.line_one, status.line_two);
    }
