@@ -143,7 +143,7 @@ for the Beaglebone Black.
 
 ::
 
-    $ sudo make BR2_EXTERNAL=../kubos-linux-build bbb_defconfig
+    $ sudo make BR2_EXTERNAL=../kubos-linux-build beaglebone-black_defconfig
 
 Build everything
 
@@ -336,7 +336,8 @@ To flash the eMMC, log into the board and then run these commands:
 
 ::
 
-    $ umount /dev/mmcblk*
+    $ umount /home/microsd
+    $ umount /home
     $ dd if=/dev/mmcblk0 of=/dev/mmcblk1
     
 The four status LEDs on the board should start flashing in a random pattern. This indicates
