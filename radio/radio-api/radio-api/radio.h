@@ -84,7 +84,7 @@ KRadioStatus k_radio_configure(uint8_t * radio_config);
  * @param [in] type Type of reset to perform (hard, soft, etc)
  * @return KRadioStatus RADIO_OK if OK, error otherwise
  */
-KRadioStatus k_radio_reset(uint8_t type);
+KRadioStatus k_radio_reset(KRadioReset type);
 /**
  * Send a message to the radio's transmit buffer
  * @param [in] buffer Pointer to the message to send
