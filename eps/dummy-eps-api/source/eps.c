@@ -22,14 +22,14 @@
 #include <stdio.h>
 #include <string.h>
 
-eps_err eps_enable_power_line(uint16_t line)
+KEPSStatus eps_enable_power_line(uint16_t line)
 {
     // Place holder implementation to enable integration
     printf("EPS enable line %d\n", line);
     return EPS_OK;
 }
 
-eps_err eps_get_power_status(eps_power_status * status)
+KEPSStatus eps_get_power_status(eps_power_state * status)
 {
     // Place holder implementation to enable integration
     if (status != NULL)

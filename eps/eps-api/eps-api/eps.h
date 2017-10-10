@@ -34,7 +34,7 @@
 typedef enum {
     EPS_OK = 0,
     EPS_ERROR,
-} eps_err;
+} KEPSStatus;
 
 /**
  * Struct for holding EPS power line status information.
@@ -49,21 +49,21 @@ typedef struct
     uint16_t line_one;
     /** Power line two */
     uint16_t line_two;
-} eps_power_status;
+} eps_power_state;
 
 /**
  * Enables the specified power line.
  * @param[in] line power line to enable
- * @return eps_err EPS_OK if successful, otherwise error
+ * @return KEPSStatus EPS_OK if successful, otherwise error
  */
-eps_err eps_enable_power_line(uint16_t line);
+KEPSStatus eps_enable_power_line(uint16_t line);
 
 /**
  * Queries the EPS for the status of all available
  * power lines.
  * @param[in] status power status structure
- * @return eps_err EPS_OK if successful, otherwise error
+ * @return KEPSStatus EPS_OK if successful, otherwise error
  */
-eps_err eps_get_power_status(eps_power_status * status);
+KEPSStatus eps_get_power_status(eps_power_state * status);
 
 /* @} */

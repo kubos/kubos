@@ -20,12 +20,13 @@
  * org.KubOS.PowerManager.PowerStatus
  */
 #include <dbus/dbus.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "evented-control/ecp.h"
 #include "evented-control/messages.h"
 
-ECPStatus format_power_status_message(eps_power_status status,
-                                      DBusMessage **   message)
+KECPStatus format_power_status_message(eps_power_state status,
+                                       DBusMessage **  message)
 {
     DBusMessageIter iter;
 
@@ -38,10 +39,10 @@ ECPStatus format_power_status_message(eps_power_status status,
     return ECP_OK;
 }
 
-ECPStatus parse_power_status_message(eps_power_status * status,
-                                     DBusMessage *      message)
+KECPStatus parse_power_status_message(eps_power_state * status,
+                                      DBusMessage *     message)
 {
-    ECPStatus       err = ECP_OK;
+    KECPStatus      err = ECP_OK;
     DBusMessageIter iter;
     DBusError       derror;
     uint16_t        line_one, line_two;
@@ -61,12 +62,13 @@ ECPStatus parse_power_status_message(eps_power_status * status,
     return err;
 }
 
-ECPStatus on_power_status_parser(ECPContext * context, DBusMessage * message,
-                                 struct _ECPMessageHandler * handler)
+KECPStatus on_power_status_parser(const ecp_context *           context,
+                                  DBusMessage *                 message,
+                                  struct _ecp_message_handler * handler)
 {
-    eps_power_status               status;
-    ECPPowerStatusMessageHandler * status_handler
-        = (ECPPowerStatusMessageHandler *) handler;
+    eps_power_state                status;
+    power_status_message_handler * status_handler
+        = (power_status_message_handler *) handler;
     if (ECP_OK == parse_power_status_message(&status, message))
     {
         status_handler->cb(status);
@@ -75,16 +77,16 @@ ECPStatus on_power_status_parser(ECPContext * context, DBusMessage * message,
     return ECP_OK;
 }
 
-ECPStatus on_power_status(ECPContext * context, PowerStatusCb cb)
+KECPStatus on_power_status(ecp_context * context, power_status_cb cb)
 {
-    ECPPowerStatusMessageHandler * handler = malloc(sizeof(*handler));
+    power_status_message_handler * handler = malloc(sizeof(*handler));
     handler->super.next                    = NULL;
     handler->super.interface               = POWER_MANAGER_INTERFACE;
     handler->super.member                  = POWER_MANAGER_STATUS;
     handler->super.parser                  = &on_power_status_parser;
     handler->cb                            = cb;
 
-    ECP_Add_Message_Handler(context, &handler->super);
+    ecp_add_message_handler(context, &handler->super);
 
-    return ECP_Listen(context, POWER_MANAGER_INTERFACE);
+    return ecp_listen(context, POWER_MANAGER_INTERFACE);
 }

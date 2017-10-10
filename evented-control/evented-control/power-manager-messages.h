@@ -41,9 +41,19 @@
 #define POWER_MANAGER_ENABLE_LINE "EnableLine"
 
 /**
+ * PowerManager signal name
+ */
+#define POWER_MANAGER_STATUS "PowerStatus"
+
+/**
  * Fuction pointer for EnableLine callback
  */
-typedef ECPStatus (*EnableLineCb)(uint8_t line);
+typedef KECPStatus (*enable_line_cb)(uint8_t line);
+
+/**
+ * Function ponter type for PowerStatus callback
+ */
+typedef KECPStatus (*power_status_cb)(eps_power_state status);
 
 /**
  * EnableLine message handler
@@ -51,50 +61,10 @@ typedef ECPStatus (*EnableLineCb)(uint8_t line);
 typedef struct
 {
     /** Pointer back to generic message handler */
-    ECPMessageHandler super;
+    ecp_message_handler super;
     /** Pointer to enable line callback */
-    EnableLineCb cb;
-} ECPEnableLineMessageHandler;
-
-/**
- * Intermediate function used by ECP_Handle_Message
- * to parse out the DBusMessage into native data structures
- * and then hand off to the message specific callback
- * @param[in] context
- * @param[in] message
- * @param[in] handler
- * @return ECPStatus
- */
-ECPStatus on_enable_line_parser(ECPContext * context, DBusMessage * message,
-                                struct _ECPMessageHandler * handler);
-
-/**
- * Creates and listener + registers callback for the
- * EnableLine method. This function should be used by the
- * process which is hosting the method
- * @param[in] context
- * @param[in] cb
- * @return ECPStatus
- */
-ECPStatus on_enable_line(ECPContext * context, EnableLineCb cb);
-
-/**
- * Calls out to the EnableLine method
- * @param[in] context
- * @param[in] line
- * @return ECPStatus
- */
-ECPStatus enable_line(ECPContext * context, uint8_t line);
-
-/**
- * PowerManager signal name
- */
-#define POWER_MANAGER_STATUS "PowerStatus"
-
-/**
- * Function ponter type for PowerStatus callback
- */
-typedef ECPStatus (*PowerStatusCb)(eps_power_status status);
+    enable_line_cb cb;
+} enable_line_message_handler;
 
 /**
  * PowerStatus message handler
@@ -102,40 +72,72 @@ typedef ECPStatus (*PowerStatusCb)(eps_power_status status);
 typedef struct
 {
     /** Pointer back to generic message handler */
-    ECPMessageHandler super;
+    ecp_message_handler super;
     /** Pointer to power status callback */
-    PowerStatusCb cb;
-} ECPPowerStatusMessageHandler;
+    power_status_cb cb;
+} power_status_message_handler;
 
 /**
- * Parses out a PowerStatus signal into an eps_power_status struct.
- * @param[in] status
- * @param[in] message
- * @return ECPStatus
- */
-ECPStatus parse_power_status_message(eps_power_status * status,
-                                     DBusMessage *      message);
-
-/**
- * Takes a eps_power_status struct and creates a PowerStatus signal.
- * @param[in] status
- * @param[in] message
- * @return ECPStatus
- */
-ECPStatus format_power_status_message(eps_power_status status,
-                                      DBusMessage **   message);
-
-/**
- * Intermediate function used by ECP_Handle_Message
+ * Intermediate function used by ecp_handle_message
  * to parse out the DBusMessage into native data structures
  * and then hand off to the message specific callback
  * @param[in] context
  * @param[in] message
  * @param[in] handler
- * @return ECPStatus
+ * @return KECPStatus
  */
-ECPStatus on_power_status_parser(ECPContext * context, DBusMessage * message,
-                                 struct _ECPMessageHandler * handler);
+KECPStatus on_enable_line_parser(const ecp_context *           context,
+                                 DBusMessage *                 message,
+                                 struct _ecp_message_handler * handler);
+
+/**
+ * Creates and listener + registers callback for the
+ * EnableLine method. This function should be used by the
+ * process which is hosting the method
+ * @param[in] context
+ * @param[in] cb
+ * @return KECPStatus
+ */
+KECPStatus on_enable_line(ecp_context * context, enable_line_cb cb);
+
+/**
+ * Calls out to the EnableLine method
+ * @param[in] context
+ * @param[in] line
+ * @return KECPStatus
+ */
+KECPStatus enable_line(ecp_context * context, uint8_t line);
+
+/**
+ * Parses out a PowerStatus signal into an eps_power_state struct.
+ * @param[in] status
+ * @param[in] message
+ * @return KECPStatus
+ */
+KECPStatus parse_power_status_message(eps_power_state * status,
+                                      DBusMessage *     message);
+
+/**
+ * Takes a eps_power_state struct and creates a PowerStatus signal.
+ * @param[in] status
+ * @param[in] message
+ * @return KECPStatus
+ */
+KECPStatus format_power_status_message(eps_power_state status,
+                                       DBusMessage **  message);
+
+/**
+ * Intermediate function used by ecp_handle_message
+ * to parse out the DBusMessage into native data structures
+ * and then hand off to the message specific callback
+ * @param[in] context
+ * @param[in] message
+ * @param[in] handler
+ * @return KECPStatus
+ */
+KECPStatus on_power_status_parser(const ecp_context *           context,
+                                  DBusMessage *                 message,
+                                  struct _ecp_message_handler * handler);
 
 /**
  * Creates a listener + registers callback for the PowerStatus signal.
@@ -143,8 +145,8 @@ ECPStatus on_power_status_parser(ECPContext * context, DBusMessage * message,
  * to the PowerStatus signal.
  * @param[in] context
  * @param[in] cb
- * @return ECPStatus
+ * @return KECPStatus
  */
-ECPStatus on_power_status(ECPContext * context, PowerStatusCb cb);
+KECPStatus on_power_status(ecp_context * context, power_status_cb cb);
 
 /* @} */

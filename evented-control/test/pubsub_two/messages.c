@@ -23,10 +23,11 @@
 #include "messages.h"
 #include <dbus/dbus.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "evented-control/ecp.h"
 
-ECPStatus format_test_signal_one_message(int16_t num, DBusMessage ** message)
+KECPStatus format_test_signal_one_message(int16_t num, DBusMessage ** message)
 {
     DBusMessageIter iter;
 
@@ -38,7 +39,7 @@ ECPStatus format_test_signal_one_message(int16_t num, DBusMessage ** message)
     return ECP_OK;
 }
 
-ECPStatus format_test_signal_two_message(int16_t num, DBusMessage ** message)
+KECPStatus format_test_signal_two_message(int16_t num, DBusMessage ** message)
 {
     DBusMessageIter iter;
 
@@ -50,7 +51,7 @@ ECPStatus format_test_signal_two_message(int16_t num, DBusMessage ** message)
     return ECP_OK;
 }
 
-ECPStatus parse_test_signal_message(int16_t * num, DBusMessage * message)
+KECPStatus parse_test_signal_message(int16_t * num, DBusMessage * message)
 {
     DBusMessageIter iter;
     DBusError       derror;
@@ -67,12 +68,13 @@ ECPStatus parse_test_signal_message(int16_t * num, DBusMessage * message)
     return ECP_OK;
 }
 
-ECPStatus on_test_signal_parser(ECPContext * context, DBusMessage * message,
-                                struct _ECPMessageHandler * handler)
+KECPStatus on_test_signal_parser(const ecp_context *           context,
+                                 DBusMessage *                 message,
+                                 struct _ecp_message_handler * handler)
 {
     int16_t                       num;
-    ECPTestSignalMessageHandler * status_handler
-        = (ECPTestSignalMessageHandler *) handler;
+    test_signal_message_handler * status_handler
+        = (test_signal_message_handler *) handler;
 
     if (ECP_OK == parse_test_signal_message(&num, message))
     {
@@ -80,30 +82,30 @@ ECPStatus on_test_signal_parser(ECPContext * context, DBusMessage * message,
     }
 }
 
-ECPStatus on_test_signal_one(ECPContext * context, test_signal_cb cb)
+KECPStatus on_test_signal_one(ecp_context * context, test_signal_cb cb)
 {
-    ECPTestSignalMessageHandler * handler = malloc(sizeof(*handler));
+    test_signal_message_handler * handler = malloc(sizeof(*handler));
     handler->super.next                   = NULL;
     handler->super.interface              = TEST_PUB_ONE_INTERFACE;
     handler->super.member                 = TEST_PUB_ONE_SIGNAL;
     handler->super.parser                 = &on_test_signal_parser;
     handler->cb                           = cb;
 
-    ECP_Add_Message_Handler(context, &handler->super);
+    ecp_add_message_handler(context, &handler->super);
 
-    return ECP_Listen(context, TEST_PUB_ONE_INTERFACE);
+    return ecp_listen(context, TEST_PUB_ONE_INTERFACE);
 }
 
-ECPStatus on_test_signal_two(ECPContext * context, test_signal_cb cb)
+KECPStatus on_test_signal_two(ecp_context * context, test_signal_cb cb)
 {
-    ECPTestSignalMessageHandler * handler = malloc(sizeof(*handler));
+    test_signal_message_handler * handler = malloc(sizeof(*handler));
     handler->super.next                   = NULL;
     handler->super.interface              = TEST_PUB_TWO_INTERFACE;
     handler->super.member                 = TEST_PUB_TWO_SIGNAL;
     handler->super.parser                 = &on_test_signal_parser;
     handler->cb                           = cb;
 
-    ECP_Add_Message_Handler(context, &handler->super);
+    ecp_add_message_handler(context, &handler->super);
 
-    return ECP_Listen(context, TEST_PUB_TWO_INTERFACE);
+    return ecp_listen(context, TEST_PUB_TWO_INTERFACE);
 }

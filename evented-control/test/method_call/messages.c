@@ -26,8 +26,9 @@
 #include <stdlib.h>
 #include "evented-control/ecp.h"
 
-ECPStatus on_test_method_parser(ECPContext * context, DBusMessage * message,
-                                struct _ECPMessageHandler * handler)
+KECPStatus on_test_method_parser(const ecp_context *           context,
+                                 DBusMessage *                 message,
+                                 struct _ecp_message_handler * handler)
 {
     DBusMessage *                  reply = NULL;
     ECPTestMethod_MessageHandler * method_handler
@@ -44,7 +45,7 @@ ECPStatus on_test_method_parser(ECPContext * context, DBusMessage * message,
     dbus_message_unref(reply);
 }
 
-ECPStatus on_test_method(ECPContext * context, test_method_cb cb)
+KECPStatus on_test_method(ecp_context * context, test_method_cb cb)
 {
     ECPTestMethod_MessageHandler * test_method_handler
         = malloc(sizeof(*test_method_handler));
@@ -54,10 +55,10 @@ ECPStatus on_test_method(ECPContext * context, test_method_cb cb)
     test_method_handler->super.next      = NULL;
     test_method_handler->cb              = cb;
 
-    return ECP_Add_Message_Handler(context, &test_method_handler->super);
+    return ecp_add_message_handler(context, &test_method_handler->super);
 }
 
-ECPStatus call_test_method(ECPContext * context, uint8_t value)
+KECPStatus call_test_method(ecp_context * context, uint8_t value)
 {
     DBusMessage * message = NULL;
 
@@ -68,5 +69,5 @@ ECPStatus call_test_method(ECPContext * context, uint8_t value)
     dbus_message_append_args(message, DBUS_TYPE_INT16, &value,
                              DBUS_TYPE_INVALID);
 
-    return ECP_Call(context, message);
+    return ecp_send_with_reply(context, message, DEFAULT_SEND_TIMEOUT);
 }

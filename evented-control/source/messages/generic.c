@@ -22,8 +22,8 @@
 #include <string.h>
 #include "evented-control/ecp.h"
 
-ECPStatus check_message(DBusMessage * message, const char * interface,
-                        const char * member)
+KECPStatus check_message(DBusMessage * message, const char * interface,
+                         const char * member)
 {
     const char * msg_interface = dbus_message_get_interface(message);
     const char * msg_member    = dbus_message_get_member(message);

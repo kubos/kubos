@@ -24,12 +24,13 @@
 
 #define TEST_PUB_SIGNAL "TestSignal"
 
-typedef ECPStatus (*test_signal_cb)(int16_t num);
+typedef KECPStatus (*test_signal_cb)(int16_t num);
 
 typedef struct
 {
-    ECPMessageHandler super;
-    test_signal_cb    cb;
-} ECPTestSignalMessageHandler;
+    ecp_message_handler super;
+    test_signal_cb      cb;
+} test_signal_message_handler;
 
-ECPStatus on_test_signal(ECPContext * context, test_signal_cb cb);
+KECPStatus on_test_signal(ecp_context * context, test_signal_cb cb);
+KECPStatus format_test_signal_message(int16_t num, DBusMessage ** message);

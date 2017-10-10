@@ -25,13 +25,14 @@
 #include "evented-control/ecp.h"
 #include "evented-control/messages.h"
 
-ECPStatus on_enable_line_parser(ECPContext * context, DBusMessage * message,
-                                struct _ECPMessageHandler * handler)
+KECPStatus on_enable_line_parser(const ecp_context *           context,
+                                 DBusMessage *                 message,
+                                 struct _ecp_message_handler * handler)
 {
     DBusMessage *                 reply = NULL;
     uint8_t                       line  = -1;
-    ECPEnableLineMessageHandler * line_handler
-        = (ECPEnableLineMessageHandler *) handler;
+    enable_line_message_handler * line_handler
+        = (enable_line_message_handler *) handler;
 
     dbus_message_get_args(message, NULL, DBUS_TYPE_BYTE, &line,
                           DBUS_TYPE_INVALID);
@@ -44,9 +45,9 @@ ECPStatus on_enable_line_parser(ECPContext * context, DBusMessage * message,
     return ECP_OK;
 }
 
-ECPStatus on_enable_line(ECPContext * context, EnableLineCb cb)
+KECPStatus on_enable_line(ecp_context * context, enable_line_cb cb)
 {
-    ECPEnableLineMessageHandler * enable_line_handler
+    enable_line_message_handler * enable_line_handler
         = malloc(sizeof(*enable_line_handler));
     enable_line_handler->super.interface = POWER_MANAGER_INTERFACE;
     enable_line_handler->super.member    = POWER_MANAGER_ENABLE_LINE;
@@ -54,13 +55,13 @@ ECPStatus on_enable_line(ECPContext * context, EnableLineCb cb)
     enable_line_handler->super.next      = NULL;
     enable_line_handler->cb              = cb;
 
-    return ECP_Add_Message_Handler(context, &enable_line_handler->super);
+    return ecp_add_message_handler(context, &enable_line_handler->super);
 }
 
-ECPStatus enable_line(ECPContext * context, uint8_t line)
+KECPStatus enable_line(ecp_context * context, uint8_t line)
 {
     DBusMessage * message = NULL;
-    ECPStatus     err     = ECP_OK;
+    KECPStatus    err     = ECP_OK;
 
     message = dbus_message_new_method_call(
         POWER_MANAGER_INTERFACE, POWER_MANAGER_PATH, POWER_MANAGER_INTERFACE,
@@ -68,5 +69,5 @@ ECPStatus enable_line(ECPContext * context, uint8_t line)
 
     dbus_message_append_args(message, DBUS_TYPE_BYTE, &line, DBUS_TYPE_INVALID);
 
-    return ECP_Call(context, message);
+    return ecp_send_with_reply(context, message, DEFAULT_SEND_TIMEOUT);
 }

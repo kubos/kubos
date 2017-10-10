@@ -20,24 +20,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-ECPStatus status_handler(eps_power_status status);
+KECPStatus status_handler(eps_power_state status);
 
 #define MY_NAME "org.KubOS.client"
 
 int main(int argc, char * argv[])
 {
-    ECPStatus  err;
-    ECPContext context;
+    KECPStatus  err;
+    ecp_context context;
 
     do
     {
 
-        if (ECP_OK != (err = ECP_Init(&context, MY_NAME)))
+        if (ECP_OK != (err = ecp_init(&context, MY_NAME)))
         {
-            printf("Error calling ECP_Init(): %d\n", err);
+            printf("Error calling ecp_init(): %d\n", err);
             break;
         }
-        printf("Successfully called ECP_Init()\n");
+        printf("Successfully called ecp_init()\n");
 
         if (ECP_OK != (err = on_power_status(&context, &status_handler)))
         {
@@ -55,11 +55,11 @@ int main(int argc, char * argv[])
 
         for (int i = 0; i < 10; i++)
         {
-            ECP_Loop(&context, 100);
+            ecp_loop(&context, 100);
         }
     } while (0);
 
-    if (ECP_OK != (err = ECP_Destroy(&context)))
+    if (ECP_OK != (err = ecp_destroy(&context)))
     {
         printf("Error calling ECP_Destroy(): %d\n", err);
     }
@@ -67,7 +67,7 @@ int main(int argc, char * argv[])
     return (err);
 }
 
-ECPStatus status_handler(eps_power_status status)
+KECPStatus status_handler(eps_power_state status)
 {
     printf("Got status %d:%d\n", status.line_one, status.line_two);
 }

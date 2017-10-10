@@ -21,14 +21,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-DBusHandlerResult _ECPMessageHandler(DBusConnection * connection,
-                                     DBusMessage * message, void * user_data);
+DBusHandlerResult _ecp_message_handler(DBusConnection * connection,
+                                       DBusMessage * message, void * user_data);
 
-ECPStatus ECP_Init(ECPContext * context, const char * name)
+KECPStatus ecp_init(ecp_context * context, const char * name)
 {
-    ECPStatus err = ECP_OK;
-    DBusError error;
-    int       i = 0;
+    KECPStatus err = ECP_OK;
+    DBusError  error;
+    int        i = 0;
 
     /* Initialize context to known state */
     context->callbacks  = NULL;
@@ -50,7 +50,8 @@ ECPStatus ECP_Init(ECPContext * context, const char * name)
             break;
         }
 
-        if (!dbus_connection_add_filter(context->connection, _ECPMessageHandler,
+        if (!dbus_connection_add_filter(context->connection,
+                                        _ecp_message_handler,
                                         (void *) context, NULL))
         {
             err = ECP_GENERIC;
@@ -63,11 +64,11 @@ ECPStatus ECP_Init(ECPContext * context, const char * name)
     return (err);
 }
 
-ECPStatus ECP_Listen(ECPContext * context, const char * channel)
+KECPStatus ecp_listen(ecp_context * context, const char * channel)
 {
-    ECPStatus err = ECP_OK;
-    DBusError error;
-    char      sig_match_str[100];
+    KECPStatus err = ECP_OK;
+    DBusError  error;
+    char       sig_match_str[100];
 
     sprintf(sig_match_str, "type='signal',interface='%s'", channel);
 
@@ -90,21 +91,21 @@ ECPStatus ECP_Listen(ECPContext * context, const char * channel)
     return err;
 }
 
-ECPStatus ECP_Loop(ECPContext * context, unsigned int timeout)
+KECPStatus ecp_loop(const ecp_context * context, unsigned int timeout)
 {
-    ECPStatus err = ECP_OK;
+    KECPStatus err = ECP_OK;
 
     dbus_connection_read_write_dispatch(context->connection, timeout);
 
     return err;
 }
 
-ECPStatus ECP_Destroy(ECPContext * context)
+KECPStatus ecp_destroy(ecp_context * context)
 {
-    ECPStatus err = ECP_OK;
+    KECPStatus err = ECP_OK;
 
-    ECPMessageHandler * current = NULL;
-    ECPMessageHandler * next    = NULL;
+    ecp_message_handler * current = NULL;
+    ecp_message_handler * next    = NULL;
 
     current = context->callbacks;
     while (current != NULL)
@@ -122,24 +123,9 @@ ECPStatus ECP_Destroy(ECPContext * context)
     return (err);
 }
 
-ECPStatus ECP_Broadcast(ECPContext * context, DBusMessage * message)
+KECPStatus ecp_handle_message(const ecp_context * context, DBusMessage * message)
 {
-    ECPStatus     err    = ECP_OK;
-    dbus_uint32_t serial = 0;
-
-    if (!dbus_connection_send(context->connection, message, &serial))
-    {
-        err = ECP_GENERIC;
-    }
-
-    dbus_message_unref(message);
-
-    return (err);
-}
-
-ECPStatus ECP_Handle_Message(ECPContext * context, DBusMessage * message)
-{
-    ECPMessageHandler * current    = NULL;
+    ecp_message_handler * current  = NULL;
     const char * message_interface = dbus_message_get_interface(message);
     const char * message_member    = dbus_message_get_member(message);
 
@@ -162,10 +148,11 @@ ECPStatus ECP_Handle_Message(ECPContext * context, DBusMessage * message)
     return ECP_OK;
 }
 
-ECPStatus ECP_Call(ECPContext * context, DBusMessage * message)
+KECPStatus ecp_send_with_reply(const ecp_context * context,
+                               DBusMessage * message, uint32_t timeout)
 {
     DBusMessage * reply = NULL;
-    ECPStatus     err   = ECP_OK;
+    KECPStatus    err   = ECP_OK;
     DBusError     derr;
 
     dbus_error_init(&derr);
@@ -173,7 +160,7 @@ ECPStatus ECP_Call(ECPContext * context, DBusMessage * message)
     if ((NULL != message) && (NULL != context->connection))
     {
         reply = dbus_connection_send_with_reply_and_block(
-            context->connection, message, 1000, &derr);
+            context->connection, message, timeout, &derr);
         if (reply == NULL)
         {
             err = ECP_GENERIC;
@@ -190,11 +177,26 @@ ECPStatus ECP_Call(ECPContext * context, DBusMessage * message)
     return err;
 }
 
-ECPStatus ECP_Add_Message_Handler(ECPContext *        context,
-                                  ECPMessageHandler * new_handler)
+KECPStatus ecp_send(const ecp_context * context, DBusMessage * message)
 {
-    ECPMessageHandler * current = NULL;
-    ECPStatus           err     = ECP_OK;
+    KECPStatus    err    = ECP_OK;
+    dbus_uint32_t serial = 0;
+
+    if (!dbus_connection_send(context->connection, message, &serial))
+    {
+        err = ECP_GENERIC;
+    }
+
+    dbus_message_unref(message);
+
+    return (err);
+}
+
+KECPStatus ecp_add_message_handler(ecp_context *         context,
+                                   ecp_message_handler * new_handler)
+{
+    ecp_message_handler * current = NULL;
+    KECPStatus            err     = ECP_OK;
 
     if (NULL == context->callbacks)
     {
@@ -213,14 +215,14 @@ ECPStatus ECP_Add_Message_Handler(ECPContext *        context,
     return err;
 }
 
-DBusHandlerResult _ECPMessageHandler(DBusConnection * connection,
-                                     DBusMessage * message, void * user_data)
+DBusHandlerResult _ecp_message_handler(DBusConnection * connection,
+                                       DBusMessage * message, void * user_data)
 {
-    ECPContext * context = NULL;
+    ecp_context * context = NULL;
     if (NULL != user_data)
     {
-        context = (ECPContext *) user_data;
-        if (ECP_OK == ECP_Handle_Message(context, message))
+        context = (ecp_context *) user_data;
+        if (ECP_OK == ecp_handle_message(context, message))
         {
             return DBUS_HANDLER_RESULT_HANDLED;
         }

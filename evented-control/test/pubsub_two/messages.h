@@ -27,12 +27,16 @@
 #define TEST_PUB_TWO_PATH "/org/KubOS/TestPublisherTwo"
 #define TEST_PUB_TWO_SIGNAL "TestSignalTwo"
 
-typedef ECPStatus (*test_signal_cb)(int16_t num);
+typedef KECPStatus (*test_signal_cb)(int16_t num);
 
 typedef struct
 {
-    ECPMessageHandler super;
-    test_signal_cb    cb;
-} ECPTestSignalMessageHandler;
+    ecp_message_handler super;
+    test_signal_cb      cb;
+} test_signal_message_handler;
 
-ECPStatus on_test_signal(ECPContext * context, test_signal_cb cb);
+KECPStatus on_test_signal_one(ecp_context * context, test_signal_cb cb);
+KECPStatus on_test_signal_two(ecp_context * context, test_signal_cb cb);
+
+KECPStatus format_test_signal_one_message(int16_t num, DBusMessage ** message);
+KECPStatus format_test_signal_two_message(int16_t num, DBusMessage ** message);
