@@ -167,19 +167,22 @@ as long as they have not already been assigned to another peripheral.
 | H2.24   | 85               | Output    |
 +---------+------------------+-----------+
 
-To interact with a pin, the user will first need to generate the pin's
-device name:
+
+CLI and Script Interface
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+To interact with a pin from the command line or from a script, the user will first need to 
+generate the pin's device name:
 
 ::
 
     $ echo {pin} > /sys/class/gpio/export
 
-For example, to interact with pin H2.23 of the CSK header, which corresponds with
-GPIO_86, the user will use:
+For example, to interact with pin H2.18, which corresponds with GPIO_61, the user will use:
 
 ::
 
-    $ echo 86 > /sys/class/gpio/export
+    $ echo 61 > /sys/class/gpio/export
 
 Once this command has been issued, the pin will be defined to the system
 as '/sys/class/gpio/gpio{pin}'. The user can then set and check the pins
@@ -187,16 +190,105 @@ direction and value.
 
 ::
 
-    Set H2.23 as output:
-    $ echo out > /sys/class/gpio/gpio86/direction
+    Set pin as output:
+    $ echo out > /sys/class/gpio/gpio61/direction
 
-    Set GPIO_86's value to 1:
-    $ echo 1 > /sys/class/gpio/gpio86/value
+    Set pin's value to 1:
+    $ echo 1 > /sys/class/gpio/gpio61/value
 
-    Get GPIO_86's value:
-    $ cat /sys/class/gpio/gpio86/value
+    Get pins's value:
+    $ cat /sys/class/gpio/gpio61/value
 
-.. note:: The GPIO direction should match the value in the above table
+Once finished, the pin can be released:
+
+::
+
+    $ echo {pin} > /sys/class/gpio/unexport
+
+Application Interface
+^^^^^^^^^^^^^^^^^^^^^
+    
+This functionality can also be used from a user's application with Linux's sysfs
+interface.
+
+An example program might look like this:
+
+.. code-block:: c
+    
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <fcntl.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+    
+    int fd;
+    int pin = 61;
+    int value = 1;
+    
+    /* Define the pin to the system */
+    fd = open("/sys/class/gpio/export", O_WRONLY);
+    write(fd, &pin, sizeof(pin)); 
+    close(fd);
+    
+    /* Set the pin's direction */
+    fd = open("/sys/class/gpio/gpio45/direction", O_WRONLY);
+    write(fd, "out", 3);
+    close(fd);
+    
+    /* Set the pin's value */
+    fd = open("/sys/class/gpio/gpio45/value", O_WRONLY);
+    write(fd, &value, 1);
+    close(fd);
+    
+    /* Read the value back */
+    fd = open("/sys/class/gpio/gpio45/value", O_RDONLY);
+    char strValue[3];
+    read(fd, strValue, 1);
+    value = atoi(strValue);
+    close(fd);
+    
+    /* Release the pin */
+    fd = open("/sys/class/gpio/unexport", O_WRONLY);
+    write(fd, &pin, sizeof(pin)); 
+    close(fd);
+     
+Ethernet
+~~~~~~~~
+
+The Pumpkin MBM2, via the embedded Beaglebone Black, provides an ethernet
+port which can be used for things like inter-system communication.
+
+The ethernet port is configured to have support for static IPv4 addressing and
+can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
+package.
+
+KubOS Linux currently guarantees support for TCP, UDP, and SCTP.
+Other protocols might be supported by default, but have not been verified.
+
+Resources
+^^^^^^^^^
+
+- `TCP tutorial <http://www.linuxhowtos.org/C_C++/socket.htm>`__
+- `UDP tutorial <https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html>`__
+- `SCTP tutorial <http://petanode.com/blog/posts/introduction-to-the-sctp-socket-api-in-linux.html>`__
+- `Packet Sender <https://packetsender.com/>`__ - A tool to send test packets between an OBC and a host computer
+
+.. note:: By default, Windows Firewall will block many incoming packet types. This may impact testing.
+
+Configuration
+^^^^^^^^^^^^^
+
+The static IP address can be updated by editing the `/etc/network/interfaces` file.
+By default the address is ``168.168.2.20``.
+
+Examples
+^^^^^^^^
+
+A couple example programs using the ethernet port can be found in the `examples` folder of the `kubos repo <https://github.com/kubostech/kubos/tree/master/examples>`__:
+
+- `kubos-linux-tcprx <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__ - Receive TCP packets and then reply to the sender
+- `kubos-linux-tcptx <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcptx>`__ - Send TCP packets to specified IP address and port
 
 User Data Partitions
 --------------------
