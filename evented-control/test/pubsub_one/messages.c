@@ -50,7 +50,7 @@ KECPStatus parse_test_signal_message(int16_t * num, DBusMessage * message)
                                DBUS_TYPE_INVALID))
     {
         printf("Had issuing parsing args\n%s\n", derror.message);
-        return ECP_GENERIC;
+        return ECP_ERROR;
     }
 
     return ECP_OK;

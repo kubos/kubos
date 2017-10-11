@@ -28,35 +28,47 @@
 KECPStatus format_power_status_message(eps_power_state status,
                                        DBusMessage **  message)
 {
+    KECPStatus      err = ECP_ERROR;
     DBusMessageIter iter;
 
-    *message = dbus_message_new_signal(
-        POWER_MANAGER_PATH, POWER_MANAGER_INTERFACE, POWER_MANAGER_STATUS);
-    dbus_message_append_args(*message, DBUS_TYPE_INT16, &(status.line_one),
-                             DBUS_TYPE_INT16, &(status.line_two),
-                             DBUS_TYPE_INVALID);
+    if (NULL != (*message = dbus_message_new_signal(POWER_MANAGER_PATH,
+                                                    POWER_MANAGER_INTERFACE,
+                                                    POWER_MANAGER_STATUS)))
+    {
+        if (dbus_message_append_args(*message, DBUS_TYPE_INT16,
+                                     &(status.line_one), DBUS_TYPE_INT16,
+                                     &(status.line_two), DBUS_TYPE_INVALID))
+        {
+            err = ECP_OK;
+        }
+    }
 
-    return ECP_OK;
+    return err;
 }
 
 KECPStatus parse_power_status_message(eps_power_state * status,
                                       DBusMessage *     message)
 {
-    KECPStatus      err = ECP_OK;
+    KECPStatus      err = ECP_ERROR;
     DBusMessageIter iter;
     DBusError       derror;
     uint16_t        line_one, line_two;
 
     dbus_error_init(&derror);
 
-    if (!dbus_message_get_args(message, &derror, DBUS_TYPE_INT16,
-                               &(status->line_one), DBUS_TYPE_INT16,
-                               &(status->line_two), DBUS_TYPE_INVALID))
+    if ((NULL != status) && (NULL != message))
     {
-        printf("Had issuing parsing args\n%s\n", derror.message);
-        err = ECP_GENERIC;
+        if (!dbus_message_get_args(message, &derror, DBUS_TYPE_INT16,
+                                   &(status->line_one), DBUS_TYPE_INT16,
+                                   &(status->line_two), DBUS_TYPE_INVALID))
+        {
+            fprintf(stderr, "Had issuing parsing args\n%s\n", derror.message);
+        }
+        else
+        {
+            err = ECP_OK;
+        }
     }
-
     dbus_error_free(&derror);
 
     return err;
@@ -66,27 +78,44 @@ KECPStatus on_power_status_parser(const ecp_context *           context,
                                   DBusMessage *                 message,
                                   struct _ecp_message_handler * handler)
 {
+    KECPStatus                     err = ECP_ERROR;
     eps_power_state                status;
     power_status_message_handler * status_handler
         = (power_status_message_handler *) handler;
-    if (ECP_OK == parse_power_status_message(&status, message))
+
+    if ((NULL != context) && (NULL != message) && (NULL != handler))
     {
-        status_handler->cb(status);
-        return ECP_GENERIC;
+        if (ECP_OK == (err = parse_power_status_message(&status, message)))
+        {
+            err = status_handler->cb(status);
+        }
     }
-    return ECP_OK;
+    return err;
 }
 
 KECPStatus on_power_status(ecp_context * context, power_status_cb cb)
 {
-    power_status_message_handler * handler = malloc(sizeof(*handler));
-    handler->super.next                    = NULL;
-    handler->super.interface               = POWER_MANAGER_INTERFACE;
-    handler->super.member                  = POWER_MANAGER_STATUS;
-    handler->super.parser                  = &on_power_status_parser;
-    handler->cb                            = cb;
+    power_status_message_handler * handler;
+    KECPStatus                     err = ECP_ERROR;
 
-    ecp_add_message_handler(context, &handler->super);
+    if (NULL != context)
+    {
+        handler = malloc(sizeof(*handler));
+        if (handler != NULL)
+        {
+            handler->super.next      = NULL;
+            handler->super.interface = POWER_MANAGER_INTERFACE;
+            handler->super.member    = POWER_MANAGER_STATUS;
+            handler->super.parser    = &on_power_status_parser;
+            handler->cb              = cb;
 
-    return ecp_listen(context, POWER_MANAGER_INTERFACE);
+            if (ECP_OK
+                == (err = ecp_add_message_handler(context, &handler->super)))
+            {
+                err = ecp_listen(context, POWER_MANAGER_INTERFACE);
+            }
+        }
+    }
+
+    return err;
 }

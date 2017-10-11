@@ -25,13 +25,20 @@
 KECPStatus check_message(DBusMessage * message, const char * interface,
                          const char * member)
 {
-    const char * msg_interface = dbus_message_get_interface(message);
-    const char * msg_member    = dbus_message_get_member(message);
+    KECPStatus   err = ECP_ERROR;
+    const char * msg_interface;
+    const char * msg_member;
 
-    if ((0 == strcmp(msg_interface, interface))
-        && (0 == strcmp(msg_member, member)))
+    if ((NULL != message) && (NULL != interface) && (NULL != member))
     {
-        return ECP_OK;
+        msg_interface = dbus_message_get_interface(message);
+        msg_member    = dbus_message_get_member(message);
+
+        if ((0 == strcmp(msg_interface, interface))
+            && (0 == strcmp(msg_member, member)))
+        {
+            err = ECP_OK;
+        }
     }
-    return ECP_GENERIC;
+    return err;
 }

@@ -26,148 +26,157 @@ DBusHandlerResult _ecp_message_handler(DBusConnection * connection,
 
 KECPStatus ecp_init(ecp_context * context, const char * name)
 {
-    KECPStatus err = ECP_OK;
+    KECPStatus err = ECP_ERROR;
     DBusError  error;
-    int        i = 0;
 
     /* Initialize context to known state */
     context->callbacks  = NULL;
     context->connection = NULL;
 
-    do
+    if ((NULL != context) && (NULL != name))
     {
-        dbus_error_init(&error);
-        context->connection = dbus_bus_get(DBUS_BUS_SESSION, &error);
-        if (NULL == context->connection)
+        do
         {
-            err = ECP_GENERIC;
-            break;
-        }
+            dbus_error_init(&error);
+            context->connection = dbus_bus_get(DBUS_BUS_SESSION, &error);
+            if (NULL == context->connection)
+            {
+                fprintf(stderr, "Error connecting to bus - %s\n",
+                        error.message);
+            }
 
-        if (0 > dbus_bus_request_name(context->connection, name, 0, &error))
-        {
-            err = ECP_GENERIC;
-            break;
-        }
+            if (0 > dbus_bus_request_name(context->connection, name, 0, &error))
+            {
+                fprintf(stderr, "Error requesting name - %s\n", error.message);
+            }
 
-        if (!dbus_connection_add_filter(context->connection,
-                                        _ecp_message_handler,
-                                        (void *) context, NULL))
-        {
-            err = ECP_GENERIC;
-            break;
-        }
-    } while (0);
-
-    dbus_error_free(&error);
+            if (!dbus_connection_add_filter(context->connection,
+                                            _ecp_message_handler,
+                                            (void *) context, NULL))
+            {
+                fprintf(stderr, "Error adding filter\n");
+            }
+            err = ECP_OK;
+        } while (0);
+        dbus_error_free(&error);
+    }
 
     return (err);
 }
 
 KECPStatus ecp_listen(ecp_context * context, const char * channel)
 {
-    KECPStatus err = ECP_OK;
-    DBusError  error;
+    KECPStatus err = ECP_ERROR;
+    DBusError  derr;
     char       sig_match_str[100];
 
-    sprintf(sig_match_str, "type='signal',interface='%s'", channel);
-
-    do
+    if ((NULL != context) && (NULL != channel))
     {
-        dbus_error_init(&error);
-        dbus_bus_add_match(context->connection, sig_match_str, &error);
-
-        if (dbus_error_is_set(&error))
+        sprintf(sig_match_str, "type='signal',interface='%s'", channel);
+        dbus_error_init(&derr);
+        dbus_bus_add_match(context->connection, sig_match_str, &derr);
+        if (dbus_error_is_set(&derr))
         {
-            fprintf(stderr, "Name Error (%s)\n", error.message);
-            dbus_error_free(&error);
-            err = ECP_GENERIC;
-            break;
+            fprintf(stderr, "Error adding listener match - %s\n", derr.message);
+        }
+        else
+        {
+            err = ECP_OK;
         }
 
+        dbus_error_free(&derr);
         dbus_connection_flush(context->connection);
-    } while (0);
-
+    }
     return err;
 }
 
 KECPStatus ecp_loop(const ecp_context * context, unsigned int timeout)
 {
-    KECPStatus err = ECP_OK;
+    KECPStatus err = ECP_ERROR;
 
-    dbus_connection_read_write_dispatch(context->connection, timeout);
+    if (dbus_connection_read_write_dispatch(context->connection, timeout))
+    {
+        err = ECP_OK;
+    }
 
     return err;
 }
 
 KECPStatus ecp_destroy(ecp_context * context)
 {
-    KECPStatus err = ECP_OK;
+    KECPStatus err = ECP_ERROR;
 
     ecp_message_handler * current = NULL;
     ecp_message_handler * next    = NULL;
 
-    current = context->callbacks;
-    while (current != NULL)
+    if (NULL != context)
     {
-        next = current->next;
-        free(current);
-        current = next;
+        current = context->callbacks;
+        while (current != NULL)
+        {
+            next = current->next;
+            free(current);
+            current = next;
+        }
+        err = ECP_OK;
     }
-
     /** Need to figure out what d-bus wants us to clean up...
-      * It looks like dbus_connection_close isn't needed since
-      * we are using dbus_bus_get
-      */
+     * It looks like dbus_connection_close isn't needed since
+     * we are using dbus_bus_get
+     */
 
-    return (err);
+    return err;
 }
 
 KECPStatus ecp_handle_message(const ecp_context * context, DBusMessage * message)
 {
-    ecp_message_handler * current  = NULL;
-    const char * message_interface = dbus_message_get_interface(message);
-    const char * message_member    = dbus_message_get_member(message);
+    KECPStatus            err     = ECP_ERROR;
+    ecp_message_handler * current = NULL;
+    const char *          message_interface;
+    const char *          message_member;
 
-    current = context->callbacks;
-    while (current != NULL)
+    if ((NULL != context) && (NULL != message))
     {
-        if ((0 == strcmp(message_interface, current->interface))
-            && (0 == strcmp(message_member, current->member)))
+        message_interface = dbus_message_get_interface(message);
+        message_member    = dbus_message_get_member(message);
+        current           = context->callbacks;
+        while (current != NULL)
         {
-            current->parser(context, message, current);
-            return ECP_OK;
+            if ((0 == strcmp(message_interface, current->interface))
+                && (0 == strcmp(message_member, current->member)))
+            {
+                current->parser(context, message, current);
+                err = ECP_OK;
+                break;
+            }
+            current = current->next;
         }
-        current = current->next;
-    }
-    if (NULL == current)
-    {
-        return ECP_GENERIC;
     }
 
-    return ECP_OK;
+    return err;
 }
 
 KECPStatus ecp_send_with_reply(const ecp_context * context,
                                DBusMessage * message, uint32_t timeout)
 {
     DBusMessage * reply = NULL;
-    KECPStatus    err   = ECP_OK;
+    KECPStatus    err   = ECP_ERROR;
     DBusError     derr;
 
     dbus_error_init(&derr);
 
-    if ((NULL != message) && (NULL != context->connection))
+    if ((NULL != message) && (NULL != context) && (NULL != context->connection))
     {
         reply = dbus_connection_send_with_reply_and_block(
             context->connection, message, timeout, &derr);
-        if (reply == NULL)
+        if (NULL != reply)
         {
-            err = ECP_GENERIC;
+            err = ECP_OK;
+            dbus_message_unref(reply);
         }
         else
         {
-            dbus_message_unref(reply);
+            fprintf(stderr, "Error send_with_reply %s\n", derr.message);
         }
         dbus_message_unref(message);
     }
@@ -179,37 +188,42 @@ KECPStatus ecp_send_with_reply(const ecp_context * context,
 
 KECPStatus ecp_send(const ecp_context * context, DBusMessage * message)
 {
-    KECPStatus    err    = ECP_OK;
-    dbus_uint32_t serial = 0;
+    KECPStatus err = ECP_ERROR;
 
-    if (!dbus_connection_send(context->connection, message, &serial))
+    if ((NULL != context) && (NULL != context->connection) && (NULL != message))
     {
-        err = ECP_GENERIC;
+        if (dbus_connection_send(context->connection, message, NULL))
+        {
+            err = ECP_OK;
+        }
+        dbus_message_unref(message);
     }
-
-    dbus_message_unref(message);
-
-    return (err);
+    return err;
 }
 
 KECPStatus ecp_add_message_handler(ecp_context *         context,
                                    ecp_message_handler * new_handler)
 {
     ecp_message_handler * current = NULL;
-    KECPStatus            err     = ECP_OK;
+    KECPStatus            err     = ECP_ERROR;
 
-    if (NULL == context->callbacks)
+    if ((NULL != context) && (NULL != new_handler))
     {
-        context->callbacks = new_handler;
-    }
-    else
-    {
-        current = context->callbacks;
-        while (NULL != current->next)
+        if (NULL == context->callbacks)
         {
-            current = current->next;
+            context->callbacks = new_handler;
+            err                = ECP_OK;
         }
-        current->next = new_handler;
+        else
+        {
+            current = context->callbacks;
+            while (NULL != current->next)
+            {
+                current = current->next;
+            }
+            current->next = new_handler;
+            err           = ECP_OK;
+        }
     }
 
     return err;
@@ -219,7 +233,7 @@ DBusHandlerResult _ecp_message_handler(DBusConnection * connection,
                                        DBusMessage * message, void * user_data)
 {
     ecp_context * context = NULL;
-    if (NULL != user_data)
+    if ((NULL != connection) && (NULL != message) && (NULL != user_data))
     {
         context = (ecp_context *) user_data;
         if (ECP_OK == ecp_handle_message(context, message))

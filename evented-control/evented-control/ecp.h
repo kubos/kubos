@@ -31,7 +31,7 @@
  */
 typedef enum {
     ECP_OK = 0,
-    ECP_GENERIC,
+    ECP_ERROR,
 } KECPStatus;
 
 /**
