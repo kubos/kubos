@@ -30,6 +30,7 @@ DOCS_DIRS = [
     "hal/kubos-hal-linux",
     "hal/kubos-hal-msp430f5529",
     "hal/kubos-hal-stm32f4",
+    "radio/radio-api",
     "services/telemetry/telemetry",
     "services/telemetry/telemetry-linux"
 ]

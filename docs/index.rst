@@ -95,12 +95,12 @@ It covers the following tutorial documents:
    :caption: Kubos APIs
    :hidden:
 
+    Device Interfaces <device-api/index>
+    Evented Control Plane <evented-control/index>
     Kubos Core <kubos-core/index>
     Kubos HAL <kubos-hal/index>
     Kubos IPC <ipc/index>
     Kubos Telemetry <telemetry/index>
-    Evented Control Plane <evented-control/index>
-
 
 .. toctree::
    :caption: Third-Party APIs
