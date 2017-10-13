@@ -24,6 +24,9 @@
 #include <dbus/dbus.h>
 #include <stdint.h>
 
+/**
+ * Default timeout used when calling ecp_send_with_reply
+ */
 #define DEFAULT_SEND_TIMEOUT 1000
 
 /**
