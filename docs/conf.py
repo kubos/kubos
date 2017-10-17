@@ -110,6 +110,7 @@ breathe_projects = {
     "ipc" : "../xml/ipc",
     "libcsp" : "../xml/libcsp",
     "kubos-core" : "../xml/kubos-core",
+    "eps-api" : "../xml/eps/eps-api",
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",
     "kubos-hal-linux" : "../xml/hal/kubos-hal-linux",

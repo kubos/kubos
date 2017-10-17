@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * @defgroup EPS_API
+ * @defgroup EPS_API High level EPS api
  * @addtogroup EPS_API
  * @{
  */
@@ -61,7 +61,7 @@ KEPSStatus eps_enable_power_line(uint16_t line);
 /**
  * Queries the EPS for the status of all available
  * power lines.
- * @param[in] status power status structure
+ * @param[out] status power status structure
  * @return KEPSStatus EPS_OK if successful, otherwise error
  */
 KEPSStatus eps_get_power_status(eps_power_state * status);
