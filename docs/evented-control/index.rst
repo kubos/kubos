@@ -17,6 +17,12 @@ logic and control elements (Orientation, Camera Control, Downlink
 Control, etc.) to allow the latter to be programmed in an event oriented
 fashion.
 
+This specific document mainly deals with the lower level workings of
+the ECP api. This document is intended for those maintaining the ECP
+api and creating the higher level abstractions around it. Application
+developers should only have to interact with application message
+specific abstractions which use the ECP api, not the lower level functions.
+
 Introduction
 -------------
 
@@ -67,6 +73,38 @@ and receive those messages. This is where the D-Bus abstraction lives.
 The higher level message api is an application specific abstraction around
 the ECP api. It defines domain specifc messages using the ECP api and
 provides simple functions for sending and receiving those messages.
+
+Basic flow of ECP usage by Subscriber/Client
+--------------------------------------------
+
+.. uml::
+
+   @startuml
+   Client --> ECP: Connection Request (ecp_init)
+   ECP --> DBus: Initiate Connection (dbus_bus_get)
+   ECP --> DBus: Register Name (dbus_request_name)
+   ECP --> DBus: Add Message Filter (dbus_connection_add_filter)
+   Client --> ECP: Listen Request (ecp_listen)
+   ECP --> DBus: Subscribe (dbus_bus_add_match)
+   DBus --> ECP: Data (callback to _ecp_message_handler)
+   Client --> ECP: Loop (ecp_loop)
+   ECP --> DBus: Loop (dbus_connection_read_write_dispatch)
+   ECP --> Client: Published Data (callback to message handler)
+   @enduml
+
+Basic flow of ECP usage by Publisher/Server
+-------------------------------------------
+
+.. uml::
+
+   @startuml
+   Server --> ECP: Connection Request (ecp_init)
+   ECP --> DBus: Initiate Connection (dbus_bus_get)
+   ECP --> DBus: Register Name (dbus_request_name)
+   ECP --> DBus: Add Message Filter (dbus_connection_add_filter)
+   Server --> ECP: Publish data (ecp_send)
+   ECP --> DBus: Publish data (dbus_connection_send)
+   @enduml
 
 What subsystems are included?
 -----------------------------
