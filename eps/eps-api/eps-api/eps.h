@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * @defgroup EPS_API High level EPS api
+ * @defgroup EPS_API High level EPS API
  * @addtogroup EPS_API
  * @{
  */

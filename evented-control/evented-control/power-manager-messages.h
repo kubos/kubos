@@ -51,7 +51,7 @@
 typedef KECPStatus (*enable_line_cb)(uint8_t line);
 
 /**
- * Function ponter type for PowerStatus callback
+ * Function pointer type for PowerStatus callback
  */
 typedef KECPStatus (*power_status_cb)(eps_power_state status);
 
@@ -81,9 +81,9 @@ typedef struct
  * Intermediate function used by ecp_handle_message
  * to parse out the DBusMessage into native data structures
  * and then hand off to the message specific callback
- * @param[in] context
- * @param[in] message
- * @param[in] handler
+ * @param[in] context ECP context
+ * @param[in] message incoming EnableLine message
+ * @param[in] handler EnableLine message handler
  * @return KECPStatus
  */
 KECPStatus on_enable_line_parser(const ecp_context *           context,
@@ -91,27 +91,27 @@ KECPStatus on_enable_line_parser(const ecp_context *           context,
                                  struct _ecp_message_handler * handler);
 
 /**
- * Creates and listener + registers callback for the
+ * Creates a listener + registers callback for the
  * EnableLine method. This function should be used by the
  * process which is hosting the method
- * @param[in] context
- * @param[in] cb
+ * @param[out] context ECP context
+ * @param[in] cb callback for EnableLine messages
  * @return KECPStatus
  */
 KECPStatus on_enable_line(ecp_context * context, enable_line_cb cb);
 
 /**
  * Calls out to the EnableLine method
- * @param[in] context
- * @param[in] line
+ * @param[in] context ECP context
+ * @param[in] line eps line to enable
  * @return KECPStatus
  */
 KECPStatus enable_line(ecp_context * context, uint8_t line);
 
 /**
  * Parses out a PowerStatus signal into an eps_power_state struct.
- * @param[in] status
- * @param[in] message
+ * @param[out] status power state structure
+ * @param[in] message power status message
  * @return KECPStatus
  */
 KECPStatus parse_power_status_message(eps_power_state * status,
@@ -119,8 +119,8 @@ KECPStatus parse_power_status_message(eps_power_state * status,
 
 /**
  * Takes a eps_power_state struct and creates a PowerStatus signal.
- * @param[in] status
- * @param[in] message
+ * @param[in] status power state structure for message
+ * @param[out] message new power status message
  * @return KECPStatus
  */
 KECPStatus format_power_status_message(eps_power_state status,
@@ -130,9 +130,9 @@ KECPStatus format_power_status_message(eps_power_state status,
  * Intermediate function used by ecp_handle_message
  * to parse out the DBusMessage into native data structures
  * and then hand off to the message specific callback
- * @param[in] context
- * @param[in] message
- * @param[in] handler
+ * @param[in] context ECP context
+ * @param[in] message incoming power status message
+ * @param[in] handler power status message callback
  * @return KECPStatus
  */
 KECPStatus on_power_status_parser(const ecp_context *           context,
@@ -143,8 +143,8 @@ KECPStatus on_power_status_parser(const ecp_context *           context,
  * Creates a listener + registers callback for the PowerStatus signal.
  * This function should be used by a process which is subscribed
  * to the PowerStatus signal.
- * @param[in] context
- * @param[in] cb
+ * @param[out] context ECP context
+ * @param[in] cb callback used for new PowerStatus messages
  * @return KECPStatus
  */
 KECPStatus on_power_status(ecp_context * context, power_status_cb cb);

@@ -25,7 +25,7 @@
 #include <stdint.h>
 
 /**
- * Default timeout used when calling ecp_send_with_reply
+ * Default timeout used when calling :cpp:func`ecp_send_with_reply`
  */
 #define DEFAULT_SEND_TIMEOUT 1000
 

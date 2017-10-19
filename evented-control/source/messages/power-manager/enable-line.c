@@ -51,8 +51,20 @@ KECPStatus on_enable_line_parser(const ecp_context *           context,
                     {
                         err = ECP_OK;
                     }
+                    else
+                    {
+                        fprintf(stderr, "Error with dbus_connection_send\n");
+                    }
                     dbus_message_unref(reply);
                 }
+                else
+                {
+                    fprintf(stderr, "Error sending reply\n");
+                }
+            }
+            else
+            {
+                fprintf(stderr, "Error calling line_handler cb\n");
             }
         }
         else
@@ -100,6 +112,10 @@ KECPStatus enable_line(ecp_context * context, uint8_t line)
             {
                 err = ecp_send_with_reply(context, message,
                                           DEFAULT_SEND_TIMEOUT);
+            }
+            else
+            {
+                fprintf(stderr, "Error appending message args\n");
             }
         }
     }

@@ -33,13 +33,13 @@ int main()
     {
         if (ECP_OK != (err = ecp_init(&context, POWER_MANAGER_INTERFACE)))
         {
-            printf("Error %d calling ecp_init()\n", err);
+            fprintf(stderr, "Error %d calling ecp_init()\n", err);
             break;
         }
 
         if (ECP_OK != on_enable_line(&context, &enable_line_handler))
         {
-            printf("Error registering enable line callback\n");
+            fprintf(stderr, "Error registering enable line callback\n");
             break;
         }
 
@@ -56,13 +56,13 @@ int main()
 
         if (err != ECP_OK)
         {
-            printf("Error %d calling ecp_loop()\n", err);
+            fprintf(stderr, "Error %d calling ecp_loop()\n", err);
         }
     } while (0);
 
     if (ECP_OK != (err = ecp_destroy(&context)))
     {
-        printf("Error %d calling ECP_Destroy()\n", err);
+        fprintf(stderr, "Error %d calling ECP_Destroy()\n", err);
     }
 
     return err;

@@ -43,11 +43,13 @@ KECPStatus ecp_init(ecp_context * context, const char * name)
             {
                 fprintf(stderr, "Error connecting to bus - %s\n",
                         error.message);
+                break;
             }
 
             if (0 > dbus_bus_request_name(context->connection, name, 0, &error))
             {
                 fprintf(stderr, "Error requesting name - %s\n", error.message);
+                break;
             }
 
             if (!dbus_connection_add_filter(context->connection,
@@ -55,6 +57,7 @@ KECPStatus ecp_init(ecp_context * context, const char * name)
                                             (void *) context, NULL))
             {
                 fprintf(stderr, "Error adding filter\n");
+                break;
             }
             err = ECP_OK;
         } while (0);
@@ -140,16 +143,21 @@ KECPStatus ecp_handle_message(const ecp_context * context, DBusMessage * message
         message_interface = dbus_message_get_interface(message);
         message_member    = dbus_message_get_member(message);
         current           = context->callbacks;
-        while (current != NULL)
+        if ((NULL != current) && (NULL != message_interface)
+            && (NULL != message_member) && (NULL != current->interface)
+            && (NULL != current->member))
         {
-            if ((0 == strcmp(message_interface, current->interface))
-                && (0 == strcmp(message_member, current->member)))
+            while (current != NULL)
             {
-                current->parser(context, message, current);
-                err = ECP_OK;
-                break;
+                if ((0 == strcmp(message_interface, current->interface))
+                    && (0 == strcmp(message_member, current->member)))
+                {
+                    current->parser(context, message, current);
+                    err = ECP_OK;
+                    break;
+                }
+                current = current->next;
             }
-            current = current->next;
         }
     }
 
@@ -195,6 +203,12 @@ KECPStatus ecp_send(const ecp_context * context, DBusMessage * message)
         if (dbus_connection_send(context->connection, message, NULL))
         {
             err = ECP_OK;
+        }
+        else
+        {
+            fprintf(
+                stderr,
+                "Error with ecp_send. dbus_connection_send out of memory\n");
         }
         dbus_message_unref(message);
     }
