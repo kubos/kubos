@@ -5,7 +5,7 @@ Abstract
 --------
 
 This documentation is for the Evented Control Plane (ECP)
-middleware. It's role is to pass "control oriented" flight domain messages
+middleware. Its role is to pass "control oriented" flight domain messages
 between software components. The ECP implements an interprocess queuing
 system that allows flight software components to listen for messages on
 "n of m" message broadcast channels.
@@ -18,17 +18,17 @@ Control, etc.) to allow the latter to be programmed in an event oriented
 fashion.
 
 This specific document mainly deals with the lower level workings of
-the ECP api. This document is intended for those maintaining the ECP
-api and creating the higher level abstractions around it. Application
+the ECP API. This document is intended for those maintaining the ECP
+API and creating the higher level abstractions around it. Application
 developers should only have to interact with application message
-specific abstractions which use the ECP api, not the lower level functions.
+specific abstractions which use the ECP API, not the lower level functions.
 
 Introduction
 -------------
 
 Consider the typical technique for programming spacecraft orientation
 control. Typically, we would have a single process which
-reads GPS, IMU and possibly Star Tracker data to determine it's current
+reads GPS, IMU and possibly Star Tracker data to determine its current
 position. It then proceeds through a series of tests to determine its
 current state, what task has priority at the moment and whether it is
 more important to orient the spacecraft towards the sun (batteries are
@@ -56,7 +56,8 @@ of other components.
 How does it work?
 -----------------
 
-The ECP middleware is currently built on top of D-Bus.
+The ECP middleware is currently built on top of
+`D-Bus <https://www.freedesktop.org/wiki/Software/dbus/>`_.
 D-Bus provides a messaging bus which is stock to many Linux systems,
 provides abstraction of the transport layer and also provides
 the functionality for Pub Sub and RPC style communication.
@@ -65,13 +66,13 @@ Ideally the ECP will completely hide away the details of how D-Bus works
 and its internals. Future implementations may not use D-Bus, therefore
 we should not be tightly coupled to how it behaves.
 
-The ECP API is split into two halves: the low level ECP api and the
-high level message API. The low level ECP api is an abstraction of
+The ECP API is split into two halves: the low level ECP API and the
+high level message API. The low level ECP API is an abstraction of
 underlying messaging layers and patterns. It does not actually define
 any messages but rather defines the tools used to create, send
 and receive those messages. This is where the D-Bus abstraction lives.
-The higher level message api is an application specific abstraction around
-the ECP api. It defines domain specifc messages using the ECP api and
+The higher level message API is an application specific abstraction around
+the ECP API. It defines domain specific messages using the ECP API and
 provides simple functions for sending and receiving those messages.
 
 Basic flow of ECP usage by Subscriber/Client
@@ -86,10 +87,10 @@ Basic flow of ECP usage by Subscriber/Client
    ECP --> DBus: Add Message Filter (dbus_connection_add_filter)
    Client --> ECP: Listen Request (ecp_listen)
    ECP --> DBus: Subscribe (dbus_bus_add_match)
-   DBus --> ECP: Data (callback to _ecp_message_handler)
    Client --> ECP: Loop (ecp_loop)
    ECP --> DBus: Loop (dbus_connection_read_write_dispatch)
-   ECP --> Client: Published Data (callback to message handler)
+   DBus --> ECP: Data (callback to _ecp_message_handler)
+   ECP --> Client: Published Data (callback to message specifc handler)
    @enduml
 
 Basic flow of ECP usage by Publisher/Server
@@ -122,7 +123,7 @@ The ECP middleware will support the following systems:
 Currently only the EPS subsystem is supported.
 
 Under the hood, each system is represented by a "channel" that carries
-channel- and message-specific messages. Processes (clients) use the ECP
+messages specific to the system's functionality. Processes (clients) use the ECP
 to send many-cast messages between themselves. The ECP middleware API is
 "broker agnostic" in that it does not itself require a broker, but the
 ECP implementation may be based on a brokered model. Consumers of the
@@ -147,8 +148,11 @@ The EPC middleware exports a "Stock C" interface in ecp.h and a library
 * The ecp_broadcast() function is used to broadcast a message to all
   processes listening on a particular channel.
 
-* The ecp_loop() function iterates through the event loop for a fixed
-  amount of time or following the execution of a listen callback.
+* The ecp_loop() function iterates through the event loop
+  for a fixed amount of time or until the execution of a listen callback.
+  The event loop is an internal ECP function which abstracts away the
+  work of waiting for new messages and handing them off to the
+  appropriate message handlers.
 
 * The ecp_destroy() function unregisters callbacks, deallocates memory
   and disassociates the client from any message subscriptions
@@ -156,7 +160,9 @@ The EPC middleware exports a "Stock C" interface in ecp.h and a library
 
 The ECP middleware makes no assumptions about the number of processes
 subscribing to or publishing to a particular channel. Messages received
-over the ECP_Listen() interface are not directly acknowledged.
+over the ECP_Listen() interface are not directly acknowledged. It is the
+responsibility of the subscriber to acknowledge any messages received,
+if that is appropriate for the message.
 
 Clients of the ECP middleware are expected to produce or consume messages
 broadcast on a channel; clients may both send and receive messages.
