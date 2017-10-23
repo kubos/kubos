@@ -104,7 +104,6 @@ html_favicon = "images/kubos_favicon.ico"
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Kubosdoc'
 
-
 breathe_projects = {
     "freertos" : "../xml/freertos/os",
     "ipc" : "../xml/ipc",

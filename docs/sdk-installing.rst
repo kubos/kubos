@@ -4,6 +4,8 @@ Installing the Kubos SDK
 What is the Kubos SDK?
 ----------------------
 
+TODO: Confusing and not entirely accurate anymore...
+
 The Kubos SDK is a term used to describe the all of the components used
 that make up a KubOS operating system and the tools used to build this
 project. The Kubos SDK components are made up of:
@@ -218,8 +220,10 @@ with your projects.
 This will start an ssh session in the vagrant box with the Kubos CLI and
 all of the required dependencies installed.
 
-That's it! From here see more on :doc:`creating your first KubOS RT project <first-rt-project>` 
-or :doc:`creating your first KubOS Linux project <first-linux-project>`
+That's it! From here see more on:
+
+  - :doc:`Creating your first KubOS RT project <first-rt-project>`
+  - :doc:`Creating your first KubOS Linux project <first-linux-project>`
 
 After a little bit of usage you may want to look at :doc:`how to upgrade the
 Kubos SDK <sdk-upgrading>`
