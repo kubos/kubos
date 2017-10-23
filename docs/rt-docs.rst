@@ -1,28 +1,26 @@
-KubOS RT Docs
-=============
+KubOS RT
+========
 
-.. raw:: html
+KubOS RT is built on top of `FreeRTOS <http://www.freertos.org/>`__ and is generally used
+to control resource-constrained, ultra-low power devices.
 
-    <iframe width="640" height="480" allowfullscreen
-    src="https://www.youtube.com/embed/WYthDHETmBU">
-    </iframe>
+KubOS RT projects are built into monolithic binaries which are then flashed onto
+the entirety of the endpoint device.
 
-This video is intended to help you set up your Kubos SDK development
-environment and get your first project built and running on an end-point
-device.
-It covers the following tutorial documents:
+Newbie Docs
+-----------
 
-  - :doc:`Installing the Kubos SDK <sdk-installing>`
-  - :doc:`Creating Your First KubOS RT Project <first-rt-project>`
-  
-.. note::
-
-    This video is intended for 100% from scratch users and covers KubOS RT only.
-    
 .. toctree::
-    :caption: KubOS RT Docs
     :maxdepth: 1
     
+    KubOS RT Quickstart Video <rt-quickstart>
     Creating Your First KubOS RT Project <first-rt-project>
+
+System Guides
+-------------
+
+.. toctree::
+    :maxdepth: 1
+    
     MSP430 Launchpad Guide <msp430-launchpad-guide>
     STM32F4 Discovery Board Guide <stm32f4-discovery-board-guide>

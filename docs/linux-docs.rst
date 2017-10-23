@@ -1,5 +1,14 @@
-KubOS Linux Docs
-================
+KubOS Linux
+===========
+
+KubOS Linux is a custom Linux distribution designed with embedded devices in mind.
+
+It focuses on including only drivers that are useful for space applications (ex. 
+I2C and SPI, rather than display drivers) and multi-layer system validation and 
+recovery logic.
+
+KubOS Linux projects are built into binaries which will run as Linux userspace 
+applications.
 
 Newbie Docs
 -----------

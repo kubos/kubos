@@ -23,7 +23,6 @@ If for some reason Slack won't work for you, feel free to email us at
 info@kubos.co.
 
 .. toctree::
-   :hidden:
 
     First Time Users <first-time-users>
     FAQs and Troubleshooting Tips <faq-troubleshooting>

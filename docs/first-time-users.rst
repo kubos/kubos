@@ -37,5 +37,6 @@ When the target OBC is using KubOS Linux, the output is a custom application bin
     :maxdepth: 1
     
     Installing the Kubos SDK <sdk-installing>
+    KubOS RT Quickstart Tutorial Video <rt-quickstart>
     Creating Your First KubOS RT Project <first-rt-project>
     Creating Your First KubOS Linux Project <first-linux-project>

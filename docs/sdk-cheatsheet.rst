@@ -1,5 +1,5 @@
-SDK Cheatsheet
-==============
+Kubos SDK Cheatsheet
+====================
 
 Creating a Project
 ------------------
