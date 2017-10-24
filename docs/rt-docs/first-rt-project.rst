@@ -7,7 +7,7 @@ using the Kubos SDK.
 Prerequisites
 -------------
 
-:doc:`Install the Kubos SDK <sdk-installing>`
+:doc:`Install the Kubos SDK <../installation-docs/sdk-installing>`
 
 Creating your Project
 ---------------------

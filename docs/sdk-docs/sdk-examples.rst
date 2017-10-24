@@ -278,10 +278,10 @@ References
 ----------
 
 .. [1] :doc:`config.json <sdk-project-config>` - Kubos project file for custom configuration options
-.. [2] :doc:`Kubos Core <kubos-core/index>` - Kubos built-in peripheral device support
-.. [3] :doc:`Kubos HAL <kubos-hal/index>` - Kubos hardware abstraction for interfacing with peripheral devices
-.. [4] :doc:`CSP <libcsp/index>` - (Cubesat Space Protocol) Lightweight communication protocol
-.. [5] `FreeRTOS <http://www.freertos.org/>`__ - The RTOS which KubOS RT is built on
+.. [2] :doc:`Kubos Core <../apis/kubos-core/index>` - Kubos built-in peripheral device support
+.. [3] :doc:`Kubos HAL <../apis/kubos-hal/index>` - Kubos hardware abstraction for interfacing with peripheral devices
+.. [4] :doc:`CSP <../apis/libcsp/index>` - (Cubesat Space Protocol) Lightweight communication protocol
+.. [5] :doc:`FreeRTOS <../apis/freertos/index>` - The RTOS which KubOS RT is built on
 
 .. todo::
 

@@ -29,7 +29,7 @@ The default values for these variables can be found in the configuration header 
 Boot Processing Diagram
 -----------------------
 
-.. figure:: images/kubos_linux_recovery.png
+.. figure:: ../images/kubos_linux_recovery.png
    :alt: Boot Processing Diagram
 
    Boot Processing Diagram

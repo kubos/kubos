@@ -12,5 +12,5 @@ environment and get your first project built and running on an end-point
 device.
 It covers the following tutorial documents:
 
-  - :doc:`Installing the Kubos SDK <sdk-installing>`
+  - :doc:`Installing the Kubos SDK <../installation-docs/sdk-installing>`
   - :doc:`Creating Your First KubOS RT Project <first-rt-project>`

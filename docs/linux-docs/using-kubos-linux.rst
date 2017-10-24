@@ -14,9 +14,9 @@ Reference Documents
 SDK Documentation
 ~~~~~~~~~~~~~~~~~
 
--  :doc:`sdk-installing`
+-  :doc:`../installation-docs/sdk-installing`
 -  :doc:`first-linux-project`
--  :doc:`sdk-reference`
+-  :doc:`../sdk-docs/sdk-reference`
 
 Board-Specific Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -113,7 +113,7 @@ to be manually created. It will reside in the top-level directory of
 the Kubos SDK project.
 
 More information about project configuration can be found in the
-:doc:`sdk-project-config` doc.
+:doc:`../sdk-docs/sdk-project-config` doc.
 
 There are a few relevant configuration options for KubOS Linux:
 

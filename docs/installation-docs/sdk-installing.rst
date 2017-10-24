@@ -152,7 +152,7 @@ virtual machine inside of the host is referred to as the "guest".
 
 .. Note:: There is not a supported method of this for Windows hosts at
   this time, as Windows does not support Linux symlinks. There is an 
-  alternate method for editing files on the SDK listed :doc:`here. <windows-dev-environment>`
+  alternate method for editing files on the SDK listed :doc:`here. <../sdk-docs/windows-dev-environment>`
 
 It is strongly recommended that you create your project in a directory
 on your host that is shared with your box when using a Linux or Mac OS
@@ -219,8 +219,8 @@ all of the required dependencies installed.
 
 That's it! From here see more on:
 
-  - :doc:`Creating your first KubOS RT project <first-rt-project>`
-  - :doc:`Creating your first KubOS Linux project <first-linux-project>`
+  - :doc:`Creating your first KubOS RT project <../rt-docs/first-rt-project>`
+  - :doc:`Creating your first KubOS Linux project <../linux-docs/first-linux-project>`
 
 After a little bit of usage you may want to look at :doc:`how to upgrade the
-Kubos SDK <sdk-upgrading>`
+Kubos SDK <../sdk-docs/sdk-upgrading>`

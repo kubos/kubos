@@ -36,7 +36,7 @@ When the target OBC is using KubOS Linux, the output is a custom application bin
 .. toctree::
     :maxdepth: 1
     
-    Installing the Kubos SDK <sdk-installing>
-    KubOS RT Quickstart Tutorial Video <rt-quickstart>
-    Creating Your First KubOS RT Project <first-rt-project>
-    Creating Your First KubOS Linux Project <first-linux-project>
+    Installing the Kubos SDK <installation-docs/sdk-installing>
+    KubOS RT Quickstart Tutorial Video <rt-docs/rt-quickstart>
+    Creating Your First KubOS RT Project <rt-docs/first-rt-project>
+    Creating Your First KubOS Linux Project <linux-docs/first-linux-project>

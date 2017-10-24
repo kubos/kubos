@@ -1,7 +1,7 @@
 Kubos Middleware
 ================
 
-.. figure:: images/kubos_middleware.png
+.. figure:: ../images/kubos_middleware.png
    :alt: Kubos Middleware
    
 .. todo:: Update all of this once the new architecture is done
@@ -19,4 +19,3 @@ possible.
     :hidden:
     
     Command and Control <command-and-control>
-    Software Updater <kubos-linux-upgrade>

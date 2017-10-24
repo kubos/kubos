@@ -254,9 +254,9 @@ file.
     
     By default, including the ``sensors`` object turns on the following APIs:
     
-    - :doc:`Altimeter <kubos-core/sensors/altimeter>`
-    - :doc:`IMU <kubos-core/sensors/imu>`
-    - :doc:`Temperature <kubos-core/sensors/temperature>`
+    - :doc:`Altimeter <../apis/kubos-core/sensors/altimeter>`
+    - :doc:`IMU <../apis/kubos-core/sensors/imu>`
+    - :doc:`Temperature <../apis/kubos-core/sensors/temperature>`
     
     Without including a corresponding sensor device (ex. HTU21D), these APIs serve only as code stubs.
     
@@ -691,7 +691,7 @@ Command and Control
 
 .. json:object:: cnc
 
-    :doc:`Kubos Command and Control <command-and-control>` configuration
+    :doc:`Kubos Command and Control <../middleware/command-and-control>` configuration
     
     **Note:** `Kubos C2 is currently only supported by KubOS Linux`
     

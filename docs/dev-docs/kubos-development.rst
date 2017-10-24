@@ -11,7 +11,7 @@ If you want to make changes to the Kubos code, perhaps for debugging
 purposes or to support a new peripheral, you'll first need to clone the
 kubos repo and then pass the folder through to your VM:
 
-:doc:`Install the latest version of the Kubos SDK <sdk-installing>`
+:doc:`Install the latest version of the Kubos SDK <../installation-docs/sdk-installing>`
 
 Clone the Kubos repo to your host machine.
 
@@ -53,8 +53,8 @@ The kubos repository is a collection of
 loaded inside the Kubos Vagrant box. They can also be built locally
 using the ``kubos link`` and ``kubos link-target`` commands.
 
-See the :doc:`KubOS RT quick start guide <first-rt-project>` or the
-:doc:`KubOS Linux quick start guide <first-linux-project>` for instructions
+See the :doc:`KubOS RT quick start guide <../rt-docs/first-rt-project>` or the
+:doc:`KubOS Linux quick start guide <../linux-docs/first-linux-project>` for instructions
 on setting up and building Kubos SDK projects.
 
 Linking in a Local Module
