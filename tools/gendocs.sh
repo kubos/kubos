@@ -67,6 +67,7 @@ gendocs_yt_module $kubos_dir/hal/kubos-hal-iobc kubos-hal/kubos-hal-iobc
 gendocs_yt_module $kubos_dir/hal/kubos-hal-linux kubos-hal/kubos-hal-linux
 gendocs_yt_module $kubos_dir/hal/kubos-hal-stm32f4 kubos-hal/kubos-hal-stm32f4
 gendocs_yt_module $kubos_dir/hal/kubos-hal-msp430f5529 kubos-hal/kubos-hal-msp430f5529
+gendocs_yt_module $kubos_dir/radio/radio-api radio-api
 gendocs_yt_module $kubos_dir/telemetry telemetry
 gendocs_yt_module $kubos_dir/telemetry-aggregator telemetry-aggregator
 gendocs_yt_module $kubos_dir/telemetry-storage telemetry-storage
