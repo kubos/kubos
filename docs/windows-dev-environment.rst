@@ -40,7 +40,7 @@ Install the NppFTP plugin using the Plugin Manager.
 Setup
 -----
 
-Find the Vagrant configuration parameters 
+Find the Vagrant configuration parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Go to the install location of the Kubos SDK and bring up your Vagrant. As it initializes, it will output its configuration:
@@ -93,7 +93,7 @@ Configure NppFTP to access the SDK
   + Initial remote directory: "/home/vagrant/"
   + Connection type: SFTP
 
-.. image:: images/NppFTP-config.PNG
+.. image:: images/NppFTP_config.PNG
 
 Usage
 -----

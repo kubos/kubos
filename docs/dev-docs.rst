@@ -1,7 +1,7 @@
 Developer Docs
 ==============
 
-APIs, Contributing to, Coding standards, internal nuts and bolts
+The internal nuts and bolts of Kubos
 
 .. toctree::
     :maxdepth: 1

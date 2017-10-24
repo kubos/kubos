@@ -17,7 +17,7 @@ OBC. They'll just need to upload their user app files onto the board.
 
 Boot-up UML diagram:
 
-.. figure:: images/Linux-UML.png
+.. figure:: images/Linux_UML.png
    :alt: Boot UML Diagram
 
    Boot UML Diagram

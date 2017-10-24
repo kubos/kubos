@@ -23,7 +23,7 @@ and then boot into the new version of KubOS Linux.
 
 The overall flow looks like this:
 
-.. figure:: images/kubos-linux-upgrade.png
+.. figure:: images/kubos_linux_upgrade.png
    :alt: KubOS Linux Upgrade
 
    KubOS Linux Upgrade
