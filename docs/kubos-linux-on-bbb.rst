@@ -4,14 +4,9 @@ KubOS Linux on the Beaglebone Black
 Overview
 --------
 
-.. note:: Just looking to install KubOS Linux onto a Beaglebone Black? See :doc:`installing-linux-bbb`.
+This supplementary document covers specific features and components of KubOS Linux for the Beaglebone Black.
 
-The goal of this document is to create a KubOS Linux installation for the 
-Beaglebone Black that can then run the satellite services (telemetry, payload 
-communication, etc) needed for customers' missions.
-
-The :doc:`Working with the Beaglebone Black <working-with-the-bbb>` doc can then be used to
-create and load a user application on top of the new KubOS Linux install.
+The :doc:`kubos-linux-overview` doc covers the major components of KubOS Linux.
 
 Software Components
 -------------------
@@ -27,62 +22,8 @@ otherwise, it attempts to boot from the microSD card.
 
 U-Boot
 ~~~~~~
-
-`Wiki <https://en.wikipedia.org/wiki/Das_U-Boot>`__
-
-`Site Page <http://www.denx.de/wiki/U-Boot>`__
-
-`Kubos U-Boot Repo <https://github.com/kubostech/uboot>`__
-
-U-Boot, at the most basic level, is responsible for loading the kernel from the
-SD card into the SDRAM. However, it also provides a basic OS and CLI which can
-be used to configure and debug the kernel before it's loaded.
-
-Additionally, we've made some changes to allow us to use it as a kernel upgrade
-and recovery system. At boot time it will check for available upgrade packages
-or a corrupted Linux kernel and will then upgrade or rollback the kernel and
-rootfs as necessary.
-
 This board utilizes U-Boot's SPL feature. A small boot file called "MLO" is
 run and that file then loads the main U-Boot image into SDRAM.
-
-Kernel
-~~~~~~
-
-Linux
-^^^^^
-
-`Version Overview <https://kernelnewbies.org/Linux_4.4>`__
-
-We're using Linux 4.4. This is the current long-term support version (LTS) and
-will be supported until early 2018.
-
-Glibc
-^^^^^
-
-`Overview <https://www.gnu.org/software/libc/>`__
-
-We use the standard GNU C library to build our toolchains. We are currently
-building using v2.23.
-
-BusyBox
-^^^^^^^
-
-`Overview <https://busybox.net/about.html>`__
-
-BusyBox provides many of the common Linux console and shell commands, but in a
-smaller package.
-
-BuildRoot
-~~~~~~~~~
-
-`Overview <https://buildroot.uclibc.org/>`__
-
-The current development tool for building all of the components required for
-running embedded Linux. Using this allows us to pass in a basic configuration
-file and then have all of the required packages and options brought in and
-compiled automatically. This reduces the amount of time to configure KubOS
-Linux for a new board.
 
 KubOS Linux Build Process
 -------------------------
@@ -207,7 +148,6 @@ For example:
 
     $ ./format-aux.sh -i ../kpack-2017.07.21.itb
 
-
 Reset the Global Links
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -230,123 +170,8 @@ module links locally:
     $ cd {project folder}
     $ kubos link -a
 
-Status LEDs
------------
-
-There are four LEDs present on the Beaglebone Black which give some indication of what state
-the board is in. When there is only one blinking LED, the board is running KubOS Linux and
-the system is currently idle. The LEDs will blink in correspondence with CPU and MMC activity.
-If all LEDs are solid, then the system has reached some kind of locked error state.
-
-Connect to the System
----------------------
-
-You should now be able to set up a serial connection to your board and interact
-with the KubOS Linux environment.
-
-You'll need to establish a serial connection with the board in order to connect
-to the console. Set up a serial connection to the board at a baudrate of 115200.
-
-If you have a Kubos Vagrant image currently running, the FTDI connection will
-be automatically passed through. You can use the included minicom configuration
-to quickly connect to the board via the ``minicom kubos`` command in the VM's
-command console.
-
-.. note:: 
-
-    If a Kubos Vagrant image is running, you will be unable to establish a serial
-    connection on your host machine. You must instead connect to the device 
-    through the VM.
-
-::
-
-    $ minicom kubos
-    
-If the board is already powered, hit the ``Enter`` key to display the login dialog.
-
-If you power the board after starting the minicom session, the end of the boot
-messages will look like this:
-
-::
-
-    ...
-    Freeing unused kernel memory: 172K (c0401000 - c042c000)
-    EXT4-fs (mmcblk1p2): re-mounted. Opts: errors=remount-ro,data=ordered
-    EXT4-fs (mmcblk1p3): mounted filesystem with ordered data mode. Opts: (null)
-    EXT4-fs (mmcblk0p1): mounted filesystem with ordered data mode. Opts: (null)
-    Initializing random number generator... random: dd: uninitialized urandom read (512 bytes read, 12 bits of entropy available)
-    done.
-    Starting network: OK
-    Starting kubos-c2-daemon:
-    OK
-    Starting linux-telemetry-service:
-    OK
-    
-    Welcome to KubOS Linux
-    Kubos login: 
-    
-By default, there are two user accounts available: "root" (the superuser), and "kubos" (a normal user).
-Both have a default password of "Kubos123". For more information, see the :ref:`user-accounts` section.
-
 Using KubOS Linux
 -----------------
 
 For information on how to create and run applications on your new KubOS Linux system, see the
 :doc:`working-with-the-bbb` guide.
-
-Upgrade Process
----------------
-
-If you already have KubOS Linux installed on your system, but would like to
-upgrade to the latest version, check out the :ref:`upgrade-installation` section. 
-Alternatively, if you would like to rollback to a previously installed version, 
-refer to the :ref:`upgrade-rollback` section.
-
-Recovery Process
-----------------
-
-Should your KubOS Linux kernel become corrupted (as indicated by failing to
-successfully boot into Linux several times), the system will automatically try
-to recover during the next boot.
-
-It will go through the following steps, if each is present (system will reboot
-after attempting each step):
-
-1. Reload the current version of KubOS Linux from the kpack\*.itb file
-   in the upgrade partition
-2. Reload the previous version of KubOS Linux from the kpack\*.itb file
-   in the upgrade partition
-3. Reload the base version of KubOS Linux from the kpack-base.itb file
-   in the upgrade partition
-4. Boot into the alternate OS
-
-If none of these steps work, then the system will boot into the U-Boot CLI. From
-here, some basic troubleshooting and debugging abilities should be available.
-
-More information about the recovery process and architecture can be found in the
-:doc:`KubOS Linux Recovery doc <kubos-linux-recovery>`
-
-Resetting the Environment
--------------------------
-
-If the system goes through the full recovery process, you will need to reset the environment
-in order to resume the normal boot process.
-
-From the U-Boot CLI:
-
-::
-
-    $ env default bootcmd
-    $ env default bootcount
-    $ env default recovery_available
-    $ saveenv
-    $ reset
-    
-These commands will:
-
-  - Restore the relevant environment variables to their default values
-  - Save the new values to persistent storage
-  - Reboot the system
-  
-As long as a valid kernel and rootfs are available, your system should now successfully boot
-into KubOS Linux.

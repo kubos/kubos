@@ -70,7 +70,7 @@ After the second system upgrade:
 
 Rolling back to a previous version of KubOS Linux uses the same mechanism as :doc:`upgrading to a new version <kubos-linux-upgrade>`. A kpack\*.itb file is broken into its components and then the kernel image is written to the boot partition and the rootfs image is written to the rootfs partition.
 
-**Note** This process will wipe out everything that was previously in the rootfs partition. As a result, all user files should be stored in the userspace partition, which is mapped to the '/home' directory. This userspace partition should not be affected by the Kubos recovery process.
+**Note** This process will wipe out everything that was previously in the rootfs partition. As a result, all user files should be stored in the user space partition, which is mapped to the '/home' directory. This user space partition should not be affected by the Kubos recovery process.
 
 Manual Recovery
 ~~~~~~~~~~~~~~~

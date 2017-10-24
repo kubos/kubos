@@ -29,8 +29,8 @@ Boot-up with storage flow:
 
    Storage Bootup Flow Diagram
 
-OS Installation
----------------
+Software Components
+-------------------
 
 Bootloader #0
 ~~~~~~~~~~~~~
@@ -56,27 +56,29 @@ U-Boot
 
 `Site Page <http://www.denx.de/wiki/U-Boot>`__
 
-U-Boot, at the most basic level, is responsible for loading the kernel
-(zImage) from persistent storage into the SDRAM. However, it also
-provides a basic OS and CLI which can be used to configure and debug the
-kernel before it's loaded.
+`Kubos U-Boot Repo <https://github.com/kubostech/uboot>`__
+
+U-Boot, at the most basic level, is responsible for loading the kernel from the
+SD card into the SDRAM. However, it also provides a basic OS and CLI which can
+be used to configure and debug the kernel before it's loaded.
+
+Additionally, we've made some changes to allow us to use it as a kernel upgrade
+and recovery system. At boot time it will check for available upgrade packages
+or a corrupted Linux kernel and will then upgrade or rollback the kernel and
+rootfs as necessary.
 
 KubOS Linux Kernel
 ~~~~~~~~~~~~~~~~~~
 
-The kernel can be built to support many boards at a time. It is usually
-only constrained by high-level hardware things like CPU architecture
-(ex. ARM). Some systems may need non-standard kernel because of size or
-other constraints.
-
 The kernel is actually composed of multiple components: the main linux
 kernel, the libc library, and the command/utility library.
 
-Mostly we should be able to create and distribute one main kernel that
-all the boards can use.
-
 Using BuildRoot allows us to include tools like BusyBox and glibc with
 the kernel and rootfs at build time.
+
+Due to the portability of Linux, we are able to primarily use a single kernel
+configuration to build the kernel for all target devices, barring a few
+architecture-specific options (ARM, OMAP, etc).
 
 zImage
 ^^^^^^
@@ -166,6 +168,56 @@ directly into the zImage file. However, this capability is largely
 implemented as a support option for older boards and isn't something
 that we should need to use.
 
+Connecting to the System
+------------------------
+
+All supported OBCs have a debug UART connection which is intended as the 
+primary way to connect to the system console.
+
+You'll need to establish a serial connection with the board in order to connect
+to the console. Set up a serial connection to the board at a baudrate of 115200.
+
+If you have a Kubos Vagrant image currently running, the FTDI connection will
+be automatically passed through. You can use the included minicom configuration
+to quickly connect to the board via the ``minicom kubos`` command in the VM's
+command console.
+
+.. note:: 
+
+    If a Kubos Vagrant image is running, you will be unable to establish a serial
+    connection on your host machine. You must instead connect to the device 
+    through the VM.
+
+::
+
+    $ minicom kubos
+    
+If the board is already powered, hit the ``Enter`` key to display the login dialog.
+
+If you power the board after starting the minicom session, the end of the boot
+messages will look like this:
+
+::
+
+    ...
+    Freeing unused kernel memory: 172K (c0401000 - c042c000)
+    EXT4-fs (mmcblk1p2): re-mounted. Opts: errors=remount-ro,data=ordered
+    EXT4-fs (mmcblk1p3): mounted filesystem with ordered data mode. Opts: (null)
+    EXT4-fs (mmcblk0p1): mounted filesystem with ordered data mode. Opts: (null)
+    Initializing random number generator... random: dd: uninitialized urandom read (512 bytes read, 12 bits of entropy available)
+    done.
+    Starting network: OK
+    Starting kubos-c2-daemon:
+    OK
+    Starting linux-telemetry-service:
+    OK
+    
+    Welcome to KubOS Linux
+    Kubos login: 
+    
+By default, there are two user accounts available: "root" (the superuser), and "kubos" (a normal user).
+Both have a default password of "Kubos123". For more information, see the :ref:`user-accounts` section.
+
 User Space
 ----------
 
@@ -248,3 +300,61 @@ the system/device\_table.txt file.
 part of the root file system. As a result, any user definitions that are
 added or changed will need to be re-added or changed after a system
 upgrade or downgrade. This behavior will be changed in the future.
+
+
+Upgrade Process
+---------------
+
+If you already have KubOS Linux installed on your system, but would like to
+upgrade to the latest version, check out the :ref:`upgrade-installation` section. 
+Alternatively, if you would like to rollback to a previously installed version, 
+refer to the :ref:`upgrade-rollback` section.
+
+Recovery Process
+----------------
+
+Should your KubOS Linux kernel become corrupted (as indicated by failing to
+successfully boot into Linux several times), the system will automatically try
+to recover during the next boot.
+
+It will go through the following steps, if each is present (system will reboot
+after attempting each step):
+
+1. Reload the current version of KubOS Linux from the kpack\*.itb file
+   in the upgrade partition
+2. Reload the previous version of KubOS Linux from the kpack\*.itb file
+   in the upgrade partition
+3. Reload the base version of KubOS Linux from the kpack-base.itb file
+   in the upgrade partition
+4. Boot into the alternate OS
+
+If none of these steps work, then the system will boot into the U-Boot CLI. From
+here, some basic troubleshooting and debugging abilities should be available.
+
+More information about the recovery process and architecture can be found in the
+:doc:`KubOS Linux Recovery doc <kubos-linux-recovery>`
+
+Resetting the Environment
+-------------------------
+
+If the system goes through the full recovery process, you will need to reset the environment
+in order to resume the normal boot process.
+
+From the U-Boot CLI:
+
+::
+
+    $ env default bootcmd
+    $ env default bootcount
+    $ env default recovery_available
+    $ saveenv
+    $ reset
+    
+These commands will:
+
+  - Restore the relevant environment variables to their default values
+  - Save the new values to persistent storage
+  - Reboot the system
+  
+As long as a valid kernel and rootfs are available, your system should now successfully boot
+into KubOS Linux.

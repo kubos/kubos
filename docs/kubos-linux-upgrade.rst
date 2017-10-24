@@ -32,7 +32,7 @@ The overall flow looks like this:
 
 User files should not be impacted by upgrade installation as long as
 they remain under the /home directory. This directory maps to the
-userspace partition.
+user space partition.
 
 However, some future releases may cause the Kubos libraries to undergo
 significant changes. In this case, backwards compatilibity is not
