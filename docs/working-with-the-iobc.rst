@@ -26,9 +26,18 @@ Kubos Documentation
 -  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
 -  :doc:`KubOS Linux on iOBC <kubos-linux-on-iobc>` - Steps to
    build and load KubOS Linux for the iOBC
+   
+Status LEDs
+-----------
 
-USB Connection
---------------
+There are four yellow LEDs present on the iOBC which give some indication of what state
+the board is in, along with one red LED which is lit when the system is powered:
+
+-  Three LEDS (solid) - The system is currently running U-Boot
+-  One LED (blinking) - The system is currently running KubOS Linux
+
+Debug Console Connection
+------------------------
 
 The iOBC should be shipped with an FTDI cable. This cable should be
 connected to the programming adapter, which should then be connected to
@@ -177,7 +186,7 @@ direction and value.
 SPI
 ~~~
 
-The external SPI bus is not currently available to the userspace. It
+The external SPI bus is not currently available to the user space. It
 will be added in a future release.
 
 User Data Partition

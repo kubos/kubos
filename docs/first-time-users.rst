@@ -31,7 +31,7 @@ Kubos users develop custom flight software for their OBCs using the Kubos SDK. T
 
 When the target OBC is using KubOS RT, the output of a Kubos project is a full system image, containing both the mission software and the underlying operating system.
 
-When the target OBC is using KubOS Linux, the output is a custom application binary which can then be run from the Linux userspace.
+When the target OBC is using KubOS Linux, the output is a custom application binary which can then be run from the Linux user space.
 
 .. toctree::
     :maxdepth: 1

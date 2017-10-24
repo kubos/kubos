@@ -7,7 +7,7 @@ It focuses on including only drivers that are useful for space applications (ex.
 I2C and SPI, rather than display drivers) and multi-layer system validation and 
 recovery logic.
 
-KubOS Linux projects are built into binaries which will run as Linux userspace 
+KubOS Linux projects are built into binaries which will run as Linux user space 
 applications.
 
 Newbie Docs

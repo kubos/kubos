@@ -26,6 +26,14 @@ Kubos Documentation
 -  :doc:`KubOS Linux on Pumpkin MBM2 <kubos-linux-on-mbm2>` - Steps to
    build and load KubOS Linux for the Pumpkin MBM2
 
+Status LEDs
+-----------
+
+There are four LEDs present on the Pumpkin MBM2 which give some indication of what state
+the board is in. When there is only one blinking LED, the board is running KubOS Linux and
+the system is currently idle. The LEDs will blink in correspondence with CPU and MMC activity.
+If all LEDs are solid, then the system has reached some kind of locked error state.
+
 USB Connection
 --------------
 

@@ -25,15 +25,12 @@ Board-Specific Documentation
 -  :doc:`working-with-the-iobc`
 -  :doc:`working-with-the-mbm2`
 
-USB Connection
---------------
+Debug Console
+-------------
 
 Each board will have some debug port available, which will then be connected
 to your computer via USB. See the appropriate `Working with {board}` document
 for more information.
-
-Debug Console
--------------
 
 If the target board is correctly connected to your host computer, you should 
 see a `/dev/ttyUSB\*` device in your vagrant VM. The VM is set up to

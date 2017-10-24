@@ -24,11 +24,12 @@ Kubos Documentation
 -  :doc:`first-linux-project` - Basic tutorial for creating your first KubOS
    Linux SDK project
 -  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
--  :doc:`KubOS Linux on the Beaglebone Black <kubos-linux-on-bbb>` - Steps to
-   build and load KubOS Linux for the Beaglebone Black
+-  :doc:`installing-linux-bbb` - Instructions for installing KubOS Linux
+-  :doc:`KubOS Linux on the Beaglebone Black <kubos-linux-on-bbb>` - Underlying
+   operating system features and instructions for building KubOS Linux
 
-USB Connection
---------------
+Debug Console Connection
+------------------------
 
 As documented in section 7.5 of the :title:`Beaglebone Black System
 Reference Manual`, an FTDI cable can be connected to the serial debug
@@ -36,6 +37,14 @@ connector in order to establish a debug console connection.
 
 This connection will be passed through to a Kubos Vagrant image as
 `/dev/FTDI`.
+
+Status LEDs
+-----------
+
+There are four LEDs present on the Beaglebone Black which give some indication of what state
+the board is in. When there is only one blinking LED, the board is running KubOS Linux and
+the system is currently idle. The LEDs will blink in correspondence with CPU and MMC activity.
+If all LEDs are solid, then the system has reached some kind of locked error state.
 
 Peripherals
 -----------
