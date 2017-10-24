@@ -7,6 +7,8 @@ Overview
 This document covers the KubOS Linux features which are specific to the
 ISIS-OBC target, also known as the iOBC.
 
+Please refer to :doc:`using-kubos-linux` for a general guide to using KubOS Linux.
+
 Reference Documents
 -------------------
 

@@ -27,8 +27,7 @@ Reference Documents
 
 -  :doc:`Main HAL API documentation <kubos-hal/index>` - Overview of
    the high-level HAL. Useful for things like k\_uart\_write.
--  FIXME: `MSP430F5 Specific HAL API
-   documentation <./kubos-hal/kubos-hal-msp430f5529/index.html>`__ -
+-  :doc:`MSP430F5 Specific HAL API documentation <kubos-hal/kubos-hal-msp430f5529/index>` -
    Specifics for the MSP430 version of the HAL. Useful for things like
    the configuration options.
 -  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
@@ -113,9 +112,8 @@ Configuration Notes
 The MSP430's inter-device communication methods do not support all of
 the same options as the STM32F4. For example, the MSP430 does not
 support 1-wire half-duplex SPI communication. Please refer to the User's
-Guide or the FIXME: `MSP430's HAL
-Documentation <./kubos-hal/kubos-hal-msp430f5529/index.html>`__ for all
-of the supported options.
+Guide or the :doc:`MSP430's HAL Documentation <kubos-hal/kubos-hal-msp430f5529/index>` 
+for all of the supported options.
 
 `UART <kubos-hal/uart_api.html#_CPPv29KUARTConf>`__ - Word length - Does not
 support 9-bit mode

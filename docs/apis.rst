@@ -1,13 +1,18 @@
 Kubos APIs
 ==========
 
-Kubos Core: APIs for supported sensors
+The Kubos SDK provides a variety of APIs to help with the development of mission software:
 
-Kubos HAL: Hardware interface abstractions (I2C, SPI, etc)
+  - :doc:`Kubos Core <kubos-core/index>` - APIs for supported sensors and devices, built on top of the Kubos HAL
+  - :doc:`Kubos HAL <kubos-hal/index>` - Hardware interface abstractions (I2C, SPI, etc)
+  - :doc:`Kubos IPC <ipc/index>` - Abstracts interprocess communication for KubOS Linux systems
+  - :doc:`Kubos Telemetry <telemetry/index>` - Offers a convenient interface for requesting and delivering 
+    telemetry data from system components
+    
+Some third-party APIs are also included with the Kubos SDK:
 
-Kubos IPC: w/e this is
-
-Kubos Telemetry: telemetry stuff...
+  - :doc:`CSP (Cubesat Space Protocol) <libcsp/index>` - A small protocol stack targeting embedded systems
+  - :doc:`FreeRTOS <freertos/index>` - The real-time operating system on which KubOS RT is built
 
 .. toctree::
     :caption: APIs

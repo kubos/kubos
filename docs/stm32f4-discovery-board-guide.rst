@@ -21,8 +21,7 @@ These are the two most useful documents to have while working with the STM32F4:
 
 -  :doc:`Main HAL API documentation <./kubos-hal/index>` - Overview of
    the high-level HAL. Useful for things like k\_uart\_write.
--  FIXME:`STM32F4 Specific HAL API
-   documentation <./kubos-hal/kubos-hal-stm32f4/index.html>`__ -
+-  :doc:`STM32F4 Specific HAL API documentation <kubos-hal/kubos-hal-stm32f4/index>` -
    Specifics for the STM32F4 version of the HAL. Useful for things like
    the configuration options.
 -  :doc:`Installing the Kubos SDK <sdk-installing>` - Basics of
