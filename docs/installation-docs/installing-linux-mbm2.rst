@@ -1,5 +1,5 @@
-Installing KubOS Linux on a Beaglebone Black
-============================================
+Installing KubOS Linux on a Pumpkin Motherboard Module 2
+========================================================
 
 The KubOS Linux installation process is composed of two high-level steps:
 
@@ -13,13 +13,7 @@ To perform a full default installation, two files are needed:
   
 All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubostech/kubos-linux-build/releases>`__
 
-Download the latest `KubOS_Linux.zip` file and then unzip the files for the Beaglebone Black. They're located in the `KubOS_Linux/{version}/Beaglebone-Black` folder.
-
-.. note::
-
-    The Beaglebone Black can also be used as a development board for the Pumpkin MBM2.
-    If you would like to use it for this purpose, please follow the
-    :doc:`installing-linux-bbb` instead.
+Download the latest `KubOS_Linux.zip` file and then unzip the files for the Pumpkin MBM2. They're located in the `KubOS_Linux/{version}/Pumpin-MBM2` folder.
 
 Pre-Requisites
 --------------
@@ -50,7 +44,7 @@ Using `Etcher <https://etcher.io/>`__:
     in your system.)
   - Click the "Flash!" button to start the flashing process
   
-.. figure:: images/iOBC/etcher.png
+.. figure:: ../images/iOBC/etcher.png
    :alt: Etcher Setup
 
    Etcher Setup
@@ -58,7 +52,7 @@ Using `Etcher <https://etcher.io/>`__:
 It should take roughly 10 minutes for a 4GB image to be loaded onto an SD card.
 
 Once the program has finished successfully, the SD card is ready to be inserted
-into the Beaglebone Black's microSD slot.
+into the Pumpkin MBM2's microSD slot.
 
 Boot into U-Boot
 ~~~~~~~~~~~~~~~~
@@ -90,7 +84,7 @@ Copy/paste these commands:
 
 ::
     
-    setenv bootargs console=ttyS0,115200 root=/dev/mmcblk0p2 ext4 rootwait; fatload mmc 0:1 ${fdtaddr} /beaglebone-black.dtb; fatload mmc 0:1 ${loadaddr} /kernel; bootm ${loadaddr} - ${fdtaddr}
+    setenv bootargs console=ttyS0,115200 root=/dev/mmcblk0p2 ext4 rootwait; fatload mmc 0:1 ${fdtaddr} /pumpkin-mbm2.dtb; fatload mmc 0:1 ${loadaddr} /kernel; bootm ${loadaddr} - ${fdtaddr}
     
 This will cause the board to load KubOS Linux off of the microSD card, allowing us to flash
 the eMMC.
@@ -135,4 +129,4 @@ Using KubOS Linux
 -----------------
 
 For information on how to create and run applications on your new KubOS Linux system, see the
-:doc:`working-with-the-bbb` guide.
+:doc:`../linux-docs/working-with-the-mbm2` guide.

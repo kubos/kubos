@@ -24,9 +24,9 @@ Installation Docs
 .. toctree::
     :maxdepth: 1
     
-    Installing KubOS Linux on Beaglebone Black <installing-linux-bbb>
-    Installing KubOS Linux on ISIS-OBC <installing-linux-iobc>
-    Installing KubOS Linux on Pumpkin MBM2 <installing-linux-mbm2>
+    Installing KubOS Linux on Beaglebone Black <../installation-docs/installing-linux-bbb>
+    Installing KubOS Linux on ISIS-OBC <../installation-docs/installing-linux-iobc>
+    Installing KubOS Linux on Pumpkin MBM2 <../installation-docs/installing-linux-mbm2>
     
 General Guide
 -------------

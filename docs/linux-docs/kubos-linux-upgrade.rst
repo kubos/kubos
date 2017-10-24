@@ -23,7 +23,7 @@ and then boot into the new version of KubOS Linux.
 
 The overall flow looks like this:
 
-.. figure:: images/kubos_linux_upgrade.png
+.. figure:: ../images/kubos_linux_upgrade.png
    :alt: KubOS Linux Upgrade
 
    KubOS Linux Upgrade
@@ -54,7 +54,7 @@ be on and running KubOS Linux.
 
 A Kubos SDK VM should be installed on your host computer and at least
 one shared folder should be set up. Installation instructions can be
-found :doc:`here <sdk-installing>`.
+found :doc:`here <../installation-docs/sdk-installing>`.
 
 Installation
 ~~~~~~~~~~~~

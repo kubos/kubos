@@ -50,7 +50,7 @@ to build Kubos projects:
    
 This documentation section contains the various guides related to using the Kubos SDK:
 
-    - :doc:`sdk-installing` - How to install the SDK onto your host machine
+    - :doc:`../installation-docs/sdk-installing` - How to install the SDK onto your host machine
     - :doc:`sdk-cheatsheet` - A quick guide for the most common SDK tasks
     - :doc:`sdk-reference` - The full list of Kubos CLI commands
     - :doc:`sdk-project-config` - How to configure a Kubos project's settings, dependencies, and underlying hardware information
@@ -60,7 +60,7 @@ This documentation section contains the various guides related to using the Kubo
 .. toctree::
     :hidden:
     
-    Installing the Kubos SDK <sdk-installing>
+    Installing the Kubos SDK <../installation-docs/sdk-installing>
     Kubos SDK Cheat Sheet <sdk-cheatsheet>
     Kubos CLI Command Reference <sdk-reference>
     Kubos Project Configuration <sdk-project-config>

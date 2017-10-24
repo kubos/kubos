@@ -26,7 +26,7 @@ Kubos Documentation
 -  :doc:`first-linux-project` - Basic tutorial for creating your first KubOS
    Linux SDK project
 -  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
--  :doc:`installing-linux-bbb` - Instructions for installing KubOS Linux
+-  :doc:`../installation-docs/installing-linux-bbb` - Instructions for installing KubOS Linux
 -  :doc:`KubOS Linux on the Beaglebone Black <kubos-linux-on-bbb>` - Underlying
    operating system features and instructions for building KubOS Linux
 
@@ -128,8 +128,8 @@ Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 KubOS Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
-For examples and instructions, see the :doc:`kubos-hal/i2c` and
-:doc:`kubos-hal/i2c_api` documents.
+For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
+:doc:`../apis/kubos-hal/i2c_api` documents.
 
 SPI
 ~~~

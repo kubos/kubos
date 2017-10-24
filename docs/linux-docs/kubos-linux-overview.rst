@@ -17,14 +17,14 @@ OBC. They'll just need to upload their user app files onto the board.
 
 Boot-up UML diagram:
 
-.. figure:: images/Linux_UML.png
+.. figure:: ../images/Linux_UML.png
    :alt: Boot UML Diagram
 
    Boot UML Diagram
 
 Boot-up with storage flow:
 
-.. figure:: images/Linux_Boot_Diagram.png
+.. figure:: ../images/Linux_Boot_Diagram.png
    :alt: Storage Bootup Flow Diagram
 
    Storage Bootup Flow Diagram

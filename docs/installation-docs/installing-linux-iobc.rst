@@ -52,7 +52,7 @@ Using `Etcher <https://etcher.io/>`__:
     in your system.)
   - Click the "Flash!" button to start the flashing process
   
-.. figure:: images/iOBC/etcher.png
+.. figure:: ../images/iOBC/etcher.png
    :alt: Etcher Setup
 
    Etcher Setup
@@ -143,7 +143,7 @@ Issue the ``reboot`` command in order to restart the system.
 Hold down any key while the board is restarting. This will exit out of the auto-boot and
 bring up the CLI.
 
-.. figure:: images/iOBC/uboot_console.png
+.. figure:: ../images/iOBC/uboot_console.png
    :alt: U-Boot Console
 
    U-Boot Console
@@ -198,7 +198,7 @@ Using KubOS Linux
 -----------------
 
 For information on how to create and run applications on your new KubOS Linux system, see the
-:doc:`working-with-the-iobc` guide.
+:doc:`../linux-docs/working-with-the-iobc` guide.
 
 
 Non-Default Installation Process
@@ -464,7 +464,7 @@ Issue the ``reboot`` command in order to restart the system.
 Hold down any key while the board is restarting. This will exit out of the auto-boot and
 bring up the CLI.
 
-.. figure:: images/iOBC/uboot_console.png
+.. figure:: ../images/iOBC/uboot_console.png
    :alt: U-Boot Console
 
    U-Boot Console
@@ -480,7 +480,7 @@ Start SAM-BA
 Start up SAM-BA. You'll want to select the at91sam9g20-ISISOBC option from the
 'Select your board' drop-down.
 
-.. figure:: images/iOBC/samba_connection_select.png
+.. figure:: ../images/iOBC/samba_connection_select.png
    :alt: SAM-BA Connection Selection
 
    SAM-BA Connection Selection
@@ -491,7 +491,7 @@ Enable Flashing
 Execute the 'Enable NorFlash' script. This will prep the board to enable
 flashing.
 
-.. figure:: images/iOBC/samba_enable_norflash.png
+.. figure:: ../images/iOBC/samba_enable_norflash.png
    :alt: SAM-BA Enable NorFlash
 
    SAM-BA Enable NorFlash
@@ -505,7 +505,7 @@ Make sure that 'Address' is set to 0xA000.
 
 Click 'Send File'
 
-.. figure:: images/iOBC/samba_send_uboot.png
+.. figure:: ../images/iOBC/samba_send_uboot.png
    :alt: SAM-BA Send U-Boot
 
    SAM-BA Send U-Boot
@@ -523,7 +523,7 @@ Set 'Address' to 0x70000.
 
 Click 'Send File'
 
-.. figure:: images/iOBC/samba_send_dtb.png
+.. figure:: ../images/iOBC/samba_send_dtb.png
    :alt: SAM-BA Send DTB
 
    SAM-BA Send DTB
