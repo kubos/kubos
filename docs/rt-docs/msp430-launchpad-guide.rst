@@ -25,17 +25,16 @@ Reference Documents
 
 **Kubos Documentation:**
 
--  :doc:`Main HAL API documentation <../apis/kubos-hal/index>` - Overview of
-   the high-level HAL. Useful for things like k\_uart\_write.
--  :doc:`MSP430F5 Specific HAL API documentation <../apis/kubos-hal/kubos-hal-msp430f5529/index>` -
-   Specifics for the MSP430 version of the HAL. Useful for things like
-   the configuration options.
 -  :doc:`Installing the Kubos SDK <../installation-docs/sdk-installing>` - Basics of
    setting up the Kubos SDK environment
 -  :doc:`Creating your first KubOS RT project <../rt-docs/first-rt-project>` - Steps to
    create and build a Kubos SDK project
--  :doc:`SDK Command Reference <../sdk-docs/sdk-reference>` - Overview of the
-   common Kubos SDK commands
+-  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
+-  :doc:`Main HAL API documentation <../apis/kubos-hal/index>` - Overview of
+   the high-level HAL. Useful for things like :cpp:func:`k_uart_write`.
+-  :doc:`MSP430F5 Specific HAL API documentation <../apis/kubos-hal/kubos-hal-msp430f5529/index>` -
+   Specifics for the MSP430 version of the HAL. Useful for things like
+   the configuration options.
 
 Pin Definitions
 ---------------
