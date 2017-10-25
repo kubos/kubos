@@ -25,10 +25,12 @@ Kubos Documentation
 
 -  :doc:`first-linux-project` - Basic tutorial for creating your first KubOS
    Linux SDK project
+-  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
--  :doc:`../installation-docs/installing-linux-bbb` - Instructions for installing KubOS Linux
--  :doc:`KubOS Linux on the Beaglebone Black <kubos-linux-on-bbb>` - Underlying
-   operating system features and instructions for building KubOS Linux
+-  :doc:`../installation-docs/installing-linux-iobc` - Instructions for 
+   installing KubOS Linux
+-  :doc:`kubos-linux-on-iobc` - Underlying operating system features and 
+   instructions for building KubOS Linux
 
 Debug Console Connection
 ------------------------
