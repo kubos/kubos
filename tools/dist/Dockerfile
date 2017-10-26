@@ -1,11 +1,10 @@
-FROM phusion/baseimage:0.9.18
+FROM phusion/baseimage:0.9.22
 
 MAINTAINER kyle@kubos.co
 
 RUN add-apt-repository -y ppa:team-gcc-arm-embedded/ppa
 RUN add-apt-repository -y ppa:george-edison55/cmake-3.x
 RUN add-apt-repository -y ppa:git-core/ppa
-RUN add-apt-repository -y ppa:fkrull/deadsnakes-python2.7
 
 RUN apt-get update -y
 
@@ -29,7 +28,7 @@ RUN echo "Installing KubOS Linux Toolchain"
 RUN apt-get install -y minicom
 RUN apt-get install -y libc6-i386 lib32stdc++6 lib32z1
 
-RUN wget http://portal.kubos.co/bin/iobc_toolchain.tar.gz
+RUN wget https://s3.amazonaws.com/kubos-provisioning/iobc_toolchain.tar.gz
 RUN tar -xf ./iobc_toolchain.tar.gz -C /usr/bin
 RUN rm ./iobc_toolchain.tar.gz
 
