@@ -42,10 +42,15 @@ RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
 RUN mkdir -p /home/vagrant/.kubos
 
+ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin"
+
+# D-Bus setup/init stufff
+# Create a D-bus init script and put the conf in place
 RUN mkdir -p /etc/my_init.d
 ADD dbus_environment.sh /etc/my_init.d/dbus_environment.sh
 RUN chmod +x /etc/my_init.d/dbus_environment.sh
-
 ADD kubos.conf /etc/dbus-1/kubos.conf
 
-ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin"
+# Export neccesary env variables
+ENV DBUS_SESSION_BUS_ADDRESS "unix:path=/tmp/kubos"
+ENV DBUS_STARTER_BUS_TYPE "session"
