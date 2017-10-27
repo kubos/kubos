@@ -16,8 +16,5 @@
     },
     "testTargets":[
         "x86-linux-native"
-    ],
-    "scripts": {
-        "preTest": "./scripts/pretest.sh"
-    }
+    ]
 }

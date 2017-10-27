@@ -15,7 +15,7 @@ RUN apt-get install -y gcc-arm-embedded
 RUN apt-get install -y git
 RUN apt-get install -y cmake
 RUN apt-get install -y gcc-msp430 gdb-msp430 msp430-libc
-RUN apt-get install -y libdbus-1-dev
+RUN apt-get install -y libdbus-1-dev dbus
 RUN apt-get install -y unzip wget
 
 #do the pip setup and installation things
@@ -41,5 +41,11 @@ RUN pip install cryptography==1.9
 RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
 RUN mkdir -p /home/vagrant/.kubos
+
+RUN mkdir -p /etc/my_init.d
+ADD dbus_environment.sh /etc/my_init.d/dbus_environment.sh
+RUN chmod +x /etc/my_init.d/dbus_environment.sh
+
+ADD kubos.conf /etc/dbus-1/kubos.conf
 
 ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin"
