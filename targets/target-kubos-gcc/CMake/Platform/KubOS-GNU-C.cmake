@@ -12,9 +12,12 @@ endif()
 # But it is more optimal than including a custom .cmake in every project that needs d-bus
 # One day we will have a better method for including external libs....
 if(TARGET_LIKE_KUBOS_LINUX)
-    # Two dbus includes
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include")
-    set(GLOBALLY_LINKED_TARGET_LIBS "${GLOBALLY_LINKED_TARGET_LIBS} -ldbus-1")
+    # For now only include these in x86 linux targets
+    # Because we haven't included d-bus in the other target toolchains yet
+    if(TARGET_LIKE_X86)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I/usr/include/dbus-1.0 -I/usr/lib/x86_64-linux-gnu/dbus-1.0/include")
+        set(GLOBALLY_LINKED_TARGET_LIBS "${GLOBALLY_LINKED_TARGET_LIBS} -ldbus-1")
+    endif()
 endif()
 
 # Override the link rules:
@@ -43,4 +46,3 @@ set(CMAKE_INCLUDE_SYSTEM_FLAG_ASM  "-isystem ")
 if(YOTTA_CFG_DEBUG_OPTIONS_COVERAGE)
     set(CMAKE_C_LINK_EXECUTABLE         "${CMAKE_C_LINK_EXECUTABLE} -fprofile-arcs -lgcov")
 endif()
-
