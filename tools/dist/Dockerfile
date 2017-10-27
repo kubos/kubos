@@ -1,3 +1,5 @@
+# kubostech/kubos-dev:0.0.6
+
 FROM phusion/baseimage:0.9.22
 
 MAINTAINER kyle@kubos.co
@@ -18,6 +20,9 @@ RUN apt-get install -y gcc-msp430 gdb-msp430 msp430-libc
 RUN apt-get install -y libdbus-1-dev dbus
 RUN apt-get install -y unzip wget
 
+# Legacy BBB toolchain
+RUN apt-get install -y crossbuild-essential-armhf gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+
 #do the pip setup and installation things
 RUN easy_install pip
 RUN pip install --upgrade pip
@@ -32,6 +37,10 @@ RUN wget https://s3.amazonaws.com/kubos-provisioning/iobc_toolchain.tar.gz
 RUN tar -xf ./iobc_toolchain.tar.gz -C /usr/bin
 RUN rm ./iobc_toolchain.tar.gz
 
+RUN wget https://s3.amazonaws.com/kubos-provisioning/bbb_toolchain.tar.gz
+RUN tar -xf ./bbb_toolchain.tar.gz -C /usr/bin
+RUN rm ./bbb_toolchain.tar.gz
+
 RUN pip install pysocks
 RUN pip install mock
 RUN pip install --upgrade setuptools
@@ -42,7 +51,7 @@ RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
 RUN mkdir -p /home/vagrant/.kubos
 
-ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin"
+ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"
 
 # D-Bus setup/init stufff
 # Create a D-bus init script and put the conf in place
