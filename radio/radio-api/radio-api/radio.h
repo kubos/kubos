@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 
+/* Define the global structures/enumerators */
 /**
  * Radio function return values
  */
@@ -62,6 +63,13 @@ typedef struct
     uint8_t ssid;
 } ax25_callsign;
 
+/* Define the radio-specific structures/enumerators */
+#if defined(YOTTA_CFG_RADIO_TRXVU) && !defined(HAVE_RADIO)
+#define HAVE_RADIO
+#include <trxvu-radio-api/radio.h>
+#endif
+
+/* Define the global functions */
 /**
  * Initialize the radio interface
  * @return KRadioStatus RADIO_OK if OK, error otherwise
@@ -74,10 +82,10 @@ void k_radio_terminate(void);
 /**
  * Configure the radio
  * @note This function might not be implemented for all radios. See specific radio API documentation for configuration availability and structure
- * @param [in] radio_config Pointer to the radio configuration structure
+ * @param [in] config Pointer to the radio configuration structure
  * @return KRadioStatus RADIO_OK if OK, error otherwise
  */
-KRadioStatus k_radio_configure(uint8_t * radio_config);
+KRadioStatus k_radio_configure(radio_config * config);
 /**
  * Reset the radio
  * @note This function might not be implemented for all radios
@@ -99,7 +107,7 @@ KRadioStatus k_radio_send(char * buffer, int len, uint8_t * response);
  * @param [out] len Length of the received message
  * @return KRadioStatus RADIO_OK if a message was received successfully, RADIO_RX_EMPTY if there are no messages to receive, error otherwise
  */
-KRadioStatus k_radio_recv(char * buffer, uint8_t * len);
+KRadioStatus k_radio_recv(radio_rx_message * buffer, uint8_t * len);
 /**
  * Read radio telemetry values
  * @note See specific radio API documentation for available telemetry types
@@ -107,6 +115,6 @@ KRadioStatus k_radio_recv(char * buffer, uint8_t * len);
  * @param [in] type Telemetry packet to read
  * @return KRadioStatus RADIO_OK if OK, error otherwise
  */
-KRadioStatus k_radio_get_telemetry(uint8_t * buffer, uint8_t type);
+KRadioStatus k_radio_get_telemetry(radio_telem * buffer, RadioTelemType type);
 
 /* @} */
