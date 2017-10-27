@@ -98,6 +98,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # html_static_path = []
 
 html_favicon = "images/kubos_favicon.ico"
+html_show_sphinx = False
 
 # -- Options for HTMLHelp output ------------------------------------------
 

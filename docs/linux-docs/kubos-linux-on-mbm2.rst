@@ -43,6 +43,8 @@ Build the OS Files
     VirtualBox does not support hard links in shared folders, which are crucial in order to complete
     the build.
 
+:doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
+
 Create new folder
 
 ::

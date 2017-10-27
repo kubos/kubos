@@ -50,6 +50,8 @@ Build the OS Files
     The OS files cannot be built using a `synced folder <https://www.vagrantup.com/docs/synced-folders/>`__ in a Vagrant box (or regular VM).
     VirtualBox does not support hard links in shared folders, which are crucial in order to complete
     the build.
+    
+:doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
 
 Create new folder
 
