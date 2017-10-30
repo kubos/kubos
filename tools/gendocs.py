@@ -11,15 +11,17 @@ echo "OUTPUT_DIRECTORY={2}";
 echo "XML_OUTPUT=.";) | doxygen -"""
 
 # DOCS_DIRS = [
-# "kubos-core", 
-# "libcsp", 
-# "freertos/os", 
+# "kubos-core",
+# "libcsp",
+# "freertos/os",
 # "services/telemetry/telemetry",
 # "services/telemetry/telemetry-linux",
 # "telemetry-aggregator",
 # "telemetry-storage"]
 
 DOCS_DIRS = [
+    "eps/eps-api",
+    "evented-control",
     "ipc",
     "freertos/os",
     "libcsp",

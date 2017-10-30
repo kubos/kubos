@@ -69,6 +69,9 @@ class KubosBuilder(object):
         module = next((m for m in self.kb.modules() if m.yotta_name() == module_name), None)
         target = next((t for t in self.kb.targets() if t.yotta_name() == target_name), None)
         if module and target:
+            if 'testTargets' not in module.yotta_data:
+                print("Please define testTargets for %s" % (module.yotta_name()))
+                return 1
             if target.yotta_name() not in module.yotta_data['testTargets']:
                 return 0
             print('Testing %s' % module.yotta_name())
@@ -189,7 +192,7 @@ def main():
 
     args = parser.parse_args()
     builder = KubosBuilder()
-    ret = 0 
+    ret = 0
 
     if not args.local:
         print("Running kubos update..")
