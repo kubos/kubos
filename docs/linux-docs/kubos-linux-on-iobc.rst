@@ -1,5 +1,5 @@
-KubOS Linux on the ISIS iOBC
-============================
+Building KubOS Linux for the ISIS-OBC
+=====================================
 
 Overview
 --------
