@@ -1,5 +1,5 @@
-KubOS Linux on the Beaglebone Black
-===================================
+Building KubOS Linux for the Beaglebone Black
+=============================================
 
 Overview
 --------

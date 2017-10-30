@@ -55,6 +55,6 @@ SysAdmin Docs
     KubOS Linux Overview <kubos-linux-overview>
     KubOS Linux Upgrades <kubos-linux-upgrade>
     KubOS Linux Recovery <kubos-linux-recovery>
-    KubOS Linux on Beaglebone Black <kubos-linux-on-bbb>
-    KubOS Linux on iOBC <kubos-linux-on-iobc>
-    KubOS Linux on Pumpkin MBM2 <kubos-linux-on-mbm2>
+    Building KubOS Linux for the Beaglebone Black <kubos-linux-on-bbb>
+    Building KubOS Linux for the ISIS-OBC <kubos-linux-on-iobc>
+    Building KubOS Linux for Pumpkin MBM2 <kubos-linux-on-mbm2>

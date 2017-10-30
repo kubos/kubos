@@ -1,5 +1,5 @@
-KubOS Linux on the Pumpkin MBM2
-===============================
+Building KubOS Linux for the Pumpkin MBM2
+=========================================
 
 Overview
 --------
