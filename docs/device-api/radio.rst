@@ -73,11 +73,13 @@ Sending a Message
 In order to write a message to the radio's transmit buffer, call the ``k_radio_send`` function.
 
 The function takes three parameters:
+
 - A pointer to the message to be sent
 - The length of the message
 - A pointer to a response byte (varies by radio. For example, returning the number of bytes written)
 
 The function will return one of two values:
+
 - RADIO_OK - Indicating a message was successfully received
 - RADIO_ERROR - Indicating that something went wrong during the send process
 
@@ -100,10 +102,12 @@ Receiving a Message
 In order to read a message from a radio's receive buffer, call the ``k_radio_recv`` function.
 
 The function takes two parameters:
+
 - A pointer to a ``radio_rx_message`` structure where the message will be put
 - A pointer to a variable which will be updated to contain the length of the message received.
 
 The function will return one of three values:
+
 - RADIO_OK - Indicating a message was successfully received
 - RADIO_RX_EMPTY - Indicating there are no messages to receive
 - RADIO_ERROR - Indicating that something went wrong during the receive process

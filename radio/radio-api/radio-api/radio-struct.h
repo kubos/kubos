@@ -58,3 +58,4 @@ typedef struct
      */
     uint8_t ssid;
 } ax25_callsign;
+/* @} */
