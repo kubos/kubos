@@ -1,0 +1,20 @@
+{
+    "license":"Apache-2.0",
+    "name":"evented-control",
+    "repository":{
+        "url":"git://github.com/kubostech/evented-control",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "homepage":"https://github.com/kubostech/evented-control",
+    "dependencies":{
+      "eps-api" : "kubostech/eps-api~0.1.0"
+    },
+    "testDependencies":{
+        "cmocka":"kubostech/cmocka",
+        "csp":"kubostech/libcsp"
+    },
+    "testTargets":[
+        "x86-linux-native"
+    ]
+}

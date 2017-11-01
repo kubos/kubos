@@ -4,8 +4,12 @@ Kubos Device APIs
 The Kubos SDK provides a selection of device APIs to make interfacing with external peripherals quick and convenient.
 
 Supported devices:
-  - Radios 
-  
+  - EPS
+
+    - Currently only high level interface and stubbed implementation exists
+
+  - Radios
+
     - `ISIS TRXVU <https://www.isispace.nl/product/isis-uhf-downlink-vhf-uplink-full-duplex-transceiver/>`__
 
 .. toctree::
@@ -18,4 +22,5 @@ Supported devices:
    :caption: Device APIs
    :name: device-apis
 
+   eps_api
    radio_api

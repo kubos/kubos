@@ -1,0 +1,17 @@
+{
+  "name": "kubos-eps-example",
+  "version": "0.1.0",
+  "bin": "./source",
+  "description": "Example app interacting with eps.",
+  "repository": {
+    "url": "ssh://git@github.com/kubostech/kubos-eps-example",
+    "type": "git"
+  },
+  "homepage": "https://github.com/kubostech/kubos-eps-example",
+  "license": "Apache-2.0",
+  "bin" : "./source",
+  "dependencies":{
+    "eps-api":"kubostech/eps-api#~0.1.0",
+    "evented-control":"kubostech/evented-control#~0.1.0"    
+  }
+}
