@@ -22,51 +22,15 @@
 #pragma once
 
 #include <stdint.h>
-
-/* Define the global structures/enumerators */
-/**
- * Radio function return values
- */
-typedef enum {
-    /** Function call completed successfully */
-    RADIO_OK = 0,
-    /** Radio receive buffer is empty */
-    RADIO_RX_EMPTY,
-    /** Generic radio error */
-    RADIO_ERROR,
-    /** Function input parameter is invalid */
-    RADIO_ERROR_CONFIG
-} KRadioStatus;
-
-/**
- * Radio reset types
- */
-typedef enum {
-    /** Perform hardware-level radio reset */
-    RADIO_HARD_RESET,
-    /** Perform software radio reset */
-    RADIO_SOFT_RESET
-} KRadioReset;
-
-/**
- * AX.25 call-sign structure
- */
-typedef struct
-{
-    /**
-     * Six character station call-sign
-     */
-    uint8_t ascii[6];
-    /**
-     * One byte station SSID value
-     */
-    uint8_t ssid;
-} ax25_callsign;
+#include "radio-struct.h"
 
 /* Define the radio-specific structures/enumerators */
 #if defined(YOTTA_CFG_RADIO_TRXVU) && !defined(HAVE_RADIO)
 #define HAVE_RADIO
 #include <trxvu-radio-api/radio.h>
+#endif
+#ifndef HAVE_RADIO
+#error No radio defined!
 #endif
 
 /* Define the global functions */

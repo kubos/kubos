@@ -50,8 +50,8 @@ For example:
 Run-Time Radio Configuration
 ----------------------------
 
-Some radios may support or require that the radio be configured during run-time. This can be done by passing a pointer to the
-appropriate configuration structure to the ``k_radio_configure`` function.
+Some radios may support or require that the radio be configured during run-time. This can be done by passing a pointer to 
+a ``radio_config`` structure to the ``k_radio_configure`` function.
 
 Unneeded configuration parameters may be left with zero values to indicate that they should not be changed.
 
@@ -60,14 +60,13 @@ For example:
 .. code-block:: c
 
     #include "radio-api/radio.h"
-    #include "example-radio-api/radio.h"
     
-    example_radio_config config;
+    radio_config config;
     config.data_rate = RADIO_RATE_1200;
-    strncpy(config.to.ascii, "MAJORT", sizeof(((ax25_callsign *)0)->ascii));
-    strncpy(config.from.ascii, "HMLTN1", sizeof(((ax25_callsign *)0)->ascii));
+    strncpy(config.to.ascii, "MAJORT", sizeof(config.to.ascii);
+    strncpy(config.from.ascii, "HMLTN1", sizeof(config.from.ascii);
 
-    k_radio_configure((uint8_t *) &config);
+    k_radio_configure(&config);
     
 Sending a Message
 -----------------
@@ -101,7 +100,7 @@ Receiving a Message
 In order to read a message from a radio's receive buffer, call the ``k_radio_recv`` function.
 
 The function takes two parameters:
-- A pointer to a storage buffer where the message should be put
+- A pointer to a ``radio_rx_message`` structure where the message will be put
 - A pointer to a variable which will be updated to contain the length of the message received.
 
 The function will return one of three values:
@@ -116,7 +115,7 @@ For example:
     #include "radio-api/radio.h"
     
     KRadioStatus status;
-    uint8_t buffer[256];
+    radio_rx_message buffer;
     uint8_t len;
 
-    status = k_radio_recv(buffer, &len);
+    status = k_radio_recv(&buffer, &len);
