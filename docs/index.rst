@@ -6,8 +6,8 @@ libraries necessary to quickly bring up space ready software. We
 leverage multiple existing open source projects like FreeRTOS and CSP,
 along with our own custom framework and SDK.
 
-Looking to build an application on Kubos? Check out our :doc:`KubOS RT 
-quick start guide <first-rt-project>` or our :doc:`KubOS Linux quick 
+Looking to build an application on Kubos? Check out our :doc:`KubOS RT
+quick start guide <first-rt-project>` or our :doc:`KubOS Linux quick
 start guide <first-linux-project>`
 
 Having issues? Want a new feature? `Come talk to
@@ -32,7 +32,7 @@ It covers the following tutorial documents:
 
   - :doc:`Installing the Kubos SDK <sdk-installing>`
   - :doc:`Creating Your First KubOS RT Project <first-rt-project>`
-  
+
 .. note::
 
     This video is intended for 100% from scratch users and covers KubOS RT only.
@@ -94,18 +94,18 @@ It covers the following tutorial documents:
 .. toctree::
    :caption: Kubos APIs
    :hidden:
-   
+
     Device Interfaces <device-api/index>
+    Evented Control Plane <evented-control/index>
     Kubos Core <kubos-core/index>
     Kubos HAL <kubos-hal/index>
     Kubos IPC <ipc/index>
     Kubos Telemetry <telemetry/index>
-    
-  
+
 .. toctree::
    :caption: Third-Party APIs
    :hidden:
-   
+
     CSP <libcsp/index>
     FreeRTOS <freertos/index>
 
