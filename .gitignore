@@ -63,3 +63,4 @@ upload.tar.gz
 .*.sw*
 vm/.vagrant/
 .vscode
+.projectile
