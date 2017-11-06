@@ -1,10 +1,7 @@
 Kubos Middleware
 ================
-
-.. figure:: ../images/kubos_middleware.png
-   :alt: Kubos Middleware
    
-.. todo:: Update all of this once the new architecture is done
+.. todo:: Architecture diagram and component overview
 
 The Kubos middleware sits on top of the desired operating system.
 Its goal is to simplify and automate intra-system processes, making
@@ -19,3 +16,4 @@ possible.
     :hidden:
     
     Command and Control <command-and-control>
+    Evented Control (ECP) <evented-control>
