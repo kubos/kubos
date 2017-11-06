@@ -106,6 +106,8 @@ html_show_sphinx = False
 htmlhelp_basename = 'Kubosdoc'
 
 breathe_projects = {
+    "eps-api" : "../xml/eps/eps-api",
+    "evented-control" : "../xml/evented-control",
     "freertos" : "../xml/freertos/os",
     "ipc" : "../xml/ipc",
     "libcsp" : "../xml/libcsp",

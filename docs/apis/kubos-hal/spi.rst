@@ -12,7 +12,7 @@ use.
 
 .. code-block:: c
 
-    KSPIConf conf = { 
+    KSPIConf conf = {
         .role = K_SPI_MASTER,
         .direction = K_SPI_DIRECTION_2LINES,
         .data_size = K_SPI_DATASIZE_8BIT,
