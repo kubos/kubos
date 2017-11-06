@@ -40,8 +40,17 @@ RT project.
 Method 2: Cloning a Project
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to copy an existing Kubos project from the internet, you will
-need to clone and link the necessary files. For example:
+We have also created several different example Kubos projects which can
+be used as starting points.
+
+- `CSP example included by default with 'kubos init -l' <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example>`__
+- `TCP Receive <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__
+- `TCP Send <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcptx>`__
+- `UART Receive <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-uartrx>`__
+- `UART Send <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-uarttx>`__
+
+If you would like to use one of our projects, you will need to clone the main repo and
+then link the necessary files. For example:
 
 ::
 

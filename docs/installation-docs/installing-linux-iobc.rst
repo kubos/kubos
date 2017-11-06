@@ -1,6 +1,35 @@
 Installing KubOS Linux on an ISIS-OBC
 =====================================
 
+Overview
+--------
+
+This document covers the steps required to install KubOS Linux onto an iOBC.
+
+Reference Documents
+-------------------
+
+iOBC Documentation
+~~~~~~~~~~~~~~~~~~
+
+The :title:`ISIS-OBC Quickstart Guide` should have been packaged with the iOBC
+and is a useful document for learning what each of the hardware
+components are, how to connect them, and what drivers need to be
+installed to support them.
+
+Kubos Documentation
+~~~~~~~~~~~~~~~~~~~
+
+-  :doc:`../linux-docs/kubos-linux-on-iobc` - Steps to build KubOS Linux
+-  :doc:`../linux-docs/first-linux-project` - Basic tutorial for creating your first KubOS
+   Linux SDK project
+-  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
+-  :doc:`../linux-docs/using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`../linux-docs/working-with-the-iobc` - Guide for interacting with iOBC-specific features
+
+Components
+----------
+
 The KubOS Linux installation process is composed of two high-level steps:
 
   - Flashing the SD card

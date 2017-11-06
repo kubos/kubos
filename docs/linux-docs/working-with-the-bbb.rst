@@ -27,10 +27,8 @@ Kubos Documentation
    Linux SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
--  :doc:`../installation-docs/installing-linux-iobc` - Instructions for 
-   installing KubOS Linux
--  :doc:`kubos-linux-on-iobc` - Underlying operating system features and 
-   instructions for building KubOS Linux
+-  :doc:`kubos-linux-on-bbb` - Steps to build KubOS Linux for the Beaglebone Black
+-  :doc:`../installation-docs/installing-linux-bbb` - Steps to install KubOS Linux
 
 Debug Console Connection
 ------------------------
