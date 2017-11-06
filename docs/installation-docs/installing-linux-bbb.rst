@@ -1,6 +1,35 @@
 Installing KubOS Linux on a Beaglebone Black
 ============================================
 
+Overview
+--------
+
+This document covers the steps required to install KubOS Linux onto a Beaglebone Black.
+
+Reference Documents
+-------------------
+
+Beaglebone Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- `Beaglebone Black Web Page <https://beagleboard.org/black>`__
+- `Beaglebone Black Wiki <http://elinux.org/Beagleboard:BeagleBoneBlack>`__
+- `Beaglebone Black Hardware Diagrams <http://beagleboard.org/Support/bone101/#hardware>`__
+- `Beaglebone Black System Reference Manual Rev C <http://static6.arrow.com/aropdfconversion/8fff89aa85f5c451318cbdee2facd9c9fac36872/bbb_srm.pdf>`__
+
+Kubos Documentation
+~~~~~~~~~~~~~~~~~~~
+
+-  :doc:`../linux-docs/kubos-linux-on-iobc` - Steps to build KubOS Linux for the iOBC
+-  :doc:`../linux-docs/first-linux-project` - Basic tutorial for creating your first KubOS
+   Linux SDK project
+-  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
+-  :doc:`../linux-docs/using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`../linux-docs/working-with-the-bbb` - Guide for interacting with BBB-specific features
+   
+Components
+----------
+
 The KubOS Linux installation process is composed of two high-level steps:
 
   - Flashing the eMMC

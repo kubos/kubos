@@ -1,6 +1,34 @@
 Installing KubOS Linux on a Pumpkin Motherboard Module 2
 ========================================================
 
+Overview
+--------
+
+This document covers the steps required to install KubOS Linux onto a Pumpkin MBM2.
+
+Reference Documents
+-------------------
+
+Pumpkin Documentation
+~~~~~~~~~~~~~~~~~~~~~
+
+The :title:`CubeSat Kit Motherboard Module (MBM) 2` reference document
+is available from Pumpkin and is a useful document for learning what 
+each of the hardware components are and how they are connected.
+
+Kubos Documentation
+~~~~~~~~~~~~~~~~~~~
+
+-  :doc:`../linux-docs/kubos-linux-on-mbm2` - Steps to build KubOS Linux
+-  :doc:`../linux-docs/first-linux-project` - Basic tutorial for creating your first KubOS
+   Linux SDK project
+-  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
+-  :doc:`../linux-docs/using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`../linux-docs/working-with-the-mbm2` - Guide for interacting with MBM2-specific features
+
+Components
+----------
+
 The KubOS Linux installation process is composed of two high-level steps:
 
   - Flashing the eMMC

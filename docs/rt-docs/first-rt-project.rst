@@ -51,8 +51,6 @@ be used as starting points.
    interface <https://github.com/kubostech/kubos/tree/master/examples/kubos-sensor-example>`__
 -  `Example showing CSP over
    UART <https://github.com/kubostech/kubos/tree/master/examples/kubos-csp-example>`__
--  `Example KubOS Linux
-   project <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example>`__
 
 If you would like to use one of our projects, you will need to clone the main repo and
 then link the necessary files. For example:

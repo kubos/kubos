@@ -18,8 +18,111 @@ This means you can simply copy the desired example to a new folder and immediate
     The default target for all of these applications is ``stm32f407-disco-gcc``. 
     You will need to manually change the target if this is not your desired endpoint device. 
     
-KubOS RT Example
-----------------
+KubOS Linux Examples
+--------------------
+
+Default Example
+~~~~~~~~~~~~~~~
+
+`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example>`__
+
+**Compatible Targets: All KubOS Linux compatible targets**
+
++----------------------+------------------------+
+| High-level Component | Specific Area          |
++======================+========================+
+| Kubos CSP [4]_       | sockets, ping, threads |
++----------------------+------------------------+
+
+This is the default application included when the ``kubos init --linux`` command is executed.
+It is intended as a basic example of how an application could be written to run on a KubOS Linux system.
+
+The application contains a CSP interaction between client and server tasks.
+
+Every 200ms, the CSP client thread pings the CSP server's address to see if it is available, and then connects and sends a CSP 
+packet containing the message "Hello World".
+
+The CSP server thread checks for connections on the CSP port and then prints any received messages to STDOUT.    
+
+TCP Receive
+~~~~~~~~~~~
+
+`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__
+
+**Compatible Targets: Pumpkin MBM2, Beaglebone Black**
+
++----------------------+------------------------+
+| High-level Component | Specific Area          |
++======================+========================+
+| Linux                | sockets, TCP, IPv4     |
++----------------------+------------------------+
+
+This is a demo program to test receiving TCP data over a valid IP connection (the ethernet port for the Pumpkin MBM2 and Beaglebone 
+Black targets)
+
+The program will wait for a client to connect over the socket, then read in any messages and send back a reply.
+
+TCP Send
+~~~~~~~~
+
+`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__
+
+**Compatible Targets: Pumpkin MBM2, Beaglebone Black**
+
++----------------------+------------------------+
+| High-level Component | Specific Area          |
++======================+========================+
+| Linux                | sockets, TCP, IPv4     |
++----------------------+------------------------+
+
+This is a demo program to test sending TCP data over a valid IP connection (the ethernet port for the Pumpkin MBM2 and Beaglebone Black 
+targets)
+
+The program takes the IP address and port to send to as input parameters, then sends a test message to the requested end point.
+It then waits for a reply message to be returned and exits.
+
+    Usage: kubos-linux-tcptx <ip_addr> <port>
+
+UART Receive
+~~~~~~~~~~~~
+
+`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-uartrx>`__
+
+**Compatible Targets: All KubOS Linux compatible targets**
+
++----------------------+-------------------------------------------------------------------+
+| High-level Component | Specific Area                                                     |
++======================+===================================================================+
+| Linux                | `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ |
++----------------------+-------------------------------------------------------------------+
+
+This is a demo program to test receiving UART data in non-blocking mode as an interrupt. It expects to read the incrementing message 
+"Test message nnn" every 5 seconds from `/dev/ttyS1`.
+
+This program should be paired with the UART Send demo program.
+
+UART Send
+~~~~~~~~~
+
+`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-uarttx>`__
+
+**Compatible Targets: All KubOS Linux compatible targets**
+
++----------------------+-------------------------------------------------------------------+
+| High-level Component | Specific Area                                                     |
++======================+===================================================================+
+| Linux                | `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ |
++----------------------+-------------------------------------------------------------------+
+
+This is a demo program to test UART transmission. It will write an incrementing message "Test message nnn" every 5 seconds out of `/dev/ttyS3`.
+
+This program should be paired with the UART Receive demo program.
+
+KubOS RT Examples
+-----------------
+    
+Default Example
+~~~~~~~~~~~~~~~
 
 `Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-rt-example>`__
 
@@ -55,32 +158,11 @@ If found, it connects to the CSP server's port and sends a message "Hello World"
 
 The CSP server thread checks for connections on the CSP port and then blinks the green LED if any messages are received.
 
-KubOS Linux Example
--------------------
-
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example>`__
-
-**Compatible Targets: All KubOS Linux compatible targets**
-
-+----------------------+------------------------+
-| High-level Component | Specific Area          |
-+======================+========================+
-| Kubos CSP [4]_       | sockets, ping, threads |
-+----------------------+------------------------+
-
-This is the default application included when the ``kubos init --linux`` command is executed.
-It is intended as a basic example of how an application could be written to run on a KubOS Linux system.
-
-The application contains a CSP interaction between client and server tasks.
-
-Every 200ms, the CSP client thread pings the CSP server's address to see if it is available, and then connects and sends a CSP packet containing the message "Hello World".
-
-The CSP server thread checks for connections on the CSP port and then prints any received messages to STDOUT.
 
 .. _sensor-example:
 
-Kubos Sensor Example
---------------------
+Sensor
+~~~~~~
 
 `Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-sensor-example>`__
 
@@ -98,8 +180,8 @@ Kubos Sensor Example
 
 This application provides a streamlined approach to using the BME280 humidity/pressure sensor and the HTU21D temperature/humidity sensor.
 
-Kubos CSP Example
------------------
+CSP
+~~~
 
 `Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-csp-example>`__
 
@@ -131,8 +213,8 @@ The CSP server thread checks for connections on the CSP port and then blinks the
 
 .. _i2c-example:
 
-Kubos I2C Example
------------------
+I2C
+~~~
 
 `Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-i2c-example>`__
 
@@ -168,8 +250,8 @@ This application gives several examples of how to interact with I2C devices in a
    
 .. _spi-example:
 
-Kubos SPI Example
------------------
+SPI
+~~~
 
 `Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-spi-example>`__
 
@@ -201,8 +283,8 @@ This application gives two examples of how to interact with SPI devices in a Kub
    
 .. _sd-example:
    
-Kubos SD Example
-----------------
+SD Card
+~~~~~~~
 
 `Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-sd-example>`__
 

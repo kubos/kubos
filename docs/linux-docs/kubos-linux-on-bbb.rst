@@ -8,6 +8,26 @@ This supplementary document covers specific features and components of KubOS Lin
 
 The :doc:`kubos-linux-overview` doc covers the major components of KubOS Linux.
 
+Additionally, this document covers the steps required in order to build KubOS Linux.
+
+Reference Documents
+-------------------
+
+Beaglebone Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- `Beaglebone Black Web Page <https://beagleboard.org/black>`__
+- `Beaglebone Black Wiki <http://elinux.org/Beagleboard:BeagleBoneBlack>`__
+- `Beaglebone Black Hardware Diagrams <http://beagleboard.org/Support/bone101/#hardware>`__
+- `Beaglebone Black System Reference Manual Rev C <http://static6.arrow.com/aropdfconversion/8fff89aa85f5c451318cbdee2facd9c9fac36872/bbb_srm.pdf>`__
+
+Kubos Documentation
+~~~~~~~~~~~~~~~~~~~
+
+-  :doc:`../installation-docs/installing-linux-bbb` - Steps to install KubOS Linux
+-  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`working-with-the-bbb` - Guide for interacting with BBB-specific features
+
 Software Components
 -------------------
 

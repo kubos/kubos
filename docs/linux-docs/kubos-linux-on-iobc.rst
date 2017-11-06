@@ -8,6 +8,26 @@ This supplementary document covers specific features and components of KubOS Lin
 
 The :doc:`kubos-linux-overview` doc covers the major components of KubOS Linux.
 
+Additionally, this document covers the steps required in order to build KubOS Linux.
+
+Reference Documents
+-------------------
+
+iOBC Documentation
+~~~~~~~~~~~~~~~~~~
+
+The :title:`ISIS-OBC Quickstart Guide` should have been packaged with the iOBC
+and is a useful document for learning what each of the hardware
+components are, how to connect them, and what drivers need to be
+installed to support them.
+
+Kubos Documentation
+~~~~~~~~~~~~~~~~~~~
+
+-  :doc:`../installation-docs/installing-linux-iobc` - Steps to install KubOS Linux on an iOBC
+-  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`working-with-the-iobc` - Guide for interacting with iOBC-specific features
+
 Software Components
 -------------------
 

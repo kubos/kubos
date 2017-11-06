@@ -9,6 +9,25 @@ Pumpkin Motherboard Module 2.
 
 The :doc:`kubos-linux-overview` doc covers the major components of KubOS Linux.
 
+Additionally, this document covers the steps required in order to build KubOS Linux.
+
+Reference Documents
+-------------------
+
+Pumpkin Documentation
+~~~~~~~~~~~~~~~~~~~~~
+
+The :title:`CubeSat Kit Motherboard Module (MBM) 2` reference document
+is available from Pumpkin and is a useful document for learning what 
+each of the hardware components are and how they are connected.
+
+Kubos Documentation
+~~~~~~~~~~~~~~~~~~~
+
+-  :doc:`../installation-docs/installing-linux-mbm2` - Steps to install KubOS Linux
+-  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`working-with-the-mbm2` - Guide for interacting with MBM2-specific features
+
 Software Components
 -------------------
 
