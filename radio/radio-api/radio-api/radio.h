@@ -25,17 +25,6 @@
 #include "radio-struct.h"
 #include "radio-impl.h"
 
-/* Define the radio-specific structures/enumerators */
-/*
-#if defined(YOTTA_CFG_RADIO_TRXVU) && !defined(HAVE_RADIO)
-#define HAVE_RADIO
-#include <trxvu-radio-api/radio.h>
-#endif
-#ifndef HAVE_RADIO
-#error No radio defined!
-#endif
-*/
-
 /* Define the global functions */
 /**
  * Initialize the radio interface
