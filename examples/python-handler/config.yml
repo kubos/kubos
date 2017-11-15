@@ -1,0 +1,7 @@
+# Stock handler configuration file
+
+# IP address for Flask to listen on
+APP_IP : "127.0.0.1"
+
+# Port number for Flask to listen on
+APP_PORT : 5000
