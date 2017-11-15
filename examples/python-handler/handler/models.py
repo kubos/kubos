@@ -10,6 +10,7 @@ Graphene ObjectType classes for subsystem modeling.
 
 import graphene
 
+
 class Subsystem(graphene.ObjectType):
     """
     Model encapsulating subsystem functionality.
