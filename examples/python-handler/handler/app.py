@@ -12,6 +12,7 @@ from flask import Flask
 from flask_graphql import GraphQLView
 from schema import schema
 
+
 def create_app():
     """
     Creates graphql and graphiql endpoints
