@@ -15,6 +15,7 @@ from models import Subsystem
 # May not be neccesary when tied into actual hardware
 _subsystem = Subsystem(power_on=False)
 
+
 class Query(graphene.ObjectType):
     """
     Creates query endpoints exposed by graphene.
