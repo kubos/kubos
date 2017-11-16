@@ -22,46 +22,10 @@
 #pragma once
 
 #include <stdint.h>
+#include "radio-struct.h"
+#include "radio-impl.h"
 
-/**
- * Radio function return values
- */
-typedef enum {
-    /** Function call completed successfully */
-    RADIO_OK = 0,
-    /** Radio receive buffer is empty */
-    RADIO_RX_EMPTY,
-    /** Generic radio error */
-    RADIO_ERROR,
-    /** Function input parameter is invalid */
-    RADIO_ERROR_CONFIG
-} KRadioStatus;
-
-/**
- * Radio reset types
- */
-typedef enum {
-    /** Perform hardware-level radio reset */
-    RADIO_HARD_RESET,
-    /** Perform software radio reset */
-    RADIO_SOFT_RESET
-} KRadioReset;
-
-/**
- * AX.25 call-sign structure
- */
-typedef struct
-{
-    /**
-     * Six character station call-sign
-     */
-    uint8_t ascii[6];
-    /**
-     * One byte station SSID value
-     */
-    uint8_t ssid;
-} ax25_callsign;
-
+/* Define the global functions */
 /**
  * Initialize the radio interface
  * @return KRadioStatus RADIO_OK if OK, error otherwise
@@ -74,10 +38,10 @@ void k_radio_terminate(void);
 /**
  * Configure the radio
  * @note This function might not be implemented for all radios. See specific radio API documentation for configuration availability and structure
- * @param [in] radio_config Pointer to the radio configuration structure
+ * @param [in] config Pointer to the radio configuration structure
  * @return KRadioStatus RADIO_OK if OK, error otherwise
  */
-KRadioStatus k_radio_configure(uint8_t * radio_config);
+KRadioStatus k_radio_configure(radio_config * config);
 /**
  * Reset the radio
  * @note This function might not be implemented for all radios
@@ -99,7 +63,7 @@ KRadioStatus k_radio_send(char * buffer, int len, uint8_t * response);
  * @param [out] len Length of the received message
  * @return KRadioStatus RADIO_OK if a message was received successfully, RADIO_RX_EMPTY if there are no messages to receive, error otherwise
  */
-KRadioStatus k_radio_recv(char * buffer, uint8_t * len);
+KRadioStatus k_radio_recv(radio_rx_message * buffer, uint8_t * len);
 /**
  * Read radio telemetry values
  * @note See specific radio API documentation for available telemetry types
@@ -107,6 +71,6 @@ KRadioStatus k_radio_recv(char * buffer, uint8_t * len);
  * @param [in] type Telemetry packet to read
  * @return KRadioStatus RADIO_OK if OK, error otherwise
  */
-KRadioStatus k_radio_get_telemetry(uint8_t * buffer, uint8_t type);
+KRadioStatus k_radio_get_telemetry(radio_telem * buffer, RadioTelemType type);
 
 /* @} */
