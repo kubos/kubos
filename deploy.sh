@@ -8,7 +8,7 @@ echo "Latest tag: $latest_tag"
 #Stable releases follow major.minor.patch version format
 major_regex='^[0-9]+\.[0-9]+\.[0-9]$'
 #Unstable (CD) releases follow major.minor.patch.build version format
-build_regex='^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'
+build_regex='^[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+$'
 
 if [[ $latest_tag =~ $major_regex ]];
 then
@@ -23,7 +23,7 @@ then
     v_patch=${version_list[2]}
     v_build=${version_list[3]}
     ((v_build+=1))
-    new_tag="$v_major.$v_minor.$v_patch.$v_build"
+    new_tag="$v_major.$v_minor.$v_patch+$v_build"
 fi
 
 echo "Tagging new verson: $new_tag"
