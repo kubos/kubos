@@ -84,7 +84,7 @@ The Beaglebone Black has 5 UART ports available for use:
 +--------------+--------+--------+---------+---------+
 
 .. note:: /dev/ttyS3 (UART3) is TX-only. /dev/ttyS1 and /dev/ttyS2 do not 
-    have RTS/CTS due to a pin conflicts with other buses.
+    have RTS/CTS due to pin conflicts with other buses.
 
 Users can interact with these ports in their applications using Linux's 
 `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
