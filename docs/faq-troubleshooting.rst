@@ -9,14 +9,14 @@ FAQs
 How do I contact y'all?
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Our community Slack: slack.kubos.co
+Our community Slack: `slack.kubos.co <https://slack.kubos.co>`__
 
 Our email: info@kubos.co
 
 How do I set up the Kubos SDK?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See :doc:`sdk-installing`
+See :doc:`installation-docs/sdk-installing`
 
 How do I check if I'm using the latest version of the Kubos Vagrant image?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
