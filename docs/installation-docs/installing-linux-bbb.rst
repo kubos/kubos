@@ -135,6 +135,15 @@ To flash the eMMC, log into the board and then run these commands:
     $ umount /home
     $ dd if=/dev/mmcblk0 of=/dev/mmcblk1
     
+.. figure:: ../images/kubos_bbb_linux_dd.png
+   :alt: dd complaints.
+
+It is possible that you will see some errors when you try to unmount the directories. 
+That's likely not a problem. The ``dd`` process will hang for a long time at the "nonblocking pool" line. 
+Then, the system will complain that there is no space left on the device. 
+You can safely ignore this error if the SD card is 4GB or larger. These errors will 
+be addressed in future releases.
+
 The four status LEDs on the board should start flashing in a random pattern. This indicates
 that the eMMC is currently being flashed. 
 
@@ -152,11 +161,21 @@ Re-Flash the SD Card
 Now flash the micro SD card with the auxiliary SD card image. This image contains the
 KubOS Linux upgrade partition and the second user data partition.
 
-Once the flash process has completed, put the card back into the microSD slot.
+Once the flash process has completed, put the card back into the microSD slot
+and boot up the system..
 
 .. warning::
 
     If you do not have a microSD card in the board, the system will not boot.
+
+
+.. figure:: ../images/kubos_bbb_linux_mount_errors.png
+   :alt: mount complaints during boot.
+
+The boot messages may cause concern, in that it looks like they indicate that
+the system is having trouble mounting directories. You can most likely ignore
+these warnings as well.
+
 
 The installation process is now complete.
 
