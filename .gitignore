@@ -64,3 +64,6 @@ upload.tar.gz
 vm/.vagrant/
 .vscode
 .projectile
+
+# rust stuff
+target/
