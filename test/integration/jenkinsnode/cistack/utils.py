@@ -18,6 +18,7 @@ def supportedBoards():
     'pyboard-gcc',
     'stm32f407-disco-gcc',
     'msp430f5529-gcc', 
+    'msp432p401r-gcc',
     'na-satbus-3c0-gcc'
     ]
     return supportedboards
@@ -74,6 +75,7 @@ def getTarget(target):
     from pyboard import Pyboard
     from stm32f407discovery import STM32F407Discovery
     from msp430f5529 import MSP430
+    from msp432p401r import MSP432
 
 #     log = logging.getLogger('logfoo') 
 
@@ -91,6 +93,10 @@ def getTarget(target):
     elif target == "msp430f5529-gcc":
         logging.debug("Matched MSP430F5529 launchpad")
         return MSP430()
+
+    elif target == "msp432p401r-gcc":
+        logging.debug("Matched MSP432P401R launchpad")
+        return MSP432()
 
     elif target == "na-satbus-3c0-gcc":
         logging.debug("Matched STM32F405 NanoAvionics SatBus 3c0")
@@ -141,6 +147,8 @@ def parseBoardIdentifier(lsusbpattern):
         '0483:df11': ['STM32F405 PyBoard', 
             True, 'USE dfu-util!', '***'], 
         '0451:2046': ['TI MSP430F5529 Launchpad', 
+            True, 'USE mspdebug!', '***'],
+        '0451:bef3': ['TI MSP432P401R Launchpad', 
             True, 'USE mspdebug!', '***'],
         '0451:f432': ['TI MSP430G2553 Launchpad', 
             False, 'NOT SUPPORTED', '/usr/bin/sleep 1']

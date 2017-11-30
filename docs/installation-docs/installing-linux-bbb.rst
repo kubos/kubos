@@ -139,16 +139,22 @@ To flash the eMMC, log into the board and then run these commands:
    :alt: dd complaints.
 
 It is possible that you will see some errors when you try to unmount the directories. 
-That's likely not a problem. The ``dd`` process will hang for a long time at the "nonblocking pool" line. 
-Then, the system will complain that there is no space left on the device. 
-You can safely ignore this error if the SD card is 4GB or larger. These errors will 
-be addressed in future releases.
+That's likely not a problem. 
+At some point, You may see an informational message, 
+``random: nonblocking pool is initialized``. 
+This message can be safely ignored.
 
-The four status LEDs on the board should start flashing in a random pattern. This indicates
-that the eMMC is currently being flashed. 
+The four status LEDs on the board should start flashing in a random pattern. 
+This indicates that the eMMC is currently being written. 
 
 The process should take roughly ten minutes, after which the LEDs should return to normal, 
 with one LED blinking to indicate a successfully running KubOS Linux system.
+
+Then, the system will complain that there is no space left on the device. 
+To explain: the eMMC is 4GB, but a small portion is set up as read-only and 
+dedicated to boot-time processing. That area means the contents of the 4 GB 
+SD card will be larger than the writeable area of the eMMC. The 
+``No space left on device`` message will be issued *but is not an error.*
 
 After this has completed, shutdown and de-power the system.
 
@@ -172,12 +178,17 @@ and boot up the system..
 .. figure:: ../images/kubos_bbb_linux_mount_errors.png
    :alt: mount complaints during boot.
 
-The boot messages may cause concern, in that it looks like they indicate that
-the system is having trouble mounting directories. You can most likely ignore
-these warnings as well.
+You will see messages as the data partitions are mounted. For example, 
 
+``EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities.``
 
-The installation process is now complete.
+While they may seem like errors, they are a normal part of the boot process as 
+the system detects the partition file type. If there are *actual* issues 
+mounting a partition, the resulting error message will look like this: 
+
+``mount: mounting /dev/mmcblk1p3 on /home failed: No such file or directory``
+
+If you see no such errors, the installation process is now complete.
 
 Using KubOS Linux
 -----------------
