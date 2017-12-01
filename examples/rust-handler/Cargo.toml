@@ -9,4 +9,3 @@ juniper = { version = "0.8.0", features = ["iron-handlers"] }
 iron = "0.5.1"
 mount = "0.3.0"
 logger = "0.3.0"
-persistent = "0.3.0"
