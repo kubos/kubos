@@ -22,7 +22,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "ADCS-impl.h"
+#include "adcs-impl.h"
 
 /* Define the global functions */
 /**
@@ -40,7 +40,7 @@ void k_adcs_terminate(void);
  * @param [in] config Pointer to the ADCS configuration structure
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_configure(adcs_config * config TODO);
+KADCSStatus k_adcs_configure(adcs_config * config, uint8_t count);
 /**
  * Reset the ADCS
  * @note This function might not be implemented for all ADCSs
@@ -57,11 +57,11 @@ KADCSStatus k_adcs_reset(KADCSReset type);
  */
 KADCSStatus k_adcs_get_telemetry(adcs_telem * buffer, ADCSTelemType type);
 
-KADCSStatus k_adcs_set_mode(ADCSMode mode);
+KADCSStatus k_adcs_set_mode(ADCSMode mode, adcs_mode_param * params);
 
 KADCSStatus k_adcs_get_mode(ADCSMode * mode);
 
-KADCSStatus k_adcs_run_test(ADCSTestType test);
+KADCSStatus k_adcs_run_test(ADCSTestType test, adcs_test_results * data);
 
 KADCSStatus k_adcs_passthrough(uint8_t * tx, int tx_len, uint8_t * rx, int rx_len);
 
