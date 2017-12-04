@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use model::Subsystem;
+use model::{Status, Subsystem};
 use juniper::Context as JuniperContext;
 
 /// Context used to pass global data into Juniper queries
@@ -45,6 +45,15 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     }
 });
 
+/// GraphQL model for Status
+graphql_object!(Status: Context as "Status" |&self| {
+    description: "Function status"
+
+    field status() -> bool as "Function status" {
+        self.status()
+    }
+});
+
 pub struct QueryRoot;
 
 /// GraphQL model for base query
@@ -53,5 +62,17 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         as "Subsystem query"
     {
         Some(executor.context().get_subsystem())
+    }
+});
+
+
+pub struct MutationRoot;
+
+/// Grahpql model for base mutation
+graphql_object!(MutationRoot : Context as "Mutation" |&self| {
+    field subsystem_power(&executor, power: bool) -> Option<&Status>
+        as "Set power state of subsystem"
+    {
+        Some(executor.context().get_subsystem().set_power(power))
     }
 });

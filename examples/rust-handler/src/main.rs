@@ -22,7 +22,6 @@ extern crate logger;
 
 use iron::prelude::*;
 use juniper::iron_handlers::{GraphQLHandler, GraphiQLHandler};
-use juniper::EmptyMutation;
 mod model;
 mod schema;
 use std::env;
@@ -38,11 +37,8 @@ fn context_factory(_: &mut Request) -> schema::Context {
 }
 
 fn main() {
-    let graphql_endpoint = GraphQLHandler::new(
-        context_factory,
-        schema::QueryRoot,
-        EmptyMutation::<schema::Context>::new(),
-    );
+    let graphql_endpoint =
+        GraphQLHandler::new(context_factory, schema::QueryRoot, schema::MutationRoot);
 
     let graphiql_endpoint = GraphiQLHandler::new("/grapihql");
 
