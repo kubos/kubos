@@ -14,10 +14,23 @@
 // limitations under the License.
 //
 
+
+/// Model for subsystem function status
+pub struct Status {
+    status: bool,
+}
+
+impl Status {
+    pub fn status(&self) -> bool {
+        self.status
+    }
+}
+
 /// Model for handler's subsystem
 pub struct Subsystem {
     power: bool,
     uptime: i32,
+    status: Status,
 }
 
 impl Subsystem {
@@ -29,6 +42,7 @@ impl Subsystem {
         Subsystem {
             power: true,
             uptime: 100,
+            status: Status { status: true },
         }
     }
 
@@ -38,6 +52,14 @@ impl Subsystem {
     pub fn power(&self) -> bool {
         println!("getting power");
         self.power
+    }
+
+    /// Power state setter
+    /// Here we would call into the low level
+    /// device function
+    pub fn set_power(&self, _power: bool) -> &Status {
+        println!("Setting power state");
+        &self.status
     }
 
     /// Uptime getter
