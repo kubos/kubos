@@ -56,7 +56,7 @@ graphql_object!(Status: Context as "Status" |&self| {
 
 pub struct QueryRoot;
 
-/// GraphQL model for base query
+/// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
     field subsystem(&executor) -> Option<&Subsystem>
         as "Subsystem query"
@@ -68,11 +68,20 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
 
 pub struct MutationRoot;
 
-/// Grahpql model for base mutation
+/// Base GraphQL mutation model
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
-    field subsystem_power(&executor, power: bool) -> Option<&Status>
+
+    // Each field represents functionality available
+    // through the GraphQL mutations
+    field power(&executor, state: bool) -> Option<Status>
         as "Set power state of subsystem"
     {
-        Some(executor.context().get_subsystem().set_power(power))
+        Some(executor.context().get_subsystem().set_power(state))
+    }
+
+    field reset_uptime(&executor) -> Option<Status>
+        as "Resets uptime counter of subsystem"
+    {
+        Some(executor.context().get_subsystem().reset_uptime())
     }
 });

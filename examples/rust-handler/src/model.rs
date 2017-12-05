@@ -30,7 +30,6 @@ impl Status {
 pub struct Subsystem {
     power: bool,
     uptime: i32,
-    status: Status,
 }
 
 impl Subsystem {
@@ -42,7 +41,6 @@ impl Subsystem {
         Subsystem {
             power: true,
             uptime: 100,
-            status: Status { status: true },
         }
     }
 
@@ -57,9 +55,10 @@ impl Subsystem {
     /// Power state setter
     /// Here we would call into the low level
     /// device function
-    pub fn set_power(&self, _power: bool) -> &Status {
+    pub fn set_power(&self, _power: bool) -> Status {
         println!("Setting power state");
-        &self.status
+        // Send command to device here
+        Status { status: true }
     }
 
     /// Uptime getter
@@ -68,5 +67,14 @@ impl Subsystem {
     pub fn uptime(&self) -> i32 {
         println!("getting uptime");
         self.uptime
+    }
+
+
+    /// Uptime reset function
+    pub fn reset_uptime(&self) -> Status {
+        println!("Resetting uptime");
+        println!("Errrr");
+        // Send command to device here
+        Status { status: false }
     }
 }
