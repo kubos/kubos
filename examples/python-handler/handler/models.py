@@ -33,6 +33,8 @@ class Subsystem(graphene.ObjectType):
         """
 
         print "Sending new power state to subsystem"
+        print "Previous State: %s" % self.power_on
+        print "New State: %s" % power_on
         self.power_on = power_on
         return Status(status=True, subsystem=self)
 
