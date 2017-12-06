@@ -20,6 +20,8 @@
  * @{
  */
 
+#pragma once
+
 /**
  * Radio function return values
  */

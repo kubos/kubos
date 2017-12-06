@@ -22,6 +22,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "adcs-struct.h"
 #include "adcs-impl.h"
 
 /* Define the global functions */
@@ -37,10 +38,10 @@ void k_adcs_terminate(void);
 /**
  * Configure the ADCS
  * @note This function might not be implemented for all ADCSs. See specific ADCS API documentation for configuration availability and structure
- * @param [in] config Pointer to the ADCS configuration structure
+ * @param [in] config ADCS configuration structure
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_configure(adcs_config * config, uint8_t count);
+KADCSStatus k_adcs_configure(const adcs_config config, uint8_t count);
 /**
  * Reset the ADCS
  * @note This function might not be implemented for all ADCSs
@@ -51,17 +52,17 @@ KADCSStatus k_adcs_reset(KADCSReset type);
 /**
  * Read ADCS telemetry values
  * @note See specific ADCS API documentation for available telemetry types
- * @param [in] buffer Pointer to structure which data should be copied to
+ * @param [in] buffer (Pointer to) structure which data should be copied to
  * @param [in] type Telemetry packet to read
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_get_telemetry(adcs_telem * buffer, ADCSTelemType type);
+KADCSStatus k_adcs_get_telemetry(ADCSTelemType type, adcs_telem buffer);
 
-KADCSStatus k_adcs_set_mode(ADCSMode mode, adcs_mode_param * params);
+KADCSStatus k_adcs_set_mode(ADCSMode mode, const adcs_mode_param * params);
 
 KADCSStatus k_adcs_get_mode(ADCSMode * mode);
 
-KADCSStatus k_adcs_run_test(ADCSTestType test, adcs_test_results * data);
+KADCSStatus k_adcs_run_test(ADCSTestType test, adcs_test_results buffer);
 
 KADCSStatus k_adcs_passthrough(uint8_t * tx, int tx_len, uint8_t * rx, int rx_len);
 
