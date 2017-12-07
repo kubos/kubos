@@ -1,0 +1,4 @@
+[root]
+name = "kubos-hal-iobc"
+version = "0.1.0"
+
