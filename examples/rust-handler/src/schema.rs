@@ -17,6 +17,8 @@
 use model::Subsystem;
 use juniper::Context as JuniperContext;
 
+use juniper::FieldResult;
+
 /// Context used to pass global data into Juniper queries
 pub struct Context {
     pub subsystem: Subsystem,
@@ -49,9 +51,9 @@ pub struct QueryRoot;
 
 /// GraphQL model for base query
 graphql_object!(QueryRoot : Context as "Query" |&self| {
-    field subsystem(&executor) -> Option<&Subsystem>
+    field subsystem(&executor) -> FieldResult<&Subsystem>
         as "Subsystem query"
     {
-        Some(executor.context().get_subsystem())
+        Ok(executor.context().get_subsystem())
     }
 });
