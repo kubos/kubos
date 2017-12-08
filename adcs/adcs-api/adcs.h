@@ -41,7 +41,7 @@ void k_adcs_terminate(void);
  * @param [in] config ADCS configuration structure
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_configure(const adcs_config config, uint8_t count);
+KADCSStatus k_adcs_configure(const adcs_config config);
 /**
  * Reset the ADCS
  * @note This function might not be implemented for all ADCSs
@@ -64,7 +64,7 @@ KADCSStatus k_adcs_get_mode(ADCSMode * mode);
 
 KADCSStatus k_adcs_run_test(ADCSTestType test, adcs_test_results buffer);
 
-KADCSStatus k_adcs_passthrough(uint8_t * tx, int tx_len, uint8_t * rx, int rx_len);
+KADCSStatus k_adcs_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx, int rx_len, const struct timespec * delay);
 
 KADCSStatus k_adcs_get_power_status(adcs_power_status * data);
 
