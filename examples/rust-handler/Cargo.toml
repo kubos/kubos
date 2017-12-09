@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
-juniper = { version = "0.8.0", features = ["iron-handlers"] }
-
+juniper =  "0.9.1"
+juniper_iron = "0.1.1"
 iron = "0.5.1"
 mount = "0.3.0"
 logger = "0.3.0"

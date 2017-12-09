@@ -34,15 +34,16 @@ impl Context {
     }
 }
 
+
 /// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Handler subsystem"
 
-    field power() -> bool as "Power state of subsystem" {
+    field power() -> FieldResult<bool> as "Power state of subsystem" {
         self.power()
     }
 
-    field uptime() -> i32 as "Uptime of subsystem" {
+    field uptime() -> FieldResult<i32> as "Uptime of subsystem" {
         self.uptime()
     }
 });
@@ -54,6 +55,9 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
     field subsystem(&executor) -> FieldResult<&Subsystem>
         as "Subsystem query"
     {
+        // I don't know if we'll ever return anything other
+        // than Ok here, as we are just returning back essentially
+        // a static struct with interesting function fields
         Ok(executor.context().get_subsystem())
     }
 });
