@@ -291,7 +291,7 @@ Configuration
 ^^^^^^^^^^^^^
 
 The static IP address can be updated by editing the `/etc/network/interfaces` file.
-By default the address is ``168.168.2.20``.
+By default the address is ``10.0.2.20``.
 
 Examples
 ^^^^^^^^
