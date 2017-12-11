@@ -46,6 +46,10 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     field uptime() -> FieldResult<i32> as "Uptime of subsystem" {
         Ok(self.uptime()?)
     }
+
+    field temperature() -> FieldResult<i32> as "Temperature of subsystem" {
+        Ok(self.temperature()?)
+    }
 });
 
 pub struct QueryRoot;
