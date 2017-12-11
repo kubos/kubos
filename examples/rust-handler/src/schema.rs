@@ -40,11 +40,11 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Handler subsystem"
 
     field power() -> FieldResult<bool> as "Power state of subsystem" {
-        self.power()
+        Ok(self.power()?)
     }
 
     field uptime() -> FieldResult<i32> as "Uptime of subsystem" {
-        self.uptime()
+        Ok(self.uptime()?)
     }
 });
 

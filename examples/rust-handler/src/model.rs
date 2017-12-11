@@ -14,10 +14,22 @@
 // limitations under the License.
 //
 
-use juniper::FieldResult;
+use std::fmt;
+use std::error;
 
 /// Model for handler's subsystem
 pub struct Subsystem;
+
+#[derive(Debug)]
+pub enum SubsystemError {
+    IOFailure,
+}
+
+impl fmt::Display for SubsystemError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self)
+    }
+}
 
 impl Subsystem {
     /// Creates new Subsystem structure instance
@@ -31,16 +43,18 @@ impl Subsystem {
     /// Power status getter
     /// Code querying for new power value
     /// could be placed here
-    pub fn power(&self) -> FieldResult<bool> {
+    pub fn power(&self) -> Result<bool, SubsystemError> {
         println!("getting power");
         // Low level query here
         Ok(true)
+        // If we had a failure retrieving power status...
+        // Err(SubsystemError::IOFailure)
     }
 
     /// Uptime getter
     /// Code querying for new uptime value
     /// could be placed here
-    pub fn uptime(&self) -> FieldResult<i32> {
+    pub fn uptime(&self) -> Result<i32, SubsystemError> {
         println!("getting uptime");
         // Low level query here
         Ok(100)
