@@ -17,6 +17,8 @@
 use model::{Status, Subsystem};
 use juniper::Context as JuniperContext;
 
+use juniper::FieldResult;
+
 /// Context used to pass global data into Juniper queries
 pub struct Context {
     pub subsystem: Subsystem,
@@ -32,16 +34,21 @@ impl Context {
     }
 }
 
+
 /// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Handler subsystem"
 
-    field power() -> bool as "Power state of subsystem" {
-        self.power()
+    field power() -> FieldResult<bool> as "Power state of subsystem" {
+        Ok(self.power()?)
     }
 
-    field uptime() -> i32 as "Uptime of subsystem" {
-        self.uptime()
+    field uptime() -> FieldResult<i32> as "Uptime of subsystem" {
+        Ok(self.uptime()?)
+    }
+
+    field temperature() -> FieldResult<i32> as "Temperature of subsystem" {
+        Ok(self.temperature()?)
     }
 });
 
@@ -58,10 +65,13 @@ pub struct QueryRoot;
 
 /// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
-    field subsystem(&executor) -> Option<&Subsystem>
+    field subsystem(&executor) -> FieldResult<&Subsystem>
         as "Subsystem query"
     {
-        Some(executor.context().get_subsystem())
+        // I don't know if we'll ever return anything other
+        // than Ok here, as we are just returning back essentially
+        // a static struct with interesting function fields
+        Ok(executor.context().get_subsystem())
     }
 });
 

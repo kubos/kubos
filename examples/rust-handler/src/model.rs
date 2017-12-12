@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+use std::io::{Error, ErrorKind};
 
 /// Model for subsystem function status
 pub struct Status {
@@ -27,29 +28,24 @@ impl Status {
 }
 
 /// Model for handler's subsystem
-pub struct Subsystem {
-    power: bool,
-    uptime: i32,
-}
+pub struct Subsystem;
 
 impl Subsystem {
     /// Creates new Subsystem structure instance
-    /// Code querying for new subsystem data could
-    /// be used here to populate structure
+    /// Code initializing subsystems communications
+    /// would likely be placed here
     pub fn new() -> Subsystem {
         println!("getting new subsystem data");
-        Subsystem {
-            power: true,
-            uptime: 100,
-        }
+        Subsystem {}
     }
 
     /// Power status getter
     /// Code querying for new power value
     /// could be placed here
-    pub fn power(&self) -> bool {
+    pub fn power(&self) -> Result<bool, Error> {
         println!("getting power");
-        self.power
+        // Low level query here
+        Ok(true)
     }
 
     /// Power state setter
@@ -64,11 +60,11 @@ impl Subsystem {
     /// Uptime getter
     /// Code querying for new uptime value
     /// could be placed here
-    pub fn uptime(&self) -> i32 {
+    pub fn uptime(&self) -> Result<i32, Error> {
         println!("getting uptime");
-        self.uptime
+        // Low level query here
+        Ok(100)
     }
-
 
     /// Uptime reset function
     pub fn reset_uptime(&self) -> Status {
@@ -76,5 +72,25 @@ impl Subsystem {
         println!("Errrr");
         // Send command to device here
         Status { status: false }
+    }
+
+    /// Temperature getter
+    /// Demonstrates returning an error condition
+    pub fn temperature(&self) -> Result<i32, Error> {
+        println!("getting temperature");
+        // Low level query here
+        Err(Error::new(
+            ErrorKind::TimedOut,
+            "Failed to retrieve temperature",
+        ))
+    }
+}
+
+/// Overriding the destructor
+impl Drop for Subsystem {
+    /// Here is where we would clean up
+    /// any subsystem communications stuff
+    fn drop(&mut self) {
+        println!("Destructing subsystem");
     }
 }
