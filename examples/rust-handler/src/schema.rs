@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use model::{Status, Subsystem};
+use model::Subsystem;
 use juniper::Context as JuniperContext;
 
 use juniper::FieldResult;
@@ -52,15 +52,6 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     }
 });
 
-/// GraphQL model for Status
-graphql_object!(Status: Context as "Status" |&self| {
-    description: "Function status"
-
-    field status() -> bool as "Function status" {
-        self.status()
-    }
-});
-
 pub struct QueryRoot;
 
 /// Base GraphQL query model
@@ -83,15 +74,28 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
     // Each field represents functionality available
     // through the GraphQL mutations
-    field power(&executor, state: bool) -> Option<Status>
-        as "Set power state of subsystem"
+    field enable_power(&executor) -> FieldResult<bool>
+        as "Enable power to subsystem"
     {
-        Some(executor.context().get_subsystem().set_power(state))
+        Ok(executor.context().get_subsystem().set_power(true)?)
     }
 
-    field reset_uptime(&executor) -> Option<Status>
+    field disable_power(&executor) -> FieldResult<bool>
+        as "Disable power to subsystem"
+    {
+        Ok(executor.context().get_subsystem().set_power(false)?)
+    }
+
+    field reset_uptime(&executor) -> FieldResult<bool>
         as "Resets uptime counter of subsystem"
     {
-        Some(executor.context().get_subsystem().reset_uptime())
+        Ok(executor.context().get_subsystem().reset_uptime()?)
     }
+
+    field calibrate_thermometer(&executor) -> FieldResult<bool>
+        as "Calibrate thermometer"
+    {
+        Ok(executor.context().get_subsystem().calibrate_thermometer()?)
+    }
+
 });

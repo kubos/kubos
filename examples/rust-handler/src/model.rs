@@ -16,17 +16,6 @@
 
 use std::io::{Error, ErrorKind};
 
-/// Model for subsystem function status
-pub struct Status {
-    status: bool,
-}
-
-impl Status {
-    pub fn status(&self) -> bool {
-        self.status
-    }
-}
-
 /// Model for handler's subsystem
 pub struct Subsystem;
 
@@ -51,10 +40,17 @@ impl Subsystem {
     /// Power state setter
     /// Here we would call into the low level
     /// device function
-    pub fn set_power(&self, _power: bool) -> Status {
+    pub fn set_power(&self, _power: bool) -> Result<bool, Error> {
         println!("Setting power state");
         // Send command to device here
-        Status { status: true }
+        if _power {
+            Ok(true)
+        } else {
+            Err(Error::new(
+                ErrorKind::PermissionDenied,
+                "I'm sorry Dave, I afraid I can't do that",
+            ))
+        }
     }
 
     /// Uptime getter
@@ -67,11 +63,10 @@ impl Subsystem {
     }
 
     /// Uptime reset function
-    pub fn reset_uptime(&self) -> Status {
+    pub fn reset_uptime(&self) -> Result<bool, Error> {
         println!("Resetting uptime");
-        println!("Errrr");
         // Send command to device here
-        Status { status: false }
+        Ok(true)
     }
 
     /// Temperature getter
@@ -82,6 +77,16 @@ impl Subsystem {
         Err(Error::new(
             ErrorKind::TimedOut,
             "Failed to retrieve temperature",
+        ))
+    }
+
+    /// Temperature calibration
+    /// Demonstrates a mutation with error condition
+    pub fn calibrate_thermometer(&self) -> Result<bool, Error> {
+        println!("calibrating thermometer");
+        Err(Error::new(
+            ErrorKind::NotFound,
+            "Failed to find thermometer",
         ))
     }
 }
