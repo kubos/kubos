@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+extern crate kubos_hal_iobc;
+
 use std::io::{Error, ErrorKind};
 
 /// Model for handler's subsystem
@@ -67,6 +69,14 @@ impl Subsystem {
         println!("Resetting uptime");
         // Send command to device here
         Ok(true)
+    }
+
+    /// Supervisor reset function
+    /// Demonstrates calling into an exposed C function
+    /// This should fail unless run on an iOBC
+    pub fn reset_supervisor(&self) -> Result<bool, Error> {
+        println!("Resetting supervisor");
+        Ok(kubos_hal_iobc::k_supervisor_reset())
     }
 
     /// Temperature getter
