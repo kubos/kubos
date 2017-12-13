@@ -16,12 +16,14 @@
 
 #[macro_use]
 extern crate juniper;
+extern crate juniper_iron;
 extern crate iron;
 extern crate mount;
 extern crate logger;
 
 use iron::prelude::*;
-use juniper::iron_handlers::{GraphQLHandler, GraphiQLHandler};
+use juniper_iron::{GraphQLHandler, GraphiQLHandler};
+
 mod model;
 mod schema;
 use std::env;

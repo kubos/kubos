@@ -14,8 +14,10 @@
 // limitations under the License.
 //
 
-use model::{Status, Subsystem};
+use model::Subsystem;
 use juniper::Context as JuniperContext;
+
+use juniper::FieldResult;
 
 /// Context used to pass global data into Juniper queries
 pub struct Context {
@@ -32,25 +34,21 @@ impl Context {
     }
 }
 
+
 /// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Handler subsystem"
 
-    field power() -> bool as "Power state of subsystem" {
-        self.power()
+    field power() -> FieldResult<bool> as "Power state of subsystem" {
+        Ok(self.power()?)
     }
 
-    field uptime() -> i32 as "Uptime of subsystem" {
-        self.uptime()
+    field uptime() -> FieldResult<i32> as "Uptime of subsystem" {
+        Ok(self.uptime()?)
     }
-});
 
-/// GraphQL model for Status
-graphql_object!(Status: Context as "Status" |&self| {
-    description: "Function status"
-
-    field status() -> bool as "Function status" {
-        self.status()
+    field temperature() -> FieldResult<i32> as "Temperature of subsystem" {
+        Ok(self.temperature()?)
     }
 });
 
@@ -58,10 +56,13 @@ pub struct QueryRoot;
 
 /// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
-    field subsystem(&executor) -> Option<&Subsystem>
+    field subsystem(&executor) -> FieldResult<&Subsystem>
         as "Subsystem query"
     {
-        Some(executor.context().get_subsystem())
+        // I don't know if we'll ever return anything other
+        // than Ok here, as we are just returning back essentially
+        // a static struct with interesting function fields
+        Ok(executor.context().get_subsystem())
     }
 });
 
@@ -73,15 +74,28 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
     // Each field represents functionality available
     // through the GraphQL mutations
-    field power(&executor, state: bool) -> Option<Status>
-        as "Set power state of subsystem"
+    field enable_power(&executor) -> FieldResult<bool>
+        as "Enable power to subsystem"
     {
-        Some(executor.context().get_subsystem().set_power(state))
+        Ok(executor.context().get_subsystem().set_power(true)?)
     }
 
-    field reset_uptime(&executor) -> Option<Status>
+    field disable_power(&executor) -> FieldResult<bool>
+        as "Disable power to subsystem"
+    {
+        Ok(executor.context().get_subsystem().set_power(false)?)
+    }
+
+    field reset_uptime(&executor) -> FieldResult<bool>
         as "Resets uptime counter of subsystem"
     {
-        Some(executor.context().get_subsystem().reset_uptime())
+        Ok(executor.context().get_subsystem().reset_uptime()?)
     }
+
+    field calibrate_thermometer(&executor) -> FieldResult<bool>
+        as "Calibrate thermometer"
+    {
+        Ok(executor.context().get_subsystem().calibrate_thermometer()?)
+    }
+
 });

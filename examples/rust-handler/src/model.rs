@@ -14,67 +14,88 @@
 // limitations under the License.
 //
 
-
-/// Model for subsystem function status
-pub struct Status {
-    status: bool,
-}
-
-impl Status {
-    pub fn status(&self) -> bool {
-        self.status
-    }
-}
+use std::io::{Error, ErrorKind};
 
 /// Model for handler's subsystem
-pub struct Subsystem {
-    power: bool,
-    uptime: i32,
-}
+pub struct Subsystem;
 
 impl Subsystem {
     /// Creates new Subsystem structure instance
-    /// Code querying for new subsystem data could
-    /// be used here to populate structure
+    /// Code initializing subsystems communications
+    /// would likely be placed here
     pub fn new() -> Subsystem {
         println!("getting new subsystem data");
-        Subsystem {
-            power: true,
-            uptime: 100,
-        }
+        Subsystem {}
     }
 
     /// Power status getter
     /// Code querying for new power value
     /// could be placed here
-    pub fn power(&self) -> bool {
+    pub fn power(&self) -> Result<bool, Error> {
         println!("getting power");
-        self.power
+        // Low level query here
+        Ok(true)
     }
 
     /// Power state setter
     /// Here we would call into the low level
     /// device function
-    pub fn set_power(&self, _power: bool) -> Status {
+    pub fn set_power(&self, _power: bool) -> Result<bool, Error> {
         println!("Setting power state");
         // Send command to device here
-        Status { status: true }
+        if _power {
+            Ok(true)
+        } else {
+            Err(Error::new(
+                ErrorKind::PermissionDenied,
+                "I'm sorry Dave, I afraid I can't do that",
+            ))
+        }
     }
 
     /// Uptime getter
     /// Code querying for new uptime value
     /// could be placed here
-    pub fn uptime(&self) -> i32 {
+    pub fn uptime(&self) -> Result<i32, Error> {
         println!("getting uptime");
-        self.uptime
+        // Low level query here
+        Ok(100)
     }
 
-
     /// Uptime reset function
-    pub fn reset_uptime(&self) -> Status {
+    pub fn reset_uptime(&self) -> Result<bool, Error> {
         println!("Resetting uptime");
-        println!("Errrr");
         // Send command to device here
-        Status { status: false }
+        Ok(true)
+    }
+
+    /// Temperature getter
+    /// Demonstrates returning an error condition
+    pub fn temperature(&self) -> Result<i32, Error> {
+        println!("getting temperature");
+        // Low level query here
+        Err(Error::new(
+            ErrorKind::TimedOut,
+            "Failed to retrieve temperature",
+        ))
+    }
+
+    /// Temperature calibration
+    /// Demonstrates a mutation with error condition
+    pub fn calibrate_thermometer(&self) -> Result<bool, Error> {
+        println!("calibrating thermometer");
+        Err(Error::new(
+            ErrorKind::NotFound,
+            "Failed to find thermometer",
+        ))
+    }
+}
+
+/// Overriding the destructor
+impl Drop for Subsystem {
+    /// Here is where we would clean up
+    /// any subsystem communications stuff
+    fn drop(&mut self) {
+        println!("Destructing subsystem");
     }
 }
