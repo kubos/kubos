@@ -53,6 +53,12 @@
             "build_source": "lsm303dlhc-i2c",
             "test_command": "lsm303dlhc-i2c",
             "expected_test_output": "LSM303DLHC I2C test completed successfully!"
+        },
+        {
+            "name": "BME280 SPI Test",
+            "build_source": "bme-spi",
+            "test_command": "bme-spi 1",
+            "expected_test_output": "BME280 SPI test completed successfully!"
         }
     ]
 }
