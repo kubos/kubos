@@ -1,0 +1,6 @@
+[package]
+name = "kubos-build-helpr"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
