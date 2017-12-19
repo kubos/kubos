@@ -1,0 +1,8 @@
+[package]
+name = "extern-lib"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+build = "build.rs"
+
+[build-dependencies]
+kubos-build-helpr = { path = "../../kubos-build-helpr" }

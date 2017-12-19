@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-extern crate kubos_hal_iobc;
+extern crate extern_lib;
 
 use std::io::{Error, ErrorKind};
 
@@ -27,6 +27,8 @@ impl Subsystem {
     /// would likely be placed here
     pub fn new() -> Subsystem {
         println!("getting new subsystem data");
+        // Here we call into an external C based function
+        extern_lib::k_init_device();
         Subsystem {}
     }
 
@@ -71,14 +73,6 @@ impl Subsystem {
         Ok(true)
     }
 
-    /// Supervisor reset function
-    /// Demonstrates calling into an exposed C function
-    /// This should fail unless run on an iOBC
-    pub fn reset_supervisor(&self) -> Result<bool, Error> {
-        println!("Resetting supervisor");
-        Ok(kubos_hal_iobc::k_supervisor_reset())
-    }
-
     /// Temperature getter
     /// Demonstrates returning an error condition
     pub fn temperature(&self) -> Result<i32, Error> {
@@ -107,5 +101,6 @@ impl Drop for Subsystem {
     /// any subsystem communications stuff
     fn drop(&mut self) {
         println!("Destructing subsystem");
+        extern_lib::k_terminate_device();
     }
 }
