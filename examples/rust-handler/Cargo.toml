@@ -10,4 +10,4 @@ iron = "0.5.1"
 mount = "0.3.0"
 logger = "0.3.0"
 
-kubos-hal-iobc = { path = "../../hal/kubos-hal-iobc" }
+extern-lib = { path = "../extern-lib" }

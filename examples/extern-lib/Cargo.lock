@@ -1,0 +1,11 @@
+[[package]]
+name = "extern-lib"
+version = "0.1.0"
+dependencies = [
+ "kubos-build-helpr 0.1.0",
+]
+
+[[package]]
+name = "kubos-build-helpr"
+version = "0.1.0"
+
