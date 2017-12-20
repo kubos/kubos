@@ -1,0 +1,7 @@
+[package]
+name = "cargo-kubos"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
+getopts = "0.2"
