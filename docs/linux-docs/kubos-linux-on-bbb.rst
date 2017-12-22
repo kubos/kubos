@@ -64,7 +64,19 @@ Build the OS Files
     
 :doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
 
-Create new folder
+In order to build KubOS Linux, two components are needed:
+
+- The `kubos-linux-build repo <https://github.com/kubostech/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build KubOS Linux
+- `BuildRoot <https://buildroot.org/>`__ - The actual build system
+
+These components should be setup as children of the same parent directory. 
+There are several commands and variables in the build process which use relative file paths to navigate between the components.
+
+After the environment has been set up, all build commands will be run from the BuildRoot directory unless otherwise stated.
+
+To set up a build environment and build KubOS Linux:
+
+Create a new parent folder to contain the build environment
 
 ::
 
@@ -76,12 +88,14 @@ Enter the new folder
 
     $ cd kubos-linux
 
-Download BuildRoot-2016.11 (more current versions of BuildRoot may work as well,
-but all testing has been done against 2016.11)
+Download BuildRoot-2017.02 (more current versions of BuildRoot may work as well,
+but all testing has been done against 2017.02)
+
+.. note:: All Kubos documentation will refer to v2017.02.8, which is the latest version of the LTS release at the time of this writing.
 
 ::
 
-    $ wget https://buildroot.uclibc.org/downloads/buildroot-2016.11.tar.gz && tar xvzf buildroot-2016.11.tar.gz && rm buildroot-2016.11.tar.gz
+    $ wget https://buildroot.uclibc.org/downloads/buildroot-2017.02.8.tar.gz && tar xvzf buildroot-2017.02.8.tar.gz && rm buildroot-2017.02.8.tar.gz
 
 Pull the kubos-linux-build repo
 
@@ -93,7 +107,7 @@ Move into the buildroot directory
 
 ::
 
-    $ cd buildroot-2016.11
+    $ cd buildroot-2017.02.8
 
 Point BuildRoot to the external kubos-linux-build folder and tell it to build
 for the Beaglebone Black.
@@ -122,7 +136,7 @@ only certain sections and it will go much more quickly (<5 min).
 BuildRoot documentation can be found
 `**here** <https://buildroot.org/docs.html>`__
 
-The generated files will be located in buildroot-2016.11/output/images.
+The generated files will be located in buildroot-2017.02.8/output/images.
 The relevant files are:
 
 -  uboot.bin - The U-Boot binary
@@ -141,7 +155,7 @@ If you would like to build your toolchain in somewhere other than the
 
 If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
-main "buildroot-2016.11" directory in a new "output/host" folder.
+main "buildroot-2017.02.8" directory in a new "output/host" folder.
 
 Create auxilliary SD Card Image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
