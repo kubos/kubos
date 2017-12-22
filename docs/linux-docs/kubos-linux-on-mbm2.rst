@@ -64,7 +64,19 @@ Build the OS Files
 
 :doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
 
-Create new folder
+In order to build KubOS Linux, two components are needed:
+
+- The `kubos-linux-build repo <https://github.com/kubostech/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build KubOS Linux
+- `BuildRoot <https://buildroot.org/>`__ - The actual build system
+
+These components should be setup as children of the same parent directory. 
+There are several commands and variables in the build process which use relative file paths to navigate between the components.
+
+After the environment has been set up, all build commands will be run from the BuildRoot directory unless otherwise stated.
+
+To set up a build environment and build KubOS Linux:
+
+Create a new parent folder to contain the build environment
 
 ::
 
