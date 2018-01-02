@@ -189,8 +189,75 @@ direction and value.
 SPI
 ~~~
 
-The external SPI bus is not currently available to the user space. It
-will be added in a future release.
+The iOBC has one SPI bus available for external use with three pre-allocated chip select pins.
+All pins are exposed via either an iOBC daughterboard (J5 connection) or optional iOBC header (J3 connection). 
+
+**SPI Bus 1**
+
++------+------------+
+| Name | Pin        |
++======+============+
+| MOSI | SPI1_MOSI  |
++------+------------+
+| MISO | SPI1_MISO  |
++------+------------+
+| SCLK | SPI1_SPCK  |
++------+------------+
+| CS0  | SPI1_NPCS0 |
++------+------------+
+| CS1  | SPI1_NPCS1 |
++------+------------+
+| CS2  | SPI1_NPCS2 |
++------+------------+
+
+Users can interact a device on this bus using Linux's `spidev interface <https://www.kernel.org/doc/Documentation/spi/spidev>`__
+The device name will be ``/dev/spidev1.n``, where *n* corresponds to the chip select number.
+
+An example user program to read a value might look like this:
+
+.. code-block:: c
+
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <sys/ioctl.h>
+    #include <linux/types.h>
+    #include <linux/spi/spidev.h>
+      
+    #define SPI_DEV "/dev/spidev1.0"
+    
+    int fd;
+    uint8_t mode = SPI_MODE_0;
+    uint8_t bits = 8;
+    uint32_t speed = 1000000;
+    uint16_t delay = 0;
+    uint8_t tx[2] = {0};
+    uint8_t rx[2] = {0};
+    
+    uint8_t value;
+    
+    fd = open(SPI_DEV, O_RDWR);
+    
+    /* Register to read from */
+    tx[0] = 0xD0;
+
+    /* Set up communication configuration */
+    struct spi_ioc_transfer tr = {
+        .tx_buf = (unsigned long)tx,
+        .rx_buf = (unsigned long)rx,
+        .len = 1,
+        .speed_hz = speed,
+        .bits_per_word = bits,
+        .cs_change = 0,
+        .delay_usecs = delay,
+    };
+
+    /* Send request to read */
+    ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+
+    /* Grab result from response buffer */
+    value = rx[1];
+
+    close(fd);
 
 User Data Partition
 -------------------
