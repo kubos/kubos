@@ -26,6 +26,7 @@ Example query:
        }
    }
 
+
 Example mutation:
 
 .. code::
