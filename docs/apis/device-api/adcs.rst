@@ -53,7 +53,7 @@ Run-Time ADCS Configuration
 ---------------------------
 
 Some ADCSs may support or require that the ADCS be configured during run-time. This can be done by passing a pointer to 
-a JSON structure (abstracted by ``adcs_config``) to the ``k_adcs_configure`` function.
+a JSON structure (defined as ``JsonNode *``) to the ``k_adcs_configure`` function.
 
 The JSON structure should be created using the CCAN/JSON library in the Kubos repo.
 
@@ -80,7 +80,7 @@ For example:
     }
     
     /* Create the JSON structure with our desired configuration options */
-    adcs_config config = json_decode("{\"0x2003\": 1,   \"0x2004\": 2}");
+    JsonNode * config = json_decode("{\"0x2003\": 1,   \"0x2004\": 2}");
     json_append_member(config, "0x2005", json_mknumber(4));
     
     /* Configure the iMTQ */
@@ -148,7 +148,7 @@ The available types of telemetry are documented in the specific ADCS API.
 This function takes two parameters:
 
     - The type of telemetry to return
-    - A pointer to a JSON structure to which the telemetry results should be added
+    - A pointer to a JSON structure (defined as ``JsonNode *``) to which the telemetry results should be added
 
 .. warning:: The JSON structure used for the telemetry information must be deleted **by the user** once it is no longer of use. 
 
@@ -161,7 +161,7 @@ For example:
     KADCSStatus status = ADCS_OK;
 
     /* Make parent object */
-    adcs_telem telem = json_mkobject();
+    JsonNode * telem = json_mkobject();
 
     /* Get the data */
     status = k_adcs_get_telemetry(NOMINAL, telem);
