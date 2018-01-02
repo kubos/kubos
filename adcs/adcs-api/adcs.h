@@ -39,13 +39,13 @@ void k_adcs_terminate(void);
  * @note This function might not be implemented for all ADCSs.
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_noop();
+KADCSStatus k_adcs_noop(void);
 /**
  * Configure the ADCS
  * @param [in] config ADCS configuration structure
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_configure(const adcs_config config);
+KADCSStatus k_adcs_configure(const JsonNode * config);
 /**
  * Reset the ADCS
  * @note This function might not be implemented for all ADCSs
@@ -103,7 +103,7 @@ KADCSStatus k_adcs_get_spin(adcs_spin * data);
  * @param [out] buffer (Pointer to) structure which data should be copied to
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_get_telemetry(ADCSTelemType type, adcs_telem buffer);
+KADCSStatus k_adcs_get_telemetry(ADCSTelemType type, JsonNode * buffer);
 /**
  * Pass a command packet directly through to the ADCS.
  * Useful for executing commands which have not been implemented in either the generic or specific ADCS APIs.
