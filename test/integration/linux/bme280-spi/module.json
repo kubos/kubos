@@ -1,0 +1,13 @@
+{
+    "bin":"./source",
+    "license":"Apache-2.0",
+    "name":"bme280-spi",
+    "repository":{
+        "url":"git://<repository_url>",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "dependencies":{},
+    "homepage":"https://<homepage>",
+    "description":"Example SPI app running on KubOS Linux."
+}
