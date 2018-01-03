@@ -64,7 +64,7 @@ dependencies = [
 name = "extern-lib"
 version = "0.1.0"
 dependencies = [
- "kubos-build-helpr 0.1.0",
+ "kubos-build-helper 0.1.0",
 ]
 
 [[package]]
@@ -178,7 +178,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "kubos-build-helpr"
+name = "kubos-build-helper"
 version = "0.1.0"
 
 [[package]]
