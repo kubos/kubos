@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+extern crate extern_lib;
+
 use std::io::{Error, ErrorKind};
 
 /// Model for power mutations
@@ -40,6 +42,8 @@ impl Subsystem {
     /// would likely be placed here
     pub fn new() -> Subsystem {
         println!("getting new subsystem data");
+        // Here we call into an external C based function
+        extern_lib::k_init_device();
         Subsystem {}
     }
 
@@ -109,5 +113,6 @@ impl Drop for Subsystem {
     /// any subsystem communications stuff
     fn drop(&mut self) {
         println!("Destructing subsystem");
+        extern_lib::k_terminate_device();
     }
 }

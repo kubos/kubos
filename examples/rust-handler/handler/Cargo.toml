@@ -9,3 +9,5 @@ juniper_iron = "0.1.1"
 iron = "0.5.1"
 mount = "0.3.0"
 logger = "0.3.0"
+
+extern-lib = { path = "../extern-lib" }
