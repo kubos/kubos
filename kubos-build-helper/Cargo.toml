@@ -1,5 +1,5 @@
 [package]
-name = "kubos-build-helpr"
+name = "kubos-build-helper"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 

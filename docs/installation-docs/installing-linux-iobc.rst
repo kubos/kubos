@@ -415,13 +415,13 @@ Copy the kubos-kernel.itb file into partition 5. It will need to be renamed to
 
 ::
 
-    $ sudo cp buildroot-2016.11/output/images/kubos-kernel.itb boot/kernel
+    $ sudo cp buildroot-2017.02.8/output/images/kubos-kernel.itb boot/kernel
 
 Untar the rootfs into partition 6
 
 ::
 
-    $ sudo tar -xvf buildroot-2016.11/output/images/rootfs.tar -C rootfs
+    $ sudo tar -xvf buildroot-2017.02.8/output/images/rootfs.tar -C rootfs
 
 Unmount the partitions
 

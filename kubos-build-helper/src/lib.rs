@@ -42,6 +42,16 @@ fn determine_target() -> String {
 /// aren't building in a way that Cargo is aware of
 /// so it isn't able to clean up for us
 fn do_build(target: &str) {
+    // Link in all system kubos modules
+    if !Command::new("kubos")
+        .args(&["link", "-a"])
+        .status()
+        .unwrap()
+        .success()
+    {
+        panic!("Failed to run kubos link")
+    }
+
     // Can we attach this to cargo clean?
     if !Command::new("kubos")
         .args(&["clean"])
