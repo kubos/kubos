@@ -111,6 +111,7 @@ breathe_projects = {
     "freertos" : "../xml/freertos/os",
     "ipc" : "../xml/ipc",
     "libcsp" : "../xml/libcsp",
+    "kubos-adcs-api" :  "../xml/adcs/adcs-api",
     "kubos-core" : "../xml/kubos-core",
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",

@@ -1,0 +1,14 @@
+{
+  "name": "ccan-json",
+  "version": "1.0.0",
+  "description": "CCAN JSON Parser",
+  "keywords": [
+    "JSON"
+  ],
+  "author": "Joseph A. Adams",
+  "homepage": "http://ccodearchive.net/",
+  "license": "BSD-MIT",
+  "lib":"./source",
+  "dependencies": {
+  }
+}
