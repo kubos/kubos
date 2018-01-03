@@ -1,8 +1,0 @@
-[package]
-name = "kubos-hal-iobc"
-version = "0.1.0"
-authors = ["ryan@kubos.com"]
-build = "build.rs"
-
-[build-dependencies]
-kubos-build-helpr = {path = "../../kubos-build-helpr"}
