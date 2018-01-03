@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use model::Subsystem;
+use model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
 use juniper::Context as JuniperContext;
 
 use juniper::FieldResult;
@@ -52,9 +52,37 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     }
 });
 
+
+/// GraphQL model for CalibrateThermometer return
+graphql_object!(CalibrateThermometer: Context as "CalibrateThermometer" |&self| {
+    description: "Calibrating thermometer return"
+
+    field temperature() -> FieldResult<i32> as "Temp of subsystem" {
+        Ok(self.temperature)
+    }
+});
+
+/// GraphQL model for ResetUptime return
+graphql_object!(ResetUptime: Context as "ResetUptime" |&self| {
+    description: "Reset uptime return"
+
+    field uptime() -> FieldResult<i32> as "Uptime of subsystem" {
+        Ok(self.uptime)
+    }
+});
+
+/// GraphQL model for SetPower return
+graphql_object!(SetPower: Context as "SetPower" |&self| {
+    description: "Enable Power Return"
+
+    field power() -> FieldResult<bool> as "Power state of subsystem" {
+        Ok(self.power)
+    }
+});
+
 pub struct QueryRoot;
 
-/// GraphQL model for base query
+/// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
     field subsystem(&executor) -> FieldResult<&Subsystem>
         as "Subsystem query"
@@ -64,4 +92,32 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         // a static struct with interesting function fields
         Ok(executor.context().get_subsystem())
     }
+});
+
+
+pub struct MutationRoot;
+
+/// Base GraphQL mutation model
+graphql_object!(MutationRoot : Context as "Mutation" |&self| {
+
+    // Each field represents functionality available
+    // through the GraphQL mutations
+    field set_power(&executor, power : bool) -> FieldResult<SetPower>
+        as "Set subsystem power state"
+    {
+        Ok(executor.context().get_subsystem().set_power(power)?)
+    }
+
+    field reset_uptime(&executor) -> FieldResult<ResetUptime>
+        as "Resets uptime counter of subsystem"
+    {
+        Ok(executor.context().get_subsystem().reset_uptime()?)
+    }
+
+    field calibrate_thermometer(&executor) -> FieldResult<CalibrateThermometer>
+        as "Calibrate thermometer"
+    {
+        Ok(executor.context().get_subsystem().calibrate_thermometer()?)
+    }
+
 });

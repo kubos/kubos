@@ -16,6 +16,21 @@
 
 use std::io::{Error, ErrorKind};
 
+/// Model for power mutations
+pub struct SetPower {
+    pub power: bool,
+}
+
+/// Model for uptime mutations
+pub struct ResetUptime {
+    pub uptime: i32,
+}
+
+/// Model for thermometer mutations
+pub struct CalibrateThermometer {
+    pub temperature: i32,
+}
+
 /// Model for handler's subsystem
 pub struct Subsystem;
 
@@ -37,13 +52,36 @@ impl Subsystem {
         Ok(true)
     }
 
+    /// Power state setter
+    /// Here we would call into the low level
+    /// device function
+    pub fn set_power(&self, _power: bool) -> Result<SetPower, Error> {
+        println!("Setting power state");
+        // Send command to device here
+        if _power {
+            Ok(SetPower { power: true })
+        } else {
+            Err(Error::new(
+                ErrorKind::PermissionDenied,
+                "I'm sorry Dave, I afraid I can't do that",
+            ))
+        }
+    }
+
     /// Uptime getter
     /// Code querying for new uptime value
     /// could be placed here
     pub fn uptime(&self) -> Result<i32, Error> {
         println!("getting uptime");
         // Low level query here
-        Ok(100)
+        Ok(111001)
+    }
+
+    /// Uptime reset function
+    pub fn reset_uptime(&self) -> Result<ResetUptime, Error> {
+        println!("Resetting uptime");
+        // Send command to device here
+        Ok(ResetUptime { uptime: 0 })
     }
 
     /// Temperature getter
@@ -55,6 +93,13 @@ impl Subsystem {
             ErrorKind::TimedOut,
             "Failed to retrieve temperature",
         ))
+    }
+
+    /// Temperature calibration
+    /// Demonstrates a mutation with error condition
+    pub fn calibrate_thermometer(&self) -> Result<CalibrateThermometer, Error> {
+        println!("calibrating thermometer");
+        Ok(CalibrateThermometer { temperature: 98 })
     }
 }
 
