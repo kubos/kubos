@@ -20,6 +20,7 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 # "telemetry-storage"]
 
 DOCS_DIRS = [
+    "adcs/adcs-api",
     "eps/eps-api",
     "evented-control",
     "ipc",
