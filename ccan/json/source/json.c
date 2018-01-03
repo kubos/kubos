@@ -360,12 +360,18 @@ static bool number_is_valid(const char *num);
 
 JsonNode *json_decode(const char *json)
 {
+    if (json == NULL) {
+        return NULL;
+    }
+
 	const char *s = json;
 	JsonNode *ret;
 	
 	skip_space(&s);
-	if (!parse_value(&s, &ret))
+	if (!parse_value(&s, &ret)) {
+	    json_delete(ret);
 		return NULL;
+	}
 	
 	skip_space(&s);
 	if (*s != 0) {
@@ -378,11 +384,19 @@ JsonNode *json_decode(const char *json)
 
 char *json_encode(const JsonNode *node)
 {
+    if (node == NULL) {
+        return NULL;
+    }
+
 	return json_stringify(node, NULL);
 }
 
 char *json_encode_string(const char *str)
 {
+    if (str == NULL) {
+        return NULL;
+    }
+
 	SB sb;
 	sb_init(&sb);
 	
@@ -393,6 +407,10 @@ char *json_encode_string(const char *str)
 
 char *json_stringify(const JsonNode *node, const char *space)
 {
+    if (node == NULL || space == NULL) {
+        return NULL;
+    }
+
 	SB sb;
 	sb_init(&sb);
 	
@@ -432,6 +450,10 @@ void json_delete(JsonNode *node)
 
 bool json_validate(const char *json)
 {
+    if (json == NULL) {
+        return false;
+    }
+
 	const char *s = json;
 	
 	skip_space(&s);
@@ -447,6 +469,10 @@ bool json_validate(const char *json)
 
 JsonNode *json_find_element(JsonNode *array, int index)
 {
+    if (array == NULL) {
+        return NULL;
+    }
+
 	JsonNode *element;
 	int i = 0;
 	
@@ -464,6 +490,10 @@ JsonNode *json_find_element(JsonNode *array, int index)
 
 JsonNode *json_find_member(JsonNode *object, const char *name)
 {
+    if (object == NULL || name == NULL) {
+        return NULL;
+    }
+
 	JsonNode *member;
 	
 	if (object == NULL || object->tag != JSON_OBJECT)
@@ -567,6 +597,10 @@ static void append_member(JsonNode *object, char *key, JsonNode *value)
 
 void json_append_element(JsonNode *array, JsonNode *element)
 {
+    if (array == NULL || element == NULL) {
+        return;
+    }
+
 	assert(array->tag == JSON_ARRAY);
 	assert(element->parent == NULL);
 	
@@ -575,6 +609,10 @@ void json_append_element(JsonNode *array, JsonNode *element)
 
 void json_prepend_element(JsonNode *array, JsonNode *element)
 {
+    if (array == NULL || element == NULL) {
+        return;
+    }
+
 	assert(array->tag == JSON_ARRAY);
 	assert(element->parent == NULL);
 	
@@ -583,6 +621,10 @@ void json_prepend_element(JsonNode *array, JsonNode *element)
 
 void json_append_member(JsonNode *object, const char *key, JsonNode *value)
 {
+    if (object == NULL || key == NULL || value == NULL) {
+        return;
+    }
+
 	assert(object->tag == JSON_OBJECT);
 	assert(value->parent == NULL);
 	
@@ -591,6 +633,10 @@ void json_append_member(JsonNode *object, const char *key, JsonNode *value)
 
 void json_prepend_member(JsonNode *object, const char *key, JsonNode *value)
 {
+    if (object == NULL || key == NULL || value == NULL) {
+        return;
+    }
+
 	assert(object->tag == JSON_OBJECT);
 	assert(value->parent == NULL);
 	
@@ -600,6 +646,10 @@ void json_prepend_member(JsonNode *object, const char *key, JsonNode *value)
 
 void json_remove_from_parent(JsonNode *node)
 {
+    if (node == NULL) {
+        return;
+    }
+
 	JsonNode *parent = node->parent;
 	
 	if (parent != NULL) {
@@ -1317,6 +1367,9 @@ bool json_check(const JsonNode *node, char errmsg[256])
 				snprintf(errmsg, 256, __VA_ARGS__); \
 			return false; \
 		} while (0)
+
+    if (node == NULL)
+        problem("node is NULL");
 	
 	if (node->key != NULL && !utf8_validate(node->key))
 		problem("key contains invalid UTF-8");
