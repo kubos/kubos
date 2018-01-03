@@ -5,4 +5,4 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 build = "build.rs"
 
 [build-dependencies]
-kubos-build-helper = { path = "../../kubos-build-helper" }
+kubos-build-helper = { path = "../../../kubos-build-helper" }
