@@ -20,11 +20,13 @@ use getopts::Options;
 use std::process::{exit, Command, Stdio};
 use std::env;
 
+const X86_TARGET_STR: &'static str = "x86-linux-native";
+
 /// Take a kubos target and convert it
 /// to a Rust/Clang target triplet
 fn target_converter(kubos_target: &str) -> String {
     match kubos_target {
-        "x86-linux-native" => String::from("x86_64-unknown-linux-gnu"),
+        X86_TARGET_STR => String::from("x86_64-unknown-linux-gnu"),
         "kubos-linux-beaglebone-gcc" => String::from("arm-unknown-linux-gnueabihf"),
         "kubos-linux-pumpkin-mbm2-gcc" => String::from("arm-unknown-linux-gnueabihf"),
         "kubos-linux-isis-gcc" => String::from("arm-unknown-linux-gnueabi"),
@@ -107,7 +109,7 @@ fn main() {
     } else {
         let k_target = match matches.opt_str("t") {
             Some(t) => t,
-            None => String::from("x86-linux-native"),
+            None => String::from(X86_TARGET_STR),
         };
         let command = matches.opt_str("c").unwrap();
         let c_target = target_converter(&k_target);
