@@ -365,7 +365,7 @@ JsonNode *json_decode(const char *json)
     }
 
 	const char *s = json;
-	JsonNode *ret;
+	JsonNode *ret = NULL;
 	
 	skip_space(&s);
 	if (!parse_value(&s, &ret)) {
