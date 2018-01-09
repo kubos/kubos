@@ -66,7 +66,7 @@ Build the OS Files
 
 In order to build KubOS Linux, two components are needed:
 
-- The `kubos-linux-build repo <https://github.com/kubostech/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build KubOS Linux
+- The `kubos-linux-build repo <https://github.com/kubos/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build KubOS Linux
 - `BuildRoot <https://buildroot.org/>`__ - The actual build system
 
 These components should be setup as children of the same parent directory. 
@@ -101,7 +101,7 @@ Pull the kubos-linux-build repo
 
 ::
 
-    $ git clone http://github.com/kubostech/kubos-linux-build
+    $ git clone http://github.com/kubos/kubos-linux-build
 
 Move into the buildroot directory
 

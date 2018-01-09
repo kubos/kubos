@@ -4,7 +4,7 @@ this_dir=$(cd "`dirname "$0"`"; pwd)
 
 extra_remote=$1
 
-./repo init -u git://github.com/kubostech/kubos-manifest
+./repo init -u git://github.com/kubos/kubos-manifest
 ./repo sync
 
 if [ ! -z $extra_remote ]

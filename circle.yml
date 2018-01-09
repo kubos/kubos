@@ -4,13 +4,13 @@ machine:
 
 dependencies:
   override:
-    - docker pull kubostech/kubos-dev:latest
+    - docker pull kubos/kubos-dev:latest
 
 test:
   override:
-      - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH -v $PWD:$PWD kubostech/kubos-dev:latest python $PWD/test/integration/integration_test.py
-      - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH --env CIRCLE_ARTIFACTS=$CIRCLE_ARTIFACTS -v $PWD:$PWD -v $CIRCLE_ARTIFACTS:$CIRCLE_ARTIFACTS --workdir $PWD kubostech/kubos-dev:latest python -m tools.ci.lint
-      - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH -v $PWD:$PWD kubostech/kubos-dev:latest /sbin/my_init -- python $PWD/tools/build.py --all-tests
+      - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH -v $PWD:$PWD kubos/kubos-dev:latest python $PWD/test/integration/integration_test.py
+      - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH --env CIRCLE_ARTIFACTS=$CIRCLE_ARTIFACTS -v $PWD:$PWD -v $CIRCLE_ARTIFACTS:$CIRCLE_ARTIFACTS --workdir $PWD kubos/kubos-dev:latest python -m tools.ci.lint
+      - docker run -t --env CIRCLE_BRANCH=$CIRCLE_BRANCH -v $PWD:$PWD kubos/kubos-dev:latest /sbin/my_init -- python $PWD/tools/build.py --all-tests
 
 deployment:
   production:

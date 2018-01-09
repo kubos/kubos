@@ -82,7 +82,7 @@ Testing Process
 
 Before running tests, verify that the master branch of the Kubos repo has passed all CircleCI
 tests. This can be done by checking the badge displayed in the Readme section of the repo's
-`main page<https://github.com/kubostech/kubos>`__. It should show a green "PASSED" icon.
+`main page<https://github.com/kubos/kubos>`__. It should show a green "PASSED" icon.
 
 All automatable tests will be executed by running the ``test_runner.py`` script against the
 iOBC's test configuration file.
@@ -127,7 +127,7 @@ Defect Management
 
 Kubers should add any bugs to the appropriate Kubos Trello board and mark them with the "Bug" label.
 
-ISIS members should open `GitHub issues within the main Kubos repo<https://github.com/kubostech/kubos/issues`__
+ISIS members should open `GitHub issues within the main Kubos repo<https://github.com/kubos/kubos/issues`__
 for any bugs found.
 
 Testing Plan

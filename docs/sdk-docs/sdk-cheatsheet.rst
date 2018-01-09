@@ -148,12 +148,12 @@ Modules and Targets
 Modules are groups of source code that implement a feature or unit of
 functionality. Kubos operating systems are split into a number of
 modules. An example of a Kubos module is the `Kubos
-HAL <https://github.com/kubostech/kubos/tree/master/hal/kubos-hal>`__
+HAL <https://github.com/kubos/kubos/tree/master/hal/kubos-hal>`__
 
 Targets are groups of configuration files that allow toolchains to build
 and cross-compile modules for specific hardware targets. One example of
 a Kubos target is the `STM32F407 Discovery
-Target <https://github.com/kubostech/kubos/tree/master/targets/target-stm32f407-disco-gcc>`__
+Target <https://github.com/kubos/kubos/tree/master/targets/target-stm32f407-disco-gcc>`__
 
 Linking Modules:
 ^^^^^^^^^^^^^^^^

@@ -6,7 +6,7 @@
     "mbed"
   ],
   "author": "Marshall Culpepper <marshall@kubos.co>",
-  "homepage": "https://github.com/kubostech/mbed-hal-st-stm32f407vg",
+  "homepage": "https://github.com/kubos/mbed-hal-st-stm32f407vg",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -17,7 +17,7 @@
     "stm32cubef4-stm32f407vg"
   ],
   "dependencies": {
-    "cmsis-core": "kubostech/cmsis-core#~1.2.1"
+    "cmsis-core": "kubos/cmsis-core#~1.2.1"
   },
   "targetDependencies": {}
 }

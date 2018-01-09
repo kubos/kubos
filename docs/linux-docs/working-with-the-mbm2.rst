@@ -296,10 +296,10 @@ By default the address is ``10.0.2.20``.
 Examples
 ^^^^^^^^
 
-A couple example programs using the ethernet port can be found in the `examples` folder of the `kubos repo <https://github.com/kubostech/kubos/tree/master/examples>`__:
+A couple example programs using the ethernet port can be found in the `examples` folder of the `kubos repo <https://github.com/kubos/kubos/tree/master/examples>`__:
 
-- `kubos-linux-tcprx <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__ - Receive TCP packets and then reply to the sender
-- `kubos-linux-tcptx <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcptx>`__ - Send TCP packets to specified IP address and port
+- `kubos-linux-tcprx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__ - Receive TCP packets and then reply to the sender
+- `kubos-linux-tcptx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcptx>`__ - Send TCP packets to specified IP address and port
 
 User Data Partitions
 --------------------

@@ -10,6 +10,6 @@
     "homepage":"https://<homepage>",
     "description":"QA test for iobc supervisor",
     "dependencies": {
-        "kubos-hal-iobc": "kubostech/kubos-hal-iobc#~0.1.0"
+        "kubos-hal-iobc": "kubos/kubos-hal-iobc#~0.1.0"
     }
 }

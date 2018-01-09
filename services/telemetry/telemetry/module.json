@@ -3,15 +3,15 @@
     "name":"telemetry",
     "version":"0.1.0",
     "dependencies":{
-      "ipc":"kubostech/ipc",
-      "kubos-core":"kubostech/kubos-core"
+      "ipc":"kubos/ipc",
+      "kubos-core":"kubos/kubos-core"
     },
     "targetDependencies":{
       "kubos-rt":{
-        "telemetry-rt":"kubostech/telemetry-rt"
+        "telemetry-rt":"kubos/telemetry-rt"
       },
       "kubos-linux":{
-        "telemetry-linux":"kubostech/telemetry-linux"
+        "telemetry-linux":"kubos/telemetry-linux"
       }
     }
 }

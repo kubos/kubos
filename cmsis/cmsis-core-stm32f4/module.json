@@ -7,7 +7,7 @@
     "mbed-official"
   ],
   "author": "Brendan Moran <brendan.moran@arm.com>",
-  "homepage": "https://github.com/kubostech/cmsis-core-stm32f4",
+  "homepage": "https://github.com/kubos/cmsis-core-stm32f4",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/BSD-3-Clause",
@@ -18,8 +18,8 @@
     "cmsis-core-stm32f4"
   ],
   "dependencies": {
-    "cmsis-core": "kubostech/cmsis-core#~1.2.1",
-    "stm32cubef4": "kubostech/stm32cubef4#~1.2.1"
+    "cmsis-core": "kubos/cmsis-core#~1.2.1",
+    "stm32cubef4": "kubos/stm32cubef4#~1.2.1"
   },
   "targetDependencies": {
     "stm32f401xe-no-inherit": {
@@ -32,10 +32,10 @@
       "cmsis-core-stm32f439zi": "~0.1.0"
     },
     "stm32f407xg": {
-      "cmsis-core-stm32f407xg": "kubostech/cmsis-core-stm32f407xg#~0.0.2"
+      "cmsis-core-stm32f407xg": "kubos/cmsis-core-stm32f407xg#~0.0.2"
     },
     "stm32f405rg": {
-      "cmsis-core-stm32f405rg": "kubostech/cmsis-core-stm32f405rg#~0.0.1"
+      "cmsis-core-stm32f405rg": "kubos/cmsis-core-stm32f405rg#~0.0.1"
     }
   }
 }

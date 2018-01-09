@@ -4,24 +4,24 @@
   "description": "KubOS HAL Module for STM32F4 MCUs",
   "keywords": [],
   "author": "kubos.co",
-  "homepage": "https://github.com/kubostech/kubos-hal-stm32f4",
+  "homepage": "https://github.com/kubos/kubos-hal-stm32f4",
   "license": "Apache-2.0",
   "extraIncludes": [
     "kubos-hal-stm32f4"
   ],
   "dependencies": {
-    "kubos-hal": "kubostech/kubos-hal#~0.1.0"
+    "kubos-hal": "kubos/kubos-hal#~0.1.0"
   },
   "targetDependencies": {
     "stm32f407vg": {
-      "stm32cubef4-stm32f407vg": "kubostech/stm32cubef4-stm32f407vg#~0.0.3"
+      "stm32cubef4-stm32f407vg": "kubos/stm32cubef4-stm32f407vg#~0.0.3"
     },
     "stm32f405rg": {
-      "stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg#~0.0.3"
+      "stm32cubef4-stm32f405rg": "kubos/stm32cubef4-stm32f405rg#~0.0.3"
     }
   },
   "testDependencies": {
-    "unity": "kubostech/unity"
+    "unity": "kubos/unity"
   },
   "testTargets": [
     "stm32f407-disco-gcc"

@@ -3,7 +3,7 @@
     "version": "0.1.1",
     "description": "parent build target for KubOS Linux devices",
     "inherits": {
-        "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
+        "kubos-gcc": "kubos/target-kubos-gcc#~0.1.0"
     },
     "licenses": 
     [

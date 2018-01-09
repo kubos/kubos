@@ -3,6 +3,6 @@
     "name":"telemetry-aggregator",
     "version":"0.1.0",
     "dependencies":{
-      "telemetry":"kubostech/telemetry"
+      "telemetry":"kubos/telemetry"
     }
 }

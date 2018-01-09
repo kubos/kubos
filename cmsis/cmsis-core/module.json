@@ -9,10 +9,10 @@
   ],
   "author": "Bogdan Marinescu <bogdan.marinescu@arm.com>",
   "repository": {
-    "url": "git@github.com:kubostech/cmsis-core.git",
+    "url": "git@github.com:kubos/cmsis-core.git",
     "type": "git"
   },
-  "homepage": "https://github.com/kubostech/cmsis-core",
+  "homepage": "https://github.com/kubos/cmsis-core",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -35,7 +35,7 @@
       "cmsis-core-freescale": "^1.0.0"
     },
     "st": {
-      "cmsis-core-st": "kubostech/cmsis-core-st#~1.0.3"
+      "cmsis-core-st": "kubos/cmsis-core-st#~1.0.3"
     },
     "nordic": {
       "cmsis-core-nordic": "^1.0.0"

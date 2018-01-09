@@ -6,8 +6,8 @@ development on satellite hardware:
 
 * [FreeRTOS](http://freertos.org)
 * [CubeSat Space Protocol](http://github.com/GOMspace/libcsp)
-* [KubOS Core Flight Middleware](http://github.com/kubostech/kubos-core)
-* [KubOS HAL](http://github.com/kubostech/kubos-hal)
+* [KubOS Core Flight Middleware](http://github.com/kubos/kubos-core)
+* [KubOS HAL](http://github.com/kubos/kubos-hal)
 
 For our v1.0 release, we will be targetting these CubeSat OBCs, and associated development boards:
 

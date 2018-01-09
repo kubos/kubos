@@ -6,7 +6,7 @@
     "mbed"
   ],
   "author": "Ryan Plauche <ryan@kubos.co>",
-  "homepage": "https://github.com/kubostech/stm32cubef4-stm32f405rg",
+  "homepage": "https://github.com/kubos/stm32cubef4-stm32f405rg",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/Apache-2.0",
@@ -17,7 +17,7 @@
     "stm32cubef4-stm32f405rg"
   ],
   "dependencies": {
-    "cmsis-core": "kubostech/cmsis-core#~1.2.1"
+    "cmsis-core": "kubos/cmsis-core#~1.2.1"
   },
   "targetDependencies": {}
 }

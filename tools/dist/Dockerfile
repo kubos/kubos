@@ -1,4 +1,4 @@
-# kubostech/kubos-dev:0.0.6
+# kubos/kubos-dev:0.0.6
 
 FROM phusion/baseimage:0.9.22
 
@@ -44,7 +44,7 @@ RUN rm ./bbb_toolchain.tar.gz
 RUN pip install pysocks
 RUN pip install mock
 RUN pip install --upgrade setuptools
-RUN pip install git+https://github.com/kubostech/kubos-cli
+RUN pip install git+https://github.com/kubos/kubos-cli
 RUN pip install cryptography==1.9
 
 RUN mkdir -p /usr/local/lib/yotta_modules

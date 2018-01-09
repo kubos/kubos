@@ -2,7 +2,7 @@
     "license":"Apache-2.0",
     "name":"cmocka",
     "repository":{
-        "url":"git://github.com/kubostech/kubos",
+        "url":"git://github.com/kubos/kubos",
         "type":"git"
     },
     "version":"1.1.0",

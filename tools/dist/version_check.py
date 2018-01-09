@@ -9,7 +9,7 @@ import re
 from .. import utils
 
 '''
-This is a utility for checking the versions of utilities in a docker image (kubostech/kubos-dev)
+This is a utility for checking the versions of utilities in a docker image (kubos/kubos-dev)
 against a vagrant environment. The path to the environment needs to be provided as an argument to
 this script.
 
@@ -23,7 +23,7 @@ $ python -m tools.dist.version_check <path-to-vagrant-environment>
 
 
 class VersionCheck(object):
-    docker_image = 'kubostech/kubos-dev:latest'
+    docker_image = 'kubos/kubos-dev:latest'
     json_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'programs.json')
     client = docker.from_env()
     pattern = re.compile(r'\s+')
@@ -60,7 +60,7 @@ class VersionCheck(object):
 
 
     def check_docker_version(self, program):
-        return self.client.containers.run('kubostech/kubos-dev', '%s --version' % program)
+        return self.client.containers.run('kubos/kubos-dev', '%s --version' % program)
 
 
 def main():

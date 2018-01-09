@@ -32,7 +32,7 @@ project names will cause warnings.
         $ kubos init myproject
 
 The ``init`` command creates a new directory with the
-`kubos-rt-example <https://github.com/kubostech/kubos/tree/master/kubos-rt-example>`__
+`kubos-rt-example <https://github.com/kubos/kubos/tree/master/kubos-rt-example>`__
 included so you can get started right away.
 
 Method 2: Cloning a Project
@@ -42,22 +42,22 @@ We have also created several different example Kubos projects which can
 be used as starting points.
 
 -  `Example showing basic FreeRTOS tasks and
-   CSP <https://github.com/kubostech/kubos/tree/master/examples/kubos-rt-example>`__
+   CSP <https://github.com/kubos/kubos/tree/master/examples/kubos-rt-example>`__
 -  `Example showing the I2C HAL and
-   sensors <https://github.com/kubostech/kubos/tree/master/examples/kubos-i2c-example>`__
+   sensors <https://github.com/kubos/kubos/tree/master/examples/kubos-i2c-example>`__
 -  `Example showing the SPI HAL and
-   sensors <https://github.com/kubostech/kubos/tree/master/examples/kubos-spi-example>`__
+   sensors <https://github.com/kubos/kubos/tree/master/examples/kubos-spi-example>`__
 -  `Example showing the sensor
-   interface <https://github.com/kubostech/kubos/tree/master/examples/kubos-sensor-example>`__
+   interface <https://github.com/kubos/kubos/tree/master/examples/kubos-sensor-example>`__
 -  `Example showing CSP over
-   UART <https://github.com/kubostech/kubos/tree/master/examples/kubos-csp-example>`__
+   UART <https://github.com/kubos/kubos/tree/master/examples/kubos-csp-example>`__
 
 If you would like to use one of our projects, you will need to clone the main repo and
 then link the necessary files. For example:
 
 ::
 
-        $ git clone https://github.com/kubostech/kubos myproject
+        $ git clone https://github.com/kubos/kubos myproject
         $ cd myproject/examples/kubos-spi-example
         $ kubos link --all
 
