@@ -90,7 +90,7 @@ Service Design
 Services will need to be compiled as binaries and have the appropriate
 argument parsing abilities to expose their desired functionality. See
 the `Kubos Core Command
-Service <https://github.com/kubostech/kubos/tree/master/commands>`__ for
+Service <https://github.com/kubos/kubos/tree/master/commands>`__ for
 an example of how this is implemented.
 
 Existing Services

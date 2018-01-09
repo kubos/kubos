@@ -144,7 +144,7 @@ series of tools that can be used to automatically correct any C coding
 inconsistencies. A stand-alone tool is available, which can then be used
 with a variety of IDEs. We have created a '.clang-format' file in the
 `Kubos
-repo <https://github.com/kubostech/kubos/blob/master/.clang-format>`__
+repo <https://github.com/kubos/kubos/blob/master/.clang-format>`__
 which can be used to automatically correct C code files to conform with
 our styling.
 

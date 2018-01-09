@@ -3,13 +3,13 @@
   "license": "Apache-2.0",
   "name": "kubos-csp-example",
   "repository": {
-    "url": "ssh://git@github.com/kubostech/kubos-csp-example",
+    "url": "ssh://git@github.com/kubos/kubos-csp-example",
     "type": "git"
   },
   "version": "0.0.1",
   "dependencies": {
     "kubos-rt": "openkosmosorg/kubos-rt#~0.1.0"
   },
-  "homepage": "https://github.com/kubostech/kubos-csp-example",
+  "homepage": "https://github.com/kubos/kubos-csp-example",
   "description": "Example app demonstrating csp over uart"
 }

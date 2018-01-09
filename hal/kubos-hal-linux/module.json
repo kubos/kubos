@@ -7,14 +7,14 @@
       "kubos-hal-linux"
   ],
   "author": "kubos.co",
-  "homepage": "https://github.com/kubostech/kubos-hal-linux",
+  "homepage": "https://github.com/kubos/kubos-hal-linux",
   "license": "Apache-2.0",
   "dependencies": {
-    "kubos-hal" : "kubostech/kubos-hal#~0.1.0"
+    "kubos-hal" : "kubos/kubos-hal#~0.1.0"
   },
   "targetDependencies": {
       "kubos-linux-isis-gcc": {
-          "kubos-hal-iobc": "kubostech/kubos-hal-iobc"
+          "kubos-hal-iobc": "kubos/kubos-hal-iobc"
       }
   }
 }

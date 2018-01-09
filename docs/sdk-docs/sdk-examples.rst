@@ -2,7 +2,7 @@ Example Kubos Projects
 ======================
 
 We have provided a variety of example applications to help you get started with your Kubos project.
-These examples are located in the 'Examples' folder of the `Kubos repo <http://github.com/kubostech/kubos/tree/master/examples>`__, 
+These examples are located in the 'Examples' folder of the `Kubos repo <http://github.com/kubos/kubos/tree/master/examples>`__, 
 as well as within the `/home/vagrant/.kubos/kubos/examples` folder of the Kubos SDK box.
 
 Using an Example Application
@@ -24,7 +24,7 @@ KubOS Linux Examples
 Default Example
 ~~~~~~~~~~~~~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-example>`__
 
 **Compatible Targets: All KubOS Linux compatible targets**
 
@@ -47,7 +47,7 @@ The CSP server thread checks for connections on the CSP port and then prints any
 TCP Receive
 ~~~~~~~~~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__
 
 **Compatible Targets: Pumpkin MBM2, Beaglebone Black**
 
@@ -65,7 +65,7 @@ The program will wait for a client to connect over the socket, then read in any 
 TCP Send
 ~~~~~~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__
 
 **Compatible Targets: Pumpkin MBM2, Beaglebone Black**
 
@@ -86,7 +86,7 @@ It then waits for a reply message to be returned and exits.
 UART Receive
 ~~~~~~~~~~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-uartrx>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uartrx>`__
 
 **Compatible Targets: All KubOS Linux compatible targets**
 
@@ -104,7 +104,7 @@ This program should be paired with the UART Send demo program.
 UART Send
 ~~~~~~~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-uarttx>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uarttx>`__
 
 **Compatible Targets: All KubOS Linux compatible targets**
 
@@ -124,7 +124,7 @@ KubOS RT Examples
 Default Example
 ~~~~~~~~~~~~~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-rt-example>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-rt-example>`__
 
 **Compatible Targets: All KubOS RT compatible targets**
 
@@ -164,7 +164,7 @@ The CSP server thread checks for connections on the CSP port and then blinks the
 Sensor
 ~~~~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-sensor-example>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-sensor-example>`__
 
 **Compatible Targets: STM32F407 Discovery**
 
@@ -183,7 +183,7 @@ This application provides a streamlined approach to using the BME280 humidity/pr
 CSP
 ~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-csp-example>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-csp-example>`__
 
 **Compatible Targets: All KubOS RT compatible targets**
 
@@ -216,7 +216,7 @@ The CSP server thread checks for connections on the CSP port and then blinks the
 I2C
 ~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-i2c-example>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-i2c-example>`__
 
 **Compatible Targets: MSP430F5529, STM32F407 Discovery**
 
@@ -253,7 +253,7 @@ This application gives several examples of how to interact with I2C devices in a
 SPI
 ~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-spi-example>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-spi-example>`__
 
 **Compatible Targets: STM32F407 Discovery**
 
@@ -286,7 +286,7 @@ This application gives two examples of how to interact with SPI devices in a Kub
 SD Card
 ~~~~~~~
 
-`Example Code - GitHub <http://github.com/kubostech/kubos/tree/master/examples/kubos-sd-example>`__
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-sd-example>`__
 
 **Compatible Targets: MSP430F5529, STM32F407 Discovery**
 
@@ -325,7 +325,7 @@ The application covers how to:
     **FIXME: What's the purpose of the CSP server? Anything?**
     **FIXME: Where's the Slash documentation?**
     
-    `kubos-shell-example <http://github.com/kubostech/kubos/tree/master/examples/kubos-shell-example>`__
+    `kubos-shell-example <http://github.com/kubos/kubos/tree/master/examples/kubos-shell-example>`__
     
     **Compatible Targets: All KubOS RT compatible targets** 
     

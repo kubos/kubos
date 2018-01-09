@@ -1052,7 +1052,7 @@ KubOS RT Default File::
         },
         "version": "0.1.0",
         "dependencies":{
-            "kubos-rt": "kubostech/kubos-rt#~0.1.0"
+            "kubos-rt": "kubos/kubos-rt#~0.1.0"
         },
         "homepage": "https://<homepage>",
         "description": "Example app running on kubos-rt."
@@ -1071,7 +1071,7 @@ KubOS Linux Default File::
         },
         "version": "0.1.0",
         "dependencies":{
-            "csp": "kubostech/libcsp#~1.5.0"
+            "csp": "kubos/libcsp#~1.5.0"
         },
         "homepage": "https://<homepage>",
         "description": "Example app running on KubOS Linux."
@@ -1114,129 +1114,129 @@ These are the configuration options which are most likely to be changed for a pr
     
     Available dependency name/value pairs (hierarchy denotes included dependecies. Italics denotes Yotta targetDependencies):
     
-    - "cmd-control-client": "kubostech/cmd-control-client"
+    - "cmd-control-client": "kubos/cmd-control-client"
     
-        - "csp": "kubostech/libcsp"
-        - "command-and-control": "kubostech/command-and-control"
-        - "ipc": "kubostech/ipc"
-        - "tinycbor": "kubostech/tinycbor"
+        - "csp": "kubos/libcsp"
+        - "command-and-control": "kubos/command-and-control"
+        - "ipc": "kubos/ipc"
+        - "tinycbor": "kubos/tinycbor"
         
-    - "cmd-control-daemon": "kubostech/cmd-control-daemon"
+    - "cmd-control-daemon": "kubos/cmd-control-daemon"
     
-        - "csp": "kubostech/libcsp"
-        - "command-and-control": "kubostech/command-and-control"
-        - "ipc": "kubostech/ipc"
-        - "tinycbor": "kubostech/tinycbor"
-        - "kubos-core": "kubostech/kubos-core"
+        - "csp": "kubos/libcsp"
+        - "command-and-control": "kubos/command-and-control"
+        - "ipc": "kubos/ipc"
+        - "tinycbor": "kubos/tinycbor"
+        - "kubos-core": "kubos/kubos-core"
         
-    - "cmsis-core": "kubostech/cmsis-core"
+    - "cmsis-core": "kubos/cmsis-core"
     
-        - `"cmsis-core-st": "kubostech/cmsis-core-st"`
+        - `"cmsis-core-st": "kubos/cmsis-core-st"`
         
-            - `"cmsis-core-stm32f4": "kubostech/cmsis-core-stm32f4"`
+            - `"cmsis-core-stm32f4": "kubos/cmsis-core-stm32f4"`
             
-                - "cmsis-core": "kubostech/cmsis-core"
-                - "stm32cubef4": "kubostech/stm32cubef4"
-                - `"cmsis-core-stm32f405rg": "kubostech/cmsis-core-stm32f405rg"`
+                - "cmsis-core": "kubos/cmsis-core"
+                - "stm32cubef4": "kubos/stm32cubef4"
+                - `"cmsis-core-stm32f405rg": "kubos/cmsis-core-stm32f405rg"`
                 
-                    - "cmsis-core": "kubostech/cmsis-core"
+                    - "cmsis-core": "kubos/cmsis-core"
                     
-                - `"cmsis-core-stm32f407xg": "kubostech/cmsis-core-stm32f407xg"`
+                - `"cmsis-core-stm32f407xg": "kubos/cmsis-core-stm32f407xg"`
                 
-                    - "cmsis-core": "kubostech/cmsis-core"
+                    - "cmsis-core": "kubos/cmsis-core"
                     
-    - "command-and-control": "kubostech/command-and-control"
-    - "csp": "kubostech/libcsp"
+    - "command-and-control": "kubos/command-and-control"
+    - "csp": "kubos/libcsp"
     
-        - `"freertos": "kubostech/freertos"`
-        - `"kubos-hal": "kubostech/kubos-hal"`
-        - `"tinycbor": "kubostech/tinycbor"`
+        - `"freertos": "kubos/freertos"`
+        - `"kubos-hal": "kubos/kubos-hal"`
+        - `"tinycbor": "kubos/tinycbor"`
         
-    - "freertos": "kubostech/freertos"
+    - "freertos": "kubos/freertos"
     
-        - `"cmsis-core": "kubostech/cmsis-core"`
-        - `"freertos-config-stm32f4": "kubostech/freertos-config-stm32f4"`
-        - `"freertos-config-msp430f5529": "kubostech/freertos-config-msp430f5529"`
+        - `"cmsis-core": "kubos/cmsis-core"`
+        - `"freertos-config-stm32f4": "kubos/freertos-config-stm32f4"`
+        - `"freertos-config-msp430f5529": "kubos/freertos-config-msp430f5529"`
         
-    - "ipc": "kubostech/ipc"
+    - "ipc": "kubos/ipc"
     
-        - "csp": "kubostech/libcsp"
-        - "tinycbor": "kubostech/tinycbor"
-        - `"kubos-rt": "kubostech/kubos-rt"`
+        - "csp": "kubos/libcsp"
+        - "tinycbor": "kubos/tinycbor"
+        - `"kubos-rt": "kubos/kubos-rt"`
         
-    - "kubos-core": "kubostech/kubos-core"
+    - "kubos-core": "kubos/kubos-core"
     
-        - "csp": "kubostech/libcsp"
-        - "kubos-hal": "kubostech/kubos-hal"
+        - "csp": "kubos/libcsp"
+        - "kubos-hal": "kubos/kubos-hal"
         
-    - "kubos-hal": "kubostech/kubos-hal"
+    - "kubos-hal": "kubos/kubos-hal"
     
-        - "csp": "kubostech/libcsp"
-        - `"kubos-hal-linux": "kubostech/kubos-hal-linux"`
+        - "csp": "kubos/libcsp"
+        - `"kubos-hal-linux": "kubos/kubos-hal-linux"`
         
-            - "kubos-hal" : "kubostech/kubos-hal"
+            - "kubos-hal" : "kubos/kubos-hal"
             
-        - `"kubos-hal-msp430f5529": "kubostech/kubos-hal-msp430f5529"`
+        - `"kubos-hal-msp430f5529": "kubos/kubos-hal-msp430f5529"`
         
-            - "kubos-hal" : "kubostech/kubos-hal"
-            - "msp430f5529-hal": "kubostech/msp430f5529-hal"
+            - "kubos-hal" : "kubos/kubos-hal"
+            - "msp430f5529-hal": "kubos/msp430f5529-hal"
             
-        - `"kubos-hal-stm32f4": "kubostech/kubos-hal-stm32f4"`
+        - `"kubos-hal-stm32f4": "kubos/kubos-hal-stm32f4"`
         
-            - "kubos-hal": "kubostech/kubos-hal"
-            - `"stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg"`
+            - "kubos-hal": "kubos/kubos-hal"
+            - `"stm32cubef4-stm32f405rg": "kubos/stm32cubef4-stm32f405rg"`
             
-                - "cmsis-core": "kubostech/cmsis-core"
+                - "cmsis-core": "kubos/cmsis-core"
                 
-            - `"stm32cubef4-stm32f407vg": "kubostech/stm32cubef4-stm32f407vg"`
+            - `"stm32cubef4-stm32f407vg": "kubos/stm32cubef4-stm32f407vg"`
             
-                - "cmsis-core": "kubostech/cmsis-core#"
+                - "cmsis-core": "kubos/cmsis-core#"
                 
-    - "kubos-rt": "kubostech/kubos-rt"
+    - "kubos-rt": "kubos/kubos-rt"
     
-        - "freertos": "kubostech/freertos"
-        - "csp": "kubostech/libcsp"
-        - "kubos-hal": "kubostech/kubos-hal"
-        - "kubos-core": "kubostech/kubos-core"
+        - "freertos": "kubos/freertos"
+        - "csp": "kubos/libcsp"
+        - "kubos-hal": "kubos/kubos-hal"
+        - "kubos-core": "kubos/kubos-core"
 
-    - "stm32cubef4": "kubostech/stm32cubef4"
+    - "stm32cubef4": "kubos/stm32cubef4"
     
-        - `"stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg"`
+        - `"stm32cubef4-stm32f405rg": "kubos/stm32cubef4-stm32f405rg"`
         
-            - "cmsis-core": "kubostech/cmsis-core"
+            - "cmsis-core": "kubos/cmsis-core"
             
-        - `"stm32cubef4-stm32f407vg": "kubostech/stm32cubef4-stm32f407vg"`
+        - `"stm32cubef4-stm32f407vg": "kubos/stm32cubef4-stm32f407vg"`
         
-            - "cmsis-core": "kubostech/cmsis-core"
+            - "cmsis-core": "kubos/cmsis-core"
 
-    - "telemetry": "kubostech/telemetry"
+    - "telemetry": "kubos/telemetry"
     
-        - "ipc": "kubostech/ipc"
-        - "kubos-core": "kubostech/kubos-core"
-        - `"telemetry-linux": "kubostech/telemetry-linux"`
+        - "ipc": "kubos/ipc"
+        - "kubos-core": "kubos/kubos-core"
+        - `"telemetry-linux": "kubos/telemetry-linux"`
         
-              - "ipc": "kubostech/ipc"
-              - "kubos-core": "kubostech/kubos-core"
-              - "telemetry": "kubostech/telemetry"
-              - "tinycbor": "kubostech/tinycbor"
+              - "ipc": "kubos/ipc"
+              - "kubos-core": "kubos/kubos-core"
+              - "telemetry": "kubos/telemetry"
+              - "tinycbor": "kubos/tinycbor"
               
-        - `"telemetry-rt": "kubostech/telemetry-rt"`
+        - `"telemetry-rt": "kubos/telemetry-rt"`
         
-              - "ipc": "kubostech/ipc"
-              - "kubos-core": "kubostech/kubos-core"
-              - `"kubos-rt": "kubostech/kubos-rt"`
+              - "ipc": "kubos/ipc"
+              - "kubos-core": "kubos/kubos-core"
+              - `"kubos-rt": "kubos/kubos-rt"`
               
-    - "telemetry-aggregator": "kubostech/telemetry-aggregator"
+    - "telemetry-aggregator": "kubos/telemetry-aggregator"
     
-        - "telemetry": "kubostech/telemetry"
+        - "telemetry": "kubos/telemetry"
         
-    - "telemetry-storage": "kubostech/telemetry-storage"
+    - "telemetry-storage": "kubos/telemetry-storage"
     
-        - "kubos-core": "kubostech/kubos-core"
-        - "telemetry": "kubostech/telemetry"
-        - `"kubos-rt": "kubostech/kubos-rt"`
+        - "kubos-core": "kubos/kubos-core"
+        - "telemetry": "kubos/telemetry"
+        - `"kubos-rt": "kubos/kubos-rt"`
         
-    - "tinycbor": "kubostech/tinycbor"
+    - "tinycbor": "kubos/tinycbor"
     
     
     

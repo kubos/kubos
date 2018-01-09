@@ -13,20 +13,20 @@
   },
   "targetDependencies": {
     "freertos": {
-      "freertos": "kubostech/freertos#~9.0.3"
+      "freertos": "kubos/freertos#~9.0.3"
     },
     "kubos-rt": {
-      "kubos-hal": "kubostech/kubos-hal#~0.1.0"
+      "kubos-hal": "kubos/kubos-hal#~0.1.0"
     },
     "x86-linux-native": {
-      "tinycbor": "kubostech/tinycbor"
+      "tinycbor": "kubos/tinycbor"
     },
     "kubos-linux-gcc": {
-      "tinycbor": "kubostech/tinycbor"
+      "tinycbor": "kubos/tinycbor"
     }
   },
   "testDependencies": {
-    "cmocka": "kubostech/cmocka"
+    "cmocka": "kubos/cmocka"
   },
   "testTargets": [
     "x86-linux-native"

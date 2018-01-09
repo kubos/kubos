@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "Base KubOS Linux build target for the Beaglebone Black arm-linux toolchain",
   "inherits": {
-    "kubos-linux-gcc": "kubostech/target-kubos-linux-gcc#~0.1.0"
+    "kubos-linux-gcc": "kubos/target-kubos-linux-gcc#~0.1.0"
   },
   "licenses": [
     {
