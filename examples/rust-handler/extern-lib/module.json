@@ -1,0 +1,6 @@
+{
+  "name": "extern-lib",
+  "version": "0.1.0",
+  "description": "Example kubos library for rust linking.",
+  "license": "Apache-2.0"
+}
