@@ -96,7 +96,7 @@ similar to the following when you start the box:
 
         $ vagrant up
         ...
-        ==> default: A newer version of the box 'kubos/kubos-dev' is available! You currently
+        ==> default: A newer version of the box 'kubostech/kubos-dev' is available! You currently
         ==> default: have version '0.2.2'. The latest is version '0.2.3'. Run
         ==> default: `vagrant box update` to update.
         ...
