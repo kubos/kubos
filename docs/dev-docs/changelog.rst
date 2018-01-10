@@ -94,7 +94,7 @@ v0.1.4 - Oct 14 2016
 v0.1.3 - Sep 16 2016
 --------------------
 
--  `KUBOS-132 <https://kubos.atlassian.net/browse/KUBOS-132>`__
+-  `KUBOS-132 <https://kubostech.atlassian.net/browse/KUBOS-132>`__
    Standardized status codes for I2C, SPI and UART HAL
 -  `KUBOS-131 <https://kubostech.atlassian.net/browse/KUBOS-131>`__
    Added basic unit testing for Kubos-HAL-MSP430F5529 and updated MSP430
