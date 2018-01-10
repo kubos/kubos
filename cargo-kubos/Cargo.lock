@@ -1,0 +1,14 @@
+[[package]]
+name = "cargo-kubos"
+version = "0.1.0"
+dependencies = [
+ "getopts 0.2.15 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "getopts"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[metadata]
+"checksum getopts 0.2.15 (registry+https://github.com/rust-lang/crates.io-index)" = "65922871abd2f101a2eb0eaebadc66668e54a87ad9c3dd82520b5f86ede5eff9"
