@@ -169,7 +169,7 @@ created automatically if it doesn't exist):
     $ git commit -m "Descriptive message about the changes you made"
     $ git push {remote name} {local branch name}
 
-If you're committing against a kubos repo, then the remote name will
+If you're committing against a Kubos repo, then the remote name will
 likely be "origin". If you're committing against your personal fork,
 then the remote name will match what you specified in the
 ``git remote add`` command.
