@@ -1,3 +1,19 @@
+//
+// Copyright (C) 2017 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 use std::env;
 use std::process::Command;
 
@@ -5,30 +21,18 @@ use std::process::Command;
 /// to compile and link a C-based yotta module under Cargo
 pub fn build_module(module_name: &str) {
     let kubos_target = determine_target();
-
     do_build(&kubos_target);
-
     setup_environment(module_name, &kubos_target);
 }
 
 
-/// Translates Cargo/Rust/Clang target triplet
-/// into the proper target for `kubos build`
-///
-/// This bit might be better wrapped in a cargo
-/// extension which takes a kubos target and then
-/// determines the correct Rust triplet
+/// Retrieve the kubos target from the environment
+/// variable CARGO_KUBOS_TARGET. This variable *should*
+/// get set when the `cargo kubos` command is run.
 fn determine_target() -> String {
-    match env::var("TARGET").unwrap().as_ref() {
-        // Default native vagrant target
-        "x86_64-unknown-linux-gnu" => String::from("x86-linux-native"),
-        // Currently set to the beaglebone black toolchain
-        // We will eventually need to determine if we intend
-        // to build with the pumpkin-mbm2 toolchain
-        "arm-unknown-linux-gnueabidf" => String::from("kubos-linux-beaglebone-gcc"),
-        // ISIS iOBC target
-        "arm-unknown-linux-gnueabi" => String::from("kubos-linux-isis-gcc"),
-        target => panic!("Target not supported for Kubos modules {}", target),
+    match env::var("CARGO_KUBOS_TARGET") {
+        Ok(val) => String::from(val),
+        Err(e) => panic!("Error retrieving cargo-kubos target: {}", e),
     }
 }
 
