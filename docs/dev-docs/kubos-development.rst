@@ -1,7 +1,7 @@
 Developing Kubos Modules
 ========================
 
-The top level `Kubos <https://github.com/kubostech/kubos>`__ project
+The top level `Kubos <https://github.com/kubos/kubos>`__ project
 contains all of the Kubos source modules and targets.
 
 Getting Started
@@ -17,7 +17,7 @@ Clone the Kubos repo to your host machine.
 
 ::
 
-    $ git clone https://github.com/kubostech/kubos
+    $ git clone https://github.com/kubos/kubos
         
 
 Update your Vagrantfile to pass the repo folder through to your VM. The

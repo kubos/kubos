@@ -4,10 +4,10 @@
   "bin": "./source",
   "description": "Example usage of fatfs sd driver",
   "repository": {
-    "url": "ssh://git@github.com/kubostech/kubos-sd-example",
+    "url": "ssh://git@github.com/kubos/kubos-sd-example",
     "type": "git"
   },
-  "homepage": "https://github.com/kubostech/kubos-sd-example",
+  "homepage": "https://github.com/kubos/kubos-sd-example",
   "license": "Apache-2.0",
   "bin" : "./source",
   "dependencies": {

@@ -3,16 +3,16 @@
     "name":"telemetry-rt",
     "version":"0.1.0",
     "dependencies":{
-      "ipc":"kubostech/ipc",
-      "kubos-core":"kubostech/kubos-core"
+      "ipc":"kubos/ipc",
+      "kubos-core":"kubos/kubos-core"
     },
     "targetDependencies":{
       "kubos-rt":{
-        "kubos-rt":"kubostech/kubos-rt"
+        "kubos-rt":"kubos/kubos-rt"
       }
     },
     "testDependencies": {
-        "cmocka": "kubostech/cmocka"
+        "cmocka": "kubos/cmocka"
     },
     "testTargets": [
         "stm32f407-disco-gcc"

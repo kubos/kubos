@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "base KubOS RT build target for the msp430-gcc toolchain",
   "inherits": {
-    "kubos-rt-gcc": "kubostech/target-kubos-rt-gcc#~0.1.0"
+    "kubos-rt-gcc": "kubos/target-kubos-rt-gcc#~0.1.0"
   },
   "licenses": [
     {

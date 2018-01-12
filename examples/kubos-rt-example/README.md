@@ -1,6 +1,6 @@
 # KubOS RT Example App
 
-This is a simple application built on top of the [KubOS RT Platform](https://github.com/kubostech/kubos/tree/master/kubos-rt) demonstrating some basic functionality from KubOS RT (CSP, UART, FreeRTOS). 
+This is a simple application built on top of the [KubOS RT Platform](https://github.com/kubos/kubos/tree/master/kubos-rt) demonstrating some basic functionality from KubOS RT (CSP, UART, FreeRTOS). 
 
 This is the default application included when the `kubos init` command is executed. It is intended to provide an overview of several components as they might run in a KubOS RT application.
 
@@ -28,7 +28,7 @@ To successfully run this project, you must have one of the supported KubOS RT ta
 
 Nagivate to your [Kubos Vagrant image](docs.kubos.co/sdk-installing.html) and clone this project's parent repo into a desired directory
 
-    $ git clone http://github.com/kubostech/kubos my-kubos
+    $ git clone http://github.com/kubos/kubos my-kubos
     
 Navigate to this project's folder
 

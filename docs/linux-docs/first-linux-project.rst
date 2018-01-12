@@ -32,7 +32,7 @@ will cause warnings.
         $ kubos init -l myproject
 
 The ``init`` command creates a new directory with the
-`kubos-linux-example <https://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example>`__
+`kubos-linux-example <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-example>`__
 included so you can get started right away. The ``-l`` or ``--linux`` command
 tells the CLI that a KubOS Linux project should be created, rather than a KubOS
 RT project.
@@ -43,18 +43,18 @@ Method 2: Cloning a Project
 We have also created several different example Kubos projects which can
 be used as starting points.
 
-- `CSP example included by default with 'kubos init -l' <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-example>`__
-- `TCP Receive <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcprx>`__
-- `TCP Send <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-tcptx>`__
-- `UART Receive <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-uartrx>`__
-- `UART Send <http://github.com/kubostech/kubos/tree/master/examples/kubos-linux-uarttx>`__
+- `CSP example included by default with 'kubos init -l' <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-example>`__
+- `TCP Receive <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__
+- `TCP Send <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcptx>`__
+- `UART Receive <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uartrx>`__
+- `UART Send <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uarttx>`__
 
 If you would like to use one of our projects, you will need to clone the main repo and
 then link the necessary files. For example:
 
 ::
 
-        $ git clone https://github.com/kubostech/kubos myproject
+        $ git clone https://github.com/kubos/kubos myproject
         $ cd myproject/examples/kubos-linux-example
         $ kubos link --all
 

@@ -3,13 +3,13 @@
     "license":"Apache-2.0",
     "name":"power-manager",
     "repository":{
-        "url":"git://github.com/kubostech/power-manager",
+        "url":"git://github.com/kubos/power-manager",
         "type":"git"
     },
     "version":"0.1.0",
-    "homepage":"https://github.com/kubostech/power-manager",
+    "homepage":"https://github.com/kubos/power-manager",
     "dependencies":{
-        "evented-control":"kubostech/evented-control#~0.1.0",
-        "eps-api":"kubostech/eps-api#~0.1.0"
+        "evented-control":"kubos/evented-control#~0.1.0",
+        "eps-api":"kubos/eps-api#~0.1.0"
     }
 }

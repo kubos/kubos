@@ -3,16 +3,16 @@
     "name":"ipc",
     "version":"0.1.0",
     "dependencies":{
-      "csp":"kubostech/libcsp",
-      "tinycbor":"kubostech/tinycbor"
+      "csp":"kubos/libcsp",
+      "tinycbor":"kubos/tinycbor"
     },
     "targetDependencies":{
       "kubos-rt":{
-        "kubos-rt":"kubostech/kubos-rt"
+        "kubos-rt":"kubos/kubos-rt"
       }
     },
     "testDependencies": {
-        "cmocka": "kubostech/cmocka"
+        "cmocka": "kubos/cmocka"
     },
     "testTargets": [
         "x86-linux-native"

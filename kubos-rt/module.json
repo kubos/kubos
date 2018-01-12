@@ -7,15 +7,15 @@
   ],
   "author": "marshall@kubos.co",
   "repository": {
-    "url": "ssh://git@github.com/kubostech/kubos-rt",
+    "url": "ssh://git@github.com/kubos/kubos-rt",
     "type": "git"
   },
-  "homepage": "https://github.com/kubostech/kubos-rt",
+  "homepage": "https://github.com/kubos/kubos-rt",
   "license": "Apache-2.0",
   "dependencies": {
-    "freertos": "kubostech/freertos#~9.0.3",
-    "csp": "kubostech/libcsp#~1.5.0",
-    "kubos-hal": "kubostech/kubos-hal#~0.1.0",
-    "kubos-core": "kubostech/kubos-core#~0.1.0"
+    "freertos": "kubos/freertos#~9.0.3",
+    "csp": "kubos/libcsp#~1.5.0",
+    "kubos-hal": "kubos/kubos-hal#~0.1.0",
+    "kubos-core": "kubos/kubos-core#~0.1.0"
   }
 }

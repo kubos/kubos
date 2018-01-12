@@ -40,7 +40,7 @@ To perform a full default installation, two files are needed:
   - A KubOS Linux SD card image
   - An aux_sd image
   
-All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubostech/kubos-linux-build/releases>`__
+All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
 Download the latest `KubOS_Linux.zip` file and then unzip the files for the Beaglebone Black. They're located in the `KubOS_Linux/{version}/Beaglebone-Black` folder.
 

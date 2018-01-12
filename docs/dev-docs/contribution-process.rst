@@ -59,7 +59,7 @@ Github
 ~~~~~~
 
 -  Navigate to the repo you'd like to open an issue against (most likely
-   kubostech/kubos)
+   kubos/kubos)
 -  Click the 'Issues' tab
 -  Click the 'New Issue' button
 -  The title should be a descriptive overview of the problem
@@ -106,7 +106,7 @@ request:
 To create your own repo:
 
 -  Navigate to the github page of the main code that you want to work
-   on. For example, https://github.com/kubostech/kubos.
+   on. For example, https://github.com/kubos/kubos.
 -  Click the 'Fork' button in the upper right-hand corner.
 -  If you see a dialog 'Where should we fork this repository?', click
    the icon with your username.
@@ -119,7 +119,7 @@ Clone the repo that you want to modify onto your local machine
 
 ::
 
-    $ git clone http://github.com/kubostech/kubos
+    $ git clone http://github.com/kubos/kubos
 
 Move into the repo folder
 
@@ -169,7 +169,7 @@ created automatically if it doesn't exist):
     $ git commit -m "Descriptive message about the changes you made"
     $ git push {remote name} {local branch name}
 
-If you're committing against a kubostech repo, then the remote name will
+If you're committing against a Kubos repo, then the remote name will
 likely be "origin". If you're committing against your personal fork,
 then the remote name will match what you specified in the
 ``git remote add`` command.
@@ -237,7 +237,7 @@ Git will edit any files with conflicts. Conflicts will look like this:
             New local changes
         ==========
             New master changes
-        <<<kubostech
+        <<<kubos
         
 
 Edit the files to resolve the conflicts. Push the resolved changed to

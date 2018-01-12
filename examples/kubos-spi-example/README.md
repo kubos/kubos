@@ -1,6 +1,6 @@
 # Kubos SPI Example App
 
-This is a simple application built on top of the [KubOS RT Platform](https://github.com/kubostech/kubos/tree/master/kubos-rt) demonstrating our SPI HAL.
+This is a simple application built on top of the [KubOS RT Platform](https://github.com/kubos/kubos/tree/master/kubos-rt) demonstrating our SPI HAL.
 
 ## Project Overview
 
@@ -39,7 +39,7 @@ You can view the STM32F4's console output by connecting an [FTDI serial cable](h
 
 Nagivate to your [Kubos Vagrant image](docs.kubos.co/sdk-installing.html) and clone this project's parent repo into a desired directory
 
-    $ git clone http://github.com/kubostech/kubos my-kubos
+    $ git clone http://github.com/kubos/kubos my-kubos
     
 Navigate to this project's folder
 

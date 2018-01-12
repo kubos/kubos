@@ -41,7 +41,7 @@ To perform a default installation, three files are needed:
   - u-boot.bin
   - at91sam9g20isis.dtb
   
-All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubostech/kubos-linux-build/releases>`__
+All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
 Download the latest `KubOS_Linux.zip` file and then unzip the files for the iOBC. They're located in the `KubOS_Linux/{version}/iOBC` folder.
 
@@ -136,7 +136,7 @@ Pre-Requisites
 7. Turn on the board.
 
 8. Copy the `kubos-nor-flash.tcl` script from the `tools/at91sam9g20isis` folder in
-   the `kubos-linux-build <https://github.com/kubostech/kubos-linux-build>`__ repo
+   the `kubos-linux-build <https://github.com/kubos/kubos-linux-build>`__ repo
    into the SAM-BA application folder.
 9. Change line 44 in `{path to SAM-BA}/tcl_lib/boards.tcl` from this:
 

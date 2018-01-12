@@ -3,16 +3,16 @@
     "license":"Apache-2.0",
     "name":"linux-telemetry-service",
     "repository":{
-        "url":"git://github.com/kubostech/kubos",
+        "url":"git://github.com/kubos/kubos",
         "type":"git"
     },
     "version":"0.1.0",
     "dependencies":{
-        "telemetry":"kubostech/telemetry"
+        "telemetry":"kubos/telemetry"
     },
     "targetDependencies":{
         "isis":{
-            "kubos-hal-iobc":"kubostech/kubos-hal-iobc"
+            "kubos-hal-iobc":"kubos/kubos-hal-iobc"
         }
     }
 }

@@ -24,7 +24,7 @@ There are several U-Boot environment variables that are used to track the state 
 * `kubos_prev_version` - The name of the kpack \*.itb file that was previously used to load the KubOS Linux kernel and rootfs.
 * `kubos_curr_tried` - Indicates that reloading the current version has been attempted.
 
-The default values for these variables can be found in the configuration header file for each board located in the `U-Boot repo <https://github.com/kubostech/uboot>`__ under the 'include/configs' directory.
+The default values for these variables can be found in the configuration header file for each board located in the `U-Boot repo <https://github.com/kubos/uboot>`__ under the 'include/configs' directory.
 
 Boot Processing Diagram
 -----------------------

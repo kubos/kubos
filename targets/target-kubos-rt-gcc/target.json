@@ -2,7 +2,7 @@
   "name": "kubos-rt-gcc",
   "version": "0.1.0",
   "inherits": {
-    "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
+    "kubos-gcc": "kubos/target-kubos-gcc#~0.1.0"
   },
   "similarTo": [
     "kubos-rt",

@@ -7,22 +7,22 @@
   "homepage": "https://www.kubos.co",
   "license": "Apache-2.0",
   "dependencies": {
-    "csp": "kubostech/libcsp#~1.5.0"
+    "csp": "kubos/libcsp#~1.5.0"
   },
   "targetDependencies": {
     "stm32f4": {
-      "kubos-hal-stm32f4": "kubostech/kubos-hal-stm32f4#~0.1.0"
+      "kubos-hal-stm32f4": "kubos/kubos-hal-stm32f4#~0.1.0"
     },
     "msp430f5529": {
-      "kubos-hal-msp430f5529": "kubostech/kubos-hal-msp430f5529#~0.1.0"
+      "kubos-hal-msp430f5529": "kubos/kubos-hal-msp430f5529#~0.1.0"
     },
     "linux": {
-      "kubos-hal-linux": "kubostech/kubos-hal-linux"
+      "kubos-hal-linux": "kubos/kubos-hal-linux"
     }
   },
   "testDependencies": {
-    "unity": "kubostech/unity",
-    "cmocka": "kubostech/cmocka"
+    "unity": "kubos/unity",
+    "cmocka": "kubos/cmocka"
   },
   "testTargets": [
     "x86-linux-native"

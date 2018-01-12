@@ -3,18 +3,18 @@
     "name":"telemetry-storage",
     "version":"0.1.0",
     "dependencies":{
-        "telemetry":"kubostech/telemetry",
-	"kubos-core": "kubostech/kubos-core"
+        "telemetry":"kubos/telemetry",
+	"kubos-core": "kubos/kubos-core"
     },
     "targetDependencies":{
       "kubos-rt":{
-        "kubos-rt":"kubostech/kubos-rt"
+        "kubos-rt":"kubos/kubos-rt"
       }
     },
     "testTargets": [
         "x86-linux-native"
     ],
     "testDependencies": {
-        "cmocka": "kubostech/cmocka"
+        "cmocka": "kubos/cmocka"
     }
 }

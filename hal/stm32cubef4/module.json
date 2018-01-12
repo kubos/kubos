@@ -6,7 +6,7 @@
     "stm32cubef4"
   ],
   "author": "Marshall Culpepper <marshall@kubos.co>",
-  "homepage": "https://github.com/kubostech/stm32cubef4",
+  "homepage": "https://github.com/kubos/stm32cubef4",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/BSD-3-Clause",
@@ -21,10 +21,10 @@
           "stm32cubef4-stm32f429zi": "*"
       },
       "stm32f407vg": {
-          "stm32cubef4-stm32f407vg": "kubostech/stm32cubef4-stm32f407vg#~0.0.1"
+          "stm32cubef4-stm32f407vg": "kubos/stm32cubef4-stm32f407vg#~0.0.1"
       },
       "stm32f405rg": {
-          "stm32cubef4-stm32f405rg": "kubostech/stm32cubef4-stm32f405rg#~0.0.1"
+          "stm32cubef4-stm32f405rg": "kubos/stm32cubef4-stm32f405rg#~0.0.1"
       }
   }
 }

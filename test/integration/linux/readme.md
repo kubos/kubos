@@ -27,7 +27,7 @@ The JSON schema is as follows:
         {
             "name": "Command and Control Ping Test",
             "pre_test": "ls",
-            "build_source": "https://github.com/kubostech/kubos-linux-example",
+            "build_source": "https://github.com/kubos/kubos-linux-example",
             "flash_source": "Path to some file",
             "test_command" : "/usr/bin/c2 exec core ping",
             "post_test": "pwd",

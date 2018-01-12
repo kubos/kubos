@@ -56,7 +56,7 @@ U-Boot
 
 `Site Page <http://www.denx.de/wiki/U-Boot>`__
 
-`Kubos U-Boot Repo <https://github.com/kubostech/uboot>`__
+`Kubos U-Boot Repo <https://github.com/kubos/uboot>`__
 
 U-Boot, at the most basic level, is responsible for loading the kernel from the
 SD card into the SDRAM. However, it also provides a basic OS and CLI which can

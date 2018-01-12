@@ -9,10 +9,10 @@
   ],
   "author": "Brendan Moran <brendan.moran@arm.com>",
   "repository": {
-    "url": "git@github.com:kubostech/cmsis-core-st.git",
+    "url": "git@github.com:kubos/cmsis-core-st.git",
     "type": "git"
   },
-  "homepage": "https://github.com/kubostech/cmsis-core-st",
+  "homepage": "https://github.com/kubos/cmsis-core-st",
   "license": "Apache-2",
   "dependencies": {},
   "targetDependencies": {
@@ -20,7 +20,7 @@
       "cmsis-core-stm32f0": "*"
     },
     "stm32f4": {
-      "cmsis-core-stm32f4": "kubostech/cmsis-core-stm32f4#~1.2.2"
+      "cmsis-core-stm32f4": "kubos/cmsis-core-stm32f4#~1.2.2"
     }
   }
 }

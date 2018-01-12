@@ -6,7 +6,7 @@
     "mbed"
   ],
   "author": "Ryan Plauche <ryan@kubos.co>",
-  "homepage": "https://github.com/kubostech/cmsis-core-stm32f405rg",
+  "homepage": "https://github.com/kubos/cmsis-core-stm32f405rg",
   "licenses": [
     {
       "url": "https://spdx.org/licenses/BSD-3-Clause",
@@ -17,7 +17,7 @@
     "cmsis-core-stm32f405rg"
   ],
   "dependencies": {
-    "cmsis-core": "kubostech/cmsis-core#~1.2.1"
+    "cmsis-core": "kubos/cmsis-core#~1.2.1"
   },
   "targetDependencies": {}
 }

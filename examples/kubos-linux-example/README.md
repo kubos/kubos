@@ -1,6 +1,6 @@
 # KubOS Linux Example App
 
-This is a simple application built on top of the [KubOS Linux Platform](https://github.com/kubostech/kubos-linux-build) demonstrating some basic functionality from KubOS Linux (CSP). 
+This is a simple application built on top of the [KubOS Linux Platform](https://github.com/kubos/kubos-linux-build) demonstrating some basic functionality from KubOS Linux (CSP). 
 
 This is the default application included when the `kubos init --linux` command is executed. It is intended as a basic example of how an application could be written to run on a KubOS Linux system.
 
@@ -20,7 +20,7 @@ This project can be built and run natively within a Kubos Vagrant image. No boar
 
 Nagivate to your [Kubos Vagrant image](docs.kubos.co/sdk-installing.html) and clone this project's parent repo into a desired directory
 
-    $ git clone http://github.com/kubostech/kubos my-kubos
+    $ git clone http://github.com/kubos/kubos my-kubos
     
 Navigate to this project's folder
 

@@ -9,8 +9,8 @@
     },
     "version": "0.1.0",
     "dependencies": {
-        "csp":"kubostech/libcsp",
-        "telemetry":"kubostech/telemetry"
+        "csp":"kubos/libcsp",
+        "telemetry":"kubos/telemetry"
     },
     "homepage": "https://<homepage>",
     "description": "QA app exercising creating a telemetry subscriber"

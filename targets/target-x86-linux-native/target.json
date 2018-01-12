@@ -2,7 +2,7 @@
   "name": "x86-linux-native",
   "version": "1.0.1",
   "inherits": {
-    "kubos-gcc": "kubostech/target-kubos-gcc#~0.1.0"
+    "kubos-gcc": "kubos/target-kubos-gcc#~0.1.0"
   },
   "similarTo": [
     "kubos-linux",

@@ -2,7 +2,7 @@
     "name" : "msp430f5529-gcc",
     "version" : "0.1.0",
     "inherits": {
-      "kubos-msp430-gcc": "kubostech/target-kubos-msp430-gcc#~0.1.0"
+      "kubos-msp430-gcc": "kubos/target-kubos-msp430-gcc#~0.1.0"
     },
     "description" : "Official kubos-rt base target description for compiling with the msp430-gcc compiler against the msp430f5529 mcu",
     "license" : "Apache-2.0",

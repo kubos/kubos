@@ -19,7 +19,7 @@ v1.0.0 - June 27 2017
    Completed Kubos Telemetry integration into KubOS Linux
 - `KUBOS-487 <https://kubostech.atlassian.net/browse/KUBOS-487>`__
    Added support for tab-completion to Kubos CLI
--  `Created an initial QA integration test suite <https://github.com/kubostech/kubos/tree/master/test/integration/linux>`__
+-  `Created an initial QA integration test suite <https://github.com/kubos/kubos/tree/master/test/integration/linux>`__
 -  Migrated from Markdown to ReStructuredText as the documentation
    language of choice
 -  Migrated from only Doxygen to Sphinx and Doxygen as the documentation
@@ -89,7 +89,7 @@ v0.1.4 - Oct 14 2016
 -  `KUBOS-81 <https://kubostech.atlassian.net/browse/KUBOS-81>`__
    Implemented FatFs SPI SD support (Current MSP430 only)
 -  A new `example using the FatFs SPI SD
-   interface <https://github.com/kubostech/kubos-sd-example>`__
+   interface <https://github.com/kubos/kubos-sd-example>`__
 
 v0.1.3 - Sep 16 2016
 --------------------
@@ -119,9 +119,9 @@ v0.1.0 - Aug 19 2016
 -  `Altimeter <./kubos-core/group__ALTIMETER.html>`__
 -  `Temperature <./kubos-core/group__TEMPERATURE.html>`__
 -  A new `sensor example
-   application <https://github.com/kubostech/kubos-sensor-example>`__
+   application <https://github.com/kubos/kubos-sensor-example>`__
 -  A new `example using CSP over
-   uart <https://github.com/kubostech/kubos-csp-example>`__
+   uart <https://github.com/kubos/kubos-csp-example>`__
 -  Added the ability to link in local targets with KubOS-SDK
 
 v0.0.5 - Aug 05 2016

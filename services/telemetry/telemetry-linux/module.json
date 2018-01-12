@@ -3,13 +3,13 @@
     "name":"telemetry-linux",
     "version":"0.1.0",
     "dependencies":{
-      "ipc":"kubostech/ipc",
-      "kubos-core":"kubostech/kubos-core",
-      "telemetry":"kubostech/telemetry",
-      "tinycbor":"kubostech/tinycbor"
+      "ipc":"kubos/ipc",
+      "kubos-core":"kubos/kubos-core",
+      "telemetry":"kubos/telemetry",
+      "tinycbor":"kubos/tinycbor"
     },
     "testDependencies": {
-      "cmocka": "kubostech/cmocka"
+      "cmocka": "kubos/cmocka"
     },
     "testTargets": [
       "x86-linux-native"
