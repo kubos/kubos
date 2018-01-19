@@ -26,7 +26,7 @@ Component Names
 Components within Kubos breakdown as follows:
 
 - API - a statically linked library
-- Service - A persistent process that is used to interact with the system. These typically call APIs.
+- Service - A persistent process that is used to interact with the system. These typically utilize APIs.
 - Application - Makes decisions and uses the services. 
 
 Components added to the system should be referred to/labeled accordingly. See the :doc:`Architecture Overview <../architecture-overview>` document for more information on each component's roll. 
