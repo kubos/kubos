@@ -1,8 +1,5 @@
 {
     "programs": [
-        "msp430-gcc",
-        "arm-none-eabi-gcc",
-        "arm-none-eabi-gdb",
         "arm-linux-gcc"
     ]
 }
