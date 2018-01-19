@@ -13,11 +13,8 @@ RUN apt-get update -y
 RUN apt-get upgrade -y python2.7
 RUN apt-get install -y build-essential libssl-dev libffi-dev libhidapi-hidraw0 clang
 RUN apt-get install -y python-setuptools build-essential ninja-build python-dev libffi-dev libssl-dev
-RUN apt-get install -y gcc-arm-embedded
 RUN apt-get install -y git
 RUN apt-get install -y cmake
-RUN apt-get install -y gcc-msp430 gdb-msp430 msp430-libc
-RUN apt-get install -y libdbus-1-dev dbus
 RUN apt-get install -y unzip wget
 
 # Legacy BBB toolchain
