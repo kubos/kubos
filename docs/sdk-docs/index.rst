@@ -61,7 +61,6 @@ This documentation section contains the various guides related to using the Kubo
 .. toctree::
     :hidden:
     
-    Creating Your First Kubos Linux Project <first-linux-project>
     Installing the Kubos SDK <../installation-docs/sdk-installing>
     Kubos SDK Cheat Sheet <sdk-cheatsheet>
     Kubos CLI Command Reference <sdk-reference>

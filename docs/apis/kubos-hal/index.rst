@@ -19,13 +19,9 @@ of Linux system calls.
 
    @startuml
    rectangle "Kubos HAL" as kubos
-   rectangle "STM32F4 HAL" as stm32f4
-   rectangle "MSP430F5520 HAL" as msp430
    rectangle "KubOS Linux HAL" as linux
    rectangle "ISIS-OBC" as iobc
    rectangle "Pumpkin MBM2" as mbm2
-   kubos <|-- stm32f4
-   kubos <|-- msp430
    kubos <|-- linux
    linux <|-- iobc
    linux <|-- mbm2
@@ -54,8 +50,6 @@ of Linux system calls.
    :name:  hal-platforms
 
    KubOS Linux Devices <kubos-hal-linux/index>
-   STM32F4 <kubos-hal-stm32f4/index>
-   MSP430F5529 <kubos-hal-msp430f5529/index>
 
 .. toctree::
    :caption: OBC HALs
