@@ -19,12 +19,12 @@ each of the hardware components are and how they are connected.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../linux-docs/kubos-linux-on-mbm2` - Steps to build KubOS Linux
--  :doc:`../linux-docs/first-linux-project` - Basic tutorial for creating your first KubOS
+-  :doc:`../os-docs/kubos-linux-on-mbm2` - Steps to build KubOS Linux
+-  :doc:`../os-docs/first-linux-project` - Basic tutorial for creating your first KubOS
    Linux SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
--  :doc:`../linux-docs/using-kubos-linux` - General guide for interacting with KubOS Linux
--  :doc:`../linux-docs/working-with-the-mbm2` - Guide for interacting with MBM2-specific features
+-  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`../os-docs/working-with-the-mbm2` - Guide for interacting with MBM2-specific features
 
 Components
 ----------
@@ -157,4 +157,4 @@ Using KubOS Linux
 -----------------
 
 For information on how to create and run applications on your new KubOS Linux system, see the
-:doc:`../linux-docs/working-with-the-mbm2` guide.
+:doc:`../os-docs/working-with-the-mbm2` guide.

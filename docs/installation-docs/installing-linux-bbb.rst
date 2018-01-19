@@ -20,12 +20,12 @@ Beaglebone Documentation
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../linux-docs/kubos-linux-on-iobc` - Steps to build KubOS Linux for the iOBC
--  :doc:`../linux-docs/first-linux-project` - Basic tutorial for creating your first KubOS
+-  :doc:`../os-docs/kubos-linux-on-iobc` - Steps to build KubOS Linux for the iOBC
+-  :doc:`../os-docs/first-linux-project` - Basic tutorial for creating your first KubOS
    Linux SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
--  :doc:`../linux-docs/using-kubos-linux` - General guide for interacting with KubOS Linux
--  :doc:`../linux-docs/working-with-the-bbb` - Guide for interacting with BBB-specific features
+-  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`../os-docs/working-with-the-bbb` - Guide for interacting with BBB-specific features
    
 Components
 ----------
@@ -194,4 +194,4 @@ Using KubOS Linux
 -----------------
 
 For information on how to create and run applications on your new KubOS Linux system, see the
-:doc:`../linux-docs/working-with-the-bbb` guide.
+:doc:`../os-docs/working-with-the-bbb` guide.

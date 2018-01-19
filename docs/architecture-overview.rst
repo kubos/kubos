@@ -68,8 +68,6 @@ Communication Service
 
 The communication service is what integrates the gateway (and the API developed for it) to talk to the mission operation center, Major Tom. 
 
- - :doc:`here <services/communication-service>`. 
-
 Hardware Integration
 ~~~~~~~~~~~~~~~~~~~~
 

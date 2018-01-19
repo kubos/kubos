@@ -53,9 +53,8 @@ The kubos repository is a collection of
 loaded inside the Kubos Vagrant box. They can also be built locally
 using the ``kubos link`` and ``kubos link-target`` commands.
 
-See the :doc:`KubOS RT quick start guide <../rt-docs/first-rt-project>` or the
-:doc:`KubOS Linux quick start guide <../linux-docs/first-linux-project>` for instructions
-on setting up and building Kubos SDK projects.
+See the :doc:`KubOS Linux quick start guide <../os-docs/first-linux-project>` 
+for instructions on setting up and building Kubos SDK projects.
 
 Linking in a Local Module
 ~~~~~~~~~~~~~~~~~~~~~~~~~

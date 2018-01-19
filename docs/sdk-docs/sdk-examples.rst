@@ -135,8 +135,6 @@ Default Example
 +----------------------+-----------------+
 | CSP [4]_             | Sockets, ping   |
 +----------------------+-----------------+
-| FreeRTOS [5]_        | Threads, queues |
-+----------------------+-----------------+
 
 This is the default application included when the ``kubos init`` command is executed. 
 It is intended to provide an overview of several components as they might run in a KubOS RT application.
@@ -172,10 +170,6 @@ Sensor
 | High-level Component | Specific Area          |
 +======================+========================+
 | config.json [1]_     | Sensors                |
-+----------------------+------------------------+
-| Kubos Core [2]_      | altimeter, temperature |
-+----------------------+------------------------+
-| FreeRTOS [5]_        | Threads                |
 +----------------------+------------------------+
 
 This application provides a streamlined approach to using the BME280 humidity/pressure sensor and the HTU21D temperature/humidity sensor.
@@ -225,11 +219,7 @@ I2C
 +======================+==============================+
 | config.json [1]_     | Sensors                      |
 +----------------------+------------------------------+
-| Kubos Core [2]_      | HTU21D sensor, BNO055 sensor |
-+----------------------+------------------------------+
 | Kubos HAL [3]_       | I2C, GPIO                    |
-+----------------------+------------------------------+
-| FreeRTOS [5]_        | Threads                      |
 +----------------------+------------------------------+
 
 This application gives several examples of how to interact with I2C devices in a Kubos project:
@@ -262,11 +252,7 @@ SPI
 +======================+===============+
 | config.json [1]_     | Sensors       |
 +----------------------+---------------+
-| Kubos Core [2]_      | BME280 sensor |
-+----------------------+---------------+
 | Kubos HAL [3]_       | SPI, GPIO     |
-+----------------------+---------------+
-| FreeRTOS [5]_        | Threads       |
 +----------------------+---------------+
 
 This application gives two examples of how to interact with SPI devices in a Kubos project:
@@ -294,10 +280,6 @@ SD Card
 | High-level Component | Specific Area |
 +======================+===============+
 | config.json [1]_     | FS            |
-+----------------------+---------------+
-| Kubos Core [2]_      | FatFS         |
-+----------------------+---------------+
-| FreeRTOS [5]_        | Threads       |
 +----------------------+---------------+
 
 This application runs a series of commands against an SD card connected to SPI bus 1 using the FatFS library.
@@ -360,10 +342,8 @@ References
 ----------
 
 .. [1] :doc:`config.json <sdk-project-config>` - Kubos project file for custom configuration options
-.. [2] :doc:`Kubos Core <../apis/kubos-core/index>` - Kubos built-in peripheral device support
 .. [3] :doc:`Kubos HAL <../apis/kubos-hal/index>` - Kubos hardware abstraction for interfacing with peripheral devices
 .. [4] :doc:`CSP <../apis/libcsp/index>` - (Cubesat Space Protocol) Lightweight communication protocol
-.. [5] :doc:`FreeRTOS <../apis/freertos/index>` - The RTOS which KubOS RT is built on
 
 .. todo::
 
