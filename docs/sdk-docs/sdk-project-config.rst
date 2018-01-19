@@ -937,28 +937,7 @@ The Kubos project's `module.json` file is originally based on `Yotta's module.js
 Default Configurations
 ^^^^^^^^^^^^^^^^^^^^^^
 
-When you run ``kubos init``, a `module.json` file is created for you with some default values.
-
-KubOS RT Default File::
-
-    {
-        "bin": "./source",
-        "license": "Apache-2.0",
-        "name": "{your-project-name}",
-        "repository":{
-            "url": "git://<repository_url>",
-            "type": "git"
-        },
-        "version": "0.1.0",
-        "dependencies":{
-            "kubos-rt": "kubos/kubos-rt#~0.1.0"
-        },
-        "homepage": "https://<homepage>",
-        "description": "Example app running on kubos-rt."
-    }
-    
-
-KubOS Linux Default File::
+When you run ``kubos init -l``, a `module.json` file is created for you with some default values::
 
     {
         "bin": "./source",
@@ -1007,26 +986,9 @@ These are the configuration options which are most likely to be changed for a pr
     As a result, if you want to use a Kubos library, it **must** be specified here, or must be included with another library
     you specify.
     
-    **WARNING: "kubos-rt" is a required dependency for all KubOS RT projects**
-    
     :property string {component}: Project dependency location and/or version
     
-    Available dependency name/value pairs (hierarchy denotes included dependecies. Italics denotes Yotta targetDependencies):
-    
-    - "cmd-control-client": "kubos/cmd-control-client"
-    
-        - "csp": "kubos/libcsp"
-        - "command-and-control": "kubos/command-and-control"
-        - "ipc": "kubos/ipc"
-        - "tinycbor": "kubos/tinycbor"
-        
-    - "cmd-control-daemon": "kubos/cmd-control-daemon"
-    
-        - "csp": "kubos/libcsp"
-        - "command-and-control": "kubos/command-and-control"
-        - "ipc": "kubos/ipc"
-        - "tinycbor": "kubos/tinycbor"
-        - "kubos-core": "kubos/kubos-core"
+    Available dependency name/value pairs (hierarchy denotes included dependencies. Italics denotes Yotta targetDependencies):
         
     - "cmsis-core": "kubos/cmsis-core"
     
@@ -1044,18 +1006,11 @@ These are the configuration options which are most likely to be changed for a pr
                 
                     - "cmsis-core": "kubos/cmsis-core"
                     
-    - "command-and-control": "kubos/command-and-control"
     - "csp": "kubos/libcsp"
     
         - `"freertos": "kubos/freertos"`
         - `"kubos-hal": "kubos/kubos-hal"`
         - `"tinycbor": "kubos/tinycbor"`
-        
-    - "freertos": "kubos/freertos"
-    
-        - `"cmsis-core": "kubos/cmsis-core"`
-        - `"freertos-config-stm32f4": "kubos/freertos-config-stm32f4"`
-        - `"freertos-config-msp430f5529": "kubos/freertos-config-msp430f5529"`
         
     - "ipc": "kubos/ipc"
     
@@ -1063,80 +1018,11 @@ These are the configuration options which are most likely to be changed for a pr
         - "tinycbor": "kubos/tinycbor"
         - `"kubos-rt": "kubos/kubos-rt"`
         
-    - "kubos-core": "kubos/kubos-core"
-    
-        - "csp": "kubos/libcsp"
-        - "kubos-hal": "kubos/kubos-hal"
-        
     - "kubos-hal": "kubos/kubos-hal"
     
         - "csp": "kubos/libcsp"
         - `"kubos-hal-linux": "kubos/kubos-hal-linux"`
         
             - "kubos-hal" : "kubos/kubos-hal"
-            
-        - `"kubos-hal-msp430f5529": "kubos/kubos-hal-msp430f5529"`
-        
-            - "kubos-hal" : "kubos/kubos-hal"
-            - "msp430f5529-hal": "kubos/msp430f5529-hal"
-            
-        - `"kubos-hal-stm32f4": "kubos/kubos-hal-stm32f4"`
-        
-            - "kubos-hal": "kubos/kubos-hal"
-            - `"stm32cubef4-stm32f405rg": "kubos/stm32cubef4-stm32f405rg"`
-            
-                - "cmsis-core": "kubos/cmsis-core"
-                
-            - `"stm32cubef4-stm32f407vg": "kubos/stm32cubef4-stm32f407vg"`
-            
-                - "cmsis-core": "kubos/cmsis-core#"
-                
-    - "kubos-rt": "kubos/kubos-rt"
-    
-        - "freertos": "kubos/freertos"
-        - "csp": "kubos/libcsp"
-        - "kubos-hal": "kubos/kubos-hal"
-        - "kubos-core": "kubos/kubos-core"
-
-    - "stm32cubef4": "kubos/stm32cubef4"
-    
-        - `"stm32cubef4-stm32f405rg": "kubos/stm32cubef4-stm32f405rg"`
-        
-            - "cmsis-core": "kubos/cmsis-core"
-            
-        - `"stm32cubef4-stm32f407vg": "kubos/stm32cubef4-stm32f407vg"`
-        
-            - "cmsis-core": "kubos/cmsis-core"
-
-    - "telemetry": "kubos/telemetry"
-    
-        - "ipc": "kubos/ipc"
-        - "kubos-core": "kubos/kubos-core"
-        - `"telemetry-linux": "kubos/telemetry-linux"`
-        
-              - "ipc": "kubos/ipc"
-              - "kubos-core": "kubos/kubos-core"
-              - "telemetry": "kubos/telemetry"
-              - "tinycbor": "kubos/tinycbor"
-              
-        - `"telemetry-rt": "kubos/telemetry-rt"`
-        
-              - "ipc": "kubos/ipc"
-              - "kubos-core": "kubos/kubos-core"
-              - `"kubos-rt": "kubos/kubos-rt"`
-              
-    - "telemetry-aggregator": "kubos/telemetry-aggregator"
-    
-        - "telemetry": "kubos/telemetry"
-        
-    - "telemetry-storage": "kubos/telemetry-storage"
-    
-        - "kubos-core": "kubos/kubos-core"
-        - "telemetry": "kubos/telemetry"
-        - `"kubos-rt": "kubos/kubos-rt"`
         
     - "tinycbor": "kubos/tinycbor"
-    
-    
-    
-    

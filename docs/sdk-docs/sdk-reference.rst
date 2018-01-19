@@ -117,7 +117,7 @@ Options
 ~~~~~~~
 
 -  ``--linux``, ``-l`` Create the new project as a linux application for
-   KubOS Linux
+   Kubos Linux
 -  ``--rt``, ``-r`` Create the new project as a KubOS RT project
 
 kubos clean

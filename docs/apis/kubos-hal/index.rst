@@ -5,10 +5,7 @@ The Kubos HAL module provides a hardware abstraction layer for the common hardwa
 found on cubesats. The interfaces provided span across the different hardware platforms
 support by KubOS.
 
-Currently there is a HAL implemented for KubOS RT on the STM32F4 and MSP430F5529 platforms.
-Each platform-specific HAL implements the same set of functions provided by the top-level Kubos-HAL.
-
-For KubOS Linux devices, the `Linux sysfs <https://en.wikipedia.org/wiki/Sysfs>`__ interface 
+For Linux devices, the `Linux sysfs <https://en.wikipedia.org/wiki/Sysfs>`__ interface 
 already provides some abstraction away from the hardware interface. In this instance, the 
 Kubos HAL creates further abstraction, removing the need for the user to learn the intricacies 
 of Linux system calls.

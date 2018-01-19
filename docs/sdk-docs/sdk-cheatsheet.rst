@@ -4,16 +4,13 @@ Kubos SDK Cheatsheet
 Creating a Project
 ------------------
 
-Run the ``kubos init`` command followed by the name of your project to
+Run the ``kubos init -l`` command followed by the name of your project to
 bootstrap your Kubos project. This will create a new directory under
 your current working directory with your project's name and add the
-source files for a basic Kubos project (kubos-rt-example).
+source files for a basic Kubos project (kubos-linux-example).
 
 ::
-
-        $ kubos init project-name # creates a KubOS RT project
-
-        $ kubos init -l linux-project-name # creates a KubOS Linux project
+        $ kubos init -l linux-project-name # creates a project
 
 **Note:** Inside of the build system there are several reserved words,
 which cannot be used as the name of the project. These are ``test``,
@@ -63,27 +60,17 @@ Kubos needs to know which target you intend to build for so it can
 select the proper cross compiler. Kubos currently supports several
 different targets:
 
-+------------+------------------------------+---------------------------------------------------+--------------+
-| MCU Family | Kubos Target                 | Description                                       | Supported OS |
-+============+==============================+===================================================+==============+
-| STM32F4    | stm32f407-disco-gcc          | STM32F407 Discovery Board                         | KubOS RT     |
-+------------+------------------------------+---------------------------------------------------+--------------+
-|            | pyboard-gcc                  | STM32F405 PyBoard                                 | KubOS RT     |
-+------------+------------------------------+---------------------------------------------------+--------------+
-|            | na-satbus-3c0-gcc            | STM32F405 NanoAvionics SatBus 3c0 OBC             | KubOS RT     |
-+------------+------------------------------+---------------------------------------------------+--------------+
-| MSP430     | msp430f5529-gcc              | MSP430F5529 Launchpad                             | KubOS RT     |
-+------------+------------------------------+---------------------------------------------------+--------------+
-| ISIS       | kubos-linux-isis-gcc         | ISIS-OBC                                          | KubOS Linux  |
-+------------+------------------------------+---------------------------------------------------+--------------+
-| Pumpkin    | kubos-linux-pumpkin-mbm2-gcc | Pumpkin Motherboard Module 2                      | KubOS Linux  |
-+------------+------------------------------+---------------------------------------------------+--------------+  
-| Beaglebone | kubos-linux-beaglebone-gcc   | Beaglebone Black, Rev. C                          | KubOS Linux  |
-+------------+------------------------------+---------------------------------------------------+--------------+
-|            | legacy-linux-beaglebone-gcc  | Beaglebone Black running a non-Kubos Linux distro | Debian       |
-+------------+------------------------------+---------------------------------------------------+--------------+
-| (Vagrant)  | x86-linux-native             | Native target for the Kubos Vagrant image         | KubOS Linux  |
-+------------+------------------------------+---------------------------------------------------+--------------+
++------------+------------------------------+---------------------------------------------------+
+| MCU Family | Kubos Target                 | Description                                       |
++============+==============================+===================================================+
+| ISIS       | kubos-linux-isis-gcc         | ISIS-OBC                                          |
++------------+------------------------------+---------------------------------------------------+
+| Pumpkin    | kubos-linux-pumpkin-mbm2-gcc | Pumpkin Motherboard Module 2                      |
++------------+------------------------------+---------------------------------------------------+
+| Beaglebone | kubos-linux-beaglebone-gcc   | Beaglebone Black, Rev. C                          |
++------------+------------------------------+---------------------------------------------------+
+| (Vagrant)  | x86-linux-native             | Native target for the Kubos Vagrant image         |
++------------+------------------------------+---------------------------------------------------+
 
 To select a target, use the ``kubos target`` command with the appropriate value from the
 "Kubos Target" column. 
@@ -92,7 +79,7 @@ For example
 
 ::
 
-        $ kubos target stm32f407-disco-gcc
+        $ kubos target kubos-linux-beaglebone-gcc
 
 To see all of the available targets run:
 
@@ -152,8 +139,8 @@ HAL <https://github.com/kubos/kubos/tree/master/hal/kubos-hal>`__
 
 Targets are groups of configuration files that allow toolchains to build
 and cross-compile modules for specific hardware targets. One example of
-a Kubos target is the `STM32F407 Discovery
-Target <https://github.com/kubos/kubos/tree/master/targets/target-stm32f407-disco-gcc>`__
+a Kubos target is the `Beaglebone Black
+Target <https://github.com/kubos/kubos/tree/master/targets/target-beaglebone-gcc>`__
 
 Linking Modules:
 ^^^^^^^^^^^^^^^^

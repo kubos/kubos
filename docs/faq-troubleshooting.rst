@@ -145,42 +145,7 @@ only. Change the project file permissions to allow the local vagrant user to hav
     
     sudo chown vagrant:vagrant . -R
 
-KubOS RT
-~~~~~~~~
-
-My ``kubos flash`` command is failing and saying that it can't find my board.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    - Make sure the board is connected to your computer
-    - Make sure the board is powered
-    - Verify that no other instances of Kubos Vagrant are running using the ``vagrant global-status`` command from your host machine
-    
-My ``kubos flash`` command failed or appeared to be hung for no obvious reason
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The MSP430 is fickle. Retry the flash command. If it continues to fail more than a few times, there might be another problem.
-        
-I flashed my program, but I'm not seeing any output
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Make sure that you are supposed to be seeing something. A loop that prints a message once a second can be helpful for this purpose.
-
-Use ``kubos debug`` to start a GDB session and debug your problem.
-    
-MSP430
-######
-
-It's possible that MSP430 has run out of RAM. Try removing some threads from your program.
-
-STM32F4
-#######
-
-Make sure that you are connected to the defined debug UART port.
-
-Run the ``kubos config`` command to see which port is currently configured. The :json:object:`hardware.console` settings define this
-connection.
-
-KubOS Linux
+Kubos Linux
 ~~~~~~~~~~~
 
 I transferred a script, but it won't run

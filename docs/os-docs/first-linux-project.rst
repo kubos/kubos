@@ -34,8 +34,7 @@ will cause warnings.
 The ``init`` command creates a new directory with the
 `kubos-linux-example <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-example>`__
 included so you can get started right away. The ``-l`` or ``--linux`` command
-tells the CLI that a KubOS Linux project should be created, rather than a KubOS
-RT project.
+tells the CLI that a Kubos Linux project should be created.
 
 Method 2: Cloning a Project
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
