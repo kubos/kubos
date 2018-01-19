@@ -8,27 +8,28 @@ working with the Kubos products.
 Product Names
 #############
 
-The general naming scheme is "Kub[OS\|os] {component}". Note that there
-is a space separating the two words.
-
-If the component is an operating system, then use the capitalized "OS".
-If not, then use "os".
-
-At the moment this means specifically: 
-
-- KubOS RT 
-- KubOS Linux
+The general naming scheme for products is "Kubos {component}". Note that there is a space separating the two words.
 
 The component should be capitalized like a normal proper noun. First
 letter capitalized if the component is a word, all letters capitalized
-if the component is an initialism.
+if the component is an initialism. For example: 
 
-For example: 
-
+- Kubos Linux
 - Kubos SDK 
 - Kubos CLI 
-- Kubos Portal 
-- Kubos Core
+
+KubOS (note the capitalization) refers to the entire system, not a specific component. 
+
+Component Names
+###############
+
+Components within Kubos breakdown as follows:
+
+- API - a statically linked library
+- Service - A persistent process that is used to interact with the system. These typically call APIs.
+- Application - Makes decisions and uses the services. 
+
+Components added to the system should be referred to/labeled accordingly. See the :doc:`Architecture Overview <../architecture-overview>` document for more information on each component's roll. 
 
 File Naming
 ###########
