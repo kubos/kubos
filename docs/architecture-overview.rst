@@ -42,7 +42,7 @@ Mission Applications
 
 TMission Applications are anything that governs the behavior of the satellite. Some common examples are deployment, housekeeping, and telemetry beaconing. Basically anything that you want the satellite to do autonomously goes into this category.
 
-- :doc:`Mission Applications <what-is-an-application>`. 
+- :doc:`Mission Applications <what-is-a-mission-application>`. 
 
 
 Typical Mission Architecture

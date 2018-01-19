@@ -26,6 +26,7 @@ General Guide
 .. toctree::
     :maxdepth: 1
     
+    First Linux Project <first-linux-project>
     Using KubOS Linux <using-kubos-linux>
     
 System Guides

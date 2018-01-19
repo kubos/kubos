@@ -320,8 +320,6 @@ The application covers how to:
     +----------------------+-------------------------------------------------+
     | Kubos HAL [3]_       | LED                                             |
     +----------------------+-------------------------------------------------+
-    | FreeRTOS [5]_        | Threads                                         |
-    +----------------------+-------------------------------------------------+
     
     This application gives an example of how to initialize and interact with the Slash shell library.
     The Slash shell is started with the ``slash_loop`` command. 
