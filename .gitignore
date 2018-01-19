@@ -1,0 +1,70 @@
+html/
+.kubos-link.json
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.a
+*.la
+*.lo
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+
+.gdbinit
+build
+*.swp
+.lock*
+.waf*
+.waf3*
+waf-*/
+*.o
+*.pyc
+.project
+.cproject
+~*
+pdebug*
+*.tar*
+tags
+.DS_store
+
+.yotta.json
+yotta_*
+
+doxygen_warn.log
+html/
+xml/
+doctrees/
+*.swo
+*.swp
+*.swo
+*.swp
+.DS_Store
+.kubos-link.json
+.travis.yml
+upload.tar.gz
+
+# vim files
+.*.sw*
+vm/.vagrant/
+.vscode
+.projectile
+*.bk
+
+# rust stuff
+target/
