@@ -1,4 +1,4 @@
-KubOS Linux I2C API
+Kubos Linux I2C API
 -------------------
 
 .. doxygengroup:: LINUX_HAL_I2C

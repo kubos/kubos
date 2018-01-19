@@ -16,7 +16,7 @@ v1.0.0 - June 27 2017
 - `KUBOS-445 <https://kubostech.atlassian.net/browse/KUBOS-445>`__
    Integrated iOBC supervisor
 - `KUBOS-274 <https://kubostech.atlassian.net/browse/KUBOS-274>`__
-   Completed Kubos Telemetry integration into KubOS Linux
+   Completed Kubos Telemetry integration into Kubos Linux
 - `KUBOS-487 <https://kubostech.atlassian.net/browse/KUBOS-487>`__
    Added support for tab-completion to Kubos CLI
 -  `Created an initial QA integration test suite <https://github.com/kubos/kubos/tree/master/test/integration/linux>`__
@@ -43,9 +43,9 @@ v0.2.2 - April 7 2017
 -  `KUBOS-372 <https://kubostech.atlassian.net/browse/KUBOS-372>`__
    Added C&C 'reboot' command
 -  `KUBOS-338 <https://kubostech.atlassian.net/browse/KUBOS-338>`__
-   Added KubOS Linux kernel rollback and recovery
+   Added Kubos Linux kernel rollback and recovery
 -  `KUBOS-340 <https://kubostech.atlassian.net/browse/KUBOS-340>`__
-   Added init script generation and flashing for KubOS Linux projects
+   Added init script generation and flashing for Kubos Linux projects
 
 v0.2.1 - Mar 7 2017
 -------------------
@@ -57,7 +57,7 @@ v0.2.1 - Mar 7 2017
 -  `KUBOS-313 <https://kubostech.atlassian.net/browse/KUBOS-313>`__
    Updated Kubos SDK to allow flashing of non-application files to iOBC
 -  `KUBOS-321 <https://kubostech.atlassian.net/browse/KUBOS-321>`__
-   Added ability to flash and install new KubOS Linux upgrade packages
+   Added ability to flash and install new Kubos Linux upgrade packages
 -  `KUBOS-360 <https://kubostech.atlassian.net/browse/KUBOS-360>`__
    Added Kubos CLI integration testing
 -  `KUBOS-363 <https://kubostech.atlassian.net/browse/KUBOS-363>`__
@@ -66,18 +66,18 @@ v0.2.1 - Mar 7 2017
 v0.2 - Feb 3 2017
 -----------------
 
--  Created KubOS Linux
+-  Created Kubos Linux
 -  Major documentation updates
 -  `KUBOS-170 <https://kubostech.atlassian.net/browse/KUBOS-170>`__
    Created Kubos CLI as primary Kubos SDK command tool
 -  `KUBOS-175 <https://kubostech.atlassian.net/browse/KUBOS-175>`__
    Migrated from Docker to Vagrant for the Kubos SDK distribution system
 -  `KUBOS-329 <https://kubostech.atlassian.net/browse/KUBOS-329>`__
-   Added KubOS Linux support to Kubos SDK
+   Added Kubos Linux support to Kubos SDK
 -  `KUBOS-361 <https://kubostech.atlassian.net/browse/KUBOS-361>`__
    Added ability to use branched versions of Kubos code to Kubos CLI
 -  `KUOBS-267 <https://kubostech.atlassian.net/browse/KUBOS-267>`__
-   Added telemetry service libraries for both KubOS RT and KubOS Linux
+   Added telemetry service libraries for both KubOS RT and Kubos Linux
 -  `KUBOS-213 <https://kubostech.atlassian.net/browse/KUBOS-213>`__
    Added telemetry aggregation service libraries
 -  `KUBOS-201 <https://kubostech.atlassian.net/browse/KUBOS-201>`__

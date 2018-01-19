@@ -32,7 +32,7 @@ to build Kubos projects:
     
     () "kubos flash" as flash
     
-    node "OBC - KubOS Linux" {
+    node "OBC - Kubos Linux" {
         cloud "kubos-proj" as application
         cloud "App1"
         cloud "App2"

@@ -1,4 +1,4 @@
-# UART RX with KubOS Linux
+# UART RX with Kubos Linux
 
 **NOTE: EXPERIMENTAL (Work in Progress)**
 

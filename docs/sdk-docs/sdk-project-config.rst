@@ -140,7 +140,7 @@ File System
 
 If present, the ``fs`` file system structure enables support for accessing storage on a peripheral device.
 
-**Note:** `This structure was created for KubOS RT. KubOS Linux has native support for various file systems.`
+**Note:** `This structure was created for KubOS RT. Kubos Linux has native support for various file systems.`
 
 .. json:object:: fs
 
@@ -253,7 +253,7 @@ System
 
 .. json:object:: system
 
-    KubOS Linux file system properties related to Kubos applications
+    Kubos Linux file system properties related to Kubos applications
     
     :property boolean initAfterFlash: `(Default: false)` Specifies whether the 
       application should be started as a background daemon on the target 
@@ -592,7 +592,7 @@ Command and Control
 
     :doc:`Kubos Command and Control <../middleware/command-and-control>` configuration
     
-    **Note:** `Kubos C2 is currently only supported by KubOS Linux`
+    **Note:** `Kubos C2 is currently only supported by Kubos Linux`
     
     :property path daemon_log_path: Absolute path for daemon log file
     :property path registry_dir: Absolute path to C2 executables
@@ -667,7 +667,7 @@ Telemetry
     :property integer external_port: `(Default: 10)` Port number used for telemetry's external socket connections
     :property rx_thread: Receive thread configuration
     :proptype rx_thread: :json:object:`rx_thread <telemetry.rx_thread>`
-    :property integer buffer_size: `(Default: 256) KubOS Linux only.` Max size of a message which can be sent/processed by the telemetry system
+    :property integer buffer_size: `(Default: 256) Kubos Linux only.` Max size of a message which can be sent/processed by the telemetry system
     :property storage: Telemetry storage configuration
     :proptype storage: :json:object:`storage <telemetry.storage>`
 
@@ -952,7 +952,7 @@ When you run ``kubos init -l``, a `module.json` file is created for you with som
             "csp": "kubos/libcsp#~1.5.0"
         },
         "homepage": "https://<homepage>",
-        "description": "Example app running on KubOS Linux."
+        "description": "Example app running on Kubos Linux."
     }
 
 Relevant Configuration Options

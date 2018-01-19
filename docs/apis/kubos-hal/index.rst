@@ -10,13 +10,13 @@ already provides some abstraction away from the hardware interface. In this inst
 Kubos HAL creates further abstraction, removing the need for the user to learn the intricacies 
 of Linux system calls.
 
-.. note:: The KubOS Linux HAL is a work in progress. Not all functionality has been implemented yet.
+.. note:: The Kubos Linux HAL is a work in progress. Not all functionality has been implemented yet.
 
 .. uml::
 
    @startuml
    rectangle "Kubos HAL" as kubos
-   rectangle "KubOS Linux HAL" as linux
+   rectangle "Kubos Linux HAL" as linux
    rectangle "ISIS-OBC" as iobc
    rectangle "Pumpkin MBM2" as mbm2
    kubos <|-- linux
@@ -46,7 +46,7 @@ of Linux system calls.
    :caption: Platform HALs
    :name:  hal-platforms
 
-   KubOS Linux Devices <kubos-hal-linux/index>
+   Kubos Linux Devices <kubos-hal-linux/index>
 
 .. toctree::
    :caption: OBC HALs

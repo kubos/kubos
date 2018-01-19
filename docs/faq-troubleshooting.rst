@@ -68,18 +68,18 @@ ISIS-OBC
 
 ``minicom kubos``
 
-How do I check what version of KubOS Linux I'm running?
+How do I check what version of Kubos Linux I'm running?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Issue the ``uname -r`` command on the target board to display the kernel information. 
-The KubOS Linux version will be the *n.n.n* number after "KubOS".
+The Kubos Linux version will be the *n.n.n* number after "KubOS".
   
 :: 
 
     uname -r    
     4.4.23-KubOS-1.0.0
 
-What's the default KubOS Linux login?
+What's the default Kubos Linux login?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 kubos/Kubos123
@@ -169,7 +169,7 @@ you can take:
 "No compatible FTDI device found"
 #################################
 
--  Check that the KubOS Linux target is turned on and connected to your 
+-  Check that the Kubos Linux target is turned on and connected to your 
    computer
 -  Check that no other vagrant images are running. Only one VM can have
    control of the USB, so it may be that another instance currently has
@@ -185,7 +185,7 @@ you can take:
 "Transfer Failed: Connection Failed"
 ####################################
 
-The SDK was unable to connect to the KubOS Linux target
+The SDK was unable to connect to the Kubos Linux target
 
 -  Verify that the USB has been mapped to a linux device. Issue the
    command ``ls /dev``. You should see a /dev/ttyUSB\* device. If you
@@ -199,7 +199,7 @@ The SDK was unable to connect to the KubOS Linux target
 "Transfer Failed: Invalid Password"
 ###################################
 
-The SDK was unable to log into the KubOS Linux target. Verify that the password is
+The SDK was unable to log into the Kubos Linux target. Verify that the password is
 correctly defined in your config.json file by issuing the ``kubos config`` command.
 
 System appears to have hung

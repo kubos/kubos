@@ -1,15 +1,15 @@
-KubOS Linux Overview
+Kubos Linux Overview
 ====================
 
 Introduction
 ------------
 
-This is intended as a higher-level overview of the KubOS Linux
+This is intended as a higher-level overview of the Kubos Linux
 configuration, installation, and distribution for the Kubos clients'
 embedded systems.
 
 The high level components of every system will be: - Low-level
-bootloader/s - U-Boot (mid-level bootloader. Loads KubOS Linux) - KubOS
+bootloader/s - U-Boot (mid-level bootloader. Loads Kubos Linux) - KubOS
 Linux
 
 Ideally, all the files will be delivered to the customer as a pre-baked
@@ -67,7 +67,7 @@ and recovery system. At boot time it will check for available upgrade packages
 or a corrupted Linux kernel and will then upgrade or rollback the kernel and
 rootfs as necessary.
 
-KubOS Linux Kernel
+Kubos Linux Kernel
 ~~~~~~~~~~~~~~~~~~
 
 The kernel is actually composed of multiple components: the main linux
@@ -212,7 +212,7 @@ messages will look like this:
     Starting linux-telemetry-service:
     OK
     
-    Welcome to KubOS Linux
+    Welcome to Kubos Linux
     Kubos login: 
     
 By default, there are two user accounts available: "root" (the superuser), and "kubos" (a normal user).
@@ -224,7 +224,7 @@ User Space
 File System
 ~~~~~~~~~~~
 
-There are a few key directories residing within the KubOS Linux user
+There are a few key directories residing within the Kubos Linux user
 space
 
 /usr/sbin
@@ -280,12 +280,12 @@ The naming format is 'S{run-level}{application}'.
 ^^^^^^^^
 
 All \*.itb files will reside in this directory. These files are used to
-upgrade the KubOS Linux kernel and root file system.
+upgrade the Kubos Linux kernel and root file system.
 
 Users
 ~~~~~
 
-By default, there are only two users defined to the KubOS Linux system:
+By default, there are only two users defined to the Kubos Linux system:
 'root' and 'kubos'. To add more users, the Linux ``adduser`` or
 ``useradd`` commands should be used. Other common Linux commands related
 to setting passwords and changing permissions are also available.
@@ -305,7 +305,7 @@ upgrade or downgrade. This behavior will be changed in the future.
 Upgrade Process
 ---------------
 
-If you already have KubOS Linux installed on your system, but would like to
+If you already have Kubos Linux installed on your system, but would like to
 upgrade to the latest version, check out the :ref:`upgrade-installation` section. 
 Alternatively, if you would like to rollback to a previously installed version, 
 refer to the :ref:`upgrade-rollback` section.
@@ -313,18 +313,18 @@ refer to the :ref:`upgrade-rollback` section.
 Recovery Process
 ----------------
 
-Should your KubOS Linux kernel become corrupted (as indicated by failing to
+Should your Kubos Linux kernel become corrupted (as indicated by failing to
 successfully boot into Linux several times), the system will automatically try
 to recover during the next boot.
 
 It will go through the following steps, if each is present (system will reboot
 after attempting each step):
 
-1. Reload the current version of KubOS Linux from the kpack\*.itb file
+1. Reload the current version of Kubos Linux from the kpack\*.itb file
    in the upgrade partition
-2. Reload the previous version of KubOS Linux from the kpack\*.itb file
+2. Reload the previous version of Kubos Linux from the kpack\*.itb file
    in the upgrade partition
-3. Reload the base version of KubOS Linux from the kpack-base.itb file
+3. Reload the base version of Kubos Linux from the kpack-base.itb file
    in the upgrade partition
 4. Boot into the alternate OS
 
@@ -332,7 +332,7 @@ If none of these steps work, then the system will boot into the U-Boot CLI. From
 here, some basic troubleshooting and debugging abilities should be available.
 
 More information about the recovery process and architecture can be found in the
-:doc:`KubOS Linux Recovery doc <kubos-linux-recovery>`
+:doc:`Kubos Linux Recovery doc <kubos-linux-recovery>`
 
 Resetting the Environment
 -------------------------
@@ -357,4 +357,4 @@ These commands will:
   - Reboot the system
   
 As long as a valid kernel and rootfs are available, your system should now successfully boot
-into KubOS Linux.
+into Kubos Linux.

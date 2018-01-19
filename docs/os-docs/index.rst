@@ -1,13 +1,13 @@
-KubOS Linux
+Kubos Linux
 ===========
 
-KubOS Linux is a custom Linux distribution designed with embedded devices in mind.
+Kubos Linux is a custom Linux distribution designed with embedded devices in mind.
 
 It focuses on including only drivers that are useful for space applications (ex. 
 I2C and SPI, rather than display drivers) and multi-layer system validation and 
 recovery logic.
 
-KubOS Linux projects are built into binaries which will run as Linux user space 
+Kubos Linux projects are built into binaries which will run as Linux user space 
 applications.
 
 Installation Docs
@@ -16,9 +16,9 @@ Installation Docs
 .. toctree::
     :maxdepth: 1
     
-    Installing KubOS Linux on Beaglebone Black <../installation-docs/installing-linux-bbb>
-    Installing KubOS Linux on ISIS-OBC <../installation-docs/installing-linux-iobc>
-    Installing KubOS Linux on Pumpkin MBM2 <../installation-docs/installing-linux-mbm2>
+    Installing Kubos Linux on Beaglebone Black <../installation-docs/installing-linux-bbb>
+    Installing Kubos Linux on ISIS-OBC <../installation-docs/installing-linux-iobc>
+    Installing Kubos Linux on Pumpkin MBM2 <../installation-docs/installing-linux-mbm2>
     
 General Guide
 -------------
@@ -26,7 +26,7 @@ General Guide
 .. toctree::
     :maxdepth: 1
     
-    Using KubOS Linux <using-kubos-linux>
+    Using Kubos Linux <using-kubos-linux>
     
 System Guides
 -------------
@@ -44,9 +44,9 @@ SysAdmin Docs
 .. toctree::
     :maxdepth: 1
     
-    KubOS Linux Overview <kubos-linux-overview>
-    KubOS Linux Upgrades <kubos-linux-upgrade>
-    KubOS Linux Recovery <kubos-linux-recovery>
-    Building KubOS Linux for the Beaglebone Black <kubos-linux-on-bbb>
-    Building KubOS Linux for the ISIS-OBC <kubos-linux-on-iobc>
-    Building KubOS Linux for Pumpkin MBM2 <kubos-linux-on-mbm2>
+    Kubos Linux Overview <kubos-linux-overview>
+    Kubos Linux Upgrades <kubos-linux-upgrade>
+    Kubos Linux Recovery <kubos-linux-recovery>
+    Building Kubos Linux for the Beaglebone Black <kubos-linux-on-bbb>
+    Building Kubos Linux for the ISIS-OBC <kubos-linux-on-iobc>
+    Building Kubos Linux for Pumpkin MBM2 <kubos-linux-on-mbm2>

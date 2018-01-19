@@ -1,14 +1,14 @@
-Building KubOS Linux for the ISIS-OBC
+Building Kubos Linux for the ISIS-OBC
 =====================================
 
 Overview
 --------
 
-This supplementary document covers specific features and components of KubOS Linux for the ISIS-OBC.
+This supplementary document covers specific features and components of Kubos Linux for the ISIS-OBC.
 
-The :doc:`kubos-linux-overview` doc covers the major components of KubOS Linux.
+The :doc:`kubos-linux-overview` doc covers the major components of Kubos Linux.
 
-Additionally, this document covers the steps required in order to build KubOS Linux.
+Additionally, this document covers the steps required in order to build Kubos Linux.
 
 Reference Documents
 -------------------
@@ -24,8 +24,8 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../installation-docs/installing-linux-iobc` - Steps to install KubOS Linux on an iOBC
--  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`../installation-docs/installing-linux-iobc` - Steps to install Kubos Linux on an iOBC
+-  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`working-with-the-iobc` - Guide for interacting with iOBC-specific features
 
 Software Components
@@ -54,10 +54,10 @@ The software tool used to program the iOBC's NOR flash storage area.
     rather than the default Atmel version, since it is packaged with several iOBC configuration
     files which are required to successfully connect to the board.
 
-KubOS Linux Build Process
+Kubos Linux Build Process
 -------------------------
 
-If for some reason you want or need to modify and rebuild the KubOS Linux components, follow
+If for some reason you want or need to modify and rebuild the Kubos Linux components, follow
 the steps in this section.
 
 .. _build-os:
@@ -73,9 +73,9 @@ Build the OS Files
     
 :doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
 
-In order to build KubOS Linux, two components are needed:
+In order to build Kubos Linux, two components are needed:
 
-- The `kubos-linux-build repo <https://github.com/kubos/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build KubOS Linux
+- The `kubos-linux-build repo <https://github.com/kubos/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build Kubos Linux
 - `BuildRoot <https://buildroot.org/>`__ - The actual build system
 
 These components should be setup as children of the same parent directory. 
@@ -83,7 +83,7 @@ There are several commands and variables in the build process which use relative
 
 After the environment has been set up, all build commands will be run from the BuildRoot directory unless otherwise stated.
 
-To set up a build environment and build KubOS Linux:
+To set up a build environment and build Kubos Linux:
 
 Create a new parent folder to contain the build environment
 
@@ -198,7 +198,7 @@ Create an SD Card Image
     or run the script natively.
 
 A script is available to create an SD card image with the latest
-KubOS Linux kernel and root filesystem.
+Kubos Linux kernel and root filesystem.
 
 Navigate to the 'kubos-linux-build/tools' directory.
 

@@ -1,7 +1,7 @@
 {
     "name": "kubos-linux-gcc",
     "version": "0.1.1",
-    "description": "parent build target for KubOS Linux devices",
+    "description": "parent build target for Kubos Linux devices",
     "inherits": {
         "kubos-gcc": "kubos/target-kubos-gcc#~0.1.0"
     },

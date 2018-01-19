@@ -1,8 +1,8 @@
-# KubOS Linux Example App
+# Kubos Linux Example App
 
-This is a simple application built on top of the [KubOS Linux Platform](https://github.com/kubos/kubos-linux-build) demonstrating some basic functionality from KubOS Linux (CSP). 
+This is a simple application built on top of the [Kubos Linux Platform](https://github.com/kubos/kubos-linux-build) demonstrating some basic functionality from Kubos Linux (CSP). 
 
-This is the default application included when the `kubos init --linux` command is executed. It is intended as a basic example of how an application could be written to run on a KubOS Linux system.
+This is the default application included when the `kubos init --linux` command is executed. It is intended as a basic example of how an application could be written to run on a Kubos Linux system.
 
 ## Project Overview
 
