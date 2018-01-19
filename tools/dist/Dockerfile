@@ -41,11 +41,9 @@ RUN wget https://s3.amazonaws.com/kubos-provisioning/bbb_toolchain.tar.gz
 RUN tar -xf ./bbb_toolchain.tar.gz -C /usr/bin
 RUN rm ./bbb_toolchain.tar.gz
 
-RUN pip install pysocks
-RUN pip install mock
 RUN pip install --upgrade setuptools
-RUN pip install git+https://github.com/kubos/kubos-cli
-RUN pip install cryptography==1.9
+RUN pip install -r https://raw.githubusercontent.com/kubos/kubos-cli/master/requirements.txt
+RUN pip install git+https://github.com/kubostech/kubos-cli
 
 RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
