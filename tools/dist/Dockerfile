@@ -6,7 +6,6 @@ MAINTAINER kyle@kubos.co
 
 RUN add-apt-repository -y ppa:team-gcc-arm-embedded/ppa
 RUN add-apt-repository -y ppa:george-edison55/cmake-3.x
-RUN add-apt-repository -y ppa:git-core/ppa
 
 RUN apt-get update -y
 
