@@ -106,21 +106,12 @@ html_show_sphinx = False
 htmlhelp_basename = 'Kubosdoc'
 
 breathe_projects = {
-    "eps-api" : "../xml/eps/eps-api",
-    "evented-control" : "../xml/evented-control",
-    "freertos" : "../xml/freertos/os",
-    "ipc" : "../xml/ipc",
     "libcsp" : "../xml/libcsp",
     "kubos-adcs-api" :  "../xml/adcs/adcs-api",
-    "kubos-core" : "../xml/kubos-core",
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",
     "kubos-hal-linux" : "../xml/hal/kubos-hal-linux",
-    "kubos-hal-msp430f5529" : "../xml/hal/kubos-hal-msp430f5529",
-    "kubos-hal-stm32f4" : "../xml/hal/kubos-hal-stm32f4",
     "kubos-radio-api" : "../xml/radio/radio-api",
-    "telemetry" : "../xml/services/telemetry/telemetry",
-    "telemetry-linux" : "../xml/services/telemetry/telemetry-linux"
 }
 
 extensions += [
