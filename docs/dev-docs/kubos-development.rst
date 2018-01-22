@@ -62,20 +62,20 @@ Linking in a Local Module
 Once you've made changes to your local kubos repo, you'll want to link
 them into your project.
 
-**Note:** If you create a new high-level component, like telemetry or
-hal, you'll need to create a module.json file so that the module can be
+**Note:** If you create a new high-level component, like ``radio/radio-api`` or
+``hal/kubos-hal``, you'll need to create a module.json file so that the module can be
 linked in successfully.
 
-Let's say that you've updated the Kubos telemetry module to add
+Let's say that you've updated the ``kubos-hal-linux`` module to add
 debugging lines to see how the flow of communication works between
 processes. This would be your process to link and build the changes:
 
 ::
 
-    $ cd /home/vagrant/shared/telemetry
+    $ cd /home/vagrant/shared/hal/kubos-hal-linux
     $ kubos link
     $ cd /home/vagrant/my-project
-    $ kubos link telemetry
+    $ kubos link kubos-hal-linux
     $ kubos build
 
 After running the ``kubos link`` command from the module directory and

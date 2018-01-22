@@ -124,7 +124,3 @@ References
 .. [1] :doc:`config.json <sdk-project-config>` - Kubos project file for custom configuration options
 .. [3] :doc:`Kubos HAL <../apis/kubos-hal/index>` - Kubos hardware abstraction for interfacing with peripheral devices
 .. [4] :doc:`CSP <../apis/libcsp/index>` - (Cubesat Space Protocol) Lightweight communication protocol
-
-.. todo::
-
-    .. [*] `Kubos Slash`

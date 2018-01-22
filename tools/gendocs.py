@@ -10,15 +10,6 @@ echo "PROJECT_NUMBER={1}";
 echo "OUTPUT_DIRECTORY={2}";
 echo "XML_OUTPUT=.";) | doxygen -"""
 
-# DOCS_DIRS = [
-# "kubos-core",
-# "libcsp",
-# "freertos/os",
-# "services/telemetry/telemetry",
-# "services/telemetry/telemetry-linux",
-# "telemetry-aggregator",
-# "telemetry-storage"]
-
 DOCS_DIRS = [
     "adcs/adcs-api",
     "libcsp",
