@@ -40,7 +40,7 @@ Kubos services are defined as any persistent process that is used to interact wi
 Mission Applications
 ~~~~~~~~~~~~~~~~~~~~
 
-TMission Applications are anything that governs the behavior of the satellite. Some common examples are deployment, housekeeping, and telemetry beaconing. Basically anything that you want the satellite to do autonomously goes into this category.
+Mission applications are anything that governs the behavior of the satellite. Some common examples are deployment, housekeeping, and telemetry beaconing. Basically anything that you want the satellite to do autonomously goes into this category.
 
 - :doc:`Mission Applications <what-is-a-mission-application>`. 
 
@@ -103,14 +103,14 @@ Mission specific code is highlighted in green in the above diagram and refers to
 Payload Service
 ^^^^^^^^^^^^^^^
 
-Payload services should be modeled after hardware services as much as possible, and the given example reflects that. That being said, the Payload Service is custom for the mission, and can be accomplished any way the payload developer sees fit. 
+Payload services should be modeled after hardware services as much as possible, and that is reflected in the given example code. That being said, the payload service is custom for the mission, and can be accomplished any way the payload developer sees fit. 
 
- - :doc:`Example Payload Service <services/example-payload-service>`
+ - :doc:`Payload Service <services/payload-service>`
 
 Mission Applications
 ^^^^^^^^^^^^^^^^^^^^
 
-The Mission Applications, as previously discussed, handle all the onboard decision making. These are, by nature, mission specific, but some of them can be largely reused due to the abstract nature of the hardware integration. These are typically written or adapted by the user. 
+Mission applications, as previously discussed, handle all the onboard decision making. These are, by nature, mission specific, but some of them can be largely reused due to the abstract nature of the hardware integration. These are typically written or adapted by the user. 
 
  - :doc:`Mission Applications <what-is-a-mission-application>`.
 
