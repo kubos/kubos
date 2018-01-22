@@ -32,24 +32,24 @@ class Query(graphene.ObjectType):
         return _subsystem
 
 
-class Subsystem(graphene.Mutation):
+class PowerOn(graphene.Mutation):
     """
-    Creates mutation for Subsystem
+    Creates mutation for Subsystem.PowerOn
     """
 
     class Arguments:
-        power_on = graphene.Boolean()
+        power = graphene.Boolean()
 
     Output = Status
 
-    def mutate(self, info, power_on):
+    def mutate(self, info, power):
         """
         Handles request for subsystem powerOn mutation
         """
 
         status = Status(status=True, subsystem=_subsystem)
-        if power_on != None:
-            status = _subsystem.set_power_on(power_on)
+        if power != None:
+            status = _subsystem.set_power_on(power)
 
         return status
 
@@ -59,6 +59,6 @@ class Mutation(graphene.ObjectType):
     Creates mutation endpoints exposed by graphene.
     """
 
-    subsystem = Subsystem.Field()
+    power_on = PowerOn.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
