@@ -5,7 +5,7 @@
 # See LICENSE file for details.
 
 """
-Boilerplate Flask setup for handler application.
+Boilerplate Flask setup for service application.
 """
 
 from flask import Flask

@@ -5,14 +5,14 @@
 # See LICENSE file for details.
 
 """
-Boilerplate main for handler application.
+Boilerplate main for service application.
 """
 
 import argparse
-from handler import app
+from service import app
 import yaml
 
-parser = argparse.ArgumentParser(description='Example Handler')
+parser = argparse.ArgumentParser(description='Example Service')
 parser.add_argument('config', type=str, help='path to config file')
 args = parser.parse_args()
 

@@ -1,4 +1,4 @@
-# Stock handler configuration file
+# Example service configuration file
 
 # IP address for Flask to listen on
 APP_IP : "127.0.0.1"
