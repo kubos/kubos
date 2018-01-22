@@ -17,16 +17,13 @@ This means you can simply copy the desired example to a new folder and immediate
 
     The default target for all of these applications is ``stm32f407-disco-gcc``. 
     You will need to manually change the target if this is not your desired endpoint device. 
-    
-Kubos Linux Examples
---------------------
 
 Default Example
-~~~~~~~~~~~~~~~
+---------------
 
 `Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-example>`__
 
-**Compatible Targets: All Kubos Linux compatible targets**
+**Compatible Targets: All targets**
 
 +----------------------+------------------------+
 | High-level Component | Specific Area          |
@@ -45,17 +42,17 @@ packet containing the message "Hello World".
 The CSP server thread checks for connections on the CSP port and then prints any received messages to STDOUT.    
 
 TCP Receive
-~~~~~~~~~~~
+-----------
 
 `Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__
 
 **Compatible Targets: Pumpkin MBM2, Beaglebone Black**
 
-+----------------------+------------------------+
-| High-level Component | Specific Area          |
-+======================+========================+
-| Linux                | sockets, TCP, IPv4     |
-+----------------------+------------------------+
++----------------------+--------------------+
+| High-level Component | Specific Area      |
++======================+====================+
+| Linux                | sockets, TCP, IPv4 |
++----------------------+--------------------+
 
 This is a demo program to test receiving TCP data over a valid IP connection (the ethernet port for the Pumpkin MBM2 and Beaglebone 
 Black targets)
@@ -63,17 +60,17 @@ Black targets)
 The program will wait for a client to connect over the socket, then read in any messages and send back a reply.
 
 TCP Send
-~~~~~~~~
+--------
 
 `Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__
 
 **Compatible Targets: Pumpkin MBM2, Beaglebone Black**
 
-+----------------------+------------------------+
-| High-level Component | Specific Area          |
-+======================+========================+
-| Linux                | sockets, TCP, IPv4     |
-+----------------------+------------------------+
++----------------------+--------------------+
+| High-level Component | Specific Area      |
++======================+====================+
+| Linux                | sockets, TCP, IPv4 |
++----------------------+--------------------+
 
 This is a demo program to test sending TCP data over a valid IP connection (the ethernet port for the Pumpkin MBM2 and Beaglebone Black 
 targets)
@@ -84,11 +81,11 @@ It then waits for a reply message to be returned and exits.
     Usage: kubos-linux-tcptx <ip_addr> <port>
 
 UART Receive
-~~~~~~~~~~~~
+------------
 
 `Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uartrx>`__
 
-**Compatible Targets: All Kubos Linux compatible targets**
+**Compatible Targets: All targets with UART ports**
 
 +----------------------+-------------------------------------------------------------------+
 | High-level Component | Specific Area                                                     |
@@ -102,11 +99,11 @@ This is a demo program to test receiving UART data in non-blocking mode as an in
 This program should be paired with the UART Send demo program.
 
 UART Send
-~~~~~~~~~
+---------
 
 `Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uarttx>`__
 
-**Compatible Targets: All Kubos Linux compatible targets**
+**Compatible Targets: All targets with UART ports**
 
 +----------------------+-------------------------------------------------------------------+
 | High-level Component | Specific Area                                                     |
