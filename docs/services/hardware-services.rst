@@ -5,15 +5,15 @@ Hardware services are GraphQL server endpoints that take in queries and mutation
 
 It is highly recommended that you first read about GraphQL:
 
- - :doc:`GraphQL <graphql>`.
+ - :doc:`GraphQL <graphql>`
 
-Hardware Services function mostly as a passthrough to the API, managing control of the resource. Each Hardware Service has only a single worker thread, so the hardware will not be damaged or report an incorrect state due to simultaneous conflicting transactions. 
+Hardware services function mostly as a passthrough to the API, managing control of the resource. Each Hardware Service has only a single worker thread, so the hardware will not be damaged or report an incorrect state due to simultaneous conflicting transactions. 
 
 
 Queries
 -------
 
-Queries are telemetry requests. Usually (if the hardware has the capability), when a Query is submitted, the Hardware Service retrieves the live data from the hardware component and completes the transaction, returning it in a JSON format. 
+Queries are telemetry requests. Usually (if the hardware has the capability), when a query is submitted, the hardware service retrieves the live data from the hardware component and completes the transaction, returning it in a JSON format. 
 
 Mutations
 ---------

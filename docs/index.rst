@@ -9,7 +9,7 @@ Overview
 
 The KubOS platform provides satellite developers the tools and libraries necessary to quickly bring up space ready software. We leverage multiple existing open source projects, along with our own custom framework and SDK. 
 
-New to KubOS? Want to know what it is? Check out our Architecture guide for an overview of how KubOS works and what it provides:
+New to KubOS? Want to know what it is? Check out our architecture guide for an overview of how KubOS works and what it provides:
 
  - :doc:`KubOS Architecture Overview <architecture-overview>`
 
@@ -17,9 +17,9 @@ Getting set up with KubOS for the first time? Check out our SDK and try your own
 
  - :doc:`First Time Users <first-time-users>`
 
-Trying to integrate a Payload or create your mission code? Check out our examples: 
+Trying to integrate a payload or create your mission code? Check out our mission specific code documentation: 
 
- - :doc:`Example Payload Service <services/example-payload-service>`
+ - :doc:`Example Payload Service <services/payload-service>`
  - :doc:`Mission Applications <what-is-a-mission-application>`
 
 Having issues? Want a new feature? Just want to say hello? `Come talk to
