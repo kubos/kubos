@@ -13,7 +13,7 @@ First Time Users
         [kubos-proj2] as proj2
     }
     
-    node "OBC - KubOS Linux" {
+    node "OBC - Kubos Linux" {
         cloud "kubos-proj2" as application
         cloud "App1"
         cloud "App2"

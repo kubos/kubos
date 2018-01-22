@@ -169,7 +169,7 @@ System
 
 .. json:object:: system
 
-    KubOS Linux file system properties related to Kubos applications
+    Kubos Linux file system properties related to Kubos applications
     
     :property boolean initAfterFlash: `(Default: false)` Specifies whether the 
       application should be started as a background daemon on the target 
@@ -541,7 +541,7 @@ When you run ``kubos init -l``, a `module.json` file is created for you with som
             "csp": "kubos/libcsp#~1.5.0"
         },
         "homepage": "https://<homepage>",
-        "description": "Example app running on KubOS Linux."
+        "description": "Example app running on Kubos Linux."
     }
 
 Relevant Configuration Options

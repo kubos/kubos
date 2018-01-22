@@ -4,10 +4,10 @@ Working with the Beaglebone Black
 Overview
 --------
 
-This document covers the KubOS Linux features which are specific to the
+This document covers the Kubos Linux features which are specific to the
 Beaglebone Black target.
 
-Please refer to :doc:`using-kubos-linux` for a general guide to using KubOS Linux.
+Please refer to :doc:`using-kubos-linux` for a general guide to using Kubos Linux.
 
 Reference Documents
 -------------------
@@ -26,9 +26,9 @@ Kubos Documentation
 -  :doc:`first-linux-project` - Basic tutorial for creating your first KubOS
    Linux SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
--  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
--  :doc:`kubos-linux-on-bbb` - Steps to build KubOS Linux for the Beaglebone Black
--  :doc:`../installation-docs/installing-linux-bbb` - Steps to install KubOS Linux
+-  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`kubos-linux-on-bbb` - Steps to build Kubos Linux for the Beaglebone Black
+-  :doc:`../installation-docs/installing-linux-bbb` - Steps to install Kubos Linux
 
 Debug Console Connection
 ------------------------
@@ -44,7 +44,7 @@ Status LEDs
 -----------
 
 There are four LEDs present on the Beaglebone Black which give some indication of what state
-the board is in. When there is only one blinking LED, the board is running KubOS Linux and
+the board is in. When there is only one blinking LED, the board is running Kubos Linux and
 the system is currently idle. The LEDs will blink in correspondence with CPU and MMC activity.
 If all LEDs are solid, then the system has reached some kind of locked error state.
 
@@ -58,7 +58,7 @@ in the future to abstract this process.
 
 .. note::
 
-    KubOS Linux for the Pumpkin MBM2 can be used instead of KubOS Linux
+    Kubos Linux for the Pumpkin MBM2 can be used instead of Kubos Linux
     for the Beaglebone Black. In this case, some buses and pins won't be
     available, since they aren't exposed in the MBM2's CSK headers, or are
     dedicated to other uses. See the :ref:`peripherals-mbm2` section for 
@@ -125,7 +125,7 @@ The Beaglebone Black has two user-accessible I2C buses.
 `I2C Standards
 Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 
-KubOS Linux is currently configured to support the I2C standard-mode
+Kubos Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
 For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
@@ -355,7 +355,7 @@ The ethernet port is configured to have support for static IPv4 addressing and
 can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
 package.
 
-KubOS Linux currently guarantees support for TCP, UDP, and SCTP.
+Kubos Linux currently guarantees support for TCP, UDP, and SCTP.
 Other protocols might be supported by default, but have not been verified.
 
 Resources

@@ -1,7 +1,7 @@
 {
   "name": "legacy-linux-beaglebone-gcc",
   "version": "0.1.1",
-  "description": "base KubOS Linux build target for the beaglebone black arm-linux-gueabihf toolchain",
+  "description": "base Kubos Linux build target for the beaglebone black arm-linux-gueabihf toolchain",
   "inherits": {
     "kubos-linux-gcc": "kubos/target-kubos-linux-gcc#~0.1.0"
   },

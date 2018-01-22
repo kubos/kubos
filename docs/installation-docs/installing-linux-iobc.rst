@@ -1,10 +1,10 @@
-Installing KubOS Linux on an ISIS-OBC
+Installing Kubos Linux on an ISIS-OBC
 =====================================
 
 Overview
 --------
 
-This document covers the steps required to install KubOS Linux onto an iOBC.
+This document covers the steps required to install Kubos Linux onto an iOBC.
 
 Reference Documents
 -------------------
@@ -20,28 +20,28 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../os-docs/kubos-linux-on-iobc` - Steps to build KubOS Linux
+-  :doc:`../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux
 -  :doc:`../os-docs/first-linux-project` - Basic tutorial for creating your first KubOS
    Linux SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
--  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`../os-docs/working-with-the-iobc` - Guide for interacting with iOBC-specific features
 
 Components
 ----------
 
-The KubOS Linux installation process is composed of two high-level steps:
+The Kubos Linux installation process is composed of two high-level steps:
 
   - Flashing the SD card
   - Flashing the on-board NOR flash
     
 To perform a default installation, three files are needed:
 
-  - A KubOS Linux SD card image
+  - A Kubos Linux SD card image
   - u-boot.bin
   - at91sam9g20isis.dtb
   
-All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
+All of these files can be obtained from `our Kubos Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
 Download the latest `KubOS_Linux.zip` file and then unzip the files for the iOBC. They're located in the `KubOS_Linux/{version}/iOBC` folder.
 
@@ -50,9 +50,9 @@ Download the latest `KubOS_Linux.zip` file and then unzip the files for the iOBC
 Install the SD Card Files
 -------------------------
 
-All users should install the SD card files using a distributed KubOS Linux image, unless they have
-created a custom KubOS Linux build. In that case, the SD card files can be installed by either 
-flashing a complete KubOS Linux image onto an SD card or :ref:`by alternate means <alt-sd-setup>`.
+All users should install the SD card files using a distributed Kubos Linux image, unless they have
+created a custom Kubos Linux build. In that case, the SD card files can be installed by either 
+flashing a complete Kubos Linux image onto an SD card or :ref:`by alternate means <alt-sd-setup>`.
 
 Pre-Requisites
 ~~~~~~~~~~~~~~
@@ -61,14 +61,14 @@ Pre-Requisites
 
 .. note:: 
 
-    The KubOS Linux SD images are created for a 4GB SD card. The image can be applied to a larger SD card, but the
+    The Kubos Linux SD images are created for a 4GB SD card. The image can be applied to a larger SD card, but the
     resulting system will still only have 4GB of space available to it.
 
  
 2. Install `Etcher <https://etcher.io/>`__. Other software to flash SD cards does exist,
    but Etcher is the Kubos software of choice.
 
-3. Obtain a KubOS Linux image
+3. Obtain a Kubos Linux image
 
 
 Flash the SD Card
@@ -76,7 +76,7 @@ Flash the SD Card
 
 Using `Etcher <https://etcher.io/>`__:
 
-  - Select the KubOS Linux image to flash
+  - Select the Kubos Linux image to flash
   - Make sure the SD card device is correct (may be auto-detected if there is only one SD card present
     in your system.)
   - Click the "Flash!" button to start the flashing process
@@ -106,7 +106,7 @@ The SD card does not need to be inserted into the iOBC in order for this step to
     running Windows. This means that you must use a Windows OS in order to initially flash
     the iOBC.**
     
-    Once KubOS Linux has been installed, the device tree, which is located in the NOR flash,
+    Once Kubos Linux has been installed, the device tree, which is located in the NOR flash,
     can be updated using the standard :ref:`upgrade-installation` process with a `kpack-nor-*.itb`
     file.
 
@@ -223,17 +223,17 @@ slot while the board is **not powered**.
 After new files have been loaded, the board will need to be powered off and back
 on again in order to go through the normal boot process.
 
-Using KubOS Linux
+Using Kubos Linux
 -----------------
 
-For information on how to create and run applications on your new KubOS Linux system, see the
+For information on how to create and run applications on your new Kubos Linux system, see the
 :doc:`../os-docs/working-with-the-iobc` guide.
 
 
 Non-Default Installation Process
 --------------------------------
 
-There are alternate ways to install KubOS Linux onto the board, in case you want to create a custom
+There are alternate ways to install Kubos Linux onto the board, in case you want to create a custom
 installation, or are having issues with the default installation work flow.
 
 .. _alt-sd-setup:
@@ -241,7 +241,7 @@ installation, or are having issues with the default installation work flow.
 Alternate SD Card Setup
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-If you do not have a KubOS Linux image, you can load the required files onto an SD card:
+If you do not have a Kubos Linux image, you can load the required files onto an SD card:
 
   - by using our flashing script
   
@@ -252,7 +252,7 @@ If you do not have a KubOS Linux image, you can load the required files onto an 
 Pre-Requisites
 ^^^^^^^^^^^^^^
 
-Since you are not using a KubOS Linux image, you will need to go through the :ref:`OS build process <build-os>`
+Since you are not using a Kubos Linux image, you will need to go through the :ref:`OS build process <build-os>`
 locally in order to create the kernel and rootfs files.
 
 In order to write the files to the SD card your build system needs be able to a)
@@ -294,7 +294,7 @@ Method 1: Run the Formatting/Flashing Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A script is available to format the SD card and then load the latest
-KubOS Linux kernel and root filesystem.
+Kubos Linux kernel and root filesystem.
 
 Navigate to the 'kubos-linux-build/tools' directory.
 

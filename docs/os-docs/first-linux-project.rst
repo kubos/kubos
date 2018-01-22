@@ -1,7 +1,7 @@
-Getting Started with KubOS Linux and the Kubos SDK
+Getting Started with Kubos Linux and the Kubos SDK
 ==================================================
 
-This is intended to be a quick guide to creating a new KubOS Linux project 
+This is intended to be a quick guide to creating a new Kubos Linux project 
 using the Kubos SDK.
 
 Prerequisites
@@ -15,7 +15,7 @@ Creating your Project
 Method 1: Kubos Init
 ~~~~~~~~~~~~~~~~~~~~
 
-The simplest way to create a new KubOS Linux project is by using the Kubos CLI.
+The simplest way to create a new Kubos Linux project is by using the Kubos CLI.
 The ``kubos init --linux`` command takes a project name and creates the project
 files and folders.
 
