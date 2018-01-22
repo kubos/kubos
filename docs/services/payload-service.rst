@@ -1,10 +1,10 @@
 ***********************
-Example Payload Service
+Payload Service
 ***********************
 
-Payload Services are essentially Hardware Services but custom designed
+Payload services are essentially hardware services but custom designed
 for mission payload hardware. They share the same architecture as the hardware
-services exposing low level device APIs through a GraphQL interface.
+services, exposing low-level device APIs through a GraphQL interface.
 
 The Kubos SDK includes an example payload service written in both Python
 and Rust. Here we will discuss the example Python-based payload service, its
@@ -29,7 +29,7 @@ folder. Inside of the `python-service` folder you will find several files and a 
 
 ``service/`` - This folder holds the guts of the service's source.
 
-The service folder contains the main files which will need modifying when building a custom payload service.
+The service folder contains the main files which will need modifying when building a custom payload service:
 
 ``__init__.py`` - This empty file belongs in the `service/` folder to give `service.py` access to the modules within.
 
@@ -46,7 +46,7 @@ API through the service.
 models.py
 =========
 
-Inside of the example `models.py` file there is a `Subsystem` and `Status` class. Both of these classes must be subclasses of `graphql.ObjectType <http://docs.graphene-python.org/en/latest/types/objecttypes/>`_ from the `graphene <http://docs.graphene-python.org/en/latest/>`_ module.
+Inside of the example `models.py` file there are `Subsystem` and `Status` classes. Both of these classes must be subclasses of `graphql.ObjectType <http://docs.graphene-python.org/en/latest/types/objecttypes/>`_ from the `graphene <http://docs.graphene-python.org/en/latest/>`_ module.
 
 The `Subsystem` class models the hardware that this service will be interacting with.
 
@@ -126,9 +126,7 @@ Queries allow us to fetch data from the subsystem. There is only one `Query` cla
 
 Any member variables of the type `graphene.Field` become top-level fields accessible by queries. Because we are using the `Subsystem` class, which is also a `graphene.ObjectType`, members of that class become accessible by queries. Each graphene field requires a resolver function named `resolve_fieldname` which returns back an object of the field's class type.  In this case we call `_subsystem.refresh()` to load the latest data into the global `_subsystem` object and return it.
 
-The above class would enable the following query for subsystem power status:
-
-.. code-block:: json
+The above class would enable the following query for subsystem power status:::
 
     {
         subsystem {
@@ -175,9 +173,7 @@ Like with the `Query`, each `Field` member becomes a top-level mutation. However
 
 		return status
 
-The `Arguments` class describe any argument fields needed for this mutation. The line ``Output = Status`` describes the class type this mutation should return. The ``mutate`` function performs the actual work of the mutation and must return back an object of the type specified in the ``Output`` line. The above classes enable the following mutation:
-
-.. code-block:: json
+The `Arguments` class describe any argument fields needed for this mutation. The line ``Output = Status`` describes the class type this mutation should return. The ``mutate`` function performs the actual work of the mutation and must return back an object of the type specified in the ``Output`` line. The above classes enable the following mutation:::
 
     mutation {
         powerOn(power:false) {
@@ -190,4 +186,20 @@ Running the example
 
 Getting the example service up and running is fairly simple. First you must make sure you have the necessary python dependencies installed. If you are using the Kubos SDK vagrant box then these will already be installed. Otherwise you will need to run ``pip install -r requirements.txt``.
 
-Once the dependencies are in place you can run ``python service.py config.yml`` and the example service should begin. You will know that it is running if the command line output says ``* Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)``. You can now point a web browser to http://127.0.0.1:5000/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_. Here you can run quries and mutations against the GraphQL endpoints and see the results.
+Once the dependencies are in place you can run ``python service.py config.yml`` and the example service should begin. You will know that it is running if the command line output says ``* Running on http://0.0.0.1:5000/ (Press CTRL+C to quit)``. You can now point a web browser to http://127.0.0.1:5000/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_. Here you can run quries and mutations against the GraphQL endpoints and see the results.
+
+.. note::
+
+   If you are running the example from within the Vagrant box then you may need
+   some additional configuration.
+
+By default the Vagrant box does not forward any ports. In order to access the HTTP
+interface of the service running inside of the Vagrant box we need to forward
+the port it is using. To do so you will need to add the following line to
+your ```Vagrantfile``` (after ``Vagrant.configure("2") do |config|``)::
+
+  config.vm.network "forwarded_port", guest: 5000, host: 5000
+
+Now restart the vagrant box with ``vagrant reload``. You should now have the ability
+to run the python service inside the Vagrant box and access it from the outside
+at http://127.0.0.1:5000.
