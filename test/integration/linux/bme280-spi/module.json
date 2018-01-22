@@ -9,5 +9,5 @@
     "version":"0.1.0",
     "dependencies":{},
     "homepage":"https://<homepage>",
-    "description":"Example SPI app running on KubOS Linux."
+    "description":"Example SPI app running on Kubos Linux."
 }

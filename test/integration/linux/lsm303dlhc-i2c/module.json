@@ -11,5 +11,5 @@
     	"kubos-hal-linux" : "kubos/kubos-hal-linux#~0.1.0"
   	},
     "homepage": "https://<homepage>",
-    "description": "Example app running on KubOS Linux."
+    "description": "Example app running on Kubos Linux."
 }

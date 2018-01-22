@@ -16,7 +16,7 @@ DOCS_DIRS = [
     "hal/kubos-hal",
     "hal/kubos-hal-iobc",
     "hal/kubos-hal-linux",
-    "radio/radio-api",
+    "radio/radio-api"
 ]
 
 def gendocs_xml(dir, doxyfile, version, doc_dir):

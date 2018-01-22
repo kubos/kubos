@@ -1,10 +1,10 @@
-Installing KubOS Linux on a Beaglebone Black
+Installing Kubos Linux on a Beaglebone Black
 ============================================
 
 Overview
 --------
 
-This document covers the steps required to install KubOS Linux onto a Beaglebone Black.
+This document covers the steps required to install Kubos Linux onto a Beaglebone Black.
 
 Reference Documents
 -------------------
@@ -20,27 +20,27 @@ Beaglebone Documentation
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../linux-docs/kubos-linux-on-iobc` - Steps to build KubOS Linux for the iOBC
--  :doc:`../linux-docs/first-linux-project` - Basic tutorial for creating your first KubOS
+-  :doc:`../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux for the iOBC
+-  :doc:`../os-docs/first-linux-project` - Basic tutorial for creating your first KubOS
    Linux SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
--  :doc:`../linux-docs/using-kubos-linux` - General guide for interacting with KubOS Linux
--  :doc:`../linux-docs/working-with-the-bbb` - Guide for interacting with BBB-specific features
+-  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../os-docs/working-with-the-bbb` - Guide for interacting with BBB-specific features
    
 Components
 ----------
 
-The KubOS Linux installation process is composed of two high-level steps:
+The Kubos Linux installation process is composed of two high-level steps:
 
   - Flashing the eMMC
   - Flashing the microSD card
     
 To perform a full default installation, two files are needed:
 
-  - A KubOS Linux SD card image
+  - A Kubos Linux SD card image
   - An aux_sd image
   
-All of these files can be obtained from `our KubOS Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
+All of these files can be obtained from `our Kubos Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
 Download the latest `KubOS_Linux.zip` file and then unzip the files for the Beaglebone Black. They're located in the `KubOS_Linux/{version}/Beaglebone-Black` folder.
 
@@ -57,7 +57,7 @@ Pre-Requisites
 
 .. note:: 
 
-    The KubOS Linux SD images are created for a 4GB SD card. The image can be applied to a larger SD card, but the
+    The Kubos Linux SD images are created for a 4GB SD card. The image can be applied to a larger SD card, but the
     resulting system will still only have 4GB of space available to it.
 
  
@@ -74,7 +74,7 @@ Flash the SD Card
 
 Using `Etcher <https://etcher.io/>`__:
 
-  - Select the KubOS Linux image to flash
+  - Select the Kubos Linux image to flash
   - Make sure the SD card device is correct (may be auto-detected if there is only one SD card present
     in your system.)
   - Click the "Flash!" button to start the flashing process
@@ -92,11 +92,11 @@ into the Beaglebone Black's microSD slot.
 Boot into U-Boot
 ~~~~~~~~~~~~~~~~
 
-.. note:: These instructions should work whether you're currently running KubOS Linux
+.. note:: These instructions should work whether you're currently running Kubos Linux
     or some other Linux distribution.
 
 We now want to overwrite the eMMC, so we'll need to use U-Boot in order to boot
-KubOS Linux from the SD card.
+Kubos Linux from the SD card.
 
 You'll need to establish a serial connection with the board in order to connect
 to the console. 
@@ -121,7 +121,7 @@ Copy/paste these commands:
     
     setenv bootargs console=ttyS0,115200 root=/dev/mmcblk0p2 ext4 rootwait; fatload mmc 0:1 ${fdtaddr} /beaglebone-black.dtb; fatload mmc 0:1 ${loadaddr} /kernel; bootm ${loadaddr} - ${fdtaddr}
     
-This will cause the board to load KubOS Linux off of the microSD card, allowing us to flash
+This will cause the board to load Kubos Linux off of the microSD card, allowing us to flash
 the eMMC.
 
 Flash the eMMC
@@ -148,7 +148,7 @@ The four status LEDs on the board should start flashing in a random pattern.
 This indicates that the eMMC is currently being written. 
 
 The process should take roughly ten minutes, after which the LEDs should return to normal, 
-with one LED blinking to indicate a successfully running KubOS Linux system.
+with one LED blinking to indicate a successfully running Kubos Linux system.
 
 Then, the system will complain that there is no space left on the device. 
 To explain: the eMMC is 4GB, but a small portion is set up as read-only and 
@@ -165,7 +165,7 @@ Re-Flash the SD Card
 ~~~~~~~~~~~~~~~~~~~~
 
 Now flash the micro SD card with the auxiliary SD card image. This image contains the
-KubOS Linux upgrade partition and the second user data partition.
+Kubos Linux upgrade partition and the second user data partition.
 
 Once the flash process has completed, put the card back into the microSD slot
 and boot up the system..
@@ -190,8 +190,8 @@ mounting a partition, the resulting error message will look like this:
 
 If you see no such errors, the installation process is now complete.
 
-Using KubOS Linux
+Using Kubos Linux
 -----------------
 
-For information on how to create and run applications on your new KubOS Linux system, see the
-:doc:`../linux-docs/working-with-the-bbb` guide.
+For information on how to create and run applications on your new Kubos Linux system, see the
+:doc:`../os-docs/working-with-the-bbb` guide.
