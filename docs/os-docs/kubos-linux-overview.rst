@@ -207,10 +207,6 @@ messages will look like this:
     Initializing random number generator... random: dd: uninitialized urandom read (512 bytes read, 12 bits of entropy available)
     done.
     Starting network: OK
-    Starting kubos-c2-daemon:
-    OK
-    Starting linux-telemetry-service:
-    OK
     
     Welcome to KubOS Linux
     Kubos login: 
@@ -231,7 +227,7 @@ space
 ^^^^^^^^^
 
 All built-in Kubos services will reside in the /usr/sbin directory. This
-covers things like the telemetry and command and control services.
+covers things like the hardware and core services.
 
 /home
 ^^^^^

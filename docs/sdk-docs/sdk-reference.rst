@@ -104,7 +104,7 @@ Synopsis
 
 ::
 
-        $ kubos init <project name> [--linux] [--rt]
+        $ kubos init <project name> [--linux]
 
 Description
 ~~~~~~~~~~~
@@ -118,7 +118,6 @@ Options
 
 -  ``--linux``, ``-l`` Create the new project as a linux application for
    Kubos Linux
--  ``--rt``, ``-r`` Create the new project as a KubOS RT project
 
 kubos clean
 -----------
