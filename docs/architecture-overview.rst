@@ -21,28 +21,28 @@ Kubos Linux
 
 Kubos Linux is Kubos's Linux distro. 
 
-- :doc:`Kubos Linux docs <os-docs/index>`. 
+- :doc:`Kubos Linux docs <os-docs/index>`
 
 Kubos APIs
 ~~~~~~~~~~
 
 Kubos offers a library of APIs to simplify the process of writing mission applications and services. It includes software abstractions for communication protocols, like UART and I2C, as well as hardware abstractions for devices like the `ISIS iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__
 
-- :doc:`Kubos API Documenation <apis/index>\`
+- :doc:`Kubos API Documenation <apis/index>`
 
 Kubos Services
 ~~~~~~~~~~~~~~
 
 Kubos services are defined as any persistent process that is used to interact with the satellite. Services rarely make decisions, but will allow the user to accomplish typical flight software tasks such as telemetry storage, file management, shell access, hardware interaction, etc. 
 
-- :doc:`Kubos Services <services/index>`. 
+- :doc:`Kubos Services <services/index>`
 
 Mission Applications
 ~~~~~~~~~~~~~~~~~~~~
 
 Mission applications are anything that governs the behavior of the satellite. Some common examples are deployment, housekeeping, and telemetry beaconing. Basically anything that you want the satellite to do autonomously goes into this category.
 
-- :doc:`Mission Applications <what-is-a-mission-application>`. 
+- :doc:`Mission Applications <what-is-a-mission-application>`
 
 
 Typical Mission Architecture
@@ -81,19 +81,19 @@ Hardware Services
 Hardware services are GraphQL server endpoints that take in queries and mutations and exercise the hardware API to complete them. 
 
  - :doc:`Hardware Services <services/hardware-services>`
- - :doc:`GraphQL <services/graphql>`. 
+ - :doc:`GraphQL <services/graphql>`
 
 Hardware APIs
 ^^^^^^^^^^^^^
 
 Hardware APIs are a two-tier system. The lower tier is specific to the exact piece of hardware and its configuration, and must be written for every piece of hardware integrated. The upper tier accesses the lower tier, and is accessed by the associated Hardware Services. This upper tier is mostly portable between different units of similar purpose (e.g., different brands of battery or ADCS), but sometimes must be augmented. 
 
- - :doc:`Hardware APIs <apis/index>`. 
+ - :doc:`Hardware APIs <apis/index>`
 
 Core Services
 ~~~~~~~~~~~~~
 
-The Core Services are all the services that provide critical Flight Software capability. Any service that does not interact with hardware or is not specific to a mission falls within this category. Each of these services are discussed in the Services section found :doc:`here <services/core-services>`.
+The Core Services are all the services that provide critical Flight Software capability. Any service that does not interact with hardware or is not specific to a mission falls within this category. Each of these services are discussed in the Services section found :doc:`here <services/core-services>`
 
 Mission Specific Code
 ~~~~~~~~~~~~~~~~~~~~~
@@ -112,7 +112,7 @@ Mission Applications
 
 Mission applications, as previously discussed, handle all the onboard decision making. These are, by nature, mission specific, but some of them can be largely reused due to the abstract nature of the hardware integration. These are typically written or adapted by the user. 
 
- - :doc:`Mission Applications <what-is-a-mission-application>`.
+ - :doc:`Mission Applications <what-is-a-mission-application>`
 
 
 Available Languages in KubOS
