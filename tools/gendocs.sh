@@ -59,16 +59,9 @@ gendocs_yt_module() {
 gendocs $kubos_dir docs/Doxyfile $release_ver
 run_cmd mv $kubos_dir/html/* $out_dir
 
-gendocs_yt_module $kubos_dir/kubos-core kubos-core
+gendocs_yt_module $kubos_dir/adcs/adcs-api adcs-api
 gendocs_yt_module $kubos_dir/libcsp libcsp
-gendocs_yt_module $kubos_dir/freertos/os freertos
 gendocs_yt_module $kubos_dir/hal/kubos-hal kubos-hal
 gendocs_yt_module $kubos_dir/hal/kubos-hal-iobc kubos-hal/kubos-hal-iobc
 gendocs_yt_module $kubos_dir/hal/kubos-hal-linux kubos-hal/kubos-hal-linux
-gendocs_yt_module $kubos_dir/hal/kubos-hal-stm32f4 kubos-hal/kubos-hal-stm32f4
-gendocs_yt_module $kubos_dir/hal/kubos-hal-msp430f5529 kubos-hal/kubos-hal-msp430f5529
 gendocs_yt_module $kubos_dir/radio/radio-api radio-api
-gendocs_yt_module $kubos_dir/telemetry telemetry
-gendocs_yt_module $kubos_dir/telemetry-aggregator telemetry-aggregator
-gendocs_yt_module $kubos_dir/telemetry-storage telemetry-storage
-gendocs_yt_module $kubos_dir/ipc ipc
