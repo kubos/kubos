@@ -44,14 +44,14 @@ Boards Currently Supported by Kubos
 .. toctree::
     :hidden:
     
-    First Time Users <first-time-users>
     KubOS Architecture <architecture-overview>
+    First Time Users <first-time-users>
+    Installation Docs <installation-docs/index>
+    Kubos SDK <sdk-docs/index>
+    Kubos Mission Applications <what-is-a-mission-application>
     Kubos Services <services/index>
-    Kubos Applications <what-is-a-mission-application>
     Kubos APIs <apis/index>
     Kubos Linux <os-docs/index>
-    Kubos SDK <sdk-docs/index>
-    Installation Docs <installation-docs/index>
     Developer Docs <dev-docs/index>
     FAQs and Troubleshooting Tips <faq-troubleshooting>
 
