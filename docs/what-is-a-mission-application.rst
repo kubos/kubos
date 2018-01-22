@@ -1,9 +1,9 @@
 What is a Mission Application?
 ==============================
 
-Mission Applications include anything that makes decisions or governs autonomy on the satellite, as well an any other applications designed to address mission-specific concerns. 
+Mission applications include anything that makes decisions or governs autonomy on the satellite, as well an any other applications designed to address mission-specific concerns. 
 
-Applications can be used to accomplish anything on the system, and are only limited by the computational or hardware capabilities of the spacecraft.
+Applications can be used to accomplish anything on the system and are only limited by the computational or hardware capabilities of the spacecraft.
 
 Autonomy Applications
 ---------------------
@@ -26,4 +26,4 @@ Applications are also used to accomplish specific mission goals. Some possible e
 Example Mission Applications
 ----------------------------
 
-An Example Mission Application is forthcoming. 
+An example mission application is forthcoming. 

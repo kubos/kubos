@@ -7,12 +7,12 @@ GraphQL is a query language used to simplify commanding and telemetry gathering 
 What uses GraphQL? 
 ------------------
 
-All :doc:`Hardware Services <hardware-services>` are GraphQL endpoints where: 
+All :doc:`hardware services <hardware-services>` are GraphQL endpoints where: 
 
  - mutations   = hardware commands
  - queries     = telemetry requests
 
-Other services, such as the Telemetry Database Service, also use GraphQL as their command and telemetry request language. 
+Other services, such as the telemetry database service, also use GraphQL as their command and telemetry request language. 
 
 All responses to GraphQL transactions are in JSON format. 
 
