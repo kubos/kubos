@@ -1,17 +1,17 @@
-Upgrading KubOS Linux
+Upgrading Kubos Linux
 =====================
 
 Overview
 --------
 
-KubOS Linux upgrades are distributed as kpack-{YYYY.MM.DD}.itb files.
+Kubos Linux upgrades are distributed as kpack-{YYYY.MM.DD}.itb files.
 ITB stands for 'Image Tree Blob' and allows Kubos to utilize the
 existing DFU utility currently available in U-Boot.
 
 Within each file will be a new version of the kernel image and root
 filesystem.
 
-To upgrade a board currently running KubOS Linux, an upgrade package
+To upgrade a board currently running Kubos Linux, an upgrade package
 will be loaded into the upgrade partition of the board. For now, this
 can be done through the Kubos SDK or by manually copying the package
 into the upgrade partition.
@@ -19,14 +19,14 @@ into the upgrade partition.
 Once the board is rebooted, U-Boot will take the package and then
 install each component into the appropriate partition (kernel/rootfs).
 If installation completes successfully, then the board will be rebooted
-and then boot into the new version of KubOS Linux.
+and then boot into the new version of Kubos Linux.
 
 The overall flow looks like this:
 
 .. figure:: ../images/kubos_linux_upgrade.png
-   :alt: KubOS Linux Upgrade
+   :alt: Kubos Linux Upgrade
 
-   KubOS Linux Upgrade
+   Kubos Linux Upgrade
 
 **Note**:
 
@@ -50,7 +50,7 @@ The SD card should have been formatted with the correct partitions. If
 not, refer to the :ref:`install-sd` instructions.
 
 The host computer should be connected to the target board, which should
-be on and running KubOS Linux.
+be on and running Kubos Linux.
 
 A Kubos SDK VM should be installed on your host computer and at least
 one shared folder should be set up. Installation instructions can be
@@ -74,7 +74,7 @@ onto the target.
     $ kubos init -l fakeproj
     $ cd fakeproj
 
-Set the target to the desired KubOS Linux target type. 
+Set the target to the desired Kubos Linux target type. 
 
 For example::
 
@@ -117,7 +117,7 @@ desired reboot time.
 
 When the board boots into U-Boot, the new package will be detected and
 loaded. If the loading is successful, the board will reboot into the
-newly installed KubOS Linux. The U-Boot console messages will look
+newly installed Kubos Linux. The U-Boot console messages will look
 similar to this:
 
 ::
@@ -146,7 +146,7 @@ package. Previous packages are not deleted once they have been loaded.
 As a result, you can simply specify which package you would like to boot
 into and then restart your system.
 
-From the KubOS Linux shell:
+From the Kubos Linux shell:
 
 ::
 
@@ -158,7 +158,7 @@ From the KubOS Linux shell:
 Upgrade Creation
 ----------------
 
-This section is for developers who have made changes to KubOS Linux and
+This section is for developers who have made changes to Kubos Linux and
 want to generate an upgrade package.
 
 Pre-requisite

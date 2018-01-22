@@ -1,15 +1,15 @@
-Building KubOS Linux for the Pumpkin MBM2
+Building Kubos Linux for the Pumpkin MBM2
 =========================================
 
 Overview
 --------
 
-This supplementary document covers specific features and components of KubOS Linux for the
+This supplementary document covers specific features and components of Kubos Linux for the
 Pumpkin Motherboard Module 2.
 
-The :doc:`kubos-linux-overview` doc covers the major components of KubOS Linux.
+The :doc:`kubos-linux-overview` doc covers the major components of Kubos Linux.
 
-Additionally, this document covers the steps required in order to build KubOS Linux.
+Additionally, this document covers the steps required in order to build Kubos Linux.
 
 Reference Documents
 -------------------
@@ -24,8 +24,8 @@ each of the hardware components are and how they are connected.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../installation-docs/installing-linux-mbm2` - Steps to install KubOS Linux
--  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
+-  :doc:`../installation-docs/installing-linux-mbm2` - Steps to install Kubos Linux
+-  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`working-with-the-mbm2` - Guide for interacting with MBM2-specific features
 
 Software Components
@@ -45,10 +45,10 @@ U-Boot
 This board utilizes U-Boot's SPL feature. A small boot file called "MLO" is
 run and that file then loads the main U-Boot image into SDRAM.
 
-KubOS Linux Build Process
+Kubos Linux Build Process
 -------------------------
 
-If for some reason you want or need to modify and rebuild the KubOS Linux components, follow
+If for some reason you want or need to modify and rebuild the Kubos Linux components, follow
 the steps in this section.
 
 .. _build-os-mbm2:
@@ -64,9 +64,9 @@ Build the OS Files
 
 :doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
 
-In order to build KubOS Linux, two components are needed:
+In order to build Kubos Linux, two components are needed:
 
-- The `kubos-linux-build repo <https://github.com/kubos/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build KubOS Linux
+- The `kubos-linux-build repo <https://github.com/kubos/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build Kubos Linux
 - `BuildRoot <https://buildroot.org/>`__ - The actual build system
 
 These components should be setup as children of the same parent directory. 
@@ -74,7 +74,7 @@ There are several commands and variables in the build process which use relative
 
 After the environment has been set up, all build commands will be run from the BuildRoot directory unless otherwise stated.
 
-To set up a build environment and build KubOS Linux:
+To set up a build environment and build Kubos Linux:
 
 Create a new parent folder to contain the build environment
 
@@ -144,7 +144,7 @@ The relevant files are:
 -  pumpkin-mbm2.dtb - The Device Tree Binary that Linux uses to configure itself
    for the Pumpkin MBM2 board
 -  rootfs.tar - The root file system. Contains BusyBox and other libraries
--  kubos-linux.img - The complete KubOS Linux SD card image
+-  kubos-linux.img - The complete Kubos Linux SD card image
 
 Changing the Output Toolchain Directory (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -161,7 +161,7 @@ Create auxilliary SD Card Image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default, the build process will create a bootable SD card image. This will be flashed
-onto the eMMC. In order to create a full KubOS Linux setup, you'll want to also create
+onto the eMMC. In order to create a full Kubos Linux setup, you'll want to also create
 an auxiliary image for the microSD card containing the upgrade partition and an additional
 user data partition.
 

@@ -23,8 +23,8 @@ RUN apt-get install -y crossbuild-essential-armhf gcc-arm-linux-gnueabihf g++-ar
 RUN easy_install pip
 RUN pip install --upgrade pip
 
-#KubOS Linux setup
-RUN echo "Installing KubOS Linux Toolchain"
+#Kubos Linux setup
+RUN echo "Installing Kubos Linux Toolchain"
 
 RUN apt-get install -y minicom
 RUN apt-get install -y libc6-i386 lib32stdc++6 lib32z1

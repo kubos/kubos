@@ -1,4 +1,4 @@
-# UART TX with KubOS Linux
+# UART TX with Kubos Linux
 
 **NOTE: EXPERIMENTAL (Work in Progress)**
 

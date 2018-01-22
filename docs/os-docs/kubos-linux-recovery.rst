@@ -1,27 +1,27 @@
-KubOS Linux Recovery Architecture
+Kubos Linux Recovery Architecture
 =================================
 
-Ideally, a space mission using KubOS Linux will run successfully until the end of its natural lifespan. However, space is unpredictable and systems can become corrupted. As a result, we've implemented a basic mechanism to help detect and recover from these random errors.
+Ideally, a space mission using Kubos Linux will run successfully until the end of its natural lifespan. However, space is unpredictable and systems can become corrupted. As a result, we've implemented a basic mechanism to help detect and recover from these random errors.
 
 Overview
 --------
 
-Each time the system attempts to boot, an internal counter is increased. If the KubOS Linux kernel successfully boots, it will reset this internal counter.
+Each time the system attempts to boot, an internal counter is increased. If the Kubos Linux kernel successfully boots, it will reset this internal counter.
 
 If the system has failed to boot twice already, then the custom Kubos recovery code is attempted. If the Kubos recovery steps fail, then the system attempts to boot into an alternate operating system instead. If that fails, then the system will stop attempting to load an OS and will instead just present the U-Boot CLI.
 
 Environment Variables
 ---------------------
 
-There are several U-Boot environment variables that are used to track the state of a KubOS Linux system: 
+There are several U-Boot environment variables that are used to track the state of a Kubos Linux system: 
 
-* `bootcmd` - The usual set of commands that are used to boot into KubOS Linux. 
-* `altbootcmd` - The alternate set of commands that are used if the system cannot successfully boot into KubOS Linux. They will be set up to attempt to boot into an alternate OS. 
+* `bootcmd` - The usual set of commands that are used to boot into Kubos Linux. 
+* `altbootcmd` - The alternate set of commands that are used if the system cannot successfully boot into Kubos Linux. They will be set up to attempt to boot into an alternate OS. 
 * `recovery_available` - Indicates that recovery actions are available and should be taken, if necessary. 
 * `bootlimit` - The number of bad boots allowed before the system attempts to use altbootcmd instead of bootcmd to boot. 
 * `bootcount` - The number of boots that have been attempted. 
-* `kubos_curr_version` - The name of the kpack \*.itb file that the current KubOS Linux kernel and rootfs were loaded from. 
-* `kubos_prev_version` - The name of the kpack \*.itb file that was previously used to load the KubOS Linux kernel and rootfs.
+* `kubos_curr_version` - The name of the kpack \*.itb file that the current Kubos Linux kernel and rootfs were loaded from. 
+* `kubos_prev_version` - The name of the kpack \*.itb file that was previously used to load the Kubos Linux kernel and rootfs.
 * `kubos_curr_tried` - Indicates that reloading the current version has been attempted.
 
 The default values for these variables can be found in the configuration header file for each board located in the `U-Boot repo <https://github.com/kubos/uboot>`__ under the 'include/configs' directory.
@@ -39,15 +39,15 @@ Kubos Recovery
 
 The Kubos recovery process has three main components: 
 
-* Attempt to reload the current version of KubOS Linux 
-* Attempt to load the previous version of KubOS Linux 
-* Attempt to load the base version of KubOS Linux
+* Attempt to reload the current version of Kubos Linux 
+* Attempt to load the previous version of Kubos Linux 
+* Attempt to load the base version of Kubos Linux
 
 The boot count will not be increased again until this full recovery process is determined to have failed.
 
-All of the files required for this process live in the board's 'upgrade' partition. The base version of KubOS Linux (kpack-base.itb) should be pre-loaded into the partition. The current and previous versions are loaded into the partition as part of the system upgrade process. These versions follow a natural process.
+All of the files required for this process live in the board's 'upgrade' partition. The base version of Kubos Linux (kpack-base.itb) should be pre-loaded into the partition. The current and previous versions are loaded into the partition as part of the system upgrade process. These versions follow a natural process.
 
-Brand new KubOS Linux system:
+Brand new Kubos Linux system:
 
 ::
 
@@ -68,16 +68,16 @@ After the second system upgrade:
     kubos_curr_version = kpack-upgrade2.itb
     kubos_prev_version = kpack-upgrade1.itb
 
-Rolling back to a previous version of KubOS Linux uses the same mechanism as :doc:`upgrading to a new version <kubos-linux-upgrade>`. A kpack\*.itb file is broken into its components and then the kernel image is written to the boot partition and the rootfs image is written to the rootfs partition.
+Rolling back to a previous version of Kubos Linux uses the same mechanism as :doc:`upgrading to a new version <kubos-linux-upgrade>`. A kpack\*.itb file is broken into its components and then the kernel image is written to the boot partition and the rootfs image is written to the rootfs partition.
 
 **Note** This process will wipe out everything that was previously in the rootfs partition. As a result, all user files should be stored in the user space partition, which is mapped to the '/home' directory. This user space partition should not be affected by the Kubos recovery process.
 
 Manual Recovery
 ~~~~~~~~~~~~~~~
 
-If for some reason your KubOS Linux system boots after an upgrade but has introduced some non-critical issue (like an incompatibility with a user application), you can manually rollback to a previously installed version. Previous packages are not deleted once they have been loaded. As a result, you can simply specify which package you would like to boot into and then restart your system. List the contents of the '/upgrade' directory to see what files are available.
+If for some reason your Kubos Linux system boots after an upgrade but has introduced some non-critical issue (like an incompatibility with a user application), you can manually rollback to a previously installed version. Previous packages are not deleted once they have been loaded. As a result, you can simply specify which package you would like to boot into and then restart your system. List the contents of the '/upgrade' directory to see what files are available.
 
-From the KubOS Linux shell:
+From the Kubos Linux shell:
 
 ::
 
@@ -118,7 +118,7 @@ should be:
 * Build an application that is capable of running on the board. Pay attention to the SDRAM address that the application is configured to run from. Frequently, this is a static address (likely the very beginning of SDRAM), so the application must end up running from this location. 
 * Load it into the appropriate persistent storage (NOR/NAND flash, SD card, etc) 
 * Update the altbootcmd variable with the address to copy the application from, the address to copy the application to, and the length of the application. 
-  Then add a command to trigger the boot process. This can be done from the U-Boot CLI with the ``setenv`` and ``saveenv`` commands, or from KubOS Linux with the ``fw_setenv`` command.
+  Then add a command to trigger the boot process. This can be done from the U-Boot CLI with the ``setenv`` and ``saveenv`` commands, or from Kubos Linux with the ``fw_setenv`` command.
 
 The updated altbootcmd might look something like this:
 

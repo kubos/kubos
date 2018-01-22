@@ -1,8 +1,8 @@
-KubOS Linux on the ISIS-OBC QA Plan
+Kubos Linux on the ISIS-OBC QA Plan
 ===================================
 
 Integration tests that should be run against an iOBC in preparation
-for the newest official release of KubOS Linux.
+for the newest official release of Kubos Linux.
 
 Introduction
 ------------
@@ -25,7 +25,7 @@ Scope
 ~~~~~
 
 The goal of this plan is to test the functionality of the major components
-of KubOS Linux that a user would use:
+of Kubos Linux that a user would use:
 
 - Command and control
 - Telemetry
@@ -37,7 +37,7 @@ All tests will be run on an ISIS-OBC.
 Out of Scope
 ^^^^^^^^^^^^
 
-- KubOS Linux build process. CircleCI will regularly verify the build process,
+- Kubos Linux build process. CircleCI will regularly verify the build process,
   so it is not necessary to duplicate the effort here.
 
 Testing Environment Setup
@@ -165,7 +165,7 @@ TODO: Create a project to call the "supervisor_get_version()" function
 Test Steps
 ^^^^^^^^^^
 
-1. Copy the "{TBD}" project into a new KubOS Linux project folder
+1. Copy the "{TBD}" project into a new Kubos Linux project folder
 2. Build the project for the iOBC target
 3. Flash the project onto the iOBC
 4. Log in to the iOBC
@@ -238,7 +238,7 @@ on the iOBC.
 Test Steps
 ^^^^^^^^^^
 
-1. Copy the "linux-i2c" project into a new KubOS Linux project folder
+1. Copy the "linux-i2c" project into a new Kubos Linux project folder
 2. Build the project for the iOBC target
 3. Flash the project onto the iOBC
 4. Log in to the iOBC
@@ -302,7 +302,7 @@ Vague Steps:
 - Delete /usr/ directory on board (to corrupt rootfs)
 - Reboot
 - Board should throw a kernel panic
-- Recovery should happen (current version of KubOS Linux should be reloaded)
+- Recovery should happen (current version of Kubos Linux should be reloaded)
 
 
 Test Plan Execution

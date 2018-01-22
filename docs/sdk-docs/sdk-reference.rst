@@ -21,7 +21,7 @@ Command Overview
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | `flash <#kubos-flash>`__             | Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.    |
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| `flash <#kubos-flash-linux>`__       | (KubOS Linux Targets) Load files onto target.                                                                                |
+| `flash <#kubos-flash-linux>`__       | (Kubos Linux Targets) Load files onto target.                                                                                |
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | `init <#kubos-init>`__               | Create a new module.                                                                                                         |
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -104,7 +104,7 @@ Synopsis
 
 ::
 
-        $ kubos init <project name> [--linux] [--rt]
+        $ kubos init <project name> [--linux]
 
 Description
 ~~~~~~~~~~~
@@ -117,8 +117,7 @@ Options
 ~~~~~~~
 
 -  ``--linux``, ``-l`` Create the new project as a linux application for
-   KubOS Linux
--  ``--rt``, ``-r`` Create the new project as a KubOS RT project
+   Kubos Linux
 
 kubos clean
 -----------
@@ -250,7 +249,7 @@ Flash the build of the current target to the target board.
 
 Note: This requires target support.
 
-kubos flash (KubOS Linux targets)
+kubos flash (Kubos Linux targets)
 ---------------------------------
 
 Synonyms: ``kubos start``
@@ -272,7 +271,7 @@ specified in the module.json file, then the file is assumed to be the
 application binary and will be loaded into /home/system/usr/bin on the
 target board.
 
-If the name of the file ends in \*.itb, the file is a KubOS Linux
+If the name of the file ends in \*.itb, the file is a Kubos Linux
 upgrade package and will be loaded into the upgrade partition of the
 target board. An internal variable will be set so that the upgrade
 package will be installed during the next reboot of the target board.
