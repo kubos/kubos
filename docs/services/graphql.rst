@@ -49,6 +49,5 @@ With GraphQL, it's a single query. The mission application is simplified and the
   query {
     battery {
       ...powerports
-      }
     }
   }
