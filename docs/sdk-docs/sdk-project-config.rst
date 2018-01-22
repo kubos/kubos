@@ -581,7 +581,6 @@ These are the configuration options which are most likely to be changed for a pr
                     
     - "csp": "kubos/libcsp"
     
-        - `"freertos": "kubos/freertos"`
         - `"kubos-hal": "kubos/kubos-hal"`
         - `"tinycbor": "kubos/tinycbor"`
         

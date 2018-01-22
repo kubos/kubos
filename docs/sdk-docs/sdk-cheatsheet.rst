@@ -61,7 +61,7 @@ select the proper cross compiler. Kubos currently supports several
 different targets:
 
 +------------+------------------------------+---------------------------------------------------+
-| MCU Family | Kubos Target                 | Description                                       |
+| Vendor     | Kubos Target                 | Description                                       |
 +============+==============================+===================================================+
 | ISIS       | kubos-linux-isis-gcc         | ISIS-OBC                                          |
 +------------+------------------------------+---------------------------------------------------+
