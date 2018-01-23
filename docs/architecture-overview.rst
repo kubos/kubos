@@ -100,12 +100,12 @@ Mission Specific Code
 
 Mission specific code is highlighted in green in the above diagram and refers to anything which is specific to a particular mission. This includes things like the payload service and mission applications. 
 
-Payload Service
-^^^^^^^^^^^^^^^
+Payload Services
+^^^^^^^^^^^^^^^^
 
 Payload services should be modeled after hardware services as much as possible, and that is reflected in the given example code. That being said, the payload service is custom for the mission, and can be accomplished any way the payload developer sees fit. 
 
- - :doc:`Payload Service <services/payload-service>`
+ - :doc:`Payload Services <services/payload-services>`
 
 Mission Applications
 ^^^^^^^^^^^^^^^^^^^^

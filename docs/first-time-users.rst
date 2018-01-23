@@ -33,4 +33,4 @@ The output of a Kubos project is a custom application binary which can then be r
     :maxdepth: 1
     
     Installing the Kubos SDK <installation-docs/sdk-installing>
-    Creating Your First KubOS Linux Project <os-docs/first-linux-project>
+    Creating Your First Kubos Linux Project <os-docs/first-linux-project>

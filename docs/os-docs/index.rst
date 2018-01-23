@@ -27,7 +27,7 @@ General Guide
     :maxdepth: 1
     
     First Linux Project <first-linux-project>
-    Using KubOS Linux <using-kubos-linux>
+    Using Kubos Linux <using-kubos-linux>
     
 System Guides
 -------------
