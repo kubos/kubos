@@ -6,9 +6,9 @@ Kubos services are defined as any persistent process that is used to interact wi
 .. toctree::
     :maxdepth: 1
     :hidden:
-    
+
     Core Services <core-services>
     Hardware Services <hardware-services>
-    Payload Servives <payload-service>
+    Payload Services <payload-service>
+    Rust Services<rust-service>
     GraphQL <graphql>
-    
