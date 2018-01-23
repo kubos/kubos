@@ -1,4 +1,4 @@
-# KubOS Linux  - BME280 SPI Test
+# Kubos Linux  - BME280 SPI Test
 
 This project tests communication with the [BME280 humidity and pressure sensor](https://cdn-shop.adafruit.com/datasheets/BST-BME280_DS001-10.pdf) over SPI.
 

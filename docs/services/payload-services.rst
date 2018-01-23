@@ -1,6 +1,6 @@
-***********************
-Payload Service
-***********************
+****************
+Payload Services
+****************
 
 Payload services are essentially hardware services but custom designed
 for mission payload hardware. They share the same architecture as the hardware

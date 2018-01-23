@@ -2,7 +2,7 @@
   "name": "kubos-linux-example",
   "version": "0.1.0",
   "bin": "./source",
-  "description": "Example app running on KubOS Linux.",
+  "description": "Example app running on Kubos Linux.",
   "repository": {
     "url": "ssh://git@github.com/kubos/kubos-linux-example",
     "type": "git"

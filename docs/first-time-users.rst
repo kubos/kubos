@@ -13,7 +13,7 @@ First Time Users
         [kubos-proj2] as proj2
     }
     
-    node "OBC - KubOS Linux" {
+    node "OBC - Kubos Linux" {
         cloud "kubos-proj2" as application
         cloud "App1"
         cloud "App2"
@@ -33,4 +33,4 @@ The output of a Kubos project is a custom application binary which can then be r
     :maxdepth: 1
     
     Installing the Kubos SDK <installation-docs/sdk-installing>
-    Creating Your First KubOS Linux Project <os-docs/first-linux-project>
+    Creating Your First Kubos Linux Project <os-docs/first-linux-project>

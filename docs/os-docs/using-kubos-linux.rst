@@ -1,4 +1,4 @@
-Using KubOS Linux
+Using Kubos Linux
 =================
 
 Overview
@@ -6,7 +6,7 @@ Overview
 
 This document is intended as an general guide for creating,
 loading, and using Kubos projects and other files within the user space
-of KubOS Linux.
+of Kubos Linux.
 
 Reference Documents
 -------------------
@@ -68,7 +68,7 @@ Fully logged in, the console should look like this:
 
 ::
 
-    Welcome to KubOS Linux
+    Welcome to Kubos Linux
 
     Kubos login: root
     Password: 
@@ -102,7 +102,7 @@ For example:
 .. note:: 
 
     You must use the ``-l|--linux`` option with ``kubos init`` in order
-    to properly create a project for KubOS Linux.
+    to properly create a project for Kubos Linux.
     
 Configuring a Project
 ~~~~~~~~~~~~~~~~~~~~~
@@ -115,7 +115,7 @@ the Kubos SDK project.
 More information about project configuration can be found in the
 :doc:`../sdk-docs/sdk-project-config` doc.
 
-There are a few relevant configuration options for KubOS Linux:
+There are a few relevant configuration options for Kubos Linux:
 
 .. _updating-credentials:
 
@@ -212,7 +212,7 @@ the application flashing process.
 Example Program
 ~~~~~~~~~~~~~~~
 
-Let's walk through the steps to create the example KubOS Linux project.
+Let's walk through the steps to create the example Kubos Linux project.
 
 Initialize the project
 
@@ -299,7 +299,7 @@ specified in the module.json file, then the file is assumed to be the
 application binary and will be loaded into /home/system/usr/bin on the
 target board.
 
-If the name of the file ends in \*.itb, the file is a KubOS Linux
+If the name of the file ends in \*.itb, the file is a Kubos Linux
 upgrade package and will be loaded into the upgrade partition of the
 target board. An internal variable will be set so that the upgrade
 package will be installed during the next reboot of the target board.
@@ -351,7 +351,7 @@ Login to the board
     Press CTRL-A Z for help on special keys
 
 
-    Welcome to KubOS Linux
+    Welcome to Kubos Linux
     (none) login: root
     Password:
     Jan  1 00:00:11 login[210]: root login on 'ttyS0'
@@ -480,7 +480,7 @@ User Accounts
 
 In general, it is preferred to use a non-root user account to interact
 with a Linux system. A default user account 'kubos' is included with
-KubOS Linux. Other user accounts can be created using the standard Linux
+Kubos Linux. Other user accounts can be created using the standard Linux
 commands (``adduser``, ``useradd``, etc).
 
 All user accounts should have a home directory in the format
@@ -492,10 +492,10 @@ accounts.
 If you change the root user's password, be sure to also update the password in
 any :ref:`Kubos SDK project configurations <updating-credentials>`.
 
-KubOS Linux File System
+Kubos Linux File System
 -----------------------
 
-There are a few key directories residing within the KubOS Linux user
+There are a few key directories residing within the Kubos Linux user
 space.
 
 /home

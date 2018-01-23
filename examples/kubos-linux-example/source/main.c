@@ -1,5 +1,5 @@
 /*
- * KubOS Linux
+ * Kubos Linux
  * Copyright (C) 2017 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * KubOS Linux Example Project
+ * Kubos Linux Example Project
  *
  * This is the default application included when the `kubos init --linux`
  * command is executed.
  * It is intended as a basic example of how an application could be written to
- * run on a KubOS Linux system.
+ * run on a Kubos Linux system.
  *
  * The application contains a CSP interaction between client and server tasks.
  *

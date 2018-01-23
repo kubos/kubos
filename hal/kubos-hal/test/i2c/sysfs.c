@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* Mock Linux system calls to use for KubOS Linux HAL unit tests */
+/* Mock Linux system calls to use for Kubos Linux HAL unit tests */
 
 #include <cmocka.h>
 #include <unistd.h>

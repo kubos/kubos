@@ -53,7 +53,7 @@ The kubos repository is a collection of
 loaded inside the Kubos Vagrant box. They can also be built locally
 using the ``kubos link`` and ``kubos link-target`` commands.
 
-See the :doc:`KubOS Linux quick start guide <../os-docs/first-linux-project>` 
+See the :doc:`Kubos Linux quick start guide <../os-docs/first-linux-project>` 
 for instructions on setting up and building Kubos SDK projects.
 
 Linking in a Local Module
@@ -62,20 +62,20 @@ Linking in a Local Module
 Once you've made changes to your local kubos repo, you'll want to link
 them into your project.
 
-**Note:** If you create a new high-level component, like telemetry or
-hal, you'll need to create a module.json file so that the module can be
+**Note:** If you create a new high-level component, like ``radio/radio-api`` or
+``hal/kubos-hal``, you'll need to create a module.json file so that the module can be
 linked in successfully.
 
-Let's say that you've updated the Kubos telemetry module to add
+Let's say that you've updated the ``kubos-hal-linux`` module to add
 debugging lines to see how the flow of communication works between
 processes. This would be your process to link and build the changes:
 
 ::
 
-    $ cd /home/vagrant/shared/telemetry
+    $ cd /home/vagrant/shared/hal/kubos-hal-linux
     $ kubos link
     $ cd /home/vagrant/my-project
-    $ kubos link telemetry
+    $ kubos link kubos-hal-linux
     $ kubos build
 
 After running the ``kubos link`` command from the module directory and
@@ -113,8 +113,8 @@ official Kubos version, use the ``kubos unlink`` and
 ::
 
     $ cd /home/vagrant/my-project
-    $ kubos unlink telemetry
-    $ kubos unlink stm32f407-disco-gcc
+    $ kubos unlink csp
+    $ kubos unlink-target kubos-linux-beaglebon-gcc
 
 Listing Linked Resources
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -130,19 +130,15 @@ file path. Any modules which are using the native Kubos code will have a
 
     vagrant@vagrant:~/my-project$ kubos ls
     my-project 0.1.0
-    ┗━ kubos-rt 0.1.0 yotta_modules/kubos-rt -> /home/vagrant/sharedOS/kubos-rt
-    ┣━ freertos 9.0.4 yotta_modules/freertos -> /home/vagrant/.kubos/kubos/freertos/os
-    ┃   ┣━ cmsis-core 1.2.4 yotta_modules/cmsis-core -> /home/vagrant/.kubos/kubos/cmsis/cmsis-core
-    ┃   ┃   ┗━ cmsis-core-st 1.0.5 yotta_modules/cmsis-core-st -> /home/vagrant/.kubos/kubos/cmsis/cmsis-core-st
-    ┃   ┃          ┗━ cmsis-core-stm32f4 1.2.4 yotta_modules/cmsis-core-stm32f4 -> /home/vagrant/.kubos/kubos/cmsis/cmsis-core-stm32f4
-    ┃   ┃              ┣━ stm32cubef4 1.2.4 yotta_modules/stm32cubef4 -> /home/vagrant/.kubos/kubos/hal/stm32cubef4
-    ┃   ┃              ┃   ┗━ stm32cubef4-stm32f407vg 0.0.3 yotta_modules/stm32cubef4-stm32f407vg -> /home/vagrant/.kubos/kubos/hal/stm32cubef4-stm32f407vg
-    ┃   ┃              ┗━ cmsis-core-stm32f407xg 0.0.4 yotta_modules/cmsis-core-stm32f407xg -> /home/vagrant/.kubos/kubos/cmsis/cmsis-core-stm32f407xg
-    ┃   ┗━ freertos-config-stm32f4 0.0.3 yotta_modules/freertos-config-stm32f4 -> /home/vagrant/.kubos/kubos/freertos/config-stm32f4
-    ┣━ csp 1.5.1 yotta_modules/csp -> /home/vagrant/sharedOS/libcsp
-    ┣━ kubos-hal 0.1.2 yotta_modules/kubos-hal -> /home/vagrant/.kubos/kubos/hal/kubos-hal
-    ┃   ┗━ kubos-hal-stm32f4 0.1.2 yotta_modules/kubos-hal-stm32f4 -> /home/vagrant/.kubos/kubos/hal/kubos-hal-stm32f4
-    ┗━ kubos-core 0.1.2 yotta_modules/kubos-core -> /home/vagrant/.kubos/kubos/kubos-core
+      ┗━ imtq-api 1.0.0 yotta_modules/imtq-api -> /home/vagrant/iobc/imtq-api
+      ┣━ adcs-api 0.1.0 yotta_modules/adcs-api -> /home/vagrant/.kubos/kubos/adcs/adcs-api
+      ┣━ kubos-hal 0.1.2 yotta_modules/kubos-hal -> /home/vagrant/.kubos/kubos/hal/kubos-hal
+      ┃ ┣━ csp 1.5.1 yotta_modules/csp -> /home/vagrant/.kubos/kubos/libcsp
+      ┃ ┃ ┗━ tinycbor 0.5.0 yotta_modules/tinycbor -> /home/vagrant/.kubos/kubos/tinycbor
+      ┃ ┗━ kubos-hal-linux 0.1.0 yotta_modules/kubos-hal-linux -> /home/vagrant/.kubos/kubos/hal/kubos-hal-linux
+      ┃   ┗━ kubos-hal-iobc 0.1.0 yotta_modules/kubos-hal-iobc -> /home/vagrant/.kubos/kubos/hal/kubos-hal-iobc
+      ┗━ ccan-json 1.0.0 yotta_modules/ccan-json -> /home/vagrant/.kubos/kubos/ccan/json
+
 
 Similarly, to see the dependencies of your target and any linked
 resources, use the ``kubos target`` command.
@@ -150,7 +146,7 @@ resources, use the ``kubos target`` command.
 ::
 
     vagrant@vagrant:~/my-project$ kubos target
-    stm32f407-disco-gcc 0.1.0 -> /home/vagrant/sharedOS/targets/target-stm32f407-disco-gcc
-    kubos-arm-none-eabi-gcc 0.1.1 -> /home/vagrant/.kubos/kubos/targets/target-kubos-arm-none-eabi-gcc
-    kubos-rt-gcc 0.1.0 -> /home/vagrant/.kubos/kubos/targets/target-kubos-rt-gcc
+    kubos-linux-beaglebone-gcc 0.1.1 -> /home/vagrant/.kubos/kubos/targets/target-kubos-linux-beaglebone-gcc
+    kubos-linux-gcc 0.1.1 -> /home/vagrant/.kubos/kubos/targets/target-kubos-linux-gcc
     kubos-gcc 0.1.1 -> /home/vagrant/.kubos/kubos/targets/target-kubos-gcc
+

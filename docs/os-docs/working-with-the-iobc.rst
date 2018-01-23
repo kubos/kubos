@@ -4,10 +4,10 @@ Working with the ISIS-OBC
 Overview
 --------
 
-This document covers the KubOS Linux features which are specific to the
+This document covers the Kubos Linux features which are specific to the
 ISIS-OBC target, also known as the iOBC.
 
-Please refer to :doc:`using-kubos-linux` for a general guide to using KubOS Linux.
+Please refer to :doc:`using-kubos-linux` for a general guide to using Kubos Linux.
 
 Reference Documents
 -------------------
@@ -26,9 +26,9 @@ Kubos Documentation
 -  :doc:`first-linux-project` - Basic tutorial for creating your first KubOS
    Linux SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
--  :doc:`using-kubos-linux` - General guide for interacting with KubOS Linux
--  :doc:`kubos-linux-on-iobc` - Steps to build KubOS Linux for the iOBC
--  :doc:`../installation-docs/installing-linux-iobc` - Steps to install KubOS Linux
+-  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`kubos-linux-on-iobc` - Steps to build Kubos Linux for the iOBC
+-  :doc:`../installation-docs/installing-linux-iobc` - Steps to install Kubos Linux
    
 Status LEDs
 -----------
@@ -37,7 +37,7 @@ There are four yellow LEDs present on the iOBC which give some indication of wha
 the board is in, along with one red LED which is lit when the system is powered:
 
 -  Three LEDS (solid) - The system is currently running U-Boot
--  One LED (blinking) - The system is currently running KubOS Linux
+-  One LED (blinking) - The system is currently running Kubos Linux
 
 Debug Console Connection
 ------------------------
@@ -81,7 +81,7 @@ I2C
 `I2C Standards
 Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 
-KubOS Linux is currently configured to support the I2C standard-mode
+Kubos Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
 The I2C bus is available through the Kubos HAL as ``K_I2C1``.
