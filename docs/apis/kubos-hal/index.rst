@@ -29,18 +29,12 @@ of Linux system calls.
    :name: hal-guides
 
    i2c
-   spi
-   uart
 
 .. toctree::
    :caption: APIs
    :name: hal-apis
 
-   gpio
    i2c_api
-   sdio
-   spi_api
-   uart_api
 
 .. toctree::
    :caption: Platform HALs

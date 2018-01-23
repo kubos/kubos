@@ -9,6 +9,6 @@ Kubos services are defined as any persistent process that is used to interact wi
     
     Core Services <core-services>
     Hardware Services <hardware-services>
-    Payload Servives <payload-service>
+    Payload Services <payload-services>
     GraphQL <graphql>
     
