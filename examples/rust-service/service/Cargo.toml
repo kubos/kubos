@@ -1,5 +1,5 @@
 [package]
-name = "rust-generic-handler"
+name = "rust-hardware-service"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 

@@ -319,7 +319,7 @@ version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "rust-generic-handler"
+name = "rust-hardware-service"
 version = "0.1.0"
 dependencies = [
  "extern-lib 0.1.0",
