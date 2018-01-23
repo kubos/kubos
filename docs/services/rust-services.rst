@@ -59,7 +59,7 @@ file you will see several ``struct`` declarations. We'll start with the ``Subsys
 
 .. code-block:: rust
 
-  ``pub struct Subsystem;``
+  pub struct Subsystem;
 
 Here we have a struct which is used to model a Subsystem. In this example the struct
 is given no member variables for persistence, all data is obtained through function
