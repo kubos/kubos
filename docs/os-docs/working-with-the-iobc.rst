@@ -58,6 +58,38 @@ peripheral devices. Currently, users should interact with these devices
 using the standard Linux functions. A Kubos HAL will be added in the
 future for the iOBC.
 
+ADC
+~~~
+
+The iOBC has four analog input pins available:
+
++------+-------+
+| iOBC | Linux |
++======+=======+
+| AIN4 | 0     |
++------+-------+
+| AIN5 | 1     |
++------+-------+
+| AIN6 | 2     |
++------+-------+
+| AIN7 | 3     |
++------+-------+
+
+The pins are available through the Linux device ``/sys/bus/iio/devices/iio\:device0/``.
+
+A single raw output value can be read from each of the pins via
+``/sys/bus/iio/devices/iio\:device0/in_voltage{n}_raw``, where `{n}` corresponds to the
+Linux AIN number.
+
+This raw value can then be converted to microvolts by multiplying it by the value
+found in ``/sys/bus/iio/devices/iio\:device0/in_voltage_scale``.
+
+More information about the capture and use of ADC can be found in 
+`this guide from Atmel <https://www.at91.com/linux4sam/bin/view/Linux4SAM/IioAdcDriver>`__.
+
+An `ADC example <http://github.com/kubos/kubos/tree/master/examples/adc-thermistor>`__ is 
+also available for reference in the Kubos repo.
+
 UART
 ~~~~
 
