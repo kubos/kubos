@@ -12,7 +12,7 @@ helper tools to integrate C-based Kubos libraries with Rust projects.
 Cargo-Kubos
 -----------
 
-A special Kubos SDKtool has been created for build interoperability between
+A special Kubos SDK tool has been created for build interoperability between
 Rust projects and C projects: `cargo kubos`. This tool allows Rust projects
 to correctly compile against existing C libraries and also provides
 cross-compiler compatibility for existing Kubos hardware targets.
@@ -41,7 +41,7 @@ Compiling a Rust project is done from within the project's folder. The command i
   cargo kubos -c build
 
 Running this command as-is will compile the current Rust project with the
-native linux compiler.
+native Linux compiler.
 
 Running
 -------

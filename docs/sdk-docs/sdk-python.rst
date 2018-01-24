@@ -20,7 +20,7 @@ There are currently two ways to add Python programs to Kubos Linux:
    See the SysAdmin section :doc:`here <../os-docs>` for more information on
    building Kubos Linux.
 
-2. Individual python files can be flashed to an attached hardware target. The
+2. Individual Python files can be flashed to an attached hardware target. The
    instructions are fairly similar to flashing a rust binary:
 
    1. Navigate to an existing example Kubos module like ``kubos-linux-example``.
