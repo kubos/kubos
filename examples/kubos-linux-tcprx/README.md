@@ -1,4 +1,4 @@
-# TCP RX with KubOS Linux
+# TCP RX with Kubos Linux
 
 This is a demo program to test receiving TCP data over a valid IP connection (the ethernet port for the Pumpkin MBM2 and Beaglebone Black targets)
 

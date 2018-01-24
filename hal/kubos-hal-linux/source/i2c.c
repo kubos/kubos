@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
- * @defgroup LINUX_HAL_I2C KubOS Linux HAL I2C Interface
+ * @defgroup LINUX_HAL_I2C Kubos Linux HAL I2C Interface
  * @addtogroup LINUX_HAL_I2C
  * @{
  */
