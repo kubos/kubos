@@ -128,7 +128,7 @@ The ``set_power`` function is an example of a function called during a mutation.
 It is essentially the same as ``power`` but takes a parameter. Functions called
 during mutations must also return the type ``Result<T, Error>``.
 
-The last function is the overridden dustructor. This is not required but can be nice
+The last function is the overridden destructor. This is not required but can be nice
 if you need to clean up any connections to the subsystem between queries.
 
 In the ``model.rs`` file there are also several other very simple structs which
@@ -244,6 +244,8 @@ Building and Running
 
 The payload service provided in the ``examples`` folder can be compiled by running
 this command ``cargo kubos -c build`` from inside of the Kubos SDK Vagrant box.
+The ``cargo kubos -c build`` command can be used to build any Rust service
+or crate from within the Vagrant box.
 
 The service can then be run by this command ``cargo kubos -c run``. You will want
 to check that port 5000 is forwarded out of your Vagrant box before testing the service.
