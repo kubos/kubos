@@ -1,8 +1,8 @@
 Kubos Changelog
 ===============
 
-Upcoming
---------
+v1.1.0 - Jan 24 2018
+--------------------
 
 - `Added iOBC UART support and demo <http://docs.kubos.co/1.1.0/os-docs/working-with-the-iobc.html#uart>`__
 - `Added iOBC SPI support <http://docs.kubos.co/1.1.0/os-docs/working-with-the-iobc.html#spi>`__
