@@ -12,13 +12,13 @@ The general naming scheme for products is "Kubos {component}". Note that there i
 
 The component should be capitalized like a normal proper noun. First
 letter capitalized if the component is a word, all letters capitalized
-if the component is an initialism. For example: 
+if the component is an initialism. For example:
 
 - Kubos Linux
-- Kubos SDK 
-- Kubos CLI 
+- Kubos SDK
+- Kubos CLI
 
-KubOS (note the capitalization) refers to the entire system, not a specific component. 
+KubOS (note the capitalization) refers to the entire system, not a specific component.
 
 Component Names
 ###############
@@ -27,9 +27,9 @@ Components within Kubos breakdown as follows:
 
 - API - a statically linked library
 - Service - A persistent process that is used to interact with the system. These typically utilize APIs.
-- Application - Makes decisions and uses the services. 
+- Application - Makes decisions and uses the services.
 
-Components added to the system should be referred to/labeled accordingly. See the :doc:`Architecture Overview <../architecture-overview>` document for more information on each component's roll. 
+Components added to the system should be referred to/labeled accordingly. See the :doc:`Architecture Overview <../architecture-overview>` document for more information on each component's roll.
 
 File Naming
 ###########
@@ -398,7 +398,7 @@ instruction lines.
         {
             ret = ERROR_CODE;
         }
-        
+
         return ret;
     }
 
@@ -475,6 +475,17 @@ automatically format your code to conform with the Python PEP8 standard.
 -  `Autopep8 for Atom <https://atom.io/packages/python-autopep8>`__
 -  `Autopep8 for Visual
    Studio <https://marketplace.visualstudio.com/items?itemName=himanoa.Python-autopep8>`__
+
+
+Rust Standards
+--------------
+
+The `Rust code formatting RFCs <https://github.com/rust-lang-nursery/fmt-rfcs>`__
+are our preferred source for Rust styling.
+
+`rustfmt <https://github.com/rust-lang-nursery/rustfmt>`__ is our preferred tool
+for formatting code and enforcing these standards. It comes included in our
+SDK's Vagrant box.
 
 Working with External Projects
 ------------------------------
