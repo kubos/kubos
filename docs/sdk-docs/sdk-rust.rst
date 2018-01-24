@@ -1,7 +1,7 @@
 Rust
 ====
 
-The Kubos SDK Vagrant box comes with support for rust, cargo and several
+The Kubos SDK Vagrant box comes with support for Rust, Cargo and several
 helper tools to integrate C-based Kubos libraries with Rust projects.
 
 .. note::
@@ -9,10 +9,18 @@ helper tools to integrate C-based Kubos libraries with Rust projects.
    All of the following instructions are assumed to be run inside of the
    Kubos SDK Vagrant environment.
 
+Cargo-Kubos
+-----------
+
+A special Kubos SDKtool has been created for build interoperability between
+Rust projects and C projects: `cargo kubos`. This tool allows Rust projects
+to correctly compile against existing C libraries and also provides
+cross-compiler compatibility for existing Kubos hardware targets.
+
 New Project
 -----------
 
-A new rust project can be created by running either of the following commands:
+A new Rust project can be created by running either of the following commands:
 
 `Executable project`::
 
@@ -28,17 +36,17 @@ Cargo will create the project folder and a basic folder structure.
 Compiling
 ---------
 
-Compiling a rust project is done from within the project's folder. The command is::
+Compiling a Rust project is done from within the project's folder. The command is::
 
   cargo kubos -c build
 
-Running this command as-is will compile the current rust project with the
+Running this command as-is will compile the current Rust project with the
 native linux compiler.
 
 Running
 -------
 
-Running a local rust project must also be done from within the project's folder.
+Running a local Rust project must also be done from within the project's folder.
 The command to run an executable project is::
 
   cargo kubos -c run
@@ -53,7 +61,7 @@ Cross-compiling
 The Kubos SDK supports cross-compiling Rust projects through the ``cargo kubos`` tool.
 The syntax for cross-compiling is::
 
-  cargo kubos -c build -t target
+  cargo kubos -c build -t [target]
 
 The following targets are currently supported:
 
@@ -73,10 +81,10 @@ Flashing Rust projects is currently done using the ``kubos-cli`` tool. It is a b
 of a process laid out in the following steps:
 
 0. Make sure the target hardware is attached to your computer via serial cable.
-1. Cross-compile the rust project for the desired target.
+1. Cross-compile the Rust project for the desired target.
 2. Navigate to an existing example kubos module like ``kubos-linux-example``.
 3. Run ``kubos linux -a``.
-4. Run ``kubos -t target build`` using the same target you cross-compiled with.
+4. Run ``kubos -t [target] build`` using the same target you cross-compiled with.
 5. Run ``kubos flash $(find `pwd`/rel/path/to/project -name project_name -type f)``.
    It is important here that you put the relative path to your rust project
    after the ```pwd```. Another option is ``kubos flash /absolute/path/to/rust/binary``.
