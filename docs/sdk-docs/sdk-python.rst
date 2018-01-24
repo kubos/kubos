@@ -26,3 +26,16 @@ There are currently two ways to add Python programs to Kubos Linux:
    3. Run ``kubos -t target build`` using the same target you cross-compiled with.
    4. Run ``kubos flash /absolute/path/to/python/file``. You must use the absolute
       path to the Python file you'd like to flash. Relative paths will not work.
+
+
+Running on Target
+-----------------
+
+The following steps will allow you to run Python files which have been flashed
+to a Linux target:
+
+1. Run ``minicom kubos`` from inside of the Vagrant box.
+2. Enter the username ``kubos`` and the password ``Kubos123``.
+3. Navigate to the folder ``/home/system/usr/local/bin``.
+4. This folder is the default destination for flashed files. Your
+   Python files should be here. You can now run them with ``python file.py``.

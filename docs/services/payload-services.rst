@@ -10,6 +10,9 @@ The Kubos SDK includes an example payload service written in both Python
 and Rust. Here we will discuss the example Python-based payload service, its
 different pieces and how to construct a custom payload service.
 
+The current guide for working with Python within the Kubos SDK can be
+found :doc:`here <../sdk-docs/sdk-python>`.
+
 Python Service
 ==============
 

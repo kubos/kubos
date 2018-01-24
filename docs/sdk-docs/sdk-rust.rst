@@ -64,6 +64,11 @@ The following targets are currently supported:
 Flashing
 --------
 
+.. note::
+
+   The addition of Rust to the Kubos SDK is pretty recent and SDK tooling is
+   currently undergoing revision to make the flashing process smoother!
+
 Flashing Rust projects is currently done using the ``kubos-cli`` tool. It is a bit
 of a process laid out in the following steps:
 
@@ -82,3 +87,16 @@ of a process laid out in the following steps:
 
    The current Kubos Rust SDK only supports cross-compiling and flashing to the
    BeagleboneBlack and Pumpkin MBM2. Support for the ISIS iOBC coming soon!
+
+
+Running on Target
+-----------------
+
+The following steps will allow you to run Rust binaries which have been flashed
+to a Linux target:
+
+1. Run ``minicom kubos`` from inside of the Vagrant box.
+2. Enter the username ``kubos`` and the password ``Kubos123``.
+3. Navigate to the folder ``/home/system/usr/local/bin``.
+4. This folder is the default destination for flashed files. Your binaries should
+   be here. You can now run them with ``./binary``.
