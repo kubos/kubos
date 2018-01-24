@@ -4,27 +4,28 @@ Kubos Changelog
 Upcoming
 --------
 
-**TODO:** Verify/fix the doc links
+- `Added iOBC UART support and demo <http://docs.kubos.co/1.1.0/os-docs/working-with-the-iobc.html#uart>`__
+- `Added iOBC SPI support <http://docs.kubos.co/1.1.0/os-docs/working-with-the-iobc.html#spi>`__
 
-- `Added iOBC UART support and demo <http://docs.kubos.co/working-with-the-iobc.html#uart>`__
-- `Added iOBC SPI support <http://docs.kubos.co/working-with-the-iobc.html#spi>`__
+- `Added Ethernet support for MBM2/BBB <http://docs.kubos.co/1.1.0/os-docs/working-with-the-bbb.html#ethernet>`__
 
-- `Added Ethernet support for MBM2/BBB <http://docs.kubos.co/working-with-the-bbb.html#ethernet>`__
+- `Added generic radio API <http://docs.kubos.co/1.1.0/apis/device-api/radio.html>`__
+- `Added generic ADCS API <http://docs.kubos.co/lastest/apis/device-api/adcs.html>`__
 
-- `Added generic radio API <http://docs.kubos.co/device-api/radio.html>`__
-- `Added generic ADCS API <http://docs.kubos.co/device-api/adcs.html>`__
+- `Added an I2C HAL for Linux <http://docs.kubos.co/lastest/apis/kubos-hal/i2c.html>`__
 
-- `Added an I2C HAL for Linux <link>`
-
-- `Added Python-based example subsystem handler <link>`__
-- `Added Rust-based example subsystem handler <link>`__
-- `Added 'cargo kubos' subcommand for Cargo-->Yotta integration <link>`__
+- Decided on using GraphQL, Rust, and Python for services and applications
+- `Added Python-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/python-service>`__
+- `Added Rust-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/rust-handler>`__
+- `Added 'cargo kubos' subcommand for Cargo-->Yotta integration <https://github.com/kubos/kubos/tree/1.1.0/cargo-kubos>`__
 
 - Upgraded to BuildRoot LTS 2017.2.8
-- `Documented Windows PowerShell v3+ requirement <link>`__
+- `Documented Windows PowerShell v3+ requirement <http://docs.kubos.co/1.1.0/installation-docs/sdk-installing.html#install-windows-powershell-v3-windows-7-sp1-only>`__
 
+- `Updated architecture documentation <http://docs.kubos.co/1.1.0/architecture-overview.html>`__
 - Refactored the repo to remove deprecated code
 - Re-organized the docs to have a more nested structure
+- `Updated naming conventions and coding standards <http://docs.kubos.co/1.1.0/dev-docs/kubos-standards.html>`__
 
 v1.0.1 - Aug 4 2017
 -------------------
