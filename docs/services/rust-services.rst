@@ -1,6 +1,6 @@
-************
-Rust Service
-************
+*************
+Rust Services
+*************
 
 This is a quick overview of the payload service written in Rust.
 
@@ -10,9 +10,9 @@ Libraries
 This payload service and future rust-based services will be written using
 the following external crates:
 
-- `Juniper <https://github.com/graphql-rust/juniper>`_ - GraphQL server library
+- `Juniper <https://github.com/graphql-rust/juniper>`__ - GraphQL server library
 
-- `Iron <http://ironframework.io/>`_ - HTTP library
+- `Iron <http://ironframework.io/>`__ - HTTP library
 
 
 The ``Cargo.toml`` in the example payload service gives a good list of crate
@@ -23,29 +23,29 @@ Example Source
 ==============
 
 The example rust service is found in the
-`examples <https://github.com/kubos/kubos/tree/master/examples>`_ folder in the
-`kubos/kubos <https://github.com/kubos/kubos>`_ repo. There is a `rust-service <https://github.com/kubos/kubos/tree/master/examples/rust-service>`_
+`examples <https://github.com/kubos/kubos/tree/master/examples>`__ folder in the
+`kubos/kubos <https://github.com/kubos/kubos>`__ repo. There is a `rust-service <https://github.com/kubos/kubos/tree/master/examples/rust-service>`__
 folder which contains two folders:
 
-``extern-lib`` - This is an example rust crate showing how to link in external C source.
+ - ``extern-lib`` - This is an example rust crate showing how to link in external C source.
 
-``service`` - This crate contains the actual rust service.
+ - ``service`` - This crate contains the actual rust service.
 
 The contents of the ``service`` folder:
 
-``Cargo.lock`` - Cargo `lock <https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html>`_ file
+ - ``Cargo.lock`` - Cargo `lock <https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html>`__ file
 
-``Cargo.toml`` - Cargo `manifest <https://doc.rust-lang.org/cargo/reference/manifest.html>`_ file
+ - ``Cargo.toml`` - Cargo `manifest <https://doc.rust-lang.org/cargo/reference/manifest.html>`__ file
 
-``src`` - Contains the actual Rust source.
+ - ``src`` - Contains the actual Rust source.
 
 The contents of the ``service/src`` folder:
 
-``main.rs`` - Contains the main/setup function of the service. May need minor customization but not much.
+ - ``main.rs`` - Contains the main/setup function of the service. May need minor customization but not much.
 
-``model.rs`` - Describes the hardware model exposed to GraphQL and contains calls down to lowel-level APIs.
+ - ``model.rs`` - Describes the hardware model exposed to GraphQL and contains calls down to lowel-level APIs.
 
-``schema.rs`` - Contains the actual GraphQL schema models used to generate the GraphQL endpoint.
+ - ``schema.rs`` - Contains the actual GraphQL schema models used to generate the GraphQL endpoint.
 
 We will now take a closer look at ``model.rs`` and ``schema.rs`` and break down
 the pieces required to expose hardware APIs through the service.
@@ -61,8 +61,8 @@ file you will see several ``struct`` declarations. We'll start with the ``Subsys
 
   pub struct Subsystem;
 
-Here we have a struct which is used to model a Subsystem. In this example the struct
-is given no member variables for persistence, all data is obtained through function
+Here we have a struct which is used to model a subsystem. In this example the struct
+is given no member variables for persistence. All data is obtained through function
 calls for real-time results.
 
 Here is an abbreviated set of functions implemented for the ``Subsystem`` struct:
@@ -84,7 +84,7 @@ Here is an abbreviated set of functions implemented for the ``Subsystem`` struct
 	    /// Code querying for new power value
 	    /// could be placed here
 	    pub fn power(&self) -> Result<bool, Error> {
-		println!("getting power");
+		println!("Getting power");
 		// Low level query here
 		Ok(true)
 	    }
@@ -117,7 +117,7 @@ Here is an abbreviated set of functions implemented for the ``Subsystem`` struct
 	}
 
 The ``new`` function is the ``Subsystem`` constructor. It can be used to establish
-a connection with the hardware if neccesary. This function is called once per
+a connection with the hardware if necessary. This function is called once per
 query or mutation and produces the struct instance used.
 
 The ``power`` function is an example of a function called during a query. These
@@ -140,7 +140,7 @@ schema.rs
 =========
 
 Now we will take a look inside of ``schema.rs``.  This file contains the query
-and mutation models used by `juniper <http://juniper.graphql.rs/>`_ to create
+and mutation models used by `Juniper <http://juniper.graphql.rs/>`__ to create
 our GraphQL endpoints.
 
 Queries
@@ -158,15 +158,12 @@ struct needed in the ``schema.rs`` file.
         field subsystem(&executor) -> FieldResult<&Subsystem>
             as "Subsystem query"
         {
-            // I don't know if we'll ever return anything other
-            // than Ok here, as we are just returning back essentially
-            // a static struct with interesting function fields
             Ok(executor.context().get_subsystem())
         }
     });
 
 
-Inside of the `graphql_object macro <http://juniper.graphql.rs/types/objects/complex_fields.html>`_
+Inside of the `graphql_object macro <http://juniper.graphql.rs/types/objects/complex_fields.html>`__
 we define each top-level query field. In this case there is just the one ``subsystem`` field.
 In order to allow GraphQL access to the member functions (or variables) of the ``Subsystem``
 struct we also apply the ``graphql_object`` macro to it:
@@ -243,11 +240,14 @@ Building and Running
 ====================
 
 The payload service provided in the ``examples`` folder can be compiled by running
-this command ``cargo kubos -c build`` from inside of the Kubos SDK Vagrant box.
+this command ``cargo kubos -c build``. This command must be run from
+within the folder ``examples/rust-service/service``. It is also suggested that
+this command be run from inside of the Kubos SDK Vagrant box.
 The ``cargo kubos -c build`` command can be used to build any Rust service
 or crate from within the Vagrant box.
 
-The service can then be run by this command ``cargo kubos -c run``. You will want
+The service can then be run by this command ``cargo kubos -c run``. This command
+must also be run from within the folder ``examples/rust-service/service``. You will want
 to check that port 5000 is forwarded out of your Vagrant box before testing the service.
 Once it is up and running you can navigate to http://127.0.0.1:5000/graphiql for
 the interactive GraphiQL interface.
