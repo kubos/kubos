@@ -17,3 +17,5 @@ deployment:
     branch: master
     commands:
       - ./deploy.sh
+      - docker run -t -v $PWD:$PWD --workdir $PWD kubos/kubos-dev:latest sh prep_docs.sh
+      - ./deploy_docs.sh
