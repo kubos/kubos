@@ -14,7 +14,8 @@ The API categories are:
 - RTC (upcoming)
 
 .. toctree::
-    :caption: API Framworks
+    :caption: API Frameworks
     :hidden:
     
     General Hardware <general-hardware>
+    Error Reporting <errors>

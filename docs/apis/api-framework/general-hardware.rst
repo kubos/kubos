@@ -4,6 +4,7 @@ General Hardware
 This is what is generally expected for any piece of hardware integrated, but doesn't fit into a predefined category. This should be augmented with commands/telemetry queries for the unit that are frequently used. 
 
 Commands:
+
 - No-op
 - Power
   - On, Off, Reset
@@ -17,6 +18,7 @@ Commands:
   - This is used to access any commands not implemented in the API
 
 Telemetry:
+
 - Power
   - on/off
   - Uptime
@@ -27,4 +29,4 @@ Telemetry:
 - Debug Telemetry
   - Telemetry items that are only used when debugging issues encountered with the unit, and are normally uninteresting as long as the unit is operating as designed
 
-Anything not implemented returns a :doc:`standard error code`. 
+Anything not implemented returns a :doc:`standard error code <error-reporting>`. 
