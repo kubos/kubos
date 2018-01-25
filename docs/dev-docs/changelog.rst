@@ -10,13 +10,13 @@ v1.1.0 - Jan 24 2018
 - `Added Ethernet support for MBM2/BBB <http://docs.kubos.co/1.1.0/os-docs/working-with-the-bbb.html#ethernet>`__
 
 - `Added generic radio API <http://docs.kubos.co/1.1.0/apis/device-api/radio.html>`__
-- `Added generic ADCS API <http://docs.kubos.co/lastest/apis/device-api/adcs.html>`__
+- `Added generic ADCS API <http://docs.kubos.co/1.1.0/apis/device-api/adcs.html>`__
 
-- `Added an I2C HAL for Linux <http://docs.kubos.co/lastest/apis/kubos-hal/i2c.html>`__
+- `Added an I2C HAL for Linux <http://docs.kubos.co/1.1.0/apis/kubos-hal/i2c.html>`__
 
 - Decided on using GraphQL, Rust, and Python for services and applications
 - `Added Python-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/python-service>`__
-- `Added Rust-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/rust-handler>`__
+- `Added Rust-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/rust-service>`__
 - `Added 'cargo kubos' subcommand for Cargo-->Yotta integration <https://github.com/kubos/kubos/tree/1.1.0/cargo-kubos>`__
 
 - Upgraded to BuildRoot LTS 2017.2.8
