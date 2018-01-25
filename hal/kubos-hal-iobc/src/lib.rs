@@ -114,13 +114,28 @@ fn convert_raw_version(raw: ffi::supervisor_version) -> SupervisorVersion {
 
 /// Interface for retrieving iOBC supervisor version data
 pub fn supervisor_version() -> Result<SupervisorVersion, String> {
+    /*
     let mut version: ffi::supervisor_version = unsafe { mem::uninitialized() };
     let version_result = unsafe { ffi::supervisor_get_version(&mut version) };
     if !version_result {
         Err(String::from("Problem retrieving supervisor version"))
     } else {
         Ok(convert_raw_version(version))
-    }
+    }*/
+    Ok(SupervisorVersion {
+        dummy: 1,
+        spi_command_status: 2,
+        index_of_subsystem: 3,
+        major_version: 4,
+        minor_version: 5,
+        patch_version: 6,
+        git_head_version: 7,
+        serial_number: 8,
+        compile_information: vec![9; ffi::LENGTH_COMPILE_INFORMATION],
+        clock_speed: 10,
+        code_type: 11,
+        crc: 12
+    })
 }
 
 /// Converts raw bytes from iOBC into SupervisorHousekeeping
