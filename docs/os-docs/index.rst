@@ -39,6 +39,8 @@ System Guides
     Working with the iOBC <working-with-the-iobc>
     Working with the Pumpkin MBM2 <working-with-the-mbm2>
     
+.. _sysadmin:
+    
 SysAdmin Docs
 -------------
     
