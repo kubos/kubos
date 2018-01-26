@@ -243,8 +243,6 @@ For example::
 Then, to turn the signal off::
 
     $ echo 0 > enable
-    
-
 
 SPI
 ~~~
