@@ -37,7 +37,7 @@ impl Context {
 
 /// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
-    description: "Handler subsystem"
+    description: "Service subsystem"
 
     field power() -> FieldResult<bool> as "Power state of subsystem" {
         Ok(self.power()?)

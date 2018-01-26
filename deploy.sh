@@ -1,5 +1,8 @@
 #! /bin/bash
 
+echo "Fetching latest tags"
+git fetch origin --tags
+
 latest_tag=`git tag --sort=-creatordate | head -n 1`
 new_build_field="+1"
 
