@@ -14,8 +14,7 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate juniper;
+#[macro_use] extern crate juniper;
 extern crate juniper_iron;
 extern crate iron;
 extern crate mount;

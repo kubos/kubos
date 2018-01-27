@@ -16,70 +16,71 @@
 
 extern crate kubos_hal_iobc;
 
-use std::io::{Error, ErrorKind};
-
 // Why create a new SupervisorVersion struct  which just holds a SupervisorVersion?
 // Because of E0117 (https://doc.rust-lang.org/error-index.html#E0117)
 // Basically we can't implement the (external) GraphQL traits on
 // kubos_hal_iobc::SupervisorVersion because it is an external type
 pub struct SupervisorVersion {
-    version : kubos_hal_iobc::SupervisorVersion
+    pub version : kubos_hal_iobc::SupervisorVersion
 }
 
 // The GraphQL spec only defines an Integer and Float type
 // These wrapper functions convert our base types (u8 mostly)
 // into the more compatible i32
-impl SupervisorVersion {
+
+
+
+pub struct SupervisorEnableStatus {
+    pub raw : kubos_hal_iobc::SupervisorEnableStatus
+}
+
+pub struct SupervisorHousekeeping {
+    pub raw : kubos_hal_iobc::SupervisorHousekeeping
+}
+
+/*
+impl SupervisorHousekeeping {
     pub fn dummy(&self) -> Result<i32, Error> {
-        Ok(self.version.dummy as i32)
+        Ok(self.housekeeping.dummy as i32)
     }
 
     pub fn spi_command_status(&self) -> Result<i32, Error> {
-        Ok(self.version.spi_command_status as i32)
+        Ok(self.housekeeping.spi_command_status as i32)
     }
 
-    pub fn index_of_subsystem(&self) -> Result<i32, Error> {
-        Ok(self.version.index_of_subsystem as i32)
+
+    pub fn enable_status(&self) -> Result<SupervisorEnableStatus, Error> {
+        Ok(self.housekeeping.enable_status)
     }
 
-    pub fn major_version(&self) -> Result<i32, Error> {
-        Ok(self.version.major_version as i32)
+
+    pub fn supervisor_uptime(&self) -> Result<i32, Error> {
+        Ok(self.housekeeping.supervisor_uptime as i32)
     }
 
-    pub fn minor_version(&self) -> Result<i32, Error> {
-        Ok(self.version.minor_version as i32)
+    pub fn iobc_uptime(&self) -> Result<i32, Error> {
+        Ok(self.housekeeping.iobc_uptime as i32)
     }
 
-    pub fn patch_version(&self) -> Result<i32, Error> {
-        Ok(self.version.patch_version as i32)
+    pub fn iobc_reset_count(&self) -> Result<i32, Error> {
+        Ok(self.housekeeping.iobc_reset_count as i32)
     }
 
-    pub fn git_head_version(&self) -> Result<i32, Error> {
-        Ok(self.version.git_head_version as i32)
+    pub fn adc_data(&self) -> Result<Vec<i32>, Error> {
+        Ok(self.housekeeping.adc_data.iter()
+           .map(|x| *x as i32)
+           .collect::<Vec<i32>>())
     }
 
-    pub fn serial_number(&self) -> Result<i32, Error> {
-        Ok(self.version.serial_number as i32)
+    pub fn adc_update_flag(&self) -> Result<i32, Error> {
+        Ok(self.housekeeping.adc_update_flag as i32)
     }
 
-    pub fn compile_information(&self) -> Result<Vec<i32>, Error> {
-        Ok(self.version.compile_information.iter()
-            .map(|x| *x as i32)
-            .collect::<Vec<i32>>())
+    pub fn crc8(&self) -> Result<i32, Error> {
+        Ok(self.housekeeping.crc8 as i32)
     }
+}*/
 
-    pub fn clock_speed(&self) -> Result<i32, Error> {
-        Ok(self.version.clock_speed as i32)
-    }
-
-    pub fn code_type(&self) -> Result<i32, Error> {
-        Ok(self.version.code_type as i32)
-    }
-
-    pub fn crc(&self) -> Result<i32, Error> {
-        Ok(self.version.crc as i32)
-    }
-}
 
 /// Model for handler's subsystem
 pub struct Supervisor;
@@ -92,6 +93,13 @@ impl Supervisor {
     pub fn version(&self) -> Result<SupervisorVersion, String> {
         match kubos_hal_iobc::supervisor_version() {
             Ok(v) => Ok(SupervisorVersion { version: v }),
+            Err(e) => Err(e)
+        }
+    }
+
+    pub fn housekeeping(&self) -> Result<SupervisorHousekeeping, String> {
+        match kubos_hal_iobc::supervisor_housekeeping() {
+            Ok(h) => Ok(SupervisorHousekeeping { raw : h}),
             Err(e) => Err(e)
         }
     }
