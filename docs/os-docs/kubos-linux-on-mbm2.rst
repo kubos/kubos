@@ -175,6 +175,7 @@ Follow the :ref:`upgrade-creation` instructions in order to create a Kubos Packa
 
 Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.img`` script. 
 This will create a new SD card image, `aux-sd.img`, with two partitions:
+
 - An upgrade partition containing `kpack-base.itb`
 - A user data partition
 
