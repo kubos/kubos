@@ -209,7 +209,6 @@ graphql_object!(SupervisorHousekeeping: Context as "SupervisorHousekeeping" |&se
     }
 });
 
-
 /// GraphQL model for Subsystem
 graphql_object!(Supervisor: Context as "Supervisor" |&self| {
     description: "iOBC Supervisor"

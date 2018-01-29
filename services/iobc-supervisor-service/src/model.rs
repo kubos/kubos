@@ -21,21 +21,19 @@ extern crate kubos_hal_iobc;
 // Basically we can't implement the (external) GraphQL traits on
 // kubos_hal_iobc::SupervisorVersion because it is an external type
 pub struct SupervisorVersion {
-    pub version : kubos_hal_iobc::SupervisorVersion
+    pub version: kubos_hal_iobc::SupervisorVersion,
 }
 
 // The GraphQL spec only defines an Integer and Float type
 // These wrapper functions convert our base types (u8 mostly)
 // into the more compatible i32
 
-
-
 pub struct SupervisorEnableStatus {
-    pub raw : kubos_hal_iobc::SupervisorEnableStatus
+    pub raw: kubos_hal_iobc::SupervisorEnableStatus,
 }
 
 pub struct SupervisorHousekeeping {
-    pub raw : kubos_hal_iobc::SupervisorHousekeeping
+    pub raw: kubos_hal_iobc::SupervisorHousekeeping,
 }
 
 /*
@@ -81,7 +79,6 @@ impl SupervisorHousekeeping {
     }
 }*/
 
-
 /// Model for handler's subsystem
 pub struct Supervisor;
 
@@ -93,14 +90,14 @@ impl Supervisor {
     pub fn version(&self) -> Result<SupervisorVersion, String> {
         match kubos_hal_iobc::supervisor_version() {
             Ok(v) => Ok(SupervisorVersion { version: v }),
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
     }
 
     pub fn housekeeping(&self) -> Result<SupervisorHousekeeping, String> {
         match kubos_hal_iobc::supervisor_housekeeping() {
-            Ok(h) => Ok(SupervisorHousekeeping { raw : h}),
-            Err(e) => Err(e)
+            Ok(h) => Ok(SupervisorHousekeeping { raw: h }),
+            Err(e) => Err(e),
         }
     }
 }

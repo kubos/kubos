@@ -14,11 +14,12 @@
 // limitations under the License.
 //
 
-#[macro_use] extern crate juniper;
-extern crate juniper_iron;
 extern crate iron;
-extern crate mount;
+#[macro_use]
+extern crate juniper;
+extern crate juniper_iron;
 extern crate logger;
+extern crate mount;
 
 use iron::prelude::*;
 use juniper_iron::{GraphQLHandler, GraphiQLHandler};
@@ -34,7 +35,9 @@ use std::env;
 /// Since this function is called once for every request, it will fetch new
 /// data with each request.
 fn context_factory(_: &mut Request) -> schema::Context {
-    schema::Context { supervisor: model::Supervisor::new() }
+    schema::Context {
+        supervisor: model::Supervisor::new(),
+    }
 }
 
 fn main() {
