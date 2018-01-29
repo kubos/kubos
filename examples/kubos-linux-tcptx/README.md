@@ -1,4 +1,4 @@
-# TCP TX with KubOS Linux
+# TCP TX with Kubos Linux
 
 This is a demo program to test sending TCP data over a valid IP connection (the ethernet port for the Pumpkin MBM2 and Beaglebone Black targets)
 

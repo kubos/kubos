@@ -1,7 +1,7 @@
-KubOS Linux HAL Documentation
+Kubos Linux HAL Documentation
 =============================
 
-The ``kubos-hal-linux`` module is the Kubos HAL implementation for devices running KubOS Linux.
+The ``kubos-hal-linux`` module is the Kubos HAL implementation for devices running Kubos Linux.
 This module sits as a proxy layer between the Kubos HAL interface the `Linux sysfs <https://en.wikipedia.org/wiki/Sysfs>`__.
 
 .. toctree::

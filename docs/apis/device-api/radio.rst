@@ -27,7 +27,7 @@ Radio Initialization and Termination
 ------------------------------------
 
 In order for a Kubos project to communicate with a radio, the ``k_radio_init`` function should be called. This opens the correct
-underlying KubOS Linux device file. The function should return ``RADIO_OK`` if it completed successfully.
+underlying Kubos Linux device file. The function should return ``RADIO_OK`` if it completed successfully.
 
 Similarly, before the project finishes executing, the ``k_radio_terminate`` function should be called to perform the appropriate
 system cleanup.

@@ -10,31 +10,13 @@ echo "PROJECT_NUMBER={1}";
 echo "OUTPUT_DIRECTORY={2}";
 echo "XML_OUTPUT=.";) | doxygen -"""
 
-# DOCS_DIRS = [
-# "kubos-core",
-# "libcsp",
-# "freertos/os",
-# "services/telemetry/telemetry",
-# "services/telemetry/telemetry-linux",
-# "telemetry-aggregator",
-# "telemetry-storage"]
-
 DOCS_DIRS = [
     "adcs/adcs-api",
-    "eps/eps-api",
-    "evented-control",
-    "ipc",
-    "freertos/os",
     "libcsp",
-    "kubos-core",
     "hal/kubos-hal",
     "hal/kubos-hal-iobc",
     "hal/kubos-hal-linux",
-    "hal/kubos-hal-msp430f5529",
-    "hal/kubos-hal-stm32f4",
-    "radio/radio-api",
-    "services/telemetry/telemetry",
-    "services/telemetry/telemetry-linux"
+    "radio/radio-api"
 ]
 
 def gendocs_xml(dir, doxyfile, version, doc_dir):
