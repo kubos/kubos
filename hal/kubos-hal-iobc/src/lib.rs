@@ -39,7 +39,7 @@ pub struct SupervisorVersion {
 
 /// Structure for individual enable statuses
 /// Used in SupervisorHousekeeping
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct SupervisorEnableStatus {
     pub power_obc: u8,
     pub power_rtc: u8,
@@ -117,28 +117,13 @@ fn convert_raw_version(raw: ffi::supervisor_version) -> SupervisorVersion {
 
 /// Interface for retrieving iOBC supervisor version data
 pub fn supervisor_version() -> Result<SupervisorVersion, String> {
-    /*
     let mut version: ffi::supervisor_version = unsafe { mem::uninitialized() };
     let version_result = unsafe { ffi::supervisor_get_version(&mut version) };
     if !version_result {
         Err(String::from("Problem retrieving supervisor version"))
     } else {
         Ok(convert_raw_version(version))
-    }*/
-    Ok(SupervisorVersion {
-        dummy: 1,
-        spi_command_status: 2,
-        index_of_subsystem: 3,
-        major_version: 4,
-        minor_version: 5,
-        patch_version: 6,
-        git_head_version: 7,
-        serial_number: 8,
-        compile_information: vec![9; ffi::LENGTH_COMPILE_INFORMATION],
-        clock_speed: 10,
-        code_type: 11,
-        crc: 12
-    })
+    }
 }
 
 /// Converts raw bytes from iOBC into SupervisorHousekeeping
@@ -184,7 +169,6 @@ fn convert_raw_housekeeping(raw: ffi::supervisor_housekeeping) -> SupervisorHous
 
 /// Interface for fetching iOBC supervisor housekeeping data
 pub fn supervisor_housekeeping() -> Result<SupervisorHousekeeping, String> {
-    /*
     let mut raw: ffi::supervisor_housekeeping = unsafe { mem::uninitialized() };
     let result = unsafe { ffi::supervisor_get_housekeeping(&mut raw) };
 
@@ -192,24 +176,7 @@ pub fn supervisor_housekeeping() -> Result<SupervisorHousekeeping, String> {
         Err(String::from("Problem retrieving supervisor housekeeping"))
     } else {
         Ok(convert_raw_housekeeping(raw))
-}*/
-    Ok(SupervisorHousekeeping {
-        dummy: 1,
-        spi_command_status: 2,
-        enable_status: SupervisorEnableStatus {
-            power_obc: 3,
-            power_rtc: 4,
-            supervisor_mode: 5,
-            busy_rtc: 6,
-            power_off_rtc: 7
-        },
-        supervisor_uptime: 8,
-        iobc_uptime: 9,
-        iobc_reset_count: 10,
-        adc_data: vec![11; ffi::SUPERVISOR_NUMBER_OF_ADC_CHANNELS],
-        adc_update_flag: 12,
-        crc8: 13
-    })
+    }
 }
 
 #[cfg(test)]
