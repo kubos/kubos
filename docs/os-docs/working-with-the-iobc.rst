@@ -58,36 +58,37 @@ peripheral devices. Currently, users should interact with these devices
 using the standard Linux functions. A Kubos HAL will be added in the
 future for the iOBC.
 
-UART
-~~~~
-
-The iOBC has 2 UART ports available for use in varying capacities:
-
-+--------------+--------+--------+---------+---------+
-| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
-+==============+========+========+=========+=========+
-| /dev/ttyS1   | TX0    | RX0    |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS3   | TX2    | RX2    | RTS2    | CTS2    |
-+--------------+--------+--------+---------+---------+
-
-Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
-
-`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
-
-I2C
+ADC
 ~~~
 
-`I2C Standards
-Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
+The iOBC has four analog input pins available:
 
-Kubos Linux is currently configured to support the I2C standard-mode
-speed of 100kHz.
++------+-------+
+| iOBC | Linux |
++======+=======+
+| AIN4 | 0     |
++------+-------+
+| AIN5 | 1     |
++------+-------+
+| AIN6 | 2     |
++------+-------+
+| AIN7 | 3     |
++------+-------+
 
-The I2C bus is available through the Kubos HAL as ``K_I2C1``.
+The pins are available through the Linux device ``/sys/bus/iio/devices/iio\:device0/``.
 
-For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
-:doc:`../apis/kubos-hal/i2c_api` documents.
+A single raw output value can be read from each of the pins via
+``/sys/bus/iio/devices/iio\:device0/in_voltage{n}_raw``, where `{n}` corresponds to the
+Linux AIN number.
+
+This raw value can then be converted to microvolts by multiplying it by the value
+found in ``/sys/bus/iio/devices/iio\:device0/in_voltage_scale``.
+
+More information about the capture and use of ADC can be found in 
+`this guide from Atmel <https://www.at91.com/linux4sam/bin/view/Linux4SAM/IioAdcDriver>`__.
+
+An `ADC example <http://github.com/kubos/kubos/tree/master/examples/adc-thermistor>`__ is 
+also available for reference in the Kubos repo.
 
 GPIO
 ~~~~
@@ -184,7 +185,21 @@ direction and value.
     $ echo 1 > /sys/class/gpio/gpio19/value
 
     Get GPIO10's value:
-    $ cat /sys/class/gpio/gpio58/value
+    $ cat /sys/class/gpio/gpio58/value  
+    
+I2C
+~~~
+
+`I2C Standards
+Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
+
+Kubos Linux is currently configured to support the I2C standard-mode
+speed of 100kHz.
+
+The I2C bus is available through the Kubos HAL as ``K_I2C1``.
+
+For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
+:doc:`../apis/kubos-hal/i2c_api` documents.
 
 SPI
 ~~~
@@ -258,6 +273,23 @@ An example user program to read a value might look like this:
     value = rx[1];
 
     close(fd);
+    
+UART
+~~~~
+
+The iOBC has 2 UART ports available for use in varying capacities:
+
++--------------+--------+--------+---------+---------+
+| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
++==============+========+========+=========+=========+
+| /dev/ttyS1   | TX0    | RX0    |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS3   | TX2    | RX2    | RTS2    | CTS2    |
++--------------+--------+--------+---------+---------+
+
+Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
+
+`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
 
 User Data Partition
 -------------------
