@@ -38,58 +38,63 @@ impl Context {
 /// GraphQL model annotations for SupervisorVersion
 graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     description: "Supervisor Version Information"
+    // The GraphQL spec only defines an Integer and Float type
+    // These wrapper functions convert our base types (u8 mostly)
+    // into the more compatible i32. Same is done for
+    // SupervisorEnableStatus and SupervisorHousekeeping
 
     field dummy() -> FieldResult<i32> as "Dummy bit" {
-        //Ok(self.dummy()?)
-        Ok(i32::from(self.version.dummy))
+        Ok(i32::from(self.raw.dummy))
     }
 
     field spi_command_status() -> FieldResult<i32>
         as "Spi Command Status"
     {
-        Ok(i32::from(self.version.spi_command_status))
+        Ok(i32::from(self.raw.spi_command_status))
     }
 
     field index_of_subsystem() -> FieldResult<i32>
         as "Index of subsystem"
     {
-        Ok(i32::from(self.version.index_of_subsystem))
+        Ok(i32::from(self.raw.index_of_subsystem))
     }
 
     field major_version() -> FieldResult<i32>
         as "Major version"
     {
-        Ok(i32::from(self.version.major_version))
+        Ok(i32::from(self.raw.major_version))
     }
 
     field minor_version() -> FieldResult<i32>
         as "Minor version"
     {
-        Ok(i32::from(self.version.minor_version))
+        Ok(i32::from(self.raw.minor_version))
     }
 
     field patch_version() -> FieldResult<i32>
         as "Patch version"
     {
-        Ok(i32::from(self.version.patch_version))
+        Ok(i32::from(self.raw.patch_version))
     }
 
     field git_head_version() -> FieldResult<i32>
         as "Git head version"
     {
-        Ok(self.version.git_head_version as i32)
+        // There is no i32::from(u32)
+        // So we have to cast like this
+        Ok(self.raw.git_head_version as i32)
     }
 
     field serial_number() -> FieldResult<i32>
         as "Serial number"
     {
-        Ok(i32::from(self.version.serial_number))
+        Ok(i32::from(self.raw.serial_number))
     }
 
     field compile_information() -> FieldResult<Vec<i32>>
         as "Compile information"
     {
-        Ok(self.version.compile_information.iter()
+        Ok(self.raw.compile_information.iter()
            .map(|x| i32::from(*x))
            .collect::<Vec<i32>>())
     }
@@ -97,19 +102,19 @@ graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     field clock_speed() -> FieldResult<i32>
         as "Clock speed"
     {
-        Ok(i32::from(self.version.clock_speed))
+        Ok(i32::from(self.raw.clock_speed))
     }
 
     field code_type() -> FieldResult<i32>
         as "Code type"
     {
-        Ok(i32::from(self.version.code_type))
+        Ok(i32::from(self.raw.code_type))
     }
 
     field crc() -> FieldResult<i32>
         as "CRC"
     {
-        Ok(i32::from(self.version.crc))
+        Ok(i32::from(self.raw.crc))
     }
 });
 
