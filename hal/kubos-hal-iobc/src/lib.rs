@@ -31,7 +31,7 @@ pub struct SupervisorVersion {
     pub patch_version: u8,
     pub git_head_version: u32,
     pub serial_number: u16,
-    pub compile_information: Vec<i8>,
+    pub compile_information: [i8; ffi::LENGTH_COMPILE_INFORMATION],
     pub clock_speed: u8,
     pub code_type: i8,
     pub crc: u8,
@@ -57,7 +57,7 @@ pub struct SupervisorHousekeeping {
     pub supervisor_uptime: u32,
     pub iobc_uptime: u32,
     pub iobc_reset_count: u32,
-    pub adc_data: Vec<u16>,
+    pub adc_data: [u16; ffi::SUPERVISOR_NUMBER_OF_ADC_CHANNELS],
     pub adc_update_flag: u8,
     pub crc8: u8,
 }
@@ -101,10 +101,13 @@ fn convert_raw_version(raw: ffi::supervisor_version) -> SupervisorVersion {
         },
         serial_number: { (raw.0[10] as u16) | (raw.0[11] as u16) << 8 },
         compile_information: {
-            (&raw.0[12..(12 + ffi::LENGTH_COMPILE_INFORMATION)])
-                .iter()
-                .map(|x| *x as i8)
-                .collect::<Vec<i8>>()
+            let mut a = [0; ffi::LENGTH_COMPILE_INFORMATION];
+            for i in 0..a.len() {
+                // 12 is the offset to locate compile_information
+                // in the version data
+                a[i] = raw.0[i + 12] as i8;
+            }
+            a
         },
         clock_speed: raw.0[31] as u8,
         code_type: raw.0[32] as i8,
@@ -151,11 +154,13 @@ fn convert_raw_housekeeping(raw: ffi::supervisor_housekeeping) -> SupervisorHous
         },
         adc_data: {
             // combining bytes into 16-bit uints
-            let mut v = Vec::<u16>::new();
-            for i in 0..(ffi::SUPERVISOR_NUMBER_OF_ADC_CHANNELS) {
-                v.push((raw.0[15 + 2 * i] as u16) | (raw.0[15 + 2 * i + 1] as u16) << 8);
+            let mut a = [0; ffi::SUPERVISOR_NUMBER_OF_ADC_CHANNELS];
+            for i in 0..a.len() {
+                // 15 is the offset to locate the adc data
+                // in the housekeeping data
+                a[i] = (raw.0[15 + 2 * i] as u16) | (raw.0[15 + 2 * i + 1] as u16) << 8;
             }
-            v
+            a
         },
         adc_update_flag: raw.0[35] as u8,
         crc8: raw.0[36] as u8,
