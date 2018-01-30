@@ -43,42 +43,44 @@ graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     // into the more compatible i32. Same is done for
     // SupervisorEnableStatus and SupervisorHousekeeping
 
-    field dummy() -> FieldResult<i32> as "Dummy bit" {
+    field dummy() -> FieldResult<i32>
+        as "Dummy Byte"
+    {
         Ok(i32::from(self.raw.dummy))
     }
 
     field spi_command_status() -> FieldResult<i32>
-        as "Spi Command Status"
+        as "SPI Command Status"
     {
         Ok(i32::from(self.raw.spi_command_status))
     }
 
     field index_of_subsystem() -> FieldResult<i32>
-        as "Index of subsystem"
+        as "Index Of Subsystem"
     {
         Ok(i32::from(self.raw.index_of_subsystem))
     }
 
     field major_version() -> FieldResult<i32>
-        as "Major version"
+        as "Major Version"
     {
         Ok(i32::from(self.raw.major_version))
     }
 
     field minor_version() -> FieldResult<i32>
-        as "Minor version"
+        as "Minor Version"
     {
         Ok(i32::from(self.raw.minor_version))
     }
 
     field patch_version() -> FieldResult<i32>
-        as "Patch version"
+        as "Patch Version"
     {
         Ok(i32::from(self.raw.patch_version))
     }
 
     field git_head_version() -> FieldResult<i32>
-        as "Git head version"
+        as "Git Head Version"
     {
         // There is no i32::from(u32)
         // So we have to cast like this
@@ -86,13 +88,13 @@ graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     }
 
     field serial_number() -> FieldResult<i32>
-        as "Serial number"
+        as "Serial Number"
     {
         Ok(i32::from(self.raw.serial_number))
     }
 
     field compile_information() -> FieldResult<Vec<i32>>
-        as "Compile information"
+        as "Compile Information"
     {
         Ok(self.raw.compile_information.iter()
            .map(|x| i32::from(*x))
@@ -100,13 +102,13 @@ graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     }
 
     field clock_speed() -> FieldResult<i32>
-        as "Clock speed"
+        as "Clock Speed"
     {
         Ok(i32::from(self.raw.clock_speed))
     }
 
     field code_type() -> FieldResult<i32>
-        as "Code type"
+        as "Code Type"
     {
         Ok(i32::from(self.raw.code_type))
     }
@@ -156,7 +158,7 @@ graphql_object!(SupervisorHousekeeping: Context as "SupervisorHousekeeping" |&se
     description: "Supervisor Housekeeping"
 
     field dummy() -> FieldResult<i32>
-        as "Dummy bit"
+        as "Dummy Byte"
     {
         Ok(i32::from(self.raw.dummy))
     }
@@ -219,7 +221,7 @@ graphql_object!(Supervisor: Context as "Supervisor" |&self| {
     description: "iOBC Supervisor"
 
     field version() -> FieldResult<SupervisorVersion>
-        as "Supervisor version information"
+        as "Supervisor Version Information"
     {
         Ok(self.version()?)
     }
@@ -236,7 +238,7 @@ pub struct QueryRoot;
 /// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
     field supervisor(&executor) -> FieldResult<&Supervisor>
-        as "Supervisor query"
+        as "Supervisor Query"
     {
         Ok(executor.context().get_supervisor())
     }
@@ -248,19 +250,19 @@ pub struct MutationRoot;
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
     field reset(&executor) -> FieldResult<()>
-        as "Reset supervisor"
+        as "Reset Supervisor"
     {
         Ok(kubos_hal_iobc::supervisor_reset()?)
     }
 
     field emergency_reset(&executor) -> FieldResult<()>
-        as "Supervisor emergency reset"
+        as "Supervisor Emergency Reset"
     {
         Ok(kubos_hal_iobc::supervisor_emergency_reset()?)
     }
 
     field powercycle(&executor) -> FieldResult<()>
-        as "Supervisor powercycle"
+        as "Supervisor Powercycle"
     {
         Ok(kubos_hal_iobc::supervisor_powercycle()?)
     }

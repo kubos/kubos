@@ -16,10 +16,11 @@
 
 extern crate kubos_hal_iobc;
 
-// Why create a new SupervisorVersion struct  which just holds a SupervisorVersion?
+// Why create a new SupervisorVersion struct which just holds a SupervisorVersion?
 // Because of E0117 (https://doc.rust-lang.org/error-index.html#E0117)
 // Basically we can't implement the (external) GraphQL traits on
-// kubos_hal_iobc::SupervisorVersion because it is an external type
+// kubos_hal_iobc::SupervisorVersion because it is an external type.
+// Same goes for SupervisorEnableStatus and SupervisorHousekeeping.
 pub struct SupervisorVersion {
     pub raw: kubos_hal_iobc::SupervisorVersion,
 }
