@@ -12,6 +12,7 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 
 DOCS_DIRS = [
     "adcs/adcs-api",
+    "antenna/antenna-api",
     "libcsp",
     "hal/kubos-hal",
     "hal/kubos-hal-iobc",
