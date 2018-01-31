@@ -5,7 +5,7 @@ Upcoming
 --------
 
 - Added Rust crate for wrapping kubos-hal-iobc.
-- Added iOBC supervisor graphql service.
+- Added iOBC supervisor GraphQL service.
 
 v1.1.0 - Jan 24 2018
 --------------------
