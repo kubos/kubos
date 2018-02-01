@@ -1,0 +1,19 @@
+[[package]]
+name = "kubos-build-helper"
+version = "0.1.0"
+
+[[package]]
+name = "kubos-hal-iobc"
+version = "0.1.0"
+dependencies = [
+ "kubos-build-helper 0.1.0",
+ "libc 0.2.34 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "libc"
+version = "0.2.34"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[metadata]
+"checksum libc 0.2.34 (registry+https://github.com/rust-lang/crates.io-index)" = "36fbc8a8929c632868295d0178dd8f63fc423fd7537ad0738372bd010b3ac9b0"
