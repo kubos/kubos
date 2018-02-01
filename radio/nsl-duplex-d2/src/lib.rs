@@ -19,11 +19,14 @@
 
 #![deny(missing_docs)]
 
+extern crate chrono;
 extern crate radio_api;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+
+use chrono::{DateTime, Utc};
 
 use serde_json::Error as SerdeJsonError;
 
@@ -38,6 +41,72 @@ pub struct DuplexD2 {}
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     retries: i32,
+}
+
+/// Structure for State of Health telemetry record
+/// According to the ICD all of these integers are unsigned, big-endian
+pub struct StateOfHealth {
+    /// Current epoch reset count. Starts at 0. Incremented for
+    /// each power system reset. Persistent over mission life
+    epoch_reset_count: u32,
+    /// Current time (seconds) from start of most recent reset
+    current_time: u32,
+    /// Current RSSI (Received Signal Strength Indicator)
+    /// 0 to 4
+    current_rssi: u8,
+    /// Connection status 0 (connection) or 1 (disconnected)
+    connection_status: u8,
+    /// Globalstar gateway connected to (proprietary ID)
+    gateway_id: u8,
+    /// Last contact time (seconds) since last reset
+    last_contact: u32,
+    /// Last attempt time (seconds) since latest reset
+    last_attempt: u32,
+    /// Count of call attempts since latest reset
+    num_call_attempts: u32,
+    /// Count of successful connects since latest reset
+    num_connects: u32,
+    /// Average connection duration (secondds)
+    avg_connection_time: u32,
+    /// Connection duration standard deviation (seconds)
+    connection_time_std_dev: u32,
+}
+
+/// Coordinate Direction
+pub enum CoordDirection {
+    /// North
+    North,
+    /// South
+    South,
+    /// East
+    East,
+    /// West
+    West,
+}
+
+/// Longitude/Latitude
+pub struct Coord {
+    /// Direction of coordinate
+    direction: CoordDirection,
+    /// Degrees
+    degrees: i16,
+    /// Minutes
+    minutes: i16,
+    /// Seconds
+    seconds: i16,
+}
+
+/// Structure for Geolocation record format
+pub struct GeolocationRecord {
+    /// N:DDD MM SS
+    latitude: Coord,
+    /// W:DDD MM SS
+    longitude: Coord,
+    /// TIME: DD MM YYY HH:MM:SS
+    /// What timezone or UTC offset will this time be in??
+    time: DateTime<Utc>,
+    /// ERR:
+    err: i32,
 }
 
 /// Different types of telemetry which can be requested
