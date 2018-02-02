@@ -14,7 +14,7 @@ The KubOS Stack
 OBC (On Board Computer)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Starting from the bottom, the OBC is up to you, as long as it is in our supported list. The current list of supported OBCs can be found :doc:`on our main docs page <index>`. We are also continually working to support new platforms, so make sure you `talk to us <https://slack.kubos.com/>`__ if your OBC is not included! 
+Starting from the bottom, the OBC is up to you, as long as it is in our supported list. The current list of supported OBCs can be found :doc:`on our main docs page <index>`. We are also continually working to support new platforms, so make sure you `talk to us <http://slack.kubos.com/>`__ if your OBC is not included! 
 
 Kubos Linux
 ~~~~~~~~~~~
@@ -124,4 +124,4 @@ The primary languages used in KubOS are Rust, Python, and C.
  - Python is used for Mission Applications and some Services. 
  - C is everything else. 
 
-Each language can be used to create projects, services, and applications within KubOS. Other languages can also be easily supported, make sure to `talk to us <https://slack.kubos.com/>`__ if there is another option you'd like to use!
+Each language can be used to create projects, services, and applications within KubOS. Other languages can also be easily supported, make sure to `talk to us <http://slack.kubos.com/>`__ if there is another option you'd like to use!
