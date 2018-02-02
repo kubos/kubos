@@ -33,7 +33,7 @@ pub struct CalibrateThermometer {
     pub temperature: i32,
 }
 
-/// Model for handler's subsystem
+/// Model for service's subsystem
 pub struct Subsystem;
 
 impl Subsystem {

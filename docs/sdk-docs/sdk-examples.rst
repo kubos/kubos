@@ -114,6 +114,30 @@ UART Send
 This is a demo program to test UART transmission. It will write an incrementing message "Test message nnn" every 5 seconds out of `/dev/ttyS3`.
 
 This program should be paired with the UART Receive demo program.
+
+ADC Thermistor
+--------------
+
+`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/adc-thermistor>`__
+
+**Compatible Targets: All targets with ADC pins**
+
+**Additional Hardware: Thermistor, 10 kOhm resistor**
+
++----------------------+---------------+
+| High-level Component | Specific Area |
++======================+===============+
+| Linux                | ADC (IIO)     |
++----------------------+---------------+
+
+This is a demo program to test reading a raw value from an ADC pin.
+It will use the raw value to derive a temperature reading from the connected thermistor.    
+
+.. note::
+
+    This example is configured for an ADC pin with a 10-bit resolution connected to a 10 kOhm
+    thermistor with a 3.3V reference voltage and a voltage supply of 2.4V. These values might
+    need to be changed based on your test setup
     
 References
 ----------
