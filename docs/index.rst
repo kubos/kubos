@@ -7,17 +7,24 @@ Overview
 
 :doc:`dev-docs/changelog`
 
-The Kubos platform provides small satellite developers the tools and
-libraries necessary to quickly bring up space ready software. We
-leverage multiple existing open source projects like FreeRTOS and CSP,
-along with our own custom framework and SDK.
+`Kubos Repo <https://github.com/kubos/kubos>`__
 
-Looking to build an application on Kubos? Check out our quick start guides:
+The KubOS platform provides satellite developers the tools and libraries necessary to quickly bring up space ready software. We leverage multiple existing open source projects, along with our own custom framework and SDK. 
 
- - :doc:`KubOS Linux quick start guide <linux-docs/first-linux-project>`
- - :doc:`KubOS RT quick start guide <rt-docs/first-rt-project>`
+New to KubOS? Want to know what it is? Check out our architecture guide for an overview of how KubOS works and what it provides:
 
-Having issues? Want a new feature? `Come talk to
+ - :doc:`KubOS Architecture Overview <architecture-overview>`
+
+Getting set up with KubOS for the first time? Check out our SDK and try your own project:
+
+ - :doc:`First Time Users <first-time-users>`
+
+Trying to integrate a payload or create your mission code? Check out our mission specific code documentation: 
+
+ - :doc:`Payload Services <services/payload-services>`
+ - :doc:`Mission Applications <what-is-a-mission-application>`
+
+Having issues? Want a new feature? Just want to say hello? `Come talk to
 us! <https://slack.kubos.co/>`__
 
 If for some reason Slack won't work for you, feel free to email us at
@@ -26,37 +33,29 @@ info@kubos.co.
 Boards Currently Supported by Kubos
 -----------------------------------
 
-+------------+--------------------------------------------------------------------------+--------------+
-| MCU Family | Description                                                              | Supported OS |
-+============+==========================================================================+==============+
-| ISIS       | :doc:`ISIS-OBC <linux-docs/working-with-the-iobc>`                       | KubOS Linux  |
-+------------+--------------------------------------------------------------------------+--------------+
-| Pumpkin    | :doc:`Pumpkin Motherboard Module 2 <linux-docs/working-with-the-mbm2>`   | KubOS Linux  |
-+------------+--------------------------------------------------------------------------+--------------+
-| Beaglebone | :doc:`Beaglebone Black, Rev. C <linux-docs/working-with-the-bbb>`        | KubOS Linux  |
-+------------+--------------------------------------------------------------------------+--------------+
-| STM32F4    | :doc:`STM32F407 Discovery Board <rt-docs/stm32f4-discovery-board-guide>` | KubOS RT     |
-+------------+--------------------------------------------------------------------------+--------------+
-|            | STM32F405 PyBoard                                                        | KubOS RT     |
-+------------+--------------------------------------------------------------------------+--------------+
-|            | STM32F405 NanoAvionics SatBus 3c0 OBC                                    | KubOS RT     |
-+------------+--------------------------------------------------------------------------+--------------+
-| MSP430     | :doc:`MSP430F5529 Launchpad <rt-docs/msp430-launchpad-guide>`            | KubOS RT     |
-+------------+--------------------------------------------------------------------------+--------------+
++------------+---------------------------------------------------------------------+
+| Vendor     | Description                                                         |
++============+=====================================================================+
+| ISIS       | :doc:`ISIS-OBC <os-docs/working-with-the-iobc>`                     |
++------------+---------------------------------------------------------------------+
+| Pumpkin    | :doc:`Pumpkin Motherboard Module 2 <os-docs/working-with-the-mbm2>` |
++------------+---------------------------------------------------------------------+
+| Beaglebone | :doc:`Beaglebone Black, Rev. C <os-docs/working-with-the-bbb>`      |
++------------+---------------------------------------------------------------------+
 
 .. toctree::
     :hidden:
-
+    
+    KubOS Architecture <architecture-overview>
     First Time Users <first-time-users>
-    FAQs and Troubleshooting Tips <faq-troubleshooting>
     Installation Docs <installation-docs/index>
-    Examples <sdk-docs/sdk-examples>
     Kubos SDK <sdk-docs/index>
-    KubOS RT <rt-docs/index>
-    KubOS Linux <linux-docs/index>
-    Kubos Middleware <middleware/index>
+    Kubos Mission Applications <what-is-a-mission-application>
+    Kubos Services <services/index>
     Kubos APIs <apis/index>
+    Kubos Linux <os-docs/index>
     Developer Docs <dev-docs/index>
+    FAQs and Troubleshooting Tips <faq-troubleshooting>
 
 Indices and tables
 ------------------

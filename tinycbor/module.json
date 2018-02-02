@@ -1,0 +1,12 @@
+{
+    "lib":"./src",
+    "license":"Apache-2.0",
+    "name":"tinycbor",
+    "repository":{
+        "url":"git://<repository_url>",
+        "type":"git"
+    },
+    "version":"0.5.0",
+    "homepage":"https://<homepage>",
+    "description":"Example app running on kubos-rt."
+}

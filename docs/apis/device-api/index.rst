@@ -7,11 +7,7 @@ Supported devices:
   
   - ADCS
   
-    - TODO
-  
-  - EPS
-
-    - Currently only high level interface and stubbed implementation exists
+    - `ISIS iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__
 
   - Radio
 
@@ -30,5 +26,4 @@ Supported devices:
    :name: device-apis
 
    adcs_api
-   eps_api
    radio_api
