@@ -8,6 +8,10 @@ Supported devices:
   - ADCS
   
     - `ISIS iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__
+    
+  - Antenna
+  
+    - `ISIS Antenna Systems <https://www.isispace.nl/product-category/products/antenna-systems/>`__
 
   - Radio
 
@@ -19,6 +23,7 @@ Supported devices:
    :name: device-guides
 
    adcs
+   antenna
    radio
 
 .. toctree::
@@ -26,4 +31,5 @@ Supported devices:
    :name: device-apis
 
    adcs_api
+   antenna_api
    radio_api

@@ -1,0 +1,10 @@
+{
+    "license":"Apache-2.0",
+    "name":"antenna-api",
+    "repository":{
+        "url":"git://github.com/kubos/antenna-api",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "homepage":"https://github.com/kubos/antenna-api"
+}
