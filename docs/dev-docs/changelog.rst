@@ -1,6 +1,11 @@
 Kubos Changelog
 ===============
 
+Upcoming
+--------
+
+- Added Rust crate for wrapping kubos-hal-iobc.
+
 v1.1.0 - Jan 24 2018
 --------------------
 
