@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
+extern crate serial;
+
 use comms;
+
+use std::io;
+use std::io::prelude::*;
+use serial::prelude::*;
 
 pub const RESP_HEADER: &'static str = "GU";
 
+#[cfg(any(target_arch = "x86_64"))]
 pub fn send_command(cmd: &str) -> Result<Vec<u8>, String> {
     let mut ret_msg = Vec::<u8>::new();
 
@@ -56,4 +63,26 @@ pub fn send_command(cmd: &str) -> Result<Vec<u8>, String> {
         }
         &_ => Err(String::from("Command not recognized")),
     }
+}
+
+#[cfg(any(target_arch = "arm"))]
+pub fn send_command(cmd: &str) -> io::Result<Vec<u8>> {
+    let mut ret_msg = Vec::<u8>::new();
+
+    let mut port = try!(serial::open("/dev/ttyUSB0"));
+
+    try!(port.reconfigure(&|settings| {
+        settings.set_baud_rate(serial::Baud38400);
+        settings.set_char_size(serial::Bits8);
+        settings.set_parity(serial::ParityNone);
+        settings.set_stop_bits(serial::Stop1);
+        settings.set_flow_control(serial::FlowNone);
+        Ok(())
+    }));
+
+    let send_buf: Vec<u8> = cmd.as_bytes().to_vec();
+
+    try!(port.write(&send_buf[..]));
+    try!(port.read(&mut ret_msg[..]));
+    Ok(ret_msg)
 }

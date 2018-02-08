@@ -17,7 +17,7 @@
 //! Device level API for interacting with the NSL EyeStar-D2 Duplex radio
 //! https://nearspacelaunch.com/product/eyestar-d2/
 
-#![deny(missing_docs)]
+// #![deny(missing_docs)]
 
 extern crate chrono;
 extern crate radio_api;
@@ -25,9 +25,10 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+extern crate serial;
 
 mod radio_stub;
-mod comms;
+pub mod comms;
 
 use chrono::{DateTime, Utc};
 

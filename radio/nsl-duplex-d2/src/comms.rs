@@ -17,7 +17,10 @@ pub fn fetch_state_of_health() -> Result<(), String> {
 }
 
 pub fn get_uploaded_file_count() -> Result<u32, String> {
-    let resp = radio_stub::send_command(GET_UPLOADED_FILE_COUNT).unwrap();
+    let resp = match radio_stub::send_command(GET_UPLOADED_FILE_COUNT) {
+        Ok(r) => r,
+        Err(e) => return Err(String::from("Failed to send command")),
+    };
 
     if resp.len() != 6 {
         return Err(String::from("Wrong response length"));
