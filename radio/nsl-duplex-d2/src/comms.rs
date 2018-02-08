@@ -34,7 +34,7 @@ pub fn get_uploaded_file_count() -> Result<u32, String> {
 }
 
 pub struct UploadedFile {
-    name: Vec<u8>,
+    name: String,
     payload: Vec<u8>,
 }
 
@@ -45,10 +45,6 @@ pub fn get_uploaded_file() -> Result<UploadedFile, String> {
         return Err(String::from("Invalid resp header"));
     }
 
-    println!("{:?}", resp);
-
-    //let name_size =
-    //     ((i32::from(resp[2])) * 100) + ((i32::from(resp[3])) * 10) + (i32::from(resp[4]));
     let name_size = String::from_utf8(resp[2..5].to_vec())
         .unwrap()
         .parse::<usize>()
@@ -58,14 +54,8 @@ pub fn get_uploaded_file() -> Result<UploadedFile, String> {
         .parse::<usize>()
         .unwrap();
 
-    //let payload_size = ((resp[5] as usize) * 100000) + ((resp[6] as usize) * 10000)
-    //  + ((resp[7] as usize) * 1000) + ((resp[8] as usize) * 100)
-    //+ ((resp[9] as usize) * 10) + (resp[10] as usize);
-
-    println!("name size {} payload size {}", name_size, payload_size);
-
-    let name: Vec<u8> = resp[11..(11 + name_size)].to_vec();
-    let payload: Vec<u8> = resp[(11 + name_size)..(11 + name_size + payload_size)].to_vec();
+    let name = String::from_utf8(resp[11..(11 + name_size)].to_vec()).unwrap();
+    let payload = resp[(11 + name_size)..(11 + name_size + payload_size)].to_vec();
 
     Ok(UploadedFile {
         name: name,
@@ -87,14 +77,11 @@ mod tests {
     fn test_uploaded_file() {
         let file = comms::get_uploaded_file().unwrap();
         // check file name
-        assert_eq!(file.name[0], 't' as u8);
-        assert_eq!(file.name[1], 'e' as u8);
-        assert_eq!(file.name[2], 's' as u8);
-        assert_eq!(file.name[3], 't' as u8);
+        assert_eq!(file.name, String::from("test.txt"));
         // check payload
-        assert_eq!(file.payload[0], 't' as u8);
-        assert_eq!(file.payload[1], 'e' as u8);
-        assert_eq!(file.payload[2], 's' as u8);
-        assert_eq!(file.payload[3], 't' as u8);
+        assert_eq!(
+            String::from_utf8(file.payload).unwrap(),
+            String::from("test")
+        );
     }
 }
