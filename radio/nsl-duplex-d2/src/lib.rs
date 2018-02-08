@@ -19,18 +19,12 @@
 
 // #![deny(missing_docs)]
 
-extern crate chrono;
 extern crate radio_api;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
 extern crate serde_json;
 extern crate serial;
 
 mod radio_stub;
 pub mod comms;
-
-use chrono::{DateTime, Utc};
 
 use serde_json::Error as SerdeJsonError;
 
@@ -38,98 +32,6 @@ use radio_api::{Radio, RadioError, RadioReset};
 
 /// Structure implementing Radio functionality for Duplex-D2
 pub struct DuplexD2 {}
-
-/// Structure implementing Duplex-D2 configuration values
-/// The retries member is a stand-in config value to allow
-/// for testing of config string parsing
-#[derive(Serialize, Deserialize)]
-pub struct Config {
-    retries: i32,
-}
-
-/// Structure for State of Health telemetry record
-/// According to the ICD all of these integers are unsigned, big-endian
-pub struct StateOfHealth {
-    /// Current epoch reset count. Starts at 0. Incremented for
-    /// each power system reset. Persistent over mission life
-    epoch_reset_count: u32,
-    /// Current time (seconds) from start of most recent reset
-    current_time: u32,
-    /// Current RSSI (Received Signal Strength Indicator)
-    /// 0 to 4
-    current_rssi: u8,
-    /// Connection status 0 (connection) or 1 (disconnected)
-    connection_status: u8,
-    /// Globalstar gateway connected to (proprietary ID)
-    gateway_id: u8,
-    /// Last contact time (seconds) since last reset
-    last_contact: u32,
-    /// Last attempt time (seconds) since latest reset
-    last_attempt: u32,
-    /// Count of call attempts since latest reset
-    num_call_attempts: u32,
-    /// Count of successful connects since latest reset
-    num_connects: u32,
-    /// Average connection duration (secondds)
-    avg_connection_time: u32,
-    /// Connection duration standard deviation (seconds)
-    connection_time_std_dev: u32,
-}
-
-/// Coordinate Direction
-pub enum CoordDirection {
-    /// North
-    North,
-    /// South
-    South,
-    /// East
-    East,
-    /// West
-    West,
-}
-
-/// Longitude/Latitude
-pub struct Coord {
-    /// Direction of coordinate
-    direction: CoordDirection,
-    /// Degrees
-    degrees: i16,
-    /// Minutes
-    minutes: i16,
-    /// Seconds
-    seconds: i16,
-}
-
-/// Structure for Geolocation record format
-pub struct GeolocationRecord {
-    /// N:DDD MM SS
-    latitude: Coord,
-    /// W:DDD MM SS
-    longitude: Coord,
-    /// TIME: DD MM YYY HH:MM:SS
-    /// What timezone or UTC offset will this time be in??
-    time: DateTime<Utc>,
-    /// ERR:
-    err: i32,
-}
-
-/// Different types of telemetry which can be requested
-/// from the Duplex-D2 radio
-pub enum TelemetryType {
-    /// Retrieves a record of information regarding modem functionality
-    StateOfHealth,
-    /// Retrieves an estimate of the modem's latitude and longitude
-    /// coordinates at the time of the last connection
-    Geolocation,
-    /// Retrieves a count of files that have been received by the modem
-    UploadedFileCount,
-    /// Retrieves a count of files still in queue on the modem
-    /// awaiting download
-    DownloadFileCount,
-    /// Retrieves a count of messages that have been received by
-    /// the modem and await retrieval
-    UploadedMsgCount,
-}
 
 impl Radio for DuplexD2 {
     fn init(&self) -> Result<(), RadioError> {
@@ -155,8 +57,7 @@ impl Radio for DuplexD2 {
         }
     }
 
-    fn configure(&self, json_config: &str) -> Result<(), SerdeJsonError> {
-        let _c: Config = serde_json::from_str(json_config)?;
+    fn configure(&self, _json_config: &str) -> Result<(), SerdeJsonError> {
         Ok(())
     }
 
@@ -165,13 +66,14 @@ impl Radio for DuplexD2 {
     }
 
     fn receive(&self) -> Result<(Vec<u8>), RadioError> {
-        let d: Vec<u8> = Vec::new();
-        Ok(d)
+        match comms::get_uploaded_file() {
+            Ok(r) => Ok(r.payload),
+            Err(_) => Err(RadioError::RxEmpty),
+        }
     }
 
     fn get_telemetry<TelemetryType>(&self, _telem_type: TelemetryType) -> Result<&str, RadioError> {
-        comms::fetch_state_of_health();
-        Ok("hi")
+        Ok("telemetry")
     }
 }
 
@@ -189,15 +91,6 @@ mod tests {
     fn test_terminate() {
         let d = DuplexD2 {};
         assert!(d.terminate().is_ok(), "Terminate should pass")
-    }
-
-    #[test]
-    fn test_configure_bad_config() {
-        let d = DuplexD2 {};
-        let config = r#"{
-                    "timer": 100
-                  }"#;
-        assert!(d.configure(config).is_err(), "Config should fail")
     }
 
     #[test]
@@ -226,14 +119,5 @@ mod tests {
     fn test_receive() {
         let d = DuplexD2 {};
         assert!(d.receive().is_ok(), "Receive should pass")
-    }
-
-    #[test]
-    fn test_get_telemetry() {
-        let d = DuplexD2 {};
-        assert!(
-            d.get_telemetry(TelemetryType::StateOfHealth).is_ok(),
-            "Telemetry should pass"
-        )
     }
 }

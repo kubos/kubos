@@ -18,10 +18,6 @@ extern crate serial;
 
 use comms;
 
-use std::io;
-use std::io::prelude::*;
-use serial::prelude::*;
-
 pub const RESP_HEADER: &'static str = "GU";
 
 #[cfg(any(target_arch = "x86_64"))]
@@ -67,6 +63,10 @@ pub fn send_command(cmd: &str) -> Result<Vec<u8>, String> {
 
 #[cfg(any(target_arch = "arm"))]
 pub fn send_command(cmd: &str) -> io::Result<Vec<u8>> {
+    use std::io;
+    use std::io::prelude::*;
+    use serial::prelude::*;
+
     let mut ret_msg = Vec::<u8>::new();
 
     let mut port = try!(serial::open("/dev/ttyUSB0"));
