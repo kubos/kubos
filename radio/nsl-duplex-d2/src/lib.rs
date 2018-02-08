@@ -26,6 +26,9 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+mod radio_stub;
+mod comms;
+
 use chrono::{DateTime, Utc};
 
 use serde_json::Error as SerdeJsonError;
@@ -166,7 +169,8 @@ impl Radio for DuplexD2 {
     }
 
     fn get_telemetry<TelemetryType>(&self, _telem_type: TelemetryType) -> Result<&str, RadioError> {
-        Ok("telemetry")
+        comms::fetch_state_of_health();
+        Ok("hi")
     }
 }
 
