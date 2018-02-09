@@ -19,6 +19,7 @@
 
 // #![deny(missing_docs)]
 
+extern crate nums_as_bytes;
 extern crate radio_api;
 extern crate serde_json;
 extern crate serial;
@@ -29,6 +30,8 @@ pub mod comms;
 use serde_json::Error as SerdeJsonError;
 
 use radio_api::{Connection, Radio, RadioError, RadioReset};
+
+use nums_as_bytes::AsBytes;
 
 /// Structure implementing Radio functionality for Duplex-D2
 pub struct DuplexD2 {
@@ -43,7 +46,9 @@ impl DuplexD2 {
     }
 
     pub fn get_uploaded_file_count(&self) -> Result<u32, String> {
-        self.conn.send(comms::GET_UPLOADED_FILE_COUNT).unwrap();
+        self.conn
+            .send(comms::GET_UPLOADED_FILE_COUNT.as_bytes())
+            .unwrap();
         let resp = match self.conn.receive() {
             Ok(r) => r,
             Err(_) => return Err(String::from("Failed to send command")),
@@ -64,7 +69,7 @@ impl DuplexD2 {
     }
 
     pub fn get_uploaded_file(&self) -> Result<comms::UploadedFile, String> {
-        self.conn.send(comms::GET_UPLOADED_FILE).unwrap();
+        self.conn.send(comms::GET_UPLOADED_FILE.as_bytes()).unwrap();
         let resp = self.conn.receive().unwrap();
 
         if (resp[0] != b'G') && (resp[1] != b'U') {
@@ -140,7 +145,7 @@ mod tests {
 
     impl Connection for TestConnection {
         /// Basic send command function. Sends and receives
-        fn send(&self, _cmd: &str) -> Result<(), String> {
+        fn send(&self, _data: Vec<u8>) -> Result<(), String> {
             Ok(())
         }
 
@@ -207,7 +212,7 @@ mod tests {
     #[test]
     fn test_uploaded_file_count_one() {
         let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.extend(comms::RESP_HEADER.as_bytes());
         ret_msg.push(1 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
@@ -222,7 +227,7 @@ mod tests {
     #[test]
     fn test_uploaded_file_count_zero() {
         let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.extend(comms::RESP_HEADER.as_bytes());
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
@@ -237,7 +242,7 @@ mod tests {
     #[test]
     fn test_uploaded_file_count_many() {
         let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.extend(comms::RESP_HEADER.as_bytes());
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
@@ -252,7 +257,7 @@ mod tests {
     #[test]
     fn test_get_uploaded_file() {
         let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.extend(comms::RESP_HEADER.as_bytes());
         let name_size = String::from("008");
         let size = String::from("000004");
         let name = String::from("test.txt");
@@ -279,29 +284,12 @@ mod tests {
 
     /*
     #[test]
+
+    /// The Duplex-D2 documentation states that after uploading a file
+    /// and receiving an ACK, the Duplex-D2 will delete the file just read.
     fn test_uploaded_file_delete() {
-        struct TestConn {
-            data: Vec<u8>,
-            count: i32
-        }
-
-        impl Connection for TestConn {
-            /// Basic send command function. Sends and receives
-            fn send(&self, _cmd: &str) -> Result<(), String> {
-                match str {
-                    comms::GET_UPLOADED_FILE_COUNT
-                }
-                Ok(())
-            }
-
-            /// Basic receive function
-            fn receive(&self) -> Result<Vec<u8>, String> {
-                Ok(self.data.clone())
-            }
-        }
-
         let d = DuplexD2 {
-            conn: Box::new(TestConn { data: vec![0; 0], count: 0 }),
+            conn: Box::new(TestConnection { data: vec![0; 0] }),
         };
 
         let count = d.get_uploaded_file_count().unwrap();
@@ -313,5 +301,6 @@ mod tests {
         let count = d.get_uploaded_file_count().unwrap();
         assert_eq!(count, 0, "File count should be zero");
     }
-*/
+    */
+
 }
