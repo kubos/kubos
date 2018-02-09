@@ -128,7 +128,9 @@ impl Radio for DuplexD2 {
 mod tests {
     use ::*;
 
-    struct TestConnection;
+    struct TestConnection {
+        data: Vec<u8>,
+    }
 
     impl Connection for TestConnection {
         /// Basic send command function. Sends and receives
@@ -138,14 +140,14 @@ mod tests {
 
         /// Basic receive function
         fn receive(&self) -> Result<Vec<u8>, String> {
-            Ok(vec![0; 0])
+            Ok(self.data.clone())
         }
     }
 
     #[test]
     fn test_init() {
         let d = DuplexD2 {
-            conn: Box::new(TestConnection {}),
+            conn: Box::new(TestConnection { data: Vec::new() }),
         };
         assert!(d.init().is_ok(), "Init should pass")
     }
@@ -153,7 +155,7 @@ mod tests {
     #[test]
     fn test_terminate() {
         let d = DuplexD2 {
-            conn: Box::new(TestConnection {}),
+            conn: Box::new(TestConnection { data: Vec::new() }),
         };
         assert!(d.terminate().is_ok(), "Terminate should pass")
     }
@@ -161,7 +163,7 @@ mod tests {
     #[test]
     fn test_configure() {
         let d = DuplexD2 {
-            conn: Box::new(TestConnection {}),
+            conn: Box::new(TestConnection { data: Vec::new() }),
         };
         let config = r#"{
                      "retries": 2
@@ -172,7 +174,7 @@ mod tests {
     #[test]
     fn test_reset() {
         let d = DuplexD2 {
-            conn: Box::new(TestConnection {}),
+            conn: Box::new(TestConnection { data: Vec::new() }),
         };
         assert!(d.reset(RadioReset::HardReset).is_ok(), "Reset should pass")
     }
@@ -180,7 +182,7 @@ mod tests {
     #[test]
     fn test_send() {
         let d = DuplexD2 {
-            conn: Box::new(TestConnection {}),
+            conn: Box::new(TestConnection { data: Vec::new() }),
         };
         let data: Vec<u8> = Vec::new();
         assert!(d.send(data).is_ok(), "Send should pass")
@@ -198,26 +200,14 @@ mod tests {
 
     #[test]
     fn test_uploaded_file_count_one() {
-        struct TestConn;
-        impl Connection for TestConn {
-            /// Basic send command function. Sends and receives
-            fn send(&self, _cmd: &str) -> Result<(), String> {
-                Ok(())
-            }
-
-            /// Basic receive function
-            fn receive(&self) -> Result<Vec<u8>, String> {
-                let mut ret_msg = Vec::<u8>::new();
-                ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
-                ret_msg.push(1 as u8);
-                ret_msg.push(0 as u8);
-                ret_msg.push(0 as u8);
-                ret_msg.push(0 as u8);
-                Ok(ret_msg)
-            }
-        }
+        let mut ret_msg = Vec::<u8>::new();
+        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.push(1 as u8);
+        ret_msg.push(0 as u8);
+        ret_msg.push(0 as u8);
+        ret_msg.push(0 as u8);
         let d = DuplexD2 {
-            conn: Box::new(TestConn {}),
+            conn: Box::new(TestConnection { data: ret_msg }),
         };
         let count = d.get_uploaded_file_count().unwrap();
         assert_eq!(count, 1, "File count should be one")
@@ -225,26 +215,14 @@ mod tests {
 
     #[test]
     fn test_uploaded_file_count_zero() {
-        struct TestConn;
-        impl Connection for TestConn {
-            /// Basic send command function. Sends and receives
-            fn send(&self, _cmd: &str) -> Result<(), String> {
-                Ok(())
-            }
-
-            /// Basic receive function
-            fn receive(&self) -> Result<Vec<u8>, String> {
-                let mut ret_msg = Vec::<u8>::new();
-                ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
-                ret_msg.push(0 as u8);
-                ret_msg.push(0 as u8);
-                ret_msg.push(0 as u8);
-                ret_msg.push(0 as u8);
-                Ok(ret_msg)
-            }
-        }
+        let mut ret_msg = Vec::<u8>::new();
+        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.push(0 as u8);
+        ret_msg.push(0 as u8);
+        ret_msg.push(0 as u8);
+        ret_msg.push(0 as u8);
         let d = DuplexD2 {
-            conn: Box::new(TestConn {}),
+            conn: Box::new(TestConnection { data: ret_msg }),
         };
         let count = d.get_uploaded_file_count().unwrap();
         assert_eq!(count, 0, "File count should be zero")
@@ -252,26 +230,14 @@ mod tests {
 
     #[test]
     fn test_uploaded_file_count_many() {
-        struct TestConn;
-        impl Connection for TestConn {
-            /// Basic send command function. Sends and receives
-            fn send(&self, _cmd: &str) -> Result<(), String> {
-                Ok(())
-            }
-
-            /// Basic receive function
-            fn receive(&self) -> Result<Vec<u8>, String> {
-                let mut ret_msg = Vec::<u8>::new();
-                ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
-                ret_msg.push(0 as u8);
-                ret_msg.push(0 as u8);
-                ret_msg.push(0 as u8);
-                ret_msg.push(1 as u8);
-                Ok(ret_msg)
-            }
-        }
+        let mut ret_msg = Vec::<u8>::new();
+        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.push(0 as u8);
+        ret_msg.push(0 as u8);
+        ret_msg.push(0 as u8);
+        ret_msg.push(1 as u8);
         let d = DuplexD2 {
-            conn: Box::new(TestConn {}),
+            conn: Box::new(TestConnection { data: ret_msg }),
         };
         let count = d.get_uploaded_file_count().unwrap();
         assert_eq!(count, 16777216, "File count should be 16777216")
@@ -279,33 +245,21 @@ mod tests {
 
     #[test]
     fn test_uploaded_file() {
-        struct TestConn;
-        impl Connection for TestConn {
-            /// Basic send command function. Sends and receives
-            fn send(&self, _cmd: &str) -> Result<(), String> {
-                Ok(())
-            }
+        let mut ret_msg = Vec::<u8>::new();
+        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        let name_size = String::from("008");
+        let size = String::from("000004");
+        let name = String::from("test.txt");
+        let data = String::from("test");
+        let crc = String::from("44");
 
-            /// Basic receive function
-            fn receive(&self) -> Result<Vec<u8>, String> {
-                let mut ret_msg = Vec::<u8>::new();
-                ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
-                let name_size = String::from("008");
-                let size = String::from("000004");
-                let name = String::from("test.txt");
-                let data = String::from("test");
-                let crc = String::from("44");
-
-                ret_msg.extend(name_size.as_bytes().iter().cloned());
-                ret_msg.extend(size.as_bytes().iter().cloned());
-                ret_msg.extend(name.as_bytes().iter().cloned());
-                ret_msg.extend(data.as_bytes().iter().cloned());
-                ret_msg.extend(crc.as_bytes().iter().cloned());
-                Ok(ret_msg)
-            }
-        }
+        ret_msg.extend(name_size.as_bytes().iter().cloned());
+        ret_msg.extend(size.as_bytes().iter().cloned());
+        ret_msg.extend(name.as_bytes().iter().cloned());
+        ret_msg.extend(data.as_bytes().iter().cloned());
+        ret_msg.extend(crc.as_bytes().iter().cloned());
         let d = DuplexD2 {
-            conn: Box::new(TestConn {}),
+            conn: Box::new(TestConnection { data: ret_msg }),
         };
         let file = d.get_uploaded_file().unwrap();
         // check file name
