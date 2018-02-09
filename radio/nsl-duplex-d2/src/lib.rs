@@ -36,7 +36,13 @@ pub struct DuplexD2 {
 }
 
 impl DuplexD2 {
-    fn get_uploaded_file_count(&self) -> Result<u32, String> {
+    pub fn init() -> DuplexD2 {
+        DuplexD2 {
+            conn: Box::new(serial_comm::SerialConnection),
+        }
+    }
+
+    pub fn get_uploaded_file_count(&self) -> Result<u32, String> {
         self.conn.send(comms::GET_UPLOADED_FILE_COUNT).unwrap();
         let resp = match self.conn.receive() {
             Ok(r) => r,
@@ -57,7 +63,7 @@ impl DuplexD2 {
         }
     }
 
-    fn get_uploaded_file(&self) -> Result<comms::UploadedFile, String> {
+    pub fn get_uploaded_file(&self) -> Result<comms::UploadedFile, String> {
         self.conn.send(comms::GET_UPLOADED_FILE).unwrap();
         let resp = self.conn.receive().unwrap();
 
@@ -244,7 +250,7 @@ mod tests {
     }
 
     #[test]
-    fn test_uploaded_file() {
+    fn test_get_uploaded_file() {
         let mut ret_msg = Vec::<u8>::new();
         ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
         let name_size = String::from("008");
@@ -270,4 +276,42 @@ mod tests {
             String::from("test")
         );
     }
+
+    /*
+    #[test]
+    fn test_uploaded_file_delete() {
+        struct TestConn {
+            data: Vec<u8>,
+            count: i32
+        }
+
+        impl Connection for TestConn {
+            /// Basic send command function. Sends and receives
+            fn send(&self, _cmd: &str) -> Result<(), String> {
+                match str {
+                    comms::GET_UPLOADED_FILE_COUNT
+                }
+                Ok(())
+            }
+
+            /// Basic receive function
+            fn receive(&self) -> Result<Vec<u8>, String> {
+                Ok(self.data.clone())
+            }
+        }
+
+        let d = DuplexD2 {
+            conn: Box::new(TestConn { data: vec![0; 0], count: 0 }),
+        };
+
+        let count = d.get_uploaded_file_count().unwrap();
+        assert_eq!(count, 1, "File count should be one");
+
+        let file = d.get_uploaded_file().unwrap();
+        assert_eq!(file.name, String::from("test.txt"));
+
+        let count = d.get_uploaded_file_count().unwrap();
+        assert_eq!(count, 0, "File count should be zero");
+    }
+*/
 }
