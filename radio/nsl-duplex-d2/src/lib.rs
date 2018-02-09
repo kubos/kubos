@@ -23,15 +23,66 @@ extern crate radio_api;
 extern crate serde_json;
 extern crate serial;
 
-mod radio_stub;
+pub mod serial_comm;
 pub mod comms;
 
 use serde_json::Error as SerdeJsonError;
 
-use radio_api::{Radio, RadioError, RadioReset};
+use radio_api::{Connection, Radio, RadioError, RadioReset};
 
 /// Structure implementing Radio functionality for Duplex-D2
-pub struct DuplexD2 {}
+pub struct DuplexD2 {
+    conn: Box<Connection>,
+}
+
+impl DuplexD2 {
+    fn get_uploaded_file_count(&self) -> Result<u32, String> {
+        self.conn.send(comms::GET_UPLOADED_FILE_COUNT);
+        let resp = match self.conn.receive() {
+            Ok(r) => r,
+            Err(_) => return Err(String::from("Failed to send command")),
+        };
+
+        if resp.len() != 6 {
+            return Err(String::from("Wrong response length"));
+        }
+
+        // Check if resp header exists
+        if (resp[0] == ('G' as u8)) && (resp[1] == ('U' as u8)) {
+            let count = (resp[2] as u32) | (resp[3] as u32) << 8 | (resp[4] as u32) << 16
+                | (resp[5] as u32) << 24;
+            Ok(count)
+        } else {
+            Err(String::from("Invalid resp header"))
+        }
+    }
+
+    fn get_uploaded_file(&self) -> Result<comms::UploadedFile, String> {
+        self.conn.send(comms::GET_UPLOADED_FILE);
+        let resp = self.conn.receive().unwrap();
+
+        if (resp[0] != ('G' as u8)) && (resp[1] != ('U' as u8)) {
+            return Err(String::from("Invalid resp header"));
+        }
+
+        let name_size = String::from_utf8(resp[2..5].to_vec())
+            .unwrap()
+            .parse::<usize>()
+            .unwrap();
+        let payload_size = String::from_utf8(resp[5..11].to_vec())
+            .unwrap()
+            .parse::<usize>()
+            .unwrap();
+
+        let name = String::from_utf8(resp[11..(11 + name_size)].to_vec()).unwrap();
+        let payload = resp[(11 + name_size)..(11 + name_size + payload_size)].to_vec();
+
+        Ok(comms::UploadedFile {
+            name: name,
+            payload: payload,
+        })
+    }
+}
 
 impl Radio for DuplexD2 {
     fn init(&self) -> Result<(), RadioError> {
@@ -66,7 +117,7 @@ impl Radio for DuplexD2 {
     }
 
     fn receive(&self) -> Result<(Vec<u8>), RadioError> {
-        match comms::get_uploaded_file() {
+        match self.get_uploaded_file() {
             Ok(r) => Ok(r.payload),
             Err(_) => Err(RadioError::RxEmpty),
         }
@@ -81,21 +132,41 @@ impl Radio for DuplexD2 {
 mod tests {
     use ::*;
 
+    struct TestConnection;
+
+    impl Connection for TestConnection {
+        /// Basic send command function. Sends and receives
+        fn send(&self, cmd: &str) -> Result<(), String> {
+            Ok(())
+        }
+
+        /// Basic receive function
+        fn receive(&self) -> Result<Vec<u8>, String> {
+            Ok(vec![0; 0])
+        }
+    }
+
     #[test]
     fn test_init() {
-        let d = DuplexD2 {};
+        let d = DuplexD2 {
+            conn: Box::new(TestConnection {}),
+        };
         assert!(d.init().is_ok(), "Init should pass")
     }
 
     #[test]
     fn test_terminate() {
-        let d = DuplexD2 {};
+        let d = DuplexD2 {
+            conn: Box::new(TestConnection {}),
+        };
         assert!(d.terminate().is_ok(), "Terminate should pass")
     }
 
     #[test]
     fn test_configure() {
-        let d = DuplexD2 {};
+        let d = DuplexD2 {
+            conn: Box::new(TestConnection {}),
+        };
         let config = r#"{
                      "retries": 2
                     }"#;
@@ -104,20 +175,95 @@ mod tests {
 
     #[test]
     fn test_reset() {
-        let d = DuplexD2 {};
+        let d = DuplexD2 {
+            conn: Box::new(TestConnection {}),
+        };
         assert!(d.reset(RadioReset::HardReset).is_ok(), "Reset should pass")
     }
 
     #[test]
     fn test_send() {
-        let d = DuplexD2 {};
+        let d = DuplexD2 {
+            conn: Box::new(TestConnection {}),
+        };
         let data: Vec<u8> = Vec::new();
         assert!(d.send(data).is_ok(), "Send should pass")
     }
 
+    /*
     #[test]
     fn test_receive() {
-        let d = DuplexD2 {};
+        let d = DuplexD2 {
+            conn: Box::new(TestConnection {}),
+        };
         assert!(d.receive().is_ok(), "Receive should pass")
+    }
+     */
+
+    #[test]
+    fn test_uploaded_file_count() {
+        struct TestConn;
+        impl Connection for TestConn {
+            /// Basic send command function. Sends and receives
+            fn send(&self, cmd: &str) -> Result<(), String> {
+                Ok(())
+            }
+
+            /// Basic receive function
+            fn receive(&self) -> Result<Vec<u8>, String> {
+                let mut ret_msg = Vec::<u8>::new();
+                ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+                ret_msg.push(1 as u8);
+                ret_msg.push(0 as u8);
+                ret_msg.push(0 as u8);
+                ret_msg.push(0 as u8);
+                Ok(ret_msg)
+            }
+        }
+        let d = DuplexD2 {
+            conn: Box::new(TestConn {}),
+        };
+        let count = d.get_uploaded_file_count().unwrap();
+        assert_eq!(count, 1, "File count should be one")
+    }
+
+    #[test]
+    fn test_uploaded_file() {
+        struct TestConn;
+        impl Connection for TestConn {
+            /// Basic send command function. Sends and receives
+            fn send(&self, cmd: &str) -> Result<(), String> {
+                Ok(())
+            }
+
+            /// Basic receive function
+            fn receive(&self) -> Result<Vec<u8>, String> {
+                let mut ret_msg = Vec::<u8>::new();
+                ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+                let name_size = String::from("008");
+                let size = String::from("000004");
+                let name = String::from("test.txt");
+                let data = String::from("test");
+                let crc = String::from("44");
+
+                ret_msg.extend(name_size.as_bytes().iter().cloned());
+                ret_msg.extend(size.as_bytes().iter().cloned());
+                ret_msg.extend(name.as_bytes().iter().cloned());
+                ret_msg.extend(data.as_bytes().iter().cloned());
+                ret_msg.extend(crc.as_bytes().iter().cloned());
+                Ok(ret_msg)
+            }
+        }
+        let d = DuplexD2 {
+            conn: Box::new(TestConn {}),
+        };
+        let file = d.get_uploaded_file().unwrap();
+        // check file name
+        assert_eq!(file.name, String::from("test.txt"));
+        // check payload
+        assert_eq!(
+            String::from_utf8(file.payload).unwrap(),
+            String::from("test")
+        );
     }
 }

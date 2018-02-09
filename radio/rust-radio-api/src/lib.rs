@@ -22,6 +22,15 @@ extern crate serde_json;
 
 use serde_json::Error as SerdeJsonError;
 
+/// Connection trait
+pub trait Connection {
+    /// Basic send command function. Sends and receives
+    fn send(&self, cmd: &str) -> Result<(), String>;
+
+    /// Basic receive function
+    fn receive(&self) -> Result<Vec<u8>, String>;
+}
+
 /// The kind of error that can be produced while interfacing with a radio
 pub enum RadioError {
     /// Returned if rx buffer is empty while trying to receive
