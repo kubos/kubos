@@ -15,7 +15,7 @@
  */
 
 //! Device level API for interacting with the NSL EyeStar-D2 Duplex radio
-//! https://nearspacelaunch.com/product/eyestar-d2/
+//! `<https://nearspacelaunch.com/product/eyestar-d2/>`
 
 // #![deny(missing_docs)]
 
@@ -37,7 +37,7 @@ pub struct DuplexD2 {
 
 impl DuplexD2 {
     fn get_uploaded_file_count(&self) -> Result<u32, String> {
-        self.conn.send(comms::GET_UPLOADED_FILE_COUNT);
+        self.conn.send(comms::GET_UPLOADED_FILE_COUNT).unwrap();
         let resp = match self.conn.receive() {
             Ok(r) => r,
             Err(_) => return Err(String::from("Failed to send command")),
@@ -48,9 +48,9 @@ impl DuplexD2 {
         }
 
         // Check if resp header exists
-        if (resp[0] == ('G' as u8)) && (resp[1] == ('U' as u8)) {
-            let count = (resp[2] as u32) | (resp[3] as u32) << 8 | (resp[4] as u32) << 16
-                | (resp[5] as u32) << 24;
+        if (resp[0] == b'G') && (resp[1] == b'U') {
+            let count = u32::from(resp[2]) | u32::from(resp[3]) << 8 | u32::from(resp[4]) << 16
+                | u32::from(resp[5]) << 24;
             Ok(count)
         } else {
             Err(String::from("Invalid resp header"))
@@ -58,10 +58,10 @@ impl DuplexD2 {
     }
 
     fn get_uploaded_file(&self) -> Result<comms::UploadedFile, String> {
-        self.conn.send(comms::GET_UPLOADED_FILE);
+        self.conn.send(comms::GET_UPLOADED_FILE).unwrap();
         let resp = self.conn.receive().unwrap();
 
-        if (resp[0] != ('G' as u8)) && (resp[1] != ('U' as u8)) {
+        if (resp[0] != b'G') && (resp[1] != b'U') {
             return Err(String::from("Invalid resp header"));
         }
 
@@ -95,16 +95,12 @@ impl Radio for DuplexD2 {
 
     fn reset(&self, reset_type: RadioReset) -> Result<(), RadioError> {
         match reset_type {
-            RadioReset::HardReset => {
-                // A hardware reset is signaled via a GPIO tied
-                // to the modem.
-                Ok(())
-            }
-            RadioReset::SoftReset => {
-                // A software reset is hopefully trigged by
-                // a command sent to the modem.
-                Ok(())
-            }
+            // A hardware reset is signaled via a GPIO tied
+            // to the modem.
+
+            // A software reset is hopefully trigged by
+            // a command sent to the modem.
+            RadioReset::HardReset | RadioReset::SoftReset => Ok(()),
         }
     }
 
@@ -136,7 +132,7 @@ mod tests {
 
     impl Connection for TestConnection {
         /// Basic send command function. Sends and receives
-        fn send(&self, cmd: &str) -> Result<(), String> {
+        fn send(&self, _cmd: &str) -> Result<(), String> {
             Ok(())
         }
 
@@ -201,11 +197,11 @@ mod tests {
      */
 
     #[test]
-    fn test_uploaded_file_count() {
+    fn test_uploaded_file_count_one() {
         struct TestConn;
         impl Connection for TestConn {
             /// Basic send command function. Sends and receives
-            fn send(&self, cmd: &str) -> Result<(), String> {
+            fn send(&self, _cmd: &str) -> Result<(), String> {
                 Ok(())
             }
 
@@ -228,11 +224,65 @@ mod tests {
     }
 
     #[test]
+    fn test_uploaded_file_count_zero() {
+        struct TestConn;
+        impl Connection for TestConn {
+            /// Basic send command function. Sends and receives
+            fn send(&self, _cmd: &str) -> Result<(), String> {
+                Ok(())
+            }
+
+            /// Basic receive function
+            fn receive(&self) -> Result<Vec<u8>, String> {
+                let mut ret_msg = Vec::<u8>::new();
+                ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+                ret_msg.push(0 as u8);
+                ret_msg.push(0 as u8);
+                ret_msg.push(0 as u8);
+                ret_msg.push(0 as u8);
+                Ok(ret_msg)
+            }
+        }
+        let d = DuplexD2 {
+            conn: Box::new(TestConn {}),
+        };
+        let count = d.get_uploaded_file_count().unwrap();
+        assert_eq!(count, 0, "File count should be zero")
+    }
+
+    #[test]
+    fn test_uploaded_file_count_many() {
+        struct TestConn;
+        impl Connection for TestConn {
+            /// Basic send command function. Sends and receives
+            fn send(&self, _cmd: &str) -> Result<(), String> {
+                Ok(())
+            }
+
+            /// Basic receive function
+            fn receive(&self) -> Result<Vec<u8>, String> {
+                let mut ret_msg = Vec::<u8>::new();
+                ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+                ret_msg.push(0 as u8);
+                ret_msg.push(0 as u8);
+                ret_msg.push(0 as u8);
+                ret_msg.push(1 as u8);
+                Ok(ret_msg)
+            }
+        }
+        let d = DuplexD2 {
+            conn: Box::new(TestConn {}),
+        };
+        let count = d.get_uploaded_file_count().unwrap();
+        assert_eq!(count, 16777216, "File count should be 16777216")
+    }
+
+    #[test]
     fn test_uploaded_file() {
         struct TestConn;
         impl Connection for TestConn {
             /// Basic send command function. Sends and receives
-            fn send(&self, cmd: &str) -> Result<(), String> {
+            fn send(&self, _cmd: &str) -> Result<(), String> {
                 Ok(())
             }
 

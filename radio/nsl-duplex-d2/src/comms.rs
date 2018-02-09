@@ -1,6 +1,6 @@
-pub const GET_UPLOADED_FILE_COUNT: &'static str = "GUGETUFC";
-pub const GET_UPLOADED_FILE: &'static str = "GUGET_UF";
-pub const RESP_HEADER: &'static str = "GU";
+pub const GET_UPLOADED_FILE_COUNT: &str = "GUGETUFC";
+pub const GET_UPLOADED_FILE: &str = "GUGET_UF";
+pub const RESP_HEADER: &str = "GU";
 
 pub struct UploadedFile {
     pub name: String,
