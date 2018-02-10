@@ -19,6 +19,7 @@
 
 // #![deny(missing_docs)]
 
+extern crate nums_as_bytes;
 extern crate radio_api;
 extern crate serde_json;
 extern crate serial;
@@ -31,6 +32,8 @@ use serde_json::Error as SerdeJsonError;
 use radio_api::{Connection, Radio, RadioError, RadioReset};
 use comms::*;
 use file::*;
+
+use nums_as_bytes::AsBytes;
 
 /// Structure implementing Radio functionality for Duplex-D2
 pub struct DuplexD2 {
@@ -52,8 +55,8 @@ impl DuplexD2 {
         }
     }
 
-    fn send_command(&self, command: &str) -> Result<Vec<u8>, String> {
-        self.conn.send(command).unwrap();
+    fn send_command(&self, command: u64) -> Result<Vec<u8>, String> {
+        self.conn.send(command.as_bytes()).unwrap();
         // wait with timeout here?
         let resp = match self.conn.receive() {
             Ok(r) => r,
@@ -65,7 +68,7 @@ impl DuplexD2 {
             return Ok(resp);
         } else {
             // retries?
-            return Err(String::from("Invalid resp header"));
+            Err(String::from("Invalid resp header"))
         }
     }
 }
@@ -120,7 +123,7 @@ mod tests {
 
     impl Connection for TestConnection {
         /// Basic send command function. Sends and receives
-        fn send(&self, _cmd: &str) -> Result<(), String> {
+        fn send(&self, _data: Vec<u8>) -> Result<(), String> {
             Ok(())
         }
 

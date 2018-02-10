@@ -25,7 +25,7 @@ use serde_json::Error as SerdeJsonError;
 /// Connection trait
 pub trait Connection {
     /// Basic send command function. Sends and receives
-    fn send(&self, cmd: &str) -> Result<(), String>;
+    fn send(&self, data: Vec<u8>) -> Result<(), String>;
 
     /// Basic receive function
     fn receive(&self) -> Result<Vec<u8>, String>;
