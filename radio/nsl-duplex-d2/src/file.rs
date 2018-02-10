@@ -73,9 +73,8 @@ mod tests {
         assert_eq!(count, 1, "File count should be one")
     }
 
-#[test]
+    #[test]
     fn test_uploaded_file_count_zero() {
-        use comms::*;
         let mut ret_msg = Vec::<u8>::new();
         ret_msg.extend(RESP_HEADER.as_bytes());
         ret_msg.push(0 as u8);
@@ -86,9 +85,8 @@ mod tests {
         assert_eq!(count, 0, "File count should be zero")
     }
 
-#[test]
+    #[test]
     fn test_uploaded_file_count_many() {
-        use comms::*;
         let mut ret_msg = Vec::<u8>::new();
         ret_msg.extend(RESP_HEADER.as_bytes());
         ret_msg.push(0 as u8);
