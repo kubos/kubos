@@ -16,7 +16,6 @@ impl File {
             payload: payload,
         }
     }
-
 }
 
 pub fn process_file_count(file_count: Vec<u8>) -> u32 {
@@ -55,4 +54,43 @@ fn test_file_from_response() {
         String::from_utf8(uploaded_file.payload).unwrap(),
         String::from("test")
         );
+}
+
+#[test]
+fn test_uploaded_file_count_one() {
+    use comms::*;
+    let mut ret_msg = Vec::<u8>::new();
+    ret_msg.extend(RESP_HEADER.as_bytes().iter().cloned());
+    ret_msg.push(1 as u8);
+    ret_msg.push(0 as u8);
+    ret_msg.push(0 as u8);
+    ret_msg.push(0 as u8);
+    let count = process_file_count(ret_msg);
+    assert_eq!(count, 1, "File count should be one")
+}
+
+#[test]
+fn test_uploaded_file_count_zero() {
+    use comms::*;
+    let mut ret_msg = Vec::<u8>::new();
+    ret_msg.extend(RESP_HEADER.as_bytes().iter().cloned());
+    ret_msg.push(0 as u8);
+    ret_msg.push(0 as u8);
+    ret_msg.push(0 as u8);
+    ret_msg.push(0 as u8);
+    let count = process_file_count(ret_msg);
+    assert_eq!(count, 0, "File count should be zero")
+}
+
+#[test]
+fn test_uploaded_file_count_many() {
+    use comms::*;
+    let mut ret_msg = Vec::<u8>::new();
+    ret_msg.extend(RESP_HEADER.as_bytes().iter().cloned());
+    ret_msg.push(0 as u8);
+    ret_msg.push(0 as u8);
+    ret_msg.push(0 as u8);
+    ret_msg.push(1 as u8);
+    let count = process_file_count(ret_msg);
+    assert_eq!(count, 16777216, "File count should be 16777216")
 }
