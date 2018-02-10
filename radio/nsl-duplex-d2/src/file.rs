@@ -31,7 +31,7 @@ fn size_from_utf_8(utf8_size: Vec<u8>) -> usize {
 }
 
 #[test]
-fn test_get_uploaded_file() {
+fn test_file_from_response() {
     use comms::*;
     let mut ret_msg = Vec::<u8>::new();
     ret_msg.extend(RESP_HEADER.as_bytes().iter().cloned());
