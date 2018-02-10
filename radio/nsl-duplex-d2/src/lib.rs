@@ -31,7 +31,6 @@ use serde_json::Error as SerdeJsonError;
 use radio_api::{Connection, Radio, RadioError, RadioReset};
 use comms::*;
 use file::*;
-use serial_comm::*;
 
 /// Structure implementing Radio functionality for Duplex-D2
 pub struct DuplexD2 {
@@ -39,12 +38,6 @@ pub struct DuplexD2 {
 }
 
 impl DuplexD2 {
-    pub fn init() -> DuplexD2 {
-        DuplexD2 {
-            conn: Box::new(SerialConnection),
-        }
-    }
-
     pub fn get_uploaded_file(&self) -> Result<File, String> {
         match self.send_command(GET_UPLOADED_FILE) {
             Ok(response) => { Ok(File::from_response(response)) },
