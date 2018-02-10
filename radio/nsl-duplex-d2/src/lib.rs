@@ -75,7 +75,6 @@ impl DuplexD2 {
             return Err(String::from("Invalid resp header"));
         }
     }
-
 }
 
 impl Radio for DuplexD2 {
@@ -227,31 +226,4 @@ mod tests {
         assert_eq!(count, 16777216, "File count should be 16777216")
     }
 
-    #[test]
-    fn test_get_uploaded_file() {
-        let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(RESP_HEADER.as_bytes().iter().cloned());
-        let name_size = String::from("008");
-        let size = String::from("000004");
-        let name = String::from("test.txt");
-        let data = String::from("test");
-        let crc = String::from("44");
-
-        ret_msg.extend(name_size.as_bytes().iter().cloned());
-        ret_msg.extend(size.as_bytes().iter().cloned());
-        ret_msg.extend(name.as_bytes().iter().cloned());
-        ret_msg.extend(data.as_bytes().iter().cloned());
-        ret_msg.extend(crc.as_bytes().iter().cloned());
-        let d = DuplexD2 {
-            conn: Box::new(TestConnection { data: ret_msg }),
-        };
-        let file = d.get_uploaded_file().unwrap();
-        // check file name
-        assert_eq!(file.name, String::from("test.txt"));
-        // check payload
-        assert_eq!(
-            String::from_utf8(file.payload).unwrap(),
-            String::from("test")
-        );
-    }
 }
