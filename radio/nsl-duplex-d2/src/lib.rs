@@ -25,10 +25,12 @@ extern crate serial;
 
 pub mod serial_comm;
 pub mod comms;
+pub mod file;
 
 use serde_json::Error as SerdeJsonError;
 use radio_api::{Connection, Radio, RadioError, RadioReset};
 use comms::*;
+use file::*;
 use serial_comm::*;
 
 /// Structure implementing Radio functionality for Duplex-D2
@@ -43,9 +45,9 @@ impl DuplexD2 {
         }
     }
 
-    pub fn get_uploaded_file(&self) -> Result<UploadedFile, String> {
+    pub fn get_uploaded_file(&self) -> Result<File, String> {
         match self.send_command(GET_UPLOADED_FILE) {
-            Ok(response) => { Ok(UploadedFile::from_response(response)) },
+            Ok(response) => { Ok(File::from_response(response)) },
             Err(e) => Err(e),
         }
     }
