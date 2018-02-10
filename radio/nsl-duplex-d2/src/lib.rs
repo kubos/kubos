@@ -37,7 +37,6 @@ pub struct DuplexD2 {
 }
 
 impl DuplexD2 {
-
     pub fn init() -> DuplexD2 {
         DuplexD2 {
             conn: Box::new(SerialConnection),
@@ -46,7 +45,7 @@ impl DuplexD2 {
 
     pub fn get_uploaded_file(&self) -> Result<UploadedFile, String> {
         match self.send_command(GET_UPLOADED_FILE) {
-            Ok(resp) => { Ok(self.uploaded_file_from_response(resp)) },
+            Ok(response) => { Ok(UploadedFile::from_response(response)) },
             Err(e) => Err(e),
         }
     }
@@ -56,23 +55,6 @@ impl DuplexD2 {
             Ok(file_count) => { Ok(self.process_file_count(file_count)) },
             Err(e) => Err(e),
         }
-    }
-
-    fn uploaded_file_from_response(&self, file_response: Vec<u8>) -> UploadedFile {
-        let name_size = self.size_from_utf_8(file_response[2..5].to_vec());
-        let payload_size = self.size_from_utf_8(file_response[5..11].to_vec());
-
-        let name = String::from_utf8(file_response[11..(11 + name_size)].to_vec()).unwrap();
-        let payload = file_response[(11 + name_size)..(11 + name_size + payload_size)].to_vec();
-
-        UploadedFile {
-            name: name,
-            payload: payload,
-        }
-    }
-
-    fn size_from_utf_8(&self, utf8_size: Vec<u8>) -> usize {
-        String::from_utf8(utf8_size).unwrap().parse::<usize>().unwrap()
     }
 
     fn process_file_count(&self, file_count: Vec<u8>) -> u32 {
