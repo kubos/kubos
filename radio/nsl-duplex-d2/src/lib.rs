@@ -27,8 +27,9 @@ pub mod serial_comm;
 pub mod comms;
 
 use serde_json::Error as SerdeJsonError;
-
 use radio_api::{Connection, Radio, RadioError, RadioReset};
+use comms::*;
+use serial_comm::*;
 
 /// Structure implementing Radio functionality for Duplex-D2
 pub struct DuplexD2 {
@@ -36,58 +37,68 @@ pub struct DuplexD2 {
 }
 
 impl DuplexD2 {
+
     pub fn init() -> DuplexD2 {
         DuplexD2 {
-            conn: Box::new(serial_comm::SerialConnection),
+            conn: Box::new(SerialConnection),
+        }
+    }
+
+    pub fn get_uploaded_file(&self) -> Result<UploadedFile, String> {
+        match self.send_command(GET_UPLOADED_FILE) {
+            Ok(resp) => { Ok(self.uploaded_file_from_response(resp)) },
+            Err(e) => Err(e),
         }
     }
 
     pub fn get_uploaded_file_count(&self) -> Result<u32, String> {
-        self.conn.send(comms::GET_UPLOADED_FILE_COUNT).unwrap();
+        match self.send_command(GET_UPLOADED_FILE_COUNT) {
+            Ok(file_count) => { Ok(self.process_file_count(file_count)) },
+            Err(e) => Err(e),
+        }
+    }
+
+    fn uploaded_file_from_response(&self, file_response: Vec<u8>) -> UploadedFile {
+        let name_size = self.size_from_utf_8(file_response[2..5].to_vec());
+        let payload_size = self.size_from_utf_8(file_response[5..11].to_vec());
+
+        let name = String::from_utf8(file_response[11..(11 + name_size)].to_vec()).unwrap();
+        let payload = file_response[(11 + name_size)..(11 + name_size + payload_size)].to_vec();
+
+        UploadedFile {
+            name: name,
+            payload: payload,
+        }
+    }
+
+    fn size_from_utf_8(&self, utf8_size: Vec<u8>) -> usize {
+        String::from_utf8(utf8_size).unwrap().parse::<usize>().unwrap()
+    }
+
+    fn process_file_count(&self, file_count: Vec<u8>) -> u32 {
+        u32::from(file_count[2])
+            | u32::from(file_count[3]) << 8
+            | u32::from(file_count[4]) << 16
+            | u32::from(file_count[5]) << 24
+    }
+
+    fn send_command(&self, command: &str) -> Result<Vec<u8>, String> {
+        self.conn.send(command).unwrap();
+        // wait with timeout here?
         let resp = match self.conn.receive() {
             Ok(r) => r,
-            Err(_) => return Err(String::from("Failed to send command")),
+            Err(e) => return Err(e),
         };
-
-        if resp.len() != 6 {
-            return Err(String::from("Wrong response length"));
-        }
 
         // Check if resp header exists
         if (resp[0] == b'G') && (resp[1] == b'U') {
-            let count = u32::from(resp[2]) | u32::from(resp[3]) << 8 | u32::from(resp[4]) << 16
-                | u32::from(resp[5]) << 24;
-            Ok(count)
+            return Ok(resp);
         } else {
-            Err(String::from("Invalid resp header"))
-        }
-    }
-
-    pub fn get_uploaded_file(&self) -> Result<comms::UploadedFile, String> {
-        self.conn.send(comms::GET_UPLOADED_FILE).unwrap();
-        let resp = self.conn.receive().unwrap();
-
-        if (resp[0] != b'G') && (resp[1] != b'U') {
+            // retries?
             return Err(String::from("Invalid resp header"));
         }
-
-        let name_size = String::from_utf8(resp[2..5].to_vec())
-            .unwrap()
-            .parse::<usize>()
-            .unwrap();
-        let payload_size = String::from_utf8(resp[5..11].to_vec())
-            .unwrap()
-            .parse::<usize>()
-            .unwrap();
-
-        let name = String::from_utf8(resp[11..(11 + name_size)].to_vec()).unwrap();
-        let payload = resp[(11 + name_size)..(11 + name_size + payload_size)].to_vec();
-
-        Ok(comms::UploadedFile {
-            name: name,
-            payload: payload,
-        })
     }
+
 }
 
 impl Radio for DuplexD2 {
@@ -194,20 +205,10 @@ mod tests {
         assert!(d.send(data).is_ok(), "Send should pass")
     }
 
-    /*
-    #[test]
-    fn test_receive() {
-        let d = DuplexD2 {
-            conn: Box::new(TestConnection {}),
-        };
-        assert!(d.receive().is_ok(), "Receive should pass")
-    }
-     */
-
     #[test]
     fn test_uploaded_file_count_one() {
         let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.extend(RESP_HEADER.as_bytes().iter().cloned());
         ret_msg.push(1 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
@@ -222,7 +223,7 @@ mod tests {
     #[test]
     fn test_uploaded_file_count_zero() {
         let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.extend(RESP_HEADER.as_bytes().iter().cloned());
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
@@ -237,7 +238,7 @@ mod tests {
     #[test]
     fn test_uploaded_file_count_many() {
         let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.extend(RESP_HEADER.as_bytes().iter().cloned());
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
@@ -252,7 +253,7 @@ mod tests {
     #[test]
     fn test_get_uploaded_file() {
         let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(comms::RESP_HEADER.as_bytes().iter().cloned());
+        ret_msg.extend(RESP_HEADER.as_bytes().iter().cloned());
         let name_size = String::from("008");
         let size = String::from("000004");
         let name = String::from("test.txt");
@@ -276,42 +277,4 @@ mod tests {
             String::from("test")
         );
     }
-
-    /*
-    #[test]
-    fn test_uploaded_file_delete() {
-        struct TestConn {
-            data: Vec<u8>,
-            count: i32
-        }
-
-        impl Connection for TestConn {
-            /// Basic send command function. Sends and receives
-            fn send(&self, _cmd: &str) -> Result<(), String> {
-                match str {
-                    comms::GET_UPLOADED_FILE_COUNT
-                }
-                Ok(())
-            }
-
-            /// Basic receive function
-            fn receive(&self) -> Result<Vec<u8>, String> {
-                Ok(self.data.clone())
-            }
-        }
-
-        let d = DuplexD2 {
-            conn: Box::new(TestConn { data: vec![0; 0], count: 0 }),
-        };
-
-        let count = d.get_uploaded_file_count().unwrap();
-        assert_eq!(count, 1, "File count should be one");
-
-        let file = d.get_uploaded_file().unwrap();
-        assert_eq!(file.name, String::from("test.txt"));
-
-        let count = d.get_uploaded_file_count().unwrap();
-        assert_eq!(count, 0, "File count should be zero");
-    }
-*/
 }
