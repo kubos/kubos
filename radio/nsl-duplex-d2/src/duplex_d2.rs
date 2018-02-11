@@ -27,6 +27,7 @@ extern crate serial;
 pub mod serial_comm;
 pub mod comms;
 pub mod file;
+pub mod state_of_health_record;
 
 use serde_json::Error as SerdeJsonError;
 use radio_api::{Connection, Radio, RadioError, RadioReset};
