@@ -13,12 +13,14 @@
 #[derive(Default)]
 pub struct StateOfHealthRecord {
    reset_count: [u8; 4],
+   current_time: [u8; 4],
 }
 
 impl StateOfHealthRecord {
     pub fn from_response(soh_response: Vec<u8>) -> StateOfHealthRecord {
         let mut state_of_health_record: StateOfHealthRecord = Default::default();
         state_of_health_record.reset_count.copy_from_slice(&soh_response[2..6]);
+        state_of_health_record.current_time.copy_from_slice(&soh_response[6..10]);
         state_of_health_record
     }
 }
@@ -30,12 +32,25 @@ mod tests {
 
     #[test]
     fn test_reset_count() {
-        let mut soh_message = Vec::<u8>::new();
-        let reset_count = [0,0,1,2];
-        soh_message.extend(RESP_HEADER.as_bytes());
-        soh_message.extend(reset_count.iter());
-
+        let soh_message = get_test_message();
         let state_of_health_record = StateOfHealthRecord::from_response(soh_message);
         assert_eq!(state_of_health_record.reset_count, [0,0,1,2]);
+    }
+
+    #[test]
+    fn test_current_time() {
+        let soh_message = get_test_message();
+        let state_of_health_record = StateOfHealthRecord::from_response(soh_message);
+        assert_eq!(state_of_health_record.current_time, [5,6,7,8]);
+    }
+
+    fn get_test_message() -> Vec<u8> {
+        let mut soh_message = Vec::<u8>::new();
+        let reset_count = [0,0,1,2];
+        let current_time = [5,6,7,8];
+        soh_message.extend(RESP_HEADER.as_bytes());
+        soh_message.extend(reset_count.iter());
+        soh_message.extend(current_time.iter());
+        soh_message
     }
 }
