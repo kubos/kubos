@@ -28,11 +28,14 @@ pub mod serial_comm;
 pub mod comms;
 pub mod file;
 pub mod state_of_health_record;
+pub mod d2_message;
 
 use serde_json::Error as SerdeJsonError;
 use radio_api::{Connection, Radio, RadioError, RadioReset};
 use comms::*;
 use file::*;
+use state_of_health_record::*;
+use d2_message::*;
 
 use nums_as_bytes::AsBytes;
 
@@ -52,6 +55,13 @@ impl DuplexD2 {
     pub fn get_uploaded_file_count(&self) -> Result<u32, String> {
         match self.send_command(GET_UPLOADED_FILE_COUNT) {
             Ok(file_count) => { Ok(file::process_file_count(file_count)) },
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn get_state_of_health_record(&self) -> Result<StateOfHealthRecord, String> {
+        match self.send_command(GET_MODEM_STATE_OF_HEALTH) {
+            Ok(response) => { Ok(StateOfHealthRecord::from_response(response)) },
             Err(e) => Err(e),
         }
     }
@@ -85,11 +95,6 @@ impl Radio for DuplexD2 {
 
     fn reset(&self, reset_type: RadioReset) -> Result<(), RadioError> {
         match reset_type {
-            // A hardware reset is signaled via a GPIO tied
-            // to the modem.
-
-            // A software reset is hopefully trigged by
-            // a command sent to the modem.
             RadioReset::HardReset | RadioReset::SoftReset => Ok(()),
         }
     }
@@ -117,27 +122,55 @@ impl Radio for DuplexD2 {
 #[cfg(test)]
 mod tests {
     use ::*;
+    use state_of_health_record::tests::*;
 
-    struct TestConnection {
+    struct TestGoodConnection {
         data: Vec<u8>,
     }
 
-    impl Connection for TestConnection {
-        /// Basic send command function. Sends and receives
+    impl Connection for TestGoodConnection {
         fn send(&self, _data: Vec<u8>) -> Result<(), String> {
             Ok(())
         }
 
-        /// Basic receive function
         fn receive(&self) -> Result<Vec<u8>, String> {
             Ok(self.data.clone())
+        }
+    }
+
+    struct TestBadConnection {
+    }
+
+    impl Connection for TestBadConnection {
+       fn send(&self, _: Vec<u8>) -> Result<(), String> {
+            Err(String::from("Send failed"))
+        }
+
+        fn receive(&self) -> Result<Vec<u8>, String> {
+            Err(String::from("Receive failed"))
+        }
+    }
+
+    #[test]
+    fn test_state_of_health_message() {
+        let radio = DuplexD2 {
+            conn: Box::new(TestGoodConnection { data: soh_message() }),
+        };
+        let soh_response = radio.get_state_of_health_record();
+        match soh_response {
+            Ok(response) => {
+                assert_eq!([0,0,1,2], response.reset_count)
+            },
+            Err(_) => {
+                assert!(false, "Expected the SOH call to succeed.")
+            }
         }
     }
 
     #[test]
     fn test_init() {
         let d = DuplexD2 {
-            conn: Box::new(TestConnection { data: Vec::new() }),
+            conn: Box::new(TestGoodConnection { data: Vec::new() }),
         };
         assert!(d.init().is_ok(), "Init should pass")
     }
@@ -145,7 +178,7 @@ mod tests {
     #[test]
     fn test_terminate() {
         let d = DuplexD2 {
-            conn: Box::new(TestConnection { data: Vec::new() }),
+            conn: Box::new(TestGoodConnection { data: Vec::new() }),
         };
         assert!(d.terminate().is_ok(), "Terminate should pass")
     }
@@ -153,7 +186,7 @@ mod tests {
     #[test]
     fn test_configure() {
         let d = DuplexD2 {
-            conn: Box::new(TestConnection { data: Vec::new() }),
+            conn: Box::new(TestGoodConnection { data: Vec::new() }),
         };
         let config = r#"{
                      "retries": 2
@@ -164,17 +197,26 @@ mod tests {
     #[test]
     fn test_reset() {
         let d = DuplexD2 {
-            conn: Box::new(TestConnection { data: Vec::new() }),
+            conn: Box::new(TestGoodConnection { data: Vec::new() }),
         };
         assert!(d.reset(RadioReset::HardReset).is_ok(), "Reset should pass")
     }
 
     #[test]
-    fn test_send() {
-        let d = DuplexD2 {
-            conn: Box::new(TestConnection { data: Vec::new() }),
+    fn test_send_fails() {
+        let radio = DuplexD2 {
+            conn: Box::new(TestBadConnection {}),
         };
         let data: Vec<u8> = Vec::new();
-        assert!(d.send(data).is_ok(), "Send should pass")
+        assert!(radio.send(data).is_ok(), "Send should fail")
+    }
+
+    #[test]
+    fn test_send_succeeds() {
+        let radio = DuplexD2 {
+            conn: Box::new(TestGoodConnection { data: Vec::new() }),
+        };
+        let data: Vec<u8> = Vec::new();
+        assert!(radio.send(data).is_ok(), "Send should pass")
     }
 }
