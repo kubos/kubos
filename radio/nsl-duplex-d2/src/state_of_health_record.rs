@@ -10,7 +10,7 @@ pub struct StateOfHealthRecord {
    call_attempts_since_reset:       [u8; 4], // (4 byte integer) Count of call attempts since latest reset
    successful_connects_since_reset: [u8; 4], // (4 byte integer) Count of successful connects since latest reset
    average_connection_duration:     [u8; 4], // (4 byte integer) Average connection duration (seconds)
-   connection_duration_std_dev:     [u8; 4] // (4 byte integer) Connection duration standard deviation (seconds)
+   connection_duration_std_dev:     [u8; 4]  // (4 byte integer) Connection duration standard deviation (seconds)
 }
 
 impl StateOfHealthRecord {
@@ -20,7 +20,7 @@ impl StateOfHealthRecord {
         state_of_health_record.current_time.copy_from_slice(&soh_response[6..10]);
         state_of_health_record.current_rssi = soh_response[10];
         state_of_health_record.connection_status = soh_response[11];
-        state_of_health_record.globalstar_gateway = soh_response[13];
+        state_of_health_record.globalstar_gateway = soh_response[12];
         state_of_health_record.last_contact_time.copy_from_slice(&soh_response[13..17]);
         state_of_health_record.last_attempt_time.copy_from_slice(&soh_response[17..21]);
         state_of_health_record.call_attempts_since_reset.copy_from_slice(&soh_response[21..25]);
@@ -38,33 +38,60 @@ mod tests {
 
     #[test]
     fn test_reset_count() {
-        let soh_message = get_test_message();
-        let state_of_health_record = StateOfHealthRecord::from_response(soh_message);
-        assert_eq!(state_of_health_record.reset_count, [0,0,1,2]);
+        assert_eq!(test_record().reset_count, [0,0,1,2]);
     }
 
     #[test]
     fn test_current_time() {
-        let soh_message = get_test_message();
-        let state_of_health_record = StateOfHealthRecord::from_response(soh_message);
-        assert_eq!(state_of_health_record.current_time, [5,6,7,8]);
+        assert_eq!(test_record().current_time, [5,6,7,8]);
     }
 
     #[test]
     fn test_current_rssi() {
-        let soh_message = get_test_message();
-        let state_of_health_record = StateOfHealthRecord::from_response(soh_message);
-        assert_eq!(state_of_health_record.current_rssi, 9);
+        assert_eq!(test_record().current_rssi, 9);
     }
 
     #[test]
-    fn test_connection_state() {
-        let soh_message = get_test_message();
-        let state_of_health_record = StateOfHealthRecord::from_response(soh_message);
-        assert_eq!(state_of_health_record.connection_status, 3);
+    fn test_connection_status() {
+        assert_eq!(test_record().connection_status, 3);
     }
 
-    fn get_test_message() -> Vec<u8> {
+    #[test]
+    fn test_globalstar_gateway() {
+        assert_eq!(test_record().globalstar_gateway, 8);
+    }
+
+    #[test]
+    fn test_conact_time() {
+        assert_eq!(test_record().last_contact_time, [0,7,0,7]);
+    }
+
+    #[test]
+    fn test_last_attempt_time() {
+        assert_eq!(test_record().last_attempt_time, [1,0,1,0]);
+    }
+
+    #[test]
+    fn test_call_attempts_since_reset() {
+        assert_eq!(test_record().call_attempts_since_reset, [3,3,3,3]);
+    }
+
+    #[test]
+    fn test_successful_connects_since_reset() {
+        assert_eq!(test_record().successful_connects_since_reset, [1,1,9,9]);
+    }
+
+    #[test]
+    fn test_average_connection_duration() {
+        assert_eq!(test_record().average_connection_duration, [7,6,5,4]);
+    }
+
+    #[test]
+    fn test_connection_duration_std_dev() {
+        assert_eq!(test_record().connection_duration_std_dev, [2,2,2,2]);
+    }
+
+    fn test_record() -> StateOfHealthRecord {
         let mut soh_message = Vec::<u8>::new();
         let reset_count = [0,0,1,2];
         let current_time = [5,6,7,8];
@@ -90,6 +117,6 @@ mod tests {
         soh_message.extend(successful_connects_since_reset.iter());
         soh_message.extend(average_connection_duration.iter());
         soh_message.extend(connection_duration_std_dev.iter());
-        soh_message
+        StateOfHealthRecord::from_response(soh_message)
     }
 }
