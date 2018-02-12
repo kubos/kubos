@@ -11,3 +11,6 @@ serde_derive = "1.0.27"
 serde_json = "1.0.9"
 serial = "0.4"
 nums_as_bytes = { path = "../../nums_as_bytes" }
+
+[lib]
+name = "duplex_d2_radio"
