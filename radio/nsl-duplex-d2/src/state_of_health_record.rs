@@ -17,7 +17,7 @@ pub struct StateOfHealthRecord {
 }
 
 impl D2Message for StateOfHealthRecord {
-	fn new(message: Vec<u8>) -> StateOfHealthRecord {
+  fn new(message: Vec<u8>) -> StateOfHealthRecord {
         let mut record: StateOfHealthRecord = Default::default();
         record.reset_count.copy_from_slice(&message[2..6]);
         record.current_time.copy_from_slice(&message[6..10]);
@@ -32,7 +32,7 @@ impl D2Message for StateOfHealthRecord {
         record.connection_duration_std_dev.copy_from_slice(&message[33..37]);
         record.message = message;
         record
-	}
+  }
 
     fn message(&self) -> & Vec<u8> {
         & self.message
