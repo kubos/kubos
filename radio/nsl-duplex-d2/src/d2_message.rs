@@ -1,14 +1,14 @@
 pub trait D2Message {
-  fn new(message: Vec<u8>) -> Self;
+    fn new(message: Vec<u8>) -> Self;
 
-    fn message(&self) -> & Vec<u8>;
+    fn message(&self) -> &Vec<u8>;
 
     fn validate(&self) -> Result<(), String> {
-       if self.validate_header() && self.validate_body() {
-           Ok(())
-       } else {
-           Err(String::from("Invalid header"))
-       }
+        if self.validate_header() && self.validate_body() {
+            Ok(())
+        } else {
+            Err(String::from("Invalid header"))
+        }
     }
 
     // default to true, individual Messages can validate as

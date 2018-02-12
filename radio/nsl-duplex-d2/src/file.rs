@@ -19,14 +19,15 @@ impl File {
 }
 
 pub fn process_file_count(file_count: Vec<u8>) -> u32 {
-    u32::from(file_count[2])
-        | u32::from(file_count[3]) << 8
-        | u32::from(file_count[4]) << 16
+    u32::from(file_count[2]) | u32::from(file_count[3]) << 8 | u32::from(file_count[4]) << 16
         | u32::from(file_count[5]) << 24
 }
 
 fn size_from_utf_8(utf8_size: Vec<u8>) -> usize {
-    String::from_utf8(utf8_size).unwrap().parse::<usize>().unwrap()
+    String::from_utf8(utf8_size)
+        .unwrap()
+        .parse::<usize>()
+        .unwrap()
 }
 
 #[cfg(test)]
@@ -58,7 +59,7 @@ mod tests {
         assert_eq!(
             String::from_utf8(uploaded_file.payload).unwrap(),
             String::from("test")
-            );
+        );
     }
 
     #[test]
