@@ -42,6 +42,7 @@ name = "nsl-duplex-d2"
 version = "0.1.0"
 dependencies = [
  "chrono 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nums_as_bytes 0.1.0",
  "radio-api 0.1.0",
  "serde 1.0.27 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.27 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -88,6 +89,10 @@ dependencies = [
 name = "num-traits"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "nums_as_bytes"
+version = "0.1.0"
 
 [[package]]
 name = "quote"
