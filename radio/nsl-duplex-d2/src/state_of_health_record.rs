@@ -45,7 +45,7 @@ pub mod tests {
     use state_of_health_record::*;
 
     #[test]
-    fn test_reset_count() {
+    fn test_new_from_message() {
         let test_record = StateOfHealthRecord::new(soh_message());
         assert_eq!(test_record.reset_count, [0,0,1,2]);
         assert_eq!(test_record.current_time, [5,6,7,8]);
