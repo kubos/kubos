@@ -18,32 +18,24 @@ pub struct StateOfHealthRecord {
 
 impl D2Message for StateOfHealthRecord {
 	fn new(message: Vec<u8>) -> StateOfHealthRecord {
-		let mut state_of_health_record: StateOfHealthRecord = Default::default();
-		state_of_health_record.message = message;
-		state_of_health_record
+        let mut record: StateOfHealthRecord = Default::default();
+        record.reset_count.copy_from_slice(&message[2..6]);
+        record.current_time.copy_from_slice(&message[6..10]);
+        record.current_rssi = message[10];
+        record.connection_status = message[11];
+        record.globalstar_gateway = message[12];
+        record.last_contact_time.copy_from_slice(&message[13..17]);
+        record.last_attempt_time.copy_from_slice(&message[17..21]);
+        record.call_attempts_since_reset.copy_from_slice(&message[21..25]);
+        record.successful_connects_since_reset.copy_from_slice(&message[25..29]);
+        record.average_connection_duration.copy_from_slice(&message[29..33]);
+        record.connection_duration_std_dev.copy_from_slice(&message[33..37]);
+        record.message = message;
+        record
 	}
 
     fn message(&self) -> & Vec<u8> {
         & self.message
-    }
-}
-
-impl StateOfHealthRecord {
-
-    pub fn from_response(soh_response: Vec<u8>) -> StateOfHealthRecord {
-        let mut state_of_health_record: StateOfHealthRecord = Default::default();
-        state_of_health_record.reset_count.copy_from_slice(&soh_response[2..6]);
-        state_of_health_record.current_time.copy_from_slice(&soh_response[6..10]);
-        state_of_health_record.current_rssi = soh_response[10];
-        state_of_health_record.connection_status = soh_response[11];
-        state_of_health_record.globalstar_gateway = soh_response[12];
-        state_of_health_record.last_contact_time.copy_from_slice(&soh_response[13..17]);
-        state_of_health_record.last_attempt_time.copy_from_slice(&soh_response[17..21]);
-        state_of_health_record.call_attempts_since_reset.copy_from_slice(&soh_response[21..25]);
-        state_of_health_record.successful_connects_since_reset.copy_from_slice(&soh_response[25..29]);
-        state_of_health_record.average_connection_duration.copy_from_slice(&soh_response[29..33]);
-        state_of_health_record.connection_duration_std_dev.copy_from_slice(&soh_response[33..37]);
-        state_of_health_record
     }
 }
 
@@ -53,23 +45,19 @@ pub mod tests {
     use state_of_health_record::*;
 
     #[test]
-    fn test_new() {
-        let soh_record = StateOfHealthRecord::new(soh_message());
-    }
-
-    #[test]
     fn test_reset_count() {
-        assert_eq!(test_record().reset_count, [0,0,1,2]);
-        assert_eq!(test_record().current_time, [5,6,7,8]);
-        assert_eq!(test_record().current_rssi, 9);
-        assert_eq!(test_record().connection_status, 3);
-        assert_eq!(test_record().globalstar_gateway, 8);
-        assert_eq!(test_record().last_contact_time, [0,7,0,7]);
-        assert_eq!(test_record().last_attempt_time, [1,0,1,0]);
-        assert_eq!(test_record().call_attempts_since_reset, [3,3,3,3]);
-        assert_eq!(test_record().successful_connects_since_reset, [1,1,9,9]);
-        assert_eq!(test_record().average_connection_duration, [7,6,5,4]);
-        assert_eq!(test_record().connection_duration_std_dev, [2,2,2,2]);
+        let test_record = StateOfHealthRecord::new(soh_message());
+        assert_eq!(test_record.reset_count, [0,0,1,2]);
+        assert_eq!(test_record.current_time, [5,6,7,8]);
+        assert_eq!(test_record.current_rssi, 9);
+        assert_eq!(test_record.connection_status, 3);
+        assert_eq!(test_record.globalstar_gateway, 8);
+        assert_eq!(test_record.last_contact_time, [0,7,0,7]);
+        assert_eq!(test_record.last_attempt_time, [1,0,1,0]);
+        assert_eq!(test_record.call_attempts_since_reset, [3,3,3,3]);
+        assert_eq!(test_record.successful_connects_since_reset, [1,1,9,9]);
+        assert_eq!(test_record.average_connection_duration, [7,6,5,4]);
+        assert_eq!(test_record.connection_duration_std_dev, [2,2,2,2]);
     }
 
     pub fn soh_message() -> Vec<u8> {
@@ -99,9 +87,5 @@ pub mod tests {
         soh_message.extend(average_connection_duration.iter());
         soh_message.extend(connection_duration_std_dev.iter());
         soh_message
-    }
-
-    fn test_record() -> StateOfHealthRecord {
-        StateOfHealthRecord::from_response(soh_message())
     }
 }
