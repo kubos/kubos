@@ -63,10 +63,10 @@ impl DuplexD2 {
     fn send_command(&self, command: u64) -> Result<Vec<u8>, String> {
         match self.conn.send(command.as_bytes()) {
             Ok(_) => {
-        match self.conn.receive() {
-          Ok(r) => { Ok(r) },
-          Err(e) => { Err(e) }
-        }
+                match self.conn.receive() {
+                  Ok(r) => { Ok(r) },
+                  Err(e) => { Err(e) }
+                }
             },
             Err(e) => { Err(e) }
         }
