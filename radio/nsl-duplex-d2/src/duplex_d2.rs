@@ -61,25 +61,20 @@ impl DuplexD2 {
 
     pub fn get_state_of_health_record(&self) -> Result<StateOfHealthRecord, String> {
         match self.send_command(GET_MODEM_STATE_OF_HEALTH) {
-            Ok(response) => { Ok(StateOfHealthRecord::from_response(response)) },
+            Ok(response) => { Ok(StateOfHealthRecord::new(response)) },
             Err(e) => Err(e),
         }
     }
 
     fn send_command(&self, command: u64) -> Result<Vec<u8>, String> {
-        self.conn.send(command.as_bytes()).unwrap();
-        // wait with timeout here?
-        let resp = match self.conn.receive() {
-            Ok(r) => r,
-            Err(e) => return Err(e),
-        };
-
-        // Check if resp header exists
-        if (resp[0] == b'G') && (resp[1] == b'U') {
-            return Ok(resp);
-        } else {
-            // retries?
-            Err(String::from("Invalid resp header"))
+        match self.conn.send(command.as_bytes()) {
+            Ok(_) => {
+        match self.conn.receive() {
+          Ok(r) => { Ok(r) },
+          Err(e) => { Err(e) }
+        }
+            },
+            Err(e) => { Err(e) }
         }
     }
 }
@@ -143,11 +138,11 @@ mod tests {
 
     impl Connection for TestBadConnection {
        fn send(&self, _: Vec<u8>) -> Result<(), String> {
-            Err(String::from("Send failed"))
+            return Err(String::from("Send failed"));
         }
 
         fn receive(&self) -> Result<Vec<u8>, String> {
-            Err(String::from("Receive failed"))
+            return Err(String::from("Receive failed"));
         }
     }
 
@@ -203,12 +198,15 @@ mod tests {
     }
 
     #[test]
-    fn test_send_fails() {
+    fn test_send_command_fails() {
         let radio = DuplexD2 {
             conn: Box::new(TestBadConnection {}),
         };
-        let data: Vec<u8> = Vec::new();
-        assert!(radio.send(data).is_ok(), "Send should fail")
+        let command: u64 = 11111111111111111;
+        match radio.send_command(command) {
+            Ok(_) => { assert!(false, "Expected send_command to fail.".to_string())},
+            Err(message) => { assert!(true, message)},
+        }
     }
 
     #[test]

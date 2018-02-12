@@ -1,4 +1,3 @@
-use ::*;
 use d2_message::{D2Message};
 
 #[derive(Default)]
