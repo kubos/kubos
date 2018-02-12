@@ -14,4 +14,3 @@ nums_as_bytes = { path = "../../nums_as_bytes" }
 
 [lib]
 name = "duplex_d2_radio"
-path = "src/duplex_d2.rs"

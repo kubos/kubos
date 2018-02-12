@@ -1,5 +1,5 @@
 pub trait D2Message {
-	fn new(message: Vec<u8>) -> Self;
+  fn new(message: Vec<u8>) -> Self;
 
     fn message(&self) -> & Vec<u8>;
 
