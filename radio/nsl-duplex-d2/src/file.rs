@@ -4,7 +4,7 @@ pub struct File {
 }
 
 impl File {
-    pub fn from_response(file_response: Vec<u8>) -> File {
+    pub fn from_response(file_response: &[u8]) -> File {
         let name_size = size_from_utf_8(file_response[2..5].to_vec());
         let payload_size = size_from_utf_8(file_response[5..11].to_vec());
 
@@ -18,7 +18,7 @@ impl File {
     }
 }
 
-pub fn process_file_count(file_count: Vec<u8>) -> u32 {
+pub fn process_file_count(file_count: &[u8]) -> u32 {
     u32::from(file_count[2]) | u32::from(file_count[3]) << 8 | u32::from(file_count[4]) << 16
         | u32::from(file_count[5]) << 24
 }
@@ -52,7 +52,7 @@ mod tests {
         ret_msg.extend(data.as_bytes().iter().cloned());
         ret_msg.extend(crc.as_bytes().iter().cloned());
 
-        let uploaded_file = File::from_response(ret_msg);
+        let uploaded_file = File::from_response(&ret_msg);
         // check file name
         assert_eq!(uploaded_file.name, String::from("test.txt"));
         // check payload
@@ -70,7 +70,7 @@ mod tests {
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
-        let count = process_file_count(ret_msg);
+        let count = process_file_count(&ret_msg);
         assert_eq!(count, 1, "File count should be one")
     }
 
@@ -82,7 +82,7 @@ mod tests {
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
-        let count = process_file_count(ret_msg);
+        let count = process_file_count(&ret_msg);
         assert_eq!(count, 0, "File count should be zero")
     }
 
@@ -94,7 +94,7 @@ mod tests {
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(1 as u8);
-        let count = process_file_count(ret_msg);
+        let count = process_file_count(&ret_msg);
         assert_eq!(count, 16777216, "File count should be 16777216")
     }
 }

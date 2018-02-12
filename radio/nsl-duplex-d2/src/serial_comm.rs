@@ -23,7 +23,7 @@ pub struct SerialConnection;
 
 impl Connection for SerialConnection {
     fn send(&self, data: Vec<u8>) -> Result<(), String> {
-        match serial_send(data) {
+        match serial_send(&data) {
             Ok(_) => Ok(()),
             Err(_) => Err(String::from("Error receiving")),
         }
@@ -37,7 +37,7 @@ impl Connection for SerialConnection {
     }
 }
 
-pub fn serial_send(data: Vec<u8>) -> io::Result<()> {
+pub fn serial_send(data: &[u8]) -> io::Result<()> {
     use std::io::prelude::*;
     use serial::prelude::*;
 

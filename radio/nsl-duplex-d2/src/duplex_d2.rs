@@ -39,14 +39,14 @@ impl DuplexD2 {
 
     pub fn get_uploaded_file(&self) -> Result<File, String> {
         match self.send_command(GET_UPLOADED_FILE) {
-            Ok(response) => Ok(File::from_response(response)),
+            Ok(response) => Ok(File::from_response(&response)),
             Err(e) => Err(e),
         }
     }
 
     pub fn get_uploaded_file_count(&self) -> Result<u32, String> {
         match self.send_command(GET_UPLOADED_FILE_COUNT) {
-            Ok(file_count) => Ok(process_file_count(file_count)),
+            Ok(file_count) => Ok(process_file_count(&file_count)),
             Err(e) => Err(e),
         }
     }
