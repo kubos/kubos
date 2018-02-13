@@ -100,7 +100,9 @@ For example, when creating a new ADCS API, a new folder should be created within
     +-- circle.yml
     +-- cmocka\
     
-See the :doc:`module development doc <kubos-development>` for steps to create a new Kubos module.
+See the :doc:`module development doc <kubos-development>` for steps to create a new Kubos module in C.
+
+APIs written in Rust will reside under the same parent folder, but their files will be generated with ``cargo``.
 
 Coding Style
 ------------
@@ -130,6 +132,8 @@ To include the new files in doc generation:
 
 Doxygen
 ~~~~~~~
+
+.. note:: This applies to APIs written in C. Rust APIs might function differently
 
 Within the new API's folder, create a ``docs`` subfolder and add a ``Doxyfile`` file. 
 Feel free to copy ``Doxyfile`` from another API, just change the ``PROJECT_NAME`` value.
@@ -190,10 +194,19 @@ The integration tests will normally be run as an automated suite.
 
 Unit Tests
 ~~~~~~~~~~
+    
+API unit tests should cover at least the following cases:
+
+    - Good cases for all functions
+    - Null pointer cases for each function pointer argument
+    - Out-of-bounds cases for each function argument which is limited by more than its size (ex. ``uint8_t`` but max value of 3)
+
+C 
+^
 
 Unit tests for APIs written in C are run using `CMocka <https://api.cmocka.org/>`__.
 
-The API will contain the following lines in its ``module.json`` file::
+The C API will contain the following lines in its ``module.json`` file::
 
     "testDependencies": {
         "cmocka": "kubos/cmocka"
@@ -202,25 +215,25 @@ The API will contain the following lines in its ``module.json`` file::
         "x86-linux-native"
     ]
 
-The API should contain a ``test`` folder with a subfolder containing the test set/s (most APIs will only have one test set).
+The C API should contain a ``test`` folder with a subfolder containing the test set/s (most APIs will only have one test set).
 
 Within each test set should be three files:
 
     - ``<test-set>.c`` - The file containing the actual tests
     - ``sysfs.c`` - Stub functions for the underlying `sysfs` calls
     - ``stubs.cmake`` - Makes the stub functions available to the test builder/runner
-    
-API unit tests should cover at least the following cases:
 
-    - Good cases for all functions
-    - Null pointer cases for each function pointer argument
-    - Out-of-bounds cases for each function argument which is limited by more than its size (ex. ``uint8_t`` but max value of 3)
     
 Unit tests can be run locally by navigating to the API folder and running ``kubos test``.
 
 To run the tests the same way that CircleCI does, navigate to the top level of the Kubos repo and issue this command::
 
     $ python $PWD/tools/build.py --all-tests
+    
+Rust
+^^^^
+
+Rust has native support for unit tests. Use it.
     
 Test Configuration
 ^^^^^^^^^^^^^^^^^^
