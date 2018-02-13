@@ -9,7 +9,7 @@
 I2C Library
 """
 
-import io,sys,fcntl
+import io,sys,fcntl,json
 
 I2C_SLAVE=0x0703
 DEFAULT_BUS=1
@@ -18,12 +18,10 @@ class I2C:
 
     def __init__(self, device, bus = DEFAULT_BUS):
         """
-        Retrieves the read/write file handles for the device
+        Retrieves the read/write file handles for the device and sets the device address
         """
         self.readfile = io.open("/dev/i2c-"+str(bus), "rb", buffering=0)
         self.writefile = io.open("/dev/i2c-"+str(bus), "wb", buffering=0)
-        
-        # set device address
         
         fcntl.ioctl(self.readfile, I2C_SLAVE, device)
         fcntl.ioctl(self.writefile, I2C_SLAVE, device)
@@ -66,3 +64,4 @@ if __name__ == "__main__":
     time.sleep(0.1)
     print('READ: ' + str(dev.read(50)))
     dev.close()
+    
