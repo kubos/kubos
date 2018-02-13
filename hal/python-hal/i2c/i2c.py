@@ -9,7 +9,7 @@
 I2C Library
 """
 
-import io,sys,fcntl,json
+import io,sys,fcntl
 
 I2C_SLAVE=0x0703
 DEFAULT_BUS=1
