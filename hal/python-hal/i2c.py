@@ -61,7 +61,7 @@ class I2C:
 if __name__ == "__main__":
     import i2c,time
     
-    dev = i2c.I2C(device=0x53,bus=1) # device 0x32, bus 1
+    dev = i2c.I2C(device=0x53)
     print('WRITE' + str(dev.write('SUP:TEL? 1,data\x0A')))
     time.sleep(0.1)
     print('READ: ' + str(dev.read(50)))
