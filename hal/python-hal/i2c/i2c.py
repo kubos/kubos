@@ -12,11 +12,10 @@ I2C Library
 import io,sys,fcntl
 
 I2C_SLAVE=0x0703
-DEFAULT_BUS=1
 
 class I2C:
 
-    def __init__(self, device, bus = DEFAULT_BUS):
+    def __init__(self, device, bus):
         """
         Retrieves the read/write file handles for the device and sets the device address
         """
@@ -35,10 +34,9 @@ class I2C:
         if type(data) is list:
             data = bytearray(data)
         elif type(data) is str:
-            if sys.hexversion >= 0x03000000:
-                data.encode('latin-1')
+            pass
         else: 
-            raise('invalid data format: '+str(type(data))+', must be string or list')
+            raise('Invalid data format: '+str(type(data))+', must be string or list')
         self.writefile.write(data)
         return True,data
     
@@ -56,12 +54,4 @@ class I2C:
         self.readfile.close()
         
 
-if __name__ == "__main__":
-    import i2c,time
-    
-    dev = i2c.I2C(device=0x53)
-    print('WRITE' + str(dev.write('SUP:TEL? 1,data\x0A')))
-    time.sleep(0.1)
-    print('READ: ' + str(dev.read(50)))
-    dev.close()
     
