@@ -18,10 +18,20 @@ For example, this code block::
     ioctl(fd, I2C_SLAVE, 0x32);
     
     uint8_t cmd = 0x54;
-    write(fd, &cmd, sizeof(cmd);
+    if(write(fd, &cmd, sizeof(cmd)) != sizeof(cmd)
+    {
+        perror("Write failed);
+        close(fd);
+        return -1;
+    }
     
     uint32_t uptime;
-    read(fd, &uptime, sizeof(uptime));
+    if(read(fd, &uptime, sizeof(uptime)) != sizeof(uptime)
+    {
+        perror("Read failed");
+        close(fd);
+        return -1;
+    }
     
     close(fd);
     
@@ -33,7 +43,14 @@ becomes
     
     uint32_t uptime;
     
-    k_radio_get_uptime(&uptime);
+    KRadioStatus status = k_radio_get_uptime(&uptime);
+    
+    if(status != RADIO_OK)
+    {
+        printf(stderr, "Failed to get radio uptime: %d\n", status);
+        k_radio_terminate();
+        return RADIO_ERROR;
+    }
     
     k_radio_terminate();
 
@@ -42,18 +59,18 @@ Research
 
 Read the hardware doc to get an idea of what commands are available.
 
-Refer to the correlating service outline doc to figure out which commands/functions are important
-
-    - For example, when implementing a new ADCS API, refer to the ADCS service outline
-    - If there is no service outline doc, harrass Jesse Coffey
+Refer to the correlating service outline doc to figure out which commands/functions are important.
+For example, when implementing a new ADCS API, refer to the ADCS service outline.
     
 Create a list of functions you expect to implement.
 If needed, create a list of potential functions you're unsure about.
-Talk to Jesse Coffey to confirm which commands should be implemented.
 
 Find a Kubos device API to model the new API's structure and naming conventions after.
 Ideally, there will be an existing API within the same category as the new API; 
 for example, the TRXVU API if you were implementing a new radio.
+
+If you have any questions about what should be implemented and how it should be structured,
+talk with other KubOS developers or the KubOS product manager.
 
 General API Framework
 ---------------------
@@ -63,8 +80,7 @@ Most APIs will likely implement most of these kinds of functions:
     - Init/terminate - Used to open/close the Linux device file
     - Configuration - Run-time configuration
     - Power - On, off, reset
-    - Watchdog - Kick, watchdog thread create/destroy
-    - Action commands - (Highly device specific) Send/receive message, deploy antenna, change orientation, etc
+    - Action commands - (Highly device specific) Kick watchdog, send/receive message, deploy antenna, change orientation, etc
     - Fetch Information - Get uptime, get system status, get system telemetry, get orientation, etc
     
 Additionally, new ``config.json`` options might be added for project configuration.
