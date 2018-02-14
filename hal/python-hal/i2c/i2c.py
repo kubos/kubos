@@ -17,7 +17,8 @@ class I2C:
 
     def __init__(self, device, bus):
         """
-        Retrieves the read/write file handles for the device and sets the device address
+        Retrieves the read/write file handle for the device and 
+        sets the device address
         """
         
         self.devfile = io.open("/dev/i2c-"+str(bus), "r+b", buffering=0)
@@ -47,7 +48,7 @@ class I2C:
     
     def close(self):
         """
-        Closes the files.
+        Closes the file.
         """
         self.devfile.close()
         
