@@ -36,7 +36,7 @@ class I2C:
         elif type(data) is str:
             pass
         else: 
-            raise('Invalid data format: '+str(type(data))+', must be string or list')
+            raise TypeError('Invalid data format: '+str(type(data))+', must be string or list')
         self.devfile.write(data)
         return True,data
     
