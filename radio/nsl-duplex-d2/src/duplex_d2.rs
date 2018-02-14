@@ -38,34 +38,24 @@ impl DuplexD2 {
     }
 
     pub fn get_uploaded_file(&self) -> Result<File, String> {
-        match self.send_command(GET_UPLOADED_FILE) {
-            Ok(response) => Ok(File::from_response(&response)),
-            Err(e) => Err(e),
-        }
+        File::from_response(&self.send_command(GET_UPLOADED_FILE)?)
     }
 
     pub fn get_uploaded_file_count(&self) -> Result<u32, String> {
-        match self.send_command(GET_UPLOADED_FILE_COUNT) {
-            Ok(file_count) => Ok(process_file_count(&file_count)),
-            Err(e) => Err(e),
-        }
+        Ok(process_file_count(&self.send_command(
+            GET_UPLOADED_FILE_COUNT,
+        )?))
     }
 
     pub fn get_state_of_health_record(&self) -> Result<StateOfHealthRecord, String> {
-        match self.send_command(GET_MODEM_STATE_OF_HEALTH) {
-            Ok(response) => Ok(StateOfHealthRecord::new(response)),
-            Err(e) => Err(e),
-        }
+        Ok(StateOfHealthRecord::new(
+            self.send_command(GET_MODEM_STATE_OF_HEALTH)?,
+        ))
     }
 
     fn send_command(&self, command: u64) -> Result<Vec<u8>, String> {
-        match self.conn.send(command.as_bytes()) {
-            Ok(_) => match self.conn.receive() {
-                Ok(r) => Ok(r),
-                Err(e) => Err(e),
-            },
-            Err(e) => Err(e),
-        }
+        self.conn.send(command.as_bytes())?;
+        Ok(self.conn.receive()?)
     }
 }
 
@@ -94,7 +84,7 @@ impl Radio for DuplexD2 {
 
     fn receive(&self) -> Result<(Vec<u8>), RadioError> {
         match self.get_uploaded_file() {
-            Ok(r) => Ok(r.payload),
+            Ok(r) => Ok(r.data),
             Err(_) => Err(RadioError::RxEmpty),
         }
     }

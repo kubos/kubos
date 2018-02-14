@@ -28,6 +28,7 @@ pub trait Connection {
     fn send(&self, data: Vec<u8>) -> Result<(), String>;
 
     /// Basic receive function
+    /// Need to define blocking/nonblocking
     fn receive(&self) -> Result<Vec<u8>, String>;
 }
 
