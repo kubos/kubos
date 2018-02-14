@@ -44,7 +44,7 @@ fn main() {
     let graphql_endpoint =
         GraphQLHandler::new(context_factory, schema::QueryRoot, schema::MutationRoot);
 
-    let graphiql_endpoint = GraphiQLHandler::new("/grapihql");
+    let graphiql_endpoint = GraphiQLHandler::new("/");
 
     let mut mount = mount::Mount::new();
     mount.mount("/", graphql_endpoint);
