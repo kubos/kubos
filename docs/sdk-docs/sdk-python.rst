@@ -17,7 +17,7 @@ There are currently two ways to add Python programs to Kubos Linux:
 1. Fork and clone `kubos-linux-build <https://github.com/kubos/kubos-linux-build>`__
    and add additional Python packages to Buildroot. You can see our current system
    packages and how they are structured `here <https://github.com/kubos/kubos-linux-build/tree/master/package/python>`__.
-   See the SysAdmin section :doc:`here <../os-docs>` for more information on
+   See the SysAdmin section :ref:`here <sysadmin>` for more information on
    building Kubos Linux.
 
 2. Individual Python files can be flashed to an attached hardware target. The
