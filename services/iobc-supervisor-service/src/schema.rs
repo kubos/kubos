@@ -46,37 +46,37 @@ graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     field dummy() -> FieldResult<i32>
         as "Dummy Byte"
     {
-        Ok(i32::from(self.raw.dummy))
+        Ok(i32::from(self.0.dummy))
     }
 
     field spi_command_status() -> FieldResult<i32>
         as "SPI Command Status"
     {
-        Ok(i32::from(self.raw.spi_command_status))
+        Ok(i32::from(self.0.spi_command_status))
     }
 
     field index_of_subsystem() -> FieldResult<i32>
         as "Index Of Subsystem"
     {
-        Ok(i32::from(self.raw.index_of_subsystem))
+        Ok(i32::from(self.0.index_of_subsystem))
     }
 
     field major_version() -> FieldResult<i32>
         as "Major Version"
     {
-        Ok(i32::from(self.raw.major_version))
+        Ok(i32::from(self.0.major_version))
     }
 
     field minor_version() -> FieldResult<i32>
         as "Minor Version"
     {
-        Ok(i32::from(self.raw.minor_version))
+        Ok(i32::from(self.0.minor_version))
     }
 
     field patch_version() -> FieldResult<i32>
         as "Patch Version"
     {
-        Ok(i32::from(self.raw.patch_version))
+        Ok(i32::from(self.0.patch_version))
     }
 
     field git_head_version() -> FieldResult<i32>
@@ -84,19 +84,19 @@ graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     {
         // There is no i32::from(u32)
         // So we have to cast like this
-        Ok(self.raw.git_head_version as i32)
+        Ok(self.0.git_head_version as i32)
     }
 
     field serial_number() -> FieldResult<i32>
         as "Serial Number"
     {
-        Ok(i32::from(self.raw.serial_number))
+        Ok(i32::from(self.0.serial_number))
     }
 
     field compile_information() -> FieldResult<Vec<i32>>
         as "Compile Information"
     {
-        Ok(self.raw.compile_information.iter()
+        Ok(self.0.compile_information.iter()
            .map(|x| i32::from(*x))
            .collect::<Vec<i32>>())
     }
@@ -104,19 +104,19 @@ graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     field clock_speed() -> FieldResult<i32>
         as "Clock Speed"
     {
-        Ok(i32::from(self.raw.clock_speed))
+        Ok(i32::from(self.0.clock_speed))
     }
 
     field code_type() -> FieldResult<i32>
         as "Code Type"
     {
-        Ok(i32::from(self.raw.code_type))
+        Ok(i32::from(self.0.code_type))
     }
 
     field crc() -> FieldResult<i32>
         as "CRC"
     {
-        Ok(i32::from(self.raw.crc))
+        Ok(i32::from(self.0.crc))
     }
 });
 
@@ -126,31 +126,31 @@ graphql_object!(SupervisorEnableStatus: Context as "SupervisorEnableStatus" |&se
     field power_obc() -> FieldResult<i32>
         as "Power OBC"
     {
-        Ok(i32::from(self.raw.power_obc))
+        Ok(i32::from(self.0.power_obc))
     }
 
     field power_rtc() -> FieldResult<i32>
         as "Power RTC"
     {
-        Ok(i32::from(self.raw.power_rtc))
+        Ok(i32::from(self.0.power_rtc))
     }
 
     field supervisor_mode() -> FieldResult<i32>
         as "Supervisor Mode"
     {
-        Ok(i32::from(self.raw.supervisor_mode))
+        Ok(i32::from(self.0.supervisor_mode))
     }
 
     field busy_rtc() -> FieldResult<i32>
         as "Busy RTC"
     {
-        Ok(i32::from(self.raw.busy_rtc))
+        Ok(i32::from(self.0.busy_rtc))
     }
 
     field power_off_rtc() -> FieldResult<i32>
         as "Power Off RTC"
     {
-        Ok(i32::from(self.raw.power_off_rtc))
+        Ok(i32::from(self.0.power_off_rtc))
     }
 });
 
@@ -160,45 +160,43 @@ graphql_object!(SupervisorHousekeeping: Context as "SupervisorHousekeeping" |&se
     field dummy() -> FieldResult<i32>
         as "Dummy Byte"
     {
-        Ok(i32::from(self.raw.dummy))
+        Ok(i32::from(self.0.dummy))
     }
 
     field spi_command_status() -> FieldResult<i32>
         as "SPI Command Status"
     {
-        Ok(i32::from(self.raw.spi_command_status))
+        Ok(i32::from(self.0.spi_command_status))
     }
 
     field enable_status() -> FieldResult<SupervisorEnableStatus>
         as "Enable Status"
     {
-        Ok(SupervisorEnableStatus {
-            raw: self.raw.enable_status
-        })
+        Ok(SupervisorEnableStatus(self.0.enable_status))
     }
 
     field supervisor_uptime() -> FieldResult<i32>
         as "Supervisor Uptime"
     {
-        Ok(self.raw.supervisor_uptime as i32)
+        Ok(self.0.supervisor_uptime as i32)
     }
 
     field iobc_uptime() -> FieldResult<i32>
         as "iOBC Uptime"
     {
-        Ok(self.raw.iobc_uptime as i32)
+        Ok(self.0.iobc_uptime as i32)
     }
 
     field iobc_reset_count() -> FieldResult<i32>
         as "iOBC Reset Count"
     {
-        Ok(self.raw.iobc_reset_count as i32)
+        Ok(self.0.iobc_reset_count as i32)
     }
 
     field adc_data() -> FieldResult<Vec<i32>>
         as "ADC Data"
     {
-        Ok(self.raw.adc_data.iter()
+        Ok(self.0.adc_data.iter()
            .map(|x| i32::from(*x))
         .collect::<Vec<i32>>())
     }
@@ -206,13 +204,13 @@ graphql_object!(SupervisorHousekeeping: Context as "SupervisorHousekeeping" |&se
     field adc_update_flag() -> FieldResult<i32>
         as "ADC Update Flag"
     {
-        Ok(i32::from(self.raw.adc_update_flag))
+        Ok(i32::from(self.0.adc_update_flag))
     }
 
     field crc8() -> FieldResult<i32>
         as "CRC8"
     {
-        Ok(i32::from(self.raw.crc8))
+        Ok(i32::from(self.0.crc8))
     }
 });
 
