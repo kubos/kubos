@@ -1,4 +1,6 @@
 use command::Command;
+use file::File;
+
 pub const RESP_HEADER: u32 = 0x4755;
 
 struct GetUploadedFileCount {
@@ -17,13 +19,12 @@ impl Command<u32> for GetUploadedFileCount {
     }
 
     fn process_response(&self, response: &[u8]) -> Result<u32, String> {
-        Ok(1)
+        File::process_file_count(response)
     }
 }
 
 #[cfg(test)]
 mod tests {
-
     mod get_uploaded_file_count {
         use ::*;
         use commands::*;
