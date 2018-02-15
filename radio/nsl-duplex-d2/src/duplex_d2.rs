@@ -24,7 +24,7 @@ use radio_api::{Connection, Radio, RadioError, RadioReset};
 use comms::*;
 use file::*;
 use state_of_health_record::*;
-use d2_message::*;
+use message::*;
 use nums_as_bytes::AsBytes;
 
 /// Structure implementing Radio functionality for Duplex-D2

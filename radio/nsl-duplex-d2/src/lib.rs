@@ -7,7 +7,7 @@ mod duplex_d2;
 mod comms;
 mod state_of_health_record;
 mod file;
-mod d2_message;
+mod message;
 mod serial_comm;
 
 pub use duplex_d2::DuplexD2;

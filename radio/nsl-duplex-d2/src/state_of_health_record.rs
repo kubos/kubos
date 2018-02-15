@@ -1,4 +1,4 @@
-use d2_message::D2Message;
+use message::Message;
 
 #[derive(Default)]
 pub struct StateOfHealthRecord {
@@ -16,7 +16,7 @@ pub struct StateOfHealthRecord {
     pub connection_duration_std_dev: [u8; 4], // (4 byte integer) Connection duration standard deviation (seconds)
 }
 
-impl D2Message for StateOfHealthRecord {
+impl Message for StateOfHealthRecord {
     fn new(message: Vec<u8>) -> StateOfHealthRecord {
         let mut record: StateOfHealthRecord = Default::default();
         record.reset_count.copy_from_slice(&message[2..6]);

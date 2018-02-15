@@ -1,4 +1,5 @@
-pub trait D2Message {
+// TODO: pull this up as 'Message' to the Radio API
+pub trait Message {
     fn new(message: Vec<u8>) -> Self;
 
     fn message(&self) -> &Vec<u8>;
