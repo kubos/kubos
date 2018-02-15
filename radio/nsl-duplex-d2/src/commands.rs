@@ -23,27 +23,33 @@ impl Command<u32> for GetUploadedFileCount {
 
 #[cfg(test)]
 mod tests {
-    use ::*;
-    use commands::*;
-    use file::*;
-    use nums_as_bytes::AsBytes;
 
-    #[test]
-    fn creates_a_command() {
-        let cmd = GetUploadedFileCount::new();
-        assert_eq!(0x4755_4745_5455_4643, cmd.command_bytes);
-    }
+    mod get_uploaded_file_count {
+        use ::*;
+        use commands::*;
+        use file::*;
+        use nums_as_bytes::AsBytes;
 
-    #[test]
-    fn processes_result() {
-        let mut ret_msg = Vec::<u8>::new();
-        ret_msg.extend(RESP_HEADER.as_bytes());
-        ret_msg.push(1 as u8);
-        ret_msg.push(0 as u8);
-        ret_msg.push(0 as u8);
-        ret_msg.push(0 as u8);
-        let count = File::process_file_count(&ret_msg);
-        let cmd = GetUploadedFileCount::new();
-        assert_eq!(1, cmd.process_response(&ret_msg).unwrap());
+        #[test]
+        fn creates_a_command() {
+            let cmd = GetUploadedFileCount::new();
+            assert_eq!(0x4755_4745_5455_4643, cmd.command_bytes);
+        }
+
+        #[test]
+        fn processes_result() {
+            let cmd = GetUploadedFileCount::new();
+            assert_eq!(1, cmd.process_response(&test_result()).unwrap());
+        }
+
+        fn test_result() -> Vec<u8> {
+            let mut ret_msg = Vec::<u8>::new();
+            ret_msg.extend(RESP_HEADER.as_bytes());
+            ret_msg.push(1 as u8);
+            ret_msg.push(0 as u8);
+            ret_msg.push(0 as u8);
+            ret_msg.push(0 as u8);
+            ret_msg
+        }
     }
 }
