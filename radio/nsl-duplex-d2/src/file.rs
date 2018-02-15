@@ -37,12 +37,15 @@ impl File {
             data: File::data_from_response(file_response, name_size, data_size)?,
         })
     }
+
+    pub fn process_file_count(file_count: &[u8]) -> Result<u32, String> {
+        Ok(u32::from(file_count[2]) |
+            u32::from(file_count[3]) << 8 |
+            u32::from(file_count[4]) << 16 |
+            u32::from(file_count[5]) << 24)
+    }
 }
 
-pub fn process_file_count(file_count: &[u8]) -> u32 {
-    u32::from(file_count[2]) | u32::from(file_count[3]) << 8 | u32::from(file_count[4]) << 16
-        | u32::from(file_count[5]) << 24
-}
 
 fn size_from_utf_8(utf8_size: Vec<u8>) -> Result<usize, String> {
     Ok(String::from_utf8(utf8_size)
@@ -113,8 +116,8 @@ mod tests {
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
-        let count = process_file_count(&ret_msg);
-        assert_eq!(count, 1, "File count should be one")
+        let count = File::process_file_count(&ret_msg);
+        assert_eq!(count.unwrap(), 1, "File count should be one")
     }
 
     #[test]
@@ -125,8 +128,8 @@ mod tests {
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
-        let count = process_file_count(&ret_msg);
-        assert_eq!(count, 0, "File count should be zero")
+        let count = File::process_file_count(&ret_msg);
+        assert_eq!(count.unwrap(), 0, "File count should be zero")
     }
 
     #[test]
@@ -137,7 +140,7 @@ mod tests {
         ret_msg.push(0 as u8);
         ret_msg.push(0 as u8);
         ret_msg.push(1 as u8);
-        let count = process_file_count(&ret_msg);
-        assert_eq!(count, 16777216, "File count should be 16777216")
+        let count = File::process_file_count(&ret_msg);
+        assert_eq!(count.unwrap(), 16777216, "File count should be 16777216")
     }
 }

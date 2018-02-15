@@ -42,9 +42,7 @@ impl DuplexD2 {
     }
 
     pub fn get_uploaded_file_count(&self) -> Result<u32, String> {
-        Ok(process_file_count(&self.send_command(
-            GET_UPLOADED_FILE_COUNT,
-        )?))
+        File::process_file_count(&self.send_command(GET_UPLOADED_FILE_COUNT)?)
     }
 
     pub fn get_state_of_health_record(&self) -> Result<StateOfHealthRecord, String> {

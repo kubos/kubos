@@ -29,4 +29,10 @@ mod tests {
         let cmd = GetUploadedFileCount::new();
         assert_eq!(0x4755_4745_5455_4643, cmd.command_bytes);
     }
+
+    #[test]
+    fn processes_result() {
+        let cmd = GetUploadedFileCount::new();
+        assert_eq!(0x4755_4745_5455_4643, cmd.command_bytes);
+    }
 }
