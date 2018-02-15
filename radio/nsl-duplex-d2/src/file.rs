@@ -25,8 +25,12 @@ impl File {
     }
 
     pub fn from_response(file_response: &[u8]) -> Result<File, String> {
-        let name_size = size_from_utf_8(file_response[2..5].to_vec());
-        let data_size = size_from_utf_8(file_response[5..11].to_vec());
+        if file_response.len() < 12 {
+            return Err(String::from("file packet too short"));
+        }
+
+        let name_size = size_from_utf_8(file_response[2..5].to_vec())?;
+        let data_size = size_from_utf_8(file_response[5..11].to_vec())?;
 
         Ok(File {
             name: File::name_from_response(file_response, name_size)?,
@@ -40,11 +44,11 @@ pub fn process_file_count(file_count: &[u8]) -> u32 {
         | u32::from(file_count[5]) << 24
 }
 
-fn size_from_utf_8(utf8_size: Vec<u8>) -> usize {
-    String::from_utf8(utf8_size)
-        .unwrap()
+fn size_from_utf_8(utf8_size: Vec<u8>) -> Result<usize, String> {
+    Ok(String::from_utf8(utf8_size)
+        .or(Err("utf8 parse error"))?
         .parse::<usize>()
-        .unwrap()
+        .or(Err("usize parse error"))?)
 }
 
 #[cfg(test)]
