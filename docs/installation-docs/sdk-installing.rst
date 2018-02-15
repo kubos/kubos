@@ -121,7 +121,7 @@ To create an instance of the SDK box follow these steps:
 
 ::
 
-       $ vagrant init kubostech/kubos-dev
+       $ vagrant init kubos/kubos-dev
        $ vagrant up
 
 This will create a Vagrantfile in your current directory. Vagrantfiles

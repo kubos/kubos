@@ -201,6 +201,49 @@ The I2C bus is available through the Kubos HAL as ``K_I2C1``.
 For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
 :doc:`../apis/kubos-hal/i2c_api` documents.
 
+PWM
+~~~
+
+The iOBC has 6 PWM pins available for use, grouped into three pairs:
+
+    - PWM0 and PWM1
+    - PWM2 and PWM3
+    - PWM4 and PWM5
+    
+Users can interact with these pins through the `PWM sysfs interface <https://www.kernel.org/doc/Documentation/pwm.txt>`__,
+and the ``/sys/class/pwm/pwmchip0/`` directory
+
+In order to make a pin available for use, the PWM number should be passed to the ``pwmchip0/export`` file.
+For example, the following would be done in order to enable access to PWM0::
+
+    $ echo 0 > /sys/class/pwm/pwmchip0/export
+    
+After doing so, a new subdirectory will be available, ``pwmchip0/pwm0``.
+
+From here, the pin's properties can be configured and then it can be enabled.
+
+.. note::
+
+    Due to the underlying hardware, each pair of pins must use the same period value.
+    They may, however, have differing duty cycles.
+    
+    The nanosecond value specified for period and duty cycle will be internally converted to the nearest clock divider value.
+
+For example::
+
+    /* Set the period of the generated wave to 1 millisecond */
+    $ echo 1000000 > /sys/class/pwm/pwmchip0/pwm0/period
+    
+    /* Set the duty cycle to 50% (.5 millisecond) */
+    $ echo 500000 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+    
+    /* Turn on the signal */
+    $ echo 1 > enable
+    
+Then, to turn the signal off::
+
+    $ echo 0 > enable
+
 SPI
 ~~~
 
