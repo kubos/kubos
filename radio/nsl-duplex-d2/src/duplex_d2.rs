@@ -21,13 +21,8 @@
 
 use serde_json::Error as SerdeJsonError;
 use radio_api::{Connection, Radio, RadioError, RadioReset};
-use comms::*;
-use file::*;
-use state_of_health_record::*;
-use message::*;
-use nums_as_bytes::AsBytes;
+use command::Command;
 
-/// Structure implementing Radio functionality for Duplex-D2
 pub struct DuplexD2 {
     conn: Box<Connection>,
 }
@@ -37,22 +32,8 @@ impl DuplexD2 {
         DuplexD2 { conn: conn }
     }
 
-    pub fn get_uploaded_file(&self) -> Result<File, String> {
-        File::from_response(&self.send_command(GET_UPLOADED_FILE)?)
-    }
-
-    pub fn get_uploaded_file_count(&self) -> Result<u32, String> {
-        File::process_file_count(&self.send_command(GET_UPLOADED_FILE_COUNT)?)
-    }
-
-    pub fn get_state_of_health_record(&self) -> Result<StateOfHealthRecord, String> {
-        Ok(StateOfHealthRecord::new(
-            self.send_command(GET_MODEM_STATE_OF_HEALTH)?,
-        ))
-    }
-
-    fn send_command(&self, command: u64) -> Result<Vec<u8>, String> {
-        self.conn.send(command.as_bytes())?;
+    fn send_command<T>(&self, command: Box<Command<T>>) -> Result<Vec<u8>, String> {
+        self.conn.send(command.command_bytes())?;
         Ok(self.conn.receive()?)
     }
 }
@@ -81,10 +62,7 @@ impl Radio for DuplexD2 {
     }
 
     fn receive(&self) -> Result<(Vec<u8>), RadioError> {
-        match self.get_uploaded_file() {
-            Ok(r) => Ok(r.data),
-            Err(_) => Err(RadioError::RxEmpty),
-        }
+        Ok(vec![1])
     }
 
     fn get_telemetry<TelemetryType>(&self, _telem_type: TelemetryType) -> Result<&str, RadioError> {
@@ -95,7 +73,7 @@ impl Radio for DuplexD2 {
 #[cfg(test)]
 mod tests {
     use duplex_d2::*;
-    use state_of_health_record::tests::*;
+    use command::Command;
 
     struct TestGoodConnection {
         data: Vec<u8>,
@@ -123,17 +101,15 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_state_of_health_message() {
-        let radio = DuplexD2 {
-            conn: Box::new(TestGoodConnection {
-                data: soh_message(),
-            }),
-        };
-        let soh_response = radio.get_state_of_health_record();
-        match soh_response {
-            Ok(response) => assert_eq!([0, 0, 1, 2], response.reset_count),
-            Err(_) => assert!(false, "Expected the SOH call to succeed."),
+    struct TestCommand {}
+
+    impl Command<u32> for TestCommand {
+        fn command_bytes(&self) -> Vec<u8> {
+            vec![0x4755, 0x0000, 0x0000, 0x0000]
+        }
+
+        fn process_response(&self, response: &[u8]) -> Result<u32, String> {
+            Ok(1)
         }
     }
 
@@ -177,8 +153,8 @@ mod tests {
         let radio = DuplexD2 {
             conn: Box::new(TestBadConnection {}),
         };
-        let command: u64 = 11111111111111111;
-        match radio.send_command(command) {
+        let command = TestCommand{};
+        match radio.send_command(Box::new(command)) {
             Ok(_) => assert!(false, "Expected send_command to fail.".to_string()),
             Err(message) => assert!(true, message),
         }

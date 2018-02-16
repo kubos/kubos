@@ -3,43 +3,46 @@ use file::File;
 
 pub const RESP_HEADER: u32 = 0x4755;
 
-struct GetUploadedFileCount {
-    command_bytes: u64,
-}
+struct GetUploadedFileCount {}
 
 impl Command<u32> for GetUploadedFileCount {
-    fn new() -> GetUploadedFileCount {
-        GetUploadedFileCount {
-            command_bytes: 0x4755_4745_5455_4643,
-        }
-    }
-
-    fn command_bytes(&self) -> u64 {
-        self.command_bytes
+    fn command_bytes(&self) -> Vec<u8> {
+       vec![0x4755, 0x4745, 0x5455, 0x4643]
     }
 
     fn process_response(&self, response: &[u8]) -> Result<u32, String> {
         File::process_file_count(response)
     }
 }
+    //pub fn get_uploaded_file(&self) -> Result<File, String> {
+    //    File::from_response(&self.send_command(GET_UPLOADED_FILE)?)
+    //}
+
+    //pub fn get_uploaded_file_count(&self) -> Result<u32, String> {
+    //    File::process_file_count(&self.send_command(GET_UPLOADED_FILE_COUNT)?)
+    //}
+
+    //pub fn get_state_of_health_record(&self) -> Result<StateOfHealthRecord, String> {
+    //    Ok(StateOfHealthRecord::new(
+    //        self.send_command(GET_MODEM_STATE_OF_HEALTH)?,
+    //    ))
+    //}
 
 #[cfg(test)]
 mod tests {
     mod get_uploaded_file_count {
-        use ::*;
         use commands::*;
-        use file::*;
         use nums_as_bytes::AsBytes;
 
         #[test]
         fn creates_a_command() {
-            let cmd = GetUploadedFileCount::new();
-            assert_eq!(0x4755_4745_5455_4643, cmd.command_bytes);
+            let cmd = GetUploadedFileCount{};
+            assert_eq!(vec![0x4755, 0x4745, 0x5455, 0x4643], cmd.command_bytes());
         }
 
         #[test]
         fn processes_result() {
-            let cmd = GetUploadedFileCount::new();
+            let cmd = GetUploadedFileCount{};
             assert_eq!(1, cmd.process_response(&test_result()).unwrap());
         }
 

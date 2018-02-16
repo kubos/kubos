@@ -14,3 +14,4 @@ mod serial_comm;
 
 pub use duplex_d2::DuplexD2;
 pub use serial_comm::SerialConnection;
+pub use command::Command;
