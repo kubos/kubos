@@ -153,6 +153,7 @@ mod tests {
         let radio = DuplexD2 {
             conn: Box::new(TestBadConnection {}),
         };
+
         let command = TestCommand{};
         match radio.send_command(Box::new(command)) {
             Ok(_) => assert!(false, "Expected send_command to fail.".to_string()),
@@ -161,11 +162,15 @@ mod tests {
     }
 
     #[test]
-    fn test_send_succeeds() {
+    fn test_send_command_succeeds() {
         let radio = DuplexD2 {
             conn: Box::new(TestGoodConnection { data: Vec::new() }),
         };
-        let data: Vec<u8> = Vec::new();
-        assert!(radio.send(data).is_ok(), "Send should pass")
+
+        let command = TestCommand{};
+        match radio.send_command(Box::new(command)) {
+            Ok(_) => assert!(true),
+            Err(message) => assert!(false, message),
+        }
     }
 }
