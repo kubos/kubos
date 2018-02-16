@@ -1,0 +1,24 @@
+{
+    "license":"Apache-2.0",
+    "name":"imtq-api",
+    "repository":{
+        "url":"git://github.com/kubos/isis-api/imtq-api",
+        "type":"git"
+    },
+    "version":"1.0.0",
+    "homepage":"https://github.com/kubos/isis-api/imtq-api",
+    "extraIncludes": [
+        "imtq-api"
+    ],
+    "dependencies":{
+        "adcs-api":"kubos/adcs-api",
+        "kubos-hal":"kubos/kubos-hal",
+        "ccan-json":"kubos/ccan-json"
+    },
+    "testDependencies": {
+        "cmocka": "kubos/cmocka"
+    },
+    "testTargets": [
+        "x86-linux-native"
+    ]
+}

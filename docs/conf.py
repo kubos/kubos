@@ -107,11 +107,12 @@ htmlhelp_basename = 'Kubosdoc'
 
 breathe_projects = {
     "libcsp" : "../xml/libcsp",
-    "kubos-adcs-api" :  "../xml/adcs/adcs-api",
+    "imtq-api": "../xml/adcs/imtq-api",
+    "ants-api" : "../xml/antenna/ants-api",
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",
     "kubos-hal-linux" : "../xml/hal/kubos-hal-linux",
-    "kubos-radio-api" : "../xml/radio/radio-api",
+    "trxvu-radio-api": "../xml/radio/trxvu-radio-api"
 }
 
 extensions += [
