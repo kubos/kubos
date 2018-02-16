@@ -21,6 +21,42 @@
 #pragma once
 
 #include <pthread.h>
+#include <stdint.h>
+#include "imtq-config.h"
+#include "imtq-data.h"
+#include "imtq-ops.h"
+
+/**
+ *  @name iMTQ config.json configuration options and default values
+ */
+/**@{*/
+/**
+ * I2C bus the iMTQ is connected to
+ */
+#ifdef YOTTA_CFG_ADCS_IMTQ_I2C_BUS
+#define IMTQ_I2C_BUS YOTTA_CFG_ADCS_IMTQ_I2C_BUS
+#else
+#define IMTQ_I2C_BUS K_I2C1
+#endif
+
+/**
+ * iMTQ I2C address
+ */
+#ifdef YOTTA_CFG_MTQ_IMTQ_ADDR
+#define MTQ_ADDR YOTTA_CFG_MTQ_IMTQ_ADDR
+#else
+#define IMTQ_ADDR 0x10
+#endif
+
+/**
+ * Watchdog timeout (in seconds)
+ */
+#ifdef YOTTA_CFG_ADCS_IMTQ_WATCHDOG_TIMEOUT
+#define IMTQ_WD_TIMEOUT YOTTA_CFG_ADCS_IMTQ_WATCHDOG_TIMEOUT
+#else
+#define IMTQ_WD_TIMEOUT 60
+#endif
+/**@}*/
 
 /**
  *  @name Command Response Flags
@@ -31,6 +67,19 @@
 #define RESP_IVA_Y 0x20         /**< Y-axis measurement might be invalid */
 #define RESP_IVA_Z 0x10         /**< Z-axis measurement might be invalid */
 /**@}*/
+
+/**
+ * ADCS function return values
+ */
+typedef enum {
+    ADCS_OK,
+    ADCS_ERROR,                  /**< Generic error */
+    ADCS_ERROR_CONFIG,           /**< Configuration error */
+    ADCS_ERROR_NO_RESPONSE,      /**< No response received from subsystem */
+    ADCS_ERROR_INTERNAL,         /**< An error was thrown by the subsystem */
+    ADCS_ERROR_MUTEX,            /**< Mutex-related error */
+    ADCS_ERROR_NOT_IMPLEMENTED   /**< Requested function has not been implemented for the subsystem */
+} KADCSStatus;
 
 /**
  * iMTQ Return Values
@@ -71,12 +120,29 @@ typedef struct {
     int16_t z;                  /**< Z-axis */
 } __attribute__((packed)) imtq_axis_data;
 
+typedef struct {
+    /* Not an implemented structure/function. Need for compliance with generic API */
+} adcs_orient;
+
+typedef struct {
+    /* Not an implemented structure/function. Need for compliance with generic API */
+} adcs_spin;
+
 /**
  * System mutex to preserve iMTQ command/response ordering
  */
 extern pthread_mutex_t imtq_mutex;
 
 /* Public Functions */
+/**
+ * Initialize the ADCS interface
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_init(void);
+/**
+ * Terminate the ADCS interface
+ */
+void k_adcs_terminate(void);
 /**
  * Start a thread to kick the iMTQ's watchdog at an interval of
  * (::IMTQ_WD_TIMEOUT/3) seconds
@@ -94,6 +160,17 @@ KADCSStatus k_imtq_watchdog_stop(void);
  * @return KADCSStatus `ADCS_OK` if OK, error otherwise
  */
 KADCSStatus k_imtq_reset(void);
+/**
+ * Pass a command packet directly through to the ADCS.
+ * Useful for executing commands which have not been implemented in either the generic or specific ADCS APIs.
+ * @param [in] tx Pointer to command packet to send
+ * @param [in] tx_len Size of command packet
+ * @param [out] rx Pointer to storage for command response
+ * @param [in] rx_len Expected length of command response
+ * @param [in] delay Time to wait inbetween sending the command packet and requesting a response
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx, int rx_len, const struct timespec * delay);
 
 /* Private Functions */
 /**

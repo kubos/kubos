@@ -196,6 +196,40 @@ typedef struct {
 
 /* Data Request Commands */
 /**
+ * Get the ADCS's power status
+ * @param [out] data Pointer to storage for returned system uptime. If the value is zero, then the ADCS is offline.
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_get_power_status(adcs_power_status * data);
+/**
+ * Get the ADCS's current operating mode
+ * @param [out] mode Pointer to storage which the mode value should be copied to
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_get_mode(ADCSMode * mode);
+/**
+ * Get the ADCS's current orientation
+ * @note This function might not be implemented for all ADCSs.
+ * @param [out] data Pointer to storage for returned data.
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_get_orientation(adcs_orient * data);
+/**
+ * Get the ADCS's current spin
+ * @note This function might not be implemented for all ADCSs.
+ * @param [out] data Pointer to storage for returned data.
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_get_spin(adcs_spin * data);
+/**
+ * Read ADCS telemetry values
+ * @note See specific ADCS API documentation for available telemetry types
+ * @param [in] type Telemetry packet to read
+ * @param [out] buffer (Pointer to) structure which data should be copied to
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_get_telemetry(ADCSTelemType type, JsonNode * buffer);
+/**
  * Get iMTQ system state
  * @param [out] state Pointer to storage for state data
  * @return KADCSStatus `ADCS_OK` if OK, error otherwise

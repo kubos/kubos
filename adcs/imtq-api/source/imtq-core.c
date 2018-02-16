@@ -16,7 +16,7 @@
  * ISIS iMTQ API - Core Functions and Configuration Commands
  */
 
-#include <adcs-api/adcs.h>
+#include <imtq-api/imtq.h>
 #include <kubos-hal/i2c.h>
 #include <pthread.h>
 #include <stdio.h>

@@ -78,6 +78,36 @@ typedef JsonNode * adcs_test_results;
 
 /* Operational Commands */
 /**
+ * Execute ADCS no-op command
+ * @note This function might not be implemented for all ADCSs.
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_noop(void);
+/**
+ * Reset the ADCS
+ * @note This function might not be implemented for all ADCSs
+ * @param [in] type Type of reset to perform (hard, soft, etc)
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_reset(KADCSReset type);
+/**
+ * Set the ADCS's operating mode
+ * @note See specific ADCS API documentation for available modes
+ * @param [in] mode Operating mode to change to
+ * @param [in] params Pointer to optional parameters which may be needed to configure the new operational mode
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_set_mode(ADCSMode mode, const adcs_mode_param * params);
+/**
+ * Run an ADCS self-test
+ * @note This function might not be implemented for all ADCSs.
+ * See specific ADCS API documentation for available self-tests.
+ * @param [in] test Type of self-test to run
+ * @param [out] buffer (Pointer to) structure which the test-results should be copied to
+ * @return KADCSStatus ADCS_OK if OK, error otherwise
+ */
+KADCSStatus k_adcs_run_test(ADCSTestType test, adcs_test_results buffer);
+/**
  * Switch to idle mode and cancel any ongoing actuation
  * @return KADCSStatus `ADCS_OK` if OK, error otherwise
  */

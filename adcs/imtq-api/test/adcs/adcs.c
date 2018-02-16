@@ -17,7 +17,7 @@
  * Unit tests for the generic ADCS API functions
  */
 
-#include <adcs-api/adcs.h>
+#include <imtq-api/imtq.h>
 #include <cmocka.h>
 
 #define NUM_CONFIG_PARAMS 83

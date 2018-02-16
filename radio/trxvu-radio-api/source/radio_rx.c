@@ -15,7 +15,7 @@
  */
 
 #include <kubos-hal/i2c.h>
-#include <radio-api/radio.h>
+#include <trxvu-radio-api/trxvu.h>
 #include <stdio.h>
 
 KRadioStatus k_radio_recv(radio_rx_message * buffer, uint8_t * len)
