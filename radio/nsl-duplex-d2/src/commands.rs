@@ -7,7 +7,7 @@ struct GetUploadedFileCount {}
 
 impl Command<u32> for GetUploadedFileCount {
     fn command_bytes(&self) -> Vec<u8> {
-       vec![0x4755, 0x4745, 0x5455, 0x4643]
+       vec![0x47, 0x55, 0x47, 0x45, 0x54, 0x55, 0x46, 0x43]
     }
 
     fn process_response(&self, response: &[u8]) -> Result<u32, String> {
@@ -37,7 +37,7 @@ mod tests {
         #[test]
         fn creates_a_command() {
             let cmd = GetUploadedFileCount{};
-            assert_eq!(vec![0x4755, 0x4745, 0x5455, 0x4643], cmd.command_bytes());
+           assert_eq!(vec![0x47, 0x55, 0x47, 0x45, 0x54, 0x55, 0x46, 0x43], cmd.command_bytes());
         }
 
         #[test]

@@ -105,7 +105,7 @@ mod tests {
 
     impl Command<u32> for TestCommand {
         fn command_bytes(&self) -> Vec<u8> {
-            vec![0x4755, 0x0000, 0x0000, 0x0000]
+            vec![0x47, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
         }
 
         fn process_response(&self, response: &[u8]) -> Result<u32, String> {
