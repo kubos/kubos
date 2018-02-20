@@ -3,15 +3,17 @@ extern crate radio_api;
 extern crate serde_json;
 extern crate serial;
 
-mod duplex_d2;
-mod comms;
-mod state_of_health_record;
-mod file;
-mod message;
-mod command;
-mod commands;
-mod serial_comm;
+#[macro_use]
+extern crate nom;
 
-pub use duplex_d2::DuplexD2;
-pub use serial_comm::SerialConnection;
-pub use command::Command;
+// mod duplex_d2;
+// mod comms;
+pub mod commands;
+mod messages;
+// mod file;
+// mod command;
+// mod serial_comm;
+
+// pub use duplex_d2::DuplexD2;
+// pub use serial_comm::SerialConnection;
+// pub use command::Command;

@@ -6,9 +6,9 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 [dependencies]
 chrono = "0.4"
 radio-api = { path = "../rust-radio-api" }
+nom = "4.0.0-beta1"
 serde = "1.0"
 serde_derive = "1.0.27"
 serde_json = "1.0.9"
 serial = "0.4"
 nums_as_bytes = { path = "../../nums_as_bytes" }
-
