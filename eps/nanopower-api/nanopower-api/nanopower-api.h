@@ -25,7 +25,8 @@
 #include <stdint.h>
 
 /**
- *  @name GOMspace NanoPower config.json configuration options and default values
+ *  @name GOMspace NanoPower config.json configuration options and default
+ * 		  values
  */
 /**@{*/
 /**
@@ -102,13 +103,15 @@ typedef enum {
 /**
  * Response header structure
  */
-typedef struct {
+typedef struct
+{
     uint8_t cmd;                /**< Command which produced this response */
     uint8_t status;             /**< Status/Error byte */
 } __attribute__((packed)) eps_resp_header;
 
 /* System Config */
-typedef struct  {
+typedef struct
+{
     uint8_t  ppt_mode;                      /**< Mode for PPT [1 = AUTO, 2 = FIXED] */
     uint8_t  battheater_mode;               /**< Mode for battheater [0 = Manual, 1 = Auto] */
     int8_t   battheater_low;                /**< Turn heater on at [degC] */
@@ -121,16 +124,17 @@ typedef struct  {
 } __attribute__((packed)) eps_system_config_t;
 
 /* Battery mode configuration (Config2) */
-typedef struct  {
+typedef struct
+{
     uint16_t batt_maxvoltage;               /**< Voltage threshold to be in FULL mode */
     uint16_t batt_safevoltage;              /**< Voltage threshold to trigger NORMAL -> SAFE mode */
     uint16_t batt_criticalvoltage;          /**< Lowest allowable voltage (-> CRITICAL mode) */
     uint16_t batt_normalvoltage;            /**< Voltage threshold to trigger SAFE -> NORMAL mode */
     uint32_t reserved1[2];
-    uint8_t reserved2[4];
+    uint8_t  reserved2[4];
 } __attribute__((packed)) eps_battery_config_t;
 
-//TODO: check if this should be packed (it's not in their docs)
+// TODO: check if this should be packed (it's not in their docs)
 /**
  *  @name Housekeeping - P31u-6
  */
@@ -138,7 +142,8 @@ typedef struct  {
 /**
  * Backwards-compatible housekeeping
  */
-typedef struct {
+typedef struct
+{
     uint16_t pv[3];                         //Photo-voltaic input voltage [mV]
     uint16_t pc;                            //Total photo current [mA]
     uint16_t bv;                            //Battery voltage [mV]
@@ -151,10 +156,10 @@ typedef struct {
      * Transmit as 5V1 first and 3.3V3 last
      */
     uint16_t latchup[6];
-    uint8_t reset;                          //Cause of last EPS reset
+    uint8_t  reset;                         //Cause of last EPS reset
     uint16_t bootcount;                     //Number of EPS reboots
     uint16_t sw_errors;                     //Number of errors in the eps software
-    uint8_t ppt_mode;                       //1 = MPPT, 2 = Fixed SW PPT.
+    uint8_t  ppt_mode;                      //1 = MPPT, 2 = Fixed SW PPT.
     /**
      * Mask of output channel status, 1=on, 0=off
      * MSB - [QH QS 3.3V3 3.3V2 3.3V1 5V3 5V2 5V1] - LSB
@@ -174,7 +179,8 @@ typedef struct {
 /**
  * P31u-8 housekeeping
  */
-typedef struct  {
+typedef struct
+{
     uint16_t vboost[3];                     //! Voltage of boost converters [mV] [PV1, PV2, PV3]
     uint16_t vbatt;                         //! Voltage of battery [mV]
     uint16_t curin[3];                      //! Current in [mA]
@@ -203,7 +209,8 @@ typedef struct  {
 /**
  * Voltage and current housekeeping
  */
-typedef struct {
+typedef struct
+{
     uint16_t vboost[3];                     //! Voltage of boost converters [mV] [PV1, PV2,PV3]
     uint16_t vbatt;                         //! Voltage of battery [mV]
     uint16_t curin[3];                      //! Current in [mA]
@@ -215,7 +222,8 @@ typedef struct {
 /**
  * Output switch housekeeping
  */
-typedef struct {
+typedef struct
+{
     uint16_t curout[6];                     //! Current out (switchable outputs) [mA]
     uint8_t output[8];                      //! Status of outputs**
     uint16_t output_on_delta[8];            //! Time till power on** [s]
@@ -226,19 +234,21 @@ typedef struct {
 /**
  * Watchdog housekeeping
  */
-typedef struct {
+typedef struct
+{
     uint32_t wdt_i2c_time_left;             //! Time left on I2C wdt [s]
     uint32_t wdt_gnd_time_left;             //! Time left on I2C wdt [s]
     uint8_t wdt_csp_pings_left[2];          //! Pings left on CSP wdt
     uint32_t counter_wdt_i2c;               //! Number of WDT I2C reboots
     uint32_t counter_wdt_gnd;               //! Number of WDT GND reboots
-uint32_t counter_wdt_csp[2];                //! Number of WDT CSP reboots
+	uint32_t counter_wdt_csp[2];            //! Number of WDT CSP reboots
 } __attribute__((packed)) eps_hk_wdt_t;
 
 /**
  * Basic housekeeping
  */
-typedef struct {
+typedef struct
+{
     uint32_t counter_boot;                  //! Number of EPS reboots
     int16_t temp[6];                        //! Temperatures [degC] [0 = TEMP1, TEMP2, TEMP3, TEMP4, BATT0, BATT1]
     uint8_t bootcause;                      //! Cause of last EPS reset
@@ -270,14 +280,17 @@ KEPSStatus k_eps_configure_system(const eps_system_config_t * config);
 KEPSStatus k_eps_configure_battery(const eps_battery_config_t * config);
 KEPSStatus k_eps_ping(void);
 /**
- * Reset both of the antenna's microcontrollers
+ * Hard reset the NanoPower
+ * It will wait 400ms before repowering
  * @return KEPSStatus EPS_OK if OK, error otherwise
  */
 KEPSStatus k_eps_reset(void);
 KEPSStatus k_eps_reboot(void);
 KEPSStatus k_eps_set_output(uint8_t channel_mask);
-KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay);
-KEPSStatus k_eps_set_input_value(uint16_t in1_voltage, uint16_t in2_voltage, uint16_t in3_voltage);
+KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value,
+                                   int16_t delay);
+KEPSStatus k_eps_set_input_value(uint16_t in1_voltage, uint16_t in2_voltage,
+                                 uint16_t in3_voltage);
 KEPSStatus k_eps_set_input_mode(uint8_t mode);
 KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t header, uint8_t mode);
 KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff);
@@ -311,13 +324,13 @@ KEPSStatus k_eps_watchdog_stop(void);
  * @return KEPSStatus EPS_OK if OK, error otherwise
  */
 KEPSStatus k_eps_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
-                               int rx_len);
+                             int rx_len);
 
 /*
  * Internal Functions
  */
 
 KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
-                               int rx_len);
+                             int rx_len);
 
 /* @} */
