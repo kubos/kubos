@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 /**
- * @defgroup ISIS_EPS_API ISIS ISIS EPS API
- * @addtogroup ISIS_EPS_API
+ * @defgroup NANOPOWER_API GOMspace NanoPower API
+ * @addtogroup NANOPOWER_API
  * @{
  */
 
@@ -25,7 +25,7 @@
 #include <stdint.h>
 
 /**
- *  @name GOMspace NanoPower EPS config.json configuration options and default values
+ *  @name GOMspace NanoPower config.json configuration options and default values
  */
 /**@{*/
 /**
@@ -47,8 +47,7 @@
 #endif
 
 /**
- * Watchdog timeout (in seconds)
- * TODO: There are multiple watchdogs...
+ * Watchdog timeout (in hours)
  */
 #ifdef YOTTA_CFG_EPS_NANOPOWER_WATCHDOG_TIMEOUT
 #define EPS_WD_TIMEOUT YOTTA_CFG_EPS_NANOPOWER_WATCHDOG_TIMEOUT
@@ -80,12 +79,14 @@
 /** \endcond */
 
 /**
- * Antenna function return values
+ * EPS function return values
  */
 typedef enum {
     EPS_OK,                     /**< Requested function completed successfully */
     EPS_ERROR,                  /**< Generic error */
     EPS_ERROR_CONFIG,           /**< Configuration error */
+    EPS_ERROR_NO_RESPONSE,      /**< No response received from subsystem */
+    EPS_ERROR_INTERNAL,         /**< An error was thrown by the subsystem */
     EPS_ERROR_NOT_IMPLEMENTED   /**< Requested function has not been implemented for the subsystem */
 } KEPSStatus;
 
@@ -275,8 +276,8 @@ KEPSStatus k_eps_ping(void);
 KEPSStatus k_eps_reset(void);
 KEPSStatus k_eps_reboot(void);
 KEPSStatus k_eps_set_output(uint8_t channel_mask);
-KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16 delay);
-KEPSStatus k_eps_set_input_value(uint16 in1_voltage, uint16 in2_voltage, uint16 in3_voltage);
+KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay);
+KEPSStatus k_eps_set_input_value(uint16_t in1_voltage, uint16_t in2_voltage, uint16_t in3_voltage);
 KEPSStatus k_eps_set_input_mode(uint8_t mode);
 KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t header, uint8_t mode);
 KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff);
@@ -290,7 +291,7 @@ KEPSStatus k_eps_get_heater(uint8_t * bp4, uint8_t * onboard);
 KEPSStatus k_eps_watchdog_kick(void);
 /**
  * Start a thread to kick the EPS's watchdogs at an interval of
- * (::EPS_WD_TIMEOUT/3) seconds
+ * (::EPS_WD_TIMEOUT/2) hours
  * @return KEPSStatus `EPS_OK` if OK, error otherwise
  */
 KEPSStatus k_eps_watchdog_start(void);
@@ -300,7 +301,7 @@ KEPSStatus k_eps_watchdog_start(void);
  */
 KEPSStatus k_eps_watchdog_stop(void);
 /**
- * Pass a command packet directly through to the antenna.
+ * Pass a command packet directly through to the EPS.
  * Useful for executing commands which have not been implemented in either the
  * generic or specific antenna APIs.
  * @param [in]  tx      Pointer to command packet to send

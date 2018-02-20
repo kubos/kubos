@@ -50,164 +50,297 @@ void k_eps_terminate()
 KEPSStatus k_eps_configure_system(const eps_system_config_t * config)
 {
     KEPSStatus status = EPS_OK;
+    uint8_t packet[1 + sizeof(eps_system_config_t)] = { SET_CONFIG1, 0 };
+    eps_resp_header response;
 
-    //TODO
+    memcpy(packet + 1, config, sizeof(config));
 
-    return status;
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                                sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
+
+    //TODO: should we be doing CONFIG_CMD to save to EEPROM?
+
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_configure_battery(const eps_battery_config_t * config)
 {
     KEPSStatus status = EPS_OK;
+    uint8_t packet[1 + sizeof(eps_battery_config_t)] = { SET_CONFIG2, 0 };
+    eps_resp_header response;
 
-    //TODO
+    memcpy(packet + 1, config, sizeof(config));
 
-    return status;
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                                sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
+
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_ping()
 {
-    KEPSStatus status = EPS_OK;
+    KI2CStatus  status;
+    uint8_t     cmd = HARD_RESET;
+    uint8_t     resp = 0;
 
-    //TODO
+    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, &cmd, 1);
+    if (status != I2C_OK)
+    {
+        fprintf(stderr, "Failed to send EPS ping: %d\n",
+                status);
+        return EPS_ERROR;
+    }
 
-    //TODO: non-standard response
-    return status;
+    status = k_i2c_read(EPS_I2C_BUS, EPS_ADDR, &resp, 1);
+    if (status != I2C_OK)
+    {
+        fprintf(stderr, "Failed to get EPS ping response: %d\n",
+                status);
+        return EPS_ERROR;
+    }
+
+    if (resp != cmd)
+    {
+        fprintf(stderr, "Unexpected EPS ping response: %#x vs %#x\n",
+                cmd, resp);
+        return EPS_ERROR;
+    }
+
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_reset()
 {
-    KEPSStatus ret = EPS_OK;
     KI2CStatus  status;
     uint8_t     cmd = HARD_RESET;
 
-    status = k_i2c_write(EPS_I2C_BUS, EPS_I2C_ADDR, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reset EPS: %d\n",
                 status);
-        ret = EPS_ERROR;
+        return EPS_ERROR;
     }
 
-    return ret;
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_reboot()
 {
-    KEPSStatus ret = EPS_OK;
     KI2CStatus status;
     uint8_t packet[] = {0x80, 0x07, 0x80, 0x07};
 
-    status = k_i2c_write(EPS_I2C_BUS, EPS_I2C_ADDR, packet, sizeof(packet));
+    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, packet, sizeof(packet));
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reboot EPS: %d\n",
                 status);
-        ret = EPS_ERROR;
+        return EPS_ERROR;
     }
 
-    return ret;
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_set_output(uint8_t channel_mask)
 {
-    KEPSStatus status = EPS_OK;
+    KEPSStatus status;
+    uint8_t    packet[] = { SET_OUTPUT, channel_mask };
+    eps_resp_header response;
 
-    //TODO
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                                sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
 
-    return status;
+    return EPS_OK;
 }
 
-KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16 delay)
+//TODO: verify delay byte ordering
+KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay)
 {
-    KEPSStatus status = EPS_OK;
+    KEPSStatus status;
+    uint8_t    packet[] = {
+            SET_SINGLE_OUTPUT,
+            channel,
+            value,
+            delay >> 8, delay & 0xFF
+    };
+    eps_resp_header response;
 
-    //TODO
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                                sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
 
-    return status;
+    return EPS_OK;
 }
 
-KEPSStatus k_eps_set_input_value(uint16 in1_voltage, uint16 in2_voltage, uint16 in3_voltage)
+KEPSStatus k_eps_set_input_value(uint16_t in1_voltage, uint16_t in2_voltage, uint16_t in3_voltage)
 {
     KEPSStatus status = EPS_OK;
+    uint8_t    packet[] = {
+            SET_PV_VOLT,
+            in1_voltage >> 8, in1_voltage & 0xFF,
+            in2_voltage >> 8, in2_voltage & 0xFF,
+            in3_voltage >> 8, in3_voltage & 0xFF
+    };
+    eps_resp_header response;
 
-    //TODO
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                                sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
 
-    return status;
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_set_input_mode(uint8_t mode)
 {
     KEPSStatus status = EPS_OK;
+    uint8_t    packet[] = { SET_PV_AUTO, mode };
+    eps_resp_header response;
 
-    //TODO
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                                sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
 
-    return status;
+    return EPS_OK;
 }
 
-KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t header, uint8_t mode)
+KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t heater, uint8_t mode)
 {
     KEPSStatus status = EPS_OK;
+    uint8_t    packet[] = {
+            SET_HEATER,
+            cmd,
+            heater,
+            mode
+    };
+    eps_resp_header response;
 
-    //TODO
-    //TODO: response
-    return status;
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                                sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
+
+    return EPS_OK;
 }
 
+//TODO: expand to allow for the other types?
 KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
 {
     KEPSStatus status = EPS_OK;
+    uint8_t    packet[] = { GET_HOUSEKEEPING, 0 }; /* Zero value is the housekeeping type */
+    uint8_t    response[sizeof(eps_resp_header) + sizeof(buff)] = { 0 };
 
-    //TODO
+    status = kprv_eps_transfer(packet, sizeof(packet), response, sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
 
-    //TODO: response
-    return status;
+    memcpy(buff, response + sizeof(eps_resp_header), sizeof(buff));
+
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_get_system_config(eps_system_config_t * buff)
 {
     KEPSStatus status = EPS_OK;
+    uint8_t    cmd = GET_CONFIG1;
+    uint8_t    response[sizeof(eps_resp_header) + sizeof(buff)] = { 0 };
 
-    //TODO
-    //TODO: response
-    return status;
+    status = kprv_eps_transfer(&cmd, 1, response, sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
+
+    memcpy(buff, response + sizeof(eps_resp_header), sizeof(buff));
+
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_get_battery_config(eps_battery_config_t * buff)
 {
     KEPSStatus status = EPS_OK;
+    uint8_t    cmd = GET_CONFIG2;
+    uint8_t    response[sizeof(eps_resp_header) + sizeof(buff)] = { 0 };
 
-    //TODO
-    //TODO: response
-    return status;
+    status = kprv_eps_transfer(&cmd, 1, response, sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
+
+    memcpy(buff, response + sizeof(eps_resp_header), sizeof(buff));
+
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_get_heater(uint8_t * bp4, uint8_t * onboard)
 {
     KEPSStatus status = EPS_OK;
+    uint8_t    cmd = SET_HEATER;
+    uint8_t    response[sizeof(eps_resp_header) + 2] = { 0 };
 
-    //TODO
-    //TODO: response
-    return status;
-}
+    status = kprv_eps_transfer(&cmd, 1, response, sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
 
-{
-    KEPSStatus status = EPS_OK;
+    //TODO: Is there a better (safer) way to do this?
+    memcpy(bp4, response + sizeof(eps_resp_header), 1);
+    memcpy(onboard, response + sizeof(eps_resp_header) + 1, 1);
 
-    //TODO
-    //TODO: response
-    return status;
+    return EPS_OK;
 }
 
 KEPSStatus k_eps_watchdog_kick()
 {
-    KI2CStatus  status;
-    KEPSStatus ret = EPS_OK;
-    uint8_t     cmd = WATCHDOG_RESET;
+    KEPSStatus status;
+    uint8_t     cmd = RESET_WDT;
+    eps_resp_header response;
 
-    //TODO. This has a SUUUUUUPER long sleep time between kicks
+    status = kprv_eps_transfer(&cmd, 1, (uint8_t *) &response, sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        return status;
+    }
 
-    return ret;
+    return EPS_OK;
 }
 
 pthread_t handle_watchdog = { 0 };
@@ -220,7 +353,7 @@ void * kprv_eps_watchdog_thread(void * args)
     {
         k_eps_watchdog_kick();
 
-        sleep(EPS_WD_TIMEOUT / 3);
+        sleep((EPS_WD_TIMEOUT * 3600) / 2);
     }
 
     return NULL;
@@ -284,7 +417,7 @@ KEPSStatus k_eps_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
 
     KI2CStatus status;
 
-    status = k_i2c_write(EPS_I2C_BUS, EPS_I2C_ADDR, (uint8_t *) tx, tx_len);
+    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) tx, tx_len);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send EPS passthrough packet: %d\n", status);
@@ -293,7 +426,7 @@ KEPSStatus k_eps_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
 
     if (rx_len != 0)
     {
-        status = k_i2c_read(EPS_I2C_BUS, EPS_I2C_ADDR, rx, rx_len);
+        status = k_i2c_read(EPS_I2C_BUS, EPS_ADDR, rx, rx_len);
         if (status != I2C_OK)
         {
             fprintf(stderr, "Failed to read EPS passthrough response: %d\n",
@@ -313,17 +446,17 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
     if (tx == NULL || tx_len < 1 || rx == NULL
         || rx_len < (int) sizeof(eps_resp_header))
     {
-        return ADCS_ERROR_CONFIG;
+        return EPS_ERROR_CONFIG;
     }
 
-    status = k_i2c_write(IMTQ_I2C_BUS, EPS_I2C_ADDR, (uint8_t *) tx, tx_len);
+    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) tx, tx_len);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send MTQ command: %d\n", status);
         return EPS_ERROR;
     }
 
-    status = k_i2c_read(EPS_I2C_BUS, EPS_I2C_ADDR, rx, rx_len);
+    status = k_i2c_read(EPS_I2C_BUS, EPS_ADDR, rx, rx_len);
 
     if (status != I2C_OK)
     {
