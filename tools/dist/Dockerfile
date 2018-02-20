@@ -39,7 +39,7 @@ RUN rm ./bbb_toolchain.tar.gz
 
 RUN pip install --upgrade setuptools
 RUN pip install -r https://raw.githubusercontent.com/kubos/kubos-cli/master/requirements.txt
-RUN pip install git+https://github.com/kubostech/kubos-cli
+RUN pip install git+https://github.com/kubos/kubos-cli
 
 RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
