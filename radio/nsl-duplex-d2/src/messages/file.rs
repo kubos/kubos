@@ -1,6 +1,7 @@
 use nom::IResult;
 use std::str;
 
+#[derive(Debug)]
 pub struct File {
     name: String,
     body: Vec<u8>,

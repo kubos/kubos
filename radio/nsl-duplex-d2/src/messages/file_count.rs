@@ -1,5 +1,6 @@
 use nom::{IResult, be_u32};
 
+#[derive(Debug)]
 pub struct FileCount(u32);
 
 impl FileCount {

@@ -1,5 +1,6 @@
 use nom::{IResult, be_u32, be_u8};
 
+#[derive(Debug)]
 pub struct StateOfHealth {
     reset_count: u32, // (4 byte integer) Current epoch reset count, starts at 0, incremented for each power system reset, persistent over the life of the mission
     current_time: u32, // (4 byte integer) Current time (seconds) from start of most recent reset
