@@ -55,7 +55,7 @@ mod tests {
     fn it_parses() {
         assert_eq!(
             Ok((
-                b"extra" as &[u8],
+                &b"extra"[..],
                 StateOfHealth {
                     reset_count: 1,
                     current_time: 2,

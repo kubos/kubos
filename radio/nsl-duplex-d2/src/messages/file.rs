@@ -33,7 +33,7 @@ mod tests {
     fn it_parses() {
         assert_eq!(
             Ok((
-                b"extra" as &[u8],
+                &b"extra"[..],
                 File {
                     name: String::from("test.txt"),
                     body: b"Hello World\n".to_vec(),
