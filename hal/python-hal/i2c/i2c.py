@@ -15,22 +15,23 @@ I2C_SLAVE=0x0703
 
 class I2C:
 
-    def __init__(self, device, bus):
+    def __init__(self, bus):
         """
-        Retrieves the read/write file handle for the device and 
-        sets the device address
+        Retrieves the read/write file handle for the device
         """
         
         self.devfile = io.open("/dev/i2c-"+str(bus), "r+b", buffering=0)
-        
-        fcntl.ioctl(self.devfile, I2C_SLAVE, device)
     
-    def write(self, data):
+    def write(self, device, data):
         """
+        Sets the address for the device.
         Formats the data and writes the data to the device. 
         Input must be a string or a list.
         Returns True and the data (as written to the device) if successful
         """
+        
+        fcntl.ioctl(self.devfile, I2C_SLAVE, device)
+        
         if type(data) is list:
             data = bytearray(data)
         elif type(data) is str:
@@ -40,10 +41,12 @@ class I2C:
         self.devfile.write(data)
         return True,data
     
-    def read(self, count):
+    def read(self, device, count):
         """
         Reads the specified number of bytes from the device. 
         """
+        fcntl.ioctl(self.devfile, I2C_SLAVE, device)
+        
         return self.devfile.read(count)
     
     def close(self):
