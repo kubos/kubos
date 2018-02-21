@@ -1,7 +1,7 @@
 use nom::IResult;
 use std::str;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct File {
     name: String,
     body: Vec<u8>,
@@ -24,3 +24,21 @@ named!(
     length_header<usize>,
     map_res!(take_str!(4), str::FromStr::from_str)
 );
+
+#[cfg(test)]
+mod tests {
+    use super::File;
+    #[test]
+    fn it_parses() {
+        assert_eq!(
+            Ok((
+                b"extra" as &[u8],
+                File {
+                    name: String::from("test.txt"),
+                    body: b"Hello World\n".to_vec(),
+                }
+            )),
+            File::parse(b"00080012test.txtHello World\nextra")
+        )
+    }
+}
