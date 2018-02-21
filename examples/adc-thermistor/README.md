@@ -1,6 +1,6 @@
 # ADC Demo with Kubos Linux
 
-This is a simple application built on top of the [KubOS Linux Platform](https://github.com/kubostech/kubos-linux-build) 
+This is a simple application built on top of the [KubOS Linux Platform](https://github.com/kubos/kubos-linux-build) 
 demonstrating some basic data gathering from a thermistor connected to an ADC pin.
 
 The project reads ADC values from the thermistor and then converts it to the temperature (in celsius) using the 
