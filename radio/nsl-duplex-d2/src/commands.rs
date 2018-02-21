@@ -26,6 +26,7 @@ pub fn get_state_of_health() -> Command<StateOfHealth> {
     }
 }
 
+/*
 // TODO: convert to test syntax and add test vectors.
 fn request<T>(command: Command<T>) {
     println!("Request {:?}", command.request);
@@ -40,3 +41,4 @@ fn test() {
     let file_count = request(get_file_count());
     let state_of_health = request(get_state_of_health());
 }
+*/
