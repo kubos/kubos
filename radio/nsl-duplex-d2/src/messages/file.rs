@@ -39,6 +39,6 @@ mod tests {
                 }
             )),
             File::parse(b"00080012test.txtHello World\nextra")
-        )
+        );
     }
 }
