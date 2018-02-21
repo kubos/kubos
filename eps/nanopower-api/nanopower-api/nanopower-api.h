@@ -53,29 +53,29 @@
 #ifdef YOTTA_CFG_EPS_NANOPOWER_WATCHDOG_TIMEOUT
 #define EPS_WD_TIMEOUT YOTTA_CFG_EPS_NANOPOWER_WATCHDOG_TIMEOUT
 #else
-#define EPS_WD_TIMEOUT 60
+#define EPS_WD_TIMEOUT 0
 #endif
 /**@}*/
 
 /** \cond WE DO NOT WANT TO HAVE THESE IN OUR GENERATED DOCS */
 /* EPS command values */
-#define PING                0x01
-#define REBOOT              0x04
-#define GET_HOUSEKEEPING    0x08
-#define SET_OUTPUT          0x09
-#define SET_SINGLE_OUTPUT   0x10
-#define SET_PV_VOLT         0x11
-#define SET_PV_AUTO         0x12
-#define SET_HEATER          0x13
-#define RESET_COUNTERS      0x15
-#define RESET_WDT           0x16 /* Reset DEDICATED WDT (not I2C WDT) */
-#define CMD_CONFIG1         0x17 /* Currently only used for resetting config */
-#define GET_CONFIG1         0x18
-#define SET_CONFIG1         0x19
-#define HARD_RESET          0x20 /* 400ms delay after reset */
-#define CMD_CONFIG2         0x21 /* Reset default config or confirm current config */
-#define GET_CONFIG2         0x22
-#define SET_CONFIG2         0x23
+#define PING                1
+#define REBOOT              4
+#define GET_HOUSEKEEPING    8
+#define SET_OUTPUT          9
+#define SET_SINGLE_OUTPUT   10
+#define SET_PV_VOLT         11
+#define SET_PV_AUTO         12
+#define SET_HEATER          13
+#define RESET_COUNTERS      15
+#define RESET_WDT           16 /* Reset DEDICATED WDT (not I2C WDT) */
+#define CMD_CONFIG1         17 /* Currently only used for resetting config */
+#define GET_CONFIG1         18
+#define SET_CONFIG1         19
+#define HARD_RESET          20 /* 400ms delay after reset */
+#define CMD_CONFIG2         21 /* Reset default config or confirm current config */
+#define GET_CONFIG2         22
+#define SET_CONFIG2         23
 
 /** \endcond */
 
