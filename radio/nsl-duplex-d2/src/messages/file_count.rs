@@ -5,6 +5,7 @@ pub struct FileCount(u32);
 
 impl FileCount {
     pub fn parse(input: &[u8]) -> IResult<&[u8], FileCount> {
+        let (input, _) = tag!(input, b"GU")?;
         let (input, file_count) = be_u32(input)?;
         Ok((input, FileCount(file_count)))
     }
@@ -17,7 +18,7 @@ mod tests {
     fn it_parses() {
         assert_eq!(
             Ok((b"\x9a\xbc" as &[u8], FileCount(0x12345678))),
-            FileCount::parse(b"\x12\x34\x56\x78\x9a\xbc")
+            FileCount::parse(b"GU\x12\x34\x56\x78\x9a\xbc")
         );
     }
 }

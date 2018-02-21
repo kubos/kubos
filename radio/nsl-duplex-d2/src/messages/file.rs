@@ -9,6 +9,7 @@ pub struct File {
 
 impl File {
     pub fn parse(input: &[u8]) -> IResult<&[u8], File> {
+        let (input, _) = tag!(input, b"GU")?;
         let (input, name_length) = length_header(input)?;
         let (input, body_length) = length_header(input)?;
         let (input, name) = take_str!(input, name_length)?;
@@ -38,7 +39,7 @@ mod tests {
                     body: b"Hello World\n".to_vec(),
                 }
             )),
-            File::parse(b"00080012test.txtHello World\nextra")
+            File::parse(b"GU00080012test.txtHello World\nextra")
         );
     }
 }
