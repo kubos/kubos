@@ -16,12 +16,11 @@ I2C_SLAVE=0x0703
 
 class I2C:
 
-    def __init__(self, bus, filepath):
+    def __init__(self, bus):
         """
         Retrieves the read/write file handle for the device
         """
-        # self.filepath = "/dev/i2c-"+str(bus)
-        self.filepath = filepath
+        self.filepath = "/dev/i2c-"+str(bus)
 
     def write(self, device, data):
         """

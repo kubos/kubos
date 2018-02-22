@@ -16,15 +16,18 @@ from contextlib import nested
 class TestI2C(unittest.TestCase):
 
     def setUp(self):
-        self.i2cdevice = i2c.I2C(1, "/dev/123")
+        self.i2cdevice = i2c.I2C(1)
 
     def test_datatype(self):
+        fake_device = 1
+        fake_data = 123
+
         with nested(
                 mock.patch('io.open'),
                 mock.patch('fcntl.ioctl'),
         ) as (mock_open, mock_ioctl):
             with self.assertRaises(TypeError):
-                self.i2cdevice.write(1, 123)
+                self.i2cdevice.write(fake_device, fake_data)
 
 
 if __name__ == '__main__':
