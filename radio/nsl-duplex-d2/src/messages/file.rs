@@ -1,5 +1,5 @@
 use nom::IResult;
-use std::str;
+use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
 pub struct File {
@@ -10,8 +10,8 @@ pub struct File {
 impl File {
     pub fn parse(input: &[u8]) -> IResult<&[u8], File> {
         let (input, _) = tag!(input, b"GU")?;
-        let (input, name_length) = length_header(input)?;
-        let (input, body_length) = length_header(input)?;
+        let (input, name_length) = map_res!(input, take_str!(3), usize::from_str)?;
+        let (input, body_length) = map_res!(input, take_str!(6), usize::from_str)?;
         let (input, name) = take_str!(input, name_length)?;
         let name = String::from(name);
         let (input, body) = take!(input, body_length)?;
@@ -19,12 +19,6 @@ impl File {
         Ok((input, File { name, body }))
     }
 }
-
-// Take 4 bytes, convert to string and then parse as usize
-named!(
-    length_header<usize>,
-    map_res!(take_str!(4), str::FromStr::from_str)
-);
 
 #[cfg(test)]
 mod tests {
@@ -39,7 +33,7 @@ mod tests {
                     body: b"Hello World\n".to_vec(),
                 }
             )),
-            File::parse(b"GU00080012test.txtHello World\nextra")
+            File::parse(b"GU008000012test.txtHello World\nextra")
         );
     }
 }

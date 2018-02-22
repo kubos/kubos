@@ -25,20 +25,3 @@ pub fn get_state_of_health() -> Command<StateOfHealth> {
         parse: StateOfHealth::parse,
     }
 }
-
-/*
-// TODO: convert to test syntax and add test vectors.
-fn request<T>(command: Command<T>) {
-    println!("Request {:?}", command.request);
-    if let Ok((_, res)) = (command.parse)(b"garbage data") {
-        // TODO: figure out how to convince compiler it has Debug
-        println!("Result: {:?}", res)
-    }
-}
-
-fn test() {
-    let file = request(get_file());
-    let file_count = request(get_file_count());
-    let state_of_health = request(get_state_of_health());
-}
-*/

@@ -6,14 +6,11 @@ extern crate serial;
 #[macro_use]
 extern crate nom;
 
-// mod duplex_d2;
-// mod comms;
-pub mod commands;
+mod duplex_d2;
+mod commands;
 mod messages;
-// mod file;
-// mod command;
-// mod serial_comm;
+mod serial_comm;
 
-// pub use duplex_d2::DuplexD2;
-// pub use serial_comm::SerialConnection;
-// pub use command::Command;
+pub use duplex_d2::DuplexD2;
+pub use commands::*;
+pub use serial_comm::SerialConnection;

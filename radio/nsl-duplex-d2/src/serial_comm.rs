@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-extern crate serial;
-
 use radio_api::Connection;
 use std::io;
 use std::time::Duration;
 use std::thread;
+use serial;
 
 pub struct SerialConnection;
 
 impl Connection for SerialConnection {
-    fn send(&self, data: Vec<u8>) -> Result<(), String> {
-        match serial_send(&data) {
+    fn send(&self, data: &[u8]) -> Result<(), String> {
+        match serial_send(data) {
             Ok(_) => Ok(()),
             Err(_) => Err(String::from("Error sending")),
         }

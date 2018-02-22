@@ -21,7 +21,7 @@
 
 use serde_json::Error as SerdeJsonError;
 use radio_api::{Connection, Radio, RadioError, RadioReset};
-use command::Command;
+use commands::Command;
 
 pub struct DuplexD2 {
     conn: Box<Connection>,
@@ -29,12 +29,13 @@ pub struct DuplexD2 {
 
 impl DuplexD2 {
     pub fn new(conn: Box<Connection>) -> DuplexD2 {
-        DuplexD2 { conn: conn }
+        DuplexD2 { conn }
     }
 
-    fn send_command<T>(&self, command: Box<Command<T>>) -> Result<Vec<u8>, String> {
-        self.conn.send(command.command_bytes())?;
-        Ok(self.conn.receive()?)
+    pub fn send_command<T>(&self, command: &Command<T>) -> Result<T, String> {
+        self.conn.send(&command.request)?;
+        let (_, res) = (command.parse)(&self.conn.receive()?).or(Err("Parse problem"))?;
+        Ok(res)
     }
 }
 
@@ -73,14 +74,14 @@ impl Radio for DuplexD2 {
 #[cfg(test)]
 mod tests {
     use duplex_d2::*;
-    use command::Command;
+    use nom::IResult;
 
     struct TestGoodConnection {
         data: Vec<u8>,
     }
 
     impl Connection for TestGoodConnection {
-        fn send(&self, _data: Vec<u8>) -> Result<(), String> {
+        fn send(&self, _data: &[u8]) -> Result<(), String> {
             Ok(())
         }
 
@@ -92,7 +93,7 @@ mod tests {
     struct TestBadConnection {}
 
     impl Connection for TestBadConnection {
-        fn send(&self, _: Vec<u8>) -> Result<(), String> {
+        fn send(&self, _: &[u8]) -> Result<(), String> {
             return Err(String::from("Send failed"));
         }
 
@@ -101,16 +102,12 @@ mod tests {
         }
     }
 
-    struct TestCommand {}
-
-    impl Command<u32> for TestCommand {
-        fn command_bytes(&self) -> Vec<u8> {
-            vec![0x47, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+    fn test_command() -> Command<u32> {
+        let request = vec![0x47, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+        fn parse(_: &[u8]) -> IResult<&[u8], u32> {
+            Ok((b"", 1))
         }
-
-        fn process_response(&self, response: &[u8]) -> Result<u32, String> {
-            Ok(1)
-        }
+        Command { request, parse }
     }
 
     #[test]
@@ -154,8 +151,8 @@ mod tests {
             conn: Box::new(TestBadConnection {}),
         };
 
-        let command = TestCommand{};
-        match radio.send_command(Box::new(command)) {
+        let command = test_command();
+        match radio.send_command(&command) {
             Ok(_) => assert!(false, "Expected send_command to fail.".to_string()),
             Err(message) => assert!(true, message),
         }
@@ -167,8 +164,8 @@ mod tests {
             conn: Box::new(TestGoodConnection { data: Vec::new() }),
         };
 
-        let command = TestCommand{};
-        match radio.send_command(Box::new(command)) {
+        let command = test_command();
+        match radio.send_command(&command) {
             Ok(_) => assert!(true),
             Err(message) => assert!(false, message),
         }

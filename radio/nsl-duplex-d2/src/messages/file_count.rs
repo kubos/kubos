@@ -17,8 +17,8 @@ mod tests {
     #[test]
     fn it_parses() {
         assert_eq!(
-            Ok((&b"\x9a\xbc"[..], FileCount(0x12345678))),
-            FileCount::parse(b"GU\x12\x34\x56\x78\x9a\xbc")
+            Ok((&b"extra"[..], FileCount(0x12345678))),
+            FileCount::parse(b"GU\x12\x34\x56\x78extra")
         );
     }
 }
