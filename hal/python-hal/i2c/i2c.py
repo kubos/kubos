@@ -13,14 +13,14 @@ import io,sys,fcntl
 
 I2C_SLAVE=0x0703
 
+
 class I2C:
 
     def __init__(self, bus):
         """
         Retrieves the read/write file handle for the device
         """
-        
-        self.devfile = io.open("/dev/i2c-"+str(bus), "r+b", buffering=0)
+        self.filepath = "/dev/i2c-"+str(bus)
     
     def write(self, device, data):
         """
@@ -30,30 +30,28 @@ class I2C:
         Returns True and the data (as written to the device) if successful
         """
         
-        fcntl.ioctl(self.devfile, I2C_SLAVE, device)
-        
-        if type(data) is list:
-            data = bytearray(data)
-        elif type(data) is str:
-            pass
-        else: 
-            raise TypeError('Invalid data format: '+str(type(data))+', must be string or list')
-        self.devfile.write(data)
-        return True,data
+        with io.open(self.filepath, "r+b", buffering=0) as file:
+
+            fcntl.ioctl(file, I2C_SLAVE, device)
+            
+            if type(data) is list:
+                data = bytearray(data)
+            elif type(data) is str:
+                pass
+            else: 
+                raise TypeError('Invalid data format: '+str(type(data))+', must be string or list')
+            file.write(data)
+            return True,data
     
     def read(self, device, count):
         """
         Reads the specified number of bytes from the device. 
         """
-        fcntl.ioctl(self.devfile, I2C_SLAVE, device)
-        
-        return self.devfile.read(count)
-    
-    def close(self):
-        """
-        Closes the file.
-        """
-        self.devfile.close()
+        with io.open(self.filepath, "r+b", buffering=0) as file:
+            fcntl.ioctl(file, I2C_SLAVE, device)
+            
+            return file.read(count)
+
         
 
     
