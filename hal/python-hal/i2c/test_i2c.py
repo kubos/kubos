@@ -18,6 +18,16 @@ class TestI2C(unittest.TestCase):
     def setUp(self):
         self.i2cdevice = i2c.I2C(1)
 
+    def test_handles_list_data(self):
+        fake_device = 1
+        fake_data = ["s"]
+
+        with nested(
+                mock.patch('io.open'),
+                mock.patch('fcntl.ioctl'),
+        ) as (mock_open, mock_ioctl):
+                assert self.i2cdevice.write(fake_device, fake_data)
+
     def test_sets_i2c_as_slave(self):
         fake_device = 1
         fake_data = "fake"
