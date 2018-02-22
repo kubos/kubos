@@ -6,7 +6,7 @@ extern crate serial;
 #[macro_use]
 extern crate nom;
 
-// mod duplex_d2;
+mod duplex_d2;
 // mod comms;
 pub mod commands;
 mod messages;
