@@ -8,7 +8,7 @@
     },
     "version":"0.1.0",
     "dependencies":{
-	"csp":"kubostech/libcsp"
+	"csp":"kubos/libcsp"
     },
     "homepage":"https://<homepage>",
     "description":"Example Kubos app which reads the temperature from a thermistor"
