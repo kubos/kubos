@@ -39,9 +39,9 @@ class TestI2C(unittest.TestCase):
             self.i2cdevice.write(fake_device, fake_data)
             mock_ioctl.assert_called_with(mock.ANY, i2c.I2C_SLAVE, fake_device)
 
-    def test_datatype(self):
+    def test_wrong_datatype_raises_type_error(self):
         fake_device = 1
-        fake_data = 123
+        fake_data = 123 # Non-string
 
         with nested(
                 mock.patch('io.open'),
