@@ -50,20 +50,51 @@ void k_eps_terminate()
 KEPSStatus k_eps_configure_system(const eps_system_config_t * config)
 {
     KEPSStatus status = EPS_OK;
-    uint8_t packet[1 + sizeof(eps_system_config_t)] = { SET_CONFIG1, 0 };
     eps_resp_header response;
+    struct __attribute__((packed))
+    {
+        uint8_t cmd;
+        eps_system_config_t sys_config;
+    }  packet;
 
-    memcpy(packet + 1, config, sizeof(config));
+    if (config == NULL)
+    {
+        return EPS_ERROR_CONFIG;
+    }
 
-    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+    packet.cmd = SET_CONFIG1;
+
+    packet.sys_config.ppt_mode = config->ppt_mode;
+    packet.sys_config.battheater_mode = config->battheater_mode;
+    packet.sys_config.battheater_low = config->battheater_low;
+    packet.sys_config.battheater_high = config->battheater_high;
+    for (int i = 0; i < 8; i++)
+    {
+        packet.sys_config.output_normal_value[i] = config->output_normal_value[i];
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        packet.sys_config.output_safe_value[i] = config->output_safe_value[i];
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        packet.sys_config.output_initial_on_delay[i] = htobe16(config->output_initial_on_delay[i]);
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        packet.sys_config.output_initial_off_delay[i] = htobe16(config->output_initial_off_delay[i]);
+    }
+    packet.sys_config.vboost[0] = htobe16(config->vboost[0]);
+    packet.sys_config.vboost[1] = htobe16(config->vboost[1]);
+    packet.sys_config.vboost[2] = htobe16(config->vboost[2]);
+
+    status = kprv_eps_transfer((uint8_t *) &packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to set EPS system configuration: %d\n", status);
         return status;
     }
-
-    // TODO: should we be doing CONFIG_CMD to save to EEPROM?
 
     return EPS_OK;
 }
@@ -71,16 +102,29 @@ KEPSStatus k_eps_configure_system(const eps_system_config_t * config)
 KEPSStatus k_eps_configure_battery(const eps_battery_config_t * config)
 {
     KEPSStatus status = EPS_OK;
-    uint8_t packet[1 + sizeof(eps_battery_config_t)] = { SET_CONFIG2, 0 };
     eps_resp_header response;
+    struct __attribute__((packed))
+    {
+        uint8_t cmd;
+        eps_battery_config_t batt_config;
+    }  packet;
 
-    memcpy(packet + 1, config, sizeof(config));
+    if (config == NULL)
+    {
+        return EPS_ERROR_CONFIG;
+    }
 
-    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+    packet.cmd = SET_CONFIG2;
+    packet.batt_config.batt_maxvoltage = htobe16(config->batt_maxvoltage);
+    packet.batt_config.batt_safevoltage = htobe16(config->batt_safevoltage);
+    packet.batt_config.batt_criticalvoltage = htobe16(config->batt_criticalvoltage);
+    packet.batt_config.batt_normalvoltage = htobe16(config->batt_normalvoltage);
+
+    status = kprv_eps_transfer((uint8_t *) &packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to set EPS battery configuration: %d\n", status);
         return status;
     }
 
@@ -135,7 +179,7 @@ KEPSStatus k_eps_reset()
 KEPSStatus k_eps_reboot()
 {
     KI2CStatus status;
-    uint8_t    packet[] = { 0x80, 0x07, 0x80, 0x07 };
+    uint8_t    packet[] = { REBOOT, 0x80, 0x07, 0x80, 0x07 };
 
     status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, packet, sizeof(packet));
     if (status != I2C_OK)
@@ -157,30 +201,45 @@ KEPSStatus k_eps_set_output(uint8_t channel_mask)
                                sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to set EPS outputs: %d\n", status);
         return status;
     }
 
     return EPS_OK;
 }
 
-// TODO: verify delay byte ordering
 KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay)
 {
     KEPSStatus status;
-    uint8_t    packet[] = {
-            SET_SINGLE_OUTPUT,
-            channel,
-            value,
-            delay >> 8, delay & 0xFF
-    };
     eps_resp_header response;
+    struct __attribute__((packed))
+    {
+        uint8_t cmd;
+        uint8_t channel;
+        uint8_t value;
+        int16_t delay;
+    }  packet;
 
-    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+    if (channel > 7)
+    {
+        return EPS_ERROR_CONFIG;
+    }
+
+    packet.cmd = SET_SINGLE_OUTPUT;
+    /*
+     * The channel ordering is secretly backwards.
+     * Output[0] is actually channel 7 (onboard heater)
+     * and output[7] is channel 0
+     */
+    packet.channel = 7 - channel;
+    packet.value = value;
+    packet.delay = htobe16(delay);
+
+    status = kprv_eps_transfer((uint8_t *) &packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to set EPS output %d value: %d\n", channel, status);
         return status;
     }
 
@@ -191,19 +250,25 @@ KEPSStatus k_eps_set_input_value(uint16_t in1_voltage, uint16_t in2_voltage,
                                  uint16_t in3_voltage)
 {
     KEPSStatus status   = EPS_OK;
-    uint8_t    packet[] = {
-            SET_PV_VOLT,
-            in1_voltage >> 8, in1_voltage & 0xFF,
-            in2_voltage >> 8, in2_voltage & 0xFF,
-            in3_voltage >> 8, in3_voltage & 0xFF
-    };
     eps_resp_header response;
+    struct __attribute__((packed))
+    {
+        uint8_t cmd;
+        uint16_t in1_voltage;
+        uint16_t in2_voltage;
+        uint16_t in3_voltage;
+    }  packet;
 
-    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+    packet.cmd = SET_PV_VOLT;
+    packet.in1_voltage = htobe16(in1_voltage);
+    packet.in2_voltage = htobe16(in2_voltage);
+    packet.in3_voltage = htobe16(in3_voltage);
+
+    status = kprv_eps_transfer((uint8_t *) &packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to set EPS input voltages: %d\n", status);
         return status;
     }
 
@@ -220,7 +285,7 @@ KEPSStatus k_eps_set_input_mode(uint8_t mode)
                                sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to set EPS input mode: %d\n", status);
         return status;
     }
 
@@ -236,13 +301,33 @@ KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t heater, uint8_t mode)
             heater,
             mode
     };
+    //eps_resp_header response;
+    uint8_t    response[sizeof(eps_resp_header) + 2] = { 0 };
+
+    printf("set heater\n");
+
+    status = kprv_eps_transfer(packet, sizeof(packet), response,
+                               sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to set EPS heater/s %d mode: %d\n", heater, status);
+        return status;
+    }
+
+    return EPS_OK;
+}
+
+KEPSStatus k_eps_reset_counters()
+{
+    KEPSStatus      status;
+    uint8_t         packet[] = { RESET_COUNTERS, 0x42 };
     eps_resp_header response;
 
     status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to reset EPS counters: %d\n", status);
         return status;
     }
 
@@ -253,19 +338,70 @@ KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t heater, uint8_t mode)
 KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
 {
     KEPSStatus status;
-    /* Zero value is the housekeeping type */
     uint8_t packet[] = { GET_HOUSEKEEPING, 0 }; 
-    uint8_t response[sizeof(eps_resp_header) + sizeof(buff)] = { 0 };
+    uint8_t response[sizeof(eps_resp_header) + sizeof(eps_hk_t)] = { 0 };
+
+    if (buff == NULL)
+    {
+        return EPS_ERROR_CONFIG;
+    }
 
     status = kprv_eps_transfer(packet, sizeof(packet), response,
                                sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to get EPS housekeeping data: %d\n", status);
         return status;
     }
 
-    memcpy(buff, response + sizeof(eps_resp_header), sizeof(buff));
+    //TODO: Maybe don't play with pointers quite so hard
+    eps_hk_t * body = (eps_hk_t *) (response + sizeof(eps_resp_header));
+
+    /* Convert big endian to host endianness for multi-byte fields */
+    buff->vboost[0] = be16toh(body->vboost[0]);
+    buff->vboost[1] = be16toh(body->vboost[1]);
+    buff->vboost[2] = be16toh(body->vboost[2]);
+    buff->vbatt = be16toh(body->vbatt);
+    buff->curin[0] = be16toh(body->curin[0]);
+    buff->curin[1] = be16toh(body->curin[1]);
+    buff->curin[2] = be16toh(body->curin[2]);
+    buff->cursys = be16toh(body->cursys);
+    for (int i = 0; i < 6; i++)
+    {
+        buff->curout[i] = be16toh(body->curout[i]);
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        buff->output[i] = body->output[i];
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        buff->output_on_delta[i] = be16toh(body->output_on_delta[i]);
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        buff->output_off_delta[i] = be16toh(body->output_off_delta[i]);
+    }
+    for (int i = 0; i < 6; i++)
+    {
+        buff->latchup[i] = be16toh(body->latchup[i]);
+    }
+    buff->wdt_i2c_time_left = be32toh(body->wdt_i2c_time_left);
+    buff->wdt_gnd_time_left = be32toh(body->wdt_gnd_time_left);
+    buff->wdt_csp_pings_left[0] = body->wdt_csp_pings_left[0];
+    buff->wdt_csp_pings_left[1] = body->wdt_csp_pings_left[1];
+    buff->counter_wdt_i2c = be32toh(body->counter_wdt_i2c);
+    buff->counter_wdt_gnd = be32toh(body->counter_wdt_gnd);
+    buff->counter_wdt_csp[0] = be32toh(body->counter_wdt_csp[0]);
+    buff->counter_wdt_csp[1] = be32toh(body->counter_wdt_csp[1]);
+    buff->counter_boot = be32toh(body->counter_boot);
+    for (int i = 0; i < 6; i++)
+    {
+        buff->temp[i] = be16toh(body->temp[i]);
+    }
+    buff->bootcause = body->bootcause;
+    buff->battmode = body->battmode;
+    buff->pptmode = body->pptmode;
 
     return EPS_OK;
 }
@@ -274,16 +410,45 @@ KEPSStatus k_eps_get_system_config(eps_system_config_t * buff)
 {
     KEPSStatus status;
     uint8_t    cmd = GET_CONFIG1;
-    uint8_t    response[sizeof(eps_resp_header) + sizeof(buff)] = { 0 };
+    uint8_t    response[sizeof(eps_resp_header) + sizeof(eps_system_config_t)] = { 0 };
+
+    if (buff == NULL)
+    {
+        return EPS_ERROR_CONFIG;
+    }
 
     status = kprv_eps_transfer(&cmd, 1, response, sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to get EPS system configuration: %d\n", status);
         return status;
     }
 
-    memcpy(buff, response + sizeof(eps_resp_header), sizeof(buff));
+    eps_system_config_t * body = (eps_system_config_t *) (response + sizeof(eps_resp_header));
+
+    buff->ppt_mode = body->ppt_mode;
+    buff->battheater_mode = body->battheater_mode;
+    buff->battheater_low = body->battheater_low;
+    buff->battheater_high = body->battheater_high;
+    for (int i = 0; i < 8; i++)
+    {
+        buff->output_normal_value[i] = body->output_normal_value[i];
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        buff->output_safe_value[i] = body->output_safe_value[i];
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        buff->output_initial_on_delay[i] = be16toh(body->output_initial_on_delay[i]);
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        buff->output_initial_off_delay[i] = be16toh(body->output_initial_off_delay[i]);
+    }
+    buff->vboost[0] = be16toh(body->vboost[0]);
+    buff->vboost[1] = be16toh(body->vboost[1]);
+    buff->vboost[2] = be16toh(body->vboost[2]);
 
     return EPS_OK;
 }
@@ -292,16 +457,26 @@ KEPSStatus k_eps_get_battery_config(eps_battery_config_t * buff)
 {
     KEPSStatus status;
     uint8_t    cmd = GET_CONFIG2;
-    uint8_t    response[sizeof(eps_resp_header) + sizeof(buff)] = { 0 };
+    uint8_t    response[sizeof(eps_resp_header) + sizeof(eps_battery_config_t)] = { 0 };
+
+    if (buff == NULL)
+    {
+        return EPS_ERROR_CONFIG;
+    }
 
     status = kprv_eps_transfer(&cmd, 1, response, sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to get EPS battery configuration: %d\n", status);
         return status;
     }
 
-    memcpy(buff, response + sizeof(eps_resp_header), sizeof(buff));
+    eps_battery_config_t * body = (eps_battery_config_t *) (response + sizeof(eps_resp_header));
+
+    buff->batt_maxvoltage = be16toh(body->batt_maxvoltage);
+    buff->batt_safevoltage = be16toh(body->batt_safevoltage);
+    buff->batt_criticalvoltage = be16toh(body->batt_criticalvoltage);
+    buff->batt_normalvoltage = be16toh(body->batt_normalvoltage);
 
     return EPS_OK;
 }
@@ -309,19 +484,30 @@ KEPSStatus k_eps_get_battery_config(eps_battery_config_t * buff)
 KEPSStatus k_eps_get_heater(uint8_t * bp4, uint8_t * onboard)
 {
     KEPSStatus status;
-    uint8_t    cmd = SET_HEATER;
+    uint8_t    cmd                                   = SET_HEATER;
     uint8_t    response[sizeof(eps_resp_header) + 2] = { 0 };
+
+    if (bp4 == NULL && onboard == NULL)
+    {
+        return EPS_ERROR_CONFIG;
+    }
 
     status = kprv_eps_transfer(&cmd, 1, response, sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to get EPS heater data: %d\n", status);
         return status;
     }
 
     // TODO: Is there a better (safer) way to do this?
-    memcpy(bp4, response + sizeof(eps_resp_header), 1);
-    memcpy(onboard, response + sizeof(eps_resp_header) + 1, 1);
+    if (bp4 != NULL)
+    {
+        memcpy(bp4, response + sizeof(eps_resp_header), 1);
+    }
+    if (onboard != NULL)
+    {
+        memcpy(onboard, response + sizeof(eps_resp_header) + 1, 1);
+    }
 
     return EPS_OK;
 }
@@ -329,14 +515,14 @@ KEPSStatus k_eps_get_heater(uint8_t * bp4, uint8_t * onboard)
 KEPSStatus k_eps_watchdog_kick()
 {
     KEPSStatus      status;
-    uint8_t         cmd = RESET_WDT;
+    uint8_t         packet[] = { RESET_WDT, 0x78 };
     eps_resp_header response;
 
-    status
-        = kprv_eps_transfer(&cmd, 1, (uint8_t *) &response, sizeof(response));
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                               sizeof(response));
     if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to start EPS MTM measurement: %d\n", status);
+        fprintf(stderr, "Failed to kick EPS watchdog: %d\n", status);
         return status;
     }
 
@@ -449,10 +635,18 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
         return EPS_ERROR_CONFIG;
     }
 
+    printf("Sending:");
+    for (int i = 0; i < tx_len; i++)
+    {
+        if (i % 10 == 0)
+            printf("\n");
+        printf("%#x ", tx[i]);
+    }
+
     status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) tx, tx_len);
     if (status != I2C_OK)
     {
-        fprintf(stderr, "Failed to send MTQ command: %d\n", status);
+        fprintf(stderr, "Failed to send EPS command: %d\n", status);
         return EPS_ERROR;
     }
 
@@ -463,6 +657,14 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
         fprintf(stderr, "Failed to read EPS response (%x): %d\n", tx[0],
                 status);
         return EPS_ERROR;
+    }
+
+    printf("Received:");
+    for (int i = 0; i < rx_len; i++)
+    {
+        if (i % 10 == 0)
+            printf("\n");
+        printf("%#x ", rx[i]);
     }
 
     eps_resp_header response = {.cmd = rx[0], .status = rx[1] };
