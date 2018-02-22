@@ -47,6 +47,66 @@ void k_eps_terminate()
     return;
 }
 
+KEPSStatus k_eps_ping()
+{
+    KI2CStatus status;
+    uint8_t    cmd  = HARD_RESET;
+    uint8_t    resp = 0;
+
+    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, &cmd, 1);
+    if (status != I2C_OK)
+    {
+        fprintf(stderr, "Failed to send EPS ping: %d\n", status);
+        return EPS_ERROR;
+    }
+
+    status = k_i2c_read(EPS_I2C_BUS, EPS_ADDR, &resp, 1);
+    if (status != I2C_OK)
+    {
+        fprintf(stderr, "Failed to get EPS ping response: %d\n", status);
+        return EPS_ERROR;
+    }
+
+    if (resp != cmd)
+    {
+        fprintf(stderr, "Unexpected EPS ping response: %#x vs %#x\n", cmd,
+                resp);
+        return EPS_ERROR;
+    }
+
+    return EPS_OK;
+}
+
+KEPSStatus k_eps_reset()
+{
+    KI2CStatus status;
+    uint8_t    cmd = HARD_RESET;
+
+    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) &cmd, 1);
+    if (status != I2C_OK)
+    {
+        fprintf(stderr, "Failed to reset EPS: %d\n", status);
+        return EPS_ERROR;
+    }
+
+    return EPS_OK;
+}
+
+KEPSStatus k_eps_reboot()
+{
+    KI2CStatus status;
+    uint8_t    packet[] = { REBOOT, 0x80, 0x07, 0x80, 0x07 };
+
+    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, packet, sizeof(packet));
+    if (status != I2C_OK)
+    {
+        fprintf(stderr, "Failed to reboot EPS: %d\n", status);
+        return EPS_ERROR;
+    }
+
+    return EPS_OK;
+}
+
 KEPSStatus k_eps_configure_system(const eps_system_config_t * config)
 {
     KEPSStatus status = EPS_OK;
@@ -131,65 +191,25 @@ KEPSStatus k_eps_configure_battery(const eps_battery_config_t * config)
     return EPS_OK;
 }
 
-KEPSStatus k_eps_ping()
+KEPSStatus k_eps_save_battery_config()
 {
-    KI2CStatus status;
-    uint8_t    cmd  = HARD_RESET;
-    uint8_t    resp = 0;
+    KEPSStatus status;
+    uint8_t packet[] = { CMD_CONFIG2, 2 };
+    eps_resp_header response;
 
-    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, &cmd, 1);
-    if (status != I2C_OK)
-    {
-        fprintf(stderr, "Failed to send EPS ping: %d\n", status);
-        return EPS_ERROR;
-    }
+    printf("Save battery config\n");
 
-    status = k_i2c_read(EPS_I2C_BUS, EPS_ADDR, &resp, 1);
-    if (status != I2C_OK)
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                               sizeof(response));
+    if (status != EPS_OK)
     {
-        fprintf(stderr, "Failed to get EPS ping response: %d\n", status);
-        return EPS_ERROR;
-    }
-
-    if (resp != cmd)
-    {
-        fprintf(stderr, "Unexpected EPS ping response: %#x vs %#x\n", cmd,
-                resp);
-        return EPS_ERROR;
+        fprintf(stderr, "Failed to reset EPS battery configuration: %d\n", status);
+        return status;
     }
 
     return EPS_OK;
 }
 
-KEPSStatus k_eps_reset()
-{
-    KI2CStatus status;
-    uint8_t    cmd = HARD_RESET;
-
-    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) &cmd, 1);
-    if (status != I2C_OK)
-    {
-        fprintf(stderr, "Failed to reset EPS: %d\n", status);
-        return EPS_ERROR;
-    }
-
-    return EPS_OK;
-}
-
-KEPSStatus k_eps_reboot()
-{
-    KI2CStatus status;
-    uint8_t    packet[] = { REBOOT, 0x80, 0x07, 0x80, 0x07 };
-
-    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, packet, sizeof(packet));
-    if (status != I2C_OK)
-    {
-        fprintf(stderr, "Failed to reboot EPS: %d\n", status);
-        return EPS_ERROR;
-    }
-
-    return EPS_OK;
-}
 
 KEPSStatus k_eps_set_output(uint8_t channel_mask)
 {
@@ -301,16 +321,47 @@ KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t heater, uint8_t mode)
             heater,
             mode
     };
-    //eps_resp_header response;
-    uint8_t    response[sizeof(eps_resp_header) + 2] = { 0 };
+    eps_resp_header response;
 
-    printf("set heater\n");
-
-    status = kprv_eps_transfer(packet, sizeof(packet), response,
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS heater/s %d mode: %d\n", heater, status);
+        return status;
+    }
+
+    return EPS_OK;
+}
+
+KEPSStatus k_eps_reset_system_config()
+{
+    KEPSStatus      status;
+    uint8_t         packet[] = { CMD_CONFIG1, 1 };
+    eps_resp_header response;
+
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                               sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to reset EPS system configuration: %d\n", status);
+        return status;
+    }
+
+    return EPS_OK;
+}
+
+KEPSStatus k_eps_reset_battery_config()
+{
+    KEPSStatus      status;
+    uint8_t         packet[] = { CMD_CONFIG2, 1 };
+    eps_resp_header response;
+
+    status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
+                               sizeof(response));
+    if (status != EPS_OK)
+    {
+        fprintf(stderr, "Failed to reset EPS battery configuration: %d\n", status);
         return status;
     }
 
@@ -635,14 +686,6 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
         return EPS_ERROR_CONFIG;
     }
 
-    printf("Sending:");
-    for (int i = 0; i < tx_len; i++)
-    {
-        if (i % 10 == 0)
-            printf("\n");
-        printf("%#x ", tx[i]);
-    }
-
     status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) tx, tx_len);
     if (status != I2C_OK)
     {
@@ -659,14 +702,6 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
         return EPS_ERROR;
     }
 
-    printf("Received:");
-    for (int i = 0; i < rx_len; i++)
-    {
-        if (i % 10 == 0)
-            printf("\n");
-        printf("%#x ", rx[i]);
-    }
-
     eps_resp_header response = {.cmd = rx[0], .status = rx[1] };
 
     if (response.cmd == 0xFF)
@@ -680,7 +715,7 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
     else if (response.cmd != tx[0])
     {
         /* Echoed command should match command requested */
-        fprintf(stderr, "Command mismatch - Sent: %x Received: %x\n", tx[0],
+        fprintf(stderr, "Command mismatch - Sent: %d Received: %d\n", tx[0],
                 response.cmd);
         return EPS_ERROR;
     }
@@ -688,7 +723,7 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
     /* Check the status byte */
     if (response.status != 0)
     {
-        fprintf(stderr, "EPS returned an error (%x): %d\n", tx[0],
+        fprintf(stderr, "EPS returned an error (%d): %d\n", tx[0],
                 response.status);
         return EPS_ERROR_INTERNAL;
     }

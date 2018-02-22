@@ -176,13 +176,6 @@ KEPSStatus k_eps_init(void);
  * Terminate the antenna interface
  */
 void k_eps_terminate(void);
-/**
- * Configure the antenna
- * @param [in] config Pointer to EPS configuration values
- * @return KEPSStatus EPS_OK if OK, error otherwise
- */
-KEPSStatus k_eps_configure_system(const eps_system_config_t * config);
-KEPSStatus k_eps_configure_battery(const eps_battery_config_t * config);
 KEPSStatus k_eps_ping(void);
 /**
  * Hard reset the NanoPower
@@ -191,6 +184,14 @@ KEPSStatus k_eps_ping(void);
  */
 KEPSStatus k_eps_reset(void);
 KEPSStatus k_eps_reboot(void);
+/**
+ * Configure the antenna
+ * @param [in] config Pointer to EPS configuration values
+ * @return KEPSStatus EPS_OK if OK, error otherwise
+ */
+KEPSStatus k_eps_configure_system(const eps_system_config_t * config);
+KEPSStatus k_eps_configure_battery(const eps_battery_config_t * config);
+KEPSStatus k_eps_save_battery_config(void);
 KEPSStatus k_eps_set_output(uint8_t channel_mask);
 KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value,
                                    int16_t delay);
@@ -198,6 +199,8 @@ KEPSStatus k_eps_set_input_value(uint16_t in1_voltage, uint16_t in2_voltage,
                                  uint16_t in3_voltage);
 KEPSStatus k_eps_set_input_mode(uint8_t mode);
 KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t header, uint8_t mode);
+KEPSStatus k_eps_reset_system_config(void);
+KEPSStatus k_eps_reset_battery_config(void);
 KEPSStatus k_eps_reset_counters(void);
 KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff);
 KEPSStatus k_eps_get_system_config(eps_system_config_t * buff);
