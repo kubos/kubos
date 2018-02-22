@@ -18,6 +18,8 @@ extern crate serial;
 
 use radio_api::Connection;
 use std::io;
+use std::time::Duration;
+use std::thread;
 
 pub struct SerialConnection;
 
@@ -25,7 +27,7 @@ impl Connection for SerialConnection {
     fn send(&self, data: Vec<u8>) -> Result<(), String> {
         match serial_send(&data) {
             Ok(_) => Ok(()),
-            Err(_) => Err(String::from("Error receiving")),
+            Err(_) => Err(String::from("Error sending")),
         }
     }
 
@@ -41,18 +43,36 @@ pub fn serial_send(data: &[u8]) -> io::Result<()> {
     use std::io::prelude::*;
     use serial::prelude::*;
 
+    println!("Open send port");
     let mut port = try!(serial::open("/dev/ttyUSB0"));
+    println!("Configure send port");
+    let settings: serial::PortSettings = serial::PortSettings {
+        baud_rate: serial::Baud38400,
+        char_size: serial::Bits8,
+        parity: serial::ParityNone,
+        stop_bits: serial::Stop1,
+        flow_control: serial::FlowNone,
+    };
+    try!(port.configure(&settings));
 
-    try!(port.reconfigure(&|settings| {
-        settings.set_baud_rate(serial::Baud38400).unwrap();
-        settings.set_char_size(serial::Bits8);
-        settings.set_parity(serial::ParityNone);
-        settings.set_stop_bits(serial::Stop1);
-        settings.set_flow_control(serial::FlowNone);
-        Ok(())
-    }));
+    try!(port.set_timeout(Duration::from_secs(1)));
 
-    try!(port.write_all(&data[..]));
+    let be_data = {
+        let mut v = Vec::<u8>::new();
+        for i in 0..data.len() {
+            v.push(data[i].to_be());
+        }
+        v
+    };
+
+    println!("Serial sending {:?}", be_data);
+
+    try!(port.flush());
+    println!("Port flushed");
+    let _count = try!(port.write(&be_data[..]));
+
+    println!("Wrote {}", _count);
+
     Ok(())
 }
 
@@ -60,19 +80,49 @@ pub fn serial_receive() -> io::Result<Vec<u8>> {
     use std::io::prelude::*;
     use serial::prelude::*;
 
-    let mut ret_msg = Vec::<u8>::new();
+    let mut ret_msg: Vec<u8> = Vec::new();
+    println!("Open receive port");
 
     let mut port = try!(serial::open("/dev/ttyUSB0"));
 
-    try!(port.reconfigure(&|settings| {
-        settings.set_baud_rate(serial::Baud38400).unwrap();
-        settings.set_char_size(serial::Bits8);
-        settings.set_parity(serial::ParityNone);
-        settings.set_stop_bits(serial::Stop1);
-        settings.set_flow_control(serial::FlowNone);
-        Ok(())
-    }));
+    println!("Configure port");
+    let settings: serial::PortSettings = serial::PortSettings {
+        baud_rate: serial::Baud38400,
+        char_size: serial::Bits8,
+        parity: serial::ParityNone,
+        stop_bits: serial::Stop1,
+        flow_control: serial::FlowNone,
+    };
+    try!(port.configure(&settings));
 
-    let _amount = try!(port.read(&mut ret_msg[..]));
+    try!(port.set_timeout(Duration::from_millis(100)));
+
+    let mut amount = 0;
+    let mut tries = 0;
+
+    println!("Attempt to read");
+
+    loop {
+        let mut read_buffer: Vec<u8> = vec![0; 1];
+
+        match port.read(&mut read_buffer[..]) {
+            Ok(c) => {
+                if c > 0 {
+                    println!("Read in {} bytes", c);
+                    println!("Serial received {:?}", read_buffer);
+                    ret_msg.extend(read_buffer);
+                } else {
+                    tries = tries + 1;
+                }
+            },
+            Err(_) => break
+        };
+        if tries > 5 {
+            break;
+        }
+    }
+
+    println!("Final received {:?}", ret_msg);
+
     Ok(ret_msg)
 }
