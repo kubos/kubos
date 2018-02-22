@@ -91,7 +91,7 @@ class MCU:
         data = self.i2cfile.read(device = self.address, count = count)
         if data[0] != '\x01':
             raise IOError('Data is not ready')
-        timestamp = struct.unpack('<i',data[1:5])/100.0 # unpack timestamp in seconds
+        timestamp = struct.unpack('<i',data[1:5])[0]/100.0 # unpack timestamp in seconds
         data = data[5:] # telemetry data
         return {'timestamp':timestamp,'data':data} 
     
@@ -106,9 +106,11 @@ class MCU:
             output_dict[telem_field] = self.read(
                 dict[telem_field]['length']
                 )
-            output_dict[telem_field]['data'] = struct.unpack(
-                dict[telem_field]['struct_arg'],
-                output_dict[telem_field]['data']
-                )
+            if dict[telem_field]['struct_arg'] in ['s']:pass
+            else:
+                output_dict[telem_field]['data'] = struct.unpack(
+                    dict[telem_field]['struct_arg'],
+                    output_dict[telem_field]['data']
+                    )
         return output_dict
             
