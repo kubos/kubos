@@ -18,10 +18,6 @@
 
 #![deny(missing_docs)]
 
-extern crate serde_json;
-
-use serde_json::Error as SerdeJsonError;
-
 /// Connection trait
 pub trait Connection {
     /// Basic send command function. Sends and receives
@@ -60,7 +56,7 @@ pub trait Radio {
     fn terminate(&self) -> Result<(), RadioError>;
 
     /// Configures radio device
-    fn configure(&self, json_config: &str) -> Result<(), SerdeJsonError>;
+    fn configure(&self, json_config: &str) -> Result<(), String>;
 
     /// Resets radio device
     fn reset(&self, reset_type: RadioReset) -> Result<(), RadioError>;

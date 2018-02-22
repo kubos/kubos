@@ -4,4 +4,3 @@ version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
-serde_json = "1.0.9"

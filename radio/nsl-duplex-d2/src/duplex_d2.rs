@@ -19,7 +19,6 @@
 
 // #![deny(missing_docs)]
 
-use serde_json::Error as SerdeJsonError;
 use radio_api::{Connection, Radio, RadioError, RadioReset};
 use commands::Command;
 
@@ -54,7 +53,7 @@ impl Radio for DuplexD2 {
         }
     }
 
-    fn configure(&self, _json_config: &str) -> Result<(), SerdeJsonError> {
+    fn configure(&self, _json_config: &str) -> Result<(), String> {
         Ok(())
     }
 

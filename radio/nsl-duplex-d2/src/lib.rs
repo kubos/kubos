@@ -1,6 +1,5 @@
 extern crate nums_as_bytes;
 extern crate radio_api;
-extern crate serde_json;
 extern crate serial;
 
 #[macro_use]
