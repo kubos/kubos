@@ -32,7 +32,7 @@ impl DuplexD2 {
         DuplexD2 { conn }
     }
 
-    fn send_command<T>(&self, command: &Command<T>) -> Result<T, String> {
+    pub fn send_command<T>(&self, command: &Command<T>) -> Result<T, String> {
         self.conn.send(&command.request)?;
         let (_, res) = (command.parse)(&self.conn.receive()?).or(Err("Parse problem"))?;
         Ok(res)
@@ -104,7 +104,7 @@ mod tests {
 
     fn test_command() -> Command<u32> {
         let request = vec![0x47, 0x55, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
-        fn parse(input: &[u8]) -> IResult<&[u8], u32> {
+        fn parse(_: &[u8]) -> IResult<&[u8], u32> {
             Ok((b"", 1))
         }
         Command { request, parse }
