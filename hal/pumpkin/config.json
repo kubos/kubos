@@ -1,0 +1,14 @@
+{"available_telemetry":{
+  "firmware_version": {"command":"SUP:TEL? 0,data","length":53,"parsing":"s"},
+  "commands_parsed":  {"command":"SUP:TEL? 1,data","length":13,"parsing":"<Q"},
+  "scpi_errors":      {"command":"SUP:TEL? 2,data","length":13,"parsing":"<Q"},
+  "voltstat":         {"command":"SUP:TEL? 3,data","length":13,"parsing":"<hhhh"},
+  "cpu_selftests":    {"command":"SUP:TEL? 4,data","length":27,"parsing":"<QQhhh"},
+  "time":             {"command":"SUP:TEL? 5,data","length":13,"parsing":"<Q"},
+  "context_switches": {"command":"SUP:TEL? 6,data","length":13,"parsing":"<Q"},
+  "idling_hooks":     {"command":"SUP:TEL? 7,data","length":13,"parsing":"<Q"},
+  "mcu_load":         {"command":"SUP:TEL? 8,data","length":13,"parsing":"<Q"}
+ },
+ "delay_between_writing_and_reading": 0.300,
+ "i2c_bus_number": 1
+}

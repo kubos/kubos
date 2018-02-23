@@ -11,57 +11,14 @@ See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.5
 """
 
 
-import i2c,struct,time
+import i2c,struct,time,json
 
-I2C_BUSNUM = 1 # KubOS Default
-DELAY = 0.300 # 300 millisecond delay between write and read
-SUP_TELS = {
-    'firmware_version': {
-        'command':'SUP:TEL? 0,data',
-        'length':53,
-        'struct_arg':'s'
-        },
-    'commands_parsed': {
-        'command':'SUP:TEL? 1,data',
-        'length':13,
-        'struct_arg':'<Q'
-        },
-    'scpi_errors': {
-        'command':'SUP:TEL? 2,data',
-        'length':13,
-        'struct_arg':'<Q'
-        },
-    'voltstat': {
-        'command':'SUP:TEL? 3,data',
-        'length':13,
-        'struct_arg':'<hhhh'
-        },
-    'cpu_selftests': {
-        'command':'SUP:TEL? 4,data',
-        'length':27,
-        'struct_arg':'<QQhhh'
-        },
-    'time': {
-        'command':'SUP:TEL? 5,data',
-        'length':13,
-        'struct_arg':'<Q'
-        },
-    'context_switches': {
-        'command':'SUP:TEL? 6,data',
-        'length':13,
-        'struct_arg':'<Q'
-        },
-    'idling_hooks': {
-        'command':'SUP:TEL? 7,data',
-        'length':13,
-        'struct_arg':'<Q'
-        },
-    'mcu_load': {
-        'command':'SUP:TEL? 8,data',
-        'length':13,
-        'struct_arg':'<Q'
-        },
-    }
+with open('config.json') as config_file:
+    data = json.load(config_file)
+
+I2C_BUSNUM = data['i2c_bus_number']
+DELAY = data['delay_between_writing_and_reading']
+SUP_TELS = data['available_telemetry']
 
 class MCU:
     
@@ -95,8 +52,21 @@ class MCU:
         data = data[5:] # telemetry data
         return {'timestamp':timestamp,'data':data} 
     
-    def get_sup_telemetry(self):
-        return self.get_telemetry(SUP_TELS)
+    def get_sup_telemetry(self,fields=None):
+        if fields is None:
+            requests = SUP_TELS
+        elif fields is list:
+            requests = {}
+            for field in fields:
+                if field not in SUP_TELS or type(field) != str:
+                    raise ValueError(
+                        'Invalid field: '+str(field))
+                else:
+                    requests[field] = SUP_TELS[field]
+        else:
+            raise TypeError('fields must be a list of strings.')
+        
+        return self.get_telemetry(requests)
     
     def get_telemetry(self,dict):
         output_dict = {}
@@ -106,11 +76,5 @@ class MCU:
             output_dict[telem_field] = self.read(
                 dict[telem_field]['length']
                 )
-            if dict[telem_field]['struct_arg'] in ['s']:pass
-            else:
-                output_dict[telem_field]['data'] = struct.unpack(
-                    dict[telem_field]['struct_arg'],
-                    output_dict[telem_field]['data']
-                    )
         return output_dict
             
