@@ -34,9 +34,10 @@ class TestI2C(unittest.TestCase):
             mock_ioctl.assert_called_with(mock.ANY, i2c.I2C_SLAVE, fake_device)
 
     def test_wrong_datatype_raises_type_error(self):
+        bad_datatype = 123 # not a string or list
         with nested(mock.patch('io.open'), mock.patch('fcntl.ioctl'),):
             with self.assertRaises(TypeError):
-                self.i2cdevice.write(1, 123)
+                self.i2cdevice.write(1, bad_datatype)
 
 
 if __name__ == '__main__':
