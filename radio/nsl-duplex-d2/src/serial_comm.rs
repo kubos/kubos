@@ -21,22 +21,15 @@ use serial;
 
 /// Connection for communicating with actual
 /// Duplex-D2 hardware
-pub struct SerialConnection;
 
-impl Connection for SerialConnection {
-    fn send(&self, data: &[u8]) -> Result<(), String> {
-        match serial_send(data) {
-            Ok(_) => Ok(()),
-            Err(_) => Err(String::from("Error sending")),
-        }
+pub fn serial_connection() -> Connection {
+    fn send(data: &[u8]) -> Result<(), String> {
+        serial_send(data).or(Err("Send Error".to_string()))
     }
-
-    fn receive(&self) -> Result<Vec<u8>, String> {
-        match serial_receive() {
-            Ok(d) => Ok(d),
-            Err(_) => Err(String::from("Error receiving")),
-        }
+    fn receive() -> Result<Vec<u8>, String> {
+        serial_receive().or(Err("Receive Error".to_string()))
     }
+    Connection::new(send, receive)
 }
 
 pub fn serial_send(data: &[u8]) -> io::Result<()> {

@@ -27,10 +27,8 @@ extern crate serial;
 extern crate nom;
 
 mod duplex_d2;
-mod commands;
 mod messages;
 mod serial_comm;
 
 pub use duplex_d2::DuplexD2;
-pub use commands::*;
-pub use serial_comm::SerialConnection;
+pub use serial_comm::serial_connection;

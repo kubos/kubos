@@ -16,16 +16,60 @@
 
 //! A high level interface for interacting with radios
 
-#![deny(missing_docs)]
+// #![deny(missing_docs)]
 
-/// Connection trait
-pub trait Connection {
-    /// Basic send command function. Sends and receives
-    fn send(&self, data: &[u8]) -> Result<(), String>;
+extern crate nom;
 
-    /// Basic receive function
-    /// Need to define blocking/nonblocking
-    fn receive(&self) -> Result<Vec<u8>, String>;
+use std::cell::RefCell;
+use nom::IResult;
+
+pub type ParseFn<T> = fn(input: &[u8]) -> IResult<&[u8], T>;
+
+/// Basic send command function. Sends and receives
+pub type SendFn = fn(data: &[u8]) -> Result<(), String>;
+
+/// Basic receive function
+/// Need to define blocking/nonblocking
+pub type ReceiveFn = fn() -> Result<Vec<u8>, String>;
+
+pub struct Connection {
+    send_fn: SendFn,
+    receive_fn: ReceiveFn,
+    buffer: RefCell<Vec<u8>>,
+}
+
+impl Connection {
+    pub fn new(send_fn: SendFn, receive_fn: ReceiveFn) -> Connection {
+        Connection {
+            send_fn,
+            receive_fn,
+            buffer: RefCell::new(Vec::new()),
+        }
+    }
+
+    pub fn send(&self, data: &[u8]) -> Result<(), String> {
+        (self.send_fn)(data)
+    }
+
+    /// Read the next object using provided parser.
+    pub fn read<T>(&self, parse: ParseFn<T>) -> Result<T, String> {
+        let mut buffer = self.buffer.borrow_mut();
+        loop {
+            let copy = buffer.clone();
+            let res = parse(&copy);
+            if let Ok((extra, value)) = res {
+                buffer.clear();
+                buffer.extend_from_slice(extra);
+                return Ok(value);
+            }
+            if let Err(nom::Err::Incomplete(_)) = res {
+                let more = (self.receive_fn)()?;
+                buffer.extend_from_slice(&more);
+                continue;
+            }
+            return Err("Parse Error".to_string());
+        }
+    }
 }
 
 /// The kind of error that can be produced while interfacing with a radio
