@@ -17,9 +17,10 @@
 use radio_api::Connection;
 use std::io;
 use std::time::Duration;
-use std::thread;
 use serial;
 
+/// Connection for communicating with actual
+/// Duplex-D2 hardware
 pub struct SerialConnection;
 
 impl Connection for SerialConnection {
@@ -42,9 +43,7 @@ pub fn serial_send(data: &[u8]) -> io::Result<()> {
     use std::io::prelude::*;
     use serial::prelude::*;
 
-    println!("Open send port");
     let mut port = try!(serial::open("/dev/ttyUSB0"));
-    println!("Configure send port");
     let settings: serial::PortSettings = serial::PortSettings {
         baud_rate: serial::Baud38400,
         char_size: serial::Bits8,
@@ -64,13 +63,8 @@ pub fn serial_send(data: &[u8]) -> io::Result<()> {
         v
     };
 
-    println!("Serial sending {:?}", be_data);
-
     try!(port.flush());
-    println!("Port flushed");
-    let _count = try!(port.write(&be_data[..]));
-
-    println!("Wrote {}", _count);
+    try!(port.write(&be_data[..]));
 
     Ok(())
 }
@@ -80,11 +74,8 @@ pub fn serial_receive() -> io::Result<Vec<u8>> {
     use serial::prelude::*;
 
     let mut ret_msg: Vec<u8> = Vec::new();
-    println!("Open receive port");
-
     let mut port = try!(serial::open("/dev/ttyUSB0"));
 
-    println!("Configure port");
     let settings: serial::PortSettings = serial::PortSettings {
         baud_rate: serial::Baud38400,
         char_size: serial::Bits8,
@@ -96,10 +87,7 @@ pub fn serial_receive() -> io::Result<Vec<u8>> {
 
     try!(port.set_timeout(Duration::from_millis(100)));
 
-    let mut amount = 0;
     let mut tries = 0;
-
-    println!("Attempt to read");
 
     loop {
         let mut read_buffer: Vec<u8> = vec![0; 1];
@@ -107,21 +95,17 @@ pub fn serial_receive() -> io::Result<Vec<u8>> {
         match port.read(&mut read_buffer[..]) {
             Ok(c) => {
                 if c > 0 {
-                    println!("Read in {} bytes", c);
-                    println!("Serial received {:?}", read_buffer);
                     ret_msg.extend(read_buffer);
                 } else {
                     tries = tries + 1;
                 }
-            },
-            Err(_) => break
+            }
+            Err(_) => break,
         };
         if tries > 5 {
             break;
         }
     }
-
-    println!("Final received {:?}", ret_msg);
 
     Ok(ret_msg)
 }

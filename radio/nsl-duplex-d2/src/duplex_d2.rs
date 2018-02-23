@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-//! Device level API for interacting with the NSL EyeStar-D2 Duplex radio
-//! `<https://nearspacelaunch.com/product/eyestar-d2/>`
-
-// #![deny(missing_docs)]
-
 use radio_api::{Connection, Radio, RadioError, RadioReset};
 use commands::Command;
 
+/// Structure for interacting with Duplex-D2 Radio API
 pub struct DuplexD2 {
     conn: Box<Connection>,
 }
 
 impl DuplexD2 {
+    /// Constructor for DuplexD2 structure
     pub fn new(conn: Box<Connection>) -> DuplexD2 {
         DuplexD2 { conn }
     }
 
+    /// Sends command to radio, parses response, returns back
+    /// an expected type T
     pub fn send_command<T>(&self, command: &Command<T>) -> Result<T, String> {
         self.conn.send(&command.request)?;
         let (_, res) = (command.parse)(&self.conn.receive()?).or(Err("Parse problem"))?;
