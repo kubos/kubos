@@ -2,7 +2,7 @@ Python I2C
 -------------
 
 Initialization
-^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 The first step in using I2C is to import the module and choose the i2c bus to be used. The KubOS primary I2C bus is 1. This operation does not open the device file. 
 
