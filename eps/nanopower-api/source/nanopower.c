@@ -719,17 +719,9 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
         return EPS_ERROR;
     }
 
-    eps_resp_header response = {.cmd = rx[0], .status = rx[1] };
+    eps_resp_header response = { .cmd = rx[0], .status = rx[1] };
 
-    if (response.cmd == 0xFF)
-    {
-        /*
-         * This isn't always an error, so we'll let the caller decide whether
-         * or not to print an error message
-         */
-        return EPS_ERROR_NO_RESPONSE;
-    }
-    else if (response.cmd != tx[0])
+    if (response.cmd != tx[0])
     {
         /* Echoed command should match command requested */
         fprintf(stderr, "Command mismatch - Sent: %d Received: %d\n", tx[0],
