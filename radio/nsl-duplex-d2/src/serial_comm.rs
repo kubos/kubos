@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-use radio_api::Connection;
+use radio_api::{Connection, Stream};
 use std::io;
 use std::time::Duration;
 use serial;
 
 /// Connection for communicating with actual
 /// Duplex-D2 hardware
-
 pub fn serial_connection() -> Connection {
-    fn send(data: &[u8]) -> Result<(), String> {
-        serial_send(data).or(Err("Send Error".to_string()))
-    }
-    fn receive() -> Result<Vec<u8>, String> {
-        serial_receive().or(Err("Receive Error".to_string()))
-    }
-    Connection::new(send, receive)
+    Connection::new(Box::new(SerialStream {}))
 }
 
-pub fn serial_send(data: &[u8]) -> io::Result<()> {
+struct SerialStream {}
+
+impl Stream for SerialStream {
+    fn write(&self, data: &[u8]) -> Result<(), String> {
+        serial_send(data).or(Err("Send Error".to_string()))
+    }
+    fn read(&self) -> Result<Vec<u8>, String> {
+        serial_receive().or(Err("Receive Error".to_string()))
+    }
+}
+
+fn serial_send(data: &[u8]) -> io::Result<()> {
     use std::io::prelude::*;
     use serial::prelude::*;
 
@@ -62,7 +66,7 @@ pub fn serial_send(data: &[u8]) -> io::Result<()> {
     Ok(())
 }
 
-pub fn serial_receive() -> io::Result<Vec<u8>> {
+fn serial_receive() -> io::Result<Vec<u8>> {
     use std::io::prelude::*;
     use serial::prelude::*;
 

@@ -19,15 +19,14 @@
 
 #![deny(missing_docs)]
 
-extern crate nums_as_bytes;
 extern crate radio_api;
 extern crate serial;
 
 #[macro_use]
 extern crate nom;
 
-mod duplex_d2;
 mod messages;
+mod duplex_d2;
 mod serial_comm;
 
 pub use duplex_d2::DuplexD2;

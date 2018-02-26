@@ -4,8 +4,6 @@ version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
-chrono = "0.4"
 radio-api = { path = "../rust-radio-api" }
 nom = "4.0.0-beta1"
 serial = "0.4"
-nums_as_bytes = { path = "../../nums_as_bytes" }
