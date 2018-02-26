@@ -404,7 +404,6 @@ KEPSStatus k_eps_reset_counters()
     return EPS_OK;
 }
 
-// TODO: expand to allow for the other types?
 KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
 {
     KEPSStatus status;
@@ -424,7 +423,6 @@ KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
         return status;
     }
 
-    //TODO: Maybe don't play with pointers quite so hard
     eps_hk_t * body = (eps_hk_t *) (response + sizeof(eps_resp_header));
 
     /* Convert big endian to host endianness for multi-byte fields */
@@ -569,7 +567,6 @@ KEPSStatus k_eps_get_heater(uint8_t * bp4, uint8_t * onboard)
         return status;
     }
 
-    // TODO: Is there a better (safer) way to do this?
     if (bp4 != NULL)
     {
         memcpy(bp4, response + sizeof(eps_resp_header), 1);
