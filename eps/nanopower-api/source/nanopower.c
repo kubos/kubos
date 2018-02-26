@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-#include <kubos-hal/i2c.h>
 #include <nanopower-api/nanopower-api.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 
-KEPSStatus k_eps_init()
+static uint8_t eps_bus = 0;
+static uint8_t eps_addr = 0;
+
+KEPSStatus k_eps_init(KEPSConf config)
 {
+    if (config.bus == K_I2C_NO_BUS || config.addr == 0)
+    {
+        return EPS_ERROR_CONFIG;
+    }
+
+    if (eps_bus != 0)
+    {
+        fprintf(stderr, "EPS already initialized. Ignoring request\n");
+        return EPS_ERROR;
+    }
+
+    eps_bus = config.bus;
+    eps_addr = config.addr;
+
     /*
      * All I2C configuration is done at the kernel level,
      * but we still need to pass a config structure to make
@@ -30,7 +46,7 @@ KEPSStatus k_eps_init()
     KI2CConf conf = k_i2c_conf_defaults();
 
     KI2CStatus status;
-    status = k_i2c_init(EPS_I2C_BUS, &conf);
+    status = k_i2c_init(eps_bus, &conf);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize EPS: %d\n", status);
@@ -42,7 +58,10 @@ KEPSStatus k_eps_init()
 
 void k_eps_terminate()
 {
-    k_i2c_terminate(EPS_I2C_BUS);
+    k_i2c_terminate(eps_bus);
+
+    eps_bus = 0;
+    eps_addr = 0;
 
     return;
 }
@@ -53,14 +72,14 @@ KEPSStatus k_eps_ping()
     uint8_t    cmd  = HARD_RESET;
     uint8_t    resp = 0;
 
-    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, &cmd, 1);
+    status = k_i2c_write(eps_bus, eps_addr, &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send EPS ping: %d\n", status);
         return EPS_ERROR;
     }
 
-    status = k_i2c_read(EPS_I2C_BUS, EPS_ADDR, &resp, 1);
+    status = k_i2c_read(eps_bus, eps_addr, &resp, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to get EPS ping response: %d\n", status);
@@ -82,7 +101,7 @@ KEPSStatus k_eps_reset()
     KI2CStatus status;
     uint8_t    cmd = HARD_RESET;
 
-    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(eps_bus, eps_addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reset EPS: %d\n", status);
@@ -97,7 +116,7 @@ KEPSStatus k_eps_reboot()
     KI2CStatus status;
     uint8_t    packet[] = { REBOOT, 0x80, 0x07, 0x80, 0x07 };
 
-    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, packet, sizeof(packet));
+    status = k_i2c_write(eps_bus, eps_addr, packet, sizeof(packet));
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reboot EPS: %d\n", status);
@@ -585,34 +604,32 @@ pthread_t handle_watchdog = { 0 };
 void * kprv_eps_watchdog_thread(void * args)
 {
     KEPSStatus status;
+    uint32_t interval = *((uint32_t *) args);
 
     while (1)
     {
         k_eps_watchdog_kick();
 
-        sleep((EPS_WD_TIMEOUT * 3600) / 2);
+        sleep(interval);
     }
 
     return NULL;
 }
 
-KEPSStatus k_eps_watchdog_start()
+KEPSStatus k_eps_watchdog_start(uint32_t interval)
 {
+    if (interval == 0)
+    {
+        return EPS_ERROR_CONFIG;
+    }
+
     if (handle_watchdog != 0)
     {
         fprintf(stderr, "EPS watchdog thread already started\n");
         return EPS_OK;
     }
 
-    if (EPS_WD_TIMEOUT == 0)
-    {
-        fprintf(
-            stderr,
-            "EPS watchdog has been disabled. No thread will be started\n");
-        return EPS_OK;
-    }
-
-    if (pthread_create(&handle_watchdog, NULL, kprv_eps_watchdog_thread, NULL)
+    if (pthread_create(&handle_watchdog, NULL, kprv_eps_watchdog_thread, (void *) &interval)
         != 0)
     {
         perror("Failed to create EPS watchdog thread");
@@ -654,7 +671,7 @@ KEPSStatus k_eps_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
 
     KI2CStatus status;
 
-    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) tx, tx_len);
+    status = k_i2c_write(eps_bus, eps_addr, (uint8_t *) tx, tx_len);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send EPS passthrough packet: %d\n", status);
@@ -663,7 +680,7 @@ KEPSStatus k_eps_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
 
     if (rx_len != 0)
     {
-        status = k_i2c_read(EPS_I2C_BUS, EPS_ADDR, rx, rx_len);
+        status = k_i2c_read(eps_bus, eps_addr, rx, rx_len);
         if (status != I2C_OK)
         {
             fprintf(stderr, "Failed to read EPS passthrough response: %d\n",
@@ -686,14 +703,14 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
         return EPS_ERROR_CONFIG;
     }
 
-    status = k_i2c_write(EPS_I2C_BUS, EPS_ADDR, (uint8_t *) tx, tx_len);
+    status = k_i2c_write(eps_bus, eps_addr, (uint8_t *) tx, tx_len);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send EPS command: %d\n", status);
         return EPS_ERROR;
     }
 
-    status = k_i2c_read(EPS_I2C_BUS, EPS_ADDR, rx, rx_len);
+    status = k_i2c_read(eps_bus, eps_addr, rx, rx_len);
 
     if (status != I2C_OK)
     {

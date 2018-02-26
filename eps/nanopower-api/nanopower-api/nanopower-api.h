@@ -21,41 +21,9 @@
 
 #pragma once
 
+#include <kubos-hal/i2c.h>
 #include <stdbool.h>
 #include <stdint.h>
-
-/**
- *  @name GOMspace NanoPower config.json configuration options and default
- * 		  values
- */
-/**@{*/
-/**
- * I2C bus the EPS is connected to
- */
-#ifdef YOTTA_CFG_EPS_NANOPOWER_I2C_BUS
-#define EPS_I2C_BUS YOTTA_CFG_EPS_NANOPOWER_I2C_BUS
-#else
-#define EPS_I2C_BUS K_I2C1
-#endif
-
-/**
- * Primary antenna controller's I2C address
- */
-#ifdef YOTTA_CFG_EPS_NANOPOWER_ADDR
-#define EPS_ADDR YOTTA_CFG_EPS_NANOPOWER_ADDR
-#else
-#define EPS_ADDR 0x02
-#endif
-
-/**
- * Watchdog timeout (in hours)
- */
-#ifdef YOTTA_CFG_EPS_NANOPOWER_WATCHDOG_TIMEOUT
-#define EPS_WD_TIMEOUT YOTTA_CFG_EPS_NANOPOWER_WATCHDOG_TIMEOUT
-#else
-#define EPS_WD_TIMEOUT 0
-#endif
-/**@}*/
 
 /** \cond WE DO NOT WANT TO HAVE THESE IN OUR GENERATED DOCS */
 /* EPS command values */
@@ -99,6 +67,15 @@ typedef enum {
     HK_WATCHDOG,
     HK_BASIC
 } KEPSHousekeepingType;
+
+/**
+ * Kubos->EPS Configuration
+ */
+typedef struct
+{
+    KI2CNum bus;                /**< I2C bus number EPS is connected to */
+    uint8_t addr;               /**< EPS I2C slave address */
+} KEPSConf;
 
 /**
  * Response header structure
@@ -171,7 +148,7 @@ typedef struct
  * Initialize the antenna interface
  * @return KEPSStatus EPS_OK if OK, error otherwise
  */
-KEPSStatus k_eps_init(void);
+KEPSStatus k_eps_init(KEPSConf config);
 /**
  * Terminate the antenna interface
  */
@@ -212,11 +189,10 @@ KEPSStatus k_eps_get_heater(uint8_t * bp4, uint8_t * onboard);
  */
 KEPSStatus k_eps_watchdog_kick(void);
 /**
- * Start a thread to kick the EPS's watchdogs at an interval of
- * (::EPS_WD_TIMEOUT/2) hours
+ * Start a thread to kick the EPS's watchdog
  * @return KEPSStatus `EPS_OK` if OK, error otherwise
  */
-KEPSStatus k_eps_watchdog_start(void);
+KEPSStatus k_eps_watchdog_start(uint32_t interval);
 /**
  * Stop the watchdog thread
  * @return KEPSStatus `EPS_OK` if OK, error otherwise
