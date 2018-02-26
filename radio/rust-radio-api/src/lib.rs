@@ -18,10 +18,42 @@
 
 #![deny(missing_docs)]
 
+#[macro_use]
+extern crate failure;
 extern crate nom;
 
 use std::cell::RefCell;
 use nom::IResult;
+
+use failure::Error;
+
+/// Common Error for Radio Actions
+#[derive(Debug, Fail)]
+pub enum RadioError {
+    #[fail(display = "Parse error: {}", message)]
+    /// There was a problem parsing the result data
+    ParseError {
+        /// The message from original error
+        message: String,
+    },
+}
+
+fn nom_to_radio_error<T>(err: nom::Err<&[u8]>) -> Result<(&[u8], T), RadioError> {
+    Err(match err {
+        nom::Err::Error(nom::simple_errors::Context::Code(_, e)) => RadioError::ParseError {
+            message: e.description().to_string(),
+        },
+        nom::Err::Failure(nom::simple_errors::Context::Code(_, e)) => RadioError::ParseError {
+            message: e.description().to_string(),
+        },
+        nom::Err::Incomplete(_) => RadioError::ParseError {
+            message: "Incomplete data".to_string(),
+        },
+    })
+}
+
+/// Custom error type for radio operations.
+pub type RadioResult<T> = Result<T, Error>;
 
 /// The signature of parse functions used in Connection read calls.
 pub type ParseFn<T> = fn(input: &[u8]) -> IResult<&[u8], T>;
@@ -29,9 +61,9 @@ pub type ParseFn<T> = fn(input: &[u8]) -> IResult<&[u8], T>;
 /// Connections expect a struct instance with this trait to represent streams.
 pub trait Stream {
     /// Write raw bytes to the stream.
-    fn write(&self, data: &[u8]) -> Result<(), String>;
+    fn write(&self, data: &[u8]) -> RadioResult<()>;
     /// Read raw bytes from the stream.
-    fn read(&self) -> Result<Vec<u8>, String>;
+    fn read(&self) -> RadioResult<Vec<u8>>;
 }
 
 /// A connection is like a stream, but allowed parsed reads with properly buffered
@@ -51,27 +83,27 @@ impl Connection {
     }
 
     /// Write out raw bytes to the underlying stream.
-    pub fn write(&self, data: &[u8]) -> Result<(), String> {
+    pub fn write(&self, data: &[u8]) -> RadioResult<()> {
         self.stream.write(data)
     }
 
     /// Read the next object using provided parser.
-    pub fn read<T>(&self, parse: ParseFn<T>) -> Result<T, String> {
+    pub fn read<T>(&self, parse: ParseFn<T>) -> RadioResult<T> {
         let mut buffer = self.buffer.borrow_mut();
         loop {
             let copy = buffer.clone();
             let res = parse(&copy);
-            if let Ok((extra, value)) = res {
-                buffer.clear();
-                buffer.extend_from_slice(extra);
-                return Ok(value);
-            }
+
             if let Err(nom::Err::Incomplete(_)) = res {
                 let more = self.stream.read()?;
                 buffer.extend_from_slice(&more);
                 continue;
             }
-            return Err("Parse Error".to_string());
+
+            let (extra, value) = res.or_else(nom_to_radio_error)?;
+            buffer.clear();
+            buffer.extend_from_slice(extra);
+            return Ok(value);
         }
     }
 }

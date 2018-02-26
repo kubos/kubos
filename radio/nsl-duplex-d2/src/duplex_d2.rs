@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use radio_api::Connection;
+use radio_api::{Connection, RadioResult};
 use messages::{File, FileCount, StateOfHealth};
 
 /// Structure for interacting with Duplex-D2 Radio API
@@ -29,7 +29,7 @@ impl DuplexD2 {
     }
 
     /// Helper function for generating Command<File>
-    pub fn get_file(&self) -> Result<File, String> {
+    pub fn get_file(&self) -> RadioResult<File> {
         self.conn.write(b"GUGET_UF")?;
         let result = self.conn.read(File::parse)?;
         self.conn.write(b"GU\x06")?;
@@ -37,13 +37,13 @@ impl DuplexD2 {
     }
 
     /// Helper function for generating Command<FileCount>
-    pub fn get_file_count(&self) -> Result<FileCount, String> {
+    pub fn get_file_count(&self) -> RadioResult<FileCount> {
         self.conn.write(b"GUGETUFC")?;
         self.conn.read(FileCount::parse)
     }
 
     /// Helper function for generating Command<StateOfHealth>
-    pub fn get_state_of_health(&self) -> Result<StateOfHealth, String> {
+    pub fn get_state_of_health(&self) -> RadioResult<StateOfHealth> {
         self.conn.write(b"GUGETSOH")?;
         self.conn.read(StateOfHealth::parse)
     }

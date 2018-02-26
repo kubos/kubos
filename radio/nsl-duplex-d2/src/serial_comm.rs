@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use radio_api::{Connection, Stream};
+use radio_api::{Connection, RadioResult, Stream};
 use std::io;
 use std::time::Duration;
 use serial;
@@ -28,11 +28,11 @@ pub fn serial_connection() -> Connection {
 struct SerialStream {}
 
 impl Stream for SerialStream {
-    fn write(&self, data: &[u8]) -> Result<(), String> {
-        serial_send(data).or(Err("Send Error".to_string()))
+    fn write(&self, data: &[u8]) -> RadioResult<()> {
+        Ok(serial_send(data)?)
     }
-    fn read(&self) -> Result<Vec<u8>, String> {
-        serial_receive().or(Err("Receive Error".to_string()))
+    fn read(&self) -> RadioResult<Vec<u8>> {
+        Ok(serial_receive()?)
     }
 }
 
