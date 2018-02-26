@@ -16,39 +16,43 @@
 
 //! A high level interface for interacting with radios
 
-// #![deny(missing_docs)]
+#![deny(missing_docs)]
 
 extern crate nom;
 
 use std::cell::RefCell;
 use nom::IResult;
 
+/// The signature of parse functions used in Connection read calls.
 pub type ParseFn<T> = fn(input: &[u8]) -> IResult<&[u8], T>;
 
-/// Basic send command function. Sends and receives
-pub type SendFn = fn(data: &[u8]) -> Result<(), String>;
+/// Connections expect a struct instance with this trait to represent streams.
+pub trait Stream {
+    /// Write raw bytes to the stream.
+    fn write(&self, data: &[u8]) -> Result<(), String>;
+    /// Read raw bytes from the stream.
+    fn read(&self) -> Result<Vec<u8>, String>;
+}
 
-/// Basic receive function
-/// Need to define blocking/nonblocking
-pub type ReceiveFn = fn() -> Result<Vec<u8>, String>;
-
+/// A connection is like a stream, but allowed parsed reads with properly buffered
+/// input data.
 pub struct Connection {
-    send_fn: SendFn,
-    receive_fn: ReceiveFn,
+    stream: Box<Stream>,
     buffer: RefCell<Vec<u8>>,
 }
 
 impl Connection {
-    pub fn new(send_fn: SendFn, receive_fn: ReceiveFn) -> Connection {
+    /// Convenience constructor to create connection from stream.
+    pub fn new(stream: Box<Stream>) -> Connection {
         Connection {
-            send_fn,
-            receive_fn,
+            stream,
             buffer: RefCell::new(Vec::new()),
         }
     }
 
-    pub fn send(&self, data: &[u8]) -> Result<(), String> {
-        (self.send_fn)(data)
+    /// Write out raw bytes to the underlying stream.
+    pub fn write(&self, data: &[u8]) -> Result<(), String> {
+        self.stream.write(data)
     }
 
     /// Read the next object using provided parser.
@@ -63,7 +67,7 @@ impl Connection {
                 return Ok(value);
             }
             if let Err(nom::Err::Incomplete(_)) = res {
-                let more = (self.receive_fn)()?;
+                let more = self.stream.read()?;
                 buffer.extend_from_slice(&more);
                 continue;
             }
