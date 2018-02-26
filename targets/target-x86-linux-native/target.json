@@ -27,6 +27,12 @@
   ],
   "buildTarget": true,
   "config": {
+      "antenna": {
+        "isis": {
+            "secondary": "0x32",
+            "count": 4
+        }
+      },
       "hardware": {
         "console": {
           "uart": "K_UART1",
