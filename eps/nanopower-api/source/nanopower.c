@@ -467,9 +467,9 @@ KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
     {
         buff->temp[i] = be16toh(body->temp[i]);
     }
-    buff->bootcause = body->bootcause;
-    buff->battmode = body->battmode;
-    buff->pptmode = body->pptmode;
+    buff->boot_cause = body->boot_cause;
+    buff->batt_mode = body->batt_mode;
+    buff->ppt_mode = body->ppt_mode;
 
     return EPS_OK;
 }
