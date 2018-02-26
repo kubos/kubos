@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use radio_api::{Connection, Radio, RadioError, RadioReset};
+use radio_api::Connection;
 use messages::{File, FileCount, StateOfHealth};
 
 /// Structure for interacting with Duplex-D2 Radio API
@@ -46,38 +46,6 @@ impl DuplexD2 {
     pub fn get_state_of_health(&self) -> Result<StateOfHealth, String> {
         self.conn.send(b"GUGETSOH")?;
         self.conn.read(StateOfHealth::parse)
-    }
-}
-
-impl Radio for DuplexD2 {
-    fn init(&self) -> Result<(), RadioError> {
-        Ok(())
-    }
-
-    fn terminate(&self) -> Result<(), RadioError> {
-        Ok(())
-    }
-
-    fn reset(&self, reset_type: RadioReset) -> Result<(), RadioError> {
-        match reset_type {
-            RadioReset::HardReset | RadioReset::SoftReset => Ok(()),
-        }
-    }
-
-    fn configure(&self, _json_config: &str) -> Result<(), String> {
-        Ok(())
-    }
-
-    fn send(&self, _buffer: Vec<u8>) -> Result<(), RadioError> {
-        Ok(())
-    }
-
-    fn receive(&self) -> Result<(Vec<u8>), RadioError> {
-        Ok(vec![1])
-    }
-
-    fn get_telemetry<TelemetryType>(&self, _telem_type: TelemetryType) -> Result<&str, RadioError> {
-        Ok("telemetry")
     }
 }
 
