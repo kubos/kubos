@@ -1,6 +1,5 @@
-****************
 Payload Services
-****************
+================
 
 Payload services are essentially hardware services but custom designed
 for mission payload hardware. They share the same architecture as the hardware
@@ -13,8 +12,10 @@ different pieces and how to construct a custom payload service.
 The current guide for working with Python within the Kubos SDK can be
 found :doc:`here <../sdk-docs/sdk-python>`.
 
+.. _python-service-ref:
+
 Python Service
-==============
+--------------
 
 The two example payload services can be found in the
 `examples <https://github.com/kubos/kubos/tree/master/examples>`_ folder in the
@@ -47,7 +48,7 @@ We will now take a closer look at `models.py` and `schema.py` to see what exactl
 API through the service.
 
 models.py
----------
+~~~~~~~~~
 
 Inside of the example `models.py` file there are `Subsystem` and `Status` classes. Both of these classes must be subclasses of `graphql.ObjectType <http://docs.graphene-python.org/en/latest/types/objecttypes/>`_ from the `graphene <http://docs.graphene-python.org/en/latest/>`_ module.
 
@@ -101,12 +102,12 @@ The `Status` class is used to model any important information gathered from call
 Right now it just contains a `status` member which represents the status of the function call and a `subsystem` member which represents the current state of the `Subsystem`.
 
 schema.py
----------
+~~~~~~~~~
 
 Now lets look inside of `schema.py`. This file contains the models used by `graphene` to create our GraphQL endpoint.
 
 Queries
-~~~~~~~
+^^^^^^^
 
 Queries allow us to fetch data from the subsystem. There is only one `Query` class needed in the `schema.py` file.
 
@@ -138,7 +139,7 @@ The above class would enable the following query for subsystem power status:::
     }
 
 Mutations
-~~~~~~~~~
+^^^^^^^^^
 
 Mutations allow us to call functions on the subsystem which cause change or perform some action. Like the `Query` class we will only need one top level `Mutation` class.
 
@@ -185,7 +186,7 @@ The `Arguments` class describe any argument fields needed for this mutation. The
     }
 
 Running the example
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 Getting the example service up and running is fairly simple. First you must make sure you have the necessary python dependencies installed. If you are using the Kubos SDK vagrant box then these will already be installed. Otherwise you will need to run ``pip install -r requirements.txt``.
 
@@ -207,8 +208,10 @@ Now restart the vagrant box with ``vagrant reload``. You should now have the abi
 to run the python service inside the Vagrant box and access it from the outside
 at http://127.0.0.1:5000.
 
+.. _rust-service-ref:
+
 Rust Service
-============
+------------
 
 This is a quick overview of the payload service written in Rust.
 
@@ -216,7 +219,7 @@ The current guide for working with Rust within the Kubos SDK can be
 found :doc:`here <../sdk-docs/sdk-rust>`.
 
 Libraries
----------
+~~~~~~~~~
 
 This payload service and future rust-based services will be written using
 the following external crates:
@@ -229,7 +232,7 @@ The ``Cargo.toml`` in the example payload service gives a good list of crate
 dependencies to start with.
 
 Example Source
---------------
+~~~~~~~~~~~~~~
 
 The example Rust service is found in the
 `examples <https://github.com/kubos/kubos/tree/master/examples>`__ folder in the
@@ -260,7 +263,7 @@ We will now take a closer look at ``model.rs`` and ``schema.rs`` and break down
 the pieces required to expose hardware APIs through the service.
 
 model.rs
---------
+~~~~~~~~
 
 The ``model.rs`` file contains structures and functions used to wrap low-level device APIs
 and provide abstractions for the GraphQL schema to call into. Looking inside of the ``model.rs``
@@ -346,14 +349,14 @@ and ``CalibrateThermometer``. These are used as wrappers around scalar values
 returned by various mutations in ``schema.rs``.
 
 schema.rs
----------
+~~~~~~~~~
 
 Now we will take a look inside of ``schema.rs``.  This file contains the query
 and mutation models used by `Juniper <http://juniper.graphql.rs/>`__ to create
 our GraphQL endpoints.
 
 Queries
-~~~~~~~
+^^^^^^^
 
 Queries allow us to fetch data from the subsystem. There is only one base ``Query``
 struct needed in the ``schema.rs`` file.
@@ -401,7 +404,7 @@ struct that we want exposed. The syntax ``Ok(self.func()?)`` allows the
 translation of return type ``Result<T, Error>`` into ``FieldResult<T>``.
 
 Mutations
-~~~~~~~~~
+^^^^^^^^^
 
 Mutations allow us to call functions on the subsystem which cause change or
 perform some action. Like the ``QueryRoot`` struct, we will only need one
@@ -444,7 +447,7 @@ These structs define fields which can then be used in the mutation to specify
 which return data is desired.
 
 Building and Running
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 The payload service provided in the ``examples`` folder can be compiled by running
 this command ``cargo kubos -c build``. This command must be run from

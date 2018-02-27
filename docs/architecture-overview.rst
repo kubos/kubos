@@ -14,7 +14,8 @@ The KubOS Stack
 OBC (On Board Computer)
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Starting from the bottom, the OBC is up to you, as long as it is in our supported list. The current list of supported OBCs can be found :doc:`on our main docs page <index>`. We are also continually working to support new platforms, so make sure you `talk to us <https://slack.kubos.co/>`__ if your OBC is not included! 
+Starting from the bottom, the OBC is up to you, as long as it is in our :ref:`supported list <supported-boards>`.
+We are continually working to support new platforms, so make sure you `talk to us <https://slack.kubos.co/>`__ if your OBC is not included! 
 
 Kubos Linux
 ~~~~~~~~~~~
@@ -26,21 +27,25 @@ Kubos Linux is Kubos's Linux distro.
 Kubos APIs
 ~~~~~~~~~~
 
-Kubos offers a library of APIs to simplify the process of writing mission applications and services. It includes software abstractions for communication protocols, like UART and I2C, as well as hardware abstractions for devices like the `ISIS iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__
+Kubos offers a library of APIs to simplify the process of writing mission applications and services.
+It includes software abstractions for communication protocols, like UART and I2C, as well as hardware abstractions for devices like the `ISIS iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__
 
 - :doc:`Kubos API Documenation <apis/index>`
 
 Kubos Services
 ~~~~~~~~~~~~~~
 
-Kubos services are defined as any persistent process that is used to interact with the satellite. Services rarely make decisions, but will allow the user to accomplish typical flight software tasks such as telemetry storage, file management, shell access, hardware interaction, etc. 
+A Kubos service is defined as any persistent process that is used to interact with the satellite.
+Services rarely make decisions, but will allow the user to accomplish typical flight software tasks such as telemetry storage, file management, shell access, and hardware interaction. 
 
 - :doc:`Kubos Services <services/index>`
 
 Mission Applications
 ~~~~~~~~~~~~~~~~~~~~
 
-Mission applications are anything that governs the behavior of the satellite. Some common examples are deployment, housekeeping, and telemetry beaconing. Basically anything that you want the satellite to do autonomously goes into this category.
+Mission applications are anything that governs the behavior of the satellite.
+Some common examples are deployment, housekeeping, and telemetry beaconing.
+Basically anything that you want the satellite to do autonomously goes into this category.
 
 - :doc:`Mission Applications <what-is-a-mission-application>`
 
@@ -51,32 +56,33 @@ Typical Mission Architecture
 .. figure:: images/mission_diagram.png
     :align: center
 
-In the above diagram, everything in blue is typically developed by Kubos, while everything in green would be mission code and written by the user for their specific mission and payload. 
+In the above diagram, everything in blue is typically developed by Kubos, while everything in green would be mission code, written by the user for their specific mission and payload. 
 
-Communication
-~~~~~~~~~~~~~
+Gateway
+~~~~~~~
 
-There is internal communication and external communication, all of which is conducted over different types of IP. 
+A gateway is any hardware device that provides an external communication connection for the satellite.
+This ranges from a desktop serial connection to an in-flight radio link through a ground station.
 
-Gateways
-^^^^^^^^
+Gateway API
+~~~~~~~~~~~
 
-Gateways are any and all communication routes to the satellite. This ranges from desktop serial connection to in flight radio link through a ground station. This is mainly just a term to encompass and abstract the notion of the connection to the satellite. 
+The gateway API provides a simplified software interface to be used by the communiction service.
 
 Communication Service
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
-The communication service is what integrates the gateway (and the API developed for it) to talk to the mission operation center, Major Tom. 
+The communication service processes all communication received from the gateway and prepares it for use by the rest of the satellite system.
 
-Hardware Integration
-~~~~~~~~~~~~~~~~~~~~
+Similarly, any messages which need to be sent out of the satellite are processed by the service and then output through the gateway.
 
-The hardware that is currently supported by KubOS is listed on the :doc:`main docs page <index>`. 
+Linux IP Stack
+~~~~~~~~~~~~~~
 
-Supported hardware (other than OBCs) is hardware that has both an API and an associated service. 
+All services use IP in order to communicate with each other. This infrastructure is referred to as the "IP stack".
 
 Hardware Services
-^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~
 
 Hardware services are GraphQL server endpoints that take in queries and mutations and exercise the hardware API to complete them. 
 
@@ -84,33 +90,35 @@ Hardware services are GraphQL server endpoints that take in queries and mutation
  - :doc:`GraphQL <services/graphql>`
 
 Hardware APIs
-^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
-Hardware APIs are a two-tier system. The lower tier is specific to the exact piece of hardware and its configuration, and must be written for every piece of hardware integrated. The upper tier accesses the lower tier, and is accessed by the associated Hardware Services. This upper tier is mostly portable between different units of similar purpose (e.g., different brands of battery or ADCS), but sometimes must be augmented. 
+Hardware APIs abstract away the particular commands and steps required to operate the device, resulting in smaller, more maintainable code.
 
- - :doc:`Hardware APIs <apis/index>`
+ - :doc:`Hardware APIs <apis/device-api/index>`
 
 Core Services
 ~~~~~~~~~~~~~
 
-The Core Services are all the services that provide critical Flight Software capability. Any service that does not interact with hardware or is not specific to a mission falls within this category. Each of these services are discussed in the Services section found :doc:`here <services/core-services>`
+Core services are all the services that provide critical flight software capability.
+Any service that does not interact with hardware and is not specific to a mission falls within this category.
 
-Mission Specific Code
-~~~~~~~~~~~~~~~~~~~~~
-
-Mission specific code is highlighted in green in the above diagram and refers to anything which is specific to a particular mission. This includes things like the payload service and mission applications. 
+- :doc:`Core Services <services/core-services>`
 
 Payload Services
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 
-Payload services should be modeled after hardware services as much as possible, and that is reflected in the given example code. That being said, the payload service is custom for the mission, and can be accomplished any way the payload developer sees fit. 
+Payload services are hardware services which implement custom code in order to accomplish mission-specific goals.
+Payload services should be modeled after hardware services as much as possible. 
+That being said, the payload service is custom for the mission, and can be accomplished any way the payload developer sees fit. 
 
  - :doc:`Payload Services <services/payload-services>`
 
 Mission Applications
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 
-Mission applications, as previously discussed, handle all the onboard decision making. These are, by nature, mission specific, but some of them can be largely reused due to the abstract nature of the hardware integration. These are typically written or adapted by the user. 
+Mission applications, as previously discussed, handle all the onboard decision making.
+These are, by nature, mission specific, but some of them can be largely reused due to the abstract nature of the hardware integration.
+These are typically written or adapted by the user. 
 
  - :doc:`Mission Applications <what-is-a-mission-application>`
 
@@ -120,8 +128,9 @@ Available Languages in KubOS
 
 The primary languages used in KubOS are Rust, Python, and C. 
 
- - Rust is the primary language for the Services. 
- - Python is used for Mission Applications and some Services. 
- - C is everything else. 
+ - :doc:`Rust <sdk-docs/sdk-rust>` is the primary language for the :ref:`services <rust-service-ref>`
+ - :doc:`Python <sdk-docs/sdk-python>` is used for mission applications and :ref:`some services <python-service-ref>` 
+ - C is used for everything else (kernel, bootloader, most APIs, etc)
 
-Each language can be used to create projects, services, and applications within KubOS. Other languages can also be easily supported, make sure to `talk to us <https://slack.kubos.co/>`__ if there is another option you'd like to use!
+Each language can be used to create projects, services, and applications within KubOS.
+Other languages can also be easily supported, make sure to `talk to us <https://slack.kubos.co/>`__ if there is another option you'd like to use!
