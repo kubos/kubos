@@ -49,7 +49,7 @@ Kubos Development Environment
 -----------------------------
 
 The kubos repository is a collection of
-`Yotta <http://yottadocs.mbed.com/>`__ modules and targets which are
+`yotta <http://yottadocs.mbed.com/>`__ modules and targets which are
 loaded inside the Kubos Vagrant box. They can also be built locally
 using the ``kubos link`` and ``kubos link-target`` commands.
 

@@ -23,7 +23,7 @@ v1.1.0 - Jan 24 2018
 - Decided on using GraphQL, Rust, and Python for services and applications
 - `Added Python-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/python-service>`__
 - `Added Rust-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/rust-service>`__
-- `Added 'cargo kubos' subcommand for Cargo-->Yotta integration <https://github.com/kubos/kubos/tree/1.1.0/cargo-kubos>`__
+- `Added 'cargo kubos' subcommand for Cargo-->yotta integration <https://github.com/kubos/kubos/tree/1.1.0/cargo-kubos>`__
 
 - Upgraded to BuildRoot LTS 2017.2.8
 - `Documented Windows PowerShell v3+ requirement <http://docs.kubos.co/1.1.0/installation-docs/sdk-installing.html#install-windows-powershell-v3-windows-7-sp1-only>`__

@@ -19,12 +19,11 @@ each of the hardware components are and how they are connected.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../os-docs/kubos-linux-on-mbm2` - Steps to build Kubos Linux
--  :doc:`../os-docs/first-linux-project` - Basic tutorial for creating your first KubOS
-   Linux SDK project
+-  :doc:`../os-docs/first-linux-project` - Basic tutorial for creating your first Kubos SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`../os-docs/working-with-the-mbm2` - Guide for interacting with MBM2-specific features
+-  :doc:`../os-docs/kubos-linux-on-mbm2` - Steps to build Kubos Linux
 
 Components
 ----------
@@ -41,7 +40,7 @@ To perform a full default installation, two files are needed:
   
 All of these files can be obtained from `our Kubos Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
-Download the latest `KubOS_Linux.zip` file and then unzip the files for the Pumpkin MBM2. They're located in the `KubOS_Linux/{version}/Pumpin-MBM2` folder.
+Download the latest `Kubos_Linux.zip` file and then unzip the files for the Pumpkin MBM2. They're located in the `Kubos_Linux/{version}/Pumpin-MBM2` folder.
 
 Pre-Requisites
 --------------

@@ -23,7 +23,7 @@ files and folders.
 cannot be used as the name of the project. The most common of these are
 ``test``, ``source`` and ``include``.
 
-**Note:** Yotta, the build system the Kubos CLI is based upon, requires project
+**Note:** yotta, the build system the Kubos CLI is based upon, requires project
 names to be hyphen-delimited or underscore-delimited. CamelCased project names
 will cause warnings.
 

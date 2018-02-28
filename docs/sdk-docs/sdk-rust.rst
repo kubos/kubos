@@ -1,7 +1,7 @@
-Rust
-====
+Using Rust with the Kubos SDK
+=============================
 
-The Kubos SDK Vagrant box comes with support for Rust, Cargo and several
+The Kubos SDK Vagrant box comes with support for Rust, Cargo, and several
 helper tools to integrate C-based Kubos libraries with Rust projects.
 
 .. note::
@@ -77,10 +77,10 @@ Flashing
    The addition of Rust to the Kubos SDK is pretty recent and SDK tooling is
    currently undergoing revision to make the flashing process smoother!
 
-Flashing Rust projects is currently done using the ``kubos-cli`` tool. It is a bit
+Flashing Rust projects is currently done using the :doc:`Kubos CLI <sdk-reference>`. It is a bit
 of a process laid out in the following steps:
 
-0. Make sure the target hardware is attached to your computer via serial cable.
+0. Make sure the target hardware is attached to your computer via a serial cable.
 1. Cross-compile the Rust project for the desired target.
 2. Navigate to an existing example kubos module like ``kubos-linux-example``.
 3. Run ``kubos linux -a``.
@@ -103,8 +103,9 @@ Running on Target
 The following steps will allow you to run Rust binaries which have been flashed
 to a Linux target:
 
+0. Make sure the target hardware is attached to your computer via a serial cable.
 1. Run ``minicom kubos`` from inside of the Vagrant box.
 2. Enter the username ``kubos`` and the password ``Kubos123``.
 3. Navigate to the folder ``/home/system/usr/local/bin``.
 4. This folder is the default destination for flashed files. Your binaries should
-   be here. You can now run them with ``./binary``.
+   be here. You can now run them with ``./{binary-name}``.

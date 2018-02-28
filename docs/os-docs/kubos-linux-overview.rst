@@ -8,9 +8,11 @@ This is intended as a higher-level overview of the Kubos Linux
 configuration, installation, and distribution for the Kubos clients'
 embedded systems.
 
-The high level components of every system will be: - Low-level
-bootloader/s - U-Boot (mid-level bootloader. Loads Kubos Linux) - KubOS
-Linux
+The high level components of every system will be: 
+
+- Low-level bootloader/s
+- U-Boot (mid-level bootloader. Loads Kubos Linux)
+- KubOS Linux
 
 Ideally, all the files will be delivered to the customer as a pre-baked
 OBC. They'll just need to upload their user app files onto the board.

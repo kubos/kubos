@@ -48,24 +48,6 @@ How do I check what my project's target is?
 How do I see the debug output of my board?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MSP430
-^^^^^^
-
-``minicom msp430``
-
-STM32F407
-^^^^^^^^^
-
-Connect an FTDI cable to your board's debug UART port. By default:
-
--  Yellow wire (TX) --> pin PC6.
--  Orange wire (RX) --> pin PC7.
-
-Then use ``minicom kubos`` to start a serial connection session.
-
-ISIS-OBC
-^^^^^^^^
-
 ``minicom kubos``
 
 How do I check what version of Kubos Linux I'm running?
@@ -101,8 +83,8 @@ I've tried other steps here, but my Kubos Vagrant image is still behaving weirdl
 
 Try logging out and restarting the VM using the ``vagrant reload`` command.
 
-I got some weird errors while running a kubos command (``kubos build``, ``kubos target``, etc)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+I got some weird errors while running a Kubos CLI command (``kubos build``, ``kubos target``, etc)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Run ``kubos update -a`` to ensure that you're using the latest version of the Kubos SDK
     
@@ -145,8 +127,8 @@ only. Change the project file permissions to allow the local vagrant user to hav
     
     sudo chown vagrant:vagrant . -R
 
-Kubos Linux
-~~~~~~~~~~~
+Interacting with an OBC
+~~~~~~~~~~~~~~~~~~~~~~~
 
 I transferred a script, but it won't run
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

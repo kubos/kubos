@@ -140,7 +140,7 @@ similar to this:
 Upgrade Rollback
 ----------------
 
-If for some reason you need to rollback to a previous version of KubOS
+If for some reason you need to rollback to a previous version of Kubos
 Linux, you don't need to reflash the board with the correct upgrade
 package. Previous packages are not deleted once they have been loaded.
 As a result, you can simply specify which package you would like to boot

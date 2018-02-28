@@ -20,12 +20,11 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux
--  :doc:`../os-docs/first-linux-project` - Basic tutorial for creating your first KubOS
-   Linux SDK project
+-  :doc:`../os-docs/first-linux-project` - Basic tutorial for creating your first SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`../os-docs/working-with-the-iobc` - Guide for interacting with iOBC-specific features
+-  :doc:`../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux
 
 Components
 ----------
@@ -43,7 +42,7 @@ To perform a default installation, three files are needed:
   
 All of these files can be obtained from `our Kubos Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
-Download the latest `KubOS_Linux.zip` file and then unzip the files for the iOBC. They're located in the `KubOS_Linux/{version}/iOBC` folder.
+Download the latest `Kubos_Linux.zip` file and then unzip the files for the iOBC. They're located in the `Kubos_Linux/{version}/iOBC` folder.
 
 .. _install-sd:
 
