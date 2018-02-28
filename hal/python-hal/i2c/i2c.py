@@ -51,7 +51,3 @@ class I2C:
             fcntl.ioctl(file, I2C_SLAVE, device)
 
             return file.read(count)
-
-
-
-

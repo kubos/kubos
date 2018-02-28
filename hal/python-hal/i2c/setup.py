@@ -1,4 +1,5 @@
-"""A setuptools based setup module for i2c.
+"""
+A setuptools based setup module for i2c.
 See:
 https://github.com/pypa/sampleproject
 """
