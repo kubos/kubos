@@ -43,7 +43,7 @@ def main():
             os.makedirs(doc_dir)
         gendocs_xml(dir, "docs/Doxyfile", args.version, doc_dir)
 
-    subprocess.call("sphinx-build docs/ html/", shell=True)
+    subprocess.call("sphinx-versioning -v build -r 1.1.0 docs/ html/", shell=True)
 
 
 if __name__ == '__main__':
