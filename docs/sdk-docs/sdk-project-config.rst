@@ -493,7 +493,7 @@ CSP
 
 .. json:object:: csp
 
-    Kubos CSP (CubeSat Protocol) configuration
+    Kubos CSP (Cubesat Space Protocol) configuration
     
     :property boolean debug: Turn on CSP debug messages
 

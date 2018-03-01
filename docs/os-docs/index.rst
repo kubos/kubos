@@ -20,8 +20,8 @@ Installation Docs
     Installing Kubos Linux on ISIS-OBC <../installation-docs/installing-linux-iobc>
     Installing Kubos Linux on Pumpkin MBM2 <../installation-docs/installing-linux-mbm2>
     
-General Guide
--------------
+General Guides
+--------------
 
 .. toctree::
     :maxdepth: 1

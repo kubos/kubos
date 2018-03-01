@@ -94,7 +94,7 @@ yourself to the ``vboxusers`` group with the following command:
         sudo usermod -aG vboxusers <username>
 
 You will need to logout and log back in to your host computer, otherwise 
-passing usb devices through to your vagrant development environment will not work correctly.
+passing USB devices through to your development environment will not work correctly.
 
 Install Vagrant
 ~~~~~~~~~~~~~~~
@@ -103,7 +103,7 @@ If you don't already have Vagrant installed see the Vagrant
 `installation
 documentation. <https://www.vagrantup.com/docs/installation>`__
 
-If your vagrant installation is set up correctly, running the following
+If your Vagrant installation is set up correctly, running the following
 command should print something similar to the following output:
 
 ::
@@ -213,7 +213,7 @@ with your projects.
 
         $ vagrant ssh
 
-This will start an SSH session in the vagrant box with the Kubos CLI and
+This will start an SSH session in the Vagrant box with the Kubos CLI and
 all of the required dependencies installed.
 
 That's it! From here see more on:

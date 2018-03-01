@@ -19,13 +19,17 @@ The simplest way to create a new Kubos Linux project is by using the Kubos CLI.
 The ``kubos init --linux`` command takes a project name and creates the project
 files and folders.
 
-**Note:** Inside of the build system there are several reserved words, which
-cannot be used as the name of the project. The most common of these are
-``test``, ``source`` and ``include``.
+.. note::
 
-**Note:** yotta, the build system the Kubos CLI is based upon, requires project
-names to be hyphen-delimited or underscore-delimited. CamelCased project names
-will cause warnings.
+    Inside of the build system there are several reserved words, which
+    cannot be used as the name of the project. The most common of these are
+    ``test``, ``source`` and ``include``.
+
+.. note::
+
+    yotta, the build system the Kubos CLI is based upon, requires project
+    names to be hyphen-delimited or underscore-delimited. CamelCased project names
+    will cause warnings.
 
 ::
 
@@ -57,7 +61,7 @@ then link the necessary files. For example:
         $ cd myproject/examples/kubos-linux-example
         $ kubos link --all
 
-**Note:** It is unnecessary to run the ``kubos init`` command in this case
+.. note:: It is unnecessary to run the ``kubos init`` command in this case
 
 Editing the project
 -------------------

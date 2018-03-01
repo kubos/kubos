@@ -27,20 +27,20 @@ destination folder will be created if it doesn't already exist.
 
     config.vm.synced_folder "C:\\Users\\Catherine\\git\\kubos", "/home/vagrant/shared"
 
-Reload your vagrant image to pick up the new synced folder.
+Reload your Vagrant image to pick up the new synced folder.
 
 ::
 
     $ vagrant reload
 
-Log in to your vagrant image
+Log in to your Vagrant image
 
 ::
 
     $ vagrant ssh       
 
 **Note:** It is possible to do development on the kubos repo from within
-the vagrant image, but it is our recommended workflow to have the repo
+the Vagrant image, but it is our recommended workflow to have the repo
 on your host machine and pass it through. This way if the image becomes
 corrupted, or if you want to pass the modified code through to another
 VM, it's still available.

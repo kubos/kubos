@@ -4,7 +4,7 @@ Using Kubos Linux
 Overview
 --------
 
-This document is intended as an general guide for creating,
+This document is intended as a general guide for creating,
 loading, and using Kubos projects and other files within the user space
 of Kubos Linux.
 
@@ -33,11 +33,11 @@ to your computer via USB. See the appropriate `Working with {board}` document
 for more information.
 
 If the target board is correctly connected to your host computer, you should 
-see a `/dev/ttyUSB\*` device in your vagrant VM. The VM is set up to
+see a `/dev/ttyUSB\*` device in your Vagrant box. The VM is set up to
 automatically forward any FTDI cables that connect to a `/dev/FTDI` device
 for ease-of-use.
 
-The vagrant image comes pre-packaged with a minicom serial connection
+The Vagrant image comes pre-packaged with a minicom serial connection
 configuration file. You can connect with this configuration file using the
 command
 
@@ -309,9 +309,11 @@ shell scripts) and will be loaded into /home/system/usr/local/bin. Once
 they have been flashed, these files can then be manually moved to
 another location.
 
-**Note:** The file does not need to reside within a Kubos SDK project,
-but the ``kubos flash`` command must still be run from the project,
-since that is where the target configuration information is stored.
+.. note::
+
+    The file does not need to reside within a Kubos SDK project,
+    but the ``kubos flash`` command must still be run from the project,
+    since that is where the target configuration information is stored.
 
 For example:
 
@@ -509,12 +511,10 @@ a kernel upgrade or downgrade.
 The home directories of all user accounts, except root, should live
 under this directory.
 
---------------
+.. warning::
 
-**Any files not residing under the /home directory will be destroyed
-during an upgrade/downgrade** 
-
---------------
+    Any files not residing under the /home directory will be destroyed
+    during an upgrade/downgrade
 
 /home/usr/bin
 ^^^^^^^^^^^^^

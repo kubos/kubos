@@ -98,7 +98,7 @@ Linux
 `Linux 4.4 Overview <https://kernelnewbies.org/Linux_4.4>`__
 
 We're using Linux 4.4. This is the current long-term support version
-(LTS) and will be supported until early 2018.
+(LTS) and will be supported until early 2022.
 
 Glibc
 ^^^^^
@@ -165,10 +165,12 @@ device tree files. It's very much trial-and-error. I recommend looking
 at the files for boards with similar processors and peripherals to see
 examples for the various component definitions.
 
-Note: There is also an option to bake the data from the \*.dtb file
-directly into the zImage file. However, this capability is largely
-implemented as a support option for older boards and isn't something
-that we should need to use.
+.. note::
+
+    There is also an option to bake the data from the \*.dtb file
+    directly into the zImage file. However, this capability is largely
+    implemented as a support option for older boards and isn't something
+    that we should need to use.
 
 Connecting to the System
 ------------------------

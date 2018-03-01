@@ -2,11 +2,11 @@ Kubos HAL Documentation
 =======================
 
 The Kubos HAL module provides a hardware abstraction layer for the common hardware interfaces
-found on cubesats. The interfaces provided span across the different hardware platforms
+found on CubeSats. The interfaces provided span across the different hardware platforms
 supported by KubOS.
 
 For Linux devices, the `Linux sysfs <https://en.wikipedia.org/wiki/Sysfs>`__ interface 
-already provides some abstraction away from the hardware interface. In this instance, the 
+already provides some abstraction away from the hardware interface. The 
 Kubos HAL creates further abstraction, removing the need for the user to learn the intricacies 
 of Linux system calls.
 
