@@ -252,7 +252,7 @@ the master branch.
 **Do not leave comments like 'TODO' or 'FIX ME' in your final code
 changes unless absolutely necessary.** Just do whatever it is that
 you're trying to procrastinate on. If you must leave a to-do, THERE
-BETTER BE A STORY FOR IT IN JIRA AND IT BETTER BE AT THE TOP OF THE
+BETTER BE A STORY FOR IT IN TRELLO AND IT BETTER BE AT THE TOP OF THE
 BACKLOG. "Oh, I'll create a story for it later". NO, YOU WON'T. DO IT
 NOW.
 

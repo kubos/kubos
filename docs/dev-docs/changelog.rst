@@ -44,14 +44,14 @@ v1.0.0 - June 27 2017
 ---------------------
 
 - `KUBOS-442 <https://kubostech.atlassian.net/browse/KUBOS-442>`__
-   Added support for iOBC I2C bus
+  Added support for iOBC I2C bus
 - `KUBOS-445 <https://kubostech.atlassian.net/browse/KUBOS-445>`__
-   Integrated iOBC supervisor
+  Integrated iOBC supervisor
 - `KUBOS-274 <https://kubostech.atlassian.net/browse/KUBOS-274>`__
-   Completed Kubos Telemetry integration into KubOS Linux
+  Completed Kubos Telemetry integration into KubOS Linux
 - `KUBOS-487 <https://kubostech.atlassian.net/browse/KUBOS-487>`__
-   Added support for tab-completion to Kubos CLI
--  `Created an initial QA integration test suite <https://github.com/kubos/kubos/tree/master/test/integration/linux>`__
+  Added support for tab-completion to Kubos CLI
+- `Created an initial QA integration test suite <https://github.com/kubos/kubos/tree/master/test/integration/linux>`__
 -  Migrated from Markdown to ReStructuredText as the documentation
    language of choice
 -  Migrated from only Doxygen to Sphinx and Doxygen as the documentation

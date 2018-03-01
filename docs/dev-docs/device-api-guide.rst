@@ -83,9 +83,13 @@ Most APIs will likely implement most of these kinds of functions:
     - Action commands - (Highly device specific) Kick watchdog, send/receive message, deploy antenna, change orientation, etc
     - Fetch Information - Get uptime, get system status, get system telemetry, get orientation, etc
     
-Additionally, new ``config.json`` options might be added for project configuration.
-For example, one might created to define the I2C address of the end-point device, if it can be configured at
-the hardware level.
+Any internal configuration required (for example, setting an I2C slave address) should be done dynamically.
+For example, by using an argument in the API's ``{api}_init()`` function.
+
+.. note::
+
+    Historically, this kind of configuration has been done with `config.json` options, but this has been deprecated
+    in favor of the dynamic configuration to make the interaction between C, Rust, and Python more smooth.
     
 File Location
 -------------
@@ -178,7 +182,6 @@ The API's users guide should give an overview of the capabilities of the API.
 
 It should cover things like:
 
-    - Project configuration options
     - Run-time configuration options
     - Complex functions
     - Available telemetry items (i.e. anything returned by a "get" function)
@@ -196,7 +199,7 @@ To verify your docs:
 
     - Make sure that the two new ``*.rst`` files are accessible through normal page clicks if you start at the top-level ``index.html``
     - Verify that any new hyperlinks work as intended
-    - Make sure that ``gendocs.py`` runs successfully without throwing any errors or warnings. Fix all warnings until the script runs cleanly.
+    - Make sure that ``tools/gendocs.py`` runs successfully without throwing any errors or warnings. Fix all warnings until the script runs cleanly.
 
 Testing
 -------
@@ -250,6 +253,12 @@ Rust
 ^^^^
 
 Rust has native support for unit tests. Use it.
+
+Python
+^^^^^^
+
+Python's ``unittest`` and ``mock`` packages should be used to create unit tests
+for Python APIs.
     
 Test Configuration
 ^^^^^^^^^^^^^^^^^^

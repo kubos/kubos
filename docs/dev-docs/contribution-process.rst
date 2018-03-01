@@ -16,47 +16,8 @@ The Kubos CLA can be found
 Create an Issue
 ---------------
 
-Everything you work on should have a corresponding JIRA issue. Community
-members might not have access to JIRA and should then create a Github
-issue instead.
-
-If one doesn't exist, you should create it.
-
-If you want to create an issue but not immediately work on it, the
-description field should be an in-depth summary of the problem/feature
-and what needs to be changed. Ideally, you, or whoever works the issue,
-should be able to read the description and understand what work needs to
-be done without talking to whoever created the issue (though talking to
-the creator is still recommended in order to make sure that the
-requirements are well understood and haven't changed since the issue was
-created).
-
-JIRA
-~~~~
-
--  Click the 'Create' button at the top of the JIRA page
--  Project should be 'Kubos'
--  Issue type should be 'Story' or 'Bug'
-
-   -  A story is something to be added or updated within the project
-   -  A bug is something that is broken within the project
-
--  The summary should be a short description of what's being changed
--  The 'Component/s' field should be updated, if possible, to list the
-   related area/s affected by this issue.
--  The description should go into more detail about what the
-   problem/feature is and what needs to be done in order to complete the
-   task.
-
-   -  If you are creating a story, the description should follow the
-      `Agile user story
-      template <https://www.mountaingoatsoftware.com/agile/user-stories>`__
-
--  If you're creating a bug, update the 'Affects Version/s' field to
-   document the oldest affected version of the project
-
-Github
-~~~~~~
+GitHub issues allow us to track what problems have been found and which
+problems are currently being addressed.
 
 -  Navigate to the repo you'd like to open an issue against (most likely
    kubos/kubos)
@@ -79,21 +40,8 @@ Mark the Issue as 'In Progress'
 
 In order to track what's being worked on and by whom, for every issue you work you should:
  
-- JIRA: Drag the issue from the backlog into the sprint (if it's not already present) 
-- Assign it to yourself 
-
-  -  Click the issue 
-  -  JIRA: Under 'People'>'Assignee', click 'Assign to me' 
-  -  Github: Click the 'Assignees' link and select yourself 
-  
-- Mark the issue as 'In Progress'.
-
-  -  JIRA: There are two ways 
-  
-    - From the full issue description page, click the 'In Progress' button 
-    - From the 'Active Sprints' page, drag the issue from the 'To-Do' column into the 'In Progress' column 
-     
-  -  Github: Edit the title of the project and add "[WIP]"
+- Click the 'Assignees' link and select yourself 
+- Mark the issue as 'In Progress' by editing the title of the project and adding "[WIP]"
 
 Create a Branch of the Code You Want to Work On
 -----------------------------------------------
@@ -105,7 +53,7 @@ request:
 
 To create your own repo:
 
--  Navigate to the github page of the main code that you want to work
+-  Navigate to the GitHub page of the main code that you want to work
    on. For example, https://github.com/kubos/kubos.
 -  Click the 'Fork' button in the upper right-hand corner.
 -  If you see a dialog 'Where should we fork this repository?', click
@@ -143,7 +91,7 @@ naming and coding standards that should be adhered to. When in doubt,
 try to match the styling of the surrounding code.
 
 Update any documentation areas that are affected by your changes. For
-instance, if you found that a uart configuration option was not
+instance, if you found that a UART configuration option was not
 available for a certain board type, you would edit
 kubos-hal/kubos-hal/uart.h in the appropriate comment section with a new
 note about the unsupported option. 
@@ -155,10 +103,9 @@ note about the unsupported option.
   - Browse to your doc updates to verify
 
 Add or update any unit tests that are affected by your changes. For
-instance, if support for i2c slave mode is added for the STM32F4 board,
-then the kubos-hal-stm32f4/test/i2c.c file's test\_i2c\_slave test case
-should be updated to test the successful execution of the board in slave
-mode.
+instance, if support for SPI is added for the Kubos Linux HAL,
+then a new test folder would be added to `hal/kubos-hal/test` with the
+relavent new test cases. 
 
 Commit your changes and push to your remote branch (the branch will be
 created automatically if it doesn't exist):
@@ -184,15 +131,12 @@ At some point, you'll want to create a pull request so that your changes
 can be merged into the main repo's master branch. You will need to
 create a pull request for each repository you are making changes to.
 
-From the github page for the repository that contains the changes you
+From the GitHub page for the repository that contains the changes you
 want to merge: 
 
 - Click the 'Branch:' dropdown on the left-hand side and select the local branch containing your changes 
 - Click the 'New pull request' button 
-- The title of the pull request should be the JIRA issue number followed by a descriptive title 
-
-  - Ex. KUBOS-111 Adding i2c slave mode for STM32F4 
-
+- The title of the pull request should clearly refer to its corresponding issue
 - In the description field, add a small summary of the changes you made. The title should have indicated the bulk of the changes you made, but it's also good to mention things like documentation updates and any miscellaneous changes that were made (for example, fixing any bugs that you ran into while working on your code changes). 
 - Click 'Create pull request'
 
@@ -200,7 +144,7 @@ If you'd like specific people to review your code, you can either
 mention them in the description with an ``@{name}`` tag, or by adding them
 to the 'Reviewers' list.
 
-You a welcome to create a pull request before your changes are entirely
+You are welcome to create a pull request before your changes are entirely
 complete. Creating a pull request early in the code-creation process
 allows others to see what changes are being made and answer questions or
 offer architectural suggestions. If you do create a pull request before
@@ -211,7 +155,7 @@ is officially ready for review.
 Merge in New Changes From Master
 --------------------------------
 
-After submitting your pull request, you may find that github has flagged
+After submitting your pull request, you may find that GitHub has flagged
 one or more files as being in conflict with the current version of the
 file in the master branch. This means that someone else has committed
 code in the same file and similar area as you and your changes can't be
@@ -256,18 +200,9 @@ that the changes okay to merge (pending pull request approval).
 Wait for Pull Request Approval
 ------------------------------
 
-Move the JIRA issue to 'Reviewing' to indicate that the work is done,
-pending approval.
-
 Once your pull request has been submitted, it must be approved by at
 least one person before the request can be merged into the master
-branch. Once it has been approved, you can go to your pull request page
-and then click the 'Merge' button. 
-
-**Note:** If your changes have been
-approved, but you don't see a 'Merge' button, you likely don't have
-permission to merge for that project. Talk to Ryan Plauche
-(ryan@kubos.co).
+branch.
 
 In all likelyhood, you'll need to make changes to your code before your
 pull request can be merged. Make the changes in your local development
@@ -275,21 +210,16 @@ environment and then commit and push them into your remote repo. As long
 as you're still using the same local branch, these new changes will be
 automatically added to your existing pull request.
 
-Mark the Issue as 'Done'
-------------------------
+Once all changes have been approved, a Kubos engineer will merge the changes
+into the master branch.
 
-Before you mark the issue as done, verify the following: 
+Close the Issue
+---------------
+
+Before you close the issue, verify the following: 
 
 - All features listed in the issue have been completed 
 - All relevant documentation changes have been made 
 - All relevant unit tests have been created or updated 
 - All code changes and related code have been tested 
 - All pull requests related to the issue have been approved and merged
-
-Update the issue's 'Fix version' field to reflect the version that these
-changes are being implemented in.
-
-Once all of the work for the issue has been completed, you can mark the
-issue as Done in one of two ways: - From the full issue description
-page, click the 'Done' button - From the 'Kanban Board' page, drag the
-issue from the 'Reviewing' column into the 'Done' column
