@@ -106,6 +106,7 @@ html_show_sphinx = False
 htmlhelp_basename = 'Kubosdoc'
 
 breathe_projects = {
+    "nanopower-api" : "../xml/eps/nanopower-api",
     "libcsp" : "../xml/libcsp",
     "kubos-adcs-api" :  "../xml/adcs/adcs-api",
     "kubos-hal" : "../xml/hal/kubos-hal",
