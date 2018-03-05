@@ -10,4 +10,4 @@ sed -i "s/0.0.0/$latest_tag/g" docs/conf.py
 echo "Generating new docs"
 ./tools/gendocs.py --version $latest_tag
 
-chmod a+rw html/
+chmod a+rw -R html/

@@ -2,6 +2,7 @@
 import argparse
 import subprocess
 import os
+import shutil
 
 GENERATE_XML = """
 (cat {0};
@@ -43,6 +44,8 @@ def main():
         gendocs_xml(dir, "docs/Doxyfile", args.version, doc_dir)
 
     subprocess.call("sphinx-build docs/ html/", shell=True)
+
+    shutil.rmtree("./xml")
 
 
 if __name__ == '__main__':
