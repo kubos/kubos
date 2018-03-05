@@ -35,8 +35,13 @@
 
 #include "kubos-hal/i2c.h"
 
- #define STRINGIFY(s) TOSTRING(s)
- #define TOSTRING(s) #s
+/**
+ * Convert constant to string value
+ */
+#define STRINGIFY(s) TOSTRING(s)
+/** \cond */
+#define TOSTRING(s) #s
+/** \endcond */
 
 /**
  * Static array of I2C bus file descriptors

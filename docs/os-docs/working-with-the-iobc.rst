@@ -58,36 +58,37 @@ peripheral devices. Currently, users should interact with these devices
 using the standard Linux functions. A Kubos HAL will be added in the
 future for the iOBC.
 
-UART
-~~~~
-
-The iOBC has 2 UART ports available for use in varying capacities:
-
-+--------------+--------+--------+---------+---------+
-| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
-+==============+========+========+=========+=========+
-| /dev/ttyS1   | TX0    | RX0    |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS3   | TX2    | RX2    | RTS2    | CTS2    |
-+--------------+--------+--------+---------+---------+
-
-Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
-
-`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
-
-I2C
+ADC
 ~~~
 
-`I2C Standards
-Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
+The iOBC has four analog input pins available:
 
-Kubos Linux is currently configured to support the I2C standard-mode
-speed of 100kHz.
++------+-------+
+| iOBC | Linux |
++======+=======+
+| AIN4 | 0     |
++------+-------+
+| AIN5 | 1     |
++------+-------+
+| AIN6 | 2     |
++------+-------+
+| AIN7 | 3     |
++------+-------+
 
-The I2C bus is available through the Kubos HAL as ``K_I2C1``.
+The pins are available through the Linux device ``/sys/bus/iio/devices/iio\:device0/``.
 
-For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
-:doc:`../apis/kubos-hal/i2c_api` documents.
+A single raw output value can be read from each of the pins via
+``/sys/bus/iio/devices/iio\:device0/in_voltage{n}_raw``, where `{n}` corresponds to the
+Linux AIN number.
+
+This raw value can then be converted to microvolts by multiplying it by the value
+found in ``/sys/bus/iio/devices/iio\:device0/in_voltage_scale``.
+
+More information about the capture and use of ADC can be found in 
+`this guide from Atmel <https://www.at91.com/linux4sam/bin/view/Linux4SAM/IioAdcDriver>`__.
+
+An `ADC example <http://github.com/kubos/kubos/tree/master/examples/adc-thermistor>`__ is 
+also available for reference in the Kubos repo.
 
 GPIO
 ~~~~
@@ -184,7 +185,64 @@ direction and value.
     $ echo 1 > /sys/class/gpio/gpio19/value
 
     Get GPIO10's value:
-    $ cat /sys/class/gpio/gpio58/value
+    $ cat /sys/class/gpio/gpio58/value  
+    
+I2C
+~~~
+
+`I2C Standards
+Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
+
+Kubos Linux is currently configured to support the I2C standard-mode
+speed of 100kHz.
+
+The I2C bus is available through the Kubos HAL as ``K_I2C1``.
+
+For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
+:doc:`../apis/kubos-hal/i2c_api` documents.
+
+PWM
+~~~
+
+The iOBC has 6 PWM pins available for use, grouped into three pairs:
+
+    - PWM0 and PWM1
+    - PWM2 and PWM3
+    - PWM4 and PWM5
+    
+Users can interact with these pins through the `PWM sysfs interface <https://www.kernel.org/doc/Documentation/pwm.txt>`__,
+and the ``/sys/class/pwm/pwmchip0/`` directory
+
+In order to make a pin available for use, the PWM number should be passed to the ``pwmchip0/export`` file.
+For example, the following would be done in order to enable access to PWM0::
+
+    $ echo 0 > /sys/class/pwm/pwmchip0/export
+    
+After doing so, a new subdirectory will be available, ``pwmchip0/pwm0``.
+
+From here, the pin's properties can be configured and then it can be enabled.
+
+.. note::
+
+    Due to the underlying hardware, each pair of pins must use the same period value.
+    They may, however, have differing duty cycles.
+    
+    The nanosecond value specified for period and duty cycle will be internally converted to the nearest clock divider value.
+
+For example::
+
+    /* Set the period of the generated wave to 1 millisecond */
+    $ echo 1000000 > /sys/class/pwm/pwmchip0/pwm0/period
+    
+    /* Set the duty cycle to 50% (.5 millisecond) */
+    $ echo 500000 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+    
+    /* Turn on the signal */
+    $ echo 1 > enable
+    
+Then, to turn the signal off::
+
+    $ echo 0 > enable
 
 SPI
 ~~~
@@ -258,6 +316,23 @@ An example user program to read a value might look like this:
     value = rx[1];
 
     close(fd);
+    
+UART
+~~~~
+
+The iOBC has 2 UART ports available for use in varying capacities:
+
++--------------+--------+--------+---------+---------+
+| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
++==============+========+========+=========+=========+
+| /dev/ttyS1   | TX0    | RX0    |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS3   | TX2    | RX2    | RTS2    | CTS2    |
++--------------+--------+--------+---------+---------+
+
+Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
+
+`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
 
 User Data Partition
 -------------------
