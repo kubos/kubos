@@ -2,12 +2,12 @@ machine:
   services:
     - docker
   pre:
-    - if [ $CIRCLE_BRANCH = 'auto-docs' ]; then pip install semantic-version; fi
+    - if [ $CIRCLE_BRANCH = 'master' ]; then pip install semantic-version; fi
 
 dependencies:
   override:
     - docker pull kubos/kubos-dev:latest
-    - if [ $CIRCLE_BRANCH = 'auto-docs' ]; then docker pull kubos/kubos-docs:latest; fi
+    - if [ $CIRCLE_BRANCH = 'master' ]; then docker pull kubos/kubos-docs:latest; fi
 
 test:
   override:
@@ -17,7 +17,7 @@ test:
 
 deployment:
   production:
-    branch: auto-docs
+    branch: master
     commands:
       - ./deploy.sh
       - docker run -t -v $PWD:$PWD --workdir $PWD kubos/kubos-docs:latest sh prep_docs.sh
