@@ -144,12 +144,13 @@ At some point, You may see an informational message,
 This message can be safely ignored.
 
 The four status LEDs on the board should start flashing in a random pattern. 
-This indicates that the eMMC is currently being written. 
+This indicates that the eMMC is currently being flashed. 
 
 The process should take roughly ten minutes, after which the LEDs should return to normal, 
 with one LED blinking to indicate a successfully running Kubos Linux system.
 
-Then, the system will complain that there is no space left on the device. 
+The system will complain that there is no space left on the device, however this message
+can be ignored.
 To explain: the eMMC is 4GB, but a small portion is set up as read-only and 
 dedicated to boot-time processing. That area means the contents of the 4 GB 
 SD card will be larger than the writeable area of the eMMC. The 
@@ -163,29 +164,29 @@ Install the Auxiliary Image
 Re-Flash the SD Card
 ~~~~~~~~~~~~~~~~~~~~
 
-Now flash the micro SD card with the auxiliary SD card image. This image contains the
+Now flash the microSD card with the auxiliary SD card image. This image contains the
 Kubos Linux upgrade partition and the second user data partition.
 
 Once the flash process has completed, put the card back into the microSD slot
-and boot up the system..
-
-.. warning::
-
-    If you do not have a microSD card in the board, the system will not boot.
+and boot up the system.
 
 
 .. figure:: ../images/kubos_bbb_linux_mount_errors.png
    :alt: mount complaints during boot.
 
-You will see messages as the data partitions are mounted. For example, 
+You will see messages as the data partitions are mounted. For example::
 
-``EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities.``
+    EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities.
 
 While they may seem like errors, they are a normal part of the boot process as 
 the system detects the partition file type. If there are *actual* issues 
-mounting a partition, the resulting error message will look like this: 
+mounting a partition, the resulting error message will look like this::
 
-``mount: mounting /dev/mmcblk1p3 on /home failed: No such file or directory``
+    mount: can't find PARTUUID=41555820-02
+
+This example message is given when the system is unable to find the axilliary
+SD card's second partition. This might be due to no microSD card being present,
+or the microSD card not being properly flashed with the auxilliary SD image.
 
 If you see no such errors, the installation process is now complete.
 
@@ -193,4 +194,4 @@ Using Kubos Linux
 -----------------
 
 For information on how to create and run applications on your new Kubos Linux system, see the
-:doc:`../os-docs/working-with-the-bbb` guide.
+:doc:`../os-docs/using-kubos-linux` and :doc:`../os-docs/working-with-the-bbb` guides.

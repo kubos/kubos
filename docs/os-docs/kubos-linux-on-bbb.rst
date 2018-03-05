@@ -47,7 +47,11 @@ run and that file then loads the main U-Boot image into SDRAM.
 
 The main U-Boot image iterates through the `boot_targets` variable to attempt 
 to boot from an available MMC device. The partuuid of the first successful
-device is passed off to Linux to be used to mount the root filesystem. 
+device is passed off to Linux to be used to mount the root filesystem.
+
+By default, the microSD card slot will be checked first, followed by the
+eMMC. This behavior can be changed by setting the ``boot_dev`` value to
+``1`` to indicate that the eMMC should be tried first.
 
 Kubos Linux Build Process
 -------------------------

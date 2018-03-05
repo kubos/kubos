@@ -105,9 +105,11 @@ The SD card does not need to be inserted into the iOBC in order for this step to
     running Windows. This means that you must use a Windows OS in order to initially flash
     the iOBC.**
     
-    Once Kubos Linux has been installed, the device tree, which is located in the NOR flash,
-    can be updated using the standard :ref:`upgrade-installation` process with a `kpack-nor-*.itb`
-    file.
+.. note::
+
+    Once Kubos Linux has been initially installed, future releases of the device tree
+    can be installed using the :ref:`upgrade-installation` process with a `kpack-nor-*.itb`
+    file, rather than by manual flashing.
 
 Pre-Requisites
 ~~~~~~~~~~~~~~
@@ -161,7 +163,7 @@ board.
 You'll need to establish a serial connection with the board in order to connect
 to the console. 
 
-You can do this via a Kubos Vagrant image with the ``minicom kubos`` command
+You can do this via a Kubos SDK Vagrant image with the ``minicom kubos`` command
 after booting the board.
 
 The default login information for an iOBC is kubos/Kubos123.
@@ -251,7 +253,7 @@ If you do not have a Kubos Linux image, you can load the required files onto an 
 Pre-Requisites
 ^^^^^^^^^^^^^^
 
-Since you are not using a Kubos Linux image, you will need to go through the :ref:`OS build process <build-os>`
+Since you are not using a pre-built Kubos Linux image, you will need to go through the :ref:`OS build process <build-os>`
 locally in order to create the kernel and rootfs files.
 
 In order to write the files to the SD card your build system needs be able to a)
