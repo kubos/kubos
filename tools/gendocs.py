@@ -36,14 +36,13 @@ def main():
 
     doc_dirs = [d for d in DOCS_DIRS if os.path.isdir(d)]
 
-
     for dir in doc_dirs:
         doc_dir = os.path.join(os.getcwd(), args.output, dir)
         if not os.path.isdir(doc_dir):
             os.makedirs(doc_dir)
         gendocs_xml(dir, "docs/Doxyfile", args.version, doc_dir)
 
-    subprocess.call("sphinx-versioning -v build -r 1.1.0 docs/ html/", shell=True)
+    subprocess.call("sphinx-build docs/ html/", shell=True)
 
 
 if __name__ == '__main__':
