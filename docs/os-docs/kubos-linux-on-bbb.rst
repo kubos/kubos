@@ -174,10 +174,10 @@ onto the eMMC. In order to create a full Kubos Linux setup, you'll want to also 
 an auxiliary image for the microSD card containing the upgrade partition and an additional
 user data partition.
 
-Follow the :ref:`upgrade-creation` instructions in order to create a Kubos Package file
-(kpack-\*.itb) to be used for recovery.
+Follow the :ref:`upgrade-creation` instructions in order to create a base Kubos Package file
+(`kpack-base.itb`) to be used for recovery.
 
-Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.img`` script. 
+Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.sh`` script. 
 This will create a new SD card image, `aux-sd.img`, with two partitions:
 
 - An upgrade partition containing `kpack-base.itb`
