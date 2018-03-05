@@ -13,7 +13,7 @@ database before playing.
 
 ::
 
-   python ./app.py
+   python main.py config.yml database.db
 
 This will start a flask server at http://127.0.0.1:5000.
 If you go to http://127.0.0.1:5000/graphiql you will find a built-in

@@ -13,6 +13,7 @@ setup(name='Kubos-Telemetry-Database',
           'SQLAlchemy==1.0.11',
           'Flask==0.10.1',
           'Flask-GraphQL==1.3.0',
-          'graphene-sqlalchemy==2.0.0'
+          'graphene-sqlalchemy==2.0.0',
+          'pyyaml==3.12'
       ],
      )
