@@ -41,8 +41,8 @@ Code (\*.c, \*.h, scripts, etc)
 -  Use underscores to separate words
 -  All lowercase
 
-Docs (\*.md)
-------------
+Docs (\*.rst)
+-------------
 
 -  No spaces
 -  Use hyphens to separate words
