@@ -2,7 +2,7 @@ machine:
   services:
     - docker
   pre:
-    - if [ $CIRCLE_BRANCH = 'auto-docs']; then pip install semantic-version; fi
+    - if [ $CIRCLE_BRANCH = 'auto-docs' ]; then pip install semantic-version; fi
 
 dependencies:
   override:
