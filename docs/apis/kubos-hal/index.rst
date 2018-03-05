@@ -35,15 +35,5 @@ of Linux system calls.
    :name: hal-apis
 
    i2c_api
-
-.. toctree::
-   :caption: Platform HALs
-   :name:  hal-platforms
-
-   Kubos Linux Devices <kubos-hal-linux/index>
-
-.. toctree::
-   :caption: OBC HALs
-   :name: hal-obcs
-
-   ISIS iOBC <kubos-hal-iobc/index>
+   Kubos Linux APIs <kubos-hal-linux/index>
+   ISIS iOBC APIs <kubos-hal-iobc/index>
