@@ -46,11 +46,3 @@ RUN mkdir -p /usr/local/lib/yotta_targets
 RUN mkdir -p /home/vagrant/.kubos
 
 ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"
-
-#Tools to generate docs
-RUN apt-get install -y doxygen graphviz plantuml
-RUN pip install Sphinx==1.5.6
-RUN pip install breathe
-RUN pip install sphinx-rtd-theme==0.2.4
-RUN pip install sphinxcontrib-plantuml
-RUN pip install sphinx-jsondomain
