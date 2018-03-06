@@ -3,6 +3,7 @@ KubOS Service Outlines
 
 This guide covers the development of KubOS hardware services and provides an outline for several major types of hardware. 
 For general information about hardware services, their role, and how they work, check out :doc:`the hardware services documentation. <../services/hardware-services>`
+Make sure you reference the general hardware service when looking at the schema for all others, because they simply build on that schema, and each section covers what is added to that base schema. 
 
 
 General Hardware Service
@@ -146,7 +147,7 @@ GraphQL Schema::
 ADCS Service
 ------------
 
-The ADCS service outline and all following service outlines aim to abstract just the telemetry items and commands that are useful for mission logic. If you need a certain telemetry item for your mission application, please `let us know! <https://slack.kubos.co/>`
+The ADCS service outline and all following service outlines aim to abstract just the telemetry items and commands that are useful for mission logic. If you need a certain telemetry item for your mission application, please let us know! 
 
 Additional GraphQL Schema::
 
@@ -223,3 +224,147 @@ Additional GraphQL Schema::
         velocity: [Float]
     }
 
+
+Battery and EPS Service(s)
+--------------------------
+
+These functions are often combined into a single piece of hardware. If so, then the schema holds for that single service. If they are separate pieces of hardware, implement everything possible for each service. 
+
+Additional GraphQL Schema::
+
+    type Query {
+        solar: SolarStatus
+        ports: PortStatus
+        power: PowerStatus
+        battery: BatteryStatus
+    }
+    
+    type SolarStatus {
+        chargingStatus: ChargingEnum
+        panelVoltages: [Float]
+        panelCurrents: [Float]
+        panelTemperatures: [Float]
+    }
+    
+    enum ChargingEnum {
+        CHARGING
+        DISCHARGING
+    }
+    
+    type PortStatus {
+        power: [PowerEnum]
+        voltage: [Float]
+        current: [Float]
+    }
+    
+    enum PowerEnum {
+        ON
+        OFF
+    }
+    
+    type PowerStatus {
+        voltageLines: [Float] # Available voltages on the bus
+        measuredLineVoltage: [Float] # Actual voltages of the available lines
+        measuredLineCurrent: [Float] # Current for each voltage line
+    }
+    
+    type BatteryStatus {
+        stateOfCharge: [Float]
+        chargingStatus: ChargingEnum
+        voltage: Float
+        current: Float
+        temperature: [Float]
+        heater: HeaterEnum
+        heaterMode: HeaterEnum 
+    }
+    
+    enum HeaterEnum {
+        ON
+        OFF
+        AUTO
+    }
+    
+    type Mutation {
+        controlPort(
+            input: ControlPortInput!
+        ): ControlPortPayload
+        controlHeater(
+            input: ControlHeaterInput!
+        ): ControlHeaterPayload
+    }
+    
+    type ControlPortPayload implements MutationResult {
+        errors: [String]
+        success: Boolean
+    }
+    
+    input ControlPortInput {
+        power: PowerEnum
+        port: Int
+    }
+    
+    type ControlHeaterPayload implements MutationResult {
+        errors: [String]
+        success: Boolean
+    }
+    
+    input ControlHeaterInput {
+        status: HeaterEnum
+    }
+
+
+Deployables Service
+-------------------
+
+The deployables service covers anything that needs to be deployed. It focuses on abstracting the logic for deploying panels, antenna, etc. from the mission logic to keep it as clean as possible. This schema should be added for an services that control hardware with deployables. 
+
+Additional GraphQL Schema::
+
+    type Query {
+        armStatus: ArmStatusEnum
+        deploymentStatus: DeploymentStatusEnum
+    }
+    
+    enum ArmStatusEnum {
+        ARMED
+        DISARMED
+    }
+    
+    enum DeploymentStatusEnum {
+        DEPLOYED
+        STOWED
+    }
+    
+    type Mutation {
+        arm(
+            input: ArmInput!
+        ): ArmPayload
+        deploy(
+            input: DeployInput!
+        ): DeployPayload
+    }
+    
+    type ArmPayload implements MutationResult {
+        errors: [String]
+        success: Boolean
+    }
+    
+    input ArmInput {
+        arm: ArmEnum
+    }
+    
+    enum ArmEnum {
+        ARM
+        DISARM
+    }
+    
+    type DeployPayload implements MutationResult {
+        errors: [String]
+        success: Boolean
+    }
+    
+    input DeployInput {
+        burntime: Int
+    }
+        
+    
