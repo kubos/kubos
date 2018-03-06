@@ -69,7 +69,7 @@ void k_eps_terminate()
 KEPSStatus k_eps_ping()
 {
     KI2CStatus status;
-    uint8_t    cmd  = HARD_RESET;
+    uint8_t    cmd  = PING;
     uint8_t    resp = 0;
 
     status = k_i2c_write(eps_bus, eps_addr, &cmd, 1);
@@ -130,11 +130,13 @@ KEPSStatus k_eps_configure_system(const eps_system_config_t * config)
 {
     KEPSStatus status = EPS_OK;
     eps_resp_header response;
-    struct __attribute__((packed))
+    typedef struct __attribute__((packed))
     {
         uint8_t cmd;
         eps_system_config_t sys_config;
-    }  packet;
+    }  config_packet;
+
+    config_packet packet = { 0 };
 
     if (config == NULL)
     {
@@ -182,11 +184,13 @@ KEPSStatus k_eps_configure_battery(const eps_battery_config_t * config)
 {
     KEPSStatus status = EPS_OK;
     eps_resp_header response;
-    struct __attribute__((packed))
+    typedef struct __attribute__((packed))
     {
         uint8_t cmd;
         eps_battery_config_t batt_config;
-    }  packet;
+    }  config_packet;
+
+    config_packet packet = { 0 };
 
     if (config == NULL)
     {
@@ -215,8 +219,6 @@ KEPSStatus k_eps_save_battery_config()
     KEPSStatus status;
     uint8_t packet[] = { CMD_CONFIG2, 2 };
     eps_resp_header response;
-
-    printf("Save battery config\n");
 
     status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
@@ -433,6 +435,7 @@ KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
     buff->curin[0] = be16toh(body->curin[0]);
     buff->curin[1] = be16toh(body->curin[1]);
     buff->curin[2] = be16toh(body->curin[2]);
+    buff->cursun = be16toh(body->cursun);
     buff->cursys = be16toh(body->cursys);
     for (int i = 0; i < 6; i++)
     {
