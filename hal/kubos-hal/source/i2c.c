@@ -71,7 +71,7 @@ KI2CStatus k_i2c_write(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
 {
     KI2C * ki2c = kprv_i2c_get(i2c);
     KI2CStatus ret = I2C_ERROR;
-    if ((ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
+    if ((ki2c != NULL) && (ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
     {
         // Today...block indefinitely
         if (csp_mutex_lock(&(ki2c->i2c_lock), CSP_MAX_DELAY) == CSP_SEMAPHORE_OK)
@@ -102,7 +102,7 @@ KI2CStatus k_i2c_read(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
 KI2C* kprv_i2c_get(KI2CNum i2c)
 {
 	//Validate I2C number
-	if(i2c > (K_NUM_I2CS))
+	if(i2c > (K_NUM_I2CS) || i2c < 1)
 	{
 		return NULL;
 	}
