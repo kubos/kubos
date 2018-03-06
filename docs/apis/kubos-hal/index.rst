@@ -29,6 +29,7 @@ of Linux system calls.
    :name: hal-guides
 
    i2c
+   python-i2c
 
 .. toctree::
    :caption: APIs
