@@ -1,5 +1,5 @@
 /*
- * Kubos API for ISIS Antenna Systems
+ * Kubos API for GOMspace NanoPower P31u
  * Copyright (C) 2018 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,11 @@
 
 /* Test Data */
 eps_resp_header response = { 0 };
+
+eps_resp_header error_resp = {
+        .cmd = 0,
+        .status = -1
+};
 
 eps_system_config_t sys_config_le = {
         .ppt_mode = 1,
@@ -149,6 +154,25 @@ single_output_packet single_output_be = {
 };
 /* End of Test Data */
 
+static void test_init_no_bus(void ** arg)
+{
+    KEPSConf config = {
+            .addr = 0x02
+    };
+
+    assert_int_equal(k_eps_init(config), EPS_ERROR_CONFIG);
+}
+
+
+static void test_init_no_addr(void ** arg)
+{
+    KEPSConf config = {
+            .bus = K_I2C1
+    };
+
+    assert_int_equal(k_eps_init(config), EPS_ERROR_CONFIG);
+}
+
 static void test_no_init_reset(void ** arg)
 {
     assert_int_equal(k_eps_reset(), EPS_ERROR);
@@ -190,6 +214,11 @@ static void test_reboot(void ** arg)
     assert_int_equal(ret, EPS_OK);
 }
 
+static void test_configure_system_null(void ** arg)
+{
+    assert_int_equal(k_eps_configure_system(NULL), EPS_ERROR_CONFIG);
+}
+
 static void test_configure_system(void ** arg)
 {
     KEPSStatus ret;
@@ -207,6 +236,11 @@ static void test_configure_system(void ** arg)
     ret = k_eps_configure_system(&sys_config_le);
 
     assert_int_equal(ret, EPS_OK);
+}
+
+static void test_configure_battery_null(void ** arg)
+{
+    assert_int_equal(k_eps_configure_battery(NULL), EPS_ERROR_CONFIG);
 }
 
 static void test_configure_battery(void ** arg)
@@ -280,6 +314,16 @@ static void test_set_output(void ** arg)
     assert_int_equal(ret, EPS_OK);
 }
 
+static void test_set_single_output_bad_channel(void ** arg)
+{
+    assert_int_equal(k_eps_set_single_output(100, 1, 5), EPS_ERROR_CONFIG);
+}
+
+static void test_set_single_output_bad_value(void ** arg)
+{
+    assert_int_equal(k_eps_set_single_output(6, 2, 5), EPS_ERROR_CONFIG);
+}
+
 static void test_set_single_output(void ** arg)
 {
     KEPSStatus ret;
@@ -298,7 +342,7 @@ static void test_set_single_output(void ** arg)
     assert_int_equal(ret, EPS_OK);
 }
 
-static void test_input_value(void ** arg)
+static void test_set_input_value(void ** arg)
 {
     KEPSStatus ret;
 
@@ -317,7 +361,12 @@ static void test_input_value(void ** arg)
     assert_int_equal(ret, EPS_OK);
 }
 
-static void test_input_mode(void ** arg)
+static void test_set_input_mode_bad(void ** arg)
+{
+    assert_int_equal(k_eps_set_input_mode(3), EPS_ERROR_CONFIG);
+}
+
+static void test_set_input_mode(void ** arg)
 {
     KEPSStatus ret;
 
@@ -328,6 +377,21 @@ static void test_input_mode(void ** arg)
     ret = k_eps_set_input_mode(2);
 
     assert_int_equal(ret, EPS_OK);
+}
+
+static void test_set_heater_bad_cmd(void ** arg)
+{
+    assert_int_equal(k_eps_set_heater(1, 1, 1), EPS_ERROR_CONFIG);
+}
+
+static void test_set_heater_bad_heater(void ** arg)
+{
+    assert_int_equal(k_eps_set_heater(1, 2, 1), EPS_ERROR_CONFIG);
+}
+
+static void test_set_heater_bad_mode(void ** arg)
+{
+    assert_int_equal(k_eps_set_heater(1, 1, 2), EPS_ERROR_CONFIG);
 }
 
 static void test_set_heater(void ** arg)
@@ -356,6 +420,11 @@ static void test_reset_counters(void ** arg)
     assert_int_equal(ret, EPS_OK);
 }
 
+static void test_get_housekeeping_null(void ** arg)
+{
+    assert_int_equal(k_eps_get_housekeeping(NULL), EPS_ERROR_CONFIG);
+}
+
 static void test_get_housekeeping(void ** arg)
 {
     KEPSStatus ret;
@@ -373,6 +442,11 @@ static void test_get_housekeeping(void ** arg)
 
     assert_int_equal(ret, EPS_OK);
     assert_memory_equal(&hk, &hk_le, sizeof(eps_hk_t));
+}
+
+static void test_get_system_config_null(void ** arg)
+{
+    assert_int_equal(k_eps_get_system_config(NULL), EPS_ERROR_CONFIG);
 }
 
 static void test_get_system_config(void ** arg)
@@ -394,6 +468,11 @@ static void test_get_system_config(void ** arg)
     assert_memory_equal(&config, &sys_config_le, sizeof(eps_system_config_t));
 }
 
+static void test_get_battery_config_null(void ** arg)
+{
+    assert_int_equal(k_eps_get_battery_config(NULL), EPS_ERROR_CONFIG);
+}
+
 static void test_get_battery_config(void ** arg)
 {
     KEPSStatus ret;
@@ -413,6 +492,43 @@ static void test_get_battery_config(void ** arg)
     assert_memory_equal(&config, &batt_config_le, sizeof(eps_battery_config_t));
 }
 
+static void test_get_heater_null_null(void ** arg)
+{
+    assert_int_equal(k_eps_get_heater(NULL, NULL), EPS_ERROR_CONFIG);
+}
+
+static void test_get_heater_null_bp4_good_onboard(void ** arg)
+{
+    KEPSStatus ret;
+
+    uint8_t onboard = 0;
+
+    expect_value(__wrap_write, cmd, SET_HEATER);
+    expect_value(__wrap_read, len, sizeof(heater_data));
+    will_return(__wrap_read, &heater_data);
+
+    ret = k_eps_get_heater(NULL, &onboard);
+
+    assert_int_equal(ret, EPS_OK);
+    assert_int_not_equal(onboard, 0);
+}
+
+static void test_get_heater_good_bp4_null_onboard(void ** arg)
+{
+    KEPSStatus ret;
+
+    uint8_t bp4 = 0;
+
+    expect_value(__wrap_write, cmd, SET_HEATER);
+    expect_value(__wrap_read, len, sizeof(heater_data));
+    will_return(__wrap_read, &heater_data);
+
+    ret = k_eps_get_heater(&bp4, NULL);
+
+    assert_int_equal(ret, EPS_OK);
+    assert_int_not_equal(bp4, 0);
+}
+
 static void test_get_heater(void ** arg)
 {
     KEPSStatus ret;
@@ -430,14 +546,14 @@ static void test_get_heater(void ** arg)
     assert_int_not_equal(bp4, 0);
     assert_int_not_equal(onboard, 0);
 }
-//TODO: Get heater NULL cases
-
 
 static void test_watchdog_kick(void ** arg)
 {
     KEPSStatus ret;
 
     expect_value(__wrap_write, cmd, RESET_WDT);
+    expect_value(__wrap_read, len, sizeof(eps_resp_header));
+    will_return(__wrap_read, &response);
     ret = k_eps_watchdog_kick();
 
     assert_int_equal(ret, EPS_OK);
@@ -449,6 +565,8 @@ static void test_watchdog_thread(void ** arg)
     KEPSStatus stop_ret;
 
     expect_value(__wrap_write, cmd, RESET_WDT);
+    expect_value(__wrap_read, len, sizeof(eps_resp_header));
+    will_return(__wrap_read, &response);
 
     start_ret = k_eps_watchdog_start(1);
 
@@ -468,6 +586,8 @@ static void test_watchdog_thread_twice(void ** arg)
     KEPSStatus stop_ret;
 
     expect_value(__wrap_write, cmd, RESET_WDT);
+    expect_value(__wrap_read, len, sizeof(eps_resp_header));
+    will_return(__wrap_read, &response);
 
     start_ret = k_eps_watchdog_start(1);
 
@@ -481,6 +601,8 @@ static void test_watchdog_thread_twice(void ** arg)
     assert_int_equal(stop_ret, EPS_OK);
 
     expect_value(__wrap_write, cmd, RESET_WDT);
+    expect_value(__wrap_read, len, sizeof(eps_resp_header));
+    will_return(__wrap_read, &response);
 
     start_ret = k_eps_watchdog_start(1);
 
@@ -501,6 +623,61 @@ static void test_watchdog_stop_no_start(void ** arg)
     assert_int_equal(ret, EPS_ERROR);
 }
 
+static void test_passthrough_null_tx(void ** arg)
+{
+    KEPSStatus ret;
+    uint8_t     tx[1] = { 0 };
+    uint8_t     rx[1] = { 0 };
+
+    ret = k_eps_passthrough(NULL, sizeof(tx), rx, sizeof(rx));
+    assert_int_equal(ret, EPS_ERROR_CONFIG);
+}
+
+static void test_passthrough_zero_tx_len(void ** arg)
+{
+    KEPSStatus ret;
+    uint8_t     tx[1] = { 0 };
+    uint8_t     rx[1] = { 0 };
+
+    ret = k_eps_passthrough(tx, 0, rx, sizeof(rx));
+    assert_int_equal(ret, EPS_ERROR_CONFIG);
+}
+
+static void test_passthrough_null_rx_nonzero_rx_len(void ** arg)
+{
+    KEPSStatus ret;
+    uint8_t     tx[1] = { 0 };
+    uint8_t     rx[1] = { 0 };
+
+    ret = k_eps_passthrough(tx, sizeof(tx), NULL, sizeof(rx));
+    assert_int_equal(ret, EPS_ERROR_CONFIG);
+}
+
+static void test_passthrough_nonnull_rx_zero_rx_len(void ** arg)
+{
+    KEPSStatus ret;
+    uint8_t     tx[1] = { 0 };
+    uint8_t     rx[1] = { 0 };
+
+    ret = k_eps_passthrough(tx, sizeof(tx), rx, 0);
+    assert_int_equal(ret, EPS_ERROR_CONFIG);
+}
+
+static void test_passthrough_null_rx_zero_rx_len(void ** arg)
+{
+    KEPSStatus ret;
+    uint8_t     tx[1] = { 0x77 };
+    uint8_t     rx[1] = { 0 };
+
+    /*
+     * Valid test case. If rx==null and rx_len==0,
+     * we're only writing to the I2C device
+     */
+    expect_value(__wrap_write, cmd, tx[0]);
+
+    ret = k_eps_passthrough(tx, sizeof(tx), NULL, 0);
+    assert_int_equal(ret, EPS_OK);
+}
 
 static void test_passthrough(void ** arg)
 {
@@ -517,7 +694,84 @@ static void test_passthrough(void ** arg)
 
     assert_int_equal(ret, EPS_OK);
 }
-//passthrough NULL cases
+
+
+static void test_transfer_null_tx(void ** arg)
+{
+    KEPSStatus           ret;
+    uint8_t               tx[1] = { 0 };
+    uint8_t               rx[1] = { 0 };
+
+    ret = kprv_eps_transfer(NULL, sizeof(tx), rx, sizeof(rx));
+
+    assert_int_equal(ret, EPS_ERROR_CONFIG);
+}
+
+static void test_transfer_zero_tx_len(void ** arg)
+{
+    KEPSStatus           ret;
+    uint8_t               tx[1] = { 0 };
+    uint8_t               rx[1] = { 0 };
+
+    ret = kprv_eps_transfer(tx, 0, rx, sizeof(rx));
+
+    assert_int_equal(ret, EPS_ERROR_CONFIG);
+}
+
+static void test_transfer_null_rx(void ** arg)
+{
+    KEPSStatus           ret;
+    uint8_t               tx[1] = { 0 };
+    uint8_t               rx[1] = { 0 };
+
+    ret = kprv_eps_transfer(tx, sizeof(tx), NULL, sizeof(rx));
+
+    assert_int_equal(ret, EPS_ERROR_CONFIG);
+}
+
+static void test_transfer_zero_rx_len(void ** arg)
+{
+    KEPSStatus           ret;
+    uint8_t               tx[1] = { 0 };
+    uint8_t               rx[1] = { 0 };
+
+    ret = kprv_eps_transfer(tx, sizeof(tx), rx, 0);
+
+    assert_int_equal(ret, EPS_ERROR_CONFIG);
+}
+
+static void test_transfer_cmd_mismatch(void ** arg)
+{
+    KEPSStatus ret;
+    /* Dummy command value */
+    uint8_t          packet[] = { 0x55 };
+    eps_resp_header resp     = { 0 };
+
+    expect_value(__wrap_write, cmd, packet[0]);
+    expect_value(__wrap_read, len, sizeof(response));
+    will_return(__wrap_read, &response);
+
+    ret = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &resp,
+                             sizeof(resp));
+
+    assert_int_equal(ret, EPS_ERROR);
+}
+
+static void test_transfer_error(void ** arg)
+{
+    KEPSStatus      ret;
+    uint8_t          packet[] = { 0x11, 0x22, 0x33, 0x44 };
+    eps_resp_header resp     = { 0 };
+
+    expect_value(__wrap_write, cmd, packet[0]);
+    expect_value(__wrap_read, len, sizeof(error_resp));
+    will_return(__wrap_read, &error_resp);
+
+    ret = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &resp,
+                             sizeof(resp));
+
+    assert_int_equal(ret, EPS_ERROR_INTERNAL);
+}
 
 static int init(void ** state)
 {
@@ -543,24 +797,58 @@ static int term(void ** state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_init_no_bus),
+        cmocka_unit_test(test_init_no_addr),
         cmocka_unit_test(test_no_init_reset),
         cmocka_unit_test_setup_teardown(test_ping, init, term),
         cmocka_unit_test_setup_teardown(test_reset, init, term),
         cmocka_unit_test_setup_teardown(test_reboot, init, term),
+        cmocka_unit_test_setup_teardown(test_configure_system_null, init, term),
         cmocka_unit_test_setup_teardown(test_configure_system, init, term),
+        cmocka_unit_test_setup_teardown(test_configure_battery_null, init, term),
         cmocka_unit_test_setup_teardown(test_configure_battery, init, term),
         cmocka_unit_test_setup_teardown(test_save_battery_config, init, term),
         cmocka_unit_test_setup_teardown(test_reset_system_config, init, term),
         cmocka_unit_test_setup_teardown(test_reset_battery_config, init, term),
         cmocka_unit_test_setup_teardown(test_set_output, init, term),
+        cmocka_unit_test_setup_teardown(test_set_single_output_bad_channel, init, term),
+        cmocka_unit_test_setup_teardown(test_set_single_output_bad_value, init, term),
         cmocka_unit_test_setup_teardown(test_set_single_output, init, term),
-        cmocka_unit_test_setup_teardown(test_input_value, init, term),
-        cmocka_unit_test_setup_teardown(test_input_mode, init, term),
+        cmocka_unit_test_setup_teardown(test_set_single_output, init, term),
+        cmocka_unit_test_setup_teardown(test_set_input_value, init, term),
+        cmocka_unit_test_setup_teardown(test_set_input_mode, init, term),
+        cmocka_unit_test_setup_teardown(test_set_input_mode_bad, init, term),
+        cmocka_unit_test_setup_teardown(test_set_heater_bad_cmd, init, term),
+        cmocka_unit_test_setup_teardown(test_set_heater_bad_heater, init, term),
+        cmocka_unit_test_setup_teardown(test_set_heater_bad_mode, init, term),
         cmocka_unit_test_setup_teardown(test_set_heater, init, term),
         cmocka_unit_test_setup_teardown(test_reset_counters, init, term),
+        cmocka_unit_test_setup_teardown(test_get_housekeeping_null, init, term),
         cmocka_unit_test_setup_teardown(test_get_housekeeping, init, term),
+        cmocka_unit_test_setup_teardown(test_get_system_config_null, init, term),
         cmocka_unit_test_setup_teardown(test_get_system_config, init, term),
+        cmocka_unit_test_setup_teardown(test_get_battery_config_null, init, term),
         cmocka_unit_test_setup_teardown(test_get_battery_config, init, term),
+        cmocka_unit_test_setup_teardown(test_get_heater_null_null, init, term),
+        cmocka_unit_test_setup_teardown(test_get_heater_null_bp4_good_onboard, init, term),
+        cmocka_unit_test_setup_teardown(test_get_heater_good_bp4_null_onboard, init, term),
+        cmocka_unit_test_setup_teardown(test_get_heater, init, term),
+        cmocka_unit_test_setup_teardown(test_watchdog_kick, init, term),
+        cmocka_unit_test_setup_teardown(test_watchdog_thread, init, term),
+        cmocka_unit_test_setup_teardown(test_watchdog_thread_twice, init, term),
+        cmocka_unit_test_setup_teardown(test_watchdog_stop_no_start, init, term),
+        cmocka_unit_test_setup_teardown(test_passthrough_null_tx, init, term),
+        cmocka_unit_test_setup_teardown(test_passthrough_zero_tx_len, init, term),
+        cmocka_unit_test_setup_teardown(test_passthrough_null_rx_nonzero_rx_len, init, term),
+        cmocka_unit_test_setup_teardown(test_passthrough_nonnull_rx_zero_rx_len, init, term),
+        cmocka_unit_test_setup_teardown(test_passthrough_null_rx_zero_rx_len, init, term),
+        cmocka_unit_test_setup_teardown(test_passthrough, init, term),
+        cmocka_unit_test_setup_teardown(test_transfer_null_tx, init, term),
+        cmocka_unit_test_setup_teardown(test_transfer_zero_tx_len, init, term),
+        cmocka_unit_test_setup_teardown(test_transfer_null_rx, init, term),
+        cmocka_unit_test_setup_teardown(test_transfer_zero_rx_len, init, term),
+        cmocka_unit_test_setup_teardown(test_transfer_cmd_mismatch, init, term),
+        cmocka_unit_test_setup_teardown(test_transfer_error, init, term),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

@@ -261,7 +261,7 @@ KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay
         int16_t delay;
     }  packet;
 
-    if (channel > 7)
+    if (channel > 7 || value > 1)
     {
         return EPS_ERROR_CONFIG;
     }
@@ -322,8 +322,16 @@ KEPSStatus k_eps_set_input_mode(uint8_t mode)
     uint8_t         packet[] = { SET_PV_AUTO, mode };
     eps_resp_header response;
 
+    /* Modes: hardware default, MPPT, software fixed */
+    if (mode > 2)
+    {
+        return EPS_ERROR_CONFIG;
+    }
+
+
     status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
+
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS input mode: %d\n", status);
@@ -343,6 +351,16 @@ KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t heater, uint8_t mode)
             mode
     };
     eps_resp_header response;
+
+    /*
+     * Currently there's only one command available (set heater on/off)
+     * Heaters: BP4, onboard
+     * Modes: off, on
+     */
+    if (cmd != 0 || heater > 1 || mode > 1)
+    {
+        return EPS_ERROR_CONFIG;
+    }
 
     status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
@@ -664,7 +682,7 @@ KEPSStatus k_eps_watchdog_stop()
 KEPSStatus k_eps_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
                              int rx_len)
 {
-    if (tx == NULL || tx_len < 1 || (rx == NULL && rx_len != 0))
+    if (tx == NULL || tx_len < 1 || (rx == NULL && rx_len != 0) || (rx != NULL && rx_len == 0))
     {
         return EPS_ERROR_CONFIG;
     }
