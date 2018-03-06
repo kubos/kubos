@@ -91,12 +91,6 @@ of a process laid out in the following steps:
 6. Assuming all went well you will now see ``kubos flash`` sending your compiled
    binary over to the target.
 
-.. note::
-
-   The current Kubos Rust SDK only supports cross-compiling and flashing to the
-   BeagleboneBlack and Pumpkin MBM2. Support for the ISIS iOBC coming soon!
-
-
 Running on Target
 -----------------
 

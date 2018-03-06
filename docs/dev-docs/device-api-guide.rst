@@ -252,7 +252,9 @@ To run the tests the same way that CircleCI does, navigate to the top level of t
 Rust
 ^^^^
 
-Rust has native support for unit tests. Use it.
+Rust has `native support for unit tests <https://doc.rust-lang.org/book/second-edition/ch11-03-test-organization.html>`__.
+
+This can be leveraged by running ``cargo test`` from within the module folder.
 
 Python
 ^^^^^^

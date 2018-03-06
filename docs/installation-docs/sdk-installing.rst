@@ -19,10 +19,9 @@ How Does The SDK Work?
 
 The Kubos SDK is distributed through a Vagrant box. A Vagrant box
 (referred to simply as a "box") is a command-line based virtual machine.
-This virtual machine contains all of the Kubos source code, compiler
-toolchains, debugging utilities, and miscellaneous tools the Kubos CLI.
+
 The box, when started, is already pre-configured with all of the
-required tools for the CLI you will need. This minimizes the set-up
+required tools for the Kubos CLI you will need. This minimizes the set-up
 process so you can work on your project rather than setting up tooling.
 
 `Vagrant <https://www.vagrantup.com/>`__ is a command-line based

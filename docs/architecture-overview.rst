@@ -61,7 +61,7 @@ In the above diagram, everything in blue is typically developed by Kubos, while 
 Gateway
 ~~~~~~~
 
-A gateway is any hardware device that provides an external communication connection for the satellite.
+A gateway is any hardware device that provides an external communication mechanism for the satellite.
 This ranges from a desktop serial connection to an in-flight radio link through a ground station.
 
 Gateway API
@@ -74,7 +74,7 @@ Communication Service
 
 The communication service processes all communication received from the gateway and prepares it for use by the rest of the satellite system.
 
-Similarly, any messages which need to be sent out of the satellite are processed by the service and then output through the gateway.
+Similarly, any messages which need to be sent out of the satellite are processed by the service and then sent through the gateway.
 
 Linux IP Stack
 ~~~~~~~~~~~~~~
