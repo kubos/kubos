@@ -69,7 +69,7 @@ void k_eps_terminate()
 KEPSStatus k_eps_ping()
 {
     KI2CStatus status;
-    uint8_t    cmd  = HARD_RESET;
+    uint8_t    cmd  = PING;
     uint8_t    resp = 0;
 
     status = k_i2c_write(eps_bus, eps_addr, &cmd, 1);
