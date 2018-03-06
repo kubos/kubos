@@ -2,6 +2,7 @@
 import argparse
 import subprocess
 import os
+import shutil
 
 GENERATE_XML = """
 (cat {0};
@@ -36,7 +37,6 @@ def main():
 
     doc_dirs = [d for d in DOCS_DIRS if os.path.isdir(d)]
 
-
     for dir in doc_dirs:
         doc_dir = os.path.join(os.getcwd(), args.output, dir)
         if not os.path.isdir(doc_dir):
@@ -44,6 +44,8 @@ def main():
         gendocs_xml(dir, "docs/Doxyfile", args.version, doc_dir)
 
     subprocess.call("sphinx-build docs/ html/", shell=True)
+
+    shutil.rmtree("./xml")
 
 
 if __name__ == '__main__':

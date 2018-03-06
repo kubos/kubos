@@ -1,10 +1,9 @@
-# kubos/kubos-dev:0.0.6
+# kubos/kubos-dev:0.1.1
 
 FROM phusion/baseimage:0.9.22
 
 MAINTAINER kyle@kubos.co
 
-RUN add-apt-repository -y ppa:team-gcc-arm-embedded/ppa
 RUN add-apt-repository -y ppa:george-edison55/cmake-3.x
 
 RUN apt-get update -y
@@ -15,9 +14,6 @@ RUN apt-get install -y python-setuptools build-essential ninja-build python-dev 
 RUN apt-get install -y git
 RUN apt-get install -y cmake
 RUN apt-get install -y unzip wget
-
-# Legacy BBB toolchain
-RUN apt-get install -y crossbuild-essential-armhf gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 
 #do the pip setup and installation things
 RUN easy_install pip
