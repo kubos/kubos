@@ -112,6 +112,7 @@ breathe_projects = {
     "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",
     "kubos-hal-linux" : "../xml/hal/kubos-hal-linux",
     "kubos-radio-api" : "../xml/radio/radio-api",
+    "nanopower-api" : "../xml/eps/nanopower-api"
 }
 
 extensions += [

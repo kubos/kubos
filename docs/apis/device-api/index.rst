@@ -12,18 +12,19 @@ Supported devices:
   - Radio
 
     - `ISIS TRXVU <https://www.isispace.nl/product/isis-uhf-downlink-vhf-uplink-full-duplex-transceiver/>`__
-    
+
+  - EPS
+
+    - `GOMspace NanoPower P31u power supply <https://gomspace.com/Shop/subsystems/power-supplies/nanopower-p31u.aspx>`__
+
+.. todo::
+
+    Readd when this exists again
+    :caption: Device Guides
+    :hidden:
 
 .. toctree::
-   :caption: Device Guides
-   :name: device-guides
+    :caption: Device APIs
+    :hidden:
 
-   adcs
-   radio
-
-.. toctree::
-   :caption: Device APIs
-   :name: device-apis
-
-   adcs_api
-   radio_api
+    nanopower-api
