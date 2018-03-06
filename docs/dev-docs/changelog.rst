@@ -1,11 +1,18 @@
 Kubos Changelog
 ===============
 
-Upcoming
---------
+v1.2.0 - Mar 5 2018
+-------------------
 
-- Added Rust crate for wrapping kubos-hal-iobc.
-- Added iOBC supervisor GraphQL service.
+- `Added Rust crate for wrapping kubos-hal-iobc <https://github.com/kubos/kubos/tree/c7bb5f1928aeb0aa3d45d649f90bd2cdccbe2bc5/hal/kubos-hal-iobc>`__
+- `Added iOBC supervisor GraphQL service <https://github.com/kubos/kubos/tree/master/services/iobc-supervisor-service>`__
+- Migrating ``cargo-kubos`` into `own repo <https://github.com/kubos/cargo-kubos>`__
+- `Added iOBC ADC support and demo <http://docs.kubos.co/1.2.0/os-docs/working-with-the-iobc.html#adc>`__
+- `Added iOBC PWM support <http://docs.kubos.co/1.2.0/os-docs/working-with-the-iobc.html#adc>`__
+- `Added API for EyeStar-D2 Duplex radio <https://github.com/kubos/kubos/tree/master/radio/nsl-duplex-d2>`__
+- `Adding telemetry database service <https://github.com/kubos/kubos/blob/master/services/telemetry-database-service>`__
+- Cleaning up doc generation warnings
+- Finalizing name changes
 
 v1.1.0 - Jan 24 2018
 --------------------
