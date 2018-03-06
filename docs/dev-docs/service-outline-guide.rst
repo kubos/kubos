@@ -316,7 +316,7 @@ Additional GraphQL Schema::
 Deployables Service
 -------------------
 
-The deployables service covers anything that needs to be deployed. It focuses on abstracting the logic for deploying panels, antenna, etc. from the mission logic to keep it as clean as possible. This schema should be added for an services that control hardware with deployables. 
+The deployables service covers anything that needs to be deployed. It focuses on abstracting the logic for deploying panels, antenna, etc. from the mission logic to keep it as clean as possible. This schema should be added for any services that control hardware with deployables. 
 
 Additional GraphQL Schema::
 
@@ -366,5 +366,10 @@ Additional GraphQL Schema::
     input DeployInput {
         burntime: Int
     }
-        
-    
+
+
+Additional Services
+-------------------
+
+If there are any major service categories that should be added, or if you feel that any sections are missing Queries or Mutations that would be essential for Mission Applications, please let us know on our `Slack <https://slack.kubos.co/>` or open a PR to add them yourself! 
+
