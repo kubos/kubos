@@ -193,3 +193,33 @@ Additional GraphQL Schema::
         gpsLock: [Float]
         # whatever else needs to be updated for the unit to function properly
     }
+
+
+GPS Service
+-----------
+
+Additional GraphQL Schema::
+
+    type Query {
+        lockStatus: LockStatus
+        lockTelemetry: LockTelemetry
+    }
+    
+    type LockStatus { 
+        time: LockStatusEnum
+        position: LockStatusEnum
+        velocity: LockStatusEnum
+    }
+    
+    enum LockStatusEnum {
+        YES
+        NO
+    }
+    
+    # Values from last lock (or current values if currently locked)
+    type LockTelemetry {
+        time: Float
+        position: [Float]
+        velocity: [Float]
+    }
+
