@@ -1,7 +1,8 @@
 [package]
-name = "cargo-kubos"
+name = "radio-api"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
-getopts = "0.2"
+nom = "4.0.0-beta1"
+failure = "0.1.1"

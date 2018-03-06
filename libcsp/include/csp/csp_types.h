@@ -105,7 +105,11 @@ typedef enum {
 /** @brief This union defines a CSP identifier and allows access to the individual fields or the entire identifier */
 typedef union {
 	uint32_t ext;
+#ifdef DOXYGEN /* For doc generation purposes only */
+	struct __fields __attribute__((__packed__)) {
+#else
 	struct __attribute__((__packed__)) {
+#endif
 #if defined(CSP_BIG_ENDIAN) && !defined(CSP_LITTLE_ENDIAN)
 		unsigned int pri : CSP_ID_PRIO_SIZE;
 		unsigned int src : CSP_ID_HOST_SIZE;
