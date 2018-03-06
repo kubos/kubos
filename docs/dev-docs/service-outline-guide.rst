@@ -57,10 +57,6 @@ GraphQL Schema::
         # results2: any type
         # ...
     }
-    
-        
-
-Mutations::
 
     type Mutation {
         noop(): NoopPayload
@@ -146,5 +142,54 @@ Mutations::
         command: String
     }
     
+
+ADCS Service
+------------
+
+The ADCS service outline and all following service outlines aim to abstract just the telemetry items and commands that are useful for mission logic. If you need a certain telemetry item for your mission application, please `let us know! <https://slack.kubos.co/>`
+
+Additional GraphQL Schema::
+
+    type Query {
+        mode(): String
+        orientation(): [Float]
+        spin(): [Float]
+    }
     
+    type Mutation {
+        setMode(
+            input: SetModeInput!
+        ): SetModePayload
+        update(
+            input: UpdateInput
+        ): UpdatePayload
+    }
     
+    type SetModePayload implements MutationResult {
+        errors: [String]
+        success: Boolean
+    }
+        
+    input SetModeInput {
+        mode: String
+        configuration: ModeConfiguration
+    }
+    
+    # Whatever is needed for the ADCS to enter a mode
+    type ModeConfiguration { 
+        parameter1: Float
+        # parameter2: any type
+        # parameter3: any type 
+        # ...
+    }
+    
+    type UpdatePayload implements MutationResult {
+        errors: [String]
+        success: Boolean
+    } 
+    
+    input UpdateInput {
+        time: Float
+        gpsLock: [Float]
+        # whatever else needs to be updated for the unit to function properly
+    }
