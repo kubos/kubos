@@ -216,8 +216,6 @@ KEPSStatus k_eps_save_battery_config()
     uint8_t packet[] = { CMD_CONFIG2, 2 };
     eps_resp_header response;
 
-    printf("Save battery config\n");
-
     status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
     if (status != EPS_OK)
@@ -433,6 +431,7 @@ KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
     buff->curin[0] = be16toh(body->curin[0]);
     buff->curin[1] = be16toh(body->curin[1]);
     buff->curin[2] = be16toh(body->curin[2]);
+    buff->cursun = be16toh(body->cursun);
     buff->cursys = be16toh(body->cursys);
     for (int i = 0; i < 6; i++)
     {
