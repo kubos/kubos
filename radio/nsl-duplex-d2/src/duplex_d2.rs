@@ -115,3 +115,36 @@ impl DuplexD2 {
         self.conn.read(parse_ack_or_nak)
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use radio_api::{Connection, RadioResult, Stream};
+    use super::*;
+
+    struct TestStream {
+        data: Vec<u8>
+    }
+
+    impl Stream for TestStream {
+        fn write(&self, _: &[u8]) -> RadioResult<()> {
+            Ok(())
+        }
+
+        fn read(&self) -> RadioResult<Vec<u8>> {
+            Ok(self.data.clone())
+        }
+    }
+
+    fn test_connection(data: Vec<u8>) -> Connection {
+        Connection::new(Box::new(TestStream {
+            data: data
+        }))
+    }
+
+    #[test]
+    fn test_get_uploaded_file_count() {
+        let radio = DuplexD2::new(test_connection(b"GU\x00\x00\x00\x37".to_vec()));
+        assert_eq!(55, radio.get_uploaded_file_count().unwrap());
+    }
+}

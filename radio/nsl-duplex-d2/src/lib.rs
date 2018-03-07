@@ -31,3 +31,4 @@ mod serial_comm;
 
 pub use duplex_d2::DuplexD2;
 pub use serial_comm::serial_connection;
+pub use messages::File;

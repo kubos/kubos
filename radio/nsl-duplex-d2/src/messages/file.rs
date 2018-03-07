@@ -19,8 +19,11 @@ use std::str::FromStr;
 use std::io::Write;
 
 #[derive(Debug, PartialEq)]
+/// Structure for files
 pub struct File {
+    /// Name of file
     pub name: String,
+    /// Contents of file
     pub body: Vec<u8>,
 }
 
