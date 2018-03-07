@@ -17,10 +17,34 @@
 //! This module contains structs and parsers for messages received on
 //! serial connection.
 
+use nom::{IResult, be_u32};
+
 mod file;
-mod file_count;
 mod state_of_health;
 
 pub use messages::file::File;
-pub use messages::file_count::FileCount;
+pub type Message = File;
 pub use messages::state_of_health::StateOfHealth;
+
+pub fn parse_u32(input: &[u8]) -> IResult<&[u8], u32> {
+    let (input, _) = tag!(input, b"GU")?;
+    let (input, file_count) = be_u32(input)?;
+    Ok((input, file_count))
+}
+
+pub fn parse_ack(input: &[u8]) -> IResult<&[u8], ()> {
+    let (input, _) = tag!(input, b"GU\x06")?;
+    Ok((input, ()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn it_parses() {
+        assert_eq!(
+            Ok((&b"extra"[..], 0x12345678)),
+            parse_u32(b"GU\x12\x34\x56\x78extra")
+        );
+    }
+}
