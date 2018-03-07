@@ -21,14 +21,16 @@ use nom::{IResult, be_u32};
 
 mod file;
 mod state_of_health;
+mod geo_record;
 
 pub use messages::file::File;
 pub type Message = File;
 pub use messages::state_of_health::StateOfHealth;
+pub use messages::geo_record::GeoRecord;
 
 /// Parse out initial sync code
 pub fn parse_sync(input: &[u8]) -> IResult<&[u8], ()> {
-    let (input, _) = take_until!(input, "GU")?;
+    let (input, _) = take_until_and_consume!(input, "GU")?;
     Ok((input, ()))
 }
 
