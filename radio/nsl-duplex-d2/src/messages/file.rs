@@ -25,8 +25,16 @@ pub struct File {
 }
 
 impl File {
+    /// Create a new file object by copying name and body.
+    pub fn new(name: &str, body: &[u8]) -> Self {
+        File {
+            name: name.to_string(),
+            body: body.to_vec(),
+        }
+    }
+
+    /// Create a new file object by parsing raw serial data.
     pub fn parse(input: &[u8]) -> IResult<&[u8], File> {
-        let (input, _) = tag!(input, b"GU")?;
         let (input, name_length) = map_res!(input, take_str!(3), usize::from_str)?;
         let (input, body_length) = map_res!(input, take_str!(6), usize::from_str)?;
         let (input, name) = take_str!(input, name_length)?;
@@ -36,10 +44,11 @@ impl File {
         Ok((input, File { name, body }))
     }
 
+    /// Encode a file object to raw serial data.
     pub fn encode(&self) -> Vec<u8> {
         let mut output: Vec<u8> = Vec::new();
         let name = self.name.as_bytes();
-        write!(&mut output, "GU{:03}{:06}", name.len(), self.body.len(),)
+        write!(&mut output, "{:03}{:06}", name.len(), self.body.len(),)
             .expect("Problem encoding lengths");
         output.extend_from_slice(&name);
         output.extend_from_slice(&self.body);
@@ -60,7 +69,7 @@ mod tests {
                     body: b"Hello World\n".to_vec(),
                 }
             )),
-            File::parse(b"GU008000012test.txtHello World\nextra")
+            File::parse(b"008000012test.txtHello World\nextra")
         );
     }
 
@@ -70,17 +79,14 @@ mod tests {
             name: String::from("test.txt"),
             body: b"Hello World\n".to_vec(),
         };
-        let expected: &[u8] = b"GU008000012test.txtHello World\n";
+        let expected: &[u8] = b"008000012test.txtHello World\n";
         let actual: &[u8] = &file.encode();
         assert_eq!(expected, actual);
     }
 
     #[test]
     fn it_roundtrips() {
-        let file = File {
-            name: String::from("test.txt"),
-            body: b"Hello World\n".to_vec(),
-        };
+        let file = File::new("test.txt", b"Hello World\n");
         let encoded = file.encode();
         let expected = Ok((&b""[..], file));
         let actual = File::parse(&encoded);
