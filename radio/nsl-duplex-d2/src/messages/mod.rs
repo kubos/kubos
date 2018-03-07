@@ -28,7 +28,7 @@ pub use messages::state_of_health::StateOfHealth;
 
 /// Parse out initial sync code
 pub fn parse_sync(input: &[u8]) -> IResult<&[u8], ()> {
-    let (input, _) = tag!(input, b"GU")?;
+    let (input, _) = take_until!(input, "GU")?;
     Ok((input, ()))
 }
 
@@ -49,6 +49,11 @@ mod tests {
     #[test]
     fn it_parses_sync() {
         assert_eq!(Ok((&b"extra"[..], ())), parse_sync(b"GUextra"));
+    }
+
+    #[test]
+    fn it_parses_sync_and_skips_garbage() {
+        assert_eq!(Ok((&b"extraGU"[..], ())), parse_sync(b"garbageGUextraGU"));
     }
 
     #[test]
