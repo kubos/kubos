@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-use nom::IResult;
+use nom::{IResult, be_u16};
 use std::str::FromStr;
 use std::io::Write;
+use crc16;
 
 #[derive(Debug, PartialEq)]
 /// Structure for files
@@ -38,12 +39,15 @@ impl File {
 
     /// Create a new file object by parsing raw serial data.
     pub fn parse(input: &[u8]) -> IResult<&[u8], File> {
+        let (input, _) = take_until_and_consume!(input, "GU")?;
         let (input, name_length) = map_res!(input, take_str!(3), usize::from_str)?;
         let (input, body_length) = map_res!(input, take_str!(6), usize::from_str)?;
         let (input, name) = take_str!(input, name_length)?;
         let name = String::from(name);
         let (input, body) = take!(input, body_length)?;
         let body = Vec::from(body);
+        let (input, crc) = be_u16(input)?;
+        println!("TODO: check crc: {}", crc);
         Ok((input, File { name, body }))
     }
 
@@ -51,10 +55,13 @@ impl File {
     pub fn encode(&self) -> Vec<u8> {
         let mut output: Vec<u8> = Vec::new();
         let name = self.name.as_bytes();
-        write!(&mut output, "{:03}{:06}", name.len(), self.body.len(),)
+        write!(&mut output, "GU{:03}{:06}", name.len(), self.body.len(),)
             .expect("Problem encoding lengths");
         output.extend_from_slice(&name);
         output.extend_from_slice(&self.body);
+        let crc = crc16::State::<crc16::XMODEM>::calculate(&output);
+        output.push((crc >> 8) as u8);
+        output.push(crc as u8);
         output
     }
 }
@@ -72,7 +79,7 @@ mod tests {
                     body: b"Hello World\n".to_vec(),
                 }
             )),
-            File::parse(b"008000012test.txtHello World\nextra")
+            File::parse(b"GU008000012test.txtHello World\n\x42\x24extra")
         );
     }
 
@@ -82,7 +89,7 @@ mod tests {
             name: String::from("test.txt"),
             body: b"Hello World\n".to_vec(),
         };
-        let expected: &[u8] = b"008000012test.txtHello World\n";
+        let expected: &[u8] = b"GU008000012test.txtHello World\n\x15\xac";
         let actual: &[u8] = &file.encode();
         assert_eq!(expected, actual);
     }

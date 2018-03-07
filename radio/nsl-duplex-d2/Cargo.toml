@@ -7,3 +7,4 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 radio-api = { path = "../rust-radio-api" }
 nom = "4.0.0-beta1"
 serial = "0.4"
+crc16 = "0.3.4"

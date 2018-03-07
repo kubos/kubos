@@ -19,6 +19,7 @@
 
 #![deny(missing_docs)]
 
+extern crate crc16;
 extern crate radio_api;
 extern crate serial;
 

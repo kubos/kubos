@@ -61,6 +61,7 @@ impl<'a> LowerHex for Hex<'a> {
 impl GeoRecord {
     pub fn parse(input: &[u8]) -> IResult<&[u8], GeoRecord> {
         println!("TODO: parse geo record {:x}", Hex(input));
+        let (input, _) = take_until_and_consume!(input, "GU")?;
         // Fields are left justified and the entire record is end padded with spaces to a fixed 90 byte length.
         // N:DDD MM SS
         // W:DDD MM SS

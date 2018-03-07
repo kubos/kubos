@@ -33,6 +33,7 @@ pub struct StateOfHealth {
 
 impl StateOfHealth {
     pub fn parse(input: &[u8]) -> IResult<&[u8], StateOfHealth> {
+        let (input, _) = take_until_and_consume!(input, "GU")?;
         let (input, reset_count) = be_u32(input)?;
         let (input, current_time) = be_u32(input)?;
         let (input, current_rssi) = be_u8(input)?;
@@ -85,7 +86,7 @@ mod tests {
                     connection_duration_std_dev: 11,
                 }
             )),
-            StateOfHealth::parse(b"\x00\x00\x00\x01\x00\x00\x00\x02\x03\x04\x05\x00\x00\x00\x06\x00\x00\x00\x07\x00\x00\x00\x08\x00\x00\x00\x09\x00\x00\x00\x0a\x00\x00\x00\x0bextra")
+            StateOfHealth::parse(b"GU\x00\x00\x00\x01\x00\x00\x00\x02\x03\x04\x05\x00\x00\x00\x06\x00\x00\x00\x07\x00\x00\x00\x08\x00\x00\x00\x09\x00\x00\x00\x0a\x00\x00\x00\x0bextra")
         )
     }
 }
