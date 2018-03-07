@@ -1,6 +1,15 @@
-# KubOS Linux Example App
+# Kubos Linux  - NanoPower P31u Test
 
-This is a simple application built on top of the [KubOS Linux Platform](https://github.com/kubostech/kubos-linux-build) 
-demonstrating some basic functionality from KubOS Linux (CSP). 
+This project tests the usage of the Kubos API for the GOMspace NanoPower P31u.
 
-The easiest way to get started building this is with the [KubOS SDK](http://docs.kubos.co/latest/md_docs_kubos-sdk.html).
+After this test has completed, there will be a file located in the calling user's home directory, `nanopower-results.txt`,
+which contains the output from the self-test and telemetry calls. These results may be examined to further
+confirm that the test has completed successfully.
+
+Test Shell Command:
+
+    $ nanopower-p31u
+
+Expected Output:
+
+    NanoPower tests completed successfully

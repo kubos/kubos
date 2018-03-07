@@ -11,5 +11,5 @@
         "nanopower-api":"kubos/nanopower-api"
     },
     "homepage":"https://<homepage>",
-    "description":"Example app running on Kubos Linux."
+    "description":"Integration test for the NanoPower P31u API."
 }
