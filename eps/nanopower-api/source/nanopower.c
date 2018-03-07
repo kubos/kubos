@@ -618,17 +618,17 @@ KEPSStatus k_eps_watchdog_kick()
 }
 
 pthread_t handle_watchdog = { 0 };
+uint32_t watchdog_interval = 0;
 
 void * kprv_eps_watchdog_thread(void * args)
 {
     KEPSStatus status;
-    uint32_t interval = *((uint32_t *) args);
 
     while (1)
     {
         k_eps_watchdog_kick();
 
-        sleep(interval);
+        sleep(watchdog_interval);
     }
 
     return NULL;
@@ -647,7 +647,9 @@ KEPSStatus k_eps_watchdog_start(uint32_t interval)
         return EPS_OK;
     }
 
-    if (pthread_create(&handle_watchdog, NULL, kprv_eps_watchdog_thread, (void *) &interval)
+    watchdog_interval = interval;
+
+    if (pthread_create(&handle_watchdog, NULL, kprv_eps_watchdog_thread, NULL)
         != 0)
     {
         perror("Failed to create EPS watchdog thread");
@@ -675,6 +677,7 @@ KEPSStatus k_eps_watchdog_stop()
     }
 
     handle_watchdog = 0;
+    watchdog_interval = 0;
 
     return EPS_OK;
 }
