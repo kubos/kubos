@@ -1,55 +1,42 @@
-****************
 Payload Services
-****************
+================
 
-Payload services are essentially hardware services but custom designed
+Payload services are essentially hardware services which have been custom designed
 for mission payload hardware. They share the same architecture as the hardware
 services, exposing low-level device APIs through a GraphQL interface.
 
-The Kubos SDK includes an example payload service written in both Python
-and Rust. Here we will discuss the example Python-based payload service, its
-different pieces and how to construct a custom payload service.
+The `examples folder of the Kubos repo <https://github.com/kubos/kubos>`__ includes
+two example payload services: one written in `Python <https://github.com/kubos/kubos/tree/master/examples/python-service>`_,
+and one written in `Rust <https://github.com/kubos/kubos/tree/master/examples/rust-service>`__.
 
-The current guide for working with Python within the Kubos SDK can be
-found :doc:`here <../sdk-docs/sdk-python>`.
+.. _python-service-ref:
 
 Python Service
-==============
+--------------
 
-The two example payload services can be found in the
-`examples <https://github.com/kubos/kubos/tree/master/examples>`_ folder in the
-`kubos/kubos <https://github.com/kubos/kubos>`_ repo. The python service is found
-in the `python-service <https://github.com/kubos/kubos/tree/master/examples/python-handler>`_
-folder. Inside of the `python-service` folder you will find several files and a folder:
+Inside of the `Python service example <https://github.com/kubos/kubos/tree/master/examples/python-service>`_
+you will find several files and a folder:
 
-``config.yml`` - This YAML file holds configuration options for the GraphQL/HTTP endpoint.
+- ``config.yml`` - This YAML file holds configuration options for the GraphQL/HTTP endpoint.
+- ``README.rst`` - Overview of the service project.
+- ``requirements.txt`` - Python module requirements file with list of module/version dependencies.
+- ``service.py`` - Boilerplate service code which reads the config file and starts up the GraphQL/HTTP endpoint.
+- ``service/`` - This folder holds the guts of the service's source. The service folder contains the main files which will need modifying when building a custom payload service:
 
-``README.rst`` - Description file for service.
-
-``requirements.txt`` - Python module requirements file with list of module/version dependencies.
-
-``service.py`` - Boilerplate service code which reads the config file and starts up the GraphQL/HTTP endpoint.
-
-``service/`` - This folder holds the guts of the service's source.
-
-The service folder contains the main files which will need modifying when building a custom payload service:
-
-``__init__.py`` - This empty file belongs in the `service/` folder to give `service.py` access to the modules within.
-
-``app.py`` - Another boilerplate service file. This one should not require any customization.
-
-``models.py`` - Describes the hardware model exposed to GraphQL and contains calls down into lower level APIs.
-
-``schema.py`` - Contains the actual GraphQL models which are used to generate the GraphQL endpoint.
-
+    - ``__init__.py`` - This empty file belongs in the `service/` folder to give `service.py` access to the modules within.
+    - ``app.py`` - Another boilerplate service file. This one should not require any customization.
+    - ``models.py`` - Describes the hardware model exposed to GraphQL and contains calls down into lower level APIs.
+    - ``schema.py`` - Contains the actual GraphQL models which are used to generate the GraphQL endpoint.
 
 We will now take a closer look at `models.py` and `schema.py` to see what exactly it takes to expose a hardware
 API through the service.
 
 models.py
----------
+~~~~~~~~~
 
-Inside of the example `models.py` file there are `Subsystem` and `Status` classes. Both of these classes must be subclasses of `graphql.ObjectType <http://docs.graphene-python.org/en/latest/types/objecttypes/>`_ from the `graphene <http://docs.graphene-python.org/en/latest/>`_ module.
+Inside of the example `models.py` file there are `Subsystem` and `Status` classes.
+Both of these classes must be subclasses of `graphql.ObjectType <http://docs.graphene-python.org/en/latest/types/objecttypes/>`_
+from the `Graphene <http://docs.graphene-python.org/en/latest/>`_ module.
 
 The `Subsystem` class models the hardware that this service will be interacting with.
 
@@ -82,7 +69,8 @@ The `Subsystem` class models the hardware that this service will be interacting 
 		self.power_on = power_on
 		return Status(status=True, subsystem=self)
 
-Member variables can be added if any persistent data needs to be stored. Member functions are called by the GraphQL schema and are used to call into low level device API functions.
+Member variables can be added if any persistent data needs to be stored.
+Member functions are called by the GraphQL schema and are used to call into low-level device API functions.
 
 The `Status` class is used to model any important information gathered from calling device API functions.
 
@@ -101,12 +89,12 @@ The `Status` class is used to model any important information gathered from call
 Right now it just contains a `status` member which represents the status of the function call and a `subsystem` member which represents the current state of the `Subsystem`.
 
 schema.py
----------
+~~~~~~~~~
 
-Now lets look inside of `schema.py`. This file contains the models used by `graphene` to create our GraphQL endpoint.
+Now lets look inside of `schema.py`. This file contains the models used by `Graphene` to create our GraphQL endpoint.
 
 Queries
-~~~~~~~
+^^^^^^^
 
 Queries allow us to fetch data from the subsystem. There is only one `Query` class needed in the `schema.py` file.
 
@@ -127,9 +115,12 @@ Queries allow us to fetch data from the subsystem. There is only one `Query` cla
 		_subsystem.refresh()
 		return _subsystem
 
-Any member variables of the type `graphene.Field` become top-level fields accessible by queries. Because we are using the `Subsystem` class, which is also a `graphene.ObjectType`, members of that class become accessible by queries. Each graphene field requires a resolver function named `resolve_fieldname` which returns back an object of the field's class type.  In this case we call `_subsystem.refresh()` to load the latest data into the global `_subsystem` object and return it.
+Any member variables of the type `graphene.Field` become top-level fields accessible by queries.
+Because we are using the `Subsystem` class, which is also a `graphene.ObjectType`, members of that class become accessible by queries.
+Each Graphene field requires a resolver function named `resolve_fieldname` which returns back an object of the field's class type.
+In this case, we call `_subsystem.refresh()` to load the latest data into the global `_subsystem` object and return it.
 
-The above class would enable the following query for subsystem power status:::
+The above class would enable the following query for subsystem power status::
 
     {
         subsystem {
@@ -138,20 +129,22 @@ The above class would enable the following query for subsystem power status:::
     }
 
 Mutations
-~~~~~~~~~
+^^^^^^^^^
 
-Mutations allow us to call functions on the subsystem which cause change or perform some action. Like the `Query` class we will only need one top level `Mutation` class.
+Mutations allow us to call functions on the subsystem which cause change or perform some action.
+Like the `Query` class we will only need one top level `Mutation` class.
 
 .. code-block:: python
 
 	class Mutation(graphene.ObjectType):
 	    """
-	    Creates mutation endpoints exposed by graphene.
+	    Creates mutation endpoints exposed by Graphene.
 	    """
 
 	    power_on = PowerOn.Field()
 
-Like with the `Query`, each `Field` member becomes a top-level mutation. However for mutations we will create a new class for each mutation field.
+Like with the `Query`, each `Field` member becomes a top-level mutation.
+However for mutations we will create a new class for each mutation field.
 
 .. code-block:: python
 
@@ -176,7 +169,10 @@ Like with the `Query`, each `Field` member becomes a top-level mutation. However
 
 		return status
 
-The `Arguments` class describe any argument fields needed for this mutation. The line ``Output = Status`` describes the class type this mutation should return. The ``mutate`` function performs the actual work of the mutation and must return back an object of the type specified in the ``Output`` line. The above classes enable the following mutation:::
+The `Arguments` class describe any argument fields needed for this mutation.
+The line ``Output = Status`` describes the class type this mutation should return.
+The ``mutate`` function performs the actual work of the mutation and must return back an object of the type specified in the ``Output`` line.
+The above classes enable the following mutation::
 
     mutation {
         powerOn(power:false) {
@@ -185,11 +181,17 @@ The `Arguments` class describe any argument fields needed for this mutation. The
     }
 
 Running the example
--------------------
+~~~~~~~~~~~~~~~~~~~
 
-Getting the example service up and running is fairly simple. First you must make sure you have the necessary python dependencies installed. If you are using the Kubos SDK vagrant box then these will already be installed. Otherwise you will need to run ``pip install -r requirements.txt``.
+Getting the example service up and running is fairly simple.
+First, you must make sure you have the necessary Python dependencies installed.
+If you are using the Kubos SDK Vagrant box then these will already be installed.
+Otherwise, you will need to run ``pip install -r requirements.txt``.
 
-Once the dependencies are in place you can run ``python service.py config.yml`` and the example service should begin. You will know that it is running if the command line output says ``* Running on http://0.0.0.1:5000/ (Press CTRL+C to quit)``. You can now point a web browser to http://127.0.0.1:5000/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_. Here you can run quries and mutations against the GraphQL endpoints and see the results.
+Once the dependencies are in place, you can run ``python service.py config.yml`` and the example service should begin.
+You will know that it is running if the command line output says ``* Running on http://0.0.0.1:5000/ (Press CTRL+C to quit)``.
+You can now point a web browser to http://127.0.0.1:5000/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_.
+Here you can run quries and mutations against the GraphQL endpoints and see the results.
 
 .. note::
 
@@ -203,12 +205,14 @@ your ```Vagrantfile``` (after ``Vagrant.configure("2") do |config|``)::
 
   config.vm.network "forwarded_port", guest: 5000, host: 5000
 
-Now restart the vagrant box with ``vagrant reload``. You should now have the ability
+Now restart the Vagrant box with ``vagrant reload``. You should now have the ability
 to run the python service inside the Vagrant box and access it from the outside
 at http://127.0.0.1:5000.
 
+.. _rust-service-ref:
+
 Rust Service
-============
+------------
 
 This is a quick overview of the payload service written in Rust.
 
@@ -216,7 +220,7 @@ The current guide for working with Rust within the Kubos SDK can be
 found :doc:`here <../sdk-docs/sdk-rust>`.
 
 Libraries
----------
+~~~~~~~~~
 
 This payload service and future rust-based services will be written using
 the following external crates:
@@ -229,38 +233,26 @@ The ``Cargo.toml`` in the example payload service gives a good list of crate
 dependencies to start with.
 
 Example Source
---------------
+~~~~~~~~~~~~~~
 
-The example Rust service is found in the
-`examples <https://github.com/kubos/kubos/tree/master/examples>`__ folder in the
-`kubos/kubos <https://github.com/kubos/kubos>`__ repo. There is a `rust-service <https://github.com/kubos/kubos/tree/master/examples/rust-service>`__
-folder which contains two folders:
+`Example Source - GitHub <https://github.com/kubos/kubos/tree/master/examples/rust-service>`__
 
  - ``extern-lib`` - This is an example Rust crate showing how to link in external C source.
-
  - ``service`` - This crate contains the actual Rust service.
 
-The contents of the ``service`` folder:
+     - ``Cargo.lock`` - Cargo `lock <https://doc.Rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html>`__ file
+     - ``Cargo.toml`` - Cargo `manifest <https://doc.Rust-lang.org/cargo/reference/manifest.html>`__ file
+     - ``src`` - Contains the actual Rust source.
 
- - ``Cargo.lock`` - Cargo `lock <https://doc.Rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html>`__ file
-
- - ``Cargo.toml`` - Cargo `manifest <https://doc.Rust-lang.org/cargo/reference/manifest.html>`__ file
-
- - ``src`` - Contains the actual Rust source.
-
-The contents of the ``service/src`` folder:
-
- - ``main.rs`` - Contains the main/setup function of the service. May need minor customization but not much.
-
- - ``model.rs`` - Describes the hardware model exposed to GraphQL and contains calls down to lowel-level APIs.
-
- - ``schema.rs`` - Contains the actual GraphQL schema models used to generate the GraphQL endpoint.
+         - ``main.rs`` - Contains the main/setup function of the service. May need minor customization but not much.
+         - ``model.rs`` - Describes the hardware model exposed to GraphQL and contains calls down to lowel-level APIs.
+         - ``schema.rs`` - Contains the actual GraphQL schema models used to generate the GraphQL endpoint.
 
 We will now take a closer look at ``model.rs`` and ``schema.rs`` and break down
 the pieces required to expose hardware APIs through the service.
 
 model.rs
---------
+~~~~~~~~
 
 The ``model.rs`` file contains structures and functions used to wrap low-level device APIs
 and provide abstractions for the GraphQL schema to call into. Looking inside of the ``model.rs``
@@ -346,14 +338,14 @@ and ``CalibrateThermometer``. These are used as wrappers around scalar values
 returned by various mutations in ``schema.rs``.
 
 schema.rs
----------
+~~~~~~~~~
 
 Now we will take a look inside of ``schema.rs``.  This file contains the query
 and mutation models used by `Juniper <http://juniper.graphql.rs/>`__ to create
 our GraphQL endpoints.
 
 Queries
-~~~~~~~
+^^^^^^^
 
 Queries allow us to fetch data from the subsystem. There is only one base ``Query``
 struct needed in the ``schema.rs`` file.
@@ -401,7 +393,7 @@ struct that we want exposed. The syntax ``Ok(self.func()?)`` allows the
 translation of return type ``Result<T, Error>`` into ``FieldResult<T>``.
 
 Mutations
-~~~~~~~~~
+^^^^^^^^^
 
 Mutations allow us to call functions on the subsystem which cause change or
 perform some action. Like the ``QueryRoot`` struct, we will only need one
@@ -444,17 +436,22 @@ These structs define fields which can then be used in the mutation to specify
 which return data is desired.
 
 Building and Running
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
-The payload service provided in the ``examples`` folder can be compiled by running
-this command ``cargo kubos -c build``. This command must be run from
-within the folder ``examples/Rust-service/service``. It is also suggested that
-this command be run from inside of the Kubos SDK Vagrant box.
-The ``cargo kubos -c build`` command can be used to build any Rust service
-or crate from within the Vagrant box.
+From inside of a Kubos SDK Vagrant box, navigate to the ``service`` folder of your
+copy of the Rust service example.
 
-The service can then be run by this command ``cargo kubos -c run``. This command
-must also be run from within the folder ``examples/rust-service/service``. You will want
-to check that port 5000 is forwarded out of your Vagrant box before testing the service.
-Once it is up and running you can navigate to http://127.0.0.1:5000/graphiql for
-the interactive GraphiQL interface.
+Issue ``cargo kubos -c build`` in order to build the service. 
+
+.. note:: 
+
+    The ``cargo kubos -c build`` command can be used to build any Rust service
+    or crate from within the Vagrant box.
+
+In order to run the service locally:
+
+    - Verify that port 5000 is being forwarded out of your Vagrant box
+    - Issue ``cargo kubos -c run``
+
+Once it is up and running you can navigate to http://127.0.0.1:5000/graphiql from
+your host OS to access the interactive GraphiQL interface.

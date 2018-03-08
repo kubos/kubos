@@ -1,9 +1,9 @@
 CSP Interfaces
 ==============
 
-This is an example of how to implement a new layer-2 interface in CSP. The example is going to show how to create a `csp_if_fifo`, using a set of [named pipes](http://en.wikipedia.org/wiki/Named_pipe). The complete interface example code can be found in `examples/fifo.c`. For an example of a fragmenting interface, see the CAN interface in `src/interfaces/csp_if_can.c`.
+This is an example of how to implement a new layer-2 interface in CSP. The example is going to show how to create a `csp_if_fifo`, using a set of `named pipes <http://en.wikipedia.org/wiki/Named_pipe>`__. The complete interface example code can be found in `examples/fifo.c`. For an example of a fragmenting interface, see the CAN interface in `src/interfaces/csp_if_can.c`.
 
-CSP interfaces are declared in a `csp_iface_t` structure, which sets the interface nexthop function and name. A maximum transmission unit can also be set, which forces CSP to drop outgoing packets above a certain size. The fifo interface is defined as:
+CSP interfaces are declared in a `csp_iface_t` structure, which sets the interface nexthop function and name. A maximum transmission unit can also be set, which forces CSP to drop outgoing packets above a certain size. The FIFO interface is defined as:
 
 .. code-block:: c
 
@@ -29,20 +29,20 @@ The nexthop function takes a pointer to a CSP packet and a timeout as parameters
        return 1;
    }
 
-In the fifo interface, we simply transmit the header, length field and data using a write to the fifo. CSP does not dictate the wire format, so other interfaces may decide to e.g. ignore the length field if the physical layer provides start/stop flags. 
+In the FIFO interface, we simply transmit the header, length field and data using a write to the FIFO. CSP does not dictate the wire format, so other interfaces may decide to e.g. ignore the length field if the physical layer provides start/stop flags. 
 
-_Important notice: If the transmission succeeds, the interface must free the packet and return 1. If transmission fails, the nexthop function should return 0 and not free the packet, to allow retransmissions by the caller._
+.. note::  If the transmission succeeds, the interface must free the packet and return 1. If transmission fails, the nexthop function should return 0 and not free the packet, to allow retransmissions by the caller.
 
 Incoming traffic
 ----------------
 
-The interface also needs to receive incoming packets and pass it to the CSP protocol stack. In the fifo interface, this is handled by a thread that blocks on the incoming fifo and waits for packets:
+The interface also needs to receive incoming packets and pass it to the CSP protocol stack. In the FIFO interface, this is handled by a thread that blocks on the incoming FIFO and waits for packets:
 
 .. code-block:: c
 
    void * fifo_rx(void * parameters) {
        csp_packet_t *buf = csp_buffer_get(BUF_SIZE);
-       /* Wait for packet on fifo */
+       /* Wait for packet on FIFO */
        while (read(rx_channel, &buf->length, BUF_SIZE) > 0) {
            csp_new_packet(buf, &csp_if_fifo, NULL);
            buf = csp_buffer_get(BUF_SIZE);
@@ -70,18 +70,18 @@ In order to initialize the interface, and make it available to the router, use t
 
 This actually happens automatically if you try to call `csp_route_add()` with an interface that is inknown to the router. This may however be removed in the future, in order to ensure that all interfaces are initialised before configuring the routing table. The reason is, that some products released in the future may ship with an empty routing table, which is then configured by a routing protocol rather than a static configuration.
 
-In order to setup a manual static route, use the follwing example where the default route is set to the fifo interface:
+In order to setup a manual static route, use the follwing example where the default route is set to the FIFO interface:
 
 .. code-block:: c
 
    csp_route_set(CSP_DEFAULT_ROUTE, &csp_if_fifo, CSP_NODE_MAC);
 
-All outgoing traffic except loopback, is now passed to the fifo interface's nexthop function. 
+All outgoing traffic except loopback, is now passed to the FIFO interface's nexthop function. 
 
 Building the example
 --------------------
 
-The fifo examples can be compiled with:
+The FIFO examples can be compiled with:
 
 .. code-block:: bash
 
