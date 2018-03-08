@@ -20,6 +20,7 @@ use std::str::from_utf8;
 use chrono::{DateTime, NaiveDateTime, Utc};
 
 #[derive(Debug, PartialEq)]
+/// Struct for storing geo-records.
 pub struct GeoRecord {
     lon: f32,
     lat: f32,
@@ -54,6 +55,7 @@ impl GeoRecord {
     // W:DDD MM SS
     // TIME: DD MM YYYY HH:MM:SS
     // ERR:<300m to <100km
+    /// Parse GeoRecord
     pub fn parse(input: &[u8]) -> IResult<&[u8], GeoRecord> {
         let (input, _) = take_until_and_consume!(input, "GU")?;
         let (input, message) = take!(input, 90)?;

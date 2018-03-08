@@ -15,7 +15,7 @@
  */
 
 use radio_api::{Connection, RadioResult};
-use messages::{parse_ack_or_nak, File, Message, StateOfHealth, parse_u32};
+use messages::{parse_ack_or_nak, File, GeoRecord, Message, StateOfHealth, parse_u32};
 
 /// Structure for interacting with Duplex-D2 Radio API
 pub struct DuplexD2 {
@@ -55,6 +55,8 @@ impl DuplexD2 {
         self.conn.read(parse_u32)
     }
 
+    /// Retrieves an estimate of the modem’s latitude and longitude coordinates at the time of the
+    /// last connection.
     pub fn get_geolocation_position_estimate(&self) -> RadioResult<GeoRecord> {
         self.conn.write(b"GUGETGEO")?;
         self.conn.read(GeoRecord::parse)
