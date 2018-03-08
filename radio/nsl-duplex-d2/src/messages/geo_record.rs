@@ -14,36 +14,14 @@
  * limitations under the License.
  */
 
-use nom::IResult;
+use nom::{float, multispace, IResult};
 
 #[derive(Debug, PartialEq)]
 pub struct GeoRecord {
-    lat: Latitude,
-    lon: Longitude,
-    time: TimeStamp,
-    precision: u32,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Longitude {
-    East(f32),
-    West(f32),
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Latitude {
-    North(f32),
-    South(f32),
-}
-
-#[derive(Debug, PartialEq)]
-pub struct TimeStamp {
-    year: u16,
-    month: u8,
-    day: u8,
-    hour: u8,
-    minute: u8,
-    second: u8,
+    lat: f32,
+    lon: f32,
+    time: u32,
+    max_error: u32,
 }
 
 use std::fmt::{Formatter, LowerHex, Result};
@@ -58,10 +36,24 @@ impl<'a> LowerHex for Hex<'a> {
     }
 }
 
+fn parse_coord<'a>(input: &'a [u8], prefix: &'static str) -> IResult<&'a [u8], f32> {
+    let (input, _) = take_until_and_consume!(input, prefix)?;
+    let (input, _) = multispace(input)?;
+    let (input, d) = float(input)?;
+    let (input, _) = multispace(input)?;
+    let (input, m) = float(input)?;
+    let (input, _) = multispace(input)?;
+    let (input, s) = float(input)?;
+    Ok((input, d + m / 60.0 + s / 3600.0))
+}
+
 impl GeoRecord {
     pub fn parse(input: &[u8]) -> IResult<&[u8], GeoRecord> {
         println!("TODO: parse geo record {:x}", Hex(input));
         let (input, _) = take_until_and_consume!(input, "GU")?;
+        let (input, n) = parse_coord(input, "N:")?;
+        let (input, w) = parse_coord(input, "W:")?;
+
         // Fields are left justified and the entire record is end padded with spaces to a fixed 90 byte length.
         // N:DDD MM SS
         // W:DDD MM SS
@@ -71,17 +63,10 @@ impl GeoRecord {
         Ok((
             input,
             GeoRecord {
-                lat: Latitude::North(33.479954),
-                lon: Longitude::West(94.182613),
-                time: TimeStamp {
-                    year: 2018,
-                    month: 3,
-                    day: 7,
-                    hour: 20,
-                    minute: 22,
-                    second: 54,
-                },
-                precision: 1500,
+                lat: n,
+                lon: -w,
+                time: 0,
+                max_error: 0,
             },
         ))
     }
@@ -96,17 +81,10 @@ mod tests {
             Ok((
                 &b"extra"[..],
                 GeoRecord {
-                    lat: Latitude::North(33.479954),
-                    lon: Longitude::West(94.182613),
-                    time: TimeStamp {
-                        year: 2018,
-                        month: 3,
-                        day: 7,
-                        hour: 20,
-                        minute: 22,
-                        second: 54,
-                    },
-                    precision: 1500,
+                    lat: 33.479954,
+                    lon: -94.182613,
+                    time: 1520527330,
+                    max_error: 1500,
                 },
             )),
             GeoRecord::parse(b"print this stuff!!")
