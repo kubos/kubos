@@ -55,7 +55,10 @@ impl DuplexD2 {
         self.conn.read(parse_u32)
     }
 
-    // TODO: get_geolocation_position_estimate
+    pub fn get_geolocation_position_estimate(&self) -> RadioResult<GeoRecord> {
+        self.conn.write(b"GUGETGEO")?;
+        self.conn.read(GeoRecord::parse)
+    }
 
     /// Retrieves the next file in the upload queue.  File is then ACKed and deleted from queue.
     pub fn get_uploaded_file(&self) -> RadioResult<File> {
