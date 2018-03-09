@@ -19,6 +19,8 @@
 
 #![deny(missing_docs)]
 
+extern crate chrono;
+extern crate crc16;
 extern crate radio_api;
 extern crate serial;
 
@@ -31,3 +33,6 @@ mod serial_comm;
 
 pub use duplex_d2::DuplexD2;
 pub use serial_comm::serial_connection;
+pub use messages::File;
+pub use messages::StateOfHealth;
+pub use messages::GeoRecord;

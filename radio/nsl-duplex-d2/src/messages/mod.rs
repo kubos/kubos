@@ -17,10 +17,57 @@
 //! This module contains structs and parsers for messages received on
 //! serial connection.
 
+use nom::{IResult, be_u32};
+
 mod file;
-mod file_count;
 mod state_of_health;
+mod geo_record;
 
 pub use messages::file::File;
-pub use messages::file_count::FileCount;
+pub type Message = File;
 pub use messages::state_of_health::StateOfHealth;
+pub use messages::geo_record::GeoRecord;
+
+/// Parse 4 byte integer
+pub fn parse_u32(input: &[u8]) -> IResult<&[u8], u32> {
+    let (input, _) = take_until_and_consume!(input, "GU")?;
+    be_u32(input)
+}
+
+/// Parse ACK or NAK byte and converts to boolean.
+pub fn parse_ack_or_nak(input: &[u8]) -> IResult<&[u8], bool> {
+    let (input, _) = take_until_and_consume!(input, "GU")?;
+    let (input, code) = one_of!(input, "\x06\x0f")?;
+    Ok((input, code == '\x06'))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_parses_u32() {
+        assert_eq!(
+            Ok((&b"extra"[..], 0x12345678)),
+            parse_u32(b"GU\x12\x34\x56\x78extra")
+        );
+    }
+
+    #[test]
+    fn it_parses_u32_and_skips_garbage() {
+        assert_eq!(
+            Ok((&b"extra"[..], 0x12345678)),
+            parse_u32(b"garbageGU\x12\x34\x56\x78extra")
+        );
+    }
+
+    #[test]
+    fn it_parses_ack() {
+        assert_eq!(Ok((&b"extra"[..], true)), parse_ack_or_nak(b"GU\x06extra"));
+    }
+
+    #[test]
+    fn it_parses_nak() {
+        assert_eq!(Ok((&b"extra"[..], false)), parse_ack_or_nak(b"GU\x0fextra"));
+    }
+}
