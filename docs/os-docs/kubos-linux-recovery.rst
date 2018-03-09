@@ -6,7 +6,7 @@ Ideally, a space mission using Kubos Linux will run successfully until the end o
 Overview
 --------
 
-Each time the system attempts to boot, an internal counter is increased. If the Kubos Linux kernel successfully boots, it will reset this internal counter.
+Each time the system attempts to boot, an internal counter is increased. On successful boot, a custom init script will reset this internal counter.
 
 If the system has failed to boot twice already, then the custom Kubos recovery code is attempted. If the Kubos recovery steps fail, then the system attempts to boot into an alternate operating system instead. If that fails, then the system will stop attempting to load an OS and will instead just present the U-Boot CLI.
 
@@ -70,7 +70,11 @@ After the second system upgrade:
 
 Rolling back to a previous version of Kubos Linux uses the same mechanism as :doc:`upgrading to a new version <kubos-linux-upgrade>`. A kpack\*.itb file is broken into its components and then the kernel image is written to the boot partition and the rootfs image is written to the rootfs partition.
 
-**Note** This process will wipe out everything that was previously in the rootfs partition. As a result, all user files should be stored in the user space partition, which is mapped to the '/home' directory. This user space partition should not be affected by the Kubos recovery process.
+.. warning::
+
+    This process will wipe out everything that was previously in the rootfs partition. 
+    As a result, all user files should be stored in the user space partition, which is mapped to the '/home' directory. 
+    This user space partition should not be affected by the Kubos recovery process.
 
 Manual Recovery
 ~~~~~~~~~~~~~~~

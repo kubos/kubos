@@ -1,10 +1,9 @@
-# kubos/kubos-dev:0.0.6
+# kubos/kubos-dev:0.1.2
 
 FROM phusion/baseimage:0.9.22
 
 MAINTAINER kyle@kubos.co
 
-RUN add-apt-repository -y ppa:team-gcc-arm-embedded/ppa
 RUN add-apt-repository -y ppa:george-edison55/cmake-3.x
 
 RUN apt-get update -y
@@ -15,9 +14,6 @@ RUN apt-get install -y python-setuptools build-essential ninja-build python-dev 
 RUN apt-get install -y git
 RUN apt-get install -y cmake
 RUN apt-get install -y unzip wget
-
-# Legacy BBB toolchain
-RUN apt-get install -y crossbuild-essential-armhf gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 
 #do the pip setup and installation things
 RUN easy_install pip
@@ -39,10 +35,15 @@ RUN rm ./bbb_toolchain.tar.gz
 
 RUN pip install --upgrade setuptools
 RUN pip install -r https://raw.githubusercontent.com/kubos/kubos-cli/master/requirements.txt
-RUN pip install git+https://github.com/kubostech/kubos-cli
+RUN pip install git+https://github.com/kubos/kubos-cli
 
 RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
 RUN mkdir -p /home/vagrant/.kubos
+
+# Setup rust stuff
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH "$PATH:/root/.cargo/bin"
+RUN /root/.cargo/bin/cargo install --git https://github.com/kubos/cargo-kubos
 
 ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"
