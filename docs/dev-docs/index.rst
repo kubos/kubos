@@ -11,3 +11,4 @@ The internal nuts and bolts of Kubos
     Kubos Naming and Coding Standards <kubos-standards>
     Kubos Module Development <kubos-development>
     Kubos Device API Development <device-api-guide>
+    Kubos Device Service Development <service-outline-guide>

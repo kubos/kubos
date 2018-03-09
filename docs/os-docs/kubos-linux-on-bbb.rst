@@ -47,7 +47,11 @@ run and that file then loads the main U-Boot image into SDRAM.
 
 The main U-Boot image iterates through the `boot_targets` variable to attempt 
 to boot from an available MMC device. The partuuid of the first successful
-device is passed off to Linux to be used to mount the root filesystem. 
+device is passed off to Linux to be used to mount the root filesystem.
+
+By default, the microSD card slot will be checked first, followed by the
+eMMC. This behavior can be changed by setting the ``boot_dev`` value to
+``1`` to indicate that the eMMC should be tried first.
 
 Kubos Linux Build Process
 -------------------------
@@ -170,10 +174,10 @@ onto the eMMC. In order to create a full Kubos Linux setup, you'll want to also 
 an auxiliary image for the microSD card containing the upgrade partition and an additional
 user data partition.
 
-Follow the :ref:`upgrade-creation` instructions in order to create a Kubos Package file
-(kpack-\*.itb) to be used for recovery.
+Follow the :ref:`upgrade-creation` instructions in order to create a base Kubos Package file
+(`kpack-base.itb`) to be used for recovery.
 
-Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.img`` script. 
+Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.sh`` script. 
 This will create a new SD card image, `aux-sd.img`, with two partitions:
 
 - An upgrade partition containing `kpack-base.itb`

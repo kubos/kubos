@@ -9,7 +9,16 @@ Using an Example Application
 ----------------------------
 
 Each of the example applications contains the files necessary to run as an independent Kubos project. 
-This means you can simply copy the desired example to a new folder and immediately build it with the ``kubos build`` command.
+
+In order to use them, copy the example into the desired location and then run these commands from within the top level
+of the example folder:
+
+    $ kubos link -a
+    $ kubos build
+    
+.. todo::
+
+    When Rust and/or Python examples get added, these instructions will need to be updated
 
 "Compatible Targets" indicates which target boards for which the application should execute successfully without modification.
 
