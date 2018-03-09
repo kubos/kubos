@@ -104,8 +104,9 @@ class KubosBuild(object):
     def find_projects(self):
         self.projects = []
         try:
-            modules = subprocess.check_output(["find", ".", "-name",
-                                            "module.json"], cwd=self.kubos_dir)
+            modules = subprocess.check_output(["find", ".", 
+                                               "(", "-path", "./examples", "-o", "-path", "./test", ")", "-prune", "-o",
+                                               "-name", "module.json", "-print"], cwd=self.kubos_dir)
             for path in modules.splitlines():
                 if "yotta_modules" not in path:
                     path = path.replace("module.json", "").strip()
