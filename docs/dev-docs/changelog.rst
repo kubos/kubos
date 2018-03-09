@@ -1,11 +1,18 @@
 Kubos Changelog
 ===============
 
-Upcoming
---------
+v1.2.0 - Mar 5 2018
+-------------------
 
-- Added Rust crate for wrapping kubos-hal-iobc.
-- Added iOBC supervisor GraphQL service.
+- `Added Rust crate for wrapping kubos-hal-iobc <https://github.com/kubos/kubos/tree/c7bb5f1928aeb0aa3d45d649f90bd2cdccbe2bc5/hal/kubos-hal-iobc>`__
+- `Added iOBC supervisor GraphQL service <https://github.com/kubos/kubos/tree/master/services/iobc-supervisor-service>`__
+- Migrating ``cargo-kubos`` into `own repo <https://github.com/kubos/cargo-kubos>`__
+- `Added iOBC ADC support and demo <http://docs.kubos.co/1.2.0/os-docs/working-with-the-iobc.html#adc>`__
+- `Added iOBC PWM support <http://docs.kubos.co/1.2.0/os-docs/working-with-the-iobc.html#adc>`__
+- `Added API for EyeStar-D2 Duplex radio <https://github.com/kubos/kubos/tree/master/radio/nsl-duplex-d2>`__
+- `Adding telemetry database service <https://github.com/kubos/kubos/blob/master/services/telemetry-database-service>`__
+- Cleaning up doc generation warnings
+- Finalizing name changes
 
 v1.1.0 - Jan 24 2018
 --------------------
@@ -23,7 +30,7 @@ v1.1.0 - Jan 24 2018
 - Decided on using GraphQL, Rust, and Python for services and applications
 - `Added Python-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/python-service>`__
 - `Added Rust-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/rust-service>`__
-- `Added 'cargo kubos' subcommand for Cargo-->Yotta integration <https://github.com/kubos/kubos/tree/1.1.0/cargo-kubos>`__
+- `Added 'cargo kubos' subcommand for Cargo-->yotta integration <https://github.com/kubos/kubos/tree/1.1.0/cargo-kubos>`__
 
 - Upgraded to BuildRoot LTS 2017.2.8
 - `Documented Windows PowerShell v3+ requirement <http://docs.kubos.co/1.1.0/installation-docs/sdk-installing.html#install-windows-powershell-v3-windows-7-sp1-only>`__
@@ -44,14 +51,14 @@ v1.0.0 - June 27 2017
 ---------------------
 
 - `KUBOS-442 <https://kubostech.atlassian.net/browse/KUBOS-442>`__
-   Added support for iOBC I2C bus
+  Added support for iOBC I2C bus
 - `KUBOS-445 <https://kubostech.atlassian.net/browse/KUBOS-445>`__
-   Integrated iOBC supervisor
+  Integrated iOBC supervisor
 - `KUBOS-274 <https://kubostech.atlassian.net/browse/KUBOS-274>`__
-   Completed Kubos Telemetry integration into KubOS Linux
+  Completed Kubos Telemetry integration into KubOS Linux
 - `KUBOS-487 <https://kubostech.atlassian.net/browse/KUBOS-487>`__
-   Added support for tab-completion to Kubos CLI
--  `Created an initial QA integration test suite <https://github.com/kubos/kubos/tree/master/test/integration/linux>`__
+  Added support for tab-completion to Kubos CLI
+- `Created an initial QA integration test suite <https://github.com/kubos/kubos/tree/master/test/integration/linux>`__
 -  Migrated from Markdown to ReStructuredText as the documentation
    language of choice
 -  Migrated from only Doxygen to Sphinx and Doxygen as the documentation

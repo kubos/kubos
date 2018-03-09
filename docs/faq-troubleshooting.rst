@@ -48,24 +48,6 @@ How do I check what my project's target is?
 How do I see the debug output of my board?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MSP430
-^^^^^^
-
-``minicom msp430``
-
-STM32F407
-^^^^^^^^^
-
-Connect an FTDI cable to your board's debug UART port. By default:
-
--  Yellow wire (TX) --> pin PC6.
--  Orange wire (RX) --> pin PC7.
-
-Then use ``minicom kubos`` to start a serial connection session.
-
-ISIS-OBC
-^^^^^^^^
-
 ``minicom kubos``
 
 How do I check what version of Kubos Linux I'm running?
@@ -101,8 +83,8 @@ I've tried other steps here, but my Kubos Vagrant image is still behaving weirdl
 
 Try logging out and restarting the VM using the ``vagrant reload`` command.
 
-I got some weird errors while running a kubos command (``kubos build``, ``kubos target``, etc)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+I got some weird errors while running a Kubos CLI command (``kubos build``, ``kubos target``, etc)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Run ``kubos update -a`` to ensure that you're using the latest version of the Kubos SDK
     
@@ -139,14 +121,14 @@ I can't build my project. I keep getting "Permission denied" errors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you copied your project from another location, it's possible that the files are set up with root permissions
-only. Change the project file permissions to allow the local vagrant user to have access.
+only. Change the project file permissions to allow the local ``vagrant`` user to have access.
 
 :: 
     
     sudo chown vagrant:vagrant . -R
 
-Kubos Linux
-~~~~~~~~~~~
+Interacting with an OBC
+~~~~~~~~~~~~~~~~~~~~~~~
 
 I transferred a script, but it won't run
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -171,15 +153,15 @@ you can take:
 
 -  Check that the Kubos Linux target is turned on and connected to your 
    computer
--  Check that no other vagrant images are running. Only one VM can have
+-  Check that no other Vagrant images are running. Only one VM can have
    control of the USB, so it may be that another instance currently has
-   control of the device. You can shutdown a vagrant image with the
+   control of the device. You can shutdown a Vagrant image with the
    command ``vagrant halt``
--  Verify that the USB is showing up within the vagrant environment with
+-  Verify that the USB is showing up within the Vagrant environment with
    the ``lsusb`` command. You should see an FTDI device
 -  Verify that the USB has been mapped to a linux device. Issue the
    command ``ls /dev``. You should see a /dev/ttyUSB\* device. If you
-   don't, try rebooting your vagrant image (``vagrant halt``,
+   don't, try rebooting your Vagrant image (``vagrant halt``,
    ``vagrant up``)
 
 "Transfer Failed: Connection Failed"
@@ -189,7 +171,7 @@ The SDK was unable to connect to the Kubos Linux target
 
 -  Verify that the USB has been mapped to a linux device. Issue the
    command ``ls /dev``. You should see a /dev/ttyUSB\* device. If you
-   don't, try rebooting your vagrant image (``vagrant halt``,
+   don't, try rebooting your Vagrant image (``vagrant halt``,
    ``vagrant up``)
 -  If this error occurs after the transfer process has started, then the
    SDK likely lost connection to the board. Verify that the board is

@@ -13,17 +13,16 @@ Supported devices:
 
     - `ISIS TRXVU <https://www.isispace.nl/product/isis-uhf-downlink-vhf-uplink-full-duplex-transceiver/>`__
     
+.. todo::
 
-.. toctree::
-   :caption: Device Guides
-   :name: device-guides
-
-   adcs
-   radio
-
-.. toctree::
-   :caption: Device APIs
-   :name: device-apis
-
-   adcs_api
-   radio_api
+    Re-add when real APIs are available
+    
+    toctree - Device Guides
+    
+       adcs
+       radio
+    
+    toctree - Device APIs
+    
+       adcs_api
+       radio_api
