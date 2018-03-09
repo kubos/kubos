@@ -1,20 +1,28 @@
 Kubos SDK Cheatsheet
 ====================
 
+.. note::
+
+    This doc refers to the process used for creating and interacting with projects written in C.
+    Please see the separate docs for details about using :doc:`Rust <sdk-rust>` or :doc:`Python <sdk-python>`.
+
 Creating a Project
 ------------------
 
 Run the ``kubos init -l`` command followed by the name of your project to
 bootstrap your Kubos project. This will create a new directory under
 your current working directory with your project's name and add the
-source files for a basic Kubos project (kubos-linux-example).
+source files for a basic Kubos C project (kubos-linux-example).
 
 ::
-        $ kubos init -l linux-project-name # creates a project
 
-**Note:** Inside of the build system there are several reserved words,
-which cannot be used as the name of the project. These are ``test``,
-``source``, ``include``, ``yotta_modules`` and ``yotta_targets``.
+        $ kubos init -l linux-project-name # Creates a project
+
+.. note:: 
+
+    Inside of the build system there are several reserved words,
+    which cannot be used as the name of the project. These are ``test``,
+    ``source``, ``include``, ``yotta_modules`` and ``yotta_targets``.
 
 The contents of your project directory should look something like this:
 
@@ -90,9 +98,9 @@ To see all of the available targets run:
 Building a Project
 ------------------
 
-To build a KubOS project, all we need to do is run the ``kubos build``
+To build a Kubos project, all we need to do is run the ``kubos build``
 command. The Kubos CLI will read the module.json file, determine what
-libraries are needed and build them.
+libraries are needed, and build them.
 
 Basic build command:
 
@@ -106,10 +114,12 @@ Build with verbose output:
 
         $ kubos build -- -v
 
-**Note:** The Kubos CLI commands have their own specific arguments that
-can be used. There are also global arguments (like ``--verbose`` or
-``-v``) a double hyphen ``--`` separates the command specific arguments
-from the global arguments
+.. note::
+
+    The Kubos CLI commands have their own specific arguments that
+    can be used. There are also global arguments (like ``--verbose`` or
+    ``-v``). A double hyphen ``--`` separates the command specific arguments
+    from the global arguments
 
 Clean command:
 
@@ -142,10 +152,10 @@ and cross-compile modules for specific hardware targets. One example of
 a Kubos target is the `Beaglebone Black
 Target <https://github.com/kubos/kubos/tree/master/targets/target-beaglebone-gcc>`__
 
-Linking Modules:
-^^^^^^^^^^^^^^^^
+Linking Modules
+^^^^^^^^^^^^^^^
 
-Links are made in two steps - first globally then locally.
+Links are made in two steps - first globally, then locally.
 
 By linking a module globally you are making it available to link into
 any of your projects. By linking the module locally you are including
@@ -168,16 +178,17 @@ the linked module in your build.
 The next time your project is built it will use your local development
 module, rather than the packaged version.
 
-**Note:** To verify where all of your targets are being loaded from
-``kubos list`` will show you which modules are linked and which are
-local to your project
+.. note:: 
 
-Linking Targets:
-^^^^^^^^^^^^^^^^
+    Use ``kubos list`` to see the modules and depencies being used by 
+    your project as well as the directories they are being referenced from
+
+Linking Targets
+^^^^^^^^^^^^^^^
 
 Custom or modified targets are linked in a very similar way to modules.
 
-Links are made in two steps - first globally then locally.
+Links are made in two steps - first globally, then locally.
 
 By linking a target globally you are making it available to link into
 any of your projects. By linking the target locally you are now able to
@@ -208,53 +219,57 @@ use the linked target in your build.
 The next time your project is built it will use your local development
 target, rather than the packaged version.
 
-**Note:** Running ``kubos target`` will show you whether you are using a
-local or a linked copy of a target
+.. note:: 
+
+    Running ``kubos target`` will show you whether you are using a
+    local or a linked copy of a target
 
 Flashing your Project
 ---------------------
 
-Flashing your project using the kubos tool is a relatively
-straightforward process:
+Ensure that your board is plugged into your computer. 
 
-1. Ensure that your board is plugged into your computer. Running the
-   following command will list all of the available devices in your
-   Kubos SDK box.
+Running the following command will list all of the available devices in your
+Kubos SDK box.
 
    ::
 
        $ lsusb
 
-2. Run the flash command
+Run the flash command
 
    ::
 
        $ kubos flash
 
-*Note: If your current user does not have read/write permission to your
-hardware device you may need to run this command as root*
+.. note:: 
+
+    If your current user does not have read/write permission to your
+    hardware device you may need to run this command as root
 
 ::
 
         $ sudo kubos flash
+        
+.. todo::
 
-Debugging your Project
-----------------------
-
-A gdb server must be started to allow your gdb instance to connect and
-debug directly on your hardware device. After building your project with
-``kubos build`` the kubos-cli can start a gdb server and gdb instance
-for you.
-
-Start a gdb server and instance: **Note:** This may need to run as root
-depending on your USB device permissions
-
-::
-
-        $ kubos debug
-
-If the debug command is successful you will be prompted with a gdb
-instance attached to your device and ready to debug!
-
-**Note:** The ``kubos debug`` command is not yet implemented for KubOS
-Linux projects.
+    Debugging your Project
+    //----------------------
+    
+    A gdb server must be started to allow your gdb instance to connect and
+    debug directly on your hardware device. After building your project with
+    ``kubos build`` the kubos-cli can start a gdb server and gdb instance
+    for you.
+    
+    Start a gdb server and instance: **Note:** This may need to run as root
+    depending on your USB device permissions
+    
+    ::
+    
+            $ kubos debug
+    
+    If the debug command is successful you will be prompted with a gdb
+    instance attached to your device and ready to debug!
+    
+    **Note:** The ``kubos debug`` command is not yet implemented for Kubos
+    Linux projects.
