@@ -58,17 +58,19 @@ impl GeoRecord {
     /// Parse GeoRecord
     pub fn parse(input: &[u8]) -> IResult<&[u8], GeoRecord> {
         let (input, _) = take_until_and_consume!(input, "GU")?;
-        let (input, message) = take!(input, 90)?;
-        let (message, _) = take_until_and_consume!(message, "N:")?;
-        let (message, n) = parse_coord(message)?;
-        let (message, _) = take_until_and_consume!(message, "W:")?;
-        let (message, w) = parse_coord(message)?;
-        let (message, time) = parse_date(message)?;
-        let (message, _) = take_until_and_consume!(message, "ERR: < ")?;
-        let (message, max_error) = float(message)?;
+        let (input, _) = take_until_and_consume!(input, "N:")?;
+        let (input, n) = parse_coord(input)?;
+        let (input, _) = take_until_and_consume!(input, "W:")?;
+        let (input, w) = parse_coord(input)?;
+        let (input, time) = parse_date(input)?;
+        let (input, _) = take_until_and_consume!(input, "ERR: < ")?;
+        let (input, max_error) = float(input)?;
         let max_error = max_error as u32;
-        let (message, _) = multispace(message)?;
-        let (_, unit) = take_until!(message, "\n")?;
+        let (input, _) = multispace(input)?;
+        let (input, unit) = take_until!(input, "\n")?;
+        let (input, _) = multispace(input)?;
+        let (input, _) = tag!(input, "OK")?;
+        let (input, _) = multispace(input)?;
         println!("unit {:?}", unit);
         let max_error = match unit {
             b"km" => max_error * 1000,
