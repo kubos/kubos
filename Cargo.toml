@@ -1,6 +1,7 @@
 [workspace]
 members = [
 "radio/nsl-duplex-d2",
+"radio/trxvu-radio-api",
 "radio/rust-radio-api",
 "radio/comms-service",
 "examples/rust-service/extern-lib",
