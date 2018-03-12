@@ -25,7 +25,7 @@ pub struct RxTelemetry {
     pub supply_voltage: u16,
     pub temp_oscillator: u16,
     pub temp_power_amp: u16,
-    pub inst_signal_strength: u16
+    pub inst_signal_strength: u16,
 }
 
 impl RxTelemetry {
@@ -45,8 +45,8 @@ impl RxTelemetry {
                 supply_voltage,
                 temp_oscillator,
                 temp_power_amp,
-                inst_signal_strength
-            }
+                inst_signal_strength,
+            },
         ))
     }
 }

@@ -25,7 +25,7 @@ pub struct TxTelemetry {
     pub supply_voltage: u16,
     pub supply_current: u16,
     pub temp_power_amp: u16,
-    pub temp_oscillator: u16
+    pub temp_oscillator: u16,
 }
 
 impl TxTelemetry {
@@ -46,7 +46,7 @@ impl TxTelemetry {
                 supply_current,
                 temp_power_amp,
                 temp_oscillator,
-            }
+            },
         ))
     }
 }

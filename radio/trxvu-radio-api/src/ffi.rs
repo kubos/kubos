@@ -30,9 +30,25 @@ pub enum radio_telem_type {
     tx_uptime,
     tx_state,
     rx_telem_all,
-    rx_uptime
+    rx_uptime,
+}
+
+/// Enum for radio status
+/// from radio-api/radio-struct.h
+#[repr(C)]
+#[derive(Debug)]
+pub enum radio_status {
+    radio_ok,
+    radio_rx_empty,
+    radio_error,
+    radio_error_config,
 }
 
 extern "C" {
-    pub fn k_radio_get_telemetry(buffer: *mut radio_telem, telem_type: radio_telem_type) -> uint8_t;
+    pub fn k_radio_init() -> radio_status;
+    pub fn k_radio_watchdog_start() -> radio_status;
+    pub fn k_radio_watchdog_stop() -> radio_status;
+    pub fn k_radio_terminate();
+    pub fn k_radio_get_telemetry(buffer: *mut radio_telem, telem_type: radio_telem_type)
+        -> uint8_t;
 }
