@@ -1,7 +1,7 @@
 {
     "bin":"./source",
     "license":"Apache-2.0",
-    "name":"adcs",
+    "name":"isis-imtq",
     "repository":{
         "url":"git://<repository_url>",
         "type":"git"

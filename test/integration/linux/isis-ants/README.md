@@ -8,7 +8,7 @@ confirm that the test has completed successfully.
 
 Test Shell Command:
 
-    $ ants
+    $ isis-ants
 
 Expected Output:
 

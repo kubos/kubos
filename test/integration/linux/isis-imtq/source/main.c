@@ -313,10 +313,10 @@ int main(int argc, char * argv[])
         exit(-1);
     }
 
-    fp = fopen("results.txt", "w");
+    fp = fopen("imtq-results.txt", "w");
     if (fp == NULL)
     {
-        perror("Failed to open results.txt");
+        perror("Failed to open imtq-results.txt");
         /* Print the results to stdout instead */
         k_adcs_terminate();
         return -1;
@@ -365,7 +365,7 @@ int main(int argc, char * argv[])
     }
     else
     {
-        fprintf(stderr, "One or more ADCS tests have failed. See results.txt for info\n");
+        fprintf(stderr, "One or more ADCS tests have failed. See imtq-results.txt for info\n");
         fprintf(fp, "One or more ADCS tests have failed\n");
     }
 
