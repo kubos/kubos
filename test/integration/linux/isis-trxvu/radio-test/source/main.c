@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Example Project Using the ISIS TRXVU Radio
+ * Manual integration test program for the ISIS TRXVU Radio
  */
 
 #include <errno.h>
