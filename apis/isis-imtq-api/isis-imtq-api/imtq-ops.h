@@ -21,7 +21,6 @@
 #pragma once
 
 #include <json/json.h>
-#include "imtq.h"
 
 /** \cond WE DO NOT WANT TO HAVE THESE IN OUR GENERATED DOCS */
 /* Operational Commands */
@@ -35,15 +34,6 @@
 #define START_TEST      0x08
 #define START_BDOT      0x09
 /** \endcond */
-
-/**
- * Available iMTQ system modes
- */
-typedef enum {
-    IDLE,           /**< Idle mode */
-    SELFTEST,       /**< Self-test mode */
-    DETUMBLE        /**< Detumble mode */
-} ADCSMode;
 
 /**
  * Available iMTQ system reset types

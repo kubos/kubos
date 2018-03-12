@@ -21,7 +21,6 @@
 #pragma once
 
 #include <json/json.h>
-#include "imtq.h"
 
 /** \cond WE DO NOT WANT TO HAVE THESE IN OUR GENERATED DOCS */
 /* Data Request Commands */

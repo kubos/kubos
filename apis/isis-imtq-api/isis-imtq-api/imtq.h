@@ -22,9 +22,7 @@
 
 #include <pthread.h>
 #include <stdint.h>
-#include "imtq-config.h"
-#include "imtq-data.h"
-#include "imtq-ops.h"
+
 
 /**
  *  @name iMTQ config.json configuration options and default values
@@ -120,6 +118,15 @@ typedef struct {
     int16_t z;                  /**< Z-axis */
 } __attribute__((packed)) imtq_axis_data;
 
+/**
+ * Available iMTQ system modes
+ */
+typedef enum {
+    IDLE,           /**< Idle mode */
+    SELFTEST,       /**< Self-test mode */
+    DETUMBLE        /**< Detumble mode */
+} ADCSMode;
+
 typedef struct {
     /* Not an implemented structure/function. Need for compliance with generic API */
 } adcs_orient;
@@ -127,6 +134,15 @@ typedef struct {
 typedef struct {
     /* Not an implemented structure/function. Need for compliance with generic API */
 } adcs_spin;
+
+/*
+ * Include the rest of the headers
+ * Note: These lines are here (rather than the top) because they need KADCSStatus
+ * to be declared already
+ */
+#include "imtq-config.h"
+#include "imtq-data.h"
+#include "imtq-ops.h"
 
 /**
  * System mutex to preserve iMTQ command/response ordering
