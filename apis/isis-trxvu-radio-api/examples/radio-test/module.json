@@ -1,0 +1,15 @@
+{
+    "bin":"./source",
+    "license":"Apache-2.0",
+    "name":"radio-test",
+    "repository":{
+        "url":"git://<repository_url>",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "dependencies":{
+        "trxvu-radio-api":"kubos/trxvu-radio-api"
+    },
+    "homepage":"https://<homepage>",
+    "description":"Example TRXVU application"
+}
