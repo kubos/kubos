@@ -24,7 +24,7 @@ extern crate nom;
 
 use std::cell::RefCell;
 use nom::IResult;
-
+use std::fmt;
 use failure::Error;
 
 /// Common Error for Radio Actions
@@ -38,7 +38,14 @@ pub enum RadioError {
     },
 }
 
-fn nom_to_radio_error<T>(err: nom::Err<&[u8]>) -> Result<(&[u8], T), RadioError> {
+impl fmt::Display for RadioError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Parse error: {}", *self)
+    }
+}
+
+/// Helper function to convert nom errors to radio errors
+pub fn nom_to_radio_error<T>(err: nom::Err<&[u8]>) -> Result<(&[u8], T), RadioError> {
     Err(match err {
         nom::Err::Error(nom::simple_errors::Context::Code(_, e)) => RadioError::ParseError {
             message: e.description().to_string(),
