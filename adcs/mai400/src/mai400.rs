@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+//TODO: remove before publishing
+#![allow(unused)]
 
 use failure::Error;
 use serial_comm::Connection;
@@ -69,9 +71,13 @@ impl MAI400 {
     pub fn get_info(&self) -> ADCSResult<()> {
         //Create packet
         let mut packet = GetInfoMessage {
-            hdr: {
-                sync: SYNC
+            hdr: MessageHeader {
+                sync: SYNC,
+                data_len: 0,
+                msg_id: 0x1D,
+                addr: 0,
             },
+            crc: 0,
         };
 
         //send packet
