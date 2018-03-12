@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
-nsl-duplex-d2 = { path = "../nsl-duplex-d2" }
+nsl-duplex-d2 = { path = "../../apis/nsl-duplex-d2" }
 
 [profile.release]
 lto = true
