@@ -1,5 +1,5 @@
 ISIS Antenna System API
 -----------------------
 
-.. doxygenfile:: isis-ants-api.h
+.. doxygenfile:: ants-api.h
     :project: isis-ants-api

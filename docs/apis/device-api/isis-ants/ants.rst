@@ -104,7 +104,7 @@ For example:
 
 .. code-block:: c
 
-    #include <isis-ants-api/isis-ants-api.h>
+    #include <isis-ants-api/ants-api.h>
     
     KANTSStatus status;
 

@@ -5,21 +5,23 @@ The Kubos SDK provides a selection of device APIs to make interfacing with exter
 
 Supported devices:
   
-  - ADCS
+  - ISIS
   
     - `ISIS iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__
-    
-  - Antenna
-  
     - `ISIS Antenna Systems <https://www.isispace.nl/product-category/products/antenna-systems/>`__
-
-  - Radio
-
     - `ISIS TRXVU <https://www.isispace.nl/product/isis-uhf-downlink-vhf-uplink-full-duplex-transceiver/>`__
+    
+  - NSL
+  
+    - `NSL EyeStar-D2 <http://www.pumpkinspace.com/store/p200/NSL_EyeStar-D2_Duplex_Globalstar_Communication_System.html>`__
     
 .. toctree::
     :hidden:
     
-    ISIS Antenna Systems <ants/ants>
-    ISIS iMTQ <imtq/imtq>
-    ISIS TRXVU Radio <trxvu/trxvu>
+    ISIS Antenna Systems <isis-ants/ants>
+    ISIS iMTQ <isis-imtq/imtq>
+    ISIS TRXVU Radio <isis-trxvu/trxvu>
+    
+.. todo::
+
+    NSL EyeStar-D2 API doc

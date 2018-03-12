@@ -4,7 +4,7 @@ ISIS iMTQ API
 Core
 ----
 
-.. doxygenfile:: imtq-core.h
+.. doxygenfile:: imtq.h
     :project: isis-imtq-api
 
 Configuration

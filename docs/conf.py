@@ -106,13 +106,15 @@ html_show_sphinx = False
 htmlhelp_basename = 'Kubosdoc'
 
 breathe_projects = {
-    "libcsp" : "../xml/libcsp",
-    "isis-imtq-api": "../xml/adcs/isis-imtq-api",
-    "isis-ants-api" : "../xml/antenna/isis-ants-api",
+    
+    "isis-ants-api" : "../xml/apis/isis-ants-api",
+    "isis-imtq-api": "../xml/apis/isis-imtq-api",
+    "isis-trxvu-api": "../xml/apis/isis-trxvu-api",
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",
     "kubos-hal-linux" : "../xml/hal/kubos-hal-linux",
-    "isis-trxvu-api": "../xml/radio/isis-trxvu-api"
+    "libcsp" : "../xml/libcsp",
+
 }
 
 extensions += [
