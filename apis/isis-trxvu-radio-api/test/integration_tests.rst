@@ -24,7 +24,7 @@ Project
 
 Clone this repo into your Kubos SDK image.
 
-Build and flash the ``trxvu-radio-api/examples/radio-test`` project onto your iOBC.
+Build and flash the ``isis-trxvu-api/examples/radio-test`` project onto your iOBC.
 
 Use `minicom kubos` to connect to the board and then run the ``radio-test`` program.
 It should give you a dialog asking for a command to run.

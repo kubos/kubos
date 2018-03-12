@@ -24,7 +24,7 @@
 #include <string.h>
 #include <getopt.h>
 
-#include "trxvu-radio-api/trxvu.h"
+#include "isis-trxvu-api/trxvu.h"
 
 #define check_status()           \
     ({                           \

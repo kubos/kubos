@@ -1,4 +1,4 @@
-set_target_properties(trxvu-radio-api-test-radio
+set_target_properties(isis-trxvu-api-test-radio
         PROPERTIES
         LINK_FLAGS
         "-Wl,--wrap=open \

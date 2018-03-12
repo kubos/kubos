@@ -2,4 +2,4 @@ ISIS TRXVU Radio API
 --------------------
 
 .. doxygenfile:: trxvu.h
-    :project: trxvu-radio-api
+    :project: isis-trxvu-api

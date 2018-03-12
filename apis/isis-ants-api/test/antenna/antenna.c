@@ -16,7 +16,7 @@
  */
 
 #include <cmocka.h>
-#include <ants-api/ants.h>
+#include <isis-ants-api/ants.h>
 
 /* Test Data */
 ants_rx_message test_packet

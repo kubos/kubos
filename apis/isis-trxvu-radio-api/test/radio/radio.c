@@ -16,7 +16,7 @@
  */
 
 #include <cmocka.h>
-#include <trxvu-radio-api/trxvu.h>
+#include <isis-trxvu-api/trxvu.h>
 
 /* Test Data */
 radio_rx_message test_packet

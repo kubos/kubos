@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include <imtq-api/imtq.h>
+#include <isis-imtq-api/imtq.h>
 #include <cmocka.h>
 
 imtq_resp_header response = { 0 };

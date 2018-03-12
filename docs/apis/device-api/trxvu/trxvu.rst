@@ -95,7 +95,7 @@ For example:
 
 .. code-block:: c
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
     
     radio_config config = {0};
     config.data_rate = RADIO_TX_RATE_1200;
@@ -137,7 +137,7 @@ For example:
 
 .. code-block:: c
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
     
     KRadioStatus status;
     uint8_t message[] = "Radio Test Message";
@@ -155,7 +155,7 @@ For example:
 
 .. code-block:: c
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
     
     KRadioStatus status;
     uint8_t response;
@@ -207,7 +207,7 @@ Example
 
 .. code-block:: c
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
     
     KRadioStatus status;
     radio_rx_msg buffer = {0};
@@ -242,7 +242,7 @@ The values can then be read by specifying the :cpp:type:`radio_telem` sub-struct
 
 For example::
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
 
     k_radio_init();
     
@@ -326,7 +326,7 @@ The ``RADIO_STATE_RATE_*`` flags are actually composed of two flag bits. In orde
 
 .. code-block:: c
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
 
     radio_telem state = {0};
     k_radio_get_telemetry(&state, RADIO_TX_STATE);
@@ -393,7 +393,7 @@ defined in the TRXVU options sheet or with the :cpp:func:`k_radio_configure` fun
 
 For example::
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
 
     radio_config config = {0};
     char beacon_msg[] = "Radio Beacon Message";
@@ -412,7 +412,7 @@ sheet, or with :cpp:func:`k_radio_configure`), use the :cpp:func:`k_radio_beacon
 
 For example::
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
 
     radio_tx_beacon beacon = {0};
     ax25_callsign to = {0};
@@ -449,7 +449,7 @@ deviates from the default of 60 seconds.
 
 For example::
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
     
     int main(void)
     {  
@@ -474,7 +474,7 @@ To specify which reset is desired, pass the appropriate :cpp:type:`RadioResetTyp
 
 For example::
 
-    #include "trxvu-radio-api/trxvu.h"
+    #include "isis-trxvu-api/trxvu.h"
     
     k_radio_init();
     k_radio_reset(RADIO_SOFT_RESET);

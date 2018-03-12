@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <ants-api/ants-api.h>
+#include <isis-ants-api/isis-ants-api.h>
 #include <kubos-hal/i2c.h>
 #include <stdio.h>
 #include <time.h>

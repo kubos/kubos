@@ -8,7 +8,7 @@
     },
     "version":"0.1.0",
     "dependencies":{
-        "imtq-api":"kubos/imtq-api"
+        "isis-imtq-api":"kubos/isis-imtq-api"
     },
     "homepage":"https://<homepage>",
     "description":"Example app running on Kubos Linux."

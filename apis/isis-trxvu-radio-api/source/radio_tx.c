@@ -15,7 +15,7 @@
  */
 
 #include <kubos-hal/i2c.h>
-#include <trxvu-radio-api/trxvu.h>
+#include <isis-trxvu-api/trxvu.h>
 #include <stdio.h>
 
 /* Public functions */

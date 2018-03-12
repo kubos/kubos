@@ -1,4 +1,4 @@
-set_target_properties(ants-api-test-antenna
+set_target_properties(isis-ants-api-test-antenna
         PROPERTIES
         LINK_FLAGS
         "-Wl,--wrap=open \

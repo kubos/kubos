@@ -94,7 +94,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
     
     KADCSStatus status = ADCS_OK;
     imtq_axis_data dipole = {0};
@@ -182,7 +182,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
     
     #define STRINGIFY(x)            STRINGIFY2(x)
     #define STRINGIFY2(x)           #x
@@ -253,7 +253,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
 
     KADCSStatus status;
 
@@ -341,7 +341,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
     
     KADCSStatus status = ADCS_OK;
 
@@ -641,7 +641,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
 
     KADCSStatus status = ADCS_OK;
     imtq_config_resp result;
@@ -695,7 +695,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
 
     KADCSStatus status = ADCS_OK;
     imtq_config_resp result;
@@ -749,7 +749,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
     
     KADCSStatus status = ADCS_OK;
     imtq_config_resp result;
@@ -793,7 +793,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
     
     KADCSStatus status = ADCS_OK;
     
@@ -875,7 +875,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
     
     KADCSStatus status = ADCS_OK;
     imtq_axis_data currents = {0};
@@ -923,7 +923,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
 
     KADCSStatus status = ADCS_OK;
     uint16_t time = 0;
@@ -1046,7 +1046,7 @@ For example:
 
 .. code-block:: c
 
-    #include <imtq-api/imtqh>
+    #include <isis-imtq-api/imtqh>
     
     KADCSStatus status = ADCS_OK;
     imtq_housekeeping_eng data = {0};

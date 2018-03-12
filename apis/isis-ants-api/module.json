@@ -1,14 +1,14 @@
 {
     "license":"Apache-2.0",
-    "name":"ants-api",
+    "name":"isis-ants-api",
     "repository":{
-        "url":"git://github.com/kubos/isis-api/ants-api",
+        "url":"git://github.com/kubos/kubos/isis-ants-api",
         "type":"git"
     },
     "version":"1.0.0",
-    "homepage":"https://github.com/kubos/isis-api/ants-api",
+    "homepage":"https://github.com/kubos/kubos/isis-ants-api",
     "extraIncludes": [
-        "ants-api"
+        "isis-ants-api"
     ],
     "dependencies":{
         "kubos-hal":"kubos/kubos-hal"

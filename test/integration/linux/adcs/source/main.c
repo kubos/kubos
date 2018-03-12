@@ -17,7 +17,7 @@
  * ADCS Integration Test for the ISIS iMTQ
  */
 
-#include <imtq-api/imtq.h>
+#include <isis-imtq-api/imtq.h>
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>

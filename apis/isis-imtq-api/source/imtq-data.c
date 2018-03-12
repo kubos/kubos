@@ -16,7 +16,7 @@
  * ISIS iMTQ API - Data Request Commands
  */
 
-#include <imtq-api/imtq.h>
+#include <isis-imtq-api/imtq.h>
 #include <stdio.h>
 #include <string.h>
 

@@ -8,7 +8,7 @@
     },
     "version":"0.1.0",
     "dependencies":{
-        "trxvu-radio-api":"kubos/trxvu-radio-api"
+        "isis-trxvu-api":"kubos/isis-trxvu-api"
     },
     "homepage":"https://<homepage>",
     "description":"Example TRXVU application"

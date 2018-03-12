@@ -1,4 +1,4 @@
-set_target_properties(imtq-api-test-adcs
+set_target_properties(isis-imtq-api-test-adcs
         PROPERTIES
         LINK_FLAGS
         "-Wl,--wrap=open \
