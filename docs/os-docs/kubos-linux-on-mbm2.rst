@@ -45,6 +45,14 @@ U-Boot
 This board utilizes U-Boot's SPL feature. A small boot file called "MLO" is
 run and that file then loads the main U-Boot image into SDRAM.
 
+The main U-Boot image iterates through the `boot_targets` variable to attempt 
+to boot from an available MMC device. The partuuid of the first successful
+device is passed off to Linux to be used to mount the root filesystem. 
+
+By default, the microSD card slot will be checked first, followed by the
+eMMC. This behavior can be changed by setting the ``boot_dev`` value to
+``1`` to indicate that the eMMC should be tried first.
+
 Kubos Linux Build Process
 -------------------------
 
@@ -144,7 +152,8 @@ The relevant files are:
 -  pumpkin-mbm2.dtb - The Device Tree Binary that Linux uses to configure itself
    for the Pumpkin MBM2 board
 -  rootfs.tar - The root file system. Contains BusyBox and other libraries
--  kubos-linux.img - The complete Kubos Linux SD card image
+-  kubos-linux.img - The complete Kubos Linux SD card image. It has a disk
+   signature of 0x4B4C4E58 ("KLNX").
 
 Changing the Output Toolchain Directory (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -165,13 +174,16 @@ onto the eMMC. In order to create a full Kubos Linux setup, you'll want to also 
 an auxiliary image for the microSD card containing the upgrade partition and an additional
 user data partition.
 
-Follow the :ref:`upgrade-creation` instructions in order to create a Kubos Package file
-(kpack-\*.itb) to be used for recovery.
+Follow the :ref:`upgrade-creation` instructions in order to create a base Kubos Package file
+(`kpack-base.itb`) to be used for recovery.
 
-Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.img`` script. 
+Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.sh`` script. 
 This will create a new SD card image, `aux-sd.img`, with two partitions:
+
 - An upgrade partition containing `kpack-base.itb`
 - A user data partition
+
+The image's disk signature will be 0x41555820 ("AUX ").
 
 There are two parameters which may be specified:
 

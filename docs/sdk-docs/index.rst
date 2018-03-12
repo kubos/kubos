@@ -52,21 +52,23 @@ This documentation section contains the various guides related to using the Kubo
 
     - :doc:`../installation-docs/sdk-installing` - How to install the SDK onto your host machine
     - :doc:`sdk-examples` - A list of example projects using the SDK
+    - :doc:`sdk-project-config` - How to configure a Kubos project's settings, dependencies, and underlying hardware information
     - :doc:`sdk-cheatsheet` - A quick guide for the most common SDK tasks
     - :doc:`sdk-reference` - The full list of Kubos CLI commands
-    - :doc:`sdk-project-config` - How to configure a Kubos project's settings, dependencies, and underlying hardware information
+    - :doc:`sdk-rust` - How to develop and run Kubos projects using Rust
+    - :doc:`sdk-python` - How to develop and run Kubos projects using Python
     - :doc:`windows-dev-environment` - How to develop Kubos projects from a Windows-based host computer
     - :doc:`sdk-upgrading` - How to upgrade to the latest version of the Kubos SDK
 
 .. toctree::
     :hidden:
 
-    Installing the Kubos SDK <../installation-docs/sdk-installing>
-    Example Projects <sdk-examples>
-    Kubos Project Configuration <sdk-project-config>
-    Kubos SDK Cheat Sheet <sdk-cheatsheet>
-    Kubos CLI Command Reference <sdk-reference>
-    Compiling and Flashing Rust <sdk-rust>
-    Flashing Python <sdk-python>
-    Windows Development Environment Example <windows-dev-environment>
+    ../installation-docs/sdk-installing
+    sdk-examples
+    sdk-project-config
+    sdk-cheatsheet
+    sdk-reference
+    sdk-rust
+    sdk-python
+    windows-dev-environment
     Upgrading Kubos SDK <sdk-upgrading>

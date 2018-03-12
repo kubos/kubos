@@ -23,4 +23,3 @@ Supported devices:
     ISIS Antenna Systems <ants/ants>
     ISIS iMTQ <imtq/imtq>
     ISIS TRXVU Radio <trxvu/trxvu>
-    

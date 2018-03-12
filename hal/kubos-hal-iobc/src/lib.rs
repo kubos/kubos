@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017 Kubos Corporation
+// Copyright (C) 2018 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ pub struct SupervisorVersion {
 
 /// Structure for individual enable statuses
 /// Used in SupervisorHousekeeping
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct SupervisorEnableStatus {
     pub power_obc: u8,
     pub power_rtc: u8,

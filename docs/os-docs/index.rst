@@ -20,8 +20,8 @@ Installation Docs
     Installing Kubos Linux on ISIS-OBC <../installation-docs/installing-linux-iobc>
     Installing Kubos Linux on Pumpkin MBM2 <../installation-docs/installing-linux-mbm2>
     
-General Guide
--------------
+General Guides
+--------------
 
 .. toctree::
     :maxdepth: 1
@@ -38,6 +38,8 @@ System Guides
     Working with the Beaglebone Black <working-with-the-bbb>
     Working with the iOBC <working-with-the-iobc>
     Working with the Pumpkin MBM2 <working-with-the-mbm2>
+    
+.. _sysadmin:
     
 SysAdmin Docs
 -------------
