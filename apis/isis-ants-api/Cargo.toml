@@ -1,0 +1,6 @@
+[package]
+name = "isis-ants-api"
+version = "0.1.0"
+authors = ["Catherine Garabedian <catherine@kubos.co>"]
+
+[dependencies]

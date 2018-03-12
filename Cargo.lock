@@ -77,6 +77,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "crc16"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "dtoa"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -193,6 +198,10 @@ dependencies = [
  "typemap 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "url 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "isis-ants-api"
+version = "0.1.0"
 
 [[package]]
 name = "itoa"
@@ -341,6 +350,8 @@ dependencies = [
 name = "nsl-duplex-d2"
 version = "0.1.0"
 dependencies = [
+ "chrono 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "crc16 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "nom 4.0.0-beta1 (registry+https://github.com/rust-lang/crates.io-index)",
  "radio-api 0.1.0",
  "serial 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -751,6 +762,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum cc 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)" = "9be26b24e988625409b19736d130f0c7d224f01d06454b5f81d8d23d6c1a618f"
 "checksum cfg-if 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "d4c819a1287eb618df47cc647173c5c4c66ba19d888a6e50d605672aed3140de"
 "checksum chrono 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7c20ebe0b2b08b0aeddba49c609fe7957ba2e33449882cb186a180bc60682fa9"
+"checksum crc16 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)" = "11a65c4797332f3e3a5945e0377875afc79b1bdc87082a4f98ac1ef15b47e2dd"
 "checksum dtoa 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "09c3753c3db574d215cba4ea76018483895d7bff25a31b49ba45db21c48e50ab"
 "checksum failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "934799b6c1de475a012a02dab0ace1ace43789ee4b99bcfbf1a2e3e8ced5de82"
 "checksum failure_derive 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "c7cdda555bb90c9bb67a3b670a0f42de8e73f5981524123ad8578aafec8ddb8b"
