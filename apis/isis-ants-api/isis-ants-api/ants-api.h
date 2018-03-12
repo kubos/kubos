@@ -151,7 +151,7 @@ typedef enum {
  */
 typedef enum {
     PRIMARY,            /**< Issue commands using the primary microcontroller */
-    SECONDARY,          /**< Issue commands using the primary microcontroller (if available) */
+    SECONDARY,          /**< Issue commands using the secondary microcontroller (if available) */
 } KANTSController;
 
 /**

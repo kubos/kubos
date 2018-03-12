@@ -18,6 +18,7 @@
 
 #include <cmocka.h>
 #include <errno.h>
+#include <linux/i2c-dev.h>
 #include <unistd.h>
 
 /* Returns a file descriptor or -1 on failure */
@@ -32,12 +33,18 @@ int __wrap_close(int fd)
     return mock_type(int);
 }
 
-/* 
+/*
  * Returns 0 on success (or occasionally a positive value) and -1 on failure
  */
-int __wrap_ioctl(int fd, unsigned long request, ...)
+int __wrap_ioctl(int fd, unsigned long request, long addr, ...)
 {
     /* Pretty sure this shouldn't ever fail */
+
+    if (request == I2C_SLAVE)
+    {
+        check_expected(addr);
+    }
+
     return 0;
 }
 

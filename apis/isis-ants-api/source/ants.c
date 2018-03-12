@@ -21,7 +21,10 @@
 #include <unistd.h>
 
 /* Address of the antenna microcontroller commands should be issued against */
-uint8_t ants_addr;
+static uint8_t ants_addr;
+
+/* Handle for watchdog thread */
+static pthread_t handle_watchdog = { 0 };
 
 /*
  * The system can lock up if you make too many calls too quickly,
@@ -54,6 +57,7 @@ KANTSStatus k_ants_init()
 
 void k_ants_terminate()
 {
+    ants_addr = 0;
     k_i2c_terminate(ANTS_I2C_BUS);
 
     return;
@@ -197,6 +201,7 @@ KANTSStatus k_ants_deploy(KANTSAnt antenna, bool override, uint8_t timeout)
             break;
 #endif
 #if ANT_COUNT > 3
+        case ANT_4:
             if (override)
             {
                 packet[0] = DEPLOY_4_OVERRIDE;
@@ -355,7 +360,7 @@ KANTSStatus k_ants_get_activation_count(KANTSAnt antenna, uint8_t * count)
 {
     KANTSStatus ret = ANTS_OK;
 
-    if (count == NULL)
+    if (count == NULL || antenna >= ANT_COUNT)
     {
         return ANTS_ERROR_CONFIG;
     }
@@ -388,7 +393,7 @@ KANTSStatus k_ants_get_activation_time(KANTSAnt antenna, uint16_t * time)
 {
     KANTSStatus ret = ANTS_OK;
 
-    if (time == NULL)
+    if (time == NULL || antenna >= ANT_COUNT)
     {
         return ANTS_ERROR_CONFIG;
     }
@@ -441,8 +446,6 @@ KANTSStatus k_ants_watchdog_kick()
 
     return ret;
 }
-
-pthread_t handle_watchdog = { 0 };
 
 void * kprv_ants_watchdog_thread(void * args)
 {
@@ -509,7 +512,7 @@ KANTSStatus k_ants_watchdog_stop()
 KANTSStatus k_ants_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
                                int rx_len)
 {
-    if (tx == NULL || tx_len < 1 || (rx == NULL && rx_len != 0))
+    if (tx == NULL || tx_len < 1 || (rx == NULL && rx_len != 0) || (rx != NULL && rx_len == 0))
     {
         return ANTS_ERROR_CONFIG;
     }
