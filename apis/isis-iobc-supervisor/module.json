@@ -1,5 +1,5 @@
 {
-  "name": "kubos-hal-iobc",
+  "name": "isis-iobc-supervisor",
   "version": "0.1.0",
   "description": "Kubos HAL for iOBC peripherals",
   "keywords": [],

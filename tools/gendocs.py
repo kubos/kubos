@@ -14,9 +14,9 @@ echo "XML_OUTPUT=.";) | doxygen -"""
 DOCS_DIRS = [
     "apis/isis-ants-api",
     "apis/isis-imtq-api",
+    "apis/isis-iobc-supervisor",
     "apis/isis-trxvu-api",
     "hal/kubos-hal",
-    "hal/kubos-hal-iobc",
     "hal/kubos-hal-linux",
     "libcsp",
 

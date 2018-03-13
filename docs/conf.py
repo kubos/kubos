@@ -109,9 +109,9 @@ breathe_projects = {
     
     "isis-ants-api" : "../xml/apis/isis-ants-api",
     "isis-imtq-api": "../xml/apis/isis-imtq-api",
+    "isis-iobc-supervisor" : "../xml/apis/isis-iobc-supervisor",
     "isis-trxvu-api": "../xml/apis/isis-trxvu-api",
     "kubos-hal" : "../xml/hal/kubos-hal",
-    "kubos-hal-iobc" : "../xml/hal/kubos-hal-iobc",
     "kubos-hal-linux" : "../xml/hal/kubos-hal-linux",
     "libcsp" : "../xml/libcsp",
 

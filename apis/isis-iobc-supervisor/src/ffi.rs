@@ -31,7 +31,7 @@ pub struct supervisor_version(pub [uint8_t; LENGTH_TELEMETRY_GET_VERSION]);
 #[repr(C)]
 pub struct supervisor_housekeeping(pub [uint8_t; LENGTH_TELEMETRY_HOUSEKEEPING]);
 
-/// Bring in C functions from kubos-hal-iobc
+/// Bring in C functions from isis-iobc-supervisor
 extern "C" {
     pub fn supervisor_emergency_reset() -> bool;
     pub fn supervisor_reset() -> bool;

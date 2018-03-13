@@ -37,4 +37,3 @@ of Linux system calls.
 
    i2c_api
    Kubos Linux APIs <kubos-hal-linux/index>
-   ISIS iOBC APIs <kubos-hal-iobc/index>

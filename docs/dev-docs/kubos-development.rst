@@ -146,7 +146,7 @@ file path. Any modules which are using the native Kubos code will have a
       ┃ ┣━ csp 1.5.1 yotta_modules/csp -> /home/vagrant/.kubos/kubos/libcsp
       ┃ ┃ ┗━ tinycbor 0.5.0 yotta_modules/tinycbor -> /home/vagrant/.kubos/kubos/tinycbor
       ┃ ┗━ kubos-hal-linux 0.1.0 yotta_modules/kubos-hal-linux -> /home/vagrant/.kubos/kubos/hal/kubos-hal-linux
-      ┃   ┗━ kubos-hal-iobc 0.1.0 yotta_modules/kubos-hal-iobc -> /home/vagrant/.kubos/kubos/hal/kubos-hal-iobc
+      ┃   ┗━ isis-iobc-supervisor 0.1.0 yotta_modules/isis-iobc-supervisor -> /home/vagrant/.kubos/kubos/apis/isis-iobc-supervisor
       ┗━ ccan-json 1.0.0 yotta_modules/ccan-json -> /home/vagrant/.kubos/kubos/ccan/json
 
 

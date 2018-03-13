@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "kubos-hal-iobc/supervisor.h"
-#include "kubos-hal-iobc/checksum.h"
+#include "isis-iobc-supervisor/supervisor.h"
+#include "isis-iobc-supervisor/checksum.h"
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
 #include <stdio.h>
