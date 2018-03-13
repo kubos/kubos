@@ -32,7 +32,7 @@ static pthread_t handle_watchdog = { 0 };
  */
 const struct timespec TRANSFER_DELAY = {.tv_sec = 0, .tv_nsec = 1000001 };
 
-KANTSStatus k_ants_init()
+KANTSStatus k_ants_init(KI2CNum bus, uint8_t primary, uint8_t secondary, uint8_t ant_count, uint32_t timeout)
 {
     /*
      * All I2C configuration is done at the kernel level,

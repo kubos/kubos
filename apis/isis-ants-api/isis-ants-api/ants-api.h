@@ -23,6 +23,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <kubos-hal/i2c.h>
 
 /**
  *  @name ISIS AntS config.json configuration options and default values
@@ -31,47 +32,27 @@
 /**
  * I2C bus the ISIS AntS is connected to
  */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_I2C_BUS
-#define ANTS_I2C_BUS YOTTA_CFG_ANTENNA_ISIS_I2C_BUS
-#else
 #define ANTS_I2C_BUS K_I2C1
-#endif
 
 /**
  * Primary antenna controller's I2C address
  */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_PRIMARY
-#define ANTS_PRIMARY YOTTA_CFG_ANTENNA_ISIS_PRIMARY
-#else
 #define ANTS_PRIMARY 0x31
-#endif
 
 /**
  * Secondary (redundant) antenna controller's I2C address
  */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_SECONDARY
-#define ANTS_SECONDARY YOTTA_CFG_ANTENNA_ISIS_SECONDARY
-#else
 #define ANTS_SECONDARY 0x00
-#endif
 
 /**
  * Number of deployable antennas
  */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_COUNT
-#define ANT_COUNT YOTTA_CFG_ANTENNA_ISIS_COUNT
-#else
-#define ANT_COUNT 2
-#endif
+#define ANT_COUNT 4
 
 /**
  * Watchdog timeout (in seconds)
  */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_WATCHDOG_TIMEOUT
-#define ANTS_WD_TIMEOUT YOTTA_CFG_ANTENNA_ISIS_WATCHDOG_TIMEOUT
-#else
 #define ANTS_WD_TIMEOUT 60
-#endif
 /**@}*/
 
 /** \cond WE DO NOT WANT TO HAVE THESE IN OUR GENERATED DOCS */
@@ -187,7 +168,7 @@ typedef struct
  * Initialize the antenna interface
  * @return KANTSStatus ANTS_OK if OK, error otherwise
  */
-KANTSStatus k_ants_init(void);
+KANTSStatus k_ants_init(KI2CNum bus, uint8_t primary, uint8_t secondary, uint8_t ant_count, uint32_t timeout);
 /**
  * Terminate the antenna interface
  */
