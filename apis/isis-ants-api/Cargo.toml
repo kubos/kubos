@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 
 [dependencies]
+failure = "0.1.1"

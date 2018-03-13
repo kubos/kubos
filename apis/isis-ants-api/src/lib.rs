@@ -14,4 +14,43 @@
 // limitations under the License.
 //
 
-mod ffi;
+//TODO: remove before publishing
+#![allow(unused)]
+
+#[macro_use]
+extern crate failure;
+use failure::Error;
+
+//TODO: Only making this pub for KI2CNum, maybe create
+//a conversion function with a new Rusty enum?
+pub mod ffi;
+
+/// Common Error for AntS Actions
+#[derive(Debug, Fail)]
+pub enum AntsError {
+    //TODO: need to do anything with 'cause'?
+    #[fail(display = "Generic error")]
+    GenericError,
+    #[fail(display = "Configuration error")]
+    ConfigError,
+}
+
+pub type Err = AntsError;
+pub type AntSResult<T> = Result<T, Error>;
+
+pub fn init(
+    bus: ffi::KI2CNum,
+    primary: u8,
+    secondary: u8,
+    ant_count: u8,
+    timeout: u32,
+) -> AntSResult<()> {
+
+    match unsafe { ffi::k_ants_init(bus, primary, secondary, ant_count, timeout) } {
+        //TODO: better error handling?
+        AntsOk => Ok(()),
+        AntsErrorConfig => Err(AntsError::ConfigError.into()),
+        _ => Err(AntsError::GenericError.into()),
+    }
+
+}
