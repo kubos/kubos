@@ -35,6 +35,12 @@ uint16_t activation_time  = 44;
 uint8_t  activation_count = 3;
 /* End of Test Data */
 
+static void test_init(void ** state)
+{
+    will_return(__wrap_open, 1);
+    assert_int_equal(k_ants_init(K_I2C1, ANTS_PRIMARY, ANTS_SECONDARY, ANT_COUNT, 10), ANTS_OK);
+}
+
 static void test_no_init_arm(void ** arg)
 {
 
@@ -676,6 +682,7 @@ int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_no_init_arm),
+        cmocka_unit_test_teardown(test_init, term),
         cmocka_unit_test_setup_teardown(test_reset, init, term),
         cmocka_unit_test_setup_teardown(test_watchdog_kick, init, term),
         cmocka_unit_test_setup_teardown(test_watchdog_thread, init, term),
