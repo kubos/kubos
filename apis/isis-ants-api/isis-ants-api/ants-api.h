@@ -25,36 +25,6 @@
 #include <stdint.h>
 #include <kubos-hal/i2c.h>
 
-/**
- *  @name ISIS AntS config.json configuration options and default values
- */
-/**@{*/
-/**
- * I2C bus the ISIS AntS is connected to
- */
-#define ANTS_I2C_BUS K_I2C1
-
-/**
- * Primary antenna controller's I2C address
- */
-#define ANTS_PRIMARY 0x31
-
-/**
- * Secondary (redundant) antenna controller's I2C address
- */
-#define ANTS_SECONDARY 0x00
-
-/**
- * Number of deployable antennas
- */
-#define ANT_COUNT 4
-
-/**
- * Watchdog timeout (in seconds)
- */
-#define ANTS_WD_TIMEOUT 60
-/**@}*/
-
 /** \cond WE DO NOT WANT TO HAVE THESE IN OUR GENERATED DOCS */
 /* AntS command values */
 #define SYSTEM_RESET                0xAA
@@ -98,23 +68,17 @@
 #define ANT_1_STOPPED_TIME          (4 << 12)   /**< Antenna 1 deployment time limit was reached */
 #define ANT_1_ACTIVE                (2 << 12)   /**< Antenna 1 deployment system is active */
 
-#if ANT_COUNT > 1
 #define ANT_2_NOT_DEPLOYED          (8 << 8)    /**< Antenna 2 is not deployed */
 #define ANT_2_STOPPED_TIME          (4 << 8)    /**< Antenna 2 deployment time limit was reached */
 #define ANT_2_ACTIVE                (2 << 8)    /**< Antenna 2 deployment system is active */
-#endif
 
-#if ANT_COUNT > 2
 #define ANT_3_NOT_DEPLOYED          (8 << 4)    /**< Antenna 3 is not deployed */
 #define ANT_3_STOPPED_TIME          (4 << 4)    /**< Antenna 3 deployment time limit was reached */
 #define ANT_3_ACTIVE                (2 << 4)    /**< Antenna 3 deployment system is active */
-#endif
 
-#if ANT_COUNT > 3
 #define ANT_4_NOT_DEPLOYED          (8 << 0)    /**< Antenna 4 is not deployed */
 #define ANT_4_STOPPED_TIME          (4 << 0)    /**< Antenna 4 deployment time limit was reached */
 #define ANT_4_ACTIVE                (2 << 0)    /**< Antenna 4 deployment system is active */
-#endif
 /**@}*/
 
 /**
@@ -140,15 +104,9 @@ typedef enum {
  */
 typedef enum {
     ANT_1,              /**< Antenna 1 */
-#if ANT_COUNT > 1
     ANT_2,              /**< Antenna 2 */
-#endif
-#if ANT_COUNT > 2
     ANT_3,              /**< Antenna 3 */
-#endif
-#if ANT_COUNT > 3
     ANT_4               /**< Antenna 4 */
-#endif
 } KANTSAnt;
 
 /**
