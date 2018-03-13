@@ -10,4 +10,4 @@ iron = "0.6.0"
 mount = "0.4.0"
 logger = "0.4.0"
 
-kubos-hal-iobc = { path = "../../hal/kubos-hal-iobc" }
+isis-iobc-supervisor = { path = "../../apis/isis-iobc-supervisor" }
