@@ -2,5 +2,5 @@ iOBC Checksum API
 -----------------
 
 .. doxygengroup:: iOBC-Checksum
-    :project: kubos-hal-iobc
+    :project: isis-iobc-supervisor
     :members:

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "kubos-hal-iobc/supervisor.h"
+#include "isis-iobc-supervisor/supervisor.h"
 
 int main(int argc, char ** argv)
 {

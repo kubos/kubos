@@ -7,8 +7,8 @@ Supported devices:
   
   - ISIS
   
-    - `ISIS iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__
     - `ISIS Antenna Systems <https://www.isispace.nl/product-category/products/antenna-systems/>`__
+    - `ISIS iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__
     - `ISIS TRXVU <https://www.isispace.nl/product/isis-uhf-downlink-vhf-uplink-full-duplex-transceiver/>`__
     
   - NSL
