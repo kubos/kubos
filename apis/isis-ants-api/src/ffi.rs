@@ -50,11 +50,10 @@ pub enum KANTSAnt {
 
 #[repr(C, packed)]
 pub struct AntsTelemetry {
-    raw_temp: u16,
-    deploy_status: u16,
-    uptime: u32,
+    pub raw_temp: u16,
+    pub deploy_status: u16,
+    pub uptime: u32,
 }
-
 
 /// Bring in C functions from isis-ants-api
 extern "C" {
@@ -81,5 +80,5 @@ extern "C" {
     pub fn k_ants_watchdog_kick() -> KANTSStatus;
     pub fn k_ants_watchdog_start() -> KANTSStatus;
     pub fn k_ants_watchdog_stop() -> KANTSStatus;
-    pub fn k_ants_passthrough(tx: &u8, tx_len: u8, rx: &u8, rx_len: u8) -> KANTSStatus;
+    pub fn k_ants_passthrough(tx: *const u8, tx_len: u8, rx: *mut u8, rx_len: u8) -> KANTSStatus;
 }
