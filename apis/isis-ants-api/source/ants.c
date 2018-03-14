@@ -121,15 +121,16 @@ KANTSStatus k_ants_reset()
         ret = ANTS_ERROR;
     }
 
-#if ants_secondary != 0
-    status = k_i2c_write(ants_bus, ants_secondary, (uint8_t *) &cmd, 1);
-    if (status != I2C_OK)
+    if (ants_secondary != 0)
     {
-        fprintf(stderr, "Failed to reset secondary AntS controller: %d\n",
-                status);
-        ret = ANTS_ERROR;
+        status = k_i2c_write(ants_bus, ants_secondary, (uint8_t *) &cmd, 1);
+        if (status != I2C_OK)
+        {
+            fprintf(stderr, "Failed to reset secondary AntS controller: %d\n",
+                    status);
+            ret = ANTS_ERROR;
+        }
     }
-#endif
 
     nanosleep(&TRANSFER_DELAY, NULL);
 
@@ -447,14 +448,15 @@ KANTSStatus k_ants_watchdog_kick()
         ret = ANTS_ERROR;
     }
 
-#if ants_secondary != 0
-    status = k_i2c_write(ants_bus, ants_secondary, (uint8_t *) &cmd, 1);
-    if (status != I2C_OK)
+    if (ants_secondary != 0)
     {
-        fprintf(stderr, "Failed to kick AntS redundant watchdog: %d\n", status);
-        ret = ANTS_ERROR;
+        status = k_i2c_write(ants_bus, ants_secondary, (uint8_t *) &cmd, 1);
+        if (status != I2C_OK)
+        {
+            fprintf(stderr, "Failed to kick AntS redundant watchdog: %d\n", status);
+            ret = ANTS_ERROR;
+        }
     }
-#endif
 
     return ret;
 }
