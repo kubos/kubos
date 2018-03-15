@@ -2,6 +2,8 @@
 name = "isis-ants-api"
 version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
+license = "Apache-2.0"
+repository = "https://github.com/kubos/kubos"
 
 [dependencies]
 failure = { git = "https://github.com/rust-lang-nursery/failure" }

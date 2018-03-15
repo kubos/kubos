@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-//TODO: Move to Rust FFI for kubos-hal-i2c?
+#[allow(dead_code)]
 #[repr(C)]
 pub enum KI2CNum {
     KI2CNoBus,
@@ -23,6 +23,7 @@ pub enum KI2CNum {
     KI2C3,
 }
 
+#[allow(dead_code)]
 #[repr(C)]
 pub enum KANTSStatus {
     AntsOK,
@@ -69,11 +70,11 @@ extern "C" {
     pub fn k_ants_deploy(antenna: KANTSAnt, force: bool, timeout: u8) -> KANTSStatus;
     pub fn k_ants_auto_deploy(timeout: u8) -> KANTSStatus;
     pub fn k_ants_cancel_deploy() -> KANTSStatus;
-    pub fn k_ants_get_deploy_status(resp: &u16) -> KANTSStatus;
-    pub fn k_ants_get_uptime(uptime: &u8) -> KANTSStatus;
-    pub fn k_ants_get_system_telemetry(telem: &AntsTelemetry) -> KANTSStatus;
-    pub fn k_ants_get_activation_count(antenna: KANTSAnt, count: &u8) -> KANTSStatus;
-    pub fn k_ants_get_activation_time(antenna: KANTSAnt, time: &u16) -> KANTSStatus;
+    pub fn k_ants_get_deploy_status(resp: *mut u16) -> KANTSStatus;
+    pub fn k_ants_get_uptime(uptime: *mut u32) -> KANTSStatus;
+    pub fn k_ants_get_system_telemetry(telem: *mut AntsTelemetry) -> KANTSStatus;
+    pub fn k_ants_get_activation_count(antenna: KANTSAnt, count: *mut u8) -> KANTSStatus;
+    pub fn k_ants_get_activation_time(antenna: KANTSAnt, time: *mut u16) -> KANTSStatus;
     pub fn k_ants_watchdog_kick() -> KANTSStatus;
     pub fn k_ants_watchdog_start() -> KANTSStatus;
     pub fn k_ants_watchdog_stop() -> KANTSStatus;

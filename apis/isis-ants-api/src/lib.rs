@@ -14,232 +14,47 @@
 // limitations under the License.
 //
 
-//TODO: remove before publishing
-#![allow(unused)]
+//! Kubos API for interacting with [ISIS Antenna Systems](https://www.isispace.nl/product-category/products/antenna-systems/)
+//!
+//! All work is done against an instantiated [`AntS`] struct.
+//!
+//! # Examples
+//!
+//! ```
+//! extern crate isis_ants_api;
+//!
+//! use isis_ants_api::{AntS, KI2CNum, KANTSController};
+//! use std::thread::sleep;
+//! use std::time::Duration;
+//!
+//! // Create a new AntS connection
+//! let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10).unwrap();
+//!
+//! // Configure it to run commands against the secondary controller
+//! ants.configure(KANTSController::Secondary)?;
+//!
+//! // Prepare the system for deployment
+//! ants.arm()?;
+//!
+//! // Auto-deploy the antennas with a five second timeout for each
+//! ants.auto_deploy(5)?;
+//!
+//! // Give deployment a moment to run
+//! sleep(Duration::from_secs(5));
+//!
+//! // Get the current deployment status
+//! let deploy = ants.get_deploy()?;
+//! println!("Antenna deployment status: {:x}", deploy);
+//! ```
+//!
+//! [`AntS`]: struct.AntS.html
+
+#![warn(missing_docs)]
 
 #[macro_use]
 extern crate failure;
-use failure::Error;
 
-//TODO: Only making this pub for KI2CNum, maybe create
-//a conversion function with a new Rusty enum?
-pub mod ffi;
+pub use ants::*;
 
-/// Common Error for AntS Actions
-#[derive(Fail, Display, Debug)]
-pub enum AntsError {
-    //TODO: need to do anything with 'cause'?
-    #[display(fmt = "Generic error")]
-    GenericError,
-    #[display(fmt = "Configuration error")]
-    ConfigError,
-}
-
-pub type Err = AntsError;
-pub type AntSResult<T> = Result<T, Error>;
-
-pub struct AntsTelemetry {
-    pub raw_temp: u16,
-    pub deploy_status: u16,
-    pub uptime: u32,
-}
-
-pub struct AntS;
-
-impl AntS {
-    pub fn new(
-        bus: ffi::KI2CNum,
-        primary: u8,
-        secondary: u8,
-        ant_count: u8,
-        timeout: u32,
-    ) -> AntSResult<Self> {
-        //call init
-        match unsafe { ffi::k_ants_init(bus, primary, secondary, ant_count, timeout) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(AntS),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn configure(&self, config: ffi::KANTSController) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_configure(config) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn reset(&self) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_reset() } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn arm(&self) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_arm() } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn disarm(&self) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_disarm() } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn deploy(&self, antenna: ffi::KANTSAnt, force: bool, timeout: u8) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_deploy(antenna, force, timeout) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn auto_deploy(&self, timeout: u8) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_auto_deploy(timeout) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn cancel_deploy(&self) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_cancel_deploy() } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn get_deploy(&self) -> AntSResult<u16> {
-
-        let mut status: u16 = 0;
-
-        match unsafe { ffi::k_ants_get_deploy_status(&mut status) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(status),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn get_uptime(&self) -> AntSResult<u8> {
-
-        let mut uptime = 0;
-
-        match unsafe { ffi::k_ants_get_uptime(&mut uptime) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(uptime),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry> {
-
-        let mut c_telem = ffi::AntsTelemetry {
-            raw_temp: 0,
-            deploy_status: 0,
-            uptime: 0,
-        };
-
-        match unsafe { ffi::k_ants_get_system_telemetry(&mut c_telem) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => {
-                let telem = AntsTelemetry {
-                    raw_temp: c_telem.raw_temp,
-                    deploy_status: c_telem.deploy_status,
-                    uptime: c_telem.uptime,
-                };
-                Ok(telem)
-            }
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn get_activation_count(&self, antenna: ffi::KANTSAnt) -> AntSResult<u8> {
-
-        let mut count: u8 = 0;
-
-        match unsafe { ffi::k_ants_get_activation_count(antenna, &mut count) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(count),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn get_activation_time(&self, antenna: ffi::KANTSAnt) -> AntSResult<u16> {
-
-        let mut time: u16 = 0;
-
-        match unsafe { ffi::k_ants_get_activation_time(antenna, &mut time) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(time),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-
-    pub fn watchdog_kick(&self) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_watchdog_kick() } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn watchdog_start(&self) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_watchdog_start() } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn watchdog_stop(&self) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_watchdog_stop() } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    pub fn passthrough(&self, tx: &[u8], rx: &mut [u8]) -> AntSResult<()> {
-
-        let tx_len: u8 = tx.len() as u8;
-        let rx_len: u8 = rx.len() as u8;
-
-        //TODO: Double check that this is the correct way to pass pointers to buffers
-        match unsafe { ffi::k_ants_passthrough(tx.as_ptr(), tx_len, rx.as_mut_ptr(), rx_len) } {
-            //TODO: better error handling?
-            ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
-        }
-    }
-
-    fn drop(&mut self) {
-        unsafe { ffi::k_ants_terminate() }
-    }
-}
+mod ants;
+mod ffi;
