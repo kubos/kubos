@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-use libc::uint8_t;
+#[deny(warnings)]
+
+use libc::{int32_t, uint16_t, uint8_t};
+
+use radio_api::RadioError;
+
+// So that we can copy the member names for the C
+// structs/enums
+
+pub const RX_MAX_SIZE: usize = 200;
 
 /// The radio_telem is a union in the C source
 /// The largest element in the union holds six uint16_t
@@ -44,11 +53,39 @@ pub enum radio_status {
     radio_error_config,
 }
 
+// Helper function to convert radio status to radio error
+pub fn radio_status_to_err(status: radio_status) -> Result<(), RadioError> {
+    match status {
+        radio_status::radio_ok => Ok(()),
+        _ => Err(RadioError::HardwareError {
+            message: format!("TRXVU radio error {:?}", status),
+        }),
+    }
+}
+
+#[repr(C)]
+pub struct radio_rx_message {
+    pub msg_size: uint16_t,
+    pub doppler_offset: uint16_t,
+    pub signal_strength: uint16_t,
+    pub message: [uint8_t; RX_MAX_SIZE],
+}
+
 extern "C" {
     pub fn k_radio_init() -> radio_status;
     pub fn k_radio_watchdog_start() -> radio_status;
     pub fn k_radio_watchdog_stop() -> radio_status;
     pub fn k_radio_terminate();
-    pub fn k_radio_get_telemetry(buffer: *mut radio_telem, telem_type: radio_telem_type)
-        -> uint8_t;
+    pub fn k_radio_get_telemetry(
+        buffer: *mut radio_telem,
+        telem_type: radio_telem_type,
+    ) -> radio_status;
+
+    pub fn k_radio_send(
+        buffer: *const uint8_t,
+        len: int32_t,
+        response: *mut uint8_t,
+    ) -> radio_status;
+
+    pub fn k_radio_recv(buffer: *mut radio_rx_message, len: *mut uint8_t) -> radio_status;
 }

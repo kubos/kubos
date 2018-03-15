@@ -20,6 +20,8 @@ use radio_api::{nom_to_radio_error, Connection, RadioResult};
 use messages::{RxTelemetry, TxTelemetry};
 use ffi;
 
+use libc;
+
 /// Structure for interacting with the TRXVU Radio API
 pub struct Trxvu {}
 
@@ -42,17 +44,44 @@ impl Trxvu {
     /// Retrieves the tx telemetry
     pub fn get_tx_telemetry(&self) -> RadioResult<TxTelemetry> {
         let mut telem: ffi::radio_telem = unsafe { mem::uninitialized() };
-        unsafe { ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::tx_telem_all) };
-        let (extra, value) = TxTelemetry::parse(&telem.0).or_else(nom_to_radio_error)?;
+        ffi::radio_status_to_err(unsafe {
+            ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::tx_telem_all)
+        })?;
+        let (_, value) = TxTelemetry::parse(&telem.0).or_else(nom_to_radio_error)?;
         Ok(value)
     }
 
     /// Retrieves the rx telemetry
     pub fn get_rx_telemetry(&self) -> RadioResult<RxTelemetry> {
         let mut telem: ffi::radio_telem = unsafe { mem::uninitialized() };
-        unsafe { ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::rx_telem_all) };
-        let (extra, value) = RxTelemetry::parse(&telem.0).or_else(nom_to_radio_error)?;
+        ffi::radio_status_to_err(unsafe {
+            ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::rx_telem_all)
+        })?;
+        let (_, value) = RxTelemetry::parse(&telem.0).or_else(nom_to_radio_error)?;
         Ok(value)
+    }
+
+    pub fn send(&self, message: &[u8]) -> RadioResult<()> {
+        let mut response: u8 = 0;
+        unsafe {
+            ffi::radio_status_to_err(ffi::k_radio_send(
+                message.as_ptr(),
+                message.len() as i32,
+                &mut response,
+            ))?;
+        };
+        Ok(())
+    }
+
+    pub fn read(&self) -> RadioResult<Vec<u8>> {
+        let mut response: Vec<u8> = Vec::new();
+        let mut rx_msg: ffi::radio_rx_message = unsafe { mem::uninitialized() };
+        let mut len: u8 = 0;
+        unsafe {
+            ffi::k_radio_recv(&mut rx_msg, &mut len);
+        }
+        response.extend_from_slice(&rx_msg.message);
+        Ok(response)
     }
 }
 

@@ -36,6 +36,11 @@ pub enum RadioError {
         /// The message from original error
         message: String,
     },
+    /// There was a problem with the radio hardware
+    HardwareError {
+        /// The message from the original error
+        message: String,
+    },
 }
 
 impl fmt::Display for RadioError {
