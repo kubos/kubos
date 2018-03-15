@@ -141,13 +141,12 @@ file path. Any modules which are using the native Kubos code will have a
 
     vagrant@vagrant:~/my-project$ kubos ls
     my-project 0.1.0
-      ┗━ imtq-api 1.0.0 yotta_modules/imtq-api -> /home/vagrant/iobc/imtq-api
-      ┣━ adcs-api 0.1.0 yotta_modules/adcs-api -> /home/vagrant/.kubos/kubos/adcs/adcs-api
+      ┗━ isis-imtq-api 1.0.0 yotta_modules/isis-imtq-api -> /home/vagrant/iobc/isis-imtq-api
       ┣━ kubos-hal 0.1.2 yotta_modules/kubos-hal -> /home/vagrant/.kubos/kubos/hal/kubos-hal
       ┃ ┣━ csp 1.5.1 yotta_modules/csp -> /home/vagrant/.kubos/kubos/libcsp
       ┃ ┃ ┗━ tinycbor 0.5.0 yotta_modules/tinycbor -> /home/vagrant/.kubos/kubos/tinycbor
       ┃ ┗━ kubos-hal-linux 0.1.0 yotta_modules/kubos-hal-linux -> /home/vagrant/.kubos/kubos/hal/kubos-hal-linux
-      ┃   ┗━ kubos-hal-iobc 0.1.0 yotta_modules/kubos-hal-iobc -> /home/vagrant/.kubos/kubos/hal/kubos-hal-iobc
+      ┃   ┗━ isis-iobc-supervisor 0.1.0 yotta_modules/isis-iobc-supervisor -> /home/vagrant/.kubos/kubos/apis/isis-iobc-supervisor
       ┗━ ccan-json 1.0.0 yotta_modules/ccan-json -> /home/vagrant/.kubos/kubos/ccan/json
 
 

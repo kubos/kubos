@@ -1,12 +1,12 @@
 [workspace]
 members = [
-"radio/nsl-duplex-d2",
 "radio/trxvu-radio-api",
-"radio/rust-radio-api",
-"radio/comms-service",
+"apis/isis-iobc-supervisor",
+"apis/nsl-duplex-d2",
+"apis/rust-radio-api",
 "examples/rust-service/extern-lib",
 "examples/rust-service/service",
 "kubos-build-helper",
-"hal/kubos-hal-iobc",
+"services/comms-service",
 "services/iobc-supervisor-service"
 ]

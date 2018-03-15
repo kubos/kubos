@@ -1,0 +1,22 @@
+{
+    "license":"Apache-2.0",
+    "name":"isis-ants-api",
+    "repository":{
+        "url":"git://github.com/kubos/kubos/isis-ants-api",
+        "type":"git"
+    },
+    "version":"1.0.0",
+    "homepage":"https://github.com/kubos/kubos/isis-ants-api",
+    "extraIncludes": [
+        "isis-ants-api"
+    ],
+    "dependencies":{
+        "kubos-hal":"kubos/kubos-hal"
+    },
+    "testDependencies": {
+        "cmocka": "kubos/cmocka"
+    },
+    "testTargets": [
+        "x86-linux-native"
+    ]
+}

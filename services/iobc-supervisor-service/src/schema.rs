@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-extern crate kubos_hal_iobc;
+extern crate isis_iobc_supervisor;
 
 use model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 use juniper::Context as JuniperContext;
@@ -250,19 +250,19 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     field reset(&executor) -> FieldResult<()>
         as "Reset Supervisor"
     {
-        Ok(kubos_hal_iobc::supervisor_reset()?)
+        Ok(isis_iobc_supervisor::supervisor_reset()?)
     }
 
     field emergency_reset(&executor) -> FieldResult<()>
         as "Supervisor Emergency Reset"
     {
-        Ok(kubos_hal_iobc::supervisor_emergency_reset()?)
+        Ok(isis_iobc_supervisor::supervisor_emergency_reset()?)
     }
 
     field powercycle(&executor) -> FieldResult<()>
         as "Supervisor Powercycle"
     {
-        Ok(kubos_hal_iobc::supervisor_powercycle()?)
+        Ok(isis_iobc_supervisor::supervisor_powercycle()?)
     }
 
 });
