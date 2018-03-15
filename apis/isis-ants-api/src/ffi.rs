@@ -14,9 +14,6 @@
 // limitations under the License.
 //
 
-//TODO: remove before publishing
-#![allow(unused)]
-
 //TODO: Move to Rust FFI for kubos-hal-i2c?
 #[repr(C)]
 pub enum KI2CNum {
