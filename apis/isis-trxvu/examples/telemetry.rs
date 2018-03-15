@@ -23,9 +23,37 @@ pub fn main() {
 
     println!("Getting transmit telemetry");
     let tx_telemetry = radio.get_tx_telemetry().unwrap();
-    println!("{:?}", tx_telemetry);
+    println!(
+        "TX Telemetry\n\
+         Inst RF Reflected {} dBm\n\
+         Inst RF Forward   {} dBm\n\
+         Supply Voltage    {} mA\n\
+         Supply Current    {} C\n\
+         Power Amp Temp   {} C\n\
+         Oscillator Temp   {} C",
+        tx_telemetry.inst_rf_reflected(),
+        tx_telemetry.inst_rf_forward(),
+        tx_telemetry.supply_voltage(),
+        tx_telemetry.supply_current(),
+        tx_telemetry.power_amp_temp(),
+        tx_telemetry.oscillator_temp()
+    );
 
     println!("Getting receive telemetry");
     let rx_telemetry = radio.get_rx_telemetry().unwrap();
-    println!("{:?}", rx_telemetry);
+    println!(
+        "TX Telemetry\n\
+         Inst Doppler Offset {} dBm\n\
+         Inst Signal Strength   {} dBm\n\
+         Supply Voltage    {} mA\n\
+         Supply Current    {} C\n\
+         Power Amp Temp   {} C\n\
+         Oscillator Temp   {} C",
+        rx_telemetry.inst_doppler_offset(),
+        rx_telemetry.inst_signal_strength(),
+        rx_telemetry.supply_voltage(),
+        rx_telemetry.supply_current(),
+        rx_telemetry.power_amp_temp(),
+        rx_telemetry.oscillator_temp()
+    );
 }

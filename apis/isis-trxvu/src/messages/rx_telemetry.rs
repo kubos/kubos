@@ -49,4 +49,28 @@ impl RxTelemetry {
             },
         ))
     }
+
+    pub fn inst_doppler_offset(&self) -> f32 {
+        (self.inst_doppler_offset as f32) * 13.352 - 22300.0
+    }
+
+    pub fn inst_signal_strength(&self) -> f32 {
+        (self.inst_signal_strength as f32) * 0.03 - 152.0
+    }
+
+    pub fn supply_voltage(&self) -> f32 {
+        (self.supply_voltage as f32) * 0.00488
+    }
+
+    pub fn supply_current(&self) -> f32 {
+        (self.supply_current as f32) * 0.16643964
+    }
+
+    pub fn power_amp_temp(&self) -> f32 {
+        (self.temp_power_amp as f32) * -0.07669 + 195.6037
+    }
+
+    pub fn oscillator_temp(&self) -> f32 {
+        (self.temp_oscillator as f32) * -0.07669 + 195.6037
+    }
 }

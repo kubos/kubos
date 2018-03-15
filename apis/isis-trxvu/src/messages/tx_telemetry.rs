@@ -17,15 +17,17 @@
 use nom::{IResult, le_u16};
 use nom::simple_errors::Context;
 
+use ffi::*;
+
 /// Struct for transmit telemetry
 #[derive(Debug)]
 pub struct TxTelemetry {
-    pub inst_rf_reflected: u16,
-    pub inst_rf_forward: u16,
-    pub supply_voltage: u16,
-    pub supply_current: u16,
-    pub temp_power_amp: u16,
-    pub temp_oscillator: u16,
+    inst_rf_reflected: u16,
+    inst_rf_forward: u16,
+    supply_voltage: u16,
+    supply_current: u16,
+    temp_power_amp: u16,
+    temp_oscillator: u16,
 }
 
 impl TxTelemetry {
@@ -48,5 +50,29 @@ impl TxTelemetry {
                 temp_oscillator,
             },
         ))
+    }
+
+    pub fn inst_rf_reflected(&self) -> f32 {
+        20.0 * ((self.inst_rf_reflected as f32) * 0.00767).log10()
+    }
+
+    pub fn inst_rf_forward(&self) -> f32 {
+        20.0 * ((self.inst_rf_forward as f32) * 0.00767).log10()
+    }
+
+    pub fn supply_voltage(&self) -> f32 {
+        (self.supply_voltage as f32) * 0.00488
+    }
+
+    pub fn supply_current(&self) -> f32 {
+        (self.supply_current as f32) * 0.16643964
+    }
+
+    pub fn power_amp_temp(&self) -> f32 {
+        (self.temp_power_amp as f32) * -0.07669 + 195.6037
+    }
+
+    pub fn oscillator_temp(&self) -> f32 {
+        (self.temp_oscillator as f32) * -0.07669 + 195.6037
     }
 }
