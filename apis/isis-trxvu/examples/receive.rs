@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-extern crate trxvu_radio_api;
+extern crate isis_trxvu;
 
-use trxvu_radio_api::Trxvu;
+use isis_trxvu::Trxvu;
 
 pub fn main() {
     let radio = Trxvu::new();
 
-    let message = vec![0, 0, 0, 0, 0, 0];
-    println!("Sending message");
-    radio.send(&message);
+    println!("Receiving message");
+    let message: Vec<u8> = radio.read().unwrap();
+    println!("Received {:?}", message);
 }

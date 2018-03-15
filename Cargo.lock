@@ -158,9 +158,9 @@ name = "iobc-supervisor-service"
 version = "0.1.0"
 dependencies = [
  "iron 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "isis-iobc-supervisor 0.1.0",
  "juniper 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "juniper_iron 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "isis-iobc-supervisor 0.1.0",
  "logger 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "mount 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -186,6 +186,24 @@ dependencies = [
  "plugin 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "typemap 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "url 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "isis-iobc-supervisor"
+version = "0.1.0"
+dependencies = [
+ "kubos-build-helper 0.1.0",
+ "libc 0.2.39 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "isis-trxvu"
+version = "0.1.0"
+dependencies = [
+ "kubos-build-helper 0.1.0",
+ "libc 0.2.39 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nom 4.0.0-beta1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "radio-api 0.1.0",
 ]
 
 [[package]]
@@ -234,14 +252,6 @@ name = "kubos-build-helper"
 version = "0.1.0"
 dependencies = [
  "glob 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "isis-iobc-supervisor"
-version = "0.1.0"
-dependencies = [
- "kubos-build-helper 0.1.0",
- "libc 0.2.39 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -674,16 +684,6 @@ dependencies = [
 name = "traitobject"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
-name = "trxvu-radio-api"
-version = "0.1.0"
-dependencies = [
- "kubos-build-helper 0.1.0",
- "libc 0.2.39 (registry+https://github.com/rust-lang/crates.io-index)",
- "nom 4.0.0-beta1 (registry+https://github.com/rust-lang/crates.io-index)",
- "radio-api 0.1.0",
-]
 
 [[package]]
 name = "typeable"

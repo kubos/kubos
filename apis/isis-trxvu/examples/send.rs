@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-extern crate trxvu_radio_api;
+extern crate isis_trxvu;
 
-use trxvu_radio_api::Trxvu;
+use isis_trxvu::Trxvu;
 
 pub fn main() {
     let radio = Trxvu::new();
 
-    println!("Getting transmit telemetry");
-    let tx_telemetry = radio.get_tx_telemetry().unwrap();
-    println!("{:?}", tx_telemetry);
-
-    println!("Getting receive telemetry");
-    let rx_telemetry = radio.get_rx_telemetry().unwrap();
-    println!("{:?}", rx_telemetry);
+    let message = vec![0, 0, 0, 0, 0, 0];
+    println!("Sending message");
+    radio.send(&message);
 }

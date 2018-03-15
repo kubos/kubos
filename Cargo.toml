@@ -1,6 +1,6 @@
 [workspace]
 members = [
-"radio/trxvu-radio-api",
+"apis/isis-trxvu",
 "apis/isis-iobc-supervisor",
 "apis/nsl-duplex-d2",
 "apis/rust-radio-api",
