@@ -16,6 +16,7 @@
 
 mod tx_telemetry;
 mod rx_telemetry;
+mod convert;
 
 pub use messages::tx_telemetry::TxTelemetry;
 pub use messages::rx_telemetry::RxTelemetry;

@@ -21,11 +21,38 @@ use radio_api::RadioError;
 
 pub const RX_MAX_SIZE: usize = 200;
 
+#[derive(Clone, Copy, Debug)]
+#[repr(C)]
+pub struct TxTelemRaw {
+    pub inst_rf_reflected: u16,
+    pub inst_rf_forward: u16,
+    pub supply_voltage: u16,
+    pub supply_current: u16,
+    pub temp_power_amp: u16,
+    pub temp_oscillator: u16,
+}
+
+#[derive(Clone, Copy, Debug)]
+#[repr(C)]
+pub struct RxTelemRaw {
+    pub inst_doppler_offset: u16,
+    pub supply_current: u16,
+    pub supply_voltage: u16,
+    pub temp_oscillator: u16,
+    pub temp_power_amp: u16,
+    pub inst_signal_strength: u16,
+}
+
 /// The radio_telem is a union in the C source
 /// The largest element in the union holds six uint16_t
 /// For simplicity we will use a buffer of two uint8_t
 #[repr(C)]
-pub struct radio_telem(pub [u8; 12]);
+pub union TelemRaw {
+    pub tx_state: u8,
+    pub uptime: u32,
+    pub tx_telem_raw: TxTelemRaw,
+    pub rx_telem_raw: RxTelemRaw,
+}
 
 /// Enum for selecting the telemetry type
 #[repr(C)]
@@ -83,7 +110,7 @@ extern "C" {
     pub fn k_radio_watchdog_stop() -> radio_status;
     pub fn k_radio_terminate();
     pub fn k_radio_get_telemetry(
-        buffer: *mut radio_telem,
+        buffer: *mut TelemRaw,
         telem_type: radio_telem_type,
     ) -> radio_status;
 

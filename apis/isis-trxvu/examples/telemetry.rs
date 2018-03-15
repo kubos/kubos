@@ -31,12 +31,12 @@ pub fn main() {
          Supply Current    {} C\n\
          Power Amp Temp   {} C\n\
          Oscillator Temp   {} C",
-        tx_telemetry.inst_rf_reflected(),
-        tx_telemetry.inst_rf_forward(),
-        tx_telemetry.supply_voltage(),
-        tx_telemetry.supply_current(),
-        tx_telemetry.power_amp_temp(),
-        tx_telemetry.oscillator_temp()
+        tx_telemetry.inst_rf_reflected,
+        tx_telemetry.inst_rf_forward,
+        tx_telemetry.supply_voltage,
+        tx_telemetry.supply_current,
+        tx_telemetry.temp_power_amp,
+        tx_telemetry.temp_oscillator
     );
 
     println!("Getting receive telemetry");
@@ -49,11 +49,11 @@ pub fn main() {
          Supply Current    {} C\n\
          Power Amp Temp   {} C\n\
          Oscillator Temp   {} C",
-        rx_telemetry.inst_doppler_offset(),
-        rx_telemetry.inst_signal_strength(),
-        rx_telemetry.supply_voltage(),
-        rx_telemetry.supply_current(),
-        rx_telemetry.power_amp_temp(),
-        rx_telemetry.oscillator_temp()
+        rx_telemetry.inst_doppler_offset,
+        rx_telemetry.inst_signal_strength,
+        rx_telemetry.supply_voltage,
+        rx_telemetry.supply_current,
+        rx_telemetry.temp_power_amp,
+        rx_telemetry.temp_oscillator
     );
 }

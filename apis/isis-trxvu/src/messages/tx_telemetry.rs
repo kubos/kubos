@@ -14,65 +14,29 @@
  * limitations under the License.
  */
 
-use nom::{IResult, le_u16};
-use nom::simple_errors::Context;
-
 use ffi::*;
+use messages::convert::*;
 
 /// Struct for transmit telemetry
 #[derive(Debug)]
 pub struct TxTelemetry {
-    inst_rf_reflected: u16,
-    inst_rf_forward: u16,
-    supply_voltage: u16,
-    supply_current: u16,
-    temp_power_amp: u16,
-    temp_oscillator: u16,
+    pub inst_rf_reflected: f32,
+    pub inst_rf_forward: f32,
+    pub supply_voltage: f32,
+    pub supply_current: f32,
+    pub temp_power_amp: f32,
+    pub temp_oscillator: f32,
 }
 
 impl TxTelemetry {
-    pub fn parse(input: &[u8]) -> IResult<&[u8], TxTelemetry> {
-        let (input, inst_rf_reflected) = le_u16(input)?;
-        let (input, inst_rf_forward) = le_u16(input)?;
-        let (input, supply_voltage) = le_u16(input)?;
-        let (input, supply_current) = le_u16(input)?;
-        let (input, temp_power_amp) = le_u16(input)?;
-        let (input, temp_oscillator) = le_u16(input)?;
-
-        Ok((
-            input,
-            TxTelemetry {
-                inst_rf_reflected,
-                inst_rf_forward,
-                supply_voltage,
-                supply_current,
-                temp_power_amp,
-                temp_oscillator,
-            },
-        ))
-    }
-
-    pub fn inst_rf_reflected(&self) -> f32 {
-        20.0 * ((self.inst_rf_reflected as f32) * 0.00767).log10()
-    }
-
-    pub fn inst_rf_forward(&self) -> f32 {
-        20.0 * ((self.inst_rf_forward as f32) * 0.00767).log10()
-    }
-
-    pub fn supply_voltage(&self) -> f32 {
-        (self.supply_voltage as f32) * 0.00488
-    }
-
-    pub fn supply_current(&self) -> f32 {
-        (self.supply_current as f32) * 0.16643964
-    }
-
-    pub fn power_amp_temp(&self) -> f32 {
-        (self.temp_power_amp as f32) * -0.07669 + 195.6037
-    }
-
-    pub fn oscillator_temp(&self) -> f32 {
-        (self.temp_oscillator as f32) * -0.07669 + 195.6037
+    pub fn parse(raw: &TxTelemRaw) -> TxTelemetry {
+        TxTelemetry {
+            inst_rf_reflected: get_rf_power_dbm(raw.inst_rf_reflected),
+            inst_rf_forward: get_rf_power_dbm(raw.inst_rf_forward),
+            supply_voltage: get_voltage(raw.supply_voltage),
+            supply_current: get_current(raw.supply_current),
+            temp_power_amp: get_temperature(raw.temp_power_amp),
+            temp_oscillator: get_temperature(raw.temp_oscillator),
+        }
     }
 }

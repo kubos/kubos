@@ -43,22 +43,28 @@ impl Trxvu {
 
     /// Retrieves the tx telemetry
     pub fn get_tx_telemetry(&self) -> RadioResult<TxTelemetry> {
-        let mut telem: ffi::radio_telem = unsafe { mem::uninitialized() };
+        let mut telem: ffi::TelemRaw = unsafe { mem::uninitialized() };
         ffi::radio_status_to_err(unsafe {
             ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::tx_telem_all)
         })?;
-        let (_, value) = TxTelemetry::parse(&telem.0).or_else(nom_to_radio_error)?;
-        Ok(value)
+        Ok(unsafe { TxTelemetry::parse(&telem.tx_telem_raw) })
     }
 
     /// Retrieves the rx telemetry
     pub fn get_rx_telemetry(&self) -> RadioResult<RxTelemetry> {
-        let mut telem: ffi::radio_telem = unsafe { mem::uninitialized() };
+        let mut telem: ffi::TelemRaw = unsafe { mem::uninitialized() };
         ffi::radio_status_to_err(unsafe {
             ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::rx_telem_all)
         })?;
-        let (_, value) = RxTelemetry::parse(&telem.0).or_else(nom_to_radio_error)?;
-        Ok(value)
+        Ok(unsafe { RxTelemetry::parse(&telem.rx_telem_raw) })
+    }
+
+    pub fn get_rx_uptime(&self) -> RadioResult<u32> {
+        let mut telem: ffi::TelemRaw = unsafe { mem::uninitialized() };
+        ffi::radio_status_to_err(unsafe {
+            ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::rx_uptime)
+        })?;
+        Ok(unsafe { telem.uptime })
     }
 
     pub fn send(&self, message: &[u8]) -> RadioResult<()> {
