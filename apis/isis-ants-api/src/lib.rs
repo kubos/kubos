@@ -21,12 +21,11 @@
 //! # Examples
 //!
 //! ```
-//! extern crate isis_ants_api;
-//!
-//! use isis_ants_api::{AntS, KI2CNum, KANTSController};
+//! use isis_ants_api::*;
 //! use std::thread::sleep;
 //! use std::time::Duration;
 //!
+//! # fn func() -> AntSResult<()> {
 //! // Create a new AntS connection
 //! let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10).unwrap();
 //!
@@ -46,6 +45,8 @@
 //! let deploy = ants.get_deploy()?;
 //! println!("Antenna 1 deployed: {}", !deploy.ant_1_not_deployed);
 //! println!("Antenna 2 deployment active: {}", deploy.ant_2_active);
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! [`AntS`]: struct.AntS.html

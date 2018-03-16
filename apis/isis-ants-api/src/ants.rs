@@ -56,10 +56,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
-    /// extern crate isis_ants_api;
-    /// use isis_ants_api::Ants;
+    /// use isis_ants_api::*;
     ///
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -93,11 +95,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
-    /// extern create isis_ants_api;
-    /// use isis_ants_api::{AntS, KANTSController};
-    ///
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x00, 2, 20)?;
     /// ants.configure(KANTSController::Secondary)?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -118,8 +121,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// ants.reset()?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -140,8 +147,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// ants.arm()?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -162,8 +173,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// ants.disarm()?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -190,11 +205,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
-    /// extern create isis_ants_api;
-    /// use isis_ants_api::{AntS, KANTSAnt};
-    ///
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x00, 2, 20)?;
     /// ants.deploy(KANTSAnt::Ant2, false, 10)?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -219,8 +235,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x00, 2, 20)?;
-    /// ants.deploy(5)?;
+    /// ants.auto_deploy(5)?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -241,8 +261,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// ants.cancel_deploy()?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -263,10 +287,14 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// let deploy = ants.get_deploy()?;
     /// println!("Antenna 1 deployed: {}", !deploy.ant_1_not_deployed);
     /// println!("Antenna 2 deployment active: {}", deploy.ant_2_active);
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -295,9 +323,13 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// let uptime = ants.get_uptime()?;
     /// println!("Antenna system uptime: {}", uptime);
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -321,15 +353,19 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// let sys_telem = ants.get_system_telemetry()?;
     ///
     /// println!("Antenna system telemetry:");
     /// println!("    raw_temp: {}", sys_telem.raw_temp);
-    /// println!("    deploy_status:", sys_telem.deploy_status);
+    /// println!("    deploy_status:");
     /// println!("        Antenna 1 deployed: {}", !sys_telem.deploy_status.ant_1_not_deployed);
     /// println!("        Antenna 2 deployment active: {}", sys_telem.deploy_status.ant_2_active);
     /// println!("    uptime: {}\n", sys_telem.uptime);
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -364,10 +400,14 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x00, 2, 20)?;
     /// let act_count = ants.get_activation_count(KANTSAnt::Ant3)?;
     ///
     /// println!("Antenna 3 activation count - {}", act_count);
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -397,10 +437,14 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x00, 2, 20)?;
     /// let act_count = ants.get_activation_time(KANTSAnt::Ant1)?;
     ///
     /// println!("Antenna 1 activation time - {}", act_count);
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -424,8 +468,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// ants.watchdog_kick()?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -447,8 +495,12 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// ants.watchdog_start()?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -469,10 +521,14 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// ants.watchdog_start()?;
-    /// ...
+    /// //...
     /// ants.watchdog_stop()?;
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
@@ -500,12 +556,16 @@ impl AntS {
     /// # Examples
     ///
     /// ```
+    /// # use isis_ants_api::*;
+    /// # fn func() -> AntSResult<()> {
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x00, 2, 20)?;
     /// let tx: [u8; 1] = [0xC3];
     /// let mut rx: [u8; 2] = [0; 2];
     ///
     /// ants.passthrough(&tx, &mut rx).unwrap();
     /// println!("Antenna passthrough response: {:?}", rx);
+    /// # Ok(())
+    /// # }
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
