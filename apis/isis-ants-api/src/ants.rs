@@ -15,40 +15,7 @@
 //
 
 use ffi;
-
-/// I<sup>2</sup>C bus which will be used for communication
-///
-/// *Note: Not all OBCs will have all of these buses avaialable*
-pub enum KI2CNum {
-    /// I<sup>2</sup>C Bus 1
-    KI2C1,
-    /// I<sup>2</sup>C Bus 2
-    KI2C2,
-    /// I<sup>2</sup>C Bus 3
-    KI2C3,
-}
-
-/// Antenna microcontroller which any commands should be run against
-pub enum KANTSController {
-    /// Primary microcontroller
-    Primary,
-    /// Secondary/redundant microcontroller
-    Secondary,
-}
-
-/// Specific antenna to control
-///
-/// *Note: Not all antenna systems have four antennas*
-pub enum KANTSAnt {
-    /// Antenna 1
-    Ant1,
-    /// Antenna 2
-    Ant2,
-    /// Antenna 3
-    Ant3,
-    /// Antenna 4
-    Ant4,
-}
+use parse::*;
 
 /// Common Error for AntS Actions
 #[derive(Fail, Display, Debug)]
@@ -64,18 +31,6 @@ pub enum AntsError {
 
 /// Custom result type for antenna operations
 pub type AntSResult<T> = Result<T, AntsError>;
-
-/// System telemetry fields returned from [`get_system_telemetry`]
-///
-/// [`get_system_telemetry`]: struct.AntS.html#method.get_system_telemetry
-pub struct AntsTelemetry {
-    /// Current system temperature (raw value)
-    pub raw_temp: u16,
-    /// Current deployment status flags
-    pub deploy_status: u16,
-    /// System uptime (in seconds)
-    pub uptime: u32,
-}
 
 /// Structure for interacting with an ISIS Antenna System
 pub struct AntS;
@@ -301,8 +256,6 @@ impl AntS {
 
     /// Get the current deployment status
     ///
-    /// Returns the deployment status flags
-    ///
     /// # Errors
     ///
     /// If this function encounters any errors, an [`AntsError`] variant will be returned.
@@ -312,16 +265,20 @@ impl AntS {
     /// ```
     /// let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10)?;
     /// let deploy = ants.get_deploy()?;
-    /// println!("Antenna deployment status: {:x}", deploy);
+    /// println!("Antenna 1 deployed: {}", !deploy.ant_1_not_deployed);
+    /// println!("Antenna 2 deployment active: {}", deploy.ant_2_active);
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn get_deploy(&self) -> AntSResult<u16> {
+    pub fn get_deploy(&self) -> AntSResult<DeployStatus> {
 
-        let mut status: u16 = 0;
+        let mut status: [u8; 2] = [0; 2];
 
-        match unsafe { ffi::k_ants_get_deploy_status(&mut status) } {
-            ffi::KANTSStatus::AntsOK => Ok(status),
+        match unsafe { ffi::k_ants_get_deploy_status(status.as_mut_ptr()) } {
+            ffi::KANTSStatus::AntsOK => {
+                let decoded = DeployStatus::new(&status)?;
+                Ok(decoded)
+            }
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
             _ => Err(AntsError::GenericError.into()),
         }
@@ -369,7 +326,9 @@ impl AntS {
     ///
     /// println!("Antenna system telemetry:");
     /// println!("    raw_temp: {}", sys_telem.raw_temp);
-    /// println!("    deploy_status: {:x}", sys_telem.deploy_status);
+    /// println!("    deploy_status:", sys_telem.deploy_status);
+    /// println!("        Antenna 1 deployed: {}", !sys_telem.deploy_status.ant_1_not_deployed);
+    /// println!("        Antenna 2 deployment active: {}", sys_telem.deploy_status.ant_2_active);
     /// println!("    uptime: {}\n", sys_telem.uptime);
     /// ```
     ///
@@ -384,11 +343,7 @@ impl AntS {
 
         match unsafe { ffi::k_ants_get_system_telemetry(&mut c_telem) } {
             ffi::KANTSStatus::AntsOK => {
-                let telem = AntsTelemetry {
-                    raw_temp: c_telem.raw_temp,
-                    deploy_status: c_telem.deploy_status,
-                    uptime: c_telem.uptime,
-                };
+                let telem = AntsTelemetry::new(c_telem)?;
                 Ok(telem)
             }
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -571,40 +526,5 @@ impl AntS {
 impl Drop for AntS {
     fn drop(&mut self) {
         unsafe { ffi::k_ants_terminate() }
-    }
-}
-
-/// Manually cast Rusty bus number enum to C equivalent
-fn convert_bus(bus: KI2CNum) -> ffi::KI2CNum {
-    match bus {
-        self::KI2CNum::KI2C1 => ffi::KI2CNum::KI2C1,
-        self::KI2CNum::KI2C2 => ffi::KI2CNum::KI2C2,
-        self::KI2CNum::KI2C3 => ffi::KI2CNum::KI2C3,
-    }
-}
-
-/// Manually cast Rusty controller enum to C equivalent
-fn convert_controller(controller: KANTSController) -> ffi::KANTSController {
-    match controller {
-        self::KANTSController::Primary => ffi::KANTSController::Primary,
-        self::KANTSController::Secondary => ffi::KANTSController::Secondary,
-    }
-}
-
-/// Manually cast Rusty antenna enum to C equivalent
-fn convert_antenna(antenna: KANTSAnt) -> ffi::KANTSAnt {
-    match antenna {
-        self::KANTSAnt::Ant1 => ffi::KANTSAnt::Ant1,
-        self::KANTSAnt::Ant2 => ffi::KANTSAnt::Ant2,
-        self::KANTSAnt::Ant3 => ffi::KANTSAnt::Ant3,
-        self::KANTSAnt::Ant4 => ffi::KANTSAnt::Ant4,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
     }
 }

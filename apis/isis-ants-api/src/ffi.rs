@@ -70,7 +70,7 @@ extern "C" {
     pub fn k_ants_deploy(antenna: KANTSAnt, force: bool, timeout: u8) -> KANTSStatus;
     pub fn k_ants_auto_deploy(timeout: u8) -> KANTSStatus;
     pub fn k_ants_cancel_deploy() -> KANTSStatus;
-    pub fn k_ants_get_deploy_status(resp: *mut u16) -> KANTSStatus;
+    pub fn k_ants_get_deploy_status(resp: *mut u8) -> KANTSStatus;
     pub fn k_ants_get_uptime(uptime: *mut u32) -> KANTSStatus;
     pub fn k_ants_get_system_telemetry(telem: *mut AntsTelemetry) -> KANTSStatus;
     pub fn k_ants_get_activation_count(antenna: KANTSAnt, count: *mut u8) -> KANTSStatus;

@@ -44,7 +44,8 @@
 //!
 //! // Get the current deployment status
 //! let deploy = ants.get_deploy()?;
-//! println!("Antenna deployment status: {:x}", deploy);
+//! println!("Antenna 1 deployed: {}", !deploy.ant_1_not_deployed);
+//! println!("Antenna 2 deployment active: {}", deploy.ant_2_active);
 //! ```
 //!
 //! [`AntS`]: struct.AntS.html
@@ -53,8 +54,12 @@
 
 #[macro_use]
 extern crate failure;
+#[macro_use]
+extern crate nom;
 
 pub use ants::*;
+pub use parse::{KI2CNum, KANTSAnt, KANTSController, AntsTelemetry, DeployStatus};
 
 mod ants;
 mod ffi;
+mod parse;

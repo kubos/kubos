@@ -7,6 +7,7 @@ repository = "https://github.com/kubos/kubos"
 
 [dependencies]
 failure = { git = "https://github.com/rust-lang-nursery/failure" }
+nom = "4.0.0-beta1"
 
 
 [build-dependencies]
