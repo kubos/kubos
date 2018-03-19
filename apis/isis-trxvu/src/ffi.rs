@@ -105,6 +105,8 @@ impl From<radio_status> for RadioError {
 pub fn radio_status_to_err(status: radio_status) -> Result<(), RadioError> {
     match status {
         radio_status::RadioOk => Ok(()),
+        // I don't feel like this should be an error...
+        radio_status::RadioRxEmpty => Ok(()),
         _ => Err(RadioError::HardwareError {
             message: format!("TRXVU radio error {:?}", status),
         }),

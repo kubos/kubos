@@ -85,7 +85,8 @@ impl Trxvu {
         unsafe {
             radio_status_to_err(k_radio_recv(&mut rx_msg, &mut len))?;
         };
-        response.extend_from_slice(&rx_msg.message);
+        let end = len as usize;
+        response.extend_from_slice(&rx_msg.message[0..end]);
         Ok(response)
     }
 }
