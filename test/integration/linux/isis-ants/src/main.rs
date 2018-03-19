@@ -61,7 +61,6 @@ fn configure(ants: &AntS, logger: &Logger) -> u8 {
         }
         Err(err) => {
             error!(logger, "[Configure Test] Failed to configure AntS: {}", err);
-            //TODO: backtrace
             return 1;
         }
     }
@@ -76,7 +75,6 @@ fn deploy(ants: &AntS, logger: &Logger) -> u8 {
         }
         Err(err) => {
             error!(logger, "[Deploy Test] Failed to deploy antenna 3: {}", err);
-            //TODO: backtrace
             return 1;
         }
     }
@@ -94,7 +92,6 @@ fn deploy_override(ants: &AntS, logger: &Logger) -> u8 {
                 "[Deploy Override Test] Failed to deploy antenna 1: {}",
                 err
             );
-            //TODO: backtrace
             return 1;
         }
     }
@@ -112,7 +109,6 @@ fn auto_deploy(ants: &AntS, logger: &Logger) -> u8 {
                 "[Auto-Deploy Test] Failed to auto-deploy antennas: {}",
                 err
             );
-            //TODO: backtrace
             return 1;
         }
     }
@@ -130,7 +126,6 @@ fn cancel_deploy(ants: &AntS, logger: &Logger) -> u8 {
                 "[Disarm Test] Failed to cancel AntS deployment: {}",
                 err
             );
-            //TODO: backtrace
             return 1;
         }
     }
@@ -151,7 +146,6 @@ fn passthrough(ants: &AntS, logger: &Logger) -> u8 {
                 "[Passthrough Test] Failed to read AntS deployment status: {}",
                 err
             );
-            //TODO: backtrace
             return 1;
         }
     }
@@ -165,7 +159,6 @@ fn reset(ants: &AntS, logger: &Logger) -> u8 {
         }
         Err(err) => {
             error!(logger, "[Reset Test] Failed to reset AntS: {}", err);
-            //TODO: backtrace
             return 1;
         }
     }
@@ -519,7 +512,7 @@ pub fn main() {
     let logger = Logger::root(slog::Duplicate(console_drain, file_drain).fuse(), o!());
 
     // Initialize connection with the antenna system
-    let ants = match AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 0) {
+    let ants = match AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10) {
         Ok(result) => result,
         Err(err) => {
             error!(logger, "Failed to init connection: {}", err);
@@ -537,7 +530,6 @@ pub fn main() {
     if ants.arm().is_err() {
         error_count += 1;
         error!(logger, "Failed to arm AntS");
-        //TODO: backtrace
     }
 
     error_count += deploy(&ants, &logger);

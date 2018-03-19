@@ -597,7 +597,7 @@ impl AntS {
 /// Close the connection to the I2C bus
 impl Drop for AntS {
     fn drop(&mut self) {
-        self.watchdog_stop();
+        let _ = self.watchdog_stop();
         unsafe { ffi::k_ants_terminate() }
     }
 }
