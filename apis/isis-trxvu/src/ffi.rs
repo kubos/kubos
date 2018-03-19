@@ -57,12 +57,27 @@ pub union TelemRaw {
 /// Enum for selecting the telemetry type
 #[repr(C)]
 pub enum radio_telem_type {
-    tx_telem_all,
-    tx_telem_last,
-    tx_uptime,
-    tx_state,
-    rx_telem_all,
-    rx_uptime,
+    TxTelemAll,
+    TxTelemLast,
+    TxUptime,
+    TxState,
+    RxTelemAll,
+    RxUptime,
+}
+
+#[repr(C)]
+pub enum RawTxStateFirstBit {
+    IdleOff = 0x00,
+    IdleOn = 0x01,
+    BeaconActive = 0x02,
+}
+
+#[repr(C)]
+pub enum RawTxStateSecondBit {
+    B1200 = 0x00,
+    B2400 = 0x01,
+    B4800 = 0x02,
+    B9600 = 0x03,
 }
 
 /// Enum for radio status
@@ -70,10 +85,10 @@ pub enum radio_telem_type {
 #[repr(C)]
 #[derive(Debug)]
 pub enum radio_status {
-    radio_ok,
-    radio_rx_empty,
-    radio_error,
-    radio_error_config,
+    RadioOk,
+    RadioRxEmpty,
+    RadioError,
+    RadioErrorConfig,
 }
 
 impl From<radio_status> for RadioError {
@@ -89,7 +104,7 @@ impl From<radio_status> for RadioError {
 // Helper function to convert radio status to radio error
 pub fn radio_status_to_err(status: radio_status) -> Result<(), RadioError> {
     match status {
-        radio_status::radio_ok => Ok(()),
+        radio_status::RadioOk => Ok(()),
         _ => Err(RadioError::HardwareError {
             message: format!("TRXVU radio error {:?}", status),
         }),

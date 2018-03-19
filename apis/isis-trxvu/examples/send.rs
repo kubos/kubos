@@ -19,9 +19,16 @@ extern crate isis_trxvu;
 use isis_trxvu::Trxvu;
 
 pub fn main() {
-    let radio = Trxvu::new();
+    let radio = match Trxvu::new() {
+        Ok(r) => r,
+        Err(e) => {
+            print!("Err {}", e);
+            return;
+        }
+    };
 
-    let message = vec![0, 0, 0, 0, 0, 0];
+    let message = vec![1, 2, 3, 4, 5, 6];
     println!("Sending message");
-    radio.send(&message);
+    let resp = radio.send(&message);
+    println!("Response {:?}", resp);
 }

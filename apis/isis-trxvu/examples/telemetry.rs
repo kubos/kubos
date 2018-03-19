@@ -19,10 +19,19 @@ extern crate isis_trxvu;
 use isis_trxvu::Trxvu;
 
 pub fn main() {
-    let radio = Trxvu::new();
+    let radio = match Trxvu::new() {
+        Ok(r) => r,
+        Err(e) => {
+            print!("Err {}", e);
+            return;
+        }
+    };
 
     println!("Getting transmit telemetry");
-    let tx_telemetry = radio.get_tx_telemetry().unwrap();
+    let tx_telemetry = match radio.get_tx_telemetry() {
+        Ok(t) => t,
+        Err(e) => panic!("Err {}", e.to_string()),
+    };
     println!(
         "TX Telemetry\n\
          Inst RF Reflected {} dBm\n\
@@ -39,8 +48,18 @@ pub fn main() {
         tx_telemetry.temp_oscillator
     );
 
+    println!("Getting transmit state");
+    let tx_state = match radio.get_tx_state() {
+        Ok(t) => t,
+        Err(e) => panic!("Err {}", e.to_string()),
+    };
+    println!("Tx State: {:?}", tx_state);
+
     println!("Getting receive telemetry");
-    let rx_telemetry = radio.get_rx_telemetry().unwrap();
+    let rx_telemetry = match radio.get_rx_telemetry() {
+        Ok(r) => r,
+        Err(e) => panic!("Err {}", e.to_string()),
+    };
     println!(
         "TX Telemetry\n\
          Inst Doppler Offset {} dBm\n\
@@ -56,4 +75,9 @@ pub fn main() {
         rx_telemetry.temp_power_amp,
         rx_telemetry.temp_oscillator
     );
+
+    match radio.get_rx_uptime() {
+        Ok(u) => println!("RX Uptime {}", u),
+        Err(e) => panic!("Err: {}", e.to_string()),
+    };
 }

@@ -16,61 +16,60 @@
 
 use std::mem;
 
-use radio_api::{nom_to_radio_error, Connection, RadioResult};
-use messages::{RxTelemetry, TxTelemetry};
-use ffi;
-
-use libc;
+use radio_api::RadioResult;
+use messages::{RxTelemetry, TxState, TxTelemetry};
+use ffi::*;
 
 /// Structure for interacting with the TRXVU Radio API
 pub struct Trxvu {}
 
 impl Trxvu {
     /// Constructor
-    pub fn new() -> Self {
+    pub fn new() -> RadioResult<Trxvu> {
         unsafe {
-            match ffi::k_radio_init() {
-                ffi::radio_status::radio_ok => (),
-                e => panic!("Error on radio_init {:?}", e),
-            };
-            match ffi::k_radio_watchdog_start() {
-                ffi::radio_status::radio_ok => (),
-                e => panic!("Error on radio watchdog start {:?}", e),
-            };
+            radio_status_to_err(k_radio_init())?;
+            radio_status_to_err(k_radio_watchdog_start())?;
         };
-        Trxvu {}
+        Ok(Trxvu {})
+    }
+
+    fn get_telemetry(&self, telem_type: radio_telem_type) -> RadioResult<TelemRaw> {
+        let mut telem: TelemRaw = unsafe { mem::uninitialized() };
+        radio_status_to_err(unsafe { k_radio_get_telemetry(&mut telem, telem_type) })?;
+        Ok(telem)
     }
 
     /// Retrieves the tx telemetry
     pub fn get_tx_telemetry(&self) -> RadioResult<TxTelemetry> {
-        let mut telem: ffi::TelemRaw = unsafe { mem::uninitialized() };
-        ffi::radio_status_to_err(unsafe {
-            ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::tx_telem_all)
-        })?;
+        let telem = self.get_telemetry(radio_telem_type::TxTelemAll)?;
         Ok(unsafe { TxTelemetry::parse(&telem.tx_telem_raw) })
+    }
+
+    pub fn get_tx_uptime(&self) -> RadioResult<u32> {
+        let telem = self.get_telemetry(radio_telem_type::TxUptime)?;
+        Ok(unsafe { telem.uptime })
+    }
+
+    pub fn get_tx_state(&self) -> RadioResult<TxState> {
+        let telem = self.get_telemetry(radio_telem_type::TxState)?;
+        Ok(unsafe { TxState::parse(telem.tx_state) })
     }
 
     /// Retrieves the rx telemetry
     pub fn get_rx_telemetry(&self) -> RadioResult<RxTelemetry> {
-        let mut telem: ffi::TelemRaw = unsafe { mem::uninitialized() };
-        ffi::radio_status_to_err(unsafe {
-            ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::rx_telem_all)
-        })?;
+        let telem = self.get_telemetry(radio_telem_type::RxTelemAll)?;
         Ok(unsafe { RxTelemetry::parse(&telem.rx_telem_raw) })
     }
 
     pub fn get_rx_uptime(&self) -> RadioResult<u32> {
-        let mut telem: ffi::TelemRaw = unsafe { mem::uninitialized() };
-        ffi::radio_status_to_err(unsafe {
-            ffi::k_radio_get_telemetry(&mut telem, ffi::radio_telem_type::rx_uptime)
-        })?;
+        let telem = self.get_telemetry(radio_telem_type::RxUptime)?;
         Ok(unsafe { telem.uptime })
     }
 
     pub fn send(&self, message: &[u8]) -> RadioResult<()> {
         let mut response: u8 = 0;
         unsafe {
-            ffi::radio_status_to_err(ffi::k_radio_send(
+            radio_status_to_err(k_radio_send(
                 message.as_ptr(),
                 message.len() as i32,
                 &mut response,
@@ -81,11 +80,11 @@ impl Trxvu {
 
     pub fn read(&self) -> RadioResult<Vec<u8>> {
         let mut response: Vec<u8> = Vec::new();
-        let mut rx_msg: ffi::radio_rx_message = unsafe { mem::uninitialized() };
+        let mut rx_msg: radio_rx_message = unsafe { mem::uninitialized() };
         let mut len: u8 = 0;
         unsafe {
-            ffi::k_radio_recv(&mut rx_msg, &mut len);
-        }
+            radio_status_to_err(k_radio_recv(&mut rx_msg, &mut len))?;
+        };
         response.extend_from_slice(&rx_msg.message);
         Ok(response)
     }
@@ -94,8 +93,8 @@ impl Trxvu {
 impl Drop for Trxvu {
     fn drop(&mut self) {
         unsafe {
-            ffi::k_radio_watchdog_stop();
-            ffi::k_radio_terminate();
+            k_radio_watchdog_stop();
+            k_radio_terminate();
         }
     }
 }

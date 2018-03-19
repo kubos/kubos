@@ -45,7 +45,10 @@ pub enum RadioError {
 
 impl fmt::Display for RadioError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Parse error: {}", *self)
+        match *self {
+            RadioError::ParseError { ref message } => write!(f, "Parse error: {}", message),
+            RadioError::HardwareError { ref message } => write!(f, "Hardware error: {}", message),
+        }
     }
 }
 

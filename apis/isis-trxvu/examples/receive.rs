@@ -19,9 +19,17 @@ extern crate isis_trxvu;
 use isis_trxvu::Trxvu;
 
 pub fn main() {
-    let radio = Trxvu::new();
+    let radio = match Trxvu::new() {
+        Ok(r) => r,
+        Err(e) => {
+            print!("Err {}", e);
+            return;
+        }
+    };
 
     println!("Receiving message");
-    let message: Vec<u8> = radio.read().unwrap();
-    println!("Received {:?}", message);
+    match radio.read() {
+        Ok(d) => println!("Received {:?}", d),
+        Err(e) => println!("{}", e),
+    }
 }
