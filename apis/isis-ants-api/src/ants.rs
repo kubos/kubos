@@ -76,10 +76,22 @@ impl AntS {
         match unsafe {
             ffi::k_ants_init(convert_bus(bus), primary, secondary, ant_count, timeout)
         } {
-            ffi::KANTSStatus::AntsOK => Ok(AntS),
+            ffi::KANTSStatus::AntsOK => {
+                if timeout > 0 {
+                    match unsafe { ffi::k_ants_watchdog_start() } {
+                        ffi::KANTSStatus::AntsOK => Ok(AntS),
+                        ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
+                        _ => Err(AntsError::GenericError.into()),
+                    }
+                } else {
+                    Ok(AntS)
+                }
+            }
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
             _ => Err(AntsError::GenericError.into()),
         }
+
+
     }
 
     /// Configure the system to send future commands to the requested microcontroller
@@ -585,6 +597,7 @@ impl AntS {
 /// Close the connection to the I2C bus
 impl Drop for AntS {
     fn drop(&mut self) {
+        self.watchdog_stop();
         unsafe { ffi::k_ants_terminate() }
     }
 }

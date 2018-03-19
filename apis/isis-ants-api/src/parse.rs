@@ -163,8 +163,6 @@ impl AntsTelemetry {
 impl DeployStatus {
     #[doc(hidden)]
     pub fn new(input: &[u8]) -> Result<DeployStatus, AntsError> {
-        println!("Raw status: {:x}{:x}", input[0], input[1]);
-
         match parse_status(input) {
             Ok(v) => {
                 let (_input, status) = v;
