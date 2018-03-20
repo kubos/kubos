@@ -15,14 +15,21 @@
 //
 #![allow(dead_code)]
 
-use isis_ants_api::{AntS, KANTSAnt, KI2CNum, AntsTelemetry};
+use isis_ants_api::{AntS, KANTSAnt, KI2CNum, AntsTelemetry, KANTSController};
 
 use std::io::Error;
 
+//TODO: Change to boolean?
 #[derive(GraphQLEnum)]
 pub enum ArmStatus {
     Armed,
     Disarmed,
+}
+
+#[derive(GraphQLEnum)]
+pub enum ArmState {
+    Arm,
+    Disarm,
 }
 
 #[derive(GraphQLEnum, Clone)]
@@ -32,10 +39,22 @@ pub enum PowerState {
     Reset,
 }
 
+#[derive(GraphQLEnum, Clone)]
+pub enum ConfigureController {
+    Primary,
+    Secondary,
+}
+
 /// Model for power queries
 pub struct GetPowerResponse {
     pub state: PowerState,
     pub uptime: u32,
+}
+
+#[derive(GraphQLObject)]
+pub struct NoopResponse {
+    pub errors: String,
+    pub success: bool,
 }
 
 /// Model for power mutations
@@ -44,6 +63,19 @@ pub struct ControlPowerResponse {
     pub errors: String,
     pub success: bool,
     pub power: PowerState,
+}
+
+#[derive(GraphQLObject)]
+pub struct ConfigureHardwareResponse {
+    pub errors: String,
+    pub success: bool,
+    pub config: ConfigureController,
+}
+
+#[derive(GraphQLObject)]
+pub struct ArmResponse {
+    pub errors: String,
+    pub success: bool,
 }
 
 #[derive(GraphQLEnum)]
@@ -68,6 +100,13 @@ pub struct TelemetryDebug {
 
 pub struct Subsystem {
     ants: AntS,
+}
+
+#[derive(GraphQLObject)]
+pub struct TestResults {
+    pub success: bool,
+    pub telemetry_nominal: TelemetryNominal,
+    pub telemetry_debug: TelemetryDebug,
 }
 
 impl Subsystem {
@@ -133,6 +172,44 @@ impl Subsystem {
         Ok(telemetry)
     }
 
+    pub fn get_test_results(&self) -> Result<TestResults, Error> {
+        let nominal = self.get_telemetry_nominal().unwrap();
+        let debug = self.get_telemetry_debug().unwrap();
+
+        Ok(TestResults {
+            success: true,
+            telemetry_nominal: nominal,
+            telemetry_debug: debug,
+        })
+    }
+
+    pub fn noop(&self) -> Result<NoopResponse, Error> {
+        self.ants.watchdog_kick().unwrap();
+
+        Ok(NoopResponse {
+            errors: String::from(""),
+            success: true,
+        })
+    }
+
+    pub fn configure_hardware(
+        &self,
+        controller: ConfigureController,
+    ) -> Result<ConfigureHardwareResponse, Error> {
+        let conv = match controller {
+            ConfigureController::Primary => KANTSController::Primary,
+            ConfigureController::Secondary => KANTSController::Secondary,
+        };
+
+        self.ants.configure(conv).unwrap();
+
+        Ok(ConfigureHardwareResponse {
+            config: controller,
+            errors: String::from(""),
+            success: true,
+        })
+    }
+
     pub fn control_power(&self, state: PowerState) -> Result<ControlPowerResponse, Error> {
         // Send command to device here
         match state {
@@ -155,5 +232,17 @@ impl Subsystem {
             }),
 
         }
+    }
+
+    pub fn arm(&self, state: ArmState) -> Result<ArmResponse, Error> {
+        match state {
+            ArmState::Arm => self.ants.arm().unwrap(),
+            ArmState::Disarm => self.ants.disarm().unwrap(),
+        };
+
+        Ok(ArmResponse {
+            errors: String::from(""),
+            success: true,
+        })
     }
 }

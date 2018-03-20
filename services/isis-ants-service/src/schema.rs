@@ -149,7 +149,11 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Service subsystem"
     
     //----- general queries ----//
-    //ack
+    //TODO: Should ack actually be doing anything?
+    field ack() -> FieldResult<String>
+    {
+    	Ok(String::from("ACK"))
+    }
 
     field power(&executor) -> FieldResult<GetPowerResponse>
         as "Antenna System Power State"
@@ -157,7 +161,10 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
         Ok(executor.context().subsystem.get_power()?)
     }
     
-    //config
+    field config() -> FieldResult<String>
+    {
+    	Ok(String::from("Default"))
+    }
     
     //errors
     
@@ -172,17 +179,19 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     	Ok(executor.context().subsystem.get_telemetry_debug()?)
     }
     
-    //testResults
+    field test_results(&executor) -> FieldResult<TestResults> {
+    	Ok(executor.context().subsystem.get_test_results()?)
+    }
 
 	//------- Deployable-specific queries ------//
 	
-	//armStatus
 	field arm_status(&executor) -> FieldResult<ArmStatus>
 	{
 		Ok(executor.context().subsystem.get_arm_status()?)
 	}
 	
 	//deploymentStatus
+	//TODO: Find out what constitutes as "Deployed". Fully only?
 });
 
 pub struct QueryRoot;
@@ -201,14 +210,20 @@ pub struct MutationRoot;
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 
-	//noop
+    field Noop(&executor) -> FieldResult<NoopResponse>
+    {
+    	Ok(executor.context().subsystem.noop()?)
+    }
 
     field controlPower(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
     {
     	Ok(executor.context().subsystem.control_power(state)?)
     }
     
-    //configurehardware
+    field configureHardware(&executor, config: ConfigureController) -> FieldResult<ConfigureHardwareResponse>
+    {
+    	Ok(executor.context().subsystem.configure_hardware(config)?)
+    }
     
     //testhardware
     
@@ -216,7 +231,10 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     
     //------- Deployable-specific mutations ------//
     
-    //arm (or disarm)
+    field arm(&executor, state: ArmState) -> FieldResult<ArmResponse>
+    {
+    	Ok(executor.context().subsystem.arm(state)?)
+    }
     
     //deploy
     
