@@ -16,9 +16,6 @@
 
 use radio_api::RadioError;
 
-// So that we can copy the member names for the C
-// structs/enums
-
 pub const RX_MAX_SIZE: usize = 200;
 
 #[derive(Clone, Copy, Debug)]

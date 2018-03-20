@@ -18,7 +18,7 @@ use ffi::*;
 use messages::convert::*;
 
 /// Struct for transmit telemetry
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TxTelemetry {
     pub inst_rf_reflected: f32,
     pub inst_rf_forward: f32,
@@ -38,5 +38,31 @@ impl TxTelemetry {
             temp_power_amp: get_temperature(raw.temp_power_amp),
             temp_oscillator: get_temperature(raw.temp_oscillator),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse() {
+        let test_telem = TxTelemRaw {
+            inst_rf_reflected: 0,
+            inst_rf_forward: 0,
+            supply_voltage: 0,
+            supply_current: 0,
+            temp_power_amp: 0,
+            temp_oscillator: 0,
+        };
+        let target_tx_telem = TxTelemetry {
+            inst_rf_reflected: 0.0,
+            inst_rf_forward: 0.0,
+            supply_voltage: 0.0,
+            supply_current: 0.0,
+            temp_power_amp: 0.0,
+            temp_oscillator: 0.0,
+        };
+        assert_eq!(target_tx_telem, TxTelemetry::parse(&test_telem));
     }
 }

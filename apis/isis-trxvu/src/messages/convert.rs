@@ -1,54 +1,50 @@
-/**
- *  @name Telemetry Conversion Functions
- *  Convert raw ADC values into human-readable units
+/*
+ * Copyright (C) 2018 Kubos Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-/**@{*/
-/**
- * @param [in] raw Raw ADC value
- * @return Voltage in volts
- */
+
+// Returns Voltage in volts
 pub fn get_voltage(raw: u16) -> f32 {
     (raw as f32) * 0.00488
 }
-/**
- * @param [in] raw Raw ADC value
- * @return Current in milliamps
- */
+
+/// Returns Current in milliamps
 pub fn get_current(raw: u16) -> f32 {
     (raw as f32) * 0.16643964
 }
-/**
- * @param [in] raw Raw ADC value
- * @return Temperature in degrees Celsius
- */
+
+/// Returns Temperature in degrees Celsius
 pub fn get_temperature(raw: u16) -> f32 {
     (raw as f32) * -0.07669 + 195.6037
 }
-/**
- * @param [in] raw Raw ADC value
- * @return Doppler shift in hertz
- */
+
+/// Returns Doppler shift in hertz
 pub fn get_doppler_offset(raw: u16) -> f32 {
     (raw as f32) * 13.352 - 22300.0
 }
-/**
- * @param [in] raw Raw ADC value
- * @return Received signal strength power in decibel-milliwatts
- */
+
+/// Returns Received signal strength power in decibel-milliwatts
 pub fn get_signal_strength(raw: u16) -> f32 {
     (raw as f32) * 0.03 - 152.0
 }
-/**
- * @param [in] raw Raw ADC value
- * @return RF reflected power in decibel-milliwatts
- */
+
+/// Returns RF reflected power in decibel-milliwatts
 pub fn get_rf_power_dbm(raw: u16) -> f32 {
     20.0 * ((raw as f32) * 0.00767).log10()
 }
-/**
- * @param [in] raw Raw ADC value
- * @return RF reflected power in milliwatts
- */
+
+/// Return RF reflected power in milliwatts
 pub fn get_rf_power_mw(raw: u16) -> f32 {
     let ten: f32 = 10.0;
     (raw as f32) * (raw as f32) * ten.powf(-2.0) * 0.00005887
