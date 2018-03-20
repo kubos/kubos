@@ -8,5 +8,6 @@ members = [
 "kubos-build-helper",
 "services/comms-service",
 "services/iobc-supervisor-service",
+"services/isis-ants-service",
 "test/integration/linux/isis-ants",
 ]

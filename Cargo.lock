@@ -265,6 +265,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "isis-ants-service"
+version = "0.1.0"
+dependencies = [
+ "iron 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "isis-ants-api 0.1.0",
+ "juniper 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "juniper_iron 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "logger 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mount 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "isis-iobc-supervisor"
 version = "0.1.0"
 dependencies = [
