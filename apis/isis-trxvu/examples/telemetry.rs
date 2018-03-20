@@ -28,7 +28,7 @@ pub fn main() {
     };
 
     println!("Getting transmit telemetry");
-    let tx_telemetry = match radio.get_tx_telemetry() {
+    let tx_telemetry = match radio.current_transmitter_telemetry() {
         Ok(t) => t,
         Err(e) => panic!("Err {}", e.to_string()),
     };
@@ -49,14 +49,14 @@ pub fn main() {
     );
 
     println!("Getting transmit state");
-    let tx_state = match radio.get_tx_state() {
+    let tx_state = match radio.transmitter_state() {
         Ok(t) => t,
         Err(e) => panic!("Err {}", e.to_string()),
     };
     println!("Tx State: {:?}", tx_state);
 
     println!("Getting receive telemetry");
-    let rx_telemetry = match radio.get_rx_telemetry() {
+    let rx_telemetry = match radio.receiver_telemetry() {
         Ok(r) => r,
         Err(e) => panic!("Err {}", e.to_string()),
     };
@@ -76,7 +76,7 @@ pub fn main() {
         rx_telemetry.temp_oscillator
     );
 
-    match radio.get_rx_uptime() {
+    match radio.receiver_uptime() {
         Ok(u) => println!("RX Uptime {}", u),
         Err(e) => panic!("Err: {}", e.to_string()),
     };

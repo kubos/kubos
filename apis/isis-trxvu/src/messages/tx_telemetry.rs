@@ -32,7 +32,7 @@ impl TxTelemetry {
     pub fn parse(raw: &TxTelemRaw) -> TxTelemetry {
         TxTelemetry {
             inst_rf_reflected: get_rf_power_dbm(raw.inst_rf_reflected),
-            inst_rf_forward: get_rf_power_dbm(raw.inst_rf_forward),
+            inst_rf_forward: get_rf_power_mw(raw.inst_rf_forward),
             supply_voltage: get_voltage(raw.supply_voltage),
             supply_current: get_current(raw.supply_current),
             temp_power_amp: get_temperature(raw.temp_power_amp),

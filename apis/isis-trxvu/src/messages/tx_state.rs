@@ -30,10 +30,10 @@ pub enum IdleState {
 
 #[derive(Debug)]
 pub enum Rate {
-    b1200,
-    b2400,
-    b4800,
-    b9600,
+    B1200,
+    B2400,
+    B4800,
+    B9600,
 }
 
 #[derive(Debug)]
@@ -47,7 +47,7 @@ impl TxState {
     pub fn parse(raw: u8) -> TxState {
         TxState {
             beacon_active: {
-                let raw = (raw & 0b11);
+                let raw = raw & 0b11;
                 if check_bits!(raw, RawTxStateFirstBit::BeaconActive as u8) {
                     true
                 } else {
@@ -55,9 +55,11 @@ impl TxState {
                 }
             },
             idle: {
-                let raw = (raw & 0b11);
+                let raw = raw & 0b11;
                 if check_bits!(raw, RawTxStateFirstBit::IdleOn as u8) {
                     IdleState::On
+                } else if check_bits!(raw, RawTxStateFirstBit::IdleOff as u8) {
+                    IdleState::Off
                 } else {
                     IdleState::Off
                 }
@@ -65,13 +67,15 @@ impl TxState {
             rate: {
                 let raw = (raw >> 2) & 0b11;
                 if check_bits!(raw, RawTxStateSecondBit::B1200 as u8) {
-                    Rate::b1200
+                    Rate::B1200
                 } else if check_bits!(raw, RawTxStateSecondBit::B2400 as u8) {
-                    Rate::b2400
+                    Rate::B2400
                 } else if check_bits!(raw, RawTxStateSecondBit::B4800 as u8) {
-                    Rate::b4800
+                    Rate::B4800
+                } else if check_bits!(raw, RawTxStateSecondBit::B9600 as u8) {
+                    Rate::B9600
                 } else {
-                    Rate::b9600
+                    Rate::B1200
                 }
             },
         }
