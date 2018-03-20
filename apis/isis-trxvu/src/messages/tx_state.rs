@@ -22,13 +22,13 @@ macro_rules! check_bits {
     );
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum IdleState {
     Off,
     On,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Rate {
     B1200,
     B2400,
@@ -36,7 +36,7 @@ pub enum Rate {
     B9600,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TxState {
     idle: IdleState,
     beacon_active: bool,
@@ -66,18 +66,89 @@ impl TxState {
             },
             rate: {
                 let raw = (raw >> 2) & 0b11;
-                if check_bits!(raw, RawTxStateSecondBit::B1200 as u8) {
-                    Rate::B1200
-                } else if check_bits!(raw, RawTxStateSecondBit::B2400 as u8) {
-                    Rate::B2400
+                if check_bits!(raw, RawTxStateSecondBit::B9600 as u8) {
+                    Rate::B9600
                 } else if check_bits!(raw, RawTxStateSecondBit::B4800 as u8) {
                     Rate::B4800
-                } else if check_bits!(raw, RawTxStateSecondBit::B9600 as u8) {
-                    Rate::B9600
+                } else if check_bits!(raw, RawTxStateSecondBit::B2400 as u8) {
+                    Rate::B2400
+                } else if check_bits!(raw, RawTxStateSecondBit::B1200 as u8) {
+                    Rate::B1200
                 } else {
                     Rate::B1200
                 }
             },
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_min_values() {
+        let raw = 0b0000;
+        let result = TxState {
+            beacon_active: false,
+            idle: IdleState::Off,
+            rate: Rate::B1200,
+        };
+        assert_eq!(result, TxState::parse(raw));
+    }
+
+    #[test]
+    fn test_parse_idle_on() {
+        let raw = 0b0001;
+        let result = TxState {
+            beacon_active: false,
+            idle: IdleState::On,
+            rate: Rate::B1200,
+        };
+        assert_eq!(result, TxState::parse(raw));
+    }
+
+    #[test]
+    fn test_parse_beacon_active() {
+        let raw = 0b0010;
+        let result = TxState {
+            beacon_active: true,
+            idle: IdleState::Off,
+            rate: Rate::B1200,
+        };
+        assert_eq!(result, TxState::parse(raw));
+    }
+
+    #[test]
+    fn test_parse_rate_2400() {
+        let raw = 0b0100;
+        let result = TxState {
+            beacon_active: false,
+            idle: IdleState::Off,
+            rate: Rate::B2400,
+        };
+        assert_eq!(result, TxState::parse(raw));
+    }
+
+    #[test]
+    fn test_parse_rate_4800() {
+        let raw = 0b1000;
+        let result = TxState {
+            beacon_active: false,
+            idle: IdleState::Off,
+            rate: Rate::B4800,
+        };
+        assert_eq!(result, TxState::parse(raw));
+    }
+
+    #[test]
+    fn test_parse_rate_9600() {
+        let raw = 0b1100;
+        let result = TxState {
+            beacon_active: false,
+            idle: IdleState::Off,
+            rate: Rate::B9600,
+        };
+        assert_eq!(result, TxState::parse(raw));
     }
 }
