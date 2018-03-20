@@ -46,6 +46,6 @@ pub fn get_rf_power_dbm(raw: u16) -> f32 {
 
 /// Return RF reflected power in milliwatts
 pub fn get_rf_power_mw(raw: u16) -> f32 {
-    let ten: f32 = 10.0;
-    (raw as f32) * (raw as f32) * ten.powf(-2.0) * 0.00005887
+    let p: f32 = -2.0;
+    (raw as f32) * (raw as f32) * p.powf(10.0) * 0.00005887
 }

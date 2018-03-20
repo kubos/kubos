@@ -48,20 +48,20 @@ mod tests {
     #[test]
     fn test_parse() {
         let test_telem = TxTelemRaw {
-            inst_rf_reflected: 0,
-            inst_rf_forward: 0,
-            supply_voltage: 0,
-            supply_current: 0,
-            temp_power_amp: 0,
-            temp_oscillator: 0,
+            inst_rf_reflected: 1,
+            inst_rf_forward: 1,
+            supply_voltage: 1,
+            supply_current: 1,
+            temp_power_amp: 1,
+            temp_oscillator: 1,
         };
         let target_tx_telem = TxTelemetry {
-            inst_rf_reflected: 0.0,
-            inst_rf_forward: 0.0,
-            supply_voltage: 0.0,
-            supply_current: 0.0,
-            temp_power_amp: 0.0,
-            temp_oscillator: 0.0,
+            inst_rf_reflected: -42.30409272102038,
+            inst_rf_forward: 0.06028288,
+            supply_voltage: 0.00488,
+            supply_current: 0.16643964,
+            temp_power_amp: 195.52701,
+            temp_oscillator: 195.52701,
         };
         assert_eq!(target_tx_telem, TxTelemetry::parse(&test_telem));
     }
