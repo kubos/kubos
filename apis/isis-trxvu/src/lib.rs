@@ -17,7 +17,8 @@
 //! Device level API for interacting with the ISIS TRXVU Radio
 
 #![deny(missing_docs)]
-
+#[macro_use]
+extern crate double;
 extern crate libc;
 extern crate nom;
 extern crate radio_api;

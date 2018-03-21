@@ -16,10 +16,10 @@
 
 extern crate isis_trxvu;
 
-use isis_trxvu::Trxvu;
+use isis_trxvu::{trxvu_raw, Trxvu};
 
 pub fn main() {
-    let radio = match Trxvu::new() {
+    let radio = match Trxvu::new(trxvu_raw()) {
         Ok(r) => r,
         Err(e) => {
             print!("Err {}", e);

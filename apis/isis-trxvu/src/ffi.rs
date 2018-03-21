@@ -52,6 +52,7 @@ pub union TelemRaw {
 }
 
 /// Enum for selecting the telemetry type
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 #[repr(C)]
 pub enum radio_telem_type {
     TxTelemAll,
@@ -80,12 +81,18 @@ pub enum RawTxStateSecondBit {
 /// Enum for radio status
 /// from radio-api/radio-struct.h
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum radio_status {
     RadioOk,
     RadioRxEmpty,
     RadioError,
     RadioErrorConfig,
+}
+
+impl Default for radio_status {
+    fn default() -> Self {
+        radio_status::RadioOk
+    }
 }
 
 impl From<radio_status> for RadioError {
@@ -118,6 +125,50 @@ pub struct radio_rx_message {
     pub message: [u8; RX_MAX_SIZE],
 }
 
+pub trait TrxvuFFI {
+    fn k_radio_init(&self) -> radio_status;
+    fn k_radio_watchdog_start(&self) -> radio_status;
+    fn k_radio_watchdog_stop(&self) -> radio_status;
+    fn k_radio_terminate(&self);
+    fn k_radio_get_telemetry(
+        &self,
+        buffer: *mut TelemRaw,
+        telem_type: radio_telem_type,
+    ) -> radio_status;
+    fn k_radio_send(&self, buffer: *const u8, len: i32, response: *mut u8) -> radio_status;
+    fn k_radio_recv(&self, buffer: *mut radio_rx_message, len: *mut u8) -> radio_status;
+}
+
+pub struct TrxvuRaw {}
+
+impl TrxvuFFI for TrxvuRaw {
+    fn k_radio_init(&self) -> radio_status {
+        unsafe { k_radio_init() }
+    }
+    fn k_radio_watchdog_start(&self) -> radio_status {
+        unsafe { k_radio_watchdog_start() }
+    }
+    fn k_radio_watchdog_stop(&self) -> radio_status {
+        unsafe { k_radio_watchdog_stop() }
+    }
+    fn k_radio_terminate(&self) {
+        unsafe { k_radio_terminate() }
+    }
+    fn k_radio_get_telemetry(
+        &self,
+        buffer: *mut TelemRaw,
+        telem_type: radio_telem_type,
+    ) -> radio_status {
+        unsafe { k_radio_get_telemetry(buffer, telem_type) }
+    }
+    fn k_radio_send(&self, buffer: *const u8, len: i32, response: *mut u8) -> radio_status {
+        unsafe { k_radio_send(buffer, len, response) }
+    }
+    fn k_radio_recv(&self, buffer: *mut radio_rx_message, len: *mut u8) -> radio_status {
+        unsafe { k_radio_recv(buffer, len) }
+    }
+}
+
 extern "C" {
     pub fn k_radio_init() -> radio_status;
     pub fn k_radio_watchdog_start() -> radio_status;
@@ -127,9 +178,6 @@ extern "C" {
         buffer: *mut TelemRaw,
         telem_type: radio_telem_type,
     ) -> radio_status;
-
     pub fn k_radio_send(buffer: *const u8, len: i32, response: *mut u8) -> radio_status;
-
     pub fn k_radio_recv(buffer: *mut radio_rx_message, len: *mut u8) -> radio_status;
-
 }

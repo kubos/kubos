@@ -7,6 +7,7 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 radio-api = { path = "../rust-radio-api" }
 libc = "0.2"
 nom = "4.0.0-beta1"
+double = "0.2.2"
 
 [build-dependencies]
 kubos-build-helper = {path = "../../kubos-build-helper"}

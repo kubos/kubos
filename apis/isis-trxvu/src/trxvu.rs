@@ -21,22 +21,27 @@ use messages::{RxTelemetry, TxState, TxTelemetry};
 use ffi::*;
 
 /// Structure for interacting with the TRXVU Radio API
-pub struct Trxvu {}
+pub struct Trxvu {
+    handle: Box<TrxvuFFI>,
+}
+
+/// Helper for generating real radio connection
+pub fn trxvu_raw() -> Box<TrxvuFFI> {
+    Box::new(TrxvuRaw {})
+}
 
 impl Trxvu {
     /// Constructor
-    pub fn new() -> RadioResult<Trxvu> {
-        unsafe {
-            radio_status_to_err(k_radio_init())?;
-            radio_status_to_err(k_radio_watchdog_start())?;
-        };
-        Ok(Trxvu {})
+    pub fn new(handle: Box<TrxvuFFI>) -> RadioResult<Trxvu> {
+        radio_status_to_err(handle.k_radio_init())?;
+        radio_status_to_err(handle.k_radio_watchdog_start())?;
+        Ok(Trxvu { handle })
     }
 
     /// Helper function for requesting telemetry
     fn get_telemetry(&self, telem_type: radio_telem_type) -> RadioResult<TelemRaw> {
         let mut telem: TelemRaw = unsafe { mem::uninitialized() };
-        radio_status_to_err(unsafe { k_radio_get_telemetry(&mut telem, telem_type) })?;
+        radio_status_to_err(self.handle.k_radio_get_telemetry(&mut telem, telem_type))?;
         Ok(telem)
     }
 
@@ -79,13 +84,11 @@ impl Trxvu {
     /// Send a message to the radio's transmit buffer
     pub fn send(&self, message: &[u8]) -> RadioResult<()> {
         let mut response: u8 = 0;
-        unsafe {
-            radio_status_to_err(k_radio_send(
-                message.as_ptr(),
-                message.len() as i32,
-                &mut response,
-            ))?;
-        };
+        radio_status_to_err(self.handle.k_radio_send(
+            message.as_ptr(),
+            message.len() as i32,
+            &mut response,
+        ))?;
         Ok(())
     }
 
@@ -94,9 +97,7 @@ impl Trxvu {
         let mut response: Vec<u8> = Vec::new();
         let mut rx_msg: radio_rx_message = unsafe { mem::uninitialized() };
         let mut len: u8 = 0;
-        unsafe {
-            radio_status_to_err(k_radio_recv(&mut rx_msg, &mut len))?;
-        };
+        radio_status_to_err(self.handle.k_radio_recv(&mut rx_msg, &mut len))?;
         let end = len as usize;
         response.extend_from_slice(&rx_msg.message[0..end]);
         Ok(response)
@@ -105,9 +106,68 @@ impl Trxvu {
 
 impl Drop for Trxvu {
     fn drop(&mut self) {
-        unsafe {
-            k_radio_watchdog_stop();
-            k_radio_terminate();
-        }
+        self.handle.k_radio_watchdog_stop();
+        self.handle.k_radio_terminate();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use double;
+    use ffi;
+
+    mock_trait!(
+        MockTrxvu,
+        k_radio_init() -> radio_status,
+        k_radio_watchdog_start() -> radio_status,
+        k_radio_watchdog_stop() -> radio_status,
+        k_radio_terminate() -> (),
+        k_radio_get_telemetry(*mut TelemRaw, radio_telem_type) -> radio_status,
+        k_radio_send(*const u8, i32, *mut u8) -> radio_status,
+        k_radio_recv(*mut radio_rx_message, *mut u8) -> radio_status
+    );
+
+    impl TrxvuFFI for MockTrxvu {
+        mock_method!(k_radio_init(&self) -> radio_status);
+        mock_method!(k_radio_watchdog_start(&self) -> radio_status);
+        mock_method!(k_radio_watchdog_stop(&self) -> radio_status);
+        mock_method!(k_radio_terminate(&self));
+        mock_method!(k_radio_get_telemetry(
+            &self,
+            buffer: *mut TelemRaw,
+            telem_type: radio_telem_type) -> radio_status);
+        mock_method!(k_radio_send(&self,
+            buffer: *const u8, len: i32, response: *mut u8) -> radio_status);
+        mock_method!(k_radio_recv(&self,
+            buffer: *mut radio_rx_message, len: *mut u8) -> radio_status);
+    }
+
+    #[test]
+    fn test_send_good() {
+        let mock = Box::new(MockTrxvu::default());
+        mock.k_radio_send.return_value(ffi::radio_status::RadioOk);
+
+        let radio = Trxvu::new(mock).unwrap();
+        let message = vec![0, 1, 2, 3, 4];
+
+        assert_eq!((), radio.send(&message).unwrap());
+    }
+
+    #[test]
+    fn test_send_get_error() {
+        let mock = Box::new(MockTrxvu::default());
+        mock.k_radio_send
+            .return_value(ffi::radio_status::RadioError);
+
+        let radio = Trxvu::new(mock).unwrap();
+        let message = vec![0, 1, 2, 3, 4];
+
+        let err = radio.send(&message).unwrap_err();
+
+        assert_eq!(
+            format!("{:?}", err),
+            "HardwareError { message: \"TRXVU radio error RadioError\" }".to_string()
+        );
     }
 }

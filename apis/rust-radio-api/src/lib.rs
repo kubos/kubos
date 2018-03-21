@@ -28,7 +28,7 @@ use std::fmt;
 use failure::Error;
 
 /// Common Error for Radio Actions
-#[derive(Debug, Fail)]
+#[derive(Debug, Fail, PartialEq)]
 pub enum RadioError {
     #[fail(display = "Parse error: {}", message)]
     /// There was a problem parsing the result data
