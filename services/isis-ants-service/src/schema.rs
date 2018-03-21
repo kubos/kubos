@@ -14,10 +14,6 @@
 // limitations under the License.
 //
 
-#![allow(dead_code)]
-
-//use isis_ants_api::AntS;
-
 use model::*;
 use juniper::Context as JuniperContext;
 use juniper::FieldResult;
@@ -37,6 +33,73 @@ graphql_object!(GetPowerResponse: () |&self| {
 	field uptime() -> FieldResult<i32> {
 		Ok(self.uptime as i32)
 	}
+});
+
+graphql_object!(GetDeployResponse: () |&self| {
+	field deploy_status() -> FieldResult<DeploymentStatus> {
+		Ok(self.deploy_status.clone())
+	}
+		
+    field sys_burn_active() -> FieldResult<bool> {
+        Ok(self.details.sys_burn_active)
+    }
+
+    field sys_ignore_deploy() -> FieldResult<bool> {
+        Ok(self.details.sys_ignore_deploy)
+    }
+
+    field sys_armed() -> FieldResult<bool> {
+        Ok(self.details.sys_armed)
+    }
+
+    field ant_1_not_deployed() -> FieldResult<bool> {
+        Ok(self.details.ant_1_not_deployed)
+    }
+
+    field ant_1_stopped_time() -> FieldResult<bool> {
+        Ok(self.details.ant_1_stopped_time)
+    }
+
+    field ant_1_active() -> FieldResult<bool> {
+        Ok(self.details.ant_1_active)
+    }
+
+    field ant_2_not_deployed() -> FieldResult<bool> {
+        Ok(self.details.ant_2_not_deployed)
+    }
+
+    field ant_2_stopped_time() -> FieldResult<bool> {
+        Ok(self.details.ant_2_stopped_time)
+    }
+
+    field ant_2_active() -> FieldResult<bool> {
+        Ok(self.details.ant_2_active)
+    }
+
+    field ant_3_not_deployed() -> FieldResult<bool> {
+        Ok(self.details.ant_3_not_deployed)
+    }
+
+    field ant_3_stopped_time() -> FieldResult<bool> {
+        Ok(self.details.ant_3_stopped_time)
+    }
+
+    field ant_3_active() -> FieldResult<bool> {
+        Ok(self.details.ant_3_active)
+    }
+
+    field ant_4_not_deployed() -> FieldResult<bool> {
+        Ok(self.details.ant_4_not_deployed)
+    }
+
+    field ant_4_stopped_time() -> FieldResult<bool> {
+        Ok(self.details.ant_4_stopped_time)
+    }
+
+    field ant_4_active() -> FieldResult<bool> {
+        Ok(self.details.ant_4_active)
+    }
+
 });
 
 graphql_object!(TelemetryNominal: () |&self| {
@@ -144,12 +207,20 @@ graphql_object!(TelemetryDebug: () |&self| {
     }
 });
 
+graphql_union!(Telemetry: () |&self| {
+		description: "Test"
+		instance_resolvers: |&_| {
+			&TelemetryNominal => match *self { Telemetry::Nominal(ref n) => Some(n), _ => None},
+			&TelemetryDebug => match *self { Telemetry::Debug(ref d) => Some(d), _ => None},
+		}
+	});
+
 /// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Service subsystem"
     
     //----- general queries ----//
-    //TODO: Should ack actually be doing anything?
+    //TODO: "Ack is the actual last command received"...????
     field ack() -> FieldResult<String>
     {
     	Ok(String::from("ACK"))
@@ -168,15 +239,12 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     
     //errors
     
-    //TODO: Maybe combine nominal and debug into under one parent field
-    field telemetry_nominal(&executor) -> FieldResult<TelemetryNominal>
+    field telemetry(&executor, telem: TelemetryType) -> FieldResult<Telemetry>
     {
-    	Ok(executor.context().subsystem.get_telemetry_nominal()?)
-    }
-    
-    field telemetry_debug(&executor) -> FieldResult<TelemetryDebug>
-    {
-    	Ok(executor.context().subsystem.get_telemetry_debug()?)
+    	match telem {
+    		TelemetryType::Nominal => Ok(Telemetry::Nominal(executor.context().subsystem.get_telemetry_nominal().unwrap())),
+    		TelemetryType::Debug => Ok(Telemetry::Debug(executor.context().subsystem.get_telemetry_debug().unwrap()))
+    	}
     }
     
     field test_results(&executor) -> FieldResult<TestResults> {
@@ -190,8 +258,10 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
 		Ok(executor.context().subsystem.get_arm_status()?)
 	}
 	
-	//deploymentStatus
-	//TODO: Find out what constitutes as "Deployed". Fully only?
+	field deployment_status(&executor) -> FieldResult<GetDeployResponse>
+	{
+		Ok(executor.context().subsystem.get_deploy_status()?)
+	}
 });
 
 pub struct QueryRoot;
@@ -225,9 +295,14 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     	Ok(executor.context().subsystem.configure_hardware(config)?)
     }
     
-    //testhardware
+    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults> {
+    	Ok(executor.context().subsystem.test_hardware(test)?)
+    }
     
-    //issuerawcommand
+    field issue_raw_command(&executor, command: String, rx_len = 0: i32) -> FieldResult<RawCommandResponse>
+    {
+    	Ok(executor.context().subsystem.passthrough(command, rx_len)?)
+    }
     
     //------- Deployable-specific mutations ------//
     
@@ -236,6 +311,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     	Ok(executor.context().subsystem.arm(state)?)
     }
     
-    //deploy
+    field deploy(&executor, ant = (DeployType::All): DeployType, force = false: bool, time: i32) -> FieldResult<DeployResponse>
+    {
+    	Ok(executor.context().subsystem.deploy(ant, force, time)?)
+    }
     
 });
