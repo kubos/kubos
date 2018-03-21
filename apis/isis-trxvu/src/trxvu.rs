@@ -40,7 +40,7 @@ impl Trxvu {
 
     /// Helper function for requesting telemetry
     fn get_telemetry(&self, telem_type: radio_telem_type) -> RadioResult<TelemRaw> {
-        let mut telem: TelemRaw = unsafe { mem::uninitialized() };
+        let mut telem: TelemRaw = Default::default();
         radio_status_to_err(self.handle.k_radio_get_telemetry(&mut telem, telem_type))?;
         Ok(telem)
     }
@@ -95,10 +95,10 @@ impl Trxvu {
     /// Attemps to read a message from the radio's receive buffer
     pub fn read(&self) -> RadioResult<Vec<u8>> {
         let mut response: Vec<u8> = Vec::new();
-        let mut rx_msg: radio_rx_message = unsafe { mem::uninitialized() };
+        let mut rx_msg: radio_rx_message = Default::default();
         let mut len: u8 = 0;
         radio_status_to_err(self.handle.k_radio_recv(&mut rx_msg, &mut len))?;
-        let end = len as usize;
+        let end = rx_msg.msg_size as usize;
         response.extend_from_slice(&rx_msg.message[0..end]);
         Ok(response)
     }
@@ -116,6 +116,7 @@ mod tests {
     use super::*;
     use double;
     use ffi;
+    use radio_api::RadioError;
 
     mock_trait!(
         MockTrxvu,
@@ -167,7 +168,93 @@ mod tests {
 
         assert_eq!(
             format!("{:?}", err),
-            "HardwareError { message: \"TRXVU radio error RadioError\" }".to_string()
+            format!(
+                "{:?}",
+                RadioError::HardwareError {
+                    message: "TRXVU radio error RadioError".to_string(),
+                }
+            )
         );
+    }
+
+    #[test]
+    fn test_receive_empty() {
+        let mock = Box::new(MockTrxvu::default());
+
+        let radio = Trxvu::new(mock).unwrap();
+        let resp = radio.read();
+        assert!(resp.is_ok());
+        assert_eq!(resp.unwrap(), vec![]);
+    }
+
+    #[test]
+    fn test_receive_good_data() {
+        fn recv((buffer, len): (*mut ffi::radio_rx_message, *mut u8)) -> ffi::radio_status {
+            unsafe {
+                *len = 10;
+                (*buffer).msg_size = 4;
+                (*buffer).message[0] = 0;
+                (*buffer).message[1] = 1;
+                (*buffer).message[2] = 2;
+                (*buffer).message[3] = 3;
+            }
+            ffi::radio_status::RadioOk
+        }
+
+        let mock = MockTrxvu::default();
+        mock.k_radio_recv.use_fn(recv);
+        let radio = Trxvu::new(Box::new(mock)).unwrap();
+        let resp = radio.read();
+        assert!(resp.is_ok());
+        assert_eq!(resp.unwrap(), vec![0, 1, 2, 3]);
+    }
+
+    #[test]
+    fn test_receive_empty_err() {
+        let mock = MockTrxvu::default();
+        mock.k_radio_recv
+            .return_value(ffi::radio_status::RadioRxEmpty);
+        let radio = Trxvu::new(Box::new(mock)).unwrap();
+        let resp = radio.read();
+        assert!(resp.is_ok());
+        assert_eq!(resp.unwrap(), vec![]);
+    }
+
+    #[test]
+    fn test_receive_err() {
+        let mock = MockTrxvu::default();
+        mock.k_radio_recv
+            .return_value(ffi::radio_status::RadioError);
+        let radio = Trxvu::new(Box::new(mock)).unwrap();
+        let resp = radio.read();
+        assert!(resp.is_err());
+        assert_eq!(
+            format!("{:?}", resp.unwrap_err()),
+            format!(
+                "{:?}",
+                RadioError::HardwareError {
+                    message: "TRXVU radio error RadioError".to_string(),
+                }
+            )
+        );
+    }
+
+    #[test]
+    fn test_receiver_uptime() {
+        fn get_telem(
+            (buffer, telem_type): (*mut ffi::TelemRaw, ffi::radio_telem_type),
+        ) -> ffi::radio_status {
+            unsafe {
+                (*buffer).uptime = 100;
+            }
+            ffi::radio_status::RadioOk
+        }
+
+        let mock = MockTrxvu::default();
+        mock.k_radio_get_telemetry.use_fn(get_telem);
+        let radio = Trxvu::new(Box::new(mock)).unwrap();
+        let resp = radio.receiver_uptime();
+        assert!(resp.is_ok());
+        assert_eq!(resp.unwrap(), 100);
     }
 }

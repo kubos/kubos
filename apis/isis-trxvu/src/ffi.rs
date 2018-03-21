@@ -40,15 +40,29 @@ pub struct RxTelemRaw {
     pub inst_signal_strength: u16,
 }
 
-/// The radio_telem is a union in the C source
-/// The largest element in the union holds six uint16_t
-/// For simplicity we will use a buffer of two uint8_t
 #[repr(C)]
 pub union TelemRaw {
     pub tx_state: u8,
     pub uptime: u32,
     pub tx_telem_raw: TxTelemRaw,
     pub rx_telem_raw: RxTelemRaw,
+}
+
+// We'll just set the TxTelemRaw to all zeros in Default
+// because it is effectively the biggest member of the union
+impl Default for TelemRaw {
+    fn default() -> Self {
+        TelemRaw {
+            tx_telem_raw: TxTelemRaw {
+                inst_rf_reflected: 0,
+                inst_rf_forward: 0,
+                supply_voltage: 0,
+                supply_current: 0,
+                temp_power_amp: 0,
+                temp_oscillator: 0,
+            },
+        }
+    }
 }
 
 /// Enum for selecting the telemetry type
@@ -123,6 +137,17 @@ pub struct radio_rx_message {
     pub doppler_offset: u16,
     pub signal_strength: u16,
     pub message: [u8; RX_MAX_SIZE],
+}
+
+impl Default for radio_rx_message {
+    fn default() -> Self {
+        radio_rx_message {
+            msg_size: 0,
+            doppler_offset: 0,
+            signal_strength: 0,
+            message: [0; RX_MAX_SIZE],
+        }
+    }
 }
 
 pub trait TrxvuFFI {
