@@ -17,6 +17,19 @@
 use isis_ants_api::{AntS, KANTSAnt, KI2CNum, AntsTelemetry, KANTSController, DeployStatus};
 
 use std::io::Error;
+use std::cell::{Cell, RefCell};
+
+#[derive(GraphQLEnum, Clone, Copy)]
+pub enum AckCommand {
+    None,
+    Noop,
+    ControlPower,
+    ConfigureHardware,
+    TestHardware,
+    IssueRawCommand,
+    Arm,
+    Deploy,
+}
 
 //TODO: Change to boolean?
 #[derive(GraphQLEnum)]
@@ -51,12 +64,6 @@ pub enum PowerState {
 pub enum ConfigureController {
     Primary,
     Secondary,
-}
-
-#[derive(GraphQLEnum, Clone)]
-pub enum TestType {
-    Integration,
-    Hardware,
 }
 
 #[derive(GraphQLEnum)]
@@ -129,15 +136,27 @@ pub struct TelemetryDebug {
     pub ant4: AntennaStats,
 }
 
-pub struct Subsystem {
-    ants: AntS,
+#[derive(GraphQLEnum)]
+pub enum TestType {
+    Integration,
+    Hardware,
+}
+pub enum TestResults {
+    Integration(IntegrationTestResults),
+    Hardware(HardwareTestResults),
 }
 
 #[derive(GraphQLObject)]
-pub struct TestResults {
+pub struct IntegrationTestResults {
     pub success: bool,
     pub telemetry_nominal: TelemetryNominal,
     pub telemetry_debug: TelemetryDebug,
+}
+
+#[derive(GraphQLObject)]
+pub struct HardwareTestResults {
+    pub success: bool,
+    pub data: String,
 }
 
 #[derive(GraphQLObject)]
@@ -147,9 +166,19 @@ pub struct RawCommandResponse {
     pub response: String,
 }
 
+pub struct Subsystem {
+    ants: AntS,
+    pub last_command: Cell<AckCommand>,
+    pub errors: RefCell<String>,
+}
+
 impl Subsystem {
     pub fn new() -> Subsystem {
-        let subsystem = Subsystem { ants: AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10).unwrap() };
+        let subsystem = Subsystem {
+            ants: AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10).unwrap(),
+            last_command: Cell::new(AckCommand::None),
+            errors: RefCell::new("".to_owned()),
+        };
 
         subsystem
         //TODO: error handling
@@ -262,12 +291,11 @@ impl Subsystem {
         Ok(telemetry)
     }
 
-    pub fn get_test_results(&self) -> Result<TestResults, Error> {
-        //TODO: Just fetch previous results instead?
+    pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
         let nominal = self.get_telemetry_nominal().unwrap();
         let debug = self.get_telemetry_debug().unwrap();
 
-        Ok(TestResults {
+        Ok(IntegrationTestResults {
             success: true,
             telemetry_nominal: nominal,
             telemetry_debug: debug,
@@ -369,12 +397,12 @@ impl Subsystem {
 
     }
 
-    pub fn test_hardware(&self, _test: TestType) -> Result<TestResults, Error> {
+    pub fn integration_test(&self) -> Result<IntegrationTestResults, Error> {
         //TODO: Handle hardware vs integration testing?
         let nominal = self.get_telemetry_nominal().unwrap();
         let debug = self.get_telemetry_debug().unwrap();
 
-        Ok(TestResults {
+        Ok(IntegrationTestResults {
             success: true,
             telemetry_nominal: nominal,
             telemetry_debug: debug,

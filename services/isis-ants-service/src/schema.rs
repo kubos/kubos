@@ -208,22 +208,29 @@ graphql_object!(TelemetryDebug: () |&self| {
 });
 
 graphql_union!(Telemetry: () |&self| {
-		description: "Test"
-		instance_resolvers: |&_| {
-			&TelemetryNominal => match *self { Telemetry::Nominal(ref n) => Some(n), _ => None},
-			&TelemetryDebug => match *self { Telemetry::Debug(ref d) => Some(d), _ => None},
-		}
-	});
+	description: "Test"
+	instance_resolvers: |&_| {
+		&TelemetryNominal => match *self { Telemetry::Nominal(ref n) => Some(n), _ => None},
+		&TelemetryDebug => match *self { Telemetry::Debug(ref d) => Some(d), _ => None},
+	}
+});
+
+graphql_union!(TestResults: () |&self| {
+	description: "Test"
+	instance_resolvers: |&_| {
+		&IntegrationTestResults => match *self { TestResults::Integration(ref i) => Some(i), _ => None},
+		&HardwareTestResults => match *self { TestResults::Hardware(ref h) => Some(h), _ => None},
+	}
+});
 
 /// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Service subsystem"
     
     //----- general queries ----//
-    //TODO: "Ack is the actual last command received"...????
-    field ack() -> FieldResult<String>
+    field ack(&executor) -> FieldResult<AckCommand>
     {
-    	Ok(String::from("ACK"))
+    	Ok(executor.context().subsystem.last_command.get())
     }
 
     field power(&executor) -> FieldResult<GetPowerResponse>
@@ -237,7 +244,10 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     	Ok(String::from("Default"))
     }
     
-    //errors
+    field errors(&executor) -> FieldResult<String>
+    {
+    	Ok(executor.context().subsystem.errors.borrow().clone())
+    }
     
     field telemetry(&executor, telem: TelemetryType) -> FieldResult<Telemetry>
     {
@@ -247,7 +257,7 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     	}
     }
     
-    field test_results(&executor) -> FieldResult<TestResults> {
+    field test_results(&executor) -> FieldResult<IntegrationTestResults> {
     	Ok(executor.context().subsystem.get_test_results()?)
     }
 
@@ -279,28 +289,50 @@ pub struct MutationRoot;
 
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
+	//TODO: Does there need to be an errors field here, too?
+	//If we have a mutation that throws errors and a following query,
+	//will the query's error field have that information?
 
     field Noop(&executor) -> FieldResult<NoopResponse>
     {
+    	executor.context().subsystem.last_command.set(AckCommand::Noop);
+    	
+    	// TEST CODE FOR FIGURING OUT HOW REFCELLS WORK
+    	// DO NOT MERGE
+    	let mut err = executor.context().subsystem.errors.borrow_mut();
+    	err.push_str("Noop failed for reasons");
+    	
     	Ok(executor.context().subsystem.noop()?)
     }
 
-    field controlPower(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
+    field control_power(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
     {
+    	executor.context().subsystem.last_command.set(AckCommand::ControlPower);
+    	
     	Ok(executor.context().subsystem.control_power(state)?)
     }
     
-    field configureHardware(&executor, config: ConfigureController) -> FieldResult<ConfigureHardwareResponse>
+    field configure_hardware(&executor, config: ConfigureController) -> FieldResult<ConfigureHardwareResponse>
     {
+    	executor.context().subsystem.last_command.set(AckCommand::ConfigureHardware);
+    	
     	Ok(executor.context().subsystem.configure_hardware(config)?)
     }
     
-    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults> {
-    	Ok(executor.context().subsystem.test_hardware(test)?)
+    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults> 
+    {
+    	executor.context().subsystem.last_command.set(AckCommand::TestHardware);
+    	
+    	match test {
+    		TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem.integration_test().unwrap())),
+    		TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { success: true, data: String::from("Not Implemented")}))
+    	}
     }
     
     field issue_raw_command(&executor, command: String, rx_len = 0: i32) -> FieldResult<RawCommandResponse>
     {
+    	executor.context().subsystem.last_command.set(AckCommand::IssueRawCommand);
+    	
     	Ok(executor.context().subsystem.passthrough(command, rx_len)?)
     }
     
@@ -308,11 +340,15 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     
     field arm(&executor, state: ArmState) -> FieldResult<ArmResponse>
     {
+    	executor.context().subsystem.last_command.set(AckCommand::Arm);
+    	
     	Ok(executor.context().subsystem.arm(state)?)
     }
     
     field deploy(&executor, ant = (DeployType::All): DeployType, force = false: bool, time: i32) -> FieldResult<DeployResponse>
     {
+    	executor.context().subsystem.last_command.set(AckCommand::Deploy);
+    	
     	Ok(executor.context().subsystem.deploy(ant, force, time)?)
     }
     
