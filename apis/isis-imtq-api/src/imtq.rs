@@ -16,7 +16,7 @@
 
 use ffi::*;
 
-#[derive(Fail, Display, Debug)]
+#[derive(Fail, Display, Debug, PartialEq)]
 pub enum AdcsError {
     #[display(fmt = "Generic error")] Generic,
     #[display(fmt = "Configuration error")] Config,
@@ -57,6 +57,7 @@ impl<T: ImtqFFI> Imtq<T> {
     /// The one argument *must* implement the `ImtqFFI` trait.
     fn new(handle: &T) -> AdcsResult<Self> {
         adcs_status_to_err(handle.k_adcs_init())?;
+        adcs_status_to_err(handle.k_imtq_watchdog_start())?;
         Ok(Imtq {
             handle: handle.clone(),
         })
@@ -102,10 +103,33 @@ impl<T: ImtqFFI> Imtq<T> {
 
         Ok(rx_buffer)
     }
+
+    /// Reboots the iMTQ.
+    /// Performing a reset will revert all configuration options
+    /// to their default values.
+    ///
+    /// # Example
+    /// ```
+    /// use isis_imtq_api::*;
+    /// let imtq = Imtq::imtq().unwrap();
+    /// imtq.reset();
+    /// ```
+    pub fn reset(&self) -> AdcsResult<()> {
+        Ok(adcs_status_to_err(self.handle.k_imtq_reset())?)
+    }
+
+    fn watchdog_start(&self) -> AdcsResult<()> {
+        Ok(adcs_status_to_err(self.handle.k_imtq_watchdog_start())?)
+    }
+
+    fn watchdog_stop(&self) -> AdcsResult<()> {
+        Ok(adcs_status_to_err(self.handle.k_imtq_watchdog_stop())?)
+    }
 }
 
 impl<T: ImtqFFI> Drop for Imtq<T> {
     fn drop(&mut self) {
+        let _res = self.watchdog_stop();
         self.handle.k_adcs_terminate();
     }
 }
@@ -119,7 +143,10 @@ mod tests {
         MockImtq,
         k_adcs_init() -> KADCSStatus,
         k_adcs_terminate() -> (),
-        k_adcs_passthrough(*const u8, i32, *mut u8, i32, *const timespec) -> KADCSStatus
+        k_adcs_passthrough(*const u8, i32, *mut u8, i32, *const timespec) -> KADCSStatus,
+        k_imtq_reset() -> KADCSStatus,
+        k_imtq_watchdog_start() -> KADCSStatus,
+        k_imtq_watchdog_stop() -> KADCSStatus
     );
 
     impl ImtqFFI for MockImtq {
@@ -130,6 +157,10 @@ mod tests {
         rx: *mut u8,
         rx_len: i32,
         delay: *const timespec) -> KADCSStatus);
+
+        mock_method!(k_imtq_reset(&self) -> KADCSStatus);
+        mock_method!(k_imtq_watchdog_start(&self) -> KADCSStatus);
+        mock_method!(k_imtq_watchdog_stop(&self) -> KADCSStatus);
     }
 
     #[test]
@@ -139,6 +170,8 @@ mod tests {
 
         let imtq = Imtq::new(&mock);
         assert!(imtq.is_ok());
+        assert_eq!(1, mock.k_adcs_init.num_calls());
+        assert_eq!(1, mock.k_imtq_watchdog_start.num_calls());
     }
 
     #[test]
@@ -151,12 +184,13 @@ mod tests {
     }
 
     #[test]
-    fn test_terminate_on_drop() {
+    fn test_on_drop() {
         let mock = MockImtq::default();
 
         let imtq = Imtq::new(&mock);
         drop(imtq);
         assert_eq!(1, mock.k_adcs_terminate.num_calls());
+        assert_eq!(1, mock.k_imtq_watchdog_stop.num_calls());
     }
 
     #[test]
@@ -187,5 +221,26 @@ mod tests {
         let result = imtq.passthrough(&cmd, 4, 0, 100);
         assert!(result.is_ok());
         assert_eq!(mock_result, result.unwrap());
+    }
+
+    #[test]
+    fn test_reset() {
+        let mock = MockImtq::default();
+        let imtq = Imtq::new(&mock).unwrap();
+        assert_eq!(Ok(()), imtq.reset());
+    }
+
+    #[test]
+    fn test_watchdog_start() {
+        let mock = MockImtq::default();
+        let imtq = Imtq::new(&mock).unwrap();
+        assert_eq!(Ok(()), imtq.watchdog_start());
+    }
+
+    #[test]
+    fn test_watchdog_stop() {
+        let mock = MockImtq::default();
+        let imtq = Imtq::new(&mock).unwrap();
+        assert_eq!(Ok(()), imtq.watchdog_stop());
     }
 }

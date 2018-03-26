@@ -64,6 +64,10 @@ pub trait ImtqFFI: Clone {
         rx_len: i32,
         delay: *const timespec,
     ) -> KADCSStatus;
+
+    fn k_imtq_reset(&self) -> KADCSStatus;
+    fn k_imtq_watchdog_start(&self) -> KADCSStatus;
+    fn k_imtq_watchdog_stop(&self) -> KADCSStatus;
 }
 
 #[derive(Debug, Clone)]
@@ -90,6 +94,18 @@ impl ImtqFFI for ImtqRaw {
     ) -> KADCSStatus {
         unsafe { k_adcs_passthrough(tx, len, rx, rx_len, delay) }
     }
+
+    fn k_imtq_reset(&self) -> KADCSStatus {
+        unsafe { k_imtq_reset() }
+    }
+
+    fn k_imtq_watchdog_start(&self) -> KADCSStatus {
+        unsafe { k_imtq_watchdog_start() }
+    }
+
+    fn k_imtq_watchdog_stop(&self) -> KADCSStatus {
+        unsafe { k_imtq_watchdog_stop() }
+    }
 }
 
 extern "C" {
@@ -102,4 +118,8 @@ extern "C" {
         rx_len: i32,
         delay: *const timespec,
     ) -> KADCSStatus;
+
+    pub fn k_imtq_reset() -> KADCSStatus;
+    pub fn k_imtq_watchdog_start() -> KADCSStatus;
+    pub fn k_imtq_watchdog_stop() -> KADCSStatus;
 }
