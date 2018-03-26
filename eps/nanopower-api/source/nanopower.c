@@ -685,32 +685,7 @@ KEPSStatus k_eps_watchdog_stop()
 KEPSStatus k_eps_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
                              int rx_len)
 {
-    if (tx == NULL || tx_len < 1 || (rx == NULL && rx_len != 0) || (rx != NULL && rx_len == 0))
-    {
-        return EPS_ERROR_CONFIG;
-    }
-
-    KI2CStatus status;
-
-    status = k_i2c_write(eps_bus, eps_addr, (uint8_t *) tx, tx_len);
-    if (status != I2C_OK)
-    {
-        fprintf(stderr, "Failed to send EPS passthrough packet: %d\n", status);
-        return EPS_ERROR;
-    }
-
-    if (rx_len != 0)
-    {
-        status = k_i2c_read(eps_bus, eps_addr, rx, rx_len);
-        if (status != I2C_OK)
-        {
-            fprintf(stderr, "Failed to read EPS passthrough response: %d\n",
-                    status);
-            return EPS_ERROR;
-        }
-    }
-
-    return EPS_OK;
+    return kprv_eps_transfer(tx, tx_len, rx, rx_len);
 }
 
 KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,

@@ -235,7 +235,7 @@ KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t heater, uint8_t mode);
  */
 KEPSStatus k_eps_reset_system_config(void);
 /**
- * Reset batter configuration to default values
+ * Reset battery configuration to default values
  * @note Values must be saved using ::k_eps_save_battery_config between 1 and 30 seconds after calling
  * this function, otherwise the changes will be erased
  * @return KEPSStatus EPS_OK if OK, error otherwise
