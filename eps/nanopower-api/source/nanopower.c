@@ -685,7 +685,20 @@ KEPSStatus k_eps_watchdog_stop()
 KEPSStatus k_eps_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
                              int rx_len)
 {
-    return kprv_eps_transfer(tx, tx_len, rx, rx_len);
+    if (tx == NULL || tx_len < 1 || (rx == NULL && rx_len != 0))
+    {
+        return EPS_ERROR_CONFIG;
+    }
+
+    if (rx == NULL)
+    {
+        eps_resp_header hdr = { 0 };
+        return kprv_eps_transfer(tx, tx_len, (uint8_t *) &hdr, sizeof(hdr));
+    }
+    else
+    {
+        return kprv_eps_transfer(tx, tx_len, rx, rx_len);
+    }
 }
 
 KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
