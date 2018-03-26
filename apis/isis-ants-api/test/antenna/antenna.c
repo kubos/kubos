@@ -19,6 +19,10 @@
 #include <cmocka.h>
 
 /* Test Data */
+#define ANTS_PRIMARY 0x31
+#define ANTS_SECONDARY 0x32
+#define ANT_COUNT 4
+
 ants_telemetry system_telem
     = {.raw_temp = 574,
        .deploy_status
@@ -30,6 +34,12 @@ uint16_t deploy_status    = SYS_ARMED | ANT_1_ACTIVE | ANT_4_NOT_DEPLOYED;
 uint16_t activation_time  = 44;
 uint8_t  activation_count = 3;
 /* End of Test Data */
+
+static void test_init(void ** state)
+{
+    will_return(__wrap_open, 1);
+    assert_int_equal(k_ants_init(K_I2C1, ANTS_PRIMARY, ANTS_SECONDARY, ANT_COUNT, 10), ANTS_OK);
+}
 
 static void test_no_init_arm(void ** arg)
 {
@@ -492,7 +502,7 @@ static void test_get_activation_count_fake(void ** arg)
 static void test_get_activation_time_1(void ** arg)
 {
     KANTSStatus ret;
-    uint8_t     resp;
+    uint16_t    resp;
 
     expect_value(__wrap_ioctl, addr, ANTS_PRIMARY);
     expect_value(__wrap_write, cmd, GET_UPTIME_1);
@@ -509,7 +519,7 @@ static void test_get_activation_time_1(void ** arg)
 static void test_get_activation_time_2(void ** arg)
 {
     KANTSStatus ret;
-    uint8_t     resp;
+    uint16_t    resp;
 
     expect_value(__wrap_ioctl, addr, ANTS_PRIMARY);
     expect_value(__wrap_write, cmd, GET_UPTIME_2);
@@ -526,7 +536,7 @@ static void test_get_activation_time_2(void ** arg)
 static void test_get_activation_time_3(void ** arg)
 {
     KANTSStatus ret;
-    uint8_t     resp;
+    uint16_t    resp;
 
     expect_value(__wrap_ioctl, addr, ANTS_PRIMARY);
     expect_value(__wrap_write, cmd, GET_UPTIME_3);
@@ -543,7 +553,7 @@ static void test_get_activation_time_3(void ** arg)
 static void test_get_activation_time_4(void ** arg)
 {
     KANTSStatus ret;
-    uint8_t     resp;
+    uint16_t    resp;
 
     expect_value(__wrap_ioctl, addr, ANTS_PRIMARY);
     expect_value(__wrap_write, cmd, GET_UPTIME_4);
@@ -569,7 +579,7 @@ static void test_get_activation_time_null(void ** arg)
 static void test_get_activation_time_fake(void ** arg)
 {
     KANTSStatus ret;
-    uint8_t     resp;
+    uint16_t    resp;
 
     ret = k_ants_get_activation_time(6, &resp);
 
@@ -655,7 +665,7 @@ static void test_passthrough(void ** arg)
 static int init(void ** state)
 {
     will_return(__wrap_open, 1);
-    k_ants_init();
+    k_ants_init(1, ANTS_PRIMARY, ANTS_SECONDARY, ANT_COUNT, 10);
 
     return 0;
 }
@@ -672,6 +682,7 @@ int main(void)
 {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_no_init_arm),
+        cmocka_unit_test_teardown(test_init, term),
         cmocka_unit_test_setup_teardown(test_reset, init, term),
         cmocka_unit_test_setup_teardown(test_watchdog_kick, init, term),
         cmocka_unit_test_setup_teardown(test_watchdog_thread, init, term),

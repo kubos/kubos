@@ -20,8 +20,12 @@
 #include <time.h>
 #include <unistd.h>
 
-/* Address of the antenna microcontroller commands should be issued against */
-static uint8_t ants_addr;
+static KI2CNum ants_bus = 0;
+static uint8_t ants_primary = 0;
+static uint8_t ants_secondary = 0;
+static uint8_t ants_addr = 0; /* Address of the antenna microcontroller commands should be issued against */
+static uint8_t ant_count = 0;
+static uint8_t ants_wd_timeout = 0;
 
 /* Handle for watchdog thread */
 static pthread_t handle_watchdog = { 0 };
@@ -32,8 +36,15 @@ static pthread_t handle_watchdog = { 0 };
  */
 const struct timespec TRANSFER_DELAY = {.tv_sec = 0, .tv_nsec = 1000001 };
 
-KANTSStatus k_ants_init()
+KANTSStatus k_ants_init(KI2CNum bus, uint8_t primary, uint8_t secondary, uint8_t count, uint32_t timeout)
 {
+    /* Save internal configuration values */
+    ants_bus = bus;
+    ants_primary = primary;
+    ants_secondary = secondary;
+    ant_count = count;
+    ants_wd_timeout = timeout;
+
     /*
      * All I2C configuration is done at the kernel level,
      * but we still need to pass a config structure to make
@@ -42,15 +53,17 @@ KANTSStatus k_ants_init()
     KI2CConf conf = k_i2c_conf_defaults();
 
     KI2CStatus status;
-    status = k_i2c_init(ANTS_I2C_BUS, &conf);
+    status = k_i2c_init(ants_bus, &conf);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize AntS: %d\n", status);
         return ANTS_ERROR;
     }
 
+
+
     /* Set default I2C slave address */
-    ants_addr = ANTS_PRIMARY;
+    ants_addr = ants_primary;
 
     return ANTS_OK;
 }
@@ -58,7 +71,7 @@ KANTSStatus k_ants_init()
 void k_ants_terminate()
 {
     ants_addr = 0;
-    k_i2c_terminate(ANTS_I2C_BUS);
+    k_i2c_terminate(ants_bus);
 
     return;
 }
@@ -69,18 +82,18 @@ KANTSStatus k_ants_configure(KANTSController config)
 
     if (config == PRIMARY)
     {
-        ants_addr = ANTS_PRIMARY;
+        ants_addr = ants_primary;
     }
     else if (config == SECONDARY)
     {
-        if (ANTS_SECONDARY == 0x00)
+        if (ants_secondary == 0x00)
         {
             fprintf(stderr, "AntS config failed: Secondary I2C target is not "
                             "available\n");
         }
         else
         {
-            ants_addr = ANTS_SECONDARY;
+            ants_addr = ants_secondary;
         }
     }
     else
@@ -100,7 +113,7 @@ KANTSStatus k_ants_reset()
     KI2CStatus  status;
     uint8_t     cmd = SYSTEM_RESET;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ANTS_PRIMARY, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_primary, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reset primary AntS controller: %d\n",
@@ -108,15 +121,16 @@ KANTSStatus k_ants_reset()
         ret = ANTS_ERROR;
     }
 
-#if ANTS_SECONDARY != 0
-    status = k_i2c_write(ANTS_I2C_BUS, ANTS_SECONDARY, (uint8_t *) &cmd, 1);
-    if (status != I2C_OK)
+    if (ants_secondary != 0)
     {
-        fprintf(stderr, "Failed to reset secondary AntS controller: %d\n",
-                status);
-        ret = ANTS_ERROR;
+        status = k_i2c_write(ants_bus, ants_secondary, (uint8_t *) &cmd, 1);
+        if (status != I2C_OK)
+        {
+            fprintf(stderr, "Failed to reset secondary AntS controller: %d\n",
+                    status);
+            ret = ANTS_ERROR;
+        }
     }
-#endif
 
     nanosleep(&TRANSFER_DELAY, NULL);
 
@@ -128,7 +142,7 @@ KANTSStatus k_ants_arm()
     KI2CStatus status;
     uint8_t    cmd = ARM_ANTS;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to arm AntS: %d\n", status);
@@ -145,7 +159,7 @@ KANTSStatus k_ants_disarm()
     KI2CStatus status;
     uint8_t    cmd = DISARM_ANTS;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to disarm AntS: %d\n", status);
@@ -162,6 +176,11 @@ KANTSStatus k_ants_deploy(KANTSAnt antenna, bool override, uint8_t timeout)
     KI2CStatus status    = ANTS_OK;
     char       packet[2] = { 0 };
 
+    if (antenna >= ant_count)
+    {
+        return ANTS_ERROR_CONFIG;
+    }
+
     packet[1] = timeout;
 
     switch (antenna)
@@ -176,7 +195,6 @@ KANTSStatus k_ants_deploy(KANTSAnt antenna, bool override, uint8_t timeout)
                 packet[0] = DEPLOY_1;
             }
             break;
-#if ANT_COUNT > 1
         case ANT_2:
             if (override)
             {
@@ -187,8 +205,6 @@ KANTSStatus k_ants_deploy(KANTSAnt antenna, bool override, uint8_t timeout)
                 packet[0] = DEPLOY_2;
             }
             break;
-#endif
-#if ANT_COUNT > 2
         case ANT_3:
             if (override)
             {
@@ -199,8 +215,6 @@ KANTSStatus k_ants_deploy(KANTSAnt antenna, bool override, uint8_t timeout)
                 packet[0] = DEPLOY_3;
             }
             break;
-#endif
-#if ANT_COUNT > 3
         case ANT_4:
             if (override)
             {
@@ -211,13 +225,12 @@ KANTSStatus k_ants_deploy(KANTSAnt antenna, bool override, uint8_t timeout)
                 packet[0] = DEPLOY_4;
             }
             break;
-#endif
         default:
             fprintf(stderr, "Unknown AntS antenna: %d\n", antenna);
             return ANTS_ERROR_CONFIG;
     }
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, packet, sizeof(packet));
+    status = k_i2c_write(ants_bus, ants_addr, packet, sizeof(packet));
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to deploy antenna %d: %d\n", (antenna + 1),
@@ -238,7 +251,7 @@ KANTSStatus k_ants_auto_deploy(uint8_t timeout)
     packet[0] = AUTO_DEPLOY;
     packet[1] = timeout;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, packet, sizeof(packet));
+    status = k_i2c_write(ants_bus, ants_addr, packet, sizeof(packet));
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to auto-deploy AntS: %d\n", status);
@@ -255,7 +268,7 @@ KANTSStatus k_ants_cancel_deploy()
     KI2CStatus status;
     uint8_t    cmd = CANCEL_DEPLOY;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to cancel AntS deployment: %d\n", status);
@@ -277,7 +290,7 @@ KANTSStatus k_ants_get_deploy_status(uint16_t * resp)
     KI2CStatus status;
     uint8_t    cmd = GET_STATUS;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to request AntS deployment status: %d\n",
@@ -285,7 +298,7 @@ KANTSStatus k_ants_get_deploy_status(uint16_t * resp)
         return ANTS_ERROR;
     }
 
-    status = k_i2c_read(ANTS_I2C_BUS, ants_addr, (uint8_t *) resp, 2);
+    status = k_i2c_read(ants_bus, ants_addr, (uint8_t *) resp, 2);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to read AntS deployment status: %d\n", status);
@@ -307,14 +320,14 @@ KANTSStatus k_ants_get_uptime(uint32_t * uptime)
     KI2CStatus status;
     uint8_t    cmd = GET_UPTIME_SYS;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to request AntS uptime: %d\n", status);
         return ANTS_ERROR;
     }
 
-    status = k_i2c_read(ANTS_I2C_BUS, ants_addr, (uint8_t *) uptime, 4);
+    status = k_i2c_read(ants_bus, ants_addr, (uint8_t *) uptime, 4);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to read AntS uptime: %d\n", status);
@@ -336,14 +349,14 @@ KANTSStatus k_ants_get_system_telemetry(ants_telemetry * telem)
     KI2CStatus status;
     uint8_t    cmd = GET_TELEMETRY;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to request AntS telemetry: %d\n", status);
         return ANTS_ERROR;
     }
 
-    status = k_i2c_read(ANTS_I2C_BUS, ants_addr, (uint8_t *) telem,
+    status = k_i2c_read(ants_bus, ants_addr, (uint8_t *) telem,
                         sizeof(ants_telemetry));
     if (status != I2C_OK)
     {
@@ -360,7 +373,7 @@ KANTSStatus k_ants_get_activation_count(KANTSAnt antenna, uint8_t * count)
 {
     KANTSStatus ret = ANTS_OK;
 
-    if (count == NULL || antenna >= ANT_COUNT)
+    if (count == NULL || antenna >= ant_count)
     {
         return ANTS_ERROR_CONFIG;
     }
@@ -368,7 +381,7 @@ KANTSStatus k_ants_get_activation_count(KANTSAnt antenna, uint8_t * count)
     KI2CStatus status;
     uint8_t    cmd = GET_COUNT_1 + antenna;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to request antenna %d activation count: %d\n",
@@ -376,7 +389,7 @@ KANTSStatus k_ants_get_activation_count(KANTSAnt antenna, uint8_t * count)
         return ANTS_ERROR;
     }
 
-    status = k_i2c_read(ANTS_I2C_BUS, ants_addr, count, 1);
+    status = k_i2c_read(ants_bus, ants_addr, count, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to read antenna %d activation count: %d\n",
@@ -393,7 +406,7 @@ KANTSStatus k_ants_get_activation_time(KANTSAnt antenna, uint16_t * time)
 {
     KANTSStatus ret = ANTS_OK;
 
-    if (time == NULL || antenna >= ANT_COUNT)
+    if (time == NULL || antenna >= ant_count)
     {
         return ANTS_ERROR_CONFIG;
     }
@@ -401,7 +414,7 @@ KANTSStatus k_ants_get_activation_time(KANTSAnt antenna, uint16_t * time)
     KI2CStatus status;
     uint8_t    cmd = GET_UPTIME_1 + antenna;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to request antenna %d activation times: %d\n",
@@ -409,7 +422,7 @@ KANTSStatus k_ants_get_activation_time(KANTSAnt antenna, uint16_t * time)
         return ANTS_ERROR;
     }
 
-    status = k_i2c_read(ANTS_I2C_BUS, ants_addr, (uint8_t *) time, 2);
+    status = k_i2c_read(ants_bus, ants_addr, (uint8_t *) time, 2);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to read antenna %d activation times: %d\n",
@@ -428,21 +441,22 @@ KANTSStatus k_ants_watchdog_kick()
     KANTSStatus ret = ANTS_OK;
     uint8_t     cmd = WATCHDOG_RESET;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ANTS_PRIMARY, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(ants_bus, ants_primary, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to kick AntS primary watchdog: %d\n", status);
         ret = ANTS_ERROR;
     }
 
-#if ANTS_SECONDARY != 0
-    status = k_i2c_write(ANTS_I2C_BUS, ANTS_SECONDARY, (uint8_t *) &cmd, 1);
-    if (status != I2C_OK)
+    if (ants_secondary != 0)
     {
-        fprintf(stderr, "Failed to kick AntS redundant watchdog: %d\n", status);
-        ret = ANTS_ERROR;
+        status = k_i2c_write(ants_bus, ants_secondary, (uint8_t *) &cmd, 1);
+        if (status != I2C_OK)
+        {
+            fprintf(stderr, "Failed to kick AntS redundant watchdog: %d\n", status);
+            ret = ANTS_ERROR;
+        }
     }
-#endif
 
     return ret;
 }
@@ -455,7 +469,7 @@ void * kprv_ants_watchdog_thread(void * args)
     {
         k_ants_watchdog_kick();
 
-        sleep(ANTS_WD_TIMEOUT / 3);
+        sleep(ants_wd_timeout / 3);
     }
 
     return NULL;
@@ -469,7 +483,7 @@ KANTSStatus k_ants_watchdog_start()
         return ANTS_OK;
     }
 
-    if (ANTS_WD_TIMEOUT == 0)
+    if (ants_wd_timeout == 0)
     {
         fprintf(
             stderr,
@@ -519,7 +533,7 @@ KANTSStatus k_ants_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
 
     KI2CStatus status;
 
-    status = k_i2c_write(ANTS_I2C_BUS, ants_addr, (uint8_t *) tx, tx_len);
+    status = k_i2c_write(ants_bus, ants_addr, (uint8_t *) tx, tx_len);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send AntS passthrough packet: %d\n", status);
@@ -528,7 +542,7 @@ KANTSStatus k_ants_passthrough(const uint8_t * tx, int tx_len, uint8_t * rx,
 
     if (rx_len != 0)
     {
-        status = k_i2c_read(ANTS_I2C_BUS, ants_addr, rx, rx_len);
+        status = k_i2c_read(ants_bus, ants_addr, rx, rx_len);
         if (status != I2C_OK)
         {
             fprintf(stderr, "Failed to read AntS passthrough response: %d\n",
