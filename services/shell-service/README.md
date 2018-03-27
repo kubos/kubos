@@ -1,3 +1,27 @@
+## Building
+
+This service can easily be built as a single luvi bundle.  Simpe install latest
+luvit and lit and run:
+
+```sh
+lit make lit://kubos/kubos-shell-service
+```
+
+And you will have a portable binary `kubos-shell-service` that depends on only
+`/home/system/usr/local/bin/luvi-tiny` to run (which in turn only depends on
+your system libc in most builds.)
+
+## Running
+
+I recommend uploading `kubos-shell-service` to `/home/system/usr/local/bin/`
+which should be in your path.  Then you can run it as simply:
+
+```sh
+PORT=6000 kubos-shell-service
+```
+
+It will listen for shell service commands over loopback UDP on the given port.
+
 ## Commands
 
 This service is a simple UDP process that allows remote control of a
