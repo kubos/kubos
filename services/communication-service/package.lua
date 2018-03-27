@@ -1,6 +1,6 @@
 return {
   name = "creationix/kubos-communication-service",
-  version = "0.0.1",
+  version = "0.0.2",
   description = "Service to route udp packets to and from a custom transport.",
   tags = { "kubos", "udp", "nat", "stdio", "serial" },
   author = { name = "Tim Caswell", email = "tim@creationix.com" },
