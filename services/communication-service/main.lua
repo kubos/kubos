@@ -76,6 +76,7 @@ end
 local function make_sender(dest)
   return wrap(function (err, data, addr)
     assert(not err, err)
+    if not data then return end
     local source = addr.port
     p('udp-req -> ' .. transport_name, {
       source = source,
