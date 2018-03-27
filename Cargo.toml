@@ -12,3 +12,6 @@ members = [
 "services/iobc-supervisor-service",
 "test/integration/linux/isis-ants",
 ]
+
+[profile.release]
+lto = true
