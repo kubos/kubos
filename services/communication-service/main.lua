@@ -64,7 +64,7 @@ local function make_receiver(dest)
     if err then return print(err) end
     if not data then return end
     local source = addr.port
-    p('udp -> ' .. transport_name, {source=source, dest=dest, len=#data})
+    p('udp-res -> ' .. transport_name, {source=source, dest=dest, len=#data})
     write {
       source = source,
       dest = dest,
@@ -76,13 +76,21 @@ end
 local function on_message(err, data, addr)
   assert(not err, err)
   if not data or #data < 2 then return end
+  local source = addr.port
+  local dest = bor(
+    lshift(byte(data, 1), 8),
+    byte(data, 2)
+  )
+  data = sub(data, 3)
+  p('udp-req -> ' .. transport_name, {
+    source = source,
+    dest = dest,
+    len = #data
+  })
   write {
-    dest = bor(
-      lshift(byte(data, 1), 8),
-      byte(data, 2)
-    ),
-    source = addr.port,
-    data = sub(data, 3),
+    source = source,
+    dest = dest,
+    data = data,
   }
 end
 
