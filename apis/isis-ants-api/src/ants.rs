@@ -16,6 +16,7 @@
 
 use ffi;
 use parse::*;
+use std::ptr;
 
 /// Common Error for AntS Actions
 #[derive(Fail, Display, Debug)]
@@ -581,12 +582,17 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn passthrough(&self, tx: &[u8], rx: &mut [u8]) -> AntSResult<()> {
+    pub fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()> {
 
         let tx_len: u8 = tx.len() as u8;
-        let rx_len: u8 = rx.len() as u8;
+        let rx_len: u8 = rx_in.len() as u8;
 
-        match unsafe { ffi::k_ants_passthrough(tx.as_ptr(), tx_len, rx.as_mut_ptr(), rx_len) } {
+        let rx: *mut u8 = match rx_len {
+            0 => ptr::null_mut(),
+            _ => rx_in.as_mut_ptr(),
+        };
+
+        match unsafe { ffi::k_ants_passthrough(tx.as_ptr(), tx_len, rx, rx_len) } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
             _ => Err(AntsError::GenericError.into()),

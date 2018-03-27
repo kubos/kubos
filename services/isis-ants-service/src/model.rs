@@ -18,6 +18,7 @@ use isis_ants_api::{AntS, KANTSAnt, KI2CNum, AntsTelemetry, KANTSController, Dep
 
 use std::io::Error;
 use std::cell::{Cell, RefCell};
+use std::str;
 
 #[derive(GraphQLEnum, Clone, Copy)]
 pub enum AckCommand {
@@ -410,15 +411,32 @@ impl Subsystem {
     }
 
     pub fn passthrough(&self, command: String, rx_len: i32) -> Result<RawCommandResponse, Error> {
-        let tx: &[u8] = command.as_bytes();
-        let mut rx = Vec::with_capacity(rx_len as usize);
 
-        self.ants.passthrough(tx, rx.as_mut_slice()).unwrap();
+        // Convert the hex values in the string into actual hex values
+        // Ex. "c3c2" -> [0xc3, 0xc2]
+        let tx: Vec<u8> = command
+            .as_bytes()
+            .chunks(2)
+            .into_iter()
+            .map(|chunk| {
+                u8::from_str_radix(str::from_utf8(chunk).unwrap(), 16).unwrap()
+            })
+            .collect();
 
+        let mut rx: Vec<u8> = vec![0; rx_len as usize];
+
+        self.ants
+            .passthrough(tx.as_slice(), rx.as_mut_slice())
+            .unwrap();
+
+        // Convert the response hex values into a String for the GraphQL output
+        // Note: This is in BIG ENDIAN format
         Ok(RawCommandResponse {
             errors: String::from(""),
             success: true,
-            response: String::from(""),
+            response: rx.iter()
+                .map(|byte| format!("{:02x}", byte))
+                .collect::<String>(),
         })
     }
 }
