@@ -124,10 +124,6 @@ impl<T: ImtqFFI> Imtq<T> {
         Ok(adcs_status_to_err(self.handle.k_imtq_reset())?)
     }
 
-    fn watchdog_start(&self) -> AdcsResult<()> {
-        Ok(adcs_status_to_err(self.handle.k_imtq_watchdog_start())?)
-    }
-
     fn watchdog_stop(&self) -> AdcsResult<()> {
         Ok(adcs_status_to_err(self.handle.k_imtq_watchdog_stop())?)
     }
@@ -234,13 +230,6 @@ mod tests {
         let mock = MockImtq::default();
         let imtq = Imtq::new(&mock, 1, 0x40, 60).unwrap();
         assert_eq!(Ok(()), imtq.reset());
-    }
-
-    #[test]
-    fn test_watchdog_start() {
-        let mock = MockImtq::default();
-        let imtq = Imtq::new(&mock, 1, 0x40, 60).unwrap();
-        assert_eq!(Ok(()), imtq.watchdog_start());
     }
 
     #[test]

@@ -194,6 +194,11 @@ KADCSStatus k_imtq_watchdog_stop(void)
     return ADCS_OK;
 }
 
+KADCSStatus k_imtq_reset(void)
+{
+    return k_adcs_reset(SOFT_RESET);
+}
+
 KADCSStatus kprv_imtq_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
                                int rx_len, const struct timespec * delay)
 {
