@@ -6,6 +6,11 @@ local getenv = require('os').getenv
 local udp = require 'codec-udp'
 local encoder = require('coro-wrapper').encoder
 local decoder = require('coro-wrapper').decoder
+local bit = require 'bit'
+local bor = bit.bor
+local lshift = bit.lshift
+local byte = string.byte
+local sub = string.sub
 
 local usage = [[
 Please specify transport and options:
@@ -70,17 +75,15 @@ end
 
 local function on_message(err, data, addr)
   assert(not err, err)
-  if not data then return end
-  local decoded = udp.decode(data, 1)
-  if not decoded then
-    print "Invalid message on raw port"
-    p {
-      data = data,
-      addr = addr,
-    }
-    return
-  end
-  write(decoded)
+  if not data or #data < 2 then return end
+  write {
+    dest = bor(
+      lshift(byte(data, 1), 8),
+      byte(data, 2)
+    ),
+    source = addr.port,
+    data = sub(data, 3),
+  }
 end
 
 wrap(function ()
@@ -90,7 +93,8 @@ wrap(function ()
   read = decoder(read, udp.decode)
   write = encoder(write, udp.encode)
 
-  -- Listen on known port for already UDP framed messages
+  -- Listen on known port for messages with target port embedded in first 2
+  -- bytes
   local server = uv.new_udp()
   local host = (getenv 'HOST') or '127.0.0.1'
   local port = getenv 'PORT'

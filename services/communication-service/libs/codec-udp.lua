@@ -29,7 +29,7 @@ local function check(source, dest, len, data)
 end
 
 local function decode(chunk, index)
-  -- p("udp-decode", chunk, index)
+  p("udp-decode", chunk, index)
 
   -- Wait till we have at least the 8 header bytes
   local offset = index - 1
@@ -55,6 +55,7 @@ local function decode(chunk, index)
 end
 
 local function encode(item)
+  p("udp-encode", item)
   if not item then return end
   local source = assert(item.source, 'missing source')
   local dest = assert(item.dest, 'missing dest')
