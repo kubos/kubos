@@ -1,5 +1,6 @@
 [workspace]
 members = [
+"apis/adcs_api",
 "apis/isis-ants-api",
 "apis/isis-imtq-api",
 "apis/isis-iobc-supervisor",

@@ -22,11 +22,9 @@
 #[macro_use]
 extern crate double;
 
-#[macro_use]
-extern crate failure;
+extern crate adcs_api;
 
 mod ffi;
 mod imtq;
 
 pub use imtq::Imtq;
-pub use imtq::{AdcsError, AdcsResult};

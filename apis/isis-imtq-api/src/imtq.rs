@@ -14,33 +14,8 @@
  * limitations under the License.
  */
 
+use adcs_api::*;
 use ffi::*;
-
-/// Errors for ADCS devices
-#[derive(Fail, Display, Debug, PartialEq)]
-pub enum AdcsError {
-    /// Generic error
-    #[display(fmt = "Generic error")]
-    Generic,
-    /// Configuration error
-    #[display(fmt = "Configuration error")]
-    Config,
-    /// No response received from subsystem
-    #[display(fmt = "No response received from subsystem")]
-    NoResponse,
-    /// An error was thrown by the subsystem
-    #[display(fmt = "An error was thrown by the subsystem")]
-    Internal,
-    /// Mutex-related error
-    #[display(fmt = "Mutex-related error")]
-    Mutex,
-    /// Requested function has not been implemented
-    #[display(fmt = "Requested function has not been implemented")]
-    NotImplemented,
-}
-
-/// ADCS specific result type
-pub type AdcsResult<T> = Result<T, AdcsError>;
 
 /// Structure for interacting with the ISIS Imtq
 pub struct Imtq<T: ImtqFFI> {
@@ -60,7 +35,12 @@ impl Imtq<ImtqRaw> {
     ///
     /// # Example
     /// ```
+    /// extern crate adcs_api;
+    /// extern crate isis_imtq_api;
+    /// use adcs_api::*;
     /// use isis_imtq_api::*;
+    ///
+    /// # fn main() { func(); }
     ///
     /// # fn func() -> AdcsResult<()> {
     /// let imtq = Imtq::imtq(1, 0x40, 60)?;
@@ -99,7 +79,12 @@ impl<T: ImtqFFI> Imtq<T> {
     ///
     /// # Example
     /// ```
+    /// extern crate adcs_api;
+    /// extern crate isis_imtq_api;
+    /// use adcs_api::*;
     /// use isis_imtq_api::*;
+    ///
+    /// # fn main() { func(); }
     ///
     /// # fn func() -> AdcsResult<()> {
     /// let imtq = Imtq::imtq(1, 0x40, 60)?;
@@ -138,7 +123,12 @@ impl<T: ImtqFFI> Imtq<T> {
     ///
     /// # Example
     /// ```
+    /// extern crate adcs_api;
+    /// extern crate isis_imtq_api;
+    /// use adcs_api::*;
     /// use isis_imtq_api::*;
+    ///
+    /// # fn main() { func(); }
     ///
     /// # fn func() -> AdcsResult<()> {
     /// let imtq = Imtq::imtq(1, 0x40, 60)?;

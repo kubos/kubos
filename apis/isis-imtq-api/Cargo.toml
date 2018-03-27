@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co", "Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
-failure = { git = "https://github.com/rust-lang-nursery/failure" }
+adcs_api = { path = "../adcs_api" }
 
 [dev-dependencies]
 double = "0.2.2"

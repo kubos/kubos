@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use imtq::AdcsError;
+use adcs_api::AdcsError;
 
 #[repr(C)]
 #[derive(Clone, Debug)]
