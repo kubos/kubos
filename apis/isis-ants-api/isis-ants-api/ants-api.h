@@ -23,56 +23,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
-/**
- *  @name ISIS AntS config.json configuration options and default values
- */
-/**@{*/
-/**
- * I2C bus the ISIS AntS is connected to
- */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_I2C_BUS
-#define ANTS_I2C_BUS YOTTA_CFG_ANTENNA_ISIS_I2C_BUS
-#else
-#define ANTS_I2C_BUS K_I2C1
-#endif
-
-/**
- * Primary antenna controller's I2C address
- */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_PRIMARY
-#define ANTS_PRIMARY YOTTA_CFG_ANTENNA_ISIS_PRIMARY
-#else
-#define ANTS_PRIMARY 0x31
-#endif
-
-/**
- * Secondary (redundant) antenna controller's I2C address
- */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_SECONDARY
-#define ANTS_SECONDARY YOTTA_CFG_ANTENNA_ISIS_SECONDARY
-#else
-#define ANTS_SECONDARY 0x00
-#endif
-
-/**
- * Number of deployable antennas
- */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_COUNT
-#define ANT_COUNT YOTTA_CFG_ANTENNA_ISIS_COUNT
-#else
-#define ANT_COUNT 2
-#endif
-
-/**
- * Watchdog timeout (in seconds)
- */
-#ifdef YOTTA_CFG_ANTENNA_ISIS_WATCHDOG_TIMEOUT
-#define ANTS_WD_TIMEOUT YOTTA_CFG_ANTENNA_ISIS_WATCHDOG_TIMEOUT
-#else
-#define ANTS_WD_TIMEOUT 60
-#endif
-/**@}*/
+#include <kubos-hal/i2c.h>
 
 /** \cond WE DO NOT WANT TO HAVE THESE IN OUR GENERATED DOCS */
 /* AntS command values */
@@ -117,23 +68,17 @@
 #define ANT_1_STOPPED_TIME          (4 << 12)   /**< Antenna 1 deployment time limit was reached */
 #define ANT_1_ACTIVE                (2 << 12)   /**< Antenna 1 deployment system is active */
 
-#if ANT_COUNT > 1
 #define ANT_2_NOT_DEPLOYED          (8 << 8)    /**< Antenna 2 is not deployed */
 #define ANT_2_STOPPED_TIME          (4 << 8)    /**< Antenna 2 deployment time limit was reached */
 #define ANT_2_ACTIVE                (2 << 8)    /**< Antenna 2 deployment system is active */
-#endif
 
-#if ANT_COUNT > 2
 #define ANT_3_NOT_DEPLOYED          (8 << 4)    /**< Antenna 3 is not deployed */
 #define ANT_3_STOPPED_TIME          (4 << 4)    /**< Antenna 3 deployment time limit was reached */
 #define ANT_3_ACTIVE                (2 << 4)    /**< Antenna 3 deployment system is active */
-#endif
 
-#if ANT_COUNT > 3
 #define ANT_4_NOT_DEPLOYED          (8 << 0)    /**< Antenna 4 is not deployed */
 #define ANT_4_STOPPED_TIME          (4 << 0)    /**< Antenna 4 deployment time limit was reached */
 #define ANT_4_ACTIVE                (2 << 0)    /**< Antenna 4 deployment system is active */
-#endif
 /**@}*/
 
 /**
@@ -159,15 +104,9 @@ typedef enum {
  */
 typedef enum {
     ANT_1,              /**< Antenna 1 */
-#if ANT_COUNT > 1
     ANT_2,              /**< Antenna 2 */
-#endif
-#if ANT_COUNT > 2
     ANT_3,              /**< Antenna 3 */
-#endif
-#if ANT_COUNT > 3
     ANT_4               /**< Antenna 4 */
-#endif
 } KANTSAnt;
 
 /**
@@ -187,7 +126,7 @@ typedef struct
  * Initialize the antenna interface
  * @return KANTSStatus ANTS_OK if OK, error otherwise
  */
-KANTSStatus k_ants_init(void);
+KANTSStatus k_ants_init(KI2CNum bus, uint8_t primary, uint8_t secondary, uint8_t ant_count, uint32_t timeout);
 /**
  * Terminate the antenna interface
  */
