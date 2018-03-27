@@ -16,16 +16,30 @@
 
 use ffi::*;
 
+/// Errors for ADCS devices
 #[derive(Fail, Display, Debug, PartialEq)]
 pub enum AdcsError {
-    #[display(fmt = "Generic error")] Generic,
-    #[display(fmt = "Configuration error")] Config,
-    #[display(fmt = "No response from ADCS")] NoResponse,
-    #[display(fmt = "Internal ADCS error")] Internal,
-    #[display(fmt = "ADCS mutex error")] Mutex,
-    #[display(fmt = "Not implemented error")] NotImplemented,
+    /// Generic error
+    #[display(fmt = "Generic error")]
+    Generic,
+    /// Configuration error
+    #[display(fmt = "Configuration error")]
+    Config,
+    /// No response received from subsystem
+    #[display(fmt = "No response received from subsystem")]
+    NoResponse,
+    /// An error was thrown by the subsystem
+    #[display(fmt = "An error was thrown by the subsystem")]
+    Internal,
+    /// Mutex-related error
+    #[display(fmt = "Mutex-related error")]
+    Mutex,
+    /// Requested function has not been implemented
+    #[display(fmt = "Requested function has not been implemented")]
+    NotImplemented,
 }
 
+/// ADCS specific result type
 pub type AdcsResult<T> = Result<T, AdcsError>;
 
 /// Structure for interacting with the ISIS Imtq
@@ -47,7 +61,11 @@ impl Imtq<ImtqRaw> {
     /// # Example
     /// ```
     /// use isis_imtq_api::*;
-    /// let imtq = Imtq::imtq(1, 0x40, 60).unwrap();
+    ///
+    /// # fn func() -> AdcsResult<()> {
+    /// let imtq = Imtq::imtq(1, 0x40, 60)?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn imtq(bus: u8, addr: u16, timeout: i32) -> AdcsResult<Self> {
         let handle = ImtqRaw {};
@@ -82,9 +100,13 @@ impl<T: ImtqFFI> Imtq<T> {
     /// # Example
     /// ```
     /// use isis_imtq_api::*;
-    /// let imtq = Imtq::imtq(1, 0x40, 60).unwrap();
+    ///
+    /// # fn func() -> AdcsResult<()> {
+    /// let imtq = Imtq::imtq(1, 0x40, 60)?;
     /// let cmd = vec![10, 10, 10, 10];
-    /// let result = imtq.passthrough(&cmd, 10, 0, 0).unwrap();
+    /// let result = imtq.passthrough(&cmd, 10, 0, 0)?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn passthrough(
         &self,
@@ -117,8 +139,12 @@ impl<T: ImtqFFI> Imtq<T> {
     /// # Example
     /// ```
     /// use isis_imtq_api::*;
-    /// let imtq = Imtq::imtq(1, 0x40, 60).unwrap();
-    /// imtq.reset();
+    ///
+    /// # fn func() -> AdcsResult<()> {
+    /// let imtq = Imtq::imtq(1, 0x40, 60)?;
+    /// imtq.reset()?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn reset(&self) -> AdcsResult<()> {
         Ok(adcs_status_to_err(self.handle.k_imtq_reset())?)

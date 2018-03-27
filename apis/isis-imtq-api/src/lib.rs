@@ -29,3 +29,4 @@ mod ffi;
 mod imtq;
 
 pub use imtq::Imtq;
+pub use imtq::{AdcsError, AdcsResult};
