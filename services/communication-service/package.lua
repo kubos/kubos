@@ -19,6 +19,6 @@ return {
   },
   files = {
     "**.lua",
-    "!libs/twxvu"
+    "**.h",
   }
 }
