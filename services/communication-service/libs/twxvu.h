@@ -38,8 +38,7 @@ typedef struct {
     ax25_callsign   to;
     ax25_callsign   from;
 } radio_config;
-typedef struct
-{
+typedef struct {
     uint16_t msg_size;
     uint16_t doppler_offset;
     uint16_t signal_strength;

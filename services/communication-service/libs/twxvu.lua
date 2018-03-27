@@ -1,7 +1,6 @@
 local ffi = require 'ffi'
 
 ffi.cdef((module:load("./twxvu.h")))
-
 local K = ffi.load("/home/system/usr/local/lib/libtwxvu.so")
 
 local rate_table = {
