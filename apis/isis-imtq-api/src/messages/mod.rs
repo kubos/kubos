@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-//! Device level API for interacting with the ISIS iMTQ
+mod config;
 
-#![deny(missing_docs)]
-
-#[cfg(test)]
-#[macro_use]
-extern crate double;
-
-extern crate adcs_api;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-
-mod messages;
-mod ffi;
-mod imtq;
-
-pub use imtq::Imtq;
+pub use self::config::Config;

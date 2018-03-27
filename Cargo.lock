@@ -304,6 +304,9 @@ dependencies = [
  "adcs_api 0.1.0",
  "double 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-build-helper 0.1.0",
+ "serde 1.0.36 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.36 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.13 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
