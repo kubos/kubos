@@ -17,6 +17,7 @@
 //! Device level API for interacting with the ISIS iMTQ
 
 #![deny(missing_docs)]
+#![deny(warnings)]
 
 #[cfg(test)]
 #[macro_use]

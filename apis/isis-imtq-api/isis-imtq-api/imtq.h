@@ -132,7 +132,7 @@ KADCSStatus k_adcs_init(KI2CNum bus, uint16_t addr, int timeout);
 void k_adcs_terminate(void);
 /**
  * Start a thread to kick the iMTQ's watchdog at an interval of
- * (::WD_TIMEOUT/3) seconds
+ * `(timeout/3)` seconds (`timeout` specified in `k_adcs_init`)
  * @return KADCSStatus `ADCS_OK` if OK, error otherwise
  */
 KADCSStatus k_imtq_watchdog_start(void);

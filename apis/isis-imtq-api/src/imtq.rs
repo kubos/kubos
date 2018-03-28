@@ -17,7 +17,7 @@
 use adcs_api::*;
 use ffi::*;
 
-/// Structure for interacting with the ISIS Imtq
+/// Structure for interacting with the ISIS iMTQ
 pub struct Imtq<T: ImtqFFI> {
     handle: T,
 }
@@ -171,11 +171,10 @@ mod tests {
         mock_method!(k_adcs_init(&self, bus: KI2CNum, addr: u16, timeout: i32) -> KADCSStatus);
         mock_method!(k_adcs_terminate(&self));
         mock_method!(k_adcs_passthrough(&self, tx: *const u8,
-        len: i32,
+        tx_len: i32,
         rx: *mut u8,
         rx_len: i32,
         delay: *const timespec) -> KADCSStatus);
-
         mock_method!(k_imtq_reset(&self) -> KADCSStatus);
         mock_method!(k_imtq_watchdog_start(&self) -> KADCSStatus);
         mock_method!(k_imtq_watchdog_stop(&self) -> KADCSStatus);
