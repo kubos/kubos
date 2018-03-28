@@ -196,7 +196,7 @@ typedef struct {
  * @param [in] config ADCS configuration structure
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_configure(const JsonNode * config);
+KADCSStatus k_adcs_configure(uint16_t param, imtq_config_value value);
 /**
  * Get the current value of a configuration parameter
  * @param [in] param ID of parameter value to fetch

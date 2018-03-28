@@ -86,19 +86,14 @@ static void test_noop(void ** arg)
 static void test_configure(void ** arg)
 {
     KADCSStatus ret;
-
-    JsonNode * config = json_decode("{\"0x2003\": 1,   \"0x2004\": 2}");
-
+    imtq_config_value val = {
+      .uint8_val = 1
+    };
     expect_value(__wrap_write, cmd, SET_PARAM);
     expect_value(__wrap_read, len, sizeof(imtq_resp_header));
     will_return(__wrap_read, &response);
-    expect_value(__wrap_write, cmd, SET_PARAM);
-    expect_value(__wrap_read, len, sizeof(imtq_resp_header));
-    will_return(__wrap_read, &response);
 
-    ret = k_adcs_configure(config);
-
-    json_delete(config);
+    ret = k_adcs_configure(0x2003, val);
 
     assert_int_equal(ret, ADCS_OK);
 }

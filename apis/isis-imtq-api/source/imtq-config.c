@@ -21,96 +21,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-KADCSStatus k_adcs_configure(const JsonNode * config)
+KADCSStatus k_adcs_configure(uint16_t param, imtq_config_value value)
 {
     KADCSStatus status      = ADCS_OK;
     KADCSStatus imtq_status = ADCS_OK;
 
-    JsonNode *        entry;
-    uint16_t          param;
-    imtq_config_value value = {0};
-
-    if (config == NULL)
+    /* Send the request */
+    imtq_status = k_imtq_set_param(param, &value, NULL);
+    if (imtq_status != ADCS_OK)
     {
-        return ADCS_ERROR_CONFIG;
+      fprintf(stderr,
+              "Failed to set iMTQ configuration parameter (%x): %d\n",
+              param, imtq_status);
+      status = ADCS_ERROR;
     }
-
-    json_foreach(entry, config)
-    {
-        if (entry->tag != JSON_NUMBER)
-        {
-            fprintf(stderr,
-                    "Skipping non-numeric iMTQ configuration entry: %.10s\n",
-                    entry->key);
-            status = ADCS_ERROR;
-            continue;
-        }
-
-        /* Convert parameter string to hex value */
-        int key_len = strlen(entry->key);
-        if (key_len < 4 || key_len > 6)
-        {
-            fprintf(stderr,
-                    "Skipping invalid iMTQ configuration parameter: %.10s\n",
-                    entry->key);
-            status = ADCS_ERROR;
-            continue;
-        }
-
-        param = (uint16_t) strtol(entry->key, NULL, 16);
-
-        /* Store the param value appropriately based on its actual size */
-        switch (param >> 12)
-        {
-            case 0x1:
-                value.int8_val = (int8_t) entry->number_;
-                break;
-            case 0x2:
-                value.uint8_val = (uint8_t) entry->number_;
-                break;
-            case 0x3:
-                value.int16_val = (int16_t) entry->number_;
-                break;
-            case 0x4:
-                value.uint16_val = (uint16_t) entry->number_;
-                break;
-            case 0x5:
-                value.int32_val = (int32_t) entry->number_;
-                break;
-            case 0x6:
-                value.uint32_val = (uint32_t) entry->number_;
-                break;
-            case 0x7:
-                value.float_val = (float) entry->number_;
-                break;
-            case 0x8:
-                value.int64_val = (int64_t) entry->number_;
-                break;
-            case 0x9:
-                value.uint64_val = (uint64_t) entry->number_;
-                break;
-            case 0xA:
-                value.double_val = entry->number_;
-                break;
-            default:
-                fprintf(
-                    stderr,
-                    "Unknown iMTQ configuration parameter type passed: %x\n",
-                    param);
-                status = ADCS_ERROR;
-        }
-
-        /* Send the request */
-        imtq_status = k_imtq_set_param(param, &value, NULL);
-        if (imtq_status != ADCS_OK)
-        {
-            fprintf(stderr,
-                    "Failed to set iMTQ configuration parameter (%x): %d\n",
-                    param, imtq_status);
-            status = ADCS_ERROR;
-        }
-    }
-
     return status;
 }
 
