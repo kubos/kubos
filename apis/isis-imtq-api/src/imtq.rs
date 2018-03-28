@@ -148,9 +148,9 @@ impl<T: ImtqFFI> Imtq<T> {
     /// # `config` - A `messages::Config` enum which describes the configuration setting+value
     ///
     pub fn configure(&self, config: Config) -> AdcsResult<()> {
-        let config_json = config.as_json();
+        let (param, value) = config.parse();
         Ok(adcs_status_to_err(
-            self.handle.k_adcs_configure(config_json.as_ptr()),
+            self.handle.k_adcs_configure(param, value),
         )?)
     }
 
@@ -176,7 +176,7 @@ mod tests {
         k_adcs_init(KI2CNum, u16, i32) -> KADCSStatus,
         k_adcs_terminate() -> (),
         k_adcs_passthrough(*const u8, i32, *mut u8, i32, *const timespec) -> KADCSStatus,
-        k_adcs_configure(*const u8) -> KADCSStatus,
+        k_adcs_configure(u16, FFIConfigValue) -> KADCSStatus,
         k_imtq_reset() -> KADCSStatus,
         k_imtq_watchdog_start() -> KADCSStatus,
         k_imtq_watchdog_stop() -> KADCSStatus
@@ -190,8 +190,8 @@ mod tests {
         rx: *mut u8,
         rx_len: i32,
         delay: *const timespec) -> KADCSStatus);
-        mock_method!(k_adcs_configure(&self, json: *const u8) -> KADCSStatus);
-
+        mock_method!(k_adcs_configure(&self,
+            param: u16, value: FFIConfigValue) -> KADCSStatus);
         mock_method!(k_imtq_reset(&self) -> KADCSStatus);
         mock_method!(k_imtq_watchdog_start(&self) -> KADCSStatus);
         mock_method!(k_imtq_watchdog_stop(&self) -> KADCSStatus);
@@ -275,25 +275,8 @@ mod tests {
     fn test_config_ok() {
         let mock = MockImtq::default();
         let imtq = Imtq::new(&mock, 1, 0x40, 60).unwrap();
-        let config = Config::InternalIntegrationTime(1);
+        let config = Config::MtmSelect(1);
         let result = imtq.configure(config);
         assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_config_gen_json() {
-        use std::ffi::CStr;
-        use std::slice;
-
-        let mock = MockImtq::default();
-        let imtq = Imtq::new(&mock, 1, 0x40, 60).unwrap();
-        let config = Config::InternalIntegrationTime(1);
-        let result = imtq.configure(config);
-        let expected_result = "{\"0x2003\":1}".to_string();
-        assert!(result.is_ok());
-        let json = mock.k_adcs_configure.calls().pop().unwrap();
-        let json_slice = unsafe { slice::from_raw_parts(json, 13) };
-        let json_str = CStr::from_bytes_with_nul(json_slice).unwrap();
-        assert_eq!(expected_result, json_str.to_str().unwrap());
     }
 }
