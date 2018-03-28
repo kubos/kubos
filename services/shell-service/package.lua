@@ -1,6 +1,6 @@
   return {
     name = "kubos/kubos-shell-service",
-    version = "0.0.1",
+    version = "0.0.2",
     description = "Service to provide access to linux files and processes remotely.",
     tags = { "kubos", "udp", "shell", "file", "process" },
     author = { name = "Tim Caswell", email = "tim@kubos.co" },
