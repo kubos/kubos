@@ -4,7 +4,7 @@ local C = ffi.C
 ffi.cdef[[
   static const int VMIN = 6;
   static const int VTIME = 5;
-  static const int	TCSANOW =		0;
+  static const int TCSANOW = 0;
   typedef struct termios {
     unsigned int c_iflag;
     unsigned int c_oflag;
