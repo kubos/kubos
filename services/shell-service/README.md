@@ -39,12 +39,12 @@ back down to ground.  Messages are shown as JS literals, but would be cbor in
 the actual protocol:
 
 ```js
-'<-'	[ 'spawn', '/bin/uname', { args: [ '-a' ] } ]
-'->'	[ 's-pid', 26319 ]
-'->'	[ 's-out', 'Linux t580 4.16.0-041600rc4-generic #201803041930 SMP Mon Mar 5 00:32:34 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux\n' ]
-'->'	[ 's-out' ]
-'->'	[ 's-err' ]
-'->'	[ 's-exit', 0, 0 ]
+'<-'	[ id, 'spawn', '/bin/uname', { args: [ '-a' ] } ]
+'->'	[ id, 'pid', 26319 ]
+'->'	[ id, 'stdout', 'Linux t580 4.16.0-041600rc4-generic #201803041930 SMP Mon Mar 5 00:32:34 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux\n' ]
+'->'	[ id, 'stdout' ]
+'->'	[ id, 'stderr' ]
+'->'	[ id, 'exit', 0, 0 ]
 ```
 
 We asked to spawn `/bin/uname` with arguments passed in as an `args` array.  We
@@ -63,16 +63,15 @@ The spawn command is used to manage child processes.
 There are 5 ground-to-flight messages:
 
  - `spawn(path, options)` - spawn a child process - make sure id is unique.
- - `s-in(data)` - write to child's stdin
- - `s-in()` - close child's stdin
- - `s-kill(signal)` - send signal to child, defaults to SIGTERM
- - `s-resize(cols, rows)` - if child has a pty, resize it
+ - `stdin(data)` - write to child's stdin
+ - `stdin()` - close child's stdin
+ - `kill(signal)` - send signal to child, defaults to SIGTERM
+ - `resize(cols, rows)` - if child has a pty, resize it
 
 The `options` argument in `spawn()` is an object that accepts:
 
  - `args` - an array of arguments to pass to the child process.
- - `pty` - an array containing `[cols, rows]` if you wish to create a pty
-   for this process.
+ - `pty` - a boolean specifying we want a new pty for this process.
  - `env` - an array of environment variable entries in the form `"KEY=val"`.
  - `cwd` - set the current working directory of the child process
  - `uid`, `gid` - set the uid or gid of the process.
@@ -80,9 +79,9 @@ The `options` argument in `spawn()` is an object that accepts:
 
 There are 3 different flight-to-ground messages (though 2 are dual purpose)
 
- - `s-pid(pid)` - process was created, this is the pid
- - `s-out(data)` - data came out of stdout
- - `s-out()` - stdout closed
- - `s-err(data)` - data came out of stderr
- - `s-err()` - stderr closed
- - `s-exit(code, signal)` - process exited with signal and/or code
+ - `pid(pid)` - process was created, this is the pid
+ - `stdout(data)` - data came out of stdout
+ - `stdout()` - stdout closed
+ - `stderr(data)` - data came out of stderr
+ - `stderr()` - stderr closed
+ - `exit(code, signal)` - process exited with signal and/or code
