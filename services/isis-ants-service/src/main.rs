@@ -22,11 +22,19 @@ extern crate logger;
 extern crate mount;
 
 use iron::prelude::*;
+use iron::typemap::Key;
 use juniper_iron::{GraphQLHandler, GraphiQLHandler};
 
 mod model;
 mod schema;
 use std::env;
+
+//TODO: use me
+#[derive(Copy, Clone)]
+pub struct LastCmd;
+impl Key for LastCmd {
+    type Value = model::AckCommand;
+}
 
 /// A context object is used in Juniper to provide out-of-band access to global
 /// data when resolving fields. We will use it here to provide a Subsystem structure

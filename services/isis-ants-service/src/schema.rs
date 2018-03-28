@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+use iron::prelude::*;
 use model::*;
 use juniper::Context as JuniperContext;
 use juniper::FieldResult;
@@ -227,6 +228,11 @@ graphql_union!(TestResults: () |&self| {
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Service subsystem"
     
+    field ping() -> FieldResult<String>
+    {
+    	Ok(String::from("Pong"))
+    }
+    
     //----- general queries ----//
     field ack(&executor) -> FieldResult<AckCommand>
     {
@@ -241,6 +247,7 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     
     field config() -> FieldResult<String>
     {
+    	//TODO: Should this be something???
     	Ok(String::from("Default"))
     }
     
@@ -292,8 +299,13 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 	//TODO: Does there need to be an errors field here, too?
 	//If we have a mutation that throws errors and a following query,
 	//will the query's error field have that information?
+	
+	field errors(&executor) -> FieldResult<String>
+    {
+    	Ok(executor.context().subsystem.errors.borrow().clone())
+    }
 
-    field Noop(&executor) -> FieldResult<NoopResponse>
+    field noop(&executor) -> FieldResult<NoopResponse>
     {
     	executor.context().subsystem.last_command.set(AckCommand::Noop);
     	
