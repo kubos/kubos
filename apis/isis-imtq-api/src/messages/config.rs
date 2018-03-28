@@ -81,6 +81,60 @@ pub enum Config {
     /// MTM raw -> corrected correction bias vector (Z-axis value)
     #[serde(rename = "0xA00C")]
     BiasZ(u8),
+    /// X-axis voltage bias for coil current ADC -> engineering value conversion
+    #[serde(rename = "0x301C")]
+    AdcCoilCurrentBiasX(u8),
+    /// Y-axis voltage bias for coil current ADC -> engineering value conversion
+    #[serde(rename = "0x301D")]
+    AdcCoilCurrentBiasY(u8),
+    /// Z-axis voltage bias for coil current ADC -> engineering value conversion
+    #[serde(rename = "0x301E")]
+    AdcCoilCurrentBiasZ(u8),
+    /// X-axis pre-multiplier for coil current ADC -> engineering value conversion
+    #[serde(rename = "0x301F")]
+    AdcCoilCurrentMultX(u8),
+    /// Y-axis pre-multiplier for coil current ADC -> engineering value conversion
+    #[serde(rename = "0x3020")]
+    AdcCoilCurrentMultY(u8),
+    /// Z-axis pre-multiplier for coil current ADC -> engineering value conversion
+    #[serde(rename = "0x3021")]
+    AdcCoilCurrentMultZ(u8),
+    /// X-axis post-divider for coil current ADC -> engineering value conversion
+    #[serde(rename = "0x3022")]
+    AdcCoilCurrentDivX(u8),
+    /// Y-axis post-divider for coil current ADC -> engineering value conversion
+    #[serde(rename = "0x3023")]
+    AdcCoilCurrentDivY(u8),
+    /// Z-axis post-divider for coil current ADC -> engineering value conversion
+    #[serde(rename = "0x3024")]
+    AdcCoilCurrentDivZ(u8),
+    /// X-axis voltage bias for coil temperature ADC -> engineering value conversion
+    #[serde(rename = "0x3025")]
+    AdcCoilTempBiasX(u8),
+    /// Y-axis voltage bias for coil temperature ADC -> engineering value conversion
+    #[serde(rename = "0x3026")]
+    AdcCoilTempBiasY(u8),
+    /// Z-axis voltage bias for coil temperature ADC -> engineering value conversion
+    #[serde(rename = "0x3027")]
+    AdcCoilTempBiasZ(u8),
+    /// X-axis pre-multiplier for coil temperature ADC -> engineering value conversion
+    #[serde(rename = "0x3028")]
+    AdcCoilTempMultX(u8),
+    /// Y-axis pre-multiplier for coil temperature ADC -> engineering value conversion
+    #[serde(rename = "0x3029")]
+    AdcCoilTempMultY(u8),
+    /// Z-axis pre-multiplier for coil temperature ADC -> engineering value conversion
+    #[serde(rename = "0x302A")]
+    AdcCoilTempMultZ(u8),
+    /// X-axis post-divider for coil temperature ADC -> engineering value conversion
+    #[serde(rename = "0x302B")]
+    AdcCoilTempDivX(u8),
+    /// Y-axis post-divider for coil temperature ADC -> engineering value conversion
+    #[serde(rename = "0x302C")]
+    AdcCoilTempDivY(u8),
+    /// Z-axis post-divider for coil temperature ADC -> engineering value conversion
+    #[serde(rename = "0x302D")]
+    AdcCoilTempDivZ(u8),
 }
 
 impl Config {
@@ -208,4 +262,95 @@ mod tests {
         assert_eq!("{\"0xA00B\":0}".to_string(), Config::BiasY(0).as_json());
         assert_eq!("{\"0xA00C\":0}".to_string(), Config::BiasZ(0).as_json());
     }
+
+    #[test]
+    fn test_serialize_adc_coil_current_bias_x() {
+        assert_eq!("{\"0x301C\":0}", Config::AdcCoilCurrentBiasX(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_current_bias_y() {
+        assert_eq!("{\"0x301D\":0}", Config::AdcCoilCurrentBiasY(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_current_bias_z() {
+        assert_eq!("{\"0x301E\":0}", Config::AdcCoilCurrentBiasZ(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_current_mult_x() {
+        assert_eq!("{\"0x301F\":0}", Config::AdcCoilCurrentMultX(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_current_mult_y() {
+        assert_eq!("{\"0x3020\":0}", Config::AdcCoilCurrentMultY(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_current_mult_z() {
+        assert_eq!("{\"0x3021\":0}", Config::AdcCoilCurrentMultZ(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_current_div_x() {
+        assert_eq!("{\"0x3022\":0}", Config::AdcCoilCurrentDivX(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_current_div_y() {
+        assert_eq!("{\"0x3023\":0}", Config::AdcCoilCurrentDivY(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_current_div_z() {
+        assert_eq!("{\"0x3024\":0}", Config::AdcCoilCurrentDivZ(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_temp_bias_x() {
+        assert_eq!("{\"0x3025\":0}", Config::AdcCoilTempBiasX(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_temp_bias_y() {
+        assert_eq!("{\"0x3026\":0}", Config::AdcCoilTempBiasY(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_temp_bias_z() {
+        assert_eq!("{\"0x3027\":0}", Config::AdcCoilTempBiasZ(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_temp_mult_x() {
+        assert_eq!("{\"0x3028\":0}", Config::AdcCoilTempMultX(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_temp_mult_y() {
+        assert_eq!("{\"0x3029\":0}", Config::AdcCoilTempMultY(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_temp_mult_z() {
+        assert_eq!("{\"0x302A\":0}", Config::AdcCoilTempMultZ(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_temp_div_x() {
+        assert_eq!("{\"0x302B\":0}", Config::AdcCoilTempDivX(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_temp_div_y() {
+        assert_eq!("{\"0x302C\":0}", Config::AdcCoilTempDivY(0).as_json());
+    }
+
+    #[test]
+    fn test_serialize_adc_coil_temp_div_z() {
+        assert_eq!("{\"0x302D\":0}", Config::AdcCoilTempDivZ(0).as_json());
+    }
+
 }
