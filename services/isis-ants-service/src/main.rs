@@ -20,6 +20,13 @@ extern crate juniper;
 extern crate juniper_iron;
 extern crate logger;
 extern crate mount;
+#[macro_use]
+extern crate serde_json;
+
+use serde_json::{Value, Error};
+
+use std::fs::File;
+use std::io::prelude::*;
 
 use iron::prelude::*;
 use iron::typemap::Key;
@@ -47,6 +54,33 @@ fn context_factory(_: &mut Request) -> schema::Context {
 }
 
 fn main() {
+
+    let default = json!({
+                    "isis-ants-service": {
+                        "addr": "0.0.0.0",
+                        "port": "8080"
+                    }
+                });
+
+    let mut raw = String::new();
+
+    //TODO: decide on official location for services' configuration file
+    let config: Value =
+        match File::open("sys-config.txt")
+            .map(|mut f| f.read_to_string(&mut raw))
+            .and_then(|_x| serde_json::from_str(&raw).map_err(|err| err.into())) {
+            Ok(v) => v,
+            _ => {
+                println!("Failed to get configuration. Using default {}", default);
+                default
+            }
+        };
+
+    let host = config["isis-ants-service"]["addr"].to_string();
+    let port = config["isis-ants-service"]["port"].to_string();
+
+    let addr = format!("{}:{}", host.trim_matches('"'), port.trim_matches('"'));
+
     let graphql_endpoint =
         GraphQLHandler::new(context_factory, schema::QueryRoot, schema::MutationRoot);
 
@@ -62,7 +96,7 @@ fn main() {
     chain.link_before(logger_before);
     chain.link_after(logger_after);
 
-    let host = env::var("LISTEN").unwrap_or("0.0.0.0:8080".to_owned());
+    let host = env::var("LISTEN").unwrap_or(addr.to_owned());
     println!("GraphQL server started on {}", host);
     Iron::new(chain).http(host.as_str()).unwrap();
 }
