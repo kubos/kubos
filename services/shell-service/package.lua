@@ -1,6 +1,6 @@
   return {
     name = "kubos/kubos-shell-service",
-    version = "0.0.2",
+    version = "0.0.3",
     description = "Service to provide access to linux files and processes remotely.",
     tags = { "kubos", "udp", "shell", "file", "process" },
     author = { name = "Tim Caswell", email = "tim@kubos.co" },
@@ -15,7 +15,6 @@
       "creationix/cbor",
     },
     files = {
-      "main.lua",
-      "package.lua",
+      "**.lua",
     }
   }
