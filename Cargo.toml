@@ -10,3 +10,9 @@ members = [
 "services/iobc-supervisor-service",
 "test/integration/linux/isis-ants",
 ]
+
+[profile.release]
+lto = true
+opt-level = 3
+opt-size = 2
+panic = "abort"
