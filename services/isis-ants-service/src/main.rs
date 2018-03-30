@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+extern crate failure;
 extern crate isis_ants_api;
 extern crate iron;
 #[macro_use]
@@ -23,7 +24,7 @@ extern crate mount;
 #[macro_use]
 extern crate serde_json;
 
-use serde_json::{Value, Error};
+use serde_json::Value;
 
 use std::fs::File;
 use std::io::prelude::*;

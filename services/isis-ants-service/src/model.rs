@@ -14,10 +14,11 @@
 // limitations under the License.
 //
 
+use failure::Fail;
 use isis_ants_api::{AntS, KANTSAnt, KI2CNum, AntsTelemetry, KANTSController, DeployStatus};
 
 use std::io::Error;
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::str;
 
 #[derive(GraphQLEnum, Clone, Copy)]
@@ -123,13 +124,16 @@ pub enum Telemetry {
     Debug(TelemetryDebug),
 }
 
+#[derive(Default)]
 pub struct TelemetryNominal(pub AntsTelemetry);
 
+#[derive(Default)]
 pub struct AntennaStats {
     pub act_count: u8,
     pub act_time: u16,
 }
 
+#[derive(Default)]
 pub struct TelemetryDebug {
     pub ant1: AntennaStats,
     pub ant2: AntennaStats,
@@ -169,15 +173,80 @@ pub struct RawCommandResponse {
 
 pub struct Subsystem {
     ants: AntS,
-    pub last_command: Cell<AckCommand>,
-    pub errors: RefCell<String>,
+    pub errors: RefCell<String>, //TODO: Consider making a vector of strings
+}
+
+// Iterate through a failure::Error and concatenate the error
+// and all its causes into a single string
+// TODO: Is there a good way to enforce delimiter formatting?
+// (ie must be String, str, or char)
+macro_rules! process_errors {
+	($err:ident) => (process_errors!($err, '\n'));
+	($err:ident, $delim:expr) => {{	
+		{
+			let mut results = String::new();
+			let mut chain = $err.causes();
+			
+		    if let Some(err) = chain.next() {
+		    	results.push_str(&format!("{}", err));
+		
+		        for err in chain {
+		            results.push_str(&format!("{}{}", $delim, err));
+		        }
+		    }
+
+		    results
+		}
+	}};
+}
+
+macro_rules! push_err {
+	($master:expr, $err:expr) => {{
+	        // TODO: Might change the master err string to a master err Vec<String>
+	        // Might be easier to process/consume later
+	        let mut err = $master.borrow_mut();
+	        err.push_str($err);
+		}}
+}
+
+// Execute a function and return a tuple containing:
+//   a) A String with any errors which were encountered
+//   b) A boolean to indicate whether the function ran successfully
+// Optionally:
+//   Add the error string to the master error string for later consumption
+macro_rules! run {
+	($func:expr) => {{
+			let (errors, success, data) = match $func {
+		        Ok(v) => (String::from(""), true, Some(v)),
+		        Err(e) => (process_errors!(e, ", "), false, None),
+		    };
+			
+			(errors, success, data)
+		}};
+	($func:expr, $master:expr) => {{
+		{
+			let (errors, success, data) = run!($func);
+			
+			// We want to know which function threw these particular errors, 
+			// but we don't want to print the entire expression, so using split
+			// to go from
+			//     self.my.func(arg1, arg2)
+			// to this
+			//     func
+			// TODO: This isn't perfect or particularly pretty. Is there a better way?
+			let mut name = stringify!($func).split('(').next().unwrap();
+			name = name.split(&[':','.'][..]).last().unwrap();
+			push_err!($master, &format!("{}: {}", name, errors));
+	        
+			(errors, success, data)
+		}
+	}};
 }
 
 impl Subsystem {
     pub fn new() -> Subsystem {
         let subsystem = Subsystem {
             ants: AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10).unwrap(),
-            last_command: Cell::new(AckCommand::None),
             errors: RefCell::new("".to_owned()),
         };
 
@@ -186,8 +255,8 @@ impl Subsystem {
     }
 
     pub fn get_arm_status(&self) -> Result<ArmStatus, Error> {
-        let deploy = self.ants.get_deploy().unwrap();
-        let armed = deploy.sys_armed;
+        let (_errors, _success, deploy) = run!(self.ants.get_deploy(), self.errors);
+        let armed = deploy.unwrap_or_default().sys_armed;
 
         let status = match armed {
             true => ArmStatus::Armed,
@@ -198,26 +267,26 @@ impl Subsystem {
     }
 
     pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
-        let uptime = self.ants.get_uptime().unwrap();
+        let (_errors, _success, uptime) = run!(self.ants.get_uptime(), self.errors);
 
-        let state = match uptime {
+        let state = match uptime.unwrap_or_default() {
             0 => PowerState::Off,
             _ => PowerState::On,
         };
 
         Ok(GetPowerResponse {
             state: state,
-            uptime: uptime,
+            uptime: uptime.unwrap_or_default(),
         })
     }
 
     pub fn get_deploy_status(&self) -> Result<GetDeployResponse, Error> {
-        let deploy = self.ants.get_deploy().unwrap();
+        let (_errors, _success, deploy) = run!(self.ants.get_deploy(), self.errors);
 
         let mut status = DeploymentStatus::Error;
 
         //TODO: What if there aren't 4 antennas?
-
+        let deploy = deploy.unwrap_or_default();
         if !deploy.ant_1_not_deployed && !deploy.ant_2_not_deployed &&
             !deploy.ant_3_not_deployed && !deploy.ant_4_not_deployed
         {
@@ -264,28 +333,44 @@ impl Subsystem {
     }
 
     pub fn get_telemetry_nominal(&self) -> Result<TelemetryNominal, Error> {
-        let telemetry = TelemetryNominal(self.ants.get_system_telemetry().unwrap());
+        let (_errors, _success, telemetry) = run!(self.ants.get_system_telemetry(), self.errors);
 
-        Ok(telemetry)
+        Ok(TelemetryNominal(telemetry.unwrap_or_default()))
     }
 
     pub fn get_telemetry_debug(&self) -> Result<TelemetryDebug, Error> {
         let telemetry = TelemetryDebug {
             ant1: AntennaStats {
-                act_count: self.ants.get_activation_count(KANTSAnt::Ant1).unwrap(),
-                act_time: self.ants.get_activation_time(KANTSAnt::Ant1).unwrap(),
+                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant1), self.errors)
+                    .2
+                    .unwrap_or_default(),
+                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant1), self.errors)
+                    .2
+                    .unwrap_or_default(),
             },
             ant2: AntennaStats {
-                act_count: self.ants.get_activation_count(KANTSAnt::Ant2).unwrap(),
-                act_time: self.ants.get_activation_time(KANTSAnt::Ant2).unwrap(),
+                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant2), self.errors)
+                    .2
+                    .unwrap_or_default(),
+                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant2), self.errors)
+                    .2
+                    .unwrap_or_default(),
             },
             ant3: AntennaStats {
-                act_count: self.ants.get_activation_count(KANTSAnt::Ant3).unwrap(),
-                act_time: self.ants.get_activation_time(KANTSAnt::Ant3).unwrap(),
+                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant3), self.errors)
+                    .2
+                    .unwrap_or_default(),
+                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant3), self.errors)
+                    .2
+                    .unwrap_or_default(),
             },
             ant4: AntennaStats {
-                act_count: self.ants.get_activation_count(KANTSAnt::Ant4).unwrap(),
-                act_time: self.ants.get_activation_time(KANTSAnt::Ant4).unwrap(),
+                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant4), self.errors)
+                    .2
+                    .unwrap_or_default(),
+                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant4), self.errors)
+                    .2
+                    .unwrap_or_default(),
             },
         };
 
@@ -293,23 +378,21 @@ impl Subsystem {
     }
 
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
-        let nominal = self.get_telemetry_nominal().unwrap();
-        let debug = self.get_telemetry_debug().unwrap();
+        let (_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
+        let (_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
 
         Ok(IntegrationTestResults {
-            success: true,
-            telemetry_nominal: nominal,
-            telemetry_debug: debug,
+            success: nom_success && debug_success,
+            telemetry_nominal: nominal.unwrap_or_default(),
+            telemetry_debug: debug.unwrap_or_default(),
         })
     }
 
     pub fn noop(&self) -> Result<NoopResponse, Error> {
-        self.ants.watchdog_kick().unwrap();
 
-        Ok(NoopResponse {
-            errors: String::from(""),
-            success: true,
-        })
+        let (errors, success, _data) = run!(self.ants.watchdog_kick(), self.errors);
+
+        Ok(NoopResponse { errors, success })
     }
 
     pub fn configure_hardware(
@@ -321,47 +404,48 @@ impl Subsystem {
             ConfigureController::Secondary => KANTSController::Secondary,
         };
 
-        self.ants.configure(conv).unwrap();
+        let (errors, success, _data) = run!(self.ants.configure(conv), self.errors);
 
         Ok(ConfigureHardwareResponse {
             config: controller,
-            errors: String::from(""),
-            success: true,
+            errors,
+            success,
         })
     }
 
     pub fn control_power(&self, state: PowerState) -> Result<ControlPowerResponse, Error> {
         match state {
             PowerState::Reset => {
-                self.ants.reset().unwrap();
+                let (errors, success, _data) = run!(self.ants.reset(), self.errors);
                 //TODO: convert/print error
 
                 Ok(ControlPowerResponse {
                     power: state,
-                    errors: String::from(""),
-                    success: true,
+                    errors,
+                    success,
                 })
 
             } 
-            _ => Ok(ControlPowerResponse {
-                power: state,
-                errors: String::from("Invalid power state"),
-                success: false,
-            }),
+            _ => {
+                push_err!(self.errors, "controlPower: Invalid power state");
+
+                Ok(ControlPowerResponse {
+                    power: state,
+                    errors: String::from("Invalid power state"),
+                    success: false,
+                })
+            }
 
         }
     }
 
     pub fn arm(&self, state: ArmState) -> Result<ArmResponse, Error> {
-        match state {
-            ArmState::Arm => self.ants.arm().unwrap(),
-            ArmState::Disarm => self.ants.disarm().unwrap(),
+        let (errors, success, _data) = match state {
+            ArmState::Arm => run!(self.ants.arm(), self.errors),
+            ArmState::Disarm => run!(self.ants.disarm(), self.errors),
         };
 
-        Ok(ArmResponse {
-            errors: String::from(""),
-            success: true,
-        })
+        Ok(ArmResponse { errors, success })
     }
 
     pub fn deploy(&self, ant: DeployType, force: bool, time: i32) -> Result<DeployResponse, Error> {
@@ -370,43 +454,36 @@ impl Subsystem {
 
         if time > 255 {
             conv = 255;
-            //TODO: Set error string
         }
 
-        match ant {
-            DeployType::All => {
-                self.ants.auto_deploy(conv).unwrap();
-            }
+        let (errors, success, _data) = match ant {
+            DeployType::All => run!(self.ants.auto_deploy(conv), self.errors),
             DeployType::Antenna1 => {
-                self.ants.deploy(KANTSAnt::Ant1, force, conv).unwrap();
+                run!(self.ants.deploy(KANTSAnt::Ant1, force, conv), self.errors)
             }
             DeployType::Antenna2 => {
-                self.ants.deploy(KANTSAnt::Ant2, force, conv).unwrap();
+                run!(self.ants.deploy(KANTSAnt::Ant2, force, conv), self.errors)
             }
             DeployType::Antenna3 => {
-                self.ants.deploy(KANTSAnt::Ant3, force, conv).unwrap();
+                run!(self.ants.deploy(KANTSAnt::Ant3, force, conv), self.errors)
             }
             DeployType::Antenna4 => {
-                self.ants.deploy(KANTSAnt::Ant4, force, conv).unwrap();
+                run!(self.ants.deploy(KANTSAnt::Ant4, force, conv), self.errors)
             }
-        }
+        };
 
-        Ok(DeployResponse {
-            errors: String::from(""),
-            success: true,
-        })
+        Ok(DeployResponse { errors, success })
 
     }
 
     pub fn integration_test(&self) -> Result<IntegrationTestResults, Error> {
-        //TODO: Handle hardware vs integration testing?
-        let nominal = self.get_telemetry_nominal().unwrap();
-        let debug = self.get_telemetry_debug().unwrap();
+        let (_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
+        let (_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
 
         Ok(IntegrationTestResults {
-            success: true,
-            telemetry_nominal: nominal,
-            telemetry_debug: debug,
+            success: nom_success && debug_success,
+            telemetry_nominal: nominal.unwrap_or_default(),
+            telemetry_debug: debug.unwrap_or_default(),
         })
     }
 
@@ -425,15 +502,16 @@ impl Subsystem {
 
         let mut rx: Vec<u8> = vec![0; rx_len as usize];
 
-        self.ants
-            .passthrough(tx.as_slice(), rx.as_mut_slice())
-            .unwrap();
+        let (errors, success, _data) = run!(
+            self.ants.passthrough(tx.as_slice(), rx.as_mut_slice()),
+            self.errors
+        );
 
         // Convert the response hex values into a String for the GraphQL output
         // Note: This is in BIG ENDIAN format
         Ok(RawCommandResponse {
-            errors: String::from(""),
-            success: true,
+            errors,
+            success,
             response: rx.iter()
                 .map(|byte| format!("{:02x}", byte))
                 .collect::<String>(),

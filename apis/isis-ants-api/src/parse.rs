@@ -55,6 +55,7 @@ pub enum KANTSController {
 /// System telemetry fields returned from [`get_system_telemetry`]
 ///
 /// [`get_system_telemetry`]: struct.AntS.html#method.get_system_telemetry
+#[derive(Default)]
 pub struct AntsTelemetry {
     /// Current system temperature (raw value)
     pub raw_temp: u16,
@@ -67,6 +68,7 @@ pub struct AntsTelemetry {
 /// Current deployment status returned from [`get_deploy`]
 ///
 /// [`get_deploy`]: struct.AntS.html#method.get_deploy
+#[derive(Default)]
 pub struct DeployStatus {
     /// Whether antenna system independent burn is active
     pub sys_burn_active: bool,
