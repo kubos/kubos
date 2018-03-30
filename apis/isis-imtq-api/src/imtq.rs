@@ -26,6 +26,9 @@ impl Imtq<ImtqRaw> {
     /// Constructor - Returns an `AdcsResult<Imtq>`
     ///
     /// Opens a connection to the underlying Imtq device.
+    /// The I2C bus number here may not correspond directly to the
+    /// device named assigned in Linux. See the hardware specific docs
+    /// for a listing of available I2C interfaces and their bus numbers.
     ///
     /// # Arguments
     ///

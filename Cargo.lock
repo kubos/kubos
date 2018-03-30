@@ -1,5 +1,5 @@
 [[package]]
-name = "adcs_api"
+name = "adcs-api"
 version = "0.1.0"
 dependencies = [
  "failure 1.0.0 (git+https://github.com/rust-lang-nursery/failure)",
@@ -301,7 +301,7 @@ dependencies = [
 name = "isis_imtq_api"
 version = "0.1.0"
 dependencies = [
- "adcs_api 0.1.0",
+ "adcs-api 0.1.0",
  "double 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-build-helper 0.1.0",
 ]

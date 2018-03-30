@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co", "Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
-adcs_api = { path = "../adcs_api" }
+adcs-api = { path = "../adcs-api" }
 
 [dev-dependencies]
 double = "0.2.2"
