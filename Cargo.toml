@@ -7,6 +7,7 @@ members = [
 "examples/rust-service/service",
 "kubos-build-helper",
 "services/comms-service",
+"services/kubos-service",
 "services/iobc-supervisor-service",
 "test/integration/linux/isis-ants",
 ]
