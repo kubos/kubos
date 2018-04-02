@@ -1,3 +1,11 @@
+--[[
+This file is part of the ljsyscall project:
+https://github.com/justincormack/ljsyscall/blob/master/syscall/linux/ioctl.lua
+
+All the ljsyscall code is under the MIT license. The ABI definitions are
+considered to be non copyrighted or CC0 if you need an official disclaimer.
+]]
+
 -- ioctls, filling in as needed
 
 local require, error, assert, tonumber, tostring,
