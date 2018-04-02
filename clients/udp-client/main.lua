@@ -23,8 +23,14 @@ local udp = uv.new_udp()
 
 assert(udp:bind('127.0.0.1', 0))
 
-local function on_line(err, line)
+local function on_line(err, line, reason)
   assert(not err, err)
+  if reason == 'EOF in readLine' then
+    print 'Exiting...'
+    udp:recv_stop()
+    udp:close()
+    return
+  end
   udp:send(line, '127.0.0.1', port)
   editor:readLine(prompt, on_line)
 end
