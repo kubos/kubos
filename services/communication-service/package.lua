@@ -1,13 +1,13 @@
 return {
   name = "kubos/kubos-communication-service",
-  version = "0.0.2",
+  version = "0.0.3",
   description = "Service to route udp packets to and from a custom transport.",
   tags = { "kubos", "udp", "nat", "stdio", "serial" },
   author = { name = "Tim Caswell", email = "tim@kubos.co" },
   homepage = "https://github.com/kubos/kubos",
   luvi = {
     flavor = "tiny",
-    inline = "#!/home/system/usr/local/bin/luvi-tiny --\n"
+    inline = "#!/home/system/usr/bin/luvi-tiny --\n"
   },
   dependencies = {
     "luvit/require",
