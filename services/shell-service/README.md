@@ -128,11 +128,12 @@ The main job of this service is to spawn and control remote processes.
 
 The service handles the following commands:
 
-- `spawn(path, options)` - spawn a child process.
-- `stdin(data)` - write to child's stdin
-- `stdin()` - close child's stdin
-- `kill(signal)` - send signal to child, defaults to SIGTERM
-- `resize(cols, rows)` - if child has a pty, resize it
+- `spawn(command, options)` - Spawn a child process. The `command` can be
+  absolute path or something in system `$PATH`.
+- `stdin(data)` - Write to child's stdin.
+- `stdin()` - Close child's stdin.
+- `kill(signal)` - Send signal to child; defaults to SIGTERM.
+- `resize(cols, rows)` - If child has a pseudo terminal, resize it.
 
 The `options` argument in `spawn()` is an object that accepts:
 
@@ -143,18 +144,17 @@ The `options` argument in `spawn()` is an object that accepts:
 - `uid`, `gid` - set the uid or gid of the process.
 - `detached` - set if you want the process detached from this service.
 
-
 ### Spawn Events
 
 The service will emit the following events that need to be handled by the
 client:
 
- - `pid(pid)` - process was created, this is the pid
- - `stdout(data)` - data came out of stdout
- - `stdout()` - stdout closed
- - `stderr(data)` - data came out of stderr
- - `stderr()` - stderr closed
- - `exit(code, signal)` - process exited with signal and/or code
+ - `pid(pid)` - Process was created; this is the pid.
+ - `stdout(data)` - Data came out of stdout.
+ - `stdout()` - Stdout was closed.
+ - `stderr(data)` - Data came out of stderr.
+ - `stderr()` - Stderr was closed.
+ - `exit(code, signal)` - Process exited with signal and/or code.
 
 ## List Command
 
@@ -162,7 +162,7 @@ In addition to spawning and managing individual processes, there is a `list`
 command that lists currently managed processes.  This is used to allow clients
 to take over or resume lost shell sessions.
 
- - `list()` - Client sends `list` command to server
+ - `list()` - Client sends `list` command to server.
  - `list(processes)` - Service sends `list` event to client.
 
 The `processes` object is a map from `channel_id` to `{path, pid}`
@@ -201,3 +201,6 @@ Translated this means the following happened:
 
 See the `kubos-shell-client` source code for a more involved example of spawning
 a persistent `sh -l` session with allocated pseudo terminal.
+
+Remember that if you want multiple concurrent processes, you need a unique
+`channel_id` for each so the command/event streams don't get crossed.
