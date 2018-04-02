@@ -1,7 +1,7 @@
 local ffi = require 'ffi'
 
 ffi.cdef((module:load("./twxvu.h")))
-local K = ffi.load("/home/system/usr/local/lib/libtwxvu.so")
+local K = ffi.load("/home/system/usr/lib/libtwxvu.so")
 
 local rate_table = {
   [1200] = K.RADIO_TX_RATE_1200,
