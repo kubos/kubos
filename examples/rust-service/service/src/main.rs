@@ -21,6 +21,8 @@ extern crate kubos_service;
 mod model;
 mod schema;
 
+use kubos_service::{config, KubosService};
+
 /// A context object is used in Juniper to provide out-of-band access to global
 /// data when resolving fields. We will use it here to provide a Subsystem structure
 /// with recently fetched data.
@@ -34,7 +36,11 @@ fn context_factory() -> schema::Context {
 }
 
 fn main() {
-    let s =
-        kubos_service::KubosService::new(context_factory, schema::QueryRoot, schema::MutationRoot);
+    let s = KubosService::new(
+        config("example-service"),
+        context_factory,
+        schema::QueryRoot,
+        schema::MutationRoot,
+    );
     s.start();
 }
