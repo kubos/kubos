@@ -1,13 +1,13 @@
   return {
     name = "kubos/kubos-shell-service",
-    version = "0.0.3",
+    version = "0.0.4",
     description = "Service to provide access to linux files and processes remotely.",
     tags = { "kubos", "udp", "shell", "file", "process" },
     author = { name = "Tim Caswell", email = "tim@kubos.co" },
     homepage = "https://github.com/kubos/kubos",
     luvi = {
       flavor = "tiny",
-      inline = "#!/home/system/usr/local/bin/luvi-tiny --\n"
+      inline = "#!/home/system/usr/bin/luvi-tiny --\n"
     },
     dependencies = {
       "luvit/require",
