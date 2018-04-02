@@ -34,7 +34,6 @@ impl Context {
     }
 }
 
-
 /// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Service subsystem"
@@ -51,7 +50,6 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
         Ok(self.temperature()?)
     }
 });
-
 
 /// GraphQL model for CalibrateThermometer return
 graphql_object!(CalibrateThermometer: Context as "CalibrateThermometer" |&self| {
@@ -93,7 +91,6 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         Ok(executor.context().get_subsystem())
     }
 });
-
 
 pub struct MutationRoot;
 

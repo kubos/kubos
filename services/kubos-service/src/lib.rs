@@ -18,47 +18,10 @@ extern crate juniper;
 extern crate serde;
 extern crate serde_json;
 
-#[macro_use]
-extern crate futures;
-extern crate tokio;
+use std::env;
+use std::net::{SocketAddr, UdpSocket};
 
-use std::{env, io};
-use std::net::SocketAddr;
-
-use tokio::prelude::*;
-use tokio::net::UdpSocket;
-
-use juniper::{Context, GraphQLType, RootNode};
-
-struct Server {
-    socket: UdpSocket,
-    buf: Vec<u8>,
-    to_send: Option<(usize, SocketAddr)>,
-}
-
-impl Future for Server {
-    type Item = ();
-    type Error = io::Error;
-
-    fn poll(&mut self) -> Poll<(), io::Error> {
-        loop {
-            // if let Some((size, peer)) = self.to_send {
-            //     let query_string =
-            //         String::from_utf8(self.buf[0..(size - 1)].to_vec()).unwrap();
-
-            //     let res = self.process(query_string);
-            //     println!("{:?}", res);
-            //     let amt = try_ready!(self.socket.poll_send_to(&res.as_bytes(), &peer));
-            // }
-
-            if let Some((size, peer)) = self.to_send {
-                let amt = try_ready!(self.socket.poll_send_to(&self.buf, &peer));
-            }
-
-            self.to_send = Some(try_ready!(self.socket.poll_recv_from(&mut self.buf)));
-        }
-    }
-}
+use juniper::{GraphQLType, RootNode};
 
 pub struct KubosService<'a, CtxFactory, Query, Mutation, CtxT>
 where
@@ -94,8 +57,15 @@ where
             &juniper::Variables::new(),
             &((self.context_factory)()),
         ) {
-            Ok((val, errs)) => return serde_json::to_string(&val).unwrap(),
-            Err(e) => return serde_json::to_string(&e).unwrap(),
+            Ok((val, _errs)) => {
+                // Should do something with _errs
+                return serde_json::to_string(&val).unwrap();
+            }
+            Err(_e) => {
+                "Error running query".to_string()
+                // Could also do this to retain the juniper error
+                // return serde_json::to_string(&e).unwrap(),
+            }
         }
     }
 
@@ -105,61 +75,16 @@ where
 
         let socket = UdpSocket::bind(&addr).unwrap();
         println!("Listening on: {}", socket.local_addr().unwrap());
+        let mut buf = [0; 128];
+        let mut to_send: Option<(usize, SocketAddr)> = None;
+        loop {
+            if let Some((size, peer)) = to_send {
+                let query_string = String::from_utf8(buf[0..(size - 1)].to_vec()).unwrap();
+                let res = self.process(query_string);
+                let _amt = socket.send_to(&res.as_bytes(), &peer);
+            }
 
-        let server = Server {
-            socket: socket,
-            buf: vec![0; 1024],
-            to_send: None,
-        };
-
-        // This starts the server task.
-        //
-        // `map_err` handles the error by logging it and maps the future to a type
-        // that can be spawned.
-        //
-        // `tokio::run` spanws the task on the Tokio runtime and starts running.
-        tokio::run(server.map_err(|e| println!("server error = {:?}", e)));
+            to_send = Some(socket.recv_from(&mut buf).unwrap());
+        }
     }
 }
-
-// pub fn start(p: fn(String) -> String) {
-//     impl Future for Server {
-//         type Item = ();
-//         type Error = io::Error;
-
-//         fn poll(&mut self) -> Poll<(), io::Error> {
-//             loop {
-//                 if let Some((size, peer)) = self.to_send {
-//                     let query_string = String::from_utf8(self.buf[0..(size - 1)].to_vec()).unwrap();
-
-//                     let res = (self.process)(query_string);
-//                     println!("{:?}", res);
-//                     let amt = try_ready!(self.socket.poll_send_to(&res.as_bytes(), &peer));
-//                 }
-
-//                 self.to_send = Some(try_ready!(self.socket.poll_recv_from(&mut self.buf)));
-//             }
-//         }
-//     }
-
-//     let addr = env::args().nth(1).unwrap_or("127.0.0.1:8080".to_string());
-//     let addr = addr.parse::<SocketAddr>().unwrap();
-
-//     let socket = UdpSocket::bind(&addr).unwrap();
-//     println!("Listening on: {}", socket.local_addr().unwrap());
-
-//     let server = Server {
-//         socket: socket,
-//         buf: vec![0; 1024],
-//         to_send: None,
-//         process: p,
-//     };
-
-//     // This starts the server task.
-//     //
-//     // `map_err` handles the error by logging it and maps the future to a type
-//     // that can be spawned.
-//     //
-//     // `tokio::run` spanws the task on the Tokio runtime and starts running.
-//     tokio::run(server.map_err(|e| println!("server error = {:?}", e)));
-// }

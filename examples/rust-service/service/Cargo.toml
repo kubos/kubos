@@ -5,11 +5,5 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
 extern-lib = { path = "../extern-lib" }
-serde = "1.0"
-serde_json = "1.0"
-tokio = "0.1"
-futures = "0.1"
 kubos-service = { path = "../../../services/kubos-service" }
-
-[dependencies.juniper]
-version = "0.9.2"
+juniper = "0.9"

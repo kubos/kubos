@@ -16,31 +16,10 @@
 
 #[macro_use]
 extern crate juniper;
-
-extern crate serde;
-extern crate serde_json;
-
-#[macro_use]
-extern crate futures;
-extern crate tokio;
-
 extern crate kubos_service;
-
-use std::{env, io};
-use std::net::SocketAddr;
-
-use tokio::prelude::*;
-use tokio::net::UdpSocket;
-
-struct Server {
-    socket: UdpSocket,
-    buf: Vec<u8>,
-    to_send: Option<(usize, SocketAddr)>,
-}
 
 mod model;
 mod schema;
-
 
 /// A context object is used in Juniper to provide out-of-band access to global
 /// data when resolving fields. We will use it here to provide a Subsystem structure
@@ -49,32 +28,13 @@ mod schema;
 /// Since this function is called once for every request, it will fetch new
 /// data with each request.
 fn context_factory() -> schema::Context {
-    schema::Context { subsystem: model::Subsystem::new() }
-}
-
-use juniper::{EmptyMutation, RootNode};
-
-type Schema = RootNode<'static, schema::QueryRoot, schema::MutationRoot>;
-
-fn process(query: String) -> String {
-    let s = Schema::new(schema::QueryRoot, schema::MutationRoot);
-    match juniper::execute(
-        &query,
-        None,
-        &s,
-        &juniper::Variables::new(),
-        &schema::Context {
-            subsystem: model::Subsystem::new(),
-        },
-    ) {
-        Ok((val, errs)) => return serde_json::to_string(&val).unwrap(),
-        Err(e) => return serde_json::to_string(&e).unwrap()
+    schema::Context {
+        subsystem: model::Subsystem::new(),
     }
 }
 
 fn main() {
-    //kubos_service::new_start(schema::QueryRoot, schema::MutationRoot, schema::Context {subsystem: model::Subsystem::new()});
-    //kubos_service::start(process);
-    let s = kubos_service::KubosService::new(context_factory, schema::QueryRoot, schema::MutationRoot);
+    let s =
+        kubos_service::KubosService::new(context_factory, schema::QueryRoot, schema::MutationRoot);
     s.start();
 }
