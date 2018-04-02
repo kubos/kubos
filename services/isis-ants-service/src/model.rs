@@ -22,161 +22,10 @@
  */
 
 use failure::Fail;
-use isis_ants_api::{AntS, KANTSAnt, KI2CNum, AntsTelemetry, KANTSController, DeployStatus};
-
-use std::io::Error;
+use isis_ants_api::{AntS, AntsTelemetry, DeployStatus, KANTSAnt, KANTSController, KI2CNum};
 use std::cell::RefCell;
+use std::io::Error;
 use std::str;
-
-#[derive(GraphQLEnum, Clone, Copy)]
-pub enum AckCommand {
-    None,
-    Noop,
-    ControlPower,
-    ConfigureHardware,
-    TestHardware,
-    IssueRawCommand,
-    Arm,
-    Deploy,
-}
-
-//TODO: Change to boolean?
-#[derive(GraphQLEnum)]
-pub enum ArmStatus {
-    Armed,
-    Disarmed,
-}
-
-#[derive(GraphQLEnum, Clone)]
-pub enum DeploymentStatus {
-    Deployed,
-    InProgress,
-    Partial,
-    Stowed,
-    Error,
-}
-
-#[derive(GraphQLEnum)]
-pub enum ArmState {
-    Arm,
-    Disarm,
-}
-
-#[derive(GraphQLEnum, Clone)]
-pub enum PowerState {
-    On,
-    Off,
-    Reset,
-}
-
-#[derive(GraphQLEnum, Clone)]
-pub enum ConfigureController {
-    Primary,
-    Secondary,
-}
-
-#[derive(GraphQLEnum)]
-pub enum DeployType {
-    All,
-    Antenna1,
-    Antenna2,
-    Antenna3,
-    Antenna4,
-}
-
-pub struct GetDeployResponse {
-    pub deploy_status: DeploymentStatus,
-    pub details: DeployStatus,
-}
-
-/// Model for power queries
-pub struct GetPowerResponse {
-    pub state: PowerState,
-    pub uptime: u32,
-}
-
-#[derive(GraphQLObject)]
-pub struct GenericResponse {
-    pub errors: String,
-    pub success: bool,
-}
-
-pub type NoopResponse = GenericResponse;
-pub type ArmResponse = GenericResponse;
-pub type DeployResponse = GenericResponse;
-
-/// Model for power mutations
-#[derive(GraphQLObject)]
-pub struct ControlPowerResponse {
-    pub errors: String,
-    pub success: bool,
-    pub power: PowerState,
-}
-
-#[derive(GraphQLObject)]
-pub struct ConfigureHardwareResponse {
-    pub errors: String,
-    pub success: bool,
-    pub config: ConfigureController,
-}
-
-#[derive(GraphQLEnum)]
-pub enum TelemetryType {
-    Nominal,
-    Debug,
-}
-
-pub enum Telemetry {
-    Nominal(TelemetryNominal),
-    Debug(TelemetryDebug),
-}
-
-#[derive(Default)]
-pub struct TelemetryNominal(pub AntsTelemetry);
-
-#[derive(Default)]
-pub struct AntennaStats {
-    pub act_count: u8,
-    pub act_time: u16,
-}
-
-#[derive(Default)]
-pub struct TelemetryDebug {
-    pub ant1: AntennaStats,
-    pub ant2: AntennaStats,
-    pub ant3: AntennaStats,
-    pub ant4: AntennaStats,
-}
-
-#[derive(GraphQLEnum)]
-pub enum TestType {
-    Integration,
-    Hardware,
-}
-pub enum TestResults {
-    Integration(IntegrationTestResults),
-    Hardware(HardwareTestResults),
-}
-
-#[derive(GraphQLObject)]
-pub struct IntegrationTestResults {
-    pub success: bool,
-    pub telemetry_nominal: TelemetryNominal,
-    pub telemetry_debug: TelemetryDebug,
-}
-
-#[derive(GraphQLObject)]
-pub struct HardwareTestResults {
-    pub success: bool,
-    pub data: String,
-}
-
-#[derive(GraphQLObject)]
-pub struct RawCommandResponse {
-    pub errors: String,
-    pub success: bool,
-    pub response: String,
-}
 
 pub struct Subsystem {
     ants: AntS,
@@ -194,6 +43,8 @@ impl Subsystem {
         subsystem
     }
 
+    // Queries
+
     pub fn get_arm_status(&self) -> Result<ArmStatus, Error> {
         let (_errors, _success, deploy) = run!(self.ants.get_deploy(), self.errors);
         let armed = deploy.unwrap_or_default().sys_armed;
@@ -206,19 +57,6 @@ impl Subsystem {
         Ok(status)
     }
 
-    pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
-        let (_errors, _success, uptime) = run!(self.ants.get_uptime(), self.errors);
-
-        let state = match uptime.unwrap_or_default() {
-            0 => PowerState::Off,
-            _ => PowerState::On,
-        };
-
-        Ok(GetPowerResponse {
-            state: state,
-            uptime: uptime.unwrap_or_default(),
-        })
-    }
 
     pub fn get_deploy_status(&self) -> Result<GetDeployResponse, Error> {
         let (_errors, _success, deploy) = run!(self.ants.get_deploy(), self.errors);
@@ -272,10 +110,18 @@ impl Subsystem {
         })
     }
 
-    pub fn get_telemetry_nominal(&self) -> Result<TelemetryNominal, Error> {
-        let (_errors, _success, telemetry) = run!(self.ants.get_system_telemetry(), self.errors);
+    pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
+        let (_errors, _success, uptime) = run!(self.ants.get_uptime(), self.errors);
 
-        Ok(TelemetryNominal(telemetry.unwrap_or_default()))
+        let state = match uptime.unwrap_or_default() {
+            0 => PowerState::Off,
+            _ => PowerState::On,
+        };
+
+        Ok(GetPowerResponse {
+            state: state,
+            uptime: uptime.unwrap_or_default(),
+        })
     }
 
     pub fn get_telemetry_debug(&self) -> Result<TelemetryDebug, Error> {
@@ -317,6 +163,12 @@ impl Subsystem {
         Ok(telemetry)
     }
 
+    pub fn get_telemetry_nominal(&self) -> Result<TelemetryNominal, Error> {
+        let (_errors, _success, telemetry) = run!(self.ants.get_system_telemetry(), self.errors);
+
+        Ok(TelemetryNominal(telemetry.unwrap_or_default()))
+    }
+
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
         let (_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
         let (_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
@@ -328,11 +180,15 @@ impl Subsystem {
         })
     }
 
-    pub fn noop(&self) -> Result<NoopResponse, Error> {
+    // Mutations
 
-        let (errors, success, _data) = run!(self.ants.watchdog_kick(), self.errors);
+    pub fn arm(&self, state: ArmState) -> Result<ArmResponse, Error> {
+        let (errors, success, _data) = match state {
+            ArmState::Arm => run!(self.ants.arm(), self.errors),
+            ArmState::Disarm => run!(self.ants.disarm(), self.errors),
+        };
 
-        Ok(NoopResponse { errors, success })
+        Ok(ArmResponse { errors, success })
     }
 
     pub fn configure_hardware(
@@ -379,15 +235,6 @@ impl Subsystem {
         }
     }
 
-    pub fn arm(&self, state: ArmState) -> Result<ArmResponse, Error> {
-        let (errors, success, _data) = match state {
-            ArmState::Arm => run!(self.ants.arm(), self.errors),
-            ArmState::Disarm => run!(self.ants.disarm(), self.errors),
-        };
-
-        Ok(ArmResponse { errors, success })
-    }
-
     pub fn deploy(&self, ant: DeployType, force: bool, time: i32) -> Result<DeployResponse, Error> {
 
         let mut conv = time as u8;
@@ -425,6 +272,13 @@ impl Subsystem {
             telemetry_nominal: nominal.unwrap_or_default(),
             telemetry_debug: debug.unwrap_or_default(),
         })
+    }
+
+    pub fn noop(&self) -> Result<NoopResponse, Error> {
+
+        let (errors, success, _data) = run!(self.ants.watchdog_kick(), self.errors);
+
+        Ok(NoopResponse { errors, success })
     }
 
     pub fn passthrough(&self, command: String, rx_len: i32) -> Result<RawCommandResponse, Error> {

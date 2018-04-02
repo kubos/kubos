@@ -13,9 +13,136 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+//! Kubos Service for interacting with [ISIS Antenna Systems](https://www.isispace.nl/product-category/products/antenna-systems/)
+//!
+//! Configuration is done via a configuration file. This should be specified as a command line argument...
+//!
+//! # Examples
+//!
+//! TODO: Example calling the process
+//!
+//! # Available Fields
+//!
+//! ```json
+//! query {
+//!     ack
+//!     armStatus
+//!     config
+//!     deploymentStatus {
+//!         status,
+//!         sysBurnActive,
+//!         sysIgnoreDeploy,
+//!         sysArmed,
+//!         ant1NotDeployed,
+//!         ant1StoppedTime,
+//!         ant1Active,
+//!         ant2NotDeployed,
+//!         ant2StoppedTime,
+//!         ant2Active,
+//!         ant3NotDeployed,
+//!         ant3StoppedTime,
+//!         ant3Active,
+//!         ant4NotDeployed,
+//!         ant4StoppedTime,
+//!         ant4Active
+//!     }
+//!     power {
+//!         state,
+//!         uptime
+//!     }
+//!     nominal: telemetry(telem: NOMINAL) {
+//!         ... on TelemetryNominal {
+//!             rawTemp,
+//!             uptime,
+//!             sysBurnActive,
+//!             sysIgnoreDeploy,
+//!             sysArmed,
+//!             ant1NotDeployed,
+//!             ant1StoppedTime,
+//!             ant1Active,
+//!             ant2NotDeployed,
+//!             ant2StoppedTime,
+//!             ant2Active,
+//!             ant3NotDeployed,
+//!             ant3StoppedTime,
+//!             ant3Active,
+//!             ant4NotDeployed,
+//!             ant4StoppedTime,
+//!             ant4Active
+//!     }}
+//!     debug: telemetry(telem: DEBUG) {
+//!         ... on TelemetryDebug {
+//!             ant1ActivationCount,
+//!             ant1ActivationTime,
+//!             ant2ActivationCount,
+//!             ant2ActivationTime,
+//!             ant3ActivationCount,
+//!             ant3ActivationTime,
+//!             ant4ActivationCount,
+//!             ant4ActivationTime,
+//!         }
+//!     }
+//!     testResults{
+//!         success,
+//!         telemetryNominal{...},
+//!         telemetryDebug{...}
+//!     }
+//!     errors
+//! }
+//!
+//! mutation {
+//!     arm(state: ArmState) {
+//!         errors,
+//!         success
+//!     }
+//!     configureHardware(config: ConfigureController) {
+//!         errors,
+//!         success,
+//!         config
+//!     }
+//!     controlPower(state: PowerState) {
+//!         errors,
+//!         success,
+//!         power
+//!     }
+//!     deploy(ant: DeployType, force: bool, time: i32) {
+//!         errors,
+//!         success
+//!     }
+//!     issueRawCommand(command: String, rx_len: i32) {
+//!         errors,
+//!         success,
+//!         response
+//!     }
+//!     noop {
+//!         errors,
+//!         success
+//!     }
+//!     integration: testHardware(test: INTEGRATION) {
+//!         ... on IntegrationTestRsults {
+//!             errors,
+//!             success,
+//!             telemetryNominal{...},
+//!             telemetryDebug{...}
+//!         }
+//!     }
+//!     hardware: testHardware(test: HARDWARE) {
+//!         ... on HardwareTestResults {
+//!             errors,
+//!             success,
+//!             data
+//!         }
+//!     }
+//! }
+//! ```
+//!
+
+#![warn(missing_docs)]
+
 extern crate failure;
-extern crate isis_ants_api;
 extern crate iron;
+extern crate isis_ants_api;
 #[macro_use]
 extern crate juniper;
 extern crate juniper_iron;
@@ -24,27 +151,20 @@ extern crate mount;
 #[macro_use]
 extern crate serde_json;
 
+use iron::prelude::*;
+use juniper_iron::{GraphQLHandler, GraphiQLHandler};
 use serde_json::Value;
-
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
-
-use iron::prelude::*;
-use juniper_iron::{GraphQLHandler, GraphiQLHandler};
 
 mod macros;
 mod model;
 mod objects;
 mod schema;
 
-
-/// A context object is used in Juniper to provide out-of-band access to global
-/// data when resolving fields. We will use it here to provide a Subsystem structure
-/// with recently fetched data.
-///
-/// Since this function is called once for every request, it will fetch new
-/// data with each request.
+// Create a connection to the underlying AntS device with each GraphQL request
+// and use it as the endpoint for queries and mutations
 fn context_factory(_: &mut Request) -> schema::Context {
     schema::Context { subsystem: model::Subsystem::new() }
 }
@@ -60,7 +180,7 @@ fn main() {
 
     let mut raw = String::new();
 
-    //TODO: decide on official location for services' configuration file
+    //TODO: Change to command line argument
     let config: Value =
         match File::open("sys-config.txt")
             .map(|mut f| f.read_to_string(&mut raw))
