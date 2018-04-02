@@ -17,6 +17,7 @@
 use juniper::Context as JuniperContext;
 use juniper::FieldResult;
 use model::*;
+use objects::*;
 
 // Context used to pass global data into Juniper queries
 pub struct Context {
@@ -30,7 +31,8 @@ pub struct QueryRoot;
 /// Base GraphQL query model
 graphql_object!(QueryRoot: Context as "Query" |&self| {
     
-    //----- Test Query -----//
+    // Test query to verify service is running without attempting
+    // to communicate with the underlying subsystem
     //
     // {
     //     ping: "pong"
@@ -91,12 +93,14 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // Get the current configuration of the system
     //
     // {
-    //     config: String
+    //     config: "Not Implemented"
     // }
     field config() -> FieldResult<String>
     {
-    	//TODO: Should this be something???
-    	Ok(String::from("Default"))
+    	// Future development: Once Rust lifetimes have been figured out,
+    	// this could be updated to return the controller previously set
+    	// with the 'configureHardware' mutation
+    	Ok(String::from("Not Implemented"))
     }
 
 	// Get current telemetry information for the system
@@ -290,7 +294,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     {
     	match test {
     		TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem.integration_test().unwrap())),
-    		TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: String::from("Not Implemented"), success: true, data: None}))
+    		TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
     	}
     }
     

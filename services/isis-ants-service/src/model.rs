@@ -14,18 +14,13 @@
 // limitations under the License.
 //
 
-/*
- Master TODO:
- - Add descriptions to everything?
- - Make code more readable (maybe move all enums/structs to own file?
- - Maybe move macros to new common kubos crate
- */
-
 use failure::Fail;
-use isis_ants_api::{AntS, AntsTelemetry, DeployStatus, KANTSAnt, KANTSController, KI2CNum};
+use isis_ants_api::{AntS, KANTSAnt, KANTSController, KI2CNum};
 use std::cell::RefCell;
 use std::io::Error;
 use std::str;
+
+use objects::*;
 
 pub struct Subsystem {
     ants: AntS,
@@ -33,10 +28,9 @@ pub struct Subsystem {
 }
 
 impl Subsystem {
-    pub fn new() -> Subsystem {
-        //TODO: Make the AntS configuration params not hard coded
+    pub fn new(bus: KI2CNum, primary: u8, secondary: u8, count: u8, timeout: u32) -> Subsystem {
         let subsystem = Subsystem {
-            ants: AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10).unwrap(),
+            ants: AntS::new(bus, primary, secondary, count, timeout).unwrap(),
             errors: RefCell::new(vec![]),
         };
 
@@ -56,7 +50,6 @@ impl Subsystem {
 
         Ok(status)
     }
-
 
     pub fn get_deploy_status(&self) -> Result<GetDeployResponse, Error> {
         let (_errors, _success, deploy) = run!(self.ants.get_deploy(), self.errors);
@@ -105,7 +98,7 @@ impl Subsystem {
         }
 
         Ok(GetDeployResponse {
-            deploy_status: status,
+            status,
             details: deploy,
         })
     }
@@ -170,10 +163,11 @@ impl Subsystem {
     }
 
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
-        let (_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
-        let (_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
+        let (nom_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
+        let (debug_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
 
         Ok(IntegrationTestResults {
+            errors: format!("Nominal: {}; Debug: {}", nom_errors, debug_errors),
             success: nom_success && debug_success,
             telemetry_nominal: nominal.unwrap_or_default(),
             telemetry_debug: debug.unwrap_or_default(),
@@ -213,7 +207,6 @@ impl Subsystem {
         match state {
             PowerState::Reset => {
                 let (errors, success, _data) = run!(self.ants.reset(), self.errors);
-                //TODO: convert/print error
 
                 Ok(ControlPowerResponse {
                     power: state,
@@ -264,10 +257,11 @@ impl Subsystem {
     }
 
     pub fn integration_test(&self) -> Result<IntegrationTestResults, Error> {
-        let (_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
-        let (_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
+        let (nom_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
+        let (debug_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
 
         Ok(IntegrationTestResults {
+            errors: format!("Nominal: {}; Debug: {}", nom_errors, debug_errors),
             success: nom_success && debug_success,
             telemetry_nominal: nominal.unwrap_or_default(),
             telemetry_debug: debug.unwrap_or_default(),

@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
+use isis_ants_api::{AntsTelemetry, DeployStatus};
 use juniper::FieldResult;
-use model::*;
 
 /// Common response fields structure for requests
 /// which don't return any specific data
@@ -133,8 +133,8 @@ pub struct GetDeployResponse {
 }
 
 graphql_object!(GetDeployResponse: () |&self| {
-	field deploy_status() -> FieldResult<DeploymentStatus> {
-		Ok(self.deploy_status.clone())
+	field status() -> FieldResult<DeploymentStatus> {
+		Ok(self.status.clone())
 	}
 		
     field sys_burn_active() -> FieldResult<bool> {
@@ -245,6 +245,7 @@ graphql_union!(TestResults: () |&self| {
 /// Response fields for 'testHardware(test: INTEGRATION)' mutation
 #[derive(GraphQLObject)]
 pub struct IntegrationTestResults {
+    pub errors: String,
     pub success: bool,
     pub telemetry_nominal: TelemetryNominal,
     pub telemetry_debug: TelemetryDebug,
@@ -253,6 +254,7 @@ pub struct IntegrationTestResults {
 /// Response fields for 'testHardware(test: HARDWARE)' mutation
 #[derive(GraphQLObject)]
 pub struct HardwareTestResults {
+    pub errors: String,
     pub success: bool,
     pub data: String,
 }
@@ -264,9 +266,6 @@ pub struct RawCommandResponse {
     pub success: bool,
     pub response: String,
 }
-
-
-
 
 /// Input field for 'telemetry' query
 ///
@@ -292,6 +291,7 @@ graphql_union!(Telemetry: () |&self| {
 	}
 });
 
+/// Response fields for 'telemetry(telem: NOMINAL)' query
 #[derive(Default)]
 pub struct TelemetryNominal(pub AntsTelemetry);
 
@@ -366,18 +366,19 @@ graphql_object!(TelemetryNominal: () |&self| {
 
 });
 
-#[derive(Default)]
-pub struct AntennaStats {
-    pub act_count: u8,
-    pub act_time: u16,
-}
-
+/// Response fields for 'telemetry(telem: DEBUG)' query
 #[derive(Default)]
 pub struct TelemetryDebug {
     pub ant1: AntennaStats,
     pub ant2: AntennaStats,
     pub ant3: AntennaStats,
     pub ant4: AntennaStats,
+}
+
+#[derive(Default)]
+pub struct AntennaStats {
+    pub act_count: u8,
+    pub act_time: u16,
 }
 
 graphql_object!(TelemetryDebug: () |&self| {

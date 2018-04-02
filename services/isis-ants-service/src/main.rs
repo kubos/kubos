@@ -139,7 +139,7 @@
 //!
 
 #![warn(missing_docs)]
-
+#[macro_use]
 extern crate failure;
 extern crate iron;
 extern crate isis_ants_api;
@@ -152,6 +152,7 @@ extern crate mount;
 extern crate serde_json;
 
 use iron::prelude::*;
+use isis_ants_api::KI2CNum;
 use juniper_iron::{GraphQLHandler, GraphiQLHandler};
 use serde_json::Value;
 use std::env;
@@ -166,7 +167,16 @@ mod schema;
 // Create a connection to the underlying AntS device with each GraphQL request
 // and use it as the endpoint for queries and mutations
 fn context_factory(_: &mut Request) -> schema::Context {
-    schema::Context { subsystem: model::Subsystem::new() }
+    //TODO: Figure out how to actually pass through the configuration values when this changes to a pure UDP implementation
+    schema::Context { subsystem: model::Subsystem::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10) }
+}
+
+#[allow(dead_code)]
+struct Config {
+    primary: u8,
+    secondary: u8,
+    antennas: u8,
+    wd_timeout: u32,
 }
 
 fn main() {
@@ -174,28 +184,48 @@ fn main() {
     let default = json!({
                     "isis-ants-service": {
                         "addr": "0.0.0.0",
-                        "port": "8080"
+                        "port": 8080,
+                        "primary": 0x31,
+                        "secondary": 0x32,
+                        "antennas": 4,
+                        "wd_timeout": 10
                     }
                 });
 
     let mut raw = String::new();
+    let filename = env::args().nth(1).unwrap_or("".to_owned());
 
-    //TODO: Change to command line argument
-    let config: Value =
-        match File::open("sys-config.txt")
+    let master_config: Value =
+        match File::open(filename)
             .map(|mut f| f.read_to_string(&mut raw))
             .and_then(|_x| serde_json::from_str(&raw).map_err(|err| err.into())) {
             Ok(v) => v,
             _ => {
-                println!("Failed to get configuration. Using default {}", default);
+                println!("Failed to get configuration. Using default values");
                 default
             }
         };
 
-    let host = config["isis-ants-service"]["addr"].to_string();
-    let port = config["isis-ants-service"]["port"].to_string();
+    let host = master_config["isis-ants-service"]["addr"].to_string();
+    let port = master_config["isis-ants-service"]["port"].to_string();
 
     let addr = format!("{}:{}", host.trim_matches('"'), port.trim_matches('"'));
+
+	#[allow(unused_variables)]
+    let config = Config {
+        primary: master_config["isis-ants-service"]["primary"]
+            .as_u64()
+            .unwrap_or(0x31) as u8,
+        secondary: master_config["isis-ants-service"]["secondary"]
+            .as_u64()
+            .unwrap_or(0x32) as u8,
+        antennas: master_config["isis-ants-service"]["antennas"]
+            .as_u64()
+            .unwrap_or(4) as u8,
+        wd_timeout: master_config["isis-ants-service"]["wd_timeout"]
+            .as_u64()
+            .unwrap_or(10) as u32,
+    };
 
     let graphql_endpoint =
         GraphQLHandler::new(context_factory, schema::QueryRoot, schema::MutationRoot);
