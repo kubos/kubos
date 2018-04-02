@@ -79,7 +79,7 @@ where
         let mut to_send: Option<(usize, SocketAddr)> = None;
         loop {
             if let Some((size, peer)) = to_send {
-                let query_string = String::from_utf8(buf[0..(size - 1)].to_vec()).unwrap();
+                let query_string = String::from_utf8(buf[0..(size)].to_vec()).unwrap();
                 let res = self.process(query_string);
                 let _amt = socket.send_to(&res.as_bytes(), &peer);
             }
