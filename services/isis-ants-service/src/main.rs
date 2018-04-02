@@ -139,8 +139,13 @@
 //!
 
 #![warn(missing_docs)]
+
+#[cfg(test)]
 #[macro_use]
 extern crate failure;
+#[cfg(not(test))]
+extern crate failure;
+
 extern crate iron;
 extern crate isis_ants_api;
 #[macro_use]

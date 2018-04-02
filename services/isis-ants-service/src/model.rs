@@ -25,6 +25,7 @@ use objects::*;
 pub struct Subsystem {
     ants: AntS,
     pub errors: RefCell<Vec<String>>,
+    count: u8,
 }
 
 impl Subsystem {
@@ -32,6 +33,7 @@ impl Subsystem {
         let subsystem = Subsystem {
             ants: AntS::new(bus, primary, secondary, count, timeout).unwrap(),
             errors: RefCell::new(vec![]),
+            count,
         };
 
         subsystem
@@ -58,9 +60,16 @@ impl Subsystem {
 
         //TODO: What if there aren't 4 antennas?
         let deploy = deploy.unwrap_or_default();
-        if !deploy.ant_1_not_deployed && !deploy.ant_2_not_deployed &&
-            !deploy.ant_3_not_deployed && !deploy.ant_4_not_deployed
-        {
+
+        let mut deployed = !deploy.ant_1_not_deployed && !deploy.ant_2_not_deployed;
+        if self.count > 2 {
+            deployed = deployed && !deploy.ant_3_not_deployed;
+        }
+        if self.count > 3 {
+            deployed = deployed && !deploy.ant_4_not_deployed;
+        }
+
+        if deployed {
             // If all antennas are not-not-deployed, then the system is fully deployed
             status = DeploymentStatus::Deployed;
 
