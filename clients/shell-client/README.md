@@ -1,3 +1,5 @@
+See [kubos-shell-service docs](../../services/shell-service/) for details on how to build and install this.
+
 How to test on a beaglebone black.
 
 On beaglebone run shell-service:
