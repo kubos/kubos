@@ -37,7 +37,7 @@ local function on_raw(err, data)
 end
 
 function handlers.pid(pid)
-  p('Remote bash process:', {pid=pid})
+  p('Remote sh process:', {pid=pid})
   send { 'stdin', '\f' }
   -- stdout:write '\x1b[2J\x1b[;H'
   stdin:set_mode(1)
@@ -55,7 +55,7 @@ end
 function handlers.exit(code, signal)
   stdin:set_mode(0)
   print()
-  p('Remote bash process exited:', {code=code,signal=signal})
+  p('Remote sh process exited:', {code=code,signal=signal})
   send { 'list' }
 end
 
@@ -68,7 +68,7 @@ end
 
 function handlers.list(processes)
   print '\x1b[2J\x1b[;HChoose an option:'
-  print 'Press enter to start a new bash shell.'
+  print 'Press enter to start a new sh shell.'
   print 'Press Control-D to exit'
   print 'Or enter session ID to take over an existing session.'
   for k, v in pairs(processes) do
@@ -81,10 +81,10 @@ function handlers.list(processes)
       return ffi.C.exit(0)
     end
     if out == '' then
-      print 'Starting new remote bash shell...'
+      print 'Starting new remote sh shell...'
       send {
         'spawn',
-        'bash',
+        'sh',
         {
           args = { '-l' },
           pty = true,
