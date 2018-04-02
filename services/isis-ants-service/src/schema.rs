@@ -25,188 +25,6 @@ pub struct Context {
 
 impl JuniperContext for Context {}
 
-graphql_object!(GetPowerResponse: () |&self| {
-	field state() -> FieldResult<PowerState> {
-		Ok(self.state.clone())
-	}
-	
-	field uptime() -> FieldResult<i32> {
-		Ok(self.uptime as i32)
-	}
-});
-
-graphql_object!(GetDeployResponse: () |&self| {
-	field deploy_status() -> FieldResult<DeploymentStatus> {
-		Ok(self.deploy_status.clone())
-	}
-		
-    field sys_burn_active() -> FieldResult<bool> {
-        Ok(self.details.sys_burn_active)
-    }
-
-    field sys_ignore_deploy() -> FieldResult<bool> {
-        Ok(self.details.sys_ignore_deploy)
-    }
-
-    field sys_armed() -> FieldResult<bool> {
-        Ok(self.details.sys_armed)
-    }
-
-    field ant_1_not_deployed() -> FieldResult<bool> {
-        Ok(self.details.ant_1_not_deployed)
-    }
-
-    field ant_1_stopped_time() -> FieldResult<bool> {
-        Ok(self.details.ant_1_stopped_time)
-    }
-
-    field ant_1_active() -> FieldResult<bool> {
-        Ok(self.details.ant_1_active)
-    }
-
-    field ant_2_not_deployed() -> FieldResult<bool> {
-        Ok(self.details.ant_2_not_deployed)
-    }
-
-    field ant_2_stopped_time() -> FieldResult<bool> {
-        Ok(self.details.ant_2_stopped_time)
-    }
-
-    field ant_2_active() -> FieldResult<bool> {
-        Ok(self.details.ant_2_active)
-    }
-
-    field ant_3_not_deployed() -> FieldResult<bool> {
-        Ok(self.details.ant_3_not_deployed)
-    }
-
-    field ant_3_stopped_time() -> FieldResult<bool> {
-        Ok(self.details.ant_3_stopped_time)
-    }
-
-    field ant_3_active() -> FieldResult<bool> {
-        Ok(self.details.ant_3_active)
-    }
-
-    field ant_4_not_deployed() -> FieldResult<bool> {
-        Ok(self.details.ant_4_not_deployed)
-    }
-
-    field ant_4_stopped_time() -> FieldResult<bool> {
-        Ok(self.details.ant_4_stopped_time)
-    }
-
-    field ant_4_active() -> FieldResult<bool> {
-        Ok(self.details.ant_4_active)
-    }
-
-});
-
-graphql_object!(TelemetryNominal: () |&self| {
-    field raw_temp() -> FieldResult<i32> {
-    	Ok(self.0.raw_temp as i32)
-    }
-    
-	field uptime() -> FieldResult<i32> {
-		Ok(self.0.uptime as i32)
-	}
-    
-    field sys_burn_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.sys_burn_active)
-    }
-
-    field sys_ignore_deploy() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.sys_ignore_deploy)
-    }
-
-    field sys_armed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.sys_armed)
-    }
-
-    field ant_1_not_deployed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_1_not_deployed)
-    }
-
-    field ant_1_stopped_time() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_1_stopped_time)
-    }
-
-    field ant_1_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_1_active)
-    }
-
-    field ant_2_not_deployed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_2_not_deployed)
-    }
-
-    field ant_2_stopped_time() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_2_stopped_time)
-    }
-
-    field ant_2_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_2_active)
-    }
-
-    field ant_3_not_deployed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_3_not_deployed)
-    }
-
-    field ant_3_stopped_time() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_3_stopped_time)
-    }
-
-    field ant_3_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_3_active)
-    }
-
-    field ant_4_not_deployed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_4_not_deployed)
-    }
-
-    field ant_4_stopped_time() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_4_stopped_time)
-    }
-
-    field ant_4_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_4_active)
-    }
-
-});
-
-graphql_object!(TelemetryDebug: () |&self| {
-    field ant_1_activation_count() -> FieldResult<i32> {
-        Ok(self.ant1.act_count as i32)
-    }
-    
-    field ant_1_activation_time() -> FieldResult<i32> {
-        Ok(self.ant1.act_time as i32)
-    }
-    
-    field ant_2_activation_count() -> FieldResult<i32> {
-        Ok(self.ant2.act_count as i32)
-    }
-    
-    field ant_2_activation_time() -> FieldResult<i32> {
-        Ok(self.ant2.act_time as i32)
-    }
-    
-    field ant_3_activation_count() -> FieldResult<i32> {
-        Ok(self.ant3.act_count as i32)
-    }
-    
-    field ant_3_activation_time() -> FieldResult<i32> {
-        Ok(self.ant3.act_time as i32)
-    }
-    
-    field ant_4_activation_count() -> FieldResult<i32> {
-        Ok(self.ant4.act_count as i32)
-    }
-    
-    field ant_4_activation_time() -> FieldResult<i32> {
-        Ok(self.ant4.act_time as i32)
-    }
-});
-
 graphql_union!(Telemetry: () |&self| {
 	description: "Test"
 	instance_resolvers: |&_| {
@@ -228,6 +46,7 @@ pub struct QueryRoot;
 /// Base GraphQL query model
 graphql_object!(QueryRoot: Context as "Query" |&self| {
     
+    //----- Test Query -----//
     field ping() -> FieldResult<String>
     {
     	Ok(String::from("Pong"))
@@ -253,9 +72,12 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     	Ok(String::from("Default"))
     }
     
-    field errors(&executor) -> FieldResult<String>
+    field errors(&executor) -> FieldResult<Vec<String>>
     {
-    	Ok(executor.context().subsystem.errors.borrow().clone())
+    	match executor.context().subsystem.errors.try_borrow() {
+    		Ok(master_vec) => Ok(master_vec.clone()),
+    		_ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
+    	}
     }
     
     field telemetry(&executor, telem: TelemetryType) -> FieldResult<Telemetry>
@@ -288,9 +110,12 @@ pub struct MutationRoot;
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 	
-	field errors(&executor) -> FieldResult<String>
+	field errors(&executor) -> FieldResult<Vec<String>>
     {
-    	Ok(executor.context().subsystem.errors.borrow().clone())
+    	match executor.context().subsystem.errors.try_borrow() {
+    		Ok(master_vec) => Ok(master_vec.clone()),
+    		_ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
+    	}
     }
 
     field noop(&executor) -> FieldResult<NoopResponse>

@@ -14,6 +14,13 @@
 // limitations under the License.
 //
 
+/*
+ Master TODO:
+ - Add descriptions to everything?
+ - Make code more readable (maybe move all enums/structs to own file?
+ - Maybe move macros to new common kubos crate
+ */
+
 use failure::Fail;
 use isis_ants_api::{AntS, KANTSAnt, KI2CNum, AntsTelemetry, KANTSController, DeployStatus};
 
@@ -173,85 +180,18 @@ pub struct RawCommandResponse {
 
 pub struct Subsystem {
     ants: AntS,
-    pub errors: RefCell<String>, //TODO: Consider making a vector of strings
-}
-
-// Iterate through a failure::Error and concatenate the error
-// and all its causes into a single string
-// TODO: Is there a good way to enforce delimiter formatting?
-// (ie must be String, str, or char)
-macro_rules! process_errors {
-	($err:ident) => (process_errors!($err, '\n'));
-	($err:ident, $delim:expr) => {{	
-		{
-			let mut results = String::new();
-			let mut chain = $err.causes();
-			
-		    if let Some(err) = chain.next() {
-		    	results.push_str(&format!("{}", err));
-		
-		        for err in chain {
-		            results.push_str(&format!("{}{}", $delim, err));
-		        }
-		    }
-
-		    results
-		}
-	}};
-}
-
-macro_rules! push_err {
-	($master:expr, $err:expr) => {{
-	        // TODO: Might change the master err string to a master err Vec<String>
-	        // Might be easier to process/consume later
-	        let mut err = $master.borrow_mut();
-	        err.push_str($err);
-		}}
-}
-
-// Execute a function and return a tuple containing:
-//   a) A String with any errors which were encountered
-//   b) A boolean to indicate whether the function ran successfully
-// Optionally:
-//   Add the error string to the master error string for later consumption
-macro_rules! run {
-	($func:expr) => {{
-			let (errors, success, data) = match $func {
-		        Ok(v) => (String::from(""), true, Some(v)),
-		        Err(e) => (process_errors!(e, ", "), false, None),
-		    };
-			
-			(errors, success, data)
-		}};
-	($func:expr, $master:expr) => {{
-		{
-			let (errors, success, data) = run!($func);
-			
-			// We want to know which function threw these particular errors, 
-			// but we don't want to print the entire expression, so using split
-			// to go from
-			//     self.my.func(arg1, arg2)
-			// to this
-			//     func
-			// TODO: This isn't perfect or particularly pretty. Is there a better way?
-			let mut name = stringify!($func).split('(').next().unwrap();
-			name = name.split(&[':','.'][..]).last().unwrap();
-			push_err!($master, &format!("{}: {}", name, errors));
-	        
-			(errors, success, data)
-		}
-	}};
+    pub errors: RefCell<Vec<String>>,
 }
 
 impl Subsystem {
     pub fn new() -> Subsystem {
+        //TODO: Make the AntS configuration params not hard coded
         let subsystem = Subsystem {
             ants: AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10).unwrap(),
-            errors: RefCell::new("".to_owned()),
+            errors: RefCell::new(vec![]),
         };
 
         subsystem
-        //TODO: error handling
     }
 
     pub fn get_arm_status(&self) -> Result<ArmStatus, Error> {
@@ -427,7 +367,7 @@ impl Subsystem {
 
             } 
             _ => {
-                push_err!(self.errors, "controlPower: Invalid power state");
+                push_err!(self.errors, "controlPower: Invalid power state".to_owned());
 
                 Ok(ControlPowerResponse {
                     power: state,
