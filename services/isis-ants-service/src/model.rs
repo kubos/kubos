@@ -58,7 +58,6 @@ impl Subsystem {
 
         let mut status = DeploymentStatus::Error;
 
-        //TODO: What if there aren't 4 antennas?
         let deploy = deploy.unwrap_or_default();
 
         let mut deployed = !deploy.ant_1_not_deployed && !deploy.ant_2_not_deployed;
@@ -175,9 +174,19 @@ impl Subsystem {
         let (nom_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
         let (debug_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
 
+        let success = nom_success && debug_success;
+        let mut errors = String::new();
+
+        if !nom_errors.is_empty() {
+            errors.push_str(format!("Nominal: {};", nom_errors));
+        }
+        if !debug_errors.is_empty() {
+            errors.push_str(format!("Debug: {}", debug_errors));
+        }
+
         Ok(IntegrationTestResults {
-            errors: format!("Nominal: {}; Debug: {}", nom_errors, debug_errors),
-            success: nom_success && debug_success,
+            errors,
+            success,
             telemetry_nominal: nominal.unwrap_or_default(),
             telemetry_debug: debug.unwrap_or_default(),
         })
@@ -269,9 +278,19 @@ impl Subsystem {
         let (nom_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
         let (debug_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
 
+        let success = nom_success && debug_success;
+        let mut errors = String::new();
+
+        if !nom_errors.is_empty() {
+            errors.push_str(format!("Nominal: {};", nom_errors));
+        }
+        if !debug_errors.is_empty() {
+            errors.push_str(format!("Debug: {}", debug_errors));
+        }
+
         Ok(IntegrationTestResults {
-            errors: format!("Nominal: {}; Debug: {}", nom_errors, debug_errors),
-            success: nom_success && debug_success,
+            errors,
+            success,
             telemetry_nominal: nominal.unwrap_or_default(),
             telemetry_debug: debug.unwrap_or_default(),
         })

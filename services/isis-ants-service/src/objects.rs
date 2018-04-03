@@ -77,7 +77,7 @@ pub struct ConfigureHardwareResponse {
 }
 
 /// Input field for 'controlPower' mutation and
-/// Response field for 'power' query
+/// response field for 'power' query
 #[derive(GraphQLEnum, Clone)]
 pub enum PowerState {
     On,
@@ -92,13 +92,13 @@ pub struct GetPowerResponse {
 }
 
 graphql_object!(GetPowerResponse: () |&self| {
-	field state() -> FieldResult<PowerState> {
-		Ok(self.state.clone())
-	}
-	
-	field uptime() -> FieldResult<i32> {
-		Ok(self.uptime as i32)
-	}
+    field state() -> FieldResult<PowerState> {
+        Ok(self.state.clone())
+    }
+    
+    field uptime() -> FieldResult<i32> {
+        Ok(self.uptime as i32)
+    }
 });
 
 /// Response fields for 'controlPower' mutation
@@ -133,10 +133,10 @@ pub struct GetDeployResponse {
 }
 
 graphql_object!(GetDeployResponse: () |&self| {
-	field status() -> FieldResult<DeploymentStatus> {
-		Ok(self.status.clone())
-	}
-		
+    field status() -> FieldResult<DeploymentStatus> {
+        Ok(self.status.clone())
+    }
+        
     field sys_burn_active() -> FieldResult<bool> {
         Ok(self.details.sys_burn_active)
     }
@@ -235,11 +235,10 @@ pub enum TestResults {
 
 /// Response union for 'testHardware' mutation
 graphql_union!(TestResults: () |&self| {
-	description: "Test"
-	instance_resolvers: |&_| {
-		&IntegrationTestResults => match *self { TestResults::Integration(ref i) => Some(i), _ => None},
-		&HardwareTestResults => match *self { TestResults::Hardware(ref h) => Some(h), _ => None},
-	}
+    instance_resolvers: |&_| {
+        &IntegrationTestResults => match *self { TestResults::Integration(ref i) => Some(i), _ => None},
+        &HardwareTestResults => match *self { TestResults::Hardware(ref h) => Some(h), _ => None},
+    }
 });
 
 /// Response fields for 'testHardware(test: INTEGRATION)' mutation
@@ -284,11 +283,11 @@ pub enum Telemetry {
 
 /// Response union for 'telemetry' query
 graphql_union!(Telemetry: () |&self| {
-	description: "Test"
-	instance_resolvers: |&_| {
-		&TelemetryNominal => match *self { Telemetry::Nominal(ref n) => Some(n), _ => None},
-		&TelemetryDebug => match *self { Telemetry::Debug(ref d) => Some(d), _ => None},
-	}
+    description: "Test"
+    instance_resolvers: |&_| {
+        &TelemetryNominal => match *self { Telemetry::Nominal(ref n) => Some(n), _ => None},
+        &TelemetryDebug => match *self { Telemetry::Debug(ref d) => Some(d), _ => None},
+    }
 });
 
 /// Response fields for 'telemetry(telem: NOMINAL)' query
@@ -297,12 +296,12 @@ pub struct TelemetryNominal(pub AntsTelemetry);
 
 graphql_object!(TelemetryNominal: () |&self| {
     field raw_temp() -> FieldResult<i32> {
-    	Ok(self.0.raw_temp as i32)
+        Ok(self.0.raw_temp as i32)
     }
     
-	field uptime() -> FieldResult<i32> {
-		Ok(self.0.uptime as i32)
-	}
+    field uptime() -> FieldResult<i32> {
+        Ok(self.0.uptime as i32)
+    }
     
     field sys_burn_active() -> FieldResult<bool> {
         Ok(self.0.deploy_status.sys_burn_active)

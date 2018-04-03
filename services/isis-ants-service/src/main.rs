@@ -216,7 +216,7 @@ fn main() {
 
     let addr = format!("{}:{}", host.trim_matches('"'), port.trim_matches('"'));
 
-	#[allow(unused_variables)]
+    #[allow(unused_variables)]
     let config = Config {
         primary: master_config["isis-ants-service"]["primary"]
             .as_u64()

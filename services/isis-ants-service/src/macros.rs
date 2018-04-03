@@ -43,10 +43,10 @@
 /// }
 ///
 /// fn main() {
-/// 	let chain: TopError = TopError::Error {
-/// 	    cause: RootError::RootError { message: "root".to_owned() },
-/// 	    message: "top".to_owned(),
-/// 	};
+///     let chain: TopError = TopError::Error {
+///         cause: RootError::RootError { message: "root".to_owned() },
+///         message: "top".to_owned(),
+///     };
 ///
 ///     let errors = process_errors!(chain);
 ///     assert_eq!(errors, "TopError: top, RootError: root");
@@ -57,23 +57,23 @@
 /// ```
 ///
 macro_rules! process_errors {
-	($err:ident) => (process_errors!($err, ", "));
-	($err:ident, $delim:expr) => {{	
-		{
-			let mut results = String::new();
-			let mut chain = $err.causes();
-			
-		    if let Some(err) = chain.next() {
-		    	results.push_str(&format!("{}", err));
-		
-		        for err in chain {
-		            results.push_str(&format!("{}{}", $delim, err));
-		        }
-		    }
+    ($err:ident) => (process_errors!($err, ", "));
+    ($err:ident, $delim:expr) => {{    
+        {
+            let mut results = String::new();
+            let mut chain = $err.causes();
+            
+            if let Some(err) = chain.next() {
+                results.push_str(&format!("{}", err));
+        
+                for err in chain {
+                    results.push_str(&format!("{}{}", $delim, err));
+                }
+            }
 
-		    results
-		}
-	}};
+            results
+        }
+    }};
 }
 
 /// Convenience macro to push an error string onto the master errors vector
@@ -94,16 +94,17 @@ macro_rules! process_errors {
 /// # }
 /// ```
 macro_rules! push_err {
-	($master:expr, $err:expr) => {{
-			if let Ok(mut master_vec) = $master.try_borrow_mut() {
-				master_vec.push($err);
-			}
-		}}
+    ($master:expr, $err:expr) => {{
+            if let Ok(mut master_vec) = $master.try_borrow_mut() {
+                master_vec.push($err);
+            }
+        }}
 }
 
 /// Execute a function and return a tuple containing:
 ///   a) A String with any errors which were encountered
 ///   b) A boolean to indicate whether the function ran successfully
+///   c) Any data returned by the function
 /// Optionally:
 ///   Add the error string to the master error string for later consumption,
 ///   prefixed with the name of the function being called
@@ -147,7 +148,7 @@ macro_rules! push_err {
 /// }
 ///
 /// fn main() {
-/// 	let master_err = RefCell::new(vec![]);
+///     let master_err = RefCell::new(vec![]);
 ///     let (errors, success, data) = run!(test_func(true, "test".to_owned()), master_err);
 ///
 ///     assert_eq!(errors, "TopError: top, RootError: root");
@@ -160,34 +161,34 @@ macro_rules! push_err {
 /// }
 /// ```
 macro_rules! run {
-	($func:expr) => {{
-			let (errors, success, data) = match $func {
-		        Ok(v) => (String::from(""), true, Some(v)),
-		        Err(e) => (process_errors!(e, ", "), false, None),
-		    };
-			
-			(errors, success, data)
-		}};
-	($func:expr, $master:expr) => {{
-		{
-			let (errors, success, data) = run!($func);
-			
-			if !errors.is_empty() {
-				// We want to know which function threw these particular errors, 
-				// but we don't want to print the entire expression, so using split
-				// to go from
-				//     self.my.func(arg1, arg2)
-				// to this
-				//     func
-				// TODO: This isn't perfect or particularly pretty. Is there a better way?
-				let mut name = stringify!($func).split('(').next().unwrap();
-				name = name.split(&[':','.'][..]).last().unwrap();
-				push_err!($master, format!("{}: {}", name, errors));
-			}
-	        
-			(errors, success, data)
-		}
-	}};
+    ($func:expr) => {{
+            let (errors, success, data) = match $func {
+                Ok(v) => (String::from(""), true, Some(v)),
+                Err(e) => (process_errors!(e, ", "), false, None),
+            };
+            
+            (errors, success, data)
+        }};
+    ($func:expr, $master:expr) => {{
+        {
+            let (errors, success, data) = run!($func);
+            
+            if !errors.is_empty() {
+                // We want to know which function threw these particular errors, 
+                // but we don't want to print the entire expression, so using split
+                // to go from
+                //     self.my.func(arg1, arg2)
+                // to this
+                //     func
+                // TODO: This isn't perfect or particularly pretty. Is there a better way?
+                let mut name = stringify!($func).split('(').next().unwrap();
+                name = name.split(&[':','.'][..]).last().unwrap();
+                push_err!($master, format!("{}: {}", name, errors));
+            }
+            
+            (errors, success, data)
+        }
+    }};
 }
 
 #[cfg(test)]
