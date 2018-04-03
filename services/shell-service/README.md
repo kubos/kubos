@@ -167,7 +167,7 @@ to take over or resume lost shell sessions.
 
 The `processes` object is a map from `channel_id` to `{path, pid}`
 
-## Protocol Example
+## Example Short-Lived Command
 
 I'm showing messages here as JavaScript literals, but remember it's send over
 the wire as binary CBOR.
@@ -199,8 +199,83 @@ Translated this means the following happened:
 - The stderr stream was closed.
 - The process exited with code 0 and/or signal 0.
 
-See the `kubos-shell-client` source code for a more involved example of spawning
-a persistent `sh -l` session with allocated pseudo terminal.
+## Example Long-Lived Command
 
-Remember that if you want multiple concurrent processes, you need a unique
-`channel_id` for each so the command/event streams don't get crossed.
+If a process doesn't exit on it's own, you can query for running processes,
+write to their stdin or send them signals.
+
+In these examples commands are shown as Lua literals.  They are still sent on
+the wire as CBOR.
+
+### Spawning Sleep
+
+```lua
+Client: { 1337, 'spawn', 'sleep', { args = { '1000' } } }
+Server: { 1337, 'pid', 16337 }
+```
+
+We created a very long-lived `sleep 1000` command and it told us the PID, but
+nothing more since it didn't do anything else.
+
+### Finding Sleep
+
+Let's pretend we forgot about the command and came back later to see what's running:
+
+```lua
+Client: { 2000, 'list' }
+Server: { 2000, 'list', { [1337] = { path = 'sleep', pid = 16337 } } }
+```
+
+We used the list command with a new `channel_id` and it told us the `sleep`
+command is still running with `channel_id` of 1337 and PID of 16337.
+
+Remember that if you want multiple concurrent processes or request name-spaces,
+you need a unique `channel_id` for each so the streams don't get crossed.
+
+### Killing Sleep
+
+Let's send it the default signal of `SIGTERM`
+
+```lua
+Client: { 1337, 'kill' }
+Server: { 1337, 'stderr' }
+Server: { 1337, 'stdout' }
+Server: { 1337, 'exit', 0, 15 }
+```
+
+We used the `channel_id` given in the listing to send a `kill()` command to the
+process.  By default it will send signal 15 which is `SIGTERM`.  We can see the
+stdout and stderr both closed and the process exited with signal 15 as the
+reason.
+
+### Writing to Input
+
+Let's do one more example writing to stdin.
+
+```lua
+Client: { 9000, 'spawn', 'sort' }
+Server: { 9000, 'pid', 16742 }
+Client: { 9000, 'stdin', 'Apple\n' }
+Client: { 9000, 'stdin', 'Grape\n' }
+Client: { 9000, 'stdin', 'Banana\n' }
+```
+
+We spawned an instance of `sort` and wrote 3 lines to it's stdin stream.  Sort
+doesn't output anything till it's stdin is closed, so let's do that and see the
+output:
+
+```lua
+Client: { 9000, 'stdin' }
+Server: { 9000, 'stdout', 'Apple\nBanana\nGrape\n' }
+Server: { 9000, 'stdout' }
+Server: { 9000, 'stderr' }
+Server: { 9000, 'exit', 0, 0 }
+```
+
+Perfect!  We get the result in stdout and the process exits cleanly.
+
+### Full Terminal
+
+See the [kubos-shell-client](../../clients/shell-client) source code for a more
+involved example of spawning a persistent `sh -l` session with allocated pseudo
+terminal as well as using `list` to resume shell sessions.
