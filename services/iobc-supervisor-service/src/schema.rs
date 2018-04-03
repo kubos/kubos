@@ -22,8 +22,6 @@ use kubos_service;
 
 type Context = kubos_service::Context<Supervisor>;
 
-
-
 /// GraphQL model annotations for SupervisorVersion
 graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     description: "Supervisor Version Information"
