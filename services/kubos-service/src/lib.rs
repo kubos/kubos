@@ -24,5 +24,4 @@ extern crate serde_json;
 mod config;
 mod service;
 
-pub use config::config;
 pub use service::KubosService;

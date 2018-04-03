@@ -26,7 +26,7 @@ where
     Query: GraphQLType<Context = CtxT> + Send + Sync + 'static,
     Mutation: GraphQLType<Context = CtxT> + Send + Sync + 'static,
 {
-    config: Config,
+    pub config: Config,
     context_factory: CtxFactory,
     root_node: RootNode<'a, Query, Mutation>,
 }
@@ -39,14 +39,9 @@ where
     Mutation: GraphQLType<Context = CtxT, TypeInfo = ()> + Send + Sync + 'static,
 {
     /// Build a new Kubos
-    pub fn new(
-        config: Config,
-        context_factory: CtxFactory,
-        query: Query,
-        mutation: Mutation,
-    ) -> Self {
+    pub fn new(name: &str, context_factory: CtxFactory, query: Query, mutation: Mutation) -> Self {
         KubosService {
-            config: config,
+            config: Config::new(&name),
             context_factory: context_factory,
             root_node: RootNode::new(query, mutation),
         }

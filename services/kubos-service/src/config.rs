@@ -19,28 +19,50 @@ use std::env;
 use serde_json;
 use std::fs::File;
 use std::io::prelude::*;
-use serde_json::Value;
+use serde_json::{Error, Value};
+use std::io;
 
-static DEFAULT_PATH: &str = "/home/system/etc/config.json";
+static PATH: &str = "/home/system/etc/config.json";
+static IP: &str = "127.0.0.1";
+const PORT: u16 = 8080;
 
 #[derive(Debug, Deserialize)]
-pub struct Config {
+pub struct Address {
     ip: String,
     port: u16,
+}
+
+impl Default for Address {
+    fn default() -> Self {
+        Address {
+            ip: IP.to_string(),
+            port: PORT,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Config {
+    addr: Address,
+    raw: String,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
-            ip: "127.0.0.1".to_string(),
-            port: 8080,
+            addr: Address::default(),
+            raw: "".to_string(),
         }
     }
 }
 
 impl Config {
+    pub fn new(name: &str) -> Self {
+        parse_config(name, get_config_path()).unwrap_or(Config::default())
+    }
+
     pub fn hosturl(&self) -> String {
-        format!("{}:{}", self.ip, self.port)
+        format!("{}:{}", self.addr.ip, self.addr.port)
     }
 }
 
@@ -56,31 +78,33 @@ fn get_config_path() -> String {
     };
     match matches.opt_str("c") {
         Some(s) => s,
-        None => DEFAULT_PATH.to_string(),
+        None => PATH.to_string(),
     }
 }
 
-fn parse_config(name: &str, path: String) -> Config {
-    let mut file = match File::open(path) {
-        Ok(f) => f,
-        Err(_) => return Config::default(),
-    };
+fn get_file_data(path: String) -> Result<String, io::Error> {
+    let mut file = File::open(path)?;
     let mut contents = String::new();
-    match file.read_to_string(&mut contents) {
-        Ok(s) => s,
-        Err(_) => return Config::default(),
-    };
-    let data: Value = match serde_json::from_str(&contents) {
-        Ok(d) => d,
-        Err(_) => return Config::default(),
-    };
-
-    match data.get(name) {
-        Some(v) => serde_json::from_str(&v.to_string()).unwrap_or(Config::default()),
-        None => Config::default(),
-    }
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
 }
 
-pub fn config(name: &str) -> Config {
-    parse_config(name, get_config_path())
+fn parse_config(name: &str, path: String) -> Result<Config, Error> {
+    let contents = get_file_data(path).unwrap_or("".to_string());
+    let data: Value = serde_json::from_str(&contents)?;
+
+    let data = match data.get(name) {
+        Some(d) => d,
+        None => return Ok(Config::default()),
+    };
+
+    let address = match data.get("addr") {
+        Some(a) => serde_json::from_value(a.clone()).unwrap_or(Address::default()),
+        None => Address::default(),
+    };
+
+    Ok(Config {
+        addr: address,
+        raw: data.to_string(),
+    })
 }
