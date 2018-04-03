@@ -18,6 +18,9 @@ limitations under the License.
 -- { channel, message, ...args }
 
 local uv = require 'uv'
+local getenv = require('os').getenv
+local port = getenv 'PORT'
+port = port and tonumber(port) or 6000
 
 local ffi = require('ffi')
 -- Define the bits of the system API we need.
@@ -156,6 +159,6 @@ function Process:resize(cols, rows)
   self.handle:kill(C.SIGWINCH)
 end
 
-require('channel-service')(Process, 6000)
+require('channel-service')(Process, port)
 
 uv.run()
