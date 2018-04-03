@@ -17,5 +17,6 @@
     },
     files = {
       "**.lua",
-    }
+    },
+    license = "Apache 2.0"
   }
