@@ -1,6 +1,6 @@
 return {
   name = "kubos/kubos-communication-service",
-  version = "0.0.3",
+  version = "0.0.4",
   description = "Service to route udp packets to and from a custom transport.",
   tags = { "kubos", "udp", "nat", "stdio", "serial" },
   author = { name = "Tim Caswell", email = "tim@kubos.co" },

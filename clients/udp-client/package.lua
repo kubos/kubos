@@ -1,6 +1,6 @@
   return {
     name = "kubos/kubos-udp-client",
-    version = "0.0.2",
+    version = "0.0.3",
     description = "UDP client for textual UDP services.",
     tags = { "kubos", "udp", "readline"},
     author = { name = "Tim Caswell", email = "tim@kubos.co" },
