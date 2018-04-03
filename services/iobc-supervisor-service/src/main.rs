@@ -29,16 +29,12 @@ use kubos_service::KubosService;
 ///
 /// Since this function is called once for every request, it will fetch new
 /// data with each request.
-fn context_factory() -> schema::Context {
-    schema::Context {
-        supervisor: model::Supervisor::new(),
-    }
-}
 
 fn main() {
+    let visor = model::Supervisor::new();
     KubosService::new(
         "iobc-supervisor-service",
-        context_factory,
+        visor,
         schema::QueryRoot,
         schema::MutationRoot,
     ).start();

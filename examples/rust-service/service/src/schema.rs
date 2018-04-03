@@ -15,24 +15,10 @@
 //
 
 use model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
-use juniper::Context as JuniperContext;
-
+use kubos_service;
 use juniper::FieldResult;
 
-/// Context used to pass global data into Juniper queries
-pub struct Context {
-    pub subsystem: Subsystem,
-}
-
-impl JuniperContext for Context {}
-
-impl Context {
-    /// Give us a reference to subsystem for passing
-    /// along the Juniper chain
-    pub fn get_subsystem(&self) -> &Subsystem {
-        &self.subsystem
-    }
-}
+type Context = kubos_service::Context<Subsystem>;
 
 /// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {

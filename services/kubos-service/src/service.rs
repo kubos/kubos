@@ -17,33 +17,43 @@
 use config::Config;
 use std::net::{SocketAddr, UdpSocket};
 use serde_json::to_string;
-use juniper::{execute, GraphQLType, RootNode, Variables};
+use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
 
-pub struct KubosService<'a, CtxFactory, Query, Mutation, CtxT>
-where
-    CtxFactory: Fn() -> CtxT + Send + Sync + 'static,
-    CtxT: 'static,
-    Query: GraphQLType<Context = CtxT> + Send + Sync + 'static,
-    Mutation: GraphQLType<Context = CtxT> + Send + Sync + 'static,
-{
-    pub config: Config,
-    context_factory: CtxFactory,
-    root_node: RootNode<'a, Query, Mutation>,
+pub struct Context<T> {
+    subsystem: T,
 }
 
-impl<'a, CtxFactory, Query, Mutation, CtxT> KubosService<'a, CtxFactory, Query, Mutation, CtxT>
+impl<T> JuniperContext for Context<T> {}
+
+impl<T> Context<T> {
+    pub fn get_subsystem(&self) -> &T {
+        &self.subsystem
+    }
+}
+
+pub struct KubosService<'a, Query, Mutation, S>
 where
-    CtxFactory: Fn() -> CtxT + Send + Sync + 'static,
-    CtxT: 'static,
-    Query: GraphQLType<Context = CtxT, TypeInfo = ()> + Send + Sync + 'static,
-    Mutation: GraphQLType<Context = CtxT, TypeInfo = ()> + Send + Sync + 'static,
+    Query: GraphQLType<Context = Context<S>> + Send + Sync + 'static,
+    Mutation: GraphQLType<Context = Context<S>> + Send + Sync + 'static,
+{
+    pub config: Config,
+    root_node: RootNode<'a, Query, Mutation>,
+    context: Context<S>,
+}
+
+impl<'a, Query, Mutation, S> KubosService<'a, Query, Mutation, S>
+where
+    Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+    Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
 {
     /// Build a new Kubos
-    pub fn new(name: &str, context_factory: CtxFactory, query: Query, mutation: Mutation) -> Self {
+    pub fn new(name: &str, subsystem: S, query: Query, mutation: Mutation) -> Self {
         KubosService {
             config: Config::new(&name),
-            context_factory: context_factory,
             root_node: RootNode::new(query, mutation),
+            context: Context {
+                subsystem: subsystem,
+            },
         }
     }
 
@@ -53,7 +63,7 @@ where
             None,
             &self.root_node,
             &Variables::new(),
-            &((self.context_factory)()),
+            &self.context,
         ) {
             Ok((val, _errs)) => {
                 // Should do something with _errs

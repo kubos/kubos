@@ -25,3 +25,4 @@ mod config;
 mod service;
 
 pub use service::KubosService;
+pub use service::Context;

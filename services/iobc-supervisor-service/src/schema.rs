@@ -17,23 +17,12 @@
 extern crate isis_iobc_supervisor;
 
 use model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
-use juniper::Context as JuniperContext;
 use juniper::FieldResult;
+use kubos_service;
 
-/// Context used to pass global data into Juniper queries
-pub struct Context {
-    pub supervisor: Supervisor,
-}
+type Context = kubos_service::Context<Supervisor>;
 
-impl JuniperContext for Context {}
 
-impl Context {
-    /// Give us a reference to subsystem for passing
-    /// along the Juniper chain
-    pub fn get_supervisor(&self) -> &Supervisor {
-        &self.supervisor
-    }
-}
 
 /// GraphQL model annotations for SupervisorVersion
 graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
@@ -238,7 +227,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
     field supervisor(&executor) -> FieldResult<&Supervisor>
         as "Supervisor Query"
     {
-        Ok(executor.context().get_supervisor())
+        Ok(executor.context().get_subsystem())
     }
 });
 
