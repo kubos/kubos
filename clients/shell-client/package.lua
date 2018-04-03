@@ -15,7 +15,7 @@ limitations under the License.
 ]]
 return {
   name = "kubos/kubos-shell-client",
-  version = "0.0.5",
+  version = "0.0.6",
   description = "Shell client to connect to remote shell service over custom transport.",
   tags = { "kubos", "udp", "nat", "shell"},
   author = { name = "Tim Caswell", email = "tim@kubos.co" },
