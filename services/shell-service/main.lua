@@ -86,8 +86,9 @@ end
 -- Takes in path and options, outputs pid,
 -- emits exit, stdout, and stderr events
 function Process:spawn(path, options)
-
+  assert(type(path) == 'string', 'Path must be a string')
   if not options then options = {} end
+  assert(type(options) == 'table', 'Options must be a table')
 
   local handle, pid, on_stdout, on_stderr, on_exit
 
@@ -113,6 +114,7 @@ function Process:spawn(path, options)
   local stdin, stdout, stderr, master, slave
 
   if options.pty then
+    assert(type(options.pty) == 'boolean', 'options.pty must be a boolean')
     master, slave = openpty()
     local pipe = uv.new_pipe(false)
     pipe:open(master)
