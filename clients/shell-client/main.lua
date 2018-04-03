@@ -23,7 +23,7 @@ local cbor = require 'cbor'
 local getenv = require('os').getenv
 local readLine = require('readline').readLine
 
--- default lua strings to utf8 strings in cbor encoding
+-- Default lua strings to utf8 strings in cbor encoding.
 cbor.type_encoders.string = cbor.type_encoders.utf8string
 
 local port = getenv 'PORT'
@@ -55,7 +55,6 @@ end
 function handlers.pid(pid)
   p('Remote sh process:', {pid=pid})
   send { 'stdin', '\f' }
-  -- stdout:write '\x1b[2J\x1b[;H'
   stdin:set_mode(1)
   stdin:read_start(on_raw)
 end
@@ -140,6 +139,7 @@ end)
 
 send { 'list' }
 
+-- TODO: uncomment when resize works better in shell service.
 -- local cols, rows = stdin:get_winsize()
 -- send { 'resize', cols, rows }
 

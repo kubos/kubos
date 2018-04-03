@@ -16,7 +16,8 @@ limitations under the License.
 
 local uv = require 'uv'
 local cbor = require 'cbor'
--- default lua strings to utf8 strings in cbor encoding
+
+-- Default lua strings to utf8 strings in cbor encoding.
 cbor.type_encoders.string = cbor.type_encoders.utf8string
 
 return function (Service, port)
