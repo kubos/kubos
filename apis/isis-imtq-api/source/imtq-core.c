@@ -26,7 +26,22 @@
 
 pthread_mutex_t imtq_mutex;
 
-KADCSStatus k_adcs_init(void)
+/**
+ * I2C bus the iMTQ is connected to
+ */
+static KI2CNum i2c_bus = K_I2C1;
+
+/**
+ * iMTQ I2C address
+ */
+static uint16_t imqt_addr = 0x10;
+
+/**
+ * Watchdog timeout (in seconds)
+ */
+static int wd_timeout = 60;
+
+KADCSStatus k_adcs_init(KI2CNum bus, uint16_t addr, int timeout)
 {
     /*
      * All I2C configuration is done at the kernel level,
@@ -34,9 +49,12 @@ KADCSStatus k_adcs_init(void)
      * our I2C API happy.
      */
     KI2CConf conf = k_i2c_conf_defaults();
+    i2c_bus = bus;
+    imqt_addr = addr;
+    wd_timeout = timeout;
 
     KI2CStatus status;
-    status = k_i2c_init(IMTQ_I2C_BUS, &conf);
+    status = k_i2c_init(i2c_bus, &conf);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize iMTQ: %d\n", status);
@@ -93,7 +111,7 @@ void k_adcs_terminate(void)
     }
 
     /* Close the I2C bus */
-    k_i2c_terminate(IMTQ_I2C_BUS);
+    k_i2c_terminate(i2c_bus);
 
     return;
 }
@@ -120,7 +138,7 @@ void * kprv_imtq_watchdog_thread(void * args)
     {
         k_adcs_noop();
 
-        sleep(IMTQ_WD_TIMEOUT / 3);
+        sleep(wd_timeout / 3);
     }
 
     return NULL;
@@ -136,7 +154,7 @@ KADCSStatus k_imtq_watchdog_start(void)
         return ADCS_OK;
     }
 
-    if (IMTQ_WD_TIMEOUT == 0)
+    if (wd_timeout == 0)
     {
         fprintf(
             stderr,
@@ -176,6 +194,11 @@ KADCSStatus k_imtq_watchdog_stop(void)
     return ADCS_OK;
 }
 
+KADCSStatus k_imtq_reset(void)
+{
+    return k_adcs_reset(SOFT_RESET);
+}
+
 KADCSStatus kprv_imtq_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
                                int rx_len, const struct timespec * delay)
 {
@@ -196,7 +219,7 @@ KADCSStatus kprv_imtq_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
         return ADCS_ERROR_MUTEX;
     }
 
-    status = k_i2c_write(IMTQ_I2C_BUS, IMTQ_ADDR, (uint8_t *) tx, tx_len);
+    status = k_i2c_write(i2c_bus, imqt_addr, (uint8_t *) tx, tx_len);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send MTQ command: %d\n", status);
@@ -222,7 +245,7 @@ KADCSStatus kprv_imtq_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
         nanosleep(delay, NULL);
     }
 
-    status = k_i2c_read(IMTQ_I2C_BUS, IMTQ_ADDR, rx, rx_len);
+    status = k_i2c_read(i2c_bus, imqt_addr, rx, rx_len);
 
     if (pthread_mutex_unlock(&imtq_mutex) != 0)
     {
