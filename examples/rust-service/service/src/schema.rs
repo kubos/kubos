@@ -71,9 +71,11 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
     field subsystem(&executor) -> FieldResult<&Subsystem>
         as "Subsystem query"
     {
-        // I don't know if we'll ever return anything other
-        // than Ok here, as we are just returning back essentially
-        // a static struct with interesting function fields
+        let num_queries = executor.context().get("num_queries");
+        println!("Num queries {}", num_queries);
+        let num = num_queries.parse::<i32>().unwrap_or(0) + 1;
+        executor.context().set("num_queries", &format!("{}", num));        
+        
         Ok(executor.context().get_subsystem())
     }
 });

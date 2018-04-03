@@ -14,13 +14,17 @@
 // limitations under the License.
 //
 
-use config::Config;
+use std::collections::HashMap;
 use std::net::{SocketAddr, UdpSocket};
+use std::cell::RefCell;
+
+use config::Config;
 use serde_json::to_string;
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
 
 pub struct Context<T> {
     subsystem: T,
+    pub storage: RefCell<HashMap<String, String>>,
 }
 
 impl<T> JuniperContext for Context<T> {}
@@ -28,6 +32,28 @@ impl<T> JuniperContext for Context<T> {}
 impl<T> Context<T> {
     pub fn get_subsystem(&self) -> &T {
         &self.subsystem
+    }
+
+    pub fn get(&self, name: &str) -> String {
+        let stor = self.storage.borrow();
+        match stor.get(&name.to_string()) {
+            Some(s) => s.clone(),
+            None => "".to_string(),
+        }
+    }
+
+    pub fn set(&self, key: &str, value: &str) {
+        let mut stor = self.storage.borrow_mut();
+        stor.insert(key.to_string(), value.to_string());
+    }
+
+    pub fn clear(&self, name: &String) {
+        let mut storage = self.storage.borrow_mut();
+        storage.remove(name);
+    }
+
+    pub fn clear_all(&self) {
+        self.storage.borrow_mut().clear();
     }
 }
 
@@ -53,6 +79,7 @@ where
             root_node: RootNode::new(query, mutation),
             context: Context {
                 subsystem: subsystem,
+                storage: RefCell::new(HashMap::new()),
             },
         }
     }
