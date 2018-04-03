@@ -1,6 +1,9 @@
 [workspace]
 members = [
+"apis/adcs-api",
 "apis/isis-ants-api",
+"apis/isis-imtq-api",
+"apis/isis-iobc-supervisor",
 "apis/nsl-duplex-d2",
 "apis/rust-radio-api",
 "examples/rust-service/extern-lib",

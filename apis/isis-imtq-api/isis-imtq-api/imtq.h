@@ -22,39 +22,7 @@
 
 #include <pthread.h>
 #include <stdint.h>
-
-
-/**
- *  @name iMTQ config.json configuration options and default values
- */
-/**@{*/
-/**
- * I2C bus the iMTQ is connected to
- */
-#ifdef YOTTA_CFG_ADCS_IMTQ_I2C_BUS
-#define IMTQ_I2C_BUS YOTTA_CFG_ADCS_IMTQ_I2C_BUS
-#else
-#define IMTQ_I2C_BUS K_I2C1
-#endif
-
-/**
- * iMTQ I2C address
- */
-#ifdef YOTTA_CFG_MTQ_IMTQ_ADDR
-#define MTQ_ADDR YOTTA_CFG_MTQ_IMTQ_ADDR
-#else
-#define IMTQ_ADDR 0x10
-#endif
-
-/**
- * Watchdog timeout (in seconds)
- */
-#ifdef YOTTA_CFG_ADCS_IMTQ_WATCHDOG_TIMEOUT
-#define IMTQ_WD_TIMEOUT YOTTA_CFG_ADCS_IMTQ_WATCHDOG_TIMEOUT
-#else
-#define IMTQ_WD_TIMEOUT 60
-#endif
-/**@}*/
+#include <kubos-hal/i2c.h>
 
 /**
  *  @name Command Response Flags
@@ -152,16 +120,19 @@ extern pthread_mutex_t imtq_mutex;
 /* Public Functions */
 /**
  * Initialize the ADCS interface
+ * @param [in] bus I2C bus
+ * @param [in] addr I2C address
+ * @param [in] timeout Watchdog timeout in seconds
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_init(void);
+KADCSStatus k_adcs_init(KI2CNum bus, uint16_t addr, int timeout);
 /**
  * Terminate the ADCS interface
  */
 void k_adcs_terminate(void);
 /**
  * Start a thread to kick the iMTQ's watchdog at an interval of
- * (::IMTQ_WD_TIMEOUT/3) seconds
+ * `(timeout/3)` seconds (`timeout` specified in `k_adcs_init`)
  * @return KADCSStatus `ADCS_OK` if OK, error otherwise
  */
 KADCSStatus k_imtq_watchdog_start(void);
