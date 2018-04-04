@@ -57,11 +57,19 @@ impl Subsystem {
     }
 
     pub fn get_deploy_status(&self) -> Result<GetDeployResponse, Error> {
-        let (_errors, _success, deploy) = run!(self.ants.get_deploy(), self.errors);
+        let (_errors, success, deploy) = run!(self.ants.get_deploy(), self.errors);
 
         let mut status = DeploymentStatus::Error;
 
         let deploy = deploy.unwrap_or_default();
+
+        // If our API called threw any errors, just go ahead and quit now
+        if !success {
+            return Ok(GetDeployResponse {
+                status,
+                details: deploy,
+            });
+        }
 
         let mut deployed = !deploy.ant_1_not_deployed && !deploy.ant_2_not_deployed;
         if self.count > 2 {
@@ -174,25 +182,7 @@ impl Subsystem {
     }
 
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
-        let (nom_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
-        let (debug_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
-
-        let success = nom_success && debug_success;
-        let mut errors = String::new();
-
-        if !nom_errors.is_empty() {
-            errors.push_str(&format!("Nominal: {};", nom_errors));
-        }
-        if !debug_errors.is_empty() {
-            errors.push_str(&format!("Debug: {}", debug_errors));
-        }
-
-        Ok(IntegrationTestResults {
-            errors,
-            success,
-            telemetry_nominal: nominal.unwrap_or_default(),
-            telemetry_debug: debug.unwrap_or_default(),
-        })
+        self.integration_test()
     }
 
     // Mutations
@@ -278,8 +268,49 @@ impl Subsystem {
     }
 
     pub fn integration_test(&self) -> Result<IntegrationTestResults, Error> {
-        let (nom_errors, nom_success, nominal) = run!(self.get_telemetry_nominal(), self.errors);
-        let (debug_errors, debug_success, debug) = run!(self.get_telemetry_debug(), self.errors);
+        let (nom_errors, nom_success, nominal) =
+            run!(self.ants.get_system_telemetry(), self.errors);
+
+        let debug_errors = RefCell::new(vec![]);
+
+        let debug = TelemetryDebug {
+            ant1: AntennaStats {
+                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant1), debug_errors)
+                    .2
+                    .unwrap_or_default(),
+                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant1), debug_errors)
+                    .2
+                    .unwrap_or_default(),
+            },
+            ant2: AntennaStats {
+                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant2), debug_errors)
+                    .2
+                    .unwrap_or_default(),
+                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant2), debug_errors)
+                    .2
+                    .unwrap_or_default(),
+            },
+            ant3: AntennaStats {
+                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant3), debug_errors)
+                    .2
+                    .unwrap_or_default(),
+                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant3), debug_errors)
+                    .2
+                    .unwrap_or_default(),
+            },
+            ant4: AntennaStats {
+                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant4), debug_errors)
+                    .2
+                    .unwrap_or_default(),
+                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant4), debug_errors)
+                    .2
+                    .unwrap_or_default(),
+            },
+        };
+
+        let debug_errors = debug_errors.into_inner();
+
+        let debug_success = debug_errors.is_empty();
 
         let success = nom_success && debug_success;
         let mut errors = String::new();
@@ -288,14 +319,16 @@ impl Subsystem {
             errors.push_str(&format!("Nominal: {};", nom_errors));
         }
         if !debug_errors.is_empty() {
-            errors.push_str(&format!("Debug: {}", debug_errors));
+            let concat = debug_errors.join(", ");
+            errors.push_str(&format!("Debug: {}", concat));
+            push_err!(self.errors, format!("get_test_results(debug): {}", concat));
         }
 
         Ok(IntegrationTestResults {
             errors,
             success,
-            telemetry_nominal: nominal.unwrap_or_default(),
-            telemetry_debug: debug.unwrap_or_default(),
+            telemetry_nominal: TelemetryNominal(nominal.unwrap_or_default()),
+            telemetry_debug: debug,
         })
     }
 

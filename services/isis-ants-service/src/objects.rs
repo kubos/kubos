@@ -42,7 +42,7 @@ pub enum AckCommand {
 }
 
 /// Return field for 'armStatus' query
-#[derive(GraphQLEnum)]
+#[derive(GraphQLEnum, Eq, PartialEq, Debug)]
 pub enum ArmStatus {
     Armed,
     Disarmed,
@@ -110,7 +110,7 @@ pub struct ControlPowerResponse {
 }
 
 /// Enum for 'deployStatus' response field of 'deploymentStatus' query
-#[derive(GraphQLEnum, Clone)]
+#[derive(GraphQLEnum, Clone, Debug, PartialEq)]
 pub enum DeploymentStatus {
     /// All antennas have been successfully deployed
     Deployed,
@@ -291,7 +291,7 @@ graphql_union!(Telemetry: () |&self| {
 });
 
 /// Response fields for 'telemetry(telem: NOMINAL)' query
-#[derive(Default)]
+#[derive(Debug, Default, PartialEq)]
 pub struct TelemetryNominal(pub AntsTelemetry);
 
 graphql_object!(TelemetryNominal: () |&self| {
@@ -366,7 +366,7 @@ graphql_object!(TelemetryNominal: () |&self| {
 });
 
 /// Response fields for 'telemetry(telem: DEBUG)' query
-#[derive(Default)]
+#[derive(Debug, Default, PartialEq)]
 pub struct TelemetryDebug {
     pub ant1: AntennaStats,
     pub ant2: AntennaStats,
@@ -374,7 +374,7 @@ pub struct TelemetryDebug {
     pub ant4: AntennaStats,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default, PartialEq)]
 pub struct AntennaStats {
     pub act_count: u8,
     pub act_time: u16,
