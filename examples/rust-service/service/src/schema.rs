@@ -75,7 +75,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         println!("Num queries {}", num_queries);
         let num = num_queries.parse::<i32>().unwrap_or(0) + 1;
         executor.context().set("num_queries", &format!("{}", num));
-        Ok(executor.context().get_subsystem())
+        Ok(executor.context().subsystem())
     }
 });
 
@@ -89,19 +89,19 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     field set_power(&executor, power : bool) -> FieldResult<SetPower>
         as "Set subsystem power state"
     {
-        Ok(executor.context().get_subsystem().set_power(power)?)
+        Ok(executor.context().subsystem().set_power(power)?)
     }
 
     field reset_uptime(&executor) -> FieldResult<ResetUptime>
         as "Resets uptime counter of subsystem"
     {
-        Ok(executor.context().get_subsystem().reset_uptime()?)
+        Ok(executor.context().subsystem().reset_uptime()?)
     }
 
     field calibrate_thermometer(&executor) -> FieldResult<CalibrateThermometer>
         as "Calibrate thermometer"
     {
-        Ok(executor.context().get_subsystem().calibrate_thermometer()?)
+        Ok(executor.context().subsystem().calibrate_thermometer()?)
     }
 
 });

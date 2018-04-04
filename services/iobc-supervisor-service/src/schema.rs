@@ -225,7 +225,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
     field supervisor(&executor) -> FieldResult<&Supervisor>
         as "Supervisor Query"
     {
-        Ok(executor.context().get_subsystem())
+        Ok(executor.context().subsystem())
     }
 });
 

@@ -44,14 +44,14 @@ impl Default for Address {
 #[derive(Debug)]
 pub struct Config {
     addr: Address,
-    raw: String,
+    pub raw: Value,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
             addr: Address::default(),
-            raw: "".to_string(),
+            raw: json!(""),
         }
     }
 }
@@ -105,6 +105,6 @@ fn parse_config(name: &str, path: String) -> Result<Config, Error> {
 
     Ok(Config {
         addr: address,
-        raw: data.to_string(),
+        raw: data.clone(),
     })
 }

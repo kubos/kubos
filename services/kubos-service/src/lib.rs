@@ -14,11 +14,18 @@
 // limitations under the License.
 //
 
+#![deny(missing_docs)]
+#![deny(warnings)]
+
+//! This crate provides an abstraction layer and common functionality for
+//! creating and interacting with hardware services.
+
 extern crate getopts;
 extern crate juniper;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
 extern crate serde_json;
 
 mod config;
