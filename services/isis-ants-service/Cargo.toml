@@ -11,5 +11,6 @@ mount = "0.4.0"
 logger = "0.4.0"
 serde_json = "1.0.10"
 failure = { git = "https://github.com/rust-lang-nursery/failure" }
+double = "0.2.2"
 
 isis-ants-api = { path = "../../apis/isis-ants-api" }

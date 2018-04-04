@@ -139,12 +139,16 @@
 //!
 
 #![warn(missing_docs)]
+//#![feature(trace_macros)]
 
 #[cfg(test)]
 #[macro_use]
 extern crate failure;
 #[cfg(not(test))]
 extern crate failure;
+
+#[macro_use]
+extern crate double;
 
 extern crate iron;
 extern crate isis_ants_api;
@@ -168,6 +172,8 @@ mod macros;
 mod model;
 mod objects;
 mod schema;
+#[cfg(test)]
+mod tests;
 
 // Create a connection to the underlying AntS device with each GraphQL request
 // and use it as the endpoint for queries and mutations
@@ -178,6 +184,7 @@ fn context_factory(_: &mut Request) -> schema::Context {
 
 #[allow(dead_code)]
 struct Config {
+    bus: KI2CNum,
     primary: u8,
     secondary: u8,
     antennas: u8,
@@ -190,6 +197,7 @@ fn main() {
                     "isis-ants-service": {
                         "addr": "0.0.0.0",
                         "port": 8080,
+                        "bus": "KI2C1",
                         "primary": 0x31,
                         "secondary": 0x32,
                         "antennas": 4,
@@ -218,6 +226,8 @@ fn main() {
 
     #[allow(unused_variables)]
     let config = Config {
+        //TODO: bus
+        bus: KI2CNum::KI2C1,
         primary: master_config["isis-ants-service"]["primary"]
             .as_u64()
             .unwrap_or(0x31) as u8,

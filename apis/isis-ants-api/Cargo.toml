@@ -9,6 +9,5 @@ repository = "https://github.com/kubos/kubos"
 failure = { git = "https://github.com/rust-lang-nursery/failure" }
 nom = "4.0.0-beta1"
 
-
 [build-dependencies]
 kubos-build-helper = {path = "../../kubos-build-helper"}

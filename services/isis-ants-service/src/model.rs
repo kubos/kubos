@@ -15,7 +15,7 @@
 //
 
 use failure::Fail;
-use isis_ants_api::{AntS, KANTSAnt, KANTSController, KI2CNum};
+use isis_ants_api::{AntS, IAntS, KANTSAnt, KANTSController, KI2CNum};
 use std::cell::RefCell;
 use std::io::Error;
 use std::str;
@@ -23,15 +23,18 @@ use std::str;
 use objects::*;
 
 pub struct Subsystem {
-    ants: AntS,
+    pub ants: Box<IAntS + 'static>,
     pub errors: RefCell<Vec<String>>,
-    count: u8,
+    pub count: u8,
 }
 
 impl Subsystem {
     pub fn new(bus: KI2CNum, primary: u8, secondary: u8, count: u8, timeout: u32) -> Subsystem {
+
+        let ants = Box::new(AntS::new(bus, primary, secondary, count, timeout).unwrap());
+
         let subsystem = Subsystem {
-            ants: AntS::new(bus, primary, secondary, count, timeout).unwrap(),
+            ants,
             errors: RefCell::new(vec![]),
             count,
         };
@@ -178,10 +181,10 @@ impl Subsystem {
         let mut errors = String::new();
 
         if !nom_errors.is_empty() {
-            errors.push_str(format!("Nominal: {};", nom_errors));
+            errors.push_str(&format!("Nominal: {};", nom_errors));
         }
         if !debug_errors.is_empty() {
-            errors.push_str(format!("Debug: {}", debug_errors));
+            errors.push_str(&format!("Debug: {}", debug_errors));
         }
 
         Ok(IntegrationTestResults {
@@ -282,10 +285,10 @@ impl Subsystem {
         let mut errors = String::new();
 
         if !nom_errors.is_empty() {
-            errors.push_str(format!("Nominal: {};", nom_errors));
+            errors.push_str(&format!("Nominal: {};", nom_errors));
         }
         if !debug_errors.is_empty() {
-            errors.push_str(format!("Debug: {}", debug_errors));
+            errors.push_str(&format!("Debug: {}", debug_errors));
         }
 
         Ok(IntegrationTestResults {

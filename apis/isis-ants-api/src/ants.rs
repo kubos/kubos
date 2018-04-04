@@ -19,7 +19,7 @@ use parse::*;
 use std::ptr;
 
 /// Common Error for AntS Actions
-#[derive(Fail, Display, Debug)]
+#[derive(Fail, Display, Debug, Clone)]
 pub enum AntsError {
     /// Catch-all error
     #[display(fmt = "Generic error")]
@@ -33,10 +33,38 @@ pub enum AntsError {
 /// Custom result type for antenna operations
 pub type AntSResult<T> = Result<T, AntsError>;
 
+pub trait IAntS {
+    fn new(
+        bus: KI2CNum,
+        primary: u8,
+        secondary: u8,
+        ant_count: u8,
+        timeout: u32,
+    ) -> AntSResult<Self>
+    where
+        Self: ::std::marker::Sized;
+    fn configure(&self, config: KANTSController) -> AntSResult<()>;
+    fn reset(&self) -> AntSResult<()>;
+    fn arm(&self) -> AntSResult<()>;
+    fn disarm(&self) -> AntSResult<()>;
+    fn deploy(&self, antenna: KANTSAnt, force: bool, timeout: u8) -> AntSResult<()>;
+    fn auto_deploy(&self, timeout: u8) -> AntSResult<()>;
+    fn cancel_deploy(&self) -> AntSResult<()>;
+    fn get_deploy(&self) -> AntSResult<DeployStatus>;
+    fn get_uptime(&self) -> AntSResult<u32>;
+    fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry>;
+    fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8>;
+    fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16>;
+    fn watchdog_kick(&self) -> AntSResult<()>;
+    fn watchdog_start(&self) -> AntSResult<()>;
+    fn watchdog_stop(&self) -> AntSResult<()>;
+    fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()>;
+}
+
 /// Structure for interacting with an ISIS Antenna System
 pub struct AntS;
 
-impl AntS {
+impl IAntS for AntS {
     /// Constructor
     ///
     /// Opens a connection to the underlying I<sup>2</sup>C device
@@ -66,13 +94,13 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn new(
+    fn new(
         bus: KI2CNum,
         primary: u8,
         secondary: u8,
         ant_count: u8,
         timeout: u32,
-    ) -> AntSResult<Self> {
+    ) -> AntSResult<AntS> {
 
         match unsafe {
             ffi::k_ants_init(convert_bus(bus), primary, secondary, ant_count, timeout)
@@ -117,7 +145,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn configure(&self, config: KANTSController) -> AntSResult<()> {
+    fn configure(&self, config: KANTSController) -> AntSResult<()> {
         match unsafe { ffi::k_ants_configure(convert_controller(config)) } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -143,7 +171,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn reset(&self) -> AntSResult<()> {
+    fn reset(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_reset() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -169,7 +197,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn arm(&self) -> AntSResult<()> {
+    fn arm(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_arm() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -195,7 +223,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn disarm(&self) -> AntSResult<()> {
+    fn disarm(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_disarm() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -227,7 +255,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn deploy(&self, antenna: KANTSAnt, force: bool, timeout: u8) -> AntSResult<()> {
+    fn deploy(&self, antenna: KANTSAnt, force: bool, timeout: u8) -> AntSResult<()> {
         match unsafe { ffi::k_ants_deploy(convert_antenna(antenna), force, timeout) } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -257,7 +285,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn auto_deploy(&self, timeout: u8) -> AntSResult<()> {
+    fn auto_deploy(&self, timeout: u8) -> AntSResult<()> {
         match unsafe { ffi::k_ants_auto_deploy(timeout) } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -283,7 +311,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn cancel_deploy(&self) -> AntSResult<()> {
+    fn cancel_deploy(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_cancel_deploy() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -311,7 +339,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn get_deploy(&self) -> AntSResult<DeployStatus> {
+    fn get_deploy(&self) -> AntSResult<DeployStatus> {
 
         let mut status: [u8; 2] = [0; 2];
 
@@ -346,7 +374,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn get_uptime(&self) -> AntSResult<u32> {
+    fn get_uptime(&self) -> AntSResult<u32> {
 
         let mut uptime = 0;
 
@@ -382,7 +410,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry> {
+    fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry> {
 
         let mut c_telem = ffi::AntsTelemetry {
             raw_temp: 0,
@@ -424,7 +452,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8> {
+    fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8> {
 
         let mut count: u8 = 0;
 
@@ -461,7 +489,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16> {
+    fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16> {
 
         let mut time: u16 = 0;
 
@@ -490,7 +518,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn watchdog_kick(&self) -> AntSResult<()> {
+    fn watchdog_kick(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_watchdog_kick() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -517,7 +545,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn watchdog_start(&self) -> AntSResult<()> {
+    fn watchdog_start(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_watchdog_start() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -545,7 +573,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn watchdog_stop(&self) -> AntSResult<()> {
+    fn watchdog_stop(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_watchdog_stop() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
@@ -582,7 +610,7 @@ impl AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    pub fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()> {
+    fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()> {
 
         let tx_len: u8 = tx.len() as u8;
         let rx_len: u8 = rx_in.len() as u8;
