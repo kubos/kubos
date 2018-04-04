@@ -62,7 +62,7 @@ pub type ArmResponse = GenericResponse;
 ///
 /// Sets which AntS microcontroller will be used to issue
 /// commands to the antennas
-#[derive(GraphQLEnum, Clone)]
+#[derive(GraphQLEnum, Clone, Eq, PartialEq, Debug)]
 pub enum ConfigureController {
     Primary,
     Secondary,
@@ -78,7 +78,7 @@ pub struct ConfigureHardwareResponse {
 
 /// Input field for 'controlPower' mutation and
 /// response field for 'power' query
-#[derive(GraphQLEnum, Clone)]
+#[derive(GraphQLEnum, Clone, Eq, PartialEq, Debug)]
 pub enum PowerState {
     On,
     Off,

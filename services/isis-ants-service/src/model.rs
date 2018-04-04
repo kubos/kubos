@@ -23,7 +23,7 @@ use std::str;
 use objects::*;
 
 pub struct Subsystem {
-    pub ants: Box<IAntS + 'static>,
+    pub ants: Box<IAntS>,
     pub errors: RefCell<Vec<String>>,
     pub count: u8,
 }

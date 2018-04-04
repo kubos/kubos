@@ -3,6 +3,30 @@ use double;
 use std::cell::RefCell;
 use isis_ants_api::*;
 use model::*;
+use objects::*;
+
+macro_rules! mock_new {
+    () => (
+        MockAntS::new(
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+        Err(AntsError::ConfigError.into()),
+    )
+    )
+}
 
 mock_trait_no_default!(
 		MockAntS,
@@ -32,24 +56,7 @@ impl IAntS for MockAntS {
         _ant_count: u8,
         _timeout: u32,
     ) -> AntSResult<MockAntS> {
-        Ok(MockAntS::new(
-            Ok(()),
-            Ok(()),
-            Ok(()),
-            Ok(()),
-            Ok(()),
-            Ok(()),
-            Ok(()),
-            Ok(DeployStatus::default()),
-            Ok(0),
-            Ok(AntsTelemetry::default()),
-            Ok(0),
-            Ok(0),
-            Ok(()),
-            Ok(()),
-            Ok(()),
-            Ok(()),
-        ))
+        Ok(mock_new!())
     }
     mock_method!(configure(&self, config: KANTSController) -> AntSResult<()>);
     mock_method!(reset(&self) -> AntSResult<()>);
@@ -71,26 +78,418 @@ impl IAntS for MockAntS {
         });
 }
 
+
+
+//TODO: verify master errors matches expected
+
 #[test]
-fn noop_good() {
-    let mock = MockAntS::new(
-        Ok(()),
-        Ok(()),
-        Ok(()),
-        Ok(()),
-        Ok(()),
-        Ok(()),
-        Ok(()),
-        Ok(DeployStatus::default()),
-        Ok(0),
-        Ok(AntsTelemetry::default()),
-        Ok(0),
-        Ok(0),
-        Ok(()),
-        Ok(()),
-        Ok(()),
+fn arm_good_arm() {
+    let mock = mock_new!();
+
+    mock.arm.return_value(Ok(()));
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.arm(ArmState::Arm).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn arm_error_arm() {
+    let mock = mock_new!();
+
+    mock.arm.return_value(Err(AntsError::GenericError.into()));
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.arm(ArmState::Arm).unwrap();
+
+    assert_eq!(result.errors, "Generic error".to_owned());
+    assert_eq!(result.success, false);
+}
+
+#[test]
+fn arm_good_disarm() {
+    let mock = mock_new!();
+
+    mock.disarm.return_value(Ok(()));
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.arm(ArmState::Disarm).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn arm_error_disarm() {
+    let mock = mock_new!();
+
+    mock.disarm.return_value(
+        Err(AntsError::GenericError.into()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.arm(ArmState::Disarm).unwrap();
+
+    assert_eq!(result.errors, "Generic error".to_owned());
+    assert_eq!(result.success, false);
+}
+
+#[test]
+fn configure_good_primary() {
+    let mock = mock_new!();
+
+    mock.configure.return_value_for(
+        (KANTSController::Primary),
         Ok(()),
     );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.configure_hardware(ConfigureController::Primary)
+        .unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+    assert_eq!(result.config, ConfigureController::Primary);
+}
+
+#[test]
+fn configure_good_secondary() {
+    let mock = mock_new!();
+
+    mock.configure.return_value_for(
+        (KANTSController::Secondary),
+        Ok(()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.configure_hardware(ConfigureController::Secondary)
+        .unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+    assert_eq!(result.config, ConfigureController::Secondary);
+}
+
+#[test]
+fn configure_bad() {
+    let mock = mock_new!();
+
+    mock.configure.return_value(
+        Err(AntsError::GenericError.into()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.configure_hardware(ConfigureController::Primary)
+        .unwrap();
+
+    assert_eq!(result.errors, "Generic error".to_owned());
+    assert_eq!(result.success, false);
+    assert_eq!(result.config, ConfigureController::Primary);
+}
+
+#[test]
+fn control_power_good() {
+    let mock = mock_new!();
+
+    mock.reset.return_value(Ok(()));
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.control_power(PowerState::Reset).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+    assert_eq!(result.power, PowerState::Reset);
+}
+
+#[test]
+fn control_power_bad() {
+    let mock = mock_new!();
+
+    mock.reset.return_value(Err(AntsError::GenericError.into()));
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.control_power(PowerState::Reset).unwrap();
+
+    assert_eq!(result.errors, "Generic error".to_owned());
+    assert_eq!(result.success, false);
+    assert_eq!(result.power, PowerState::Reset);
+}
+
+#[test]
+fn control_power_invalid() {
+    let mock = mock_new!();
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.control_power(PowerState::On).unwrap();
+
+    assert_eq!(result.errors, "Invalid power state".to_owned());
+    assert_eq!(result.success, false);
+    assert_eq!(result.power, PowerState::On);
+}
+
+#[test]
+fn deploy_good_all() {
+    let mock = mock_new!();
+
+    mock.auto_deploy.return_value(Ok(()));
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::All, false, 5).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn deploy_good_ant1() {
+    let mock = mock_new!();
+
+    mock.deploy.return_value_for(
+        (KANTSAnt::Ant1, false, 5),
+        Ok(()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::Antenna1, false, 5).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn deploy_good_ant1_override() {
+    let mock = mock_new!();
+
+    mock.deploy.return_value_for(
+        (KANTSAnt::Ant1, true, 5),
+        Ok(()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::Antenna1, true, 5).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn deploy_good_ant2() {
+    let mock = mock_new!();
+
+    mock.deploy.return_value_for(
+        (KANTSAnt::Ant2, false, 5),
+        Ok(()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::Antenna2, false, 5).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn deploy_good_ant2_override() {
+    let mock = mock_new!();
+
+    mock.deploy.return_value_for(
+        (KANTSAnt::Ant2, true, 5),
+        Ok(()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::Antenna2, true, 5).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn deploy_good_ant3() {
+    let mock = mock_new!();
+
+    mock.deploy.return_value_for(
+        (KANTSAnt::Ant3, false, 5),
+        Ok(()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::Antenna3, false, 5).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn deploy_good_ant3_override() {
+    let mock = mock_new!();
+
+    mock.deploy.return_value_for(
+        (KANTSAnt::Ant3, true, 5),
+        Ok(()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::Antenna3, true, 5).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn deploy_good_ant4() {
+    let mock = mock_new!();
+
+    mock.deploy.return_value_for(
+        (KANTSAnt::Ant4, false, 5),
+        Ok(()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::Antenna4, false, 5).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn deploy_good_ant4_override() {
+    let mock = mock_new!();
+
+    mock.deploy.return_value_for(
+        (KANTSAnt::Ant4, true, 5),
+        Ok(()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::Antenna4, true, 5).unwrap();
+
+    assert_eq!(result.errors, "".to_owned());
+    assert_eq!(result.success, true);
+}
+
+#[test]
+fn deploy_bad() {
+    let mock = mock_new!();
+
+    mock.deploy.return_value(
+        Err(AntsError::GenericError.into()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.deploy(DeployType::Antenna1, true, 5).unwrap();
+
+    assert_eq!(result.errors, "Generic error".to_owned());
+    assert_eq!(result.success, false);
+}
+
+//TODO: Integration test
+
+#[test]
+fn noop_good() {
+    let mock = mock_new!();
 
     mock.watchdog_kick.return_value(Ok(()));
 
@@ -104,4 +503,24 @@ fn noop_good() {
 
     assert_eq!(result.errors, "".to_owned());
     assert_eq!(result.success, true);
+}
+
+#[test]
+fn noop_error() {
+    let mock = mock_new!();
+
+    mock.watchdog_kick.return_value(
+        Err(AntsError::GenericError.into()),
+    );
+
+    let sub = Subsystem {
+        ants: Box::new(mock),
+        errors: RefCell::new(vec![]),
+        count: 4,
+    };
+
+    let result = sub.noop().unwrap();
+
+    assert_eq!(result.errors, "Generic error".to_owned());
+    assert_eq!(result.success, false);
 }
