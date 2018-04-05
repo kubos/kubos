@@ -20,25 +20,39 @@ local cbor = require 'cbor'
 -- Default lua strings to utf8 strings in cbor encoding.
 cbor.type_encoders.string = cbor.type_encoders.utf8string
 
-return function (Service, port)
+return function (make_service, port)
 
   local server = uv.new_udp()
   assert(server:bind('127.0.0.1', port))
 
+  local meta = {}
+  function meta:__index(key)
+    local fn = function (...)
+      local message = { self.id, key, ... }
+      p('->', message)
+      local encoded = cbor.encode(message)
+      p(encoded, self.ip, self.port)
+      server:send(encoded, self.ip, self.port)
+    end
+    self[key] = fn
+    return fn
+  end
+
   local channels = {}
   local function get_channel(id, addr)
     local channel = channels[id]
-    if not channel then
-      channel = setmetatable({ id = id }, { __index = Service })
-      function channel:send(...)
-        -- p('->', { id, ... })
-        local message = cbor.encode { id, ... }
-        server:send(message, self.ip, self.port)
-      end
+    if channel then
+      channel.ip = addr.ip
+      channel.port = addr.port
+    else
+      channel = setmetatable({
+        id = id,
+        ip = addr.ip,
+        port = addr.port,
+       }, meta)
+      channel.service = make_service(channel)
       channels[id] = channel
     end
-    channel.ip = addr.ip
-    channel.port = addr.port
     return channel
   end
 
@@ -48,18 +62,18 @@ return function (Service, port)
     local channel
     local success, error = xpcall(function ()
       local message = cbor.decode(data)
-      -- p('<-', message)
+      p('<-', message)
       assert(type(message) == 'table' and #message >= 1, 'Message must be list')
       local id = table.remove(message, 1)
       channel = get_channel(id, addr)
-      local fn = Service[table.remove(message, 1)]
+      local fn = channel.service[table.remove(message, 1)]
       assert(type(fn) == 'function', 'Invalid command')
-      fn(channel, unpack(message))
+      fn(unpack(message))
     end, debug.traceback)
     if not success then
       print(error)
       if channel then
-        channel:send('error', error)
+        channel.error(error)
       end
     end
   end)
