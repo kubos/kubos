@@ -19,6 +19,9 @@ with open('mcu_config.json') as config_file:
 I2C_BUSNUM = data['i2c_bus_number']
 DELAY = data['delay_between_writing_and_reading']
 SUP_TELS = data['available_telemetry']
+# json import converts to unicode, changing commands to be strings
+for field in SUP_TELS:
+    SUP_TELS[field]['command'] = str(SUP_TELS[field]['command'])
 
 class MCU:
     
@@ -58,6 +61,8 @@ class MCU:
         elif fields is list:
             requests = {}
             for field in fields:
+                print "field: " + str(field)
+                print type(field)
                 if field not in SUP_TELS or type(field) != str:
                     raise ValueError(
                         'Invalid field: '+str(field))
