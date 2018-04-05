@@ -1,0 +1,7 @@
+[package]
+name = "i2c-api"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
+i2c-linux = "0.1"
