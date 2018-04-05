@@ -29,9 +29,8 @@ return function (make_service, port)
   function meta:__index(key)
     local fn = function (...)
       local message = { self.id, key, ... }
-      p('->', message)
+      -- p('->', message)
       local encoded = cbor.encode(message)
-      p(encoded, self.ip, self.port)
       server:send(encoded, self.ip, self.port)
     end
     self[key] = fn
@@ -62,7 +61,7 @@ return function (make_service, port)
     local channel
     local success, error = xpcall(function ()
       local message = cbor.decode(data)
-      p('<-', message)
+      -- p('<-', message)
       assert(type(message) == 'table' and #message >= 1, 'Message must be list')
       local id = table.remove(message, 1)
       channel = get_channel(id, addr)
