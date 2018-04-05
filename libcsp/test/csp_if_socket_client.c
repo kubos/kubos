@@ -69,10 +69,10 @@ static void test_client(void ** arg) {
 
 	csp_thread_create(server_task, "SERVER", 1024, NULL, 0, &server_task_handle);
 
-	while (!server_running) {
+	do {
 		csp_sleep_ms(100);
-	}
-
+	} while (!server_running);
+	
 	assert_int_equal(socket_init(&socket_driver, CSP_SOCKET_CLIENT, TEST_SOCKET_PORT), CSP_ERR_NONE);
 	assert_int_equal(csp_socket_init(&csp_socket_if, &socket_driver), CSP_ERR_NONE);
 
