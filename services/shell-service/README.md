@@ -4,7 +4,7 @@ This service is implemented as a [luvi](https://github.com/luvit/luvi)
 application.
 
 The single-file executable is literally a Unix
-[hashbang](https://en.wikipedia.org/wiki/Shebang_(Unix) line containing
+[hashbang](https://en.wikipedia.org/wiki/Shebang_(Unix)) line containing
 `#!/home/system/usr/bin/luvi-tiny --\n` with a zip-file of
 [Lua](https://www.lua.org/) scripts and assets appended.
 
