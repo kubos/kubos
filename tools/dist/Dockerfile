@@ -1,4 +1,4 @@
-# kubos/kubos-dev:0.1.1
+# kubos/kubos-dev:0.1.2
 
 FROM phusion/baseimage:0.9.22
 
@@ -40,5 +40,10 @@ RUN pip install git+https://github.com/kubos/kubos-cli
 RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
 RUN mkdir -p /home/vagrant/.kubos
+
+# Setup rust stuff
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH "$PATH:/root/.cargo/bin"
+RUN /root/.cargo/bin/cargo install --git https://github.com/kubos/cargo-kubos
 
 ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"

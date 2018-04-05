@@ -5,8 +5,8 @@ Mission applications include anything that makes decisions or governs autonomy o
 
 Applications can be used to accomplish anything on the system and are only limited by the computational or hardware capabilities of the spacecraft.
 
-Autonomy Applications
----------------------
+Autonomous Applications
+-----------------------
 
 Applications can be used to enable the satellite to act autonomously. Some basic versions of this are:
 
@@ -23,7 +23,9 @@ Applications are also used to accomplish specific mission goals. Some possible e
 - Payload operation 
 - Payload monitoring
 
-Example Mission Applications
-----------------------------
+.. todo::
 
-An example mission application is forthcoming. 
+    Example Mission Applications
+    //----------------------------
+    
+    An example mission application is forthcoming. 

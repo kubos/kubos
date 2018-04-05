@@ -1,15 +1,15 @@
 Upgrading Your Kubos Development Environment
 ============================================
 
-New updates will be announced on the `Kubos
-website <http://docs.kubos.co/>`__. There will be instructions depending
+New updates will be announced to the Kubos community and the new releases will
+be published through GitHub. There will may instructions depending
 on the specific release details of all the steps needed to upgrade for
 the newest release.
 
 Upgrading Kubos CLI
 -------------------
 
-Inside of a vagrant box lives the Kubos CLI. Upon new Kubos releases
+Inside of a Vagrant box lives the Kubos CLI. Upon new Kubos releases
 there may be updates for the Kubos CLI.
 
 First SSH into your kubos-dev box:
@@ -81,13 +81,13 @@ In the event you want to downgrade to an older version of the Kubos
 source modules simply use the ``kubos use <version>`` command with the
 older version number you want to downgrade to.
 
-Upgrading Kubos-dev Vagrant Box
--------------------------------
+Upgrading the Vagrant Box
+-------------------------
 
 Occasionally there will be an update or addition to one of the
-components of the kubos-dev Vagrant environment. When any of these
+components of the Vagrant environment. When any of these
 components is changes we will package and release a new version of the
-kubos-dev box.
+`kubos-dev` box.
 
 If there's a new version of the box available you will see something
 similar to the following when you start the box:
@@ -107,8 +107,7 @@ To manually check if your box is up-to-date you can run:
 
         $ vagrant box outdated
 
-Beware - Updating your box will overwrite the filesystem inside the environment.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. warning::  Updating your box will overwrite the filesystem inside the environment.
 
 Moving projects into synced folders prevents them from being overwritten
 since their actual location is external to the box. For more information
@@ -122,6 +121,7 @@ To update the box run:
         $ vagrant destroy
         $ vagrant up
 
-Unfortunately the ``vagrant box update`` only downloads the changes but
-does not apply them to your local environment. It's required to destroy
-and re-create a new instance of the kubos-dev box.
+.. note:: 
+
+    ``vagrant destroy`` must be used if you want your current box to be
+    updated to use the new version.

@@ -1,5 +1,5 @@
-Python
-======
+Using Python with the Kubos SDK
+===============================
 
 The Kubos SDK Vagrant box comes with a Python interperter and all the modules
 needed to develop a basic hardware service. Services can be tested locally
@@ -12,23 +12,24 @@ Flashing
 
    Python is currently only supported on the BeagleboneBlack and MBM2
 
-There are currently two ways to add Python programs to Kubos Linux:
+There are currently two ways to add Python programs to a system running Kubos Linux:
 
-1. Fork and clone `kubos-linux-build <https://github.com/kubos/kubos-linux-build>`__
-   and add additional Python packages to Buildroot. You can see our current system
-   packages and how they are structured `here <https://github.com/kubos/kubos-linux-build/tree/master/package/python>`__.
-   See the SysAdmin section :ref:`here <sysadmin>` for more information on
-   building Kubos Linux.
+- Add a new Python package to a custom Kubos Linux build
 
-2. Individual Python files can be flashed to an attached hardware target. The
-   instructions are fairly similar to flashing a rust binary:
+    - Fork and clone `kubos-linux-build <https://github.com/kubos/kubos-linux-build>`__
+      and add additional Python packages to the `package/python` directory
+    - You can see our current system packages and how they are structured 
+      `here <https://github.com/kubos/kubos-linux-build/tree/master/package/python>`__.
+    - See the :ref:`SysAdmin docs <sysadmin>` for more information on
+      building Kubos Linux.
 
-   1. Navigate to an existing example Kubos module like ``kubos-linux-example``.
-   2. Run ``kubos linux -a``.
-   3. Run ``kubos -t [target] build`` using the same target you cross-compiled with.
-   4. Run ``kubos flash /absolute/path/to/python/file``. You must use the absolute
+- Add individual Python files on the fly by flashing them to an attached hardware target
+
+    - Navigate to an existing example Kubos module like ``kubos-linux-example``.
+    - Run ``kubos linux -a``.
+    - Run ``kubos -t [target] build`` using the same target you cross-compiled with.
+    - Run ``kubos flash /absolute/path/to/python/file``. You must use the absolute
       path to the Python file you'd like to flash. Relative paths will not work.
-
 
 Running on Target
 -----------------
@@ -36,6 +37,7 @@ Running on Target
 The following steps will allow you to run Python files which have been flashed
 to a Linux target:
 
+0. Make sure the target hardware is attached to your computer via a serial cable.
 1. Run ``minicom kubos`` from inside of the Vagrant box.
 2. Enter the username ``kubos`` and the password ``Kubos123``.
 3. Navigate to the folder ``/home/system/usr/local/bin``.

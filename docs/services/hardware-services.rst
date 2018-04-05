@@ -7,7 +7,7 @@ It is highly recommended that you first read about GraphQL:
 
  - :doc:`GraphQL <graphql>`
 
-Hardware services function mostly as a passthrough to the API, managing control of the resource. Each Hardware Service has only a single worker thread, so the hardware will not be damaged or report an incorrect state due to simultaneous conflicting transactions. 
+Hardware services function mostly as a passthrough to the API, managing control of the resource. Each hardware service has only a single worker thread, so the hardware will not be damaged or report an incorrect state due to simultaneous conflicting transactions. 
 
 
 Queries
@@ -24,7 +24,7 @@ Mutations are hardware commands. Submitting a mutation changes the state of the 
 Service Types
 -------------
 
-There are a few common categories of satellite bus hadware. Each of these has a Hardware Service that is generalized, but specific to the type of hardware:
+There are a few common categories of satellite bus hadware:
 
  - Power Systems (EPS and/or Battery)
  - Attitude Determination and Control Systems (ADCS)
