@@ -13,7 +13,7 @@ See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.5
 
 import i2c,struct,time,json
 
-with open('config.json') as config_file:
+with open('mcu_config.json') as config_file:
     data = json.load(config_file)
 
 I2C_BUSNUM = data['i2c_bus_number']
