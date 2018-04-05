@@ -18,6 +18,7 @@
 #if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
 #include <string.h>
+#include <stdio.h> //Test line
 
 static KI2C k_i2cs[K_NUM_I2CS];
 

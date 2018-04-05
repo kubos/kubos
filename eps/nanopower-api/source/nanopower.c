@@ -130,11 +130,13 @@ KEPSStatus k_eps_configure_system(const eps_system_config_t * config)
 {
     KEPSStatus status = EPS_OK;
     eps_resp_header response;
-    struct __attribute__((packed))
+    typedef struct __attribute__((packed))
     {
         uint8_t cmd;
         eps_system_config_t sys_config;
-    }  packet;
+    }  config_packet;
+
+    config_packet packet = { 0 };
 
     if (config == NULL)
     {
@@ -182,11 +184,13 @@ KEPSStatus k_eps_configure_battery(const eps_battery_config_t * config)
 {
     KEPSStatus status = EPS_OK;
     eps_resp_header response;
-    struct __attribute__((packed))
+    typedef struct __attribute__((packed))
     {
         uint8_t cmd;
         eps_battery_config_t batt_config;
-    }  packet;
+    }  config_packet;
+
+    config_packet packet = { 0 };
 
     if (config == NULL)
     {
@@ -257,7 +261,7 @@ KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay
         int16_t delay;
     }  packet;
 
-    if (channel > 7)
+    if (channel > 7 || value > 1)
     {
         return EPS_ERROR_CONFIG;
     }
@@ -318,8 +322,16 @@ KEPSStatus k_eps_set_input_mode(uint8_t mode)
     uint8_t         packet[] = { SET_PV_AUTO, mode };
     eps_resp_header response;
 
+    /* Modes: hardware default, MPPT, software fixed */
+    if (mode > 2)
+    {
+        return EPS_ERROR_CONFIG;
+    }
+
+
     status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
+
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS input mode: %d\n", status);
@@ -339,6 +351,16 @@ KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t heater, uint8_t mode)
             mode
     };
     eps_resp_header response;
+
+    /*
+     * Currently there's only one command available (set heater on/off)
+     * Heaters: BP4, onboard
+     * Modes: off, on
+     */
+    if (cmd != 0 || heater > 1 || mode > 1)
+    {
+        return EPS_ERROR_CONFIG;
+    }
 
     status = kprv_eps_transfer(packet, sizeof(packet), (uint8_t *) &response,
                                sizeof(response));
@@ -596,17 +618,17 @@ KEPSStatus k_eps_watchdog_kick()
 }
 
 pthread_t handle_watchdog = { 0 };
+uint32_t watchdog_interval = 0;
 
 void * kprv_eps_watchdog_thread(void * args)
 {
     KEPSStatus status;
-    uint32_t interval = *((uint32_t *) args);
 
     while (1)
     {
         k_eps_watchdog_kick();
 
-        sleep(interval);
+        sleep(watchdog_interval);
     }
 
     return NULL;
@@ -625,7 +647,9 @@ KEPSStatus k_eps_watchdog_start(uint32_t interval)
         return EPS_OK;
     }
 
-    if (pthread_create(&handle_watchdog, NULL, kprv_eps_watchdog_thread, (void *) &interval)
+    watchdog_interval = interval;
+
+    if (pthread_create(&handle_watchdog, NULL, kprv_eps_watchdog_thread, NULL)
         != 0)
     {
         perror("Failed to create EPS watchdog thread");
@@ -653,6 +677,7 @@ KEPSStatus k_eps_watchdog_stop()
     }
 
     handle_watchdog = 0;
+    watchdog_interval = 0;
 
     return EPS_OK;
 }
