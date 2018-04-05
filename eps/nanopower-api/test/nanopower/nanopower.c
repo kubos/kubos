@@ -671,9 +671,12 @@ static void test_passthrough_null_rx_zero_rx_len(void ** arg)
 
     /*
      * Valid test case. If rx==null and rx_len==0,
-     * we're only writing to the I2C device
+     * we'll genarate the required response header under the covers,
+     * but we won't return anything back to the user
      */
     expect_value(__wrap_write, cmd, tx[0]);
+    expect_value(__wrap_read, len, sizeof(eps_resp_header));
+    will_return(__wrap_read, &response);
 
     ret = k_eps_passthrough(tx, sizeof(tx), NULL, 0);
     assert_int_equal(ret, EPS_OK);
