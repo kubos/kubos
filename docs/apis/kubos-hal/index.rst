@@ -2,11 +2,11 @@ Kubos HAL Documentation
 =======================
 
 The Kubos HAL module provides a hardware abstraction layer for the common hardware interfaces
-found on cubesats. The interfaces provided span across the different hardware platforms
-support by KubOS.
+found on CubeSats. The interfaces provided span across the different hardware platforms
+supported by KubOS.
 
 For Linux devices, the `Linux sysfs <https://en.wikipedia.org/wiki/Sysfs>`__ interface 
-already provides some abstraction away from the hardware interface. In this instance, the 
+already provides some abstraction away from the hardware interface. The 
 Kubos HAL creates further abstraction, removing the need for the user to learn the intricacies 
 of Linux system calls.
 
@@ -36,15 +36,4 @@ of Linux system calls.
    :name: hal-apis
 
    i2c_api
-
-.. toctree::
-   :caption: Platform HALs
-   :name:  hal-platforms
-
-   Kubos Linux Devices <kubos-hal-linux/index>
-
-.. toctree::
-   :caption: OBC HALs
-   :name: hal-obcs
-
-   ISIS iOBC <kubos-hal-iobc/index>
+   Kubos Linux APIs <kubos-hal-linux/index>

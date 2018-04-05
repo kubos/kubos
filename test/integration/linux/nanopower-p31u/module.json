@@ -8,7 +8,7 @@
     },
     "version":"0.1.0",
     "dependencies":{
-        "nanopower-api":"kubos/nanopower-api"
+        "gomspace-p31u-api":"kubos/gomspace-p31u-api"
     },
     "homepage":"https://<homepage>",
     "description":"Integration test for the NanoPower P31u API."

@@ -4,10 +4,10 @@ version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
-juniper =  "0.9.1"
-juniper_iron = "0.1.1"
-iron = "0.5.1"
-mount = "0.3.0"
-logger = "0.3.0"
+juniper =  "0.9.2"
+juniper_iron = "0.1.2"
+iron = "0.6.0"
+mount = "0.4.0"
+logger = "0.4.0"
 
-kubos-hal-iobc = { path = "../../hal/kubos-hal-iobc" }
+isis-iobc-supervisor = { path = "../../apis/isis-iobc-supervisor" }

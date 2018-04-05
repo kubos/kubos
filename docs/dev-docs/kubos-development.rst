@@ -4,6 +4,10 @@ Developing Kubos Modules
 The top level `Kubos <https://github.com/kubos/kubos>`__ project
 contains all of the Kubos source modules and targets.
 
+.. note::
+
+    This document only covers modules written in C
+
 Getting Started
 ---------------
 
@@ -27,29 +31,31 @@ destination folder will be created if it doesn't already exist.
 
     config.vm.synced_folder "C:\\Users\\Catherine\\git\\kubos", "/home/vagrant/shared"
 
-Reload your vagrant image to pick up the new synced folder.
+Reload your Vagrant image to pick up the new synced folder.
 
 ::
 
     $ vagrant reload
 
-Log in to your vagrant image
+Log in to your Vagrant image
 
 ::
 
     $ vagrant ssh       
 
-**Note:** It is possible to do development on the kubos repo from within
-the vagrant image, but it is our recommended workflow to have the repo
-on your host machine and pass it through. This way if the image becomes
-corrupted, or if you want to pass the modified code through to another
-VM, it's still available.
+.. note::
+
+    It is possible to do development on the kubos repo from within
+    the Vagrant image, but it is our recommended workflow to have the repo
+    on your host machine and pass it through. This way if the image becomes
+    corrupted, or if you want to pass the modified code through to another
+    VM, it's still available.
 
 Kubos Development Environment
 -----------------------------
 
-The kubos repository is a collection of
-`Yotta <http://yottadocs.mbed.com/>`__ modules and targets which are
+The `kubos repository <https://github.com/kubos/kubos>`__ is a collection of
+`yotta <http://yottadocs.mbed.com/>`__ modules and targets which are
 loaded inside the Kubos Vagrant box. They can also be built locally
 using the ``kubos link`` and ``kubos link-target`` commands.
 
@@ -62,9 +68,11 @@ Linking in a Local Module
 Once you've made changes to your local kubos repo, you'll want to link
 them into your project.
 
-**Note:** If you create a new high-level component, like ``radio/radio-api`` or
-``hal/kubos-hal``, you'll need to create a module.json file so that the module can be
-linked in successfully.
+.. note::
+
+    If you create a new high-level component, like ``radio/radio-api`` or
+    ``hal/kubos-hal``, you'll need to create a module.json file so that the module can be
+    linked in successfully.
 
 Let's say that you've updated the ``kubos-hal-linux`` module to add
 debugging lines to see how the flow of communication works between
@@ -82,9 +90,11 @@ After running the ``kubos link`` command from the module directory and
 ``kubos link <module name>`` from the project directory, ``kubos build``
 will pick up the module and pull it into the build process.
 
-**Note:** The module name is taken from the "name" definition in the
-module.json file, not from the folder name. For example, to link in the
-CSP module, you would do ``kubos link csp``, not ``kubos link libcsp``.
+.. note::
+
+    The module name is taken from the "name" definition in the
+    module.json file, not from the folder name. For example, to link in the
+    CSP module, you would do ``kubos link csp``, not ``kubos link libcsp``.
 
 Linking in a Local Target
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,8 +110,9 @@ process. For example:
     $ kubos link-target stm32f407-disco-gcc
     $ kubos build
 
-**Note:** The target name is taken from the "name" definition in the
-target.json file, not from the folder name.
+.. note::
+    The target name is taken from the "name" definition in the
+    target.json file, not from the folder name.
 
 Unlinking Modules and Targets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -130,13 +141,12 @@ file path. Any modules which are using the native Kubos code will have a
 
     vagrant@vagrant:~/my-project$ kubos ls
     my-project 0.1.0
-      ┗━ imtq-api 1.0.0 yotta_modules/imtq-api -> /home/vagrant/iobc/imtq-api
-      ┣━ adcs-api 0.1.0 yotta_modules/adcs-api -> /home/vagrant/.kubos/kubos/adcs/adcs-api
+      ┗━ isis-imtq-api 1.0.0 yotta_modules/isis-imtq-api -> /home/vagrant/iobc/isis-imtq-api
       ┣━ kubos-hal 0.1.2 yotta_modules/kubos-hal -> /home/vagrant/.kubos/kubos/hal/kubos-hal
       ┃ ┣━ csp 1.5.1 yotta_modules/csp -> /home/vagrant/.kubos/kubos/libcsp
       ┃ ┃ ┗━ tinycbor 0.5.0 yotta_modules/tinycbor -> /home/vagrant/.kubos/kubos/tinycbor
       ┃ ┗━ kubos-hal-linux 0.1.0 yotta_modules/kubos-hal-linux -> /home/vagrant/.kubos/kubos/hal/kubos-hal-linux
-      ┃   ┗━ kubos-hal-iobc 0.1.0 yotta_modules/kubos-hal-iobc -> /home/vagrant/.kubos/kubos/hal/kubos-hal-iobc
+      ┃   ┗━ isis-iobc-supervisor 0.1.0 yotta_modules/isis-iobc-supervisor -> /home/vagrant/.kubos/kubos/apis/isis-iobc-supervisor
       ┗━ ccan-json 1.0.0 yotta_modules/ccan-json -> /home/vagrant/.kubos/kubos/ccan/json
 
 

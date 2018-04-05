@@ -15,6 +15,13 @@ class KubosLinker(object):
     def __init__(self):
         self.kb = KubosBuild()
 
+    def get_module_deps(self, app_dir):
+        module_json = json.load(open("%s/module.json" % app_dir))
+        if 'dependencies' in module_json:
+            return module_json['dependencies']
+        else:
+            return []
+
     def link_sys(self, link_cmd):
         for module in self.kb.modules(include_bin=False):
             print '[module %s@%s]' % (module.yotta_name(), module.path)
@@ -26,8 +33,10 @@ class KubosLinker(object):
 
     def link_app(self, app_dir, link_cmd):
         print '[app %s]' % app_dir
+        app_modules = self.get_module_deps(app_dir)
         for module in self.kb.modules(include_bin=False):
-            utils.cmd('kubos', link_cmd, module.yotta_name(), cwd=app_dir)
+            if module.yotta_name() in app_modules:
+                utils.cmd('kubos', link_cmd, module.yotta_name(), cwd=app_dir)
 
         for target in self.kb.targets():
             utils.cmd('kubos', link_cmd + '-target', target.yotta_name(),

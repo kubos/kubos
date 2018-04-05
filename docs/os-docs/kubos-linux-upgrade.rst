@@ -4,7 +4,7 @@ Upgrading Kubos Linux
 Overview
 --------
 
-Kubos Linux upgrades are distributed as kpack-{YYYY.MM.DD}.itb files.
+Kubos Linux upgrades are distributed as `kpack-{YYYY.MM.DD}.itb` files.
 ITB stands for 'Image Tree Blob' and allows Kubos to utilize the
 existing DFU utility currently available in U-Boot.
 
@@ -28,15 +28,15 @@ The overall flow looks like this:
 
    Kubos Linux Upgrade
 
-**Note**:
+.. note::
 
-User files should not be impacted by upgrade installation as long as
-they remain under the /home directory. This directory maps to the
-user space partition.
-
-However, some future releases may cause the Kubos libraries to undergo
-significant changes. In this case, backwards compatilibity is not
-guaranteed and user applications may need to be rebuilt.
+    User files should not be impacted by upgrade installation as long as
+    they remain under the /home directory. This directory maps to the
+    user space partition.
+    
+    However, some future releases may cause the Kubos libraries to undergo
+    significant changes. In this case, backwards compatilibity is not
+    guaranteed and user applications may need to be rebuilt.
 
 .. _upgrade-installation:
 
@@ -52,16 +52,20 @@ not, refer to the :ref:`install-sd` instructions.
 The host computer should be connected to the target board, which should
 be on and running Kubos Linux.
 
-A Kubos SDK VM should be installed on your host computer and at least
+A Kubos SDK Vagrant box should be installed on your host computer and at least
 one shared folder should be set up. Installation instructions can be
 found :doc:`here <../installation-docs/sdk-installing>`.
 
 Installation
 ~~~~~~~~~~~~
 
-Acquire an upgrade package. For now, this will likely be sent via email
-from a Kubos engineer. Once an official distribution process has been
-created this document will be upgraded with the new procedure.
+Acquire an upgrade package from https://github.com/kubos/kubos-linux-build/releases.
+
+.. note::
+
+    Not all releases can be installed via upgrade. Some releases contain
+    changes which massively alter the system, causing a full install to be
+    required instead.
 
 Load the package into a shared folder accessible by your Kubos SDK VM.
 
@@ -88,7 +92,7 @@ in order to flash files to the board.
 
     $ kubos build
 
-Use the kubos flash command to load the package onto your board. Note:
+Use the ``kubos flash`` command to load the package onto your board. Note:
 You might need to update your config.json file with the appropriate
 login information to access your board. See the section :ref:`updating-credentials`
 for more information.
@@ -140,7 +144,7 @@ similar to this:
 Upgrade Rollback
 ----------------
 
-If for some reason you need to rollback to a previous version of KubOS
+If for some reason you need to rollback to a previous version of Kubos
 Linux, you don't need to reflash the board with the correct upgrade
 package. Previous packages are not deleted once they have been loaded.
 As a result, you can simply specify which package you would like to boot
@@ -169,14 +173,14 @@ Build the new OS. Refer to the :ref:`build-os` instructions.
 Run the Packaging Script
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-From the 'kubos-linux-build/tools' folder, run the kubos-package.sh
-script. This will create the rootfs.img and kubos-kernel.itb files and
-then use the kpack.its file to bundle them into an \*.itb file. This is
+From the 'kubos-linux-build/tools' folder, run the ``kubos-package.sh``
+script. This will create the `rootfs.img` and `kubos-kernel.itb` files and
+then use the `kpack.its` file to bundle them into an `\*.itb` file. This is
 the file that will be distributed to customers when an upgrade is
 needed.
 
 The automatically generated naming convention for the package is
-kpack-\ *yyyy*-*mm*-*dd*.itb
+kpack-*yyyy*-*mm*-*dd*.itb
 
 Custom Packages
 ^^^^^^^^^^^^^^^
@@ -189,12 +193,12 @@ options available through the script:
    directory.
 -  -s : Sets the size of the rootfs.img file, specified in KB. The
    default is 13000 (13MB).
--  -i : Sets the name and location of the input \*.its file. Use if you
+-  -i : Sets the name and location of the input `\*.its` file. Use if you
    want to create a custom package. The default is *kpack.its*.
 -  -o {folder} : Specifies the name of the buildroot output folder. The
    default is 'output'
 -  -v : Sets the version information for the package. The output file
-   will be kpack-{version}.itb.
+   will be `kpack-{version}.itb`.
 -  -b {branch} : Specifies the branch name of U-Boot that has been
    built. The default is 'master'. This option should not need to be
    used outside of development. U-Boot contains files which are used in
@@ -210,5 +214,5 @@ Distribute the Package
 ~~~~~~~~~~~~~~~~~~~~~~
 
 There isn't currently a central storage location or procedure for
-upgrade packages, since no official packages have been created yet. This
-section should be upgraded once something has been implemented.
+non-release upgrade packages. 
+This section should be upgraded once something has been implemented.

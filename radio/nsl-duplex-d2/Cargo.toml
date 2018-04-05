@@ -1,9 +1,0 @@
-[package]
-name = "nsl-duplex-d2"
-version = "0.1.0"
-authors = ["Ryan Plauche <ryan@kubos.co>"]
-
-[dependencies]
-radio-api = { path = "../rust-radio-api" }
-nom = "4.0.0-beta1"
-serial = "0.4"

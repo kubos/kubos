@@ -2,7 +2,7 @@ Kubos CLI Command Reference
 ===========================
 
 The ``kubos`` command is always run with a subcommand in order to do
-something, ``kubos`` with no subcommand will only display help
+something; ``kubos`` with no subcommand will only display help
 information.
 
 Command Overview
@@ -17,11 +17,7 @@ Command Overview
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | `config <#kubos-config>`__           | Display the target configuration info.                                                                                       |
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| `debug <#kubos-debug>`__             | Attach a debugger to the current target.  Requires target support.                                                           |
-+--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| `flash <#kubos-flash>`__             | Launch the compiled program (available for executable modules only). Requires target support for cross-compiling targets.    |
-+--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| `flash <#kubos-flash-linux>`__       | (Kubos Linux Targets) Load files onto target.                                                                                |
+| `flash <#kubos-flash>`__             | Load files onto target.                                                                                                      |
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | `init <#kubos-init>`__               | Create a new module.                                                                                                         |
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -39,7 +35,7 @@ Command Overview
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | `version <#kubos-version>`__         | Display the current active version of the CLI and Kubos source repo.                                                         |
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
-| `versions <#kubos-versions>`__       | Display the available versions of the KubOS source.                                                                          |
+| `versions <#kubos-versions>`__       | Display the available versions of the Kubos source.                                                                          |
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
 | `update <#kubos-update>`__           | Download newer versions of the Kubos Modules                                                                                 |
 +--------------------------------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -64,11 +60,11 @@ Build the current module and its dependencies.
 
 Kubos uses CMake to control the build, the basic process is:
 
--  kubos generates CMakeLists.txt describing the libraries and
+-  Generate CMakeLists.txt describing the libraries and
    executables to build
--  kubos instructs CMake to generate the make files / ninja files / IDE
+-  Instruct CMake to generate the make files / ninja files / IDE
    project file (depending on --cmake-generator)
--  kubos instructs CMake to execute the build. The compiler used depends
+-  Instruct CMake to execute the build. The compiler used depends
    on the CMake Toolchain file provided by the active kubos target.
 
 Options
@@ -82,9 +78,9 @@ Options
    but generally this means no optimization, and NDEBUG is not defined.
 
 -  ``--release-build``, ``-r``: build a release (optimized) build.
-   deprecated The effects depend on the target (this selects CMake build
-   type RelWithDebInfo). This option is deprecated because it is now the
-   default, unless --debug-build is specified.
+   The effects depend on the target (this selects CMake build
+   type RelWithDebInfo). *This option is deprecated because it is now the
+   default, unless --debug-build is specified.*
 
 -  ``--cmake-generator``, ``-G``: specify the CMake Generator. CMake can
    generate project files for various editors and IDEs.
@@ -116,7 +112,7 @@ abort and not delete or overwrite any files.
 Options
 ~~~~~~~
 
--  ``--linux``, ``-l`` Create the new project as a linux application for
+-  ``--linux``, ``-l`` Create the new project as a Linux application for
    Kubos Linux
 
 kubos clean
@@ -178,21 +174,24 @@ Examples
         $ kubos test -n my-test
         $ kubos test --config="path/to/test-config.json"
 
-kubos debug
------------
+.. todo::
 
-Synopsis
-~~~~~~~~
 
-::
-
-        $ kubos debug
-
-Description
-~~~~~~~~~~~
-
-If the target description supports it, launch a debugger attached to the
-specified executable.
+    kubos debug
+    //-----------
+    
+    Synopsis
+    //~~~~~~~~
+    
+    ::
+    
+            $ kubos debug
+    
+    Description
+    //~~~~~~~~~~~
+    
+    If the target description supports it, launch a debugger attached to the
+    specified executable.
 
 kubos target
 ------------
@@ -214,7 +213,7 @@ Display or set the current target.
 Targets define the options and commands that ``kubos`` uses to compile
 modules and executables.
 
-A target must define a CMake Toolchain file describing all of the rules
+A target must define a CMake toolchain file describing all of the rules
 that ``kubos`` uses to build software, it may also define commands to
 launch a debugger (used by ``kubos debug``).
 
@@ -228,29 +227,10 @@ Examples
 
 ::
 
-        $ kubos target stm32f407-disco-gcc
+        $ kubos target kubos-linux-beaglebone-gcc
 
 kubos flash
 -----------
-
-Synonyms: ``kubos start``
-
-Synopsis
-~~~~~~~~
-
-::
-
-        $ kubos flash
-
-Description
-~~~~~~~~~~~
-
-Flash the build of the current target to the target board.
-
-Note: This requires target support.
-
-kubos flash (Kubos Linux targets)
----------------------------------
 
 Synonyms: ``kubos start``
 
@@ -283,8 +263,6 @@ Options
 ~~~~~~~
 
 -  ``file`` File to flash.
-
-Note: This requires target support.
 
 kubos update
 ------------
@@ -443,7 +421,7 @@ Directories
 ~~~~~~~~~~~
 
 When you run ``kubos link``, links are created in a system-wide
-directory under ``yotta_PREFIX``, and the links in that directory are
+directory under ``yotta_modules``, and the links in that directory are
 then picked up by subsequent ``kubos link <modulename>`` commands.
 
 kubos link-target
@@ -575,9 +553,11 @@ List the licenses of all of the modules that the current module depends
 on. If ``--all`` is specified, then each unique license is listed for
 each module it occurs in, instead of just once.
 
-**NOTE:** while kubos can list the licenses that modules have declared
-in their ``module.json`` files, it can make no warranties about whether
-modules contain code under other licenses that have not been declared.
+.. note::
+
+    While ``kubos licenses`` can list the licenses that modules have declared
+    in their ``module.json`` files, it can make no warranties about whether
+    modules contain code under other licenses that have not been declared.
 
 kubos config
 ------------
@@ -595,7 +575,7 @@ Description
 Display the merged config data for the current target (and application,
 if the current module defines an executable application).
 
-The config data is produced by merging the json config data defined by
+The config data is produced by merging the JSON config data defined by
 the application, the current target, and any targets the current target
 inherits from recursively. Values defined by the application will
 override those defined at the same path by targets, and values defined

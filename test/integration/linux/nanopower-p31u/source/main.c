@@ -17,7 +17,7 @@
  * EPS Integration Test for the ISIS iMTQ
  */
 
-#include <nanopower-api/nanopower-api.h>
+#include <gomspace-p31u-api/gomspace-p31u-api.h>
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>

@@ -1,0 +1,8 @@
+# Base IP address for demo processes
+APP_IP : "0.0.0.0"
+
+# Process Ports
+RADIO_PORT : 5000
+TELEM_PORT : 5001
+PAYLOAD_PORT : 5002
+MAJORTOM_PORT : 5003

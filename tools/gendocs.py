@@ -12,13 +12,15 @@ echo "OUTPUT_DIRECTORY={2}";
 echo "XML_OUTPUT=.";) | doxygen -"""
 
 DOCS_DIRS = [
-    "adcs/adcs-api",
-    "eps/nanopower-api",
-    "libcsp",
+    "apis/gomspace-p31u-api",
+    "apis/isis-ants-api",
+    "apis/isis-imtq-api",
+    "apis/isis-iobc-supervisor",
+    "apis/isis-trxvu-api",
     "hal/kubos-hal",
-    "hal/kubos-hal-iobc",
     "hal/kubos-hal-linux",
-    "radio/radio-api"
+    "libcsp",
+
 ]
 
 def gendocs_xml(dir, doxyfile, version, doc_dir):

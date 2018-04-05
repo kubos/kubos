@@ -14,18 +14,18 @@
 // limitations under the License.
 //
 
-extern crate kubos_hal_iobc;
+extern crate isis_iobc_supervisor;
 
 // Why create a new SupervisorVersion struct which just holds a SupervisorVersion?
 // Because of E0117 (https://doc.rust-lang.org/error-index.html#E0117)
 // Basically we can't implement the (external) GraphQL traits on
-// kubos_hal_iobc::SupervisorVersion because it is an external type.
+// isis_iobc_supervisor::SupervisorVersion because it is an external type.
 // Same goes for SupervisorEnableStatus and SupervisorHousekeeping.
-pub struct SupervisorVersion(pub kubos_hal_iobc::SupervisorVersion);
+pub struct SupervisorVersion(pub isis_iobc_supervisor::SupervisorVersion);
 
-pub struct SupervisorEnableStatus(pub kubos_hal_iobc::SupervisorEnableStatus);
+pub struct SupervisorEnableStatus(pub isis_iobc_supervisor::SupervisorEnableStatus);
 
-pub struct SupervisorHousekeeping(pub kubos_hal_iobc::SupervisorHousekeeping);
+pub struct SupervisorHousekeeping(pub isis_iobc_supervisor::SupervisorHousekeeping);
 
 pub struct Supervisor;
 
@@ -35,12 +35,14 @@ impl Supervisor {
     }
 
     pub fn version(&self) -> Result<SupervisorVersion, String> {
-        Ok(SupervisorVersion(kubos_hal_iobc::supervisor_version()?))
+        Ok(SupervisorVersion(
+            isis_iobc_supervisor::supervisor_version()?,
+        ))
     }
 
     pub fn housekeeping(&self) -> Result<SupervisorHousekeeping, String> {
         Ok(SupervisorHousekeeping(
-            kubos_hal_iobc::supervisor_housekeeping()?,
+            isis_iobc_supervisor::supervisor_housekeeping()?,
         ))
     }
 }
