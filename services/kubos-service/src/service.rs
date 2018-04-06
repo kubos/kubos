@@ -20,7 +20,6 @@ use std::cell::RefCell;
 use serde_json;
 use config::Config;
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
-use toml::Value;
 
 /// Context struct used by a service to provide:
 /// - Juniper context
@@ -90,17 +89,17 @@ impl<T> Context<T> {
 ///
 /// Creating and starting a service:
 /// ```
-/// use kubos_service::KubosService;
+/// use kubos_service::Service;
 ///
 /// let sub = model::Subsystem::new();
-/// KubosService::new(
+/// Service::new(
 ///     "example-service",
 ///     sub,
 ///     schema::QueryRoot,
 ///     schema::MutationRoot,
 /// ).start();
 /// ```
-pub struct KubosService<'a, Query, Mutation, S>
+pub struct Service<'a, Query, Mutation, S>
 where
     Query: GraphQLType<Context = Context<S>> + Send + Sync + 'static,
     Mutation: GraphQLType<Context = Context<S>> + Send + Sync + 'static,
@@ -110,7 +109,7 @@ where
     context: Context<S>,
 }
 
-impl<'a, Query, Mutation, S> KubosService<'a, Query, Mutation, S>
+impl<'a, Query, Mutation, S> Service<'a, Query, Mutation, S>
 where
     Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
     Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
@@ -123,9 +122,9 @@ where
     /// `subsystem` - An instance of the subsystem struct. This one instance will be used by all queries.
     /// `query` - The root query struct holding all other GraphQL queries.
     /// `mutation` - The root mutation struct holding all other GraphQL mutations.
-    pub fn new(name: &str, subsystem: S, query: Query, mutation: Mutation) -> Self {
-        KubosService {
-            config: Config::new(&name),
+    pub fn new(config: Config, subsystem: S, query: Query, mutation: Mutation) -> Self {
+        Service {
+            config: config,
             root_node: RootNode::new(query, mutation),
             context: Context {
                 subsystem: subsystem,
@@ -156,14 +155,6 @@ where
 
             to_send = Some(socket.recv_from(&mut buf).unwrap());
         }
-    }
-
-    /// Returns the service's configuration information
-    /// in the `serde_json::Value` format.
-    /// This will contain the ip/port if provided, along with any other
-    /// configuration information found in the config file.
-    pub fn config(&self) -> Value {
-        return self.config.raw.clone();
     }
 
     fn process(&self, query: String) -> String {

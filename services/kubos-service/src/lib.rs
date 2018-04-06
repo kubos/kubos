@@ -31,5 +31,5 @@ extern crate toml;
 mod config;
 mod service;
 
-pub use service::KubosService;
-pub use service::Context;
+pub use config::Config;
+pub use service::{Context, Service};

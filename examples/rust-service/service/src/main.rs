@@ -21,14 +21,15 @@ extern crate kubos_service;
 mod model;
 mod schema;
 
-use kubos_service::KubosService;
+use kubos_service::{Config, Service};
+use model::Subsystem;
+use schema::{MutationRoot, QueryRoot};
 
 fn main() {
-    let sub = model::Subsystem::new();
-    KubosService::new(
-        "example-service",
-        sub,
-        schema::QueryRoot,
-        schema::MutationRoot,
+    Service::new(
+        Config::new("example-service"),
+        Subsystem::new(),
+        QueryRoot,
+        MutationRoot,
     ).start();
 }

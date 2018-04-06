@@ -41,10 +41,11 @@ impl Default for Address {
     }
 }
 
+/// Service configuration structure
 #[derive(Debug)]
 pub struct Config {
-    pub addr: Address,
-    pub raw: Value,
+    addr: Address,
+    raw: Value,
 }
 
 impl Default for Config {
@@ -57,12 +58,24 @@ impl Default for Config {
 }
 
 impl Config {
+    /// Creates and parses configuration data. Service name is used
+    /// as a key in the config file.
     pub fn new(name: &str) -> Self {
         parse_config(name, get_config_path()).unwrap_or(Config::default())
     }
 
+    /// Returns the configured hosturl string in the following
+    /// format (using IPv4 addresses) - 0.0.0.0:0000
     pub fn hosturl(&self) -> String {
         format!("{}:{}", self.addr.ip, self.addr.port)
+    }
+
+    /// Returns the service's configuration information
+    /// in the `toml::Value` format.
+    /// This will contain the ip/port if provided, along with any other
+    /// configuration information found in the config file.
+    pub fn raw(&self) -> toml::Value {
+        self.raw.clone()
     }
 }
 
