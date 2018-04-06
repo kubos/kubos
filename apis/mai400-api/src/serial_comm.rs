@@ -15,7 +15,7 @@
  */
 
 use mai400::MAIResult;
-use std::io;
+//use std::io;
 use std::time::Duration;
 use serial;
 use std::io::prelude::*;
@@ -25,7 +25,7 @@ use serial::prelude::*;
 /// A connection is like a stream, but allowed parsed reads with properly buffered
 /// input data.
 pub struct Connection {
-    stream: Box<Stream>,
+    pub stream: Box<Stream>,
     //buffer: RefCell<Vec<u8>>,
 }
 
@@ -57,6 +57,7 @@ impl Connection {
 
     /// Write out raw bytes to the underlying stream.
     pub fn write(&self, data: &[u8]) -> MAIResult<()> {
+        println!("Writing: {:?}", data);
         self.stream.write(data)
     }
 
@@ -104,9 +105,9 @@ impl Stream for SerialStream {
     fn read(&self) -> MAIResult<Vec<u8>> {
         //TODO: This will have to change to listening
         let mut ret_msg: Vec<u8> = Vec::new();
-        let mut port = serial::open(bus)?;
+        let mut port = serial::open(self.bus.as_str())?;
 
-        port.configure(&settings)?;
+        port.configure(&self.settings)?;
 
         port.set_timeout(Duration::from_millis(100))?;
 

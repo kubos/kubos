@@ -7,10 +7,11 @@ repository = "https://github.com/kubos/kubos"
 
 [dependencies]
 bincode = "1.0.0"
+byteorder = "1.2"
 crc16 = "0.3.4"
+double = "0.2.2"
 failure = { git = "https://github.com/rust-lang-nursery/failure" }
 nom = "4.0.0-beta1"
-byteorder = "1.2"
 serial = "0.4"
 
 

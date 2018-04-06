@@ -19,6 +19,10 @@
 extern crate byteorder;
 //extern crate chrono;
 extern crate crc16;
+
+#[cfg(test)]
+#[macro_use]
+extern crate double;
 //extern crate radio_api;
 extern crate serial;
 #[macro_use]
@@ -30,6 +34,8 @@ extern crate failure;
 mod mai400;
 mod messages;
 mod serial_comm;
+#[cfg(test)]
+mod tests;
 
 pub use mai400::*;
 pub use messages::*;

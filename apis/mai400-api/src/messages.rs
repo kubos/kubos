@@ -15,7 +15,6 @@
  */
 
 use byteorder::{LittleEndian, WriteBytesExt};
-use mai400::MAIResult;
 
 pub const SYNC: u16 = 0xEB90;
 pub const HDR_SZ: u8 = 6;
@@ -44,6 +43,8 @@ impl MessageHeader {
     fn serialize(&self) -> Vec<u8> {
         let mut vec = vec![];
 
+        //TODO: Verify that we want to make the sync variable
+        //little endian...
         vec.write_u16::<LittleEndian>(self.sync).unwrap();
         vec.write_u16::<LittleEndian>(self.data_len).unwrap();
         vec.push(self.msg_id);
@@ -60,12 +61,6 @@ pub struct GetInfoMessage {
 }
 
 pub trait Message {
-    fn calc_crc(&self) -> u16 {
-        unimplemented!()
-    }
-    fn verify_crc(&self) -> MAIResult<()> {
-        unimplemented!()
-    }
     fn serialize(&self) -> Vec<u8>;
 }
 

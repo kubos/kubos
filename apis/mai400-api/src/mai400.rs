@@ -20,28 +20,20 @@ use byteorder::{LittleEndian, WriteBytesExt};
 use crc16::*;
 use failure::Error;
 use messages::*;
+use serial;
 use serial_comm::Connection;
+use std::io;
 
 //TODO: Create container trait? Or just for the serial connection part...
 
 pub struct MAI400 {
-    conn: Connection,
+    pub conn: Connection,
 }
 
 impl MAI400 {
     /// Constructor for MAI400 structure
     pub fn new(conn: Connection) -> MAI400 {
         MAI400 { conn }
-    }
-
-    pub fn init_tx() {}
-
-    pub fn init_rx() {}
-
-    pub fn terminate() {
-
-        //close(tx);
-        //close(rx);
     }
 
     pub fn reset() {
@@ -52,18 +44,11 @@ impl MAI400 {
     pub fn set_mode() {}
 
     pub fn get_info(&self) -> MAIResult<()> {
-        //Create packet
-        let mut packet = GetInfoMessage::default().serialize();
-
-        let crc = State::<AUG_CCITT>::calculate(&packet[1..]);
-        packet.write_u16::<LittleEndian>(crc).unwrap();
-
-        //send packet
-        self.conn.write(packet.as_slice())?;
-        Ok(())
+        self.send_message(GetInfoMessage::default().serialize())
     }
     //Option 2
     //Don't actually merge this. Need to figure out which way is preferable
+    /*
     pub fn get_info_alt(&self) -> MAIResult<()> {
         //Create packet
         let packet = GetInfoMessage::default();
@@ -77,20 +62,74 @@ impl MAI400 {
         self.conn.write(&slice)?;
         Ok(())
     }
+    */
 
-    fn send_message() {}
+    fn send_message(&self, mut msg: Vec<u8>) -> MAIResult<()> {
+        let crc = State::<AUG_CCITT>::calculate(&msg[1..]);
+        msg.write_u16::<LittleEndian>(crc).unwrap();
+
+        //send packet
+        self.conn.write(msg.as_slice())?;
+        Ok(())
+    }
 }
 
-/// Common Error for MAI Actions
+/* 
+TODO: Deal with the fact that you can't clone io::error,
+but double requires the ability to clone errors 
+
 #[derive(Fail, Display, Debug)]
 pub enum MAIError {
-    #[display(fmt = "Parse error: {}", message)]
+    #[display(fmt = "Generic Error")]
+    GenericError,
+    #[display(fmt = "Serial Error: {}", cause)]
     /// There was a problem parsing the result data
-    ParseError {
-        /// The message from original error
-        message: String,
+    SerialError { #[fail(cause)] cause: serial::Error },
+    #[display(fmt = "IO Error: {}", cause)]
+    /// There was a problem parsing the result data
+    IoError {
+        #[fail(cause)]
+        cause: io::Error,
     },
 }
 
+impl From<io::Error> for MAIError {
+    fn from(error: io::Error) -> Self {
+        MAIError::IoError { cause: error }
+    }
+}
+
+impl From<serial::Error> for MAIError {
+    fn from(error: serial::Error) -> Self {
+        MAIError::SerialError { cause: error }
+    }
+}
+*/
+
+/// Common Error for MAI Actions
+#[derive(Fail, Display, Debug, Clone, PartialEq)]
+pub enum MAIError {
+    #[display(fmt = "Generic Error")]
+    GenericError,
+    #[display(fmt = "Serial Error: {}", cause)]
+    /// There was a problem parsing the result data
+    SerialError { cause: String },
+    #[display(fmt = "IO Error: {}", cause)]
+    /// There was a problem parsing the result data
+    IoError { cause: String },
+}
+
+impl From<io::Error> for MAIError {
+    fn from(error: io::Error) -> Self {
+        MAIError::IoError { cause: format!("{}", error) }
+    }
+}
+
+impl From<serial::Error> for MAIError {
+    fn from(error: serial::Error) -> Self {
+        MAIError::SerialError { cause: format!("{}", error) }
+    }
+}
+
 /// Custom error type for MAI400 operations.
-pub type MAIResult<T> = Result<T, Error>;
+pub type MAIResult<T> = Result<T, MAIError>;
