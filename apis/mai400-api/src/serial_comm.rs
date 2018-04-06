@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use byteorder::{LittleEndian, ReadBytesExt};
 use mai400::MAIResult;
 //use std::io;
 use std::time::Duration;
@@ -21,6 +22,8 @@ use serial;
 use std::io::prelude::*;
 use serial::prelude::*;
 //use std::cell::RefCell;
+use messages::*;
+use std::io::Cursor;
 
 /// A connection is like a stream, but allowed parsed reads with properly buffered
 /// input data.
@@ -61,10 +64,9 @@ impl Connection {
         self.stream.write(data)
     }
 
-    /// Read the next object using provided parser.
-    //TODO: Make listener function rather than poller
-    pub fn read<T>(&self) -> MAIResult<()> {
-        Ok(())
+    /// Wait for and then return the next message received on the bus
+    pub fn read(&self) -> MAIResult<Vec<u8>> {
+        self.stream.read()
     }
 }
 
@@ -103,32 +105,58 @@ impl Stream for SerialStream {
     }
 
     fn read(&self) -> MAIResult<Vec<u8>> {
-        //TODO: This will have to change to listening
-        let mut ret_msg: Vec<u8> = Vec::new();
+
+        //TODO: I don't like closing this after every read. how likely is it that this will cause us to miss messages?
         let mut port = serial::open(self.bus.as_str())?;
 
         port.configure(&self.settings)?;
 
-        port.set_timeout(Duration::from_millis(100))?;
-
-        let mut tries = 0;
+        let mut ret_msg: Vec<u8>;
 
         loop {
-            let mut read_buffer: Vec<u8> = vec![0; 1];
+            ret_msg = Vec::new();
 
-            match port.read(&mut read_buffer[..]) {
-                Ok(c) => {
-                    if c > 0 {
-                        ret_msg.extend(read_buffer);
-                    } else {
-                        tries = tries + 1;
-                    }
-                }
-                Err(_) => break,
-            };
-            if tries > 5 {
-                break;
+            // We just want to sit and wait until a message starts to come in
+            port.set_timeout(Duration::new(0, 0))?;
+
+            let mut sync: [u8; 2] = [0; 2];
+            port.read(&mut sync)?;
+
+            let mut wrapper = Cursor::new(sync.to_vec());
+            if wrapper.read_u16::<LittleEndian>()? == SYNC {
+                ret_msg.append(&mut sync.to_vec());
+            } else {
+                // Odds are that we magically ended up in the middle of a message,
+                // so just loop so we can get all of the bytes out of the buffer
+                continue;
             }
+
+            port.set_timeout(Duration::new(0, 1))?;
+
+            // We got the SYNC bytes, so we know we're at the start of a message.
+            // Get the rest of the header
+            let mut hdr: [u8; HDR_SZ - 2] = [0; HDR_SZ - 2];
+            if port.read(&mut hdr)? == 0 {
+                // We timed out. Throw out what we've got and start over
+                continue;
+            }
+
+            // Pull out the data_len value so we know how many more bytes we need to read
+            // (Add 2 to account for the CRC bytes)
+            let mut wrapper = Cursor::new(hdr[0..2].to_vec());
+            let len = wrapper.read_u16::<LittleEndian>()? + 2;
+
+            // Add the rest of the header to our return message
+            ret_msg.append(&mut hdr.to_vec());
+
+            let mut data: Vec<u8> = vec![0; len as usize];
+            if port.read(&mut data[..])? == 0 {
+                // We timed out. Throw out what we've got and start over
+                continue;
+            }
+
+            ret_msg.append(&mut data);
+            break;
         }
 
         Ok(ret_msg)

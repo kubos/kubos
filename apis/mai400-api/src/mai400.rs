@@ -41,10 +41,37 @@ impl MAI400 {
         //CONFIRM_RESET
     }
 
-    pub fn set_mode() {}
+    //SetAcsMode
+    pub fn set_mode(
+        &self,
+        mode: u8,
+        sec_vec: i32,
+        pri_axis: i32,
+        sec_axis: i32,
+        qbi_cmd4: i32,
+    ) -> MAIResult<()> {
+        let request = SetAcsMode {
+            mode,
+            sec_vec,
+            pri_axis,
+            sec_axis,
+            qbi_cmd4,
+            ..Default::default()
+        };
+
+        self.send_message(request.serialize())
+    }
+
+    pub fn set_gps_time(&self) -> MAIResult<()> {
+        unimplemented!()
+    }
+
+    pub fn set_rv(&self) -> MAIResult<()> {
+        unimplemented!()
+    }
 
     pub fn get_info(&self) -> MAIResult<()> {
-        self.send_message(GetInfoMessage::default().serialize())
+        self.send_message(GetInfo::default().serialize())
     }
     //Option 2
     //Don't actually merge this. Need to figure out which way is preferable
@@ -65,12 +92,22 @@ impl MAI400 {
     */
 
     fn send_message(&self, mut msg: Vec<u8>) -> MAIResult<()> {
-        let crc = State::<AUG_CCITT>::calculate(&msg[1..]);
+        let crc = State::<AUG_CCITT>::calculate(&msg[2..]);
         msg.write_u16::<LittleEndian>(crc).unwrap();
 
         //send packet
         self.conn.write(msg.as_slice())?;
         Ok(())
+    }
+
+    fn get_message(&self) -> MAIResult<Response> {
+        let msg = self.conn.read()?;
+
+        // Verify CRC
+
+        // Identify message type and convert to usable structure
+        let info = ConfigInfo::new(&msg[..]);
+        Ok(Response::Config(info))
     }
 }
 

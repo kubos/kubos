@@ -27,8 +27,8 @@ extern crate double;
 extern crate serial;
 #[macro_use]
 extern crate failure;
-//#[macro_use]
-//extern crate nom;
+#[macro_use]
+extern crate nom;
 
 
 mod mai400;
