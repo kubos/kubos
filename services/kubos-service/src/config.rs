@@ -16,13 +16,13 @@
 
 use getopts::Options;
 use std::env;
-use serde_json;
+use toml;
 use std::fs::File;
 use std::io::prelude::*;
-use serde_json::{Error, Value};
+use toml::Value;
 use std::io;
 
-static PATH: &str = "/home/system/etc/config.json";
+static PATH: &str = "/home/system/etc/config.toml";
 static IP: &str = "127.0.0.1";
 const PORT: u16 = 8080;
 
@@ -43,7 +43,7 @@ impl Default for Address {
 
 #[derive(Debug)]
 pub struct Config {
-    addr: Address,
+    pub addr: Address,
     pub raw: Value,
 }
 
@@ -51,7 +51,7 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             addr: Address::default(),
-            raw: json!(""),
+            raw: Value::String("".to_string()),
         }
     }
 }
@@ -83,28 +83,23 @@ fn get_config_path() -> String {
 }
 
 fn get_file_data(path: String) -> Result<String, io::Error> {
-    let mut file = File::open(path)?;
     let mut contents = String::new();
+    let mut file = File::open(path)?;
     file.read_to_string(&mut contents)?;
     Ok(contents)
 }
 
-fn parse_config(name: &str, path: String) -> Result<Config, Error> {
+fn parse_config(name: &str, path: String) -> Result<Config, toml::de::Error> {
     let contents = get_file_data(path).unwrap_or("".to_string());
-    let data: Value = serde_json::from_str(&contents)?;
+    let data: Value = toml::from_str(&contents)?;
+    let mut config = Config::default();
 
-    let data = match data.get(name) {
-        Some(d) => d,
-        None => return Ok(Config::default()),
-    };
+    if let Some(data) = data.get(name) {
+        if let Some(address) = data.get("addr") {
+            config.addr = address.clone().try_into()?;
+        }
+        config.raw = data.clone();
+    }
 
-    let address = match data.get("addr") {
-        Some(a) => serde_json::from_value(a.clone()).unwrap_or(Address::default()),
-        None => Address::default(),
-    };
-
-    Ok(Config {
-        addr: address,
-        raw: data.clone(),
-    })
+    Ok(config)
 }

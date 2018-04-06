@@ -25,8 +25,8 @@ extern crate juniper;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use]
 extern crate serde_json;
+extern crate toml;
 
 mod config;
 mod service;

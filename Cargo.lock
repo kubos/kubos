@@ -299,6 +299,7 @@ dependencies = [
  "serde 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "toml 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -728,6 +729,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "toml"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "serde 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "unicode-bidi"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -884,6 +893,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum termios 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "d5d9cf598a6d7ce700a4e6a9199da127e6819a61e64b68609683cc9a01b5683a"
 "checksum thread_local 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)" = "279ef31c19ededf577bfd12dfae728040a21f635b06a24cd670ff510edd38963"
 "checksum time 0.1.39 (registry+https://github.com/rust-lang/crates.io-index)" = "a15375f1df02096fb3317256ce2cee6a1f42fc84ea5ad5fc8c421cfe40c73098"
+"checksum toml 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)" = "a0263c6c02c4db6c8f7681f9fd35e90de799ebd4cfdeab77a38f4ff6b3d8c0d9"
 "checksum unicode-bidi 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)" = "49f2bd0c6468a8230e1db229cff8029217cf623c767ea5d60bfbd42729ea54d5"
 "checksum unicode-normalization 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "51ccda9ef9efa3f7ef5d91e8f9b83bbe6955f9bf86aec89d5cce2c874625920f"
 "checksum unicode-xid 0.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "8c1f860d7d29cf02cb2f3f359fd35991af3d30bac52c57d265a3c461074cb4dc"

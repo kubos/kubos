@@ -17,10 +17,10 @@
 use std::collections::HashMap;
 use std::net::{SocketAddr, UdpSocket};
 use std::cell::RefCell;
-
+use serde_json;
 use config::Config;
-use serde_json::{to_string, Value};
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
+use toml::Value;
 
 /// Context struct used by a service to provide:
 /// - Juniper context
@@ -176,7 +176,7 @@ where
         ) {
             Ok((val, _errs)) => {
                 // Should do something with _errs
-                return to_string(&val).unwrap();
+                return serde_json::to_string(&val).unwrap();
             }
             Err(_e) => {
                 "Error running query".to_string()
