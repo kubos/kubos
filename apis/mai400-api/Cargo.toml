@@ -1,0 +1,18 @@
+[package]
+name = "mai400-api"
+version = "0.1.0"
+authors = ["Catherine Garabedian <catherine@kubos.co>"]
+license = "Apache-2.0"
+repository = "https://github.com/kubos/kubos"
+
+[dependencies]
+bincode = "1.0.0"
+crc16 = "0.3.4"
+failure = { git = "https://github.com/rust-lang-nursery/failure" }
+nom = "4.0.0-beta1"
+byteorder = "1.2"
+serial = "0.4"
+
+
+[build-dependencies]
+kubos-build-helper = {path = "../../kubos-build-helper"}
