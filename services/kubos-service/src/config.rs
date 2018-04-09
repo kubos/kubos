@@ -74,6 +74,16 @@ impl Config {
     /// in the `toml::Value` format.
     /// This will contain the ip/port if provided, along with any other
     /// configuration information found in the config file.
+    ///
+    /// ### Examples
+    ///
+    /// ```rust,no_run
+    /// use kubos_service::Config;
+    ///
+    /// let config = Config::new("example-service");
+    /// let raw = config.raw();
+    /// let bus = raw["bus"].as_str();
+    /// ```
     pub fn raw(&self) -> toml::Value {
         self.raw.clone()
     }

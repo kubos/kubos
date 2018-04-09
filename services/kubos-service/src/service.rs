@@ -21,10 +21,8 @@ use serde_json;
 use config::Config;
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
 
-/// Context struct used by a service to provide:
-/// - Juniper context
-/// - Subsystem access
-/// - Persistent storage
+/// Context struct used by a service to provide Juniper context,
+/// subsystem access and persistent storage.
 pub struct Context<T> {
     subsystem: T,
     storage: RefCell<HashMap<String, String>>,
@@ -79,16 +77,16 @@ impl<T> Context<T> {
 }
 
 /// This structure represents a hardware service.
+///
 /// Specifically the functionality provided by this struct
-/// exists to provide
-/// - A GraphQL interface over UDP
-/// - A means of exposing a subsystem to GraphQL queries
-/// - A means of persistence throughout GraphQL queries
+/// exists to provide a GraphQL interface over UDP, a means
+/// of exposing a subsystem to GraphQL queries and means
+/// for persistence throughout GraphQL queries.
 ///
-/// # Examples
+/// ### Examples
 ///
-/// Creating and starting a service:
-/// ```
+/// # Creating and starting a service.
+/// ```rust,ignore
 /// use kubos_service::Service;
 ///
 /// let sub = model::Subsystem::new();
@@ -133,7 +131,8 @@ where
         }
     }
 
-    /// Starts the service's GraphQL/UDP server
+    /// Starts the service's GraphQL/UDP server. This function runs
+    /// without return.
     ///
     /// # Panics
     ///
@@ -169,10 +168,8 @@ where
                 // Should do something with _errs
                 return serde_json::to_string(&val).unwrap();
             }
-            Err(_e) => {
-                "Error running query".to_string()
-                // Could also do this to retain the juniper error
-                // return serde_json::to_string(&e).unwrap(),
+            Err(e) => {
+                return serde_json::to_string(&e).unwrap();
             }
         }
     }
