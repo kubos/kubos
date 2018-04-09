@@ -13,8 +13,7 @@ local os = require 'os'
 local safe_serial = require 'safe-serial'
 
 -- http://mdfs.net/Info/Comp/Comms/CRC16.htm
-local function xmodem_crc16(data)
-  local crc = 0
+local function xmodem_crc16(data, crc)
   -- Step through bytes in memory
   for i = 1, #data do
     -- Fetch byte from memory, XOR into CRC top byte
@@ -143,13 +142,31 @@ return function (dev, baud)
   local function get_uploaded_file()
     serial_write 'GUGET_UF'
     sync()
-    local name_length = tonumber(assert(serial_read(3)))
-    local body_length = tonumber(assert(serial_read(6)))
+    local crc = xmodem_crc16('GU', 0)
+    local chunk = assert(serial_read(3))
+    crc = xmodem_crc16(chunk, crc)
+    local name_length = tonumber(chunk)
+    chunk = assert(serial_read(6))
+    crc = xmodem_crc16(chunk, crc)
+    local body_length = tonumber(chunk)
     local name = assert(serial_read(name_length))
+    crc = xmodem_crc16(name, crc)
     local body = assert(serial_read(body_length))
-    local crc = be_u16()
-    -- TODO: verify CRC
-    return name, body, crc
+    crc = xmodem_crc16(body, crc)
+    local expected = be_u16()
+    p {
+      crc = crc,
+      expected = expected,
+      name = name,
+      body = body,
+    }
+    if crc == expected then
+      serial_write 'GU\x06'
+      return name, body
+    else
+      serial_write 'GU\x0f'
+      return nil, "CRC mismatch: " .. crc .. ' vs ' ..expected
+    end
   end
 
   local function delete_download_files()
@@ -171,7 +188,7 @@ return function (dev, baud)
     serial_write 'GUPUT_DF'
     assert(ack_or_nak())
     local output = format('GU%03d%06d%s%s', #name, #body, name, body)
-    local crc = xmodem_crc16(output)
+    local crc = xmodem_crc16(output, 0)
     output = output .. char(rshift(crc, 8), band(crc, 0xff))
     serial_write(output)
     return ack_or_nak()
