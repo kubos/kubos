@@ -25,6 +25,7 @@ return function (dev, baud)
   local get_uploaded_file = radio.get_uploaded_file
   local get_download_file_count = radio.get_download_file_count
   local put_download_file = radio.put_download_file
+  local get_state_of_health_for_modem = radio.get_state_of_health_for_modem
 
   -- coroutine.wrap(function ()
   --   p("alive", radio.get_alive())
@@ -44,8 +45,12 @@ return function (dev, baud)
 
   local function read()
     repeat
+      local down = get_download_file_count()
       local count = get_uploaded_file_count()
-      if count == 0 then sleep(1000) end
+      p{up_queue = count, down_queue = down }
+      local health = get_state_of_health_for_modem()
+      p(health)
+      if count == 0 then sleep(5000) end
     until count > 0
     local name, body = get_uploaded_file()
     p("Received file", name)
@@ -54,6 +59,7 @@ return function (dev, baud)
 
   local count = 1
   local function write(data)
+    p("Download count", get_download_file_count())
     -- while get_download_file_count() > 1 do
     --   sleep(1000)
     -- end
