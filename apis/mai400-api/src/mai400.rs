@@ -80,13 +80,12 @@ impl MAI400 {
         MAI400 { conn }
     }
 
-    pub fn reset() {
-        // Resetting requires a pair of commands: request, then confirm
-
-        let request = RequestReset::default().0;
+    // Resetting requires a pair of commands: request, then confirm
+    pub fn reset(&self) -> MAIResult<()> {
+        let request = RequestReset::default();
         self.send_message(request.serialize())?;
 
-        let request = ConfirmReset::default().0;
+        let request = ConfirmReset::default();
         self.send_message(request.serialize())
     }
 
@@ -108,8 +107,6 @@ impl MAI400 {
             ..Default::default()
         };
 
-        // NOTE: This changed pretty drastically between versions
-        // Don't bother testing with the old firmware
         self.send_message(request.serialize())
     }
 
@@ -147,14 +144,13 @@ impl MAI400 {
     }
 
     pub fn passthrough(&self, msg: &[u8]) -> MAIResult<()> {
-        self.conn.write(msg.as_slice())
+        self.conn.write(msg)
     }
 
     fn send_message(&self, mut msg: Vec<u8>) -> MAIResult<()> {
         let crc = State::<AUG_CCITT>::calculate(&msg[2..]);
         msg.write_u16::<LittleEndian>(crc).unwrap();
 
-        //send packet
         self.conn.write(msg.as_slice())?;
         Ok(())
     }
@@ -167,14 +163,6 @@ impl MAI400 {
         loop {
             msg = self.conn.read()?;
 
-            // Pull out raw IMU message
-            let len = msg.len();
-            let imu = msg.split_off(len - 21);
-
-            // Pull out IREHS telemetry message
-            let len = msg.len();
-            let irehs = msg.split_off(len - 56);
-
             // Get the CRC bytes
             let len = msg.len();
             let mut raw = msg.split_off(len - 2);
@@ -182,11 +170,7 @@ impl MAI400 {
             let crc = crc.read_u16::<LittleEndian>()?;
 
             // Get the calculated CRC
-            //let calc = State::<AUG_CCITT>::calculate(&msg[1..]);
-            let mut calc: u16 = 0;
-            for byte in msg.iter() {
-                calc += *byte as u16;
-            }
+            let calc = State::<AUG_CCITT>::calculate(&msg[1..]);
 
             // Make sure they match
             // If not, pretend this never happened and go get another message
@@ -197,9 +181,24 @@ impl MAI400 {
             // Put the CRC bytes back and translate the vector into a useable structure
             msg.append(&mut raw);
 
-            let telem = StandardTelemetry::new(&msg[..]);
-            response = Response::StdTelem(telem);
-            break;
+            // Identify message type and convert to usable structure
+            // TODO: Add remaining messages
+            let id = msg[5];
+            match id {
+                1 => {
+                    let telem = StandardTelemetry::new(&msg[..]);
+                    response = Response::StdTelem(telem);
+                    break;
+                }
+                6 => {
+                    let info = ConfigInfo::new(&msg[..]);
+                    response = Response::Config(info);
+                    break;
+                }
+                _ => {
+                    throw!(MAIError::GenericError);
+                }
+            }
         }
 
         Ok(response)

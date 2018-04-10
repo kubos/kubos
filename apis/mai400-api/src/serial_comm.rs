@@ -16,20 +16,17 @@
 
 use byteorder::{LittleEndian, ReadBytesExt};
 use mai400::MAIResult;
-//use std::io;
-use std::time::Duration;
-use serial;
-use std::io::prelude::*;
-use serial::prelude::*;
-//use std::cell::RefCell;
 use messages::*;
 use std::io::Cursor;
+use std::io::prelude::*;
+use std::time::Duration;
+use serial;
+use serial::prelude::*;
 
 /// A connection is like a stream, but allowed parsed reads with properly buffered
 /// input data.
 pub struct Connection {
     pub stream: Box<Stream>,
-    //buffer: RefCell<Vec<u8>>,
 }
 
 impl Connection {
@@ -46,13 +43,11 @@ impl Connection {
                     flow_control: serial::FlowNone,
                 },
             }),
-            //buffer: RefCell::new(Vec::new()),
         }
     }
 
     /// Write out raw bytes to the underlying stream.
     pub fn write(&self, data: &[u8]) -> MAIResult<()> {
-        println!("Writing: {:?}", data);
         self.stream.write(data)
     }
 
@@ -102,28 +97,6 @@ impl Stream for SerialStream {
         let mut port = serial::open(self.bus.as_str())?;
 
         port.configure(&self.settings)?;
-        /*        {
-            use termios::{CREAD, CLOCAL}; // cflags
-            use termios::{ICANON, ECHO, ECHOE, ECHOK, ECHONL, ISIG, IEXTEN}; // lflags
-            use termios::OPOST; // oflags
-            use termios::{INLCR, IGNCR, ICRNL, IGNBRK}; // iflags
-            use termios::{VMIN, VTIME}; // c_cc indexes
-
-            let mut termios = match termios::Termios::from_fd(self.fd) {
-                Ok(t) => t,
-                Err(e) => return Err(super::error::from_io_error(e)),
-            };
-
-            // setup TTY for binary serial port access
-            termios.c_cflag |= CREAD | CLOCAL;
-            termios.c_lflag &= !(ICANON | ECHONL);
-            //termios.c_oflag &= !OPOST;
-            termios.c_iflag &= !(INLCR | IGNCR | ICRNL | IGNBRK);
-
-            termios.c_cc[VMIN] = 0;
-            termios.c_cc[VTIME] = 0;
-
-        } */
 
         let mut ret_msg: Vec<u8> = Vec::new();
         loop {
@@ -134,10 +107,9 @@ impl Stream for SerialStream {
             port.set_timeout(Duration::new(0, 500))?;
 
             let mut sync: [u8; 2] = [0; 2];
-            //println!("First read");
-            let mut len = match port.read(&mut sync) {
-                Ok(v) => v,
-                Err(_err) => continue, //TODO: process timeout
+            match port.read(&mut sync) {
+                Ok(_len) => {} //TODO: Check if len==2. If not, throw error
+                Err(_err) => continue, //TODO: Process error. If timeout, continue. O/w, throw error
             };
 
             let mut wrapper = Cursor::new(sync.to_vec());
@@ -147,28 +119,39 @@ impl Stream for SerialStream {
             } else {
                 // Odds are that we magically ended up in the middle of a message,
                 // so just loop so we can get all of the bytes out of the buffer
-                //println!("Got unknown: {:?}", sync);
                 continue;
             }
 
-            //port.set_timeout(Duration::new(0, 1))?;
-            while len < 200 {
-                let mut data: Vec<u8> = vec![0; 46];
-                //println!("Third read");
+            // We got the SYNC bytes, so we know we're at the start of a message.
+            // Get the rest of the header
+            let mut hdr: [u8; HDR_SZ - 2] = [0; HDR_SZ - 2];
+            port.read(&mut hdr)?;
+
+            // Pull out the data_len value so we know how many more bytes we need to read
+            // (Add 2 to account for the CRC bytes)
+            let mut wrapper = Cursor::new(hdr[0..2].to_vec());
+            let mut len = wrapper.read_u16::<LittleEndian>()? + 2;
+
+            // Add the rest of the header to our return message
+            ret_msg.append(&mut hdr.to_vec());
+
+            // Read in chunks
+            // TODO: Might have to go to single byte reads...
+            // Or hopefully the problem will magically go away...
+            while len > 40 {
+                let mut data: Vec<u8> = vec![0; 40];
                 let temp = match port.read(&mut data[..]) {
                     Ok(v) => v,
-                    Err(_err) => continue, //TODO: process timeout
+                    Err(_err) => continue,
                 };
 
-                len += temp;
+                len -= temp as u16;
                 ret_msg.append(&mut data[0..temp].to_vec());
             }
 
-            println!("Read len: {}", len);
             break;
         }
 
-        println!("Returning");
         Ok(ret_msg)
     }
 }
