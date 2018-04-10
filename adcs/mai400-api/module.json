@@ -1,0 +1,19 @@
+{
+    "license":"Apache-2.0",
+    "name":"mai400-api",
+    "repository":{
+        "url":"git://github.com/kubos/kubos/mai400-api",
+        "type":"git"
+    },
+    "version":"1.0.0",
+    "homepage":"https://github.com/kubos/kubos/mai400-api",
+    "extraIncludes": [
+        "ants-api"
+    ],
+    "testDependencies": {
+        "cmocka": "kubos/cmocka"
+    },
+    "testTargets": [
+        "x86-linux-native"
+    ]
+}
