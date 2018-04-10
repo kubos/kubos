@@ -23,6 +23,8 @@ return function (dev, baud)
   local radio = new_radio(dev, baud)
   local get_uploaded_file_count = radio.get_uploaded_file_count
   local get_uploaded_file = radio.get_uploaded_file
+  local get_uploaded_message_count = radio.get_uploaded_message_count
+  local get_uploaded_message = radio.get_uploaded_message
   local get_download_file_count = radio.get_download_file_count
   local put_download_file = radio.put_download_file
   local get_state_of_health_for_modem = radio.get_state_of_health_for_modem
@@ -44,17 +46,26 @@ return function (dev, baud)
   }
 
   local function read()
-    repeat
-      local down = get_download_file_count()
-      local count = get_uploaded_file_count()
-      p{up_queue = count, down_queue = down }
-      local health = get_state_of_health_for_modem()
-      p(health)
-      if count == 0 then sleep(5000) end
-    until count > 0
-    local name, body = get_uploaded_file()
-    p("Received file", name)
-    return body
+    while true do
+      local ufile = get_uploaded_file_count()
+      p("Upload File Count", ufile)
+      if ufile > 0 then
+        local name, body = get_uploaded_file()
+        p("Received file", name)
+        return body
+      end
+      local umessage = get_uploaded_message_count()
+      p("Upload Message Count", umessage)
+      if umessage > 0 then
+        p("message", get_uploaded_message())
+      else
+        local dfile = get_download_file_count()
+        p("Download File Count", dfile)
+        local health = get_state_of_health_for_modem()
+        p(health)
+        sleep(5000)
+      end
+    end
   end
 
   local count = 1

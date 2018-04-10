@@ -139,8 +139,7 @@ return function (dev, baud)
     }
   end
 
-  local function get_uploaded_file()
-    serial_write 'GUGET_UF'
+  local function get_upload()
     sync()
     local crc = xmodem_crc16('GU', 0)
     local chunk = assert(serial_read(3))
@@ -167,6 +166,16 @@ return function (dev, baud)
       serial_write 'GU\x0f'
       return nil, "CRC mismatch: " .. crc .. ' vs ' ..expected
     end
+  end
+
+  local function get_uploaded_file()
+    serial_write 'GUGET_UF'
+    return get_upload()
+  end
+
+  local function get_uploaded_message()
+    serial_write 'GUGET_UM'
+    return get_upload()
   end
 
   local function delete_download_files()
@@ -206,6 +215,7 @@ return function (dev, baud)
     get_download_file_count = protect(get_download_file_count),
     get_geolocation_position_estimate = protect(get_geolocation_position_estimate),
     get_uploaded_file = protect(get_uploaded_file),
+    get_uploaded_message = protect(get_uploaded_message),
     delete_download_files = protect(delete_download_files),
     delete_uploaded_files = protect(delete_uploaded_files),
     delete_uploaded_messages = protect(delete_uploaded_messages),
