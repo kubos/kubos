@@ -14,35 +14,33 @@
  * limitations under the License.
  */
 
-use i2c_api;
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum Flags {
-    LastCommandFailed = 0b0000001,
-    WatchdogError = 0b0000010,
-    BadCommandData = 0b0000100,
-    BadCommandChannel = 0b0001000,
-    ErrorReadingEeprom = 0b0010000,
-    PowerOnReset = 0b0100000,
-    BrownOutReset = 0b1000000,
+bitflags! {
+    #[derive(Default)]
+    pub struct Status: u8 {
+        const LAST_COMMAND_FAILED = 0b0000001;
+        const WATCHDOG_ERROR = 0b0000010;
+        const BAD_COMMAND_DATA = 0b0000100;
+        const BAD_COMMAND_CHANNEL = 0b0001000;
+        const ERROR_READING_EEPROM = 0b0010000;
+        const POWER_ON_RESET = 0b0100000;
+        const BROWN_OUT_RESET = 0b1000000;
+    }
 }
-
-#[derive(Debug, Eq, PartialEq)]
-pub struct Status(Vec<Flags>);
 
 impl Status {
     pub fn parse(data: &[u8]) -> Self {
-        Status::default()
+        if data.len() > 0 {
+            match Status::from_bits(data[0]) {
+                Some(s) => s,
+                None => Status::default(),
+            }
+        } else {
+            Status::default()
+        }
     }
 
     pub fn command() -> (Vec<u8>) {
         (vec![0x01, 0x00])
-    }
-}
-
-impl Default for Status {
-    fn default() -> Self {
-        Status { 0: vec![] }
     }
 }
 
@@ -51,17 +49,47 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_no_flags() {
-        assert_eq!(Status { 0: vec![] }, Status::parse(&vec![]));
+    fn test_parse_no_flags() {
+        assert_eq!(Status::default(), Status::parse(&vec![]));
     }
 
     #[test]
-    fn test_last_cmd_failed() {
-        assert_eq!(
-            Status {
-                0: vec![Flags::LastCommandFailed],
-            },
-            Status::parse(&vec![Flags::LastCommandFailed as u8])
-        );
+    fn test_parse_last_cmd_failed() {
+        assert_eq!(Status::LAST_COMMAND_FAILED, Status::parse(&vec![0b1]));
+    }
+
+    #[test]
+    fn test_parse_watchdog_error() {
+        assert_eq!(Status::WATCHDOG_ERROR, Status::parse(&vec![0b10]));
+    }
+
+    #[test]
+    fn test_parse_bad_command_data() {
+        assert_eq!(Status::BAD_COMMAND_DATA, Status::parse(&vec![0b100]));
+    }
+
+    #[test]
+    fn test_parse_bad_command_channel() {
+        assert_eq!(Status::BAD_COMMAND_CHANNEL, Status::parse(&vec![0b1000]));
+    }
+
+    #[test]
+    fn test_parse_error_reading_eeprom() {
+        assert_eq!(Status::ERROR_READING_EEPROM, Status::parse(&vec![0b10000]));
+    }
+
+    #[test]
+    fn test_parse_power_on_reset() {
+        assert_eq!(Status::POWER_ON_RESET, Status::parse(&vec![0b100000]));
+    }
+
+    #[test]
+    fn test_parse_brown_out_reset() {
+        assert_eq!(Status::BROWN_OUT_RESET, Status::parse(&vec![0b1000000]));
+    }
+
+    #[test]
+    fn test_parse_all() {
+        assert_eq!(Status::all(), Status::parse(&vec![0b1111111]));
     }
 }

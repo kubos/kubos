@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
+use std::io;
+
 use i2c_api::Stream;
 
 use commands::*;
+
+#[derive(Debug, Display, Fail)]
+pub enum EpsError {
+    #[display(fmt = "IO Error {}", cause)] IoError { cause: io::Error },
+}
+
+impl From<io::Error> for EpsError {
+    fn from(error: io::Error) -> Self {
+        EpsError::IoError { cause: error }
+    }
+}
+
+pub type EpsStatus<T> = Result<T, EpsError>;
 
 pub struct Eps {
     connection: Box<Stream>,
@@ -27,10 +42,9 @@ impl Eps {
         Eps { connection }
     }
 
-    pub fn get_board_status(&self) -> Result<Status, String> {
-        let data = Status::command();
-        let res = self.connection.write(&data);
-        Ok(Status::parse(&self.connection.read(2).unwrap()))
+    pub fn get_board_status(&self) -> EpsStatus<Status> {
+        self.connection.write(&Status::command())?;
+        Ok(Status::parse(&self.connection.read(2)?))
     }
 }
 
@@ -49,11 +63,5 @@ mod tests {
         fn read(&self, length: usize) -> Result<Vec<u8>, Error> {
             Ok(vec![])
         }
-    }
-
-    #[test]
-    fn test_board_status() {
-        let eps = Eps::new(Box::new(MockConn {}));
-        assert_eq!(Ok(Status::default()), eps.get_board_status());
     }
 }

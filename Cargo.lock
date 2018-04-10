@@ -80,6 +80,8 @@ dependencies = [
 name = "clyde-3g-eps-api"
 version = "0.1.0"
 dependencies = [
+ "bitflags 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 1.0.0 (git+https://github.com/rust-lang-nursery/failure)",
  "i2c-api 0.1.0",
 ]
 

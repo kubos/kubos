@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
+#[macro_use]
+extern crate bitflags;
+#[macro_use]
+extern crate failure;
 extern crate i2c_api;
 
 mod commands;
 mod eps;
+
+pub use eps::Eps;
