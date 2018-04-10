@@ -14,18 +14,43 @@
  * limitations under the License.
  */
 
-//#![deny(missing_docs)]
+//! Kubos API for interacting with [Adcole Maryland Aerospace MAI-400 ADACS](https://www.cubesatshop.com/product/mai-400-adacs/)
+//!
+//! All work is done against an instantiated [`MAI400`] struct.
+//!
+//! # Examples
+//! //TODO: This could be better
+//!
+//! ```
+//! use mai400_api::*;
+//!
+//! # fn func() -> MAIResult<()> {
+//! // Create a new MAI connection
+//! let connection = Connection::new("/dev/ttyS5".to_owned());
+//! let mai = MAI400::new(connection);
+//!
+//! // Request configuration information
+//! mai.get_info()?;
+//!
+//! // Get next message from MAI-400
+//! let result = mai.get_message()?;
+//!
+//! // Message processing logic...
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! [`MAI400`]: struct.MAI400.html
+
+#![warn(missing_docs)]
 //Need a higher recursion limit for nom when parsing larger (>60 bytes) structures
 #![recursion_limit="256"]
 
 extern crate byteorder;
-//extern crate chrono;
 extern crate crc16;
-
 #[cfg(test)]
 #[macro_use]
 extern crate double;
-//extern crate radio_api;
 extern crate serial;
 #[macro_use]
 extern crate failure;
@@ -40,5 +65,4 @@ mod serial_comm;
 mod tests;
 
 pub use mai400::*;
-pub use messages::*;
-pub use serial_comm::*;
+pub use messages::rx::*;

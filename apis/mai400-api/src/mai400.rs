@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//TODO: remove before publishing
-#![allow(unused)]
 
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use crc16::*;
@@ -159,7 +157,6 @@ impl MAI400 {
         let mut msg = vec![];
         let mut response: Response;
 
-        //TODO: Update for newer FW version
         loop {
             msg = self.conn.read()?;
 
@@ -206,6 +203,7 @@ impl MAI400 {
     }
 
     //TODO: verify the bit shifting
+    // TODO: Doc says 3 MSB are used for version information. Need to extract
     pub fn update_rotating(&self, msg: &StandardTelemetry, rotating: &mut RotatingTelemetry) {
         match msg.tlm_counter {
             0 => {

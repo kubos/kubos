@@ -17,75 +17,69 @@
 use nom::*;
 use super::*;
 
+/// Standard telemetry packet sent by the MAI-400 every 250ms
 pub struct StandardTelemetry {
+    /// Message Header
     pub hdr: MessageHeader,
+    /// Rotating variable indicator
     pub tlm_counter: u8,
+    /// UTC Time in Seconds
     pub gps_time: u32,
+    /// 4 Hz Subsecond counter
     pub time_subsec: u8,
+    /// Valid Command Counter
     pub cmd_valid_cntr: u16,
+    /// Invalid Command Counter. Number of commands which did not pass command verification.
     pub cmd_invalid_cntr: u16,
+    /// Invalid Command CRC Counter. Number of command messages received with invalid checksums
     pub cmd_invalid_chksum_cntr: u16,
+    /// Last valid CCT command received
     pub last_command: u8,
+    /// Commanded ACS Mode
     pub acs_mode: u8, //TODO: enum
-    pub css_0: u16,
-    pub css_1: u16,
-    pub css_2: u16,
-    pub css_3: u16,
-    pub css_4: u16,
-    pub css_5: u16,
+    /// Raw sun sensor outputs
+    pub css: [u16; 6],
+    /// Whether the device is eclipsed or not
     pub eclipse_flag: u8, //TODO: bool
-    pub sun_vec_b_0: i16,
-    pub sun_vec_b_1: i16,
-    pub sun_vec_b_2: i16,
-    pub i_b_field_meas_0: i16,
-    pub i_b_field_meas_1: i16,
-    pub i_b_field_meas_2: i16,
-    pub bd_0: f32,
-    pub bd_1: f32,
-    pub bd_2: f32,
-    pub rws_speed_cmd_0: i16,
-    pub rws_speed_cmd_1: i16,
-    pub rws_speed_cmd_2: i16,
-    pub rws_speed_tach_0: i16,
-    pub rws_speed_tach_1: i16,
-    pub rws_speed_tach_2: i16,
-    pub rwa_torque_cmd_0: f32,
-    pub rwa_torque_cmd_1: f32,
-    pub rwa_torque_cmd_2: f32,
-    pub gc_rwa_torque_cmd_0: char,
-    pub gc_rwa_torque_cmd_1: char,
-    pub gc_rwa_torque_cmd_2: char,
-    pub torque_coil_cmd_0: f32,
-    pub torque_coil_cmd_1: f32,
-    pub torque_coil_cmd_2: f32,
-    pub gc_torque_coil_cmd_0: char,
-    pub gc_torque_coil_cmd_1: char,
-    pub gc_torque_coil_cmd_2: char,
-    pub qbo_cmd_0: i32,
-    pub qbo_cmd_1: i32,
-    pub qbo_cmd_2: i32,
-    pub qbo_cmd_3: i32,
-    pub qbo_hat_0: i32,
-    pub qbo_hat_1: i32,
-    pub qbo_hat_2: i32,
-    pub qbo_hat_3: i32,
+    /// Unit Sun Vector in Body Frame
+    pub sun_vec_b: [i16; 3],
+    /// Magnetometer Reading (inc. bias and gain)
+    pub i_b_field_meas: [i16; 3],
+    /// Rate of Change of Magnetic field Vector in Body Frame
+    pub bd: [f32; 3],
+    /// RWS Commanded Wheel Speed, lsb: 1 RPM
+    pub rws_speed_cmd: [i16; 3],
+    /// RWS Wheel Speeds, lsb: 1 RPM
+    pub rws_speed_tach: [i16; 3],
+    /// Commanded Wheel Torque computed by ADACS (mNm)
+    pub rwa_torque_cmd: [f32; 3],
+    /// RWS Torque Command to wheel
+    pub gc_rwa_torque_cmd: [i8; 3],
+    /// Torque Coil Command computed by ADACS (Am^2)
+    pub torque_coil_cmd: [f32; 3],
+    /// Torque Coil Command (lsb)
+    pub gc_torque_coil_cmd: [i8; 3],
+    /// Commanded orbit-to-body quaternion
+    pub qbo_cmd: [i32; 4],
+    /// Current Estimated Orbit-to-Body Quaternion
+    pub qbo_hat: [i32; 4],
+    /// Angle to Go in radians
     pub angle_to_go: f32,
-    pub q_error_0: i32,
-    pub q_error_1: i32,
-    pub q_error_2: i32,
-    pub q_error_3: i32,
-    pub omega_b_0: f32,
-    pub omega_b_1: f32,
-    pub omega_b_2: f32,
+    /// Error between command and estimate Qbo
+    pub q_error: [i32; 4],
+    /// Body rate in body frame (rad/sec).
+    pub omega_b: [f32; 3],
+    /// Rotating variable A. Use RotatingVariables struct if interaction is needed
     pub rotating_variable_a: u32,
+    /// Rotating variable B. Use RotatingVariables struct if interaction is needed
     pub rotating_variable_b: u32,
+    /// Rotating variable C. Use RotatingVariables struct if interaction is needed
     pub rotating_variable_c: u32,
-    pub nb_0: i32,
-    pub nb_1: i32,
-    pub nb_2: i32,
-    pub neci_0: i32,
-    pub neci_1: i32,
-    pub neci_2: i32,
+    /// Nadir vectors in Body
+    pub nb: [i32; 3],
+    /// Nadir vectors in ECI frame
+    pub neci: [i32; 3],
+    /// Message checksum
     pub crc: u16,
 }
 
@@ -134,15 +128,15 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
         rwa_torque_cmd_0: le_f32 >>
         rwa_torque_cmd_1: le_f32 >>
         rwa_torque_cmd_2: le_f32 >>
-        gc_rwa_torque_cmd_0: le_u8 >>
-        gc_rwa_torque_cmd_1: le_u8 >>
-        gc_rwa_torque_cmd_2: le_u8 >>
+        gc_rwa_torque_cmd_0: le_i8 >>
+        gc_rwa_torque_cmd_1: le_i8 >>
+        gc_rwa_torque_cmd_2: le_i8 >>
         torque_coil_cmd_0: le_f32 >>
         torque_coil_cmd_1: le_f32 >>
         torque_coil_cmd_2: le_f32 >>
-        gc_torque_coil_cmd_0: le_u8 >>
-        gc_torque_coil_cmd_1: le_u8 >>
-        gc_torque_coil_cmd_2: le_u8 >>
+        gc_torque_coil_cmd_0: le_i8 >>
+        gc_torque_coil_cmd_1: le_i8 >>
+        gc_torque_coil_cmd_2: le_i8 >>
         qbo_cmd_0: le_i32 >>
         qbo_cmd_1: le_i32 >>
         qbo_cmd_2: le_i32 >>
@@ -184,65 +178,97 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
             cmd_invalid_chksum_cntr,
             last_command,
             acs_mode, //TODO: enum
-            css_0,
-            css_1,
-            css_2,
-            css_3,
-            css_4,
-            css_5,
+            css: [
+                css_0,
+                css_1,
+                css_2,
+                css_3,
+                css_4,
+                css_5
+            ],
             eclipse_flag, //TODO: bool
-            sun_vec_b_0,
-            sun_vec_b_1,
-            sun_vec_b_2,
-            i_b_field_meas_0,
-            i_b_field_meas_1,
-            i_b_field_meas_2,
-            bd_0,
-            bd_1,
-            bd_2,
-            rws_speed_cmd_0,
-            rws_speed_cmd_1,
-            rws_speed_cmd_2,
-            rws_speed_tach_0,
-            rws_speed_tach_1,
-            rws_speed_tach_2,
-            rwa_torque_cmd_0,
-            rwa_torque_cmd_1,
-            rwa_torque_cmd_2,
-            gc_rwa_torque_cmd_0: gc_rwa_torque_cmd_0 as char,
-            gc_rwa_torque_cmd_1: gc_rwa_torque_cmd_1 as char,
-            gc_rwa_torque_cmd_2: gc_rwa_torque_cmd_2 as char,
-            torque_coil_cmd_0,
-            torque_coil_cmd_1,
-            torque_coil_cmd_2,
-            gc_torque_coil_cmd_0: gc_torque_coil_cmd_0 as char,
-            gc_torque_coil_cmd_1: gc_torque_coil_cmd_1 as char,
-            gc_torque_coil_cmd_2: gc_torque_coil_cmd_2 as char,
-            qbo_cmd_0,
-            qbo_cmd_1,
-            qbo_cmd_2,
-            qbo_cmd_3,
-            qbo_hat_0,
-            qbo_hat_1,
-            qbo_hat_2,
-            qbo_hat_3,
+            sun_vec_b: [
+                sun_vec_b_0,
+                sun_vec_b_1,
+                sun_vec_b_2
+            ],
+            i_b_field_meas: [
+                i_b_field_meas_0,
+                i_b_field_meas_1,
+                i_b_field_meas_2
+            ],
+            bd: [
+                bd_0,
+                bd_1,
+                bd_2
+            ],
+            rws_speed_cmd: [
+                rws_speed_cmd_0,
+                rws_speed_cmd_1,
+                rws_speed_cmd_2
+            ],
+            rws_speed_tach: [
+                rws_speed_tach_0,
+                rws_speed_tach_1,
+                rws_speed_tach_2
+            ],
+            rwa_torque_cmd: [
+                rwa_torque_cmd_0,
+                rwa_torque_cmd_1,
+                rwa_torque_cmd_2
+            ],
+            gc_rwa_torque_cmd: [
+                gc_rwa_torque_cmd_0,
+                gc_rwa_torque_cmd_1,
+                gc_rwa_torque_cmd_2
+            ],
+            torque_coil_cmd: [
+                torque_coil_cmd_0,
+                torque_coil_cmd_1,
+                torque_coil_cmd_2
+            ],
+            gc_torque_coil_cmd: [
+                gc_torque_coil_cmd_0,
+                gc_torque_coil_cmd_1,
+                gc_torque_coil_cmd_2
+            ],
+            qbo_cmd: [
+                qbo_cmd_0,
+                qbo_cmd_1,
+                qbo_cmd_2,
+                qbo_cmd_3
+            ],
+            qbo_hat: [
+                qbo_hat_0,
+                qbo_hat_1,
+                qbo_hat_2,
+                qbo_hat_3
+            ],
             angle_to_go,
-            q_error_0,
-            q_error_1,
-            q_error_2,
-            q_error_3,
-            omega_b_0,
-            omega_b_1,
-            omega_b_2,
+            q_error: [
+                q_error_0,
+                q_error_1,
+                q_error_2,
+                q_error_3
+            ],
+            omega_b: [
+                omega_b_0,
+                omega_b_1,
+                omega_b_2
+            ],
             rotating_variable_a,
             rotating_variable_b,
             rotating_variable_c,
-            nb_0,
-            nb_1,
-            nb_2,
-            neci_0,
-            neci_1,
-            neci_2,
+            nb: [
+                nb_0,
+                nb_1,
+                nb_2
+            ],
+            neci: [
+                neci_0,
+                neci_1,
+                neci_2
+            ],
             crc
         })
     )

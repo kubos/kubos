@@ -14,22 +14,27 @@
 // limitations under the License.
 //
 
-mod rx;
+pub mod rx;
 mod tx;
 
 use byteorder::{LittleEndian, WriteBytesExt};
 pub use self::rx::*;
 pub use self::tx::*;
 
+/// IRIG-106 sync word
 pub const SYNC: u16 = 0xEB90;
+/// Size of message header (packed)
 pub const HDR_SZ: usize = 6;
-pub const FRAME_SZ: usize = HDR_SZ + 2;
 
-#[repr(C, packed)]
+/// Header for all sent and received messages
 pub struct MessageHeader {
+    /// IRIG-106 sync word
     pub sync: u16,
+    /// Length of data in message, not including header or CRC bytes
     pub data_len: u16,
+    /// Message ID
     pub msg_id: u8,
+    /// Endpoint device address
     pub addr: u8,
 }
 

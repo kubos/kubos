@@ -23,9 +23,10 @@ use std::time::Duration;
 use serial;
 use serial::prelude::*;
 
-/// A connection is like a stream, but allowed parsed reads with properly buffered
-/// input data.
+/// Wrapper structure for underlying stream
 pub struct Connection {
+    /// UART stream to interact with
+    /// It's wrapped in a Box so that it can be easily mocked for unit tests
     pub stream: Box<Stream>,
 }
 
