@@ -34,24 +34,16 @@ pub struct Connection {
 
 impl Connection {
     /// Convenience constructor to create connection from stream.
-    pub fn new(
-        bus: String,
-        baud_rate: serial::BaudRate,
-        char_size: serial::CharSize,
-        parity: serial::Parity,
-        stop_bits: serial::StopBits,
-        flow_control: serial::FlowControl,
-    ) -> Connection {
-
+    pub fn new(bus: String) -> Connection {
         Connection {
             stream: Box::new(SerialStream {
                 bus,
                 settings: serial::PortSettings {
-                    baud_rate,
-                    char_size,
-                    parity,
-                    stop_bits,
-                    flow_control,
+                    baud_rate: serial::Baud115200,
+                    char_size: serial::Bits8,
+                    parity: serial::ParityNone,
+                    stop_bits: serial::Stop1,
+                    flow_control: serial::FlowNone,
                 },
             }),
             //buffer: RefCell::new(Vec::new()),

@@ -1,64 +1,20 @@
-/*
- * Copyright (C) 2018 Kubos Corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-//#![feature(associated_consts)]
+//
+// Copyright (C) 2018 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
-
-use byteorder::{LittleEndian, WriteBytesExt};
 use nom::*;
-
-pub const SYNC: u16 = 0xEB90;
-
-pub trait Message {
-    fn serialize(&self) -> Vec<u8>;
-}
-
-pub struct SetAcsMode {
-    //pub hdr: MessageHeader,
-    pub mode: u8,
-    pub sec_vec: i32,
-    pub pri_axis: i32,
-    pub sec_axis: i32,
-    pub qbi_cmd4: i32,
-}
-
-impl Default for SetAcsMode {
-    fn default() -> Self {
-        SetAcsMode {
-            mode: 0,
-            sec_vec: 0,
-            pri_axis: 0,
-            sec_axis: 0,
-            qbi_cmd4: 0,
-        }
-    }
-}
-
-impl Message for SetAcsMode {
-    fn serialize(&self) -> Vec<u8> {
-        let mut vec = vec![];
-
-        //vec.append(&mut self.hdr.serialize());
-        vec.push(self.mode);
-        vec.write_i32::<LittleEndian>(self.sec_vec).unwrap();
-        vec.write_i32::<LittleEndian>(self.pri_axis).unwrap();
-        vec.write_i32::<LittleEndian>(self.sec_axis).unwrap();
-        vec.write_i32::<LittleEndian>(self.qbi_cmd4).unwrap();
-        vec
-    }
-}
 
 pub struct StandardTelemetry {
     pub sync: u16,
@@ -283,8 +239,146 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
     )
 );
 
-pub struct RawIMU {}
+pub struct RawIMU {
+    pub sync: u16,
+    pub data_len: u16,
+    pub packet_type: u16,
+    pub accel: [i16; 3],
+    pub gyro: [i16; 3],
+    pub gyro_temp: u8,
+    pub crc: u16,
+}
+
+impl RawIMU {
+    pub fn new(msg: &[u8]) -> Self {
+        raw_imu(msg).unwrap().1
+    }
+}
+
+named!(raw_imu(&[u8]) -> RawIMU,
+    do_parse!(
+        sync: le_u16 >>
+        data_len: le_u16 >>
+        packet_type: le_u16 >>
+        accel_x: le_i16 >>
+        accel_y: le_i16 >>
+        accel_z: le_i16 >>
+        gyro_x: le_i16 >>
+        gyro_y: le_i16 >>
+        gyro_z: le_i16 >>
+        gyro_temp: le_u8 >>
+        crc: le_u16 >>
+        (RawIMU {
+                sync,
+                data_len,
+                packet_type,
+                accel: [accel_x ,accel_y, accel_z],
+                gyro: [gyro_x, gyro_y, gyro_z],
+                gyro_temp,
+                crc
+        })
+    )
+);
+
+pub struct IREHSTelemetry {
+    pub sync: u16,
+    pub data_len: u16,
+    pub packet_type: u16,
+    pub thermopiles_a: [u16; 4],
+    pub thermopiles_b: [u16; 4],
+    pub temp_a: [u16; 4],
+    pub temp_b: [u16; 4],
+    pub dip_angle_a: u32,
+    pub dip_angle_b: u32,
+    pub solution_degraded: [u8; 8],
+    pub crc: u16,
+}
+
+impl IREHSTelemetry {
+    pub fn new(msg: &[u8]) -> Self {
+        irehs_telem(msg).unwrap().1
+    }
+}
+
+named!(irehs_telem(&[u8]) -> IREHSTelemetry,
+    do_parse!(
+        sync: le_u16 >>
+        data_len: le_u16 >>
+        packet_type: le_u16 >>
+        thermopiles_a_earth_limb: le_u16 >>
+        thermopiles_a_earth_ref: le_u16 >>
+        thermopiles_a_space_ref: le_u16 >>
+        thermopiles_a_wide_fov: le_u16 >>
+        thermopiles_b_earth_limb: le_u16 >>
+        thermopiles_b_earth_ref: le_u16 >>
+        thermopiles_b_space_ref: le_u16 >>
+        thermopiles_b_wide_fov: le_u16 >>
+        temp_a_earth_limb: le_u16 >>
+        temp_a_earth_ref: le_u16 >>
+        temp_a_space_ref: le_u16 >>
+        temp_a_wide_fov: le_u16 >>
+        temp_b_earth_limb: le_u16 >>
+        temp_b_earth_ref: le_u16 >>
+        temp_b_space_ref: le_u16 >>
+        temp_b_wide_fov: le_u16 >>
+        dip_angle_a: le_u32 >>
+        dip_angle_b: le_u32 >>
+        solution_degraded_earth_limb_a: le_u8 >>
+        solution_degraded_earth_ref_a: le_u8 >>
+        solution_degraded_space_ref_a: le_u8 >>
+        solution_degraded_wide_fov_a: le_u8 >>
+        solution_degraded_earth_limb_b: le_u8 >>
+        solution_degraded_earth_ref_b: le_u8 >>
+        solution_degraded_space_ref_b: le_u8 >>
+        solution_degraded_wide_fov_b: le_u8 >>
+        crc: le_u16 >>
+        (IREHSTelemetry {
+                sync,
+                data_len,
+                packet_type,
+                thermopiles_a: [
+                    thermopiles_a_earth_limb,
+                    thermopiles_a_earth_ref,
+                    thermopiles_a_space_ref,
+                    thermopiles_a_wide_fov
+                ],
+                thermopiles_b: [
+                    thermopiles_b_earth_limb,
+                    thermopiles_b_earth_ref,
+                    thermopiles_b_space_ref,
+                    thermopiles_b_wide_fov
+                ],
+                temp_a: [
+                    temp_a_earth_limb,
+                    temp_a_earth_ref,
+                    temp_a_space_ref,
+                    temp_a_wide_fov
+                ],
+                temp_b: [
+                    temp_b_earth_limb,
+                    temp_b_earth_ref,
+                    temp_b_space_ref,
+                    temp_b_wide_fov
+                ],
+                dip_angle_a,
+                dip_angle_b,
+                solution_degraded: [
+                    solution_degraded_earth_limb_a,
+                    solution_degraded_earth_ref_a,
+                    solution_degraded_space_ref_a,
+                    solution_degraded_wide_fov_a,
+                    solution_degraded_earth_limb_b,
+                    solution_degraded_earth_ref_b,
+                    solution_degraded_space_ref_b,
+                    solution_degraded_wide_fov_b
+                ],
+                crc,
+        })
+    )
+);
 
 pub enum Response {
     StdTelem(StandardTelemetry),
+    IMU(RawIMU),
+    IREHS(IREHSTelemetry),
 }

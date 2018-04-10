@@ -67,7 +67,7 @@ pub struct RotatingTelemetry {
     q_sat: f32,
     raw_trq_max: f32,
     rws_motor_current: [u16; 3],
-    raw_motor_temp: i16, //TODO: Conversion formula
+    raw_motor_temp: i16,
 }
 
 pub struct MAI400 {
@@ -81,8 +81,13 @@ impl MAI400 {
     }
 
     pub fn reset() {
-        //REQUEST_RESET
-        //CONFIRM_RESET
+        // Resetting requires a pair of commands: request, then confirm
+
+        let request = RequestReset::default().0;
+        self.send_message(request.serialize())?;
+
+        let request = ConfirmReset::default().0;
+        self.send_message(request.serialize())
     }
 
     //SetAcsMode
@@ -103,34 +108,47 @@ impl MAI400 {
             ..Default::default()
         };
 
+        // NOTE: This changed pretty drastically between versions
+        // Don't bother testing with the old firmware
         self.send_message(request.serialize())
     }
 
-    pub fn set_gps_time(&self) -> MAIResult<()> {
-        unimplemented!()
-    }
-
-    pub fn set_rv(&self) -> MAIResult<()> {
-        unimplemented!()
-    }
-
-    //Option 2
-    //Don't actually merge this. Need to figure out which way is preferable
-    /*
-    pub fn get_info_alt(&self) -> MAIResult<()> {
-        //Create packet
-        let packet = GetInfoMessage::default();
-        let slice = unsafe {
-            ::std::mem::transmute::<GetInfoMessage, [u8; ::std::mem::size_of::<GetInfoMessage>()]>(
-                packet,
-            )
+    pub fn set_gps_time(&self, gps_time: u32) -> MAIResult<()> {
+        let request = SetGPSTime {
+            gps_time,
+            ..Default::default()
         };
 
-        //send packet
-        self.conn.write(&slice)?;
-        Ok(())
+        self.send_message(request.serialize())
     }
-    */
+
+    pub fn set_rv(
+        &self,
+        eci_pos_x: f32,
+        eci_pos_y: f32,
+        eci_pos_z: f32,
+        eci_vel_x: f32,
+        eci_vel_y: f32,
+        eci_vel_z: f32,
+        time_epoch: u32,
+    ) -> MAIResult<()> {
+        let request = SetRV {
+            eci_pos_x,
+            eci_pos_y,
+            eci_pos_z,
+            eci_vel_x,
+            eci_vel_y,
+            eci_vel_z,
+            time_epoch,
+            ..Default::default()
+        };
+
+        self.send_message(request.serialize())
+    }
+
+    pub fn passthrough(&self, msg: &[u8]) -> MAIResult<()> {
+        self.conn.write(msg.as_slice())
+    }
 
     fn send_message(&self, mut msg: Vec<u8>) -> MAIResult<()> {
         let crc = State::<AUG_CCITT>::calculate(&msg[2..]);
@@ -145,6 +163,7 @@ impl MAI400 {
         let mut msg = vec![];
         let mut response: Response;
 
+        //TODO: Update for newer FW version
         loop {
             msg = self.conn.read()?;
 
@@ -187,6 +206,7 @@ impl MAI400 {
 
     }
 
+    //TODO: verify the bit shifting
     pub fn update_rotating(&self, msg: &StandardTelemetry, rotating: &mut RotatingTelemetry) {
         match msg.tlm_counter {
             0 => {
@@ -195,49 +215,44 @@ impl MAI400 {
                 rotating.b_field_igrf[2] = msg.rotating_variable_c as f32;
             }
             1 => {
-                rotating.b_field_igrf[0] = msg.rotating_variable_a as f32;
-                rotating.b_field_igrf[1] = msg.rotating_variable_b as f32;
-                rotating.b_field_igrf[2] = msg.rotating_variable_c as f32;
-            }
-            2 => {
                 rotating.sun_vec_eph[0] = msg.rotating_variable_a as f32;
                 rotating.sun_vec_eph[1] = msg.rotating_variable_b as f32;
                 rotating.sun_vec_eph[2] = msg.rotating_variable_c as f32;
             }
-            3 => {
+            2 => {
                 rotating.sc_pos_eci[0] = msg.rotating_variable_a as f32;
                 rotating.sc_pos_eci[1] = msg.rotating_variable_b as f32;
                 rotating.sc_pos_eci[2] = msg.rotating_variable_c as f32;
             }
-            4 => {
+            3 => {
                 rotating.sc_vel_eci[0] = msg.rotating_variable_a as f32;
                 rotating.sc_vel_eci[1] = msg.rotating_variable_b as f32;
                 rotating.sc_vel_eci[2] = msg.rotating_variable_c as f32;
             }
-            5 => {
+            4 => {
                 rotating.kepler_elem[0] = msg.rotating_variable_a as f32;
                 rotating.kepler_elem[1] = msg.rotating_variable_b as f32;
                 rotating.kepler_elem[2] = msg.rotating_variable_c as f32;
             }
-            6 => {
+            5 => {
                 rotating.kepler_elem[3] = msg.rotating_variable_a as f32;
                 rotating.kepler_elem[4] = msg.rotating_variable_b as f32;
                 rotating.kepler_elem[5] = msg.rotating_variable_c as f32;
             }
-            7 => {
+            6 => {
                 rotating.k_bdot[0] = msg.rotating_variable_a as f32;
                 rotating.k_bdot[1] = msg.rotating_variable_b as f32;
                 rotating.k_bdot[2] = msg.rotating_variable_c as f32;
             }
-            8 => {
+            7 => {
                 rotating.kp[0] = msg.rotating_variable_a as f32;
                 rotating.kp[1] = msg.rotating_variable_b as f32;
                 rotating.kp[2] = msg.rotating_variable_c as f32;
             }
             8 => {
-                rotating.kd[3] = msg.rotating_variable_a as f32;
-                rotating.kd[4] = msg.rotating_variable_b as f32;
-                rotating.kd[5] = msg.rotating_variable_c as f32;
+                rotating.kd[0] = msg.rotating_variable_a as f32;
+                rotating.kd[1] = msg.rotating_variable_b as f32;
+                rotating.kd[2] = msg.rotating_variable_c as f32;
             }
             9 => {
                 rotating.k_unload[0] = msg.rotating_variable_a as f32;
@@ -330,7 +345,6 @@ impl MAI400 {
                 rotating.rws_motor_current[2] = msg.rotating_variable_c.wrapping_shr(16) as u16;
                 rotating.raw_motor_temp = msg.rotating_variable_c as i16;
             }
-
             _ => {}
         }
     }
