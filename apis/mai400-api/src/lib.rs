@@ -15,6 +15,8 @@
  */
 
 //#![deny(missing_docs)]
+//Need a higher recursion limit for nom when parsing larger (>60 bytes) structures
+#![recursion_limit="256"]
 
 extern crate byteorder;
 //extern crate chrono;

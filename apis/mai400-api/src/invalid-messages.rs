@@ -20,13 +20,73 @@ use byteorder::{LittleEndian, WriteBytesExt};
 use nom::*;
 
 pub const SYNC: u16 = 0xEB90;
+pub const HDR_SZ: usize = 6;
+pub const FRAME_SZ: usize = HDR_SZ + 2;
+
+#[repr(C, packed)]
+pub struct MessageHeader {
+    pub sync: u16,
+    pub data_len: u16,
+    pub msg_id: u8,
+    pub addr: u8,
+}
+
+impl Default for MessageHeader {
+    fn default() -> Self {
+        MessageHeader {
+            sync: SYNC,
+            data_len: 0,
+            msg_id: 0,
+            addr: 0,
+        }
+    }
+}
+
+impl MessageHeader {
+    fn serialize(&self) -> Vec<u8> {
+        let mut vec = vec![];
+
+        //TODO: Verify that we want to make the sync variable
+        //little endian...
+        vec.write_u16::<LittleEndian>(self.sync).unwrap();
+        vec.write_u16::<LittleEndian>(self.data_len).unwrap();
+        vec.push(self.msg_id);
+        vec.push(self.addr);
+        vec
+    }
+}
 
 pub trait Message {
     fn serialize(&self) -> Vec<u8>;
 }
 
+pub struct GetInfo {
+    hdr: MessageHeader,
+}
+
+impl Default for GetInfo {
+    fn default() -> Self {
+        GetInfo {
+            hdr: MessageHeader {
+                msg_id: 0x1D,
+                ..Default::default()
+            },
+        }
+    }
+}
+
+impl Message for GetInfo {
+    fn serialize(&self) -> Vec<u8> {
+        let mut vec = vec![];
+
+        vec.append(&mut self.hdr.serialize());
+        //vec.write_u16::<LittleEndian>(self.crc).unwrap();
+        vec
+    }
+}
+
 pub struct SetAcsMode {
-    //pub hdr: MessageHeader,
+    pub hdr: MessageHeader,
     pub mode: u8,
     pub sec_vec: i32,
     pub pri_axis: i32,
@@ -37,6 +97,10 @@ pub struct SetAcsMode {
 impl Default for SetAcsMode {
     fn default() -> Self {
         SetAcsMode {
+            hdr: MessageHeader {
+                data_len: 17,
+                ..Default::default()
+            },
             mode: 0,
             sec_vec: 0,
             pri_axis: 0,
@@ -50,7 +114,7 @@ impl Message for SetAcsMode {
     fn serialize(&self) -> Vec<u8> {
         let mut vec = vec![];
 
-        //vec.append(&mut self.hdr.serialize());
+        vec.append(&mut self.hdr.serialize());
         vec.push(self.mode);
         vec.write_i32::<LittleEndian>(self.sec_vec).unwrap();
         vec.write_i32::<LittleEndian>(self.pri_axis).unwrap();
@@ -60,8 +124,70 @@ impl Message for SetAcsMode {
     }
 }
 
+pub struct ConfigInfo {
+    pub hdr: MessageHeader,
+    pub model: u16,
+    pub serial: u16,
+    pub major: u8,
+    pub minor: u8,
+    pub build: u16,
+    pub n_ehs: u8,
+    pub ehs_type: EHSType,
+    pub n_st: u8,
+    pub st_type: StarTracker,
+    pub crc: u16,
+}
+
+impl ConfigInfo {
+    pub fn new(msg: &[u8]) -> Self {
+        configinfo(msg).unwrap().1
+    }
+}
+
+named!(configinfo(&[u8]) -> ConfigInfo,
+    do_parse!(
+        sync: le_u16 >>
+        data_len: le_u16 >>
+        msg_id: le_u8 >>
+        addr: le_u8 >>
+        model: le_u16 >>
+        serial: le_u16 >>
+        major: le_u8 >>
+        minor: le_u8 >>
+        build: le_u16 >>
+        n_ehs: le_u8 >> 
+        ehs_type: le_u8 >>
+        n_st: le_u8 >>
+        st_type: le_u8 >>
+        crc: le_u16 >>
+        (ConfigInfo{
+                hdr: MessageHeader {
+                    sync, 
+                    data_len, 
+                    msg_id, 
+                    addr
+                }, 
+                model, 
+                serial, 
+                major, 
+                minor,
+                build, 
+                n_ehs,
+                ehs_type: match ehs_type {
+                    0 => EHSType::Internal,
+                    _ => EHSType::External
+                },
+                n_st,
+                st_type: match st_type {
+                    0 => StarTracker::MAISextant,
+                    _ => StarTracker::Vectronic,
+                }, 
+                crc})
+    )
+);
+
 pub struct StandardTelemetry {
-    pub sync: u16,
+    pub hdr: MessageHeader,
     pub tlm_counter: u8,
     pub gps_time: u32,
     pub time_subsec: u8,
@@ -104,31 +230,31 @@ pub struct StandardTelemetry {
     pub gc_torque_coil_cmd_0: char,
     pub gc_torque_coil_cmd_1: char,
     pub gc_torque_coil_cmd_2: char,
-    pub qbo_cmd_0: i16,
-    pub qbo_cmd_1: i16,
-    pub qbo_cmd_2: i16,
-    pub qbo_cmd_3: i16,
-    pub qbo_hat_0: i16,
-    pub qbo_hat_1: i16,
-    pub qbo_hat_2: i16,
-    pub qbo_hat_3: i16,
+    pub qbo_cmd_0: i32,
+    pub qbo_cmd_1: i32,
+    pub qbo_cmd_2: i32,
+    pub qbo_cmd_3: i32,
+    pub qbo_hat_0: i32,
+    pub qbo_hat_1: i32,
+    pub qbo_hat_2: i32,
+    pub qbo_hat_3: i32,
     pub angle_to_go: f32,
-    pub q_error_0: i16,
-    pub q_error_1: i16,
-    pub q_error_2: i16,
-    pub q_error_3: i16,
+    pub q_error_0: i32,
+    pub q_error_1: i32,
+    pub q_error_2: i32,
+    pub q_error_3: i32,
     pub omega_b_0: f32,
     pub omega_b_1: f32,
     pub omega_b_2: f32,
     pub rotating_variable_a: u32,
     pub rotating_variable_b: u32,
     pub rotating_variable_c: u32,
-    pub nb_0: i16,
-    pub nb_1: i16,
-    pub nb_2: i16,
-    pub neci_0: i16,
-    pub neci_1: i16,
-    pub neci_2: i16,
+    pub nb_0: i32,
+    pub nb_1: i32,
+    pub nb_2: i32,
+    pub neci_0: i32,
+    pub neci_1: i32,
+    pub neci_2: i32,
     pub crc: u16,
 }
 
@@ -141,6 +267,9 @@ impl StandardTelemetry {
 named!(standardtelem(&[u8]) -> StandardTelemetry,
     do_parse!(
         sync: le_u16 >>
+        data_len: le_u16 >>
+        msg_id: le_u8 >>
+        addr: le_u8 >>
         tlm_counter: le_u8 >>
         gps_time: le_u32 >>
         time_subsec: le_u8 >>
@@ -183,34 +312,39 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
         gc_torque_coil_cmd_0: le_u8 >>
         gc_torque_coil_cmd_1: le_u8 >>
         gc_torque_coil_cmd_2: le_u8 >>
-        qbo_cmd_0: le_i16 >>
-        qbo_cmd_1: le_i16 >>
-        qbo_cmd_2: le_i16 >>
-        qbo_cmd_3: le_i16 >>
-        qbo_hat_0: le_i16 >>
-        qbo_hat_1: le_i16 >>
-        qbo_hat_2: le_i16 >>
-        qbo_hat_3: le_i16 >>
+        qbo_cmd_0: le_i32 >>
+        qbo_cmd_1: le_i32 >>
+        qbo_cmd_2: le_i32 >>
+        qbo_cmd_3: le_i32 >>
+        qbo_hat_0: le_i32 >>
+        qbo_hat_1: le_i32 >>
+        qbo_hat_2: le_i32 >>
+        qbo_hat_3: le_i32 >>
         angle_to_go: le_f32 >>
-        q_error_0: le_i16 >>
-        q_error_1: le_i16 >>
-        q_error_2: le_i16 >>
-        q_error_3: le_i16 >>
+        q_error_0: le_i32 >>
+        q_error_1: le_i32 >>
+        q_error_2: le_i32 >>
+        q_error_3: le_i32 >>
         omega_b_0: le_f32 >>
         omega_b_1: le_f32 >>
         omega_b_2: le_f32 >>
         rotating_variable_a: le_u32 >>
         rotating_variable_b: le_u32 >>
         rotating_variable_c: le_u32 >>
-        nb_0: le_i16 >>
-        nb_1: le_i16 >>
-        nb_2: le_i16 >>
-        neci_0: le_i16 >>
-        neci_1: le_i16 >>
-        neci_2: le_i16 >>
+        nb_0: le_i32 >>
+        nb_1: le_i32 >>
+        nb_2: le_i32 >>
+        neci_0: le_i32 >>
+        neci_1: le_i32 >>
+        neci_2: le_i32 >>
         crc: le_u16 >>
         (StandardTelemetry{
-            sync,
+            hdr: MessageHeader {
+                sync, 
+                data_len, 
+                msg_id, 
+                addr
+            },
             tlm_counter,
             gps_time,
             time_subsec,
@@ -283,8 +417,17 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
     )
 );
 
-pub struct RawIMU {}
-
 pub enum Response {
+    Config(ConfigInfo),
     StdTelem(StandardTelemetry),
+}
+
+pub enum EHSType {
+    Internal,
+    External,
+}
+
+pub enum StarTracker {
+    MAISextant,
+    Vectronic,
 }

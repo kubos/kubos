@@ -141,17 +141,15 @@ impl Stream for SerialStream {
             // so giving the timeout a little bit of wiggle room
             port.set_timeout(Duration::new(0, 500))?;
 
-            let mut sync: [u8; 2] = [0; 2];
+            let mut sync: [u8; 256] = [0; 256];
             //println!("First read");
-            let mut len = match port.read(&mut sync) {
-                Ok(v) => v,
-                Err(_err) => continue, //TODO: process timeout
-            };
+            let len = port.read(&mut sync)?;
 
             let mut wrapper = Cursor::new(sync.to_vec());
             let check = wrapper.read_u16::<LittleEndian>()?;
             if check == SYNC {
                 ret_msg.append(&mut sync.to_vec());
+                break;
             } else {
                 // Odds are that we magically ended up in the middle of a message,
                 // so just loop so we can get all of the bytes out of the buffer
@@ -159,20 +157,39 @@ impl Stream for SerialStream {
                 continue;
             }
 
-            //port.set_timeout(Duration::new(0, 1))?;
-            while len < 200 {
-                let mut data: Vec<u8> = vec![0; 46];
-                //println!("Third read");
-                let temp = match port.read(&mut data[..]) {
-                    Ok(v) => v,
-                    Err(_err) => continue, //TODO: process timeout
-                };
+            port.set_timeout(Duration::new(0, 1))?;
 
-                len += temp;
-                ret_msg.append(&mut data[0..temp].to_vec());
+            // We got the SYNC bytes, so we know we're at the start of a message.
+            // Get the rest of the header
+            let mut hdr: [u8; HDR_SZ - 2] = [0; HDR_SZ - 2];
+            //println!("Second read");
+            if port.read(&mut hdr)? == 0 {
+                // We timed out. Throw out what we've got and start over
+                println!("Timed out");
+                continue;
             }
 
-            println!("Read len: {}", len);
+            println!("hdr: {:?}", hdr);
+
+            // Pull out the data_len value so we know how many more bytes we need to read
+            // (Add 2 to account for the CRC bytes)
+            let mut wrapper = Cursor::new(hdr[0..2].to_vec());
+            let len = wrapper.read_u16::<LittleEndian>()? + 2;
+            println!("Data Len: {:x}", len);
+
+            // Add the rest of the header to our return message
+            ret_msg.append(&mut hdr.to_vec());
+
+            let mut data: Vec<u8> = vec![0; len as usize];
+            //println!("Third read");
+            if port.read(&mut data[..])? == 0 {
+                // We timed out. Throw out what we've got and start over
+                println!("Timed out");
+                continue;
+            }
+
+            println!("Done reading");
+            ret_msg.append(&mut data);
             break;
         }
 
