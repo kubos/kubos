@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+mod checksum;
 mod status;
 
+pub use commands::checksum::Checksum;
 pub use commands::status::Status;

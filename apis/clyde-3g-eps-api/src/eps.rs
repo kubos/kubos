@@ -20,14 +20,17 @@ use i2c_api::Stream;
 
 use commands::*;
 
-#[derive(Debug, Display, Fail)]
+#[derive(Debug, Display, Eq, Fail, PartialEq)]
 pub enum EpsError {
-    #[display(fmt = "IO Error {}", cause)] IoError { cause: io::Error },
+    #[display(fmt = "IO Error {}", cause)] IoError { cause: String },
+    #[display(fmt = "Bad Data")] BadData,
 }
 
 impl From<io::Error> for EpsError {
     fn from(error: io::Error) -> Self {
-        EpsError::IoError { cause: error }
+        EpsError::IoError {
+            cause: error.to_string(),
+        }
     }
 }
 
