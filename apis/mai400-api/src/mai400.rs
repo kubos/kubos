@@ -16,59 +16,103 @@
 
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use crc16::*;
-use failure::Error;
 use messages::*;
 use serial;
 use serial_comm::Connection;
 use std::io;
 use std::io::Cursor;
 
+/// Structure to contain all possible variables which can be returned
+/// by the standard telemetry message's `rotating_variable` fields
 #[derive(Default)]
 pub struct RotatingTelemetry {
+    /// IGRF magnetic fields [X, Y, Z] (Tesla)
     b_field_igrf: [f32; 3],
+    /// ECI Sun Vector from Ephemeris [X, Y, Z] (Unit)
     sun_vec_eph: [f32; 3],
+    /// ECI Spacecraft Position [X, Y, Z] (km)
     sc_pos_eci: [f32; 3],
+    /// ECI Spacecraft Velocity [X, Y, Z] (km)
     sc_vel_eci: [f32; 3],
+    // TODO: These are all actually different fields...
     kepler_elem: [f32; 6],
+    /// Bdot Gain Acquisition Mode [X, Y, Z]
     k_bdot: [f32; 3],
+    /// Proportional Gain Normal Mode [X, Y, Z]
     kp: [f32; 3],
+    /// Derivative Gain Normal Mode [X, Y, Z]
     kd: [f32; 3],
+    /// Unloading Gain Normal Mode [X, Y, Z]
     k_unload: [f32; 3],
+    /// CSS{n} Bias [1, 2, 3, 4, 5, 6]
     css_bias: [i16; 6],
+    /// MAG Bias [X, Y, Z]
     mag_bias: [i16; 3],
+    /// RWS Bus Voltage (0.00483516483 v/lsb)
     rws_volt: i16,
+    /// Reserved
     rws_press: i16,
+    /// Attitude Determination Mode
     att_det_mode: u8, //TODO: enum
+    /// RWS Reset Counter [X, Y, Z]
     rws_reset_cntr: [u8; 3],
+    /// Sun and Mag Field are aligned
     sun_mag_aligned: u8, //TODO: bool
+    /// Software Minor Version
     minor_version: u8,
+    /// Software Unit Serial Number
     mai_sn: u8,
+    /// Orbit Propagation Mode
     orbit_prop_mode: u8,
+    /// ACS Mode in Operation
     acs_op_mode: u8,
+    /// ADACS Processor Reset Counter
     proc_reset_cntr: u8,
+    /// Software Major Version
     major_version: u8,
+    /// ADS Mode in Operation
     ads_op_mode: u8, //TODO: enum
+    /// CSS{n} Gain [1, 2, 3, 4, 5, 6]
     css_gain: [f32; 6],
+    /// Mag Gain [X, Y, Z]
     mag_gain: [f32; 3],
+    /// Epoch of Current Orbit (GPS sec)
     orbit_epoch: u32,
+    /// True Anomaly at Epoch – Kepler (deg)
     true_anomoly_epoch: f32,
+    /// Epoch of Next Updated RV (GPS sec)
     orbit_epoch_next: u32,
+    /// ECI Position at Next Epoch [X, Y, Z] (km)
     sc_pos_eci_epoch: [f32; 3],
+    /// ECI Velocity at Next Epoch [X, Y, Z] (km/sec)
     sc_vel_eci_epoch: [f32; 3],
+    /// QbX Wheel Speed Command (rpm)
     qb_x_wheel_speed: i16,
+    /// QbX Filter Gain
     qb_x_filter_gain: f32,
+    /// QbX Dipole Gain
     qb_x_dipole_gain: f32,
+    /// Dipole Gain [X, Y, Z]
     dipole_gain: [f32; 3],
+    /// Wheel Speed Bias [X, Y, Z] (rpm)
     wheel_speed_bias: [i16; 3],
+    /// Cosine of Sun/Mag Align Threshold Angle
     cos_sun_mag_align_thresh: f32,
+    /// Max AngleToGo for Unloading (rad)
     unload_ang_thresh: f32,
+    /// Quaternion feedback saturation.
     q_sat: f32,
+    /// Maximum RWA Torque (mNm)
     raw_trq_max: f32,
+    /// Reaction Wheel Motor Current [X, Y, Z] (A) (0.0003663003663 A/lsb)
     rws_motor_current: [u16; 3],
+    /// RWS Motor Temperature (Temperature oC = rwsMotorTemp * 0.0402930 - 50)
     raw_motor_temp: i16,
 }
 
+/// Structure for MAI-400 device instance
 pub struct MAI400 {
+    /// Device connection structure
     pub conn: Connection,
 }
 
@@ -78,6 +122,7 @@ impl MAI400 {
         MAI400 { conn }
     }
 
+    /// Request a hardware reset of the MAI-400
     // Resetting requires a pair of commands: request, then confirm
     pub fn reset(&self) -> MAIResult<()> {
         let request = RequestReset::default();
@@ -87,7 +132,7 @@ impl MAI400 {
         self.send_message(request.serialize())
     }
 
-    //SetAcsMode
+    /// Set the ACS mode
     pub fn set_mode(
         &self,
         mode: u8,
@@ -108,6 +153,7 @@ impl MAI400 {
         self.send_message(request.serialize())
     }
 
+    /// Set the ADACS clock with the desired GPS time
     pub fn set_gps_time(&self, gps_time: u32) -> MAIResult<()> {
         let request = SetGPSTime {
             gps_time,
@@ -117,6 +163,7 @@ impl MAI400 {
         self.send_message(request.serialize())
     }
 
+    /// Set orbital position and velocity at epoch for RK4 integration method of orbit propagation
     pub fn set_rv(
         &self,
         eci_pos_x: f32,
@@ -141,6 +188,7 @@ impl MAI400 {
         self.send_message(request.serialize())
     }
 
+    /// Directly send a message without formatting or checksum calculation
     pub fn passthrough(&self, msg: &[u8]) -> MAIResult<()> {
         self.conn.write(msg)
     }
@@ -153,12 +201,15 @@ impl MAI400 {
         Ok(())
     }
 
+    /// Wait for and read a message from the MAI-400
+    /// Note: Messages are sent every 250ms, so, to the human eye, this should
+    /// appear to be instantaneous
     pub fn get_message(&self) -> MAIResult<Response> {
-        let mut msg = vec![];
-        let mut response: Response;
+
+        let response: Response;
 
         loop {
-            msg = self.conn.read()?;
+            let mut msg = self.conn.read()?;
 
             // Get the CRC bytes
             let len = msg.len();
@@ -202,6 +253,9 @@ impl MAI400 {
 
     }
 
+    /// Extract the rotating variables from a standard telemetry message and update
+    /// the appropriate corresponding fields in a `RotatingTelemetry` structure
+    /// TODO: structure reference
     //TODO: verify the bit shifting
     // TODO: Doc says 3 MSB are used for version information. Need to extract
     pub fn update_rotating(&self, msg: &StandardTelemetry, rotating: &mut RotatingTelemetry) {
@@ -382,14 +436,21 @@ impl From<serial::Error> for MAIError {
 /// Common Error for MAI Actions
 #[derive(Fail, Display, Debug, Clone, PartialEq)]
 pub enum MAIError {
+    /// Catch-all error
     #[display(fmt = "Generic Error")]
     GenericError,
     #[display(fmt = "Serial Error: {}", cause)]
-    /// There was a problem parsing the result data
-    SerialError { cause: String },
+    /// An error was thrown by the serial driver
+    SerialError {
+        /// The underlying error
+        cause: String,
+    },
     #[display(fmt = "IO Error: {}", cause)]
-    /// There was a problem parsing the result data
-    IoError { cause: String },
+    /// An I/O error was thrown by the kernel
+    IoError {
+        /// The underlying error
+        cause: String,
+    },
 }
 
 impl From<io::Error> for MAIError {

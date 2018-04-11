@@ -84,6 +84,7 @@ pub struct StandardTelemetry {
 }
 
 impl StandardTelemetry {
+    /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
     pub fn new(msg: &[u8]) -> Self {
         standardtelem(msg).unwrap().1
     }
@@ -274,15 +275,22 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
     )
 );
 
+/// Raw accelerometer and gyroscope data
 pub struct RawIMU {
+    /// Message Header
     pub hdr: MessageHeader,
+    /// Accelerometer [X, Y, Z]  (3.9 mg/lsb)
     pub accel: [i16; 3],
+    /// Gyroscope [X, Y, Z] (8.75 mdps/lsb)
     pub gyro: [i16; 3],
+    /// Gyroscope temperature (-1C/lsb)
     pub gyro_temp: u8,
+    /// Message checksum
     pub crc: u16,
 }
 
 impl RawIMU {
+    /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
     pub fn new(msg: &[u8]) -> Self {
         raw_imu(msg).unwrap().1
     }
@@ -317,19 +325,35 @@ named!(raw_imu(&[u8]) -> RawIMU,
     )
 );
 
+/// IR Earth Horizon Sensor telemetry data
 pub struct IREHSTelemetry {
+    /// Message Header
     pub hdr: MessageHeader,
+    /// IREHS A Thermopile Sensors 12-bit ADC (0.8059 mV per lsb)
+    /// [earth limb, earth reference, space reference, wide FOV]
     pub thermopiles_a: [u16; 4],
+    /// IREHS B Thermopile Sensors 12-bit ADC (0.8059 mV per lsb)
+    /// [earth limb, earth reference, space reference, wide FOV]
     pub thermopiles_b: [u16; 4],
+    /// Thermistor Temp 12-bit ADC for A (0.8059 mV per lsb)
+    /// [earth limb, earth reference, space reference, wide FOV]
     pub temp_a: [u16; 4],
+    /// Thermistor Temp 12-bit ADC for B (0.8059 mV per lsb)
+    /// [earth limb, earth reference, space reference, wide FOV]
     pub temp_b: [u16; 4],
+    /// Calculated dip angle of Earth limb for A in degrees
     pub dip_angle_a: u32,
+    /// Calculated dip angle of Earth limb for B in degrees
     pub dip_angle_b: u32,
-    pub solution_degraded: [u8; 8],
+    /// Degradation codes for thermopiles
+    /// [{A}, {B}]
+    pub solution_degraded: [u8; 8], // TODO: process error codes
+    /// Message checksum
     pub crc: u16,
 }
 
 impl IREHSTelemetry {
+    /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
     pub fn new(msg: &[u8]) -> Self {
         irehs_telem(msg).unwrap().1
     }
@@ -416,22 +440,34 @@ named!(irehs_telem(&[u8]) -> IREHSTelemetry,
     )
 );
 
-
+/// ADCS configuration information
 pub struct ConfigInfo {
+    /// Message header
     pub hdr: MessageHeader,
+    /// ADACS model number (should be `400`)
     pub model: u16,
+    /// Device serial number
     pub serial: u16,
+    /// Firmware major version number
     pub major: u8,
+    /// Firmware minor version number
     pub minor: u8,
+    /// Firmware build number
     pub build: u16,
+    /// Number of earth horizon sensors
     pub n_ehs: u8,
+    /// Type of earth horizon sensors
     pub ehs_type: EHSType,
+    /// Number of star trackers
     pub n_st: u8,
+    /// Type of star trackers
     pub st_type: StarTracker,
+    /// Message checksum
     pub crc: u16,
 }
 
 impl ConfigInfo {
+    /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
     pub fn new(msg: &[u8]) -> Self {
         configinfo(msg).unwrap().1
     }
@@ -479,20 +515,30 @@ named!(configinfo(&[u8]) -> ConfigInfo,
     )
 );
 
-
+/// Messages sent by the MAI-400
 pub enum Response {
+    /// Standard telemetry message
     StdTelem(StandardTelemetry),
+    /// Raw IMU message
     IMU(RawIMU),
+    /// IREHS telemetry message
     IREHS(IREHSTelemetry),
+    /// Device configuration information
     Config(ConfigInfo),
 }
 
+/// Type of earth horizon sensor
 pub enum EHSType {
+    /// Internal MAI IREHS
     Internal,
+    /// External EHS
     External,
 }
 
+/// Type of star tracker
 pub enum StarTracker {
+    /// MAI space sextant
     MAISextant,
+    /// Vectronic VST41-M
     Vectronic,
 }
