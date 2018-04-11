@@ -36,11 +36,11 @@ pub struct StandardTelemetry {
     /// Last valid CCT command received
     pub last_command: u8,
     /// Commanded ACS Mode
-    pub acs_mode: u8, //TODO: enum
+    pub acs_mode: u8,
     /// Raw sun sensor outputs
     pub css: [u16; 6],
     /// Whether the device is eclipsed or not
-    pub eclipse_flag: u8, //TODO: bool
+    pub eclipse_flag: u8,
     /// Unit Sun Vector in Body Frame
     pub sun_vec_b: [i16; 3],
     /// Magnetometer Reading (inc. bias and gain)
@@ -55,7 +55,7 @@ pub struct StandardTelemetry {
     pub rwa_torque_cmd: [f32; 3],
     /// RWS Torque Command to wheel
     pub gc_rwa_torque_cmd: [i8; 3],
-    /// Torque Coil Command computed by ADACS (Am^2)
+    /// Torque Coil Command computed by ADACS (Am<sup>2</sup>)
     pub torque_coil_cmd: [f32; 3],
     /// Torque Coil Command (lsb)
     pub gc_torque_coil_cmd: [i8; 3],
@@ -69,11 +69,11 @@ pub struct StandardTelemetry {
     pub q_error: [i32; 4],
     /// Body rate in body frame (rad/sec).
     pub omega_b: [f32; 3],
-    /// Rotating variable A. Use RotatingVariables struct if interaction is needed
+    /// Rotating variable A. Use [RotatingTelemetry](struct.RotatingTelemetry.html) struct if interaction is needed
     pub rotating_variable_a: u32,
-    /// Rotating variable B. Use RotatingVariables struct if interaction is needed
+    /// Rotating variable B. Use [RotatingTelemetry](struct.RotatingTelemetry.html) struct if interaction is needed
     pub rotating_variable_b: u32,
-    /// Rotating variable C. Use RotatingVariables struct if interaction is needed
+    /// Rotating variable C. Use [RotatingTelemetry](struct.RotatingTelemetry.html) struct if interaction is needed
     pub rotating_variable_c: u32,
     /// Nadir vectors in Body
     pub nb: [i32; 3],
@@ -103,14 +103,14 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
         cmd_invalid_cntr: le_u16 >>
         cmd_invalid_chksum_cntr: le_u16 >>
         last_command: le_u8 >>
-        acs_mode: le_u8 >> //TODO: le_enum
+        acs_mode: le_u8 >>
         css_0: le_u16 >>
         css_1: le_u16 >>
         css_2: le_u16 >>
         css_3: le_u16 >>
         css_4: le_u16 >>
         css_5: le_u16 >>
-        eclipse_flag: le_u8 >> //TODO: le_bool
+        eclipse_flag: le_u8 >>
         sun_vec_b_0: le_i16 >>
         sun_vec_b_1: le_i16 >>
         sun_vec_b_2: le_i16 >>
@@ -178,7 +178,7 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
             cmd_invalid_cntr,
             cmd_invalid_chksum_cntr,
             last_command,
-            acs_mode, //TODO: enum
+            acs_mode,
             css: [
                 css_0,
                 css_1,
@@ -187,7 +187,7 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
                 css_4,
                 css_5
             ],
-            eclipse_flag, //TODO: bool
+            eclipse_flag,
             sun_vec_b: [
                 sun_vec_b_0,
                 sun_vec_b_1,
@@ -279,9 +279,9 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
 pub struct RawIMU {
     /// Message Header
     pub hdr: MessageHeader,
-    /// Accelerometer [X, Y, Z]  (3.9 mg/lsb)
+    /// Accelerometer (X, Y, Z)  (3.9 mg/lsb)
     pub accel: [i16; 3],
-    /// Gyroscope [X, Y, Z] (8.75 mdps/lsb)
+    /// Gyroscope (X, Y, Z) (8.75 mdps/lsb)
     pub gyro: [i16; 3],
     /// Gyroscope temperature (-1C/lsb)
     pub gyro_temp: u8,
@@ -347,7 +347,7 @@ pub struct IREHSTelemetry {
     pub dip_angle_b: u32,
     /// Degradation codes for thermopiles
     /// [{A}, {B}]
-    pub solution_degraded: [u8; 8], // TODO: process error codes
+    pub solution_degraded: [ThermopileFlags; 8],
     /// Message checksum
     pub crc: u16,
 }
@@ -426,19 +426,38 @@ named!(irehs_telem(&[u8]) -> IREHSTelemetry,
                 dip_angle_a,
                 dip_angle_b,
                 solution_degraded: [
-                    solution_degraded_earth_limb_a,
-                    solution_degraded_earth_ref_a,
-                    solution_degraded_space_ref_a,
-                    solution_degraded_wide_fov_a,
-                    solution_degraded_earth_limb_b,
-                    solution_degraded_earth_ref_b,
-                    solution_degraded_space_ref_b,
-                    solution_degraded_wide_fov_b
+                    ThermopileFlags::from_bits_truncate(solution_degraded_earth_limb_a),
+                    ThermopileFlags::from_bits_truncate(solution_degraded_earth_ref_a),
+                    ThermopileFlags::from_bits_truncate(solution_degraded_space_ref_a),
+                    ThermopileFlags::from_bits_truncate(solution_degraded_wide_fov_a),
+                    ThermopileFlags::from_bits_truncate(solution_degraded_earth_limb_b),
+                    ThermopileFlags::from_bits_truncate(solution_degraded_earth_ref_b),
+                    ThermopileFlags::from_bits_truncate(solution_degraded_space_ref_b),
+                    ThermopileFlags::from_bits_truncate(solution_degraded_wide_fov_b)
                 ],
                 crc,
         })
     )
 );
+
+bitflags! {
+    /// Thermopile error flags
+    #[derive(Default)]
+    pub struct ThermopileFlags: u8 {
+        /// Dip angle exceeded senser system limit
+        const DIP_ANGLE_LIMIT = 0x01;
+        /// Sun in FOV using sun ephemeris
+        const SUN_IN_EPHEMERIS = 0x02;
+        /// Thermopile is saturated
+        const THERMOPILE_SAT = 0x04;
+        /// No communications
+        const NO_COMM = 0x08;
+        /// Earth reference is bad
+        const BAD_EARTH_REF = 0x10;
+        /// Using auxiliary wide FOV sensor
+        const AUX_WIDE_FOV = 0x20;
+    }
+}
 
 /// ADCS configuration information
 pub struct ConfigInfo {

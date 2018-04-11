@@ -32,20 +32,28 @@
 //! // Request configuration information
 //! mai.get_info()?;
 //!
-//! // Get next message from MAI-400
-//! let result = mai.get_message()?;
-//!
-//! // Message processing logic...
+//! // Grab returned config message
+//! loop {
+//! 	match mai.get_message()? {
+//!     	Response::Config(config) => {
+//!         	println!("FW Version: {}.{}.{}", config.major, config.minor, config.build);
+//!         	break;
+//!     	}
+//!     	_ => continue
+//! 	}
+//! }
 //! # Ok(())
 //! # }
 //! ```
 //!
 //! [`MAI400`]: struct.MAI400.html
 
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 //Need a higher recursion limit for nom when parsing larger (>60 bytes) structures
 #![recursion_limit="256"]
 
+#[macro_use]
+extern crate bitflags;
 extern crate byteorder;
 extern crate crc16;
 #[cfg(test)]
@@ -66,3 +74,4 @@ mod tests;
 
 pub use mai400::*;
 pub use messages::rx::*;
+pub use serial_comm::Connection;

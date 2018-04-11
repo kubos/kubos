@@ -16,6 +16,7 @@
 
 use double;
 use super::*;
+use serial_comm::*;
 
 macro_rules! mock_new {
     () => (

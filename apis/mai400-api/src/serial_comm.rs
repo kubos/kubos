@@ -72,7 +72,6 @@ struct SerialStream {
 }
 
 impl Stream for SerialStream {
-    //TODO: Encapsulate the possible IO errors into appropriate MAIError values
     fn write(&self, data: &[u8]) -> MAIResult<()> {
         //But why don't you just make 'port' a field of SerialStream and then you
         //only have to open the connection once, during new?
@@ -109,9 +108,18 @@ impl Stream for SerialStream {
 
             let mut sync: [u8; 2] = [0; 2];
             match port.read(&mut sync) {
-                Ok(_len) => {} //TODO: Check if len==2. If not, throw error
-                Err(_err) => continue, //TODO: Process error. If timeout, continue. O/w, throw error
-            };
+                Ok(len) => {
+                    if len != 2 {
+                        continue;
+                    }
+                }
+                Err(err) => {
+                    match err.kind() {
+                        ::std::io::ErrorKind::TimedOut => continue, //TODO: Govern with a master timer? Or will the set_timeout call be enough? Needs to be tested
+                        _ => throw!(err),
+                    }
+                }
+            }
 
             let mut wrapper = Cursor::new(sync.to_vec());
             let check = wrapper.read_u16::<LittleEndian>()?;

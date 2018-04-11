@@ -26,88 +26,105 @@ use std::io::Cursor;
 /// by the standard telemetry message's `rotating_variable` fields
 #[derive(Default)]
 pub struct RotatingTelemetry {
-    /// IGRF magnetic fields [X, Y, Z] (Tesla)
-    b_field_igrf: [f32; 3],
-    /// ECI Sun Vector from Ephemeris [X, Y, Z] (Unit)
-    sun_vec_eph: [f32; 3],
-    /// ECI Spacecraft Position [X, Y, Z] (km)
-    sc_pos_eci: [f32; 3],
-    /// ECI Spacecraft Velocity [X, Y, Z] (km)
-    sc_vel_eci: [f32; 3],
-    // TODO: These are all actually different fields...
-    kepler_elem: [f32; 6],
-    /// Bdot Gain Acquisition Mode [X, Y, Z]
-    k_bdot: [f32; 3],
-    /// Proportional Gain Normal Mode [X, Y, Z]
-    kp: [f32; 3],
-    /// Derivative Gain Normal Mode [X, Y, Z]
-    kd: [f32; 3],
-    /// Unloading Gain Normal Mode [X, Y, Z]
-    k_unload: [f32; 3],
-    /// CSS{n} Bias [1, 2, 3, 4, 5, 6]
-    css_bias: [i16; 6],
-    /// MAG Bias [X, Y, Z]
-    mag_bias: [i16; 3],
+    /// IGRF magnetic fields (X, Y, Z) (Tesla)
+    pub b_field_igrf: [f32; 3],
+    /// ECI Sun Vector from Ephemeris (X, Y, Z) (Unit)
+    pub sun_vec_eph: [f32; 3],
+    /// ECI Spacecraft Position (X, Y, Z) (km)
+    pub sc_pos_eci: [f32; 3],
+    /// ECI Spacecraft Velocity (X, Y, Z) (km)
+    pub sc_vel_eci: [f32; 3],
+    /// Keplerian elements
+    pub kepler_elem: KeplerElem,
+    /// Bdot Gain Acquisition Mode (X, Y, Z)
+    pub k_bdot: [f32; 3],
+    /// Proportional Gain Normal Mode (X, Y, Z)
+    pub kp: [f32; 3],
+    /// Derivative Gain Normal Mode (X, Y, Z)
+    pub kd: [f32; 3],
+    /// Unloading Gain Normal Mode (X, Y, Z)
+    pub k_unload: [f32; 3],
+    /// CSS{n} Bias (1, 2, 3, 4, 5, 6)
+    pub css_bias: [i16; 6],
+    /// MAG Bias (X, Y, Z)
+    pub mag_bias: [i16; 3],
     /// RWS Bus Voltage (0.00483516483 v/lsb)
-    rws_volt: i16,
+    pub rws_volt: i16,
     /// Reserved
-    rws_press: i16,
+    pub rws_press: i16,
     /// Attitude Determination Mode
-    att_det_mode: u8, //TODO: enum
-    /// RWS Reset Counter [X, Y, Z]
-    rws_reset_cntr: [u8; 3],
+    pub att_det_mode: u8,
+    /// RWS Reset Counter (X, Y, Z)
+    pub rws_reset_cntr: [u8; 3],
     /// Sun and Mag Field are aligned
-    sun_mag_aligned: u8, //TODO: bool
+    pub sun_mag_aligned: u8,
     /// Software Minor Version
-    minor_version: u8,
+    pub minor_version: u8,
     /// Software Unit Serial Number
-    mai_sn: u8,
+    pub mai_sn: u8,
     /// Orbit Propagation Mode
-    orbit_prop_mode: u8,
+    pub orbit_prop_mode: u8,
     /// ACS Mode in Operation
-    acs_op_mode: u8,
+    pub acs_op_mode: u8,
     /// ADACS Processor Reset Counter
-    proc_reset_cntr: u8,
+    pub proc_reset_cntr: u8,
     /// Software Major Version
-    major_version: u8,
+    pub major_version: u8,
     /// ADS Mode in Operation
-    ads_op_mode: u8, //TODO: enum
-    /// CSS{n} Gain [1, 2, 3, 4, 5, 6]
-    css_gain: [f32; 6],
-    /// Mag Gain [X, Y, Z]
-    mag_gain: [f32; 3],
+    pub ads_op_mode: u8,
+    /// CSS{n} Gain (1, 2, 3, 4, 5, 6)
+    pub css_gain: [f32; 6],
+    /// Mag Gain (X, Y, Z)
+    pub mag_gain: [f32; 3],
     /// Epoch of Current Orbit (GPS sec)
-    orbit_epoch: u32,
+    pub orbit_epoch: u32,
     /// True Anomaly at Epoch – Kepler (deg)
-    true_anomoly_epoch: f32,
+    pub true_anomoly_epoch: f32,
     /// Epoch of Next Updated RV (GPS sec)
-    orbit_epoch_next: u32,
-    /// ECI Position at Next Epoch [X, Y, Z] (km)
-    sc_pos_eci_epoch: [f32; 3],
-    /// ECI Velocity at Next Epoch [X, Y, Z] (km/sec)
-    sc_vel_eci_epoch: [f32; 3],
+    pub orbit_epoch_next: u32,
+    /// ECI Position at Next Epoch (X, Y, Z) (km)
+    pub sc_pos_eci_epoch: [f32; 3],
+    /// ECI Velocity at Next Epoch (X, Y, Z) (km/sec)
+    pub sc_vel_eci_epoch: [f32; 3],
     /// QbX Wheel Speed Command (rpm)
-    qb_x_wheel_speed: i16,
+    pub qb_x_wheel_speed: i16,
     /// QbX Filter Gain
-    qb_x_filter_gain: f32,
+    pub qb_x_filter_gain: f32,
     /// QbX Dipole Gain
-    qb_x_dipole_gain: f32,
-    /// Dipole Gain [X, Y, Z]
-    dipole_gain: [f32; 3],
-    /// Wheel Speed Bias [X, Y, Z] (rpm)
-    wheel_speed_bias: [i16; 3],
+    pub qb_x_dipole_gain: f32,
+    /// Dipole Gain (X, Y, Z)
+    pub dipole_gain: [f32; 3],
+    /// Wheel Speed Bias (X, Y, Z) (rpm)
+    pub wheel_speed_bias: [i16; 3],
     /// Cosine of Sun/Mag Align Threshold Angle
-    cos_sun_mag_align_thresh: f32,
+    pub cos_sun_mag_align_thresh: f32,
     /// Max AngleToGo for Unloading (rad)
-    unload_ang_thresh: f32,
+    pub unload_ang_thresh: f32,
     /// Quaternion feedback saturation.
-    q_sat: f32,
+    pub q_sat: f32,
     /// Maximum RWA Torque (mNm)
-    raw_trq_max: f32,
-    /// Reaction Wheel Motor Current [X, Y, Z] (A) (0.0003663003663 A/lsb)
-    rws_motor_current: [u16; 3],
+    pub raw_trq_max: f32,
+    /// Reaction Wheel Motor Current (X, Y, Z) (A) (0.0003663003663 A/lsb)
+    pub rws_motor_current: [u16; 3],
     /// RWS Motor Temperature (Temperature oC = rwsMotorTemp * 0.0402930 - 50)
-    raw_motor_temp: i16,
+    pub raw_motor_temp: i16,
+}
+
+/// Structure for keplarian elements returned in the standard telemetry message
+#[derive(Default)]
+pub struct KeplerElem {
+    /// Semi major axis (km)
+    pub semi_major_axis: f32,
+    /// Eccentricity
+    pub eccentricity: f32,
+    /// Inclination (deg)
+    pub inclination: f32,
+    /// Right ascension of ascending node (deg)
+    pub raan: f32,
+    /// Argument of perigee (deg)
+    pub arg_parigee: f32,
+    /// True anomaly (deg)
+    pub true_anomoly: f32,
 }
 
 /// Structure for MAI-400 device instance
@@ -118,11 +135,46 @@ pub struct MAI400 {
 
 impl MAI400 {
     /// Constructor for MAI400 structure
+    ///
+    /// # Arguments
+    ///
+    /// * conn - The underlying connection stream to use for communication with the device
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mai400_api::*;
+    ///
+    /// # fn func() -> MAIResult<()> {
+    /// let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
     pub fn new(conn: Connection) -> MAI400 {
         MAI400 { conn }
     }
 
     /// Request a hardware reset of the MAI-400
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    /// mai.reset()?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
     // Resetting requires a pair of commands: request, then confirm
     pub fn reset(&self) -> MAIResult<()> {
         let request = RequestReset::default();
@@ -133,6 +185,36 @@ impl MAI400 {
     }
 
     /// Set the ACS mode
+    ///
+    /// # Arguments
+    ///
+    /// *Note: Arguments should be set to `0x00` when not needed for desired mode*
+    ///
+    /// * mode - ACS mode to enter
+    /// * sec_vec - Secondary vector, when entering Object Track mode,
+    ///   or Qbi_cmd[0] when entering Qinertial mode
+    /// * pri_axis - Primary pointing axis, or Qbi_cmd[1] when entering Qinertial mode
+    /// * sec_axis - Secondary pointing axis, or Qbi_cmd[2] when entering Qinertial mode
+    /// * qbi_cmd4 - Qbi_cmd[3] when entering Qinertial mode
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    /// mai.set_mode(13, 1, -1, -3, 0)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
+    // TODO: Get good values for examples
     pub fn set_mode(
         &self,
         mode: u8,
@@ -154,6 +236,29 @@ impl MAI400 {
     }
 
     /// Set the ADACS clock with the desired GPS time
+    ///
+    /// # Arguments
+    ///
+    /// * gps_time - New clock time (elapsed seconds after Jan 6, 1980 00:00:00)
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    /// // Jan 01, 2018
+    /// mai.set_gps_time(1198800018)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
     pub fn set_gps_time(&self, gps_time: u32) -> MAIResult<()> {
         let request = SetGPSTime {
             gps_time,
@@ -164,6 +269,34 @@ impl MAI400 {
     }
 
     /// Set orbital position and velocity at epoch for RK4 integration method of orbit propagation
+    ///
+    /// # Arguments
+    ///
+    /// * eci_pos_x - X-axis ECI position
+    /// * eci_pos_y - Y-axis ECI position
+    /// * eci_pos_z - Z-axis ECI position
+    /// * eci_vel_x - X-axis ECI velocity
+    /// * eci_vel_y - Y-axis ECI velocity
+    /// * eci_vel_z - Z-axis ECI velocity
+    /// * time_epoch - GPS time at Epoch
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    /// mai.set_rv(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1198800018)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
     pub fn set_rv(
         &self,
         eci_pos_x: f32,
@@ -188,7 +321,78 @@ impl MAI400 {
         self.send_message(request.serialize())
     }
 
+    /// Request the device configuration information
+    ///
+    /// *Note: The configuration information should be fetched with a separate `read` call*
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    ///
+    /// // Request configuration information
+    /// mai.get_info()?;
+    ///
+    /// // Grab returned config message
+    /// loop {
+    /// 	match mai.get_message()? {
+    ///     	Response::Config(config) => {
+    ///         	println!("FW Version: {}.{}.{}", config.major, config.minor, config.build);
+    ///         	break;
+    ///     	}
+    ///     	_ => continue
+    /// 	}
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
+    pub fn get_info(&self) -> MAIResult<()> {
+        self.send_message(GetInfo::default().serialize())
+    }
+
     /// Directly send a message without formatting or checksum calculation
+    ///
+    /// # Arguments
+    ///
+    /// * msg - Message to send
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    ///
+    /// let mut array = [0; 8];
+    /// array[0] = 0x90; // SYNC byte 1
+    /// array[1] = 0xEB; // SYNC byte 2
+    /// array[2] = 0x0;  // Data_len byte 1
+    /// array[3] = 0x0;  // Data_len byte 2
+    /// array[4] = 0x5A; // Msg_id
+    /// array[5] = 0x0;  // Addr
+    /// array[6] = 0x00; // CRC byte 1
+    /// array[7] = 0x00; // CRC byte 2
+    ///
+    /// mai.passthrough(&array)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
     pub fn passthrough(&self, msg: &[u8]) -> MAIResult<()> {
         self.conn.write(msg)
     }
@@ -201,9 +405,37 @@ impl MAI400 {
         Ok(())
     }
 
-    /// Wait for and read a message from the MAI-400
-    /// Note: Messages are sent every 250ms, so, to the human eye, this should
+    /// Wait for and read a message from the MAI-400.
+    ///
+    /// Returns a `Response` enum containing a received message
+    ///
+    /// *Note*: Messages are sent every 250ms, so, to the human eye, this should
     /// appear to be instantaneous
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    /// let msg = mai.get_message()?;
+    ///
+    /// match msg {
+    ///     Response::StdTelem(telem) => {
+    ///         println!("Num successful commands: {}", telem.cmd_valid_cntr);
+    ///     }
+    ///     _ => {}
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
     pub fn get_message(&self) -> MAIResult<Response> {
 
         let response: Response;
@@ -230,12 +462,21 @@ impl MAI400 {
             msg.append(&mut raw);
 
             // Identify message type and convert to usable structure
-            // TODO: Add remaining messages
             let id = msg[5];
             match id {
                 1 => {
                     let telem = StandardTelemetry::new(&msg[..]);
                     response = Response::StdTelem(telem);
+                    break;
+                }
+                2 => {
+                    let irehs = IREHSTelemetry::new(&msg[..]);
+                    response = Response::IREHS(irehs);
+                    break;
+                }
+                3 => {
+                    let imu = RawIMU::new(&msg[..]);
+                    response = Response::IMU(imu);
                     break;
                 }
                 6 => {
@@ -254,9 +495,42 @@ impl MAI400 {
     }
 
     /// Extract the rotating variables from a standard telemetry message and update
-    /// the appropriate corresponding fields in a `RotatingTelemetry` structure
-    /// TODO: structure reference
-    //TODO: verify the bit shifting
+    /// the appropriate corresponding fields in a [`RotatingTelemetry`] structure
+    ///
+    /// # Arguments
+    ///
+    /// * msg - Standard telemetry message to extract variables from
+    /// * rotating - Rotating variables structure to copy extracted data into
+    ///
+    /// # Errors
+    ///
+    /// If errors are encountered, the structure will not be updated
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    ///
+    /// let mut rotating = RotatingTelemetry::default();
+    ///
+    /// let msg = mai.get_message()?;
+    /// match msg {
+    ///     Response::StdTelem(telem) => {
+    ///         mai.update_rotating(&telem, &mut rotating);
+    ///     }
+    ///     _ => {}
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
+    ///
+    /// [`RotatingTelemetry`]: struct.RotatingTelemetry.html
+    // TODO: verify the bit shifting
     // TODO: Doc says 3 MSB are used for version information. Need to extract
     pub fn update_rotating(&self, msg: &StandardTelemetry, rotating: &mut RotatingTelemetry) {
         match msg.tlm_counter {
@@ -281,14 +555,14 @@ impl MAI400 {
                 rotating.sc_vel_eci[2] = msg.rotating_variable_c as f32;
             }
             4 => {
-                rotating.kepler_elem[0] = msg.rotating_variable_a as f32;
-                rotating.kepler_elem[1] = msg.rotating_variable_b as f32;
-                rotating.kepler_elem[2] = msg.rotating_variable_c as f32;
+                rotating.kepler_elem.semi_major_axis = msg.rotating_variable_a as f32;
+                rotating.kepler_elem.eccentricity = msg.rotating_variable_b as f32;
+                rotating.kepler_elem.inclination = msg.rotating_variable_c as f32;
             }
             5 => {
-                rotating.kepler_elem[3] = msg.rotating_variable_a as f32;
-                rotating.kepler_elem[4] = msg.rotating_variable_b as f32;
-                rotating.kepler_elem[5] = msg.rotating_variable_c as f32;
+                rotating.kepler_elem.raan = msg.rotating_variable_a as f32;
+                rotating.kepler_elem.arg_parigee = msg.rotating_variable_b as f32;
+                rotating.kepler_elem.true_anomoly = msg.rotating_variable_c as f32;
             }
             6 => {
                 rotating.k_bdot[0] = msg.rotating_variable_a as f32;
@@ -400,38 +674,6 @@ impl MAI400 {
         }
     }
 }
-
-/* 
-TODO: Deal with the fact that you can't clone io::error,
-but double requires the ability to clone errors 
-
-#[derive(Fail, Display, Debug)]
-pub enum MAIError {
-    #[display(fmt = "Generic Error")]
-    GenericError,
-    #[display(fmt = "Serial Error: {}", cause)]
-    /// There was a problem parsing the result data
-    SerialError { #[fail(cause)] cause: serial::Error },
-    #[display(fmt = "IO Error: {}", cause)]
-    /// There was a problem parsing the result data
-    IoError {
-        #[fail(cause)]
-        cause: io::Error,
-    },
-}
-
-impl From<io::Error> for MAIError {
-    fn from(error: io::Error) -> Self {
-        MAIError::IoError { cause: error }
-    }
-}
-
-impl From<serial::Error> for MAIError {
-    fn from(error: serial::Error) -> Self {
-        MAIError::SerialError { cause: error }
-    }
-}
-*/
 
 /// Common Error for MAI Actions
 #[derive(Fail, Display, Debug, Clone, PartialEq)]
