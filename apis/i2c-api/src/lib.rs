@@ -11,9 +11,9 @@ use i2c_linux::I2c;
 /// High level read/write trait for I2C connections to implement
 pub trait Stream {
     /// Write bytes
-    fn write(&self, data: &[u8]) -> Result<()>;
+    fn write(&self, command: u8, data: &[u8]) -> Result<()>;
     /// Read bytes and return vector
-    fn read(&self, length: usize) -> Result<Vec<u8>>;
+    fn read(&self, command: u8) -> Result<Vec<u8>>;
 }
 
 /// Struct for communicating with an I2c device
@@ -29,24 +29,30 @@ impl Connection {
     ///
     /// `path` - Path to I2c device
     /// `slave` - I2c slave address to read/write to
-    pub fn new(path: String, slave: u16) -> Self {
-        Connection { path, slave }
+    pub fn new(path: &str, slave: u16) -> Self {
+        Connection {
+            path: path.to_string(),
+            slave,
+        }
     }
 }
 
 impl Stream for Connection {
     /// Writing
-    fn write(&self, data: &[u8]) -> Result<()> {
+    fn write(&self, command: u8, data: &[u8]) -> Result<()> {
         let mut i2c = I2c::from_path(self.path.clone())?;
+        println!("i2c_connection writing {:?} to {}", data, self.slave);
         i2c.smbus_set_slave_address(self.slave, false)?;
-        i2c.smbus_write_byte(data[0])
+        i2c.i2c_write_block_data(command, data)
     }
 
     /// Reading
-    fn read(&self, _length: usize) -> Result<Vec<u8>> {
+    fn read(&self, command: u8) -> Result<Vec<u8>> {
         let mut i2c = I2c::from_path(self.path.clone())?;
+        println!("i2c connection reading from {}", self.slave);
         i2c.smbus_set_slave_address(self.slave, false)?;
-        let data = i2c.smbus_read_byte()?;
-        Ok(vec![data])
+        let mut data = vec![0; 4];
+        i2c.i2c_read_block_data(command, &mut data)?;
+        Ok(data)
     }
 }

@@ -46,8 +46,15 @@ impl Eps {
     }
 
     pub fn get_board_status(&self) -> EpsStatus<Status> {
-        self.connection.write(&Status::command())?;
-        Ok(Status::parse(&self.connection.read(2)?))
+        let cmd = Status::command();
+        self.connection.write(cmd[0], &cmd[1..])?;
+        Ok(Status::parse(&self.connection.read(cmd[0])?))
+    }
+
+    pub fn get_checksum(&self) -> EpsStatus<Checksum> {
+        let cmd = Checksum::command();
+        self.connection.write(cmd[0], &cmd[1..])?;
+        Checksum::parse(&self.connection.read(cmd[0])?)
     }
 }
 
