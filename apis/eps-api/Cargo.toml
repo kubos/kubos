@@ -1,0 +1,7 @@
+[package]
+name = "eps-api"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
+failure = { git = "https://github.com/rust-lang-nursery/failure" }

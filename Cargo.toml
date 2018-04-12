@@ -2,6 +2,7 @@
 members = [
 "apis/adcs-api",
 "apis/clyde-3g-eps-api",
+"apis/eps-api",
 "apis/i2c-api",
 "apis/isis-ants-api",
 "apis/isis-imtq-api",

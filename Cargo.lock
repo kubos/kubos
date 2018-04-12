@@ -81,7 +81,7 @@ name = "clyde-3g-eps-api"
 version = "0.1.0"
 dependencies = [
  "bitflags 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "failure 1.0.0 (git+https://github.com/rust-lang-nursery/failure)",
+ "eps-api 0.1.0",
  "i2c-api 0.1.0",
 ]
 
@@ -121,6 +121,13 @@ dependencies = [
 name = "dtoa"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "eps-api"
+version = "0.1.0"
+dependencies = [
+ "failure 1.0.0 (git+https://github.com/rust-lang-nursery/failure)",
+]
 
 [[package]]
 name = "extern-lib"

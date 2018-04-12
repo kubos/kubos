@@ -14,27 +14,10 @@
  * limitations under the License.
  */
 
-use std::io;
-
 use i2c_api::Stream;
 
 use commands::*;
-
-#[derive(Debug, Display, Eq, Fail, PartialEq)]
-pub enum EpsError {
-    #[display(fmt = "IO Error {}", cause)] IoError { cause: String },
-    #[display(fmt = "Bad Data")] BadData,
-}
-
-impl From<io::Error> for EpsError {
-    fn from(error: io::Error) -> Self {
-        EpsError::IoError {
-            cause: error.to_string(),
-        }
-    }
-}
-
-pub type EpsStatus<T> = Result<T, EpsError>;
+use eps_api::EpsError;
 
 pub struct Eps {
     connection: Box<Stream>,
@@ -45,11 +28,11 @@ impl Eps {
         Eps { connection }
     }
 
-    pub fn get_board_status(&self) -> EpsStatus<Status> {
+    pub fn get_board_status(&self) -> Result<Status, EpsError> {
         Status::parse(&self.connection.transfer(Status::command())?)
     }
 
-    pub fn get_checksum(&self) -> EpsStatus<Checksum> {
+    pub fn get_checksum(&self) -> Result<Checksum, EpsError> {
         Checksum::parse(&self.connection.transfer(Checksum::command())?)
     }
 }
@@ -59,15 +42,15 @@ mod tests {
     use super::*;
     use std::io::Error;
 
-    struct MockConn;
+    // struct MockConn;
 
-    impl Stream for MockConn {
-        fn write(&self, data: &[u8]) -> Result<(), Error> {
-            Ok(())
-        }
+    // impl Stream for MockConn {
+    //     fn write(&self, data: &[u8]) -> Result<(), Error> {
+    //         Ok(())
+    //     }
 
-        fn read(&self, length: usize) -> Result<Vec<u8>, Error> {
-            Ok(vec![])
-        }
-    }
+    //     fn read(&self, length: usize) -> Result<Vec<u8>, Error> {
+    //         Ok(vec![])
+    //     }
+    // }
 }

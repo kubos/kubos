@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use eps::{EpsError, EpsStatus};
+use eps_api::EpsError;
 use i2c_api::Command;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -35,7 +35,7 @@ impl Default for Checksum {
 }
 
 impl Checksum {
-    pub fn parse(data: &[u8]) -> EpsStatus<Self> {
+    pub fn parse(data: &[u8]) -> Result<Self, EpsError> {
         if data.len() == 4 {
             Ok(Checksum {
                 motherboard: data[2] as u16 | (data[3] as u16) << 8,

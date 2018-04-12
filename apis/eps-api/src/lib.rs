@@ -15,11 +15,23 @@
  */
 
 #[macro_use]
-extern crate bitflags;
-extern crate eps_api;
-extern crate i2c_api;
+extern crate failure;
 
-mod commands;
-mod eps;
+use std::io;
 
-pub use eps::Eps;
+#[derive(Debug, Display, Eq, Fail, PartialEq)]
+#[display(fmt = "Eps Error")]
+pub enum EpsError {
+    #[display(fmt = "IO Error {}", cause)] IoError { cause: String },
+    #[display(fmt = "Bad Data")] BadData,
+}
+
+impl From<io::Error> for EpsError {
+    fn from(error: io::Error) -> Self {
+        EpsError::IoError {
+            cause: error.to_string(),
+        }
+    }
+}
+
+pub type EpsResult<T> = Result<T, EpsError>;
