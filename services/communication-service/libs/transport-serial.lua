@@ -1,5 +1,5 @@
 -- This transport is for communicating over a serial device.  Simply point it
--- to `/dev/ttyUSB*` or `/dev/ttyUSBO*` or whatever device you want with the
+-- to `/dev/ttyUSB*` or `/dev/ttyO*` or whatever device you want with the
 -- agreed upon baud rate and it will open the device file and configure it.
 
 local fs = require 'coro-fs'

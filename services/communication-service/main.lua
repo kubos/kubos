@@ -6,11 +6,6 @@ local getenv = require('os').getenv
 local udp = require 'codec-udp'
 local encoder = require('coro-wrapper').encoder
 local decoder = require('coro-wrapper').decoder
-local bit = require 'bit'
-local bor = bit.bor
-local lshift = bit.lshift
-local byte = string.byte
-local sub = string.sub
 
 local usage = [[
 Please specify transport and options:
@@ -20,12 +15,6 @@ kubos-communication-service serial /dev/ttyUSB0 115200
 
 # Take over the current PTY assuming it's serial
 kubos-communication-service debug-serial 115200
-
-# Communicate with a twxvu ground station over TCP
-kubos-communication-service twxvu-tcp ip port
-
-# Communicate with a twxvu flight radio over serial
-kubos-communication-service twxvu-serial /dev/ttyUSB1
 ]]
 
 

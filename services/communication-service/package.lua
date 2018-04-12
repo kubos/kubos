@@ -15,10 +15,8 @@ return {
     "creationix/coro-wrapper",
     "creationix/coro-channel",
     "creationix/coro-fs",
-    "creationix/coro-net",
   },
   files = {
     "**.lua",
-    "**.h",
   }
 }
