@@ -1,3 +1,16 @@
+--[[
+Copyright (C) 2018 Kubos Corporation
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+]]
+
 -- Listens for udp packets over a custom transport and forwards to UDP services
 -- on the local device.
 
@@ -14,9 +27,9 @@ Please specify transport and options:
 kubos-communication-service serial /dev/ttyUSB0 115200
 
 # Take over the current PTY assuming it's serial
-kubos-communication-service debug-serial 115200
+# You need to redirect stderr somewhere so it doesn't dirty the serial data.
+kubos-communication-service debug-serial 115200 2> debug-log
 ]]
-
 
 local transport_name = args[1]
 if not transport_name then
