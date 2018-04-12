@@ -1,3 +1,21 @@
+--[[
+Copyright (C) 2018 Kubos Corporation
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+]]
+
+-- This client gives a nice readline interface for talking to UDP services.
+-- Any command typed into the prompt will be send as-is to the UDP service.
+-- This can be used for any text-based service such as graphql services.
+-- Results will be printed to the console.
+
 local uv = require 'uv'
 local dump = require('pretty-print').dump
 local Editor = require('readline').Editor
