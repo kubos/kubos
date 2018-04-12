@@ -15,6 +15,7 @@
  */
 
 use eps::{EpsError, EpsStatus};
+use i2c_api::Command;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Checksum {
@@ -50,8 +51,11 @@ impl Checksum {
         }
     }
 
-    pub fn command() -> Vec<u8> {
-        vec![0x05, 0x00]
+    pub fn command() -> Command {
+        Command {
+            cmd: 0x05,
+            data: vec![0x00],
+        }
     }
 }
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use i2c_api::Command;
+
 bitflags! {
     #[derive(Default)]
     pub struct Status: u8 {
@@ -39,8 +41,11 @@ impl Status {
         }
     }
 
-    pub fn command() -> (Vec<u8>) {
-        (vec![0x01, 0x00])
+    pub fn command() -> Command {
+        Command {
+            cmd: 0x01,
+            data: vec![0x00],
+        }
     }
 }
 
