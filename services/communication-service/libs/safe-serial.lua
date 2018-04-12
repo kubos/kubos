@@ -57,12 +57,12 @@ return function (dev, baud)
   local function read(num)
     local timer = uv.new_timer()
     local thread = coroutine.running()
-    timer:start(5000, 0, function ()
+    timer:start(60000, 0, function ()
       coroutine.resume(thread, nil, 'Read Timeout')
     end)
     while #buffer < num do
-      local chunk = assert(fs.read(fd, num))
-      p('Serial read', chunk)
+      local chunk = assert(fs.read(fd))
+      -- p('Serial read', chunk)
       if not chunk then break end
       buffer = buffer .. chunk
     end
@@ -79,7 +79,7 @@ return function (dev, baud)
   end
 
   local function write(data)
-    p('Serial write', data)
+    -- p('Serial write', data)
     if not data then
       return assert(fs.close(fd))
     end

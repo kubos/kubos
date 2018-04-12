@@ -28,6 +28,7 @@ return function (dev, baud)
   local get_download_file_count = radio.get_download_file_count
   local put_download_file = radio.put_download_file
   local get_state_of_health_for_modem = radio.get_state_of_health_for_modem
+  local get_geolocation_position_estimate = radio.get_geolocation_position_estimate
 
   -- coroutine.wrap(function ()
   --   p("alive", radio.get_alive())
@@ -45,8 +46,11 @@ return function (dev, baud)
     baud = baud,
   }
 
+  local count = 1
+
   local function read()
     while true do
+      sleep(1000)
       local ufile = get_uploaded_file_count()
       p("Upload File Count", ufile)
       if ufile > 0 then
@@ -54,27 +58,30 @@ return function (dev, baud)
         p("Received file", name)
         return body
       end
+      sleep(1000)
       local umessage = get_uploaded_message_count()
       p("Upload Message Count", umessage)
       if umessage > 0 then
         p("message", get_uploaded_message())
       else
+        sleep(1000)
         local dfile = get_download_file_count()
         p("Download File Count", dfile)
+        if dfile == 0 then
+          local name = 'K' .. count
+          assert(put_download_file(name, ''))
+        end
+        sleep(1000)
         local health = get_state_of_health_for_modem()
         p(health)
-        sleep(5000)
+        local geo = get_geolocation_position_estimate()
+        p(geo)
       end
     end
   end
 
-  local count = 1
   local function write(data)
-    p("Download count", get_download_file_count())
-    -- while get_download_file_count() > 1 do
-    --   sleep(1000)
-    -- end
-    local name = 'p' .. count
+    local name = 'UDP' .. count
     count = count + 1
     p("Sending file", name)
     assert(put_download_file(name, data))
