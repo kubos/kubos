@@ -19,9 +19,11 @@ mod status;
 mod last_error;
 mod reset;
 mod version;
+mod telemetry;
 
 pub use commands::checksum::Checksum;
 pub use commands::last_error::LastError;
 pub use commands::reset::Reset;
 pub use commands::status::Status;
 pub use commands::version::VersionInfo;
+pub use commands::telemetry::Telemetry;
