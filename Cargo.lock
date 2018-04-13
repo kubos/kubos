@@ -82,7 +82,7 @@ version = "0.1.0"
 dependencies = [
  "bitflags 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "eps-api 0.1.0",
- "i2c-api 0.1.0",
+ "i2c-hal 0.1.0",
 ]
 
 [[package]]
@@ -230,7 +230,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "i2c-api"
+name = "i2c-hal"
 version = "0.1.0"
 dependencies = [
  "i2c-linux 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",

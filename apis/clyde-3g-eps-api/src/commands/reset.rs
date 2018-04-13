@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-mod checksum;
-mod status;
-mod last_error;
-mod reset;
-mod version;
+use eps_api::EpsError;
+use i2c_hal::Command;
 
-pub use commands::checksum::Checksum;
-pub use commands::last_error::LastError;
-pub use commands::reset::Reset;
-pub use commands::status::Status;
-pub use commands::version::VersionInfo;
+/// Sends a reset command to the EPS TTC node
+///
+/// If required the user can reset the TTC node using this command. When issued,
+/// the board will reset within 1 second. This command will result in the board
+/// being brought up in its defined initial condition. Resetting the board in
+/// this fashion will increment the Manual Reset Counter.
+pub struct Reset;
+
+impl Reset {
+    pub fn command() -> Command {
+        Command {
+            cmd: 0x80,
+            data: vec![0x00],
+        }
+    }
+}

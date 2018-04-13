@@ -28,12 +28,30 @@ impl Eps {
         Eps { connection }
     }
 
+    /// Retrieves operational status data from TTC node
     pub fn get_board_status(&self) -> Result<Status, EpsError> {
         Status::parse(&self.connection.transfer(Status::command())?)
     }
 
+    /// Retrieves checksum of TTC node ROM
     pub fn get_checksum(&self) -> Result<Checksum, EpsError> {
         Checksum::parse(&self.connection.transfer(Checksum::command())?)
+    }
+
+    /// Retrieves firmware and board revision information
+    pub fn get_version_info(&self) -> Result<VersionInfo, EpsError> {
+        VersionInfo::parse(&self.connection.transfer(VersionInfo::command())?)
+    }
+
+    /// Retrieves details of last error generated
+    pub fn get_last_error(&self) -> Result<LastError, EpsError> {
+        LastError::parse(&self.connection.transfer(LastError::command())?)
+    }
+
+    /// Performs manual reset of TTC node
+    pub fn manual_reset(&self) -> Result<(), EpsError> {
+        self.connection.write(Reset::command())?;
+        Ok(())
     }
 }
 
