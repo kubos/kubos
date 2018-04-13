@@ -6,4 +6,4 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 [dependencies]
 bitflags = "1.0"
 eps-api = { path = "../eps-api" }
-i2c-api = { path = "../i2c-api" }
+i2c-hal = { path = "../../hal/i2c-hal" }

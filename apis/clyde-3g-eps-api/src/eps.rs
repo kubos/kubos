@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use i2c_api::Stream;
+use i2c_hal::Stream;
 
 use commands::*;
 use eps_api::EpsError;

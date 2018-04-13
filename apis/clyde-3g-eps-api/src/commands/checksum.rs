@@ -15,7 +15,7 @@
  */
 
 use eps_api::EpsError;
-use i2c_api::Command;
+use i2c_hal::Command;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Checksum {

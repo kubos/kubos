@@ -15,7 +15,7 @@
  */
 
 use eps_api::EpsError;
-use i2c_api::Command;
+use i2c_hal::Command;
 
 bitflags! {
     #[derive(Default)]

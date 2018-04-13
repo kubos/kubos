@@ -1,5 +1,5 @@
 [package]
-name = "i2c-api"
+name = "i2c-hal"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 

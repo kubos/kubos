@@ -17,7 +17,7 @@
 #[macro_use]
 extern crate bitflags;
 extern crate eps_api;
-extern crate i2c_api;
+extern crate i2c_hal;
 
 mod commands;
 mod eps;
