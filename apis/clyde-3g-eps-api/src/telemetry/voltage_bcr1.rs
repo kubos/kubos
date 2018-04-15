@@ -14,14 +14,28 @@
  * limitations under the License.
  */
 
-mod checksum;
-mod status;
-mod last_error;
-mod reset;
-mod version;
+use eps_api::EpsError;
+use i2c_hal::Command;
+use telemetry::TELEM_CMD;
 
-pub use commands::checksum::Checksum;
-pub use commands::last_error::LastError;
-pub use commands::reset::Reset;
-pub use commands::status::Status;
-pub use commands::version::VersionInfo;
+pub fn parse(adc_data: f32) -> f32 {
+    0.0249 * adc_data
+}
+
+pub fn command() -> Command {
+    Command {
+        cmd: TELEM_CMD,
+        data: vec![0xE1, 0x10],
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse() {
+        let data: f32 = 100.0;
+        assert_eq!(2.49, parse(data));
+    }
+}

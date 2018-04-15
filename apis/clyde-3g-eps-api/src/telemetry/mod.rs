@@ -17,43 +17,38 @@
 use eps_api::EpsError;
 use i2c_hal::Command;
 
+mod temp_sa1a;
+mod voltage_bcr1;
+mod current_bcr1_sa1a;
+
 const TELEM_CMD: u8 = 0x10;
 
 pub enum Type {
-    Voltage,
+    /// Voltage feeding BRC1 (V)
+    VoltageFeedingBRC1,
+    /// Current BRC1, Connector SA1A (A)
+    IBCR1A,
+    /// Array Temp, Connector SA1A (*C)
+    TempSA1A,
 }
 
-pub struct Telemetry;
+pub fn parse(data: &[u8], telem_type: Type) -> Result<f32, EpsError> {
+    let adc_data = get_adc_result(data);
+    Ok(match telem_type {
+        Voltage => voltage_bcr1::parse(adc_data),
+        IBCR1A => current_bcr1_sa1a::parse(adc_data),
+        TempSA1A => temp_sa1a::parse(adc_data),
+    })
+}
 
-impl Telemetry {
-    pub fn parse(data: &[u8], telem_type: Type) -> Result<f32, EpsError> {
-        match telem_type {
-            Voltage => VoltageFeedingBRC1::parse(data),
-        }
-    }
-
-    pub fn command(telem_type: Type) -> Command {
-        match telem_type {
-            Voltage => VoltageFeedingBRC1::command(),
-        }
+pub fn command(telem_type: Type) -> Command {
+    match telem_type {
+        Voltage => voltage_bcr1::command(),
+        IBCR1A => current_bcr1_sa1a::command(),
+        TempSA1A => temp_sa1a::command(),
     }
 }
 
 fn get_adc_result(data: &[u8]) -> f32 {
     ((data[0] as u16) | ((data[1] as u16) & 0xF) << 4) as f32
-}
-
-mod VoltageFeedingBRC1 {
-    use super::*;
-
-    pub fn parse(data: &[u8]) -> Result<f32, EpsError> {
-        Ok(0.0249 * get_adc_result(data))
-    }
-
-    pub fn command() -> Command {
-        Command {
-            cmd: TELEM_CMD,
-            data: vec![0xE1, 0x10],
-        }
-    }
 }
