@@ -12,6 +12,7 @@ members = [
 "kubos-build-helper",
 "services/comms-service",
 "services/iobc-supervisor-service",
+"services/mai400-service",
 "test/integration/linux/isis-ants",
 ]
 
