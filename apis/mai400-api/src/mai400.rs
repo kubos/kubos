@@ -357,7 +357,7 @@ impl MAI400 {
             msg.append(&mut raw);
 
             // Identify message type and convert to usable structure
-            let id = msg[5];
+            let id = msg[4];
             match id {
                 1 => {
                     let telem = StandardTelemetry::new(&msg[..]);
@@ -380,7 +380,7 @@ impl MAI400 {
                     break;
                 }
                 _ => {
-                    throw!(MAIError::GenericError);
+                    throw!(MAIError::UnknownMessage { id });
                 }
             }
         }
@@ -396,6 +396,12 @@ pub enum MAIError {
     /// Catch-all error
     #[display(fmt = "Generic Error")]
     GenericError,
+    /// Received a valid message, but the message ID doesn't match any known message type
+    #[display(fmt = "Unknown Message Received: {:X}", id)]
+    UnknownMessage {
+        /// ID of message received
+        id: u8,
+    },
     #[display(fmt = "Serial Error: {}", cause)]
     /// An error was thrown by the serial driver
     SerialError {

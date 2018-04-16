@@ -43,7 +43,7 @@ impl Stream for MockStream {
 }
 
 #[test]
-fn testme() {
+fn mock_test() {
     let mock = mock_new!();
 
     let connection = Connection { stream: Box::new(mock) };
@@ -51,4 +51,6 @@ fn testme() {
     assert_eq!(connection.write(b"test").unwrap_err(), MAIError::GenericError);
 }
 
-//mod mai400;
+mod tx;
+mod rx;
+mod rotating;

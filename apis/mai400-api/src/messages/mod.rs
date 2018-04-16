@@ -27,7 +27,7 @@ pub const SYNC: u16 = 0xEB90;
 pub const HDR_SZ: usize = 6;
 
 /// Header for all sent and received messages
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct MessageHeader {
     /// IRIG-106 sync word
     pub sync: u16,

@@ -73,6 +73,7 @@ struct SerialStream {
 
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> MAIResult<()> {
+
         //But why don't you just make 'port' a field of SerialStream and then you
         //only have to open the connection once, during new?
         //

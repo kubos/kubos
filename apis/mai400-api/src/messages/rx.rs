@@ -18,7 +18,7 @@ use nom::*;
 use super::*;
 
 /// Standard telemetry packet sent by the MAI-400 every 250ms
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct StandardTelemetry {
     /// Message Header
     pub hdr: MessageHeader,
@@ -277,7 +277,7 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
 );
 
 /// Raw accelerometer and gyroscope data
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct RawIMU {
     /// Message Header
     pub hdr: MessageHeader,
@@ -328,7 +328,7 @@ named!(raw_imu(&[u8]) -> RawIMU,
 );
 
 /// IR Earth Horizon Sensor telemetry data
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct IREHSTelemetry {
     /// Message Header
     pub hdr: MessageHeader,
@@ -463,7 +463,7 @@ bitflags! {
 }
 
 /// ADCS configuration information
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ConfigInfo {
     /// Message header
     pub hdr: MessageHeader,
@@ -539,6 +539,7 @@ named!(configinfo(&[u8]) -> ConfigInfo,
 );
 
 /// Messages sent by the MAI-400
+#[derive(Debug, PartialEq)]
 pub enum Response {
     /// Standard telemetry message
     StdTelem(StandardTelemetry),
@@ -551,7 +552,7 @@ pub enum Response {
 }
 
 /// Type of earth horizon sensor
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum EHSType {
     /// EHS type has not been successfully fetched yet
     Unknown,
@@ -568,7 +569,7 @@ impl Default for EHSType {
 }
 
 /// Type of star tracker
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum StarTracker {
     /// Star tracker type has not been successfully fetched yet
     Unknown,
@@ -715,54 +716,54 @@ impl RotatingTelemetry {
     pub fn update(&mut self, msg: &StandardTelemetry) {
         match msg.tlm_counter {
             0 => {
-                self.b_field_igrf[0] = msg.rotating_variable_a as f32;
-                self.b_field_igrf[1] = msg.rotating_variable_b as f32;
-                self.b_field_igrf[2] = msg.rotating_variable_c as f32;
+                self.b_field_igrf[0] = f32::from_bits(msg.rotating_variable_a);
+                self.b_field_igrf[1] = f32::from_bits(msg.rotating_variable_b);
+                self.b_field_igrf[2] = f32::from_bits(msg.rotating_variable_c);
             }
             1 => {
-                self.sun_vec_eph[0] = msg.rotating_variable_a as f32;
-                self.sun_vec_eph[1] = msg.rotating_variable_b as f32;
-                self.sun_vec_eph[2] = msg.rotating_variable_c as f32;
+                self.sun_vec_eph[0] = f32::from_bits(msg.rotating_variable_a);
+                self.sun_vec_eph[1] = f32::from_bits(msg.rotating_variable_b);
+                self.sun_vec_eph[2] = f32::from_bits(msg.rotating_variable_c);
             }
             2 => {
-                self.sc_pos_eci[0] = msg.rotating_variable_a as f32;
-                self.sc_pos_eci[1] = msg.rotating_variable_b as f32;
-                self.sc_pos_eci[2] = msg.rotating_variable_c as f32;
+                self.sc_pos_eci[0] = f32::from_bits(msg.rotating_variable_a);
+                self.sc_pos_eci[1] = f32::from_bits(msg.rotating_variable_b);
+                self.sc_pos_eci[2] = f32::from_bits(msg.rotating_variable_c);
             }
             3 => {
-                self.sc_vel_eci[0] = msg.rotating_variable_a as f32;
-                self.sc_vel_eci[1] = msg.rotating_variable_b as f32;
-                self.sc_vel_eci[2] = msg.rotating_variable_c as f32;
+                self.sc_vel_eci[0] = f32::from_bits(msg.rotating_variable_a);
+                self.sc_vel_eci[1] = f32::from_bits(msg.rotating_variable_b);
+                self.sc_vel_eci[2] = f32::from_bits(msg.rotating_variable_c);
             }
             4 => {
-                self.kepler_elem.semi_major_axis = msg.rotating_variable_a as f32;
-                self.kepler_elem.eccentricity = msg.rotating_variable_b as f32;
-                self.kepler_elem.inclination = msg.rotating_variable_c as f32;
+                self.kepler_elem.semi_major_axis = f32::from_bits(msg.rotating_variable_a);
+                self.kepler_elem.eccentricity = f32::from_bits(msg.rotating_variable_b);
+                self.kepler_elem.inclination = f32::from_bits(msg.rotating_variable_c);
             }
             5 => {
-                self.kepler_elem.raan = msg.rotating_variable_a as f32;
-                self.kepler_elem.arg_parigee = msg.rotating_variable_b as f32;
-                self.kepler_elem.true_anomoly = msg.rotating_variable_c as f32;
+                self.kepler_elem.raan = f32::from_bits(msg.rotating_variable_a);
+                self.kepler_elem.arg_parigee = f32::from_bits(msg.rotating_variable_b);
+                self.kepler_elem.true_anomoly = f32::from_bits(msg.rotating_variable_c);
             }
             6 => {
-                self.k_bdot[0] = msg.rotating_variable_a as f32;
-                self.k_bdot[1] = msg.rotating_variable_b as f32;
-                self.k_bdot[2] = msg.rotating_variable_c as f32;
+                self.k_bdot[0] = f32::from_bits(msg.rotating_variable_a);
+                self.k_bdot[1] = f32::from_bits(msg.rotating_variable_b);
+                self.k_bdot[2] = f32::from_bits(msg.rotating_variable_c);
             }
             7 => {
-                self.kp[0] = msg.rotating_variable_a as f32;
-                self.kp[1] = msg.rotating_variable_b as f32;
-                self.kp[2] = msg.rotating_variable_c as f32;
+                self.kp[0] = f32::from_bits(msg.rotating_variable_a);
+                self.kp[1] = f32::from_bits(msg.rotating_variable_b);
+                self.kp[2] = f32::from_bits(msg.rotating_variable_c);
             }
             8 => {
-                self.kd[0] = msg.rotating_variable_a as f32;
-                self.kd[1] = msg.rotating_variable_b as f32;
-                self.kd[2] = msg.rotating_variable_c as f32;
+                self.kd[0] = f32::from_bits(msg.rotating_variable_a);
+                self.kd[1] = f32::from_bits(msg.rotating_variable_b);
+                self.kd[2] = f32::from_bits(msg.rotating_variable_c);
             }
             9 => {
-                self.k_unload[0] = msg.rotating_variable_a as f32;
-                self.k_unload[1] = msg.rotating_variable_b as f32;
-                self.k_unload[2] = msg.rotating_variable_c as f32;
+                self.k_unload[0] = f32::from_bits(msg.rotating_variable_a);
+                self.k_unload[1] = f32::from_bits(msg.rotating_variable_b);
+                self.k_unload[2] = f32::from_bits(msg.rotating_variable_c);
             }
             10 => {
                 self.css_bias[0] = msg.rotating_variable_a.wrapping_shr(16) as i16;
@@ -794,44 +795,44 @@ impl RotatingTelemetry {
                 self.ads_op_mode = msg.rotating_variable_c as u8;
             }
             13 => {
-                self.css_gain[0] = msg.rotating_variable_a as f32;
-                self.css_gain[1] = msg.rotating_variable_b as f32;
-                self.css_gain[2] = msg.rotating_variable_c as f32;
+                self.css_gain[0] = f32::from_bits(msg.rotating_variable_a);
+                self.css_gain[1] = f32::from_bits(msg.rotating_variable_b);
+                self.css_gain[2] = f32::from_bits(msg.rotating_variable_c);
             }
             14 => {
-                self.css_gain[3] = msg.rotating_variable_a as f32;
-                self.css_gain[4] = msg.rotating_variable_b as f32;
-                self.css_gain[5] = msg.rotating_variable_c as f32;
+                self.css_gain[3] = f32::from_bits(msg.rotating_variable_a);
+                self.css_gain[4] = f32::from_bits(msg.rotating_variable_b);
+                self.css_gain[5] = f32::from_bits(msg.rotating_variable_c);
             }
             15 => {
-                self.mag_gain[0] = msg.rotating_variable_a as f32;
-                self.mag_gain[1] = msg.rotating_variable_b as f32;
-                self.mag_gain[2] = msg.rotating_variable_c as f32;
+                self.mag_gain[0] = f32::from_bits(msg.rotating_variable_a);
+                self.mag_gain[1] = f32::from_bits(msg.rotating_variable_b);
+                self.mag_gain[2] = f32::from_bits(msg.rotating_variable_c);
             }
             16 => {
                 self.orbit_epoch = msg.rotating_variable_a as u32;
-                self.true_anomoly_epoch = msg.rotating_variable_b as f32;
+                self.true_anomoly_epoch = f32::from_bits(msg.rotating_variable_b);
                 self.orbit_epoch_next = msg.rotating_variable_c as u32;
             }
             17 => {
-                self.sc_pos_eci_epoch[0] = msg.rotating_variable_a as f32;
-                self.sc_pos_eci_epoch[1] = msg.rotating_variable_b as f32;
-                self.sc_pos_eci_epoch[2] = msg.rotating_variable_c as f32;
+                self.sc_pos_eci_epoch[0] = f32::from_bits(msg.rotating_variable_a);
+                self.sc_pos_eci_epoch[1] = f32::from_bits(msg.rotating_variable_b);
+                self.sc_pos_eci_epoch[2] = f32::from_bits(msg.rotating_variable_c);
             }
             18 => {
-                self.sc_vel_eci_epoch[0] = msg.rotating_variable_a as f32;
-                self.sc_vel_eci_epoch[1] = msg.rotating_variable_b as f32;
-                self.sc_vel_eci_epoch[2] = msg.rotating_variable_c as f32;
+                self.sc_vel_eci_epoch[0] = f32::from_bits(msg.rotating_variable_a);
+                self.sc_vel_eci_epoch[1] = f32::from_bits(msg.rotating_variable_b);
+                self.sc_vel_eci_epoch[2] = f32::from_bits(msg.rotating_variable_c);
             }
             19 => {
                 self.qb_x_wheel_speed = msg.rotating_variable_a.wrapping_shr(16) as i16;
-                self.qb_x_filter_gain = msg.rotating_variable_b as f32;
-                self.qb_x_dipole_gain = msg.rotating_variable_c as f32;
+                self.qb_x_filter_gain = f32::from_bits(msg.rotating_variable_b);
+                self.qb_x_dipole_gain = f32::from_bits(msg.rotating_variable_c);
             }
             20 => {
-                self.dipole_gain[0] = msg.rotating_variable_a as f32;
-                self.dipole_gain[1] = msg.rotating_variable_b as f32;
-                self.dipole_gain[2] = msg.rotating_variable_c as f32;
+                self.dipole_gain[0] = f32::from_bits(msg.rotating_variable_a);
+                self.dipole_gain[1] = f32::from_bits(msg.rotating_variable_b);
+                self.dipole_gain[2] = f32::from_bits(msg.rotating_variable_c);
             }
             21 => {
                 self.wheel_speed_bias[0] = msg.rotating_variable_a.wrapping_shr(16) as i16;
@@ -839,12 +840,12 @@ impl RotatingTelemetry {
                 self.wheel_speed_bias[2] = msg.rotating_variable_c.wrapping_shr(16) as i16;
             }
             22 => {
-                self.cos_sun_mag_align_thresh = msg.rotating_variable_a as f32;
-                self.unload_ang_thresh = msg.rotating_variable_b as f32;
-                self.q_sat = msg.rotating_variable_c as f32;
+                self.cos_sun_mag_align_thresh = f32::from_bits(msg.rotating_variable_a);
+                self.unload_ang_thresh = f32::from_bits(msg.rotating_variable_b);
+                self.q_sat = f32::from_bits(msg.rotating_variable_c);
             }
             23 => {
-                self.raw_trq_max = msg.rotating_variable_a as f32;
+                self.raw_trq_max = f32::from_bits(msg.rotating_variable_a);
                 self.rws_motor_current[0] = msg.rotating_variable_b.wrapping_shr(16) as u16;
                 self.rws_motor_current[1] = msg.rotating_variable_b as u16;
                 self.rws_motor_current[2] = msg.rotating_variable_c.wrapping_shr(16) as u16;
