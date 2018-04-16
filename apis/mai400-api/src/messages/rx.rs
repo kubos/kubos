@@ -18,6 +18,7 @@ use nom::*;
 use super::*;
 
 /// Standard telemetry packet sent by the MAI-400 every 250ms
+#[derive(Clone, Default)]
 pub struct StandardTelemetry {
     /// Message Header
     pub hdr: MessageHeader,
@@ -276,6 +277,7 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
 );
 
 /// Raw accelerometer and gyroscope data
+#[derive(Clone, Default)]
 pub struct RawIMU {
     /// Message Header
     pub hdr: MessageHeader,
@@ -326,6 +328,7 @@ named!(raw_imu(&[u8]) -> RawIMU,
 );
 
 /// IR Earth Horizon Sensor telemetry data
+#[derive(Clone, Default)]
 pub struct IREHSTelemetry {
     /// Message Header
     pub hdr: MessageHeader,
@@ -460,6 +463,7 @@ bitflags! {
 }
 
 /// ADCS configuration information
+#[derive(Clone, Default)]
 pub struct ConfigInfo {
     /// Message header
     pub hdr: MessageHeader,
@@ -547,17 +551,323 @@ pub enum Response {
 }
 
 /// Type of earth horizon sensor
+#[derive(Clone, Debug)]
 pub enum EHSType {
+    /// EHS type has not been successfully fetched yet
+    Unknown,
     /// Internal MAI IREHS
     Internal,
     /// External EHS
     External,
 }
 
+impl Default for EHSType {
+    fn default() -> Self {
+        EHSType::Unknown
+    }
+}
+
 /// Type of star tracker
+#[derive(Clone, Debug)]
 pub enum StarTracker {
+    /// Star tracker type has not been successfully fetched yet
+    Unknown,
     /// MAI space sextant
     MAISextant,
     /// Vectronic VST41-M
     Vectronic,
+}
+
+impl Default for StarTracker {
+    fn default() -> Self {
+        StarTracker::Unknown
+    }
+}
+
+
+/// Structure to contain all possible variables which can be returned
+/// by the standard telemetry message's `rotating_variable` fields
+#[derive(Default)]
+pub struct RotatingTelemetry {
+    /// IGRF magnetic fields (X, Y, Z) (Tesla)
+    pub b_field_igrf: [f32; 3],
+    /// ECI Sun Vector from Ephemeris (X, Y, Z) (Unit)
+    pub sun_vec_eph: [f32; 3],
+    /// ECI Spacecraft Position (X, Y, Z) (km)
+    pub sc_pos_eci: [f32; 3],
+    /// ECI Spacecraft Velocity (X, Y, Z) (km)
+    pub sc_vel_eci: [f32; 3],
+    /// Keplerian elements
+    pub kepler_elem: KeplerElem,
+    /// Bdot Gain Acquisition Mode (X, Y, Z)
+    pub k_bdot: [f32; 3],
+    /// Proportional Gain Normal Mode (X, Y, Z)
+    pub kp: [f32; 3],
+    /// Derivative Gain Normal Mode (X, Y, Z)
+    pub kd: [f32; 3],
+    /// Unloading Gain Normal Mode (X, Y, Z)
+    pub k_unload: [f32; 3],
+    /// CSS{n} Bias (1, 2, 3, 4, 5, 6)
+    pub css_bias: [i16; 6],
+    /// MAG Bias (X, Y, Z)
+    pub mag_bias: [i16; 3],
+    /// RWS Bus Voltage (0.00483516483 v/lsb)
+    pub rws_volt: i16,
+    /// Reserved
+    pub rws_press: i16,
+    /// Attitude Determination Mode
+    pub att_det_mode: u8,
+    /// RWS Reset Counter (X, Y, Z)
+    pub rws_reset_cntr: [u8; 3],
+    /// Sun and Mag Field are aligned
+    pub sun_mag_aligned: u8,
+    /// Software Minor Version
+    pub minor_version: u8,
+    /// Software Unit Serial Number
+    pub mai_sn: u8,
+    /// Orbit Propagation Mode
+    pub orbit_prop_mode: u8,
+    /// ACS Mode in Operation
+    pub acs_op_mode: u8,
+    /// ADACS Processor Reset Counter
+    pub proc_reset_cntr: u8,
+    /// Software Major Version
+    pub major_version: u8,
+    /// ADS Mode in Operation
+    pub ads_op_mode: u8,
+    /// CSS{n} Gain (1, 2, 3, 4, 5, 6)
+    pub css_gain: [f32; 6],
+    /// Mag Gain (X, Y, Z)
+    pub mag_gain: [f32; 3],
+    /// Epoch of Current Orbit (GPS sec)
+    pub orbit_epoch: u32,
+    /// True Anomaly at Epoch – Kepler (deg)
+    pub true_anomoly_epoch: f32,
+    /// Epoch of Next Updated RV (GPS sec)
+    pub orbit_epoch_next: u32,
+    /// ECI Position at Next Epoch (X, Y, Z) (km)
+    pub sc_pos_eci_epoch: [f32; 3],
+    /// ECI Velocity at Next Epoch (X, Y, Z) (km/sec)
+    pub sc_vel_eci_epoch: [f32; 3],
+    /// QbX Wheel Speed Command (rpm)
+    pub qb_x_wheel_speed: i16,
+    /// QbX Filter Gain
+    pub qb_x_filter_gain: f32,
+    /// QbX Dipole Gain
+    pub qb_x_dipole_gain: f32,
+    /// Dipole Gain (X, Y, Z)
+    pub dipole_gain: [f32; 3],
+    /// Wheel Speed Bias (X, Y, Z) (rpm)
+    pub wheel_speed_bias: [i16; 3],
+    /// Cosine of Sun/Mag Align Threshold Angle
+    pub cos_sun_mag_align_thresh: f32,
+    /// Max AngleToGo for Unloading (rad)
+    pub unload_ang_thresh: f32,
+    /// Quaternion feedback saturation.
+    pub q_sat: f32,
+    /// Maximum RWA Torque (mNm)
+    pub raw_trq_max: f32,
+    /// Reaction Wheel Motor Current (X, Y, Z) (A) (0.0003663003663 A/lsb)
+    pub rws_motor_current: [u16; 3],
+    /// RWS Motor Temperature (Temperature oC = rwsMotorTemp * 0.0402930 - 50)
+    pub raw_motor_temp: i16,
+}
+
+impl RotatingTelemetry {
+    /// Extract the self variables from a standard telemetry message and update
+    /// the appropriate corresponding fields in a [`selfTelemetry`] structure
+    ///
+    /// # Arguments
+    ///
+    /// * msg - Standard telemetry message to extract variables from
+    /// * self - self variables structure to copy extracted data into
+    ///
+    /// # Errors
+    ///
+    /// If errors are encountered, the structure will not be updated
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    ///
+    /// let mut rotating = RotatingTelemetry::default();
+    ///
+    /// let msg = mai.get_message()?;
+    /// match msg {
+    ///     Response::StdTelem(telem) => {
+    ///         rotating.update(&telem);
+    ///     }
+    ///     _ => {}
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
+    ///
+    /// [`selfTelemetry`]: struct.selfTelemetry.html
+    // TODO: verify the bit shifting
+    // TODO: Doc says 3 MSB are used for version information. Need to extract
+    pub fn update(&mut self, msg: &StandardTelemetry) {
+        match msg.tlm_counter {
+            0 => {
+                self.b_field_igrf[0] = msg.rotating_variable_a as f32;
+                self.b_field_igrf[1] = msg.rotating_variable_b as f32;
+                self.b_field_igrf[2] = msg.rotating_variable_c as f32;
+            }
+            1 => {
+                self.sun_vec_eph[0] = msg.rotating_variable_a as f32;
+                self.sun_vec_eph[1] = msg.rotating_variable_b as f32;
+                self.sun_vec_eph[2] = msg.rotating_variable_c as f32;
+            }
+            2 => {
+                self.sc_pos_eci[0] = msg.rotating_variable_a as f32;
+                self.sc_pos_eci[1] = msg.rotating_variable_b as f32;
+                self.sc_pos_eci[2] = msg.rotating_variable_c as f32;
+            }
+            3 => {
+                self.sc_vel_eci[0] = msg.rotating_variable_a as f32;
+                self.sc_vel_eci[1] = msg.rotating_variable_b as f32;
+                self.sc_vel_eci[2] = msg.rotating_variable_c as f32;
+            }
+            4 => {
+                self.kepler_elem.semi_major_axis = msg.rotating_variable_a as f32;
+                self.kepler_elem.eccentricity = msg.rotating_variable_b as f32;
+                self.kepler_elem.inclination = msg.rotating_variable_c as f32;
+            }
+            5 => {
+                self.kepler_elem.raan = msg.rotating_variable_a as f32;
+                self.kepler_elem.arg_parigee = msg.rotating_variable_b as f32;
+                self.kepler_elem.true_anomoly = msg.rotating_variable_c as f32;
+            }
+            6 => {
+                self.k_bdot[0] = msg.rotating_variable_a as f32;
+                self.k_bdot[1] = msg.rotating_variable_b as f32;
+                self.k_bdot[2] = msg.rotating_variable_c as f32;
+            }
+            7 => {
+                self.kp[0] = msg.rotating_variable_a as f32;
+                self.kp[1] = msg.rotating_variable_b as f32;
+                self.kp[2] = msg.rotating_variable_c as f32;
+            }
+            8 => {
+                self.kd[0] = msg.rotating_variable_a as f32;
+                self.kd[1] = msg.rotating_variable_b as f32;
+                self.kd[2] = msg.rotating_variable_c as f32;
+            }
+            9 => {
+                self.k_unload[0] = msg.rotating_variable_a as f32;
+                self.k_unload[1] = msg.rotating_variable_b as f32;
+                self.k_unload[2] = msg.rotating_variable_c as f32;
+            }
+            10 => {
+                self.css_bias[0] = msg.rotating_variable_a.wrapping_shr(16) as i16;
+                self.css_bias[1] = msg.rotating_variable_b.wrapping_shr(16) as i16;
+                self.css_bias[2] = msg.rotating_variable_c.wrapping_shr(16) as i16;
+                self.css_bias[3] = msg.rotating_variable_a as i16;
+                self.css_bias[4] = msg.rotating_variable_b as i16;
+                self.css_bias[5] = msg.rotating_variable_c as i16;
+            }
+            11 => {
+                self.mag_bias[0] = msg.rotating_variable_a.wrapping_shr(16) as i16;
+                self.mag_bias[1] = msg.rotating_variable_b.wrapping_shr(16) as i16;
+                self.mag_bias[2] = msg.rotating_variable_c.wrapping_shr(16) as i16;
+                self.rws_volt = msg.rotating_variable_a as i16;
+                self.rws_press = msg.rotating_variable_b as i16;
+            }
+            12 => {
+                self.att_det_mode = msg.rotating_variable_a.wrapping_shr(24) as u8;
+                self.rws_reset_cntr[0] = msg.rotating_variable_a.wrapping_shr(16) as u8;
+                self.sun_mag_aligned = msg.rotating_variable_a.wrapping_shr(8) as u8;
+                self.minor_version = msg.rotating_variable_a as u8;
+                self.mai_sn = msg.rotating_variable_b.wrapping_shr(24) as u8;
+                self.rws_reset_cntr[1] = msg.rotating_variable_b.wrapping_shr(16) as u8;
+                self.orbit_prop_mode = msg.rotating_variable_b.wrapping_shr(8) as u8;
+                self.acs_op_mode = msg.rotating_variable_b as u8;
+                self.proc_reset_cntr = msg.rotating_variable_c.wrapping_shr(24) as u8;
+                self.rws_reset_cntr[2] = msg.rotating_variable_c.wrapping_shr(16) as u8;
+                self.major_version = msg.rotating_variable_c.wrapping_shr(8) as u8;
+                self.ads_op_mode = msg.rotating_variable_c as u8;
+            }
+            13 => {
+                self.css_gain[0] = msg.rotating_variable_a as f32;
+                self.css_gain[1] = msg.rotating_variable_b as f32;
+                self.css_gain[2] = msg.rotating_variable_c as f32;
+            }
+            14 => {
+                self.css_gain[3] = msg.rotating_variable_a as f32;
+                self.css_gain[4] = msg.rotating_variable_b as f32;
+                self.css_gain[5] = msg.rotating_variable_c as f32;
+            }
+            15 => {
+                self.mag_gain[0] = msg.rotating_variable_a as f32;
+                self.mag_gain[1] = msg.rotating_variable_b as f32;
+                self.mag_gain[2] = msg.rotating_variable_c as f32;
+            }
+            16 => {
+                self.orbit_epoch = msg.rotating_variable_a as u32;
+                self.true_anomoly_epoch = msg.rotating_variable_b as f32;
+                self.orbit_epoch_next = msg.rotating_variable_c as u32;
+            }
+            17 => {
+                self.sc_pos_eci_epoch[0] = msg.rotating_variable_a as f32;
+                self.sc_pos_eci_epoch[1] = msg.rotating_variable_b as f32;
+                self.sc_pos_eci_epoch[2] = msg.rotating_variable_c as f32;
+            }
+            18 => {
+                self.sc_vel_eci_epoch[0] = msg.rotating_variable_a as f32;
+                self.sc_vel_eci_epoch[1] = msg.rotating_variable_b as f32;
+                self.sc_vel_eci_epoch[2] = msg.rotating_variable_c as f32;
+            }
+            19 => {
+                self.qb_x_wheel_speed = msg.rotating_variable_a.wrapping_shr(16) as i16;
+                self.qb_x_filter_gain = msg.rotating_variable_b as f32;
+                self.qb_x_dipole_gain = msg.rotating_variable_c as f32;
+            }
+            20 => {
+                self.dipole_gain[0] = msg.rotating_variable_a as f32;
+                self.dipole_gain[1] = msg.rotating_variable_b as f32;
+                self.dipole_gain[2] = msg.rotating_variable_c as f32;
+            }
+            21 => {
+                self.wheel_speed_bias[0] = msg.rotating_variable_a.wrapping_shr(16) as i16;
+                self.wheel_speed_bias[1] = msg.rotating_variable_b.wrapping_shr(16) as i16;
+                self.wheel_speed_bias[2] = msg.rotating_variable_c.wrapping_shr(16) as i16;
+            }
+            22 => {
+                self.cos_sun_mag_align_thresh = msg.rotating_variable_a as f32;
+                self.unload_ang_thresh = msg.rotating_variable_b as f32;
+                self.q_sat = msg.rotating_variable_c as f32;
+            }
+            23 => {
+                self.raw_trq_max = msg.rotating_variable_a as f32;
+                self.rws_motor_current[0] = msg.rotating_variable_b.wrapping_shr(16) as u16;
+                self.rws_motor_current[1] = msg.rotating_variable_b as u16;
+                self.rws_motor_current[2] = msg.rotating_variable_c.wrapping_shr(16) as u16;
+                self.raw_motor_temp = msg.rotating_variable_c as i16;
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Structure for keplarian elements returned in the standard telemetry message
+#[derive(Default)]
+pub struct KeplerElem {
+    /// Semi major axis (km)
+    pub semi_major_axis: f32,
+    /// Eccentricity
+    pub eccentricity: f32,
+    /// Inclination (deg)
+    pub inclination: f32,
+    /// Right ascension of ascending node (deg)
+    pub raan: f32,
+    /// Argument of perigee (deg)
+    pub arg_parigee: f32,
+    /// True anomaly (deg)
+    pub true_anomoly: f32,
 }
