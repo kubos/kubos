@@ -1,0 +1,3 @@
+- cbor channel based core protocol
+- initial packet on channel is manifest
+- each packet after contains index + data
