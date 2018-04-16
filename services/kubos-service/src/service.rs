@@ -109,8 +109,20 @@ where
 
 impl<'a, Query, Mutation, S> Service<'a, Query, Mutation, S>
 where
-    Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
-    Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+    Query: GraphQLType<
+        Context = Context<S>,
+        TypeInfo = (),
+    >
+        + Send
+        + Sync
+        + 'static,
+    Mutation: GraphQLType<
+        Context = Context<S>,
+        TypeInfo = (),
+    >
+        + Send
+        + Sync
+        + 'static,
 {
     /// Creates a new service instance
     ///
@@ -175,8 +187,7 @@ where
 
                 json!({
                     "msg": msg,
-                    "errs": errs_msg})
-                    .to_string()
+                    "errs": errs_msg}).to_string()
             }
             Err(e) => serde_json::to_string(&e).unwrap(),
         }

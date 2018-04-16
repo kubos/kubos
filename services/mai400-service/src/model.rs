@@ -15,10 +15,10 @@
 //
 
 use failure::Fail;
-use mai400_api::MAI400;
+use mai400_api::*;
 use std::cell::RefCell;
 use std::io::Error;
-use std::str;
+//use std::str;
 
 use objects::*;
 
@@ -29,6 +29,7 @@ pub struct Subsystem {
 
 impl Subsystem {
     pub fn new(bus: String) -> Subsystem {
+        println!("New Subsystem");
 
         let connection = Connection::new(bus);
         let mai = MAI400::new(connection);
@@ -45,15 +46,49 @@ impl Subsystem {
 
     // Queries
 
-    pub fn get_arm_status(&self) -> Result<ArmStatus, Error> {
-        let (_errors, _success, deploy) = run!(self.ants.get_deploy(), self.errors);
-        let armed = deploy.unwrap_or_default().sys_armed;
+    pub fn get_config(&self) -> Result<Config, Error> {
+        unimplemented!();
+    }
 
-        let status = match armed {
-            true => ArmStatus::Armed,
-            false => ArmStatus::Disarmed,
-        };
+    pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
+        unimplemented!();
+    }
 
-        Ok(status)
+    pub fn get_telemetry(&self) -> Result<Telemetry, Error> {
+        unimplemented!();
+    }
+
+    pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
+        unimplemented!();
+    }
+
+    pub fn get_mode(&self) -> Result<Mode, Error> {
+        unimplemented!();
+    }
+
+    pub fn get_orientation(&self) -> Result<Orientation, Error> {
+        unimplemented!();
+    }
+
+    pub fn get_spin(&self) -> Result<Spin, Error> {
+        unimplemented!();
+    }
+
+    // Mutations
+
+    pub fn passthrough(&self, command: String) -> Result<GenericResponse, Error> {
+        let result = run!(self.mai.passthrough(command.as_bytes()), self.errors);
+
+        Ok(GenericResponse {
+            success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => err,
+            },
+        })
+    }
+
+    pub fn noop(&self) -> Result<NoopResponse, Error> {
+        unimplemented!();
     }
 }

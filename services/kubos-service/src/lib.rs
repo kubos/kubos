@@ -84,6 +84,7 @@ extern crate serde_json;
 extern crate toml;
 
 mod config;
+mod macros;
 mod service;
 
 pub use config::Config;

@@ -13,8 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+#![allow(unused_variables)]
 
 use juniper::FieldResult;
+use mai400_api::*;
 
 /// Common response fields structure for requests
 /// which don't return any specific data
@@ -36,16 +38,18 @@ pub enum AckCommand {
     ConfigureHardware,
     TestHardware,
     IssueRawCommand,
-    Arm,
-    Deploy,
+    SetMode,
+    Update,
 }
+
+#[derive(GraphQLObject)]
+pub struct Config {}
 
 /// Response fields for 'configureHardware' mutation
 #[derive(GraphQLObject)]
 pub struct ConfigureHardwareResponse {
     pub errors: String,
     pub success: bool,
-    pub config: ConfigureController,
 }
 
 /// Input field for 'controlPower' mutation and
@@ -93,20 +97,6 @@ pub enum TestType {
     Hardware,
 }
 
-/// Enum for the 'testHardware' mutation response union
-pub enum TestResults {
-    Integration(IntegrationTestResults),
-    Hardware(HardwareTestResults),
-}
-
-/// Response union for 'testHardware' mutation
-graphql_union!(TestResults: () |&self| {
-    instance_resolvers: |&_| {
-        &IntegrationTestResults => match *self { TestResults::Integration(ref i) => Some(i), _ => None},
-        &HardwareTestResults => match *self { TestResults::Hardware(ref h) => Some(h), _ => None},
-    }
-});
-
 /// Response fields for 'testHardware(test: INTEGRATION)' mutation
 #[derive(GraphQLObject)]
 pub struct IntegrationTestResults {
@@ -124,37 +114,31 @@ pub struct HardwareTestResults {
     pub data: String,
 }
 
-/// Response fields for 'issueRawCommand' mutation
+#[derive(GraphQLEnum, Clone, Copy)]
+pub enum Mode {
+    TestMode,
+    RateNulling,
+    Reserved1,
+    NadirPointing,
+    LatLongPointing,
+    QbxMode,
+    Reserved2,
+    NormalSun,
+    LatLongSun,
+    Qintertial,
+}
+
 #[derive(GraphQLObject)]
-pub struct RawCommandResponse {
-    pub errors: String,
-    pub success: bool,
-    pub response: String,
-}
+pub struct Orientation {}
 
-/// Input field for 'telemetry' query
-///
-/// Indicates which type of telemetry data should be fetched
-#[derive(GraphQLEnum)]
-pub enum TelemetryType {
-    Nominal,
-    Debug,
-}
+#[derive(GraphQLObject)]
+pub struct Spin {}
 
-/// Enum for 'telemetry' query response union
-pub enum Telemetry {
-    Nominal(TelemetryNominal),
-    Debug(TelemetryDebug),
+#[derive(GraphQLObject)]
+pub struct Telemetry {
+    pub nominal: TelemetryNominal,
+    pub debug: TelemetryDebug,
 }
-
-/// Response union for 'telemetry' query
-graphql_union!(Telemetry: () |&self| {
-    description: "Test"
-    instance_resolvers: |&_| {
-        &TelemetryNominal => match *self { Telemetry::Nominal(ref n) => Some(n), _ => None},
-        &TelemetryDebug => match *self { Telemetry::Debug(ref d) => Some(d), _ => None},
-    }
-});
 
 /// Response fields for 'telemetry(telem: NOMINAL)' query
 #[derive(Debug, Default, PartialEq)]

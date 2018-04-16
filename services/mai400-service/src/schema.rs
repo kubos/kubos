@@ -14,17 +14,12 @@
 // limitations under the License.
 //
 
-use juniper::Context as JuniperContext;
+use kubos_service;
 use juniper::FieldResult;
 use model::*;
 use objects::*;
 
-// Context used to pass global data into Juniper queries
-pub struct Context {
-    pub subsystem: Subsystem,
-}
-
-impl JuniperContext for Context {}
+type Context = kubos_service::Context<Subsystem>;
 
 pub struct QueryRoot;
 
@@ -70,7 +65,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        match executor.context().subsystem.errors.try_borrow() {
+        match executor.context().subsystem().errors.try_borrow() {
             Ok(master_vec) => Ok(master_vec.clone()),
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
         }
@@ -85,9 +80,8 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //     }
     // }            
     field power(&executor) -> FieldResult<GetPowerResponse>
-        as "Antenna System Power State"
     {
-        Ok(executor.context().subsystem.get_power()?)
+        Ok(executor.context().subsystem().get_power()?)
     }
     
     // Get the current configuration of the system
@@ -95,12 +89,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // {
     //     config: "Not Implemented"
     // }
-    field config() -> FieldResult<String>
+    field config(&executor) -> FieldResult<Config>
     {
-        // Future development: Once Rust lifetimes have been figured out,
-        // this could be updated to return the controller previously set
-        // with the 'configureHardware' mutation
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_config()?)
     }
 
     // Get current telemetry information for the system
@@ -140,12 +131,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         }
     //     }
     // }
-    field telemetry(&executor, telem: TelemetryType) -> FieldResult<Telemetry>
+    field telemetry(&executor) -> FieldResult<Telemetry>
     {
-        match telem {
-            TelemetryType::Nominal => Ok(Telemetry::Nominal(executor.context().subsystem.get_telemetry_nominal().unwrap())),
-            TelemetryType::Debug => Ok(Telemetry::Debug(executor.context().subsystem.get_telemetry_debug().unwrap()))
-        }
+        Ok(executor.context().subsystem().get_telemetry()?)
     }
     
     // Get the test results of the last run test
@@ -162,7 +150,19 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //     }
     // }
     field test_results(&executor) -> FieldResult<IntegrationTestResults> {
-        Ok(executor.context().subsystem.get_test_results()?)
+        Ok(executor.context().subsystem().get_test_results()?)
+    }
+    
+    field mode(&executor) -> FieldResult<Mode> {
+        Ok(executor.context().subsystem().get_mode()?)
+    }
+        
+    field orientation(&executor) -> FieldResult<Orientation> {
+        Ok(executor.context().subsystem().get_orientation()?)
+    }
+    
+    field spin(&executor) -> FieldResult<Spin> {
+        Ok(executor.context().subsystem().get_spin()?)
     }
 });
 
@@ -182,7 +182,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        match executor.context().subsystem.errors.try_borrow() {
+        match executor.context().subsystem().errors.try_borrow() {
             Ok(master_vec) => Ok(master_vec.clone()),
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
         }
@@ -198,7 +198,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field noop(&executor) -> FieldResult<NoopResponse>
     {
-        Ok(executor.context().subsystem.noop()?)
+        Ok(executor.context().subsystem().noop()?)
     }
 
     // Control the power state of the system
@@ -213,9 +213,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         power: PowerState
     //     }
     // }
-    field control_power(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
+    field control_power(&executor) -> FieldResult<ControlPowerResponse>
     {
-        Ok(executor.context().subsystem.control_power(state)?)
+        unimplemented!();
     }
     
     // Configure the system
@@ -229,9 +229,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         config: ConfigureController
     //    }
     // }
-    field configure_hardware(&executor, config: ConfigureController) -> FieldResult<ConfigureHardwareResponse>
+    field configure_hardware(&executor) -> FieldResult<ConfigureHardwareResponse>
     {
-        Ok(executor.context().subsystem.configure_hardware(config)?)
+        unimplemented!();
     }
     
     // Run a system self-test
@@ -253,12 +253,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         }
     //    }
     // }
-    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults> 
+    field test_hardware(&executor) -> FieldResult<HardwareTestResults> 
     {
-        match test {
-            TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem.integration_test().unwrap())),
-            TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
-        }
+        unimplemented!();
     }
     
     // Pass a custom command through to the system
@@ -274,9 +271,18 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         response: String
     //     }
     // }
-    field issue_raw_command(&executor, command: String, rx_len = 0: i32) -> FieldResult<RawCommandResponse>
+    // TODO: Maybe allow us to wait for a response?
+    field issue_raw_command(&executor, command: String) -> FieldResult<GenericResponse>
     {
-        Ok(executor.context().subsystem.passthrough(command, rx_len)?)
+        Ok(executor.context().subsystem().passthrough(command)?)
+    }
+    
+    field set_mode(&executor) -> FieldResult<GenericResponse> {
+        unimplemented!();
+    }
+    
+    field update(&executor) -> FieldResult<GenericResponse> {
+        unimplemented!();
     }
     
 });

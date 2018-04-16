@@ -14,8 +14,14 @@
 // limitations under the License.
 //
 
+#[cfg(test)]
+#[macro_use]
+extern crate failure;
+#[cfg(not(test))]
+extern crate failure;
 #[macro_use]
 extern crate juniper;
+#[macro_use]
 extern crate kubos_service;
 extern crate mai400_api;
 
@@ -30,7 +36,7 @@ use schema::{MutationRoot, QueryRoot};
 fn main() {
     Service::new(
         Config::new("mai400-service"),
-        Subsystem::new(),
+        Subsystem::new("/dev/ttyS5".to_owned()),
         QueryRoot,
         MutationRoot,
     ).start();
