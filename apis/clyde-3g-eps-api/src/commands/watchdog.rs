@@ -64,12 +64,98 @@ pub mod GetCommsWatchdogPeriod {
 /// Any valid command will reset the communications watchdog timer. If the user
 /// does not require any telemetry from the board, this command can be sent
 /// to reset the communications watchdog.
-pub mod ResetCommunicationsWatchdog {
+pub mod ResetCommsWatchdog {
     use super::*;
 
     pub fn command() -> Command {
         Command {
             cmd: 0x22,
+            data: vec![0x00],
+        }
+    }
+}
+
+/// Get Number of Brown-out Resets
+///
+/// This counter is designed to keep track of the number of brown-out resets that
+/// have occurred. This counter will roll over at 255 to 0. The first two bytes
+/// outputted represent the Motherboard’s value, the second two represent the Daughterboard’s.
+pub mod GetNumBrownOutResets {
+    use super::*;
+
+    pub fn parse(data: &[u8]) -> Result<(u8, u8), EpsError> {
+        Ok((data[1], data[3]))
+    }
+
+    pub fn command() -> Command {
+        Command {
+            cmd: 0x31,
+            data: vec![0x00],
+        }
+    }
+}
+
+/// Get Number of Automatic Software Resets
+///
+/// If the on-board microcontroller has experienced a malfunction, such as being stuck
+/// in a loop, it will reset itself into a pre-defined initial state. Using this command,
+/// 0x32, it is possible to retrieve the number of times this reset has occurred. The
+/// first two bytes outputted represent the Motherboard’s value, the second two
+/// represent the Daughterboard’s. This counter will roll over at 255 to 0.
+pub mod GetNumAutomaticSoftwareResets {
+    use super::*;
+
+    pub fn parse(data: &[u8]) -> Result<(u8, u8), EpsError> {
+        Ok((data[1], data[3]))
+    }
+
+    pub fn command() -> Command {
+        Command {
+            cmd: 0x32,
+            data: vec![0x00],
+        }
+    }
+}
+
+/// Get Number of Manual Resets
+///
+/// A count is kept of the number of times the device has been manually reset using
+/// the Reset command. Sending the command 0x33 with data byte 0x00 will return the
+/// number of times the device has been reset in this fashion. The first two bytes
+/// outputted represent the Motherboard’s value, the second two represent the
+/// Daughterboard’s. This counter will roll over at 255 to 0.
+pub mod GetNumManualResets {
+    use super::*;
+
+    pub fn parse(data: &[u8]) -> Result<(u8, u8), EpsError> {
+        Ok((data[1], data[3]))
+    }
+
+    pub fn command() -> Command {
+        Command {
+            cmd: 0x33,
+            data: vec![0x00],
+        }
+    }
+}
+
+/// Get Number of Communications Watchdog Resets
+///
+/// As described previously, the device will reset itself if it does not receive any
+/// data via i2c for a predefined length of time. The communications node keeps a count
+/// of the number of times such an event has taken place. Sending the command 0x34 along
+/// with the data byte 0x00 will return the number of communication watchdog resets.
+/// This counter will roll over at 255 to 0.
+pub mod GetNumCommsWatchdogResets {
+    use super::*;
+
+    pub fn parse(data: &[u8]) -> Result<(u8, u8), EpsError> {
+        Ok((data[1], data[3]))
+    }
+
+    pub fn command() -> Command {
+        Command {
+            cmd: 0x33,
             data: vec![0x00],
         }
     }
