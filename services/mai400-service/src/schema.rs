@@ -133,7 +133,8 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field telemetry(&executor) -> FieldResult<Telemetry>
     {
-        Ok(executor.context().subsystem().get_telemetry()?)
+        //Ok(executor.context().subsystem().telemetry())
+        unimplemented!();
     }
     
     // Get the test results of the last run test

@@ -588,7 +588,7 @@ impl Default for StarTracker {
 
 /// Structure to contain all possible variables which can be returned
 /// by the standard telemetry message's `rotating_variable` fields
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct RotatingTelemetry {
     /// IGRF magnetic fields (X, Y, Z) (Tesla)
     pub b_field_igrf: [f32; 3],
@@ -857,7 +857,7 @@ impl RotatingTelemetry {
 }
 
 /// Structure for keplarian elements returned in the standard telemetry message
-#[derive(Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct KeplerElem {
     /// Semi major axis (km)
     pub semi_major_axis: f32,
