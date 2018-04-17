@@ -6,6 +6,8 @@ local Bitfield = require 'bitfield'
 
 local storage_path = 'storage'
 
+local FileService = {}
+
 local function ensure_dir(hash)
   local hash_path = join(storage_path, hash)
   assert(fs.mkdirp(hash_path))
@@ -38,8 +40,6 @@ local function load_meta(hash)
   return assert(tonumber(assert(fs.readFile(meta_path)), 16))
 end
 
-
-
 -- check what chunks are missing.  Also store_meta
 local function sync(hash, num_chunks)
 
@@ -70,11 +70,86 @@ local function sync(hash, num_chunks)
   if #ranges % 2 == 1 then
     ranges[#ranges + 1] = num_chunks
   end
-  return ranges
+  if #ranges > 0 then
+    return false, num_chunks, unpack(ranges)
+  else
+    return true, num_chunks, unpack(ranges)
+  end
+end
+
+-- { hash, chunk_index, data }, -- send chunk no reply needed
+-- { hash, num_chunks }, -- syn
+-- { hash, true }, -- ack
+-- { hash, false, 1, 4, 6, 7 }, -- nak
+
+
+-- { 1 2 3 }
+-- nh nil -> h 1
+-- nh 1 -> 2
+-- nh 2 -> 3
+-- nh 3 -> nil
+--   nh nil -> 1
+
+local downloads = {}
+local paused = false
+local next_hash
+function FileService.process()
+  while true do
+    local hash = next(downloads, next_hash)
+    if not (hash or next_hash) then break end
+    next_hash = hash
+    if hash then
+      local ranges = downloads[hash]
+      if #ranges < 2 then
+        downloads[hash] = nil
+        return
+      end
+      local first = ranges[1]
+      local last = ranges[2]
+      FileService.send(hash, first, load_chunk(hash, first))
+      ranges[1] = first + 1
+      if first + 1 == last then
+        downloads[hash] = { unpack(ranges, 3) }
+      end
+      return
+    end
+  end
+  print "Waiting for download requests..."
+  paused = coroutine.running()
+  coroutine.yield()
+  print "Starting downloads..."
+end
+
+function FileService.on_hash(hash, first, ...)
+  local first_type = type(first)
+  if first_type == 'nil' then
+    FileService.send(hash, sync(hash))
+  elseif first_type == 'number' then
+    local data = ...
+    if type(data) == 'string' then
+      store_chunk(hash, first, data)
+    else
+      FileService.send(hash, sync(hash, first))
+    end
+  elseif first_type == 'boolean' then
+    if first then
+      -- Request a download to stop
+      downloads[hash] = nil
+    else
+      -- Request a download to start
+      downloads[hash] = {...}
+      p{downloads=downloads,paused=paused}
+      if paused then
+        local thread = paused
+        paused = nil
+        coroutine.resume(thread)
+      end
+    end
+  end
 end
 
 -- combine chunks and write to target path
-local function export(hash, path, mode)
+function FileService.export(hash, path, mode)
   assert(type(hash) == 'string')
   assert(type(path) == 'string')
   if mode then
@@ -98,7 +173,7 @@ end
 -- create temporary folder for chunks
 -- stream copy file from mutable space to immutable space
 -- move folder to hash of contents
-local function import(path)
+function FileService.import(path)
   local temp_path, input, output, hash, index
   local success, message = xpcall(function ()
 
@@ -138,10 +213,4 @@ local function import(path)
   return hash, index
 end
 
-return {
-  store_chunk = store_chunk,
-  load_chunk = load_chunk,
-  sync = sync,
-  import = import,
-  export = export
-}
+return FileService
