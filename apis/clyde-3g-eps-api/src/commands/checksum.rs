@@ -34,28 +34,26 @@ impl Default for Checksum {
     }
 }
 
-impl Checksum {
-    pub fn parse(data: &[u8]) -> Result<Self, EpsError> {
-        if data.len() == 4 {
-            Ok(Checksum {
-                motherboard: data[2] as u16 | (data[3] as u16) << 8,
-                daughterboard: data[0] as u16 | (data[1] as u16) << 8,
-            })
-        } else if data.len() == 2 {
-            Ok(Checksum {
-                motherboard: data[0] as u16 | (data[1] as u16) << 8,
-                daughterboard: 0,
-            })
-        } else {
-            Err(EpsError::BadData)
-        }
+pub fn parse(data: &[u8]) -> Result<Checksum, EpsError> {
+    if data.len() == 4 {
+        Ok(Checksum {
+            motherboard: data[2] as u16 | (data[3] as u16) << 8,
+            daughterboard: data[0] as u16 | (data[1] as u16) << 8,
+        })
+    } else if data.len() == 2 {
+        Ok(Checksum {
+            motherboard: data[0] as u16 | (data[1] as u16) << 8,
+            daughterboard: 0,
+        })
+    } else {
+        Err(EpsError::BadData)
     }
+}
 
-    pub fn command() -> Command {
-        Command {
-            cmd: 0x05,
-            data: vec![0x00],
-        }
+pub fn command() -> Command {
+    Command {
+        cmd: 0x05,
+        data: vec![0x00],
     }
 }
 
@@ -70,7 +68,7 @@ mod tests {
                 motherboard: 0b1010010110100101,
                 daughterboard: 0,
             }),
-            Checksum::parse(&vec![0b10100101, 0b10100101])
+            parse(&vec![0b10100101, 0b10100101])
         );
     }
 
@@ -81,17 +79,17 @@ mod tests {
                 motherboard: 3084,
                 daughterboard: 771,
             }),
-            Checksum::parse(&vec![0b0011, 0b0011, 0b1100, 0b1100])
+            parse(&vec![0b0011, 0b0011, 0b1100, 0b1100])
         );
     }
 
     #[test]
     fn test_parse_one_byte() {
-        assert_eq!(Err(EpsError::BadData), Checksum::parse(&vec![0]));
+        assert_eq!(Err(EpsError::BadData), parse(&vec![0]));
     }
 
     #[test]
     fn test_parse_three_bytes() {
-        assert_eq!(Err(EpsError::BadData), Checksum::parse(&vec![1, 2, 3]));
+        assert_eq!(Err(EpsError::BadData), parse(&vec![1, 2, 3]));
     }
 }

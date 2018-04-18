@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use eps_api::EpsError;
 use i2c_hal::Command;
 
 /// Sends a reset command to the EPS TTC node
@@ -23,13 +22,9 @@ use i2c_hal::Command;
 /// the board will reset within 1 second. This command will result in the board
 /// being brought up in its defined initial condition. Resetting the board in
 /// this fashion will increment the Manual Reset Counter.
-pub struct Reset;
-
-impl Reset {
     pub fn command() -> Command {
         Command {
             cmd: 0x80,
             data: vec![0x00],
         }
     }
-}

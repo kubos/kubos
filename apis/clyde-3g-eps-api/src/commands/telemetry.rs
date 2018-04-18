@@ -23,30 +23,27 @@ macro_rules! make_telemetry {
     (
         $($type: ident => {$data: expr, $parser: expr},)+
     ) => {
-        pub struct Telemetry;
 
         #[derive(Clone, Copy)]
-        pub enum TelemetryType {
+        pub enum Type {
             $($type,)+
         }
 
-        impl Telemetry {
-            pub fn parse(data: &[u8], telem_type: TelemetryType) -> Result<f32, EpsError> {
+            pub fn parse(data: &[u8], telem_type: Type) -> Result<f32, EpsError> {
                 let adc_data = get_adc_result(data)?;
                 Ok(match telem_type {
-                    $(TelemetryType::$type => $parser(adc_data),)+
+                    $(Type::$type => $parser(adc_data),)+
                 })
             }
 
-            pub fn command(telem_type: TelemetryType) -> Command {
+            pub fn command(telem_type: Type) -> Command {
                 Command {
                     cmd: TELEM_CMD,
                     data: match telem_type {
-                        $(TelemetryType::$type => $data,)+
+                        $(Type::$type => $data,)+
                     }
                 }
             }
-        }
     }
 }
 

@@ -29,7 +29,7 @@ use i2c_hal::Command;
 /// A minimum value of 1 minute or a maximum of 90 minutes can be set.
 /// The device will always reboot with a timeout value of 4 minutes set.
 /// If an invalid value is specified then the device will generate a Data Error.
-pub mod SetCommsWatchdogPeriod {
+pub mod set_comms_watchdog_period {
     use super::*;
 
     pub fn command(period: u8) -> Command {
@@ -44,7 +44,7 @@ pub mod SetCommsWatchdogPeriod {
 ///
 /// This command provides the user with the current communications watchdog
 /// timeout that has been set. The returned value is indicated in minutes.
-pub mod GetCommsWatchdogPeriod {
+pub mod get_comms_watchdog_period {
     use super::*;
 
     pub fn parse(data: &[u8]) -> Result<u8, EpsError> {
@@ -64,7 +64,7 @@ pub mod GetCommsWatchdogPeriod {
 /// Any valid command will reset the communications watchdog timer. If the user
 /// does not require any telemetry from the board, this command can be sent
 /// to reset the communications watchdog.
-pub mod ResetCommsWatchdog {
+pub mod reset_comms_watchdog {
     use super::*;
 
     pub fn command() -> Command {
@@ -80,7 +80,7 @@ pub mod ResetCommsWatchdog {
 /// This counter is designed to keep track of the number of brown-out resets that
 /// have occurred. This counter will roll over at 255 to 0. The first two bytes
 /// outputted represent the Motherboard’s value, the second two represent the Daughterboard’s.
-pub mod GetNumBrownOutResets {
+pub mod get_number_brown_out_resets {
     use super::*;
 
     pub fn parse(data: &[u8]) -> Result<(u8, u8), EpsError> {
@@ -102,7 +102,7 @@ pub mod GetNumBrownOutResets {
 /// 0x32, it is possible to retrieve the number of times this reset has occurred. The
 /// first two bytes outputted represent the Motherboard’s value, the second two
 /// represent the Daughterboard’s. This counter will roll over at 255 to 0.
-pub mod GetNumAutomaticSoftwareResets {
+pub mod get_number_automatic_software_resets {
     use super::*;
 
     pub fn parse(data: &[u8]) -> Result<(u8, u8), EpsError> {
@@ -124,7 +124,7 @@ pub mod GetNumAutomaticSoftwareResets {
 /// number of times the device has been reset in this fashion. The first two bytes
 /// outputted represent the Motherboard’s value, the second two represent the
 /// Daughterboard’s. This counter will roll over at 255 to 0.
-pub mod GetNumManualResets {
+pub mod get_number_manual_resets {
     use super::*;
 
     pub fn parse(data: &[u8]) -> Result<(u8, u8), EpsError> {
@@ -146,7 +146,7 @@ pub mod GetNumManualResets {
 /// of the number of times such an event has taken place. Sending the command 0x34 along
 /// with the data byte 0x00 will return the number of communication watchdog resets.
 /// This counter will roll over at 255 to 0.
-pub mod GetNumCommsWatchdogResets {
+pub mod get_number_comms_watchdog_resets {
     use super::*;
 
     pub fn parse(data: &[u8]) -> Result<(u8, u8), EpsError> {

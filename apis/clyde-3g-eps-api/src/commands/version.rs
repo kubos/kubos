@@ -29,8 +29,7 @@ pub struct VersionInfo {
     daughterboard: Version,
 }
 
-impl VersionInfo {
-    pub fn parse(data: &[u8]) -> Result<Self, EpsError> {
+    pub fn parse(data: &[u8]) -> Result<VersionInfo, EpsError> {
         if data.len() > 0 {
             let firmware_number = (data[0] as u16) | ((data[1] as u16) & 0xF) << 8;
             let revision = (data[1] & 0xF0) >> 4;
@@ -55,7 +54,6 @@ impl VersionInfo {
             data: vec![0x00],
         }
     }
-}
 
 #[cfg(test)]
 mod tests {
@@ -74,7 +72,7 @@ mod tests {
                     firmware_number: 0,
                 },
             },),
-            VersionInfo::parse(&vec![0, 0])
+            parse(&vec![0, 0])
         );
     }
 }

@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-mod checksum;
-mod status;
-mod last_error;
-mod reset;
-mod version;
-mod watchdog;
-mod telemetry;
-
-pub use commands::checksum::Checksum;
-pub use commands::last_error::LastError;
-pub use commands::reset::Reset;
-pub use commands::status::Status;
-pub use commands::telemetry::{TelemetryType,Telemetry};
-pub use commands::version::VersionInfo;
-pub use commands::watchdog::{GetCommsWatchdogPeriod, ResetCommsWatchdog, SetCommsWatchdogPeriod};
+pub mod checksum;
+pub mod board_status;
+pub mod last_error;
+pub mod reset;
+pub mod version;
+pub mod watchdog;
+pub mod telemetry;

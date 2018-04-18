@@ -48,8 +48,7 @@ bitflags! {
     }
 }
 
-impl LastError {
-    pub fn parse(data: &[u8]) -> Result<Self, EpsError> {
+    pub fn parse(data: &[u8]) -> Result<LastError, EpsError> {
         if data.len() > 0 {
             match LastError::from_bits(data[0]) {
                 Some(s) => Ok(s),
@@ -66,7 +65,6 @@ impl LastError {
             data: vec![0x00],
         }
     }
-}
 
 #[cfg(test)]
 mod tests {
@@ -74,6 +72,6 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        assert_eq!(Ok(LastError::BAD_CRC), LastError::parse(&vec![0x10]));
+        assert_eq!(Ok(LastError::BAD_CRC), parse(&vec![0x10]));
     }
 }

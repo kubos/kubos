@@ -29,35 +29,34 @@ impl Eps {
     }
 
     /// Retrieves operational status data from TTC node
-    pub fn get_board_status(&self) -> Result<Status, EpsError> {
-        Status::parse(&self.connection.transfer(Status::command())?)
+    pub fn get_board_status(&self) -> Result<board_status::BoardStatus, EpsError> {
+        board_status::parse(&self.connection.transfer(board_status::command())?)
     }
 
     /// Retrieves checksum of TTC node ROM
-    pub fn get_checksum(&self) -> Result<Checksum, EpsError> {
-        Checksum::parse(&self.connection.transfer(Checksum::command())?)
+    pub fn get_checksum(&self) -> Result<checksum::Checksum, EpsError> {
+        checksum::parse(&self.connection.transfer(checksum::command())?)
     }
 
     /// Retrieves firmware and board revision information
-    pub fn get_version_info(&self) -> Result<VersionInfo, EpsError> {
-        VersionInfo::parse(&self.connection.transfer(VersionInfo::command())?)
+    pub fn get_version_info(&self) -> Result<version::VersionInfo, EpsError> {
+        version::parse(&self.connection.transfer(version::command())?)
     }
 
     /// Retrieves details of last error generated
-    pub fn get_last_error(&self) -> Result<LastError, EpsError> {
-        LastError::parse(&self.connection.transfer(LastError::command())?)
+    pub fn get_last_error(&self) -> Result<last_error::LastError, EpsError> {
+        last_error::parse(&self.connection.transfer(last_error::command())?)
     }
 
     /// Performs manual reset of TTC node
     pub fn manual_reset(&self) -> Result<(), EpsError> {
-        self.connection.write(Reset::command())?;
-        Ok(())
+        Ok(self.connection.write(reset::command())?)
     }
 
     /// Retrieves telemetry
-    pub fn get_telemetry(&self, telem_type: TelemetryType) -> Result<f32, EpsError> {
-        Telemetry::parse(
-            &self.connection.transfer(Telemetry::command(telem_type))?,
+    pub fn get_telemetry(&self, telem_type: telemetry::Type) -> Result<f32, EpsError> {
+        telemetry::parse(
+            &self.connection.transfer(telemetry::command(telem_type))?,
             telem_type,
         )
     }

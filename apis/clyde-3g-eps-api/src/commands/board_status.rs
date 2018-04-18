@@ -19,7 +19,7 @@ use i2c_hal::Command;
 
 bitflags! {
     #[derive(Default)]
-    pub struct Status: u8 {
+    pub struct BoardStatus: u8 {
         const LAST_COMMAND_FAILED = 0b0000001;
         const WATCHDOG_ERROR = 0b0000010;
         const BAD_COMMAND_DATA = 0b0000100;
@@ -30,12 +30,12 @@ bitflags! {
     }
 }
 
-impl Status {
-    pub fn parse(data: &[u8]) -> Result<Self, EpsError> {
+
+    pub fn parse(data: &[u8]) -> Result<BoardStatus, EpsError> {
         if data.len() > 0 {
-            match Status::from_bits(data[0]) {
+            match BoardStatus::from_bits(data[0]) {
                 Some(s) => Ok(s),
-                None => Ok(Status::default()),
+                None => Ok(BoardStatus::default()),
             }
         } else {
             Err(EpsError::BadData)
@@ -48,7 +48,7 @@ impl Status {
             data: vec![0x00],
         }
     }
-}
+
 
 #[cfg(test)]
 mod tests {
