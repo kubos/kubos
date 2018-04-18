@@ -20,10 +20,12 @@ mod last_error;
 mod reset;
 mod version;
 mod watchdog;
+mod telemetry;
 
 pub use commands::checksum::Checksum;
 pub use commands::last_error::LastError;
 pub use commands::reset::Reset;
 pub use commands::status::Status;
+pub use commands::telemetry::{TelemetryType,Telemetry};
 pub use commands::version::VersionInfo;
 pub use commands::watchdog::{GetCommsWatchdogPeriod, ResetCommsWatchdog, SetCommsWatchdogPeriod};

@@ -53,6 +53,14 @@ impl Eps {
         self.connection.write(Reset::command())?;
         Ok(())
     }
+
+    /// Retrieves telemetry
+    pub fn get_telemetry(&self, telem_type: TelemetryType) -> Result<f32, EpsError> {
+        Telemetry::parse(
+            &self.connection.transfer(Telemetry::command(telem_type))?,
+            telem_type,
+        )
+    }
 }
 
 #[cfg(test)]
