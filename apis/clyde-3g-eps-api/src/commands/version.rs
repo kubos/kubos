@@ -29,31 +29,31 @@ pub struct VersionInfo {
     daughterboard: Version,
 }
 
-    pub fn parse(data: &[u8]) -> Result<VersionInfo, EpsError> {
-        if data.len() > 0 {
-            let firmware_number = (data[0] as u16) | ((data[1] as u16) & 0xF) << 8;
-            let revision = (data[1] & 0xF0) >> 4;
-            Ok(VersionInfo {
-                motherboard: Version {
-                    revision,
-                    firmware_number,
-                },
-                daughterboard: Version {
-                    revision,
-                    firmware_number,
-                },
-            })
-        } else {
-            Err(EpsError::BadData)
-        }
+pub fn parse(data: &[u8]) -> Result<VersionInfo, EpsError> {
+    if data.len() > 0 {
+        let firmware_number = (data[0] as u16) | ((data[1] as u16) & 0xF) << 8;
+        let revision = (data[1] & 0xF0) >> 4;
+        Ok(VersionInfo {
+            motherboard: Version {
+                revision,
+                firmware_number,
+            },
+            daughterboard: Version {
+                revision,
+                firmware_number,
+            },
+        })
+    } else {
+        Err(EpsError::BadData)
     }
+}
 
-    pub fn command() -> Command {
-        Command {
-            cmd: 0x04,
-            data: vec![0x00],
-        }
+pub fn command() -> Command {
+    Command {
+        cmd: 0x04,
+        data: vec![0x00],
     }
+}
 
 #[cfg(test)]
 mod tests {

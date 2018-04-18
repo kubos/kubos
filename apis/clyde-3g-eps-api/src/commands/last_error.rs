@@ -48,23 +48,23 @@ bitflags! {
     }
 }
 
-    pub fn parse(data: &[u8]) -> Result<LastError, EpsError> {
-        if data.len() > 0 {
-            match LastError::from_bits(data[0]) {
-                Some(s) => Ok(s),
-                None => Err(EpsError::BadData),
-            }
-        } else {
-            Err(EpsError::BadData)
+pub fn parse(data: &[u8]) -> Result<LastError, EpsError> {
+    if data.len() > 0 {
+        match LastError::from_bits(data[0]) {
+            Some(s) => Ok(s),
+            None => Err(EpsError::BadData),
         }
+    } else {
+        Err(EpsError::BadData)
     }
+}
 
-    pub fn command() -> Command {
-        Command {
-            cmd: 0x03,
-            data: vec![0x00],
-        }
+pub fn command() -> Command {
+    Command {
+        cmd: 0x03,
+        data: vec![0x00],
     }
+}
 
 #[cfg(test)]
 mod tests {

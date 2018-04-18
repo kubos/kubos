@@ -55,7 +55,6 @@ fn get_adc_result(data: &[u8]) -> Result<f32, EpsError> {
     }
 }
 
-
 make_telemetry!(
     // Voltage feeding BRC1 (V)
     VoltageFeedingBcr1 => {vec![0xE1, 0x10], |d| 0.0249 * d},
