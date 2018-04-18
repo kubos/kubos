@@ -19,8 +19,6 @@ local dump = require('pretty-print').dump
 local Editor = require('readline').Editor
 local cbor = require 'cbor'
 
--- Default lua strings to utf8 strings in cbor encoding.
-cbor.type_encoders.string = cbor.type_encoders.utf8string
 
 local usage = [[
 Kubos CBOR Client
