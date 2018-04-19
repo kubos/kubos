@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017 Kubos Corporation
+// Copyright (C) 2018 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -93,8 +93,7 @@ fn get_config_path() -> String {
     let args: Vec<String> = env::args().collect();
 
     let mut opts = Options::new();
-    opts.optopt("c", "config", "path to config file", "CONFIG");
-    opts.optflag("h", "help", "print this help menu");
+    opts.optopt("c", "config", "Path to config file", "CONFIG");
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
         Err(f) => panic!(f.to_string()),

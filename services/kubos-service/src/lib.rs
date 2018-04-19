@@ -18,7 +18,7 @@
 #![deny(warnings)]
 
 //! A collection of structures and functions used to create hardware services
-//! in the kubos linux ecosystem.
+//! in the Kubos Linux ecosystem.
 //!
 //! # Use
 //!
@@ -31,6 +31,31 @@
 //!
 //! Services should only link to the `kubos_service` crate if they have a
 //! hardware device they want to expose over the service interface (currently GraphQL/UDP).
+//!
+//! ## Configuration
+//!
+//! Services which use this crate have the option of using a local configuration file
+//! or falling back on default config values. The service will search for the configuration
+//! file at this location `/home/system/etc/config.toml` unless otherwise specified with
+//! the `-c` flag at run time.
+//!
+//! The service configuration file uses the Toml format and is expected to use the
+//! following layout:
+//! ```
+//! [service-name]
+//! config-key = "value"
+//! config-key2 = 123
+//!
+//! # This section and values are needed for all services
+//! [service-name.addr]
+//! ip = "127.0.0.1"
+//! port = 8082
+//! ```
+//! The `[service-name.addr]` section is required for all services and is used to set
+//! the ip/port on which the service will listen for messages. Any service specific
+//! configuration values can be specified directly under the `[service-name]` section.
+//! Note - the `service-name` used in the sections must match the name used when creating
+//! the `Config` instance inside your service.
 //!
 //! ### Examples
 //!
