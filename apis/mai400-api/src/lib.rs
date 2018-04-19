@@ -19,7 +19,7 @@
 //! All work is done against an instantiated [`MAI400`] struct.
 //!
 //! # Examples
-//! //TODO: This could be better
+//! //TODO: No longer valid
 //!
 //! ```
 //! use mai400_api::*;

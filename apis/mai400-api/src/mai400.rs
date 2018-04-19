@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use crc16::*;
+use byteorder::{LittleEndian, WriteBytesExt};
 use messages::*;
 use serial;
 use serial_comm::Connection;
 use std::io;
-use std::io::Cursor;
 
 /// Structure for MAI-400 device instance
 pub struct MAI400 {
@@ -86,11 +84,7 @@ impl MAI400 {
     /// *Note: Arguments should be set to `0x00` when not needed for desired mode*
     ///
     /// * mode - ACS mode to enter
-    /// * sec_vec - Secondary vector, when entering Object Track mode,
-    ///   or Qbi_cmd[0] when entering Qinertial mode
-    /// * pri_axis - Primary pointing axis, or Qbi_cmd[1] when entering Qinertial mode
-    /// * sec_axis - Secondary pointing axis, or Qbi_cmd[2] when entering Qinertial mode
-    /// * qbi_cmd4 - Qbi_cmd[3] when entering Qinertial mode
+    /// * params - Array of signed shorts containing the arguments for configuring the requested mode
     ///
     /// # Errors
     ///
@@ -103,27 +97,61 @@ impl MAI400 {
     /// # fn func() -> MAIResult<()> {
     /// # let connection = Connection::new("/dev/ttyS5".to_owned());
     /// let mai = MAI400::new(connection);
-    /// mai.set_mode(13, 1, -1, -3, 0)?;
+    /// mai.set_mode(9, [1, -1, -3, 0])?;
     /// # Ok(())
     /// # }
     /// ```
     ///
     /// [`MAIError`]: enum.MAIError.html
     // TODO: Get good values for examples
-    pub fn set_mode(
-        &self,
-        mode: u8,
-        sec_vec: i32,
-        pri_axis: i32,
-        sec_axis: i32,
-        qbi_cmd4: i32,
-    ) -> MAIResult<()> {
+    pub fn set_mode(&self, mode: u8, params: [i16; 4]) -> MAIResult<()> {
         let request = SetAcsMode {
             mode,
-            sec_vec,
-            pri_axis,
-            sec_axis,
-            qbi_cmd4,
+            qbi_cmd: params,
+            ..Default::default()
+        };
+
+        self.send_message(request.serialize())
+    }
+
+    /// Set the ACS mode (Normal-Sun or Lat/Long-Sun)
+    ///
+    /// # Arguments
+    ///
+    /// *Note: Arguments should be set to `0x00` when not needed for desired mode*
+    ///
+    /// * mode - ACS mode to enter. Should be either Normal-Sun or Lat/Long-Sun
+    /// * sun_angle_enable - Sun angle enable (0 = no update, 1 = update)
+    /// * sun_rot_angle - Sun rotation angle, in degrees
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use mai400_api::*;
+    /// # fn func() -> MAIResult<()> {
+    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let mai = MAI400::new(connection);
+    /// mai.set_mode(7, 1, 45.0)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`MAIError`]: enum.MAIError.html
+    // TODO: Get good values for examples
+    pub fn set_mode_sun(
+        &self,
+        mode: u8,
+        sun_angle_enable: i16,
+        sun_rot_angle: f32,
+    ) -> MAIResult<()> {
+        let request = SetAcsModeSun {
+            mode,
+            sun_angle_enable,
+            sun_rot_angle,
             ..Default::default()
         };
 
@@ -167,12 +195,8 @@ impl MAI400 {
     ///
     /// # Arguments
     ///
-    /// * eci_pos_x - X-axis ECI position
-    /// * eci_pos_y - Y-axis ECI position
-    /// * eci_pos_z - Z-axis ECI position
-    /// * eci_vel_x - X-axis ECI velocity
-    /// * eci_vel_y - Y-axis ECI velocity
-    /// * eci_vel_z - Z-axis ECI velocity
+    /// * eci_pos - ECI position [X, Y, Z]
+    /// * eci_vel - ECI velocity [X, Y, Z]
     /// * time_epoch - GPS time at Epoch
     ///
     /// # Errors
@@ -186,72 +210,21 @@ impl MAI400 {
     /// # fn func() -> MAIResult<()> {
     /// # let connection = Connection::new("/dev/ttyS5".to_owned());
     /// let mai = MAI400::new(connection);
-    /// mai.set_rv(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1198800018)?;
+    /// mai.set_rv([0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 1198800018)?;
     /// # Ok(())
     /// # }
     /// ```
     ///
     /// [`MAIError`]: enum.MAIError.html
-    pub fn set_rv(
-        &self,
-        eci_pos_x: f32,
-        eci_pos_y: f32,
-        eci_pos_z: f32,
-        eci_vel_x: f32,
-        eci_vel_y: f32,
-        eci_vel_z: f32,
-        time_epoch: u32,
-    ) -> MAIResult<()> {
+    pub fn set_rv(&self, eci_pos: [f32; 3], eci_vel: [f32; 3], time_epoch: u32) -> MAIResult<()> {
         let request = SetRV {
-            eci_pos_x,
-            eci_pos_y,
-            eci_pos_z,
-            eci_vel_x,
-            eci_vel_y,
-            eci_vel_z,
+            eci_pos,
+            eci_vel,
             time_epoch,
             ..Default::default()
         };
 
         self.send_message(request.serialize())
-    }
-
-    /// Request the device configuration information
-    ///
-    /// *Note: The configuration information should be fetched with a separate `read` call*
-    ///
-    /// # Errors
-    ///
-    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use mai400_api::*;
-    /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
-    /// let mai = MAI400::new(connection);
-    ///
-    /// // Request configuration information
-    /// mai.get_info()?;
-    ///
-    /// // Grab returned config message
-    /// loop {
-    /// 	match mai.get_message()? {
-    ///     	Response::Config(config) => {
-    ///         	println!("FW Version: {}.{}.{}", config.major, config.minor, config.build);
-    ///         	break;
-    ///     	}
-    ///     	_ => continue
-    /// 	}
-    /// }
-    /// # Ok(())
-    /// # }
-    /// ```
-    ///
-    /// [`MAIError`]: enum.MAIError.html
-    pub fn get_info(&self) -> MAIResult<()> {
-        self.send_message(GetInfo::default().serialize())
     }
 
     /// Directly send a message without formatting or checksum calculation
@@ -293,7 +266,12 @@ impl MAI400 {
     }
 
     fn send_message(&self, mut msg: Vec<u8>) -> MAIResult<()> {
-        let crc = State::<AUG_CCITT>::calculate(&msg[2..]);
+        // Get the calculated CRC
+        //let calc = State::<AUG_CCITT>::calculate(&msg[1..]);
+        let mut crc: u16 = 0;
+        for byte in msg.iter() {
+            crc += *byte as u16;
+        }
         msg.write_u16::<LittleEndian>(crc).unwrap();
 
         self.conn.write(msg.as_slice())?;
@@ -331,61 +309,26 @@ impl MAI400 {
     /// ```
     ///
     /// [`MAIError`]: enum.MAIError.html
-    pub fn get_message(&self) -> MAIResult<Response> {
+    pub fn get_message(
+        &self,
+    ) -> MAIResult<(Option<StandardTelemetry>, Option<RawIMU>, Option<IREHSTelemetry>)> {
 
-        let response: Response;
+        let mut msg = self.conn.read()?;
 
-        loop {
-            let mut msg = self.conn.read()?;
+        // Pull out raw IMU message
+        let len = msg.len();
+        let imu = msg.split_off(len - 21);
+        let imu = RawIMU::new(imu);
 
-            // Get the CRC bytes
-            let len = msg.len();
-            let mut raw = msg.split_off(len - 2);
-            let mut crc = Cursor::new(raw.to_vec());
-            let crc = crc.read_u16::<LittleEndian>()?;
+        // Pull out IREHS telemetry message
+        let len = msg.len();
+        let irehs = msg.split_off(len - 56);
+        let irehs = IREHSTelemetry::new(irehs);
 
-            // Get the calculated CRC
-            let calc = State::<AUG_CCITT>::calculate(&msg[1..]);
+        // Process remaining bytes as standard telemetry message
+        let std = StandardTelemetry::new(msg);
 
-            // Make sure they match
-            // If not, pretend this never happened and go get another message
-            if calc != crc {
-                continue;
-            }
-
-            // Put the CRC bytes back and translate the vector into a useable structure
-            msg.append(&mut raw);
-
-            // Identify message type and convert to usable structure
-            let id = msg[4];
-            match id {
-                1 => {
-                    let telem = StandardTelemetry::new(&msg[..]);
-                    response = Response::StdTelem(telem);
-                    break;
-                }
-                2 => {
-                    let irehs = IREHSTelemetry::new(&msg[..]);
-                    response = Response::IREHS(irehs);
-                    break;
-                }
-                3 => {
-                    let imu = RawIMU::new(&msg[..]);
-                    response = Response::IMU(imu);
-                    break;
-                }
-                6 => {
-                    let info = ConfigInfo::new(&msg[..]);
-                    response = Response::Config(info);
-                    break;
-                }
-                _ => {
-                    throw!(MAIError::UnknownMessage { id });
-                }
-            }
-        }
-
-        Ok(response)
+        Ok((std, imu, irehs))
 
     }
 }
@@ -396,11 +339,14 @@ pub enum MAIError {
     /// Catch-all error
     #[display(fmt = "Generic Error")]
     GenericError,
+    /// Software attempted to send a command packet which was not exactly 40 characters long
+    #[display(fmt = "Bad Command Length")]
+    BadCommand,
     /// Received a valid message, but the message ID doesn't match any known message type
     #[display(fmt = "Unknown Message Received: {:X}", id)]
     UnknownMessage {
         /// ID of message received
-        id: u8,
+        id: u16,
     },
     #[display(fmt = "Serial Error: {}", cause)]
     /// An error was thrown by the serial driver

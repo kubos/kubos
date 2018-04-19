@@ -15,13 +15,15 @@
  */
 
 use byteorder::{LittleEndian, ReadBytesExt};
-use mai400::MAIResult;
-use messages::*;
+use mai400::{MAIError, MAIResult};
 use std::io::Cursor;
 use std::io::prelude::*;
 use std::time::Duration;
 use serial;
 use serial::prelude::*;
+
+/// IRIG-106 sync word
+const SYNC: u16 = 0xEB90;
 
 /// Wrapper structure for underlying stream
 pub struct Connection {
@@ -49,6 +51,9 @@ impl Connection {
 
     /// Write out raw bytes to the underlying stream.
     pub fn write(&self, data: &[u8]) -> MAIResult<()> {
+        if data.len() != 40 {
+            throw!(MAIError::BadCommand);
+        }
         self.stream.write(data)
     }
 
@@ -100,12 +105,11 @@ impl Stream for SerialStream {
         port.configure(&self.settings)?;
 
         let mut ret_msg: Vec<u8> = Vec::new();
+
         loop {
             ret_msg.clear();
 
-            // Messages should be coming out every 250 msec,
-            // so giving the timeout a little bit of wiggle room
-            port.set_timeout(Duration::new(0, 500))?;
+            port.set_timeout(Duration::new(0, 10))?;
 
             let mut sync: [u8; 2] = [0; 2];
             match port.read(&mut sync) {
@@ -132,30 +136,15 @@ impl Stream for SerialStream {
                 continue;
             }
 
-            // We got the SYNC bytes, so we know we're at the start of a message.
-            // Get the rest of the header
-            let mut hdr: [u8; HDR_SZ - 2] = [0; HDR_SZ - 2];
-            port.read(&mut hdr)?;
-
-            // Pull out the data_len value so we know how many more bytes we need to read
-            // (Add 2 to account for the CRC bytes)
-            let mut wrapper = Cursor::new(hdr[0..2].to_vec());
-            let mut len = wrapper.read_u16::<LittleEndian>()? + 2;
-
-            // Add the rest of the header to our return message
-            ret_msg.append(&mut hdr.to_vec());
-
-            // Read in chunks
-            // TODO: Might have to go to single byte reads...
-            // Or hopefully the problem will magically go away...
-            while len > 40 {
-                let mut data: Vec<u8> = vec![0; 40];
+            let mut len = 0;
+            while len < 200 {
+                let mut data: Vec<u8> = vec![0; 46];
                 let temp = match port.read(&mut data[..]) {
                     Ok(v) => v,
-                    Err(_err) => continue,
+                    Err(_err) => continue, //TODO: process timeout
                 };
 
-                len -= temp as u16;
+                len += temp;
                 ret_msg.append(&mut data[0..temp].to_vec());
             }
 
