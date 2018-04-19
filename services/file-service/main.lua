@@ -24,9 +24,9 @@ local addrs = {}
 
 -- Expire address table entries after a period of inactivity
 local timer = uv.new_timer()
-timer:start(1000, 1000, function ()
+timer:start(1000*60, 1000*60, function ()
   local new_addrs = {}
-  local expire = uv.now() - 10000
+  local expire = uv.now() - 60*60*1000
   for k, v in pairs(addrs) do
     if v[3] > expire then
       new_addrs[k] = v
@@ -39,7 +39,11 @@ timer:unref()
 local function send(channel_id, ...)
   local message = {channel_id, ...}
   p('->', message)
-  local addr = assert(addrs[channel_id], 'Unknown receiver address')
+  local addr = addrs[channel_id]
+  if not addr then
+    print('Unknown receiver address: ' .. addr)
+    return
+  end
   local ip, port = unpack(addr)
   addrs[channel_id][3] = uv.now()
   local encoded = cbor.encode(message)

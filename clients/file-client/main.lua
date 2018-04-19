@@ -41,6 +41,7 @@ local protocol = file_protocol(send, 'storage')
 handle:recv_start(function (err, data, addr)
   if err then return print(err) end
   if not data then return end
+  p(addr)
   assert(addr.port == port)
   coroutine.wrap(function ()
     local success, error = xpcall(function ()
@@ -67,9 +68,23 @@ local function upload(path, target_path)
   protocol.call_export(hash, target_path, mode)
 end
 
+local usage = [[
+Kubos File Client Utility Usage:
+
+  kubos-file-client upload path/to/local/file.txt [/remote/path/file.txt]
+  kubos-file-client download /remote/path/file.txt [local/path/file.txt]
+]]
+
 coroutine.wrap(function ()
   local success, message = xpcall(function ()
-    upload(args[1], args[2])
+    local command = args[1]
+    if command == 'upload' and #args >= 2 then
+      upload(args[2], args[3])
+    elseif command == 'download' and #args >= 2 then
+      download(args[2], args[3])
+    else
+      print(usage)
+    end
     handle:close()
   end, debug.traceback)
   if not success then

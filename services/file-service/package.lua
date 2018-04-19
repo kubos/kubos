@@ -16,6 +16,7 @@ return {
     "creationix/bitfield",
     "creationix/coro-fs",
     "creationix/blake2s",
+    "creationix/defer",
   },
   files = {
     "**.lua",
