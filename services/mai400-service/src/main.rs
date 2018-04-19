@@ -31,13 +31,14 @@ mod objects;
 mod schema;
 
 use kubos_service::{Config, Service};
-use model::Subsystem;
+use model::{Subsystem, ReadData};
 use schema::{MutationRoot, QueryRoot};
+use std::sync::Arc;
 
 fn main() {
     Service::new(
         Config::new("mai400-service"),
-        Subsystem::new("/dev/ttyS5".to_owned()),
+        Subsystem::new("/dev/ttyS5".to_owned(), Arc::new(ReadData::new())),
         QueryRoot,
         MutationRoot,
     ).start();

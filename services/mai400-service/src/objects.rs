@@ -123,13 +123,20 @@ pub enum Mode {
     NormalSun,
     LatLongSun,
     Qintertial,
+    Reserved3,
+    Qtable,
+    SunRam,
 }
 
 #[derive(GraphQLObject)]
 pub struct Orientation {}
 
 #[derive(GraphQLObject)]
-pub struct Spin {}
+pub struct Spin {
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+}
 
 #[derive(GraphQLObject)]
 pub struct Telemetry {
@@ -140,14 +147,10 @@ pub struct Telemetry {
 #[derive(GraphQLObject)]
 pub struct TelemetryNominal {
     pub std: StdTelem,
-    pub rotating: Rotating,
 }
 
 #[derive(Debug, Default, PartialEq)]
 pub struct StdTelem(pub StandardTelemetry);
-
-#[derive(Debug, Default, PartialEq)]
-pub struct Rotating(pub RotatingTelemetry);
 
 graphql_object!(StdTelem: () |&self| {
 
@@ -271,6 +274,111 @@ graphql_object!(StdTelem: () |&self| {
         Ok(self.0.crc as i32)
     }
 });
+
+
+/// Response fields for 'telemetry(telem: DEBUG)' query
+#[derive(GraphQLObject)]
+pub struct TelemetryDebug {
+    pub config: Config,
+    pub irehs: IREHSTelem,
+    pub raw_imu: RawIMUTelem,
+    pub rotating: Rotating,
+}
+
+#[derive(Debug, Default, PartialEq)]
+pub struct Config(pub ConfigInfo);
+
+graphql_object!(Config: () |&self| {
+        
+    field model() -> FieldResult<i32> {
+        Ok(self.0.model as i32)
+    }
+    
+    field serial() -> FieldResult<i32> {
+        Ok(self.0.serial as i32)
+    }
+    
+    field major() -> FieldResult<i32> {
+        Ok(self.0.major as i32)
+    }
+    
+    field minor() -> FieldResult<i32> {
+        Ok(self.0.minor as i32)
+    }
+    
+    field build() -> FieldResult<i32> {
+        Ok(self.0.build as i32)
+    }
+    
+    field n_ehs() -> FieldResult<i32> {
+        Ok(self.0.n_ehs as i32)
+    }
+    
+    field ehs_type() -> FieldResult<i32> {
+        unimplemented!();
+    }
+    
+    field n_st() -> FieldResult<i32> {
+        Ok(self.0.n_st as i32)
+    }
+    
+    field st_type() -> FieldResult<i32> {
+        unimplemented!();
+    }
+});
+
+#[derive(Debug, Default, PartialEq)]
+pub struct IREHSTelem(pub IREHSTelemetry);
+
+graphql_object!(IREHSTelem: () |&self| {
+    field thermopiles_a() -> FieldResult<Vec<i32>> {
+        Ok(self.0.thermopiles_a.iter().map(|&elem| elem as i32).collect())
+    }
+    
+    field thermopiles_b() -> FieldResult<Vec<i32>> {
+        Ok(self.0.thermopiles_b.iter().map(|&elem| elem as i32).collect())
+    }
+    
+    field temp_a() -> FieldResult<Vec<i32>> {
+        Ok(self.0.temp_a.iter().map(|&elem| elem as i32).collect())
+    }
+    
+    field temp_b() -> FieldResult<Vec<i32>> {
+        Ok(self.0.temp_b.iter().map(|&elem| elem as i32).collect())
+    }
+    
+    field dip_angle_a() -> FieldResult<i32> {
+        Ok(self.0.dip_angle_a as i32)
+    }
+    
+    field dip_angle_b() -> FieldResult<i32> {
+        Ok(self.0.dip_angle_b as i32)
+    }
+    
+    field solution_degraded() -> FieldResult<i32> {
+        unimplemented!();
+    }
+});
+
+#[derive(Debug, Default, PartialEq)]
+pub struct RawIMUTelem(pub RawIMU);
+
+graphql_object!(RawIMUTelem: () |&self| {
+    field accel() -> FieldResult<Vec<i32>> {
+        Ok(self.0.accel.iter().map(|&elem| elem as i32).collect())
+    }
+    
+    field gyro() -> FieldResult<Vec<i32>> {
+        Ok(self.0.gyro.iter().map(|&elem| elem as i32).collect())
+    }
+    
+    field gyro_temp() -> FieldResult<i32> {
+        Ok(self.0.gyro_temp as i32)
+    }
+});
+
+#[derive(Debug, Default, PartialEq)]
+pub struct Rotating(pub RotatingTelemetry);
 
 graphql_object!(Rotating: () |&self| {
 
@@ -439,104 +547,4 @@ graphql_object!(Rotating: () |&self| {
         Ok(self.0.raw_motor_temp as i32)
     }
 
-});
-
-/// Response fields for 'telemetry(telem: DEBUG)' query
-#[derive(GraphQLObject)]
-pub struct TelemetryDebug {
-    pub irehs: IREHSTelem,
-    pub raw_imu: RawIMUTelem,
-    pub config: Config,
-}
-
-#[derive(Debug, Default, PartialEq)]
-pub struct IREHSTelem(pub IREHSTelemetry);
-
-#[derive(Debug, Default, PartialEq)]
-pub struct RawIMUTelem(pub RawIMU);
-
-#[derive(Debug, Default, PartialEq)]
-pub struct Config(pub ConfigInfo);
-
-graphql_object!(IREHSTelem: () |&self| {
-    field thermopiles_a() -> FieldResult<Vec<i32>> {
-        Ok(self.0.thermopiles_a.iter().map(|&elem| elem as i32).collect())
-    }
-    
-    field thermopiles_b() -> FieldResult<Vec<i32>> {
-        Ok(self.0.thermopiles_b.iter().map(|&elem| elem as i32).collect())
-    }
-    
-    field temp_a() -> FieldResult<Vec<i32>> {
-        Ok(self.0.temp_a.iter().map(|&elem| elem as i32).collect())
-    }
-    
-    field temp_b() -> FieldResult<Vec<i32>> {
-        Ok(self.0.temp_b.iter().map(|&elem| elem as i32).collect())
-    }
-    
-    field dip_angle_a() -> FieldResult<i32> {
-        Ok(self.0.dip_angle_a as i32)
-    }
-    
-    field dip_angle_b() -> FieldResult<i32> {
-        Ok(self.0.dip_angle_b as i32)
-    }
-    
-    field solution_degraded() -> FieldResult<i32> {
-        unimplemented!();
-    }
-});
-
-graphql_object!(RawIMUTelem: () |&self| {
-    field accel() -> FieldResult<Vec<i32>> {
-        Ok(self.0.accel.iter().map(|&elem| elem as i32).collect())
-    }
-    
-    field gyro() -> FieldResult<Vec<i32>> {
-        Ok(self.0.gyro.iter().map(|&elem| elem as i32).collect())
-    }
-    
-    field gyro_temp() -> FieldResult<i32> {
-        Ok(self.0.gyro_temp as i32)
-    }
-});
-
-graphql_object!(Config: () |&self| {
-        
-    field model() -> FieldResult<i32> {
-        Ok(self.0.model as i32)
-    }
-    
-    field serial() -> FieldResult<i32> {
-        Ok(self.0.serial as i32)
-    }
-    
-    field major() -> FieldResult<i32> {
-        Ok(self.0.major as i32)
-    }
-    
-    field minor() -> FieldResult<i32> {
-        Ok(self.0.minor as i32)
-    }
-    
-    field build() -> FieldResult<i32> {
-        Ok(self.0.build as i32)
-    }
-    
-    field n_ehs() -> FieldResult<i32> {
-        Ok(self.0.n_ehs as i32)
-    }
-    
-    field ehs_type() -> FieldResult<i32> {
-        unimplemented!();
-    }
-    
-    field n_st() -> FieldResult<i32> {
-        Ok(self.0.n_st as i32)
-    }
-    
-    field st_type() -> FieldResult<i32> {
-        unimplemented!();
-    }
 });

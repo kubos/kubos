@@ -100,6 +100,7 @@ impl Stream for SerialStream {
         port.configure(&self.settings)?;
 
         let mut ret_msg: Vec<u8> = Vec::new();
+        println!("Starting read loop2");
         loop {
             ret_msg.clear();
 
@@ -122,13 +123,17 @@ impl Stream for SerialStream {
                 }
             }
 
+            println!("Got bytes: {:x} {:x}", sync[0], sync[1]);
+
             let mut wrapper = Cursor::new(sync.to_vec());
             let check = wrapper.read_u16::<LittleEndian>()?;
             if check == SYNC {
+                println!("Got sync bytes");
                 ret_msg.append(&mut sync.to_vec());
             } else {
                 // Odds are that we magically ended up in the middle of a message,
                 // so just loop so we can get all of the bytes out of the buffer
+                println!("Got random bytes: {:x} {:x}", sync[0], sync[1]);
                 continue;
             }
 
@@ -137,10 +142,14 @@ impl Stream for SerialStream {
             let mut hdr: [u8; HDR_SZ - 2] = [0; HDR_SZ - 2];
             port.read(&mut hdr)?;
 
+            println!("Hdr: {:x} {:x} {:x} {:x}", hdr[0], hdr[1], hdr[2], hdr[3]);
+
             // Pull out the data_len value so we know how many more bytes we need to read
             // (Add 2 to account for the CRC bytes)
             let mut wrapper = Cursor::new(hdr[0..2].to_vec());
             let mut len = wrapper.read_u16::<LittleEndian>()? + 2;
+
+            println!("Length: {}", len);
 
             // Add the rest of the header to our return message
             ret_msg.append(&mut hdr.to_vec());
@@ -148,7 +157,9 @@ impl Stream for SerialStream {
             // Read in chunks
             // TODO: Might have to go to single byte reads...
             // Or hopefully the problem will magically go away...
-            while len > 40 {
+            //while len > 40
+            {
+                //println!("Reading more bytes");
                 let mut data: Vec<u8> = vec![0; 40];
                 let temp = match port.read(&mut data[..]) {
                     Ok(v) => v,
@@ -158,6 +169,8 @@ impl Stream for SerialStream {
                 len -= temp as u16;
                 ret_msg.append(&mut data[0..temp].to_vec());
             }
+
+            println!("Returning message");
 
             break;
         }

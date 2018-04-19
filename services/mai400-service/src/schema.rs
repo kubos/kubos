@@ -133,8 +133,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field telemetry(&executor) -> FieldResult<Telemetry>
     {
-        //Ok(executor.context().subsystem().telemetry())
-        unimplemented!();
+        Ok(executor.context().subsystem().get_telemetry()?)
     }
     
     // Get the test results of the last run test
@@ -278,7 +277,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         Ok(executor.context().subsystem().passthrough(command)?)
     }
     
-    field set_mode(&executor) -> FieldResult<GenericResponse> {
+    field set_mode(&executor, mode: Mode, args = vec![0; 4]: vec![i32; 4]) -> FieldResult<GenericResponse> {
         unimplemented!();
     }
     

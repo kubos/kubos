@@ -334,6 +334,7 @@ impl MAI400 {
     pub fn get_message(&self) -> MAIResult<Response> {
 
         let response: Response;
+        println!("get_message");
 
         loop {
             let mut msg = self.conn.read()?;
