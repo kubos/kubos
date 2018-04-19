@@ -17,7 +17,6 @@ limitations under the License.
 local uv = require 'uv'
 local cbor = require 'cbor'
 local getenv = require('os').getenv
-local fs = require 'coro-fs'
 local splitPath = require('pathjoin').splitPath
 
 local port = getenv 'PORT'
@@ -55,16 +54,25 @@ handle:recv_start(function (err, data, addr)
   end)()
 end)
 
-local function upload(path, target_path)
+local function upload(source_path, target_path)
   if not target_path then
-    local parts = splitPath(path)
+    local parts = splitPath(source_path)
     target_path = parts[#parts]
   end
-  p(path, target_path)
-  local mode = assert(fs.stat(path)).mode
-  local hash, num_chunks = protocol.local_import(path)
+  local hash, num_chunks, mode = protocol.local_import(source_path)
   protocol.send_sync(hash, num_chunks)
   protocol.call_export(hash, target_path, mode)
+end
+
+local function download(source_path, target_path)
+  if not target_path then
+    local parts = splitPath(source_path)
+    target_path = parts[#parts]
+  end
+  local hash, num_chunks, mode = protocol.call_import(source_path)
+  protocol.store_meta(hash, num_chunks)
+  protocol.send_nak(hash, 0, num_chunks)
+  return protocol.local_export(hash, target_path, mode)
 end
 
 local usage = [[

@@ -140,7 +140,9 @@ return function (send, storage_path)
   -- move folder to hash of contents
   local function local_import(path)
     local temp_path, input, output, hash, index
+    local mode
     local success, message = xpcall(function ()
+      mode = assert(fs.stat(path)).mode
 
       -- Copy the input file to storage area and calculate hash
       assert(fs.mkdirp(storage_path))
@@ -175,7 +177,7 @@ return function (send, storage_path)
     if not success then
       error(message)
     end
-    return hash, index
+    return hash, index, mode
   end
 
   -- combine chunks and write to target path
@@ -401,6 +403,7 @@ return function (send, storage_path)
 
   return {
     on_message = on_message,
+    store_meta = store_meta,
     local_import = local_import,
     local_export = local_export,
     local_sync = local_sync,
