@@ -41,7 +41,6 @@ local protocol = file_protocol(send, 'storage')
 handle:recv_start(function (err, data, addr)
   if err then return print(err) end
   if not data then return end
-  p(addr)
   assert(addr.port == port)
   coroutine.wrap(function ()
     local success, error = xpcall(function ()

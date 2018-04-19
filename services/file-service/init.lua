@@ -20,6 +20,7 @@ local function wrap(fn)
     end
   end)
 end
+
 return function (send, storage_path)
 
   -- coroutines waiting on a sync to finish
@@ -35,14 +36,11 @@ return function (send, storage_path)
     assert(fs.writeFile(join(storage_path, hash, string.format('%x', index)), data, true))
   end
 
-  local function store_meta(hash, num_chunks, last_requested)
+  local function store_meta(hash, num_chunks)
     assert(type(hash) == 'string')
     assert(type(num_chunks) == 'number')
-    if not last_requested then last_requested = num_chunks end
-    assert(type(last_requested) == 'number')
     local data = cbor.encode {
       num_chunks = num_chunks,
-      last_requested = last_requested,
     }
     local meta_path = join(storage_path, hash, 'meta')
     local temp_path = join(storage_path, hash, '.meta.tmp')
@@ -63,7 +61,7 @@ return function (send, storage_path)
     local data, error = fs.readFile(meta_path)
     if not data then return nil, error end
     local message = cbor.decode(data)
-    return message.num_chunks, message.last_requested
+    return message.num_chunks
   end
 
   -- check what chunks are missing.  Also store_meta
@@ -121,7 +119,6 @@ return function (send, storage_path)
 
   local downloads = {}
   local paused = false
-  local second_send_timers = {}
 
   local function start_push(hash, ...)
     -- Request a download to start
@@ -229,6 +226,8 @@ return function (send, storage_path)
     export = local_export,
   }
 
+  local receive_timeouts = {}
+
   local function on_message(message)
     assert(type(message) == 'table' and #message > 0)
 
@@ -252,11 +251,17 @@ return function (send, storage_path)
         if chunk then
           local chunk_index = message[2]
           store_chunk(hash, chunk_index, chunk)
-          local num_chunks, last_requested = load_meta(hash)
-          if num_chunks and (
-            chunk_index == num_chunks - 1 or chunk_index == last_requested - 1
-          ) then
-            send(hash, local_sync(hash))
+          local timer = receive_timeouts[hash]
+          if not timer then
+            timer = uv.new_timer()
+            receive_timeouts[hash] = timer
+            timer:start(1000, 1000, wrap(function ()
+              send(hash, local_sync(hash))
+              timer:close()
+              receive_timeouts[hash] = nil
+            end))
+          else
+            timer:again()
           end
           return
         end
@@ -273,14 +278,6 @@ return function (send, storage_path)
 
         -- { hash, true, num_chunks } - ACK
         if message[2] then
-          local list = second_send_timers[hash]
-          second_send_timers[hash] = nil
-          if list then
-            for i = 1, #list do
-              local timer = list[i]
-              if not timer:is_closing() then timer:close() end
-            end
-          end
           return stop_push(hash)
         end
 
@@ -384,18 +381,6 @@ return function (send, storage_path)
             if first + 1 == last then
               if #ranges == 2 then
                 downloads[hash] = nil
-                local timer = uv.new_timer()
-                local list = second_send_timers[hash]
-                if not list then
-                  list = {}
-                  second_send_timers[hash] = list
-                end
-                list[#list + 1] = timer
-                -- TODO: make this delay some multiple of RTT on the transport.
-                timer:start(1000, 0, wrap(function ()
-                  send_chunk(hash, first, load_chunk(hash, first))
-                  timer:close()
-                end))
               else
                 downloads[hash] = { unpack(ranges, 3) }
               end
