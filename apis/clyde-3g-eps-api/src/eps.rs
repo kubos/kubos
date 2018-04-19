@@ -50,7 +50,7 @@ impl Eps {
 
     /// Performs manual reset of TTC node
     pub fn manual_reset(&self) -> Result<(), EpsError> {
-        Ok(self.connection.write(reset::command())?)
+        Ok(self.connection.write(manual_reset::command())?)
     }
 
     /// Retrieves telemetry
@@ -59,6 +59,29 @@ impl Eps {
             &self.connection.transfer(telemetry::command(telem_type))?,
             telem_type,
         )
+    }
+
+    /// Retrieves telemetry on resets
+    pub fn get_reset_telemetry(
+        &self,
+        telem_type: reset_telemetry::ResetType,
+    ) -> Result<ResetTelemetry, EpsError> {
+        reset_telemetry::parse(&self.connection
+            .transfer(reset_telemetry::command(telem_type))?)
+    }
+
+    pub fn set_comms_watchdog_period(&self, period: u8) -> Result<(), EpsError> {
+        Ok(self.connection
+            .write(set_comms_watchdog_period::command(period))?)
+    }
+
+    pub fn get_comms_watchdog_period(&self) -> Result<u8, EpsError> {
+        get_comms_watchdog_period::parse(&self.connection
+            .transfer(get_comms_watchdog_period::command())?)
+    }
+
+    pub fn reset_comms_watchdog(&self) -> Result<(), EpsError> {
+        Ok(self.connection.write(reset_comms_watchdog::command())?)
     }
 }
 

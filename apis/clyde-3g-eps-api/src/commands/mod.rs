@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+mod reset;
+mod watchdog;
+
 pub mod checksum;
 pub mod board_status;
 pub mod last_error;
-pub mod reset;
+pub mod reset_telemetry;
 pub mod version;
-pub mod watchdog;
 pub mod telemetry;
+
+pub use commands::reset::*;
+pub use commands::watchdog::*;
+pub use commands::reset_telemetry::*;
