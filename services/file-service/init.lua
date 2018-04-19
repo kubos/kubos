@@ -64,9 +64,14 @@ return function (send, storage_path)
     return message.num_chunks
   end
 
+  local local_sync
+
+  local function sync_and_send(hash, num_chunks)
+    return send(hash, local_sync(hash, num_chunks))
+  end
+
   -- check what chunks are missing.  Also store_meta
-  local function local_sync(hash, num_chunks)
-    print('local_sync', hash, num_chunks)
+  function local_sync(hash, num_chunks)
 
     if num_chunks then
       store_meta(hash, num_chunks)
@@ -242,7 +247,7 @@ return function (send, storage_path)
 
       -- { hash } - SYNC - asking for num_chunks
       if next_type == 'nil' then
-        return send(hash, local_sync(hash))
+        return sync_and_send(hash)
       end
 
       -- { hash, number, ... } - SYNC or CHUNK
@@ -258,7 +263,7 @@ return function (send, storage_path)
             timer = uv.new_timer()
             receive_timeouts[hash] = timer
             timer:start(1000, 1000, wrap(function ()
-              send(hash, local_sync(hash))
+              sync_and_send(hash)
               timer:close()
               receive_timeouts[hash] = nil
             end))
@@ -270,7 +275,7 @@ return function (send, storage_path)
 
         -- { hash, num_chunks } - SYNC - setting num_chunks
         local num_chunks = message[2]
-        return send(hash, local_sync(hash, num_chunks))
+        return sync_and_send(hash, num_chunks)
 
       end
 
@@ -403,10 +408,10 @@ return function (send, storage_path)
 
   return {
     on_message = on_message,
-    store_meta = store_meta,
     local_import = local_import,
     local_export = local_export,
     local_sync = local_sync,
+    sync_and_send = sync_and_send,
     call_export = call_export,
     call_import = call_import,
     send_chunk = send_chunk,

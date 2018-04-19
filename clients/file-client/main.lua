@@ -70,8 +70,7 @@ local function download(source_path, target_path)
     target_path = parts[#parts]
   end
   local hash, num_chunks, mode = protocol.call_import(source_path)
-  protocol.store_meta(hash, num_chunks)
-  protocol.send_nak(hash, 0, num_chunks)
+  protocol.sync_and_send(hash, num_chunks)
   return protocol.local_export(hash, target_path, mode)
 end
 
