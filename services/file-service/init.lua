@@ -106,9 +106,7 @@ return function (send, storage_path)
       return false, unpack(ranges)
     end
 
-    print("Deferring")
     defer(function ()
-      print("Deferred")
       local list = waiting[hash]
       if list then
         waiting[hash] = nil

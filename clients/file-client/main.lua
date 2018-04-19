@@ -59,9 +59,11 @@ local function upload(source_path, target_path)
     local parts = splitPath(source_path)
     target_path = parts[#parts]
   end
+  print(string.format("Uploading local:%s to remote:%s", source_path, target_path))
   local hash, num_chunks, mode = protocol.local_import(source_path)
   protocol.send_sync(hash, num_chunks)
   protocol.call_export(hash, target_path, mode)
+  print 'Upload Complete'
 end
 
 local function download(source_path, target_path)
@@ -69,9 +71,11 @@ local function download(source_path, target_path)
     local parts = splitPath(source_path)
     target_path = parts[#parts]
   end
+  print(string.format("Downloading remote:%s to local:%s", source_path, target_path))
   local hash, num_chunks, mode = protocol.call_import(source_path)
   protocol.sync_and_send(hash, num_chunks)
-  return protocol.local_export(hash, target_path, mode)
+  protocol.local_export(hash, target_path, mode)
+  print 'Download Complete'
 end
 
 local usage = [[
