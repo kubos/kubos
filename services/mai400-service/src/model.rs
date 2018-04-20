@@ -21,13 +21,11 @@ use std::cell::RefCell;
 use std::io::Error;
 //use std::str;
 use std::sync::{Arc, Mutex};
-use std::sync::mpsc::{channel, Sender, Receiver};
 use std::thread::spawn;
 
 use objects::*;
 
 pub struct ReadData {
-    pub config: Mutex<ConfigInfo>,
     pub std_telem: Mutex<StandardTelemetry>,
     pub irehs_telem: Mutex<IREHSTelemetry>,
     pub imu: Mutex<RawIMU>,
@@ -37,7 +35,6 @@ pub struct ReadData {
 impl ReadData {
     pub fn new() -> ReadData {
         ReadData {
-            config: Mutex::new(ConfigInfo::default()),
             std_telem: Mutex::new(StandardTelemetry::default()),
             irehs_telem: Mutex::new(IREHSTelemetry::default()),
             imu: Mutex::new(RawIMU::default()),
@@ -65,43 +62,27 @@ impl ReadData {
         let mut local = self.imu.lock().unwrap();
         *local = imu;
     }
-
-    pub fn update_config(&self, config: ConfigInfo) {
-        let mut local = self.config.lock().unwrap();
-        *local = config;
-    }
 }
 
-pub fn read_thread(bus: String, data: Arc<ReadData>, sender: Sender<ConfigInfo>) -> MAIResult<()> {
+pub fn read_thread(bus: String, data: Arc<ReadData>) -> MAIResult<()> {
     let connection = Connection::new(bus);
     let mai = MAI400::new(connection);
 
     loop {
         // TODO: Error handling and reporting
-        let msg = mai.get_message().unwrap();
-        match msg {
-            Response::StdTelem(telem) => {
-                data.update_std(telem);
-                println!("Got StdTelem");
-            }
-            Response::Config(config) => {
-                // Update our persistent config struct
-                data.update_config(config.clone());
-                // Tell whoever requested the config that we got the response
-                // TODO: Maybe check the result and print an error message?
-                // It's not a critical error, so we don't want to exit the loop
-                // or anything
-                let _ = sender.send(config);
-                println!("Got config");
-            }
-            Response::IMU(telem) => {
-                data.update_imu(telem);
-                println!("Got RawIMU");
-            }
-            Response::IREHS(telem) => {
-                data.update_irehs(telem);
-                println!("Got IREHS");
-            }
+        let (std, imu, irehs) = mai.get_message().unwrap();
+
+        if let Some(telem) = std {
+            data.update_std(telem);
+            println!("Got StdTelem");
+        }
+        if let Some(telem) = imu {
+            data.update_imu(telem);
+            println!("Got RawIMU");
+        }
+        if let Some(telem) = irehs {
+            data.update_irehs(telem);
+            println!("Got IREHS");
         }
     }
 }
@@ -110,7 +91,6 @@ pub struct Subsystem {
     pub mai: MAI400,
     pub errors: RefCell<Vec<String>>,
     pub persistent: Arc<ReadData>,
-    pub receiver: Receiver<ConfigInfo>,
 }
 
 impl Subsystem {
@@ -120,33 +100,18 @@ impl Subsystem {
         let connection = Connection::new(bus.clone());
         let mai = MAI400::new(connection);
 
-        let (sender, receiver) = channel();
         let data_ref = data.clone();
 
-        spawn(move || read_thread(bus, data_ref, sender));
+        spawn(move || read_thread(bus, data_ref));
 
         Subsystem {
             mai,
             errors: RefCell::new(vec![]),
             persistent: data.clone(),
-            receiver,
         }
     }
 
     // Queries
-
-    pub fn get_config(&self) -> Result<Config, Error> {
-        let res = run!(self.mai.get_info(), self.errors).and_then(|_| {
-            self.receiver.recv().map_err(|err| format!("{}", err))
-        });
-
-        let config = match res {
-            Ok(cfg) => cfg,
-            _ => self.persistent.config.lock().unwrap().clone(),
-        };
-
-        Ok(Config(config))
-    }
 
     pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
         unimplemented!();
@@ -156,12 +121,11 @@ impl Subsystem {
         Ok(Telemetry {
             nominal: TelemetryNominal {
                 std: StdTelem(self.persistent.std_telem.lock().unwrap().clone()),
-                rotating: Rotating(self.persistent.rotating.lock().unwrap().clone()),
             },
             debug: TelemetryDebug {
                 irehs: IREHSTelem(self.persistent.irehs_telem.lock().unwrap().clone()),
                 raw_imu: RawIMUTelem(self.persistent.imu.lock().unwrap().clone()),
-                config: Config(self.persistent.config.lock().unwrap().clone()),
+                rotating: Rotating(self.persistent.rotating.lock().unwrap().clone()),
             },
         })
     }
@@ -171,7 +135,10 @@ impl Subsystem {
     }
 
     pub fn get_mode(&self) -> Result<Mode, Error> {
-        let raw = self.persistent.std_telem.lock()?.acs_mode;
+        let raw = match self.persistent.std_telem.lock() {
+            Ok(telem) => telem.acs_mode,
+            _ => 0xFF,
+        };
 
         Ok(match raw {
             0 => Mode::TestMode,
@@ -187,6 +154,7 @@ impl Subsystem {
             10 => Mode::Reserved3,
             11 => Mode::Qtable,
             12 => Mode::SunRam,
+            _ => Mode::Unknown,
         })
     }
 
@@ -195,18 +163,18 @@ impl Subsystem {
     }
 
     pub fn get_spin(&self) -> Result<Spin, Error> {
-        let rotating = self.persistent.rotating.lock()?;
+        let rotating = self.persistent.rotating.lock().unwrap();
         Ok(Spin {
-            x: rotating.k_bdot[0],
-            y: rotating.k_bdot[1],
-            z: rotating.k_bdot[2],
+            x: rotating.k_bdot[0] as f64,
+            y: rotating.k_bdot[1] as f64,
+            z: rotating.k_bdot[2] as f64,
         })
     }
 
     // Mutations
 
     pub fn noop(&self) -> Result<NoopResponse, Error> {
-        // Get config? Would test sending and receiving
+        // ????
         unimplemented!();
     }
 
@@ -222,7 +190,7 @@ impl Subsystem {
     }
 
     pub fn test_hardware(&self) -> Result<HardwareTestResults, Error> {
-        // Get config? Would test sending and receiving
+        // ????
         unimplemented!();
     }
 

@@ -91,7 +91,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field config(&executor) -> FieldResult<Config>
     {
-        Ok(executor.context().subsystem().get_config()?)
+        unimplemented!();
     }
 
     // Get current telemetry information for the system
@@ -277,7 +277,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         Ok(executor.context().subsystem().passthrough(command)?)
     }
     
-    field set_mode(&executor, mode: Mode, args = vec![0; 4]: vec![i32; 4]) -> FieldResult<GenericResponse> {
+    field set_mode(&executor, mode: Mode, args: Vec<i32>) -> FieldResult<GenericResponse> {
         unimplemented!();
     }
     

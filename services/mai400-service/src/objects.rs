@@ -42,6 +42,9 @@ pub enum AckCommand {
     Update,
 }
 
+#[derive(GraphQLObject)]
+pub struct Config {}
+
 /// Response fields for 'configureHardware' mutation
 #[derive(GraphQLObject)]
 pub struct ConfigureHardwareResponse {
@@ -113,6 +116,7 @@ pub struct HardwareTestResults {
 
 #[derive(GraphQLEnum, Clone, Copy)]
 pub enum Mode {
+    Unknown,
     TestMode,
     RateNulling,
     Reserved1,
@@ -231,11 +235,11 @@ graphql_object!(StdTelem: () |&self| {
     }
     
     field qbo_cmd() -> FieldResult<Vec<i32>> {
-        Ok(self.0.qbo_cmd.to_vec())
+        Ok(self.0.qbo_cmd.iter().map(|&elem| elem as i32).collect())
     }
     
     field qbo_hat() -> FieldResult<Vec<i32>> {
-        Ok(self.0.qbo_hat.to_vec())
+        Ok(self.0.qbo_hat.iter().map(|&elem| elem as i32).collect())
     }
     
     field angle_to_go() -> FieldResult<f64> {
@@ -243,7 +247,7 @@ graphql_object!(StdTelem: () |&self| {
     }
     
     field q_error() -> FieldResult<Vec<i32>> {
-        Ok(self.0.q_error.to_vec())
+        Ok(self.0.q_error.iter().map(|&elem| elem as i32).collect())
     }
     
     field omega_b() -> FieldResult<Vec<f64>> {
@@ -263,15 +267,11 @@ graphql_object!(StdTelem: () |&self| {
     }
     
     field nb() -> FieldResult<Vec<i32>> {
-        Ok(self.0.nb.to_vec())
+        Ok(self.0.nb.iter().map(|&elem| elem as i32).collect())
     }
     
     field neci() -> FieldResult<Vec<i32>> {
-        Ok(self.0.neci.to_vec())
-    }
-    
-    field crc() -> FieldResult<i32> {
-        Ok(self.0.crc as i32)
+        Ok(self.0.neci.iter().map(|&elem| elem as i32).collect())
     }
 });
 
@@ -279,53 +279,10 @@ graphql_object!(StdTelem: () |&self| {
 /// Response fields for 'telemetry(telem: DEBUG)' query
 #[derive(GraphQLObject)]
 pub struct TelemetryDebug {
-    pub config: Config,
     pub irehs: IREHSTelem,
     pub raw_imu: RawIMUTelem,
     pub rotating: Rotating,
 }
-
-#[derive(Debug, Default, PartialEq)]
-pub struct Config(pub ConfigInfo);
-
-graphql_object!(Config: () |&self| {
-        
-    field model() -> FieldResult<i32> {
-        Ok(self.0.model as i32)
-    }
-    
-    field serial() -> FieldResult<i32> {
-        Ok(self.0.serial as i32)
-    }
-    
-    field major() -> FieldResult<i32> {
-        Ok(self.0.major as i32)
-    }
-    
-    field minor() -> FieldResult<i32> {
-        Ok(self.0.minor as i32)
-    }
-    
-    field build() -> FieldResult<i32> {
-        Ok(self.0.build as i32)
-    }
-    
-    field n_ehs() -> FieldResult<i32> {
-        Ok(self.0.n_ehs as i32)
-    }
-    
-    field ehs_type() -> FieldResult<i32> {
-        unimplemented!();
-    }
-    
-    field n_st() -> FieldResult<i32> {
-        Ok(self.0.n_st as i32)
-    }
-    
-    field st_type() -> FieldResult<i32> {
-        unimplemented!();
-    }
-});
 
 #[derive(Debug, Default, PartialEq)]
 pub struct IREHSTelem(pub IREHSTelemetry);
