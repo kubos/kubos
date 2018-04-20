@@ -53,10 +53,26 @@ impl Eps {
         Ok(self.connection.write(manual_reset::command())?)
     }
 
-    /// Retrieves telemetry
-    pub fn get_telemetry(&self, telem_type: telemetry::Type) -> Result<f32, EpsError> {
-        telemetry::parse(
-            &self.connection.transfer(telemetry::command(telem_type))?,
+    /// Retrieves motherboard telemetry
+    pub fn get_motherboard_telemetry(
+        &self,
+        telem_type: motherboard_telemetry::Type,
+    ) -> Result<f32, EpsError> {
+        motherboard_telemetry::parse(
+            &self.connection
+                .transfer(motherboard_telemetry::command(telem_type))?,
+            telem_type,
+        )
+    }
+
+    /// Retrieves daughterboard telemetry
+    pub fn get_daughterboard_telemetry(
+        &self,
+        telem_type: daughterboard_telemetry::Type,
+    ) -> Result<f32, EpsError> {
+        daughterboard_telemetry::parse(
+            &self.connection
+                .transfer(daughterboard_telemetry::command(telem_type))?,
             telem_type,
         )
     }

@@ -22,7 +22,8 @@ pub mod board_status;
 pub mod last_error;
 pub mod reset_telemetry;
 pub mod version;
-pub mod telemetry;
+pub mod motherboard_telemetry;
+pub mod daughterboard_telemetry;
 
 pub use commands::reset::*;
 pub use commands::watchdog::*;
