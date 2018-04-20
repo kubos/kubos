@@ -163,7 +163,7 @@ impl Subsystem {
     }
 
     pub fn get_spin(&self) -> Result<Spin, Error> {
-        let rotating = self.persistent.rotating.lock().unwrap();
+        let rotating = self.persistent.rotating.lock().unwrap_or([0; 3]);
         Ok(Spin {
             x: rotating.k_bdot[0] as f64,
             y: rotating.k_bdot[1] as f64,
