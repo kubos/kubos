@@ -18,9 +18,7 @@ use crc16::*;
 use byteorder::{LittleEndian, ReadBytesExt};
 use nom::*;
 use std::io::Cursor;
-
-/// Sync word for raw IMU and IREHS telemetry packets
-const AUX_SYNC: u16 = 0xEA91;
+use super::*;
 
 /// Standard telemetry packet sent by the MAI-400 every 250ms
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -104,7 +102,10 @@ impl StandardTelemetry {
         // Make sure they match
         match calc == crc {
             true => Some(standardtelem(&msg).unwrap().1),
-            false => None,
+            false => {
+                //println!("Checksum mismatch: {:X} {:X}", calc, crc);
+                None
+            }
         }
     }
 }
@@ -608,12 +609,9 @@ impl RotatingTelemetry {
     ///
     /// let mut rotating = RotatingTelemetry::default();
     ///
-    /// let msg = mai.get_message()?;
-    /// match msg {
-    ///     Response::StdTelem(telem) => {
-    ///         rotating.update(&telem);
-    ///     }
-    ///     _ => {}
+    /// let (std, _imu, _irehs) = mai.get_message()?;
+    /// if std.is_some() {
+    /// 	rotating.update(&std.unwrap());
     /// }
     /// # Ok(())
     /// # }
