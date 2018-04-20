@@ -19,7 +19,7 @@
 //! All work is done against an instantiated [`MAI400`] struct.
 //!
 //! # Examples
-//! //TODO: This could be better
+//! //TODO: No longer valid
 //!
 //! ```
 //! use mai400_api::*;
@@ -29,18 +29,14 @@
 //! let connection = Connection::new("/dev/ttyS5".to_owned());
 //! let mai = MAI400::new(connection);
 //!
-//! // Request configuration information
-//! mai.get_info()?;
+//! // Set the GPS time to Jan 01, 2018
+//! mai.set_gps_time(1198800018)?;
 //!
-//! // Grab returned config message
-//! loop {
-//! 	match mai.get_message()? {
-//!     	Response::Config(config) => {
-//!         	println!("FW Version: {}.{}.{}", config.major, config.minor, config.build);
-//!         	break;
-//!     	}
-//!     	_ => continue
-//! 	}
+//! // Pull the updated time out of the next standard telemetry message
+//! let (std, _imu, _irehs) = mai.get_message()?;
+//!
+//! if let Some(telem) = std {
+//!     println!("Current GPS time: {}", telem.gps_time);
 //! }
 //! # Ok(())
 //! # }

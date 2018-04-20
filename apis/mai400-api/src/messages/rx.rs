@@ -14,14 +14,15 @@
 // limitations under the License.
 //
 
+use crc16::*;
+use byteorder::{LittleEndian, ReadBytesExt};
 use nom::*;
+use std::io::Cursor;
 use super::*;
 
 /// Standard telemetry packet sent by the MAI-400 every 250ms
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct StandardTelemetry {
-    /// Message Header
-    pub hdr: MessageHeader,
     /// Rotating variable indicator
     pub tlm_counter: u8,
     /// UTC Time in Seconds
@@ -61,13 +62,13 @@ pub struct StandardTelemetry {
     /// Torque Coil Command (lsb)
     pub gc_torque_coil_cmd: [i8; 3],
     /// Commanded orbit-to-body quaternion
-    pub qbo_cmd: [i32; 4],
+    pub qbo_cmd: [i16; 4],
     /// Current Estimated Orbit-to-Body Quaternion
-    pub qbo_hat: [i32; 4],
+    pub qbo_hat: [i16; 4],
     /// Angle to Go in radians
     pub angle_to_go: f32,
     /// Error between command and estimate Qbo
-    pub q_error: [i32; 4],
+    pub q_error: [i16; 4],
     /// Body rate in body frame (rad/sec).
     pub omega_b: [f32; 3],
     /// Rotating variable A. Use [RotatingTelemetry](struct.RotatingTelemetry.html) struct if interaction is needed
@@ -77,26 +78,41 @@ pub struct StandardTelemetry {
     /// Rotating variable C. Use [RotatingTelemetry](struct.RotatingTelemetry.html) struct if interaction is needed
     pub rotating_variable_c: u32,
     /// Nadir vectors in Body
-    pub nb: [i32; 3],
+    pub nb: [i16; 3],
     /// Nadir vectors in ECI frame
-    pub neci: [i32; 3],
-    /// Message checksum
-    pub crc: u16,
+    pub neci: [i16; 3],
 }
 
 impl StandardTelemetry {
     /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
-    pub fn new(msg: &[u8]) -> Self {
-        standardtelem(msg).unwrap().1
+    pub fn new(mut msg: Vec<u8>) -> Option<Self> {
+
+        // Get the CRC bytes
+        let len = msg.len() - 2;
+
+        let mut crc = Cursor::new(msg.split_off(len));
+        let crc = crc.read_u16::<LittleEndian>().unwrap_or(0);
+
+        // Get the calculated CRC
+        let mut calc: u16 = 0;
+        for byte in msg.iter() {
+            calc += *byte as u16;
+        }
+
+        // Make sure they match
+        match calc == crc {
+            true => Some(standardtelem(&msg).unwrap().1),
+            false => {
+                //println!("Checksum mismatch: {:X} {:X}", calc, crc);
+                None
+            }
+        }
     }
 }
 
 named!(standardtelem(&[u8]) -> StandardTelemetry,
     do_parse!(
-        sync: le_u16 >>
-        data_len: le_u16 >>
-        msg_id: le_u8 >>
-        addr: le_u8 >>
+        le_u16 >>
         tlm_counter: le_u8 >>
         gps_time: le_u32 >>
         time_subsec: le_u8 >>
@@ -139,39 +155,32 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
         gc_torque_coil_cmd_0: le_i8 >>
         gc_torque_coil_cmd_1: le_i8 >>
         gc_torque_coil_cmd_2: le_i8 >>
-        qbo_cmd_0: le_i32 >>
-        qbo_cmd_1: le_i32 >>
-        qbo_cmd_2: le_i32 >>
-        qbo_cmd_3: le_i32 >>
-        qbo_hat_0: le_i32 >>
-        qbo_hat_1: le_i32 >>
-        qbo_hat_2: le_i32 >>
-        qbo_hat_3: le_i32 >>
+        qbo_cmd_0: le_i16 >>
+        qbo_cmd_1: le_i16 >>
+        qbo_cmd_2: le_i16 >>
+        qbo_cmd_3: le_i16 >>
+        qbo_hat_0: le_i16 >>
+        qbo_hat_1: le_i16 >>
+        qbo_hat_2: le_i16 >>
+        qbo_hat_3: le_i16 >>
         angle_to_go: le_f32 >>
-        q_error_0: le_i32 >>
-        q_error_1: le_i32 >>
-        q_error_2: le_i32 >>
-        q_error_3: le_i32 >>
+        q_error_0: le_i16 >>
+        q_error_1: le_i16 >>
+        q_error_2: le_i16 >>
+        q_error_3: le_i16 >>
         omega_b_0: le_f32 >>
         omega_b_1: le_f32 >>
         omega_b_2: le_f32 >>
         rotating_variable_a: le_u32 >>
         rotating_variable_b: le_u32 >>
         rotating_variable_c: le_u32 >>
-        nb_0: le_i32 >>
-        nb_1: le_i32 >>
-        nb_2: le_i32 >>
-        neci_0: le_i32 >>
-        neci_1: le_i32 >>
-        neci_2: le_i32 >>
-        crc: le_u16 >>
+        nb_0: le_i16 >>
+        nb_1: le_i16 >>
+        nb_2: le_i16 >>
+        neci_0: le_i16 >>
+        neci_1: le_i16 >>
+        neci_2: le_i16 >>
         (StandardTelemetry{
-            hdr: MessageHeader {
-                sync, 
-                data_len, 
-                msg_id, 
-                addr
-            },
             tlm_counter,
             gps_time,
             time_subsec,
@@ -270,8 +279,7 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
                 neci_0,
                 neci_1,
                 neci_2
-            ],
-            crc
+            ]
         })
     )
 );
@@ -279,31 +287,48 @@ named!(standardtelem(&[u8]) -> StandardTelemetry,
 /// Raw accelerometer and gyroscope data
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct RawIMU {
-    /// Message Header
-    pub hdr: MessageHeader,
     /// Accelerometer (X, Y, Z)  (3.9 mg/lsb)
     pub accel: [i16; 3],
     /// Gyroscope (X, Y, Z) (8.75 mdps/lsb)
     pub gyro: [i16; 3],
     /// Gyroscope temperature (-1C/lsb)
     pub gyro_temp: u8,
-    /// Message checksum
-    pub crc: u16,
 }
 
 impl RawIMU {
     /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
-    pub fn new(msg: &[u8]) -> Self {
-        raw_imu(msg).unwrap().1
+    pub fn new(mut msg: Vec<u8>) -> Option<Self> {
+
+        // Verify message starts with sync bytes
+        let mut data = msg.split_off(2);
+
+        let mut wrapper = Cursor::new(msg);
+        let check = wrapper.read_u16::<LittleEndian>().unwrap_or(0);
+        if check != AUX_SYNC {
+            println!("RawIMU: Bad sync - {:x}", check);
+            return None;
+        }
+
+        // Get the CRC bytes
+        let len = data.len() - 2;
+        let mut crc = Cursor::new(data.split_off(len));
+        let crc = crc.read_u16::<LittleEndian>().unwrap_or(0);
+
+        // Note: Yes, this is a different way of calculating the checksum than everywhere else
+        let calc = State::<ARC>::calculate(&data);
+
+        // Verify the CRC bytes at the end of the message
+        match calc == crc {
+            true => Some(raw_imu(&data).unwrap().1),
+            false => None,
+        }
     }
 }
 
 named!(raw_imu(&[u8]) -> RawIMU,
     do_parse!(
-        sync: le_u16 >>
-        data_len: le_u16 >>
-        msg_id: le_u8 >>
-        addr: le_u8 >>
+        le_i16 >>
+        le_i16 >>
         accel_x: le_i16 >>
         accel_y: le_i16 >>
         accel_z: le_i16 >>
@@ -311,18 +336,10 @@ named!(raw_imu(&[u8]) -> RawIMU,
         gyro_y: le_i16 >>
         gyro_z: le_i16 >>
         gyro_temp: le_u8 >>
-        crc: le_u16 >>
         (RawIMU {
-                hdr: MessageHeader {
-                    sync, 
-                    data_len, 
-                    msg_id, 
-                    addr
-                },
                 accel: [accel_x ,accel_y, accel_z],
                 gyro: [gyro_x, gyro_y, gyro_z],
-                gyro_temp,
-                crc
+                gyro_temp
         })
     )
 );
@@ -330,8 +347,6 @@ named!(raw_imu(&[u8]) -> RawIMU,
 /// IR Earth Horizon Sensor telemetry data
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct IREHSTelemetry {
-    /// Message Header
-    pub hdr: MessageHeader,
     /// IREHS A Thermopile Sensors 12-bit ADC (0.8059 mV per lsb)
     /// [earth limb, earth reference, space reference, wide FOV]
     pub thermopiles_a: [u16; 4],
@@ -345,29 +360,47 @@ pub struct IREHSTelemetry {
     /// [earth limb, earth reference, space reference, wide FOV]
     pub temp_b: [u16; 4],
     /// Calculated dip angle of Earth limb for A in degrees
-    pub dip_angle_a: u32,
+    pub dip_angle_a: i32,
     /// Calculated dip angle of Earth limb for B in degrees
-    pub dip_angle_b: u32,
+    pub dip_angle_b: i32,
     /// Degradation codes for thermopiles
     /// [{A}, {B}]
     pub solution_degraded: [ThermopileFlags; 8],
-    /// Message checksum
-    pub crc: u16,
 }
 
 impl IREHSTelemetry {
     /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
-    pub fn new(msg: &[u8]) -> Self {
-        irehs_telem(msg).unwrap().1
+    pub fn new(mut msg: Vec<u8>) -> Option<Self> {
+
+        // Verify message starts with sync bytes
+        let mut data = msg.split_off(2);
+
+        let mut wrapper = Cursor::new(msg);
+        let check = wrapper.read_u16::<LittleEndian>().unwrap_or(0);
+        if check != AUX_SYNC {
+            return None;
+        }
+
+        // Get the CRC bytes
+        let len = data.len() - 2;
+        let mut crc = Cursor::new(data.split_off(len));
+        let crc = crc.read_u16::<LittleEndian>().unwrap_or(0);
+
+        // Note: Yes, this is a different way of calculating the checksum than everywhere else
+        let calc = State::<ARC>::calculate(&data);
+
+        // Verify the CRC bytes at the end of the message
+        match calc == crc {
+            true => Some(irehs_telem(&data).unwrap().1),
+            false => None,
+        }
     }
 }
 
 named!(irehs_telem(&[u8]) -> IREHSTelemetry,
     do_parse!(
-        sync: le_u16 >>
-        data_len: le_u16 >>
-        msg_id: le_u8 >>
-        addr: le_u8 >>
+        le_i16 >>
+        le_i16 >>
         thermopiles_a_earth_limb: le_u16 >>
         thermopiles_a_earth_ref: le_u16 >>
         thermopiles_a_space_ref: le_u16 >>
@@ -384,8 +417,8 @@ named!(irehs_telem(&[u8]) -> IREHSTelemetry,
         temp_b_earth_ref: le_u16 >>
         temp_b_space_ref: le_u16 >>
         temp_b_wide_fov: le_u16 >>
-        dip_angle_a: le_u32 >>
-        dip_angle_b: le_u32 >>
+        dip_angle_a: le_i32 >>
+        dip_angle_b: le_i32 >>
         solution_degraded_earth_limb_a: le_u8 >>
         solution_degraded_earth_ref_a: le_u8 >>
         solution_degraded_space_ref_a: le_u8 >>
@@ -394,14 +427,7 @@ named!(irehs_telem(&[u8]) -> IREHSTelemetry,
         solution_degraded_earth_ref_b: le_u8 >>
         solution_degraded_space_ref_b: le_u8 >>
         solution_degraded_wide_fov_b: le_u8 >>
-        crc: le_u16 >>
         (IREHSTelemetry {
-                hdr: MessageHeader {
-                    sync, 
-                    data_len, 
-                    msg_id, 
-                    addr
-                },
                 thermopiles_a: [
                     thermopiles_a_earth_limb,
                     thermopiles_a_earth_ref,
@@ -437,8 +463,7 @@ named!(irehs_telem(&[u8]) -> IREHSTelemetry,
                     ThermopileFlags::from_bits_truncate(solution_degraded_earth_ref_b),
                     ThermopileFlags::from_bits_truncate(solution_degraded_space_ref_b),
                     ThermopileFlags::from_bits_truncate(solution_degraded_wide_fov_b)
-                ],
-                crc,
+                ]
         })
     )
 );
@@ -462,82 +487,6 @@ bitflags! {
     }
 }
 
-/// ADCS configuration information
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct ConfigInfo {
-    /// Message header
-    pub hdr: MessageHeader,
-    /// ADACS model number (should be `400`)
-    pub model: u16,
-    /// Device serial number
-    pub serial: u16,
-    /// Firmware major version number
-    pub major: u8,
-    /// Firmware minor version number
-    pub minor: u8,
-    /// Firmware build number
-    pub build: u16,
-    /// Number of earth horizon sensors
-    pub n_ehs: u8,
-    /// Type of earth horizon sensors
-    pub ehs_type: EHSType,
-    /// Number of star trackers
-    pub n_st: u8,
-    /// Type of star trackers
-    pub st_type: StarTracker,
-    /// Message checksum
-    pub crc: u16,
-}
-
-impl ConfigInfo {
-    /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
-    pub fn new(msg: &[u8]) -> Self {
-        configinfo(msg).unwrap().1
-    }
-}
-
-named!(configinfo(&[u8]) -> ConfigInfo,
-    do_parse!(
-        sync: le_u16 >>
-        data_len: le_u16 >>
-        msg_id: le_u8 >>
-        addr: le_u8 >>
-        model: le_u16 >>
-        serial: le_u16 >>
-        major: le_u8 >>
-        minor: le_u8 >>
-        build: le_u16 >>
-        n_ehs: le_u8 >> 
-        ehs_type: le_u8 >>
-        n_st: le_u8 >>
-        st_type: le_u8 >>
-        crc: le_u16 >>
-        (ConfigInfo{
-                hdr: MessageHeader {
-                    sync, 
-                    data_len, 
-                    msg_id, 
-                    addr
-                }, 
-                model, 
-                serial, 
-                major, 
-                minor,
-                build, 
-                n_ehs,
-                ehs_type: match ehs_type {
-                    0 => EHSType::Internal,
-                    _ => EHSType::External
-                },
-                n_st,
-                st_type: match st_type {
-                    0 => StarTracker::MAISextant,
-                    _ => StarTracker::Vectronic,
-                }, 
-                crc})
-    )
-);
-
 /// Messages sent by the MAI-400
 #[derive(Debug, PartialEq)]
 pub enum Response {
@@ -547,44 +496,7 @@ pub enum Response {
     IMU(RawIMU),
     /// IREHS telemetry message
     IREHS(IREHSTelemetry),
-    /// Device configuration information
-    Config(ConfigInfo),
 }
-
-/// Type of earth horizon sensor
-#[derive(Clone, Debug, PartialEq)]
-pub enum EHSType {
-    /// EHS type has not been successfully fetched yet
-    Unknown,
-    /// Internal MAI IREHS
-    Internal,
-    /// External EHS
-    External,
-}
-
-impl Default for EHSType {
-    fn default() -> Self {
-        EHSType::Unknown
-    }
-}
-
-/// Type of star tracker
-#[derive(Clone, Debug, PartialEq)]
-pub enum StarTracker {
-    /// Star tracker type has not been successfully fetched yet
-    Unknown,
-    /// MAI space sextant
-    MAISextant,
-    /// Vectronic VST41-M
-    Vectronic,
-}
-
-impl Default for StarTracker {
-    fn default() -> Self {
-        StarTracker::Unknown
-    }
-}
-
 
 /// Structure to contain all possible variables which can be returned
 /// by the standard telemetry message's `rotating_variable` fields
@@ -697,12 +609,9 @@ impl RotatingTelemetry {
     ///
     /// let mut rotating = RotatingTelemetry::default();
     ///
-    /// let msg = mai.get_message()?;
-    /// match msg {
-    ///     Response::StdTelem(telem) => {
-    ///         rotating.update(&telem);
-    ///     }
-    ///     _ => {}
+    /// let (std, _imu, _irehs) = mai.get_message()?;
+    /// if std.is_some() {
+    /// 	rotating.update(&std.unwrap());
     /// }
     /// # Ok(())
     /// # }

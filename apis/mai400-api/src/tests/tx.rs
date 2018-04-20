@@ -25,13 +25,95 @@ fn reset_good() {
 
     // Packet for RequestReset
     mock.write.return_value_for(
-        (vec![0x90, 0xEB, 0, 0, 0x5A, 0, 0x64, 0xEF]),
+        (vec![
+            0x90,
+            0xEB,
+            0x5A,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0xD5,
+            0x1,
+        ]),
         Ok(()),
     );
 
     // Packet for ConfirmReset
     mock.write.return_value_for(
-        (vec![0x90, 0xEB, 0, 0, 0xF1, 0, 0xE0, 0x2E]),
+        (vec![
+            0x90,
+            0xEB,
+            0xF1,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x6C,
+            0x2,
+        ]),
         Ok(()),
     );
 
@@ -70,7 +152,6 @@ fn reset_bad_confirm() {
     assert_eq!(mai.reset().unwrap_err(), MAIError::GenericError);
 }
 
-
 #[test]
 fn set_mode_good() {
     let mock = mock_new!();
@@ -79,36 +160,51 @@ fn set_mode_good() {
         (vec![
             0x90,
             0xEB,
-            0x11,
-            0x00,
-            0x00,
-            0x00,
-            0x01,
-            0x02,
-            0x00,
-            0x00,
-            0x00,
-            0x03,
-            0x00,
-            0x00,
-            0x00,
-            0x04,
-            0x00,
-            0x00,
-            0x00,
-            0x05,
-            0x00,
-            0x00,
-            0x00,
-            0x51,
-            0x7B,
+            0x0,
+            0x1,
+            0x2,
+            0x0,
+            0x3,
+            0x0,
+            0x4,
+            0x0,
+            0x5,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x8A,
+            0x1,
         ]),
         Ok(()),
     );
 
     let mai = MAI400 { conn: Connection { stream: Box::new(mock) } };
 
-    assert_eq!(mai.set_mode(0x01, 0x02, 0x03, 0x04, 0x05).unwrap(), ());
+    assert_eq!(mai.set_mode(0x01, [0x02, 0x03, 0x04, 0x05]).unwrap(), ());
 }
 
 #[test]
@@ -118,7 +214,74 @@ fn set_mode_bad() {
     let mai = MAI400 { conn: Connection { stream: Box::new(mock) } };
 
     assert_eq!(
-        mai.set_mode(0x01, 0x02, 0x03, 0x04, 0x05).unwrap_err(),
+        mai.set_mode(0x01, [0x02, 0x03, 0x04, 0x05]).unwrap_err(),
+        MAIError::GenericError
+    );
+}
+
+#[test]
+fn set_mode_sun_good() {
+    let mock = mock_new!();
+
+    mock.write.return_value_for(
+        (vec![
+            0x90,
+            0xEB,
+            0x0,
+            0x8,
+            0x1,
+            0x0,
+            0xCD,
+            0xCC,
+            0xC,
+            0x40,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x69,
+            0x3,
+        ]),
+        Ok(()),
+    );
+
+    let mai = MAI400 { conn: Connection { stream: Box::new(mock) } };
+
+    assert_eq!(mai.set_mode_sun(0x08, 1, 2.2).unwrap(), ());
+}
+
+#[test]
+fn set_mode_sun_bad() {
+    let mock = mock_new!();
+
+    let mai = MAI400 { conn: Connection { stream: Box::new(mock) } };
+
+    assert_eq!(
+        mai.set_mode_sun(0x08, 1, 2.2).unwrap_err(),
         MAIError::GenericError
     );
 }
@@ -131,16 +294,44 @@ fn set_gps_time_good() {
         (vec![
             0x90,
             0xEB,
-            0x04,
-            0,
             0x44,
-            0,
             0x92,
             0x3C,
             0x74,
             0x47,
-            0x68,
-            0xE5,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x48,
+            0x3,
         ]),
         Ok(()),
     );
@@ -167,10 +358,7 @@ fn set_rv_good() {
         (vec![
             0x90,
             0xEB,
-            0x1C,
-            0x0,
             0x41,
-            0x0,
             0xCD,
             0xCC,
             0x8C,
@@ -199,8 +387,15 @@ fn set_rv_good() {
             0x3C,
             0x74,
             0x47,
-            0x54,
-            0xFB,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            0x55,
+            0xD,
         ]),
         Ok(()),
     );
@@ -208,7 +403,7 @@ fn set_rv_good() {
     let mai = MAI400 { conn: Connection { stream: Box::new(mock) } };
 
     assert_eq!(
-        mai.set_rv(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 1198800018)
+        mai.set_rv([1.1, 2.2, 3.3], [4.4, 5.5, 6.6], 1198800018)
             .unwrap(),
         ()
     );
@@ -221,39 +416,16 @@ fn set_rv_bad() {
     let mai = MAI400 { conn: Connection { stream: Box::new(mock) } };
 
     assert_eq!(
-        mai.set_rv(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0).unwrap_err(),
+        mai.set_rv([0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 0).unwrap_err(),
         MAIError::GenericError
     );
-}
-
-#[test]
-fn get_info_good() {
-    let mock = mock_new!();
-
-    mock.write.return_value_for(
-        (vec![0x90, 0xEB, 0, 0, 0x1D, 0, 0x3F, 0x7B]),
-        Ok(()),
-    );
-
-    let mai = MAI400 { conn: Connection { stream: Box::new(mock) } };
-
-    assert_eq!(mai.get_info().unwrap(), ());
-}
-
-#[test]
-fn get_info_bad() {
-    let mock = mock_new!();
-
-    let mai = MAI400 { conn: Connection { stream: Box::new(mock) } };
-
-    assert_eq!(mai.get_info().unwrap_err(), MAIError::GenericError);
 }
 
 #[test]
 fn passthrough_good() {
     let mock = mock_new!();
 
-    let msg: [u8; 5] = [0x00, 0x01, 0x02, 0x03, 0x04];
+    let msg: [u8; 40] = [0x00; 40];
 
     mock.write.return_value_for((msg.to_vec()), Ok(()));
 
@@ -266,7 +438,7 @@ fn passthrough_good() {
 fn passthrough_bad() {
     let mock = mock_new!();
 
-    let msg: [u8; 5] = [0x00; 5];
+    let msg: [u8; 40] = [0x00; 40];
 
     let mai = MAI400 { conn: Connection { stream: Box::new(mock) } };
 

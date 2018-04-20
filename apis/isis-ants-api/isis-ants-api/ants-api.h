@@ -124,6 +124,11 @@ typedef struct
  */
 /**
  * Initialize the antenna interface
+ * @param [in] bus I2C bus the antenna systems device is connected to
+ * @param [in] primary The I2C address of the device's primary microcontroller
+ * @param [in] secondary The I2C address of the device's secondary/redundant microcontroller
+ * @param [in] ant_count The number of antennas that the device can deploy
+ * @param [in] timeout The watchdog timeout interval (in seconds)
  * @return KANTSStatus ANTS_OK if OK, error otherwise
  */
 KANTSStatus k_ants_init(KI2CNum bus, uint8_t primary, uint8_t secondary, uint8_t ant_count, uint32_t timeout);
@@ -213,7 +218,7 @@ KANTSStatus k_ants_get_activation_time(KANTSAnt antenna, uint16_t * time);
 KANTSStatus k_ants_watchdog_kick(void);
 /**
  * Start a thread to kick the AntS's watchdogs at an interval of
- * (::ANTS_WD_TIMEOUT/3) seconds
+ * (timeout/3) seconds
  * @return KANTSStatus `ANTS_OK` if OK, error otherwise
  */
 KANTSStatus k_ants_watchdog_start(void);

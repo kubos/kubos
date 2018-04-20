@@ -12,6 +12,7 @@ echo "OUTPUT_DIRECTORY={2}";
 echo "XML_OUTPUT=.";) | doxygen -"""
 
 DOCS_DIRS = [
+    "apis/gomspace-p31u-api",
     "apis/isis-ants-api",
     "apis/isis-imtq-api",
     "apis/isis-iobc-supervisor",

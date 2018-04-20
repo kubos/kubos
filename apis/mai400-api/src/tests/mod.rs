@@ -48,7 +48,9 @@ fn mock_test() {
 
     let connection = Connection { stream: Box::new(mock) };
 
-    assert_eq!(connection.write(b"test").unwrap_err(), MAIError::GenericError);
+    let packet: [u8; 40] = [0; 40];
+
+    assert_eq!(connection.write(&packet).unwrap_err(), MAIError::GenericError);
 }
 
 mod tx;
