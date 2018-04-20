@@ -15,9 +15,7 @@
 //
 
 use byteorder::{LittleEndian, WriteBytesExt};
-
-/// IRIG-106 sync word
-const SYNC: u16 = 0xEB90;
+use super::*;
 
 pub trait Message {
     fn serialize(&self) -> Vec<u8>;
@@ -145,7 +143,7 @@ impl Message for SetRV {
         vec.write_f32::<LittleEndian>(self.eci_vel[1]).unwrap();
         vec.write_f32::<LittleEndian>(self.eci_vel[2]).unwrap();
         vec.write_u32::<LittleEndian>(self.time_epoch).unwrap();
-        vec.append(&mut vec![0; 6]);
+        vec.append(&mut vec![0; 7]);
         vec
     }
 }
