@@ -14,11 +14,12 @@
 // limitations under the License.
 //
 #![allow(unused_variables)]
+#![allow(dead_code)]
 
 use failure::Fail;
 use mai400_api::*;
 use std::cell::RefCell;
-use std::io::Error;
+use std::io::{Error, ErrorKind};
 //use std::str;
 use std::sync::{Arc, Mutex};
 use std::thread::spawn;
@@ -163,7 +164,7 @@ impl Subsystem {
     }
 
     pub fn get_spin(&self) -> Result<Spin, Error> {
-        let rotating = self.persistent.rotating.lock().unwrap_or([0; 3]);
+        let rotating = self.persistent.rotating.lock().unwrap();
         Ok(Spin {
             x: rotating.k_bdot[0] as f64,
             y: rotating.k_bdot[1] as f64,
@@ -178,10 +179,32 @@ impl Subsystem {
         unimplemented!();
     }
 
-    pub fn control_power(&self) -> Result<ControlPowerResponse, Error> {
-        // Reset command
-        // (Copy AntS impl)
-        unimplemented!();
+    pub fn control_power(&self, state: PowerState) -> Result<ControlPowerResponse, Error> {
+        match state {
+            PowerState::Reset => {
+                let result = run!(self.mai.reset(), self.errors);
+
+                Ok(ControlPowerResponse {
+                    power: state,
+                    success: result.is_ok(),
+                    errors: match result {
+                        Ok(_) => "".to_owned(),
+                        Err(err) => err,
+                    },
+                })
+
+            } 
+            _ => {
+                push_err!(self.errors, "controlPower: Invalid power state".to_owned());
+
+                Ok(ControlPowerResponse {
+                    power: state,
+                    errors: String::from("Invalid power state"),
+                    success: false,
+                })
+            }
+
+        }
     }
 
     pub fn configure_hardware(&self) -> Result<ConfigureHardwareResponse, Error> {
@@ -206,13 +229,113 @@ impl Subsystem {
         })
     }
 
-    pub fn set_mode(&self) -> Result<GenericResponse, Error> {
-        // Set mode commnd
-        unimplemented!();
+    pub fn set_mode(&self, mode: u8, qbi_cmd: Vec<i32>) -> Result<GenericResponse, Error> {
+        if qbi_cmd.len() != 4 {
+            //TODO: throw better error
+            return Err(Error::new(
+                ErrorKind::InvalidInput,
+                "qbi_cmd must contain exactly 4 elements",
+            ));
+        }
+
+        let result = run!(
+            self.mai.set_mode(
+                mode,
+                [
+                    qbi_cmd[0] as i16,
+                    qbi_cmd[1] as i16,
+                    qbi_cmd[2] as i16,
+                    qbi_cmd[3] as i16,
+                ],
+            ),
+            self.errors
+        );
+
+        Ok(GenericResponse {
+            success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => err,
+            },
+        })
     }
 
-    pub fn update(&self) -> Result<GenericResponse, Error> {
-        // Set_RV, Set_GPS_time
-        unimplemented!();
+    pub fn set_mode_sun(
+        &self,
+        mode: u8,
+        sun_angle_enable: i16,
+        sun_rot_angle: f32,
+    ) -> Result<GenericResponse, Error> {
+
+        let result = run!(
+            self.mai.set_mode_sun(mode, sun_angle_enable, sun_rot_angle),
+            self.errors
+        );
+
+        Ok(GenericResponse {
+            success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => err,
+            },
+        })
+    }
+
+    pub fn update(
+        &self,
+        gps_time: Option<i32>,
+        rv: Option<RVInput>,
+    ) -> Result<GenericResponse, Error> {
+        let mut success = true;
+        let mut errors = "".to_owned();
+
+        if let Some(time) = gps_time {
+            let result = run!(self.mai.set_gps_time(time as u32), self.errors);
+            success &= result.is_ok();
+            if let Err(err) = result {
+                errors.push_str(&err);
+            }
+        }
+
+        if let Some(params) = rv {
+            if params.eci_pos.len() != 3 {
+                //TODO: throw better error
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    "eci_pos must contain exactly 4 elements",
+                ));
+            }
+
+            if params.eci_vel.len() != 3 {
+                //TODO: throw better error
+                return Err(Error::new(
+                    ErrorKind::InvalidInput,
+                    "eci_vel must contain exactly 4 elements",
+                ));
+            }
+
+            let result = run!(
+                self.mai.set_rv(
+                    [
+                        params.eci_pos[0] as f32,
+                        params.eci_pos[1] as f32,
+                        params.eci_pos[2] as f32,
+                    ],
+                    [
+                        params.eci_vel[0] as f32,
+                        params.eci_vel[1] as f32,
+                        params.eci_vel[2] as f32,
+                    ],
+                    params.time_epoch as u32,
+                ),
+                self.errors
+            );
+            success &= result.is_ok();
+            if let Err(err) = result {
+                errors.push_str(&err);
+            }
+        }
+
+        Ok(GenericResponse { success, errors })
     }
 }

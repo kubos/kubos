@@ -97,39 +97,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // Get current telemetry information for the system
     //
     // {
-    //     nominal: telemetry(telem: NOMINAL) {
-    //         ... on TelemetryNominal {
-    //             rawTemp: Int,
-    //             uptime: Int,
-    //             sysBurnActive: Boolean,
-    //             sysIgnoreDeploy: Boolean,
-    //             sysArmed: Boolean,
-    //             ant1NotDeployed: Boolean,
-    //             ant1StoppedTime: Boolean,
-    //             ant1Active: Boolean,
-    //             ant2NotDeployed: Boolean,
-    //             ant2StoppedTime: Boolean,
-    //             ant2Active: Boolean,
-    //             ant3NotDeployed: Boolean,
-    //             ant3StoppedTime: Boolean,
-    //             ant3Active: Boolean,
-    //             ant4NotDeployed: Boolean,
-    //             ant4StoppedTime: Boolean,
-    //             ant4Active: Boolean
-    //         }
-    //     }
-    //     debug: telemetry(telem: DEBUG) {
-    //         ... on TelemetryDebug {
-    //             ant1ActivationCount: Int,
-    //             ant1ActivationTime: Int,
-    //             ant2ActivationCount: Int,
-    //             ant2ActivationTime: Int,
-    //             ant3ActivationCount: Int,
-    //             ant3ActivationTime: Int,
-    //             ant4ActivationCount: Int,
-    //             ant4ActivationTime: Int,
-    //         }
-    //     }
+    //     //TODO
     // }
     field telemetry(&executor) -> FieldResult<Telemetry>
     {
@@ -213,9 +181,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         power: PowerState
     //     }
     // }
-    field control_power(&executor) -> FieldResult<ControlPowerResponse>
+    field control_power(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
     {
-        unimplemented!();
+        Ok(executor.context().subsystem().control_power(state)?)
     }
     
     // Configure the system
@@ -277,12 +245,17 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         Ok(executor.context().subsystem().passthrough(command)?)
     }
     
-    field set_mode(&executor, mode: Mode, args: Vec<i32>) -> FieldResult<GenericResponse> {
-        unimplemented!();
+    //TODO: TEST THE DEFAULT ARGS VALUE. I have 10% confidence in it actually working
+    //TODO: maybe make aliases of the various args (qbi_cmd_1 vs
+    field set_mode(&executor, mode: Mode, qbi_cmd = {vec![0,0,0,0]}: Vec<i32>, sun_angle_enable = false: bool, sun_rot_angle = 0.0: f64) -> FieldResult<GenericResponse> {
+        match mode {
+            Mode::NormalSun | Mode::LatLongSun => Ok(executor.context().subsystem().set_mode_sun(mode as u8, sun_angle_enable as i16, sun_rot_angle as f32)?),
+            _ => Ok(executor.context().subsystem().set_mode(mode as u8, qbi_cmd)?),
+        }
     }
     
-    field update(&executor) -> FieldResult<GenericResponse> {
-        unimplemented!();
+    field update(&executor, gps_time: Option<i32>, rv: Option<RVInput>) -> FieldResult<GenericResponse> {
+        Ok(executor.context().subsystem().update(gps_time, rv)?)
     }
     
 });

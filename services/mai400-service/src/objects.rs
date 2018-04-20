@@ -116,24 +116,31 @@ pub struct HardwareTestResults {
 
 #[derive(GraphQLEnum, Clone, Copy)]
 pub enum Mode {
-    Unknown,
-    TestMode,
-    RateNulling,
-    Reserved1,
-    NadirPointing,
-    LatLongPointing,
-    QbxMode,
-    Reserved2,
-    NormalSun,
-    LatLongSun,
-    Qintertial,
-    Reserved3,
-    Qtable,
-    SunRam,
+    TestMode = 0,
+    RateNulling = 1,
+    Reserved1 = 2,
+    NadirPointing = 3,
+    LatLongPointing = 4,
+    QbxMode = 5,
+    Reserved2 = 6,
+    NormalSun = 7,
+    LatLongSun = 8,
+    Qintertial = 9,
+    Reserved3 = 10,
+    Qtable = 11,
+    SunRam = 12,
+    Unknown = 0xFF,
 }
 
 #[derive(GraphQLObject)]
 pub struct Orientation {}
+
+#[derive(GraphQLInputObject)]
+pub struct RVInput {
+    pub eci_pos: Vec<f64>,
+    pub eci_vel: Vec<f64>,
+    pub time_epoch: i32,
+}
 
 #[derive(GraphQLObject)]
 pub struct Spin {
