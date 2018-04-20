@@ -5,4 +5,3 @@ authors = ["Catherine Garabedian <catherine@kubos.co>"]
 
 [dependencies]
 mai400-api = { path = ".." }
-serial = "0.4"
