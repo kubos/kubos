@@ -15,7 +15,6 @@ limitations under the License.
 ]]
 
 local uv = require 'uv'
-local cbor = require 'cbor'
 local getenv = require('os').getenv
 local splitPath = require('pathjoin').splitPath
 
@@ -23,28 +22,19 @@ local port = getenv 'PORT'
 if port then port = tonumber(port) end
 if not port then port = 7000 end
 
-local file_protocol = require 'kubos-file-service'
+local cbor_message_protocol = require 'cbor-message-protocol'
+local file_protocol = require 'file-protocol'
 
 local handle = uv.new_udp()
 handle:bind('127.0.0.1', 0)
 p(handle:getsockname())
 
-local function send(...)
-  local message = {...}
-  p("->", message)
-  handle:send(cbor.encode(message), "127.0.0.1", port)
-end
+local protocol
 
-local protocol = file_protocol(send, 'storage')
-
-handle:recv_start(function (err, data, addr)
-  if err then return print(err) end
-  if not data then return end
+local function on_message(message, addr)
   assert(addr.port == port)
   coroutine.wrap(function ()
     local success, error = xpcall(function ()
-      local message = cbor.decode(data)
-      p('<-', message)
       assert(type(message) == 'table' and #message > 0)
       protocol.on_message(message)
     end, debug.traceback)
@@ -52,7 +42,15 @@ handle:recv_start(function (err, data, addr)
       print(error)
     end
   end)()
-end)
+end
+
+local send_message = cbor_message_protocol(handle, on_message, true)
+
+local function send(...)
+  send_message({...}, "127.0.0.1", port)
+end
+
+protocol = file_protocol(send, 'storage')
 
 local function upload(source_path, target_path)
   if not target_path then

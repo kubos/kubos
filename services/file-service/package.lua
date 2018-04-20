@@ -12,11 +12,8 @@ return {
   dependencies = {
     "luvit/require",
     "luvit/pretty-print",
-    "creationix/cbor",
-    "creationix/bitfield",
-    "creationix/coro-fs",
-    "creationix/blake2s",
-    "creationix/defer",
+    "kubos/cbor-message-protocol",
+    "kubos/file-protocol",
   },
   files = {
     "**.lua",

@@ -1,18 +1,8 @@
 local getenv = require('os').getenv
 local uv = require 'uv'
-local cbor = require 'cbor'
 
-local file_protocol = require './.'
-
--- { hash }, -- syn
--- { hash, num_chunks }, -- syn
--- { hash, chunk_index, data }, -- send chunk no reply needed
--- { hash, true, num_chunks }, -- ack
--- { hash, false, 1, 4, 6, 7 }, -- nak
--- { channel_id, "export", hash, path, mode } -- mode is optional
--- { channel_id, "import", path }, --> returns file hash, num_chunks
--- { channel_id, true, value },
--- { channel_id, false, error_message},
+local cbor_message_protocol = require 'cbor-message-protocol'
+local file_protocol = require 'file-protocol'
 
 local server = uv.new_udp()
 local service_port = getenv 'PORT'
@@ -24,9 +14,9 @@ local addrs = {}
 
 -- Expire address table entries after a period of inactivity
 local timer = uv.new_timer()
-timer:start(1000*60, 1000*60, function ()
+timer:start(1000 * 60, 1000 * 60, function ()
   local new_addrs = {}
-  local expire = uv.now() - 60*60*1000
+  local expire = uv.now() - 60 * 60 * 1000
   for k, v in pairs(addrs) do
     if v[3] > expire then
       new_addrs[k] = v
@@ -36,29 +26,11 @@ timer:start(1000*60, 1000*60, function ()
 end)
 timer:unref()
 
-local function send(channel_id, ...)
-  local message = {channel_id, ...}
-  p('->', message)
-  local addr = addrs[channel_id]
-  if not addr then
-    print('Unknown receiver address: ' .. addr)
-    return
-  end
-  local ip, port = unpack(addr)
-  addrs[channel_id][3] = uv.now()
-  local encoded = cbor.encode(message)
-  server:send(encoded, ip, port)
-end
+local protocol
 
-local protocol = file_protocol(send, 'storage')
-
-server:recv_start(function (err, data, addr)
-  if err then return print(err) end
-  if not data then return end
+local function on_message(message, addr)
   coroutine.wrap(function ()
     local success, error = xpcall(function ()
-      local message = cbor.decode(data)
-      p('<-', message)
       assert(type(message) == 'table' and #message > 0)
       addrs[message[1]] = { addr.ip, addr.port, uv.now() }
       protocol.on_message(message)
@@ -67,6 +39,22 @@ server:recv_start(function (err, data, addr)
       print(error)
     end
   end)()
-end)
+end
+
+local send_message = cbor_message_protocol(server, on_message, true)
+
+local function send(channel_id, ...)
+  local message = {channel_id, ...}
+  local addr = addrs[channel_id]
+  if not addr then
+    print('Unknown receiver address: ' .. addr)
+    return
+  end
+  local ip, port = unpack(addr)
+  addrs[channel_id][3] = uv.now()
+  send_message(message, ip, port)
+end
+
+protocol = file_protocol(send, 'storage')
 
 require('uv').run()
