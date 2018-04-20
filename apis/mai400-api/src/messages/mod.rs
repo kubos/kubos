@@ -19,3 +19,9 @@ mod tx;
 
 pub use self::rx::*;
 pub use self::tx::*;
+
+/// IRIG-106 sync word
+pub const SYNC: u16 = 0xEB90;
+
+/// Sync word for raw IMU and IREHS telemetry packets
+pub const AUX_SYNC: u16 = 0xEA91;

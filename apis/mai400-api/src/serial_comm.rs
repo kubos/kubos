@@ -16,14 +16,12 @@
 
 use byteorder::{LittleEndian, ReadBytesExt};
 use mai400::{MAIError, MAIResult};
+use messages::*;
 use std::io::Cursor;
 use std::io::prelude::*;
 use std::time::Duration;
 use serial;
 use serial::prelude::*;
-
-/// IRIG-106 sync word
-const SYNC: u16 = 0xEB90;
 
 /// Wrapper structure for underlying stream
 pub struct Connection {
@@ -52,8 +50,9 @@ impl Connection {
     /// Write out raw bytes to the underlying stream.
     pub fn write(&self, data: &[u8]) -> MAIResult<()> {
         if data.len() != 40 {
-            throw!(MAIError::BadCommand);
+            throw!(MAIError::BadCommandLen);
         }
+
         self.stream.write(data)
     }
 

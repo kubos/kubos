@@ -135,7 +135,7 @@ impl MAI400 {
     /// # fn func() -> MAIResult<()> {
     /// # let connection = Connection::new("/dev/ttyS5".to_owned());
     /// let mai = MAI400::new(connection);
-    /// mai.set_mode(7, 1, 45.0)?;
+    /// mai.set_mode_sun(7, 1, 45.0)?;
     /// # Ok(())
     /// # }
     /// ```
@@ -278,9 +278,10 @@ impl MAI400 {
         Ok(())
     }
 
-    /// Wait for and read a message from the MAI-400.
+    /// Wait for and read a message set from the MAI-400.
     ///
-    /// Returns a `Response` enum containing a received message
+    /// Returns a tuple potentially containing a standard telemetry message, a raw IMU telemetry message,
+    /// and an IREHS telemetry packet.
     ///
     /// *Note*: Messages are sent every 250ms, so, to the human eye, this should
     /// appear to be instantaneous
@@ -296,13 +297,10 @@ impl MAI400 {
     /// # fn func() -> MAIResult<()> {
     /// # let connection = Connection::new("/dev/ttyS5".to_owned());
     /// let mai = MAI400::new(connection);
-    /// let msg = mai.get_message()?;
+    /// let (std, imu, irehs) = mai.get_message()?;
     ///
-    /// match msg {
-    ///     Response::StdTelem(telem) => {
-    ///         println!("Num successful commands: {}", telem.cmd_valid_cntr);
-    ///     }
-    ///     _ => {}
+    /// if let Some(telem) = std {
+    ///     println!("Num successful commands: {}", telem.cmd_valid_cntr);
     /// }
     /// # Ok(())
     /// # }
@@ -341,7 +339,7 @@ pub enum MAIError {
     GenericError,
     /// Software attempted to send a command packet which was not exactly 40 characters long
     #[display(fmt = "Bad Command Length")]
-    BadCommand,
+    BadCommandLen,
     /// Received a valid message, but the message ID doesn't match any known message type
     #[display(fmt = "Unknown Message Received: {:X}", id)]
     UnknownMessage {
