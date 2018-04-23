@@ -13,6 +13,7 @@ members = [
 "services/kubos-service",
 "services/iobc-supervisor-service",
 "test/integration/linux/isis-ants",
+"hal/rust-hal/rust-uart",
 ]
 
 [profile.release]
