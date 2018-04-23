@@ -16,45 +16,11 @@
 
 use eps_api::EpsError;
 use i2c_hal::Command;
+use telemetry::lib::get_adc_result;
 
 const TELEM_CMD: u8 = 0x10;
 
-macro_rules! make_telemetry {
-    (
-        $($type: ident => {$data: expr, $parser: expr},)+
-    ) => {
-
-        #[derive(Clone, Copy)]
-        pub enum Type {
-            $($type,)+
-        }
-
-            pub fn parse(data: &[u8], telem_type: Type) -> Result<f32, EpsError> {
-                let adc_data = get_adc_result(data)?;
-                Ok(match telem_type {
-                    $(Type::$type => $parser(adc_data),)+
-                })
-            }
-
-            pub fn command(telem_type: Type) -> Command {
-                Command {
-                    cmd: TELEM_CMD,
-                    data: match telem_type {
-                        $(Type::$type => $data,)+
-                    }
-                }
-            }
-    }
-}
-
-fn get_adc_result(data: &[u8]) -> Result<f32, EpsError> {
-    if data.len() != 2 {
-        Err(EpsError::BadData)
-    } else {
-        Ok(((data[0] as u16) | ((data[1] as u16) & 0xF) << 4) as f32)
-    }
-}
-
+/// TODO - need to make these parsing functions generic and configurable
 make_telemetry!(
     // VBCR1 - Voltage feeding BRC1 (V)
     VoltageFeedingBcr1 => {vec![0xE1, 0x10], |d| (0.0322537 * d) - 0.051236678},

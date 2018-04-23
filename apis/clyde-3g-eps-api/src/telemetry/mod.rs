@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-mod reset;
-mod watchdog;
+#[macro_use]
+mod lib;
 
-pub mod checksum;
-pub mod board_status;
-pub mod last_error;
-pub mod version;
-
-pub use commands::reset::*;
-pub use commands::watchdog::*;
+pub mod motherboard;
+pub mod daughterboard;
+pub mod reset;

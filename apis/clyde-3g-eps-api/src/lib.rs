@@ -21,5 +21,6 @@ extern crate i2c_hal;
 
 mod commands;
 mod eps;
+mod telemetry;
 
 pub use eps::Eps;

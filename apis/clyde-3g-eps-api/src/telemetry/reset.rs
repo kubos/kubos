@@ -17,27 +17,6 @@
 use eps_api::EpsError;
 use i2c_hal::Command;
 
-macro_rules! make_reset_telemetry {
-    (
-        $($type: ident => $cmd: expr,)+
-    ) => {
-
-        #[derive(Clone, Copy)]
-        pub enum ResetType {
-            $($type,)+
-        }
-
-        pub fn command(reset_type: ResetType) -> Command {
-            Command {
-                cmd: match reset_type {
-                    $(ResetType::$type => $cmd,)+
-                },
-                data: vec![0x00],
-            }
-        }
-    }
-}
-
 /// Common Reset Telemetry Structure
 pub struct ResetTelemetry {
     pub motherboard: u8,

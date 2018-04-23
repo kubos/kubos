@@ -18,6 +18,7 @@ use i2c_hal::Stream;
 
 use commands::*;
 use eps_api::EpsError;
+use telemetry;
 
 pub struct Eps {
     connection: Box<Stream>,
@@ -53,14 +54,13 @@ impl Eps {
         Ok(self.connection.write(manual_reset::command())?)
     }
 
-    /// Retrieves motherboard telemetry
     pub fn get_motherboard_telemetry(
         &self,
-        telem_type: motherboard_telemetry::Type,
+        telem_type: telemetry::motherboard::Type,
     ) -> Result<f32, EpsError> {
-        motherboard_telemetry::parse(
+        telemetry::motherboard::parse(
             &self.connection
-                .transfer(motherboard_telemetry::command(telem_type))?,
+                .transfer(telemetry::motherboard::command(telem_type))?,
             telem_type,
         )
     }
@@ -68,11 +68,11 @@ impl Eps {
     /// Retrieves daughterboard telemetry
     pub fn get_daughterboard_telemetry(
         &self,
-        telem_type: daughterboard_telemetry::Type,
+        telem_type: telemetry::daughterboard::Type,
     ) -> Result<f32, EpsError> {
-        daughterboard_telemetry::parse(
+        telemetry::daughterboard::parse(
             &self.connection
-                .transfer(daughterboard_telemetry::command(telem_type))?,
+                .transfer(telemetry::daughterboard::command(telem_type))?,
             telem_type,
         )
     }
@@ -80,10 +80,10 @@ impl Eps {
     /// Retrieves telemetry on resets
     pub fn get_reset_telemetry(
         &self,
-        telem_type: reset_telemetry::ResetType,
-    ) -> Result<ResetTelemetry, EpsError> {
-        reset_telemetry::parse(&self.connection
-            .transfer(reset_telemetry::command(telem_type))?)
+        telem_type: telemetry::reset::ResetType,
+    ) -> Result<telemetry::reset::ResetTelemetry, EpsError> {
+        telemetry::reset::parse(&self.connection
+            .transfer(telemetry::reset::command(telem_type))?)
     }
 
     pub fn set_comms_watchdog_period(&self, period: u8) -> Result<(), EpsError> {
