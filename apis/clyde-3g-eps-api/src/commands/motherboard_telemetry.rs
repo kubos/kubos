@@ -63,9 +63,9 @@ make_telemetry!(
     // IBCR1B - Current BCR1, Connection SA1B (A)
     CurrentBcr1Sa1b => {vec![0xE1, 0x15], |d| (0.999566912 * d) + 2.087050671},
     // TBCR1A - Array Temp, Connector SA1A (*C)
-    ArrayTempSa1a => {vec![0xE1, 0x18], |d| (0.4963 * d) - 273.15},
+    ArrayTempSa1a => {vec![0xE1, 0x18], |d| (0.35657344 * d) - 273.88402},
     // TBCR1B - Array Temp, Connector SA1B (*C)
-    ArrayTempSa1b => {vec![0xE1, 0x19], |d| (0.4963 * d) - 273.15},
+    ArrayTempSa1b => {vec![0xE1, 0x19], |d| (0.35657344 * d) - 273.88402},
     // SDBCR1A - Sun Detector, Connector SA1A (W/m^2)
     SunDetectorSa1a => {vec![0xE1, 0x1C], |d| d},
     // SDBCR1B - Sun Detector, Connector SA1B (W/m^2)
@@ -78,9 +78,9 @@ make_telemetry!(
     // IBCR2B - Current BCR2, Connector SA2B (A)
     CurrentBcr2Sa2b => {vec![0xE1, 0x25], |d| (0.971278847 * d) + 10.95397897},
     // TBCR2A - Array Temp, Connector SA2A (*C)
-    ArrayTempSa2a => {vec![0xE1, 0x28], |d| (0.4963 * d) - 273.15},
+    ArrayTempSa2a => {vec![0xE1, 0x28], |d| (0.35657344 * d) - 273.88402},
     // TBCR2B - Array Temp, Connector SA2B (*C)
-    ArrayTempSa2b => {vec![0xE1, 0x29], |d| (0.4963 * d) - 273.15},
+    ArrayTempSa2b => {vec![0xE1, 0x29], |d| (0.35657344 * d) - 273.88402},
     // SDBCR2A - Sun Detector, Connector SA2A (W/m^2)
     SunDetectorSa2a => {vec![0xE1, 0x2C], |d| d},
     // SDBCR2B - Sun Detector, Connector SA2B (W/m^2)
@@ -93,9 +93,9 @@ make_telemetry!(
     // IBCR3B - Current BCR3, Connector SA3B (A)
     CurrentBcr3Sa3b => {vec![0xE1, 0x35], |d| (0.982520653 * d) + 7.656558533},
     // TBCR3A - Array Temp, Connector SA3A (*C)
-    ArrayTempSa3a => {vec![0xE1, 0x38], |d| (0.4963 * d) - 273.15},
+    ArrayTempSa3a => {vec![0xE1, 0x38], |d| (0.35657344 * d) - 273.88402},
     // TBCR3B - Array Temp, Connector SA3B (*C)
-    ArrayTempSa3b => {vec![0xE1, 0x39], |d| (0.4963 * d) - 273.15},
+    ArrayTempSa3b => {vec![0xE1, 0x39], |d| (0.35657344 * d) - 273.88402},
     // SDBCR3A - Sun Detector, Connector SA3A (W/m^2)
     SunDetectorSa3a => {vec![0xE1, 0x3C], |d| d},
     // SDBCR3B - Sun Detector, Connector SA3B (W/m^2)
