@@ -17,6 +17,12 @@
 use eps_api::EpsError;
 use i2c_hal::Command;
 
+/// Checksum
+///
+/// This command instructs the node to self-inspect its ROM contents in order
+/// to generate a checksum. The value retrieved can be used to determine whether
+/// the contents of the ROM have changed during the operation of the device.
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct Checksum {
     /// Motherboard ROM checksum

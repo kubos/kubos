@@ -17,6 +17,14 @@
 use eps_api::EpsError;
 use i2c_hal::Command;
 
+/// Board Status
+///
+/// The status bytes are designed to supply operational data about the I2C Node.
+/// To retrieve the data that represent the status, the command 0x01 should be
+/// sent followed by 0x00. The meaning of each bit of the returned status bytes
+/// is shown below. Please note that Data[3] is the first byte returned from the
+/// EPS and Data[0] is the last.
+
 bitflags! {
     #[derive(Default)]
     pub struct BoardStatus: u8 {

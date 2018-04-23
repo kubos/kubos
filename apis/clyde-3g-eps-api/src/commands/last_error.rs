@@ -17,13 +17,15 @@
 use eps_api::EpsError;
 use i2c_hal::Command;
 
-/// Bitflags struct holding last error information.
+/// Last Error
 ///
 /// If an error has been generated after attempting to execute a user’s command
 /// the value 0xFFFF is returned. To find out the details of the last error,
 /// send the command 0x03 followed by the data byte 0x00. This will return
 /// the code of the last error generated. The first two bytes returned represent
 /// the Motherboard’s error code, the second two bytes represent the Daughterboard’s.
+
+/// Bitflags struct holding last error information.
 bitflags! {
     #[derive(Default)]
     pub struct LastError: u8 {

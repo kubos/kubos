@@ -17,6 +17,12 @@
 use eps_api::EpsError;
 use i2c_hal::Command;
 
+/// Version
+///
+/// The version number of the firmware will be returned on this command.
+/// The revision number returns the current revision of the firmware that is
+/// present on the board. The firmware number returns the current firmware on the board.
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct Version {
     revision: u8,
