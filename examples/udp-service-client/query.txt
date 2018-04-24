@@ -1,0 +1,31 @@
+{
+    telemetry{
+        nominal{
+            gpsTime,
+            timeSubsec,
+            cmdValidCntr,
+            cmdInvalidCntr,
+            cmdInvalidChksumCntr,
+            lastCommand,
+            acsMode,
+            css,
+            eclipseFlag,
+            sunVecB,
+            iBFieldMeas,
+            bd,
+            rwsSpeedCmd,
+            rwsSpeedTach,
+            rwaTorqueCmd,
+            gcRwaTorqueCmd,
+            torqueCoilCmd,
+            gcTorqueCoilCmd,
+            qboCmd,
+            qboHat,
+            angleToGo,
+            qError,
+            omegaB,
+            nb,
+            neci
+        }
+    }
+}
