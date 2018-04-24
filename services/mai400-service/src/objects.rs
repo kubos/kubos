@@ -62,20 +62,11 @@ pub enum PowerState {
 }
 
 /// Response fields for 'power' query
+#[derive(GraphQLObject)]
 pub struct GetPowerResponse {
     pub state: PowerState,
-    pub uptime: u32,
+    pub uptime: i32,
 }
-
-graphql_object!(GetPowerResponse: () |&self| {
-    field state() -> FieldResult<PowerState> {
-        Ok(self.state.clone())
-    }
-    
-    field uptime() -> FieldResult<i32> {
-        Ok(self.uptime as i32)
-    }
-});
 
 /// Response fields for 'controlPower' mutation
 #[derive(GraphQLObject)]
@@ -102,7 +93,7 @@ pub enum TestType {
 pub struct IntegrationTestResults {
     pub errors: String,
     pub success: bool,
-    pub telemetry_nominal: TelemetryNominal,
+    pub telemetry_nominal: StdTelem,
     pub telemetry_debug: TelemetryDebug,
 }
 
@@ -132,6 +123,27 @@ pub enum Mode {
     Unknown = 0xFF,
 }
 
+impl From<u8> for Mode {
+    fn from(raw: u8) -> Mode {
+        match raw {
+            0 => Mode::TestMode,
+            1 => Mode::RateNulling,
+            2 => Mode::Reserved1,
+            3 => Mode::NadirPointing,
+            4 => Mode::LatLongPointing,
+            5 => Mode::QbxMode,
+            6 => Mode::Reserved2,
+            7 => Mode::NormalSun,
+            8 => Mode::LatLongSun,
+            9 => Mode::Qintertial,
+            10 => Mode::Reserved3,
+            11 => Mode::Qtable,
+            12 => Mode::SunRam,
+            _ => Mode::Unknown,
+        }
+    }
+}
+
 #[derive(GraphQLObject)]
 pub struct Orientation {}
 
@@ -151,13 +163,8 @@ pub struct Spin {
 
 #[derive(GraphQLObject)]
 pub struct Telemetry {
-    pub nominal: TelemetryNominal,
+    pub nominal: StdTelem,
     pub debug: TelemetryDebug,
-}
-
-#[derive(GraphQLObject)]
-pub struct TelemetryNominal {
-    pub std: StdTelem,
 }
 
 #[derive(Debug, Default, PartialEq)]
@@ -193,8 +200,8 @@ graphql_object!(StdTelem: () |&self| {
         Ok(self.0.last_command as i32)
     }
     
-    field acs_mode() -> FieldResult<i32> {
-        Ok(self.0.acs_mode as i32)
+    field acs_mode() -> FieldResult<Mode> {
+        Ok(Mode::from(self.0.acs_mode))
     }
     
     field css() -> FieldResult<Vec<i32>> {

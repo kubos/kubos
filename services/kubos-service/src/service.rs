@@ -155,7 +155,7 @@ where
 
         let socket = UdpSocket::bind(&addr).unwrap();
         println!("Listening on: {}", socket.local_addr().unwrap());
-        let mut buf = [0; 128];
+        let mut buf = [0; 500];
         let mut to_send: Option<(usize, SocketAddr)> = None;
         loop {
             if let Some((size, peer)) = to_send {
@@ -176,6 +176,7 @@ where
             &Variables::new(),
             &self.context,
         ) {
+
             Ok((val, errs)) => {
                 let msg = match val {
                     Value::Null => "".to_string(),

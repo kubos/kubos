@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 
 [dependencies]
+i2c-linux = "0.1"
 juniper =  "0.9"
 
 serde_json = "1.0"

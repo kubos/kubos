@@ -22,7 +22,8 @@ use std::cell::RefCell;
 use std::io::{Error, ErrorKind};
 //use std::str;
 use std::sync::{Arc, Mutex};
-use std::thread::spawn;
+use std::thread::{spawn, sleep};
+use std::time::Duration;
 
 use objects::*;
 
@@ -69,21 +70,22 @@ pub fn read_thread(bus: String, data: Arc<ReadData>) -> MAIResult<()> {
     let connection = Connection::new(bus);
     let mai = MAI400::new(connection);
 
+    println!("Read thread started");
     loop {
         // TODO: Error handling and reporting
         let (std, imu, irehs) = mai.get_message().unwrap();
 
         if let Some(telem) = std {
             data.update_std(telem);
-            println!("Got StdTelem");
+            //println!("Got StdTelem");
         }
         if let Some(telem) = imu {
             data.update_imu(telem);
-            println!("Got RawIMU");
+            //println!("Got RawIMU");
         }
         if let Some(telem) = irehs {
             data.update_irehs(telem);
-            println!("Got IREHS");
+            //println!("Got IREHS");
         }
     }
 }
@@ -115,14 +117,31 @@ impl Subsystem {
     // Queries
 
     pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
-        unimplemented!();
+        let old_ctr = {
+            self.persistent.std_telem.lock().unwrap().tlm_counter
+        };
+
+        // Wait long enough for a new telemetry set to be read
+        sleep(Duration::from_millis(300));
+
+        let new_ctr = {
+            self.persistent.std_telem.lock().unwrap().tlm_counter
+        };
+
+        let (state, uptime) = match new_ctr != old_ctr {
+            true => (
+                PowerState::On,
+                self.persistent.std_telem.lock().unwrap().cmd_valid_cntr as i32,
+            ),
+            false => (PowerState::Off, 0),
+        };
+
+        Ok(GetPowerResponse { state, uptime })
     }
 
     pub fn get_telemetry(&self) -> Result<Telemetry, Error> {
         Ok(Telemetry {
-            nominal: TelemetryNominal {
-                std: StdTelem(self.persistent.std_telem.lock().unwrap().clone()),
-            },
+            nominal: StdTelem(self.persistent.std_telem.lock().unwrap().clone()),
             debug: TelemetryDebug {
                 irehs: IREHSTelem(self.persistent.irehs_telem.lock().unwrap().clone()),
                 raw_imu: RawIMUTelem(self.persistent.imu.lock().unwrap().clone()),
@@ -141,22 +160,7 @@ impl Subsystem {
             _ => 0xFF,
         };
 
-        Ok(match raw {
-            0 => Mode::TestMode,
-            1 => Mode::RateNulling,
-            2 => Mode::Reserved1,
-            3 => Mode::NadirPointing,
-            4 => Mode::LatLongPointing,
-            5 => Mode::QbxMode,
-            6 => Mode::Reserved2,
-            7 => Mode::NormalSun,
-            8 => Mode::LatLongSun,
-            9 => Mode::Qintertial,
-            10 => Mode::Reserved3,
-            11 => Mode::Qtable,
-            12 => Mode::SunRam,
-            _ => Mode::Unknown,
-        })
+        Ok(Mode::from(raw))
     }
 
     pub fn get_orientation(&self) -> Result<Orientation, Error> {
@@ -302,7 +306,7 @@ impl Subsystem {
                 //TODO: throw better error
                 return Err(Error::new(
                     ErrorKind::InvalidInput,
-                    "eci_pos must contain exactly 4 elements",
+                    "eci_pos must contain exactly 3 elements",
                 ));
             }
 
@@ -310,7 +314,7 @@ impl Subsystem {
                 //TODO: throw better error
                 return Err(Error::new(
                     ErrorKind::InvalidInput,
-                    "eci_vel must contain exactly 4 elements",
+                    "eci_vel must contain exactly 3 elements",
                 ));
             }
 
