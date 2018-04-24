@@ -55,6 +55,6 @@ local function send(channel_id, ...)
   send_message(message, ip, port)
 end
 
-protocol = file_protocol(send, 'storage')
+protocol = file_protocol(send, 'storage', args[1])
 
 require('uv').run()

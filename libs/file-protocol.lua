@@ -64,7 +64,16 @@ local function wrap(fn)
   end)
 end
 
-return function (send, storage_path)
+return function (send, storage_path, nak_timeout)
+  if type(nak_timeout) == 'string' then
+    nak_timeout = tonumber(nak_timeout)
+  end
+  if not nak_timeout then nak_timeout = 1000 end
+  print 'Starting file protocol'
+  p {
+    storage_path = storage_path,
+    nak_timeout = nak_timeout,
+  }
 
   -- coroutines waiting on a sync to finish
   local waiting = {}
@@ -300,7 +309,7 @@ return function (send, storage_path)
           if not timer then
             timer = uv.new_timer()
             receive_timeouts[hash] = timer
-            timer:start(1000, 1000, wrap(function ()
+            timer:start(nak_timeout, nak_timeout, wrap(function ()
               sync_and_send(hash)
               timer:close()
               receive_timeouts[hash] = nil
