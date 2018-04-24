@@ -101,6 +101,8 @@
 
 extern crate getopts;
 extern crate juniper;
+#[macro_use]
+extern crate nix;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;

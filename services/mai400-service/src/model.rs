@@ -222,7 +222,18 @@ impl Subsystem {
     }
 
     pub fn passthrough(&self, command: String) -> Result<GenericResponse, Error> {
-        let result = run!(self.mai.passthrough(command.as_bytes()), self.errors);
+        // Convert the hex values in the string into actual hex values
+        // Ex. "c3c2" -> [0xc3, 0xc2]
+        let tx: Vec<u8> = command
+            .as_bytes()
+            .chunks(2)
+            .into_iter()
+            .map(|chunk| {
+                u8::from_str_radix(::std::str::from_utf8(chunk).unwrap(), 16).unwrap()
+            })
+            .collect();
+
+        let result = run!(self.mai.passthrough(tx.as_slice()), self.errors);
 
         Ok(GenericResponse {
             success: result.is_ok(),
@@ -235,7 +246,6 @@ impl Subsystem {
 
     pub fn set_mode(&self, mode: u8, qbi_cmd: Vec<i32>) -> Result<GenericResponse, Error> {
         if qbi_cmd.len() != 4 {
-            //TODO: throw better error
             return Err(Error::new(
                 ErrorKind::InvalidInput,
                 "qbi_cmd must contain exactly 4 elements",
