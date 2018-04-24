@@ -20,10 +20,10 @@ ip = "10.63.1.20"
 port = 8082
 ```
 
-Where
-    - `query_file` specifies the file containing the GraphQL request to be sent
-    - `[host]` specifies the IP address and port the client should use to send and listen from
-    - `[service]` specifies the IP address and port of the service to query
+Where:
+- `query_file` specifies the file containing the GraphQL request to be sent
+- `[host]` specifies the IP address and port the client should use to send and listen from
+- `[service]` specifies the IP address and port of the service to query
     
 ## Running
 
@@ -38,5 +38,5 @@ For example:
 ## Example Files
 
 This folder contains two example files: 
-    - `query.txt` - Contains an example GraphQL query
-    - `config.toml` - Contains an example configuration TOML file
+- `query.txt` - Contains an example GraphQL query
+- `config.toml` - Contains an example configuration TOML file
