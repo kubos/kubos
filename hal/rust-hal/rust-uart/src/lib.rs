@@ -1,3 +1,4 @@
+//! A generalized HAL for communitcating over serial ports
 extern crate serial;
 
 use std::io::prelude::*;
@@ -9,10 +10,10 @@ pub struct Connection {
 }
 
 /// Errors that occur while reading from and writing to stream
-type UartResult<T> = Result<T, std::io::Error>;
+pub type UartResult<T> = Result<T, std::io::Error>;
 
 impl Connection {
-    /// Constructor to create connection
+    /// Constructor to create connection from path
     pub fn new(bus: String) -> Connection {
         Connection {
             stream: Box::new(SerialStream {
@@ -33,26 +34,28 @@ impl Connection {
         self.stream.write(data)
     }
 
-    /// Reads messages of specified length recieved on the bus
+    /// Reads messages upto specified length recieved on the bus
     pub fn read(&self, len: usize) -> UartResult<Vec<u8>> {
         self.stream.read(len)
     }
 }
 
-/// This trait is used to represent streams
+/// This trait is used to represent streams and allows for mocking for api unit tests
 pub trait Stream {
     /// Write raw bytes to stream
     fn write(&self, data: &[u8]) -> UartResult<()>;
 
-    /// Read specified amount of raw bytes from the stream
+    /// Read upto a specified amount of raw bytes from the stream
     fn read(&self, len: usize) -> UartResult<Vec<u8>>;
 }
 
+// This is the actual stream that data is tranferred over
 struct SerialStream {
     bus: String,
     settings: serial::PortSettings,
 }
 
+// Read and write implementations for the serial stream
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> UartResult<()> {
         let mut port = serial::open(self.bus.as_str())?;
