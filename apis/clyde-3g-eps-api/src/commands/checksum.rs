@@ -15,6 +15,7 @@
  */
 
 use eps_api::EpsError;
+use failure::Error;
 use i2c_hal::Command;
 
 /// Checksum
@@ -40,7 +41,7 @@ impl Default for Checksum {
     }
 }
 
-pub fn parse(data: &[u8]) -> Result<Checksum, EpsError> {
+pub fn parse(data: &[u8]) -> Result<Checksum, Error> {
     if data.len() == 4 {
         Ok(Checksum {
             motherboard: data[2] as u16 | (data[3] as u16) << 8,
@@ -52,7 +53,7 @@ pub fn parse(data: &[u8]) -> Result<Checksum, EpsError> {
             daughterboard: 0,
         })
     } else {
-        Err(EpsError::BadData)
+        throw!(EpsError::BadData)
     }
 }
 

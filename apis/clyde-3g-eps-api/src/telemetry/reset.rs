@@ -15,6 +15,7 @@
  */
 
 use eps_api::EpsError;
+use failure::Error;
 use i2c_hal::Command;
 
 /// Common Reset Telemetry Structure
@@ -45,7 +46,7 @@ make_reset_telemetry!(
     Watchdog => 0x34,
 );
 
-pub fn parse(data: &[u8]) -> Result<ResetTelemetry, EpsError> {
+pub fn parse(data: &[u8]) -> Result<ResetTelemetry, Error> {
     if data.len() == 2 {
         Ok(ResetTelemetry {
             motherboard: data[1],
@@ -57,6 +58,6 @@ pub fn parse(data: &[u8]) -> Result<ResetTelemetry, EpsError> {
             daughterboard: Some(data[3]),
         })
     } else {
-        Err(EpsError::BadData)
+        throw!(EpsError::BadData)
     }
 }

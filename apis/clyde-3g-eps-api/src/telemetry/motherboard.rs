@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use eps_api::EpsError;
+use failure::Error;
 use i2c_hal::Command;
 use telemetry::lib::get_adc_result;
 

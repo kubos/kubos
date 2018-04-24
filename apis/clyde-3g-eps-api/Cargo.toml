@@ -6,4 +6,5 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 [dependencies]
 bitflags = "1.0"
 eps-api = { path = "../eps-api" }
+failure = { git = "https://github.com/rust-lang-nursery/failure", version = "1.0"  }
 i2c-hal = { path = "../../hal/i2c-hal" }

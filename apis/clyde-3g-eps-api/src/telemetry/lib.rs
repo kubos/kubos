@@ -15,6 +15,7 @@
  */
 
 use eps_api::EpsError;
+use failure::Error;
 
 #[macro_export]
 macro_rules! make_telemetry {
@@ -27,7 +28,7 @@ macro_rules! make_telemetry {
             $($type,)+
         }
 
-        pub fn parse(data: &[u8], telem_type: Type) -> Result<f32, EpsError> {
+        pub fn parse(data: &[u8], telem_type: Type) -> Result<f32, Error> {
             let adc_data = get_adc_result(data)?;
             Ok(match telem_type {
                 $(Type::$type => $parser(adc_data),)+
@@ -67,9 +68,9 @@ macro_rules! make_reset_telemetry {
     }
 }
 
-pub fn get_adc_result(data: &[u8]) -> Result<f32, EpsError> {
+pub fn get_adc_result(data: &[u8]) -> Result<f32, Error> {
     if data.len() != 2 {
-        Err(EpsError::BadData)
+        throw!(EpsError::BadData)
     } else {
         Ok(((data[0] as u16) | ((data[1] as u16) & 0xF) << 4) as f32)
     }

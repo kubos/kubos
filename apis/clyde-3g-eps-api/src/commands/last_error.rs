@@ -15,6 +15,7 @@
  */
 
 use eps_api::EpsError;
+use failure::Error;
 use i2c_hal::Command;
 
 /// Last Error
@@ -50,14 +51,14 @@ bitflags! {
     }
 }
 
-pub fn parse(data: &[u8]) -> Result<LastError, EpsError> {
+pub fn parse(data: &[u8]) -> Result<LastError, Error> {
     if data.len() > 0 {
         match LastError::from_bits(data[0]) {
             Some(s) => Ok(s),
-            None => Err(EpsError::BadData),
+            None => throw!(EpsError::BadData),
         }
     } else {
-        Err(EpsError::BadData)
+        throw!(EpsError::BadData)
     }
 }
 

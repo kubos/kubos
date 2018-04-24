@@ -15,6 +15,7 @@
  */
 
 use eps_api::EpsError;
+use failure::Error;
 use i2c_hal::Command;
 
 /// Board Status
@@ -38,14 +39,14 @@ bitflags! {
     }
 }
 
-pub fn parse(data: &[u8]) -> Result<BoardStatus, EpsError> {
+pub fn parse(data: &[u8]) -> Result<BoardStatus, Error> {
     if data.len() > 0 {
         match BoardStatus::from_bits(data[0]) {
             Some(s) => Ok(s),
             None => Ok(BoardStatus::default()),
         }
     } else {
-        Err(EpsError::BadData)
+        throw!(EpsError::BadData)
     }
 }
 

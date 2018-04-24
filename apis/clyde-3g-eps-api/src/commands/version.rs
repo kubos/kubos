@@ -15,6 +15,7 @@
  */
 
 use eps_api::EpsError;
+use failure::Error;
 use i2c_hal::Command;
 
 /// Version
@@ -35,7 +36,7 @@ pub struct VersionInfo {
     daughterboard: Version,
 }
 
-pub fn parse(data: &[u8]) -> Result<VersionInfo, EpsError> {
+pub fn parse(data: &[u8]) -> Result<VersionInfo, Error> {
     if data.len() > 0 {
         let firmware_number = (data[0] as u16) | ((data[1] as u16) & 0xF) << 8;
         let revision = (data[1] & 0xF0) >> 4;
@@ -50,7 +51,7 @@ pub fn parse(data: &[u8]) -> Result<VersionInfo, EpsError> {
             },
         })
     } else {
-        Err(EpsError::BadData)
+        throw!(EpsError::BadData)
     }
 }
 

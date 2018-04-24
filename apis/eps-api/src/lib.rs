@@ -33,5 +33,3 @@ impl From<io::Error> for EpsError {
         }
     }
 }
-
-pub type EpsResult<T> = Result<T, EpsError>;

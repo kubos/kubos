@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use eps_api::EpsError;
+use failure::Error;
 use i2c_hal::Command;
 
 /// Set Communications Watchdog Period
@@ -47,7 +47,7 @@ pub mod set_comms_watchdog_period {
 pub mod get_comms_watchdog_period {
     use super::*;
 
-    pub fn parse(data: &[u8]) -> Result<u8, EpsError> {
+    pub fn parse(data: &[u8]) -> Result<u8, Error> {
         Ok(data[1])
     }
 
