@@ -41,7 +41,7 @@ impl Connection {
     /// `path` - Path to I2c device
     /// `slave` - I2c slave address to read/write to
     pub fn new(path: &str, slave: u16) -> Self {
-        Connection {
+        Self {
             path: path.to_string(),
             slave,
         }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use eps_api::EpsError;
 use failure::Error;
 use i2c_hal::Command;
 
@@ -48,7 +49,11 @@ pub mod get_comms_watchdog_period {
     use super::*;
 
     pub fn parse(data: &[u8]) -> Result<u8, Error> {
-        Ok(data[1])
+        if data.len() == 2 {
+            Ok(data[1])
+        } else {
+            throw!(EpsError::invalid_data(data))
+        }
     }
 
     pub fn command() -> Command {

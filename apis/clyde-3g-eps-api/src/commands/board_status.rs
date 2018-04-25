@@ -48,16 +48,16 @@ pub struct BoardStatus {
 pub fn parse(data: &[u8]) -> Result<BoardStatus, Error> {
     if data.len() == 2 {
         Ok(BoardStatus {
-            motherboard: StatusCode::from_bits(data[0]).unwrap_or(StatusCode::default()),
+            motherboard: StatusCode::from_bits(data[0]).unwrap_or_default(),
             daughterboard: None,
         })
     } else if data.len() == 4 {
         Ok(BoardStatus {
-            motherboard: StatusCode::from_bits(data[2]).unwrap_or(StatusCode::default()),
-            daughterboard: Some(StatusCode::from_bits(data[0]).unwrap_or(StatusCode::default())),
+            motherboard: StatusCode::from_bits(data[2]).unwrap_or_default(),
+            daughterboard: Some(StatusCode::from_bits(data[0]).unwrap_or_default()),
         })
     } else {
-        throw!(EpsError::BadData)
+        throw!(EpsError::invalid_data(data))
     }
 }
 

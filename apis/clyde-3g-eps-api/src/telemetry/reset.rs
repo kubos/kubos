@@ -58,6 +58,6 @@ pub fn parse(data: &[u8]) -> Result<ResetTelemetry, Error> {
             daughterboard: Some(data[3]),
         })
     } else {
-        throw!(EpsError::BadData)
+        throw!(EpsError::invalid_data(data))
     }
 }

@@ -69,7 +69,7 @@ pub fn parse(data: &[u8]) -> Result<LastError, Error> {
             daughterboard: ErrorCode::from_bits(data[2]),
         })
     } else {
-        throw!(EpsError::BadData)
+        throw!(EpsError::invalid_data(data))
     }
 }
 
@@ -109,7 +109,9 @@ mod tests {
     #[test]
     fn test_parse_bad_data_len() {
         assert_eq!(
-            EpsError::BadData,
+            EpsError::InvalidData {
+                data: String::from(""),
+            },
             parse(&vec![])
                 .err()
                 .unwrap()

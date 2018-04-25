@@ -69,7 +69,8 @@ impl Eps {
     /// being brought up in its defined initial condition. Resetting the board in
     /// this fashion will increment the Manual Reset Counter.
     pub fn manual_reset(&self) -> Result<(), Error> {
-        Ok(self.connection.write(manual_reset::command())?)
+        self.connection.write(manual_reset::command())?;
+        Ok(())
     }
 
     /// Reset Communications Watchdog
@@ -78,7 +79,8 @@ impl Eps {
     /// does not require any telemetry from the board, this command can be sent
     /// to reset the communications watchdog.
     pub fn reset_comms_watchdog(&self) -> Result<(), Error> {
-        Ok(self.connection.write(reset_comms_watchdog::command())?)
+        self.connection.write(reset_comms_watchdog::command())?;
+        Ok(())
     }
 
     /// Get Motherboard Telemetry
@@ -132,8 +134,9 @@ impl Eps {
     /// Period command, 0x21. The data byte specifies the number of minutes the
     /// communications watchdog will wait before timing out.
     pub fn set_comms_watchdog_period(&self, period: u8) -> Result<(), Error> {
-        Ok(self.connection
-            .write(set_comms_watchdog_period::command(period))?)
+        self.connection
+            .write(set_comms_watchdog_period::command(period))?;
+        Ok(())
     }
 
     /// Get Communications Watchdog Period
@@ -144,22 +147,4 @@ impl Eps {
         get_comms_watchdog_period::parse(&self.connection
             .transfer(get_comms_watchdog_period::command())?)
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::io::Error;
-
-    // struct MockConn;
-
-    // impl Stream for MockConn {
-    //     fn write(&self, data: &[u8]) -> Result<(), Error> {
-    //         Ok(())
-    //     }
-
-    //     fn read(&self, length: usize) -> Result<Vec<u8>, Error> {
-    //         Ok(vec![])
-    //     }
-    // }
 }

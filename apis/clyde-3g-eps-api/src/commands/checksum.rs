@@ -41,19 +41,23 @@ impl Default for Checksum {
     }
 }
 
+fn parse_checksum(data1: u8, data2: u8) -> u16 {
+    u16::from(data1) | (u16::from(data2) << 8)
+}
+
 pub fn parse(data: &[u8]) -> Result<Checksum, Error> {
     if data.len() == 4 {
         Ok(Checksum {
-            motherboard: data[2] as u16 | (data[3] as u16) << 8,
-            daughterboard: Some(data[0] as u16 | (data[1] as u16) << 8),
+            motherboard: parse_checksum(data[2], data[3]),
+            daughterboard: Some(parse_checksum(data[0], data[1])),
         })
     } else if data.len() == 2 {
         Ok(Checksum {
-            motherboard: data[0] as u16 | (data[1] as u16) << 8,
+            motherboard: parse_checksum(data[0], data[1]),
             daughterboard: None,
         })
     } else {
-        throw!(EpsError::BadData)
+        throw!(EpsError::invalid_data(data))
     }
 }
 
@@ -93,7 +97,9 @@ mod tests {
     #[test]
     fn test_parse_one_byte() {
         assert_eq!(
-            EpsError::BadData,
+            EpsError::InvalidData {
+                data: String::from("\u{0}"),
+            },
             parse(&vec![0])
                 .err()
                 .unwrap()
@@ -105,7 +111,9 @@ mod tests {
     #[test]
     fn test_parse_three_bytes() {
         assert_eq!(
-            EpsError::BadData,
+            EpsError::InvalidData {
+                data: String::from("\u{1}\u{2}\u{3}"),
+            },
             parse(&vec![1, 2, 3])
                 .err()
                 .unwrap()

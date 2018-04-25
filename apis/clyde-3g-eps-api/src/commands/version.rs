@@ -37,7 +37,7 @@ pub struct VersionInfo {
 }
 
 fn get_firmware(num1: u8, num2: u8) -> u16 {
-    (num1 as u16) | ((num2 as u16) & 0xF) << 8
+    u16::from(num1) | (u16::from(num2) & 0xF) << 8
 }
 
 fn get_revision(num: u8) -> u8 {
@@ -65,7 +65,7 @@ pub fn parse(data: &[u8]) -> Result<VersionInfo, Error> {
             }),
         })
     } else {
-        throw!(EpsError::BadData)
+        throw!(EpsError::invalid_data(data))
     }
 }
 
@@ -114,7 +114,9 @@ mod tests {
     #[test]
     fn test_parse_one() {
         assert_eq!(
-            EpsError::BadData,
+            EpsError::InvalidData {
+                data: String::from("\u{0}"),
+            },
             parse(&vec![0x0])
                 .err()
                 .unwrap()
@@ -126,7 +128,9 @@ mod tests {
     #[test]
     fn test_parse_three() {
         assert_eq!(
-            EpsError::BadData,
+            EpsError::InvalidData {
+                data: String::from("\u{0}\u{1}\u{3}"),
+            },
             parse(&vec![0x0, 0x1, 0x3])
                 .err()
                 .unwrap()

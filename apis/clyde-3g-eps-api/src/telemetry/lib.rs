@@ -70,8 +70,10 @@ macro_rules! make_reset_telemetry {
 
 pub fn get_adc_result(data: &[u8]) -> Result<f32, Error> {
     if data.len() != 2 {
-        throw!(EpsError::BadData)
+        throw!(EpsError::invalid_data(data))
     } else {
-        Ok(((data[0] as u16) | ((data[1] as u16) & 0xF) << 4) as f32)
+        Ok(f32::from(
+            u16::from(data[0]) | (u16::from(data[1]) & 0xF) << 4,
+        ))
     }
 }
