@@ -487,6 +487,34 @@ bitflags! {
     }
 }
 
+impl ThermopileFlags {
+    /// Convert the flags byte into a vector containing the string representations
+    /// of all flags present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mai400_api::*;
+    ///
+    /// # fn func() -> MAIResult<()> {
+    /// let flags = ThermopileFlags::NO_COMM | ThermopileFlags::BAD_EARTH_REF;
+    ///
+    /// let conv = flags.to_vec();
+    ///
+    /// assert_eq!(conv, vec!["NO_COMM", "BAD_EARTH_REF"]);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn to_vec(&self) -> Vec<String> {
+        format!("{:?}", self)
+            .to_owned()
+            .split(" | ")
+            .map(|x| x.to_string())
+            .collect()
+    }
+}
+
 /// Messages sent by the MAI-400
 #[derive(Debug, PartialEq)]
 pub enum Response {
@@ -579,11 +607,11 @@ pub struct RotatingTelemetry {
     /// Quaternion feedback saturation.
     pub q_sat: f32,
     /// Maximum RWA Torque (mNm)
-    pub raw_trq_max: f32,
+    pub rwa_trq_max: f32,
     /// Reaction Wheel Motor Current (X, Y, Z) (A) (0.0003663003663 A/lsb)
     pub rws_motor_current: [u16; 3],
     /// RWS Motor Temperature (Temperature oC = rwsMotorTemp * 0.0402930 - 50)
-    pub raw_motor_temp: i16,
+    pub rws_motor_temp: i16,
 }
 
 impl RotatingTelemetry {
@@ -623,7 +651,7 @@ impl RotatingTelemetry {
     // TODO: verify the bit shifting
     // TODO: Doc says 3 MSB are used for version information. Need to extract
     pub fn update(&mut self, msg: &StandardTelemetry) {
-        match msg.tlm_counter {
+        match msg.tlm_counter & 0x1F {
             0 => {
                 self.b_field_igrf[0] = f32::from_bits(msg.rotating_variable_a);
                 self.b_field_igrf[1] = f32::from_bits(msg.rotating_variable_b);
@@ -675,33 +703,33 @@ impl RotatingTelemetry {
                 self.k_unload[2] = f32::from_bits(msg.rotating_variable_c);
             }
             10 => {
-                self.css_bias[0] = msg.rotating_variable_a.wrapping_shr(16) as i16;
-                self.css_bias[1] = msg.rotating_variable_b.wrapping_shr(16) as i16;
-                self.css_bias[2] = msg.rotating_variable_c.wrapping_shr(16) as i16;
-                self.css_bias[3] = msg.rotating_variable_a as i16;
-                self.css_bias[4] = msg.rotating_variable_b as i16;
-                self.css_bias[5] = msg.rotating_variable_c as i16;
+                self.css_bias[0] = msg.rotating_variable_a as i16;
+                self.css_bias[1] = msg.rotating_variable_b as i16;
+                self.css_bias[2] = msg.rotating_variable_c as i16;
+                self.css_bias[3] = msg.rotating_variable_a.wrapping_shr(16) as i16;
+                self.css_bias[4] = msg.rotating_variable_b.wrapping_shr(16) as i16;
+                self.css_bias[5] = msg.rotating_variable_c.wrapping_shr(16) as i16;
             }
             11 => {
-                self.mag_bias[0] = msg.rotating_variable_a.wrapping_shr(16) as i16;
-                self.mag_bias[1] = msg.rotating_variable_b.wrapping_shr(16) as i16;
-                self.mag_bias[2] = msg.rotating_variable_c.wrapping_shr(16) as i16;
-                self.rws_volt = msg.rotating_variable_a as i16;
-                self.rws_press = msg.rotating_variable_b as i16;
+                self.mag_bias[0] = msg.rotating_variable_a as i16;
+                self.mag_bias[1] = msg.rotating_variable_b as i16;
+                self.mag_bias[2] = msg.rotating_variable_c as i16;
+                self.rws_volt = msg.rotating_variable_a.wrapping_shr(16) as i16;
+                self.rws_press = msg.rotating_variable_b.wrapping_shr(16) as i16;
             }
             12 => {
-                self.att_det_mode = msg.rotating_variable_a.wrapping_shr(24) as u8;
-                self.rws_reset_cntr[0] = msg.rotating_variable_a.wrapping_shr(16) as u8;
-                self.sun_mag_aligned = msg.rotating_variable_a.wrapping_shr(8) as u8;
-                self.minor_version = msg.rotating_variable_a as u8;
-                self.mai_sn = msg.rotating_variable_b.wrapping_shr(24) as u8;
-                self.rws_reset_cntr[1] = msg.rotating_variable_b.wrapping_shr(16) as u8;
-                self.orbit_prop_mode = msg.rotating_variable_b.wrapping_shr(8) as u8;
-                self.acs_op_mode = msg.rotating_variable_b as u8;
-                self.proc_reset_cntr = msg.rotating_variable_c.wrapping_shr(24) as u8;
-                self.rws_reset_cntr[2] = msg.rotating_variable_c.wrapping_shr(16) as u8;
-                self.major_version = msg.rotating_variable_c.wrapping_shr(8) as u8;
-                self.ads_op_mode = msg.rotating_variable_c as u8;
+                self.att_det_mode = msg.rotating_variable_a as u8;
+                self.rws_reset_cntr[0] = msg.rotating_variable_a.wrapping_shr(8) as u8;
+                self.sun_mag_aligned = msg.rotating_variable_a.wrapping_shr(16) as u8;
+                self.minor_version = msg.rotating_variable_a.wrapping_shr(24) as u8;
+                self.mai_sn = msg.rotating_variable_b as u8;
+                self.rws_reset_cntr[1] = msg.rotating_variable_b.wrapping_shr(8) as u8;
+                self.orbit_prop_mode = msg.rotating_variable_b.wrapping_shr(16) as u8;
+                self.acs_op_mode = msg.rotating_variable_b.wrapping_shr(24) as u8;
+                self.proc_reset_cntr = msg.rotating_variable_c as u8;
+                self.rws_reset_cntr[2] = msg.rotating_variable_c.wrapping_shr(8) as u8;
+                self.major_version = msg.rotating_variable_c.wrapping_shr(16) as u8;
+                self.ads_op_mode = msg.rotating_variable_c.wrapping_shr(24) as u8;
             }
             13 => {
                 self.css_gain[0] = f32::from_bits(msg.rotating_variable_a);
@@ -744,9 +772,9 @@ impl RotatingTelemetry {
                 self.dipole_gain[2] = f32::from_bits(msg.rotating_variable_c);
             }
             21 => {
-                self.wheel_speed_bias[0] = msg.rotating_variable_a.wrapping_shr(16) as i16;
-                self.wheel_speed_bias[1] = msg.rotating_variable_b.wrapping_shr(16) as i16;
-                self.wheel_speed_bias[2] = msg.rotating_variable_c.wrapping_shr(16) as i16;
+                self.wheel_speed_bias[0] = msg.rotating_variable_a as i16;
+                self.wheel_speed_bias[1] = msg.rotating_variable_b as i16;
+                self.wheel_speed_bias[2] = msg.rotating_variable_c as i16;
             }
             22 => {
                 self.cos_sun_mag_align_thresh = f32::from_bits(msg.rotating_variable_a);
@@ -754,13 +782,13 @@ impl RotatingTelemetry {
                 self.q_sat = f32::from_bits(msg.rotating_variable_c);
             }
             23 => {
-                self.raw_trq_max = f32::from_bits(msg.rotating_variable_a);
-                self.rws_motor_current[0] = msg.rotating_variable_b.wrapping_shr(16) as u16;
-                self.rws_motor_current[1] = msg.rotating_variable_b as u16;
-                self.rws_motor_current[2] = msg.rotating_variable_c.wrapping_shr(16) as u16;
-                self.raw_motor_temp = msg.rotating_variable_c as i16;
+                self.rwa_trq_max = f32::from_bits(msg.rotating_variable_a);
+                self.rws_motor_current[0] = msg.rotating_variable_b as u16;
+                self.rws_motor_current[1] = msg.rotating_variable_b.wrapping_shr(16) as u16;
+                self.rws_motor_current[2] = msg.rotating_variable_c as u16;
+                self.rws_motor_temp = msg.rotating_variable_c.wrapping_shr(16) as i16;
             }
-            _ => {}
+            _ => println!("Received unknown rotating ID: {}", msg.tlm_counter),
         }
     }
 }

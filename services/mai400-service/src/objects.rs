@@ -76,9 +76,6 @@ pub struct ControlPowerResponse {
     pub power: PowerState,
 }
 
-/// Response fields for 'noop' mutation
-pub type NoopResponse = GenericResponse;
-
 /// Input field for 'testHardware' mutation
 ///
 /// Indicates which test should be run against the AntS device
@@ -87,6 +84,20 @@ pub enum TestType {
     Integration,
     Hardware,
 }
+
+/// Enum for the 'testHardware' mutation response union
+pub enum TestResults {
+    Integration(IntegrationTestResults),
+    Hardware(HardwareTestResults),
+}
+
+/// Response union for 'testHardware' mutation
+graphql_union!(TestResults: () |&self| {
+    instance_resolvers: |&_| {
+        &IntegrationTestResults => match *self { TestResults::Integration(ref i) => Some(i), _ => None},
+        &HardwareTestResults => match *self { TestResults::Hardware(ref h) => Some(h), _ => None},
+    }
+});
 
 /// Response fields for 'testHardware(test: INTEGRATION)' mutation
 #[derive(GraphQLObject)]
@@ -301,7 +312,86 @@ pub struct TelemetryDebug {
 #[derive(Debug, Default, PartialEq)]
 pub struct IREHSTelem(pub IREHSTelemetry);
 
+#[derive(GraphQLObject)]
+pub struct ThermopileStruct {
+    dip_angle: i32,
+    earth_limb: ThermopileSensor,
+    earth_ref: ThermopileSensor,
+    space_ref: ThermopileSensor,
+    wide_fov: ThermopileSensor,
+}
+
+#[derive(GraphQLObject)]
+pub struct ThermopileSensor {
+    adc: i32,
+    temp: i32,
+    errors: bool,
+    flags: Vec<String>,
+}
+
 graphql_object!(IREHSTelem: () |&self| {
+    field thermopile_struct_a() -> FieldResult<ThermopileStruct> {
+        Ok(ThermopileStruct {
+                dip_angle: self.0.dip_angle_a as i32,
+                earth_limb: ThermopileSensor {
+                    adc: self.0.thermopiles_a[0] as i32,
+                    temp: self.0.temp_a[0] as i32,
+                    errors: !self.0.solution_degraded[0].is_empty(),
+                    flags: self.0.solution_degraded[0].to_vec()
+                },
+                earth_ref: ThermopileSensor {
+                    adc: self.0.thermopiles_a[1] as i32,
+                    temp: self.0.temp_a[1] as i32,
+                    errors: !self.0.solution_degraded[1].is_empty(),
+                    flags: self.0.solution_degraded[1].to_vec()
+                },
+                space_ref: ThermopileSensor {
+                    adc: self.0.thermopiles_a[2] as i32,
+                    temp: self.0.temp_a[2] as i32,
+                    errors: !self.0.solution_degraded[2].is_empty(),
+                    flags: self.0.solution_degraded[2].to_vec()
+                },
+                wide_fov: ThermopileSensor {
+                    adc: self.0.thermopiles_a[3] as i32,
+                    temp: self.0.temp_a[3] as i32,
+                    errors: !self.0.solution_degraded[3].is_empty(),
+                    flags: self.0.solution_degraded[3].to_vec()
+                }
+            }
+        )
+    }
+    
+    field thermopile_struct_b() -> FieldResult<ThermopileStruct> {
+        Ok(ThermopileStruct {
+                dip_angle: self.0.dip_angle_b as i32,
+                earth_limb: ThermopileSensor {
+                    adc: self.0.thermopiles_b[0] as i32,
+                    temp: self.0.temp_b[0] as i32,
+                    errors: !self.0.solution_degraded[4].is_empty(),
+                    flags: self.0.solution_degraded[4].to_vec()
+                },
+                earth_ref: ThermopileSensor {
+                    adc: self.0.thermopiles_b[1] as i32,
+                    temp: self.0.temp_b[1] as i32,
+                    errors: !self.0.solution_degraded[5].is_empty(),
+                    flags: self.0.solution_degraded[5].to_vec()
+                },
+                space_ref: ThermopileSensor {
+                    adc: self.0.thermopiles_b[2] as i32,
+                    temp: self.0.temp_b[2] as i32,
+                    errors: !self.0.solution_degraded[6].is_empty(),
+                    flags: self.0.solution_degraded[6].to_vec()
+                },
+                wide_fov: ThermopileSensor {
+                    adc: self.0.thermopiles_b[3] as i32,
+                    temp: self.0.temp_b[3] as i32,
+                    errors: !self.0.solution_degraded[7].is_empty(),
+                    flags: self.0.solution_degraded[7].to_vec()
+                }
+            }
+        )
+    }
+    
     field thermopiles_a() -> FieldResult<Vec<i32>> {
         Ok(self.0.thermopiles_a.iter().map(|&elem| elem as i32).collect())
     }
@@ -326,8 +416,17 @@ graphql_object!(IREHSTelem: () |&self| {
         Ok(self.0.dip_angle_b as i32)
     }
     
-    field solution_degraded() -> FieldResult<i32> {
-        unimplemented!();
+    field solution_degraded() -> FieldResult<Vec<Vec<String>>> {
+        let mut parent = vec![];
+        for elem in self.0.solution_degraded.iter() {
+            if elem.is_empty() {
+                parent.push(vec![]);
+            } else {
+                parent.push(elem.to_vec());
+            }
+        }
+        
+        Ok(parent)
     }
 });
 
@@ -369,9 +468,8 @@ graphql_object!(Rotating: () |&self| {
         Ok(self.0.sc_vel_eci.iter().map(|&elem| elem as f64).collect())
     }
     
-    field kepler_elem() -> FieldResult<i32> {
-        unimplemented!();
-        //TODO
+    field kepler_elem() -> FieldResult<Kepler> {
+        Ok(Kepler(self.0.kepler_elem.clone()))
     }
     
     field k_bdot() -> FieldResult<Vec<f64>> {
@@ -506,16 +604,45 @@ graphql_object!(Rotating: () |&self| {
         Ok(self.0.q_sat as f64)
     }
     
-    field raw_trq_max() -> FieldResult<f64> {
-        Ok(self.0.raw_trq_max as f64)
+    field rwa_trq_max() -> FieldResult<f64> {
+        Ok(self.0.rwa_trq_max as f64)
     }
     
     field rws_motor_current() -> FieldResult<Vec<i32>> {
         Ok(self.0.rws_motor_current.iter().map(|&elem| elem as i32).collect())
     }
     
-    field raw_motor_temp() -> FieldResult<i32> {
-        Ok(self.0.raw_motor_temp as i32)
+    field rws_motor_temp() -> FieldResult<i32> {
+        Ok(self.0.rws_motor_temp as i32)
     }
 
+});
+
+#[derive(Debug, Default, PartialEq)]
+pub struct Kepler(pub KeplerElem);
+
+graphql_object!(Kepler: () |&self| {
+    field semi_major_axis() -> FieldResult<f64> {
+        Ok(self.0.semi_major_axis as f64)
+    }
+    
+    field eccentricity() -> FieldResult<f64> {
+        Ok(self.0.eccentricity as f64)
+    }
+    
+    field inclination() -> FieldResult<f64> {
+        Ok(self.0.inclination as f64)
+    }
+    
+    field raan() -> FieldResult<f64> {
+        Ok(self.0.raan as f64)
+    }
+    
+    field arg_parigee() -> FieldResult<f64> {
+        Ok(self.0.arg_parigee as f64)
+    }
+    
+    field true_anomoly() -> FieldResult<f64> {
+        Ok(self.0.true_anomoly as f64)
+    }
 });

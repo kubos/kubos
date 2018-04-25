@@ -89,9 +89,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // {
     //     config: "Not Implemented"
     // }
-    field config(&executor) -> FieldResult<Config>
+    field config(&executor) -> FieldResult<String>
     {
-        unimplemented!();
+        Ok(String::from("Not Implemented"))
     }
 
     // Get current telemetry information for the system
@@ -125,8 +125,8 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(executor.context().subsystem().get_mode()?)
     }
         
-    field orientation(&executor) -> FieldResult<Orientation> {
-        Ok(executor.context().subsystem().get_orientation()?)
+    field orientation(&executor) -> FieldResult<String> {
+        Ok(String::from("Not Implemented"))
     }
     
     field spin(&executor) -> FieldResult<Spin> {
@@ -164,7 +164,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         success: Boolean
     //    }
     // }
-    field noop(&executor) -> FieldResult<NoopResponse>
+    field noop(&executor) -> FieldResult<GenericResponse>
     {
         Ok(executor.context().subsystem().noop()?)
     }
@@ -197,9 +197,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         config: ConfigureController
     //    }
     // }
-    field configure_hardware(&executor) -> FieldResult<ConfigureHardwareResponse>
+    field configure_hardware(&executor) -> FieldResult<String>
     {
-        unimplemented!();
+        Ok(String::from("Not Implemented"))
     }
     
     // Run a system self-test
@@ -221,9 +221,12 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         }
     //    }
     // }
-    field test_hardware(&executor) -> FieldResult<HardwareTestResults> 
+    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults> 
     {
-        unimplemented!();
+        match test {
+            TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem().get_test_results().unwrap())),
+            TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
+        }
     }
     
     // Pass a custom command through to the system
@@ -245,8 +248,6 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         Ok(executor.context().subsystem().passthrough(command)?)
     }
     
-    //TODO: TEST THE DEFAULT ARGS VALUE. I have 10% confidence in it actually working
-    //TODO: maybe make aliases of the various args (qbi_cmd_1 vs
     field set_mode(&executor, mode: Mode, qbi_cmd = {vec![0,0,0,0]}: Vec<i32>, sun_angle_enable = false: bool, sun_rot_angle = 0.0: f64) -> FieldResult<GenericResponse> {
         match mode {
             Mode::NormalSun | Mode::LatLongSun => Ok(executor.context().subsystem().set_mode_sun(mode as u8, sun_angle_enable as i16, sun_rot_angle as f32)?),

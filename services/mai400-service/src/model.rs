@@ -151,7 +151,16 @@ impl Subsystem {
     }
 
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
-        unimplemented!();
+        Ok(IntegrationTestResults {
+            success: true,
+            errors: "".to_owned(),
+            telemetry_nominal: StdTelem(self.persistent.std_telem.lock().unwrap().clone()),
+            telemetry_debug: TelemetryDebug {
+                irehs: IREHSTelem(self.persistent.irehs_telem.lock().unwrap().clone()),
+                raw_imu: RawIMUTelem(self.persistent.imu.lock().unwrap().clone()),
+                rotating: Rotating(self.persistent.rotating.lock().unwrap().clone()),
+            },
+        })
     }
 
     pub fn get_mode(&self) -> Result<Mode, Error> {
@@ -178,9 +187,30 @@ impl Subsystem {
 
     // Mutations
 
-    pub fn noop(&self) -> Result<NoopResponse, Error> {
-        // ????
-        unimplemented!();
+    pub fn noop(&self) -> Result<GenericResponse, Error> {
+        let old_ctr = {
+            self.persistent.std_telem.lock().unwrap().tlm_counter
+        };
+
+        // Wait long enough for a new telemetry set to be read
+        sleep(Duration::from_millis(300));
+
+        let new_ctr = {
+            self.persistent.std_telem.lock().unwrap().tlm_counter
+        };
+
+        let (success, errors) = match new_ctr != old_ctr {
+            true => (true, "".to_owned()),
+            false => {
+                push_err!(
+                    self.errors,
+                    "Noop: Unable to communicate with MAI400".to_owned()
+                );
+                (false, "Unable to communicate with MAI400".to_owned())
+            }
+        };
+
+        Ok(GenericResponse { success, errors })
     }
 
     pub fn control_power(&self, state: PowerState) -> Result<ControlPowerResponse, Error> {
@@ -209,16 +239,6 @@ impl Subsystem {
             }
 
         }
-    }
-
-    pub fn configure_hardware(&self) -> Result<ConfigureHardwareResponse, Error> {
-        // ????
-        unimplemented!();
-    }
-
-    pub fn test_hardware(&self) -> Result<HardwareTestResults, Error> {
-        // ????
-        unimplemented!();
     }
 
     pub fn passthrough(&self, command: String) -> Result<GenericResponse, Error> {
