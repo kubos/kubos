@@ -21,6 +21,7 @@
 /// # Examples
 ///
 /// ```
+/// # #[macro_use] extern crate kubos_service;
 /// #[macro_use]
 /// extern crate failure;
 ///
@@ -82,6 +83,8 @@ macro_rules! process_errors {
 /// # Examples
 ///
 /// ```
+/// # #[macro_use] extern crate kubos_service;
+/// use std::cell::RefCell;
 /// # fn main() {
 /// let master_err = RefCell::new(vec![]);
 ///
@@ -103,10 +106,7 @@ macro_rules! push_err {
         }}
 }
 
-/// Execute a function and return a tuple containing:
-///   a) A String with any errors which were encountered
-///   b) A boolean to indicate whether the function ran successfully
-///   c) Any data returned by the function
+/// Execute a function and return Result<func_data, String>
 /// Optionally:
 ///   Add the error string to the master error string for later consumption,
 ///   prefixed with the name of the function being called
@@ -114,10 +114,12 @@ macro_rules! push_err {
 /// # Examples
 ///
 /// ```
+/// # #[macro_use] extern crate kubos_service;
 /// #[macro_use]
 /// extern crate failure;
 ///
-/// use failure::Fail;
+/// use failure::{Error, Fail};
+/// use std::cell::RefCell;
 ///
 /// #[derive(Fail, Display, Debug)]
 /// pub enum RootError {
@@ -151,11 +153,9 @@ macro_rules! push_err {
 ///
 /// fn main() {
 ///     let master_err = RefCell::new(vec![]);
-///     let (errors, success, data) = run!(test_func(true, "test".to_owned()), master_err);
+///     let result = run!(test_func(true, "test".to_owned()), master_err);
 ///
-///     assert_eq!(errors, "TopError: top, RootError: root");
-///     assert_eq!(success, false);
-///     assert_eq!(data, None);
+///     assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
 ///     assert_eq!(
 ///         vec!["test_func: TopError: top, RootError: root".to_owned()],
 ///         master_err.borrow().clone()
@@ -270,21 +270,17 @@ mod tests {
 
     #[test]
     fn run_default() {
-        let (errors, success, data) = run!(test_func(true, "test".to_owned()));
+        let result = run!(test_func(true, "test".to_owned()));
 
-        assert_eq!(errors, "TopError: top, RootError: root");
-        assert_eq!(success, false);
-        assert_eq!(data, None);
+        assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
     }
 
     #[test]
     fn run_push() {
         let master_err = RefCell::new(vec![]);
-        let (errors, success, data) = run!(test_func(true, "test".to_owned()), master_err);
+        let result = run!(test_func(true, "test".to_owned()), master_err);
 
-        assert_eq!(errors, "TopError: top, RootError: root");
-        assert_eq!(success, false);
-        assert_eq!(data, None);
+        assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
         assert_eq!(
             vec!["test_func: TopError: top, RootError: root".to_owned()],
             master_err.borrow().clone()
@@ -294,11 +290,9 @@ mod tests {
     #[test]
     fn run_push_good() {
         let master_err = RefCell::new(vec![]);
-        let (errors, success, data) = run!(test_func(false, "test".to_owned()), master_err);
+        let result = run!(test_func(false, "test".to_owned()), master_err);
 
-        assert_eq!(errors, "");
-        assert_eq!(success, true);
-        assert_eq!(data.unwrap(), "test");
+        assert_eq!(result, Ok("test".to_owned()));
         let test_vec: Vec<String> = vec![];
         assert_eq!(test_vec, master_err.borrow().clone());
     }

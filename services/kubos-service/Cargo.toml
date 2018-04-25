@@ -11,3 +11,6 @@ juniper = "0.9"
 getopts = "0.2"
 toml = "0.4"
 nix = "0.10.0"
+
+[dev-dependencies]
+failure = { git = "https://github.com/rust-lang-nursery/failure" }

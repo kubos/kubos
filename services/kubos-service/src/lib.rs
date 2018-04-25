@@ -99,6 +99,9 @@
 //! $ ./example-service -c config.toml
 //! ```
 
+#[cfg(test)]
+#[macro_use]
+extern crate failure;
 extern crate getopts;
 extern crate juniper;
 #[macro_use]
