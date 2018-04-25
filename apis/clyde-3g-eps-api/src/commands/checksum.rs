@@ -29,14 +29,14 @@ pub struct Checksum {
     /// Motherboard ROM checksum
     pub motherboard: u16,
     /// Daughterboard ROM checksum
-    pub daughterboard: u16,
+    pub daughterboard: Option<u16>,
 }
 
 impl Default for Checksum {
     fn default() -> Self {
         Checksum {
             motherboard: 0,
-            daughterboard: 0,
+            daughterboard: None,
         }
     }
 }
@@ -45,12 +45,12 @@ pub fn parse(data: &[u8]) -> Result<Checksum, Error> {
     if data.len() == 4 {
         Ok(Checksum {
             motherboard: data[2] as u16 | (data[3] as u16) << 8,
-            daughterboard: data[0] as u16 | (data[1] as u16) << 8,
+            daughterboard: Some(data[0] as u16 | (data[1] as u16) << 8),
         })
     } else if data.len() == 2 {
         Ok(Checksum {
             motherboard: data[0] as u16 | (data[1] as u16) << 8,
-            daughterboard: 0,
+            daughterboard: None,
         })
     } else {
         throw!(EpsError::BadData)
@@ -71,32 +71,46 @@ mod tests {
     #[test]
     fn test_parse_motherboard_version() {
         assert_eq!(
-            Ok(Checksum {
+            Checksum {
                 motherboard: 0b1010010110100101,
-                daughterboard: 0,
-            }),
-            parse(&vec![0b10100101, 0b10100101])
+                daughterboard: None,
+            },
+            parse(&vec![0b10100101, 0b10100101]).unwrap()
         );
     }
 
     #[test]
     fn test_parse_both_versions() {
         assert_eq!(
-            Ok(Checksum {
+            Checksum {
                 motherboard: 3084,
-                daughterboard: 771,
-            }),
-            parse(&vec![0b0011, 0b0011, 0b1100, 0b1100])
+                daughterboard: Some(771),
+            },
+            parse(&vec![0b0011, 0b0011, 0b1100, 0b1100]).unwrap()
         );
     }
 
     #[test]
     fn test_parse_one_byte() {
-        assert_eq!(Err(EpsError::BadData), parse(&vec![0]));
+        assert_eq!(
+            EpsError::BadData,
+            parse(&vec![0])
+                .err()
+                .unwrap()
+                .downcast::<EpsError>()
+                .unwrap()
+        );
     }
 
     #[test]
     fn test_parse_three_bytes() {
-        assert_eq!(Err(EpsError::BadData), parse(&vec![1, 2, 3]));
+        assert_eq!(
+            EpsError::BadData,
+            parse(&vec![1, 2, 3])
+                .err()
+                .unwrap()
+                .downcast::<EpsError>()
+                .unwrap()
+        );
     }
 }

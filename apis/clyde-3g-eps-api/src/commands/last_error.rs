@@ -29,7 +29,7 @@ use i2c_hal::Command;
 /// Bitflags struct holding last error information.
 bitflags! {
     #[derive(Default)]
-    pub struct LastError: u8 {
+    pub struct ErrorCode: u8 {
         /// CRC code does not match data
         const BAD_CRC = 0x10;
         /// Unknown command received
@@ -51,12 +51,23 @@ bitflags! {
     }
 }
 
+#[derive(Debug, Eq, PartialEq)]
+pub struct LastError {
+    pub motherboard: ErrorCode,
+    pub daughterboard: Option<ErrorCode>,
+}
+
 pub fn parse(data: &[u8]) -> Result<LastError, Error> {
-    if data.len() > 0 {
-        match LastError::from_bits(data[0]) {
-            Some(s) => Ok(s),
-            None => throw!(EpsError::BadData),
-        }
+    if data.len() == 2 {
+        Ok(LastError {
+            motherboard: ErrorCode::from_bits(data[0]).unwrap(),
+            daughterboard: None,
+        })
+    } else if data.len() == 4 {
+        Ok(LastError {
+            motherboard: ErrorCode::from_bits(data[0]).unwrap(),
+            daughterboard: ErrorCode::from_bits(data[2]),
+        })
     } else {
         throw!(EpsError::BadData)
     }
@@ -74,7 +85,36 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse() {
-        assert_eq!(Ok(LastError::BAD_CRC), parse(&vec![0x10]));
+    fn test_parse_motherboard() {
+        assert_eq!(
+            LastError {
+                motherboard: ErrorCode::BAD_CRC,
+                daughterboard: None,
+            },
+            parse(&vec![0x10, 0x00]).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_parse_motherboard_daughterboard() {
+        assert_eq!(
+            LastError {
+                motherboard: ErrorCode::COMMAND_DATA_INCORRECT,
+                daughterboard: Some(ErrorCode::CHANNEL_INACTIVE),
+            },
+            parse(&vec![0x02, 0x00, 0x04, 0x00]).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_parse_bad_data_len() {
+        assert_eq!(
+            EpsError::BadData,
+            parse(&vec![])
+                .err()
+                .unwrap()
+                .downcast::<EpsError>()
+                .unwrap()
+        );
     }
 }

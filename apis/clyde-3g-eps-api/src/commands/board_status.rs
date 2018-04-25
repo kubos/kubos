@@ -28,7 +28,7 @@ use i2c_hal::Command;
 
 bitflags! {
     #[derive(Default)]
-    pub struct BoardStatus: u8 {
+    pub struct StatusCode: u8 {
         const LAST_COMMAND_FAILED = 0b0000001;
         const WATCHDOG_ERROR = 0b0000010;
         const BAD_COMMAND_DATA = 0b0000100;
@@ -39,12 +39,23 @@ bitflags! {
     }
 }
 
+#[derive(Debug, Eq, PartialEq)]
+pub struct BoardStatus {
+    pub motherboard: StatusCode,
+    pub daughterboard: Option<StatusCode>,
+}
+
 pub fn parse(data: &[u8]) -> Result<BoardStatus, Error> {
-    if data.len() > 0 {
-        match BoardStatus::from_bits(data[0]) {
-            Some(s) => Ok(s),
-            None => Ok(BoardStatus::default()),
-        }
+    if data.len() == 2 {
+        Ok(BoardStatus {
+            motherboard: StatusCode::from_bits(data[0]).unwrap_or(StatusCode::default()),
+            daughterboard: None,
+        })
+    } else if data.len() == 4 {
+        Ok(BoardStatus {
+            motherboard: StatusCode::from_bits(data[2]).unwrap_or(StatusCode::default()),
+            daughterboard: Some(StatusCode::from_bits(data[0]).unwrap_or(StatusCode::default())),
+        })
     } else {
         throw!(EpsError::BadData)
     }
@@ -61,54 +72,36 @@ pub fn command() -> Command {
 mod tests {
     use super::*;
 
-    // #[test]
-    // fn test_parse_no_flags() {
-    //     assert_eq!(Err(EpsError::BadData), Status::parse(&vec![]));
-    // }
+    #[test]
+    fn test_parse_both_no_flags() {
+        assert_eq!(
+            BoardStatus {
+                motherboard: StatusCode::default(),
+                daughterboard: Some(StatusCode::default()),
+            },
+            parse(&vec![0x0, 0x0, 0x0, 0x0]).unwrap()
+        )
+    }
 
-    // #[test]
-    // fn test_parse_last_cmd_failed() {
-    //     assert_eq!(Ok(Status::LAST_COMMAND_FAILED), Status::parse(&vec![0b1]));
-    // }
+    #[test]
+    fn test_parse_both() {
+        assert_eq!(
+            BoardStatus {
+                motherboard: StatusCode::LAST_COMMAND_FAILED,
+                daughterboard: Some(StatusCode::WATCHDOG_ERROR),
+            },
+            parse(&vec![0x2, 0x0, 0x1, 0x0]).unwrap()
+        )
+    }
 
-    // #[test]
-    // fn test_parse_watchdog_error() {
-    //     assert_eq!(Ok(Status::WATCHDOG_ERROR), Status::parse(&vec![0b10]));
-    // }
-
-    // #[test]
-    // fn test_parse_bad_command_data() {
-    //     assert_eq!(Ok(Status::BAD_COMMAND_DATA), Status::parse(&vec![0b100]));
-    // }
-
-    // #[test]
-    // fn test_parse_bad_command_channel() {
-    //     assert_eq!(
-    //         Ok(Status::BAD_COMMAND_CHANNEL),
-    //         Status::parse(&vec![0b1000])
-    //     );
-    // }
-
-    // #[test]
-    // fn test_parse_error_reading_eeprom() {
-    //     assert_eq!(
-    //         Ok(Status::ERROR_READING_EEPROM),
-    //         Status::parse(&vec![0b10000])
-    //     );
-    // }
-
-    // #[test]
-    // fn test_parse_power_on_reset() {
-    //     assert_eq!(Ok(Status::POWER_ON_RESET), Status::parse(&vec![0b100000]));
-    // }
-
-    // #[test]
-    // fn test_parse_brown_out_reset() {
-    //     assert_eq!(Ok(Status::BROWN_OUT_RESET), Status::parse(&vec![0b1000000]));
-    // }
-
-    // #[test]
-    // fn test_parse_all() {
-    //     assert_eq!(Ok(Status::all()), Status::parse(&vec![0b1111111]));
-    // }
+    #[test]
+    fn test_parse_motherboard() {
+        assert_eq!(
+            BoardStatus {
+                motherboard: StatusCode::BAD_COMMAND_DATA,
+                daughterboard: None,
+            },
+            parse(&vec![0x4, 0x0]).unwrap()
+        )
+    }
 }

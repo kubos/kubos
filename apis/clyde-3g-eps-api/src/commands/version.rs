@@ -33,22 +33,36 @@ pub struct Version {
 #[derive(Debug, Eq, PartialEq)]
 pub struct VersionInfo {
     motherboard: Version,
-    daughterboard: Version,
+    daughterboard: Option<Version>,
+}
+
+fn get_firmware(num1: u8, num2: u8) -> u16 {
+    (num1 as u16) | ((num2 as u16) & 0xF) << 8
+}
+
+fn get_revision(num: u8) -> u8 {
+    (num & 0xF0) >> 4
 }
 
 pub fn parse(data: &[u8]) -> Result<VersionInfo, Error> {
-    if data.len() > 0 {
-        let firmware_number = (data[0] as u16) | ((data[1] as u16) & 0xF) << 8;
-        let revision = (data[1] & 0xF0) >> 4;
+    if data.len() == 2 {
         Ok(VersionInfo {
             motherboard: Version {
-                revision,
-                firmware_number,
+                firmware_number: get_firmware(data[0], data[1]),
+                revision: get_revision(data[1]),
             },
-            daughterboard: Version {
-                revision,
-                firmware_number,
+            daughterboard: None,
+        })
+    } else if data.len() == 4 {
+        Ok(VersionInfo {
+            motherboard: Version {
+                firmware_number: get_firmware(data[2], data[3]),
+                revision: get_revision(data[3]),
             },
+            daughterboard: Some(Version {
+                firmware_number: get_firmware(data[0], data[1]),
+                revision: get_revision(data[1]),
+            }),
         })
     } else {
         throw!(EpsError::BadData)
@@ -67,19 +81,57 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse() {
+    fn test_parse_motherboard() {
         assert_eq!(
-            Ok(VersionInfo {
+            VersionInfo {
                 motherboard: Version {
-                    revision: 0,
-                    firmware_number: 0,
+                    revision: 12,
+                    firmware_number: 2152,
                 },
-                daughterboard: Version {
-                    revision: 0,
-                    firmware_number: 0,
+                daughterboard: None,
+            },
+            parse(&vec![0x68, 0xC8]).unwrap()
+        )
+    }
+
+    #[test]
+    fn test_parse_both() {
+        assert_eq!(
+            VersionInfo {
+                motherboard: Version {
+                    revision: 12,
+                    firmware_number: 2152,
                 },
-            },),
-            parse(&vec![0, 0])
+                daughterboard: Some(Version {
+                    revision: 15,
+                    firmware_number: 100,
+                }),
+            },
+            parse(&vec![0x64, 0xF0, 0x68, 0xC8]).unwrap()
         );
+    }
+
+    #[test]
+    fn test_parse_one() {
+        assert_eq!(
+            EpsError::BadData,
+            parse(&vec![0x0])
+                .err()
+                .unwrap()
+                .downcast::<EpsError>()
+                .unwrap()
+        )
+    }
+
+    #[test]
+    fn test_parse_three() {
+        assert_eq!(
+            EpsError::BadData,
+            parse(&vec![0x0, 0x1, 0x3])
+                .err()
+                .unwrap()
+                .downcast::<EpsError>()
+                .unwrap()
+        )
     }
 }
