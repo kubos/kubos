@@ -1,4 +1,4 @@
-//! A generalized HAL for communitcating over serial ports
+//! A generalized HAL for communicating over serial ports
 extern crate serial;
 
 use std::io::prelude::*;
@@ -13,8 +13,13 @@ pub struct Connection {
 pub type UartResult<T> = Result<T, std::io::Error>;
 
 impl Connection {
-    /// Constructor to create connection from path
-    pub fn new(bus: String) -> Connection {
+    /// Constructor to creation connection with provided stream
+    pub fn new(stream: Box<Stream>) -> Connection {
+        Connection { stream }
+    }
+
+    /// Convenience constructor to create connection from bus path
+    pub fn from_path(bus: String) -> Connection {
         Connection {
             stream: Box::new(SerialStream {
                 bus,
