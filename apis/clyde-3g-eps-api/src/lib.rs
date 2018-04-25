@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#![deny(missing_docs)]
+
+//! Low level interface for interacting with a ClydeSpace 3G EPS
+
 #[macro_use]
 extern crate bitflags;
 extern crate eps_api;

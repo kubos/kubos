@@ -20,11 +20,19 @@ use commands::*;
 use telemetry;
 use failure::Error;
 
+/// Eps structure containing low level connection and functionality
+/// required for commanding and requesting telemetry from Eps device.
 pub struct Eps {
     connection: Box<Stream>,
 }
 
 impl Eps {
+    /// Constructor
+    ///
+    /// Creates new instance of Eps structure.
+    ///
+    /// # Arguments
+    /// - connection - A `Box<Stream>` used as low-level connection to eps hardware
     pub fn new(connection: Box<Stream>) -> Self {
         Eps { connection }
     }
