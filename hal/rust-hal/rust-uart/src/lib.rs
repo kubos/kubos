@@ -1,3 +1,5 @@
+#![deny(missing_docs)]
+
 //! A generalized HAL for communicating over serial ports
 extern crate serial;
 
@@ -6,6 +8,8 @@ use serial::prelude::*;
 
 /// Wrapper for UART stream
 pub struct Connection {
+
+    // Any boxed stream that allows for communication over serial ports
     pub stream: Box<Stream>,
 }
 

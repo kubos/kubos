@@ -8,12 +8,12 @@ members = [
 "apis/rust-radio-api",
 "examples/rust-service/extern-lib",
 "examples/rust-service/service",
+"hal/rust-hal/rust-uart",
 "kubos-build-helper",
 "services/comms-service",
 "services/kubos-service",
 "services/iobc-supervisor-service",
 "test/integration/linux/isis-ants",
-"hal/rust-hal/rust-uart",
 ]
 
 [profile.release]
