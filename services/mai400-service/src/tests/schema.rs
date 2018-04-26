@@ -13,23 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![allow(unused_imports)]
 
 use kubos_service::{Config, Service};
-use super::*;
 use model::*;
-use schema::*;
 use objects::*;
+use schema::*;
+use serde_json;
 use std::cell::{Cell, RefCell};
-//use std::io::{Error, ErrorKind};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use serde_json;
+use super::*;
 use tests::test_data::*;
-
-use juniper::{execute, RootNode, Value, Variables};
-use std::collections::HashMap;
 
 macro_rules! wrap {
     ($result:ident) => {{

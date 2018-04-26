@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#![allow(unused_variables)]
 
 use juniper::FieldResult;
 use mai400_api::*;
@@ -40,9 +39,6 @@ pub enum AckCommand {
     SetMode,
     Update,
 }
-
-#[derive(GraphQLObject)]
-pub struct Config {}
 
 /// Response fields for 'configureHardware' mutation
 #[derive(GraphQLObject)]
@@ -153,9 +149,6 @@ impl From<u8> for Mode {
         }
     }
 }
-
-#[derive(GraphQLObject)]
-pub struct Orientation {}
 
 #[derive(GraphQLInputObject)]
 pub struct RVInput {
