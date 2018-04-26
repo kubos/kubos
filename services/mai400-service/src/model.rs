@@ -317,7 +317,7 @@ impl Subsystem {
             let result = run!(self.mai.set_gps_time(time as u32), self.errors);
             success &= result.is_ok();
             if let Err(err) = result {
-                errors.push_str(&err);
+                errors.push_str(&format!("update(gpsTime): {}", err));
             }
         }
 
@@ -356,7 +356,10 @@ impl Subsystem {
             );
             success &= result.is_ok();
             if let Err(err) = result {
-                errors.push_str(&err);
+                if !errors.is_empty() {
+                    errors.push_str(", ");
+                }
+                errors.push_str(&format!("update(rv): {}", err));
             }
         }
 

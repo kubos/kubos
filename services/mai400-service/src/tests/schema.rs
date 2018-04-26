@@ -23,6 +23,8 @@ use objects::*;
 use std::cell::{Cell, RefCell};
 //use std::io::{Error, ErrorKind};
 use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 use serde_json;
 use tests::test_data::*;
 
@@ -40,21 +42,21 @@ macro_rules! wrap {
 macro_rules! service_new {
     ($mock:ident) => {{
             Service::new(
-            Config::new("mai400-service"),
-            Subsystem {
-                mai: MAI400 { conn: Connection { stream: Box::new($mock) } },
-                last_cmd: Cell::new(AckCommand::None),
-                errors: RefCell::new(vec![]),
-                persistent: Arc::new(ReadData {
-                        std_telem: Mutex::new(STD),
-                        irehs_telem: Mutex::new(IREHS),
-                        imu: Mutex::new(IMU),
-                        rotating: Mutex::new(ROTATING),
-                }),
-            },
-            QueryRoot,
-            MutationRoot,
-        )
+                Config::new("mai400-service"),
+                Subsystem {
+                    mai: MAI400 { conn: Connection { stream: Box::new($mock) } },
+                    last_cmd: Cell::new(AckCommand::None),
+                    errors: RefCell::new(vec![]),
+                    persistent: Arc::new(ReadData {
+                            std_telem: Mutex::new(STD),
+                            irehs_telem: Mutex::new(IREHS),
+                            imu: Mutex::new(IMU),
+                            rotating: Mutex::new(ROTATING),
+                    }),
+                },
+                QueryRoot,
+                MutationRoot,
+            )
         }}
 }
 
@@ -112,6 +114,159 @@ fn ack_noop() {
 
     let expected = json!({
             "ack": "NOOP"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn ack_control_power() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            controlPower(state: RESET) {
+                success
+            }
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let query = r#"{
+            ack
+        }"#;
+
+    let expected = json!({
+            "ack": "CONTROL_POWER"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn ack_configure_hardware() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            configureHardware
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let query = r#"{
+            ack
+        }"#;
+
+    let expected = json!({
+            "ack": "CONFIGURE_HARDWARE"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn ack_test_hardware() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            testHardware(test: INTEGRATION){
+            ... on IntegrationTestResults{
+                errors
+            }}
+        }"#;
+
+
+    service.process(mutation.to_owned());
+
+    let query = r#"{
+            ack
+        }"#;
+
+    let expected = json!({
+            "ack": "TEST_HARDWARE"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn ack_issue_raw_command() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            issueRawCommand(command: "90EB5AD501"){
+                errors,
+                success
+            }
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let query = r#"{
+            ack
+        }"#;
+
+    let expected = json!({
+            "ack": "ISSUE_RAW_COMMAND"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn ack_set_mode() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            setMode(mode: RATE_NULLING) {
+                errors,
+                success
+            }
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let query = r#"{
+            ack
+        }"#;
+
+    let expected = json!({
+            "ack": "SET_MODE"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn ack_update() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            update(gpsTime: 1198800018) {
+                errors,
+                success
+            }
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let query = r#"{
+            ack
+        }"#;
+
+    let expected = json!({
+            "ack": "UPDATE"
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
@@ -213,9 +368,58 @@ fn query_errors_clear_after_query() {
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
 }
 
-//TODO: HOW DO I TEST POWER ON???????? It involves mucking with the read thread...
 #[test]
-fn power_off() {
+fn get_power_on() {
+    let mock = mock_new!();
+
+    let data = Arc::new(ReadData {
+        std_telem: Mutex::new(STD),
+        irehs_telem: Mutex::new(IREHS),
+        imu: Mutex::new(IMU),
+        rotating: Mutex::new(ROTATING),
+    });
+
+    let data_ref = data.clone();
+
+    let service = Service::new(
+        Config::new("mai400-service"),
+        Subsystem {
+            mai: MAI400 { conn: Connection { stream: Box::new(mock) } },
+            last_cmd: Cell::new(AckCommand::None),
+            errors: RefCell::new(vec![]),
+            persistent: data,
+        },
+        QueryRoot,
+        MutationRoot,
+    );
+
+    thread::spawn(move || loop {
+        {
+            let mut local = data_ref.std_telem.lock().unwrap();
+            local.tlm_counter += 1;
+        }
+        thread::sleep(Duration::from_millis(100));
+    });
+
+    let query = r#"{
+            power{
+                state,
+                uptime
+            }
+        }"#;
+
+    let expected = json!({
+            "power": {
+                "state": "ON",
+                "uptime": 2
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn get_power_off() {
     let mock = mock_new!();
 
     let service = service_new!(mock);
@@ -658,9 +862,9 @@ fn telemetry_debug_rotating() {
                         "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
                         "magBias": [1028, 0, 0],
                         "magGain": [1.0, 1.0, 1.0],
-                        "maiSn": 1,
-                        "majorVersion": 0,
-                        "minorVersion": 0,
+                        "maiSn": 120,
+                        "majorVersion": 2,
+                        "minorVersion": 24,
                         "orbitEpoch": 511358571,
                         "orbitEpochNext": 1,
                         "orbitPropMode": 0,
@@ -955,9 +1159,9 @@ fn test_results() {
                         "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
                         "magBias": [1028, 0, 0],
                         "magGain": [1.0, 1.0, 1.0],
-                        "maiSn": 1,
-                        "majorVersion": 0,
-                        "minorVersion": 0,
+                        "maiSn": 120,
+                        "majorVersion": 2,
+                        "minorVersion": 24,
                         "orbitEpoch": 511358571,
                         "orbitEpochNext": 1,
                         "orbitPropMode": 0,
@@ -1144,7 +1348,57 @@ fn mutation_errors_multiple() {
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
 }
 
-//TODO: noop good
+#[test]
+fn noop_good() {
+    let mock = mock_new!();
+
+    let data = Arc::new(ReadData {
+        std_telem: Mutex::new(STD),
+        irehs_telem: Mutex::new(IREHS),
+        imu: Mutex::new(IMU),
+        rotating: Mutex::new(ROTATING),
+    });
+
+    let data_ref = data.clone();
+
+    let service = Service::new(
+        Config::new("mai400-service"),
+        Subsystem {
+            mai: MAI400 { conn: Connection { stream: Box::new(mock) } },
+            last_cmd: Cell::new(AckCommand::None),
+            errors: RefCell::new(vec![]),
+            persistent: data,
+        },
+        QueryRoot,
+        MutationRoot,
+    );
+
+    thread::spawn(move || loop {
+        {
+            let mut local = data_ref.std_telem.lock().unwrap();
+            local.tlm_counter += 1;
+        }
+        thread::sleep(Duration::from_millis(100));
+    });
+
+    let query = r#"mutation {
+            noop {
+                errors,
+                success
+            }
+            
+        }"#;
+
+    let expected = json!({
+            "noop": {
+                "errors": "",
+                "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
 #[test]
 fn noop_fail() {
     let mock = mock_new!();
@@ -1156,6 +1410,7 @@ fn noop_fail() {
                 errors,
                 success
             }
+            
         }"#;
 
     let expected = json!({
@@ -1196,6 +1451,56 @@ fn control_power_good() {
                 "errors": "",
                 "power": "RESET",
                 "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn control_power_bad() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            controlPower(state: OFF) {
+                errors,
+                power,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "controlPower": {
+                "errors": "Invalid power state",
+                "power": "OFF",
+                "success": false
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn control_power_fail() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            controlPower(state: RESET) {
+                errors,
+                power,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "controlPower": {
+                "errors": "Generic Error",
+                "power": "RESET",
+                "success": false
             }
     });
 
@@ -1486,9 +1791,9 @@ fn test_hardware_integration() {
                         "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
                         "magBias": [1028, 0, 0],
                         "magGain": [1.0, 1.0, 1.0],
-                        "maiSn": 1,
-                        "majorVersion": 0,
-                        "minorVersion": 0,
+                        "maiSn": 120,
+                        "majorVersion": 2,
+                        "minorVersion": 24,
                         "orbitEpoch": 511358571,
                         "orbitEpochNext": 1,
                         "orbitPropMode": 0,
@@ -1625,11 +1930,62 @@ fn issue_raw_command_bad() {
 }
 
 #[test]
-fn set_mode() {
+fn issue_raw_command_fail() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            issueRawCommand(command: "90EB5A0000000000000000000000000000000000000000000000000000000000000000000000D501"){
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "issueRawCommand": {
+                "errors": "Generic Error",
+                "success": false
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn set_mode_default() {
     let mock = mock_new!();
 
     mock.write.return_value_for(
-        (SET_MODE_AQUISITION.to_vec()),
+        (SET_MODE_ACQUISITION_DEFAULT.to_vec()),
+        Ok(()),
+    );
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            setMode(mode: RATE_NULLING) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "setMode": {
+                "errors": "",
+                "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn set_mode_good() {
+    let mock = mock_new!();
+
+    mock.write.return_value_for(
+        (SET_MODE_ACQUISITION.to_vec()),
         Ok(()),
     );
 
@@ -1653,7 +2009,137 @@ fn set_mode() {
 }
 
 #[test]
-fn update_gps() {
+fn set_mode_fail() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            setMode(mode: RATE_NULLING, qbiCmd: [2, 3, 4, 5]) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "setMode": {
+                "errors": "Generic Error",
+                "success": false
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn set_mode_normal_sun() {
+    let mock = mock_new!();
+
+    mock.write.return_value_for(
+        (SET_MODE_NORMAL_SUN.to_vec()),
+        Ok(()),
+    );
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            setMode(mode: NORMAL_SUN, sunAngleEnable: true, sunRotAngle: 2.2) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "setMode": {
+                "errors": "",
+                "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn set_mode_latlong_sun() {
+    let mock = mock_new!();
+
+    mock.write.return_value_for(
+        (SET_MODE_LATLONG_SUN.to_vec()),
+        Ok(()),
+    );
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            setMode(mode: LAT_LONG_SUN, sunAngleEnable: true, sunRotAngle: 2.2) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "setMode": {
+                "errors": "",
+                "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn set_mode_sun_default() {
+    let mock = mock_new!();
+
+    mock.write.return_value_for(
+        (SET_MODE_SUN_DEFAULT.to_vec()),
+        Ok(()),
+    );
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            setMode(mode: LAT_LONG_SUN) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "setMode": {
+                "errors": "",
+                "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn set_mode_sun_fail() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            setMode(mode: LAT_LONG_SUN) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "setMode": {
+                "errors": "Generic Error",
+                "success": false
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn update_gps_good() {
     let mock = mock_new!();
 
     mock.write.return_value_for((SET_GPS_TIME.to_vec()), Ok(()));
@@ -1678,7 +2164,30 @@ fn update_gps() {
 }
 
 #[test]
-fn update_rv() {
+fn update_gps_fail() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            update(gpsTime: 1198800018) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "update": {
+                "errors": "update(gpsTime): Generic Error",
+                "success": false
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn update_rv_good() {
     let mock = mock_new!();
 
     mock.write.return_value_for((SET_RV.to_vec()), Ok(()));
@@ -1696,6 +2205,128 @@ fn update_rv() {
             "update": {
                 "errors": "",
                 "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn update_rv_fail() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            update(rv: {eciPos: [1.1, 2.2, 3.3], eciVel: [4.4, 5.5, 6.6], timeEpoch: 1198800018}) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "update": {
+                "errors": "update(rv): Generic Error",
+                "success": false
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn update_both_both_good() {
+    let mock = mock_new!();
+
+    mock.write.return_value_for((SET_GPS_TIME.to_vec()), Ok(()));
+    mock.write.return_value_for((SET_RV.to_vec()), Ok(()));
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            update(gpsTime: 1198800018, rv: {eciPos: [1.1, 2.2, 3.3], eciVel: [4.4, 5.5, 6.6], timeEpoch: 1198800018}) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "update": {
+                "errors": "",
+                "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn update_both_both_fail() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            update(gpsTime: 1198800018, rv: {eciPos: [1.1, 2.2, 3.3], eciVel: [4.4, 5.5, 6.6], timeEpoch: 1198800018}) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "update": {
+                "errors": "update(gpsTime): Generic Error, update(rv): Generic Error",
+                "success": false
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn update_both_gps_fail() {
+    let mock = mock_new!();
+
+    mock.write.return_value_for((SET_RV.to_vec()), Ok(()));
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            update(gpsTime: 1198800018, rv: {eciPos: [1.1, 2.2, 3.3], eciVel: [4.4, 5.5, 6.6], timeEpoch: 1198800018}) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "update": {
+                "errors": "update(gpsTime): Generic Error",
+                "success": false
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn update_both_rv_fail() {
+    let mock = mock_new!();
+
+    mock.write.return_value_for((SET_GPS_TIME.to_vec()), Ok(()));
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            update(gpsTime: 1198800018, rv: {eciPos: [1.1, 2.2, 3.3], eciVel: [4.4, 5.5, 6.6], timeEpoch: 1198800018}) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "update": {
+                "errors": "update(rv): Generic Error",
+                "success": false
             }
     });
 
