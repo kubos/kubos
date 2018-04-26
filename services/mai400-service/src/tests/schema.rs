@@ -118,7 +118,7 @@ fn ack_noop() {
 }
 
 #[test]
-fn errors_empty() {
+fn query_errors_empty() {
     let mock = mock_new!();
 
     let service = service_new!(mock);
@@ -135,7 +135,7 @@ fn errors_empty() {
 }
 
 #[test]
-fn errors_single() {
+fn query_errors_single() {
     let mock = mock_new!();
 
     let service = service_new!(mock);
@@ -160,7 +160,7 @@ fn errors_single() {
 }
 
 #[test]
-fn errors_multiple() {
+fn query_errors_multiple() {
     let mock = mock_new!();
 
     let service = service_new!(mock);
@@ -186,7 +186,7 @@ fn errors_multiple() {
 }
 
 #[test]
-fn errors_clear_after_query() {
+fn query_errors_clear_after_query() {
     let mock = mock_new!();
 
     let service = service_new!(mock);
@@ -254,9 +254,767 @@ fn config() {
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
 }
 
-// TODO: telemetry
+// telemetry: nominal, debug {rotating, irehs, imu}
+#[test]
+fn telemetry_nominal() {
+    let mock = mock_new!();
 
-// TODO: testResults
+    let service = service_new!(mock);
+
+    let query = r#"{
+            telemetry{
+                nominal{
+                    acsMode,
+                    angleToGo,
+                    bd,
+                    cmdInvalidChksumCntr,
+                    cmdInvalidCntr,
+                    cmdValidCntr,
+                    css,
+                    eclipseFlag,
+                    gcRwaTorqueCmd,
+                    gcTorqueCoilCmd,
+                    gpsTime,
+                    iBFieldMeas,
+                    lastCommand,
+                    nb,
+                    neci
+                    omegaB,
+                    qError,
+                    qboCmd,
+                    qboHat,
+                    rwaTorqueCmd,
+                    rwsSpeedCmd,
+                    rwsSpeedTach,
+                    sunVecB,
+                    timeSubsec,
+                    torqueCoilCmd,
+                }
+            }
+        }"#;
+
+    let expected = json!({
+            "telemetry": {
+                "nominal": {
+                    "acsMode": "TEST_MODE",
+                    "angleToGo": 0.0,
+                    "bd": [-0.0000017433042103220942, 1.2922178882490699e-7 ,-9.995264917961322e-7],
+                    "cmdInvalidChksumCntr": 0,
+                    "cmdInvalidCntr": 0,
+                    "cmdValidCntr": 2,
+                    "css": [0, 4, 1, 0, 0, 4],
+                    "eclipseFlag": 1,
+                    "gcRwaTorqueCmd": [0, 0, 0],
+                    "gcTorqueCoilCmd": [127, -15, 118],
+                    "gpsTime": 1198800019,
+                    "iBFieldMeas": [-1369, 105, -785],
+                    "lastCommand": 0x44,
+                    "nb": [31769, 31769, 31769],
+                    "neci": [-32754, -627, -627],
+                    "omegaB": [0.0, 0.0, 0.0],
+                    "qError": [0, 0, 0, 32767],
+                    "qboCmd": [0, 0, 0, 32767],
+                    "qboHat": [0, 0, 0, 32767],
+                    "rwaTorqueCmd": [0.0, 0.0, 0.0],
+                    "rwsSpeedCmd": [0, 0, 0],
+                    "rwsSpeedTach": [0, 0, 0],
+                    "sunVecB": [-32767, -32767, -32767],
+                    "timeSubsec": 0,
+                    "torqueCoilCmd": [0.1080000028014183, -0.012922178953886032, 0.09995264559984207]
+                }
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn telemetry_debug_irehs() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"{
+            telemetry{
+                debug{
+                    irehs{
+                        dipAngleA,
+                        dipAngleB,
+                        solutionDegraded,
+                        tempA,
+                        tempB,
+                        thermopileStructA{
+                            dipAngle,
+                            earthLimb{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            earthRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            spaceRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            wideFov{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                        },
+                        thermopileStructB{
+                            dipAngle,
+                            earthLimb{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            earthRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            spaceRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            wideFov{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                        },
+                        thermopilesA,
+                        thermopilesB,
+                    }
+                }
+            }
+        }"#;
+
+    let expected = json!({
+            "telemetry": {
+                "debug": {
+                    "irehs": {
+                        "dipAngleA": 0,
+                        "dipAngleB": 0,
+                        "solutionDegraded": [
+                            ["NO_COMM"],
+                            ["NO_COMM"],
+                            ["DIP_ANGLE_LIMIT"],
+                            ["DIP_ANGLE_LIMIT"],
+                            ["NO_COMM"],
+                            ["NO_COMM"],
+                            ["DIP_ANGLE_LIMIT"],
+                            ["DIP_ANGLE_LIMIT"],
+                        ],
+                        "tempA": [0, 0, 0, 0],
+                        "tempB": [0, 0, 0, 0],
+                        "thermopileStructA": {
+                            "dipAngle": 0,
+                            "earthLimb": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "earthRef": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "spaceRef": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "wideFov": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                        },
+                        "thermopileStructB": {
+                            "dipAngle": 0,
+                            "earthLimb": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "earthRef": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "spaceRef": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "wideFov": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                        },
+                        "thermopilesA": [0, 0, 0, 0],
+                        "thermopilesB": [0, 0, 0, 0],
+                    }
+                }
+            }
+    });
+
+    let result = service.process(query.to_owned());
+
+    assert_eq!(result, wrap!(expected));
+
+    let mut actual: serde_json::Value = serde_json::from_slice(&result.as_bytes()).unwrap();
+    match serde_json::from_value::<String>(actual["msg"].clone()) {
+        Ok(msg) => {
+            actual = serde_json::from_str(&msg).unwrap();
+        }
+        _ => panic!("Errors returned from query"),
+    }
+
+    // Make sure derived structure values matche original values from arrays
+
+    let dip_angle_a = &actual["telemetry"]["debug"]["irehs"]["dipAngleA"];
+    let dip_angle_b = &actual["telemetry"]["debug"]["irehs"]["dipAngleB"];
+    let solution_degraded = &actual["telemetry"]["debug"]["irehs"]["solutionDegraded"];
+    let temp_a = &actual["telemetry"]["debug"]["irehs"]["tempA"];
+    let temp_b = &actual["telemetry"]["debug"]["irehs"]["tempB"];
+    let thermopiles_a = &actual["telemetry"]["debug"]["irehs"]["thermopilesA"];
+    let thermopiles_b = &actual["telemetry"]["debug"]["irehs"]["thermopilesB"];
+    let struct_a = &actual["telemetry"]["debug"]["irehs"]["thermopileStructA"];
+    let struct_b = &actual["telemetry"]["debug"]["irehs"]["thermopileStructB"];
+
+    assert_eq!(&struct_a["dipAngle"], dip_angle_a);
+    assert_eq!(struct_a["earthLimb"]["adc"], thermopiles_a[0]);
+    assert_eq!(struct_a["earthLimb"]["flags"], solution_degraded[0]);
+    assert_eq!(struct_a["earthLimb"]["temp"], temp_a[0]);
+    assert_eq!(struct_a["earthRef"]["adc"], thermopiles_a[1]);
+    assert_eq!(struct_a["earthRef"]["flags"], solution_degraded[1]);
+    assert_eq!(struct_a["earthRef"]["temp"], temp_a[1]);
+    assert_eq!(struct_a["spaceRef"]["adc"], thermopiles_a[2]);
+    assert_eq!(struct_a["spaceRef"]["flags"], solution_degraded[2]);
+    assert_eq!(struct_a["spaceRef"]["temp"], temp_a[2]);
+    assert_eq!(struct_a["wideFov"]["adc"], thermopiles_a[3]);
+    assert_eq!(struct_a["wideFov"]["flags"], solution_degraded[3]);
+    assert_eq!(struct_a["wideFov"]["temp"], temp_a[3]);
+
+    assert_eq!(&struct_b["dipAngle"], dip_angle_b);
+    assert_eq!(struct_b["earthLimb"]["adc"], thermopiles_b[0]);
+    assert_eq!(struct_b["earthLimb"]["flags"], solution_degraded[4]);
+    assert_eq!(struct_b["earthLimb"]["temp"], temp_b[0]);
+    assert_eq!(struct_b["earthRef"]["adc"], thermopiles_b[1]);
+    assert_eq!(struct_b["earthRef"]["flags"], solution_degraded[5]);
+    assert_eq!(struct_b["earthRef"]["temp"], temp_b[1]);
+    assert_eq!(struct_b["spaceRef"]["adc"], thermopiles_b[2]);
+    assert_eq!(struct_b["spaceRef"]["flags"], solution_degraded[6]);
+    assert_eq!(struct_b["spaceRef"]["temp"], temp_b[2]);
+    assert_eq!(struct_b["wideFov"]["adc"], thermopiles_b[3]);
+    assert_eq!(struct_b["wideFov"]["flags"], solution_degraded[7]);
+    assert_eq!(struct_b["wideFov"]["temp"], temp_b[3]);
+}
+
+#[test]
+fn telemetry_debug_imu() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"{
+            telemetry{
+                debug{
+                    rawImu{
+                        accel,
+                        gyro,
+                        gyroTemp
+                    }
+                }
+            }
+        }"#;
+
+    let expected = json!({
+            "telemetry": {
+                "debug": {
+                    "rawImu": {
+                        "accel": [1, -5, 272],
+                        "gyro": [38, 29, 22],
+                        "gyroTemp": 19,
+                    }
+                }
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn telemetry_debug_rotating() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"{
+            telemetry{
+                debug{
+                    rotating{
+                        acsOpMode,
+                        adsOpMode,
+                        attDetMode,
+                        bFieldIgrf,
+                        cosSunMagAlignThresh,
+                        cssBias,
+                        cssGain,
+                        dipoleGain,
+                        kBdot,
+                        kUnload,
+                        kd,
+                        keplerElem{
+                            argParigee,
+                            eccentricity,
+                            inclination,
+                            raan,
+                            semiMajorAxis,
+                            trueAnomoly
+                        },
+                        kp,
+                        magBias,
+                        magGain,
+                        maiSn,
+                        majorVersion,
+                        minorVersion,
+                        orbitEpoch,
+                        orbitEpochNext,
+                        orbitPropMode,
+                        procResetCntr,
+                        qSat,
+                        qbXDipoleGain,
+                        qbXFilterGain,
+                        qbXWheelSpeed,
+                        rwaTrqMax,
+                        rwsMotorCurrent,
+                        rwsMotorTemp,
+                        rwsPress,
+                        rwsResetCntr,
+                        rwsVolt,
+                        scPosEci,
+                        scPosEciEpoch,
+                        scVelEci,
+                        scVelEciEpoch,
+                        sunMagAligned,
+                        sunVecEph,
+                        trueAnomolyEpoch,
+                        unloadAngThresh,
+                        wheelSpeedBias,
+                    }
+                }
+            }
+        }"#;
+
+    let expected = json!({
+            "telemetry": {
+                "debug": {
+                    "rotating": {
+                    	"acsOpMode": 169,
+                        "adsOpMode": 0,
+                        "attDetMode": 24,
+                        "bFieldIgrf": [-0.000015042761333461386, 2.054659944406012e-7, 0.0000222020080400398],
+                        "cosSunMagAlignThresh": 0.9900000095367432,
+                        "cssBias": [0, 0, 0, 0, 0, 0],
+                        "cssGain": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+                        "dipoleGain": [1.0, 1.0, 1.0],
+                        "kBdot": [-100000.0, -100000.0, -100000.0],
+                        "kUnload": [-5000000.0, -5000000.0, -5000000.0],
+                        "kd": [-12.100000381469727, -12.0, -4.0],
+                        "keplerElem": {
+                        	"argParigee": 0.0,
+                        	"eccentricity": 0.0,
+                        	"inclination": 45.0,
+                        	"raan": 0.0,
+                        	"semiMajorAxis": 6787.47021484375,
+                        	"trueAnomoly": 0.0,
+                        },
+                        "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
+                        "magBias": [1028, 0, 0],
+                        "magGain": [1.0, 1.0, 1.0],
+                        "maiSn": 1,
+                        "majorVersion": 0,
+                        "minorVersion": 0,
+                        "orbitEpoch": 511358571,
+                        "orbitEpochNext": 1,
+                        "orbitPropMode": 0,
+                        "procResetCntr": 4,
+                        "qSat": 0.30000001192092898,
+                        "qbXDipoleGain": 1.0,
+                        "qbXFilterGain": 1.0,
+                        "qbXWheelSpeed": 0,
+                        "rwaTrqMax": 0.20000000298023225,
+                        "rwsMotorCurrent": [4, 4, 4004],
+                        "rwsMotorTemp": 12,
+                        "rwsPress": 0,
+                        "rwsResetCntr": [1, 1, 2],
+                        "rwsVolt": 0,
+                        "scPosEci": [6720.96533203125, 669.7313842773438, 669.7247314453125],
+                        "scPosEciEpoch": [6787.47021484375, 0.0, 0.0],
+                        "scVelEci": [-1.0794577598571778, 5.364816188812256, 5.364662170410156],
+                        "scVelEciEpoch": [0.0, 5.418765068054199, 5.418765068054199],
+                        "sunMagAligned": 0,
+                        "sunVecEph": [0.1826000213623047, -0.9020766615867615, -0.39104345440864565],
+                        "trueAnomolyEpoch": 0.0,
+                        "unloadAngThresh": 0.05000000074505806,
+                        "wheelSpeedBias": [16256, 16256, 16256],
+                    }
+                }
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn test_results() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"{
+            testResults{
+                success,
+                telemetryDebug{
+                    irehs{
+                        dipAngleA,
+                        dipAngleB,
+                        solutionDegraded,
+                        tempA,
+                        tempB,
+                        thermopileStructA{
+                            dipAngle,
+                            earthLimb{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            earthRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            spaceRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            wideFov{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                        },
+                        thermopileStructB{
+                            dipAngle,
+                            earthLimb{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            earthRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            spaceRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            wideFov{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                        },
+                        thermopilesA,
+                        thermopilesB,
+                    },
+                    rawImu{
+                        accel,
+                        gyro,
+                        gyroTemp
+                    },
+                    rotating{
+                        acsOpMode,
+                        adsOpMode,
+                        attDetMode,
+                        bFieldIgrf,
+                        cosSunMagAlignThresh,
+                        cssBias,
+                        cssGain,
+                        dipoleGain,
+                        kBdot,
+                        kUnload,
+                        kd,
+                        keplerElem{
+                            argParigee,
+                            eccentricity,
+                            inclination,
+                            raan,
+                            semiMajorAxis,
+                            trueAnomoly
+                        },
+                        kp,
+                        magBias,
+                        magGain,
+                        maiSn,
+                        majorVersion,
+                        minorVersion,
+                        orbitEpoch,
+                        orbitEpochNext,
+                        orbitPropMode,
+                        procResetCntr,
+                        qSat,
+                        qbXDipoleGain,
+                        qbXFilterGain,
+                        qbXWheelSpeed,
+                        rwaTrqMax,
+                        rwsMotorCurrent,
+                        rwsMotorTemp,
+                        rwsPress,
+                        rwsResetCntr,
+                        rwsVolt,
+                        scPosEci,
+                        scPosEciEpoch,
+                        scVelEci,
+                        scVelEciEpoch,
+                        sunMagAligned,
+                        sunVecEph,
+                        trueAnomolyEpoch,
+                        unloadAngThresh,
+                        wheelSpeedBias,
+                    }
+                },
+                telemetryNominal{
+                    acsMode,
+                    angleToGo,
+                    bd,
+                    cmdInvalidChksumCntr,
+                    cmdInvalidCntr,
+                    cmdValidCntr,
+                    css,
+                    eclipseFlag,
+                    gcRwaTorqueCmd,
+                    gcTorqueCoilCmd,
+                    gpsTime,
+                    iBFieldMeas,
+                    lastCommand,
+                    nb,
+                    neci
+                    omegaB,
+                    qError,
+                    qboCmd,
+                    qboHat,
+                    rwaTorqueCmd,
+                    rwsSpeedCmd,
+                    rwsSpeedTach,
+                    sunVecB,
+                    timeSubsec,
+                    torqueCoilCmd,
+                }
+            }
+        }"#;
+
+    let expected = json!({
+            "testResults": {
+                "success": true,
+                "telemetryDebug": {
+                    "irehs": {
+                        "dipAngleA": 0,
+                        "dipAngleB": 0,
+                        "solutionDegraded": [
+                            ["NO_COMM"],
+                            ["NO_COMM"],
+                            ["DIP_ANGLE_LIMIT"],
+                            ["DIP_ANGLE_LIMIT"],
+                            ["NO_COMM"],
+                            ["NO_COMM"],
+                            ["DIP_ANGLE_LIMIT"],
+                            ["DIP_ANGLE_LIMIT"],
+                        ],
+                        "tempA": [0, 0, 0, 0],
+                        "tempB": [0, 0, 0, 0],
+                        "thermopileStructA": {
+                            "dipAngle": 0,
+                            "earthLimb": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "earthRef": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "spaceRef": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "wideFov": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                        },
+                        "thermopileStructB": {
+                            "dipAngle": 0,
+                            "earthLimb": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "earthRef": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "spaceRef": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "wideFov": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                        },
+                        "thermopilesA": [0, 0, 0, 0],
+                        "thermopilesB": [0, 0, 0, 0],
+                    },
+                    "rawImu": {
+                        "accel": [1, -5, 272],
+                        "gyro": [38, 29, 22],
+                        "gyroTemp": 19,
+                    },
+                    "rotating": {
+                    	"acsOpMode": 169,
+                        "adsOpMode": 0,
+                        "attDetMode": 24,
+                        "bFieldIgrf": [-0.000015042761333461386, 2.054659944406012e-7, 0.0000222020080400398],
+                        "cosSunMagAlignThresh": 0.9900000095367432,
+                        "cssBias": [0, 0, 0, 0, 0, 0],
+                        "cssGain": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+                        "dipoleGain": [1.0, 1.0, 1.0],
+                        "kBdot": [-100000.0, -100000.0, -100000.0],
+                        "kUnload": [-5000000.0, -5000000.0, -5000000.0],
+                        "kd": [-12.100000381469727, -12.0, -4.0],
+                        "keplerElem": {
+                        	"argParigee": 0.0,
+                        	"eccentricity": 0.0,
+                        	"inclination": 45.0,
+                        	"raan": 0.0,
+                        	"semiMajorAxis": 6787.47021484375,
+                        	"trueAnomoly": 0.0,
+                        },
+                        "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
+                        "magBias": [1028, 0, 0],
+                        "magGain": [1.0, 1.0, 1.0],
+                        "maiSn": 1,
+                        "majorVersion": 0,
+                        "minorVersion": 0,
+                        "orbitEpoch": 511358571,
+                        "orbitEpochNext": 1,
+                        "orbitPropMode": 0,
+                        "procResetCntr": 4,
+                        "qSat": 0.30000001192092898,
+                        "qbXDipoleGain": 1.0,
+                        "qbXFilterGain": 1.0,
+                        "qbXWheelSpeed": 0,
+                        "rwaTrqMax": 0.20000000298023225,
+                        "rwsMotorCurrent": [4, 4, 4004],
+                        "rwsMotorTemp": 12,
+                        "rwsPress": 0,
+                        "rwsResetCntr": [1, 1, 2],
+                        "rwsVolt": 0,
+                        "scPosEci": [6720.96533203125, 669.7313842773438, 669.7247314453125],
+                        "scPosEciEpoch": [6787.47021484375, 0.0, 0.0],
+                        "scVelEci": [-1.0794577598571778, 5.364816188812256, 5.364662170410156],
+                        "scVelEciEpoch": [0.0, 5.418765068054199, 5.418765068054199],
+                        "sunMagAligned": 0,
+                        "sunVecEph": [0.1826000213623047, -0.9020766615867615, -0.39104345440864565],
+                        "trueAnomolyEpoch": 0.0,
+                        "unloadAngThresh": 0.05000000074505806,
+                        "wheelSpeedBias": [16256, 16256, 16256],
+                    }
+                },
+                "telemetryNominal": {
+                    "acsMode": "TEST_MODE",
+                    "angleToGo": 0.0,
+                    "bd": [-0.0000017433042103220942, 1.2922178882490699e-7 ,-9.995264917961322e-7],
+                    "cmdInvalidChksumCntr": 0,
+                    "cmdInvalidCntr": 0,
+                    "cmdValidCntr": 2,
+                    "css": [0, 4, 1, 0, 0, 4],
+                    "eclipseFlag": 1,
+                    "gcRwaTorqueCmd": [0, 0, 0],
+                    "gcTorqueCoilCmd": [127, -15, 118],
+                    "gpsTime": 1198800019,
+                    "iBFieldMeas": [-1369, 105, -785],
+                    "lastCommand": 0x44,
+                    "nb": [31769, 31769, 31769],
+                    "neci": [-32754, -627, -627],
+                    "omegaB": [0.0, 0.0, 0.0],
+                    "qError": [0, 0, 0, 32767],
+                    "qboCmd": [0, 0, 0, 32767],
+                    "qboHat": [0, 0, 0, 32767],
+                    "rwaTorqueCmd": [0.0, 0.0, 0.0],
+                    "rwsSpeedCmd": [0, 0, 0],
+                    "rwsSpeedTach": [0, 0, 0],
+                    "sunVecB": [-32767, -32767, -32767],
+                    "timeSubsec": 0,
+                    "torqueCoilCmd": [0.1080000028014183, -0.012922178953886032, 0.09995264559984207]
+                }
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
 
 #[test]
 fn mode() {
@@ -317,7 +1075,74 @@ fn spin() {
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
 }
 
-//TODO: errors (mutation)
+#[test]
+fn mutation_errors_empty() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            errors
+        }"#;
+
+    let expected = json!({
+            "errors": []
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn mutation_errors_single() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let noop = r#"mutation {
+            noop {
+                success
+            },
+            errors
+        }"#;
+
+    service.process(noop.to_owned());
+
+    let query = r#"{
+            errors
+        }"#;
+
+    let expected = json!({
+            "errors": ["Noop: Unable to communicate with MAI400"]
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn mutation_errors_multiple() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let noop = r#"mutation {
+            noop {
+                success
+            }
+        }"#;
+
+    service.process(noop.to_owned());
+    service.process(noop.to_owned());
+
+    let query = r#"{
+            errors
+        }"#;
+
+    let expected = json!({
+            "errors": ["Noop: Unable to communicate with MAI400", "Noop: Unable to communicate with MAI400"]
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
 
 //TODO: noop good
 #[test]
@@ -394,7 +1219,333 @@ fn configure_hardware() {
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
 }
 
-//TODO: testHardware(integration)
+
+#[test]
+fn test_hardware_integration() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            testHardware(test: INTEGRATION){
+            ... on IntegrationTestResults{
+                errors,
+                success,
+                telemetryDebug{
+                    irehs{
+                        dipAngleA,
+                        dipAngleB,
+                        solutionDegraded,
+                        tempA,
+                        tempB,
+                        thermopileStructA{
+                            dipAngle,
+                            earthLimb{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            earthRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            spaceRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            wideFov{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                        },
+                        thermopileStructB{
+                            dipAngle,
+                            earthLimb{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            earthRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            spaceRef{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                            wideFov{
+                                adc,
+                                errors,
+                                flags,
+                                temp
+                            },
+                        },
+                        thermopilesA,
+                        thermopilesB,
+                    },
+                    rawImu{
+                        accel,
+                        gyro,
+                        gyroTemp
+                    },
+                    rotating{
+                        acsOpMode,
+                        adsOpMode,
+                        attDetMode,
+                        bFieldIgrf,
+                        cosSunMagAlignThresh,
+                        cssBias,
+                        cssGain,
+                        dipoleGain,
+                        kBdot,
+                        kUnload,
+                        kd,
+                        keplerElem{
+                            argParigee,
+                            eccentricity,
+                            inclination,
+                            raan,
+                            semiMajorAxis,
+                            trueAnomoly
+                        },
+                        kp,
+                        magBias,
+                        magGain,
+                        maiSn,
+                        majorVersion,
+                        minorVersion,
+                        orbitEpoch,
+                        orbitEpochNext,
+                        orbitPropMode,
+                        procResetCntr,
+                        qSat,
+                        qbXDipoleGain,
+                        qbXFilterGain,
+                        qbXWheelSpeed,
+                        rwaTrqMax,
+                        rwsMotorCurrent,
+                        rwsMotorTemp,
+                        rwsPress,
+                        rwsResetCntr,
+                        rwsVolt,
+                        scPosEci,
+                        scPosEciEpoch,
+                        scVelEci,
+                        scVelEciEpoch,
+                        sunMagAligned,
+                        sunVecEph,
+                        trueAnomolyEpoch,
+                        unloadAngThresh,
+                        wheelSpeedBias,
+                    }
+                },
+                telemetryNominal{
+                    acsMode,
+                    angleToGo,
+                    bd,
+                    cmdInvalidChksumCntr,
+                    cmdInvalidCntr,
+                    cmdValidCntr,
+                    css,
+                    eclipseFlag,
+                    gcRwaTorqueCmd,
+                    gcTorqueCoilCmd,
+                    gpsTime,
+                    iBFieldMeas,
+                    lastCommand,
+                    nb,
+                    neci
+                    omegaB,
+                    qError,
+                    qboCmd,
+                    qboHat,
+                    rwaTorqueCmd,
+                    rwsSpeedCmd,
+                    rwsSpeedTach,
+                    sunVecB,
+                    timeSubsec,
+                    torqueCoilCmd,
+                }
+            }}
+        }"#;
+
+    let expected = json!({
+            "testHardware": {
+                "errors": "",
+                "success": true,
+                "telemetryDebug": {
+                    "irehs": {
+                        "dipAngleA": 0,
+                        "dipAngleB": 0,
+                        "solutionDegraded": [
+                            ["NO_COMM"],
+                            ["NO_COMM"],
+                            ["DIP_ANGLE_LIMIT"],
+                            ["DIP_ANGLE_LIMIT"],
+                            ["NO_COMM"],
+                            ["NO_COMM"],
+                            ["DIP_ANGLE_LIMIT"],
+                            ["DIP_ANGLE_LIMIT"],
+                        ],
+                        "tempA": [0, 0, 0, 0],
+                        "tempB": [0, 0, 0, 0],
+                        "thermopileStructA": {
+                            "dipAngle": 0,
+                            "earthLimb": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "earthRef": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "spaceRef": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "wideFov": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                        },
+                        "thermopileStructB": {
+                            "dipAngle": 0,
+                            "earthLimb": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "earthRef": {
+                                "adc": 0,
+                                "flags": ["NO_COMM"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "spaceRef": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                            "wideFov": {
+                                "adc": 0,
+                                "flags": ["DIP_ANGLE_LIMIT"],
+                                "errors": true,
+                                "temp": 0
+                            },
+                        },
+                        "thermopilesA": [0, 0, 0, 0],
+                        "thermopilesB": [0, 0, 0, 0],
+                    },
+                    "rawImu": {
+                        "accel": [1, -5, 272],
+                        "gyro": [38, 29, 22],
+                        "gyroTemp": 19,
+                    },
+                    "rotating": {
+                    	"acsOpMode": 169,
+                        "adsOpMode": 0,
+                        "attDetMode": 24,
+                        "bFieldIgrf": [-0.000015042761333461386, 2.054659944406012e-7, 0.0000222020080400398],
+                        "cosSunMagAlignThresh": 0.9900000095367432,
+                        "cssBias": [0, 0, 0, 0, 0, 0],
+                        "cssGain": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+                        "dipoleGain": [1.0, 1.0, 1.0],
+                        "kBdot": [-100000.0, -100000.0, -100000.0],
+                        "kUnload": [-5000000.0, -5000000.0, -5000000.0],
+                        "kd": [-12.100000381469727, -12.0, -4.0],
+                        "keplerElem": {
+                        	"argParigee": 0.0,
+                        	"eccentricity": 0.0,
+                        	"inclination": 45.0,
+                        	"raan": 0.0,
+                        	"semiMajorAxis": 6787.47021484375,
+                        	"trueAnomoly": 0.0,
+                        },
+                        "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
+                        "magBias": [1028, 0, 0],
+                        "magGain": [1.0, 1.0, 1.0],
+                        "maiSn": 1,
+                        "majorVersion": 0,
+                        "minorVersion": 0,
+                        "orbitEpoch": 511358571,
+                        "orbitEpochNext": 1,
+                        "orbitPropMode": 0,
+                        "procResetCntr": 4,
+                        "qSat": 0.30000001192092898,
+                        "qbXDipoleGain": 1.0,
+                        "qbXFilterGain": 1.0,
+                        "qbXWheelSpeed": 0,
+                        "rwaTrqMax": 0.20000000298023225,
+                        "rwsMotorCurrent": [4, 4, 4004],
+                        "rwsMotorTemp": 12,
+                        "rwsPress": 0,
+                        "rwsResetCntr": [1, 1, 2],
+                        "rwsVolt": 0,
+                        "scPosEci": [6720.96533203125, 669.7313842773438, 669.7247314453125],
+                        "scPosEciEpoch": [6787.47021484375, 0.0, 0.0],
+                        "scVelEci": [-1.0794577598571778, 5.364816188812256, 5.364662170410156],
+                        "scVelEciEpoch": [0.0, 5.418765068054199, 5.418765068054199],
+                        "sunMagAligned": 0,
+                        "sunVecEph": [0.1826000213623047, -0.9020766615867615, -0.39104345440864565],
+                        "trueAnomolyEpoch": 0.0,
+                        "unloadAngThresh": 0.05000000074505806,
+                        "wheelSpeedBias": [16256, 16256, 16256],
+                    }
+                },
+                "telemetryNominal": {
+                    "acsMode": "TEST_MODE",
+                    "angleToGo": 0.0,
+                    "bd": [-0.0000017433042103220942, 1.2922178882490699e-7 ,-9.995264917961322e-7],
+                    "cmdInvalidChksumCntr": 0,
+                    "cmdInvalidCntr": 0,
+                    "cmdValidCntr": 2,
+                    "css": [0, 4, 1, 0, 0, 4],
+                    "eclipseFlag": 1,
+                    "gcRwaTorqueCmd": [0, 0, 0],
+                    "gcTorqueCoilCmd": [127, -15, 118],
+                    "gpsTime": 1198800019,
+                    "iBFieldMeas": [-1369, 105, -785],
+                    "lastCommand": 0x44,
+                    "nb": [31769, 31769, 31769],
+                    "neci": [-32754, -627, -627],
+                    "omegaB": [0.0, 0.0, 0.0],
+                    "qError": [0, 0, 0, 32767],
+                    "qboCmd": [0, 0, 0, 32767],
+                    "qboHat": [0, 0, 0, 32767],
+                    "rwaTorqueCmd": [0.0, 0.0, 0.0],
+                    "rwsSpeedCmd": [0, 0, 0],
+                    "rwsSpeedTach": [0, 0, 0],
+                    "sunVecB": [-32767, -32767, -32767],
+                    "timeSubsec": 0,
+                    "torqueCoilCmd": [0.1080000028014183, -0.012922178953886032, 0.09995264559984207]
+                }
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
 
 #[test]
 fn test_hardware_hardware() {
@@ -423,7 +1574,55 @@ fn test_hardware_hardware() {
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
 }
 
-//TODO: issueRawCommand
+#[test]
+fn issue_raw_command_good() {
+    let mock = mock_new!();
+
+    mock.write.return_value(Ok(()));
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            issueRawCommand(command: "90EB5A0000000000000000000000000000000000000000000000000000000000000000000000D501"){
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "issueRawCommand": {
+                "errors": "",
+                "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn issue_raw_command_bad() {
+    let mock = mock_new!();
+
+    mock.write.return_value(Ok(()));
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            issueRawCommand(command: "90EB5AD501"){
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "issueRawCommand": {
+                "errors": "Bad Command Length",
+                "success": false
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
 
 #[test]
 fn set_mode() {
