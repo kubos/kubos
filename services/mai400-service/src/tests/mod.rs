@@ -15,8 +15,7 @@
 //
 
 use double;
-use super::*;
-use serial_comm::*;
+use mai400_api::*;
 
 #[macro_export]
 macro_rules! mock_new {
@@ -56,6 +55,5 @@ fn mock_test() {
     );
 }
 
-mod tx;
-mod rx;
-mod rotating;
+mod test_data;
+mod schema;

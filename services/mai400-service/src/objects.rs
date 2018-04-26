@@ -29,7 +29,6 @@ pub struct GenericResponse {
 /// Return field for 'ack' query
 ///
 /// Indicates last mutation executed by the service
-// Future work: Actually implement this. Rust lifetimes are hard...
 #[derive(GraphQLEnum, Clone, Copy)]
 pub enum AckCommand {
     None,

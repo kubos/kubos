@@ -13,14 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#![allow(unused_variables)]
-#![allow(dead_code)]
 
 use failure::Fail;
 use mai400_api::*;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::io::{Error, ErrorKind};
-//use std::str;
 use std::sync::{Arc, Mutex};
 use std::thread::{spawn, sleep};
 use std::time::Duration;
@@ -46,7 +43,6 @@ impl ReadData {
 
     pub fn update_std(&self, telem: StandardTelemetry) {
         {
-            //TODO: change to try_lock
             let mut local = self.std_telem.lock().unwrap();
             *local = telem.clone();
         }
@@ -70,28 +66,25 @@ pub fn read_thread(bus: String, data: Arc<ReadData>) -> MAIResult<()> {
     let connection = Connection::new(bus);
     let mai = MAI400::new(connection);
 
-    println!("Read thread started");
     loop {
         // TODO: Error handling and reporting
         let (std, imu, irehs) = mai.get_message().unwrap();
 
         if let Some(telem) = std {
             data.update_std(telem);
-            //println!("Got StdTelem");
         }
         if let Some(telem) = imu {
             data.update_imu(telem);
-            //println!("Got RawIMU");
         }
         if let Some(telem) = irehs {
             data.update_irehs(telem);
-            //println!("Got IREHS");
         }
     }
 }
 
 pub struct Subsystem {
     pub mai: MAI400,
+    pub last_cmd: Cell<AckCommand>,
     pub errors: RefCell<Vec<String>>,
     pub persistent: Arc<ReadData>,
 }
@@ -109,6 +102,7 @@ impl Subsystem {
 
         Subsystem {
             mai,
+            last_cmd: Cell::new(AckCommand::None),
             errors: RefCell::new(vec![]),
             persistent: data.clone(),
         }
@@ -170,10 +164,6 @@ impl Subsystem {
         };
 
         Ok(Mode::from(raw))
-    }
-
-    pub fn get_orientation(&self) -> Result<Orientation, Error> {
-        unimplemented!();
     }
 
     pub fn get_spin(&self) -> Result<Spin, Error> {

@@ -184,7 +184,8 @@ where
         }
     }
 
-    fn process(&self, query: String) -> String {
+    /// Processes a GraphQL query
+    pub fn process(&self, query: String) -> String {
         match execute(
             &query,
             None,

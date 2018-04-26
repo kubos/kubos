@@ -17,19 +17,28 @@
 
 #[cfg(test)]
 #[macro_use]
-extern crate failure;
-#[cfg(not(test))]
+extern crate double;
+//#[cfg(test)]
+//#[macro_use]
+//extern crate failure;
+//#[cfg(not(test))]
 extern crate failure;
 extern crate i2c_linux;
 #[macro_use]
 extern crate juniper;
 #[macro_use]
 extern crate kubos_service;
+//#[macro_use]
 extern crate mai400_api;
+#[cfg(test)]
+#[macro_use]
+extern crate serde_json;
 
 mod model;
 mod objects;
 mod schema;
+#[cfg(test)]
+mod tests;
 
 use i2c_linux::I2c;
 use kubos_service::{Config, Service};

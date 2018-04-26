@@ -44,29 +44,25 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // {
     //     ack: AckCommand
     // }
-    field ack() -> FieldResult<AckCommand>
+    field ack(&executor) -> FieldResult<AckCommand>
     {
-        // Future development: figure out how Rust lifetimes work and persist the
-        // last mutation run between requests
-        Ok(AckCommand::None)
+        Ok(executor.context().subsystem().last_cmd.get())
     }
     
-    // Get all errors encountered while processing this GraphQL request
-    //
-    // Note: This will only return errors thrown by fields which have
-    // already been processed for this request, so it is recommended that
-    // this field be specified last.
-    // Also, query fields are processed in parallel, so it is still possible
-    // that this field will be processed before others and some error messages
-    // might be excluded
+    // Get all errors encountered since the last time this field was queried
     //
     // {
     //     errors: [String]
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        match executor.context().subsystem().errors.try_borrow() {
-            Ok(master_vec) => Ok(master_vec.clone()),
+        match executor.context().subsystem().errors.try_borrow_mut() {
+            Ok(mut master_vec) => {
+                let current = master_vec.clone();
+                master_vec.clear();
+                master_vec.shrink_to_fit();
+                Ok(current)
+            },
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
         }
     }
@@ -166,6 +162,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field noop(&executor) -> FieldResult<GenericResponse>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::Noop);
         Ok(executor.context().subsystem().noop()?)
     }
 
@@ -183,6 +180,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field control_power(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::ControlPower);
         Ok(executor.context().subsystem().control_power(state)?)
     }
     
@@ -199,6 +197,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field configure_hardware(&executor) -> FieldResult<String>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::ConfigureHardware);
         Ok(String::from("Not Implemented"))
     }
     
@@ -223,6 +222,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field test_hardware(&executor, test: TestType) -> FieldResult<TestResults> 
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::TestHardware);
         match test {
             TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem().get_test_results().unwrap())),
             TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
@@ -245,10 +245,12 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // TODO: Maybe allow us to wait for a response?
     field issue_raw_command(&executor, command: String) -> FieldResult<GenericResponse>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::IssueRawCommand);
         Ok(executor.context().subsystem().passthrough(command)?)
     }
     
     field set_mode(&executor, mode: Mode, qbi_cmd = {vec![0,0,0,0]}: Vec<i32>, sun_angle_enable = false: bool, sun_rot_angle = 0.0: f64) -> FieldResult<GenericResponse> {
+        executor.context().subsystem().last_cmd.set(AckCommand::SetMode);
         match mode {
             Mode::NormalSun | Mode::LatLongSun => Ok(executor.context().subsystem().set_mode_sun(mode as u8, sun_angle_enable as i16, sun_rot_angle as f32)?),
             _ => Ok(executor.context().subsystem().set_mode(mode as u8, qbi_cmd)?),
@@ -256,6 +258,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     }
     
     field update(&executor, gps_time: Option<i32>, rv: Option<RVInput>) -> FieldResult<GenericResponse> {
+        executor.context().subsystem().last_cmd.set(AckCommand::Update);
         Ok(executor.context().subsystem().update(gps_time, rv)?)
     }
     

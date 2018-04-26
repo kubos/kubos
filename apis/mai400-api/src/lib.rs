@@ -70,4 +70,4 @@ mod tests;
 
 pub use mai400::*;
 pub use messages::rx::*;
-pub use serial_comm::Connection;
+pub use serial_comm::{Connection, Stream};
