@@ -9,7 +9,7 @@ use serial::prelude::*;
 /// Wrapper for UART stream
 pub struct Connection {
 
-    // Any boxed stream that allows for communication over serial ports
+    /// Any boxed stream that allows for communication over serial ports
     pub stream: Box<Stream>,
 }
 
