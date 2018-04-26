@@ -648,9 +648,9 @@ impl RotatingTelemetry {
     /// [`MAIError`]: enum.MAIError.html
     ///
     /// [`selfTelemetry`]: struct.selfTelemetry.html
-    // TODO: verify the bit shifting
-    // TODO: Doc says 3 MSB are used for version information. Need to extract
     pub fn update(&mut self, msg: &StandardTelemetry) {
+        // Note: The documentation says the 3 MSB are used for version information,
+        // so we want to isolate just the rotating counter bits
         match msg.tlm_counter & 0x1F {
             0 => {
                 self.b_field_igrf[0] = f32::from_bits(msg.rotating_variable_a);
