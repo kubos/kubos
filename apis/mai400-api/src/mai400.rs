@@ -309,8 +309,13 @@ impl MAI400 {
     /// [`MAIError`]: enum.MAIError.html
     pub fn get_message(
         &self,
-    ) -> MAIResult<(Option<StandardTelemetry>, Option<RawIMU>, Option<IREHSTelemetry>)> {
-
+    ) -> MAIResult<
+        (
+            Option<StandardTelemetry>,
+            Option<RawIMU>,
+            Option<IREHSTelemetry>,
+        ),
+    > {
         let mut msg = self.conn.read()?;
 
         // Pull out raw IMU message
@@ -327,7 +332,6 @@ impl MAI400 {
         let std = StandardTelemetry::new(msg);
 
         Ok((std, imu, irehs))
-
     }
 }
 
@@ -362,13 +366,17 @@ pub enum MAIError {
 
 impl From<io::Error> for MAIError {
     fn from(error: io::Error) -> Self {
-        MAIError::IoError { cause: format!("{}", error) }
+        MAIError::IoError {
+            cause: format!("{}", error),
+        }
     }
 }
 
 impl From<serial::Error> for MAIError {
     fn from(error: serial::Error) -> Self {
-        MAIError::SerialError { cause: format!("{}", error) }
+        MAIError::SerialError {
+            cause: format!("{}", error),
+        }
     }
 }
 

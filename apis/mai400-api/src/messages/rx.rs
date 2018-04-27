@@ -86,7 +86,6 @@ pub struct StandardTelemetry {
 impl StandardTelemetry {
     /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
     pub fn new(mut msg: Vec<u8>) -> Option<Self> {
-
         // Get the CRC bytes
         let len = msg.len() - 2;
 
@@ -298,7 +297,6 @@ pub struct RawIMU {
 impl RawIMU {
     /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
     pub fn new(mut msg: Vec<u8>) -> Option<Self> {
-
         // Verify message starts with sync bytes
         let mut data = msg.split_off(2);
 
@@ -371,7 +369,6 @@ pub struct IREHSTelemetry {
 impl IREHSTelemetry {
     /// Constructor. Converts a raw data array received from the MAI-400 into a usable structure
     pub fn new(mut msg: Vec<u8>) -> Option<Self> {
-
         // Verify message starts with sync bytes
         let mut data = msg.split_off(2);
 

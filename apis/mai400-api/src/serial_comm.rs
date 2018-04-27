@@ -77,7 +77,6 @@ struct SerialStream {
 
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> MAIResult<()> {
-
         //But why don't you just make 'port' a field of SerialStream and then you
         //only have to open the connection once, during new?
         //
@@ -97,7 +96,6 @@ impl Stream for SerialStream {
     }
 
     fn read(&self) -> MAIResult<Vec<u8>> {
-
         //TODO: I don't like closing this after every read. how likely is it that this will cause us to miss messages?
         let mut port = serial::open(self.bus.as_str())?;
 
