@@ -14,11 +14,19 @@
 // limitations under the License.
 //
 
-pub mod rx;
-mod tx;
+/// Module for receiving and processing the IREHS telemetry message
+pub mod irehs;
+/// Module for receiving and processing the raw IMU telemetry message
+pub mod raw_imu;
+/// Module for extracting and saving the rotating variables from the standard telemetry messages
+pub mod rotating;
+/// Module for receiving and processing the standard telemetry message
+pub mod std_telem;
 
-pub use self::rx::*;
-pub use self::tx::*;
+pub use self::irehs::*;
+pub use self::raw_imu::*;
+pub use self::rotating::*;
+pub use self::std_telem::*;
 
-/// IRIG-106 sync word
-pub const SYNC: u16 = 0xEB90;
+/// Sync word for raw IMU and IREHS telemetry packets
+pub const AUX_SYNC: u16 = 0xEA91;

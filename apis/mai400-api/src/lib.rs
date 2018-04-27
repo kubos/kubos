@@ -19,14 +19,13 @@
 //! All work is done against an instantiated [`MAI400`] struct.
 //!
 //! # Examples
-//! //TODO: No longer valid
 //!
 //! ```
 //! use mai400_api::*;
 //!
 //! # fn func() -> MAIResult<()> {
 //! // Create a new MAI connection
-//! let connection = Connection::new("/dev/ttyS5".to_owned());
+//! let connection = Connection::new("/dev/ttyS5");
 //! let mai = MAI400::new(connection);
 //!
 //! // Set the GPS time to Jan 01, 2018

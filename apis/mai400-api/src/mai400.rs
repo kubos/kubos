@@ -39,7 +39,7 @@ impl MAI400 {
     /// use mai400_api::*;
     ///
     /// # fn func() -> MAIResult<()> {
-    /// let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// let connection = Connection::new("/dev/ttyS5");
     /// let mai = MAI400::new(connection);
     /// # Ok(())
     /// # }
@@ -60,7 +60,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// # let connection = Connection::new("/dev/ttyS5");
     /// let mai = MAI400::new(connection);
     /// mai.reset()?;
     /// # Ok(())
@@ -71,10 +71,10 @@ impl MAI400 {
     // Resetting requires a pair of commands: request, then confirm
     pub fn reset(&self) -> MAIResult<()> {
         let request = RequestReset::default();
-        self.send_message(request.serialize())?;
+        self.send_message(request)?;
 
         let request = ConfirmReset::default();
-        self.send_message(request.serialize())
+        self.send_message(request)
     }
 
     /// Set the ACS mode
@@ -95,7 +95,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// # let connection = Connection::new("/dev/ttyS5");
     /// let mai = MAI400::new(connection);
     /// mai.set_mode(9, [1, -1, -3, 0])?;
     /// # Ok(())
@@ -111,7 +111,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request.serialize())
+        self.send_message(request)
     }
 
     /// Set the ACS mode (Normal-Sun or Lat/Long-Sun)
@@ -133,7 +133,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// # let connection = Connection::new("/dev/ttyS5");
     /// let mai = MAI400::new(connection);
     /// mai.set_mode_sun(7, 1, 45.0)?;
     /// # Ok(())
@@ -155,7 +155,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request.serialize())
+        self.send_message(request)
     }
 
     /// Set the ADACS clock with the desired GPS time
@@ -173,7 +173,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// # let connection = Connection::new("/dev/ttyS5");
     /// let mai = MAI400::new(connection);
     /// // Jan 01, 2018
     /// mai.set_gps_time(1198800018)?;
@@ -188,7 +188,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request.serialize())
+        self.send_message(request)
     }
 
     /// Set orbital position and velocity at epoch for RK4 integration method of orbit propagation
@@ -208,7 +208,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// # let connection = Connection::new("/dev/ttyS5");
     /// let mai = MAI400::new(connection);
     /// mai.set_rv([0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 1198800018)?;
     /// # Ok(())
@@ -224,7 +224,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request.serialize())
+        self.send_message(request)
     }
 
     /// Directly send a message without formatting or checksum calculation
@@ -242,7 +242,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// # let connection = Connection::new("/dev/ttyS5");
     /// let mai = MAI400::new(connection);
     ///
     /// let mut array = [0; 8];
@@ -265,16 +265,17 @@ impl MAI400 {
         self.conn.write(msg)
     }
 
-    fn send_message(&self, mut msg: Vec<u8>) -> MAIResult<()> {
+    fn send_message<T: Message>(&self, msg: T) -> MAIResult<()> {
+        let mut raw = msg.serialize();
+
         // Get the calculated CRC
-        //let calc = State::<AUG_CCITT>::calculate(&msg[1..]);
         let mut crc: u16 = 0;
-        for byte in msg.iter() {
+        for byte in raw.iter() {
             crc += *byte as u16;
         }
-        msg.write_u16::<LittleEndian>(crc).unwrap();
+        raw.write_u16::<LittleEndian>(crc).unwrap();
 
-        self.conn.write(msg.as_slice())?;
+        self.conn.write(raw.as_slice())?;
         Ok(())
     }
 
@@ -295,7 +296,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5".to_owned());
+    /// # let connection = Connection::new("/dev/ttyS5");
     /// let mai = MAI400::new(connection);
     /// let (std, imu, irehs) = mai.get_message()?;
     ///

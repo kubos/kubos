@@ -32,10 +32,10 @@ pub struct Connection {
 
 impl Connection {
     /// Convenience constructor to create connection from stream.
-    pub fn new(bus: String) -> Connection {
+    pub fn new(bus: &str) -> Connection {
         Connection {
             stream: Box::new(SerialStream {
-                bus,
+                bus: bus.to_owned(),
                 settings: serial::PortSettings {
                     baud_rate: serial::Baud115200,
                     char_size: serial::Bits8,
