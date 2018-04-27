@@ -147,7 +147,7 @@ fn main() {
             // Extract the query response JSON from the field
             match serde_json::from_value::<String>(v["msg"].clone()) {
                 Ok(msg) => {
-                    v = serde_json::from_str(&msg).unwrap();
+                    v = serde_json::from_str(&msg).unwrap_or_default();
                 }
                 // Otherwise, we'll just print the raw returned JSON
                 _ => println!("Errors returned from query"),
