@@ -9,6 +9,7 @@ members = [
 "examples/rust-service/extern-lib",
 "examples/rust-service/service",
 "examples/udp-service-client",
+"hal/rust-hal/rust-uart",
 "kubos-build-helper",
 "services/comms-service",
 "services/kubos-service",

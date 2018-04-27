@@ -1,0 +1,7 @@
+[package]
+name = "rust-uart"
+version = "0.1.0"
+authors = ["William Greer <wgreer184@gmail.com>"]
+
+[dependencies]
+serial = "0.4.0"

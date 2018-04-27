@@ -531,6 +531,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust-uart"
+version = "0.1.0"
+dependencies = [
+ "serial 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
