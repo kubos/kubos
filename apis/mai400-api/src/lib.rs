@@ -46,7 +46,7 @@
 
 #![deny(missing_docs)]
 //Need a higher recursion limit for nom when parsing larger (>60 bytes) structures
-#![recursion_limit="256"]
+#![recursion_limit = "256"]
 
 #[macro_use]
 extern crate bitflags;
@@ -55,12 +55,11 @@ extern crate crc16;
 #[cfg(test)]
 #[macro_use]
 extern crate double;
-extern crate serial;
 #[macro_use]
 extern crate failure;
 #[macro_use]
 extern crate nom;
-
+extern crate serial;
 
 mod mai400;
 mod messages;

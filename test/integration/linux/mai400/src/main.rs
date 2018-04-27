@@ -95,14 +95,12 @@ fn set_gps_time(mai: &MAI400, logger: &Logger) -> u8 {
             info!(logger, "cmd_invalid_cntr: {}", std.cmd_invalid_cntr);
             info!(
                 logger,
-                "cmd_invalid_chksum_cntr: {}",
-                std.cmd_invalid_chksum_cntr
+                "cmd_invalid_chksum_cntr: {}", std.cmd_invalid_chksum_cntr
             );
             info!(logger, "last_command: {:X}", std.last_command);
             info!(logger, "acs_mode: {}", std.acs_mode);
             1
         }
-
     } else {
         error!(
             logger,
@@ -139,9 +137,7 @@ fn set_mode(mai: &MAI400, logger: &Logger) -> u8 {
             } else {
                 error!(
                     logger,
-                    "[Set Mode] Mode mismatch. Expected: {}, Found: {}",
-                    mode,
-                    std.acs_mode
+                    "[Set Mode] Mode mismatch. Expected: {}, Found: {}", mode, std.acs_mode
                 );
                 1
             }
@@ -180,7 +176,6 @@ fn set_mode_sun(mai: &MAI400, logger: &Logger) -> u8 {
     let (telem, _imu, _irehs) = mai.get_message().unwrap();
 
     let rc = if let Some(std) = telem {
-
         if std.last_command == 0x0 {
             if std.acs_mode == mode {
                 info!(logger, "[Set Mode (Sun)] Test completed successfully");
@@ -188,9 +183,7 @@ fn set_mode_sun(mai: &MAI400, logger: &Logger) -> u8 {
             } else {
                 error!(
                     logger,
-                    "[Set Mode (Sun)] Mode mismatch. Expected: {}, Found: {}",
-                    mode,
-                    std.acs_mode
+                    "[Set Mode (Sun)] Mode mismatch. Expected: {}, Found: {}", mode, std.acs_mode
                 );
                 1
             }
@@ -215,7 +208,6 @@ fn set_mode_sun(mai: &MAI400, logger: &Logger) -> u8 {
 }
 
 fn set_rv(mai: &MAI400, logger: &Logger) -> u8 {
-
     // TODO: Set real values
     let result = mai.set_rv(RV_POS_ECI, RV_VEL_ECI, RV_EPOCH);
 
@@ -231,7 +223,6 @@ fn set_rv(mai: &MAI400, logger: &Logger) -> u8 {
     let (telem, _imu, _irehs) = mai.get_message().unwrap();
 
     let rc = if let Some(std) = telem {
-
         if std.last_command == 0x41 {
             // The other telemetry values we can check are part of the rotating variable set,
             // so we'll need to wait to vrify them until we've read in all of the rotating variables.
@@ -240,9 +231,7 @@ fn set_rv(mai: &MAI400, logger: &Logger) -> u8 {
         } else {
             error!(
                 logger,
-                "[Set RV] Last command mismatch. Expected: {:X}, Found: {:X}",
-                0x41,
-                std.acs_mode
+                "[Set RV] Last command mismatch. Expected: {:X}, Found: {:X}", 0x41, std.acs_mode
             );
             1
         }
@@ -254,7 +243,6 @@ fn set_rv(mai: &MAI400, logger: &Logger) -> u8 {
 }
 
 fn passthrough(mai: &MAI400, logger: &Logger) -> u8 {
-
     let msg_id = 0x5A;
 
     let mut array = [0; 40];
@@ -278,7 +266,6 @@ fn passthrough(mai: &MAI400, logger: &Logger) -> u8 {
     let (telem, _imu, _irehs) = mai.get_message().unwrap();
 
     let rc = if let Some(std) = telem {
-
         if std.last_command == msg_id {
             info!(logger, "[Passthrough] Test completed successfully");
             0
@@ -321,8 +308,7 @@ fn reset(mai: &MAI400, logger: &Logger) -> u8 {
         } else {
             error!(
                 logger,
-                "[Reset] System reporting a non-zero number of received commands: {}",
-                cmds
+                "[Reset] System reporting a non-zero number of received commands: {}", cmds
             );
             1
         }
@@ -335,7 +321,6 @@ fn reset(mai: &MAI400, logger: &Logger) -> u8 {
 }
 
 fn read(mai: &MAI400, logger: &Logger) -> u8 {
-
     let mut rc = 0;
 
     // Read loop test
@@ -368,8 +353,7 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
         info!(logger, "cmd_invalid_cntr: {}", telem.cmd_invalid_cntr);
         info!(
             logger,
-            "cmd_invalid_chksum_cntr: {}",
-            telem.cmd_invalid_chksum_cntr
+            "cmd_invalid_chksum_cntr: {}", telem.cmd_invalid_chksum_cntr
         );
         info!(logger, "last_command: {:X}", telem.last_command);
         info!(logger, "acs_mode: {}", telem.acs_mode);
@@ -400,36 +384,30 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
         info!(logger, "rwa_torque_cmd_2: {}", telem.rwa_torque_cmd[2]);
         info!(
             logger,
-            "gc_rwa_torque_cmd_0: {}",
-            telem.gc_rwa_torque_cmd[0]
+            "gc_rwa_torque_cmd_0: {}", telem.gc_rwa_torque_cmd[0]
         );
         info!(
             logger,
-            "gc_rwa_torque_cmd_1: {}",
-            telem.gc_rwa_torque_cmd[1]
+            "gc_rwa_torque_cmd_1: {}", telem.gc_rwa_torque_cmd[1]
         );
         info!(
             logger,
-            "gc_rwa_torque_cmd_2: {}",
-            telem.gc_rwa_torque_cmd[2]
+            "gc_rwa_torque_cmd_2: {}", telem.gc_rwa_torque_cmd[2]
         );
         info!(logger, "torque_coil_cmd_0: {}", telem.torque_coil_cmd[0]);
         info!(logger, "torque_coil_cmd_1: {}", telem.torque_coil_cmd[1]);
         info!(logger, "torque_coil_cmd_2: {}", telem.torque_coil_cmd[2]);
         info!(
             logger,
-            "gc_torque_coil_cmd_0: {}",
-            telem.gc_torque_coil_cmd[0]
+            "gc_torque_coil_cmd_0: {}", telem.gc_torque_coil_cmd[0]
         );
         info!(
             logger,
-            "gc_torque_coil_cmd_1: {}",
-            telem.gc_torque_coil_cmd[1]
+            "gc_torque_coil_cmd_1: {}", telem.gc_torque_coil_cmd[1]
         );
         info!(
             logger,
-            "gc_torque_coil_cmd_2: {}",
-            telem.gc_torque_coil_cmd[2]
+            "gc_torque_coil_cmd_2: {}", telem.gc_torque_coil_cmd[2]
         );
         info!(logger, "qbo_cmd_0: {}", telem.qbo_cmd[0]);
         info!(logger, "qbo_cmd_1: {}", telem.qbo_cmd[1]);
@@ -453,7 +431,6 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
         info!(logger, "neci_0: {}", telem.neci[0]);
         info!(logger, "neci_1: {}", telem.neci[1]);
         info!(logger, "neci_2: {}", telem.neci[2]);
-
 
         // Print rotating
         info!(logger, "Rotating variables:");
@@ -484,29 +461,24 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
         info!(logger, "kepler_elem:");
         info!(
             logger,
-            "    semi_major_axis: {}",
-            rotating.kepler_elem.semi_major_axis
+            "    semi_major_axis: {}", rotating.kepler_elem.semi_major_axis
         );
         info!(
             logger,
-            "    eccentricity: {}",
-            rotating.kepler_elem.eccentricity
+            "    eccentricity: {}", rotating.kepler_elem.eccentricity
         );
         info!(
             logger,
-            "    inclination: {}",
-            rotating.kepler_elem.inclination
+            "    inclination: {}", rotating.kepler_elem.inclination
         );
         info!(logger, "    raan: {}", rotating.kepler_elem.raan);
         info!(
             logger,
-            "    arg_parigee: {}",
-            rotating.kepler_elem.arg_parigee
+            "    arg_parigee: {}", rotating.kepler_elem.arg_parigee
         );
         info!(
             logger,
-            "    true_anomoly: {}",
-            rotating.kepler_elem.true_anomoly
+            "    true_anomoly: {}", rotating.kepler_elem.true_anomoly
         );
         let data: String = rotating.k_bdot.iter().map(|x| format!(" {}", x)).collect();
         info!(logger, "k_bdot:{}", data);
@@ -576,8 +548,7 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
         info!(logger, "orbit_epoch: {}", rotating.orbit_epoch);
         info!(
             logger,
-            "true_anomoly_epoch: {}",
-            rotating.true_anomoly_epoch
+            "true_anomoly_epoch: {}", rotating.true_anomoly_epoch
         );
         info!(logger, "orbit_epoch_next: {}", rotating.orbit_epoch_next);
         info!(logger, "sc_pos_eci_epoch:{}", data);
@@ -605,8 +576,7 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
         info!(logger, "wheel_speed_bias:{}", data);
         info!(
             logger,
-            "cos_sun_mag_align_thresh: {}",
-            rotating.cos_sun_mag_align_thresh
+            "cos_sun_mag_align_thresh: {}", rotating.cos_sun_mag_align_thresh
         );
         info!(logger, "unload_ang_thresh: {}", rotating.unload_ang_thresh);
         info!(logger, "q_sat: {}", rotating.q_sat);
@@ -665,17 +635,11 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
         info!(logger, "Raw IMU:");
         info!(
             logger,
-            "accel: {} {} {}",
-            telem.accel[0],
-            telem.accel[1],
-            telem.accel[2]
+            "accel: {} {} {}", telem.accel[0], telem.accel[1], telem.accel[2]
         );
         info!(
             logger,
-            "gyro: {} {} {}",
-            telem.gyro[0],
-            telem.gyro[1],
-            telem.gyro[2]
+            "gyro: {} {} {}", telem.gyro[0], telem.gyro[1], telem.gyro[2]
         );
         info!(logger, "gyro_temp: {}", telem.gyro_temp);
     } else {
@@ -725,10 +689,12 @@ fn read_loop(
     exit: Arc<AtomicBool>,
     logger: &Logger,
     sender: Sender<
-        (Option<StandardTelemetry>,
-         Option<RawIMU>,
-         Option<IREHSTelemetry>,
-         RotatingTelemetry),
+        (
+            Option<StandardTelemetry>,
+            Option<RawIMU>,
+            Option<IREHSTelemetry>,
+            RotatingTelemetry,
+        ),
     >,
 ) {
     let connection = Connection::new("/dev/ttyS5".to_owned());
@@ -758,7 +724,6 @@ fn read_loop(
 }
 
 fn main() {
-
     let mut error_count: u8 = 0;
 
     // Output warning and error messages to stderr

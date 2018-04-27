@@ -33,7 +33,6 @@ mock_trait_no_default!(
     read() -> MAIResult<Vec<u8>>
 );
 
-
 impl Stream for MockStream {
     mock_method!(write(&self, data: &[u8]) -> MAIResult<()>, self, {
             self.write.call(data.to_vec())
@@ -46,11 +45,16 @@ impl Stream for MockStream {
 fn mock_test() {
     let mock = mock_new!();
 
-    let connection = Connection { stream: Box::new(mock) };
+    let connection = Connection {
+        stream: Box::new(mock),
+    };
 
     let packet: [u8; 40] = [0; 40];
 
-    assert_eq!(connection.write(&packet).unwrap_err(), MAIError::GenericError);
+    assert_eq!(
+        connection.write(&packet).unwrap_err(),
+        MAIError::GenericError
+    );
 }
 
 mod tx;
