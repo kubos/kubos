@@ -54,7 +54,8 @@ fn configure_client() -> (SocketAddr, SocketAddr, String) {
         let filename = &args[1];
         match File::open(filename)
             .map(|mut f| f.read_to_string(&mut raw))
-            .map(|_| toml::from_str(&raw)) {
+            .map(|_| toml::from_str(&raw))
+        {
             Ok(toml) => toml.unwrap(),
             _ => {
                 panic!("Couldn't open config file");
@@ -87,7 +88,6 @@ fn configure_client() -> (SocketAddr, SocketAddr, String) {
 }
 
 fn main() {
-
     // Get the host IP, remote IP, and query string from the configuration file
     let (client_addr, service_addr, query) = configure_client();
 
