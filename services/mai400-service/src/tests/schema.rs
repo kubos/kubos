@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use super::*;
 use kubos_service::{Config, Service};
 use model::*;
 use objects::*;
@@ -23,36 +24,40 @@ use std::cell::{Cell, RefCell};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use super::*;
 use tests::test_data::*;
 
 macro_rules! wrap {
     ($result:ident) => {{
-            json!({
-                    "msg": serde_json::to_string(&$result).unwrap(),
-                    "errs": ""}).to_string()
-        }}
+        json!({
+                                        "msg": serde_json::to_string(&$result).unwrap(),
+                                        "errs": ""})
+            .to_string()
+    }};
 }
 
 macro_rules! service_new {
     ($mock:ident) => {{
-            Service::new(
-                Config::new("mai400-service"),
-                Subsystem {
-                    mai: MAI400 { conn: Connection { stream: Box::new($mock) } },
-                    last_cmd: Cell::new(AckCommand::None),
-                    errors: RefCell::new(vec![]),
-                    persistent: Arc::new(ReadData {
-                            std_telem: Mutex::new(STD),
-                            irehs_telem: Mutex::new(IREHS),
-                            imu: Mutex::new(IMU),
-                            rotating: Mutex::new(ROTATING),
-                    }),
+        Service::new(
+            Config::new("mai400-service"),
+            Subsystem {
+                mai: MAI400 {
+                    conn: Connection {
+                        stream: Box::new($mock),
+                    },
                 },
-                QueryRoot,
-                MutationRoot,
-            )
-        }}
+                last_cmd: Cell::new(AckCommand::None),
+                errors: RefCell::new(vec![]),
+                persistent: Arc::new(ReadData {
+                    std_telem: Mutex::new(STD),
+                    irehs_telem: Mutex::new(IREHS),
+                    imu: Mutex::new(IMU),
+                    rotating: Mutex::new(ROTATING),
+                }),
+            },
+            QueryRoot,
+            MutationRoot,
+        )
+    }};
 }
 
 #[test]
@@ -174,7 +179,6 @@ fn ack_test_hardware() {
                 errors
             }}
         }"#;
-
 
     service.process(mutation.to_owned());
 
@@ -379,7 +383,11 @@ fn get_power_on() {
     let service = Service::new(
         Config::new("mai400-service"),
         Subsystem {
-            mai: MAI400 { conn: Connection { stream: Box::new(mock) } },
+            mai: MAI400 {
+                conn: Connection {
+                    stream: Box::new(mock),
+                },
+            },
             last_cmd: Cell::new(AckCommand::None),
             errors: RefCell::new(vec![]),
             persistent: data,
@@ -1359,7 +1367,11 @@ fn noop_good() {
     let service = Service::new(
         Config::new("mai400-service"),
         Subsystem {
-            mai: MAI400 { conn: Connection { stream: Box::new(mock) } },
+            mai: MAI400 {
+                conn: Connection {
+                    stream: Box::new(mock),
+                },
+            },
             last_cmd: Cell::new(AckCommand::None),
             errors: RefCell::new(vec![]),
             persistent: data,
@@ -1422,14 +1434,10 @@ fn noop_fail() {
 fn control_power_good() {
     let mock = mock_new!();
 
-    mock.write.return_value_for(
-        (REQUEST_RESET.to_vec()),
-        Ok(()),
-    );
-    mock.write.return_value_for(
-        (CONFIRM_RESET.to_vec()),
-        Ok(()),
-    );
+    mock.write
+        .return_value_for((REQUEST_RESET.to_vec()), Ok(()));
+    mock.write
+        .return_value_for((CONFIRM_RESET.to_vec()), Ok(()));
 
     let service = service_new!(mock);
 
@@ -1518,7 +1526,6 @@ fn configure_hardware() {
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
 }
-
 
 #[test]
 fn test_hardware_integration() {
@@ -1951,10 +1958,8 @@ fn issue_raw_command_fail() {
 fn set_mode_default() {
     let mock = mock_new!();
 
-    mock.write.return_value_for(
-        (SET_MODE_ACQUISITION_DEFAULT.to_vec()),
-        Ok(()),
-    );
+    mock.write
+        .return_value_for((SET_MODE_ACQUISITION_DEFAULT.to_vec()), Ok(()));
 
     let service = service_new!(mock);
 
@@ -1979,10 +1984,8 @@ fn set_mode_default() {
 fn set_mode_good() {
     let mock = mock_new!();
 
-    mock.write.return_value_for(
-        (SET_MODE_ACQUISITION.to_vec()),
-        Ok(()),
-    );
+    mock.write
+        .return_value_for((SET_MODE_ACQUISITION.to_vec()), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2030,10 +2033,8 @@ fn set_mode_fail() {
 fn set_mode_normal_sun() {
     let mock = mock_new!();
 
-    mock.write.return_value_for(
-        (SET_MODE_NORMAL_SUN.to_vec()),
-        Ok(()),
-    );
+    mock.write
+        .return_value_for((SET_MODE_NORMAL_SUN.to_vec()), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2058,10 +2059,8 @@ fn set_mode_normal_sun() {
 fn set_mode_latlong_sun() {
     let mock = mock_new!();
 
-    mock.write.return_value_for(
-        (SET_MODE_LATLONG_SUN.to_vec()),
-        Ok(()),
-    );
+    mock.write
+        .return_value_for((SET_MODE_LATLONG_SUN.to_vec()), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2086,10 +2085,8 @@ fn set_mode_latlong_sun() {
 fn set_mode_sun_default() {
     let mock = mock_new!();
 
-    mock.write.return_value_for(
-        (SET_MODE_SUN_DEFAULT.to_vec()),
-        Ok(()),
-    );
+    mock.write
+        .return_value_for((SET_MODE_SUN_DEFAULT.to_vec()), Ok(()));
 
     let service = service_new!(mock);
 

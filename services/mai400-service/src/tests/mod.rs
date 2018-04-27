@@ -19,12 +19,12 @@ use mai400_api::*;
 
 #[macro_export]
 macro_rules! mock_new {
-    () => (
+    () => {
         MockStream::new(
             Err(MAIError::GenericError.into()),
-            Err(MAIError::GenericError.into())
-       )
-    )
+            Err(MAIError::GenericError.into()),
+        )
+    };
 }
 
 mock_trait_no_default!(
@@ -45,7 +45,9 @@ impl Stream for MockStream {
 fn mock_test() {
     let mock = mock_new!();
 
-    let connection = Connection { stream: Box::new(mock) };
+    let connection = Connection {
+        stream: Box::new(mock),
+    };
 
     let packet: [u8; 40] = [0; 40];
 
@@ -55,5 +57,5 @@ fn mock_test() {
     );
 }
 
-mod test_data;
 mod schema;
+mod test_data;

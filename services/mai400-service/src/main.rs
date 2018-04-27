@@ -251,7 +251,7 @@
 //! ```
 //!
 
-#![recursion_limit="256"]
+#![recursion_limit = "256"]
 
 #[cfg(test)]
 #[macro_use]
@@ -275,7 +275,7 @@ mod tests;
 
 use i2c_linux::I2c;
 use kubos_service::{Config, Service};
-use model::{Subsystem, ReadData};
+use model::{ReadData, Subsystem};
 use schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
 
@@ -291,7 +291,6 @@ fn i2c_cmds() {
 }
 
 fn main() {
-
     //TODO: Remove before merging
     i2c_cmds();
 

@@ -19,7 +19,7 @@ use mai400_api::*;
 use std::cell::{Cell, RefCell};
 use std::io::{Error, ErrorKind};
 use std::sync::{Arc, Mutex};
-use std::thread::{spawn, sleep};
+use std::thread::{sleep, spawn};
 use std::time::Duration;
 
 use objects::*;
@@ -111,16 +111,12 @@ impl Subsystem {
     // Queries
 
     pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
-        let old_ctr = {
-            self.persistent.std_telem.lock().unwrap().tlm_counter
-        };
+        let old_ctr = { self.persistent.std_telem.lock().unwrap().tlm_counter };
 
         // Wait long enough for a new telemetry set to be read
         sleep(Duration::from_millis(300));
 
-        let new_ctr = {
-            self.persistent.std_telem.lock().unwrap().tlm_counter
-        };
+        let new_ctr = { self.persistent.std_telem.lock().unwrap().tlm_counter };
 
         let (state, uptime) = match new_ctr != old_ctr {
             true => (
@@ -178,16 +174,12 @@ impl Subsystem {
     // Mutations
 
     pub fn noop(&self) -> Result<GenericResponse, Error> {
-        let old_ctr = {
-            self.persistent.std_telem.lock().unwrap().tlm_counter
-        };
+        let old_ctr = { self.persistent.std_telem.lock().unwrap().tlm_counter };
 
         // Wait long enough for a new telemetry set to be read
         sleep(Duration::from_millis(300));
 
-        let new_ctr = {
-            self.persistent.std_telem.lock().unwrap().tlm_counter
-        };
+        let new_ctr = { self.persistent.std_telem.lock().unwrap().tlm_counter };
 
         let (success, errors) = match new_ctr != old_ctr {
             true => (true, "".to_owned()),
@@ -216,8 +208,7 @@ impl Subsystem {
                         Err(err) => err,
                     },
                 })
-
-            } 
+            }
             _ => {
                 push_err!(self.errors, "controlPower: Invalid power state".to_owned());
 
@@ -227,7 +218,6 @@ impl Subsystem {
                     success: false,
                 })
             }
-
         }
     }
 
@@ -238,9 +228,7 @@ impl Subsystem {
             .as_bytes()
             .chunks(2)
             .into_iter()
-            .map(|chunk| {
-                u8::from_str_radix(::std::str::from_utf8(chunk).unwrap(), 16).unwrap()
-            })
+            .map(|chunk| u8::from_str_radix(::std::str::from_utf8(chunk).unwrap(), 16).unwrap())
             .collect();
 
         let result = run!(self.mai.passthrough(tx.as_slice()), self.errors);
@@ -290,7 +278,6 @@ impl Subsystem {
         sun_angle_enable: i16,
         sun_rot_angle: f32,
     ) -> Result<GenericResponse, Error> {
-
         let result = run!(
             self.mai.set_mode_sun(mode, sun_angle_enable, sun_rot_angle),
             self.errors

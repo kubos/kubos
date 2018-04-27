@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use kubos_service;
 use juniper::FieldResult;
+use kubos_service;
 use model::*;
 use objects::*;
 
@@ -25,7 +25,7 @@ pub struct QueryRoot;
 
 /// Base GraphQL query model
 graphql_object!(QueryRoot: Context as "Query" |&self| {
-    
+
     // Test query to verify service is running without attempting
     // to communicate with the underlying subsystem
     //
@@ -36,9 +36,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     {
         Ok(String::from("pong"))
     }
-    
+
     //----- Generic Queries -----//
-    
+
     // Get the last run mutation
     //
     // {
@@ -48,7 +48,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     {
         Ok(executor.context().subsystem().last_cmd.get())
     }
-    
+
     // Get all errors encountered since the last time this field was queried
     //
     // {
@@ -74,12 +74,12 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         state: PowerState,
     //         uptime: Int
     //     }
-    // }            
+    // }
     field power(&executor) -> FieldResult<GetPowerResponse>
     {
         Ok(executor.context().subsystem().get_power()?)
     }
-    
+
     // Get the current configuration of the system
     //
     // {
@@ -205,7 +205,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     {
         Ok(executor.context().subsystem().get_telemetry()?)
     }
-    
+
     // Get the test results of the last run test
     //
     // Note: For this service, this actually just fetches the nominal
@@ -222,7 +222,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     field test_results(&executor) -> FieldResult<IntegrationTestResults> {
         Ok(executor.context().subsystem().get_test_results()?)
     }
-    
+
     // Get the current mode of the system
     //
     // {
@@ -231,7 +231,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     field mode(&executor) -> FieldResult<Mode> {
         Ok(executor.context().subsystem().get_mode()?)
     }
-    
+
     // Get the last reported orientation of the system
     //
     // {
@@ -240,7 +240,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     field orientation(&executor) -> FieldResult<String> {
         Ok(String::from("Not Implemented"))
     }
-    
+
     // Get the last reported spin values of the system
     // Note: The spin values are automatically updated every six seconds
     //
@@ -260,7 +260,7 @@ pub struct MutationRoot;
 
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
-    
+
     // Get all errors encountered while processing this GraphQL request
     //
     // Note: This will only return errors thrown by fields which have
@@ -308,7 +308,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         executor.context().subsystem().last_cmd.set(AckCommand::ControlPower);
         Ok(executor.context().subsystem().control_power(state)?)
     }
-    
+
     // Configure the system
     //
     // mutation {
@@ -319,7 +319,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         executor.context().subsystem().last_cmd.set(AckCommand::ConfigureHardware);
         Ok(String::from("Not Implemented"))
     }
-    
+
     // Run a system self-test
     //
     // test: Type of self-test to perform
@@ -339,15 +339,17 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         }
     //    }
     // }
-    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults> 
+    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults>
     {
         executor.context().subsystem().last_cmd.set(AckCommand::TestHardware);
         match test {
-            TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem().get_test_results().unwrap())),
-            TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
+            TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem()
+                    .get_test_results().unwrap())),
+            TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults {
+                        errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
         }
     }
-    
+
     // Pass a custom command through to the system
     //
     // command: String containing the hex values to be sent (ex. "C3")
@@ -365,12 +367,13 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         executor.context().subsystem().last_cmd.set(AckCommand::IssueRawCommand);
         Ok(executor.context().subsystem().passthrough(command)?)
     }
-    
+
     // Set the attitude control mode
     //
     // mode: Control mode to change to
     // qbiCmd: Optional array of four values needed for Qinertial and Qtable mode
-    // sunAngleEnable: Optional. Specifies whether the sun rotating angle should be updated when using Normal-Sun or LatLong-Sun mode
+    // sunAngleEnable: Optional. Specifies whether the sun rotating angle should be updated when
+    //                 using Normal-Sun or LatLong-Sun mode
     // sunRotAngle: Optional. The sun rotating angle for use in Normal-Sun and LatLong-Sun mode
     //
     // mutation {
@@ -380,14 +383,21 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         response: String
     //     }
     // }
-    field set_mode(&executor, mode: Mode, qbi_cmd = {vec![0,0,0,0]}: Vec<i32>, sun_angle_enable = false: bool, sun_rot_angle = 0.0: f64) -> FieldResult<GenericResponse> {
+    field set_mode(
+        &executor,
+        mode: Mode,
+        qbi_cmd = {vec![0,0,0,0]}: Vec<i32>,
+        sun_angle_enable = false: bool,
+        sun_rot_angle = 0.0: f64)
+    -> FieldResult<GenericResponse> {
         executor.context().subsystem().last_cmd.set(AckCommand::SetMode);
         match mode {
-            Mode::NormalSun | Mode::LatLongSun => Ok(executor.context().subsystem().set_mode_sun(mode as u8, sun_angle_enable as i16, sun_rot_angle as f32)?),
+            Mode::NormalSun | Mode::LatLongSun => Ok(executor.context().subsystem().set_mode_sun(
+                    mode as u8, sun_angle_enable as i16, sun_rot_angle as f32)?),
             _ => Ok(executor.context().subsystem().set_mode(mode as u8, qbi_cmd)?),
         }
     }
-    
+
     // Update system values
     //
     // gpsTime: Optional. If specified, updates the system's ADACS clock
@@ -398,13 +408,16 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         - timeEpoch: GPS time at which the eciPos and eciVel values will go into effect
     //
     // mutation {
-    //     update(gps_time: Option<i32>, rv: Option<{eciPos: [f64; 3], eciVel: [f64; 3], timeEpoch: i32}>) {
+    //     update(gps_time: Option<i32>,
+    //         rv: Option<{eciPos: [f64; 3], eciVel: [f64; 3], timeEpoch: i32}>) {
     //         errors: String,
     //         success: Boolean,
+    //     }
     // }
-    field update(&executor, gps_time: Option<i32>, rv: Option<RVInput>) -> FieldResult<GenericResponse> {
+    field update(&executor, gps_time: Option<i32>, rv: Option<RVInput>)
+    -> FieldResult<GenericResponse> {
         executor.context().subsystem().last_cmd.set(AckCommand::Update);
         Ok(executor.context().subsystem().update(gps_time, rv)?)
     }
-    
+
 });
