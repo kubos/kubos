@@ -12,7 +12,7 @@ return {
   dependencies = {
     "luvit/require",
     "luvit/pretty-print",
-    "creationix/cbor",
+    "kubos/cbor-message-protocol",
   },
   files = {
     "**.lua",

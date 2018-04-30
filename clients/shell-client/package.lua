@@ -28,7 +28,7 @@ return {
     "luvit/require",
     "luvit/pretty-print",
     "luvit/readline",
-    "creationix/cbor",
+    "kubos/cbor-message-protocol",
   },
   files = {
     "**.lua",
