@@ -49,6 +49,26 @@ local function check(source, dest, len, data)
   return band(bnot(sum), 0xffff)
 end
 
+-- Assume the entire frame is already here.
+local function framed_decode(frame, index)
+  -- p("udp-framed-decode", frame, index)
+
+  assert(index == 1)
+  local frame_len = #frame
+  local source = frame_len >= 2 and u16(frame, 1)
+  local dest = frame_len >= 4 and u16(frame, 3)
+  local len = frame_len >= 6 and u16(frame, 5)
+  local checksum = frame_len >= 8 and u16(frame, 7)
+  local data = len and sub(frame, 9, len)
+  local sum = frame_len == len and check(source, dest, len, data)
+  return {
+    source = source,
+    dest = dest,
+    data = data,
+    checksum = sum == checksum,
+  }
+end
+
 local function decode(chunk, index)
   -- p("udp-decode", chunk, index)
 
@@ -98,5 +118,6 @@ end
 
 return {
   encode = encode,
-  decode = decode
+  decode = decode,
+  framed_decode = framed_decode,
 }
