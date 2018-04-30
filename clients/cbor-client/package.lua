@@ -1,6 +1,6 @@
   return {
     name = "kubos/kubos-cbor-client",
-    version = "0.0.1",
+    version = "1.1.0",
     description = "Client for CBOR UDP services.",
     tags = { "kubos", "udp", "cbor", "readline"},
     author = { name = "Tim Caswell", email = "tim@kubos.co" },

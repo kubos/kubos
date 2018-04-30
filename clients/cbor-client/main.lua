@@ -18,9 +18,8 @@ local uv = require 'uv'
 local dump = require('pretty-print').dump
 local Editor = require('readline').Editor
 local cbor = require 'cbor'
+local byte = string.byte
 
--- Default lua strings to utf8 strings in cbor encoding.
-cbor.type_encoders.string = cbor.type_encoders.utf8string
 
 local usage = [[
 Kubos CBOR Client
@@ -61,7 +60,7 @@ local function on_line(err, line, reason)
     local success, value = pcall(fn)
     if success then
       editor:insertAbove('Client: ' .. dump(value))
-      udp:send(cbor.encode(value), '127.0.0.1', port)
+      udp:send('\x00' .. cbor.encode(value), '127.0.0.1', port)
     else
       editor:insertAbove(value)
     end
@@ -73,8 +72,10 @@ end
 udp:recv_start(function (err, data)
   assert(not err, err)
   if not data then return end
-  local value = cbor.decode(data)
-  editor:insertAbove('Server: ' .. dump(value))
+  if byte(data, 1) == 0 then
+    local value = cbor.decode(data, 2)
+    editor:insertAbove('Server: ' .. dump(value))
+  end
 end)
 
 editor:readLine(prompt, on_line)
