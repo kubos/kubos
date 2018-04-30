@@ -13,7 +13,7 @@ limitations under the License.
 
 --[[lit-meta
   name = "kubos/file-protocol"
-  version = "0.0.2"
+  version = "1.0.0"
   description = "Core protocol used by file-service and file-client."
   tags = { "kubos", "udp", "file"}
   author = { name = "Tim Caswell", email = "tim@kubos.co" }
@@ -29,15 +29,15 @@ limitations under the License.
 ]]
 
 -- Protocol Messages
--- { hash }, -- syn
--- { hash, num_chunks }, -- syn
+-- { hash }, -- sync
+-- { hash, num_chunks }, -- sync
 -- { hash, chunk_index, data }, -- send chunk no reply needed
 -- { hash, true, num_chunks }, -- ack
 -- { hash, false, 1, 4, 6, 7 }, -- nak
 -- { channel_id, "export", hash, path, mode } -- mode is optional
 -- { channel_id, "import", path }, --> returns file hash, num_chunks
--- { channel_id, true, value },
--- { channel_id, false, error_message},
+-- { channel_id, true, ...values }, -- import/export was successdul
+-- { channel_id, false, error_message}, -- there was an error in request
 
 local ffi = require 'ffi'
 local os = require 'os'

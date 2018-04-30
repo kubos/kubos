@@ -1,6 +1,6 @@
 return {
   name = "kubos/kubos-file-client",
-  version = "0.0.1",
+  version = "1.0.0",
   description = "File client to connect to remote file service over custom transport.",
   tags = { "kubos", "udp", "nat", "file"},
   author = { name = "Tim Caswell", email = "tim@kubos.co" },
@@ -18,5 +18,6 @@ return {
   },
   files = {
     "**.lua",
-  }
+  },
+  license = "Apache 2.0"
 }

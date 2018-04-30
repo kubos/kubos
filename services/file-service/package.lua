@@ -1,6 +1,6 @@
 return {
   name = "kubos/kubos-file-service",
-  version = "0.0.1",
+  version = "1.0.0",
   description = "Service to upload and download files to cubesats.",
   tags = { "kubos", "udp", "file" },
   author = { name = "Tim Caswell", email = "tim@kubos.co" },
