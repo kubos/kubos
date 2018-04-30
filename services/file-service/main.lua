@@ -8,6 +8,7 @@ local server = uv.new_udp()
 local service_port = getenv 'PORT'
 service_port = service_port and tonumber(service_port) or 7000
 assert(server:bind('127.0.0.1', service_port))
+p('File Service: UDP server bound', server:getsockname())
 
 -- Map from channel_id/hash to {ip,port}
 local addrs = {}
