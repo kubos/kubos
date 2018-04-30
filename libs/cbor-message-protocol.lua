@@ -13,7 +13,7 @@ limitations under the License.
 
 --[[lit-meta
   name = "kubos/cbor-message-protocol"
-  version = "0.0.2"
+  version = "1.0.0"
   description = "Simple protocol for streaming CBOR messages with backpressure over UDP"
   tags = { "kubos", "udp", "cbor", "backpressure"}
   author = { name = "Tim Caswell", email = "tim@kubos.co" }
