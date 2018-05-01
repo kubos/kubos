@@ -358,13 +358,6 @@ version = "0.2.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "mai-test"
-version = "0.1.0"
-dependencies = [
- "mai400-api 0.1.0",
-]
-
-[[package]]
 name = "mai400-api"
 version = "0.1.0"
 dependencies = [
