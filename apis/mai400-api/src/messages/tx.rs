@@ -107,7 +107,7 @@ impl Message for SetGPSTime {
         vec.write_u16::<LittleEndian>(SYNC).unwrap();
         vec.push(self.id);
         vec.write_u32::<LittleEndian>(self.gps_time).unwrap();
-        vec.append(&mut vec![0; 31]); //TODO: Remove for newer FW version
+        vec.append(&mut vec![0; 31]);
         vec
     }
 }

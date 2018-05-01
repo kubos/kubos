@@ -210,9 +210,9 @@ fn update_9() {
 fn update_10() {
     let input = StandardTelemetry {
         tlm_counter: 10,
-        rotating_variable_a: 0x01020304,
-        rotating_variable_b: 0x05060708,
-        rotating_variable_c: 0x090A0B0C,
+        rotating_variable_a: 0x03040102,
+        rotating_variable_b: 0x07080506,
+        rotating_variable_c: 0x0B0C090A,
         ..Default::default()
     };
 
@@ -232,9 +232,9 @@ fn update_10() {
 fn update_11() {
     let input = StandardTelemetry {
         tlm_counter: 11,
-        rotating_variable_a: 0x01020304,
-        rotating_variable_b: 0x05060708,
-        rotating_variable_c: 0x090A0B0C,
+        rotating_variable_a: 0x03040102,
+        rotating_variable_b: 0x07080506,
+        rotating_variable_c: 0x0B0C090A,
         ..Default::default()
     };
 
@@ -253,9 +253,9 @@ fn update_11() {
 fn update_12() {
     let input = StandardTelemetry {
         tlm_counter: 12,
-        rotating_variable_a: 0x01020304,
-        rotating_variable_b: 0x05060708,
-        rotating_variable_c: 0x090A0B0C,
+        rotating_variable_a: 0x04030201,
+        rotating_variable_b: 0x08070605,
+        rotating_variable_c: 0x0C0B0A09,
         ..Default::default()
     };
 
@@ -433,9 +433,9 @@ fn update_20() {
 fn update_21() {
     let input = StandardTelemetry {
         tlm_counter: 21,
-        rotating_variable_a: 0x01020304,
-        rotating_variable_b: 0x05060708,
-        rotating_variable_c: 0x090A0B0C,
+        rotating_variable_a: 0x03040102,
+        rotating_variable_b: 0x07080506,
+        rotating_variable_c: 0x0B0C090A,
         ..Default::default()
     };
 
@@ -472,8 +472,8 @@ fn update_23() {
     let input = StandardTelemetry {
         tlm_counter: 23,
         rotating_variable_a: 0x3F8CCCCD,
-        rotating_variable_b: 0x05060708,
-        rotating_variable_c: 0x090A0B0C,
+        rotating_variable_b: 0x07080506,
+        rotating_variable_c: 0x0B0C090A,
         ..Default::default()
     };
 
@@ -481,9 +481,9 @@ fn update_23() {
 
     rotating.update(&input);
 
-    assert_eq!(rotating.raw_trq_max, 1.1);
+    assert_eq!(rotating.rwa_trq_max, 1.1);
     assert_eq!(rotating.rws_motor_current[0], 0x0506);
     assert_eq!(rotating.rws_motor_current[1], 0x0708);
     assert_eq!(rotating.rws_motor_current[2], 0x090A);
-    assert_eq!(rotating.raw_motor_temp, 0x0B0C);
+    assert_eq!(rotating.rws_motor_temp, 0x0B0C);
 }
