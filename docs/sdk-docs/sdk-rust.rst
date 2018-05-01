@@ -103,3 +103,29 @@ to a Linux target:
 3. Navigate to the folder ``/home/system/usr/local/bin``.
 4. This folder is the default destination for flashed files. Your binaries should
    be here. You can now run them with ``./{binary-name}``.
+
+Formatting
+----------
+
+The ``rustfmt`` tool can be used to automatically edit your source code to match the
+current Rust standards.
+
+To format your code:
+
+- Install ``rustfmt``::
+
+    $ rustup component add rustfmt-preview
+    
+- Navigate to your project folder
+- Run the formatting tool via Cargo::
+
+    $ cargo fmt
+    
+Important Notes
+~~~~~~~~~~~~~~~
+
+- Kubos is currently using the ``0.3.8-nightly`` version of ``rustfmt``.
+  Despite the name, it is the latest version of ``rustfmt`` for stable Rust.
+- Using ``cargo install rustfmt`` to install ``rustfmt`` will result in the deprecated version being installed, 
+  which has slightly different formatting rules. Please use the ``rustup`` installation method instead.
+
