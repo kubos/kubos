@@ -320,7 +320,7 @@ fn reset(mai: &MAI400, logger: &Logger) -> u8 {
     return rc;
 }
 
-fn read(mai: &MAI400, logger: &Logger) -> u8 {
+fn read(logger: &Logger) -> u8 {
     let mut rc = 0;
 
     // Read loop test
@@ -328,9 +328,8 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
     let thread_exit = main_exit.clone();
 
     let (sender, receiver) = channel();
-    let thread_logger = logger.clone();
 
-    let handle = thread::spawn(move || read_loop(thread_exit, &thread_logger, sender));
+    let handle = thread::spawn(move || read_loop(thread_exit, sender));
 
     // Let read loop run for 10 seconds to ensure that we get all of the
     // rotating variable values
@@ -580,14 +579,14 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
         );
         info!(logger, "unload_ang_thresh: {}", rotating.unload_ang_thresh);
         info!(logger, "q_sat: {}", rotating.q_sat);
-        info!(logger, "raw_trq_max: {}", rotating.raw_trq_max);
+        info!(logger, "rwa_trq_max: {}", rotating.rwa_trq_max);
         let data: String = rotating
             .rws_motor_current
             .iter()
             .map(|x| format!(" {}", x))
             .collect();
         info!(logger, "rws_motor_current:{}", data);
-        info!(logger, "raw_motor_temp: {}", rotating.raw_motor_temp);
+        info!(logger, "rws_motor_temp: {}", rotating.rws_motor_temp);
 
         // Finish up 'Set RV' integration test
         rc += if rotating.orbit_epoch_next == RV_EPOCH {
@@ -687,7 +686,6 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
 
 fn read_loop(
     exit: Arc<AtomicBool>,
-    logger: &Logger,
     sender: Sender<
         (
             Option<StandardTelemetry>,
@@ -697,7 +695,7 @@ fn read_loop(
         ),
     >,
 ) {
-    let connection = Connection::new("/dev/ttyS5".to_owned());
+    let connection = Connection::new("/dev/ttyS5");
     let mai = MAI400::new(connection);
 
     let mut std: Option<StandardTelemetry> = None;
@@ -747,7 +745,7 @@ fn main() {
     thread::sleep(Duration::new(1, 0));
 
     // Initialize a connection with the device
-    let connection = Connection::new("/dev/ttyS5".to_owned());
+    let connection = Connection::new("/dev/ttyS5");
     let mai = MAI400::new(connection);
 
     info!(logger, "MAI400 Integration Tests");
@@ -757,7 +755,7 @@ fn main() {
     error_count += set_mode_sun(&mai, &logger);
     error_count += set_rv(&mai, &logger);
     error_count += passthrough(&mai, &logger);
-    error_count += read(&mai, &logger);
+    error_count += read(&logger);
     error_count += reset(&mai, &logger);
 
     info!(logger, "MAI400 Integration Tests Complete");
