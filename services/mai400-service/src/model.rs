@@ -62,7 +62,7 @@ impl ReadData {
     }
 }
 
-pub fn read_thread(bus: String, data: Arc<ReadData>) -> MAIResult<()> {
+pub fn read_thread(bus: &str, data: Arc<ReadData>) -> MAIResult<()> {
     let connection = Connection::new(bus);
     let mai = MAI400::new(connection);
 
@@ -90,10 +90,8 @@ pub struct Subsystem {
 }
 
 impl Subsystem {
-    pub fn new(bus: String, data: Arc<ReadData>) -> Subsystem {
-        println!("New Subsystem");
-
-        let connection = Connection::new(bus.clone());
+    pub fn new(bus: &'static str, data: Arc<ReadData>) -> Subsystem {
+        let connection = Connection::new(bus);
         let mai = MAI400::new(connection);
 
         let data_ref = data.clone();

@@ -296,7 +296,7 @@ fn main() {
 
     Service::new(
         Config::new("mai400-service"),
-        Subsystem::new("/dev/ttyS5".to_owned(), Arc::new(ReadData::new())),
+        Subsystem::new("/dev/ttyS5", Arc::new(ReadData::new())),
         QueryRoot,
         MutationRoot,
     ).start();

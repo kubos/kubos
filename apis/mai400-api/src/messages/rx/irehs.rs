@@ -167,3 +167,31 @@ bitflags! {
         const AUX_WIDE_FOV = 0x20;
     }
 }
+
+impl ThermopileFlags {
+    /// Convert the flags byte into a vector containing the string representations
+    /// of all flags present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mai400_api::*;
+    ///
+    /// # fn func() -> MAIResult<()> {
+    /// let flags = ThermopileFlags::NO_COMM | ThermopileFlags::BAD_EARTH_REF;
+    ///
+    /// let conv = flags.to_vec();
+    ///
+    /// assert_eq!(conv, vec!["NO_COMM", "BAD_EARTH_REF"]);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn to_vec(&self) -> Vec<String> {
+        format!("{:?}", self)
+            .to_owned()
+            .split(" | ")
+            .map(|x| x.to_string())
+            .collect()
+    }
+}
