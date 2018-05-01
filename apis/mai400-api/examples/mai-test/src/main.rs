@@ -7,7 +7,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 fn read_loop(exit: Arc<AtomicBool>) {
-    let connection = Connection::new("/dev/ttyS5".to_owned());
+    let connection = Connection::new("/dev/ttyS5");
     let mai = MAI400::new(connection);
 
     let mut std = StandardTelemetry::default();
@@ -201,12 +201,12 @@ fn read_loop(exit: Arc<AtomicBool>) {
     );
     println!("unload_ang_thresh: {}", rotating.unload_ang_thresh);
     println!("q_sat: {}", rotating.q_sat);
-    println!("raw_trq_max: {}", rotating.raw_trq_max);
+    println!("rwa_trq_max: {}", rotating.rwa_trq_max);
     print!("rws_motor_current:");
     for elem in rotating.rws_motor_current.iter() {
         print!(" {}", elem);
     }
-    println!("\nraw_motor_temp: {}", rotating.raw_motor_temp);
+    println!("\nrws_motor_temp: {}", rotating.rws_motor_temp);
 
     // Print raw IMU
     println!("\nRaw IMU:\n-----------------------");
@@ -239,13 +239,12 @@ fn read_loop(exit: Arc<AtomicBool>) {
         print!(" {:?}", elem);
     }
     println!("");
-
 }
 
 fn main() {
     println!("MAI400 Rust Test");
 
-    let connection = Connection::new("/dev/ttyS5".to_owned());
+    let connection = Connection::new("/dev/ttyS5");
     let mai = MAI400::new(connection);
 
     // Start read thread

@@ -5,6 +5,7 @@ members = [
 "apis/isis-imtq-api",
 "apis/isis-iobc-supervisor",
 "apis/mai400-api",
+"apis/mai400-api/examples/mai-test",
 "apis/nsl-duplex-d2",
 "apis/rust-radio-api",
 "examples/rust-service/extern-lib",
