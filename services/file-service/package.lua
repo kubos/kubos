@@ -1,8 +1,8 @@
 return {
-  name = "kubos/kubos-shell-service",
+  name = "kubos/kubos-file-service",
   version = "1.0.0",
-  description = "Service to provide access to linux files and processes remotely.",
-  tags = { "kubos", "udp", "shell", "file", "process" },
+  description = "Service to upload and download files to cubesats.",
+  tags = { "kubos", "udp", "file" },
   author = { name = "Tim Caswell", email = "tim@kubos.co" },
   homepage = "https://github.com/kubos/kubos",
   luvi = {
@@ -13,6 +13,7 @@ return {
     "luvit/require",
     "luvit/pretty-print",
     "kubos/cbor-message-protocol",
+    "kubos/file-protocol",
   },
   files = {
     "**.lua",

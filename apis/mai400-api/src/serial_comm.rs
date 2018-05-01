@@ -32,10 +32,10 @@ pub struct Connection {
 
 impl Connection {
     /// Convenience constructor to create connection from stream.
-    pub fn new(bus: String) -> Connection {
+    pub fn new(bus: &str) -> Connection {
         Connection {
             stream: Box::new(SerialStream {
-                bus,
+                bus: bus.to_owned(),
                 settings: serial::PortSettings {
                     baud_rate: serial::Baud115200,
                     char_size: serial::Bits8,
@@ -77,7 +77,6 @@ struct SerialStream {
 
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> MAIResult<()> {
-
         //But why don't you just make 'port' a field of SerialStream and then you
         //only have to open the connection once, during new?
         //
@@ -97,7 +96,6 @@ impl Stream for SerialStream {
     }
 
     fn read(&self) -> MAIResult<Vec<u8>> {
-
         //TODO: I don't like closing this after every read. how likely is it that this will cause us to miss messages?
         let mut port = serial::open(self.bus.as_str())?;
 

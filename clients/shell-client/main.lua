@@ -19,12 +19,35 @@ local ffi = require 'ffi'
 local stdout = require('pretty-print').stdout
 local stderr = require('pretty-print').stderr
 local stdin = require('pretty-print').stdin
-local cbor = require 'cbor'
 local getenv = require('os').getenv
 local readLine = require('readline').readLine
+local cbor_message_protocol = require 'cbor-message-protocol'
 
--- Default lua strings to utf8 strings in cbor encoding.
-cbor.type_encoders.string = cbor.type_encoders.utf8string
+local function makeCallback()
+  local thread = coroutine.running()
+  return function (err, value, ...)
+    if err then
+      assert(coroutine.resume(thread, nil, err))
+    else
+      assert(coroutine.resume(thread, value == nil and true or value, ...))
+    end
+  end
+end
+
+local function wrapper(fn)
+  return function (...)
+    local nargs = select('#', ...)
+    local args = { ... }
+    return coroutine.wrap(function()
+      local success, result = xpcall(function ()
+        return fn(unpack(args, 1, nargs))
+      end, debug.traceback)
+      if not success then
+        print(result)
+      end
+    end)()
+  end
+end
 
 local port = getenv 'PORT'
 if port then port = tonumber(port) end
@@ -36,9 +59,10 @@ local handle = uv.new_udp()
 handle:bind('127.0.0.1', 0)
 -- p(handle:getsockname())
 
+local send_message
+
 local function send(message)
-  local data = cbor.encode { id, unpack(message) }
-  handle:send(data, '127.0.0.1', port)
+  return send_message({ id, unpack(message) }, '127.0.0.1', port)
 end
 
 ffi.cdef[[
@@ -47,10 +71,10 @@ ffi.cdef[[
 
 local handlers = {}
 
-local function on_raw(err, data)
+local on_raw = wrapper(function (err, data)
   assert(not err, err)
   send { 'stdin', data }
-end
+end)
 
 function handlers.pid(pid)
   p('Remote sh process:', {pid=pid})
@@ -60,11 +84,13 @@ function handlers.pid(pid)
 end
 
 function handlers.stdout(data)
-  stdout:write(data)
+  stdout:write(data, makeCallback())
+  coroutine.yield()
 end
 
 function handlers.stderr(data)
-  stderr:write(data)
+  stderr:write(data, makeCallback())
+  coroutine.yield()
 end
 
 function handlers.exit(code, signal)
@@ -89,7 +115,7 @@ function handlers.list(processes)
   for k, v in pairs(processes) do
     p(k, v)
   end
-  local function onReadLine(err, out, reason)
+  local onReadLine = wrapper(function (err, out, reason)
     assert(not err, err)
     if reason == 'EOF in readLine' then
       print()
@@ -97,6 +123,7 @@ function handlers.list(processes)
     end
     if out == '' then
       print 'Starting new remote sh shell...'
+      id = uv.hrtime() % 0x10000
       send {
         'spawn',
         'sh',
@@ -117,14 +144,11 @@ function handlers.list(processes)
 
     id = option
     handlers.pid(proc.pid)
-  end
+  end)
   readLine("> ", onReadLine)
 end
 
-handle:recv_start(function (err, data)
-  assert(not err, err)
-  if not data then return end
-  local message = cbor.decode(data)
+local function on_message(message)
   local rid = message[1]
   if rid ~= id then return end
   local command = message[2]
@@ -135,9 +159,11 @@ handle:recv_start(function (err, data)
     return
   end
   fn(unpack(message, 3))
-end)
+end
 
-send { 'list' }
+send_message = cbor_message_protocol(handle, on_message, false)
+
+wrapper(send){ 'list' }
 
 -- TODO: uncomment when resize works better in shell service.
 -- local cols, rows = stdin:get_winsize()

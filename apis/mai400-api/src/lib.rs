@@ -19,14 +19,13 @@
 //! All work is done against an instantiated [`MAI400`] struct.
 //!
 //! # Examples
-//! //TODO: No longer valid
 //!
 //! ```
 //! use mai400_api::*;
 //!
 //! # fn func() -> MAIResult<()> {
 //! // Create a new MAI connection
-//! let connection = Connection::new("/dev/ttyS5".to_owned());
+//! let connection = Connection::new("/dev/ttyS5");
 //! let mai = MAI400::new(connection);
 //!
 //! // Set the GPS time to Jan 01, 2018
@@ -46,7 +45,7 @@
 
 #![deny(missing_docs)]
 //Need a higher recursion limit for nom when parsing larger (>60 bytes) structures
-#![recursion_limit="256"]
+#![recursion_limit = "256"]
 
 #[macro_use]
 extern crate bitflags;
@@ -55,12 +54,11 @@ extern crate crc16;
 #[cfg(test)]
 #[macro_use]
 extern crate double;
-extern crate serial;
 #[macro_use]
 extern crate failure;
 #[macro_use]
 extern crate nom;
-
+extern crate serial;
 
 mod mai400;
 mod messages;

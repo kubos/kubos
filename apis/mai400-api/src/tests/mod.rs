@@ -46,7 +46,9 @@ impl Stream for MockStream {
 fn mock_test() {
     let mock = mock_new!();
 
-    let connection = Connection { stream: Box::new(mock) };
+    let connection = Connection {
+        stream: Box::new(mock),
+    };
 
     let packet: [u8; 40] = [0; 40];
 
