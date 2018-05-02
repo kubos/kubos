@@ -10,12 +10,18 @@ members = [
 "apis/rust-radio-api",
 "examples/rust-service/extern-lib",
 "examples/rust-service/service",
+"examples/udp-service-client",
 "hal/i2c-hal",
+"hal/rust-hal/rust-uart",
 "kubos-build-helper",
 "services/comms-service",
+"services/kubos-service",
 "services/iobc-supervisor-service",
 "test/integration/linux/isis-ants",
 ]
 
 [profile.release]
 lto = true
+opt-level = 3
+opt-size = 2
+panic = "abort"

@@ -14,49 +14,22 @@
 // limitations under the License.
 //
 
-extern crate iron;
 #[macro_use]
 extern crate juniper;
-extern crate juniper_iron;
-extern crate logger;
-extern crate mount;
-
-use iron::prelude::*;
-use juniper_iron::{GraphQLHandler, GraphiQLHandler};
+extern crate kubos_service;
 
 mod model;
 mod schema;
-use std::env;
 
-/// A context object is used in Juniper to provide out-of-band access to global
-/// data when resolving fields. We will use it here to provide a Subsystem structure
-/// with recently fetched data.
-///
-/// Since this function is called once for every request, it will fetch new
-/// data with each request.
-fn context_factory(_: &mut Request) -> schema::Context {
-    schema::Context {
-        supervisor: model::Supervisor::new(),
-    }
-}
+use kubos_service::{Config, Service};
+use model::Supervisor;
+use schema::{MutationRoot, QueryRoot};
 
 fn main() {
-    let graphql_endpoint =
-        GraphQLHandler::new(context_factory, schema::QueryRoot, schema::MutationRoot);
-
-    let graphiql_endpoint = GraphiQLHandler::new("/");
-
-    let mut mount = mount::Mount::new();
-    mount.mount("/", graphql_endpoint);
-    mount.mount("/graphiql", graphiql_endpoint);
-
-    let (logger_before, logger_after) = logger::Logger::new(None);
-
-    let mut chain = Chain::new(mount);
-    chain.link_before(logger_before);
-    chain.link_after(logger_after);
-
-    let host = env::var("LISTEN").unwrap_or("0.0.0.0:8080".to_owned());
-    println!("GraphQL server started on {}", host);
-    Iron::new(chain).http(host.as_str()).unwrap();
+    Service::new(
+        Config::new("iobc-supervisor-service"),
+        Supervisor::new(),
+        QueryRoot,
+        MutationRoot,
+    ).start();
 }

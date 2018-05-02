@@ -15,23 +15,18 @@ limitations under the License.
 ]]
 
 local uv = require 'uv'
-local cbor = require 'cbor'
-
--- Default lua strings to utf8 strings in cbor encoding.
-cbor.type_encoders.string = cbor.type_encoders.utf8string
+local cbor_message_protocol = require 'cbor-message-protocol'
 
 return function (make_service, port)
 
+  local send_message
   local server = uv.new_udp()
   assert(server:bind('127.0.0.1', port))
 
   local meta = {}
   function meta:__index(key)
     local fn = function (...)
-      local message = { self.id, key, ... }
-      -- p('->', message)
-      local encoded = cbor.encode(message)
-      server:send(encoded, self.ip, self.port)
+      send_message({ self.id, key, ... }, self.ip, self.port)
     end
     self[key] = fn
     return fn
@@ -55,13 +50,9 @@ return function (make_service, port)
     return channel
   end
 
-  server:recv_start(function (err, data, addr)
-    if err then return print(err) end
-    if not data then return end
+  local function on_message(message, addr)
     local channel
     local success, error = xpcall(function ()
-      local message = cbor.decode(data)
-      -- p('<-', message)
       assert(type(message) == 'table' and #message >= 1, 'Message must be list')
       local id = table.remove(message, 1)
       channel = get_channel(id, addr)
@@ -75,8 +66,10 @@ return function (make_service, port)
         channel.error(error)
       end
     end
-  end)
+  end
 
-  p('UDP server bound', server:getsockname())
+  send_message = cbor_message_protocol(server, on_message, true)
+
+  p('Shell Service: UDP server bound', server:getsockname())
 
 end

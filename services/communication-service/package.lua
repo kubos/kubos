@@ -1,8 +1,8 @@
 return {
-  name = "kubos/kubos-shell-service",
-  version = "1.0.0",
-  description = "Service to provide access to linux files and processes remotely.",
-  tags = { "kubos", "udp", "shell", "file", "process" },
+  name = "kubos/kubos-communication-service",
+  version = "0.0.4",
+  description = "Service to route udp packets to and from a custom transport.",
+  tags = { "kubos", "udp", "nat", "stdio", "serial" },
   author = { name = "Tim Caswell", email = "tim@kubos.co" },
   homepage = "https://github.com/kubos/kubos",
   luvi = {
@@ -12,11 +12,12 @@ return {
   dependencies = {
     "luvit/require",
     "luvit/pretty-print",
-    "kubos/cbor-message-protocol",
+    "creationix/coro-wrapper",
+    "creationix/coro-channel",
+    "creationix/coro-fs",
   },
   files = {
     "**.lua",
-    "!tests",
   },
   license = "Apache 2.0"
 }
