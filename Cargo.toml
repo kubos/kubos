@@ -16,6 +16,7 @@ members = [
 "services/kubos-service",
 "services/iobc-supervisor-service",
 "test/integration/linux/isis-ants",
+"test/integration/linux/mai400",
 ]
 
 [profile.release]
