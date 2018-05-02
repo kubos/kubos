@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use i2c_hal::Stream;
+use i2c_hal::Connection;
 
 use commands::*;
 use telemetry;
@@ -23,7 +23,7 @@ use failure::Error;
 /// Eps structure containing low level connection and functionality
 /// required for commanding and requesting telemetry from Eps device.
 pub struct Eps {
-    connection: Box<Stream>,
+    connection: Connection,
 }
 
 impl Eps {
@@ -33,7 +33,7 @@ impl Eps {
     ///
     /// # Arguments
     /// - connection - A `Box<Stream>` used as low-level connection to eps hardware
-    pub fn new(connection: Box<Stream>) -> Self {
+    pub fn new(connection: Connection) -> Self {
         Eps { connection }
     }
 

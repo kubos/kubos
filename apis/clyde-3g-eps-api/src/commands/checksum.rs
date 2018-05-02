@@ -46,6 +46,7 @@ fn parse_checksum(data1: u8, data2: u8) -> u16 {
 }
 
 pub fn parse(data: &[u8]) -> Result<Checksum, Error> {
+    println!("Checksum {:?}", data);
     if data.len() == 4 {
         Ok(Checksum {
             motherboard: parse_checksum(data[2], data[3]),

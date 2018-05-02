@@ -60,13 +60,13 @@ pub struct LastError {
 pub fn parse(data: &[u8]) -> Result<LastError, Error> {
     if data.len() == 2 {
         Ok(LastError {
-            motherboard: ErrorCode::from_bits(data[0]).unwrap(),
+            motherboard: ErrorCode::from_bits(data[1]).unwrap_or_default(),
             daughterboard: None,
         })
     } else if data.len() == 4 {
         Ok(LastError {
-            motherboard: ErrorCode::from_bits(data[0]).unwrap(),
-            daughterboard: ErrorCode::from_bits(data[2]),
+            motherboard: ErrorCode::from_bits(data[1]).unwrap_or_default(),
+            daughterboard: ErrorCode::from_bits(data[3]),
         })
     } else {
         throw!(EpsError::invalid_data(data))
