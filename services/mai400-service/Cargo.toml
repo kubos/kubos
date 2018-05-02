@@ -9,8 +9,8 @@ juniper =  "0.9"
 serde_json = "1.0"
 failure = { git = "https://github.com/rust-lang-nursery/failure" }
 double = "0.2"
-kubos-service = { git = "https://github.com/kubos/kubos", branch = "mai400-service" }
-mai400-api = { git = "https://github.com/kubos/kubos", branch = "mai400-service" }
+kubos-service = { path = "../kubos-service" }
+mai400-api = { path = "../../apis/mai400-api" }
 
 [dev-dependencies]
 serde = "1.0"

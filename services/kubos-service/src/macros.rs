@@ -60,14 +60,14 @@
 #[macro_export]
 macro_rules! process_errors {
     ($err:ident) => (process_errors!($err, ", "));
-    ($err:ident, $delim:expr) => {{    
+    ($err:ident, $delim:expr) => {{
         {
             let mut results = String::new();
             let mut chain = $err.causes();
-            
+
             if let Some(err) = chain.next() {
                 results.push_str(&format!("{}", err));
-        
+
                 for err in chain {
                     results.push_str(&format!("{}{}", $delim, err));
                 }
@@ -106,7 +106,7 @@ macro_rules! push_err {
         }}
 }
 
-/// Execute a function and return Result<func_data, String>
+/// Execute a function and return `Result<func_data, String>`
 /// Optionally:
 ///   Add the error string to the master error string for later consumption,
 ///   prefixed with the name of the function being called
@@ -157,22 +157,22 @@ macro_rules! push_err {
 ///
 ///     assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
 ///     assert_eq!(
-///         vec!["test_func: TopError: top, RootError: root".to_owned()],
+///         vec!["test_func (src/macros.rs:41): TopError: top, RootError: root".to_owned()],
 ///         master_err.borrow().clone()
 ///     );
 /// }
 /// ```
 #[macro_export]
 macro_rules! run {
-    ($func:expr) => {{       
+    ($func:expr) => {{
             $func.map_err(|err| process_errors!(err))
         }};
     ($func:expr, $master:expr) => {{
         {
             let result = run!($func);
-            
+
             if result.is_err() {
-                // We want to know which function threw these particular errors, 
+                // We want to know which function threw these particular errors,
                 // but we don't want to print the entire expression, so using split
                 // to go from
                 //     self.my.func(arg1, arg2)
@@ -181,9 +181,9 @@ macro_rules! run {
                 // TODO: This isn't perfect or particularly pretty. Is there a better way?
                 let mut name = stringify!($func).split('(').next().unwrap();
                 name = name.split(&[':','.'][..]).last().unwrap();
-                push_err!($master, format!("{}: {}", name, result.clone().unwrap_err()));
+                push_err!($master, format!("{} ({}:{}): {}", name, file!(), line!(), result.clone().unwrap_err()));
             }
-            
+
             result
         }
     }};
@@ -191,7 +191,7 @@ macro_rules! run {
 
 #[cfg(test)]
 mod tests {
-    use failure::{Fail, Error};
+    use failure::{Error, Fail};
     use std::cell::RefCell;
 
     #[derive(Fail, Display, Debug)]
@@ -214,7 +214,9 @@ mod tests {
         match fail {
             true => {
                 let chain: TopError = TopError::Error {
-                    cause: RootError::RootError { message: "root".to_owned() },
+                    cause: RootError::RootError {
+                        message: "root".to_owned(),
+                    },
                     message: "top".to_owned(),
                 };
 
@@ -227,7 +229,9 @@ mod tests {
     #[test]
     fn process_errors_default() {
         let chain: TopError = TopError::Error {
-            cause: RootError::RootError { message: "root".to_owned() },
+            cause: RootError::RootError {
+                message: "root".to_owned(),
+            },
             message: "top".to_owned(),
         };
 
@@ -238,7 +242,9 @@ mod tests {
     #[test]
     fn process_errors_delim() {
         let chain: TopError = TopError::Error {
-            cause: RootError::RootError { message: "root".to_owned() },
+            cause: RootError::RootError {
+                message: "root".to_owned(),
+            },
             message: "top".to_owned(),
         };
 
@@ -282,7 +288,7 @@ mod tests {
 
         assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
         assert_eq!(
-            vec!["test_func: TopError: top, RootError: root".to_owned()],
+            vec!["test_func (services/kubos-service/src/macros.rs:287): TopError: top, RootError: root".to_owned()],
             master_err.borrow().clone()
         );
     }

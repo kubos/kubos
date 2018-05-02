@@ -41,7 +41,8 @@
 //!
 //! The service configuration file uses the Toml format and is expected to use the
 //! following layout:
-//! ```
+//!
+//! ```text
 //! [service-name]
 //! config-key = "value"
 //! config-key2 = 123
@@ -51,6 +52,7 @@
 //! ip = "127.0.0.1"
 //! port = 8082
 //! ```
+//!
 //! The `[service-name.addr]` section is required for all services and is used to set
 //! the ip/port on which the service will listen for messages. Any service specific
 //! configuration values can be specified directly under the `[service-name]` section.
@@ -60,6 +62,7 @@
 //! ### Examples
 //!
 //! # Creating and starting a simple service.
+//!
 //! ```rust,ignore
 //! use kubos_service::{Config, Service};
 //! use model::Subsystem;
@@ -74,6 +77,7 @@
 //! ```
 //!
 //! # Using the service config info to configure the subsystem.
+//!
 //! ```rust,ignore
 //! use kubos_service::{Config, Service};
 //! use model::Subsystem;
@@ -90,11 +94,13 @@
 //! ```
 //!
 //! # Running a service with the default config file (`/home/system/etc/config.toml`).
+//!
 //! ```bash
 //! $ ./example-service
 //! ```
 //!
 //! # Running a service with a custom config file.
+//!
 //! ```bash
 //! $ ./example-service -c config.toml
 //! ```
