@@ -21,6 +21,7 @@ use serial_comm::Connection;
 use std::io;
 
 /// Structure for MAI-400 device instance
+#[derive(Clone)]
 pub struct MAI400 {
     /// Device connection structure
     pub conn: Connection,

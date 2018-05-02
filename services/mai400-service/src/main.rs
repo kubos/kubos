@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#![deny(missing_docs)]
-#![deny(warnings)]
+//#![deny(missing_docs)]
+//#![deny(warnings)]
 
 //! Kubos Service for interacting with an [Adcole Maryland Aerospace MAI-400](https://www.adcolemai.com/adacs)
 //!
@@ -36,7 +36,8 @@
 //!
 //! ```
 //! $ mai400-service
-// TODO: copy startup messages
+//! Kubos MAI-400 service started
+//! Listening on: 10.63.1.20:8082
 //! ```
 //!
 //! # Available Fields
@@ -257,7 +258,6 @@
 #[macro_use]
 extern crate double;
 extern crate failure;
-extern crate i2c_linux;
 #[macro_use]
 extern crate juniper;
 #[macro_use]
@@ -273,27 +273,12 @@ mod schema;
 #[cfg(test)]
 mod tests;
 
-use i2c_linux::I2c;
 use kubos_service::{Config, Service};
 use model::{ReadData, Subsystem};
 use schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
 
-//TODO: remove before merging. This is tied to the presence of an AIM, rather than the MAI itself
-fn i2c_cmds() {
-    // Make sure the power line that goes to the MAI is turned on
-
-    let mut i2c = I2c::from_path("/dev/i2c-1").unwrap();
-    i2c.smbus_set_slave_address(0x1F, false).unwrap();
-
-    i2c.i2c_write_block_data(0x03, &[0xF0]).unwrap();
-    i2c.i2c_write_block_data(0x01, &[0x0E]).unwrap();
-}
-
 fn main() {
-    //TODO: Remove before merging
-    i2c_cmds();
-
     Service::new(
         Config::new("mai400-service"),
         Subsystem::new("/dev/ttyS5", Arc::new(ReadData::new())),

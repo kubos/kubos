@@ -16,6 +16,7 @@
 
 use double;
 use mai400_api::*;
+use std::sync::mpsc::channel;
 
 #[macro_export]
 macro_rules! mock_new {
@@ -41,6 +42,34 @@ impl Stream for MockStream {
     mock_method!(read(&self) -> MAIResult<Vec<u8>>);
 }
 
+#[macro_export]
+macro_rules! service_new {
+    ($mock:ident) => {{
+        let (_sender, receiver) = channel();
+        Service::new(
+            Config::new("mai400-service"),
+            Subsystem {
+                mai: MAI400 {
+                    conn: Connection {
+                        stream: Box::new($mock),
+                    },
+                },
+                last_cmd: Cell::new(AckCommand::None),
+                errors: RefCell::new(vec![]),
+                persistent: Arc::new(ReadData {
+                    std_telem: Mutex::new(STD),
+                    irehs_telem: Mutex::new(IREHS),
+                    imu: Mutex::new(IMU),
+                    rotating: Mutex::new(ROTATING),
+                }),
+                receiver,
+            },
+            QueryRoot,
+            MutationRoot,
+        )
+    }};
+}
+
 #[test]
 fn mock_test() {
     let mock = mock_new!();
@@ -57,5 +86,6 @@ fn mock_test() {
     );
 }
 
+mod read;
 mod schema;
 mod test_data;

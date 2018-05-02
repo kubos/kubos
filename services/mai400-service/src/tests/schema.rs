@@ -29,34 +29,9 @@ use tests::test_data::*;
 macro_rules! wrap {
     ($result:ident) => {{
         json!({
-                                        "msg": serde_json::to_string(&$result).unwrap(),
-                                        "errs": ""})
-            .to_string()
-    }};
-}
-
-macro_rules! service_new {
-    ($mock:ident) => {{
-        Service::new(
-            Config::new("mai400-service"),
-            Subsystem {
-                mai: MAI400 {
-                    conn: Connection {
-                        stream: Box::new($mock),
-                    },
-                },
-                last_cmd: Cell::new(AckCommand::None),
-                errors: RefCell::new(vec![]),
-                persistent: Arc::new(ReadData {
-                    std_telem: Mutex::new(STD),
-                    irehs_telem: Mutex::new(IREHS),
-                    imu: Mutex::new(IMU),
-                    rotating: Mutex::new(ROTATING),
-                }),
-            },
-            QueryRoot,
-            MutationRoot,
-        )
+                "msg": serde_json::to_string(&$result).unwrap(),
+                "errs": ""
+        }).to_string()
     }};
 }
 
@@ -380,6 +355,8 @@ fn get_power_on() {
 
     let data_ref = data.clone();
 
+    let (_, receiver) = channel();
+
     let service = Service::new(
         Config::new("mai400-service"),
         Subsystem {
@@ -391,6 +368,7 @@ fn get_power_on() {
             last_cmd: Cell::new(AckCommand::None),
             errors: RefCell::new(vec![]),
             persistent: data,
+            receiver,
         },
         QueryRoot,
         MutationRoot,
@@ -503,7 +481,7 @@ fn telemetry_nominal() {
     let expected = json!({
             "telemetry": {
                 "nominal": {
-                    "acsMode": "TEST_MODE",
+                    "acsMode": "RATE_NULLING",
                     "angleToGo": 0.0,
                     "bd": [-0.0000017433042103220942, 1.2922178882490699e-7 ,-9.995264917961322e-7],
                     "cmdInvalidChksumCntr": 0,
@@ -884,7 +862,7 @@ fn telemetry_debug_rotating() {
                         "rwsVolt": 0,
                         "scPosEci": [6720.96533203125, 669.7313842773438, 669.7247314453125],
                         "scPosEciEpoch": [6787.47021484375, 0.0, 0.0],
-                        "scVelEci": [-1.0794577598571778, 5.364816188812256, 5.364662170410156],
+                        "scVelEci": [-0.20792292058467866, 5.416772842407227, 5.4167680740356449],
                         "scVelEciEpoch": [0.0, 5.418765068054199, 5.418765068054199],
                         "sunMagAligned": 0,
                         "sunVecEph": [0.1826000213623047, -0.9020766615867615, -0.39104345440864565],
@@ -1181,7 +1159,7 @@ fn test_results() {
                         "rwsVolt": 0,
                         "scPosEci": [6720.96533203125, 669.7313842773438, 669.7247314453125],
                         "scPosEciEpoch": [6787.47021484375, 0.0, 0.0],
-                        "scVelEci": [-1.0794577598571778, 5.364816188812256, 5.364662170410156],
+                        "scVelEci": [-0.20792292058467866, 5.416772842407227, 5.4167680740356449],
                         "scVelEciEpoch": [0.0, 5.418765068054199, 5.418765068054199],
                         "sunMagAligned": 0,
                         "sunVecEph": [0.1826000213623047, -0.9020766615867615, -0.39104345440864565],
@@ -1191,7 +1169,7 @@ fn test_results() {
                     }
                 },
                 "telemetryNominal": {
-                    "acsMode": "TEST_MODE",
+                    "acsMode": "RATE_NULLING",
                     "angleToGo": 0.0,
                     "bd": [-0.0000017433042103220942, 1.2922178882490699e-7 ,-9.995264917961322e-7],
                     "cmdInvalidChksumCntr": 0,
@@ -1234,7 +1212,7 @@ fn mode() {
         }"#;
 
     let expected = json!({
-            "mode": "TEST_MODE"
+            "mode": "RATE_NULLING"
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
@@ -1364,6 +1342,8 @@ fn noop_good() {
 
     let data_ref = data.clone();
 
+    let (_, receiver) = channel();
+
     let service = Service::new(
         Config::new("mai400-service"),
         Subsystem {
@@ -1375,6 +1355,7 @@ fn noop_good() {
             last_cmd: Cell::new(AckCommand::None),
             errors: RefCell::new(vec![]),
             persistent: data,
+            receiver,
         },
         QueryRoot,
         MutationRoot,
@@ -1434,10 +1415,8 @@ fn noop_fail() {
 fn control_power_good() {
     let mock = mock_new!();
 
-    mock.write
-        .return_value_for((REQUEST_RESET.to_vec()), Ok(()));
-    mock.write
-        .return_value_for((CONFIRM_RESET.to_vec()), Ok(()));
+    mock.write.return_value_for(REQUEST_RESET.to_vec(), Ok(()));
+    mock.write.return_value_for(CONFIRM_RESET.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -1812,7 +1791,7 @@ fn test_hardware_integration() {
                         "rwsVolt": 0,
                         "scPosEci": [6720.96533203125, 669.7313842773438, 669.7247314453125],
                         "scPosEciEpoch": [6787.47021484375, 0.0, 0.0],
-                        "scVelEci": [-1.0794577598571778, 5.364816188812256, 5.364662170410156],
+                        "scVelEci": [-0.20792292058467866, 5.416772842407227, 5.4167680740356449],
                         "scVelEciEpoch": [0.0, 5.418765068054199, 5.418765068054199],
                         "sunMagAligned": 0,
                         "sunVecEph": [0.1826000213623047, -0.9020766615867615, -0.39104345440864565],
@@ -1822,7 +1801,7 @@ fn test_hardware_integration() {
                     }
                 },
                 "telemetryNominal": {
-                    "acsMode": "TEST_MODE",
+                    "acsMode": "RATE_NULLING",
                     "angleToGo": 0.0,
                     "bd": [-0.0000017433042103220942, 1.2922178882490699e-7 ,-9.995264917961322e-7],
                     "cmdInvalidChksumCntr": 0,
@@ -1959,7 +1938,7 @@ fn set_mode_default() {
     let mock = mock_new!();
 
     mock.write
-        .return_value_for((SET_MODE_ACQUISITION_DEFAULT.to_vec()), Ok(()));
+        .return_value_for(SET_MODE_ACQUISITION_DEFAULT.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -1985,7 +1964,7 @@ fn set_mode_good() {
     let mock = mock_new!();
 
     mock.write
-        .return_value_for((SET_MODE_ACQUISITION.to_vec()), Ok(()));
+        .return_value_for(SET_MODE_ACQUISITION.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2034,7 +2013,7 @@ fn set_mode_normal_sun() {
     let mock = mock_new!();
 
     mock.write
-        .return_value_for((SET_MODE_NORMAL_SUN.to_vec()), Ok(()));
+        .return_value_for(SET_MODE_NORMAL_SUN.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2060,7 +2039,7 @@ fn set_mode_latlong_sun() {
     let mock = mock_new!();
 
     mock.write
-        .return_value_for((SET_MODE_LATLONG_SUN.to_vec()), Ok(()));
+        .return_value_for(SET_MODE_LATLONG_SUN.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2086,7 +2065,7 @@ fn set_mode_sun_default() {
     let mock = mock_new!();
 
     mock.write
-        .return_value_for((SET_MODE_SUN_DEFAULT.to_vec()), Ok(()));
+        .return_value_for(SET_MODE_SUN_DEFAULT.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2134,7 +2113,7 @@ fn set_mode_sun_fail() {
 fn update_gps_good() {
     let mock = mock_new!();
 
-    mock.write.return_value_for((SET_GPS_TIME.to_vec()), Ok(()));
+    mock.write.return_value_for(SET_GPS_TIME.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2182,7 +2161,7 @@ fn update_gps_fail() {
 fn update_rv_good() {
     let mock = mock_new!();
 
-    mock.write.return_value_for((SET_RV.to_vec()), Ok(()));
+    mock.write.return_value_for(SET_RV.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2230,8 +2209,8 @@ fn update_rv_fail() {
 fn update_both_both_good() {
     let mock = mock_new!();
 
-    mock.write.return_value_for((SET_GPS_TIME.to_vec()), Ok(()));
-    mock.write.return_value_for((SET_RV.to_vec()), Ok(()));
+    mock.write.return_value_for(SET_GPS_TIME.to_vec(), Ok(()));
+    mock.write.return_value_for(SET_RV.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2279,7 +2258,7 @@ fn update_both_both_fail() {
 fn update_both_gps_fail() {
     let mock = mock_new!();
 
-    mock.write.return_value_for((SET_RV.to_vec()), Ok(()));
+    mock.write.return_value_for(SET_RV.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 
@@ -2304,7 +2283,7 @@ fn update_both_gps_fail() {
 fn update_both_rv_fail() {
     let mock = mock_new!();
 
-    mock.write.return_value_for((SET_GPS_TIME.to_vec()), Ok(()));
+    mock.write.return_value_for(SET_GPS_TIME.to_vec(), Ok(()));
 
     let service = service_new!(mock);
 

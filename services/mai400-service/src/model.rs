@@ -21,6 +21,8 @@ use std::io::{Error, ErrorKind};
 use std::sync::{Arc, Mutex};
 use std::thread::{sleep, spawn};
 use std::time::Duration;
+use std::sync::mpsc::channel;
+use std::sync::mpsc::{Receiver, Sender, TryRecvError};
 
 use objects::*;
 
@@ -62,13 +64,31 @@ impl ReadData {
     }
 }
 
-pub fn read_thread(bus: &str, data: Arc<ReadData>) -> MAIResult<()> {
-    let connection = Connection::new(bus);
-    let mai = MAI400::new(connection);
-
+pub fn read_thread(mai: MAI400, data: Arc<ReadData>, sender: Sender<String>) {
     loop {
         // TODO: Error handling and reporting
-        let (std, imu, irehs) = mai.get_message().unwrap();
+        let (std, imu, irehs) = match mai.get_message() {
+            Ok(v) => v,
+            Err(err) => {
+                match err {
+                    MAIError::SerialError { cause } => {
+                        // As far as I can tell, the only way this error
+                        // will occur is if the UART bus itself becomes
+                        // unavailable. We need to bail hard if we run into this.
+                        sender
+                            .send(format!(
+                                "SerialError: {}. Read thread bailing. Service restart required.",
+                                cause
+                            ))
+                            .unwrap();
+                        break;
+                    }
+                    _ => sender.send(process_errors!(err)).unwrap(),
+                }
+
+                (None, None, None)
+            }
+        };
 
         if let Some(telem) = std {
             data.update_std(telem);
@@ -87,6 +107,7 @@ pub struct Subsystem {
     pub last_cmd: Cell<AckCommand>,
     pub errors: RefCell<Vec<String>>,
     pub persistent: Arc<ReadData>,
+    pub receiver: Receiver<String>,
 }
 
 impl Subsystem {
@@ -96,13 +117,41 @@ impl Subsystem {
 
         let data_ref = data.clone();
 
-        spawn(move || read_thread(bus, data_ref));
+        let (sender, receiver) = channel();
+
+        spawn(move || read_thread(MAI400::new(Connection::new(bus)), data_ref, sender));
+
+        println!("Kubos MAI-400 service started");
 
         Subsystem {
             mai,
             last_cmd: Cell::new(AckCommand::None),
             errors: RefCell::new(vec![]),
             persistent: data.clone(),
+            receiver,
+        }
+    }
+
+    pub fn get_read_health(&self) {
+        match self.receiver.try_recv() {
+            Ok(v) => {
+                push_err!(self.errors, v);
+
+                while let Ok(err) = self.receiver.try_recv() {
+                    push_err!(self.errors, err);
+                }
+            } // TODO: Process error/s
+            Err(err) => match err {
+                // Do nothing. This is the good case
+                TryRecvError::Empty => {}
+                // The sky is falling. The read thread panicked somehow.
+                TryRecvError::Disconnected => {
+                    push_err!(
+                        self.errors,
+                        "Read thread panicked. Service restart required.".to_owned()
+                    );
+                }
+            },
         }
     }
 
@@ -308,7 +357,6 @@ impl Subsystem {
 
         if let Some(params) = rv {
             if params.eci_pos.len() != 3 {
-                //TODO: throw better error
                 return Err(Error::new(
                     ErrorKind::InvalidInput,
                     "eci_pos must contain exactly 3 elements",
@@ -316,7 +364,6 @@ impl Subsystem {
             }
 
             if params.eci_vel.len() != 3 {
-                //TODO: throw better error
                 return Err(Error::new(
                     ErrorKind::InvalidInput,
                     "eci_vel must contain exactly 3 elements",

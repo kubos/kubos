@@ -24,6 +24,7 @@ use serial;
 use serial::prelude::*;
 
 /// Wrapper structure for underlying stream
+#[derive(Clone)]
 pub struct Connection {
     /// UART stream to interact with
     /// It's wrapped in a Box so that it can be easily mocked for unit tests
@@ -63,13 +64,34 @@ impl Connection {
 }
 
 /// Connections expect a struct instance with this trait to represent streams.
-pub trait Stream {
+pub trait Stream: StreamClone {
     /// Write raw bytes to the stream.
     fn write(&self, data: &[u8]) -> MAIResult<()>;
     /// Read raw bytes from the stream.
     fn read(&self) -> MAIResult<Vec<u8>>;
 }
 
+pub trait StreamClone {
+    fn clone_box(&self) -> Box<Stream>;
+}
+
+impl<T> StreamClone for T
+where
+    T: 'static + Stream + Clone,
+{
+    fn clone_box(&self) -> Box<Stream> {
+        Box::new(self.clone())
+    }
+}
+
+// We can now implement Clone manually by forwarding to clone_box.
+impl Clone for Box<Stream> {
+    fn clone(&self) -> Box<Stream> {
+        self.clone_box()
+    }
+}
+
+#[derive(Clone)]
 struct SerialStream {
     bus: String,
     settings: serial::PortSettings,
@@ -96,7 +118,6 @@ impl Stream for SerialStream {
     }
 
     fn read(&self) -> MAIResult<Vec<u8>> {
-        //TODO: I don't like closing this after every read. how likely is it that this will cause us to miss messages?
         let mut port = serial::open(self.bus.as_str())?;
 
         port.configure(&self.settings)?;
@@ -115,12 +136,10 @@ impl Stream for SerialStream {
                         continue;
                     }
                 }
-                Err(err) => {
-                    match err.kind() {
-                        ::std::io::ErrorKind::TimedOut => continue, //TODO: Govern with a master timer? Or will the set_timeout call be enough? Needs to be tested
-                        _ => throw!(err),
-                    }
-                }
+                Err(err) => match err.kind() {
+                    ::std::io::ErrorKind::TimedOut => continue,
+                    _ => throw!(err),
+                },
             }
 
             let mut wrapper = Cursor::new(sync.to_vec());
@@ -138,7 +157,7 @@ impl Stream for SerialStream {
                 let mut data: Vec<u8> = vec![0; 46];
                 let temp = match port.read(&mut data[..]) {
                     Ok(v) => v,
-                    Err(_err) => continue, //TODO: process timeout
+                    Err(_err) => continue,
                 };
 
                 len += temp;
