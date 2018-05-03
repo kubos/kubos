@@ -1,3 +1,4 @@
+local uv = require 'uv'
 local jwt = require 'jwt'
 local Gateway = require 'gateway'
 local fs = require 'fs'
@@ -64,7 +65,7 @@ function on_gateway(id, read, write)
     dest = 6000,
     source = 5000,
     data = '\0' .. CBOR.encode {
-      100, "spawn", "ls"
+      uv.hrtime() % 0x10000, "spawn", "ls"
     }
   }
   for message in read do
