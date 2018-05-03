@@ -32,20 +32,19 @@ pub struct LogCmd {
 }
 
 impl LogCmd {
-    fn new(
+    pub fn new(
         port: u32, //Hardcode?
         msg_id: u16,
-        msg_type: u8, //Bit field
         trigger: u32, //enum
         period: f64,
         offset: f64,
         hold: bool,
     ) -> Self {
         LogCmd {
-            hdr: Header::new(1, 32),
+            hdr: Header::new(MessageID::Log as u16, 32),
             port,
             msg_id,
-            msg_type,
+            msg_type: 0,
             trigger,
             period,
             offset,
@@ -72,4 +71,19 @@ impl Message for LogCmd {
 
         vec
     }
+}
+
+pub enum MessageID {
+    Log = 1,
+    Version = 37,
+    BestXYZ = 241,
+}
+
+pub enum LogTrigger {
+    OnNew = 0,
+    OnChanged = 1,
+    OnTime = 2,
+    OnNext = 3,
+    Once = 4,
+    OnMark = 5,
 }

@@ -26,7 +26,9 @@ pub use self::tx::*;
 
 pub const SYNC: [u8; 3] = [0xAA, 0x44, 0x12];
 pub const HDR_LEN: u8 = 28;
+pub const RESP_HDR_LEN: u8 = HDR_LEN + 4;
 
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Header {
     pub sync: [u8; 3],
     pub hdr_len: u8,
@@ -40,7 +42,6 @@ pub struct Header {
     pub week: u16,
     pub ms: i32,
     pub recv_status: u32, //Ignore for TX
-    pub rsrv: u16,        //Ignore for TX
     pub recv_ver: u16,    //Ignore for TX
 }
 
@@ -51,7 +52,7 @@ impl Header {
             hdr_len: HDR_LEN,
             msg_id,
             msg_type: 0, // Measurement source = Primary antenna, Format = Binary, Response bit = Original message. TODO: Verify
-            port_addr: 1, //COM1, all virtual ports
+            port_addr: Port::ThisPort as u8,
             msg_len,
             seq: 0,         // Always zero. We're only sending the one message
             idle_time: 0,   // TODO: calculate
@@ -59,7 +60,6 @@ impl Header {
             week: 0,        // TODO: calculate
             ms: 0,          // TODO: calculate
             recv_status: 0, // Ignored for TX
-            rsrv: 0,        // Ignored for TX
             recv_ver: 0,    // Ignored for TX
         }
     }
@@ -80,9 +80,15 @@ impl Message for Header {
         vec.write_u16::<LittleEndian>(self.week).unwrap();
         vec.write_i32::<LittleEndian>(self.ms).unwrap();
         vec.write_u32::<LittleEndian>(self.recv_status).unwrap();
-        vec.write_u16::<LittleEndian>(self.rsrv).unwrap();
+        vec.push(0);
+        vec.push(0);
         vec.write_u16::<LittleEndian>(self.recv_ver).unwrap();
 
         vec
     }
+}
+
+pub enum Port {
+    COM1 = 32,
+    ThisPort = 192,
 }

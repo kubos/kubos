@@ -17,32 +17,28 @@
 
 const CRC32_POLY: u32 = 0xEDB8_8320;
 
-pub struct CRC32(pub u32);
-
-impl CRC32 {
-    fn calc_val(&self, val: u8) -> u32 {
-        let mut crc: u32 = val.into();
-        for _num in 0..8 {
-            if crc & 1 == 1 {
-                crc = crc.wrapping_shr(1) ^ CRC32_POLY;
-            } else {
-                crc = crc.wrapping_shr(1);
-            }
+fn calc_val(val: u8) -> u32 {
+    let mut crc: u32 = val.into();
+    for _num in 0..8 {
+        if crc & 1 == 1 {
+            crc = crc.wrapping_shr(1) ^ CRC32_POLY;
+        } else {
+            crc = crc.wrapping_shr(1);
         }
-
-        crc
     }
 
-    pub fn calc_crc(&self, msg: &[u8]) -> Self {
-        let mut crc: u32 = 0;
+    crc
+}
 
-        for elem in msg.iter() {
-            let val1 = crc.wrapping_shr(8);
-            let arg: u32 = crc ^ (elem.clone() as u32);
-            let val2 = self.calc_val(arg as u8);
-            crc = val2 ^ val1;
-        }
+pub fn calc_crc(msg: &[u8]) -> u32 {
+    let mut crc: u32 = 0;
 
-        CRC32(crc)
+    for elem in msg.iter() {
+        let val1 = crc.wrapping_shr(8);
+        let arg: u32 = crc ^ (elem.clone() as u32);
+        let val2 = calc_val(arg as u8);
+        crc = val2 ^ val1;
     }
+
+    crc
 }
