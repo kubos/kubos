@@ -167,7 +167,7 @@ where
             let query_string = String::from_utf8(buf[0..(size)].to_vec()).unwrap();
             let res = self.process(query_string);
 
-            // And then the response back
+            // And then send the response back
             let _amt = socket.send_to(&res.as_bytes(), &peer);
         }
     }

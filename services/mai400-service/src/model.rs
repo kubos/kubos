@@ -19,10 +19,10 @@ use mai400_api::*;
 use std::cell::{Cell, RefCell};
 use std::io::{Error, ErrorKind};
 use std::sync::{Arc, Mutex};
-use std::thread::{sleep, spawn};
-use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
+use std::thread::{sleep, spawn};
+use std::time::Duration;
 
 use objects::*;
 

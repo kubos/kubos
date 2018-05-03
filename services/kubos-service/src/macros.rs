@@ -178,7 +178,8 @@ macro_rules! run {
                 //     self.my.func(arg1, arg2)
                 // to this
                 //     func
-                // TODO: This isn't perfect or particularly pretty. Is there a better way?
+                // and then add the file and line number where said function was
+                // called from
                 let mut name = stringify!($func).split('(').next().unwrap();
                 name = name.split(&[':','.'][..]).last().unwrap();
                 push_err!($master, format!("{} ({}:{}): {}", name, file!(), line!(), result.clone().unwrap_err()));
