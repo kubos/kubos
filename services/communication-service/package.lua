@@ -19,6 +19,7 @@ return {
     "creationix/coro-channel",
     "creationix/coro-fs",
     "creationix/coro-websocket",
+    "creationix/toml",
   },
   files = {
     "**.lua",
