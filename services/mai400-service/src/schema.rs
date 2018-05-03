@@ -57,7 +57,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     field errors(&executor) -> FieldResult<Vec<String>>
     {
         executor.context().subsystem().get_read_health();
-        
+
         match executor.context().subsystem().errors.try_borrow_mut() {
             Ok(mut master_vec) => {
                 let current = master_vec.clone();

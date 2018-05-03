@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-//#![deny(missing_docs)]
-//#![deny(warnings)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 //! Kubos Service for interacting with an [Adcole Maryland Aerospace MAI-400](https://www.adcolemai.com/adacs)
 //!

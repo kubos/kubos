@@ -64,13 +64,32 @@ impl ReadData {
     }
 }
 
+// The MAI-400 sends a set of telemtery messages every 250ms
+// This function continuously reads them and updates the persistent data structs
 pub fn read_thread(mai: MAI400, data: Arc<ReadData>, sender: Sender<String>) {
+    let mut io_err_count = 0;
     loop {
-        // TODO: Error handling and reporting
         let (std, imu, irehs) = match mai.get_message() {
             Ok(v) => v,
             Err(err) => {
                 match err {
+                    MAIError::IoError { cause } => {
+                        // While unlikely, maybe EIO or EINTR could be thrown?
+                        // This would indicate that a random issue happened, so
+                        // go ahead and retry a few times to see if it clears up
+                        if io_err_count > 10 {
+                            sender
+                                .send(format!(
+                                    "IOError: {}. Read thread bailing. Service restart required.",
+                                    cause
+                                ))
+                                .unwrap();
+                            break;
+                        }
+
+                        sleep(Duration::from_millis(100));
+                        io_err_count += 1;
+                    }
                     MAIError::SerialError { cause } => {
                         // As far as I can tell, the only way this error
                         // will occur is if the UART bus itself becomes
@@ -83,7 +102,15 @@ pub fn read_thread(mai: MAI400, data: Arc<ReadData>, sender: Sender<String>) {
                             .unwrap();
                         break;
                     }
-                    _ => sender.send(process_errors!(err)).unwrap(),
+                    _ => {
+                        sender
+                            .send(format!(
+                                "Unexpected read errors encountered: {}. Service restart required.",
+                                process_errors!(err)
+                            ))
+                            .unwrap();
+                        break;
+                    }
                 }
 
                 (None, None, None)
@@ -134,13 +161,13 @@ impl Subsystem {
 
     pub fn get_read_health(&self) {
         match self.receiver.try_recv() {
-            Ok(v) => {
-                push_err!(self.errors, v);
+            Ok(msg) => {
+                push_err!(self.errors, msg);
 
                 while let Ok(err) = self.receiver.try_recv() {
                     push_err!(self.errors, err);
                 }
-            } // TODO: Process error/s
+            }
             Err(err) => match err {
                 // Do nothing. This is the good case
                 TryRecvError::Empty => {}

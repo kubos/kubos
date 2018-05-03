@@ -45,7 +45,12 @@ impl Stream for MockStream {
 #[macro_export]
 macro_rules! service_new {
     ($mock:ident) => {{
-        let (_sender, receiver) = channel();
+        let (sender, receiver) = channel();
+
+        // We don't actually want to do anything with this thread, the channel
+        // sender just needs to live through the lifetime of each test
+        thread::spawn(move || {let _send = sender; thread::sleep(Duration::from_secs(2))});
+
         Service::new(
             Config::new("mai400-service"),
             Subsystem {
