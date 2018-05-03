@@ -6,19 +6,20 @@ local UDP = require 'codec-udp'
 local JSON = require 'json'
 local Base64 = require 'base64'
 
+local identifier = JSON.stringify { channel = 'GatewayChannel' }
+
 local subscribe = JSON.stringify {
   command = 'subscribe',
-  identifier = { channel = 'GatewayChannel' }
+  identifier = identifier
 }
 
 local action_frame = JSON.stringify {
   command = 'message',
-  identifier = JSON.stringify {
-    channel = 'GatewayChannel'
-  },
+  identifier = identifier,
   data = JSON.stringify {
-    packet = '%', -- placeholder
-    action = 'message' },
+    action = 'message',
+    packet = '%' -- placeholder
+  }
 }
 
 local function encode(frame)
