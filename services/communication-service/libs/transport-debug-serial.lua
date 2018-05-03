@@ -18,6 +18,7 @@ limitations under the License.
 -- data.  It will also set the baud rate of stdout and configure the serial
 -- termios.
 
+local UDP = require 'codec-udp'
 local uv = require 'uv'
 local stdin = require('pretty-print').stdin
 local stdout = require('pretty-print').stdout
@@ -30,9 +31,9 @@ local decoder = require('coro-wrapper').decoder
 local kiss = require 'codec-slip'
 local set_termio = require 'termios-serial'
 
-return function (baud)
-  assert(baud, 'Missing baud parameter')
-  baud = assert(tonumber(baud), 'baud is not a number')
+return function (config)
+  local io = {}
+  local baud = assert(config.baud, 'Missing baud parameter')
   print "Setting raw mode, you can no longer kill this with Control + C"
   set_termio(0, baud)
 
@@ -56,7 +57,15 @@ return function (baud)
     uv.write(stderr, table.concat(arguments, "\t") .. "\n")
   end
 
-  local read = decoder(wrapRead(stdin), kiss.decode)
-  local write = encoder(wrapWrite(stdout), kiss.encode)
-  return read, write
+  io.receive = encoder(encoder(wrapWrite(stdout), kiss.encode), UDP.encode)
+  local read = decoder(decoder(wrapRead(stdin), kiss.decode), UDP.framed_decode)
+
+  coroutine.wrap(function ()
+    for packet in read do
+      io.send(packet)
+    end
+    io.send()
+  end)()
+
+  return io
 end

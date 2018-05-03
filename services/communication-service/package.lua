@@ -7,14 +7,18 @@ return {
   homepage = "https://github.com/kubos/kubos",
   luvi = {
     flavor = "tiny",
-    inline = "#!/home/system/usr/bin/luvi-tiny --\n"
+    inline = "#!/home/system/usr/bin/luvi-regular --\n"
   },
   dependencies = {
     "luvit/require",
     "luvit/pretty-print",
+    "luvit/json",
+    "luvit/secure-socket",
+    "creationix/base64",
     "creationix/coro-wrapper",
     "creationix/coro-channel",
     "creationix/coro-fs",
+    "creationix/coro-websocket",
   },
   files = {
     "**.lua",

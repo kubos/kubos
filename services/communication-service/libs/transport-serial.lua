@@ -15,6 +15,7 @@ limitations under the License.
 -- to `/dev/ttyUSB*` or `/dev/ttyO*` or whatever device you want with the
 -- agreed upon baud rate and it will open the device file and configure it.
 
+local UDP = require 'codec-udp'
 local fs = require 'coro-fs'
 local constants = require('uv').constants
 local O_RDWR = constants.O_RDWR
@@ -27,12 +28,13 @@ local kiss = require 'codec-slip'
 local encoder = require('coro-wrapper').encoder
 local decoder = require('coro-wrapper').decoder
 
-return function (dev, baud)
-  assert(dev, 'missing device argument to serial transport')
-  assert(baud, 'missing baud argument to serial transport')
-  baud = assert(tonumber(baud), 'baud is not a number')
+return function (config)
+  local io = {}
+
+  local device = assert(config.device, 'missing device argument to serial transport')
+  local baud = assert(config.baud, 'missing baud argument to serial transport')
   local mode = bor(O_RDWR, O_NOCTTY, O_SYNC)
-  local fd = assert(fs.open(dev, mode))
+  local fd = assert(fs.open(device, mode))
   set_termio(fd, baud)
 
   local read, write
@@ -51,13 +53,21 @@ return function (dev, baud)
     local bytes = assert(fs.write(fd, data))
     assert(bytes == #data)
   end
-  print 'Serial transport setup:'
   p {
-    dev = dev,
+    device = device,
     baud = baud,
     fd = fd
   }
-  read = decoder(read, kiss.decode)
-  write = encoder(write, kiss.encode)
-  return read, write
+
+  io.receive = encoder(encoder(write, kiss.encode), UDP.encode)
+  read = decoder(decoder(read, kiss.decode), UDP.framed_decode)
+
+  coroutine.wrap(function ()
+    for packet in read do
+      io.send(packet)
+    end
+    io.send()
+  end)()
+
+  return io
 end
