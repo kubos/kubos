@@ -6,6 +6,11 @@ local UDP = require 'codec-udp'
 local JSON = require 'json'
 local Base64 = require 'base64'
 
+local subscribe = JSON.stringify {
+  command = 'subscribe',
+  identifier = { channel = 'GatewayChannel' }
+}
+
 local action_frame = JSON.stringify {
   command = 'message',
   identifier = JSON.stringify {
@@ -47,11 +52,6 @@ local function wrap(read, write)
 
   return receive, send
 end
-
-local subscribe = JSON.stringify {
-  command = 'subscribe',
-  identifier = { channel = 'GatewayChannel' }
-}
 
 return {
   subscribe = subscribe,
