@@ -1,17 +1,17 @@
 [[communication-service]]
 name = "Local UDP Test Services"
 transport = "udp"
-expose-ports = [ 6000, 7000 ]
+# expose-ports = [ 6000, 7000 ]
 # expose-host = '0.0.0.0'
 
-# [[communication-service]]
-# name = "Sample Websocket Server"
-# transport = "action-cable"
-# url = "wss://localhost:8443/register"
-# token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnYXRld2F5X2lkIjo0MiwiZXhwIjoxNTI1MzgyNTg3LCJpYXQiOjE1MjUzNzg5ODd9.n04j1-v7UgibF-XL7D8EgOC_MvOaXh4LQummoNfhk-0"
-
 [[communication-service]]
-name = "Beaglebone serial"
-transport = "serial"
-device = "/dev/ttyUSB2"
-baud = 115200
+name = "Sample Websocket Server"
+transport = "action-cable"
+url = "wss://localhost:8443/register"
+token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnYXRld2F5X2lkIjo0MiwiZXhwIjoxNTI1Mzg4ODQwLCJpYXQiOjE1MjUzODUyNDB9.244HYXz_wE-MhXARgPyMv0aCrqtd5hON3xJJkvbeWns"
+
+# [[communication-service]]
+# name = "Beaglebone serial"
+# transport = "serial"
+# device = "/dev/ttyUSB2"
+# baud = 115200

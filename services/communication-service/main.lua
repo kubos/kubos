@@ -55,13 +55,20 @@ end
 
 local function link(io1, io2, transport1, transport2)
   io1.send = function (frame)
-    print(string.format("%s(%s) -> %s(%s) %s bytes",
-      transport1.transport,
-      dump(frame.source),
-      transport2.transport,
-      dump(frame.dest),
-      dump(#frame.data)
-    ))
+    if frame then
+      print(string.format("%s(%s) -> %s(%s) %s bytes",
+        transport1.transport,
+        dump(frame.source),
+        transport2.transport,
+        dump(frame.dest),
+        dump(#frame.data)
+      ))
+    else
+      print(string.format("%s -> %s [CLOSE]",
+        transport1.transport,
+        transport2.transport
+      ))
+    end
     return io2.receive(frame)
   end
 end
@@ -75,8 +82,6 @@ coroutine.wrap(function ()
   local io2 = load(transports[2])
   link(io1, io2, transports[1], transports[2])
   link(io2, io1, transports[2], transports[1])
-  p(1, io)
-  p(2, io)
 end)()
 
 uv.run()

@@ -68,7 +68,7 @@ function on_gateway(id, read, write)
     }
   }
   for message in read do
-    p(message)
+    p(CBOR.decode(message.data, 2))
   end
 end
 --

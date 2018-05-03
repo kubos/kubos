@@ -1,4 +1,6 @@
 local uv = require 'uv'
+local make_callback = require 'make-callback'
+local wrapper = require 'wrapper'
 
 -- udp packets come in
 -- forward them to real udp services
@@ -9,31 +11,6 @@ local uv = require 'uv'
 -- can be just xxxx for same ports on both sides
 -- or can have two numbers like xxxx:xxxx where left side is remote and right
 -- is local.
-
-local function make_callback()
-  local thread = coroutine.running()
-  return function (err, value, ...)
-    if err then
-      assert(coroutine.resume(thread, nil, err))
-    else
-      assert(coroutine.resume(thread, value == nil and true or value, ...))
-    end
-  end
-end
-
-local function wrapper(fn)
-  return function (...)
-    local args = { ... }
-    return coroutine.wrap(function()
-      local success, result = xpcall(function ()
-        return fn(unpack(args))
-      end, debug.traceback)
-      if not success then
-        print(result)
-      end
-    end)()
-  end
-end
 
 return function (config)
   -- The framework will populate this with io.send(frame)
@@ -90,6 +67,7 @@ return function (config)
   end
 
   function io.receive(packet)
+    if not packet then return end
     local handle = get_handle(packet.source)
     handle:send(packet.data, "127.0.0.1", packet.dest, make_callback())
     return coroutine.yield()
