@@ -8,7 +8,6 @@ use serial::prelude::*;
 
 /// Wrapper for UART stream
 pub struct Connection {
-
     /// Any boxed stream that allows for communication over serial ports
     pub stream: Box<Stream>,
 }
@@ -71,7 +70,7 @@ impl Stream for SerialStream {
 
         port.configure(&self.settings)?;
 
-        port.write(data)?;
+        port.write_all(data)?;
 
         Ok(())
     }
