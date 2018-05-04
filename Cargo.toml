@@ -4,6 +4,7 @@ members = [
 "apis/isis-ants-api",
 "apis/isis-imtq-api",
 "apis/isis-iobc-supervisor",
+"apis/mai400-api",
 "apis/nsl-duplex-d2",
 "apis/rust-radio-api",
 "examples/rust-service/extern-lib",
@@ -15,6 +16,7 @@ members = [
 "services/kubos-service",
 "services/iobc-supervisor-service",
 "test/integration/linux/isis-ants",
+"test/integration/linux/mai400",
 ]
 
 [profile.release]
