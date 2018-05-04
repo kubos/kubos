@@ -17,17 +17,32 @@
 use eps_api::EpsError;
 use failure::Error;
 
+/// Macro for generating `Type` enum, `parse` and `command` functions
+/// for motherboard and daughterboard telemetry items.
 #[macro_export]
 macro_rules! make_telemetry {
     (
-        $($type: ident => {$data: expr, $parser: expr},)+
+        $(
+            $(#[$meta:meta])+
+            $type: ident => {$data: expr, $parser: expr},
+        )+
     ) => {
 
         #[derive(Clone, Copy)]
+        /// Telemetry variants
         pub enum Type {
-            $($type,)+
+            $(
+                $(#[$meta])+
+                $type,
+            )+
         }
 
+        /// Telemetry parsing function
+        ///
+        /// # Arguments
+        ///
+        /// `data` - Raw telemetry data from eps
+        /// `telem_type` - `Type` of telemetry to parse
         pub fn parse(data: &[u8], telem_type: Type) -> Result<f32, Error> {
             let adc_data = get_adc_result(data)?;
             Ok(match telem_type {
@@ -35,6 +50,11 @@ macro_rules! make_telemetry {
             })
         }
 
+        /// Helper function storing telemetry command information
+        ///
+        /// # Arguments
+        ///
+        /// `telem_type` - `Type` of telemetry to return command for
         pub fn command(telem_type: Type) -> Command {
             Command {
                 cmd: TELEM_CMD,
@@ -46,17 +66,32 @@ macro_rules! make_telemetry {
     }
 }
 
+/// Macro for generating `ResetType` enum and `command` function
+/// for reset telemetry items.
 #[macro_export]
 macro_rules! make_reset_telemetry {
     (
-        $($type: ident => $cmd: expr,)+
+        //$(#[$type: ident => $cmd: expr],)+
+        $(
+            $(#[$meta:meta])+
+            $type: ident => $cmd: expr,
+        )+
     ) => {
 
         #[derive(Clone, Copy)]
+        /// Reset Telemetry Variants
         pub enum ResetType {
-            $($type,)+
+            $(
+                $(#[$meta])+
+                $type,
+            )+
         }
 
+        /// Helper function storing telemetry command information
+        ///
+        /// # Arguments
+        ///
+        /// `telem_type` - `ResetType` of telemetry to return command for
         pub fn command(reset_type: ResetType) -> Command {
             Command {
                 cmd: match reset_type {

@@ -41,7 +41,7 @@ impl Eps {
     ///
     /// The status bytes are designed to supply operational data about the I2C Node.
     pub fn get_board_status(&self) -> Result<board_status::BoardStatus, Error> {
-        board_status::parse(&self.connection.transfer(board_status::command())?)
+        board_status::parse(&self.connection.transfer(board_status::command(), 2)?)
     }
 
     /// Get Checksum
@@ -50,7 +50,7 @@ impl Eps {
     /// to generate a checksum. The value retrieved can be used to determine whether
     /// the contents of the ROM have changed during the operation of the device.
     pub fn get_checksum(&self) -> Result<checksum::Checksum, Error> {
-        checksum::parse(&self.connection.transfer(checksum::command())?)
+        checksum::parse(&self.connection.transfer(checksum::command(), 100)?)
     }
 
     /// Get Version
@@ -59,7 +59,7 @@ impl Eps {
     /// The revision number returns the current revision of the firmware that is
     /// present on the board. The firmware number returns the current firmware on the board.
     pub fn get_version_info(&self) -> Result<version::VersionInfo, Error> {
-        version::parse(&self.connection.transfer(version::command())?)
+        version::parse(&self.connection.transfer(version::command(), 2)?)
     }
 
     /// Get Last Error
@@ -67,7 +67,7 @@ impl Eps {
     /// If an error has been generated after attempting to execute a user's command,
     /// this command can be used to retrieve details about the error.
     pub fn get_last_error(&self) -> Result<last_error::LastError, Error> {
-        last_error::parse(&self.connection.transfer(last_error::command())?)
+        last_error::parse(&self.connection.transfer(last_error::command(), 2)?)
     }
 
     /// Manual Reset
@@ -101,12 +101,12 @@ impl Eps {
     ) -> Result<f32, Error> {
         telemetry::motherboard::parse(
             &self.connection
-                .transfer(telemetry::motherboard::command(telem_type))?,
+                .transfer(telemetry::motherboard::command(telem_type), 5)?,
             telem_type,
         )
     }
 
-    /// Get Motherboard Telemetry
+    /// Get Daugterboard Telemetry
     ///
     /// This command is used to request telemetry items from the daughterboard's
     /// telemetry node.
@@ -116,7 +116,7 @@ impl Eps {
     ) -> Result<f32, Error> {
         telemetry::daughterboard::parse(
             &self.connection
-                .transfer(telemetry::daughterboard::command(telem_type))?,
+                .transfer(telemetry::daughterboard::command(telem_type), 15)?,
             telem_type,
         )
     }
@@ -130,7 +130,7 @@ impl Eps {
         telem_type: telemetry::reset::ResetType,
     ) -> Result<telemetry::reset::ResetTelemetry, Error> {
         telemetry::reset::parse(&self.connection
-            .transfer(telemetry::reset::command(telem_type))?)
+            .transfer(telemetry::reset::command(telem_type), 2)?)
     }
 
     /// Set Communications Watchdog Period
@@ -153,6 +153,6 @@ impl Eps {
     /// timeout that has been set. The returned value is indicated in minutes.
     pub fn get_comms_watchdog_period(&self) -> Result<u8, Error> {
         get_comms_watchdog_period::parse(&self.connection
-            .transfer(get_comms_watchdog_period::command())?)
+            .transfer(get_comms_watchdog_period::command(), 2)?)
     }
 }

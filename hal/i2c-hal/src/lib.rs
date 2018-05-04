@@ -8,6 +8,7 @@ extern crate i2c_linux;
 // use std::thread;
 use std::time::Duration;
 use std::io::Result;
+use std::thread;
 use i2c_linux::I2c;
 
 /// High level read/write trait for I2C connections to implement
@@ -31,7 +32,8 @@ pub trait Stream {
     /// # Arguments
     ///
     /// `command` - Command to write and read from
-    fn transfer(&self, command: Command) -> Result<Vec<u8>>;
+    /// `delay` - Delay between writing and reading
+    fn transfer(&self, command: Command, delay: u64) -> Result<Vec<u8>>;
 }
 
 /// An implementation of `i2c_hal::Stream` which uses the `i2c_linux` crate
@@ -76,15 +78,15 @@ impl Stream for I2cStream {
     }
 
     /// Read/Write transaction
-    fn transfer(&self, command: Command) -> Result<Vec<u8>> {
+    fn transfer(&self, command: Command, delay: u64) -> Result<Vec<u8>> {
         let mut i2c = I2c::from_path(self.path.clone())?;
         let mut data = vec![0; 4];
         println!("i2c_transfer wrote {:?} to {}", command, self.slave);
         i2c.smbus_set_slave_address(self.slave, false)?;
 
-        i2c.i2c_set_timeout(Duration::from_millis(100))?;
-        i2c.i2c_set_retries(10)?;
+        i2c.i2c_set_retries(5)?;
         i2c.i2c_write_block_data(command.cmd, &command.data)?;
+        thread::sleep(Duration::from_millis(delay));
         i2c.i2c_read_block_data(command.cmd, &mut data)?;
         println!("i2c transfer got {:?} from {}", data, self.slave);
         Ok(data)
@@ -151,7 +153,8 @@ impl Connection {
     /// # Arguments
     ///
     /// `command` - Command to write and read from
-    pub fn transfer(&self, command: Command) -> Result<Vec<u8>> {
-        self.stream.transfer(command)
+    /// `delay` - Delay between writing and reading
+    pub fn transfer(&self, command: Command, delay: u64) -> Result<Vec<u8>> {
+        self.stream.transfer(command, delay)
     }
 }

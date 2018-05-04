@@ -26,14 +26,14 @@ use i2c_hal::Command;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Version {
-    revision: u8,
-    firmware_number: u16,
+    pub revision: u8,
+    pub firmware_number: u16,
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct VersionInfo {
-    motherboard: Version,
-    daughterboard: Option<Version>,
+    pub motherboard: Version,
+    pub daughterboard: Option<Version>,
 }
 
 fn get_firmware(num1: u8, num2: u8) -> u16 {

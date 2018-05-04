@@ -29,4 +29,7 @@ mod commands;
 mod eps;
 mod telemetry;
 
+pub use telemetry::reset::ResetType as ResetTelemetry;
+pub use telemetry::motherboard::Type as MotherboardTelemetry;
+pub use telemetry::daughterboard::Type as DaughterboardTelemetry;
 pub use eps::Eps;
