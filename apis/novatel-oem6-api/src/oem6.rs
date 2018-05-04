@@ -73,7 +73,7 @@ impl OEM6 {
     /// ```
     ///
     /// [`MAIError`]: enum.MAIError.html
-    pub fn get_version(&self) -> OEMResult<()> {
+    pub fn request_version(&self) -> OEMResult<()> {
         let request = LogCmd::new(
             Port::COM1 as u32,
             MessageID::Version as u16,
@@ -87,12 +87,7 @@ impl OEM6 {
         self.send_message(request)?;
 
         // Get request response
-        let result = self.get_response()?;
-
-        // Get the version message
-
-        // TODO: remove this. Test code only
-        Ok(())
+        self.get_response(MessageID::Log)
     }
 
     /// Directly send a message without formatting or checksum calculation
@@ -134,11 +129,10 @@ impl OEM6 {
         let crc = calc_crc(&raw);
         raw.write_u32::<LittleEndian>(crc).unwrap();
 
-        self.conn.write(raw.as_slice())?;
-        self.get_response()
+        Ok(self.conn.write(raw.as_slice())?)
     }
 
-    /// Wait for and read a message set from the OEM6.
+    /// Wait for and read a message from the OEM6.
     ///
     /// # Errors
     ///
@@ -161,44 +155,97 @@ impl OEM6 {
     /// ```
     ///
     /// [`OEMError`]: enum.OEMError.html
-    pub fn get_message(&self) -> OEMResult<()> {
-        unimplemented!();
+    fn get_message(&self) -> OEMResult<(Header, Vec<u8>)> {
+        loop {
+            // Read header
+            // TODO: Failure processing. If it's just that we weren't able
+            // to read the requested number of bytes, then try again
+            let mut message = self.conn.read(HDR_LEN.into())?;
+
+            let hdr = match Header::parse(&message) {
+                Some(v) => v,
+                None => {
+                    println!("failed to parse header");
+                    continue;
+                }
+            };
+
+            if hdr.sync != SYNC {
+                println!("SYNC bytes invalid: {:?}", hdr.sync);
+                continue;
+            }
+
+            // Read body
+            message.append(&mut self.conn.read(hdr.msg_len as usize)?);
+
+            // Read CRC
+            let crc = nom::le_u32(self.conn.read(4)?.as_slice()).unwrap().1;
+
+            // Verify CRC
+            let calc = calc_crc(&message);
+            if calc != crc {
+                // TODO: remove debugging line
+                println!("CRC Mismatch: {:X} {:X}", calc, crc);
+            } else {
+                let body = message.split_off(HDR_LEN.into());
+                return Ok((hdr, body));
+            }
+        }
     }
 
-    pub fn get_response(&self) -> OEMResult<()> {
-        // Read response header
-        let mut message = self.conn.read(RESP_HDR_LEN.into())?;
+    // TODO: how to deal with async log messages being interspersed?
+    // Probably set up a read thread with two channels: one for responses and one for logs
+    fn get_response(&self, id: MessageID) -> OEMResult<()> {
+        let (hdr, body) = self.get_message()?;
 
-        if &message[0..3] != SYNC {
-            println!("SYNC bytes invalid: {:?}", &message[0..3]);
-            throw!(OEMError::BadSync);
+        // Make sure we got specifically a response message
+        if hdr.msg_type & 0x80 != 0x80 {
+            println!("Response bit not set");
+            throw!(OEMError::NoResponse);
         }
 
-        // Pull out message length
-        let msg_len = message[3];
+        let resp = match Response::new(body) {
+            Some(v) => v,
+            None => {
+                println!("failed to parse response");
+                throw!(OEMError::NoResponse);
+            }
+        };
 
-        // Read body
-        message.append(&mut self.conn.read(msg_len.into())?);
-
-        // Read CRC
-        let crc = nom::le_u32(self.conn.read(4)?.as_slice()).unwrap().1;
-
-        // Verify CRC
-        let calc = calc_crc(&message);
-        if calc != crc {
-            // TODO: remove debugging line
-            println!("CRC Mismatch: {:X} {:X}", calc, crc);
-            throw!(OEMError::BadCRC);
+        if hdr.msg_id != id {
+            println!("ID mismatch: {:?} {:?}", hdr.msg_id, id);
+            throw!(OEMError::ResponseMismatch);
         }
 
-        // Get response ID
-        // Parse message? Or pass back to caller?
+        if resp.resp_id != ResponseID::Ok {
+            println!("Error response: {:?} {}", resp.resp_id, resp.resp_string);
+            throw!(OEMError::CommandError {
+                id: resp.resp_id,
+                description: resp.resp_string.clone(),
+            });
+        }
 
-        // TODO: how to deal with async log messages being interspersed?
-        // Probably set up a read thread with two channels: one for responses and one for logs
-
-        // TODO: remove this
         Ok(())
+    }
+
+    pub fn get_log(&self) -> OEMResult<Log> {
+        loop {
+            let (hdr, body) = self.get_message()?;
+
+            // Make sure it's not a response message
+            if hdr.msg_type & 0x80 == 0x80 {
+                println!("Response bit not set");
+                continue;
+            }
+
+            let resp = match Log::new(hdr.msg_id, body) {
+                Some(v) => return Ok(v),
+                None => {
+                    println!("failed to parse response");
+                    continue;
+                }
+            };
+        }
     }
 }
 
@@ -208,12 +255,19 @@ pub enum OEMError {
     /// Catch-all error
     #[display(fmt = "Generic Error")]
     GenericError,
-    /// A message was received, but the CRC didn't match what was expected
-    #[display(fmt = "Bad Response CRC")]
-    BadCRC,
-    /// A message was received, but didn't start with the correct sync bytes
-    #[display(fmt = "Bad Response Sync Bytes")]
-    BadSync,
+    /// A response message was received, but the ID doesn't match the command that was sent
+    #[display(fmt = "Response ID Mistmatch")]
+    ResponseMismatch,
+    /// A command was sent, but we were unable to get the response
+    #[display(fmt = "Failed to get command response")]
+    NoResponse,
+    /// A response was recieved and indicates an error with the previously sent command
+    #[display(fmt = "Command Error({:?}): {}", id, description)]
+    CommandError {
+        /// The underlying error
+        id: ResponseID,
+        description: String,
+    },
     /// Received a valid message, but the message ID doesn't match any known message type
     #[display(fmt = "Unknown Message Received: {:X}", id)]
     UnknownMessage {

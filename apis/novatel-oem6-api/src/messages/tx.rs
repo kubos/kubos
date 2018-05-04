@@ -41,7 +41,7 @@ impl LogCmd {
         hold: bool,
     ) -> Self {
         LogCmd {
-            hdr: Header::new(MessageID::Log as u16, 32),
+            hdr: Header::new(MessageID::Log, 32),
             port,
             msg_id,
             msg_type: 0,
@@ -73,10 +73,29 @@ impl Message for LogCmd {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum MessageID {
     Log = 1,
     Version = 37,
     BestXYZ = 241,
+    Unknown,
+}
+
+impl Default for MessageID {
+    fn default() -> MessageID {
+        MessageID::Unknown
+    }
+}
+
+impl From<u16> for MessageID {
+    fn from(t: u16) -> MessageID {
+        match t {
+            1 => MessageID::Log,
+            37 => MessageID::Version,
+            241 => MessageID::BestXYZ,
+            _ => MessageID::Unknown,
+        }
+    }
 }
 
 pub enum LogTrigger {

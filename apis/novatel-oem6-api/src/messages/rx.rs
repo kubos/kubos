@@ -14,16 +14,11 @@
 // limitations under the License.
 //
 
-use super::*;
-
-use byteorder::{LittleEndian, ReadBytesExt};
 use nom::*;
-use std::io::Cursor;
 use super::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Response {
-    pub hdr: Header,
     pub resp_id: ResponseID,
     pub resp_string: String,
 }
@@ -32,9 +27,12 @@ impl Response {
     /// Constructor. Converts a raw data array received from the OEM6 into a usable structure
     pub fn new(msg: Vec<u8>) -> Option<Self> {
         // Convert the raw data to an official struct
-        match parse_response(&msg) {
+        match le_u32(&msg) {
             Ok(conv) => {
-                let mut resp = conv.1;
+                let mut resp: Response = Response {
+                    resp_id: conv.1.into(),
+                    resp_string: "".to_owned(),
+                };
 
                 for elem in conv.0 {
                     resp.resp_string.push(*elem as char);
@@ -46,47 +44,6 @@ impl Response {
         }
     }
 }
-
-named!(parse_response(&[u8]) -> Response,
-    do_parse!(
-        sync1: le_u8 >>
-        sync2: le_u8 >>
-        sync3: le_u8 >>
-        hdr_len: le_u8 >>
-        msg_id: le_u16 >>
-        msg_type: le_u8 >>
-        port_addr: le_u8 >>
-        msg_len: le_u16 >>
-        seq: le_u16 >>
-        idle_time: le_u8 >>
-        time_status: le_u8 >>
-        week: le_u16 >>
-        ms: le_i32 >>
-        recv_status: le_u32 >>
-        le_u16 >>
-        recv_ver: le_u16 >>
-        resp_id: le_u32 >>
-        (Response {
-                hdr: Header {
-                    sync: [sync1, sync2, sync3],
-                    hdr_len,
-                    msg_id,
-                    msg_type,
-                    port_addr,
-                    msg_len,
-                    seq,
-                    idle_time,
-                    time_status,
-                    week,
-                    ms,
-                    recv_status,
-                    recv_ver
-                },
-                resp_id: resp_id.into(),
-                resp_string: "".to_owned()
-        })
-    )
-);
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ResponseID {

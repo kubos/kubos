@@ -17,10 +17,13 @@
 #![allow(dead_code)]
 
 use byteorder::{LittleEndian, WriteBytesExt};
+use nom::*;
 
+pub mod logs;
 pub mod rx;
 mod tx;
 
+pub use self::logs::*;
 pub use self::rx::*;
 pub use self::tx::*;
 
@@ -32,7 +35,7 @@ pub const RESP_HDR_LEN: u8 = HDR_LEN + 4;
 pub struct Header {
     pub sync: [u8; 3],
     pub hdr_len: u8,
-    pub msg_id: u16,
+    pub msg_id: MessageID,
     pub msg_type: u8, //Can probably be hardcoded. Bit fields
     pub port_addr: u8,
     pub msg_len: u16,
@@ -46,7 +49,7 @@ pub struct Header {
 }
 
 impl Header {
-    fn new(msg_id: u16, msg_len: u16) -> Self {
+    fn new(msg_id: MessageID, msg_len: u16) -> Self {
         Header {
             sync: SYNC,
             hdr_len: HDR_LEN,
@@ -63,6 +66,14 @@ impl Header {
             recv_ver: 0,    // Ignored for TX
         }
     }
+
+    pub fn parse(raw: &Vec<u8>) -> Option<Self> {
+        // Convert the raw data to an official struct
+        match parse_header(raw) {
+            Ok(conv) => Some(conv.1),
+            _ => None,
+        }
+    }
 }
 
 impl Message for Header {
@@ -70,7 +81,7 @@ impl Message for Header {
         let mut vec = SYNC.to_vec();
 
         vec.push(self.hdr_len);
-        vec.write_u16::<LittleEndian>(self.msg_id).unwrap();
+        vec.write_u16::<LittleEndian>(self.msg_id as u16).unwrap();
         vec.push(self.msg_type);
         vec.push(self.port_addr);
         vec.write_u16::<LittleEndian>(self.msg_len).unwrap();
@@ -92,3 +103,39 @@ pub enum Port {
     COM1 = 32,
     ThisPort = 192,
 }
+
+named!(parse_header(&[u8]) -> Header,
+    do_parse!(
+        sync1: le_u8 >>
+        sync2: le_u8 >>
+        sync3: le_u8 >>
+        hdr_len: le_u8 >>
+        msg_id: le_u16 >>
+        msg_type: le_u8 >>
+        port_addr: le_u8 >>
+        msg_len: le_u16 >>
+        seq: le_u16 >>
+        idle_time: le_u8 >>
+        time_status: le_u8 >>
+        week: le_u16 >>
+        ms: le_i32 >>
+        recv_status: le_u32 >>
+        le_u16 >>
+        recv_ver: le_u16 >>
+        (Header {
+                sync: [sync1, sync2, sync3],
+                hdr_len,
+                msg_id: msg_id.into(),
+                msg_type,
+                port_addr,
+                msg_len,
+                seq,
+                idle_time,
+                time_status,
+                week,
+                ms,
+                recv_status,
+                recv_ver
+        })
+    )
+);
