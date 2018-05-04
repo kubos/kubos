@@ -8,7 +8,7 @@ transport = "udp"
 name = "Sample Websocket Server"
 transport = "action-cable"
 url = "wss://localhost:8443/register"
-token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnYXRld2F5X2lkIjo0MiwiZXhwIjoxNTI1Mzg4ODQwLCJpYXQiOjE1MjUzODUyNDB9.244HYXz_wE-MhXARgPyMv0aCrqtd5hON3xJJkvbeWns"
+token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnYXRld2F5X2lkIjo0MiwiZXhwIjoxNTQxMDA1NDY3LCJpYXQiOjE1MjU0NTM0Njd9.tppIkUQlsuFeruAgGAHoK1cyShxPduFqiWwhjJpUtA8"
 
 # [[communication-service]]
 # name = "Beaglebone serial"

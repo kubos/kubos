@@ -53,7 +53,7 @@ app.start()
 local token = jwt.sign({
   gateway_id = 42,
 }, {
-  expiresIn = 60 * 60, -- expires in an hour
+  expiresIn = 60 * 60 * 24 * 30 * 6, -- expires in 6 months
   secret = shared_secret
 })
 
