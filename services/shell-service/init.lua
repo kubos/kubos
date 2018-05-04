@@ -115,19 +115,19 @@ return function(channel)
     if not options then options = {} end
     assert(type(options) == 'table', 'Options must be a table')
 
-    local on_stdout, on_stderr, on_exit
     local pause, resume
     local pressure = 0
 
-    on_exit = wrapper(function (exit_code, exit_signal)
+    local on_exit = wrapper(function (exit_code, exit_signal)
       code = exit_code
       signal = exit_signal
       channel.exit(code, signal)
       processes[channel_id] = nil
     end)
 
-    on_stdout = wrapper(function (err, data)
+    local on_stdout = wrapper(function (err, data)
       if err then return print(err) end
+      if not stdout then return end
       pressure = pressure + 1
       if pressure == 2 then pause() end
       channel.stdout(data)
@@ -136,15 +136,14 @@ return function(channel)
       if not data then stdout = nil end
     end)
 
-    on_stderr = wrapper(function (err, data)
+    local on_stderr = wrapper(function (err, data)
       if err then return print(err) end
-      for i = 1, #data, 1000 do
-        pressure = pressure + 1
-        if pressure == 2 then pause() end
-        channel.stderr(sub(data, i, i + 1000))
-        pressure = pressure - 1
-        if pressure == 1 then resume() end
-      end
+      if not stderr then return end
+      pressure = pressure + 1
+      if pressure == 2 then pause() end
+      channel.stderr(data)
+      pressure = pressure - 1
+      if pressure == 1 then resume() end
       if not data then stderr = nil end
     end)
 
@@ -175,7 +174,9 @@ return function(channel)
     function resume()
       if not paused then return end
       paused = false
-      stdout:read_start(on_stdout)
+      if stdout then
+        stdout:read_start(on_stdout)
+      end
       if stderr then
         stderr:read_start(on_stderr)
       end
@@ -184,7 +185,9 @@ return function(channel)
     function pause()
       if paused then return end
       paused = true
-      stdout:read_stop()
+      if stdout then
+        stdout:read_stop()
+      end
       if stderr then
         stderr:read_stop()
       end
