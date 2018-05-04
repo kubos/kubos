@@ -1,17 +1,26 @@
+--[[
+Copyright (C) 2018 Kubos Corporation
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+]]
+
+-- This transport acts as a transparent UDP bridge for real UDP clients and
+-- services.
+
 local uv = require 'uv'
 local make_callback = require 'make-callback'
 local wrapper = require 'wrapper'
 
--- udp packets come in
--- forward them to real udp services
--- nat route responses back
--- needs port forwarding option
-
--- ports to expose locally
--- can be just xxxx for same ports on both sides
--- or can have two numbers like xxxx:xxxx where left side is remote and right
--- is local.
-
+-- config.expose-ports - A list of ports to expose locally for forwarding.
+-- config.expose-host - Optionally bind exposed ports to a specific network
+--                      interface by specifying the ip address.
 return function (config)
   -- The framework will populate this with io.send(frame)
   local io = {}

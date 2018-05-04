@@ -7,13 +7,17 @@ return {
   homepage = "https://github.com/kubos/kubos",
   luvi = {
     flavor = "tiny",
-    inline = "#!/home/system/usr/bin/luvi-regular --\n"
+    -- Use luvi-regular for action-cable transport (or anything needing https)
+    -- inline = "#!/home/system/usr/bin/luvi-regular --\n"
+    -- Use luvi-tiny for anything you want to keep small.
+    inline = "#!/home/system/usr/bin/luvi-tiny --\n"
   },
   dependencies = {
+    -- Uncomment secure-socket when using luvi-regular
+    -- "luvit/secure-socket",
     "luvit/require",
     "luvit/pretty-print",
     "luvit/json",
-    "luvit/secure-socket",
     "creationix/base64",
     "creationix/coro-wrapper",
     "creationix/coro-channel",
@@ -23,6 +27,7 @@ return {
   },
   files = {
     "**.lua",
+    "!sample-server/**",
   },
   license = "Apache 2.0"
 }

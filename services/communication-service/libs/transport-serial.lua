@@ -28,6 +28,8 @@ local kiss = require 'codec-slip'
 local encoder = require('coro-wrapper').encoder
 local decoder = require('coro-wrapper').decoder
 
+-- config.device - The `/dev/tty*` device tto connect to.
+-- config.baud - The baud rate. (115200, 9600, etc...)
 return function (config)
   local io = {}
 

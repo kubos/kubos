@@ -33,13 +33,8 @@ with local UDP clients.
     [[communication-service]]
     name = "Local UDP Clients"
     type = "udp"
-    exports = [ 6000, 7000 ]
+    expose-ports = [ 6000, 7000 ]
 ]=]
-
-
--- # Take over the current PTY assuming it's serial
--- # You need to redirect stderr somewhere so it doesn't dirty the serial data.
--- kubos-communication-service debug-serial 115200 2> debug-log
 
 local config_file_path = args[1]
 if not config_file_path then

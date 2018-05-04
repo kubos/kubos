@@ -18,6 +18,20 @@ limitations under the License.
 -- data.  It will also set the baud rate of stdout and configure the serial
 -- termios.
 
+-- To use this transport, screen into the device using the debug serial.
+--
+--     screen /dev/ttyUSB0 115200
+--
+-- In the shell session, run this transport and redirect stderr to a log file.
+--
+--     kubos-communication-service config.toml 2> comm-logs
+--
+-- And then leave that running and exit the screen session by pressing
+-- Control-A and Control-K
+--
+-- Then start the host side of the communication service using the normal serial
+-- transport.
+
 local UDP = require 'codec-udp'
 local uv = require 'uv'
 local stdin = require('pretty-print').stdin
@@ -31,6 +45,7 @@ local decoder = require('coro-wrapper').decoder
 local kiss = require 'codec-slip'
 local set_termio = require 'termios-serial'
 
+-- config.baud - The baud rate. (115200, 9600, etc...)
 return function (config)
   local io = {}
   local baud = assert(config.baud, 'Missing baud parameter')
