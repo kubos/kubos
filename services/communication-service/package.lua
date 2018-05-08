@@ -14,7 +14,7 @@ return {
   },
   dependencies = {
     -- Uncomment secure-socket when using luvi-regular
-    -- "luvit/secure-socket",
+    "luvit/secure-socket",
     "luvit/require",
     "luvit/pretty-print",
     "luvit/json",
@@ -23,6 +23,7 @@ return {
     "creationix/coro-channel",
     "creationix/coro-fs",
     "creationix/coro-websocket",
+    "creationix/coro-http",
     "creationix/toml",
   },
   files = {
