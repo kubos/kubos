@@ -1,6 +1,6 @@
 local uv = require 'uv'
 local fs = require 'coro-fs'
-local defer = require 'defer'
+-- local defer = require 'defer'
 local constants = require('uv').constants
 local O_RDWR = constants.O_RDWR
 local O_NOCTTY = constants.O_NOCTTY
@@ -40,18 +40,18 @@ return function (dev, baud)
     coroutine.resume(thread)
   end
 
-  local function protect(fn)
-    return function (...)
-      lock()
-      local res = { pcall(fn, ...) }
-      defer(unlock)
-      if res[1] then
-        return unpack(res, 2)
-      else
-        error(res[2])
-      end
-    end
-  end
+  -- local function protect(fn)
+  --   return function (...)
+  --     lock()
+  --     local res = { pcall(fn, ...) }
+  --     defer(unlock)
+  --     if res[1] then
+  --       return unpack(res, 2)
+  --     else
+  --       error(res[2])
+  --     end
+  --   end
+  -- end
 
   local buffer = ''
   local function read(num)
