@@ -64,10 +64,11 @@ impl Message for LogCmd {
         vec.write_u32::<LittleEndian>(self.port).unwrap();
         vec.write_u16::<LittleEndian>(self.msg_id).unwrap();
         vec.push(self.msg_type);
+        vec.push(0x00); // Reserved byte
         vec.write_u32::<LittleEndian>(self.trigger).unwrap();
         vec.write_f64::<LittleEndian>(self.period).unwrap();
         vec.write_f64::<LittleEndian>(self.offset).unwrap();
-        vec.push(self.hold as u8);
+        vec.write_u32::<LittleEndian>(self.hold as u32).unwrap();
 
         vec
     }
@@ -93,6 +94,8 @@ impl From<u16> for MessageID {
             1 => MessageID::Log,
             37 => MessageID::Version,
             241 => MessageID::BestXYZ,
+            //TODO: UNLOG
+            //TODO: RXSTATUSEVENT
             _ => MessageID::Unknown,
         }
     }

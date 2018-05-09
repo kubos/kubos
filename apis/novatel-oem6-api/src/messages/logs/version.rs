@@ -21,8 +21,8 @@ const COMPONENT_SIZE: usize = 108;
 
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct VersionLog {
-    num_components: u32,
-    components: Vec<Component>,
+    pub num_components: u32,
+    pub components: Vec<Component>,
 }
 
 impl VersionLog {
@@ -47,14 +47,14 @@ impl VersionLog {
 
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct Component {
-    comp_type: u32, //TODO: enum
-    model: String,
-    serial_num: String,
-    hw_version: String,
-    sw_version: String,
-    boot_version: String,
-    compile_date: String,
-    compile_time: String,
+    pub comp_type: u32, //TODO: enum
+    pub model: String,
+    pub serial_num: String,
+    pub hw_version: String,
+    pub sw_version: String,
+    pub boot_version: String,
+    pub compile_date: String,
+    pub compile_time: String,
 }
 
 named!(parse_component(&[u8]) -> Component,

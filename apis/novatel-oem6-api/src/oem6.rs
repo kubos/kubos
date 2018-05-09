@@ -20,14 +20,69 @@ use byteorder::{LittleEndian, WriteBytesExt};
 use crc32::*;
 use messages::*;
 use nom;
-use rust_uart::*;
 use std::io;
 use serial;
+use serial_comm::*;
+use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
+use std::thread;
+use std::time::Duration;
+
+pub fn read_thread(
+    bus: &str,
+    log_send: SyncSender<(Header, Vec<u8>)>,
+    response_send: SyncSender<(Header, Vec<u8>)>,
+) {
+    let conn = Connection::new(bus);
+    println!("Read thread started");
+    loop {
+        let mut message = conn.read().unwrap();
+        println!("Got message");
+
+        let hdr = match Header::parse(&message) {
+            Some(v) => v,
+            None => {
+                println!("failed to parse header");
+                continue;
+            }
+        };
+
+        if hdr.sync != SYNC {
+            println!("SYNC bytes invalid: {:?}", hdr.sync);
+            continue;
+        }
+
+        // Read body
+        //message.append(&mut self.conn.read(hdr.msg_len as usize)?);
+        let len = message.len();
+
+        // Read CRC
+        let crc = nom::le_u32(message.split_off(len - 4).as_slice())
+            .unwrap()
+            .1;
+
+        // Verify CRC
+        let calc = calc_crc(&message);
+        if calc != crc {
+            // TODO: remove debugging line
+            println!("CRC Mismatch: {:X} {:X}", calc, crc);
+            continue;
+        }
+
+        let body = message.split_off(HDR_LEN.into());
+
+        match hdr.msg_type & 0x80 == 0x80 {
+            true => response_send.try_send((hdr, body)).unwrap(),
+            false => log_send.try_send((hdr, body)).unwrap(),
+        }
+    }
+}
 
 /// Structure for OEM6 device instance
 pub struct OEM6 {
     /// Device connection structure
     pub conn: Connection,
+    pub log_recv: Receiver<(Header, Vec<u8>)>,
+    pub response_recv: Receiver<(Header, Vec<u8>)>,
 }
 
 impl OEM6 {
@@ -49,8 +104,17 @@ impl OEM6 {
     /// # }
     /// ```
     ///
-    pub fn new(conn: Connection) -> OEM6 {
-        OEM6 { conn }
+    pub fn new(
+        conn: Connection,
+        log_recv: Receiver<(Header, Vec<u8>)>,
+        response_recv: Receiver<(Header, Vec<u8>)>,
+    ) -> OEM6 {
+        OEM6 {
+            conn,
+            log_recv,
+            response_recv,
+        }
+        //TODO: Turn off RXSTATUSEVENTA messages (UNLOG)
     }
 
     /// Get the system version information
@@ -61,16 +125,6 @@ impl OEM6 {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use mai400_api::*;
-    /// # fn func() -> OEMResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS4");
-    /// let mai = MAI400::new(connection);
-    /// let result = mai.get_version()?;
-    /// TODO
-    /// # Ok(())
-    /// # }
-    /// ```
     ///
     /// [`MAIError`]: enum.MAIError.html
     pub fn request_version(&self) -> OEMResult<()> {
@@ -79,6 +133,33 @@ impl OEM6 {
             MessageID::Version as u16,
             LogTrigger::Once as u32,
             0.0,
+            0.0,
+            false,
+        );
+
+        // Send request
+        self.send_message(request)?;
+
+        // Get request response
+        self.get_response(MessageID::Log)
+    }
+
+    /// Get the position data ONCE (TODO: change to ONTIME trigger)
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// [`MAIError`]: enum.MAIError.html
+    pub fn request_position(&self) -> OEMResult<()> {
+        let request = LogCmd::new(
+            Port::COM1 as u32,
+            MessageID::BestXYZ as u16,
+            LogTrigger::OnTime as u32,
+            1.0,
             0.0,
             false,
         );
@@ -102,19 +183,6 @@ impl OEM6 {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use OEM6_api::*;
-    /// # fn func() -> OEMResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS4");
-    /// let oem = OEM6::new(connection);
-    ///
-    /// let mut array = [0; 8];
-    /// TODO
-    ///
-    /// oem.passthrough(&array)?;
-    /// # Ok(())
-    /// # }
-    /// ```
     ///
     /// [`OEMError`]: enum.OEMError.html
     pub fn passthrough(&self, msg: &[u8]) -> OEMResult<()> {
@@ -140,52 +208,46 @@ impl OEM6 {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use OEM6_api::*;
-    /// # fn func() -> OEMResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS4");
-    /// let oem = OEM6::new(connection);
-    /// let (std, imu, irehs) = oem.get_message()?;
-    ///
-    /// if let Some(telem) = std {
-    ///     println!("Num successful commands: {}", telem.cmd_valid_cntr);
-    /// }
-    /// # Ok(())
-    /// # }
-    /// ```
     ///
     /// [`OEMError`]: enum.OEMError.html
     fn get_message(&self) -> OEMResult<(Header, Vec<u8>)> {
-        loop {
+        //loop {
+        {
             // Read header
             // TODO: Failure processing. If it's just that we weren't able
             // to read the requested number of bytes, then try again
-            let mut message = self.conn.read(HDR_LEN.into())?;
+            let mut message = self.conn.read()?;
 
             let hdr = match Header::parse(&message) {
                 Some(v) => v,
                 None => {
                     println!("failed to parse header");
-                    continue;
+                    throw!(OEMError::GenericError);
+                    //continue;
                 }
             };
 
             if hdr.sync != SYNC {
                 println!("SYNC bytes invalid: {:?}", hdr.sync);
-                continue;
+                throw!(OEMError::GenericError);
+                //continue;
             }
 
             // Read body
-            message.append(&mut self.conn.read(hdr.msg_len as usize)?);
+            //message.append(&mut self.conn.read(hdr.msg_len as usize)?);
+            let len = message.len();
 
             // Read CRC
-            let crc = nom::le_u32(self.conn.read(4)?.as_slice()).unwrap().1;
+            let crc = nom::le_u32(message.split_off(len - 4).as_slice())
+                .unwrap()
+                .1;
 
             // Verify CRC
             let calc = calc_crc(&message);
             if calc != crc {
                 // TODO: remove debugging line
                 println!("CRC Mismatch: {:X} {:X}", calc, crc);
+                throw!(OEMError::GenericError);
             } else {
                 let body = message.split_off(HDR_LEN.into());
                 return Ok((hdr, body));
@@ -196,7 +258,12 @@ impl OEM6 {
     // TODO: how to deal with async log messages being interspersed?
     // Probably set up a read thread with two channels: one for responses and one for logs
     fn get_response(&self, id: MessageID) -> OEMResult<()> {
-        let (hdr, body) = self.get_message()?;
+        println!("Waiting for response");
+        let (hdr, body) = self.response_recv
+            .recv_timeout(Duration::from_millis(500))
+            .unwrap();
+
+        println!("Got response");
 
         // Make sure we got specifically a response message
         if hdr.msg_type & 0x80 != 0x80 {
@@ -229,23 +296,23 @@ impl OEM6 {
     }
 
     pub fn get_log(&self) -> OEMResult<Log> {
-        loop {
-            let (hdr, body) = self.get_message()?;
+        println!("Waiting for log");
+        let (hdr, body) = self.log_recv.recv_timeout(Duration::from_secs(5)).unwrap();
+        println!("Got log");
 
-            // Make sure it's not a response message
-            if hdr.msg_type & 0x80 == 0x80 {
-                println!("Response bit not set");
-                continue;
-            }
-
-            let resp = match Log::new(hdr.msg_id, body) {
-                Some(v) => return Ok(v),
-                None => {
-                    println!("failed to parse response");
-                    continue;
-                }
-            };
+        // Make sure it's not a response message
+        if hdr.msg_type & 0x80 == 0x80 {
+            println!("Response bit not set");
+            throw!(OEMError::GenericError);
         }
+
+        let resp = match Log::new(hdr.msg_id, body) {
+            Some(v) => return Ok(v),
+            None => {
+                println!("failed to parse response");
+                throw!(OEMError::GenericError);
+            }
+        };
     }
 }
 

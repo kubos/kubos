@@ -19,25 +19,25 @@ use super::*;
 
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct BestXYZLog {
-    pos_status: u32, //TODO: enum
-    pos_type: u32,   //TODO: enum
-    position: [f64; 3],
-    pos_deviation: [f32; 3],
-    vel_status: u32,
-    vel_type: u32,
-    velocity: [f64; 3],
-    vel_deviation: [f32; 3],
-    station_id: String,
-    vel_time_latency: f32,
-    diff_age: f32,
-    sol_age: f32,
-    num_sats: u8,
-    num_sat_vehicles: u8,
-    num_gg_l1: u8,
-    num_multi_sats: u8,
-    ext_sol_stat: u8,
-    gal_beidou_sig: u8,
-    gps_glonass_sig: u8,
+    pub pos_status: u32, //TODO: enum
+    pub pos_type: u32,   //TODO: enum
+    pub position: [f64; 3],
+    pub pos_deviation: [f32; 3],
+    pub vel_status: u32,
+    pub vel_type: u32,
+    pub velocity: [f64; 3],
+    pub vel_deviation: [f32; 3],
+    pub station_id: String,
+    pub vel_time_latency: f32,
+    pub diff_age: f32,
+    pub sol_age: f32,
+    pub num_sats: u8,
+    pub num_sat_vehicles: u8,
+    pub num_gg_l1: u8,
+    pub num_multi_sats: u8,
+    pub ext_sol_stat: u8,
+    pub gal_beidou_sig: u8,
+    pub gps_glonass_sig: u8,
 }
 
 impl BestXYZLog {

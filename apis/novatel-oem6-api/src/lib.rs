@@ -46,8 +46,10 @@ extern crate serial;
 mod crc32;
 mod oem6;
 mod messages;
+mod serial_comm;
 //#[cfg(test)]
 //mod tests;
 
 pub use oem6::*;
-pub use messages::rx::*;
+pub use messages::*;
+pub use serial_comm::*;

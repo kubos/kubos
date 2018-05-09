@@ -30,6 +30,8 @@ pub use self::best_xyz::*;
 pub enum Log {
     BestXYZ(BestXYZLog),
     Version(VersionLog),
+    //TODO: RXSTATUSEVENTA (to use with UNLOG)
+    //TODO: RXSTATUSEVENTB (to actually report error events)
 }
 
 impl Log {
