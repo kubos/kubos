@@ -1,0 +1,11 @@
+[package]
+name = "telemetry-service"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
+diesel = { version = "0.13.0", features = ["sqlite"] }
+diesel_codegen = { version = "0.13.0", features = ["sqlite"] }
+dotenv = "0.8"
+juniper =  "0.9.2"
+"kubos-service" = { path = "../kubos-service" }
