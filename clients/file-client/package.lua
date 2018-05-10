@@ -1,8 +1,8 @@
 return {
-  name = "kubos/kubos-shell-service",
+  name = "kubos/kubos-file-client",
   version = "1.0.0",
-  description = "Service to provide access to linux files and processes remotely.",
-  tags = { "kubos", "udp", "shell", "file", "process" },
+  description = "File client to connect to remote file service over custom transport.",
+  tags = { "kubos", "udp", "nat", "file"},
   author = { name = "Tim Caswell", email = "tim@kubos.co" },
   homepage = "https://github.com/kubos/kubos",
   luvi = {
@@ -12,11 +12,12 @@ return {
   dependencies = {
     "luvit/require",
     "luvit/pretty-print",
+    "creationix/pathjoin",
+    "kubos/file-protocol",
     "kubos/cbor-message-protocol",
   },
   files = {
     "**.lua",
-    "!tests",
   },
   license = "Apache 2.0"
 }

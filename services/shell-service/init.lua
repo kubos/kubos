@@ -2,6 +2,32 @@
 -- { channel, message, ...args }
 
 local uv = require 'uv'
+local sub = string.sub
+
+local function makeCallback()
+  local thread = coroutine.running()
+  return function (err, value, ...)
+    if err then
+      assert(coroutine.resume(thread, nil, err))
+    else
+      assert(coroutine.resume(thread, value == nil and true or value, ...))
+    end
+  end
+end
+
+local function wrapper(fn)
+  return function (...)
+    local args = { ... }
+    return coroutine.wrap(function()
+      local success, result = xpcall(function ()
+        return fn(unpack(args))
+      end, debug.traceback)
+      if not success then
+        print(result)
+      end
+    end)()
+  end
+end
 
 local ffi = require('ffi')
 -- Define the bits of the system API we need.
@@ -89,26 +115,37 @@ return function(channel)
     if not options then options = {} end
     assert(type(options) == 'table', 'Options must be a table')
 
-    local on_stdout, on_stderr, on_exit
+    local pause, resume
+    local pressure = 0
 
-    function on_exit (exit_code, exit_signal)
+    local on_exit = wrapper(function (exit_code, exit_signal)
       code = exit_code
       signal = exit_signal
       channel.exit(code, signal)
       processes[channel_id] = nil
-    end
+    end)
 
-    function on_stdout (err, data)
+    local on_stdout = wrapper(function (err, data)
       if err then return print(err) end
+      if not stdout then return end
+      pressure = pressure + 1
+      if pressure == 2 then pause() end
       channel.stdout(data)
+      pressure = pressure - 1
+      if pressure == 1 then resume() end
       if not data then stdout = nil end
-    end
+    end)
 
-    function on_stderr (err, data)
+    local on_stderr = wrapper(function (err, data)
       if err then return print(err) end
+      if not stderr then return end
+      pressure = pressure + 1
+      if pressure == 2 then pause() end
       channel.stderr(data)
+      pressure = pressure - 1
+      if pressure == 1 then resume() end
       if not data then stderr = nil end
-    end
+    end)
 
     if options.pty then
       assert(type(options.pty) == 'boolean', 'options.pty must be a boolean')
@@ -131,18 +168,33 @@ return function(channel)
       path = path,
       pid = pid,
     }
-    stdout:read_start(on_stdout)
-    if stderr then
-      stderr:read_start(on_stderr)
+
+    local paused = true
+
+    function resume()
+      if not paused then return end
+      paused = false
+      if stdout then
+        stdout:read_start(on_stdout)
+      end
+      if stderr then
+        stderr:read_start(on_stderr)
+      end
     end
 
-    master = master
-    slave = slave
-    handle = handle
-    pid = pid
-    stdin = stdin
-    stdout = stdout
-    stderr = stderr
+    function pause()
+      if paused then return end
+      paused = true
+      if stdout then
+        stdout:read_stop()
+      end
+      if stderr then
+        stderr:read_stop()
+      end
+    end
+
+    resume()
+
     channel.pid(pid)
   end
 
@@ -150,11 +202,16 @@ return function(channel)
     assert(handle, 'Need to spawn first before writing to stdin')
     assert(stdin, 'Can not write to closed stdin')
     if data then
-      stdin:write(data)
+      stdin:write(data, makeCallback())
+      coroutine.yield()
     else
       local copy = stdin
       stdin = nil
-      copy:shutdown(function () copy:close() end)
+      copy:shutdown(makeCallback())
+      coroutine.yield()
+      if not copy:is_closing() then
+        copy:close()
+      end
     end
   end
 

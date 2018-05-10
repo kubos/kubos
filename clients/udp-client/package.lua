@@ -1,8 +1,8 @@
   return {
-    name = "kubos/kubos-cbor-client",
-    version = "1.1.0",
-    description = "Client for CBOR UDP services.",
-    tags = { "kubos", "udp", "cbor", "readline"},
+    name = "kubos/kubos-udp-client",
+    version = "0.0.3",
+    description = "UDP client for textual UDP services.",
+    tags = { "kubos", "udp", "readline"},
     author = { name = "Tim Caswell", email = "tim@kubos.co" },
     homepage = "https://github.com/kubos/kubos",
     luvi = {
@@ -13,7 +13,6 @@
       "luvit/require",
       "luvit/pretty-print",
       "luvit/readline",
-      "creationix/cbor",
     },
     files = {
       "**.lua",
