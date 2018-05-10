@@ -18,10 +18,14 @@ with open('mcu_config.json') as config_file:
 
 I2C_BUSNUM = data['i2c_bus_number']
 DELAY = data['delay_between_writing_and_reading']
-SUP_TELS = data['available_telemetry']
+TELEMETRY = data['telemetry']
+# SUP_TELS = data['supervisor_telemetry']
+# GPSRM_TELS = data['gpsrm_telemetry']
+# AIM2_TELS = data['aim2_telemetry']
 # json import converts to unicode, changing commands to be strings
-for field in SUP_TELS:
-    SUP_TELS[field]['command'] = str(SUP_TELS[field]['command'])
+for device in TELEMETRY:
+    for field in device:
+        TELEMETRY[device][field]['command'] = str(TELEMETRY[device][field]['command'])
 
 class MCU:
     
@@ -57,17 +61,17 @@ class MCU:
     
     def get_sup_telemetry(self,fields=None):
         if fields is None:
-            requests = SUP_TELS
+            requests = TELEMETRY['supervisor_telemetry']
         elif fields is list:
             requests = {}
             for field in fields:
                 print "field: " + str(field)
                 print type(field)
-                if field not in SUP_TELS or type(field) != str:
+                if field not in TELEMETRY['supervisor_telemetry'] or type(field) != str:
                     raise ValueError(
                         'Invalid field: '+str(field))
                 else:
-                    requests[field] = SUP_TELS[field]
+                    requests[field] = TELEMETRY['supervisor_telemetry'][field]
         else:
             raise TypeError('fields must be a list of strings.')
         

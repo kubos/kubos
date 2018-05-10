@@ -1,14 +1,35 @@
-{"available_telemetry":{
-  "firmware_version": {"command":"SUP:TEL? 0,data","length":53,"parsing":"s"},
-  "commands_parsed":  {"command":"SUP:TEL? 1,data","length":13,"parsing":"<Q"},
-  "scpi_errors":      {"command":"SUP:TEL? 2,data","length":13,"parsing":"<Q"},
-  "voltstat":         {"command":"SUP:TEL? 3,data","length":13,"parsing":"<hhhh"},
-  "cpu_selftests":    {"command":"SUP:TEL? 4,data","length":27,"parsing":"<QQhhh"},
-  "time":             {"command":"SUP:TEL? 5,data","length":13,"parsing":"<Q"},
-  "context_switches": {"command":"SUP:TEL? 6,data","length":13,"parsing":"<Q"},
-  "idling_hooks":     {"command":"SUP:TEL? 7,data","length":13,"parsing":"<Q"},
-  "mcu_load":         {"command":"SUP:TEL? 8,data","length":13,"parsing":"<Q"}
- },
+{"telemetry":{
+  "supervisor_telemetry":{
+   "firmware_version": {"command":"SUP:TEL? 0,data","length":53,"parsing":"s"},
+   "commands_parsed":  {"command":"SUP:TEL? 1,data","length":13,"parsing":"<Q"},
+   "scpi_errors":      {"command":"SUP:TEL? 2,data","length":13,"parsing":"<Q"},
+   "voltstat":         {"command":"SUP:TEL? 3,data","length":13,"parsing":"<hhhh","names":["voltstat0","voltstat1","voltstat2","voltstat3"]},
+   "cpu_selftests":    {"command":"SUP:TEL? 4,data","length":27,"parsing":"<QQhhh","names":["selftest0","selftest1","selftest2","selftest3","selftest4"]},
+   "time":             {"command":"SUP:TEL? 5,data","length":13,"parsing":"<Q"},
+   "context_switches": {"command":"SUP:TEL? 6,data","length":13,"parsing":"<Q"},
+   "idling_hooks":     {"command":"SUP:TEL? 7,data","length":13,"parsing":"<Q"},
+   "mcu_load":         {"command":"SUP:TEL? 8,data","length":13,"parsing":"<Q"}
+  },
+  "gpsrm_telemetry":{
+   "status":           {"command":"GPS:TEL? 0,data","length":2,  "parsing":"s"},
+   "nmea_string":      {"command":"GPS:TEL? 1,data","length":512,"parsing":"s"},
+   "propagator":       {"command":"GPS:TEL? 2,data","length":56, "parsing":"<ddddddd","names":["",""]},
+   "oem_power":        {"command":"GPS:TEL? 3,data","length":16, "parsing":"<ffff","names":["",""]},
+  },
+  "aim2_telemetry":{
+   "status":           {"command":"AIM:TEL? 0,data", "length":2,  "parsing":"s"},
+   "nmea_string":      {"command":"AIM:TEL? 1,data", "length":512,"parsing":"s"},
+   "propagator":       {"command":"AIM:TEL? 2,data", "length":56, "parsing":"<ddddddd"},
+   "oem_power":        {"command":"AIM:TEL? 3,data", "length":16, "parsing":"<ffff"},
+   "gps_uart":         {"command":"AIM:TEL? 4,data", "length":1,  "parsing":"<B"},
+   "gps_event_pin":    {"command":"AIM:TEL? 5,data", "length":1,  "parsing":"s"},
+   "gps_power":        {"command":"AIM:TEL? 6,data", "length":1,  "parsing":"s"},
+   "adcs_uart":        {"command":"AIM:TEL? 7,data", "length":1,  "parsing":"s"},
+   "ftdi_chip":        {"command":"AIM:TEL? 8,data", "length":1,  "parsing":"s"},
+   "adcs_power":       {"command":"AIM:TEL? 9,data", "length":1,  "parsing":"s"},
+   "wdt_period":       {"command":"AIM:TEL? 10,data","length":4,  "parsing":"<I"},
+  },
+ }
  "delay_between_writing_and_reading": 0.300,
  "i2c_bus_number": 1
 }

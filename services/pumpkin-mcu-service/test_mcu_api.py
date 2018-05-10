@@ -5,9 +5,7 @@
 # See LICENSE file for details.
 
 """
-API for interacting with all Pumpkin SupMCUs. 
-
-See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.5
+Testing mcu_api
 """
 
 import mcu_api
@@ -44,7 +42,3 @@ print rhm.get_sup_telemetry()
 
 
 
-
-"""
-stuff
-"""
