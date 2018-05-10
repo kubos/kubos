@@ -40,7 +40,7 @@ return function (config)
   local username = assert(config.username, 'missing username for nsl https gateway')
   local password = assert(config.password, 'missing password for nsl https gateway')
   local mission = assert(config.mission, 'missing mission name for nsl https gateway')
-
+  local upload_count = 0
   local gateway = new_gateway(username, password, mission)
   p(gateway)
 
@@ -66,12 +66,14 @@ return function (config)
           return file
         end
       end
-      p("no files")
     end
   end
 
   function write(data)
     p("write", data)
+    res = gateway. upload_file("UDP" .. upload_count, data)
+    upload_count = upload_count + 1
+    p(res)
   end
 
   --- io.receive = encoder(encoder(write, kiss.encode), UDP.encode)
