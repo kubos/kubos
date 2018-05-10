@@ -13,8 +13,8 @@
   "gpsrm_telemetry":{
    "status":           {"command":"GPS:TEL? 0,data","length":2,  "parsing":"s"},
    "nmea_string":      {"command":"GPS:TEL? 1,data","length":512,"parsing":"s"},
-   "propagator":       {"command":"GPS:TEL? 2,data","length":56, "parsing":"<ddddddd","names":["",""]},
-   "oem_power":        {"command":"GPS:TEL? 3,data","length":16, "parsing":"<ffff","names":["",""]},
+   "propagator":       {"command":"GPS:TEL? 2,data","length":56, "parsing":"<ddddddd"},
+   "oem_power":        {"command":"GPS:TEL? 3,data","length":16, "parsing":"<ffff"},
   },
   "aim2_telemetry":{
    "status":           {"command":"AIM:TEL? 0,data", "length":2,  "parsing":"s"},
@@ -29,7 +29,7 @@
    "adcs_power":       {"command":"AIM:TEL? 9,data", "length":1,  "parsing":"s"},
    "wdt_period":       {"command":"AIM:TEL? 10,data","length":4,  "parsing":"<I"},
   },
- }
+ },
  "delay_between_writing_and_reading": 0.300,
  "i2c_bus_number": 1
 }

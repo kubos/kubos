@@ -65,8 +65,6 @@ class MCU:
         elif fields is list:
             requests = {}
             for field in fields:
-                print "field: " + str(field)
-                print type(field)
                 if field not in TELEMETRY['supervisor_telemetry'] or type(field) != str:
                     raise ValueError(
                         'Invalid field: '+str(field))
