@@ -20,23 +20,45 @@ use byteorder::{LittleEndian, WriteBytesExt};
 use crc32::*;
 use messages::*;
 use nom;
+use rust_uart::*;
 use std::io;
 use serial;
-use serial_comm::*;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 use std::thread;
 use std::time::Duration;
 
+const CHAR_SIZE: serial::CharSize = serial::Bits8;
+const PARITY: serial::Parity = serial::ParityNone;
+const STOP_BITS: serial::StopBits = serial::Stop1;
+const FLOW_CONTROL: serial::FlowControl = serial::FlowNone;
+const TIMEOUT: Duration = Duration::from_millis(60);
+
 pub fn read_thread(
     bus: &str,
+    baud_rate: serial::BaudRate,
     log_send: SyncSender<(Header, Vec<u8>)>,
     response_send: SyncSender<(Header, Vec<u8>)>,
 ) {
-    let conn = Connection::new(bus);
-    println!("Read thread started");
+    let settings = serial::PortSettings {
+        baud_rate,
+        char_size: CHAR_SIZE,
+        parity: PARITY,
+        stop_bits: STOP_BITS,
+        flow_control: FLOW_CONTROL,
+    };
+
+    let conn = Connection::from_path(bus, settings, TIMEOUT).unwrap();
     loop {
-        let mut message = conn.read().unwrap();
-        println!("Got message");
+        // Read SYNC bytes
+        let mut message = conn.read(3, Duration::from_secs(2)).unwrap();
+
+        if message != SYNC {
+            println!("SYNC mismatch: {:?} {:?}", message, SYNC);
+            continue;
+        }
+
+        // Read the rest of the header
+        message.append(&mut conn.read(25, TIMEOUT).unwrap());
 
         let hdr = match Header::parse(&message) {
             Some(v) => v,
@@ -46,13 +68,9 @@ pub fn read_thread(
             }
         };
 
-        if hdr.sync != SYNC {
-            println!("SYNC bytes invalid: {:?}", hdr.sync);
-            continue;
-        }
+        // Read body + CRC bytes
+        message.append(&mut conn.read((hdr.msg_len + 4) as usize, TIMEOUT).unwrap());
 
-        // Read body
-        //message.append(&mut self.conn.read(hdr.msg_len as usize)?);
         let len = message.len();
 
         // Read CRC
@@ -105,15 +123,26 @@ impl OEM6 {
     /// ```
     ///
     pub fn new(
-        conn: Connection,
+        bus: &str,
+        baud_rate: serial::BaudRate,
         log_recv: Receiver<(Header, Vec<u8>)>,
         response_recv: Receiver<(Header, Vec<u8>)>,
-    ) -> OEM6 {
-        OEM6 {
+    ) -> OEMResult<OEM6> {
+        let settings = serial::PortSettings {
+            baud_rate,
+            char_size: CHAR_SIZE,
+            parity: PARITY,
+            stop_bits: STOP_BITS,
+            flow_control: FLOW_CONTROL,
+        };
+
+        let conn = Connection::from_path(bus, settings, TIMEOUT)?;
+
+        Ok(OEM6 {
             conn,
             log_recv,
             response_recv,
-        }
+        })
         //TODO: Turn off RXSTATUSEVENTA messages (UNLOG)
     }
 
@@ -144,7 +173,7 @@ impl OEM6 {
         self.get_response(MessageID::Log)
     }
 
-    /// Get the position data ONCE (TODO: change to ONTIME trigger)
+    /// Request BestXYZ position log/s from the device
     ///
     /// # Errors
     ///
@@ -154,12 +183,45 @@ impl OEM6 {
     ///
     ///
     /// [`MAIError`]: enum.MAIError.html
-    pub fn request_position(&self) -> OEMResult<()> {
+    pub fn request_position(&self, interval: f64, offset: f64, hold: bool) -> OEMResult<()> {
+        let trigger = if interval == 0.0 {
+            LogTrigger::Once
+        } else {
+            LogTrigger::OnTime
+        };
+
         let request = LogCmd::new(
             Port::COM1 as u32,
             MessageID::BestXYZ as u16,
-            LogTrigger::OnTime as u32,
-            1.0,
+            trigger as u32,
+            interval,
+            offset,
+            hold,
+        );
+
+        // Send request
+        self.send_message(request)?;
+
+        // Get request response
+        self.get_response(MessageID::Log)
+    }
+
+    /// Request that the device send error messages as they occur
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// [`MAIError`]: enum.MAIError.html
+    pub fn request_errors(&self) -> OEMResult<()> {
+        let request = LogCmd::new(
+            Port::COM1 as u32,
+            MessageID::RxStatusEvent as u16,
+            LogTrigger::OnChanged as u32,
+            0.0,
             0.0,
             false,
         );
@@ -169,6 +231,26 @@ impl OEM6 {
 
         // Get request response
         self.get_response(MessageID::Log)
+    }
+
+    pub fn request_unlog(&self, id: MessageID) -> OEMResult<()> {
+        let request = UnlogCmd::new(Port::COM1 as u32, id as u16);
+
+        // Send request
+        self.send_message(request)?;
+
+        // Get request response
+        self.get_response(MessageID::Unlog)
+    }
+
+    pub fn request_unlog_all(&self, hold: bool) -> OEMResult<()> {
+        let request = UnlogAllCmd::new(Port::COM1 as u32, hold);
+
+        // Send request
+        self.send_message(request)?;
+
+        // Get request response
+        self.get_response(MessageID::UnlogAll)
     }
 
     /// Directly send a message without formatting or checksum calculation
@@ -198,61 +280,6 @@ impl OEM6 {
         raw.write_u32::<LittleEndian>(crc).unwrap();
 
         Ok(self.conn.write(raw.as_slice())?)
-    }
-
-    /// Wait for and read a message from the OEM6.
-    ///
-    /// # Errors
-    ///
-    /// If this function encounters any errors, an [`OEMError`] variant will be returned.
-    ///
-    /// # Examples
-    ///
-    ///
-    /// [`OEMError`]: enum.OEMError.html
-    fn get_message(&self) -> OEMResult<(Header, Vec<u8>)> {
-        //loop {
-        {
-            // Read header
-            // TODO: Failure processing. If it's just that we weren't able
-            // to read the requested number of bytes, then try again
-            let mut message = self.conn.read()?;
-
-            let hdr = match Header::parse(&message) {
-                Some(v) => v,
-                None => {
-                    println!("failed to parse header");
-                    throw!(OEMError::GenericError);
-                    //continue;
-                }
-            };
-
-            if hdr.sync != SYNC {
-                println!("SYNC bytes invalid: {:?}", hdr.sync);
-                throw!(OEMError::GenericError);
-                //continue;
-            }
-
-            // Read body
-            //message.append(&mut self.conn.read(hdr.msg_len as usize)?);
-            let len = message.len();
-
-            // Read CRC
-            let crc = nom::le_u32(message.split_off(len - 4).as_slice())
-                .unwrap()
-                .1;
-
-            // Verify CRC
-            let calc = calc_crc(&message);
-            if calc != crc {
-                // TODO: remove debugging line
-                println!("CRC Mismatch: {:X} {:X}", calc, crc);
-                throw!(OEMError::GenericError);
-            } else {
-                let body = message.split_off(HDR_LEN.into());
-                return Ok((hdr, body));
-            }
-        }
     }
 
     // TODO: how to deal with async log messages being interspersed?

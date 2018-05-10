@@ -56,7 +56,7 @@ named!(parse_bestxyz(&[u8]) -> BestXYZLog,
         pos_type: le_u32 >>
         pos_x: le_f64 >>
         pos_y: le_f64 >>
-        pos_z: le_f64 >>    
+        pos_z: le_f64 >>
         pos_dev_x: le_f32 >>
         pos_dev_y: le_f32 >>
         pos_dev_z: le_f32 >>
@@ -101,7 +101,6 @@ named!(parse_bestxyz(&[u8]) -> BestXYZLog,
             gal_beidou_sig,
             gps_glonass_sig,
             }
-            
         )
     )
 );

@@ -14,8 +14,23 @@
 // limitations under the License.
 //
 
+#![allow(dead_code)]
+
+use byteorder::{LittleEndian, WriteBytesExt};
 use nom::*;
 use super::*;
+
+pub mod log;
+pub mod unlog;
+pub mod unlog_all;
+
+pub use self::log::*;
+pub use self::unlog::*;
+pub use self::unlog_all::*;
+
+pub trait Message {
+    fn serialize(&self) -> Vec<u8>;
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Response {

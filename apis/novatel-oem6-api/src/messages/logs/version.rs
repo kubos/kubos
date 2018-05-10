@@ -77,7 +77,6 @@ named!(parse_component(&[u8]) -> Component,
             compile_date: ::std::str::from_utf8(compile_date).unwrap().to_owned(),
             compile_time: ::std::str::from_utf8(compile_time).unwrap().to_owned(),
             }
-            
         )
     )
 );

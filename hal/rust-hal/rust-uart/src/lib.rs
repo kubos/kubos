@@ -5,10 +5,11 @@ extern crate serial;
 
 use std::io::prelude::*;
 use serial::prelude::*;
+use std::time::Duration;
+use std::cell::RefCell;
 
 /// Wrapper for UART stream
 pub struct Connection {
-
     /// Any boxed stream that allows for communication over serial ports
     pub stream: Box<Stream>,
 }
@@ -23,19 +24,14 @@ impl Connection {
     }
 
     /// Convenience constructor to create connection from bus path
-    pub fn from_path(bus: String) -> Connection {
-        Connection {
-            stream: Box::new(SerialStream {
-                bus,
-                settings: serial::PortSettings {
-                    baud_rate: serial::Baud115200,
-                    char_size: serial::Bits8,
-                    parity: serial::ParityNone,
-                    stop_bits: serial::Stop1,
-                    flow_control: serial::FlowNone,
-                },
-            }),
-        }
+    pub fn from_path(
+        bus: &str,
+        settings: serial::PortSettings,
+        timeout: Duration,
+    ) -> UartResult<Connection> {
+        Ok(Connection {
+            stream: Box::new(SerialStream::new(bus, settings, timeout)?),
+        })
     }
 
     /// Writes out raw bytes to the stream
@@ -44,8 +40,8 @@ impl Connection {
     }
 
     /// Reads messages upto specified length recieved on the bus
-    pub fn read(&self, len: usize) -> UartResult<Vec<u8>> {
-        self.stream.read(len)
+    pub fn read(&self, len: usize, timeout: Duration) -> UartResult<Vec<u8>> {
+        self.stream.read(len, timeout)
     }
 }
 
@@ -55,31 +51,43 @@ pub trait Stream {
     fn write(&self, data: &[u8]) -> UartResult<()>;
 
     /// Read upto a specified amount of raw bytes from the stream
-    fn read(&self, len: usize) -> UartResult<Vec<u8>>;
+    fn read(&self, len: usize, timeout: Duration) -> UartResult<Vec<u8>>;
 }
 
 // This is the actual stream that data is tranferred over
 struct SerialStream {
-    bus: String,
-    settings: serial::PortSettings,
+    port: RefCell<serial::SystemPort>,
+    timeout: Duration,
+}
+
+impl SerialStream {
+    fn new(bus: &str, settings: serial::PortSettings, timeout: Duration) -> UartResult<Self> {
+        let mut port = serial::open(bus)?;
+
+        port.configure(&settings)?;
+
+        Ok(SerialStream {
+            port: RefCell::new(port),
+            timeout,
+        })
+    }
 }
 
 // Read and write implementations for the serial stream
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> UartResult<()> {
-        let mut port = serial::open(self.bus.as_str())?;
+        let mut port = self.port.try_borrow_mut().unwrap();
+        port.set_timeout(self.timeout)?;
 
-        port.configure(&self.settings)?;
-
-        port.write(data)?;
+        port.write_all(data)?;
 
         Ok(())
     }
 
-    fn read(&self, len: usize) -> UartResult<Vec<u8>> {
-        let mut port = serial::open(self.bus.as_str())?;
+    fn read(&self, len: usize, timeout: Duration) -> UartResult<Vec<u8>> {
+        let mut port = self.port.try_borrow_mut().unwrap();
 
-        port.configure(&self.settings)?;
+        port.set_timeout(timeout)?;
 
         let mut response: Vec<u8> = vec![0; len];
 

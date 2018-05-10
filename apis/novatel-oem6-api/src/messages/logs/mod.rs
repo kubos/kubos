@@ -22,16 +22,17 @@ use super::*;
 
 pub mod version;
 pub mod best_xyz;
+pub mod rxstatusevent;
 
 pub use self::version::*;
 pub use self::best_xyz::*;
+pub use self::rxstatusevent::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Log {
     BestXYZ(BestXYZLog),
+    RxStatusEvent(RxStatusEventLog),
     Version(VersionLog),
-    //TODO: RXSTATUSEVENTA (to use with UNLOG)
-    //TODO: RXSTATUSEVENTB (to actually report error events)
 }
 
 impl Log {
@@ -39,6 +40,10 @@ impl Log {
         match id {
             MessageID::BestXYZ => match BestXYZLog::new(raw) {
                 Some(log) => Some(Log::BestXYZ(log)),
+                _ => None,
+            },
+            MessageID::RxStatusEvent => match RxStatusEventLog::new(raw) {
+                Some(log) => Some(Log::RxStatusEvent(log)),
                 _ => None,
             },
             MessageID::Version => match VersionLog::new(raw) {

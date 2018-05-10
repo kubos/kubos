@@ -16,10 +16,6 @@
 
 use super::*;
 
-pub trait Message {
-    fn serialize(&self) -> Vec<u8>;
-}
-
 pub struct LogCmd {
     hdr: Header,
     port: u32, //Hardcode?
@@ -71,33 +67,6 @@ impl Message for LogCmd {
         vec.write_u32::<LittleEndian>(self.hold as u32).unwrap();
 
         vec
-    }
-}
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum MessageID {
-    Log = 1,
-    Version = 37,
-    BestXYZ = 241,
-    Unknown,
-}
-
-impl Default for MessageID {
-    fn default() -> MessageID {
-        MessageID::Unknown
-    }
-}
-
-impl From<u16> for MessageID {
-    fn from(t: u16) -> MessageID {
-        match t {
-            1 => MessageID::Log,
-            37 => MessageID::Version,
-            241 => MessageID::BestXYZ,
-            //TODO: UNLOG
-            //TODO: RXSTATUSEVENT
-            _ => MessageID::Unknown,
-        }
     }
 }
 

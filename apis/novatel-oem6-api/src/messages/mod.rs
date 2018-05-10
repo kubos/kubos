@@ -20,16 +20,45 @@ use byteorder::{LittleEndian, WriteBytesExt};
 use nom::*;
 
 pub mod logs;
-pub mod rx;
-mod tx;
+pub mod commands;
 
 pub use self::logs::*;
-pub use self::rx::*;
-pub use self::tx::*;
+pub use self::commands::*;
 
 pub const SYNC: [u8; 3] = [0xAA, 0x44, 0x12];
 pub const HDR_LEN: u8 = 28;
 pub const RESP_HDR_LEN: u8 = HDR_LEN + 4;
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum MessageID {
+    Log = 1,
+    Unlog = 36,
+    UnlogAll = 38,
+    Version = 37,
+    RxStatusEvent = 94,
+    BestXYZ = 241,
+    Unknown,
+}
+
+impl Default for MessageID {
+    fn default() -> MessageID {
+        MessageID::Unknown
+    }
+}
+
+impl From<u16> for MessageID {
+    fn from(t: u16) -> MessageID {
+        match t {
+            1 => MessageID::Log,
+            36 => MessageID::Unlog,
+            37 => MessageID::Version,
+            38 => MessageID::UnlogAll,
+            94 => MessageID::RxStatusEvent,
+            241 => MessageID::BestXYZ,
+            _ => MessageID::Unknown,
+        }
+    }
+}
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Header {

@@ -42,14 +42,14 @@ extern crate failure;
 extern crate nom;
 extern crate rust_uart;
 extern crate serial;
+extern crate termios;
 
 mod crc32;
 mod oem6;
 mod messages;
-mod serial_comm;
 //#[cfg(test)]
 //mod tests;
 
 pub use oem6::*;
 pub use messages::*;
-pub use serial_comm::*;
+pub use serial::BaudRate;
