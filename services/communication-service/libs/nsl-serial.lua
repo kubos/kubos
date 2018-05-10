@@ -37,9 +37,9 @@ return function (dev, baud)
 
   local function sync()
     repeat
-      -- repeat
-      --   local first = serial_read(1)
-      -- until first == 'G'
+      repeat
+        local first = serial_read(1)
+      until first == 'G'
       local second = serial_read(1)
     until second == 'U'
   end
@@ -65,8 +65,18 @@ return function (dev, baud)
   end
 
   local function ack_or_nak()
-    sync()
-    local r = byte(serial_read(1), 1)
+    p("ack or nak")
+    local c = 0
+    local r = 0
+    repeat
+      p("Try sync")
+      sync()
+      p("try read")
+      r = byte(serial_read(1), 1)
+      p(string.format("byte %x", r))
+      c = c + 1
+    until r == 0x06 or r == 0x0F or c > 2
+    p("ack_or_nak r", r)
     assert(r == 0x06 or r == 0x0f)
     return r == 0x06
   end
@@ -194,11 +204,14 @@ return function (dev, baud)
   end
 
   local function put_download_file(name, body)
+    p("put download body", body)
     serial_write 'GUPUT_DF'
     assert(ack_or_nak())
-    local output = format('GU%03d%06d%s%s', #name, #body, name, body)
+    local output = format('GU%03d%06d%s', #name, #body, name)
+    output = output .. body
     local crc = xmodem_crc16(output, 0)
     output = output .. char(rshift(crc, 8), band(crc, 0xff))
+    p("download output", output)
     serial_write(output)
     return ack_or_nak()
   end
