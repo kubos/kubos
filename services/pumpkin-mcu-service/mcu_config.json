@@ -1,5 +1,5 @@
 {"telemetry":{
-  "supervisor_telemetry":{
+  "supervisor":{
    "firmware_version": {"command":"SUP:TEL? 0,data","length":53,"parsing":"s"},
    "commands_parsed":  {"command":"SUP:TEL? 1,data","length":13,"parsing":"<Q"},
    "scpi_errors":      {"command":"SUP:TEL? 2,data","length":13,"parsing":"<Q"},
@@ -10,13 +10,13 @@
    "idling_hooks":     {"command":"SUP:TEL? 7,data","length":13,"parsing":"<Q"},
    "mcu_load":         {"command":"SUP:TEL? 8,data","length":13,"parsing":"<Q"}
   },
-  "gpsrm_telemetry":{
+  "gpsrm":{
    "status":           {"command":"GPS:TEL? 0,data","length":2,  "parsing":"s"},
    "nmea_string":      {"command":"GPS:TEL? 1,data","length":512,"parsing":"s"},
    "propagator":       {"command":"GPS:TEL? 2,data","length":56, "parsing":"<ddddddd"},
    "oem_power":        {"command":"GPS:TEL? 3,data","length":16, "parsing":"<ffff"}
   },
-  "aim2_telemetry":{
+  "aim2":{
    "status":           {"command":"AIM:TEL? 0,data", "length":2,  "parsing":"s"},
    "nmea_string":      {"command":"AIM:TEL? 1,data", "length":512,"parsing":"s"},
    "propagator":       {"command":"AIM:TEL? 2,data", "length":56, "parsing":"<ddddddd"},

@@ -61,20 +61,54 @@ class MCU:
     
     def get_sup_telemetry(self,fields=None):
         if fields is None:
-            requests = TELEMETRY['supervisor_telemetry']
+            requests = TELEMETRY['supervisor']
         elif fields is list:
             requests = {}
             for field in fields:
-                if field not in TELEMETRY['supervisor_telemetry'] or type(field) != str:
+                if field not in TELEMETRY['supervisor'] or type(field) != str:
                     raise ValueError(
                         'Invalid field: '+str(field))
                 else:
-                    requests[field] = TELEMETRY['supervisor_telemetry'][field]
+                    requests[field] = TELEMETRY['supervisor'][field]
         else:
             raise TypeError('fields must be a list of strings.')
         
         return self.get_telemetry(requests)
-    
+        
+    def get_module_telemetry(self,module,fields=None):
+        if module not in TELEMETRY: 
+            raise KeyError(
+                'Module name: '+str(module)+' not found in mcu_config file.'
+                )
+        if type(fields) != list and type(fields) != None: 
+            raise TypeError(
+                'fields argument must be a list of strings.'
+                )
+                
+        module_telem = TELEMETRY[module]
+        supervisor_telem = TELEMETRY['supervisor']
+        for field in fields:
+            if (
+                field not in module_telem or 
+                field not in supervisor_telem or 
+                type(field) != str
+                ):
+                raise ValueError('Invalid field: '+str(field))
+                
+        if fields is None:
+            # Pulling all info
+            requests = module_telem
+            requests.update(supervisor_telem)
+        elif fields is list:
+            requests = {}
+            for field in fields:
+                if field in module_telem:
+                    requests[field] = module_telem[field]
+                if field in supervisor_telem:
+                    requests[field] = supervisor_telem[field]
+            
+        return self.get_telemetry(requests)
+        
     def get_telemetry(self,dict):
         output_dict = {}
         for telem_field in dict:
@@ -88,22 +122,23 @@ class MCU:
         
     def __unpacking__(self,input_dict,output_dict):
         for field in input_dict:
-            print("field: ",field,output_dict[field]["data"],input_dict[field]["parsing"])
-            if input_dict[field]["parsing"] == "s":
+            parsing = input_dict[field]["parsing"]
+            if parsing == "s":
                 # Leave strings alone
-                print "string"
                 pass
-            elif (len(input_dict[field]["parsing"]) == 2 and input_dict[field]["parsing"][0] in ['<','>']) or len(input_dict[field]["parsing"]) == 1:
-                print "one field"
+            elif (len(parsing) == 2 and parsing[0] in ['<','>']) or len(parsing) == 1:
                 # Only one value, parse and store
-                output_dict[field]['data'] = struct.unpack(input_dict[field]["parsing"],output_dict[field]["data"])[0]
+                output_dict[field]['data'] = struct.unpack(parsing,output_dict[field]["data"])[0]
             else:
-                print "multiple fields"
                 # Multiple values. Parse and store as new fields
-                parsed_values = struct.unpack(input_dict[field]["parsing"],output_dict[field]["data"])
-                if len(parsed_values) == len(input_dict[field]["names"]):
-                    for new_field in input_dict[field]["names"]:
-                        output_dict[new_field] = {"data":None,"timestamp":None}
-                        output_dict[new_field]["data"] = parsed_values[input_dict[field]["names"].index(new_field)] # Store parsed telemetry in output with corresponding field name
-                        output_dict[new_field]["timestamp"] = output_dict[field]["timestamp"] # Copy timestamp
+                names = input_dict[field]["names"]
+                parsed_values = struct.unpack(parsing,output_dict[field]["data"])
+                if len(parsed_values) == len(names):
+                    for new_field in names:
+                        output_dict[new_field] = {
+                            # Store parsed telemetry in output with corresponding field name
+                            "data":parsed_values[names.index(new_field)],
+                            # Copy timestamp
+                            "timestamp":output_dict[field]["timestamp"] 
+                        }
         return output_dict
