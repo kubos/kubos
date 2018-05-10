@@ -19,12 +19,11 @@ with open('mcu_config.json') as config_file:
 I2C_BUSNUM = data['i2c_bus_number']
 DELAY = data['delay_between_writing_and_reading']
 TELEMETRY = data['telemetry']
-# SUP_TELS = data['supervisor_telemetry']
-# GPSRM_TELS = data['gpsrm_telemetry']
-# AIM2_TELS = data['aim2_telemetry']
 # json import converts to unicode, changing commands to be strings
 for device in TELEMETRY:
-    for field in device:
+    print("device: ",device)
+    for field in TELEMETRY[device]:
+        print('field: ', field)
         TELEMETRY[device][field]['command'] = str(TELEMETRY[device][field]['command'])
 
 class MCU:
