@@ -93,14 +93,14 @@ class MCU:
                 # Leave strings alone
                 print "string"
                 pass
-            elif len(input_dict[field]["parsing"]) == 2:
+            elif (len(input_dict[field]["parsing"]) == 2 and input_dict[field]["parsing"][0] in ['<','>']) or len(input_dict[field]["parsing"]) == 1:
                 print "one field"
                 # Only one value, parse and store
-                output_dict[field] = struct.unpack(output_dict[field]["data"],input_dict["parsing"])[0]
+                output_dict[field] = struct.unpack(input_dict[field]["parsing"],output_dict[field]["data"])[0]
             else:
                 print "multiple fields"
                 # Multiple values. Parse and store as new fields
-                parsed_values = struct.unpack(output_dict[field]["data"],input_dict[field]["parsing"])
+                parsed_values = struct.unpack(input_dict[field]["parsing"],output_dict[field]["data"])
                 if len(parsed_values) == len(input_dict[field]["names"]):
                     for new_field in input_dict[field]["names"]:
                         output_dict[new_field]["data"] = parsed_values[input_dict[field]["names"].index(new_field)] # Store parsed telemetry in output with corresponding field name
