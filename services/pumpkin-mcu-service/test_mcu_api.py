@@ -28,11 +28,11 @@ pim_address = 0x53
 pim = mcu_api.MCU(address = pim_address)
 print pim.get_sup_telemetry()
 
-print "\n Address 54: DCPS"
+# print "\n Address 54: DCPS"
 
-dcps_address = 0x54
-dcps = mcu_api.MCU(address = dcps_address)
-print dcps.get_sup_telemetry()
+# dcps_address = 0x54
+# dcps = mcu_api.MCU(address = dcps_address)
+# print dcps.get_sup_telemetry()
 
 print "\n Address 55: RHM"
 

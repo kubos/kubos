@@ -19,12 +19,13 @@ with open('mcu_config.json') as config_file:
 I2C_BUSNUM = data['i2c_bus_number']
 DELAY = data['delay_between_writing_and_reading']
 TELEMETRY = data['telemetry']
-# json import converts to unicode, changing commands to be strings
+# json import converts to unicode, changing commands and parsing to be strings
 for device in TELEMETRY:
-    print("device: ",device)
+    # print("device: ",device)
     for field in TELEMETRY[device]:
-        print('field: ', field)
+        # print('field: ', field)
         TELEMETRY[device][field]['command'] = str(TELEMETRY[device][field]['command'])
+        TELEMETRY[device][field]['parsing'] = str(TELEMETRY[device][field]['parsing'])
 
 class MCU:
     
@@ -82,5 +83,25 @@ class MCU:
             output_dict[telem_field] = self.read(
                 dict[telem_field]['length']
                 )
+        output_dict = self.__unpacking__(dict,output_dict)
         return output_dict
-            
+        
+    def __unpacking__(self,input_dict,output_dict):
+        for field in input_dict:
+            print("field: ",field)
+            if input_dict[field]["parsing"] == "s":
+                # Leave strings alone
+                print "string"
+                pass
+            elif len(input_dict[field]["parsing"]) == 2:
+                print "one field"
+                # Only one value, parse and store
+                output_dict[field] = struct.unpack(output_dict[field],input_dict["parsing"])[0]
+            else:
+                print "multiple fields"
+                # Multiple values. Parse and store as new fields
+                parsed_values = struct.unpack(output_dict[field],input_dict["parsing"])
+                if len(parsed_values) == len(input_dict[field]["names"]):
+                    for new_field in input_dict[field]["names"]:
+                        output_dict[new_field] = parsed_values[input_dict[field]["names"].index(new_field)]
+        return output_dict
