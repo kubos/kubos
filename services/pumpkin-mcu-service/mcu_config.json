@@ -1,10 +1,15 @@
-{"telemetry":{
+{
+ "telemetry":{
   "supervisor":{
    "firmware_version": {"command":"SUP:TEL? 0,data","length":53,"parsing":"s"},
    "commands_parsed":  {"command":"SUP:TEL? 1,data","length":13,"parsing":"<Q"},
    "scpi_errors":      {"command":"SUP:TEL? 2,data","length":13,"parsing":"<Q"},
-   "voltstat":         {"command":"SUP:TEL? 3,data","length":13,"parsing":"<hhhh","names":["voltstat0","voltstat1","voltstat2","voltstat3"]},
-   "cpu_selftests":    {"command":"SUP:TEL? 4,data","length":27,"parsing":"<QQhhh","names":["selftest0","selftest1","selftest2","selftest3","selftest4"]},
+   "voltstat":         {
+    "command":"SUP:TEL? 3,data","length":13,"parsing":"<hhhh",
+    "names":["voltstat0","voltstat1","voltstat2","voltstat3"]},
+   "cpu_selftests":    {
+    "command":"SUP:TEL? 4,data","length":27,"parsing":"<QQhhh",
+    "names":["selftest0","selftest1","selftest2","selftest3","selftest4"]},
    "time":             {"command":"SUP:TEL? 5,data","length":13,"parsing":"<Q"},
    "context_switches": {"command":"SUP:TEL? 6,data","length":13,"parsing":"<Q"},
    "idling_hooks":     {"command":"SUP:TEL? 7,data","length":13,"parsing":"<Q"},
@@ -13,14 +18,22 @@
   "gpsrm":{
    "status":           {"command":"GPS:TEL? 0,data","length":7,  "parsing":"s"},
    "nmea_string":      {"command":"GPS:TEL? 1,data","length":512,"parsing":"s"},
-   "propagator":       {"command":"GPS:TEL? 2,data","length":61, "parsing":"<ddddddd"},
-   "oem_power":        {"command":"GPS:TEL? 3,data","length":21, "parsing":"<ffff"}
+   "propagator":       {
+    "command":"GPS:TEL? 2,data","length":61, "parsing":"<ddddddd",
+    "names":["propagator0","propagator1","propagator2","propagator3","propagator4","propagator5","propagator6"]},
+   "oem_power":        {
+    "command":"GPS:TEL? 3,data","length":21, "parsing":"<ffff",
+    "names":["oem_power0","oem_power1","oem_power2","oem_power3"]}
   },
   "aim2":{
    "status":           {"command":"AIM:TEL? 0,data", "length":7,  "parsing":"s"},
    "nmea_string":      {"command":"AIM:TEL? 1,data", "length":512,"parsing":"s"},
-   "propagator":       {"command":"AIM:TEL? 2,data", "length":61, "parsing":"<ddddddd"},
-   "oem_power":        {"command":"AIM:TEL? 3,data", "length":21, "parsing":"<ffff"},
+   "propagator":       {
+    "command":"AIM:TEL? 2,data", "length":61, "parsing":"<ddddddd",
+    "names":["propagator0","propagator1","propagator2","propagator3","propagator4","propagator5","propagator6"]},
+   "oem_power":        {
+    "command":"AIM:TEL? 3,data", "length":21, "parsing":"<ffff",
+    "names":["oem_power0","oem_power1","oem_power2","oem_power3"]},
    "gps_uart":         {"command":"AIM:TEL? 4,data", "length":6,  "parsing":"<B"},
    "gps_event_pin":    {"command":"AIM:TEL? 5,data", "length":6,  "parsing":"s"},
    "gps_power":        {"command":"AIM:TEL? 6,data", "length":6,  "parsing":"s"},
