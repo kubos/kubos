@@ -14,19 +14,25 @@ print "\n Address 50: SIM"
 
 sim_address = 0x50
 sim = mcu_api.MCU(address = sim_address)
-print sim.get_module_telemetry(module = 'sim')
+out = sim.get_module_telemetry(module = 'sim')
+for field in out:
+    print (field,out[field])
 
 print "\n Address 51: GPSRM"
 
 gpsrm_address = 0x51
 gpsrm = mcu_api.MCU(address = gpsrm_address)
-print gpsrm.get_module_telemetry(module = 'gpsrm')
+out = gpsrm.get_module_telemetry(module = 'gpsrm')
+for field in out:
+    print (field,out[field])
 
 print "\n Address 53: PIM"
 
 pim_address = 0x53
 pim = mcu_api.MCU(address = pim_address)
-print gpsrm.get_module_telemetry(module = 'pim')
+out = pim.get_module_telemetry(module = 'pim')
+for field in out:
+    print (field,out[field])
 
 # print "\n Address 54: DCPS"
 
@@ -38,7 +44,9 @@ print "\n Address 55: RHM"
 
 rhm_address = 0x55
 rhm = mcu_api.MCU(address = rhm_address)
-print gpsrm.get_module_telemetry(module = 'rhm')
+out = rhm.get_module_telemetry(module = 'rhm')
+for field in out:
+    print (field,out[field])
 
 
 
