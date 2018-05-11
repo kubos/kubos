@@ -1,49 +1,115 @@
 {
  "telemetry":{
   "supervisor":{
-   "firmware_version": {"command":"SUP:TEL? 0,data","length":53,"parsing":"s"},
-   "commands_parsed":  {"command":"SUP:TEL? 1,data","length":13,"parsing":"<Q"},
-   "scpi_errors":      {"command":"SUP:TEL? 2,data","length":13,"parsing":"<Q"},
-   "voltstat":         {
-    "command":"SUP:TEL? 3,data","length":13,"parsing":"<hhhh",
+   "firmware_version": {"command":"SUP:TEL? 0,data","length":48,"parsing":"s"},
+   "commands_parsed":  {"command":"SUP:TEL? 1,data","length":8, "parsing":"<Q"},
+   "scpi_errors":      {"command":"SUP:TEL? 2,data","length":8, "parsing":"<Q"},
+   "voltstat":         {"command":"SUP:TEL? 3,data","length":8, "parsing":"<hhhh",
     "names":["voltstat0","voltstat1","voltstat2","voltstat3"]},
-   "cpu_selftests":    {
-    "command":"SUP:TEL? 4,data","length":27,"parsing":"<QQhhh",
+   "cpu_selftests":    {"command":"SUP:TEL? 4,data","length":22,"parsing":"<QQhhh",
     "names":["selftest0","selftest1","selftest2","selftest3","selftest4"]},
-   "time":             {"command":"SUP:TEL? 5,data","length":13,"parsing":"<Q"},
-   "context_switches": {"command":"SUP:TEL? 6,data","length":13,"parsing":"<Q"},
-   "idling_hooks":     {"command":"SUP:TEL? 7,data","length":13,"parsing":"<Q"},
-   "mcu_load":         {"command":"SUP:TEL? 8,data","length":13,"parsing":"<Q"}
+   "time":             {"command":"SUP:TEL? 5,data","length":8, "parsing":"<Q"},
+   "context_switches": {"command":"SUP:TEL? 6,data","length":8, "parsing":"<Q"},
+   "idling_hooks":     {"command":"SUP:TEL? 7,data","length":8, "parsing":"<Q"},
+   "mcu_load":         {"command":"SUP:TEL? 8,data","length":8, "parsing":"<Q"}
+  },
+  "bim":{
+   "temperature":      {"command":"BIM:TEL? 0,data", "length":24,"parsing":"<ffff",
+    "names": ["temp0","temp1","temp2","temp3"]
+   },
+   "uart_status":      {"command":"BIM:TEL? 1,data", "length":6, "parsing":"<hhh"
+    "names": ["uart1_status","uart2_status","uart3_status"]
+   },
+   "imu":              {"command":"BIM:TEL? 2,data", "length":12,"parsing":"<hhhhhh"
+    "names": ["imu0","imu1","imu2","imu3","imu4","imu5"]
+   },
+   "tini_status":      {"command":"BIM:TEL? 3,data", "length":1, "parsing":"<B"},
+   "temp_offsets":     {"command":"BIM:TEL? 4,data", "length":24,"parsing":"<ffffff"
+    "names": ["temp0_offset","temp1_offset","temp2_offset","temp3_offset","temp4_offset","temp5_offset"]
+   },
+   "temp_sensors":     {"command":"BIM:TEL? 5,data", "length":24,"parsing":"<ffffff"
+    "names": ["temp0_sensor","temp1_sensor","temp2_sensor","temp3_sensor","temp4_sensor","temp5_sensor"]
+   }
   },
   "gpsrm":{
-   "status":           {"command":"GPS:TEL? 0,data","length":7,  "parsing":"s"},
+   "status":           {"command":"GPS:TEL? 0,data","length":2,  "parsing":"s"},
    "nmea_string":      {"command":"GPS:TEL? 1,data","length":512,"parsing":"s"},
-   "propagator":       {
-    "command":"GPS:TEL? 2,data","length":61, "parsing":"<ddddddd",
+   "propagator":       {"command":"GPS:TEL? 2,data","length":56, "parsing":"<ddddddd",
     "names":["propagator0","propagator1","propagator2","propagator3","propagator4","propagator5","propagator6"]},
-   "oem_power":        {
-    "command":"GPS:TEL? 3,data","length":21, "parsing":"<ffff",
+   "oem_power":        {"command":"GPS:TEL? 3,data","length":16, "parsing":"<ffff",
     "names":["oem_power0","oem_power1","oem_power2","oem_power3"]}
   },
+  "sim":{},
   "aim2":{
-   "status":           {"command":"AIM:TEL? 0,data", "length":7,  "parsing":"s"},
+   "status":           {"command":"AIM:TEL? 0,data", "length":2,  "parsing":"s"},
    "nmea_string":      {"command":"AIM:TEL? 1,data", "length":512,"parsing":"s"},
-   "propagator":       {
-    "command":"AIM:TEL? 2,data", "length":61, "parsing":"<ddddddd",
+   "propagator":       {"command":"AIM:TEL? 2,data", "length":56, "parsing":"<ddddddd",
     "names":["propagator0","propagator1","propagator2","propagator3","propagator4","propagator5","propagator6"]},
-   "oem_power":        {
-    "command":"AIM:TEL? 3,data", "length":21, "parsing":"<ffff",
+   "oem_power":        {"command":"AIM:TEL? 3,data", "length":16, "parsing":"<ffff",
     "names":["oem_power0","oem_power1","oem_power2","oem_power3"]},
-   "gps_uart":         {"command":"AIM:TEL? 4,data", "length":6,  "parsing":"<B"},
-   "gps_event_pin":    {"command":"AIM:TEL? 5,data", "length":6,  "parsing":"s"},
-   "gps_power":        {"command":"AIM:TEL? 6,data", "length":6,  "parsing":"s"},
-   "adcs_uart":        {"command":"AIM:TEL? 7,data", "length":6,  "parsing":"s"},
-   "ftdi_chip":        {"command":"AIM:TEL? 8,data", "length":6,  "parsing":"s"},
-   "adcs_power":       {"command":"AIM:TEL? 9,data", "length":6,  "parsing":"s"},
-   "wdt_period":       {"command":"AIM:TEL? 10,data","length":9,  "parsing":"<I"}
+   "gps_uart":         {"command":"AIM:TEL? 4,data", "length":1,  "parsing":"<B"},
+   "gps_event_pin":    {"command":"AIM:TEL? 5,data", "length":1,  "parsing":"s"},
+   "gps_power":        {"command":"AIM:TEL? 6,data", "length":1,  "parsing":"s"},
+   "adcs_uart":        {"command":"AIM:TEL? 7,data", "length":1,  "parsing":"s"},
+   "ftdi_chip":        {"command":"AIM:TEL? 8,data", "length":1,  "parsing":"s"},
+   "adcs_power":       {"command":"AIM:TEL? 9,data", "length":1,  "parsing":"s"},
+   "wdt_period":       {"command":"AIM:TEL? 10,data","length":4,  "parsing":"<I"}
   },
-  "sim":{}
+  "rhm":{
+   "lithium_power":     {"command":"RHM:TEL? 0,data", "length":1,"parsing":"s"},
+   "lithium_uart":      {"command":"RHM:TEL? 1,data", "length":1,"parsing":"<B"},
+   "lithium_config":    {"command":"RHM:TEL? 2,data", "length":1,"parsing":"s"},
+   "globalstar_power":  {"command":"RHM:TEL? 3,data", "length":1,"parsing":"s"},
+   "globalstar_uart":   {"command":"RHM:TEL? 4,data", "length":1,"parsing":"<B"},
+   "globalstar_din_out":{"command":"RHM:TEL? 5,data", "length":1,"parsing":"s"},
+   "globalstar_busy":   {"command":"RHM:TEL? 6,data", "length":1,"parsing":"s"},
+   "watchdog_period":   {"command":"RHM:TEL? 7,data", "length":4,"parsing":"<I"}
+  }
+  "pim":{
+   "channel_currents": {"command":"PIM:TEL? 0,data", "length":8, "parsing":"<HHHH",
+    "name":["channel0_current","channel1_current","channel2_current","channel3_current"]},
+   "channel_resistors":{"command":"PIM:TEL? 1,data", "length":8, "parsing":"<HHHH",
+    "name":["channel0_resistor","channel1_resistor","channel2_resistor","channel3_resistor"]},
+   "channel_limits":   {"command":"PIM:TEL? 2,data", "length":8, "parsing":"<HHHH",
+    "name":["channel0_limit","channel1_limit","channel2_limit","channel3_limit"]},
+   "channel_offsets":  {"command":"PIM:TEL? 3,data", "length":16,"parsing":"<ffff",
+    "name":["channel0_offset","channel1_offset","channel2_offset","channel3_offset"]},
+   "channel_scaling":  {"command":"PIM:TEL? 4,data", "length":16,"parsing":"<ffff",
+    "name":["channel0_scaling","channel1_scaling","channel2_scaling","channel3_scaling"]},
+   "status":           {"command":"PIM:TEL? 5,data", "length":6, "parsing":"s"},
+   "overcurrent_log":  {"command":"PIM:TEL? 6,data", "length":8, "parsing":"<HHHH",
+    "name":["channel0_overcurrent","channel1_overcurrent","channel2_overcurrent","channel3_overcurrent"]},
+   "channel_volts":    {"command":"PIM:TEL? 7,data", "length":8, "parsing":"<HHHH",
+    "name":["channel0_voltage","channel1_voltage","channel2_voltage","channel3_voltage"]}
+  },
+  "bsm":{
+   "channel_currents":    {"command":"BSM:TEL? 0,data", "length":10,"parsing":"<HHHHH",
+    "name":["channel0_current","channel1_current","channel2_current","channel3_current","channel4_current"]},
+   "channel_resistors":   {"command":"BSM:TEL? 1,data", "length":10,"parsing":"<HHHHH",
+    "name":["channel0_resistor","channel1_resistor","channel2_resistor","channel3_resistor","channel4_resistor"]},
+   "channel_limits":      {"command":"BSM:TEL? 2,data", "length":10,"parsing":"<HHHHH",
+    "name":["channel0_limit","channel1_limit","channel2_limit","channel3_limit","channel4_limit"]},
+   "channel_offsets":     {"command":"BSM:TEL? 3,data", "length":20,"parsing":"<fffff",
+    "name":["channel0_offset","channel1_offset","channel2_offset","channel3_offset","channel4_offset"]},
+   "channel_scaling":     {"command":"BSM:TEL? 4,data", "length":20,"parsing":"<fffff",
+    "name":["channel0_scaling","channel1_scaling","channel2_scaling","channel3_scaling","channel4_scaling"]},
+   "status":              {"command":"BSM:TEL? 5,data", "length":1, "parsing":"s"},
+   "overcurrent_log":     {"command":"BSM:TEL? 6,data", "length":10,"parsing":"<HHHHH",
+    "name":["channel0_overcurrent","channel1_overcurrent","channel2_overcurrent","channel3_overcurrent","channel4_overcurrent"]},
+   "temperature9":        {"command":"BSM:TEL? 7,data",  "length":2, "parsing":"<H"},
+   "temperature10":       {"command":"BSM:TEL? 8,data",  "length":2, "parsing":"<H"},
+   "temperature11":       {"command":"BSM:TEL? 9,data",  "length":2, "parsing":"<H"},
+   "temperature12":       {"command":"BSM:TEL? 10,data", "length":2, "parsing":"<H"},
+   "temp_scaling_offsets":{"command":"BSM:TEL? 11,data", "length":16,"parsing":"<ffff",
+    "name":["temp9_offset","temp10_offset","temp11_offset","temp12_offset"]},
+   "temp_scaling_sensors":{"command":"BSM:TEL? 12,data", "length":16,"parsing":"<ffff",
+    "name":["temp9_sensor","temp10_sensor","temp11_sensor","temp12_sensor"]}
+  },
+  "bm2":{
+   "status":           {"command":"BM2:TEL? 0,data", "length":1,"parsing":"s"}
+  }
  },
- "delay_between_writing_and_reading": 0.300,
- "i2c_bus_number": 1
+ "delay_between_writing_and_reading": 0.200,
+ "i2c_bus_number": 1,
+ "header_size": 5
 }

@@ -19,6 +19,7 @@ with open('mcu_config.json') as config_file:
 I2C_BUSNUM = data['i2c_bus_number']
 DELAY = data['delay_between_writing_and_reading']
 TELEMETRY = data['telemetry']
+HEADER_SIZE = data['header_size']
 # json import converts to unicode, changing commands and parsing to be strings
 for device in TELEMETRY:
     # print("device: ",device)
@@ -26,6 +27,7 @@ for device in TELEMETRY:
         # print('field: ', field)
         TELEMETRY[device][field]['command'] = str(TELEMETRY[device][field]['command'])
         TELEMETRY[device][field]['parsing'] = str(TELEMETRY[device][field]['parsing'])
+        TELEMETRY[device][field]['length'] = TELEMETRY[device][field]['length'] + HEADER_SIZE
 
 class MCU:
     
@@ -89,11 +91,9 @@ class MCU:
         supervisor_telem = TELEMETRY['supervisor']
         if fields != None:
             for field in fields:
-                if (
-                    field not in module_telem or 
-                    field not in supervisor_telem or 
-                    type(field) != str
-                    ):
+                if field not in module_telem or \
+                   field not in supervisor_telem or \
+                   type(field) != str:
                     raise ValueError('Invalid field: '+str(field))
                 
         if fields is None:
