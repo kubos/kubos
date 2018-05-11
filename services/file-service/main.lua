@@ -64,7 +64,7 @@ local function send(channel_id, ...)
   local message = {channel_id, ...}
   local addr = addrs[channel_id]
   if not addr then
-    print('Unknown receiver address: ' .. addr)
+    print('Unknown receiver address: ')
     return
   end
   local ip, port = unpack(addr)
