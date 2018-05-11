@@ -34,13 +34,6 @@ class MCU:
     def __init__(self,address):
         self.i2cfile = i2c.I2C(bus = I2C_BUSNUM)
         self.address = address
-        
-    def led(self,state):
-        """
-        Controls status LED
-        """
-        if state in ['OFF','ON','FLASH','ERROR','I2C']:
-            self.write('SUP:LED '+state)
 
     def write(self,command):
         """
