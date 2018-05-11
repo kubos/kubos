@@ -1,4 +1,7 @@
 {
+ "delay_between_writing_and_reading": 0.200,
+ "i2c_bus_number": 1,
+ "header_size": 5,
  "telemetry":{
   "supervisor":{
    "firmware_version": {"command":"SUP:TEL? 0,data","length":48,"parsing":"s"},
@@ -103,8 +106,5 @@
   "bm2":{
    "status":           {"command":"BM2:TEL? 0,data", "length":1,"parsing":"s"}
   }
- },
- "delay_between_writing_and_reading": 0.200,
- "i2c_bus_number": 1,
- "header_size": 5
+ }
 }

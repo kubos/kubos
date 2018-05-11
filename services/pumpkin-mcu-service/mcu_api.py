@@ -52,13 +52,14 @@ class MCU:
         else:raise TypeError('Commands must be strings.')    
     
     def read(self,count):
-        if count < 6:
-            raise TypeError('Read count must be at least 6 bytes.')
+        if count < (HEADER_SIZE+1):
+            raise TypeError('Read count must be at least '+str(HEADER_SIZE+1)+' bytes.')
         data = self.i2cfile.read(device = self.address, count = count)
         if data[0] != '\x01':
-            raise IOError('Data is not ready')
-        timestamp = struct.unpack('<i',data[1:5])[0]/100.0 # unpack timestamp in seconds
-        data = data[5:] # telemetry data
+            #raise IOError('Data is not ready')
+            return {'timestamp':0,'data':(count-HEADER_SIZE)*'\xff'}
+        timestamp = struct.unpack('<i',data[1:HEADER_SIZE])[0]/100.0 # unpack timestamp in seconds
+        data = data[HEADER_SIZE:] # telemetry data
         return {'timestamp':timestamp,'data':data} 
     
     def get_sup_telemetry(self,fields=None):
