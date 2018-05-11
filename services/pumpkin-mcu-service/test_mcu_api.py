@@ -76,3 +76,18 @@ for field in out:
 print "\n Errors: "
 for field in ERRORS:
     print (field,out[field])
+
+print "\n Address 5C: BM2"
+
+bm2_address = 0x5C
+bm2 = mcu_api.MCU(address = bm2_address)
+out = bm2.get_module_telemetry(module = 'bm2')
+ERRORS = []
+for field in out:
+    print (field,out[field])
+    if out[field]['timestamp'] == 0:
+        ERRORS.append([field])
+
+print "\n Errors: "
+for field in ERRORS:
+    print (field,out[field])
