@@ -21,6 +21,7 @@ use nom;
 use rust_uart::*;
 use std::io;
 use serial;
+use std::sync::{Arc, Mutex};
 use std::sync::mpsc::{Receiver, SyncSender};
 use std::time::Duration;
 
@@ -31,63 +32,62 @@ const FLOW_CONTROL: serial::FlowControl = serial::FlowNone;
 const TIMEOUT: Duration = Duration::from_millis(60);
 
 pub fn read_thread(
-    bus: &str,
-    baud_rate: serial::BaudRate,
+    rx_conn: Arc<Mutex<Connection>>,
     log_send: SyncSender<(Header, Vec<u8>)>,
     response_send: SyncSender<(Header, Vec<u8>)>,
 ) {
-    let settings = serial::PortSettings {
-        baud_rate,
-        char_size: CHAR_SIZE,
-        parity: PARITY,
-        stop_bits: STOP_BITS,
-        flow_control: FLOW_CONTROL,
-    };
+    //TODO: try_lock? or just error handling
 
-    let conn = Connection::from_path(bus, settings, TIMEOUT).unwrap();
     loop {
-        // Read SYNC bytes
-        let mut message = conn.read(3, Duration::from_secs(2)).unwrap();
+        {
+            // Read SYNC bytes
+            println!("Read taking lock");
+            let conn = rx_conn.lock().unwrap();
+            let mut message = match conn.read(3, Duration::from_secs(2)) {
+                Ok(v) => v,
+                Err(_err) => continue, //TODO: actual error handling. Loop on timeout
+            };
 
-        if message != SYNC {
-            println!("SYNC mismatch: {:?} {:?}", message, SYNC);
-            continue;
-        }
-
-        // Read the rest of the header
-        message.append(&mut conn.read(25, TIMEOUT).unwrap());
-
-        let hdr = match Header::parse(&message) {
-            Some(v) => v,
-            None => {
-                println!("failed to parse header");
+            if message != SYNC {
+                println!("SYNC mismatch: {:?} {:?}", message, SYNC);
                 continue;
             }
-        };
 
-        // Read body + CRC bytes
-        message.append(&mut conn.read((hdr.msg_len + 4) as usize, TIMEOUT).unwrap());
+            // Read the rest of the header
+            message.append(&mut conn.read(25, TIMEOUT).unwrap());
 
-        let len = message.len();
+            let hdr = match Header::parse(&message) {
+                Some(v) => v,
+                None => {
+                    println!("failed to parse header");
+                    continue;
+                }
+            };
 
-        // Read CRC
-        let crc = nom::le_u32(message.split_off(len - 4).as_slice())
-            .unwrap()
-            .1;
+            // Read body + CRC bytes
+            message.append(&mut conn.read((hdr.msg_len + 4) as usize, TIMEOUT).unwrap());
 
-        // Verify CRC
-        let calc = calc_crc(&message);
-        if calc != crc {
-            // TODO: remove debugging line
-            println!("CRC Mismatch: {:X} {:X}", calc, crc);
-            continue;
-        }
+            let len = message.len();
 
-        let body = message.split_off(HDR_LEN.into());
+            // Read CRC
+            let crc = nom::le_u32(message.split_off(len - 4).as_slice())
+                .unwrap()
+                .1;
 
-        match hdr.msg_type & 0x80 == 0x80 {
-            true => response_send.try_send((hdr, body)).unwrap(),
-            false => log_send.try_send((hdr, body)).unwrap(),
+            // Verify CRC
+            let calc = calc_crc(&message);
+            if calc != crc {
+                // TODO: remove debugging line
+                println!("CRC Mismatch: {:X} {:X}", calc, crc);
+                continue;
+            }
+
+            let body = message.split_off(HDR_LEN.into());
+
+            match hdr.msg_type & 0x80 == 0x80 {
+                true => response_send.try_send((hdr, body)).unwrap(),
+                false => log_send.try_send((hdr, body)).unwrap(),
+            }
         }
     }
 }
@@ -95,7 +95,7 @@ pub fn read_thread(
 /// Structure for OEM6 device instance
 pub struct OEM6 {
     /// Device connection structure
-    pub conn: Connection,
+    pub conn: Arc<Mutex<Connection>>,
     pub log_recv: Receiver<(Header, Vec<u8>)>,
     pub response_recv: Receiver<(Header, Vec<u8>)>,
 }
@@ -133,7 +133,7 @@ impl OEM6 {
             flow_control: FLOW_CONTROL,
         };
 
-        let conn = Connection::from_path(bus, settings, TIMEOUT)?;
+        let conn = Arc::new(Mutex::new(Connection::from_path(bus, settings, TIMEOUT)?));
 
         Ok(OEM6 {
             conn,
@@ -266,7 +266,8 @@ impl OEM6 {
     /// [`OEMError`]: enum.OEMError.html
     pub fn passthrough(&self, msg: &[u8]) -> OEMResult<()> {
         // TODO: get_response()?
-        Ok(self.conn.write(msg)?)
+        println!("Passthrough taking lock");
+        Ok(self.conn.lock().unwrap().write(msg)?)
     }
 
     fn send_message<T: Message>(&self, msg: T) -> OEMResult<()> {
@@ -276,7 +277,8 @@ impl OEM6 {
         let crc = calc_crc(&raw);
         raw.write_u32::<LittleEndian>(crc).unwrap();
 
-        Ok(self.conn.write(raw.as_slice())?)
+        println!("Send message taking lock");
+        Ok(self.conn.lock().unwrap().write(raw.as_slice())?)
     }
 
     // TODO: how to deal with async log messages being interspersed?

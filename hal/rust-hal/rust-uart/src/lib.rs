@@ -18,7 +18,7 @@ pub struct Connection {
 }
 
 /// Custom errors for UART actions
-#[derive(Fail, Display, Debug, Clone)]
+#[derive(Fail, Display, Debug, Clone, PartialEq)]
 pub enum UartError {
     /// Catch-all error case
     #[display(fmt = "Generic Error")]
@@ -81,17 +81,19 @@ impl Connection {
 
     /// Writes out raw bytes to the stream
     pub fn write(&self, data: &[u8]) -> UartResult<()> {
+        println!("Connection write");
         self.stream.write(data)
     }
 
     /// Reads messages upto specified length recieved on the bus
     pub fn read(&self, len: usize, timeout: Duration) -> UartResult<Vec<u8>> {
+        println!("Connection read");
         self.stream.read(len, timeout)
     }
 }
 
 /// This trait is used to represent streams and allows for mocking for api unit tests
-pub trait Stream {
+pub trait Stream: Send {
     /// Write raw bytes to stream
     fn write(&self, data: &[u8]) -> UartResult<()>;
 
