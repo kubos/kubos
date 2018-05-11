@@ -52,6 +52,20 @@ return function(username, password, mission_name)
     return JSON.parse(body)
   end
 
+  local function req_body(url, file_name, file_body)
+    if not cookie then login() end
+    body_data = "--------------------------d74496d66958873e\r\nContent-Disposition: form-data; name=\"datafile\"; filename=\"" .. file_name .. "\"\r\nContent-Type: text/plain\r\n\r\n" .. file_body .. "\r\n--------------------------d74496d66958873e--"
+
+    local head, body = request("POST", url, {
+                                 cookie, {"Content-Type", "multipart/form-data; boundary=------------------------d74496d66958873e"}, }, body_data
+    )
+    if head.code ~= 200 then
+      if body and #body == 0 then body = nil end
+      error("Unexpected HTTP response: " .. head.code .. ' - ' .. (body or head.reason))
+    end
+    return JSON.parse(body)
+  end
+
   local function req_raw(method, url)
     if not cookie then login() end
     local head, body = request(method, url, {
@@ -91,24 +105,22 @@ return function(username, password, mission_name)
 
   local function get_min_file_id()
     if not mission_id then get_mission() end
-    local res = req('GET', 'https://data2.nsldata.com/~gsdata/fepAPI/downloadDuplex.php?FullListing=DoFullListing&MissionID=' .. mission_id)
+    local res = req('GET', 'https://data2.nsldata.com/~gsdata/webAPIv1.0/downloadDuplex.php?FullListing=DoFullListing&MissionID=' .. mission_id)
     table.sort(res, function (a, b)
       return tonumber(a[1]) > tonumber(b[1])
     end)
     -- TODO: if you don't want to replay the last file, add 1 to result.
-    min_file_id = tonumber(res[1][1])
+    min_file_id = tonumber(res['results'][1]['FileID'])
   end
 
   local function get_new_files()
     if not min_file_id then get_min_file_id() end
-    p("looking min_file_id", min_file_id)
     local res = req('GET', 'https://data2.nsldata.com/~gsdata/webAPIv1.0/duplex.php?MissionID=' .. mission_id
                       .. '&MinFileID=' .. min_file_id)
     return res.results
   end
 
   local function download_file(file_id)
-    p("Download " .. file_id)
     if not mission_id then get_mission() end
     url = 'https://data2.nsldata.com/~gsdata/webAPIv1.0/downloadDuplex.php?MissionID=' .. mission_id
       .. '&FileID=' .. file_id
@@ -116,6 +128,26 @@ return function(username, password, mission_name)
     if res then
       min_file_id = min_file_id + 1
     end
+    return res
+  end
+
+  local function send_sms(data)
+    if not mission_id then get_mission() end
+    url = 'https://data2.nsldata.com/~gsdata/webAPIv1.0/uploadSMS.php?MissionID=' .. mission_id
+      .. '&Message=' .. data
+    local res = req('POST', url)
+    return res
+  end
+
+  local function upload_file(file_name, file_data)
+    if not mission_id then get_mission() end
+    url = 'https://data2.nsldata.com/~gsdata/webAPIv1.0/uploadDuplex.php?MissionID=' .. mission_id
+
+    header = { { "Expect", "100-continue"}, "Content-Type", "multipart/form-data; boundary=------------------------d74496d66958873e"}
+
+    body = 'Content-Disposition: form-data; name="datafile"; filename="' .. file_name .. '"\r\n' .. 'Content-Type: application/octet\r\n' .. file_data
+
+    local res = req_body(url, file_name, file_data)
     return res
   end
 
@@ -128,5 +160,7 @@ return function(username, password, mission_name)
     get_min_file_id = get_min_file_id,
     get_new_files = get_new_files,
     download_file = download_file,
+    send_sms = send_sms,
+    upload_file = upload_file
   }
 end
