@@ -106,7 +106,7 @@ html_show_sphinx = False
 htmlhelp_basename = 'Kubosdoc'
 
 breathe_projects = {
-    
+    "gomspace-p31u-api" : "../xml/apis/gomspace-p31u-api",
     "isis-ants-api" : "../xml/apis/isis-ants-api",
     "isis-imtq-api": "../xml/apis/isis-imtq-api",
     "isis-iobc-supervisor" : "../xml/apis/isis-iobc-supervisor",
@@ -114,7 +114,6 @@ breathe_projects = {
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-linux" : "../xml/hal/kubos-hal-linux",
     "libcsp" : "../xml/libcsp",
-
 }
 
 extensions += [

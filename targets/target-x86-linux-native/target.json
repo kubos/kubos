@@ -33,6 +33,9 @@
             "count": 4
         }
       },
+      "csp": {
+        "verbose": true
+      },
       "hardware": {
         "console": {
           "uart": "K_UART1",

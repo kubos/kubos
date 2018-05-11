@@ -15,25 +15,10 @@
 //
 
 use model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
-use juniper::Context as JuniperContext;
-
+use kubos_service;
 use juniper::FieldResult;
 
-/// Context used to pass global data into Juniper queries
-pub struct Context {
-    pub subsystem: Subsystem,
-}
-
-impl JuniperContext for Context {}
-
-impl Context {
-    /// Give us a reference to subsystem for passing
-    /// along the Juniper chain
-    pub fn get_subsystem(&self) -> &Subsystem {
-        &self.subsystem
-    }
-}
-
+type Context = kubos_service::Context<Subsystem>;
 
 /// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
@@ -51,7 +36,6 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
         Ok(self.temperature()?)
     }
 });
-
 
 /// GraphQL model for CalibrateThermometer return
 graphql_object!(CalibrateThermometer: Context as "CalibrateThermometer" |&self| {
@@ -87,13 +71,13 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
     field subsystem(&executor) -> FieldResult<&Subsystem>
         as "Subsystem query"
     {
-        // I don't know if we'll ever return anything other
-        // than Ok here, as we are just returning back essentially
-        // a static struct with interesting function fields
-        Ok(executor.context().get_subsystem())
+        let num_queries = executor.context().get("num_queries");
+        println!("Num queries {}", num_queries);
+        let num = num_queries.parse::<i32>().unwrap_or(0) + 1;
+        executor.context().set("num_queries", &format!("{}", num));
+        Ok(executor.context().subsystem())
     }
 });
-
 
 pub struct MutationRoot;
 
@@ -105,19 +89,19 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     field set_power(&executor, power : bool) -> FieldResult<SetPower>
         as "Set subsystem power state"
     {
-        Ok(executor.context().get_subsystem().set_power(power)?)
+        Ok(executor.context().subsystem().set_power(power)?)
     }
 
     field reset_uptime(&executor) -> FieldResult<ResetUptime>
         as "Resets uptime counter of subsystem"
     {
-        Ok(executor.context().get_subsystem().reset_uptime()?)
+        Ok(executor.context().subsystem().reset_uptime()?)
     }
 
     field calibrate_thermometer(&executor) -> FieldResult<CalibrateThermometer>
         as "Calibrate thermometer"
     {
-        Ok(executor.context().get_subsystem().calibrate_thermometer()?)
+        Ok(executor.context().subsystem().calibrate_thermometer()?)
     }
 
 });

@@ -1,0 +1,12 @@
+[package]
+name = "mai400"
+version = "0.1.0"
+authors = ["Catherine Garabedian <catherine@kubos.co>"]
+
+[dependencies]
+mai400-api = { path = "../../../../apis/mai400-api" }
+i2c-linux = "0.1"
+slog = "2.1.1"
+slog-stream = "1.2.1"
+slog-term = "2.3.0"
+slog-async = "2.0.0-2.0"

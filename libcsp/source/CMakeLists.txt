@@ -44,6 +44,11 @@ if (YOTTA_CFG_CSP_DEBUG)
     set (CSP_DEBUG ON)
 endif()
 
+if (YOTTA_CFG_CSP_VERBOSE)
+    set (CSP_DEBUG ON)
+    set (CSP_VERBOSE ON)
+endif()
+
 # check if we want KISS/USART
 if (YOTTA_CFG_CSP_USART)
     # set flag
