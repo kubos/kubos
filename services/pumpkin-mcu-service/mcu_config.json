@@ -11,23 +11,23 @@
    "mcu_load":         {"command":"SUP:TEL? 8,data","length":13,"parsing":"<Q"}
   },
   "gpsrm":{
-   "status":           {"command":"GPS:TEL? 0,data","length":2,  "parsing":"s"},
+   "status":           {"command":"GPS:TEL? 0,data","length":7,  "parsing":"s"},
    "nmea_string":      {"command":"GPS:TEL? 1,data","length":512,"parsing":"s"},
-   "propagator":       {"command":"GPS:TEL? 2,data","length":56, "parsing":"<ddddddd"},
-   "oem_power":        {"command":"GPS:TEL? 3,data","length":16, "parsing":"<ffff"}
+   "propagator":       {"command":"GPS:TEL? 2,data","length":61, "parsing":"<ddddddd"},
+   "oem_power":        {"command":"GPS:TEL? 3,data","length":21, "parsing":"<ffff"}
   },
   "aim2":{
-   "status":           {"command":"AIM:TEL? 0,data", "length":2,  "parsing":"s"},
+   "status":           {"command":"AIM:TEL? 0,data", "length":7,  "parsing":"s"},
    "nmea_string":      {"command":"AIM:TEL? 1,data", "length":512,"parsing":"s"},
-   "propagator":       {"command":"AIM:TEL? 2,data", "length":56, "parsing":"<ddddddd"},
-   "oem_power":        {"command":"AIM:TEL? 3,data", "length":16, "parsing":"<ffff"},
-   "gps_uart":         {"command":"AIM:TEL? 4,data", "length":1,  "parsing":"<B"},
-   "gps_event_pin":    {"command":"AIM:TEL? 5,data", "length":1,  "parsing":"s"},
-   "gps_power":        {"command":"AIM:TEL? 6,data", "length":1,  "parsing":"s"},
-   "adcs_uart":        {"command":"AIM:TEL? 7,data", "length":1,  "parsing":"s"},
-   "ftdi_chip":        {"command":"AIM:TEL? 8,data", "length":1,  "parsing":"s"},
-   "adcs_power":       {"command":"AIM:TEL? 9,data", "length":1,  "parsing":"s"},
-   "wdt_period":       {"command":"AIM:TEL? 10,data","length":4,  "parsing":"<I"}
+   "propagator":       {"command":"AIM:TEL? 2,data", "length":61, "parsing":"<ddddddd"},
+   "oem_power":        {"command":"AIM:TEL? 3,data", "length":21, "parsing":"<ffff"},
+   "gps_uart":         {"command":"AIM:TEL? 4,data", "length":6,  "parsing":"<B"},
+   "gps_event_pin":    {"command":"AIM:TEL? 5,data", "length":6,  "parsing":"s"},
+   "gps_power":        {"command":"AIM:TEL? 6,data", "length":6,  "parsing":"s"},
+   "adcs_uart":        {"command":"AIM:TEL? 7,data", "length":6,  "parsing":"s"},
+   "ftdi_chip":        {"command":"AIM:TEL? 8,data", "length":6,  "parsing":"s"},
+   "adcs_power":       {"command":"AIM:TEL? 9,data", "length":6,  "parsing":"s"},
+   "wdt_period":       {"command":"AIM:TEL? 10,data","length":9,  "parsing":"<I"}
   },
   "sim":{}
  },
