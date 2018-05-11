@@ -80,20 +80,21 @@ class MCU:
             raise KeyError(
                 'Module name: '+str(module)+' not found in mcu_config file.'
                 )
-        if type(fields) != list and type(fields) != None: 
+        if type(fields) != list and fields != None: 
             raise TypeError(
                 'fields argument must be a list of strings.'
                 )
                 
         module_telem = TELEMETRY[module]
         supervisor_telem = TELEMETRY['supervisor']
-        for field in fields:
-            if (
-                field not in module_telem or 
-                field not in supervisor_telem or 
-                type(field) != str
-                ):
-                raise ValueError('Invalid field: '+str(field))
+        if fields != None:
+            for field in fields:
+                if (
+                    field not in module_telem or 
+                    field not in supervisor_telem or 
+                    type(field) != str
+                    ):
+                    raise ValueError('Invalid field: '+str(field))
                 
         if fields is None:
             # Pulling all info

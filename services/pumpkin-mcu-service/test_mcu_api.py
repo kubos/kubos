@@ -14,19 +14,19 @@ print "\n Address 50: SIM"
 
 sim_address = 0x50
 sim = mcu_api.MCU(address = sim_address)
-print sim.get_sup_telemetry()
+print sim.get_module_telemetry(module = 'sim')
 
 print "\n Address 51: GPSRM"
 
 gpsrm_address = 0x51
 gpsrm = mcu_api.MCU(address = gpsrm_address)
-print gpsrm.get_sup_telemetry()
+print gpsrm.get_module_telemetry(module = 'gpsrm')
 
-print "\n Address 53: PIM"
+# print "\n Address 53: PIM"
 
-pim_address = 0x53
-pim = mcu_api.MCU(address = pim_address)
-print pim.get_sup_telemetry()
+# pim_address = 0x53
+# pim = mcu_api.MCU(address = pim_address)
+# print pim.get_sup_telemetry()
 
 # print "\n Address 54: DCPS"
 
@@ -34,11 +34,11 @@ print pim.get_sup_telemetry()
 # dcps = mcu_api.MCU(address = dcps_address)
 # print dcps.get_sup_telemetry()
 
-print "\n Address 55: RHM"
+# print "\n Address 55: RHM"
 
-rhm_address = 0x55
-rhm = mcu_api.MCU(address = rhm_address)
-print rhm.get_sup_telemetry()
+# rhm_address = 0x55
+# rhm = mcu_api.MCU(address = rhm_address)
+# print rhm.get_sup_telemetry()
 
 
 

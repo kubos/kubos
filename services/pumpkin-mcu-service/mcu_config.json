@@ -28,7 +28,8 @@
    "ftdi_chip":        {"command":"AIM:TEL? 8,data", "length":1,  "parsing":"s"},
    "adcs_power":       {"command":"AIM:TEL? 9,data", "length":1,  "parsing":"s"},
    "wdt_period":       {"command":"AIM:TEL? 10,data","length":4,  "parsing":"<I"}
-  }
+  },
+  "sim":{}
  },
  "delay_between_writing_and_reading": 0.300,
  "i2c_bus_number": 1
