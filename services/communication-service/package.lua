@@ -24,6 +24,7 @@ return {
     "creationix/coro-fs",
     "creationix/coro-websocket",
     "creationix/coro-http",
+    "creationix/defer",
     "creationix/toml",
   },
   files = {
