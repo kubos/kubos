@@ -34,11 +34,11 @@ print gpsrm.get_module_telemetry(module = 'pim')
 # dcps = mcu_api.MCU(address = dcps_address)
 # print dcps.get_sup_telemetry()
 
-# print "\n Address 55: RHM"
+print "\n Address 55: RHM"
 
-# rhm_address = 0x55
-# rhm = mcu_api.MCU(address = rhm_address)
-# print rhm.get_sup_telemetry()
+rhm_address = 0x55
+rhm = mcu_api.MCU(address = rhm_address)
+print gpsrm.get_module_telemetry(module = 'rhm')
 
 
 

@@ -15,21 +15,16 @@
   },
   "bim":{
    "temperature":      {"command":"BIM:TEL? 0,data", "length":24,"parsing":"<ffff",
-    "names": ["temp0","temp1","temp2","temp3"]
-   },
-   "uart_status":      {"command":"BIM:TEL? 1,data", "length":6, "parsing":"<hhh"
-    "names": ["uart1_status","uart2_status","uart3_status"]
-   },
-   "imu":              {"command":"BIM:TEL? 2,data", "length":12,"parsing":"<hhhhhh"
-    "names": ["imu0","imu1","imu2","imu3","imu4","imu5"]
-   },
+    "names": ["temp0","temp1","temp2","temp3"]},
+   "uart_status":      {"command":"BIM:TEL? 1,data", "length":6, "parsing":"<hhh",
+    "names": ["uart1_status","uart2_status","uart3_status"]},
+   "imu":              {"command":"BIM:TEL? 2,data", "length":12,"parsing":"<hhhhhh",
+    "names": ["imu0","imu1","imu2","imu3","imu4","imu5"]},
    "tini_status":      {"command":"BIM:TEL? 3,data", "length":1, "parsing":"<B"},
-   "temp_offsets":     {"command":"BIM:TEL? 4,data", "length":24,"parsing":"<ffffff"
-    "names": ["temp0_offset","temp1_offset","temp2_offset","temp3_offset","temp4_offset","temp5_offset"]
-   },
-   "temp_sensors":     {"command":"BIM:TEL? 5,data", "length":24,"parsing":"<ffffff"
-    "names": ["temp0_sensor","temp1_sensor","temp2_sensor","temp3_sensor","temp4_sensor","temp5_sensor"]
-   }
+   "temp_offsets":     {"command":"BIM:TEL? 4,data", "length":24,"parsing":"<ffffff",
+    "names": ["temp0_offset","temp1_offset","temp2_offset","temp3_offset","temp4_offset","temp5_offset"]},
+   "temp_sensors":     {"command":"BIM:TEL? 5,data", "length":24,"parsing":"<ffffff",
+    "names": ["temp0_sensor","temp1_sensor","temp2_sensor","temp3_sensor","temp4_sensor","temp5_sensor"]}
   },
   "gpsrm":{
    "status":           {"command":"GPS:TEL? 0,data","length":2,  "parsing":"s"},
@@ -64,7 +59,7 @@
    "globalstar_din_out":{"command":"RHM:TEL? 5,data", "length":1,"parsing":"s"},
    "globalstar_busy":   {"command":"RHM:TEL? 6,data", "length":1,"parsing":"s"},
    "watchdog_period":   {"command":"RHM:TEL? 7,data", "length":4,"parsing":"<I"}
-  }
+  },
   "pim":{
    "channel_currents": {"command":"PIM:TEL? 0,data", "length":8, "parsing":"<HHHH",
     "name":["channel0_current","channel1_current","channel2_current","channel3_current"]},
