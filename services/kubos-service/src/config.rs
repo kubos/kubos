@@ -87,6 +87,14 @@ impl Config {
     pub fn raw(&self) -> toml::Value {
         self.raw.clone()
     }
+
+    /// Performs a get on the raw config data
+    pub fn get(&self, key: &str) -> Option<toml::Value> {
+        match self.raw.get(key) {
+            Some(v) => Some(v.clone()),
+            None => None,
+        }
+    }
 }
 
 fn get_config_path() -> String {

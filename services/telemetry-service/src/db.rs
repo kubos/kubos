@@ -22,27 +22,26 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn new() -> Self {
+    pub fn new(path: &str) -> Self {
         Database {
-            connection: establish_connection(),
+            connection: establish_connection(path),
         }
     }
 }
 
-fn establish_connection() -> SqliteConnection {
-    let database_url = String::from("run.db");
-
-    SqliteConnection::establish(&database_url).expect(&format!(
+fn establish_connection(path: &str) -> SqliteConnection {
+    println!("Opening database {}", path);
+    SqliteConnection::establish(&String::from(path)).expect(&format!(
         "Could not create SQLite database connection to: {}",
-        database_url
+        path
     ))
 }
 
 table! {
-    Telemetry (timestamp) {
+    telemetry (timestamp) {
         timestamp -> Nullable<Integer>,
         subsystem -> Nullable<Text>,
         param -> Nullable<Text>,
-        value -> Nullable<Integer>,
+        value -> Nullable<Double>,
     }
 }

@@ -20,9 +20,6 @@ extern crate kubos_service;
 
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate diesel_codegen;
-extern crate dotenv;
 
 use kubos_service::{Config, Service};
 
@@ -35,6 +32,8 @@ use db::Database;
 
 fn main() {
     let config = Config::new("telemetry-service");
+    let db_path = config.get("database").expect("No database path found");
+    let db_path: &str = db_path.as_str().expect("No database path found");
 
-    Service::new(config, Database::new(), QueryRoot, MutationRoot).start();
+    Service::new(config, Database::new(db_path), QueryRoot, MutationRoot).start();
 }

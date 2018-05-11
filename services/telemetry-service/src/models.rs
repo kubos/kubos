@@ -14,13 +14,10 @@
 // limitations under the License.
 //
 
-use db::Telemetry;
-use diesel::types::Integer;
-
 #[derive(Queryable)]
-pub struct Telem {
+pub struct Entry {
     pub timestamp: Option<i32>,
     pub subsystem: Option<String>,
     pub param: Option<String>,
-    pub value: Option<i32>,
+    pub value: Option<f64>,
 }
