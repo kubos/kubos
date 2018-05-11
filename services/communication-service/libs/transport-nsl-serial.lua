@@ -83,10 +83,10 @@ return function (config)
         sleep(1000)
         local dfile = get_download_file_count()
         p("Download File Count", dfile)
-        -- if dfile == 0 then
-        --   local name = 'K' .. count
-        --   assert(put_download_file(name, ''))
-        -- end
+        if dfile == 0 then
+          local name = 'K' .. count
+          assert(put_download_file(name, ''))
+        end
         sleep(1000)
         local health = get_state_of_health_for_modem()
         p(health)
@@ -99,7 +99,7 @@ return function (config)
   function write(data)
     local name = 'UDP' .. count
     count = count + 1
-    p("Sending file", name)
+    p("Sending file " .. name .. " on ", coroutine.running())
     assert(put_download_file(name, data))
   end
 

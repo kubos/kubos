@@ -33,7 +33,7 @@ local function xmodem_crc16(data, crc)
 end
 
 return function (dev, baud)
-  local serial_read, serial_write = safe_serial(dev, baud)
+  local serial_read, serial_write, protect = safe_serial(dev, baud)
 
   local function sync()
     repeat
@@ -216,23 +216,18 @@ return function (dev, baud)
     return ack_or_nak()
   end
 
-  local function get_alive()
-    serial_write 'GUGETALV'
-    return ack_or_nak()
-  end
-
   return {
-    get_state_of_health_for_modem = (get_state_of_health_for_modem),
-    get_uploaded_file_count = (get_uploaded_file_count),
-    get_uploaded_message_count = (get_uploaded_message_count),
-    get_download_file_count = (get_download_file_count),
-    get_geolocation_position_estimate = (get_geolocation_position_estimate),
-    get_uploaded_file = (get_uploaded_file),
-    get_uploaded_message = (get_uploaded_message),
-    delete_download_files = (delete_download_files),
-    delete_uploaded_files = (delete_uploaded_files),
-    delete_uploaded_messages = (delete_uploaded_messages),
-    put_download_file = (put_download_file),
-    get_alive = (get_alive),
+    get_state_of_health_for_modem = protect(get_state_of_health_for_modem),
+    get_uploaded_file_count = protect(get_uploaded_file_count),
+    get_uploaded_message_count = protect(get_uploaded_message_count),
+    get_download_file_count = protect(get_download_file_count),
+    get_geolocation_position_estimate = protect(get_geolocation_position_estimate),
+    get_uploaded_file = protect(get_uploaded_file),
+    get_uploaded_message = protect(get_uploaded_message),
+    delete_download_files = protect(delete_download_files),
+    delete_uploaded_files = protect(delete_uploaded_files),
+    delete_uploaded_messages = protect(delete_uploaded_messages),
+    put_download_file = protect(put_download_file),
+    get_alive = protect(get_alive),
   }
 end
