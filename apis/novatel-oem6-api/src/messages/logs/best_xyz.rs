@@ -15,7 +15,6 @@
 //
 
 use nom::*;
-use super::*;
 
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct BestXYZLog {

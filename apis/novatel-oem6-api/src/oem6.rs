@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![allow(dead_code)]
-#![allow(unused_variables)]
 
 use byteorder::{LittleEndian, WriteBytesExt};
 use crc32::*;
@@ -23,8 +21,7 @@ use nom;
 use rust_uart::*;
 use std::io;
 use serial;
-use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
-use std::thread;
+use std::sync::mpsc::{Receiver, SyncSender};
 use std::time::Duration;
 
 const CHAR_SIZE: serial::CharSize = serial::Bits8;
@@ -333,7 +330,7 @@ impl OEM6 {
             throw!(OEMError::GenericError);
         }
 
-        let resp = match Log::new(hdr.msg_id, body) {
+        match Log::new(hdr.msg_id, body) {
             Some(v) => return Ok(v),
             None => {
                 println!("failed to parse response");
@@ -368,33 +365,17 @@ pub enum OEMError {
         /// ID of message received
         id: u16,
     },
-    #[display(fmt = "Serial Error: {}", cause)]
+    #[display(fmt = "{}", cause)]
     /// An error was thrown by the serial driver
-    SerialError {
-        /// The underlying error
-        cause: String,
-    },
-    #[display(fmt = "IO Error: {}", cause)]
-    /// An I/O error was thrown by the kernel
-    IoError {
-        /// The underlying error
-        cause: String,
+    UartError {
+        #[fail(cause)]
+        cause: UartError,
     },
 }
 
-impl From<io::Error> for OEMError {
-    fn from(error: io::Error) -> Self {
-        OEMError::IoError {
-            cause: format!("{}", error),
-        }
-    }
-}
-
-impl From<serial::Error> for OEMError {
-    fn from(error: serial::Error) -> Self {
-        OEMError::SerialError {
-            cause: format!("{}", error),
-        }
+impl From<UartError> for OEMError {
+    fn from(error: UartError) -> Self {
+        OEMError::UartError { cause: error }
     }
 }
 

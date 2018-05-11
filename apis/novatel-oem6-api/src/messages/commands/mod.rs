@@ -14,9 +14,7 @@
 // limitations under the License.
 //
 
-#![allow(dead_code)]
-
-use byteorder::{LittleEndian, WriteBytesExt};
+use byteorder::LittleEndian;
 use nom::*;
 use super::*;
 

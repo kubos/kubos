@@ -15,7 +15,6 @@
 //
 
 use nom::*;
-use super::*;
 
 const COMPONENT_SIZE: usize = 108;
 

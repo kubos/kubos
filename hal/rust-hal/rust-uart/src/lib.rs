@@ -1,12 +1,15 @@
 #![deny(missing_docs)]
 
 //! A generalized HAL for communicating over serial ports
+#[macro_use]
+extern crate failure;
 extern crate serial;
 
 use std::io::prelude::*;
 use serial::prelude::*;
 use std::time::Duration;
 use std::cell::RefCell;
+use std::error::Error;
 
 /// Wrapper for UART stream
 pub struct Connection {
@@ -14,8 +17,50 @@ pub struct Connection {
     pub stream: Box<Stream>,
 }
 
+/// Custom errors for UART actions
+#[derive(Fail, Display, Debug, Clone)]
+pub enum UartError {
+    /// Catch-all error case
+    #[display(fmt = "Generic Error")]
+    GenericError,
+    #[display(fmt = "Serial Error: {}", description)]
+    /// An error was thrown by the serial driver
+    SerialError {
+        /// The underlying error type
+        cause: serial::ErrorKind,
+        /// Error description
+        description: String,
+    },
+    #[display(fmt = "IO Error: {}", description)]
+    /// An I/O error was thrown by the kernel
+    IoError {
+        /// The underlying error type
+        cause: std::io::ErrorKind,
+        /// Error description
+        description: String,
+    },
+}
+
+impl From<std::io::Error> for UartError {
+    fn from(error: std::io::Error) -> Self {
+        UartError::IoError {
+            cause: error.kind(),
+            description: error.description().to_owned(),
+        }
+    }
+}
+
+impl From<serial::Error> for UartError {
+    fn from(error: serial::Error) -> Self {
+        UartError::SerialError {
+            cause: error.kind(),
+            description: error.description().to_owned(),
+        }
+    }
+}
+
 /// Errors that occur while reading from and writing to stream
-pub type UartResult<T> = Result<T, std::io::Error>;
+pub type UartResult<T> = Result<T, UartError>;
 
 impl Connection {
     /// Constructor to creation connection with provided stream

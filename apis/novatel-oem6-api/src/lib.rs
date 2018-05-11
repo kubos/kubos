@@ -25,11 +25,9 @@
 //! [`MAI400`]: struct.MAI400.html
 
 #![allow(missing_docs)]
-#![allow(unused_imports)]
 //Need a higher recursion limit for nom when parsing larger (>60 bytes) structures
 #![recursion_limit = "256"]
 
-#[macro_use]
 extern crate bitflags;
 extern crate byteorder;
 extern crate crc16;
@@ -47,8 +45,8 @@ extern crate termios;
 mod crc32;
 mod oem6;
 mod messages;
-//#[cfg(test)]
-//mod tests;
+#[cfg(test)]
+mod tests;
 
 pub use oem6::*;
 pub use messages::*;

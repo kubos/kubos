@@ -5,3 +5,4 @@ authors = ["William Greer <wgreer184@gmail.com>"]
 
 [dependencies]
 serial = "0.4.0"
+failure = { git = "https://github.com/rust-lang-nursery/failure" }
