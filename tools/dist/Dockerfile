@@ -17,7 +17,9 @@ RUN apt-get install -y unzip wget
 
 #do the pip setup and installation things
 RUN easy_install pip
-RUN pip install --upgrade pip
+# Need to install pip<v10 due to this issue: https://github.com/ARMmbed/yotta/issues/835
+# Forcibly controlling version until this is resolved
+RUN pip install pip==9.0.3
 
 #Kubos Linux setup
 RUN echo "Installing Kubos Linux Toolchain"
