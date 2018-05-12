@@ -26,6 +26,14 @@ pub struct Database {
 }
 
 impl Database {
+    /// Construct new database structure and database file if needed
+    ///
+    /// # Arguments
+    /// `path` - Path to database file
+    ///
+    /// # Panics
+    ///
+    /// Attempts to connect to sqlite database and will `panic!` if connection fails.
     pub fn new(path: &str) -> Self {
         if !::std::path::Path::new(path).exists() {
             println!("Creating database {}", path);
@@ -38,6 +46,11 @@ impl Database {
         }
     }
 
+    /// Check if database has correct table and creates table if needed
+    ///
+    /// # Panics
+    ///
+    /// Will `panic!` if fails to locate and/or create telemetry table
     pub fn setup(&self) {
         match select(sql::<Bool>(
             "EXISTS \
