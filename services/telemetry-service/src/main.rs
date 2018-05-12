@@ -54,11 +54,11 @@
 //! type Entry {
 //!   timestamp: Integer!
 //!   subsystem: String!
-//!   param: String!
+//!   parameter: String!
 //!   value: Float!
 //! }
 //!
-//! query telemetry(timestampGe: Float, timestampLe: Float, subsystem: String, param: String): Entry
+//! query telemetry(timestampGe: Float, timestampLe: Float, subsystem: String, parameter: String): Entry
 //! ```
 //!
 //! # Example Queries
@@ -69,7 +69,7 @@
 //!   telemetry {
 //!     timestamp,
 //!     subsystem,
-//!     param,
+//!     parameter,
 //!     value
 //!   }
 //! }
@@ -81,19 +81,19 @@
 //!   telemetry(subsystem: "eps") {
 //!     timestamp,
 //!     subsystem,
-//!     param,
+//!     parameter,
 //!     value
 //!   }
 //! }
 //! ```
 //!
-//! ## Select all attributes of all telemetry entries for the voltage parameter of the eps subsystem
+//! ## Select all attributes of all telemetry entries for the voltage parametereter of the eps subsystem
 //! ```graphql
 //! {
-//!   telemetry(subsystem: "eps", param: "voltage") {
+//!   telemetry(subsystem: "eps", parameter: "voltage") {
 //!     timestamp,
 //!     subsystem,
-//!     param,
+//!     parameter,
 //!     value
 //!   }
 //! }
@@ -105,7 +105,7 @@
 //!   telemetry(timestampGe: 101, timestampLe: 199) {
 //!     timestamp,
 //!     subsystem,
-//!     param,
+//!     parameter,
 //!     value
 //!   }
 //! }

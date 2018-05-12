@@ -18,6 +18,6 @@
 pub struct Entry {
     pub timestamp: Option<i32>,
     pub subsystem: Option<String>,
-    pub param: Option<String>,
+    pub parameter: Option<String>,
     pub value: Option<f64>,
 }

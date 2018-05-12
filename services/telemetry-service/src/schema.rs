@@ -33,8 +33,8 @@ graphql_object!(Entry: () |&self| {
         &self.subsystem
     }
 
-    field param() -> &Option<String> as "Telemetry parameter" {
-        &self.param
+    field parameter() -> &Option<String> as "Telemetry parameter" {
+        &self.parameter
     }
 
     field value() -> Option<f64> as "Telemetry value" {
@@ -45,7 +45,13 @@ graphql_object!(Entry: () |&self| {
 pub struct QueryRoot;
 
 graphql_object!(QueryRoot: Context |&self| {
-    field telemetry(&executor, timestamp_ge: Option<i32>, timestamp_le: Option<i32>, subsystem: Option<String>, param: Option<String>) -> FieldResult<Vec<Entry>>
+    field telemetry(
+        &executor,
+        timestamp_ge: Option<i32>,
+        timestamp_le: Option<i32>,
+        subsystem: Option<String>,
+        parameter: Option<String>
+    ) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
         use ::db::telemetry::dsl;
@@ -58,8 +64,8 @@ graphql_object!(QueryRoot: Context |&self| {
             query = query.filter(dsl::subsystem.eq(subsystem));
         }
 
-        if let Some(param) = param {
-            query = query.filter(dsl::param.eq(param));
+        if let Some(parameter) = parameter {
+            query = query.filter(dsl::parameter.eq(parameter));
         }
 
         if let Some(timestamp_ge) = timestamp_ge {

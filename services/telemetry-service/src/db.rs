@@ -68,9 +68,9 @@ impl Database {
                     "CREATE TABLE telemetry (
                     timestamp INTEGER NOT NULL,
                     subsystem VARCHAR(255) NOT NULL,
-                    param VARCHAR(255) NOT NULL,
+                    parameter VARCHAR(255) NOT NULL,
                     value DOUBLE NOT NULL,
-                    PRIMARY KEY (timestamp, subsystem, param))",
+                    PRIMARY KEY (timestamp, subsystem, parameter))",
                 ).execute(&self.connection)
                 {
                     Ok(_) => println!("Telemetry table created"),
@@ -85,7 +85,7 @@ table! {
     telemetry (timestamp) {
         timestamp -> Nullable<Integer>,
         subsystem -> Nullable<Text>,
-        param -> Nullable<Text>,
+        parameter -> Nullable<Text>,
         value -> Nullable<Double>,
     }
 }
