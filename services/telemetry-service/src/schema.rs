@@ -45,7 +45,7 @@ graphql_object!(Entry: () |&self| {
 pub struct QueryRoot;
 
 graphql_object!(QueryRoot: Context |&self| {
-    field telemetry(&executor, subsystem: Option<String>, param: Option<String>) -> FieldResult<Vec<Entry>>
+    field telemetry(&executor, timestamp_ge: Option<i32>, timestamp_le: Option<i32>, subsystem: Option<String>, param: Option<String>) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
         use ::db::telemetry::dsl;
@@ -60,6 +60,14 @@ graphql_object!(QueryRoot: Context |&self| {
 
         if let Some(param) = param {
             query = query.filter(dsl::param.eq(param));
+        }
+
+        if let Some(timestamp_ge) = timestamp_ge {
+            query = query.filter(dsl::timestamp.ge(timestamp_ge));
+        }
+
+        if let Some(timestamp_le) = timestamp_le {
+            query = query.filter(dsl::timestamp.le(timestamp_le));
         }
 
         query = query.order(dsl::timestamp);
