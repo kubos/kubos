@@ -9,8 +9,19 @@ local match = string.match
 local format = string.format
 local char = string.char
 local os = require 'os'
+local uv = require 'uv'
 
 local safe_serial = require 'safe-serial'
+
+local function sleep(ms)
+  local thread = coroutine.running()
+  local timer = uv.new_timer()
+  timer:start(ms, 0, function ()
+                coroutine.resume(thread)
+  end)
+  coroutine.yield()
+  timer:close()
+end
 
 -- http://mdfs.net/Info/Comp/Comms/CRC16.htm
 local function xmodem_crc16(data, crc)
@@ -213,6 +224,7 @@ return function (dev, baud)
     output = output .. char(rshift(crc, 8), band(crc, 0xff))
     p("download output", output)
     serial_write(output)
+    sleep(5000)
     return ack_or_nak()
   end
 

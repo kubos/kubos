@@ -57,7 +57,7 @@ return function (dev, baud)
   local function read(num)
     local timer = uv.new_timer()
     local thread = coroutine.running()
-    timer:start(60000, 0, function ()
+    timer:start(90000, 0, function ()
       coroutine.resume(thread, nil, 'Read Timeout')
     end)
     while #buffer < num do
