@@ -45,13 +45,26 @@ graphql_object!(Entry: () |&self| {
 pub struct QueryRoot;
 
 graphql_object!(QueryRoot: Context |&self| {
-    field telemetry(&executor) -> FieldResult<Vec<Entry>>
+    field telemetry(&executor, subsystem: Option<String>, param: Option<String>) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
         use ::db::telemetry::dsl;
+        use ::db::telemetry;
+        use diesel::sqlite::SqliteConnection;
 
-        Ok(dsl::telemetry.order(dsl::subsystem)
-            .load::<Entry>(&executor.context().subsystem().connection)?)
+        let mut query = telemetry::table.into_boxed::<<SqliteConnection as Connection>::Backend>();
+
+        if let Some(subsystem) = subsystem {
+            query = query.filter(dsl::subsystem.eq(subsystem));
+        }
+
+        if let Some(param) = param {
+            query = query.filter(dsl::param.eq(param));
+        }
+
+        query = query.order(dsl::timestamp);
+
+        Ok(query.load::<Entry>(&executor.context().subsystem().connection)?)
     }
 });
 
