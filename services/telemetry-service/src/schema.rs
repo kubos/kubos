@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
+use db::Database;
 use diesel::prelude::*;
 use juniper::FieldResult;
 use kubos_service;
 use models::Entry;
-use db::Database;
 
 type Context = kubos_service::Context<Database>;
 

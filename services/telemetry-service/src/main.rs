@@ -121,9 +121,9 @@ mod db;
 mod models;
 mod schema;
 
-use schema::{MutationRoot, QueryRoot};
 use db::Database;
 use kubos_service::{Config, Service};
+use schema::{MutationRoot, QueryRoot};
 
 fn main() {
     let config = Config::new("telemetry-service");

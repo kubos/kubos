@@ -14,12 +14,12 @@
 // limitations under the License.
 //
 
+use diesel::dsl::sql;
 use diesel::prelude::*;
+use diesel::sql_query;
+use diesel::sql_types::Bool;
 use diesel::sqlite::SqliteConnection;
 use diesel::*;
-use diesel::dsl::sql;
-use diesel::sql_types::Bool;
-use diesel::sql_query;
 
 pub struct Database {
     pub connection: SqliteConnection,
