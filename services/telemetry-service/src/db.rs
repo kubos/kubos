@@ -16,6 +16,10 @@
 
 use diesel::prelude::*;
 use diesel::sqlite::SqliteConnection;
+use diesel::*;
+use diesel::dsl::sql;
+use diesel::sql_types::Bool;
+use diesel::sql_query;
 
 pub struct Database {
     pub connection: SqliteConnection,
@@ -23,18 +27,44 @@ pub struct Database {
 
 impl Database {
     pub fn new(path: &str) -> Self {
+        if !::std::path::Path::new(path).exists() {
+            println!("Creating database {}", path);
+        }
         Database {
-            connection: establish_connection(path),
+            connection: SqliteConnection::establish(&String::from(path)).expect(&format!(
+                "Could not create SQLite database connection to: {}",
+                path
+            )),
         }
     }
-}
 
-fn establish_connection(path: &str) -> SqliteConnection {
-    println!("Opening database {}", path);
-    SqliteConnection::establish(&String::from(path)).expect(&format!(
-        "Could not create SQLite database connection to: {}",
-        path
-    ))
+    pub fn setup(&self) {
+        match select(sql::<Bool>(
+            "EXISTS \
+             (SELECT 1 \
+             FROM sqlite_master \
+             WHERE type = 'table' \
+             AND name = 'telemetry')",
+        )).get_result::<bool>(&self.connection)
+        {
+            Err(_) => panic!("Error querying table"),
+            Ok(true) => println!("Table exists"),
+            Ok(false) => {
+                println!("Telemetry table not found. Creating table.");
+                match sql_query(
+                    "CREATE TABLE telemetry (
+                    timestamp INTEGER PRIMARY KEY NULL,
+                    subsystem VARCHAR(255) NOT NULL,
+                    param VARCHAR(255) NOT NULL,
+                    value DOUBLE NOT NULL)",
+                ).execute(&self.connection)
+                {
+                    Ok(_) => println!("Telemetry table created"),
+                    _ => panic!("Error creating table"),
+                }
+            }
+        };
+    }
 }
 
 table! {

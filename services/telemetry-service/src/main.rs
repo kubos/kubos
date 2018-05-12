@@ -21,19 +21,24 @@ extern crate kubos_service;
 #[macro_use]
 extern crate diesel;
 
-use kubos_service::{Config, Service};
-
 mod db;
 mod models;
 mod schema;
 
 use schema::{MutationRoot, QueryRoot};
 use db::Database;
+use kubos_service::{Config, Service};
 
 fn main() {
     let config = Config::new("telemetry-service");
-    let db_path = config.get("database").expect("No database path found");
-    let db_path: &str = db_path.as_str().expect("No database path found");
 
-    Service::new(config, Database::new(db_path), QueryRoot, MutationRoot).start();
+    let db_path = config
+        .get("database")
+        .expect("No database path found in config file");
+    let db_path = db_path.as_str().unwrap_or("");
+
+    let db = Database::new(&db_path);
+    db.setup();
+
+    Service::new(config, db, QueryRoot, MutationRoot).start();
 }

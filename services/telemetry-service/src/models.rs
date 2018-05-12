@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#[derive(Queryable)]
+#[derive(Debug, Queryable)]
 pub struct Entry {
     pub timestamp: Option<i32>,
     pub subsystem: Option<String>,
