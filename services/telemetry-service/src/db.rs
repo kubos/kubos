@@ -53,10 +53,11 @@ impl Database {
                 println!("Telemetry table not found. Creating table.");
                 match sql_query(
                     "CREATE TABLE telemetry (
-                    timestamp INTEGER PRIMARY KEY NULL,
+                    timestamp INTEGER NOT NULL,
                     subsystem VARCHAR(255) NOT NULL,
                     param VARCHAR(255) NOT NULL,
-                    value DOUBLE NOT NULL)",
+                    value DOUBLE NOT NULL,
+                    PRIMARY KEY (timestamp, subsystem, param))",
                 ).execute(&self.connection)
                 {
                     Ok(_) => println!("Telemetry table created"),
