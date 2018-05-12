@@ -89,6 +89,9 @@ impl Config {
     }
 
     /// Performs a get on the raw config data
+    ///
+    /// # Arguments
+    /// `key` - Key of value to get from config
     pub fn get(&self, key: &str) -> Option<toml::Value> {
         match self.raw.get(key) {
             Some(v) => Some(v.clone()),
