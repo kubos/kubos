@@ -1,0 +1,6 @@
+[telemetry-service]
+database = "test.db"
+
+[telemetry-service.addr]
+ip = "127.0.0.1"
+port = 8111
