@@ -28,8 +28,10 @@ fn test() {
     assert_eq!(
         res,
         json!({
-        "errs": "",
-        "msg": "{\"telemetry\":[]}"
-    })
+            "errs": "",
+            "msg": {
+                "telemetry":[]
+            }
+        })
     );
 }

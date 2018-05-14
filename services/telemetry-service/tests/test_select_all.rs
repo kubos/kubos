@@ -32,8 +32,12 @@ fn test() {
     assert_eq!(
         res,
         json!({
-        "errs": "",
-        "msg": "{\"telemetry\":[{\"timestamp\":1000,\"subsystem\":\"eps\",\"parameter\":\"voltage\",\"value\":3.3}]}"
-    })
+            "errs": "",
+            "msg": {
+                "telemetry":[
+                    {"timestamp":1000,"subsystem":"eps","parameter":"voltage","value":3.3}
+                ]
+            }
+        })
     );
 }

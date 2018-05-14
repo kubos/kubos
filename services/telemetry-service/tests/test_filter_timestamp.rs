@@ -46,16 +46,27 @@ fn tests() {
     assert_eq!(
         ge_res,
         json!({
-        "errs": "",
-            "msg": "{\"telemetry\":[{\"value\":3.7},{\"value\":3.8}]}"
-    })
+            "errs": "",
+            "msg": {
+                "telemetry": [
+                    {"value":3.7},
+                    {"value":3.8}
+                ]
+            }
+        })
     );
 
     assert_eq!(
         le_res,
         json!({
             "errs": "",
-            "msg": "{\"telemetry\":[{\"value\":3.3},{\"value\":3.4},{\"value\":3.5}]}"
+            "msg": {
+                "telemetry": [
+                    {"value":3.3},
+                    {"value":3.4},
+                    {"value":3.5}
+                ]
+            }
         })
     );
 
@@ -63,7 +74,13 @@ fn tests() {
         range_res,
         json!({
             "errs": "",
-            "msg": "{\"telemetry\":[{\"value\":3.4},{\"value\":3.5},{\"value\":3.6}]}"
+            "msg": {
+                "telemetry": [
+                    {"value":3.4},
+                    {"value":3.5},
+                    {"value":3.6}
+                ]
+            }
         })
     );
 
@@ -71,7 +88,11 @@ fn tests() {
         single_res,
         json!({
             "errs": "",
-            "msg": "{\"telemetry\":[{\"value\":3.6}]}"
+            "msg": {
+                "telemetry": [
+                    {"value":3.6},
+                ]
+            }
         })
     );
 }

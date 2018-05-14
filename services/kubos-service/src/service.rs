@@ -19,7 +19,7 @@ use std::net::{SocketAddr, UdpSocket};
 use std::cell::RefCell;
 use serde_json;
 use config::Config;
-use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Value, Variables};
+use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
 
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.
@@ -165,16 +165,12 @@ where
             &self.context,
         ) {
             Ok((val, errs)) => {
-                let msg = match val {
-                    Value::Null => "".to_string(),
-                    _ => serde_json::to_string(&val).unwrap(),
-                };
                 let errs_msg: String = errs.into_iter()
                     .map(|x| serde_json::to_string(&x).unwrap())
                     .collect();
 
                 json!({
-                    "msg": msg,
+                    "msg": val,
                     "errs": errs_msg})
                     .to_string()
             }
