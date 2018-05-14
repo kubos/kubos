@@ -1,7 +1,7 @@
 [package]
 name = "rust-uart"
-version = "0.1.0"
-authors = ["William Greer <wgreer184@gmail.com>"]
+version = "0.2.0"
+authors = ["William Greer <wgreer184@gmail.com>", "Catherine Garabedian <catherine@kubos.co>"]
 
 [dependencies]
 serial = "0.4.0"
