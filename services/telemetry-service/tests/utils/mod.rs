@@ -61,6 +61,7 @@ fn start_telemetry() -> (JoinHandle<()>, Sender<bool>) {
 
     let (tx, rx): (Sender<bool>, Receiver<bool>) = channel();
     let telem_thread = thread::spawn(move || {
+        println!("Current working dir {:?}", env::current_dir());
         let mut telem_proc = Command::new(telem_path)
             .arg("-c")
             .arg("tests/config.toml")
