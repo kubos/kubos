@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
+use super::*;
 use byteorder::LittleEndian;
 use nom::*;
-use super::*;
 
 pub mod log;
 pub mod unlog;

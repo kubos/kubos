@@ -31,9 +31,6 @@
 extern crate bitflags;
 extern crate byteorder;
 extern crate crc16;
-#[cfg(test)]
-#[macro_use]
-extern crate double;
 #[macro_use]
 extern crate failure;
 #[macro_use]
@@ -43,11 +40,11 @@ extern crate serial;
 extern crate termios;
 
 mod crc32;
-mod oem6;
 mod messages;
+mod oem6;
 #[cfg(test)]
 mod tests;
 
-pub use oem6::*;
 pub use messages::*;
+pub use oem6::*;
 pub use serial::BaudRate;

@@ -8,7 +8,6 @@ bincode = "1.0.0"
 bitflags = "1.0"
 byteorder = "1.2"
 crc16 = "0.3.4"
-double = "0.2.2"
 failure = { git = "https://github.com/rust-lang-nursery/failure" }
 nom = "4.0.0-beta1"
 rust-uart = { path = "../../hal/rust-hal/rust-uart" }

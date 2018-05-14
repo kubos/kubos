@@ -16,13 +16,13 @@
 
 use super::*;
 
-pub mod version;
 pub mod best_xyz;
 pub mod rxstatusevent;
+pub mod version;
 
-pub use self::version::*;
 pub use self::best_xyz::*;
 pub use self::rxstatusevent::*;
+pub use self::version::*;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Log {

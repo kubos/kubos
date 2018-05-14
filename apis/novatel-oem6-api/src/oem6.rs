@@ -18,11 +18,12 @@ use byteorder::{LittleEndian, WriteBytesExt};
 use crc32::*;
 use messages::*;
 use nom;
+use rust_uart::UartError;
 use rust_uart::*;
-use std::io;
+//use std::io;
 use serial;
-use std::sync::{Arc, Mutex};
 use std::sync::mpsc::{Receiver, SyncSender};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 const CHAR_SIZE: serial::CharSize = serial::Bits8;
@@ -41,7 +42,6 @@ pub fn read_thread(
     loop {
         {
             // Read SYNC bytes
-            println!("Read taking lock");
             let conn = rx_conn.lock().unwrap();
             let mut message = match conn.read(3, Duration::from_secs(2)) {
                 Ok(v) => v,
@@ -108,16 +108,6 @@ impl OEM6 {
     /// * conn - The underlying connection stream to use for communication with the device
     ///
     /// # Examples
-    ///
-    /// ```
-    /// use OEM6_api::*;
-    ///
-    /// # fn func() -> OEMResult<()> {
-    /// let connection = Connection::new("/dev/ttyS4");
-    /// let oem = OEM6::new(connection);
-    /// # Ok(())
-    /// # }
-    /// ```
     ///
     pub fn new(
         bus: &str,
@@ -287,7 +277,7 @@ impl OEM6 {
         println!("Waiting for response");
         let (hdr, body) = self.response_recv
             .recv_timeout(Duration::from_millis(500))
-            .unwrap();
+            .map_err(|_| OEMError::NoResponse)?;
 
         println!("Got response");
 

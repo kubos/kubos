@@ -17,11 +17,11 @@
 use byteorder::{LittleEndian, WriteBytesExt};
 use nom::*;
 
-pub mod logs;
 pub mod commands;
+pub mod logs;
 
-pub use self::logs::*;
 pub use self::commands::*;
+pub use self::logs::*;
 
 pub const SYNC: [u8; 3] = [0xAA, 0x44, 0x12];
 pub const HDR_LEN: u8 = 28;
