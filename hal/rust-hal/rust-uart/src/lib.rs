@@ -26,7 +26,7 @@ pub mod mock;
 #[cfg(test)]
 mod tests;
 
-use error::*;
+pub use error::*;
 use serial::prelude::*;
 use std::cell::RefCell;
 use std::io::prelude::*;
