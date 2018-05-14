@@ -588,8 +588,9 @@ dependencies = [
 
 [[package]]
 name = "rust-uart"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
+ "failure 1.0.0 (git+https://github.com/rust-lang-nursery/failure)",
  "serial 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
