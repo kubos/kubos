@@ -27,10 +27,10 @@ pub mod mock;
 mod tests;
 
 use error::*;
-use std::io::prelude::*;
 use serial::prelude::*;
-use std::time::Duration;
 use std::cell::RefCell;
+use std::io::prelude::*;
+use std::time::Duration;
 
 /// Wrapper for UART stream
 pub struct Connection {

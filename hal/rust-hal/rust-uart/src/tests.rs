@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use mock::*;
 use super::*;
+use mock::*;
 use std::time::Duration;
 
 #[test]

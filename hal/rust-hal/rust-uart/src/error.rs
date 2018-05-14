@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use std::error::Error;
 use super::*;
+use std::error::Error;
 
 /// Custom errors for UART actions
 #[derive(Fail, Display, Debug, Clone, PartialEq)]
