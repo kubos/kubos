@@ -40,7 +40,7 @@ class MCU:
         Write command used to append the proper stopbyte to all writes.
         """
         if type(command) is str:
-            self.i2cfile.write(
+            return self.i2cfile.write(
                 device = self.address,data = command+'\x0A')
         else:raise TypeError('Commands must be strings.')    
     

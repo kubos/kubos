@@ -10,7 +10,6 @@ Graphene ObjectType classes for subsystem modeling.
 
 import graphene
 
-
 class Subsystem(graphene.ObjectType):
     """
     Model encapsulating subsystem functionality.
@@ -39,7 +38,7 @@ class Subsystem(graphene.ObjectType):
         return Status(status=True, subsystem=self)
 
 
-class Status(graphene.ObjectType):
+class CommandStatus(graphene.ObjectType):
     """
     Model representing execution status. This allows us to return
     the status of the mutation function alongside the state of
@@ -47,4 +46,13 @@ class Status(graphene.ObjectType):
     """
 
     status = graphene.Boolean()
-    subsystem = graphene.Field(Subsystem)
+    command = graphene.String()
+
+class ReadData(graphene.ObjectType):
+    """
+    
+    """
+
+    status = graphene.Boolean()
+    data = graphene.String()
+    
