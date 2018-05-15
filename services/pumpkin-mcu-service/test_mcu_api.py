@@ -16,10 +16,10 @@ for module in MODULES:
     module = str(module)
     address = MODULES[module]['address']
     if address == 0:
-        print('Module not configured:',module)
+        print('\nModule not configured:' + module + '\n')
     else:
-        print('Module: ',module)
-        print('Address: ',address)
+        print('\nModule: ' + module)
+        print('Address: ' + str(address) + '\n')
         mcu = mcu_api.MCU(address = address)
         out = mcu.get_module_telemetry(module = module)
         ERRORS = []
