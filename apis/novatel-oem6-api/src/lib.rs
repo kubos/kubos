@@ -30,7 +30,6 @@
 
 extern crate bitflags;
 extern crate byteorder;
-extern crate crc16;
 #[macro_use]
 extern crate failure;
 #[macro_use]

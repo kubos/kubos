@@ -68,13 +68,13 @@ named!(parse_component(&[u8]) -> Component,
         compile_time: take!(12) >>
         (Component {
             comp_type,
-            model: ::std::str::from_utf8(model).unwrap().to_owned(),
-            serial_num: ::std::str::from_utf8(serial_num).unwrap().to_owned(),
-            hw_version: ::std::str::from_utf8(hw_version).unwrap().to_owned(),
-            sw_version: ::std::str::from_utf8(sw_version).unwrap().to_owned(),
-            boot_version: ::std::str::from_utf8(boot_version).unwrap().to_owned(),
-            compile_date: ::std::str::from_utf8(compile_date).unwrap().to_owned(),
-            compile_time: ::std::str::from_utf8(compile_time).unwrap().to_owned(),
+            model: ::std::str::from_utf8(model).unwrap().trim_right_matches('\u{0}').to_owned(),
+            serial_num: ::std::str::from_utf8(serial_num).unwrap().trim_right_matches('\u{0}').to_owned(),
+            hw_version: ::std::str::from_utf8(hw_version).unwrap().trim_right_matches('\u{0}').to_owned(),
+            sw_version: ::std::str::from_utf8(sw_version).unwrap().trim_right_matches('\u{0}').to_owned(),
+            boot_version: ::std::str::from_utf8(boot_version).unwrap().trim_right_matches('\u{0}').to_owned(),
+            compile_date: ::std::str::from_utf8(compile_date).unwrap().trim_right_matches('\u{0}').to_owned(),
+            compile_time: ::std::str::from_utf8(compile_time).unwrap().trim_right_matches('\u{0}').to_owned(),
             }
         )
     )

@@ -16,7 +16,6 @@
 
 use super::*;
 use byteorder::LittleEndian;
-use nom::*;
 
 pub mod log;
 pub mod unlog;
