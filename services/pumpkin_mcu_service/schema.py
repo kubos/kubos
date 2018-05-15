@@ -10,6 +10,7 @@ Graphene schema setup to enable queries.
 
 import graphene
 from models import *
+
 from pumpkin_mcu_api import mcu_api
 
 # Get what modules are present from config file

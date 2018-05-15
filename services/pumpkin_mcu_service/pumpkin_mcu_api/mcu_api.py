@@ -11,16 +11,21 @@ See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.5
 """
 
 
-import i2c,struct,time,json
+import struct,time,json
+from i2c import i2c
 
-with open('mcu_config.json') as config_file:
+# I know this is hacky...I need help with how to manage config files
+import os.path
+config_filename = 'mcu_config.json'
+config_path = os.path.abspath(os.path.dirname(__file__)) + '/' + config_filename
+with open(config_path) as config_file:
     CONFIG_DATA = json.load(config_file)
 
 I2C_BUSNUM = CONFIG_DATA['i2c_bus_number']
 DELAY = CONFIG_DATA['delay_between_writing_and_reading']
 TELEMETRY = CONFIG_DATA['telemetry']
 HEADER_SIZE = CONFIG_DATA['header_size']
-# json import converts to unicode, changing commands and parsing to be strings
+# json import converts to unicode, changing type sensitive fields to be strings
 for device in TELEMETRY:
     # print("device: ",device)
     for field in TELEMETRY[device]:
@@ -112,10 +117,10 @@ class MCU:
             output_dict[telem_field] = self.read(
                 dict[telem_field]['length']
                 )
-        output_dict = self.__unpacking__(dict,output_dict)
+        output_dict = self._unpacking(dict,output_dict)
         return output_dict
         
-    def __unpacking__(self,input_dict,output_dict):
+    def _unpacking(self,input_dict,output_dict):
         for field in input_dict:
             parsing = input_dict[field]["parsing"]
             if parsing == "s":
