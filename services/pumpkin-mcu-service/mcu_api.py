@@ -14,12 +14,12 @@ See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.5
 import i2c,struct,time,json
 
 with open('mcu_config.json') as config_file:
-    data = json.load(config_file)
+    CONFIG_DATA = json.load(config_file)
 
-I2C_BUSNUM = data['i2c_bus_number']
-DELAY = data['delay_between_writing_and_reading']
-TELEMETRY = data['telemetry']
-HEADER_SIZE = data['header_size']
+I2C_BUSNUM = CONFIG_DATA['i2c_bus_number']
+DELAY = CONFIG_DATA['delay_between_writing_and_reading']
+TELEMETRY = CONFIG_DATA['telemetry']
+HEADER_SIZE = CONFIG_DATA['header_size']
 # json import converts to unicode, changing commands and parsing to be strings
 for device in TELEMETRY:
     # print("device: ",device)

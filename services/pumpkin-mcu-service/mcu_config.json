@@ -2,6 +2,16 @@
  "delay_between_writing_and_reading": 0.200,
  "i2c_bus_number": 1,
  "header_size": 5,
+ "modules":{
+  "sim":  {"address":80},
+  "gpsrm":{"address":81},
+  "aim2": {"address":0},
+  "bim":  {"address":0},
+  "pim":  {"address":83},
+  "rhm":  {"address":85},
+  "bsm":  {"address":0},
+  "bm2":  {"address":92}
+ },
  "telemetry":{
   "supervisor":{
    "firmware_version": {"command":"SUP:TEL? 0,data","length":48,"parsing":"s"},
@@ -16,19 +26,7 @@
    "idling_hooks":     {"command":"SUP:TEL? 7,data","length":8, "parsing":"<Q"},
    "mcu_load":         {"command":"SUP:TEL? 8,data","length":8, "parsing":"<Q"}
   },
-  "bim":{
-   "temperature":         {"command":"BIM:TEL? 0,data", "length":24,"parsing":"<ffff",
-    "names": ["temp0","temp1","temp2","temp3"]},
-   "uart_status":         {"command":"BIM:TEL? 1,data", "length":6, "parsing":"<hhh",
-    "names": ["uart1_status","uart2_status","uart3_status"]},
-   "imu":                 {"command":"BIM:TEL? 2,data", "length":12,"parsing":"<hhhhhh",
-    "names": ["imu0","imu1","imu2","imu3","imu4","imu5"]},
-   "tini_status":         {"command":"BIM:TEL? 3,data", "length":1, "parsing":"<B"},
-   "temp_scaling_offsets":{"command":"BIM:TEL? 4,data", "length":24,"parsing":"<ffffff",
-    "names": ["temp0_offset","temp1_offset","temp2_offset","temp3_offset","temp4_offset","temp5_offset"]},
-   "temp_scaling_factors":{"command":"BIM:TEL? 5,data", "length":24,"parsing":"<ffffff",
-    "names": ["temp0_factor","temp1_factor","temp2_factor","temp3_factor","temp4_factor","temp5_factor"]}
-  },
+  "sim":{},
   "gpsrm":{
    "status":           {"command":"GPS:TEL? 0,data","length":2,  "parsing":"s"},
    "nmea_string":      {"command":"GPS:TEL? 1,data","length":512,"parsing":"s"},
@@ -37,7 +35,6 @@
    "oem_power":        {"command":"GPS:TEL? 3,data","length":16, "parsing":"<ffff",
     "names":["oem_power0","oem_power1","oem_power2","oem_power3"]}
   },
-  "sim":{},
   "aim2":{
    "status":           {"command":"AIM:TEL? 0,data", "length":2,  "parsing":"s"},
    "nmea_string":      {"command":"AIM:TEL? 1,data", "length":512,"parsing":"s"},
@@ -53,15 +50,18 @@
    "adcs_power":       {"command":"AIM:TEL? 9,data", "length":1,  "parsing":"s"},
    "wdt_period":       {"command":"AIM:TEL? 10,data","length":4,  "parsing":"<I"}
   },
-  "rhm":{
-   "lithium_power":     {"command":"RHM:TEL? 0,data", "length":1,"parsing":"s"},
-   "lithium_uart":      {"command":"RHM:TEL? 1,data", "length":1,"parsing":"<B"},
-   "lithium_config":    {"command":"RHM:TEL? 2,data", "length":1,"parsing":"s"},
-   "globalstar_power":  {"command":"RHM:TEL? 3,data", "length":1,"parsing":"s"},
-   "globalstar_uart":   {"command":"RHM:TEL? 4,data", "length":1,"parsing":"<B"},
-   "globalstar_din_out":{"command":"RHM:TEL? 5,data", "length":1,"parsing":"s"},
-   "globalstar_busy":   {"command":"RHM:TEL? 6,data", "length":1,"parsing":"s"},
-   "watchdog_period":   {"command":"RHM:TEL? 7,data", "length":4,"parsing":"<I"}
+  "bim":{
+   "temperature":         {"command":"BIM:TEL? 0,data", "length":24,"parsing":"<ffff",
+    "names": ["temp0","temp1","temp2","temp3"]},
+   "uart_status":         {"command":"BIM:TEL? 1,data", "length":6, "parsing":"<hhh",
+    "names": ["uart1_status","uart2_status","uart3_status"]},
+   "imu":                 {"command":"BIM:TEL? 2,data", "length":12,"parsing":"<hhhhhh",
+    "names": ["imu0","imu1","imu2","imu3","imu4","imu5"]},
+   "tini_status":         {"command":"BIM:TEL? 3,data", "length":1, "parsing":"<B"},
+   "temp_scaling_offsets":{"command":"BIM:TEL? 4,data", "length":24,"parsing":"<ffffff",
+    "names": ["temp0_offset","temp1_offset","temp2_offset","temp3_offset","temp4_offset","temp5_offset"]},
+   "temp_scaling_factors":{"command":"BIM:TEL? 5,data", "length":24,"parsing":"<ffffff",
+    "names": ["temp0_factor","temp1_factor","temp2_factor","temp3_factor","temp4_factor","temp5_factor"]}
   },
   "pim":{
    "channel_currents": {"command":"PIM:TEL? 0,data", "length":8, "parsing":"<HHHH",
@@ -79,6 +79,16 @@
     "names":["channel0_overcurrent","channel1_overcurrent","channel2_overcurrent","channel3_overcurrent"]},
    "channel_volts":    {"command":"PIM:TEL? 7,data", "length":8, "parsing":"<HHHH",
     "names":["channel0_voltage","channel1_voltage","channel2_voltage","channel3_voltage"]}
+  },
+  "rhm":{
+   "lithium_power":     {"command":"RHM:TEL? 0,data", "length":1,"parsing":"s"},
+   "lithium_uart":      {"command":"RHM:TEL? 1,data", "length":1,"parsing":"<B"},
+   "lithium_config":    {"command":"RHM:TEL? 2,data", "length":1,"parsing":"s"},
+   "globalstar_power":  {"command":"RHM:TEL? 3,data", "length":1,"parsing":"s"},
+   "globalstar_uart":   {"command":"RHM:TEL? 4,data", "length":1,"parsing":"<B"},
+   "globalstar_din_out":{"command":"RHM:TEL? 5,data", "length":1,"parsing":"s"},
+   "globalstar_busy":   {"command":"RHM:TEL? 6,data", "length":1,"parsing":"s"},
+   "watchdog_period":   {"command":"RHM:TEL? 7,data", "length":4,"parsing":"<I"}
   },
   "bsm":{
    "channel_currents":    {"command":"BSM:TEL? 0,data", "length":10,"parsing":"<HHHHH",
