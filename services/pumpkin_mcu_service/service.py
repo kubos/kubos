@@ -8,16 +8,15 @@
 Boilerplate main for service application.
 """
 
-import argparse
 from service import app
-import yaml
+import json
 
-parser = argparse.ArgumentParser(description='Example Service')
-parser.add_argument('config', type=str, help='path to config file')
-args = parser.parse_args()
-
-with open(args.config) as ymlfile:
-    cfg = yaml.load(ymlfile)
+# I know this is hacky...I need help with how to manage config files
+import os.path
+config_filename = 'service_config.json'
+config_path = os.path.abspath(os.path.dirname(__file__)) + '/' + config_filename
+with open(config_path) as config_file:
+    CONFIG_DATA = json.load(config_file)
 
 app = app.create_app()
-app.run(host=cfg['APP_IP'], port=cfg['APP_PORT'])
+app.run(host=CONFIG_DATA['APP_IP'], port=CONFIG_DATA['APP_PORT'])
