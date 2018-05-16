@@ -200,10 +200,33 @@ impl OEM6 {
     ///
     /// # Arguments
     ///
-    /// * conn - The underlying connection stream to use for communication with the device
+    /// * bus - Serial bus to use for communication
+    /// * baud_rate - Communication data rate
+    /// * log_recv - Receiver for log messages sent by read thread
+    /// * response_recv - Receiver for response messages sent by read thread
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`OEMError`] variant will be returned.
     ///
     /// # Examples
     ///
+    /// ```
+    /// use novatel_oem6_api::*;
+    /// use std::sync::mpsc::sync_channel;
+    ///
+    /// # fn func() -> OEMResult<()> {
+    /// let bus = "/dev/ttyS5";
+    ///
+    /// let (log_send, log_recv) = sync_channel(5);
+    /// let (response_send, response_recv) = sync_channel(5);
+    ///
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`OEMError`]: enum.OEMError.html
     pub fn new(
         bus: &str,
         baud_rate: serial::BaudRate,
@@ -228,16 +251,60 @@ impl OEM6 {
         //TODO: Turn off RXSTATUSEVENTA messages (UNLOG)
     }
 
-    /// Get the system version information
+    /// Request the system version information
+    ///
+    /// Note: A subsequent [`get_log()`] call is required to fetch the information
     ///
     /// # Errors
     ///
-    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    /// If this function encounters any errors, an [`OEMError`] variant will be returned.
     ///
     /// # Examples
     ///
+    /// ```
+    /// # use novatel_oem6_api::*;
+    /// # use std::thread;
+    /// # use std::sync::mpsc::sync_channel;
     ///
-    /// [`MAIError`]: enum.MAIError.html
+    /// # fn func() -> OEMResult<()> {
+    /// # let bus = "/dev/ttyS5";
+    /// # let (log_send, log_recv) = sync_channel(5);
+    /// # let (response_send, response_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// let rx_conn = oem.conn.clone();
+    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    ///
+    /// oem.request_version()?;
+    ///
+    /// // Read the next log message, which should have the reply
+    /// let entry = oem.get_log()?;
+    ///
+    /// match entry {
+    ///     Log::Version(log) => {
+    ///         println!("Version Info ({}):\n", log.num_components);
+    ///         for component in log.components.iter() {
+    ///             println!(
+    ///                 "Type: {} Model: {} SN: {}",
+    ///                 component.comp_type, component.model, component.serial_num
+    ///             );
+    ///             println!("    HW Version: {}", component.hw_version);
+    ///             println!("    SW Version: {}", component.sw_version);
+    ///             println!("    Boot Version: {}", component.boot_version);
+    ///             println!(
+    ///                 "    Compiled: {} {}",
+    ///                 component.compile_date, component.compile_time
+    ///             );
+    ///             println!("");
+    ///         }
+    ///     }
+    ///     _ => {},
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`get_log()`]: method.get_log.html
+    /// [`OEMError`]: enum.OEMError.html
     pub fn request_version(&self) -> OEMResult<()> {
         let request = LogCmd::new(
             Port::COM1 as u32,
@@ -248,23 +315,63 @@ impl OEM6 {
             false,
         );
 
-        // Send request
-        self.send_message(request)?;
-
-        // Get request response
-        self.get_response(MessageID::Log)
+        self.send_message(request)
+            .and_then(|_| self.get_response(MessageID::Log))
     }
 
     /// Request BestXYZ position log/s from the device
     ///
+    /// Note: Subsequent [`get_log()`] calls are required to fetch the information
+    ///
+    /// # Arguments
+    ///
+    /// * interval - Frequency, in seconds, at which the OEM6 should emit position log messages
+    /// * offset - Offset, in seconds, of the message emit frequency
+    /// * hold - Whether the [`unlog_all`] command should be able to apply to this log. A value
+    ///          of `true` will prevent [`unlog_all`] from applying to this log.
+    ///
     /// # Errors
     ///
-    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    /// If this function encounters any errors, an [`OEMError`] variant will be returned.
     ///
     /// # Examples
     ///
+    /// ```
+    /// # use novatel_oem6_api::*;
+    /// # use std::thread;
+    /// # use std::sync::mpsc::sync_channel;
     ///
-    /// [`MAIError`]: enum.MAIError.html
+    /// # fn func() -> OEMResult<()> {
+    /// # let bus = "/dev/ttyS5";
+    /// # let (log_send, log_recv) = sync_channel(5);
+    /// # let (response_send, response_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// let rx_conn = oem.conn.clone();
+    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    ///
+    /// oem.request_position(1.0, 0.0, false)?;
+    ///
+    /// // Continually read the position log messages
+    /// loop {
+    ///     // Read the next log message, which should have the reply
+    ///     let entry = oem.get_log()?;
+    ///
+    ///     match entry {
+    ///         Log::BestXYZ(log) => {
+    ///             println!("Best XYZ Data:");
+    ///             println!("    Position: {:?}", log.position);
+    ///             println!("    Velocity: {:?}", log.velocity);
+    ///         }
+    ///         _ => {},
+    ///     }
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`get_log()`]: method.get_log.html
+    /// [`unlog_all`]: method.unlog_all.html
+    /// [`OEMError`]: enum.OEMError.html
     pub fn request_position(&self, interval: f64, offset: f64, hold: bool) -> OEMResult<()> {
         let trigger = if interval == 0.0 {
             LogTrigger::Once
@@ -281,23 +388,35 @@ impl OEM6 {
             hold,
         );
 
-        // Send request
-        self.send_message(request)?;
-
-        // Get request response
-        self.get_response(MessageID::Log)
+        self.send_message(request)
+            .and_then(|_| self.get_response(MessageID::Log))
     }
 
     /// Request that the device send error messages as they occur
     ///
     /// # Errors
     ///
-    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    /// If this function encounters any errors, an [`OEMError`] variant will be returned.
     ///
     /// # Examples
     ///
+    /// ```
+    /// # use novatel_oem6_api::*;
+    /// # use std::thread;
+    /// # use std::sync::mpsc::sync_channel;
     ///
-    /// [`MAIError`]: enum.MAIError.html
+    /// # fn func() -> OEMResult<()> {
+    /// # let bus = "/dev/ttyS5";
+    /// # let (log_send, log_recv) = sync_channel(5);
+    /// # let (response_send, response_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    ///
+    /// oem.request_errors()?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`OEMError`]: enum.OEMError.html
     pub fn request_errors(&self) -> OEMResult<()> {
         let request = LogCmd::new(
             Port::COM1 as u32,
@@ -308,54 +427,111 @@ impl OEM6 {
             false,
         );
 
-        // Send request
-        self.send_message(request)?;
-
-        // Get request response
-        self.get_response(MessageID::Log)
+        self.send_message(request)
+            .and_then(|_| self.get_response(MessageID::Log))
     }
 
     /// Request that automatic logging for a particular log type be stopped
     ///
+    /// # Arguments
+    ///
+    /// * id - Message ID which should no longer be logged
+    ///
     /// # Errors
     ///
-    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    /// If this function encounters any errors, an [`OEMError`] variant will be returned.
     ///
     /// # Examples
     ///
+    /// ```
+    /// # use novatel_oem6_api::*;
+    /// # use std::thread;
+    /// # use std::sync::mpsc::sync_channel;
     ///
-    /// [`MAIError`]: enum.MAIError.html
+    /// # fn func() -> OEMResult<()> {
+    /// # let bus = "/dev/ttyS5";
+    /// # let (log_send, log_recv) = sync_channel(5);
+    /// # let (response_send, response_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    ///
+    /// oem.request_unlog(MessageID::BestXYZ)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`OEMError`]: enum.OEMError.html
     pub fn request_unlog(&self, id: MessageID) -> OEMResult<()> {
         let request = UnlogCmd::new(Port::COM1 as u32, id as u16);
 
-        // Send request
-        self.send_message(request)?;
-
-        // Get request response
-        self.get_response(MessageID::Unlog)
+        self.send_message(request)
+            .and_then(|_| self.get_response(MessageID::Unlog))
     }
 
     /// Request that all automatic logging be stopped
     ///
+    /// # Arguments
+    ///
+    /// * hold - Specifies whether log messages which were set with the `hold` option should
+    ///          also be unlogged
+    ///
     /// # Errors
     ///
-    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    /// If this function encounters any errors, an [`OEMError`] variant will be returned.
     ///
     /// # Examples
     ///
+    /// ```
+    /// # use novatel_oem6_api::*;
+    /// # use std::thread;
+    /// # use std::sync::mpsc::sync_channel;
     ///
-    /// [`MAIError`]: enum.MAIError.html
+    /// # fn func() -> OEMResult<()> {
+    /// # let bus = "/dev/ttyS5";
+    /// # let (log_send, log_recv) = sync_channel(5);
+    /// # let (response_send, response_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    ///
+    /// // Request position information every second and prevent unlogging with unlog_all()
+    /// oem.request_position(1.0, 0.0, true)?;
+    ///
+    /// // Unlog everything. Previous request for position information will remain intact
+    /// oem.request_unlog_all(false)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// ```
+    /// # use novatel_oem6_api::*;
+    /// # use std::thread;
+    /// # use std::sync::mpsc::sync_channel;
+    ///
+    /// # fn func() -> OEMResult<()> {
+    /// # let bus = "/dev/ttyS5";
+    /// # let (log_send, log_recv) = sync_channel(5);
+    /// # let (response_send, response_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    ///
+    /// // Request position information every second and prevent unlogging with unlog_all()
+    /// oem.request_position(1.0, 0.0, true)?;
+    ///
+    /// // Unlog everything. This will override the position request's `hold=true` value and
+    /// // also unlog that request
+    /// oem.request_unlog_all(true)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`OEMError`]: enum.OEMError.html
     pub fn request_unlog_all(&self, hold: bool) -> OEMResult<()> {
         let request = UnlogAllCmd::new(Port::COM1 as u32, hold);
 
-        // Send request
-        self.send_message(request)?;
-
-        // Get request response
-        self.get_response(MessageID::UnlogAll)
+        self.send_message(request)
+            .and_then(|_| self.get_response(MessageID::UnlogAll))
     }
 
     /// Directly send a message without formatting or checksum calculation
+    ///
+    /// Note: The message will not be verified by checking for a command response
     ///
     /// # Arguments
     ///
@@ -366,6 +542,23 @@ impl OEM6 {
     /// If this function encounters any errors, an [`OEMError`] variant will be returned.
     ///
     /// # Examples
+    ///
+    /// ```
+    /// # use novatel_oem6_api::*;
+    /// # use std::thread;
+    /// # use std::sync::mpsc::sync_channel;
+    ///
+    /// # fn func() -> OEMResult<()> {
+    /// # let bus = "/dev/ttyS5";
+    /// # let (log_send, log_recv) = sync_channel(5);
+    /// # let (response_send, response_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    ///
+    /// let packet: [u8; 6] = [0, 1, 2, 3, 4, 5];
+    /// oem.passthrough(&packet)?;
+    /// # Ok(())
+    /// # }
+    /// ```
     ///
     ///
     /// [`OEMError`]: enum.OEMError.html
@@ -436,12 +629,36 @@ impl OEM6 {
     ///
     /// # Errors
     ///
-    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    /// If this function encounters any errors, an [`OEMError`] variant will be returned.
     ///
     /// # Examples
     ///
+    /// ```
+    /// # use novatel_oem6_api::*;
+    /// # use std::thread;
+    /// # use std::sync::mpsc::sync_channel;
     ///
-    /// [`MAIError`]: enum.MAIError.html
+    /// # fn func() -> OEMResult<()> {
+    /// # let bus = "/dev/ttyS5";
+    /// # let (log_send, log_recv) = sync_channel(5);
+    /// # let (response_send, response_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// let rx_conn = oem.conn.clone();
+    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    ///
+    /// let entry = oem.get_log()?;
+    ///
+    /// match entry {
+    ///     Log::Version(log) => println!("Received version information: {:?}", log),
+    ///     Log::BestXYZ(log) =>  println!("Received position information: {:?}", log),
+    ///     Log::RxStatusEvent(log) =>  println!("Received system event: {:?}", log),
+    ///     _ => println!("Received unknown log type"),
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`OEMError`]: enum.OEMError.html
     pub fn get_log(&self) -> OEMResult<Log> {
         loop {
             let (hdr, body) = match self.log_recv.recv_timeout(Duration::from_secs(5)) {

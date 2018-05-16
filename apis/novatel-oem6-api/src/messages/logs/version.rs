@@ -86,13 +86,20 @@ named!(parse_component(&[u8]) -> Component,
         compile_time: take!(12) >>
         (Component {
             comp_type,
-            model: String::from_utf8_lossy(model).trim_right_matches('\u{0}').to_owned(),
-            serial_num: String::from_utf8_lossy(serial_num).trim_right_matches('\u{0}').to_owned(),
-            hw_version: String::from_utf8_lossy(hw_version).trim_right_matches('\u{0}').to_owned(),
-            sw_version: String::from_utf8_lossy(sw_version).trim_right_matches('\u{0}').to_owned(),
-            boot_version: String::from_utf8_lossy(boot_version).trim_right_matches('\u{0}').to_owned(),
-            compile_date: String::from_utf8_lossy(compile_date).trim_right_matches('\u{0}').to_owned(),
-            compile_time: String::from_utf8_lossy(compile_time).trim_right_matches('\u{0}').to_owned(),
+            model: String::from_utf8_lossy(model)
+                            .trim_right_matches('\u{0}').to_owned(),
+            serial_num: String::from_utf8_lossy(serial_num)
+                            .trim_right_matches('\u{0}').to_owned(),
+            hw_version: String::from_utf8_lossy(hw_version)
+                            .trim_right_matches('\u{0}').to_owned(),
+            sw_version: String::from_utf8_lossy(sw_version)
+                            .trim_right_matches('\u{0}').to_owned(),
+            boot_version: String::from_utf8_lossy(boot_version)
+                            .trim_right_matches('\u{0}').to_owned(),
+            compile_date: String::from_utf8_lossy(compile_date)
+                            .trim_right_matches('\u{0}').to_owned(),
+            compile_time: String::from_utf8_lossy(compile_time)
+                            .trim_right_matches('\u{0}').to_owned(),
             }
         )
     )

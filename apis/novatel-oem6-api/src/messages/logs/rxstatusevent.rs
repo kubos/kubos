@@ -49,7 +49,8 @@ named!(parse_rxstatusevent(&[u8]) -> RxStatusEventLog,
             word,
             bit,
             event,
-            description: String::from_utf8_lossy(description).trim_right_matches('\u{0}').to_owned(),
+            description: String::from_utf8_lossy(description)
+                            .trim_right_matches('\u{0}').to_owned(),
             }
         )
     )

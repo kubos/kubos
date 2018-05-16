@@ -55,7 +55,11 @@ impl Response {
     }
 }
 
-/// Response values returned after sending a command to the device
+/// Response values returned after sending a command to the device.
+///
+/// Error values will be returned as part of the [`OEMError::CommandError`] variant.
+///
+/// [`OEMError::CommandError`]: enum.OEMError.html#variant.CommandError
 #[derive(Clone, Debug, PartialEq)]
 pub enum ResponseID {
     /// Command was received correctly
@@ -70,18 +74,18 @@ pub enum ResponseID {
     CommandFailed = 5,
     /// Input message ID is not valid
     InvalidID = 6,
-    /// An input field was invalid. See the `Response` structure's `resp_string` field for
+    /// An input field was invalid. See the [`OEMError::CommandError`](variant.CommandError.html) variant's `description` field for
     /// information about the specific field that caused the error.
     InvalidField = 7,
     /// The checksum of the sent message was invalid
     InvalidChecksum = 8,
     /// A field is missing from the sent message
     MissingField = 9,
-    /// An input field contains more array elements than allowed. See the `Response` structure's
-    /// `resp_string` field for information about the specific field that caused the error.
+    /// An input field contains more array elements than allowed. See the [`OEMError::CommandError`](variant.CommandError.html)
+    /// variant's `description` field for information about the specific field that caused the error.
     ArrayOverflow = 10,
-    /// An input field's value is outside acceptable limits. See the `Response` structure's
-    /// `resp_string` field for information about the specific field that caused the error.
+    /// An input field's value is outside acceptable limits. See the [`OEMError::CommandError`](variant.CommandError.html) variant's
+    /// `description` field for information about the specific field that caused the error.
     ErrorField = 11,
     /// The requested trigger type is invalid for the requested log type
     InvalidTrigger = 14,
