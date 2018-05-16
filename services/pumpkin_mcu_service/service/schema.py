@@ -41,11 +41,8 @@ class Query(graphene.ObjectType):
         if address == 0:
             raise ValueError('Module not present',module)
         fields = map(str,fields)
-        #mcu = mcu_api.MCU(address = address)
-        #out = mcu.get_module_telemetry(module = module,fields = fields)
-        out = {'field1':{'timestamp':1.2,'data':'modulename'},
-            'field2':{'timestamp':1.3,'data':56},
-            'field3':{'timestamp':1.4,'data':-35.46}}
+        mcu = mcu_api.MCU(address = address)
+        out = mcu.get_module_telemetry(module = module,fields = fields)
         
         return json.dumps(out)
 
