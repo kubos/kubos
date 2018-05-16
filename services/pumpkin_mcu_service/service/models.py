@@ -53,6 +53,6 @@ class ReadData(graphene.ObjectType):
     
     """
 
-    status = graphene.Boolean()
+    timestamp = graphene.Float()
     data = graphene.String()
     

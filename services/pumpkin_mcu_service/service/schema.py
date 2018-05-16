@@ -33,6 +33,8 @@ class Query(graphene.ObjectType):
         """
         Handles request for subsystem query.
         """
+        if module not in MODULES:
+            raise KeyError('Module not configured: ',module)
         address = MODULES[module]['address']
         mcu = mcu_api.MCU(address = address)
         out = mcu.read(count = count)
@@ -42,7 +44,7 @@ class Query(graphene.ObjectType):
         return readData
 
 
-class Passthrough(graphene.Mutation):
+class CommandPassthrough(graphene.Mutation):
     """
     Creates mutation for Passthrough Module Commanding
     """
@@ -60,13 +62,38 @@ class Passthrough(graphene.Mutation):
         if module not in MODULES:
             raise KeyError('Module not configured: ',module)
         if type(command) == unicode: command = str(command)
-        elif type(command) not str:
-            raise TypeError('Commands must be strings, input: ',type(command))
         address = MODULES[module]['address']
         mcu = mcu_api.MCU(address = address)
         out = mcu.write(command)
         
         commandStatus = CommandStatus(status = out[0], command = out[1])
+        
+        return commandStatus
+
+class ReadPassthrough(graphene.Mutation):
+    """
+    Creates mutation for Passthrough Module Commanding
+    """
+
+    class Arguments:
+        module = graphene.String()
+        count = graphene.Int()
+        
+    Output = ReadData
+
+    def mutate(self, info, module, count):
+        """
+        Handles request for subsystem query.
+        """
+        if module not in MODULES:
+            raise KeyError('Module not configured: ',module)
+        address = MODULES[module]['address']
+        mcu = mcu_api.MCU(address = address)
+        out = mcu.read(count = count)
+        
+        readData = ReadData(
+            timestamp = out['timestamp'], 
+            data = out['data'])
         
         return commandStatus
 
@@ -76,6 +103,6 @@ class Mutation(graphene.ObjectType):
     Creates mutation endpoints exposed by graphene.
     """
 
-    passthrough = Passthrough.Field()
+    commandPassthrough = CommandPassthrough.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
