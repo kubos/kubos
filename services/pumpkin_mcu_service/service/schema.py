@@ -57,11 +57,16 @@ class Passthrough(graphene.Mutation):
         """
         Handles passthrough commands to the Pumpkin MCU modules. 
         """
+        if module not in MODULES:
+            raise KeyError('Module not configured: ',module)
+        if type(command) == unicode: command = str(command)
+        elif type(command) not str:
+            raise TypeError('Commands must be strings, input: ',type(command))
         address = MODULES[module]['address']
         mcu = mcu_api.MCU(address = address)
         out = mcu.write(command)
         
-        commandStatus = CommandStatus(status = True, command = "heythere")
+        commandStatus = CommandStatus(status = out[0], command = out[1])
         
         return commandStatus
 
