@@ -29,7 +29,8 @@ class Query(graphene.ObjectType):
         module = graphene.String()
         field = graphene.String()
     
-    mcuTelemetry = graphene.Field(readData)
+    mcuTelemetry = graphene.Field(
+        graphene.Argument(module=graphene.String, default_value="bim"))
 
     def resolve_mcuTelemetry(self, info, module, field):
         """
