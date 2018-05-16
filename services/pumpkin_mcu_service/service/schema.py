@@ -65,7 +65,7 @@ class Query(graphene.ObjectType):
         
 
 
-class CommandPassthrough(graphene.Mutation):
+class Passthrough(graphene.Mutation):
     """
     Creates mutation for Passthrough Module Commanding
     """
@@ -99,6 +99,6 @@ class Mutation(graphene.ObjectType):
     Creates mutation endpoints exposed by graphene.
     """
 
-    commandPassthrough = CommandPassthrough.Field()
+    passthrough = Passthrough.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
