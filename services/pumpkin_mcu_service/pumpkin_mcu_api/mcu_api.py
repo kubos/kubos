@@ -61,7 +61,7 @@ class MCU:
         return {'timestamp':timestamp,'data':data} 
     
     def get_sup_telemetry(self,fields=["all"]):
-        if fields is ["all"]:
+        if fields == ["all"]:
             requests = TELEMETRY['supervisor']
         elif fields is list:
             requests = {}
@@ -95,7 +95,7 @@ class MCU:
                    type(field) != str:
                     raise ValueError('Invalid field: '+str(field))
                 
-        if fields is ["all"]:
+        if fields == ["all"]:
             # Pulling all info
             requests = module_telem
             requests.update(supervisor_telem)

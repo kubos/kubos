@@ -30,6 +30,10 @@ class Query(graphene.ObjectType):
     mcuTelemetry = graphene.JSONString(
         module=graphene.String(),
         fields=graphene.List(graphene.String,default_value = ["all"]))
+    rawRead = graphene.Field(
+        ReadData,
+        module=graphene.String(),
+        count=graphene.Int())
         
     def resolve_mcuTelemetry(self, info, module, fields):
         """
@@ -45,6 +49,25 @@ class Query(graphene.ObjectType):
         out = mcu.get_module_telemetry(module = module,fields = fields)
         
         return json.dumps(out)
+    
+    def resolve_rawRead(self, info, module, count):
+        """
+        Reads number of bytes from the specified MCU
+        """
+        if module not in MODULES:
+            raise KeyError('Module not configured',module)
+        address = MODULES[module]['address']
+        if address == 0:
+            raise ValueError('Module not present',module)
+        mcu = mcu_api.MCU(address = address)
+        out = mcu.read(count = count)
+        
+        readData = ReadData(
+            timestamp = out['timestamp'], 
+            data = out['data'])
+        
+        return readData
+        
 
 
 class CommandPassthrough(graphene.Mutation):
@@ -75,34 +98,34 @@ class CommandPassthrough(graphene.Mutation):
         
         return commandStatus
 
-class ReadPassthrough(graphene.Mutation):
-    """
-    Creates mutation for Passthrough Module Commanding
-    """
+# class ReadPassthrough(graphene.Mutation):
+#     """
+#     Creates mutation for Passthrough Module Commanding
+#     """
 
-    class Arguments:
-        module = graphene.String()
-        count = graphene.Int()
+#     class Arguments:
+#         module = graphene.String()
+#         count = graphene.Int()
         
-    Output = ReadData
+#     Output = ReadData
 
-    def mutate(self, info, module, count):
-        """
-        Handles request for subsystem query.
-        """
-        if module not in MODULES:
-            raise KeyError('Module not configured',module)
-        address = MODULES[module]['address']
-        if address == 0:
-            raise KeyError('Module not present',module)
-        mcu = mcu_api.MCU(address = address)
-        out = mcu.read(count = count)
+#     def mutate(self, info, module, count):
+#         """
+#         Handles request for subsystem query.
+#         """
+#         if module not in MODULES:
+#             raise KeyError('Module not configured',module)
+#         address = MODULES[module]['address']
+#         if address == 0:
+#             raise KeyError('Module not present',module)
+#         mcu = mcu_api.MCU(address = address)
+#         out = mcu.read(count = count)
         
-        readData = ReadData(
-            timestamp = out['timestamp'], 
-            data = out['data'])
+#         readData = ReadData(
+#             timestamp = out['timestamp'], 
+#             data = out['data'])
         
-        return readData
+#         return readData
 
 
 class Mutation(graphene.ObjectType):
@@ -111,6 +134,6 @@ class Mutation(graphene.ObjectType):
     """
 
     commandPassthrough = CommandPassthrough.Field()
-    readPassthrough = ReadPassthrough.Field()
+    # readPassthrough = ReadPassthrough.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
