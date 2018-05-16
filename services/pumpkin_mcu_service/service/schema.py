@@ -25,13 +25,14 @@ class Query(graphene.ObjectType):
     """
     Creates query endpoints exposed by graphene.
     """
-    class Arguments:
-        module = graphene.String()
-        field = graphene.String()
     
-    mcuTelemetry = graphene.Field(
-        graphene.Argument(module=graphene.String, default_value="bim"))
+    mcuTelemetry = graphene.TelemetryArguments(
+        module=graphene.String(),
+        field=graphene.String())
+    hello = graphene.String(name=graphene.String(default_value="stranger"))
 
+    def resolve_hello(self, info, name):
+        return 'Hello ' + name
     def resolve_mcuTelemetry(self, info, module, field):
         """
         Handles request for subsystem query.

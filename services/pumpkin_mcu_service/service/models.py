@@ -56,3 +56,6 @@ class ReadData(graphene.ObjectType):
     timestamp = graphene.Float()
     data = graphene.String()
     
+class TelemetryArguments(graphene.ObjectType):
+    module = graphene.String()
+    field = graphene.String()
