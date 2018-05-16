@@ -57,11 +57,11 @@ class Passthrough(graphene.Mutation):
         """
         Handles passthrough commands to the Pumpkin MCU modules. 
         """
-        address = MODULES[module]['address']
-        mcu = mcu_api.MCU(address = address)
-        out = mcu.write(command)
+        # address = MODULES[module]['address']
+        # mcu = mcu_api.MCU(address = address)
+        # out = mcu.write(command)
         
-        commandStatus = CommandStatus(status = out[0], command = out[1])
+        commandStatus = CommandStatus(status = True, command = "heythere")
         
         return commandStatus
 
