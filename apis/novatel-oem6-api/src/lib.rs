@@ -73,7 +73,6 @@ extern crate failure;
 extern crate nom;
 extern crate rust_uart;
 extern crate serial;
-extern crate termios;
 
 mod crc32;
 mod messages;

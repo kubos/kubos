@@ -453,7 +453,6 @@ dependencies = [
  "nom 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-uart 0.2.0",
  "serial 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "termios 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
