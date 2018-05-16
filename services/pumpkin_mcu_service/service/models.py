@@ -48,11 +48,3 @@ class CommandStatus(graphene.ObjectType):
     status = graphene.Boolean()
     command = graphene.String()
 
-class ReadData(graphene.ObjectType):
-    """
-    
-    """
-
-    timestamp = graphene.Float()
-    data = graphene.String()
-

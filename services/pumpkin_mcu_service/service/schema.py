@@ -30,8 +30,7 @@ class Query(graphene.ObjectType):
     mcuTelemetry = graphene.JSONString(
         module=graphene.String(),
         fields=graphene.List(graphene.String,default_value = ["all"]))
-    rawRead = graphene.Field(
-        ReadData,
+    rawRead = graphene.JSONString(
         module=graphene.String(),
         count=graphene.Int())
         
@@ -62,11 +61,7 @@ class Query(graphene.ObjectType):
         mcu = mcu_api.MCU(address = address)
         out = mcu.read(count = count)
         
-        readData = ReadData(
-            timestamp = out['timestamp'], 
-            data = out['data'])
-        
-        return readData
+        return json.dumps(out)
         
 
 
@@ -98,35 +93,6 @@ class CommandPassthrough(graphene.Mutation):
         
         return commandStatus
 
-# class ReadPassthrough(graphene.Mutation):
-#     """
-#     Creates mutation for Passthrough Module Commanding
-#     """
-
-#     class Arguments:
-#         module = graphene.String()
-#         count = graphene.Int()
-        
-#     Output = ReadData
-
-#     def mutate(self, info, module, count):
-#         """
-#         Handles request for subsystem query.
-#         """
-#         if module not in MODULES:
-#             raise KeyError('Module not configured',module)
-#         address = MODULES[module]['address']
-#         if address == 0:
-#             raise KeyError('Module not present',module)
-#         mcu = mcu_api.MCU(address = address)
-#         out = mcu.read(count = count)
-        
-#         readData = ReadData(
-#             timestamp = out['timestamp'], 
-#             data = out['data'])
-        
-#         return readData
-
 
 class Mutation(graphene.ObjectType):
     """
@@ -134,6 +100,5 @@ class Mutation(graphene.ObjectType):
     """
 
     commandPassthrough = CommandPassthrough.Field()
-    # readPassthrough = ReadPassthrough.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
