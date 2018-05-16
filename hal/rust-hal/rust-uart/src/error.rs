@@ -23,19 +23,22 @@ pub enum UartError {
     /// Catch-all error case
     #[display(fmt = "Generic Error")]
     GenericError,
-    #[display(fmt = "Serial Error: {}", description)]
-    /// An error was thrown by the serial driver
-    SerialError {
-        /// The underlying error type
-        cause: serial::ErrorKind,
-        /// Error description
-        description: String,
-    },
-    #[display(fmt = "IO Error: {}", description)]
+    /// A read/write call was made while another call was already in-progress
+    #[display(fmt = "Serial port already in-use")]
+    PortBusy,
     /// An I/O error was thrown by the kernel
+    #[display(fmt = "IO Error: {}", description)]
     IoError {
         /// The underlying error type
         cause: std::io::ErrorKind,
+        /// Error description
+        description: String,
+    },
+    /// An error was thrown by the serial driver
+    #[display(fmt = "Serial Error: {}", description)]
+    SerialError {
+        /// The underlying error type
+        cause: serial::ErrorKind,
         /// Error description
         description: String,
     },
