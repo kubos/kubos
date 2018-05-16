@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-use super::*;
-
 pub mod best_xyz;
 pub mod rxstatusevent;
 pub mod version;
@@ -23,7 +21,9 @@ pub mod version;
 pub use self::best_xyz::*;
 pub use self::rxstatusevent::*;
 pub use self::version::*;
+use super::*;
 
+/// Supported log messages
 #[derive(Clone, Debug, PartialEq)]
 pub enum Log {
     BestXYZ(BestXYZLog),
@@ -32,6 +32,7 @@ pub enum Log {
 }
 
 impl Log {
+    /// Convert a raw data buffer into a useable struct
     pub fn new(id: MessageID, raw: Vec<u8>) -> Option<Log> {
         match id {
             MessageID::BestXYZ => match BestXYZLog::new(raw) {

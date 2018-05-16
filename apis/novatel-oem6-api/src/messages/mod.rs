@@ -14,12 +14,11 @@
 // limitations under the License.
 //
 
-use byteorder::{LittleEndian, WriteBytesExt};
-use nom::*;
-
 pub mod commands;
 pub mod logs;
 
+use byteorder::{LittleEndian, WriteBytesExt};
+use nom::*;
 pub use self::commands::*;
 pub use self::logs::*;
 
@@ -58,21 +57,22 @@ impl From<u16> for MessageID {
     }
 }
 
+/// Common header structure for all messages
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Header {
     pub sync: [u8; 3],
     pub hdr_len: u8,
     pub msg_id: MessageID,
-    pub msg_type: u8, //Can probably be hardcoded. Bit fields
+    pub msg_type: u8,
     pub port_addr: u8,
     pub msg_len: u16,
     pub seq: u16,
-    pub idle_time: u8,   //Ignore for TX
-    pub time_status: u8, //TODO: enum?
+    pub idle_time: u8,
+    pub time_status: u8,
     pub week: u16,
     pub ms: i32,
-    pub recv_status: u32, //Ignore for TX
-    pub recv_ver: u16,    //Ignore for TX
+    pub recv_status: u32,
+    pub recv_ver: u16,
 }
 
 impl Header {
@@ -81,14 +81,14 @@ impl Header {
             sync: SYNC,
             hdr_len: HDR_LEN,
             msg_id,
-            msg_type: 0, // Measurement source = Primary antenna, Format = Binary, Response bit = Original message. TODO: Verify
+            msg_type: 0, // Measurement source = Primary antenna, Format = Binary, Response bit = Original message.
             port_addr: Port::ThisPort as u8,
             msg_len,
             seq: 0,         // Always zero. We're only sending the one message
-            idle_time: 0,   // TODO: calculate
-            time_status: 0, // TODO: ...figure out...
-            week: 0,        // TODO: calculate
-            ms: 0,          // TODO: calculate
+            idle_time: 0,   // Ignored for TX
+            time_status: 0, // Ignored for TX
+            week: 0,        // Ignored for TX
+            ms: 0,          // Ignored for TX
             recv_status: 0, // Ignored for TX
             recv_ver: 0,    // Ignored for TX
         }
@@ -126,6 +126,7 @@ impl Message for Header {
     }
 }
 
+/// Device communication ports
 pub enum Port {
     COM1 = 32,
     ThisPort = 192,

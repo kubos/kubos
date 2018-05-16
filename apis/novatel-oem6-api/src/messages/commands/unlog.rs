@@ -18,16 +18,13 @@ use super::*;
 
 pub struct UnlogCmd {
     hdr: Header,
-    port: u32, //Hardcode?
+    port: u32,
     msg_id: u16,
-    msg_type: u8, //Bit field
+    msg_type: u8,
 }
 
 impl UnlogCmd {
-    pub fn new(
-        port: u32, //Hardcode?
-        msg_id: u16,
-    ) -> Self {
+    pub fn new(port: u32, msg_id: u16) -> Self {
         UnlogCmd {
             hdr: Header::new(MessageID::Unlog, 8),
             port,

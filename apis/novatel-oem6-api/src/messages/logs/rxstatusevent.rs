@@ -16,15 +16,21 @@
 
 use nom::*;
 
+/// Event/error log message
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct RxStatusEventLog {
-    pub word: u32, //TODO: enum
+    /// Status word which generated the event
+    pub word: u32,
+    /// Location of the bit in the status word
     pub bit: u32,
-    pub event: u32, //TODO: enum
+    /// Event type
+    pub event: u32,
+    /// Text description of event/error
     pub description: String,
 }
 
 impl RxStatusEventLog {
+    /// Convert a raw data buffer into a useable struct
     pub fn new(raw: Vec<u8>) -> Option<Self> {
         match parse_rxstatusevent(&raw) {
             Ok(conv) => Some(conv.1),
@@ -43,7 +49,8 @@ named!(parse_rxstatusevent(&[u8]) -> RxStatusEventLog,
             word,
             bit,
             event,
-            description: ::std::str::from_utf8(description).unwrap().trim_right_matches('\u{0}').to_owned(),
+            description: ::std::str::from_utf8(description).unwrap()
+                            .trim_right_matches('\u{0}').to_owned(),
             }
         )
     )

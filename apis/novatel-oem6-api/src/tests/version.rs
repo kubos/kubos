@@ -20,6 +20,7 @@
 // function, so can't be explicitly tested.
 
 use super::*;
+use messages::commands::ResponseID;
 
 #[test]
 fn test_request_version_good() {

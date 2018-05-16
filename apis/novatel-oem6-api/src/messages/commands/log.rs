@@ -18,20 +18,20 @@ use super::*;
 
 pub struct LogCmd {
     hdr: Header,
-    port: u32, //Hardcode?
+    port: u32,
     msg_id: u16,
-    msg_type: u8, //Bit field
-    trigger: u32, //enum
+    msg_type: u8,
+    trigger: LogTrigger,
     period: f64,
     offset: f64,
-    hold: bool, //bool...
+    hold: bool,
 }
 
 impl LogCmd {
     pub fn new(
-        port: u32, //Hardcode?
+        port: u32,
         msg_id: u16,
-        trigger: u32, //enum
+        trigger: LogTrigger,
         period: f64,
         offset: f64,
         hold: bool,
@@ -61,7 +61,7 @@ impl Message for LogCmd {
         vec.write_u16::<LittleEndian>(self.msg_id).unwrap();
         vec.push(self.msg_type);
         vec.push(0x00); // Reserved byte
-        vec.write_u32::<LittleEndian>(self.trigger).unwrap();
+        vec.write_u32::<LittleEndian>(self.trigger as u32).unwrap();
         vec.write_f64::<LittleEndian>(self.period).unwrap();
         vec.write_f64::<LittleEndian>(self.offset).unwrap();
         vec.write_u32::<LittleEndian>(self.hold as u32).unwrap();
@@ -70,6 +70,7 @@ impl Message for LogCmd {
     }
 }
 
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum LogTrigger {
     OnNew = 0,
     OnChanged = 1,

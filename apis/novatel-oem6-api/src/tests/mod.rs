@@ -85,7 +85,7 @@ fn test_passthrough_good() {
     assert_eq!(oem.passthrough(&packet), Ok(()));
 }
 
-mod version;
-mod position;
 mod errors;
+mod position;
 mod unlog;
+mod version;

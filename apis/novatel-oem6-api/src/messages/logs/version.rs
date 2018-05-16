@@ -18,13 +18,17 @@ use nom::*;
 
 const COMPONENT_SIZE: usize = 108;
 
+/// Log message containing version information
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct VersionLog {
+    /// Number of components present in this structure
     pub num_components: u32,
+    /// Version information for each component present in the system
     pub components: Vec<Component>,
 }
 
 impl VersionLog {
+    /// Convert a raw data buffer into a useable struct
     pub fn new(mut raw: Vec<u8>) -> Option<Self> {
         let raw_comp = raw.split_off(4);
 
@@ -44,15 +48,24 @@ impl VersionLog {
     }
 }
 
+/// Version information about a specific system component
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct Component {
-    pub comp_type: u32, //TODO: enum
+    /// The component type which the version info is about
+    pub comp_type: u32,
+    /// Model number
     pub model: String,
+    /// Serial number
     pub serial_num: String,
+    /// Hardware version
     pub hw_version: String,
+    /// Software version
     pub sw_version: String,
+    /// Boot code version
     pub boot_version: String,
+    /// Software compilation date stamp
     pub compile_date: String,
+    /// Software compilation time stamp
     pub compile_time: String,
 }
 
@@ -68,13 +81,20 @@ named!(parse_component(&[u8]) -> Component,
         compile_time: take!(12) >>
         (Component {
             comp_type,
-            model: ::std::str::from_utf8(model).unwrap().trim_right_matches('\u{0}').to_owned(),
-            serial_num: ::std::str::from_utf8(serial_num).unwrap().trim_right_matches('\u{0}').to_owned(),
-            hw_version: ::std::str::from_utf8(hw_version).unwrap().trim_right_matches('\u{0}').to_owned(),
-            sw_version: ::std::str::from_utf8(sw_version).unwrap().trim_right_matches('\u{0}').to_owned(),
-            boot_version: ::std::str::from_utf8(boot_version).unwrap().trim_right_matches('\u{0}').to_owned(),
-            compile_date: ::std::str::from_utf8(compile_date).unwrap().trim_right_matches('\u{0}').to_owned(),
-            compile_time: ::std::str::from_utf8(compile_time).unwrap().trim_right_matches('\u{0}').to_owned(),
+            model: ::std::str::from_utf8(model).unwrap()
+                            .trim_right_matches('\u{0}').to_owned(),
+            serial_num: ::std::str::from_utf8(serial_num).unwrap()
+                            .trim_right_matches('\u{0}').to_owned(),
+            hw_version: ::std::str::from_utf8(hw_version).unwrap()
+                            .trim_right_matches('\u{0}').to_owned(),
+            sw_version: ::std::str::from_utf8(sw_version).unwrap()
+                            .trim_right_matches('\u{0}').to_owned(),
+            boot_version: ::std::str::from_utf8(boot_version).unwrap()
+                            .trim_right_matches('\u{0}').to_owned(),
+            compile_date: ::std::str::from_utf8(compile_date).unwrap()
+                            .trim_right_matches('\u{0}').to_owned(),
+            compile_time: ::std::str::from_utf8(compile_time).unwrap()
+                            .trim_right_matches('\u{0}').to_owned(),
             }
         )
     )

@@ -16,32 +16,52 @@
 
 use nom::*;
 
+/// Log message containing position information
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct BestXYZLog {
-    pub pos_status: u32, //TODO: enum
-    pub pos_type: u32,   //TODO: enum
+    /// Position solution status
+    pub pos_status: u32,
+    /// Position type
+    pub pos_type: u32,
+    /// Position coordinates {X, Y, Z} (m)
     pub position: [f64; 3],
+    /// Standard deviation of position coordinates {X, Y, Z} (m)
     pub pos_deviation: [f32; 3],
+    /// Velocity solution status
     pub vel_status: u32,
+    /// Velocity type
     pub vel_type: u32,
+    /// Velocity vector along {X, Y, Z}-axis (m/s)
     pub velocity: [f64; 3],
+    /// Standard deviation of velocity vector along {X, Y, Z}-axis (m/s)
     pub vel_deviation: [f32; 3],
+    /// Base station ID
     pub station_id: String,
+    /// Latency of the velocity time tag
     pub vel_time_latency: f32,
+    /// Differential age (seconds)
     pub diff_age: f32,
+    /// Solution age (seconds)
     pub sol_age: f32,
+    /// Number of satellites tracked
     pub num_sats: u8,
+    /// Number of satellite vehicles used in solution
     pub num_sat_vehicles: u8,
+    /// Number of GPS plus GLONASS plus BDS L1/B1 used in solution
     pub num_gg_l1: u8,
+    /// Number of satellites with L1/E1/B1 signals used in solution
     pub num_multi_sats: u8,
+    /// Extended solution status
     pub ext_sol_stat: u8,
+    /// Galileo and BeiDou signals used mask
     pub gal_beidou_sig: u8,
+    /// GPS and GLONASS signals used mask
     pub gps_glonass_sig: u8,
 }
 
 impl BestXYZLog {
+    /// Convert a raw data buffer into a useable struct
     pub fn new(raw: Vec<u8>) -> Option<Self> {
-        // Convert the raw data to an official struct
         match parse_bestxyz(&raw) {
             Ok(conv) => Some(conv.1),
             _ => None,
@@ -88,7 +108,8 @@ named!(parse_bestxyz(&[u8]) -> BestXYZLog,
             vel_type,
             velocity: [vel_x, vel_y, vel_z],
             vel_deviation: [vel_dev_x, vel_dev_y, vel_dev_z],
-            station_id: ::std::str::from_utf8(station_id).unwrap().trim_right_matches('\u{0}').to_owned(),
+            station_id: ::std::str::from_utf8(station_id).unwrap()
+                            .trim_right_matches('\u{0}').to_owned(),
             vel_time_latency,
             diff_age,
             sol_age,

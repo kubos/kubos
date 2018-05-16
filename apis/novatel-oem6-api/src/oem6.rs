@@ -32,6 +32,41 @@ const STOP_BITS: serial::StopBits = serial::Stop1;
 const FLOW_CONTROL: serial::FlowControl = serial::FlowNone;
 const TIMEOUT: Duration = Duration::from_millis(60);
 
+/// Continually read messages from the OEM6 device
+///
+/// Messages will either be a response to a previously sent command,
+/// or a log message. The function will detect the type and then forward
+/// the message to the appropriate channel receiver.
+///
+/// # Arguments
+///
+/// * rx_conn - UART connection stream to use for communication
+/// * log_send - SyncSender for forwarding received log messages
+/// * response_send - SyncSender for forwarding recieved response messages
+///
+/// # Examples
+///
+/// ```
+/// use novatel_oem6_api::*;
+/// use std::thread;
+/// use std::sync::mpsc::sync_channel;
+///
+/// # fn func() -> OEMResult<()> {
+/// let bus = "/dev/ttyS5";
+///
+/// let (log_send, log_recv) = sync_channel(5);
+/// let (response_send, response_recv) = sync_channel(5);
+///
+/// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+///
+/// let rx_conn = oem.conn.clone();
+///
+/// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+/// # Ok(())
+/// # }
+/// ```
+///
+
 pub fn read_thread(
     rx_conn: Arc<Mutex<Connection>>,
     log_send: SyncSender<(Header, Vec<u8>)>,
@@ -45,11 +80,18 @@ pub fn read_thread(
             let conn = rx_conn.lock().unwrap();
             let mut message = match conn.read(3, Duration::from_secs(2)) {
                 Ok(v) => v,
-                Err(_err) => continue, //TODO: actual error handling. Loop on timeout
+                Err(err) => match err {
+                    #[cfg(test)]
+                    UartError::GenericError => continue,
+                    UartError::IoError {
+                        cause: ::std::io::ErrorKind::TimedOut,
+                        description: _,
+                    } => continue,
+                    _ => panic!(err),
+                },
             };
 
             if message != SYNC {
-                println!("SYNC mismatch: {:?} {:?}", message, SYNC);
                 continue;
             }
 
@@ -59,7 +101,6 @@ pub fn read_thread(
             let hdr = match Header::parse(&message) {
                 Some(v) => v,
                 None => {
-                    println!("failed to parse header");
                     continue;
                 }
             };
@@ -77,8 +118,6 @@ pub fn read_thread(
             // Verify CRC
             let calc = calc_crc(&message);
             if calc != crc {
-                // TODO: remove debugging line
-                println!("CRC Mismatch: {:X} {:X}", calc, crc);
                 continue;
             }
 
@@ -96,7 +135,9 @@ pub fn read_thread(
 pub struct OEM6 {
     /// Device connection structure
     pub conn: Arc<Mutex<Connection>>,
+    /// Channel for receiving log messages
     pub log_recv: Receiver<(Header, Vec<u8>)>,
+    /// Channel for receiveing response messages
     pub response_recv: Receiver<(Header, Vec<u8>)>,
 }
 
@@ -147,7 +188,7 @@ impl OEM6 {
         let request = LogCmd::new(
             Port::COM1 as u32,
             MessageID::Version as u16,
-            LogTrigger::Once as u32,
+            LogTrigger::Once,
             0.0,
             0.0,
             false,
@@ -180,7 +221,7 @@ impl OEM6 {
         let request = LogCmd::new(
             Port::COM1 as u32,
             MessageID::BestXYZ as u16,
-            trigger as u32,
+            trigger,
             interval,
             offset,
             hold,
@@ -207,7 +248,7 @@ impl OEM6 {
         let request = LogCmd::new(
             Port::COM1 as u32,
             MessageID::RxStatusEvent as u16,
-            LogTrigger::OnChanged as u32,
+            LogTrigger::OnChanged,
             0.0,
             0.0,
             false,
@@ -220,6 +261,16 @@ impl OEM6 {
         self.get_response(MessageID::Log)
     }
 
+    /// Request that automatic logging for a particular log type be stopped
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// [`MAIError`]: enum.MAIError.html
     pub fn request_unlog(&self, id: MessageID) -> OEMResult<()> {
         let request = UnlogCmd::new(Port::COM1 as u32, id as u16);
 
@@ -230,6 +281,16 @@ impl OEM6 {
         self.get_response(MessageID::Unlog)
     }
 
+    /// Request that all automatic logging be stopped
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// [`MAIError`]: enum.MAIError.html
     pub fn request_unlog_all(&self, hold: bool) -> OEMResult<()> {
         let request = UnlogAllCmd::new(Port::COM1 as u32, hold);
 
@@ -271,8 +332,6 @@ impl OEM6 {
         Ok(self.conn.lock().unwrap().write(raw.as_slice())?)
     }
 
-    // TODO: how to deal with async log messages being interspersed?
-    // Probably set up a read thread with two channels: one for responses and one for logs
     fn get_response(&self, id: MessageID) -> OEMResult<()> {
         println!("Waiting for response");
         let (hdr, body) = self.response_recv
@@ -311,24 +370,32 @@ impl OEM6 {
         Ok(())
     }
 
+    /// Fetch a log message from the OEM6 read thread
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, an [`MAIError`] variant will be returned.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// [`MAIError`]: enum.MAIError.html
     pub fn get_log(&self) -> OEMResult<Log> {
-        println!("Waiting for log");
-        let (hdr, body) = self.log_recv.recv_timeout(Duration::from_secs(5)).unwrap();
-        println!("Got log");
+        loop {
+            let (hdr, body) = self.log_recv.recv_timeout(Duration::from_secs(5)).unwrap();
 
-        // Make sure it's not a response message
-        if hdr.msg_type & 0x80 == 0x80 {
-            println!("Response bit not set");
-            throw!(OEMError::GenericError);
-        }
-
-        match Log::new(hdr.msg_id, body) {
-            Some(v) => return Ok(v),
-            None => {
-                println!("failed to parse response");
-                throw!(OEMError::GenericError);
+            // Make sure it's not a response message
+            if hdr.msg_type & 0x80 == 0x80 {
+                continue;;
             }
-        };
+
+            match Log::new(hdr.msg_id, body) {
+                Some(v) => return Ok(v),
+                None => {
+                    continue;
+                }
+            };
+        }
     }
 }
 
@@ -349,6 +416,7 @@ pub enum OEMError {
     CommandError {
         /// The underlying error
         id: ResponseID,
+        /// Description of error encountered
         description: String,
     },
     /// Received a valid message, but the message ID doesn't match any known message type
@@ -357,9 +425,10 @@ pub enum OEMError {
         /// ID of message received
         id: u16,
     },
+    /// An error was thrown by the serial communication driver
     #[display(fmt = "{}", cause)]
-    /// An error was thrown by the serial driver
     UartError {
+        /// The underlying error
         #[fail(cause)]
         cause: UartError,
     },

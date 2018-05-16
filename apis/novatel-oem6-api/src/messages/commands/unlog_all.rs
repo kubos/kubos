@@ -18,15 +18,12 @@ use super::*;
 
 pub struct UnlogAllCmd {
     hdr: Header,
-    port: u32, //Hardcode?
+    port: u32,
     hold: bool,
 }
 
 impl UnlogAllCmd {
-    pub fn new(
-        port: u32, //Hardcode?
-        hold: bool,
-    ) -> Self {
+    pub fn new(port: u32, hold: bool) -> Self {
         UnlogAllCmd {
             hdr: Header::new(MessageID::UnlogAll, 8),
             port,

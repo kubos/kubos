@@ -15,6 +15,7 @@
 //
 
 use super::*;
+use messages::MessageID;
 
 #[test]
 fn test_unlog() {

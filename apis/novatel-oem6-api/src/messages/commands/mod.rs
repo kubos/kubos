@@ -17,9 +17,9 @@
 use super::*;
 use byteorder::LittleEndian;
 
-pub mod log;
-pub mod unlog;
-pub mod unlog_all;
+mod log;
+mod unlog;
+mod unlog_all;
 
 pub use self::log::*;
 pub use self::unlog::*;
@@ -36,19 +36,17 @@ pub struct Response {
 }
 
 impl Response {
-    /// Constructor. Converts a raw data array received from the OEM6 into a usable structure
     pub fn new(msg: Vec<u8>) -> Option<Self> {
-        // Convert the raw data to an official struct
         match le_u32(&msg) {
             Ok(conv) => {
                 let mut resp: Response = Response {
+                    // Convert the bytes we just read into the response ID
                     resp_id: conv.1.into(),
                     resp_string: "".to_owned(),
                 };
 
-                for elem in conv.0 {
-                    resp.resp_string.push(*elem as char);
-                }
+                // Add the actual response message
+                resp.resp_string.push_str(&String::from_utf8_lossy(&conv.0));
 
                 Some(resp)
             }
