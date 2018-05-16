@@ -29,7 +29,7 @@ class Query(graphene.ObjectType):
     module = graphene.String()
     count = graphene.Int()
 
-    def read(self, module, count):
+    def read(self, info, module, count):
         """
         Handles request for subsystem query.
         """
@@ -53,13 +53,13 @@ class Passthrough(graphene.Mutation):
         
     Output = CommandStatus
 
-    def mutate(self, module, command):
+    def mutate(self, info, module, command):
         """
         Handles passthrough commands to the Pumpkin MCU modules. 
         """
-        # address = MODULES[module]['address']
-        # mcu = mcu_api.MCU(address = address)
-        # out = mcu.write(command)
+        address = MODULES[module]['address']
+        mcu = mcu_api.MCU(address = address)
+        out = mcu.write(command)
         
         commandStatus = CommandStatus(status = True, command = "heythere")
         
