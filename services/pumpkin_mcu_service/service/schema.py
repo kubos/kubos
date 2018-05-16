@@ -9,6 +9,7 @@ Graphene schema setup to enable queries.
 """
 
 import graphene
+import json
 from models import *
 
 from pumpkin_mcu_api import mcu_api
@@ -26,14 +27,11 @@ class Query(graphene.ObjectType):
     Creates query endpoints exposed by graphene.
     """
     
-    mcuTelemetry = graphene.TelemetryArguments(
+    mcuTelemetry = graphene.JSONString(
         module=graphene.String(),
-        field=graphene.String())
-    hello = graphene.String(name=graphene.String(default_value="stranger"))
-
-    def resolve_hello(self, info, name):
-        return 'Hello ' + name
-    def resolve_mcuTelemetry(self, info, module, field):
+        fields=graphene.List(graphene.String,default_value = ["all"]))
+        
+    def resolve_mcuTelemetry(self, info, module, fields):
         """
         Handles request for subsystem query.
         """
@@ -42,15 +40,14 @@ class Query(graphene.ObjectType):
         address = MODULES[module]['address']
         if address == 0:
             raise ValueError('Module not present',module)
-        if type(field) == unicode: field = str(field)
-        mcu = mcu_api.MCU(address = address)
-        out = mcu.get_module_telemetry(module = module,fields = [field])
+        fields = map(str,fields)
+        #mcu = mcu_api.MCU(address = address)
+        #out = mcu.get_module_telemetry(module = module,fields = fields)
+        out = {'field1':{'timestamp':1.2,'data':'modulename'},
+            'field2':{'timestamp':1.3,'data':56},
+            'field3':{'timestamp':1.4,'data':-35.46}}
         
-        readData = ReadData(
-            timestamp = out[field]['timestamp'], 
-            data = out[field]['data'])
-        
-        return readData
+        return json.dumps(out)
 
 
 class CommandPassthrough(graphene.Mutation):

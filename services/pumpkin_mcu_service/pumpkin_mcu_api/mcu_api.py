@@ -60,8 +60,8 @@ class MCU:
         data = data[HEADER_SIZE:] # telemetry data
         return {'timestamp':timestamp,'data':data} 
     
-    def get_sup_telemetry(self,fields=None):
-        if fields is None:
+    def get_sup_telemetry(self,fields=["all"]):
+        if fields is ["all"]:
             requests = TELEMETRY['supervisor']
         elif fields is list:
             requests = {}
@@ -76,30 +76,30 @@ class MCU:
         
         return self.get_telemetry(requests)
         
-    def get_module_telemetry(self,module,fields=None):
+    def get_module_telemetry(self,module,fields=["all"]):
         if module not in TELEMETRY: 
             raise KeyError(
                 'Module name: '+str(module)+' not found in mcu_config file.'
                 )
-        if type(fields) != list and fields != None: 
+        if type(fields) != list: 
             raise TypeError(
                 'fields argument must be a list of strings.'
                 )
                 
         module_telem = TELEMETRY[module]
         supervisor_telem = TELEMETRY['supervisor']
-        if fields != None:
+        if fields != ["all"]:
             for field in fields:
                 if field not in module_telem or \
                    field not in supervisor_telem or \
                    type(field) != str:
                     raise ValueError('Invalid field: '+str(field))
                 
-        if fields is None:
+        if fields is ["all"]:
             # Pulling all info
             requests = module_telem
             requests.update(supervisor_telem)
-        elif fields is list:
+        else:
             requests = {}
             for field in fields:
                 if field in module_telem:
