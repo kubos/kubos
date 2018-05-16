@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-pub mod best_xyz;
-pub mod rxstatusevent;
-pub mod version;
+mod best_xyz;
+mod rxstatusevent;
+mod version;
 
 pub use self::best_xyz::*;
 pub use self::rxstatusevent::*;
@@ -26,8 +26,11 @@ use super::*;
 /// Supported log messages
 #[derive(Clone, Debug, PartialEq)]
 pub enum Log {
+    /// Best available position and velocity in ECEF coordinates
     BestXYZ(BestXYZLog),
+    /// Event and/or error message
     RxStatusEvent(RxStatusEventLog),
+    /// System version information
     Version(VersionLog),
 }
 

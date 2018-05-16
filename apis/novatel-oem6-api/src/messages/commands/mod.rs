@@ -55,45 +55,87 @@ impl Response {
     }
 }
 
+/// Response values returned after sending a command to the device
 #[derive(Clone, Debug, PartialEq)]
 pub enum ResponseID {
+    /// Command was received correctly
     Ok = 1,
+    /// Requested log type does not exist
     LogInvalid = 2,
+    /// The request has exceeded some (unspecified) limit
     OutOfResources = 3,
+    /// Data packet is not verified
     PacketNotVerified = 4,
+    /// Command was attempted, but failed
     CommandFailed = 5,
+    /// Input message ID is not valid
     InvalidID = 6,
+    /// An input field was invalid. See the `Response` structure's `resp_string` field for
+    /// information about the specific field that caused the error.
     InvalidField = 7,
+    /// The checksum of the sent message was invalid
     InvalidChecksum = 8,
+    /// A field is missing from the sent message
     MissingField = 9,
+    /// An input field contains more array elements than allowed. See the `Response` structure's
+    /// `resp_string` field for information about the specific field that caused the error.
     ArrayOverflow = 10,
+    /// An input field's value is outside acceptable limits. See the `Response` structure's
+    /// `resp_string` field for information about the specific field that caused the error.
     ErrorField = 11,
+    /// The requested trigger type is invalid for the requested log type
     InvalidTrigger = 14,
+    /// Too many authcodes are stored in the receiver. The receiver firmware must be reloaded
     AuthcodeOverflow = 15,
+    /// This error is related to the inputting of authcodes. Indicates the date attached to the code is not valid
     InvalidDate = 16,
+    /// The authcode entered is not valid
     InvalidAuthcode = 17,
+    /// The model requested for removal does not exist
     NoModel = 18,
+    /// The model attached to the authcode is not valid
     InvalidModel = 19,
+    /// The selected channel is invalid
     InvalidChannel = 20,
+    /// The requested rate is invalid
     InvalidRate = 21,
+    /// The word has no mask for this type of log
     NoMask = 22,
+    /// Channels are locked due to an error
     LockedChannels = 23,
+    /// The injected time is invalid
     InvalidTime = 24,
+    /// The COM/USB port is not supported
     InvalidPort = 25,
+    /// The sent message is invalid
     InvalidMessage = 26,
+    /// The PRN is invalid
     InvalidPRN = 27,
+    /// The PRN is not locked out
     PRNNotLocked = 28,
+    /// The PRN lockout list is full
     PRNLockoutOverflow = 29,
+    /// The PRN is already locked out
     PRNAlreadyLocked = 30,
+    /// Message timed out
     Timeout = 31,
+    /// Unknown COM/USB port requested
     UnknownPort = 33,
+    /// Hex string not formatted correctly
     BadHex = 34,
+    /// The baud rate is invalid
     InvalidBaud = 35,
+    /// The sent message is invalid for this model of receiver
     ModelInvalidMessage = 36,
+    /// Command is only valid if NVM is in fail mode
     RequiresFailMode = 40,
+    /// The offset is invalid
     InvalidOffset = 41,
+    /// The maximum number of user messages has been reached
     MessageOverflow = 78,
+    /// GPS precise time is already known
     PreciseTimeAlreadyKnown = 84,
+    /// Catch-all value for unknown response IDs
     Unknown,
 }
 

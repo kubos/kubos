@@ -24,7 +24,7 @@
 //!
 //! [`MAI400`]: struct.MAI400.html
 
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 //Need a higher recursion limit for nom when parsing larger (>60 bytes) structures
 #![recursion_limit = "256"]
 
@@ -44,7 +44,8 @@ mod oem6;
 #[cfg(test)]
 mod tests;
 
-pub use messages::logs::*;
+pub use messages::MessageID;
 pub use messages::commands::ResponseID;
+pub use messages::logs::*;
 pub use oem6::*;
 pub use serial::BaudRate;

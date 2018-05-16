@@ -33,7 +33,12 @@ impl VersionLog {
         let raw_comp = raw.split_off(4);
 
         let mut log = VersionLog {
-            num_components: le_u32(&raw).unwrap().1,
+            num_components: {
+                match le_u32(&raw) {
+                    Ok(v) => v.1,
+                    Err(_) => return None,
+                }
+            },
             components: vec![],
         };
 
@@ -81,20 +86,13 @@ named!(parse_component(&[u8]) -> Component,
         compile_time: take!(12) >>
         (Component {
             comp_type,
-            model: ::std::str::from_utf8(model).unwrap()
-                            .trim_right_matches('\u{0}').to_owned(),
-            serial_num: ::std::str::from_utf8(serial_num).unwrap()
-                            .trim_right_matches('\u{0}').to_owned(),
-            hw_version: ::std::str::from_utf8(hw_version).unwrap()
-                            .trim_right_matches('\u{0}').to_owned(),
-            sw_version: ::std::str::from_utf8(sw_version).unwrap()
-                            .trim_right_matches('\u{0}').to_owned(),
-            boot_version: ::std::str::from_utf8(boot_version).unwrap()
-                            .trim_right_matches('\u{0}').to_owned(),
-            compile_date: ::std::str::from_utf8(compile_date).unwrap()
-                            .trim_right_matches('\u{0}').to_owned(),
-            compile_time: ::std::str::from_utf8(compile_time).unwrap()
-                            .trim_right_matches('\u{0}').to_owned(),
+            model: String::from_utf8_lossy(model).trim_right_matches('\u{0}').to_owned(),
+            serial_num: String::from_utf8_lossy(serial_num).trim_right_matches('\u{0}').to_owned(),
+            hw_version: String::from_utf8_lossy(hw_version).trim_right_matches('\u{0}').to_owned(),
+            sw_version: String::from_utf8_lossy(sw_version).trim_right_matches('\u{0}').to_owned(),
+            boot_version: String::from_utf8_lossy(boot_version).trim_right_matches('\u{0}').to_owned(),
+            compile_date: String::from_utf8_lossy(compile_date).trim_right_matches('\u{0}').to_owned(),
+            compile_time: String::from_utf8_lossy(compile_time).trim_right_matches('\u{0}').to_owned(),
             }
         )
     )

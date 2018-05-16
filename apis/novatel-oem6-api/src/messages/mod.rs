@@ -24,16 +24,23 @@ pub use self::logs::*;
 
 pub const SYNC: [u8; 3] = [0xAA, 0x44, 0x12];
 pub const HDR_LEN: u8 = 28;
-pub const RESP_HDR_LEN: u8 = HDR_LEN + 4;
 
+/// Supported message types
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum MessageID {
+    /// Log command message
     Log = 1,
+    /// Unlog command message
     Unlog = 36,
+    /// Unlog all command message
     UnlogAll = 38,
+    /// Version data log
     Version = 37,
+    /// RX status event data log
     RxStatusEvent = 94,
+    /// Best XYZ position/velocity data log
     BestXYZ = 241,
+    /// Catch-all value for received messages with an unknown ID
     Unknown,
 }
 
@@ -95,7 +102,6 @@ impl Header {
     }
 
     pub fn parse(raw: &Vec<u8>) -> Option<Self> {
-        // Convert the raw data to an official struct
         match parse_header(raw) {
             Ok(conv) => Some(conv.1),
             _ => None,

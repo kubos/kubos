@@ -20,9 +20,8 @@ use messages::*;
 use nom;
 use rust_uart::UartError;
 use rust_uart::*;
-//use std::io;
 use serial;
-use std::sync::mpsc::{Receiver, SyncSender};
+use std::sync::mpsc::{Receiver, RecvTimeoutError, SyncSender, TrySendError};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -72,13 +71,21 @@ pub fn read_thread(
     log_send: SyncSender<(Header, Vec<u8>)>,
     response_send: SyncSender<(Header, Vec<u8>)>,
 ) {
-    //TODO: try_lock? or just error handling
+    let mut log_err = false;
+    let mut response_err = false;
 
     loop {
         {
+            // Take the stream connection mutex
+            // If the lock() call fails, it means that a different thread poisoned
+            // the mutex. We want to maintain our ability to read messages from the
+            // device for as long as possible, so we'll go ahead and just ignore the
+            // poisoned status. Ideally, the master thread will have detected whatever
+            // error caused the problem and will take error handling measures.
+            let conn = rx_conn.lock().unwrap_or_else(|err| err.into_inner());
+
             // Read SYNC bytes
-            let conn = rx_conn.lock().unwrap();
-            let mut message = match conn.read(3, Duration::from_secs(2)) {
+            let mut message = match conn.read(3, Duration::from_millis(500)) {
                 Ok(v) => v,
                 Err(err) => match err {
                     #[cfg(test)]
@@ -96,7 +103,17 @@ pub fn read_thread(
             }
 
             // Read the rest of the header
-            message.append(&mut conn.read(25, TIMEOUT).unwrap());
+            let mut hdr = match conn.read(25, TIMEOUT) {
+                Ok(v) => v,
+                Err(err) => match err {
+                    UartError::IoError {
+                        cause: ::std::io::ErrorKind::TimedOut,
+                        description: _,
+                    } => continue,
+                    _ => panic!(err),
+                },
+            };
+            message.append(&mut hdr);
 
             let hdr = match Header::parse(&message) {
                 Some(v) => v,
@@ -106,7 +123,17 @@ pub fn read_thread(
             };
 
             // Read body + CRC bytes
-            message.append(&mut conn.read((hdr.msg_len + 4) as usize, TIMEOUT).unwrap());
+            let mut body = match conn.read((hdr.msg_len + 4) as usize, TIMEOUT) {
+                Ok(v) => v,
+                Err(err) => match err {
+                    UartError::IoError {
+                        cause: ::std::io::ErrorKind::TimedOut,
+                        description: _,
+                    } => continue,
+                    _ => panic!(err),
+                },
+            };
+            message.append(&mut body);
 
             let len = message.len();
 
@@ -124,9 +151,36 @@ pub fn read_thread(
             let body = message.split_off(HDR_LEN.into());
 
             match hdr.msg_type & 0x80 == 0x80 {
-                true => response_send.try_send((hdr, body)).unwrap(),
-                false => log_send.try_send((hdr, body)).unwrap(),
-            }
+                true => response_send
+                    .try_send((hdr, body))
+                    .or_else::<TrySendError<(Header, Vec<u8>)>, _>(|err| match err {
+                        // Our buffer is full, but the receiver should still be alive, so let's keep going
+                        TrySendError::Full(_) => Ok(()),
+                        // The receiver is gone. If both receivers are gone, then there's no point in this
+                        // loop still trying
+                        TrySendError::Disconnected(_) => {
+                            if log_err {
+                                panic!()
+                            }
+                            response_err = true;
+                            Ok(())
+                        }
+                    })
+                    .unwrap(),
+                false => log_send
+                    .try_send((hdr, body))
+                    .or_else::<TrySendError<(Header, Vec<u8>)>, _>(|err| match err {
+                        TrySendError::Full(_) => Ok(()),
+                        TrySendError::Disconnected(_) => {
+                            if response_err {
+                                panic!()
+                            }
+                            log_err = true;
+                            Ok(())
+                        }
+                    })
+                    .unwrap(),
+            };
         }
     }
 }
@@ -316,9 +370,16 @@ impl OEM6 {
     ///
     /// [`OEMError`]: enum.OEMError.html
     pub fn passthrough(&self, msg: &[u8]) -> OEMResult<()> {
-        // TODO: get_response()?
-        println!("Passthrough taking lock");
-        Ok(self.conn.lock().unwrap().write(msg)?)
+        // If the mutex has been poisoned by the read thread,
+        // go ahead and attempt the write anyways, to try to
+        // preserve functionality, but inform the caller afterwards
+        match self.conn.lock() {
+            Ok(conn) => conn.write(msg).map_err(|err| err.into()),
+            Err(conn) => conn.into_inner()
+                .write(msg)
+                .map_err(|err| err.into())
+                .and(Err(OEMError::ThreadCommError)),
+        }
     }
 
     fn send_message<T: Message>(&self, msg: T) -> OEMResult<()> {
@@ -328,39 +389,40 @@ impl OEM6 {
         let crc = calc_crc(&raw);
         raw.write_u32::<LittleEndian>(crc).unwrap();
 
-        println!("Send message taking lock");
-        Ok(self.conn.lock().unwrap().write(raw.as_slice())?)
+        // If the mutex has been poisoned by the read thread,
+        // go ahead and attempt the write anyways, to try to
+        // preserve functionality, but inform the caller afterwards
+        match self.conn.lock() {
+            Ok(conn) => conn.write(raw.as_slice()).map_err(|err| err.into()),
+            Err(conn) => conn.into_inner()
+                .write(raw.as_slice())
+                .map_err(|err| err.into())
+                .and(Err(OEMError::ThreadCommError)),
+        }
     }
 
     fn get_response(&self, id: MessageID) -> OEMResult<()> {
-        println!("Waiting for response");
         let (hdr, body) = self.response_recv
             .recv_timeout(Duration::from_millis(500))
             .map_err(|_| OEMError::NoResponse)?;
 
-        println!("Got response");
-
         // Make sure we got specifically a response message
         if hdr.msg_type & 0x80 != 0x80 {
-            println!("Response bit not set");
             throw!(OEMError::NoResponse);
         }
 
         let resp = match Response::new(body) {
             Some(v) => v,
             None => {
-                println!("failed to parse response");
                 throw!(OEMError::NoResponse);
             }
         };
 
         if hdr.msg_id != id {
-            println!("ID mismatch: {:?} {:?}", hdr.msg_id, id);
             throw!(OEMError::ResponseMismatch);
         }
 
         if resp.resp_id != ResponseID::Ok {
-            println!("Error response: {:?} {}", resp.resp_id, resp.resp_string);
             throw!(OEMError::CommandError {
                 id: resp.resp_id,
                 description: resp.resp_string.clone(),
@@ -382,11 +444,15 @@ impl OEM6 {
     /// [`MAIError`]: enum.MAIError.html
     pub fn get_log(&self) -> OEMResult<Log> {
         loop {
-            let (hdr, body) = self.log_recv.recv_timeout(Duration::from_secs(5)).unwrap();
+            let (hdr, body) = match self.log_recv.recv_timeout(Duration::from_secs(5)) {
+                Ok(v) => v,
+                Err(RecvTimeoutError::Timeout) => continue,
+                Err(RecvTimeoutError::Disconnected) => throw!(OEMError::ThreadCommError),
+            };
 
             // Make sure it's not a response message
             if hdr.msg_type & 0x80 == 0x80 {
-                continue;;
+                continue;
             }
 
             match Log::new(hdr.msg_id, body) {
@@ -406,11 +472,14 @@ pub enum OEMError {
     #[display(fmt = "Generic Error")]
     GenericError,
     /// A response message was received, but the ID doesn't match the command that was sent
-    #[display(fmt = "Response ID Mistmatch")]
+    #[display(fmt = "Response ID Mismatch")]
     ResponseMismatch,
     /// A command was sent, but we were unable to get the response
     #[display(fmt = "Failed to get command response")]
     NoResponse,
+    /// The thread reading messages from the device is no longer working
+    #[display(fmt = "Failed to communicate with read thread")]
+    ThreadCommError,
     /// A response was recieved and indicates an error with the previously sent command
     #[display(fmt = "Command Error({:?}): {}", id, description)]
     CommandError {
