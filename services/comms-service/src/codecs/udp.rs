@@ -41,7 +41,7 @@ fn check(source: u16, dest: u16, len: u16, data: &[u8]) -> Result<u32, String> {
 pub fn encode(packet: &UdpData) -> Result<Vec<u8>, String> {
     let mut data: Vec<u8> = vec![];
 
-    let len = packet.data.len() as u16;
+    let len = (packet.data.len() as u16) + 8;
     let checksum = check(packet.source, packet.dest, len, &packet.data)?;
 
     // Source
@@ -211,7 +211,7 @@ mod tests {
     fn test_encode_framed_decode() {
         let data = UdpData {
             source: 7000,
-            dest: 70001,
+            dest: 7001,
             data: vec![0, 130, 26, 0, 3, 129, 131, 245],
             checksum: true,
         };
@@ -223,11 +223,11 @@ mod tests {
     }
 
     #[test]
-    fn test_encode_framed_decode_test_data() {
+    fn test_encode_framed_decode_single() {
         let data = UdpData {
             source: 7000,
-            dest: 70001,
-            data: vec![0, 130, 26, 0, 7, 116, 65, 245],
+            dest: 7001,
+            data: vec![0],
             checksum: true,
         };
         let encoded = encode(&data).unwrap();
