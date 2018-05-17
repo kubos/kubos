@@ -1,26 +1,73 @@
+#[macro_use]
+extern crate nom;
+
 extern crate nsl_duplex_d2;
 
 use nsl_duplex_d2::DuplexD2;
-use nsl_duplex_d2::serial_connection;
 use nsl_duplex_d2::File;
+use nsl_duplex_d2::serial_connection;
+
+use std::thread;
+use std::time::Duration;
+
+mod codecs;
+mod transports;
+
+use codecs::kiss;
+use codecs::udp;
+use std::io::{self, Write};
+use transports::*;
+
+use std::net::{SocketAddr, UdpSocket};
 
 fn main() {
-    let radio = DuplexD2::new(serial_connection());
+    let radio_transport = nsl_serial::Transport::new();
+    let pressure = 0;
 
-    let count = radio.get_uploaded_file_count().unwrap();
-    println!("Count {:?}", count);
+    loop {
+        print!(".");
+        io::stdout().flush().unwrap();
 
-    if count != 0 {
-        let file = radio.get_uploaded_file().unwrap();
-        println!("File name: {}", file.name);
-        println!("File data: {:?}", file.body);
+        match radio_transport.read() {
+            Ok(data) => match data {
+                Some(packet) => {
+                    // use udp packet here
+                    let mut socket =
+                        UdpSocket::bind(format!("127.0.0.1:{}", packet.source)).unwrap();
+
+                    let dest = SocketAddr::from(([127, 0, 0, 1], packet.dest));
+
+                    socket.send_to(&packet.data, &dest);
+
+                    thread::sleep(Duration::from_millis(100));
+
+                    let mut buf = vec![0u8; 1024];
+                    let (amt, src) = socket.recv_from(&mut buf).unwrap();
+                    let pressure = pressure + 1;
+                    if pressure == 2 {
+                        print!("pause");
+                        socket.send_to(&vec![0x01], src);
+                    }
+                    println!("Received from {:?}\n{:?}", src, &buf[0..amt]);
+                    println!(
+                        "Sending over radio {:?}",
+                        radio_transport.write(udp::UdpData {
+                            source: packet.dest,
+                            dest: packet.source,
+                            data: buf[0..amt].to_vec(),
+                            checksum: false,
+                        })
+                    );
+                    let pressure = pressure - 1;
+                    if pressure == 1 {
+                        print!("resume");
+                        socket.send_to(&vec![0x02], src);
+                    }
+                }
+                None => (),
+            },
+            Err(e) => println!("Read err {:?}", e),
+        };
+        thread::sleep(Duration::from_millis(500));
     }
-
-    println!("Sending file");
-    let send_file = File {
-        name: String::from("test.txt"),
-        body: b"Hello from kubos\n".to_vec(),
-    };
-    let res = radio.put_download_file(&send_file).unwrap();
-    println!("Result {}", res);
 }

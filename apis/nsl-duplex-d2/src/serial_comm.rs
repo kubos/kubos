@@ -15,9 +15,9 @@
  */
 
 use radio_api::{Connection, RadioResult, Stream};
+use serial;
 use std::io;
 use std::time::Duration;
-use serial;
 
 /// Connection for communicating with actual
 /// Duplex-D2 hardware
@@ -37,8 +37,8 @@ impl Stream for SerialStream {
 }
 
 fn serial_send(data: &[u8]) -> io::Result<()> {
-    use std::io::prelude::*;
     use serial::prelude::*;
+    use std::io::prelude::*;
 
     let mut port = try!(serial::open("/dev/ttyUSB0"));
     let settings: serial::PortSettings = serial::PortSettings {
@@ -67,8 +67,8 @@ fn serial_send(data: &[u8]) -> io::Result<()> {
 }
 
 fn serial_receive() -> io::Result<Vec<u8>> {
-    use std::io::prelude::*;
     use serial::prelude::*;
+    use std::io::prelude::*;
 
     let mut ret_msg: Vec<u8> = Vec::new();
     let mut port = try!(serial::open("/dev/ttyUSB0"));
@@ -87,19 +87,19 @@ fn serial_receive() -> io::Result<Vec<u8>> {
     let mut tries = 0;
 
     loop {
-        let mut read_buffer: Vec<u8> = vec![0; 1];
+        let mut read_buffer: Vec<u8> = vec![0; 1024];
 
         match port.read(&mut read_buffer[..]) {
             Ok(c) => {
                 if c > 0 {
-                    ret_msg.extend(read_buffer);
+                    ret_msg.extend(&read_buffer[0..c]);
                 } else {
                     tries = tries + 1;
                 }
             }
             Err(_) => break,
         };
-        if tries > 5 {
+        if tries > 10 {
             break;
         }
     }
