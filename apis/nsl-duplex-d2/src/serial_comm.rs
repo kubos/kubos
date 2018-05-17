@@ -87,7 +87,7 @@ fn serial_receive() -> io::Result<Vec<u8>> {
     let mut tries = 0;
 
     loop {
-        let mut read_buffer: Vec<u8> = vec![0; 1024];
+        let mut read_buffer: Vec<u8> = vec![0; 8192];
 
         match port.read(&mut read_buffer[..]) {
             Ok(c) => {
