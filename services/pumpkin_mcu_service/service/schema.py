@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2017 Kubos Corporation
+# Copyright 2018 Kubos Corporation
 # Licensed under the Apache License, Version 2.0
 # See LICENSE file for details.
 
@@ -10,6 +10,7 @@ Graphene schema setup to enable queries.
 
 import graphene
 from models import *
+import json
 
 from pumpkin_mcu_api import mcu_api
 
@@ -29,24 +30,24 @@ class Query(graphene.ObjectType):
     rawRead = graphene.String(
         module=graphene.String(),
         count=graphene.Int())
+    mcuTelemetry = graphene.JSONString(
+        module=graphene.String(),
+        fields=graphene.List(graphene.String,default_value = ["all"]))
         
-    # def resolve_mcuTelemetry(self, info, module, fields):
-    #     """
-    #     Handles request for subsystem query.
-    #     """
-    #     if module not in MODULES:
-    #         raise KeyError('Module not configured',module)
-    #     address = MODULES[module]['address']
-    #     if address == 0:
-    #         raise ValueError('Module not present',module)
-    #     fields = map(str,fields)
-    #     mcu = mcu_api.MCU(address = address)
-    #     out = mcu.get_module_telemetry(module = module,fields = fields)
-    #     # out = {"field1":{"timestamp": 152349502.1,"data":12345},
-    #     #     "field2": {"timestamp": 152349502.1,"data":"stuffandthings"},
-    #     #     "field3": {"timestamp": 152349502.1,"data":1245234.212415},
-    #     #     "field4": {"timestamp": 152349502.1,"data":"\x12\x23\x34\x45\x56\x67\x78\x89\x0a"}}
-    #     return out
+    def resolve_mcuTelemetry(self, info, module, fields):
+        """
+        Handles request for subsystem query.
+        """
+        if module not in MODULES:
+            raise KeyError('Module not configured',module)
+        address = MODULES[module]['address']
+        if address == 0:
+            raise ValueError('Module not present',module)
+        fields = map(str,fields)
+        mcu = mcu_api.MCU(address = address)
+        out = mcu.get_module_telemetry(module = module,fields = fields)
+        
+        return json.dumps(out)
     
     def resolve_rawRead(self, info, module, count):
         """
@@ -58,7 +59,8 @@ class Query(graphene.ObjectType):
         if address == 0:
             raise ValueError('Module not present',module)
         mcu = mcu_api.MCU(address = address)
-        return 
+        bin_data = mcu.raw_read(count = count)
+        return bin_data.encode("hex")
         
 
 

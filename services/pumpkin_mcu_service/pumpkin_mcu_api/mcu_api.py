@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2017 Kubos Corporation
+# Copyright 2018 Kubos Corporation
 # Licensed under the Apache License, Version 2.0
 # See LICENSE file for details.
 
@@ -52,13 +52,16 @@ class MCU:
     def read(self,count):
         if count < (HEADER_SIZE+1):
             raise TypeError('Read count must be at least '+str(HEADER_SIZE+1)+' bytes.')
-        data = self.i2cfile.read(device = self.address, count = count)
+        data = raw_read(count = count)
         if data[0] != '\x01':
             #raise IOError('Data is not ready')
             return {'timestamp':0,'data':(count-HEADER_SIZE)*'\xff'}
         timestamp = struct.unpack('<i',data[1:HEADER_SIZE])[0]/100.0 # unpack timestamp in seconds
         data = data[HEADER_SIZE:] # telemetry data
         return {'timestamp':timestamp,'data':data} 
+    
+    def raw_read(self,count):
+        return self.i2cfile.read(device = self.address, count = count)
     
     def get_sup_telemetry(self,fields=["all"]):
         if fields == ["all"]:
