@@ -745,7 +745,7 @@ fn main() {
     thread::sleep(Duration::new(1, 0));
 
     // Initialize a connection with the device
-    let mai = MAI400::new("/dev/ttyS5");
+    let mai = MAI400::new("/dev/ttyS5").unwrap();
 
     info!(logger, "MAI400 Integration Tests");
 
@@ -754,7 +754,7 @@ fn main() {
     error_count += set_mode_sun(&mai, &logger);
     error_count += set_rv(&mai, &logger);
     error_count += passthrough(&mai, &logger);
-    error_count += read(&logger);
+    error_count += read(&mai, &logger);
     error_count += reset(&mai, &logger);
 
     info!(logger, "MAI400 Integration Tests Complete");
