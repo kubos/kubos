@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use mai400::*;
 use super::*;
+use mai400::*;
 
 static RAW_READ: [u8; 238] = [
     0x90, 0xEB, 0x3, 0x93, 0x3C, 0x74, 0x47, 0x0, 0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x44, 0x1, 0x0,
@@ -36,20 +36,20 @@ static RAW_READ: [u8; 238] = [
 
 #[test]
 fn get_message_bad() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
-    let mai = MAI400 {
-        conn: Connection {
-            stream: Box::new(mock),
-        },
-    };
+    let mai = mock_new!(mock);
 
     assert_eq!(mai.get_message().unwrap_err(), MAIError::GenericError);
 }
 
 #[test]
 fn get_message_good_stdtelem() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
+
+    mock.read.set_output(RAW_READ.to_vec());
+
+    let mai = mock_new!(mock);
 
     let expected = Some(StandardTelemetry {
         tlm_counter: 3,
@@ -83,14 +83,6 @@ fn get_message_good_stdtelem() {
         neci: [-32754, -627, -627],
     });
 
-    mock.read.return_value(Ok(RAW_READ.to_vec()));
-
-    let mai = MAI400 {
-        conn: Connection {
-            stream: Box::new(mock),
-        },
-    };
-
     let (result, _, _) = mai.get_message().unwrap();
 
     assert_eq!(result, expected);
@@ -98,21 +90,17 @@ fn get_message_good_stdtelem() {
 
 #[test]
 fn get_message_good_rawimu() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
+
+    mock.read.set_output(RAW_READ.to_vec());
+
+    let mai = mock_new!(mock);
 
     let expected = Some(RawIMU {
         accel: [1, -5, 272],
         gyro: [38, 29, 22],
         gyro_temp: 19,
     });
-
-    mock.read.return_value(Ok(RAW_READ.to_vec()));
-
-    let mai = MAI400 {
-        conn: Connection {
-            stream: Box::new(mock),
-        },
-    };
 
     let (_, result, _) = mai.get_message().unwrap();
 
@@ -121,7 +109,11 @@ fn get_message_good_rawimu() {
 
 #[test]
 fn get_message_good_irehs() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
+
+    mock.read.set_output(RAW_READ.to_vec());
+
+    let mai = mock_new!(mock);
 
     let expected = Some(IREHSTelemetry {
         thermopiles_a: [0, 0, 0, 0],
@@ -141,14 +133,6 @@ fn get_message_good_irehs() {
             ThermopileFlags::empty(),
         ],
     });
-
-    mock.read.return_value(Ok(RAW_READ.to_vec()));
-
-    let mai = MAI400 {
-        conn: Connection {
-            stream: Box::new(mock),
-        },
-    };
 
     let (_, _, result) = mai.get_message().unwrap();
 

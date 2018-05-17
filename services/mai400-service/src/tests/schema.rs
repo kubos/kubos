@@ -17,10 +17,8 @@
 use super::*;
 use kubos_service::{Config, Service};
 use model::*;
-use objects::*;
 use schema::*;
 use serde_json;
-use std::cell::{Cell, RefCell};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -29,15 +27,15 @@ use tests::test_data::*;
 macro_rules! wrap {
     ($result:ident) => {{
         json!({
-                "msg": serde_json::to_string(&$result).unwrap(),
-                "errs": ""
-        }).to_string()
+                    "msg": serde_json::to_string(&$result).unwrap(),
+                    "errs": ""
+            }).to_string()
     }};
 }
 
 #[test]
 fn ping() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -54,7 +52,7 @@ fn ping() {
 
 #[test]
 fn ack_default() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -71,7 +69,7 @@ fn ack_default() {
 
 #[test]
 fn ack_noop() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -96,7 +94,7 @@ fn ack_noop() {
 
 #[test]
 fn ack_control_power() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -121,7 +119,7 @@ fn ack_control_power() {
 
 #[test]
 fn ack_configure_hardware() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -144,7 +142,7 @@ fn ack_configure_hardware() {
 
 #[test]
 fn ack_test_hardware() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -170,7 +168,7 @@ fn ack_test_hardware() {
 
 #[test]
 fn ack_issue_raw_command() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -196,7 +194,7 @@ fn ack_issue_raw_command() {
 
 #[test]
 fn ack_set_mode() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -222,7 +220,7 @@ fn ack_set_mode() {
 
 #[test]
 fn ack_update() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -248,7 +246,7 @@ fn ack_update() {
 
 #[test]
 fn query_errors_empty() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -265,7 +263,7 @@ fn query_errors_empty() {
 
 #[test]
 fn query_errors_single() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -290,7 +288,7 @@ fn query_errors_single() {
 
 #[test]
 fn query_errors_multiple() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -316,7 +314,7 @@ fn query_errors_multiple() {
 
 #[test]
 fn query_errors_clear_after_query() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -344,7 +342,7 @@ fn query_errors_clear_after_query() {
 
 #[test]
 fn get_power_on() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let data = Arc::new(ReadData {
         std_telem: Mutex::new(STD),
@@ -355,24 +353,7 @@ fn get_power_on() {
 
     let data_ref = data.clone();
 
-    let (_, receiver) = channel();
-
-    let service = Service::new(
-        Config::new("mai400-service"),
-        Subsystem {
-            mai: MAI400 {
-                conn: Connection {
-                    stream: Box::new(mock),
-                },
-            },
-            last_cmd: Cell::new(AckCommand::None),
-            errors: RefCell::new(vec![]),
-            persistent: data,
-            receiver,
-        },
-        QueryRoot,
-        MutationRoot,
-    );
+    let service = service_new!(mock, data);
 
     thread::spawn(move || loop {
         {
@@ -401,7 +382,7 @@ fn get_power_on() {
 
 #[test]
 fn get_power_off() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -424,7 +405,7 @@ fn get_power_off() {
 
 #[test]
 fn config() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -442,7 +423,7 @@ fn config() {
 // telemetry: nominal, debug {rotating, irehs, imu}
 #[test]
 fn telemetry_nominal() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -515,7 +496,7 @@ fn telemetry_nominal() {
 
 #[test]
 fn telemetry_debug_irehs() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -723,7 +704,7 @@ fn telemetry_debug_irehs() {
 
 #[test]
 fn telemetry_debug_imu() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -756,7 +737,7 @@ fn telemetry_debug_imu() {
 
 #[test]
 fn telemetry_debug_rotating() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -879,7 +860,7 @@ fn telemetry_debug_rotating() {
 
 #[test]
 fn test_results() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1203,7 +1184,7 @@ fn test_results() {
 
 #[test]
 fn mode() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1220,7 +1201,7 @@ fn mode() {
 
 #[test]
 fn orientation() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1237,7 +1218,7 @@ fn orientation() {
 
 #[test]
 fn spin() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1262,7 +1243,7 @@ fn spin() {
 
 #[test]
 fn mutation_errors_empty() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1279,7 +1260,7 @@ fn mutation_errors_empty() {
 
 #[test]
 fn mutation_errors_single() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1305,7 +1286,7 @@ fn mutation_errors_single() {
 
 #[test]
 fn mutation_errors_multiple() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1331,7 +1312,7 @@ fn mutation_errors_multiple() {
 
 #[test]
 fn noop_good() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let data = Arc::new(ReadData {
         std_telem: Mutex::new(STD),
@@ -1340,30 +1321,11 @@ fn noop_good() {
         rotating: Mutex::new(ROTATING),
     });
 
-    let data_ref = data.clone();
-
-    let (_, receiver) = channel();
-
-    let service = Service::new(
-        Config::new("mai400-service"),
-        Subsystem {
-            mai: MAI400 {
-                conn: Connection {
-                    stream: Box::new(mock),
-                },
-            },
-            last_cmd: Cell::new(AckCommand::None),
-            errors: RefCell::new(vec![]),
-            persistent: data,
-            receiver,
-        },
-        QueryRoot,
-        MutationRoot,
-    );
+    let service = service_new!(mock, data);
 
     thread::spawn(move || loop {
         {
-            let mut local = data_ref.std_telem.lock().unwrap();
+            let mut local = data.std_telem.lock().unwrap();
             local.tlm_counter += 1;
         }
         thread::sleep(Duration::from_millis(100));
@@ -1389,7 +1351,7 @@ fn noop_good() {
 
 #[test]
 fn noop_fail() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1413,10 +1375,10 @@ fn noop_fail() {
 
 #[test]
 fn control_power_good() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write.return_value_for(REQUEST_RESET.to_vec(), Ok(()));
-    mock.write.return_value_for(CONFIRM_RESET.to_vec(), Ok(()));
+    mock.write.set_input(REQUEST_RESET.to_vec());
+    mock.write.set_input(CONFIRM_RESET.to_vec());
 
     let service = service_new!(mock);
 
@@ -1441,7 +1403,7 @@ fn control_power_good() {
 
 #[test]
 fn control_power_bad() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1466,7 +1428,7 @@ fn control_power_bad() {
 
 #[test]
 fn control_power_fail() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1480,7 +1442,7 @@ fn control_power_fail() {
 
     let expected = json!({
             "controlPower": {
-                "errors": "Generic Error",
+                "errors": "UART Error, Generic Error",
                 "power": "RESET",
                 "success": false
             }
@@ -1491,7 +1453,7 @@ fn control_power_fail() {
 
 #[test]
 fn configure_hardware() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1508,7 +1470,7 @@ fn configure_hardware() {
 
 #[test]
 fn test_hardware_integration() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1835,7 +1797,7 @@ fn test_hardware_integration() {
 
 #[test]
 fn test_hardware_hardware() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1862,9 +1824,9 @@ fn test_hardware_hardware() {
 
 #[test]
 fn issue_raw_command_good() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write.return_value(Ok(()));
+    mock.write.set_result(Ok(()));
 
     let service = service_new!(mock);
 
@@ -1886,33 +1848,8 @@ fn issue_raw_command_good() {
 }
 
 #[test]
-fn issue_raw_command_bad() {
-    let mock = mock_new!();
-
-    mock.write.return_value(Ok(()));
-
-    let service = service_new!(mock);
-
-    let query = r#"mutation {
-            issueRawCommand(command: "90EB5AD501"){
-                errors,
-                success
-            }
-        }"#;
-
-    let expected = json!({
-            "issueRawCommand": {
-                "errors": "Bad Command Length",
-                "success": false
-            }
-    });
-
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
-}
-
-#[test]
 fn issue_raw_command_fail() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -1925,7 +1862,7 @@ fn issue_raw_command_fail() {
 
     let expected = json!({
             "issueRawCommand": {
-                "errors": "Generic Error",
+                "errors": "UART Error, Generic Error",
                 "success": false
             }
     });
@@ -1935,10 +1872,9 @@ fn issue_raw_command_fail() {
 
 #[test]
 fn set_mode_default() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write
-        .return_value_for(SET_MODE_ACQUISITION_DEFAULT.to_vec(), Ok(()));
+    mock.write.set_input(SET_MODE_ACQUISITION_DEFAULT.to_vec());
 
     let service = service_new!(mock);
 
@@ -1961,10 +1897,9 @@ fn set_mode_default() {
 
 #[test]
 fn set_mode_good() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write
-        .return_value_for(SET_MODE_ACQUISITION.to_vec(), Ok(()));
+    mock.write.set_input(SET_MODE_ACQUISITION.to_vec());
 
     let service = service_new!(mock);
 
@@ -1987,7 +1922,7 @@ fn set_mode_good() {
 
 #[test]
 fn set_mode_fail() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -2000,7 +1935,7 @@ fn set_mode_fail() {
 
     let expected = json!({
             "setMode": {
-                "errors": "Generic Error",
+                "errors": "UART Error, Generic Error",
                 "success": false
             }
     });
@@ -2010,10 +1945,9 @@ fn set_mode_fail() {
 
 #[test]
 fn set_mode_normal_sun() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write
-        .return_value_for(SET_MODE_NORMAL_SUN.to_vec(), Ok(()));
+    mock.write.set_input(SET_MODE_NORMAL_SUN.to_vec());
 
     let service = service_new!(mock);
 
@@ -2036,10 +1970,9 @@ fn set_mode_normal_sun() {
 
 #[test]
 fn set_mode_latlong_sun() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write
-        .return_value_for(SET_MODE_LATLONG_SUN.to_vec(), Ok(()));
+    mock.write.set_input(SET_MODE_LATLONG_SUN.to_vec());
 
     let service = service_new!(mock);
 
@@ -2062,10 +1995,9 @@ fn set_mode_latlong_sun() {
 
 #[test]
 fn set_mode_sun_default() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write
-        .return_value_for(SET_MODE_SUN_DEFAULT.to_vec(), Ok(()));
+    mock.write.set_input(SET_MODE_SUN_DEFAULT.to_vec());
 
     let service = service_new!(mock);
 
@@ -2088,7 +2020,7 @@ fn set_mode_sun_default() {
 
 #[test]
 fn set_mode_sun_fail() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -2101,7 +2033,7 @@ fn set_mode_sun_fail() {
 
     let expected = json!({
             "setMode": {
-                "errors": "Generic Error",
+                "errors": "UART Error, Generic Error",
                 "success": false
             }
     });
@@ -2111,9 +2043,9 @@ fn set_mode_sun_fail() {
 
 #[test]
 fn update_gps_good() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write.return_value_for(SET_GPS_TIME.to_vec(), Ok(()));
+    mock.write.set_input(SET_GPS_TIME.to_vec());
 
     let service = service_new!(mock);
 
@@ -2136,7 +2068,7 @@ fn update_gps_good() {
 
 #[test]
 fn update_gps_fail() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -2149,7 +2081,7 @@ fn update_gps_fail() {
 
     let expected = json!({
             "update": {
-                "errors": "update(gpsTime): Generic Error",
+                "errors": "update(gpsTime): UART Error, Generic Error",
                 "success": false
             }
     });
@@ -2159,9 +2091,9 @@ fn update_gps_fail() {
 
 #[test]
 fn update_rv_good() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write.return_value_for(SET_RV.to_vec(), Ok(()));
+    mock.write.set_input(SET_RV.to_vec());
 
     let service = service_new!(mock);
 
@@ -2184,7 +2116,7 @@ fn update_rv_good() {
 
 #[test]
 fn update_rv_fail() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -2197,7 +2129,7 @@ fn update_rv_fail() {
 
     let expected = json!({
             "update": {
-                "errors": "update(rv): Generic Error",
+                "errors": "update(rv): UART Error, Generic Error",
                 "success": false
             }
     });
@@ -2207,10 +2139,10 @@ fn update_rv_fail() {
 
 #[test]
 fn update_both_both_good() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write.return_value_for(SET_GPS_TIME.to_vec(), Ok(()));
-    mock.write.return_value_for(SET_RV.to_vec(), Ok(()));
+    mock.write.set_input(SET_GPS_TIME.to_vec());
+    mock.write.set_input(SET_RV.to_vec());
 
     let service = service_new!(mock);
 
@@ -2233,7 +2165,7 @@ fn update_both_both_good() {
 
 #[test]
 fn update_both_both_fail() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -2246,7 +2178,7 @@ fn update_both_both_fail() {
 
     let expected = json!({
             "update": {
-                "errors": "update(gpsTime): Generic Error, update(rv): Generic Error",
+                "errors": "update(gpsTime): UART Error, Generic Error, update(rv): UART Error, Generic Error",
                 "success": false
             }
     });
@@ -2256,9 +2188,10 @@ fn update_both_both_fail() {
 
 #[test]
 fn update_both_gps_fail() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write.return_value_for(SET_RV.to_vec(), Ok(()));
+    mock.write.set_input(vec![]);
+    mock.write.set_input(SET_RV.to_vec());
 
     let service = service_new!(mock);
 
@@ -2271,7 +2204,7 @@ fn update_both_gps_fail() {
 
     let expected = json!({
             "update": {
-                "errors": "update(gpsTime): Generic Error",
+                "errors": "update(gpsTime): UART Error, Generic Error",
                 "success": false
             }
     });
@@ -2281,9 +2214,9 @@ fn update_both_gps_fail() {
 
 #[test]
 fn update_both_rv_fail() {
-    let mock = mock_new!();
+    let mut mock = MockStream::default();
 
-    mock.write.return_value_for(SET_GPS_TIME.to_vec(), Ok(()));
+    mock.write.set_input(SET_GPS_TIME.to_vec());
 
     let service = service_new!(mock);
 
@@ -2296,7 +2229,7 @@ fn update_both_rv_fail() {
 
     let expected = json!({
             "update": {
-                "errors": "update(rv): Generic Error",
+                "errors": "update(rv): UART Error, Generic Error",
                 "success": false
             }
     });

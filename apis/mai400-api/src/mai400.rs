@@ -16,15 +16,19 @@
 
 use byteorder::{LittleEndian, WriteBytesExt};
 use messages::*;
+use rust_uart::UartError;
+use rust_uart::*;
 use serial;
-use serial_comm::Connection;
-use std::io;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+
+const TIMEOUT: Duration = Duration::from_millis(60);
 
 /// Structure for MAI-400 device instance
 #[derive(Clone)]
 pub struct MAI400 {
     /// Device connection structure
-    pub conn: Connection,
+    pub conn: Arc<Mutex<Connection>>,
 }
 
 impl MAI400 {
@@ -40,14 +44,25 @@ impl MAI400 {
     /// use mai400_api::*;
     ///
     /// # fn func() -> MAIResult<()> {
-    /// let connection = Connection::new("/dev/ttyS5");
-    /// let mai = MAI400::new(connection);
+    /// let mai = MAI400::new("/dev/ttyS5")?;
     /// # Ok(())
     /// # }
     /// ```
     ///
-    pub fn new(conn: Connection) -> MAI400 {
-        MAI400 { conn }
+    pub fn new(bus: &str) -> MAIResult<MAI400> {
+        let settings = serial::PortSettings {
+            baud_rate: serial::Baud115200,
+            char_size: serial::Bits8,
+            parity: serial::ParityNone,
+            stop_bits: serial::Stop1,
+            flow_control: serial::FlowNone,
+        };
+
+        let conn = Connection::from_path(bus, settings, TIMEOUT)?;
+
+        Ok(MAI400 {
+            conn: Arc::new(Mutex::new(conn)),
+        })
     }
 
     /// Request a hardware reset of the MAI-400
@@ -61,8 +76,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5");
-    /// let mai = MAI400::new(connection);
+    /// let mai = MAI400::new("/dev/ttyS5")?;
     /// mai.reset()?;
     /// # Ok(())
     /// # }
@@ -96,8 +110,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5");
-    /// let mai = MAI400::new(connection);
+    /// let mai = MAI400::new("/dev/ttyS5")?;
     /// mai.set_mode(9, [1, -1, -3, 0])?;
     /// # Ok(())
     /// # }
@@ -134,8 +147,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5");
-    /// let mai = MAI400::new(connection);
+    /// let mai = MAI400::new("/dev/ttyS5")?;
     /// mai.set_mode_sun(7, 1, 45.0)?;
     /// # Ok(())
     /// # }
@@ -174,8 +186,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5");
-    /// let mai = MAI400::new(connection);
+    /// let mai = MAI400::new("/dev/ttyS5")?;
     /// // Jan 01, 2018
     /// mai.set_gps_time(1198800018)?;
     /// # Ok(())
@@ -209,8 +220,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5");
-    /// let mai = MAI400::new(connection);
+    /// let mai = MAI400::new("/dev/ttyS5")?;
     /// mai.set_rv([0.0, 0.0, 0.0], [0.0, 0.0, 0.0], 1198800018)?;
     /// # Ok(())
     /// # }
@@ -243,8 +253,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5");
-    /// let mai = MAI400::new(connection);
+    /// let mai = MAI400::new("/dev/ttyS5")?;
     ///
     /// let mut array = [0; 8];
     /// array[0] = 0x90; // SYNC byte 1
@@ -263,7 +272,16 @@ impl MAI400 {
     ///
     /// [`MAIError`]: enum.MAIError.html
     pub fn passthrough(&self, msg: &[u8]) -> MAIResult<()> {
-        self.conn.write(msg)
+        // If the mutex has been poisoned by the read thread,
+        // go ahead and attempt the write anyways, to try to
+        // preserve functionality, but inform the caller afterwards
+        match self.conn.lock() {
+            Ok(conn) => conn.write(msg).map_err(|err| err.into()),
+            Err(conn) => conn.into_inner()
+                .write(msg)
+                .map_err(|err| err.into())
+                .and(Err(MAIError::ThreadCommError)),
+        }
     }
 
     fn send_message<T: Message>(&self, msg: T) -> MAIResult<()> {
@@ -276,8 +294,16 @@ impl MAI400 {
         }
         raw.write_u16::<LittleEndian>(crc).unwrap();
 
-        self.conn.write(raw.as_slice())?;
-        Ok(())
+        // If the mutex has been poisoned by the read thread,
+        // go ahead and attempt the write anyways, to try to
+        // preserve functionality, but inform the caller afterwards
+        match self.conn.lock() {
+            Ok(conn) => conn.write(raw.as_slice()).map_err(|err| err.into()),
+            Err(conn) => conn.into_inner()
+                .write(raw.as_slice())
+                .map_err(|err| err.into())
+                .and(Err(MAIError::ThreadCommError)),
+        }
     }
 
     /// Wait for and read a message set from the MAI-400.
@@ -297,8 +323,7 @@ impl MAI400 {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5");
-    /// let mai = MAI400::new(connection);
+    /// let mai = MAI400::new("/dev/ttyS5")?;
     /// let (std, imu, irehs) = mai.get_message()?;
     ///
     /// if let Some(telem) = std {
@@ -311,14 +336,58 @@ impl MAI400 {
     /// [`MAIError`]: enum.MAIError.html
     pub fn get_message(
         &self,
-    ) -> MAIResult<
-        (
-            Option<StandardTelemetry>,
-            Option<RawIMU>,
-            Option<IREHSTelemetry>,
-        ),
-    > {
-        let mut msg = self.conn.read()?;
+    ) -> MAIResult<(
+        Option<StandardTelemetry>,
+        Option<RawIMU>,
+        Option<IREHSTelemetry>,
+    )> {
+        let mut msg = vec![];
+        loop {
+            {
+                // Take the stream connection mutex
+                // If the lock() call fails, it means that a different thread poisoned
+                // the mutex. We want to maintain our ability to read messages from the
+                // device for as long as possible, so we'll go ahead and just ignore the
+                // poisoned status. Ideally, the master thread will have detected whatever
+                // error caused the problem and will take error handling measures.
+                let conn = self.conn.lock().unwrap_or_else(|err| err.into_inner());
+
+                // Read SYNC bytes
+                let mut sync = match conn.read(2, Duration::from_millis(250)) {
+                    Ok(v) => v,
+                    Err(err) => match err {
+                        #[cfg(test)]
+                        UartError::GenericError => throw!(MAIError::GenericError),
+                        UartError::IoError {
+                            cause: ::std::io::ErrorKind::TimedOut,
+                            description: _,
+                        } => continue,
+                        _ => panic!(err),
+                    },
+                };
+
+                if sync != SYNC {
+                    continue;
+                }
+
+                msg.append(&mut sync);
+
+                // Read the rest of the message
+                let mut body = match conn.read(236, TIMEOUT) {
+                    Ok(v) => v,
+                    Err(err) => match err {
+                        UartError::IoError {
+                            cause: ::std::io::ErrorKind::TimedOut,
+                            description: _,
+                        } => continue,
+                        _ => panic!(err),
+                    },
+                };
+
+                msg.append(&mut body);
+                break;
+            }
+        }
 
         // Pull out raw IMU message
         let len = msg.len();
@@ -343,42 +412,27 @@ pub enum MAIError {
     /// Catch-all error
     #[display(fmt = "Generic Error")]
     GenericError,
-    /// Software attempted to send a command packet which was not exactly 40 characters long
-    #[display(fmt = "Bad Command Length")]
-    BadCommandLen,
+    /// The thread reading messages from the device is no longer working
+    #[display(fmt = "Failed to communicate with read thread")]
+    ThreadCommError,
     /// Received a valid message, but the message ID doesn't match any known message type
     #[display(fmt = "Unknown Message Received: {:X}", id)]
     UnknownMessage {
         /// ID of message received
         id: u16,
     },
-    #[display(fmt = "Serial Error: {}", cause)]
-    /// An error was thrown by the serial driver
-    SerialError {
+    /// An error was thrown by the serial communication driver
+    #[display(fmt = "UART Error")]
+    UartError {
         /// The underlying error
-        cause: String,
-    },
-    #[display(fmt = "IO Error: {}", cause)]
-    /// An I/O error was thrown by the kernel
-    IoError {
-        /// The underlying error
-        cause: String,
+        #[fail(cause)]
+        cause: UartError,
     },
 }
 
-impl From<io::Error> for MAIError {
-    fn from(error: io::Error) -> Self {
-        MAIError::IoError {
-            cause: format!("{}", error),
-        }
-    }
-}
-
-impl From<serial::Error> for MAIError {
-    fn from(error: serial::Error) -> Self {
-        MAIError::SerialError {
-            cause: format!("{}", error),
-        }
+impl From<UartError> for MAIError {
+    fn from(error: UartError) -> Self {
+        MAIError::UartError { cause: error }
     }
 }
 

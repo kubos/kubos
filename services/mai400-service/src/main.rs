@@ -15,7 +15,7 @@
 //
 
 #![deny(missing_docs)]
-#![deny(warnings)]
+//#![deny(warnings)]
 
 //! Kubos Service for interacting with an [Adcole Maryland Aerospace MAI-400](https://www.adcolemai.com/adacs)
 //!
@@ -254,14 +254,12 @@
 
 #![recursion_limit = "256"]
 
-#[cfg(test)]
-#[macro_use]
-extern crate double;
 extern crate failure;
 #[macro_use]
 extern crate juniper;
 #[macro_use]
 extern crate kubos_service;
+#[macro_use]
 extern crate mai400_api;
 #[cfg(test)]
 #[macro_use]
@@ -274,15 +272,18 @@ mod schema;
 mod tests;
 
 use kubos_service::{Config, Service};
+use mai400_api::MAIResult;
 use model::{ReadData, Subsystem};
 use schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
 
-fn main() {
+fn main() -> MAIResult<()> {
     Service::new(
         Config::new("mai400-service"),
-        Subsystem::new("/dev/ttyS5", Arc::new(ReadData::new())),
+        Subsystem::new("/dev/ttyS5", Arc::new(ReadData::new()))?,
         QueryRoot,
         MutationRoot,
     ).start();
+
+    Ok(())
 }

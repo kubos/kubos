@@ -20,33 +20,15 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use tests::test_data::*;
-use std::sync::mpsc::TryRecvError;
-
-fn sleep_read(_: ()) -> MAIResult<Vec<u8>> {
-    thread::sleep(Duration::from_millis(250));
-    Ok(RAW_READ.to_vec())
-}
 
 #[test]
 fn read_good() {
+    let mut mock = MockStream::default();
     let data = Arc::new(ReadData::new());
 
-    let data_ref = data.clone();
+    mock.read.set_output(RAW_READ.to_vec());
 
-    let (sender, _) = channel();
-
-    thread::spawn(move || {
-        let mock = mock_new!();
-
-        mock.read.use_fn(sleep_read);
-
-        let mai = MAI400 {
-            conn: Connection {
-                stream: Box::new(mock),
-            },
-        };
-        read_thread(mai, data_ref, sender)
-    });
+    service_new_with_read!(mock, data);
 
     // Give it a sec to work
     thread::sleep(Duration::from_millis(500));
@@ -65,74 +47,29 @@ fn read_good() {
 }
 
 #[test]
-fn read_bad() {
+fn read_panic() {
+    let mut mock = MockStream::default();
     let data = Arc::new(ReadData::new());
 
-    let data_ref = data.clone();
+    mock.read.set_result(Err(UartError::GenericError));
 
-    let (sender, receiver) = channel();
-
-    thread::spawn(move || {
-        let mock = mock_new!();
-
-        mock.read.return_value(Err(MAIError::SerialError {
-            cause: "some serial error".to_owned(),
-        }));
-
-        let mai = MAI400 {
-            conn: Connection {
-                stream: Box::new(mock),
-            },
-        };
-        read_thread(mai, data_ref, sender)
-    });
+    let service = service_new_with_read!(mock, data);
 
     // Give it a sec to work
     thread::sleep(Duration::from_millis(500));
 
-    let result = receiver.try_recv();
+    let query = r#"{
+            errors
+        }"#;
 
-    assert_eq!(
-        result,
-        Ok(
-            "SerialError: some serial error. Read thread bailing. Service restart required."
-                .to_owned()
-        )
-    );
-}
-
-fn panic_read(_: ()) -> MAIResult<Vec<u8>> {
-    panic!();
-}
-
-#[test]
-fn read_panic() {
-    let data = Arc::new(ReadData::new());
-
-    let data_ref = data.clone();
-
-    let (sender, receiver) = channel();
-
-    thread::spawn(move || {
-        let mock = mock_new!();
-
-        mock.read.use_fn(panic_read);
-
-        mock.read.return_value(Err(MAIError::SerialError {
-            cause: "some serial error".to_owned(),
-        }));
-
-        let mai = MAI400 {
-            conn: Connection {
-                stream: Box::new(mock),
-            },
-        };
-        read_thread(mai, data_ref, sender)
+    let expected = json!({
+            "errors": ["Read thread panicked. Service restart required."]
     });
 
-    thread::sleep(Duration::from_millis(500));
+    let expected = json!({
+                "msg": serde_json::to_string(&expected).unwrap(),
+                "errs": ""
+        }).to_string();
 
-    let result = receiver.try_recv();
-
-    assert_eq!(result, Err(TryRecvError::Disconnected));
+    assert_eq!(service.process(query.to_owned()), expected);
 }

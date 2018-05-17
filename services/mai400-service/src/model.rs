@@ -18,9 +18,9 @@ use failure::Fail;
 use mai400_api::*;
 use std::cell::{Cell, RefCell};
 use std::io::{Error, ErrorKind};
-use std::sync::{Arc, Mutex};
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
+use std::sync::{Arc, Mutex};
 use std::thread::{sleep, spawn};
 use std::time::Duration;
 
@@ -67,20 +67,20 @@ impl ReadData {
 // The MAI-400 sends a set of telemtery messages every 250ms
 // This function continuously reads them and updates the persistent data structs
 pub fn read_thread(mai: MAI400, data: Arc<ReadData>, sender: Sender<String>) {
-    let mut io_err_count = 0;
+    let mut err_count = 0;
     loop {
         let (std, imu, irehs) = match mai.get_message() {
             Ok(v) => v,
             Err(err) => {
                 match err {
-                    MAIError::IoError { cause } => {
+                    MAIError::UartError { cause } => {
                         // While unlikely, maybe EIO or EINTR could be thrown?
                         // This would indicate that a random issue happened, so
                         // go ahead and retry a few times to see if it clears up
-                        if io_err_count > 10 {
+                        if err_count > 10 {
                             sender
                                 .send(format!(
-                                    "IOError: {}. Read thread bailing. Service restart required.",
+                                    "UartError: {:?}. Read thread bailing. Service restart required.",
                                     cause
                                 ))
                                 .unwrap();
@@ -88,19 +88,7 @@ pub fn read_thread(mai: MAI400, data: Arc<ReadData>, sender: Sender<String>) {
                         }
 
                         sleep(Duration::from_millis(100));
-                        io_err_count += 1;
-                    }
-                    MAIError::SerialError { cause } => {
-                        // As far as I can tell, the only way this error
-                        // will occur is if the UART bus itself becomes
-                        // unavailable. We need to bail hard if we run into this.
-                        sender
-                            .send(format!(
-                                "SerialError: {}. Read thread bailing. Service restart required.",
-                                cause
-                            ))
-                            .unwrap();
-                        break;
+                        err_count += 1;
                     }
                     _ => {
                         sender
@@ -138,25 +126,25 @@ pub struct Subsystem {
 }
 
 impl Subsystem {
-    pub fn new(bus: &'static str, data: Arc<ReadData>) -> Subsystem {
-        let connection = Connection::new(bus);
-        let mai = MAI400::new(connection);
+    pub fn new(bus: &'static str, data: Arc<ReadData>) -> MAIResult<Subsystem> {
+        let mai = MAI400::new(bus)?;
 
         let data_ref = data.clone();
+        let mai_ref = mai.clone();
 
         let (sender, receiver) = channel();
 
-        spawn(move || read_thread(MAI400::new(Connection::new(bus)), data_ref, sender));
+        spawn(move || read_thread(mai_ref, data_ref, sender));
 
         println!("Kubos MAI-400 service started");
 
-        Subsystem {
+        Ok(Subsystem {
             mai,
             last_cmd: Cell::new(AckCommand::None),
             errors: RefCell::new(vec![]),
             persistent: data.clone(),
             receiver,
-        }
+        })
     }
 
     pub fn get_read_health(&self) {

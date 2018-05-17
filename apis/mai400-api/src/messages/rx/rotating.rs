@@ -122,8 +122,7 @@ impl RotatingTelemetry {
     /// ```
     /// # use mai400_api::*;
     /// # fn func() -> MAIResult<()> {
-    /// # let connection = Connection::new("/dev/ttyS5");
-    /// let mai = MAI400::new(connection);
+    /// let mai = MAI400::new("/dev/ttyS5")?;
     ///
     /// let mut rotating = RotatingTelemetry::default();
     ///

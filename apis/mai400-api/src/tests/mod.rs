@@ -14,50 +14,25 @@
 // limitations under the License.
 //
 
-use double;
 use super::*;
-use serial_comm::*;
+use rust_uart::mock::*;
+use rust_uart::*;
 
-#[macro_export]
-macro_rules! mock_new {
-    () => (
-        MockStream::new(
-            Err(MAIError::GenericError.into()),
-            Err(MAIError::GenericError.into())
-       )
-    )
-}
-
-mock_trait_no_default!(
-    pub MockStream,
-    write(Vec<u8>) -> MAIResult<()>,
-    read() -> MAIResult<Vec<u8>>
-);
-
-impl Stream for MockStream {
-    mock_method!(write(&self, data: &[u8]) -> MAIResult<()>, self, {
-            self.write.call(data.to_vec())
-        });
-
-    mock_method!(read(&self) -> MAIResult<Vec<u8>>);
-}
-
+// Simple test to make sure our mock objects are working as expected
 #[test]
 fn mock_test() {
-    let mock = mock_new!();
+    let mock = MockStream::default();
 
-    let connection = Connection {
-        stream: Box::new(mock),
-    };
+    let mai = mock_new!(mock);
 
     let packet: [u8; 40] = [0; 40];
 
     assert_eq!(
-        connection.write(&packet).unwrap_err(),
-        MAIError::GenericError
+        mai.conn.lock().unwrap().write(&packet).unwrap_err(),
+        UartError::GenericError
     );
 }
 
-mod tx;
-mod rx;
 mod rotating;
+mod rx;
+mod tx;

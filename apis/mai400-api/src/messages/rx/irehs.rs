@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-use crc16::*;
+use super::*;
 use byteorder::{LittleEndian, ReadBytesExt};
+use crc16::*;
 use nom::*;
 use std::io::Cursor;
-use super::*;
 
 /// IR Earth Horizon Sensor telemetry data
 #[derive(Clone, Debug, Default, PartialEq)]

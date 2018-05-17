@@ -31,9 +31,9 @@ use mai400_api::*;
 use slog::{Drain, Logger};
 use std::fs::File;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{channel, Sender};
-use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 
@@ -320,7 +320,7 @@ fn reset(mai: &MAI400, logger: &Logger) -> u8 {
     return rc;
 }
 
-fn read(logger: &Logger) -> u8 {
+fn read(mai: &MAI400, logger: &Logger) -> u8 {
     let mut rc = 0;
 
     // Read loop test
@@ -329,7 +329,9 @@ fn read(logger: &Logger) -> u8 {
 
     let (sender, receiver) = channel();
 
-    let handle = thread::spawn(move || read_loop(thread_exit, sender));
+    let mai_ref = mai.clone();
+
+    let handle = thread::spawn(move || read_loop(mai_ref, thread_exit, sender));
 
     // Let read loop run for 10 seconds to ensure that we get all of the
     // rotating variable values
@@ -685,6 +687,7 @@ fn read(logger: &Logger) -> u8 {
 }
 
 fn read_loop(
+    mai: MAI400,
     exit: Arc<AtomicBool>,
     sender: Sender<
         (
@@ -695,9 +698,6 @@ fn read_loop(
         ),
     >,
 ) {
-    let connection = Connection::new("/dev/ttyS5");
-    let mai = MAI400::new(connection);
-
     let mut std: Option<StandardTelemetry> = None;
     let mut imu: Option<RawIMU> = None;
     let mut irehs: Option<IREHSTelemetry> = None;
@@ -745,8 +745,7 @@ fn main() {
     thread::sleep(Duration::new(1, 0));
 
     // Initialize a connection with the device
-    let connection = Connection::new("/dev/ttyS5");
-    let mai = MAI400::new(connection);
+    let mai = MAI400::new("/dev/ttyS5");
 
     info!(logger, "MAI400 Integration Tests");
 

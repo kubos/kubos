@@ -14,11 +14,18 @@
 // limitations under the License.
 //
 
-pub mod rx;
-mod tx;
+//! Macro for mocking MAI400 objects
 
-pub use self::rx::*;
-pub use self::tx::*;
+#[macro_export]
+macro_rules! mock_new {
+    ($mock:ident) => {{
+        use mai400_api::Connection;
+        use std::sync::{Arc, Mutex};
 
-/// IRIG-106 sync word
-pub const SYNC: [u8; 2] = [0x90, 0xEB];
+        let conn = Arc::new(Mutex::new(Connection {
+            stream: Box::new($mock),
+        }));
+
+        MAI400 { conn }
+    }};
+}
