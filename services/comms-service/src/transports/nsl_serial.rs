@@ -13,21 +13,6 @@ impl Transport {
     }
 
     pub fn read(&self) -> Result<Option<udp::UdpData>, String> {
-        match self.radio.get_download_file_count() {
-            Ok(c) => {
-                print!("D:{}", c);
-                if c == 0 {
-                    println!("No files in queue. Sending ping");
-                    let f = File {
-                        name: String::from("PING"),
-                        body: vec![],
-                    };
-                    println!("{:?}", self.radio.put_download_file(&f));
-                }
-            }
-            Err(e) => print!("{:?}\n", e),
-        };
-
         match self.radio.get_uploaded_file_count() {
             Ok(c) => {
                 if c > 0 {
@@ -47,6 +32,21 @@ impl Transport {
                             Err(e) => println!("Kiss decode err {:?}", e),
                         }
                     }
+                }
+            }
+            Err(e) => print!("{:?}\n", e),
+        };
+
+        match self.radio.get_download_file_count() {
+            Ok(c) => {
+                print!("D:{}", c);
+                if c == 0 {
+                    println!("No files in queue. Sending ping");
+                    let f = File {
+                        name: String::from("PING"),
+                        body: vec![],
+                    };
+                    println!("{:?}", self.radio.put_download_file(&f));
                 }
             }
             Err(e) => print!("{:?}\n", e),
