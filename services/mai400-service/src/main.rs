@@ -15,7 +15,7 @@
 //
 
 #![deny(missing_docs)]
-//#![deny(warnings)]
+#![deny(warnings)]
 
 //! Kubos Service for interacting with an [Adcole Maryland Aerospace MAI-400](https://www.adcolemai.com/adacs)
 //!
@@ -259,7 +259,6 @@ extern crate failure;
 extern crate juniper;
 #[macro_use]
 extern crate kubos_service;
-#[macro_use]
 extern crate mai400_api;
 #[cfg(test)]
 #[macro_use]

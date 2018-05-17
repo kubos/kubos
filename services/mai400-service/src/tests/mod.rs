@@ -31,13 +31,17 @@ macro_rules! service_new {
         service_new!($mock, data)
     }};
     ($mock:ident, $data:ident) => {{
+        use mai400_api::Connection;
         use objects::AckCommand;
         use std::cell::{Cell, RefCell};
+        use std::sync::{Arc, Mutex};
         use std::thread;
 
         let (sender, receiver) = channel();
 
-        let mai = mock_new!($mock);
+        let mai = MAI400 { conn: Arc::new(Mutex::new(Connection {
+            stream: Box::new($mock),
+        })) };
 
         // We don't actually want to do anything with this thread, the channel
         // sender just needs to live through the lifetime of each test
@@ -64,13 +68,17 @@ macro_rules! service_new {
 #[macro_export]
 macro_rules! service_new_with_read {
     ($mock:ident, $data:ident) => {{
+        use mai400_api::Connection;
         use objects::AckCommand;
         use std::cell::{Cell, RefCell};
+        use std::sync::{Arc, Mutex};
         use std::thread;
 
         let (sender, receiver) = channel();
 
-        let mai = mock_new!($mock);
+        let mai = MAI400 { conn: Arc::new(Mutex::new(Connection {
+            stream: Box::new($mock),
+        })) };
 
         let mai_ref = mai.clone();
         let data_ref = $data.clone();

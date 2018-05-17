@@ -18,6 +18,19 @@ use super::*;
 use rust_uart::mock::*;
 use rust_uart::*;
 
+#[macro_export]
+macro_rules! mock_new {
+    ($mock:ident) => {{
+        use std::sync::{Arc, Mutex};
+
+        let conn = Arc::new(Mutex::new(Connection {
+            stream: Box::new($mock),
+        }));
+
+        MAI400 { conn }
+    }};
+}
+
 // Simple test to make sure our mock objects are working as expected
 #[test]
 fn mock_test() {
