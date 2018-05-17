@@ -78,7 +78,6 @@ dependencies = [
 name = "comms-service"
 version = "0.1.0"
 dependencies = [
- "nom 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "nsl-duplex-d2 0.1.0",
 ]
 

@@ -62,8 +62,8 @@ impl Transport {
         match self.device_read()? {
             Some(data) => {
                 println!("decode nsl read");
-                let (decoded, _) = kiss::decode(&data, 0)?;
-                let decoded = udp::framed_decode(&decoded, 0)?;
+                let decoded = kiss::decode(&data)?;
+                let decoded = udp::framed_decode(&decoded)?;
                 Ok(Some(decoded))
             }
             None => Ok(None),

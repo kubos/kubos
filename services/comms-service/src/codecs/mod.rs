@@ -23,8 +23,8 @@ mod tests {
         let udp_encoded = udp::encode(&orig_udp).unwrap();
         let kiss_encoded = kiss::encode(&udp_encoded).unwrap();
 
-        let (kiss_decoded_data, kiss_decoded_len) = kiss::decode(&kiss_encoded, 0).unwrap();
-        let udp_decoded = udp::framed_decode(&kiss_decoded_data, 0).unwrap();
+        let kiss_decoded_data = kiss::decode(&kiss_encoded).unwrap();
+        let udp_decoded = udp::framed_decode(&kiss_decoded_data).unwrap();
 
         assert_eq!(kiss_decoded_data, udp_encoded);
         assert_eq!(orig_udp, udp_decoded);
@@ -47,8 +47,8 @@ mod tests {
         let udp_encoded = udp::encode(&orig_udp).unwrap();
         let kiss_encoded = kiss::encode(&udp_encoded).unwrap();
 
-        let (kiss_decoded_data, kiss_decoded_len) = kiss::decode(&kiss_encoded, 0).unwrap();
-        let udp_decoded = udp::framed_decode(&kiss_decoded_data, 0).unwrap();
+        let kiss_decoded_data = kiss::decode(&kiss_encoded).unwrap();
+        let udp_decoded = udp::framed_decode(&kiss_decoded_data).unwrap();
 
         assert_eq!(kiss_decoded_data, udp_encoded);
         assert_eq!(orig_udp, udp_decoded);

@@ -1,7 +1,3 @@
-use codecs::Codec;
-
-pub struct Kiss;
-
 fn escape(buf: &[u8]) -> Vec<u8> {
     let mut new_buf = vec![];
     for (_, e) in buf.iter().enumerate() {
@@ -54,15 +50,15 @@ pub fn encode(frame: &[u8]) -> Result<Vec<u8>, String> {
     Ok(buff)
 }
 
-pub fn decode(chunk: &[u8], index: usize) -> Result<(Vec<u8>, usize), String> {
+pub fn decode(chunk: &[u8]) -> Result<Vec<u8>, String> {
     let mut frame = vec![];
-    let mut index_l = index;
+    let mut index_l = 0;
     let mut valid = false;
 
     while !valid {
         frame.clear();
         let mut index_a = 0;
-        let mut index_b = 0;
+        let mut index_b;
 
         // Search for first full kiss frame
         for (i, e) in chunk.iter().skip(index_l).enumerate() {
@@ -100,7 +96,7 @@ pub fn decode(chunk: &[u8], index: usize) -> Result<(Vec<u8>, usize), String> {
         frame = un_frame;
     }
 
-    Ok((frame, index_l))
+    Ok(frame)
 }
 
 #[cfg(test)]
@@ -150,76 +146,59 @@ mod tests {
         assert_eq!(
             encoded,
             vec![
-                0xC0, 0x00, 0x01, 0xDB, 0xDD, 0x02, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0xDB, 0xDC, 0xC0
+                0xC0, 0x00, 0x01, 0xDB, 0xDD, 0x02, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0xDB, 0xDC, 0xC0,
             ]
         );
     }
 
     #[test]
     fn test_decode_frame() {
-        let (decoded, _) = decode(&vec![0xC0, 0x00, 0x01, 0x01, 0x01, 0xC0], 0).unwrap();
+        let decoded = decode(&vec![0xC0, 0x00, 0x01, 0x01, 0x01, 0xC0]).unwrap();
         assert_eq!(decoded, vec![0x01, 0x1, 0x1]);
     }
 
     #[test]
     fn test_decode_frame_pre_junk() {
-        let (decoded, _) = decode(
-            &vec![0xFF, 0xBB, 0xCC, 0xC0, 0x00, 0x01, 0x02, 0x03, 0xC0],
-            0,
-        ).unwrap();
+        let decoded = decode(&vec![0xFF, 0xBB, 0xCC, 0xC0, 0x00, 0x01, 0x02, 0x03, 0xC0]).unwrap();
         assert_eq!(decoded, vec![0x01, 0x2, 0x3]);
     }
 
     #[test]
     fn test_decode_frame_post_junk() {
-        let (decoded, _) = decode(
-            &vec![0xC0, 0x00, 0x03, 0x02, 0x01, 0xC0, 0xFF, 0xBB, 0xCC],
-            0,
-        ).unwrap();
+        let decoded = decode(&vec![0xC0, 0x00, 0x03, 0x02, 0x01, 0xC0, 0xFF, 0xBB, 0xCC]).unwrap();
         assert_eq!(decoded, vec![0x03, 0x2, 0x1]);
     }
 
     #[test]
     fn test_decode_frame_junk_surround() {
-        let (decoded, _) = decode(
-            &vec![
-                0xFF, 0xBB, 0xCC, 0xC0, 0x00, 0x03, 0x04, 0x05, 0xC0, 0xFF, 0xBB, 0xCC
-            ],
-            0,
-        ).unwrap();
+        let decoded = decode(&vec![
+            0xFF, 0xBB, 0xCC, 0xC0, 0x00, 0x03, 0x04, 0x05, 0xC0, 0xFF, 0xBB, 0xCC,
+        ]).unwrap();
         assert_eq!(decoded, vec![0x03, 0x4, 0x5]);
     }
 
     #[test]
     fn test_decode_frame_escapes() {
-        let (decoded, _) = decode(
-            &vec![0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0],
-            0,
-        ).unwrap();
+        let decoded = decode(&vec![
+            0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0,
+        ]).unwrap();
         assert_eq!(decoded, vec![0x03, 0xC0, 0x4, 0xDB, 0x5]);
     }
 
     #[test]
     fn test_decode_frame_escapes_junks() {
-        let (decoded, _) = decode(
-            &vec![
-                0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF, 0x2
-            ],
-            0,
-        ).unwrap();
+        let decoded = decode(&vec![
+            0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF, 0x2,
+        ]).unwrap();
         assert_eq!(decoded, vec![0x03, 0xC0, 0x4, 0xDB, 0x5]);
     }
 
     #[test]
     fn test_decode_frame_no_start() {
         assert_eq!(
-            decode(
-                &vec![
-                    0x1, 0xF, 0xC1, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF,
-                    0x2,
-                ],
-                0,
-            ),
+            decode(&vec![
+                0x1, 0xF, 0xC1, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF, 0x2,
+            ],),
             Err(String::from("Kiss frame start not found"))
         );
     }
@@ -227,13 +206,9 @@ mod tests {
     #[test]
     fn test_decode_frame_no_end() {
         assert_eq!(
-            decode(
-                &vec![
-                    0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0x10, 0x1, 0xF,
-                    0x2,
-                ],
-                0,
-            ),
+            decode(&vec![
+                0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0x10, 0x1, 0xF, 0x2,
+            ],),
             Err(String::from("Kiss frame end not found"))
         );
     }
@@ -241,19 +216,13 @@ mod tests {
     #[test]
     fn test_decode_test_data() {
         assert_eq!(
-            decode(
-                &vec![
-                    192, 000, 027, 88, 143, 61, 000, 98, 85, 98, 000, 130, 026, 000, 004, 124, 82,
-                    245, 192,
-                ],
-                0
-            ),
-            Ok((
-                vec![
-                    27, 88, 143, 61, 0, 98, 85, 98, 0, 130, 26, 0, 4, 124, 82, 245
-                ],
-                19,
-            ))
+            decode(&vec![
+                192, 000, 027, 88, 143, 61, 000, 98, 85, 98, 000, 130, 026, 000, 004, 124, 82, 245,
+                192,
+            ],),
+            Ok(vec![
+                27, 88, 143, 61, 0, 98, 85, 98, 0, 130, 26, 0, 4, 124, 82, 245,
+            ])
         );
     }
 
@@ -262,7 +231,7 @@ mod tests {
         let orig = vec![0, 130, 26, 0, 1, 218, 134, 245];
 
         let encoded = encode(&orig).unwrap();
-        let (decoded_dat, decoded_len) = decode(&encoded, 0).unwrap();
+        let decoded_dat = decode(&encoded).unwrap();
 
         assert_eq!(decoded_dat, orig);
     }

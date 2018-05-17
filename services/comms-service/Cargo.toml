@@ -5,4 +5,3 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
 nsl-duplex-d2 = { path = "../../apis/nsl-duplex-d2" }
-nom = "4.0"

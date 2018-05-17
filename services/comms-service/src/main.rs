@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate nom;
-
 extern crate nsl_duplex_d2;
 
 use std::thread;

@@ -1,5 +1,3 @@
-use nom::le_u16;
-
 #[derive(Debug, Eq, PartialEq)]
 pub struct UdpData {
     pub source: u16,
@@ -61,51 +59,10 @@ pub fn encode(packet: &UdpData) -> Result<Vec<u8>, String> {
     Ok(data)
 }
 
-pub fn decode(chunk: &[u8], index: usize) -> Result<UdpData, String> {
-    let mut data: Vec<u8> = vec![];
-    let index = index as u32;
-
-    // Check for 8 header bytes
-    // let offset = index - 1;
-    // Let's assume we always have either a complete udp packet or trash
-    let index = 0;
-    let offset = 0;
-    let length = (chunk.len() as u32) - offset;
-    if length < 8 {
-        return Err(String::from("Header bytes not found"));
-    }
-
-    // Check for length of entire datagram
-    let len = get_u16(chunk, index + 4)?;
-    if length < u32::from(len) {
-        return Err(String::from("Incomplete datagram"));
-    }
-
-    // Read rest of datagram and parse
-    let source = get_u16(chunk, index)?;
-    let dest = get_u16(chunk, index + 2)?;
-    let checksum = u32::from(get_u16(chunk, index + 6)?);
-    data.extend(
-        chunk[(index + 8) as usize..(index + u32::from(len) - 1) as usize]
-            .iter()
-            .cloned(),
-    );
-    let sum = check(source, dest, len, &data)?;
-    let checksum = sum == checksum;
-
-    Ok(UdpData {
-        source,
-        dest,
-        data,
-        checksum,
-    })
-}
-
-pub fn framed_decode(chunk: &[u8], index: usize) -> Result<UdpData, String> {
-    let index = 0 as u32;
+pub fn framed_decode(chunk: &[u8]) -> Result<UdpData, String> {
     let mut data = vec![];
 
-    let length = (chunk.len() as u32);
+    let length = chunk.len() as u32;
     if length < 8 {
         return Err(String::from("Header bytes not found"));
     }
@@ -137,7 +94,7 @@ mod tests {
     #[test]
     fn test_framed_decode() {
         let data = vec![141, 183, 23, 112, 0, 12, 246, 101, 49, 50, 51, 52];
-        let decoded = framed_decode(&data, 0);
+        let decoded = framed_decode(&data);
         assert_eq!(
             decoded,
             Ok(UdpData {
@@ -152,7 +109,7 @@ mod tests {
     #[test]
     fn test_framed_decode_again() {
         let data = vec![141, 183, 23, 112, 0, 11, 248, 155, 49, 49, 49];
-        let decoded = framed_decode(&data, 0);
+        let decoded = framed_decode(&data);
         assert_eq!(
             decoded,
             Ok(UdpData {
@@ -167,23 +124,12 @@ mod tests {
     #[test]
     fn test_framed_decode_test_data() {
         let data = vec![
-            027, 88, 158, 88, 000, 8, 69, 71, 000, 130, 026, 000, 7, 116, 65, 245
+            027, 88, 158, 88, 000, 8, 69, 71, 000, 130, 026, 000, 7, 116, 65, 245,
         ];
         let payload: Vec<u8> = vec![];
-        let decoded = framed_decode(&data, 0);
+        let decoded = framed_decode(&data);
         assert_eq!(true, decoded.is_ok());
         assert_eq!(payload, decoded.unwrap().data);
-    }
-
-    #[test]
-    fn test_encode() {
-        let data = UdpData {
-            source: 7000,
-            dest: 70001,
-            data: vec![0, 130, 26, 0, 3, 129, 131, 245],
-            checksum: true,
-        };
-        encode(&data);
     }
 
     #[test]
@@ -196,7 +142,7 @@ mod tests {
         };
         let encoded = encode(&data).unwrap();
         println!("encoded {:?}", encoded);
-        let decoded = framed_decode(&encoded, 0).unwrap();
+        let decoded = framed_decode(&encoded).unwrap();
 
         assert_eq!(decoded, data);
     }
@@ -211,7 +157,7 @@ mod tests {
         };
         let encoded = encode(&data).unwrap();
         println!("encoded {:?}", encoded);
-        let decoded = framed_decode(&encoded, 0).unwrap();
+        let decoded = framed_decode(&encoded).unwrap();
 
         assert_eq!(decoded, data);
     }
