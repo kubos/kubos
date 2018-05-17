@@ -16,12 +16,12 @@ mod transports;
 use codecs::kiss;
 use codecs::udp;
 use std::io::{self, Write};
-use transports::*;
 
 use std::net::{SocketAddr, UdpSocket};
 
 fn main() {
-    let radio_transport = nsl_serial::Transport::new();
+    let radio_transport = transports::nsl_serial::Transport::new();
+    let mut udp_transport = transports::udp::Transport::new();
     let pressure = 0;
 
     loop {
@@ -31,41 +31,19 @@ fn main() {
         match radio_transport.read() {
             Ok(data) => match data {
                 Some(packet) => {
-                    // use udp packet here
-                    let mut socket =
-                        UdpSocket::bind(format!("127.0.0.1:{}", packet.source)).unwrap();
+                    if let Err(e) = udp_transport.write(packet) {
+                        println!("udp_transport failed write {:?}", e);
+                    }
 
-                    socket.set_read_timeout(Some(::std::time::Duration::from_millis(100)));
-                    socket.set_write_timeout(Some(::std::time::Duration::from_millis(100)));
-
-                    let dest = SocketAddr::from(([127, 0, 0, 1], packet.dest));
-
-                    socket.send_to(&packet.data, &dest);
-
-                    thread::sleep(Duration::from_millis(100));
-
-                    let mut buf = vec![0u8; 1024];
-                    if let Ok((amt, src)) = socket.recv_from(&mut buf) {
-                        let pressure = pressure + 1;
-                        if pressure == 2 {
-                            print!("pause");
-                            socket.send_to(&vec![0x01], src);
+                    if let Ok(res) = udp_transport.read() {
+                        match res {
+                            Some(packet) => if let Err(e) = radio_transport.write(packet) {
+                                println!("radio_transport failed write {:?}", e)
+                            },
+                            None => (),
                         }
-                        println!("Received from {:?}\n{:?}", src, &buf[0..amt]);
-                        println!(
-                            "Sending over radio {:?}",
-                            radio_transport.write(udp::UdpData {
-                                source: packet.dest,
-                                dest: packet.source,
-                                data: buf[0..amt].to_vec(),
-                                checksum: false,
-                            })
-                        );
-                        let pressure = pressure - 1;
-                        if pressure == 1 {
-                            print!("resume");
-                            socket.send_to(&vec![0x02], src);
-                        }
+                    } else {
+                        println!("udp_transport failed read");
                     }
                 }
                 None => (),

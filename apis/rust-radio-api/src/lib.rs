@@ -22,8 +22,8 @@
 extern crate failure;
 extern crate nom;
 
-use std::cell::RefCell;
 use nom::IResult;
+use std::cell::RefCell;
 
 use failure::Error;
 
@@ -90,13 +90,20 @@ impl Connection {
     /// Read the next object using provided parser.
     pub fn read<T>(&self, parse: ParseFn<T>) -> RadioResult<T> {
         let mut buffer = self.buffer.borrow_mut();
+        let mut tries = 0;
         loop {
             let copy = buffer.clone();
             let res = parse(&copy);
 
+            if tries > 5 {
+                bail!(RadioError::ParseError {
+                    message: String::from("Incomplete parsing")
+                });
+            }
             if let Err(nom::Err::Incomplete(_)) = res {
                 let more = self.stream.read()?;
                 buffer.extend_from_slice(&more);
+                tries += 1;
                 continue;
             }
 

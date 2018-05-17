@@ -12,62 +12,68 @@ impl Transport {
         }
     }
 
-    pub fn read(&self) -> Result<Option<udp::UdpData>, String> {
-        match self.radio.get_uploaded_file_count() {
-            Ok(c) => {
-                if c > 0 {
-                    print!("Fetching Uploaded File: ");
-                    if let Ok(file) = self.radio.get_uploaded_file() {
-                        //print!("{:?}", file);
-                        println!("Kiss decoding file");
-                        match kiss::decode(&file.body, 0) {
-                            Ok((frame, index)) => {
-                                //println!("Got kiss file index {}\n{:#?}", index, frame);
-                                println!("Udp decoding file");
-                                match udp::framed_decode(&frame, 0) {
-                                    Ok(u) => return Ok(Some(u)),
-                                    Err(e) => println!("Udp decode err {:?}", e),
-                                }
-                            }
-                            Err(e) => println!("Kiss decode err {:?}", e),
-                        }
-                    }
-                }
-            }
-            Err(e) => print!("{:?}\n", e),
+    fn device_read(&self) -> Result<Option<Vec<u8>>, String> {
+        let upload_count = match self.radio.get_uploaded_file_count() {
+            Ok(c) => c,
+            Err(e) => return Err(format!("Failed to get uploaded file count {:?}", e)),
         };
 
-        match self.radio.get_download_file_count() {
-            Ok(c) => {
-                print!("D:{}", c);
-                if c == 0 {
-                    println!("No files in queue. Sending ping");
-                    let f = File {
-                        name: String::from("PING"),
-                        body: vec![],
-                    };
-                    println!("{:?}", self.radio.put_download_file(&f));
-                }
-            }
-            Err(e) => print!("{:?}\n", e),
+        if upload_count > 0 {
+            let uploaded_file = match self.radio.get_uploaded_file() {
+                Ok(f) => f,
+                Err(e) => return Err(format!("Failed to get uploaded file {:?}", e)),
+            };
+
+            return Ok(Some(uploaded_file.body));
+        }
+
+        let download_count = match self.radio.get_download_file_count() {
+            Ok(c) => c,
+            Err(e) => return Err(format!("Failed to get uploaded file count {:?}", e)),
         };
+
+        if download_count == 0 {
+            print!("ping");
+            match self.radio.put_download_file(&File {
+                name: String::from("PING"),
+                body: vec![],
+            }) {
+                Ok(_) => (),
+                Err(e) => return Err(format!("Failed to send ping {:?}", e)),
+            }
+        }
 
         Ok(None)
     }
 
-    pub fn write(&self, data: udp::UdpData) -> Result<(), String> {
-        // We have raw data so we'll encode it here...
-        // encode/decode layers to be moved elsewhere eventually
-        let udp_encoded = udp::encode(&data)?;
-        let kiss_encoded = kiss::encode(&udp_encoded)?;
-
+    fn device_write(&self, data: &[u8]) -> Result<(), String> {
         let f = File {
             name: String::from("UPLOAD"),
-            body: kiss_encoded.to_vec(),
+            body: data.to_vec(),
         };
         match self.radio.put_download_file(&f) {
-            Ok(o) => Ok(()),
-            Err(e) => Err(format!("Download error {:?}", e)),
+            Ok(_) => Ok(()),
+            Err(e) => Err(format!("Failed to put download file {:?}", e)),
         }
+    }
+
+    pub fn read(&self) -> Result<Option<udp::UdpData>, String> {
+        //        println!("nsl_read");
+        match self.device_read()? {
+            Some(data) => {
+                println!("decode nsl read");
+                let (decoded, _) = kiss::decode(&data, 0)?;
+                let decoded = udp::framed_decode(&decoded, 0)?;
+                Ok(Some(decoded))
+            }
+            None => Ok(None),
+        }
+    }
+
+    pub fn write(&self, data: udp::UdpData) -> Result<(), String> {
+        //      println!("nsl_write");
+        // We have raw data so we'll encode it here...
+        // encode/decode layers to be moved elsewhere eventually
+        self.device_write(&kiss::encode(&udp::encode(&data)?)?)
     }
 }

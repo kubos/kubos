@@ -51,7 +51,6 @@ pub fn encode(packet: &UdpData) -> Result<Vec<u8>, String> {
     data.push((packet.dest >> 8) as u8);
     data.push((packet.dest & 0xFF) as u8);
     // Payload Length
-    println!("encoding len {}", len);
     data.push((len >> 8) as u8);
     data.push((len & 0xFF) as u8);
     // Checksum
@@ -92,7 +91,6 @@ pub fn decode(chunk: &[u8], index: usize) -> Result<UdpData, String> {
             .cloned(),
     );
     let sum = check(source, dest, len, &data)?;
-    println!("checksumming {} v {}", checksum, sum);
     let checksum = sum == checksum;
 
     Ok(UdpData {
@@ -119,7 +117,6 @@ pub fn framed_decode(chunk: &[u8], index: usize) -> Result<UdpData, String> {
     if u32::from(len) > length {
         return Err(format!("Bad length in header {}", len));
     }
-    println!("get data {} .. {}", 8, (len));
     data.extend(chunk[8 as usize..(len) as usize].iter().cloned());
 
     let sum = check(source, dest, len, &data)?;
@@ -172,29 +169,11 @@ mod tests {
         let data = vec![
             027, 88, 158, 88, 000, 8, 69, 71, 000, 130, 026, 000, 7, 116, 65, 245
         ];
-        let payload = vec![0, 130, 26, 0, 7, 116, 65, 245];
+        let payload: Vec<u8> = vec![];
         let decoded = framed_decode(&data, 0);
         assert_eq!(true, decoded.is_ok());
         assert_eq!(payload, decoded.unwrap().data);
     }
-
-    // #[test]
-    // fn test_framed_decode_test_data() {
-    //     let data = vec![
-    //         027, 88, 174, 5, 000, 98, 6, 106, 000, 130, 026, 000, 001, 218, 134, 245
-    //     ];
-
-    //     let decoded = framed_decode(&data, 0);
-    //     assert_eq!(
-    //         decoded,
-    //         Ok(UdpData {
-    //             source: 36279,
-    //             dest: 6000,
-    //             data: vec![49, 49, 49],
-    //             checksum: false,
-    //         })
-    //     );
-    // }
 
     #[test]
     fn test_encode() {
