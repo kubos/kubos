@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use byteorder::{LittleEndian, WriteBytesExt};
 use super::*;
+use byteorder::{LittleEndian, WriteBytesExt};
 
 pub trait Message {
     fn serialize(&self) -> Vec<u8>;
@@ -39,9 +39,8 @@ impl Default for SetAcsMode {
 
 impl Message for SetAcsMode {
     fn serialize(&self) -> Vec<u8> {
-        let mut vec = vec![];
+        let mut vec = SYNC.to_vec();
 
-        vec.write_u16::<LittleEndian>(SYNC).unwrap();
         vec.push(self.id);
         vec.push(self.mode);
         vec.write_i16::<LittleEndian>(self.qbi_cmd[0]).unwrap();
@@ -73,9 +72,8 @@ impl Default for SetAcsModeSun {
 
 impl Message for SetAcsModeSun {
     fn serialize(&self) -> Vec<u8> {
-        let mut vec = vec![];
+        let mut vec = SYNC.to_vec();
 
-        vec.write_u16::<LittleEndian>(SYNC).unwrap();
         vec.push(self.id);
         vec.push(self.mode);
         vec.write_i16::<LittleEndian>(self.sun_angle_enable)
@@ -102,9 +100,8 @@ impl Default for SetGPSTime {
 
 impl Message for SetGPSTime {
     fn serialize(&self) -> Vec<u8> {
-        let mut vec = vec![];
+        let mut vec = SYNC.to_vec();
 
-        vec.write_u16::<LittleEndian>(SYNC).unwrap();
         vec.push(self.id);
         vec.write_u32::<LittleEndian>(self.gps_time).unwrap();
         vec.append(&mut vec![0; 31]);
@@ -132,9 +129,8 @@ impl Default for SetRV {
 
 impl Message for SetRV {
     fn serialize(&self) -> Vec<u8> {
-        let mut vec = vec![];
+        let mut vec = SYNC.to_vec();
 
-        vec.write_u16::<LittleEndian>(SYNC).unwrap();
         vec.push(self.id);
         vec.write_f32::<LittleEndian>(self.eci_pos[0]).unwrap();
         vec.write_f32::<LittleEndian>(self.eci_pos[1]).unwrap();
