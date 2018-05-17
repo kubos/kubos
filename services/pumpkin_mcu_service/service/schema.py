@@ -58,7 +58,6 @@ class Query(graphene.ObjectType):
         if address == 0:
             raise ValueError('Module not present',module)
         mcu = mcu_api.MCU(address = address)
-        out = mcu.
         return 
         
 
