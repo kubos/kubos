@@ -35,6 +35,9 @@ fn main() {
                     let mut socket =
                         UdpSocket::bind(format!("127.0.0.1:{}", packet.source)).unwrap();
 
+                    socket.set_read_timeout(Some(::std::time::Duration::from_millis(100)));
+                    socket.set_write_timeout(Some(::std::time::Duration::from_millis(100)));
+
                     let dest = SocketAddr::from(([127, 0, 0, 1], packet.dest));
 
                     socket.send_to(&packet.data, &dest);
@@ -42,26 +45,27 @@ fn main() {
                     thread::sleep(Duration::from_millis(100));
 
                     let mut buf = vec![0u8; 1024];
-                    let (amt, src) = socket.recv_from(&mut buf).unwrap();
-                    let pressure = pressure + 1;
-                    if pressure == 2 {
-                        print!("pause");
-                        socket.send_to(&vec![0x01], src);
-                    }
-                    println!("Received from {:?}\n{:?}", src, &buf[0..amt]);
-                    println!(
-                        "Sending over radio {:?}",
-                        radio_transport.write(udp::UdpData {
-                            source: packet.dest,
-                            dest: packet.source,
-                            data: buf[0..amt].to_vec(),
-                            checksum: false,
-                        })
-                    );
-                    let pressure = pressure - 1;
-                    if pressure == 1 {
-                        print!("resume");
-                        socket.send_to(&vec![0x02], src);
+                    if let Ok((amt, src)) = socket.recv_from(&mut buf) {
+                        let pressure = pressure + 1;
+                        if pressure == 2 {
+                            print!("pause");
+                            socket.send_to(&vec![0x01], src);
+                        }
+                        println!("Received from {:?}\n{:?}", src, &buf[0..amt]);
+                        println!(
+                            "Sending over radio {:?}",
+                            radio_transport.write(udp::UdpData {
+                                source: packet.dest,
+                                dest: packet.source,
+                                data: buf[0..amt].to_vec(),
+                                checksum: false,
+                            })
+                        );
+                        let pressure = pressure - 1;
+                        if pressure == 1 {
+                            print!("resume");
+                            socket.send_to(&vec![0x02], src);
+                        }
                     }
                 }
                 None => (),
