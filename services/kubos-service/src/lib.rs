@@ -42,7 +42,7 @@
 //! The service configuration file uses the Toml format and is expected to use the
 //! following layout:
 //!
-//! ```text
+//! ```toml,ignore
 //! [service-name]
 //! config-key = "value"
 //! config-key2 = 123
