@@ -79,6 +79,8 @@ pub fn framed_decode(chunk: &[u8]) -> Result<UdpData, String> {
     let sum = check(source, dest, len, &data)?;
     let checksum = sum == checksum;
 
+    info!("framed_decode {:?}", chunk);
+
     Ok(UdpData {
         source,
         dest,

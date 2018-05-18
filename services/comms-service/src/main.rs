@@ -12,7 +12,38 @@ use std::time::Duration;
 mod codecs;
 mod transports;
 
-use std::io::{self, Write};
+use transports::Transport;
+
+fn transport_comms(mut t1: Box<Transport>, mut t2: Box<Transport>) -> Result<(), String> {
+    loop {
+        match t1.read() {
+            Ok(data) => match data {
+                Some(packet) => {
+                    info!("t1 --> {:?} --> t2", packet);
+                    if let Err(e) = t2.write(packet) {
+                        warn!("transport2 failed write {:?}", e);
+                    }
+                }
+                None => (),
+            },
+            Err(e) => warn!("transport1 failed read {:?}", e),
+        };
+
+        match t2.read() {
+            Ok(data) => match data {
+                Some(packet) => {
+                    info!("t2 --> {:?} --> t1", packet);
+                    if let Err(e) = t1.write(packet) {
+                        warn!("transport1 failed write {:?}", e);
+                    }
+                }
+                None => (),
+            },
+            Err(e) => warn!("transport2 failed read {:?}", e),
+        };
+        thread::sleep(Duration::from_millis(100));
+    }
+}
 
 fn main() {
     CombinedLogger::init(vec![
@@ -22,35 +53,19 @@ fn main() {
 
     info!("Starting communications service");
 
-    let radio_transport = transports::nsl_serial::Transport::new();
-    let mut udp_transport = transports::udp::Transport::new();
+    let radio_transport = Box::new(transports::nsl_serial::NslSerial::new());
+    //let echo_transport = Box::new(transports::echo::Echo::new());
+    let mut udp_transport = Box::new(transports::udp::Udp::new());
 
-    loop {
-        io::stdout().flush().unwrap();
+    // if let Err(e) = udp_transport.expose_ports(&vec![6000, 7000]) {
+    //     warn!("failed to exposed udp ports {:?}", e);
+    // }
 
-        match radio_transport.read() {
-            Ok(data) => match data {
-                Some(packet) => {
-                    let dest = packet.dest;
-                    if let Err(e) = udp_transport.write(packet, dest) {
-                        warn!("udp_transport failed write {:?}", e);
-                    }
-
-                    if let Ok(res) = udp_transport.read(dest) {
-                        match res {
-                            Some(packet) => if let Err(e) = radio_transport.write(packet) {
-                                warn!("radio_transport failed write {:?}", e);
-                            },
-                            None => (),
-                        }
-                    } else {
-                        warn!("udp_transport failed read");
-                    }
-                }
-                None => (),
-            },
-            Err(e) => warn!("radio_transport failed read {:?}", e),
-        };
-        thread::sleep(Duration::from_millis(500));
+    if let Err(e) = transport_comms(radio_transport, udp_transport) {
+        warn!("transport comms err {:?}", e);
     }
+
+    // if let Err(e) = transport_comms(radio_transport, udp_transport) {
+    //     warn!("transport comms err {:?}", e);
+    // }
 }

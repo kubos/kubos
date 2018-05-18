@@ -1,13 +1,16 @@
-use codecs::*;
+use codecs;
 use nsl_duplex_d2::{serial_connection, DuplexD2, File};
+use transports::Transport;
 
-pub struct Transport {
+pub struct NslSerial {
+    count: u32,
     radio: DuplexD2,
 }
 
-impl Transport {
+impl NslSerial {
     pub fn new() -> Self {
         Self {
+            count: 0,
             radio: DuplexD2::new(serial_connection()),
         }
     }
@@ -23,6 +26,8 @@ impl Transport {
                 Ok(f) => f,
                 Err(e) => return Err(format!("Failed to get uploaded file {:?}", e)),
             };
+
+            info!("NSL received file {}", uploaded_file.name);
 
             return Ok(Some(uploaded_file.body));
         }
@@ -46,31 +51,35 @@ impl Transport {
         Ok(None)
     }
 
-    fn device_write(&self, data: &[u8]) -> Result<(), String> {
+    fn device_write(&mut self, data: &[u8]) -> Result<(), String> {
         let f = File {
-            name: String::from("UPLOAD"),
+            name: format!("UPLOAD{}", self.count),
             body: data.to_vec(),
         };
+        self.count += 1;
+        info!("NSL sending file {}", f.name);
         match self.radio.put_download_file(&f) {
             Ok(_) => Ok(()),
             Err(e) => Err(format!("Failed to put download file {:?}", e)),
         }
     }
+}
 
-    pub fn read(&self) -> Result<Option<udp::UdpData>, String> {
+impl Transport for NslSerial {
+    fn read(&self) -> Result<Option<codecs::udp::UdpData>, String> {
         match self.device_read()? {
             Some(data) => {
-                let decoded = kiss::decode(&data)?;
-                let decoded = udp::framed_decode(&decoded)?;
+                let decoded = codecs::kiss::decode(&data)?;
+                let decoded = codecs::udp::framed_decode(&decoded)?;
                 Ok(Some(decoded))
             }
             None => Ok(None),
         }
     }
 
-    pub fn write(&self, data: udp::UdpData) -> Result<(), String> {
+    fn write(&mut self, data: codecs::udp::UdpData) -> Result<(), String> {
         // We have raw data so we'll encode it here...
         // encode/decode layers to be moved elsewhere eventually
-        self.device_write(&kiss::encode(&udp::encode(&data)?)?)
+        self.device_write(&codecs::kiss::encode(&codecs::udp::encode(&data)?)?)
     }
 }

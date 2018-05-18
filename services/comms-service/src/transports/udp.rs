@@ -1,27 +1,29 @@
-use codecs::*;
+use codecs;
 use std::collections::HashMap;
 use std::net::{SocketAddr, UdpSocket};
 use std::sync::mpsc::{channel, Receiver, Sender, TryRecvError};
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
+use transports::Transport;
 
 pub struct SocketInfo {
-    pub sender: Sender<udp::UdpData>,
+    pub sender: Sender<codecs::udp::UdpData>,
     pub handle: JoinHandle<()>,
 }
 
-pub struct Transport {
+pub struct Udp {
     sockets: HashMap<u16, SocketInfo>,
     /// Used by the transport to receive data from the socket threads
-    receiver: Receiver<udp::UdpData>,
+    receiver: Receiver<codecs::udp::UdpData>,
     /// Used by the socket threads to send data to the transport
-    sender: Sender<udp::UdpData>,
+    sender: Sender<codecs::udp::UdpData>,
 }
 
-impl Transport {
+impl Udp {
     pub fn new() -> Self {
-        let (tx, rx) = channel::<udp::UdpData>();
+        info!("udp transport starting");
+        let (tx, rx) = channel::<codecs::udp::UdpData>();
         Self {
             sockets: HashMap::new(),
             receiver: rx,
@@ -29,46 +31,62 @@ impl Transport {
         }
     }
 
+    pub fn expose_ports(&mut self, ports: &[u16]) -> Result<(), String> {
+        for p in ports {
+            info!("udp exposing port {}", p);
+            self.listen_socket(*p)?;
+        }
+        Ok(())
+    }
+
+    // Attempts to grab socket for destination port from socket map
+    // Creates a new socket for port if one doesn't exist already
+    fn listen_socket(&mut self, listen_port: u16) -> Result<(), String> {
+        let (socket_tx, socket_rx) = channel::<codecs::udp::UdpData>();
+        let transport_tx = self.sender.clone();
+        let handle = thread::spawn(move || thread_loop(listen_port, 0, transport_tx, socket_rx));
+
+        let info = SocketInfo {
+            sender: socket_tx,
+            handle: handle,
+        };
+
+        self.sockets.insert(listen_port, info);
+
+        Ok(())
+    }
+
     // Attempts to grab socket for destination port from socket map
     // Creates a new socket for port if one doesn't exist already
     fn init_socket(&mut self, dest_port: u16) -> Result<(), String> {
-        let socket = match UdpSocket::bind("127.0.0.1:0") {
-            Ok(s) => s,
-            Err(e) => return Err(format!("Failed to bind UdpSocket {:?}", e)),
-        };
-
-        if let Err(e) = socket.set_write_timeout(Some(Duration::from_millis(100))) {
-            return Err(format!("Failed to set udp write timeout {:?}", e));
-        }
-
-        if let Err(e) = socket.set_read_timeout(Some(Duration::from_millis(100))) {
-            return Err(format!("Failed to set udp read timeout {:?}", e));
-        }
-
-        let (socket_tx, socket_rx) = channel::<udp::UdpData>();
+        let (socket_tx, socket_rx) = channel::<codecs::udp::UdpData>();
         let transport_tx = self.sender.clone();
-        let handle = thread::spawn(move || loop {
-            loop {
-                let dest = SocketAddr::from(([127, 0, 0, 1], 7000));
-                let mut buffer = vec![0u8; 4096];
-                if let Ok((amount, _source)) = socket.recv_from(&mut buffer) {
-                    transport_tx
-                        .send(udp::UdpData {
-                            source: 7000,
-                            dest: 7000,
-                            data: buffer[0..amount].to_vec(),
-                            checksum: false,
-                        })
-                        .unwrap();
-                }
+        let handle = thread::spawn(move || thread_loop(0, dest_port, transport_tx, socket_rx));
 
-                if let Ok(data) = socket_rx.recv() {
-                    if let Err(e) = socket.send_to(&data.data, &dest) {
-                        warn!("Failed socket.send_to {:?}", e);
-                    }
-                }
-            }
-        });
+        // let handle = thread::spawn(move || loop {
+        //     let tx = transport_tx.clone();
+        //     let dest = SocketAddr::from(([127, 0, 0, 1], dest_port));
+        //     let mut buffer = vec![0u8; 4096];
+        //     if let Ok((amount, _source)) = socket.recv_from(&mut buffer) {
+        //         info!("udp received {} bytes from {}", amount, dest_port);
+        //         let dat = codecs::udp::UdpData {
+        //             source: socket_port,
+        //             dest: dest_port,
+        //             data: buffer[0..amount].to_vec(),
+        //             checksum: false,
+        //         };
+        //         info!("udp sending {:?} from {}", dat, dest_port);
+        //         tx.send(dat).unwrap();
+        //     }
+
+        //     if let Ok(data) = socket_rx.recv() {
+        //         if let Err(e) = socket.send_to(&data.data, &dest) {
+        //             warn!("udp failed socket.send_to {:?}", e);
+        //         } else {
+        //             info!("udp sent {} bytes to {}", data.data.len(), dest_port);
+        //         }
+        //     }
+        // });
 
         let info = SocketInfo {
             sender: socket_tx,
@@ -90,22 +108,22 @@ impl Transport {
             None => Err(format!("Failed to locate socket {}", dest_port)),
         }
     }
+}
 
-    pub fn read(&mut self, dest_port: u16) -> Result<Option<udp::UdpData>, String> {
-        let _ = self.grab_socket(dest_port)?;
-
-        info!("-udp-recv-");
-
+impl Transport for Udp {
+    fn read(&self) -> Result<Option<codecs::udp::UdpData>, String> {
         match self.receiver.try_recv() {
-            Ok(data) => Ok(Some(data)),
-            Err(TryRecvError::Empty) => Ok(None),
-            Err(TryRecvError::Disconnected) => {
-                Err(format!("Socket channel {:?} disconnected", dest_port))
+            Ok(data) => {
+                info!("got msg from channe {:?}", data);
+                Ok(Some(data))
             }
+            Err(TryRecvError::Empty) => Ok(None),
+            Err(TryRecvError::Disconnected) => Err(String::from("udp receiver disconnected")),
         }
     }
 
-    pub fn write(&mut self, data: udp::UdpData, dest_port: u16) -> Result<(), String> {
+    fn write(&mut self, data: codecs::udp::UdpData) -> Result<(), String> {
+        let dest_port = data.dest;
         let socket = self.grab_socket(dest_port)?;
 
         if let Err(e) = socket.sender.send(data) {
@@ -116,5 +134,63 @@ impl Transport {
         }
 
         Ok(())
+    }
+}
+
+fn thread_loop(
+    source_port: u16,
+    dest_port: u16,
+    sender: Sender<codecs::udp::UdpData>,
+    receiver: Receiver<codecs::udp::UdpData>,
+) {
+    let socket = match UdpSocket::bind(format!("127.0.0.1:{}", source_port)) {
+        Ok(s) => s,
+        Err(e) => {
+            error!("Failed to bind UdpSocket {:?}", e);
+            return;
+        }
+    };
+
+    if let Err(e) = socket.set_write_timeout(Some(Duration::from_millis(100))) {
+        error!("Failed to set udp write timeout {:?}", e);
+        return;
+    }
+
+    if let Err(e) = socket.set_read_timeout(Some(Duration::from_millis(100))) {
+        error!("Failed to set udp read timeout {:?}", e);
+        return;
+    }
+
+    loop {
+        let mut dest_port = dest_port;
+        let mut buffer = vec![0u8; 4096];
+        // info!("attempt to recv@{}", listen_port);
+        if let Ok((amount, source)) = socket.recv_from(&mut buffer) {
+            // info!("got packet {} --> {}", listen_port, source.port());
+            dest_port = source.port();
+            // info!("udp received {} bytes from {}", amount, source);
+            let dat = codecs::udp::UdpData {
+                source: dest_port,
+                dest: source_port,
+                data: buffer[0..amount].to_vec(),
+                checksum: true,
+            };
+            // info!("udp sending {:?} from {}", dat, listen_port);
+            sender.send(dat).unwrap();
+        }
+
+        // info!("attempt to read msg off channel");
+        if let Ok(data) = receiver.try_recv() {
+            if dest_port != 0 {
+                let dest = SocketAddr::from(([127, 0, 0, 1], dest_port));
+
+                if let Err(e) = socket.send_to(&data.data, &dest) {
+                    warn!("udp failed socket.send_to {:?}", e);
+                } else {
+                    // info!("udp sent {} bytes to {}", data.data.len(), dest_port);
+                }
+            }
+        }
+        thread::sleep(Duration::from_millis(1000));
     }
 }
