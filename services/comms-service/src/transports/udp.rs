@@ -64,7 +64,7 @@ impl Transport {
 
                 if let Ok(data) = socket_rx.recv() {
                     if let Err(e) = socket.send_to(&data.data, &dest) {
-                        println!("Failed socket.send_to {:?}", e);
+                        warn!("Failed socket.send_to {:?}", e);
                     }
                 }
             }
@@ -94,7 +94,7 @@ impl Transport {
     pub fn read(&mut self, dest_port: u16) -> Result<Option<udp::UdpData>, String> {
         let _ = self.grab_socket(dest_port)?;
 
-        println!("-udp-recv-");
+        info!("-udp-recv-");
 
         match self.receiver.try_recv() {
             Ok(data) => Ok(Some(data)),

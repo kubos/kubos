@@ -33,7 +33,7 @@ impl Transport {
         };
 
         if download_count == 0 {
-            print!("ping");
+            info!("ping");
             match self.radio.put_download_file(&File {
                 name: String::from("PING"),
                 body: vec![],
@@ -58,10 +58,8 @@ impl Transport {
     }
 
     pub fn read(&self) -> Result<Option<udp::UdpData>, String> {
-        //        println!("nsl_read");
         match self.device_read()? {
             Some(data) => {
-                println!("decode nsl read");
                 let decoded = kiss::decode(&data)?;
                 let decoded = udp::framed_decode(&decoded)?;
                 Ok(Some(decoded))
@@ -71,7 +69,6 @@ impl Transport {
     }
 
     pub fn write(&self, data: udp::UdpData) -> Result<(), String> {
-        //      println!("nsl_write");
         // We have raw data so we'll encode it here...
         // encode/decode layers to be moved elsewhere eventually
         self.device_write(&kiss::encode(&udp::encode(&data)?)?)

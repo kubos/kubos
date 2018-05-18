@@ -5,3 +5,5 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
 nsl-duplex-d2 = { path = "../../apis/nsl-duplex-d2" }
+simplelog = "^0.5.0"
+log = "^0.4.0"

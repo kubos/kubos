@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use nom::{IResult, be_u16};
-use std::str::FromStr;
-use std::io::Write;
 use crc16;
+use nom::{IResult, be_u16};
+use std::io::Write;
+use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
 /// Structure for files
@@ -46,8 +46,8 @@ impl File {
         let name = String::from(name);
         let (input, body) = take!(input, body_length)?;
         let body = Vec::from(body);
-        let (input, crc) = be_u16(input)?;
-        println!("TODO: check crc: {}", crc);
+        let (input, _crc) = be_u16(input)?;
+        // TODO: check crc
         Ok((input, File { name, body }))
     }
 

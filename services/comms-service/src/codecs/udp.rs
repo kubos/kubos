@@ -124,7 +124,7 @@ mod tests {
     #[test]
     fn test_framed_decode_test_data() {
         let data = vec![
-            027, 88, 158, 88, 000, 8, 69, 71, 000, 130, 026, 000, 7, 116, 65, 245,
+            027, 88, 158, 88, 000, 8, 69, 71, 000, 130, 026, 000, 7, 116, 65, 245
         ];
         let payload: Vec<u8> = vec![];
         let decoded = framed_decode(&data);
@@ -141,7 +141,6 @@ mod tests {
             checksum: true,
         };
         let encoded = encode(&data).unwrap();
-        println!("encoded {:?}", encoded);
         let decoded = framed_decode(&encoded).unwrap();
 
         assert_eq!(decoded, data);
@@ -156,7 +155,6 @@ mod tests {
             checksum: true,
         };
         let encoded = encode(&data).unwrap();
-        println!("encoded {:?}", encoded);
         let decoded = framed_decode(&encoded).unwrap();
 
         assert_eq!(decoded, data);

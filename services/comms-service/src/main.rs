@@ -1,5 +1,11 @@
 extern crate nsl_duplex_d2;
 
+#[macro_use]
+extern crate log;
+extern crate simplelog;
+
+use simplelog::*;
+
 use std::thread;
 use std::time::Duration;
 
@@ -9,11 +15,17 @@ mod transports;
 use std::io::{self, Write};
 
 fn main() {
+    CombinedLogger::init(vec![
+        TermLogger::new(LevelFilter::Warn, Config::default()).unwrap(),
+        TermLogger::new(LevelFilter::Info, Config::default()).unwrap(),
+    ]).unwrap();
+
+    info!("Starting communications service");
+
     let radio_transport = transports::nsl_serial::Transport::new();
     let mut udp_transport = transports::udp::Transport::new();
 
     loop {
-        print!(".");
         io::stdout().flush().unwrap();
 
         match radio_transport.read() {
@@ -21,23 +33,23 @@ fn main() {
                 Some(packet) => {
                     let dest = packet.dest;
                     if let Err(e) = udp_transport.write(packet, dest) {
-                        println!("udp_transport failed write {:?}", e);
+                        warn!("udp_transport failed write {:?}", e);
                     }
 
                     if let Ok(res) = udp_transport.read(dest) {
                         match res {
                             Some(packet) => if let Err(e) = radio_transport.write(packet) {
-                                println!("radio_transport failed write {:?}", e)
+                                warn!("radio_transport failed write {:?}", e);
                             },
                             None => (),
                         }
                     } else {
-                        println!("udp_transport failed read");
+                        warn!("udp_transport failed read");
                     }
                 }
                 None => (),
             },
-            Err(e) => println!("Read err {:?}", e),
+            Err(e) => warn!("radio_transport failed read {:?}", e),
         };
         thread::sleep(Duration::from_millis(500));
     }
