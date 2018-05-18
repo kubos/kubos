@@ -52,7 +52,7 @@ class MCU:
     def read(self,count):
         if count < (HEADER_SIZE+1):
             raise TypeError('Read count must be at least '+str(HEADER_SIZE+1)+' bytes.')
-        data = raw_read(count = count)
+        data = self.raw_read(count = count)
         if data[0] != '\x01':
             #raise IOError('Data is not ready')
             return {'timestamp':0,'data':(count-HEADER_SIZE)*'\xff'}
@@ -129,6 +129,9 @@ class MCU:
             if parsing == "s":
                 # Leave strings alone
                 pass
+            elif parsing == "h":
+                # store as a hex string
+                output_dict[field]['data'] = output_dict[field]['data'].encode('hex')
             elif (len(parsing) == 2 and parsing[0] in ['<','>']) or len(parsing) == 1:
                 # Only one value, parse and store
                 output_dict[field]['data'] = struct.unpack(parsing,output_dict[field]["data"])[0]
