@@ -1,3 +1,6 @@
-graphene==2.0.1
+graphene==2.1
 Flask==0.12.2
 Flask-GraphQL==1.4.1
+graphql-core==2.0
+rx
+aniso8601

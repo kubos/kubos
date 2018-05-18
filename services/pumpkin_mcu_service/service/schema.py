@@ -60,6 +60,7 @@ class Query(graphene.ObjectType):
             raise ValueError('Module not present',module)
         mcu = mcu_api.MCU(address = address)
         bin_data = mcu.raw_read(count = count)
+        
         return bin_data.encode("hex")
         
 
