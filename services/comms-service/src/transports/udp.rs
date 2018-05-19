@@ -161,8 +161,10 @@ fn thread_loop(
         return;
     }
 
+    let mut dest_port = dest_port;
+    let mut source_port = 0;
+
     loop {
-        let mut dest_port = dest_port;
         let mut buffer = vec![0u8; 4096];
         // info!("attempt to recv@{}", listen_port);
         if let Ok((amount, source)) = socket.recv_from(&mut buffer) {
@@ -170,6 +172,8 @@ fn thread_loop(
             dest_port = source.port();
             // info!("udp received {} bytes from {}", amount, source);
             let dat = codecs::udp::UdpData {
+                //source: dest_port,
+                //dest: source_port,
                 source: dest_port,
                 dest: source_port,
                 data: buffer[0..amount].to_vec(),
@@ -181,6 +185,7 @@ fn thread_loop(
 
         // info!("attempt to read msg off channel");
         if let Ok(data) = receiver.try_recv() {
+            source_port = data.source;
             if dest_port != 0 {
                 let dest = SocketAddr::from(([127, 0, 0, 1], dest_port));
 

@@ -9,6 +9,7 @@ pub struct NslSerial {
 
 impl NslSerial {
     pub fn new() -> Self {
+        info!("nsl transport starting");
         Self {
             count: 0,
             radio: DuplexD2::new(serial_connection()),
