@@ -22,7 +22,7 @@ class Query(graphene.ObjectType):
     Creates query endpoints exposed by graphene.
     """
     moduleList = graphene.JSONString()
-    fieldList = graphene.List(module=graphene.String())
+    fieldList = graphene.List(graphene.String,module=graphene.String())
     rawRead = graphene.String(
         module=graphene.String(),
         count=graphene.Int())
