@@ -12,6 +12,8 @@ import mcu_api
 
 MODULES = mcu_api.CONFIG_DATA['modules']
 
+
+"""
 for module in MODULES:
     module = str(module)
     address = MODULES[module]['address']
@@ -31,3 +33,13 @@ for module in MODULES:
         print "\n Errors: "
         for field in ERRORS:
             print (field,out[field])
+"""
+
+module = "sim"
+address = MODULES[module]['address']
+fields = ["firmware_version","commands_parsed","scpi_errors","time"]
+print('\nModule: ' + module)
+print('Address: ' + str(address))
+print('Fields: ' + str(fields) + '\n')
+mcu = mcu_api.MCU(address = address)
+out = mcu.get_module_telemetry(module = module,fields = fields)
