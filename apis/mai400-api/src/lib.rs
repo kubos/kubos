@@ -25,8 +25,7 @@
 //!
 //! # fn func() -> MAIResult<()> {
 //! // Create a new MAI connection
-//! let connection = Connection::new("/dev/ttyS5");
-//! let mai = MAI400::new(connection);
+//! let mai = MAI400::new("/dev/ttyS5")?;
 //!
 //! // Set the GPS time to Jan 01, 2018
 //! mai.set_gps_time(1198800018)?;
@@ -51,21 +50,18 @@
 extern crate bitflags;
 extern crate byteorder;
 extern crate crc16;
-#[cfg(test)]
-#[macro_use]
-extern crate double;
 #[macro_use]
 extern crate failure;
 #[macro_use]
 extern crate nom;
+extern crate rust_uart;
 extern crate serial;
 
 mod mai400;
 mod messages;
-mod serial_comm;
 #[cfg(test)]
 mod tests;
 
 pub use mai400::*;
 pub use messages::rx::*;
-pub use serial_comm::Connection;
+pub use rust_uart::{mock, Connection, UartError};
