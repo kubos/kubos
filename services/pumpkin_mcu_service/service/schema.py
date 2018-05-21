@@ -17,23 +17,21 @@ from pumpkin_mcu_api import mcu_api
 # Get what modules are present from config file
 MODULES = mcu_api.CONFIG_DATA['modules']
 
-# Local subsystem instance for tracking state
-# May not be neccesary when tied into actual hardware
-#_local = Subsystem(power_on=False)
-
-
 class Query(graphene.ObjectType):
     """
     Creates query endpoints exposed by graphene.
     """
-    
+    moduleList = graphene.String()
     rawRead = graphene.String(
         module=graphene.String(),
         count=graphene.Int())
     mcuTelemetry = graphene.JSONString(
         module=graphene.String(),
         fields=graphene.List(graphene.String,default_value = ["all"]))
-        
+    
+    def resolve_moduleList(self, info):
+        return json.dumps(MODULES)
+    
     def resolve_mcuTelemetry(self, info, module, fields):
         """
         Handles request for subsystem query.
@@ -46,7 +44,6 @@ class Query(graphene.ObjectType):
         fields = map(str,fields)
         mcu = mcu_api.MCU(address = address)
         out = mcu.get_module_telemetry(module = module,fields = fields)
-        
         return json.dumps(out)
     
     def resolve_rawRead(self, info, module, count):
@@ -62,8 +59,6 @@ class Query(graphene.ObjectType):
         bin_data = mcu.raw_read(count = count)
         
         return bin_data.encode("hex")
-        
-
 
 class Passthrough(graphene.Mutation):
     """
