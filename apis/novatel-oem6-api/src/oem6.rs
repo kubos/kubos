@@ -712,7 +712,7 @@ pub enum OEMError {
         id: u16,
     },
     /// An error was thrown by the serial communication driver
-    #[display(fmt = "{}", cause)]
+    #[display(fmt = "UART Error")]
     UartError {
         /// The underlying error
         #[fail(cause)]

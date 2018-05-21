@@ -14,8 +14,10 @@
 // limitations under the License.
 //
 
+use failure::Fail;
 use novatel_oem6_api::*;
 use std::cell::{Cell, RefCell};
+use std::io::Error;
 use std::sync::mpsc::sync_channel;
 
 use objects::*;
@@ -41,6 +43,27 @@ impl Subsystem {
             oem,
             last_cmd: Cell::new(AckCommand::None),
             errors: RefCell::new(vec![]),
+        })
+    }
+
+    pub fn passthrough(&self, command: String) -> Result<GenericResponse, Error> {
+        // Convert the hex values in the string into actual hex values
+        // Ex. "c3c2" -> [0xc3, 0xc2]
+        let tx: Vec<u8> = command
+            .as_bytes()
+            .chunks(2)
+            .into_iter()
+            .map(|chunk| u8::from_str_radix(::std::str::from_utf8(chunk).unwrap(), 16).unwrap())
+            .collect();
+
+        let result = run!(self.oem.passthrough(tx.as_slice()), self.errors);
+
+        Ok(GenericResponse {
+            success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => err,
+            },
         })
     }
 }

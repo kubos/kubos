@@ -228,10 +228,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         response: String
     //     }
     // }
-    field issue_raw_command(&executor) -> FieldResult<String>
+    field issue_raw_command(&executor, command: String) -> FieldResult<GenericResponse>
     {
         executor.context().subsystem().last_cmd.set(AckCommand::IssueRawCommand);
-        //Ok(executor.context().subsystem().passthrough(command)?)
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().passthrough(command)?)
     }
 });

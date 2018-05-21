@@ -132,7 +132,9 @@ fn ack_issue_raw_command() {
     let service = service_new!(mock);
 
     let mutation = r#"mutation {
-            issueRawCommand
+            issueRawCommand(command: "01"){
+                success
+            }
         }"#;
 
     service.process(mutation.to_owned());
