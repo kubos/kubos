@@ -43,3 +43,8 @@ print('Address: ' + str(address))
 print('Fields: ' + str(fields) + '\n')
 mcu = mcu_api.MCU(address = address)
 out = mcu.get_module_telemetry(module = module,fields = fields)
+ERRORS = []
+for field in out:
+    print (field,out[field])
+    if out[field]['timestamp'] == 0:
+        ERRORS.append([field])
