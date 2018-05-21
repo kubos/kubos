@@ -18,7 +18,7 @@ use super::*;
 
 #[test]
 fn get_lock_status() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 

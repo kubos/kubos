@@ -200,10 +200,13 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // mutation {
     //     configureHardware: "Not Implemented"
     // }
-    field configure_hardware(&executor) -> FieldResult<String>
+    field configure_hardware(
+        &executor, 
+        config: Vec<ConfigStruct>,
+    ) -> FieldResult<ConfigureHardwareResponse>
     {
         executor.context().subsystem().last_cmd.set(AckCommand::ConfigureHardware);
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().configure_hardware(config)?)
     }
 
     // Run a system self-test

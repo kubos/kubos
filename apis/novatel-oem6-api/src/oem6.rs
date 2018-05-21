@@ -417,14 +417,14 @@ impl OEM6 {
     /// ```
     ///
     /// [`OEMError`]: enum.OEMError.html
-    pub fn request_errors(&self) -> OEMResult<()> {
+    pub fn request_errors(&self, hold: bool) -> OEMResult<()> {
         let request = LogCmd::new(
             Port::COM1 as u32,
             MessageID::RxStatusEvent as u16,
             LogTrigger::OnChanged,
             0.0,
             0.0,
-            false,
+            hold,
         );
 
         self.send_message(request)

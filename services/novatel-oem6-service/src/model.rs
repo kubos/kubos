@@ -46,6 +46,55 @@ impl Subsystem {
         })
     }
 
+    pub fn configure_hardware(
+        &self,
+        input: Vec<ConfigStruct>,
+    ) -> Result<ConfigureHardwareResponse, Error> {
+        let mut success = true;
+        let mut errors = "".to_owned();
+        let mut config = "".to_owned();
+
+        for entry in input.iter() {
+            let result = run!(
+                match entry.option {
+                    ConfigOption::LogErrorData => self.oem.request_errors(entry.hold),
+                    ConfigOption::LogPositionData => {
+                        self.oem
+                            .request_position(entry.interval, entry.offset, entry.hold)
+                    }
+                    ConfigOption::UnlogAll => self.oem.request_unlog_all(entry.hold),
+                    ConfigOption::UnlogErrorData => {
+                        self.oem.request_unlog(MessageID::RxStatusEvent)
+                    }
+                    ConfigOption::UnlogPositionData => self.oem.request_unlog(MessageID::BestXYZ),
+                },
+                self.errors
+            );
+
+            success &= result.is_ok();
+            if let Err(err) = result {
+                if !errors.is_empty() {
+                    errors.push_str(". ");
+                }
+                errors.push_str(&format!("{:?}: {}", entry.option, err));
+            }
+
+            if !config.is_empty() {
+                config.push_str(", ");
+            }
+            config.push_str(&format!("{:?}(Hold: {})", entry.option, entry.hold));
+            if entry.interval != 0.0 {
+                config.push_str(&format!(": {}+{}sec", entry.interval, entry.offset));
+            }
+        }
+
+        Ok(ConfigureHardwareResponse {
+            success,
+            errors,
+            config,
+        })
+    }
+
     pub fn passthrough(&self, command: String) -> Result<GenericResponse, Error> {
         // Convert the hex values in the string into actual hex values
         // Ex. "c3c2" -> [0xc3, 0xc2]

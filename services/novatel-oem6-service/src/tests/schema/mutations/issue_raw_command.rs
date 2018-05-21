@@ -43,7 +43,7 @@ fn issue_raw_command_good() {
 
 #[test]
 fn issue_raw_command_bad() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 
