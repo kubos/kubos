@@ -14,9 +14,8 @@
 // limitations under the License.
 //
 
-//TODO: enable these
-//#![deny(missing_docs)]
-//#![deny(warnings)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 //! Kubos Service for interacting with a [NovAtel OEM6 High Precision GNSS Receiver](https://www.novatel.com/products/gnss-receivers/oem-receiver-boards/oem6-receivers/)
 //!
@@ -53,7 +52,6 @@
 extern crate failure;
 #[macro_use]
 extern crate juniper;
-#[macro_use]
 extern crate kubos_service;
 extern crate novatel_oem6_api;
 #[cfg(test)]
@@ -61,16 +59,17 @@ extern crate novatel_oem6_api;
 extern crate serde_json;
 
 mod model;
-//mod objects;
+mod objects;
 mod schema;
 #[cfg(test)]
 mod tests;
 
 use kubos_service::{Config, Service};
-use novatel_oem6_api::OEMResult;
 use model::Subsystem;
+use novatel_oem6_api::OEMResult;
 use schema::{MutationRoot, QueryRoot};
-use std::sync::Arc;
+
+// TODO: CHANGE THE UART BUS TO UART4!!!
 
 fn main() -> OEMResult<()> {
     Service::new(

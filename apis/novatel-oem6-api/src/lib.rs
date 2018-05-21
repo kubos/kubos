@@ -84,4 +84,5 @@ pub use messages::MessageID;
 pub use messages::commands::ResponseID;
 pub use messages::logs::*;
 pub use oem6::*;
+pub use rust_uart::{mock, Connection, UartError};
 pub use serial::BaudRate;

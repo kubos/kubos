@@ -14,23 +14,11 @@
 // limitations under the License.
 //
 
-/// Common response fields structure for requests
-/// which don't return any specific data
-#[derive(GraphQLObject)]
-pub struct GenericResponse {
-    pub errors: String,
-    pub success: bool,
-}
+use super::*;
 
-/// Return field for 'ack' query
-///
-/// Indicates last mutation executed by the service
-#[derive(GraphQLEnum, Clone, Copy)]
-pub enum AckCommand {
-    None,
-    Noop,
-    ControlPower,
-    ConfigureHardware,
-    TestHardware,
-    IssueRawCommand,
-}
+mod configure_hardware;
+mod control_power;
+mod errors;
+mod issue_raw_command;
+mod noop;
+mod test_hardware;

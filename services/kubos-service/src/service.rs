@@ -15,11 +15,15 @@
 //
 
 use std::collections::HashMap;
+use std::os::unix::io::AsRawFd;
 use std::net::{SocketAddr, UdpSocket};
 use std::cell::RefCell;
 use serde_json;
 use config::Config;
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Value, Variables};
+
+const FIONREAD: u16 = 0x541B;
+ioctl!(bad read udp_bytes_available with FIONREAD; usize);
 
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.
@@ -143,20 +147,33 @@ where
 
         let socket = UdpSocket::bind(&addr).unwrap();
         println!("Listening on: {}", socket.local_addr().unwrap());
-        let mut buf = [0; 128];
-        let mut to_send: Option<(usize, SocketAddr)> = None;
+
         loop {
-            if let Some((size, peer)) = to_send {
-                let query_string = String::from_utf8(buf[0..(size)].to_vec()).unwrap();
-                let res = self.process(query_string);
-                let _amt = socket.send_to(&res.as_bytes(), &peer);
+            // Wait for an incoming message
+            let mut buf: [u8; 1] = [0];
+            socket.peek_from(&mut buf).unwrap();
+
+            // Get the message size
+            let mut len: usize = 0;
+            unsafe {
+                udp_bytes_available(socket.as_raw_fd(), &mut len).unwrap();
             }
 
-            to_send = Some(socket.recv_from(&mut buf).unwrap());
+            // Read it into a correctly sized buffer
+            let mut buf = vec![0u8; len].into_boxed_slice();
+
+            // Go process the request
+            let (size, peer) = socket.recv_from(&mut buf).unwrap();
+            let query_string = String::from_utf8(buf[0..(size)].to_vec()).unwrap();
+            let res = self.process(query_string);
+
+            // And then send the response back
+            let _amt = socket.send_to(&res.as_bytes(), &peer);
         }
     }
 
-    fn process(&self, query: String) -> String {
+    /// Processes a GraphQL query
+    pub fn process(&self, query: String) -> String {
         match execute(
             &query,
             None,

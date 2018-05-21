@@ -14,23 +14,21 @@
 // limitations under the License.
 //
 
-/// Common response fields structure for requests
-/// which don't return any specific data
-#[derive(GraphQLObject)]
-pub struct GenericResponse {
-    pub errors: String,
-    pub success: bool,
-}
+use super::*;
 
-/// Return field for 'ack' query
-///
-/// Indicates last mutation executed by the service
-#[derive(GraphQLEnum, Clone, Copy)]
-pub enum AckCommand {
-    None,
-    Noop,
-    ControlPower,
-    ConfigureHardware,
-    TestHardware,
-    IssueRawCommand,
+#[test]
+fn issue_raw_command() {
+    let mock = MockStream::default();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            issueRawCommand
+        }"#;
+
+    let expected = json!({
+            "issueRawCommand": "Not Implemented"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
 }
