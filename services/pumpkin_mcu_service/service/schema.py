@@ -21,7 +21,8 @@ class Query(graphene.ObjectType):
     """
     Creates query endpoints exposed by graphene.
     """
-    moduleList = graphene.String()
+    moduleList = graphene.JSONString()
+    fieldList = graphene.List(module=graphene.String())
     rawRead = graphene.String(
         module=graphene.String(),
         count=graphene.Int())
@@ -31,6 +32,20 @@ class Query(graphene.ObjectType):
     
     def resolve_moduleList(self, info):
         return json.dumps(MODULES)
+        
+    def resolve_fieldList(self, info, module):
+        if module not in MODULES:
+            raise KeyError('Module not configured',module)
+        address = MODULES[module]['address']
+        if address == 0:
+            raise ValueError('Module not present',module)
+        telemetry = mcu_api.CONFIG_DATA['telemetry']
+        fields = []
+        for field in telemetry["supervisor"]:
+            fields.append(field)
+        for field in telemetry[module]:
+            fields.append(field)
+        return fields
     
     def resolve_mcuTelemetry(self, info, module, fields):
         """
