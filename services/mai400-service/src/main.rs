@@ -23,7 +23,7 @@
 //!
 //! The service can be configured in the `/home/system/etc/config.toml` with the following fields:
 //! ```
-//! [mai400-service]
+//! [mai400-service.addr]
 //! ip = "127.0.0.1"
 //! port = 8082
 //! ```
