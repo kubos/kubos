@@ -160,7 +160,7 @@ pub fn read_thread(
                         // loop still trying
                         TrySendError::Disconnected(_) => {
                             if log_err {
-                                panic!()
+                                panic!("Both message receivers have disconnected")
                             }
                             response_err = true;
                             Ok(())
@@ -173,7 +173,7 @@ pub fn read_thread(
                         TrySendError::Full(_) => Ok(()),
                         TrySendError::Disconnected(_) => {
                             if response_err {
-                                panic!()
+                                panic!("Both message receivers have disconnected")
                             }
                             log_err = true;
                             Ok(())
