@@ -399,10 +399,10 @@ dependencies = [
  "bitflags 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "byteorder 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "crc16 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "double 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 1.0.0 (git+https://github.com/rust-lang-nursery/failure)",
  "kubos-build-helper 0.1.0",
  "nom 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust-uart 0.2.0",
  "serial 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

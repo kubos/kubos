@@ -21,4 +21,4 @@ pub use self::rx::*;
 pub use self::tx::*;
 
 /// IRIG-106 sync word
-pub const SYNC: u16 = 0xEB90;
+pub const SYNC: [u8; 2] = [0x90, 0xEB];
