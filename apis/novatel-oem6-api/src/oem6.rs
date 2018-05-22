@@ -394,6 +394,11 @@ impl OEM6 {
 
     /// Request that the device send error messages as they occur
     ///
+    /// # Arguments
+    ///
+    /// * hold - Whether the [`unlog_all`] command should be able to apply to this log. A value
+    ///          of `true` will prevent [`unlog_all`] from applying to this log.
+    ///
     /// # Errors
     ///
     /// If this function encounters any errors, an [`OEMError`] variant will be returned.
@@ -411,7 +416,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     ///
-    /// oem.request_errors()?;
+    /// oem.request_errors(false)?;
     /// # Ok(())
     /// # }
     /// ```
