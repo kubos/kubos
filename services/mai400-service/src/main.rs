@@ -22,7 +22,8 @@
 //! # Configuration
 //!
 //! The service can be configured in the `/home/system/etc/config.toml` with the following fields:
-//! ```
+//!
+//! ```toml
 //! [mai400-service.addr]
 //! ip = "127.0.0.1"
 //! port = 8082
@@ -34,7 +35,7 @@
 //!
 //! The service should be started automatically by its init script, but may also be started manually:
 //!
-//! ```
+//! ```shell
 //! $ mai400-service
 //! Kubos MAI-400 service started
 //! Listening on: 10.63.1.20:8082
