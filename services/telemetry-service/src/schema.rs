@@ -60,20 +60,20 @@ graphql_object!(QueryRoot: Context |&self| {
 
         let mut query = telemetry::table.into_boxed::<<SqliteConnection as Connection>::Backend>();
 
-        if let Some(subsystem) = subsystem {
-            query = query.filter(dsl::subsystem.eq(subsystem));
+        if let Some(sub) = subsystem {
+            query = query.filter(dsl::subsystem.eq(sub));
         }
 
-        if let Some(parameter) = parameter {
-            query = query.filter(dsl::parameter.eq(parameter));
+        if let Some(param) = parameter {
+            query = query.filter(dsl::parameter.eq(param));
         }
 
-        if let Some(timestamp_ge) = timestamp_ge {
-            query = query.filter(dsl::timestamp.ge(timestamp_ge));
+        if let Some(time_ge) = timestamp_ge {
+            query = query.filter(dsl::timestamp.ge(time_ge));
         }
 
-        if let Some(timestamp_le) = timestamp_le {
-            query = query.filter(dsl::timestamp.le(timestamp_le));
+        if let Some(time_le) = timestamp_le {
+            query = query.filter(dsl::timestamp.le(time_le));
         }
 
         query = query.order(dsl::timestamp);
