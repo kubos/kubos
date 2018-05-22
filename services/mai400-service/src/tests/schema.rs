@@ -27,7 +27,7 @@ use tests::test_data::*;
 macro_rules! wrap {
     ($result:ident) => {{
         json!({
-                    "msg": serde_json::to_string(&$result).unwrap(),
+                    "msg": $result,
                     "errs": ""
             }).to_string()
     }};
@@ -654,12 +654,7 @@ fn telemetry_debug_irehs() {
     assert_eq!(result, wrap!(expected));
 
     let mut actual: serde_json::Value = serde_json::from_slice(&result.as_bytes()).unwrap();
-    match serde_json::from_value::<String>(actual["msg"].clone()) {
-        Ok(msg) => {
-            actual = serde_json::from_str(&msg).unwrap();
-        }
-        _ => panic!("Errors returned from query"),
-    }
+    actual = actual["msg"].clone();
 
     // Make sure derived structure values matche original values from arrays
 
