@@ -50,7 +50,8 @@ graphql_object!(QueryRoot: Context |&self| {
         timestamp_ge: Option<i32>,
         timestamp_le: Option<i32>,
         subsystem: Option<String>,
-        parameter: Option<String>
+        parameter: Option<String>,
+        limit: Option<i32>,
     ) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
@@ -74,6 +75,10 @@ graphql_object!(QueryRoot: Context |&self| {
 
         if let Some(time_le) = timestamp_le {
             query = query.filter(dsl::timestamp.le(time_le));
+        }
+
+        if let Some(l) = limit {
+            query = query.limit(l.into());
         }
 
         query = query.order(dsl::timestamp);

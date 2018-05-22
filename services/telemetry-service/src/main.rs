@@ -125,6 +125,18 @@
 //!   }
 //! }
 //! ```
+//!
+//! ## Select ten entries occurring on or after the timestamp 1008
+//! ```graphql
+//! {
+//!   telemetry(limit: 10, timestampGe: 1008) {
+//!     timestamp,
+//!     subsystem,
+//!     parameter,
+//!     value
+//!   }
+//! }
+//! ```
 
 #[macro_use]
 extern crate diesel;
