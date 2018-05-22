@@ -1,15 +1,12 @@
 extern crate mai400_api;
 
 use mai400_api::*;
-use std::thread;
-use std::time::Duration;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::thread;
+use std::time::Duration;
 
-fn read_loop(exit: Arc<AtomicBool>) {
-    let connection = Connection::new("/dev/ttyS5");
-    let mai = MAI400::new(connection);
-
+fn read_loop(mai: MAI400, exit: Arc<AtomicBool>) {
     let mut std = StandardTelemetry::default();
     let mut imu = RawIMU::default();
     let mut irehs = IREHSTelemetry::default();
@@ -241,17 +238,17 @@ fn read_loop(exit: Arc<AtomicBool>) {
     println!("");
 }
 
-fn main() {
+fn main() -> MAIResult<()> {
     println!("MAI400 Rust Test");
 
-    let connection = Connection::new("/dev/ttyS5");
-    let mai = MAI400::new(connection);
+    let mai = MAI400::new("/dev/ttyS5")?;
 
     // Start read thread
+    let mai_ref = mai.clone();
     let main_exit = Arc::new(AtomicBool::new(false));
     let thread_exit = main_exit.clone();
 
-    let handle = thread::spawn(move || read_loop(thread_exit));
+    let handle = thread::spawn(move || read_loop(mai_ref, thread_exit));
 
     // Set GPS time to Jan 01, 2018
     mai.set_gps_time(1198800018).unwrap();
@@ -265,4 +262,6 @@ fn main() {
     handle.join().unwrap();
 
     println!("End of test");
+
+    Ok(())
 }
