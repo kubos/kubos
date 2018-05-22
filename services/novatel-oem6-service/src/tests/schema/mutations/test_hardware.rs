@@ -17,17 +17,29 @@
 use super::*;
 
 #[test]
-fn test_hardware() {
+fn test_hardware_integration_good() {
     let mut mock = MockStream::default();
+
+    mock.write.set_input(LOG_VERSION_COMMAND.to_vec());
+
+    let mut output = LOG_RESPONSE_GOOD.to_vec();
+    output.extend_from_slice(&VERSION_LOG);
+    mock.read.set_output(output);
 
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            testHardware
+            testHardware {
+                errors,
+                success
+            }
         }"#;
 
     let expected = json!({
-            "testHardware": "Not Implemented"
+            "testHardware": {
+                "errors": "",
+                "success": true
+            }
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));

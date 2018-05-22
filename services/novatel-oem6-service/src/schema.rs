@@ -97,6 +97,19 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(String::from("Not Implemented"))
     }
     
+    // Get the test results of the last run test
+    //
+    // {
+    //     testResults{
+    //         success,
+    //         telemetryNominal{...},
+    //         telemetryDebug{...}
+    //     }
+    // }
+    field test_results(&executor) -> FieldResult<IntegrationTestResults> {
+        Ok(executor.context().subsystem().get_test_results()?)
+    }
+    
     // TODO: Check for system errors
     // Stretch goal: Implement RXSTATUS
     field system_status(&executor) -> FieldResult<String>
@@ -165,19 +178,16 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 
     // Execute a trivial command against the system
     //
-    // TODO: Get/Read FW version
-    //
     // mutation {
     //     noop {
     //         errors: String,
     //         success: Boolean
     //    }
     // }
-    field noop(&executor) -> FieldResult<String>
+    field noop(&executor) -> FieldResult<GenericResponse>
     {
         executor.context().subsystem().last_cmd.set(AckCommand::Noop);
-        //Ok(executor.context().subsystem().noop()?)
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().noop()?)
     }
 
     // Control the power state of the system
@@ -224,12 +234,32 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 
     // Run a system self-test
     //
-    // TODO: minimum - No-op command. Stretch goal: implement RXSTATUS and the "built-in status tests"
+    // test: Type of self-test to perform
     //
-    field test_hardware(&executor) -> FieldResult<String>
+    // mutation {
+    //     testHardware(test: TestType) {
+    //         ... on IntegrationTestResults {
+    //             errors: String,
+    //             success: Boolean,
+    //             telemetryNominal{...},
+    //             telemetryDebug{...}
+    //         }
+    //         ... on HardwareTestResults {
+    //             errors: "Not Implemented",
+    //             success: true,
+    //             data: Empty
+    //         }
+    //    }
+    // }
+    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults>
     {
         executor.context().subsystem().last_cmd.set(AckCommand::TestHardware);
-        Ok(String::from("Not Implemented"))
+        match test {
+            TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem()
+                    .get_test_results().unwrap())),
+            TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults {
+                        errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
+        }
     }
 
     // Pass a custom command through to the system

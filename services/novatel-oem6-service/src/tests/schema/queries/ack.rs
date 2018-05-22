@@ -40,7 +40,9 @@ fn ack_noop() {
     let service = service_new!(mock);
 
     let noop = r#"mutation {
-            noop
+            noop {
+                success
+            }
         }"#;
 
     service.process(noop.to_owned());
