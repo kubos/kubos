@@ -248,7 +248,6 @@ impl OEM6 {
             log_recv,
             response_recv,
         })
-        //TODO: Turn off RXSTATUSEVENTA messages (UNLOG)
     }
 
     /// Request the system version information
@@ -471,8 +470,8 @@ impl OEM6 {
     ///
     /// # Arguments
     ///
-    /// * hold - Specifies whether log messages which were set with the `hold` option should
-    ///          also be unlogged
+    /// * clear_holds - Specifies whether log messages which were set with the `hold` option
+    ///                 should also be unlogged
     ///
     /// # Errors
     ///
@@ -522,8 +521,8 @@ impl OEM6 {
     /// ```
     ///
     /// [`OEMError`]: enum.OEMError.html
-    pub fn request_unlog_all(&self, hold: bool) -> OEMResult<()> {
-        let request = UnlogAllCmd::new(Port::COM1 as u32, hold);
+    pub fn request_unlog_all(&self, clear_holds: bool) -> OEMResult<()> {
+        let request = UnlogAllCmd::new(Port::COM1 as u32, clear_holds);
 
         self.send_message(request)
             .and_then(|_| self.get_response(MessageID::UnlogAll))
