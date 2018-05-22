@@ -22,6 +22,7 @@
 //! # Configuration
 //!
 //! The service can be configured in the `/home/system/etc/config.toml` with the following fields:
+//!
 //! ```
 //! [telemetry-service]
 //! database = "/var/lib/telemetry.db"
@@ -31,7 +32,9 @@
 //! port = 8089
 //! ```
 //!
-//! Where `database` specifies the path to the telemetry database file, `ip` specifies the service's IP address, and `port` specifies the port on which the service will be listening for UDP packets.
+//! Where `database` specifies the path to the telemetry database file, `ip` specifies the
+//! service's IP address, and `port` specifies the port on which the service will be
+//! listening for UDP packets.
 //!
 //! # Starting the Service
 //!
@@ -58,7 +61,7 @@
 //!   value: Float!
 //! }
 //!
-//! query telemetry(timestampGe: Float, timestampLe: Float, subsystem: String, parameter: String): Entry
+//! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): Entry
 //! ```
 //!
 //! # Example Queries
@@ -110,12 +113,24 @@
 //!   }
 //! }
 //! ```
-#[macro_use]
-extern crate juniper;
-extern crate kubos_service;
+//!
+//! ## Select all attributes of all telemetry entries occurring at the timestamp 101
+//! ```graphql
+//! {
+//!   telemetry(timestampGe: 101, timestampLe: 101) {
+//!     timestamp,
+//!     subsystem,
+//!     parameter,
+//!     value
+//!   }
+//! }
+//! ```
 
 #[macro_use]
 extern crate diesel;
+#[macro_use]
+extern crate juniper;
+extern crate kubos_service;
 
 mod db;
 mod models;

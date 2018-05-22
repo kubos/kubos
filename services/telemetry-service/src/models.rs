@@ -16,8 +16,8 @@
 
 #[derive(Debug, Queryable)]
 pub struct Entry {
-    pub timestamp: Option<i32>,
-    pub subsystem: Option<String>,
-    pub parameter: Option<String>,
-    pub value: Option<f64>,
+    pub timestamp: i32,
+    pub subsystem: String,
+    pub parameter: String,
+    pub value: String,
 }

@@ -24,11 +24,11 @@ use std::time::Duration;
 use std::{thread, thread::JoinHandle};
 
 static UP_SQL: &'static str = r"CREATE TABLE telemetry (
-timestamp INTEGER NOT NULL,
-subsystem VARCHAR(255) NOT NULL,
-parameter VARCHAR(255) NOT NULL,
-value DOUBLE NOT NULL,
-PRIMARY KEY (timestamp, subsystem, parameter));";
+    timestamp INTEGER NOT NULL,
+    subsystem VARCHAR(255) NOT NULL,
+    parameter VARCHAR(255) NOT NULL,
+    value VARCHAR(255) NOT NULL,
+    PRIMARY KEY (timestamp, subsystem, parameter))";
 
 static DOWN_SQL: &'static str = r"DROP TABLE telemetry;";
 

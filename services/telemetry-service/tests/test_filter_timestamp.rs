@@ -21,12 +21,12 @@ mod utils;
 use utils::*;
 
 static SQL: &'static str = r"
-insert into telemetry values(1000, 'eps', 'voltage', 3.3);
-insert into telemetry values(1001, 'eps', 'voltage', 3.4);
-insert into telemetry values(1002, 'eps', 'voltage', 3.5);
-insert into telemetry values(1003, 'eps', 'voltage', 3.6);
-insert into telemetry values(1004, 'eps', 'voltage', 3.7);
-insert into telemetry values(1005, 'eps', 'voltage', 3.8);
+insert into telemetry values(1000, 'eps', 'voltage', '3.3');
+insert into telemetry values(1001, 'eps', 'voltage', '3.4');
+insert into telemetry values(1002, 'eps', 'voltage', '3.5');
+insert into telemetry values(1003, 'eps', 'voltage', '3.6');
+insert into telemetry values(1004, 'eps', 'voltage', '3.7');
+insert into telemetry values(1005, 'eps', 'voltage', '3.8');
 ";
 
 /// These four test cases are all in one test function because
@@ -49,8 +49,8 @@ fn tests() {
             "errs": "",
             "msg": {
                 "telemetry": [
-                    {"value":3.7},
-                    {"value":3.8}
+                    {"value":"3.7"},
+                    {"value":"3.8"}
                 ]
             }
         })
@@ -62,9 +62,9 @@ fn tests() {
             "errs": "",
             "msg": {
                 "telemetry": [
-                    {"value":3.3},
-                    {"value":3.4},
-                    {"value":3.5}
+                    {"value":"3.3"},
+                    {"value":"3.4"},
+                    {"value":"3.5"}
                 ]
             }
         })
@@ -76,9 +76,9 @@ fn tests() {
             "errs": "",
             "msg": {
                 "telemetry": [
-                    {"value":3.4},
-                    {"value":3.5},
-                    {"value":3.6}
+                    {"value":"3.4"},
+                    {"value":"3.5"},
+                    {"value":"3.6"}
                 ]
             }
         })
@@ -90,7 +90,7 @@ fn tests() {
             "errs": "",
             "msg": {
                 "telemetry": [
-                    {"value":3.6},
+                    {"value":"3.6"},
                 ]
             }
         })

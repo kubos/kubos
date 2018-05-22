@@ -25,20 +25,20 @@ type Context = kubos_service::Context<Database>;
 graphql_object!(Entry: () |&self| {
     description: "A telemetry entry"
 
-    field timestamp() -> Option<i32> as "Timestamp" {
+    field timestamp() -> i32 as "Timestamp" {
         self.timestamp
     }
 
-    field subsystem() -> &Option<String> as "Subsystem name" {
+    field subsystem() -> &String as "Subsystem name" {
         &self.subsystem
     }
 
-    field parameter() -> &Option<String> as "Telemetry parameter" {
+    field parameter() -> &String as "Telemetry parameter" {
         &self.parameter
     }
 
-    field value() -> Option<f64> as "Telemetry value" {
-        self.value
+    field value() -> &String as "Telemetry value" {
+        &self.value
     }
 });
 

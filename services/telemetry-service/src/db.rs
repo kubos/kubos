@@ -69,7 +69,7 @@ impl Database {
                     timestamp INTEGER NOT NULL,
                     subsystem VARCHAR(255) NOT NULL,
                     parameter VARCHAR(255) NOT NULL,
-                    value DOUBLE NOT NULL,
+                    value VARCHAR(255) NOT NULL,
                     PRIMARY KEY (timestamp, subsystem, parameter))",
                 ).execute(&self.connection)
                 {
@@ -83,9 +83,9 @@ impl Database {
 
 table! {
     telemetry (timestamp) {
-        timestamp -> Nullable<Integer>,
-        subsystem -> Nullable<Text>,
-        parameter -> Nullable<Text>,
-        value -> Nullable<Double>,
+        timestamp -> Integer,
+        subsystem -> Text,
+        parameter -> Text,
+        value -> Text,
     }
 }
