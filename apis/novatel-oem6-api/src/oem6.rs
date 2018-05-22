@@ -421,6 +421,7 @@ impl OEM6 {
     /// # }
     /// ```
     ///
+    /// [`unlog_all`]: method.unlog_all.html
     /// [`OEMError`]: enum.OEMError.html
     pub fn request_errors(&self, hold: bool) -> OEMResult<()> {
         let request = LogCmd::new(
