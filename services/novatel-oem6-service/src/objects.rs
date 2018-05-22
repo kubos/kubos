@@ -35,15 +35,16 @@ pub enum AckCommand {
     IssueRawCommand,
 }
 
+/// Input structure for 'configureHardware' mutation
 #[derive(GraphQLInputObject)]
 pub struct ConfigStruct {
     pub option: ConfigOption,
+    #[graphql(default = "false")]
+    pub hold: bool,
     #[graphql(default = "0.0")]
     pub interval: f64,
     #[graphql(default = "0.0")]
     pub offset: f64,
-    #[graphql(default = "false")]
-    pub hold: bool,
 }
 
 /// Input field for 'configureHardware' mutation

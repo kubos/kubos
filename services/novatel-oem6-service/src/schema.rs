@@ -195,10 +195,23 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 
     // Configure the system
     //
-    // TODO: Enum - Start logging new type, stop logging an existing type, stop logging everything
+    // config: Vector of configuration requests (ConfigStruct)
+    //   - option: Configuration operation which should be performed
+    //   - hold: For `LOG_*` requests, specifies whether this request should be excluded
+    //           from removal by future 'UNLOG_ALL' requests.
+    //           For `UNLOG_ALL` requests, specifies whether the 'hold' value in previous
+    //           `LOG_*` requests should be ignored.
+    //   - interval: Interval at which log messages should be generated.
+    //               Note: Only applies to `LOG_POSITION_DATA` requests. Ignored otherwise
+    //   - offset: Offset of interval at which log messages should be generated.
+    //             Note: Only applies to `LOG_POSITION_DATA` requests. Ignored otherwise
     //
     // mutation {
-    //     configureHardware: "Not Implemented"
+    //     configureHardware(config: [{option: ConfigOption, hold: Boolean, interval: Float, offset: Float},...]) {
+    //         config: String
+    //         errors: String,
+    //         success: Boolean,
+    //     }
     // }
     field configure_hardware(
         &executor, 
