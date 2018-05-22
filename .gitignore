@@ -68,3 +68,6 @@ vm/.vagrant/
 
 # rust stuff
 target/
+
+# database files
+*.db
