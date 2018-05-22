@@ -105,8 +105,13 @@
 //! $ ./example-service -c config.toml
 //! ```
 
+#[cfg(test)]
+#[macro_use]
+extern crate failure;
 extern crate getopts;
 extern crate juniper;
+#[macro_use]
+extern crate nix;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -115,6 +120,7 @@ extern crate serde_json;
 extern crate toml;
 
 mod config;
+mod macros;
 mod service;
 
 pub use config::Config;
