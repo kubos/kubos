@@ -91,7 +91,7 @@ mod tests {
                 motherboard: ErrorCode::BAD_CRC,
                 daughterboard: None,
             },
-            parse(&vec![0x10, 0x00]).unwrap()
+            parse(&vec![0x00, 0x10]).unwrap()
         );
     }
 
@@ -102,7 +102,7 @@ mod tests {
                 motherboard: ErrorCode::COMMAND_DATA_INCORRECT,
                 daughterboard: Some(ErrorCode::CHANNEL_INACTIVE),
             },
-            parse(&vec![0x02, 0x00, 0x04, 0x00]).unwrap()
+            parse(&vec![0x00, 0x02, 0x00, 0x04]).unwrap()
         );
     }
 
