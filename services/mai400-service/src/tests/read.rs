@@ -67,7 +67,7 @@ fn read_panic() {
     });
 
     let expected = json!({
-                "msg": serde_json::to_string(&expected).unwrap(),
+                "msg": expected,
                 "errs": ""
         }).to_string();
 

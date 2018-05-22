@@ -17,6 +17,7 @@ members = [
 "services/kubos-service",
 "services/iobc-supervisor-service",
 "services/mai400-service",
+"services/telemetry-service",
 "test/integration/linux/isis-ants",
 "test/integration/linux/mai400",
 ]
