@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 
-# Copyright 2017 Kubos Corporation
+# Copyright 2018 Kubos Corporation
 # Licensed under the Apache License, Version 2.0
 # See LICENSE file for details.
 
+
 """
-Boilerplate Flask setup for service application.
+Wrapper for creating a HTTP based Kubos service
 """
 
 from flask import Flask
 from flask_graphql import GraphQLView
-from schema import schema
 
-
-def create_app():
+def start(config, schema):
     """
-    Creates graphql and graphiql endpoints
+    Creates flask based graphql and graphiql endpoints
     """
 
     app = Flask(__name__)
@@ -39,4 +38,4 @@ def create_app():
         )
     )
 
-    return app
+    app.run(config.ip, config.port)
