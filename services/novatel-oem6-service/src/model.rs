@@ -27,6 +27,16 @@ use objects::*;
 
 pub const RECV_TIMEOUT: Duration = Duration::from_millis(300);
 
+// Listen for log messages from the OEM6 and route data to the appropriate
+// listener or structure.
+//
+// The OEM6 will send us one of three log messages:
+// - Position information. The OEM6 will likely be set up to output this data
+//   once per second.
+// - Version information. This data will be output immediately upon request by
+//   the `noop` and `get_test_results` functions
+// - Error information. If enabled, this will be output by the OEM6 when an
+//   error or event occurs.
 pub fn log_thread(
     oem: OEM6,
     error_send: SyncSender<RxStatusEventLog>,
@@ -96,6 +106,8 @@ impl Subsystem {
         })
     }
 
+    // Queries
+
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
         // Send the request for version information
         let result = run!(self.oem.request_version(), self.errors);
@@ -140,6 +152,8 @@ impl Subsystem {
             telemetry_debug: version_info,
         })
     }
+
+    // Mutations
 
     pub fn noop(&self) -> Result<GenericResponse, Error> {
         // Send the request for version information

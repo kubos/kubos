@@ -117,6 +117,8 @@ pub struct HardwareTestResults {
     pub data: String,
 }
 
+/// Version information about the device, returned as the
+/// `telemetryDebug` response field
 #[derive(GraphQLObject)]
 pub struct VersionInfo {
     pub num_components: i32,

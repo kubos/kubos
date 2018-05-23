@@ -150,10 +150,6 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     {
         Ok(String::from("Not Implemented"))
     }
-
-    field test_results(&executor) -> FieldResult<String> {
-        Ok(String::from("Not Implemented"))
-    }
 });
 
 pub struct MutationRoot;

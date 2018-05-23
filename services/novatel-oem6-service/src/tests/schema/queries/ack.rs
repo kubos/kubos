@@ -113,7 +113,11 @@ fn ack_test_hardware() {
     let service = service_new!(mock);
 
     let mutation = r#"mutation {
-            testHardware
+            testHardware(test: INTEGRATION) {
+                ... on IntegrationTestResults {
+                    success
+                }
+            }
         }"#;
 
     service.process(mutation.to_owned());
