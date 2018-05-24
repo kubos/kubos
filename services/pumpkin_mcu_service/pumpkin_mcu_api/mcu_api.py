@@ -116,7 +116,7 @@ class MCU:
                     output_dict.update(
                         {field: {
                             'timestamp':read_data['timestamp'],
-                            'data':parsed_data[ind]})
+                            'data':parsed_data[ind]}})
             else:
                 # Single item parsed - pull in dict then update with parsed data
                 output_dict[telem_field] = read_data
