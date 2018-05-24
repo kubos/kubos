@@ -23,7 +23,7 @@ class Query(graphene.ObjectType):
     """
     moduleList = graphene.JSONString()
     fieldList = graphene.List(graphene.String,module=graphene.String())
-    rawRead = graphene.String(
+    read = graphene.String(
         module=graphene.String(),
         count=graphene.Int())
     mcuTelemetry = graphene.JSONString(
@@ -47,6 +47,20 @@ class Query(graphene.ObjectType):
             fields.append(field)
         return fields
     
+    def resolve_read(self, info, module, count):
+        """
+        Reads number of bytes from the specified MCU
+        """
+        if module not in MODULES:
+            raise KeyError('Module not configured',module)
+        address = MODULES[module]['address']
+        if address == 0:
+            raise ValueError('Module not present',module)
+        mcu = mcu_api.MCU(address = address)
+        bin_data = mcu.read(count = count)
+        
+        return bin_data.encode("hex")
+    
     def resolve_mcuTelemetry(self, info, module, fields):
         """
         Handles request for subsystem query.
@@ -58,22 +72,8 @@ class Query(graphene.ObjectType):
             raise ValueError('Module not present',module)
         fields = map(str,fields)
         mcu = mcu_api.MCU(address = address)
-        out = mcu.get_module_telemetry(module = module,fields = fields)
+        out = mcu.read_telemetry(module = module,fields = fields)
         return json.dumps(out)
-    
-    def resolve_rawRead(self, info, module, count):
-        """
-        Reads number of bytes from the specified MCU
-        """
-        if module not in MODULES:
-            raise KeyError('Module not configured',module)
-        address = MODULES[module]['address']
-        if address == 0:
-            raise ValueError('Module not present',module)
-        mcu = mcu_api.MCU(address = address)
-        bin_data = mcu.raw_read(count = count)
-        
-        return bin_data.encode("hex")
 
 class Passthrough(graphene.Mutation):
     """

@@ -50,37 +50,9 @@ class MCU:
         else:raise TypeError('Commands must be strings.')    
     
     def read(self,count):
-        if count < (HEADER_SIZE+1):
-            raise TypeError('Read count must be at least '+str(HEADER_SIZE+1)+' bytes.')
-        data = self.raw_read(count = count)
-        if data[0] != '\x01':
-            #raise IOError('Data is not ready')
-            return {'timestamp':0,'data':(count-HEADER_SIZE)*'\xff'}
-        timestamp = struct.unpack('<i',data[1:HEADER_SIZE])[0]/100.0 # unpack timestamp in seconds
-        data = data[HEADER_SIZE:] # telemetry data
-        return {'timestamp':timestamp,'data':data} 
-    
-    def raw_read(self,count):
         return self.i2cfile.read(device = self.address, count = count)
-    
-    def get_sup_telemetry(self,fields=["all"]):
-        if fields == ["all"]:
-            requests = TELEMETRY['supervisor']
-        elif fields is list:
-            requests = {}
-            for field in fields:
-                if field not in TELEMETRY['supervisor'] or \
-                type(field) not in [str,unicode]:
-                    raise ValueError(
-                        'Invalid field: '+str(field))
-                else:
-                    requests[field] = TELEMETRY['supervisor'][field]
-        else:
-            raise TypeError('fields must be a list of strings.')
         
-        return self.get_telemetry(requests)
-        
-    def get_module_telemetry(self,module,fields=["all"]):
+    def read_telemetry(self,module,fields=["all"]):
         if module not in TELEMETRY: 
             raise KeyError(
                 'Module name: '+str(module)+' not found in mcu_config file.'
@@ -111,39 +83,110 @@ class MCU:
                 if field in supervisor_telem:
                     requests[field] = supervisor_telem[field]
             
-        return self.get_telemetry(requests)
+        return self._read_telemetry_items(requests)
         
-    def get_telemetry(self,dict):
+    def _read_telemetry_items(self,dict):
+        # Create empty dictionary
         output_dict = {}
         for telem_field in dict:
-            self.write(dict[telem_field]['command'])
+            input_dict = dict[telem_field]
+            # Write command for the MCU to prepare the data
+            self.write(input_dict['command'])
+            # Delay time specified in the Supervisor Reference Manual
             time.sleep(DELAY)
-            output_dict[telem_field] = self.read(
-                dict[telem_field]['length']
-                )
-        output_dict = self._unpacking(dict,output_dict)
+            # Read the data, check and parse the header
+            read_data = self._header_read(input_dict['length'])
+            # Parse the data
+            parsed_data = self._unpack(data = read_data['data'],parsing = parsing)
+            if len(parsed) > 1:
+                if "names" not in input_dict:
+                    raise KeyError("Must be a names field for parsing multiple \
+                        items")
+                # Multiple items parsed
+                if len(input_dict['names']) != len(parsed_data):
+                    raise KeyError("Number of field names doesn't match parsing\
+                        strings")
+                for ind,field in enumerate(input_dict['names']):
+                    output_dict.update(
+                        {field: {
+                            'timestamp':read_data['timestamp'],
+                            'data':parsed_data[ind]})
+            else:
+                # Single item parsed - pull in dict then update with parsed data
+                output_dict[telem_field] = read_data
+                output_dict[telem_field]['data'] = parsed_data[0]
+        
         return output_dict
+    
+    def _header_read(self,count):
+        """
+        Reads and parses the header data. Format is:
+        [data ready flag][timestamp][data]
+        output format is:
+        {'timestamp':timestamp,'data':data}
+        """
+        if count < (HEADER_SIZE+1):
+            # There must be at least 1 byte of data. 
+            raise TypeError('Read count must be at least '+
+                str(HEADER_SIZE+1)+' bytes.')
+        data = self.read(count = count)
+        if data[0] != '\x01':
+            # Returns 0 for timestamp if data was not ready, but still returns
+            # the data for debugging purposes.
+            return {'timestamp':0,'data':data[HEADER_SIZE:] # telemetry data}
+        
+        # Unpack timestamp in seconds. 
+        timestamp = struct.unpack('<i',data[1:HEADER_SIZE])[0]/100.0 
+        # Return the valid packet timestamp and data
+        return {'timestamp':timestamp,'data':data[HEADER_SIZE:]} 
+        
+    def _unpack(self,data,parsing):
+        if type(parsing) not in [str,unicode]:
+            # Check that parsing is a valid type
+            raise TypeError('Parsing field must be a valid struct parsing \
+            string. Input: '+str(type(parsing)))
+        
+        if parsing == "s":
+            # Leave strings alone
+            return (data)
+        elif parsing == "h":
+            # store as a hex string. This is so we can return binary data
+            return (data.encode('hex'))
+        
+        # All others parse directly with the parsing string. 
+        return struct.unpack(parsing,data)
+        
         
     def _unpacking(self,input_dict,output_dict):
+        """
+        Takes in a dictionary of data from I2C reads and parses it into single
+        or multiple fields according to the string in the parsing field. String
+        must be a struct package format string. 
+        """
         for field in input_dict:
             parsing = input_dict[field]["parsing"]
             if parsing == "s":
                 # Leave strings alone
                 pass
             elif parsing == "h":
-                # store as a hex string
-                output_dict[field]['data'] = output_dict[field]['data'].encode('hex')
-            elif (len(parsing) == 2 and parsing[0] in ['<','>']) or len(parsing) == 1:
+                # store as a hex string. This is so we can return binary data
+                output_dict[field]['data'] = \
+                    output_dict[field]['data'].encode('hex')
+            elif (len(parsing) == 2 and parsing[0] in ['<','>']) or \
+                len(parsing) == 1:
                 # Only one value, parse and store
-                output_dict[field]['data'] = struct.unpack(parsing,output_dict[field]["data"])[0]
+                output_dict[field]['data'] = \
+                    struct.unpack(parsing,output_dict[field]["data"])[0]
             else:
                 # Multiple values. Parse and store as new fields
                 names = input_dict[field]["names"]
-                parsed_values = struct.unpack(parsing,output_dict[field]["data"])
+                parsed_values = struct.unpack(
+                    parsing,output_dict[field]["data"])
                 if len(parsed_values) == len(names):
                     for new_field in names:
                         output_dict[new_field] = {
-                            # Store parsed telemetry in output with corresponding field name
+                            # Store parsed telemetry in output 
+                            # with corresponding field name
                             "data":parsed_values[names.index(new_field)],
                             # Copy timestamp
                             "timestamp":output_dict[field]["timestamp"] 
