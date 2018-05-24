@@ -86,6 +86,10 @@ class MCU:
         return self._read_telemetry_items(requests)
         
     def _read_telemetry_items(self,dict):
+        """
+        Creates the output_dict, reads the data, then inserts and formats it 
+        in the output_dict. 
+        """
         # Create empty dictionary
         output_dict = {}
         for telem_field in dict:
@@ -97,12 +101,14 @@ class MCU:
             # Read the data, check and parse the header
             read_data = self._header_read(input_dict['length'])
             # Parse the data
-            parsed_data = self._unpack(data = read_data['data'],parsing = parsing)
+            parsed_data = self._unpack(
+                data = read_data['data'],
+                parsing = parsing)
             if len(parsed) > 1:
+                # Multiple items parsed
                 if "names" not in input_dict:
                     raise KeyError("Must be a names field for parsing multiple \
                         items")
-                # Multiple items parsed
                 if len(input_dict['names']) != len(parsed_data):
                     raise KeyError("Number of field names doesn't match parsing\
                         strings")
