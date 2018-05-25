@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use eps_api::EpsError;
-use failure::Error;
+use eps_api::{EpsError, EpsResult};
 
 /// Macro for generating `Type` enum, `parse` and `command` functions
 /// for motherboard and daughterboard telemetry items.
@@ -43,7 +42,7 @@ macro_rules! make_telemetry {
         ///
         /// `data` - Raw telemetry data from eps
         /// `telem_type` - `Type` of telemetry to parse
-        pub fn parse(data: &[u8], telem_type: Type) -> Result<f32, Error> {
+        pub fn parse(data: &[u8], telem_type: Type) -> EpsResult<f32> {
             let adc_data = get_adc_result(data)?;
             Ok(match telem_type {
                 $(Type::$type => $parser(adc_data),)+
@@ -103,7 +102,7 @@ macro_rules! make_reset_telemetry {
     }
 }
 
-pub fn get_adc_result(data: &[u8]) -> Result<f32, Error> {
+pub fn get_adc_result(data: &[u8]) -> EpsResult<f32> {
     if data.len() != 2 {
         throw!(EpsError::invalid_data(data))
     } else {

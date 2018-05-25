@@ -72,3 +72,6 @@ impl From<io::Error> for EpsError {
         }
     }
 }
+
+/// Universal return type for Eps api functions
+pub type EpsResult<T> = Result<T, EpsError>;

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use eps_api::EpsError;
-use failure::Error;
+use eps_api::{EpsError, EpsResult};
 use i2c_hal::Command;
 
 /// Board Status
@@ -45,7 +44,7 @@ pub struct BoardStatus {
     pub daughterboard: Option<StatusCode>,
 }
 
-pub fn parse(data: &[u8]) -> Result<BoardStatus, Error> {
+pub fn parse(data: &[u8]) -> EpsResult<BoardStatus> {
     if data.len() == 2 {
         Ok(BoardStatus {
             motherboard: StatusCode::from_bits(data[0]).unwrap_or_default(),

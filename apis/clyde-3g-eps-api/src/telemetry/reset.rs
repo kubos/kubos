@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use eps_api::EpsError;
-use failure::Error;
+use eps_api::{EpsError, EpsResult};
 use i2c_hal::Command;
 
 /// Common Reset Telemetry Structure
@@ -54,7 +53,7 @@ make_reset_telemetry!(
 /// # Arguments
 ///
 /// `data` - Data received from Eps
-pub fn parse(data: &[u8]) -> Result<ResetTelemetry, Error> {
+pub fn parse(data: &[u8]) -> EpsResult<ResetTelemetry> {
     if data.len() == 2 {
         Ok(ResetTelemetry {
             motherboard: data[1],

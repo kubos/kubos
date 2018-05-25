@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use eps_api::EpsError;
-use failure::Error;
+use eps_api::{EpsError, EpsResult};
 use i2c_hal::Command;
 
 /// Version
@@ -44,7 +43,7 @@ fn get_revision(num: u8) -> u8 {
     (num & 0xF0) >> 4
 }
 
-pub fn parse(data: &[u8]) -> Result<VersionInfo, Error> {
+pub fn parse(data: &[u8]) -> EpsResult<VersionInfo> {
     if data.len() == 2 {
         Ok(VersionInfo {
             motherboard: Version {

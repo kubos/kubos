@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-use failure::Error;
+use eps_api::EpsResult;
 use i2c_hal::Command;
 use telemetry::lib::get_adc_result;
 

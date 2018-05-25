@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use eps_api::EpsError;
-use failure::Error;
+use eps_api::{EpsError, EpsResult};
 use i2c_hal::Command;
 
 /// Checksum
@@ -45,7 +44,7 @@ fn parse_checksum(data1: u8, data2: u8) -> u16 {
     u16::from(data1) | (u16::from(data2) << 8)
 }
 
-pub fn parse(data: &[u8]) -> Result<Checksum, Error> {
+pub fn parse(data: &[u8]) -> EpsResult<Checksum> {
     println!("Checksum {:?}", data);
     if data.len() == 4 {
         Ok(Checksum {

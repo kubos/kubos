@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use eps_api::EpsError;
-use failure::Error;
+use eps_api::{EpsError, EpsResult};
 use i2c_hal::Command;
 
 /// Last Error
@@ -57,7 +56,7 @@ pub struct LastError {
     pub daughterboard: Option<ErrorCode>,
 }
 
-pub fn parse(data: &[u8]) -> Result<LastError, Error> {
+pub fn parse(data: &[u8]) -> EpsResult<LastError> {
     if data.len() == 2 {
         Ok(LastError {
             motherboard: ErrorCode::from_bits(data[1]).unwrap_or_default(),
