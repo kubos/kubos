@@ -21,15 +21,14 @@ config_path = os.path.abspath(os.path.dirname(__file__)) + '/' + config_filename
 with open(config_path) as config_file:
     CONFIG_DATA = json.load(config_file)
 
+# Pull all the config variables from the config file. 
 I2C_BUSNUM = CONFIG_DATA['i2c_bus_number']
 DELAY = CONFIG_DATA['delay_between_writing_and_reading']
 TELEMETRY = CONFIG_DATA['telemetry']
 HEADER_SIZE = CONFIG_DATA['header_size']
 # json import converts to unicode, changing type sensitive fields to be strings
 for device in TELEMETRY:
-    # print("device: ",device)
     for field in TELEMETRY[device]:
-        # print('field: ', field)
         TELEMETRY[device][field]['command'] = str(TELEMETRY[device][field]['command'])
         TELEMETRY[device][field]['parsing'] = str(TELEMETRY[device][field]['parsing'])
         TELEMETRY[device][field]['length'] = TELEMETRY[device][field]['length'] + HEADER_SIZE
