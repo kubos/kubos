@@ -9,14 +9,10 @@ Boilerplate main for service application.
 """
 
 from service import app
-import json
 
-# I know this is hacky...I need help with how to manage config files
-import os.path
-config_filename = 'service_config.json'
-config_path = os.path.abspath(os.path.dirname(__file__)) + '/' + config_filename
-with open(config_path) as config_file:
-    CONFIG_DATA = json.load(config_file)
+# Service Configuration Variables
+APP_IP = "0.0.0.0"
+APP_PORT = 5000
 
 app = app.create_app()
-app.run(host=CONFIG_DATA['APP_IP'], port=CONFIG_DATA['APP_PORT'])
+app.run(host=APP_IP, port=APP_PORT)
