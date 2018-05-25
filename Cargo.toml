@@ -5,6 +5,7 @@ members = [
 "apis/isis-imtq-api",
 "apis/isis-iobc-supervisor",
 "apis/mai400-api",
+"apis/novatel-oem6-api",
 "apis/nsl-duplex-d2",
 "apis/rust-radio-api",
 "examples/rust-service/extern-lib",
@@ -15,6 +16,8 @@ members = [
 "services/comms-service",
 "services/kubos-service",
 "services/iobc-supervisor-service",
+"services/mai400-service",
+"services/telemetry-service",
 "test/integration/linux/isis-ants",
 "test/integration/linux/mai400",
 ]
