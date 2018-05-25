@@ -27,7 +27,7 @@ macro_rules! make_telemetry {
         )+
     ) => {
 
-        #[derive(Clone, Copy)]
+        #[derive(Clone, Copy, Debug)]
         /// Telemetry variants
         pub enum Type {
             $(
@@ -77,7 +77,7 @@ macro_rules! make_reset_telemetry {
         )+
     ) => {
 
-        #[derive(Clone, Copy)]
+        #[derive(Clone, Copy, Debug)]
         /// Reset Telemetry Variants
         pub enum ResetType {
             $(
@@ -103,11 +103,27 @@ macro_rules! make_reset_telemetry {
 }
 
 pub fn get_adc_result(data: &[u8]) -> EpsResult<f32> {
-    if data.len() != 2 {
+    // It appears the ADCS actually sends back 4 bytes
+    // The first two contain the actual response and
+    // the second two are 0s
+    if data.len() < 2 {
         throw!(EpsError::invalid_data(data))
     } else {
         Ok(f32::from(
-            u16::from(data[0]) | (u16::from(data[1]) & 0xF) << 4,
+            u16::from(data[0]) | (u16::from(data[1]) & 0xF) << 8,
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_adcs_result() {
+        let raw = vec![3, 29, 0, 0];
+        let adc = get_adc_result(&raw).unwrap();
+
+        assert_eq!(adc, 3331.0);
     }
 }

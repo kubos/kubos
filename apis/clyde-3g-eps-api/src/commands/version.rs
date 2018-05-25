@@ -116,11 +116,7 @@ mod tests {
             EpsError::InvalidData {
                 data: String::from("\u{0}"),
             },
-            parse(&vec![0x0])
-                .err()
-                .unwrap()
-                .downcast::<EpsError>()
-                .unwrap()
+            parse(&vec![0x0]).err().unwrap()
         )
     }
 
@@ -130,11 +126,7 @@ mod tests {
             EpsError::InvalidData {
                 data: String::from("\u{0}\u{1}\u{3}"),
             },
-            parse(&vec![0x0, 0x1, 0x3])
-                .err()
-                .unwrap()
-                .downcast::<EpsError>()
-                .unwrap()
+            parse(&vec![0x0, 0x1, 0x3]).err().unwrap()
         )
     }
 }

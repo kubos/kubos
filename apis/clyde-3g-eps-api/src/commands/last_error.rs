@@ -111,11 +111,7 @@ mod tests {
             EpsError::InvalidData {
                 data: String::from(""),
             },
-            parse(&vec![])
-                .err()
-                .unwrap()
-                .downcast::<EpsError>()
-                .unwrap()
+            parse(&vec![]).err().unwrap()
         );
     }
 }

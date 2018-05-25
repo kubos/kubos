@@ -6,10 +6,10 @@
 extern crate i2c_linux;
 
 // use std::thread;
-use std::time::Duration;
+use i2c_linux::I2c;
 use std::io::Result;
 use std::thread;
-use i2c_linux::I2c;
+use std::time::Duration;
 
 /// High level read/write trait for I2C connections to implement
 pub trait Stream {
@@ -62,7 +62,6 @@ impl Stream for I2cStream {
     /// Writing
     fn write(&self, command: Command) -> Result<()> {
         let mut i2c = I2c::from_path(self.path.clone())?;
-        println!("i2c_connection writing {:?} to {}", command, self.slave);
         i2c.smbus_set_slave_address(self.slave, false)?;
         i2c.i2c_write_block_data(command.cmd, &command.data)
     }
@@ -70,7 +69,6 @@ impl Stream for I2cStream {
     /// Reading
     fn read(&self, command: Command) -> Result<Vec<u8>> {
         let mut i2c = I2c::from_path(self.path.clone())?;
-        println!("i2c connection reading from {}", self.slave);
         i2c.smbus_set_slave_address(self.slave, false)?;
         let mut data = vec![0; 4];
         i2c.i2c_read_block_data(command.cmd, &mut data)?;
@@ -81,14 +79,12 @@ impl Stream for I2cStream {
     fn transfer(&self, command: Command, delay: u64) -> Result<Vec<u8>> {
         let mut i2c = I2c::from_path(self.path.clone())?;
         let mut data = vec![0; 4];
-        println!("i2c_transfer wrote {:?} to {}", command, self.slave);
         i2c.smbus_set_slave_address(self.slave, false)?;
 
         i2c.i2c_set_retries(5)?;
         i2c.i2c_write_block_data(command.cmd, &command.data)?;
         thread::sleep(Duration::from_millis(delay));
         i2c.i2c_read_block_data(command.cmd, &mut data)?;
-        println!("i2c transfer got {:?} from {}", data, self.slave);
         Ok(data)
     }
 }
