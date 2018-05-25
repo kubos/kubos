@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2017 Kubos Corporation
+# Copyright 2018 Kubos Corporation
 # Licensed under the Apache License, Version 2.0
 # See LICENSE file for details.
 
@@ -9,7 +9,6 @@ Graphene ObjectType classes for subsystem modeling.
 """
 
 import graphene
-
 
 class Subsystem(graphene.ObjectType):
     """
@@ -39,7 +38,7 @@ class Subsystem(graphene.ObjectType):
         return Status(status=True, subsystem=self)
 
 
-class Status(graphene.ObjectType):
+class CommandStatus(graphene.ObjectType):
     """
     Model representing execution status. This allows us to return
     the status of the mutation function alongside the state of
@@ -47,4 +46,5 @@ class Status(graphene.ObjectType):
     """
 
     status = graphene.Boolean()
-    subsystem = graphene.Field(Subsystem)
+    command = graphene.String()
+
