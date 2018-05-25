@@ -9,6 +9,7 @@ Example usage of the mcu_api
 """
 
 import mcu_api
+import time
 
 MODULES = mcu_api.CONFIG_DATA['modules']
 
