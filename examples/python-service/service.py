@@ -9,13 +9,10 @@ Boilerplate main for service application.
 """
 
 from service import schema
-import sys
 
-sys.path.append("../../libs")
-
-from kubos_python_service import http_service
-from kubos_python_service import udp_service
-from kubos_python_service.config import Config
+from kubos_service import http_service
+from kubos_service import udp_service
+from kubos_service.config import Config
 
 c = Config("example-service")
 
