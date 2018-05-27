@@ -17,6 +17,6 @@
 #[macro_use]
 mod lib;
 
-pub mod motherboard;
 pub mod daughterboard;
+pub mod motherboard;
 pub mod reset;

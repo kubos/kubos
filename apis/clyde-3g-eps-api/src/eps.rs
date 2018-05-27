@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-use i2c_hal::Connection;
-
 use commands::*;
 use eps_api::EpsResult;
+use i2c_hal::Connection;
 use telemetry;
 
 /// Eps structure containing low level connection and functionality
@@ -95,12 +94,16 @@ impl Eps {
     ///
     /// This command is used to request telemetry items from the motherboard's
     /// telemetry node.
+    ///
+    /// # Arguments
+    /// `telem_type` - Variant of `telemetry::motherboard::Type` to request
     pub fn get_motherboard_telemetry(
         &self,
         telem_type: telemetry::motherboard::Type,
     ) -> EpsResult<f32> {
         telemetry::motherboard::parse(
-            &self.connection
+            &self
+                .connection
                 .transfer(telemetry::motherboard::command(telem_type), 20)?,
             telem_type,
         )
@@ -110,12 +113,16 @@ impl Eps {
     ///
     /// This command is used to request telemetry items from the daughterboard's
     /// telemetry node.
+    ///
+    /// # Arguments
+    /// `telem_type` - Variant of `telemetry::daughterboard::Type` to request
     pub fn get_daughterboard_telemetry(
         &self,
         telem_type: telemetry::daughterboard::Type,
     ) -> EpsResult<f32> {
         telemetry::daughterboard::parse(
-            &self.connection
+            &self
+                .connection
                 .transfer(telemetry::daughterboard::command(telem_type), 20)?,
             telem_type,
         )
@@ -125,11 +132,15 @@ impl Eps {
     ///
     /// This command is used to request telemetry items regarding various
     /// reset conditions on both the motherboard and daughterboard.
+    ///
+    /// # Arguments
+    /// `telem_type` - Variant of `telemetry::daughterboard::ResetType` to request
     pub fn get_reset_telemetry(
         &self,
         telem_type: telemetry::reset::ResetType,
     ) -> EpsResult<telemetry::reset::ResetTelemetry> {
-        telemetry::reset::parse(&self.connection
+        telemetry::reset::parse(&self
+            .connection
             .transfer(telemetry::reset::command(telem_type), 20)?)
     }
 
@@ -141,6 +152,9 @@ impl Eps {
     /// value of 4 minutes can be changed using the Set Communications Watchdog
     /// Period command, 0x21. The data byte specifies the number of minutes the
     /// communications watchdog will wait before timing out.
+    ///
+    /// # Arguments
+    /// 'period' - Watchdog period to set in minutes
     pub fn set_comms_watchdog_period(&self, period: u8) -> EpsResult<()> {
         self.connection
             .write(set_comms_watchdog_period::command(period))?;
@@ -152,7 +166,8 @@ impl Eps {
     /// This command provides the user with the current communications watchdog
     /// timeout that has been set. The returned value is indicated in minutes.
     pub fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
-        get_comms_watchdog_period::parse(&self.connection
+        get_comms_watchdog_period::parse(&self
+            .connection
             .transfer(get_comms_watchdog_period::command(), 2)?)
     }
 }

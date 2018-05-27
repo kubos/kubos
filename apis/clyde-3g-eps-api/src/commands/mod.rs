@@ -17,8 +17,8 @@
 mod reset;
 mod watchdog;
 
-pub mod checksum;
 pub mod board_status;
+pub mod checksum;
 pub mod last_error;
 pub mod version;
 

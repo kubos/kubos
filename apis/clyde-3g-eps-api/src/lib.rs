@@ -15,6 +15,7 @@
  */
 
 #![deny(missing_docs)]
+#![deny(warnings)]
 
 //! Low level interface for interacting with a ClydeSpace 3G EPS
 
@@ -29,7 +30,7 @@ mod commands;
 mod eps;
 mod telemetry;
 
-pub use telemetry::reset::ResetType as ResetTelemetry;
-pub use telemetry::motherboard::Type as MotherboardTelemetry;
-pub use telemetry::daughterboard::Type as DaughterboardTelemetry;
 pub use eps::Eps;
+pub use telemetry::daughterboard::Type as DaughterboardTelemetry;
+pub use telemetry::motherboard::Type as MotherboardTelemetry;
+pub use telemetry::reset::ResetType as ResetTelemetry;

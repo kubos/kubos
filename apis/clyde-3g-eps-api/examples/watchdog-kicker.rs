@@ -80,7 +80,7 @@ pub fn main() {
     let eps = Eps::new(Connection::from_path("/dev/i2c-1", 0x2B));
 
     loop {
-	eps.get_version_info();
+        eps.get_version_info();
         thread::sleep(Duration::from_millis(50000));
     }
 }
