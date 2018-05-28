@@ -16,6 +16,7 @@
 
 use juniper::FieldResult;
 use kubos_service;
+use models::motherboard_telemetry;
 use models::reset_telemetry;
 use models::subsystem::Subsystem;
 
@@ -51,5 +52,10 @@ graphql_object!(Root: Context as "Query" |&self| {
     field reset_telemetry(&executor, telem_type: reset_telemetry::Type) -> FieldResult<reset_telemetry::Data>
     {
         Ok(executor.context().subsystem().get_reset_telemetry(telem_type)?)
+    }
+
+    field motherboard_telemetry(&executor, telem_type: motherboard_telemetry::Type) -> FieldResult<f64>
+    {
+        Ok(f64::from(executor.context().subsystem().get_motherboard_telemetry(telem_type)?))
     }
 });

@@ -42,6 +42,13 @@ impl Subsystem {
         })
     }
 
+    pub fn get_motherboard_telemetry(
+        &self,
+        telem_type: motherboard_telemetry::Type,
+    ) -> Result<f32, Error> {
+        Ok(self.eps.get_motherboard_telemetry(telem_type.into())?)
+    }
+
     pub fn get_reset_telemetry(
         &self,
         telem_type: reset_telemetry::Type,
