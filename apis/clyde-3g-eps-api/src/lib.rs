@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#![deny(missing_docs)]
+// #![deny(missing_docs)]
 #![deny(warnings)]
 
 //! Low level interface for interacting with a ClydeSpace 3G EPS
@@ -31,6 +31,6 @@ mod eps;
 mod telemetry;
 
 pub use eps::Eps;
-pub use telemetry::daughterboard::Type as DaughterboardTelemetry;
-pub use telemetry::motherboard::Type as MotherboardTelemetry;
-pub use telemetry::reset::ResetType as ResetTelemetry;
+pub use telemetry::daughterboard as DaughterboardTelemetry;
+pub use telemetry::motherboard as MotherboardTelemetry;
+pub use telemetry::reset as ResetTelemetry;
