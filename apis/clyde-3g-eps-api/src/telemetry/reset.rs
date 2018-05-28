@@ -19,7 +19,7 @@ use i2c_hal::Command;
 
 /// Common Reset Telemetry Structure
 #[derive(Debug)]
-pub struct ResetTelemetry {
+pub struct Data {
     /// Motherboard telemetry value
     pub motherboard: u8,
     /// Optional daughterboard telemetry value
@@ -53,14 +53,14 @@ make_reset_telemetry!(
 /// # Arguments
 ///
 /// `data` - Data received from Eps
-pub fn parse(data: &[u8]) -> EpsResult<ResetTelemetry> {
+pub fn parse(data: &[u8]) -> EpsResult<Data> {
     if data.len() == 2 {
-        Ok(ResetTelemetry {
+        Ok(Data {
             motherboard: data[1],
             daughterboard: None,
         })
     } else if data.len() == 4 {
-        Ok(ResetTelemetry {
+        Ok(Data {
             motherboard: data[1],
             daughterboard: Some(data[3]),
         })

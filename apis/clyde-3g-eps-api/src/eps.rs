@@ -102,8 +102,7 @@ impl Eps {
         telem_type: telemetry::motherboard::Type,
     ) -> EpsResult<f32> {
         telemetry::motherboard::parse(
-            &self
-                .connection
+            &self.connection
                 .transfer(telemetry::motherboard::command(telem_type), 20)?,
             telem_type,
         )
@@ -121,8 +120,7 @@ impl Eps {
         telem_type: telemetry::daughterboard::Type,
     ) -> EpsResult<f32> {
         telemetry::daughterboard::parse(
-            &self
-                .connection
+            &self.connection
                 .transfer(telemetry::daughterboard::command(telem_type), 20)?,
             telem_type,
         )
@@ -137,10 +135,9 @@ impl Eps {
     /// `telem_type` - Variant of `telemetry::daughterboard::ResetType` to request
     pub fn get_reset_telemetry(
         &self,
-        telem_type: telemetry::reset::ResetType,
-    ) -> EpsResult<telemetry::reset::ResetTelemetry> {
-        telemetry::reset::parse(&self
-            .connection
+        telem_type: telemetry::reset::Type,
+    ) -> EpsResult<telemetry::reset::Data> {
+        telemetry::reset::parse(&self.connection
             .transfer(telemetry::reset::command(telem_type), 20)?)
     }
 
@@ -166,8 +163,7 @@ impl Eps {
     /// This command provides the user with the current communications watchdog
     /// timeout that has been set. The returned value is indicated in minutes.
     pub fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
-        get_comms_watchdog_period::parse(&self
-            .connection
+        get_comms_watchdog_period::parse(&self.connection
             .transfer(get_comms_watchdog_period::command(), 2)?)
     }
 }

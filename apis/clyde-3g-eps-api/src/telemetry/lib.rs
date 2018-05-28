@@ -79,7 +79,7 @@ macro_rules! make_reset_telemetry {
 
         #[derive(Clone, Copy, Debug)]
         /// Reset Telemetry Variants
-        pub enum ResetType {
+        pub enum Type {
             $(
                 $(#[$meta])+
                 $type,
@@ -90,11 +90,11 @@ macro_rules! make_reset_telemetry {
         ///
         /// # Arguments
         ///
-        /// `telem_type` - `ResetType` of telemetry to return command for
-        pub fn command(reset_type: ResetType) -> Command {
+        /// `telem_type` - `Type` of telemetry to return command for
+        pub fn command(reset_type: Type) -> Command {
             Command {
                 cmd: match reset_type {
-                    $(ResetType::$type => $cmd,)+
+                    $(Type::$type => $cmd,)+
                 },
                 data: vec![0x00],
             }
