@@ -49,6 +49,13 @@ impl Subsystem {
         Ok(self.eps.get_motherboard_telemetry(telem_type.into())?)
     }
 
+    pub fn get_daughterboard_telemetry(
+        &self,
+        telem_type: daughterboard_telemetry::Type,
+    ) -> Result<f32, Error> {
+        Ok(self.eps.get_daughterboard_telemetry(telem_type.into())?)
+    }
+
     pub fn get_reset_telemetry(
         &self,
         telem_type: reset_telemetry::Type,
