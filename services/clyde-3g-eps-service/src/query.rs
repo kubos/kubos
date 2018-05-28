@@ -38,6 +38,11 @@ graphql_object!(Root: Context as "Query" |&self| {
         Ok(String::from("pong"))
     }
 
+    field version(&executor) -> FieldResult<version::Data>
+    {
+        Ok(executor.context().subsystem().get_version()?)
+    }
+
     // Get current reset telemetry information for the system
     //
     // {
@@ -61,5 +66,10 @@ graphql_object!(Root: Context as "Query" |&self| {
     field daughterboard_telemetry(&executor, telem_type: daughterboard_telemetry::Type) -> FieldResult<f64>
     {
         Ok(f64::from(executor.context().subsystem().get_daughterboard_telemetry(telem_type)?))
+    }
+
+    field watchdog_period(&executor) -> FieldResult<i32>
+    {
+        Ok(i32::from(executor.context().subsystem().get_comms_watchdog_period()?))
     }
 });

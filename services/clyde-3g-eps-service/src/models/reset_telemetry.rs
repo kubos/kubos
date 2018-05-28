@@ -27,10 +27,7 @@ impl Into<Data> for ResetTelemetryData {
     fn into(self) -> Data {
         Data {
             motherboard: i32::from(self.motherboard),
-            daughterboard: match self.daughterboard {
-                Some(d) => Some(i32::from(d)),
-                None => None,
-            },
+            daughterboard: self.daughterboard.map(|d| i32::from(d)),
         }
     }
 }

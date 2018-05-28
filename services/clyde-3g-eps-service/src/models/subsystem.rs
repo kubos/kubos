@@ -62,4 +62,12 @@ impl Subsystem {
     ) -> Result<reset_telemetry::Data, Error> {
         Ok((self.eps.get_reset_telemetry(telem_type.into())?).into())
     }
+
+    pub fn get_comms_watchdog_period(&self) -> Result<u8, Error> {
+        Ok(self.eps.get_comms_watchdog_period()?)
+    }
+
+    pub fn get_version(&self) -> Result<version::Data, Error> {
+        Ok(self.eps.get_version_info()?.into())
+    }
 }
