@@ -15,6 +15,7 @@ members = [
 "hal/i2c-hal",
 "hal/rust-hal/rust-uart",
 "kubos-build-helper",
+"services/clyde-3g-eps-service",
 "services/comms-service",
 "services/kubos-service",
 "services/iobc-supervisor-service",

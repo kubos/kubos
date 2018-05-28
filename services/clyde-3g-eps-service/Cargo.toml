@@ -1,0 +1,12 @@
+[package]
+name = "clyde-3g-eps-service"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
+clyde-3g-eps-api = { path = "../../apis/clyde-3g-eps-api" }
+eps-api = { path = "../../apis/eps-api" }
+failure = { git = "https://github.com/rust-lang-nursery/failure" }
+kubos-service = { path = "../kubos-service" }
+juniper =  "0.9"
+i2c-hal = { path = "../../hal/i2c-hal" }
