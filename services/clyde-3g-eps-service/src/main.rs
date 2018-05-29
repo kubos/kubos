@@ -35,7 +35,12 @@ use schema::query::Root as QueryRoot;
 
 fn main() {
     let config = Config::new("clyde-3g-eps-service");
-    let subsystem = Subsystem::new("i2c-1").unwrap();
+    let bus = config
+        .get("bus")
+        .expect("No eps device path found in config");
+    let bus = bus.as_str().unwrap_or("");
+
+    let subsystem = Subsystem::new(bus).unwrap();
 
     Service::new(config, subsystem, QueryRoot, MutationRoot).start();
 }
