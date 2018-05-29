@@ -73,17 +73,30 @@ pub fn log_thread(
             .expect("Underlying read thread no longer communicating")
         {
             BestXYZ(log) => {
+                // TODO: Do we want to only update our stored values if
+                // both position and velocity are valid? The alternative
+                // would be to just update which ever one is valid and
+                // ignore the other
+                if log.pos_status == 0 && log.vel_status == 0 {
+                    data.update_info(LockInfo {
+                        time: OEMTime {
+                            week: log.week as i32,
+                            ms: log.ms,
+                        },
+                        position: log.position,
+                        velocity: log.velocity,
+                    });
+                }
                 data.update_status(LockStatus {
-                    status: 0,
-                    position_type: 0,
-                    time: 0,
-                    position: false,
-                    velocity: false,
-                });
-                data.update_info(LockInfo {
-                    time: 1.0,
-                    position: [1.0, 2.0, 3.0],
-                    velocity: [1.0, 2.0, 3.0],
+                    time_status: log.time_status,
+                    time: OEMTime {
+                        week: log.week as i32,
+                        ms: log.ms,
+                    },
+                    position_status: log.pos_status,
+                    position_type: log.pos_type,
+                    velocity_status: log.vel_status,
+                    velocity_type: log.vel_type,
                 });
             }
             RxStatusEvent(log) => error_send

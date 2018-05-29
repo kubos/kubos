@@ -120,11 +120,18 @@ pub struct HardwareTestResults {
 
 #[derive(Clone, Default)]
 pub struct LockStatus {
-    pub status: u32,
+    pub time_status: u32, // Validity of time
+    pub time: OEMTime,    // Timestamp from last BestXYZ log message received
+    pub position_status: u32,
     pub position_type: u32,
-    pub time: u32,
-    pub position: bool,
-    pub velocity: bool,
+    pub velocity_status: u32,
+    pub velocity_type: u32,
+}
+
+#[derive(Clone, Default, GraphQLObject)]
+pub struct OEMTime {
+    pub week: i32,
+    pub ms: i32,
 }
 
 #[derive(GraphQLEnum, Debug)]
@@ -146,8 +153,30 @@ pub enum SolutionStatus {
     KubosInvalid,
 }
 
+impl From<u32> for SolutionStatus {
+    fn from(t: u32) -> SolutionStatus {
+        match t {
+            0 => SolutionStatus::SolComputed,
+            1 => SolutionStatus::InsufficientObservations,
+            2 => SolutionStatus::NoConvergence,
+            3 => SolutionStatus::Singularity,
+            4 => SolutionStatus::CovarianceTraceExceeded,
+            5 => SolutionStatus::TestDistanceExceeded,
+            6 => SolutionStatus::ColdStart,
+            7 => SolutionStatus::HeightVelocityExceeded,
+            8 => SolutionStatus::VarianceExceeded,
+            9 => SolutionStatus::ResidualsTooLarge,
+            13 => SolutionStatus::IntegrityWarning,
+            18 => SolutionStatus::Pending,
+            19 => SolutionStatus::InvalidFix,
+            20 => SolutionStatus::Unauthorized,
+            _ => SolutionStatus::KubosInvalid,
+        }
+    }
+}
+
 #[derive(GraphQLEnum, Debug)]
-pub enum PositionType {
+pub enum PosVelType {
     None,
     FixedPos,
     FixedHeight,
@@ -174,6 +203,37 @@ pub enum PositionType {
     KubosInvalid,
 }
 
+impl From<u32> for PosVelType {
+    fn from(t: u32) -> PosVelType {
+        match t {
+            0 => PosVelType::None,
+            1 => PosVelType::FixedPos,
+            2 => PosVelType::FixedHeight,
+            8 => PosVelType::DopplerVelocity,
+            16 => PosVelType::Single,
+            17 => PosVelType::PSRDiff,
+            18 => PosVelType::WAAS,
+            19 => PosVelType::Propagated,
+            20 => PosVelType::Omnistar,
+            32 => PosVelType::L1Float,
+            33 => PosVelType::IonoFreeFloat,
+            34 => PosVelType::NarrowFloat,
+            48 => PosVelType::L1Integer,
+            50 => PosVelType::NarrowInteger,
+            64 => PosVelType::OmnistarHP,
+            65 => PosVelType::OmnistarXP,
+            68 => PosVelType::PPPConverging,
+            69 => PosVelType::PPP,
+            70 => PosVelType::Operational,
+            71 => PosVelType::Warning,
+            72 => PosVelType::OutOfBounds,
+            77 => PosVelType::PPPBasicConverging,
+            78 => PosVelType::PPPBasic,
+            _ => PosVelType::KubosInvalid,
+        }
+    }
+}
+
 #[derive(GraphQLEnum, Debug)]
 pub enum RefTimeStatus {
     Unknown,
@@ -190,58 +250,9 @@ pub enum RefTimeStatus {
     KubosInvalid,
 }
 
-graphql_object!(LockStatus: () | &self | {
-    field status() -> FieldResult<SolutionStatus> {
-        Ok(match self.status {
-            0 => SolutionStatus::SolComputed,
-            1 => SolutionStatus::InsufficientObservations,
-            2 => SolutionStatus::NoConvergence,
-            3 => SolutionStatus::Singularity,
-            4 => SolutionStatus::CovarianceTraceExceeded,
-            5 => SolutionStatus::TestDistanceExceeded,
-            6 => SolutionStatus::ColdStart,
-            7 => SolutionStatus::HeightVelocityExceeded,
-            8 => SolutionStatus::VarianceExceeded,
-            9 => SolutionStatus::ResidualsTooLarge,
-            13 => SolutionStatus::IntegrityWarning,
-            18 => SolutionStatus::Pending,
-            19 => SolutionStatus::InvalidFix,
-            20 => SolutionStatus::Unauthorized,
-        	_ => SolutionStatus::KubosInvalid
-        })
-    }
-    
-    field position_type() -> FieldResult<PositionType> {
-        Ok(match self.position_type {
-            0 => PositionType::None,
-            1 => PositionType::FixedPos,
-            2 => PositionType::FixedHeight,
-            8 => PositionType::DopplerVelocity,
-            16 => PositionType::Single,
-            17 => PositionType::PSRDiff,
-            18 => PositionType::WAAS,
-            19 => PositionType::Propagated,
-            20 => PositionType::Omnistar,
-            32 => PositionType::L1Float,
-            33 => PositionType::IonoFreeFloat,
-            34 => PositionType::NarrowFloat,
-            48 => PositionType::L1Integer,
-            50 => PositionType::NarrowInteger,
-            64 => PositionType::OmnistarHP,
-            65 => PositionType::OmnistarXP,
-            68 => PositionType::PPPConverging,
-            69 => PositionType::PPP,
-            70 => PositionType::Operational,
-            71 => PositionType::Warning,
-            72 => PositionType::OutOfBounds,
-            77 => PositionType::PPPBasicConverging,
-            78 => PositionType::PPPBasic,
-            _ => PositionType::KubosInvalid
-        })
-    }
-    
-    field time() -> FieldResult<RefTimeStatus> {
-        Ok(match self.time {
+impl From<u32> for RefTimeStatus {
+    fn from(t: u32) -> RefTimeStatus {
+        match t {
             20 => RefTimeStatus::Unknown,
             60 => RefTimeStatus::Approximate,
             80 => RefTimeStatus::CoarseAdjusting,
@@ -253,31 +264,49 @@ graphql_object!(LockStatus: () | &self | {
             170 => RefTimeStatus::FineBackupSteering,
             180 => RefTimeStatus::FineSteering,
             200 => RefTimeStatus::SatTime,
-            _ => RefTimeStatus::KubosInvalid
-        })
+            _ => RefTimeStatus::KubosInvalid,
+        }
+    }
+}
+
+graphql_object!(LockStatus: () | &self | {
+            
+    field time_status() -> FieldResult<RefTimeStatus> {
+        Ok(self.time_status.into())
     }
     
-    field position() -> FieldResult<bool> {
-        // TODO
-        Ok(false)
+    field time() -> FieldResult<OEMTime> {
+        Ok(self.time.clone())
     }
     
-    field velocity() -> FieldResult<bool> {
-        // TODO
-        Ok(false)
+    field position_status() -> FieldResult<SolutionStatus> {
+        Ok(self.position_status.into())
     }
+    
+    field position_type() -> FieldResult<PosVelType> {
+        Ok(self.position_type.into())
+    }
+    
+    field velocity_status() -> FieldResult<SolutionStatus> {
+        Ok(self.velocity_status.into())
+    }
+    
+    field velocity_type() -> FieldResult<PosVelType> {
+        Ok(self.velocity_type.into())
+    }
+
 });
 
 #[derive(Clone, Default)]
 pub struct LockInfo {
-    pub time: f64,
-    pub position: [f64; 3],
-    pub velocity: [f64; 3],
+    pub time: OEMTime,      // Timestamp when other fields were last updated
+    pub position: [f64; 3], // Last known good position
+    pub velocity: [f64; 3], // Last known good velocity
 }
 
 graphql_object!(LockInfo: () | &self | {
-    field time() -> FieldResult<f64> {
-        Ok(self.time)
+    field time() -> FieldResult<OEMTime> {
+        Ok(self.time.clone())
     }
     
     field position() -> FieldResult<Vec<f64>> {

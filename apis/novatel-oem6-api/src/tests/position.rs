@@ -123,6 +123,9 @@ fn test_get_position() {
     let oem = mock_new!(mock);
 
     let expected: Log = Log::BestXYZ(BestXYZLog {
+        time_status: 120,
+        week: 3025,
+        ms: 164195000,
         pos_status: 1,
         pos_type: 0,
         position: [0.0, 0.0, 0.0],
