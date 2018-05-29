@@ -95,7 +95,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     {
         Ok(String::from("Not Implemented"))
     }
-    
+
     // Get the test results of the last run test
     //
     // {
@@ -108,7 +108,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     field test_results(&executor) -> FieldResult<IntegrationTestResults> {
         Ok(executor.context().subsystem().get_test_results()?)
     }
-    
+
     // TODO: Check for system errors
     // Stretch goal: Implement RXSTATUS
     field system_status(&executor) -> FieldResult<String>
@@ -166,7 +166,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     field errors(&executor) -> FieldResult<Vec<String>>
     {
         executor.context().subsystem().get_errors();
-        
+
         match executor.context().subsystem().errors.try_borrow() {
             Ok(master_vec) => Ok(master_vec.clone()),
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
@@ -221,7 +221,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //     }
     // }
     field configure_hardware(
-        &executor, 
+        &executor,
         config: Vec<ConfigStruct>,
     ) -> FieldResult<ConfigureHardwareResponse>
     {

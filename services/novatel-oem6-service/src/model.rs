@@ -15,8 +15,8 @@
 //
 
 use failure::Fail;
-use novatel_oem6_api::*;
 use novatel_oem6_api::Log::*;
+use novatel_oem6_api::*;
 use std::cell::{Cell, RefCell};
 use std::io::Error;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError, TrySendError};

@@ -107,6 +107,7 @@ pub struct IntegrationTestResults {
     pub errors: String,
     pub success: bool,
     pub telemetry_debug: Option<VersionInfo>,
+    /* TODO: Add telemetry_nominal */
 }
 
 /// Response fields for 'testHardware(test: HARDWARE)' mutation
