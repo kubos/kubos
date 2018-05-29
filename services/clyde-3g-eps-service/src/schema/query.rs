@@ -15,12 +15,8 @@
 //
 
 use juniper::FieldResult;
-use kubos_service;
-use models::subsystem::Subsystem;
 use models::*;
-
-/// Move this elsewhere?
-pub type Context = kubos_service::Context<Subsystem>;
+use schema::Context;
 
 pub struct Root;
 

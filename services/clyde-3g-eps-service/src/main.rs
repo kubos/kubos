@@ -26,15 +26,16 @@ extern crate juniper;
 extern crate kubos_service;
 
 mod models;
-mod mutation;
-mod query;
+mod schema;
 
 use kubos_service::{Config, Service};
 use models::subsystem::Subsystem;
+use schema::mutation::Root as MutationRoot;
+use schema::query::Root as QueryRoot;
 
 fn main() {
     let config = Config::new("clyde-3g-eps-service");
     let subsystem = Subsystem::new("i2c-1").unwrap();
 
-    Service::new(config, subsystem, query::Root, mutation::Root).start();
+    Service::new(config, subsystem, QueryRoot, MutationRoot).start();
 }

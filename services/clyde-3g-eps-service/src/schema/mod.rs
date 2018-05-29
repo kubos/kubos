@@ -14,8 +14,10 @@
 // limitations under the License.
 //
 
-pub mod daughterboard_telemetry;
-pub mod motherboard_telemetry;
-pub mod reset_telemetry;
-pub mod subsystem;
-pub mod version;
+use kubos_service;
+use models::subsystem::Subsystem;
+
+pub type Context = kubos_service::Context<Subsystem>;
+
+pub mod mutation;
+pub mod query;

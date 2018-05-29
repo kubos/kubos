@@ -16,7 +16,7 @@
 
 use juniper::FieldResult;
 use models::subsystem::Mutations;
-use query::Context;
+use schema::Context;
 
 pub struct Root;
 
