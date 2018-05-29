@@ -104,7 +104,7 @@ fn query_errors_device_single() {
 
     let service = service_new!(mock);
 
-    thread::sleep(Duration::from_millis(50));
+    thread::sleep(Duration::from_millis(100));
 
     let query = r#"{
             errors
@@ -127,7 +127,7 @@ fn query_errors_device_multiple() {
 
     let service = service_new!(mock);
 
-    thread::sleep(Duration::from_millis(50));
+    thread::sleep(Duration::from_millis(100));
 
     let query = r#"{
             errors
