@@ -17,17 +17,48 @@
 use super::*;
 
 #[test]
-fn issue_raw_command() {
-    let mock = MockStream::default();
+fn issue_raw_command_good() {
+    let mut mock = MockStream::default();
+
+    mock.write.set_input(vec![1, 2, 3, 4, 0xFA]);
 
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            issueRawCommand
+            issueRawCommand(command: "01020304FA"){
+                errors,
+                success
+            }
         }"#;
 
     let expected = json!({
-            "issueRawCommand": "Not Implemented"
+            "issueRawCommand": {
+                "errors": "",
+                "success": true
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn issue_raw_command_bad() {
+    let mut mock = MockStream::default();
+
+    let service = service_new!(mock);
+
+    let query = r#"mutation {
+            issueRawCommand(command: "01020304FA"){
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+            "issueRawCommand": {
+                "errors": "UART Error, Generic Error",
+                "success": false
+            }
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));

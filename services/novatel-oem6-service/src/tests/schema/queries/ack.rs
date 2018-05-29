@@ -18,7 +18,7 @@ use super::*;
 
 #[test]
 fn ack_default() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -35,7 +35,7 @@ fn ack_default() {
 
 #[test]
 fn ack_noop() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -58,7 +58,7 @@ fn ack_noop() {
 
 #[test]
 fn ack_control_power() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -81,12 +81,14 @@ fn ack_control_power() {
 
 #[test]
 fn ack_configure_hardware() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 
     let mutation = r#"mutation {
-            configureHardware
+            configureHardware(config: [{option: LOG_ERROR_DATA}]) {
+                success
+            }
         }"#;
 
     service.process(mutation.to_owned());
@@ -104,7 +106,7 @@ fn ack_configure_hardware() {
 
 #[test]
 fn ack_test_hardware() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 
@@ -127,12 +129,14 @@ fn ack_test_hardware() {
 
 #[test]
 fn ack_issue_raw_command() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 
     let mutation = r#"mutation {
-            issueRawCommand
+            issueRawCommand(command: "01"){
+                success
+            }
         }"#;
 
     service.process(mutation.to_owned());

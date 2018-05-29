@@ -34,3 +34,40 @@ pub enum AckCommand {
     TestHardware,
     IssueRawCommand,
 }
+
+/// Input structure for 'configureHardware' mutation
+#[derive(GraphQLInputObject)]
+pub struct ConfigStruct {
+    pub option: ConfigOption,
+    #[graphql(default = "false")]
+    pub hold: bool,
+    #[graphql(default = "0.0")]
+    pub interval: f64,
+    #[graphql(default = "0.0")]
+    pub offset: f64,
+}
+
+/// Input field for 'configureHardware' mutation
+///
+/// Indicates which configuration operation should be performed
+#[derive(GraphQLEnum, Debug)]
+pub enum ConfigOption {
+    /// Configure system to output error data when errors or events occur
+    LogErrorData,
+    /// Configure system to output position data at a requested interval
+    LogPositionData,
+    /// Stop generation of all output data from device
+    UnlogAll,
+    /// Stop generation of error data from device
+    UnlogErrorData,
+    /// Stop generation of position data from device
+    UnlogPositionData,
+}
+
+/// Response fields for 'configureHardware' mutation
+#[derive(GraphQLObject, Clone)]
+pub struct ConfigureHardwareResponse {
+    pub config: String,
+    pub errors: String,
+    pub success: bool,
+}

@@ -52,6 +52,7 @@
 extern crate failure;
 #[macro_use]
 extern crate juniper;
+#[macro_use]
 extern crate kubos_service;
 extern crate novatel_oem6_api;
 #[cfg(test)]

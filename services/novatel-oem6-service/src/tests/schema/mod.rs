@@ -15,6 +15,8 @@
 //
 
 use super::*;
+use self::test_data::*;
+
 use kubos_service::{Config, Service};
 use model::*;
 use schema::*;
@@ -30,12 +32,13 @@ macro_rules! wrap {
     }};
 }
 
-mod queries;
 mod mutations;
+mod queries;
+mod test_data;
 
 #[test]
 fn ping() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 

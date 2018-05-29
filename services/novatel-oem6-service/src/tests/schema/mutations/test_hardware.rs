@@ -18,7 +18,7 @@ use super::*;
 
 #[test]
 fn test_hardware() {
-    let mock = MockStream::default();
+    let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 

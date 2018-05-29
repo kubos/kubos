@@ -25,10 +25,14 @@ macro_rules! service_new {
         use std::cell::{Cell, RefCell};
         use std::sync::{Arc, Mutex};
         use std::thread;
-        use std::time::Duration;
 
         let (log_send, log_recv) = sync_channel(5);
         let (response_send, response_recv) = sync_channel(5);
+
+        $mock.read.set_result(Err(UartError::IoError {
+            cause: ::std::io::ErrorKind::TimedOut,
+            description: "Mock Timeout".to_owned(),
+        }));
 
         let oem = OEM6 {
             conn: Arc::new(Mutex::new(Connection {
@@ -38,13 +42,11 @@ macro_rules! service_new {
             response_recv,
         };
 
+        let rx_conn = oem.conn.clone();
+
         // We don't actually want to do anything with this thread, the channel
         // senders just need to live through the lifetime of each test
-        thread::spawn(move || {
-            let _log_sender = log_send;
-            let _response_sender = response_send;
-            thread::sleep(Duration::from_secs(2))
-        });
+        thread::spawn(move || read_thread(rx_conn, log_send, response_send));
 
         Service::new(
             Config::new("novatel-oem6-service"),
