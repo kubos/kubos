@@ -26,54 +26,44 @@ pub struct Root;
 
 /// Base GraphQL query
 graphql_object!(Root: Context as "Query" |&self| {
-
-    // Test query to verify service is running without attempting
-    // to communicate with the underlying subsystem
-    //
-    // {
-    //     ping: "pong"
-    // }
     field ping() -> FieldResult<String>
+        as "Test service query"
     {
         Ok(String::from("pong"))
     }
 
     field ack(&executor) -> FieldResult<subsystem::Mutations>
+        as "Last run mutation"
     {
         Ok(executor.context().subsystem().last_mutation.get())
     }
 
     field version(&executor) -> FieldResult<version::Data>
+        as "Hardware version information"
     {
         Ok(executor.context().subsystem().get_version()?)
     }
 
-    // Get current reset telemetry information for the system
-    //
-    // {
-    //    resetTelemetry {
-    //      brownOut: i32,
-    //      automaticSoftware: i32,
-    //      manual: i32,
-    //      watchdog: i32,
-    //   }
-    // }
     field reset_telemetry(&executor, telem_type: reset_telemetry::Type) -> FieldResult<reset_telemetry::Data>
+        as "Telemetry data regarding the number of resets"
     {
         Ok(executor.context().subsystem().get_reset_telemetry(telem_type)?)
     }
 
     field motherboard_telemetry(&executor, telem_type: motherboard_telemetry::Type) -> FieldResult<f64>
+        as "Telemetry data from motherboard"
     {
         Ok(f64::from(executor.context().subsystem().get_motherboard_telemetry(telem_type)?))
     }
 
     field daughterboard_telemetry(&executor, telem_type: daughterboard_telemetry::Type) -> FieldResult<f64>
+        as "Telemetry data from daughterboard"
     {
         Ok(f64::from(executor.context().subsystem().get_daughterboard_telemetry(telem_type)?))
     }
 
     field watchdog_period(&executor) -> FieldResult<i32>
+        as "Current watchdog period in minutes"
     {
         Ok(i32::from(executor.context().subsystem().get_comms_watchdog_period()?))
     }

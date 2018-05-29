@@ -23,22 +23,22 @@ pub struct Root;
 /// Base GraphQL mutation model
 graphql_object!(Root: Context as "Mutation" |&self| {
 
-    // Performs a manual reset of the EPS board
     field manual_reset(&executor) -> FieldResult<()>
+        as "Perform manual reset of EPS board"
     {
         executor.context().subsystem().last_mutation.set(Mutations::ManualReset);
         Ok(executor.context().subsystem().manual_reset()?)
     }
 
-    // Reset communications watchdog
     field reset_watchdog(&executor) -> FieldResult<()>
+        as "Reset/kick communications watchdog"
     {
         executor.context().subsystem().last_mutation.set(Mutations::ResetWatchdog);
         Ok(executor.context().subsystem().reset_watchdog()?)
     }
 
-    // Set watchdog period
     field set_watchdog_period(&executor, period: i32) -> FieldResult<()>
+        as "Set watchdog period (in minutes)"
     {
         executor.context().subsystem().last_mutation.set(Mutations::SetWatchdogPeriod);
         Ok(executor.context().subsystem().set_watchdog_period(period as u8)?)
