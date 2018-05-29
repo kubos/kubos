@@ -30,6 +30,7 @@ mod commands;
 mod eps;
 mod telemetry;
 
+pub use commands::version::{Version, VersionInfo};
 pub use eps::Eps;
 pub use telemetry::daughterboard as DaughterboardTelemetry;
 pub use telemetry::motherboard as MotherboardTelemetry;
