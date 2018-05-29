@@ -38,6 +38,11 @@ graphql_object!(Root: Context as "Query" |&self| {
         Ok(String::from("pong"))
     }
 
+    field ack(&executor) -> FieldResult<subsystem::Mutations>
+    {
+        Ok(executor.context().subsystem().last_mutation.get())
+    }
+
     field version(&executor) -> FieldResult<version::Data>
     {
         Ok(executor.context().subsystem().get_version()?)

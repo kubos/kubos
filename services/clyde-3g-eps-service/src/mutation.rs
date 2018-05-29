@@ -15,6 +15,7 @@
 //
 
 use juniper::FieldResult;
+use models::subsystem::Mutations;
 use query::Context;
 
 pub struct Root;
@@ -25,18 +26,21 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     // Performs a manual reset of the EPS board
     field manual_reset(&executor) -> FieldResult<()>
     {
+        executor.context().subsystem().last_mutation.set(Mutations::ManualReset);
         Ok(executor.context().subsystem().manual_reset()?)
     }
 
     // Reset communications watchdog
     field reset_watchdog(&executor) -> FieldResult<()>
     {
+        executor.context().subsystem().last_mutation.set(Mutations::ResetWatchdog);
         Ok(executor.context().subsystem().reset_watchdog()?)
     }
 
     // Set watchdog period
     field set_watchdog_period(&executor, period: i32) -> FieldResult<()>
     {
+        executor.context().subsystem().last_mutation.set(Mutations::SetWatchdogPeriod);
         Ok(executor.context().subsystem().set_watchdog_period(period as u8)?)
     }
 });

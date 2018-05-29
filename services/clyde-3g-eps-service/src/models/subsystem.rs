@@ -21,13 +21,17 @@ use i2c_hal::*;
 use models::*;
 use std::cell::{Cell, RefCell};
 
-pub enum AckCommand {
+#[derive(Copy, Clone, GraphQLEnum)]
+pub enum Mutations {
     None,
+    ManualReset,
+    ResetWatchdog,
+    SetWatchdogPeriod,
 }
 
 pub struct Subsystem {
     pub eps: Eps,
-    pub last_cmd: Cell<AckCommand>,
+    pub last_mutation: Cell<Mutations>,
     pub errors: RefCell<Vec<String>>,
 }
 
@@ -37,7 +41,7 @@ impl Subsystem {
 
         Ok(Subsystem {
             eps,
-            last_cmd: Cell::new(AckCommand::None),
+            last_mutation: Cell::new(Mutations::None),
             errors: RefCell::new(vec![]),
         })
     }
