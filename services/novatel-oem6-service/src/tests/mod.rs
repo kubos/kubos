@@ -46,11 +46,13 @@ macro_rules! service_new {
 
         thread::spawn(move || read_thread(rx_conn, log_send, response_send));
 
+        let data = Arc::new(LockData::new());
         let (error_send, error_recv) = sync_channel(10);
         let (version_send, version_recv) = sync_channel(1);
 
+        let data_ref = data.clone();
         let oem_ref = oem.clone();
-        thread::spawn(move || log_thread(oem_ref, error_send, version_send));
+        thread::spawn(move || log_thread(oem_ref, data_ref, error_send, version_send));
 
         Service::new(
             Config::new("novatel-oem6-service"),
@@ -58,6 +60,7 @@ macro_rules! service_new {
                 oem,
                 last_cmd: Cell::new(AckCommand::None),
                 errors: RefCell::new(vec![]),
+                lock_data: data,
                 error_recv,
                 version_recv,
             },

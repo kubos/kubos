@@ -118,22 +118,39 @@ pub struct HardwareTestResults {
     pub data: String,
 }
 
-#[derive(Clone, Default)]
+/// Response fields for `lockStatus` query
+#[derive(Clone)]
 pub struct LockStatus {
-    pub time_status: u32, // Validity of time
-    pub time: OEMTime,    // Timestamp from last BestXYZ log message received
+    pub time_status: u8, // Validity of time
+    pub time: OEMTime,   // Timestamp from last BestXYZ log message received
     pub position_status: u32,
     pub position_type: u32,
     pub velocity_status: u32,
     pub velocity_type: u32,
 }
 
+impl Default for LockStatus {
+    fn default() -> LockStatus {
+        LockStatus {
+            time_status: 20, // Unknown
+            time: OEMTime { week: 0, ms: 0 },
+            position_status: 1, // Insufficient Observations
+            position_type: 0,   // None
+            velocity_status: 1, // Insufficient Observations
+            velocity_type: 0,   // None
+        }
+    }
+}
+
+/// Time structure for `lockStatus` and `lockInfo` response fields
 #[derive(Clone, Default, GraphQLObject)]
 pub struct OEMTime {
     pub week: i32,
     pub ms: i32,
 }
 
+/// Enum for the `positionStatus` and `velocityStatus` response fields
+/// of the `lockStatus` query
 #[derive(GraphQLEnum, Debug)]
 pub enum SolutionStatus {
     SolComputed,
@@ -175,6 +192,8 @@ impl From<u32> for SolutionStatus {
     }
 }
 
+/// Enum for the `positionType` and `velocityType` response fields
+/// of the `lockStatus` query
 #[derive(GraphQLEnum, Debug)]
 pub enum PosVelType {
     None,
@@ -234,6 +253,7 @@ impl From<u32> for PosVelType {
     }
 }
 
+/// Enum for the `TimeStatus` response field of the `lockStatus` query
 #[derive(GraphQLEnum, Debug)]
 pub enum RefTimeStatus {
     Unknown,
@@ -250,8 +270,8 @@ pub enum RefTimeStatus {
     KubosInvalid,
 }
 
-impl From<u32> for RefTimeStatus {
-    fn from(t: u32) -> RefTimeStatus {
+impl From<u8> for RefTimeStatus {
+    fn from(t: u8) -> RefTimeStatus {
         match t {
             20 => RefTimeStatus::Unknown,
             60 => RefTimeStatus::Approximate,
@@ -270,33 +290,34 @@ impl From<u32> for RefTimeStatus {
 }
 
 graphql_object!(LockStatus: () | &self | {
-            
+
     field time_status() -> FieldResult<RefTimeStatus> {
         Ok(self.time_status.into())
     }
-    
+
     field time() -> FieldResult<OEMTime> {
         Ok(self.time.clone())
     }
-    
+
     field position_status() -> FieldResult<SolutionStatus> {
         Ok(self.position_status.into())
     }
-    
+
     field position_type() -> FieldResult<PosVelType> {
         Ok(self.position_type.into())
     }
-    
+
     field velocity_status() -> FieldResult<SolutionStatus> {
         Ok(self.velocity_status.into())
     }
-    
+
     field velocity_type() -> FieldResult<PosVelType> {
         Ok(self.velocity_type.into())
     }
-
 });
 
+/// Current system lock information. Used in the response fields of
+/// the `lockInfo` query
 #[derive(Clone, Default)]
 pub struct LockInfo {
     pub time: OEMTime,      // Timestamp when other fields were last updated
@@ -308,11 +329,11 @@ graphql_object!(LockInfo: () | &self | {
     field time() -> FieldResult<OEMTime> {
         Ok(self.time.clone())
     }
-    
+
     field position() -> FieldResult<Vec<f64>> {
         Ok(self.position.to_vec())
     }
-    
+
     field velocity() -> FieldResult<Vec<f64>> {
         Ok(self.velocity.to_vec())
     }

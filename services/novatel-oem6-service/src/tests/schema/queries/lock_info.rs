@@ -15,19 +15,142 @@
 //
 
 use super::*;
+use std::thread;
+use std::time::Duration;
 
 #[test]
-fn get_lock_info() {
+fn get_lock_info_default() {
     let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 
     let query = r#"{
-            lockInfo
+            lockInfo {
+                position,
+                time {
+                    ms,
+                    week
+                },
+                velocity
+            }
         }"#;
 
     let expected = json!({
-            "lockInfo": "Not Implemented"
+            "lockInfo": {
+                "position": [0.0, 0.0, 0.0],
+                "time": {
+                    "ms": 0,
+                    "week": 0,
+                },
+                "velocity": [0.0, 0.0, 0.0],
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn get_lock_info_no_lock() {
+    let mut mock = MockStream::default();
+
+    mock.read.set_output(POSITION_LOG_NO_LOCK.to_vec());
+
+    let service = service_new!(mock);
+
+    thread::sleep(Duration::from_millis(50));
+
+    let query = r#"{
+            lockInfo {
+                position,
+                time {
+                    ms,
+                    week
+                },
+                velocity
+            }
+        }"#;
+
+    let expected = json!({
+            "lockInfo": {
+                "position": [0.0, 0.0, 0.0],
+                "time": {
+                    "ms": 0,
+                    "week": 0,
+                },
+                "velocity": [0.0, 0.0, 0.0],
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn get_lock_info_good() {
+    let mut mock = MockStream::default();
+
+    mock.read.set_output(POSITION_LOG_GOOD.to_vec());
+
+    let service = service_new!(mock);
+
+    thread::sleep(Duration::from_millis(50));
+
+    let query = r#"{
+            lockInfo {
+                position,
+                time {
+                    ms,
+                    week
+                },
+                velocity
+            }
+        }"#;
+
+    let expected = json!({
+            "lockInfo": {
+                "position": [1.1, 2.2, 3.3],
+                "time": {
+                    "ms": 164195000,
+                	"week": 3025
+                },
+                "velocity": [4.4, 5.5, 6.6],
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn get_lock_info_nolock_after_good() {
+    let mut mock = MockStream::default();
+
+    let mut output = POSITION_LOG_GOOD.to_vec();
+    output.extend_from_slice(&POSITION_LOG_NO_LOCK);
+    mock.read.set_output(output);
+
+    let service = service_new!(mock);
+
+    thread::sleep(Duration::from_millis(50));
+
+    let query = r#"{
+            lockInfo {
+                position,
+                time {
+                    ms,
+                    week
+                },
+                velocity
+            }
+        }"#;
+
+    let expected = json!({
+            "lockInfo": {
+                "position": [1.1, 2.2, 3.3],
+                "time": {
+                    "ms": 164195000,
+                	"week": 3025
+                },
+                "velocity": [4.4, 5.5, 6.6],
+            }
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
