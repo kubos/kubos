@@ -118,6 +118,177 @@ pub struct HardwareTestResults {
     pub data: String,
 }
 
+#[derive(Clone, Default)]
+pub struct LockStatus {
+    pub status: u32,
+    pub position_type: u32,
+    pub time: u32,
+    pub position: bool,
+    pub velocity: bool,
+}
+
+#[derive(GraphQLEnum, Debug)]
+pub enum SolutionStatus {
+    SolComputed,
+    InsufficientObservations,
+    NoConvergence,
+    Singularity,
+    CovarianceTraceExceeded,
+    TestDistanceExceeded,
+    ColdStart,
+    HeightVelocityExceeded,
+    VarianceExceeded,
+    ResidualsTooLarge,
+    IntegrityWarning,
+    Pending,
+    InvalidFix,
+    Unauthorized,
+    KubosInvalid,
+}
+
+#[derive(GraphQLEnum, Debug)]
+pub enum PositionType {
+    None,
+    FixedPos,
+    FixedHeight,
+    DopplerVelocity,
+    Single,
+    PSRDiff,
+    WAAS,
+    Propagated,
+    Omnistar,
+    L1Float,
+    IonoFreeFloat,
+    NarrowFloat,
+    L1Integer,
+    NarrowInteger,
+    OmnistarHP,
+    OmnistarXP,
+    PPPConverging,
+    PPP,
+    Operational,
+    Warning,
+    OutOfBounds,
+    PPPBasicConverging,
+    PPPBasic,
+    KubosInvalid,
+}
+
+#[derive(GraphQLEnum, Debug)]
+pub enum RefTimeStatus {
+    Unknown,
+    Approximate,
+    CoarseAdjusting,
+    Coarse,
+    CoarseSteering,
+    FreeWheeling,
+    FineAdjusting,
+    Fine,
+    FineBackupSteering,
+    FineSteering,
+    SatTime,
+    KubosInvalid,
+}
+
+graphql_object!(LockStatus: () | &self | {
+    field status() -> FieldResult<SolutionStatus> {
+        Ok(match self.status {
+            0 => SolutionStatus::SolComputed,
+            1 => SolutionStatus::InsufficientObservations,
+            2 => SolutionStatus::NoConvergence,
+            3 => SolutionStatus::Singularity,
+            4 => SolutionStatus::CovarianceTraceExceeded,
+            5 => SolutionStatus::TestDistanceExceeded,
+            6 => SolutionStatus::ColdStart,
+            7 => SolutionStatus::HeightVelocityExceeded,
+            8 => SolutionStatus::VarianceExceeded,
+            9 => SolutionStatus::ResidualsTooLarge,
+            13 => SolutionStatus::IntegrityWarning,
+            18 => SolutionStatus::Pending,
+            19 => SolutionStatus::InvalidFix,
+            20 => SolutionStatus::Unauthorized,
+        	_ => SolutionStatus::KubosInvalid
+        })
+    }
+    
+    field position_type() -> FieldResult<PositionType> {
+        Ok(match self.position_type {
+            0 => PositionType::None,
+            1 => PositionType::FixedPos,
+            2 => PositionType::FixedHeight,
+            8 => PositionType::DopplerVelocity,
+            16 => PositionType::Single,
+            17 => PositionType::PSRDiff,
+            18 => PositionType::WAAS,
+            19 => PositionType::Propagated,
+            20 => PositionType::Omnistar,
+            32 => PositionType::L1Float,
+            33 => PositionType::IonoFreeFloat,
+            34 => PositionType::NarrowFloat,
+            48 => PositionType::L1Integer,
+            50 => PositionType::NarrowInteger,
+            64 => PositionType::OmnistarHP,
+            65 => PositionType::OmnistarXP,
+            68 => PositionType::PPPConverging,
+            69 => PositionType::PPP,
+            70 => PositionType::Operational,
+            71 => PositionType::Warning,
+            72 => PositionType::OutOfBounds,
+            77 => PositionType::PPPBasicConverging,
+            78 => PositionType::PPPBasic,
+            _ => PositionType::KubosInvalid
+        })
+    }
+    
+    field time() -> FieldResult<RefTimeStatus> {
+        Ok(match self.time {
+            20 => RefTimeStatus::Unknown,
+            60 => RefTimeStatus::Approximate,
+            80 => RefTimeStatus::CoarseAdjusting,
+            100 => RefTimeStatus::Coarse,
+            120 => RefTimeStatus::CoarseSteering,
+            130 => RefTimeStatus::FreeWheeling,
+            140 => RefTimeStatus::FineAdjusting,
+            160 => RefTimeStatus::Fine,
+            170 => RefTimeStatus::FineBackupSteering,
+            180 => RefTimeStatus::FineSteering,
+            200 => RefTimeStatus::SatTime,
+            _ => RefTimeStatus::KubosInvalid
+        })
+    }
+    
+    field position() -> FieldResult<bool> {
+        // TODO
+        Ok(false)
+    }
+    
+    field velocity() -> FieldResult<bool> {
+        // TODO
+        Ok(false)
+    }
+});
+
+#[derive(Clone, Default)]
+pub struct LockInfo {
+    pub time: f64,
+    pub position: [f64; 3],
+    pub velocity: [f64; 3],
+}
+
+graphql_object!(LockInfo: () | &self | {
+    field time() -> FieldResult<f64> {
+        Ok(self.time)
+    }
+    
+    field position() -> FieldResult<Vec<f64>> {
+        Ok(self.position.to_vec())
+    }
+    
+    field velocity() -> FieldResult<Vec<f64>> {
+        Ok(self.velocity.to_vec())
+    }
+});
+
 /// Version information about the device, returned as the
 /// `telemetryDebug` response field
 #[derive(GraphQLObject)]

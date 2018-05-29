@@ -15,7 +15,7 @@
 //
 
 #![deny(missing_docs)]
-#![deny(warnings)]
+//#![deny(warnings)]
 
 //! Kubos Service for interacting with a [NovAtel OEM6 High Precision GNSS Receiver](https://www.novatel.com/products/gnss-receivers/oem-receiver-boards/oem6-receivers/)
 //!
@@ -66,16 +66,17 @@ mod schema;
 mod tests;
 
 use kubos_service::{Config, Service};
-use model::Subsystem;
+use model::{LockData, Subsystem};
 use novatel_oem6_api::OEMResult;
 use schema::{MutationRoot, QueryRoot};
+use std::sync::Arc;
 
 // TODO: CHANGE THE UART BUS TO UART4!!!
 
 fn main() -> OEMResult<()> {
     Service::new(
         Config::new("novatel-oem6-service"),
-        Subsystem::new("/dev/ttyS5")?,
+        Subsystem::new("/dev/ttyS5", Arc::new(LockData::new()))?,
         QueryRoot,
         MutationRoot,
     ).start();

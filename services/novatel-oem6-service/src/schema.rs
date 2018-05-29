@@ -122,9 +122,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // - velocity - yes/no
     // - confidence? (ex. FINESTEERING)
     // - Potentially change the yes/no's to a gradient
-    field lock_status(&executor) -> FieldResult<String>
+    field lock_status(&executor) -> FieldResult<LockStatus>
     {
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_lock_status()?)
     }
 
     // TODO: 
@@ -132,9 +132,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // - Locked position
     // - Locked velocity
     // - System time lock occurred
-    field lock_info(&executor) -> FieldResult<String>
+    field lock_info(&executor) -> FieldResult<LockInfo>
     {
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_lock_info()?)
     }
 
     // TODO:

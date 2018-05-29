@@ -20,6 +20,7 @@ use novatel_oem6_api::*;
 use std::cell::{Cell, RefCell};
 use std::io::Error;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError, TrySendError};
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -27,11 +28,35 @@ use objects::*;
 
 pub const RECV_TIMEOUT: Duration = Duration::from_millis(300);
 
+pub struct LockData {
+    pub status: Mutex<LockStatus>,
+    pub info: Mutex<LockInfo>,
+}
+
+impl LockData {
+    pub fn new() -> Self {
+        LockData {
+            status: Mutex::new(LockStatus::default()),
+            info: Mutex::new(LockInfo::default()),
+        }
+    }
+
+    pub fn update_status(&self, status: LockStatus) {
+        let mut local = self.status.lock().unwrap();
+        *local = status;
+    }
+
+    pub fn update_info(&self, info: LockInfo) {
+        let mut local = self.info.lock().unwrap();
+        *local = info;
+    }
+}
+
 // Listen for log messages from the OEM6 and route data to the appropriate
 // listener or structure.
 //
 // The OEM6 will send us one of three log messages:
-// - Position information. The OEM6 will likely be set up to output this data
+// - Lock information. The OEM6 will likely be set up to output this data
 //   once per second.
 // - Version information. This data will be output immediately upon request by
 //   the `noop` and `get_test_results` functions
@@ -39,6 +64,7 @@ pub const RECV_TIMEOUT: Duration = Duration::from_millis(300);
 //   error or event occurs.
 pub fn log_thread(
     oem: OEM6,
+    data: Arc<LockData>,
     error_send: SyncSender<RxStatusEventLog>,
     version_send: SyncSender<VersionLog>,
 ) {
@@ -46,7 +72,20 @@ pub fn log_thread(
         match oem.get_log()
             .expect("Underlying read thread no longer communicating")
         {
-            BestXYZ(_log) => { /* TODO: Update our position information */ }
+            BestXYZ(log) => {
+                data.update_status(LockStatus {
+                    status: 0,
+                    position_type: 0,
+                    time: 0,
+                    position: false,
+                    velocity: false,
+                });
+                data.update_info(LockInfo {
+                    time: 1.0,
+                    position: [1.0, 2.0, 3.0],
+                    velocity: [1.0, 2.0, 3.0],
+                });
+            }
             RxStatusEvent(log) => error_send
                 .try_send(log)
                 .or_else::<TrySendError<RxStatusEventLog>, _>(|err| match err {
@@ -75,12 +114,13 @@ pub struct Subsystem {
     pub oem: OEM6,
     pub last_cmd: Cell<AckCommand>,
     pub errors: RefCell<Vec<String>>,
+    pub lock_data: Arc<LockData>,
     pub error_recv: Receiver<RxStatusEventLog>,
     pub version_recv: Receiver<VersionLog>,
 }
 
 impl Subsystem {
-    pub fn new(bus: &'static str) -> OEMResult<Subsystem> {
+    pub fn new(bus: &'static str, data: Arc<LockData>) -> OEMResult<Subsystem> {
         let (log_send, log_recv) = sync_channel(5);
         let (response_send, response_recv) = sync_channel(5);
 
@@ -92,8 +132,9 @@ impl Subsystem {
         let (error_send, error_recv) = sync_channel(10);
         let (version_send, version_recv) = sync_channel(1);
 
+        let data_ref = data.clone();
         let oem_ref = oem.clone();
-        thread::spawn(move || log_thread(oem_ref, error_send, version_send));
+        thread::spawn(move || log_thread(oem_ref, data_ref, error_send, version_send));
 
         println!("Kubos OEM6 service started");
 
@@ -101,6 +142,7 @@ impl Subsystem {
             oem,
             last_cmd: Cell::new(AckCommand::None),
             errors: RefCell::new(vec![]),
+            lock_data: data.clone(),
             error_recv,
             version_recv,
         })
@@ -138,6 +180,14 @@ impl Subsystem {
                 }
             },
         }
+    }
+
+    pub fn get_lock_status(&self) -> Result<LockStatus, Error> {
+        Ok(self.lock_data.status.lock().unwrap().clone())
+    }
+
+    pub fn get_lock_info(&self) -> Result<LockInfo, Error> {
+        Ok(self.lock_data.info.lock().unwrap().clone())
     }
 
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
