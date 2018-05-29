@@ -70,4 +70,16 @@ impl Subsystem {
     pub fn get_version(&self) -> Result<version::Data, Error> {
         Ok(self.eps.get_version_info()?.into())
     }
+
+    pub fn manual_reset(&self) -> Result<(), Error> {
+        Ok(self.eps.manual_reset()?)
+    }
+
+    pub fn reset_watchdog(&self) -> Result<(), Error> {
+        Ok(self.eps.reset_comms_watchdog()?)
+    }
+
+    pub fn set_watchdog_period(&self, period: u8) -> Result<(), Error> {
+        Ok(self.eps.set_comms_watchdog_period(period)?)
+    }
 }
