@@ -19,7 +19,7 @@ use novatel_oem6_api::*;
 use novatel_oem6_api::Log::*;
 use std::cell::{Cell, RefCell};
 use std::io::Error;
-use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TrySendError};
+use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError, TrySendError};
 use std::thread;
 use std::time::Duration;
 
@@ -107,6 +107,38 @@ impl Subsystem {
     }
 
     // Queries
+
+    pub fn get_errors(&self) {
+        match self.error_recv.try_recv() {
+            Ok(msg) => {
+                push_err!(
+                    self.errors,
+                    format!(
+                        "RxStatusEvent({}, {}, {}): {}",
+                        msg.word, msg.bit, msg.event, msg.description
+                    )
+                );
+
+                while let Ok(err) = self.error_recv.try_recv() {
+                    push_err!(
+                        self.errors,
+                        format!(
+                            "RxStatusEvent({}, {}, {}): {}",
+                            err.word, err.bit, err.event, err.description
+                        )
+                    );
+                }
+            }
+            Err(err) => match err {
+                // Do nothing. This is the good case
+                TryRecvError::Empty => {}
+                // We've lost connection with the errors channel
+                TryRecvError::Disconnected => {
+                    push_err!(self.errors, "Errors sender disconnected".to_owned());
+                }
+            },
+        }
+    }
 
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
         // Send the request for version information

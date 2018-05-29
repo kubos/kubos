@@ -56,8 +56,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        // TODO: Get the status of the read thread
-        //executor.context().subsystem().get_read_health();
+        executor.context().subsystem().get_errors();
 
         match executor.context().subsystem().errors.try_borrow_mut() {
             Ok(mut master_vec) => {
@@ -166,6 +165,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
+        executor.context().subsystem().get_errors();
+        
         match executor.context().subsystem().errors.try_borrow() {
             Ok(master_vec) => Ok(master_vec.clone()),
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
