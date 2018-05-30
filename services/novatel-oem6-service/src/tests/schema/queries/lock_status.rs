@@ -15,7 +15,6 @@
 //
 
 use super::*;
-use std::thread;
 
 #[test]
 fn get_lock_status_default() {
@@ -62,8 +61,6 @@ fn get_lock_status_good() {
 
     let service = service_new!(mock);
 
-    thread::sleep(SETUP_DELAY);
-
     let query = r#"{
             lockStatus {
                 positionStatus,
@@ -102,8 +99,6 @@ fn get_lock_status_nondefault() {
     mock.read.set_output(POSITION_LOG_GOOD.to_vec());
 
     let service = service_new!(mock);
-
-    thread::sleep(SETUP_DELAY);
 
     let query = r#"{
             lockStatus {

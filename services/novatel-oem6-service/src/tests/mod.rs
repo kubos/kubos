@@ -25,6 +25,7 @@ macro_rules! service_new {
         use std::cell::{Cell, RefCell};
         use std::sync::{Arc, Mutex};
         use std::thread;
+        use std::time::Duration;
 
         let (log_send, log_recv) = sync_channel(5);
         let (response_send, response_recv) = sync_channel(5);
@@ -54,6 +55,12 @@ macro_rules! service_new {
         let oem_ref = oem.clone();
         thread::spawn(move || log_thread(oem_ref, data_ref, error_send, version_send));
 
+        // The read thread needs some time to intake and process the
+        // sample data we give it.
+        // Note: If run locally, this delay can be 50ms. However, when
+        // run on CircleCI, it needs to be 200ms
+        thread::sleep(Duration::from_millis(200));
+
         Service::new(
             Config::new("novatel-oem6-service"),
             Subsystem {
@@ -67,6 +74,7 @@ macro_rules! service_new {
             QueryRoot,
             MutationRoot,
         )
+
     }};
 }
 

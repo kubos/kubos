@@ -15,7 +15,6 @@
 //
 
 use super::*;
-use std::thread;
 
 #[test]
 fn query_errors_empty() {
@@ -103,8 +102,6 @@ fn query_errors_device_single() {
 
     let service = service_new!(mock);
 
-    thread::sleep(SETUP_DELAY);
-
     let query = r#"{
             errors
         }"#;
@@ -125,8 +122,6 @@ fn query_errors_device_multiple() {
     mock.read.set_output(output);
 
     let service = service_new!(mock);
-
-    thread::sleep(SETUP_DELAY);
 
     let query = r#"{
             errors

@@ -22,13 +22,6 @@ use model::*;
 use schema::*;
 use serde_json;
 use std::sync::mpsc::sync_channel;
-use std::time::Duration;
-
-// The read thread needs some time to intake and process the
-// sample data we give it.
-// Note: If run locally, this delay can be 50ms. However, when
-// run on CircleCI, it needs to be 200ms
-const SETUP_DELAY: Duration = Duration::from_millis(200);
 
 macro_rules! wrap {
     ($result:ident) => {{
