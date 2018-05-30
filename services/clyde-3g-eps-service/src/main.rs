@@ -77,8 +77,8 @@
 //!
 //! `type Mutation { setWatchdogPeriod(period: i32) }` - Calls [Eps::set_comms_watchdog_period](../clyde_3g_eps_api/eps/struct.Eps.html#method.set_comms_watchdog_period)
 
-#![deny(missing_docs)]
-#![deny(warnings)]
+//#![deny(missing_docs)]
+// #![deny(warnings)]
 
 extern crate clyde_3g_eps_api;
 extern crate eps_api;
