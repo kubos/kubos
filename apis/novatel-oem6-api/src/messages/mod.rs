@@ -78,7 +78,7 @@ pub struct Header {
     pub time_status: u8,
     pub week: u16,
     pub ms: i32,
-    pub recv_status: u32,
+    pub recv_status: ReceiverStatusFlags,
     pub recv_ver: u16,
 }
 
@@ -96,7 +96,7 @@ impl Header {
             time_status: 0, // Ignored for TX
             week: 0,        // Ignored for TX
             ms: 0,          // Ignored for TX
-            recv_status: 0, // Ignored for TX
+            recv_status: ReceiverStatusFlags::empty(), // Ignored for TX
             recv_ver: 0,    // Ignored for TX
         }
     }
@@ -123,7 +123,8 @@ impl Message for Header {
         vec.push(self.time_status);
         vec.write_u16::<LittleEndian>(self.week).unwrap();
         vec.write_i32::<LittleEndian>(self.ms).unwrap();
-        vec.write_u32::<LittleEndian>(self.recv_status).unwrap();
+        vec.write_u32::<LittleEndian>(self.recv_status.bits())
+            .unwrap();
         vec.push(0);
         vec.push(0);
         vec.write_u16::<LittleEndian>(self.recv_ver).unwrap();
@@ -168,8 +169,94 @@ named!(parse_header(&[u8]) -> Header,
                 time_status,
                 week,
                 ms,
-                recv_status,
+                recv_status: ReceiverStatusFlags::from_bits_truncate(recv_status),
                 recv_ver
         })
     )
 );
+
+bitflags! {
+    /// Receiver status flags
+    #[derive(Default)]
+    pub struct ReceiverStatusFlags: u32 {
+        /// System has encountered an error
+        const ERROR_PRESENT = 0x00000001;
+        /// Temperature warning
+        const TEMPERATURE_WARNING = 0x00000002;
+        /// Voltage supply warning
+        const VOLTAGE_SUPPLY_WARNING = 0x00000004;
+        /// Antenna not powered
+        const ANTENNA_NOT_POWERED = 0x00000008;
+        /// LNA failure encountered
+        const LNA_FAILURE = 0x00000010;
+        /// Antenna open
+        const ANTENNA_OPEN = 0x00000020;
+        /// Antenna shortened
+        const ANTENNA_SHORTENED = 0x00000040;
+        /// CPU overloaded
+        const CPU_OVERLOAD = 0x00000080;
+        /// The COM1 buffer has been overrun
+        const COM1_BUFFER_OVERRUN = 0x00000100;
+        /// The COM2 buffer has been overrun
+        const COM2_BUFFER_OVERRUN = 0x00000200;
+        /// The COM3 buffer has been overrun
+        const COM3_BUFFER_OVERRUN = 0x00000400;
+        /// Link overrun
+        const LINK_OVERRUN = 0x00000800;
+        /// Auxilliary transmit overrun
+        const AUX_TRANSMIT_OVERRUN = 0x00002000;
+        /// AGC out of range
+        const AGC_OUT_OF_RANGE = 0x00004000;
+        /// INS has been reset
+        const INS_RESET = 0x00010000;
+        /// GPS almanac invalid and/or UTC unknown
+        const GPS_ALMANAC_INVALID = 0x00040000;
+        /// Position solution is invalid
+        const POSITION_SOLUTION_INVALID = 0x00080000;
+        /// A fixed position is in place
+        const POSITION_FIXED = 0x00100000;
+        /// Clock steering is disabled
+        const CLOCK_STEERING_DISABLED = 0x00200000;
+        /// The clock model is invalid
+        const CLOCK_MODEL_INVALID = 0x00400000;
+        /// The external oscillator is locked
+        const EXTERNAL_OSCILLATOR_LOCKED = 0x00800000;
+        /// Software resource warning
+        const SOFTWARE_RESOURCE_WARNING = 0x01000000;
+        /// An auxilliary 3 status event has occurred
+        const AUX3_STATUS_EVENT = 0x20000000;
+        /// An auxilliary 2 status event has occurred
+        const AUX2_STATUS_EVENT = 0x40000000;
+        /// An auxilliary 1 status event has occurred
+        const AUX1_STATUS_EVENT = 0x80000000;
+    }
+}
+
+impl ReceiverStatusFlags {
+    /// Convert the flags byte into a vector containing the string representations
+    /// of all flags present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use novatel_oem6_api::*;
+    ///
+    /// # fn func() -> OEMResult<()> {
+    /// let flags = ReceiverStatusFlags::CLOCK_MODEL_INVALID |
+    ///     ReceiverStatusFlags::POSITION_SOLUTION_INVALID;
+    ///
+    /// let conv = flags.to_vec();
+    ///
+    /// assert_eq!(conv, vec!["CLOCK_MODEL_INVALID", "POSITION_SOLUTION_INVALID"]);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn to_vec(&self) -> Vec<String> {
+        format!("{:?}", self)
+            .to_owned()
+            .split(" | ")
+            .map(|x| x.to_string())
+            .collect()
+    }
+}

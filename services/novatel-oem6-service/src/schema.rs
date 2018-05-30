@@ -109,11 +109,15 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(executor.context().subsystem().get_test_results()?)
     }
 
-    // TODO: Check for system errors
-    // Stretch goal: Implement RXSTATUS
-    field system_status(&executor) -> FieldResult<String>
+    // Get the current system status and errors
+    //
+    // systemStatus {
+    //    errors: Vec<String>,
+    //    status: Vec<String>
+    // }
+    field system_status(&executor) -> FieldResult<SystemStatus>
     {
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_system_status()?)
     }
 
     // Get current status of position information gathering

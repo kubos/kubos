@@ -685,7 +685,14 @@ impl OEM6 {
                 continue;
             }
 
-            match Log::new(hdr.msg_id, hdr.time_status, hdr.week, hdr.ms, body) {
+            match Log::new(
+                hdr.msg_id,
+                hdr.recv_status,
+                hdr.time_status,
+                hdr.week,
+                hdr.ms,
+                body,
+            ) {
                 Some(v) => return Ok(v),
                 None => {
                     continue;

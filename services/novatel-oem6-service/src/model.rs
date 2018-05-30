@@ -195,6 +195,38 @@ impl Subsystem {
         }
     }
 
+    pub fn get_system_status(&self) -> Result<SystemStatus, Error> {
+        self.get_errors();
+
+        let mut errors = match self.errors.try_borrow() {
+            Ok(master_vec) => master_vec.clone(),
+            _ => vec!["Error: Failed to borrow master errors vector".to_owned()],
+        };
+
+        let status = match self.oem.request_version() {
+            Ok(_) => match self.version_recv.recv_timeout(RECV_TIMEOUT) {
+                Ok(log) => log.recv_status,
+                Err(err) => {
+                    errors.push(
+                        format!("System Status: Failed to receive version info - {}", err)
+                            .to_owned(),
+                    );
+                    /* My first thought was to use ReceiverStatusFlags::empty(),
+                     * but I'm worried that that is easily mistaken for this function
+                     * actually having succeeded
+                     */
+                    ReceiverStatusFlags::all()
+                }
+            },
+            Err(err) => {
+                errors.push(process_errors!(err));
+                ReceiverStatusFlags::all()
+            }
+        };
+
+        Ok(SystemStatus { status, errors })
+    }
+
     pub fn get_lock_status(&self) -> Result<LockStatus, Error> {
         Ok(self.lock_data.status.lock().unwrap().clone())
     }

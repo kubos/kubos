@@ -15,10 +15,13 @@
 //
 
 use nom::*;
+use super::*;
 
 /// Log message containing position information
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct BestXYZLog {
+    /// Current status of receiver
+    pub recv_status: ReceiverStatusFlags,
     /// Validity of the time information
     pub time_status: u8,
     /// GPS reference week
@@ -67,12 +70,19 @@ pub struct BestXYZLog {
 
 impl BestXYZLog {
     /// Convert a raw data buffer into a useable struct
-    pub fn new(time_status: u8, week: u16, ms: i32, raw: Vec<u8>) -> Option<Self> {
+    pub fn new(
+        recv_status: ReceiverStatusFlags,
+        time_status: u8,
+        week: u16,
+        ms: i32,
+        raw: Vec<u8>,
+    ) -> Option<Self> {
         let mut log = match parse_bestxyz(&raw) {
             Ok(conv) => conv.1,
             _ => return None,
         };
 
+        log.recv_status = recv_status;
         log.time_status = time_status;
         log.week = week;
         log.ms = ms;
@@ -112,6 +122,7 @@ named!(parse_bestxyz(&[u8]) -> BestXYZLog,
         gal_beidou_sig: le_u8 >>
         gps_glonass_sig: le_u8 >>
         (BestXYZLog {
+            recv_status: ReceiverStatusFlags::empty(),
             time_status: 0,
             week: 0,
             ms: 0,

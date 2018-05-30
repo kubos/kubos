@@ -15,7 +15,7 @@
 //
 
 use juniper::FieldResult;
-use novatel_oem6_api::Component;
+use novatel_oem6_api::{Component, ReceiverStatusFlags};
 
 /// Common response fields structure for requests
 /// which don't return any specific data
@@ -336,6 +336,21 @@ graphql_object!(LockInfo: () | &self | {
 
     field velocity() -> FieldResult<Vec<f64>> {
         Ok(self.velocity.to_vec())
+    }
+});
+
+pub struct SystemStatus {
+    pub status: ReceiverStatusFlags,
+    pub errors: Vec<String>,
+}
+
+graphql_object!(SystemStatus: () | &self | {
+    field status() -> FieldResult<Vec<String>> {
+        Ok(self.status.to_vec())
+    }
+    
+    field errors() -> FieldResult<Vec<String>> {
+        Ok(self.errors.clone())
     }
 });
 
