@@ -76,6 +76,9 @@ pub fn read_thread(
 
     loop {
         {
+            // Give any writes the chance to grab the lock first
+            ::std::thread::sleep(Duration::from_millis(1));
+
             // Take the stream connection mutex
             // If the lock() call fails, it means that a different thread poisoned
             // the mutex. We want to maintain our ability to read messages from the
@@ -85,7 +88,7 @@ pub fn read_thread(
             let conn = rx_conn.lock().unwrap_or_else(|err| err.into_inner());
 
             // Read SYNC bytes
-            let mut message = match conn.read(3, Duration::from_millis(500)) {
+            let mut message = match conn.read(3, Duration::from_millis(250)) {
                 Ok(v) => v,
                 Err(err) => match err {
                     #[cfg(test)]
