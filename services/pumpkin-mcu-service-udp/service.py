@@ -10,7 +10,7 @@ Boilerplate main for service application.
 
 from service import schema
 
-from kubos_service import http_service
+#from kubos_service import http_service
 from kubos_service import udp_service
 from kubos_service.config import Config
 
