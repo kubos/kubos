@@ -150,7 +150,7 @@ fn test_hardware_integration_no_log() {
 
     let expected = json!({
             "testHardware": {
-                "errors": "timed out waiting on channel",
+                "errors": "Failed to receive version info - timed out waiting on channel",
                 "success": false,
                 "telemetryDebug": null,
             }

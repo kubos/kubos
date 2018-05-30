@@ -161,6 +161,16 @@ impl Subsystem {
         })
     }
 
+    fn get_version_log(&self) -> Result<VersionLog, String> {
+        match self.oem.request_version() {
+            Ok(_) => match self.version_recv.recv_timeout(RECV_TIMEOUT) {
+                Ok(log) => Ok(log),
+                Err(err) => Err(format!("Failed to receive version info - {}", err).to_owned()),
+            },
+            Err(err) => Err(process_errors!(err)),
+        }
+    }
+
     // Queries
 
     pub fn get_errors(&self) {
@@ -195,6 +205,15 @@ impl Subsystem {
         }
     }
 
+    pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
+        let (state, uptime) = match self.get_version_log().is_ok() {
+            true => (PowerState::On, 1),
+            false => (PowerState::Off, 0),
+        };
+
+        Ok(GetPowerResponse { state, uptime })
+    }
+
     pub fn get_system_status(&self) -> Result<SystemStatus, Error> {
         self.get_errors();
 
@@ -203,23 +222,14 @@ impl Subsystem {
             _ => vec!["Error: Failed to borrow master errors vector".to_owned()],
         };
 
-        let status = match self.oem.request_version() {
-            Ok(_) => match self.version_recv.recv_timeout(RECV_TIMEOUT) {
-                Ok(log) => log.recv_status,
-                Err(err) => {
-                    errors.push(
-                        format!("System Status: Failed to receive version info - {}", err)
-                            .to_owned(),
-                    );
-                    /* My first thought was to use ReceiverStatusFlags::empty(),
-                     * but I'm worried that that is easily mistaken for this function
-                     * actually having succeeded
-                     */
-                    ReceiverStatusFlags::all()
-                }
-            },
+        let status = match self.get_version_log() {
+            Ok(log) => log.recv_status,
             Err(err) => {
-                errors.push(process_errors!(err));
+                errors.push(format!("System Status: {}", err).to_owned());
+                /* My first thought was to use ReceiverStatusFlags::empty(),
+                 * but I'm worried that that is easily mistaken for this function
+                 * actually having succeeded
+                 */
                 ReceiverStatusFlags::all()
             }
         };
@@ -236,41 +246,26 @@ impl Subsystem {
     }
 
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
-        // Send the request for version information
-        let result = run!(self.oem.request_version(), self.errors);
+        let result = self.get_version_log();
 
-        let mut success = result.is_ok();
-        let mut errors = match result {
-            Ok(_) => "".to_owned(),
-            Err(err) => err,
-        };
+        let success = result.is_ok();
 
-        let version_info = match success {
-            true => {
-                // Read the response
-                let result = self.version_recv.recv_timeout(RECV_TIMEOUT);
-
-                success &= result.is_ok();
-                match result {
-                    Ok(log) => Some(VersionInfo {
-                        num_components: log.num_components as i32,
-                        components: log.components
-                            .iter()
-                            .map(|comp| VersionComponent(comp.clone()))
-                            .collect(),
-                    }),
-                    Err(err) => {
-                        errors.push_str(&format!("{}", err));
-                        push_err!(
-                            self.errors,
-                            format!("Self-Test: Failed to receive version info - {}", err)
-                                .to_owned()
-                        );
-                        None
-                    }
-                }
+        let (errors, version_info) = match result {
+            Ok(log) => (
+                "".to_owned(),
+                Some(VersionInfo {
+                    num_components: log.num_components as i32,
+                    components: log.components
+                        .iter()
+                        .map(|comp| VersionComponent(comp.clone()))
+                        .collect(),
+                }),
+            ),
+            Err(err) => {
+                let temp = format!("Get Test Results: {}", err);
+                push_err!(self.errors, temp);
+                (err, None)
             }
-            false => None,
         };
 
         Ok(IntegrationTestResults {
@@ -283,28 +278,18 @@ impl Subsystem {
     // Mutations
 
     pub fn noop(&self) -> Result<GenericResponse, Error> {
-        // Send the request for version information
-        let result = run!(self.oem.request_version(), self.errors);
+        let result = self.get_version_log();
 
-        let mut success = result.is_ok();
-        let mut errors = match result {
+        let success = result.is_ok();
+
+        let errors = match result {
             Ok(_) => "".to_owned(),
-            Err(err) => err,
-        };
-
-        if success == true {
-            // Read the response
-            let result = self.version_recv.recv_timeout(RECV_TIMEOUT);
-
-            success &= result.is_ok();
-            if let Err(err) = result {
-                errors.push_str(&format!("{}", err));
-                push_err!(
-                    self.errors,
-                    format!("Noop: Failed to receive version info - {}", err).to_owned()
-                );
+            Err(err) => {
+                let temp = format!("Noop: {}", err);
+                push_err!(self.errors, temp);
+                err
             }
-        }
+        };
 
         Ok(GenericResponse { success, errors })
     }

@@ -339,6 +339,20 @@ graphql_object!(LockInfo: () | &self | {
     }
 });
 
+/// Response field for 'power' query
+#[derive(GraphQLEnum, Clone, Eq, PartialEq, Debug)]
+pub enum PowerState {
+    On,
+    Off,
+}
+
+/// Response fields for 'power' query
+#[derive(GraphQLObject)]
+pub struct GetPowerResponse {
+    pub state: PowerState,
+    pub uptime: i32,
+}
+
 pub struct SystemStatus {
     pub status: ReceiverStatusFlags,
     pub errors: Vec<String>,
