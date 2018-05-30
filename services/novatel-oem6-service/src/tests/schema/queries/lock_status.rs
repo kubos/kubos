@@ -16,7 +16,6 @@
 
 use super::*;
 use std::thread;
-use std::time::Duration;
 
 #[test]
 fn get_lock_status_default() {
@@ -63,7 +62,7 @@ fn get_lock_status_good() {
 
     let service = service_new!(mock);
 
-    thread::sleep(Duration::from_millis(50));
+    thread::sleep(SETUP_DELAY);
 
     let query = r#"{
             lockStatus {
@@ -104,7 +103,7 @@ fn get_lock_status_nondefault() {
 
     let service = service_new!(mock);
 
-    thread::sleep(Duration::from_millis(50));
+    thread::sleep(SETUP_DELAY);
 
     let query = r#"{
             lockStatus {

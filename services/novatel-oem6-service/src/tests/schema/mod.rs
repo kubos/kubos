@@ -22,13 +22,16 @@ use model::*;
 use schema::*;
 use serde_json;
 use std::sync::mpsc::sync_channel;
+use std::time::Duration;
+
+const SETUP_DELAY: Duration = Duration::from_millis(100);
 
 macro_rules! wrap {
     ($result:ident) => {{
         json!({
-                                        "msg": serde_json::to_string(&$result).unwrap(),
-                                        "errs": ""
-                                }).to_string()
+                "msg": serde_json::to_string(&$result).unwrap(),
+                "errs": ""
+        }).to_string()
     }};
 }
 
