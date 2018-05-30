@@ -58,8 +58,8 @@ macro_rules! service_new {
         // The read thread needs some time to intake and process the
         // sample data we give it.
         // Note: If run locally, this delay can be 50ms. However, when
-        // run on CircleCI, it needs to be 200ms
-        thread::sleep(Duration::from_millis(200));
+        // run on CircleCI, it needs to be 500ms
+        thread::sleep(Duration::from_millis(500));
 
         Service::new(
             Config::new("novatel-oem6-service"),
