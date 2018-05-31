@@ -155,17 +155,31 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(executor.context().subsystem().get_lock_info()?)
     }
 
-    // TODO:
-    // Nominal - 
-    // - System status
-    // - Lock status
-    // - Lock info
-    // - Power status
-    // Debug -
-    // - Maybe - System config info (LOGLIST?)
-    field telemetry(&executor) -> FieldResult<String>
+    // Get current telemetry information for the system
+    //
+    // telemetry{
+    //     debug {
+    //         components: [{
+    //             bootVersion: String,
+    //             compType: Int,
+    //             compileDate: String,
+    //             compileTime: String, 
+    //             hwVersion: String,
+    //             model: String,
+    //             serialNum: String,
+    //             swVersion: String,
+    //         }],
+    //         numComponents: Int
+    //     },
+    //     nominal{
+    //         lockInfo {...},
+    //         lockStatus {...},
+    //         systemStatus: Vec<String>
+    //     }
+    // }
+    field telemetry(&executor) -> FieldResult<Telemetry>
     {
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_telemetry()?)
     }
 });
 

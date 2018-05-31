@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use juniper::FieldResult;
+use juniper::{FieldResult, Value};
 use novatel_oem6_api::{Component, ReceiverStatusFlags};
 
 /// Common response fields structure for requests
@@ -107,7 +107,7 @@ pub struct IntegrationTestResults {
     pub errors: String,
     pub success: bool,
     pub telemetry_debug: Option<VersionInfo>,
-    /* TODO: Add telemetry_nominal */
+    pub telemetry_nominal: TelemetryNominal,
 }
 
 /// Response fields for 'testHardware(test: HARDWARE)' mutation
@@ -353,29 +353,49 @@ pub struct GetPowerResponse {
     pub uptime: i32,
 }
 
+#[derive(Clone, GraphQLObject)]
 pub struct SystemStatus {
-    pub status: ReceiverStatusFlags,
+    pub status: ReceiverStatus,
     pub errors: Vec<String>,
 }
 
-graphql_object!(SystemStatus: () | &self | {
-    field status() -> FieldResult<Vec<String>> {
-        Ok(self.status.to_vec())
+#[derive(Clone)]
+pub struct ReceiverStatus(pub ReceiverStatusFlags);
+
+graphql_scalar!(ReceiverStatus {
+   resolve(&self) -> Value {
+        Value::list(self.0.to_vec().iter().map(|flag| Value::string(flag)).collect())
     }
-    
-    field errors() -> FieldResult<Vec<String>> {
-        Ok(self.errors.clone())
+
+    // The macro requires that we have this function,
+    // but it won't ever actually be used
+    from_input_value(_v: &InputValue) -> Option<ReceiverStatus> {
+        None
     }
 });
 
+#[derive(GraphQLObject)]
+pub struct Telemetry {
+    pub nominal: TelemetryNominal,
+    pub debug: Option<VersionInfo>,
+}
+
+#[derive(Clone, GraphQLObject)]
+pub struct TelemetryNominal {
+    pub system_status: SystemStatus,
+    pub lock_status: Option<LockStatus>,
+    pub lock_info: Option<LockInfo>,
+}
+
 /// Version information about the device, returned as the
 /// `telemetryDebug` response field
-#[derive(GraphQLObject)]
+#[derive(Clone, GraphQLObject)]
 pub struct VersionInfo {
     pub num_components: i32,
     pub components: Vec<VersionComponent>,
 }
 
+#[derive(Clone)]
 pub struct VersionComponent(pub Component);
 
 graphql_object!(VersionComponent: () | &self | {

@@ -74,7 +74,6 @@ macro_rules! service_new {
             QueryRoot,
             MutationRoot,
         )
-
     }};
 }
 
