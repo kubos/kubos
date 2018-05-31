@@ -11,7 +11,16 @@ Example usage of the mcu_api
 import mcu_api
 import time
 
-MODULES = mcu_api.CONFIG_DATA['modules']
+MODULES = {
+    "sim":  {"address":80},
+    "gpsrm":{"address":81},
+    "aim2": {"address":0},
+    "bim":  {"address":0},
+    "pim":  {"address":83},
+    "rhm":  {"address":85},
+    "bsm":  {"address":0},
+    "bm2":  {"address":92}
+ }
 
 # Sending commands
 module = "sim"
@@ -34,7 +43,6 @@ print('Address: ' + str(address))
 print('Fields: ' + str(fields) + '\n')
 mcu = mcu_api.MCU(address = address)
 out = mcu.read_telemetry(module = module,fields = fields)
-ERRORS = []
 for field in out:
     print (field,out[field])
 
@@ -50,6 +58,8 @@ for module in MODULES:
         print('Address: ' + str(address) + '\n')
         mcu = mcu_api.MCU(address = address)
         out = mcu.read_telemetry(module = module)
-        ERRORS = []
         for field in out:
             print (field,out[field])
+
+
+
