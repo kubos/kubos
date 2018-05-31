@@ -12,7 +12,7 @@ See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.5
 
 
 import struct,time,json
-from i2c import i2c
+import i2c
 
 # I know this is hacky...I need help with how to manage config files
 import os.path

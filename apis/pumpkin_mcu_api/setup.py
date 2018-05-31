@@ -11,5 +11,5 @@ setup(name='pumpkin_mcu',
       version='0.1.0',
       license='MIT',
       description='KubOS API for communicating with Pumpkin module MCUs',
-      packages=["mcu_api"]
+      py_modules=["mcu_api"]
       )
