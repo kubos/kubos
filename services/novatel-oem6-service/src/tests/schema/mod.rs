@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use super::*;
 use self::test_data::*;
+use super::*;
 
 use kubos_service::{Config, Service};
 use model::*;
@@ -26,9 +26,9 @@ use std::sync::mpsc::sync_channel;
 macro_rules! wrap {
     ($result:ident) => {{
         json!({
-                    "msg": serde_json::to_string(&$result).unwrap(),
-                    "errs": ""
-            }).to_string()
+                            "msg": serde_json::to_string(&$result).unwrap(),
+                            "errs": ""
+                    }).to_string()
     }};
 }
 

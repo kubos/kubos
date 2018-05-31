@@ -40,7 +40,9 @@ fn ack_noop() {
     let service = service_new!(mock);
 
     let noop = r#"mutation {
-            noop
+            noop {
+                success
+            }
         }"#;
 
     service.process(noop.to_owned());
@@ -111,7 +113,11 @@ fn ack_test_hardware() {
     let service = service_new!(mock);
 
     let mutation = r#"mutation {
-            testHardware
+            testHardware(test: INTEGRATION) {
+                ... on IntegrationTestResults {
+                    success
+                }
+            }
         }"#;
 
     service.process(mutation.to_owned());

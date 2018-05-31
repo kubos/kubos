@@ -186,13 +186,14 @@ pub fn read_thread(
 }
 
 /// Structure for OEM6 device instance
+#[derive(Clone)]
 pub struct OEM6 {
     /// Device connection structure
     pub conn: Arc<Mutex<Connection>>,
     /// Channel for receiving log messages
-    pub log_recv: Receiver<(Header, Vec<u8>)>,
+    pub log_recv: Arc<Mutex<Receiver<(Header, Vec<u8>)>>>,
     /// Channel for receiveing response messages
-    pub response_recv: Receiver<(Header, Vec<u8>)>,
+    pub response_recv: Arc<Mutex<Receiver<(Header, Vec<u8>)>>>,
 }
 
 impl OEM6 {
@@ -245,8 +246,8 @@ impl OEM6 {
 
         Ok(OEM6 {
             conn,
-            log_recv,
-            response_recv,
+            log_recv: Arc::new(Mutex::new(log_recv)),
+            response_recv: Arc::new(Mutex::new(response_recv)),
         })
         //TODO: Turn off RXSTATUSEVENTA messages (UNLOG)
     }
@@ -602,6 +603,8 @@ impl OEM6 {
 
     fn get_response(&self, id: MessageID) -> OEMResult<()> {
         let (hdr, body) = self.response_recv
+            .lock()
+            .map_err(|_| OEMError::MutexError)?
             .recv_timeout(Duration::from_millis(500))
             .map_err(|_| OEMError::NoResponse)?;
 
@@ -667,7 +670,11 @@ impl OEM6 {
     /// [`OEMError`]: enum.OEMError.html
     pub fn get_log(&self) -> OEMResult<Log> {
         loop {
-            let (hdr, body) = match self.log_recv.recv_timeout(Duration::from_secs(5)) {
+            let (hdr, body) = match self.log_recv
+                .lock()
+                .map_err(|_| OEMError::MutexError)?
+                .recv_timeout(Duration::from_secs(5))
+            {
                 Ok(v) => v,
                 Err(RecvTimeoutError::Timeout) => continue,
                 Err(RecvTimeoutError::Disconnected) => throw!(OEMError::ThreadCommError),
@@ -694,6 +701,9 @@ pub enum OEMError {
     /// Catch-all error
     #[display(fmt = "Generic Error")]
     GenericError,
+    /// An issue occurred while attempted to obtain a mutex lock
+    #[display(fmt = "Mutex Error")]
+    MutexError,
     /// A response message was received, but the ID doesn't match the command that was sent
     #[display(fmt = "Response ID Mismatch")]
     ResponseMismatch,

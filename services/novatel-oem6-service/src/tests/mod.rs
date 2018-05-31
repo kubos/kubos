@@ -38,15 +38,19 @@ macro_rules! service_new {
             conn: Arc::new(Mutex::new(Connection {
                 stream: Box::new($mock),
             })),
-            log_recv,
-            response_recv,
+            log_recv: Arc::new(Mutex::new(log_recv)),
+            response_recv: Arc::new(Mutex::new(response_recv)),
         };
 
         let rx_conn = oem.conn.clone();
 
-        // We don't actually want to do anything with this thread, the channel
-        // senders just need to live through the lifetime of each test
         thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+
+        let (error_send, error_recv) = sync_channel(10);
+        let (version_send, version_recv) = sync_channel(1);
+
+        let oem_ref = oem.clone();
+        thread::spawn(move || log_thread(oem_ref, error_send, version_send));
 
         Service::new(
             Config::new("novatel-oem6-service"),
@@ -54,6 +58,8 @@ macro_rules! service_new {
                 oem,
                 last_cmd: Cell::new(AckCommand::None),
                 errors: RefCell::new(vec![]),
+                error_recv,
+                version_recv,
             },
             QueryRoot,
             MutationRoot,

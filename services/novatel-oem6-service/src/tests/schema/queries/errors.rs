@@ -15,6 +15,8 @@
 //
 
 use super::*;
+use std::thread;
+use std::time::Duration;
 
 #[test]
 fn query_errors_empty() {
@@ -33,4 +35,169 @@ fn query_errors_empty() {
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
 }
 
-// TODO: More query_errors cases (once first mutation is implemented)
+#[test]
+fn query_errors_local_single() {
+    let mut mock = MockStream::default();
+
+    mock.write.set_input(LOG_VERSION_COMMAND.to_vec());
+
+    mock.read.set_output(LOG_RESPONSE_GOOD.to_vec());
+
+    let service = service_new!(mock);
+
+    let noop = r#"mutation {
+            noop {
+                success
+            }
+        }"#;
+
+    service.process(noop.to_owned());
+
+    let query = r#"{
+            errors
+        }"#;
+
+    let expected = json!({
+            "errors": ["Noop: Failed to receive version info - timed out waiting on channel"]
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn query_errors_local_multiple() {
+    let mut mock = MockStream::default();
+
+    mock.write.set_input(LOG_VERSION_COMMAND.to_vec());
+
+    let mut output = LOG_RESPONSE_GOOD.to_vec();
+    output.extend_from_slice(&LOG_RESPONSE_GOOD);
+    mock.read.set_output(output);
+
+    let service = service_new!(mock);
+
+    let noop = r#"mutation {
+            noop {
+                success
+            }
+        }"#;
+
+    service.process(noop.to_owned());
+    service.process(noop.to_owned());
+
+    let query = r#"{
+            errors
+        }"#;
+
+    let expected = json!({
+            "errors": ["Noop: Failed to receive version info - timed out waiting on channel", "Noop: Failed to receive version info - timed out waiting on channel"]
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn query_errors_device_single() {
+    let mut mock = MockStream::default();
+
+    mock.read.set_output(ERROR_LOG.to_vec());
+
+    let service = service_new!(mock);
+
+    thread::sleep(Duration::from_millis(100));
+
+    let query = r#"{
+            errors
+        }"#;
+
+    let expected = json!({
+            "errors": ["RxStatusEvent(1, 19, 1): No Valid Position Calculated"]
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn query_errors_device_multiple() {
+    let mut mock = MockStream::default();
+
+    let mut output = ERROR_LOG.to_vec();
+    output.extend_from_slice(&ERROR_LOG);
+    mock.read.set_output(output);
+
+    let service = service_new!(mock);
+
+    thread::sleep(Duration::from_millis(100));
+
+    let query = r#"{
+            errors
+        }"#;
+
+    let expected = json!({
+            "errors": ["RxStatusEvent(1, 19, 1): No Valid Position Calculated", "RxStatusEvent(1, 19, 1): No Valid Position Calculated"]
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn query_errors_mixed() {
+    let mut mock = MockStream::default();
+
+    mock.write.set_input(LOG_VERSION_COMMAND.to_vec());
+
+    let mut output = LOG_RESPONSE_GOOD.to_vec();
+    output.extend_from_slice(&ERROR_LOG);
+    mock.read.set_output(output);
+
+    let service = service_new!(mock);
+
+    let noop = r#"mutation {
+            noop {
+                success
+            }
+        }"#;
+
+    service.process(noop.to_owned());
+
+    let query = r#"{
+            errors
+        }"#;
+
+    let expected = json!({
+            "errors": ["Noop: Failed to receive version info - timed out waiting on channel", "RxStatusEvent(1, 19, 1): No Valid Position Calculated"]
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn query_errors_clear_after_query() {
+    let mut mock = MockStream::default();
+
+    mock.write.set_input(LOG_VERSION_COMMAND.to_vec());
+
+    mock.read.set_output(LOG_RESPONSE_GOOD.to_vec());
+
+    let service = service_new!(mock);
+
+    let noop = r#"mutation {
+            noop {
+                success
+            }
+        }"#;
+
+    service.process(noop.to_owned());
+
+    let query = r#"{
+            errors
+        }"#;
+
+    service.process(query.to_owned());
+
+    let expected = json!({
+            "errors": []
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
