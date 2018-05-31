@@ -20,4 +20,4 @@ c = Config("example-service")
 #http_service.start(c, schema.schema)
 
 # Use this to start a udp service
-udp_service.start(c, schema)
+udp_service.start(c, schema, {'path': '/home/ryan/'})

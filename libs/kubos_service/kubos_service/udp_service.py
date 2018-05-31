@@ -13,7 +13,7 @@ import graphene
 import socket
 import json
 
-def start(config, schema):
+def start(config, schema, context={}):
     print "{} starting on {}:{}".format(config.name, config.ip, config.port)
     sock = socket.socket(socket.AF_INET, # Internet
                          socket.SOCK_DGRAM) # UDP
@@ -26,7 +26,7 @@ def start(config, schema):
             errs = None
             msg = None
             try:
-                result = base_schema.execute(data)
+                result = base_schema.execute(data, context_value=context)
                 msg = result.data
                 if result.errors:
                     errs = []

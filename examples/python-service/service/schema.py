@@ -28,6 +28,8 @@ class Query(graphene.ObjectType):
         Handles request for subsystem query.
         """
 
+        print("Query found path {}".format(info.context['path']))
+
         _subsystem.refresh()
         return _subsystem
 
@@ -46,6 +48,8 @@ class PowerOn(graphene.Mutation):
         """
         Handles request for subsystem powerOn mutation
         """
+
+        print("Mutation found path {}".format(info.context['path']))
 
         status = Status(status=True, subsystem=_subsystem)
         if power != None:
