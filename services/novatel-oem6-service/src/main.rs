@@ -15,7 +15,7 @@
 //
 
 #![deny(missing_docs)]
-//#![deny(warnings)]
+#![deny(warnings)]
 
 //! Kubos Service for interacting with a [NovAtel OEM6 High Precision GNSS Receiver](https://www.novatel.com/products/gnss-receivers/oem-receiver-boards/oem6-receivers/)
 //!
@@ -23,7 +23,7 @@
 //!
 //! The service can be configured in the `/home/system/etc/config.toml` with the following fields:
 //! ```
-//! [novatel-oem6-service]
+//! [novatel-oem6-service.addr]
 //! ip = "127.0.0.1"
 //! port = 8082
 //! ```
@@ -43,7 +43,187 @@
 //! # Available Fields
 //!
 //! ```json
-//! TODO
+//! query {
+//!     ack,
+//!     config,
+//!     errors,
+//!     lockInfo {
+//!         position,
+//!         time {
+//!             ms,
+//!             week
+//!         },
+//!         velocity
+//!     },
+//!     lockStatus {
+//!         positionStatus,
+//!         positionType,
+//!         time {
+//!             ms,
+//!             week
+//!         },
+//!         timeStatus,
+//!         velocityStatus,
+//!         velocityType
+//!     },
+//!     power{
+//!         state,
+//!         uptime
+//!     },
+//!     systemStatus {
+//!         errors,
+//!         status
+//!     },
+//!     telemetry{
+//!         debug {
+//!             components {
+//!                 bootVersion,
+//!                 compType,
+//!                 compileDate,
+//!                 compileTime,
+//!                 hwVersion,
+//!                 model,
+//!                 serialNum,
+//!                 swVersion,
+//!             },
+//!             numComponents
+//!         },
+//!         nominal{
+//!             lockInfo {
+//!                 position,
+//!                 time {
+//!                     ms,
+//!                     week
+//!                 },
+//!                 velocity
+//!             },
+//!             lockStatus {
+//!                 positionStatus,
+//!                 positionType,
+//!                 time {
+//!                     ms,
+//!                     week
+//!                 },
+//!                 timeStatus,
+//!                 velocityStatus,
+//!                 velocityType
+//!             },
+//!             systemStatus {
+//!                 errors,
+//!                 status
+//!             }
+//!         }
+//!     },
+//!     testResults {
+//!         errors,
+//!         success,
+//!         telemetryDebug {
+//!             components {
+//!                 bootVersion,
+//!                 compType,
+//!                 compileDate,
+//!                 compileTime,
+//!                 hwVersion,
+//!                 model,
+//!                 serialNum,
+//!                 swVersion,
+//!             },
+//!             numComponents
+//!         },
+//!         telemetryNominal{
+//!             lockInfo {
+//!                 position,
+//!                 time {
+//!                     ms,
+//!                     week
+//!                 },
+//!                 velocity
+//!             },
+//!             lockStatus {
+//!                 positionStatus,
+//!                 positionType,
+//!                 time {
+//!                     ms,
+//!                     week
+//!                 },
+//!                 timeStatus,
+//!                 velocityStatus,
+//!                 velocityType
+//!             },
+//!             systemStatus {
+//!                 errors,
+//!                 status
+//!             }
+//!         }
+//!     }
+//! }
+//!
+//! mutation {
+//!     configureHardware(config: [{option: ConfigOption, hold: Boolean, interval: Float, offset: Float},...]) {
+//!         config,
+//!         errors,
+//!         success
+//!     },
+//!     controlPower,
+//!     errors,
+//!     issueRawCommand(command: String){
+//!         errors,
+//!         success
+//!     },
+//!     noop {
+//!         errors,
+//!         success
+//!     },
+//!     testHardware(test: TestType) {
+//!         ... on IntegrationTestResults {
+//!             errors,
+//!             success,
+//!             telemetryDebug {
+//!                 components {
+//!                     bootVersion,
+//!                     compType,
+//!                     compileDate,
+//!                     compileTime,
+//!                     hwVersion,
+//!                     model,
+//!                     serialNum,
+//!                     swVersion,
+//!                 },
+//!                 numComponents
+//!             },
+//!             telemetryNominal{
+//!                 lockInfo {
+//!                     position,
+//!                     time {
+//!                         ms,
+//!                         week
+//!                     },
+//!                     velocity
+//!                 },
+//!                 lockStatus {
+//!                     positionStatus,
+//!                     positionType,
+//!                     time {
+//!                         ms,
+//!                         week
+//!                     },
+//!                     timeStatus,
+//!                     velocityStatus,
+//!                     velocityType
+//!                 },
+//!                 systemStatus {
+//!                     errors,
+//!                     status
+//!                 }
+//!             }
+//!         }
+//!         ... on HardwareTestResults {
+//!             data,
+//!             errors,
+//!             success
+//!         }
+//!     }
+//! }
 //! ```
 //!
 

@@ -88,7 +88,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
     // Get the current configuration of the system
     //
-    // TODO: Return the version log info? Stretch goal: implement the LOGLIST command
+    // Stretch goal: implement the LOGLIST command
     //
     // {
     //     config: "Not Implemented"
@@ -113,9 +113,11 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
     // Get the current system status and errors
     //
-    // systemStatus {
-    //    errors: Vec<String>,
-    //    status: Vec<String>
+    // {
+    //     systemStatus {
+    //        errors: Vec<String>,
+    //        status: Vec<String>
+    //     }
     // }
     field system_status(&executor) -> FieldResult<SystemStatus>
     {
@@ -124,16 +126,18 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
     // Get current status of position information gathering
     //
-    // lockStatus {
-    //     positionStatus: SolutionStatus,
-    // 	   positionType: PosVelType,
-    // 	   time {
-    //         ms: Int,
-    // 		   week: Int
-    // 	   },
-    //     timeStatus: RefTimeStatus,
-    //     velocityStatus: SolutionStatus,
-    // 	   velocityType: PosVelType
+    // {
+    //     lockStatus {
+    //         positionStatus: SolutionStatus,
+    //           positionType: PosVelType,
+    //           time {
+    //             ms: Int,
+    //               week: Int
+    //           },
+    //         timeStatus: RefTimeStatus,
+    //         velocityStatus: SolutionStatus,
+    //           velocityType: PosVelType
+    //     }
     // }
     field lock_status(&executor) -> FieldResult<LockStatus>
     {
@@ -142,13 +146,15 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
     // Get the last known good position information
     //
-    // lockInfo {
-    // 	position: Vec<Float>,
-    // 	time {
-    // 		ms: Int,
-    // 		week: Int
-    // 	},
-    // 	velocity: Vec<Float>
+    // {
+    //     lockInfo {
+    //        position: Vec<Float>,
+    //        time {
+    //            ms: Int,
+    //            week: Int
+    //        },
+    //        velocity: Vec<Float>
+    //     }
     // }
     field lock_info(&executor) -> FieldResult<LockInfo>
     {
@@ -157,24 +163,26 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
     // Get current telemetry information for the system
     //
-    // telemetry{
-    //     debug {
-    //         components: [{
-    //             bootVersion: String,
-    //             compType: Int,
-    //             compileDate: String,
-    //             compileTime: String, 
-    //             hwVersion: String,
-    //             model: String,
-    //             serialNum: String,
-    //             swVersion: String,
-    //         }],
-    //         numComponents: Int
-    //     },
-    //     nominal{
-    //         lockInfo {...},
-    //         lockStatus {...},
-    //         systemStatus: Vec<String>
+    // {
+    //     telemetry{
+    //         debug {
+    //             components: [{
+    //                 bootVersion: String,
+    //                 compType: Int,
+    //                 compileDate: String,
+    //                 compileTime: String, 
+    //                 hwVersion: String,
+    //                 model: String,
+    //                 serialNum: String,
+    //                 swVersion: String,
+    //             }],
+    //             numComponents: Int
+    //         },
+    //         nominal{
+    //             lockInfo {...},
+    //             lockStatus {...},
+    //             systemStatus: Vec<String>
+    //         }
     //     }
     // }
     field telemetry(&executor) -> FieldResult<Telemetry>
