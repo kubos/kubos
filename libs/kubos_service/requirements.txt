@@ -1,4 +1,4 @@
 graphene==2.0.1
 Flask==0.12.2
 Flask-GraphQL==1.4.1
-kubos_service==1.0
+toml==0.9.3
