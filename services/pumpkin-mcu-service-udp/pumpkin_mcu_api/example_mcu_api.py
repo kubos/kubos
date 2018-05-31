@@ -37,8 +37,6 @@ out = mcu.read_telemetry(module = module,fields = fields)
 ERRORS = []
 for field in out:
     print (field,out[field])
-    if out[field]['timestamp'] == 0:
-        ERRORS.append([field])
 
 
 # Read all telemetry from all configured modules
@@ -54,10 +52,4 @@ for module in MODULES:
         out = mcu.read_telemetry(module = module)
         ERRORS = []
         for field in out:
-            print (field,out[field])
-            if out[field]['timestamp'] == 0:
-                ERRORS.append([field])
-        
-        print "\n Errors: "
-        for field in ERRORS:
             print (field,out[field])
