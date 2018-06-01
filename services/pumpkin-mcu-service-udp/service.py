@@ -15,7 +15,8 @@ from kubos_service.config import Config
 
 c = Config("example-service")
 
-# schema.MODULES = use config data to set this
+# Set which modules are present and their addresses. 
+schema.MODULES = c.raw['modules']
 
 # Use this to start a udp service
-udp_service.start(c, schema, api_config_data)
+udp_service.start(c, schema)

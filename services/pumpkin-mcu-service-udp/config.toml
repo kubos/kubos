@@ -1,5 +1,15 @@
 [example-service]
 
+[example-service.modules]
+[example-service.modules.sim]
+address = 80
+[example-service.modules.gpsrm]
+address = 81
+[example-service.modules.pim]
+address = 83
+[example-service.modules.rhm]
+address = 85
+
 [example-service.addr]
 ip = "0.0.0.0"
 port = 8123

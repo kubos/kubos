@@ -13,17 +13,12 @@ from models import *
 import json
 import mcu_api
 
-# Get what modules are present 
-# TO DO: pass this in from service config file
+# Initialize MODULES global. This is then configured in the service file. 
+# "module_name" must match an entry in the api configuration dict
+# "address" must be a valid i2c address int, if it's set to 0, it's 
+# treated as not present. 
 MODULES = {
-    "sim":  {"address":80},
-    "gpsrm":{"address":81},
-    "aim2": {"address":0},
-    "bim":  {"address":0},
-    "pim":  {"address":83},
-    "rhm":  {"address":85},
-    "bsm":  {"address":0},
-    "bm2":  {"address":92}
+    "module_name": {"address":0xFF} 
  }
 
 class Query(graphene.ObjectType):
@@ -80,7 +75,7 @@ class Query(graphene.ObjectType):
         if address == 0:
             raise ValueError('Module not present',module)
         fields = map(str,fields)
-        mcu = mcu_api.MCU(address = address,config_data = API_CONFIG_DATA)
+        mcu = mcu_api.MCU(address = address)
         out = mcu.read_telemetry(module = module,fields = fields)
         return json.dumps(out)
 
@@ -105,7 +100,7 @@ class Passthrough(graphene.Mutation):
         if address == 0:
             raise KeyError('Module not present',module)
         if type(command) == unicode: command = str(command)
-        mcu = mcu_api.MCU(address = address,config_data = API_CONFIG_DATA)
+        mcu = mcu_api.MCU(address = address)
         out = mcu.write(command)
         
         commandStatus = CommandStatus(status = out[0], command = out[1])
