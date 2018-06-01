@@ -32,3 +32,10 @@ Example mutation:
            command
        }
    }
+   
+Some commands to run to test from the command line (for module "sim"):
+
+.. code::
+    echo "query {moduleList}" | nc -uw1 127.0.0.1 8123
+    echo "query {fieldList(module:\"sim\")}" | nc -uw1 127.0.0.1 8123
+    echo "mutation {passthrough(module:\"sim\",command:\"SUP:LED ON\"){status,command}}" | nc -uw1 127.0.0.1 8123
