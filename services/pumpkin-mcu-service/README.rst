@@ -1,29 +1,25 @@
-Python Service Example
+Pumpkin MCU Service
 ======================
 
-This is an example of a subsystem service implemented in Python.
+Hardware service for all Pumpkin Modules that run off MCU commands.
 
-This service listens on http://127.0.0.1:5000/graphql for
-graphql queries and mutations.
-Queries are requests for state information (telemetry).
-Mutations are equivalent to commands.
+This service listens on 127.0.0.1:8123 for UDP graphql queries and mutations. 
 
-There is also a graphiql interface at http://127.0.0.1:5000/graphiql
-for ease of development.
+Queries are telemetry requests (data obtained from the module)
+Mutations are commands (data written to the module)
+Both require I2C interaction with the module
 
 .. note::
-   The IP address and port used by this service is controlled by a file
-   `config.yml` found in the root `python-service` directory.
+   The IP address, port, and module address configuration used by this service is controlled by a file `config.toml` found in the root `pumpkin-mcu-service` directory. You MUST set the module addresses within the config file to match your hardware configuration. 
 
-Currently this payload has a single member `powerOn`.
 
 Example query:
 
 .. code::
-   {
-       subsystem {
-           powerOn
-       }
+   query {
+       mcuTelemetry(
+           module:"sim",
+           fields:["firmware_version","commands_parsed","scpi_errors"]
    }
 
 
@@ -31,7 +27,8 @@ Example mutation:
 
 .. code::
    mutation {
-       powerOn(power: true) {
-           status
+       passthrough(module:"sim",command:"SUP:LED ON") {
+           status,
+           command
        }
    }
