@@ -15,6 +15,7 @@
 //
 
 use super::*;
+use messages::ReceiverStatusFlags;
 
 #[test]
 fn test_request_errors() {
@@ -76,6 +77,18 @@ fn test_get_error() {
     let oem = mock_new!(mock);
 
     let expected: Log = Log::RxStatusEvent(RxStatusEventLog {
+        recv_status: ReceiverStatusFlags::ANTENNA_NOT_POWERED
+            | ReceiverStatusFlags::ANTENNA_SHORTENED
+            | ReceiverStatusFlags::INS_RESET
+            | ReceiverStatusFlags::GPS_ALMANAC_INVALID
+            | ReceiverStatusFlags::CLOCK_STEERING_DISABLED
+            | ReceiverStatusFlags::CLOCK_MODEL_INVALID
+            | ReceiverStatusFlags::SOFTWARE_RESOURCE_WARNING
+            | ReceiverStatusFlags::AUX3_STATUS_EVENT
+            | ReceiverStatusFlags::AUX1_STATUS_EVENT,
+        time_status: 130,
+        week: 45230,
+        ms: 6230,
         word: 1,
         bit: 19,
         event: 1,

@@ -15,6 +15,7 @@
 //
 
 use super::*;
+use messages::ReceiverStatusFlags;
 
 #[test]
 fn test_request_position_ontime() {
@@ -123,6 +124,8 @@ fn test_get_position() {
     let oem = mock_new!(mock);
 
     let expected: Log = Log::BestXYZ(BestXYZLog {
+        recv_status: ReceiverStatusFlags::CLOCK_MODEL_INVALID
+            | ReceiverStatusFlags::POSITION_SOLUTION_INVALID,
         time_status: 120,
         week: 3025,
         ms: 164195000,

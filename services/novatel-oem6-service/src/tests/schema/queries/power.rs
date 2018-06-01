@@ -17,17 +17,54 @@
 use super::*;
 
 #[test]
-fn get_power() {
+fn get_power_on() {
     let mut mock = MockStream::default();
+
+    mock.write.set_input(LOG_VERSION_COMMAND.to_vec());
+
+    let mut output = LOG_RESPONSE_GOOD.to_vec();
+    output.extend_from_slice(&VERSION_LOG);
+    mock.read.set_output(output);
 
     let service = service_new!(mock);
 
     let query = r#"{
-            power
+            power{
+                state,
+                uptime
+            }
         }"#;
 
     let expected = json!({
-            "power": "Not Implemented"
+            "power": {
+                "state": "ON",
+                "uptime": 1
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn get_power_off() {
+    let mut mock = MockStream::default();
+
+    mock.write.set_input(LOG_VERSION_COMMAND.to_vec());
+
+    let service = service_new!(mock);
+
+    let query = r#"{
+            power{
+                state,
+                uptime
+            }
+        }"#;
+
+    let expected = json!({
+            "power": {
+                "state": "OFF",
+                "uptime": 0
+            }
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));

@@ -89,7 +89,7 @@ fn noop_no_log() {
 
     let expected = json!({
             "noop": {
-                "errors": "timed out waiting on channel",
+                "errors": "Failed to receive version info - timed out waiting on channel",
                 "success": false
             }
     });

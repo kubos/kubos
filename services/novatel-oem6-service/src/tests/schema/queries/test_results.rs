@@ -144,7 +144,7 @@ fn test_results_no_log() {
 
     let expected = json!({
             "testResults": {
-                "errors": "timed out waiting on channel",
+                "errors": "Failed to receive version info - timed out waiting on channel",
                 "success": false,
                 "telemetryDebug": null,
             }

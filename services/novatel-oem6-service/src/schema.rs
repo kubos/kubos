@@ -69,9 +69,11 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         }
     }
 
-    // Get the current power state and uptime of the system
+    // Get the current power state of the system
     //
-    // TODO: Figure out what to do with uptime. It isn't returned by the device at all...
+    // Note: `uptime` is included as an available field in order to conform to
+    //       the Kubos Service Outline, but cannot be implemented for this device,
+    //       so the value will be 1 if the device is on and 0 if the device is off
     //
     // {
     //     power {
@@ -79,9 +81,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         uptime: Int
     //     }
     // }
-    field power(&executor) -> FieldResult<String>
+    field power(&executor) -> FieldResult<GetPowerResponse>
     {
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_power()?)
     }
 
     // Get the current configuration of the system
@@ -109,11 +111,15 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(executor.context().subsystem().get_test_results()?)
     }
 
-    // TODO: Check for system errors
-    // Stretch goal: Implement RXSTATUS
-    field system_status(&executor) -> FieldResult<String>
+    // Get the current system status and errors
+    //
+    // systemStatus {
+    //    errors: Vec<String>,
+    //    status: Vec<String>
+    // }
+    field system_status(&executor) -> FieldResult<SystemStatus>
     {
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_system_status()?)
     }
 
     // Get current status of position information gathering
