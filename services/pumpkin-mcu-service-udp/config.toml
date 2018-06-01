@@ -1,15 +1,15 @@
-[example-service]
+[pumpkin-mcu-service]
 
-[example-service.modules]
-[example-service.modules.sim]
+[pumpkin-mcu-service.modules]
+[pumpkin-mcu-service.modules.sim]
 address = 80
-[example-service.modules.gpsrm]
+[pumpkin-mcu-service.modules.gpsrm]
 address = 81
-[example-service.modules.pim]
+[pumpkin-mcu-service.modules.pim]
 address = 83
-[example-service.modules.rhm]
+[pumpkin-mcu-service.modules.rhm]
 address = 85
 
-[example-service.addr]
+[pumpkin-mcu-service.addr]
 ip = "0.0.0.0"
 port = 8123
