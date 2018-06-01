@@ -14,11 +14,8 @@ import time
 MODULES = {
     "sim":  {"address":80},
     "gpsrm":{"address":81},
-    "aim2": {"address":0},
-    "bim":  {"address":0},
     "pim":  {"address":83},
     "rhm":  {"address":85},
-    "bsm":  {"address":0},
     "bm2":  {"address":92}
  }
 
@@ -47,19 +44,16 @@ for field in out:
     print (field,out[field])
 
 
-# Read all telemetry from all configured modules
+# Read all telemetry from all modules
 for module in MODULES:
     module = str(module)
     address = MODULES[module]['address']
-    if address == 0:
-        print('\nModule not configured: ' + module + '\n')
-    else:
-        print('\nModule: ' + module)
-        print('Address: ' + str(address) + '\n')
-        mcu = mcu_api.MCU(address = address)
-        out = mcu.read_telemetry(module = module)
-        for field in out:
-            print (field,out[field])
+    print('\nModule: ' + module)
+    print('Address: ' + str(address) + '\n')
+    mcu = mcu_api.MCU(address = address)
+    out = mcu.read_telemetry(module = module)
+    for field in out:
+        print (field,out[field])
 
 
 

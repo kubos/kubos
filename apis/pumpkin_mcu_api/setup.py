@@ -8,7 +8,7 @@ https://github.com/pypa/sampleproject
 from setuptools import setup
 
 setup(name='pumpkin_mcu',
-      version='0.1.2',
+      version='0.1.3',
       license='MIT',
       description='KubOS API for communicating with Pumpkin module MCUs',
       py_modules=["mcu_api"]

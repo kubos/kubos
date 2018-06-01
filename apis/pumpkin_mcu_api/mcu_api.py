@@ -335,8 +335,11 @@ class MCU:
                 +str(type(parsing)))
         
         if parsing == "str":
-            # Leave strings alone, return it in a tuple
-            return (data,)
+            # Search for the null terminator, return the leading string it in a tuple
+            str_data = data.split('\0')[0]
+            if str_data == '':
+                str_data = "No valid data received, raw data:"+data
+            return (str_data,)
         elif parsing == "hex":
             # Store as a hex string. This is so we can return binary data.
             # Return as a single field in a tuple
