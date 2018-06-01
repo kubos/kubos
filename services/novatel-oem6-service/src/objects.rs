@@ -118,6 +118,227 @@ pub struct HardwareTestResults {
     pub data: String,
 }
 
+/// Response fields for `lockStatus` query
+#[derive(Clone)]
+pub struct LockStatus {
+    pub time_status: u8, // Validity of time
+    pub time: OEMTime,   // Timestamp from last BestXYZ log message received
+    pub position_status: u32,
+    pub position_type: u32,
+    pub velocity_status: u32,
+    pub velocity_type: u32,
+}
+
+impl Default for LockStatus {
+    fn default() -> LockStatus {
+        LockStatus {
+            time_status: 20, // Unknown
+            time: OEMTime { week: 0, ms: 0 },
+            position_status: 1, // Insufficient Observations
+            position_type: 0,   // None
+            velocity_status: 1, // Insufficient Observations
+            velocity_type: 0,   // None
+        }
+    }
+}
+
+/// Time structure for `lockStatus` and `lockInfo` response fields
+#[derive(Clone, Default, GraphQLObject)]
+pub struct OEMTime {
+    pub week: i32,
+    pub ms: i32,
+}
+
+/// Enum for the `positionStatus` and `velocityStatus` response fields
+/// of the `lockStatus` query
+#[derive(GraphQLEnum, Debug)]
+pub enum SolutionStatus {
+    SolComputed,
+    InsufficientObservations,
+    NoConvergence,
+    Singularity,
+    CovarianceTraceExceeded,
+    TestDistanceExceeded,
+    ColdStart,
+    HeightVelocityExceeded,
+    VarianceExceeded,
+    ResidualsTooLarge,
+    IntegrityWarning,
+    Pending,
+    InvalidFix,
+    Unauthorized,
+    KubosInvalid,
+}
+
+impl From<u32> for SolutionStatus {
+    fn from(t: u32) -> SolutionStatus {
+        match t {
+            0 => SolutionStatus::SolComputed,
+            1 => SolutionStatus::InsufficientObservations,
+            2 => SolutionStatus::NoConvergence,
+            3 => SolutionStatus::Singularity,
+            4 => SolutionStatus::CovarianceTraceExceeded,
+            5 => SolutionStatus::TestDistanceExceeded,
+            6 => SolutionStatus::ColdStart,
+            7 => SolutionStatus::HeightVelocityExceeded,
+            8 => SolutionStatus::VarianceExceeded,
+            9 => SolutionStatus::ResidualsTooLarge,
+            13 => SolutionStatus::IntegrityWarning,
+            18 => SolutionStatus::Pending,
+            19 => SolutionStatus::InvalidFix,
+            20 => SolutionStatus::Unauthorized,
+            _ => SolutionStatus::KubosInvalid,
+        }
+    }
+}
+
+/// Enum for the `positionType` and `velocityType` response fields
+/// of the `lockStatus` query
+#[derive(GraphQLEnum, Debug)]
+pub enum PosVelType {
+    None,
+    FixedPos,
+    FixedHeight,
+    DopplerVelocity,
+    Single,
+    PSRDiff,
+    WAAS,
+    Propagated,
+    Omnistar,
+    L1Float,
+    IonoFreeFloat,
+    NarrowFloat,
+    L1Integer,
+    NarrowInteger,
+    OmnistarHP,
+    OmnistarXP,
+    PPPConverging,
+    PPP,
+    Operational,
+    Warning,
+    OutOfBounds,
+    PPPBasicConverging,
+    PPPBasic,
+    KubosInvalid,
+}
+
+impl From<u32> for PosVelType {
+    fn from(t: u32) -> PosVelType {
+        match t {
+            0 => PosVelType::None,
+            1 => PosVelType::FixedPos,
+            2 => PosVelType::FixedHeight,
+            8 => PosVelType::DopplerVelocity,
+            16 => PosVelType::Single,
+            17 => PosVelType::PSRDiff,
+            18 => PosVelType::WAAS,
+            19 => PosVelType::Propagated,
+            20 => PosVelType::Omnistar,
+            32 => PosVelType::L1Float,
+            33 => PosVelType::IonoFreeFloat,
+            34 => PosVelType::NarrowFloat,
+            48 => PosVelType::L1Integer,
+            50 => PosVelType::NarrowInteger,
+            64 => PosVelType::OmnistarHP,
+            65 => PosVelType::OmnistarXP,
+            68 => PosVelType::PPPConverging,
+            69 => PosVelType::PPP,
+            70 => PosVelType::Operational,
+            71 => PosVelType::Warning,
+            72 => PosVelType::OutOfBounds,
+            77 => PosVelType::PPPBasicConverging,
+            78 => PosVelType::PPPBasic,
+            _ => PosVelType::KubosInvalid,
+        }
+    }
+}
+
+/// Enum for the `TimeStatus` response field of the `lockStatus` query
+#[derive(GraphQLEnum, Debug)]
+pub enum RefTimeStatus {
+    Unknown,
+    Approximate,
+    CoarseAdjusting,
+    Coarse,
+    CoarseSteering,
+    FreeWheeling,
+    FineAdjusting,
+    Fine,
+    FineBackupSteering,
+    FineSteering,
+    SatTime,
+    KubosInvalid,
+}
+
+impl From<u8> for RefTimeStatus {
+    fn from(t: u8) -> RefTimeStatus {
+        match t {
+            20 => RefTimeStatus::Unknown,
+            60 => RefTimeStatus::Approximate,
+            80 => RefTimeStatus::CoarseAdjusting,
+            100 => RefTimeStatus::Coarse,
+            120 => RefTimeStatus::CoarseSteering,
+            130 => RefTimeStatus::FreeWheeling,
+            140 => RefTimeStatus::FineAdjusting,
+            160 => RefTimeStatus::Fine,
+            170 => RefTimeStatus::FineBackupSteering,
+            180 => RefTimeStatus::FineSteering,
+            200 => RefTimeStatus::SatTime,
+            _ => RefTimeStatus::KubosInvalid,
+        }
+    }
+}
+
+graphql_object!(LockStatus: () | &self | {
+
+    field time_status() -> FieldResult<RefTimeStatus> {
+        Ok(self.time_status.into())
+    }
+
+    field time() -> FieldResult<OEMTime> {
+        Ok(self.time.clone())
+    }
+
+    field position_status() -> FieldResult<SolutionStatus> {
+        Ok(self.position_status.into())
+    }
+
+    field position_type() -> FieldResult<PosVelType> {
+        Ok(self.position_type.into())
+    }
+
+    field velocity_status() -> FieldResult<SolutionStatus> {
+        Ok(self.velocity_status.into())
+    }
+
+    field velocity_type() -> FieldResult<PosVelType> {
+        Ok(self.velocity_type.into())
+    }
+});
+
+/// Current system lock information. Used in the response fields of
+/// the `lockInfo` query
+#[derive(Clone, Default)]
+pub struct LockInfo {
+    pub time: OEMTime,      // Timestamp when other fields were last updated
+    pub position: [f64; 3], // Last known good position
+    pub velocity: [f64; 3], // Last known good velocity
+}
+
+graphql_object!(LockInfo: () | &self | {
+    field time() -> FieldResult<OEMTime> {
+        Ok(self.time.clone())
+    }
+
+    field position() -> FieldResult<Vec<f64>> {
+        Ok(self.position.to_vec())
+    }
+
+    field velocity() -> FieldResult<Vec<f64>> {
+        Ok(self.velocity.to_vec())
+    }
+});
+
 /// Version information about the device, returned as the
 /// `telemetryDebug` response field
 #[derive(GraphQLObject)]

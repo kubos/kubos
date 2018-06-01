@@ -36,9 +36,9 @@ pub enum Log {
 
 impl Log {
     /// Convert a raw data buffer into a useable struct
-    pub fn new(id: MessageID, raw: Vec<u8>) -> Option<Log> {
+    pub fn new(id: MessageID, time_status: u8, week: u16, ms: i32, raw: Vec<u8>) -> Option<Log> {
         match id {
-            MessageID::BestXYZ => match BestXYZLog::new(raw) {
+            MessageID::BestXYZ => match BestXYZLog::new(time_status, week, ms, raw) {
                 Some(log) => Some(Log::BestXYZ(log)),
                 _ => None,
             },

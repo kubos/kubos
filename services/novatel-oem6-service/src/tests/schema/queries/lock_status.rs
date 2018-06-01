@@ -17,17 +17,115 @@
 use super::*;
 
 #[test]
-fn get_lock_status() {
+fn get_lock_status_default() {
     let mut mock = MockStream::default();
 
     let service = service_new!(mock);
 
     let query = r#"{
-            lockStatus
+            lockStatus {
+                positionStatus,
+                positionType,
+                time {
+                    ms,
+                    week
+                },
+                timeStatus,
+                velocityStatus,
+                velocityType
+            }
         }"#;
 
     let expected = json!({
-            "lockStatus": "Not Implemented"
+            "lockStatus": {
+                "positionStatus": "INSUFFICIENT_OBSERVATIONS",
+                "positionType": "NONE",
+                "time": {
+                    "ms": 0,
+                	"week": 0
+                },
+                "timeStatus": "UNKNOWN",
+                "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
+                "velocityType": "NONE"
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn get_lock_status_good() {
+    let mut mock = MockStream::default();
+
+    mock.read.set_output(POSITION_LOG_NO_LOCK.to_vec());
+
+    let service = service_new!(mock);
+
+    let query = r#"{
+            lockStatus {
+                positionStatus,
+                positionType,
+                time {
+                    ms,
+                    week
+                },
+                timeStatus,
+                velocityStatus,
+                velocityType
+            }
+        }"#;
+
+    let expected = json!({
+            "lockStatus": {
+                "positionStatus": "INSUFFICIENT_OBSERVATIONS",
+                "positionType": "NONE",
+                "time": {
+                    "ms": 164195000,
+                	"week": 3025
+                },
+                "timeStatus": "COARSE_STEERING",
+                "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
+                "velocityType": "NONE"
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn get_lock_status_nondefault() {
+    let mut mock = MockStream::default();
+
+    mock.read.set_output(POSITION_LOG_GOOD.to_vec());
+
+    let service = service_new!(mock);
+
+    let query = r#"{
+            lockStatus {
+                positionStatus,
+                positionType,
+                time {
+                    ms,
+                    week
+                },
+                timeStatus,
+                velocityStatus,
+                velocityType
+            }
+        }"#;
+
+    let expected = json!({
+            "lockStatus": {
+                "positionStatus": "SOL_COMPUTED",
+                "positionType": "PSRDIFF",
+                "time": {
+                    "ms": 164195000,
+                	"week": 3025
+                },
+                "timeStatus": "FINE_STEERING",
+                "velocityStatus": "SOL_COMPUTED",
+                "velocityType": "PSRDIFF"
+            }
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));

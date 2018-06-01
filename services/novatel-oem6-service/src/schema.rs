@@ -116,25 +116,37 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(String::from("Not Implemented"))
     }
 
-    // TODO:
-    // - Time - yes/no
-    // - position - yes/no
-    // - velocity - yes/no
-    // - confidence? (ex. FINESTEERING)
-    // - Potentially change the yes/no's to a gradient
-    field lock_status(&executor) -> FieldResult<String>
+    // Get current status of position information gathering
+    //
+    // lockStatus {
+    //     positionStatus: SolutionStatus,
+    // 	   positionType: PosVelType,
+    // 	   time {
+    //         ms: Int,
+    // 		   week: Int
+    // 	   },
+    //     timeStatus: RefTimeStatus,
+    //     velocityStatus: SolutionStatus,
+    // 	   velocityType: PosVelType
+    // }
+    field lock_status(&executor) -> FieldResult<LockStatus>
     {
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_lock_status()?)
     }
 
-    // TODO: 
-    // - Locked GPS time
-    // - Locked position
-    // - Locked velocity
-    // - System time lock occurred
-    field lock_info(&executor) -> FieldResult<String>
+    // Get the last known good position information
+    //
+    // lockInfo {
+    // 	position: Vec<Float>,
+    // 	time {
+    // 		ms: Int,
+    // 		week: Int
+    // 	},
+    // 	velocity: Vec<Float>
+    // }
+    field lock_info(&executor) -> FieldResult<LockInfo>
     {
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_lock_info()?)
     }
 
     // TODO:

@@ -15,8 +15,6 @@
 //
 
 use super::*;
-use std::thread;
-use std::time::Duration;
 
 #[test]
 fn mutation_errors_empty() {
@@ -104,8 +102,6 @@ fn mutation_errors_device_single() {
 
     let service = service_new!(mock);
 
-    thread::sleep(Duration::from_millis(100));
-
     let query = r#"mutation {
             errors
         }"#;
@@ -126,8 +122,6 @@ fn mutation_errors_device_multiple() {
     mock.read.set_output(output);
 
     let service = service_new!(mock);
-
-    thread::sleep(Duration::from_millis(100));
 
     let query = r#"mutation {
             errors
