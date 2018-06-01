@@ -3,7 +3,7 @@ Pumpkin MCU Service
 
 Hardware service for all Pumpkin Modules that run off MCU commands.
 
-This service listens on 127.0.0.1:8123 for UDP graphql queries and mutations. 
+This service listens on 127.0.0.1:8101 for UDP graphql queries and mutations. 
 
 Queries are telemetry requests (data obtained from the module)
 Mutations are commands (data written to the module)
@@ -36,6 +36,6 @@ Example mutation:
 Some commands to run to test from the command line (for module "sim"):
 
 .. code::
-    echo "query {moduleList}" | nc -uw1 127.0.0.1 8123
-    echo "query {fieldList(module:\"sim\")}" | nc -uw1 127.0.0.1 8123
-    echo "mutation {passthrough(module:\"sim\",command:\"SUP:LED ON\"){status,command}}" | nc -uw1 127.0.0.1 8123
+    echo "query {moduleList}" | nc -uw1 127.0.0.1 8101
+    echo "query {fieldList(module:\"sim\")}" | nc -uw1 127.0.0.1 8101
+    echo "mutation {passthrough(module:\"sim\",command:\"SUP:LED ON\"){status,command}}" | nc -uw1 127.0.0.1 8101

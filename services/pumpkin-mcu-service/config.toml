@@ -12,4 +12,4 @@ address = 85
 
 [pumpkin-mcu-service.addr]
 ip = "0.0.0.0"
-port = 8123
+port = 8101
