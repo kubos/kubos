@@ -14,6 +14,7 @@ import unittest
 import mcu_api
 import mock
 
+
 class TestMCUAPI(unittest.TestCase):
 
 	def setUp(self):
@@ -39,8 +40,6 @@ class TestMCUAPI(unittest.TestCase):
 			mock_i2cread.assert_called_with(
 				device = self.mcu.address,
 				count = read_count)
-
-	
 
 if __name__ == '__main__':
     unittest.main()

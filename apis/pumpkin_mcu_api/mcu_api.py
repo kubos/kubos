@@ -201,8 +201,15 @@ class MCU:
     
     def read(self,count):
         return self.i2cfile.read(device = self.address, count = count)
-        
+    
     def read_telemetry(self,module,fields=["all"]):
+        requests = _build_telemetry_dict(module = module,fields=["all"])
+        output = _read_telemetry_items()
+        _header_parse()
+        _unpack()
+        return output
+
+    def _build_telemetry_dict(self,module,fields=["all"]):
         """
         Read and parse specific fields from the MCUs that are contained in the
         config file. 
@@ -237,7 +244,7 @@ class MCU:
             # Pulling all info
             requests = module_telem
             requests.update(supervisor_telem)
-            return self._read_telemetry_items(requests)
+            return requests
         
         # Builds requested dict
         # Validates fields input values
@@ -249,7 +256,7 @@ class MCU:
                 requests[field] = supervisor_telem[field]
             else:
                 raise ValueError('Invalid field: '+str(field))
-        return self._read_telemetry_items(requests)            
+        return requests            
         
     def _read_telemetry_items(self,dict):
         """
@@ -258,14 +265,18 @@ class MCU:
         """
         # Create empty dictionary
         output_dict = {}
+
         for telem_field in dict:
             input_dict = dict[telem_field]
             # Write command for the MCU to prepare the data
             self.write(input_dict['command'])
-            # Delay time specified in the Supervisor Reference Manual
+            # Delay time specified in the config parameter 
+            # (specified in the Pumpkin Firmware Reference Manual)
             time.sleep(DELAY)
-            # Read the data, check and parse the header
-            read_data = self._header_parse(input_dict['length']+HEADER_SIZE)
+            # Read the data
+            raw_read_data = self.read(count = input_dict['length']+HEADER_SIZE)
+            # Check and parse the header
+            read_data = self._header_parse(raw_read_data)
             # Parse the data
             parsed_data = self._unpack(
                 parsing = input_dict['parsing'],
@@ -290,23 +301,13 @@ class MCU:
         
         return output_dict
     
-    def _header_parse(self,count):
+    def _header_parse(self,data):
         """
-        Reads and parses the header data. Format is:
+        Parses the header data. Format is:
         [data ready flag][timestamp][data]
         output format is:
         {'timestamp':timestamp,'data':data}
         """
-        if type(count) != int:
-            # Validate count type
-            raise TypeError("count must be an int. Type given: "\
-                +str(type(count)))
-        if count < (HEADER_SIZE+1):
-            # Check count value
-            # There must be at least 1 byte of data. 
-            raise TypeError('Read count must be at least '+
-                str(HEADER_SIZE+1)+' bytes.')
-        data = self.read(count = count)
         if data[0] != '\x01':
             # Returns 0 for timestamp if data was not ready, but still returns
             # the data for debugging purposes.
@@ -336,7 +337,7 @@ class MCU:
         
         if parsing == "str":
             # Search for the null terminator, 
-            # return the leading string it in a tuple
+            # return the leading string in a tuple
             str_data = data.split('\0')[0]
             return (str_data,)
         elif parsing == "hex":
@@ -346,3 +347,4 @@ class MCU:
         
         # All others parse directly with the parsing string. 
         return struct.unpack(parsing,data)
+
