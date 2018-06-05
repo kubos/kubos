@@ -14,6 +14,7 @@ RUN apt-get install -y python-setuptools build-essential ninja-build python-dev 
 RUN apt-get install -y git
 RUN apt-get install -y cmake
 RUN apt-get install -y unzip wget
+RUN apt-get install -y sqlite3 libsqlite3-dev
 
 #do the pip setup and installation things
 RUN easy_install pip

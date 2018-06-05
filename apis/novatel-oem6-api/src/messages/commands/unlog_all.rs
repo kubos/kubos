@@ -19,15 +19,15 @@ use super::*;
 pub struct UnlogAllCmd {
     hdr: Header,
     port: u32,
-    hold: bool,
+    clear_holds: bool,
 }
 
 impl UnlogAllCmd {
-    pub fn new(port: u32, hold: bool) -> Self {
+    pub fn new(port: u32, clear_holds: bool) -> Self {
         UnlogAllCmd {
             hdr: Header::new(MessageID::UnlogAll, 8),
             port,
-            hold,
+            clear_holds,
         }
     }
 }
@@ -41,7 +41,8 @@ impl Message for UnlogAllCmd {
 
         // Add UnlogAll message
         vec.write_u32::<LittleEndian>(self.port).unwrap();
-        vec.write_u32::<LittleEndian>(self.hold as u32).unwrap();
+        vec.write_u32::<LittleEndian>(self.clear_holds as u32)
+            .unwrap();
 
         vec
     }

@@ -163,7 +163,7 @@ pub fn read_thread(
                         // loop still trying
                         TrySendError::Disconnected(_) => {
                             if log_err {
-                                panic!()
+                                panic!("Both message receivers have disconnected")
                             }
                             response_err = true;
                             Ok(())
@@ -176,7 +176,7 @@ pub fn read_thread(
                         TrySendError::Full(_) => Ok(()),
                         TrySendError::Disconnected(_) => {
                             if response_err {
-                                panic!()
+                                panic!("Both message receivers have disconnected")
                             }
                             log_err = true;
                             Ok(())
@@ -252,7 +252,6 @@ impl OEM6 {
             log_recv: Arc::new(Mutex::new(log_recv)),
             response_recv: Arc::new(Mutex::new(response_recv)),
         })
-        //TODO: Turn off RXSTATUSEVENTA messages (UNLOG)
     }
 
     /// Request the system version information
@@ -481,8 +480,8 @@ impl OEM6 {
     ///
     /// # Arguments
     ///
-    /// * hold - Specifies whether log messages which were set with the `hold` option should
-    ///          also be unlogged
+    /// * clear_holds - Specifies whether log messages which were set with the `hold` option
+    ///                 should also be unlogged
     ///
     /// # Errors
     ///
@@ -532,8 +531,8 @@ impl OEM6 {
     /// ```
     ///
     /// [`OEMError`]: enum.OEMError.html
-    pub fn request_unlog_all(&self, hold: bool) -> OEMResult<()> {
-        let request = UnlogAllCmd::new(Port::COM1 as u32, hold);
+    pub fn request_unlog_all(&self, clear_holds: bool) -> OEMResult<()> {
+        let request = UnlogAllCmd::new(Port::COM1 as u32, clear_holds);
 
         self.send_message(request)
             .and_then(|_| self.get_response(MessageID::UnlogAll))

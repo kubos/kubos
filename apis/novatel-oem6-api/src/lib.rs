@@ -18,6 +18,10 @@
 //!
 //! All work is done against an instantiated [`OEM6`] struct.
 //!
+//! More information about the device and it's behavior can be found in the following guides:
+//! - [OEM6 Family Firmware Reference Manual](https://www.novatel.com/assets/documents/manuals/om-20000129.pdf)
+//! - [OEM6 Family Installation and Operation User Manual](https://www.novatel.com/assets/Documents/Manuals/om-20000128.pdf)
+//!
 //! # Examples
 //!
 //! ```
