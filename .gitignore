@@ -71,3 +71,7 @@ target/
 
 # database files
 *.db
+
+# python packages
+*.egg-info/
+dist/
