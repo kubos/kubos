@@ -203,13 +203,6 @@ class MCU:
         return self.i2cfile.read(device = self.address, count = count)
     
     def read_telemetry(self,module,fields=["all"]):
-        requests = _build_telemetry_dict(module = module,fields=["all"])
-        output = _read_telemetry_items()
-        _header_parse()
-        _unpack()
-        return output
-
-    def _build_telemetry_dict(self,module,fields=["all"]):
         """
         Read and parse specific fields from the MCUs that are contained in the
         config file. 
@@ -225,9 +218,14 @@ class MCU:
         
         Output: A dict with keys for all fields requested with "timestamp" and
         "data" keys for each field. 
-        
-        This method specifically just builds the dictionary of requested data
-        and passes it into the method that does the actual reading. 
+        """
+        requests = _build_telemetry_dict(module = module,fields=["all"])
+        output = _read_telemetry_items(requests)
+        return output
+
+    def _build_telemetry_dict(self,module,fields=["all"]):
+        """
+        This method builds the dictionary of requested data. 
         """
         if module not in TELEMETRY: 
             # Check that module is listed in config file
@@ -260,8 +258,8 @@ class MCU:
         
     def _read_telemetry_items(self,dict):
         """
-        Creates the output_dict, reads the data, then inserts and formats it 
-        in the output_dict. 
+        Creates the output_dict, reads the data, inputs it into parsing mehods,
+        then inserts and formats it in the output_dict. 
         """
         # Create empty dictionary
         output_dict = {}
@@ -275,29 +273,18 @@ class MCU:
             time.sleep(DELAY)
             # Read the data
             raw_read_data = self.read(count = input_dict['length']+HEADER_SIZE)
-            # Check and parse the header
+            # Check and parse the header into a formatted dict
             read_data = self._header_parse(raw_read_data)
             # Parse the data
             parsed_data = self._unpack(
                 parsing = input_dict['parsing'],
                 data = read_data['data'])
-            if len(parsed_data) > 1:
-                # Multiple items parsed
-                if "names" not in input_dict:
-                    raise KeyError(
-                        "Must be a names field for parsing multiple items")
-                if len(input_dict['names']) != len(parsed_data):
-                    raise KeyError(
-                        "Number of field names doesn't match parsing strings")
-                for ind,field in enumerate(input_dict['names']):
-                    output_dict.update(
-                        {field: {
-                            'timestamp':read_data['timestamp'],
-                            'data':parsed_data[ind]}})
-            else:
-                # Single item parsed - pull in dict then update with parsed data
-                output_dict[telem_field] = read_data
-                output_dict[telem_field]['data'] = parsed_data[0]
+            output_dict.update(
+                self._format_data(
+                    telem_field = telem_field,
+                    input_dict = input_dict,
+                    read_data = read_data,
+                    parsed_data = parsed_data))
         
         return output_dict
     
@@ -307,6 +294,7 @@ class MCU:
         [data ready flag][timestamp][data]
         output format is:
         {'timestamp':timestamp,'data':data}
+        If the data ready flag is not set, it sets the timestamp to 0
         """
         if data[0] != '\x01':
             # Returns 0 for timestamp if data was not ready, but still returns
@@ -347,4 +335,37 @@ class MCU:
         
         # All others parse directly with the parsing string. 
         return struct.unpack(parsing,data)
+
+    def _format_data(telem_field, input_dict, read_data, parsed_data):
+        """
+        Takes in the read data, parsed data, and the input dictionary and outputs
+        a formatted dictionary in the form of:
+        {
+            'fieldname': {'timestamp': int,'data': parsed data}, 
+            etc...
+        }
+        """
+        output_dict = {}
+        if len(parsed_data) > 1:
+                # Multiple items parsed
+                if "names" not in input_dict:
+                    raise KeyError(
+                        "Must be a names field when multiple items are parsed: " +\
+                        telem_field)
+                if len(input_dict['names']) != len(parsed_data):
+                    raise KeyError(
+                        "Number of field names doesn't match parsing strings: " +\
+                        telem_field)
+                for ind,field in enumerate(input_dict['names']):
+                    output_dict.update(
+                        {field: {
+                            'timestamp':read_data['timestamp'],
+                            'data':parsed_data[ind]}})
+
+            else:
+                # Single item parsed - pull in dict then update with parsed data. 
+                # Must be done in this order otherwise it generates a keyerror.
+                output_dict[telem_field] = read_data
+                output_dict[telem_field]['data'] = parsed_data[0]
+        return output_dict
 
