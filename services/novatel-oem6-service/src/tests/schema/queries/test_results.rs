@@ -46,6 +46,31 @@ fn test_results_good() {
                         swVersion,
                     },
                     numComponents
+                },
+                telemetryNominal{
+                    lockInfo {
+                        position,
+                        time {
+                            ms,
+                            week
+                        },
+                        velocity
+                    },
+                    lockStatus {
+                        positionStatus,
+                        positionType,
+                        time {
+                            ms,
+                            week
+                        },
+                        timeStatus,
+                        velocityStatus,
+                        velocityType
+                    },
+                    systemStatus {
+                        errors,
+                        status
+                    }
                 }
             }
         }"#;
@@ -66,6 +91,31 @@ fn test_results_good() {
                         "swVersion": "OEM060600RN0000",   
                     }],
                     "numComponents": 1
+                },
+                "telemetryNominal": {
+                    "lockInfo": {
+                        "position": [0.0, 0.0, 0.0],
+                        "time": {
+                            "ms": 0,
+                            "week": 0,
+                        },
+                        "velocity": [0.0, 0.0, 0.0],
+                    },
+                    "lockStatus": {
+                        "positionStatus": "INSUFFICIENT_OBSERVATIONS",
+                        "positionType": "NONE",
+                        "time": {
+                            "ms": 0,
+                        	"week": 0
+                        },
+                        "timeStatus": "UNKNOWN",
+                        "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
+                        "velocityType": "NONE"
+                    },
+                    "systemStatus": {
+                        "errors": [],
+                        "status": ["POSITION_SOLUTION_INVALID", "CLOCK_MODEL_INVALID"]
+                    }
                 }
             }
     });
@@ -97,15 +147,91 @@ fn test_results_no_response() {
                         swVersion,
                     },
                     numComponents
+                },
+                telemetryNominal{
+                    lockInfo {
+                        position,
+                        time {
+                            ms,
+                            week
+                        },
+                        velocity
+                    },
+                    lockStatus {
+                        positionStatus,
+                        positionType,
+                        time {
+                            ms,
+                            week
+                        },
+                        timeStatus,
+                        velocityStatus,
+                        velocityType
+                    },
+                    systemStatus {
+                        errors,
+                        status
+                    }
                 }
             }
         }"#;
 
     let expected = json!({
             "testResults": {
-                "errors": "Failed to get command response",
+                "errors": "Get Telemetry: Failed to get command response",
                 "success": false,
                 "telemetryDebug": null,
+                "telemetryNominal": {
+                    "lockInfo": {
+                        "position": [0.0, 0.0, 0.0],
+                        "time": {
+                            "ms": 0,
+                            "week": 0,
+                        },
+                        "velocity": [0.0, 0.0, 0.0],
+                    },
+                    "lockStatus": {
+                        "positionStatus": "INSUFFICIENT_OBSERVATIONS",
+                        "positionType": "NONE",
+                        "time": {
+                            "ms": 0,
+                        	"week": 0
+                        },
+                        "timeStatus": "UNKNOWN",
+                        "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
+                        "velocityType": "NONE"
+                    },
+                    "systemStatus": {
+                        "errors": ["Get Telemetry: Failed to get command response"],
+                        "status": [
+                           "ERROR_PRESENT", 
+                           "TEMPERATURE_WARNING", 
+                           "VOLTAGE_SUPPLY_WARNING", 
+                           "ANTENNA_NOT_POWERED", 
+                           "LNA_FAILURE", 
+                           "ANTENNA_OPEN", 
+                           "ANTENNA_SHORTENED", 
+                           "CPU_OVERLOAD", 
+                           "COM1_BUFFER_OVERRUN", 
+                           "COM2_BUFFER_OVERRUN", 
+                           "COM3_BUFFER_OVERRUN", 
+                           "LINK_OVERRUN", 
+                           "AUX_TRANSMIT_OVERRUN", 
+                           "AGC_OUT_OF_RANGE", 
+                           "INS_RESET", 
+                           "GPS_ALMANAC_INVALID", 
+                           "POSITION_SOLUTION_INVALID", 
+                           "POSITION_FIXED", 
+                           "CLOCK_STEERING_DISABLED", 
+                           "CLOCK_MODEL_INVALID", 
+                           "EXTERNAL_OSCILLATOR_LOCKED", 
+                           "SOFTWARE_RESOURCE_WARNING", 
+                           "AUX3_STATUS_EVENT", 
+                           "AUX2_STATUS_EVENT", 
+                           "AUX1_STATUS_EVENT"
+                           ]
+                    }
+                }
             }
     });
 
@@ -138,15 +264,91 @@ fn test_results_no_log() {
                         swVersion,
                     },
                     numComponents
+                },
+                telemetryNominal{
+                    lockInfo {
+                        position,
+                        time {
+                            ms,
+                            week
+                        },
+                        velocity
+                    },
+                    lockStatus {
+                        positionStatus,
+                        positionType,
+                        time {
+                            ms,
+                            week
+                        },
+                        timeStatus,
+                        velocityStatus,
+                        velocityType
+                    },
+                    systemStatus {
+                        errors,
+                        status
+                    }
                 }
             }
         }"#;
 
     let expected = json!({
             "testResults": {
-                "errors": "Failed to receive version info - timed out waiting on channel",
+                "errors": "Get Telemetry: Failed to receive version info - timed out waiting on channel",
                 "success": false,
                 "telemetryDebug": null,
+                "telemetryNominal": {
+                    "lockInfo": {
+                        "position": [0.0, 0.0, 0.0],
+                        "time": {
+                            "ms": 0,
+                            "week": 0,
+                        },
+                        "velocity": [0.0, 0.0, 0.0],
+                    },
+                    "lockStatus": {
+                        "positionStatus": "INSUFFICIENT_OBSERVATIONS",
+                        "positionType": "NONE",
+                        "time": {
+                            "ms": 0,
+                        	"week": 0
+                        },
+                        "timeStatus": "UNKNOWN",
+                        "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
+                        "velocityType": "NONE"
+                    },
+                    "systemStatus": {
+                        "errors": ["Get Telemetry: Failed to receive version info - timed out waiting on channel"],
+                        "status": [
+                           "ERROR_PRESENT", 
+                           "TEMPERATURE_WARNING", 
+                           "VOLTAGE_SUPPLY_WARNING", 
+                           "ANTENNA_NOT_POWERED", 
+                           "LNA_FAILURE", 
+                           "ANTENNA_OPEN", 
+                           "ANTENNA_SHORTENED", 
+                           "CPU_OVERLOAD", 
+                           "COM1_BUFFER_OVERRUN", 
+                           "COM2_BUFFER_OVERRUN", 
+                           "COM3_BUFFER_OVERRUN", 
+                           "LINK_OVERRUN", 
+                           "AUX_TRANSMIT_OVERRUN", 
+                           "AGC_OUT_OF_RANGE", 
+                           "INS_RESET", 
+                           "GPS_ALMANAC_INVALID", 
+                           "POSITION_SOLUTION_INVALID", 
+                           "POSITION_FIXED", 
+                           "CLOCK_STEERING_DISABLED", 
+                           "CLOCK_MODEL_INVALID", 
+                           "EXTERNAL_OSCILLATOR_LOCKED", 
+                           "SOFTWARE_RESOURCE_WARNING", 
+                           "AUX3_STATUS_EVENT", 
+                           "AUX2_STATUS_EVENT", 
+                           "AUX1_STATUS_EVENT"
+                           ]
+                    }
+                }
             }
     });
 

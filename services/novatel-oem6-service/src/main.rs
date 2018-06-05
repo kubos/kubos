@@ -15,26 +15,34 @@
 //
 
 #![deny(missing_docs)]
-//#![deny(warnings)]
+#![deny(warnings)]
 
 //! Kubos Service for interacting with a [NovAtel OEM6 High Precision GNSS Receiver](https://www.novatel.com/products/gnss-receivers/oem-receiver-boards/oem6-receivers/)
 //!
 //! # Configuration
 //!
 //! The service can be configured in the `/home/system/etc/config.toml` with the following fields:
-//! ```
+//!
+//! - `bus` - Specifies the UART bus the OEM6 is connected to
+//! - `ip` - Specifies the service's IP address
+//! - `port` - Specifies the port on which the service will be listening for UDP packets
+//!
+//! For example:
+//!
+//! ```toml
+//! [novatel-oem6-service]
+//! bus = "/dev/ttyS4"
+//!
 //! [novatel-oem6-service.addr]
 //! ip = "127.0.0.1"
 //! port = 8082
 //! ```
 //!
-//! Where `ip` specifies the service's IP address, and `port` specifies the port which UDP requests should be sent to.
-//!
 //! # Starting the Service
 //!
 //! The service should be started automatically by its init script, but may also be started manually:
 //!
-//! ```
+//! ```toml
 //! $ novatel-oem6-service
 //! Kubos OEM6 service started
 //! Listening on: 10.63.1.20:8082
@@ -43,7 +51,187 @@
 //! # Available Fields
 //!
 //! ```json
-//! TODO
+//! query {
+//!     ack,
+//!     config,
+//!     errors,
+//!     lockInfo {
+//!         position,
+//!         time {
+//!             ms,
+//!             week
+//!         },
+//!         velocity
+//!     },
+//!     lockStatus {
+//!         positionStatus,
+//!         positionType,
+//!         time {
+//!             ms,
+//!             week
+//!         },
+//!         timeStatus,
+//!         velocityStatus,
+//!         velocityType
+//!     },
+//!     power{
+//!         state,
+//!         uptime
+//!     },
+//!     systemStatus {
+//!         errors,
+//!         status
+//!     },
+//!     telemetry{
+//!         debug {
+//!             components {
+//!                 bootVersion,
+//!                 compType,
+//!                 compileDate,
+//!                 compileTime,
+//!                 hwVersion,
+//!                 model,
+//!                 serialNum,
+//!                 swVersion,
+//!             },
+//!             numComponents
+//!         },
+//!         nominal{
+//!             lockInfo {
+//!                 position,
+//!                 time {
+//!                     ms,
+//!                     week
+//!                 },
+//!                 velocity
+//!             },
+//!             lockStatus {
+//!                 positionStatus,
+//!                 positionType,
+//!                 time {
+//!                     ms,
+//!                     week
+//!                 },
+//!                 timeStatus,
+//!                 velocityStatus,
+//!                 velocityType
+//!             },
+//!             systemStatus {
+//!                 errors,
+//!                 status
+//!             }
+//!         }
+//!     },
+//!     testResults {
+//!         errors,
+//!         success,
+//!         telemetryDebug {
+//!             components {
+//!                 bootVersion,
+//!                 compType,
+//!                 compileDate,
+//!                 compileTime,
+//!                 hwVersion,
+//!                 model,
+//!                 serialNum,
+//!                 swVersion,
+//!             },
+//!             numComponents
+//!         },
+//!         telemetryNominal{
+//!             lockInfo {
+//!                 position,
+//!                 time {
+//!                     ms,
+//!                     week
+//!                 },
+//!                 velocity
+//!             },
+//!             lockStatus {
+//!                 positionStatus,
+//!                 positionType,
+//!                 time {
+//!                     ms,
+//!                     week
+//!                 },
+//!                 timeStatus,
+//!                 velocityStatus,
+//!                 velocityType
+//!             },
+//!             systemStatus {
+//!                 errors,
+//!                 status
+//!             }
+//!         }
+//!     }
+//! }
+//!
+//! mutation {
+//!     configureHardware(config: [{option: ConfigOption, hold: Boolean, interval: Float, offset: Float},...]) {
+//!         config,
+//!         errors,
+//!         success
+//!     },
+//!     controlPower,
+//!     errors,
+//!     issueRawCommand(command: String){
+//!         errors,
+//!         success
+//!     },
+//!     noop {
+//!         errors,
+//!         success
+//!     },
+//!     testHardware(test: TestType) {
+//!         ... on IntegrationTestResults {
+//!             errors,
+//!             success,
+//!             telemetryDebug {
+//!                 components {
+//!                     bootVersion,
+//!                     compType,
+//!                     compileDate,
+//!                     compileTime,
+//!                     hwVersion,
+//!                     model,
+//!                     serialNum,
+//!                     swVersion,
+//!                 },
+//!                 numComponents
+//!             },
+//!             telemetryNominal{
+//!                 lockInfo {
+//!                     position,
+//!                     time {
+//!                         ms,
+//!                         week
+//!                     },
+//!                     velocity
+//!                 },
+//!                 lockStatus {
+//!                     positionStatus,
+//!                     positionType,
+//!                     time {
+//!                         ms,
+//!                         week
+//!                     },
+//!                     timeStatus,
+//!                     velocityStatus,
+//!                     velocityType
+//!                 },
+//!                 systemStatus {
+//!                     errors,
+//!                     status
+//!                 }
+//!             }
+//!         }
+//!         ... on HardwareTestResults {
+//!             data,
+//!             errors,
+//!             success
+//!         }
+//!     }
+//! }
 //! ```
 //!
 
@@ -71,8 +259,6 @@ use novatel_oem6_api::OEMResult;
 use schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
 
-// TODO: CHANGE THE UART BUS TO UART4!!!
-
 fn main() -> OEMResult<()> {
     Service::new(
         Config::new("novatel-oem6-service"),
@@ -83,3 +269,19 @@ fn main() -> OEMResult<()> {
 
     Ok(())
 }
+
+/* TODO: Use once master has been merged into main service PR
+fn main() -> OEMResult<()> {
+    let config = Config::new("novatel-oem6-service");
+    let bus = config
+        .get("bus")
+        .expect("No OEM6 device path found in config");
+    let bus = bus.as_str()?;
+
+    let subsystem = Subsystem::new(bus, Arc::new(LockData::new()))?;
+
+    Service::new(config, subsystem, QueryRoot, MutationRoot).start();
+
+    Ok(())
+}
+*/

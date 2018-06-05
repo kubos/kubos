@@ -234,7 +234,10 @@ impl Subsystem {
             }
         };
 
-        Ok(SystemStatus { status, errors })
+        Ok(SystemStatus {
+            status: ReceiverStatus(status),
+            errors,
+        })
     }
 
     pub fn get_lock_status(&self) -> Result<LockStatus, Error> {
@@ -246,13 +249,27 @@ impl Subsystem {
     }
 
     pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
-        let result = self.get_version_log();
+        let telem = self.get_telemetry()?;
 
-        let success = result.is_ok();
+        Ok(IntegrationTestResults {
+            success: !telem.debug.is_none(),
+            errors: telem.nominal.system_status.errors.clone().join("; "),
+            telemetry_debug: telem.debug.clone(),
+            telemetry_nominal: telem.nominal.clone(),
+        })
+    }
 
-        let (errors, version_info) = match result {
+    pub fn get_telemetry(&self) -> Result<Telemetry, Error> {
+        self.get_errors();
+
+        let mut errors = match self.errors.try_borrow() {
+            Ok(master_vec) => master_vec.clone(),
+            _ => vec!["Error: Failed to borrow master errors vector".to_owned()],
+        };
+
+        let (status, version_info) = match self.get_version_log() {
             Ok(log) => (
-                "".to_owned(),
+                log.recv_status,
                 Some(VersionInfo {
                     num_components: log.num_components as i32,
                     components: log.components
@@ -262,16 +279,26 @@ impl Subsystem {
                 }),
             ),
             Err(err) => {
-                let temp = format!("Get Test Results: {}", err);
+                let temp = format!("Get Telemetry: {}", err);
+                errors.push(temp.clone());
                 push_err!(self.errors, temp);
-                (err, None)
+                (ReceiverStatusFlags::all(), None)
             }
         };
 
-        Ok(IntegrationTestResults {
-            success,
-            errors,
-            telemetry_debug: version_info,
+        let lock_status = self.get_lock_status().ok();
+        let lock_info = self.get_lock_info().ok();
+
+        Ok(Telemetry {
+            nominal: TelemetryNominal {
+                system_status: SystemStatus {
+                    status: ReceiverStatus(status),
+                    errors,
+                },
+                lock_status,
+                lock_info,
+            },
+            debug: version_info,
         })
     }
 
