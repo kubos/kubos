@@ -22,12 +22,13 @@
 //! guaranteed to be single-threaded, so we made the decision to create our own mock objects.
 
 use super::*;
+use std::collections::VecDeque;
 use std::io::Cursor;
 
 /// Structure containing the input data to verify and/or result to return
 /// when the MockStream's write function is called
 pub struct WriteStruct {
-    input: Option<Vec<u8>>,
+    input: RefCell<VecDeque<Vec<u8>>>,
     result: UartResult<()>,
 }
 
@@ -95,7 +96,7 @@ impl WriteStruct {
     /// }
     /// ```
     pub fn set_input(&mut self, input: Vec<u8>) {
-        self.input = Some(input)
+        self.input.borrow_mut().push_back(input)
     }
 }
 
@@ -195,7 +196,7 @@ impl Default for MockStream {
         MockStream {
             write: WriteStruct {
                 result: Err(UartError::GenericError.into()),
-                input: None,
+                input: RefCell::new(VecDeque::new()),
             },
             read: ReadStruct {
                 result: Err(UartError::GenericError.into()),
@@ -207,12 +208,17 @@ impl Default for MockStream {
 
 impl Stream for MockStream {
     fn write(&self, data: &[u8]) -> UartResult<()> {
-        if let Some(ref input) = self.write.input {
-            //Verify input matches data
-            assert_eq!(input.as_slice(), data);
-            Ok(())
-        } else {
+        if self.write.input.borrow_mut().is_empty() {
             self.write.result.clone()
+        } else {
+            let input = self.write.input.borrow_mut().pop_front().unwrap();
+            if input.is_empty() {
+                self.write.result.clone()
+            } else {
+                //Verify input matches data
+                assert_eq!(input.as_slice(), data);
+                Ok(())
+            }
         }
     }
 
