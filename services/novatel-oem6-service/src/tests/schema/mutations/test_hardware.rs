@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-// TODO: Add telemetryNominal results
-
 use super::*;
 
 #[test]
