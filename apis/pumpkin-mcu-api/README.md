@@ -24,6 +24,17 @@ If the struct.unpack format string indicates there are multiple values unpacked,
 
 All MCUs have SUP:TEL? ... commands. These commands are encapsulated in the existing "supervisor" entry in the TELEMETRY definition in mcu_api.py and therefore do not need to be re-defined when adding new modules. 
 
+Modules currently configured: 
+
+  - sim
+  - gpsrm
+  - aim2
+  - bim
+  - pim
+  - rhm
+  - bsm
+  - bm2
+
 If read_telemetry function is returning items with a timestamp of 0, this means the Data Ready field was 0, and the data for that item is invalid. It must be re-requested with a longer "DELAY" (delay time between requesting the data and reading it). This is set by default to 200 ms, but if it consistently getting data that isn't ready, it is recommended to set it to a full second. Reference the Firmware Reference Manual for more details on this. 
 
 ## Usage
