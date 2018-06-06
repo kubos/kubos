@@ -9,7 +9,6 @@ from setuptools import setup
 
 setup(name='i2c',
       version='0.1.0',
-      license='MIT',
       description='I2C library for KubOS',
       py_modules=["i2c"]
       )

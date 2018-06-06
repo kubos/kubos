@@ -54,6 +54,3 @@ for module in MODULES:
     out = mcu.read_telemetry(module = module)
     for field in out:
         print (field,out[field])
-
-
-
