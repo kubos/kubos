@@ -185,7 +185,7 @@ class MCU:
     
     def __init__(self,address):
         """
-        Sets the bus number, stores the address and configuration data
+        Sets the bus number and stores the address
         """
         self.i2cfile = i2c.I2C(bus = I2C_BUS_NUM)
         self.address = address

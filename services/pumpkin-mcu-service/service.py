@@ -18,5 +18,5 @@ c = Config("pumpkin-mcu-service")
 # Set which modules are present and their addresses. 
 schema.MODULES = c.raw['modules']
 
-# Use this to start a udp service
+# Use this to start a UDP service
 udp_service.start(c, schema)

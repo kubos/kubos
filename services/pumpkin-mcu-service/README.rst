@@ -10,17 +10,18 @@ Mutations are commands (data written to the module)
 Both require I2C interaction with the module
 
 .. note::
-   The IP address, port, and module address configuration used by this service is controlled by a file `config.toml` found in the root `pumpkin-mcu-service` directory. You MUST set the module addresses within the config file to match your hardware configuration. 
+   The IP address, port, and module address configuration used by this service is controlled by a file `/home/system/etc/config.toml`. You MUST set the module addresses within the config file to match your hardware configuration. 
 
 
 Example query:
 
 .. code::
-   query {
-       mcuTelemetry(
-           module:"sim",
-           fields:["firmware_version","commands_parsed","scpi_errors"]
-   }
+  query {
+      mcuTelemetry(
+          module:"sim",
+          fields:["firmware_version","commands_parsed","scpi_errors"]
+      )
+  }
 
 
 Example mutation:

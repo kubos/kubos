@@ -14,9 +14,8 @@ import json
 import mcu_api
 
 # Initialize MODULES global. This is then configured in the service file. 
-# "module_name" must match an entry in the api configuration dict
-# "address" must be a valid i2c address int, if it's set to 0, it's 
-# treated as not present. 
+# "module_name" must match an entry in the API configuration dict
+# "address" must be a valid I2C address int.
 MODULES = {
     "module_name": {"address":0xFF} 
  }
@@ -35,14 +34,20 @@ class Query(graphene.ObjectType):
         fields=graphene.List(graphene.String,default_value = ["all"]))
     
     def resolve_moduleList(self, info):
+        """
+        This allows discovery of which modules are present and what 
+        addresses they have. Mostly just a debugging/discovery tool.
+        """
         return json.dumps(MODULES)
         
     def resolve_fieldList(self, info, module):
+        """
+        This allows discovery of which fields are available for a 
+        specific module. Mostly just a debugging/discovery tool. 
+        """
         if module not in MODULES:
             raise KeyError('Module not configured',module)
         address = MODULES[module]['address']
-        if address == 0:
-            raise ValueError('Module not present',module)
         telemetry = mcu_api.TELEMETRY
         fields = []
         for field in telemetry["supervisor"]:
@@ -54,12 +59,11 @@ class Query(graphene.ObjectType):
     def resolve_read(self, info, module, count):
         """
         Reads number of bytes from the specified MCU
+        Returns as a hex string. 
         """
         if module not in MODULES:
             raise KeyError('Module not configured',module)
         address = MODULES[module]['address']
-        if address == 0:
-            raise ValueError('Module not present',module)
         mcu = mcu_api.MCU(address = address)
         bin_data = mcu.read(count = count)
         
@@ -67,13 +71,22 @@ class Query(graphene.ObjectType):
     
     def resolve_mcuTelemetry(self, info, module, fields):
         """
-        Handles request for subsystem query.
+        Queries specific telemetry item fields from the speficied
+        module. 
+        
+        fields must be a list of value field names matching the 
+        configuration data in the mcu_api.py file. Inputting ['all']
+        retrieves all available telemetry for that module. 
+
+        Retuns json dump of the form:
+        {
+        'fieldname1':{'timestamp':float,'data':configured datatype},
+        'fieldname2':{'timestamp':float,'data':configured datatype}
+        }
         """
         if module not in MODULES:
             raise KeyError('Module not configured',module)
         address = MODULES[module]['address']
-        if address == 0:
-            raise ValueError('Module not present',module)
         fields = map(str,fields)
         mcu = mcu_api.MCU(address = address)
         out = mcu.read_telemetry(module = module,fields = fields)
@@ -97,8 +110,6 @@ class Passthrough(graphene.Mutation):
         if module not in MODULES:
             raise KeyError('Module not configured',module)
         address = MODULES[module]['address']
-        if address == 0:
-            raise KeyError('Module not present',module)
         if type(command) == unicode: command = str(command)
         mcu = mcu_api.MCU(address = address)
         out = mcu.write(command)
