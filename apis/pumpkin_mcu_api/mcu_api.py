@@ -234,7 +234,8 @@ class MCU:
         if type(fields) != list: 
             # Validate fields input type
             raise TypeError(
-                'fields argument must be a list of strings.')
+                'fields argument must be a list of fieldnames from ' +
+                'the configuration data. Input: ' + str(fields))
                 
         module_telem = TELEMETRY[module]
         supervisor_telem = TELEMETRY['supervisor']
@@ -253,7 +254,7 @@ class MCU:
             elif field in supervisor_telem:
                 requests[field] = supervisor_telem[field]
             else:
-                raise ValueError('Invalid field: '+str(field))
+                raise KeyError('Invalid field: '+str(field))
         return requests            
         
     def _read_telemetry_items(self,dict):
@@ -336,7 +337,7 @@ class MCU:
         # All others parse directly with the parsing string. 
         return struct.unpack(parsing,data)
 
-    def _format_data(telem_field, input_dict, read_data, parsed_data):
+    def _format_data(self,telem_field,input_dict,read_data,parsed_data):
         """
         Takes in the read data, parsed data, and the input dictionary and outputs
         a formatted dictionary in the form of:
@@ -346,26 +347,31 @@ class MCU:
         }
         """
         output_dict = {}
+        if "names" in input_dict:
+            if len(parsed_data) == 1:
+                raise KeyError(
+                    "Only one item parsed but subfields are listed: " +\
+                    telem_field)
         if len(parsed_data) > 1:
-                # Multiple items parsed
-                if "names" not in input_dict:
-                    raise KeyError(
-                        "Must be a names field when multiple items are parsed: " +\
-                        telem_field)
-                if len(input_dict['names']) != len(parsed_data):
-                    raise KeyError(
-                        "Number of field names doesn't match parsing strings: " +\
-                        telem_field)
-                for ind,field in enumerate(input_dict['names']):
-                    output_dict.update(
-                        {field: {
-                            'timestamp':read_data['timestamp'],
-                            'data':parsed_data[ind]}})
+            # Multiple items parsed
+            if "names" not in input_dict:
+                raise KeyError(
+                    "Must be a names field when multiple items are parsed: " +\
+                    telem_field)
+            if len(input_dict['names']) != len(parsed_data):
+                raise KeyError(
+                    "Number of field names doesn't match parsing strings: " +\
+                    telem_field)
+            for ind,field in enumerate(input_dict['names']):
+                output_dict.update(
+                    {field: {
+                        'timestamp':read_data['timestamp'],
+                        'data':parsed_data[ind]}})
 
-            else:
-                # Single item parsed - pull in dict then update with parsed data. 
-                # Must be done in this order otherwise it generates a keyerror.
-                output_dict[telem_field] = read_data
-                output_dict[telem_field]['data'] = parsed_data[0]
+        else:
+            # Single item parsed - pull in dict then update with parsed data. 
+            # Must be done in this order otherwise it generates a keyerror.
+            output_dict[telem_field] = read_data
+            output_dict[telem_field]['data'] = parsed_data[0]
         return output_dict
 

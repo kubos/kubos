@@ -14,6 +14,21 @@ import unittest
 import mcu_api
 import mock
 
+############################
+# Testing configuration data
+
+mcu_api.DELAY = 0
+mcu_api.HEADER_SIZE = 5
+mcu_api.TELEMETRY = {
+	"supervisor": {},
+	"module_1": {
+		"field_1": {"command":"TESTCOMMAND","length":2,"parsing":"hex"},
+		"field_2": {"command":"TESTCOMMAND","length":2,"parsing":"str"},
+		"field_3": {"command":"TESTCOMMAND","length":2,"parsing":"<H"},
+		"field_4": {"command":"TESTCOMMAND","length":4,"parsing":"<HH",
+			"names": ["subfield_1","subfield_2"]}
+	}
+}
 
 class TestMCUAPI(unittest.TestCase):
 
@@ -41,5 +56,176 @@ class TestMCUAPI(unittest.TestCase):
 				device = self.mcu.address,
 				count = read_count)
 
+	def test_build_telemetry_dict_modulechecking(self):
+		bad_module = "notamodule"
+		good_fields = ["field_1"]
+		with self.assertRaises(KeyError):
+			self.mcu._build_telemetry_dict(
+				module = bad_module,
+				fields = good_fields)
+
+	def test_build_telemetry_dict_fieldchecking(self):
+		bad_fields = ["notafieldname"]
+		with self.assertRaises(KeyError):
+			self.mcu._build_telemetry_dict(
+				module = "module_1",
+				fields = bad_fields)
+
+	def test_build_telemetry_dict_all(self):
+		requests_assert = mcu_api.TELEMETRY['module_1']
+		self.assertEqual(self.mcu._build_telemetry_dict(
+				module = "module_1"),
+			requests_assert)
+
+	def test_build_telemetry_dict_field(self):
+		requests_assert = {}
+		requests_assert['field_1'] = \
+			mcu_api.TELEMETRY['module_1']['field_1']
+		self.assertEqual(
+			self.mcu._build_telemetry_dict(
+				module = "module_1",
+				fields = ["field_1"]),
+			requests_assert)
+
+	def test_header_parse_datareadyflag(self):
+		notready_data = '\x00\x00\x00\x00\x00\x00'
+		self.assertEqual(
+			self.mcu._header_parse(
+				data = notready_data)['timestamp'],
+			0)
+
+	def test_header_parse(self):
+		data_ready = '\x01'
+		timestamp = '\x02\x03\x04\x05'
+		data = '\x06'
+		inputdata = data_ready+timestamp+data
+		output_assert = {
+			'timestamp': 841489.94,
+			'data': '\x06'
+		}
+		self.assertEqual(
+			self.mcu._header_parse(
+				data = inputdata),
+			output_assert)
+
+	def test_unpack_str(self):
+		result_data = 'this should be included'
+		input_data = result_data + '\0this part \0should be \0cut off'
+		output_assert = (result_data,)
+		self.assertEqual(
+			self.mcu._unpack(
+				parsing = 'str',
+				data = input_data),
+			output_assert)
+
+	def test_unpack_hex(self):
+		result_data = '00010203040506'
+		input_data = '\x00\x01\x02\x03\x04\x05\x06'
+		output_assert = (result_data,)
+		self.assertEqual(
+			self.mcu._unpack(
+				parsing = 'hex',
+				data = input_data),
+			output_assert)
+
+	def test_format_data_oneitem(self):
+		fake_telem_field = 'field_1' # Single item
+		fake_input_dict = mcu_api.TELEMETRY['module_1'][fake_telem_field]
+		fake_timestamp = 100.00
+		fake_read_data = {'timestamp': fake_timestamp,'data': None}
+		fake_data = 200
+		fake_parsed_data = (fake_data,)
+		output_assert = {fake_telem_field:{
+			'timestamp': fake_timestamp,
+			'data': fake_data}
+		}
+		self.assertEqual(
+			self.mcu._format_data(
+				telem_field = fake_telem_field,
+				input_dict = fake_input_dict,
+				read_data = fake_read_data,
+				parsed_data = fake_parsed_data
+			),
+			output_assert)
+
+	def test_format_data_multiitem(self):
+		fake_telem_field = 'field_4' # Has subfields
+		fake_input_dict = mcu_api.TELEMETRY['module_1'][fake_telem_field]
+		fake_timestamp = 100.00
+		fake_read_data = {'timestamp': fake_timestamp,'data': None}
+		fake_data1 = 100
+		fake_data2 = 200
+		fake_parsed_data = (fake_data1,fake_data2)
+		output_assert = {
+			'subfield_1':{
+				'timestamp': fake_timestamp,
+				'data': fake_data1},
+			'subfield_2':{
+				'timestamp': fake_timestamp,
+				'data': fake_data2}
+		}
+		self.assertEqual(
+			self.mcu._format_data(
+				telem_field = fake_telem_field,
+				input_dict = fake_input_dict,
+				read_data = fake_read_data,
+				parsed_data = fake_parsed_data
+			),
+			output_assert)
+
+	def test_format_data_parsingrejection(self):
+		fake_telem_field = 'field_4' # Has subfields
+		fake_input_dict = mcu_api.TELEMETRY['module_1'][fake_telem_field]
+		fake_read_data = {'timestamp': 100.00,'data': None}
+		bad_parsed_data = ('whatever stuff',)
+		with self.assertRaises(KeyError):
+			self.mcu._format_data(
+				telem_field = fake_telem_field,
+				input_dict = fake_input_dict,
+				read_data = fake_read_data,
+				parsed_data = bad_parsed_data)
+
+	def test_format_data_namesrejection(self):
+		bad_telem_field = 'field_1' # Single item
+		fake_input_dict = mcu_api.TELEMETRY['module_1'][bad_telem_field]
+		fake_read_data = {'timestamp': 100.00,'data': None}
+		fake_parsed_data = ( # Multiple items
+			'whatever stuff',
+			'whatever other stuff'
+		)
+		with self.assertRaises(KeyError):
+			self.mcu._format_data(
+				telem_field = bad_telem_field,
+				input_dict = fake_input_dict,
+				read_data = fake_read_data,
+				parsed_data = fake_parsed_data)
+
+	def test_format_data_lengthrejection(self):
+		fake_telem_field = 'field_4' # Single item
+		fake_input_dict = mcu_api.TELEMETRY['module_1'][fake_telem_field]
+		fake_read_data = {'timestamp': 100.00,'data': None}
+		bad_parsed_data = ( # More than number of subfields
+			'whatever stuff',
+			'whatever other stuff',
+			'and things'
+		)
+		with self.assertRaises(KeyError):
+			self.mcu._format_data(
+				telem_field = fake_telem_field,
+				input_dict = fake_input_dict,
+				read_data = fake_read_data,
+				parsed_data = bad_parsed_data)
+
 if __name__ == '__main__':
     unittest.main()
+
+
+
+
+
+
+
+
+
+
+
