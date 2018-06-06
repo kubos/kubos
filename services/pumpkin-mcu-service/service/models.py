@@ -5,7 +5,7 @@
 # See LICENSE file for details.
 
 """
-Graphene ObjectType classes for PumpkinMCU Command Statuss.
+Graphene ObjectType classes for PumpkinMCU Command Status.
 """
 
 import graphene

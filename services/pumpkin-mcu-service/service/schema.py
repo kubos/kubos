@@ -46,7 +46,7 @@ class Query(graphene.ObjectType):
         specific module. Mostly just a debugging/discovery tool. 
         """
         if module not in MODULES:
-            raise KeyError('Module not configured',module)
+            raise KeyError('Module not configured: '+str(module))
         address = MODULES[module]['address']
         telemetry = mcu_api.TELEMETRY
         fields = []
@@ -62,7 +62,7 @@ class Query(graphene.ObjectType):
         Returns as a hex string. 
         """
         if module not in MODULES:
-            raise KeyError('Module not configured',module)
+            raise KeyError('Module not configured: '+str(module))
         address = MODULES[module]['address']
         mcu = mcu_api.MCU(address = address)
         bin_data = mcu.read(count = count)
@@ -85,7 +85,7 @@ class Query(graphene.ObjectType):
         }
         """
         if module not in MODULES:
-            raise KeyError('Module not configured',module)
+            raise KeyError('Module not configured: '+str(module))
         address = MODULES[module]['address']
         fields = map(str,fields)
         mcu = mcu_api.MCU(address = address)
