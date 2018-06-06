@@ -73,10 +73,6 @@ pub fn log_thread(
             .expect("Underlying read thread no longer communicating")
         {
             BestXYZ(log) => {
-                // TODO: Do we want to only update our stored values if
-                // both position and velocity are valid? The alternative
-                // would be to just update which ever one is valid and
-                // ignore the other
                 if log.pos_status == 0 && log.vel_status == 0 {
                     data.update_info(LockInfo {
                         time: OEMTime {
@@ -133,7 +129,7 @@ pub struct Subsystem {
 }
 
 impl Subsystem {
-    pub fn new(bus: &'static str, data: Arc<LockData>) -> OEMResult<Subsystem> {
+    pub fn new(bus: &str, data: Arc<LockData>) -> OEMResult<Subsystem> {
         let (log_send, log_recv) = sync_channel(5);
         let (response_send, response_recv) = sync_channel(5);
 

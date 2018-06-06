@@ -260,23 +260,11 @@ use schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
 
 fn main() -> OEMResult<()> {
-    Service::new(
-        Config::new("novatel-oem6-service"),
-        Subsystem::new("/dev/ttyS5", Arc::new(LockData::new()))?,
-        QueryRoot,
-        MutationRoot,
-    ).start();
-
-    Ok(())
-}
-
-/* TODO: Use once master has been merged into main service PR
-fn main() -> OEMResult<()> {
     let config = Config::new("novatel-oem6-service");
     let bus = config
         .get("bus")
-        .expect("No OEM6 device path found in config");
-    let bus = bus.as_str()?;
+        .expect("No 'bus' value found in 'novatel-oem6-service' section of config");
+    let bus = bus.as_str().unwrap();
 
     let subsystem = Subsystem::new(bus, Arc::new(LockData::new()))?;
 
@@ -284,4 +272,3 @@ fn main() -> OEMResult<()> {
 
     Ok(())
 }
-*/
