@@ -15,7 +15,7 @@ from kubos_service.config import Config
 
 c = Config("pumpkin-mcu-service")
 
-# Set which modules are present and their addresses from the config file. 
+# Set which modules are present and their addresses from the config file.
 schema.MODULES = c.raw['modules']
 
 # Starts the UDP service

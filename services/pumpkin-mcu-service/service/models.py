@@ -10,6 +10,7 @@ Graphene ObjectType classes for PumpkinMCU Command Status.
 
 import graphene
 
+
 class CommandStatus(graphene.ObjectType):
     """
     Model representing execution status. This allows us to return
@@ -19,4 +20,3 @@ class CommandStatus(graphene.ObjectType):
 
     status = graphene.Boolean()
     command = graphene.String()
-
