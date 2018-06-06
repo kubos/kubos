@@ -38,7 +38,7 @@ class Query(graphene.ObjectType):
         This allows discovery of which modules are present and what 
         addresses they have. Mostly just a debugging/discovery tool.
         """
-        return json.dumps(MODULES)
+        return MODULES
         
     def resolve_fieldList(self, info, module):
         """
@@ -90,7 +90,7 @@ class Query(graphene.ObjectType):
         fields = map(str,fields)
         mcu = mcu_api.MCU(address = address)
         out = mcu.read_telemetry(module = module,fields = fields)
-        return json.dumps(out)
+        return out
 
 class Passthrough(graphene.Mutation):
     """
