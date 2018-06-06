@@ -133,7 +133,7 @@ pub struct Subsystem {
 }
 
 impl Subsystem {
-    pub fn new(bus: &'static str, data: Arc<LockData>) -> OEMResult<Subsystem> {
+    pub fn new(bus: &str, data: Arc<LockData>) -> OEMResult<Subsystem> {
         let (log_send, log_recv) = sync_channel(5);
         let (response_send, response_recv) = sync_channel(5);
 
