@@ -219,8 +219,8 @@ class MCU:
         Output: A dict with keys for all fields requested with "timestamp" and
         "data" keys for each field. 
         """
-        requests = _build_telemetry_dict(module = module,fields=["all"])
-        output = _read_telemetry_items(requests)
+        requests = self._build_telemetry_dict(module = module,fields=fields)
+        output = self._read_telemetry_items(dict = requests)
         return output
 
     def _build_telemetry_dict(self,module,fields=["all"]):

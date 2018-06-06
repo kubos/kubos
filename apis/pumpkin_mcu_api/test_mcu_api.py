@@ -13,6 +13,7 @@ Unit test module for the pumpkin mcu api
 import unittest
 import mcu_api
 import mock
+from contextlib import nested
 
 ############################
 # Testing configuration data
@@ -215,6 +216,43 @@ class TestMCUAPI(unittest.TestCase):
 				input_dict = fake_input_dict,
 				read_data = fake_read_data,
 				parsed_data = bad_parsed_data)
+
+	def test_read_telemetry(self):
+		module = 'module_1'
+		field = 'field_1'
+		fields = [field]
+		input_assert = {}
+		input_assert[field] = mcu_api.TELEMETRY[module][field] 
+		with mock.patch('mcu_api.MCU._read_telemetry_items') as mock_read_telemetry_items:
+			self.mcu.read_telemetry(
+				module = module,
+				fields = fields)
+			mock_read_telemetry_items.assert_called_with(
+				dict = input_assert)
+
+	def test_read_telemetry_items(self):
+		module = 'module_1'
+		field = 'field_2'
+		fields = [field]
+		input_dict = {}
+		input_dict[field] = mcu_api.TELEMETRY[module][field] 
+		output_data = 'this should be returned'
+		fake_timestamp = 841489.94
+		return_data = '\x01\x02\x03\x04\x05' + output_data + \
+			'\0this \0should be \0cut off'
+		output_assert = {field: {
+			'timestamp': fake_timestamp,
+			'data': output_data
+		}}
+		with nested(
+			mock.patch('mcu_api.MCU.write'),
+			mock.patch('mcu_api.MCU.read')) as \
+			(mock_write,mock_read):
+			mock_read.return_value = return_data
+			self.assertEqual(
+				self.mcu._read_telemetry_items(dict = input_dict),
+				output_assert)
+
 
 if __name__ == '__main__':
     unittest.main()
