@@ -88,7 +88,7 @@ fn query_errors_local_multiple() {
         }"#;
 
     let expected = json!({
-            "errors": ["Noop: Failed to receive version info - timed out waiting on channel", "Noop: Failed to receive version info - timed out waiting on channel"]
+            "errors": ["Noop: Failed to receive version info - timed out waiting on channel", "Noop: UART Error, Generic Error"]
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));
