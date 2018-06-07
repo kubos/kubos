@@ -56,4 +56,4 @@ Run with:
 
 .. code:: 
 
-  python integration_test.py /path/to/service/config.toml
+  python integration_test.py -c /path/to/service/config.toml
