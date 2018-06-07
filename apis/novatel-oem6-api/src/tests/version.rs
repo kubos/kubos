@@ -21,6 +21,7 @@
 
 use super::*;
 use messages::commands::ResponseID;
+use messages::ReceiverStatusFlags;
 
 #[test]
 fn test_request_version_good() {
@@ -131,6 +132,11 @@ fn test_get_version() {
     let oem = mock_new!(mock);
 
     let expected: Log = Log::Version(VersionLog {
+        recv_status: ReceiverStatusFlags::CLOCK_MODEL_INVALID
+            | ReceiverStatusFlags::POSITION_SOLUTION_INVALID,
+        time_status: 120,
+        week: 3025,
+        ms: 164191800,
         num_components: 1,
         components: vec![
             Component {

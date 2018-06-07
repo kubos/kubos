@@ -15,12 +15,21 @@
 //
 
 use nom::*;
+use super::*;
 
 const COMPONENT_SIZE: usize = 108;
 
 /// Log message containing version information
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct VersionLog {
+    /// Current status of receiver
+    pub recv_status: ReceiverStatusFlags,
+    /// Validity of the time information
+    pub time_status: u8,
+    /// GPS reference week
+    pub week: u16,
+    /// Milliseconds into GPS reference week
+    pub ms: i32,
     /// Number of components present in this structure
     pub num_components: u32,
     /// Version information for each component present in the system
@@ -29,10 +38,20 @@ pub struct VersionLog {
 
 impl VersionLog {
     /// Convert a raw data buffer into a useable struct
-    pub fn new(mut raw: Vec<u8>) -> Option<Self> {
+    pub fn new(
+        recv_status: ReceiverStatusFlags,
+        time_status: u8,
+        week: u16,
+        ms: i32,
+        mut raw: Vec<u8>,
+    ) -> Option<Self> {
         let raw_comp = raw.split_off(4);
 
         let mut log = VersionLog {
+            recv_status,
+            time_status,
+            week,
+            ms,
             num_components: {
                 match le_u32(&raw) {
                     Ok(v) => v.1,
