@@ -106,7 +106,7 @@ fn get_position(oem: &OEM6) -> OEMResult<()> {
 }
 
 fn get_errors(oem: &OEM6) -> OEMResult<()> {
-    oem.request_errors().map_err(|err| {
+    oem.request_errors(false).map_err(|err| {
         println!("{}: Failed to request error messages", line!());
         err
     })

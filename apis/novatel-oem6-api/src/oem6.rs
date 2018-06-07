@@ -76,6 +76,9 @@ pub fn read_thread(
 
     loop {
         {
+            // Give any writes the chance to grab the lock first
+            ::std::thread::sleep(Duration::from_millis(1));
+
             // Take the stream connection mutex
             // If the lock() call fails, it means that a different thread poisoned
             // the mutex. We want to maintain our ability to read messages from the
@@ -85,7 +88,7 @@ pub fn read_thread(
             let conn = rx_conn.lock().unwrap_or_else(|err| err.into_inner());
 
             // Read SYNC bytes
-            let mut message = match conn.read(3, Duration::from_millis(500)) {
+            let mut message = match conn.read(3, Duration::from_millis(250)) {
                 Ok(v) => v,
                 Err(err) => match err {
                     #[cfg(test)]
@@ -186,13 +189,14 @@ pub fn read_thread(
 }
 
 /// Structure for OEM6 device instance
+#[derive(Clone)]
 pub struct OEM6 {
     /// Device connection structure
     pub conn: Arc<Mutex<Connection>>,
     /// Channel for receiving log messages
-    pub log_recv: Receiver<(Header, Vec<u8>)>,
+    pub log_recv: Arc<Mutex<Receiver<(Header, Vec<u8>)>>>,
     /// Channel for receiveing response messages
-    pub response_recv: Receiver<(Header, Vec<u8>)>,
+    pub response_recv: Arc<Mutex<Receiver<(Header, Vec<u8>)>>>,
 }
 
 impl OEM6 {
@@ -245,8 +249,8 @@ impl OEM6 {
 
         Ok(OEM6 {
             conn,
-            log_recv,
-            response_recv,
+            log_recv: Arc::new(Mutex::new(log_recv)),
+            response_recv: Arc::new(Mutex::new(response_recv)),
         })
     }
 
@@ -393,6 +397,11 @@ impl OEM6 {
 
     /// Request that the device send error messages as they occur
     ///
+    /// # Arguments
+    ///
+    /// * hold - Whether the [`unlog_all`] command should be able to apply to this log. A value
+    ///          of `true` will prevent [`unlog_all`] from applying to this log.
+    ///
     /// # Errors
     ///
     /// If this function encounters any errors, an [`OEMError`] variant will be returned.
@@ -410,20 +419,21 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     ///
-    /// oem.request_errors()?;
+    /// oem.request_errors(false)?;
     /// # Ok(())
     /// # }
     /// ```
     ///
+    /// [`unlog_all`]: method.unlog_all.html
     /// [`OEMError`]: enum.OEMError.html
-    pub fn request_errors(&self) -> OEMResult<()> {
+    pub fn request_errors(&self, hold: bool) -> OEMResult<()> {
         let request = LogCmd::new(
             Port::COM1 as u32,
             MessageID::RxStatusEvent as u16,
             LogTrigger::OnChanged,
             0.0,
             0.0,
-            false,
+            hold,
         );
 
         self.send_message(request)
@@ -595,6 +605,8 @@ impl OEM6 {
 
     fn get_response(&self, id: MessageID) -> OEMResult<()> {
         let (hdr, body) = self.response_recv
+            .lock()
+            .map_err(|_| OEMError::MutexError)?
             .recv_timeout(Duration::from_millis(500))
             .map_err(|_| OEMError::NoResponse)?;
 
@@ -660,7 +672,11 @@ impl OEM6 {
     /// [`OEMError`]: enum.OEMError.html
     pub fn get_log(&self) -> OEMResult<Log> {
         loop {
-            let (hdr, body) = match self.log_recv.recv_timeout(Duration::from_secs(5)) {
+            let (hdr, body) = match self.log_recv
+                .lock()
+                .map_err(|_| OEMError::MutexError)?
+                .recv_timeout(Duration::from_secs(5))
+            {
                 Ok(v) => v,
                 Err(RecvTimeoutError::Timeout) => continue,
                 Err(RecvTimeoutError::Disconnected) => throw!(OEMError::ThreadCommError),
@@ -671,7 +687,14 @@ impl OEM6 {
                 continue;
             }
 
-            match Log::new(hdr.msg_id, body) {
+            match Log::new(
+                hdr.msg_id,
+                hdr.recv_status,
+                hdr.time_status,
+                hdr.week,
+                hdr.ms,
+                body,
+            ) {
                 Some(v) => return Ok(v),
                 None => {
                     continue;
@@ -687,6 +710,9 @@ pub enum OEMError {
     /// Catch-all error
     #[display(fmt = "Generic Error")]
     GenericError,
+    /// An issue occurred while attempted to obtain a mutex lock
+    #[display(fmt = "Mutex Error")]
+    MutexError,
     /// A response message was received, but the ID doesn't match the command that was sent
     #[display(fmt = "Response ID Mismatch")]
     ResponseMismatch,
@@ -711,7 +737,7 @@ pub enum OEMError {
         id: u16,
     },
     /// An error was thrown by the serial communication driver
-    #[display(fmt = "{}", cause)]
+    #[display(fmt = "UART Error")]
     UartError {
         /// The underlying error
         #[fail(cause)]

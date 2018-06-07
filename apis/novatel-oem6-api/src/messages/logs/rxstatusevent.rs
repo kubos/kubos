@@ -15,10 +15,19 @@
 //
 
 use nom::*;
+use super::*;
 
 /// Event/error log message
 #[derive(Clone, Default, Debug, PartialEq)]
 pub struct RxStatusEventLog {
+    /// Current status of receiver
+    pub recv_status: ReceiverStatusFlags,
+    /// Validity of the time information
+    pub time_status: u8,
+    /// GPS reference week
+    pub week: u16,
+    /// Milliseconds into GPS reference week
+    pub ms: i32,
     /// Status word which generated the event
     pub word: u32,
     /// Location of the bit in the status word
@@ -31,11 +40,24 @@ pub struct RxStatusEventLog {
 
 impl RxStatusEventLog {
     /// Convert a raw data buffer into a useable struct
-    pub fn new(raw: Vec<u8>) -> Option<Self> {
-        match parse_rxstatusevent(&raw) {
-            Ok(conv) => Some(conv.1),
-            _ => None,
-        }
+    pub fn new(
+        recv_status: ReceiverStatusFlags,
+        time_status: u8,
+        week: u16,
+        ms: i32,
+        raw: Vec<u8>,
+    ) -> Option<Self> {
+        let mut log = match parse_rxstatusevent(&raw) {
+            Ok(conv) => conv.1,
+            _ => return None,
+        };
+
+        log.recv_status = recv_status;
+        log.time_status = time_status;
+        log.week = week;
+        log.ms = ms;
+
+        Some(log)
     }
 }
 
@@ -46,6 +68,10 @@ named!(parse_rxstatusevent(&[u8]) -> RxStatusEventLog,
         event: le_u32 >>
         description: take!(32) >>
         (RxStatusEventLog {
+            recv_status: ReceiverStatusFlags::empty(),
+            time_status: 0,
+            week: 0,
+            ms: 0,
             word,
             bit,
             event,
