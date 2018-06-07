@@ -1,8 +1,0 @@
-{
-    "antenna": {
-        "isis": {
-            "secondary": "0x32",
-            "count": 4
-        }
-    }
-}

@@ -1,5 +1,0 @@
-build/
-.yotta*
-yotta_*
-.kubos-link.json
-.travis.yml
