@@ -14,7 +14,7 @@ DEFAULT_PATH = "/home/system/etc/config.toml"
 def get_args(name):
     parser = argparse.ArgumentParser(description=name)
     parser = argparse.ArgumentParser(description='Example Service')
-    parser.add_argument('config', type=str, help='path to config file')
+    parser.add_argument("-c","--config", type=str, help='path to config file')
     return parser.parse_args()
 
 

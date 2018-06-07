@@ -25,7 +25,7 @@ def start(config, schema, context={}):
         view_func=GraphQLView.as_view(
             'graphql',
             schema=schema,
-            context=context
+            context=context,
             graphiql=False
         )
     )
@@ -35,7 +35,7 @@ def start(config, schema, context={}):
         view_func=GraphQLView.as_view(
             'graphiql',
             schema=schema,
-            context=context
+            context=context,
             graphiql=True
         )
     )
