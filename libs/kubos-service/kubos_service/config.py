@@ -11,10 +11,11 @@ DEFAULT_IP = "127.0.01"
 DEFAULT_PORT = 8001
 DEFAULT_PATH = "/home/system/etc/config.toml"
 
+
 def get_args(name):
     parser = argparse.ArgumentParser(description=name)
     parser = argparse.ArgumentParser(description='Example Service')
-    parser.add_argument("-c","--config", type=str, help='path to config file')
+    parser.add_argument("-c", "--config", type=str, help='path to config file')
     return parser.parse_args()
 
 
@@ -24,7 +25,7 @@ class Config:
     ip = ""
     port = 0
     raw = []
-    
+
     def __init__(self, name):
         args = get_args(name)
         if args.config:
@@ -37,7 +38,7 @@ class Config:
             self.ip = data[name]['addr']['ip']
             self.port = data[name]['addr']['port']
             self.raw = data[name]
-    
-        except Exception as e:
+
+        except Exception:
             self.ip = DEFAULT_IP
             self.port = DEFAULT_PORT

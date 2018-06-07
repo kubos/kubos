@@ -9,14 +9,14 @@
 Wrapper for creating a UDP based Kubos service
 """
 
-import graphene
 import socket
 import json
 
+
 def start(config, schema, context={}):
     print "{} starting on {}:{}".format(config.name, config.ip, config.port)
-    sock = socket.socket(socket.AF_INET, # Internet
-                         socket.SOCK_DGRAM) # UDP
+    sock = socket.socket(socket.AF_INET,  # Internet
+                         socket.SOCK_DGRAM)  # UDP
     sock.bind((config.ip, config.port))
     base_schema = schema.schema
 
@@ -37,8 +37,8 @@ def start(config, schema, context={}):
                 errs = "Exception encountered {}".format(e)
 
             result = json.dumps({
-                "msg" : msg,
-                "errs" : errs
+                "msg": msg,
+                "errs": errs
             })
             sock.sendto(result, source)
         except Exception as e:

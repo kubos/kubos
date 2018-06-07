@@ -9,14 +9,15 @@ Boilerplate main for service application.
 """
 
 from service import schema
-from kubos_service import http_service
-from kubos_service import udp_service
 from kubos_service.config import Config
 
 config = Config("example-service")
 
+# from kubos_service import http_service
 # Start an http service
 # http_service.start(config, schema.schema)
+
+from kubos_service import udp_service
 
 # Start a udp service with optional context
 # udp_service.start(config, schema, {'bus': '/dev/ttyS3'})

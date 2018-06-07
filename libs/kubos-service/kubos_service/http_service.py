@@ -12,6 +12,7 @@ Wrapper for creating a HTTP based Kubos service
 from flask import Flask
 from flask_graphql import GraphQLView
 
+
 def start(config, schema, context={}):
     """
     Creates flask based graphql and graphiql endpoints
