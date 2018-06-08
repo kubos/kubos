@@ -16,7 +16,7 @@
 
 use commands::*;
 use eps_api::EpsResult;
-use i2c_hal::Connection;
+use rust_i2c::Connection;
 use telemetry;
 
 /// Eps structure containing low level connection and functionality

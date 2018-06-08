@@ -15,7 +15,7 @@
  */
 
 use eps_api::{EpsError, EpsResult};
-use i2c_hal::Command;
+use rust_i2c::Command;
 
 /// Board Status
 ///

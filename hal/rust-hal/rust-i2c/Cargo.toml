@@ -1,5 +1,5 @@
 [package]
-name = "i2c-hal"
+name = "rust-i2c"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 

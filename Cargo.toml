@@ -13,7 +13,7 @@ members = [
 "examples/rust-service/extern-lib",
 "examples/rust-service/service",
 "examples/udp-service-client",
-"hal/i2c-hal",
+"hal/rust-hal/rust-i2c",
 "hal/rust-hal/rust-uart",
 "kubos-build-helper",
 "services/comms-service",

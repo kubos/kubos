@@ -15,10 +15,10 @@
  */
 
 extern crate clyde_3g_eps_api;
-extern crate i2c_hal;
+extern crate rust_i2c;
 
 use clyde_3g_eps_api::*;
-use i2c_hal::*;
+use rust_i2c::*;
 use std::thread;
 use std::time::Duration;
 
