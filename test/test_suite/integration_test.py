@@ -6,34 +6,52 @@
 
 """
 Runs Integration tests on all services included in service config file.
+
+Records results in individual files named: {servicenname}__results.txt.
 """
 
 import subprocess
 import toml
 
-DEFAULT_CONFIG_PATH = "/home/system/etc/config.toml"
-DEFAULT_RESULT_PATH = "/home/system/etc/integration_test_results.txt"
+DEFAULT_RESULT_PATH = "results/"
 TEST_CONFIG_PATH = "testing_config.toml"
+RESULTS_FILE_APPEND = "__results"
 
 
 class KubosServiceTest:
 
     def __init__(self,
-                 config_path=DEFAULT_CONFIG_PATH,
-                 result_path=DEFAULT_RESULT_PATH):
-        self.config_data = toml.load(config_path)
-        self.result_file = open(result_path, "w+")
+                 result_path=DEFAULT_RESULT_PATH,
+                 test_config_path=TEST_CONFIG_PATH):
 
-    def runIntegrationTests(filepath):
-        for service in self.config_data:
+        self.test_config = toml.load(test_config_path)
+        self.result_path = result_path
+
+    def runIntegrationTests(self):
+        for service in self.test_config:
+            # Create and open results file
+            service_result_file = open(
+                self.result_path+service+RESULTS_FILE_APPEND, "w+")
             try:
-                subprocess.
+                #
+                service_config = self.test_config[service]
+                if "test_command" in service_config:
+                    subprocess.call(service_config['test_command'],
+                                    shell=True,
+                                    stdout=service_result_file,
+                                    stderr=subprocess.STDOUT)
+                else:
+                    service_result_file.write(
+                        "Service: "+service + " has no test_command\n")
             except Exception as e:
+                service_result_file.write(
+                    "Service: "+service +
+                    "\n Failed to test with error: "+str(e))
                 print e
+            finally:
+                service_result_file.close()
 
 
 if __name__ == '__main__':
-    test = KubosServiceTest(
-        config_path="/Users/jessecoffey/Code/apollo-fusion" +
-        "/common/overlay/home/system/etc/config.toml",
-        result_path="/Users/jessecoffey/Code/integration_test_results.txt")
+    test = KubosServiceTest()
+    test.runIntegrationTests()

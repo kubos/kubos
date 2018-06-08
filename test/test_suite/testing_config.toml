@@ -1,2 +1,2 @@
 [pumpkin-mcu-service]
-test_command = "python "
+test_command = "python pumpkin_mcu_service_test.py -c /Users/jessecoffey/Code/apollo-fusion/common/overlay/home/system/etc/config.toml"
