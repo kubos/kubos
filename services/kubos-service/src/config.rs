@@ -58,10 +58,23 @@ impl Default for Config {
 }
 
 impl Config {
-    /// Creates and parses configuration data. Service name is used
-    /// as a key in the config file.
+    /// Creates and parses configuration data from the system configuration
+    /// file or the path passed as the '-c' or '--config' option to this
+    /// executable.
+    ///
+    /// # Arguments
+    /// `name` - Service name used as a key in the config file
     pub fn new(name: &str) -> Self {
-        parse_config(name, get_config_path()).unwrap_or(Config::default())
+        Self::new_from_path(name, get_config_path())
+    }
+
+    /// Creates and parses configuration data from the passed in configuration
+    /// path.
+    /// # Arguments
+    /// `name` - Service name used as a key in the config file
+    /// `path` - Path to configuration file
+    pub fn new_from_path(name: &str, path: String) -> Self {
+        parse_config(name, path).unwrap_or(Config::default())
     }
 
     /// Returns the configured hosturl string in the following
