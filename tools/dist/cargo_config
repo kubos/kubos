@@ -1,0 +1,5 @@
+[target.arm-unknown-linux-gnueabihf]
+linker = "/usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc"
+
+[target.armv5te-unknown-linux-gnueabi]
+linker = "/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc"

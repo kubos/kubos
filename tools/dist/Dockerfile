@@ -47,6 +47,9 @@ RUN mkdir -p /home/vagrant/.kubos
 # Setup rust stuff
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH "$PATH:/root/.cargo/bin"
+RUN rustup target install arm-unknown-linux-gnueabihf
+RUN rustup target install armv5te-unknown-linux-gnueabi
 RUN /root/.cargo/bin/cargo install --git https://github.com/kubos/cargo-kubos
+COPY cargo_config /root/.cargo/config
 
 ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"
