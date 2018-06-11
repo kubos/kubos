@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import os
 import shutil
+from distutils import dir_util
 
 GENERATE_XML = """
 (cat {0};
@@ -47,9 +48,10 @@ def main():
         gendocs_xml(dir, "docs/Doxyfile", args.version, doc_dir)
 
     subprocess.call("sphinx-build docs/ html/", shell=True)
-
     shutil.rmtree("./xml")
-
+    
+    subprocess.call("cargo kubos -c doc -t x86-linux-native -- --no-deps", shell=True)
+    dir_util.copy_tree("target/x86_64-unknown-linux-gnu/doc", "html/sdk-docs/rust")
 
 if __name__ == '__main__':
     main()
