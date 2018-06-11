@@ -36,8 +36,8 @@ macro_rules! mock_new {
 
         OEM6 {
             conn,
-            log_recv,
-            response_recv,
+            log_recv: Arc::new(Mutex::new(log_recv)),
+            response_recv: Arc::new(Mutex::new(response_recv)),
         }
     }};
 }
