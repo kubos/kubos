@@ -14,31 +14,32 @@
 // limitations under the License.
 //
 
-use db::Database;
+use kubos_telemetry::{Database, self};
 use diesel::prelude::*;
 use juniper::FieldResult;
 use kubos_service;
-use models::Entry;
 
 type Context = kubos_service::Context<Database>;
+
+pub struct Entry(kubos_telemetry::Entry);
 
 graphql_object!(Entry: () |&self| {
     description: "A telemetry entry"
 
     field timestamp() -> i32 as "Timestamp" {
-        self.timestamp
+        self.0.timestamp
     }
 
     field subsystem() -> &String as "Subsystem name" {
-        &self.subsystem
+        &self.0.subsystem
     }
 
     field parameter() -> &String as "Telemetry parameter" {
-        &self.parameter
+        &self.0.parameter
     }
 
     field value() -> &String as "Telemetry value" {
-        &self.value
+        &self.0.value
     }
 });
 
@@ -55,8 +56,8 @@ graphql_object!(QueryRoot: Context |&self| {
     ) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
-        use ::db::telemetry::dsl;
-        use ::db::telemetry;
+        use kubos_telemetry::telemetry::dsl;
+        use kubos_telemetry::telemetry;
         use diesel::sqlite::SqliteConnection;
 
         let mut query = telemetry::table.into_boxed::<<SqliteConnection as Connection>::Backend>();
@@ -83,7 +84,13 @@ graphql_object!(QueryRoot: Context |&self| {
 
         query = query.order(dsl::timestamp);
 
-        Ok(query.load::<Entry>(&executor.context().subsystem().connection)?)
+        let entries = query.load::<kubos_telemetry::Entry>(&executor.context().subsystem().connection)?;
+        let mut g_entries: Vec<Entry> = Vec::new();
+        for entry in entries {
+            g_entries.push(Entry(entry));
+        }
+
+        Ok(g_entries)
     }
 });
 

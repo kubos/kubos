@@ -137,18 +137,16 @@
 //!   }
 //! }
 //! ```
-
-#[macro_use]
 extern crate diesel;
+
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;
+extern crate kubos_telemetry;
 
-mod db;
-mod models;
 mod schema;
 
-use db::Database;
+use kubos_telemetry::Database;
 use kubos_service::{Config, Service};
 use schema::{MutationRoot, QueryRoot};
 
