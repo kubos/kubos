@@ -1,5 +1,6 @@
 [workspace]
 members = [
+"apis/app-api",
 "apis/adcs-api",
 "apis/isis-ants-api",
 "apis/isis-imtq-api",
@@ -15,6 +16,7 @@ members = [
 "examples/udp-service-client",
 "hal/rust-hal/rust-uart",
 "kubos-build-helper",
+"services/app-service",
 "services/comms-service",
 "services/kubos-service",
 "services/iobc-supervisor-service",
