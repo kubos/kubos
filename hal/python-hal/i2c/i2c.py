@@ -9,9 +9,11 @@
 I2C Library
 """
 
-import io,sys,fcntl
+import io
+import sys
+import fcntl
 
-I2C_SLAVE=0x0703
+I2C_SLAVE = 0x0703
 
 
 class I2C:
@@ -39,9 +41,10 @@ class I2C:
             elif type(data) is str:
                 pass
             else:
-                raise TypeError('Invalid data format: '+str(type(data))+', must be string or list')
+                raise TypeError('Invalid data format: ' +
+                                str(type(data))+', must be string or list')
             file.write(data)
-            return True,data
+            return True, data
 
     def read(self, device, count):
         """
