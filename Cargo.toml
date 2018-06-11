@@ -8,6 +8,7 @@ members = [
 "apis/novatel-oem6-api",
 "apis/nsl-duplex-d2",
 "apis/rust-radio-api",
+"apis/system-api",
 "apis/telemetry-api",
 "examples/rust-service/extern-lib",
 "examples/rust-service/service",

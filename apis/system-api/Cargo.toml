@@ -1,0 +1,10 @@
+[package]
+name = "kubos-system"
+version = "0.1.0"
+authors = ["Marshall Culpepper <marshall@kubos.com>"]
+
+[dependencies]
+lazy_static = "1.0"
+kubos-service = { path = "../../services/kubos-service" }
+nix = "0.10.0"
+serde_json = "1.0"
