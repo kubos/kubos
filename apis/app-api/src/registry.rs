@@ -117,9 +117,6 @@ impl AppRegistryEntry {
             },
             Err(err) => Err(format!("{}", err))
         }
-
-        //let mut file = fs::File::create(app_toml).unwrap();
-        //let _result = file.write_all(&toml::to_string(&self).unwrap().into_bytes());
     }
 }
 
@@ -282,6 +279,44 @@ impl AppRegistry {
         entries.push(reg_entry);
         entries[entries.len() - 1].save()?;
         Ok(entries[entries.len() - 1].clone())
+    }
+
+    pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, String>
+    {
+        let mut entries = self.entries.borrow_mut();
+        let app_index: usize;
+
+        match entries.binary_search_by(
+            |ref e| e.app.uuid.cmp(&String::from(app_uuid)).then(
+                    e.app.metadata.version.cmp(&String::from(version))))
+        {
+            Ok(index) => {
+                app_index = index;
+            },
+            Err(_) => {
+                return Err(format!("Active app with UUID {} does not exist", app_uuid));
+            }
+        }
+
+        let app_path = PathBuf::from(&entries[app_index].app.path);
+        if !app_path.exists() {
+            return Err(format!("{} does not exist", &entries[app_index].app.path));
+        }
+
+        match app_path.parent() {
+            Some(parent) => {
+                match fs::remove_dir_all(parent.clone()) {
+                    Ok(_) => {
+                        if app_index < entries.len() {
+                            entries.remove(app_index);
+                        }
+                        Ok(true)
+                    },
+                    Err(err) => Err(format!("Error removing app directory: {}", err))
+                }
+            },
+            None => Err(String::from("Error finding parent path of app"))
+        }
     }
 
     pub fn start_app(&self, app_uuid: &str, run_level: RunLevel) -> Result<u32, String>

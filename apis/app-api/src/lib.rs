@@ -119,8 +119,6 @@ impl App {
             return;
         }
 
-        // TODO graphql client, update
-
         let _uuid = env::var_os("KUBOS_APP_UUID");
         let run_level = env::var_os("KUBOS_APP_RUN_LEVEL");
 
