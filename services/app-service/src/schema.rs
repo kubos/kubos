@@ -121,7 +121,19 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         }
     }
 
-    field start_app(&executor, app_uuid: String, run_level: String) -> FieldResult<f64>
+    field uninstall(&executor, uuid: String, version: String) -> FieldResult<bool>
+        as "Uninstall App"
+    {
+        match executor.context().subsystem().uninstall(&uuid, &version) {
+            Ok(v) => Ok(v),
+            Err(msg) => {
+                println!("{}", msg);
+                Err(FieldError::new(msg, juniper::Value::null()))
+            }
+        }
+    }
+
+    field start_app(&executor, uuid: String, run_level: String) -> FieldResult<f64>
         as "Start App"
     {
         let run_level_o = {
@@ -131,7 +143,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             }
         };
 
-        match executor.context().subsystem().start_app(&app_uuid, run_level_o) {
+        match executor.context().subsystem().start_app(&uuid, run_level_o) {
             Ok(pid) => Ok(f64::from(pid)),
             Err(err) => Err(FieldError::new(err, juniper::Value::null()))
         }
