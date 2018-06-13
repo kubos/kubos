@@ -82,6 +82,18 @@ pub fn main() {
     print_result!("Version Info", eps.get_version_info());
     thread::sleep(Duration::from_millis(100));
 
+    print_result!("Board Status", eps.get_board_status());
+    thread::sleep(Duration::from_millis(100));
+
+    print_result!("Checksum", eps.get_checksum());
+    thread::sleep(Duration::from_millis(100));
+
+    print_result!("Last Error", eps.get_last_error());
+    thread::sleep(Duration::from_millis(100));
+
+    print_result!("Watchdog Period", eps.get_comms_watchdog_period());
+    thread::sleep(Duration::from_millis(100));
+
     dump_mother_telem!(
         eps,
         VoltageFeedingBcr1,

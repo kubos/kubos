@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+//! Motherboard Telemetry
+//!
+//! This module provides the enum, commands and parsers necessary for working
+//! with telemetry from the EPS motherboard.
+//!
+//! The macro `make_telemetry!` is responsibly for generating the enum `Type`, the
+//! `parse` function and the `command` function.
+
 use eps_api::EpsResult;
 use rust_i2c::Command;
 use telemetry::lib::get_adc_result;
 
 const TELEM_CMD: u8 = 0x10;
 
-/// TODO - need to make these parsing functions generic and configurable
 make_telemetry!(
     /// VBCR1 - Voltage feeding BRC1 (V)
     VoltageFeedingBcr1 => {vec![0xE1, 0x10], |d| (0.0322537 * d) - 0.051236678},

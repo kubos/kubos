@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-// #![deny(missing_docs)]
-// #![deny(warnings)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 //! Low level interface for interacting with a ClydeSpace 3G EPS
 

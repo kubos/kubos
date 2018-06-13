@@ -23,24 +23,31 @@ use rust_i2c::Command;
 /// The revision number returns the current revision of the firmware that is
 /// present on the board. The firmware number returns the current firmware on the board.
 
+/// Structure containing board firmware versions
 #[derive(Debug, Eq, PartialEq)]
 pub struct Version {
+    /// Current firmware revision on board
     pub revision: u8,
+    /// Current firmware on board
     pub firmware_number: u16,
 }
 
+/// Structure containing version information for the EPS motherboard
+/// and daughterboard if present
 #[derive(Debug, Eq, PartialEq)]
 pub struct VersionInfo {
+    /// Motherboard version information
     pub motherboard: Version,
+    /// Optional daughterboard version information
     pub daughterboard: Option<Version>,
 }
 
 fn get_firmware(num1: u8, num2: u8) -> u16 {
-    u16::from(num1) << 4 | (u16::from(num2) & 0xF0) >> 4
+    u16::from(num1) | (u16::from(num2) & 0xF) << 8
 }
 
 fn get_revision(num: u8) -> u8 {
-    (num & 0xF)
+    (num & 0xF0) >> 4
 }
 
 pub fn parse(data: &[u8]) -> EpsResult<VersionInfo> {
@@ -85,11 +92,11 @@ mod tests {
             VersionInfo {
                 motherboard: Version {
                     revision: 0xD,
-                    firmware_number: 0xABC,
+                    firmware_number: 0xCBA
                 },
                 daughterboard: None,
             },
-            parse(&vec![0xAB, 0xCD]).unwrap()
+            parse(&vec![0xBA, 0xDC]).unwrap()
         )
     }
 
@@ -99,14 +106,14 @@ mod tests {
             VersionInfo {
                 motherboard: Version {
                     revision: 0xD,
-                    firmware_number: 0xABC,
+                    firmware_number: 0xCBA,
                 },
                 daughterboard: Some(Version {
                     revision: 0x4,
-                    firmware_number: 0x123,
+                    firmware_number: 0x321,
                 }),
             },
-            parse(&vec![0x12, 0x34, 0xAB, 0xCD]).unwrap()
+            parse(&vec![0x21, 0x43, 0xBA, 0xDC]).unwrap()
         );
     }
 

@@ -14,11 +14,55 @@
  * limitations under the License.
  */
 
+//! Reset Telemetry
+//!
+//! This module provides the enum, commands and parsers necessary for working
+//! with reset telemetry from the EPS motherboard and daughterboard (if present).
+//!
+//! The macro `make_reset_telemetry!` is responsibly for generating the enum `Type`,
+//! and the `command` function.
+
 use eps_api::{EpsError, EpsResult};
 use rust_i2c::Command;
 
+/// Macro for generating `ResetType` enum and `command` function
+/// for reset telemetry items.
+#[macro_export]
+macro_rules! make_reset_telemetry {
+    (
+        $(
+            $(#[$meta:meta])+
+                $type: ident => $cmd: expr,
+        )+
+    ) => {
+
+        #[derive(Clone, Copy, Debug)]
+        /// Reset Telemetry Variants
+        pub enum Type {
+            $(
+                $(#[$meta])+
+                    $type,
+            )+
+        }
+
+        /// Helper function storing telemetry command information
+        ///
+        /// # Arguments
+        ///
+        /// `telem_type` - `Type` of telemetry to return command for
+        pub fn command(reset_type: Type) -> Command {
+            Command {
+                cmd: match reset_type {
+                    $(Type::$type => $cmd,)+
+                },
+                data: vec![0x00],
+            }
+        }
+    }
+}
+
 /// Common Reset Telemetry Structure
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Data {
     /// Motherboard telemetry value
     pub motherboard: u8,
@@ -66,5 +110,59 @@ pub fn parse(data: &[u8]) -> EpsResult<Data> {
         })
     } else {
         throw!(EpsError::parsing_failure("Reset Telemetry"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_make_reset_telemetry() {
+        make_reset_telemetry!(
+            /// TestValue1
+            TestVal1 => 0x30,
+        );
+
+        assert_eq!(
+            command(Type::TestVal1),
+            Command {
+                cmd: 0x30,
+                data: vec![0x00],
+            }
+        );
+    }
+
+    #[test]
+    fn test_parse_motherboard() {
+        let input = vec![0x0, 0x1];
+        assert_eq!(
+            parse(&input),
+            Ok(Data {
+                motherboard: 1,
+                daughterboard: None
+            })
+        );
+    }
+
+    #[test]
+    fn test_parse_motherboard_daughterboard() {
+        let input = vec![0x0, 0x1, 0x0, 0x10];
+        assert_eq!(
+            parse(&input),
+            Ok(Data {
+                motherboard: 1,
+                daughterboard: Some(0x10)
+            })
+        );
+    }
+
+    #[test]
+    fn test_parse_bad_data() {
+        let input = vec![0x0, 0x1, 0x2, 0x3, 0x4, 0x4];
+        assert_eq!(
+            parse(&input),
+            Err(EpsError::parsing_failure("Reset Telemetry"))
+        );
     }
 }

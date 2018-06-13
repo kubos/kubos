@@ -41,7 +41,8 @@ impl Eps {
     ///
     /// The status bytes are designed to supply operational data about the I2C Node.
     pub fn get_board_status(&self) -> EpsResult<board_status::BoardStatus> {
-        board_status::parse(&self.connection
+        board_status::parse(&self
+            .connection
             .transfer(board_status::command(), Duration::from_millis(2))?)
     }
 
@@ -51,7 +52,8 @@ impl Eps {
     /// to generate a checksum. The value retrieved can be used to determine whether
     /// the contents of the ROM have changed during the operation of the device.
     pub fn get_checksum(&self) -> EpsResult<checksum::Checksum> {
-        checksum::parse(&self.connection
+        checksum::parse(&self
+            .connection
             .transfer(checksum::command(), Duration::from_millis(50))?)
     }
 
@@ -61,7 +63,8 @@ impl Eps {
     /// The revision number returns the current revision of the firmware that is
     /// present on the board. The firmware number returns the current firmware on the board.
     pub fn get_version_info(&self) -> EpsResult<version::VersionInfo> {
-        version::parse(&self.connection
+        version::parse(&self
+            .connection
             .transfer(version::command(), Duration::from_millis(2))?)
     }
 
@@ -70,7 +73,8 @@ impl Eps {
     /// If an error has been generated after attempting to execute a user's command,
     /// this command can be used to retrieve details about the error.
     pub fn get_last_error(&self) -> EpsResult<last_error::LastError> {
-        last_error::parse(&self.connection
+        last_error::parse(&self
+            .connection
             .transfer(last_error::command(), Duration::from_millis(2))?)
     }
 
