@@ -107,7 +107,7 @@ pub fn get_adc_result(data: &[u8]) -> EpsResult<f32> {
     // The first two contain the actual response and
     // the second two are 0s
     if data.len() < 2 {
-        throw!(EpsError::invalid_data(data))
+        throw!(EpsError::parsing_failure("ADC Result"))
     } else {
         Ok(f32::from(
             u16::from(data[0]) | (u16::from(data[1]) & 0xF) << 8,

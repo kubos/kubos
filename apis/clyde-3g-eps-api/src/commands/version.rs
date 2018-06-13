@@ -36,11 +36,11 @@ pub struct VersionInfo {
 }
 
 fn get_firmware(num1: u8, num2: u8) -> u16 {
-    u16::from(num1) | (u16::from(num2) & 0xF) << 8
+    u16::from(num1) << 4 | (u16::from(num2) & 0xF0) >> 4
 }
 
 fn get_revision(num: u8) -> u8 {
-    (num & 0xF0) >> 4
+    (num & 0xF)
 }
 
 pub fn parse(data: &[u8]) -> EpsResult<VersionInfo> {
@@ -64,7 +64,7 @@ pub fn parse(data: &[u8]) -> EpsResult<VersionInfo> {
             }),
         })
     } else {
-        throw!(EpsError::invalid_data(data))
+        throw!(EpsError::parsing_failure("Version Info"))
     }
 }
 
@@ -84,12 +84,12 @@ mod tests {
         assert_eq!(
             VersionInfo {
                 motherboard: Version {
-                    revision: 12,
-                    firmware_number: 2152,
+                    revision: 0xD,
+                    firmware_number: 0xABC,
                 },
                 daughterboard: None,
             },
-            parse(&vec![0x68, 0xC8]).unwrap()
+            parse(&vec![0xAB, 0xCD]).unwrap()
         )
     }
 
@@ -98,24 +98,22 @@ mod tests {
         assert_eq!(
             VersionInfo {
                 motherboard: Version {
-                    revision: 12,
-                    firmware_number: 2152,
+                    revision: 0xD,
+                    firmware_number: 0xABC,
                 },
                 daughterboard: Some(Version {
-                    revision: 15,
-                    firmware_number: 100,
+                    revision: 0x4,
+                    firmware_number: 0x123,
                 }),
             },
-            parse(&vec![0x64, 0xF0, 0x68, 0xC8]).unwrap()
+            parse(&vec![0x12, 0x34, 0xAB, 0xCD]).unwrap()
         );
     }
 
     #[test]
     fn test_parse_one() {
         assert_eq!(
-            EpsError::InvalidData {
-                data: String::from("\u{0}"),
-            },
+            EpsError::parsing_failure("Version Info"),
             parse(&vec![0x0]).err().unwrap()
         )
     }
@@ -123,9 +121,7 @@ mod tests {
     #[test]
     fn test_parse_three() {
         assert_eq!(
-            EpsError::InvalidData {
-                data: String::from("\u{0}\u{1}\u{3}"),
-            },
+            EpsError::parsing_failure("Version Info"),
             parse(&vec![0x0, 0x1, 0x3]).err().unwrap()
         )
     }

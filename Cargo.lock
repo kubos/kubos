@@ -81,6 +81,7 @@ dependencies = [
  "bitflags 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "eps-api 0.1.0",
  "failure 1.0.0 (git+https://github.com/rust-lang-nursery/failure)",
+ "nom 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-i2c 0.1.0",
 ]
 

@@ -15,7 +15,7 @@
  */
 
 // #![deny(missing_docs)]
-#![deny(warnings)]
+// #![deny(warnings)]
 
 //! Low level interface for interacting with a ClydeSpace 3G EPS
 
@@ -24,6 +24,7 @@ extern crate bitflags;
 extern crate eps_api;
 #[macro_use]
 extern crate failure;
+extern crate nom;
 extern crate rust_i2c;
 
 mod commands;

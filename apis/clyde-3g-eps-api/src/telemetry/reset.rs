@@ -65,6 +65,6 @@ pub fn parse(data: &[u8]) -> EpsResult<Data> {
             daughterboard: Some(data[3]),
         })
     } else {
-        throw!(EpsError::invalid_data(data))
+        throw!(EpsError::parsing_failure("Reset Telemetry"))
     }
 }
