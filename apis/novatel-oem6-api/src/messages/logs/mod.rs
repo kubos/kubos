@@ -36,17 +36,26 @@ pub enum Log {
 
 impl Log {
     /// Convert a raw data buffer into a useable struct
-    pub fn new(id: MessageID, raw: Vec<u8>) -> Option<Log> {
+    pub fn new(
+        id: MessageID,
+        recv_status: ReceiverStatusFlags,
+        time_status: u8,
+        week: u16,
+        ms: i32,
+        raw: Vec<u8>,
+    ) -> Option<Log> {
         match id {
-            MessageID::BestXYZ => match BestXYZLog::new(raw) {
+            MessageID::BestXYZ => match BestXYZLog::new(recv_status, time_status, week, ms, raw) {
                 Some(log) => Some(Log::BestXYZ(log)),
                 _ => None,
             },
-            MessageID::RxStatusEvent => match RxStatusEventLog::new(raw) {
-                Some(log) => Some(Log::RxStatusEvent(log)),
-                _ => None,
-            },
-            MessageID::Version => match VersionLog::new(raw) {
+            MessageID::RxStatusEvent => {
+                match RxStatusEventLog::new(recv_status, time_status, week, ms, raw) {
+                    Some(log) => Some(Log::RxStatusEvent(log)),
+                    _ => None,
+                }
+            }
+            MessageID::Version => match VersionLog::new(recv_status, time_status, week, ms, raw) {
                 Some(log) => Some(Log::Version(log)),
                 _ => None,
             },
