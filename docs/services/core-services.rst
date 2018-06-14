@@ -5,7 +5,11 @@ The core services are all the services that provide critical flight software cap
 
 Upcoming services are:
 
- - Telmetry Database Service
+ - |telem-db|
  - Communication Service
  - Shell Service
  - File Service
+ 
+ .. |telem-db| raw:: html
+ 
+    <a href="../rust-docs/telemetry_service/index.html" target="_blank">Telemetry Database Service</a>
