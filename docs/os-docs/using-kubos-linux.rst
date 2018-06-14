@@ -590,3 +590,16 @@ endpoint directory is desired, the files will need to be manually moved.
 
 All user-application initialization scripts live under this directory.
 The naming format is 'S{run-level}{application}'.
+
+Resetting the Boot Environment
+------------------------------
+
+.. note::
+
+    This is a case which normal users should never encounter, but becomes more likely when initially testing custom Kubos Linux builds.
+    Due to the blocking nature of the behavior, this information has been included in this doc in order to make it more prominent.
+
+If the system goes through the :doc:`full recovery process <kubos-linux-recovery>` and the bootcount is still exceeded,
+it will present the U-Boot CLI instead of attempting to boot into Kubos Linux again.
+
+If this occurs, follow the :ref:`instructions for resetting the boot environment <env-reset>`.

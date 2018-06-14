@@ -130,6 +130,25 @@ only. Change the project file permissions to allow the local ``vagrant`` user to
 Interacting with an OBC
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+Can't Connect via SSH
+^^^^^^^^^^^^^^^^^^^^^
+
+Log in to the board via the debug UART and verify the IP address matches what is expected with ``ipaddr``.
+
+For more information, check out our documentation about :ref:`ethernet connections <ethernet>`.
+
+System Won't Boot into Linux
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If the system goes through the :doc:`full recovery process <os-docs/kubos-linux-recovery>` and the bootcount is still exceeded,
+it will present the U-Boot CLI instead of attempting to boot into Kubos Linux again.
+
+If this occurs, follow the :ref:`instructions for resetting the boot environment <env-reset>`.
+
+Note: This is a case which normal users should never encounter, but becomes more likely when initially testing
+custom Kubos Linux builds.
+
+
 I transferred a script, but it won't run
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
