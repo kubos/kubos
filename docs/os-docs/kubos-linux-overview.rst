@@ -334,6 +334,8 @@ here, some basic troubleshooting and debugging abilities should be available.
 More information about the recovery process and architecture can be found in the
 :doc:`Kubos Linux Recovery doc <kubos-linux-recovery>`
 
+.. _env-reset:
+
 Resetting the Environment
 -------------------------
 
