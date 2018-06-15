@@ -98,3 +98,11 @@ Once these changes have been made, you can run ``sudo make menuconfig`` in order
 Once selected, you can run ``sudo make`` to do a full build, or ``sudo make {your-package}`` in order to test building only your package.
 
 If you make changes to your package, you can run ``sudo make {your-package}-rebuild`` in order to recompile it.
+
+Configuring Services
+--------------------
+
+The Kubos service system relies on a configuration file in `/home/system/etc/config.toml` in order to know which IP ports should be used for which service.
+This file is included in Kubos Linux from `kubos-linux-build/common/overlay/home/system/etc/config.toml`.
+
+Users may edit it prior to building their Linux image in order to add/remove/update service configurations.
