@@ -488,23 +488,6 @@ Hardware
     :property string alt: `(STM32F4* only)` GPIO alternate function mapping
     :options alt: GPIO_AFx_I2Cy
 
-CSP
-###
-
-.. json:object:: csp
-
-    Kubos CSP (Cubesat Space Protocol) configuration
-    
-    :property boolean debug: Turn on CSP debug messages
-
-    **Example**::
-    
-        {
-            "csp": {
-                "debug": true
-            }
-        }
-
 module.json
 -----------
 

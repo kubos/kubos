@@ -113,7 +113,6 @@ breathe_projects = {
     "isis-trxvu-api": "../xml/apis/isis-trxvu-api",
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-linux" : "../xml/hal/kubos-hal-linux",
-    "libcsp" : "../xml/libcsp",
 }
 
 extensions += [
