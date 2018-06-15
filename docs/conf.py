@@ -16,9 +16,10 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../apis/pumpkin-mcu-api'))
+sys.path.insert(0, os.path.abspath('../hal/python-hal/i2c'))
 
 import sphinx_rtd_theme
 
@@ -117,6 +118,7 @@ breathe_projects = {
 
 extensions += [
     'breathe',
+    'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinxjsondomain',
