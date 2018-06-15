@@ -1,7 +1,0 @@
-# Example service configuration file
-
-# IP address for Flask to listen on
-APP_IP : "0.0.0.0"
-
-# Port number for Flask to listen on
-APP_PORT : 5000
