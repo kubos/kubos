@@ -17,7 +17,7 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-//! I2c device connection abstractions
+//! I2C device connection abstractions
 
 extern crate i2c_linux;
 
@@ -28,7 +28,7 @@ use std::time::Duration;
 
 /// High level read/write trait for I2C connections to implement
 pub trait Stream {
-    /// Writes an I2c command
+    /// Writes an I2C command
     ///
     /// # Arguments
     ///
@@ -42,7 +42,7 @@ pub trait Stream {
     /// `command` - Command to read result from
     fn read(&self, command: Command) -> Result<Vec<u8>>;
 
-    /// Writes I2c command and reads result
+    /// Writes I2C command and reads result
     ///
     /// # Arguments
     ///
@@ -52,7 +52,7 @@ pub trait Stream {
 }
 
 /// An implementation of `i2c_hal::Stream` which uses the `i2c_linux` crate
-/// for communication with actual I2c hardware.
+/// for communication with actual I2C hardware.
 pub struct I2cStream {
     path: String,
     slave: u16,
@@ -63,7 +63,7 @@ impl I2cStream {
     ///
     /// # Arguments
     ///
-    /// `path` - File system path to I2c device handle
+    /// `path` - File system path to I2C device handle
     /// `slave` - Address of slave I2c device
     pub fn new(path: &str, slave: u16) -> Self {
         Self {

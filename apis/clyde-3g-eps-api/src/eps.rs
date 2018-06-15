@@ -32,7 +32,9 @@ impl Eps {
     /// Creates new instance of Eps structure.
     ///
     /// # Arguments
-    /// - connection - A `Box<Stream>` used as low-level connection to EPS hardware
+    /// `connection` - A [`Connection`] used as low-level connection to EPS hardware
+    ///
+    /// [`Connection`]: ../rust_i2c/struct.Connection.html
     pub fn new(connection: Connection) -> Self {
         Eps { connection }
     }
@@ -105,7 +107,9 @@ impl Eps {
     /// telemetry node.
     ///
     /// # Arguments
-    /// `telem_type` - Variant of `telemetry::motherboard::Type` to request
+    /// `telem_type` - Variant of [`MotherboardTelemetry::Type`] to request
+    ///
+    /// [`MotherboardTelemetry::Type`]: ./MotherboardTelemetry/enum.Type.html
     pub fn get_motherboard_telemetry(
         &self,
         telem_type: telemetry::motherboard::Type,
@@ -125,7 +129,9 @@ impl Eps {
     /// telemetry node.
     ///
     /// # Arguments
-    /// `telem_type` - Variant of `telemetry::daughterboard::Type` to request
+    /// `telem_type` - Variant of [`DaughterboardTelemetry::Type`] to request
+    ///
+    /// [`DaughterboardTelemetry::Type`]: ./DaughterboardTelemetry/enum.Type.html
     pub fn get_daughterboard_telemetry(
         &self,
         telem_type: telemetry::daughterboard::Type,
@@ -145,7 +151,9 @@ impl Eps {
     /// reset conditions on both the motherboard and daughterboard.
     ///
     /// # Arguments
-    /// `telem_type` - Variant of `telemetry::daughterboard::ResetType` to request
+    /// `telem_type` - Variant of [`ResetTelemetry::Type`] to request
+    ///
+    /// [`ResetTelemetry::Type`]: ./ResetTelemetry/enum.Type.html
     pub fn get_reset_telemetry(
         &self,
         telem_type: telemetry::reset::Type,
@@ -166,7 +174,7 @@ impl Eps {
     /// communications watchdog will wait before timing out.
     ///
     /// # Arguments
-    /// 'period' - Watchdog period to set in minutes
+    /// `period` - Watchdog period to set in minutes
     pub fn set_comms_watchdog_period(&self, period: u8) -> EpsResult<()> {
         self.connection
             .write(set_comms_watchdog_period::command(period))?;

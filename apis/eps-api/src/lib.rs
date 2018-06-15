@@ -16,10 +16,10 @@
 
 #![deny(missing_docs)]
 
-//! High level Eps API functions
+//! High level EPS API functions
 //!
 //! This crate contains high level types and functions for use
-//! by other crates implementing Eps APIs.
+//! by other crates implementing EPS APIs.
 
 #[macro_use]
 extern crate failure;
@@ -29,7 +29,7 @@ use std::io;
 
 /// EpsError
 ///
-/// Describes various errors which may result from using Eps APIs
+/// Describes various errors which may result from using EPS APIs
 #[derive(Debug, Display, Eq, Fail, PartialEq)]
 #[display(fmt = "Eps Error")]
 pub enum EpsError {
@@ -41,16 +41,16 @@ pub enum EpsError {
         /// Error description
         description: String,
     },
-    /// Error resulting from receiving invalid data from Eps
+    /// Error resulting from receiving invalid data from EPS
     #[display(fmt = "Parsing failed: {}", source)]
     ParsingFailure {
         /// Source where invalid data was received
         source: String,
     },
-    /// Error resulting from a failure with an Eps command
+    /// Error resulting from a failure with an EPS command
     #[display(fmt = "Failure in Eps command: {}", command)]
     CommandFailure {
-        /// Eps command which failed
+        /// EPS command which failed
         command: String,
     },
 }
@@ -77,5 +77,5 @@ impl From<io::Error> for EpsError {
     }
 }
 
-/// Universal return type for Eps api functions
+/// Universal return type for EPS api functions
 pub type EpsResult<T> = Result<T, EpsError>;
