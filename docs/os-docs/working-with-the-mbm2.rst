@@ -127,6 +127,7 @@ Other protocols might be supported by default, but have not been verified.
 Resources
 ^^^^^^^^^
 
+- :ref:`Kubos Ethernet Communication Guide <ethernet>` 
 - `TCP tutorial <http://www.linuxhowtos.org/C_C++/socket.htm>`__
 - `UDP tutorial <https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html>`__
 - `SCTP tutorial <http://petanode.com/blog/posts/introduction-to-the-sctp-socket-api-in-linux.html>`__
