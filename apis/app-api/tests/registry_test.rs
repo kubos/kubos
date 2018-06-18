@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#![deny(warnings)]
 extern crate kubos_app;
 extern crate toml;
 
 use std::env;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use kubos_app::registry::*;
 
@@ -54,7 +55,7 @@ fn invalid_apps_dir_empty_reg() {
 
 #[test]
 fn empty_apps_dir_empty_reg() {
-    let mut registry_dir = setup_registry();
+    let registry_dir = setup_registry();
 
     let registry = AppRegistry::new_from_dir(registry_dir.to_str().unwrap());
     assert_eq!(registry.entries.borrow().len(), 0);

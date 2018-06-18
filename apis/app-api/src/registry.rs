@@ -68,22 +68,11 @@ pub struct App {
     pub metadata: AppMetadata,
 }
 
-#[derive(Debug,Deserialize,Serialize)]
+#[derive(Clone,Debug,Deserialize,Serialize)]
 pub struct AppRegistryEntry {
     pub active: bool,
     pub run_level: RunLevel,
     pub app: App,
-}
-
-
-impl Clone for AppRegistryEntry {
-    fn clone(&self) -> AppRegistryEntry {
-        AppRegistryEntry {
-            app: self.app.clone(),
-            active: self.active,
-            run_level: self.run_level.clone()
-        }
-    }
 }
 
 impl AppRegistryEntry {
@@ -93,14 +82,19 @@ impl AppRegistryEntry {
             return None;
         }
 
-        let mut f = fs::File::open(app_toml).unwrap();
-        let mut buffer = String::new();
-        if let Ok(_) = f.read_to_string(&mut buffer) {
-            if let Ok(entry) = toml::from_str::<AppRegistryEntry>(&buffer) {
-                return Some(entry);
-            }
+        match fs::File::open(app_toml) {
+            Ok(mut f) => {
+                let mut buffer = String::new();
+                match f.read_to_string(&mut buffer) {
+                    Ok(_) => match toml::from_str::<AppRegistryEntry>(&buffer) {
+                        Ok(entry) => Some(entry),
+                        Err(_) => None
+                    },
+                    Err(_) => None
+                }
+            },
+            Err(_) => None
         }
-        return None;
     }
 
     pub fn save(&self) -> Result<bool, String> {
@@ -167,17 +161,26 @@ impl AppRegistry {
         let mut reg_entries: Vec<AppRegistryEntry> = Vec::new();
         if let Ok(versions) = fs::read_dir(app_dir) {
             for version in versions {
-                if let Ok(version) = version {
-                    if let Ok(v_file_type) = version.file_type() {
+                if version.is_err() {
+                    continue;
+                }
+
+                let version = version.unwrap();
+                match version.file_type() {
+                    Ok(v_file_type) => {
                         if v_file_type.is_dir() {
                             let v_path = version.path();
-                            let version_path = v_path.to_str().expect("invalid version path");
+                            let version_path = match v_path.to_str() {
+                                Some(v) => v,
+                                None => continue
+                            };
 
                             if let Some(entry) = AppRegistryEntry::from_dir(version_path) {
                                 reg_entries.push(entry);
                             }
                         }
-                    }
+                    },
+                    Err(_) => continue
                 }
             }
         }
@@ -190,11 +193,12 @@ impl AppRegistry {
             return Err(format!("{} does not exist", path));
         }
 
-        let app_metadata = Command::new(path)
-                                   .args(&["--metadata"])
-                                   .output()
-                                   .expect("Failed to get app metadata");
+        let result = Command::new(path).args(&["--metadata"]).output();
+        if result.is_err() {
+            return Err(format!("Failed to get app metadata: {}", result.err().unwrap()));
+        }
 
+        let app_metadata = result.unwrap();
         if !app_metadata.status.success() {
             return Err("Bad exit code getting app metadata".to_string());
         }
@@ -222,7 +226,10 @@ impl AppRegistry {
             }
         }
 
-        assert!(apps_dir.exists());
+        if !apps_dir.exists() {
+            return Err(format!("Couldn't create app dir: {}", apps_dir.display()));
+        }
+
         let app_dir_path = format!("{}/{}/{}", self.apps_dir, app_uuid_str,
                                    metadata.version.as_str());
         let app_dir = Path::new(&app_dir_path);
@@ -234,51 +241,56 @@ impl AppRegistry {
             }
         }
 
-        let app_filename = app_path.file_name().expect("couldn't get app filename");
+        match app_path.file_name() {
+            Some(app_filename) => {
+                match fs::copy(path, app_dir.join(Path::new(app_filename))) {
+                    Err(err) => { return Err(format!("Couldn't copy app binary: {:?}", err)); },
+                    Ok(_) => {}
+                }
 
-        match fs::copy(path, app_dir.join(Path::new(app_filename))) {
-            Err(err) => { return Err(format!("Couldn't copy app binary: {:?}", err)); },
-            Ok(_) => {}
-        }
+                let active_dir = PathBuf::from(format!("{}/active", self.apps_dir));
+                if !active_dir.exists() {
+                    match fs::create_dir_all(active_dir.clone()) {
+                        Err(err) => { return Err(format!("Couldn't create 'active' dir {}: {:?}", active_dir.display(), err)); },
+                        Ok(_) => {}
+                    }
+                }
 
-        let active_dir = PathBuf::from(format!("{}/active", self.apps_dir));
-        if !active_dir.exists() {
-            match fs::create_dir_all(active_dir.clone()) {
-                Err(err) => { return Err(format!("Couldn't create 'active' dir {}: {:?}", active_dir.display(), err)); },
-                Ok(_) => {}
-            }
-        }
+                let active_symlink = active_dir.join(app_uuid_str.clone());
 
-        let active_symlink = active_dir.join(app_uuid_str.clone());
+                if active_symlink.exists() {
+                    match fs::remove_file(active_symlink.clone()) {
+                        Err(err) => { return Err(format!("Couldn't remove symlink {}: {:?}", active_symlink.display(), err)); },
+                        Ok(_) => {}
+                    }
+                }
 
-        if active_symlink.exists() {
-            match fs::remove_file(active_symlink.clone()) {
-                Err(err) => { return Err(format!("Couldn't remove symlink {}: {:?}", active_symlink.display(), err)); },
-                Ok(_) => {}
-            }
-        }
+                match unix::fs::symlink(app_dir.to_str().expect("invalid app dir"),
+                                        active_symlink.clone())
+                {
+                    Err(err) => { return Err(format!("Couldn't symlink {} to {}: {:?}", active_symlink.display(), app_dir.display(), err)); },
+                    Ok(_) => {}
+                }
 
-        match unix::fs::symlink(app_dir.to_str().expect("invalid app dir"),
-                                active_symlink.clone())
-        {
-            Err(err) => { return Err(format!("Couldn't symlink {} to {}: {:?}", active_symlink.display(), app_dir.display(), err)); },
-            Ok(_) => {}
-        }
+                let reg_entry = AppRegistryEntry {
+                    app: App {
+                        uuid: app_uuid_str.to_string(),
+                        metadata: metadata,
+                        pid: 0,
+                        path: app_dir.join(Path::new(app_filename)).to_str().expect("invalid app dir").to_string(),
+                    },
+                    active: true,
+                    run_level: RunLevel::OnCommand
+                };
 
-        let reg_entry = AppRegistryEntry {
-            app: App {
-                uuid: app_uuid_str.to_string(),
-                metadata: metadata,
-                pid: 0,
-                path: app_dir.join(Path::new(app_filename)).to_str().expect("invalid app dir").to_string(),
+                entries.push(reg_entry);
+                entries[entries.len() - 1].save()?;
+                Ok(entries[entries.len() - 1].clone())
             },
-            active: true,
-            run_level: RunLevel::OnCommand
-        };
-
-        entries.push(reg_entry);
-        entries[entries.len() - 1].save()?;
-        Ok(entries[entries.len() - 1].clone())
+            None => {
+                return Err(String::from("Couldn't get app filename"));
+            }
+        }
     }
 
     pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, String>

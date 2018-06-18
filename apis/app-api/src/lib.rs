@@ -35,36 +35,12 @@ use getopts::Options;
 pub mod registry;
 use self::registry::*;
 
-/// SystemState
-#[allow(dead_code)]
-pub struct SystemState {
-    initial_deploy: bool,
-    detumble: bool,
-    over_station: bool,
-    reboot: bool,
-    sys_update: bool
-}
-
 pub type App = registry::App;
 pub type RunLevel = registry::RunLevel;
-
-#[allow(dead_code)]
-pub struct Timer {
-    id: u32,
-    label: String,
-    executed: bool,
-    when: u32,
-    rel_system_time: u32,
-    app_uuid: String
-}
 
 /// AppHandler
 #[allow(unused_variables)]
 pub trait AppHandler {
-    /// Timer fired
-    fn on_timer(&self, timer: &Timer) {
-    }
-
     ///
     fn on_boot(&self) {
     }
@@ -99,8 +75,8 @@ impl App {
         let program = args[0].clone();
 
         let mut opts = Options::new();
-        opts.optflag("M", "metadata", "print app metadata and immediately exit");
-        opts.optflag("h", "help", "print this help menu");
+        opts.optflag("m", "metadata", "Print app metadata and immediately exit");
+        opts.optflag("h", "help", "Print this help menu");
 
         let matches = match opts.parse(&args[1..]) {
             Ok(m) => m,
