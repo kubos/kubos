@@ -4,8 +4,10 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 
 [dependencies]
+getopts = "0.2"
 nix = "0.10.0"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0.10"
 toml = "0.4"
+kubos-service = { path = "../../services/kubos-service" }

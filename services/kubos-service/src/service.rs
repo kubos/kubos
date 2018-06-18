@@ -15,11 +15,12 @@
 //
 
 use std::collections::HashMap;
-use std::net::{SocketAddr, UdpSocket};
+use std::net::SocketAddr;
 use std::cell::RefCell;
 use serde_json;
 use config::Config;
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
+use kiss::{FrameHandler, KissUdpSocket};
 
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.
@@ -107,6 +108,22 @@ where
     context: Context<S>,
 }
 
+impl<'a, Query, Mutation, S> FrameHandler for Service<'a, Query, Mutation, S>
+where
+    Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+    Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+{
+    fn handle_frame(&self, socket: &KissUdpSocket, frame: &[u8], src_addr: SocketAddr) {
+        if let Ok(query_string) = String::from_utf8(frame.to_vec()) {
+            // Go process the request
+            let res = self.process(query_string);
+            if let Err(err) = socket.send_to(&res.as_bytes(), src_addr) {
+                eprintln!("{}", err);
+            }
+        }
+    }
+}
+
 impl<'a, Query, Mutation, S> Service<'a, Query, Mutation, S>
 where
     Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
@@ -140,27 +157,8 @@ where
     /// cannot be bound (like if they are already in use).
     pub fn start(&self) {
         let addr = self.config.hosturl().parse::<SocketAddr>().unwrap();
-
-        let socket = UdpSocket::bind(&addr).unwrap();
-        println!("Listening on: {}", socket.local_addr().unwrap());
-
-        let mut buf = [0; 4096];
-        loop {
-            // Wait for an incoming message
-            let (size, peer) = socket.recv_from(&mut buf).expect("failed to peek");
-            if let Ok(query_string) = String::from_utf8(buf[0..(size)].to_vec()) {
-                println!("[{}] <- [{}] {}", peer,
-                         socket.local_addr().unwrap(), &query_string);
-
-                // Go process the request
-                let res = self.process(query_string);
-
-                // And then send the response back
-                let _amt = socket.send_to(&res.as_bytes(), &peer);
-                println!("[{}] -> [{}] {}", socket.local_addr().unwrap(),
-                         peer, &res);
-            }
-        }
+        let socket = KissUdpSocket::bind(addr, self).unwrap();
+        socket.recv_loop();
     }
 
     /// Processes a GraphQL query

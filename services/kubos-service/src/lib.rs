@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#![deny(missing_docs)]
-#![deny(warnings)]
+//#![deny(missing_docs)]
+//#![deny(warnings)]
 
 //! A collection of structures and functions used to create hardware services
 //! in the Kubos Linux ecosystem.
@@ -110,8 +110,6 @@
 extern crate failure;
 extern crate getopts;
 extern crate juniper;
-//#[macro_use]
-//extern crate nix;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -122,6 +120,8 @@ extern crate toml;
 mod config;
 mod macros;
 mod service;
+mod kiss;
 
 pub use config::Config;
 pub use service::{Context, Service};
+pub use kiss::{FrameHandler, KissUdpSocket};
