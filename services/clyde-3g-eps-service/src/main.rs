@@ -83,7 +83,7 @@
 extern crate clyde_3g_eps_api;
 extern crate eps_api;
 extern crate failure;
-extern crate i2c_hal;
+extern crate rust_i2c;
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// #![deny(missing_docs)]
+#![deny(missing_docs)]
 #![deny(warnings)]
 
 //! Low level interface for interacting with a ClydeSpace 3G EPS
@@ -24,7 +24,8 @@ extern crate bitflags;
 extern crate eps_api;
 #[macro_use]
 extern crate failure;
-extern crate i2c_hal;
+extern crate nom;
+extern crate rust_i2c;
 
 mod commands;
 mod eps;

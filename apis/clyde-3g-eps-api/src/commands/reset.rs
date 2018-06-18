@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use i2c_hal::Command;
+use rust_i2c::Command;
 
 /// Sends a reset command to the EPS TTC node
 ///

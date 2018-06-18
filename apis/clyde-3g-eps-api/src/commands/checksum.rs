@@ -15,7 +15,8 @@
  */
 
 use eps_api::{EpsError, EpsResult};
-use i2c_hal::Command;
+use nom::le_u16;
+use rust_i2c::Command;
 
 /// Checksum
 ///
@@ -40,24 +41,26 @@ impl Default for Checksum {
     }
 }
 
-fn parse_checksum(data1: u8, data2: u8) -> u16 {
-    u16::from(data1) | (u16::from(data2) << 8)
+fn parse_checksum(data: &[u8]) -> EpsResult<u16> {
+    match le_u16(data) {
+        Ok((_rem, res)) => Ok(res),
+        Err(_) => Err(EpsError::parsing_failure("Checksum")),
+    }
 }
 
 pub fn parse(data: &[u8]) -> EpsResult<Checksum> {
-    println!("Checksum {:?}", data);
     if data.len() == 4 {
         Ok(Checksum {
-            motherboard: parse_checksum(data[2], data[3]),
-            daughterboard: Some(parse_checksum(data[0], data[1])),
+            motherboard: parse_checksum(&data[2..])?,
+            daughterboard: Some(parse_checksum(data)?),
         })
     } else if data.len() == 2 {
         Ok(Checksum {
-            motherboard: parse_checksum(data[0], data[1]),
+            motherboard: parse_checksum(data)?,
             daughterboard: None,
         })
     } else {
-        throw!(EpsError::invalid_data(data))
+        throw!(EpsError::parsing_failure("Checksum"))
     }
 }
 
@@ -73,33 +76,31 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_motherboard_version() {
+    fn test_parse_motherboard_checksum() {
         assert_eq!(
             Checksum {
-                motherboard: 0b1010010110100101,
+                motherboard: 0xCDAB,
                 daughterboard: None,
             },
-            parse(&vec![0b10100101, 0b10100101]).unwrap()
+            parse(&vec![0xAB, 0xCD]).unwrap()
         );
     }
 
     #[test]
-    fn test_parse_both_versions() {
+    fn test_parse_both_checksum() {
         assert_eq!(
             Checksum {
-                motherboard: 3084,
-                daughterboard: Some(771),
+                motherboard: 0x3412,
+                daughterboard: Some(0xCDAB),
             },
-            parse(&vec![0b0011, 0b0011, 0b1100, 0b1100]).unwrap()
+            parse(&vec![0xAB, 0xCD, 0x12, 0x34]).unwrap()
         );
     }
 
     #[test]
     fn test_parse_one_byte() {
         assert_eq!(
-            EpsError::InvalidData {
-                data: String::from("\u{0}"),
-            },
+            EpsError::parsing_failure("Checksum"),
             parse(&vec![0]).err().unwrap()
         );
     }
@@ -107,9 +108,7 @@ mod tests {
     #[test]
     fn test_parse_three_bytes() {
         assert_eq!(
-            EpsError::InvalidData {
-                data: String::from("\u{1}\u{2}\u{3}"),
-            },
+            EpsError::parsing_failure("Checksum"),
             parse(&vec![1, 2, 3]).err().unwrap()
         );
     }

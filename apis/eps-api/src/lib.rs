@@ -16,62 +16,66 @@
 
 #![deny(missing_docs)]
 
-//! High level Eps API functions
+//! High level EPS API functions
 //!
 //! This crate contains high level types and functions for use
-//! by other crates implementing Eps APIs.
+//! by other crates implementing EPS APIs.
 
 #[macro_use]
 extern crate failure;
 
+use std::error::Error;
 use std::io;
 
 /// EpsError
 ///
-/// Describes various errors which may result from using Eps APIs
+/// Describes various errors which may result from using EPS APIs
 #[derive(Debug, Display, Eq, Fail, PartialEq)]
 #[display(fmt = "Eps Error")]
 pub enum EpsError {
     /// Error resulting from underlying Io functions
-    #[display(fmt = "IO Error: {}", cause)]
+    #[display(fmt = "IO Error: {}", description)]
     IoError {
         /// Underlying cause captured from io function
-        cause: String,
+        cause: std::io::ErrorKind,
+        /// Error description
+        description: String,
     },
-    /// Error resulting from receiving invalid data from Eps
-    #[display(fmt = "Received invalid data: {}", data)]
-    InvalidData {
-        /// Invalid data which was received
-        data: String,
+    /// Error resulting from receiving invalid data from EPS
+    #[display(fmt = "Parsing failed: {}", source)]
+    ParsingFailure {
+        /// Source where invalid data was received
+        source: String,
     },
-    /// Error resulting from a failure with an Eps command
+    /// Error resulting from a failure with an EPS command
     #[display(fmt = "Failure in Eps command: {}", command)]
     CommandFailure {
-        /// Eps command which failed
+        /// EPS command which failed
         command: String,
     },
 }
 
 impl EpsError {
-    /// Convience function for creating an EpsError::InvalidData
+    /// Convience function for creating an EpsError::ParsingFailure
     ///
     /// # Arguments
-    /// - data - Byte array to store in data parameter of enum
-    pub fn invalid_data(data: &[u8]) -> EpsError {
-        EpsError::InvalidData {
-            data: String::from_utf8(data.to_vec()).unwrap(),
+    /// - source - Source of parsing failure
+    pub fn parsing_failure(source: &str) -> EpsError {
+        EpsError::ParsingFailure {
+            source: String::from(source),
         }
     }
 }
 
 /// Convience converter from io::Error to EpsError
 impl From<io::Error> for EpsError {
-    fn from(error: io::Error) -> Self {
+    fn from(error: std::io::Error) -> Self {
         EpsError::IoError {
-            cause: error.to_string(),
+            cause: error.kind(),
+            description: error.description().to_owned(),
         }
     }
 }
 
-/// Universal return type for Eps api functions
+/// Universal return type for EPS api functions
 pub type EpsResult<T> = Result<T, EpsError>;

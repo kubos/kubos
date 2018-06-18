@@ -15,7 +15,7 @@
  */
 
 use eps_api::{EpsError, EpsResult};
-use i2c_hal::Command;
+use rust_i2c::Command;
 
 /// Set Communications Watchdog Period
 ///
@@ -51,7 +51,7 @@ pub mod get_comms_watchdog_period {
         if data.len() == 2 {
             Ok(data[1])
         } else {
-            throw!(EpsError::invalid_data(data))
+            throw!(EpsError::parsing_failure("Comms Watchdog Period"))
         }
     }
 

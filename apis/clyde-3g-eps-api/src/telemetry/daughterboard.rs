@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+//! Daughterboard Telemetry
+//!
+//! This module provides the enum, commands and parsers necessary for working
+//! with telemetry from the EPS daughterboard.
+//!
+//! The macro `make_telemetry!` is responsibly for generating the enum `Type`, the
+//! `parse` function and the `command` function.
+
 use eps_api::EpsResult;
-use i2c_hal::Command;
+use rust_i2c::Command;
 use telemetry::lib::get_adc_result;
 
 const TELEM_CMD: u8 = 0x10;
 
-/// TODO - need to make these parsing functions generic and configurable
 make_telemetry!(
     /// VBCR4 - Voltage feeding BRC4 (V)
     VoltageFeedingBcr4 => {vec![0xE1, 0x40], |d| (0.032233143 * d) + 0.022840592},

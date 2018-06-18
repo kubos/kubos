@@ -17,8 +17,8 @@
 use clyde_3g_eps_api::Eps;
 use eps_api::EpsResult;
 use failure::Error;
-use i2c_hal::*;
 use models::*;
+use rust_i2c::*;
 use std::cell::{Cell, RefCell};
 use std::sync::{Arc, Mutex};
 use std::thread;

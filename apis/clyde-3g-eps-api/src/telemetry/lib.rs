@@ -65,49 +65,12 @@ macro_rules! make_telemetry {
     }
 }
 
-/// Macro for generating `ResetType` enum and `command` function
-/// for reset telemetry items.
-#[macro_export]
-macro_rules! make_reset_telemetry {
-    (
-        //$(#[$type: ident => $cmd: expr],)+
-        $(
-            $(#[$meta:meta])+
-            $type: ident => $cmd: expr,
-        )+
-    ) => {
-
-        #[derive(Clone, Copy, Debug)]
-        /// Reset Telemetry Variants
-        pub enum Type {
-            $(
-                $(#[$meta])+
-                $type,
-            )+
-        }
-
-        /// Helper function storing telemetry command information
-        ///
-        /// # Arguments
-        ///
-        /// `telem_type` - `Type` of telemetry to return command for
-        pub fn command(reset_type: Type) -> Command {
-            Command {
-                cmd: match reset_type {
-                    $(Type::$type => $cmd,)+
-                },
-                data: vec![0x00],
-            }
-        }
-    }
-}
-
 pub fn get_adc_result(data: &[u8]) -> EpsResult<f32> {
     // It appears the ADCS actually sends back 4 bytes
     // The first two contain the actual response and
     // the second two are 0s
     if data.len() < 2 {
-        throw!(EpsError::invalid_data(data))
+        throw!(EpsError::parsing_failure("ADC Result"))
     } else {
         Ok(f32::from(
             u16::from(data[0]) | (u16::from(data[1]) & 0xF) << 8,
@@ -121,9 +84,32 @@ mod tests {
 
     #[test]
     fn test_adcs_result() {
-        let raw = vec![3, 29, 0, 0];
+        let raw = vec![0xAB, 0xCD, 0x12, 0x34];
         let adc = get_adc_result(&raw).unwrap();
 
-        assert_eq!(adc, 3331.0);
+        assert_eq!(adc, 3499.0);
+    }
+
+    #[test]
+    fn test_make_telemetry() {
+        use rust_i2c::Command;
+        const TELEM_CMD: u8 = 0x00;
+
+        make_telemetry!(
+            /// TestValue1
+            TestVal1 => {vec![0xE1], |d| (10.0 * d) - 10.0},
+        );
+
+        assert_eq!(
+            command(Type::TestVal1),
+            Command {
+                cmd: TELEM_CMD,
+                data: vec![0xE1],
+            }
+        );
+        assert_eq!(
+            parse(&vec![0xAB, 0xCD, 0x0, 0x0], Type::TestVal1),
+            Ok(34980.0)
+        );
     }
 }

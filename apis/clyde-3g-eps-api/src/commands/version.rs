@@ -15,7 +15,7 @@
  */
 
 use eps_api::{EpsError, EpsResult};
-use i2c_hal::Command;
+use rust_i2c::Command;
 
 /// Version
 ///
@@ -23,15 +23,22 @@ use i2c_hal::Command;
 /// The revision number returns the current revision of the firmware that is
 /// present on the board. The firmware number returns the current firmware on the board.
 
+/// Structure containing board firmware versions
 #[derive(Debug, Eq, PartialEq)]
 pub struct Version {
+    /// Current firmware revision on board
     pub revision: u8,
+    /// Current firmware on board
     pub firmware_number: u16,
 }
 
+/// Structure containing version information for the EPS motherboard
+/// and daughterboard if present
 #[derive(Debug, Eq, PartialEq)]
 pub struct VersionInfo {
+    /// Motherboard version information
     pub motherboard: Version,
+    /// Optional daughterboard version information
     pub daughterboard: Option<Version>,
 }
 
@@ -64,7 +71,7 @@ pub fn parse(data: &[u8]) -> EpsResult<VersionInfo> {
             }),
         })
     } else {
-        throw!(EpsError::invalid_data(data))
+        throw!(EpsError::parsing_failure("Version Info"))
     }
 }
 
@@ -84,12 +91,12 @@ mod tests {
         assert_eq!(
             VersionInfo {
                 motherboard: Version {
-                    revision: 12,
-                    firmware_number: 2152,
+                    revision: 0xD,
+                    firmware_number: 0xCBA
                 },
                 daughterboard: None,
             },
-            parse(&vec![0x68, 0xC8]).unwrap()
+            parse(&vec![0xBA, 0xDC]).unwrap()
         )
     }
 
@@ -98,24 +105,22 @@ mod tests {
         assert_eq!(
             VersionInfo {
                 motherboard: Version {
-                    revision: 12,
-                    firmware_number: 2152,
+                    revision: 0xD,
+                    firmware_number: 0xCBA,
                 },
                 daughterboard: Some(Version {
-                    revision: 15,
-                    firmware_number: 100,
+                    revision: 0x4,
+                    firmware_number: 0x321,
                 }),
             },
-            parse(&vec![0x64, 0xF0, 0x68, 0xC8]).unwrap()
+            parse(&vec![0x21, 0x43, 0xBA, 0xDC]).unwrap()
         );
     }
 
     #[test]
     fn test_parse_one() {
         assert_eq!(
-            EpsError::InvalidData {
-                data: String::from("\u{0}"),
-            },
+            EpsError::parsing_failure("Version Info"),
             parse(&vec![0x0]).err().unwrap()
         )
     }
@@ -123,9 +128,7 @@ mod tests {
     #[test]
     fn test_parse_three() {
         assert_eq!(
-            EpsError::InvalidData {
-                data: String::from("\u{0}\u{1}\u{3}"),
-            },
+            EpsError::parsing_failure("Version Info"),
             parse(&vec![0x0, 0x1, 0x3]).err().unwrap()
         )
     }

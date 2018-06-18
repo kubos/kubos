@@ -9,4 +9,4 @@ eps-api = { path = "../../apis/eps-api" }
 failure = { git = "https://github.com/rust-lang-nursery/failure" }
 kubos-service = { path = "../kubos-service" }
 juniper =  "0.9"
-i2c-hal = { path = "../../hal/i2c-hal" }
+rust-i2c = { path = "../../hal/rust-hal/rust-i2c" }

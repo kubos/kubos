@@ -15,7 +15,7 @@
  */
 
 use eps_api::{EpsError, EpsResult};
-use i2c_hal::Command;
+use rust_i2c::Command;
 
 /// Last Error
 ///
@@ -68,7 +68,7 @@ pub fn parse(data: &[u8]) -> EpsResult<LastError> {
             daughterboard: ErrorCode::from_bits(data[3]),
         })
     } else {
-        throw!(EpsError::invalid_data(data))
+        throw!(EpsError::parsing_failure("Last Error"))
     }
 }
 
@@ -108,9 +108,7 @@ mod tests {
     #[test]
     fn test_parse_bad_data_len() {
         assert_eq!(
-            EpsError::InvalidData {
-                data: String::from(""),
-            },
+            EpsError::parsing_failure("Last Error"),
             parse(&vec![]).err().unwrap()
         );
     }

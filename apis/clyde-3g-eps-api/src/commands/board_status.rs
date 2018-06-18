@@ -15,12 +15,12 @@
  */
 
 use eps_api::{EpsError, EpsResult};
-use i2c_hal::Command;
+use rust_i2c::Command;
 
 /// Board Status
 ///
 /// The status bytes are designed to supply operational data about the I2C Node.
-/// To retrieve the data that represent the status, the command 0x01 should be
+/// To retrieve the data that represents the status, the command 0x01 should be
 /// sent followed by 0x00. The meaning of each bit of the returned status bytes
 /// is shown below. Please note that Data[3] is the first byte returned from the
 /// EPS and Data[0] is the last.
@@ -28,13 +28,13 @@ use i2c_hal::Command;
 bitflags! {
     #[derive(Default)]
     pub struct StatusCode: u8 {
-        const LAST_COMMAND_FAILED = 0b0000001;
-        const WATCHDOG_ERROR = 0b0000010;
-        const BAD_COMMAND_DATA = 0b0000100;
-        const BAD_COMMAND_CHANNEL = 0b0001000;
-        const ERROR_READING_EEPROM = 0b0010000;
-        const POWER_ON_RESET = 0b0100000;
-        const BROWN_OUT_RESET = 0b1000000;
+        const LAST_COMMAND_FAILED = 0b00000001;
+        const WATCHDOG_ERROR = 0b00000010;
+        const BAD_COMMAND_DATA = 0b00000100;
+        const BAD_COMMAND_CHANNEL = 0b00001000;
+        const ERROR_READING_EEPROM = 0b00010000;
+        const POWER_ON_RESET = 0b00100000;
+        const BROWN_OUT_RESET = 0b01000000;
     }
 }
 
@@ -56,7 +56,7 @@ pub fn parse(data: &[u8]) -> EpsResult<BoardStatus> {
             daughterboard: Some(StatusCode::from_bits(data[0]).unwrap_or_default()),
         })
     } else {
-        throw!(EpsError::invalid_data(data))
+        throw!(EpsError::parsing_failure("Board Status"))
     }
 }
 
