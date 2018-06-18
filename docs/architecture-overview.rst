@@ -47,7 +47,7 @@ Mission applications are anything that governs the behavior of the satellite.
 Some common examples are deployment, housekeeping, and telemetry beaconing.
 Basically anything that you want the satellite to do autonomously goes into this category.
 
-- :doc:`Mission Applications <what-is-a-mission-application>`
+- :doc:`Mission Applications <app-docs/index>`
 
 
 Typical Mission Architecture
@@ -120,7 +120,7 @@ Mission applications, as previously discussed, handle all the onboard decision m
 These are, by nature, mission specific, but some of them can be largely reused due to the abstract nature of the hardware integration.
 These are typically written or adapted by the user. 
 
- - :doc:`Mission Applications <what-is-a-mission-application>`
+ - :doc:`Mission Applications <app-docs/index>`
 
 
 Available Languages in KubOS
