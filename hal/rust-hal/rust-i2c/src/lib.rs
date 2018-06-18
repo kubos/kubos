@@ -53,18 +53,18 @@ pub trait Stream {
 
 /// An implementation of `i2c_hal::Stream` which uses the `i2c_linux` crate
 /// for communication with actual I2C hardware.
-pub struct I2cStream {
+pub struct I2CStream {
     path: String,
     slave: u16,
 }
 
-impl I2cStream {
-    /// Creates new I2cStream instance
+impl I2CStream {
+    /// Creates new I2CStream instance
     ///
     /// # Arguments
     ///
     /// `path` - File system path to I2C device handle
-    /// `slave` - Address of slave I2c device
+    /// `slave` - Address of slave I2C device
     pub fn new(path: &str, slave: u16) -> Self {
         Self {
             path: path.to_string(),
@@ -73,7 +73,7 @@ impl I2cStream {
     }
 }
 
-impl Stream for I2cStream {
+impl Stream for I2CStream {
     /// Writing
     fn write(&self, command: Command) -> Result<()> {
         let mut i2c = I2c::from_path(self.path.clone())?;
@@ -104,44 +104,44 @@ impl Stream for I2cStream {
     }
 }
 
-/// Struct for abstracting I2c command/data structure
+/// Struct for abstracting I2C command/data structure
 #[derive(Debug, Eq, PartialEq)]
 pub struct Command {
-    /// I2c command or registry
+    /// I2C command or registry
     pub cmd: u8,
     /// Data to write to registry
     pub data: Vec<u8>,
 }
 
-/// Struct for communicating with an I2c device
+/// Struct for communicating with an I2C device
 pub struct Connection {
     stream: Box<Stream>,
 }
 
 impl Connection {
-    /// I2c connection constructor
+    /// I2C connection constructor
     ///
     /// # Arguments
     ///
-    /// `path` - Path to I2c device
-    /// `slave` - I2c slave address to read/write to
+    /// `path` - Path to I2C device
+    /// `slave` - I2C slave address to read/write to
     pub fn new(stream: Box<Stream>) -> Self {
         Self { stream }
     }
 
-    /// Convenience constructor for creating a Connection with an I2cStream.
+    /// Convenience constructor for creating a Connection with an I2CStream.
     ///
     /// # Arguments
     ///
-    /// `path` - Path to I2c device
-    /// `slave` - I2c slave address
+    /// `path` - Path to I2C device
+    /// `slave` - I2C slave address
     pub fn from_path(path: &str, slave: u16) -> Self {
         Self {
-            stream: Box::new(I2cStream::new(path, slave)),
+            stream: Box::new(I2CStream::new(path, slave)),
         }
     }
 
-    /// Writes an I2c command
+    /// Writes an I2C command
     ///
     /// # Arguments
     ///
@@ -159,7 +159,7 @@ impl Connection {
         self.stream.read(command)
     }
 
-    /// Writes I2c command and reads result
+    /// Writes I2C command and reads result
     ///
     /// # Arguments
     ///
