@@ -59,7 +59,9 @@
 ///
 #[macro_export]
 macro_rules! process_errors {
-    ($err:ident) => (process_errors!($err, ", "));
+    ($err:ident) => {
+        process_errors!($err, ", ")
+    };
     ($err:ident, $delim:expr) => {{
         {
             let mut results = String::new();
@@ -100,10 +102,10 @@ macro_rules! process_errors {
 #[macro_export]
 macro_rules! push_err {
     ($master:expr, $err:expr) => {{
-            if let Ok(mut master_vec) = $master.try_borrow_mut() {
-                master_vec.push($err);
-            }
-        }}
+        if let Ok(mut master_vec) = $master.try_borrow_mut() {
+            master_vec.push($err);
+        }
+    }};
 }
 
 /// Execute a function and return `Result<func_data, String>`
@@ -165,8 +167,8 @@ macro_rules! push_err {
 #[macro_export]
 macro_rules! run {
     ($func:expr) => {{
-            $func.map_err(|err| process_errors!(err))
-        }};
+        $func.map_err(|err| process_errors!(err))
+    }};
     ($func:expr, $master:expr) => {{
         {
             let result = run!($func);
@@ -181,8 +183,17 @@ macro_rules! run {
                 // and then add the file and line number where said function was
                 // called from
                 let mut name = stringify!($func).split('(').next().unwrap();
-                name = name.split(&[':','.'][..]).last().unwrap();
-                push_err!($master, format!("{} ({}:{}): {}", name, file!(), line!(), result.clone().unwrap_err()));
+                name = name.split(&[':', '.'][..]).last().unwrap();
+                push_err!(
+                    $master,
+                    format!(
+                        "{} ({}:{}): {}",
+                        name,
+                        file!(),
+                        line!(),
+                        result.clone().unwrap_err()
+                    )
+                );
             }
 
             result

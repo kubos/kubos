@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use nom::*;
 use super::*;
+use nom::*;
 
 /// Log message containing position information
 #[derive(Clone, Default, Debug, PartialEq)]

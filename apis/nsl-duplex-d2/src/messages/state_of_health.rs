@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use nom::{IResult, be_u32, be_u8};
+use nom::{be_u32, be_u8, IResult};
 
 #[derive(Debug, PartialEq)]
 /// Struct for storing state of health records

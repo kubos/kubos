@@ -16,9 +16,9 @@
 
 extern crate isis_iobc_supervisor;
 
-use model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 use juniper::FieldResult;
 use kubos_service;
+use model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 
 type Context = kubos_service::Context<Supervisor>;
 

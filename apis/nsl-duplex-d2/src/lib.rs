@@ -27,12 +27,12 @@ extern crate serial;
 #[macro_use]
 extern crate nom;
 
-mod messages;
 mod duplex_d2;
+mod messages;
 mod serial_comm;
 
 pub use duplex_d2::DuplexD2;
-pub use serial_comm::serial_connection;
 pub use messages::File;
-pub use messages::StateOfHealth;
 pub use messages::GeoRecord;
+pub use messages::StateOfHealth;
+pub use serial_comm::serial_connection;

@@ -85,9 +85,9 @@ mod oem6;
 #[cfg(test)]
 mod tests;
 
-pub use messages::MessageID;
 pub use messages::commands::ResponseID;
 pub use messages::logs::*;
+pub use messages::MessageID;
 pub use messages::ReceiverStatusFlags;
 pub use oem6::*;
 pub use rust_uart::{mock, Connection, UartError};
