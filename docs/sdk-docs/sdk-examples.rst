@@ -7,8 +7,8 @@ as well as within the `/home/vagrant/.kubos/kubos/examples` folder of the Kubos 
 
 Each example project directory contains a `README.md` file which details the purpose of the example and how to use it.
 
-Setting Up a C Example Application
-----------------------------------
+Using a C Example Application
+-----------------------------
 
 Each of the example applications written in C contains the files necessary to run as an independent Kubos project. 
 
@@ -33,9 +33,9 @@ To use a Rust example, copy the example into the desired location, then run::
 .. note:: 
 
     While they ultimately resolve to the same underlying target, the target names for Cargo are not the same as the
-    target names used by ``kubos target``. For more information, see :ref:`info about Caro targets <TODO>`.
+    target names used by ``kubos target``. For more information, see :ref:`Rust SDK doc <rust-targets>`.
     
-From here, please refer to the :ref:`Rust project transfer instructions <TODO>` for information about how to transfer and run
+From here, please refer to the :ref:`Rust project transfer instructions <rust-transfer>` for information about how to transfer and run
 a Rust project.
 
 Using a Python Example Application

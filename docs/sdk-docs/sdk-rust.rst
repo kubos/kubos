@@ -73,6 +73,8 @@ The target name varies depending which command is used to compile the project.
 | Pumpkin MBM2     | arm-unknown-linux-gnueabihf   | kubos-linux-pumpkin-mbm2-gcc |
 +------------------+-------------------------------+------------------------------+
 
+.. _rust-transfer:
+
 Flashing
 --------
 
