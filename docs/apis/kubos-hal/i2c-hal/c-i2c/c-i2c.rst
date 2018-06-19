@@ -1,5 +1,11 @@
-Using I2C
-=========
+Using I2C in C
+==============
+
+.. toctree::
+    :maxdepth: 1
+    
+    I2C API <c-i2c-api>
+    Underlying Linux HAL <linux-i2c>
 
 Initialization
 --------------

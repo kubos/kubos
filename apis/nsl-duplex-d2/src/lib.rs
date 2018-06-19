@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-//! Device level API for interacting with the NSL EyeStar-D2 Duplex radio
-//! `<https://nearspacelaunch.com/product/eyestar-d2/>`
+//! Device level API for interacting with the
+//! [NSL EyeStar-D2 Duplex radio](https://nearspacelaunch.com/product/eyestar-d2/)
 
 #![deny(missing_docs)]
 
