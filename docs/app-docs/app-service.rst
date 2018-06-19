@@ -68,6 +68,8 @@ For example::
             }
         }
     }
+    
+.. _register-app:
 
 Registering
 -----------
@@ -75,7 +77,8 @@ Registering
 TODO: How to transfer app to stack. Can probably link to some other doc
 
 Once the application has been transfered to the OBC, users can register it with the applications service using
-the ``register(path: {path/to/app})`` mutation.
+the ``register`` mutation by specifying the directory containing the application binary and its corresponding
+:ref:`manifest file <app-manifest>`.
 
 The service will copy the application from the specified path into the apps registry.
 Once registered, users may delete the original application.
@@ -104,7 +107,11 @@ Upgrading
 
 Users may register a new version of an application without needing to remove the existing registration.
 
-To do this, they will use the ``register`` mutation with the optional ``uuid`` input parameter::
+To do this, they will use the ``register`` mutation with the optional ``uuid`` input parameter.
+An application's UUID is given as a return field of the ``register`` mutation and can also be looked up
+using the ``apps`` query.
+
+::
 
     mutation {
         register(path: /home/kubos/payload-app, uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a) {
@@ -129,13 +136,13 @@ Customizing the Applications Service
 The configuration for the applications service is saved in `/home/system/etc/config.toml`.
 This file can be editted to add or modify the following fields:
 
-- [app-service.addr]
+- ``[app-service.addr]``
 
-    - ip - The IP address that the service will use
-    - port - The UDP port GraphQL requests should be sent to
+    - ``ip`` - The IP address that the service will use
+    - ``port`` - The UDP port GraphQL requests should be sent to
     
-- [app-service]
+- ``[app-service]``
 
-    - registry-dir - *(Default: /home/system/kubos/apps)* The directory under which all registry entries should be stored
+    - ``registry-dir`` - *(Default: /home/system/kubos/apps)* The directory under which all registry entries should be stored
 
 TODO: Any other options?
