@@ -273,8 +273,7 @@ speed of 100kHz.
 
 The I2C bus is available through the Kubos HAL as ``K_I2C1``.
 
-For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
-:doc:`../apis/kubos-hal/i2c_api` documents.
+For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubos-hal/i2c-hal/index>`.
 
 UART
 ~~~~
@@ -311,7 +310,7 @@ eMMC
 The user partition on the eMMC device is used as the primary user data storage area.
 All system-related `/home/` paths will reside here.
 
-/home/usr/bin
+/home/system/usr/bin
 ^^^^^^^^^^^^^
 
 All user-created applications will be loaded into this folder during the
@@ -319,7 +318,7 @@ All user-created applications will be loaded into this folder during the
 so applications can then be called directly from anywhere, without
 needing to know the full file path.
 
-/home/usr/local/bin
+/home/system/usr/local/bin
 ^^^^^^^^^^^^^^^^^^^
 
 All user-created non-application files will be loaded into this folder
@@ -327,7 +326,7 @@ during the ``kubos flash`` process. There is currently not a way to set
 a destination folder for the ``kubos flash`` command, so if a different
 endpoint directory is desired, the files will need to be manually moved.
 
-/home/etc/init.d
+/home/system/etc/init.d
 ^^^^^^^^^^^^^^^^
 
 All user-application initialization scripts live under this directory.
