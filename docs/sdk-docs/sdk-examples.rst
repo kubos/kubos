@@ -27,29 +27,6 @@ of the example folder:
     The default target for all of these applications is ``stm32f407-disco-gcc``. 
     You will need to manually change the target if this is not your desired endpoint device. 
 
-Default Example
----------------
-
-`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-example>`__
-
-**Compatible Targets: All targets**
-
-+----------------------+------------------------+
-| High-level Component | Specific Area          |
-+======================+========================+
-| Kubos CSP [4]_       | sockets, ping, threads |
-+----------------------+------------------------+
-
-This is the default application included when the ``kubos init --linux`` command is executed.
-It is intended as a basic example of how an application could be written to run on a Kubos Linux system.
-
-The application contains a CSP interaction between client and server tasks.
-
-Every 200ms, the CSP client thread pings the CSP server's address to see if it is available, and then connects and sends a CSP 
-packet containing the message "Hello World".
-
-The CSP server thread checks for connections on the CSP port and then prints any received messages to STDOUT.    
-
 TCP Receive
 -----------
 
@@ -147,10 +124,3 @@ It will use the raw value to derive a temperature reading from the connected the
     This example is configured for an ADC pin with a 10-bit resolution connected to a 10 kOhm
     thermistor with a 3.3V reference voltage and a voltage supply of 2.4V. These values might
     need to be changed based on your test setup
-    
-References
-----------
-
-.. [1] :doc:`config.json <sdk-project-config>` - Kubos project file for custom configuration options
-.. [3] :doc:`Kubos HAL <../apis/kubos-hal/index>` - Kubos hardware abstraction for interfacing with peripheral devices
-.. [4] :doc:`CSP <../apis/libcsp/index>` - (Cubesat Space Protocol) Lightweight communication protocol

@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-//! Device level API for interacting with the
-//! [NSL EyeStar-D2 Duplex radio](https://nearspacelaunch.com/product/eyestar-d2/)
-
 #![deny(missing_docs)]
+#![deny(warnings)]
 
-extern crate chrono;
-extern crate crc16;
-extern crate radio_api;
-extern crate serial;
+//! Low level interface for interacting with a ClydeSpace 3G EPS
 
 #[macro_use]
+extern crate bitflags;
+extern crate eps_api;
+#[macro_use]
+extern crate failure;
 extern crate nom;
+extern crate rust_i2c;
 
-mod messages;
-mod duplex_d2;
-mod serial_comm;
+mod commands;
+mod eps;
+mod telemetry;
 
-pub use duplex_d2::DuplexD2;
-pub use serial_comm::serial_connection;
-pub use messages::File;
-pub use messages::StateOfHealth;
-pub use messages::GeoRecord;
+pub use commands::version::{Version, VersionInfo};
+pub use eps::Eps;
+pub use telemetry::daughterboard as DaughterboardTelemetry;
+pub use telemetry::motherboard as MotherboardTelemetry;
+pub use telemetry::reset as ResetTelemetry;

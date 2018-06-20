@@ -1,6 +1,8 @@
 [workspace]
 members = [
 "apis/adcs-api",
+"apis/clyde-3g-eps-api",
+"apis/eps-api",
 "apis/isis-ants-api",
 "apis/isis-imtq-api",
 "apis/isis-iobc-supervisor",
@@ -11,6 +13,7 @@ members = [
 "examples/rust-service/extern-lib",
 "examples/rust-service/service",
 "examples/udp-service-client",
+"hal/rust-hal/rust-i2c",
 "hal/rust-hal/rust-uart",
 "kubos-build-helper",
 "services/comms-service",

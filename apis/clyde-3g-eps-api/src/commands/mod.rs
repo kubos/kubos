@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-//! Device level API for interacting with the
-//! [NSL EyeStar-D2 Duplex radio](https://nearspacelaunch.com/product/eyestar-d2/)
+mod reset;
+mod watchdog;
 
-#![deny(missing_docs)]
+pub mod board_status;
+pub mod checksum;
+pub mod last_error;
+pub mod version;
 
-extern crate chrono;
-extern crate crc16;
-extern crate radio_api;
-extern crate serial;
-
-#[macro_use]
-extern crate nom;
-
-mod messages;
-mod duplex_d2;
-mod serial_comm;
-
-pub use duplex_d2::DuplexD2;
-pub use serial_comm::serial_connection;
-pub use messages::File;
-pub use messages::StateOfHealth;
-pub use messages::GeoRecord;
+pub use commands::reset::*;
+pub use commands::watchdog::*;
