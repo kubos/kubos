@@ -17,6 +17,7 @@
 use clyde_3g_eps_api::Eps;
 use eps_api::EpsResult;
 use failure::Error;
+use kubos_service::MutationResponse;
 use models::*;
 use rust_i2c::*;
 use std::cell::{Cell, RefCell};
@@ -99,15 +100,33 @@ impl Subsystem {
         Ok(self.eps.lock().unwrap().get_version_info()?.into())
     }
 
-    pub fn manual_reset(&self) -> Result<(), Error> {
-        Ok(self.eps.lock().unwrap().manual_reset()?)
+    pub fn manual_reset(&self) -> Result<MutationResponse, Error> {
+        match self.eps.lock().unwrap().manual_reset() {
+            Ok(_v) => Ok(MutationResponse {
+                success: true,
+                errors: "".to_string(),
+            }),
+            Err(e) => Err(format_err!("ManualReset: {}", e)),
+        }
     }
 
-    pub fn reset_watchdog(&self) -> Result<(), Error> {
-        Ok(self.eps.lock().unwrap().reset_comms_watchdog()?)
+    pub fn reset_watchdog(&self) -> Result<MutationResponse, Error> {
+        match self.eps.lock().unwrap().reset_comms_watchdog() {
+            Ok(_v) => Ok(MutationResponse {
+                success: true,
+                errors: "".to_string(),
+            }),
+            Err(e) => Err(format_err!("ResetWatchdog: {}", e)),
+        }
     }
 
-    pub fn set_watchdog_period(&self, period: u8) -> Result<(), Error> {
-        Ok(self.eps.lock().unwrap().set_comms_watchdog_period(period)?)
+    pub fn set_watchdog_period(&self, period: u8) -> Result<MutationResponse, Error> {
+        match self.eps.lock().unwrap().set_comms_watchdog_period(period) {
+            Ok(_v) => Ok(MutationResponse {
+                success: true,
+                errors: "".to_string(),
+            }),
+            Err(e) => Err(format_err!("SetWatchdogPeriod: {}", e)),
+        }
     }
 }

@@ -82,6 +82,7 @@
 
 extern crate clyde_3g_eps_api;
 extern crate eps_api;
+#[macro_use]
 extern crate failure;
 extern crate rust_i2c;
 #[macro_use]

@@ -109,6 +109,7 @@
 #[macro_use]
 extern crate failure;
 extern crate getopts;
+#[macro_use]
 extern crate juniper;
 #[macro_use]
 extern crate nix;
@@ -124,4 +125,4 @@ mod macros;
 mod service;
 
 pub use config::Config;
-pub use service::{Context, Service};
+pub use service::{Context, MutationResponse, Service};

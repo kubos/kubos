@@ -14,16 +14,25 @@
 // limitations under the License.
 //
 
-use std::collections::HashMap;
-use std::os::unix::io::AsRawFd;
-use std::net::{SocketAddr, UdpSocket};
-use std::cell::RefCell;
-use serde_json;
 use config::Config;
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
+use serde_json;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::net::{SocketAddr, UdpSocket};
+use std::os::unix::io::AsRawFd;
 
 const FIONREAD: u16 = 0x541B;
 ioctl!(bad read udp_bytes_available with FIONREAD; usize);
+
+/// GenericResponse struct for use in queries or mutations without an explicit response
+#[derive(GraphQLObject)]
+pub struct MutationResponse {
+    /// Any errors which occurred during query
+    pub errors: String,
+    /// Success or fail status of query
+    pub success: bool,
+}
 
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.

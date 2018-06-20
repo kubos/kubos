@@ -15,6 +15,7 @@
 //
 
 use juniper::FieldResult;
+use kubos_service::MutationResponse;
 use models::subsystem::Mutations;
 use schema::Context;
 
@@ -23,21 +24,21 @@ pub struct Root;
 /// Base GraphQL mutation model
 graphql_object!(Root: Context as "Mutation" |&self| {
 
-    field manual_reset(&executor) -> FieldResult<()>
+    field manual_reset(&executor) -> FieldResult<MutationResponse>
         as "Perform manual reset of EPS board"
     {
         executor.context().subsystem().last_mutation.set(Mutations::ManualReset);
         Ok(executor.context().subsystem().manual_reset()?)
     }
 
-    field reset_watchdog(&executor) -> FieldResult<()>
+    field reset_watchdog(&executor) -> FieldResult<MutationResponse>
         as "Reset/kick communications watchdog"
     {
         executor.context().subsystem().last_mutation.set(Mutations::ResetWatchdog);
         Ok(executor.context().subsystem().reset_watchdog()?)
     }
 
-    field set_watchdog_period(&executor, period: i32) -> FieldResult<()>
+    field set_watchdog_period(&executor, period: i32) -> FieldResult<MutationResponse>
         as "Set watchdog period (in minutes)"
     {
         executor.context().subsystem().last_mutation.set(Mutations::SetWatchdogPeriod);
