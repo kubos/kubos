@@ -15,13 +15,15 @@
  */
 #![allow(dead_code)]
 use std::{env, fs};
-use std::io::Write;
+use std::io::{self, Write};
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::{thread, thread::JoinHandle};
 use std::time::Duration;
+
+use tempfile::TempDir;
 
 pub struct MockAppBuilder {
     _name: String,
@@ -115,8 +117,8 @@ impl MockAppBuilder {
         )
     }
 
-    pub fn install(&self, registry_dir: &PathBuf) {
-        let mut parent_dir = registry_dir.clone();
+    pub fn install(&self, registry_dir: &Path) {
+        let mut parent_dir = registry_dir.to_path_buf().clone();
         parent_dir.push(&self._uuid);
         parent_dir.push(self._version.as_ref().unwrap_or(&String::from("0.0.1")));
         assert!(fs::create_dir_all(parent_dir.clone()).is_ok());
@@ -156,35 +158,47 @@ impl MockAppBuilder {
 }
 
 pub struct AppServiceFixture {
-    pub registry_dir: PathBuf,
+    pub registry_dir: TempDir,
+    pub addr: String,
     config_toml: PathBuf,
     join_handle: Option<JoinHandle<()>>,
     sender: Option<Sender<bool>>
 }
 
 impl AppServiceFixture {
+    fn service_port() -> io::Result<u16> {
+        use std::net::{SocketAddrV4, Ipv4Addr, TcpListener};
+        let port = {
+            let loopback = Ipv4Addr::new(127, 0, 0, 1);
+            let socket = SocketAddrV4::new(loopback, 0);
+            let listener = TcpListener::bind(socket)?;
+            listener.local_addr()?.port()
+        };
+        Ok(port)
+    }
+
     pub fn setup() -> Self {
-        let mut registry_dir = env::temp_dir();
-        registry_dir.push("apps");
+        let registry_dir = TempDir::new().expect("Failed to create registry dir");
 
-        if !registry_dir.exists() {
-            assert!(fs::create_dir_all(registry_dir.clone()).is_ok());
-        }
-
-        let mut config_toml = env::temp_dir();
+        let mut config_toml = registry_dir.path().to_path_buf().clone();
         config_toml.push("config.toml");
 
         let mut toml = fs::File::create(config_toml.clone()).unwrap();
+        let port = Self::service_port().unwrap_or(9999);
+
+        println!("Registry dir: {}, Port: {}", registry_dir.path().to_str().unwrap(), port);
+
         toml.write_all(format!(r#"
             [app-service]
             registry-dir = "{}"
             [app-service.addr]
-            ip = "0.0.0.0"
-            port = 9999"#, registry_dir.to_str().unwrap()).as_bytes())
+            ip = "127.0.0.1"
+            port = {}"#, registry_dir.path().to_str().unwrap(), port).as_bytes())
             .expect("Failed to write config.toml");
 
         Self {
             registry_dir: registry_dir,
+            addr: format!("127.0.0.1:{}", port),
             config_toml: config_toml.clone(),
             join_handle: None,
             sender: None
@@ -220,7 +234,7 @@ impl AppServiceFixture {
         });
 
         // Give the process a bit to actually start
-        thread::sleep(Duration::from_millis(100));
+        thread::sleep(Duration::from_millis(1000));
         self.join_handle = Some(handle);
         self.sender = Some(tx);
     }
@@ -231,10 +245,6 @@ impl AppServiceFixture {
         }
         if self.join_handle.is_some() {
             self.join_handle.take().unwrap().join().unwrap();
-        }
-
-        if self.registry_dir.exists() {
-            assert!(fs::remove_dir_all(self.registry_dir.clone()).is_ok());
         }
     }
 }

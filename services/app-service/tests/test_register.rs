@@ -18,6 +18,7 @@ extern crate kubos_app;
 extern crate kubos_system;
 #[macro_use]
 extern crate serde_json;
+extern crate tempfile;
 
 use std::{env, panic};
 use std::time::Duration;
@@ -31,10 +32,10 @@ fn register_app() {
     let mut app_bin = env::temp_dir();
     app_bin.push("dummy-app");
 
-    let mut app = MockAppBuilder::new("dummy", "a-b-c-d-e");
-    app.version("0.0.1")
-       .author("user");
-    app.generate_bin(&app_bin);
+    MockAppBuilder::new("dummy", "a-b-c-d-e")
+        .version("0.0.1")
+        .author("user")
+        .generate_bin(&app_bin);
 
     let register_query = format!(r#"mutation {{
         register(path: "{}") {{
@@ -59,14 +60,15 @@ fn register_app() {
 
     fixture.start_service();
 
+    let addr = fixture.addr.clone();
     let result = panic::catch_unwind(|| {
         println!("{}", register_query);
-        let result = kubos_system::query("localhost:9999", &register_query,
+        let result = kubos_system::query(&addr, &register_query,
                                         Some(Duration::from_secs(2)));
         assert!(result.is_ok(), "{:?}", result.err());
         assert_expected(&result.unwrap()["register"]);
 
-        let result = kubos_system::query("localhost:9999", &apps_query,
+        let result = kubos_system::query(&addr, &apps_query,
                                         Some(Duration::from_secs(5)));
         assert!(result.is_ok());
         assert_expected(&result.unwrap()["apps"][0]);

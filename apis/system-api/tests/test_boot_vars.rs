@@ -21,10 +21,10 @@ use std::fs;
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 
-const DUMMY_PRINTENV: &'static str = r#"
-#!/bin/bash
-[[ -n "${!2+set}" ]] || exit 1
-echo ${!2}
+const DUMMY_PRINTENV: &'static str = r#"#!/bin/bash
+VAR="$2"
+[[ -n "${!VAR+set}" ]] || exit 1
+echo ${!VAR}
 "#;
 
 fn setup_dummy_printenv() -> String {
@@ -68,6 +68,7 @@ fn bool_vars() {
     assert_eq!(kubos_system::kubos_initial_deploy(), None);
 
     env::set_var(kubos_system::VAR_KUBOS_INITIAL_DEPLOY, "0");
+
     assert_eq!(kubos_system::kubos_initial_deploy(), Some(false));
 
     env::set_var(kubos_system::VAR_KUBOS_INITIAL_DEPLOY, "1");

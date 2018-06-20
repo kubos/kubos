@@ -11,3 +11,4 @@ kubos-service = { path = "../kubos-service" }
 [dev-dependencies]
 kubos-system = { path = "../../apis/system-api" }
 serde_json = "1.0"
+tempfile = "3"

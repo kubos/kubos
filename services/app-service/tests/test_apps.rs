@@ -18,15 +18,16 @@ extern crate kubos_app;
 extern crate kubos_system;
 #[macro_use]
 extern crate serde_json;
+extern crate tempfile;
 
 use std::panic;
-use std::path::PathBuf;
+use std::path::Path;
 use std::time::Duration;
 
 mod utils;
 use utils::*;
 
-fn setup_apps(registry_dir: &PathBuf) {
+fn setup_apps(registry_dir: &Path) {
     MockAppBuilder::new("app1", "a-b-c-d-e").version("0.0.1").active(false).install(&registry_dir);
     MockAppBuilder::new("app1", "a-b-c-d-e").version("0.0.2").active(false).install(&registry_dir);
     MockAppBuilder::new("app2", "f-g-h-i-j").version("1.0.0").active(false).install(&registry_dir);
@@ -35,8 +36,8 @@ fn setup_apps(registry_dir: &PathBuf) {
     MockAppBuilder::new("app4", "1-2-3-4-5").version("1.0.0").active(true).install(&registry_dir);
 }
 
-fn apps_query(query: &str) -> Vec<serde_json::Value> {
-    let result = kubos_system::query("localhost:9999", query, Some(Duration::from_secs(5)));
+fn apps_query(addr: &str, query: &str) -> Vec<serde_json::Value> {
+    let result = kubos_system::query(addr, query, Some(Duration::from_secs(5)));
     assert!(result.is_ok());
 
     let apps = result.unwrap()["apps"].clone();
@@ -57,12 +58,13 @@ macro_rules! test_query {
         #[test]
         fn $name() {
             let mut fixture = AppServiceFixture::setup();
-            setup_apps(&fixture.registry_dir);
+            setup_apps(&fixture.registry_dir.path());
             fixture.start_service();
 
+            let addr = fixture.addr.clone();
             let result = panic::catch_unwind(|| {
                 let test: &Fn(Vec<serde_json::Value>) = &$test_closure;
-                test(apps_query($query));
+                test(apps_query(&addr, $query));
             });
 
             fixture.teardown();

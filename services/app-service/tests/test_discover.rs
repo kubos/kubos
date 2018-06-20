@@ -18,6 +18,7 @@ extern crate kubos_app;
 extern crate kubos_system;
 #[macro_use]
 extern crate serde_json;
+extern crate tempfile;
 
 use std::panic;
 use std::time::Duration;
@@ -33,20 +34,20 @@ fn discover_app() {
         .run_level("OnCommand")
         .version("1.0.1")
         .author("mham")
-        .install(&fixture.registry_dir);
+        .install(&fixture.registry_dir.path());
     MockAppBuilder::new("dummy", "a-b-c-d-e")
         .active(true)
         .run_level("OnBoot")
         .version("0.0.1")
         .author("user")
-        .install(&fixture.registry_dir);
+        .install(&fixture.registry_dir.path());
 
 
     fixture.start_service();
-
+    let addr = fixture.addr.clone();
     let result = panic::catch_unwind(|| {
         let apps_query = "{ apps { active, runLevel, app { uuid, name, version, author } } }";
-        let result = kubos_system::query("localhost:9999", &apps_query,
+        let result = kubos_system::query(&addr, &apps_query,
                                         Some(Duration::from_secs(5)));
         assert!(result.is_ok());
 

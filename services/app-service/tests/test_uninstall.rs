@@ -16,8 +16,8 @@
 #![deny(warnings)]
 extern crate kubos_app;
 extern crate kubos_system;
-//#[macro_use]
 extern crate serde_json;
+extern crate tempfile;
 
 use std::panic;
 use std::time::Duration;
@@ -39,16 +39,17 @@ fn uninstall_app() {
        .version("0.0.1")
        .author("user");
 
-    app.install(&fixture.registry_dir);
+    app.install(&fixture.registry_dir.path());
     fixture.start_service();
 
+    let addr = fixture.addr.clone();
     let result = panic::catch_unwind(|| {
-        let result = kubos_system::query("localhost:9999", UNINSTALL_QUERY,
+        let result = kubos_system::query(&addr, UNINSTALL_QUERY,
                                          Some(Duration::from_secs(5)));
         assert!(result.is_ok(), "{:?}", result.err());
         assert!(result.unwrap()["uninstall"].as_bool().unwrap());
 
-        let result = kubos_system::query("localhost:9999", APPS_QUERY,
+        let result = kubos_system::query(&addr, APPS_QUERY,
                                          Some(Duration::from_secs(1)));
         assert!(result.is_ok(), "{:?}", result.err());
         assert_eq!(result.unwrap()["apps"].as_array().expect("Not an array").len(), 0);
