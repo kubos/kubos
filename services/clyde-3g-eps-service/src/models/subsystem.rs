@@ -107,7 +107,7 @@ impl Subsystem {
                 success: true,
                 errors: "".to_string(),
             }),
-            Err(e) => Err(format_err!("ManualReset: {}", e)),
+            Err(e) => throw!(e),
         }
     }
 
@@ -117,7 +117,7 @@ impl Subsystem {
                 success: true,
                 errors: "".to_string(),
             }),
-            Err(e) => Err(format_err!("ResetWatchdog: {}", e)),
+            Err(e) => throw!(e),
         }
     }
 
@@ -127,7 +127,7 @@ impl Subsystem {
                 success: true,
                 errors: "".to_string(),
             }),
-            Err(e) => Err(format_err!("SetWatchdogPeriod: {}", e)),
+            Err(e) => throw!(e),
         }
     }
 
@@ -137,7 +137,7 @@ impl Subsystem {
                 success: true,
                 errors: "".to_string(),
             }),
-            Err(e) => Err(format_err!("RawCommand: {}", e)),
+            Err(e) => throw!(e),
         }
     }
 }
