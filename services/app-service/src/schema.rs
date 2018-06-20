@@ -50,10 +50,10 @@ graphql_object!(KApp: () as "App" |&self| {
         Ok(&self.0.metadata.author)
     }
 
-    field pid() -> FieldResult<f64>
+    field pid() -> FieldResult<i32>
         as "Process ID"
     {
-        Ok(f64::from(self.0.pid))
+        Ok(self.0.pid as i32)
     }
 
     field path() -> FieldResult<&String>
@@ -91,14 +91,36 @@ pub struct QueryRoot;
 
 /// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
-    field apps(&executor) -> FieldResult<Vec<KAppRegistryEntry>>
-        as "Kubos Apps Query"
+    field apps(&executor,
+               uuid: Option<String>,
+               name: Option<String>,
+               version: Option<String>,
+               active: Option<bool>)
+        -> FieldResult<Vec<KAppRegistryEntry>> as "Kubos Apps Query"
     {
-        let mut entries: Vec<KAppRegistryEntry> = Vec::new();
-        for entry in executor.context().subsystem().entries.borrow().iter() {
-            entries.push(KAppRegistryEntry(entry.clone()));
+        let mut result: Vec<KAppRegistryEntry> = Vec::new();
+        let entries = executor.context().subsystem().entries.borrow();
+        let mut final_iter = entries.iter().filter(|ref e| {
+            if uuid.is_some() && &e.app.uuid != uuid.as_ref().unwrap() {
+                return false;
+            }
+            if name.is_some() && &e.app.metadata.name != name.as_ref().unwrap() {
+                return false;
+            }
+            if version.is_some() && &e.app.metadata.version != version.as_ref().unwrap() {
+                return false;
+            }
+            if active.is_some() && e.active != active.unwrap() {
+                return false;
+            }
+            true
+        });
+
+        for entry in final_iter {
+            result.push(KAppRegistryEntry(entry.clone()));
         }
-        Ok(entries)
+
+        Ok(result)
     }
 });
 
@@ -133,7 +155,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         }
     }
 
-    field start_app(&executor, uuid: String, run_level: String) -> FieldResult<f64>
+    field start_app(&executor, uuid: String, run_level: String) -> FieldResult<i32>
         as "Start App"
     {
         let run_level_o = {
@@ -144,7 +166,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         };
 
         match executor.context().subsystem().start_app(&uuid, run_level_o) {
-            Ok(pid) => Ok(f64::from(pid)),
+            Ok(pid) => Ok(pid as i32),
             Err(err) => Err(FieldError::new(err, juniper::Value::null()))
         }
     }

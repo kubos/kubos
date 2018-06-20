@@ -120,7 +120,10 @@ fn get_config_path() -> String {
     opts.optopt("c", "config", "Path to config file", "CONFIG");
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
-        Err(f) => panic!(f.to_string()),
+        Err(_) => {
+            // suppress errors so applications using Config can have their own Options
+            return PATH.to_string();
+        }
     };
     match matches.opt_str("c") {
         Some(s) => s,

@@ -28,7 +28,20 @@ use utils::*;
 #[test]
 fn discover_app() {
     let mut fixture = AppServiceFixture::setup();
-    fixture.install_dummy_app();
+    MockAppBuilder::new("app2", "1-2-3-4-5")
+        .active(false)
+        .run_level("OnCommand")
+        .version("1.0.1")
+        .author("mham")
+        .install(&fixture.registry_dir);
+    MockAppBuilder::new("dummy", "a-b-c-d-e")
+        .active(true)
+        .run_level("OnBoot")
+        .version("0.0.1")
+        .author("user")
+        .install(&fixture.registry_dir);
+
+
     fixture.start_service();
 
     let result = panic::catch_unwind(|| {
@@ -39,9 +52,22 @@ fn discover_app() {
 
         let apps = &result.unwrap()["apps"];
         assert!(apps.is_array());
-        assert_eq!(apps.as_array().unwrap().len(), 1);
+        assert_eq!(apps.as_array().unwrap().len(), 2);
 
-        let v = &apps.as_array().unwrap()[0];
+        // Sort by UUID to make testing deterministic
+        let mut sorted = apps.as_array().unwrap().clone();
+        sorted.sort_unstable_by_key(|a| a["app"]["uuid"].to_string());
+
+        let v = &sorted[0];
+        assert_eq!(v["active"], json!(false));
+        assert_eq!(v["runLevel"], json!("OnCommand"));
+        assert!(v["app"].is_object());
+        assert_eq!(v["app"]["uuid"], json!("1-2-3-4-5"));
+        assert_eq!(v["app"]["name"], json!("app2"));
+        assert_eq!(v["app"]["version"], json!("1.0.1"));
+        assert_eq!(v["app"]["author"], json!("mham"));
+
+        let v = &sorted[1];
         assert_eq!(v["active"], json!(true));
         assert_eq!(v["runLevel"], json!("OnBoot"));
         assert!(v["app"].is_object());
@@ -49,6 +75,7 @@ fn discover_app() {
         assert_eq!(v["app"]["name"], json!("dummy"));
         assert_eq!(v["app"]["version"], json!("0.0.1"));
         assert_eq!(v["app"]["author"], json!("user"));
+
     });
 
     fixture.teardown();

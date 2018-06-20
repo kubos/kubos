@@ -31,7 +31,10 @@ fn register_app() {
     let mut app_bin = env::temp_dir();
     app_bin.push("dummy-app");
 
-    fixture.setup_dummy_bin(&app_bin);
+    let mut app = MockAppBuilder::new("dummy", "a-b-c-d-e");
+    app.version("0.0.1")
+       .author("user");
+    app.generate_bin(&app_bin);
 
     let register_query = format!(r#"mutation {{
         register(path: "{}") {{
@@ -67,10 +70,6 @@ fn register_app() {
                                         Some(Duration::from_secs(5)));
         assert!(result.is_ok());
         assert_expected(&result.unwrap()["apps"][0]);
-
-        /*let start_result = registry.start_app(&entry.app.uuid, RunLevel::OnBoot);
-        assert!(start_result.is_ok(), format!("error starting app: {}", start_result.unwrap_err()));
-        assert!(start_result.unwrap() > 0); // pid*/
     });
     fixture.teardown();
     assert!(result.is_ok());

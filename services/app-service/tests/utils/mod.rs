@@ -23,32 +23,137 @@ use std::sync::mpsc::{channel, Receiver, Sender};
 use std::{thread, thread::JoinHandle};
 use std::time::Duration;
 
-const DUMMY_APP_SRC: &'static str = r#"
-#!/bin/bash
-if [ "$1" = "--metadata" ]; then
-    echo name = \"dummy\"
-    echo version = \"0.0.1\"
-    echo author = \"user\"
-else
-    echo uuid = \"$KUBOS_APP_UUID\"
-    echo run_level = \"$KUBOS_APP_RUN_LEVEL\"
-fi
-"#;
+pub struct MockAppBuilder {
+    _name: String,
+    _uuid: String,
+    _bin: Option<String>,
+    _version: Option<String>,
+    _author: Option<String>,
+    _active: Option<bool>,
+    _run_level: Option<String>,
+}
 
-const DUMMY_APP_TOML: &'static str = r#"
-active = true
-run_level = "OnBoot"
+impl MockAppBuilder {
+    pub fn new(name: &str, uuid: &str) -> Self {
+        Self {
+            _name: String::from(name),
+            _uuid: String::from(uuid),
+            _bin: None,
+            _version: None,
+            _author: None,
+            _active: None,
+            _run_level: None
+        }
+    }
 
-[app]
-uuid = "a-b-c-d-e"
-pid = 0
-path = "{}/a-b-c-d-e/0.0.1/dummy-app"
+    pub fn bin<'a>(&'a mut self, bin_name: &str) -> &'a mut Self {
+        self._bin = Some(String::from(bin_name));
+        self
+    }
 
-[app.metadata]
-name = "dummy"
-version = "0.0.1"
-author = "user"
-"#;
+    pub fn version<'a>(&'a mut self, version: &str) -> &'a mut Self {
+        self._version = Some(String::from(version));
+        self
+    }
+
+    pub fn author<'a>(&'a mut self, author: &str) -> &'a mut Self {
+        self._author = Some(String::from(author));
+        self
+    }
+
+    pub fn active<'a>(&'a mut self, active: bool) -> &'a mut Self {
+        self._active = Some(active);
+        self
+    }
+
+    pub fn run_level<'a>(&'a mut self, run_level: &str) -> &'a mut Self {
+        self._run_level = Some(String::from(run_level));
+        self
+    }
+
+    pub fn toml(&self, registry_dir: &str) -> String {
+        format!(r#"
+            active = {active}
+            run_level = "{run_level}"
+
+            [app]
+            uuid = "{uuid}"
+            pid = 0
+            path = "{dir}/{uuid}/{version}/{bin}"
+
+            [app.metadata]
+            name = "{name}"
+            version = "{version}"
+            author = "{author}"
+            "#,
+            uuid=self._uuid,
+            name=self._name,
+            dir=registry_dir,
+            active=self._active.unwrap_or(true),
+            run_level=self._run_level.as_ref().unwrap_or(&String::from("OnBoot")),
+            version=self._version.as_ref().unwrap_or(&String::from("0.0.1")),
+            author=self._author.as_ref().unwrap_or(&String::from("user")),
+            bin=self._bin.as_ref().unwrap_or(&self._name),
+        )
+    }
+
+    pub fn src(&self) -> String {
+        format!(r#"
+            #!/bin/bash
+            if [ "$1" = "--metadata" ]; then
+                echo name = \"{name}\"
+                echo version = \"{version}\"
+                echo author = \"{author}\"
+            else
+                echo uuid = \"$KUBOS_APP_UUID\"
+                echo run_level = \"$KUBOS_APP_RUN_LEVEL\"
+            fi
+            "#,
+            name=self._name,
+            version=self._version.as_ref().unwrap_or(&String::from("0.0.1")),
+            author=self._author.as_ref().unwrap_or(&String::from("user")),
+        )
+    }
+
+    pub fn install(&self, registry_dir: &PathBuf) {
+        let mut parent_dir = registry_dir.clone();
+        parent_dir.push(&self._uuid);
+        parent_dir.push(self._version.as_ref().unwrap_or(&String::from("0.0.1")));
+        assert!(fs::create_dir_all(parent_dir.clone()).is_ok());
+
+        let mut app_bin = parent_dir.clone();
+        app_bin.push(self._bin.as_ref().unwrap_or(&self._name));
+
+        self.generate_bin(&app_bin);
+
+        let mut app_toml = parent_dir.clone();
+        app_toml.push("app.toml");
+
+        self.generate_toml(&registry_dir, &app_toml);
+    }
+
+    pub fn generate_bin(&self, bin_dest: &Path) {
+        let mut file = fs::File::create(bin_dest.clone()).unwrap();
+        if !file.write_all(self.src().as_bytes()).is_ok() {
+            panic!("failed to write app script");
+        }
+
+        let mut perms = file.metadata().unwrap().permissions();
+        perms.set_mode(0o755);
+
+        if !file.set_permissions(perms).is_ok() {
+            panic!("failed to change permissions of app script");
+        }
+    }
+
+    pub fn generate_toml(&self, registry_dir: &Path, toml_dest: &Path) {
+        let mut file = fs::File::create(toml_dest.clone()).unwrap();
+        let toml = self.toml(registry_dir.to_str().unwrap());
+        if !file.write_all(toml.as_bytes()).is_ok() {
+            panic!("Failed to write app TOML");
+        }
+    }
+}
 
 pub struct AppServiceFixture {
     pub registry_dir: PathBuf,
@@ -120,58 +225,6 @@ impl AppServiceFixture {
         self.sender = Some(tx);
     }
 
-    pub fn install_dummy_app(&self) {
-        let mut parent_dir = self.registry_dir.clone();
-        parent_dir.push("a-b-c-d-e");
-        parent_dir.push("0.0.1");
-        assert!(fs::create_dir_all(parent_dir.clone()).is_ok());
-
-        let mut app_bin = parent_dir.clone();
-        app_bin.push("dummy-app");
-
-        self.setup_dummy_bin(&app_bin);
-
-        let mut app_toml = parent_dir.clone();
-        app_toml.push("app.toml");
-
-        self.setup_dummy_toml(&app_toml);
-    }
-
-    pub fn setup_dummy_bin(&self, bin_dest: &Path) {
-        let mut file = fs::File::create(bin_dest.clone()).unwrap();
-        if !file.write_all(DUMMY_APP_SRC.as_bytes()).is_ok() {
-            panic!("failed to write app script");
-        }
-
-        let mut perms = file.metadata().unwrap().permissions();
-        perms.set_mode(0o755);
-
-        if !file.set_permissions(perms).is_ok() {
-            panic!("failed to change permissions of app script");
-        }
-    }
-
-    pub fn setup_dummy_toml(&self, toml_dest: &Path) {
-        let mut file = fs::File::create(toml_dest.clone()).unwrap();
-        if !file.write_all(format!(r#"
-            active = true
-            run_level = "OnBoot"
-
-            [app]
-            uuid = "a-b-c-d-e"
-            pid = 0
-            path = "{}/a-b-c-d-e/0.0.1/dummy-app"
-
-            [app.metadata]
-            name = "dummy"
-            version = "0.0.1"
-            author = "user"
-            "#, self.registry_dir.to_str().unwrap()).as_bytes()).is_ok()
-        {
-            panic!("failed to write app TOML");
-        }
-    }
-
     pub fn teardown(&mut self) {
         if self.sender.is_some() {
             self.sender.take().unwrap().send(true).unwrap();
@@ -183,6 +236,5 @@ impl AppServiceFixture {
         if self.registry_dir.exists() {
             assert!(fs::remove_dir_all(self.registry_dir.clone()).is_ok());
         }
-
     }
 }

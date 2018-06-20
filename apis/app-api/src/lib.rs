@@ -89,7 +89,7 @@ impl App {
             return;
         }
 
-        if matches.opt_present("M") {
+        if matches.opt_present("m") {
             println!("{}", toml::to_string(
                 &AppMetadata::new(name, version, authors)).unwrap());
             return;

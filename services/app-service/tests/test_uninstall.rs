@@ -33,7 +33,13 @@ const APPS_QUERY: &'static str = "{ apps { active } }";
 #[test]
 fn uninstall_app() {
     let mut fixture = AppServiceFixture::setup();
-    fixture.install_dummy_app();
+    let mut app = MockAppBuilder::new("dummy", "a-b-c-d-e");
+    app.active(true)
+       .run_level("OnBoot")
+       .version("0.0.1")
+       .author("user");
+
+    app.install(&fixture.registry_dir);
     fixture.start_service();
 
     let result = panic::catch_unwind(|| {
