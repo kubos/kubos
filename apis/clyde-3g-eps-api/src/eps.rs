@@ -16,7 +16,7 @@
 
 use commands::*;
 use eps_api::EpsResult;
-use rust_i2c::Connection;
+use rust_i2c::{Command, Connection};
 use std::time::Duration;
 use telemetry;
 
@@ -186,5 +186,13 @@ impl Eps {
             get_comms_watchdog_period::command(),
             Duration::from_millis(2),
         )?)
+    }
+
+    /// Issue Raw Command
+    ///
+    /// This command sends a raw command to the EPS
+    pub fn raw_command(&self, cmd: u8, data: Vec<u8>) -> EpsResult<()> {
+        self.connection.write(Command { cmd, data })?;
+        Ok(())
     }
 }

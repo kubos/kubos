@@ -44,4 +44,12 @@ graphql_object!(Root: Context as "Mutation" |&self| {
         executor.context().subsystem().last_mutation.set(Mutations::SetWatchdogPeriod);
         Ok(executor.context().subsystem().set_watchdog_period(period as u8)?)
     }
+
+    field issue_raw_command(&executor, command: i32, data: Vec<i32>) -> FieldResult<MutationResponse>
+        as "Issue raw command to EPS"
+    {
+        executor.context().subsystem().last_mutation.set(Mutations::RawCommand);
+        let data_u8 = data.iter().map(|x| *x as u8).collect();
+        Ok(executor.context().subsystem().raw_command(command as u8, data_u8)?)
+    }
 });

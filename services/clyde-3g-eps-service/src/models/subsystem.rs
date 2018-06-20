@@ -29,6 +29,7 @@ use std::time::Duration;
 pub enum Mutations {
     None,
     ManualReset,
+    RawCommand,
     ResetWatchdog,
     SetWatchdogPeriod,
 }
@@ -127,6 +128,16 @@ impl Subsystem {
                 errors: "".to_string(),
             }),
             Err(e) => Err(format_err!("SetWatchdogPeriod: {}", e)),
+        }
+    }
+
+    pub fn raw_command(&self, command: u8, data: Vec<u8>) -> Result<MutationResponse, Error> {
+        match self.eps.lock().unwrap().raw_command(command, data) {
+            Ok(_v) => Ok(MutationResponse {
+                success: true,
+                errors: "".to_string(),
+            }),
+            Err(e) => Err(format_err!("RawCommand: {}", e)),
         }
     }
 }
