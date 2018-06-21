@@ -197,8 +197,7 @@ speed of 100kHz.
 
 The I2C bus is available through the Kubos HAL as ``K_I2C1``.
 
-For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
-:doc:`../apis/kubos-hal/i2c_api` documents.
+For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubos-hal/i2c-hal/index>`.
 
 PWM
 ~~~

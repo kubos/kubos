@@ -166,7 +166,7 @@ System
       generated with the run level specified by ``runLevel`` 
     :property number runLevel: `(Default: 50. Range: 10-99)` The priority of the generated init script. 
       Scripts with lower values will be run first
-    :property string destDir: `(Default: "/home/usr/local/bin")` Specifies flashing destination directory for all 
+    :property string destDir: `(Default: "/home/system/usr/local/bin")` Specifies flashing destination directory for all 
       non-application files
     :property string password: `(Default: "Kubos123") Specifies the root password to be used by 
       ``kubos flash`` to successfully connect to the target device
