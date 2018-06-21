@@ -26,7 +26,7 @@ const FIONREAD: u16 = 0x541B;
 ioctl!(bad read udp_bytes_available with FIONREAD; usize);
 
 /// GenericResponse struct for use in queries or mutations without an explicit response
-#[derive(GraphQLObject)]
+#[derive(Clone, Debug, GraphQLObject)]
 pub struct MutationResponse {
     /// Any errors which occurred during query
     pub errors: String,
@@ -174,7 +174,7 @@ where
             // Go process the request
             let (size, peer) = socket.recv_from(&mut buf).unwrap();
             let query_string = String::from_utf8(buf[0..(size)].to_vec()).unwrap();
-            let res = self.process(query_string);
+            let res = self.process(&query_string);
 
             // And then send the response back
             let _amt = socket.send_to(&res.as_bytes(), &peer);
@@ -182,7 +182,7 @@ where
     }
 
     /// Processes a GraphQL query
-    pub fn process(&self, query: String) -> String {
+    pub fn process(&self, query: &str) -> String {
         match execute(
             &query,
             None,

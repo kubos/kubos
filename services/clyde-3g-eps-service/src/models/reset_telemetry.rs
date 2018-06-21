@@ -17,7 +17,7 @@
 use clyde_3g_eps_api::ResetTelemetry::Data as ResetTelemetryData;
 use clyde_3g_eps_api::ResetTelemetry::Type as ResetTelemetryType;
 
-#[derive(GraphQLObject)]
+#[derive(Clone, Debug, GraphQLObject)]
 pub struct Data {
     pub motherboard: i32,
     pub daughterboard: Option<i32>,
@@ -32,7 +32,7 @@ impl Into<Data> for ResetTelemetryData {
     }
 }
 
-#[derive(GraphQLEnum)]
+#[derive(Clone, Debug, Eq, Hash, GraphQLEnum, PartialEq)]
 pub enum Type {
     BrownOut,
     AutomaticSoftware,

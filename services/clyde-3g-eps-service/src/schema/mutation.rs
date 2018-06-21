@@ -27,28 +27,28 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     field manual_reset(&executor) -> FieldResult<MutationResponse>
         as "Perform manual reset of EPS board"
     {
-        executor.context().subsystem().last_mutation.set(Mutations::ManualReset);
+        executor.context().subsystem().set_last_mutation(Mutations::ManualReset);
         Ok(executor.context().subsystem().manual_reset()?)
     }
 
     field reset_watchdog(&executor) -> FieldResult<MutationResponse>
         as "Reset/kick communications watchdog"
     {
-        executor.context().subsystem().last_mutation.set(Mutations::ResetWatchdog);
+        executor.context().subsystem().set_last_mutation(Mutations::ResetWatchdog);
         Ok(executor.context().subsystem().reset_watchdog()?)
     }
 
     field set_watchdog_period(&executor, period: i32) -> FieldResult<MutationResponse>
         as "Set watchdog period (in minutes)"
     {
-        executor.context().subsystem().last_mutation.set(Mutations::SetWatchdogPeriod);
+        executor.context().subsystem().set_last_mutation(Mutations::SetWatchdogPeriod);
         Ok(executor.context().subsystem().set_watchdog_period(period as u8)?)
     }
 
     field issue_raw_command(&executor, command: i32, data: Vec<i32>) -> FieldResult<MutationResponse>
         as "Issue raw command to EPS"
     {
-        executor.context().subsystem().last_mutation.set(Mutations::RawCommand);
+        executor.context().subsystem().set_last_mutation(Mutations::RawCommand);
         let data_u8 = data.iter().map(|x| *x as u8).collect();
         Ok(executor.context().subsystem().raw_command(command as u8, data_u8)?)
     }

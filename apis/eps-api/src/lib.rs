@@ -30,9 +30,12 @@ use std::io;
 /// EpsError
 ///
 /// Describes various errors which may result from using EPS APIs
-#[derive(Debug, Display, Eq, Fail, PartialEq)]
+#[derive(Clone, Debug, Display, Eq, Fail, PartialEq)]
 #[display(fmt = "Eps Error")]
 pub enum EpsError {
+    /// Generic error condition
+    #[display(fmt = "Generic Error")]
+    GenericError,
     /// Error resulting from underlying Io functions
     #[display(fmt = "IO Error: {}", description)]
     IoError {

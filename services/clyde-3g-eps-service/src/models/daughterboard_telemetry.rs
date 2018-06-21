@@ -20,7 +20,7 @@ macro_rules! make_telemetry {
     (
         $($type: ident,)+
     ) => {
-        #[derive(GraphQLEnum)]
+        #[derive(Clone, Hash, Debug, Eq, GraphQLEnum, PartialEq)]
         pub enum Type {
             $($type,)+
         }

@@ -16,16 +16,16 @@
 
 use clyde_3g_eps_api::{Version, VersionInfo};
 
-#[derive(GraphQLObject)]
+#[derive(Clone, Debug, GraphQLObject)]
 pub struct VersionData {
     pub revision: i32,
     pub firmware_number: i32,
 }
 
-#[derive(GraphQLObject)]
+#[derive(Clone, Debug, GraphQLObject)]
 pub struct Data {
-    motherboard: VersionData,
-    daughterboard: Option<VersionData>,
+    pub motherboard: VersionData,
+    pub daughterboard: Option<VersionData>,
 }
 
 impl Into<VersionData> for Version {

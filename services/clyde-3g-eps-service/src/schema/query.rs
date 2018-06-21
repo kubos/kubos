@@ -31,7 +31,7 @@ graphql_object!(Root: Context as "Query" |&self| {
     field ack(&executor) -> FieldResult<subsystem::Mutations>
         as "Last run mutation"
     {
-        Ok(executor.context().subsystem().last_mutation.get())
+        Ok(executor.context().subsystem().get_last_mutation())
     }
 
     field version(&executor) -> FieldResult<version::Data>

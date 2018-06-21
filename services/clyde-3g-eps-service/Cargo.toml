@@ -3,6 +3,7 @@ name = "clyde-3g-eps-service"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 
+
 [dependencies]
 clyde-3g-eps-api = { path = "../../apis/clyde-3g-eps-api" }
 eps-api = { path = "../../apis/eps-api" }
@@ -10,3 +11,7 @@ failure = { git = "https://github.com/rust-lang-nursery/failure" }
 kubos-service = { path = "../kubos-service" }
 juniper =  "0.9"
 rust-i2c = { path = "../../hal/rust-hal/rust-i2c" }
+
+[dev-dependencies]
+serde_json = "1.0"
+double = "0.2.2"
