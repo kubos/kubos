@@ -110,7 +110,7 @@ It is a bit of a process laid out in the following steps:
    binary over to the target.
 
 If you would like the transferred binary to be accessible from any location in the system,
-it will then need to be manually transferred to a locatoin the system PATH:
+it will then need to be manually transferred to a location the system PATH:
 
 1. Run ``minicom kubos`` from inside of the Vagrant box.
 2. Enter the username ``kubos`` and the password ``Kubos123``.
@@ -144,8 +144,7 @@ To format your code:
 Important Notes
 ~~~~~~~~~~~~~~~
 
-- Kubos is currently using the ``0.4.2-nightly`` version of ``rustfmt``.
-  Despite the name, it is the latest version of ``rustfmt`` for stable Rust.
+- Kubos is currently using the ``0.4.2-stable`` version of ``rustfmt``.
 - Using ``cargo install rustfmt`` to install ``rustfmt`` will result in the deprecated version being installed, 
   which has slightly different formatting rules. Please use the ``rustup`` installation method instead.
 
