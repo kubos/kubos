@@ -5,122 +5,41 @@ We have provided a variety of example applications to help you get started with 
 These examples are located in the 'Examples' folder of the `Kubos repo <http://github.com/kubos/kubos/tree/master/examples>`__, 
 as well as within the `/home/vagrant/.kubos/kubos/examples` folder of the Kubos SDK box.
 
-Using an Example Application
-----------------------------
+Each example project directory contains a `README.md` file which details the purpose of the example and how to use it.
 
-Each of the example applications contains the files necessary to run as an independent Kubos project. 
+Using a C Example Application
+-----------------------------
+
+Each of the example applications written in C contains the files necessary to run as an independent Kubos project. 
 
 In order to use them, copy the example into the desired location and then run these commands from within the top level
-of the example folder:
+of the example folder::
 
     $ kubos link -a
+    $ kubos target {desired target}
     $ kubos build
+
+The ``kubos flash`` command can then be used to transfer the compiled binary onto your OBC.
+
+Once transferred, you can connect to your OBC and run the binary.
+
+Using a Rust Example Application
+--------------------------------
+
+To use a Rust example, copy the example into the desired location, then run::
+
+    $ cargo build --target {desired target}
     
-.. todo::
-
-    When Rust and/or Python examples get added, these instructions will need to be updated
-
-"Compatible Targets" indicates which target boards for which the application should execute successfully without modification.
-
 .. note:: 
 
-    The default target for all of these applications is ``stm32f407-disco-gcc``. 
-    You will need to manually change the target if this is not your desired endpoint device. 
+    While they ultimately resolve to the same underlying target, the target names for Cargo are not the same as the
+    target names used by ``kubos target``. For more information, see :ref:`Rust SDK doc <rust-targets>`.
+    
+From here, please refer to the :ref:`Rust project transfer instructions <rust-transfer>` for information about how to transfer and run
+a Rust project.
 
-TCP Receive
------------
+Using a Python Example Application
+----------------------------------
 
-`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__
-
-**Compatible Targets: Pumpkin MBM2, Beaglebone Black**
-
-+----------------------+--------------------+
-| High-level Component | Specific Area      |
-+======================+====================+
-| Linux                | sockets, TCP, IPv4 |
-+----------------------+--------------------+
-
-This is a demo program to test receiving TCP data over a valid IP connection (the ethernet port for the Pumpkin MBM2 and Beaglebone 
-Black targets)
-
-The program will wait for a client to connect over the socket, then read in any messages and send back a reply.
-
-TCP Send
---------
-
-`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__
-
-**Compatible Targets: Pumpkin MBM2, Beaglebone Black**
-
-+----------------------+--------------------+
-| High-level Component | Specific Area      |
-+======================+====================+
-| Linux                | sockets, TCP, IPv4 |
-+----------------------+--------------------+
-
-This is a demo program to test sending TCP data over a valid IP connection (the ethernet port for the Pumpkin MBM2 and Beaglebone Black 
-targets)
-
-The program takes the IP address and port to send to as input parameters, then sends a test message to the requested end point.
-It then waits for a reply message to be returned and exits.
-
-    Usage: kubos-linux-tcptx <ip_addr> <port>
-
-UART Receive
-------------
-
-`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uartrx>`__
-
-**Compatible Targets: All targets with UART ports**
-
-+----------------------+-------------------------------------------------------------------+
-| High-level Component | Specific Area                                                     |
-+======================+===================================================================+
-| Linux                | `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ |
-+----------------------+-------------------------------------------------------------------+
-
-This is a demo program to test receiving UART data in non-blocking mode as an interrupt. It expects to read the incrementing message 
-"Test message nnn" every 5 seconds from `/dev/ttyS1`.
-
-This program should be paired with the UART Send demo program.
-
-UART Send
----------
-
-`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uarttx>`__
-
-**Compatible Targets: All targets with UART ports**
-
-+----------------------+-------------------------------------------------------------------+
-| High-level Component | Specific Area                                                     |
-+======================+===================================================================+
-| Linux                | `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ |
-+----------------------+-------------------------------------------------------------------+
-
-This is a demo program to test UART transmission. It will write an incrementing message "Test message nnn" every 5 seconds out of `/dev/ttyS3`.
-
-This program should be paired with the UART Receive demo program.
-
-ADC Thermistor
---------------
-
-`Example Code - GitHub <http://github.com/kubos/kubos/tree/master/examples/adc-thermistor>`__
-
-**Compatible Targets: All targets with ADC pins**
-
-**Additional Hardware: Thermistor, 10 kOhm resistor**
-
-+----------------------+---------------+
-| High-level Component | Specific Area |
-+======================+===============+
-| Linux                | ADC (IIO)     |
-+----------------------+---------------+
-
-This is a demo program to test reading a raw value from an ADC pin.
-It will use the raw value to derive a temperature reading from the connected thermistor.    
-
-.. note::
-
-    This example is configured for an ADC pin with a 10-bit resolution connected to a 10 kOhm
-    thermistor with a 3.3V reference voltage and a voltage supply of 2.4V. These values might
-    need to be changed based on your test setup
+Since Python modules do not require compilation, the Python examples can be directly transferred to the OBC and
+run. For more information, see the :doc:`Python SDK guide <sdk-python>`.
