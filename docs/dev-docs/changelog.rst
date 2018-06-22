@@ -10,7 +10,7 @@ v1.3.0 - Jun 21 2018
 - `Added telemetry database core service <https://github.com/kubos/kubos/tree/master/services/telemetry-service>`__
 - `Added Rust API and UDP/GraphQL service for NovAtel OEM6 High Precision GNSS Receiver <https://github.com/kubos/kubos/blob/master/services/novatel-oem6-service>`__
 - `Added Python API and UDP/GraphQL service for Pumpkin MCUs <https://github.com/kubos/kubos/tree/master/services/pumpkin-mcu-service>`__
-- `Added Rust API and UDP/GraphQL service for ClydeSpace 3G EPS <https://github.com/kubos/kubos/tree/master/services/clyde-3g-eps-service>`__
+- `Added Rust API for ClydeSpace 3G EPS <https://github.com/kubos/kubos/tree/master/apis/clyde-3g-eps-api>`__
 - `Added Rust API and UDP/GraphQL service for Adcole Maryland Aerospace MAI-400 ADACS <https://github.com/kubos/kubos/tree/master/services/mai400-service>`__
 - `Added API for GOMspace NanoPower P31U <https://github.com/kubos/kubos/blob/master/apis/gomspace-p31u-api>`__
 - `Added C and Rust APIs for ISIS Antenna Systems <https://github.com/kubos/kubos/tree/master/apis/isis-ants-api>`__
