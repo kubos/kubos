@@ -97,6 +97,51 @@ These truly are the backbone of the operation of the satellite, and it is highly
 
  - :doc:`Mission Applications <what-is-a-mission-application>`
 
+Communication and KubOS
+-----------------------
+
+Universally, the method of communication is UDP. This includes onboard and the space/ground link. The rest of this overview is broken into onboard and space/ground sections to give an example of what to expect from these communication mediums. These descriptions will not cover every possible use case, but you can also come `talk to us on Slack <https://slack.kubos.co/>`__ if you have addition cases you would like to know about.
+
+Onboard Communication
+~~~~~~~~~~~~~~~~~~~~~
+
+Onboard the spacecraft, most communication is centered around mission applications. Mission applications use Graphql over UDP for controlling hardware services and payloads to change the state of the spacecraft or execute operations. Mission applications get all of their data directly from the hardware services, to ensure they have the most up-to-date information to make decisions. Typically, a telemetry application will fulfill the role of polling all the services to generate the health and status beacon and log data into the telemetry database. There is no other onboard communication that is required by the KubOS system.
+
+Space/Ground Communication
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As stated before, all communication is UDP. The way this is acheived for the space/ground link is through the communication service. This service provides UDP passthrough so the details of the radio link packetization, the encryption, etc. are transparent to the onboard services. See the :doc:`service documentation <services/communication-service>` for more details of how this is accomplished. The usage of this UDP passthrough over the space/ground link is governed by two major use cases: nominal operations and error recovery. Since these are so drastically different they have been broken out individually.
+
+Nominal Operations
+^^^^^^^^^^^^^^^^^^
+
+For nominal operations, the user will issue GraphQL commands to the mission application service with arguments that will cause the mission application to execute a desired operation or state change. The application service will run the application with the arguments and return the state information of the application (similar to an ACK, but with more information). For an example of this commanding process we can look at the case of an imaging satellite. You could have a mission application entitled "image target" that you pass the lat/long to through a GraphQL mutation to the mission application service. This "image target" application will then read its position data from the GPS service, command the ADCS to track the target, and command the imager to take the picture when it reaches the appropriate time.
+
+So far, this only covers commanding the satellite. For downlinking data, there are 3 major methods that are employed: health and status beacon, telemetry database queries, and file transfer. The health and status beacon is constantly being output by the telemetry application, and covers the high level state information of the spacecraft. Telemetry database queries are issued to collect data logged between passes, more detailed data on certain subsystems, or general data for storage on the ground (if the link budget allows). Lastly, file transfers are the primary method for payload data to be transferred to ground. For example, in the example above for the imaging spacecraft, the user would receive the status of the operation from the health and status beacon, issue a command to the file transfer service to downlink the resulting image, and issue a telemetry query to get the temperature/power measurements collected during the operation time window.
+
+These are just examples of nominal communication. The core function of the communication service is providing a UDP passthrough, so a mission operator or flight software developer can really use it in any way they see fit.
+
+In the case provided, this mode's link is generally used for:
+
+- Mission application service commands
+- Health and status beacon
+- Telemetry database queries
+- File transfers of payload data
+
+Error Recovery
+^^^^^^^^^^^^^^
+
+The other major use case is recovery. KubOS was designed to make recovery as easy, safe, and powerful as possible. When the satellite experiences an error or problem that the automatic recovery methods cannot handle, manual diagnosis and recovery might be necessary. We empower the mission operator to have as many tools as possible. In an error recovery situation, the primary link usage would most likely come from the shell and file services. The shell service provides complete terminal access to the satellite and the file transfer service allows the transfer of new applications/services/binaries/images to the satellite.
+
+In addition to these tools, each of the hardware service endpoints are also available to be queried/commanded directly from ground. Since they are GraphQL UDP endpoints, the mission control software can directly access them to take immediate action if necessary, so only a single command needs to get through to make drastic changes to recover the satellite. In fact, the mission control software would be accessing the hardware in the same way as the mission application does locally, so it can exercise the same level of control.
+
+Overall this mode's link is generally used for:
+
+- Shell service terminal command/terminal output
+- File service uploads to update onboard software
+- Telemetry database queries to diagnose what happened
+- Direct hardware queries and mutations and their responses
+- Health and status beacon
 
 Available Languages in KubOS
 ----------------------------
