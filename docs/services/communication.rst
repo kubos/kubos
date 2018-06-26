@@ -99,7 +99,11 @@ with remote services over serial:
 Transports
 ----------
 
-TODO write blurb
+Transports are different sources of messages for the communication service. They will
+often take the form of physical layers such as serial links or radios. The communication
+service should always be configured with one UDP transport to allow communication with
+local services. A single communication service instance can only be configured
+to work with two transports at a time.
 
 UDP
 ~~~
