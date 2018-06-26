@@ -25,8 +25,6 @@ a custom transport designed for the ground side of the gateway.
 
    @startuml
 
-   title "Comments - Sequence Diagram"
-
    participant "UDP Transport" as h_udp
    participant "Ground Communication Service" as host
    participant "External Gateway" as ext
@@ -103,7 +101,7 @@ Transports are different sources of messages for the communication service. They
 often take the form of physical layers such as serial links or radios. The communication
 service should always be configured with one UDP transport to allow communication with
 local services. A single communication service instance can only be configured
-to work with two transports at a time.
+to work with exactly two transports at a time.
 
 UDP
 ~~~
