@@ -5,7 +5,6 @@ machine:
 dependencies:
   override:
     - docker pull kubos/kubos-dev:latest
-    - if [ $CIRCLE_BRANCH = 'master' ]; then docker pull kubos/kubos-docs:latest; fi
 
 test:
   override:
@@ -21,11 +20,11 @@ deployment:
     commands:
       - pip install semantic-version
       - ./deploy.sh
-      - docker run -t -v $PWD:$PWD --workdir $PWD kubos/kubos-docs:latest sh prep_docs.sh
+      - docker run -t -v $PWD:$PWD --workdir $PWD kubos/kubos-dev:latest sh prep_docs.sh
       - ./deploy_docs.sh
   release:
     tag: /^[0-9]+(\.[0-9]+)*$/
     commands:
       - pip install semantic-version
-      - docker run -t -v $PWD:$PWD --workdir $PWD kubos/kubos-docs:latest sh prep_docs.sh
+      - docker run -t -v $PWD:$PWD --workdir $PWD kubos/kubos-dev:latest sh prep_docs.sh
       - ./deploy_docs.sh
