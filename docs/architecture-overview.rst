@@ -100,7 +100,7 @@ These truly are the backbone of the operation of the satellite, and it is highly
 Communication and KubOS
 -----------------------
 
-Universally, the method of communication is UDP. This includes onboard and the space/ground link. The rest of this overview is broken into onboard and space/ground sections to give an example of what to expect from these communication mediums. These descriptions will not cover every possible use case, but you can also come `talk to us on Slack <https://slack.kubos.co/>`__ if you have addition cases you would like to know about.
+Universally, the method of communication is UDP. This includes onboard and the space/ground link. The rest of this overview is broken into onboard and space/ground sections to give an example of what to expect from these communication mediums. These descriptions will not cover every possible use case, but you can also come `talk to us on Slack <https://slack.kubos.co/>`__ if you have additional cases you would like to know about.
 
 Onboard Communication
 ~~~~~~~~~~~~~~~~~~~~~
@@ -110,7 +110,7 @@ Onboard the spacecraft, most communication is centered around mission applicatio
 Space/Ground Communication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As stated before, all communication is UDP. The way this is acheived for the space/ground link is through the communication service. This service provides UDP passthrough so the details of the radio link packetization, the encryption, etc. are transparent to the onboard services. See the :doc:`service documentation <services/communication-service>` for more details of how this is accomplished. The usage of this UDP passthrough over the space/ground link is governed by two major use cases: nominal operations and error recovery. Since these are so drastically different they have been broken out individually.
+As stated before, all communication is done over UDP. The way this is acheived for the space/ground link is through the communication service. This service provides UDP passthrough so the details of the radio link packetization, the encryption, etc. are transparent to the onboard services. See the :doc:`service documentation <services/communication-service>` for more details of how this is accomplished. The usage of this UDP passthrough over the space/ground link is governed by two major use cases: nominal operations and error recovery. Since these are so drastically different they have been broken out individually.
 
 Nominal Operations
 ^^^^^^^^^^^^^^^^^^
