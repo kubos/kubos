@@ -163,9 +163,9 @@ Available Languages in KubOS
 
 The primary languages used in KubOS are Rust and Python.
 
- - :doc:`Rust <sdk-docs/sdk-rust>` is the primary language for the :ref:`services <rust-service-ref>`
- - :doc:`Python <sdk-docs/sdk-python>` is used for mission applications and :ref:`some services <python-service-ref>`
+ - :doc:`Rust <sdk-docs/sdk-rust>` is the primary language for the :ref:`services <rust-service-ref>` and mission applications.
+ - :doc:`Python <sdk-docs/sdk-python>` is used for easier development of mission applications and :ref:`some services <python-service-ref>`
 
-Rust and Python are used to create services and applications within KubOS. C is used for Linux and lower level functionality.
 Other languages (for example, C and C++) are compatible with KubOS, but are not currently directly supported.
+C is already used with KubOS for Linux and lower level functionality.
 Make sure to `talk to us <https://slack.kubos.co/>`__ if there is another language you'd like to use, as many are easily able to be used within KubOS!
