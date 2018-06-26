@@ -8,7 +8,7 @@ The core services are all the services that provide critical flight software cap
     :maxdepth: 1
     :hidden:
 
-    Communication Service <communication-service>
+    Communication Service <communication>
 
 Upcoming services are:
 
