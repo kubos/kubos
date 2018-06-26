@@ -13,7 +13,6 @@ The core services are all the services that provide critical flight software cap
 Upcoming services are:
 
  - |telem-db|
- - Communication Service <communication-service>
  - Shell Service
  - File Service
  

@@ -2,8 +2,8 @@ Using Lua with the Kubos SDK
 ============================
 
 The Kubos SDK Vagrant box contains limited support for running Lua based
-projects. This functionality is primarily used when running the communications,
-shell and file services or clients.
+projects. This functionality is primarily used when running the communication
+service, shell service, file service, or their respective clients.
 
 .. note::
 
