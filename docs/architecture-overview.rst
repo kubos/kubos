@@ -35,7 +35,10 @@ Services rarely make decisions, but will allow the user to accomplish typical fl
 Mission Applications
 ~~~~~~~~~~~~~~~~~~~~
 
-Mission applications are anything that governs the behavior of the satellite. They govern state management, accomplish scripted tasks, monitor onboard behavior, and generally are the brains of the system. Each application is typically dedicated to a certain mode or isolated task the satellite is supposed to accomplish to keep them lightweight and portable. They can be simple, such as a telemetry beacon app, or complex, such as a payload operations app.
+Mission applications are anything that governs the behavior of the satellite.
+They govern state management, accomplish scripted tasks, monitor onboard behavior, and generally are the brains of the system.
+Each application is typically dedicated to a certain mode or isolated task the satellite is supposed to accomplish to keep them lightweight and portable.
+They can be simple, such as a telemetry beacon app, or complex, such as a payload operations app.
 
 - :doc:`Mission Applications <what-is-a-mission-application>`
 
@@ -46,7 +49,9 @@ Typical Mission Architecture
 .. figure:: images/mission_diagram.png
     :align: center
 
-In the above diagram, everything in blue/purple is developed by Kubos's support system, while everything in red would be mission code, written by the user for their specific mission and payload. (Hardware services can be an exception, if they are not integrated into the system already)
+In the above diagram, everything in blue/purple is developed by Kubos.
+Everything in red would be mission code, written by the user for their specific mission and payload.
+(Hardware services can fall into the user category if they are not integrated into the system already)
 
 Gateway
 ~~~~~~~
@@ -64,7 +69,8 @@ Similarly, any messages which need to be sent out of the satellite are processed
 Hardware Services
 ~~~~~~~~~~~~~~~~~
 
-Hardware services are GraphQL server endpoints that take in queries and mutations and exercise the hardware API to complete them. Typically, there is an accompanying hardware API to allow for easy interaction with the hardware.
+Hardware services are GraphQL server endpoints that take in queries and mutations and exercise the hardware API to complete them.
+Typically, there is an accompanying hardware API to allow for easy interaction with the hardware.
 
  - :doc:`Hardware Services <services/hardware-services>`
  - :doc:`GraphQL <services/graphql>`
@@ -75,15 +81,21 @@ Core Services
 
 Core services are all the services that provide critical flight software capability.
 Any service that does not interact with hardware and is not specific to a mission falls within this category.
-Currently, core services include: shell service, telemetry database service, file transfer service, process monitoring service, and the application service/registry.
+Currently, :doc:`core services <services/core-services>` include:
 
-- :doc:`Core Services <services/core-services>`
+- Shell service
+- Telemetry database service
+- File transfer service
+- Process monitoring service
+- Application service/registry
 
 Payload Integration
 ~~~~~~~~~~~~~~~~~~~
 
-Payloads can be integrated in any way desired by the user to interact with their payload hardware to accomplish mission goals.
+The payload integration block denotes any software used to integrate payload hardware into KubOS.
+Payload hardware can be integrated in any way desired by the user to accomplish mission goals.
 If possible, payload services should be modeled after hardware services to simplify the interface with the mission application.
+The documentation we have provided shows how to make a payload service mirror a hardware service:
 
  - :doc:`Payload Services <services/payload-services>`
 
@@ -92,67 +104,68 @@ Mission Applications
 
 Mission applications, as previously discussed, handle all the onboard decision making.
 These are, by nature, mission specific, but some of them can be largely reused due to the abstract nature of the hardware integration.
-These are typically written or adapted by the user.
-These truly are the backbone of the operation of the satellite, and it is highly recommended to read more in depth on them to truly understand KubOS.
+These are typically written or adapted by the user and are the backbone of the operation of the satellite.
+It is highly recommended to read more in depth on them to truly understand KubOS.
 
  - :doc:`Mission Applications <what-is-a-mission-application>`
 
 Communication and KubOS
 -----------------------
 
-Universally, the method of communication is UDP. This includes onboard and the space/ground link. The rest of this overview is broken into onboard and space/ground sections to give an example of what to expect from these communication mediums. These descriptions will not cover every possible use case, but you can also come `talk to us on Slack <https://slack.kubos.co/>`__ if you have additional cases you would like to know about.
+UDP is used for all communication, both onboard and over the space/ground link.
+The rest of this overview is broken into onboard and space/ground sections to give an example of what to expect from these communication mediums.
+These descriptions will not cover every possible use case, but you can also come `talk to us on Slack <https://slack.kubos.co/>`__ if you have additional cases you would like to know about.
 
 Onboard Communication
 ~~~~~~~~~~~~~~~~~~~~~
 
-Onboard the spacecraft, most communication is centered around mission applications. Mission applications use Graphql over UDP for controlling hardware services and payloads to change the state of the spacecraft or execute operations. Mission applications get all of their data directly from the hardware services, to ensure they have the most up-to-date information to make decisions. Typically, a telemetry application will fulfill the role of polling all the services to generate the health and status beacon and log data into the telemetry database. There is no other onboard communication that is required by the KubOS system.
+Onboard the spacecraft, most communication is centered around mission applications.
+Mission applications use :doc:`Graphql <services/graphql>` over UDP for controlling hardware services and payloads to change the state of the spacecraft or execute operations.
+Mission applications get all of their data directly from the hardware services, to ensure they have the most up-to-date information to make decisions.
+Typically, a telemetry application will fulfill the role of polling all the services to generate the health and status beacon and log data into the :doc:`telemetry database. <services/telemetry-database>`
+There is no other onboard communication that is required by the KubOS system.
 
 Space/Ground Communication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As stated before, all communication is done over UDP. The way this is acheived for the space/ground link is through the communication service. This service provides UDP passthrough so the details of the radio link packetization, the encryption, etc. are transparent to the onboard services. See the :doc:`service documentation <services/communication-service>` for more details of how this is accomplished. The usage of this UDP passthrough over the space/ground link is governed by two major use cases: nominal operations and error recovery. Since these are so drastically different they have been broken out individually.
+The communication service is responsible for maintaining the space/ground link.
+This service provides UDP passthrough so the details of the radio link (packetization, the encryption, etc.) are transparent to the onboard services.
+See the :doc:`service documentation <services/communication-service>` for more details of how this is accomplished.
+
+The usage of this UDP passthrough over the space/ground link is governed by two major use cases: nominal operations and error recovery.
 
 Nominal Operations
 ^^^^^^^^^^^^^^^^^^
 
-For nominal operations, the user will issue GraphQL commands to the mission application service with arguments that will cause the mission application to execute a desired operation or state change. The application service will run the application with the arguments and return the state information of the application (similar to an ACK, but with more information). For an example of this commanding process we can look at the case of an imaging satellite. You could have a mission application entitled "image target" that you pass the lat/long to through a GraphQL mutation to the mission application service. This "image target" application will then read its position data from the GPS service, command the ADCS to track the target, and command the imager to take the picture when it reaches the appropriate time.
+In day-to-day operations, the space/ground link will most commonly be used for a few different purposes:
 
-So far, this only covers commanding the satellite. For downlinking data, there are 3 major methods that are employed: health and status beacon, telemetry database queries, and file transfer. The health and status beacon is constantly being output by the telemetry application, and covers the high level state information of the spacecraft. Telemetry database queries are issued to collect data logged between passes, more detailed data on certain subsystems, or general data for storage on the ground (if the link budget allows). Lastly, file transfers are the primary method for payload data to be transferred to ground. For example, in the example above for the imaging spacecraft, the user would receive the status of the operation from the health and status beacon, issue a command to the file transfer service to downlink the resulting image, and issue a telemetry query to get the temperature/power measurements collected during the operation time window.
+- Executing :doc:`mission applications <what-is-a-mission-application>` on-demand. For instance, triggering a mission application which orients an imaging device to the requested coordinates and takes a picture.
+- Automatically sending and receiving health and status information (health and status beacon)
+- Querying the :doc:`telemetry database <services/telemetry-database>` for specific hardware status information
+- Downloading payload data files through the :doc:`file transfer service <services/file-transfer>`.
 
-These are just examples of nominal communication. The core function of the communication service is providing a UDP passthrough, so a mission operator or flight software developer can really use it in any way they see fit.
-
-In the case provided, this mode's link is generally used for:
-
-- Mission application service commands
-- Health and status beacon
-- Telemetry database queries
-- File transfers of payload data
+These are just examples of nominal communication.
+The core function of the communication service is providing a UDP passthrough, so a mission operator or flight software developer can really use it in any way they see fit.
 
 Error Recovery
 ^^^^^^^^^^^^^^
 
-The other major use case is recovery. KubOS was designed to make recovery as easy, safe, and powerful as possible. When the satellite experiences an error or problem that the automatic recovery methods cannot handle, manual diagnosis and recovery might be necessary. We empower the mission operator to have as many tools as possible. In an error recovery situation, the primary link usage would most likely come from the shell and file services. The shell service provides complete terminal access to the satellite and the file transfer service allows the transfer of new applications/services/binaries/images to the satellite.
+KubOS was designed to make recovery as easy, safe, and powerful as possible.
+When the satellite experiences an error or problem that the automatic recovery methods cannot handle, manual diagnosis and recovery might be necessary.
+We empower the mission operator to have as many tools as possible:
 
-In addition to these tools, each of the hardware service endpoints are also available to be queried/commanded directly from ground. Since they are GraphQL UDP endpoints, the mission control software can directly access them to take immediate action if necessary, so only a single command needs to get through to make drastic changes to recover the satellite. In fact, the mission control software would be accessing the hardware in the same way as the mission application does locally, so it can exercise the same level of control.
-
-Overall this mode's link is generally used for:
-
-- Shell service terminal command/terminal output
-- File service uploads to update onboard software
-- Telemetry database queries to diagnose what happened
-- Direct hardware queries and mutations and their responses
-- Health and status beacon
+- The :doc:`shell service <services/shell>` provides complete terminal access to the satellite
+- The :doc:`file transfer service <services/file-transfer>` allows corrected versions of the software to be uploaded and installed in the satellite
+- Each :doc:`hardware service <services/hardware-services>` endpoint can be directly queried/commanded to gather specific debugging data or control hardware, bypassing the core services
 
 Available Languages in KubOS
 ----------------------------
 
-The primary languages used in KubOS are Rust and Python. C is also used, but only for the bootloader, kernal, and some APIs.
+The primary languages used in KubOS are Rust and Python.
 
  - :doc:`Rust <sdk-docs/sdk-rust>` is the primary language for the :ref:`services <rust-service-ref>`
  - :doc:`Python <sdk-docs/sdk-python>` is used for mission applications and :ref:`some services <python-service-ref>`
 
-Rust and Python are used to create services and applications within KubOS. C is only used for linux and lower level functionality.
-Other languages can also be easily supported, make sure to `talk to us <https://slack.kubos.co/>`__ if there is another language you'd like to use!
-
-.. Note::
-    C is able to be used to create services and applications within the system. We do not list it as an "available language" because we do not include pre-built tools for KubOS specific tasks like we do in Python and Rust. We assume that if you are comfortable enough to build your application or service in C, you can handle the required interactions. We would highly recommend talking to us about the implications before beginning.
+Rust and Python are used to create services and applications within KubOS. C is used for Linux and lower level functionality.
+Other languages (for example, C and C++) are compatible with KubOS, but are not currently directly supported.
+Make sure to `talk to us <https://slack.kubos.co/>`__ if there is another language you'd like to use, as many are easily able to be used within KubOS!
