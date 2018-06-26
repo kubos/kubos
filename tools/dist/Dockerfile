@@ -1,4 +1,4 @@
-# kubos/kubos-dev:0.1.3
+# kubos/kubos-dev:0.1.6
 
 FROM phusion/baseimage:0.9.22
 
