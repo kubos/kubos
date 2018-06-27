@@ -8,16 +8,18 @@ The core services are all the services that provide critical flight software cap
     :hidden:
 
     Communication Service <communication>
+    File Service <file>
+    File Protocol <file-protocol>
 
 Available services are:
 
  - :doc:`Communication Service <communication>`
+ - :doc:`File Service <file>`
 
 Upcoming services are:
 
  - |telem-db|
  - Shell Service
- - File Service
  
  .. |telem-db| raw:: html
  
