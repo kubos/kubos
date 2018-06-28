@@ -24,16 +24,29 @@ use std::process::Command;
 use toml;
 use uuid::Uuid;
 
+/// The default application registry directory in KubOS
 pub const K_APPS_DIR: &'static str = "/home/system/kubos/apps";
 
+/// The high level metadata of an application
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AppMetadata {
+    /// A unique name for the application (usually the same as the name of the binary)
     pub name: String,
+    /// The version of this application
     pub version: String,
+    /// The author of the application
     pub author: String,
 }
 
 impl AppMetadata {
+    /// Create a new AppMetadata object
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::AppMetadata;
+    /// let metadata = AppMetadata::new("my-app", "1.0", "Jane Doe <jane@doe.com>");
+    /// ```
     pub fn new(name: &str, version: &str, author: &str) -> AppMetadata {
         AppMetadata {
             name: name.to_string(),
@@ -43,10 +56,13 @@ impl AppMetadata {
     }
 }
 
-/// Kubos RunLevel struct
+/// The different RunLevels supported by KubOS applications
 #[derive(Clone,Debug,Deserialize,Serialize,PartialEq)]
 pub enum RunLevel {
+    /// An application will start at system boot time, and is managed automatically by the
+    /// Application Service
     OnBoot,
+    /// An application will start when commanded through the `start_app` GraphQL mutation
     OnCommand
 }
 
@@ -62,21 +78,29 @@ impl fmt::Display for RunLevel {
 /// Kubos App struct
 #[derive(Clone,Debug,Deserialize,Serialize)]
 pub struct App {
+    /// The generated UUID for the application
     pub uuid: String,
+    /// The process ID of the application, if it's currently running (0 otherwise)
     pub pid: u32,
+    /// The absolute path to the application binary
     pub path: String,
+    /// The associated metadata of the application
     pub metadata: AppMetadata,
 }
 
+/// AppRegistryEntry
 #[derive(Clone,Debug,Deserialize,Serialize)]
 pub struct AppRegistryEntry {
+    /// Whether or not this application is the active installation
     pub active: bool,
+    /// The run level of the application
     pub run_level: RunLevel,
+    /// The app itself
     pub app: App,
 }
 
 impl AppRegistryEntry {
-    pub fn from_dir(dir: &str) -> Option<AppRegistryEntry> {
+    fn from_dir(dir: &str) -> Option<AppRegistryEntry> {
         let app_toml: PathBuf = [dir, "app.toml"].iter().collect();
         if !app_toml.exists() {
             return None;
@@ -97,7 +121,7 @@ impl AppRegistryEntry {
         }
     }
 
-    pub fn save(&self) -> Result<bool, String> {
+    fn save(&self) -> Result<bool, String> {
         let mut app_toml = PathBuf::from(self.app.path.clone());
         app_toml.set_file_name("app.toml");
 
@@ -114,13 +138,28 @@ impl AppRegistryEntry {
     }
 }
 
+/// AppRegistry
 #[derive(Deserialize,Serialize)]
 pub struct AppRegistry {
+    #[doc(hidden)]
     pub entries: RefCell<Vec<AppRegistryEntry>>,
+    /// The managed root directory of the AppRegistry
     pub apps_dir: String
 }
 
 impl AppRegistry {
+    /// Create a new AppRegistry located at a specific directory in the filesystem
+    ///
+    /// # Arguments
+    ///
+    /// * `apps_dir` - The root directory that applications are loaded from
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::AppRegistry;
+    /// let registry = AppRegistry::new_from_dir("/my/apps");
+    /// ```
     pub fn new_from_dir(apps_dir: &str) -> AppRegistry {
         let registry = AppRegistry {
             entries: RefCell::new(Vec::new()),
@@ -135,6 +174,15 @@ impl AppRegistry {
         return registry;
     }
 
+    /// Create a new AppRegistry located at the default directory (see [`K_APPS_DIR`])
+    ///
+    /// [`K_APPS_DIR`]: constant.K_APPS_DIR.html
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::AppRegistry;
+    /// let registry = AppRegistry::new();
+    /// ```
     pub fn new() -> AppRegistry {
         Self::new_from_dir(K_APPS_DIR)
     }
@@ -187,6 +235,20 @@ impl AppRegistry {
         reg_entries
     }
 
+    /// Register an application binary with the AppRegistry, extracting metadata and installing it
+    /// into the proper folder structure under the AppRegistry directory.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The path to an application binary
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::AppRegistry;
+    /// let registry = AppRegistry::new();
+    /// registry.register("/home/kubos/my-app-bin");
+    /// ```
     pub fn register(&self, path: &str) -> Result<AppRegistryEntry, String> {
         let app_path = Path::new(path);
         if !app_path.exists() {
@@ -293,6 +355,21 @@ impl AppRegistry {
         }
     }
 
+    /// Uninstall an application from the AppRegistry
+    ///
+    /// # Arguments
+    ///
+    /// * `app_uuid` - The UUID generated for the app
+    /// * `version` - The version of the app to delete
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::AppRegistry;
+    /// let registry = AppRegistry::new();
+    /// registry.uninstall("01234567-89ab-cdef0-1234-56789abcdef0", "1.0");
+    /// ```
+    ///
     pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, String>
     {
         let mut entries = self.entries.borrow_mut();
@@ -331,6 +408,20 @@ impl AppRegistry {
         }
     }
 
+    /// Start an application. If successful, returns the pid of the application process.
+    ///
+    /// # Arguments
+    ///
+    /// * `app_uuid` - The UUID generated for the app when it was registered
+    /// * `run_level` - Which Run Level to run the app with
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::{AppRegistry, RunLevel};
+    /// let registry = AppRegistry::new();
+    /// registry.start_app("01234567-89ab-cdef0-1234-56789abcdef0", RunLevel::OnCommand);
+    /// ```
     pub fn start_app(&self, app_uuid: &str, run_level: RunLevel) -> Result<u32, String>
     {
         let entries = self.entries.borrow();

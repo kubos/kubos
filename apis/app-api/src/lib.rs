@@ -16,14 +16,11 @@
 
 //! A simple API to make standalone Rust applications with high-level hooks
 //! for mission life-cycle management
-//#![deny(missing_docs)]
+#![deny(missing_docs)]
 #![deny(warnings)]
-
 extern crate uuid;
 extern crate getopts;
-
 extern crate kubos_system;
-
 #[macro_use]
 extern crate serde_derive;
 extern crate toml;
@@ -32,28 +29,65 @@ use std::env;
 
 use getopts::Options;
 
+/// The registry submodule
 pub mod registry;
 use self::registry::*;
 
+/// The App type
 pub type App = registry::App;
+
+/// The RunLevel type
 pub type RunLevel = registry::RunLevel;
 
-/// AppHandler
+/// The trait that should be implemented by KubOS Applications to be notified when the application
+/// goes through one of three lifecycle events:
+///
+/// 1. Start on system boot-up
+/// 2. Start on demand when being commanded (i.e. through the `start_app` GraphQL mutation)
+/// 3. When the app is shutting down, to clean up any resources initialized in on_boot or
+///    on_command
 #[allow(unused_variables)]
 pub trait AppHandler {
-    ///
+    /// Called when the Application is started at system boot time
     fn on_boot(&self) {
     }
 
-    ///
+    /// Called when the Application is started on demand through the `start_app` GraphQL mutation
     fn on_command(&self) {
     }
 
-    /// app process shutting down
+    /// Called when the Application is shutting down, to clean up any resources initialized in
+    /// on_boot or on_command. Note: This function is not guaranteed to be called if the process
+    /// exits for unexpected reasons
     fn on_shutdown(&self) {
     }
 }
 
+/// A helper macro that can be called from a KubOS application's `main` function.
+///
+/// # Arguments
+///
+/// * `handler` - An implementation of `AppHandler`
+///
+/// # Examples
+///
+/// ```
+/// #[macro_use]
+/// extern crate kubos_app;
+///
+/// struct MyApp;
+///
+/// impl kubos_app::AppHandler for MyApp {
+///   fn on_boot(&self) {
+///     //..
+///   }
+/// }
+///
+/// fn main() {
+///     let app = MyApp { };
+///     app_main!(&app);
+/// }
+/// ```
 #[macro_export]
 macro_rules! app_main {
     ($handler:expr) => {{
@@ -61,15 +95,17 @@ macro_rules! app_main {
         let version: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
         let authors: Option<&'static str> = option_env!("CARGO_PKG_AUTHORS");
 
-         App::main(name.unwrap_or("Unknown"),
-                   version.unwrap_or("Unknown"),
-                   authors.unwrap_or("Unknown"),
-                   std::process::id(),
-                   $handler)
+         kubos_app::App::main(name.unwrap_or("Unknown"),
+                              version.unwrap_or("Unknown"),
+                              authors.unwrap_or("Unknown"),
+                              std::process::id(),
+                              $handler)
     }};
 }
 
 impl App {
+    /// The entry point for all KubOS applications. The preferred way to use this application
+    /// is through the `app_main!` macro
     pub fn main(name: &str, version: &str, authors: &str, _pid: u32, handler: &AppHandler) {
         let args: Vec<String> = env::args().collect();
         let program = args[0].clone();
