@@ -1,32 +1,34 @@
 File Protocol
 =============
 
-The file protocol is implemented by both the :doc:`file service <file>` and
-and clients interacting with the service. This protocol uses a content
-addressable methodology similar to git for storing and chunking files.
-This document covers the content addressable storage, all messages
-used in the protocol and includes diagrams of common use cases.
+The file protocol is implemented by both the
+:doc:`file transfer service <file>` and clients interacting
+with the service. This protocol uses a content-addressable
+methodology similar to git for storing and chunking files.
+This document covers the content-addressable storage, all
+messages used in the protocol, and includes diagrams
+of common use cases.
 
 Content Addressable Storage
 ---------------------------
 
-The file protocol uses a content addressable system to store file data.
+The file protocol uses a content-addressable system to store file data.
 All files are broken up into 4kB chunks prior to sending. This chunking
 is initiated either by an ``export`` or ``import`` message. A local
 folder called ``storage`` is created by the file service and client
-for storing the content addressable information. Inside of ``storage``
+for storing the content-addressable information. Inside of ``storage``
 each file has it's own folder. The folder name is a 16-bit
 `blake2 hash <https://blake2.net/>`_ of the file's
 contents. This folder is created as part of the import/export process.
 
 Inside of each file's folder there is a ``meta`` file and chunk files.
-Each ``meta`` file contains meta data about the file in a cbor list.
+Each ``meta`` file contains metadata about the file in a CBOR list.
 Currently we only store the number of chunks in the ``meta`` file.
 Each chunk file is also stored in this folder. Chunk files are named
 after the hex representation of their chunk number. Each chunk file
 contains the raw contents of that chunk.
 
-Here is an example content addressable storage structure containing
+Here is an example content-addressable storage structure containing
 an eleven chunk file::
 
     storage/
@@ -49,83 +51,134 @@ Messages
 
 All messages in the file protocol are encoded as `CBOR` arrays and are sent
 in UDP packets. The first value in the encoded list is the ``channel_id``
-for request/response type messages and the ``hash`` for content-addressable messages.
+for request/response type messages and the ``hash`` for content-addressable
+messages.
+
+The ``hash`` parameter is the blake2 hash for the corresponding file
+which is being transferred.
+
+The ``channel_id`` parameter corresponds to an in-memory array of coroutines
+created as part of the file transfer process.
 
 Send Chunk
 ~~~~~~~~~~
 
-Files are sent to the remote side in 4kB chunks. This is the payload
-message containing the chunks indexed by file hash and chunk index.
+This message is sent as part of the file ``import`` or ``export`` process.
+It contains the file hash, chunk index and raw chunk data.
+
+Each raw chunk is 4KB in size. Individual chunk messages will not get
+an immediate reply. However if no chunks are received within the
+timeout window then an ``ack`` or ``nak`` will be sent depending
+on whether all the chunks have been received or not.
 
     ``{ hash, chunk_index, data }``
-
-The protocol typically won't reply to these unless there is a long
-pause in sending (such as after sending the last chunk). In this case
-the receive will send either an ack or nak depending on if
-all the chunks have been received or not.
 
 Sync
 ~~~~
 
-To query whether the other side has all the chunks for a file, send a
-sync message. The ``num_chunks`` is optional, but it should be sent for
-new files so the other side knows how many chunks to expect.
+This message is sent to query to message receiver on the status
+of a file. It contains the file's hash and the expected number
+of chunks for the file.
+
+If the file does not exist on the receiver's side then the receiver
+will send a ``nak`` requesting all chunks and create the appropriate
+file storage structure. If the file does exist then the receiver will
+send back an ``ack``. The ``num_chunks`` is optional, however it
+should be sent in the first ``sync`` of an ``import`` or ``export``
+to ensure the expected number of chunks is known.
 
     ``{ hash, num_chunks }``
-
-An acknowledge or negative acknowledge message will be sent in response.
 
 Acknowledge (Ack)
 ~~~~~~~~~~~~~~~~~
 
-This message tells the other side that the sender has all chunks
-for a given hash file.
+This message is sent to inform the message receiver that the
+message sender has all chunks for a given file. It contains the
+file's hash, the boolean value true, and the number of
+chunks in the file.
 
     ``{ hash, true, num_chunks }``
 
 Negative Acknowledge (Nak)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This message tells the other side that the sender is missing chunks.
-The numbers after ``false`` are pairs of ranges where the first number is
-inclusive and the second is exclusive. For example ``0, 2`` means the
-first two chunks are missing.
+This message is sent to inform the message receiver that the
+message sender does not have all chunks for a given file. It
+contains the file's hash, the boolean value false, and a list
+of missing chunks. The list of missing chunks is made up of
+pairs of ranges where the first number is inclusive and the
+second is exclusive. For example ``0, 2`` means the first
+two chunks are missing.
 
-    ``{ hash, false 1, 4, 6 ,7 }``
+A ``nak`` may be sent in response to a ``sync`` or after a
+timeout during a file ``import`` or ``export``. The message
+sender should expect the message receiver to send
+the missing file chunks upon receipt of a ``nak``.
+
+    ``{ hash, false 1, 4, 6, 7 }``
+
+The above example ``nak`` indicates that chunks 1-3 and 6
+are missing.
 
 Export
 ~~~~~~
 
-The sender wishes that the other side exports a file from content addressable
-storage to somewhere on the normal file system. Typically this is the first
-command when uploading a file to a remote service.
+This message is sent to initiate the process of transferring
+a file from the message sender to the message receiver. It
+contains the channel id, the string "export", the file's hash,
+the target path for the file and file's permissions mode.
+
+The message receiver will begin waiting for file chunks after
+receiving this message. Once the timeout triggers it will
+attempt to export the file locally. If the file is incomplete then
+the receiver will request any missing chunks. Upon receiving
+all chunks it will attempt to verify and export the file to
+the local filesystem. This message is sent after the
+``sync`` command as part of the export process.
 
     ``{ channel_id, "export", hash, path, mode }``
 
-If the chunks aren't there yet, then other side will request them. The export
-command will wait to execute until all chunks are received.
 
 Import
 ~~~~~~
 
-Import is used to tell a remote side to import a file from the normal file system
-into the managed content addressable storage. 
+This message is sent to initiate the process of transferring
+a file to the message sender from the message receiver. It
+contains the channel id, the string "import", and the requested
+file's path.
+
+Upon receiving, the message receiver will import the requested
+file into the managed content-addressable storage and send a
+``success`` message to the sender. This ``success`` message
+will contain the file`s hash and allow the original message
+sender to determine which file chunks are required.
 
     ``{ channel_id, "import", path }``
 
 Success
 ~~~~~~~
 
-When an import or export command finishes with success, this will be received
-with the results.
+This message is sent as part of the ``import`` or ``export``
+processes. It contains the channel id, the boolean value true
+and potentially other values depending on the situation.
+
+This message is primarily sent in two different situations:
+at the end of an ``export`` and near the beginning of an ``import``.
+The message sender would send a ``success`` if an ``export``
+has completed successfully. The ``success`` is also used
+during an ``import`` to indicate a file is ready for sending
+and to communicate the file's hash.
+
+Extra values in this command appear as extra items in the list.
 
     ``{ channel_id, true, ..values }``
 
 Failure
 ~~~~~~~
 
-If there is an error in the import or export, this will be received with an
-error message.
+This message is sent if there as an error in the ``import`` or
+``export`` process. It contains the channel id, the boolean false
+and the error message.
 
     ``{ channel_id, false, error_message }``
 
@@ -138,8 +191,8 @@ Uploading a single chunk file from a ground station to an OBC:
 
     @startuml
 
-    participant "OBC" as obc
     participant "Ground Station" as ground
+    participant "OBC" as obc
 
     ground -> obc : Sync 
     ground -> obc : Export 
@@ -156,8 +209,8 @@ Downloading a single chunk file from an OBC to a ground station:
 
     @startuml
 
-    participant "OBC" as obc
     participant "Ground Station" as ground
+    participant "OBC" as obc
 
     ground -> obc : Import 
     obc -> ground : Success 
@@ -173,8 +226,8 @@ Uploading a three chunk file from ground station with a chunk re-request:
 
     @startuml
 
-    participant "OBC" as obc
     participant "Ground Station" as ground
+    participant "OBC" as obc
 
     ground -> obc : Sync 
     ground -> obc : Export 
@@ -187,4 +240,3 @@ Uploading a three chunk file from ground station with a chunk re-request:
     obc -> ground : Success
 
     @enduml
-
