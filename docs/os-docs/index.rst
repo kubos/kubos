@@ -53,3 +53,4 @@ SysAdmin Docs
     Building Kubos Linux for the Beaglebone Black <kubos-linux-on-bbb>
     Building Kubos Linux for the ISIS-OBC <kubos-linux-on-iobc>
     Building Kubos Linux for Pumpkin MBM2 <kubos-linux-on-mbm2>
+    Configuring KubOS <configuring-kubos>

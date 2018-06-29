@@ -26,7 +26,7 @@ use std::time::Duration;
 
 use objects::*;
 
-pub const RECV_TIMEOUT: Duration = Duration::from_millis(300);
+pub const RECV_TIMEOUT: Duration = Duration::from_millis(350);
 
 pub struct LockData {
     pub status: Mutex<LockStatus>,
