@@ -11,9 +11,9 @@ which means a connection is required between the OBC and ground segment
 capable of transferring UDP packets. This could be established using the
 :doc:`communication service <communication>` or a standard network connection.
 
-Currently both the file service and file client are implement in Lua, so refer
-to the :doc:`Lua SDK doc <../sdk-docs/sdk-lua>` for more detailed
-Lua instructions.
+Currently both the file service and file client are implemented in Lua,
+so refer to the :doc:`Lua SDK doc <../sdk-docs/sdk-lua>` for more
+detailed Lua instructions.
 
 Running The Service From KubOS
 ------------------------------
