@@ -59,9 +59,6 @@ class IntegrationTest:
 
 if __name__ == '__main__':
     test = IntegrationTest()
-    # "/Users/jessecoffey/Workspace/apollo-fusion/common/overlay" +
-    # DEFAULT_CONFIG_PATH
     print "Services Test"
     print "#############\n"
-    # test.test_services()
-    test.test_service(service="pumpkin-mcu-service")
+    test.test_services()
