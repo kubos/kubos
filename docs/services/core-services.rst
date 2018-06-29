@@ -6,19 +6,10 @@ The core services are all the services that provide critical flight software cap
 Available services are:
 
 .. toctree::
+    :hidden:
     :maxdepth: 1
 
     Communication Service <communication>
     File Transfer Service <file>
     File Protocol <file-protocol>
     Telemetry Database Service <telemetry-db>
-
-Available services are:
-
- - :doc:`Communication Service <communication>`
- - :doc:`File Transfer Service <file>`
- - :doc:`Telemetry Database Service <telemetry-db>`
-
-Upcoming services are:
-
- - Shell Service
