@@ -10,7 +10,6 @@ Graphene schema setup to enable queries.
 
 import graphene
 from models import *
-import json
 import mcu_api
 
 # Initialize MODULES global. This is then configured in the service file.
@@ -36,19 +35,18 @@ class Query(graphene.ObjectType):
 
     def resolve_moduleList(self, info):
         """
-        This allows discovery of which modules are present and what 
+        This allows discovery of which modules are present and what
         addresses they have. Mostly just a debugging/discovery tool.
         """
         return MODULES
 
     def resolve_fieldList(self, info, module):
         """
-        This allows discovery of which fields are available for a 
-        specific module. Mostly just a debugging/discovery tool. 
+        This allows discovery of which fields are available for a
+        specific module. Mostly just a debugging/discovery tool.
         """
         if module not in MODULES:
-            raise KeyError('Module not configured: '+str(module))
-        address = MODULES[module]['address']
+            raise KeyError('Module not configured: {}'.format(module))
         telemetry = mcu_api.TELEMETRY
         fields = []
         for field in telemetry["supervisor"]:
@@ -60,10 +58,10 @@ class Query(graphene.ObjectType):
     def resolve_read(self, info, module, count):
         """
         Reads number of bytes from the specified MCU
-        Returns as a hex string. 
+        Returns as a hex string.
         """
         if module not in MODULES:
-            raise KeyError('Module not configured: '+str(module))
+            raise KeyError('Module not configured: {}'.format(module))
         address = MODULES[module]['address']
         mcu = mcu_api.MCU(address=address)
         bin_data = mcu.read(count=count)
@@ -73,11 +71,11 @@ class Query(graphene.ObjectType):
     def resolve_mcuTelemetry(self, info, module, fields):
         """
         Queries specific telemetry item fields from the speficied
-        module. 
+        module.
 
-        fields must be a list of value field names matching the 
+        fields must be a list of value field names matching the
         configuration data in the mcu_api.py file. Inputting ['all']
-        retrieves all available telemetry for that module. 
+        retrieves all available telemetry for that module.
 
         Retuns json dump of the form:
         {
@@ -86,7 +84,7 @@ class Query(graphene.ObjectType):
         }
         """
         if module not in MODULES:
-            raise KeyError('Module not configured: '+str(module))
+            raise KeyError('Module not configured: {}'.format(module))
         address = MODULES[module]['address']
         fields = map(str, fields)
         mcu = mcu_api.MCU(address=address)
@@ -107,19 +105,52 @@ class Passthrough(graphene.Mutation):
 
     def mutate(self, info, module, command):
         """
-        Handles passthrough commands to the Pumpkin MCU modules. 
+        Handles passthrough commands to the Pumpkin MCU modules.
         """
         if module not in MODULES:
             raise KeyError('Module not configured', module)
-        address = MODULES[module]['address']
         if type(command) == unicode:
             command = str(command)
-        mcu = mcu_api.MCU(address=address)
+        mcu = mcu_api.MCU(address=MODULES[module]['address'])
         out = mcu.write(command)
 
         commandStatus = CommandStatus(status=out[0], command=out[1])
 
         return commandStatus
+
+
+class TestHardware(graphene.Mutation):
+    """
+    Tests if the hardware is present and talking.
+    """
+
+    class Arguments:
+        test = graphene.String()
+
+    Output = TestResults
+
+    def mutate(self, info, test):
+
+        test_output = {}
+        status = True
+        errors = None
+        if test == "Integration":
+            for module in MODULES:
+                mcu = mcu_api.MCU(address=MODULES[module]['address'])
+                out = mcu.read_telemetry(module=module, fields=['all'])
+                test_output.update(out)
+
+        else:
+            status = False
+            errors = "Test type not implemented."
+
+        testResults = TestResults(
+            errors=errors,
+            status=status,
+            results=test_output
+        )
+
+        return testResults
 
 
 class Mutation(graphene.ObjectType):
@@ -128,6 +159,7 @@ class Mutation(graphene.ObjectType):
     """
 
     passthrough = Passthrough.Field()
+    testHardware = TestHardware.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
