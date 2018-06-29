@@ -46,7 +46,6 @@ Method 2: Cloning a Project
 We have also created several different example Kubos projects which can
 be used as starting points.
 
-- `CSP example included by default with 'kubos init -l' <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-example>`__
 - `TCP Receive <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__
 - `TCP Send <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcptx>`__
 - `UART Receive <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uartrx>`__

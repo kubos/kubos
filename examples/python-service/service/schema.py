@@ -48,7 +48,7 @@ class PowerOn(graphene.Mutation):
         """
 
         status = Status(status=True, subsystem=_subsystem)
-        if power != None:
+        if power is not None:
             status = _subsystem.set_power_on(power)
 
         return status
@@ -60,5 +60,6 @@ class Mutation(graphene.ObjectType):
     """
 
     power_on = PowerOn.Field()
+
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
