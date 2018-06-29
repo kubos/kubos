@@ -8,13 +8,13 @@ The core services are all the services that provide critical flight software cap
     :hidden:
 
     Communication Service <communication>
-    File Service <file>
+    File Transfer Service <file>
     File Protocol <file-protocol>
 
 Available services are:
 
  - :doc:`Communication Service <communication>`
- - :doc:`File Service <file>`
+ - :doc:`File Transfer Service <file>`
 
 Upcoming services are:
 

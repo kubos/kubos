@@ -9,11 +9,11 @@ This document covers the content-addressable storage, all
 messages used in the protocol, and includes diagrams
 of common use cases.
 
-Content Addressable Storage
+Content-Addressable Storage
 ---------------------------
 
 The file protocol uses a content-addressable system to store file data.
-All files are broken up into 4kB chunks prior to sending. This chunking
+All files are broken up into 4KB chunks prior to sending. This chunking
 is initiated either by an ``export`` or ``import`` message. A local
 folder called ``storage`` is created by the file service and client
 for storing the content-addressable information. Inside of ``storage``
@@ -76,7 +76,7 @@ on whether all the chunks have been received or not.
 Sync
 ~~~~
 
-This message is sent to query to message receiver on the status
+This message is sent to query the message receiver on the status
 of a file. It contains the file's hash and the expected number
 of chunks for the file.
 
@@ -144,7 +144,7 @@ Import
 
 This message is sent to initiate the process of transferring
 a file to the message sender from the message receiver. It
-contains the channel id, the string "import", and the requested
+contains the channel ID, the string "import", and the requested
 file's path.
 
 Upon receiving, the message receiver will import the requested
@@ -159,7 +159,7 @@ Success
 ~~~~~~~
 
 This message is sent as part of the ``import`` or ``export``
-processes. It contains the channel id, the boolean value true
+processes. It contains the channel ID, the boolean value true
 and potentially other values depending on the situation.
 
 This message is primarily sent in two different situations:
@@ -177,7 +177,7 @@ Failure
 ~~~~~~~
 
 This message is sent if there as an error in the ``import`` or
-``export`` process. It contains the channel id, the boolean false
+``export`` process. It contains the channel ID, the boolean false
 and the error message.
 
     ``{ channel_id, false, error_message }``

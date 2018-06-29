@@ -18,7 +18,7 @@ Lua instructions.
 Running The Service From KubOS
 ------------------------------
 
-The KubOS Linux distribution (as of v1.3.0) ships with the file transfer
+The Kubos Linux distribution (as of v1.3.0) ships with the file transfer
 service installed and configured to run on boot. This can be verified by
 booting the KubOS system, running the ``ps`` command and looking for the
 ``file-service`` process. If the service is not running then it can
