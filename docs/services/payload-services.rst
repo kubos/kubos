@@ -223,11 +223,13 @@ Libraries
 ~~~~~~~~~
 
 This payload service and future rust-based services will be written using
-the following external crates:
+the following external crate:
 
 - `Juniper <https://github.com/graphql-rust/juniper>`__ - GraphQL server library
 
-- `Iron <http://ironframework.io/>`__ - HTTP library
+And one internal helper crate:
+
+- `Kubos Service <../rust-docs/kubos_service/index.html>`__ - UDP service interface
 
 The ``Cargo.toml`` in the example payload service gives a good list of crate
 dependencies to start with.
@@ -237,16 +239,13 @@ Example Source
 
 `Example Source - GitHub <https://github.com/kubos/kubos/tree/master/examples/rust-service>`__
 
- - ``extern-lib`` - This is an example Rust crate showing how to link in external C source.
- - ``service`` - This crate contains the actual Rust service.
+ - ``Cargo.lock`` - Cargo `lock <https://doc.Rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html>`__ file
+ - ``Cargo.toml`` - Cargo `manifest <https://doc.Rust-lang.org/cargo/reference/manifest.html>`__ file
+ - ``src`` - Contains the actual Rust source.
 
-     - ``Cargo.lock`` - Cargo `lock <https://doc.Rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html>`__ file
-     - ``Cargo.toml`` - Cargo `manifest <https://doc.Rust-lang.org/cargo/reference/manifest.html>`__ file
-     - ``src`` - Contains the actual Rust source.
-
-         - ``main.rs`` - Contains the main/setup function of the service. May need minor customization but not much.
-         - ``model.rs`` - Describes the hardware model exposed to GraphQL and contains calls down to lowel-level APIs.
-         - ``schema.rs`` - Contains the actual GraphQL schema models used to generate the GraphQL endpoint.
+     - ``main.rs`` - Contains setup code using the ``kubos-service`` crate. May need minor customization but not much.
+     - ``model.rs`` - Describes the hardware model exposed to GraphQL and contains calls down to lowel-level APIs.
+     - ``schema.rs`` - Contains the actual GraphQL schema models used to generate the GraphQL endpoint.
 
 We will now take a closer look at ``model.rs`` and ``schema.rs`` and break down
 the pieces required to expose hardware APIs through the service.
@@ -276,8 +275,7 @@ Here is an abbreviated set of functions implemented for the ``Subsystem`` struct
 	    /// would likely be placed here
 	    pub fn new() -> Subsystem {
 		println!("getting new subsystem data");
-		// Here we call into an external C based function
-		extern_lib::k_init_device();
+		// Here we would call into a hardware API
 		Subsystem {}
 	    }
 
@@ -313,7 +311,6 @@ Here is an abbreviated set of functions implemented for the ``Subsystem`` struct
 	    /// any subsystem communications stuff
 	    fn drop(&mut self) {
 		println!("Destructing subsystem");
-		extern_lib::k_terminate_device();
 	    }
 	}
 
@@ -441,17 +438,17 @@ Building and Running
 From inside of a Kubos SDK Vagrant box, navigate to the ``service`` folder of your
 copy of the Rust service example.
 
-Issue ``cargo kubos -c build`` in order to build the service. 
+Issue ``cargo build`` in order to build the service. 
 
 .. note:: 
 
-    The ``cargo kubos -c build`` command can be used to build any Rust service
+    The ``cargo build`` command can be used to build any Rust service
     or crate from within the Vagrant box.
 
 In order to run the service locally:
 
-    - Verify that port 5000 is being forwarded out of your Vagrant box
-    - Issue ``cargo kubos -c run``
+    - Verify that port 8000 is being forwarded out of your Vagrant box
+    - Issue ``cargo run``
 
-Once it is up and running you can navigate to http://127.0.0.1:5000/graphiql from
-your host OS to access the interactive GraphiQL interface.
+Once it is up and running you can use the `udp-service-client <https://github.com/kubos/kubos/tree/master/examples/udp-service-client>`_
+to issue queries or mutations against the service.

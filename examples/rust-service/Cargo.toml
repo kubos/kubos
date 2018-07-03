@@ -1,0 +1,8 @@
+[package]
+name = "example-rust-service"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
+kubos-service = { path = "../../services/kubos-service" }
+juniper = "0.9"
