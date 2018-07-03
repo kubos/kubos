@@ -41,7 +41,7 @@ argument are as follows:
     - ``gid`` - The gid of the process
     - ``detached`` - Determines if the child process should be detached from the service
 
-Example of starting a long running shell::
+Example of starting a long running shell:
 
     ``{ 1, 'spawn', 'sh', { detached = true, pty = true, args = { '-l' } } }``
 
@@ -178,3 +178,134 @@ The result of a process exiting normally:
 The result of sending a SIGKILL to a process:
 
     ``{ 14, 'exit', 0, 9 }``
+
+Request List Of Processes
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This message is sent to the shell service to request a list
+of the current processes running in the shell service. It
+contains the channel ID and the string 'list'.
+
+    ``{ channel_id, 'list' }``
+
+List Of Processes
+~~~~~~~~~~~~~~~~~
+
+This message is sent from the shell service when a list
+of processes is requested. It contains the channel ID,
+the string 'list', and a list of objects containing
+process information (channel_id, path and pid). The
+channel ID can be used to communicate with the corresponding
+process in the list.
+
+    ``{ channel_id, 'list', [ [channel_id] = { path, pid } ] }``
+
+Example list of processes:
+
+    ``{ 16, 'list', { [12] = { path = 'sh', pid = 45 }, [14] = { path = 'sh', pid = 50 } }``
+
+
+Example Usages
+--------------
+
+Running a short-lived process
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The goal here is to run ``uname -a`` on a remote machine
+via the shell service and see the output. The shell client
+randomly chooses ``35`` as it's ``channel_id`` and sends a
+``spawn`` command with the arguments.
+
+::
+
+    Client: { 35, 'spawn', 'uname', { args = {'-a'} } }
+
+The service sends back multiple messages in quick
+succession because this is a short-lived process.
+
+::
+
+    Server: { 35, 'pid', 26191 }
+    Server: { 35, 'stdout', 'Linux vagrant 4.4.0-128-generic #154-Ubuntu SMP Fri May 25 14:15:18 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux' }
+    Server: { 35, 'stdout' }
+    Server: { 35, 'stderr' }
+    Server: { 35, 'exit', 0, 0 }
+
+Running a long-lived process
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The goal here is to open a ``bash`` shell on a remote
+machine via the shell service and use that shell to
+execute commands.
+
+**Starting the process**
+
+
+The shell client randomly chooses ``45`` as it's ``channel_id``
+and sends a ``spawn`` command with the arguments.
+
+::
+
+    Client: { 55, 'spawn', 'sh', { detached = true, pty = true, args = { '-l' } } }
+
+The service responds back with the ``pid`` of the newly
+created process.
+
+::
+
+    Server: { 55, 'pid', 26825 }
+    Server: { 55, 'stdout', '\027kryan@plaubox:~/Development/kubos_work/kubos_repos/kubos/services/shell-service\027\\' }
+    Server: { 55, 'stdout', '[ryan@plaubox shell-service]$ ' }
+
+
+**Finding the process**
+
+The shell client can send the ``list`` command over a new ``channel_id``
+to find this process and it's information.
+
+::
+
+    Client: { 65, 'list' }
+
+The service responds with the list of current processes.
+
+::
+
+    Server: { 65, 'list', { [55] = { path = '/bin/sh', pid = 26825 } } }
+
+**Sending data to the process**
+
+The shell client can use the ``channel_id`` to send data to the
+``stdin`` of the process.
+
+::
+
+    Client: { 55, 'stdin', 'echo hello\n' }
+
+The server will write this data to the ``stdin`` of the process
+and send back any data received over ``stdout``.
+
+::
+
+    Server: { 55, 'stdout', 'echo hello\r\n' }
+    Server: { 55, 'stdout', 'hello\r\n\027kryan@plaubox:~/Development/kubos_work/kubos_repos/kubos/services/shell-service\027\\' }
+    Server: { 55, 'stdout', '[ryan@plaubox shell-service]$ ' }
+
+
+**Killing the process**
+
+Once the shell client is finished it can use the ``kill`` command
+to terminate the process.
+
+::
+
+    Client: { 55, 'kill' }
+
+The service will terminate the process, respond with any data which was
+sent via ``stdout`` or ``stderr`` and send the ``exist`` message.
+
+::
+
+    Server: { 55, 'stdout', 'logout\r\n' }
+    Server: { 55, 'exit', 0, 0 }
+
