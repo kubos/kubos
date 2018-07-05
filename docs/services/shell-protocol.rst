@@ -12,7 +12,7 @@ and any additional values will be parameters for the ``command``.
 
     ``{ channel_id, command, parameters.. }``
 
-Spawn Messages
+Messages
 --------------
 
 The primary purpose of the shell protocol is to allow the
@@ -79,6 +79,9 @@ omitted then `SIGTERM` will be sent.
 
     ``{ channel_id, 'kill', signal }``
 
+A list of available signals can be found
+`here <http://man7.org/linux/man-pages/man7/signal.7.html>`_.
+
 Example usages:
 
 Send `SIGTERM` to a child process:
@@ -108,7 +111,7 @@ Process Created
 
 This message is sent from the shell service when a process
 has been created. It contains the channel ID, the string 'pid'
-and a number which is the pid.
+and a decimal number which is the pid.
 
     ``{ channel_id, 'pid', pid }``
 
@@ -179,7 +182,7 @@ The result of sending a SIGKILL to a process:
 
     ``{ 14, 'exit', 0, 9 }``
 
-Request List Of Processes
+Request List of Processes
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This message is sent to the shell service to request a list
@@ -188,7 +191,7 @@ contains the channel ID and the string 'list'.
 
     ``{ channel_id, 'list' }``
 
-List Of Processes
+List of Processes
 ~~~~~~~~~~~~~~~~~
 
 This message is sent from the shell service when a list
@@ -198,22 +201,22 @@ process information (channel_id, path and pid). The
 channel ID can be used to communicate with the corresponding
 process in the list.
 
-    ``{ channel_id, 'list', [ [channel_id] = { path, pid } ] }``
+    ``{ channel_id, 'list', { [channel_id] = { path, pid } } }``
 
 Example list of processes:
 
-    ``{ 16, 'list', { [12] = { path = 'sh', pid = 45 }, [14] = { path = 'sh', pid = 50 } }``
+    ``{ 16, 'list', { [12] = { path = 'sh', pid = 45 }, [14] = { path = 'sh', pid = 50 } } }``
 
 
 Example Usages
 --------------
 
-Running a short-lived process
+Running a Short-Lived Process
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The goal here is to run ``uname -a`` on a remote machine
 via the shell service and see the output. The shell client
-randomly chooses ``35`` as it's ``channel_id`` and sends a
+randomly chooses ``35`` as its ``channel_id`` and sends a
 ``spawn`` command with the arguments.
 
 ::
@@ -231,17 +234,18 @@ succession because this is a short-lived process.
     Server: { 35, 'stderr' }
     Server: { 35, 'exit', 0, 0 }
 
-Running a long-lived process
+Running a Long-Lived Process
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The goal here is to open a ``bash`` shell on a remote
 machine via the shell service and use that shell to
 execute commands.
 
-**Starting the process**
+Starting the Process
+^^^^^^^^^^^^^^^^^^^^
 
 
-The shell client randomly chooses ``45`` as it's ``channel_id``
+The shell client randomly chooses ``55`` as its ``channel_id``
 and sends a ``spawn`` command with the arguments.
 
 ::
@@ -254,14 +258,15 @@ created process.
 ::
 
     Server: { 55, 'pid', 26825 }
-    Server: { 55, 'stdout', '\027kryan@plaubox:~/Development/kubos_work/kubos_repos/kubos/services/shell-service\027\\' }
-    Server: { 55, 'stdout', '[ryan@plaubox shell-service]$ ' }
+    Server: { 55, 'stdout', '\027kvagrant@vagrant:/home/vagrant\027\\' }
+    Server: { 55, 'stdout', '[vagrant@vagrant vagrant]$ ' }
 
 
-**Finding the process**
+Finding the Process
+^^^^^^^^^^^^^^^^^^^
 
 The shell client can send the ``list`` command over a new ``channel_id``
-to find this process and it's information.
+to find this process and its information.
 
 ::
 
@@ -288,11 +293,11 @@ and send back any data received over ``stdout``.
 ::
 
     Server: { 55, 'stdout', 'echo hello\r\n' }
-    Server: { 55, 'stdout', 'hello\r\n\027kryan@plaubox:~/Development/kubos_work/kubos_repos/kubos/services/shell-service\027\\' }
-    Server: { 55, 'stdout', '[ryan@plaubox shell-service]$ ' }
+    Server: { 55, 'stdout', 'hello\r\n\027kvagrant@vagrant:/home/vagrant\027\\' }
+    Server: { 55, 'stdout', '[vagrant@vagrant vagrant]$ ' }
 
-
-**Killing the process**
+Killing the Process
+^^^^^^^^^^^^^^^^^^^
 
 Once the shell client is finished it can use the ``kill`` command
 to terminate the process.
@@ -302,7 +307,7 @@ to terminate the process.
     Client: { 55, 'kill' }
 
 The service will terminate the process, respond with any data which was
-sent via ``stdout`` or ``stderr`` and send the ``exist`` message.
+sent via ``stdout`` or ``stderr`` and send the ``exit`` message.
 
 ::
 
