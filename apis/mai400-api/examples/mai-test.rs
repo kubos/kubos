@@ -1,8 +1,8 @@
 extern crate mai400_api;
 
 use mai400_api::*;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 

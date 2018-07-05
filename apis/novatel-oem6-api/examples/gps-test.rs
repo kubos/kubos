@@ -17,9 +17,9 @@
 extern crate novatel_oem6_api;
 
 use novatel_oem6_api::*;
+use std::sync::mpsc::sync_channel;
 use std::thread;
 use std::time::Duration;
-use std::sync::mpsc::sync_channel;
 
 fn get_version(oem: &OEM6) -> OEMResult<()> {
     // Send the request for info

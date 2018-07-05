@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use nom::{IResult, be_u16};
-use std::str::FromStr;
-use std::io::Write;
 use crc16;
+use nom::{be_u16, IResult};
+use std::io::Write;
+use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
 /// Structure for files

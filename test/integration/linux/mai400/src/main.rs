@@ -30,10 +30,10 @@ use i2c_linux::I2c;
 use mai400_api::*;
 use slog::{Drain, Logger};
 use std::fs::File;
-use std::sync::Arc;
-use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{channel, Sender};
+use std::sync::Arc;
+use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 
@@ -689,14 +689,12 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
 fn read_loop(
     mai: MAI400,
     exit: Arc<AtomicBool>,
-    sender: Sender<
-        (
-            Option<StandardTelemetry>,
-            Option<RawIMU>,
-            Option<IREHSTelemetry>,
-            RotatingTelemetry,
-        ),
-    >,
+    sender: Sender<(
+        Option<StandardTelemetry>,
+        Option<RawIMU>,
+        Option<IREHSTelemetry>,
+        RotatingTelemetry,
+    )>,
 ) {
     let mut std: Option<StandardTelemetry> = None;
     let mut imu: Option<RawIMU> = None;

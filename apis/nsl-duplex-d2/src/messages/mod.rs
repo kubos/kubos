@@ -17,16 +17,16 @@
 //! This module contains structs and parsers for messages received on
 //! serial connection.
 
-use nom::{IResult, be_u32};
+use nom::{be_u32, IResult};
 
 mod file;
-mod state_of_health;
 mod geo_record;
+mod state_of_health;
 
 pub use messages::file::File;
 pub type Message = File;
-pub use messages::state_of_health::StateOfHealth;
 pub use messages::geo_record::GeoRecord;
+pub use messages::state_of_health::StateOfHealth;
 
 /// Parse 4 byte integer
 pub fn parse_u32(input: &[u8]) -> IResult<&[u8], u32> {

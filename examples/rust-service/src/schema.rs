@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-use model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
-use kubos_service;
 use juniper::FieldResult;
+use kubos_service;
+use model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
 
 type Context = kubos_service::Context<Subsystem>;
 

@@ -1,7 +1,7 @@
 extern crate nsl_duplex_d2;
 
-use nsl_duplex_d2::DuplexD2;
 use nsl_duplex_d2::serial_connection;
+use nsl_duplex_d2::DuplexD2;
 use nsl_duplex_d2::File;
 
 fn main() {
