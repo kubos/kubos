@@ -244,7 +244,6 @@ execute commands.
 Starting the Process
 ^^^^^^^^^^^^^^^^^^^^
 
-
 The shell client randomly chooses ``55`` as its ``channel_id``
 and sends a ``spawn`` command with the arguments.
 
@@ -278,7 +277,8 @@ The service responds with the list of current processes.
 
     Server: { 65, 'list', { [55] = { path = '/bin/sh', pid = 26825 } } }
 
-**Sending data to the process**
+Sending Data to the Process
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The shell client can use the ``channel_id`` to send data to the
 ``stdin`` of the process.
