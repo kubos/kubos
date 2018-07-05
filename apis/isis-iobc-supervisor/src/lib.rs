@@ -96,7 +96,9 @@ fn convert_raw_version(raw: ffi::supervisor_version) -> SupervisorVersion {
         minor_version: raw.0[4] as u8,
         patch_version: raw.0[5] as u8,
         git_head_version: {
-            (raw.0[6] as u32) | (raw.0[7] as u32) << 8 | (raw.0[8] as u32) << 16
+            (raw.0[6] as u32)
+                | (raw.0[7] as u32) << 8
+                | (raw.0[8] as u32) << 16
                 | (raw.0[9] as u32) << 24
         },
         serial_number: { (raw.0[10] as u16) | (raw.0[11] as u16) << 8 },
@@ -141,15 +143,21 @@ fn convert_raw_housekeeping(raw: ffi::supervisor_housekeeping) -> SupervisorHous
             power_off_rtc: ((raw.0[2] as u8) & 0x40) >> 6,
         },
         supervisor_uptime: {
-            (raw.0[3] as u32) | (raw.0[4] as u32) << 8 | (raw.0[5] as u32) << 16
+            (raw.0[3] as u32)
+                | (raw.0[4] as u32) << 8
+                | (raw.0[5] as u32) << 16
                 | (raw.0[6] as u32) << 24
         },
         iobc_uptime: {
-            (raw.0[7] as u32) | (raw.0[8] as u32) << 8 | (raw.0[9] as u32) << 16
+            (raw.0[7] as u32)
+                | (raw.0[8] as u32) << 8
+                | (raw.0[9] as u32) << 16
                 | (raw.0[10] as u32) << 24
         },
         iobc_reset_count: {
-            (raw.0[11] as u32) | (raw.0[12] as u32) << 8 | (raw.0[13] as u32) << 16
+            (raw.0[11] as u32)
+                | (raw.0[12] as u32) << 8
+                | (raw.0[13] as u32) << 16
                 | (raw.0[14] as u32) << 24
         },
         adc_data: {
