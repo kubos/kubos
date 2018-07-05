@@ -5,7 +5,7 @@ Payload services are essentially hardware services which have been custom design
 for mission payload hardware. They share the same architecture as the hardware
 services, exposing low-level device APIs through a GraphQL interface.
 
-The `examples folder of the Kubos repo <https://github.com/kubos/kubos>`__ includes
+The `examples folder of the Kubos repo <https://github.com/kubos/kubos/tree/master/examples>`__ includes
 two example payload services: one written in `Python <https://github.com/kubos/kubos/tree/master/examples/python-service>`_,
 and one written in `Rust <https://github.com/kubos/kubos/tree/master/examples/rust-service>`__.
 
@@ -191,7 +191,7 @@ Otherwise, you will need to run ``pip install -r requirements.txt``.
 Once the dependencies are in place, you can run ``python service.py config.yml`` and the example service should begin.
 You will know that it is running if the command line output says ``* Running on http://0.0.0.1:5000/ (Press CTRL+C to quit)``.
 You can now point a web browser to http://127.0.0.1:5000/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_.
-Here you can run quries and mutations against the GraphQL endpoints and see the results.
+Here you can run queries and mutations against the GraphQL endpoints and see the results.
 
 .. note::
 

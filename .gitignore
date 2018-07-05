@@ -36,6 +36,7 @@ waf-*/
 *.o
 *.pyc
 .project
+.idea
 .cproject
 ~*
 pdebug*
