@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use ffi;
 use ants::*;
+use ffi;
 use std::mem::transmute;
 
 /// I<sup>2</sup>C bus which will be used for communication
@@ -100,7 +100,7 @@ pub struct DeployStatus {
     pub ant_4_active: bool,
 }
 
-named!(parse_status<&[u8], DeployStatus>, 
+named!(parse_status<&[u8], DeployStatus>,
 	do_parse!(
 		bits: bits!(
 				tuple!(
@@ -146,7 +146,6 @@ named!(parse_status<&[u8], DeployStatus>,
 impl AntsTelemetry {
     #[doc(hidden)]
     pub fn new(c_telem: ffi::AntsTelemetry) -> Result<AntsTelemetry, AntsError> {
-
         let raw_status: [u8; 2] = unsafe { transmute(c_telem.deploy_status) };
 
         let status = DeployStatus::new(&raw_status)?;

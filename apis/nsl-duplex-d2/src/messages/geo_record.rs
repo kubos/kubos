@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use nom::{float, multispace, Err, ErrorKind, IResult};
-use nom::simple_errors::Context;
-use std::str::from_utf8;
 use chrono::{DateTime, NaiveDateTime, Utc};
+use nom::simple_errors::Context;
+use nom::{float, multispace, Err, ErrorKind, IResult};
+use std::str::from_utf8;
 
 #[derive(Debug, PartialEq)]
 /// Struct for storing geo-records.

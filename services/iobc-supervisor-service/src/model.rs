@@ -36,7 +36,7 @@ impl Supervisor {
 
     pub fn version(&self) -> Result<SupervisorVersion, String> {
         Ok(SupervisorVersion(
-            isis_iobc_supervisor::supervisor_version()?,
+            isis_iobc_supervisor::supervisor_version()?
         ))
     }
 

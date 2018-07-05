@@ -138,18 +138,16 @@ fn test_get_version() {
         week: 3025,
         ms: 164191800,
         num_components: 1,
-        components: vec![
-            Component {
-                comp_type: 1,
-                model: "G1SB0GTT0".to_owned(),
-                serial_num: "BJYA15120038H".to_owned(),
-                hw_version: "OEM615-2.00".to_owned(),
-                sw_version: "OEM060600RN0000".to_owned(),
-                boot_version: "OEM060201RB0000".to_owned(),
-                compile_date: "2015/Jan/28".to_owned(),
-                compile_time: "15:27:29".to_owned(),
-            },
-        ],
+        components: vec![Component {
+            comp_type: 1,
+            model: "G1SB0GTT0".to_owned(),
+            serial_num: "BJYA15120038H".to_owned(),
+            hw_version: "OEM615-2.00".to_owned(),
+            sw_version: "OEM060600RN0000".to_owned(),
+            boot_version: "OEM060201RB0000".to_owned(),
+            compile_date: "2015/Jan/28".to_owned(),
+            compile_time: "15:27:29".to_owned(),
+        }],
     });
 
     assert_eq!(oem.get_log().unwrap(), expected);

@@ -15,9 +15,9 @@
  */
 
 use radio_api::{Connection, RadioResult, Stream};
+use serial;
 use std::io;
 use std::time::Duration;
-use serial;
 
 /// Connection for communicating with actual
 /// Duplex-D2 hardware
@@ -37,8 +37,8 @@ impl Stream for SerialStream {
 }
 
 fn serial_send(data: &[u8]) -> io::Result<()> {
-    use std::io::prelude::*;
     use serial::prelude::*;
+    use std::io::prelude::*;
 
     let mut port = try!(serial::open("/dev/ttyUSB0"));
     let settings: serial::PortSettings = serial::PortSettings {
@@ -67,8 +67,8 @@ fn serial_send(data: &[u8]) -> io::Result<()> {
 }
 
 fn serial_receive() -> io::Result<Vec<u8>> {
-    use std::io::prelude::*;
     use serial::prelude::*;
+    use std::io::prelude::*;
 
     let mut ret_msg: Vec<u8> = Vec::new();
     let mut port = try!(serial::open("/dev/ttyUSB0"));
