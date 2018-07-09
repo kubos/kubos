@@ -569,24 +569,24 @@ under this directory.
     Any files not residing under the /home directory will be destroyed
     during an upgrade/downgrade
 
-/home/usr/bin
-^^^^^^^^^^^^^
+/home/system/usr/bin
+^^^^^^^^^^^^^^^^^^^^
 
 All user-created applications will be loaded into this folder during the
 ``kubos flash`` process. The directory is included in the system's PATH,
 so applications can then be called directly from anywhere, without
 needing to know the full file path.
 
-/home/usr/local/bin
-^^^^^^^^^^^^^^^^^^^
+/home/system/usr/local/bin
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All user-created non-application files will be loaded into this folder
 during the ``kubos flash`` process. There is currently not a way to set
 a destination folder for the ``kubos flash`` command, so if a different
 endpoint directory is desired, the files will need to be manually moved.
 
-/home/etc/init.d
-^^^^^^^^^^^^^^^^
+/home/system/etc/init.d
+^^^^^^^^^^^^^^^^^^^^^^^
 
 All user-application initialization scripts live under this directory.
 The naming format is 'S{run-level}{application}'.

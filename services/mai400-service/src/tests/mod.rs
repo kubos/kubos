@@ -39,9 +39,11 @@ macro_rules! service_new {
 
         let (sender, receiver) = channel();
 
-        let mai = MAI400 { conn: Arc::new(Mutex::new(Connection {
-            stream: Box::new($mock),
-        })) };
+        let mai = MAI400 {
+            conn: Arc::new(Mutex::new(Connection {
+                stream: Box::new($mock),
+            })),
+        };
 
         // We don't actually want to do anything with this thread, the channel
         // sender just needs to live through the lifetime of each test
@@ -76,9 +78,11 @@ macro_rules! service_new_with_read {
 
         let (sender, receiver) = channel();
 
-        let mai = MAI400 { conn: Arc::new(Mutex::new(Connection {
-            stream: Box::new($mock),
-        })) };
+        let mai = MAI400 {
+            conn: Arc::new(Mutex::new(Connection {
+                stream: Box::new($mock),
+            })),
+        };
 
         let mai_ref = mai.clone();
         let data_ref = $data.clone();

@@ -166,7 +166,7 @@ System
       generated with the run level specified by ``runLevel`` 
     :property number runLevel: `(Default: 50. Range: 10-99)` The priority of the generated init script. 
       Scripts with lower values will be run first
-    :property string destDir: `(Default: "/home/usr/local/bin")` Specifies flashing destination directory for all 
+    :property string destDir: `(Default: "/home/system/usr/local/bin")` Specifies flashing destination directory for all 
       non-application files
     :property string password: `(Default: "Kubos123") Specifies the root password to be used by 
       ``kubos flash`` to successfully connect to the target device
@@ -487,23 +487,6 @@ Hardware
     :property pin port: GPIO port that the SPI pins belong to
     :property string alt: `(STM32F4* only)` GPIO alternate function mapping
     :options alt: GPIO_AFx_I2Cy
-
-CSP
-###
-
-.. json:object:: csp
-
-    Kubos CSP (Cubesat Space Protocol) configuration
-    
-    :property boolean debug: Turn on CSP debug messages
-
-    **Example**::
-    
-        {
-            "csp": {
-                "debug": true
-            }
-        }
 
 module.json
 -----------

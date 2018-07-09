@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use nom::*;
 use super::*;
+use nom::*;
 
 const COMPONENT_SIZE: usize = 108;
 
