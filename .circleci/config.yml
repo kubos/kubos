@@ -1,0 +1,62 @@
+version: 2
+jobs:
+
+    # Main CI tests
+    # Run for all PR commits
+    build:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: python test/integration/integration_test.py
+        - run: python -m tools.ci.lint
+        - run: python tools/build.py --all-tests
+        - run: python hal/python-hal/i2c/test_i2c.py
+        - run: ./tools/rustbuild.sh
+        
+    # Create and push new git version tag (n.n.n+{new build number})
+    # Run when code is merged into master
+    deploy:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: pip install semantic-version
+        - run: ./deploy.sh
+        
+    # Generate and upload new docs
+    # Run when code is merged into master or when an official release tag is generated
+    docs:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: pip install semantic-version
+        - run: ./prep_docs.sh
+        - run: ./deploy_docs.sh
+        
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: master
+  deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only: master
+      - docs:
+          requires:
+            - deploy
+  release:
+    jobs:
+      - docs:
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*$/
+            branches:
+              ignore: /.*/
