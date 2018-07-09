@@ -31,6 +31,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
+        - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
         - run: pip install semantic-version
         - run: ./prep_docs.sh
         - run: ./deploy_docs.sh
