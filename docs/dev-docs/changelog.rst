@@ -1,6 +1,41 @@
 Kubos Changelog
 ===============
 
+v1.3.0 - Jun 21 2018
+--------------------
+
+- `Added communication core service <https://github.com/kubos/kubos/tree/master/services/communication-service>`__
+- `Added file transfer core service <https://github.com/kubos/kubos/tree/master/services/file-service>`__
+- `Added shell core service <https://github.com/kubos/kubos/tree/master/services/shell-service>`__
+- `Added telemetry database core service <https://github.com/kubos/kubos/tree/master/services/telemetry-service>`__
+- `Added Rust API and UDP/GraphQL service for NovAtel OEM6 High Precision GNSS Receiver <https://github.com/kubos/kubos/blob/master/services/novatel-oem6-service>`__
+- `Added Python API and UDP/GraphQL service for Pumpkin MCUs <https://github.com/kubos/kubos/tree/master/services/pumpkin-mcu-service>`__
+- `Added Rust API for ClydeSpace 3G EPS <https://github.com/kubos/kubos/tree/master/apis/clyde-3g-eps-api>`__
+- `Added Rust API and UDP/GraphQL service for Adcole Maryland Aerospace MAI-400 ADACS <https://github.com/kubos/kubos/tree/master/services/mai400-service>`__
+- `Added API for GOMspace NanoPower P31U <https://github.com/kubos/kubos/blob/master/apis/gomspace-p31u-api>`__
+- `Added C and Rust APIs for ISIS Antenna Systems <https://github.com/kubos/kubos/tree/master/apis/isis-ants-api>`__
+- `Added C and Rust APIs for ISIS iMTQ <https://github.com/kubos/kubos/tree/master/apis/isis-imtq-api>`__
+- `Added C API for ISIS TRXVU radio <https://github.com/kubos/kubos/tree/master/apis/isis-trxvu-api>`__
+- `Added Python library for use when creating Kubos services <https://github.com/kubos/kubos/blob/master/libs/kubos-service>`__
+- `Added Rust helper crate for use when creating Kubos services <https://github.com/kubos/kubos/tree/master/services/kubos-service>`__
+- `Added Python library for I2C HAL <https://github.com/kubos/kubos/tree/master/hal/python-hal/i2c>`__
+- `Added Rust crate for I2C HAL <https://github.com/kubos/kubos/tree/master/hal/rust-hal/rust-i2c>`__
+- Upgraded Kubos SDK Vagrant and Docker images to use `Rust 1.26 <https://blog.rust-lang.org/2018/05/10/Rust-1.26.html>`__
+- `Added link to nightly version of docs to main docs page <http://docs.kubos.co/master>`__
+- `Added documentation for using ethernet as primary board-communication method <http://docs.kubos.co/latest/os-docs/using-kubos-linux.html#ethernet>`__
+- Improved documentation about using Python and Rust for development with KubOS
+
+Bug Fixes:
+~~~~~~~~~~
+
+- `Forcibly downgrading pip to <v10 to prevent incompatibility issue with yotta <https://github.com/kubos/kubos/blob/master/tools/dist/Dockerfile>`__
+
+Community Contributions:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- `Added Rust crate for UART HAL <https://github.com/kubos/kubos/tree/master/hal/rust-hal/rust-uart>`__
+
+
 v1.2.0 - Mar 5 2018
 -------------------
 

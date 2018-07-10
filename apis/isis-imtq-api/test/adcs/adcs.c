@@ -20,6 +20,10 @@
 #include <isis-imtq-api/imtq.h>
 #include <cmocka.h>
 
+static KI2CNum bus = K_I2C1;
+static uint16_t addr = 0x40;
+static int timeout = 60;
+
 #define NUM_CONFIG_PARAMS 83
 
 imtq_resp_header response = { 0 };
@@ -54,7 +58,7 @@ static void test_init(void ** arg)
     expect_value(__wrap_write, cmd, NOOP);
     expect_value(__wrap_read, len, sizeof(imtq_resp_header));
     will_return(__wrap_read, &response);
-    ret = k_adcs_init();
+    ret = k_adcs_init(bus, addr, timeout);
 
     will_return(__wrap_close, 0);
     k_adcs_terminate();
@@ -341,7 +345,7 @@ static int init(void ** state)
     expect_value(__wrap_write, cmd, NOOP);
     expect_value(__wrap_read, len, sizeof(imtq_resp_header));
     will_return(__wrap_read, &response);
-    k_adcs_init();
+    k_adcs_init(bus, addr, timeout);
 
     return 0;
 }

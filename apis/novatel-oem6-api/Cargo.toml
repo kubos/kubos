@@ -1,0 +1,12 @@
+[package]
+name = "novatel-oem6-api"
+version = "0.1.0"
+authors = ["Catherine Garabedian <catherine@kubos.co>"]
+
+[dependencies]
+bitflags = "1.0"
+byteorder = "1.2"
+failure = { git = "https://github.com/rust-lang-nursery/failure" }
+nom = "4.0.0-beta1"
+rust-uart = { path = "../../hal/rust-hal/rust-uart" }
+serial = "0.4"

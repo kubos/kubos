@@ -101,10 +101,8 @@ impl IAntS for AntS {
         ant_count: u8,
         timeout: u32,
     ) -> AntSResult<AntS> {
-
-        match unsafe {
-            ffi::k_ants_init(convert_bus(bus), primary, secondary, ant_count, timeout)
-        } {
+        match unsafe { ffi::k_ants_init(convert_bus(bus), primary, secondary, ant_count, timeout) }
+        {
             ffi::KANTSStatus::AntsOK => {
                 if timeout > 0 {
                     match unsafe { ffi::k_ants_watchdog_start() } {
@@ -119,8 +117,6 @@ impl IAntS for AntS {
             ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
             _ => Err(AntsError::GenericError.into()),
         }
-
-
     }
 
     /// Configure the system to send future commands to the requested microcontroller
@@ -340,7 +336,6 @@ impl IAntS for AntS {
     ///
     /// [`AntsError`]: enum.AntsError.html
     fn get_deploy(&self) -> AntSResult<DeployStatus> {
-
         let mut status: [u8; 2] = [0; 2];
 
         match unsafe { ffi::k_ants_get_deploy_status(status.as_mut_ptr()) } {
@@ -375,7 +370,6 @@ impl IAntS for AntS {
     ///
     /// [`AntsError`]: enum.AntsError.html
     fn get_uptime(&self) -> AntSResult<u32> {
-
         let mut uptime = 0;
 
         match unsafe { ffi::k_ants_get_uptime(&mut uptime) } {
@@ -411,7 +405,6 @@ impl IAntS for AntS {
     ///
     /// [`AntsError`]: enum.AntsError.html
     fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry> {
-
         let mut c_telem = ffi::AntsTelemetry {
             raw_temp: 0,
             deploy_status: 0,
@@ -453,7 +446,6 @@ impl IAntS for AntS {
     ///
     /// [`AntsError`]: enum.AntsError.html
     fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8> {
-
         let mut count: u8 = 0;
 
         match unsafe { ffi::k_ants_get_activation_count(convert_antenna(antenna), &mut count) } {
@@ -490,7 +482,6 @@ impl IAntS for AntS {
     ///
     /// [`AntsError`]: enum.AntsError.html
     fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16> {
-
         let mut time: u16 = 0;
 
         match unsafe { ffi::k_ants_get_activation_time(convert_antenna(antenna), &mut time) } {
@@ -611,7 +602,6 @@ impl IAntS for AntS {
     ///
     /// [`AntsError`]: enum.AntsError.html
     fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()> {
-
         let tx_len: u8 = tx.len() as u8;
         let rx_len: u8 = rx_in.len() as u8;
 

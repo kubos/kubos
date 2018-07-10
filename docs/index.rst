@@ -5,9 +5,11 @@
 Overview
 --------
 
-:doc:`dev-docs/changelog`
++----------------------------------------+------------------------------------------------+---------------------------+-------------------------------------------------+
+| `Stable Docs <http://docs.kubos.co>`__ | `Nightly Docs <http://docs.kubos.co/master>`__ | :doc:`dev-docs/changelog` | `Kubos Repo <https://github.com/kubos/kubos>`__ |
++----------------------------------------+------------------------------------------------+---------------------------+-------------------------------------------------+
 
-`Kubos Repo <https://github.com/kubos/kubos>`__
+
 
 The KubOS platform provides satellite developers the tools and libraries necessary to quickly bring up space-ready software. We leverage multiple existing open source projects, along with our own custom framework and SDK. 
 

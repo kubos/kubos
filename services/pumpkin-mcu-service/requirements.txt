@@ -1,0 +1,10 @@
+aniso8601==3.0.0 
+graphene==2.1.1
+graphql-core==2.0
+graphql-relay==0.4.5
+promise==2.1
+rx==1.6.1
+six==1.11.0
+typing==3.6.4
+kubos_service==1.0
+toml==0.9.4

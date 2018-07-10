@@ -16,9 +16,10 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../apis/pumpkin-mcu-api'))
+sys.path.insert(0, os.path.abspath('../hal/python-hal/i2c'))
 
 import sphinx_rtd_theme
 
@@ -106,19 +107,18 @@ html_show_sphinx = False
 htmlhelp_basename = 'Kubosdoc'
 
 breathe_projects = {
-    
+    "gomspace-p31u-api" : "../xml/apis/gomspace-p31u-api",
     "isis-ants-api" : "../xml/apis/isis-ants-api",
     "isis-imtq-api": "../xml/apis/isis-imtq-api",
     "isis-iobc-supervisor" : "../xml/apis/isis-iobc-supervisor",
     "isis-trxvu-api": "../xml/apis/isis-trxvu-api",
     "kubos-hal" : "../xml/hal/kubos-hal",
     "kubos-hal-linux" : "../xml/hal/kubos-hal-linux",
-    "libcsp" : "../xml/libcsp",
-
 }
 
 extensions += [
     'breathe',
+    'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinxjsondomain',

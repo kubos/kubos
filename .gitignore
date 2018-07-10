@@ -36,6 +36,7 @@ waf-*/
 *.o
 *.pyc
 .project
+.idea
 .cproject
 ~*
 pdebug*
@@ -68,3 +69,10 @@ vm/.vagrant/
 
 # rust stuff
 target/
+
+# database files
+*.db
+
+# python packages
+*.egg-info/
+dist/

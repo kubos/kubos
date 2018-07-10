@@ -18,6 +18,10 @@
 #include <isis-imtq-api/imtq.h>
 #include <cmocka.h>
 
+static KI2CNum bus = K_I2C1;
+static uint16_t addr = 0x40;
+static int timeout = 60;
+
 imtq_resp_header response = { 0 };
 
 imtq_resp_header error_resp = {
@@ -60,7 +64,7 @@ static void test_init(void ** arg)
     expect_value(__wrap_write, cmd, NOOP);
     expect_value(__wrap_read, len, sizeof(imtq_resp_header));
     will_return(__wrap_read, &response);
-    ret = k_adcs_init();
+    ret = k_adcs_init(bus, addr, timeout);
 
     will_return(__wrap_close, 0);
     k_adcs_terminate();
@@ -761,9 +765,9 @@ static void test_transfer_cmd_mismatch(void ** arg)
 static void test_transfer_no_resp(void ** arg)
 {
     KADCSStatus ret;
-    /* 
+    /*
      * Faking the empty response, since our stubs are set up to echo the
-     * requested command 
+     * requested command
      */
     uint8_t          packet[] = { 0xFF };
     imtq_resp_header resp     = { 0 };
@@ -802,7 +806,7 @@ static int init(void ** state)
     expect_value(__wrap_write, cmd, NOOP);
     expect_value(__wrap_read, len, sizeof(imtq_resp_header));
     will_return(__wrap_read, &response);
-    k_adcs_init();
+    k_adcs_init(bus, addr, timeout);
 
     return 0;
 }

@@ -24,7 +24,7 @@ Using a human readable query language makes it obvious exactly what the satellit
 Why GraphQL?
 ------------
 
-GraphQL gives callers more control over how they fetch data. Where REST exposes the business domain as URL-addressable resources that clients fetch as needed, **GraphQL models the domain as graph of fields** (sometimes with arguments) that may be fetched in a single query.
+GraphQL gives callers more control over how they fetch data. Where REST exposes the business domain as URL-addressable resources that clients fetch as needed, **GraphQL models the domain as a graph of fields** (sometimes with arguments) that may be fetched in a single query.
 
 For example, say a mission application needs to quickly get the current status of a single power port on a module to check if a payload is powered. For a ReST endpoint, a separate GET would be required to be available with just that single telemetry item. Now say there are 15 different power ports, and those assignments can change depending on the payload configuration.
 
