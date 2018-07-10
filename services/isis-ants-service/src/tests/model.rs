@@ -15,7 +15,7 @@
 //
 
 use super::*;
-use isis_ants_api::*;
+//use isis_ants_api::*;
 use model::*;
 use std::cell::RefCell;
 
@@ -334,21 +334,21 @@ fn get_telemetry_debug_good() {
     let mock = mock_new!();
 
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant1), Ok(1));
+        .return_value_for(KANTSAnt::Ant1, Ok(1));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant1), Ok(11));
+        .return_value_for(KANTSAnt::Ant1, Ok(11));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant2), Ok(2));
+        .return_value_for(KANTSAnt::Ant2, Ok(2));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant2), Ok(22));
+        .return_value_for(KANTSAnt::Ant2, Ok(22));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant3), Ok(3));
+        .return_value_for(KANTSAnt::Ant3, Ok(3));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant3), Ok(33));
+        .return_value_for(KANTSAnt::Ant3, Ok(33));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant4), Ok(4));
+        .return_value_for(KANTSAnt::Ant4, Ok(4));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant4), Ok(44));
+        .return_value_for(KANTSAnt::Ant4, Ok(44));
 
     let expected = TelemetryDebug {
         ant1: AntennaStats {
@@ -386,17 +386,17 @@ fn get_telemetry_debug_bad() {
     let mock = mock_new!();
 
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant1), Ok(1));
+        .return_value_for(KANTSAnt::Ant1, Ok(1));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant1), Ok(11));
+        .return_value_for(KANTSAnt::Ant1, Ok(11));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant2), Ok(2));
+        .return_value_for(KANTSAnt::Ant2, Ok(2));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant2), Ok(22));
+        .return_value_for(KANTSAnt::Ant2, Ok(22));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant3), Ok(3));
+        .return_value_for(KANTSAnt::Ant3, Ok(3));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant3), Ok(33));
+        .return_value_for(KANTSAnt::Ant3, Ok(33));
     // Leaving out Ant4 to throw 2 ConfigErrors
 
     let expected = TelemetryDebug {
@@ -508,21 +508,21 @@ fn get_test_results_good() {
     mock.get_system_telemetry.return_value(Ok(nominal.clone()));
 
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant1), Ok(1));
+        .return_value_for(KANTSAnt::Ant1, Ok(1));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant1), Ok(11));
+        .return_value_for(KANTSAnt::Ant1, Ok(11));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant2), Ok(2));
+        .return_value_for(KANTSAnt::Ant2, Ok(2));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant2), Ok(22));
+        .return_value_for(KANTSAnt::Ant2, Ok(22));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant3), Ok(3));
+        .return_value_for(KANTSAnt::Ant3, Ok(3));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant3), Ok(33));
+        .return_value_for(KANTSAnt::Ant3, Ok(33));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant4), Ok(4));
+        .return_value_for(KANTSAnt::Ant4, Ok(4));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant4), Ok(44));
+        .return_value_for(KANTSAnt::Ant4, Ok(44));
 
     let debug = TelemetryDebug {
         ant1: AntennaStats {
@@ -567,21 +567,21 @@ fn get_test_results_bad_nominal() {
         .return_value(Err(AntsError::GenericError.into()));
 
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant1), Ok(1));
+        .return_value_for(KANTSAnt::Ant1, Ok(1));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant1), Ok(11));
+        .return_value_for(KANTSAnt::Ant1, Ok(11));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant2), Ok(2));
+        .return_value_for(KANTSAnt::Ant2, Ok(2));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant2), Ok(22));
+        .return_value_for(KANTSAnt::Ant2, Ok(22));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant3), Ok(3));
+        .return_value_for(KANTSAnt::Ant3, Ok(3));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant3), Ok(33));
+        .return_value_for(KANTSAnt::Ant3, Ok(33));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant4), Ok(4));
+        .return_value_for(KANTSAnt::Ant4, Ok(4));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant4), Ok(44));
+        .return_value_for(KANTSAnt::Ant4, Ok(44));
 
     let debug = TelemetryDebug {
         ant1: AntennaStats {
@@ -637,18 +637,18 @@ fn get_test_results_bad_debug() {
     mock.get_system_telemetry.return_value(Ok(nominal.clone()));
 
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant1), Ok(1));
+        .return_value_for(KANTSAnt::Ant1, Ok(1));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant1), Ok(11));
+        .return_value_for(KANTSAnt::Ant1, Ok(11));
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant2), Ok(2));
+        .return_value_for(KANTSAnt::Ant2, Ok(2));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant2), Ok(22));
+        .return_value_for(KANTSAnt::Ant2, Ok(22));
     //Excluding Ant3 for error testing
     mock.get_activation_count
-        .return_value_for((KANTSAnt::Ant4), Ok(4));
+        .return_value_for(KANTSAnt::Ant4, Ok(4));
     mock.get_activation_time
-        .return_value_for((KANTSAnt::Ant4), Ok(44));
+        .return_value_for(KANTSAnt::Ant4, Ok(44));
 
     let debug = TelemetryDebug {
         ant1: AntennaStats {
@@ -775,7 +775,7 @@ fn configure_good_primary() {
     let mock = mock_new!();
 
     mock.configure
-        .return_value_for((KANTSController::Primary), Ok(()));
+        .return_value_for(KANTSController::Primary, Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -797,7 +797,7 @@ fn configure_good_secondary() {
     let mock = mock_new!();
 
     mock.configure
-        .return_value_for((KANTSController::Secondary), Ok(()));
+        .return_value_for(KANTSController::Secondary, Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),

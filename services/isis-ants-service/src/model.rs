@@ -82,18 +82,14 @@ impl Subsystem {
         if deployed {
             // If all antennas are not-not-deployed, then the system is fully deployed
             status = DeploymentStatus::Deployed;
-        } else if deploy.ant_1_stopped_time
-            || deploy.ant_2_stopped_time
-            || deploy.ant_3_stopped_time
-            || deploy.ant_4_stopped_time
+        } else if deploy.ant_1_stopped_time || deploy.ant_2_stopped_time
+            || deploy.ant_3_stopped_time || deploy.ant_4_stopped_time
         {
             // If any antennas failed to deploy, mark the system as in an error state
             // Note: A successful deployment should clear this flag for an antenna
             status = DeploymentStatus::Error;
-        } else if !deploy.ant_1_not_deployed
-            || !deploy.ant_2_not_deployed
-            || !deploy.ant_3_not_deployed
-            || !deploy.ant_4_not_deployed
+        } else if !deploy.ant_1_not_deployed || !deploy.ant_2_not_deployed
+            || !deploy.ant_3_not_deployed || !deploy.ant_4_not_deployed
         {
             // If there aren't any errors, but some of the antannas have been deployed,
             // mark it as a partial deployment
@@ -101,10 +97,8 @@ impl Subsystem {
             // a partial deployment is possible (without any errors) is if someone
             // manually deploys a single antenna
             status = DeploymentStatus::Partial
-        } else if deploy.ant_1_not_deployed
-            && deploy.ant_2_not_deployed
-            && deploy.ant_3_not_deployed
-            && deploy.ant_4_not_deployed
+        } else if deploy.ant_1_not_deployed && deploy.ant_2_not_deployed
+            && deploy.ant_3_not_deployed && deploy.ant_4_not_deployed
         {
             // Otherwise, if they're all marked as not-deployed, then we can
             // assume that the system is currently safely stowed
@@ -140,46 +134,32 @@ impl Subsystem {
     }
 
     pub fn get_telemetry_debug(&self) -> AntSResult<TelemetryDebug> {
-        /* TODO
-        let telemetry = TelemetryDebug {
-            
+        Ok(TelemetryDebug {
             ant1: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant1), self.errors)
-                    .2
                     .unwrap_or_default(),
                 act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant1), self.errors)
-                    .2
                     .unwrap_or_default(),
             },
             ant2: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant2), self.errors)
-                    .2
                     .unwrap_or_default(),
                 act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant2), self.errors)
-                    .2
                     .unwrap_or_default(),
             },
             ant3: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant3), self.errors)
-                    .2
                     .unwrap_or_default(),
                 act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant3), self.errors)
-                    .2
                     .unwrap_or_default(),
             },
             ant4: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant4), self.errors)
-                    .2
                     .unwrap_or_default(),
                 act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant4), self.errors)
-                    .2
                     .unwrap_or_default(),
             },
-        };
-        */
-        let telemetry = TelemetryDebug::default();
-
-        Ok(telemetry)
+        })
     }
 
     pub fn get_telemetry_nominal(&self) -> AntSResult<TelemetryNominal> {
@@ -200,10 +180,12 @@ impl Subsystem {
             ArmState::Disarm => run!(self.ants.disarm(), self.errors),
         };
 
-        //todo
         Ok(ArmResponse {
-            errors: "".to_owned(),
             success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => err,
+            },
         })
     }
 
@@ -220,8 +202,11 @@ impl Subsystem {
 
         Ok(ConfigureHardwareResponse {
             config: controller,
-            errors: "".to_owned(),
             success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => err,
+            },
         })
     }
 
@@ -232,8 +217,11 @@ impl Subsystem {
 
                 Ok(ControlPowerResponse {
                     power: state,
-                    errors: "".to_owned(),
                     success: result.is_ok(),
+                    errors: match result {
+                        Ok(_) => "".to_owned(),
+                        Err(err) => err,
+                    },
                 })
             }
             _ => {
@@ -272,65 +260,59 @@ impl Subsystem {
         };
 
         Ok(DeployResponse {
-            errors: "".to_owned(),
             success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => err,
+            },
         })
     }
 
     pub fn integration_test(&self) -> AntSResult<IntegrationTestResults> {
-        let result = run!(self.ants.get_system_telemetry(), self.errors);
+        let nom_result = run!(self.ants.get_system_telemetry(), self.errors);
 
         let debug_errors: RefCell<Vec<String>> = RefCell::new(vec![]);
 
-        /* TODO
         let debug = TelemetryDebug {
             ant1: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant1), debug_errors)
-                    .2
                     .unwrap_or_default(),
                 act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant1), debug_errors)
-                    .2
                     .unwrap_or_default(),
             },
             ant2: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant2), debug_errors)
-                    .2
                     .unwrap_or_default(),
                 act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant2), debug_errors)
-                    .2
                     .unwrap_or_default(),
             },
             ant3: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant3), debug_errors)
-                    .2
                     .unwrap_or_default(),
                 act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant3), debug_errors)
-                    .2
                     .unwrap_or_default(),
             },
             ant4: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant4), debug_errors)
-                    .2
                     .unwrap_or_default(),
                 act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant4), debug_errors)
-                    .2
                     .unwrap_or_default(),
             },
         };
-        */
-
-        let debug = TelemetryDebug::default();
 
         let debug_errors = debug_errors.into_inner();
 
-        let debug_success = debug_errors.is_empty();
-
-        let success = result.is_ok() && debug_success;
+        let success = nom_result.is_ok() && debug_errors.is_empty();
         let mut errors = String::new();
 
-        //if !nom_errors.is_empty() {
-        //errors.push_str(&format!("Nominal: {};", nom_errors));
-        //}
+        let telemetry_nominal = match nom_result {
+            Ok(data) => TelemetryNominal(data),
+            Err(err) => {
+                errors.push_str(&format!("Nominal: {};", err));
+                TelemetryNominal::default()
+            }
+        };
+
         if !debug_errors.is_empty() {
             let concat = debug_errors.join(", ");
             errors.push_str(&format!("Debug: {}", concat));
@@ -340,7 +322,7 @@ impl Subsystem {
         Ok(IntegrationTestResults {
             errors,
             success,
-            telemetry_nominal: TelemetryNominal(result.unwrap_or_default()),
+            telemetry_nominal,
             telemetry_debug: debug,
         })
     }
@@ -349,8 +331,11 @@ impl Subsystem {
         let result = run!(self.ants.watchdog_kick(), self.errors);
 
         Ok(NoopResponse {
-            errors: "".to_owned(),
             success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => err,
+            },
         })
     }
 
@@ -374,8 +359,11 @@ impl Subsystem {
         // Convert the response hex values into a String for the GraphQL output
         // Note: This is in BIG ENDIAN format
         Ok(RawCommandResponse {
-            errors: "".to_owned(),
             success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => err,
+            },
             response: rx.iter()
                 .map(|byte| format!("{:02x}", byte))
                 .collect::<String>(),
