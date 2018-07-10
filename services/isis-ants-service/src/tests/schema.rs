@@ -15,9 +15,9 @@
 //
 
 //use double;
-use std::cell::RefCell;
 use isis_ants_api::*;
 use model::*;
+use std::cell::RefCell;
 //use objects::*;
 use super::*;
 use schema::*;
@@ -46,9 +46,7 @@ fn ping() {
     assert_eq!(
         execute(query, None, &schema, &Variables::new(), &context),
         Ok((
-            Value::object(
-                vec![("ping", Value::string("pong"))].into_iter().collect(),
-            ),
+            Value::object(vec![("ping", Value::string("pong"))].into_iter().collect(),),
             vec![],
         ))
     );
@@ -76,9 +74,7 @@ fn ack() {
     assert_eq!(
         execute(query, None, &schema, &Variables::new(), &context),
         Ok((
-            Value::object(
-                vec![("ack", Value::string("NONE"))].into_iter().collect(),
-            ),
+            Value::object(vec![("ack", Value::string("NONE"))].into_iter().collect(),),
             vec![],
         ))
     );
@@ -114,18 +110,14 @@ fn power() {
         execute(query, None, &schema, &Variables::new(), &context),
         Ok((
             Value::object(
-                vec![
-                    (
-                        "power",
-                        Value::object(
-                            vec![
-                                ("state", Value::string("ON")),
-                                ("uptime", Value::int(10)),
-                            ].into_iter()
-                                .collect(),
-                        )
+                vec![(
+                    "power",
+                    Value::object(
+                        vec![("state", Value::string("ON")), ("uptime", Value::int(10))]
+                            .into_iter()
+                            .collect(),
                     ),
-                ].into_iter()
+                )].into_iter()
                     .collect(),
             ),
             vec![],
@@ -171,7 +163,6 @@ fn config() {
 fn test_results() {
     let mock = mock_new!();
 
-
     let nominal = AntsTelemetry {
         raw_temp: 15,
         uptime: 35,
@@ -184,38 +175,22 @@ fn test_results() {
     };
     mock.get_system_telemetry.return_value(Ok(nominal.clone()));
 
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(1),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(11),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(2),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(22),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(3),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(33),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(4),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(44),
-    );
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant1), Ok(1));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant1), Ok(11));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant2), Ok(2));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant2), Ok(22));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant3), Ok(3));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant3), Ok(33));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant4), Ok(4));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant4), Ok(44));
 
     let debug = TelemetryDebug {
         ant1: AntennaStats {
@@ -286,29 +261,26 @@ fn test_results() {
         execute(query, None, &schema, &Variables::new(), &context),
         Ok((
             Value::object(
-                vec![
-                    (
-                        "testResults",
-                        Value::object(
-                            vec![
-                                ("success", Value::boolean(true)),
-                                (
-                                    "telemtryNominal",
-                                    Value::object(
-                                        vec![
-                                            ("rawtemp", Value::int(15)),
-                                            ("uptime", Value::int(35)),
-                                            ("sysBurnActive", Value::boolean(false)),
-                                        ].into_iter()
-                                            .collect(),
-                                    )
-                                    //TODO: remaining return fields
-                                ),
-                            ].into_iter()
-                                .collect(),
-                        )
+                vec![(
+                    "testResults",
+                    Value::object(
+                        vec![
+                            ("success", Value::boolean(true)),
+                            (
+                                "telemtryNominal",
+                                Value::object(
+                                    vec![
+                                        ("rawtemp", Value::int(15)),
+                                        ("uptime", Value::int(35)),
+                                        ("sysBurnActive", Value::boolean(false)),
+                                    ].into_iter()
+                                        .collect(),
+                                ), //TODO: remaining return fields
+                            ),
+                        ].into_iter()
+                            .collect(),
                     ),
-                ].into_iter()
+                )].into_iter()
                     .collect(),
             ),
             vec![],

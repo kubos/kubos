@@ -25,7 +25,7 @@ pub struct QueryRoot;
 
 /// Base GraphQL query model
 graphql_object!(QueryRoot: Context as "Query" |&self| {
-    
+
     // Test query to verify service is running without attempting
     // to communicate with the underlying subsystem
     //
@@ -36,9 +36,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     {
         Ok(String::from("pong"))
     }
-    
+
     //----- Generic Queries -----//
-    
+
     // Get the last run mutation
     //
     // {
@@ -50,7 +50,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         // last mutation run between requests
         Ok(AckCommand::None)
     }
-    
+
     // Get all errors encountered while processing this GraphQL request
     //
     // Note: This will only return errors thrown by fields which have
@@ -78,13 +78,13 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         state: PowerState,
     //         uptime: Int
     //     }
-    // }            
+    // }        
     field power(&executor) -> FieldResult<GetPowerResponse>
         as "Antenna System Power State"
     {
         Ok(executor.context().subsystem().get_power()?)
     }
-    
+
     // Get the current configuration of the system
     //
     // {
@@ -142,7 +142,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
             TelemetryType::Debug => Ok(Telemetry::Debug(executor.context().subsystem().get_telemetry_debug().unwrap()))
         }
     }
-    
+
     // Get the test results of the last run test
     //
     // Note: For this service, this actually just fetches the nominal
@@ -161,7 +161,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     }
 
     //----- Deployable-specific Queries -----//
-    
+
     // Get the current armed/disarmed status of the system
     //
     // {
@@ -171,7 +171,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     {
         Ok(executor.context().subsystem().get_arm_status()?)
     }
-    
+
     // Get the current deployment status of the system
     //
     // {
@@ -203,7 +203,7 @@ pub struct MutationRoot;
 
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
-    
+
     // Get all errors encountered while processing this GraphQL request
     //
     // Note: This will only return errors thrown by fields which have
@@ -250,7 +250,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     {
         Ok(executor.context().subsystem().control_power(state)?)
     }
-    
+
     // Configure the system
     //
     // config: Set which microcontroller future commands should be issued from
@@ -266,7 +266,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     {
         Ok(executor.context().subsystem().configure_hardware(config)?)
     }
-    
+
     // Run a system self-test
     //
     // test: Type of self-test to perform
@@ -286,14 +286,14 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         }
     //    }
     // }
-    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults> 
+    field test_hardware(&executor, test: TestType) -> FieldResult<TestResults>
     {
         match test {
             TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem().integration_test().unwrap())),
             TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
         }
     }
-    
+
     // Pass a custom command through to the system
     //
     // command: String containing the hex values to be sent (ex. "C3")
@@ -311,9 +311,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     {
         Ok(executor.context().subsystem().passthrough(command, rx_len)?)
     }
-    
+
     //----- Deployable-specific mutations -----//
-    
+
     // Arm/Disarm the system
     //
     // state: Armed/Disarmed state the system should be changed to
@@ -328,7 +328,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     {
         Ok(executor.context().subsystem().arm(state)?)
     }
-    
+
     // Deploy antenna/s
     //
     // ant: (Default - All) Antenna to deploy
@@ -340,11 +340,11 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //     deploy(ant: DeployType = DeployType::All, force: Boolean = false, time: Int) {
     //         errors: String,
     //         success: Boolean
-    //    }    
+    //    }
     // }
     field deploy(&executor, ant = (DeployType::All): DeployType, force = false: bool, time: i32) -> FieldResult<DeployResponse>
     {
         Ok(executor.context().subsystem().deploy(ant, force, time)?)
     }
-    
+
 });

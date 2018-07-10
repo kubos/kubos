@@ -142,6 +142,9 @@
 //#![feature(trace_macros)]
 #![recursion_limit = "256"]
 
+#[cfg(test)]
+#[macro_use]
+extern crate double;
 extern crate failure;
 extern crate isis_ants_api;
 #[macro_use]
@@ -152,8 +155,8 @@ extern crate kubos_service;
 #[macro_use]
 extern crate serde_json;
 
+use isis_ants_api::{AntSResult, KI2CNum};
 use kubos_service::{Config, Service};
-use isis_ants_api::KI2CNum;
 use model::Subsystem;
 use schema::{MutationRoot, QueryRoot};
 
@@ -196,7 +199,7 @@ fn main() {
 }
 */
 
-fn main() {
+fn main() -> AntSResult<()> {
     let config = Config::new("isis-ants-service");
 
     // Temp code. Replace with proper config
@@ -208,9 +211,10 @@ fn main() {
 
     Service::new(
         config,
-        // TODO: Add Subsystem::new return status
-        Subsystem::new(bus, primary, secondary, antennas, wd_timeout),
+        Subsystem::new(bus, primary, secondary, antennas, wd_timeout)?,
         QueryRoot,
         MutationRoot,
     ).start();
+
+    Ok(())
 }

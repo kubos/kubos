@@ -15,9 +15,8 @@
 //
 
 use failure::Fail;
-use isis_ants_api::{AntS, IAntS, KANTSAnt, KANTSController, KI2CNum};
+use isis_ants_api::*;
 use std::cell::RefCell;
-use std::io::Error;
 use std::str;
 
 use objects::*;
@@ -29,33 +28,35 @@ pub struct Subsystem {
 }
 
 impl Subsystem {
-    pub fn new(bus: KI2CNum, primary: u8, secondary: u8, count: u8, timeout: u32) -> Subsystem {
-        let ants = Box::new(AntS::new(bus, primary, secondary, count, timeout).unwrap());
+    pub fn new(
+        bus: KI2CNum,
+        primary: u8,
+        secondary: u8,
+        count: u8,
+        timeout: u32,
+    ) -> AntSResult<Subsystem> {
+        let ants = Box::new(AntS::new(bus, primary, secondary, count, timeout)?);
 
-        let subsystem = Subsystem {
+        Ok(Subsystem {
             ants,
             errors: RefCell::new(vec![]),
             count,
-        };
-
-        subsystem
+        })
     }
 
     // Queries
 
-    pub fn get_arm_status(&self) -> Result<ArmStatus, Error> {
+    pub fn get_arm_status(&self) -> AntSResult<ArmStatus> {
         let result = run!(self.ants.get_deploy(), self.errors);
         let armed = result.unwrap_or_default().sys_armed;
 
-        let status = match armed {
+        Ok(match armed {
             true => ArmStatus::Armed,
             false => ArmStatus::Disarmed,
-        };
-
-        Ok(status)
+        })
     }
 
-    pub fn get_deploy_status(&self) -> Result<GetDeployResponse, Error> {
+    pub fn get_deploy_status(&self) -> AntSResult<GetDeployResponse> {
         let result = run!(self.ants.get_deploy(), self.errors);
 
         let mut status = DeploymentStatus::Error;
@@ -81,14 +82,18 @@ impl Subsystem {
         if deployed {
             // If all antennas are not-not-deployed, then the system is fully deployed
             status = DeploymentStatus::Deployed;
-        } else if deploy.ant_1_stopped_time || deploy.ant_2_stopped_time
-            || deploy.ant_3_stopped_time || deploy.ant_4_stopped_time
+        } else if deploy.ant_1_stopped_time
+            || deploy.ant_2_stopped_time
+            || deploy.ant_3_stopped_time
+            || deploy.ant_4_stopped_time
         {
             // If any antennas failed to deploy, mark the system as in an error state
             // Note: A successful deployment should clear this flag for an antenna
             status = DeploymentStatus::Error;
-        } else if !deploy.ant_1_not_deployed || !deploy.ant_2_not_deployed
-            || !deploy.ant_3_not_deployed || !deploy.ant_4_not_deployed
+        } else if !deploy.ant_1_not_deployed
+            || !deploy.ant_2_not_deployed
+            || !deploy.ant_3_not_deployed
+            || !deploy.ant_4_not_deployed
         {
             // If there aren't any errors, but some of the antannas have been deployed,
             // mark it as a partial deployment
@@ -96,8 +101,10 @@ impl Subsystem {
             // a partial deployment is possible (without any errors) is if someone
             // manually deploys a single antenna
             status = DeploymentStatus::Partial
-        } else if deploy.ant_1_not_deployed && deploy.ant_2_not_deployed
-            && deploy.ant_3_not_deployed && deploy.ant_4_not_deployed
+        } else if deploy.ant_1_not_deployed
+            && deploy.ant_2_not_deployed
+            && deploy.ant_3_not_deployed
+            && deploy.ant_4_not_deployed
         {
             // Otherwise, if they're all marked as not-deployed, then we can
             // assume that the system is currently safely stowed
@@ -117,7 +124,7 @@ impl Subsystem {
         })
     }
 
-    pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
+    pub fn get_power(&self) -> AntSResult<GetPowerResponse> {
         let result = run!(self.ants.get_uptime(), self.errors);
         let uptime = result.unwrap_or_default();
 
@@ -132,7 +139,7 @@ impl Subsystem {
         })
     }
 
-    pub fn get_telemetry_debug(&self) -> Result<TelemetryDebug, Error> {
+    pub fn get_telemetry_debug(&self) -> AntSResult<TelemetryDebug> {
         /* TODO
         let telemetry = TelemetryDebug {
             
@@ -175,19 +182,19 @@ impl Subsystem {
         Ok(telemetry)
     }
 
-    pub fn get_telemetry_nominal(&self) -> Result<TelemetryNominal, Error> {
+    pub fn get_telemetry_nominal(&self) -> AntSResult<TelemetryNominal> {
         let result = run!(self.ants.get_system_telemetry(), self.errors);
 
         Ok(TelemetryNominal(result.unwrap_or_default()))
     }
 
-    pub fn get_test_results(&self) -> Result<IntegrationTestResults, Error> {
+    pub fn get_test_results(&self) -> AntSResult<IntegrationTestResults> {
         self.integration_test()
     }
 
     // Mutations
 
-    pub fn arm(&self, state: ArmState) -> Result<ArmResponse, Error> {
+    pub fn arm(&self, state: ArmState) -> AntSResult<ArmResponse> {
         let result = match state {
             ArmState::Arm => run!(self.ants.arm(), self.errors),
             ArmState::Disarm => run!(self.ants.disarm(), self.errors),
@@ -203,7 +210,7 @@ impl Subsystem {
     pub fn configure_hardware(
         &self,
         controller: ConfigureController,
-    ) -> Result<ConfigureHardwareResponse, Error> {
+    ) -> AntSResult<ConfigureHardwareResponse> {
         let conv = match controller {
             ConfigureController::Primary => KANTSController::Primary,
             ConfigureController::Secondary => KANTSController::Secondary,
@@ -218,7 +225,7 @@ impl Subsystem {
         })
     }
 
-    pub fn control_power(&self, state: PowerState) -> Result<ControlPowerResponse, Error> {
+    pub fn control_power(&self, state: PowerState) -> AntSResult<ControlPowerResponse> {
         match state {
             PowerState::Reset => {
                 let result = run!(self.ants.reset(), self.errors);
@@ -241,7 +248,7 @@ impl Subsystem {
         }
     }
 
-    pub fn deploy(&self, ant: DeployType, force: bool, time: i32) -> Result<DeployResponse, Error> {
+    pub fn deploy(&self, ant: DeployType, force: bool, time: i32) -> AntSResult<DeployResponse> {
         let mut conv = time as u8;
 
         if time > 255 {
@@ -270,7 +277,7 @@ impl Subsystem {
         })
     }
 
-    pub fn integration_test(&self) -> Result<IntegrationTestResults, Error> {
+    pub fn integration_test(&self) -> AntSResult<IntegrationTestResults> {
         let result = run!(self.ants.get_system_telemetry(), self.errors);
 
         let debug_errors: RefCell<Vec<String>> = RefCell::new(vec![]);
@@ -338,7 +345,7 @@ impl Subsystem {
         })
     }
 
-    pub fn noop(&self) -> Result<NoopResponse, Error> {
+    pub fn noop(&self) -> AntSResult<NoopResponse> {
         let result = run!(self.ants.watchdog_kick(), self.errors);
 
         Ok(NoopResponse {
@@ -347,7 +354,7 @@ impl Subsystem {
         })
     }
 
-    pub fn passthrough(&self, command: String, rx_len: i32) -> Result<RawCommandResponse, Error> {
+    pub fn passthrough(&self, command: String, rx_len: i32) -> AntSResult<RawCommandResponse> {
         // Convert the hex values in the string into actual hex values
         // Ex. "c3c2" -> [0xc3, 0xc2]
         let tx: Vec<u8> = command

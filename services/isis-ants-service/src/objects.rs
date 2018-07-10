@@ -95,7 +95,7 @@ graphql_object!(GetPowerResponse: () |&self| {
     field state() -> FieldResult<PowerState> {
         Ok(self.state.clone())
     }
-    
+
     field uptime() -> FieldResult<i32> {
         Ok(self.uptime as i32)
     }
@@ -136,7 +136,7 @@ graphql_object!(GetDeployResponse: () |&self| {
     field status() -> FieldResult<DeploymentStatus> {
         Ok(self.status.clone())
     }
-        
+
     field sys_burn_active() -> FieldResult<bool> {
         Ok(self.details.sys_burn_active)
     }
@@ -298,11 +298,11 @@ graphql_object!(TelemetryNominal: () |&self| {
     field raw_temp() -> FieldResult<i32> {
         Ok(self.0.raw_temp as i32)
     }
-    
+
     field uptime() -> FieldResult<i32> {
         Ok(self.0.uptime as i32)
     }
-    
+
     field sys_burn_active() -> FieldResult<bool> {
         Ok(self.0.deploy_status.sys_burn_active)
     }
@@ -384,31 +384,31 @@ graphql_object!(TelemetryDebug: () |&self| {
     field ant_1_activation_count() -> FieldResult<i32> {
         Ok(self.ant1.act_count as i32)
     }
-    
+
     field ant_1_activation_time() -> FieldResult<i32> {
         Ok(self.ant1.act_time as i32)
     }
-    
+
     field ant_2_activation_count() -> FieldResult<i32> {
         Ok(self.ant2.act_count as i32)
     }
-    
+
     field ant_2_activation_time() -> FieldResult<i32> {
         Ok(self.ant2.act_time as i32)
     }
-    
+
     field ant_3_activation_count() -> FieldResult<i32> {
         Ok(self.ant3.act_count as i32)
     }
-    
+
     field ant_3_activation_time() -> FieldResult<i32> {
         Ok(self.ant3.act_time as i32)
     }
-    
+
     field ant_4_activation_count() -> FieldResult<i32> {
         Ok(self.ant4.act_count as i32)
     }
-    
+
     field ant_4_activation_time() -> FieldResult<i32> {
         Ok(self.ant4.act_time as i32)
     }

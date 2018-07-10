@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-use std::cell::RefCell;
+use super::*;
 use isis_ants_api::*;
 use model::*;
-use super::*;
+use std::cell::RefCell;
 
 #[test]
 fn get_arm_status_good_armed() {
@@ -69,9 +69,8 @@ fn get_arm_status_good_disarmed() {
 fn get_arm_status_bad() {
     let mock = mock_new!();
 
-    mock.get_deploy.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.get_deploy
+        .return_value(Err(AntsError::GenericError.into()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -250,9 +249,8 @@ fn get_deploy_status_good_error() {
 fn get_deploy_status_bad() {
     let mock = mock_new!();
 
-    mock.get_deploy.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.get_deploy
+        .return_value(Err(AntsError::GenericError.into()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -312,9 +310,8 @@ fn get_power_good_off() {
 fn get_power_bad() {
     let mock = mock_new!();
 
-    mock.get_uptime.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.get_uptime
+        .return_value(Err(AntsError::GenericError.into()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -336,38 +333,22 @@ fn get_power_bad() {
 fn get_telemetry_debug_good() {
     let mock = mock_new!();
 
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(1),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(11),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(2),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(22),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(3),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(33),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(4),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(44),
-    );
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant1), Ok(1));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant1), Ok(11));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant2), Ok(2));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant2), Ok(22));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant3), Ok(3));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant3), Ok(33));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant4), Ok(4));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant4), Ok(44));
 
     let expected = TelemetryDebug {
         ant1: AntennaStats {
@@ -404,30 +385,18 @@ fn get_telemetry_debug_good() {
 fn get_telemetry_debug_bad() {
     let mock = mock_new!();
 
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(1),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(11),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(2),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(22),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(3),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(33),
-    );
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant1), Ok(1));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant1), Ok(11));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant2), Ok(2));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant2), Ok(22));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant3), Ok(3));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant3), Ok(33));
     // Leaving out Ant4 to throw 2 ConfigErrors
 
     let expected = TelemetryDebug {
@@ -502,9 +471,8 @@ fn get_telemetry_nominal_bad() {
 
     let expected = AntsTelemetry::default();
 
-    mock.get_system_telemetry.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.get_system_telemetry
+        .return_value(Err(AntsError::GenericError.into()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -539,38 +507,22 @@ fn get_test_results_good() {
     };
     mock.get_system_telemetry.return_value(Ok(nominal.clone()));
 
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(1),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(11),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(2),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(22),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(3),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(33),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(4),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(44),
-    );
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant1), Ok(1));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant1), Ok(11));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant2), Ok(2));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant2), Ok(22));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant3), Ok(3));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant3), Ok(33));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant4), Ok(4));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant4), Ok(44));
 
     let debug = TelemetryDebug {
         ant1: AntennaStats {
@@ -611,42 +563,25 @@ fn get_test_results_bad_nominal() {
     let mock = mock_new!();
 
     let nominal = AntsTelemetry::default();
-    mock.get_system_telemetry.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.get_system_telemetry
+        .return_value(Err(AntsError::GenericError.into()));
 
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(1),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(11),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(2),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(22),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(3),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant3),
-        Ok(33),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(4),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(44),
-    );
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant1), Ok(1));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant1), Ok(11));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant2), Ok(2));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant2), Ok(22));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant3), Ok(3));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant3), Ok(33));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant4), Ok(4));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant4), Ok(44));
 
     let debug = TelemetryDebug {
         ant1: AntennaStats {
@@ -701,31 +636,19 @@ fn get_test_results_bad_debug() {
     };
     mock.get_system_telemetry.return_value(Ok(nominal.clone()));
 
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(1),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant1),
-        Ok(11),
-    );
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(2),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant2),
-        Ok(22),
-    );
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant1), Ok(1));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant1), Ok(11));
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant2), Ok(2));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant2), Ok(22));
     //Excluding Ant3 for error testing
-    mock.get_activation_count.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(4),
-    );
-    mock.get_activation_time.return_value_for(
-        (KANTSAnt::Ant4),
-        Ok(44),
-    );
+    mock.get_activation_count
+        .return_value_for((KANTSAnt::Ant4), Ok(4));
+    mock.get_activation_time
+        .return_value_for((KANTSAnt::Ant4), Ok(44));
 
     let debug = TelemetryDebug {
         ant1: AntennaStats {
@@ -831,9 +754,8 @@ fn arm_good_disarm() {
 fn arm_error_disarm() {
     let mock = mock_new!();
 
-    mock.disarm.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.disarm
+        .return_value(Err(AntsError::GenericError.into()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -852,10 +774,8 @@ fn arm_error_disarm() {
 fn configure_good_primary() {
     let mock = mock_new!();
 
-    mock.configure.return_value_for(
-        (KANTSController::Primary),
-        Ok(()),
-    );
+    mock.configure
+        .return_value_for((KANTSController::Primary), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -876,10 +796,8 @@ fn configure_good_primary() {
 fn configure_good_secondary() {
     let mock = mock_new!();
 
-    mock.configure.return_value_for(
-        (KANTSController::Secondary),
-        Ok(()),
-    );
+    mock.configure
+        .return_value_for((KANTSController::Secondary), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -900,9 +818,8 @@ fn configure_good_secondary() {
 fn configure_bad() {
     let mock = mock_new!();
 
-    mock.configure.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.configure
+        .return_value(Err(AntsError::GenericError.into()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1002,10 +919,8 @@ fn deploy_good_all() {
 fn deploy_good_ant1() {
     let mock = mock_new!();
 
-    mock.deploy.return_value_for(
-        (KANTSAnt::Ant1, false, 5),
-        Ok(()),
-    );
+    mock.deploy
+        .return_value_for((KANTSAnt::Ant1, false, 5), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1024,10 +939,8 @@ fn deploy_good_ant1() {
 fn deploy_good_ant1_override() {
     let mock = mock_new!();
 
-    mock.deploy.return_value_for(
-        (KANTSAnt::Ant1, true, 5),
-        Ok(()),
-    );
+    mock.deploy
+        .return_value_for((KANTSAnt::Ant1, true, 5), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1046,10 +959,8 @@ fn deploy_good_ant1_override() {
 fn deploy_good_ant2() {
     let mock = mock_new!();
 
-    mock.deploy.return_value_for(
-        (KANTSAnt::Ant2, false, 5),
-        Ok(()),
-    );
+    mock.deploy
+        .return_value_for((KANTSAnt::Ant2, false, 5), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1068,10 +979,8 @@ fn deploy_good_ant2() {
 fn deploy_good_ant2_override() {
     let mock = mock_new!();
 
-    mock.deploy.return_value_for(
-        (KANTSAnt::Ant2, true, 5),
-        Ok(()),
-    );
+    mock.deploy
+        .return_value_for((KANTSAnt::Ant2, true, 5), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1090,10 +999,8 @@ fn deploy_good_ant2_override() {
 fn deploy_good_ant3() {
     let mock = mock_new!();
 
-    mock.deploy.return_value_for(
-        (KANTSAnt::Ant3, false, 5),
-        Ok(()),
-    );
+    mock.deploy
+        .return_value_for((KANTSAnt::Ant3, false, 5), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1112,10 +1019,8 @@ fn deploy_good_ant3() {
 fn deploy_good_ant3_override() {
     let mock = mock_new!();
 
-    mock.deploy.return_value_for(
-        (KANTSAnt::Ant3, true, 5),
-        Ok(()),
-    );
+    mock.deploy
+        .return_value_for((KANTSAnt::Ant3, true, 5), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1134,10 +1039,8 @@ fn deploy_good_ant3_override() {
 fn deploy_good_ant4() {
     let mock = mock_new!();
 
-    mock.deploy.return_value_for(
-        (KANTSAnt::Ant4, false, 5),
-        Ok(()),
-    );
+    mock.deploy
+        .return_value_for((KANTSAnt::Ant4, false, 5), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1156,10 +1059,8 @@ fn deploy_good_ant4() {
 fn deploy_good_ant4_override() {
     let mock = mock_new!();
 
-    mock.deploy.return_value_for(
-        (KANTSAnt::Ant4, true, 5),
-        Ok(()),
-    );
+    mock.deploy
+        .return_value_for((KANTSAnt::Ant4, true, 5), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1178,9 +1079,8 @@ fn deploy_good_ant4_override() {
 fn deploy_bad() {
     let mock = mock_new!();
 
-    mock.deploy.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.deploy
+        .return_value(Err(AntsError::GenericError.into()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1218,9 +1118,8 @@ fn noop_good() {
 fn noop_error() {
     let mock = mock_new!();
 
-    mock.watchdog_kick.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.watchdog_kick
+        .return_value(Err(AntsError::GenericError.into()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1242,10 +1141,8 @@ fn noop_error() {
 fn passthrough_good_noresponse() {
     let mock = mock_new!();
 
-    mock.passthrough.return_value_for(
-        (vec![0xc3, 0xc2], vec![]),
-        Ok(()),
-    );
+    mock.passthrough
+        .return_value_for((vec![0xc3, 0xc2], vec![]), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1264,10 +1161,8 @@ fn passthrough_good_noresponse() {
 fn passthrough_good_withresponse() {
     let mock = mock_new!();
 
-    mock.passthrough.return_value_for(
-        (vec![0xc3, 0xc2], vec![0x00, 0x01]),
-        Ok(()),
-    );
+    mock.passthrough
+        .return_value_for((vec![0xc3, 0xc2], vec![0x00, 0x01]), Ok(()));
 
     let sub = Subsystem {
         ants: Box::new(mock),
@@ -1287,9 +1182,8 @@ fn passthrough_good_withresponse() {
 fn passthrough_error() {
     let mock = mock_new!();
 
-    mock.passthrough.return_value(
-        Err(AntsError::GenericError.into()),
-    );
+    mock.passthrough
+        .return_value(Err(AntsError::GenericError.into()));
 
     let sub = Subsystem {
         ants: Box::new(mock),

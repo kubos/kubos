@@ -16,30 +16,30 @@
 
 use double;
 //use std::cell::RefCell;
-use isis_ants_api::*;
 use super::objects::*;
+use isis_ants_api::*;
 
 macro_rules! mock_new {
-    () => (
+    () => {
         MockAntS::new(
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-        Err(AntsError::ConfigError.into()),
-    )
-    )
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+            Err(AntsError::ConfigError.into()),
+        )
+    };
 }
 
 mock_trait_no_default!(
@@ -94,7 +94,6 @@ impl IAntS for MockAntS {
             self.passthrough.call((tx.to_vec(), rx.to_vec()))
         });
 }
-
 
 mod model;
 mod schema;
