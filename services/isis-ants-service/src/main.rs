@@ -140,59 +140,31 @@
 
 #![warn(missing_docs)]
 //#![feature(trace_macros)]
+#![recursion_limit = "256"]
 
-#[cfg(test)]
-#[macro_use]
 extern crate failure;
-#[cfg(not(test))]
-extern crate failure;
-
-#[macro_use]
-extern crate double;
-
-extern crate iron;
 extern crate isis_ants_api;
 #[macro_use]
 extern crate juniper;
-extern crate juniper_iron;
-extern crate logger;
-extern crate mount;
+#[macro_use]
+extern crate kubos_service;
+#[cfg(test)]
 #[macro_use]
 extern crate serde_json;
 
-use iron::prelude::*;
+use kubos_service::{Config, Service};
 use isis_ants_api::KI2CNum;
-use juniper_iron::{GraphQLHandler, GraphiQLHandler};
-use serde_json::Value;
-use std::env;
-use std::fs::File;
-use std::io::prelude::*;
+use model::Subsystem;
+use schema::{MutationRoot, QueryRoot};
 
-mod macros;
 mod model;
 mod objects;
 mod schema;
 #[cfg(test)]
 mod tests;
 
-// Create a connection to the underlying AntS device with each GraphQL request
-// and use it as the endpoint for queries and mutations
-fn context_factory(_: &mut Request) -> schema::Context {
-    //TODO: Figure out how to actually pass through the configuration values when this changes to a pure UDP implementation
-    schema::Context { subsystem: model::Subsystem::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10) }
-}
-
-#[allow(dead_code)]
-struct Config {
-    bus: KI2CNum,
-    primary: u8,
-    secondary: u8,
-    antennas: u8,
-    wd_timeout: u32,
-}
-
+/*
 fn main() {
-
     let default = json!({
                     "isis-ants-service": {
                         "addr": "0.0.0.0",
@@ -205,26 +177,6 @@ fn main() {
                     }
                 });
 
-    let mut raw = String::new();
-    let filename = env::args().nth(1).unwrap_or("".to_owned());
-
-    let master_config: Value =
-        match File::open(filename)
-            .map(|mut f| f.read_to_string(&mut raw))
-            .and_then(|_x| serde_json::from_str(&raw).map_err(|err| err.into())) {
-            Ok(v) => v,
-            _ => {
-                println!("Failed to get configuration. Using default values");
-                default
-            }
-        };
-
-    let host = master_config["isis-ants-service"]["addr"].to_string();
-    let port = master_config["isis-ants-service"]["port"].to_string();
-
-    let addr = format!("{}:{}", host.trim_matches('"'), port.trim_matches('"'));
-
-    #[allow(unused_variables)]
     let config = Config {
         //TODO: bus
         bus: KI2CNum::KI2C1,
@@ -241,23 +193,24 @@ fn main() {
             .as_u64()
             .unwrap_or(10) as u32,
     };
+}
+*/
 
-    let graphql_endpoint =
-        GraphQLHandler::new(context_factory, schema::QueryRoot, schema::MutationRoot);
+fn main() {
+    let config = Config::new("isis-ants-service");
 
-    let graphiql_endpoint = GraphiQLHandler::new("/");
+    // Temp code. Replace with proper config
+    let bus = KI2CNum::KI2C1;
+    let primary = 0x31;
+    let secondary = 0x32;
+    let antennas = 4;
+    let wd_timeout = 10;
 
-    let mut mount = mount::Mount::new();
-    mount.mount("/", graphql_endpoint);
-    mount.mount("/graphiql", graphiql_endpoint);
-
-    let (logger_before, logger_after) = logger::Logger::new(None);
-
-    let mut chain = Chain::new(mount);
-    chain.link_before(logger_before);
-    chain.link_after(logger_after);
-
-    let host = env::var("LISTEN").unwrap_or(addr.to_owned());
-    println!("GraphQL server started on {}", host);
-    Iron::new(chain).http(host.as_str()).unwrap();
+    Service::new(
+        config,
+        // TODO: Add Subsystem::new return status
+        Subsystem::new(bus, primary, secondary, antennas, wd_timeout),
+        QueryRoot,
+        MutationRoot,
+    ).start();
 }

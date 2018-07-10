@@ -14,17 +14,12 @@
 // limitations under the License.
 //
 
-use juniper::Context as JuniperContext;
 use juniper::FieldResult;
+use kubos_service;
 use model::*;
 use objects::*;
 
-// Context used to pass global data into Juniper queries
-pub struct Context {
-    pub subsystem: Subsystem,
-}
-
-impl JuniperContext for Context {}
+type Context = kubos_service::Context<Subsystem>;
 
 pub struct QueryRoot;
 
@@ -70,7 +65,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        match executor.context().subsystem.errors.try_borrow() {
+        match executor.context().subsystem().errors.try_borrow() {
             Ok(master_vec) => Ok(master_vec.clone()),
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
         }
@@ -87,7 +82,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     field power(&executor) -> FieldResult<GetPowerResponse>
         as "Antenna System Power State"
     {
-        Ok(executor.context().subsystem.get_power()?)
+        Ok(executor.context().subsystem().get_power()?)
     }
     
     // Get the current configuration of the system
@@ -143,8 +138,8 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     field telemetry(&executor, telem: TelemetryType) -> FieldResult<Telemetry>
     {
         match telem {
-            TelemetryType::Nominal => Ok(Telemetry::Nominal(executor.context().subsystem.get_telemetry_nominal().unwrap())),
-            TelemetryType::Debug => Ok(Telemetry::Debug(executor.context().subsystem.get_telemetry_debug().unwrap()))
+            TelemetryType::Nominal => Ok(Telemetry::Nominal(executor.context().subsystem().get_telemetry_nominal().unwrap())),
+            TelemetryType::Debug => Ok(Telemetry::Debug(executor.context().subsystem().get_telemetry_debug().unwrap()))
         }
     }
     
@@ -162,7 +157,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //     }
     // }
     field test_results(&executor) -> FieldResult<IntegrationTestResults> {
-        Ok(executor.context().subsystem.get_test_results()?)
+        Ok(executor.context().subsystem().get_test_results()?)
     }
 
     //----- Deployable-specific Queries -----//
@@ -174,7 +169,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field arm_status(&executor) -> FieldResult<ArmStatus>
     {
-        Ok(executor.context().subsystem.get_arm_status()?)
+        Ok(executor.context().subsystem().get_arm_status()?)
     }
     
     // Get the current deployment status of the system
@@ -200,7 +195,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field deployment_status(&executor) -> FieldResult<GetDeployResponse>
     {
-        Ok(executor.context().subsystem.get_deploy_status()?)
+        Ok(executor.context().subsystem().get_deploy_status()?)
     }
 });
 
@@ -220,7 +215,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        match executor.context().subsystem.errors.try_borrow() {
+        match executor.context().subsystem().errors.try_borrow() {
             Ok(master_vec) => Ok(master_vec.clone()),
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
         }
@@ -236,7 +231,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field noop(&executor) -> FieldResult<NoopResponse>
     {
-        Ok(executor.context().subsystem.noop()?)
+        Ok(executor.context().subsystem().noop()?)
     }
 
     // Control the power state of the system
@@ -253,7 +248,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field control_power(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
     {
-        Ok(executor.context().subsystem.control_power(state)?)
+        Ok(executor.context().subsystem().control_power(state)?)
     }
     
     // Configure the system
@@ -269,7 +264,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field configure_hardware(&executor, config: ConfigureController) -> FieldResult<ConfigureHardwareResponse>
     {
-        Ok(executor.context().subsystem.configure_hardware(config)?)
+        Ok(executor.context().subsystem().configure_hardware(config)?)
     }
     
     // Run a system self-test
@@ -294,7 +289,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     field test_hardware(&executor, test: TestType) -> FieldResult<TestResults> 
     {
         match test {
-            TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem.integration_test().unwrap())),
+            TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem().integration_test().unwrap())),
             TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
         }
     }
@@ -314,7 +309,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field issue_raw_command(&executor, command: String, rx_len = 0: i32) -> FieldResult<RawCommandResponse>
     {
-        Ok(executor.context().subsystem.passthrough(command, rx_len)?)
+        Ok(executor.context().subsystem().passthrough(command, rx_len)?)
     }
     
     //----- Deployable-specific mutations -----//
@@ -331,7 +326,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field arm(&executor, state: ArmState) -> FieldResult<ArmResponse>
     {
-        Ok(executor.context().subsystem.arm(state)?)
+        Ok(executor.context().subsystem().arm(state)?)
     }
     
     // Deploy antenna/s
@@ -349,7 +344,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field deploy(&executor, ant = (DeployType::All): DeployType, force = false: bool, time: i32) -> FieldResult<DeployResponse>
     {
-        Ok(executor.context().subsystem.deploy(ant, force, time)?)
+        Ok(executor.context().subsystem().deploy(ant, force, time)?)
     }
     
 });

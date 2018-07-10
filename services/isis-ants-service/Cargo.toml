@@ -4,13 +4,13 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 
 [dependencies]
-juniper =  "0.9.2"
-juniper_iron = "0.1.2"
-iron = "0.6.0"
-mount = "0.4.0"
-logger = "0.4.0"
-serde_json = "1.0.10"
 failure = { git = "https://github.com/rust-lang-nursery/failure" }
-double = "0.2.2"
-
 isis-ants-api = { path = "../../apis/isis-ants-api" }
+juniper =  "0.9"
+kubos-service = { path = "../kubos-service" }
+
+[dev-dependencies]
+double = "0.2"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0.10"
