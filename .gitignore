@@ -59,6 +59,7 @@ doctrees/
 .kubos-link.json
 .travis.yml
 upload.tar.gz
+config.toml
 
 # vim files
 .*.sw*

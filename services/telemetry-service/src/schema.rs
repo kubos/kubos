@@ -25,7 +25,7 @@ type Context = kubos_service::Context<Database>;
 graphql_object!(Entry: () |&self| {
     description: "A telemetry entry"
 
-    field timestamp() -> i32 as "Timestamp" {
+    field timestamp() -> f64 as "Timestamp" {
         self.timestamp
     }
 
@@ -47,8 +47,8 @@ pub struct QueryRoot;
 graphql_object!(QueryRoot: Context |&self| {
     field telemetry(
         &executor,
-        timestamp_ge: Option<i32>,
-        timestamp_le: Option<i32>,
+        timestamp_ge: Option<f64>,
+        timestamp_le: Option<f64>,
         subsystem: Option<String>,
         parameter: Option<String>,
         limit: Option<i32>,

@@ -66,7 +66,7 @@ impl Database {
                 println!("Telemetry table not found. Creating table.");
                 match sql_query(
                     "CREATE TABLE telemetry (
-                    timestamp INTEGER NOT NULL,
+                    timestamp DOUBLE NOT NULL,
                     subsystem VARCHAR(255) NOT NULL,
                     parameter VARCHAR(255) NOT NULL,
                     value VARCHAR(255) NOT NULL,
@@ -83,7 +83,7 @@ impl Database {
 
 table! {
     telemetry (timestamp) {
-        timestamp -> Integer,
+        timestamp -> Double,
         subsystem -> Text,
         parameter -> Text,
         value -> Text,
