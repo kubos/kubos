@@ -18,7 +18,9 @@ use super::*;
 
 #[test]
 fn ack_default() {
-    let service = service_new!();
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
 
     let query = r#"{
             ack
@@ -33,7 +35,9 @@ fn ack_default() {
 
 #[test]
 fn ack_noop() {
-    let service = service_new!();
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
 
     let noop = r#"mutation {
             noop {
@@ -56,10 +60,14 @@ fn ack_noop() {
 
 #[test]
 fn ack_control_power() {
-    let service = service_new!();
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
 
     let mutation = r#"mutation {
-            controlPower
+            controlPower(state: RESET) {
+                success
+            }
         }"#;
 
     service.process(mutation.to_owned());
@@ -77,10 +85,12 @@ fn ack_control_power() {
 
 #[test]
 fn ack_configure_hardware() {
-    let service = service_new!();
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
 
     let mutation = r#"mutation {
-            configureHardware(config: [{option: LOG_ERROR_DATA}]) {
+            configureHardware(config: SECONDARY) {
                 success
             }
         }"#;
@@ -99,8 +109,60 @@ fn ack_configure_hardware() {
 }
 
 #[test]
+fn ack_arm() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            arm(state: ARM) {
+                success
+            }
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let query = r#"{
+            ack
+        }"#;
+
+    let expected = json!({
+            "ack": "ARM"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn ack_deploy() {
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            deploy(time: 5) {
+                success
+            }
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let query = r#"{
+            ack
+        }"#;
+
+    let expected = json!({
+            "ack": "DEPLOY"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
 fn ack_test_hardware() {
-    let service = service_new!();
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
 
     let mutation = r#"mutation {
             testHardware(test: INTEGRATION) {
@@ -125,7 +187,9 @@ fn ack_test_hardware() {
 
 #[test]
 fn ack_issue_raw_command() {
-    let service = service_new!();
+    let mock = mock_new!();
+
+    let service = service_new!(mock);
 
     let mutation = r#"mutation {
             issueRawCommand(command: "01"){

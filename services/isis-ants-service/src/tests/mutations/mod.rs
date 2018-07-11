@@ -16,12 +16,11 @@
 
 use super::*;
 
-//TODO: mod ack;
-mod arm_status;
-mod config;
-mod debug_telem;
-mod deployment_status;
-//TODO: mod errors;
-mod nominal_telem;
-mod power;
-mod test_results;
+mod arm;
+mod configure_hardware;
+mod control_power;
+mod deploy;
+//mod errors;
+mod issue_raw;
+mod noop;
+mod test_hardware;

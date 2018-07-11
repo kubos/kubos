@@ -16,9 +16,12 @@
 #[allow(unused_parens)]
 
 use double;
-//use std::cell::RefCell;
-use super::objects::*;
 use isis_ants_api::*;
+use kubos_service::{Config, Service};
+use model::*;
+use objects::*;
+use schema::*;
+use std::cell::{Cell, RefCell};
 
 macro_rules! mock_new {
     () => {
@@ -96,5 +99,47 @@ impl IAntS for MockAntS {
         });
 }
 
-//mod model;
-mod schema;
+macro_rules! wrap {
+    ($result:ident) => {{
+        json!({
+                "msg": $result,
+                "errs": ""
+        }).to_string()
+    }};
+}
+
+macro_rules! service_new {
+    ($mock:ident) => {{
+        Service::new(
+            Config::new("isis-ants-service"),
+            Subsystem {
+                ants: Box::new($mock),
+                count: 4,
+                errors: RefCell::new(vec![]),
+                last_cmd: Cell::new(AckCommand::None)
+            },
+            QueryRoot,
+            MutationRoot,
+        )
+    }};
+}
+
+mod mutations;
+mod queries;
+
+#[test]
+fn ping() {
+    let mock = mock_new!();
+    let service = service_new!(mock);
+
+    let query = r#"
+        {
+            ping
+        }"#;
+
+    let expected = json!({
+            "ping": "pong"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}

@@ -159,6 +159,7 @@ fn deploy_status_deployed_2_antennas() {
         Subsystem {
             ants: Box::new(mock),
             errors: RefCell::new(vec![]),
+            last_cmd: Cell::new(AckCommand::None),
             count: 2,
         },
         QueryRoot,
@@ -230,6 +231,7 @@ fn deploy_status_stowed_2_antennas() {
         Subsystem {
             ants: Box::new(mock),
             errors: RefCell::new(vec![]),
+            last_cmd: Cell::new(AckCommand::None),
             count: 2,
         },
         QueryRoot,

@@ -16,15 +16,16 @@
 
 use failure::Fail;
 use isis_ants_api::*;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::str;
 
 use objects::*;
 
 pub struct Subsystem {
     pub ants: Box<IAntS>,
-    pub errors: RefCell<Vec<String>>,
     pub count: u8,
+    pub errors: RefCell<Vec<String>>,
+    pub last_cmd: Cell<AckCommand>,
 }
 
 impl Subsystem {
@@ -39,8 +40,9 @@ impl Subsystem {
 
         Ok(Subsystem {
             ants,
-            errors: RefCell::new(vec![]),
             count,
+            errors: RefCell::new(vec![]),
+            last_cmd: Cell::new(AckCommand::None),
         })
     }
 

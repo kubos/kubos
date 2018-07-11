@@ -44,11 +44,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // {
     //     ack: AckCommand
     // }
-    field ack() -> FieldResult<AckCommand>
+    field ack(&executor) -> FieldResult<AckCommand>
     {
-        // Future development: figure out how Rust lifetimes work and persist the
-        // last mutation run between requests
-        Ok(AckCommand::None)
+        Ok(executor.context().subsystem().last_cmd.get())
     }
 
     // Get all errors encountered while processing this GraphQL request
@@ -231,6 +229,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field noop(&executor) -> FieldResult<NoopResponse>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::Noop);
         Ok(executor.context().subsystem().noop()?)
     }
 
@@ -248,6 +247,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field control_power(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::ControlPower);
         Ok(executor.context().subsystem().control_power(state)?)
     }
 
@@ -264,6 +264,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field configure_hardware(&executor, config: ConfigureController) -> FieldResult<ConfigureHardwareResponse>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::ConfigureHardware);
         Ok(executor.context().subsystem().configure_hardware(config)?)
     }
 
@@ -288,6 +289,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field test_hardware(&executor, test: TestType) -> FieldResult<TestResults>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::TestHardware);
+        
         match test {
             TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem().integration_test().unwrap())),
             TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
@@ -309,6 +312,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field issue_raw_command(&executor, command: String, rx_len = 0: i32) -> FieldResult<RawCommandResponse>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::IssueRawCommand);
         Ok(executor.context().subsystem().passthrough(command, rx_len)?)
     }
 
@@ -326,6 +330,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field arm(&executor, state: ArmState) -> FieldResult<ArmResponse>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::Arm);
         Ok(executor.context().subsystem().arm(state)?)
     }
 
@@ -344,6 +349,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field deploy(&executor, ant = (DeployType::All): DeployType, force = false: bool, time: i32) -> FieldResult<DeployResponse>
     {
+        executor.context().subsystem().last_cmd.set(AckCommand::Deploy);
         Ok(executor.context().subsystem().deploy(ant, force, time)?)
     }
 
