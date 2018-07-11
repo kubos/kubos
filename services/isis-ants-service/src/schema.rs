@@ -273,7 +273,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //
     // mutation {
     //     testHardware(test: TestType) {
-    //         ... on IntegrationTestRsults {
+    //         ... on IntegrationTestResults {
     //             errors: String,
     //             success: Boolean,
     //             telemetryNominal{...},

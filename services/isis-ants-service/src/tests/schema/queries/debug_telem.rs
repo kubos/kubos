@@ -17,23 +17,96 @@
 use super::*;
 
 #[test]
-fn config() {
+fn debug_telem_good() {
     let mock = mock_new!();
 
-    mock.get_deploy.return_value(Ok(DeployStatus {
-        sys_armed: true,
-        ..Default::default()
-    }));
+    mock.get_activation_count
+        .return_value_for(KANTSAnt::Ant1, Ok(1));
+    mock.get_activation_time
+        .return_value_for(KANTSAnt::Ant1, Ok(11));
+    mock.get_activation_count
+        .return_value_for(KANTSAnt::Ant2, Ok(2));
+    mock.get_activation_time
+        .return_value_for(KANTSAnt::Ant2, Ok(22));
+    mock.get_activation_count
+        .return_value_for(KANTSAnt::Ant3, Ok(3));
+    mock.get_activation_time
+        .return_value_for(KANTSAnt::Ant3, Ok(33));
+    mock.get_activation_count
+        .return_value_for(KANTSAnt::Ant4, Ok(4));
+    mock.get_activation_time
+        .return_value_for(KANTSAnt::Ant4, Ok(44));
+    let service = service_new!(mock);
+
+    let query = r#"
+        {
+            debug: telemetry(telem: DEBUG) {
+            ... on TelemetryDebug {
+                 ant1ActivationCount,
+                 ant1ActivationTime,
+                 ant2ActivationCount,
+                 ant2ActivationTime,
+                 ant3ActivationCount,
+                 ant3ActivationTime,
+                 ant4ActivationCount,
+                 ant4ActivationTime,
+            }
+            }
+        }"#;
+
+    let expected = json!({
+            "debug": {
+                 "ant1ActivationCount": 1,
+                 "ant1ActivationTime": 11,
+                 "ant2ActivationCount": 2,
+                 "ant2ActivationTime": 22,
+                 "ant3ActivationCount": 3,
+                 "ant3ActivationTime": 33,
+                 "ant4ActivationCount": 4,
+                 "ant4ActivationTime": 44,
+            }
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn debug_telem_bad() {
+    let mock = mock_new!();
+
+    mock.get_activation_count
+        .return_value(Err(AntsError::GenericError));
+    mock.get_activation_time
+        .return_value(Err(AntsError::GenericError));
 
     let service = service_new!(mock);
 
     let query = r#"
         {
-            config
+            debug: telemetry(telem: DEBUG) {
+            ... on TelemetryDebug {
+                 ant1ActivationCount,
+                 ant1ActivationTime,
+                 ant2ActivationCount,
+                 ant2ActivationTime,
+                 ant3ActivationCount,
+                 ant3ActivationTime,
+                 ant4ActivationCount,
+                 ant4ActivationTime,
+            }}
         }"#;
 
     let expected = json!({
-            "config": "Not Implemented"
+            "debug": {
+                 "ant1ActivationCount": 0,
+                 "ant1ActivationTime": 0,
+                 "ant2ActivationCount": 0,
+                 "ant2ActivationTime": 0,
+                 "ant3ActivationCount": 0,
+                 "ant3ActivationTime": 0,
+                 "ant4ActivationCount": 0,
+                 "ant4ActivationTime": 0,
+            }
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));

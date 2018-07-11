@@ -89,7 +89,8 @@ impl Subsystem {
             // Note: A successful deployment should clear this flag for an antenna
             status = DeploymentStatus::Error;
         } else if !deploy.ant_1_not_deployed || !deploy.ant_2_not_deployed
-            || !deploy.ant_3_not_deployed || !deploy.ant_4_not_deployed
+            || (!deploy.ant_3_not_deployed && self.count > 2)
+            || (!deploy.ant_4_not_deployed && self.count > 3)
         {
             // If there aren't any errors, but some of the antannas have been deployed,
             // mark it as a partial deployment
@@ -98,7 +99,8 @@ impl Subsystem {
             // manually deploys a single antenna
             status = DeploymentStatus::Partial
         } else if deploy.ant_1_not_deployed && deploy.ant_2_not_deployed
-            && deploy.ant_3_not_deployed && deploy.ant_4_not_deployed
+            && (deploy.ant_3_not_deployed || self.count < 3)
+            && (deploy.ant_4_not_deployed || self.count < 4)
         {
             // Otherwise, if they're all marked as not-deployed, then we can
             // assume that the system is currently safely stowed
@@ -308,12 +310,15 @@ impl Subsystem {
         let telemetry_nominal = match nom_result {
             Ok(data) => TelemetryNominal(data),
             Err(err) => {
-                errors.push_str(&format!("Nominal: {};", err));
+                errors.push_str(&format!("Nominal: {}", err));
                 TelemetryNominal::default()
             }
         };
 
         if !debug_errors.is_empty() {
+            if !errors.is_empty() {
+                errors.push_str("; ");
+            }
             let concat = debug_errors.join(", ");
             errors.push_str(&format!("Debug: {}", concat));
             push_err!(self.errors, format!("get_test_results(debug): {}", concat));
@@ -358,15 +363,19 @@ impl Subsystem {
 
         // Convert the response hex values into a String for the GraphQL output
         // Note: This is in BIG ENDIAN format
-        Ok(RawCommandResponse {
-            success: result.is_ok(),
-            errors: match result {
-                Ok(_) => "".to_owned(),
-                Err(err) => err,
+        Ok(match result {
+            Ok(_) => RawCommandResponse {
+                success: true,
+                errors: "".to_owned(),
+                response: rx.iter()
+                    .map(|byte| format!("{:02x}", byte))
+                    .collect::<String>(),
             },
-            response: rx.iter()
-                .map(|byte| format!("{:02x}", byte))
-                .collect::<String>(),
+            Err(err) => RawCommandResponse {
+                success: false,
+                errors: err,
+                response: "".to_owned(),
+            },
         })
     }
 }
