@@ -119,47 +119,12 @@ class Passthrough(graphene.Mutation):
         return commandStatus
 
 
-class TestHardware(graphene.Mutation):
-    """
-    Tests if the hardware is present and talking.
-    """
-
-    class Arguments:
-        test = graphene.String()
-
-    Output = TestResults
-
-    def mutate(self, info, test):
-
-        test_output = {}
-        status = True
-        errors = None
-        if test == "Integration":
-            for module in MODULES:
-                mcu = mcu_api.MCU(address=MODULES[module]['address'])
-                out = mcu.read_telemetry(module=module, fields=['all'])
-                test_output.update(out)
-
-        else:
-            status = False
-            errors = "Test type not implemented."
-
-        testResults = TestResults(
-            errors=errors,
-            status=status,
-            results=test_output
-        )
-
-        return testResults
-
-
 class Mutation(graphene.ObjectType):
     """
     Creates mutation endpoints exposed by graphene.
     """
 
     passthrough = Passthrough.Field()
-    testHardware = TestHardware.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
