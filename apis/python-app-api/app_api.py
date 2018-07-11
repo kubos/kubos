@@ -23,7 +23,7 @@ class Services:
     def __init__(self, config_filepath=DEFAULT_CONFIG_PATH):
         self.config = toml.load(config_filepath)
 
-    def query(self, service, query):
+    def query(self, service, query, timeout=QUERY_TIMEOUT):
 
         # Check inputs
         if service not in self.config:
@@ -36,20 +36,20 @@ class Services:
         port = self.config[service]["addr"]["port"]
 
         # Talk to the server
-        response = self._udp_query(query, (ip, port))
+        response = self._udp_query(query, (ip, port), timeout)
 
         # format the response and detect errors
         data = self._format(response, service)
 
         return data
 
-    def _udp_query(self, query, (ip, port)):
+    def _udp_query(self, query, (ip, port), timeout):
         try:
             # Set up the socket
             sock = socket.socket(socket.AF_INET,  # Internet
                                  socket.SOCK_DGRAM)  # UDP
-            sock.settimeout(QUERY_TIMEOUT)
             sock.setblocking(BLOCKING)
+            sock.settimeout(timeout)
             sock.bind(("", 0))  # Binds to an available port
 
             # Send Query

@@ -10,16 +10,15 @@ Unit testing for the I2C library.
 
 import app_api
 import unittest
-# import mock
-# from contextlib import nested
+import mock
+from contextlib import nested
 
 
 class TestAppAPI(unittest.TestCase):
 
     def setUp(self):
         self.api = app_api.Services(
-            config_filepath="/Users/jessecoffey/Workspace/apollo-fusion" +
-            "/common/overlay/home/system/etc/config.toml")
+            config_filepath="test_config.toml")
 
     def test_query_servicetype(self):
         bad_service = 1
@@ -28,10 +27,15 @@ class TestAppAPI(unittest.TestCase):
             self.api.query(service=bad_service, query=query)
 
     def test_query_querytype(self):
-        service = "app-service"
+        service = "test-service"
         bad_query = 20
         with self.assertRaises(TypeError):
             self.api.query(service=service, query=bad_query)
+
+    def test_query_call(self):
+        service = "test-service"
+        query = "test query"
+        self.assertEqual(1, 1)
 
 
 if __name__ == '__main__':
