@@ -25,19 +25,12 @@ extern crate eps_api;
 extern crate failure;
 extern crate rust_i2c;
 
-use clyde_3g_eps_api::Eps;
 use clyde_3g_eps_service::models::subsystem::{Mutations, Subsystem};
 use clyde_3g_eps_service::models::*;
 use clyde_3g_eps_service::schema::mutation::Root as MutationRoot;
 use clyde_3g_eps_service::schema::query::Root as QueryRoot;
 use eps_api::{EpsError, EpsResult};
-use failure::Error;
 use kubos_service::{Config, MutationResponse, Service};
-use rust_i2c::Connection;
-use std::cell::{Cell, RefCell};
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::Duration;
 
 mock_trait_no_default!(
     MockSubsystem,

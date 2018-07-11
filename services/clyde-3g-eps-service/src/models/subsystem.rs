@@ -16,7 +16,6 @@
 
 use clyde_3g_eps_api::Eps;
 use eps_api::EpsResult;
-use failure::Error;
 use kubos_service::MutationResponse;
 use models::*;
 use rust_i2c::*;
@@ -164,7 +163,7 @@ impl Subsystem for RealSubsystem {
         Mutations::None
     }
 
-    fn set_last_mutation(&self, mutation: Mutations) {
+    fn set_last_mutation(&self, _mutation: Mutations) {
         ()
     }
 }
