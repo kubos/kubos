@@ -13,9 +13,8 @@ import socket
 
 DEFAULT_CONFIG_PATH = "/home/system/etc/config.toml"
 SERVICE_MUTATION = (
-    'mutation {testHardware' +
-    '(test:"Integration")' +
-    '{errors,status}}')
+    'mutation {testHardware(test:"Integration"){errors,status}}')
+app_api.QUERY_TIMEOUT = 10.0  # seconds
 
 
 class IntegrationTest:
