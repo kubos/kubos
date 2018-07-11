@@ -21,7 +21,7 @@ extern crate slog_async;
 extern crate slog_stream;
 extern crate slog_term;
 
-use isis_ants_api::{AntS, KANTSAnt, KANTSController, KI2CNum};
+use isis_ants_api::*;
 use slog::{Drain, Logger};
 use std::fs::File;
 use std::sync::Mutex;
