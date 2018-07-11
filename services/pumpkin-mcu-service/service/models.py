@@ -20,3 +20,14 @@ class CommandStatus(graphene.ObjectType):
 
     status = graphene.Boolean()
     command = graphene.String()
+
+
+class TestResults(graphene.ObjectType):
+    """
+    Model representing Test status.
+    Returns status of the hardware as well as status of the
+    mutation function.
+    """
+    errors = graphene.String()
+    status = graphene.Boolean()
+    results = graphene.JSONString()
