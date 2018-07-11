@@ -1,7 +1,7 @@
 KubOS Architecture Overview
 ===========================
 
-The KubOS system is designed to take care of every aspect of the satellite's flight software.
+The KubOS system is designed to take care of every aspect of a satellite's flight software.
 
 
 The KubOS Stack
@@ -51,7 +51,7 @@ Typical Mission Architecture
 
 In the above diagram, everything in blue/purple is developed by Kubos.
 Everything in red would be mission code, written by the user for their specific mission and payload.
-(Hardware services can fall into the user category if they are not integrated into the system already)
+(Hardware services can fall into the user category if they are not integrated into the system already.)
 
 Gateway
 ~~~~~~~
@@ -122,7 +122,7 @@ Onboard Communication
 Onboard the spacecraft, most communication is centered around mission applications.
 Mission applications use :doc:`Graphql <services/graphql>` over UDP for controlling hardware services and payloads to change the state of the spacecraft or execute operations.
 Mission applications get all of their data directly from the hardware services, to ensure they have the most up-to-date information to make decisions.
-Typically, a telemetry application will fulfill the role of polling all the services to generate the health and status beacon and log data into the :doc:`telemetry database. <services/telemetry-database>`
+Typically, a telemetry application will fulfill the role of polling all the services to generate the health and status beacon and log data into the :doc:`telemetry database. <services/telemetry-db>`
 There is no other onboard communication that is required by the KubOS system.
 
 Space/Ground Communication
@@ -130,7 +130,7 @@ Space/Ground Communication
 
 The communication service is responsible for maintaining the space/ground link.
 This service provides UDP passthrough so the details of the radio link (packetization, the encryption, etc.) are transparent to the onboard services.
-See the :doc:`service documentation <services/communication-service>` for more details of how this is accomplished.
+See the :doc:`service documentation <services/communication>` for more details of how this is accomplished.
 
 The usage of this UDP passthrough over the space/ground link is governed by two major use cases: nominal operations and error recovery.
 
@@ -140,9 +140,9 @@ Nominal Operations
 In day-to-day operations, the space/ground link will most commonly be used for a few different purposes:
 
 - Executing :doc:`mission applications <what-is-a-mission-application>` on-demand. For instance, triggering a mission application which orients an imaging device to the requested coordinates and takes a picture.
-- Automatically sending and receiving health and status information (health and status beacon)
-- Querying the :doc:`telemetry database <services/telemetry-database>` for specific hardware status information
-- Downloading payload data files through the :doc:`file transfer service <services/file-transfer>`.
+- Automatically sending and receiving health and status information (health and status beacon).
+- Querying the :doc:`telemetry database <services/telemetry-db>` for specific hardware status information.
+- Downloading payload data files through the :doc:`file transfer service <services/file>`.
 
 These are just examples of nominal communication.
 The core function of the communication service is providing a UDP passthrough, so a mission operator or flight software developer can really use it in any way they see fit.
@@ -155,7 +155,7 @@ When the satellite experiences an error or problem that the automatic recovery m
 We empower the mission operator to have as many tools as possible:
 
 - The :doc:`shell service <services/shell>` provides complete terminal access to the satellite
-- The :doc:`file transfer service <services/file-transfer>` allows corrected versions of the software to be uploaded and installed in the satellite
+- The :doc:`file transfer service <services/file>` allows corrected versions of the software to be uploaded and installed in the satellite
 - Each :doc:`hardware service <services/hardware-services>` endpoint can be directly queried/commanded to gather specific debugging data or control hardware, bypassing the core services
 
 Available Languages in KubOS

@@ -157,8 +157,8 @@ impl<T: ImtqFFI> Drop for Imtq<T> {
 
 #[cfg(test)]
 mod tests {
-    use double;
     use super::*;
+    use double;
 
     mock_trait!(
         MockImtq,

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+use messages::{parse_ack_or_nak, parse_u32, File, GeoRecord, Message, StateOfHealth};
 use radio_api::{Connection, RadioResult};
-use messages::{parse_ack_or_nak, File, GeoRecord, Message, StateOfHealth, parse_u32};
 
 /// Structure for interacting with Duplex-D2 Radio API
 pub struct DuplexD2 {
@@ -113,8 +113,8 @@ impl DuplexD2 {
 #[cfg(test)]
 mod tests {
 
-    use radio_api::{Connection, RadioResult, Stream};
     use super::*;
+    use radio_api::{Connection, RadioResult, Stream};
 
     struct TestStream {
         data: Vec<u8>,

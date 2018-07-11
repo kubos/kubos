@@ -16,11 +16,11 @@
 
 use getopts::Options;
 use std::env;
-use toml;
 use std::fs::File;
-use std::io::prelude::*;
-use toml::Value;
 use std::io;
+use std::io::prelude::*;
+use toml;
+use toml::Value;
 
 static PATH: &str = "/home/system/etc/config.toml";
 static IP: &str = "127.0.0.1";

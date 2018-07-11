@@ -1,5 +1,5 @@
 [package]
-name = "rust-hardware-service"
+name = "example-rust-c-service"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 

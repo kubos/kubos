@@ -59,7 +59,7 @@ extern crate failure;
 extern crate nom;
 
 pub use ants::*;
-pub use parse::{KI2CNum, KANTSAnt, KANTSController, AntsTelemetry, DeployStatus};
+pub use parse::{AntsTelemetry, DeployStatus, KANTSAnt, KANTSController, KI2CNum};
 
 mod ants;
 mod ffi;

@@ -6,7 +6,7 @@ to build Kubos projects:
 
 -  Vagrant box - The VM that contains the "ready to run" Kubos development
    environment
--  Kubos CLI - The command-line tool used to create, configure, build
+-  Kubos CLI - The command-line tool used to create, configure, build,
    and debug Kubos projects
 -  Kubos source modules - the underlying libraries on which Kubos projects
    are built

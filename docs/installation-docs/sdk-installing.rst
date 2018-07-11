@@ -9,7 +9,7 @@ to build and run a Kubos project on a target device:
 
 -  Kubos source modules - The individual components of the APIs, services,
    and mission applications
--  Kubos CLI - The command-line tool used to create, configure, build
+-  Kubos CLI - The command-line tool used to create, configure, build,
    and debug Kubos projects
 -  Vagrant box - A command-line based VM that contains a "ready to run"
    Kubos development environment
@@ -27,7 +27,8 @@ process so you can work on your project rather than setting up tooling.
 `Vagrant <https://www.vagrantup.com/>`__ is a command-line based
 tool that abstracts the virtualization provider into a simple-to-use
 interface. Vagrant supports a variety of providers (VirtualBox, VmWare,
-Parallels, etc.) but right now the Kubos SDK only supports VirtualBox.
+Parallels, etc.) but right now the Kubos SDK only supports VirtualBox, a
+free cross-platform virtualization provider.
 
 Prerequisites
 -------------

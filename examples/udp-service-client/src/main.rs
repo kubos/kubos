@@ -23,10 +23,10 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate toml;
 
-use std::net::{SocketAddr, UdpSocket};
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
+use std::net::{SocketAddr, UdpSocket};
 use std::os::unix::io::AsRawFd;
 use std::time::Duration;
 
