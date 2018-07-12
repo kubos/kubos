@@ -46,8 +46,8 @@ fn test() {
             "errs": "",
             "msg": {
                 "telemetry":[
-                    {"timestamp":1008,"subsystem":"eps","parameter":"voltage","value":"2.6"},
-                    {"timestamp":1009,"subsystem":"eps","parameter":"voltage","value":"2.5"},
+                    {"timestamp":1008.0,"subsystem":"eps","parameter":"voltage","value":"2.6"},
+                    {"timestamp":1009.0,"subsystem":"eps","parameter":"voltage","value":"2.5"},
                 ]
             }
         })
