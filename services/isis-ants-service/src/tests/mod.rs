@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 #[allow(unused_parens)]
-
 use double;
 use isis_ants_api::*;
 use kubos_service::{Config, Service};
@@ -102,9 +101,9 @@ impl IAntS for MockAntS {
 macro_rules! wrap {
     ($result:ident) => {{
         json!({
-                "msg": $result,
-                "errs": ""
-        }).to_string()
+                        "msg": $result,
+                        "errs": ""
+                }).to_string()
     }};
 }
 
@@ -116,7 +115,7 @@ macro_rules! service_new {
                 ants: Box::new($mock),
                 count: 4,
                 errors: RefCell::new(vec![]),
-                last_cmd: Cell::new(AckCommand::None)
+                last_cmd: Cell::new(AckCommand::None),
             },
             QueryRoot,
             MutationRoot,

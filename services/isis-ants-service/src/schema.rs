@@ -282,7 +282,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     field test_hardware(&executor, test: TestType) -> FieldResult<TestResults>
     {
         executor.context().subsystem().last_cmd.set(AckCommand::TestHardware);
-        
+
         match test {
             TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem().integration_test().unwrap())),
             TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
