@@ -21,7 +21,7 @@ mod arm_status;
 mod config;
 mod debug_telem;
 mod deployment_status;
-//TODO: mod errors;
+mod errors;
 mod nominal_telem;
 mod power;
 mod test_results;

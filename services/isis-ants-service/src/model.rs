@@ -30,7 +30,7 @@ pub struct Subsystem {
 
 impl Subsystem {
     pub fn new(
-        bus: KI2CNum,
+        bus: &str,
         primary: u8,
         secondary: u8,
         count: u8,

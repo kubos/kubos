@@ -20,7 +20,7 @@ mod arm;
 mod configure_hardware;
 mod control_power;
 mod deploy;
-//mod errors;
+mod errors;
 mod issue_raw;
 mod noop;
 mod test_hardware;

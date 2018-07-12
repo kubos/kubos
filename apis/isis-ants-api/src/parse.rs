@@ -177,11 +177,12 @@ impl DeployStatus {
     }
 }
 
-pub fn convert_bus(bus: KI2CNum) -> ffi::KI2CNum {
+pub fn convert_bus(bus: &str) -> ffi::KI2CNum {
     match bus {
-        self::KI2CNum::KI2C1 => ffi::KI2CNum::KI2C1,
-        self::KI2CNum::KI2C2 => ffi::KI2CNum::KI2C2,
-        self::KI2CNum::KI2C3 => ffi::KI2CNum::KI2C3,
+        "KI2C1" => ffi::KI2CNum::KI2C1,
+        "KI2C2" => ffi::KI2CNum::KI2C2,
+        "KI2C3" => ffi::KI2CNum::KI2C3,
+        _ => ffi::KI2CNum::KI2CNoBus,
     }
 }
 

@@ -34,13 +34,7 @@ pub enum AntsError {
 pub type AntSResult<T> = Result<T, AntsError>;
 
 pub trait IAntS {
-    fn new(
-        bus: KI2CNum,
-        primary: u8,
-        secondary: u8,
-        ant_count: u8,
-        timeout: u32,
-    ) -> AntSResult<Self>
+    fn new(bus: &str, primary: u8, secondary: u8, ant_count: u8, timeout: u32) -> AntSResult<Self>
     where
         Self: ::std::marker::Sized;
     fn configure(&self, config: KANTSController) -> AntSResult<()>;
@@ -94,13 +88,7 @@ impl IAntS for AntS {
     /// ```
     ///
     /// [`AntsError`]: enum.AntsError.html
-    fn new(
-        bus: KI2CNum,
-        primary: u8,
-        secondary: u8,
-        ant_count: u8,
-        timeout: u32,
-    ) -> AntSResult<AntS> {
+    fn new(bus: &str, primary: u8, secondary: u8, ant_count: u8, timeout: u32) -> AntSResult<AntS> {
         match unsafe { ffi::k_ants_init(convert_bus(bus), primary, secondary, ant_count, timeout) }
         {
             ffi::KANTSStatus::AntsOK => {

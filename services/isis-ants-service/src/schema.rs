@@ -49,22 +49,20 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(executor.context().subsystem().last_cmd.get())
     }
 
-    // Get all errors encountered while processing this GraphQL request
-    //
-    // Note: This will only return errors thrown by fields which have
-    // already been processed for this request, so it is recommended that
-    // this field be specified last.
-    // Also, query fields are processed in parallel, so it is still possible
-    // that this field will be processed before others and some error messages
-    // might be excluded
+    // Get all errors encountered since the last time this field was queried
     //
     // {
     //     errors: [String]
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        match executor.context().subsystem().errors.try_borrow() {
-            Ok(master_vec) => Ok(master_vec.clone()),
+        match executor.context().subsystem().errors.try_borrow_mut() {
+            Ok(mut master_vec) => {
+                let current = master_vec.clone();
+                master_vec.clear();
+                master_vec.shrink_to_fit();
+                Ok(current)
+            },
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
         }
     }
@@ -205,8 +203,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // Get all errors encountered while processing this GraphQL request
     //
     // Note: This will only return errors thrown by fields which have
-    // already been processed for this request, so it is recommended that
-    // this field be specified last.
+    // already been processed, so it is recommended that this field be specified last.
     //
     // mutation {
     //     errors: [String]

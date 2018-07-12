@@ -68,7 +68,7 @@ mock_trait_no_default!(
 
 impl IAntS for MockAntS {
     fn new(
-        _bus: KI2CNum,
+        _bus: &str,
         _primary: u8,
         _secondary: u8,
         _ant_count: u8,

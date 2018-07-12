@@ -138,8 +138,7 @@
 //! ```
 //!
 
-#![warn(missing_docs)]
-//#![feature(trace_macros)]
+#![deny(missing_docs)]
 #![recursion_limit = "256"]
 
 #[cfg(test)]
@@ -155,7 +154,7 @@ extern crate kubos_service;
 #[macro_use]
 extern crate serde_json;
 
-use isis_ants_api::{AntSResult, KI2CNum};
+use isis_ants_api::AntSResult;
 use kubos_service::{Config, Service};
 use model::Subsystem;
 use schema::{MutationRoot, QueryRoot};
@@ -202,12 +201,38 @@ fn main() {
 fn main() -> AntSResult<()> {
     let config = Config::new("isis-ants-service");
 
-    // Temp code. Replace with proper config
-    let bus = KI2CNum::KI2C1;
-    let primary = 0x31;
-    let secondary = 0x32;
-    let antennas = 4;
-    let wd_timeout = 10;
+    let bus = config
+        .get("bus")
+        .expect("No 'bus' value found in 'isis-ants-service' section of config");
+    let bus = bus.as_str().unwrap();
+
+    let primary = config
+        .get("primary")
+        .expect("No 'primary' value found in 'isis-ants-service' section of config");
+    let primary = primary.as_str().unwrap();
+    let primary: u8 = match primary.starts_with("0x") {
+        true => u8::from_str_radix(&primary[2..], 16).unwrap(),
+        false => u8::from_str_radix(primary, 16).unwrap(),
+    };
+
+    let secondary = config
+        .get("secondary")
+        .expect("No 'secondary' value found in 'isis-ants-service' section of config");
+    let secondary = secondary.as_str().unwrap();
+    let secondary: u8 = match secondary.starts_with("0x") {
+        true => u8::from_str_radix(&secondary[2..], 16).unwrap(),
+        false => u8::from_str_radix(secondary, 16).unwrap(),
+    };
+
+    let antennas = config
+        .get("antennas")
+        .expect("No 'antennas' value found in 'isis-ants-service' section of config");
+    let antennas = antennas.as_integer().unwrap() as u8;
+
+    let wd_timeout = config
+        .get("wd_timeout")
+        .expect("No 'wd_timeout' value found in 'isis-ants-service' section of config");
+    let wd_timeout = wd_timeout.as_integer().unwrap() as u32;
 
     Service::new(
         config,
