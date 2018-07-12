@@ -16,11 +16,47 @@
 
 //! Kubos Service for interacting with [ISIS Antenna Systems](https://www.isispace.nl/product-category/products/antenna-systems/)
 //!
-//! Configuration is done via a configuration file. This should be specified as a command line argument...
+//! # Configuration
 //!
-//! # Examples
+//! The service must be configured in `/home/system/etc/config.toml` with the following fields:
 //!
-//! TODO: Example calling the process
+//! - `[isis-ants-service.addr]`
+//!
+//!     - `ip` - Specifies the service's IP address
+//!     - `port` - Specifies the port on which the service will be listening for UDP packets
+//!
+//! - `[isis-ants-service]`
+//!
+//!     - `bus` - Specifies the I2C bus the antenna system is connected to
+//! 	- `primary` - Specifies the I2C address of the antenna system's primary microcontroller
+//! 	- `secondary` - Specifies the I2C address of the secondary microcontroller. If no secondary contoller is present, this value should be `"0x00"`.
+//! 	- `antennas` - Specifies the number of antennas present in the system. Expected value: 2 or 4.
+//! 	- `wd_timeout` - Specifies the interval at which the AntS watchdog should be automatically kicked. To disable automatic kicking, this value should be `0`.
+//!
+//! For example:
+//!
+//! ```toml
+//! [isis-ants-service.addr]
+//! ip = "0.0.0.0"
+//! port = 8006
+//!
+//! [isis-ants-service]
+//! bus = "KI2C1"
+//! primary = "0x31"
+//! secondary = "0x32"
+//! antennas = 4
+//! wd_timeout = 10
+//! ```
+//!
+//! # Starting the Service
+//!
+//! The service should be started automatically by its init script, but may also be started manually:
+//!
+//! ```shell
+//! $ isis-ants-service
+//! Kubos antenna systems service started
+//! Listening on: 0.0.0.0:8006
+//! ```
 //!
 //! # Available Fields
 //!
@@ -51,8 +87,8 @@
 //!         state,
 //!         uptime
 //!     }
-//!     nominal: telemetry(telem: NOMINAL) {
-//!         ... on TelemetryNominal {
+//!     telemetry {
+//!         nominal {
 //!             rawTemp,
 //!             uptime,
 //!             sysBurnActive,
@@ -70,9 +106,8 @@
 //!             ant4NotDeployed,
 //!             ant4StoppedTime,
 //!             ant4Active
-//!     }}
-//!     debug: telemetry(telem: DEBUG) {
-//!         ... on TelemetryDebug {
+//!         },
+//!         debug {
 //!             ant1ActivationCount,
 //!             ant1ActivationTime,
 //!             ant2ActivationCount,
@@ -164,39 +199,6 @@ mod objects;
 mod schema;
 #[cfg(test)]
 mod tests;
-
-/*
-fn main() {
-    let default = json!({
-                    "isis-ants-service": {
-                        "addr": "0.0.0.0",
-                        "port": 8080,
-                        "bus": "KI2C1",
-                        "primary": 0x31,
-                        "secondary": 0x32,
-                        "antennas": 4,
-                        "wd_timeout": 10
-                    }
-                });
-
-    let config = Config {
-        //TODO: bus
-        bus: KI2CNum::KI2C1,
-        primary: master_config["isis-ants-service"]["primary"]
-            .as_u64()
-            .unwrap_or(0x31) as u8,
-        secondary: master_config["isis-ants-service"]["secondary"]
-            .as_u64()
-            .unwrap_or(0x32) as u8,
-        antennas: master_config["isis-ants-service"]["antennas"]
-            .as_u64()
-            .unwrap_or(4) as u8,
-        wd_timeout: master_config["isis-ants-service"]["wd_timeout"]
-            .as_u64()
-            .unwrap_or(10) as u32,
-    };
-}
-*/
 
 fn main() -> AntSResult<()> {
     let config = Config::new("isis-ants-service");

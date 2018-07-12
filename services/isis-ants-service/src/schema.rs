@@ -81,17 +81,17 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(executor.context().subsystem().get_power()?)
     }
 
-    // Get the current configuration of the system
+    // Get the current microcontroller which commands will be sent to
     //
     // {
-    //     config: "Not Implemented"
+    //     config: ConfigureController
     // }
-    field config() -> FieldResult<String>
+    field config(&executor) -> FieldResult<ConfigureController>
     {
         // Future development: Once Rust lifetimes have been figured out,
         // this could be updated to return the controller previously set
         // with the 'configureHardware' mutation
-        Ok(String::from("Not Implemented"))
+        Ok(executor.context().subsystem().get_config()?)
     }
 
     // Get current telemetry information for the system

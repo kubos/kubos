@@ -114,6 +114,7 @@ macro_rules! service_new {
             Subsystem {
                 ants: Box::new($mock),
                 count: 4,
+                controller: Cell::new(ConfigureController::Primary),
                 errors: RefCell::new(vec![]),
                 last_cmd: Cell::new(AckCommand::None),
             },

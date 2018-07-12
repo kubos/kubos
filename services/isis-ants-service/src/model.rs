@@ -24,6 +24,7 @@ use objects::*;
 pub struct Subsystem {
     pub ants: Box<IAntS>,
     pub count: u8,
+    pub controller: Cell<ConfigureController>,
     pub errors: RefCell<Vec<String>>,
     pub last_cmd: Cell<AckCommand>,
 }
@@ -38,15 +39,22 @@ impl Subsystem {
     ) -> AntSResult<Subsystem> {
         let ants = Box::new(AntS::new(bus, primary, secondary, count, timeout)?);
 
+        println!("Kubos antenna systems service started");
+
         Ok(Subsystem {
             ants,
             count,
+            controller: Cell::new(ConfigureController::Primary),
             errors: RefCell::new(vec![]),
             last_cmd: Cell::new(AckCommand::None),
         })
     }
 
     // Queries
+
+    pub fn get_config(&self) -> AntSResult<ConfigureController> {
+        Ok(self.controller.get())
+    }
 
     pub fn get_arm_status(&self) -> AntSResult<ArmStatus> {
         let result = run!(self.ants.get_deploy(), self.errors);
@@ -65,7 +73,7 @@ impl Subsystem {
 
         let deploy = result.clone().unwrap_or_default();
 
-        // If our API called threw any errors, just go ahead and quit now
+        // If our API call threw any errors, just go ahead and quit now
         if result.is_err() {
             return Ok(GetDeployResponse {
                 status,
@@ -84,27 +92,23 @@ impl Subsystem {
         if deployed {
             // If all antennas are not-not-deployed, then the system is fully deployed
             status = DeploymentStatus::Deployed;
-        } else if deploy.ant_1_stopped_time
-            || deploy.ant_2_stopped_time
-            || deploy.ant_3_stopped_time
-            || deploy.ant_4_stopped_time
+        } else if deploy.ant_1_stopped_time || deploy.ant_2_stopped_time
+            || deploy.ant_3_stopped_time || deploy.ant_4_stopped_time
         {
             // If any antennas failed to deploy, mark the system as in an error state
             // Note: A successful deployment should clear this flag for an antenna
             status = DeploymentStatus::Error;
-        } else if !deploy.ant_1_not_deployed
-            || !deploy.ant_2_not_deployed
+        } else if !deploy.ant_1_not_deployed || !deploy.ant_2_not_deployed
             || (!deploy.ant_3_not_deployed && self.count > 2)
             || (!deploy.ant_4_not_deployed && self.count > 3)
         {
             // If there aren't any errors, but some of the antannas have been deployed,
             // mark it as a partial deployment
-            // Note: This should be overridden by "InProgress". The only other way
+            // Note: This should be overridden by "InProgress". The only real way
             // a partial deployment is possible (without any errors) is if someone
             // manually deploys a single antenna
             status = DeploymentStatus::Partial
-        } else if deploy.ant_1_not_deployed
-            && deploy.ant_2_not_deployed
+        } else if deploy.ant_1_not_deployed && deploy.ant_2_not_deployed
             && (deploy.ant_3_not_deployed || self.count < 3)
             && (deploy.ant_4_not_deployed || self.count < 4)
         {
@@ -143,6 +147,7 @@ impl Subsystem {
 
     pub fn get_telemetry(&self) -> AntSResult<Telemetry> {
         let nominal = run!(self.ants.get_system_telemetry(), self.errors).unwrap_or_default();
+
         let debug = TelemetryDebug {
             ant1: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant1), self.errors)
@@ -207,6 +212,10 @@ impl Subsystem {
         };
 
         let result = run!(self.ants.configure(conv), self.errors);
+
+        if result.is_ok() {
+            self.controller.set(controller);
+        }
 
         Ok(ConfigureHardwareResponse {
             config: controller,

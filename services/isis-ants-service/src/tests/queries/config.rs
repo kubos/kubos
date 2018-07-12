@@ -17,7 +17,7 @@
 use super::*;
 
 #[test]
-fn config() {
+fn config_default() {
     let mock = mock_new!();
     let service = service_new!(mock);
 
@@ -27,7 +27,71 @@ fn config() {
         }"#;
 
     let expected = json!({
-            "config": "Not Implemented"
+            "config": "PRIMARY"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn config_primary() {
+    let mock = mock_new!();
+
+    mock.configure.return_value(Ok(()));
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            configureHardware(config: SECONDARY) {
+                success
+            }
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let mutation = r#"mutation {
+            configureHardware(config: PRIMARY) {
+                success
+            }
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let query = r#"
+        {
+            config
+        }"#;
+
+    let expected = json!({
+            "config": "PRIMARY"
+    });
+
+    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+}
+
+#[test]
+fn config_secondary() {
+    let mock = mock_new!();
+
+    mock.configure.return_value(Ok(()));
+
+    let service = service_new!(mock);
+
+    let mutation = r#"mutation {
+            configureHardware(config: SECONDARY) {
+                success
+            }
+        }"#;
+
+    service.process(mutation.to_owned());
+
+    let query = r#"
+        {
+            config
+        }"#;
+
+    let expected = json!({
+            "config": "SECONDARY"
     });
 
     assert_eq!(service.process(query.to_owned()), wrap!(expected));

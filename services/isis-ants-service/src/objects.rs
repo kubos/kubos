@@ -61,7 +61,7 @@ pub type ArmResponse = GenericResponse;
 ///
 /// Sets which AntS microcontroller will be used to issue
 /// commands to the antennas
-#[derive(GraphQLEnum, Clone, Eq, PartialEq, Debug)]
+#[derive(GraphQLEnum, Clone, Copy, Eq, PartialEq, Debug)]
 pub enum ConfigureController {
     Primary,
     Secondary,
@@ -272,7 +272,7 @@ pub struct Telemetry {
     pub debug: TelemetryDebug,
 }
 
-/// Response fields for 'telemetry(telem: NOMINAL)' query
+/// Nominal telemetry data
 #[derive(Debug, Default, PartialEq)]
 pub struct TelemetryNominal(pub AntsTelemetry);
 
@@ -347,7 +347,7 @@ graphql_object!(TelemetryNominal: () |&self| {
 
 });
 
-/// Response fields for 'telemetry(telem: DEBUG)' query
+/// Debug telemetry data
 #[derive(Debug, Default, PartialEq)]
 pub struct TelemetryDebug {
     pub ant1: AntennaStats,
