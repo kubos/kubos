@@ -261,7 +261,7 @@ An example program might look like this:
 I2C
 ~~~
 
-The Pumpkin MBM2 has one user-accessible I2C bus.
+The Pumpkin MBM2 has one user-accessible I2C bus, ``/dev/i2c-1``
 Users can connect a new device to it via pins **H1.43** (SCL) and **H1.41** (SDA)
 of the CubeSat Kit Bus connectors.
 
@@ -271,9 +271,9 @@ Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 Kubos Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
-The I2C bus is available through the Kubos HAL as ``K_I2C1``.
-
 For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubos-hal/i2c-hal/index>`.
+
+.. note:: The I2C bus is available through the Kubos C HAL as ``K_I2C1``.
 
 UART
 ~~~~
