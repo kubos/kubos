@@ -466,7 +466,7 @@ pub fn main() {
     let logger = Logger::root(slog::Duplicate(console_drain, file_drain).fuse(), o!());
 
     // Initialize connection with the antenna system
-    let ants = match AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10) {
+    let ants = match AntS::new("KI2C1", 0x31, 0x32, 4, 10) {
         Ok(result) => result,
         Err(err) => {
             error!(logger, "Failed to init connection: {}", err);
