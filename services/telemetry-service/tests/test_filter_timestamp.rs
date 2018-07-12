@@ -21,12 +21,12 @@ mod utils;
 use utils::*;
 
 static SQL: &'static str = r"
-insert into telemetry values(1531347346000, 'eps', 'voltage', '3.3');
-insert into telemetry values(1531347346001, 'eps', 'voltage', '3.4');
-insert into telemetry values(15313473460002, 'eps', 'voltage', '3.5');
-insert into telemetry values(15313473460003, 'eps', 'voltage', '3.6');
-insert into telemetry values(15313473460004, 'eps', 'voltage', '3.7');
-insert into telemetry values(15313473460005, 'eps', 'voltage', '3.8');
+insert into telemetry values(1531412196210, 'eps', 'voltage', '3.3');
+insert into telemetry values(1531412196211, 'eps', 'voltage', '3.4');
+insert into telemetry values(1531412196212, 'eps', 'voltage', '3.5');
+insert into telemetry values(1531412196213, 'eps', 'voltage', '3.6');
+insert into telemetry values(1531412196214, 'eps', 'voltage', '3.7');
+insert into telemetry values(1531412196215, 'eps', 'voltage', '3.8');
 ";
 
 /// These four test cases are all in one test function because
@@ -36,10 +36,10 @@ insert into telemetry values(15313473460005, 'eps', 'voltage', '3.8');
 fn tests() {
     let (handle, sender) = setup(Some(SQL));
 
-    let ge_res = do_query("{telemetry(timestampGe: 15313473460004){value}}");
-    let le_res = do_query("{telemetry(timestampLe: 15313473460002){value}}");
-    let range_res = do_query("{telemetry(timestampGe: 15313473460001, timestampLe:15313473460003){value}}");
-    let single_res = do_query("{telemetry(timestampGe: 15313473460003, timestampLe:15313473460003){value}}");
+    let ge_res = do_query("{telemetry(timestampGe: 1531412196214.0){value}}");
+    let le_res = do_query("{telemetry(timestampLe: 1531412196212.0){value}}");
+    let range_res = do_query("{telemetry(timestampGe: 1531412196211.0, timestampLe:1531412196213.0){value}}");
+    let single_res = do_query("{telemetry(timestampGe: 1531412196213.0, timestampLe:1531412196213.0){value}}");
 
     teardown(handle, sender);
 

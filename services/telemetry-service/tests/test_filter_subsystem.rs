@@ -21,9 +21,9 @@ mod utils;
 use utils::*;
 
 static SQL: &'static str = r"
-insert into telemetry values(1000, 'eps', 'voltage', '3.3');
-insert into telemetry values(1010, 'gps', 'x_position', '-1.0');
-insert into telemetry values(1011, 'eps', 'voltage', '10');
+insert into telemetry values(1531412196210.0, 'eps', 'voltage', '3.3');
+insert into telemetry values(1531412196211.0, 'gps', 'x_position', '-1.0');
+insert into telemetry values(1531412196212.0, 'eps', 'voltage', '10');
 ";
 
 #[test]
@@ -37,7 +37,7 @@ fn test() {
             "errs": "",
             "msg": {
                 "telemetry":[
-                    {"timestamp":1010.0,"subsystem":"gps","parameter":"x_position","value":"-1.0"}
+                    {"timestamp":1531412196211.0,"subsystem":"gps","parameter":"x_position","value":"-1.0"}
                 ]
             }
         })
