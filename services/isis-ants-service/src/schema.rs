@@ -97,8 +97,8 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // Get current telemetry information for the system
     //
     // {
-    //     nominal: telemetry(telem: NOMINAL) {
-    //         ... on TelemetryNominal {
+    //     telemetry {
+    //         nominal {
     //             rawTemp: Int,
     //             uptime: Int,
     //             sysBurnActive: Boolean,
@@ -116,10 +116,8 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //             ant4NotDeployed: Boolean,
     //             ant4StoppedTime: Boolean,
     //             ant4Active: Boolean
-    //         }
-    //     }
-    //     debug: telemetry(telem: DEBUG) {
-    //         ... on TelemetryDebug {
+    //         },
+    //     	   debug {
     //             ant1ActivationCount: Int,
     //             ant1ActivationTime: Int,
     //             ant2ActivationCount: Int,
@@ -131,12 +129,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         }
     //     }
     // }
-    field telemetry(&executor, telem: TelemetryType) -> FieldResult<Telemetry>
+    field telemetry(&executor) -> FieldResult<Telemetry>
     {
-        match telem {
-            TelemetryType::Nominal => Ok(Telemetry::Nominal(executor.context().subsystem().get_telemetry_nominal().unwrap())),
-            TelemetryType::Debug => Ok(Telemetry::Debug(executor.context().subsystem().get_telemetry_debug().unwrap()))
-        }
+        Ok(executor.context().subsystem().get_telemetry()?)
     }
 
     // Get the test results of the last run test

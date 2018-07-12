@@ -137,8 +137,9 @@ impl Subsystem {
         })
     }
 
-    pub fn get_telemetry_debug(&self) -> AntSResult<TelemetryDebug> {
-        Ok(TelemetryDebug {
+    pub fn get_telemetry(&self) -> AntSResult<Telemetry> {
+        let nominal = run!(self.ants.get_system_telemetry(), self.errors).unwrap_or_default();
+        let debug = TelemetryDebug {
             ant1: AntennaStats {
                 act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant1), self.errors)
                     .unwrap_or_default(),
@@ -163,13 +164,12 @@ impl Subsystem {
                 act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant4), self.errors)
                     .unwrap_or_default(),
             },
+        };
+
+        Ok(Telemetry {
+            nominal: TelemetryNominal(nominal),
+            debug,
         })
-    }
-
-    pub fn get_telemetry_nominal(&self) -> AntSResult<TelemetryNominal> {
-        let result = run!(self.ants.get_system_telemetry(), self.errors);
-
-        Ok(TelemetryNominal(result.unwrap_or_default()))
     }
 
     pub fn get_test_results(&self) -> AntSResult<IntegrationTestResults> {

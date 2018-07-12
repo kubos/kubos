@@ -265,29 +265,12 @@ pub struct RawCommandResponse {
     pub response: String,
 }
 
-/// Input field for 'telemetry' query
-///
-/// Indicates which type of telemetry data should be fetched
-#[derive(GraphQLEnum)]
-pub enum TelemetryType {
-    Nominal,
-    Debug,
+/// Response fields for 'telemetry' query
+#[derive(GraphQLObject)]
+pub struct Telemetry {
+    pub nominal: TelemetryNominal,
+    pub debug: TelemetryDebug,
 }
-
-/// Enum for 'telemetry' query response union
-pub enum Telemetry {
-    Nominal(TelemetryNominal),
-    Debug(TelemetryDebug),
-}
-
-/// Response union for 'telemetry' query
-graphql_union!(Telemetry: () |&self| {
-    description: "Test"
-    instance_resolvers: |&_| {
-        &TelemetryNominal => match *self { Telemetry::Nominal(ref n) => Some(n), _ => None},
-        &TelemetryDebug => match *self { Telemetry::Debug(ref d) => Some(d), _ => None},
-    }
-});
 
 /// Response fields for 'telemetry(telem: NOMINAL)' query
 #[derive(Debug, Default, PartialEq)]
