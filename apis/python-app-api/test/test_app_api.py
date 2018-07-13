@@ -11,7 +11,6 @@ Unit testing for the Kubos App API.
 import app_api
 import unittest
 import mock
-import json
 
 
 class TestAppAPI(unittest.TestCase):
