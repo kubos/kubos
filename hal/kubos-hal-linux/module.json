@@ -14,7 +14,7 @@
   },
   "targetDependencies": {
       "kubos-linux-isis-gcc": {
-          "kubos-hal-iobc": "kubos/kubos-hal-iobc"
+          "isis-iobc-supervisor": "kubos/isis-iobc-supervisor"
       }
   }
 }

@@ -3,7 +3,7 @@ Kubos Linux
 
 Kubos Linux is a custom Linux distribution designed with embedded devices in mind.
 
-It focuses on including only drivers that are useful for space applications (ex. 
+It focuses on including only drivers that are useful for space applications (eg.
 I2C and SPI, rather than display drivers) and multi-layer system validation and 
 recovery logic.
 
@@ -20,8 +20,8 @@ Installation Docs
     Installing Kubos Linux on ISIS-OBC <../installation-docs/installing-linux-iobc>
     Installing Kubos Linux on Pumpkin MBM2 <../installation-docs/installing-linux-mbm2>
     
-General Guide
--------------
+General Guides
+--------------
 
 .. toctree::
     :maxdepth: 1
@@ -39,6 +39,8 @@ System Guides
     Working with the iOBC <working-with-the-iobc>
     Working with the Pumpkin MBM2 <working-with-the-mbm2>
     
+.. _sysadmin:
+    
 SysAdmin Docs
 -------------
     
@@ -51,3 +53,4 @@ SysAdmin Docs
     Building Kubos Linux for the Beaglebone Black <kubos-linux-on-bbb>
     Building Kubos Linux for the ISIS-OBC <kubos-linux-on-iobc>
     Building Kubos Linux for Pumpkin MBM2 <kubos-linux-on-mbm2>
+    Configuring KubOS <configuring-kubos>

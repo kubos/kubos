@@ -1,11 +1,10 @@
 Kubos Project Configuration
 ===========================
 
-Kubos project configuration is derived from Yotta's `configuration system <http://docs.yottabuild.org/reference/config.html>`__ 
+For Kubos projects using C, the project configuration is derived from yotta's `configuration system <http://docs.yottabuild.org/reference/config.html>`__ 
 and `module.json <http://docs.yottabuild.org/reference/module.html>`__ files.
 
 If a project's configuration is changed, the new settings will be incorporated during the next execution of ``kubos build``.
-   
 
 config.json
 -----------
@@ -35,48 +34,21 @@ For example:
     $ kubos config
     
     {
-      "test": false, // application's config.json
       "hardware": {
-        "console": {
-          "uart": "K_UART2", // msp430f5529-gcc
-          "baudRate": 115200 // msp430f5529-gcc
-        },
         "i2c": {
-          "count": 2, // msp430f5529-gcc
+          "count": 1, // kubos-linux-isis-gcc
           "defaults": {
-            "bus": "K_I2C2", // msp430f5529-gcc
+            "bus": "K_I2C1", // kubos-linux-isis-gcc
             "role": "K_MASTER", // kubos-gcc
             "clockSpeed": 100000, // kubos-gcc
             "addressingMode": "K_ADDRESSINGMODE_7BIT" // kubos-gcc
           },
-          "i2c1": {},
-          "i2c2": {}
-        },
-        "spi": {
-          "count": 2, // msp430f5529-gcc
-          "defaults": {
-            "bus": "K_SPI1", // msp430f5529-gcc
-            "role": "K_SPI_MASTER", // kubos-gcc
-            "direction": "K_SPI_DIRECTION_2LINES", // kubos-gcc
-            "dataSize": "K_SPI_DATASIZE_8BIT", // kubos-gcc
-            "clockPolarity": "K_SPI_CPOL_HIGH", // kubos-gcc
-            "clockPhase": "K_SPI_CPHA_1EDGE", // kubos-gcc
-            "firstBit": "K_SPI_FIRSTBIT_LSB", // kubos-gcc
-            "speed": "10000" // kubos-gcc
-          },
-          "spi1": {},
-          "spi2": {}
+          "i2c1": {
+            "device": "/dev/i2c-0" // kubos-linux-isis-gcc
+          }
         },
         "uart": {
-          "count": 2, // msp430f5529-gcc
-          "uart1": {
-            "tx": "P33", // msp430f5529-gcc
-            "rx": "P34" // msp430f5529-gcc
-          },
-          "uart2": {
-            "tx": "P44", // msp430f5529-gcc
-            "rx": "P45" // msp430f5529-gcc
-          },
+          "count": 0, // kubos-gcc
           "defaults": {
             "baudRate": 9600, // kubos-gcc
             "wordLen": "K_WORD_LEN_8BIT", // kubos-gcc
@@ -85,15 +57,30 @@ For example:
             "rxQueueLen": 128, // kubos-gcc
             "txQueueLen": 128 // kubos-gcc
           }
+        },
+        "spi": {
+          "count": 0, // kubos-gcc
+          "defaults": {
+            "bus": "K_SPI1", // kubos-gcc
+            "role": "K_SPI_MASTER", // kubos-gcc
+            "direction": "K_SPI_DIRECTION_2LINES", // kubos-gcc
+            "dataSize": "K_SPI_DATASIZE_8BIT", // kubos-gcc
+            "clockPolarity": "K_SPI_CPOL_HIGH", // kubos-gcc
+            "clockPhase": "K_SPI_CPHA_1EDGE", // kubos-gcc
+            "firstBit": "K_SPI_FIRSTBIT_LSB", // kubos-gcc
+            "speed": "10000" // kubos-gcc
+          }
         }
       },
-      "gcc": {
-        "printf-float": false // kubos-msp430-gcc
-      },
-      "arch": {
-        "msp430": {}
+      "system": {
+        "initAfterFlash": false, // kubos-linux-gcc
+        "initAtBoot": false, // kubos-linux-gcc
+        "runLevel": 50, // kubos-linux-gcc
+        "destDir": "/home/system/usr/local/bin", // kubos-linux-gcc
+        "password": "Kubos123" // kubos-linux-gcc
       }
     }
+
     
 Custom Settings
 ^^^^^^^^^^^^^^^
@@ -179,7 +166,7 @@ System
       generated with the run level specified by ``runLevel`` 
     :property number runLevel: `(Default: 50. Range: 10-99)` The priority of the generated init script. 
       Scripts with lower values will be run first
-    :property string destDir: `(Default: "/home/usr/local/bin")` Specifies flashing destination directory for all 
+    :property string destDir: `(Default: "/home/system/usr/local/bin")` Specifies flashing destination directory for all 
       non-application files
     :property string password: `(Default: "Kubos123") Specifies the root password to be used by 
       ``kubos flash`` to successfully connect to the target device
@@ -501,27 +488,10 @@ Hardware
     :property string alt: `(STM32F4* only)` GPIO alternate function mapping
     :options alt: GPIO_AFx_I2Cy
 
-CSP
-###
-
-.. json:object:: csp
-
-    Kubos CSP (CubeSat Protocol) configuration
-    
-    :property boolean debug: Turn on CSP debug messages
-
-    **Example**::
-    
-        {
-            "csp": {
-                "debug": true
-            }
-        }
-
 module.json
 -----------
 
-The Kubos project's `module.json` file is originally based on `Yotta's module.json file <http://docs.yottabuild.org/reference/module.html>`__
+The Kubos project's `module.json` file is originally based on `yotta's module.json file <http://docs.yottabuild.org/reference/module.html>`__
 
 Default Configurations
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -548,7 +518,7 @@ Relevant Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 These are the configuration options which are most likely to be changed for a project.
-(For all other options, refer to `Yotta's documentation <http://docs.yottabuild.org/reference/module.html>`__.)
+(For all other options, refer to `yotta's documentation <http://docs.yottabuild.org/reference/module.html>`__.)
 
 .. json:object:: name
 
@@ -577,8 +547,10 @@ These are the configuration options which are most likely to be changed for a pr
     
     :property string {component}: Project dependency location and/or version
     
-    Available dependency name/value pairs (hierarchy denotes included dependencies. Italics denotes Yotta targetDependencies):
-                    
+    Available dependency name/value pairs (hierarchy denotes included dependencies. Italics denotes yotta targetDependencies):
+                
+    - "ccan-json": "kubos/ccan-json"
+    - "cmocka": "kubos/cmocka"             
     - "csp": "kubos/libcsp"
     
         - `"kubos-hal": "kubos/kubos-hal"`
@@ -591,4 +563,5 @@ These are the configuration options which are most likely to be changed for a pr
         
             - "kubos-hal" : "kubos/kubos-hal"
         
+    - "isis-iobc-supervisor": "kubos/isis-iobc-supervisor"
     - "tinycbor": "kubos/tinycbor"

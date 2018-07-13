@@ -7,28 +7,28 @@ What is the Kubos SDK?
 The Kubos SDK is a term used to describe all of the components used
 to build and run a Kubos project on a target device:
 
--  Kubos source modules - the individual components of the operating
-   systems, hardware abstraction layers, and APIs
--  Kubos CLI - The command-line tool used to create, configure, build
-   and debug KubOS projects
+-  Kubos source modules - The individual components of the APIs, services,
+   and mission applications
+-  Kubos CLI - The command-line tool used to create, configure, build,
+   and debug Kubos projects
 -  Vagrant box - A command-line based VM that contains a "ready to run"
-   kubos development environment
+   Kubos development environment
 
 How Does The SDK Work?
 ----------------------
 
 The Kubos SDK is distributed through a Vagrant box. A Vagrant box
 (referred to simply as a "box") is a command-line based virtual machine.
-This virtual machine contains all of the Kubos source code, compiler
-toolchains, debugging utilities and miscellaneous tools the Kubos CLI.
+
 The box, when started, is already pre-configured with all of the
-required tools for the CLI you will need. This minimizes the set-up
+required tools for the Kubos CLI you will need. This minimizes the set-up
 process so you can work on your project rather than setting up tooling.
 
 `Vagrant <https://www.vagrantup.com/>`__ is a command-line based
 tool that abstracts the virtualization provider into a simple-to-use
 interface. Vagrant supports a variety of providers (VirtualBox, VmWare,
-Parallels, etc.) but right now the Kubos SDK only supports VirtualBox.
+Parallels, etc.) but right now the Kubos SDK only supports VirtualBox, a
+free cross-platform virtualization provider.
 
 Prerequisites
 -------------
@@ -94,7 +94,7 @@ yourself to the ``vboxusers`` group with the following command:
         sudo usermod -aG vboxusers <username>
 
 You will need to logout and log back in to your host computer, otherwise 
-passing usb devices through to your vagrant development environment will not work correctly.
+passing USB devices through to your development environment will not work correctly.
 
 Install Vagrant
 ~~~~~~~~~~~~~~~
@@ -103,7 +103,7 @@ If you don't already have Vagrant installed see the Vagrant
 `installation
 documentation. <https://www.vagrantup.com/docs/installation>`__
 
-If your vagrant installation is set up correctly, running the following
+If your Vagrant installation is set up correctly, running the following
 command should print something similar to the following output:
 
 ::
@@ -121,7 +121,7 @@ To create an instance of the SDK box follow these steps:
 
 ::
 
-       $ vagrant init kubostech/kubos-dev
+       $ vagrant init kubos/kubos-dev
        $ vagrant up
 
 This will create a Vagrantfile in your current directory. Vagrantfiles
@@ -134,8 +134,7 @@ If the output of ``vagrant up`` mentions there's a new version of the
 kubos-dev box available you can upgrade your box with the following
 command:
 
-WARNING: THIS WILL OVERWRITE ALL FILES IN YOUR EXISTING BOX
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. warning:: THIS WILL OVERWRITE ALL FILES IN YOUR EXISTING BOX
 
 ::
 
@@ -150,14 +149,14 @@ In the context of these documents, as well as virtual machines in
 general, the physical "main" computer is referred to as the "host". The
 virtual machine inside of the host is referred to as the "guest".
 
-.. Note:: There is not a supported method of this for Windows hosts at
-  this time, as Windows does not support Linux symlinks. There is an 
-  alternate method for editing files on the SDK listed :doc:`here. <../sdk-docs/windows-dev-environment>`
-
 It is strongly recommended that you create your project in a directory
 on your host that is shared with your box when using a Linux or Mac OS
 host. By keeping your project on your host it will protect them in the
 event your box is destroyed or re-built.
+
+.. Note:: There is not a supported method of this for Windows hosts at
+  this time, as Windows does not support Linux symlinks. There is an 
+  alternate method for editing files on the SDK listed :doc:`here. <../sdk-docs/windows-dev-environment>`
 
 To mount a specific directory from your host, open the Vagrantfile
 located in the directory from the previous step and look for the
@@ -214,7 +213,7 @@ with your projects.
 
         $ vagrant ssh
 
-This will start an ssh session in the vagrant box with the Kubos CLI and
+This will start an SSH session in the Vagrant box with the Kubos CLI and
 all of the required dependencies installed.
 
 That's it! From here see more on:

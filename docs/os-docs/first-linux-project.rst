@@ -19,13 +19,17 @@ The simplest way to create a new Kubos Linux project is by using the Kubos CLI.
 The ``kubos init --linux`` command takes a project name and creates the project
 files and folders.
 
-**Note:** Inside of the build system there are several reserved words, which
-cannot be used as the name of the project. The most common of these are
-``test``, ``source`` and ``include``.
+.. note::
 
-**Note:** Yotta, the build system the Kubos CLI is based upon, requires project
-names to be hyphen-delimited or underscore-delimited. CamelCased project names
-will cause warnings.
+    Inside of the build system there are several reserved words, which
+    cannot be used as the name of the project. The most common of these are
+    ``test``, ``source`` and ``include``.
+
+.. note::
+
+    yotta, the build system the Kubos CLI is based upon, requires project
+    names to be hyphen-delimited or underscore-delimited. CamelCased project names
+    will cause warnings.
 
 ::
 
@@ -42,7 +46,6 @@ Method 2: Cloning a Project
 We have also created several different example Kubos projects which can
 be used as starting points.
 
-- `CSP example included by default with 'kubos init -l' <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-example>`__
 - `TCP Receive <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__
 - `TCP Send <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcptx>`__
 - `UART Receive <http://github.com/kubos/kubos/tree/master/examples/kubos-linux-uartrx>`__
@@ -57,7 +60,7 @@ then link the necessary files. For example:
         $ cd myproject/examples/kubos-linux-example
         $ kubos link --all
 
-**Note:** It is unnecessary to run the ``kubos init`` command in this case
+.. note:: It is unnecessary to run the ``kubos init`` command in this case
 
 Editing the project
 -------------------

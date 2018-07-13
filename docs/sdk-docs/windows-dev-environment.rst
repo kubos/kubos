@@ -4,7 +4,7 @@ Setting up the Kubos Windows Development Environment
 What is the Kubos Windows Development Environment?
 --------------------------------------------------
 
-The Kubos Windows Development Environment is a way to edit files on the SDK through an IDE. Since Windows does not support symlinks, editing the files can be a pain, as they are only accessible to tools within the SDK such as vim or nano. This guide walks through a single method to edit those files through an IDE on the host machine, rather than through these command line tools. 
+The Kubos Windows Development Environment is a way to edit files on the SDK through an IDE. Since Windows does not support symlinks, editing the files can be a pain, as they are only accessible to tools within the SDK such as ``vim`` or ``nano``. This guide walks through a single method to edit those files through an IDE on the host machine, rather than through these command line tools. 
 
 .. Note:: 
 	Before proceeding, please make sure you have :doc:`installed the SDK. <../installation-docs/sdk-installing>`
@@ -49,8 +49,8 @@ Go to the install location of the Kubos SDK and bring up your Vagrant. As it ini
 
 		$ vagrant up
 		Bringing machine 'default' up with 'virtualbox' provider...
-		==> default: Checking if box 'kubostech/kubos-dev' is up to date...
-		==> default: A newer version of the box 'kubostech/kubos-dev' is available! You currently
+		==> default: Checking if box 'kubos/kubos-dev' is up to date...
+		==> default: A newer version of the box 'kubos/kubos-dev' is available! You currently
 		==> default: have version '0.2.3'. The latest is version '1.0.1'. Run
 		==> default: `vagrant box update` to update.
 		==> default: Clearing any previously set forwarded ports...

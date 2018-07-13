@@ -22,8 +22,7 @@ each of the hardware components are and how they are connected.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`first-linux-project` - Basic tutorial for creating your first KubOS
-   Linux SDK project
+-  :doc:`first-linux-project` - Basic tutorial for creating your first Kubos SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`kubos-linux-on-mbm2` - Steps to build Kubos Linux for the Pumpkin MBM2
@@ -60,47 +59,6 @@ The Pumpkin MBM2 has several different ports available for interacting
 with peripheral devices. Currently, users should interact with these 
 devices using the standard Linux functions. A Kubos HAL will be added 
 in the future to abstract this process.
-
-UART
-~~~~
-
-The Pumpkin MBM2 has 5 UART ports available for use in varying capacities:
-
-+--------------+--------+--------+---------+---------+
-| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
-+==============+========+========+=========+=========+
-| /dev/ttyS1   | H1.18  | H1.17  | H1.10   | H1.9    |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS2   | H1.8   | H1.7   |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS3   | H1.5   |        |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS4   | H1.16  | H1.15  |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS5   | H1.20  | H1.19  | H1.12   | H1.11   |
-+--------------+--------+--------+---------+---------+
-
-Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
-
-`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
-
-I2C
-~~~
-
-The Pumpkin MBM2 has one user-accessible I2C bus.
-Users can connect a new device to it via pins **H1.43** (SCL) and **H1.41** (SDA)
-of the CubeSat Kit Bus connectors.
-
-`I2C Standards
-Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
-
-Kubos Linux is currently configured to support the I2C standard-mode
-speed of 100kHz.
-
-The I2C bus is available through the Kubos HAL as ``K_I2C1``.
-
-For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
-:doc:`../apis/kubos-hal/i2c_api` documents.
 
 ADC
 ~~~
@@ -152,7 +110,44 @@ resulting equation is
 .. math::
 
     V_{in} = \frac{D * (4095)}{1.8}
+     
+Ethernet
+~~~~~~~~
 
+The Pumpkin MBM2, via the embedded Beaglebone Black, provides an ethernet
+port which can be used for things like inter-system communication.
+
+The ethernet port is configured to have support for static IPv4 addressing and
+can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
+package.
+
+Kubos Linux currently guarantees support for TCP, UDP, and SCTP.
+Other protocols might be supported by default, but have not been verified.
+
+Resources
+^^^^^^^^^
+
+- :ref:`Kubos Ethernet Communication Guide <ethernet>` 
+- `TCP tutorial <http://www.linuxhowtos.org/C_C++/socket.htm>`__
+- `UDP tutorial <https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html>`__
+- `SCTP tutorial <http://petanode.com/blog/posts/introduction-to-the-sctp-socket-api-in-linux.html>`__
+- `Packet Sender <https://packetsender.com/>`__ - A tool to send test packets between an OBC and a host computer
+
+.. note:: By default, Windows Firewall will block many incoming packet types. This may impact testing.
+
+Configuration
+^^^^^^^^^^^^^
+
+The static IP address can be updated by editing the `/etc/network/interfaces` file.
+By default the address is ``10.0.2.20``.
+
+Examples
+^^^^^^^^
+
+A couple example programs using the ethernet port can be found in the `examples` folder of the `kubos repo <https://github.com/kubos/kubos/tree/master/examples>`__:
+
+- `kubos-linux-tcprx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__ - Receive TCP packets and then reply to the sender
+- `kubos-linux-tcptx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcptx>`__ - Send TCP packets to specified IP address and port
 
 GPIO
 ~~~~
@@ -177,7 +172,6 @@ as long as they have not already been assigned to another peripheral.
 +---------+------------------+-----------+
 | H2.24   | 85               | Output    |
 +---------+------------------+-----------+
-
 
 CLI and Script Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -263,43 +257,46 @@ An example program might look like this:
     fd = open("/sys/class/gpio/unexport", O_WRONLY);
     write(fd, &pin, sizeof(pin)); 
     close(fd);
-     
-Ethernet
-~~~~~~~~
 
-The Pumpkin MBM2, via the embedded Beaglebone Black, provides an ethernet
-port which can be used for things like inter-system communication.
+I2C
+~~~
 
-The ethernet port is configured to have support for static IPv4 addressing and
-can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
-package.
+The Pumpkin MBM2 has one user-accessible I2C bus, ``/dev/i2c-1``
+Users can connect a new device to it via pins **H1.43** (SCL) and **H1.41** (SDA)
+of the CubeSat Kit Bus connectors.
 
-Kubos Linux currently guarantees support for TCP, UDP, and SCTP.
-Other protocols might be supported by default, but have not been verified.
+`I2C Standards
+Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 
-Resources
-^^^^^^^^^
+Kubos Linux is currently configured to support the I2C standard-mode
+speed of 100kHz.
 
-- `TCP tutorial <http://www.linuxhowtos.org/C_C++/socket.htm>`__
-- `UDP tutorial <https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html>`__
-- `SCTP tutorial <http://petanode.com/blog/posts/introduction-to-the-sctp-socket-api-in-linux.html>`__
-- `Packet Sender <https://packetsender.com/>`__ - A tool to send test packets between an OBC and a host computer
+For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubos-hal/i2c-hal/index>`.
 
-.. note:: By default, Windows Firewall will block many incoming packet types. This may impact testing.
+.. note:: The I2C bus is available through the Kubos C HAL as ``K_I2C1``.
 
-Configuration
-^^^^^^^^^^^^^
+UART
+~~~~
 
-The static IP address can be updated by editing the `/etc/network/interfaces` file.
-By default the address is ``10.0.2.20``.
+The Pumpkin MBM2 has 5 UART ports available for use in varying capacities:
 
-Examples
-^^^^^^^^
++--------------+--------+--------+---------+---------+
+| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
++==============+========+========+=========+=========+
+| /dev/ttyS1   | H1.18  | H1.17  | H1.10   | H1.9    |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS2   | H1.8   | H1.7   |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS3   | H1.5   |        |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS4   | H1.16  | H1.15  |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS5   | H1.20  | H1.19  | H1.12   | H1.11   |
++--------------+--------+--------+---------+---------+
 
-A couple example programs using the ethernet port can be found in the `examples` folder of the `kubos repo <https://github.com/kubos/kubos/tree/master/examples>`__:
+Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
 
-- `kubos-linux-tcprx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__ - Receive TCP packets and then reply to the sender
-- `kubos-linux-tcptx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcptx>`__ - Send TCP packets to specified IP address and port
+`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
 
 User Data Partitions
 --------------------
@@ -313,24 +310,24 @@ eMMC
 The user partition on the eMMC device is used as the primary user data storage area.
 All system-related `/home/` paths will reside here.
 
-/home/usr/bin
-^^^^^^^^^^^^^
+/home/system/usr/bin
+^^^^^^^^^^^^^^^^^^^^
 
 All user-created applications will be loaded into this folder during the
 ``kubos flash`` process. The directory is included in the system's PATH,
 so applications can then be called directly from anywhere, without
 needing to know the full file path.
 
-/home/usr/local/bin
-^^^^^^^^^^^^^^^^^^^
+/home/system/usr/local/bin
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All user-created non-application files will be loaded into this folder
 during the ``kubos flash`` process. There is currently not a way to set
 a destination folder for the ``kubos flash`` command, so if a different
 endpoint directory is desired, the files will need to be manually moved.
 
-/home/etc/init.d
-^^^^^^^^^^^^^^^^
+/home/system/etc/init.d
+^^^^^^^^^^^^^^^^^^^^^^^
 
 All user-application initialization scripts live under this directory.
 The naming format is 'S{run-level}{application}'.

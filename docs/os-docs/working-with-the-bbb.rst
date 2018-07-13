@@ -23,8 +23,7 @@ Beaglebone Documentation
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`first-linux-project` - Basic tutorial for creating your first KubOS
-   Linux SDK project
+-  :doc:`first-linux-project` - Basic tutorial for creating your first Kubos SDK project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`kubos-linux-on-bbb` - Steps to build Kubos Linux for the Beaglebone Black
@@ -63,144 +62,7 @@ in the future to abstract this process.
     available, since they aren't exposed in the MBM2's CSK headers, or are
     dedicated to other uses. See the :ref:`peripherals-mbm2` section for 
     more information.
-    
-UART
-~~~~
-
-The Beaglebone Black has 5 UART ports available for use:
-
-+--------------+--------+--------+---------+---------+
-| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
-+==============+========+========+=========+=========+
-| /dev/ttyS1   | P9.24  | P9.26  |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS2   | P9.21  | P9.22  |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS3   | P9.42  |        | P8.34   | P8.36   |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS4   | P9.13  | P9.11  | P8.33   | P8.35   |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS5   | P8.37  | P8.38  | P8.32   | P8.31   |
-+--------------+--------+--------+---------+---------+
-
-.. note:: /dev/ttyS3 (UART3) is TX-only. /dev/ttyS1 and /dev/ttyS2 do not 
-    have RTS/CTS due to pin conflicts with other buses.
-
-Users can interact with these ports in their applications using Linux's 
-`termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
-
-`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
-
-Additionally, the ports can be used from the command line:
-
-The ``stty -F {device} [parameters]`` command can be used to 
-configure the port. For example, this command will set the
-baud rate of `/dev/ttyS1` to 4800::
-
-    $ stty -F /dev/ttyS1 4800
-    
-The ``echo`` command can be used to transmit basic data out of
-the TX pin. For example::
-
-    $ echo "Hello!" > /dev/ttyS1
-    
-The ``cat`` command can be used to read any data from the RX
-pin. For example::
-
-    $ cat < /dev/ttyS1
-
-I2C
-~~~
-
-The Beaglebone Black has two user-accessible I2C buses.
-
-+--------------+---------+---------+
-| Kubos Device | SCL Pin | SDA Pin |
-+==============+=========+=========+
-| K_I2C1       | P9.17   | P9.18   |
-+--------------+---------+---------+
-| K_I2C2       | P9.19   | P9.20   |
-+--------------+---------+---------+
-
-`I2C Standards
-Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
-
-Kubos Linux is currently configured to support the I2C standard-mode
-speed of 100kHz.
-
-For examples and instructions, see the :doc:`../apis/kubos-hal/i2c` and
-:doc:`../apis/kubos-hal/i2c_api` documents.
-
-SPI
-~~~
-
-The Beaglebone has one SPI bus available with a pre-allocated chip select pin.
-
-**SPI Bus 1**
-
-+------+-------+
-| Name | Pin   |
-+======+=======+
-| MOSI | P9.30 |
-+------+-------+
-| MISO | P9.29 |
-+------+-------+
-| SCLK | P9.31 |
-+------+-------+
-| CS0  | P9.28 |
-+------+-------+
-
-Users can interact a device on this bus using Linux's `spidev interface <https://www.kernel.org/doc/Documentation/spi/spidev>`__
-The device name will be ``/dev/spidev1.0``.
-
-An example user program to read a value might look like this:
-
-.. code-block:: c
-
-    #include <fcntl.h>
-    #include <unistd.h>
-    #include <sys/ioctl.h>
-    #include <linux/types.h>
-    #include <linux/spi/spidev.h>
-      
-    #define SPI_DEV "/dev/spidev1.0"
-    
-    int fd;
-    uint8_t mode = SPI_MODE_0;
-    uint8_t bits = 8;
-    uint32_t speed = 100000;
-    uint16_t delay = 0;
-    
-    uint8_t register, shift_reg;
-    uint8_t value;
-    
-    fd = open(SPI_DEV, O_RDWR);
-    
-    /* Register to read from */
-    register = 0xD0;
-
-    struct spi_ioc_transfer tr = {
-        .tx_buf = (unsigned long)&register,
-        .rx_buf = (unsigned long)&register,
-        .len = 1,
-        .speed_hz = speed,
-        .bits_per_word = bits,
-        .cs_change = 0,
-        .delay_usecs = delay,
-    };
-
-    /* Send request to read */
-    ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-
-    /* Setup buffer to read to */
-    tr.tx_buf = &value;
-    tr.rx_buf = &value;    
-    
-    /* Read data */
-    ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-
-    close(fd);
-    
+          
 ADC
 ~~~
 
@@ -251,6 +113,44 @@ resulting equation is
 .. math::
 
     V_{in} = \frac{D * (4095)}{1.8}
+    
+Ethernet
+~~~~~~~~
+
+The Beaglebone Black provides an ethernet port which can be used for things 
+like inter-system communication.
+
+The ethernet port is configured to have support for static IPv4 addressing and
+can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
+package.
+
+Kubos Linux currently guarantees support for TCP, UDP, and SCTP.
+Other protocols might be supported by default, but have not been verified.
+
+Resources
+^^^^^^^^^
+
+- :ref:`Kubos Ethernet Communication Guide <ethernet>` 
+- `TCP tutorial <http://www.linuxhowtos.org/C_C++/socket.htm>`__
+- `UDP tutorial <https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html>`__
+- `SCTP tutorial <http://petanode.com/blog/posts/introduction-to-the-sctp-socket-api-in-linux.html>`__
+- `Packet Sender <https://packetsender.com/>`__ - A tool to send test packets between an OBC and a host computer
+
+.. note:: By default, Windows Firewall will block many incoming packet types. This may impact testing.
+
+Configuration
+^^^^^^^^^^^^^
+
+The static IP address can be updated by editing the `/etc/network/interfaces` file.
+By default the address is ``10.0.2.20``.
+
+Examples
+^^^^^^^^
+
+A couple example programs using the ethernet port can be found in the `examples` folder of the `kubos repo <https://github.com/kubos/kubos/tree/master/examples>`__:
+
+- `kubos-linux-tcprx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__ - Receive TCP packets and then reply to the sender
+- `kubos-linux-tcptx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcptx>`__ - Send TCP packets to specified IP address and port
 
 GPIO
 ~~~~
@@ -344,43 +244,142 @@ An example program might look like this:
     fd = open("/sys/class/gpio/unexport", O_WRONLY);
     write(fd, &pin, sizeof(pin)); 
     close(fd);
-     
-Ethernet
-~~~~~~~~
+    
+I2C
+~~~
 
-The Beaglebone Black provides an ethernet port which can be used for things 
-like inter-system communication.
+The Beaglebone Black has two user-accessible I2C buses.
 
-The ethernet port is configured to have support for static IPv4 addressing and
-can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
-package.
++--------------+--------------+---------+---------+
+| Linux Device | Kubos Device | SCL Pin | SDA Pin |
++==============+==============+=========+=========+
+| /dev/i2c-1   | K_I2C1       | P9.17   | P9.18   |
++--------------+--------------+---------+---------+
+| /dev/i2c-2   | K_I2C2       | P9.19   | P9.20   |
++--------------+--------------+---------+---------+
 
-Kubos Linux currently guarantees support for TCP, UDP, and SCTP.
-Other protocols might be supported by default, but have not been verified.
+`I2C Standards
+Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 
-Resources
-^^^^^^^^^
+Kubos Linux is currently configured to support the I2C standard-mode
+speed of 100kHz.
 
-- `TCP tutorial <http://www.linuxhowtos.org/C_C++/socket.htm>`__
-- `UDP tutorial <https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html>`__
-- `SCTP tutorial <http://petanode.com/blog/posts/introduction-to-the-sctp-socket-api-in-linux.html>`__
-- `Packet Sender <https://packetsender.com/>`__ - A tool to send test packets between an OBC and a host computer
+For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubos-hal/i2c-hal/index>`.
 
-.. note:: By default, Windows Firewall will block many incoming packet types. This may impact testing.
+SPI
+~~~
 
-Configuration
-^^^^^^^^^^^^^
+The Beaglebone has one SPI bus available with a pre-allocated chip select pin.
 
-The static IP address can be updated by editing the `/etc/network/interfaces` file.
-By default the address is ``10.0.2.20``.
+**SPI Bus 1**
 
-Examples
-^^^^^^^^
++------+-------+
+| Name | Pin   |
++======+=======+
+| MOSI | P9.30 |
++------+-------+
+| MISO | P9.29 |
++------+-------+
+| SCLK | P9.31 |
++------+-------+
+| CS0  | P9.28 |
++------+-------+
 
-A couple example programs using the ethernet port can be found in the `examples` folder of the `kubos repo <https://github.com/kubos/kubos/tree/master/examples>`__:
+Users can interact a device on this bus using Linux's `spidev interface <https://www.kernel.org/doc/Documentation/spi/spidev>`__
+The device name will be ``/dev/spidev1.0``.
 
-- `kubos-linux-tcprx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcprx>`__ - Receive TCP packets and then reply to the sender
-- `kubos-linux-tcptx <https://github.com/kubos/kubos/tree/master/examples/kubos-linux-tcptx>`__ - Send TCP packets to specified IP address and port
+An example user program to read a value might look like this:
+
+.. code-block:: c
+
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <sys/ioctl.h>
+    #include <linux/types.h>
+    #include <linux/spi/spidev.h>
+      
+    #define SPI_DEV "/dev/spidev1.0"
+    
+    int fd;
+    uint8_t mode = SPI_MODE_0;
+    uint8_t bits = 8;
+    uint32_t speed = 100000;
+    uint16_t delay = 0;
+    
+    uint8_t register, shift_reg;
+    uint8_t value;
+    
+    fd = open(SPI_DEV, O_RDWR);
+    
+    /* Register to read from */
+    register = 0xD0;
+
+    struct spi_ioc_transfer tr = {
+        .tx_buf = (unsigned long)&register,
+        .rx_buf = (unsigned long)&register,
+        .len = 1,
+        .speed_hz = speed,
+        .bits_per_word = bits,
+        .cs_change = 0,
+        .delay_usecs = delay,
+    };
+
+    /* Send request to read */
+    ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+
+    /* Setup buffer to read to */
+    tr.tx_buf = &value;
+    tr.rx_buf = &value;    
+    
+    /* Read data */
+    ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+
+    close(fd);
+
+UART
+~~~~
+
+The Beaglebone Black has 5 UART ports available for use:
+
++--------------+--------+--------+---------+---------+
+| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
++==============+========+========+=========+=========+
+| /dev/ttyS1   | P9.24  | P9.26  |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS2   | P9.21  | P9.22  |         |         |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS3   | P9.42  |        | P8.34   | P8.36   |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS4   | P9.13  | P9.11  | P8.33   | P8.35   |
++--------------+--------+--------+---------+---------+
+| /dev/ttyS5   | P8.37  | P8.38  | P8.32   | P8.31   |
++--------------+--------+--------+---------+---------+
+
+.. note:: /dev/ttyS3 (UART3) is TX-only. /dev/ttyS1 and /dev/ttyS2 do not 
+    have RTS/CTS due to pin conflicts with other buses.
+
+Users can interact with these ports in their applications using Linux's 
+`termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
+
+`A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
+
+Additionally, the ports can be used from the command line:
+
+The ``stty -F {device} [parameters]`` command can be used to 
+configure the port. For example, this command will set the
+baud rate of `/dev/ttyS1` to 4800::
+
+    $ stty -F /dev/ttyS1 4800
+    
+The ``echo`` command can be used to transmit basic data out of
+the TX pin. For example::
+
+    $ echo "Hello!" > /dev/ttyS1
+    
+The ``cat`` command can be used to read any data from the RX
+pin. For example::
+
+    $ cat < /dev/ttyS1
 
 User Data Partitions
 --------------------
@@ -394,24 +393,24 @@ eMMC
 The user partition on the eMMC device is used as the primary user data storage area.
 All system-related `/home/` paths will reside here.
 
-/home/usr/bin
-^^^^^^^^^^^^^
+/home/system/usr/bin
+^^^^^^^^^^^^^^^^^^^^
 
 All user-created applications will be loaded into this folder during the
 ``kubos flash`` process. The directory is included in the system's PATH,
 so applications can then be called directly from anywhere, without
 needing to know the full file path.
 
-/home/usr/local/bin
-^^^^^^^^^^^^^^^^^^^
+/home/system/usr/local/bin
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All user-created non-application files will be loaded into this folder
 during the ``kubos flash`` process. There is currently not a way to set
 a destination folder for the ``kubos flash`` command, so if a different
 endpoint directory is desired, the files will need to be manually moved.
 
-/home/etc/init.d
-^^^^^^^^^^^^^^^^
+/home/system/etc/init.d
+^^^^^^^^^^^^^^^^^^^^^^^
 All user-application initialization scripts live under this directory.
 The naming format is 'S{run-level}{application}'.
 

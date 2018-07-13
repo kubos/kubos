@@ -18,13 +18,14 @@
 #if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
 #include <string.h>
+#include <stdio.h> //Test line
 
 static KI2C k_i2cs[K_NUM_I2CS];
 
 KI2CStatus k_i2c_init(KI2CNum i2c, KI2CConf *conf)
 {
     KI2C *k_i2c = kprv_i2c_get(i2c);
-    if (k_i2c->bus_num == K_I2C_NO_BUS)
+    if ((k_i2c != NULL) && (k_i2c->bus_num == K_I2C_NO_BUS))
     {
         memcpy(&k_i2c->conf, conf, sizeof(KI2CConf));
         k_i2c->bus_num = i2c;
@@ -38,7 +39,7 @@ KI2CStatus k_i2c_init(KI2CNum i2c, KI2CConf *conf)
 void k_i2c_terminate(KI2CNum i2c)
 {
     KI2C *k_i2c = kprv_i2c_get(i2c);
-    if (k_i2c->bus_num != K_I2C_NO_BUS)
+    if ((k_i2c != NULL) && (k_i2c->bus_num != K_I2C_NO_BUS))
     {
         kprv_i2c_dev_terminate(i2c);
         csp_mutex_remove(&(k_i2c->i2c_lock));
@@ -71,7 +72,7 @@ KI2CStatus k_i2c_write(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
 {
     KI2C * ki2c = kprv_i2c_get(i2c);
     KI2CStatus ret = I2C_ERROR;
-    if ((ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
+    if ((ki2c != NULL) && (ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
     {
         // Today...block indefinitely
         if (csp_mutex_lock(&(ki2c->i2c_lock), CSP_MAX_DELAY) == CSP_SEMAPHORE_OK)
@@ -87,7 +88,7 @@ KI2CStatus k_i2c_read(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
 {
     KI2C * ki2c = kprv_i2c_get(i2c);
     KI2CStatus ret = I2C_ERROR;
-    if ((ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
+    if ((ki2c != NULL) && (ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
     {
         // Today...block indefinitely
         if (csp_mutex_lock(&(ki2c->i2c_lock), CSP_MAX_DELAY) == CSP_SEMAPHORE_OK)
@@ -102,7 +103,7 @@ KI2CStatus k_i2c_read(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
 KI2C* kprv_i2c_get(KI2CNum i2c)
 {
 	//Validate I2C number
-	if(i2c > (K_NUM_I2CS))
+	if(i2c > (K_NUM_I2CS) || i2c < 1)
 	{
 		return NULL;
 	}

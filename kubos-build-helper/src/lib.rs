@@ -14,17 +14,20 @@
 // limitations under the License.
 //
 
+extern crate glob;
+
 use std::env;
 use std::process::Command;
 
+use glob::glob;
+
 /// Performs all the setup, build and configuration neccesary
 /// to compile and link a C-based yotta module under Cargo
-pub fn build_module(module_name: &str) {
+pub fn build_module() {
     let kubos_target = determine_target();
     do_build(&kubos_target);
-    setup_environment(module_name, &kubos_target);
+    setup_libraries(&kubos_target);
 }
-
 
 /// Retrieve the kubos target from the environment
 /// variable CARGO_KUBOS_TARGET. This variable *should*
@@ -73,28 +76,51 @@ fn do_build(target: &str) {
     }
 }
 
-/// Perform any neccesary post-build environment setup
-fn setup_environment(module_name: &str, target: &str) {
+// The default behavior of yotta is to create
+// multiple static libraries which are linked into
+// the final executable. We will copy all of the static
+// libraries created by yotta into the folder where
+// rustc can link against them.
+fn setup_libraries(target: &str) {
     let out_dir = env::var("OUT_DIR").unwrap();
-    let lib_path = format!("build/{}/source/{}.a", target, module_name);
-    let out_path = format!("{}/lib{}.a", out_dir, module_name);
+    let lib_glob = format!(
+        "{}/build/{}/**/*.a",
+        env::current_dir().unwrap().display(),
+        target
+    );
 
+    // Inform Cargo -> Rustc about which folder our static
+    // libraries will be in
+    println!("cargo:rustc-link-search=native={}", out_dir);
 
     // The default behavior of rustc-link-lib=static
     // is to look for a library named lib{name}.a
-    // We also need to move the library into the OUT_DIR
-    // so that the module building can find it
-    if !Command::new("cp")
-        .args(&[&lib_path, &out_path])
-        .status()
-        .unwrap()
-        .success()
-    {
-        panic!("Failed to copy kubos lib")
+    // We will copy each static lib into the right
+    // location (OUT_DIR) with the correct name.
+    for entry in glob(&lib_glob).expect("Failed to read glob pattern") {
+        match entry {
+            Ok(path) => {
+                let out_path = format!(
+                    "{}/lib{}.a",
+                    out_dir,
+                    path.file_stem().unwrap().to_str().unwrap()
+                );
+                if !Command::new("cp")
+                    .args(&[path.to_str().unwrap(), &out_path])
+                    .status()
+                    .unwrap()
+                    .success()
+                {
+                    panic!("Failed to copy lib {}", path.display())
+                } else {
+                    // Inform Cargo -> Rust about this library file
+                    println!(
+                        "cargo:rustc-link-lib=static={}",
+                        path.file_stem().unwrap().to_str().unwrap()
+                    );
+                }
+            }
+            Err(e) => println!("bad path {:?}", e),
+        }
     }
-
-    // Inform Cargo -> Rust about where our library file is
-    // and how to link against it
-    println!("cargo:rustc-link-search=native={}", out_dir);
-    println!("cargo:rustc-link-lib=static={}", module_name);
 }

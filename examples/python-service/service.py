@@ -8,16 +8,19 @@
 Boilerplate main for service application.
 """
 
-import argparse
-from service import app
-import yaml
+from service import schema
+from kubos_service.config import Config
 
-parser = argparse.ArgumentParser(description='Example Service')
-parser.add_argument('config', type=str, help='path to config file')
-args = parser.parse_args()
+config = Config("example-service")
 
-with open(args.config) as ymlfile:
-    cfg = yaml.load(ymlfile)
+# from kubos_service import http_service
+# Start an http service
+# http_service.start(config, schema.schema)
 
-app = app.create_app()
-app.run(host=cfg['APP_IP'], port=cfg['APP_PORT'])
+from kubos_service import udp_service
+
+# Start a udp service with optional context
+# udp_service.start(config, schema, {'bus': '/dev/ttyS3'})
+
+# Start a udp service
+udp_service.start(config, schema)

@@ -1,0 +1,34 @@
+[workspace]
+members = [
+"apis/adcs-api",
+"apis/clyde-3g-eps-api",
+"apis/eps-api",
+"apis/isis-ants-api",
+"apis/isis-imtq-api",
+"apis/isis-iobc-supervisor",
+"apis/mai400-api",
+"apis/novatel-oem6-api",
+"apis/nsl-duplex-d2",
+"apis/rust-radio-api",
+"examples/rust-c-service/extern-lib",
+"examples/rust-c-service/service",
+"examples/rust-service",
+"examples/udp-service-client",
+"hal/rust-hal/rust-i2c",
+"hal/rust-hal/rust-uart",
+"kubos-build-helper",
+"services/comms-service",
+"services/kubos-service",
+"services/iobc-supervisor-service",
+"services/mai400-service",
+"services/novatel-oem6-service",
+"services/telemetry-service",
+"test/integration/linux/isis-ants",
+"test/integration/linux/mai400",
+]
+
+[profile.release]
+lto = true
+opt-level = 3
+opt-size = 2
+panic = "abort"

@@ -4,7 +4,7 @@ Using Kubos Linux
 Overview
 --------
 
-This document is intended as an general guide for creating,
+This document is intended as a general guide for creating,
 loading, and using Kubos projects and other files within the user space
 of Kubos Linux.
 
@@ -25,19 +25,27 @@ Board-Specific Documentation
 -  :doc:`working-with-the-iobc`
 -  :doc:`working-with-the-mbm2`
 
+Communicating with an OBC
+-------------------------
+
+There are currently two primary methods for users to communicate directly with their OBCs:
+
+    - Via a debug UART port
+    - Via an ethernet port (not supported by all boards)
+
 Debug Console
--------------
+~~~~~~~~~~~~~
 
 Each board will have some debug port available, which will then be connected
 to your computer via USB. See the appropriate `Working with {board}` document
 for more information.
 
 If the target board is correctly connected to your host computer, you should 
-see a `/dev/ttyUSB\*` device in your vagrant VM. The VM is set up to
+see a `/dev/ttyUSB\*` device in your Vagrant box. The VM is set up to
 automatically forward any FTDI cables that connect to a `/dev/FTDI` device
 for ease-of-use.
 
-The vagrant image comes pre-packaged with a minicom serial connection
+The Vagrant image comes pre-packaged with a minicom serial connection
 configuration file. You can connect with this configuration file using the
 command
 
@@ -79,6 +87,51 @@ Fully logged in, the console should look like this:
 
     Please make sure to either logout of your board, or change it back to the
     root user's home directory before beginning any file transfer
+
+.. _ethernet:
+
+Ethernet
+~~~~~~~~
+
+Some OBCs support communication via an ethernet port. Once configured, this port can be used
+as an alternate method to access the board's shell interface and to transfer files.
+
+Setup
+^^^^^
+
+Connect an ethernet cable from the board to either your computer or an open network port.
+
+Log into the board using the debug console and then edit ``/etc/network/interfaces``. 
+Update the IP address field to be an address of your choosing.
+
+Once updated, run the following commands in order to make the board use the new address::
+    
+    $ ifdown eth0; ifup eth0
+    
+The address can be verified by running the ``ipaddr`` command
+
+Communicating via SSH
+^^^^^^^^^^^^^^^^^^^^^
+
+Once a board has been given a valid IP address, you can create an SSH connection to it.
+
+This can be done from either the SDK or your host machine.
+
+To connect from the command line, run ``ssh kubos@{ip-address}``.
+You will be prompted for the `kubos` account password.
+
+You can also use a tool, like PuTTY, to create an SSH connection.
+    
+File Transfer
+^^^^^^^^^^^^^
+
+Once the IP address has been set, you can also transfer files to and from the stack using the ``scp`` command.
+Again, this command can be run from either the SDK or your host machine.
+
+For example, if I wanted to send a file on my host machine, `test.txt`, to reside in the `kubos` account's home directory,
+given a stack IP of ``10.50.1.10``, I would enter::
+
+    $ scp test.txt kubos@10.50.1.10:/home/kubos
 
 User Applications
 -----------------
@@ -309,9 +362,11 @@ shell scripts) and will be loaded into /home/system/usr/local/bin. Once
 they have been flashed, these files can then be manually moved to
 another location.
 
-**Note:** The file does not need to reside within a Kubos SDK project,
-but the ``kubos flash`` command must still be run from the project,
-since that is where the target configuration information is stored.
+.. note::
+
+    The file does not need to reside within a Kubos SDK project,
+    but the ``kubos flash`` command must still be run from the project,
+    since that is where the target configuration information is stored.
 
 For example:
 
@@ -509,31 +564,42 @@ a kernel upgrade or downgrade.
 The home directories of all user accounts, except root, should live
 under this directory.
 
---------------
+.. warning::
 
-**Any files not residing under the /home directory will be destroyed
-during an upgrade/downgrade** 
+    Any files not residing under the /home directory will be destroyed
+    during an upgrade/downgrade
 
---------------
-
-/home/usr/bin
-^^^^^^^^^^^^^
+/home/system/usr/bin
+^^^^^^^^^^^^^^^^^^^^
 
 All user-created applications will be loaded into this folder during the
 ``kubos flash`` process. The directory is included in the system's PATH,
 so applications can then be called directly from anywhere, without
 needing to know the full file path.
 
-/home/usr/local/bin
-^^^^^^^^^^^^^^^^^^^
+/home/system/usr/local/bin
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All user-created non-application files will be loaded into this folder
 during the ``kubos flash`` process. There is currently not a way to set
 a destination folder for the ``kubos flash`` command, so if a different
 endpoint directory is desired, the files will need to be manually moved.
 
-/home/etc/init.d
-^^^^^^^^^^^^^^^^
+/home/system/etc/init.d
+^^^^^^^^^^^^^^^^^^^^^^^
 
 All user-application initialization scripts live under this directory.
 The naming format is 'S{run-level}{application}'.
+
+Resetting the Boot Environment
+------------------------------
+
+.. note::
+
+    This is a case which normal users should never encounter, but becomes more likely when initially testing custom Kubos Linux builds.
+    Due to the blocking nature of the behavior, this information has been included in this doc in order to make it more prominent.
+
+If the system goes through the :doc:`full recovery process <kubos-linux-recovery>` and the bootcount is still exceeded,
+it will present the U-Boot CLI instead of attempting to boot into Kubos Linux again.
+
+If this occurs, follow the :ref:`instructions for resetting the boot environment <env-reset>`.

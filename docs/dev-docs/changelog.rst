@@ -1,6 +1,54 @@
 Kubos Changelog
 ===============
 
+v1.3.0 - Jun 21 2018
+--------------------
+
+- `Added communication core service <https://github.com/kubos/kubos/tree/master/services/communication-service>`__
+- `Added file transfer core service <https://github.com/kubos/kubos/tree/master/services/file-service>`__
+- `Added shell core service <https://github.com/kubos/kubos/tree/master/services/shell-service>`__
+- `Added telemetry database core service <https://github.com/kubos/kubos/tree/master/services/telemetry-service>`__
+- `Added Rust API and UDP/GraphQL service for NovAtel OEM6 High Precision GNSS Receiver <https://github.com/kubos/kubos/blob/master/services/novatel-oem6-service>`__
+- `Added Python API and UDP/GraphQL service for Pumpkin MCUs <https://github.com/kubos/kubos/tree/master/services/pumpkin-mcu-service>`__
+- `Added Rust API for ClydeSpace 3G EPS <https://github.com/kubos/kubos/tree/master/apis/clyde-3g-eps-api>`__
+- `Added Rust API and UDP/GraphQL service for Adcole Maryland Aerospace MAI-400 ADACS <https://github.com/kubos/kubos/tree/master/services/mai400-service>`__
+- `Added API for GOMspace NanoPower P31U <https://github.com/kubos/kubos/blob/master/apis/gomspace-p31u-api>`__
+- `Added C and Rust APIs for ISIS Antenna Systems <https://github.com/kubos/kubos/tree/master/apis/isis-ants-api>`__
+- `Added C and Rust APIs for ISIS iMTQ <https://github.com/kubos/kubos/tree/master/apis/isis-imtq-api>`__
+- `Added C API for ISIS TRXVU radio <https://github.com/kubos/kubos/tree/master/apis/isis-trxvu-api>`__
+- `Added Python library for use when creating Kubos services <https://github.com/kubos/kubos/blob/master/libs/kubos-service>`__
+- `Added Rust helper crate for use when creating Kubos services <https://github.com/kubos/kubos/tree/master/services/kubos-service>`__
+- `Added Python library for I2C HAL <https://github.com/kubos/kubos/tree/master/hal/python-hal/i2c>`__
+- `Added Rust crate for I2C HAL <https://github.com/kubos/kubos/tree/master/hal/rust-hal/rust-i2c>`__
+- Upgraded Kubos SDK Vagrant and Docker images to use `Rust 1.26 <https://blog.rust-lang.org/2018/05/10/Rust-1.26.html>`__
+- `Added link to nightly version of docs to main docs page <http://docs.kubos.co/master>`__
+- `Added documentation for using ethernet as primary board-communication method <http://docs.kubos.co/latest/os-docs/using-kubos-linux.html#ethernet>`__
+- Improved documentation about using Python and Rust for development with KubOS
+
+Bug Fixes:
+~~~~~~~~~~
+
+- `Forcibly downgrading pip to <v10 to prevent incompatibility issue with yotta <https://github.com/kubos/kubos/blob/master/tools/dist/Dockerfile>`__
+
+Community Contributions:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- `Added Rust crate for UART HAL <https://github.com/kubos/kubos/tree/master/hal/rust-hal/rust-uart>`__
+
+
+v1.2.0 - Mar 5 2018
+-------------------
+
+- `Added Rust crate for wrapping isis-iobc-supervisor <https://github.com/kubos/kubos/tree/c7bb5f1928aeb0aa3d45d649f90bd2cdccbe2bc5/hal/isis-iobc-supervisor>`__
+- `Added iOBC supervisor GraphQL service <https://github.com/kubos/kubos/tree/master/services/iobc-supervisor-service>`__
+- Migrating ``cargo-kubos`` into `own repo <https://github.com/kubos/cargo-kubos>`__
+- `Added iOBC ADC support and demo <http://docs.kubos.co/1.2.0/os-docs/working-with-the-iobc.html#adc>`__
+- `Added iOBC PWM support <http://docs.kubos.co/1.2.0/os-docs/working-with-the-iobc.html#adc>`__
+- `Added API for EyeStar-D2 Duplex radio <https://github.com/kubos/kubos/tree/master/apis/nsl-duplex-d2>`__
+- `Adding telemetry database service <https://github.com/kubos/kubos/blob/master/services/telemetry-database-service>`__
+- Cleaning up doc generation warnings
+- Finalizing name changes
+
 v1.1.0 - Jan 24 2018
 --------------------
 
@@ -17,7 +65,7 @@ v1.1.0 - Jan 24 2018
 - Decided on using GraphQL, Rust, and Python for services and applications
 - `Added Python-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/python-service>`__
 - `Added Rust-based example subsystem handler <https://github.com/kubos/kubos/tree/1.1.0/examples/rust-service>`__
-- `Added 'cargo kubos' subcommand for Cargo-->Yotta integration <https://github.com/kubos/kubos/tree/1.1.0/cargo-kubos>`__
+- `Added 'cargo kubos' subcommand for Cargo-->yotta integration <https://github.com/kubos/kubos/tree/1.1.0/cargo-kubos>`__
 
 - Upgraded to BuildRoot LTS 2017.2.8
 - `Documented Windows PowerShell v3+ requirement <http://docs.kubos.co/1.1.0/installation-docs/sdk-installing.html#install-windows-powershell-v3-windows-7-sp1-only>`__
@@ -38,14 +86,14 @@ v1.0.0 - June 27 2017
 ---------------------
 
 - `KUBOS-442 <https://kubostech.atlassian.net/browse/KUBOS-442>`__
-   Added support for iOBC I2C bus
+  Added support for iOBC I2C bus
 - `KUBOS-445 <https://kubostech.atlassian.net/browse/KUBOS-445>`__
-   Integrated iOBC supervisor
+  Integrated iOBC supervisor
 - `KUBOS-274 <https://kubostech.atlassian.net/browse/KUBOS-274>`__
-   Completed Kubos Telemetry integration into KubOS Linux
+  Completed Kubos Telemetry integration into KubOS Linux
 - `KUBOS-487 <https://kubostech.atlassian.net/browse/KUBOS-487>`__
-   Added support for tab-completion to Kubos CLI
--  `Created an initial QA integration test suite <https://github.com/kubos/kubos/tree/master/test/integration/linux>`__
+  Added support for tab-completion to Kubos CLI
+- `Created an initial QA integration test suite <https://github.com/kubos/kubos/tree/master/test/integration/linux>`__
 -  Migrated from Markdown to ReStructuredText as the documentation
    language of choice
 -  Migrated from only Doxygen to Sphinx and Doxygen as the documentation

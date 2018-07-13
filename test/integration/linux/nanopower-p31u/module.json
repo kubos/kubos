@@ -1,0 +1,15 @@
+{
+    "bin":"./source",
+    "license":"Apache-2.0",
+    "name":"nanopower-p31u",
+    "repository":{
+        "url":"git://<repository_url>",
+        "type":"git"
+    },
+    "version":"0.1.0",
+    "dependencies":{
+        "gomspace-p31u-api":"kubos/gomspace-p31u-api"
+    },
+    "homepage":"https://<homepage>",
+    "description":"Integration test for the NanoPower P31u API."
+}
