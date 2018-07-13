@@ -15,7 +15,6 @@ jobs:
         - run: cd hal/python-hal/i2c; python setup.py install
         - run: python apis/pumpkin-mcu-api/test_mcu_api.py
         - run: python apis/python-app-api/test/test_app_api.py
-        - run: cd apis/python-app-api; python setup.py install
         - run: ./tools/rustbuild.sh
 
     # Create and push new git version tag (n.n.n+{new build number})
