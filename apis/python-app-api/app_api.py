@@ -13,7 +13,7 @@ import socket
 import json
 
 SERVICE_CONFIG_PATH = "/home/system/etc/config.toml"
-UDP_BUFF = 1024
+UDP_BUFF_LEN = 1024
 DEFAULT_TIMEOUT = 10.0  # Seconds
 
 
@@ -37,7 +37,7 @@ class Services:
         # Talk to the server
         response = self._udp_query(query, (ip, port), timeout)
 
-        # format the response and detect errors
+        # Format the response and detect errors
         data = self._format(response, service)
 
         return data
@@ -54,7 +54,7 @@ class Services:
             sock.sendto(query, (ip, port))
 
             # Wait for response (until timeout occurs)
-            response = sock.recv(UDP_BUFF)
+            response = sock.recv(UDP_BUFF_LEN)
             return response
         finally:
             sock.close()
@@ -62,7 +62,14 @@ class Services:
     def _format(self, response, service):
 
         # Parse JSON response
-        response = json.loads(response)
+        try:
+            response = json.loads(response)
+        except Exception as error:
+            print("Response was unable to be parsed as JSON.")
+            print("It is likely incomplete or the endpoint is misbehaving")
+            print("response: ", response)
+            print("error: ", error)
+            raise
 
         # Check that it follows GraphQL format
         if 'msg' not in response or 'errs' not in response:

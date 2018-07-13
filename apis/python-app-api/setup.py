@@ -10,5 +10,6 @@ from setuptools import setup
 setup(name='app_api',
       version='0.1.0',
       description='Mission Application API for KubOS',
-      py_modules=["app_api"]
+      py_modules=["app_api"],
+      install_requires=['toml']
       )

@@ -5,7 +5,7 @@
 # See LICENSE file for details.
 
 """
-Unit testing for the I2C library.
+Unit testing for the Kubos App API.
 """
 
 import app_api
