@@ -12,18 +12,17 @@ import toml
 import socket
 import json
 
-DEFAULT_CONFIG_PATH = "/home/system/etc/config.toml"
+SERVICE_CONFIG_PATH = "/home/system/etc/config.toml"
 UDP_BUFF = 1024
-QUERY_TIMEOUT = 10.0  # Seconds
-BLOCKING = 1  # 1 for blocking
+DEFAULT_TIMEOUT = 10.0  # Seconds
 
 
 class Services:
 
-    def __init__(self, config_filepath=DEFAULT_CONFIG_PATH):
-        self.config = toml.load(config_filepath)
+    def __init__(self, service_config_filepath=SERVICE_CONFIG_PATH):
+        self.config = toml.load(service_config_filepath)
 
-    def query(self, service, query):
+    def query(self, service, query, timeout=DEFAULT_TIMEOUT):
 
         # Check inputs
         if service not in self.config:
@@ -36,40 +35,40 @@ class Services:
         port = self.config[service]["addr"]["port"]
 
         # Talk to the server
-        response = self._udp_query(query, (ip, port))
+        response = self._udp_query(query, (ip, port), timeout)
 
         # format the response and detect errors
         data = self._format(response, service)
 
         return data
 
-    def _udp_query(self, query, (ip, port)):
+    def _udp_query(self, query, (ip, port), timeout):
+        # Set up the socket
+        sock = socket.socket(socket.AF_INET,  # Internet
+                             socket.SOCK_DGRAM)  # UDP
         try:
-            # Set up the socket
-            sock = socket.socket(socket.AF_INET,  # Internet
-                                 socket.SOCK_DGRAM)  # UDP
-            sock.settimeout(QUERY_TIMEOUT)
-            sock.setblocking(BLOCKING)
+            sock.settimeout(timeout)
             sock.bind(("", 0))  # Binds to an available port
 
             # Send Query
             sock.sendto(query, (ip, port))
 
             # Wait for response (until timeout occurs)
-            return sock.recv(UDP_BUFF)
+            response = sock.recv(UDP_BUFF)
+            return response
         finally:
             sock.close()
 
     def _format(self, response, service):
 
-        # Check and see if the length was maxed out
-        if len(response) == UDP_BUFF:
-            return response
+        # Parse JSON response
+        response = json.loads(response)
 
-        # Convert from JSON String if necessary
-        if type(response) in [str, unicode]:
-            response = json.loads(response)
-
+        # Check that it follows GraphQL format
+        if 'msg' not in response or 'errs' not in response:
+            raise KeyError(
+                "{} Endpoint Error: ".format(service) +
+                "Response contains incorrect fields: \n{}".format(response))
         # Parse response according to GraphQL standard format
         data = response['msg']
         errors = response['errs']
