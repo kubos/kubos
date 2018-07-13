@@ -5,7 +5,9 @@
 # See LICENSE file for details.
 
 """
-Unit testing for the I2C library.
+Testing library for KubOS.
+
+Currently only implements integration testing for hardware services.
 """
 
 import app_api
@@ -24,20 +26,7 @@ class IntegrationTest:
 
     def test_services(self):
         for service in self.api.config:
-            try:
-                response = self.api.query(
-                    service=service,
-                    query=SERVICE_MUTATION,
-                    timeout=QUERY_TIMEOUT)
-                print "Status: SUCCESS\n {}".format(service)
-                print "Response: {}\n".format(response)
-            except socket.timeout as e:
-                print "Status: FAILED\n {}".format(service)
-                print "Error: No response from server"
-                print " Timeout: {} seconds\n".format(QUERY_TIMEOUT)
-            except Exception as e:
-                print "Status: FAILED\n {}".format(service)
-                print "Error: {}, {}\n".format(type(e), e)
+            self.test_service(service=service)
 
     def test_service(self, service):
         try:
@@ -48,9 +37,9 @@ class IntegrationTest:
             print "Status: SUCCESS\n {}".format(service)
             print "Response: {}\n".format(response)
         except socket.timeout as e:
-            print "Status: FAILED\n {}".format(service)
-            print "Error: No response from server"
-            print " Timeout: {} seconds\n".format(QUERY_TIMEOUT)
+            print "Status: TIMEOUT\n {}".format(service)
+            print "No response from server"
+            print "Timeout: {} seconds\n".format(QUERY_TIMEOUT)
         except Exception as e:
             print "Status: FAILED\n {}".format(service)
             print "Error: {}, {}\n".format(type(e), e)
