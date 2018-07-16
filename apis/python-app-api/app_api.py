@@ -38,7 +38,12 @@ class Services:
         response = self._udp_query(query, (ip, port), timeout)
 
         # Format the response and detect errors
-        data = self._format(response, service)
+        (data, errors) = self._format(response, service)
+
+        # Check for endpoint errors
+        if errors not in ([], None):
+            raise EnvironmentError(
+                "{} Endpoint Error: {}".format(service, errors))
 
         return data
 
@@ -64,11 +69,11 @@ class Services:
         # Parse JSON response
         try:
             response = json.loads(response)
-        except Exception as error:
+        except Exception as e:
             print("Response was unable to be parsed as JSON.")
             print("It is likely incomplete or the endpoint is misbehaving")
             print("response: ", response)
-            print("error: ", error)
+            print("error: ", e)
             raise
 
         # Check that it follows GraphQL format
@@ -76,13 +81,9 @@ class Services:
             raise KeyError(
                 "{} Endpoint Error: ".format(service) +
                 "Response contains incorrect fields: \n{}".format(response))
+
         # Parse response according to GraphQL standard format
         data = response['msg']
         errors = response['errs']
 
-        # Check for endpoint errors
-        if errors not in ([], None):
-            raise EnvironmentError(
-                "{} Endpoint Error: {}".format(service, errors))
-
-        return data
+        return (data, errors)
