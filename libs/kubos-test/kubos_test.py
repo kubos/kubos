@@ -15,14 +15,18 @@ import socket
 
 DEFAULT_CONFIG_PATH = "/home/system/etc/config.toml"
 SERVICE_MUTATION = (
-    'mutation {testHardware(test:"Integration"){errors,status}}')
+    'mutation {testHardware(test:INTEGRATION){errors,status}}')
 QUERY_TIMEOUT = 1.0  # Seconds
 
 
 class IntegrationTest:
 
-    def __init__(self, config_filepath=DEFAULT_CONFIG_PATH):
+    def __init__(self,
+                 config_filepath=DEFAULT_CONFIG_PATH,
+                 output_file=None):
         self.api = app_api.Services(config_filepath)
+        if output_file is not None and type(output_file) == str:
+            self.logfile = output_file
 
     def test_services(self):
         for service in self.api.config:

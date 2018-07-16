@@ -31,3 +31,11 @@ class TestResults(graphene.ObjectType):
     errors = graphene.String()
     status = graphene.Boolean()
     results = graphene.JSONString()
+
+
+class TestEnum(graphene.Enum):
+    """
+    Enum for denoting test type.
+    Currently only Integration is supported.
+    """
+    INTEGRATION = 0

@@ -125,7 +125,7 @@ class TestHardware(graphene.Mutation):
     """
 
     class Arguments:
-        test = graphene.String()
+        test = TestEnum(required=True)
 
     Output = TestResults
 
@@ -133,16 +133,22 @@ class TestHardware(graphene.Mutation):
 
         test_output = {}
         status = True
-        errors = None
-        if test == "Integration":
+        errors = []
+        if test == 0:  # INTEGRATION test
             for module in MODULES:
-                mcu = mcu_api.MCU(address=MODULES[module]['address'])
-                out = mcu.read_telemetry(module=module, fields=['all'])
-                test_output.update(out)
+                try:
+                    mcu = mcu_api.MCU(address=MODULES[module]['address'])
+                    out = mcu.read_telemetry(
+                        module=module,
+                        fields=['firmware_version'])
+                    test_output.update(out)
+                except Exception as e:
+                    status = False
+                    errors.append(
+                        'Error with module : {} : {}'.format(module, e))
 
         else:
-            status = False
-            errors = "Test type not implemented."
+            raise NotImplementedError("Test type not implemented.")
 
         testResults = TestResults(
             errors=errors,
