@@ -13,7 +13,7 @@ import socket
 import json
 
 SERVICE_CONFIG_PATH = "/home/system/etc/config.toml"
-UDP_BUFF = 1024
+UDP_BUFF_LEN = 1024
 DEFAULT_TIMEOUT = 10.0  # Seconds
 
 
@@ -37,8 +37,13 @@ class Services:
         # Talk to the server
         response = self._udp_query(query, (ip, port), timeout)
 
-        # format the response and detect errors
-        data = self._format(response, service)
+        # Format the response and detect errors
+        (data, errors) = self._format(response, service)
+
+        # Check for endpoint errors
+        if errors not in ([], None):
+            raise EnvironmentError(
+                "{} Endpoint Error: {}".format(service, errors))
 
         return data
 
@@ -54,7 +59,7 @@ class Services:
             sock.sendto(query, (ip, port))
 
             # Wait for response (until timeout occurs)
-            response = sock.recv(UDP_BUFF)
+            response = sock.recv(UDP_BUFF_LEN)
             return response
         finally:
             sock.close()
@@ -62,20 +67,23 @@ class Services:
     def _format(self, response, service):
 
         # Parse JSON response
-        response = json.loads(response)
+        try:
+            response = json.loads(response)
+        except Exception as e:
+            print("Response was unable to be parsed as JSON.")
+            print("It is likely incomplete or the endpoint is misbehaving")
+            print("response: ", response)
+            print("error: ", e)
+            raise
 
         # Check that it follows GraphQL format
         if 'msg' not in response or 'errs' not in response:
             raise KeyError(
                 "{} Endpoint Error: ".format(service) +
                 "Response contains incorrect fields: \n{}".format(response))
+
         # Parse response according to GraphQL standard format
         data = response['msg']
         errors = response['errs']
 
-        # Check for endpoint errors
-        if errors not in ([], None):
-            raise EnvironmentError(
-                "{} Endpoint Error: {}".format(service, errors))
-
-        return data
+        return (data, errors)

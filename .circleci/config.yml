@@ -12,8 +12,11 @@ jobs:
         - run: python -m tools.ci.lint
         - run: python tools/build.py --all-tests
         - run: python hal/python-hal/i2c/test_i2c.py
+        - run: cd hal/python-hal/i2c; python setup.py install
+        - run: cd apis/pumpkin-mcu-api; python test_mcu_api.py
+        - run: cd apis/python-app-api; python test_app_api.py
         - run: ./tools/rustbuild.sh
-        
+
     # Create and push new git version tag (n.n.n+{new build number})
     # Run when code is merged into master
     deploy:
@@ -23,7 +26,7 @@ jobs:
         - checkout
         - run: pip install semantic-version
         - run: ./deploy.sh
-        
+
     # Generate and upload new docs
     # Run when code is merged into master or when an official release tag is generated
     docs:
@@ -35,7 +38,7 @@ jobs:
         - run: pip install semantic-version
         - run: ./prep_docs.sh
         - run: ./deploy_docs.sh
-        
+
 workflows:
   version: 2
   build:
