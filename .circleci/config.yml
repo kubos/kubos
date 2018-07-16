@@ -13,7 +13,7 @@ jobs:
         - run: python tools/build.py --all-tests
         - run: python hal/python-hal/i2c/test_i2c.py
         - run: cd hal/python-hal/i2c; python setup.py install
-        - run: python apis/pumpkin-mcu-api/test_mcu_api.py
+        - run: cd apis/pumpkin-mcu-api; python test_mcu_api.py
         - run: cd apis/python-app-api; python test_app_api.py
         - run: ./tools/rustbuild.sh
 
