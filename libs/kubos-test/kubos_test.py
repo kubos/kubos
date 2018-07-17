@@ -12,7 +12,6 @@ Currently only implements integration testing for hardware services.
 
 import app_api
 import socket
-import json
 
 DEFAULT_CONFIG_PATH = "/home/system/etc/config.toml"
 SERVICE_MUTATION = (
