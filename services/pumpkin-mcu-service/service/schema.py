@@ -132,7 +132,7 @@ class TestHardware(graphene.Mutation):
     def mutate(self, info, test):
 
         test_output = {}
-        status = True
+        success = True
         errors = []
         if test == 0:  # INTEGRATION test
             for module in MODULES:
@@ -143,7 +143,7 @@ class TestHardware(graphene.Mutation):
                         fields=['firmware_version'])
                     test_output.update(out)
                 except Exception as e:
-                    status = False
+                    success = False
                     errors.append(
                         'Error with module : {} : {}'.format(module, e))
 
@@ -152,7 +152,7 @@ class TestHardware(graphene.Mutation):
 
         testResults = TestResults(
             errors=errors,
-            status=status,
+            success=success,
             results=test_output
         )
 
