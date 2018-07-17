@@ -1,4 +1,4 @@
-# kubos/kubos-dev:0.1.6
+# kubos/kubos-dev:0.1.7
 
 FROM phusion/baseimage:0.9.22
 
@@ -43,6 +43,9 @@ RUN pip install git+https://github.com/kubos/kubos-cli
 RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
 RUN mkdir -p /home/vagrant/.kubos
+
+# Setup Python package dependencies
+RUN pip install toml
 
 # Setup rust stuff
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
