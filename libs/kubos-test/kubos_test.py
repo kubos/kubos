@@ -30,6 +30,7 @@ class IntegrationTest:
             self.test_service(service=service)
 
     def test_service(self, service):
+        response = []
         try:
             # Complete the test mutation
             response = self.api.query(

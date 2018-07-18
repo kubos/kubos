@@ -92,6 +92,55 @@ class Query(graphene.ObjectType):
         return out
 
 
+class Ping(graphene.Mutation):
+    """
+    Service noop mutation
+    Confirms the service is running, but not that it's talking to hardware
+    """
+    Output = TestResults
+
+    def mutate(self, info):
+        """
+        Pong
+        """
+        testResults = TestResults(success=True,
+                                  errors=[],
+                                  results="Pong")
+        return testResults
+
+
+class Noop(graphene.Mutation):
+    """
+    Hardware noop mutation
+    """
+    Output = TestResults
+
+    def mutate(self, info):
+        """
+        Run firmware version telem request on all modules as a noop
+        """
+        success = True
+        errors = []
+        test_output = {}
+        for module in MODULES:
+            try:
+                mcu = mcu_api.MCU(address=MODULES[module]['address'])
+                out = mcu.read_telemetry(
+                    module=module,
+                    fields=['firmware_version'])
+                mcu_out = {module: out}
+                test_output.update(mcu_out)
+            except Exception as e:
+                success = False
+                errors.append(
+                    'Error with module : {} : {}'.format(module, e))
+
+        testResults = TestResults(errors=errors,
+                                  success=success,
+                                  results=test_output)
+        return testResults
+
+
 class Passthrough(graphene.Mutation):
     """
     Creates mutation for Passthrough Module Commanding
@@ -141,7 +190,8 @@ class TestHardware(graphene.Mutation):
                     out = mcu.read_telemetry(
                         module=module,
                         fields=['firmware_version'])
-                    test_output.update(out)
+                    mcu_out = {module: out}
+                    test_output.update(mcu_out)
                 except Exception as e:
                     success = False
                     errors.append(
@@ -163,7 +213,8 @@ class Mutation(graphene.ObjectType):
     """
     Creates mutation endpoints exposed by graphene.
     """
-
+    ping = Ping.Field()
+    noop = Noop.Field()
     passthrough = Passthrough.Field()
     testHardware = TestHardware.Field()
 
