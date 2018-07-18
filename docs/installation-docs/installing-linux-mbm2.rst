@@ -157,7 +157,7 @@ Install the Auxiliary Image
 Re-Flash the SD Card
 ~~~~~~~~~~~~~~~~~~~~
 
-Now flash the microSD card with the auxiliary SD card image. This image contains the
+Now flash the microSD card with the auxiliary SD card image (``aux-sd.img``). This image contains the
 Kubos Linux upgrade partition and the second user data partition.
 
 Once the flash process has completed, put the card back into the microSD slot
