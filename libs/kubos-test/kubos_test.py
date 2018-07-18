@@ -15,7 +15,7 @@ import socket
 
 DEFAULT_CONFIG_PATH = "/home/system/etc/config.toml"
 SERVICE_MUTATION = (
-    'mutation {testHardware(test:INTEGRATION){errors,success}}')
+    'mutation {test(test:NOOP){success,errors,results}}')
 QUERY_TIMEOUT = 1.0  # Seconds
 
 
@@ -25,21 +25,21 @@ class IntegrationTest:
                  config_filepath=DEFAULT_CONFIG_PATH):
         self.api = app_api.Services(config_filepath)
 
-    def test_services(self):
+    def test_services(self, query=SERVICE_MUTATION):
         for service in self.api.config:
-            self.test_service(service=service)
+            self.test_service(service=service, query=query)
 
-    def test_service(self, service):
+    def test_service(self, service, query=SERVICE_MUTATION):
         response = []
         try:
             # Complete the test mutation
             response = self.api.query(
                 service=service,
-                query=SERVICE_MUTATION,
+                query=query,
                 timeout=QUERY_TIMEOUT)
 
             # Check for successful test
-            if response['testHardware']['success']:
+            if response['test']['success']:
                 print "Status : SUCCESS\n {}".format(service)
                 print "Response : {}\n".format(response)
             else:
@@ -52,7 +52,6 @@ class IntegrationTest:
         except KeyError as e:
             print "Status : FORMAT ERROR\n {}".format(service)
             print "Service is sending back invalid response format"
-            print "Response : {}\n".format(response)
             print "Error : {}, {}\n".format(type(e), e)
         except Exception as e:
             print "Status : TEST ERROR\n {}".format(service)

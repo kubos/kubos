@@ -37,4 +37,6 @@ class TestEnum(graphene.Enum):
     """
     Enum to denote test levels
     """
-    INTEGRATION = 0
+    PING = 0
+    NOOP = 1
+    INTEGRATION = 2

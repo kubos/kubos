@@ -24,6 +24,7 @@ class Query(graphene.ObjectType):
     """
     Creates query endpoints exposed by graphene.
     """
+    ping = graphene.String()
     moduleList = graphene.JSONString()
     fieldList = graphene.List(graphene.String, module=graphene.String())
     read = graphene.String(
@@ -32,6 +33,9 @@ class Query(graphene.ObjectType):
     mcuTelemetry = graphene.JSONString(
         module=graphene.String(),
         fields=graphene.List(graphene.String, default_value=["all"]))
+
+    def resolve_ping(self):
+        return "PONG"
 
     def resolve_moduleList(self, info):
         """
@@ -92,55 +96,6 @@ class Query(graphene.ObjectType):
         return out
 
 
-class Ping(graphene.Mutation):
-    """
-    Service noop mutation
-    Confirms the service is running, but not that it's talking to hardware
-    """
-    Output = TestResults
-
-    def mutate(self, info):
-        """
-        Pong
-        """
-        testResults = TestResults(success=True,
-                                  errors=[],
-                                  results="Pong")
-        return testResults
-
-
-class Noop(graphene.Mutation):
-    """
-    Hardware noop mutation
-    """
-    Output = TestResults
-
-    def mutate(self, info):
-        """
-        Run firmware version telem request on all modules as a noop
-        """
-        success = True
-        errors = []
-        test_output = {}
-        for module in MODULES:
-            try:
-                mcu = mcu_api.MCU(address=MODULES[module]['address'])
-                out = mcu.read_telemetry(
-                    module=module,
-                    fields=['firmware_version'])
-                mcu_out = {module: out}
-                test_output.update(mcu_out)
-            except Exception as e:
-                success = False
-                errors.append(
-                    'Error with module : {} : {}'.format(module, e))
-
-        testResults = TestResults(errors=errors,
-                                  success=success,
-                                  results=test_output)
-        return testResults
-
-
 class Passthrough(graphene.Mutation):
     """
     Creates mutation for Passthrough Module Commanding
@@ -168,9 +123,9 @@ class Passthrough(graphene.Mutation):
         return commandStatus
 
 
-class TestHardware(graphene.Mutation):
+class Test(graphene.Mutation):
     """
-    Tests if the hardware is present and talking.
+    Tests the service and hardware is present and talking.
     """
 
     class Arguments:
@@ -180,10 +135,12 @@ class TestHardware(graphene.Mutation):
 
     def mutate(self, info, test):
 
-        test_output = {}
         success = True
         errors = []
-        if test == 0:  # INTEGRATION test
+        test_output = {}
+        if test == 0:  # PING
+            test_output = "PONG"
+        elif test == 1:  # NOOP
             for module in MODULES:
                 try:
                     mcu = mcu_api.MCU(address=MODULES[module]['address'])
@@ -197,6 +154,19 @@ class TestHardware(graphene.Mutation):
                     errors.append(
                         'Error with module : {} : {}'.format(module, e))
 
+        elif test == 2:  # INTEGRATION test
+            for module in MODULES:
+                try:
+                    mcu = mcu_api.MCU(address=MODULES[module]['address'])
+                    out = mcu.read_telemetry(
+                        module=module,
+                        fields=['firmware_version'])
+                    mcu_out = {module: out}
+                    test_output.update(mcu_out)
+                except Exception as e:
+                    success = False
+                    errors.append(
+                        'Error with module : {} : {}'.format(module, e))
         else:
             raise NotImplementedError("Test type not implemented.")
 
@@ -213,10 +183,8 @@ class Mutation(graphene.ObjectType):
     """
     Creates mutation endpoints exposed by graphene.
     """
-    ping = Ping.Field()
-    noop = Noop.Field()
     passthrough = Passthrough.Field()
-    testHardware = TestHardware.Field()
+    test = Test.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
