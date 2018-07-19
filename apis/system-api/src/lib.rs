@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 #![deny(warnings)]
+//#![deny(missing_docs)]
 
 /// KubOS System level APIs
+extern crate getopts;
 #[macro_use]
 extern crate lazy_static;
-extern crate kubos_service;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde_json;
+extern crate toml;
 
 use std::env;
 use std::error;
@@ -29,6 +33,10 @@ use std::net::UdpSocket;
 use std::process::Command;
 use std::str::FromStr;
 use std::time::Duration;
+
+mod config;
+
+pub use config::*;
 
 pub const VAR_BOOT_COUNT: &'static str = "bootcount";
 pub const VAR_BOOT_LIMIT: &'static str = "bootlimit";
@@ -116,7 +124,9 @@ fn get_boot_var(name: &str) -> Result<String> {
                          .expect(&format!("Failed to execute {}", *FW_PRINTENV_PATH));
 
     if !output.status.success() {
-        Err(SystemError::Message(String::from("Var not found")))
+        Err(SystemError::Message(format!("Var not found: {}, printenv: {}, stdout: {}", name,
+                                        *FW_PRINTENV_PATH,
+                                        &String::from_utf8_lossy(&output.stdout))))
     } else {
         Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
     }
@@ -130,7 +140,10 @@ macro_rules! u32_boot_var_getter {
                     Ok(val) => Some(val),
                     Err(_) => None,
                 },
-                Err(_) => None
+                Err(err) => {
+                    eprintln!("{:?}", err);
+                    None
+                }
             }
         }
     }
@@ -141,7 +154,10 @@ macro_rules! str_boot_var_getter {
         pub fn $fn() -> Option<String> {
             match get_boot_var($prop) {
                 Ok(v) => Some(v),
-                Err(_) => None
+                Err(err) => {
+                    eprintln!("{:?}", err);
+                    None
+                }
             }
         }
     }
@@ -155,7 +171,10 @@ macro_rules! bool_boot_var_getter {
                     "t" | "true" | "on" | "1" | "y" | "yes" => Some(true),
                     _ => Some(false)
                 },
-                Err(_) => None
+                Err(err) => {
+                    eprintln!("{:?}", err);
+                    None
+                }
             }
         }
     }
@@ -171,35 +190,47 @@ bool_boot_var_getter!(kubos_initial_deploy, VAR_KUBOS_INITIAL_DEPLOY);
 pub fn query(host_url: &str, query: &str, timeout: Option<Duration>)
     -> Result<serde_json::Value>
 {
-    // TODO: make these return Results
     let socket = UdpSocket::bind("0.0.0.0:0")?;
     socket.connect(host_url)?;
     socket.send(query.as_bytes())?;
 
-    // Wait for a response, but don't actually read it yet.
-    // If we don't get a reply within one second, the service probably
-    // isn't actually running.
+    // Allow the caller to set a read timeout on the socket
     socket.set_read_timeout(timeout).unwrap();
 
     let mut buf = [0; 4096];
     let (amt, _) = socket.recv_from(&mut buf)?;
 
     let v: serde_json::Value = serde_json::from_slice(&buf[0..(amt)])?;
+    println!("data: {:?}", serde_json::to_string(&v));
 
-    if v.is_array() {
-        let err = v.get(0).unwrap();
-        return Err(SystemError::Message(err["message"].as_str().unwrap().to_string()));
-    } else if v.get("errs").is_some() {
-        let errs: serde_json::Value = v.get("errs").unwrap().clone();
+    if let Some(errs) = v.get("errs") {
         if errs.is_string() {
             let errs_str = errs.as_str().unwrap();
             if errs_str.len() > 0 {
                 return Err(SystemError::Message(errs_str.to_string()));
             }
         } else {
-            return Err(SystemError::Message(errs["message"].as_str().unwrap().to_string()));
+            match errs.get("message") {
+                Some(message) => {
+                    return Err(SystemError::Message(message.as_str().unwrap().to_string()));
+                },
+                None => {
+                    return Err(SystemError::Message(serde_json::to_string(errs).unwrap()));
+                }
+            }
         }
     }
 
-    Ok(v["msg"].clone())
+    match v.get(0) {
+        Some(err) if err.get("message").is_some() => {
+            return Err(SystemError::Message(err["message"].as_str().unwrap().to_string()));
+        },
+        _ => {}
+    }
+
+    match v.get("msg") {
+        Some(result) => Ok(result.clone()),
+        None => Err(SystemError::Message(format!("No result returned in 'msg' key: {}",
+                                         serde_json::to_string(&v).unwrap())))
+    }
 }

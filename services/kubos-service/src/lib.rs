@@ -108,20 +108,15 @@
 #[cfg(test)]
 #[macro_use]
 extern crate failure;
-extern crate getopts;
 extern crate juniper;
-//#[macro_use]
-//extern crate nix;
 extern crate serde;
 #[macro_use]
-extern crate serde_derive;
-#[macro_use]
 extern crate serde_json;
-extern crate toml;
 
-mod config;
+extern crate kubos_system;
+
 mod macros;
 mod service;
 
-pub use config::Config;
+pub use kubos_system::Config;
 pub use service::{Context, Service};

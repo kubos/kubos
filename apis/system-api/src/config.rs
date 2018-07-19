@@ -13,7 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
 use getopts::Options;
 use std::env;
 use std::fs::File;
@@ -22,26 +21,58 @@ use std::io::prelude::*;
 use toml;
 use toml::Value;
 
-static PATH: &str = "/home/system/etc/config.toml";
-static IP: &str = "127.0.0.1";
-const PORT: u16 = 8080;
+/// The default conifguration file path
+pub static DEFAULT_PATH: &str = "/home/system/etc/config.toml";
+/// The default IP address for service bindings
+pub static DEFAULT_IP: &str = "127.0.0.1";
+/// The default port for service bindings
+pub const DEFAULT_PORT: u16 = 8080;
 
 #[derive(Debug, Deserialize)]
 pub struct Address {
-    ip: String,
-    port: u16,
+    ip: Option<String>,
+    port: Option<u16>,
 }
 
 impl Default for Address {
     fn default() -> Self {
         Address {
-            ip: IP.to_string(),
-            port: PORT,
+            ip: Some(DEFAULT_IP.to_string()),
+            port: Some(DEFAULT_PORT),
         }
     }
 }
 
-/// Service configuration structure
+impl Address {
+    pub fn ip(&self) -> &str {
+        match self.ip.as_ref() {
+            Some(ref ip) => ip,
+            None => DEFAULT_IP
+        }
+    }
+
+    pub fn port(&self) -> u16 {
+        self.port.unwrap_or(DEFAULT_PORT)
+    }
+}
+
+/// KubOS config used by either Apps or Services. KubOS config files use the TOML format, and can
+/// may contain multiple named Categories. Typically each category corresponds to an App or Service
+/// name. This allows one config file to store configuration for multiple Apps / Services at a
+/// time.
+///
+/// Example KubOS config files for a Service called `my-service` with an IP/port binding
+/// ```toml
+/// [my-service]
+/// my-property = "value"
+///
+/// [my-service.addr]
+/// ip = 0.0.0.0
+/// port = 8181
+/// ```
+///
+/// When `addr`, `addr.ip`, or `addr.port` are not provided in the config file, the default IP 
+/// `"127.0.0.1"` and default port `8080` are used instead.
 #[derive(Debug)]
 pub struct Config {
     addr: Address,
@@ -63,7 +94,7 @@ impl Config {
     /// executable.
     ///
     /// # Arguments
-    /// `name` - Service name used as a key in the config file
+    /// `name` - Category name used as a key in the config file
     pub fn new(name: &str) -> Self {
         Self::new_from_path(name, get_config_path())
     }
@@ -71,19 +102,28 @@ impl Config {
     /// Creates and parses configuration data from the passed in configuration
     /// path.
     /// # Arguments
-    /// `name` - Service name used as a key in the config file
+    /// `name` - Category name used as a key in the config file
     /// `path` - Path to configuration file
     pub fn new_from_path(name: &str, path: String) -> Self {
-        parse_config(name, path).unwrap_or(Config::default())
+        parse_config_file(name, path).unwrap_or(Config::default())
+    }
+
+    /// Creates and parses configuration data from the passed in configuration
+    /// string.
+    /// # Arguments
+    /// `name` - Category name used as a key in the config
+    /// `config` - Config data as a string
+    pub fn new_from_str(name: &str, config: &str) -> Self {
+        parse_config_str(name, config).unwrap_or(Config::default())
     }
 
     /// Returns the configured hosturl string in the following
     /// format (using IPv4 addresses) - 0.0.0.0:0000
     pub fn hosturl(&self) -> String {
-        format!("{}:{}", self.addr.ip, self.addr.port)
+        format!("{}:{}", self.addr.ip(), self.addr.port())
     }
 
-    /// Returns the service's configuration information
+    /// Returns the category's configuration information
     /// in the `toml::Value` format.
     /// This will contain the ip/port if provided, along with any other
     /// configuration information found in the config file.
@@ -91,7 +131,7 @@ impl Config {
     /// ### Examples
     ///
     /// ```rust,no_run
-    /// use kubos_service::Config;
+    /// use kubos_system::Config;
     ///
     /// let config = Config::new("example-service");
     /// let raw = config.raw();
@@ -122,12 +162,12 @@ fn get_config_path() -> String {
         Ok(m) => m,
         Err(_) => {
             // suppress errors so applications using Config can have their own Options
-            return PATH.to_string();
+            return DEFAULT_PATH.to_string();
         }
     };
     match matches.opt_str("c") {
         Some(s) => s,
-        None => PATH.to_string(),
+        None => DEFAULT_PATH.to_string(),
     }
 }
 
@@ -138,8 +178,12 @@ fn get_file_data(path: String) -> Result<String, io::Error> {
     Ok(contents)
 }
 
-fn parse_config(name: &str, path: String) -> Result<Config, toml::de::Error> {
+fn parse_config_file(name: &str, path: String) -> Result<Config, toml::de::Error> {
     let contents = get_file_data(path).unwrap_or("".to_string());
+    parse_config_str(name, &contents)
+}
+
+fn parse_config_str(name: &str, contents: &str) -> Result<Config, toml::de::Error> {
     let data: Value = toml::from_str(&contents)?;
     let mut config = Config::default();
 

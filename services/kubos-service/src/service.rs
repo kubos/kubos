@@ -14,13 +14,12 @@
 // limitations under the License.
 //
 
-use config::Config;
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
+use kubos_system::Config;
 use serde_json;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::net::{SocketAddr, UdpSocket};
-use std::os::unix::io::AsRawFd;
 
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.
