@@ -47,7 +47,7 @@ impl Address {
     pub fn ip(&self) -> &str {
         match self.ip.as_ref() {
             Some(ref ip) => ip,
-            None => DEFAULT_IP
+            None => DEFAULT_IP,
         }
     }
 

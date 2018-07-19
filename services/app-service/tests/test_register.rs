@@ -20,8 +20,8 @@ extern crate kubos_system;
 extern crate serde_json;
 extern crate tempfile;
 
-use std::{env, panic};
 use std::time::Duration;
+use std::{env, panic};
 
 mod utils;
 use utils::*;
@@ -37,13 +37,16 @@ fn register_app() {
         .author("user")
         .generate_bin(&app_bin);
 
-    let register_query = format!(r#"mutation {{
+    let register_query = format!(
+        r#"mutation {{
         register(path: "{}") {{
             active, runLevel, app {{
                 uuid, name, version, author, pid, path
             }}
         }}
-    }}"#, app_bin.to_str().unwrap());
+    }}"#,
+        app_bin.to_str().unwrap()
+    );
 
     let apps_query = r#"{ apps { active, runLevel, app {
         uuid, name, version, author, pid, path
@@ -63,13 +66,11 @@ fn register_app() {
     let addr = fixture.addr.clone();
     let result = panic::catch_unwind(|| {
         println!("{}", register_query);
-        let result = kubos_system::query(&addr, &register_query,
-                                        Some(Duration::from_secs(2)));
+        let result = kubos_system::query(&addr, &register_query, Some(Duration::from_secs(2)));
         assert!(result.is_ok(), "{:?}", result.err());
         assert_expected(&result.unwrap()["register"]);
 
-        let result = kubos_system::query(&addr, &apps_query,
-                                        Some(Duration::from_secs(5)));
+        let result = kubos_system::query(&addr, &apps_query, Some(Duration::from_secs(5)));
         assert!(result.is_ok());
         assert_expected(&result.unwrap()["apps"][0]);
     });

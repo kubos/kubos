@@ -59,7 +59,7 @@ lazy_static! {
                 mem::forget(path);
                 ret
             },
-            _ => "/usr/sbin/fw_printenv"
+            _ => "/usr/sbin/fw_printenv",
         }
     };
 }
@@ -119,14 +119,17 @@ impl From<std::io::Error> for SystemError {
 
 fn get_boot_var(name: &str) -> Result<String> {
     let output = Command::new(*FW_PRINTENV_PATH)
-                         .args(&["-n", name])
-                         .output()
-                         .expect(&format!("Failed to execute {}", *FW_PRINTENV_PATH));
+        .args(&["-n", name])
+        .output()
+        .expect(&format!("Failed to execute {}", *FW_PRINTENV_PATH));
 
     if !output.status.success() {
-        Err(SystemError::Message(format!("Var not found: {}, printenv: {}, stdout: {}", name,
-                                        *FW_PRINTENV_PATH,
-                                        &String::from_utf8_lossy(&output.stdout))))
+        Err(SystemError::Message(format!(
+            "Var not found: {}, printenv: {}, stdout: {}",
+            name,
+            *FW_PRINTENV_PATH,
+            &String::from_utf8_lossy(&output.stdout)
+        )))
     } else {
         Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
     }
@@ -146,7 +149,7 @@ macro_rules! u32_boot_var_getter {
                 }
             }
         }
-    }
+    };
 }
 
 macro_rules! str_boot_var_getter {
@@ -160,7 +163,7 @@ macro_rules! str_boot_var_getter {
                 }
             }
         }
-    }
+    };
 }
 
 macro_rules! bool_boot_var_getter {
@@ -169,7 +172,7 @@ macro_rules! bool_boot_var_getter {
             match get_boot_var($prop) {
                 Ok(v) => match v.to_lowercase().as_ref() {
                     "t" | "true" | "on" | "1" | "y" | "yes" => Some(true),
-                    _ => Some(false)
+                    _ => Some(false),
                 },
                 Err(err) => {
                     eprintln!("{:?}", err);
@@ -177,7 +180,7 @@ macro_rules! bool_boot_var_getter {
                 }
             }
         }
-    }
+    };
 }
 
 u32_boot_var_getter!(boot_count, VAR_BOOT_COUNT);
@@ -187,9 +190,7 @@ str_boot_var_getter!(kubos_prev_version, VAR_KUBOS_PREV_VERSION);
 u32_boot_var_getter!(kubos_curr_tried, VAR_KUBOS_CURR_TRIED);
 bool_boot_var_getter!(kubos_initial_deploy, VAR_KUBOS_INITIAL_DEPLOY);
 
-pub fn query(host_url: &str, query: &str, timeout: Option<Duration>)
-    -> Result<serde_json::Value>
-{
+pub fn query(host_url: &str, query: &str, timeout: Option<Duration>) -> Result<serde_json::Value> {
     let socket = UdpSocket::bind("0.0.0.0:0")?;
     socket.connect(host_url)?;
     socket.send(query.as_bytes())?;
@@ -213,7 +214,7 @@ pub fn query(host_url: &str, query: &str, timeout: Option<Duration>)
             match errs.get("message") {
                 Some(message) => {
                     return Err(SystemError::Message(message.as_str().unwrap().to_string()));
-                },
+                }
                 None => {
                     return Err(SystemError::Message(serde_json::to_string(errs).unwrap()));
                 }
@@ -223,14 +224,18 @@ pub fn query(host_url: &str, query: &str, timeout: Option<Duration>)
 
     match v.get(0) {
         Some(err) if err.get("message").is_some() => {
-            return Err(SystemError::Message(err["message"].as_str().unwrap().to_string()));
-        },
+            return Err(SystemError::Message(
+                err["message"].as_str().unwrap().to_string(),
+            ));
+        }
         _ => {}
     }
 
     match v.get("msg") {
         Some(result) => Ok(result.clone()),
-        None => Err(SystemError::Message(format!("No result returned in 'msg' key: {}",
-                                         serde_json::to_string(&v).unwrap())))
+        None => Err(SystemError::Message(format!(
+            "No result returned in 'msg' key: {}",
+            serde_json::to_string(&v).unwrap()
+        ))),
     }
 }

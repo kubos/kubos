@@ -32,11 +32,13 @@ fn setup_dummy_printenv() -> String {
     bin_dest.push("dummy-printenv");
 
     let mut file = fs::File::create(bin_dest.clone()).unwrap();
-    file.write_all(DUMMY_PRINTENV.as_bytes()).expect("Failed to write dummy printenv");;
+    file.write_all(DUMMY_PRINTENV.as_bytes())
+        .expect("Failed to write dummy printenv");;
 
     let mut perms = file.metadata().unwrap().permissions();
     perms.set_mode(0o755);
-    file.set_permissions(perms).expect("Failed to change file permissions");
+    file.set_permissions(perms)
+        .expect("Failed to change file permissions");
 
     let bin_str = bin_dest.to_str().unwrap();
     env::set_var("KUBOS_PRINTENV", bin_str);
@@ -82,7 +84,10 @@ fn str_vars() {
     assert_eq!(kubos_system::kubos_curr_version(), None);
 
     env::set_var(kubos_system::VAR_KUBOS_CURR_VERSION, "1.23");
-    assert_eq!(kubos_system::kubos_curr_version(), Some(String::from("1.23")));
+    assert_eq!(
+        kubos_system::kubos_curr_version(),
+        Some(String::from("1.23"))
+    );
 
     env::set_var(kubos_system::VAR_KUBOS_CURR_VERSION, "");
     assert_eq!(kubos_system::kubos_curr_version(), Some(String::from("")));

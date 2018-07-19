@@ -25,7 +25,7 @@ pub struct Entry {
 }
 
 #[derive(Insertable)]
-#[table_name="telemetry"]
+#[table_name = "telemetry"]
 pub struct NewEntry<'a> {
     pub timestamp: i32,
     pub subsystem: &'a str,

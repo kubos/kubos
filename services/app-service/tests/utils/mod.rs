@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![allow(dead_code)]
-use std::{env, fs};
 use std::io::{self, Write};
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::mpsc::{channel, Receiver, Sender};
-use std::{thread, thread::JoinHandle};
 use std::time::Duration;
+use std::{env, fs};
+use std::{thread, thread::JoinHandle};
 
 use tempfile::TempDir;
 
@@ -35,6 +34,7 @@ pub struct MockAppBuilder {
     _run_level: Option<String>,
 }
 
+#[allow(dead_code)]
 impl MockAppBuilder {
     pub fn new(name: &str, uuid: &str) -> Self {
         Self {
@@ -44,7 +44,7 @@ impl MockAppBuilder {
             _version: None,
             _author: None,
             _active: None,
-            _run_level: None
+            _run_level: None,
         }
     }
 
@@ -74,7 +74,8 @@ impl MockAppBuilder {
     }
 
     pub fn toml(&self, registry_dir: &str) -> String {
-        format!(r#"
+        format!(
+            r#"
             active = {active}
             run_level = "{run_level}"
 
@@ -88,19 +89,20 @@ impl MockAppBuilder {
             version = "{version}"
             author = "{author}"
             "#,
-            uuid=self._uuid,
-            name=self._name,
-            dir=registry_dir,
-            active=self._active.unwrap_or(true),
-            run_level=self._run_level.as_ref().unwrap_or(&String::from("OnBoot")),
-            version=self._version.as_ref().unwrap_or(&String::from("0.0.1")),
-            author=self._author.as_ref().unwrap_or(&String::from("user")),
-            bin=self._bin.as_ref().unwrap_or(&self._name),
+            uuid = self._uuid,
+            name = self._name,
+            dir = registry_dir,
+            active = self._active.unwrap_or(true),
+            run_level = self._run_level.as_ref().unwrap_or(&String::from("OnBoot")),
+            version = self._version.as_ref().unwrap_or(&String::from("0.0.1")),
+            author = self._author.as_ref().unwrap_or(&String::from("user")),
+            bin = self._bin.as_ref().unwrap_or(&self._name),
         )
     }
 
     pub fn src(&self) -> String {
-        format!(r#"
+        format!(
+            r#"
             #!/bin/bash
             if [ "$1" = "--metadata" ]; then
                 echo name = \"{name}\"
@@ -111,9 +113,9 @@ impl MockAppBuilder {
                 echo run_level = \"$KUBOS_APP_RUN_LEVEL\"
             fi
             "#,
-            name=self._name,
-            version=self._version.as_ref().unwrap_or(&String::from("0.0.1")),
-            author=self._author.as_ref().unwrap_or(&String::from("user")),
+            name = self._name,
+            version = self._version.as_ref().unwrap_or(&String::from("0.0.1")),
+            author = self._author.as_ref().unwrap_or(&String::from("user")),
         )
     }
 
@@ -162,12 +164,12 @@ pub struct AppServiceFixture {
     pub addr: String,
     config_toml: PathBuf,
     join_handle: Option<JoinHandle<()>>,
-    sender: Option<Sender<bool>>
+    sender: Option<Sender<bool>>,
 }
 
 impl AppServiceFixture {
     fn service_port() -> io::Result<u16> {
-        use std::net::{SocketAddrV4, Ipv4Addr, TcpListener};
+        use std::net::{Ipv4Addr, SocketAddrV4, TcpListener};
         let port = {
             let loopback = Ipv4Addr::new(127, 0, 0, 1);
             let socket = SocketAddrV4::new(loopback, 0);
@@ -186,27 +188,35 @@ impl AppServiceFixture {
         let mut toml = fs::File::create(config_toml.clone()).unwrap();
         let port = Self::service_port().unwrap_or(9999);
 
-        println!("Registry dir: {}, Port: {}", registry_dir.path().to_str().unwrap(), port);
+        println!(
+            "Registry dir: {}, Port: {}",
+            registry_dir.path().to_str().unwrap(),
+            port
+        );
 
-        toml.write_all(format!(r#"
+        toml.write_all(
+            format!(
+                r#"
             [app-service]
             registry-dir = "{}"
             [app-service.addr]
             ip = "127.0.0.1"
-            port = {}"#, registry_dir.path().to_str().unwrap(), port).as_bytes())
-            .expect("Failed to write config.toml");
+            port = {}"#,
+                registry_dir.path().to_str().unwrap(),
+                port
+            ).as_bytes(),
+        ).expect("Failed to write config.toml");
 
         Self {
             registry_dir: registry_dir,
             addr: format!("127.0.0.1:{}", port),
             config_toml: config_toml.clone(),
             join_handle: None,
-            sender: None
+            sender: None,
         }
     }
 
-    pub fn start_service(&mut self)
-    {
+    pub fn start_service(&mut self) {
         let mut app_service = env::current_exe().unwrap();
         app_service.pop();
         app_service.set_file_name("kubos-app-service");

@@ -72,14 +72,14 @@ fn serialize_entry() {
                 author: String::from("noone"),
             },
             pid: 101,
-            path: String::from("/fake/path")
+            path: String::from("/fake/path"),
         },
         active: true,
-        run_level: RunLevel::OnCommand
+        run_level: RunLevel::OnCommand,
     };
 
     let str = toml::to_string(&dummy).unwrap();
-    let parsed: AppRegistryEntry  = toml::from_str(&str).unwrap();
+    let parsed: AppRegistryEntry = toml::from_str(&str).unwrap();
 
     assert_eq!(parsed.active, dummy.active);
     assert_eq!(parsed.run_level, dummy.run_level);

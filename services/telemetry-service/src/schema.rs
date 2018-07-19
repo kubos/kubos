@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-use kubos_telemetry::{Database, self};
 use diesel::prelude::*;
 use juniper::FieldResult;
 use kubos_service;
+use kubos_telemetry::{self, Database};
 
 type Context = kubos_service::Context<Database>;
 
@@ -84,7 +84,8 @@ graphql_object!(QueryRoot: Context |&self| {
 
         query = query.order(dsl::timestamp);
 
-        let entries = query.load::<kubos_telemetry::Entry>(&executor.context().subsystem().connection)?;
+        let entries = query.load::<kubos_telemetry::Entry>(
+            &executor.context().subsystem().connection)?;
         let mut g_entries: Vec<Entry> = Vec::new();
         for entry in entries {
             g_entries.push(Entry(entry));

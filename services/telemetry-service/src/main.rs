@@ -146,8 +146,8 @@ extern crate kubos_telemetry;
 
 mod schema;
 
-use kubos_telemetry::Database;
 use kubos_service::{Config, Service};
+use kubos_telemetry::Database;
 use schema::{MutationRoot, QueryRoot};
 
 fn main() {

@@ -85,7 +85,6 @@ graphql_object!(KAppRegistryEntry: () as "AppRegistryEntry" |&self| {
     }
 });
 
-
 ///
 pub struct QueryRoot;
 

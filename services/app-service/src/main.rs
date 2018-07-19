@@ -34,8 +34,5 @@ fn main() {
         }
     };
 
-    Service::new(config,
-                 registry,
-                 schema::QueryRoot,
-                 schema::MutationRoot).start();
+    Service::new(config, registry, schema::QueryRoot, schema::MutationRoot).start();
 }

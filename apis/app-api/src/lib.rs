@@ -18,9 +18,9 @@
 //! for mission life-cycle management
 #![deny(missing_docs)]
 #![deny(warnings)]
-extern crate uuid;
 extern crate getopts;
 extern crate kubos_system;
+extern crate uuid;
 #[macro_use]
 extern crate serde_derive;
 extern crate toml;
@@ -49,18 +49,15 @@ pub type RunLevel = registry::RunLevel;
 #[allow(unused_variables)]
 pub trait AppHandler {
     /// Called when the Application is started at system boot time
-    fn on_boot(&self) {
-    }
+    fn on_boot(&self) {}
 
     /// Called when the Application is started on demand through the `start_app` GraphQL mutation
-    fn on_command(&self) {
-    }
+    fn on_command(&self) {}
 
     /// Called when the Application is shutting down, to clean up any resources initialized in
     /// on_boot or on_command. Note: This function is not guaranteed to be called if the process
     /// exits for unexpected reasons
-    fn on_shutdown(&self) {
-    }
+    fn on_shutdown(&self) {}
 }
 
 /// A helper macro that can be called from a KubOS application's `main` function.
@@ -95,11 +92,13 @@ macro_rules! app_main {
         let version: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
         let authors: Option<&'static str> = option_env!("CARGO_PKG_AUTHORS");
 
-         kubos_app::App::main(name.unwrap_or("Unknown"),
-                              version.unwrap_or("Unknown"),
-                              authors.unwrap_or("Unknown"),
-                              std::process::id(),
-                              $handler)
+        kubos_app::App::main(
+            name.unwrap_or("Unknown"),
+            version.unwrap_or("Unknown"),
+            authors.unwrap_or("Unknown"),
+            std::process::id(),
+            $handler,
+        )
     }};
 }
 
@@ -116,7 +115,7 @@ impl App {
 
         let matches = match opts.parse(&args[1..]) {
             Ok(m) => m,
-            Err(f) => panic!(f.to_string())
+            Err(f) => panic!(f.to_string()),
         };
 
         if matches.opt_present("h") {
@@ -126,8 +125,10 @@ impl App {
         }
 
         if matches.opt_present("m") {
-            println!("{}", toml::to_string(
-                &AppMetadata::new(name, version, authors)).unwrap());
+            println!(
+                "{}",
+                toml::to_string(&AppMetadata::new(name, version, authors)).unwrap()
+            );
             return;
         }
 
@@ -137,12 +138,14 @@ impl App {
         match run_level {
             Some(ref level) if level == "OnBoot" => {
                 handler.on_boot();
-            },
+            }
             Some(ref level) if level == "OnCommand" => {
                 handler.on_command();
-            },
+            }
             _ => {
-                eprintln!("Warning, unknown or missing KUBOS_APP_RUN_LEVEL, set to OnBoot or OnCommand");
+                eprintln!(
+                    "Warning, unknown or missing KUBOS_APP_RUN_LEVEL, set to OnBoot or OnCommand"
+                );
                 handler.on_command();
             }
         }

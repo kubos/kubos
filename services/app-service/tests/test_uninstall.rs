@@ -25,34 +25,41 @@ use std::time::Duration;
 mod utils;
 use utils::*;
 
-const UNINSTALL_QUERY: &'static str = r#"mutation {
-    uninstall(uuid: "a-b-c-d-e", version: "0.0.1")
-}"#;
-const APPS_QUERY: &'static str = "{ apps { active } }";
-
 #[test]
 fn uninstall_app() {
     let mut fixture = AppServiceFixture::setup();
     let mut app = MockAppBuilder::new("dummy", "a-b-c-d-e");
     app.active(true)
-       .run_level("OnBoot")
-       .version("0.0.1")
-       .author("user");
+        .run_level("OnBoot")
+        .version("0.0.1")
+        .author("user");
 
     app.install(&fixture.registry_dir.path());
     fixture.start_service();
 
     let addr = fixture.addr.clone();
     let result = panic::catch_unwind(|| {
-        let result = kubos_system::query(&addr, UNINSTALL_QUERY,
-                                         Some(Duration::from_secs(5)));
+        let result = kubos_system::query(
+            &addr,
+            r#"mutation {
+            uninstall(uuid: "a-b-c-d-e", version: "0.0.1")
+        }"#,
+            Some(Duration::from_secs(5)),
+        );
+
         assert!(result.is_ok(), "{:?}", result.err());
         assert!(result.unwrap()["uninstall"].as_bool().unwrap());
 
-        let result = kubos_system::query(&addr, APPS_QUERY,
-                                         Some(Duration::from_secs(1)));
+        let result =
+            kubos_system::query(&addr, "{ apps { active } }", Some(Duration::from_secs(1)));
         assert!(result.is_ok(), "{:?}", result.err());
-        assert_eq!(result.unwrap()["apps"].as_array().expect("Not an array").len(), 0);
+        assert_eq!(
+            result.unwrap()["apps"]
+                .as_array()
+                .expect("Not an array")
+                .len(),
+            0
+        );
     });
 
     fixture.teardown();

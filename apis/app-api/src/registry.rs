@@ -51,32 +51,32 @@ impl AppMetadata {
         AppMetadata {
             name: name.to_string(),
             version: version.to_string(),
-            author: author.to_string()
+            author: author.to_string(),
         }
     }
 }
 
 /// The different RunLevels supported by KubOS applications
-#[derive(Clone,Debug,Deserialize,Serialize,PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub enum RunLevel {
     /// An application will start at system boot time, and is managed automatically by the
     /// Application Service
     OnBoot,
     /// An application will start when commanded through the `start_app` GraphQL mutation
-    OnCommand
+    OnCommand,
 }
 
 impl fmt::Display for RunLevel {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             RunLevel::OnBoot => write!(f, "OnBoot"),
-            RunLevel::OnCommand => write!(f, "OnCommand")
+            RunLevel::OnCommand => write!(f, "OnCommand"),
         }
     }
 }
 
 /// Kubos App struct
-#[derive(Clone,Debug,Deserialize,Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct App {
     /// The generated UUID for the application
     pub uuid: String,
@@ -89,7 +89,7 @@ pub struct App {
 }
 
 /// AppRegistryEntry
-#[derive(Clone,Debug,Deserialize,Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AppRegistryEntry {
     /// Whether or not this application is the active installation
     pub active: bool,
@@ -112,12 +112,12 @@ impl AppRegistryEntry {
                 match f.read_to_string(&mut buffer) {
                     Ok(_) => match toml::from_str::<AppRegistryEntry>(&buffer) {
                         Ok(entry) => Some(entry),
-                        Err(_) => None
+                        Err(_) => None,
                     },
-                    Err(_) => None
+                    Err(_) => None,
                 }
-            },
-            Err(_) => None
+            }
+            Err(_) => None,
         }
     }
 
@@ -129,22 +129,22 @@ impl AppRegistryEntry {
             Ok(mut file) => match toml::to_string(&self) {
                 Ok(toml_str) => match file.write_all(&toml_str.into_bytes()) {
                     Ok(_) => Ok(true),
-                    Err(err) => Err(format!("{}", err))
+                    Err(err) => Err(format!("{}", err)),
                 },
-                Err(err) => Err(format!("{}", err))
+                Err(err) => Err(format!("{}", err)),
             },
-            Err(err) => Err(format!("{}", err))
+            Err(err) => Err(format!("{}", err)),
         }
     }
 }
 
 /// AppRegistry
-#[derive(Deserialize,Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct AppRegistry {
     #[doc(hidden)]
     pub entries: RefCell<Vec<AppRegistryEntry>>,
     /// The managed root directory of the AppRegistry
-    pub apps_dir: String
+    pub apps_dir: String,
 }
 
 impl AppRegistry {
@@ -163,7 +163,7 @@ impl AppRegistry {
     pub fn new_from_dir(apps_dir: &str) -> AppRegistry {
         let registry = AppRegistry {
             entries: RefCell::new(Vec::new()),
-            apps_dir: String::from(apps_dir)
+            apps_dir: String::from(apps_dir),
         };
 
         let apps_dir = Path::new(apps_dir);
@@ -177,12 +177,19 @@ impl AppRegistry {
         let active_dir = apps_dir.clone().join("active");
         if !active_dir.exists() {
             if let Err(err) = fs::create_dir_all(&active_dir) {
-                eprintln!("Couldn't create 'active' dir {}: {:?}", active_dir.display(), err);
+                eprintln!(
+                    "Couldn't create 'active' dir {}: {:?}",
+                    active_dir.display(),
+                    err
+                );
                 return registry;
             }
         }
 
-        registry.entries.borrow_mut().extend(registry.discover_apps());
+        registry
+            .entries
+            .borrow_mut()
+            .extend(registry.discover_apps());
         return registry;
     }
 
@@ -232,15 +239,15 @@ impl AppRegistry {
                             let v_path = version.path();
                             let version_path = match v_path.to_str() {
                                 Some(v) => v,
-                                None => continue
+                                None => continue,
                             };
 
                             if let Some(entry) = AppRegistryEntry::from_dir(version_path) {
                                 reg_entries.push(entry);
                             }
                         }
-                    },
-                    Err(_) => continue
+                    }
+                    Err(_) => continue,
                 }
             }
         }
@@ -269,7 +276,10 @@ impl AppRegistry {
 
         let result = Command::new(path).args(&["--metadata"]).output();
         if result.is_err() {
-            return Err(format!("Failed to get app metadata: {}", result.err().unwrap()));
+            return Err(format!(
+                "Failed to get app metadata: {}",
+                result.err().unwrap()
+            ));
         }
 
         let app_metadata = result.unwrap();
@@ -277,8 +287,7 @@ impl AppRegistry {
             return Err("Bad exit code getting app metadata".to_string());
         }
 
-        let metadata: AppMetadata =
-            toml::from_slice(app_metadata.stdout.as_slice()).unwrap();
+        let metadata: AppMetadata = toml::from_slice(app_metadata.stdout.as_slice()).unwrap();
 
         let mut entries = self.entries.borrow_mut();
         let mut app_uuid: Uuid = Uuid::new_v4();
@@ -292,13 +301,23 @@ impl AppRegistry {
         }
 
         let app_uuid_str = app_uuid.hyphenated().to_string();
-        let app_dir_str = format!("{}/{}/{}", self.apps_dir, app_uuid_str,
-                                   metadata.version.as_str());
+        let app_dir_str = format!(
+            "{}/{}/{}",
+            self.apps_dir,
+            app_uuid_str,
+            metadata.version.as_str()
+        );
         let app_dir = Path::new(&app_dir_str);
 
         if !app_dir.exists() {
             match fs::create_dir_all(app_dir) {
-                Err(err) => { return Err(format!("Couldn't create app dir {}: {:?}", app_dir.display(), err)); },
+                Err(err) => {
+                    return Err(format!(
+                        "Couldn't create app dir {}: {:?}",
+                        app_dir.display(),
+                        err
+                    ));
+                }
                 Ok(_) => {}
             }
         }
@@ -306,21 +325,36 @@ impl AppRegistry {
         match app_path.file_name() {
             Some(app_filename) => {
                 match fs::copy(path, app_dir.join(Path::new(app_filename))) {
-                    Err(err) => { return Err(format!("Couldn't copy app binary: {:?}", err)); },
+                    Err(err) => {
+                        return Err(format!("Couldn't copy app binary: {:?}", err));
+                    }
                     Ok(_) => {}
                 }
 
-                let active_symlink = PathBuf::from(format!("{}/active/{}", self.apps_dir, app_uuid_str));
+                let active_symlink =
+                    PathBuf::from(format!("{}/active/{}", self.apps_dir, app_uuid_str));
                 if active_symlink.exists() {
                     match fs::remove_file(active_symlink.clone()) {
-                        Err(err) => { return Err(format!("Couldn't remove symlink {}: {:?}", active_symlink.display(), err)); },
+                        Err(err) => {
+                            return Err(format!(
+                                "Couldn't remove symlink {}: {:?}",
+                                active_symlink.display(),
+                                err
+                            ));
+                        }
                         Ok(_) => {}
                     }
                 }
 
-                match unix::fs::symlink(&app_dir_str, active_symlink.clone())
-                {
-                    Err(err) => { return Err(format!("Couldn't symlink {} to {}: {:?}", active_symlink.display(), app_dir_str, err)); },
+                match unix::fs::symlink(&app_dir_str, active_symlink.clone()) {
+                    Err(err) => {
+                        return Err(format!(
+                            "Couldn't symlink {} to {}: {:?}",
+                            active_symlink.display(),
+                            app_dir_str,
+                            err
+                        ));
+                    }
                     Ok(_) => {}
                 }
 
@@ -329,16 +363,17 @@ impl AppRegistry {
                         uuid: app_uuid_str.to_string(),
                         metadata: metadata,
                         pid: 0,
-                        path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy()).to_owned(),
+                        path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy())
+                            .to_owned(),
                     },
                     active: true,
-                    run_level: RunLevel::OnCommand
+                    run_level: RunLevel::OnCommand,
                 };
 
                 entries.push(reg_entry);
                 entries[entries.len() - 1].save()?;
                 Ok(entries[entries.len() - 1].clone())
-            },
+            }
             None => {
                 return Err(String::from("Couldn't get app filename"));
             }
@@ -360,18 +395,19 @@ impl AppRegistry {
     /// registry.uninstall("01234567-89ab-cdef0-1234-56789abcdef0", "1.0");
     /// ```
     ///
-    pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, String>
-    {
+    pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, String> {
         let mut entries = self.entries.borrow_mut();
         let app_index: usize;
 
-        match entries.binary_search_by(
-            |ref e| e.app.uuid.cmp(&String::from(app_uuid)).then(
-                    e.app.metadata.version.cmp(&String::from(version))))
-        {
+        match entries.binary_search_by(|ref e| {
+            e.app
+                .uuid
+                .cmp(&String::from(app_uuid))
+                .then(e.app.metadata.version.cmp(&String::from(version)))
+        }) {
             Ok(index) => {
                 app_index = index;
-            },
+            }
             Err(_) => {
                 return Err(format!("Active app with UUID {} does not exist", app_uuid));
             }
@@ -382,7 +418,7 @@ impl AppRegistry {
             let parent = match app_path.parent() {
                 Some(parent) => parent,
                 // This should never happen
-                None => return Err(String::from("Error finding parent path of app"))
+                None => return Err(String::from("Error finding parent path of app")),
             };
 
             if let Err(err) = fs::remove_dir_all(parent.clone()) {
@@ -411,13 +447,15 @@ impl AppRegistry {
     /// let registry = AppRegistry::new();
     /// registry.start_app("01234567-89ab-cdef0-1234-56789abcdef0", RunLevel::OnCommand);
     /// ```
-    pub fn start_app(&self, app_uuid: &str, run_level: RunLevel) -> Result<u32, String>
-    {
+    pub fn start_app(&self, app_uuid: &str, run_level: RunLevel) -> Result<u32, String> {
         let entries = self.entries.borrow();
 
-        let app = match entries.iter().find(|ref e| e.active && e.app.uuid == app_uuid) {
+        let app = match entries
+            .iter()
+            .find(|ref e| e.active && e.app.uuid == app_uuid)
+        {
             Some(entry) => &entry.app,
-            None => return Err(format!("Active app with UUID {} does not exist", app_uuid))
+            None => return Err(format!("Active app with UUID {} does not exist", app_uuid)),
         };
 
         let app_path = PathBuf::from(&app.path);
@@ -426,10 +464,10 @@ impl AppRegistry {
         }
 
         let child = Command::new(app_path)
-                            .env("KUBOS_APP_UUID", app.uuid.clone())
-                            .env("KUBOS_APP_RUN_LEVEL", format!("{}", run_level))
-                            .spawn()
-                            .expect("Failed to spawn app");
+            .env("KUBOS_APP_UUID", app.uuid.clone())
+            .env("KUBOS_APP_RUN_LEVEL", format!("{}", run_level))
+            .spawn()
+            .expect("Failed to spawn app");
 
         Ok(child.id())
     }

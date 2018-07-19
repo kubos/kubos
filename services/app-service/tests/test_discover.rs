@@ -42,13 +42,11 @@ fn discover_app() {
         .author("user")
         .install(&fixture.registry_dir.path());
 
-
     fixture.start_service();
     let addr = fixture.addr.clone();
     let result = panic::catch_unwind(|| {
         let apps_query = "{ apps { active, runLevel, app { uuid, name, version, author } } }";
-        let result = kubos_system::query(&addr, &apps_query,
-                                        Some(Duration::from_secs(5)));
+        let result = kubos_system::query(&addr, &apps_query, Some(Duration::from_secs(5)));
         assert!(result.is_ok());
 
         let apps = &result.unwrap()["apps"];
@@ -76,7 +74,6 @@ fn discover_app() {
         assert_eq!(v["app"]["name"], json!("dummy"));
         assert_eq!(v["app"]["version"], json!("0.0.1"));
         assert_eq!(v["app"]["author"], json!("user"));
-
     });
 
     fixture.teardown();

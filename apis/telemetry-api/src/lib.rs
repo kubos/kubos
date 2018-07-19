@@ -89,11 +89,13 @@ impl Database {
         };
     }
 
-    pub fn insert<'a>(&self, timestamp: i32,
-                             subsystem: &'a str,
-                             parameter: &'a str,
-                             value: &'a str) -> QueryResult<usize>
-    {
+    pub fn insert<'a>(
+        &self,
+        timestamp: i32,
+        subsystem: &'a str,
+        parameter: &'a str,
+        value: &'a str,
+    ) -> QueryResult<usize> {
         use self::telemetry;
 
         let new_entry = NewEntry {
@@ -108,10 +110,12 @@ impl Database {
             .execute(&self.connection)
     }
 
-    pub fn insert_systime<'a>(&self, subsystem: &'a str,
-                                     parameter: &'a str,
-                                     value: &'a str) -> QueryResult<usize>
-    {
+    pub fn insert_systime<'a>(
+        &self,
+        subsystem: &'a str,
+        parameter: &'a str,
+        value: &'a str,
+    ) -> QueryResult<usize> {
         let timestamp = time::now_utc().to_timespec().sec;
         self.insert(timestamp as i32, subsystem, parameter, value)
     }
