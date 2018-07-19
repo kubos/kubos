@@ -135,14 +135,16 @@ impl App {
         let run_level = env::var_os("KUBOS_APP_RUN_LEVEL");
 
         match run_level {
-            Some(level) => {
-                if &level == "OnBoot" {
-                    handler.on_boot();
-                } else {
-                    handler.on_command();
-                }
+            Some(ref level) if level == "OnBoot" => {
+                handler.on_boot();
             },
-            None => { handler.on_command(); },
+            Some(ref level) if level == "OnCommand" => {
+                handler.on_command();
+            },
+            _ => {
+                eprintln!("Warning, unknown or missing KUBOS_APP_RUN_LEVEL, set to OnBoot or OnCommand");
+                handler.on_command();
+            }
         }
     }
 }

@@ -166,8 +166,20 @@ impl AppRegistry {
             apps_dir: String::from(apps_dir)
         };
 
-        if !Path::new(apps_dir).is_dir() {
-            return registry;
+        let apps_dir = Path::new(apps_dir);
+        if !apps_dir.exists() {
+            if let Err(err) = fs::create_dir(apps_dir) {
+                eprintln!("Couldn't create apps dir {}: {:?}", apps_dir.display(), err);
+                return registry;
+            }
+        }
+
+        let active_dir = apps_dir.clone().join("active");
+        if !active_dir.exists() {
+            if let Err(err) = fs::create_dir_all(&active_dir) {
+                eprintln!("Couldn't create 'active' dir {}: {:?}", active_dir.display(), err);
+                return registry;
+            }
         }
 
         registry.entries.borrow_mut().extend(registry.discover_apps());
@@ -280,21 +292,9 @@ impl AppRegistry {
         }
 
         let app_uuid_str = app_uuid.hyphenated().to_string();
-        let apps_dir = Path::new(&self.apps_dir);
-        if !apps_dir.exists() {
-            match fs::create_dir(apps_dir) {
-                Err(err) => { return Err(format!("Couldn't create apps dir {}: {:?}", apps_dir.display(), err)); },
-                Ok(_) => {}
-            }
-        }
-
-        if !apps_dir.exists() {
-            return Err(format!("Couldn't create app dir: {}", apps_dir.display()));
-        }
-
-        let app_dir_path = format!("{}/{}/{}", self.apps_dir, app_uuid_str,
+        let app_dir_str = format!("{}/{}/{}", self.apps_dir, app_uuid_str,
                                    metadata.version.as_str());
-        let app_dir = Path::new(&app_dir_path);
+        let app_dir = Path::new(&app_dir_str);
 
         if !app_dir.exists() {
             match fs::create_dir_all(app_dir) {
@@ -310,16 +310,7 @@ impl AppRegistry {
                     Ok(_) => {}
                 }
 
-                let active_dir = PathBuf::from(format!("{}/active", self.apps_dir));
-                if !active_dir.exists() {
-                    match fs::create_dir_all(active_dir.clone()) {
-                        Err(err) => { return Err(format!("Couldn't create 'active' dir {}: {:?}", active_dir.display(), err)); },
-                        Ok(_) => {}
-                    }
-                }
-
-                let active_symlink = active_dir.join(app_uuid_str.clone());
-
+                let active_symlink = PathBuf::from(format!("{}/active/{}", self.apps_dir, app_uuid_str));
                 if active_symlink.exists() {
                     match fs::remove_file(active_symlink.clone()) {
                         Err(err) => { return Err(format!("Couldn't remove symlink {}: {:?}", active_symlink.display(), err)); },
@@ -327,10 +318,9 @@ impl AppRegistry {
                     }
                 }
 
-                match unix::fs::symlink(app_dir.to_str().expect("invalid app dir"),
-                                        active_symlink.clone())
+                match unix::fs::symlink(&app_dir_str, active_symlink.clone())
                 {
-                    Err(err) => { return Err(format!("Couldn't symlink {} to {}: {:?}", active_symlink.display(), app_dir.display(), err)); },
+                    Err(err) => { return Err(format!("Couldn't symlink {} to {}: {:?}", active_symlink.display(), app_dir_str, err)); },
                     Ok(_) => {}
                 }
 
@@ -339,7 +329,7 @@ impl AppRegistry {
                         uuid: app_uuid_str.to_string(),
                         metadata: metadata,
                         pid: 0,
-                        path: app_dir.join(Path::new(app_filename)).to_str().expect("invalid app dir").to_string(),
+                        path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy()).to_owned(),
                     },
                     active: true,
                     run_level: RunLevel::OnCommand
@@ -388,24 +378,23 @@ impl AppRegistry {
         }
 
         let app_path = PathBuf::from(&entries[app_index].app.path);
-        if !app_path.exists() {
-            return Err(format!("{} does not exist", &entries[app_index].app.path));
+        if app_path.exists() {
+            let parent = match app_path.parent() {
+                Some(parent) => parent,
+                // This should never happen
+                None => return Err(String::from("Error finding parent path of app"))
+            };
+
+            if let Err(err) = fs::remove_dir_all(parent.clone()) {
+                return Err(format!("Error removing app directory: {}", err));
+            }
         }
 
-        match app_path.parent() {
-            Some(parent) => {
-                match fs::remove_dir_all(parent.clone()) {
-                    Ok(_) => {
-                        if app_index < entries.len() {
-                            entries.remove(app_index);
-                        }
-                        Ok(true)
-                    },
-                    Err(err) => Err(format!("Error removing app directory: {}", err))
-                }
-            },
-            None => Err(String::from("Error finding parent path of app"))
+        if app_index < entries.len() {
+            entries.remove(app_index);
         }
+
+        Ok(true)
     }
 
     /// Start an application. If successful, returns the pid of the application process.
@@ -425,14 +414,11 @@ impl AppRegistry {
     pub fn start_app(&self, app_uuid: &str, run_level: RunLevel) -> Result<u32, String>
     {
         let entries = self.entries.borrow();
-        let app: &App;
 
-        match entries.iter().find(|ref e| e.active && e.app.uuid == app_uuid) {
-            Some(entry) => { app = &entry.app; },
-            None => {
-                return Err(format!("Active app with UUID {} does not exist", app_uuid));
-            }
-        }
+        let app = match entries.iter().find(|ref e| e.active && e.app.uuid == app_uuid) {
+            Some(entry) => &entry.app,
+            None => return Err(format!("Active app with UUID {} does not exist", app_uuid))
+        };
 
         let app_path = PathBuf::from(&app.path);
         if !app_path.exists() {
