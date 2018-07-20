@@ -48,7 +48,7 @@ pub mod get_comms_watchdog_period {
     use super::*;
 
     pub fn parse(data: &[u8]) -> EpsResult<u8> {
-        if data.len() == 2 {
+        if data.len() == 2 || data.len() == 4 {
             Ok(data[1])
         } else {
             throw!(EpsError::parsing_failure("Comms Watchdog Period"))
