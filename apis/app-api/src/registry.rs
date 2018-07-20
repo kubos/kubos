@@ -92,7 +92,7 @@ pub struct App {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AppRegistryEntry {
     /// Whether or not this application is the active installation
-    pub active: bool,
+    pub active_version: bool,
     /// The run level of the application
     pub run_level: RunLevel,
     /// The app itself
@@ -292,8 +292,8 @@ impl AppRegistry {
         let mut entries = self.entries.borrow_mut();
         let mut app_uuid: Uuid = Uuid::new_v4();
         for entry in entries.iter_mut() {
-            if entry.active && entry.app.metadata.name == metadata.name {
-                entry.active = false;
+            if entry.active_version && entry.app.metadata.name == metadata.name {
+                entry.active_version = false;
                 app_uuid = Uuid::parse_str(&entry.app.uuid).unwrap();
                 entry.save()?;
                 break;
@@ -366,7 +366,7 @@ impl AppRegistry {
                         path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy())
                             .to_owned(),
                     },
-                    active: true,
+                    active_version: true,
                     run_level: RunLevel::OnCommand,
                 };
 
@@ -446,7 +446,7 @@ impl AppRegistry {
 
         let app = match entries
             .iter()
-            .find(|ref e| e.active && e.app.uuid == app_uuid)
+            .find(|ref e| e.active_version && e.app.uuid == app_uuid)
         {
             Some(entry) => &entry.app,
             None => return Err(format!("Active app with UUID {} does not exist", app_uuid)),

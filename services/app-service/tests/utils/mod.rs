@@ -76,7 +76,7 @@ impl MockAppBuilder {
     pub fn toml(&self, registry_dir: &str) -> String {
         format!(
             r#"
-            active = {active}
+            active_version = {active}
             run_level = "{run_level}"
 
             [app]

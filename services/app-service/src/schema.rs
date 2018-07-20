@@ -75,7 +75,7 @@ graphql_object!(KAppRegistryEntry: () as "AppRegistryEntry" |&self| {
     field active() -> FieldResult<bool>
         as "Active"
     {
-        Ok(self.0.active)
+        Ok(self.0.active_version)
     }
 
     field run_level() -> FieldResult<String>
@@ -109,7 +109,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
             if version.is_some() && &e.app.metadata.version != version.as_ref().unwrap() {
                 return false;
             }
-            if active.is_some() && e.active != active.unwrap() {
+            if active.is_some() && e.active_version != active.unwrap() {
                 return false;
             }
             true

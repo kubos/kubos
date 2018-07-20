@@ -74,14 +74,14 @@ fn serialize_entry() {
             pid: 101,
             path: String::from("/fake/path"),
         },
-        active: true,
+        active_version: true,
         run_level: RunLevel::OnCommand,
     };
 
     let str = toml::to_string(&dummy).unwrap();
     let parsed: AppRegistryEntry = toml::from_str(&str).unwrap();
 
-    assert_eq!(parsed.active, dummy.active);
+    assert_eq!(parsed.active_version, dummy.active_version);
     assert_eq!(parsed.run_level, dummy.run_level);
     assert_eq!(parsed.app.uuid, dummy.app.uuid);
     assert_eq!(parsed.app.pid, dummy.app.pid);
