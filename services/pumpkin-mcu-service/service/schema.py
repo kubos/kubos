@@ -24,6 +24,7 @@ class Query(graphene.ObjectType):
     """
     Creates query endpoints exposed by graphene.
     """
+    ping = graphene.String()
     moduleList = graphene.JSONString()
     fieldList = graphene.List(graphene.String, module=graphene.String())
     read = graphene.String(
@@ -32,6 +33,9 @@ class Query(graphene.ObjectType):
     mcuTelemetry = graphene.JSONString(
         module=graphene.String(),
         fields=graphene.List(graphene.String, default_value=["all"]))
+
+    def resolve_ping(self):
+        return "PONG"
 
     def resolve_moduleList(self, info):
         """
@@ -119,12 +123,68 @@ class Passthrough(graphene.Mutation):
         return commandStatus
 
 
+class Test(graphene.Mutation):
+    """
+    Tests the service and hardware is present and talking.
+    """
+
+    class Arguments:
+        test = TestEnum(required=True)
+
+    Output = TestResults
+
+    def mutate(self, info, test):
+
+        success = True
+        errors = []
+        test_output = {}
+        if test == 0:  # PING
+            test_output = "PONG"
+        elif test == 1:  # NOOP
+            for module in MODULES:
+                try:
+                    mcu = mcu_api.MCU(address=MODULES[module]['address'])
+                    out = mcu.read_telemetry(
+                        module=module,
+                        fields=['firmware_version'])
+                    mcu_out = {module: out}
+                    test_output.update(mcu_out)
+                except Exception as e:
+                    success = False
+                    errors.append(
+                        'Error with module : {} : {}'.format(module, e))
+
+        elif test == 2:  # INTEGRATION test
+            for module in MODULES:
+                try:
+                    mcu = mcu_api.MCU(address=MODULES[module]['address'])
+                    out = mcu.read_telemetry(
+                        module=module,
+                        fields=['firmware_version'])
+                    mcu_out = {module: out}
+                    test_output.update(mcu_out)
+                except Exception as e:
+                    success = False
+                    errors.append(
+                        'Error with module : {} : {}'.format(module, e))
+        else:
+            raise NotImplementedError("Test type not implemented.")
+
+        testResults = TestResults(
+            errors=errors,
+            success=success,
+            results=test_output
+        )
+
+        return testResults
+
+
 class Mutation(graphene.ObjectType):
     """
     Creates mutation endpoints exposed by graphene.
     """
-
     passthrough = Passthrough.Field()
+    test = Test.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
