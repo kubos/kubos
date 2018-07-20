@@ -397,21 +397,15 @@ impl AppRegistry {
     ///
     pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, String> {
         let mut entries = self.entries.borrow_mut();
-        let app_index: usize;
-
-        match entries.binary_search_by(|ref e| {
+        let app_index = match entries.binary_search_by(|ref e| {
             e.app
                 .uuid
                 .cmp(&String::from(app_uuid))
                 .then(e.app.metadata.version.cmp(&String::from(version)))
         }) {
-            Ok(index) => {
-                app_index = index;
-            }
-            Err(_) => {
-                return Err(format!("Active app with UUID {} does not exist", app_uuid));
-            }
-        }
+            Ok(index) => index,
+            Err(_) => return Err(format!("Active app with UUID {} does not exist", app_uuid)),
+        };
 
         let app_path = PathBuf::from(&entries[app_index].app.path);
         if app_path.exists() {
