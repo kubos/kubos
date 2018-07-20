@@ -44,7 +44,8 @@ mock_trait_no_default!(
     set_watchdog_period(u8) -> EpsResult<MutationResponse>,
     raw_command(u8, Vec<u8>) -> EpsResult<MutationResponse>,
     get_last_mutation() -> Mutations,
-    set_last_mutation(Mutations) -> ()
+    set_last_mutation(Mutations) -> (),
+    get_errors() -> EpsResult<Vec<String>>
 );
 
 impl Subsystem for MockSubsystem {
@@ -58,7 +59,8 @@ impl Subsystem for MockSubsystem {
     mock_method!(set_watchdog_period(&self, period: u8) -> EpsResult<MutationResponse>);
     mock_method!(raw_command(&self, cmd: u8, data: Vec<u8>) -> EpsResult<MutationResponse>);
     mock_method!(get_last_mutation(&self) -> Mutations);
-    mock_method!(set_last_mutation(&self, mutation: Mutations) -> ());
+    mock_method!(set_last_mutation(&self, mutation: Mutations));
+    mock_method!(get_errors(&self) -> EpsResult<Vec<String>>);
 }
 
 #[test]
@@ -76,6 +78,7 @@ fn test_ping() {
         Err(EpsError::GenericError),
         Mutations::None,
         (),
+        Err(EpsError::GenericError),
     ));
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
@@ -103,6 +106,7 @@ fn test_version() {
         Err(EpsError::GenericError),
         Mutations::None,
         (),
+        Err(EpsError::GenericError),
     );
 
     mock.get_version.return_value(Ok(version::Data {
@@ -117,15 +121,60 @@ fn test_version() {
 
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
-    let query = r#"{ version { motherboard { revision }}}"#;
+    let query = r#"{ telemetry { version { motherboard { revision } daughterboard { revision }}}}"#;
 
     assert_eq!(
         service.process(&query),
         json!({
             "msg":{
-                "version":{
-                    "motherboard":{
-                        "revision":10
+                "telemetry":{
+                    "version":{
+                        "daughterboard": null,
+                        "motherboard": {
+                            "revision": 10
+                        }
+                    }
+                }
+            },
+            "errs":""
+        }).to_string()
+    );
+}
+
+#[test]
+fn test_daughterboard_telemetry() {
+    let config: Config = Default::default();
+
+    let mock = MockSubsystem::new(
+        Err(EpsError::GenericError),
+        Err(EpsError::GenericError),
+        Err(EpsError::GenericError),
+        Err(EpsError::GenericError),
+        Err(EpsError::GenericError),
+        Err(EpsError::GenericError),
+        Err(EpsError::GenericError),
+        Err(EpsError::GenericError),
+        Err(EpsError::GenericError),
+        Mutations::None,
+        (),
+        Err(EpsError::GenericError),
+    );
+
+    mock.get_daughterboard_telemetry.return_value(Ok(10.0));
+
+    let subsystem: Box<Subsystem + 'static> = Box::new(mock);
+
+    let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
+
+    let query = r#"{ telemetry { daughterboard { BoardTemperature }}}"#;
+
+    assert_eq!(
+        service.process(&query),
+        json!({
+            "msg":{
+                "telemetry":{
+                    "daughterboard":{
+                        "BoardTemperature": 10.0,
                     }
                 }
             },

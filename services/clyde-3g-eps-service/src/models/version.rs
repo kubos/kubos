@@ -23,6 +23,7 @@ pub struct VersionData {
 }
 
 #[derive(Clone, Debug, GraphQLObject)]
+#[graphql(name = "data")]
 pub struct Data {
     pub motherboard: VersionData,
     pub daughterboard: Option<VersionData>,

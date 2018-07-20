@@ -15,6 +15,10 @@
 //
 
 use clyde_3g_eps_api::DaughterboardTelemetry::Type as DaughterboardTelemetryType;
+use juniper::FieldResult;
+use schema::Context;
+
+pub struct Telemetry;
 
 macro_rules! make_telemetry {
     (
@@ -32,6 +36,15 @@ macro_rules! make_telemetry {
                 }
             }
         }
+
+        graphql_object!(Telemetry: Context as "daughterboard" |&self| {
+            $(
+                field $type(&executor) -> FieldResult<f64>
+                {
+                    Ok(f64::from(executor.context().subsystem().get_daughterboard_telemetry(Type::$type)?))
+                }
+            )+
+        });
     }
 }
 

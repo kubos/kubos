@@ -16,6 +16,8 @@
 
 use clyde_3g_eps_api::ResetTelemetry::Data as ResetTelemetryData;
 use clyde_3g_eps_api::ResetTelemetry::Type as ResetTelemetryType;
+use juniper::FieldResult;
+use schema::Context;
 
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct Data {
@@ -50,3 +52,27 @@ impl Into<ResetTelemetryType> for Type {
         }
     }
 }
+
+pub struct Telemetry;
+
+graphql_object!(Telemetry: Context as "ResetTelemetry" |&self| {
+    field brown_out(&executor) -> FieldResult<Data>
+    {
+        Ok(executor.context().subsystem().get_reset_telemetry(Type::BrownOut)?)
+    }
+
+    field automatic_software(&executor) -> FieldResult<Data>
+    {
+        Ok(executor.context().subsystem().get_reset_telemetry(Type::AutomaticSoftware)?)
+    }
+
+    field manual(&executor) -> FieldResult<Data>
+    {
+        Ok(executor.context().subsystem().get_reset_telemetry(Type::Manual)?)
+    }
+
+    field watchdog(&executor) -> FieldResult<Data>
+    {
+        Ok(executor.context().subsystem().get_reset_telemetry(Type::Watchdog)?)
+    }
+});

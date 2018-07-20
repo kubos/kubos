@@ -18,49 +18,115 @@ use juniper::FieldResult;
 use models::*;
 use schema::Context;
 
-pub struct Root;
+pub struct Telemetry;
 
-/// Base GraphQL query
-graphql_object!(Root: Context as "Query" |&self| {
-    field ping() -> FieldResult<String>
-        as "Test service query"
+graphql_object!(Telemetry: Context as "telemetry" |&self| {
+    field motherboard() -> FieldResult<motherboard_telemetry::Telemetry>
+        as "Motherboard Telemetry"
     {
-        Ok(String::from("pong"))
+        Ok(motherboard_telemetry::Telemetry {})
     }
 
-    field ack(&executor) -> FieldResult<subsystem::Mutations>
-        as "Last run mutation"
+    field daughterboard() -> FieldResult<daughterboard_telemetry::Telemetry>
+        as "Daughterboard Telemetry"
     {
-        Ok(executor.context().subsystem().get_last_mutation())
+        Ok(daughterboard_telemetry::Telemetry {})
     }
 
-    field version(&executor) -> FieldResult<version::Data>
-        as "Hardware version information"
+    field reset() -> FieldResult<reset_telemetry::Telemetry>
+        as "Reset Telemetry"
     {
-        Ok(executor.context().subsystem().get_version()?)
-    }
-
-    field reset_telemetry(&executor, telem_type: reset_telemetry::Type) -> FieldResult<reset_telemetry::Data>
-        as "Telemetry data regarding the number of resets"
-    {
-        Ok(executor.context().subsystem().get_reset_telemetry(telem_type)?)
-    }
-
-    field motherboard_telemetry(&executor, telem_type: motherboard_telemetry::Type) -> FieldResult<f64>
-        as "Telemetry data from motherboard"
-    {
-        Ok(f64::from(executor.context().subsystem().get_motherboard_telemetry(telem_type)?))
-    }
-
-    field daughterboard_telemetry(&executor, telem_type: daughterboard_telemetry::Type) -> FieldResult<f64>
-        as "Telemetry data from daughterboard"
-    {
-        Ok(f64::from(executor.context().subsystem().get_daughterboard_telemetry(telem_type)?))
+        Ok(reset_telemetry::Telemetry {})
     }
 
     field watchdog_period(&executor) -> FieldResult<i32>
         as "Current watchdog period in minutes"
     {
         Ok(i32::from(executor.context().subsystem().get_comms_watchdog_period()?))
+    }
+
+    // Get the version information for the EPS
+    // motherboard and daughterboard (if accesssible)
+    //
+    // {
+    //     Data: {
+    //         motherboard: VersionData {
+    //             revision: i32,
+    //             firmware_number: i32
+    //         },
+    //         daughterboard: VersionData {
+    //             revision: i32,
+    //             firmware_number: i32
+    //         }
+    //     }
+    // }
+    field version(&executor) -> FieldResult<version::Data>
+        as "Hardware version information"
+    {
+        Ok(executor.context().subsystem().get_version()?)
+    }
+});
+
+pub struct Root;
+
+/// Base GraphQL query
+graphql_object!(Root: Context as "Query" |&self| {
+
+    // Test query to verify service is running without
+    // attempting to communicate with hardware
+    //
+    // {
+    //    ping: "pong"
+    // }
+    field ping() -> FieldResult<String>
+        as "Test service query"
+    {
+        Ok(String::from("pong"))
+    }
+
+    // Get the last mutation run
+    //
+    // {
+    //    ack: subsystem::Mutations
+    // }
+    field ack(&executor) -> FieldResult<subsystem::Mutations>
+        as "Last run mutation"
+    {
+        Ok(executor.context().subsystem().get_last_mutation())
+    }
+
+    // Get all errors encountered since the last time
+    // this field was queried
+    //
+    // {
+    //    errors: [String]
+    // }
+    field errors(&executor) -> FieldResult<Vec<String>>
+        as "Last errors encountered"
+    {
+        Ok(executor.context().subsystem().get_errors()?)
+    }
+
+    // Get telemetry from the EPS
+    //
+    // {
+    //     telemetry {
+    //         version {
+    //             motherboard {
+    //                 revision: i32,
+    //                 firmwareVersion: i32
+    //             },
+    //             daughterboard {
+    //                 revision: i32,
+    //                 firmwareVersion: i32
+    //             }
+    //         },
+    //         watchdogPeriod: i32,
+
+    //     }
+    // }
+    field telemetry(&executor) -> FieldResult<Telemetry>
+    {
+        Ok(Telemetry {})
     }
 });

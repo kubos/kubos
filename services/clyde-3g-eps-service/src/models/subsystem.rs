@@ -58,6 +58,7 @@ pub trait Subsystem {
     fn raw_command(&self, command: u8, data: Vec<u8>) -> EpsResult<MutationResponse>;
     fn get_last_mutation(&self) -> Mutations;
     fn set_last_mutation(&self, mutation: Mutations);
+    fn get_errors(&self) -> EpsResult<Vec<String>>;
 }
 
 pub struct RealSubsystem {
@@ -165,5 +166,19 @@ impl Subsystem for RealSubsystem {
 
     fn set_last_mutation(&self, _mutation: Mutations) {
         ()
+    }
+
+    fn get_errors(&self) -> EpsResult<Vec<String>> {
+        match self.errors.try_borrow_mut() {
+            Ok(mut master_vec) => {
+                let current = master_vec.clone();
+                master_vec.clear();
+                master_vec.shrink_to_fit();
+                Ok(current)
+            }
+            _ => Ok(vec![
+                "Error: Failed to borrow master errors vector".to_string(),
+            ]),
+        }
     }
 }
