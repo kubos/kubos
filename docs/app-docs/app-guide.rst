@@ -48,7 +48,9 @@ On Command
 
 The ``OnCommand`` run level defines logic which should be executed when the application is started manually.
 
-TODO: An example of the kind of logic you'd want to do on-demand rather than automatically
+For example, a user might want a custom batch of telemetry to be gathered and returned occassionally.
+Rather than sending individual telemetry requests, they could code their application to take care of the work,
+so then they only have to send a single query in order to trigger the process.
 
 On Boot
 ~~~~~~~
