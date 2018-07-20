@@ -27,7 +27,7 @@
 //!
 //! # fn func() -> AntSResult<()> {
 //! // Create a new AntS connection
-//! let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10).unwrap();
+//! let ants = AntS::new("KI2C1", 0x31, 0x32, 4, 10).unwrap();
 //!
 //! // Configure it to run commands against the secondary controller
 //! ants.configure(KANTSController::Secondary)?;
@@ -51,7 +51,7 @@
 //!
 //! [`AntS`]: struct.AntS.html
 
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 
 #[macro_use]
 extern crate failure;

@@ -20,6 +20,7 @@ members = [
 "services/comms-service",
 "services/kubos-service",
 "services/iobc-supervisor-service",
+"services/isis-ants-service",
 "services/mai400-service",
 "services/novatel-oem6-service",
 "services/telemetry-service",
