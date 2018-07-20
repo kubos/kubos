@@ -195,7 +195,7 @@ Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 Kubos Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
-The I2C bus is available through the Kubos HAL as ``K_I2C1``.
+The I2C bus is available as ``/dev/i2c-0``, or through the Kubos C HAL as ``K_I2C1``.
 
 For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubos-hal/i2c-hal/index>`.
 
