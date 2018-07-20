@@ -33,25 +33,43 @@ pub enum AntsError {
 /// Custom result type for antenna operations
 pub type AntSResult<T> = Result<T, AntsError>;
 
+/// Trait used to represent the AntS object. Allows for mock objects to be created for unit tests
 pub trait IAntS {
+    /// Construct a new AntS instance
     fn new(bus: &str, primary: u8, secondary: u8, ant_count: u8, timeout: u32) -> AntSResult<Self>
     where
         Self: ::std::marker::Sized;
+    /// Configure which microcontroller should be used to control the system
     fn configure(&self, config: KANTSController) -> AntSResult<()>;
+    /// Perform a software reset of the microcontrollers
     fn reset(&self) -> AntSResult<()>;
+    /// Arm the system for deployment
     fn arm(&self) -> AntSResult<()>;
+    /// Disable deployment
     fn disarm(&self) -> AntSResult<()>;
+    /// Deploy one antenna
     fn deploy(&self, antenna: KANTSAnt, force: bool, timeout: u8) -> AntSResult<()>;
+    /// Automatically deploy all antennas
     fn auto_deploy(&self, timeout: u8) -> AntSResult<()>;
+    /// Cancel all current deployment actions
     fn cancel_deploy(&self) -> AntSResult<()>;
+    /// Get the current deployment status of the system
     fn get_deploy(&self) -> AntSResult<DeployStatus>;
+    /// Get the system uptime
     fn get_uptime(&self) -> AntSResult<u32>;
+    /// Get the system telemetry data
     fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry>;
+    /// Get an antenna's activation count
     fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8>;
+    /// Get the amount of time spent attempting to deploy an antenna
     fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16>;
+    /// Kick the hardware watchdog
     fn watchdog_kick(&self) -> AntSResult<()>;
+    /// Start automatic watchdog kicking
     fn watchdog_start(&self) -> AntSResult<()>;
+    /// Stop automatic watchdog kicking
     fn watchdog_stop(&self) -> AntSResult<()>;
+    /// Pass a data packet directly through to the device
     fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()>;
 }
 

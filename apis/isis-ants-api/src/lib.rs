@@ -51,7 +51,7 @@
 //!
 //! [`AntS`]: struct.AntS.html
 
-//#![warn(missing_docs)]
+#![deny(missing_docs)]
 
 #[macro_use]
 extern crate failure;
