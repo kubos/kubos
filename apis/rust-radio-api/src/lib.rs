@@ -22,8 +22,8 @@
 extern crate failure;
 extern crate nom;
 
-use std::cell::RefCell;
 use nom::IResult;
+use std::cell::RefCell;
 
 use failure::Error;
 

@@ -93,8 +93,7 @@ will pick up the module and pull it into the build process.
 .. note::
 
     The module name is taken from the "name" definition in the
-    module.json file, not from the folder name. For example, to link in the
-    CSP module, you would do ``kubos link csp``, not ``kubos link libcsp``.
+    module.json file, not from the folder name.
 
 Linking in a Local Target
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -124,8 +123,8 @@ official Kubos version, use the ``kubos unlink`` and
 ::
 
     $ cd /home/vagrant/my-project
-    $ kubos unlink csp
-    $ kubos unlink-target kubos-linux-beaglebon-gcc
+    $ kubos unlink kubos-hal
+    $ kubos unlink-target kubos-linux-beaglebone-gcc
 
 Listing Linked Resources
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-use std::collections::HashMap;
-use std::os::unix::io::AsRawFd;
-use std::net::{SocketAddr, UdpSocket};
-use std::cell::RefCell;
-use serde_json;
 use config::Config;
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
+use serde_json;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::net::{SocketAddr, UdpSocket};
+use std::os::unix::io::AsRawFd;
 
 const FIONREAD: u16 = 0x541B;
 ioctl!(bad read udp_bytes_available with FIONREAD; usize);

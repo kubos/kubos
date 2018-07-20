@@ -1,7 +1,7 @@
 Kubos Mission Applications
 ==========================
 
-Mission applications include anything that makes decisions or governs autonomy on the satellite, as well an any other applications designed to address mission-specific concerns. 
+Mission applications include anything that makes decisions or governs autonomy on the satellite, as well as any other applications designed to address mission-specific concerns. 
 
 Applications can be used to enable the satellite to act autonomously. Some basic versions of this are:
 

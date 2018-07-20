@@ -1,4 +1,4 @@
-# kubos/kubos-dev:0.1.2
+# kubos/kubos-dev:0.1.7
 
 FROM phusion/baseimage:0.9.22
 
@@ -44,6 +44,9 @@ RUN mkdir -p /usr/local/lib/yotta_modules
 RUN mkdir -p /usr/local/lib/yotta_targets
 RUN mkdir -p /home/vagrant/.kubos
 
+# Setup Python package dependencies
+RUN pip install toml
+
 # Setup rust stuff
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH "$PATH:/root/.cargo/bin"
@@ -51,5 +54,13 @@ RUN rustup target install arm-unknown-linux-gnueabihf
 RUN rustup target install armv5te-unknown-linux-gnueabi
 RUN /root/.cargo/bin/cargo install --git https://github.com/kubos/cargo-kubos
 COPY cargo_config /root/.cargo/config
+
+#Tools to generate docs
+RUN apt-get install -y doxygen graphviz plantuml
+RUN pip install Sphinx==1.5.6
+RUN pip install breathe
+RUN pip install sphinx-rtd-theme==0.2.4
+RUN pip install sphinxcontrib-plantuml sphinxcontrib-versioning
+RUN pip install sphinx-jsondomain
 
 ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"

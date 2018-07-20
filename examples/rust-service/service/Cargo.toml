@@ -1,9 +1,0 @@
-[package]
-name = "rust-hardware-service"
-version = "0.1.0"
-authors = ["Ryan Plauche <ryan@kubos.co>"]
-
-[dependencies]
-extern-lib = { path = "../extern-lib" }
-kubos-service = { path = "../../../services/kubos-service" }
-juniper = "0.9"
