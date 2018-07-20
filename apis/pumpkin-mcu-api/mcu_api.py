@@ -33,7 +33,7 @@ TELEMETRY = {
         "context_switches": {"command": "SUP:TEL? 6,data",  "length": 8, "parsing": "<Q"},
         "idling_hooks":     {"command": "SUP:TEL? 7,data",  "length": 8, "parsing": "<Q"},
         "mcu_load":         {"command": "SUP:TEL? 8,data",  "length": 4, "parsing": "<L"},
-        "reset_cause":      {"command": "SUP:TEL? 13,data", "length": 4, "parsing": "<H"}
+        "reset_cause":      {"command": "SUP:TEL? 13,data", "length": 2, "parsing": "<H"}
     },
     "sim": {},
     "bim": {
