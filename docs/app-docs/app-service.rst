@@ -133,7 +133,7 @@ De-Registering
 .. todo::
 
     Upgrading
-    ---------
+    //---------
     
     Users may register a new version of an application without needing to remove the existing registration.
     
@@ -154,7 +154,7 @@ De-Registering
         }
     
     Recovery
-    --------
+    //--------
     
     Is not a thing that actually exists yet...
     

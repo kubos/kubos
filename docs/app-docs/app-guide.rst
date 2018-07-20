@@ -61,7 +61,7 @@ For instance, an application might be set up to fetch the current time from a GP
 .. todo::
 
     On Deploy
-    ~~~~~~~~~
+    //~~~~~~~~~
     
     The ``on-deploy`` run level defines the deployment logic for the system.
     
@@ -90,7 +90,7 @@ For Rust, this is the `Cargo.toml` file which is automatically generated when yo
 .. todo::
 
     Example Walkthrough
-    -------------------
+    //-------------------
     
     Here's how we go about coding an actual mission application...
     
