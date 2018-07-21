@@ -65,6 +65,18 @@ graphql_object!(Telemetry: Context as "telemetry" |&self| {
     {
         Ok(executor.context().subsystem().get_version()?)
     }
+
+    field last_eps_error(&executor) -> FieldResult<last_error::Data>
+        as "Last EPS error reported"
+    {
+        Ok(executor.context().subsystem().get_last_eps_error()?)
+    }
+
+    field board_status(&executor) -> FieldResult<board_status::Data>
+        as "EPS board status"
+    {
+        Ok(executor.context().subsystem().get_board_status()?)
+    }
 });
 
 pub struct Root;

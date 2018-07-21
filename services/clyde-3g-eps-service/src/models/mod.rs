@@ -14,7 +14,9 @@
 // limitations under the License.
 //
 
+pub mod board_status;
 pub mod daughterboard_telemetry;
+pub mod last_error;
 pub mod motherboard_telemetry;
 pub mod reset_telemetry;
 pub mod subsystem;

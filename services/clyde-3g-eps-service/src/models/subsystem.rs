@@ -52,6 +52,8 @@ pub trait Subsystem {
     ) -> EpsResult<reset_telemetry::Data>;
     fn get_comms_watchdog_period(&self) -> EpsResult<u8>;
     fn get_version(&self) -> EpsResult<version::Data>;
+    fn get_board_status(&self) -> EpsResult<board_status::Data>;
+    fn get_last_eps_error(&self) -> EpsResult<last_error::Data>;
     fn manual_reset(&self) -> EpsResult<MutationResponse>;
     fn reset_watchdog(&self) -> EpsResult<MutationResponse>;
     fn set_watchdog_period(&self, period: u8) -> EpsResult<MutationResponse>;
@@ -118,6 +120,14 @@ impl Subsystem for RealSubsystem {
 
     fn get_version(&self) -> EpsResult<version::Data> {
         Ok(self.eps.lock().unwrap().get_version_info()?.into())
+    }
+
+    fn get_board_status(&self) -> EpsResult<board_status::Data> {
+        Ok(self.eps.lock().unwrap().get_board_status()?.into())
+    }
+
+    fn get_last_eps_error(&self) -> EpsResult<last_error::Data> {
+        Ok(self.eps.lock().unwrap().get_last_error()?.into())
     }
 
     fn manual_reset(&self) -> EpsResult<MutationResponse> {
