@@ -25,22 +25,34 @@ use rust_i2c::Command;
 /// is shown below. Please note that Data[3] is the first byte returned from the
 /// EPS and Data[0] is the last.
 
+/// EPS Board Status Codes
 bitflags! {
+    /// EPS Board Status Codes
     #[derive(Default)]
     pub struct StatusCode: u8 {
+        /// Last Command Failed
         const LAST_COMMAND_FAILED = 0b00000001;
+        /// Watchdog Error
         const WATCHDOG_ERROR = 0b00000010;
+        /// Bad Command Data
         const BAD_COMMAND_DATA = 0b00000100;
+        /// Bad Command Channel
         const BAD_COMMAND_CHANNEL = 0b00001000;
+        /// Error Reading EEPROM
         const ERROR_READING_EEPROM = 0b00010000;
+        /// Power On Reset
         const POWER_ON_RESET = 0b00100000;
+        /// Brown Out Reset
         const BROWN_OUT_RESET = 0b01000000;
     }
 }
 
+/// Status of EPS Motherboard and Daughterboard
 #[derive(Debug, Eq, PartialEq)]
 pub struct BoardStatus {
+    /// Motherboard status code
     pub motherboard: StatusCode,
+    /// Daughterboard status code
     pub daughterboard: Option<StatusCode>,
 }
 

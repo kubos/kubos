@@ -31,6 +31,8 @@ mod commands;
 mod eps;
 mod telemetry;
 
+pub use commands::board_status::{BoardStatus, StatusCode};
+pub use commands::last_error::{ErrorCode, LastError};
 pub use commands::version::{Version, VersionInfo};
 pub use eps::Eps;
 pub use telemetry::daughterboard as DaughterboardTelemetry;

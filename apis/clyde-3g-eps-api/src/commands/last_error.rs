@@ -27,6 +27,7 @@ use rust_i2c::Command;
 
 /// Bitflags struct holding last error information.
 bitflags! {
+    /// Bitflags struct holding last error information.
     #[derive(Default)]
     pub struct ErrorCode: u8 {
         /// CRC code does not match data
@@ -50,9 +51,12 @@ bitflags! {
     }
 }
 
+/// Struct holding EPS last error information
 #[derive(Debug, Eq, PartialEq)]
 pub struct LastError {
+    /// Last error reported by motherboard
     pub motherboard: ErrorCode,
+    /// Last error reported by daughterboard
     pub daughterboard: Option<ErrorCode>,
 }
 
