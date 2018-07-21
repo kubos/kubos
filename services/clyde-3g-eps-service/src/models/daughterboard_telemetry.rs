@@ -41,7 +41,7 @@ macro_rules! make_telemetry {
             $(
                 field $type(&executor) -> FieldResult<f64>
                 {
-                    Ok(f64::from(executor.context().subsystem().get_daughterboard_telemetry(Type::$type)?))
+                    Ok(executor.context().subsystem().get_daughterboard_telemetry(Type::$type)? as f64)
                 }
             )+
         });

@@ -48,7 +48,7 @@ bitflags! {
 }
 
 /// Status of EPS Motherboard and Daughterboard
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BoardStatus {
     /// Motherboard status code
     pub motherboard: StatusCode,

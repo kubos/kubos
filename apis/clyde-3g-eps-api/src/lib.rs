@@ -32,9 +32,10 @@ mod eps;
 mod telemetry;
 
 pub use commands::board_status::{BoardStatus, StatusCode};
+pub use commands::checksum::Checksum;
 pub use commands::last_error::{ErrorCode, LastError};
 pub use commands::version::{Version, VersionInfo};
-pub use eps::Eps;
+pub use eps::{Clyde3gEps, Eps};
 pub use telemetry::daughterboard as DaughterboardTelemetry;
 pub use telemetry::motherboard as MotherboardTelemetry;
 pub use telemetry::reset as ResetTelemetry;

@@ -25,61 +25,143 @@ extern crate eps_api;
 extern crate failure;
 extern crate rust_i2c;
 
+use clyde_3g_eps_api::*;
 use clyde_3g_eps_service::models::subsystem::{Mutations, Subsystem};
 use clyde_3g_eps_service::models::*;
 use clyde_3g_eps_service::schema::mutation::Root as MutationRoot;
 use clyde_3g_eps_service::schema::query::Root as QueryRoot;
-use eps_api::{EpsError, EpsResult};
+use eps_api::*;
 use kubos_service::{Config, MutationResponse, Service};
+use std::cell::{Cell, RefCell};
+use std::sync::{Arc, Mutex};
 
-mock_trait_no_default!(
-    MockSubsystem,
-    get_motherboard_telemetry(motherboard_telemetry::Type) -> EpsResult<f32>,
-    get_daughterboard_telemetry(daughterboard_telemetry::Type) -> EpsResult<f32>,
-    get_reset_telemetry(reset_telemetry::Type) -> EpsResult<reset_telemetry::Data>,
-    get_comms_watchdog_period() -> EpsResult<u8>,
-    get_version() -> EpsResult<version::Data>,
-    manual_reset() -> EpsResult<MutationResponse>,
-    reset_watchdog() -> EpsResult<MutationResponse>,
-    set_watchdog_period(u8) -> EpsResult<MutationResponse>,
-    raw_command(u8, Vec<u8>) -> EpsResult<MutationResponse>,
-    get_last_mutation() -> Mutations,
-    set_last_mutation(Mutations) -> (),
-    get_errors() -> EpsResult<Vec<String>>
-);
+struct MockBadEps {}
 
-impl Subsystem for MockSubsystem {
-    mock_method!(get_motherboard_telemetry(&self, t: motherboard_telemetry::Type) -> EpsResult<f32>);
-    mock_method!(get_daughterboard_telemetry(&self, t: daughterboard_telemetry::Type) -> EpsResult<f32>);
-    mock_method!(get_reset_telemetry(&self, t: reset_telemetry::Type) -> EpsResult<reset_telemetry::Data>);
-    mock_method!(get_comms_watchdog_period(&self) -> EpsResult<u8>);
-    mock_method!(get_version(&self) -> EpsResult<version::Data>);
-    mock_method!(manual_reset(&self) -> EpsResult<MutationResponse>);
-    mock_method!(reset_watchdog(&self) -> EpsResult<MutationResponse>);
-    mock_method!(set_watchdog_period(&self, period: u8) -> EpsResult<MutationResponse>);
-    mock_method!(raw_command(&self, cmd: u8, data: Vec<u8>) -> EpsResult<MutationResponse>);
-    mock_method!(get_last_mutation(&self) -> Mutations);
-    mock_method!(set_last_mutation(&self, mutation: Mutations));
-    mock_method!(get_errors(&self) -> EpsResult<Vec<String>>);
+impl Clyde3gEps for MockBadEps {
+    fn get_board_status(&self) -> EpsResult<BoardStatus> {
+        Err(EpsError::GenericError)
+    }
+    fn get_checksum(&self) -> EpsResult<Checksum> {
+        Err(EpsError::GenericError)
+    }
+    fn get_version_info(&self) -> EpsResult<VersionInfo> {
+        Err(EpsError::GenericError)
+    }
+    fn get_last_error(&self) -> EpsResult<LastError> {
+        Err(EpsError::GenericError)
+    }
+    fn manual_reset(&self) -> EpsResult<()> {
+        Err(EpsError::GenericError)
+    }
+    fn reset_comms_watchdog(&self) -> EpsResult<()> {
+        Err(EpsError::GenericError)
+    }
+    fn get_motherboard_telemetry(&self, telem_type: MotherboardTelemetry::Type) -> EpsResult<f32> {
+        Err(EpsError::GenericError)
+    }
+    fn get_daughterboard_telemetry(
+        &self,
+        telem_type: DaughterboardTelemetry::Type,
+    ) -> EpsResult<f32> {
+        Err(EpsError::GenericError)
+    }
+    fn get_reset_telemetry(
+        &self,
+        telem_type: ResetTelemetry::Type,
+    ) -> EpsResult<ResetTelemetry::Data> {
+        Err(EpsError::GenericError)
+    }
+    fn set_comms_watchdog_period(&self, period: u8) -> EpsResult<()> {
+        Err(EpsError::GenericError)
+    }
+    fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
+        Err(EpsError::GenericError)
+    }
+    fn raw_command(&self, cmd: u8, data: Vec<u8>) -> EpsResult<()> {
+        Err(EpsError::GenericError)
+    }
+}
+
+fn gen_mock_bad_eps() -> Box<Clyde3gEps + Send> {
+    Box::new(MockBadEps {})
+}
+
+struct MockGoodEps {}
+
+impl Clyde3gEps for MockGoodEps {
+    fn get_board_status(&self) -> EpsResult<BoardStatus> {
+        Ok(BoardStatus {
+            motherboard: StatusCode::LAST_COMMAND_FAILED,
+            daughterboard: Some(StatusCode::WATCHDOG_ERROR),
+        })
+    }
+    fn get_checksum(&self) -> EpsResult<Checksum> {
+        Ok(Checksum {
+            motherboard: 155,
+            daughterboard: Some(164),
+        })
+    }
+    fn get_version_info(&self) -> EpsResult<VersionInfo> {
+        Ok(VersionInfo {
+            motherboard: Version {
+                revision: 10,
+                firmware_number: 100,
+            },
+            daughterboard: Some(Version {
+                revision: 12,
+                firmware_number: 105,
+            }),
+        })
+    }
+    fn get_last_error(&self) -> EpsResult<LastError> {
+        Ok(LastError {
+            motherboard: ErrorCode::BAD_CRC,
+            daughterboard: None,
+        })
+    }
+    fn manual_reset(&self) -> EpsResult<()> {
+        Ok(())
+    }
+    fn reset_comms_watchdog(&self) -> EpsResult<()> {
+        Ok(())
+    }
+    fn get_motherboard_telemetry(&self, telem_type: MotherboardTelemetry::Type) -> EpsResult<f32> {
+        Ok(105.13)
+    }
+    fn get_daughterboard_telemetry(
+        &self,
+        telem_type: DaughterboardTelemetry::Type,
+    ) -> EpsResult<f32> {
+        Ok(101.55)
+    }
+    fn get_reset_telemetry(
+        &self,
+        telem_type: ResetTelemetry::Type,
+    ) -> EpsResult<ResetTelemetry::Data> {
+        Ok(ResetTelemetry::Data {
+            motherboard: 89,
+            daughterboard: Some(99),
+        })
+    }
+    fn set_comms_watchdog_period(&self, period: u8) -> EpsResult<()> {
+        Ok(())
+    }
+    fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
+        Ok(10)
+    }
+    fn raw_command(&self, cmd: u8, data: Vec<u8>) -> EpsResult<()> {
+        Ok(())
+    }
+}
+
+fn gen_mock_good_eps() -> Box<Clyde3gEps + Send> {
+    Box::new(MockGoodEps {})
 }
 
 #[test]
 fn test_ping() {
     let config: Config = Default::default();
-    let subsystem: Box<Subsystem + 'static> = Box::new(MockSubsystem::new(
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Mutations::None,
-        (),
-        Err(EpsError::GenericError),
-    ));
+    let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
     let query = r#"{ ping }"#;
@@ -93,32 +175,7 @@ fn test_ping() {
 #[test]
 fn test_version() {
     let config: Config = Default::default();
-
-    let mock = MockSubsystem::new(
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Mutations::None,
-        (),
-        Err(EpsError::GenericError),
-    );
-
-    mock.get_version.return_value(Ok(version::Data {
-        motherboard: version::VersionData {
-            firmware_number: 100,
-            revision: 10,
-        },
-        daughterboard: None,
-    }));
-
-    let subsystem: Box<Subsystem + 'static> = Box::new(mock);
-
+    let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_good_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
     let query = r#"{ telemetry { version { motherboard { revision } daughterboard { revision }}}}"#;
@@ -129,7 +186,9 @@ fn test_version() {
             "msg":{
                 "telemetry":{
                     "version":{
-                        "daughterboard": null,
+                        "daughterboard": {
+                            "revision": 12
+                        },
                         "motherboard": {
                             "revision": 10
                         }
@@ -144,26 +203,7 @@ fn test_version() {
 #[test]
 fn test_daughterboard_telemetry() {
     let config: Config = Default::default();
-
-    let mock = MockSubsystem::new(
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Err(EpsError::GenericError),
-        Mutations::None,
-        (),
-        Err(EpsError::GenericError),
-    );
-
-    mock.get_daughterboard_telemetry.return_value(Ok(10.0));
-
-    let subsystem: Box<Subsystem + 'static> = Box::new(mock);
-
+    let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_good_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
     let query = r#"{ telemetry { daughterboard { BoardTemperature }}}"#;
@@ -174,7 +214,54 @@ fn test_daughterboard_telemetry() {
             "msg":{
                 "telemetry":{
                     "daughterboard":{
-                        "BoardTemperature": 10.0,
+                        "BoardTemperature": 101.55000305175781,
+                    }
+                }
+            },
+            "errs":""
+        }).to_string()
+    );
+}
+
+#[test]
+fn test_telemetry_status_last_error() {
+    let config: Config = Default::default();
+    let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_good_eps()).unwrap());
+    let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
+
+    let query = r#"
+    {
+        telemetry {
+            daughterboard {
+                BoardTemperature
+            }
+            motherboard {
+                BoardTemperature
+            }
+            boardStatus { motherboard daughterboard }
+            lastEpsError { motherboard daughterboard }
+        }
+    }
+    "#;
+
+    assert_eq!(
+        service.process(&query),
+        json!({
+            "msg":{
+                "telemetry":{
+                    "boardStatus":{
+                        "motherboard":"LAST_COMMAND_FAILED",
+                        "daughterboard":"WATCHDOG_ERROR",
+                    },
+                    "daughterboard":{
+                        "BoardTemperature": 101.55000305175781,
+                    },
+                    "lastEpsError":{
+                        "daughterboard":null,
+                        "motherboard":"BAD_CRC",
+                    },
+                    "motherboard":{
+                        "BoardTemperature": 105.12999725341797
                     }
                 }
             },

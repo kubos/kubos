@@ -83,7 +83,7 @@
 extern crate clyde_3g_eps_service;
 extern crate kubos_service;
 
-use clyde_3g_eps_service::models::subsystem::{RealSubsystem, Subsystem};
+use clyde_3g_eps_service::models::subsystem::Subsystem;
 use clyde_3g_eps_service::schema::mutation::Root as MutationRoot;
 use clyde_3g_eps_service::schema::query::Root as QueryRoot;
 use kubos_service::{Config, Service};
@@ -95,7 +95,7 @@ fn main() {
         .expect("No eps device path found in config");
     let bus = bus.as_str().unwrap_or("");
 
-    let subsystem: Box<Subsystem + 'static> = Box::new(RealSubsystem::new(bus).unwrap());
+    let subsystem: Box<Subsystem> = Box::new(Subsystem::from_path(bus).unwrap());
 
     Service::new(config, subsystem, QueryRoot, MutationRoot).start();
 }

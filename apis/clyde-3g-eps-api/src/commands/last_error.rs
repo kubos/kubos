@@ -52,7 +52,7 @@ bitflags! {
 }
 
 /// Struct holding EPS last error information
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LastError {
     /// Last error reported by motherboard
     pub motherboard: ErrorCode,

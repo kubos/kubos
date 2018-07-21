@@ -27,7 +27,7 @@ macro_rules! make_telemetry {
         )+
     ) => {
 
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         /// Telemetry variants
         pub enum Type {
             $(

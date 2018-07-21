@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use clyde_3g_eps_api::Eps;
+use clyde_3g_eps_api::{Clyde3gEps, Eps};
 use eps_api::EpsResult;
 use kubos_service::MutationResponse;
 use models::*;
@@ -33,67 +33,53 @@ pub enum Mutations {
     SetWatchdogPeriod,
 }
 
-fn watchdog_thread(eps: Arc<Mutex<Eps>>) {
+fn watchdog_thread(eps: Arc<Mutex<Box<Clyde3gEps + Send>>>) {
     loop {
         thread::sleep(Duration::from_secs(60));
         let _res_ = eps.lock().unwrap().reset_comms_watchdog();
     }
 }
 
-pub trait Subsystem {
-    fn get_motherboard_telemetry(&self, telem_type: motherboard_telemetry::Type) -> EpsResult<f32>;
-    fn get_daughterboard_telemetry(
-        &self,
-        telem_type: daughterboard_telemetry::Type,
-    ) -> EpsResult<f32>;
-    fn get_reset_telemetry(
-        &self,
-        telem_type: reset_telemetry::Type,
-    ) -> EpsResult<reset_telemetry::Data>;
-    fn get_comms_watchdog_period(&self) -> EpsResult<u8>;
-    fn get_version(&self) -> EpsResult<version::Data>;
-    fn get_board_status(&self) -> EpsResult<board_status::Data>;
-    fn get_last_eps_error(&self) -> EpsResult<last_error::Data>;
-    fn manual_reset(&self) -> EpsResult<MutationResponse>;
-    fn reset_watchdog(&self) -> EpsResult<MutationResponse>;
-    fn set_watchdog_period(&self, period: u8) -> EpsResult<MutationResponse>;
-    fn raw_command(&self, command: u8, data: Vec<u8>) -> EpsResult<MutationResponse>;
-    fn get_last_mutation(&self) -> Mutations;
-    fn set_last_mutation(&self, mutation: Mutations);
-    fn get_errors(&self) -> EpsResult<Vec<String>>;
-}
-
-pub struct RealSubsystem {
-    pub eps: Arc<Mutex<Eps>>,
+pub struct Subsystem {
+    pub eps: Arc<Mutex<Box<Clyde3gEps + Send>>>,
     pub last_mutation: Cell<Mutations>,
     pub errors: RefCell<Vec<String>>,
     pub watchdog_handle: thread::JoinHandle<()>,
 }
 
-impl RealSubsystem {
-    pub fn new(bus: &str) -> EpsResult<RealSubsystem> {
-        let eps = Arc::new(Mutex::new(Eps::new(Connection::from_path(bus, 0x2B))));
+impl Subsystem {
+    pub fn new(eps: Box<Clyde3gEps + Send>) -> EpsResult<Self> {
+        let eps = Arc::new(Mutex::new(eps));
         let thread_eps = eps.clone();
         let watchdog_handle = thread::spawn(move || watchdog_thread(thread_eps));
 
-        Ok(RealSubsystem {
+        Ok(Self {
             eps,
             last_mutation: Cell::new(Mutations::None),
             errors: RefCell::new(vec![]),
             watchdog_handle,
         })
     }
+
+    pub fn from_path(bus: &str) -> EpsResult<Self> {
+        let clyde_eps: Box<Clyde3gEps + Send> =
+            Box::new(Eps::new(Connection::from_path(bus, 0x2B)));
+        Subsystem::new(clyde_eps)
+    }
 }
 
-impl Subsystem for RealSubsystem {
-    fn get_motherboard_telemetry(&self, telem_type: motherboard_telemetry::Type) -> EpsResult<f32> {
+impl Subsystem {
+    pub fn get_motherboard_telemetry(
+        &self,
+        telem_type: motherboard_telemetry::Type,
+    ) -> EpsResult<f32> {
         Ok(self.eps
             .lock()
             .unwrap()
             .get_motherboard_telemetry(telem_type.into())?)
     }
 
-    fn get_daughterboard_telemetry(
+    pub fn get_daughterboard_telemetry(
         &self,
         telem_type: daughterboard_telemetry::Type,
     ) -> EpsResult<f32> {
@@ -103,7 +89,7 @@ impl Subsystem for RealSubsystem {
             .get_daughterboard_telemetry(telem_type.into())?)
     }
 
-    fn get_reset_telemetry(
+    pub fn get_reset_telemetry(
         &self,
         telem_type: reset_telemetry::Type,
     ) -> EpsResult<reset_telemetry::Data> {
@@ -114,23 +100,23 @@ impl Subsystem for RealSubsystem {
             .into())
     }
 
-    fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
+    pub fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
         Ok(self.eps.lock().unwrap().get_comms_watchdog_period()?)
     }
 
-    fn get_version(&self) -> EpsResult<version::Data> {
+    pub fn get_version(&self) -> EpsResult<version::Data> {
         Ok(self.eps.lock().unwrap().get_version_info()?.into())
     }
 
-    fn get_board_status(&self) -> EpsResult<board_status::Data> {
+    pub fn get_board_status(&self) -> EpsResult<board_status::Data> {
         Ok(self.eps.lock().unwrap().get_board_status()?.into())
     }
 
-    fn get_last_eps_error(&self) -> EpsResult<last_error::Data> {
+    pub fn get_last_eps_error(&self) -> EpsResult<last_error::Data> {
         Ok(self.eps.lock().unwrap().get_last_error()?.into())
     }
 
-    fn manual_reset(&self) -> EpsResult<MutationResponse> {
+    pub fn manual_reset(&self) -> EpsResult<MutationResponse> {
         match self.eps.lock().unwrap().manual_reset() {
             Ok(_v) => Ok(MutationResponse {
                 success: true,
@@ -140,7 +126,7 @@ impl Subsystem for RealSubsystem {
         }
     }
 
-    fn reset_watchdog(&self) -> EpsResult<MutationResponse> {
+    pub fn reset_watchdog(&self) -> EpsResult<MutationResponse> {
         match self.eps.lock().unwrap().reset_comms_watchdog() {
             Ok(_v) => Ok(MutationResponse {
                 success: true,
@@ -150,7 +136,7 @@ impl Subsystem for RealSubsystem {
         }
     }
 
-    fn set_watchdog_period(&self, period: u8) -> EpsResult<MutationResponse> {
+    pub fn set_watchdog_period(&self, period: u8) -> EpsResult<MutationResponse> {
         match self.eps.lock().unwrap().set_comms_watchdog_period(period) {
             Ok(_v) => Ok(MutationResponse {
                 success: true,
@@ -160,7 +146,7 @@ impl Subsystem for RealSubsystem {
         }
     }
 
-    fn raw_command(&self, command: u8, data: Vec<u8>) -> EpsResult<MutationResponse> {
+    pub fn raw_command(&self, command: u8, data: Vec<u8>) -> EpsResult<MutationResponse> {
         match self.eps.lock().unwrap().raw_command(command, data) {
             Ok(_v) => Ok(MutationResponse {
                 success: true,
@@ -170,15 +156,15 @@ impl Subsystem for RealSubsystem {
         }
     }
 
-    fn get_last_mutation(&self) -> Mutations {
+    pub fn get_last_mutation(&self) -> Mutations {
         Mutations::None
     }
 
-    fn set_last_mutation(&self, _mutation: Mutations) {
+    pub fn set_last_mutation(&self, _mutation: Mutations) {
         ()
     }
 
-    fn get_errors(&self) -> EpsResult<Vec<String>> {
+    pub fn get_errors(&self) -> EpsResult<Vec<String>> {
         match self.errors.try_borrow_mut() {
             Ok(mut master_vec) => {
                 let current = master_vec.clone();
