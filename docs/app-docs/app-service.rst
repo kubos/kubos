@@ -101,13 +101,11 @@ For example::
 Registering
 -----------
 
-.. todo::
+Once an application has been written and compiled, and its corresponding manifest file has been created,
+it can be transferred to the OBC using the :doc:`file transfer service <../services/file>`.
 
-    TODO: How to transfer app to stack. Can probably link to some other doc
-
-Once the application has been transfered to the OBC, users can register it with the applications service using
-the ``register`` mutation by specifying the directory containing the application binary and its corresponding
-:ref:`manifest file <app-manifest>`.
+It can then be registereed with the applications service using the ``register`` mutation by specifying
+the directory containing the application binary and its corresponding :ref:`manifest file <app-manifest>`.
 
 The service will copy the application from the specified path into the apps registry.
 Once registered, users may delete the original application.
@@ -129,6 +127,38 @@ If the registration fails for some reason, then the service will return an error
 
 De-Registering
 --------------
+
+A particular version of an application can be removed using the ``uninstall`` mutation.
+
+The mutation returns a single boolean value to indicate success or failure.
+
+For example::
+
+    mutation {
+        uninstall(uuid: 46d01f19-ab45-4c6f-896e-88f90266f12e, version: 1.1)
+    }
+    
+    
+.. _start-app:
+    
+Starting an Application
+-----------------------
+
+To manually start an application, the ``startApp`` mutation can be used.
+
+The mutation takes two arguments: the UUID of the application to start and the run level which the
+app should execute with.
+
+On success, the mutation will return the PID of the running application.
+
+For example::
+
+    mutation {
+        startApp(uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a, runLevel: OnCommand)
+    }
+    
+Under the covers, the service receives the mutation and identifies the current active version of the
+application specified. It then calls that version's binary, passing along the run level as a system envar.
 
 .. todo::
 
@@ -158,7 +188,7 @@ De-Registering
     
     Is not a thing that actually exists yet...
     
-    TODO: Is it possible to do manual rollback?
+    TODO: Automatic and manual rollback
 
 Customizing the Applications Service
 ------------------------------------

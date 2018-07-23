@@ -46,7 +46,7 @@ In this case, each of the run level options should simply call the common logic 
 On Command
 ~~~~~~~~~~
 
-The ``OnCommand`` run level defines logic which should be executed when the application is started manually.
+The ``OnCommand`` run level defines logic which should be executed when the :ref:`application is started manually <start-app>`.
 
 For example, a user might want a custom batch of telemetry to be gathered and returned occassionally.
 Rather than sending individual telemetry requests, they could code their application to take care of the work,
@@ -56,6 +56,8 @@ On Boot
 ~~~~~~~
 
 The ``OnBoot`` run level defines logic which should be executed each time the system is started.
+
+.. note:: The OnBoot logic has not been fully implemented, so an application using this run level must still be :ref:`started manually <start-app>`. 
 
 This run level is frequently used for setting up continuous fetching and processing of data from the other system services and hardware.
 For instance, an application might be set up to fetch the current time from a GPS device and then pass that information through to the ADCS device.
@@ -67,10 +69,11 @@ For instance, an application might be set up to fetch the current time from a GP
     
     The ``on-deploy`` run level defines the deployment logic for the system.
     
-    This is a special level which will be run when the system is started if and only if this is the first time deployment has been attempted.
+    This is a special level which will be run when the system is started if deployment has not completed successfully yet.
     
-    TODO: Is it the first time deployment is attempted, or is it if deployment has not yet completed successfully? Also how do we keep track of that? Is it built into the API?
-    Need waaaay more details on this, since it's crazy mission critical.
+    Two U-Boot variables help keep track of this: `deployed` - boolean indicating whether deployment has been completed or not,
+    and `deploy_start` - a timestamp that's generated the first time deployment is started. This is used to keep track of the
+    delay required between initial launch and when deployment is allowed to begin.
 
 .. _app-manifest:
 
@@ -83,11 +86,7 @@ This file should contain the application name, version number, and author inform
 
 For Rust, this is the `Cargo.toml` file which is automatically generated when you create a new project.
 
-.. todo::
-
-    For Python... we need to do some stuff...
-
-    TODO: What should users name the file? What fields are allowed and/or must be present?
+.. note:: The manifest file structure for Python projects has not been defined yet
     
 .. todo::
 
