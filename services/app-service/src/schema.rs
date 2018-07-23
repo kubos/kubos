@@ -135,10 +135,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         let registry = executor.context().subsystem();
         match registry.register(&path) {
             Ok(entry) => Ok(KAppRegistryEntry(entry)),
-            Err(e) => {
-                println!("Register error: {}", e);
-                Err(FieldError::new(e, juniper::Value::null()))
-            }
+            Err(e) => Err(FieldError::new(e, juniper::Value::null()))
         }
     }
 

@@ -138,7 +138,6 @@
 //! }
 //! ```
 extern crate diesel;
-
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;

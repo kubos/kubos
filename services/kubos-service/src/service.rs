@@ -137,7 +137,8 @@ where
     /// # Panics
     ///
     /// The UDP interface will panic if the ip address and port provided
-    /// cannot be bound (like if they are already in use).
+    /// cannot be bound (like if they are already in use), or if for some reason the socket fails
+    /// to receive a message.
     pub fn start(&self) {
         let addr = self.config.hosturl().parse::<SocketAddr>().unwrap();
 
@@ -147,7 +148,7 @@ where
         let mut buf = [0; 4096];
         loop {
             // Wait for an incoming message
-            let (size, peer) = socket.recv_from(&mut buf).expect("failed to peek");
+            let (size, peer) = socket.recv_from(&mut buf).expect("Failed to receive a message");
             if let Ok(query_string) = String::from_utf8(buf[0..(size)].to_vec()) {
                 println!(
                     "[{}] <- [{}] {}",

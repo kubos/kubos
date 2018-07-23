@@ -274,6 +274,11 @@ impl AppRegistry {
             return Err(format!("{} does not exist", path));
         }
 
+        let app_filename = match app_path.file_name() {
+            Some(filename) => filename,
+            None => return Err(String::from("Couldn't get app filename")),
+        };
+
         let result = Command::new(path).args(&["--metadata"]).output();
         if result.is_err() {
             return Err(format!(
@@ -290,21 +295,20 @@ impl AppRegistry {
         let metadata: AppMetadata = toml::from_slice(app_metadata.stdout.as_slice()).unwrap();
 
         let mut entries = self.entries.borrow_mut();
-        let mut app_uuid: Uuid = Uuid::new_v4();
+        let mut app_uuid = Uuid::new_v4().hyphenated().to_string();
         for entry in entries.iter_mut() {
             if entry.active_version && entry.app.metadata.name == metadata.name {
                 entry.active_version = false;
-                app_uuid = Uuid::parse_str(&entry.app.uuid).unwrap();
+                app_uuid = entry.app.uuid.clone();
                 entry.save()?;
                 break;
             }
         }
 
-        let app_uuid_str = app_uuid.hyphenated().to_string();
         let app_dir_str = format!(
             "{}/{}/{}",
             self.apps_dir,
-            app_uuid_str,
+            app_uuid,
             metadata.version.as_str()
         );
         let app_dir = Path::new(&app_dir_str);
@@ -322,62 +326,53 @@ impl AppRegistry {
             }
         }
 
-        match app_path.file_name() {
-            Some(app_filename) => {
-                match fs::copy(path, app_dir.join(Path::new(app_filename))) {
-                    Err(err) => {
-                        return Err(format!("Couldn't copy app binary: {:?}", err));
-                    }
-                    Ok(_) => {}
-                }
-
-                let active_symlink =
-                    PathBuf::from(format!("{}/active/{}", self.apps_dir, app_uuid_str));
-                if active_symlink.exists() {
-                    match fs::remove_file(active_symlink.clone()) {
-                        Err(err) => {
-                            return Err(format!(
-                                "Couldn't remove symlink {}: {:?}",
-                                active_symlink.display(),
-                                err
-                            ));
-                        }
-                        Ok(_) => {}
-                    }
-                }
-
-                match unix::fs::symlink(&app_dir_str, active_symlink.clone()) {
-                    Err(err) => {
-                        return Err(format!(
-                            "Couldn't symlink {} to {}: {:?}",
-                            active_symlink.display(),
-                            app_dir_str,
-                            err
-                        ));
-                    }
-                    Ok(_) => {}
-                }
-
-                let reg_entry = AppRegistryEntry {
-                    app: App {
-                        uuid: app_uuid_str.to_string(),
-                        metadata: metadata,
-                        pid: 0,
-                        path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy())
-                            .to_owned(),
-                    },
-                    active_version: true,
-                    run_level: RunLevel::OnCommand,
-                };
-
-                entries.push(reg_entry);
-                entries[entries.len() - 1].save()?;
-                Ok(entries[entries.len() - 1].clone())
+        match fs::copy(path, app_dir.join(Path::new(app_filename))) {
+            Err(err) => {
+                return Err(format!("Couldn't copy app binary: {:?}", err));
             }
-            None => {
-                return Err(String::from("Couldn't get app filename"));
+            Ok(_) => {}
+        }
+
+        let active_symlink = PathBuf::from(format!("{}/active/{}", self.apps_dir, app_uuid));
+        if active_symlink.exists() {
+            match fs::remove_file(active_symlink.clone()) {
+                Err(err) => {
+                    return Err(format!(
+                        "Couldn't remove symlink {}: {:?}",
+                        active_symlink.display(),
+                        err
+                    ));
+                }
+                Ok(_) => {}
             }
         }
+
+        match unix::fs::symlink(&app_dir_str, active_symlink.clone()) {
+            Err(err) => {
+                return Err(format!(
+                    "Couldn't symlink {} to {}: {:?}",
+                    active_symlink.display(),
+                    app_dir_str,
+                    err
+                ));
+            }
+            Ok(_) => {}
+        }
+
+        let reg_entry = AppRegistryEntry {
+            app: App {
+                uuid: app_uuid,
+                metadata: metadata,
+                pid: 0,
+                path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy()).to_owned(),
+            },
+            active_version: true,
+            run_level: RunLevel::OnCommand,
+        };
+
+        entries.push(reg_entry);
+        entries[entries.len() - 1].save()?;
+        Ok(entries[entries.len() - 1].clone())
     }
 
     /// Uninstall an application from the AppRegistry
@@ -457,12 +452,13 @@ impl AppRegistry {
             return Err(format!("{} does not exist", &app.path));
         }
 
-        let child = Command::new(app_path)
+        match Command::new(app_path)
             .env("KUBOS_APP_UUID", app.uuid.clone())
             .env("KUBOS_APP_RUN_LEVEL", format!("{}", run_level))
             .spawn()
-            .expect("Failed to spawn app");
-
-        Ok(child.id())
+        {
+            Ok(child) => Ok(child.id()),
+            Err(err) => Err(format!("Failed to spawn app: {:?}", err)),
+        }
     }
 }
