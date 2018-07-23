@@ -21,13 +21,15 @@ use std::fs;
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 
+use kubos_system::UBootVars;
+
 const DUMMY_PRINTENV: &'static str = r#"#!/bin/bash
 VAR="$2"
 [[ -n "${!VAR+set}" ]] || exit 1
 echo ${!VAR}
 "#;
 
-fn setup_dummy_printenv() -> String {
+fn setup_dummy_vars() -> UBootVars {
     let mut bin_dest = env::temp_dir();
     bin_dest.push("dummy-printenv");
 
@@ -41,54 +43,46 @@ fn setup_dummy_printenv() -> String {
         .expect("Failed to change file permissions");
 
     let bin_str = bin_dest.to_str().unwrap();
-    env::set_var("KUBOS_PRINTENV", bin_str);
-
-    String::from(bin_str)
+    UBootVars::new_from_path(bin_str)
 }
 
 #[test]
 fn u32_vars() {
-    setup_dummy_printenv();
+    let vars = setup_dummy_vars();
 
-    env::set_var(kubos_system::VAR_BOOT_COUNT, "123");
-    assert_eq!(kubos_system::boot_count(), Some(123));
+    env::set_var("count", "123");
+    assert_eq!(vars.get_u32("count"), Some(123));
 
-    env::set_var(kubos_system::VAR_BOOT_COUNT, "");
-    assert_eq!(kubos_system::boot_count(), None);
+    env::set_var("count", "");
+    assert_eq!(vars.get_u32("count"), None);
 
     // should be undefined so far..
-    assert_eq!(kubos_system::boot_limit(), None);
+    assert_eq!(vars.get_u32("limit"), None);
 
-    env::set_var(kubos_system::VAR_BOOT_LIMIT, "abc");
-    assert_eq!(kubos_system::boot_limit(), None);
+    env::set_var("limit", "abc");
+    assert_eq!(vars.get_u32("limit"), None);
 }
 
 #[test]
 fn bool_vars() {
-    setup_dummy_printenv();
+    let vars = setup_dummy_vars();
+    assert_eq!(vars.get_bool("abcdefg"), None);
 
-    assert_eq!(kubos_system::kubos_initial_deploy(), None);
+    env::set_var("abcdefg", "0");
+    assert_eq!(vars.get_bool("abcdefg"), Some(false));
 
-    env::set_var(kubos_system::VAR_KUBOS_INITIAL_DEPLOY, "0");
-
-    assert_eq!(kubos_system::kubos_initial_deploy(), Some(false));
-
-    env::set_var(kubos_system::VAR_KUBOS_INITIAL_DEPLOY, "1");
-    assert_eq!(kubos_system::kubos_initial_deploy(), Some(true));
+    env::set_var("abcdefg", "1");
+    assert_eq!(vars.get_bool("abcdefg"), Some(true));
 }
 
 #[test]
 fn str_vars() {
-    setup_dummy_printenv();
+    let vars = setup_dummy_vars();
+    assert_eq!(vars.get_str("currv"), None);
 
-    assert_eq!(kubos_system::kubos_curr_version(), None);
+    env::set_var("currv", "1.23");
+    assert_eq!(vars.get_str("currv"), Some(String::from("1.23")));
 
-    env::set_var(kubos_system::VAR_KUBOS_CURR_VERSION, "1.23");
-    assert_eq!(
-        kubos_system::kubos_curr_version(),
-        Some(String::from("1.23"))
-    );
-
-    env::set_var(kubos_system::VAR_KUBOS_CURR_VERSION, "");
-    assert_eq!(kubos_system::kubos_curr_version(), Some(String::from("")));
+    env::set_var("currv", "");
+    assert_eq!(vars.get_str("currv"), Some(String::from("")));
 }

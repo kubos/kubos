@@ -29,6 +29,7 @@ pub static DEFAULT_IP: &str = "127.0.0.1";
 pub const DEFAULT_PORT: u16 = 8080;
 
 #[derive(Debug, Deserialize)]
+/// A simple address consisting of an IP address and port number
 pub struct Address {
     ip: Option<String>,
     port: Option<u16>,
@@ -44,6 +45,7 @@ impl Default for Address {
 }
 
 impl Address {
+    /// Returns the IP portion of this address, or "127.0.0.1" if one was not provided.
     pub fn ip(&self) -> &str {
         match self.ip.as_ref() {
             Some(ref ip) => ip,
@@ -51,6 +53,7 @@ impl Address {
         }
     }
 
+    /// Returns the port of this address, or 8080 if one was not provided.
     pub fn port(&self) -> u16 {
         self.port.unwrap_or(DEFAULT_PORT)
     }
@@ -71,7 +74,7 @@ impl Address {
 /// port = 8181
 /// ```
 ///
-/// When `addr`, `addr.ip`, or `addr.port` are not provided in the config file, the default IP 
+/// When `addr`, `addr.ip`, or `addr.port` are not provided in the config file, the default IP
 /// `"127.0.0.1"` and default port `8080` are used instead.
 #[derive(Debug)]
 pub struct Config {
