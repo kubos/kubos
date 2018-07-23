@@ -1,6 +1,18 @@
 Kubos Changelog
 ===============
 
+v1.4.0 - July 23 2018
+---------------------
+
+- `Added UDP/GraphQL service for ISIS Antenna Systems <https://github.com/kubos/kubos/tree/master/services/isis-ants-service>`__
+- `Updated Pumpkin MCU service to be compliant with the latest ICD <https://github.com/kubos/kubos/tree/master/services/pumpkin-mcu-service>`__
+- `Added initial version of the mission applications service <https://github.com/kubos/kubos/tree/master/services/app-service>`__
+- `Added initial mission applications Rust API <https://github.com/kubos/kubos/tree/master/apis/app-api>`__
+- `Added initial mission applications Python API <https://github.com/kubos/kubos/tree/master/apis/python-app-api>`__
+- `Added system Rust API for system-wide common functionality <https://github.com/kubos/kubos/tree/master/apis/system-api>`__
+- `Upgraded CircleCI automation config to use the 2.0 configuration format <https://github.com/kubos/kubos/blob/master/.circleci/config.yml>`__
+- Updated docs to reflect changes in how auxiliary SD images are generated
+
 v1.3.0 - Jun 21 2018
 --------------------
 
