@@ -21,6 +21,7 @@ use std::mem::transmute;
 /// I<sup>2</sup>C bus which will be used for communication
 ///
 /// *Note: Not all OBCs will have all of these buses avaialable*
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum KI2CNum {
     /// I<sup>2</sup>C Bus 1
     KI2C1,
@@ -33,6 +34,7 @@ pub enum KI2CNum {
 /// Specific antenna to control
 ///
 /// *Note: Not all antenna systems have four antennas*
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum KANTSAnt {
     /// Antenna 1
     Ant1,
@@ -45,6 +47,7 @@ pub enum KANTSAnt {
 }
 
 /// Antenna microcontroller which any commands should be run against
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum KANTSController {
     /// Primary microcontroller
     Primary,
@@ -55,6 +58,7 @@ pub enum KANTSController {
 /// System telemetry fields returned from [`get_system_telemetry`]
 ///
 /// [`get_system_telemetry`]: struct.AntS.html#method.get_system_telemetry
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct AntsTelemetry {
     /// Current system temperature (raw value)
     pub raw_temp: u16,
@@ -67,6 +71,7 @@ pub struct AntsTelemetry {
 /// Current deployment status returned from [`get_deploy`]
 ///
 /// [`get_deploy`]: struct.AntS.html#method.get_deploy
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct DeployStatus {
     /// Whether antenna system independent burn is active
     pub sys_burn_active: bool,
@@ -172,11 +177,12 @@ impl DeployStatus {
     }
 }
 
-pub fn convert_bus(bus: KI2CNum) -> ffi::KI2CNum {
+pub fn convert_bus(bus: &str) -> ffi::KI2CNum {
     match bus {
-        self::KI2CNum::KI2C1 => ffi::KI2CNum::KI2C1,
-        self::KI2CNum::KI2C2 => ffi::KI2CNum::KI2C2,
-        self::KI2CNum::KI2C3 => ffi::KI2CNum::KI2C3,
+        "KI2C1" => ffi::KI2CNum::KI2C1,
+        "KI2C2" => ffi::KI2CNum::KI2C2,
+        "KI2C3" => ffi::KI2CNum::KI2C3,
+        _ => ffi::KI2CNum::KI2CNoBus,
     }
 }
 
