@@ -23,7 +23,7 @@ use std::panic;
 use std::time::Duration;
 
 mod utils;
-use utils::*;
+pub use utils::*;
 
 #[test]
 fn uninstall_app() {

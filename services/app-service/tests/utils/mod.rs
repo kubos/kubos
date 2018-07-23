@@ -34,7 +34,6 @@ pub struct MockAppBuilder {
     _run_level: Option<String>,
 }
 
-#[allow(dead_code)]
 impl MockAppBuilder {
     pub fn new(name: &str, uuid: &str) -> Self {
         Self {
@@ -95,7 +94,7 @@ impl MockAppBuilder {
             active = self._active.unwrap_or(true),
             run_level = self._run_level.as_ref().unwrap_or(&String::from("OnBoot")),
             version = self._version.as_ref().unwrap_or(&String::from("0.0.1")),
-            author = self._author.as_ref().unwrap_or(&String::from("user")),
+            author = self._author.as_ref().unwrap_or(&String::from("unknown")),
             bin = self._bin.as_ref().unwrap_or(&self._name),
         )
     }

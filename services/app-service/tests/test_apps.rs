@@ -25,12 +25,14 @@ use std::path::Path;
 use std::time::Duration;
 
 mod utils;
-use utils::*;
+pub use utils::*;
 
 fn setup_apps(registry_dir: &Path) {
     MockAppBuilder::new("app1", "a-b-c-d-e")
         .version("0.0.1")
         .active(false)
+        .run_level("OnCommand")
+        .author("mham")
         .install(&registry_dir);
     MockAppBuilder::new("app1", "a-b-c-d-e")
         .version("0.0.2")
@@ -51,6 +53,8 @@ fn setup_apps(registry_dir: &Path) {
     MockAppBuilder::new("app4", "1-2-3-4-5")
         .version("1.0.0")
         .active(true)
+        .run_level("OnBoot")
+        .author("user")
         .install(&registry_dir);
 }
 
@@ -97,32 +101,32 @@ macro_rules! test_query {
 
 test_query!(
     all_apps,
-    "{ apps { app { uuid, name, version } } }",
+    "{ apps { active, runLevel, app { uuid, name, version, author } } }",
     |apps| {
         assert_eq!(apps.len(), 6);
         assert_eq!(
             apps[0],
-            json!({"app": {"uuid": "1-2-3-4-5", "name": "app4", "version": "1.0.0"}})
+            json!({"active": true, "runLevel": "OnBoot", "app": {"uuid": "1-2-3-4-5", "name": "app4", "version": "1.0.0", "author": "user"}})
         );
         assert_eq!(
             apps[1],
-            json!({"app": {"uuid": "a-b-c-d-e", "name": "app1", "version": "0.0.1"}})
+            json!({"active": false, "runLevel": "OnCommand", "app": {"uuid": "a-b-c-d-e", "name": "app1", "version": "0.0.1", "author": "mham"}})
         );
         assert_eq!(
             apps[2],
-            json!({"app": {"uuid": "a-b-c-d-e", "name": "app1", "version": "0.0.2"}})
+            json!({"active": false, "runLevel": "OnBoot", "app": {"uuid": "a-b-c-d-e", "name": "app1", "version": "0.0.2", "author": "unknown"}})
         );
         assert_eq!(
             apps[3],
-            json!({"app": {"uuid": "a-b-c-d-e", "name": "app3", "version": "0.0.3"}})
+            json!({"active": true, "runLevel": "OnBoot", "app": {"uuid": "a-b-c-d-e", "name": "app3", "version": "0.0.3", "author": "unknown"}})
         );
         assert_eq!(
             apps[4],
-            json!({"app": {"uuid": "f-g-h-i-j", "name": "app2", "version": "1.0.0"}})
+            json!({"active": false, "runLevel": "OnBoot", "app": {"uuid": "f-g-h-i-j", "name": "app2", "version": "1.0.0", "author": "unknown"}})
         );
         assert_eq!(
             apps[5],
-            json!({"app": {"uuid": "f-g-h-i-j", "name": "app2", "version": "1.0.1"}})
+            json!({"active": true, "runLevel": "OnBoot", "app": {"uuid": "f-g-h-i-j", "name": "app2", "version": "1.0.1", "author": "unknown"}})
         );
     }
 );

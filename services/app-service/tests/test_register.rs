@@ -24,7 +24,7 @@ use std::time::Duration;
 use std::{env, panic};
 
 mod utils;
-use utils::*;
+pub use utils::*;
 
 #[test]
 fn register_app() {
