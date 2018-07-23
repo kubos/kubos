@@ -40,7 +40,7 @@ They govern state management, accomplish scripted tasks, monitor onboard behavio
 Each application is typically dedicated to a certain mode or isolated task the satellite is supposed to accomplish to keep them lightweight and portable.
 They can be simple, such as a telemetry beacon app, or complex, such as a payload operations app.
 
-- :doc:`Mission Applications <what-is-a-mission-application>`
+- :doc:`Mission Applications <app-docs/index>`
 
 
 Typical Mission Architecture
@@ -107,7 +107,7 @@ These are, by nature, mission specific, but some of them can be largely reused d
 These are typically written or adapted by the user and are the backbone of the operation of the satellite.
 It is highly recommended to read more in depth on them to truly understand KubOS.
 
- - :doc:`Mission Applications <what-is-a-mission-application>`
+ - :doc:`Mission Applications <app-docs/index>`
 
 Communication and KubOS
 -----------------------
