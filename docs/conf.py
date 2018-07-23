@@ -19,6 +19,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../apis/pumpkin-mcu-api'))
+sys.path.insert(0, os.path.abspath('../apis/python-app-api'))
 sys.path.insert(0, os.path.abspath('../hal/python-hal/i2c'))
 
 import sphinx_rtd_theme

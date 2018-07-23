@@ -1,4 +1,4 @@
-# kubos/kubos-dev:0.1.7
+# kubos/kubos-dev:0.1.8
 
 FROM phusion/baseimage:0.9.22
 
@@ -28,11 +28,11 @@ RUN echo "Installing Kubos Linux Toolchain"
 RUN apt-get install -y minicom
 RUN apt-get install -y libc6-i386 lib32stdc++6 lib32z1
 
-RUN wget https://s3.amazonaws.com/kubos-provisioning/iobc_toolchain.tar.gz
+RUN wget https://s3.amazonaws.com/provisioning-kubos/iobc_toolchain.tar.gz
 RUN tar -xf ./iobc_toolchain.tar.gz -C /usr/bin
 RUN rm ./iobc_toolchain.tar.gz
 
-RUN wget https://s3.amazonaws.com/kubos-provisioning/bbb_toolchain.tar.gz
+RUN wget https://s3.amazonaws.com/provisioning-kubos/bbb_toolchain.tar.gz
 RUN tar -xf ./bbb_toolchain.tar.gz -C /usr/bin
 RUN rm ./bbb_toolchain.tar.gz
 

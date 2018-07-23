@@ -1,0 +1,8 @@
+[package]
+name = "kubos-telemetry-db"
+version = "0.1.0"
+authors = ["Marshall Culpepper <marshall@kubos.com>"]
+
+[dependencies]
+diesel = { version = "1.0.0", features = ["sqlite"] }
+time = "0.1"

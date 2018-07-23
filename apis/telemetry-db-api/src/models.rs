@@ -14,10 +14,21 @@
 // limitations under the License.
 //
 
+use super::telemetry;
+
 #[derive(Debug, Queryable)]
 pub struct Entry {
     pub timestamp: i32,
     pub subsystem: String,
     pub parameter: String,
     pub value: String,
+}
+
+#[derive(Insertable)]
+#[table_name = "telemetry"]
+pub struct NewEntry<'a> {
+    pub timestamp: i32,
+    pub subsystem: &'a str,
+    pub parameter: &'a str,
+    pub value: &'a str,
 }

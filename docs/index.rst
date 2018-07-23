@@ -24,7 +24,7 @@ Getting set up with KubOS for the first time? Check out our SDK and try your own
 Trying to integrate a payload or create your mission code? Check out our mission-specific code documentation: 
 
  - :doc:`Payload Services <services/payload-services>`
- - :doc:`Mission Applications <what-is-a-mission-application>`
+ - :doc:`Mission Applications <app-docs/index>`
 
 Having issues? Want a new feature? Just want to say hello? `Come talk to us! <https://slack.kubos.co/>`__
 
@@ -52,7 +52,7 @@ Boards Currently Supported by Kubos
     First Time Users <first-time-users>
     Installation Docs <installation-docs/index>
     Kubos SDK <sdk-docs/index>
-    Kubos Mission Applications <what-is-a-mission-application>
+    Kubos Mission Applications <app-docs/index>
     Kubos Services <services/index>
     Kubos APIs <apis/index>
     Kubos Linux <os-docs/index>
