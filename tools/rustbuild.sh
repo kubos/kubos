@@ -8,4 +8,4 @@
 cargo kubos -c check
 
 # Run all unit tests
-cargo kubos -c test
+RUST_BACKTRACE=1 cargo kubos -c test -- -- --test-threads=1
