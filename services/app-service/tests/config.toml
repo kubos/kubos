@@ -1,0 +1,6 @@
+[app-service]
+registry-dir = "/tmp/apps"
+
+[app-service.addr]
+ip = "0.0.0.0"
+port = 9999

@@ -13,8 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+#[macro_use]
+extern crate diesel;
+extern crate time;
+
+pub mod models;
+pub use models::*;
 
 use diesel::dsl::sql;
+use diesel::insert_into;
 use diesel::prelude::*;
 use diesel::sql_query;
 use diesel::sql_types::Bool;
@@ -60,7 +67,7 @@ impl Database {
              AND name = 'telemetry')",
         )).get_result::<bool>(&self.connection)
         {
-            Err(_) => panic!("Error querying table"),
+            Err(err) => panic!("Error querying table: {:?}", err),
             Ok(true) => println!("Table exists"),
             Ok(false) => {
                 println!("Telemetry table not found. Creating table.");
@@ -74,10 +81,41 @@ impl Database {
                 ).execute(&self.connection)
                 {
                     Ok(_) => println!("Telemetry table created"),
-                    _ => panic!("Error creating table"),
+                    Err(err) => panic!("Error creating table: {:?}", err),
                 }
             }
         };
+    }
+
+    pub fn insert<'a>(
+        &self,
+        timestamp: i32,
+        subsystem: &'a str,
+        parameter: &'a str,
+        value: &'a str,
+    ) -> QueryResult<usize> {
+        use self::telemetry;
+
+        let new_entry = NewEntry {
+            timestamp: timestamp,
+            subsystem: subsystem,
+            parameter: parameter,
+            value: value,
+        };
+
+        insert_into(telemetry::table)
+            .values(&new_entry)
+            .execute(&self.connection)
+    }
+
+    pub fn insert_systime<'a>(
+        &self,
+        subsystem: &'a str,
+        parameter: &'a str,
+        value: &'a str,
+    ) -> QueryResult<usize> {
+        let timestamp = time::now_utc().to_timespec().sec;
+        self.insert(timestamp as i32, subsystem, parameter, value)
     }
 }
 

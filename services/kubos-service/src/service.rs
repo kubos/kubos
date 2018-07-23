@@ -14,16 +14,12 @@
 // limitations under the License.
 //
 
-use config::Config;
 use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
+use kubos_system::Config;
 use serde_json;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::net::{SocketAddr, UdpSocket};
-use std::os::unix::io::AsRawFd;
-
-const FIONREAD: u16 = 0x541B;
-ioctl!(bad read udp_bytes_available with FIONREAD; usize);
 
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.
@@ -141,34 +137,33 @@ where
     /// # Panics
     ///
     /// The UDP interface will panic if the ip address and port provided
-    /// cannot be bound (like if they are already in use).
+    /// cannot be bound (like if they are already in use), or if for some reason the socket fails
+    /// to receive a message.
     pub fn start(&self) {
         let addr = self.config.hosturl().parse::<SocketAddr>().unwrap();
 
         let socket = UdpSocket::bind(&addr).unwrap();
         println!("Listening on: {}", socket.local_addr().unwrap());
 
+        let mut buf = [0; 4096];
         loop {
             // Wait for an incoming message
-            let mut buf: [u8; 1] = [0];
-            socket.peek_from(&mut buf).unwrap();
+            let (size, peer) = socket.recv_from(&mut buf).expect("Failed to receive a message");
+            if let Ok(query_string) = String::from_utf8(buf[0..(size)].to_vec()) {
+                //println!(
+                //  "[{}] <- [{}] {}",
+                //  peer,
+                //  socket.local_addr().unwrap(),
+                //  &query_string
+                //);
 
-            // Get the message size
-            let mut len: usize = 0;
-            unsafe {
-                udp_bytes_available(socket.as_raw_fd(), &mut len).unwrap();
+                // Go process the request
+                let res = self.process(query_string);
+
+                // And then send the response back
+                let _amt = socket.send_to(&res.as_bytes(), &peer);
+                //println!("[{}] -> [{}] {}", socket.local_addr().unwrap(), peer, &res);
             }
-
-            // Read it into a correctly sized buffer
-            let mut buf = vec![0u8; len].into_boxed_slice();
-
-            // Go process the request
-            let (size, peer) = socket.recv_from(&mut buf).unwrap();
-            let query_string = String::from_utf8(buf[0..(size)].to_vec()).unwrap();
-            let res = self.process(query_string);
-
-            // And then send the response back
-            let _amt = socket.send_to(&res.as_bytes(), &peer);
         }
     }
 
