@@ -46,7 +46,6 @@ pub type RunLevel = registry::RunLevel;
 /// 2. Start on demand when being commanded (i.e. through the `start_app` GraphQL mutation)
 /// 3. When the app is shutting down, to clean up any resources initialized in on_boot or
 ///    on_command
-#[allow(unused_variables)]
 pub trait AppHandler {
     /// Called when the Application is started at system boot time
     fn on_boot(&self) {}

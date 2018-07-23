@@ -150,19 +150,19 @@ where
             // Wait for an incoming message
             let (size, peer) = socket.recv_from(&mut buf).expect("Failed to receive a message");
             if let Ok(query_string) = String::from_utf8(buf[0..(size)].to_vec()) {
-                println!(
-                    "[{}] <- [{}] {}",
-                    peer,
-                    socket.local_addr().unwrap(),
-                    &query_string
-                );
+                //println!(
+                //  "[{}] <- [{}] {}",
+                //  peer,
+                //  socket.local_addr().unwrap(),
+                //  &query_string
+                //);
 
                 // Go process the request
                 let res = self.process(query_string);
 
                 // And then send the response back
                 let _amt = socket.send_to(&res.as_bytes(), &peer);
-                println!("[{}] -> [{}] {}", socket.local_addr().unwrap(), peer, &res);
+                //println!("[{}] -> [{}] {}", socket.local_addr().unwrap(), peer, &res);
             }
         }
     }
