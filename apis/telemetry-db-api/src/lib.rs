@@ -17,8 +17,6 @@
 extern crate diesel;
 extern crate time;
 
-use std::time::SystemTime;
-
 pub mod models;
 pub use models::*;
 
@@ -69,7 +67,7 @@ impl Database {
              AND name = 'telemetry')",
         )).get_result::<bool>(&self.connection)
         {
-            Err(_) => panic!("Error querying table"),
+            Err(err) => panic!("Error querying table: {:?}", err),
             Ok(true) => println!("Table exists"),
             Ok(false) => {
                 println!("Telemetry table not found. Creating table.");

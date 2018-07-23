@@ -7,7 +7,7 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 diesel = { version = "1.0.0", features = ["sqlite"] }
 juniper =  "0.9.2"
 kubos-service = { path = "../kubos-service" }
-kubos-telemetry = { path = "../../apis/telemetry-api" }
+kubos-telemetry-db = { path = "../../apis/telemetry-db-api" }
 
 [dev-dependencies]
 serde_json = "1.0"

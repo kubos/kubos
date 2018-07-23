@@ -1,5 +1,5 @@
 [package]
-name = "kubos-telemetry"
+name = "kubos-telemetry-db"
 version = "0.1.0"
 authors = ["Marshall Culpepper <marshall@kubos.com>"]
 

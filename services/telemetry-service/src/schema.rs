@@ -17,11 +17,11 @@
 use diesel::prelude::*;
 use juniper::FieldResult;
 use kubos_service;
-use kubos_telemetry::{self, Database};
+use kubos_telemetry_db::{self, Database};
 
 type Context = kubos_service::Context<Database>;
 
-pub struct Entry(kubos_telemetry::Entry);
+pub struct Entry(kubos_telemetry_db::Entry);
 
 graphql_object!(Entry: () |&self| {
     description: "A telemetry entry"
@@ -56,8 +56,8 @@ graphql_object!(QueryRoot: Context |&self| {
     ) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
-        use kubos_telemetry::telemetry::dsl;
-        use kubos_telemetry::telemetry;
+        use kubos_telemetry_db::telemetry::dsl;
+        use kubos_telemetry_db::telemetry;
         use diesel::sqlite::SqliteConnection;
 
         let mut query = telemetry::table.into_boxed::<<SqliteConnection as Connection>::Backend>();
@@ -84,7 +84,7 @@ graphql_object!(QueryRoot: Context |&self| {
 
         query = query.order(dsl::timestamp);
 
-        let entries = query.load::<kubos_telemetry::Entry>(
+        let entries = query.load::<kubos_telemetry_db::Entry>(
             &executor.context().subsystem().connection)?;
         let mut g_entries: Vec<Entry> = Vec::new();
         for entry in entries {
