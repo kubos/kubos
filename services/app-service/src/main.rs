@@ -15,15 +15,21 @@
  */
 #![deny(warnings)]
 
+extern crate getopts;
 #[macro_use]
 extern crate juniper;
 extern crate kubos_app;
 extern crate kubos_service;
+#[macro_use]
+extern crate serde_derive;
+extern crate toml;
+extern crate uuid;
 
-use kubos_app::registry::AppRegistry;
-use kubos_service::{Config, Service};
-
+mod registry;
 mod schema;
+
+use registry::AppRegistry;
+use kubos_service::{Config, Service};
 
 fn main() {
     let config = Config::new("app-service");

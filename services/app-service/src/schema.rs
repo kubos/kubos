@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-extern crate juniper;
-extern crate kubos_service;
-
-use juniper::{FieldError, FieldResult};
-use kubos_app::registry::{self, AppRegistry, RunLevel};
+use juniper::{FieldError, FieldResult, Value};
+use registry::{self, AppRegistry};
+use kubos_app::RunLevel;
+use kubos_service;
 
 type Context = kubos_service::Context<AppRegistry>;
 
@@ -77,12 +76,6 @@ graphql_object!(KAppRegistryEntry: () as "AppRegistryEntry" |&self| {
     {
         Ok(self.0.active_version)
     }
-
-    field run_level() -> FieldResult<String>
-        as "Run Level"
-    {
-        Ok(String::from(format!("{}", self.0.run_level)))
-    }
 });
 
 ///
@@ -135,7 +128,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         let registry = executor.context().subsystem();
         match registry.register(&path) {
             Ok(entry) => Ok(KAppRegistryEntry(entry)),
-            Err(e) => Err(FieldError::new(e, juniper::Value::null()))
+            Err(e) => Err(FieldError::new(e, Value::null()))
         }
     }
 
@@ -146,7 +139,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             Ok(v) => Ok(v),
             Err(msg) => {
                 println!("{}", msg);
-                Err(FieldError::new(msg, juniper::Value::null()))
+                Err(FieldError::new(msg, Value::null()))
             }
         }
     }
@@ -163,7 +156,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
         match executor.context().subsystem().start_app(&uuid, run_level_o) {
             Ok(pid) => Ok(pid as i32),
-            Err(err) => Err(FieldError::new(err, juniper::Value::null()))
+            Err(err) => Err(FieldError::new(err, Value::null()))
         }
     }
 });

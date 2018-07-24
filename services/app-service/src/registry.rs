@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 use std::cell::RefCell;
-use std::fmt;
+//use std::fmt;
 use std::fs;
 use std::io::{Read, Write};
 use std::os::unix;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use kubos_app::RunLevel;
 
 use toml;
 use uuid::Uuid;
@@ -38,6 +39,7 @@ pub struct AppMetadata {
     pub author: String,
 }
 
+/*
 impl AppMetadata {
     /// Create a new AppMetadata object
     ///
@@ -55,6 +57,7 @@ impl AppMetadata {
         }
     }
 }
+*/
 
 /// Kubos App struct
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -74,8 +77,6 @@ pub struct App {
 pub struct AppRegistryEntry {
     /// Whether or not this application is the active installation
     pub active_version: bool,
-    /// The run level of the application
-    pub run_level: RunLevel,
     /// The app itself
     pub app: App,
 }
@@ -348,7 +349,6 @@ impl AppRegistry {
                 path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy()).to_owned(),
             },
             active_version: true,
-            run_level: RunLevel::OnCommand,
         };
 
         entries.push(reg_entry);
