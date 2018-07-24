@@ -56,25 +56,6 @@ impl AppMetadata {
     }
 }
 
-/// The different RunLevels supported by KubOS applications
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
-pub enum RunLevel {
-    /// An application will start at system boot time, and is managed automatically by the
-    /// Application Service
-    OnBoot,
-    /// An application will start when commanded through the `start_app` GraphQL mutation
-    OnCommand,
-}
-
-impl fmt::Display for RunLevel {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            RunLevel::OnBoot => write!(f, "OnBoot"),
-            RunLevel::OnCommand => write!(f, "OnCommand"),
-        }
-    }
-}
-
 /// Kubos App struct
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct App {

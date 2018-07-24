@@ -15,6 +15,7 @@ members = [
 "apis/telemetry-db-api",
 "examples/rust-c-service/extern-lib",
 "examples/rust-c-service/service",
+"examples/rust-mission-app",
 "examples/rust-service",
 "examples/udp-service-client",
 "hal/rust-hal/rust-i2c",
