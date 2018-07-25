@@ -45,7 +45,7 @@ fn query_error() {
             ping(fail: true)
         }"#;
 
-    let result = query("0.0.0.0:8765", request, Some(Duration::from_secs(1))).unwrap_err();
+    let result = query("0.0.0.0:8764", request, Some(Duration::from_secs(1))).unwrap_err();
 
     let result_str = format!("{}", result);
 
