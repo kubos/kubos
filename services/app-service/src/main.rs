@@ -35,8 +35,8 @@ mod schema;
 #[cfg(test)]
 mod tests;
 
-use registry::AppRegistry;
 use kubos_service::{Config, Service};
+use registry::AppRegistry;
 
 fn main() {
     let config = Config::new("app-service");

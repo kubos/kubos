@@ -15,12 +15,12 @@
  */
 use std::cell::RefCell;
 //use std::fmt;
+use kubos_app::RunLevel;
 use std::fs;
 use std::io::{Read, Write};
 use std::os::unix;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use kubos_app::RunLevel;
 
 use toml;
 use uuid::Uuid;

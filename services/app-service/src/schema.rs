@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 use juniper::{FieldError, FieldResult, Value};
-use registry::{self, AppRegistry};
 use kubos_app::RunLevel;
 use kubos_service;
+use registry::{self, AppRegistry};
 
 type Context = kubos_service::Context<AppRegistry>;
 

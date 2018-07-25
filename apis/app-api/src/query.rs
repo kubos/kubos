@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use std::net::UdpSocket;
-use std::time::Duration;
 use failure;
 use serde_json;
+use std::net::UdpSocket;
+use std::time::Duration;
 
 /// The result type used by `query`
 type AppResult<T> = Result<T, failure::Error>;
