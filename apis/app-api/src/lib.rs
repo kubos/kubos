@@ -37,4 +37,4 @@ mod query;
 mod tests;
 
 pub use framework::*;
-pub use query::*;
+pub use query::query;

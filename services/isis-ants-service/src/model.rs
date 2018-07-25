@@ -92,13 +92,16 @@ impl Subsystem {
         if deployed {
             // If all antennas are not-not-deployed, then the system is fully deployed
             status = DeploymentStatus::Deployed;
-        } else if deploy.ant_1_stopped_time || deploy.ant_2_stopped_time
-            || deploy.ant_3_stopped_time || deploy.ant_4_stopped_time
+        } else if deploy.ant_1_stopped_time
+            || deploy.ant_2_stopped_time
+            || deploy.ant_3_stopped_time
+            || deploy.ant_4_stopped_time
         {
             // If any antennas failed to deploy, mark the system as in an error state
             // Note: A successful deployment should clear this flag for an antenna
             status = DeploymentStatus::Error;
-        } else if !deploy.ant_1_not_deployed || !deploy.ant_2_not_deployed
+        } else if !deploy.ant_1_not_deployed
+            || !deploy.ant_2_not_deployed
             || (!deploy.ant_3_not_deployed && self.count > 2)
             || (!deploy.ant_4_not_deployed && self.count > 3)
         {
@@ -108,7 +111,8 @@ impl Subsystem {
             // a partial deployment is possible (without any errors) is if someone
             // manually deploys a single antenna
             status = DeploymentStatus::Partial
-        } else if deploy.ant_1_not_deployed && deploy.ant_2_not_deployed
+        } else if deploy.ant_1_not_deployed
+            && deploy.ant_2_not_deployed
             && (deploy.ant_3_not_deployed || self.count < 3)
             && (deploy.ant_4_not_deployed || self.count < 4)
         {

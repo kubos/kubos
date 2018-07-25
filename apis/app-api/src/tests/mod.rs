@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-use kubos_service::{Config, Service};
-
 mod mock_service;
-
-use self::mock_service::*;
-use query::query;
-use std::thread;
-use std::time::Duration;
 
 macro_rules! mock_service {
     ($addr:expr, $port:expr) => {{

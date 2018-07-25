@@ -33,6 +33,29 @@ type AppResult<T> = Result<T, failure::Error>;
 /// * `timeout` - The timeout provided to the UDP socket. Note: this function will block when `None`
 ///               is provided here
 ///
+/// # Examples
+///
+/// ```
+/// # extern crate failure;
+/// # extern crate kubos_app;
+/// # use failure;
+/// use kubos_app::query;
+/// use std::time::Duration;
+///
+/// # fn func() -> Result<(), failure::Error> {
+/// let request = r#"{
+/// 		ping
+/// 	}"#;
+///
+/// let result = query("0.0.0.0:1234", request, Some(Duration::from_secs(1)))?;
+///
+/// let data = result.get("ping").unwrap().as_str();
+///
+/// assert_eq!(data, Some("pong"));
+/// # Ok(())
+/// # }
+/// ```
+///
 pub fn query(
     host_addr: &str,
     query: &str,

@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+use super::mock_service::*;
+use std::thread;
+use std::time::Duration;
+use kubos_service::{Config, Service};
+use query::query;
+
 #[test]
 fn query_good() {
     mock_service!("0.0.0.0", 8765);
