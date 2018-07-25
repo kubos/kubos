@@ -93,14 +93,7 @@ pub trait AppHandler {
 macro_rules! app_main {
     ($handler:expr) => {{
 
-        let name: Option<&'static str> = option_env!("CARGO_PKG_NAME");
-        let version: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
-        let authors: Option<&'static str> = option_env!("CARGO_PKG_AUTHORS");
-
         kubos_app::app_start(
-            name.unwrap_or("Unknown"),
-            version.unwrap_or("Unknown"),
-            authors.unwrap_or("Unknown"),
             std::process::id(),
             $handler,
         )
@@ -109,16 +102,21 @@ macro_rules! app_main {
 
 /// The entry point for all KubOS applications. The preferred way to use this application
 /// is through the `app_main!` macro
-pub fn app_start(name: &str, version: &str, authors: &str, _pid: u32, handler: &AppHandler) {
+pub fn app_start(_pid: u32, handler: &AppHandler) {
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
 
     let mut opts = Options::new();
-    opts.optflag("m", "metadata", "Print app metadata and immediately exit");
+    opts.optflagopt(
+        "r",
+        "run",
+        "Run level which should be executed",
+        "RUN_LEVEL",
+    );
     opts.optflag("h", "help", "Print this help menu");
 
     let matches = match opts.parse(&args[1..]) {
-        Ok(m) => m,
+        Ok(r) => r,
         Err(f) => panic!(f.to_string()),
     };
 
@@ -128,21 +126,14 @@ pub fn app_start(name: &str, version: &str, authors: &str, _pid: u32, handler: &
         return;
     }
 
-    if matches.opt_present("m") {
-        println!("name = \"{}\"", name);
-        println!("version = \"{}\"", version);
-        println!("author = \"{}\"", authors);
-        return;
-    }
-
     let _uuid = env::var_os("KUBOS_APP_UUID");
-    let run_level = env::var_os("KUBOS_APP_RUN_LEVEL");
+    let run_level = matches.opt_str("r").unwrap_or("OnCommand".to_owned());
 
-    match run_level {
-        Some(ref level) if level == "OnBoot" => {
+    match run_level.as_ref() {
+        "OnBoot" => {
             handler.on_boot();
         }
-        Some(ref level) if level == "OnCommand" => {
+        "OnCommand" => {
             handler.on_command();
         }
         _ => {

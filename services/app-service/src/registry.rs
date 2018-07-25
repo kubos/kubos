@@ -235,25 +235,37 @@ impl AppRegistry {
             return Err(format!("{} does not exist", path));
         }
 
-        let app_filename = match app_path.file_name() {
-            Some(filename) => filename,
-            None => return Err(String::from("Couldn't get app filename")),
+        if !app_path.is_dir() {
+            return Err(format!("{} is not a directory", path));
+        }
+
+        let mut files = match fs::read_dir(app_path) {
+            Ok(v) => v.filter_map(|file| file.ok()),
+            Err(error) => return Err(format!("Failed to read directory: {}", error)),
         };
 
-        let result = Command::new(path).args(&["--metadata"]).output();
-        if result.is_err() {
-            return Err(format!(
-                "Failed to get app metadata: {}",
-                result.err().unwrap()
-            ));
+        match files.size_hint() {
+            (_, count) if count != Some(2) => {
+                return Err("Exactly two files should be present in the app directory".to_owned())
+            }
+            _ => {}
         }
 
-        let app_metadata = result.unwrap();
-        if !app_metadata.status.success() {
-            return Err("Bad exit code getting app metadata".to_string());
-        }
+        let manifest = match files.find(|file| file.file_name().to_str() == Some("manifest.toml")) {
+            Some(file) => file.path(),
+            _ => return Err("Failed to find manifest file".to_owned()),
+        };
 
-        let metadata: AppMetadata = toml::from_slice(app_metadata.stdout.as_slice()).unwrap();
+        let mut data = String::new();
+        fs::File::open(manifest)
+            .and_then(|mut fp| fp.read_to_string(&mut data))
+            .or_else(|error| return Err(format!("Failed to read manifest: {}", error)))?;
+
+        // Test code. Todo: remove
+        let app_filename = "myapp";
+
+        let metadata: AppMetadata = toml::from_str(&data)
+            .or_else(|error| return Err(format!("Failed to read manifest: {}", error)))?;
 
         let mut entries = self.entries.borrow_mut();
         let mut app_uuid = Uuid::new_v4().hyphenated().to_string();
@@ -325,7 +337,7 @@ impl AppRegistry {
                 uuid: app_uuid,
                 metadata: metadata,
                 pid: 0,
-                path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy()).to_owned(),
+                path: format!("{}/{}", app_dir_str, app_filename),
             },
             active_version: true,
         };
