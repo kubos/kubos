@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 use std::cell::RefCell;
-//use std::fmt;
 use kubos_app::RunLevel;
 use std::fs;
 use std::io::{Read, Write};
@@ -38,26 +37,6 @@ pub struct AppMetadata {
     /// The author of the application
     pub author: String,
 }
-
-/*
-impl AppMetadata {
-    /// Create a new AppMetadata object
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use kubos_app::registry::AppMetadata;
-    /// let metadata = AppMetadata::new("my-app", "1.0", "Jane Doe <jane@doe.com>");
-    /// ```
-    pub fn new(name: &str, version: &str, author: &str) -> AppMetadata {
-        AppMetadata {
-            name: name.to_string(),
-            version: version.to_string(),
-            author: author.to_string(),
-        }
-    }
-}
-*/
 
 /// Kubos App struct
 #[derive(Clone, Debug, Deserialize, Serialize)]
