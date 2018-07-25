@@ -20,6 +20,8 @@
 #![deny(warnings)]
 
 use std::fmt;
+use getopts::Options;
+use std::env;
 
 /// The RunLevel type
 /// The different RunLevels supported by KubOS applications
@@ -90,56 +92,64 @@ pub trait AppHandler {
 #[macro_export]
 macro_rules! app_main {
     ($handler:expr) => {{
-        use getopts::Options;
-        use std::env;
 
-        let name = option_env!("CARGO_PKG_NAME").unwrap_or("Unknown");
-        let version = option_env!("CARGO_PKG_VERSION").unwrap_or("Unknown");
-        let authors = option_env!("CARGO_PKG_AUTHORS").unwrap_or("Unknown");
+        let name: Option<&'static str> = option_env!("CARGO_PKG_NAME");
+        let version: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
+        let authors: Option<&'static str> = option_env!("CARGO_PKG_AUTHORS");
 
-        let _pid = std::process::id();
-
-        let args: Vec<String> = env::args().collect();
-        let program = args[0].clone();
-
-        let mut opts = Options::new();
-        opts.optflag("m", "metadata", "Print app metadata and immediately exit");
-        opts.optflag("h", "help", "Print this help menu");
-
-        let matches = match opts.parse(&args[1..]) {
-            Ok(m) => m,
-            Err(f) => panic!(f.to_string()),
-        };
-
-        if matches.opt_present("h") {
-            let brief = format!("Usage: {} [options]", program);
-            print!("{}", opts.usage(&brief));
-            return;
-        }
-
-        if matches.opt_present("m") {
-            println!("name = \"{}\"", name);
-            println!("version = \"{}\"", version);
-            println!("author = \"{}\"", authors);
-            return;
-        }
-
-        let _uuid = env::var_os("KUBOS_APP_UUID");
-        let run_level = env::var_os("KUBOS_APP_RUN_LEVEL");
-
-        match run_level {
-            Some(ref level) if level == "OnBoot" => {
-                $handler.on_boot();
-            }
-            Some(ref level) if level == "OnCommand" => {
-                $handler.on_command();
-            }
-            _ => {
-                eprintln!(
-                    "Warning: Unknown or missing KUBOS_APP_RUN_LEVEL. Set to OnBoot or OnCommand"
-                );
-                $handler.on_command();
-            }
-        }
+        kubos_app::app_start(
+            name.unwrap_or("Unknown"),
+            version.unwrap_or("Unknown"),
+            authors.unwrap_or("Unknown"),
+            std::process::id(),
+            $handler,
+        )
     }};
+}
+
+/// The entry point for all KubOS applications. The preferred way to use this application
+/// is through the `app_main!` macro
+pub fn app_start(name: &str, version: &str, authors: &str, _pid: u32, handler: &AppHandler) {
+    let args: Vec<String> = env::args().collect();
+    let program = args[0].clone();
+
+    let mut opts = Options::new();
+    opts.optflag("m", "metadata", "Print app metadata and immediately exit");
+    opts.optflag("h", "help", "Print this help menu");
+
+    let matches = match opts.parse(&args[1..]) {
+        Ok(m) => m,
+        Err(f) => panic!(f.to_string()),
+    };
+
+    if matches.opt_present("h") {
+        let brief = format!("Usage: {} [options]", program);
+        print!("{}", opts.usage(&brief));
+        return;
+    }
+
+    if matches.opt_present("m") {
+        println!("name = \"{}\"", name);
+        println!("version = \"{}\"", version);
+        println!("author = \"{}\"", authors);
+        return;
+    }
+
+    let _uuid = env::var_os("KUBOS_APP_UUID");
+    let run_level = env::var_os("KUBOS_APP_RUN_LEVEL");
+
+    match run_level {
+        Some(ref level) if level == "OnBoot" => {
+            handler.on_boot();
+        }
+        Some(ref level) if level == "OnCommand" => {
+            handler.on_command();
+        }
+        _ => {
+            eprintln!(
+                "Warning: Unknown or missing KUBOS_APP_RUN_LEVEL. Set to OnBoot or OnCommand"
+            );
+            handler.on_command();
+        }
+    }
 }

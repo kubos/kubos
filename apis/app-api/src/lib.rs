@@ -20,6 +20,7 @@
 #![deny(warnings)]
 #[macro_use]
 extern crate failure;
+extern crate getopts;
 #[cfg(test)]
 #[macro_use]
 extern crate juniper;
