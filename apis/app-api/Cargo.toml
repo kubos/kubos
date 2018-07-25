@@ -7,3 +7,7 @@ authors = ["Marshall Culpepper <marshall@kubos.com>", "Catherine Garabedian <cat
 failure = { git = "https://github.com/rust-lang-nursery/failure", version = "1.0"  }
 getopts = "0.2"
 serde_json = "1.0"
+
+[dev-dependencies]
+kubos-service = { path = "../../services/kubos-service" }
+juniper =  "0.9"

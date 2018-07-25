@@ -20,11 +20,21 @@
 #![deny(warnings)]
 #[macro_use]
 extern crate failure;
+#[cfg(test)]
+#[macro_use]
+extern crate juniper;
+#[cfg(test)]
+extern crate kubos_service;
+#[cfg(not(test))]
+extern crate serde_json;
+#[cfg(test)]
+#[macro_use]
 extern crate serde_json;
 
-//#[macro_escape]
 mod framework;
 mod query;
+#[cfg(test)]
+mod tests;
 
 pub use framework::*;
 pub use query::*;
