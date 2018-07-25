@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![deny(warnings)]
+//#![deny(warnings)]
 
 extern crate getopts;
 #[macro_use]
@@ -22,11 +22,18 @@ extern crate kubos_app;
 extern crate kubos_service;
 #[macro_use]
 extern crate serde_derive;
+#[cfg(test)]
+#[macro_use]
+extern crate serde_json;
+#[cfg(test)]
+extern crate tempfile;
 extern crate toml;
 extern crate uuid;
 
 mod registry;
 mod schema;
+#[cfg(test)]
+mod tests;
 
 use registry::AppRegistry;
 use kubos_service::{Config, Service};

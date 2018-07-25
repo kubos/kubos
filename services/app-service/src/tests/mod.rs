@@ -14,17 +14,4 @@
  * limitations under the License.
  */
 
-//! A simple API to make standalone Rust applications with high-level hooks
-//! for mission life-cycle management
-#![deny(missing_docs)]
-#![deny(warnings)]
-#[macro_use]
-extern crate failure;
-extern crate serde_json;
-
-//#[macro_escape]
-mod framework;
-mod query;
-
-pub use framework::*;
-pub use query::*;
+mod registry_test;

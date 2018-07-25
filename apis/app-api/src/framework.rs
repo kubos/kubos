@@ -65,12 +65,15 @@ pub trait AppHandler {
 /// # Examples
 ///
 /// ```
+/// extern crate getopts;
 /// #[macro_use]
 /// extern crate kubos_app;
 ///
+/// use kubos_app::AppHandler;
+///
 /// struct MyApp;
 ///
-/// impl kubos_app::AppHandler for MyApp {
+/// impl AppHandler for MyApp {
 ///   fn on_boot(&self) {
 ///     println!("OnBoot logic");
 ///   }

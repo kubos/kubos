@@ -39,7 +39,7 @@ fn uninstall_app() {
 
     let addr = fixture.addr.clone();
     let result = panic::catch_unwind(|| {
-        let result = kubos_system::query(
+        let result = kubos_app::query(
             &addr,
             r#"mutation {
             uninstall(uuid: "a-b-c-d-e", version: "0.0.1")
@@ -50,8 +50,7 @@ fn uninstall_app() {
         assert!(result.is_ok(), "{:?}", result.err());
         assert!(result.unwrap()["uninstall"].as_bool().unwrap());
 
-        let result =
-            kubos_system::query(&addr, "{ apps { active } }", Some(Duration::from_secs(1)));
+        let result = kubos_app::query(&addr, "{ apps { active } }", Some(Duration::from_secs(1)));
         assert!(result.is_ok(), "{:?}", result.err());
         assert_eq!(
             result.unwrap()["apps"]
