@@ -239,37 +239,50 @@ impl AppRegistry {
             return Err(format!("{} is not a directory", path));
         }
 
-        let mut files = match fs::read_dir(app_path) {
-            Ok(v) => v.filter_map(|file| file.ok()),
+        let files: Vec<fs::DirEntry> = match fs::read_dir(app_path) {
+            Ok(v) => v.filter_map(|file| file.ok()).collect(),
             Err(error) => return Err(format!("Failed to read directory: {}", error)),
         };
 
-        match files.size_hint() {
-            (_, count) if count != Some(2) => {
-                return Err("Exactly two files should be present in the app directory".to_owned())
-            }
-            _ => {}
+        if files.len() != 2 {
+            return Err("Exactly two files should be present in the app directory".to_owned());
         }
 
-        let manifest = match files.find(|file| file.file_name().to_str() == Some("manifest.toml")) {
-            Some(file) => file.path(),
-            _ => return Err("Failed to find manifest file".to_owned()),
+        let mut manifest_file: Option<fs::DirEntry> = None;
+        let mut app_file: Option<fs::DirEntry> = None;
+
+        for file in files {
+            match file.file_name().to_str() {
+                Some("manifest.toml") => manifest_file = Some(file),
+                Some(_) => app_file = Some(file),
+                _ => {}
+            }
+        }
+
+        let manifest = match manifest_file {
+            Some(file) => file,
+            None => return Err("Failed to find manifest file".to_owned()),
+        };
+        let app = match app_file {
+            Some(file) => file,
+            None => return Err("Failed to find app file".to_owned()),
         };
 
         let mut data = String::new();
-        fs::File::open(manifest)
+        fs::File::open(manifest.path())
             .and_then(|mut fp| fp.read_to_string(&mut data))
             .or_else(|error| return Err(format!("Failed to read manifest: {}", error)))?;
 
-        // Test code. Todo: remove
-        let app_filename = "myapp";
-
         let metadata: AppMetadata = toml::from_str(&data)
-            .or_else(|error| return Err(format!("Failed to read manifest: {}", error)))?;
+            .or_else(|error| return Err(format!("Failed to parse manifest: {}", error)))?;
 
         let mut entries = self.entries.borrow_mut();
         let mut app_uuid = Uuid::new_v4().hyphenated().to_string();
+        // TODO: Do the lookup based on the passed UUID
+        // Also TODO: Allow a UUID to be passed...
         for entry in entries.iter_mut() {
+            // Find the existing active version of the app and make it inactive.
+            // Use the existing UUID for our new app
             if entry.active_version && entry.app.metadata.name == metadata.name {
                 entry.active_version = false;
                 app_uuid = entry.app.uuid.clone();
@@ -287,19 +300,16 @@ impl AppRegistry {
         let app_dir = Path::new(&app_dir_str);
 
         if !app_dir.exists() {
-            match fs::create_dir_all(app_dir) {
-                Err(err) => {
-                    return Err(format!(
-                        "Couldn't create app dir {}: {:?}",
-                        app_dir.display(),
-                        err
-                    ));
-                }
-                Ok(_) => {}
-            }
+            fs::create_dir_all(app_dir).or_else(|err| {
+                return Err(format!(
+                    "Couldn't create app dir {}: {:?}",
+                    app_dir.display(),
+                    err
+                ));
+            })?;
         }
 
-        match fs::copy(path, app_dir.join(Path::new(app_filename))) {
+        match fs::copy(app.path(), app_dir.join(app.file_name())) {
             Err(err) => {
                 return Err(format!("Couldn't copy app binary: {:?}", err));
             }
@@ -337,12 +347,14 @@ impl AppRegistry {
                 uuid: app_uuid,
                 metadata: metadata,
                 pid: 0,
-                path: format!("{}/{}", app_dir_str, app_filename),
+                path: format!("{}/{}", app_dir_str, app.file_name().to_string_lossy()),
             },
             active_version: true,
         };
 
+        // Add the new registry entry
         entries.push(reg_entry);
+        // Create the app.toml file and save the metadata information
         entries[entries.len() - 1].save()?;
         Ok(entries[entries.len() - 1].clone())
     }

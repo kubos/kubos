@@ -15,3 +15,4 @@
  */
 
 mod registry_test;
+mod register_app;
