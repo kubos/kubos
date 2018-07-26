@@ -438,7 +438,8 @@ impl AppRegistry {
 
         match Command::new(app_path)
             .env("KUBOS_APP_UUID", app.uuid.clone())
-            .env("KUBOS_APP_RUN_LEVEL", format!("{}", run_level))
+            .arg("-r")
+            .arg(format!("{}", run_level))
             .spawn()
         {
             Ok(child) => Ok(child.id()),

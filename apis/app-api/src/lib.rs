@@ -16,6 +16,63 @@
 
 //! A simple API to make standalone Rust applications with high-level hooks
 //! for mission life-cycle management
+//!
+//! # Examples
+//!
+//! ```
+//! #[macro_use]
+//! extern crate kubos_app;
+//!
+//! use kubos_app::{AppHandler, query};
+//! use std::time::Duration;
+//!
+//! struct MyApp;
+//!
+//! impl AppHandler for MyApp {
+//!   fn on_boot(&self) {
+//!     println!("OnBoot logic");
+//!
+//! 	let request = r#"mutation {
+//!             power(state: ON) {
+//!                 success
+//!             }
+//!         }"#;
+//!
+//! 	let radio_service = "0.0.0.0:8002";
+//!
+//! 	match query(radio_service, request, Some(Duration::from_secs(1))) {
+//!         Err(error) => {
+//!             eprintln!("Failed to communicate with radio service: {}", error);
+//!             return;
+//!         }
+//!         Ok(data) => {
+//!             if let Some(success) = data.get("power")
+//!                 .and_then(|power| power.get("success"))
+//!             {
+//!                 match success.as_bool() {
+//! 					Some(true) => println!("Successfully turned on radio"),
+//! 					Some(false) => eprintln!("Failed to turn on radio"),
+//! 					None => eprintln!("Failed to fetch radio power state")
+//! 				}
+//!             } else {
+//!                 eprintln!("Failed to fetch radio power state");
+//!                 return;
+//!             }
+//!         }
+//! 	}
+//!   }
+//!   fn on_command(&self) {
+//!     println!("OnCommand logic");
+//!   }
+//! }
+//!
+//! fn main() {
+//!     let app = MyApp { };
+//!     app_main!(&app);
+//! }
+//! ```
+//!
+
 #![deny(missing_docs)]
 #![deny(warnings)]
 #[macro_use]

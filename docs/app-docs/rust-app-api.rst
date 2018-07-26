@@ -5,4 +5,4 @@ Rust Applications API
 
  .. |rust-api| raw:: html
  
-    <a href="../rust-docs/app-api/index.html" target="_blank">Rust Applications API</a>
+    <a href="../rust-docs/kubos_app/index.html" target="_blank">Rust Applications API</a>

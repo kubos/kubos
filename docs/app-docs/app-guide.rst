@@ -14,7 +14,7 @@ Once an application has been built, it should be transferred to the system, alon
 APIs
 ----
 
-User's may write applications in the language of their choice.
+Users may write applications in the language of their choice.
 However, Kubos provides APIs to assist and simplify with application development for use with one of our preferred languages.
 
 Our supported languages for mission applications are:
@@ -80,13 +80,19 @@ For instance, an application might be set up to fetch the current time from a GP
 Application Manifest
 --------------------
 
-In order for the applications service to properly maintain versioning information, each application should be registered along with a manifest file.
+In order for the applications service to properly maintain versioning information, each application should be registered along with a manifest file, `manifest.toml`.
 
-This file should contain the application name, version number, and author information.
+This file must have the following key values:
 
-For Rust, this is the `Cargo.toml` file which is automatically generated when you create a new project.
+- ``name`` - The name of the application
+- ``version`` - The version number of the application
+- ``author`` - The author of the application
 
-.. note:: The manifest file structure for Python projects has not been defined yet
+For example::
+
+    name = "mission-app"
+    version = "1.1"
+    author = "Me"
     
 .. todo::
 

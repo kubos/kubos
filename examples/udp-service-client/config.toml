@@ -1,9 +1,9 @@
 query_file = "query.txt"
 
 [host]
-ip = "10.0.2.15"
+ip = "0.0.0.0"
 port = 8000
 
 [service]
-ip = "10.63.1.20"
-port = 8082
+ip = "168.168.2.20"
+port = 8000

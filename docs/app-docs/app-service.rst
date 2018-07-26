@@ -101,11 +101,14 @@ For example::
 Registering
 -----------
 
-Once an application has been written and compiled, and its corresponding manifest file has been created,
-it can be transferred to the OBC using the :doc:`file transfer service <../services/file>`.
+Once an application has been written and compiled, the application and its accompanying :ref:`manifest.toml file <app-manifest>`
+should be transferred to a new directory on the OBC. 
+This file transfer can be done using the :doc:`file transfer service <../services/file>`.
 
-It can then be registereed with the applications service using the ``register`` mutation by specifying
-the directory containing the application binary and its corresponding :ref:`manifest file <app-manifest>`.
+The application and manifest *must* be the only files in the directory.
+
+It can then be registered with the applications service using the ``register`` mutation by specifying
+the directory containing the application files.
 
 The service will copy the application from the specified path into the apps registry.
 Once registered, users may delete the original application.

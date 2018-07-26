@@ -67,7 +67,6 @@ pub trait AppHandler {
 /// # Examples
 ///
 /// ```
-/// extern crate getopts;
 /// #[macro_use]
 /// extern crate kubos_app;
 ///
