@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-mod registry_test;
 mod register_app;
+mod registry_test;

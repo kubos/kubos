@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-use std::cell::RefCell;
 use kubos_app::RunLevel;
+use std::cell::RefCell;
 use std::fs;
 use std::io::{Read, Write};
 use std::os::unix;

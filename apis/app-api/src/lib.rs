@@ -32,15 +32,15 @@
 //!   fn on_boot(&self) {
 //!     println!("OnBoot logic");
 //!
-//! 	let request = r#"mutation {
+//!     let request = r#"mutation {
 //!             power(state: ON) {
 //!                 success
 //!             }
 //!         }"#;
 //!
-//! 	let radio_service = "0.0.0.0:8002";
+//!     let radio_service = "0.0.0.0:8002";
 //!
-//! 	match query(radio_service, request, Some(Duration::from_secs(1))) {
+//!     match query(radio_service, request, Some(Duration::from_secs(1))) {
 //!         Err(error) => {
 //!             eprintln!("Failed to communicate with radio service: {}", error);
 //!             return;
@@ -50,16 +50,16 @@
 //!                 .and_then(|power| power.get("success"))
 //!             {
 //!                 match success.as_bool() {
-//! 					Some(true) => println!("Successfully turned on radio"),
-//! 					Some(false) => eprintln!("Failed to turn on radio"),
-//! 					None => eprintln!("Failed to fetch radio power state")
-//! 				}
+//!                     Some(true) => println!("Successfully turned on radio"),
+//!                     Some(false) => eprintln!("Failed to turn on radio"),
+//!                     None => eprintln!("Failed to fetch radio power state")
+//!                 }
 //!             } else {
 //!                 eprintln!("Failed to fetch radio power state");
 //!                 return;
 //!             }
 //!         }
-//! 	}
+//!     }
 //!   }
 //!   fn on_command(&self) {
 //!     println!("OnCommand logic");

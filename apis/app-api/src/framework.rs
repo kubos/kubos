@@ -19,9 +19,9 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-use std::fmt;
 use getopts::Options;
 use std::env;
+use std::fmt;
 
 /// The RunLevel type
 /// The different RunLevels supported by KubOS applications
@@ -91,11 +91,7 @@ pub trait AppHandler {
 #[macro_export]
 macro_rules! app_main {
     ($handler:expr) => {{
-
-        kubos_app::app_start(
-            std::process::id(),
-            $handler,
-        )
+        kubos_app::app_start(std::process::id(), $handler)
     }};
 }
 

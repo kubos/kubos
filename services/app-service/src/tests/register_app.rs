@@ -24,23 +24,25 @@ use schema;
 
 macro_rules! mock_service {
     ($registry_dir:ident) => {{
+        let registry = AppRegistry::new_from_dir(&$registry_dir.path().to_string_lossy());
 
-    let registry = AppRegistry::new_from_dir(&$registry_dir.path().to_string_lossy());
-
-    let config =
-            format!(
-                r#"
+        let config = format!(
+            r#"
             [app-service]
             registry-dir = "{}"
             [app-service.addr]
             ip = "127.0.0.1"
             port = 9999"#,
-                $registry_dir.path().to_str().unwrap(),
-            );
+            $registry_dir.path().to_str().unwrap(),
+        );
 
-    Service::new(Config::new_from_str("app-service", &config), registry, schema::QueryRoot, schema::MutationRoot)
-
-        }};
+        Service::new(
+            Config::new_from_str("app-service", &config),
+            registry,
+            schema::QueryRoot,
+            schema::MutationRoot,
+        )
+    }};
 }
 
 #[test]
