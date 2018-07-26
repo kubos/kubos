@@ -22,15 +22,6 @@ use tempfile::TempDir;
 use registry::*;
 use schema;
 
-macro_rules! wrap {
-    ($result:ident) => {{
-        json!({
-                "msg": $result,
-                "errs": ""
-        }).to_string()
-    }};
-}
-
 macro_rules! mock_service {
     ($registry_dir:ident) => {{
 
@@ -85,17 +76,20 @@ fn register_good() {
     );
 
     let expected = json!({
-           "register": {
-               "active": true,
-               "app": {
-                   "name": "dummy",
-                   "version": "0.0.1",
-                   "author": "user"
+            "errs": "",
+            "msg": {
+               "register": {
+                   "active": true,
+                   "app": {
+                       "name": "dummy",
+                       "version": "0.0.1",
+                       "author": "user"
+                   }
                }
-           } 
-        });
+            }
+        }).to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(register_query.to_owned()), expected);
 }
 
 #[test]
@@ -163,6 +157,132 @@ fn register_extra_file() {
     );
 
     let expected = "{\"errs\":\"{\\\"message\\\":\\\"Exactly two files should be present in the app directory\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+
+    assert_eq!(service.process(register_query.to_owned()), expected);
+}
+
+#[test]
+fn register_no_name() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    // Create dummy app file
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    // Create manifest file
+    let manifest = r#"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: "{}") {{
+            active, app {{
+                name, version, author
+            }}
+        }}
+    }}"#,
+        app_bin.to_str().unwrap()
+    );
+
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to parse manifest: missing field `name`\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+
+    assert_eq!(service.process(register_query.to_owned()), expected);
+}
+
+#[test]
+fn register_no_version() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    // Create dummy app file
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    // Create manifest file
+    let manifest = r#"
+            name = "dummy"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: "{}") {{
+            active, app {{
+                name, version, author
+            }}
+        }}
+    }}"#,
+        app_bin.to_str().unwrap()
+    );
+
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to parse manifest: missing field `version`\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+
+    assert_eq!(service.process(register_query.to_owned()), expected);
+}
+
+#[test]
+fn register_no_author() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    // Create dummy app file
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    // Create manifest file
+    let manifest = r#"
+            name = "dummy"
+            version = "0.0.1"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: "{}") {{
+            active, app {{
+                name, version, author
+            }}
+        }}
+    }}"#,
+        app_bin.to_str().unwrap()
+    );
+
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to parse manifest: missing field `author`\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+
+    assert_eq!(service.process(register_query.to_owned()), expected);
+}
+
+#[test]
+fn register_bad_path() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let register_query = r#"mutation {
+        register(path: "fake/files") {
+            active, app {
+                name, version, author
+            }
+        }
+    }"#;
+
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"fake/files does not exist\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
 
     assert_eq!(service.process(register_query.to_owned()), expected);
 }
