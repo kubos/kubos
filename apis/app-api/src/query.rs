@@ -30,7 +30,7 @@ type AppResult<T> = Result<T, failure::Error>;
 ///
 /// * `host_addr` - An address in `IP:PORT` format where the Service is running
 /// * `query` - the raw GraphQL query as a string
-/// * `timeout` - The timeout provided to the UDP socket. Note: this function will block when `None`
+/// * `timeout` - The timeout provided to the UDP socket. Note: This function will block when `None`
 ///               is provided here
 ///
 /// # Examples

@@ -23,14 +23,12 @@ use getopts::Options;
 use std::env;
 use std::fmt;
 
-/// The RunLevel type
-/// The different RunLevels supported by KubOS applications
+/// The different ways an application can be started
 #[derive(Clone, Debug, PartialEq)]
 pub enum RunLevel {
-    /// An application will start at system boot time, and is managed automatically by the
-    /// Application Service
+    /// Logic intended to be run if the application is started at system boot time
     OnBoot,
-    /// An application will start when commanded through the `start_app` GraphQL mutation
+    /// Logic intended to be run if the application is started manually
     OnCommand,
 }
 
@@ -43,26 +41,20 @@ impl fmt::Display for RunLevel {
     }
 }
 
-/// The trait that should be implemented by KubOS Applications to be notified when the application
-/// goes through one of three lifecycle events:
-///
-/// 1. Start on system boot-up
-/// 2. Start on demand when being commanded (i.e. through the `start_app` GraphQL mutation)
-/// 3. When the app is shutting down, to clean up any resources initialized in on_boot or
-///    on_command
+/// Common trait which is used to ensure handlers for all required run levels are defined
 pub trait AppHandler {
-    /// Called when the Application is started at system boot time
+    /// Called when the application is started at system boot time
     fn on_boot(&self);
 
-    /// Called when the Application is started on demand through the `start_app` GraphQL mutation
+    /// Called when the application is started on-demand through the `start_app` GraphQL mutation
     fn on_command(&self);
 }
 
-/// A helper macro that can be called from a KubOS application's `main` function.
+/// A helper macro which detects the requested run level and calls the appropriate handler function
 ///
 /// # Arguments
 ///
-/// * `handler` - An implementation of `AppHandler`
+/// * `handler` - A reference to an object which implements the run level handler functions
 ///
 /// # Examples
 ///
