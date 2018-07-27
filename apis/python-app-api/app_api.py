@@ -6,6 +6,10 @@
 
 """
 Mission Application API for Python Mission Applications.
+
+NOTE: Mission application service will NOT run Python mission apps
+without the environment indicator at the top of the file:
+"#!/usr/bin/env python"
 """
 
 import toml
@@ -26,7 +30,8 @@ class Services:
 
         # Check inputs
         if service not in self.config:
-            raise KeyError("Service not available.")
+            raise KeyError(
+                "Service name invalid. Check config file for service names.")
         if type(query) not in [str, unicode]:
             raise TypeError("Query must be str or unicode.")
 
