@@ -58,8 +58,8 @@ fn setup_apps(registry_dir: &Path) {
         .install(&registry_dir);
 }
 
-fn apps_query(addr: &str, query: &str) -> Vec<serde_json::Value> {
-    let result = kubos_app::query(addr, query, Some(Duration::from_secs(5)));
+fn apps_query(service: &str, config: Option<&str>, query: &str) -> Vec<serde_json::Value> {
+    let result = kubos_app::query(service, config, query, Some(Duration::from_secs(5)));
     assert!(result.is_ok());
 
     let apps = result.unwrap()["apps"].clone();
@@ -84,13 +84,13 @@ macro_rules! test_query {
         #[test]
         fn $name() {
             let mut fixture = AppServiceFixture::setup();
+            let config = format!("{}", fixture.registry_dir.path().join("config.toml").to_string_lossy());
             setup_apps(&fixture.registry_dir.path());
             fixture.start_service();
 
-            let addr = fixture.addr.clone();
             let result = panic::catch_unwind(|| {
                 let test: &Fn(Vec<serde_json::Value>) = &$test_closure;
-                test(apps_query(&addr, $query));
+                test(apps_query("app-service", Some(&config), $query));
             });
 
             fixture.teardown();
