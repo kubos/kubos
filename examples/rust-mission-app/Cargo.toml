@@ -4,4 +4,4 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 
 [dependencies]
-kubos-app = { path = "../../apis/app-api" }
+kubos-app = { path = "../../apis/app-api/rust" }

@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Marshall Culpepper <marshall@kubos.com>"]
 
 [dependencies]
-kubos-app = { path = "../../apis/app-api" }
+kubos-app = { path = "../../apis/app-api/rust" }
 kubos-service = { path = "../kubos-service" }
 
 getopts = "0.2"

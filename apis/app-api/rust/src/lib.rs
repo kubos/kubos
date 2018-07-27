@@ -38,9 +38,7 @@
 //!             }
 //!         }"#;
 //!
-//!     let radio_service = "0.0.0.0:8002";
-//!
-//!     match query(radio_service, request, Some(Duration::from_secs(1))) {
+//!     match query("radio-service", None, request, Some(Duration::from_secs(1))) {
 //!         Err(error) => {
 //!             eprintln!("Failed to communicate with radio service: {}", error);
 //!             return;
@@ -83,11 +81,14 @@ extern crate getopts;
 extern crate juniper;
 #[cfg(test)]
 extern crate kubos_service;
+extern crate kubos_system;
 #[cfg(not(test))]
 extern crate serde_json;
 #[cfg(test)]
 #[macro_use]
 extern crate serde_json;
+#[cfg(test)]
+extern crate tempfile;
 
 mod framework;
 mod query;

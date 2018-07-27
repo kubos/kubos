@@ -15,6 +15,7 @@
  */
 
 use failure;
+use kubos_system::Config;
 use serde_json;
 use std::net::UdpSocket;
 use std::time::Duration;
@@ -28,8 +29,11 @@ type AppResult<T> = Result<T, failure::Error>;
 ///
 /// # Arguments
 ///
-/// * `host_addr` - An address in `IP:PORT` format where the Service is running
-/// * `query` - the raw GraphQL query as a string
+/// * `service` - The name of the service to send the query to
+/// * `config_path` - The system location of the `config.toml` file which has the IP and port information
+///                   of the service to query. If `None` is specified, the default config location will be
+///                   used
+/// * `query` - The raw GraphQL query as a string
 /// * `timeout` - The timeout provided to the UDP socket. Note: This function will block when `None`
 ///               is provided here
 ///
@@ -47,7 +51,7 @@ type AppResult<T> = Result<T, failure::Error>;
 /// 		ping
 /// 	}"#;
 ///
-/// let result = query("0.0.0.0:1234", request, Some(Duration::from_secs(1)))?;
+/// let result = query("radio-service", Some("/home/kubos/config.toml"), request, Some(Duration::from_secs(1)))?;
 ///
 /// let data = result.get("ping").unwrap().as_str();
 ///
@@ -57,12 +61,18 @@ type AppResult<T> = Result<T, failure::Error>;
 /// ```
 ///
 pub fn query(
-    host_addr: &str,
+    service: &str,
+    config_path: Option<&str>,
     query: &str,
     timeout: Option<Duration>,
 ) -> AppResult<serde_json::Value> {
+    let config = match config_path {
+        Some(path) => Config::new_from_path(service, path.to_owned()),
+        None => Config::new(service),
+    };
+
     let socket = UdpSocket::bind("0.0.0.0:0")?;
-    socket.connect(host_addr)?;
+    socket.connect(config.hosturl())?;
     socket.send(query.as_bytes())?;
 
     // Allow the caller to set a read timeout on the socket

@@ -123,11 +123,11 @@ pub fn app_start(_pid: u32, handler: &AppHandler) {
         "OnCommand" => {
             handler.on_command();
         }
-        _ => {
+        level => {
             eprintln!(
-                "Warning: Unknown or missing KUBOS_APP_RUN_LEVEL. Set to OnBoot or OnCommand"
+                "Error: Unknown run level was requested - {}. Available run levels: OnBoot, OnCommand", level
             );
-            handler.on_command();
+            return;
         }
     }
 }
