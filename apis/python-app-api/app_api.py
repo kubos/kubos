@@ -48,6 +48,24 @@ class Services:
 
         return data
 
+    def ip_query(self, (ip, port), query, timeout=DEFAULT_TIMEOUT):
+
+        # Make a service for debug messages
+        service = "{}:{}".format(ip, port)
+
+        # Talk to the server
+        response = self._udp_query(query, (ip, port), timeout)
+
+        # Format the response and detect errors
+        (data, errors) = self._format(response, service)
+
+        # Check for endpoint errors
+        if errors not in ([], None):
+            raise EnvironmentError(
+                "{} Endpoint Error: {}".format(service, errors))
+
+        return data
+
     def _udp_query(self, query, (ip, port), timeout):
         # Set up the socket
         sock = socket.socket(socket.AF_INET,  # Internet
