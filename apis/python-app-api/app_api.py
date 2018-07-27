@@ -6,10 +6,6 @@
 
 """
 Mission Application API for Python Mission Applications.
-
-NOTE: Mission application service will NOT run Python mission apps
-without the environment indicator at the top of the file:
-"#!/usr/bin/env python"
 """
 
 import toml

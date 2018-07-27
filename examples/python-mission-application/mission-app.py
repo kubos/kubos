@@ -10,6 +10,10 @@ available and how to interact with onboard services.
 
 This application is meant to be run through the mission application
 service, but can be run directly from the command line as well.
+
+NOTE: Mission application service will NOT run Python mission apps
+without the environment indicator at the top of the file:
+"#!/usr/bin/env python"
 """
 
 import argparse
