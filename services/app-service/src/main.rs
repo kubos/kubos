@@ -35,8 +35,10 @@ mod schema;
 #[cfg(test)]
 mod tests;
 
+use getopts::Options;
 use kubos_service::{Config, Service};
 use registry::AppRegistry;
+use std::env;
 
 fn main() {
     let config = Config::new("app-service");
@@ -46,6 +48,20 @@ fn main() {
             None => AppRegistry::new(),
         }
     };
+
+    let args: Vec<String> = env::args().collect();
+
+    let mut opts = Options::new();
+    opts.optflag("b", "onboot", "Execute OnBoot logic");
+    match opts.parse(&args[1..]) {
+        Ok(m) => match m.opt_present("b") {
+            true => registry
+                .run_onboot()
+                .unwrap_or_else(|err| eprintln!("Error starting applications: {}", err)),
+            false => {}
+        },
+        Err(_) => {}
+    }
 
     Service::new(config, registry, schema::QueryRoot, schema::MutationRoot).start();
 }
