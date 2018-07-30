@@ -88,7 +88,7 @@ To list all available versions of a specific application, specify the desired UU
 For example::
 
     {
-        apps(uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a) {
+        apps(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a") {
             app {
                 name,
                 version
@@ -116,7 +116,7 @@ Once registered, users may delete the original application.
 For example::
 
     mutation {
-        register(path: /home/kubos/payload-app) {
+        register(path: "/home/kubos/payload-app") {
             active,
             app {
                 name,
@@ -138,7 +138,7 @@ The mutation returns a single boolean value to indicate success or failure.
 For example::
 
     mutation {
-        uninstall(uuid: 46d01f19-ab45-4c6f-896e-88f90266f12e, version: 1.1)
+        uninstall(uuid: "46d01f19-ab45-4c6f-896e-88f90266f12e", version: "1.1")
     }
     
     
@@ -160,7 +160,7 @@ On success, the mutation will return the PID of the running application.
 For example::
 
     mutation {
-        startApp(uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a, runLevel: OnCommand)
+        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand")
     }
     
 Under the covers, the service receives the mutation and identifies the current active version of the
