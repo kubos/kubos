@@ -55,9 +55,7 @@ so then they only have to send a single query in order to trigger the process.
 On Boot
 ~~~~~~~
 
-The ``OnBoot`` run level defines logic which should be executed each time the system is started.
-
-.. note:: The OnBoot logic has not been fully implemented, so an application using this run level must still be :ref:`started manually <start-app>`. 
+The ``OnBoot`` run level defines logic which should be executed when the applications service is started at system boot time.
 
 This run level is frequently used for setting up continuous fetching and processing of data from the other system services and hardware.
 For instance, an application might be set up to fetch the current time from a GPS device and then pass that information through to the ADCS device.

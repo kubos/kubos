@@ -147,6 +147,9 @@ For example::
 Starting an Application
 -----------------------
 
+On Demand
+~~~~~~~~~
+
 To manually start an application, the ``startApp`` mutation can be used.
 
 The mutation takes two arguments: the UUID of the application to start and the run level which the
@@ -161,7 +164,15 @@ For example::
     }
     
 Under the covers, the service receives the mutation and identifies the current active version of the
-application specified. It then calls that version's binary, passing along the run level as a system envar.
+application specified. It then calls that version's binary, passing along the run level as a command argument.
+
+At Boot
+~~~~~~~
+
+All applications will be started with the ``OnBoot`` run level automatically when the applications service is
+started during system initialization.
+
+This logic may also be triggered by manually starting the applications service with the ``-b`` flag. 
 
 .. todo::
 

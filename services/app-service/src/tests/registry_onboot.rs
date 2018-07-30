@@ -25,7 +25,7 @@ use tempfile::TempDir;
 use registry::*;
 
 #[test]
-fn onboot_internal_good() {
+fn registry_onboot_good() {
     let registry_dir = TempDir::new().unwrap();
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy());
 
@@ -64,7 +64,7 @@ fn onboot_internal_good() {
 }
 
 #[test]
-fn onboot_internal_fail() {
+fn registry_onboot_fail() {
     let registry_dir = TempDir::new().unwrap();
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy());
 
