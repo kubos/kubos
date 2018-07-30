@@ -162,8 +162,8 @@ pub struct AppServiceFixture {
     pub registry_dir: TempDir,
     pub addr: String,
     pub config_toml: PathBuf,
-    pub join_handle: Option<JoinHandle<()>>,
-    pub sender: Option<Sender<bool>>,
+    join_handle: Option<JoinHandle<()>>,
+    sender: Option<Sender<bool>>,
 }
 
 impl AppServiceFixture {
