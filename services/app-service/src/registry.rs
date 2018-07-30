@@ -448,6 +448,15 @@ impl AppRegistry {
         }
     }
 
+    /// Call the active version of all registered applications with the "OnBoot" run level
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::{AppRegistry, RunLevel};
+    /// let registry = AppRegistry::new();
+    /// registry.run_onboot();
+    /// ```
     pub fn run_onboot(&self) -> Result<(), String> {
         // TODO: Decide whether or not we actually want to track started/failed apps
         let mut apps_started = 0;
@@ -455,7 +464,6 @@ impl AppRegistry {
 
         let active_symlink = PathBuf::from(format!("{}/active", self.apps_dir));
         if !active_symlink.exists() {
-            // TODO: Is this the way we want to handle this?
             return Err(format!("Failed to get list of active UUIDs"));
         }
 
@@ -474,7 +482,7 @@ impl AppRegistry {
             }
         }
 
-        // TODO: Remove me. Debug line.
+        // QUESTION: Keep this or not? It's kind of a nice informational message
         println!(
             "Apps started: {}, Apps failed: {}",
             apps_started, apps_not_started
