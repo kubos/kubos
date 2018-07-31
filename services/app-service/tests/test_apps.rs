@@ -93,7 +93,7 @@ macro_rules! test_query {
                     .to_string_lossy()
             );
             setup_apps(&fixture.registry_dir.path());
-            fixture.start_service();
+            fixture.start_service(false);
 
             let result = panic::catch_unwind(|| {
                 let test: &Fn(Vec<serde_json::Value>) = &$test_closure;

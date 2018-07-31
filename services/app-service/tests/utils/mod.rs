@@ -215,7 +215,7 @@ impl AppServiceFixture {
         }
     }
 
-    pub fn start_service(&mut self) {
+    pub fn start_service(&mut self, onboot: bool) {
         let mut app_service = env::current_exe().unwrap();
         app_service.pop();
         app_service.set_file_name("kubos-app-service");
@@ -224,13 +224,26 @@ impl AppServiceFixture {
         let config_toml = self.config_toml.clone();
 
         let handle = thread::spawn(move || {
-            let mut service_proc = Command::new(app_service)
+            let mut service = Command::new(app_service);
+
+            service
                 .arg("-c")
                 .arg(config_toml.to_str().unwrap())
                 .stdin(Stdio::piped())
-                .stdout(Stdio::piped())
-                .spawn()
-                .unwrap();
+                .stdout(Stdio::piped());
+
+            if onboot {
+                service.arg("-b");
+            }
+
+            let mut service_proc = service.spawn().unwrap();
+
+            thread::sleep(Duration::from_millis(100));
+            match service_proc.try_wait() {
+                Ok(Some(status)) => panic!("Service exited early: {}", status),
+                Ok(None) => {}
+                Err(err) => panic!("Failed to wait for service: {}", err),
+            }
 
             let mut run = true;
             while run {

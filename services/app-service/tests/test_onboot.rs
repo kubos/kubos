@@ -19,10 +19,7 @@ extern crate kubos_system;
 extern crate serde_json;
 extern crate tempfile;
 
-use std::{env, thread};
 use std::path::Path;
-use std::process::{Command, Stdio};
-use std::time::Duration;
 
 mod utils;
 pub use utils::*;
@@ -60,37 +57,9 @@ fn setup_apps(registry_dir: &Path) {
 // doesn't panic anywhere
 #[test]
 fn onboot_good() {
-    let fixture = AppServiceFixture::setup();
+    let mut fixture = AppServiceFixture::setup();
     setup_apps(&fixture.registry_dir.path());
 
-    let mut app_service = env::current_exe().unwrap();
-    app_service.pop();
-    app_service.set_file_name("kubos-app-service");
-
-    let config_toml = fixture.config_toml.clone();
-
-    let handle: thread::JoinHandle<_> = thread::spawn(move || {
-        let mut cmd = Command::new(app_service)
-            .arg("-c")
-            .arg(config_toml.to_str().unwrap())
-            .arg("-b")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .spawn()
-            .unwrap();
-
-        thread::sleep(Duration::from_millis(100));
-        match cmd.try_wait() {
-            Ok(Some(status)) => panic!("Command exited early: {}", status),
-            Ok(None) => {}
-            Err(err) => panic!("Failed to wait for command: {}", err),
-        }
-
-        thread::sleep(Duration::from_millis(1000));
-        // Kill the app service that was started. Since it was spawned
-        // as a command it'll just run forever if we let it.
-        cmd.kill().unwrap();
-    });
-
-    assert!(handle.join().is_ok());
+    fixture.start_service(true);
+    fixture.teardown();
 }
