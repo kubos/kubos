@@ -124,10 +124,10 @@ We'll update the `src/main.rs` file to have the following::
     
     impl AppHandler for MyApp {
         fn on_boot(&self) {
-            fs::write("home/kubos/test-output", "OnBoot logic\r\n").unwrap();
+            fs::write("/home/kubos/test-output", "OnBoot logic\r\n").unwrap();
         }
         fn on_command(&self) {
-            fs::write("home/kubos/test-output", "OnCommand logic\r\n").unwrap();
+            fs::write("/home/kubos/test-output", "OnCommand logic\r\n").unwrap();
         }
     }
     
@@ -211,7 +211,7 @@ Registering
 Once both files have been transferred, we can register the application using the ``register`` query::
 
     mutation {
-        register(path: /home/kubos/example-app) {
+        register(path: "/home/kubos/example-app") {
             app {
                 uuid,
                 name,
@@ -238,7 +238,7 @@ Starting
 We'll go ahead and start our app now to verify it works::
 
     mutation {
-        startApp(uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a, runLevel: OnCommand)
+        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand")
     }
     
 The response JSON should contain a number indicating the PID of our started application.
@@ -260,7 +260,7 @@ After compiling (for Rust) and transferring the new files into a new folder, `/h
 we can register the updated application::
  
     mutation {
-        register(path: /home/kubos/example-app-2) {
+        register(path: "/home/kubos/example-app-2") {
             app {
                 uuid,
                 name,
