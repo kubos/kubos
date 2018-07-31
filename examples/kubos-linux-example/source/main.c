@@ -69,7 +69,7 @@ CSP_DEFINE_TASK(csp_server)
             {
                 case MY_PORT:
                     /* Process packet here */
-                    printf("Packet received on MY_PORT: %s\r\n",
+                    printf("Packet received on MY_PORT yes: %s\r\n",
                            (char *) packet->data);
                     csp_buffer_free(packet);
                     break;
@@ -186,4 +186,4 @@ int main(void)
 
     return 0;
 }
-/* Hi Catherine... I'M CODING!!!
+/* Hi Catherine... I'M CODING!!!*/
