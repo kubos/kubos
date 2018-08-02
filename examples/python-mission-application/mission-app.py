@@ -24,7 +24,7 @@ import app_api
 
 MANIFEST = toml.load('manifest.toml')
 SERVICES = app_api.Services()
-LOGFILE = '/home/kubos/mission_app_log'
+LOGFILE = '/home/system/var/app-log'
 
 
 def on_boot():
