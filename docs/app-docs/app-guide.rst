@@ -139,7 +139,7 @@ We'll update the `src/main.rs` file to have the following::
 And then update the `config.toml` file to add the `kubos-app` dependency ::
 
     [dependencies]
-    kubos-app = { path = "../../apis/app-api/rust" }
+    kubos-app = { git = "https://github.com/kubos/kubos" }
     
 And then compile the project for the Beaglebone Black target::
 
@@ -165,7 +165,7 @@ making sure to include ``#!/usr/bin/env python`` at the top of the file::
     def on_command():
         
         file = open("/home/kubos/test-output","w+")
-        file.write("OnBoot logic\r\n")
+        file.write("OnCommand logic\r\n")
     
     def main():
         parser = argparse.ArgumentParser()
@@ -188,7 +188,8 @@ And then we'll update the file permissions to allow execution::
     
 .. note::
 
-    We're foregoing the usual ".py" extension so that the file name is the same as the Rust example file name. 
+    We're foregoing the usual ".py" extension so that the file name is the same as the Rust example file name
+    for the remainder of this walkthrough. It has no impact on actual execution.
 
 Manifest
 ^^^^^^^^
