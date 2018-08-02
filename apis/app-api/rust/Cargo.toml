@@ -5,9 +5,11 @@ authors = ["Marshall Culpepper <marshall@kubos.com>", "Catherine Garabedian <cat
 
 [dependencies]
 failure = { git = "https://github.com/rust-lang-nursery/failure", branch = "evolution/1.0" }
+kubos-system = { path = "../../system-api" }
 getopts = "0.2"
 serde_json = "1.0"
 
 [dev-dependencies]
-kubos-service = { path = "../../services/kubos-service" }
+kubos-service = { path = "../../../services/kubos-service" }
 juniper =  "0.9"
+tempfile = "3"

@@ -23,7 +23,7 @@
 //! #[macro_use]
 //! extern crate kubos_app;
 //!
-//! use kubos_app::{AppHandler, query};
+//! use kubos_app::*;
 //! use std::time::Duration;
 //!
 //! struct MyApp;
@@ -38,9 +38,7 @@
 //!             }
 //!         }"#;
 //!
-//!     let radio_service = "0.0.0.0:8002";
-//!
-//!     match query(radio_service, request, Some(Duration::from_secs(1))) {
+//!     match query(ServiceConfig::new("radio-service"), request, Some(Duration::from_secs(1))) {
 //!         Err(error) => {
 //!             eprintln!("Failed to communicate with radio service: {}", error);
 //!             return;
@@ -83,11 +81,14 @@ extern crate getopts;
 extern crate juniper;
 #[cfg(test)]
 extern crate kubos_service;
+extern crate kubos_system;
 #[cfg(not(test))]
 extern crate serde_json;
 #[cfg(test)]
 #[macro_use]
 extern crate serde_json;
+#[cfg(test)]
+extern crate tempfile;
 
 mod framework;
 mod query;
@@ -96,3 +97,4 @@ mod tests;
 
 pub use framework::*;
 pub use query::query;
+pub use kubos_system::Config as ServiceConfig;

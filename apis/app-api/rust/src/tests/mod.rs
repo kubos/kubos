@@ -17,25 +17,30 @@
 mod mock_service;
 
 macro_rules! mock_service {
-    ($addr:expr, $port:expr) => {{
-        thread::spawn(|| {
-            let config = format!(
-                r#"
-                [mock-service.addr]
-                ip = "{}"
-                port = {}
-                "#,
-                $addr, $port
-            );
+    ($config:ident, $addr:expr, $port:expr) => {{
+        let config = format!(
+            r#"
+            [mock-service.addr]
+            ip = "{}"
+            port = {}
+            "#,
+            $addr, $port
+        );
+
+        ::std::fs::write($config.clone(), config).unwrap();
+
+        let config_thread = $config.to_string_lossy().to_string();
+
+        ::std::thread::spawn(|| {
             Service::new(
-                Config::new_from_str("mock-service", &config),
+                ServiceConfig::new_from_path("mock-service", config_thread),
                 Subsystem,
                 QueryRoot,
                 MutationRoot,
             ).start()
         });
 
-        thread::sleep(Duration::from_millis(100));
+        ::std::thread::sleep(::std::time::Duration::from_millis(100));
     }};
 }
 
