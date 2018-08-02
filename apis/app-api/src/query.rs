@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-use failure::Fallible;
+use failure;
 use serde_json;
 use std::net::UdpSocket;
 use std::time::Duration;
+
+/// The result type used by `query`
+type AppResult<T> = Result<T, failure::Error>;
 
 /// Execute a GraphQL query against a running KubOS Service using UDP.
 ///
@@ -57,7 +60,7 @@ pub fn query(
     host_addr: &str,
     query: &str,
     timeout: Option<Duration>,
-) -> Fallible<serde_json::Value> {
+) -> AppResult<serde_json::Value> {
     let socket = UdpSocket::bind("0.0.0.0:0")?;
     socket.connect(host_addr)?;
     socket.send(query.as_bytes())?;
