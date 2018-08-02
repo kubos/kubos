@@ -147,9 +147,6 @@ For example::
 Starting an Application
 -----------------------
 
-On Demand
-~~~~~~~~~
-
 To manually start an application, the ``startApp`` mutation can be used.
 
 The mutation takes two arguments: the UUID of the application to start and the run level which the
@@ -166,8 +163,23 @@ For example::
 Under the covers, the service receives the mutation and identifies the current active version of the
 application specified. It then calls that version's binary, passing along the run level as a command argument.
 
-At Boot
-~~~~~~~
+Passing Additional Arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To pass additional arguments to the underlying application, the ``args`` input argument can be used.
+
+For example::
+
+    mutation {
+        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand", args: "--verbose --release")
+    }
+    
+Under the covers, the application would be called like so::
+
+    mission-app -r OnCommand --verbose --release
+    
+Automatically Starting on Boot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 All applications will be started with the ``OnBoot`` run level automatically when the applications service is
 started during system initialization.
@@ -203,7 +215,7 @@ This logic may also be triggered by manually starting the applications service w
     Is not a thing that actually exists yet...
     
     TODO: Automatic and manual rollback
-
+    
 Customizing the Applications Service
 ------------------------------------
 

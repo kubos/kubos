@@ -420,7 +420,12 @@ impl AppRegistry {
     /// let registry = AppRegistry::new();
     /// registry.start_app("01234567-89ab-cdef0-1234-56789abcdef0", RunLevel::OnCommand);
     /// ```
-    pub fn start_app(&self, app_uuid: &str, run_level: RunLevel) -> Result<u32, String> {
+    pub fn start_app(
+        &self,
+        app_uuid: &str,
+        run_level: RunLevel,
+        args: Option<Vec<String>>,
+    ) -> Result<u32, String> {
         let entries = self.entries.borrow();
 
         let app = match entries
@@ -437,12 +442,17 @@ impl AppRegistry {
             return Err(format!("{} does not exist", &app.path));
         }
 
-        match Command::new(app_path)
-            .env("KUBOS_APP_UUID", app.uuid.clone())
+        let mut cmd = Command::new(app_path);
+
+        cmd.env("KUBOS_APP_UUID", app.uuid.clone())
             .arg("-r")
-            .arg(format!("{}", run_level))
-            .spawn()
-        {
+            .arg(format!("{}", run_level));
+
+        if let Some(add_args) = args {
+            cmd.args(&add_args);
+        }
+
+        match cmd.spawn() {
             Ok(child) => Ok(child.id()),
             Err(err) => Err(format!("Failed to spawn app: {:?}", err)),
         }
@@ -473,7 +483,7 @@ impl AppRegistry {
             match entry {
                 Ok(file) => {
                     let uuid = file.file_name();
-                    match self.start_app(&uuid.to_string_lossy(), RunLevel::OnBoot) {
+                    match self.start_app(&uuid.to_string_lossy(), RunLevel::OnBoot, None) {
                         Ok(_) => apps_started += 1,
                         Err(_) => apps_not_started += 1,
                     }
