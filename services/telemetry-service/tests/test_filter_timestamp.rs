@@ -49,8 +49,8 @@ fn tests() {
             "errs": "",
             "msg": {
                 "telemetry": [
-                    {"value":"3.7"},
-                    {"value":"3.8"}
+                    {"value":"3.8"},
+                    {"value":"3.7"}
                 ]
             }
         })
@@ -62,9 +62,9 @@ fn tests() {
             "errs": "",
             "msg": {
                 "telemetry": [
-                    {"value":"3.3"},
+                    {"value":"3.5"},
                     {"value":"3.4"},
-                    {"value":"3.5"}
+                    {"value":"3.3"}
                 ]
             }
         })
@@ -76,9 +76,9 @@ fn tests() {
             "errs": "",
             "msg": {
                 "telemetry": [
-                    {"value":"3.4"},
+                    {"value":"3.6"},
                     {"value":"3.5"},
-                    {"value":"3.6"}
+                    {"value":"3.4"}
                 ]
             }
         })

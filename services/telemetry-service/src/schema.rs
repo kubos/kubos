@@ -82,7 +82,7 @@ graphql_object!(QueryRoot: Context |&self| {
             query = query.limit(l.into());
         }
 
-        query = query.order(dsl::timestamp);
+        query = query.order(dsl::timestamp.desc());
 
         let entries = query.load::<kubos_telemetry_db::Entry>(
             &executor.context().subsystem().connection)?;
