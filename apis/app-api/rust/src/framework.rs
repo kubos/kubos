@@ -19,18 +19,16 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-use std::fmt;
 use getopts::Options;
 use std::env;
+use std::fmt;
 
-/// The RunLevel type
-/// The different RunLevels supported by KubOS applications
+/// The different ways an application can be started
 #[derive(Clone, Debug, PartialEq)]
 pub enum RunLevel {
-    /// An application will start at system boot time, and is managed automatically by the
-    /// Application Service
+    /// Logic intended to be run if the application is started at system boot time
     OnBoot,
-    /// An application will start when commanded through the `start_app` GraphQL mutation
+    /// Logic intended to be run if the application is started manually
     OnCommand,
 }
 
@@ -43,31 +41,24 @@ impl fmt::Display for RunLevel {
     }
 }
 
-/// The trait that should be implemented by KubOS Applications to be notified when the application
-/// goes through one of three lifecycle events:
-///
-/// 1. Start on system boot-up
-/// 2. Start on demand when being commanded (i.e. through the `start_app` GraphQL mutation)
-/// 3. When the app is shutting down, to clean up any resources initialized in on_boot or
-///    on_command
+/// Common trait which is used to ensure handlers for all required run levels are defined
 pub trait AppHandler {
-    /// Called when the Application is started at system boot time
+    /// Called when the application is started at system boot time
     fn on_boot(&self);
 
-    /// Called when the Application is started on demand through the `start_app` GraphQL mutation
+    /// Called when the application is started on-demand through the `start_app` GraphQL mutation
     fn on_command(&self);
 }
 
-/// A helper macro that can be called from a KubOS application's `main` function.
+/// A helper macro which detects the requested run level and calls the appropriate handler function
 ///
 /// # Arguments
 ///
-/// * `handler` - An implementation of `AppHandler`
+/// * `handler` - A reference to an object which implements the run level handler functions
 ///
 /// # Examples
 ///
 /// ```
-/// extern crate getopts;
 /// #[macro_use]
 /// extern crate kubos_app;
 ///
@@ -92,33 +83,27 @@ pub trait AppHandler {
 #[macro_export]
 macro_rules! app_main {
     ($handler:expr) => {{
-
-        let name: Option<&'static str> = option_env!("CARGO_PKG_NAME");
-        let version: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
-        let authors: Option<&'static str> = option_env!("CARGO_PKG_AUTHORS");
-
-        kubos_app::app_start(
-            name.unwrap_or("Unknown"),
-            version.unwrap_or("Unknown"),
-            authors.unwrap_or("Unknown"),
-            std::process::id(),
-            $handler,
-        )
+        kubos_app::app_start(std::process::id(), $handler)
     }};
 }
 
 /// The entry point for all KubOS applications. The preferred way to use this application
 /// is through the `app_main!` macro
-pub fn app_start(name: &str, version: &str, authors: &str, _pid: u32, handler: &AppHandler) {
+pub fn app_start(_pid: u32, handler: &AppHandler) {
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
 
     let mut opts = Options::new();
-    opts.optflag("m", "metadata", "Print app metadata and immediately exit");
+    opts.optflagopt(
+        "r",
+        "run",
+        "Run level which should be executed",
+        "RUN_LEVEL",
+    );
     opts.optflag("h", "help", "Print this help menu");
 
     let matches = match opts.parse(&args[1..]) {
-        Ok(m) => m,
+        Ok(r) => r,
         Err(f) => panic!(f.to_string()),
     };
 
@@ -128,28 +113,21 @@ pub fn app_start(name: &str, version: &str, authors: &str, _pid: u32, handler: &
         return;
     }
 
-    if matches.opt_present("m") {
-        println!("name = \"{}\"", name);
-        println!("version = \"{}\"", version);
-        println!("author = \"{}\"", authors);
-        return;
-    }
-
     let _uuid = env::var_os("KUBOS_APP_UUID");
-    let run_level = env::var_os("KUBOS_APP_RUN_LEVEL");
+    let run_level = matches.opt_str("r").unwrap_or("OnCommand".to_owned());
 
-    match run_level {
-        Some(ref level) if level == "OnBoot" => {
+    match run_level.as_ref() {
+        "OnBoot" => {
             handler.on_boot();
         }
-        Some(ref level) if level == "OnCommand" => {
+        "OnCommand" => {
             handler.on_command();
         }
-        _ => {
+        level => {
             eprintln!(
-                "Warning: Unknown or missing KUBOS_APP_RUN_LEVEL. Set to OnBoot or OnCommand"
+                "Error: Unknown run level was requested - {}. Available run levels: OnBoot, OnCommand", level
             );
-            handler.on_command();
+            return;
         }
     }
 }

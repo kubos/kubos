@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-use std::cell::RefCell;
 use kubos_app::RunLevel;
+use std::cell::RefCell;
 use std::fs;
 use std::io::{Read, Write};
 use std::os::unix;
@@ -235,29 +235,54 @@ impl AppRegistry {
             return Err(format!("{} does not exist", path));
         }
 
-        let app_filename = match app_path.file_name() {
-            Some(filename) => filename,
-            None => return Err(String::from("Couldn't get app filename")),
+        if !app_path.is_dir() {
+            return Err(format!("{} is not a directory", path));
+        }
+
+        let files: Vec<fs::DirEntry> = match fs::read_dir(app_path) {
+            Ok(v) => v.filter_map(|file| file.ok()).collect(),
+            Err(error) => return Err(format!("Failed to read directory: {}", error)),
         };
 
-        let result = Command::new(path).args(&["--metadata"]).output();
-        if result.is_err() {
-            return Err(format!(
-                "Failed to get app metadata: {}",
-                result.err().unwrap()
-            ));
+        if files.len() != 2 {
+            return Err("Exactly two files should be present in the app directory".to_owned());
         }
 
-        let app_metadata = result.unwrap();
-        if !app_metadata.status.success() {
-            return Err("Bad exit code getting app metadata".to_string());
+        let mut manifest_file: Option<fs::DirEntry> = None;
+        let mut app_file: Option<fs::DirEntry> = None;
+
+        for file in files {
+            match file.file_name().to_str() {
+                Some("manifest.toml") => manifest_file = Some(file),
+                Some(_) => app_file = Some(file),
+                _ => {}
+            }
         }
 
-        let metadata: AppMetadata = toml::from_slice(app_metadata.stdout.as_slice()).unwrap();
+        let manifest = match manifest_file {
+            Some(file) => file,
+            None => return Err("Failed to find manifest file".to_owned()),
+        };
+        let app = match app_file {
+            Some(file) => file,
+            None => return Err("Failed to find app file".to_owned()),
+        };
+
+        let mut data = String::new();
+        fs::File::open(manifest.path())
+            .and_then(|mut fp| fp.read_to_string(&mut data))
+            .or_else(|error| return Err(format!("Failed to read manifest: {}", error)))?;
+
+        let metadata: AppMetadata = toml::from_str(&data)
+            .or_else(|error| return Err(format!("Failed to parse manifest: {}", error)))?;
 
         let mut entries = self.entries.borrow_mut();
         let mut app_uuid = Uuid::new_v4().hyphenated().to_string();
+        // TODO: Do the lookup based on the passed UUID
+        // Also TODO: Allow a UUID to be passed...
         for entry in entries.iter_mut() {
+            // Find the existing active version of the app and make it inactive.
+            // Use the existing UUID for our new app
             if entry.active_version && entry.app.metadata.name == metadata.name {
                 entry.active_version = false;
                 app_uuid = entry.app.uuid.clone();
@@ -275,19 +300,16 @@ impl AppRegistry {
         let app_dir = Path::new(&app_dir_str);
 
         if !app_dir.exists() {
-            match fs::create_dir_all(app_dir) {
-                Err(err) => {
-                    return Err(format!(
-                        "Couldn't create app dir {}: {:?}",
-                        app_dir.display(),
-                        err
-                    ));
-                }
-                Ok(_) => {}
-            }
+            fs::create_dir_all(app_dir).or_else(|err| {
+                return Err(format!(
+                    "Couldn't create app dir {}: {:?}",
+                    app_dir.display(),
+                    err
+                ));
+            })?;
         }
 
-        match fs::copy(path, app_dir.join(Path::new(app_filename))) {
+        match fs::copy(app.path(), app_dir.join(app.file_name())) {
             Err(err) => {
                 return Err(format!("Couldn't copy app binary: {:?}", err));
             }
@@ -325,12 +347,14 @@ impl AppRegistry {
                 uuid: app_uuid,
                 metadata: metadata,
                 pid: 0,
-                path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy()).to_owned(),
+                path: format!("{}/{}", app_dir_str, app.file_name().to_string_lossy()),
             },
             active_version: true,
         };
 
+        // Add the new registry entry
         entries.push(reg_entry);
+        // Create the app.toml file and save the metadata information
         entries[entries.len() - 1].save()?;
         Ok(entries[entries.len() - 1].clone())
     }
@@ -414,7 +438,8 @@ impl AppRegistry {
 
         match Command::new(app_path)
             .env("KUBOS_APP_UUID", app.uuid.clone())
-            .env("KUBOS_APP_RUN_LEVEL", format!("{}", run_level))
+            .arg("-r")
+            .arg(format!("{}", run_level))
             .spawn()
         {
             Ok(child) => Ok(child.id()),

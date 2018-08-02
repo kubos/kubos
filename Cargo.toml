@@ -1,6 +1,6 @@
 [workspace]
 members = [
-"apis/app-api",
+"apis/app-api/rust",
 "apis/adcs-api",
 "apis/clyde-3g-eps-api",
 "apis/eps-api",

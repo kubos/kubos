@@ -139,7 +139,7 @@ Nominal Operations
 
 In day-to-day operations, the space/ground link will most commonly be used for a few different purposes:
 
-- Executing :doc:`mission applications <what-is-a-mission-application>` on-demand. For instance, triggering a mission application which orients an imaging device to the requested coordinates and takes a picture.
+- Executing :doc:`mission applications <app-docs/index>` on-demand. For instance, triggering a mission application which orients an imaging device to the requested coordinates and takes a picture.
 - Automatically sending and receiving health and status information (health and status beacon).
 - Querying the :doc:`telemetry database <services/telemetry-db>` for specific hardware status information.
 - Downloading payload data files through the :doc:`file transfer service <services/file>`.
