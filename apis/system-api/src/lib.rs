@@ -27,9 +27,6 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate toml;
 
-use std::net::UdpSocket;
-use std::time::Duration;
-
 mod config;
 mod uboot;
 
@@ -40,9 +37,6 @@ pub use uboot::UBootVars;
 pub const SERVICE_APP: &'static str = "app-service";
 /// The name of the KubOS telemetry db service that can be used to dervice service configuration
 pub const SERVICE_TELEMETRY: &'static str = "telemetry-service";
-
-/// The result type used by `query`
-type Result<T> = std::result::Result<T, failure::Error>;
 
 /// Information about the version(s) of KubOS installed in the system
 pub struct KubosVersions {
@@ -68,65 +62,4 @@ pub fn kubos_versions() -> KubosVersions {
 pub fn initial_deploy() -> Option<bool> {
     let vars = UBootVars::new();
     vars.get_bool(uboot::VAR_KUBOS_INITIAL_DEPLOY)
-}
-
-/// Execute a GraphQL query against a running KubOS Service using UDP.
-///
-/// Returns the parsed JSON result as a serde_json::Value on success
-///
-/// # Arguments
-///
-/// * `host_addr` - An address in `IP:PORT` format where the Service is running
-/// * `query` - the raw GraphQL query as a string
-/// * `timeout` - The timeout provided to the UDP socket. Note: this function will block when `None`
-///               is provided here
-///
-pub fn query(host_addr: &str, query: &str, timeout: Option<Duration>) -> Result<serde_json::Value> {
-    let socket = UdpSocket::bind("0.0.0.0:0")?;
-    socket.connect(host_addr)?;
-    socket.send(query.as_bytes())?;
-
-    // Allow the caller to set a read timeout on the socket
-    socket.set_read_timeout(timeout).unwrap();
-
-    let mut buf = [0; 4096];
-    let (amt, _) = socket.recv_from(&mut buf)?;
-
-    let v: serde_json::Value = serde_json::from_slice(&buf[0..(amt)])?;
-
-    if let Some(errs) = v.get("errs") {
-        if errs.is_string() {
-            let errs_str = errs.as_str().unwrap();
-            if errs_str.len() > 0 {
-                return Err(format_err!("{}", errs_str.to_string()));
-            }
-        } else {
-            match errs.get("message") {
-                Some(message) => {
-                    return Err(format_err!("{}", message.as_str().unwrap().to_string()));
-                }
-                None => {
-                    return Err(format_err!("{}", serde_json::to_string(errs).unwrap()));
-                }
-            }
-        }
-    }
-
-    match v.get(0) {
-        Some(err) if err.get("message").is_some() => {
-            return Err(format_err!(
-                "{}",
-                err["message"].as_str().unwrap().to_string(),
-            ));
-        }
-        _ => {}
-    }
-
-    match v.get("msg") {
-        Some(result) => Ok(result.clone()),
-        None => Err(format_err!(
-            "No result returned in 'msg' key: {}",
-            serde_json::to_string(&v).unwrap()
-        )),
-    }
 }

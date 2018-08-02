@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 use std::cell::RefCell;
-use std::fmt;
+use kubos_app::RunLevel;
 use std::fs;
 use std::io::{Read, Write};
 use std::os::unix;
@@ -38,43 +38,6 @@ pub struct AppMetadata {
     pub author: String,
 }
 
-impl AppMetadata {
-    /// Create a new AppMetadata object
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use kubos_app::registry::AppMetadata;
-    /// let metadata = AppMetadata::new("my-app", "1.0", "Jane Doe <jane@doe.com>");
-    /// ```
-    pub fn new(name: &str, version: &str, author: &str) -> AppMetadata {
-        AppMetadata {
-            name: name.to_string(),
-            version: version.to_string(),
-            author: author.to_string(),
-        }
-    }
-}
-
-/// The different RunLevels supported by KubOS applications
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
-pub enum RunLevel {
-    /// An application will start at system boot time, and is managed automatically by the
-    /// Application Service
-    OnBoot,
-    /// An application will start when commanded through the `start_app` GraphQL mutation
-    OnCommand,
-}
-
-impl fmt::Display for RunLevel {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            RunLevel::OnBoot => write!(f, "OnBoot"),
-            RunLevel::OnCommand => write!(f, "OnCommand"),
-        }
-    }
-}
-
 /// Kubos App struct
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct App {
@@ -93,8 +56,6 @@ pub struct App {
 pub struct AppRegistryEntry {
     /// Whether or not this application is the active installation
     pub active_version: bool,
-    /// The run level of the application
-    pub run_level: RunLevel,
     /// The app itself
     pub app: App,
 }
@@ -367,7 +328,6 @@ impl AppRegistry {
                 path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy()).to_owned(),
             },
             active_version: true,
-            run_level: RunLevel::OnCommand,
         };
 
         entries.push(reg_entry);

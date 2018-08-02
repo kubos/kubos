@@ -148,7 +148,9 @@ where
         let mut buf = [0; 4096];
         loop {
             // Wait for an incoming message
-            let (size, peer) = socket.recv_from(&mut buf).expect("Failed to receive a message");
+            let (size, peer) = socket
+                .recv_from(&mut buf)
+                .expect("Failed to receive a message");
             if let Ok(query_string) = String::from_utf8(buf[0..(size)].to_vec()) {
                 //println!(
                 //  "[{}] <- [{}] {}",

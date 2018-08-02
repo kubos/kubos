@@ -40,7 +40,7 @@ fn register_app() {
     let register_query = format!(
         r#"mutation {{
         register(path: "{}") {{
-            active, runLevel, app {{
+            active, app {{
                 uuid, name, version, author, pid, path
             }}
         }}
@@ -48,13 +48,12 @@ fn register_app() {
         app_bin.to_str().unwrap()
     );
 
-    let apps_query = r#"{ apps { active, runLevel, app {
+    let apps_query = r#"{ apps { active, app {
         uuid, name, version, author, pid, path
     } } }"#;
 
     fn assert_expected(v: &serde_json::Value) {
         assert_eq!(v["active"], json!(true));
-        assert_eq!(v["runLevel"], json!("OnCommand"));
         assert!(v["app"].is_object());
         assert_eq!(v["app"]["name"], json!("dummy"));
         assert_eq!(v["app"]["version"], json!("0.0.1"));
@@ -66,11 +65,11 @@ fn register_app() {
     let addr = fixture.addr.clone();
     let result = panic::catch_unwind(|| {
         println!("{}", register_query);
-        let result = kubos_system::query(&addr, &register_query, Some(Duration::from_secs(2)));
+        let result = kubos_app::query(&addr, &register_query, Some(Duration::from_secs(2)));
         assert!(result.is_ok(), "{:?}", result.err());
         assert_expected(&result.unwrap()["register"]);
 
-        let result = kubos_system::query(&addr, &apps_query, Some(Duration::from_secs(5)));
+        let result = kubos_app::query(&addr, &apps_query, Some(Duration::from_secs(5)));
         assert!(result.is_ok());
         assert_expected(&result.unwrap()["apps"][0]);
     });

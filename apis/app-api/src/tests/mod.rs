@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-//! A simple API to make standalone Rust applications with high-level hooks
-//! for mission life-cycle management
-#![deny(missing_docs)]
-#![deny(warnings)]
-#[macro_use]
-extern crate failure;
-extern crate getopts;
-#[cfg(test)]
-#[macro_use]
-extern crate juniper;
-#[cfg(test)]
-extern crate kubos_service;
-#[cfg(not(test))]
-extern crate serde_json;
-#[cfg(test)]
-#[macro_use]
-extern crate serde_json;
+mod mock_service;
 
-mod framework;
+macro_rules! mock_service {
+    ($addr:expr, $port:expr) => {{
+        thread::spawn(|| {
+            let config = format!(
+                r#"
+                [mock-service.addr]
+                ip = "{}"
+                port = {}
+                "#,
+                $addr, $port
+            );
+            Service::new(
+                Config::new_from_str("mock-service", &config),
+                Subsystem,
+                QueryRoot,
+                MutationRoot,
+            ).start()
+        });
+
+        thread::sleep(Duration::from_millis(100));
+    }};
+}
+
 mod query;
-#[cfg(test)]
-mod tests;
-
-pub use framework::*;
-pub use query::query;
