@@ -433,6 +433,7 @@ impl AppRegistry {
 
         let app_path = PathBuf::from(&app.path);
         if !app_path.exists() {
+            // TODO: Unregister app if path doesn't exist
             return Err(format!("{} does not exist", &app.path));
         }
 
@@ -445,5 +446,52 @@ impl AppRegistry {
             Ok(child) => Ok(child.id()),
             Err(err) => Err(format!("Failed to spawn app: {:?}", err)),
         }
+    }
+
+    /// Call the active version of all registered applications with the "OnBoot" run level
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::{AppRegistry, RunLevel};
+    /// let registry = AppRegistry::new();
+    /// registry.run_onboot();
+    /// ```
+    pub fn run_onboot(&self) -> Result<(), String> {
+        // TODO: Decide whether or not we actually want to track started/failed apps
+        let mut apps_started = 0;
+        let mut apps_not_started = 0;
+
+        let active_symlink = PathBuf::from(format!("{}/active", self.apps_dir));
+        if !active_symlink.exists() {
+            return Err(format!("Failed to get list of active UUIDs"));
+        }
+
+        for entry in fs::read_dir(active_symlink)
+            .or_else(|error| return Err(format!("Failed to process existing apps: {}", error)))?
+        {
+            match entry {
+                Ok(file) => {
+                    let uuid = file.file_name();
+                    match self.start_app(&uuid.to_string_lossy(), RunLevel::OnBoot) {
+                        Ok(_) => apps_started += 1,
+                        Err(_) => apps_not_started += 1,
+                    }
+                }
+                Err(_) => apps_not_started += 1,
+            }
+        }
+
+        // QUESTION: Keep this or not? It's kind of a nice informational message
+        println!(
+            "Apps started: {}, Apps failed: {}",
+            apps_started, apps_not_started
+        );
+
+        if apps_not_started != 0 {
+            return Err(format!("Failed to start {} app/s", apps_not_started));
+        }
+
+        Ok(())
     }
 }
