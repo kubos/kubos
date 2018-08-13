@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use failure::Fail;
+use failure::Error;
 use isis_ants_api::*;
 use std::cell::{Cell, RefCell};
 use std::str;

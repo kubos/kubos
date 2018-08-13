@@ -14,11 +14,10 @@
 // limitations under the License.
 //
 
-use failure::Fail;
+use failure::Error;
 use novatel_oem6_api::Log::*;
 use novatel_oem6_api::*;
 use std::cell::{Cell, RefCell};
-use std::io::Error;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError, TrySendError};
 use std::sync::{Arc, Mutex};
 use std::thread;

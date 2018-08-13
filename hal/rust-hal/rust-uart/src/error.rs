@@ -18,16 +18,16 @@ use super::*;
 use std::error::Error;
 
 /// Custom errors for UART actions
-#[derive(Fail, Display, Debug, Clone, PartialEq)]
+#[derive(Fail, Debug, Clone, PartialEq)]
 pub enum UartError {
     /// Catch-all error case
-    #[display(fmt = "Generic Error")]
+    #[fail(display = "Generic Error")]
     GenericError,
     /// A read/write call was made while another call was already in-progress
-    #[display(fmt = "Serial port already in-use")]
+    #[fail(display = "Serial port already in-use")]
     PortBusy,
     /// An I/O error was thrown by the kernel
-    #[display(fmt = "IO Error: {}", description)]
+    #[fail(display = "IO Error: {}", description)]
     IoError {
         /// The underlying error type
         cause: std::io::ErrorKind,
@@ -35,7 +35,7 @@ pub enum UartError {
         description: String,
     },
     /// An error was thrown by the serial driver
-    #[display(fmt = "Serial Error: {}", description)]
+    #[fail(display = "Serial Error: {}", description)]
     SerialError {
         /// The underlying error type
         cause: serial::ErrorKind,

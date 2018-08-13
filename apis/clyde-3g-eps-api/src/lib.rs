@@ -22,7 +22,6 @@
 #[macro_use]
 extern crate bitflags;
 extern crate eps_api;
-#[macro_use]
 extern crate failure;
 extern crate nom;
 extern crate rust_i2c;
