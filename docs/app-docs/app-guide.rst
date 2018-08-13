@@ -170,11 +170,11 @@ making sure to include ``#!/usr/bin/env python`` at the top of the file::
     def main():
         parser = argparse.ArgumentParser()
         
-        parser.add_argument('--run', '-r', nargs=1, default='OnCommand')
+        parser.add_argument('--run', '-r', default='OnCommand')
         
         args = parser.parse_args()
         
-        if args.run[0] == 'OnBoot':
+        if args.run == 'OnBoot':
             on_boot()
         else:
             on_command()
