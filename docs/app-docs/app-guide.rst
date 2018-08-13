@@ -124,10 +124,10 @@ We'll update the `src/main.rs` file to have the following::
     
     impl AppHandler for MyApp {
         fn on_boot(&self) {
-            fs::write("home/kubos/test-output", "OnBoot logic\r\n").unwrap();
+            fs::write("/home/kubos/test-output", "OnBoot logic\r\n").unwrap();
         }
         fn on_command(&self) {
-            fs::write("home/kubos/test-output", "OnCommand logic\r\n").unwrap();
+            fs::write("/home/kubos/test-output", "OnCommand logic\r\n").unwrap();
         }
     }
     
@@ -139,7 +139,7 @@ We'll update the `src/main.rs` file to have the following::
 And then update the `config.toml` file to add the `kubos-app` dependency ::
 
     [dependencies]
-    kubos-app = { path = "../../apis/app-api/rust" }
+    kubos-app = { git = "https://github.com/kubos/kubos" }
     
 And then compile the project for the Beaglebone Black target::
 
@@ -165,16 +165,16 @@ making sure to include ``#!/usr/bin/env python`` at the top of the file::
     def on_command():
         
         file = open("/home/kubos/test-output","w+")
-        file.write("OnBoot logic\r\n")
+        file.write("OnCommand logic\r\n")
     
     def main():
         parser = argparse.ArgumentParser()
         
-        parser.add_argument('--run', '-r', nargs=1, default='OnCommand')
+        parser.add_argument('--run', '-r', default='OnCommand')
         
         args = parser.parse_args()
         
-        if args.run[0] == 'OnBoot':
+        if args.run == 'OnBoot':
             on_boot()
         else:
             on_command()
@@ -188,7 +188,8 @@ And then we'll update the file permissions to allow execution::
     
 .. note::
 
-    We're foregoing the usual ".py" extension so that the file name is the same as the Rust example file name. 
+    We're foregoing the usual ".py" extension so that the file name is the same as the Rust example file name
+    for the remainder of this walkthrough. It has no impact on actual execution.
 
 Manifest
 ^^^^^^^^
@@ -211,7 +212,7 @@ Registering
 Once both files have been transferred, we can register the application using the ``register`` query::
 
     mutation {
-        register(path: /home/kubos/example-app) {
+        register(path: "/home/kubos/example-app") {
             app {
                 uuid,
                 name,
@@ -238,7 +239,7 @@ Starting
 We'll go ahead and start our app now to verify it works::
 
     mutation {
-        startApp(uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a, runLevel: OnCommand)
+        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand")
     }
     
 The response JSON should contain a number indicating the PID of our started application.
@@ -260,7 +261,7 @@ After compiling (for Rust) and transferring the new files into a new folder, `/h
 we can register the updated application::
  
     mutation {
-        register(path: /home/kubos/example-app-2) {
+        register(path: "/home/kubos/example-app-2") {
             app {
                 uuid,
                 name,
