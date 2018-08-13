@@ -15,7 +15,8 @@
  */
 
 use super::mock_service::*;
-use kubos_service::{Config, Service};
+use kubos_service::Service;
+use kubos_system::Config as ServiceConfig;
 use query::query;
 
 use std::time::Duration;
@@ -36,8 +37,7 @@ fn query_good() {
         });
 
     let result = query(
-        "mock-service",
-        Some(&config_file.to_string_lossy()),
+        ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap();
@@ -56,8 +56,7 @@ fn query_error() {
         }"#;
 
     let result = query(
-        "mock-service",
-        Some(&config_file.to_string_lossy()),
+        ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap_err();
@@ -78,8 +77,7 @@ fn query_bad_service() {
         }"#;
 
     let result = query(
-        "fake-service",
-        Some(&config_file.to_string_lossy()),
+        ServiceConfig::new_from_path("fake-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap_err();
@@ -96,8 +94,7 @@ fn query_bad_file() {
         }"#;
 
     let result = query(
-        "mock-service",
-        Some("/fake/path"),
+        ServiceConfig::new_from_path("mock-service", "/fake/path".to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap_err();
@@ -122,8 +119,7 @@ fn query_mutation() {
         });
 
     let result = query(
-        "mock-service",
-        Some(&config_file.to_string_lossy()),
+        ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap();

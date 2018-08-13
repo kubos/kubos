@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 
 [dependencies]
-failure = { git = "https://github.com/rust-lang-nursery/failure" }
+failure = { git = "https://github.com/rust-lang-nursery/failure", branch = "evolution/1.0" }
 isis-ants-api = { path = "../../apis/isis-ants-api" }
 juniper =  "0.9"
 kubos-service = { path = "../kubos-service" }
