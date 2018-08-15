@@ -15,24 +15,63 @@
  */
 #![deny(warnings)]
 
+extern crate getopts;
 #[macro_use]
 extern crate juniper;
 extern crate kubos_app;
 extern crate kubos_service;
+#[macro_use]
+extern crate serde_derive;
+#[cfg(test)]
+#[macro_use]
+extern crate serde_json;
+#[cfg(test)]
+extern crate tempfile;
+extern crate toml;
+extern crate uuid;
 
-use kubos_app::registry::AppRegistry;
-use kubos_service::{Config, Service};
-
+mod registry;
 mod schema;
+#[cfg(test)]
+mod tests;
+
+use getopts::Options;
+use kubos_service::{Config, Service};
+use registry::AppRegistry;
+use std::env;
 
 fn main() {
-    let config = Config::new("app-service");
+    let args: Vec<String> = env::args().collect();
+    let mut opts = Options::new();
+
+    opts.optflag("b", "onboot", "Execute OnBoot logic");
+    opts.optopt("c", "config", "Path to config file", "CONFIG");
+    let matches = match opts.parse(&args[1..]) {
+        Ok(m) => m,
+        Err(err) => {
+            eprintln!("Unable to parse command options: {}", err);
+            return;
+        }
+    };
+
+    let config = match matches.opt_str("c") {
+        Some(file) => Config::new_from_path("app-service", file),
+        None => Config::new("app-service"),
+    };
+
     let registry = {
         match config.get("registry-dir") {
             Some(dir) => AppRegistry::new_from_dir(dir.as_str().unwrap()),
             None => AppRegistry::new(),
         }
     };
+
+    match matches.opt_present("b") {
+        true => registry
+            .run_onboot()
+            .unwrap_or_else(|err| eprintln!("Error starting applications: {}", err)),
+        false => {}
+    }
 
     Service::new(config, registry, schema::QueryRoot, schema::MutationRoot).start();
 }

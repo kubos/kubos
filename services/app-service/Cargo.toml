@@ -4,9 +4,16 @@ version = "0.1.0"
 authors = ["Marshall Culpepper <marshall@kubos.com>"]
 
 [dependencies]
-juniper =  "0.9.2"
-kubos-app = { path = "../../apis/app-api" }
+kubos-app = { path = "../../apis/app-api/rust" }
 kubos-service = { path = "../kubos-service" }
+
+getopts = "0.2"
+juniper =  "0.9.2"
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
+toml = "0.4"
+uuid = { version = "0.6", features = ["v4"] }
 
 [dev-dependencies]
 kubos-system = { path = "../../apis/system-api" }

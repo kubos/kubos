@@ -88,7 +88,7 @@ To list all available versions of a specific application, specify the desired UU
 For example::
 
     {
-        apps(uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a) {
+        apps(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a") {
             app {
                 name,
                 version
@@ -101,11 +101,14 @@ For example::
 Registering
 -----------
 
-Once an application has been written and compiled, and its corresponding manifest file has been created,
-it can be transferred to the OBC using the :doc:`file transfer service <../services/file>`.
+Once an application has been written and compiled, the application and its accompanying :ref:`manifest.toml file <app-manifest>`
+should be transferred to a new directory on the OBC. 
+This file transfer can be done using the :doc:`file transfer service <../services/file>`.
 
-It can then be registereed with the applications service using the ``register`` mutation by specifying
-the directory containing the application binary and its corresponding :ref:`manifest file <app-manifest>`.
+The application and manifest *must* be the only files in the directory.
+
+It can then be registered with the applications service using the ``register`` mutation by specifying
+the directory containing the application files.
 
 The service will copy the application from the specified path into the apps registry.
 Once registered, users may delete the original application.
@@ -113,7 +116,7 @@ Once registered, users may delete the original application.
 For example::
 
     mutation {
-        register(path: /home/kubos/payload-app) {
+        register(path: "/home/kubos/payload-app") {
             active,
             app {
                 name,
@@ -135,7 +138,7 @@ The mutation returns a single boolean value to indicate success or failure.
 For example::
 
     mutation {
-        uninstall(uuid: 46d01f19-ab45-4c6f-896e-88f90266f12e, version: 1.1)
+        uninstall(uuid: "46d01f19-ab45-4c6f-896e-88f90266f12e", version: "1.1")
     }
     
     
@@ -143,6 +146,9 @@ For example::
     
 Starting an Application
 -----------------------
+
+On Demand
+~~~~~~~~~
 
 To manually start an application, the ``startApp`` mutation can be used.
 
@@ -154,11 +160,19 @@ On success, the mutation will return the PID of the running application.
 For example::
 
     mutation {
-        startApp(uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a, runLevel: OnCommand)
+        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand")
     }
     
 Under the covers, the service receives the mutation and identifies the current active version of the
-application specified. It then calls that version's binary, passing along the run level as a system envar.
+application specified. It then calls that version's binary, passing along the run level as a command argument.
+
+At Boot
+~~~~~~~
+
+All applications will be started with the ``OnBoot`` run level automatically when the applications service is
+started during system initialization.
+
+This logic may also be triggered by manually starting the applications service with the ``-b`` flag. 
 
 .. todo::
 

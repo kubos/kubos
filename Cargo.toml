@@ -1,6 +1,6 @@
 [workspace]
 members = [
-"apis/app-api",
+"apis/app-api/rust",
 "apis/adcs-api",
 "apis/clyde-3g-eps-api",
 "apis/eps-api",
@@ -15,6 +15,7 @@ members = [
 "apis/telemetry-db-api",
 "examples/rust-c-service/extern-lib",
 "examples/rust-c-service/service",
+"examples/rust-mission-app",
 "examples/rust-service",
 "examples/udp-service-client",
 "hal/rust-hal/rust-i2c",

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+use kubos_app::RunLevel;
 use std::cell::RefCell;
-use std::fmt;
 use std::fs;
 use std::io::{Read, Write};
 use std::os::unix;
@@ -38,43 +38,6 @@ pub struct AppMetadata {
     pub author: String,
 }
 
-impl AppMetadata {
-    /// Create a new AppMetadata object
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use kubos_app::registry::AppMetadata;
-    /// let metadata = AppMetadata::new("my-app", "1.0", "Jane Doe <jane@doe.com>");
-    /// ```
-    pub fn new(name: &str, version: &str, author: &str) -> AppMetadata {
-        AppMetadata {
-            name: name.to_string(),
-            version: version.to_string(),
-            author: author.to_string(),
-        }
-    }
-}
-
-/// The different RunLevels supported by KubOS applications
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
-pub enum RunLevel {
-    /// An application will start at system boot time, and is managed automatically by the
-    /// Application Service
-    OnBoot,
-    /// An application will start when commanded through the `start_app` GraphQL mutation
-    OnCommand,
-}
-
-impl fmt::Display for RunLevel {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            RunLevel::OnBoot => write!(f, "OnBoot"),
-            RunLevel::OnCommand => write!(f, "OnCommand"),
-        }
-    }
-}
-
 /// Kubos App struct
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct App {
@@ -93,8 +56,6 @@ pub struct App {
 pub struct AppRegistryEntry {
     /// Whether or not this application is the active installation
     pub active_version: bool,
-    /// The run level of the application
-    pub run_level: RunLevel,
     /// The app itself
     pub app: App,
 }
@@ -274,29 +235,54 @@ impl AppRegistry {
             return Err(format!("{} does not exist", path));
         }
 
-        let app_filename = match app_path.file_name() {
-            Some(filename) => filename,
-            None => return Err(String::from("Couldn't get app filename")),
+        if !app_path.is_dir() {
+            return Err(format!("{} is not a directory", path));
+        }
+
+        let files: Vec<fs::DirEntry> = match fs::read_dir(app_path) {
+            Ok(v) => v.filter_map(|file| file.ok()).collect(),
+            Err(error) => return Err(format!("Failed to read directory: {}", error)),
         };
 
-        let result = Command::new(path).args(&["--metadata"]).output();
-        if result.is_err() {
-            return Err(format!(
-                "Failed to get app metadata: {}",
-                result.err().unwrap()
-            ));
+        if files.len() != 2 {
+            return Err("Exactly two files should be present in the app directory".to_owned());
         }
 
-        let app_metadata = result.unwrap();
-        if !app_metadata.status.success() {
-            return Err("Bad exit code getting app metadata".to_string());
+        let mut manifest_file: Option<fs::DirEntry> = None;
+        let mut app_file: Option<fs::DirEntry> = None;
+
+        for file in files {
+            match file.file_name().to_str() {
+                Some("manifest.toml") => manifest_file = Some(file),
+                Some(_) => app_file = Some(file),
+                _ => {}
+            }
         }
 
-        let metadata: AppMetadata = toml::from_slice(app_metadata.stdout.as_slice()).unwrap();
+        let manifest = match manifest_file {
+            Some(file) => file,
+            None => return Err("Failed to find manifest file".to_owned()),
+        };
+        let app = match app_file {
+            Some(file) => file,
+            None => return Err("Failed to find app file".to_owned()),
+        };
+
+        let mut data = String::new();
+        fs::File::open(manifest.path())
+            .and_then(|mut fp| fp.read_to_string(&mut data))
+            .or_else(|error| return Err(format!("Failed to read manifest: {}", error)))?;
+
+        let metadata: AppMetadata = toml::from_str(&data)
+            .or_else(|error| return Err(format!("Failed to parse manifest: {}", error)))?;
 
         let mut entries = self.entries.borrow_mut();
         let mut app_uuid = Uuid::new_v4().hyphenated().to_string();
+        // TODO: Do the lookup based on the passed UUID
+        // Also TODO: Allow a UUID to be passed...
         for entry in entries.iter_mut() {
+            // Find the existing active version of the app and make it inactive.
+            // Use the existing UUID for our new app
             if entry.active_version && entry.app.metadata.name == metadata.name {
                 entry.active_version = false;
                 app_uuid = entry.app.uuid.clone();
@@ -314,19 +300,16 @@ impl AppRegistry {
         let app_dir = Path::new(&app_dir_str);
 
         if !app_dir.exists() {
-            match fs::create_dir_all(app_dir) {
-                Err(err) => {
-                    return Err(format!(
-                        "Couldn't create app dir {}: {:?}",
-                        app_dir.display(),
-                        err
-                    ));
-                }
-                Ok(_) => {}
-            }
+            fs::create_dir_all(app_dir).or_else(|err| {
+                return Err(format!(
+                    "Couldn't create app dir {}: {:?}",
+                    app_dir.display(),
+                    err
+                ));
+            })?;
         }
 
-        match fs::copy(path, app_dir.join(Path::new(app_filename))) {
+        match fs::copy(app.path(), app_dir.join(app.file_name())) {
             Err(err) => {
                 return Err(format!("Couldn't copy app binary: {:?}", err));
             }
@@ -364,13 +347,14 @@ impl AppRegistry {
                 uuid: app_uuid,
                 metadata: metadata,
                 pid: 0,
-                path: format!("{}/{}", app_dir_str, app_filename.to_string_lossy()).to_owned(),
+                path: format!("{}/{}", app_dir_str, app.file_name().to_string_lossy()),
             },
             active_version: true,
-            run_level: RunLevel::OnCommand,
         };
 
+        // Add the new registry entry
         entries.push(reg_entry);
+        // Create the app.toml file and save the metadata information
         entries[entries.len() - 1].save()?;
         Ok(entries[entries.len() - 1].clone())
     }
@@ -449,16 +433,65 @@ impl AppRegistry {
 
         let app_path = PathBuf::from(&app.path);
         if !app_path.exists() {
+            // TODO: Unregister app if path doesn't exist
             return Err(format!("{} does not exist", &app.path));
         }
 
         match Command::new(app_path)
             .env("KUBOS_APP_UUID", app.uuid.clone())
-            .env("KUBOS_APP_RUN_LEVEL", format!("{}", run_level))
+            .arg("-r")
+            .arg(format!("{}", run_level))
             .spawn()
         {
             Ok(child) => Ok(child.id()),
             Err(err) => Err(format!("Failed to spawn app: {:?}", err)),
         }
+    }
+
+    /// Call the active version of all registered applications with the "OnBoot" run level
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::{AppRegistry, RunLevel};
+    /// let registry = AppRegistry::new();
+    /// registry.run_onboot();
+    /// ```
+    pub fn run_onboot(&self) -> Result<(), String> {
+        // TODO: Decide whether or not we actually want to track started/failed apps
+        let mut apps_started = 0;
+        let mut apps_not_started = 0;
+
+        let active_symlink = PathBuf::from(format!("{}/active", self.apps_dir));
+        if !active_symlink.exists() {
+            return Err(format!("Failed to get list of active UUIDs"));
+        }
+
+        for entry in fs::read_dir(active_symlink)
+            .or_else(|error| return Err(format!("Failed to process existing apps: {}", error)))?
+        {
+            match entry {
+                Ok(file) => {
+                    let uuid = file.file_name();
+                    match self.start_app(&uuid.to_string_lossy(), RunLevel::OnBoot) {
+                        Ok(_) => apps_started += 1,
+                        Err(_) => apps_not_started += 1,
+                    }
+                }
+                Err(_) => apps_not_started += 1,
+            }
+        }
+
+        // QUESTION: Keep this or not? It's kind of a nice informational message
+        println!(
+            "Apps started: {}, Apps failed: {}",
+            apps_started, apps_not_started
+        );
+
+        if apps_not_started != 0 {
+            return Err(format!("Failed to start {} app/s", apps_not_started));
+        }
+
+        Ok(())
     }
 }
