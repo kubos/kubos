@@ -10,9 +10,16 @@ use file_protocol::FileProtocol;
 use std::env;
 use std::path::Path;
 
+// Receive callback function
+// Called after a message is received over UDP and then validated by the CBOR `recv_start` function?
+fn on_message(message: &str) {
+    // TODO: Get a pointer to `f_protocol` and call its `on_message` function
+    unimplemented!();
+}
+
 fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
     // Get a local UDP socket (Bind)
-    let c_protocol = CborProtocol::new(0);
+    let c_protocol = CborProtocol::new(0, on_message);
 
     // Set up the full connection info
     let f_protocol = FileProtocol {
@@ -39,7 +46,7 @@ fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
 
 fn download(source_path: &str, target_path: &str) -> Result<(), String> {
     // Get a local UDP socket (Bind)
-    let c_protocol = CborProtocol::new(0);
+    let c_protocol = CborProtocol::new(0, on_message);
 
     // Set up the full connection info
     let f_protocol = FileProtocol {
@@ -55,17 +62,14 @@ fn download(source_path: &str, target_path: &str) -> Result<(), String> {
     );
 
     // Send our file request to the remote addr and get the returned data
-
     let (hash, num_chunks, mode) = f_protocol.send_import(source_path)?;
 
     // Calculate our received hash and number of chunks and send back to the remote addr to verify
     // successful transfer
-
-    f_protocol.sync_and_send(&hash, num_chunks)?;
+    f_protocol.sync_and_send(&hash, Some(num_chunks))?;
 
     // If good, save received data to the requested path
-
-    f_protocol.local_export(&hash, target_path, mode)?;
+    f_protocol.local_export(&hash, target_path, Some(mode))?;
 
     Ok(())
 }

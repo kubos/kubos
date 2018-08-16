@@ -83,6 +83,7 @@ impl Protocol {
         // cbor decode meta
         // let _d = Decoder::from_bytes(data);
 
+        // TODO: Get real value
         Ok(Some(10))
     }
 
@@ -204,15 +205,193 @@ impl Protocol {
         Ok(())
     }
 
+    // Request a file from a remote target
     pub fn send_import(&self, source_path: &str) -> Result<(String, u32, u16), String> {
+        let vec = ser::to_vec_packed(&("import", source_path)).unwrap();
+        self.cbor_proto
+            .send_message(&vec, &self.host, self.dest_port)
+            .unwrap();
+
+        // TODO: Get response. Message type: `success`
+        Ok(("temp".to_owned(), 1, 0))
+    }
+
+    // Figure out if/what chunks are missing and send the hash and info back to the remote addr
+    pub fn sync_and_send(&self, hash: &str, num_chunks: Option<u32>) -> Result<(), String> {
         unimplemented!();
     }
 
-    pub fn sync_and_send(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
+    // Copy temporary data chunks into permanent file?
+    pub fn local_export(
+        &self,
+        hash: &str,
+        target_path: &str,
+        mode: Option<u16>,
+    ) -> Result<(), String> {
         unimplemented!();
     }
 
-    pub fn local_export(&self, hash: &str, target_path: &str, mode: u16) -> Result<(), String> {
+    // Request a download to start
+    pub fn start_push(&self, hash: &str, chunks: Option<Vec<u32>>) -> Result<(), String> {
+        unimplemented!();
+    }
+
+    // Request a download to stop
+    pub fn stop_push(&self, hash: &str) -> Result<(), String> {
+        unimplemented!();
+    }
+
+    // Received message handler/parser
+    pub fn on_message(&self, message: &str) -> Result<(), String> {
+        let mut pieces = message.split(',');
+
+        let first_param = pieces
+            .next()
+            .ok_or(format!("Unable to parse message: No contents"))?;
+
+        // TODO: verify channel ID number type
+        match first_param.parse::<u32>() {
+            // It's a channel ID
+            Ok(channel_id) => match pieces.next().ok_or(format!(
+                "Unable to parse message: No param after channel ID"
+            ))? {
+                "export" => {
+                    let hash = pieces
+                        .next()
+                        .ok_or(format!("Unable to parse export message: No hash param"))?;
+                    let path = pieces
+                        .next()
+                        .ok_or(format!("Unable to parse export message: No path param"))?;
+                    let mode = pieces.next().and_then(|val| val.parse::<u16>().ok());
+                    match self.local_export(hash, path, mode) {
+                        Ok(results) => {
+                            // TODO: Results might need to be unpacked from tuple
+                            let vec = ser::to_vec_packed(&(channel_id, true, results)).unwrap();
+                            self.cbor_proto
+                                .send_message(&vec, &self.host, self.dest_port)
+                                .unwrap();
+                        }
+                        Err(error) => {
+                            let vec = ser::to_vec_packed(&(channel_id, false, error)).unwrap();
+                            self.cbor_proto
+                                .send_message(&vec, &self.host, self.dest_port)
+                                .unwrap();
+                        }
+                    }
+                }
+                "import" => {
+                    let path = pieces
+                        .next()
+                        .ok_or(format!("Unable to parse import message: No path param"))?;
+                    match self.local_import(path) {
+                        Ok(results) => {
+                            // TODO: Results might need to be unpacked from tuple
+                            let vec = ser::to_vec_packed(&(channel_id, true, results)).unwrap();
+                            self.cbor_proto
+                                .send_message(&vec, &self.host, self.dest_port)
+                                .unwrap();
+                        }
+                        Err(error) => {
+                            let vec = ser::to_vec_packed(&(channel_id, false, error)).unwrap();
+                            self.cbor_proto
+                                .send_message(&vec, &self.host, self.dest_port)
+                                .unwrap();
+                        }
+                    }
+                }
+                result if result == "true" || result == "false" => {
+                    //TODO: Return result to caller
+                }
+                _ => {
+                    return Err(format!(
+                        "Unable to parse message: Unknown param after channel ID"
+                    ))
+                }
+            },
+            // It's a hash value
+            Err(_) => {
+                let hash = first_param;
+                if let Some(second_param) = pieces.next() {
+                    match second_param {
+                        "true" => {
+                            // It's an ACK
+                            // Our data transfer (export) completed succesfully
+                            self.stop_push(hash)?;
+
+                            //TODO: Do something with the third param? (num_chunks)
+                        }
+                        "false" => {
+                            // It's a NAK
+                            // Some number of chunks were not received by the remote addr
+                            let mut remaining_chunks: Vec<u32> = vec![];
+                            for chunk in pieces {
+                                if let Ok(chunk_num) = chunk.parse::<u32>() {
+                                    remaining_chunks.push(chunk_num);
+                                }
+                            }
+
+                            if remaining_chunks.len() > 0 {
+                                self.start_push(hash, Some(remaining_chunks))?
+                            } else {
+                                return Err(format!(
+                                    "Unable to parse NAK message: Missing missing chunks"
+                                ));
+                            }
+                        }
+                        x => match x.parse::<u32>() {
+                            Ok(num) => {
+                                if let Some(data) = pieces.next() {
+                                    // It's a data chunk message
+                                    // Store the new chunk
+                                    self.store_chunk(hash, num, data.as_bytes());
+                                    // TODO: receive_timeouts
+                                    //let timer = receive_timeouts(hash);
+                                    self.sync_and_send(hash, None);
+                                } else {
+                                    // It's a sync message
+                                }
+                            }
+                            Err(_) => {
+                                return Err(format!(
+                                    "Unable to parse message: Unknown param after hash"
+                                ))
+                            }
+                        },
+                    }
+                } else {
+                    // It's a sync message.
+                    self.sync_and_send(hash, None)?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    // Send a single file chunk to the remote address
+    pub fn send_chunk(&self, hash: &str, index: u32, chunk: &[u8]) -> Result<(), String> {
+        unimplemented!();
+    }
+
+    // Send an acknowledge to the remote address
+    pub fn send_ack(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
+        let vec = ser::to_vec_packed(&(hash, true, num_chunks)).unwrap();
+        self.cbor_proto
+            .send_message(&vec, &self.host, self.dest_port)
+            .unwrap();
+        Ok(())
+    }
+
+    // Send a NAK to the remote address
+    pub fn send_nak(&self, hash: &str) -> Result<(), String> {
+        let vec = ser::to_vec_packed(&(hash, false)).unwrap();
+        self.cbor_proto
+            .send_message(&vec, &self.host, self.dest_port)
+            .unwrap();
+        Ok(())
+    }
+
+    pub fn listen_thread(&self) -> Result<(), String> {
         unimplemented!();
     }
 }
