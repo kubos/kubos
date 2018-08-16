@@ -1,0 +1,13 @@
+[package]
+name = "file-protocol"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
+serde_cbor = "0.8"
+simplelog = "^0.5.0"
+log = "^0.4.0"
+time = "0.1"
+blake2-rfc = "0.2.18"
+serde = "1.0.58"
+serde_derive = "1.0.58"
