@@ -24,8 +24,6 @@ use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::Path;
 use time;
-//use std::sync::mpsc::{channel, Receiver, Sender};
-//use std::thread;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const CHUNK_SIZE: usize = 4096;
@@ -34,7 +32,6 @@ pub struct Protocol {
     cbor_proto: CborProtocol,
     host: String,
     dest_port: u16,
-    //result_receiver: Receiver<(u32, String, <str as Trait>::Split)>,
 }
 
 impl Protocol {
@@ -42,18 +39,12 @@ impl Protocol {
         // Get a local UDP socket (Bind)
         let c_protocol = CborProtocol::new(0);
 
-        //let (result_sender, result_receiver) = channel();
-
-        // Spawn the thread which will listen for messages from the server
-        //thread::spawn(move || listen_thread(result_sender));
-
         // Set up the full connection info
         Protocol {
             cbor_proto: c_protocol,
             // Remote IP?
             host,
             dest_port,
-            //result_receiver,
         }
     }
 
@@ -97,11 +88,6 @@ impl Protocol {
             .send_message(&vec, &self.host, self.dest_port)
             .unwrap();
 
-        /*
-        let (channel_id, result, data) = self.result_receiver
-            .recv()
-            .map_err(|err| format!("Failed to receive op result: {}", err))?;
-            */
         // Listen on UDP port
         let message = self.cbor_proto
             .recv_message()?
@@ -133,10 +119,13 @@ impl Protocol {
                         }
                     };
 
-                    //let mode = pieces.next().and_then(|val| Some(val as u16));
+                    let mode = match pieces.next() {
+                        Some(Value::U64(val)) => Some(*val as u16),
+                        _ => None,
+                    };
 
                     // Return the file info
-                    Ok((hash.to_string(), num_chunks as u32, Some(0) /*mode*/))
+                    Ok((hash.to_string(), num_chunks as u32, mode))
                 }
                 false => {
                     return Err(format!(
@@ -153,12 +142,13 @@ impl Protocol {
     }
 
     // Figure out if/what chunks are missing and send the hash and info back to the remote addr
+    // Q: This copies ACK/NAK. Should it replace them? Or use them?
     pub fn sync_and_send(&self, hash: &str, num_chunks: Option<u32>) -> Result<(), String> {
-        let (result, chunks) = storage::local_sync(hash, num_chunks)?;
-        // TODO: chunks will eventually be more than a single value, so we'll need to iter through the list
-        // and add each missing chunk # to the vector
-        println!("-> {{ {}, {:?} }}", hash, result);
-        let vec = ser::to_vec_packed(&(hash, result, chunks)).unwrap();
+        let (result, mut chunks) = storage::local_sync(hash, num_chunks)?;
+        //TODO: Should local_sync be waiting on the actual data that we're expecting to come back?
+        // If so, it should have a while(chunks_remaining > 0 || !timedout || something... ) {recv_message}
+        println!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
+        let mut vec = ser::to_vec_packed(&(hash, result, chunks)).unwrap();
 
         self.cbor_proto
             .send_message(&vec, &self.host, self.dest_port)
@@ -220,18 +210,6 @@ impl Protocol {
             .unwrap();
         Ok(())
     }
-
-    /*
-    fn listen_thread(&self) -> Result<(), String> {
-        loop {
-            // Listen on UDP port
-            if let Some(message) = self.cbor_proto.recv_message()? {
-                // Call on_message with any received messages
-                self.on_message(message);
-            }
-        }
-    }
-    */
 
     // Received message handler/parser
     fn on_message(&self, message: Value) -> Result<Option<(u32, bool, Vec<Value>)>, String> {

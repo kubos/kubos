@@ -62,14 +62,14 @@ pub fn load_meta(hash: &str) -> Result<Option<u32>, String> {
 }
 
 // Verify that the local chunk files match the expected hash?
-pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, u32), String> {
+pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>), String> {
     if let Some(num) = num_chunks {
         store_meta(hash, num).unwrap();
     } else {
         let _num_chunks = match load_meta(hash) {
             Ok(d) => match d {
                 Some(d) => d,
-                None => return Ok((false, 0)),
+                None => return Ok((false, vec![0, 1])),
             },
             Err(e) => return Err(format!("failed loading meta {:?}", e)),
         };
@@ -80,7 +80,7 @@ pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, u32), St
     let _hash_path = Path::new("storage").join(hash);
 
     // TODO
-    Ok((true, 0))
+    Ok((false, vec![0, 1]))
 }
 
 /// Create temporary folder for chunks

@@ -21,6 +21,7 @@ impl Protocol {
         let mut payload = vec![];
         payload.extend(message);
         payload.insert(0, 0);
+        println!("{:?}", payload);
         self.handle.send_to(&payload, &dest).unwrap();
         Ok(())
     }
