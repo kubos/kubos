@@ -1,16 +1,14 @@
 use std::net::{SocketAddr, UdpSocket};
-use serde_cbor::de;
+use serde_cbor::{self, de};
 
 pub struct Protocol {
     pub handle: UdpSocket,
-    recv_handle: fn(&str),
 }
 
 impl Protocol {
-    pub fn new(bind_port: u16, recv_handle: fn(&str)) -> Self {
+    pub fn new(bind_port: u16) -> Self {
         Self {
             handle: UdpSocket::bind(format!("127.0.0.1:{}", bind_port)).unwrap(),
-            recv_handle,
         }
     }
 
@@ -40,7 +38,7 @@ impl Protocol {
     pub fn send_pause(&self, host: &str, port: u16) -> Result<(), String> {
         println!("-> pause");
         let dest: SocketAddr = format!("{}:{}", host, port).parse().unwrap();
-        let mut payload = vec![1];
+        let payload = vec![1];
         self.handle.send_to(&payload, &dest).unwrap();
         Ok(())
     }
@@ -49,39 +47,57 @@ impl Protocol {
     pub fn send_resume(&self, host: &str, port: u16) -> Result<(), String> {
         println!("-> resume");
         let dest: SocketAddr = format!("{}:{}", host, port).parse().unwrap();
-        let mut payload = vec![2];
+        let payload = vec![2];
         self.handle.send_to(&payload, &dest).unwrap();
         Ok(())
     }
 
+    pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, String> {
+        let mut buf = [0; 4096];
+        let (size, peer) = self.handle
+            .recv_from(&mut buf)
+            .map_err(|err| format!("Failed to receive a message: {}", err))?;
+
+        self.recv_start(&buf[0..size])
+    }
+
     // Called when a message is received over UDP?
     // It's somehow a wrapper around UDP `recv_start`???
-    pub fn recv_start(&self, _err: &str, data: &[u8]) -> Result<(), String> {
+    pub fn recv_start(&self, data: &[u8]) -> Result<Option<serde_cbor::Value>, String> {
         // TODO: error processing?
         if data.len() == 0 {
-            return Ok(());
+            return Ok(None);
         }
 
-        match data[0] {
+        let result: Option<serde_cbor::Value> = match data[0] {
             0 => {
-                let message: String = de::from_slice(&data[1..])
+                let message: serde_cbor::Value = de::from_slice(&data[1..])
                     .map_err(|err| format!("Failed to parse data: {:?}", err))?;
-                println!("<- {}", message);
-                // TODO: This somehow corresponds to `main`s on_message...wat.
-                (self.recv_handle)(&message);
+                println!("<- {:?}", message);
+
+                if message.is_array() {
+                    Some(message)
+                } else {
+                    return Err(format!("Failed to parse data: Body not an array"));
+                }
             }
             1 => {
-                println!("<- puase");
+                println!("<- pause");
                 //TODO: paused = true
+                None
             }
             2 => {
                 println!("<- resume");
                 // TODO: This might need to be a channel message/signal
                 self.resume();
+                None
             }
-            x => eprintln!("Ignoring unknown control frame: {}", x),
-        }
+            x => {
+                eprintln!("Ignoring unknown control frame: {}", x);
+                None
+            }
+        };
 
-        Ok(())
+        Ok(result)
     }
 }

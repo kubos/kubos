@@ -18,16 +18,7 @@ fn on_message(message: &str) {
 }
 
 fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
-    // Get a local UDP socket (Bind)
-    let c_protocol = CborProtocol::new(0, on_message);
-
-    // Set up the full connection info
-    let f_protocol = FileProtocol {
-        cbor_proto: c_protocol,
-        // Remote IP?
-        host: String::from("127.0.0.1"),
-        dest_port: 7000,
-    };
+    let f_protocol = FileProtocol::new(String::from("127.0.0.1"), 7000);
 
     info!(
         "Uploading local:{} to remote:{}",
@@ -45,16 +36,7 @@ fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
 }
 
 fn download(source_path: &str, target_path: &str) -> Result<(), String> {
-    // Get a local UDP socket (Bind)
-    let c_protocol = CborProtocol::new(0, on_message);
-
-    // Set up the full connection info
-    let f_protocol = FileProtocol {
-        cbor_proto: c_protocol,
-        // Remote IP?
-        host: String::from("127.0.0.1"),
-        dest_port: 7000,
-    };
+    let f_protocol = FileProtocol::new(String::from("127.0.0.1"), 7000);
 
     info!(
         "Downloading remote: {} to remote: {}",
@@ -69,7 +51,7 @@ fn download(source_path: &str, target_path: &str) -> Result<(), String> {
     f_protocol.sync_and_send(&hash, Some(num_chunks))?;
 
     // If good, save received data to the requested path
-    f_protocol.local_export(&hash, target_path, Some(mode))?;
+    f_protocol.local_export(&hash, target_path, mode)?;
 
     Ok(())
 }
