@@ -49,7 +49,8 @@ pub fn load_chunk(hash: &str, index: u32) -> Result<Vec<u8>, String> {
     Ok(data)
 }
 
-pub fn load_meta(hash: &str) -> Result<Option<u32>, String> {
+// Load number of chunks in file from metadata
+pub fn load_meta(hash: &str) -> Result<u32, String> {
     let mut data = vec![];
     let meta_path = Path::new("storage").join(hash).join("meta");
     File::open(meta_path)
@@ -57,33 +58,92 @@ pub fn load_meta(hash: &str) -> Result<Option<u32>, String> {
         .read_to_end(&mut data)
         .unwrap();
 
-    // cbor decode meta
-    // let _d = Decoder::from_bytes(data);
+    let metadata: Value = de::from_slice(&data).unwrap();
 
-    // TODO: Get real value
-    Ok(Some(10))
+    // Returned data should be CBOR: '[["num_chunks", value]]'
+    let num_chunks = metadata
+        .as_array()
+        .and_then(|data| data[0].as_array())
+        .and_then(|data| {
+            let mut entries = data.iter();
+
+            entries
+                .next()
+                .and_then(|val| val.as_string())
+                .and_then(|key| {
+                    if key == "num_chunks" {
+                        entries.next().and_then(|val| val.as_u64())
+                    } else {
+                        None
+                    }
+                })
+        })
+        .ok_or("Failed to parse temporary file's metadata".to_owned())?;
+
+    Ok(num_chunks as u32)
 }
 
-// Verify that the local chunk files match the expected hash?
+// Check if all of a files chunks are present in the temporary directory
 pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>), String> {
-    if let Some(num) = num_chunks {
+    let num_chunks = if let Some(num) = num_chunks {
         store_meta(hash, num).unwrap();
+        num
     } else {
-        let _num_chunks = match load_meta(hash) {
-            Ok(d) => match d {
-                Some(d) => d,
-                None => return Ok((false, vec![0, 1])),
-            },
-            Err(e) => return Err(format!("failed loading meta {:?}", e)),
+        load_meta(hash)?
+    };
+
+    let mut missing_ranges: Vec<u32> = vec![];
+
+    let hash_path = Path::new("storage").join(hash);
+
+    let mut prev_entry: i32 = -1;
+
+    for entry in fs::read_dir(hash_path.clone())
+        .map_err(|err| format!("Failed to read {:?} directory: {}", hash_path, err))?
+    {
+        let entry = match entry {
+            Ok(file) => file,
+            Err(err) => {
+                eprintln!("Bad dir entry: {}", err);
+                continue;
+            }
         };
+
+        let entry_num = match entry
+            .file_name()
+            .into_string()
+            .map_err(|err| format!("Failed to parse file name: {:?}", err))
+            .and_then(|val| {
+                val.parse::<i32>()
+                    .map_err(|err| format!("Failed to parse chunk number: {:?}", err))
+            }) {
+            Ok(num) => num,
+            _ => continue,
+        };
+
+        // Check for non-sequential dir entries to detect missing chunk ranges
+        if entry_num - prev_entry > 1 {
+            // Add start of range (inclusive)
+            missing_ranges.push((prev_entry + 1) as u32);
+            // Add end of range (non-inclusive)
+            missing_ranges.push(entry_num as u32);
+        }
+
+        prev_entry = entry_num;
     }
 
-    let mut _bits: Vec<u8> = vec![];
+    // Check for a trailing range
+    // Ex. Last known chunk is 5, but there are 10 chunks.
+    //     We will already have added '6', so we need to add '10'
+    //     to close it out.
+    if (num_chunks as i32) - prev_entry != 1 {
+        // Add start of range
+        missing_ranges.push((prev_entry + 1) as u32);
+        // Add end of range
+        missing_ranges.push(num_chunks as u32);
+    }
 
-    let _hash_path = Path::new("storage").join(hash);
-
-    // TODO
-    Ok((false, vec![0, 1]))
+    Ok((missing_ranges.is_empty(), missing_ranges))
 }
 
 /// Create temporary folder for chunks
@@ -171,9 +231,7 @@ pub fn local_import(source_path: &str) -> Result<(String, u32, u32), String> {
 // Copy temporary data chunks into permanent file?
 pub fn local_export(hash: &str, target_path: &str, mode: Option<u32>) -> Result<(), String> {
     // Double check that all the chunks of the file are present and the hash matches up
-    let (_result, _) = storage::local_sync(hash, None)?;
-    // TEST LINE: Until `local_sync` is complete
-    let result = true;
+    let (result, _) = storage::local_sync(hash, None)?;
 
     if result != true {
         return Err("File missing chunks".to_owned());
@@ -181,8 +239,6 @@ pub fn local_export(hash: &str, target_path: &str, mode: Option<u32>) -> Result<
 
     // Get the total number of chunks we're saving
     let num_chunks = load_meta(hash)?;
-    // TEST CODE: Make it 1 until `load_meta` is completed
-    let num_chunks = 1;
 
     // Q: Do we want to create the parent directories if they don't exist?
     let mut file = File::create(target_path)

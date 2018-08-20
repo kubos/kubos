@@ -19,7 +19,7 @@ mod storage;
 use blake2_rfc::blake2s::Blake2s;
 use cbor_codec::Protocol as CborProtocol;
 use serde::Serializer;
-use serde_cbor::{ser, to_vec, Value};
+use serde_cbor::{de, ser, to_vec, Value};
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::Path;
@@ -124,13 +124,6 @@ impl Protocol {
         let mut counter = 2;
         loop {
             let (mut result, mut chunks) = storage::local_sync(hash, num_chunks)?;
-
-            // Test lines until `local_sync` is done
-            // to prevent infinite loop
-            counter -= 1;
-            if counter == 0 {
-                result = true
-            }
 
             println!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
             let mut vec = ser::to_vec_packed(&(hash, result)).unwrap();
