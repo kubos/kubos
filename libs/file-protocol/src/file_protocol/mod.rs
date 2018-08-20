@@ -28,6 +28,19 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 const CHUNK_SIZE: usize = 4096;
 
+pub enum Message {
+    SYNC(String),
+    SYNC_CHUNKS(String, u32),
+    RECV_CHUNK(String),
+    ACK(String),
+    NAK(String),
+    REQ_RECV(u64),
+    REQ_TRANSMIT(u64),
+    SUCCESS_RECV(u64), //TODO: Success after export might be missing values?
+    SUCCESS_TRANSMIT(u64, String, u32, Option<u16>),
+    FAILURE(u64, String),
+}
+
 pub struct Protocol {
     cbor_proto: CborProtocol,
     host: String,
@@ -94,50 +107,15 @@ impl Protocol {
             .ok_or(format!("Failed to receive op result"))?;
 
         // Parse the received message
-        if let Some((channel_id, result, data)) = self.on_message(message)? {
-            let mut pieces = data.iter();
-            match result {
-                true => {
-                    //let mut pieces = data.iter();
-                    let hash = match pieces
-                        .next()
-                        .ok_or(format!("Unable to parse success message: No hash param"))?
-                    {
-                        Value::String(val) => val,
-                        _ => {
-                            return Err("Unable to parse success message: Invalid hash param".to_owned())
-                        }
-                    };
-
-                    let num_chunks = match pieces.next().ok_or(format!(
-                        "Unable to parse success message: No num_chunks param"
-                    ))? {
-                        Value::U64(val) => *val,
-                        _ => {
-                            return Err("Unable to parse success message: Invalid num_chunks param"
-                                .to_owned())
-                        }
-                    };
-
-                    let mode = match pieces.next() {
-                        Some(Value::U64(val)) => Some(*val as u16),
-                        _ => None,
-                    };
-
-                    // Return the file info
-                    Ok((hash.to_string(), num_chunks as u32, mode))
-                }
-                false => {
-                    return Err(format!(
-                        "Failed to request file import: {:?}",
-                        pieces
-                            .next()
-                            .ok_or(format!("Unable to parse failure message: No error param"))?
-                    ));
+        match self.on_message(message)? {
+            Message::SUCCESS_TRANSMIT(id, hash, num_chunks, mode) => {
+                if (id as u32) == channel_id {
+                    Ok((hash, num_chunks, mode))
+                } else {
+                    return Err("Channel ID mismatch".to_owned());
                 }
             }
-        } else {
-            Err(format!("Failed to receive success message response"))
+            _ => return Err("Received unexpected response to import request".to_owned()),
         }
     }
 
@@ -148,11 +126,18 @@ impl Protocol {
         //TODO: Should local_sync be waiting on the actual data that we're expecting to come back?
         // If so, it should have a while(chunks_remaining > 0 || !timedout || something... ) {recv_message}
         println!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
-        let mut vec = ser::to_vec_packed(&(hash, result, chunks)).unwrap();
+        // TODO: Put the chunks in the message for real...Q.Q
+        let mut vec = ser::to_vec_packed(&(hash, result, 0, 1)).unwrap();
 
         self.cbor_proto
             .send_message(&vec, &self.host, self.dest_port)
             .unwrap();
+
+        // Now we wait for the actual data
+        // TODO: receive_timeouts
+        //let timer = receive_timeouts(&hash);
+        //self.sync_and_send(&hash, None);
+
         Ok(())
     }
 
@@ -212,7 +197,7 @@ impl Protocol {
     }
 
     // Received message handler/parser
-    fn on_message(&self, message: Value) -> Result<Option<(u32, bool, Vec<Value>)>, String> {
+    fn on_message(&self, message: Value) -> Result<Message, String> {
         let data = match message {
             Value::Array(val) => val.to_owned(),
             _ => return Err("Unable to parse message: Data not an array".to_owned()),
@@ -227,119 +212,174 @@ impl Protocol {
         // TODO: verify channel ID number type
         match first_param {
             // It's a channel ID
-            Value::U64(channel_id) => match pieces.next().ok_or(format!(
-                "Unable to parse message: No param after channel ID"
-            ))? {
-                Value::String(operation) => {
-                    match operation.as_ref() {
-                        "export" => {
-                            // It's an export request: { channel_id, "export", hash, path [, mode] }
+            Value::U64(channel_id) => {
+                match pieces.next().ok_or(format!(
+                    "Unable to parse message: No param after channel ID"
+                ))? {
+                    Value::String(operation) => {
+                        match operation.as_ref() {
+                            "export" => {
+                                // It's an export request: { channel_id, "export", hash, path [, mode] }
 
-                            let hash = match pieces
-                                .next()
-                                .ok_or(format!("Unable to parse export message: No hash param"))?
-                            {
-                                Value::String(val) => val,
-                                _ => {
-                                    return Err("Unable to parse export message: Invalid hash param"
-                                        .to_owned())
+                                let hash =
+                                    match pieces.next().ok_or(format!(
+                                        "Unable to parse export message: No hash param"
+                                    ))? {
+                                        Value::String(val) => val,
+                                        _ => return Err(
+                                            "Unable to parse export message: Invalid hash param"
+                                                .to_owned(),
+                                        ),
+                                    };
+
+                                let path =
+                                    match pieces.next().ok_or(format!(
+                                        "Unable to parse export message: No path param"
+                                    ))? {
+                                        Value::String(val) => val,
+                                        _ => return Err(
+                                            "Unable to parse export message: Invalid path param"
+                                                .to_owned(),
+                                        ),
+                                    };
+
+                                let mode = match pieces.next() {
+                                    Some(Value::U64(num)) => Some(*num as u16),
+                                    _ => None,
+                                };
+
+                                match storage::local_export(hash, path, mode) {
+                                    Ok(results) => {
+                                        // TODO: Results might need to be unpacked from tuple
+                                        println!("-> {{ {}, true, {:?} }}", channel_id, results);
+                                        let vec = ser::to_vec_packed(&(channel_id, true, results))
+                                            .unwrap();
+
+                                        self.cbor_proto
+                                            .send_message(&vec, &self.host, self.dest_port)
+                                            .unwrap();
+                                    }
+                                    Err(error) => {
+                                        println!("-> {{ {}, false, {} }}", channel_id, error);
+                                        let vec = ser::to_vec_packed(&(channel_id, false, error))
+                                            .unwrap();
+
+                                        self.cbor_proto
+                                            .send_message(&vec, &self.host, self.dest_port)
+                                            .unwrap();
+                                    }
                                 }
-                            };
 
-                            let path = match pieces
-                                .next()
-                                .ok_or(format!("Unable to parse export message: No path param"))?
-                            {
-                                Value::String(val) => val,
-                                _ => {
-                                    return Err("Unable to parse export message: Invalid path param"
-                                        .to_owned())
+                                return Ok(Message::REQ_RECV(channel_id));
+                            }
+                            "import" => {
+                                // It's an import request: { channel_id, "import", path }
+                                let path =
+                                    match pieces.next().ok_or(format!(
+                                        "Unable to parse import message: No path param"
+                                    ))? {
+                                        Value::String(val) => val,
+                                        _ => return Err(
+                                            "Unable to parse import message: Invalid path param"
+                                                .to_owned(),
+                                        ),
+                                    };
+
+                                match storage::local_import(path) {
+                                    Ok(results) => {
+                                        // TODO: Results might need to be unpacked from tuple
+                                        println!("-> {{ {}, true, {:?} }}", channel_id, results);
+                                        let vec = ser::to_vec_packed(&(channel_id, true, results))
+                                            .unwrap();
+
+                                        self.cbor_proto
+                                            .send_message(&vec, &self.host, self.dest_port)
+                                            .unwrap();
+                                    }
+                                    Err(error) => {
+                                        println!("-> {{ {}, false, {} }}", channel_id, error);
+                                        let vec = ser::to_vec_packed(&(channel_id, false, error))
+                                            .unwrap();
+
+                                        self.cbor_proto
+                                            .send_message(&vec, &self.host, self.dest_port)
+                                            .unwrap();
+                                    }
                                 }
-                            };
 
-                            let mode = match pieces.next() {
-                                Some(Value::U64(num)) => Some(*num as u16),
-                                _ => None,
-                            };
+                                return Ok(Message::REQ_TRANSMIT(channel_id));
+                            }
+                            _ => return Err(format!("Unable to parse message: Unknown operation")),
+                        }
+                    }
+                    Value::Bool(result) => {
+                        // It's an import/export op result
+                        // Good - { channel_id, true, ...values }
 
-                            match storage::local_export(hash, path, mode) {
-                                Ok(results) => {
-                                    // TODO: Results might need to be unpacked from tuple
-                                    println!("-> {{ {}, true, {:?} }}", channel_id, results);
-                                    let vec =
-                                        ser::to_vec_packed(&(channel_id, true, results)).unwrap();
+                        match result {
+                            true => {
+                                // Good - { channel_id, true, ...values }
+                                if let Some(piece) = pieces.next() {
+                                    // It's a good result after an 'import' operation
+                                    let hash = match piece {
+                                        Value::String(val) => val,
+                                        _ => return Err(
+                                            "Unable to parse success message: Invalid hash param"
+                                                .to_owned(),
+                                        ),
+                                    };
 
-                                    self.cbor_proto
-                                        .send_message(&vec, &self.host, self.dest_port)
-                                        .unwrap();
-                                }
-                                Err(error) => {
-                                    println!("-> {{ {}, false, {} }}", channel_id, error);
-                                    let vec =
-                                        ser::to_vec_packed(&(channel_id, false, error)).unwrap();
+                                    let num_chunks = match pieces.next().ok_or(format!(
+                                        "Unable to parse success message: No num_chunks param"
+                                    ))? {
+                                        Value::U64(val) => *val,
+                                        _ => return Err(
+                                            "Unable to parse success message: Invalid num_chunks param"
+                                                .to_owned(),
+                                        ),
+                                    };
 
-                                    self.cbor_proto
-                                        .send_message(&vec, &self.host, self.dest_port)
-                                        .unwrap();
+                                    let mode = match pieces.next() {
+                                        Some(Value::U64(val)) => Some(*val as u16),
+                                        _ => None,
+                                    };
+
+                                    // Return the file info
+                                    return Ok(Message::SUCCESS_TRANSMIT(
+                                        channel_id,
+                                        hash.to_string(),
+                                        num_chunks as u32,
+                                        mode,
+                                    ));
+                                } else {
+                                    // It's a good result after an 'export' operation
+                                    return Ok(Message::SUCCESS_RECV(channel_id));
                                 }
                             }
-                        }
-                        "import" => {
-                            // It's an import request: { channel_id, "import", path }
-                            let path = match pieces
-                                .next()
-                                .ok_or(format!("Unable to parse import message: No path param"))?
-                            {
-                                Value::String(val) => val,
-                                _ => {
-                                    return Err("Unable to parse import message: Invalid path param"
-                                        .to_owned())
-                                }
-                            };
+                            false => {
+                                // Bad - { channel_id, false, error_message}
+                                let error =
+                                    match pieces.next().ok_or(format!(
+                                        "Unable to parse failure message: No error param"
+                                    ))? {
+                                        Value::String(val) => val,
+                                        _ => return Err(
+                                            "Unable to parse failure message: Invalid error param"
+                                                .to_owned(),
+                                        ),
+                                    };
 
-                            match storage::local_import(path) {
-                                Ok(results) => {
-                                    // TODO: Results might need to be unpacked from tuple
-                                    println!("-> {{ {}, true, {:?} }}", channel_id, results);
-                                    let vec =
-                                        ser::to_vec_packed(&(channel_id, true, results)).unwrap();
-
-                                    self.cbor_proto
-                                        .send_message(&vec, &self.host, self.dest_port)
-                                        .unwrap();
-                                }
-                                Err(error) => {
-                                    println!("-> {{ {}, false, {} }}", channel_id, error);
-                                    let vec =
-                                        ser::to_vec_packed(&(channel_id, false, error)).unwrap();
-
-                                    self.cbor_proto
-                                        .send_message(&vec, &self.host, self.dest_port)
-                                        .unwrap();
-                                }
+                                return Ok(Message::FAILURE(channel_id, error.to_owned()));
                             }
                         }
-                        _ => return Err(format!("Unable to parse message: Unknown operation")),
+                    }
+                    _ => {
+                        return Err(format!(
+                            "Unable to parse message: Unknown param after channel ID"
+                        ))
                     }
                 }
-                Value::Bool(result) => {
-                    // It's an import/export op result
-                    // Good - { channel_id, true, ...values }
-                    // Bad - { channel_id, false, error_message}
-
-                    // Return result to caller
-                    return Ok(Some((
-                        channel_id as u32,
-                        *result,
-                        pieces.map(|val| val.clone()).collect(),
-                    )));
-                }
-                _ => {
-                    return Err(format!(
-                        "Unable to parse message: Unknown param after channel ID"
-                    ))
-                }
-            },
+            }
             // It's a hash value
             Value::String(hash) => {
                 if let Some(second_param) = pieces.next() {
@@ -350,6 +390,7 @@ impl Protocol {
                             self.stop_push(&hash)?;
 
                             //TODO: Do something with the third param? (num_chunks)
+                            return Ok(Message::ACK(hash));
                         }
                         Value::Bool(false) => {
                             // It's a NAK: { hash, false, 1, 4, 6, 7 }
@@ -368,6 +409,8 @@ impl Protocol {
                                     "Unable to parse NAK message: Missing missing chunks"
                                 ));
                             }
+
+                            return Ok(Message::NAK(hash));
                         }
                         Value::U64(num) => {
                             if let Some(third_param) = pieces.next() {
@@ -375,9 +418,8 @@ impl Protocol {
                                     // It's a data chunk message: { hash, chunk_index, data }
                                     // Store the new chunk
                                     storage::store_chunk(&hash, *num as u32, data);
-                                    // TODO: receive_timeouts
-                                    //let timer = receive_timeouts(&hash);
-                                    self.sync_and_send(&hash, None);
+
+                                    return Ok(Message::RECV_CHUNK(hash));
                                 } else {
                                     return Err(format!(
                                         "Unable to parse chunk message: Invalid data format"
@@ -385,7 +427,9 @@ impl Protocol {
                                 }
                             } else {
                                 // It's a sync message: { hash, num_chunks }
-                                self.sync_and_send(&hash, Some(*num as u32));
+                                // TODO: Whoever processes this message should do the sync_and_send
+                                //self.sync_and_send(&hash, Some(*num as u32));
+                                return Ok(Message::SYNC_CHUNKS(hash, *num as u32));
                             }
                         }
                         _ => {
@@ -394,12 +438,12 @@ impl Protocol {
                     }
                 } else {
                     // It's a sync message: { hash }
-                    self.sync_and_send(&hash, None)?;
+                    // TODO: Whoever processes this message should do the sync_and_send
+                    //self.sync_and_send(&hash, None)?;
+                    return Ok(Message::SYNC(hash));
                 }
             }
             _ => return Err(format!("Unable to parse message: Unknown first param type")),
         }
-
-        Ok(None)
     }
 }
