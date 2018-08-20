@@ -1,4 +1,5 @@
 use std::net::{SocketAddr, UdpSocket};
+use std::time::Duration;
 use serde_cbor::{self, de};
 
 pub struct Protocol {
@@ -21,7 +22,7 @@ impl Protocol {
         let mut payload = vec![];
         payload.extend(message);
         payload.insert(0, 0);
-        println!("{:?}", payload);
+
         self.handle.send_to(&payload, &dest).unwrap();
         Ok(())
     }
@@ -60,6 +61,34 @@ impl Protocol {
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
         self.recv_start(&buf[0..size])
+    }
+
+    pub fn recv_message_timeout(
+        &self,
+        timeout: Duration,
+    ) -> Result<Option<serde_cbor::Value>, Option<String>> {
+        // Set the timeout for this particular receive
+
+        self.handle
+            .set_read_timeout(Some(timeout))
+            .map_err(|err| format!("Failed to set timeout: {}", err))?;
+
+        let mut buf = [0; 4096];
+        let result = self.handle.recv_from(&mut buf);
+
+        // Reset the timeout for future calls
+        // TODO: Decide what should happen if this fails...
+        let _ = self.handle.set_read_timeout(None);
+
+        let (size, peer) = match result {
+            Ok(data) => data,
+            Err(err) => match err.kind() {
+                ::std::io::ErrorKind::WouldBlock => return Err(None), // For some reason, UDP recv returns WouldBlock for timeouts
+                _ => return Err(Some(format!("Failed to receive a message: {:?}", err))),
+            },
+        };
+
+        self.recv_start(&buf[0..size]).map_err(|err| Some(err))
     }
 
     // Called when a message is received over UDP?

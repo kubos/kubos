@@ -24,21 +24,21 @@ use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::Path;
 use time;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 const CHUNK_SIZE: usize = 4096;
 
 pub enum Message {
-    SYNC(String),
-    SYNC_CHUNKS(String, u32),
-    RECV_CHUNK(String),
+    Sync(String),
+    SyncChunks(String, u32),
+    ReceiveChunk(String),
     ACK(String),
     NAK(String),
-    REQ_RECV(u64),
-    REQ_TRANSMIT(u64),
-    SUCCESS_RECV(u64), //TODO: Success after export might be missing values?
-    SUCCESS_TRANSMIT(u64, String, u32, Option<u16>),
-    FAILURE(u64, String),
+    ReqReceive(u64),
+    ReqTransmit(u64),
+    SuccessReceive(u64), //TODO: Success after export might be missing values?
+    SuccessTransmit(u64, String, u32, Option<u16>),
+    Failure(u64, String),
 }
 
 pub struct Protocol {
@@ -108,7 +108,7 @@ impl Protocol {
 
         // Parse the received message
         match self.on_message(message)? {
-            Message::SUCCESS_TRANSMIT(id, hash, num_chunks, mode) => {
+            Message::SuccessTransmit(id, hash, num_chunks, mode) => {
                 if (id as u32) == channel_id {
                     Ok((hash, num_chunks, mode))
                 } else {
@@ -122,21 +122,54 @@ impl Protocol {
     // Figure out if/what chunks are missing and send the hash and info back to the remote addr
     // Q: This copies ACK/NAK. Should it replace them? Or use them?
     pub fn sync_and_send(&self, hash: &str, num_chunks: Option<u32>) -> Result<(), String> {
-        let (result, mut chunks) = storage::local_sync(hash, num_chunks)?;
-        //TODO: Should local_sync be waiting on the actual data that we're expecting to come back?
-        // If so, it should have a while(chunks_remaining > 0 || !timedout || something... ) {recv_message}
-        println!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
-        // TODO: Put the chunks in the message for real...Q.Q
-        let mut vec = ser::to_vec_packed(&(hash, result, 0, 1)).unwrap();
+        let mut counter = 2;
+        loop {
+            let (mut result, mut chunks) = storage::local_sync(hash, num_chunks)?;
 
-        self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port)
-            .unwrap();
+            // Test lines until `local_sync` is done
+            // to prevent infinite loop
+            counter -= 1;
+            if counter == 0 {
+                result = true
+            }
 
-        // Now we wait for the actual data
-        // TODO: receive_timeouts
-        //let timer = receive_timeouts(&hash);
-        //self.sync_and_send(&hash, None);
+            println!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
+            // TODO: Put the chunks in the message for real...Q.Q
+            let mut vec = ser::to_vec_packed(&(hash, result, 0, 1)).unwrap();
+
+            self.cbor_proto
+                .send_message(&vec, &self.host, self.dest_port)
+                .unwrap();
+
+            if result == true {
+                // We've received all the chunks we were expecting. Time to go home.
+                break;
+            }
+
+            // Try to receive the missing chunks
+            loop {
+                // Listen on UDP port
+                // TODO: Make timeout a config option
+                // TODO: Make timeout 'receive chunk' message-specific
+                match self.cbor_proto.recv_message_timeout(Duration::from_secs(1)) {
+                    // Parse the received message
+                    Ok(Some(message)) => match self.on_message(message) {
+                        Ok(_) => { /* TODO: Verify that we got a ReceiveChunk message? */ }
+                        Err(err) => eprintln!("Failed to parse message: {}", err),
+                    },
+                    Ok(None) => { /* TODO: Handle pause or resume messages? */ }
+                    Err(None) => {
+                        // We timed out of receiving a new chunk. Let's go see if we got everything
+                        break;
+                    }
+                    Err(Some(err)) => {
+                        // Something went wrong while we were receiving
+                        // Let's quit while we're ahead
+                        return Err(err);
+                    }
+                }
+            }
+        }
 
         Ok(())
     }
@@ -270,7 +303,7 @@ impl Protocol {
                                     }
                                 }
 
-                                return Ok(Message::REQ_RECV(channel_id));
+                                return Ok(Message::ReqReceive(channel_id));
                             }
                             "import" => {
                                 // It's an import request: { channel_id, "import", path }
@@ -307,7 +340,7 @@ impl Protocol {
                                     }
                                 }
 
-                                return Ok(Message::REQ_TRANSMIT(channel_id));
+                                return Ok(Message::ReqTransmit(channel_id));
                             }
                             _ => return Err(format!("Unable to parse message: Unknown operation")),
                         }
@@ -345,7 +378,7 @@ impl Protocol {
                                     };
 
                                     // Return the file info
-                                    return Ok(Message::SUCCESS_TRANSMIT(
+                                    return Ok(Message::SuccessTransmit(
                                         channel_id,
                                         hash.to_string(),
                                         num_chunks as u32,
@@ -353,7 +386,7 @@ impl Protocol {
                                     ));
                                 } else {
                                     // It's a good result after an 'export' operation
-                                    return Ok(Message::SUCCESS_RECV(channel_id));
+                                    return Ok(Message::SuccessReceive(channel_id));
                                 }
                             }
                             false => {
@@ -369,7 +402,7 @@ impl Protocol {
                                         ),
                                     };
 
-                                return Ok(Message::FAILURE(channel_id, error.to_owned()));
+                                return Ok(Message::Failure(channel_id, error.to_owned()));
                             }
                         }
                     }
@@ -419,7 +452,7 @@ impl Protocol {
                                     // Store the new chunk
                                     storage::store_chunk(&hash, *num as u32, data);
 
-                                    return Ok(Message::RECV_CHUNK(hash));
+                                    return Ok(Message::ReceiveChunk(hash));
                                 } else {
                                     return Err(format!(
                                         "Unable to parse chunk message: Invalid data format"
@@ -429,7 +462,7 @@ impl Protocol {
                                 // It's a sync message: { hash, num_chunks }
                                 // TODO: Whoever processes this message should do the sync_and_send
                                 //self.sync_and_send(&hash, Some(*num as u32));
-                                return Ok(Message::SYNC_CHUNKS(hash, *num as u32));
+                                return Ok(Message::SyncChunks(hash, *num as u32));
                             }
                         }
                         _ => {
@@ -440,7 +473,7 @@ impl Protocol {
                     // It's a sync message: { hash }
                     // TODO: Whoever processes this message should do the sync_and_send
                     //self.sync_and_send(&hash, None)?;
-                    return Ok(Message::SYNC(hash));
+                    return Ok(Message::Sync(hash));
                 }
             }
             _ => return Err(format!("Unable to parse message: Unknown first param type")),
