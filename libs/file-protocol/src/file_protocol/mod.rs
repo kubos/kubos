@@ -36,8 +36,8 @@ pub enum Message {
     NAK(String),
     ReqReceive(u64),
     ReqTransmit(u64),
-    SuccessReceive(u64), //TODO: Success after export might be missing values?
-    SuccessTransmit(u64, String, u32, Option<u16>),
+    SuccessReceive(u64),
+    SuccessTransmit(u64, String, u32, Option<u32>),
     Failure(u64, String),
 }
 
@@ -71,7 +71,7 @@ impl Protocol {
     }
 
     // Request remote target to receive file from host
-    pub fn send_export(&self, hash: &str, target_path: &str, mode: u16) -> Result<(), String> {
+    pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
         println!("-> {{ export, {}, {}, {} }}", hash, target_path, mode);
         let vec = ser::to_vec_packed(&("export", hash, target_path, mode)).unwrap();
 
@@ -84,8 +84,7 @@ impl Protocol {
     }
 
     // Request a file from a remote target
-    pub fn send_import(&self, source_path: &str) -> Result<(String, u32, Option<u16>), String> {
-        //local channel_id = (os.time() + uv.hrtime()) % 0x100000
+    pub fn send_import(&self, source_path: &str) -> Result<(String, u32, Option<u32>), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .and_then(
@@ -134,8 +133,13 @@ impl Protocol {
             }
 
             println!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
-            // TODO: Put the chunks in the message for real...Q.Q
-            let mut vec = ser::to_vec_packed(&(hash, result, 0, 1)).unwrap();
+            let mut vec = ser::to_vec_packed(&(hash, result)).unwrap();
+            for chunk in chunks.iter() {
+                // Add the chunk number to the end of the CBOR array
+                vec.append(&mut ser::to_vec_packed(&chunk).unwrap());
+                // Update length of CBOR array
+                vec[0] += 1;
+            }
 
             self.cbor_proto
                 .send_message(&vec, &self.host, self.dest_port)
@@ -177,16 +181,16 @@ impl Protocol {
     /// Create temporary folder for chunks
     /// Stream copy file from mutable space to immutable space
     /// Move folder to hash of contents
-    pub fn local_import(&self, source_path: &str) -> Result<(String, u32, u16), String> {
+    pub fn local_import(&self, source_path: &str) -> Result<(String, u32, u32), String> {
         storage::local_import(source_path)
     }
 
-    // Copy temporary data chunks into permanent file?
+    // Save file chunks into the requested permanent file location
     pub fn local_export(
         &self,
         hash: &str,
         target_path: &str,
-        mode: Option<u16>,
+        mode: Option<u32>,
     ) -> Result<(), String> {
         storage::local_export(hash, target_path, mode)
     }
@@ -242,7 +246,6 @@ impl Protocol {
             .ok_or(format!("Unable to parse message: No contents"))?
             .to_owned();
 
-        // TODO: verify channel ID number type
         match first_param {
             // It's a channel ID
             Value::U64(channel_id) => {
@@ -277,9 +280,11 @@ impl Protocol {
                                     };
 
                                 let mode = match pieces.next() {
-                                    Some(Value::U64(num)) => Some(*num as u16),
+                                    Some(Value::U64(num)) => Some(*num as u32),
                                     _ => None,
                                 };
+
+                                // TODO: The actual logic for an export request
 
                                 match storage::local_export(hash, path, mode) {
                                     Ok(results) => {
@@ -317,6 +322,8 @@ impl Protocol {
                                                 .to_owned(),
                                         ),
                                     };
+
+                                // TODO: Actual logic for an import request
 
                                 match storage::local_import(path) {
                                     Ok(results) => {
@@ -373,7 +380,7 @@ impl Protocol {
                                     };
 
                                     let mode = match pieces.next() {
-                                        Some(Value::U64(val)) => Some(*val as u16),
+                                        Some(Value::U64(val)) => Some(*val as u32),
                                         _ => None,
                                     };
 

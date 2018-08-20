@@ -1,4 +1,6 @@
 use super::*;
+use std::fs::Permissions;
+use std::os::unix::fs::PermissionsExt;
 
 const HASH_SIZE: usize = 16;
 
@@ -9,7 +11,6 @@ pub fn store_chunk(hash: &str, index: u32, data: &[u8]) -> Result<(), String> {
     let file_name = format!("{:x}", index);
     let storage_path = Path::new("storage").join(hash).join(file_name);
 
-    // may need to check directory existence
     fs::create_dir_all(&storage_path.parent().unwrap()).unwrap();
     let mut file = File::create(&storage_path).unwrap();
     file.write_all(data).unwrap();
@@ -88,7 +89,7 @@ pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>
 /// Create temporary folder for chunks
 /// Stream copy file from mutable space to immutable space
 /// Move folder to hash of contents
-pub fn local_import(source_path: &str) -> Result<(String, u32, u16), String> {
+pub fn local_import(source_path: &str) -> Result<(String, u32, u32), String> {
     let storage_path = String::from("storage");
 
     if let Err(e) = fs::metadata(source_path) {
@@ -168,7 +169,7 @@ pub fn local_import(source_path: &str) -> Result<(String, u32, u16), String> {
 }
 
 // Copy temporary data chunks into permanent file?
-pub fn local_export(hash: &str, target_path: &str, _mode: Option<u16>) -> Result<(), String> {
+pub fn local_export(hash: &str, target_path: &str, mode: Option<u32>) -> Result<(), String> {
     // Double check that all the chunks of the file are present and the hash matches up
     let (_result, _) = storage::local_sync(hash, None)?;
     // TEST LINE: Until `local_sync` is complete
@@ -186,6 +187,11 @@ pub fn local_export(hash: &str, target_path: &str, _mode: Option<u16>) -> Result
     // Q: Do we want to create the parent directories if they don't exist?
     let mut file = File::create(target_path)
         .map_err(|err| format!("Failed to create/open file for writing: {}", err))?;
+
+    if let Some(mode_val) = mode {
+        file.set_permissions(Permissions::from_mode(mode_val))
+            .map_err(|err| format!("Failed to set target file's mode: {}", err))?;
+    }
 
     let mut calc_hash = Blake2s::new(HASH_SIZE);
 
@@ -207,6 +213,8 @@ pub fn local_export(hash: &str, target_path: &str, _mode: Option<u16>) -> Result
         .collect::<String>();
 
     if calc_hash_str == hash {
+        // TODO: Do we want to clean up the temporary directory here?
+        // Alternatively, the service can be resposible for that
         Ok(())
     } else {
         Err("File hash mismatch".to_owned())

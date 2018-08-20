@@ -68,7 +68,6 @@ impl Protocol {
         timeout: Duration,
     ) -> Result<Option<serde_cbor::Value>, Option<String>> {
         // Set the timeout for this particular receive
-
         self.handle
             .set_read_timeout(Some(timeout))
             .map_err(|err| format!("Failed to set timeout: {}", err))?;
@@ -91,8 +90,7 @@ impl Protocol {
         self.recv_start(&buf[0..size]).map_err(|err| Some(err))
     }
 
-    // Called when a message is received over UDP?
-    // It's somehow a wrapper around UDP `recv_start`???
+    // Parse the received CBOR message
     pub fn recv_start(&self, data: &[u8]) -> Result<Option<serde_cbor::Value>, String> {
         // TODO: error processing?
         if data.len() == 0 {
