@@ -241,6 +241,29 @@ impl Protocol {
         unimplemented!();
     }
 
+    fn load_chunk(&self, hash: &str, index: u32) -> Result<Vec<u8>, String> {
+        unimplemented!();
+    }
+
+    // This is the guts of a coroutine which appears to have been
+    // spawned when the module file-protocol.lua is loaded...
+    fn background_worker(&self) -> Result<(), String> {
+        let hash = "";
+        let first = 0;
+        let chunk = vec![0];
+
+        let download_ranges = vec![(0, 1)];
+
+        for (first, last) in download_ranges {
+            for chunk_index in first..last {
+                let chunk = self.load_chunk(hash, chunk_index).unwrap();
+                self.send_chunk(hash, chunk_index, &chunk);
+            }
+        }
+
+        Ok(())
+    }
+
     // Send an acknowledge to the remote address
     fn send_ack(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
         println!("-> {{ {}, true, {} }}", hash, num_chunks);
