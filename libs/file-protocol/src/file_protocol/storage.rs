@@ -2,6 +2,9 @@ use super::*;
 use std::fs::Permissions;
 use std::os::unix::fs::PermissionsExt;
 
+use std::fs;
+use std::os::unix::fs::MetadataExt;
+
 const HASH_SIZE: usize = 16;
 
 // Save new chunk in a temporary storage file
@@ -225,7 +228,9 @@ pub fn local_import(source_path: &str) -> Result<(String, u32, u32), String> {
     }
     store_meta(&hash, index).unwrap();
 
-    Ok((hash, index, 0))
+    let meta = fs::metadata(source_path).unwrap();
+
+    Ok((hash, index, meta.mode()))
 }
 
 // Copy temporary data chunks into permanent file?

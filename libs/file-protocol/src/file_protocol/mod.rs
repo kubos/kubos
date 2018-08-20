@@ -24,6 +24,7 @@ use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::net::SocketAddr;
 use std::path::Path;
+use std::str;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use time;
 
@@ -34,7 +35,7 @@ pub enum Message {
     SyncChunks(String, u32),
     ReceiveChunk(String),
     ACK(String),
-    NAK(String),
+    NAK(String, Option<Vec<(u32, u32)>>),
     ReqReceive(u64),
     ReqTransmit(u64),
     SuccessReceive(u64),
@@ -110,6 +111,17 @@ impl Protocol {
         // if let Some((channel_id, result, data)) = self.on_message(message)? {
         //     println!("Got {} {} {:?}", channel_id, result, data);
         // }
+
+        match self.on_message(message)? {
+            Message::NAK(hash, chunks) => {
+                if let Some(c) = chunks {
+                    self.do_upload(&hash, &c)?;
+                }
+            }
+            _ => {
+                println!("Got other msg");
+            }
+        }
 
         //TODO: Send the actual file
         Ok(())
@@ -233,30 +245,31 @@ impl Protocol {
 
     // Request a download to stop
     fn stop_push(&self, hash: &str) -> Result<(), String> {
-        unimplemented!();
+        println!("Stop push yo");
+        Ok(())
     }
 
     // Send a single file chunk to the remote address
     fn send_chunk(&self, hash: &str, index: u32, chunk: &[u8]) -> Result<(), String> {
-        unimplemented!();
-    }
+        let chunk_bytes = Value::Bytes(chunk.to_vec());
+        println!("-> {{ {}, {}, {:?}", hash, index, chunk_bytes);
+        let mut vec = ser::to_vec_packed(&(hash, index, chunk_bytes)).unwrap();
 
-    fn load_chunk(&self, hash: &str, index: u32) -> Result<Vec<u8>, String> {
-        unimplemented!();
+        self.cbor_proto
+            .send_message(&vec, &self.host, self.dest_port)
+            .unwrap();
+        Ok(())
     }
 
     // This is the guts of a coroutine which appears to have been
     // spawned when the module file-protocol.lua is loaded...
-    fn background_worker(&self) -> Result<(), String> {
-        let hash = "";
+    fn do_upload(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
         let first = 0;
         let chunk = vec![0];
 
-        let download_ranges = vec![(0, 1)];
-
-        for (first, last) in download_ranges {
-            for chunk_index in first..last {
-                let chunk = self.load_chunk(hash, chunk_index).unwrap();
+        for (first, last) in chunks {
+            for chunk_index in *first..*last {
+                let chunk = storage::load_chunk(hash, chunk_index).unwrap();
                 self.send_chunk(hash, chunk_index, &chunk);
             }
         }
@@ -490,38 +503,29 @@ impl Protocol {
                             // It's a NAK: { hash, false, 1, 4, 6, 7 }
                             // Some number of chunks were not received by the remote addr
 
-                            let mut remaining_chunks: Vec<u32> = vec![];
-                            // All the remaining values should be numbers. Extract them.
-                            let ranges: Vec<u64> = match pieces
-                                .map(|val| {
-                                    val.as_u64().ok_or(format!("Bad range value: {:?}", val))
-                                })
-                                .collect()
-                            {
-                                Ok(val) => val,
-                                Err(err) => return Err(err),
-                            };
-
-                            // Break it up into the [start, end) pairs
-                            let range_pairs = ranges.chunks(2);
-                            for pair in range_pairs {
-                                for num in pair[0]..pair[1] {
-                                    // Add the missing chunk number to our list
-                                    remaining_chunks.push(num as u32);
+                            let mut remaining_chunks: Vec<(u32, u32)> = vec![];
+                            let mut chunk_nums: Vec<u32> = vec![];
+                            for entry in pieces {
+                                if let Value::U64(chunk_num) = entry {
+                                    chunk_nums.push(*chunk_num as u32);
                                 }
                             }
 
-                            // Transmit the missing chunks
-                            // TODO: start_push
-                            if remaining_chunks.len() > 0 {
-                                self.start_push(&hash, Some(remaining_chunks))?
-                            } else {
-                                return Err(format!(
-                                    "Unable to parse NAK message: Missing missing chunks"
-                                ));
+                            for chunk in chunk_nums.chunks(2) {
+                                let first = chunk[0];
+                                let last = chunk[1];
+                                remaining_chunks.push((first, last));
                             }
 
-                            return Ok(Message::NAK(hash));
+                            // if remaining_chunks.len() > 0 {
+                            //     self.start_push(&hash, Some(remaining_chunks))?
+                            // } else {
+                            //     return Err(format!(
+                            //         "Unable to parse NAK message: Missing missing chunks"
+                            //     ));
+                            // }
+
+                            return Ok(Message::NAK(hash, Some(remaining_chunks)));
                         }
                         Value::U64(num) => {
                             if let Some(third_param) = pieces.next() {
