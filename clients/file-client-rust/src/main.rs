@@ -39,11 +39,10 @@ fn download(source_path: &str, target_path: &str) -> Result<(), String> {
     // Send our file request to the remote addr and get the returned data
     let (hash, num_chunks, mode) = f_protocol.send_import(source_path)?;
 
-    // Calculate our received hash and number of chunks and send back to the remote addr to verify
-    // successful transfer?
+    // Check the number of chunks we need to receive and then receive them
     f_protocol.sync_and_send(&hash, Some(num_chunks))?;
 
-    // If good, save received data to the requested path
+    // Save received data to the requested path
     f_protocol.local_export(&hash, target_path, mode)?;
 
     Ok(())

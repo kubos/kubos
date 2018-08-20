@@ -1,5 +1,7 @@
 use super::*;
 
+const HASH_SIZE: usize = 16;
+
 // Save new chunk in a temporary storage file
 pub fn store_chunk(hash: &str, index: u32, data: &[u8]) -> Result<(), String> {
     // if data is type uint8_t[]
@@ -99,7 +101,7 @@ pub fn local_import(source_path: &str) -> Result<(String, u32, u16), String> {
     }
 
     let temp_path = Path::new(&storage_path).join(format!(".{}", time::get_time().nsec));
-    let mut hasher = Blake2s::new(16);
+    let mut hasher = Blake2s::new(HASH_SIZE);
     {
         let mut input = File::open(&source_path).unwrap();
         let mut output = File::create(&temp_path).unwrap();
@@ -166,7 +168,47 @@ pub fn local_import(source_path: &str) -> Result<(String, u32, u16), String> {
 }
 
 // Copy temporary data chunks into permanent file?
-pub fn local_export(_hash: &str, _target_path: &str, _mode: Option<u16>) -> Result<(), String> {
-    println!("Implement me: local_export");
-    Ok(())
+pub fn local_export(hash: &str, target_path: &str, _mode: Option<u16>) -> Result<(), String> {
+    // Double check that all the chunks of the file are present and the hash matches up
+    let (_result, _) = storage::local_sync(hash, None)?;
+    // TEST LINE: Until `local_sync` is complete
+    let result = true;
+
+    if result != true {
+        return Err("File missing chunks".to_owned());
+    }
+
+    // Get the total number of chunks we're saving
+    let num_chunks = load_meta(hash)?;
+    // TEST CODE: Make it 1 until `load_meta` is completed
+    let num_chunks = 1;
+
+    // Q: Do we want to create the parent directories if they don't exist?
+    let mut file = File::create(target_path)
+        .map_err(|err| format!("Failed to create/open file for writing: {}", err))?;
+
+    let mut calc_hash = Blake2s::new(HASH_SIZE);
+
+    for chunk_num in 0..num_chunks {
+        let chunk = load_chunk(hash, chunk_num)?;
+
+        // Update our verification hash
+        calc_hash.update(&chunk);
+        // Write the chunk to the destination file
+        file.write_all(&chunk)
+            .map_err(|err| format!("Failed to write chunk {}: {}", chunk_num, err))?;
+    }
+
+    let calc_hash_str = calc_hash
+        .finalize()
+        .as_bytes()
+        .iter()
+        .map(|val| format!("{:02x}", val))
+        .collect::<String>();
+
+    if calc_hash_str == hash {
+        Ok(())
+    } else {
+        Err("File hash mismatch".to_owned())
+    }
 }
