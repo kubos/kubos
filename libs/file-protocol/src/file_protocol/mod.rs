@@ -22,10 +22,10 @@ use serde::Serializer;
 use serde_cbor::{de, ser, to_vec, Value};
 use std::fs::{self, File};
 use std::io::{Read, Write};
-use std::path::Path;
-use time;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::net::SocketAddr;
+use std::path::Path;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use time;
 
 const CHUNK_SIZE: usize = 4096;
 
@@ -83,12 +83,33 @@ impl Protocol {
 
     // Request remote target to receive file from host
     pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
-        println!("-> {{ export, {}, {}, {} }}", hash, target_path, mode);
-        let vec = ser::to_vec_packed(&("export", hash, target_path, mode)).unwrap();
+        let time = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .and_then(|duration| {
+                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
+            })
+            .map_err(|err| format!("Failed to get current system time: {}", err))?;
+        let channel_id: u32 = (time % 100000) as u32;
+
+        println!(
+            "-> {{ {}, export, {}, {}, {} }}",
+            channel_id, hash, target_path, mode
+        );
+
+        let vec = ser::to_vec_packed(&(channel_id, "export", hash, target_path, mode)).unwrap();
 
         self.cbor_proto
             .send_message(&vec, &self.host, self.dest_port)
             .unwrap();
+
+        // Listen on UDP port
+        let message = self.cbor_proto
+            .recv_message()?
+            .ok_or(format!("Failed to receive op result"))?;
+
+        // if let Some((channel_id, result, data)) = self.on_message(message)? {
+        //     println!("Got {} {} {:?}", channel_id, result, data);
+        // }
 
         //TODO: Send the actual file
         Ok(())
@@ -98,9 +119,9 @@ impl Protocol {
     pub fn send_import(&self, source_path: &str) -> Result<(String, u32, Option<u32>), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .and_then(
-                |duration| Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
-            )
+            .and_then(|duration| {
+                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
+            })
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
