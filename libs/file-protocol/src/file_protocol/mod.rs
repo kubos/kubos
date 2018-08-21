@@ -30,6 +30,7 @@ use time;
 
 const CHUNK_SIZE: usize = 4096;
 
+#[derive(Debug)]
 pub enum Message {
     Sync(String),
     SyncChunks(String, u32),
@@ -103,28 +104,31 @@ impl Protocol {
             .send_message(&vec, &self.host, self.dest_port)
             .unwrap();
 
-        // Listen on UDP port
-        let message = self.cbor_proto
-            .recv_message()?
-            .ok_or(format!("Failed to receive op result"))?;
+        loop {
+            // Listen on UDP port
+            let message = self.cbor_proto
+                .recv_message()?
+                .ok_or(format!("Failed to receive op result"))?;
 
-        // if let Some((channel_id, result, data)) = self.on_message(message)? {
-        //     println!("Got {} {} {:?}", channel_id, result, data);
-        // }
-
-        match self.on_message(message)? {
-            Message::NAK(hash, chunks) => {
-                if let Some(c) = chunks {
-                    self.do_upload(&hash, &c)?;
+            match self.on_message(message)? {
+                Message::NAK(hash, chunks) => {
+                    if let Some(c) = chunks {
+                        self.do_upload(&hash, &c)?;
+                    }
+                }
+                Message::ACK(ack_hash) => {
+                    if ack_hash == hash {
+                        return Ok(());
+                    }
+                }
+                Message::Failure(channel, error) => {
+                    return Err(format!("Transfer {} failed: {}", channel, error));
+                }
+                _m => {
+                    return Err(format!("Unexpected message found {:?}", _m));
                 }
             }
-            _ => {
-                println!("Got other msg");
-            }
         }
-
-        //TODO: Send the actual file
-        Ok(())
     }
 
     // Request a file from a remote target
@@ -494,9 +498,10 @@ impl Protocol {
                         Value::Bool(true) => {
                             // It's an ACK: { hash, true, num_chunks }
                             // Our data transfer (export) completed succesfully
-                            self.stop_push(&hash)?;
+                            // self.stop_push(&hash)?;
 
                             //TODO: Do something with the third param? (num_chunks)
+                            // Doesn't look like we do anything with num_chunks
                             return Ok(Message::ACK(hash));
                         }
                         Value::Bool(false) => {
@@ -516,14 +521,6 @@ impl Protocol {
                                 let last = chunk[1];
                                 remaining_chunks.push((first, last));
                             }
-
-                            // if remaining_chunks.len() > 0 {
-                            //     self.start_push(&hash, Some(remaining_chunks))?
-                            // } else {
-                            //     return Err(format!(
-                            //         "Unable to parse NAK message: Missing missing chunks"
-                            //     ));
-                            // }
 
                             return Ok(Message::NAK(hash, Some(remaining_chunks)));
                         }
