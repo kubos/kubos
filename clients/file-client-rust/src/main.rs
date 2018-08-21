@@ -32,7 +32,7 @@ fn download(source_path: &str, target_path: &str) -> Result<(), String> {
     let f_protocol = FileProtocol::new(String::from("127.0.0.1"), 7000);
 
     info!(
-        "Downloading remote: {} to remote: {}",
+        "Downloading remote: {} to local: {}",
         source_path, target_path
     );
 

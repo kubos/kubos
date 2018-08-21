@@ -25,3 +25,4 @@ mod file_protocol;
 
 pub use cbor_codec::Protocol as CborProtocol;
 pub use file_protocol::Protocol as FileProtocol;
+pub use file_protocol::Message;

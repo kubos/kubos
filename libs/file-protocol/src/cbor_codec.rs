@@ -55,12 +55,26 @@ impl Protocol {
     }
 
     pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, String> {
-        let mut buf = [0; 4096];
+        let mut buf = [0; 4136];
         let (size, peer) = self.handle
             .recv_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
+        println!("Received {} bytes", size);
+
         self.recv_start(&buf[0..size])
+    }
+
+    pub fn recv_message_peer(&self) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
+        let mut buf = [0; 4136];
+        let (size, peer) = self.handle
+            .recv_from(&mut buf)
+            .map_err(|err| format!("Failed to receive a message: {}", err))?;
+
+        println!("Received {} bytes", size);
+
+        let message = self.recv_start(&buf[0..size])?;
+        Ok((peer, message))
     }
 
     pub fn recv_message_timeout(
@@ -72,7 +86,11 @@ impl Protocol {
             .set_read_timeout(Some(timeout))
             .map_err(|err| format!("Failed to set timeout: {}", err))?;
 
-        let mut buf = [0; 4096];
+        // Max message size:
+        // - 4096 - Max chunk size TODO: Make this configurable
+        // -   32 - Hash string
+        // -    8 - Chunk number
+        let mut buf = [0; 4136];
         let result = self.handle.recv_from(&mut buf);
 
         // Reset the timeout for future calls
@@ -86,6 +104,8 @@ impl Protocol {
                 _ => return Err(Some(format!("Failed to receive a message: {:?}", err))),
             },
         };
+
+        //println!("Received {} bytes", size);
 
         self.recv_start(&buf[0..size]).map_err(|err| Some(err))
     }
@@ -101,7 +121,7 @@ impl Protocol {
             0 => {
                 let message: serde_cbor::Value = de::from_slice(&data[1..])
                     .map_err(|err| format!("Failed to parse data: {:?}", err))?;
-                println!("<- {:?}", message);
+                //println!("<- {:?}", message);
 
                 if message.is_array() {
                     Some(message)

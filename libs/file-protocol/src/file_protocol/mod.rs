@@ -25,6 +25,7 @@ use std::io::{Read, Write};
 use std::path::Path;
 use time;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::net::SocketAddr;
 
 const CHUNK_SIZE: usize = 4096;
 
@@ -58,6 +59,16 @@ impl Protocol {
             // Remote IP?
             host,
             dest_port,
+        }
+    }
+
+    // We already have a CBOR connection, we just need to setup the file system stuff
+    pub fn new_listener(c_protocol: CborProtocol, destination: SocketAddr) -> Self {
+        Protocol {
+            cbor_proto: c_protocol,
+            // Remote IP?
+            host: format!("{}", destination.ip()).to_owned(),
+            dest_port: destination.port(),
         }
     }
 
@@ -114,6 +125,12 @@ impl Protocol {
                     return Err("Channel ID mismatch".to_owned());
                 }
             }
+            Message::Failure(id, error) => {
+                return Err(format!(
+                    "Failed to request file. Error returned from service: {}",
+                    error
+                ))
+            }
             _ => return Err("Received unexpected response to import request".to_owned()),
         }
     }
@@ -121,7 +138,7 @@ impl Protocol {
     // Figure out if/what chunks are missing and send the hash and info back to the remote addr
     // Q: This copies ACK/NAK. Should it replace them? Or use them?
     pub fn sync_and_send(&self, hash: &str, num_chunks: Option<u32>) -> Result<(), String> {
-        let mut counter = 2;
+        // TODO: Create some way to break out of this loop if we never receive all the chunks
         loop {
             let (mut result, mut chunks) = storage::local_sync(hash, num_chunks)?;
 
@@ -227,7 +244,7 @@ impl Protocol {
     }
 
     // Received message handler/parser
-    fn on_message(&self, message: Value) -> Result<Message, String> {
+    pub fn on_message(&self, message: Value) -> Result<Message, String> {
         let data = match message {
             Value::Array(val) => val.to_owned(),
             _ => return Err("Unable to parse message: Data not an array".to_owned()),
@@ -428,13 +445,30 @@ impl Protocol {
                         Value::Bool(false) => {
                             // It's a NAK: { hash, false, 1, 4, 6, 7 }
                             // Some number of chunks were not received by the remote addr
+
                             let mut remaining_chunks: Vec<u32> = vec![];
-                            for entry in pieces {
-                                if let Value::U64(chunk_num) = entry {
-                                    remaining_chunks.push(*chunk_num as u32);
+                            // All the remaining values should be numbers. Extract them.
+                            let ranges: Vec<u64> = match pieces
+                                .map(|val| {
+                                    val.as_u64().ok_or(format!("Bad range value: {:?}", val))
+                                })
+                                .collect()
+                            {
+                                Ok(val) => val,
+                                Err(err) => return Err(err),
+                            };
+
+                            // Break it up into the [start, end) pairs
+                            let range_pairs = ranges.chunks(2);
+                            for pair in range_pairs {
+                                for num in pair[0]..pair[1] {
+                                    // Add the missing chunk number to our list
+                                    remaining_chunks.push(num as u32);
                                 }
                             }
 
+                            // Transmit the missing chunks
+                            // TODO: start_push
                             if remaining_chunks.len() > 0 {
                                 self.start_push(&hash, Some(remaining_chunks))?
                             } else {
