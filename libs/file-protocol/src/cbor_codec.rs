@@ -8,9 +8,9 @@ pub struct Protocol {
 }
 
 impl Protocol {
-    pub fn new(bind_port: u16) -> Self {
+    pub fn new(host_url: String) -> Self {
         Self {
-            handle: UdpSocket::bind(format!("127.0.0.1:{}", bind_port)).unwrap(),
+            handle: UdpSocket::bind(host_url.parse::<SocketAddr>().unwrap()).unwrap(),
         }
     }
 

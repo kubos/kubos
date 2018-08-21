@@ -54,7 +54,7 @@ pub struct Protocol {
 impl Protocol {
     pub fn new(host: String, dest_port: u16) -> Self {
         // Get a local UDP socket (Bind)
-        let c_protocol = CborProtocol::new(0);
+        let c_protocol = CborProtocol::new(format!("{}:0", host));
 
         // Set up the full connection info
         Protocol {

@@ -1,15 +1,18 @@
 extern crate file_protocol;
+extern crate kubos_system;
 #[macro_use]
 extern crate log;
 extern crate simplelog;
 
+use kubos_system::Config as ServiceConfig;
 use simplelog::*;
+use std::thread;
 
 use file_protocol::{CborProtocol, FileProtocol, Message};
 
-fn recv_loop() -> Result<(), String> {
+fn recv_loop(config: ServiceConfig) -> Result<(), String> {
     // TODO: Make configurable
-    let c_protocol = CborProtocol::new(7000);
+    let c_protocol = CborProtocol::new(config.hosturl());
 
     loop {
         // Listen on UDP port
@@ -18,95 +21,67 @@ fn recv_loop() -> Result<(), String> {
             _ => continue,
         };
 
-        // TODO: thread::spawn()
+        // Break the processing work off into its own thread so we can
+        // listen for requests from other clients
+        thread::spawn(move || {
+            // Set up the file system processor with the reply socket information
+            // TODO: Opening a second local port might be a terrible plan. Though it is kind of what TCP does
+            let f_protocol = FileProtocol::new(format!("{}", peer.ip()).to_owned(), peer.port());
 
-        // Set up the file system processor with the reply socket information
-        // TODO: Opening a second local port might be a terrible plan. Though it is kind of what TCP does
-        let f_protocol = FileProtocol::new(format!("{}", peer.ip()).to_owned(), peer.port());
-
-        // Parse it into a known message type and process
-        // TODO: How to handle message parsing failures? Do we tell the client?
-        // TODO: Handle multiple simultaneous clients
-        // TODO: Convert match failures to not trigger a function return. just go get the next message
-        match f_protocol.on_message(message)? {
-            Message::Sync(hash) => {
-                debug!("Sync({})", hash);
-                //TODO: sync_and_send
-            }
-            Message::SyncChunks(hash, num_chunks) => {
-                debug!("SyncChunks({}, {})", hash, num_chunks);
-                // A client has notified us of a file we should be prepared to receive
-                f_protocol.store_meta(&hash, num_chunks)?;
-            }
-            Message::ReceiveChunk(hash) => {
-                debug!("ReceiveChunk({})", hash);
-                // A chunk was automatically stored. Do nothing
-            }
-            Message::ACK(hash) => {
-                debug!("ACK({})", hash);
-                // The client now has all of the needed chunks of a file.
-                // Q: Do nothing?
-            }
-            Message::NAK(hash, missing_chunks) => {
-                debug!("NAK({}, {:?})", hash, missing_chunks);
-                // Some number of chunks weren't received by the client.
-                // Resend them
-                if let Some(chunks) = missing_chunks {
-                    f_protocol.do_upload(&hash, &chunks)?;
-                }
-            }
-            Message::ReqReceive(channel_id, hash, path, mode) => {
-                debug!("ReqReceive({})", channel_id);
-                // The client wants to send us a file
-                // TODO: This doesn't actually work because we're now listening on
-                // a different socket
-                f_protocol.sync_and_send(&hash, None)?;
-
-                match f_protocol.local_export(&hash, &path, mode) {
-                    Ok(()) => {
-                        f_protocol.send_success(channel_id)?;
+            // Parse it into a known message type and process
+            // TODO: Convert the various failures/unwraps to nice error printing
+            if let Ok(message) = f_protocol.on_message(message) {
+                match message {
+                    Message::SyncChunks(hash, num_chunks) => {
+                        // A client has notified us of a file we should be prepared to receive
+                        f_protocol.store_meta(&hash, num_chunks).unwrap();
                     }
-                    Err(error) => {
-                        f_protocol.send_failure(channel_id, &error)?;
+                    Message::NAK(hash, missing_chunks) => {
+                        // Some number of chunks weren't received by the client.
+                        // Resend them
+                        if let Some(chunks) = missing_chunks {
+                            f_protocol.do_upload(&hash, &chunks).unwrap();
+                        }
+                    }
+                    Message::ReqReceive(channel_id, hash, path, mode) => {
+                        // The client wants to send us a file.
+                        // Go listen for the chunks.
+                        // Note: Won't return until we've received all of them.
+                        // (so could potentially never return)
+                        f_protocol.sync_and_send(&hash, None).unwrap();
+
+                        match f_protocol.local_export(&hash, &path, mode) {
+                            Ok(()) => {
+                                f_protocol.send_success(channel_id).unwrap();
+                            }
+                            Err(error) => {
+                                f_protocol.send_failure(channel_id, &error).unwrap();
+                            }
+                        }
+                    }
+                    _ => {
+                        // Whatever action was needed for this particular message
+                        // was already taken care of by `on_message()`
                     }
                 }
+            } else {
+                // Q: Do we want to do any kind of error handling,
+                //    or just move on to the next message?
             }
-            Message::ReqTransmit(channel_id) => {
-                debug!("ReqTransmit({})", channel_id);
-                // The client wants us to send a file
-                // We already did the underlying chunking and sent the success/failure message
-                // Q: Do nothing...currently on_message takes care of everything
-            }
-            Message::SuccessReceive(channel_id) => {
-                debug!("SuccessReceive({})", channel_id);
-                // Q: I don't think the server will ever receive this.
-                //    I think that the server only ever *sends* this.
-            }
-            Message::SuccessTransmit(channel_id, hash, chunk_num, mode) => {
-                debug!(
-                    "SuccessTransmit({}, {}, {}, {:?})",
-                    channel_id, hash, chunk_num, mode
-                );
-                // Q: I don't think the server will ever receive this.
-                //    I think that the server only ever *sends* this.
-            }
-            Message::Failure(channel_id, error) => {
-                debug!("Failure({}, {})", channel_id, error);
-                // Q: I don't think the server will ever receive this.
-                //    I think that the server only ever *sends* this.
-            }
-        }
+        });
     }
 }
 
 fn main() {
     CombinedLogger::init(vec![
-        TermLogger::new(LevelFilter::Debug, Config::default()).unwrap(),
+        TermLogger::new(LevelFilter::Info, Config::default()).unwrap(),
     ]).unwrap();
+
+    let config = ServiceConfig::new("file-transfer-service");
 
     info!("Starting file transfer service");
 
-    match recv_loop() {
+    match recv_loop(config) {
         Ok(()) => warn!("Service listener loop exited successfully?"),
         Err(err) => error!("Service listener exited early: {}", err),
     }

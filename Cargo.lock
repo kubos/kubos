@@ -265,6 +265,7 @@ name = "file-service-rust"
 version = "0.1.0"
 dependencies = [
  "file-protocol 0.1.0",
+ "kubos-system 0.1.0",
  "log 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "simplelog 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
