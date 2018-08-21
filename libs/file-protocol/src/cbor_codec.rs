@@ -1,3 +1,4 @@
+use std::cell::Cell;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Duration;
 use serde_cbor::{self, de};

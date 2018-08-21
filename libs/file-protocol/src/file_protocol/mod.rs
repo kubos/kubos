@@ -20,6 +20,7 @@ use blake2_rfc::blake2s::Blake2s;
 use cbor_codec::Protocol as CborProtocol;
 use serde::Serializer;
 use serde_cbor::{de, ser, to_vec, Value};
+use std::cell::Cell;
 use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::net::SocketAddr;
@@ -47,7 +48,7 @@ pub enum Message {
 pub struct Protocol {
     cbor_proto: CborProtocol,
     host: String,
-    dest_port: u16,
+    dest_port: Cell<u16>,
 }
 
 impl Protocol {
@@ -60,10 +61,11 @@ impl Protocol {
             cbor_proto: c_protocol,
             // Remote IP?
             host,
-            dest_port,
+            dest_port: Cell::new(dest_port),
         }
     }
 
+    /*
     // We already have a CBOR connection, we just need to setup the file system stuff
     pub fn new_listener(c_protocol: CborProtocol, destination: SocketAddr) -> Self {
         Protocol {
@@ -73,12 +75,13 @@ impl Protocol {
             dest_port: destination.port(),
         }
     }
+    */
 
     pub fn send_sync(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
         println!("-> {{ {}, {} }}", hash, num_chunks);
         let vec = ser::to_vec_packed(&(hash, num_chunks)).unwrap();
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port)
+            .send_message(&vec, &self.host, self.dest_port.get())
             .unwrap();
         Ok(())
     }
@@ -101,14 +104,18 @@ impl Protocol {
         let vec = ser::to_vec_packed(&(channel_id, "export", hash, target_path, mode)).unwrap();
 
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port)
+            .send_message(&vec, &self.host, self.dest_port.get())
             .unwrap();
 
         loop {
             // Listen on UDP port
-            let message = self.cbor_proto
-                .recv_message()?
-                .ok_or(format!("Failed to receive op result"))?;
+            let (peer, message) = match self.cbor_proto.recv_message_peer()? {
+                (peer, Some(data)) => (peer, data),
+                _ => return Err("Failed to receive op result".to_owned()),
+            };
+
+            // Update our response port
+            self.dest_port.set(peer.port());
 
             match self.on_message(message)? {
                 Message::NAK(hash, chunks) => {
@@ -145,7 +152,7 @@ impl Protocol {
         let vec = ser::to_vec_packed(&(channel_id, "import", source_path)).unwrap();
 
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port)
+            .send_message(&vec, &self.host, self.dest_port.get())
             .unwrap();
 
         // Listen on UDP port
@@ -189,7 +196,7 @@ impl Protocol {
             }
 
             self.cbor_proto
-                .send_message(&vec, &self.host, self.dest_port)
+                .send_message(&vec, &self.host, self.dest_port.get())
                 .unwrap();
 
             if result == true {
@@ -260,11 +267,11 @@ impl Protocol {
     // Send a single file chunk to the remote address
     fn send_chunk(&self, hash: &str, index: u32, chunk: &[u8]) -> Result<(), String> {
         let chunk_bytes = Value::Bytes(chunk.to_vec());
-        println!("-> {{ {}, {}, {:?}", hash, index, chunk_bytes);
+        //println!("-> {{ {}, {}, {:?}", hash, index, chunk_bytes);
         let mut vec = ser::to_vec_packed(&(hash, index, chunk_bytes)).unwrap();
 
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port)
+            .send_message(&vec, &self.host, self.dest_port.get())
             .unwrap();
         Ok(())
     }
@@ -291,7 +298,7 @@ impl Protocol {
         let vec = ser::to_vec_packed(&(hash, true, num_chunks)).unwrap();
 
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port)
+            .send_message(&vec, &self.host, self.dest_port.get())
             .unwrap();
         Ok(())
     }
@@ -303,7 +310,7 @@ impl Protocol {
         let vec = ser::to_vec_packed(&(hash, false)).unwrap();
 
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port)
+            .send_message(&vec, &self.host, self.dest_port.get())
             .unwrap();
         Ok(())
     }
@@ -313,7 +320,7 @@ impl Protocol {
         let vec = ser::to_vec_packed(&(channel_id, true)).unwrap();
 
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port)
+            .send_message(&vec, &self.host, self.dest_port.get())
             .unwrap();
 
         Ok(())
@@ -324,7 +331,7 @@ impl Protocol {
         let vec = ser::to_vec_packed(&(channel_id, false, error)).unwrap();
 
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port)
+            .send_message(&vec, &self.host, self.dest_port.get())
             .unwrap();
 
         Ok(())
@@ -418,7 +425,7 @@ impl Protocol {
                                         )).unwrap();
 
                                         self.cbor_proto
-                                            .send_message(&vec, &self.host, self.dest_port)
+                                            .send_message(&vec, &self.host, self.dest_port.get())
                                             .unwrap();
                                     }
                                     Err(error) => {
@@ -427,7 +434,7 @@ impl Protocol {
                                             .unwrap();
 
                                         self.cbor_proto
-                                            .send_message(&vec, &self.host, self.dest_port)
+                                            .send_message(&vec, &self.host, self.dest_port.get())
                                             .unwrap();
                                     }
                                 }
