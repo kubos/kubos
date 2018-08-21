@@ -27,14 +27,16 @@ fn recv_loop() -> Result<(), String> {
         // Parse it into a known message type and process
         // TODO: How to handle message parsing failures? Do we tell the client?
         // TODO: Handle multiple simultaneous clients
+        // TODO: Convert match failures to not trigger a function return. just go get the next message
         match f_protocol.on_message(message)? {
             Message::Sync(hash) => {
                 debug!("Sync({})", hash);
                 //TODO: sync_and_send
             }
-            Message::SyncChunks(hash, chunk_num) => {
-                debug!("SyncChunks({}, {})", hash, chunk_num);
-                //TODO: sync_and_send
+            Message::SyncChunks(hash, num_chunks) => {
+                debug!("SyncChunks({}, {})", hash, num_chunks);
+                // A client has notified us of a file we should be prepared to receive
+                f_protocol.store_meta(&hash, num_chunks)?;
             }
             Message::ReceiveChunk(hash) => {
                 debug!("ReceiveChunk({})", hash);
@@ -45,15 +47,29 @@ fn recv_loop() -> Result<(), String> {
                 // The client now has all of the needed chunks of a file.
                 // Q: Do nothing?
             }
-            Message::NAK(hash) => {
-                debug!("NAK({})", hash);
-                // TODO: Some number of chunks weren't received by the client.
+            Message::NAK(hash, missing_chunks) => {
+                debug!("NAK({}, {:?})", hash, missing_chunks);
+                // Some number of chunks weren't received by the client.
                 // Resend them
+                if let Some(chunks) = missing_chunks {
+                    f_protocol.do_upload(&hash, &chunks)?;
+                }
             }
-            Message::ReqReceive(channel_id) => {
+            Message::ReqReceive(channel_id, hash, path, mode) => {
                 debug!("ReqReceive({})", channel_id);
                 // The client wants to send us a file
-                // TODO: Let it. sync_and_send
+                // TODO: This doesn't actually work because we're now listening on
+                // a different socket
+                f_protocol.sync_and_send(&hash, None)?;
+
+                match f_protocol.local_export(&hash, &path, mode) {
+                    Ok(()) => {
+                        f_protocol.send_success(channel_id)?;
+                    }
+                    Err(error) => {
+                        f_protocol.send_failure(channel_id, &error)?;
+                    }
+                }
             }
             Message::ReqTransmit(channel_id) => {
                 debug!("ReqTransmit({})", channel_id);
@@ -74,8 +90,8 @@ fn recv_loop() -> Result<(), String> {
                 // Q: I don't think the server will ever receive this.
                 //    I think that the server only ever *sends* this.
             }
-            Message::Failure(channel_id, hash) => {
-                debug!("Failure({}, {})", channel_id, hash);
+            Message::Failure(channel_id, error) => {
+                debug!("Failure({}, {})", channel_id, error);
                 // Q: I don't think the server will ever receive this.
                 //    I think that the server only ever *sends* this.
             }
@@ -85,7 +101,7 @@ fn recv_loop() -> Result<(), String> {
 
 fn main() {
     CombinedLogger::init(vec![
-        TermLogger::new(LevelFilter::Info, Config::default()).unwrap(),
+        TermLogger::new(LevelFilter::Debug, Config::default()).unwrap(),
     ]).unwrap();
 
     info!("Starting file transfer service");

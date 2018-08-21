@@ -37,7 +37,7 @@ pub enum Message {
     ReceiveChunk(String),
     ACK(String),
     NAK(String, Option<Vec<(u32, u32)>>),
-    ReqReceive(u64),
+    ReqReceive(u64, String, String, Option<u32>),
     ReqTransmit(u64),
     SuccessReceive(u64),
     SuccessTransmit(u64, String, u32, Option<u32>),
@@ -87,9 +87,9 @@ impl Protocol {
     pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .and_then(|duration| {
-                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
-            })
+            .and_then(
+                |duration| Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
+            )
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
@@ -135,9 +135,9 @@ impl Protocol {
     pub fn send_import(&self, source_path: &str) -> Result<(String, u32, Option<u32>), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .and_then(|duration| {
-                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
-            })
+            .and_then(
+                |duration| Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
+            )
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
@@ -225,6 +225,10 @@ impl Protocol {
         Ok(())
     }
 
+    pub fn store_meta(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
+        storage::store_meta(hash, num_chunks)
+    }
+
     /// Create temporary folder for chunks
     /// Stream copy file from mutable space to immutable space
     /// Move folder to hash of contents
@@ -267,7 +271,7 @@ impl Protocol {
 
     // This is the guts of a coroutine which appears to have been
     // spawned when the module file-protocol.lua is loaded...
-    fn do_upload(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
+    pub fn do_upload(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
         let first = 0;
         let chunk = vec![0];
 
@@ -301,6 +305,28 @@ impl Protocol {
         self.cbor_proto
             .send_message(&vec, &self.host, self.dest_port)
             .unwrap();
+        Ok(())
+    }
+
+    pub fn send_success(&self, channel_id: u64) -> Result<(), String> {
+        println!("-> {{ {}, true }}", channel_id);
+        let vec = ser::to_vec_packed(&(channel_id, true)).unwrap();
+
+        self.cbor_proto
+            .send_message(&vec, &self.host, self.dest_port)
+            .unwrap();
+
+        Ok(())
+    }
+
+    pub fn send_failure(&self, channel_id: u64, error: &str) -> Result<(), String> {
+        println!("-> {{ {}, false, {} }}", channel_id, error);
+        let vec = ser::to_vec_packed(&(channel_id, false, error)).unwrap();
+
+        self.cbor_proto
+            .send_message(&vec, &self.host, self.dest_port)
+            .unwrap();
+
         Ok(())
     }
 
@@ -355,31 +381,12 @@ impl Protocol {
                                     _ => None,
                                 };
 
-                                // TODO: The actual logic for an export request
-
-                                match storage::local_export(hash, path, mode) {
-                                    Ok(results) => {
-                                        // TODO: Results might need to be unpacked from tuple
-                                        println!("-> {{ {}, true, {:?} }}", channel_id, results);
-                                        let vec = ser::to_vec_packed(&(channel_id, true, results))
-                                            .unwrap();
-
-                                        self.cbor_proto
-                                            .send_message(&vec, &self.host, self.dest_port)
-                                            .unwrap();
-                                    }
-                                    Err(error) => {
-                                        println!("-> {{ {}, false, {} }}", channel_id, error);
-                                        let vec = ser::to_vec_packed(&(channel_id, false, error))
-                                            .unwrap();
-
-                                        self.cbor_proto
-                                            .send_message(&vec, &self.host, self.dest_port)
-                                            .unwrap();
-                                    }
-                                }
-
-                                return Ok(Message::ReqReceive(channel_id));
+                                return Ok(Message::ReqReceive(
+                                    channel_id,
+                                    hash.to_owned(),
+                                    path.to_owned(),
+                                    mode,
+                                ));
                             }
                             "import" => {
                                 // It's an import request: { channel_id, "import", path }
@@ -397,11 +404,18 @@ impl Protocol {
                                 // TODO: Actual logic for an import request
 
                                 match storage::local_import(path) {
-                                    Ok(results) => {
-                                        // TODO: Results might need to be unpacked from tuple
-                                        println!("-> {{ {}, true, {:?} }}", channel_id, results);
-                                        let vec = ser::to_vec_packed(&(channel_id, true, results))
-                                            .unwrap();
+                                    Ok((hash, num_chunks, mode)) => {
+                                        println!(
+                                            "-> {{ {}, true, {}, {}, {} }}",
+                                            channel_id, hash, num_chunks, mode
+                                        );
+                                        let vec = ser::to_vec_packed(&(
+                                            channel_id,
+                                            true,
+                                            hash,
+                                            num_chunks,
+                                            mode,
+                                        )).unwrap();
 
                                         self.cbor_proto
                                             .send_message(&vec, &self.host, self.dest_port)
