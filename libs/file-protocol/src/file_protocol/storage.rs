@@ -101,28 +101,30 @@ pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>
 
     let mut prev_entry: i32 = -1;
 
-    for entry in fs::read_dir(hash_path.clone())
-        .map_err(|err| format!("Failed to read {:?} directory: {}", hash_path, err))?
-    {
-        let entry = match entry {
-            Ok(file) => file,
-            Err(err) => {
-                eprintln!("Bad dir entry: {}", err);
-                continue;
-            }
-        };
+    let entries = fs::read_dir(hash_path.clone())
+        .map_err(|err| format!("Failed to read {:?} directory: {}", hash_path, err))?;
 
-        let entry_num = match entry
-            .file_name()
-            .into_string()
-            .map_err(|err| format!("Failed to parse file name: {:?}", err))
-            .and_then(|val| {
-                val.parse::<i32>()
-                    .map_err(|err| format!("Failed to parse chunk number: {:?}", err))
-            }) {
-            Ok(num) => num,
-            _ => continue,
-        };
+    let mut converted_entries: Vec<i32> = entries
+        .filter_map(|entry| entry.ok())
+        .filter_map(|entry| {
+            match entry
+                .file_name()
+                .into_string()
+                .map_err(|err| format!("Failed to parse file name: {:?}", err))
+                .and_then(|val| {
+                    val.parse::<i32>()
+                        .map_err(|err| format!("Failed to parse chunk number: {:?}", err))
+                }) {
+                Ok(num) => Some(num),
+                _ => None,
+            }
+        })
+        .collect();
+
+    converted_entries.sort();
+
+    for &entry_num in converted_entries.iter() {
+        println!("checking {} vs {}", entry_num, prev_entry);
 
         // Check for non-sequential dir entries to detect missing chunk ranges
         if entry_num - prev_entry > 1 {
