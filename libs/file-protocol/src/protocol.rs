@@ -215,38 +215,52 @@ impl Protocol {
         Ok(())
     }
 
-    pub fn message_engine(&self, hash: Option<&str>) -> Result<(), String> {
-        loop {
+    pub fn message_engine(&self, hash: Option<&str>, pump: bool) -> Result<Option<Message>, String> {
+        let mut last_message: Result<Option<Message>, String> = Ok(None);
+        let mut running = true;
+        while running {
             // Listen on UDP port
-            let (peer, message) = match self.cbor_proto.recv_message_peer()? {
+            let (peer, message) = match self.cbor_proto.recv_message_peer_timeout(Duration::from_secs(1))? {
                 (peer, Some(data)) => (peer, data),
                 _ => return Err("Failed to receive op result".to_owned()),
             };
             // Update our response port
             self.dest_port.set(peer.port());
 
-            match self.on_message(message, hash) {
+            last_message = self.on_message(message, hash);
+
+            let stop = match last_message.to_owned() {
                 Ok(Some(Message::ACK(_))) => {
-                    return Ok(())
+                    true
                 },
-                Ok(Some(Message::SuccessReceive(channel))) => {
-                    return Ok(())
+                Ok(Some(Message::SuccessReceive(_))) => {
+                    true
+                },
+                Ok(Some(Message::SuccessTransmit(_, _, _, _))) => {
+                    true
                 },
                 Ok(Some(_message)) => {
-                    continue;
+                    if !pump {
+                        true
+                    } else {
+                        false
+                    }
                 },
                 Ok(None) => {
-                    println!("no msg received?");
-                    continue;
+                    false
                 },
                 Err(e) => return Err(e)
+            };
+            if stop {
+                break;
             }
         }
+        last_message
     }
 
     pub fn on_message(&self, message: Value, hash: Option<&str>) -> Result<Option<Message>, String> {
         let parsed_message = parsers::parse_message(message);
-        println!("parsed_message: {:?}", parsed_message);
+        //println!("parsed_message: {:?}", parsed_message);
         match parsed_message.to_owned() {
             Ok(Message::Sync(hash)) => {}
             Ok(Message::SyncChunks(hash, num_chunks)) => {}
@@ -260,7 +274,6 @@ impl Protocol {
                         // return Ok(true);
                     }
                 }
-                println!("pack up go home");
                 // return Ok(true);
             }
             Ok(Message::NAK(hash, Some(missing_chunks))) => {

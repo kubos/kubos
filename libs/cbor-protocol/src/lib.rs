@@ -97,6 +97,37 @@ impl Protocol {
         Ok((peer, message))
     }
 
+    pub fn recv_message_peer_timeout(&self, timeout: Duration) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
+        // Set the timeout for this particular receive
+        self.handle
+            .set_read_timeout(Some(timeout))
+            .map_err(|err| format!("Failed to set timeout: {}", err))?;
+
+        // Max message size:
+        // - 4096 - Max chunk size TODO: Make this configurable
+        // -   32 - Hash string
+        // -    8 - Chunk number
+        let mut buf = [0; 4136];
+        let result = self.handle.recv_from(&mut buf);
+
+        // Reset the timeout for future calls
+        // TODO: Decide what should happen if this fails...
+        let _ = self.handle.set_read_timeout(None);
+
+        let (size, peer) = match result {
+            Ok(data) => data,
+            Err(err) => match err.kind() {
+                ::std::io::ErrorKind::WouldBlock => return Err(format!("")), // For some reason, UDP recv returns WouldBlock for timeouts
+                _ => return Err(format!("Failed to receive a message: {:?}", err)),
+            },
+        };
+
+        //println!("Received {} bytes", size);
+
+        let message = self.recv_start(&buf[0..size])?;
+        Ok((peer, message))
+    }
+
     pub fn recv_message_timeout(
         &self,
         timeout: Duration,

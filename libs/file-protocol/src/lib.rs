@@ -62,29 +62,39 @@ pub fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
     // Start the engine
-    f_protocol.message_engine(Some(&hash))?;
+    f_protocol.message_engine(Some(&hash), true)?;
 
     Ok(())
 }
 
-// pub fn download(source_path: &str, target_path: &str) -> Result<(), String> {
-//     let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000);
+pub fn download(source_path: &str, target_path: &str) -> Result<(), String> {
+    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000);
 
-//     info!(
-//         "Downloading remote: {} to local: {}",
-//         source_path, target_path
-//     );
+    info!(
+        "Downloading remote: {} to local: {}",
+        source_path, target_path
+    );
 
-//     // Send our file request to the remote addr and get the returned data
-//     f_protocol.send_import(source_path)?;
+    // Send our file request to the remote addr and get the returned data
+    f_protocol.send_import(source_path)?;
 
-//     // Check the number of chunks we need to receive and then receive them
-//     // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
+    // Check the number of chunks we need to receive and then receive them
+    // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
+    match f_protocol.message_engine(None, false) {
+        Ok(Some(Message::SuccessTransmit(id, hash, num_chunks, mode))) => {
+            f_protocol.message_engine(Some(&hash), true);
 
-//     f_protocol.message_engine(None).unwrap();
+            println!("done recv");
 
-//     // Save received data to the requested path
-//     //storage::local_export(&hash, target_path, mode)?;
-
-//     Ok(())
-// }
+            // Save received data to the requested path
+            storage::local_export(&hash, target_path, mode)?;
+            return Ok(())
+        },
+        Ok(msg) => {
+            return Err(format!("Wrong first message found! {:?}", msg));
+        },
+        Err(msg) => {
+            return Err(format!("Error message found! {:?}", msg));
+        }
+    }
+}
