@@ -17,12 +17,15 @@
 extern crate blake2_rfc;
 extern crate serde;
 extern crate serde_cbor;
-#[macro_use]
-extern crate serde_derive;
 extern crate time;
+#[macro_use]
+extern crate log;
+
 mod cbor_codec;
 mod file_protocol;
 
 pub use cbor_codec::Protocol as CborProtocol;
-pub use file_protocol::Protocol as FileProtocol;
+pub use file_protocol::download;
+pub use file_protocol::protocol::Protocol as FileProtocol;
+pub use file_protocol::upload;
 pub use file_protocol::Message;

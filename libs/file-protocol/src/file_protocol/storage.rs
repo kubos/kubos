@@ -1,9 +1,32 @@
-use super::*;
-use std::fs::Permissions;
-use std::os::unix::fs::PermissionsExt;
+//
+// Copyright (C) 2018 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
+use super::CHUNK_SIZE;
+
+use blake2_rfc::blake2s::Blake2s;
+use serde_cbor::{de, to_vec, Value};
 use std::fs;
+use std::fs::File;
+use std::fs::Permissions;
+use std::io::{Read, Write};
 use std::os::unix::fs::MetadataExt;
+use std::os::unix::fs::PermissionsExt;
+use std::path::Path;
+use std::str;
+use time;
 
 const HASH_SIZE: usize = 16;
 
@@ -240,7 +263,7 @@ pub fn local_import(source_path: &str) -> Result<(String, u32, u32), String> {
 // Copy temporary data chunks into permanent file?
 pub fn local_export(hash: &str, target_path: &str, mode: Option<u32>) -> Result<(), String> {
     // Double check that all the chunks of the file are present and the hash matches up
-    let (result, _) = storage::local_sync(hash, None)?;
+    let (result, _) = local_sync(hash, None)?;
 
     if result != true {
         return Err("File missing chunks".to_owned());

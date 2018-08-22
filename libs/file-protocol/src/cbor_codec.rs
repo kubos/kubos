@@ -1,7 +1,7 @@
 use std::cell::Cell;
+use serde_cbor::{self, de};
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Duration;
-use serde_cbor::{self, de};
 
 pub struct Protocol {
     pub handle: UdpSocket,
@@ -57,7 +57,8 @@ impl Protocol {
 
     pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, String> {
         let mut buf = [0; 4136];
-        let (size, peer) = self.handle
+        let (size, _peer) = self
+            .handle
             .recv_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
@@ -68,7 +69,8 @@ impl Protocol {
 
     pub fn recv_message_peer(&self) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
         let mut buf = [0; 4136];
-        let (size, peer) = self.handle
+        let (size, peer) = self
+            .handle
             .recv_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
@@ -98,7 +100,7 @@ impl Protocol {
         // TODO: Decide what should happen if this fails...
         let _ = self.handle.set_read_timeout(None);
 
-        let (size, peer) = match result {
+        let (size, _peer) = match result {
             Ok(data) => data,
             Err(err) => match err.kind() {
                 ::std::io::ErrorKind::WouldBlock => return Err(None), // For some reason, UDP recv returns WouldBlock for timeouts
@@ -138,7 +140,7 @@ impl Protocol {
             2 => {
                 println!("<- resume");
                 // TODO: This might need to be a channel message/signal
-                self.resume();
+                self.resume().unwrap();
                 None
             }
             x => {
