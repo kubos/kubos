@@ -5,4 +5,4 @@ authors = ["William Greer <wgreer184@gmail.com>", "Catherine Garabedian <catheri
 
 [dependencies]
 serial = "0.4.0"
-failure = { git = "https://github.com/rust-lang-nursery/failure", branch = "evolution/1.0" }
+failure = "0.1.2"

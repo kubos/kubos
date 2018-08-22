@@ -22,25 +22,25 @@
 extern crate failure;
 
 /// Errors for ADCS devices
-#[derive(Fail, Display, Debug, PartialEq)]
+#[derive(Fail, Debug, PartialEq)]
 pub enum AdcsError {
     /// Generic error
-    #[display(fmt = "Generic error")]
+    #[fail(display = "Generic error")]
     Generic,
     /// Configuration error
-    #[display(fmt = "Configuration error")]
+    #[fail(display = "Configuration error")]
     Config,
     /// No response received from subsystem
-    #[display(fmt = "No response received from subsystem")]
+    #[fail(display = "No response received from subsystem")]
     NoResponse,
     /// An error was thrown by the subsystem
-    #[display(fmt = "An error was thrown by the subsystem")]
+    #[fail(display = "An error was thrown by the subsystem")]
     Internal,
     /// Mutex-related error
-    #[display(fmt = "Mutex-related error")]
+    #[fail(display = "Mutex-related error")]
     Mutex,
     /// Requested function has not been implemented
-    #[display(fmt = "Requested function has not been implemented")]
+    #[fail(display = "Requested function has not been implemented")]
     NotImplemented,
 }
 

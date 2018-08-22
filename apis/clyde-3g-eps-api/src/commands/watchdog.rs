@@ -51,7 +51,7 @@ pub mod get_comms_watchdog_period {
         if data.len() == 2 {
             Ok(data[1])
         } else {
-            throw!(EpsError::parsing_failure("Comms Watchdog Period"))
+            return Err(EpsError::parsing_failure("Comms Watchdog Period"));
         }
     }
 

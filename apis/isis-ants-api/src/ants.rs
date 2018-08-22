@@ -19,14 +19,14 @@ use parse::*;
 use std::ptr;
 
 /// Common Error for AntS Actions
-#[derive(Fail, Display, Debug, Clone)]
+#[derive(Fail, Debug, Clone)]
 pub enum AntsError {
     /// Catch-all error
-    #[display(fmt = "Generic error")]
+    #[fail(display = "Generic error")]
     GenericError,
     /// Configuration error. Thrown when a parameter passed to a C API function
     /// is out-of-bounds.
-    #[display(fmt = "Configuration error")]
+    #[fail(display = "Configuration error")]
     ConfigError,
 }
 
