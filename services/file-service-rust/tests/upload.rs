@@ -1,6 +1,7 @@
 extern crate file_protocol;
 extern crate file_service_rust;
 extern crate kubos_system;
+extern crate rand;
 extern crate tempfile;
 extern crate threadpool;
 
@@ -9,6 +10,7 @@ use file_service_rust::recv_loop;
 use std::thread;
 use file_protocol::CborProtocol;
 use file_protocol::FileProtocol;
+use rand::{thread_rng, Rng};
 use std::env;
 use std::path::Path;
 use std::fs;
@@ -306,16 +308,17 @@ fn upload_multi_client() {
 
 // Massive upload
 // TODO: Enable once chunk numbers > 9 are supported properly
-/*
+
 #[test]
 fn upload_large() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
-    let service_port = 7001;
+    let service_port = 7006;
 
-    let contents = [1; 1_000_000];
+    let mut contents = [0u8; 1_000_000];
+    thread_rng().fill(&mut contents[..]);
 
     create_test_file(&source, &contents);
 
@@ -339,4 +342,3 @@ fn upload_large() {
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
-*/

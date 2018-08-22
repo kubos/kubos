@@ -11,7 +11,7 @@ const HASH_SIZE: usize = 16;
 pub fn store_chunk(hash: &str, index: u32, data: &[u8]) -> Result<(), String> {
     // if data is type uint8_t[]
     // change data to ffi.string
-    let file_name = format!("{:x}", index);
+    let file_name = format!("{}", index);
     let storage_path = Path::new("storage").join(hash).join(file_name);
 
     fs::create_dir_all(&storage_path.parent().unwrap()).unwrap();
@@ -46,7 +46,7 @@ pub fn store_meta(hash: &str, num_chunks: u32) -> Result<(), String> {
 // Load a chunk from its temporary storage file
 pub fn load_chunk(hash: &str, index: u32) -> Result<Vec<u8>, String> {
     let mut data = vec![];
-    let path = Path::new("storage").join(hash).join(format!("{:x}", index));
+    let path = Path::new("storage").join(hash).join(format!("{}", index));
 
     File::open(path).unwrap().read_to_end(&mut data).unwrap();
     Ok(data)
@@ -128,6 +128,7 @@ pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>
 
         // Check for non-sequential dir entries to detect missing chunk ranges
         if entry_num - prev_entry > 1 {
+            println!("Found missing chunk");
             // Add start of range (inclusive)
             missing_ranges.push((prev_entry + 1) as u32);
             // Add end of range (non-inclusive)
@@ -142,6 +143,7 @@ pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>
     //     We will already have added '6', so we need to add '10'
     //     to close it out.
     if (num_chunks as i32) - prev_entry != 1 {
+        println!("Detected missing range");
         // Add start of range
         missing_ranges.push((prev_entry + 1) as u32);
         // Add end of range
