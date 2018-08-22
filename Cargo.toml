@@ -22,6 +22,7 @@ members = [
 "hal/rust-hal/rust-i2c",
 "hal/rust-hal/rust-uart",
 "kubos-build-helper",
+"libs/cbor-protocol",
 "libs/file-protocol",
 "services/app-service",
 "services/comms-service",

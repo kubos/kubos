@@ -1,0 +1,7 @@
+[package]
+name = "cbor-protocol"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
+serde_cbor = "0.8"

@@ -17,10 +17,9 @@
 use super::messages;
 use super::storage;
 use super::Message;
-use cbor_codec::Protocol as CborProtocol;
+use cbor_protocol::Protocol as CborProtocol;
 use serde_cbor::{ser, Value};
 use std::cell::Cell;
-use std::net::SocketAddr;
 use std::str;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -67,9 +66,9 @@ impl Protocol {
     pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .and_then(
-            |duration|   Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
-            )
+            .and_then(|duration| {
+                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
+            })
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
@@ -110,9 +109,9 @@ impl Protocol {
     pub fn send_import(&self, source_path: &str) -> Result<(String, u32, Option<u32>), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .and_then(
-            |duration|Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
-            )
+            .and_then(|duration| {
+                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
+            })
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
@@ -187,7 +186,12 @@ impl Protocol {
         Ok(())
     }
 
-    pub fn local_export(&self, hash: &str, target_path: &str, mode: Option<u32>) -> Result<(), String> {
+    pub fn local_export(
+        &self,
+        hash: &str,
+        target_path: &str,
+        mode: Option<u32>,
+    ) -> Result<(), String> {
         storage::local_export(hash, target_path, mode)
     }
 
@@ -235,7 +239,6 @@ impl Protocol {
             .unwrap();
         Ok(())
     }
-
 
     // Received message handler/parser
     pub fn on_message(&self, message: Value) -> Result<Message, String> {
@@ -288,7 +291,7 @@ impl Protocol {
                                     _ => None,
                                 };
 
-                               return Ok(Message::ReqReceive(
+                                return Ok(Message::ReqReceive(
                                     channel_id,
                                     hash.to_owned(),
                                     path.to_owned(),

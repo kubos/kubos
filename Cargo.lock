@@ -72,6 +72,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "cbor-protocol"
+version = "0.1.0"
+dependencies = [
+ "serde_cbor 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -252,6 +259,7 @@ name = "file-protocol"
 version = "0.1.0"
 dependencies = [
  "blake2-rfc 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cbor-protocol 0.1.0",
  "log 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.71 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_cbor 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -263,6 +271,7 @@ dependencies = [
 name = "file-service-rust"
 version = "0.1.0"
 dependencies = [
+ "cbor-protocol 0.1.0",
  "file-protocol 0.1.0",
  "kubos-system 0.1.0",
  "log 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
