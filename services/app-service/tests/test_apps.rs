@@ -85,9 +85,16 @@ macro_rules! test_query {
         #[test]
         fn $name() {
             let mut fixture = AppServiceFixture::setup();
-            let config = format!("{}", fixture.registry_dir.path().join("config.toml").to_string_lossy());
+            let config = format!(
+                "{}",
+                fixture
+                    .registry_dir
+                    .path()
+                    .join("config.toml")
+                    .to_string_lossy()
+            );
             setup_apps(&fixture.registry_dir.path());
-            fixture.start_service();
+            fixture.start_service(false);
 
             let result = panic::catch_unwind(|| {
                 let test: &Fn(Vec<serde_json::Value>) = &$test_closure;

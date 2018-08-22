@@ -44,7 +44,7 @@ fn uninstall_app() {
         .author("user");
 
     app.install(&fixture.registry_dir.path());
-    fixture.start_service();
+    fixture.start_service(false);
 
     let result = panic::catch_unwind(|| {
         let result = kubos_app::query(

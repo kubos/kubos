@@ -104,7 +104,7 @@ pub fn query(
             if errs_str.len() > 0 {
                 return Err(format_err!("{}", errs_str.to_string()));
             }
-        } else {
+        } else if !errs.is_null() {
             match errs.get("message") {
                 Some(message) => {
                     return Err(format_err!("{}", message.as_str().unwrap().to_string()));
