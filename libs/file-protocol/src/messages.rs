@@ -47,11 +47,7 @@ pub fn local_import(channel_id: u64, path: &str) -> Result<Vec<u8>, Error> {
                 channel_id, hash, num_chunks, mode
             );
             Ok(ser::to_vec_packed(&(
-                channel_id,
-                true,
-                hash,
-                num_chunks,
-                mode,
+                channel_id, true, hash, num_chunks, mode,
             ))?)
         }
         Err(error) => {

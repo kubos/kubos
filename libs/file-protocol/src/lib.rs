@@ -25,6 +25,7 @@ extern crate time;
 extern crate log;
 
 mod messages;
+mod parsers;
 pub mod protocol;
 mod storage;
 
@@ -32,15 +33,15 @@ pub use protocol::Protocol as FileProtocol;
 
 const CHUNK_SIZE: usize = 4096;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Message {
     Sync(String),
     SyncChunks(String, u32),
-    ReceiveChunk(String),
+    ReceiveChunk(String, u32, Vec<u8>),
     ACK(String),
     NAK(String, Option<Vec<(u32, u32)>>),
     ReqReceive(u64, String, String, Option<u32>),
-    ReqTransmit(u64),
+    ReqTransmit(u64, String),
     SuccessReceive(u64),
     SuccessTransmit(u64, String, u32, Option<u32>),
     Failure(u64, String),
@@ -58,28 +59,32 @@ pub fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
     let (hash, num_chunks, mode) = storage::local_import(&source_path)?;
     // Tell our destination the hash and number of chunks to expect
     f_protocol.send(messages::sync(&hash, num_chunks).unwrap())?;
-    // Send the actual file
+    // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
+    // Start the engine
+    f_protocol.message_engine(Some(&hash))?;
 
     Ok(())
 }
 
-pub fn download(source_path: &str, target_path: &str) -> Result<(), String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000);
+// pub fn download(source_path: &str, target_path: &str) -> Result<(), String> {
+//     let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000);
 
-    info!(
-        "Downloading remote: {} to local: {}",
-        source_path, target_path
-    );
+//     info!(
+//         "Downloading remote: {} to local: {}",
+//         source_path, target_path
+//     );
 
-    // Send our file request to the remote addr and get the returned data
-    let (hash, num_chunks, mode) = f_protocol.send_import(source_path)?;
+//     // Send our file request to the remote addr and get the returned data
+//     f_protocol.send_import(source_path)?;
 
-    // Check the number of chunks we need to receive and then receive them
-    f_protocol.sync_and_send(&hash, Some(num_chunks))?;
+//     // Check the number of chunks we need to receive and then receive them
+//     // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
 
-    // Save received data to the requested path
-    storage::local_export(&hash, target_path, mode)?;
+//     f_protocol.message_engine(None).unwrap();
 
-    Ok(())
-}
+//     // Save received data to the requested path
+//     //storage::local_export(&hash, target_path, mode)?;
+
+//     Ok(())
+// }

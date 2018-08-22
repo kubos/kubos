@@ -15,6 +15,7 @@
 //
 
 use super::messages;
+use super::parsers;
 use super::storage;
 use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
@@ -75,38 +76,11 @@ impl Protocol {
         self.send(messages::export(channel_id, hash, target_path, mode).unwrap())
             .unwrap();
 
-        loop {
-            // Listen on UDP port
-            let (peer, message) = match self.cbor_proto.recv_message_peer()? {
-                (peer, Some(data)) => (peer, data),
-                _ => return Err("Failed to receive op result".to_owned()),
-            };
-            // Update our response port
-            self.dest_port.set(peer.port());
-
-            match self.on_message(message)? {
-                Message::NAK(hash, chunks) => {
-                    if let Some(c) = chunks {
-                        self.do_upload(&hash, &c)?;
-                    }
-                }
-                Message::ACK(ack_hash) => {
-                    if ack_hash == hash {
-                        return Ok(());
-                    }
-                }
-                Message::Failure(channel, error) => {
-                    return Err(format!("Transfer {} failed: {}", channel, error));
-                }
-                _m => {
-                    return Err(format!("Unexpected message found {:?}", _m));
-                }
-            }
-        }
+        Ok(())
     }
 
     // Request a file from a remote target
-    pub fn send_import(&self, source_path: &str) -> Result<(String, u32, Option<u32>), String> {
+    pub fn send_import(&self, source_path: &str) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .and_then(|duration| {
@@ -117,30 +91,31 @@ impl Protocol {
 
         self.send(messages::import(channel_id, source_path).unwrap())
             .unwrap();
+        Ok(())
 
-        // Listen on UDP port
-        let message = self
-            .cbor_proto
-            .recv_message()?
-            .ok_or(format!("Failed to receive op result"))?;
+        // // Listen on UDP port
+        // let message = self
+        //     .cbor_proto
+        //     .recv_message()?
+        //     .ok_or(format!("Failed to receive op result"))?;
 
-        // Parse the received message
-        match self.on_message(message)? {
-            Message::SuccessTransmit(id, hash, num_chunks, mode) => {
-                if (id as u32) == channel_id {
-                    Ok((hash, num_chunks, mode))
-                } else {
-                    return Err("Channel ID mismatch".to_owned());
-                }
-            }
-            Message::Failure(id, error) => {
-                return Err(format!(
-                    "Failed to request file {}. Error returned from service: {}",
-                    id, error
-                ))
-            }
-            _ => return Err("Received unexpected response to import request".to_owned()),
-        }
+        // // Parse the received message
+        // match self.on_message(message, None)? {
+        //     Message::SuccessTransmit(id, hash, num_chunks, mode) => {
+        //         if (id as u32) == channel_id {
+        //             Ok((hash, num_chunks, mode))
+        //         } else {
+        //             return Err("Channel ID mismatch".to_owned());
+        //         }
+        //     }
+        //     Message::Failure(id, error) => {
+        //         return Err(format!(
+        //             "Failed to request file {}. Error returned from service: {}",
+        //             id, error
+        //         ))
+        //     }
+        //     _ => return Err("Received unexpected response to import request".to_owned()),
+        // }
     }
 
     // Figure out if/what chunks are missing and send the hash and info back to the remote addr
@@ -165,7 +140,7 @@ impl Protocol {
                 // TODO: Make timeout 'receive chunk' message-specific
                 match self.cbor_proto.recv_message_timeout(Duration::from_secs(1)) {
                     // Parse the received message
-                    Ok(Some(message)) => match self.on_message(message) {
+                    Ok(Some(message)) => match self.on_message(message, Some(hash)) {
                         Ok(_) => { /* TODO: Verify that we got a ReceiveChunk message? */ }
                         Err(err) => eprintln!("Failed to parse message: {}", err),
                     },
@@ -240,219 +215,95 @@ impl Protocol {
         Ok(())
     }
 
-    // Received message handler/parser
-    pub fn on_message(&self, message: Value) -> Result<Message, String> {
-        let data = match message {
-            Value::Array(val) => val.to_owned(),
-            _ => return Err("Unable to parse message: Data not an array".to_owned()),
-        };
-        let mut pieces = data.iter();
+    pub fn message_engine(&self, hash: Option<&str>) -> Result<(), String> {
+        loop {
+            // Listen on UDP port
+            let (peer, message) = match self.cbor_proto.recv_message_peer()? {
+                (peer, Some(data)) => (peer, data),
+                _ => return Err("Failed to receive op result".to_owned()),
+            };
+            // Update our response port
+            self.dest_port.set(peer.port());
 
-        let first_param: Value = pieces
-            .next()
-            .ok_or(format!("Unable to parse message: No contents"))?
-            .to_owned();
+            match self.on_message(message, hash) {
+                Ok(Some(Message::ACK(_))) => {
+                    return Ok(())
+                },
+                Ok(Some(Message::SuccessReceive(channel))) => {
+                    return Ok(())
+                },
+                Ok(Some(_message)) => {
+                    continue;
+                },
+                Ok(None) => {
+                    println!("no msg received?");
+                    continue;
+                },
+                Err(e) => return Err(e)
+            }
+        }
+    }
 
-        match first_param {
-            // It's a channel ID
-            Value::U64(channel_id) => {
-                match pieces.next().ok_or(format!(
-                    "Unable to parse message: No param after channel ID"
-                ))? {
-                    Value::String(operation) => {
-                        match operation.as_ref() {
-                            "export" => {
-                                // It's an export request: { channel_id, "export", hash, path [, mode] }
-
-                                let hash =
-                                    match pieces.next().ok_or(format!(
-                                        "Unable to parse export message: No hash param"
-                                    ))? {
-                                        Value::String(val) => val,
-                                        _ => return Err(
-                                            "Unable to parse export message: Invalid hash param"
-                                                .to_owned(),
-                                        ),
-                                    };
-
-                                let path =
-                                    match pieces.next().ok_or(format!(
-                                        "Unable to parse export message: No path param"
-                                    ))? {
-                                        Value::String(val) => val,
-                                        _ => return Err(
-                                            "Unable to parse export message: Invalid path param"
-                                                .to_owned(),
-                                        ),
-                                    };
-
-                                let mode = match pieces.next() {
-                                    Some(Value::U64(num)) => Some(*num as u32),
-                                    _ => None,
-                                };
-
-                                return Ok(Message::ReqReceive(
-                                    channel_id,
-                                    hash.to_owned(),
-                                    path.to_owned(),
-                                    mode,
-                                ));
-                            }
-                            "import" => {
-                                // It's an import request: { channel_id, "import", path }
-                                let path =
-                                    match pieces.next().ok_or(format!(
-                                        "Unable to parse import message: No path param"
-                                    ))? {
-                                        Value::String(val) => val,
-                                        _ => return Err(
-                                            "Unable to parse import message: Invalid path param"
-                                                .to_owned(),
-                                        ),
-                                    };
-
-                                // TODO: Actual logic for an import request
-                                self.send(messages::local_import(channel_id, path).unwrap())
-                                    .unwrap();
-
-                                return Ok(Message::ReqTransmit(channel_id));
-                            }
-                            _ => return Err(format!("Unable to parse message: Unknown operation")),
-                        }
-                    }
-                    Value::Bool(result) => {
-                        // It's an import/export op result
-                        // Good - { channel_id, true, ...values }
-
-                        match result {
-                            true => {
-                                // Good - { channel_id, true, ...values }
-                                if let Some(piece) = pieces.next() {
-                                    // It's a good result after an 'import' operation
-                                    let hash = match piece {
-                                        Value::String(val) => val,
-                                        _ => return Err(
-                                            "Unable to parse success message: Invalid hash param"
-                                                .to_owned(),
-                                        ),
-                                    };
-
-                                    let num_chunks = match pieces.next().ok_or(format!(
-                                        "Unable to parse success message: No num_chunks param"
-                                    ))? {
-                                        Value::U64(val) => *val,
-                                        _ => return Err(
-                                            "Unable to parse success message: Invalid num_chunks param"
-                                                .to_owned(),
-                                        ),
-                                    };
-
-                                    let mode = match pieces.next() {
-                                        Some(Value::U64(val)) => Some(*val as u32),
-                                        _ => None,
-                                    };
-
-                                    // Return the file info
-                                    return Ok(Message::SuccessTransmit(
-                                        channel_id,
-                                        hash.to_string(),
-                                        num_chunks as u32,
-                                        mode,
-                                    ));
-                                } else {
-                                    // It's a good result after an 'export' operation
-                                    return Ok(Message::SuccessReceive(channel_id));
-                                }
-                            }
-                            false => {
-                                // Bad - { channel_id, false, error_message}
-                                let error =
-                                    match pieces.next().ok_or(format!(
-                                        "Unable to parse failure message: No error param"
-                                    ))? {
-                                        Value::String(val) => val,
-                                        _ => return Err(
-                                            "Unable to parse failure message: Invalid error param"
-                                                .to_owned(),
-                                        ),
-                                    };
-
-                                return Ok(Message::Failure(channel_id, error.to_owned()));
-                            }
-                        }
-                    }
-                    _ => {
-                        return Err(format!(
-                            "Unable to parse message: Unknown param after channel ID"
-                        ))
+    pub fn on_message(&self, message: Value, hash: Option<&str>) -> Result<Option<Message>, String> {
+        let parsed_message = parsers::parse_message(message);
+        println!("parsed_message: {:?}", parsed_message);
+        match parsed_message.to_owned() {
+            Ok(Message::Sync(hash)) => {}
+            Ok(Message::SyncChunks(hash, num_chunks)) => {}
+            Ok(Message::ReceiveChunk(hash, chunk_num, data)) => {
+                storage::store_chunk(&hash, chunk_num, &data).unwrap();
+            }
+            Ok(Message::ACK(ack_hash)) => {
+                if let Some(hash_val) = hash {
+                    if ack_hash == hash_val {
+                        // Done processing its time to go home
+                        // return Ok(true);
                     }
                 }
+                println!("pack up go home");
+                // return Ok(true);
             }
-            // It's a hash value
-            Value::String(hash) => {
-                if let Some(second_param) = pieces.next() {
-                    match second_param {
-                        Value::Bool(true) => {
-                            // It's an ACK: { hash, true, num_chunks }
-                            // Our data transfer (export) completed succesfully
-                            // self.stop_push(&hash)?;
-
-                            //TODO: Do something with the third param? (num_chunks)
-                            // Doesn't look like we do anything with num_chunks
-                            return Ok(Message::ACK(hash));
-                        }
-                        Value::Bool(false) => {
-                            // It's a NAK: { hash, false, 1, 4, 6, 7 }
-                            // Some number of chunks were not received by the remote addr
-
-                            let mut remaining_chunks: Vec<(u32, u32)> = vec![];
-                            let mut chunk_nums: Vec<u32> = vec![];
-                            for entry in pieces {
-                                if let Value::U64(chunk_num) = entry {
-                                    chunk_nums.push(*chunk_num as u32);
-                                }
-                            }
-
-                            for chunk in chunk_nums.chunks(2) {
-                                let first = chunk[0];
-                                let last = chunk[1];
-                                remaining_chunks.push((first, last));
-                            }
-
-                            return Ok(Message::NAK(hash, Some(remaining_chunks)));
-                        }
-                        Value::U64(num) => {
-                            if let Some(third_param) = pieces.next() {
-                                if let Value::Bytes(data) = third_param {
-                                    // It's a data chunk message: { hash, chunk_index, data }
-                                    // Store the new chunk
-                                    storage::store_chunk(&hash, *num as u32, data).unwrap();
-
-                                    return Ok(Message::ReceiveChunk(hash));
-                                } else {
-                                    return Err(format!(
-                                        "Unable to parse chunk message: Invalid data format"
-                                    ));
-                                }
-                            } else {
-                                // It's a sync message: { hash, num_chunks }
-                                // TODO: Whoever processes this message should do the sync_and_send
-                                //self.sync_and_send(&hash, Some(*num as u32));
-                                return Ok(Message::SyncChunks(hash, *num as u32));
-                            }
-                        }
-                        _ => {
-                            return Err(format!("Unable to parse message: Unknown param after hash"))
-                        }
-                    }
-                } else {
-                    // It's a sync message: { hash }
-                    // TODO: Whoever processes this message should do the sync_and_send
-                    //self.sync_and_send(&hash, None)?;
-                    return Ok(Message::Sync(hash));
+            Ok(Message::NAK(hash, Some(missing_chunks))) => {
+                if let Some(chunks) = Some(missing_chunks) {
+                    self.do_upload(&hash, &chunks)?;
                 }
             }
-            _ => return Err(format!("Unable to parse message: Unknown first param type")),
+            Ok(Message::NAK(hash, None)) => {}
+            Ok(Message::ReqReceive(channel_id, hash, path, Some(mode))) => {}
+            Ok(Message::ReqReceive(channel_id, hash, path, None)) => {}
+            Ok(Message::ReqTransmit(channel_id, path)) => {
+                self.send(messages::local_import(channel_id, &path).unwrap()).unwrap();
+            }
+            Ok(Message::SuccessReceive(channel_id)) => {
+                // return Ok(true);
+            }
+            Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, Some(mode))) => {
+                // TODO: handle channel_id mismatch
+                let (result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
+                            self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
+                .unwrap();
+
+            }
+            Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, None)) => {
+                // TODO: handle channel_id mismatch
+                let (result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
+                            self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
+                .unwrap();
+
+            }
+            Ok(Message::Failure(channel_id, error_message)) => {
+                return Err(format!(
+                    "Transmission failure on channel {}. Error returned from server: {}",
+                    channel_id, error_message
+                ))
+            }
+            Err(e) => {}
+        }
+
+        if parsed_message.is_ok() {
+            return Ok(Some(parsed_message.unwrap()))
+        } else {
+            return Ok(None)
         }
     }
 }
