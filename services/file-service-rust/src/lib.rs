@@ -42,11 +42,11 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         );
 
         match f_protocol.message_engine(None, Duration::from_secs(1), false) {
-            Ok(Some(Message::SyncChunks(_, _))) => {
+            Ok(Some(Message::Metadata(_, _))) => {
                 match f_protocol.message_engine(None, Duration::from_secs(1), false) {
                     Ok(Some(Message::ReqReceive(channel, hash, path, mode))) => {
                         f_protocol.message_engine(None, Duration::from_secs(1), true);
-                        match f_protocol.local_export(&hash, &path, mode) {
+                        match f_protocol.finalize_file(&hash, &path, mode) {
                             Ok(_) => f_protocol.send_success(channel),
                             Err(e) => {
                                 f_protocol.send_failure(channel, &e);
@@ -99,7 +99,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
     //         //             // (so could potentially never return)
     //         //             f_protocol.sync_and_send(&hash, None).unwrap();
 
-    //         //             match f_protocol.local_export(&hash, &path, mode) {
+    //         //             match f_protocol.finalize_file(&hash, &path, mode) {
     //         //                 Ok(()) => {
     //         //                     f_protocol.send_success(channel_id).unwrap();
     //         //                 }
@@ -142,7 +142,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
 //             // TODO: Convert the various failures/unwraps to nice error printing
 //             if let Ok(message) = f_protocol.process_message(message) {
 //                 match message {
-//                     Message::SyncChunks(hash, num_chunks) => {
+//                     Message::Metadata(hash, num_chunks) => {
 //                         // A client has notified us of a file we should be prepared to receive
 //                         f_protocol.store_meta(&hash, num_chunks).unwrap();
 //                     }
@@ -160,7 +160,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
 //                         // (so could potentially never return)
 //                         f_protocol.sync_and_send(&hash, None).unwrap();
 
-//                         match f_protocol.local_export(&hash, &path, mode) {
+//                         match f_protocol.finalize_file(&hash, &path, mode) {
 //                             Ok(()) => {
 //                                 f_protocol.send_success(channel_id).unwrap();
 //                             }

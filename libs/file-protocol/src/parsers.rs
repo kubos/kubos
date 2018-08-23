@@ -189,9 +189,7 @@ pub fn parse_success_transmit(message: Value) -> Result<Option<Message>, String>
                     let hash = match piece {
                         Value::String(val) => val,
                         _ => {
-                            return Err(
-                                "Unable to parse success message: Invalid hash param".to_owned()
-                            )
+                            return Err("Unable to parse success message: Invalid hash param".to_owned())
                         }
                     };
 
@@ -384,7 +382,7 @@ pub fn parse_sync(message: Value) -> Result<Option<Message>, String> {
                     // It's a sync message: { hash, num_chunks }
                     // TODO: Whoever processes this message should do the sync_and_send
                     //self.sync_and_send(&hash, Some(*num as u32));
-                    return Ok(Some(Message::SyncChunks(hash, *num as u32)));
+                    return Ok(Some(Message::Metadata(hash, *num as u32)));
                 }
             }
         } else {

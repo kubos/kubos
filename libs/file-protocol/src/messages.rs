@@ -69,7 +69,7 @@ pub fn import_request(channel_id: u32, source_path: &str) -> Result<Vec<u8>, Err
 }
 
 // Create sync message
-pub fn sync(hash: &str, num_chunks: u32) -> Result<Vec<u8>, Error> {
+pub fn metadata(hash: &str, num_chunks: u32) -> Result<Vec<u8>, Error> {
     info!("-> {{ {}, {} }}", hash, num_chunks);
     Ok(ser::to_vec_packed(&(hash, num_chunks))?)
 }

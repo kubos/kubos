@@ -44,7 +44,7 @@ pub enum Message {
     /// TODO: Decide whether or not to keep this
     Sync(String),
     /// Receiver should prepare a new temporary storage folder with the specified metadata
-    SyncChunks(String, u32),
+    Metadata(String, u32),
     /// File data chunk message
     ReceiveChunk(String, u32, Vec<u8>),
     /// Receiver has successfully gotten all data chunks of the requested file
@@ -75,8 +75,9 @@ pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), Str
     // Copy file to upload to temp storage. Calculate the hash and chunk info
     let (hash, num_chunks, mode) = storage::initialize_file(&source_path)?;
 
+    // Q: Why not combine this and export into one message? it's really only a single extra parameter
     // Tell our destination the hash and number of chunks to expect
-    f_protocol.send(messages::sync(&hash, num_chunks).unwrap())?;
+    f_protocol.send(messages::metadata(&hash, num_chunks).unwrap())?;
 
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;

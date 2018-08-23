@@ -268,7 +268,7 @@ impl Protocol {
             Ok(Message::Sync(hash)) => {
                 info!("<- {{ {} }}", hash);
             }
-            Ok(Message::SyncChunks(hash, num_chunks)) => {
+            Ok(Message::Metadata(hash, num_chunks)) => {
                 info!("<- {{ {}, {} }}", hash, num_chunks);
                 storage::store_meta(&hash, num_chunks).unwrap();
             }
