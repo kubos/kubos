@@ -147,8 +147,7 @@ pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>
     converted_entries.sort();
 
     for &entry_num in converted_entries.iter() {
-        println!("checking {} vs {}", entry_num, prev_entry);
-
+        //println!("checking {} vs {}", entry_num, prev_entry);
         // Check for non-sequential dir entries to detect missing chunk ranges
         if entry_num - prev_entry > 1 {
             println!("Found missing chunk");

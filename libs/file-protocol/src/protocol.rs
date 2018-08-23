@@ -23,15 +23,23 @@ use serde_cbor::{ser, Value};
 use std::cell::Cell;
 use std::str;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::net::UdpSocket;
+
+#[derive(Eq, PartialEq)]
+pub enum Role {
+    Client,
+    Server
+}
 
 pub struct Protocol {
     cbor_proto: CborProtocol,
     host: String,
     dest_port: Cell<u16>,
+    role: Role,
 }
 
 impl Protocol {
-    pub fn new(host: String, dest_port: u16) -> Self {
+    pub fn new(host: String, dest_port: u16, role: Role) -> Self {
         // Get a local UDP socket (Bind)
         let c_protocol = CborProtocol::new(format!("{}:0", host));
 
@@ -41,6 +49,16 @@ impl Protocol {
             // Remote IP?
             host,
             dest_port: Cell::new(dest_port),
+            role
+        }
+    }
+
+    pub fn new_from_socket(socket: UdpSocket, host: String, dest_port: u16, role: Role) -> Self {
+        Protocol {
+            cbor_proto : CborProtocol::new_from_socket(socket),
+            host,
+            dest_port: Cell::new(dest_port),
+            role
         }
     }
 
@@ -220,12 +238,23 @@ impl Protocol {
         let mut running = true;
         while running {
             // Listen on UDP port
-            let (peer, message) = match self.cbor_proto.recv_message_peer_timeout(Duration::from_secs(1))? {
-                (peer, Some(data)) => (peer, data),
+            info!("listening...");
+
+            let message = if self.role == Role::Client {
+                match self.cbor_proto.recv_message_peer_timeout(Duration::from_secs(1))? {
+                (peer, Some(message)) => {
+                    // Update our response port
+                    self.dest_port.set(peer.port());
+                    message   
+                }
                 _ => return Err("Failed to receive op result".to_owned()),
+                }
+            } else {
+                match self.cbor_proto.recv_message_timeout(Duration::from_secs(1)) {
+                    Ok(Some(message)) => message,
+                    _ => return Err("Failed to receive data".to_owned())
+                }
             };
-            // Update our response port
-            self.dest_port.set(peer.port());
 
             last_message = self.on_message(message, hash);
 
@@ -262,12 +291,19 @@ impl Protocol {
         let parsed_message = parsers::parse_message(message);
         //println!("parsed_message: {:?}", parsed_message);
         match parsed_message.to_owned() {
-            Ok(Message::Sync(hash)) => {}
-            Ok(Message::SyncChunks(hash, num_chunks)) => {}
+            Ok(Message::Sync(hash)) => {
+                info!("<- {{ {} }}", hash);
+            }
+            Ok(Message::SyncChunks(hash, num_chunks)) => {
+                info!("<- {{ {}, {} }}", hash, num_chunks);
+                storage::store_meta(&hash, num_chunks);
+            }
             Ok(Message::ReceiveChunk(hash, chunk_num, data)) => {
+                info!("<- {{ {}, {}, chunk_data }}", hash, chunk_num);
                 storage::store_chunk(&hash, chunk_num, &data).unwrap();
             }
             Ok(Message::ACK(ack_hash)) => {
+                info!("<- {{ {}, true }}", ack_hash);
                 if let Some(hash_val) = hash {
                     if ack_hash == hash_val {
                         // Done processing its time to go home
@@ -277,20 +313,47 @@ impl Protocol {
                 // return Ok(true);
             }
             Ok(Message::NAK(hash, Some(missing_chunks))) => {
+                info!("<- {{ {}, false, {:?} }}", hash, missing_chunks);
                 if let Some(chunks) = Some(missing_chunks) {
                     self.do_upload(&hash, &chunks)?;
                 }
             }
-            Ok(Message::NAK(hash, None)) => {}
-            Ok(Message::ReqReceive(channel_id, hash, path, Some(mode))) => {}
-            Ok(Message::ReqReceive(channel_id, hash, path, None)) => {}
+            Ok(Message::NAK(hash, None)) => {
+                info!("<- {{ {}, false }}", hash);
+            }
+            Ok(Message::ReqReceive(channel_id, hash, path, Some(mode))) => {
+                info!("<- {{ {}, export, {}, {}, {} }}", channel_id, hash, path, mode);
+                // The client wants to send us a file.
+                // Go listen for the chunks.
+                // Note: Won't return until we've received all of them.
+                // (so could potentially never return)
+                // TODO: handle channel_id mismatch
+                // let (result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
+                //             self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
+                // .unwrap();
+
+                // match storage::local_export(&hash, &path, mode) {
+                //     Ok(()) => {
+                //         self.send_success(channel_id).unwrap();
+                //     }
+                //     Err(error) => {
+                //         self.send_failure(channel_id, &error).unwrap();
+                //     }
+                // }
+            }
+            Ok(Message::ReqReceive(channel_id, hash, path, None)) => {
+                info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
+            }
             Ok(Message::ReqTransmit(channel_id, path)) => {
+                info!("<- {{ {}, import, {} }}", channel_id, path);
                 self.send(messages::local_import(channel_id, &path).unwrap()).unwrap();
             }
             Ok(Message::SuccessReceive(channel_id)) => {
+                info!("<- {{ {}, true }}", channel_id);
                 // return Ok(true);
             }
             Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, Some(mode))) => {
+                info!("<- {{ {}, true, {}, {}, {} }}", channel_id, hash, num_chunks, mode);
                 // TODO: handle channel_id mismatch
                 let (result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
                             self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
@@ -298,6 +361,7 @@ impl Protocol {
 
             }
             Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, None)) => {
+                info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks);
                 // TODO: handle channel_id mismatch
                 let (result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
                             self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
@@ -305,12 +369,15 @@ impl Protocol {
 
             }
             Ok(Message::Failure(channel_id, error_message)) => {
+                info!("<- {{ {}, false, {} }}", channel_id, error_message);
                 return Err(format!(
                     "Transmission failure on channel {}. Error returned from server: {}",
                     channel_id, error_message
                 ))
             }
-            Err(e) => {}
+            Err(e) => {
+                info!("<- what did we get??");
+            }
         }
 
         if parsed_message.is_ok() {

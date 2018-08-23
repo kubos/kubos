@@ -30,6 +30,7 @@ pub mod protocol;
 mod storage;
 
 pub use protocol::Protocol as FileProtocol;
+pub use protocol::Role as Role;
 
 const CHUNK_SIZE: usize = 4096;
 
@@ -48,7 +49,7 @@ pub enum Message {
 }
 
 pub fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000);
+    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000, Role::Client);
 
     info!(
         "Uploading local:{} to remote:{}",
@@ -68,7 +69,7 @@ pub fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
 }
 
 pub fn download(source_path: &str, target_path: &str) -> Result<(), String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000);
+    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000, Role::Client);
 
     info!(
         "Downloading remote: {} to local: {}",

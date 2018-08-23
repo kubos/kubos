@@ -27,11 +27,11 @@ pub fn local_export(
     match storage::local_export(hash, path, mode) {
         Ok(results) => {
             // TODO: Results might need to be unpacked from tuple
-            println!("-> {{ {}, true, {:?} }}", channel_id, results);
+            info!("-> {{ {}, true, {:?} }}", channel_id, results);
             Ok(ser::to_vec_packed(&(channel_id, true, results))?)
         }
         Err(error) => {
-            println!("-> {{ {}, false, {} }}", channel_id, error);
+            info!("-> {{ {}, false, {} }}", channel_id, error);
             Ok(ser::to_vec_packed(&(channel_id, false, error))?)
         }
     }
@@ -42,7 +42,7 @@ pub fn local_import(channel_id: u64, path: &str) -> Result<Vec<u8>, Error> {
     match storage::local_import(path) {
         Ok((hash, num_chunks, mode)) => {
             // TODO: Results might need to be unpacked from tuple
-            println!(
+            info!(
                 "-> {{ {}, true, {}, {}, {} }}",
                 channel_id, hash, num_chunks, mode
             );
@@ -51,7 +51,7 @@ pub fn local_import(channel_id: u64, path: &str) -> Result<Vec<u8>, Error> {
             ))?)
         }
         Err(error) => {
-            println!("-> {{ {}, false, {} }}", channel_id, error);
+            info!("-> {{ {}, false, {} }}", channel_id, error);
             Ok(ser::to_vec_packed(&(channel_id, false, error))?)
         }
     }
@@ -59,7 +59,7 @@ pub fn local_import(channel_id: u64, path: &str) -> Result<Vec<u8>, Error> {
 
 // Create export message
 pub fn export(channel_id: u32, hash: &str, target_path: &str, mode: u32) -> Result<Vec<u8>, Error> {
-    println!(
+    info!(
         "-> {{ {}, export, {}, {}, {} }}",
         channel_id, hash, target_path, mode
     );
@@ -75,13 +75,13 @@ pub fn export(channel_id: u32, hash: &str, target_path: &str, mode: u32) -> Resu
 
 // Create import message
 pub fn import(channel_id: u32, source_path: &str) -> Result<Vec<u8>, Error> {
-    println!("-> {{ import, {} }}", source_path);
+    info!("-> {{ import, {} }}", source_path);
     Ok(ser::to_vec_packed(&(channel_id, "import", source_path))?)
 }
 
 // Create sync message
 pub fn sync(hash: &str, num_chunks: u32) -> Result<Vec<u8>, Error> {
-    println!("-> {{ {}, {} }}", hash, num_chunks);
+    info!("-> {{ {}, {} }}", hash, num_chunks);
     Ok(ser::to_vec_packed(&(hash, num_chunks))?)
 }
 
@@ -90,7 +90,7 @@ pub fn sync(hash: &str, num_chunks: u32) -> Result<Vec<u8>, Error> {
 pub fn ack_or_nak(hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, Error> {
     let (result, chunks) = storage::local_sync(hash, num_chunks).unwrap();
 
-    println!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
+    info!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
     let mut vec = ser::to_vec_packed(&(hash, result)).unwrap();
     for chunk in chunks.iter() {
         // Add the chunk number to the end of the CBOR array
@@ -103,20 +103,20 @@ pub fn ack_or_nak(hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, Error>
 
 // Send an acknowledge to the remote address
 fn ack(hash: &str, num_chunks: u32) -> Result<Vec<u8>, Error> {
-    println!("-> {{ {}, true, {} }}", hash, num_chunks);
+    info!("-> {{ {}, true, {} }}", hash, num_chunks);
     Ok(ser::to_vec_packed(&(hash, true, num_chunks))?)
 }
 
 // Send a NAK to the remote address
 // TODO: should include missing chunks
 fn nak(hash: &str) -> Result<Vec<u8>, Error> {
-    println!("-> {{ {}, false}}", hash);
+    info!("-> {{ {}, false}}", hash);
     Ok(ser::to_vec_packed(&(hash, false))?)
 }
 
 // Create chunk message
 pub fn chunk(hash: &str, index: u32, chunk: &[u8]) -> Result<Vec<u8>, Error> {
     let chunk_bytes = Value::Bytes(chunk.to_vec());
-    println!("-> {{ {}, {}, {:?}", hash, index, chunk_bytes);
+    info!("-> {{ {}, {}, {:?}", hash, index, chunk_bytes);
     Ok(ser::to_vec_packed(&(hash, index, chunk_bytes))?)
 }

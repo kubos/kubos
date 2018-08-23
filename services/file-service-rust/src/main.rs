@@ -27,8 +27,7 @@ use kubos_system::Config as ServiceConfig;
 use simplelog::*;
 use std::thread;
 
-use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::{FileProtocol, Message};
+use file_protocol::{FileProtocol, Message, Role};
 
 fn main() {
     CombinedLogger::init(vec![

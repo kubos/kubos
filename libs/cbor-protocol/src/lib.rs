@@ -31,6 +31,10 @@ impl Protocol {
         }
     }
 
+    pub fn new_from_socket(handle: UdpSocket) -> Self {
+        Self { handle }
+    }
+
     pub fn send_message(&self, message: &[u8], host: &str, port: u16) -> Result<(), String> {
         // TODO: If paused, just queue up the message
         let dest: SocketAddr = format!("{}:{}", host, port).parse().unwrap();
@@ -82,6 +86,19 @@ impl Protocol {
         println!("Received {} bytes", size);
 
         self.recv_start(&buf[0..size])
+    }
+
+    // Gets the peer attempting to send a message
+    // But does *not* retrieve the message
+    pub fn peek_peer(&self) -> Result<SocketAddr, String> {
+        let mut buf = [0; 4136];
+        let (size, peer) = self
+            .handle
+            .peek_from(&mut buf)
+            .map_err(|err| format!("Failed to receive a message: {}", err))?;
+
+        println!("Receiving {} bytes from {:?}", size, peer);
+        Ok(peer)
     }
 
     pub fn recv_message_peer(&self) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
