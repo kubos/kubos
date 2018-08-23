@@ -62,18 +62,6 @@ impl Protocol {
         }
     }
 
-    /*
-    // We already have a CBOR connection, we just need to setup the file system stuff
-    pub fn new_listener(c_protocol: CborProtocol, destination: SocketAddr) -> Self {
-        Protocol {
-            cbor_proto: c_protocol,
-            // Remote IP?
-            host: format!("{}", destination.ip()).to_owned(),
-            dest_port: destination.port(),
-        }
-    }
-    */
-
     pub fn send(&self, vec: Vec<u8>) -> Result<(), String> {
         self.cbor_proto
             .send_message(&vec, &self.host, self.dest_port.get())
@@ -252,13 +240,16 @@ impl Protocol {
             } else {
                 match self.cbor_proto.recv_message_timeout(Duration::from_secs(1)) {
                     Ok(Some(message)) => message,
-                    _ => return Err("Failed to receive data".to_owned())
+                    _ =>  {
+                        println!("no data so bailing");
+                        return Err("Failed to receive data".to_owned())
+                    }
                 }
             };
 
-            last_message = self.on_message(message, hash);
+            let new_message = self.on_message(message, hash);
 
-            let stop = match last_message.to_owned() {
+            let stop = match new_message.to_owned() {
                 Ok(Some(Message::ACK(_))) => {
                     true
                 },
@@ -280,6 +271,7 @@ impl Protocol {
                 },
                 Err(e) => return Err(e)
             };
+            last_message = new_message;
             if stop {
                 break;
             }
@@ -328,9 +320,9 @@ impl Protocol {
                 // Note: Won't return until we've received all of them.
                 // (so could potentially never return)
                 // TODO: handle channel_id mismatch
-                // let (result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
-                //             self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
-                // .unwrap();
+                let (result, _chunks) = storage::local_sync(&hash, None).unwrap();
+                            self.send(messages::ack_or_nak(&hash, None).unwrap())
+                .unwrap();
 
                 // match storage::local_export(&hash, &path, mode) {
                 //     Ok(()) => {
