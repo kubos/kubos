@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+//! TODO: Module documentation
+
 use super::messages;
 use super::parsers;
 use super::storage;
@@ -25,12 +27,16 @@ use std::net::UdpSocket;
 use std::str;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+/// File Transfer Protocol Roles
 #[derive(Eq, PartialEq)]
 pub enum Role {
+    /// User will be sending operation requests
     Client,
+    /// User will be listening for and processing operation requests
     Server,
 }
 
+/// File Protocol Information Structure
 pub struct Protocol {
     cbor_proto: CborProtocol,
     host: String,
@@ -39,6 +45,7 @@ pub struct Protocol {
 }
 
 impl Protocol {
+    /// Create a new file protocol instance using an automatically assigned UDP socket
     pub fn new(host: String, dest_port: u16, role: Role) -> Self {
         // Get a local UDP socket (Bind)
         let c_protocol = CborProtocol::new(format!("{}:0", host));
@@ -53,6 +60,7 @@ impl Protocol {
         }
     }
 
+    /// Create a new file protocol instance using a specific UDP socket
     pub fn new_from_socket(socket: UdpSocket, host: String, dest_port: u16, role: Role) -> Self {
         Protocol {
             cbor_proto: CborProtocol::new_from_socket(socket),
@@ -62,6 +70,7 @@ impl Protocol {
         }
     }
 
+    /// Wrap the specified data into a CBOR packet and then send to the destination port
     pub fn send(&self, vec: Vec<u8>) -> Result<(), String> {
         self.cbor_proto
             .send_message(&vec, &self.host, self.dest_port.get())
@@ -69,45 +78,44 @@ impl Protocol {
         Ok(())
     }
 
-    // Request remote target to receive file from host
+    /// Request remote target to receive file from host
     pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .and_then(|duration| {
-                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
-            })
+            .and_then(
+                |duration| Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
+            )
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
-        self.send(messages::export(channel_id, hash, target_path, mode).unwrap())
+        self.send(messages::export_request(channel_id, hash, target_path, mode).unwrap())
             .unwrap();
 
         Ok(())
     }
 
-    // Request a file from a remote target
+    /// Request a file from a remote target
     pub fn send_import(&self, source_path: &str) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .and_then(|duration| {
-                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
-            })
+            .and_then(
+                |duration| Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
+            )
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
-        self.send(messages::import(channel_id, source_path).unwrap())
+        self.send(messages::import_request(channel_id, source_path).unwrap())
             .unwrap();
         Ok(())
     }
 
-    // Figure out if/what chunks are missing and send the hash and info back to the remote addr
-    // Q: This copies ACK/NAK. Should it replace them? Or use them?
+    /// Figure out if/what chunks are missing and send the hash and info back to the remote addr
     pub fn sync_and_send(&self, hash: &str, num_chunks: Option<u32>) -> Result<(), String> {
         // TODO: Create some way to break out of this loop if we never receive all the chunks
         loop {
-            let (result, _chunks) = storage::local_sync(hash, num_chunks)?;
+            let (result, _chunks) = storage::validate_file(hash, num_chunks)?;
 
-            self.send(messages::ack_or_nak(hash, num_chunks).unwrap())
+            self.send(messages::file_status(hash, num_chunks).unwrap())
                 .unwrap();
 
             if result == true {
@@ -122,7 +130,7 @@ impl Protocol {
                 // TODO: Make timeout 'receive chunk' message-specific
                 match self.cbor_proto.recv_message_timeout(Duration::from_secs(1)) {
                     // Parse the received message
-                    Ok(Some(message)) => match self.on_message(message, Some(hash)) {
+                    Ok(Some(message)) => match self.process_message(message, Some(hash)) {
                         Ok(_) => { /* TODO: Verify that we got a ReceiveChunk message? */ }
                         Err(err) => eprintln!("Failed to parse message: {}", err),
                     },
@@ -143,32 +151,28 @@ impl Protocol {
         Ok(())
     }
 
-    pub fn local_export(
+    /// Verify the integrity of received file data and then transfer into the requested permanent file location
+    ///
+    /// Verifies:
+    /// 	a) All of the chunks of a file have been received
+    ///     b) That the calculated hash of said chunks matches the expected hash
+    ///
+    pub fn finalize_file(
         &self,
         hash: &str,
         target_path: &str,
         mode: Option<u32>,
     ) -> Result<(), String> {
-        storage::local_export(hash, target_path, mode)
+        storage::finalize_file(hash, target_path, mode)
     }
 
+    /// Store a files metadata into the appropriate temporary storage location
     pub fn store_meta(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
         storage::store_meta(hash, num_chunks)
     }
 
-    // Request a download to start
-    fn start_push(&self, _hash: &str, _chunks: Option<Vec<u32>>) -> Result<(), String> {
-        unimplemented!();
-    }
-
-    // Request a download to stop
-    fn stop_push(&self, _hash: &str) -> Result<(), String> {
-        unimplemented!();
-    }
-
-    // This is the guts of a coroutine which appears to have been
-    // spawned when the module file-protocol.lua is loaded...
-    pub fn do_upload(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
+    /// Send all requested chunks of a file to the remote destination
+    pub fn send_chunks(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
         for (first, last) in chunks {
             for chunk_index in *first..*last {
                 let chunk = storage::load_chunk(hash, chunk_index).unwrap();
@@ -179,6 +183,7 @@ impl Protocol {
         Ok(())
     }
 
+    /// Report to the requestor that the export operation has completed successfully
     pub fn send_success(&self, channel_id: u64) -> Result<(), String> {
         info!("-> {{ {}, true }}", channel_id);
         let vec = ser::to_vec_packed(&(channel_id, true)).unwrap();
@@ -188,6 +193,7 @@ impl Protocol {
         Ok(())
     }
 
+    /// Report to the requestor that the export operation has failed
     pub fn send_failure(&self, channel_id: u64, error: &str) -> Result<(), String> {
         info!("-> {{ {}, false, {} }}", channel_id, error);
         let vec = ser::to_vec_packed(&(channel_id, false, error)).unwrap();
@@ -197,6 +203,8 @@ impl Protocol {
         Ok(())
     }
 
+    /// Listen for and process file protocol messages
+    /// TODO: Make this more descriptive
     pub fn message_engine(
         &self,
         hash: Option<&str>,
@@ -224,7 +232,7 @@ impl Protocol {
                 }
             };
 
-            let new_message = self.on_message(message, hash);
+            let new_message = self.process_message(message, hash);
 
             let stop = match new_message.to_owned() {
                 Ok(Some(Message::ACK(_))) => true,
@@ -248,7 +256,8 @@ impl Protocol {
         last_message
     }
 
-    pub fn on_message(
+    /// Process a file protocol message
+    pub fn process_message(
         &self,
         message: Value,
         hash: Option<&str>,
@@ -279,9 +288,7 @@ impl Protocol {
             }
             Ok(Message::NAK(hash, Some(missing_chunks))) => {
                 info!("<- {{ {}, false, {:?} }}", hash, missing_chunks);
-                if let Some(chunks) = Some(missing_chunks) {
-                    self.do_upload(&hash, &chunks)?;
-                }
+                self.send_chunks(&hash, &missing_chunks)?;
             }
             Ok(Message::NAK(hash, None)) => {
                 info!("<- {{ {}, false }}", hash);
@@ -296,8 +303,8 @@ impl Protocol {
                 // Note: Won't return until we've received all of them.
                 // (so could potentially never return)
                 // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::local_sync(&hash, None).unwrap();
-                self.send(messages::ack_or_nak(&hash, None).unwrap())
+                let (_result, _chunks) = storage::validate_file(&hash, None).unwrap();
+                self.send(messages::file_status(&hash, None).unwrap())
                     .unwrap();
             }
             Ok(Message::ReqReceive(channel_id, hash, path, None)) => {
@@ -305,7 +312,7 @@ impl Protocol {
             }
             Ok(Message::ReqTransmit(channel_id, path)) => {
                 info!("<- {{ {}, import, {} }}", channel_id, path);
-                self.send(messages::local_import(channel_id, &path).unwrap())
+                self.send(messages::import_result(channel_id, &path).unwrap())
                     .unwrap();
             }
             Ok(Message::SuccessReceive(channel_id)) => {
@@ -317,15 +324,15 @@ impl Protocol {
                     channel_id, hash, num_chunks, mode
                 );
                 // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
-                self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
+                let (_result, _chunks) = storage::validate_file(&hash, Some(num_chunks)).unwrap();
+                self.send(messages::file_status(&hash, Some(num_chunks)).unwrap())
                     .unwrap();
             }
             Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, None)) => {
                 info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks);
                 // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
-                self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
+                let (_result, _chunks) = storage::validate_file(&hash, Some(num_chunks)).unwrap();
+                self.send(messages::file_status(&hash, Some(num_chunks)).unwrap())
                     .unwrap();
             }
             Ok(Message::Failure(channel_id, error_message)) => {

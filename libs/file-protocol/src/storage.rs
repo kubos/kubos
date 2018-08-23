@@ -110,7 +110,7 @@ pub fn load_meta(hash: &str) -> Result<u32, String> {
 }
 
 // Check if all of a files chunks are present in the temporary directory
-pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>), String> {
+pub fn validate_file(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>), String> {
     let num_chunks = if let Some(num) = num_chunks {
         store_meta(hash, num).unwrap();
         num
@@ -150,7 +150,6 @@ pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>
         //println!("checking {} vs {}", entry_num, prev_entry);
         // Check for non-sequential dir entries to detect missing chunk ranges
         if entry_num - prev_entry > 1 {
-            println!("Found missing chunk");
             // Add start of range (inclusive)
             missing_ranges.push((prev_entry + 1) as u32);
             // Add end of range (non-inclusive)
@@ -165,7 +164,6 @@ pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>
     //     We will already have added '6', so we need to add '10'
     //     to close it out.
     if (num_chunks as i32) - prev_entry != 1 {
-        println!("Detected missing range");
         // Add start of range
         missing_ranges.push((prev_entry + 1) as u32);
         // Add end of range
@@ -178,7 +176,7 @@ pub fn local_sync(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>
 /// Create temporary folder for chunks
 /// Stream copy file from mutable space to immutable space
 /// Move folder to hash of contents
-pub fn local_import(source_path: &str) -> Result<(String, u32, u32), String> {
+pub fn initialize_file(source_path: &str) -> Result<(String, u32, u32), String> {
     let storage_path = String::from("storage");
 
     if let Err(e) = fs::metadata(source_path) {
@@ -260,9 +258,9 @@ pub fn local_import(source_path: &str) -> Result<(String, u32, u32), String> {
 }
 
 // Copy temporary data chunks into permanent file?
-pub fn local_export(hash: &str, target_path: &str, mode: Option<u32>) -> Result<(), String> {
+pub fn finalize_file(hash: &str, target_path: &str, mode: Option<u32>) -> Result<(), String> {
     // Double check that all the chunks of the file are present and the hash matches up
-    let (result, _) = local_sync(hash, None)?;
+    let (result, _) = validate_file(hash, None)?;
 
     if result != true {
         return Err("File missing chunks".to_owned());

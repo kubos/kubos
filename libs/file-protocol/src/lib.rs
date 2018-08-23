@@ -14,40 +14,56 @@
 // limitations under the License.
 //
 
+//! TODO: Crate documentation
+
+#![deny(missing_docs)]
+
 extern crate blake2_rfc;
 extern crate cbor_protocol;
+#[macro_use]
+extern crate log;
 extern crate serde;
 extern crate serde_cbor;
 extern crate time;
-#[macro_use]
-extern crate log;
 
 use std::time::Duration;
 
 mod messages;
 mod parsers;
 pub mod protocol;
-pub mod storage;
+mod storage;
 
 pub use protocol::Protocol as FileProtocol;
 pub use protocol::Role;
 
 const CHUNK_SIZE: usize = 4096;
 
+/// File protocol message types
 #[derive(Debug, Clone)]
 pub enum Message {
+    /// TODO: Decide whether or not to keep this
     Sync(String),
+    /// Receiver should prepare a new temporary storage folder with the specified metadata
     SyncChunks(String, u32),
+    /// File data chunk message
     ReceiveChunk(String, u32, Vec<u8>),
+    /// Receiver has successfully gotten all data chunks of the requested file
     ACK(String),
+    /// Receiver is missing the specified file data chunks
     NAK(String, Option<Vec<(u32, u32)>>),
+    /// (Client Only) Message requesting the recipient to receive the specified file
     ReqReceive(u64, String, String, Option<u32>),
+    /// (Client Only) Message requesting the recipient to transmit the speicified file
     ReqTransmit(u64, String),
+    /// (Server Only) Recipient has successfully processed a request to receive a file
     SuccessReceive(u64),
+    /// (Server Only) Recipient has successfully prepared to transmit a file
     SuccessTransmit(u64, String, u32, Option<u32>),
+    /// (Server Only) The transmit or receive request has failed to be completed
     Failure(u64, String),
 }
 
+/// Upload a file to the target server location
 pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
     let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
 
@@ -55,19 +71,23 @@ pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), Str
         "Uploading local:{} to remote:{}",
         &source_path, &target_path
     );
+
     // Copy file to upload to temp storage. Calculate the hash and chunk info
-    // Q: What's `mode` for? `local_import` always returns 0. Looks like it should be file permissions
-    let (hash, num_chunks, mode) = storage::local_import(&source_path)?;
+    let (hash, num_chunks, mode) = storage::initialize_file(&source_path)?;
+
     // Tell our destination the hash and number of chunks to expect
     f_protocol.send(messages::sync(&hash, num_chunks).unwrap())?;
+
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
-    // Start the engine
+
+    // Start the engine to send the file data chunks
     f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
 
     Ok(())
 }
 
+/// Download a file from the target server location
 pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
     let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
 
@@ -76,7 +96,8 @@ pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), S
         source_path, target_path
     );
 
-    // Send our file request to the remote addr and get the returned data
+    // Send our file request to the remote addr and verify that it's
+    // going to be able to send it
     f_protocol.send_import(source_path)?;
 
     // Check the number of chunks we need to receive and then receive them
@@ -84,12 +105,12 @@ pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), S
     match f_protocol.message_engine(None, Duration::from_secs(1), false) {
         Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
             info!("file has been transmitted?");
-            f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true);
+            f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
 
             info!("done recv");
 
             // Save received data to the requested path
-            storage::local_export(&hash, target_path, mode)?;
+            storage::finalize_file(&hash, target_path, mode)?;
             return Ok(());
         }
         Ok(msg) => {
