@@ -114,7 +114,10 @@ impl Protocol {
         Ok((peer, message))
     }
 
-    pub fn recv_message_peer_timeout(&self, timeout: Duration) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
+    pub fn recv_message_peer_timeout(
+        &self,
+        timeout: Duration,
+    ) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
         // Set the timeout for this particular receive
         self.handle
             .set_read_timeout(Some(timeout))

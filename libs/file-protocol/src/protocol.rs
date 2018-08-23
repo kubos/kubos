@@ -21,14 +21,14 @@ use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
 use serde_cbor::{ser, Value};
 use std::cell::Cell;
+use std::net::UdpSocket;
 use std::str;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::net::UdpSocket;
 
 #[derive(Eq, PartialEq)]
 pub enum Role {
     Client,
-    Server
+    Server,
 }
 
 pub struct Protocol {
@@ -49,16 +49,16 @@ impl Protocol {
             // Remote IP?
             host,
             dest_port: Cell::new(dest_port),
-            role
+            role,
         }
     }
 
     pub fn new_from_socket(socket: UdpSocket, host: String, dest_port: u16, role: Role) -> Self {
         Protocol {
-            cbor_proto : CborProtocol::new_from_socket(socket),
+            cbor_proto: CborProtocol::new_from_socket(socket),
             host,
             dest_port: Cell::new(dest_port),
-            role
+            role,
         }
     }
 
@@ -197,7 +197,12 @@ impl Protocol {
         Ok(())
     }
 
-    pub fn message_engine(&self, hash: Option<&str>, timeout: Duration, pump: bool) -> Result<Option<Message>, String> {
+    pub fn message_engine(
+        &self,
+        hash: Option<&str>,
+        timeout: Duration,
+        pump: bool,
+    ) -> Result<Option<Message>, String> {
         let mut last_message: Result<Option<Message>, String>;
         loop {
             // Listen on UDP port
@@ -205,45 +210,35 @@ impl Protocol {
 
             let message = if self.role == Role::Client {
                 match self.cbor_proto.recv_message_peer_timeout(timeout)? {
-                (peer, Some(message)) => {
-                    // Update our response port
-                    self.dest_port.set(peer.port());
-                    message   
-                }
-                _ => return Err("Failed to receive op result".to_owned()),
+                    (peer, Some(message)) => {
+                        // Update our response port
+                        self.dest_port.set(peer.port());
+                        message
+                    }
+                    _ => return Err("Failed to receive op result".to_owned()),
                 }
             } else {
                 match self.cbor_proto.recv_message_timeout(timeout) {
                     Ok(Some(message)) => message,
-                    _ =>  {
-                        return Err("Failed to receive data".to_owned())
-                    }
+                    _ => return Err("Failed to receive data".to_owned()),
                 }
             };
 
             let new_message = self.on_message(message, hash);
 
             let stop = match new_message.to_owned() {
-                Ok(Some(Message::ACK(_))) => {
-                    true
-                },
-                Ok(Some(Message::SuccessReceive(_))) => {
-                    true
-                },
-                Ok(Some(Message::SuccessTransmit(_, _, _, _))) => {
-                    true
-                },
+                Ok(Some(Message::ACK(_))) => true,
+                Ok(Some(Message::SuccessReceive(_))) => true,
+                Ok(Some(Message::SuccessTransmit(_, _, _, _))) => true,
                 Ok(Some(_message)) => {
                     if !pump {
                         true
                     } else {
                         false
                     }
-                },
-                Ok(None) => {
-                    false
-                },
-                Err(e) => return Err(e)
+                }
+                Ok(None) => false,
+                Err(e) => return Err(e),
             };
             last_message = new_message;
             if stop {
@@ -253,7 +248,11 @@ impl Protocol {
         last_message
     }
 
-    pub fn on_message(&self, message: Value, hash: Option<&str>) -> Result<Option<Message>, String> {
+    pub fn on_message(
+        &self,
+        message: Value,
+        hash: Option<&str>,
+    ) -> Result<Option<Message>, String> {
         let parsed_message = parsers::parse_message(message);
         //println!("parsed_message: {:?}", parsed_message);
         match parsed_message.to_owned() {
@@ -288,48 +287,53 @@ impl Protocol {
                 info!("<- {{ {}, false }}", hash);
             }
             Ok(Message::ReqReceive(channel_id, hash, path, Some(mode))) => {
-                info!("<- {{ {}, export, {}, {}, {} }}", channel_id, hash, path, mode);
+                info!(
+                    "<- {{ {}, export, {}, {}, {} }}",
+                    channel_id, hash, path, mode
+                );
                 // The client wants to send us a file.
                 // Go listen for the chunks.
                 // Note: Won't return until we've received all of them.
                 // (so could potentially never return)
                 // TODO: handle channel_id mismatch
                 let (_result, _chunks) = storage::local_sync(&hash, None).unwrap();
-                            self.send(messages::ack_or_nak(&hash, None).unwrap())
-                .unwrap();
+                self.send(messages::ack_or_nak(&hash, None).unwrap())
+                    .unwrap();
             }
             Ok(Message::ReqReceive(channel_id, hash, path, None)) => {
                 info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
             }
             Ok(Message::ReqTransmit(channel_id, path)) => {
                 info!("<- {{ {}, import, {} }}", channel_id, path);
-                self.send(messages::local_import(channel_id, &path).unwrap()).unwrap();
+                self.send(messages::local_import(channel_id, &path).unwrap())
+                    .unwrap();
             }
             Ok(Message::SuccessReceive(channel_id)) => {
                 info!("<- {{ {}, true }}", channel_id);
             }
             Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, Some(mode))) => {
-                info!("<- {{ {}, true, {}, {}, {} }}", channel_id, hash, num_chunks, mode);
+                info!(
+                    "<- {{ {}, true, {}, {}, {} }}",
+                    channel_id, hash, num_chunks, mode
+                );
                 // TODO: handle channel_id mismatch
                 let (_result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
-                            self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
-                .unwrap();
-
+                self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
+                    .unwrap();
             }
             Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, None)) => {
                 info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks);
                 // TODO: handle channel_id mismatch
                 let (_result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
-                            self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
-                .unwrap();
-
+                self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
+                    .unwrap();
             }
             Ok(Message::Failure(channel_id, error_message)) => {
                 info!("<- {{ {}, false, {} }}", channel_id, error_message);
                 return Err(format!(
                     "Transmission failure on channel {}. Error returned from server: {}",
                     channel_id, error_message
-                ))
+                ));
             }
             Err(e) => {
                 info!("<- what did we get?? {}", e);
@@ -337,9 +341,9 @@ impl Protocol {
         }
 
         if parsed_message.is_ok() {
-            return Ok(Some(parsed_message.unwrap()))
+            return Ok(Some(parsed_message.unwrap()));
         } else {
-            return Ok(None)
+            return Ok(None);
         }
     }
 }

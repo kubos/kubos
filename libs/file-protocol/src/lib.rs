@@ -30,7 +30,7 @@ pub mod protocol;
 mod storage;
 
 pub use protocol::Protocol as FileProtocol;
-pub use protocol::Role as Role;
+pub use protocol::Role;
 
 const CHUNK_SIZE: usize = 4096;
 
@@ -90,11 +90,11 @@ pub fn download(source_path: &str, target_path: &str) -> Result<(), String> {
 
             // Save received data to the requested path
             storage::local_export(&hash, target_path, mode)?;
-            return Ok(())
-        },
+            return Ok(());
+        }
         Ok(msg) => {
             return Err(format!("Wrong first message found! {:?}", msg));
-        },
+        }
         Err(msg) => {
             return Err(format!("Error message found! {:?}", msg));
         }

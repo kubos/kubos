@@ -344,7 +344,11 @@ pub fn parse_chunk(message: Value) -> Result<Option<Message>, String> {
         if let Value::U64(num) = pieces.next().ok_or("".to_owned()).unwrap() {
             if let Some(third_param) = pieces.next() {
                 if let Value::Bytes(data) = third_param {
-                    return Ok(Some(Message::ReceiveChunk(hash, *num as u32, data.to_vec())));
+                    return Ok(Some(Message::ReceiveChunk(
+                        hash,
+                        *num as u32,
+                        data.to_vec(),
+                    )));
                 } else {
                     return Err(format!(
                         "Unable to parse chunk message: Invalid data format"
