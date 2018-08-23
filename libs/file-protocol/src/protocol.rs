@@ -98,30 +98,6 @@ impl Protocol {
         self.send(messages::import(channel_id, source_path).unwrap())
             .unwrap();
         Ok(())
-
-        // // Listen on UDP port
-        // let message = self
-        //     .cbor_proto
-        //     .recv_message()?
-        //     .ok_or(format!("Failed to receive op result"))?;
-
-        // // Parse the received message
-        // match self.on_message(message, None)? {
-        //     Message::SuccessTransmit(id, hash, num_chunks, mode) => {
-        //         if (id as u32) == channel_id {
-        //             Ok((hash, num_chunks, mode))
-        //         } else {
-        //             return Err("Channel ID mismatch".to_owned());
-        //         }
-        //     }
-        //     Message::Failure(id, error) => {
-        //         return Err(format!(
-        //             "Failed to request file {}. Error returned from service: {}",
-        //             id, error
-        //         ))
-        //     }
-        //     _ => return Err("Received unexpected response to import request".to_owned()),
-        // }
     }
 
     // Figure out if/what chunks are missing and send the hash and info back to the remote addr
@@ -204,7 +180,7 @@ impl Protocol {
     }
 
     pub fn send_success(&self, channel_id: u64) -> Result<(), String> {
-        println!("-> {{ {}, true }}", channel_id);
+        info!("-> {{ {}, true }}", channel_id);
         let vec = ser::to_vec_packed(&(channel_id, true)).unwrap();
         self.cbor_proto
             .send_message(&vec, &self.host, self.dest_port.get())
@@ -213,7 +189,7 @@ impl Protocol {
     }
 
     pub fn send_failure(&self, channel_id: u64, error: &str) -> Result<(), String> {
-        println!("-> {{ {}, false, {} }}", channel_id, error);
+        info!("-> {{ {}, false, {} }}", channel_id, error);
         let vec = ser::to_vec_packed(&(channel_id, false, error)).unwrap();
         self.cbor_proto
             .send_message(&vec, &self.host, self.dest_port.get())
@@ -221,15 +197,14 @@ impl Protocol {
         Ok(())
     }
 
-    pub fn message_engine(&self, hash: Option<&str>, pump: bool) -> Result<Option<Message>, String> {
-        let mut last_message: Result<Option<Message>, String> = Ok(None);
-        let mut running = true;
-        while running {
+    pub fn message_engine(&self, hash: Option<&str>, timeout: Duration, pump: bool) -> Result<Option<Message>, String> {
+        let mut last_message: Result<Option<Message>, String>;
+        loop {
             // Listen on UDP port
             info!("listening...");
 
             let message = if self.role == Role::Client {
-                match self.cbor_proto.recv_message_peer_timeout(Duration::from_secs(1))? {
+                match self.cbor_proto.recv_message_peer_timeout(timeout)? {
                 (peer, Some(message)) => {
                     // Update our response port
                     self.dest_port.set(peer.port());
@@ -238,10 +213,9 @@ impl Protocol {
                 _ => return Err("Failed to receive op result".to_owned()),
                 }
             } else {
-                match self.cbor_proto.recv_message_timeout(Duration::from_secs(1)) {
+                match self.cbor_proto.recv_message_timeout(timeout) {
                     Ok(Some(message)) => message,
                     _ =>  {
-                        println!("no data so bailing");
                         return Err("Failed to receive data".to_owned())
                     }
                 }
@@ -288,7 +262,7 @@ impl Protocol {
             }
             Ok(Message::SyncChunks(hash, num_chunks)) => {
                 info!("<- {{ {}, {} }}", hash, num_chunks);
-                storage::store_meta(&hash, num_chunks);
+                storage::store_meta(&hash, num_chunks).unwrap();
             }
             Ok(Message::ReceiveChunk(hash, chunk_num, data)) => {
                 info!("<- {{ {}, {}, chunk_data }}", hash, chunk_num);
@@ -320,18 +294,9 @@ impl Protocol {
                 // Note: Won't return until we've received all of them.
                 // (so could potentially never return)
                 // TODO: handle channel_id mismatch
-                let (result, _chunks) = storage::local_sync(&hash, None).unwrap();
+                let (_result, _chunks) = storage::local_sync(&hash, None).unwrap();
                             self.send(messages::ack_or_nak(&hash, None).unwrap())
                 .unwrap();
-
-                // match storage::local_export(&hash, &path, mode) {
-                //     Ok(()) => {
-                //         self.send_success(channel_id).unwrap();
-                //     }
-                //     Err(error) => {
-                //         self.send_failure(channel_id, &error).unwrap();
-                //     }
-                // }
             }
             Ok(Message::ReqReceive(channel_id, hash, path, None)) => {
                 info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
@@ -342,12 +307,11 @@ impl Protocol {
             }
             Ok(Message::SuccessReceive(channel_id)) => {
                 info!("<- {{ {}, true }}", channel_id);
-                // return Ok(true);
             }
             Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, Some(mode))) => {
                 info!("<- {{ {}, true, {}, {}, {} }}", channel_id, hash, num_chunks, mode);
                 // TODO: handle channel_id mismatch
-                let (result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
+                let (_result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
                             self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
                 .unwrap();
 
@@ -355,7 +319,7 @@ impl Protocol {
             Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, None)) => {
                 info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks);
                 // TODO: handle channel_id mismatch
-                let (result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
+                let (_result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
                             self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
                 .unwrap();
 
@@ -368,7 +332,7 @@ impl Protocol {
                 ))
             }
             Err(e) => {
-                info!("<- what did we get??");
+                info!("<- what did we get?? {}", e);
             }
         }
 

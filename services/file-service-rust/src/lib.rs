@@ -8,10 +8,10 @@ extern crate cbor_protocol;
 use kubos_system::Config as ServiceConfig;
 use simplelog::*;
 use std::thread;
-
+use std::time::Duration;
 use std::net::UdpSocket;
 
-use cbor_protocol::Protocol as CborProtocol;
+// use cbor_protocol::Protocol as CborProtocol;
 use file_protocol::{FileProtocol, Message, Role};
 
 // We need this in this lib.rs file so we can build integration tests
@@ -19,27 +19,52 @@ use file_protocol::{FileProtocol, Message, Role};
 pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
     // TODO: Make configurable
     //let c_protocol = CborProtocol::new(config.hosturl());
-    let socket = match UdpSocket::bind("127.0.0.1:7000") {
-        Ok(s) => s,
-        Err(e) => panic!("Couldn't bind to socket {}", e)
-    };
+    loop {
+        let socket = match UdpSocket::bind("127.0.0.1:7000") {
+            Ok(s) => s,
+            Err(e) => panic!("Couldn't bind to socket {}", e)
+        };
 
-    let mut buf = [0; 4096];
-    let (num_bytes, source) = match socket.peek_from(&mut buf) {
-        Ok((num_bytes, source)) => {
-            println!("peeked {} {:?}", num_bytes, source);
-            (num_bytes, source)
-        }
-        Err(e) => panic!("No data received")
-    };
+        let mut buf = [0; 4096];
+        let (num_bytes, source) = match socket.peek_from(&mut buf) {
+            Ok((num_bytes, source)) => {
+                println!("peeked {} {:?}", num_bytes, source);
+                (num_bytes, source)
+            }
+            Err(e) => panic!("No data received {}", e)
+        };
 
-    //let peer = c_protocol.peek_peer()?;
+        //let peer = c_protocol.peek_peer()?;
 
-    let f_protocol = FileProtocol::new_from_socket(socket.try_clone().expect("no clone"), format!("{}", source.ip()).to_owned(), source.port(), Role::Server);
+        let f_protocol = FileProtocol::new_from_socket(socket.try_clone().expect("no clone"), format!("{}", source.ip()).to_owned(), source.port(), Role::Server);
 
-    // let f_protocol = FileProtocol::new(format!("{}", source.ip()).to_owned(), source.port(), Role::Server);
+        // let f_protocol = FileProtocol::new(format!("{}", source.ip()).to_owned(), source.port(), Role::Server);
 
-    f_protocol.message_engine(None, true);
+        match f_protocol.message_engine(None, Duration::from_secs(1), false) {
+            Ok(Some(Message::SyncChunks(_, _))) => {
+                match f_protocol.message_engine(None, Duration::from_secs(1), false) {
+                    Ok(Some(Message::ReqReceive(channel, hash, path, mode))) => {
+                        f_protocol.message_engine(None, Duration::from_secs(5), true);
+                        match f_protocol.local_export(&hash, &path, mode) {
+                            Ok(_) => f_protocol.send_success(channel),
+                            Err(e) =>  {
+                                f_protocol.send_failure(channel, &e);
+                                Ok(())
+                            }
+                        }
+                    }
+                    _ => {
+                        f_protocol.message_engine(None, Duration::from_secs(5), true);
+                        Ok(())
+                    }
+                }
+            }
+            _ => {
+                f_protocol.message_engine(None, Duration::from_secs(5), true);
+                Ok(())
+            }
+        };
+    }
 
     return Ok(());
 

@@ -25,9 +25,6 @@ extern crate simplelog;
 use file_service_rust::*;
 use kubos_system::Config as ServiceConfig;
 use simplelog::*;
-use std::thread;
-
-use file_protocol::{FileProtocol, Message, Role};
 
 fn main() {
     CombinedLogger::init(vec![

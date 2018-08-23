@@ -24,7 +24,10 @@ pub fn parse_message(message: Value) -> Result<Message, String> {
     if let Some(msg) = parse_import_request(message.to_owned())? {
         return Ok(msg);
     }
-    if let Some(msg) = parse_good_op(message.to_owned())? {
+    if let Some(msg) = parse_success_receive(message.to_owned())? {
+        return Ok(msg);
+    }
+    if let Some(msg) = parse_success_transmit(message.to_owned())? {
         return Ok(msg);
     }
     if let Some(msg) = parse_bad_op(message.to_owned())? {
@@ -135,9 +138,37 @@ pub fn parse_import_request(message: Value) -> Result<Option<Message>, String> {
     return Ok(None);
 }
 
-// Parse out good
+// Parse out success received message
+// { channel_id, true }
+pub fn parse_success_receive(message: Value) -> Result<Option<Message>, String> {
+    let data = match message {
+        Value::Array(val) => val.to_owned(),
+        _ => return Err("Unable to parse message: Data not an array".to_owned()),
+    };
+    let mut pieces = data.iter();
+
+    let first_param: Value = pieces
+        .next()
+        .ok_or(format!("Unable to parse message: No contents"))?
+        .to_owned();
+
+    if let Value::U64(channel_id) = first_param {
+        if let Value::Bool(result) = pieces.next().ok_or("".to_owned()).unwrap() {
+            if *result == true {
+                // Good - { channel_id, true, ...values }
+                if let None = pieces.next() {
+                    return Ok(Some(Message::SuccessReceive(channel_id)));
+                }
+            }
+        }
+    }
+
+    return Ok(None);
+}
+
+// Parse out success transmit message
 // { channel_id, "true", ..values }
-pub fn parse_good_op(message: Value) -> Result<Option<Message>, String> {
+pub fn parse_success_transmit(message: Value) -> Result<Option<Message>, String> {
     let data = match message {
         Value::Array(val) => val.to_owned(),
         _ => return Err("Unable to parse message: Data not an array".to_owned()),

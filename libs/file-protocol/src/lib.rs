@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-#![allow(dead_code)]
-
 extern crate blake2_rfc;
 extern crate cbor_protocol;
 extern crate serde;
@@ -23,6 +21,8 @@ extern crate serde_cbor;
 extern crate time;
 #[macro_use]
 extern crate log;
+
+use std::time::Duration;
 
 mod messages;
 mod parsers;
@@ -63,7 +63,7 @@ pub fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
     // Start the engine
-    f_protocol.message_engine(Some(&hash), true)?;
+    f_protocol.message_engine(Some(&hash), Duration::from_secs(10), true)?;
 
     Ok(())
 }
@@ -81,11 +81,12 @@ pub fn download(source_path: &str, target_path: &str) -> Result<(), String> {
 
     // Check the number of chunks we need to receive and then receive them
     // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
-    match f_protocol.message_engine(None, false) {
-        Ok(Some(Message::SuccessTransmit(id, hash, num_chunks, mode))) => {
-            f_protocol.message_engine(Some(&hash), true);
+    match f_protocol.message_engine(None, Duration::from_secs(1), false) {
+        Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
+            info!("file has been transmitted?");
+            f_protocol.message_engine(Some(&hash), Duration::from_secs(10), true);
 
-            println!("done recv");
+            info!("done recv");
 
             // Save received data to the requested path
             storage::local_export(&hash, target_path, mode)?;
