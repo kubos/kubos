@@ -27,7 +27,7 @@ use std::time::Duration;
 mod messages;
 mod parsers;
 pub mod protocol;
-mod storage;
+pub mod storage;
 
 pub use protocol::Protocol as FileProtocol;
 pub use protocol::Role;
@@ -48,8 +48,8 @@ pub enum Message {
     Failure(u64, String),
 }
 
-pub fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000, Role::Client);
+pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
+    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
 
     info!(
         "Uploading local:{} to remote:{}",
@@ -63,13 +63,13 @@ pub fn upload(source_path: &str, target_path: &str) -> Result<(), String> {
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
     // Start the engine
-    f_protocol.message_engine(Some(&hash), Duration::from_secs(10), true)?;
+    f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
 
     Ok(())
 }
 
-pub fn download(source_path: &str, target_path: &str) -> Result<(), String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), 7000, Role::Client);
+pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
+    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
 
     info!(
         "Downloading remote: {} to local: {}",
@@ -84,7 +84,7 @@ pub fn download(source_path: &str, target_path: &str) -> Result<(), String> {
     match f_protocol.message_engine(None, Duration::from_secs(1), false) {
         Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
             info!("file has been transmitted?");
-            f_protocol.message_engine(Some(&hash), Duration::from_secs(10), true);
+            f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true);
 
             info!("done recv");
 

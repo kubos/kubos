@@ -17,58 +17,58 @@ use file_protocol::{FileProtocol, Message, Role};
 // We need this in this lib.rs file so we can build integration tests
 
 pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
-    // TODO: Make configurable
-    //let c_protocol = CborProtocol::new(config.hosturl());
-    loop {
-        let socket = match UdpSocket::bind("127.0.0.1:7000") {
+    let socket = match UdpSocket::bind(config.hosturl()) {
             Ok(s) => s,
             Err(e) => panic!("Couldn't bind to socket {}", e),
         };
-
+        
+    loop {
+        
         let mut buf = [0; 4096];
         let (num_bytes, source) = match socket.peek_from(&mut buf) {
             Ok((num_bytes, source)) => {
-                println!("peeked {} {:?}", num_bytes, source);
+                println!("got {} from {:?}", num_bytes, source);
                 (num_bytes, source)
             }
             Err(e) => panic!("No data received {}", e),
         };
 
-        //let peer = c_protocol.peek_peer()?;
+        let cloned_socket = socket.try_clone().expect("can't clone");
+        // thread::spawn(move || {
+            let f_protocol = FileProtocol::new_from_socket(
+                cloned_socket,
+                format!("{}", source.ip()).to_owned(),
+                source.port(),
+                Role::Server,
+            );
 
-        let f_protocol = FileProtocol::new_from_socket(
-            socket.try_clone().expect("no clone"),
-            format!("{}", source.ip()).to_owned(),
-            source.port(),
-            Role::Server,
-        );
-
-        // let f_protocol = FileProtocol::new(format!("{}", source.ip()).to_owned(), source.port(), Role::Server);
-
-        match f_protocol.message_engine(None, Duration::from_secs(1), false) {
-            Ok(Some(Message::SyncChunks(_, _))) => {
-                match f_protocol.message_engine(None, Duration::from_secs(1), false) {
-                    Ok(Some(Message::ReqReceive(channel, hash, path, mode))) => {
-                        f_protocol.message_engine(None, Duration::from_secs(5), true);
-                        match f_protocol.local_export(&hash, &path, mode) {
-                            Ok(_) => f_protocol.send_success(channel),
-                            Err(e) => {
-                                f_protocol.send_failure(channel, &e);
-                                Ok(())
+            match f_protocol.message_engine(None, Duration::from_secs(1), false) {
+                Ok(Some(Message::SyncChunks(_, _))) => {
+                    match f_protocol.message_engine(None, Duration::from_secs(1), false) {
+                        Ok(Some(Message::ReqReceive(channel, hash, path, mode))) => {
+                            f_protocol.message_engine(None, Duration::from_secs(1), true);
+                            match f_protocol.local_export(&hash, &path, mode) {
+                                Ok(_) => f_protocol.send_success(channel),
+                                Err(e) => {
+                                    f_protocol.send_failure(channel, &e);
+                                    Ok(())
+                                }
                             }
                         }
-                    }
-                    _ => {
-                        f_protocol.message_engine(None, Duration::from_secs(5), true);
-                        Ok(())
+                        _ => {
+                            f_protocol.message_engine(None, Duration::from_secs(1), true);
+                            Ok(())
+                        }
                     }
                 }
-            }
-            _ => {
-                f_protocol.message_engine(None, Duration::from_secs(5), true);
-                Ok(())
-            }
-        };
+                _ => {
+                    f_protocol.message_engine(None, Duration::from_secs(1), true);
+                    Ok(())
+                }
+            };
+        // });
+
+        // thread::sleep(Duration::from_secs(1));
     }
 
     return Ok(());
