@@ -93,7 +93,7 @@ fn upload_single() {
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
     // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
+    thread::sleep(Duration::new(2, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -128,7 +128,7 @@ fn upload_multi_clean() {
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
     // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
+    thread::sleep(Duration::new(2, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -162,7 +162,7 @@ fn upload_multi_resume() {
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
     // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
+    thread::sleep(Duration::new(2, 0));
 
     // Remove a chunk so we can test the retry logic
     fs::remove_file(format!("service/storage/{}/0", hash)).unwrap();
@@ -208,7 +208,7 @@ fn upload_multi_complete() {
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
     // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
+    thread::sleep(Duration::new(2, 0));
 
     // Upload the file again
     let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
@@ -257,10 +257,8 @@ fn upload_bad_hash() {
     // Tweak the chunk contents so the future hash calculation will fail
     fs::write(format!("service/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
-    // TODO: THIS SHOULD FAIL
     let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
-    // TODO: Verify exact error message
-    assert!(result.is_ok());
+    assert!(result.unwrap_err().contains("File hash mismatch"));
 
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
@@ -269,7 +267,7 @@ fn upload_bad_hash() {
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
+    //fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 }
 
 /*

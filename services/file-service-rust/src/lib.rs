@@ -11,16 +11,13 @@ use std::net::UdpSocket;
 use std::thread;
 use std::time::Duration;
 
-// use cbor_protocol::Protocol as CborProtocol;
+use cbor_protocol::Protocol as CborProtocol;
 use file_protocol::{FileProtocol, Message, Role};
 
 // We need this in this lib.rs file so we can build integration tests
 
 pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
-    let socket = match UdpSocket::bind(config.hosturl()) {
-        Ok(s) => s,
-        Err(e) => panic!("Couldn't bind to socket {}", e),
-    };
+    let c_protocol = CborProtocol::new(config.hosturl());
 
     let prefix = match config.get("storage_dir") {
         Some(val) => val.as_str().and_then(|str| Some(str.to_owned())),
@@ -28,29 +25,38 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
     };
 
     loop {
-        let mut buf = [0; 5000];
-        let (num_bytes, source) = match socket.peek_from(&mut buf) {
-            Ok((num_bytes, source)) => {
-                //println!("got {} from {:?}", num_bytes, source);
-                (num_bytes, source)
-            }
-            Err(e) => panic!("No data received {}", e),
+        // Listen on UDP port
+        let (peer, message) = match c_protocol.recv_message_peer().map_err(|err| match err {
+            Some(err) => err,
+            None => "Failed to receive message".to_owned(),
+        })? {
+            (peer, Some(data)) => (peer, data),
+            _ => continue,
         };
 
-        let cloned_socket = socket.try_clone().expect("can't clone");
-        // thread::spawn(move || {
-        let f_protocol = FileProtocol::new_from_socket(
-            cloned_socket,
-            format!("{}", source.ip()).to_owned(),
-            source.port(),
-            Role::Server,
-            prefix.clone(),
-        );
+        let prefix_ref = prefix.clone();
 
-        f_protocol.message_engine(None, Some(Duration::new(0, 800)), true);
-        // });
+        // Break the processing work off into its own thread so we can
+        // listen for requests from other clients
+        thread::spawn(move || {
+            // Set up the file system processor with the reply socket information
+            // TODO: Opening a second local port might be a terrible plan. Though it is kind of what TCP does
+            let f_protocol = FileProtocol::new(
+                format!("{}", peer.ip()).to_owned(),
+                peer.port(),
+                Role::Server,
+                prefix_ref,
+            );
 
-        // thread::sleep(Duration::from_secs(1));
+            // Parse it into a known message type and process
+            // TODO: Convert the various failures/unwraps to nice error printing
+            if let Ok(message) = f_protocol.process_message(message, None, None) {
+                // TODO: Probably nothing
+            } else {
+                // Q: Do we want to do any kind of error handling,
+                //    or just move on to the next message?
+            }
+        });
     }
 
     return Ok(());

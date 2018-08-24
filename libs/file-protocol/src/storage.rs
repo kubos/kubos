@@ -85,10 +85,11 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, String> {
     let meta_path = Path::new(&format!("{}/storage", prefix))
         .join(hash)
         .join("meta");
+
     File::open(meta_path)
-        .unwrap()
+        .map_err(|err| format!("Unable to open {} metadata file: {}", hash, err))?
         .read_to_end(&mut data)
-        .map_err(|err| format!("Unable to open {} metadata file: {}", hash, err))?;
+        .map_err(|err| format!("Unable to read {} metadata file: {}", hash, err))?;
 
     let metadata: Value = de::from_slice(&data).unwrap();
 
@@ -267,6 +268,7 @@ pub fn initialize_file(prefix: &str, source_path: &str) -> Result<(String, u32, 
             }
         }
     }
+
     store_meta(prefix, &hash, index).unwrap();
 
     let meta = fs::metadata(source_path).unwrap();

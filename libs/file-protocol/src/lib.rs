@@ -52,7 +52,7 @@ pub enum Message {
     /// Receiver is missing the specified file data chunks
     NAK(String, Option<Vec<(u32, u32)>>),
     /// (Client Only) Message requesting the recipient to receive the specified file
-    ReqReceive(u64, String, String, Option<u32>),
+    ReqReceive(u64, String, u32, String, Option<u32>),
     /// (Client Only) Message requesting the recipient to transmit the specified file
     ReqTransmit(u64, String),
     /// (Server Only) Recipient has successfully processed a request to receive a file
@@ -80,12 +80,8 @@ pub fn upload(
     // Copy file to upload to temp storage. Calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 
-    // Q: Why not combine this and export into one message? it's really only a single extra parameter
-    // Tell our destination the hash and number of chunks to expect
-    f_protocol.send(messages::metadata(&hash, num_chunks).unwrap())?;
-
     // Send export command for file
-    f_protocol.send_export(&hash, &target_path, mode)?;
+    f_protocol.send_export(&hash, num_chunks, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
     f_protocol.message_engine(Some(&hash), Some(Duration::from_secs(2)), true)?;

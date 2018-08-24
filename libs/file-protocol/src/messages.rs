@@ -45,18 +45,20 @@ pub fn import_result(prefix: &str, channel_id: u64, path: &str) -> Result<Vec<u8
 pub fn export_request(
     channel_id: u32,
     hash: &str,
+    num_chunks: u32,
     target_path: &str,
     mode: u32,
 ) -> Result<Vec<u8>, Error> {
     info!(
-        "-> {{ {}, export, {}, {}, {} }}",
-        channel_id, hash, target_path, mode
+        "-> {{ {}, export, {}, {}, {}, {} }}",
+        channel_id, hash, num_chunks, target_path, mode
     );
 
     Ok(ser::to_vec_packed(&(
         channel_id,
         "export",
         hash,
+        num_chunks,
         target_path,
         mode,
     ))?)

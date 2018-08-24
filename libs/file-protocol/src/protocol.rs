@@ -26,6 +26,7 @@ use std::cell::Cell;
 use std::net::UdpSocket;
 use std::str;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::net::SocketAddr;
 
 /// File Transfer Protocol Roles
 #[derive(Eq, PartialEq)]
@@ -88,7 +89,13 @@ impl Protocol {
     }
 
     /// Request remote target to receive file from host
-    pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
+    pub fn send_export(
+        &self,
+        hash: &str,
+        num_chunks: u32,
+        target_path: &str,
+        mode: u32,
+    ) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .and_then(
@@ -97,8 +104,9 @@ impl Protocol {
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
-        self.send(messages::export_request(channel_id, hash, target_path, mode).unwrap())
-            .unwrap();
+        self.send(
+            messages::export_request(channel_id, hash, num_chunks, target_path, mode).unwrap(),
+        ).unwrap();
 
         Ok(())
     }
@@ -138,7 +146,7 @@ impl Protocol {
                 // TODO: Make timeout 'receive chunk' message-specific
                 match self.cbor_proto.recv_message_timeout(Duration::from_secs(1)) {
                     // Parse the received message
-                    Ok(Some(message)) => match self.process_message(message, Some(hash)) {
+                    Ok(Some(message)) => match self.process_message(message, Some(hash), None) {
                         Ok(_) => { /* TODO: Verify that we got a ReceiveChunk message? */ }
                         Err(err) => eprintln!("Failed to parse message: {}", err),
                     },
@@ -183,6 +191,7 @@ impl Protocol {
 
     /// Store a files metadata into the appropriate temporary storage location
     pub fn store_meta(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
+        println!("protocol: store_meta");
         storage::store_meta(&self.prefix, hash, num_chunks)
     }
 
@@ -235,17 +244,13 @@ impl Protocol {
             // Listen on UDP port
             info!("listening...");
 
-            let message = if self.role == Role::Client {
+            let (peer, message) = if self.role == Role::Client {
                 let result = match timeout {
                     Some(val) => self.cbor_proto.recv_message_peer_timeout(val),
                     None => self.cbor_proto.recv_message_peer(),
                 };
                 match result {
-                    Ok((peer, Some(message))) => {
-                        // Update our response port
-                        self.dest_port.set(peer.port());
-                        message
-                    }
+                    Ok((peer, Some(message))) => (Some(peer), message),
                     Ok(_) => continue,
                     // We timed out
                     Err(None) => {
@@ -261,7 +266,7 @@ impl Protocol {
                     None => self.cbor_proto.recv_message(),
                 };
                 match result {
-                    Ok(Some(message)) => message,
+                    Ok(Some(message)) => (None, message),
                     Ok(_) => continue,
                     // We timed out
                     Err(None) => {
@@ -273,10 +278,10 @@ impl Protocol {
                 }
             };
 
-            let new_message = self.process_message(message, hash);
+            let new_message = self.process_message(message, hash, peer);
 
             let stop = match new_message.to_owned() {
-                Ok(Some(Message::ACK(_))) => true,
+                //Ok(Some(Message::ACK(_))) => true,
                 Ok(Some(Message::SuccessReceive(_))) => true,
                 Ok(Some(Message::SuccessTransmit(_, _, _, _))) => true,
                 Ok(Some(_message)) => {
@@ -291,6 +296,7 @@ impl Protocol {
             };
             last_message = new_message;
             if stop {
+                println!("hit stop case");
                 break;
             }
         }
@@ -302,6 +308,7 @@ impl Protocol {
         &self,
         message: Value,
         hash: Option<&str>,
+        peer: Option<SocketAddr>,
     ) -> Result<Option<Message>, String> {
         let parsed_message = parsers::parse_message(message);
         //println!("parsed_message: {:?}", parsed_message);
@@ -329,16 +336,21 @@ impl Protocol {
             }
             Ok(Message::NAK(hash, Some(missing_chunks))) => {
                 info!("<- {{ {}, false, {:?} }}", hash, missing_chunks);
+                if let Some(socket) = peer {
+                    self.dest_port.set(socket.port());
+                }
                 self.send_chunks(&hash, &missing_chunks)?;
             }
             Ok(Message::NAK(hash, None)) => {
                 info!("<- {{ {}, false }}", hash);
             }
-            Ok(Message::ReqReceive(channel_id, hash, path, Some(mode))) => {
+            Ok(Message::ReqReceive(channel_id, hash, num_chunks, path, Some(mode))) => {
                 info!(
-                    "<- {{ {}, export, {}, {}, {} }}",
-                    channel_id, hash, path, mode
+                    "<- {{ {}, export, {}, {}, {}, {} }}",
+                    channel_id, hash, num_chunks, path, mode
                 );
+
+                storage::store_meta(&self.prefix, &hash, num_chunks).unwrap();
 
                 match self.finalize_file(&hash, &path, Some(mode)) {
                     Ok(_) => {
@@ -349,8 +361,14 @@ impl Protocol {
                     }
                 }
             }
-            Ok(Message::ReqReceive(channel_id, hash, path, None)) => {
-                info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
+            Ok(Message::ReqReceive(channel_id, hash, num_chunks, path, None)) => {
+                info!(
+                    "<- {{ {}, export, {}, {}, {} }}",
+                    channel_id, hash, num_chunks, path
+                );
+
+                storage::store_meta(&self.prefix, &hash, num_chunks).unwrap();
+
                 match self.finalize_file(&hash, &path, None) {
                     Ok(_) => {
                         self.send_success(channel_id);
