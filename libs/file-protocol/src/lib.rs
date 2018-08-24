@@ -16,7 +16,7 @@
 
 //! TODO: Crate documentation
 
-#![deny(missing_docs)]
+//#![deny(missing_docs)]
 
 extern crate blake2_rfc;
 extern crate cbor_protocol;
@@ -31,7 +31,7 @@ use std::time::Duration;
 mod messages;
 mod parsers;
 pub mod protocol;
-mod storage;
+pub mod storage;
 
 pub use protocol::Protocol as FileProtocol;
 pub use protocol::Role;
@@ -53,7 +53,7 @@ pub enum Message {
     NAK(String, Option<Vec<(u32, u32)>>),
     /// (Client Only) Message requesting the recipient to receive the specified file
     ReqReceive(u64, String, String, Option<u32>),
-    /// (Client Only) Message requesting the recipient to transmit the speicified file
+    /// (Client Only) Message requesting the recipient to transmit the specified file
     ReqTransmit(u64, String),
     /// (Server Only) Recipient has successfully processed a request to receive a file
     SuccessReceive(u64),
@@ -64,7 +64,7 @@ pub enum Message {
 }
 
 /// Upload a file to the target server location
-pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
+pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
     let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
 
     info!(
@@ -85,11 +85,11 @@ pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), Str
     // Start the engine to send the file data chunks
     f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
 
-    Ok(())
+    Ok(hash)
 }
 
 /// Download a file from the target server location
-pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
+pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
     let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
 
     info!(
@@ -112,7 +112,7 @@ pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), S
 
             // Save received data to the requested path
             storage::finalize_file(&hash, target_path, mode)?;
-            return Ok(());
+            return Ok(hash);
         }
         Ok(msg) => {
             return Err(format!("Wrong first message found! {:?}", msg));

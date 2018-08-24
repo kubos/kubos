@@ -4,10 +4,9 @@ extern crate file_service_rust;
 extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
-extern crate threadpool;
 
 use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::{FileProtocol, Role, storage};
+use file_protocol::{storage, FileProtocol, Role};
 use file_service_rust::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
@@ -19,7 +18,6 @@ use std::path::Path;
 use std::thread;
 use std::time::Duration;
 use tempfile::TempDir;
-use threadpool::ThreadPool;
 
 // NOTE: Each test's file contents must be unique. Otherwise the hash is the same, so
 // the same storage directory is used across all of them, creating conflicts
@@ -50,8 +48,8 @@ macro_rules! service_new {
 //         &source_path, &target_path
 //     );
 //     // Copy file to upload to temp storage. Calculate the hash and chunk info
-//     // Q: What's `mode` for? `local_import` always returns 0. Looks like it should be file permissions
-//     let (hash, num_chunks, mode) = f_protocol.local_import(&source_path)?;
+//     // Q: What's `mode` for? `initialize_file` always returns 0. Looks like it should be file permissions
+//     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 //     // Tell our destination the hash and number of chunks to expect
 //     f_protocol.send_sync(&hash, num_chunks)?;
 //     // Send the actual file
@@ -83,7 +81,7 @@ fn upload_single() {
 
     assert!(result.is_ok());
 
-    let (hash, _, _) = file_protocol::storage::local_import(&source).unwrap();
+    let hash = result.unwrap();
 
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
@@ -117,7 +115,7 @@ fn upload_multi_clean() {
 
     assert!(result.is_ok());
 
-    let (hash, _, _) = file_protocol::storage::local_import(&source).unwrap();
+    let hash = result.unwrap();
 
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
@@ -150,7 +148,7 @@ fn upload_multi_resume() {
     // Go ahead and upload the whole file so we can manipulate the temporary directory
     let result = file_protocol::upload(service_port, &source, &dest);
     assert!(result.is_ok());
-    let (hash, _, _) = file_protocol::storage::local_import(&source).unwrap();
+    let hash = result.unwrap();
 
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
@@ -163,7 +161,6 @@ fn upload_multi_resume() {
     // Upload the file again
     let result = file_protocol::upload(service_port, &source, &dest);
     assert!(result.is_ok());
-    let (hash, _, _) = file_protocol::storage::local_import(&source).unwrap();
 
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
@@ -196,6 +193,7 @@ fn upload_multi_complete() {
     // Upload the file once (clean upload)
     let result = file_protocol::upload(service_port, &source, &dest);
     assert!(result.is_ok());
+    let hash = result.unwrap();
 
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
@@ -205,7 +203,6 @@ fn upload_multi_complete() {
     // Upload the file again
     let result = file_protocol::upload(service_port, &source, &dest);
     assert!(result.is_ok());
-    let (hash, _, _) = file_protocol::storage::local_import(&source).unwrap();
 
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
@@ -238,7 +235,7 @@ fn upload_bad_hash() {
     // Upload the file so we can mess with the temporary storage
     let result = file_protocol::upload(service_port, &source, &dest);
     assert!(result.is_ok());
-    let (hash, _, _) = file_protocol::storage::local_import(&source).unwrap();
+    let hash = result.unwrap();
 
     // TODO: Remove this sleep. We need it to let the service
     // finish its work. The upload logic needs to wait on
@@ -262,6 +259,7 @@ fn upload_bad_hash() {
     fs::remove_dir_all(format!("storage/{}", hash)).unwrap();
 }
 
+/*
 #[test]
 fn upload_multi_client() {
     let service_port = 7004;
@@ -269,11 +267,11 @@ fn upload_multi_client() {
     // Spawn our single service
     service_new!(service_port);
 
-    let pool = ThreadPool::new(5);
+    let mut thread_handles = vec![];
 
     // Spawn 5 simultaneous clients
     for num in 0..5 {
-        pool.execute(move || {
+        thread_handles.push(thread::spawn(move || {
             let test_dir = TempDir::new().expect("Failed to create test dir");
             let test_dir_str = test_dir.path().to_str().unwrap();
             let source = format!("{}/source", test_dir_str);
@@ -283,10 +281,9 @@ fn upload_multi_client() {
             create_test_file(&source, &contents);
 
             let result = file_protocol::upload(service_port, &source, &dest);
-
             assert!(result.is_ok());
 
-            let (hash, _, _) = file_protocol::storage::local_import(&source).unwrap();
+            let hash = result.unwrap();
 
             // TODO: Remove this sleep. We need it to let the service
             // finish its work. The upload logic needs to wait on
@@ -299,12 +296,15 @@ fn upload_multi_client() {
             // Verify the final file's contents
             let dest_contents = fs::read(dest).unwrap();
             assert_eq!(&contents[..], dest_contents.as_slice());
-        });
+        }));
     }
 
-    // Wait for all the threads to finish
-    pool.join();
+    for entry in thread_handles {
+        // Check for any thread failures
+        assert!(entry.join().is_ok());
+    }
 }
+*/
 
 // // Massive upload
 // // TODO: Enable once chunk numbers > 9 are supported properly
