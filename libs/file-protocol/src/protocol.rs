@@ -41,24 +41,21 @@ pub enum Role {
 pub struct Protocol {
     prefix: String,
     cbor_proto: CborProtocol,
-    host: String,
-    dest_port: Cell<u16>,
+    remote_addr: Cell<SocketAddr>,
     role: Role,
 }
 
 impl Protocol {
     /// Create a new file protocol instance using an automatically assigned UDP socket
-    pub fn new(host: String, dest_port: u16, role: Role, prefix: Option<String>) -> Self {
+    pub fn new(host_ip: &str, remote_addr: &str, role: Role, prefix: Option<String>) -> Self {
         // Get a local UDP socket (Bind)
-        let c_protocol = CborProtocol::new(format!("{}:0", host));
+        let c_protocol = CborProtocol::new(format!("{}:0", host_ip));
 
         // Set up the full connection info
         Protocol {
             prefix: prefix.unwrap_or("file-transfer".to_owned()),
             cbor_proto: c_protocol,
-            // Remote IP?
-            host,
-            dest_port: Cell::new(dest_port),
+            remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
             role,
         }
     }
@@ -66,16 +63,14 @@ impl Protocol {
     /// Create a new file protocol instance using a specific UDP socket
     pub fn new_from_socket(
         socket: UdpSocket,
-        host: String,
-        dest_port: u16,
+        remote_addr: &str,
         role: Role,
         prefix: Option<String>,
     ) -> Self {
         Protocol {
             prefix: prefix.unwrap_or("file-transfer".to_owned()),
             cbor_proto: CborProtocol::new_from_socket(socket),
-            host,
-            dest_port: Cell::new(dest_port),
+            remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
             role,
         }
     }
@@ -83,7 +78,7 @@ impl Protocol {
     /// Wrap the specified data into a CBOR packet and then send to the destination port
     pub fn send(&self, vec: Vec<u8>) -> Result<(), String> {
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port.get())
+            .send_message(&vec, self.remote_addr.get())
             .unwrap();
         Ok(())
     }
@@ -216,7 +211,7 @@ impl Protocol {
         info!("-> {{ {}, true }}", channel_id);
         let vec = ser::to_vec_packed(&(channel_id, true)).unwrap();
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port.get())
+            .send_message(&vec, self.remote_addr.get())
             .unwrap();
         Ok(())
     }
@@ -226,7 +221,7 @@ impl Protocol {
         info!("-> {{ {}, false, {} }}", channel_id, error);
         let vec = ser::to_vec_packed(&(channel_id, false, error)).unwrap();
         self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port.get())
+            .send_message(&vec, self.remote_addr.get())
             .unwrap();
         Ok(())
     }
@@ -336,7 +331,7 @@ impl Protocol {
             Ok(Message::NAK(hash, Some(missing_chunks))) => {
                 info!("<- {{ {}, false, {:?} }}", hash, missing_chunks);
                 if let Some(socket) = peer {
-                    self.dest_port.set(socket.port());
+                    self.remote_addr.set(socket);
                 }
                 self.send_chunks(&hash, &missing_chunks)?;
             }

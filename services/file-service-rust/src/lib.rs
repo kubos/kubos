@@ -17,7 +17,11 @@ use file_protocol::{FileProtocol, Message, Role};
 // We need this in this lib.rs file so we can build integration tests
 
 pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
-    let c_protocol = CborProtocol::new(config.hosturl());
+    let host = config.hosturl();
+    let c_protocol = CborProtocol::new(host.clone());
+
+    let mut host_parts = host.split(':').map(|val| val.to_owned());
+    let host_ip = host_parts.next().unwrap();
 
     let prefix = match config.get("storage_dir") {
         Some(val) => val.as_str().and_then(|str| Some(str.to_owned())),
@@ -35,18 +39,15 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         };
 
         let prefix_ref = prefix.clone();
+        let host_ref = host_ip.clone();
 
         // Break the processing work off into its own thread so we can
         // listen for requests from other clients
         thread::spawn(move || {
             // Set up the file system processor with the reply socket information
             // TODO: Opening a second local port might be a terrible plan. Though it is kind of what TCP does
-            let f_protocol = FileProtocol::new(
-                format!("{}", peer.ip()).to_owned(),
-                peer.port(),
-                Role::Server,
-                prefix_ref,
-            );
+            let f_protocol =
+                FileProtocol::new(&host_ref, &format!("{}", peer), Role::Server, prefix_ref);
 
             // Parse it into a known message type and process
             // TODO: Convert the various failures/unwraps to nice error printing

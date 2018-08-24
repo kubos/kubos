@@ -80,7 +80,13 @@ fn download_single() {
 
     service_new!(service_port);
 
-    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(
+        "127.0.0.1",
+        "127.0.0.1:8000",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
 
     let hash = result.unwrap();
@@ -109,7 +115,13 @@ fn download_multi_clean() {
 
     service_new!(service_port);
 
-    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(
+        "127.0.0.1",
+        "127.0.0.1:8001",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
 
     assert!(result.is_ok());
 
@@ -140,7 +152,13 @@ fn download_multi_resume() {
     service_new!(service_port);
 
     // Go ahead and download the whole file so we can manipulate the temporary directory
-    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(
+        "127.0.0.1",
+        "127.0.0.1:8002",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
     let hash = result.unwrap();
 
@@ -148,7 +166,13 @@ fn download_multi_resume() {
     fs::remove_file(format!("service/storage/{}/0", hash)).unwrap();
 
     // download the file again
-    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(
+        "127.0.0.1",
+        "127.0.0.1:8002",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
     let hash = result.unwrap();
 
@@ -177,11 +201,23 @@ fn download_multi_complete() {
     service_new!(service_port);
 
     // download the file once (clean download)
-    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(
+        "127.0.0.1",
+        "127.0.0.1:8005",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
 
     // download the file again
-    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(
+        "127.0.0.1",
+        "127.0.0.1:8005",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
 
     assert!(result.is_ok());
     let hash = result.unwrap();
@@ -211,14 +247,26 @@ fn download_bad_hash() {
     service_new!(service_port);
 
     // download the file so we can mess with the temporary storage
-    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(
+        "127.0.0.1",
+        "127.0.0.1:8003",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
     let hash = result.unwrap();
 
     // Tweak the chunk contents so the future hash calculation will fail
     fs::write(format!("client/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
-    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(
+        "127.0.0.1",
+        "127.0.0.1:8003",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert_eq!(result.unwrap_err(), "File hash mismatch");
 
     // Cleanup the temporary files so that the test can be repeatable
@@ -246,8 +294,13 @@ fn download_multi_client() {
 
             create_test_file(&source, &contents);
 
-            let result =
-                file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+            let result = file_protocol::download(
+                "127.0.0.1",
+                "127.0.0.1:8004",
+                &source,
+                &dest,
+                Some("client".to_owned()),
+            );
             assert!(result.is_ok());
 
             let hash = result.unwrap();
@@ -300,7 +353,13 @@ fn download_large() {
 
     service_new!(service_port);
 
-    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(
+        "127.0.0.1",
+        "127.0.0.1:8006",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     println!("Result: {:?}", result);
     assert!(result.is_ok());
 

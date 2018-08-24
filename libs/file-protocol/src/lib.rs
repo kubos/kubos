@@ -65,12 +65,13 @@ pub enum Message {
 
 /// Upload a file to the target server location
 pub fn upload(
-    port: u16,
+    host_ip: &str,
+    remote_addr: &str,
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
 ) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client, prefix);
+    let f_protocol = protocol::Protocol::new(host_ip, remote_addr, Role::Client, prefix);
 
     info!(
         "Uploading local:{} to remote:{}",
@@ -91,12 +92,13 @@ pub fn upload(
 
 /// Download a file from the target server location
 pub fn download(
-    port: u16,
+    host_ip: &str,
+    remote_addr: &str,
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
 ) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client, prefix);
+    let f_protocol = protocol::Protocol::new(host_ip, remote_addr, Role::Client, prefix);
 
     info!(
         "Downloading remote: {} to local: {}",

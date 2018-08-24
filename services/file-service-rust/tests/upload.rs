@@ -76,7 +76,13 @@ fn upload_single() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::upload(
+        "127.0.0.1",
+        "127.0.0.1:7000",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
 
     if let Err(err) = result.clone() {
         println!("Error: {}", err);
@@ -115,7 +121,13 @@ fn upload_multi_clean() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::upload(
+        "127.0.0.1",
+        "127.0.0.1:7001",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
 
     assert!(result.is_ok());
 
@@ -151,7 +163,13 @@ fn upload_multi_resume() {
     service_new!(service_port);
 
     // Go ahead and upload the whole file so we can manipulate the temporary directory
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::upload(
+        "127.0.0.1",
+        "127.0.0.1:7002",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
     let hash = result.unwrap();
 
@@ -164,7 +182,13 @@ fn upload_multi_resume() {
     fs::remove_file(format!("service/storage/{}/0", hash)).unwrap();
 
     // Upload the file again
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::upload(
+        "127.0.0.1",
+        "127.0.0.1:7002",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
     let hash = result.unwrap();
 
@@ -198,7 +222,13 @@ fn upload_multi_complete() {
     service_new!(service_port);
 
     // Upload the file once (clean upload)
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::upload(
+        "127.0.0.1",
+        "127.0.0.1:7005",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
 
     // TODO: Remove this sleep. We need it to let the service
@@ -207,7 +237,13 @@ fn upload_multi_complete() {
     thread::sleep(Duration::new(2, 0));
 
     // Upload the file again
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::upload(
+        "127.0.0.1",
+        "127.0.0.1:7005",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
     let hash = result.unwrap();
 
@@ -241,7 +277,13 @@ fn upload_bad_hash() {
     service_new!(service_port);
 
     // Upload the file so we can mess with the temporary storage
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::upload(
+        "127.0.0.1",
+        "127.0.0.1:7003",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.is_ok());
     let hash = result.unwrap();
 
@@ -253,7 +295,13 @@ fn upload_bad_hash() {
     // Tweak the chunk contents so the future hash calculation will fail
     fs::write(format!("service/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::upload(
+        "127.0.0.1",
+        "127.0.0.1:7003",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     assert!(result.unwrap_err().contains("File hash mismatch"));
 
     // TODO: Remove this sleep. We need it to let the service
@@ -286,8 +334,13 @@ fn upload_multi_client() {
 
             create_test_file(&source, &contents);
 
-            let result =
-                file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+            let result = file_protocol::upload(
+                "127.0.0.1",
+                "127.0.0.1:7004",
+                &source,
+                &dest,
+                Some("client".to_owned()),
+            );
             assert!(result.is_ok());
 
             let hash = result.unwrap();
@@ -341,7 +394,13 @@ fn upload_large() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::upload(
+        "127.0.0.1",
+        "127.0.0.1:7006",
+        &source,
+        &dest,
+        Some("client".to_owned()),
+    );
     println!("Result: {:?}", result);
     assert!(result.is_ok());
 

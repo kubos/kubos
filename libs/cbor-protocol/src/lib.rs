@@ -37,9 +37,9 @@ impl Protocol {
         Self { handle }
     }
 
-    pub fn send_message(&self, message: &[u8], host: &str, port: u16) -> Result<(), String> {
+    pub fn send_message(&self, message: &[u8], dest: SocketAddr) -> Result<(), String> {
         // TODO: If paused, just queue up the message
-        let dest: SocketAddr = format!("{}:{}", host, port).parse().unwrap();
+
         // let mut e = Encoder::from_memory();
         //e.encode(&message).unwrap();
         //let mut payload = e.as_bytes().to_vec();
@@ -61,18 +61,18 @@ impl Protocol {
     }
 
     // Not actually used by anything in the original Lua?
-    pub fn send_pause(&self, host: &str, port: u16) -> Result<(), String> {
+    pub fn send_pause(&self, dest: SocketAddr) -> Result<(), String> {
         println!("-> pause");
-        let dest: SocketAddr = format!("{}:{}", host, port).parse().unwrap();
+
         let payload = vec![1];
         self.handle.send_to(&payload, &dest).unwrap();
         Ok(())
     }
 
     // Not actually used by anything in the original Lua?
-    pub fn send_resume(&self, host: &str, port: u16) -> Result<(), String> {
+    pub fn send_resume(&self, dest: SocketAddr) -> Result<(), String> {
         println!("-> resume");
-        let dest: SocketAddr = format!("{}:{}", host, port).parse().unwrap();
+
         let payload = vec![2];
         self.handle.send_to(&payload, &dest).unwrap();
         Ok(())

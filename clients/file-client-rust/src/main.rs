@@ -48,8 +48,20 @@ fn main() {
     };
 
     let result = match command.as_ref() {
-        "upload" => file_protocol::upload(7000, &source_path, &target_path, None),
-        "download" => file_protocol::download(7000, &source_path, &target_path, None),
+        "upload" => file_protocol::upload(
+            "127.0.0.1",
+            "127.0.0.1:7000",
+            &source_path,
+            &target_path,
+            None,
+        ),
+        "download" => file_protocol::download(
+            "127.0.0.1",
+            "127.0.0.1:7000",
+            &source_path,
+            &target_path,
+            None,
+        ),
         // This shouldn't be possible, since we checked the string earlier
         _ => {
             error!("Unknown command given");
