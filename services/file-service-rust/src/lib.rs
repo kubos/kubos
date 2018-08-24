@@ -28,7 +28,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
     };
 
     loop {
-        let mut buf = [0; 4096];
+        let mut buf = [0; 5000];
         let (num_bytes, source) = match socket.peek_from(&mut buf) {
             Ok((num_bytes, source)) => {
                 //println!("got {} from {:?}", num_bytes, source);
@@ -47,11 +47,10 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
             prefix.clone(),
         );
 
-        match f_protocol.message_engine(None, Duration::from_secs(1), false) {
+        match f_protocol.message_engine(None, Duration::new(0, 800), true) {
             Ok(Some(Message::Metadata(_, _))) => {
-                match f_protocol.message_engine(None, Duration::from_secs(1), false) {
+                match f_protocol.message_engine(None, Duration::new(0, 800), false) {
                     Ok(Some(Message::ReqReceive(channel, hash, path, mode))) => {
-                        f_protocol.message_engine(None, Duration::from_secs(1), true);
                         match f_protocol.finalize_file(&hash, &path, mode) {
                             Ok(_) => f_protocol.send_success(channel),
                             Err(e) => {
@@ -61,15 +60,12 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                         }
                     }
                     _ => {
-                        f_protocol.message_engine(None, Duration::from_secs(1), true);
+                        f_protocol.message_engine(None, Duration::new(0, 800), true);
                         Ok(())
                     }
                 }
             }
-            _ => {
-                f_protocol.message_engine(None, Duration::from_secs(1), true);
-                Ok(())
-            }
+            other => Ok(()),
         };
         // });
 

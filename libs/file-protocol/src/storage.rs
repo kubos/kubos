@@ -88,7 +88,7 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, String> {
     File::open(meta_path)
         .unwrap()
         .read_to_end(&mut data)
-        .unwrap();
+        .map_err(|err| format!("Unable to open {} metadata file: {}", hash, err))?;
 
     let metadata: Value = de::from_slice(&data).unwrap();
 

@@ -123,7 +123,6 @@ impl Protocol {
         // TODO: Create some way to break out of this loop if we never receive all the chunks
         loop {
             let (result, _chunks) = storage::validate_file(&self.prefix, hash, num_chunks)?;
-
             self.send(messages::file_status(&self.prefix, hash, num_chunks).unwrap())
                 .unwrap();
 
@@ -178,6 +177,7 @@ impl Protocol {
         target_path: &str,
         mode: Option<u32>,
     ) -> Result<(), String> {
+        self.sync_and_send(hash, None)?;
         storage::finalize_file(&self.prefix, hash, target_path, mode)
     }
 
@@ -240,7 +240,9 @@ impl Protocol {
                     }
                     Ok(_) => continue,
                     // We timed out
-                    Err(None) => break,
+                    Err(None) => {
+                        break;
+                    }
                     Err(Some(err)) => {
                         return Err(format!("Failed to receive op result: {}", err));
                     }
@@ -250,7 +252,9 @@ impl Protocol {
                     Ok(Some(message)) => message,
                     Ok(_) => continue,
                     // We timed out
-                    Err(None) => break,
+                    Err(None) => {
+                        break;
+                    }
                     Err(Some(err)) => {
                         return Err(format!("Failed to receive data: {}", err));
                     }
@@ -323,14 +327,6 @@ impl Protocol {
                     "<- {{ {}, export, {}, {}, {} }}",
                     channel_id, hash, path, mode
                 );
-                // The client wants to send us a file.
-                // Go listen for the chunks.
-                // Note: Won't return until we've received all of them.
-                // (so could potentially never return)
-                // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::validate_file(&self.prefix, &hash, None).unwrap();
-                self.send(messages::file_status(&self.prefix, &hash, None).unwrap())
-                    .unwrap();
             }
             Ok(Message::ReqReceive(channel_id, hash, path, None)) => {
                 info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
@@ -348,19 +344,12 @@ impl Protocol {
                     "<- {{ {}, true, {}, {}, {} }}",
                     channel_id, hash, num_chunks, mode
                 );
-                // TODO: handle channel_id mismatch
-                let (_result, _chunks) =
-                    storage::validate_file(&self.prefix, &hash, Some(num_chunks)).unwrap();
-                self.send(messages::file_status(&self.prefix, &hash, Some(num_chunks)).unwrap())
-                    .unwrap();
+
+                storage::store_meta(&self.prefix, &hash, num_chunks)?;
             }
             Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, None)) => {
                 info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks);
-                // TODO: handle channel_id mismatch
-                let (_result, _chunks) =
-                    storage::validate_file(&self.prefix, &hash, Some(num_chunks)).unwrap();
-                self.send(messages::file_status(&self.prefix, &hash, Some(num_chunks)).unwrap())
-                    .unwrap();
+                storage::store_meta(&self.prefix, &hash, num_chunks)?;
             }
             Ok(Message::Failure(channel_id, error_message)) => {
                 info!("<- {{ {}, false, {} }}", channel_id, error_message);

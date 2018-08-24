@@ -115,9 +115,7 @@ pub fn download(
     // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
     match f_protocol.message_engine(None, Duration::from_secs(1), false) {
         Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
-            f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
-
-            // Save received data to the requested path
+            // Receive the data and then save received data to the requested path
             f_protocol.finalize_file(&hash, target_path, mode)?;
             return Ok(hash);
         }

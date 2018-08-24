@@ -81,7 +81,6 @@ fn download_single() {
     service_new!(service_port);
 
     let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
-
     assert!(result.is_ok());
 
     let hash = result.unwrap();
@@ -183,13 +182,9 @@ fn download_multi_complete() {
 
     // download the file again
     let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+
     assert!(result.is_ok());
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The download logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
