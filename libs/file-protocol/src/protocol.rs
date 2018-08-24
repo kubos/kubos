@@ -69,6 +69,10 @@ impl Protocol {
         Ok(())
     }
 
+    pub fn recv(&self, timeout: Option<Duration>) -> Result<Option<Value>, Option<String>> {
+        self.cbor_proto.recv_message_timeout(Duration::from_secs(1))
+    }
+
     // Request remote target to receive file from host
     pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
         let time = SystemTime::now()
@@ -206,7 +210,6 @@ impl Protocol {
         let mut last_message: Result<Option<Message>, String>;
         loop {
             // Listen on UDP port
-            info!("listening...");
 
             let message = if self.role == Role::Client {
                 match self.cbor_proto.recv_message_peer_timeout(timeout)? {
@@ -254,7 +257,6 @@ impl Protocol {
         hash: Option<&str>,
     ) -> Result<Option<Message>, String> {
         let parsed_message = parsers::parse_message(message);
-        //println!("parsed_message: {:?}", parsed_message);
         match parsed_message.to_owned() {
             Ok(Message::Sync(hash)) => {
                 info!("<- {{ {} }}", hash);

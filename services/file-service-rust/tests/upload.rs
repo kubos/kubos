@@ -7,7 +7,7 @@ extern crate tempfile;
 extern crate threadpool;
 
 use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::{FileProtocol, Role, storage};
+use file_protocol::{storage, FileProtocol, Role};
 use file_service_rust::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
