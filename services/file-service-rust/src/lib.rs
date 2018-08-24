@@ -47,26 +47,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
             prefix.clone(),
         );
 
-        match f_protocol.message_engine(None, Duration::new(0, 800), true) {
-            Ok(Some(Message::Metadata(_, _))) => {
-                match f_protocol.message_engine(None, Duration::new(0, 800), false) {
-                    Ok(Some(Message::ReqReceive(channel, hash, path, mode))) => {
-                        match f_protocol.finalize_file(&hash, &path, mode) {
-                            Ok(_) => f_protocol.send_success(channel),
-                            Err(e) => {
-                                f_protocol.send_failure(channel, &e);
-                                Ok(())
-                            }
-                        }
-                    }
-                    _ => {
-                        f_protocol.message_engine(None, Duration::new(0, 800), true);
-                        Ok(())
-                    }
-                }
-            }
-            other => Ok(()),
-        };
+        f_protocol.message_engine(None, Some(Duration::new(0, 800)), true);
         // });
 
         // thread::sleep(Duration::from_secs(1));

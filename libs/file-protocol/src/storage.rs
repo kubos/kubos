@@ -156,6 +156,7 @@ pub fn validate_file(
 
     converted_entries.sort();
 
+    let mut max_entries = 186;
     for &entry_num in converted_entries.iter() {
         //println!("checking {} vs {}", entry_num, prev_entry);
         // Check for non-sequential dir entries to detect missing chunk ranges
@@ -164,6 +165,12 @@ pub fn validate_file(
             missing_ranges.push((prev_entry + 1) as u32);
             // Add end of range (non-inclusive)
             missing_ranges.push(entry_num as u32);
+
+            max_entries -= 1;
+
+            if max_entries == 0 {
+                break;
+            }
         }
 
         prev_entry = entry_num;
@@ -173,7 +180,7 @@ pub fn validate_file(
     // Ex. Last known chunk is 5, but there are 10 chunks.
     //     We will already have added '6', so we need to add '10'
     //     to close it out.
-    if (num_chunks as i32) - prev_entry != 1 {
+    if max_entries != 0 && (num_chunks as i32) - prev_entry != 1 {
         // Add start of range
         missing_ranges.push((prev_entry + 1) as u32);
         // Add end of range

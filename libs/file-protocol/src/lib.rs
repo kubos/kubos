@@ -88,7 +88,7 @@ pub fn upload(
     f_protocol.send_export(&hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
+    f_protocol.message_engine(Some(&hash), Some(Duration::from_secs(2)), true)?;
 
     Ok(hash)
 }
@@ -111,9 +111,9 @@ pub fn download(
     // going to be able to send it
     f_protocol.send_import(source_path)?;
 
-    // Check the number of chunks we need to receive and then receive them
-    // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
-    match f_protocol.message_engine(None, Duration::from_secs(1), false) {
+    // Wait forever for our sucessful response message
+    // (It can take the service a while -- multiple seconds -- to prepare large files for transfer)
+    match f_protocol.message_engine(None, None, false) {
         Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
             // Receive the data and then save received data to the requested path
             f_protocol.finalize_file(&hash, target_path, mode)?;

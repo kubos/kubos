@@ -193,6 +193,10 @@ impl Protocol {
                 let chunk = storage::load_chunk(&self.prefix, hash, chunk_index).unwrap();
                 self.send(messages::chunk(hash, chunk_index, &chunk).unwrap())
                     .unwrap();
+
+                // Give the receiver a moment to process this chunk before sending
+                // the next one
+                ::std::thread::sleep(Duration::new(0, 50));
             }
         }
         Ok(())
@@ -223,7 +227,7 @@ impl Protocol {
     pub fn message_engine(
         &self,
         hash: Option<&str>,
-        timeout: Duration,
+        timeout: Option<Duration>,
         pump: bool,
     ) -> Result<Option<Message>, String> {
         let mut last_message: Result<Option<Message>, String> = Ok(None);
@@ -232,7 +236,11 @@ impl Protocol {
             info!("listening...");
 
             let message = if self.role == Role::Client {
-                match self.cbor_proto.recv_message_peer_timeout(timeout) {
+                let result = match timeout {
+                    Some(val) => self.cbor_proto.recv_message_peer_timeout(val),
+                    None => self.cbor_proto.recv_message_peer(),
+                };
+                match result {
                     Ok((peer, Some(message))) => {
                         // Update our response port
                         self.dest_port.set(peer.port());
@@ -248,7 +256,11 @@ impl Protocol {
                     }
                 }
             } else {
-                match self.cbor_proto.recv_message_timeout(timeout) {
+                let result = match timeout {
+                    Some(val) => self.cbor_proto.recv_message_timeout(val),
+                    None => self.cbor_proto.recv_message(),
+                };
+                match result {
                     Ok(Some(message)) => message,
                     Ok(_) => continue,
                     // We timed out
@@ -327,9 +339,26 @@ impl Protocol {
                     "<- {{ {}, export, {}, {}, {} }}",
                     channel_id, hash, path, mode
                 );
+
+                match self.finalize_file(&hash, &path, Some(mode)) {
+                    Ok(_) => {
+                        self.send_success(channel_id);
+                    }
+                    Err(e) => {
+                        self.send_failure(channel_id, &e);
+                    }
+                }
             }
             Ok(Message::ReqReceive(channel_id, hash, path, None)) => {
                 info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
+                match self.finalize_file(&hash, &path, None) {
+                    Ok(_) => {
+                        self.send_success(channel_id);
+                    }
+                    Err(e) => {
+                        self.send_failure(channel_id, &e);
+                    }
+                }
             }
             Ok(Message::ReqTransmit(channel_id, path)) => {
                 info!("<- {{ {}, import, {} }}", channel_id, path);

@@ -78,13 +78,13 @@ impl Protocol {
         Ok(())
     }
 
-    pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, String> {
+    pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, Option<String>> {
         let mut buf = [0; MAX_MSG_SIZE];
         let (size, _peer) = self.handle
             .recv_from(&mut buf)
-            .map_err(|err| format!("Failed to receive a message: {}", err))?;
+            .map_err(|err| Some(format!("Failed to receive a message: {}", err)))?;
 
-        self.recv_start(&buf[0..size])
+        self.recv_start(&buf[0..size]).map_err(|err| Some(err))
     }
 
     // Gets the peer attempting to send a message
@@ -98,13 +98,15 @@ impl Protocol {
         Ok(peer)
     }
 
-    pub fn recv_message_peer(&self) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
+    pub fn recv_message_peer(
+        &self,
+    ) -> Result<(SocketAddr, Option<serde_cbor::Value>), Option<String>> {
         let mut buf = [0; MAX_MSG_SIZE];
         let (size, peer) = self.handle
             .recv_from(&mut buf)
-            .map_err(|err| format!("Failed to receive a message: {}", err))?;
+            .map_err(|err| Some(format!("Failed to receive a message: {}", err)))?;
 
-        let message = self.recv_start(&buf[0..size])?;
+        let message = self.recv_start(&buf[0..size]).map_err(|err| Some(err))?;
         Ok((peer, message))
     }
 
@@ -132,7 +134,7 @@ impl Protocol {
             },
         };
 
-        let message = self.recv_start(&buf[0..size])?;
+        let message = self.recv_start(&buf[0..size]).map_err(|err| Some(err))?;
         Ok((peer, message))
     }
 

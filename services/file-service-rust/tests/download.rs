@@ -72,9 +72,9 @@ fn download_single() {
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
-    let service_port = 7000;
+    let service_port = 8000;
 
-    let contents = "test1".as_bytes();
+    let contents = "download_single".as_bytes();
 
     create_test_file(&source, &contents);
 
@@ -101,9 +101,9 @@ fn download_multi_clean() {
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
-    let service_port = 7001;
+    let service_port = 8001;
 
-    let contents = [1; 5000];
+    let contents = [1; 6000];
 
     create_test_file(&source, &contents);
 
@@ -131,9 +131,9 @@ fn download_multi_resume() {
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
-    let service_port = 7002;
+    let service_port = 8002;
 
-    let contents = [2; 5000];
+    let contents = [2; 6000];
 
     create_test_file(&source, &contents);
 
@@ -168,9 +168,9 @@ fn download_multi_complete() {
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
-    let service_port = 7005;
+    let service_port = 8005;
 
-    let contents = [3; 5000];
+    let contents = [3; 6000];
 
     create_test_file(&source, &contents);
 
@@ -202,9 +202,9 @@ fn download_bad_hash() {
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
-    let service_port = 7003;
+    let service_port = 8003;
 
-    let contents = "test1".as_bytes();
+    let contents = "download_bad_hash".as_bytes();
 
     create_test_file(&source, &contents);
 
@@ -229,7 +229,7 @@ fn download_bad_hash() {
 /*
 #[test]
 fn download_multi_client() {
-    let service_port = 7004;
+    let service_port = 8004;
 
     // Spawn our single service
     service_new!(service_port);
@@ -243,7 +243,7 @@ fn download_multi_client() {
             let test_dir_str = test_dir.path().to_str().unwrap();
             let source = format!("{}/source", test_dir_str);
             let dest = format!("{}/dest", test_dir_str);
-            let contents = [num; 5000];
+            let contents = [num; 6000];
 
             create_test_file(&source, &contents);
 
@@ -272,7 +272,7 @@ fn download_multi_client() {
         assert!(entry.join().is_ok());
     }
 }
-
+*/
 // Massive download
 #[test]
 fn download_large() {
@@ -280,7 +280,7 @@ fn download_large() {
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
-    let service_port = 7006;
+    let service_port = 8006;
 
     // Create a 100MB file filled with random data
     {
@@ -301,7 +301,7 @@ fn download_large() {
     service_new!(service_port);
 
     let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
-
+    println!("Result: {:?}", result);
     assert!(result.is_ok());
 
     let hash = result.unwrap();
@@ -324,4 +324,3 @@ fn download_large() {
         assert_eq!(&source_buf[..], &dest_buf[..], "Chunk mismatch: {}", num);
     }
 }
-*/

@@ -74,7 +74,7 @@ fn upload_single() {
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7000;
 
-    let contents = "test1".as_bytes();
+    let contents = "upload_single".as_bytes();
 
     create_test_file(&source, &contents);
 
@@ -238,7 +238,7 @@ fn upload_bad_hash() {
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7003;
 
-    let contents = "test1".as_bytes();
+    let contents = "upload_bad_hash".as_bytes();
 
     create_test_file(&source, &contents);
 
@@ -318,7 +318,7 @@ fn upload_multi_client() {
         assert!(entry.join().is_ok());
     }
 }
-
+*/
 // Massive upload
 
 #[test]
@@ -348,7 +348,7 @@ fn upload_large() {
     service_new!(service_port);
 
     let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
-
+    println!("Result: {:?}", result);
     assert!(result.is_ok());
 
     let hash = result.unwrap();
@@ -376,4 +376,3 @@ fn upload_large() {
         assert_eq!(&source_buf[..], &dest_buf[..], "Chunk mismatch: {}", num);
     }
 }
-*/
