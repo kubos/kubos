@@ -226,7 +226,6 @@ fn download_bad_hash() {
     fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 }
 
-/*
 #[test]
 fn download_multi_client() {
     let service_port = 8004;
@@ -259,7 +258,8 @@ fn download_multi_client() {
             thread::sleep(Duration::new(2, 0));
 
             // Cleanup the temporary files so that the test can be repeatable
-            fs::remove_dir_all(format!("storage/{}", hash)).unwrap();
+            fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
+            fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
             // Verify the final file's contents
             let dest_contents = fs::read(dest).unwrap();
@@ -272,7 +272,7 @@ fn download_multi_client() {
         assert!(entry.join().is_ok());
     }
 }
-*/
+
 // Massive download
 #[test]
 fn download_large() {

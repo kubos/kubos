@@ -24,11 +24,7 @@ extern crate tempfile;
 use kubos_system::Config as ServiceConfig;
 use file_service_rust::recv_loop;
 use std::thread;
-use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::FileProtocol;
 use rand::{thread_rng, Rng};
-use std::env;
-use std::path::Path;
 use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
@@ -270,7 +266,6 @@ fn upload_bad_hash() {
     //fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 }
 
-/*
 #[test]
 fn upload_multi_client() {
     let service_port = 7004;
@@ -303,7 +298,8 @@ fn upload_multi_client() {
             thread::sleep(Duration::new(2, 0));
 
             // Cleanup the temporary files so that the test can be repeatable
-            fs::remove_dir_all(format!("storage/{}", hash)).unwrap();
+            fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
+            fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
             // Verify the final file's contents
             let dest_contents = fs::read(dest).unwrap();
@@ -316,7 +312,7 @@ fn upload_multi_client() {
         assert!(entry.join().is_ok());
     }
 }
-*/
+
 // Massive upload
 
 #[test]

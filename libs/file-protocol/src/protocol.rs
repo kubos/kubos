@@ -205,7 +205,7 @@ impl Protocol {
 
                 // Give the receiver a moment to process this chunk before sending
                 // the next one
-                ::std::thread::sleep(Duration::new(0, 50));
+                ::std::thread::sleep(Duration::new(0, 100));
             }
         }
         Ok(())
@@ -296,7 +296,6 @@ impl Protocol {
             };
             last_message = new_message;
             if stop {
-                println!("hit stop case");
                 break;
             }
         }
