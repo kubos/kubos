@@ -56,7 +56,7 @@ macro_rules! service_new {
             )).unwrap();
         });
 
-        thread::sleep(Duration::new(0,500));
+        thread::sleep(Duration::new(1, 0));
     }};
 }
 
@@ -67,7 +67,7 @@ fn create_test_file(name: &str, contents: &[u8]) {
 
 // upload single-chunk file from scratch
 #[test]
-fn upload_single() {
+fn download_single() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
@@ -80,20 +80,11 @@ fn upload_single() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
-
-    if let Err(err) = result.clone() {
-        println!("Error: {}", err);
-    }
+    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
 
     assert!(result.is_ok());
 
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -104,9 +95,9 @@ fn upload_single() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload multi-chunk file from scratch
+// download multi-chunk file from scratch
 #[test]
-fn upload_multi_clean() {
+fn download_multi_clean() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
@@ -119,16 +110,11 @@ fn upload_multi_clean() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
 
     assert!(result.is_ok());
 
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -139,9 +125,9 @@ fn upload_multi_clean() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload multi-chunk file which we already have 1 chunk for
+// download multi-chunk file which we already have 1 chunk for
 #[test]
-fn upload_multi_resume() {
+fn download_multi_resume() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
@@ -154,28 +140,18 @@ fn upload_multi_resume() {
 
     service_new!(service_port);
 
-    // Go ahead and upload the whole file so we can manipulate the temporary directory
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    // Go ahead and download the whole file so we can manipulate the temporary directory
+    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
     assert!(result.is_ok());
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
 
     // Remove a chunk so we can test the retry logic
     fs::remove_file(format!("service/storage/{}/0", hash)).unwrap();
 
-    // Upload the file again
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    // download the file again
+    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
     assert!(result.is_ok());
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -186,9 +162,9 @@ fn upload_multi_resume() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload multi-chunk file which we already have all chunks for
+// download multi-chunk file which we already have all chunks for
 #[test]
-fn upload_multi_complete() {
+fn download_multi_complete() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
@@ -201,22 +177,17 @@ fn upload_multi_complete() {
 
     service_new!(service_port);
 
-    // Upload the file once (clean upload)
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    // download the file once (clean download)
+    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
     assert!(result.is_ok());
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
-
-    // Upload the file again
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    // download the file again
+    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
     assert!(result.is_ok());
     let hash = result.unwrap();
 
     // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
+    // finish its work. The download logic needs to wait on
     // the final ACK message before returning
     thread::sleep(Duration::new(1, 0));
 
@@ -229,9 +200,9 @@ fn upload_multi_complete() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload. Create hash mismatch.
+// download. Create hash mismatch.
 #[test]
-fn upload_bad_hash() {
+fn download_bad_hash() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
@@ -244,28 +215,16 @@ fn upload_bad_hash() {
 
     service_new!(service_port);
 
-    // Upload the file so we can mess with the temporary storage
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    // download the file so we can mess with the temporary storage
+    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
     assert!(result.is_ok());
     let hash = result.unwrap();
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
-
     // Tweak the chunk contents so the future hash calculation will fail
-    fs::write(format!("service/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
+    fs::write(format!("client/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
-    // TODO: THIS SHOULD FAIL
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
-    // TODO: Verify exact error message
-    assert!(result.is_ok());
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
+    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
+    assert_eq!(result.unwrap_err(), "File hash mismatch");
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -274,7 +233,7 @@ fn upload_bad_hash() {
 
 /*
 #[test]
-fn upload_multi_client() {
+fn download_multi_client() {
     let service_port = 7004;
 
     // Spawn our single service
@@ -294,7 +253,7 @@ fn upload_multi_client() {
             create_test_file(&source, &contents);
 
             let result =
-                file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+                file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
             assert!(result.is_ok());
 
             let hash = result.unwrap();
@@ -319,10 +278,9 @@ fn upload_multi_client() {
     }
 }
 
-// Massive upload
-
+// Massive download
 #[test]
-fn upload_large() {
+fn download_large() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
@@ -347,16 +305,11 @@ fn upload_large() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(service_port, &source, &dest, Some("client".to_owned()));
+    let result = file_protocol::download(service_port, &source, &dest, Some("client".to_owned()));
 
     assert!(result.is_ok());
 
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(15, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();

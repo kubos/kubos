@@ -38,6 +38,7 @@ pub enum Role {
 
 /// File Protocol Information Structure
 pub struct Protocol {
+    prefix: String,
     cbor_proto: CborProtocol,
     host: String,
     dest_port: Cell<u16>,
@@ -46,12 +47,13 @@ pub struct Protocol {
 
 impl Protocol {
     /// Create a new file protocol instance using an automatically assigned UDP socket
-    pub fn new(host: String, dest_port: u16, role: Role) -> Self {
+    pub fn new(host: String, dest_port: u16, role: Role, prefix: Option<String>) -> Self {
         // Get a local UDP socket (Bind)
         let c_protocol = CborProtocol::new(format!("{}:0", host));
 
         // Set up the full connection info
         Protocol {
+            prefix: prefix.unwrap_or("file-transfer".to_owned()),
             cbor_proto: c_protocol,
             // Remote IP?
             host,
@@ -61,8 +63,15 @@ impl Protocol {
     }
 
     /// Create a new file protocol instance using a specific UDP socket
-    pub fn new_from_socket(socket: UdpSocket, host: String, dest_port: u16, role: Role) -> Self {
+    pub fn new_from_socket(
+        socket: UdpSocket,
+        host: String,
+        dest_port: u16,
+        role: Role,
+        prefix: Option<String>,
+    ) -> Self {
         Protocol {
+            prefix: prefix.unwrap_or("file-transfer".to_owned()),
             cbor_proto: CborProtocol::new_from_socket(socket),
             host,
             dest_port: Cell::new(dest_port),
@@ -113,9 +122,9 @@ impl Protocol {
     pub fn sync_and_send(&self, hash: &str, num_chunks: Option<u32>) -> Result<(), String> {
         // TODO: Create some way to break out of this loop if we never receive all the chunks
         loop {
-            let (result, _chunks) = storage::validate_file(hash, num_chunks)?;
+            let (result, _chunks) = storage::validate_file(&self.prefix, hash, num_chunks)?;
 
-            self.send(messages::file_status(hash, num_chunks).unwrap())
+            self.send(messages::file_status(&self.prefix, hash, num_chunks).unwrap())
                 .unwrap();
 
             if result == true {
@@ -151,10 +160,16 @@ impl Protocol {
         Ok(())
     }
 
+    /// TODO
+    ///
+    pub fn initialize_file(&self, source_path: &str) -> Result<(String, u32, u32), String> {
+        storage::initialize_file(&self.prefix, source_path)
+    }
+
     /// Verify the integrity of received file data and then transfer into the requested permanent file location
     ///
     /// Verifies:
-    /// 	a) All of the chunks of a file have been received
+    ///     a) All of the chunks of a file have been received
     ///     b) That the calculated hash of said chunks matches the expected hash
     ///
     pub fn finalize_file(
@@ -163,19 +178,19 @@ impl Protocol {
         target_path: &str,
         mode: Option<u32>,
     ) -> Result<(), String> {
-        storage::finalize_file(hash, target_path, mode)
+        storage::finalize_file(&self.prefix, hash, target_path, mode)
     }
 
     /// Store a files metadata into the appropriate temporary storage location
     pub fn store_meta(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
-        storage::store_meta(hash, num_chunks)
+        storage::store_meta(&self.prefix, hash, num_chunks)
     }
 
     /// Send all requested chunks of a file to the remote destination
     pub fn send_chunks(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
         for (first, last) in chunks {
             for chunk_index in *first..*last {
-                let chunk = storage::load_chunk(hash, chunk_index).unwrap();
+                let chunk = storage::load_chunk(&self.prefix, hash, chunk_index).unwrap();
                 self.send(messages::chunk(hash, chunk_index, &chunk).unwrap())
                     .unwrap();
             }
@@ -211,24 +226,34 @@ impl Protocol {
         timeout: Duration,
         pump: bool,
     ) -> Result<Option<Message>, String> {
-        let mut last_message: Result<Option<Message>, String>;
+        let mut last_message: Result<Option<Message>, String> = Ok(None);
         loop {
             // Listen on UDP port
             info!("listening...");
 
             let message = if self.role == Role::Client {
-                match self.cbor_proto.recv_message_peer_timeout(timeout)? {
-                    (peer, Some(message)) => {
+                match self.cbor_proto.recv_message_peer_timeout(timeout) {
+                    Ok((peer, Some(message))) => {
                         // Update our response port
                         self.dest_port.set(peer.port());
                         message
                     }
-                    _ => return Err("Failed to receive op result".to_owned()),
+                    Ok(_) => continue,
+                    // We timed out
+                    Err(None) => break,
+                    Err(Some(err)) => {
+                        return Err(format!("Failed to receive op result: {}", err));
+                    }
                 }
             } else {
                 match self.cbor_proto.recv_message_timeout(timeout) {
                     Ok(Some(message)) => message,
-                    _ => return Err("Failed to receive data".to_owned()),
+                    Ok(_) => continue,
+                    // We timed out
+                    Err(None) => break,
+                    Err(Some(err)) => {
+                        return Err(format!("Failed to receive data: {}", err));
+                    }
                 }
             };
 
@@ -270,11 +295,11 @@ impl Protocol {
             }
             Ok(Message::Metadata(hash, num_chunks)) => {
                 info!("<- {{ {}, {} }}", hash, num_chunks);
-                storage::store_meta(&hash, num_chunks).unwrap();
+                storage::store_meta(&self.prefix, &hash, num_chunks).unwrap();
             }
             Ok(Message::ReceiveChunk(hash, chunk_num, data)) => {
                 info!("<- {{ {}, {}, chunk_data }}", hash, chunk_num);
-                storage::store_chunk(&hash, chunk_num, &data).unwrap();
+                storage::store_chunk(&self.prefix, &hash, chunk_num, &data).unwrap();
             }
             Ok(Message::ACK(ack_hash)) => {
                 info!("<- {{ {}, true }}", ack_hash);
@@ -303,8 +328,8 @@ impl Protocol {
                 // Note: Won't return until we've received all of them.
                 // (so could potentially never return)
                 // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::validate_file(&hash, None).unwrap();
-                self.send(messages::file_status(&hash, None).unwrap())
+                let (_result, _chunks) = storage::validate_file(&self.prefix, &hash, None).unwrap();
+                self.send(messages::file_status(&self.prefix, &hash, None).unwrap())
                     .unwrap();
             }
             Ok(Message::ReqReceive(channel_id, hash, path, None)) => {
@@ -312,7 +337,7 @@ impl Protocol {
             }
             Ok(Message::ReqTransmit(channel_id, path)) => {
                 info!("<- {{ {}, import, {} }}", channel_id, path);
-                self.send(messages::import_result(channel_id, &path).unwrap())
+                self.send(messages::import_result(&self.prefix, channel_id, &path).unwrap())
                     .unwrap();
             }
             Ok(Message::SuccessReceive(channel_id)) => {
@@ -324,15 +349,17 @@ impl Protocol {
                     channel_id, hash, num_chunks, mode
                 );
                 // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::validate_file(&hash, Some(num_chunks)).unwrap();
-                self.send(messages::file_status(&hash, Some(num_chunks)).unwrap())
+                let (_result, _chunks) =
+                    storage::validate_file(&self.prefix, &hash, Some(num_chunks)).unwrap();
+                self.send(messages::file_status(&self.prefix, &hash, Some(num_chunks)).unwrap())
                     .unwrap();
             }
             Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, None)) => {
                 info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks);
                 // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::validate_file(&hash, Some(num_chunks)).unwrap();
-                self.send(messages::file_status(&hash, Some(num_chunks)).unwrap())
+                let (_result, _chunks) =
+                    storage::validate_file(&self.prefix, &hash, Some(num_chunks)).unwrap();
+                self.send(messages::file_status(&self.prefix, &hash, Some(num_chunks)).unwrap())
                     .unwrap();
             }
             Ok(Message::Failure(channel_id, error_message)) => {

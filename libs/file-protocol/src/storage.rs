@@ -31,11 +31,13 @@ use time;
 const HASH_SIZE: usize = 16;
 
 // Save new chunk in a temporary storage file
-pub fn store_chunk(hash: &str, index: u32, data: &[u8]) -> Result<(), String> {
+pub fn store_chunk(prefix: &str, hash: &str, index: u32, data: &[u8]) -> Result<(), String> {
     // if data is type uint8_t[]
     // change data to ffi.string
     let file_name = format!("{}", index);
-    let storage_path = Path::new("storage").join(hash).join(file_name);
+    let storage_path = Path::new(&format!("{}/storage", prefix))
+        .join(hash)
+        .join(file_name);
 
     fs::create_dir_all(&storage_path.parent().unwrap()).unwrap();
     let mut file = File::create(&storage_path).unwrap();
@@ -44,14 +46,14 @@ pub fn store_chunk(hash: &str, index: u32, data: &[u8]) -> Result<(), String> {
     Ok(())
 }
 
-pub fn store_meta(hash: &str, num_chunks: u32) -> Result<(), String> {
+pub fn store_meta(prefix: &str, hash: &str, num_chunks: u32) -> Result<(), String> {
     let data = vec![("num_chunks", num_chunks)];
 
     // let mut e = Encoder::from_memory();
     // e.encode(&data).unwrap();
     let vec = to_vec(&data).unwrap();
 
-    let file_dir = Path::new("storage").join(hash);
+    let file_dir = Path::new(&format!("{}/storage", prefix)).join(hash);
     // Make sure the directory exists
     fs::create_dir_all(file_dir.clone())
         .map_err(|err| format!("Failed to create temp storage directory: {:?}", err))?;
@@ -67,18 +69,22 @@ pub fn store_meta(hash: &str, num_chunks: u32) -> Result<(), String> {
 }
 
 // Load a chunk from its temporary storage file
-pub fn load_chunk(hash: &str, index: u32) -> Result<Vec<u8>, String> {
+pub fn load_chunk(prefix: &str, hash: &str, index: u32) -> Result<Vec<u8>, String> {
     let mut data = vec![];
-    let path = Path::new("storage").join(hash).join(format!("{}", index));
+    let path = Path::new(&format!("{}/storage", prefix))
+        .join(hash)
+        .join(format!("{}", index));
 
     File::open(path).unwrap().read_to_end(&mut data).unwrap();
     Ok(data)
 }
 
 // Load number of chunks in file from metadata
-pub fn load_meta(hash: &str) -> Result<u32, String> {
+pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, String> {
     let mut data = vec![];
-    let meta_path = Path::new("storage").join(hash).join("meta");
+    let meta_path = Path::new(&format!("{}/storage", prefix))
+        .join(hash)
+        .join("meta");
     File::open(meta_path)
         .unwrap()
         .read_to_end(&mut data)
@@ -110,17 +116,21 @@ pub fn load_meta(hash: &str) -> Result<u32, String> {
 }
 
 // Check if all of a files chunks are present in the temporary directory
-pub fn validate_file(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u32>), String> {
+pub fn validate_file(
+    prefix: &str,
+    hash: &str,
+    num_chunks: Option<u32>,
+) -> Result<(bool, Vec<u32>), String> {
     let num_chunks = if let Some(num) = num_chunks {
-        store_meta(hash, num).unwrap();
+        store_meta(prefix, hash, num).unwrap();
         num
     } else {
-        load_meta(hash)?
+        load_meta(prefix, hash)?
     };
 
     let mut missing_ranges: Vec<u32> = vec![];
 
-    let hash_path = Path::new("storage").join(hash);
+    let hash_path = Path::new(&format!("{}/storage", prefix)).join(hash);
 
     let mut prev_entry: i32 = -1;
 
@@ -176,16 +186,16 @@ pub fn validate_file(hash: &str, num_chunks: Option<u32>) -> Result<(bool, Vec<u
 /// Create temporary folder for chunks
 /// Stream copy file from mutable space to immutable space
 /// Move folder to hash of contents
-pub fn initialize_file(source_path: &str) -> Result<(String, u32, u32), String> {
-    let storage_path = String::from("storage");
+pub fn initialize_file(prefix: &str, source_path: &str) -> Result<(String, u32, u32), String> {
+    let storage_path = format!("{}/storage", prefix);
 
     if let Err(e) = fs::metadata(source_path) {
-        return Err(format!("failed to stat file {}: {:?}", source_path, e));
+        return Err(format!("Failed to stat file {}: {:?}", source_path, e));
     }
 
     // Copy input file to storage area and calculate hash
     if let Err(e) = fs::create_dir_all(&storage_path) {
-        return Err(format!("failed to create dir {}: {:?}", storage_path, e));
+        return Err(format!("Failed to create dir {}: {:?}", storage_path, e));
     }
 
     let temp_path = Path::new(&storage_path).join(format!(".{}", time::get_time().nsec));
@@ -205,10 +215,10 @@ pub fn initialize_file(source_path: &str) -> Result<(String, u32, u32), String> 
                     }
                     hasher.update(&chunk[0..n]);
                     if let Err(e) = output.write(&chunk[0..n]) {
-                        return Err(format!("failed to write chunk {:?}", e));
+                        return Err(format!("Failed to write chunk {:?}", e));
                     }
                 }
-                Err(e) => return Err(format!("failed to read chunk from source {:?}", e)),
+                Err(e) => return Err(format!("Failed to read chunk from source {:?}", e)),
             }
         }
     }
@@ -238,7 +248,7 @@ pub fn initialize_file(source_path: &str) -> Result<(String, u32, u32), String> 
                 if n == 0 {
                     break;
                 }
-                store_chunk(&hash, index, &chunk[0..n]).unwrap();
+                store_chunk(prefix, &hash, index, &chunk[0..n]).unwrap();
                 index = index + 1;
                 offset = offset + n;
             }
@@ -250,7 +260,7 @@ pub fn initialize_file(source_path: &str) -> Result<(String, u32, u32), String> 
             }
         }
     }
-    store_meta(&hash, index).unwrap();
+    store_meta(prefix, &hash, index).unwrap();
 
     let meta = fs::metadata(source_path).unwrap();
 
@@ -258,16 +268,21 @@ pub fn initialize_file(source_path: &str) -> Result<(String, u32, u32), String> 
 }
 
 // Copy temporary data chunks into permanent file?
-pub fn finalize_file(hash: &str, target_path: &str, mode: Option<u32>) -> Result<(), String> {
+pub fn finalize_file(
+    prefix: &str,
+    hash: &str,
+    target_path: &str,
+    mode: Option<u32>,
+) -> Result<(), String> {
     // Double check that all the chunks of the file are present and the hash matches up
-    let (result, _) = validate_file(hash, None)?;
+    let (result, _) = validate_file(prefix, hash, None)?;
 
     if result != true {
         return Err("File missing chunks".to_owned());
     }
 
     // Get the total number of chunks we're saving
-    let num_chunks = load_meta(hash)?;
+    let num_chunks = load_meta(prefix, hash)?;
 
     // Q: Do we want to create the parent directories if they don't exist?
     let mut file = File::create(target_path)
@@ -281,7 +296,7 @@ pub fn finalize_file(hash: &str, target_path: &str, mode: Option<u32>) -> Result
     let mut calc_hash = Blake2s::new(HASH_SIZE);
 
     for chunk_num in 0..num_chunks {
-        let chunk = load_chunk(hash, chunk_num)?;
+        let chunk = load_chunk(prefix, hash, chunk_num)?;
 
         // Update our verification hash
         calc_hash.update(&chunk);

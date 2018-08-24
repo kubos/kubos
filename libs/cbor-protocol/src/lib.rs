@@ -20,6 +20,8 @@ use serde_cbor::de;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Duration;
 
+const MAX_MSG_SIZE: usize = 5000;
+
 pub struct Protocol {
     pub handle: UdpSocket,
 }
@@ -77,13 +79,10 @@ impl Protocol {
     }
 
     pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, String> {
-        let mut buf = [0; 4136];
-        let (size, _peer) = self
-            .handle
+        let mut buf = [0; MAX_MSG_SIZE];
+        let (size, _peer) = self.handle
             .recv_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
-
-        println!("Received {} bytes", size);
 
         self.recv_start(&buf[0..size])
     }
@@ -91,24 +90,19 @@ impl Protocol {
     // Gets the peer attempting to send a message
     // But does *not* retrieve the message
     pub fn peek_peer(&self) -> Result<SocketAddr, String> {
-        let mut buf = [0; 4136];
-        let (size, peer) = self
-            .handle
+        let mut buf = [0; MAX_MSG_SIZE];
+        let (size, peer) = self.handle
             .peek_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
-        println!("Receiving {} bytes from {:?}", size, peer);
         Ok(peer)
     }
 
     pub fn recv_message_peer(&self) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
-        let mut buf = [0; 4136];
-        let (size, peer) = self
-            .handle
+        let mut buf = [0; MAX_MSG_SIZE];
+        let (size, peer) = self.handle
             .recv_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
-
-        println!("Received {} bytes", size);
 
         let message = self.recv_start(&buf[0..size])?;
         Ok((peer, message))
@@ -117,17 +111,13 @@ impl Protocol {
     pub fn recv_message_peer_timeout(
         &self,
         timeout: Duration,
-    ) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
+    ) -> Result<(SocketAddr, Option<serde_cbor::Value>), Option<String>> {
         // Set the timeout for this particular receive
         self.handle
             .set_read_timeout(Some(timeout))
             .map_err(|err| format!("Failed to set timeout: {}", err))?;
 
-        // Max message size:
-        // - 4096 - Max chunk size TODO: Make this configurable
-        // -   32 - Hash string
-        // -    8 - Chunk number
-        let mut buf = [0; 4136];
+        let mut buf = [0; MAX_MSG_SIZE];
         let result = self.handle.recv_from(&mut buf);
 
         // Reset the timeout for future calls
@@ -137,12 +127,10 @@ impl Protocol {
         let (size, peer) = match result {
             Ok(data) => data,
             Err(err) => match err.kind() {
-                ::std::io::ErrorKind::WouldBlock => return Err(format!("")), // For some reason, UDP recv returns WouldBlock for timeouts
-                _ => return Err(format!("Failed to receive a message: {:?}", err)),
+                ::std::io::ErrorKind::WouldBlock => return Err(None), // For some reason, UDP recv returns WouldBlock for timeouts
+                other => return Err(Some(format!("Failed to receive a message: {:?}", err))),
             },
         };
-
-        //println!("Received {} bytes", size);
 
         let message = self.recv_start(&buf[0..size])?;
         Ok((peer, message))
@@ -157,11 +145,7 @@ impl Protocol {
             .set_read_timeout(Some(timeout))
             .map_err(|err| format!("Failed to set timeout: {}", err))?;
 
-        // Max message size:
-        // - 4096 - Max chunk size TODO: Make this configurable
-        // -   32 - Hash string
-        // -    8 - Chunk number
-        let mut buf = [0; 4136];
+        let mut buf = [0; MAX_MSG_SIZE];
         let result = self.handle.recv_from(&mut buf);
 
         // Reset the timeout for future calls
@@ -172,11 +156,9 @@ impl Protocol {
             Ok(data) => data,
             Err(err) => match err.kind() {
                 ::std::io::ErrorKind::WouldBlock => return Err(None), // For some reason, UDP recv returns WouldBlock for timeouts
-                _ => return Err(Some(format!("Failed to receive a message: {:?}", err))),
+                other => return Err(Some(format!("Failed to receive a message: {:?}", err))),
             },
         };
-
-        //println!("Received {} bytes", size);
 
         self.recv_start(&buf[0..size]).map_err(|err| Some(err))
     }

@@ -19,8 +19,8 @@ use serde_cbor::{ser, Value};
 use serde_cbor::error::Error;
 
 // Store requested file as chunks in temporary storage and create appropriate message from results
-pub fn import_result(channel_id: u64, path: &str) -> Result<Vec<u8>, Error> {
-    match storage::initialize_file(path) {
+pub fn import_result(prefix: &str, channel_id: u64, path: &str) -> Result<Vec<u8>, Error> {
+    match storage::initialize_file(prefix, path) {
         Ok((hash, num_chunks, mode)) => {
             info!(
                 "-> {{ {}, true, {}, {}, {} }}",
@@ -75,8 +75,8 @@ pub fn metadata(hash: &str, num_chunks: u32) -> Result<Vec<u8>, Error> {
 }
 
 // Generate ACK or NAK depending on state of received file
-pub fn file_status(hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, Error> {
-    let (result, chunks) = storage::validate_file(hash, num_chunks).unwrap();
+pub fn file_status(prefix: &str, hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, Error> {
+    let (result, chunks) = storage::validate_file(prefix, hash, num_chunks).unwrap();
 
     info!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
     let mut vec = ser::to_vec_packed(&(hash, result)).unwrap();

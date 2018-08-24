@@ -64,8 +64,13 @@ pub enum Message {
 }
 
 /// Upload a file to the target server location
-pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
+pub fn upload(
+    port: u16,
+    source_path: &str,
+    target_path: &str,
+    prefix: Option<String>,
+) -> Result<String, String> {
+    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client, prefix);
 
     info!(
         "Uploading local:{} to remote:{}",
@@ -73,7 +78,7 @@ pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String,
     );
 
     // Copy file to upload to temp storage. Calculate the hash and chunk info
-    let (hash, num_chunks, mode) = storage::initialize_file(&source_path)?;
+    let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 
     // Q: Why not combine this and export into one message? it's really only a single extra parameter
     // Tell our destination the hash and number of chunks to expect
@@ -89,8 +94,13 @@ pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String,
 }
 
 /// Download a file from the target server location
-pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
+pub fn download(
+    port: u16,
+    source_path: &str,
+    target_path: &str,
+    prefix: Option<String>,
+) -> Result<String, String> {
+    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client, prefix);
 
     info!(
         "Downloading remote: {} to local: {}",
@@ -105,13 +115,10 @@ pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<Strin
     // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
     match f_protocol.message_engine(None, Duration::from_secs(1), false) {
         Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
-            info!("file has been transmitted?");
             f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
 
-            info!("done recv");
-
             // Save received data to the requested path
-            storage::finalize_file(&hash, target_path, mode)?;
+            f_protocol.finalize_file(&hash, target_path, mode)?;
             return Ok(hash);
         }
         Ok(msg) => {

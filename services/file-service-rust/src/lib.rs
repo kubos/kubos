@@ -22,11 +22,16 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         Err(e) => panic!("Couldn't bind to socket {}", e),
     };
 
+    let prefix = match config.get("storage_dir") {
+        Some(val) => val.as_str().and_then(|str| Some(str.to_owned())),
+        None => None,
+    };
+
     loop {
         let mut buf = [0; 4096];
         let (num_bytes, source) = match socket.peek_from(&mut buf) {
             Ok((num_bytes, source)) => {
-                println!("got {} from {:?}", num_bytes, source);
+                //println!("got {} from {:?}", num_bytes, source);
                 (num_bytes, source)
             }
             Err(e) => panic!("No data received {}", e),
@@ -39,6 +44,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
             format!("{}", source.ip()).to_owned(),
             source.port(),
             Role::Server,
+            prefix.clone(),
         );
 
         match f_protocol.message_engine(None, Duration::from_secs(1), false) {
