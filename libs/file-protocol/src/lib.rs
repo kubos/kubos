@@ -83,12 +83,9 @@ pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), S
     // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
     match f_protocol.message_engine(None, Duration::from_secs(1), false) {
         Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
-            info!("file has been transmitted?");
             f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true);
-
-            info!("done recv");
-
             // Save received data to the requested path
+            // Need to check the output of export and retry if needed
             storage::local_export(&hash, target_path, mode)?;
             return Ok(());
         }

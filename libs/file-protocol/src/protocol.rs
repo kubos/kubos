@@ -258,94 +258,89 @@ impl Protocol {
     ) -> Result<Option<Message>, String> {
         let parsed_message = parsers::parse_message(message);
         match parsed_message.to_owned() {
-            Ok(Message::Sync(hash)) => {
-                info!("<- {{ {} }}", hash);
-            }
-            Ok(Message::SyncChunks(hash, num_chunks)) => {
-                info!("<- {{ {}, {} }}", hash, num_chunks);
-                storage::store_meta(&hash, num_chunks).unwrap();
-            }
-            Ok(Message::ReceiveChunk(hash, chunk_num, data)) => {
-                info!("<- {{ {}, {}, chunk_data }}", hash, chunk_num);
-                storage::store_chunk(&hash, chunk_num, &data).unwrap();
-            }
-            Ok(Message::ACK(ack_hash)) => {
-                info!("<- {{ {}, true }}", ack_hash);
-                if let Some(hash_val) = hash {
-                    if ack_hash == hash_val {
-                        // Done processing its time to go home
+            Ok(parsed_message) => {
+                match &parsed_message {
+                    Message::Sync(hash) => {
+                        info!("<- {{ {} }}", hash);
+                    }
+                    Message::SyncChunks(hash, num_chunks) => {
+                        info!("<- {{ {}, {} }}", hash, num_chunks);
+                        storage::store_meta(&hash, *num_chunks).unwrap();
+                    }
+                    Message::ReceiveChunk(hash, chunk_num, data) => {
+                        info!("<- {{ {}, {}, chunk_data }}", hash, chunk_num);
+                        storage::store_chunk(&hash, *chunk_num, &data).unwrap();
+                    }
+                    Message::ACK(ack_hash) => {
+                        info!("<- {{ {}, true }}", ack_hash);
+                        if let Some(hash_val) = hash {
+                            if ack_hash == hash_val {
+                                // Done processing its time to go home
+                                // return Ok(true);
+                            }
+                        }
                         // return Ok(true);
                     }
+                    Message::NAK(hash, Some(missing_chunks)) => {
+                        info!("<- {{ {}, false, {:?} }}", hash, missing_chunks);
+                        self.do_upload(&hash, &missing_chunks)?;
+                    }
+                    Message::NAK(hash, None) => {
+                        info!("<- {{ {}, false }}", hash);
+                    }
+                    Message::ReqReceive(channel_id, hash, path, Some(mode)) => {
+                        info!(
+                            "<- {{ {}, export, {}, {}, {} }}",
+                            channel_id, hash, path, mode
+                        );
+                        // The client wants to send us a file.
+                        // Go listen for the chunks.
+                        // Note: Won't return until we've received all of them.
+                        // (so could potentially never return)
+                        // TODO: handle channel_id mismatch
+                        self.send(messages::ack_or_nak(&hash, None).unwrap())
+                            .unwrap();
+                    }
+                    Message::ReqReceive(channel_id, hash, path, None) => {
+                        info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
+                    }
+                    Message::ReqTransmit(channel_id, path) => {
+                        info!("<- {{ {}, import, {} }}", channel_id, path);
+                        self.send(messages::local_import(*channel_id, &path).unwrap())
+                            .unwrap();
+                    }
+                    Message::SuccessReceive(channel_id) => {
+                        info!("<- {{ {}, true }}", channel_id);
+                    }
+                    Message::SuccessTransmit(channel_id, hash, num_chunks, Some(mode)) => {
+                        info!(
+                            "<- {{ {}, true, {}, {}, {} }}",
+                            channel_id, hash, num_chunks, mode
+                        );
+                        // TODO: handle channel_id mismatch
+                        self.send(messages::ack_or_nak(&hash, Some(*num_chunks)).unwrap())
+                            .unwrap();
+                    }
+                    Message::SuccessTransmit(channel_id, hash, num_chunks, None) => {
+                        info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks);
+                        // TODO: handle channel_id mismatch
+                        self.send(messages::ack_or_nak(&hash, Some(*num_chunks)).unwrap())
+                            .unwrap();
+                    }
+                    Message::Failure(channel_id, error_message) => {
+                        info!("<- {{ {}, false, {} }}", channel_id, error_message);
+                        return Err(format!(
+                            "Transmission failure on channel {}. Error returned from server: {}",
+                            channel_id, error_message
+                        ));
+                    }
                 }
-                // return Ok(true);
-            }
-            Ok(Message::NAK(hash, Some(missing_chunks))) => {
-                info!("<- {{ {}, false, {:?} }}", hash, missing_chunks);
-                if let Some(chunks) = Some(missing_chunks) {
-                    self.do_upload(&hash, &chunks)?;
-                }
-            }
-            Ok(Message::NAK(hash, None)) => {
-                info!("<- {{ {}, false }}", hash);
-            }
-            Ok(Message::ReqReceive(channel_id, hash, path, Some(mode))) => {
-                info!(
-                    "<- {{ {}, export, {}, {}, {} }}",
-                    channel_id, hash, path, mode
-                );
-                // The client wants to send us a file.
-                // Go listen for the chunks.
-                // Note: Won't return until we've received all of them.
-                // (so could potentially never return)
-                // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::local_sync(&hash, None).unwrap();
-                self.send(messages::ack_or_nak(&hash, None).unwrap())
-                    .unwrap();
-            }
-            Ok(Message::ReqReceive(channel_id, hash, path, None)) => {
-                info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
-            }
-            Ok(Message::ReqTransmit(channel_id, path)) => {
-                info!("<- {{ {}, import, {} }}", channel_id, path);
-                self.send(messages::local_import(channel_id, &path).unwrap())
-                    .unwrap();
-            }
-            Ok(Message::SuccessReceive(channel_id)) => {
-                info!("<- {{ {}, true }}", channel_id);
-            }
-            Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, Some(mode))) => {
-                info!(
-                    "<- {{ {}, true, {}, {}, {} }}",
-                    channel_id, hash, num_chunks, mode
-                );
-                // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
-                self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
-                    .unwrap();
-            }
-            Ok(Message::SuccessTransmit(channel_id, hash, num_chunks, None)) => {
-                info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks);
-                // TODO: handle channel_id mismatch
-                let (_result, _chunks) = storage::local_sync(&hash, Some(num_chunks)).unwrap();
-                self.send(messages::ack_or_nak(&hash, Some(num_chunks)).unwrap())
-                    .unwrap();
-            }
-            Ok(Message::Failure(channel_id, error_message)) => {
-                info!("<- {{ {}, false, {} }}", channel_id, error_message);
-                return Err(format!(
-                    "Transmission failure on channel {}. Error returned from server: {}",
-                    channel_id, error_message
-                ));
+                Ok(Some(parsed_message))
             }
             Err(e) => {
                 info!("<- what did we get?? {}", e);
+                Ok(None)
             }
-        }
-
-        if parsed_message.is_ok() {
-            return Ok(Some(parsed_message.unwrap()));
-        } else {
-            return Ok(None);
         }
     }
 }
