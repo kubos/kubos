@@ -120,3 +120,13 @@ pub fn chunk(hash: &str, index: u32, chunk: &[u8]) -> Result<Vec<u8>, Error> {
     info!("-> {{ {}, {}, chunk_data", hash, index);
     Ok(ser::to_vec_packed(&(hash, index, chunk_bytes))?)
 }
+
+pub fn success(channel_id: u64) -> Result<Vec<u8>, Error> {
+    info!("-> {{ {}, true }}", channel_id);
+    Ok(ser::to_vec_packed(&(channel_id, true))?)
+}
+
+pub fn failure(channel_id: u64, error: &str) -> Result<Vec<u8>, Error> {
+    info!("-> {{ {}, false, {} }}", channel_id, error);
+    Ok(ser::to_vec_packed(&(channel_id, false, error))?)
+}

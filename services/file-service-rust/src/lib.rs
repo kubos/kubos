@@ -1,17 +1,29 @@
+//
+// Copyright (C) 2018 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+extern crate cbor_protocol;
 extern crate file_protocol;
 extern crate kubos_system;
-#[macro_use]
 extern crate log;
-extern crate cbor_protocol;
 extern crate simplelog;
 
 use kubos_system::Config as ServiceConfig;
-use simplelog::*;
-use std::net::UdpSocket;
 use std::thread;
-use std::time::Duration;
 
-use file_protocol::{FileProtocol, Role, State};
+use file_protocol::{messages, FileProtocol, State};
 
 // We need this in this lib.rs file so we can build integration tests
 
@@ -24,30 +36,32 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         thread::spawn(move || {
             let mut state = State::Holding;
 
-            let f_protocol =
-                FileProtocol::new(String::from("127.0.0.1"), source.port(), Role::Server);
+            let f_protocol = FileProtocol::new(String::from("127.0.0.1"), source.port());
 
             if let Some(msg) = first_message {
-                let (_, n_state) = f_protocol.on_message(msg, &state, None).unwrap();
-                state = n_state;
+                if let Ok(new_state) = f_protocol.on_message(msg, state.clone()) {
+                    state = new_state;
+                }
             }
             loop {
-                
                 let message = match f_protocol.recv(None) {
                     Ok(message) => (message),
-                    Err(e) => {
+                    Err(_e) => {
                         // Probably should check the type of error...
                         // For now we'll assume its just no msg received
-                        match &state {
+                        match state.clone() {
                             State::Receiving(channel, hash, path, mode) => {
-                                match f_protocol.local_export(&hash, &path, *mode) {
+                                match f_protocol.local_export(&hash, &path, mode) {
                                     Ok(_) => {
-                                        // new_state = State::Holding;
-                                        f_protocol.send_success(*channel);
+                                        f_protocol
+                                            .send(messages::success(channel).unwrap())
+                                            .unwrap();
                                         return;
                                     }
                                     Err(e) => {
-                                        f_protocol.send_failure(*channel, &e);
+                                        f_protocol
+                                            .send(messages::failure(channel, &e).unwrap())
+                                            .unwrap();
                                         break;
                                     }
                                 }
@@ -58,7 +72,9 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                     }
                 };
                 if let Some(msg) = message.clone() {
-                    let (_, state) = f_protocol.on_message(msg, &state, None).unwrap();
+                    if let Ok(new_state) = f_protocol.on_message(msg, state.clone()) {
+                        state = new_state;
+                    }
                 }
             }
         });

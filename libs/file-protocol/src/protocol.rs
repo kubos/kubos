@@ -19,23 +19,16 @@ use super::parsers;
 use super::storage;
 use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
-use serde_cbor::{ser, Value};
+use serde_cbor::Value;
 use std::cell::Cell;
 use std::net::UdpSocket;
 use std::str;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-#[derive(Eq, PartialEq)]
-pub enum Role {
-    Client,
-    Server,
-}
-
 pub struct Protocol {
     cbor_proto: CborProtocol,
     host: String,
     dest_port: Cell<u16>,
-    role: Role,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -50,7 +43,7 @@ pub enum State {
 }
 
 impl Protocol {
-    pub fn new(host: String, dest_port: u16, role: Role) -> Self {
+    pub fn new(host: String, dest_port: u16) -> Self {
         // Get a local UDP socket (Bind)
         let c_protocol = CborProtocol::new(format!("{}:0", host));
 
@@ -60,16 +53,14 @@ impl Protocol {
             // Remote IP?
             host,
             dest_port: Cell::new(dest_port),
-            role,
         }
     }
 
-    pub fn new_from_socket(socket: UdpSocket, host: String, dest_port: u16, role: Role) -> Self {
+    pub fn new_from_socket(socket: UdpSocket, host: String, dest_port: u16) -> Self {
         Protocol {
             cbor_proto: CborProtocol::new_from_socket(socket),
             host,
             dest_port: Cell::new(dest_port),
-            role,
         }
     }
 
@@ -115,50 +106,6 @@ impl Protocol {
         Ok(())
     }
 
-    // // Figure out if/what chunks are missing and send the hash and info back to the remote addr
-    // // Q: This copies ACK/NAK. Should it replace them? Or use them?
-    // pub fn sync_and_send(&self, hash: &str, num_chunks: Option<u32>) -> Result<(), String> {
-    //     // TODO: Create some way to break out of this loop if we never receive all the chunks
-    //     loop {
-    //         let (result, _chunks) = storage::local_sync(hash, num_chunks)?;
-
-    //         self.send(messages::ack_or_nak(hash, num_chunks).unwrap())
-    //             .unwrap();
-
-    //         if result == true {
-    //             // We've received all the chunks we were expecting. Time to go home.
-    //             break;
-    //         }
-
-    //         // Try to receive the missing chunks
-    //         loop {
-    //             // Listen on UDP port
-    //             // TODO: Make timeout a config option
-    //             // TODO: Make timeout 'receive chunk' message-specific
-    //             match self.cbor_proto.recv_message_timeout(Duration::from_secs(1)) {
-    //                 // Parse the received message
-    //                 Ok(Some(message)) => match self.on_message(message, State::Holding, Some(hash))
-    //                 {
-    //                     Ok(_) => { /* TODO: Verify that we got a ReceiveChunk message? */ }
-    //                     Err(err) => eprintln!("Failed to parse message: {}", err),
-    //                 },
-    //                 Ok(None) => { /* TODO: Handle pause or resume messages? */ }
-    //                 Err(None) => {
-    //                     // We timed out of receiving a new chunk. Let's go see if we got everything
-    //                     break;
-    //                 }
-    //                 Err(Some(err)) => {
-    //                     // Something went wrong while we were receiving
-    //                     // Let's quit while we're ahead
-    //                     return Err(err);
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     Ok(())
-    // }
-
     pub fn local_export(
         &self,
         hash: &str,
@@ -195,32 +142,7 @@ impl Protocol {
         Ok(())
     }
 
-    pub fn send_success(&self, channel_id: u64) -> Result<(), String> {
-        info!("-> {{ {}, true }}", channel_id);
-        let vec = ser::to_vec_packed(&(channel_id, true)).unwrap();
-        self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port.get())
-            .unwrap();
-        Ok(())
-    }
-
-    pub fn send_failure(&self, channel_id: u64, error: &str) -> Result<(), String> {
-        info!("-> {{ {}, false, {} }}", channel_id, error);
-        let vec = ser::to_vec_packed(&(channel_id, false, error)).unwrap();
-        self.cbor_proto
-            .send_message(&vec, &self.host, self.dest_port.get())
-            .unwrap();
-        Ok(())
-    }
-
-    pub fn message_engine(
-        &self,
-        hash: Option<&str>,
-        timeout: Duration,
-        start_state: State,
-        pump: bool,
-    ) -> Result<Option<Message>, String> {
-        let mut last_message: Option<Message> = None;
+    pub fn message_engine(&self, timeout: Duration, start_state: State) -> Result<(), String> {
         let mut state = start_state.clone();
         loop {
             // Listen on UDP port
@@ -230,47 +152,40 @@ impl Protocol {
                     self.dest_port.set(peer.port());
                     message
                 }
-                _ => {
-                    match state.clone() {
-                        State::Receiving(channel_id, hash, path, mode) => {
-                            match self.local_export(&hash, &path, mode) {
-                                Ok(_) => {
-                                    self.send_success(channel_id).unwrap();
-                                    break;
-                                }
-                                Err(e) => {
-                                    self.send_failure(channel_id, &e).unwrap();
-                                    continue;
-                                }
+                _ => match state.clone() {
+                    State::Receiving(channel_id, hash, path, mode) => {
+                        match self.local_export(&hash, &path, mode) {
+                            Ok(_) => {
+                                self.send(messages::success(channel_id).unwrap())?;
+                                return Ok(());
+                            }
+                            Err(e) => {
+                                self.send(messages::failure(channel_id, &e).unwrap())?;
+                                continue;
                             }
                         }
-                        _ => continue,
                     }
-                }
+                    State::Done => {
+                        return Ok(());
+                    }
+                    _ => continue,
+                },
             };
-            
-            let (new_message, new_state) = self.on_message(message, &state.clone(), hash)?;
-            state = new_state;
-            match state {
-                State::Done => break,
-                _ => continue,
-            }
 
-            if !pump {
-                break;
+            if let Ok(new_state) = self.on_message(message, state.clone()) {
+                println!("on_msg {:?} -> {:?}", state, new_state);
+                state = new_state;
             }
+            match state.clone() {
+                State::Done => return Ok(()),
+                _ => continue,
+            };
         }
-        Ok(last_message)
     }
 
-    pub fn on_message(
-        &self,
-        message: Value,
-        state: &State,
-        hash: Option<&str>,
-    ) -> Result<(Option<Message>, State), String> {
+    pub fn on_message(&self, message: Value, state: State) -> Result<State, String> {
         let parsed_message = parsers::parse_message(message);
-        let mut new_state = State::Holding;
+        let new_state;
         match parsed_message.to_owned() {
             Ok(parsed_message) => {
                 match &parsed_message {
@@ -334,7 +249,7 @@ impl Protocol {
                     }
                     Message::SuccessReceive(channel_id) => {
                         info!("<- {{ {}, true }}", channel_id);
-                        new_state = state.clone();
+                        new_state = State::Done;
                     }
                     Message::SuccessTransmit(channel_id, hash, num_chunks, Some(mode)) => {
                         info!(
@@ -344,11 +259,15 @@ impl Protocol {
                         // TODO: handle channel_id mismatch
                         self.send(messages::ack_or_nak(&hash, Some(*num_chunks)).unwrap())
                             .unwrap();
-                        // new_state = State::Receiving;
-                        match state {
+                        match state.clone() {
                             State::StartReceive(path) => {
-                                new_state = State::Receiving(*channel_id, hash.to_string(), path.to_string(), Some(*mode));
-                            },
+                                new_state = State::Receiving(
+                                    *channel_id,
+                                    hash.to_string(),
+                                    path.to_string(),
+                                    Some(*mode),
+                                );
+                            }
                             _ => {
                                 new_state = state.clone();
                             }
@@ -363,39 +282,35 @@ impl Protocol {
                     }
                     Message::Failure(channel_id, error_message) => {
                         info!("<- {{ {}, false, {} }}", channel_id, error_message);
-                        new_state = state.clone();
                         return Err(format!(
                             "Transmission failure on channel {}. Error returned from server: {}",
                             channel_id, error_message
                         ));
                     }
                 }
-                Ok((Some(parsed_message), new_state))
+                Ok(new_state)
             }
             Err(e) => {
                 info!("<- what did we get?? {}", e);
-                match state {
+                match state.clone() {
                     State::Receiving(channel_id, hash, path, mode) => {
-                        match self.local_export(&hash, &path, *mode) {
+                        match self.local_export(&hash, &path, mode) {
                             Ok(_) => {
-                                self.send_success(*channel_id).unwrap();
-                                Ok((None, State::Done))
+                                self.send(messages::success(channel_id).unwrap())?;
+                                Ok(State::Done)
                             }
                             Err(e) => {
-                                self.send_failure(*channel_id, &e).unwrap();
-                                Ok((
-                                    None,
-                                    State::Receiving(
-                                        *channel_id,
-                                        hash.to_string(),
-                                        path.to_string(),
-                                        *mode,
-                                    ),
+                                self.send(messages::failure(channel_id, &e).unwrap())?;
+                                Ok(State::Receiving(
+                                    channel_id,
+                                    hash.to_string(),
+                                    path.to_string(),
+                                    mode,
                                 ))
                             }
                         }
                     }
-                    _ => Ok((None, State::Holding)),
+                    _ => Ok(State::Holding),
                 }
             }
         }
