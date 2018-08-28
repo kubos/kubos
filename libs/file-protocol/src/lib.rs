@@ -22,6 +22,7 @@ extern crate time;
 #[macro_use]
 extern crate log;
 
+use std::thread;
 use std::time::Duration;
 
 mod messages;
@@ -31,6 +32,7 @@ pub mod storage;
 
 pub use protocol::Protocol as FileProtocol;
 pub use protocol::Role;
+pub use protocol::State;
 
 const CHUNK_SIZE: usize = 4096;
 
@@ -60,10 +62,15 @@ pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), Str
     let (hash, num_chunks, mode) = storage::local_import(&source_path)?;
     // Tell our destination the hash and number of chunks to expect
     f_protocol.send(messages::sync(&hash, num_chunks).unwrap())?;
+    // TODO: Remove this sleep - see below
+    // There is currently a race condition where sync and export are both sent
+    // quickly and the server processes them concurrently, but the folder
+    // structure from sync isn't ready when export starts
+    thread::sleep(Duration::from_millis(100));
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
     // Start the engine
-    f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
+    f_protocol.message_engine(Some(&hash), Duration::from_secs(2), State::Transmitting, true);
 
     Ok(())
 }
@@ -79,21 +86,24 @@ pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), S
     // Send our file request to the remote addr and get the returned data
     f_protocol.send_import(source_path)?;
 
+    f_protocol.message_engine(None, Duration::from_secs(2), State::StartReceive(target_path.to_string()), true);
+    Ok(())
+
     // Check the number of chunks we need to receive and then receive them
     // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
-    match f_protocol.message_engine(None, Duration::from_secs(1), false) {
-        Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
-            f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true);
-            // Save received data to the requested path
-            // Need to check the output of export and retry if needed
-            storage::local_export(&hash, target_path, mode)?;
-            return Ok(());
-        }
-        Ok(msg) => {
-            return Err(format!("Wrong first message found! {:?}", msg));
-        }
-        Err(msg) => {
-            return Err(format!("Error message found! {:?}", msg));
-        }
-    }
+    // match f_protocol.message_engine(None, Duration::from_secs(1), false) {
+    //     Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
+    //         f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true);
+    //         // Save received data to the requested path
+    //         // Need to check the output of export and retry if needed
+    //         storage::local_export(&hash, target_path, mode)?;
+    //         return Ok(());
+    //     }
+    //     Ok(msg) => {
+    //         return Err(format!("Wrong first message found! {:?}", msg));
+    //     }
+    //     Err(msg) => {
+    //         return Err(format!("Error message found! {:?}", msg));
+    //     }
+    // }
 }
