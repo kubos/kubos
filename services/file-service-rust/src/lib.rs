@@ -25,8 +25,11 @@ use std::thread;
 
 use file_protocol::{messages, FileProtocol, State};
 
-// We need this in this lib.rs file so we can build integration tests
+// How many times do we read no messages
+// while holding before killing the thread
+const HOLD_TIMEOUT: u16 = 5;
 
+// We need this in this lib.rs file so we can build integration tests
 pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
     let c_protocol = cbor_protocol::Protocol::new(config.hosturl());
 
@@ -34,7 +37,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         let (source, first_message) = c_protocol.recv_message_peer()?;
 
         thread::spawn(move || {
-            let mut state = State::Holding;
+            let mut state = State::Holding { count: 0 };
 
             let f_protocol = FileProtocol::new(String::from("127.0.0.1"), source.port());
 
@@ -44,9 +47,14 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                 }
             }
             loop {
-                let message = match f_protocol.recv(None) {
-                    Ok(message) => (message),
-                    Err(_e) => {
+                match f_protocol.recv(None) {
+                    Ok(Some(message)) => {
+                        if let Ok(new_state) = f_protocol.on_message(message.clone(), state.clone())
+                        {
+                            state = new_state;
+                        }
+                    }
+                    _ => {
                         // Probably should check the type of error...
                         // For now we'll assume its just no msg received
                         match state.clone() {
@@ -66,17 +74,20 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                                     f_protocol
                                         .send(messages::failure(channel_id, &e).unwrap())
                                         .unwrap();
-                                    break;
                                 }
                             },
+                            State::Done => {
+                                return;
+                            }
+                            State::Holding { count } => {
+                                if count > HOLD_TIMEOUT {
+                                    return;
+                                } else {
+                                    state = State::Holding { count: count + 1 };
+                                }
+                            }
                             _ => {}
                         }
-                        continue;
-                    }
-                };
-                if let Some(msg) = message.clone() {
-                    if let Ok(new_state) = f_protocol.on_message(msg, state.clone()) {
-                        state = new_state;
                     }
                 }
             }

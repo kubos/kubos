@@ -34,7 +34,9 @@ pub struct Protocol {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum State {
     // Neutral state, neither transmitting nor receiving
-    Holding,
+    Holding {
+        count: u16,
+    },
     // Receiving a file has been requested
     StartReceive {
         path: String,
@@ -329,7 +331,7 @@ impl Protocol {
                             })
                         }
                     },
-                    _ => Ok(State::Holding),
+                    _ => Ok(State::Holding { count: 0 }),
                 }
             }
         }
