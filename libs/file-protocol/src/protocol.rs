@@ -33,12 +33,22 @@ pub struct Protocol {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum State {
-    StartReceive(String),
-    Receiving(u64, String, String, Option<u32>),
-    ReceivingDone,
-    Transmitting,
-    TransmittingDone,
+    // Neutral state, neither transmitting nor receiving
     Holding,
+    // Receiving a file has been requested
+    StartReceive {
+        path: String,
+    },
+    // Currently receiving a file
+    Receiving {
+        channel_id: u64,
+        hash: String,
+        path: String,
+        mode: Option<u32>,
+    },
+    // Currenty transmitting a file
+    Transmitting,
+    // Finished transmitting/receiving, thread or process may end
     Done,
 }
 
@@ -153,18 +163,21 @@ impl Protocol {
                     message
                 }
                 _ => match state.clone() {
-                    State::Receiving(channel_id, hash, path, mode) => {
-                        match self.local_export(&hash, &path, mode) {
-                            Ok(_) => {
-                                self.send(messages::success(channel_id).unwrap())?;
-                                return Ok(());
-                            }
-                            Err(e) => {
-                                self.send(messages::failure(channel_id, &e).unwrap())?;
-                                continue;
-                            }
+                    State::Receiving {
+                        channel_id,
+                        hash,
+                        path,
+                        mode,
+                    } => match self.local_export(&hash, &path, mode) {
+                        Ok(_) => {
+                            self.send(messages::success(channel_id).unwrap())?;
+                            return Ok(());
                         }
-                    }
+                        Err(e) => {
+                            self.send(messages::failure(channel_id, &e).unwrap())?;
+                            continue;
+                        }
+                    },
                     State::Done => {
                         return Ok(());
                     }
@@ -173,7 +186,6 @@ impl Protocol {
             };
 
             if let Ok(new_state) = self.on_message(message, state.clone()) {
-                println!("on_msg {:?} -> {:?}", state, new_state);
                 state = new_state;
             }
             match state.clone() {
@@ -229,17 +241,21 @@ impl Protocol {
                         // TODO: handle channel_id mismatch
                         self.send(messages::ack_or_nak(&hash, None).unwrap())
                             .unwrap();
-                        new_state = State::Receiving(
-                            *channel_id,
-                            hash.to_string(),
-                            path.to_string(),
-                            Some(*mode),
-                        );
+                        new_state = State::Receiving {
+                            channel_id: *channel_id,
+                            hash: hash.to_string(),
+                            path: path.to_string(),
+                            mode: Some(*mode),
+                        };
                     }
                     Message::ReqReceive(channel_id, hash, path, None) => {
                         info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
-                        new_state =
-                            State::Receiving(*channel_id, hash.to_string(), path.to_string(), None);
+                        new_state = State::Receiving {
+                            channel_id: *channel_id,
+                            hash: hash.to_string(),
+                            path: path.to_string(),
+                            mode: None,
+                        };
                     }
                     Message::ReqTransmit(channel_id, path) => {
                         info!("<- {{ {}, import, {} }}", channel_id, path);
@@ -260,13 +276,13 @@ impl Protocol {
                         self.send(messages::ack_or_nak(&hash, Some(*num_chunks)).unwrap())
                             .unwrap();
                         match state.clone() {
-                            State::StartReceive(path) => {
-                                new_state = State::Receiving(
-                                    *channel_id,
-                                    hash.to_string(),
-                                    path.to_string(),
-                                    Some(*mode),
-                                );
+                            State::StartReceive { path } => {
+                                new_state = State::Receiving {
+                                    channel_id: *channel_id,
+                                    hash: hash.to_string(),
+                                    path: path.to_string(),
+                                    mode: Some(*mode),
+                                };
                             }
                             _ => {
                                 new_state = state.clone();
@@ -293,23 +309,26 @@ impl Protocol {
             Err(e) => {
                 info!("<- what did we get?? {}", e);
                 match state.clone() {
-                    State::Receiving(channel_id, hash, path, mode) => {
-                        match self.local_export(&hash, &path, mode) {
-                            Ok(_) => {
-                                self.send(messages::success(channel_id).unwrap())?;
-                                Ok(State::Done)
-                            }
-                            Err(e) => {
-                                self.send(messages::failure(channel_id, &e).unwrap())?;
-                                Ok(State::Receiving(
-                                    channel_id,
-                                    hash.to_string(),
-                                    path.to_string(),
-                                    mode,
-                                ))
-                            }
+                    State::Receiving {
+                        channel_id,
+                        hash,
+                        path,
+                        mode,
+                    } => match self.local_export(&hash, &path, mode) {
+                        Ok(_) => {
+                            self.send(messages::success(channel_id).unwrap())?;
+                            Ok(State::Done)
                         }
-                    }
+                        Err(e) => {
+                            self.send(messages::failure(channel_id, &e).unwrap())?;
+                            Ok(State::Receiving {
+                                channel_id,
+                                hash: hash.to_string(),
+                                path: path.to_string(),
+                                mode,
+                            })
+                        }
+                    },
                     _ => Ok(State::Holding),
                 }
             }

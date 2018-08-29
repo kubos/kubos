@@ -85,6 +85,8 @@ pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), S
 
     Ok(f_protocol.message_engine(
         Duration::from_secs(2),
-        State::StartReceive(target_path.to_string()),
+        State::StartReceive {
+            path: target_path.to_string(),
+        },
     )?)
 }

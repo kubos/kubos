@@ -50,22 +50,25 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                         // Probably should check the type of error...
                         // For now we'll assume its just no msg received
                         match state.clone() {
-                            State::Receiving(channel, hash, path, mode) => {
-                                match f_protocol.local_export(&hash, &path, mode) {
-                                    Ok(_) => {
-                                        f_protocol
-                                            .send(messages::success(channel).unwrap())
-                                            .unwrap();
-                                        return;
-                                    }
-                                    Err(e) => {
-                                        f_protocol
-                                            .send(messages::failure(channel, &e).unwrap())
-                                            .unwrap();
-                                        break;
-                                    }
+                            State::Receiving {
+                                channel_id,
+                                hash,
+                                path,
+                                mode,
+                            } => match f_protocol.local_export(&hash, &path, mode) {
+                                Ok(_) => {
+                                    f_protocol
+                                        .send(messages::success(channel_id).unwrap())
+                                        .unwrap();
+                                    return;
                                 }
-                            }
+                                Err(e) => {
+                                    f_protocol
+                                        .send(messages::failure(channel_id, &e).unwrap())
+                                        .unwrap();
+                                    break;
+                                }
+                            },
                             _ => {}
                         }
                         continue;
