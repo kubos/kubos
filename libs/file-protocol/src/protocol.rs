@@ -176,11 +176,11 @@ impl Protocol {
                         mode,
                     } => match self.finalize_file(&hash, &path, mode) {
                         Ok(_) => {
-                            self.send(messages::success(channel_id).unwrap())?;
+                            //self.send(messages::success(channel_id).unwrap())?;
                             return Ok(());
                         }
                         Err(e) => {
-                            self.send(messages::failure(channel_id, &e).unwrap())?;
+                            //self.send(messages::failure(channel_id, &e).unwrap())?;
                             continue;
                         }
                     },
@@ -266,9 +266,30 @@ impl Protocol {
                     }
                     Message::ReqTransmit(channel_id, path) => {
                         info!("<- {{ {}, import, {} }}", channel_id, path);
-                        self.send(messages::import_result(*channel_id, &path).unwrap())
-                            .unwrap();
-                        new_state = State::Transmitting;
+                        // Set up the requested file for transmission
+                        match storage::initialize_file(path) {
+                            Ok((hash, num_chunks, mode)) => {
+                                // It worked, let the requester know we're ready to send
+                                self.send(
+                                    messages::import_setup_success(
+                                        *channel_id,
+                                        &hash,
+                                        num_chunks,
+                                        mode,
+                                    ).unwrap(),
+                                ).unwrap();
+
+                                new_state = State::Transmitting;
+                            }
+                            Err(error) => {
+                                // It failed. Let the requester know that we can't transmit
+                                // the file they want.
+                                self.send(messages::failure(*channel_id, &error).unwrap())
+                                    .unwrap();
+
+                                new_state = State::Done;
+                            }
+                        }
                     }
                     Message::SuccessReceive(channel_id) => {
                         info!("<- {{ {}, true }}", channel_id);
@@ -315,29 +336,7 @@ impl Protocol {
             }
             Err(e) => {
                 info!("<- what did we get?? {}", e);
-                match state.clone() {
-                    State::Receiving {
-                        channel_id,
-                        hash,
-                        path,
-                        mode,
-                    } => match self.finalize_file(&hash, &path, mode) {
-                        Ok(_) => {
-                            self.send(messages::success(channel_id).unwrap())?;
-                            Ok(State::Done)
-                        }
-                        Err(e) => {
-                            self.send(messages::failure(channel_id, &e).unwrap())?;
-                            Ok(State::Receiving {
-                                channel_id,
-                                hash: hash.to_string(),
-                                path: path.to_string(),
-                                mode,
-                            })
-                        }
-                    },
-                    _ => Ok(State::Holding { count: 0 }),
-                }
+                Ok(State::Holding { count: 0 })
             }
         }
     }
