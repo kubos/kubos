@@ -252,9 +252,12 @@ pub fn initialize_file(source_path: &str) -> Result<(String, u32, u32), String> 
     }
     store_meta(&hash, index).unwrap();
 
-    let meta = fs::metadata(source_path).unwrap();
-
-    Ok((hash, index, meta.mode()))
+    if let Ok(meta) = fs::metadata(source_path) {
+        Ok((hash, index, meta.mode()))
+    } else {
+        // default mode to 0o644
+        Ok((hash, index, 0x1a4))
+    }
 }
 
 // Copy temporary data chunks into permanent file?

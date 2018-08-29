@@ -26,15 +26,16 @@ extern crate serde;
 extern crate serde_cbor;
 extern crate time;
 
+use std::thread;
 use std::time::Duration;
 
-mod messages;
+pub mod messages;
 mod parsers;
 pub mod protocol;
 pub mod storage;
 
 pub use protocol::Protocol as FileProtocol;
-pub use protocol::Role;
+pub use protocol::State;
 
 const CHUNK_SIZE: usize = 4096;
 
@@ -64,8 +65,8 @@ pub enum Message {
 }
 
 /// Upload a file to the target server location
-pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
+pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
+    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port);
 
     info!(
         "Uploading local:{} to remote:{}",
@@ -77,20 +78,21 @@ pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String,
 
     // Q: Why not combine this and export into one message? it's really only a single extra parameter
     // Tell our destination the hash and number of chunks to expect
-    f_protocol.send(messages::metadata(&hash, num_chunks).unwrap())?;
-
+    f_protocol.send(messages::sync(&hash, num_chunks).unwrap())?;
+    // TODO: Remove this sleep - see below
+    // There is currently a race condition where sync and export are both sent
+    // quickly and the server processes them concurrently, but the folder
+    // structure from sync isn't ready when export starts
+    thread::sleep(Duration::from_millis(100));
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
-
-    // Start the engine to send the file data chunks
-    f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
-
-    Ok(hash)
+    // Start the engine
+    Ok(f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?)
 }
 
 /// Download a file from the target server location
-pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port, Role::Client);
+pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
+    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port);
 
     info!(
         "Downloading remote: {} to local: {}",
@@ -101,24 +103,10 @@ pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<Strin
     // going to be able to send it
     f_protocol.send_import(source_path)?;
 
-    // Check the number of chunks we need to receive and then receive them
-    // f_protocol.sync_and_send(&hash, Some(num_chunks))?;
-    match f_protocol.message_engine(None, Duration::from_secs(1), false) {
-        Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
-            info!("file has been transmitted?");
-            f_protocol.message_engine(Some(&hash), Duration::from_secs(2), true)?;
-
-            info!("done recv");
-
-            // Save received data to the requested path
-            storage::finalize_file(&hash, target_path, mode)?;
-            return Ok(hash);
-        }
-        Ok(msg) => {
-            return Err(format!("Wrong first message found! {:?}", msg));
-        }
-        Err(msg) => {
-            return Err(format!("Error message found! {:?}", msg));
-        }
-    }
+    Ok(f_protocol.message_engine(
+        Duration::from_secs(2),
+        State::StartReceive {
+            path: target_path.to_string(),
+        },
+    )?)
 }
