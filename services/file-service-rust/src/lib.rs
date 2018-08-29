@@ -43,14 +43,15 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
             let f_protocol = FileProtocol::new(String::from("127.0.0.1"), source.port());
 
             if let Some(msg) = first_message {
-                if let Ok(new_state) = f_protocol.on_message(msg, state.clone()) {
+                if let Ok(new_state) = f_protocol.process_message(msg, state.clone()) {
                     state = new_state;
                 }
             }
             loop {
                 match f_protocol.recv(None) {
                     Ok(Some(message)) => {
-                        if let Ok(new_state) = f_protocol.on_message(message.clone(), state.clone())
+                        if let Ok(new_state) =
+                            f_protocol.process_message(message.clone(), state.clone())
                         {
                             state = new_state;
                         }
@@ -64,7 +65,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                                 hash,
                                 path,
                                 mode,
-                            } => match f_protocol.local_export(&hash, &path, mode) {
+                            } => match f_protocol.finalize_file(&hash, &path, mode) {
                                 Ok(_) => {
                                     f_protocol
                                         .send(messages::success(channel_id).unwrap())

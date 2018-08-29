@@ -6,7 +6,7 @@ extern crate rand;
 extern crate tempfile;
 
 use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::{storage, FileProtocol, Role};
+use file_protocol::{storage, FileProtocol};
 use file_service_rust::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
@@ -40,29 +40,12 @@ macro_rules! service_new {
     }};
 }
 
-// fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
-//     let f_protocol = FileProtocol::new(String::from("127.0.0.1"), port, Role::Client);
-
-//     println!(
-//         "Uploading local:{} to remote:{}",
-//         &source_path, &target_path
-//     );
-//     // Copy file to upload to temp storage. Calculate the hash and chunk info
-//     // Q: What's `mode` for? `initialize_file` always returns 0. Looks like it should be file permissions
-//     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
-//     // Tell our destination the hash and number of chunks to expect
-//     f_protocol.send_sync(&hash, num_chunks)?;
-//     // Send the actual file
-//     f_protocol.send_export(&hash, &target_path, mode)?;
-//     Ok(hash.to_owned())
-// }
-
 fn create_test_file(name: &str, contents: &[u8]) {
     let mut file = File::create(name).unwrap();
     file.write_all(contents).unwrap();
 }
 
-// upload single-chunk file from scratch
+// Upload single-chunk file from scratch
 #[test]
 fn upload_single() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -96,7 +79,7 @@ fn upload_single() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload multi-chunk file from scratch
+// Upload multi-chunk file from scratch
 #[test]
 fn upload_multi_clean() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -130,7 +113,7 @@ fn upload_multi_clean() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload multi-chunk file which we already have 1 chunk for
+// Upload multi-chunk file which we already have 1 chunk for
 #[test]
 fn upload_multi_resume() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -175,7 +158,7 @@ fn upload_multi_resume() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload multi-chunk file which we already have all chunks for
+// Upload multi-chunk file which we already have all chunks for
 #[test]
 fn upload_multi_complete() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -217,7 +200,7 @@ fn upload_multi_complete() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload. Create hash mismatch.
+// Upload. Create hash mismatch.
 #[test]
 fn upload_bad_hash() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
