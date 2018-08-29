@@ -78,7 +78,7 @@ pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), Str
 
     // Q: Why not combine this and export into one message? it's really only a single extra parameter
     // Tell our destination the hash and number of chunks to expect
-    f_protocol.send(messages::sync(&hash, num_chunks).unwrap())?;
+    f_protocol.send(messages::metadata(&hash, num_chunks).unwrap())?;
     // TODO: Remove this sleep - see below
     // There is currently a race condition where sync and export are both sent
     // quickly and the server processes them concurrently, but the folder
