@@ -67,15 +67,15 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                                 mode,
                             } => match f_protocol.finalize_file(&hash, &path, mode) {
                                 Ok(_) => {
-                                    f_protocol
-                                        .send(messages::success(channel_id).unwrap())
-                                        .unwrap();
+                                    //f_protocol
+                                    //    .send(messages::success(channel_id).unwrap())
+                                    //    .unwrap();
                                     return;
                                 }
                                 Err(e) => {
-                                    f_protocol
-                                        .send(messages::failure(channel_id, &e).unwrap())
-                                        .unwrap();
+                                    //f_protocol
+                                    //    .send(messages::failure(channel_id, &e).unwrap())
+                                    //    .unwrap();
                                 }
                             },
                             State::Done => {

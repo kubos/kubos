@@ -96,7 +96,7 @@ pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String,
 }
 
 /// Download a file from the target server location
-pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
+pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
     let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port);
 
     info!(
@@ -116,5 +116,5 @@ pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), S
         },
     )?;
 
-    Ok(())
+    Ok("TODO: Will be the hash at some point".to_owned())
 }
