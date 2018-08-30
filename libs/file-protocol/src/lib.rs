@@ -22,9 +22,6 @@ extern crate time;
 #[macro_use]
 extern crate log;
 
-use std::thread;
-use std::time::Duration;
-
 pub mod messages;
 mod parsers;
 pub mod protocol;
@@ -47,46 +44,4 @@ pub enum Message {
     SuccessReceive(u64),
     SuccessTransmit(u64, String, u32, Option<u32>),
     Failure(u64, String),
-}
-
-pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port);
-
-    info!(
-        "Uploading local:{} to remote:{}",
-        &source_path, &target_path
-    );
-    // Copy file to upload to temp storage. Calculate the hash and chunk info
-    // Q: What's `mode` for? `local_import` always returns 0. Looks like it should be file permissions
-    let (hash, num_chunks, mode) = storage::local_import(&source_path)?;
-    // Tell our destination the hash and number of chunks to expect
-    f_protocol.send(messages::sync(&hash, num_chunks).unwrap())?;
-    // TODO: Remove this sleep - see below
-    // There is currently a race condition where sync and export are both sent
-    // quickly and the server processes them concurrently, but the folder
-    // structure from sync isn't ready when export starts
-    thread::sleep(Duration::from_millis(100));
-    // Send export command for file
-    f_protocol.send_export(&hash, &target_path, mode)?;
-    // Start the engine
-    Ok(f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?)
-}
-
-pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port);
-
-    info!(
-        "Downloading remote: {} to local: {}",
-        source_path, target_path
-    );
-
-    // Send our file request to the remote addr and get the returned data
-    f_protocol.send_import(source_path)?;
-
-    Ok(f_protocol.message_engine(
-        Duration::from_secs(2),
-        State::StartReceive {
-            path: target_path.to_string(),
-        },
-    )?)
 }

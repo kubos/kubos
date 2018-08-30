@@ -257,8 +257,7 @@ pub fn local_import(source_path: &str) -> Result<(String, u32, u32), String> {
     if let Ok(meta) = fs::metadata(source_path) {
         Ok((hash, index, meta.mode()))
     } else {
-        // default mode to 0o644
-        Ok((hash, index, 0x1a4))
+        Ok((hash, index, 0o644))
     }
 }
 

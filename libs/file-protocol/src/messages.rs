@@ -85,33 +85,23 @@ pub fn sync(hash: &str, num_chunks: u32) -> Result<Vec<u8>, Error> {
     Ok(ser::to_vec_packed(&(hash, num_chunks))?)
 }
 
-// Generate ACK or NAK depending on state of
-// received file
-pub fn ack_or_nak(hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, Error> {
-    let (result, chunks) = storage::local_sync(hash, num_chunks).unwrap();
+// Send an acknowledge to the remote address
+pub fn ack(hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, Error> {
+    info!("-> {{ {}, true, {:?} }}", hash, num_chunks);
+    Ok(ser::to_vec_packed(&(hash, true, num_chunks))?)
+}
 
-    info!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
-    let mut vec = ser::to_vec_packed(&(hash, result)).unwrap();
-    for chunk in chunks.iter() {
+// Sends a nak with ranges of missing chunks
+pub fn nak(hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8>, Error> {
+    info!("-> {{ {}, false, {:?} }}", hash, missing_chunks);
+    let mut vec = ser::to_vec_packed(&(hash, false))?;
+    for chunk in missing_chunks.iter() {
         // Add the chunk number to the end of the CBOR array
-        vec.append(&mut ser::to_vec_packed(&chunk).unwrap());
+        vec.append(&mut ser::to_vec_packed(&chunk)?);
         // Update length of CBOR array
         vec[0] += 1;
     }
     Ok(vec)
-}
-
-// Send an acknowledge to the remote address
-fn ack(hash: &str, num_chunks: u32) -> Result<Vec<u8>, Error> {
-    info!("-> {{ {}, true, {} }}", hash, num_chunks);
-    Ok(ser::to_vec_packed(&(hash, true, num_chunks))?)
-}
-
-// Send a NAK to the remote address
-// TODO: should include missing chunks
-fn nak(hash: &str) -> Result<Vec<u8>, Error> {
-    info!("-> {{ {}, false}}", hash);
-    Ok(ser::to_vec_packed(&(hash, false))?)
 }
 
 // Create chunk message
