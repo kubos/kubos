@@ -21,15 +21,31 @@ extern crate kubos_system;
 #[macro_use]
 extern crate log;
 extern crate simplelog;
+use std::fs::File;
 
 use file_service_rust::*;
 use kubos_system::Config as ServiceConfig;
 use simplelog::*;
 
 fn main() {
-    CombinedLogger::init(vec![
-        TermLogger::new(LevelFilter::Info, Config::default()).unwrap(),
-    ]).unwrap();
+    let mut loggers: Vec<Box<SharedLogger>> = vec![];
+    if let Some(l) = TermLogger::new(LevelFilter::Info, Config::default()) {
+        loggers.push(l);
+    }
+
+    // This will panic if the log file fails to open
+    // But I think that is correct
+    loggers.push(WriteLogger::new(
+        LevelFilter::Info,
+        Config::default(),
+        // Should this log path come from the config file?
+        File::create("/var/log/kubos/file-transfer-service.log").unwrap(),
+    ));
+
+    match CombinedLogger::init(loggers) {
+        Err(e) => panic!("Logging failed to start {:?}", e),
+        _ => {}
+    }
 
     let config = ServiceConfig::new("file-transfer-service");
 

@@ -27,6 +27,10 @@ use std::net::UdpSocket;
 use std::str;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+// How many times do we read no messages
+// while holding before killing the thread
+const HOLD_TIMEOUT: u16 = 5;
+
 /// File Protocol Information Structure
 pub struct Protocol {
     cbor_proto: CborProtocol,
@@ -162,6 +166,7 @@ impl Protocol {
         let mut state = start_state.clone();
         loop {
             // Listen on UDP port
+            println!("recv : {:?}", state);
             let message = match self.cbor_proto.recv_message_peer_timeout(timeout) {
                 Ok((peer, Some(message))) => {
                     // Update our response port
@@ -180,12 +185,22 @@ impl Protocol {
                             return Ok(());
                         }
                         Err(e) => {
-                            //self.send(messages::failure(channel_id, &e).unwrap())?;
+                            self.send(messages::failure(channel_id, &e).unwrap())?;
+                            // We need a way to error out here...
+                            state = State::Holding { count: 0 };
                             continue;
                         }
                     },
                     State::Done => {
                         return Ok(());
+                    }
+                    State::Holding { count } => {
+                        if count > HOLD_TIMEOUT {
+                            return Ok(());
+                        } else {
+                            state = State::Holding { count: count + 1 };
+                            continue;
+                        }
                     }
                     _ => continue,
                 },
@@ -246,14 +261,22 @@ impl Protocol {
                         // Note: Won't return until we've received all of them.
                         // (so could potentially never return)
                         // TODO: handle channel_id mismatch
-                        self.send(messages::file_status(&hash, None).unwrap())
-                            .unwrap();
-                        new_state = State::Receiving {
-                            channel_id: *channel_id,
-                            hash: hash.to_string(),
-                            path: path.to_string(),
-                            mode: Some(*mode),
-                        };
+                        match storage::validate_file(hash, None) {
+                            Ok((true, _)) => {
+                                self.send(messages::ack(&hash, None).unwrap()).unwrap();
+                                new_state = State::Done;
+                            }
+                            Ok((false, chunks)) => {
+                                self.send(messages::nak(&hash, &chunks).unwrap()).unwrap();
+                                new_state = State::Receiving {
+                                    channel_id: *channel_id,
+                                    hash: hash.to_string(),
+                                    path: path.to_string(),
+                                    mode: Some(*mode),
+                                };
+                            }
+                            Err(e) => return Err(e),
+                        }
                     }
                     Message::ReqReceive(channel_id, hash, path, None) => {
                         info!("<- {{ {}, export, {}, {} }}", channel_id, hash, path);
@@ -301,28 +324,49 @@ impl Protocol {
                             channel_id, hash, num_chunks, mode
                         );
                         // TODO: handle channel_id mismatch
-                        self.send(messages::file_status(&hash, Some(*num_chunks)).unwrap())
-                            .unwrap();
-                        match state.clone() {
-                            State::StartReceive { path } => {
-                                new_state = State::Receiving {
-                                    channel_id: *channel_id,
-                                    hash: hash.to_string(),
-                                    path: path.to_string(),
-                                    mode: Some(*mode),
+                        match storage::validate_file(hash, Some(*num_chunks)) {
+                            Ok((true, _)) => {
+                                self.send(messages::ack(&hash, Some(*num_chunks)).unwrap())
+                                    .unwrap();
+                                new_state = State::Done;
+                            }
+                            Ok((false, chunks)) => {
+                                self.send(messages::nak(&hash, &chunks).unwrap()).unwrap();
+                                new_state = match state.clone() {
+                                    State::StartReceive { path } => State::Receiving {
+                                        channel_id: *channel_id,
+                                        hash: hash.to_string(),
+                                        path: path.to_string(),
+                                        mode: Some(*mode),
+                                    },
+                                    _ => state.clone(),
                                 };
                             }
-                            _ => {
-                                new_state = state.clone();
-                            }
+                            Err(e) => return Err(e),
                         }
                     }
                     Message::SuccessTransmit(channel_id, hash, num_chunks, None) => {
                         info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks);
-                        // TODO: handle channel_id mismatch
-                        self.send(messages::file_status(&hash, Some(*num_chunks)).unwrap())
-                            .unwrap();
-                        new_state = state.clone();
+                        match storage::validate_file(hash, Some(*num_chunks)) {
+                            Ok((true, _)) => {
+                                self.send(messages::ack(&hash, Some(*num_chunks)).unwrap())
+                                    .unwrap();
+                                new_state = State::Done;
+                            }
+                            Ok((false, chunks)) => {
+                                self.send(messages::nak(&hash, &chunks).unwrap()).unwrap();
+                                new_state = match state.clone() {
+                                    State::StartReceive { path } => State::Receiving {
+                                        channel_id: *channel_id,
+                                        hash: hash.to_string(),
+                                        path: path.to_string(),
+                                        mode: None,
+                                    },
+                                    _ => state.clone(),
+                                };
+                            }
+                            Err(e) => return Err(e),
+                        }
                     }
                     Message::Failure(channel_id, error_message) => {
                         info!("<- {{ {}, false, {} }}", channel_id, error_message);
@@ -336,7 +380,7 @@ impl Protocol {
             }
             Err(e) => {
                 info!("<- what did we get?? {}", e);
-                Ok(State::Holding { count: 0 })
+                Err(e)
             }
         }
     }

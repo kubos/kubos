@@ -26,9 +26,6 @@ extern crate serde;
 extern crate serde_cbor;
 extern crate time;
 
-use std::thread;
-use std::time::Duration;
-
 pub mod messages;
 mod parsers;
 pub mod protocol;
@@ -62,59 +59,4 @@ pub enum Message {
     SuccessTransmit(u64, String, u32, Option<u32>),
     /// (Server Only) The transmit or receive request has failed to be completed
     Failure(u64, String),
-}
-
-/// Upload a file to the target server location
-pub fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port);
-
-    info!(
-        "Uploading local:{} to remote:{}",
-        &source_path, &target_path
-    );
-
-    // Copy file to upload to temp storage. Calculate the hash and chunk info
-    let (hash, num_chunks, mode) = storage::initialize_file(&source_path)?;
-
-    // Q: Why not combine this and export into one message? it's really only a single extra parameter
-    // Tell our destination the hash and number of chunks to expect
-    f_protocol.send(messages::metadata(&hash, num_chunks).unwrap())?;
-
-    // TODO: Remove this sleep - see below
-    // There is currently a race condition where sync and export are both sent
-    // quickly and the server processes them concurrently, but the folder
-    // structure from sync isn't ready when export starts
-    thread::sleep(Duration::from_millis(100));
-
-    // Send export command for file
-    f_protocol.send_export(&hash, &target_path, mode)?;
-
-    // Start the engine
-    f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?;
-
-    Ok(hash)
-}
-
-/// Download a file from the target server location
-pub fn download(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(String::from("127.0.0.1"), port);
-
-    info!(
-        "Downloading remote: {} to local: {}",
-        source_path, target_path
-    );
-
-    // Send our file request to the remote addr and verify that it's
-    // going to be able to send it
-    f_protocol.send_import(source_path)?;
-
-    // Go receive the file chunks
-    f_protocol.message_engine(
-        Duration::from_secs(2),
-        State::StartReceive {
-            path: target_path.to_string(),
-        },
-    )?;
-
-    Ok("TODO: Will be the hash at some point".to_owned())
 }
