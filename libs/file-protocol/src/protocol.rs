@@ -23,6 +23,7 @@ use serde_cbor::Value;
 use std::cell::Cell;
 use std::net::UdpSocket;
 use std::str;
+use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 // How many times do we read no messages
@@ -153,6 +154,7 @@ impl Protocol {
                 let chunk = storage::load_chunk(hash, chunk_index).unwrap();
                 self.send(messages::chunk(hash, chunk_index, &chunk).unwrap())
                     .unwrap();
+                thread::sleep(Duration::from_millis(1));
             }
         }
         Ok(())
@@ -169,24 +171,36 @@ impl Protocol {
                     self.dest_port.set(peer.port());
                     message
                 }
+                // I don't think recv_message reports the difference between
+                // no message/timeout and an actual error
                 _ => match state.clone() {
                     State::Receiving {
                         channel_id,
                         hash,
                         path,
                         mode,
-                    } => match self.local_export(&hash, &path, mode) {
-                        Ok(_) => {
-                            self.send(messages::success(channel_id).unwrap())?;
-                            return Ok(());
+                    } => {
+                        match storage::local_sync(&hash, None) {
+                            Ok((true, _)) => {
+                                match self.local_export(&hash, &path, mode) {
+                                    Ok(_) => {
+                                        self.send(messages::success(channel_id).unwrap())?;
+                                        return Ok(());
+                                    }
+                                    Err(e) => {
+                                        self.send(messages::failure(channel_id, &e).unwrap())?;
+                                        // We need a way to error out here...
+                                        return Err(e);
+                                    }
+                                }
+                            }
+                            Ok((false, chunks)) => {
+                                self.send(messages::nak(&hash, &chunks).unwrap()).unwrap();
+                                continue;
+                            }
+                            Err(e) => return Err(e),
                         }
-                        Err(e) => {
-                            self.send(messages::failure(channel_id, &e).unwrap())?;
-                            // We need a way to error out here...
-                            state = State::Holding { count: 0 };
-                            continue;
-                        }
-                    },
+                    }
                     State::Done => {
                         return Ok(());
                     }
@@ -258,8 +272,17 @@ impl Protocol {
                         // TODO: handle channel_id mismatch
                         match storage::local_sync(hash, None) {
                             Ok((true, _)) => {
-                                self.send(messages::ack(&hash, None).unwrap()).unwrap();
-                                new_state = State::Done;
+                                match self.local_export(&hash, &path, Some(*mode)) {
+                                    Ok(_) => {
+                                        self.send(messages::success(*channel_id).unwrap())?;
+                                        new_state = State::Done;
+                                    }
+                                    Err(e) => {
+                                        self.send(messages::failure(*channel_id, &e).unwrap())?;
+                                        // We need a way to error out here...
+                                        return Err(e);
+                                    }
+                                }
                             }
                             Ok((false, chunks)) => {
                                 self.send(messages::nak(&hash, &chunks).unwrap()).unwrap();

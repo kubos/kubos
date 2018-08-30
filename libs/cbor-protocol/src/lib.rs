@@ -20,6 +20,10 @@ use serde_cbor::de;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Duration;
 
+// Was 4136
+// Somewhere we are sending packets bigger than this...
+const MSG_SIZE: usize = 4500;
+
 pub struct Protocol {
     pub handle: UdpSocket,
 }
@@ -38,9 +42,6 @@ impl Protocol {
     pub fn send_message(&self, message: &[u8], host: &str, port: u16) -> Result<(), String> {
         // TODO: If paused, just queue up the message
         let dest: SocketAddr = format!("{}:{}", host, port).parse().unwrap();
-        // let mut e = Encoder::from_memory();
-        //e.encode(&message).unwrap();
-        //let mut payload = e.as_bytes().to_vec();
         let mut payload = vec![];
         payload.extend(message);
         payload.insert(0, 0);
@@ -77,7 +78,7 @@ impl Protocol {
     }
 
     pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, String> {
-        let mut buf = [0; 4136];
+        let mut buf = [0; MSG_SIZE];
         let (size, _peer) = self
             .handle
             .recv_from(&mut buf)
@@ -91,7 +92,7 @@ impl Protocol {
     // Gets the peer attempting to send a message
     // But does *not* retrieve the message
     pub fn peek_peer(&self) -> Result<SocketAddr, String> {
-        let mut buf = [0; 4136];
+        let mut buf = [0; MSG_SIZE];
         let (size, peer) = self
             .handle
             .peek_from(&mut buf)
@@ -102,7 +103,7 @@ impl Protocol {
     }
 
     pub fn recv_message_peer(&self) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
-        let mut buf = [0; 4136];
+        let mut buf = [0; MSG_SIZE];
         let (size, peer) = self
             .handle
             .recv_from(&mut buf)
@@ -127,7 +128,7 @@ impl Protocol {
         // - 4096 - Max chunk size TODO: Make this configurable
         // -   32 - Hash string
         // -    8 - Chunk number
-        let mut buf = [0; 4136];
+        let mut buf = [0; MSG_SIZE];
         let result = self.handle.recv_from(&mut buf);
 
         // Reset the timeout for future calls
@@ -161,7 +162,7 @@ impl Protocol {
         // - 4096 - Max chunk size TODO: Make this configurable
         // -   32 - Hash string
         // -    8 - Chunk number
-        let mut buf = [0; 4136];
+        let mut buf = [0; MSG_SIZE];
         let result = self.handle.recv_from(&mut buf);
 
         // Reset the timeout for future calls

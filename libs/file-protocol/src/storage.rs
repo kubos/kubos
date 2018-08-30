@@ -26,6 +26,8 @@ use std::os::unix::fs::MetadataExt;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::str;
+use std::thread;
+use std::time::Duration;
 use time;
 
 const HASH_SIZE: usize = 16;
