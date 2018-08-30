@@ -6,7 +6,7 @@ extern crate rand;
 extern crate tempfile;
 
 use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::{storage, FileProtocol};
+use file_protocol::{messages, storage, FileProtocol, State};
 use file_service_rust::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
@@ -40,6 +40,31 @@ macro_rules! service_new {
     }};
 }
 
+fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String, String> {
+    let f_protocol = FileProtocol::new(String::from("127.0.0.1"), port);
+
+    println!(
+        "Uploading local:{} to remote:{}",
+        &source_path, &target_path
+    );
+    // Copy file to upload to temp storage. Calculate the hash and chunk info
+    // Q: What's `mode` for? `initialize_file` always returns 0. Looks like it should be file permissions
+    let (hash, num_chunks, mode) = storage::initialize_file(&source_path)?;
+    // Tell our destination the hash and number of chunks to expect
+    f_protocol.send(messages::metadata(&hash, num_chunks).unwrap())?;
+    // TODO: Remove this sleep - see below
+    // There is currently a race condition where sync and export are both sent
+    // quickly and the server processes them concurrently, but the folder
+    // structure from sync isn't ready when export starts
+    thread::sleep(Duration::from_millis(100));
+    // Send export command for file
+    f_protocol.send_export(&hash, &target_path, mode)?;
+    // Start the engine
+    f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?;
+
+    Ok(hash)
+}
+
 fn create_test_file(name: &str, contents: &[u8]) {
     let mut file = File::create(name).unwrap();
     file.write_all(contents).unwrap();
@@ -60,7 +85,7 @@ fn upload_single() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(service_port, &source, &dest);
+    let result = upload(service_port, &source, &dest);
 
     assert!(result.is_ok());
 
@@ -94,7 +119,7 @@ fn upload_multi_clean() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(service_port, &source, &dest);
+    let result = upload(service_port, &source, &dest);
 
     assert!(result.is_ok());
 
@@ -129,7 +154,7 @@ fn upload_multi_resume() {
     service_new!(service_port);
 
     // Go ahead and upload the whole file so we can manipulate the temporary directory
-    let result = file_protocol::upload(service_port, &source, &dest);
+    let result = upload(service_port, &source, &dest);
     assert!(result.is_ok());
     let hash = result.unwrap();
 
@@ -142,7 +167,7 @@ fn upload_multi_resume() {
     fs::remove_file(format!("storage/{}/0", hash)).unwrap();
 
     // Upload the file again
-    let result = file_protocol::upload(service_port, &source, &dest);
+    let result = upload(service_port, &source, &dest);
     assert!(result.is_ok());
 
     // TODO: Remove this sleep. We need it to let the service
@@ -174,7 +199,7 @@ fn upload_multi_complete() {
     service_new!(service_port);
 
     // Upload the file once (clean upload)
-    let result = file_protocol::upload(service_port, &source, &dest);
+    let result = upload(service_port, &source, &dest);
     assert!(result.is_ok());
     let hash = result.unwrap();
 
@@ -184,7 +209,7 @@ fn upload_multi_complete() {
     thread::sleep(Duration::new(2, 0));
 
     // Upload the file again
-    let result = file_protocol::upload(service_port, &source, &dest);
+    let result = upload(service_port, &source, &dest);
     assert!(result.is_ok());
 
     // TODO: Remove this sleep. We need it to let the service
@@ -216,7 +241,7 @@ fn upload_bad_hash() {
     service_new!(service_port);
 
     // Upload the file so we can mess with the temporary storage
-    let result = file_protocol::upload(service_port, &source, &dest);
+    let result = upload(service_port, &source, &dest);
     assert!(result.is_ok());
     let hash = result.unwrap();
 
@@ -229,7 +254,7 @@ fn upload_bad_hash() {
     fs::write(format!("storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
     // TODO: THIS SHOULD FAIL
-    let result = file_protocol::upload(service_port, &source, &dest);
+    let result = upload(service_port, &source, &dest);
     // TODO: Verify exact error message
     assert!(result.is_ok());
 
@@ -263,7 +288,7 @@ fn upload_multi_client() {
 
             create_test_file(&source, &contents);
 
-            let result = file_protocol::upload(service_port, &source, &dest);
+            let result = upload(service_port, &source, &dest);
             assert!(result.is_ok());
 
             let hash = result.unwrap();
