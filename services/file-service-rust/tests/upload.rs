@@ -60,7 +60,7 @@ fn upload(port: u16, source_path: &str, target_path: &str) -> Result<String, Str
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
     // Start the engine
-    f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?;
+    f_protocol.message_engine(Duration::from_secs(1), State::Transmitting)?;
 
     Ok(hash)
 }
@@ -91,11 +91,6 @@ fn upload_single() {
 
     let hash = result.unwrap();
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
-
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("storage/{}", hash)).unwrap();
 
@@ -125,11 +120,6 @@ fn upload_multi_clean() {
 
     let hash = result.unwrap();
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
-
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("storage/{}", hash)).unwrap();
 
@@ -158,22 +148,12 @@ fn upload_multi_resume() {
     assert!(result.is_ok());
     let hash = result.unwrap();
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
-
     // Remove a chunk so we can test the retry logic
     fs::remove_file(format!("storage/{}/0", hash)).unwrap();
 
     // Upload the file again
     let result = upload(service_port, &source, &dest);
     assert!(result.is_ok());
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("storage/{}", hash)).unwrap();
@@ -203,19 +183,9 @@ fn upload_multi_complete() {
     assert!(result.is_ok());
     let hash = result.unwrap();
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
-
     // Upload the file again
     let result = upload(service_port, &source, &dest);
     assert!(result.is_ok());
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("storage/{}", hash)).unwrap();
@@ -245,11 +215,6 @@ fn upload_bad_hash() {
     assert!(result.is_ok());
     let hash = result.unwrap();
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
-
     // Tweak the chunk contents so the future hash calculation will fail
     fs::write(format!("storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
@@ -257,11 +222,6 @@ fn upload_bad_hash() {
     let result = upload(service_port, &source, &dest);
     // TODO: Verify exact error message
     assert!(result.is_ok());
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("storage/{}", hash)).unwrap();

@@ -29,6 +29,7 @@ use file_protocol::{FileProtocol, State};
 // We need this in this lib.rs file so we can build integration tests
 pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
     let c_protocol = cbor_protocol::Protocol::new(config.hosturl());
+    let mut counter = 0;
 
     loop {
         let (source, first_message) = c_protocol.recv_message_peer()?;

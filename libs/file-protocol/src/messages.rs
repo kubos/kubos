@@ -102,13 +102,13 @@ pub fn import_setup_success(
 }
 
 // Create successful export request response message
-pub fn export_complete_success(channel_id: u64) -> Result<Vec<u8>, Error> {
+pub fn operation_success(channel_id: u64) -> Result<Vec<u8>, Error> {
     info!("-> {{ {}, true }}", channel_id);
     Ok(ser::to_vec_packed(&(channel_id, true))?)
 }
 
 // Create an operation failure response message
-pub fn failure(channel_id: u64, error: &str) -> Result<Vec<u8>, Error> {
+pub fn operation_failure(channel_id: u64, error: &str) -> Result<Vec<u8>, Error> {
     info!("-> {{ {}, false, {} }}", channel_id, error);
     Ok(ser::to_vec_packed(&(channel_id, false, error))?)
 }
