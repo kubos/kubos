@@ -9,7 +9,7 @@ use std::env;
 use std::path::Path;
 use std::time::Duration;
 use std::thread;
-use file_protocol::{FileProtocol, State, storage, messages};
+use file_protocol::{messages, storage, FileProtocol, State};
 
 fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
     let f_protocol = FileProtocol::new(String::from("127.0.0.1"), port);
@@ -19,10 +19,10 @@ fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), String>
         &source_path, &target_path
     );
     // Copy file to upload to temp storage. Calculate the hash and chunk info
-    // Q: What's `mode` for? `local_import` always returns 0. Looks like it should be file permissions
-    let (hash, num_chunks, mode) = storage::local_import(&source_path)?;
+    // Q: What's `mode` for? `initialize_file` always returns 0. Looks like it should be file permissions
+    let (hash, num_chunks, mode) = storage::initialize_file(&source_path)?;
     // Tell our destination the hash and number of chunks to expect
-    f_protocol.send(messages::sync(&hash, num_chunks).unwrap())?;
+    f_protocol.send(messages::metadata(&hash, num_chunks).unwrap())?;
     // TODO: Remove this sleep - see below
     // There is currently a race condition where sync and export are both sent
     // quickly and the server processes them concurrently, but the folder
@@ -52,7 +52,6 @@ fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), Strin
         },
     )?)
 }
-
 
 fn main() {
     CombinedLogger::init(vec![

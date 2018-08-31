@@ -13,4 +13,3 @@ kubos-system = { path = "../../apis/system-api" }
 [dev-dependencies]
 rand = "0.5.5"
 tempfile = "3"
-threadpool = "1.7.1"

@@ -30,6 +30,7 @@ use file_protocol::{FileProtocol, State};
 // We need this in this lib.rs file so we can build integration tests
 pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
     let c_protocol = cbor_protocol::Protocol::new(config.hosturl());
+    let mut counter = 0;
 
     loop {
         let (source, first_message) = c_protocol.recv_message_peer()?;
@@ -37,10 +38,11 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         thread::spawn(move || {
             let mut state = State::Holding { count: 0 };
 
+            // TODO: Fix hardcoded addr
             let f_protocol = FileProtocol::new(String::from("127.0.0.1"), source.port());
 
             if let Some(msg) = first_message {
-                if let Ok(new_state) = f_protocol.on_message(msg, state.clone()) {
+                if let Ok(new_state) = f_protocol.process_message(msg, state.clone()) {
                     state = new_state;
                 }
             }

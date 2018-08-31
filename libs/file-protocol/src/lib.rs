@@ -14,13 +14,17 @@
 // limitations under the License.
 //
 
+//! TODO: Crate documentation
+
+//#![deny(missing_docs)]
+
 extern crate blake2_rfc;
 extern crate cbor_protocol;
+#[macro_use]
+extern crate log;
 extern crate serde;
 extern crate serde_cbor;
 extern crate time;
-#[macro_use]
-extern crate log;
 
 pub mod messages;
 mod parsers;
@@ -32,16 +36,27 @@ pub use protocol::State;
 
 const CHUNK_SIZE: usize = 4096;
 
+/// File protocol message types
 #[derive(Debug, Clone)]
 pub enum Message {
+    /// TODO: Decide whether or not to keep this
     Sync(String),
-    SyncChunks(String, u32),
+    /// Receiver should prepare a new temporary storage folder with the specified metadata
+    Metadata(String, u32),
+    /// File data chunk message
     ReceiveChunk(String, u32, Vec<u8>),
+    /// Receiver has successfully gotten all data chunks of the requested file
     ACK(String),
+    /// Receiver is missing the specified file data chunks
     NAK(String, Option<Vec<(u32, u32)>>),
+    /// (Client Only) Message requesting the recipient to receive the specified file
     ReqReceive(u64, String, String, Option<u32>),
+    /// (Client Only) Message requesting the recipient to transmit the specified file
     ReqTransmit(u64, String),
+    /// (Server Only) Recipient has successfully processed a request to receive a file
     SuccessReceive(u64),
+    /// (Server Only) Recipient has successfully prepared to transmit a file
     SuccessTransmit(u64, String, u32, Option<u32>),
+    /// (Server Only) The transmit or receive request has failed to be completed
     Failure(u64, String),
 }
