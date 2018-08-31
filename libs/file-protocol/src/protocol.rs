@@ -33,7 +33,7 @@ use std::net::SocketAddr;
 // while holding before killing the thread
 const HOLD_TIMEOUT: u16 = 5;
 
-/// File Protocol Information Structure
+/// File Protocol information Structure
 pub struct Protocol {
     prefix: String,
     cbor_proto: CborProtocol,
@@ -109,7 +109,10 @@ impl Protocol {
     }
 
     pub fn recv(&self, timeout: Option<Duration>) -> Result<Option<Value>, Option<String>> {
-        self.cbor_proto.recv_message_timeout(Duration::from_secs(1))
+        match timeout {
+            Some(value) => self.cbor_proto.recv_message_timeout(value),
+            None => self.cbor_proto.recv_message(),
+        }
     }
 
     /// Request a file from a remote target
@@ -231,7 +234,12 @@ impl Protocol {
                         match storage::validate_file(&self.prefix, &hash, None) {
                             Ok((true, _)) => {
                                 self.send(messages::ack(&hash, None).unwrap()).unwrap();
-                                state = State::Done { hash: hash.clone() };
+                                state = State::ReceivingDone {
+                                    channel_id,
+                                    hash: hash.clone(),
+                                    path: path.clone(),
+                                    mode,
+                                };
                             }
                             Ok((false, chunks)) => {
                                 self.send(messages::nak(&hash, &chunks).unwrap()).unwrap();
@@ -333,7 +341,7 @@ impl Protocol {
                         new_state = state.clone();
                     }
                     Message::ReceiveChunk(hash, chunk_num, data) => {
-                        //info!("<- {{ {}, {}, chunk_data }}", hash, chunk_num);
+                        info!("<- {{ {}, {}, chunk_data }}", hash, chunk_num);
                         storage::store_chunk(&self.prefix, &hash, *chunk_num, &data).unwrap();
                         new_state = state.clone();
                     }
@@ -449,8 +457,16 @@ impl Protocol {
                             Ok((true, _)) => {
                                 self.send(messages::ack(&hash, Some(*num_chunks)).unwrap())
                                     .unwrap();
-                                new_state = State::Done {
-                                    hash: hash.to_owned(),
+                                new_state = match state.clone() {
+                                    State::StartReceive { path } => State::ReceivingDone {
+                                        channel_id: *channel_id,
+                                        hash: hash.to_string(),
+                                        path: path.to_string(),
+                                        mode: *mode,
+                                    },
+                                    _ => State::Done {
+                                        hash: hash.to_owned(),
+                                    },
                                 };
                             }
                             Ok((false, chunks)) => {

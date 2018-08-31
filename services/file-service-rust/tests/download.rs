@@ -73,12 +73,21 @@ fn download(
     // going to be able to send it
     f_protocol.send_import(source_path)?;
 
-    let hash = f_protocol.message_engine(
-        Duration::from_secs(2),
+    let reply = match f_protocol.recv(None) {
+        Ok(Some(message)) => message,
+        Ok(None) => return Err("Failed to import file".to_owned()),
+        Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
+        Err(None) => return Err("Failed to import file".to_owned()),
+    };
+
+    let state = f_protocol.process_message(
+        reply,
         State::StartReceive {
             path: target_path.to_string(),
         },
     )?;
+
+    let hash = f_protocol.message_engine(Duration::from_secs(2), state)?;
 
     Ok(hash)
 }
@@ -383,7 +392,7 @@ fn download_large() {
         &dest,
         Some("client".to_owned()),
     );
-    println!("Result: {:?}", result);
+
     assert!(result.is_ok());
 
     let hash = result.unwrap();

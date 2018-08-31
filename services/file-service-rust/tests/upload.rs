@@ -338,11 +338,6 @@ fn upload_multi_client() {
 
             let hash = result.unwrap();
 
-            // TODO: Remove this sleep. We need it to let the service
-            // finish its work. The upload logic needs to wait on
-            // the final ACK message before returning
-            thread::sleep(Duration::new(2, 0));
-
             // Cleanup the temporary files so that the test can be repeatable
             fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
             fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
