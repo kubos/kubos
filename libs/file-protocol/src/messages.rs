@@ -14,51 +14,25 @@
 // limitations under the License.
 //
 
-use super::storage;
 use serde_cbor::{ser, Value};
 use serde_cbor::error::Error;
-
-// Store requested file as chunks in temporary storage and create appropriate message from results
-pub fn import_result(prefix: &str, channel_id: u64, path: &str) -> Result<Vec<u8>, Error> {
-    match storage::initialize_file(prefix, path) {
-        Ok((hash, num_chunks, mode)) => {
-            info!(
-                "-> {{ {}, true, {}, {}, {} }}",
-                channel_id, hash, num_chunks, mode
-            );
-            Ok(ser::to_vec_packed(&(
-                channel_id,
-                true,
-                hash,
-                num_chunks,
-                mode,
-            ))?)
-        }
-        Err(error) => {
-            info!("-> {{ {}, false, {} }}", channel_id, error);
-            Ok(ser::to_vec_packed(&(channel_id, false, error))?)
-        }
-    }
-}
 
 // Create export message
 pub fn export_request(
     channel_id: u32,
     hash: &str,
-    num_chunks: u32,
     target_path: &str,
     mode: u32,
 ) -> Result<Vec<u8>, Error> {
     info!(
-        "-> {{ {}, export, {}, {}, {}, {} }}",
-        channel_id, hash, num_chunks, target_path, mode
+        "-> {{ {}, export, {}, {}, {} }}",
+        channel_id, hash, target_path, mode
     );
 
     Ok(ser::to_vec_packed(&(
         channel_id,
         "export",
         hash,
-        num_chunks,
         target_path,
         mode,
     ))?)
@@ -76,12 +50,23 @@ pub fn metadata(hash: &str, num_chunks: u32) -> Result<Vec<u8>, Error> {
     Ok(ser::to_vec_packed(&(hash, num_chunks))?)
 }
 
-// Generate ACK or NAK depending on state of received file
-pub fn file_status(prefix: &str, hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, Error> {
-    let (result, chunks) = storage::validate_file(prefix, hash, num_chunks).unwrap();
+// Send an acknowledge to the remote address
+pub fn ack(hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, Error> {
+    info!("-> {{ {}, true, {:?} }}", hash, num_chunks);
+    Ok(ser::to_vec_packed(&(hash, true, num_chunks))?)
+}
 
-    info!("-> {{ {}, {:?}, {:?} }}", hash, result, chunks);
-    let mut vec = ser::to_vec_packed(&(hash, result)).unwrap();
+// Sends a nak with ranges of missing chunks
+pub fn nak(hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8>, Error> {
+    let chunks = if missing_chunks.len() > 20 {
+        &missing_chunks[0..20]
+    } else {
+        &missing_chunks
+    };
+
+    info!("-> {{ {}, false, {:?} }}", hash, chunks);
+    let mut vec = ser::to_vec_packed(&(hash, false))?;
+
     // Make the array indefinite-length
     vec[0] |= 0x1F;
 
@@ -98,6 +83,38 @@ pub fn file_status(prefix: &str, hash: &str, num_chunks: Option<u32>) -> Result<
 // Create chunk message
 pub fn chunk(hash: &str, index: u32, chunk: &[u8]) -> Result<Vec<u8>, Error> {
     let chunk_bytes = Value::Bytes(chunk.to_vec());
-    info!("-> {{ {}, {}, chunk_data", hash, index);
+    info!("-> {{ {}, {}, chunk_data }}", hash, index);
     Ok(ser::to_vec_packed(&(hash, index, chunk_bytes))?)
+}
+
+// Create succesful import request response message
+pub fn import_setup_success(
+    channel_id: u64,
+    hash: &str,
+    num_chunks: u32,
+    mode: u32,
+) -> Result<Vec<u8>, Error> {
+    info!(
+        "-> {{ {}, true, {}, {}, {} }}",
+        channel_id, hash, num_chunks, mode
+    );
+    Ok(ser::to_vec_packed(&(
+        channel_id,
+        true,
+        hash,
+        num_chunks,
+        mode,
+    ))?)
+}
+
+// Create successful export request response message
+pub fn operation_success(channel_id: u64) -> Result<Vec<u8>, Error> {
+    info!("-> {{ {}, true }}", channel_id);
+    Ok(ser::to_vec_packed(&(channel_id, true))?)
+}
+
+// Create an operation failure response message
+pub fn operation_failure(channel_id: u64, error: &str) -> Result<Vec<u8>, Error> {
+    info!("-> {{ {}, false, {} }}", channel_id, error);
+    Ok(ser::to_vec_packed(&(channel_id, false, error))?)
 }

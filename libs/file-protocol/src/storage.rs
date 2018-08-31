@@ -21,11 +21,13 @@ use serde_cbor::{de, to_vec, Value};
 use std::fs;
 use std::fs::File;
 use std::fs::Permissions;
-use std::io::{Read, Write};
+use std::io::{BufRead, BufReader, Read, Write};
 use std::os::unix::fs::MetadataExt;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::str;
+use std::thread;
+use std::time::Duration;
 use time;
 
 const HASH_SIZE: usize = 16;
@@ -210,24 +212,28 @@ pub fn initialize_file(prefix: &str, source_path: &str) -> Result<(String, u32, 
     let mut hasher = Blake2s::new(HASH_SIZE);
     {
         let mut input = File::open(&source_path).unwrap();
+        let mut reader = BufReader::with_capacity(CHUNK_SIZE * 2, input);
         let mut output = File::create(&temp_path).unwrap();
 
         // Need to bring in blake2fs here to create hash
         loop {
-            let mut chunk = vec![0u8; CHUNK_SIZE];
-            match input.read(&mut chunk) {
-                Ok(n) => {
-                    if n == 0 {
-                        output.sync_all().unwrap();
-                        break;
-                    }
-                    hasher.update(&chunk[0..n]);
-                    if let Err(e) = output.write(&chunk[0..n]) {
-                        return Err(format!("Failed to write chunk {:?}", e));
-                    }
+            let length = {
+                let chunk = match reader.fill_buf() {
+                    Ok(c) => c,
+                    Err(e) => return Err(format!("Failed to read chunk from source {:?}", e)),
+                };
+                if chunk.len() == 0 {
+                    output.sync_all().unwrap();
+                    break;
                 }
-                Err(e) => return Err(format!("Failed to read chunk from source {:?}", e)),
-            }
+                hasher.update(&chunk);
+                if let Err(e) = output.write(&chunk) {
+                    return Err(format!("failed to write chunk {:?}", e));
+                }
+                chunk.len()
+            };
+            reader.consume(length);
+            thread::sleep(Duration::from_millis(2));
         }
     }
     let hash_result = hasher.finalize();
@@ -271,9 +277,11 @@ pub fn initialize_file(prefix: &str, source_path: &str) -> Result<(String, u32, 
 
     store_meta(prefix, &hash, index).unwrap();
 
-    let meta = fs::metadata(source_path).unwrap();
-
-    Ok((hash, index, meta.mode()))
+    if let Ok(meta) = fs::metadata(source_path) {
+        Ok((hash, index, meta.mode()))
+    } else {
+        Ok((hash, index, 0o644))
+    }
 }
 
 // Copy temporary data chunks into permanent file?

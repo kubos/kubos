@@ -7,6 +7,72 @@ extern crate simplelog;
 use clap::{App, Arg};
 use simplelog::*;
 use std::path::Path;
+use std::time::Duration;
+use file_protocol::{FileProtocol, State};
+
+fn upload(
+    host_ip: &str,
+    remote_addr: &str,
+    source_path: &str,
+    target_path: &str,
+    prefix: Option<String>,
+) -> Result<String, String> {
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
+
+    info!(
+        "Uploading local:{} to remote:{}",
+        &source_path, &target_path
+    );
+
+    // Copy file to upload to temp storage. Calculate the hash and chunk info
+    let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
+
+    // Tell our destination the hash and number of chunks to expect
+    f_protocol.send_metadata(&hash, num_chunks)?;
+
+    // TODO: We need this sleep so that the service can have time to set up the temporary
+    // storage directory. Do something to make this unnecessary
+    ::std::thread::sleep(Duration::from_millis(1));
+
+    // Send export command for file
+    f_protocol.send_export(&hash, &target_path, mode)?;
+
+    // Start the engine to send the file data chunks
+    f_protocol.message_engine(
+        Duration::from_secs(2),
+        State::Transmitting { hash: hash.clone() },
+    )?;
+
+    Ok(hash.to_owned())
+}
+
+fn download(
+    host_ip: &str,
+    remote_addr: &str,
+    source_path: &str,
+    target_path: &str,
+    prefix: Option<String>,
+) -> Result<String, String> {
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
+
+    info!(
+        "Downloading remote: {} to local: {}",
+        source_path, target_path
+    );
+
+    // Send our file request to the remote addr and verify that it's
+    // going to be able to send it
+    f_protocol.send_import(source_path)?;
+
+    let hash = f_protocol.message_engine(
+        Duration::from_secs(2),
+        State::StartReceive {
+            path: target_path.to_string(),
+        },
+    )?;
+
+    Ok(hash)
+}
 
 fn main() {
     CombinedLogger::init(vec![
@@ -59,10 +125,8 @@ fn main() {
     let remote_addr = args.value_of("remote_addr").unwrap();
 
     let result = match command.as_ref() {
-        "upload" => file_protocol::upload(local_ip, remote_addr, &source_path, &target_path, None),
-        "download" => {
-            file_protocol::download(local_ip, remote_addr, &source_path, &target_path, None)
-        }
+        "upload" => upload(local_ip, remote_addr, &source_path, &target_path, None),
+        "download" => download(local_ip, remote_addr, &source_path, &target_path, None),
         // This shouldn't be possible, since we checked the string earlier
         _ => {
             error!("Unknown command given");

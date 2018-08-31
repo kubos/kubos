@@ -76,15 +76,6 @@ pub fn parse_export_request(message: Value) -> Result<Option<Message>, String> {
                     }
                 };
 
-                let num_chunks = match pieces.next().ok_or(format!(
-                    "Unable to parse export message: No num_chunks param"
-                ))? {
-                    Value::U64(num) => *num as u32,
-                    _ => {
-                        return Err("Unable to parse export message: Invalid hash param".to_owned())
-                    }
-                };
-
                 let path = match pieces
                     .next()
                     .ok_or(format!("Unable to parse export message: No path param"))?
@@ -103,7 +94,6 @@ pub fn parse_export_request(message: Value) -> Result<Option<Message>, String> {
                 return Ok(Some(Message::ReqReceive(
                     channel_id,
                     hash.to_owned(),
-                    num_chunks,
                     path.to_owned(),
                     mode,
                 )));

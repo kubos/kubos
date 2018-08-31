@@ -21,8 +21,10 @@ extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
 
-use kubos_system::Config as ServiceConfig;
+use cbor_protocol::Protocol as CborProtocol;
+use file_protocol::{messages, storage, FileProtocol, State};
 use file_service_rust::recv_loop;
+use kubos_system::Config as ServiceConfig;
 use std::thread;
 use rand::{thread_rng, Rng};
 use std::fs;
@@ -56,12 +58,43 @@ macro_rules! service_new {
     }};
 }
 
+fn upload(
+    host_ip: &str,
+    remote_addr: &str,
+    source_path: &str,
+    target_path: &str,
+    prefix: Option<String>,
+) -> Result<String, String> {
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
+
+    // Copy file to upload to temp storage. Calculate the hash and chunk info
+    let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
+
+    // Tell our destination the hash and number of chunks to expect
+    f_protocol.send_metadata(&hash, num_chunks)?;
+
+    // TODO: We need this sleep so that the service can have time to set up the temporary
+    // storage directory. Do something to make this unnecessary
+    ::std::thread::sleep(Duration::from_millis(1));
+
+    // Send export command for file
+    f_protocol.send_export(&hash, &target_path, mode)?;
+
+    // Start the engine to send the file data chunks
+    f_protocol.message_engine(
+        Duration::from_secs(2),
+        State::Transmitting { hash: hash.clone() },
+    )?;
+
+    Ok(hash.to_owned())
+}
+
 fn create_test_file(name: &str, contents: &[u8]) {
     let mut file = File::create(name).unwrap();
     file.write_all(contents).unwrap();
 }
 
-// upload single-chunk file from scratch
+// Upload single-chunk file from scratch
 #[test]
 fn upload_single() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -76,7 +109,7 @@ fn upload_single() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(
+    let result = upload(
         "127.0.0.1",
         "127.0.0.1:7000",
         &source,
@@ -92,11 +125,6 @@ fn upload_single() {
 
     let hash = result.unwrap();
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
-
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
     fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
@@ -106,7 +134,7 @@ fn upload_single() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload multi-chunk file from scratch
+// Upload multi-chunk file from scratch
 #[test]
 fn upload_multi_clean() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -121,7 +149,7 @@ fn upload_multi_clean() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(
+    let result = upload(
         "127.0.0.1",
         "127.0.0.1:7001",
         &source,
@@ -133,11 +161,6 @@ fn upload_multi_clean() {
 
     let hash = result.unwrap();
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
-
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
     fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
@@ -147,7 +170,7 @@ fn upload_multi_clean() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload multi-chunk file which we already have 1 chunk for
+// Upload multi-chunk file which we already have 1 chunk for
 #[test]
 fn upload_multi_resume() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -163,7 +186,7 @@ fn upload_multi_resume() {
     service_new!(service_port);
 
     // Go ahead and upload the whole file so we can manipulate the temporary directory
-    let result = file_protocol::upload(
+    let result = upload(
         "127.0.0.1",
         "127.0.0.1:7002",
         &source,
@@ -172,17 +195,12 @@ fn upload_multi_resume() {
     );
     assert!(result.is_ok());
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
 
     // Remove a chunk so we can test the retry logic
     fs::remove_file(format!("service/storage/{}/0", hash)).unwrap();
 
     // Upload the file again
-    let result = file_protocol::upload(
+    let result = upload(
         "127.0.0.1",
         "127.0.0.1:7002",
         &source,
@@ -191,11 +209,6 @@ fn upload_multi_resume() {
     );
     assert!(result.is_ok());
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -206,7 +219,7 @@ fn upload_multi_resume() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload multi-chunk file which we already have all chunks for
+// Upload multi-chunk file which we already have all chunks for
 #[test]
 fn upload_multi_complete() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -222,7 +235,7 @@ fn upload_multi_complete() {
     service_new!(service_port);
 
     // Upload the file once (clean upload)
-    let result = file_protocol::upload(
+    let result = upload(
         "127.0.0.1",
         "127.0.0.1:7005",
         &source,
@@ -231,13 +244,8 @@ fn upload_multi_complete() {
     );
     assert!(result.is_ok());
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(2, 0));
-
     // Upload the file again
-    let result = file_protocol::upload(
+    let result = upload(
         "127.0.0.1",
         "127.0.0.1:7005",
         &source,
@@ -246,11 +254,6 @@ fn upload_multi_complete() {
     );
     assert!(result.is_ok());
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -261,7 +264,7 @@ fn upload_multi_complete() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// upload. Create hash mismatch.
+// Upload. Create hash mismatch.
 #[test]
 fn upload_bad_hash() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -277,7 +280,7 @@ fn upload_bad_hash() {
     service_new!(service_port);
 
     // Upload the file so we can mess with the temporary storage
-    let result = file_protocol::upload(
+    let result = upload(
         "127.0.0.1",
         "127.0.0.1:7003",
         &source,
@@ -287,15 +290,10 @@ fn upload_bad_hash() {
     assert!(result.is_ok());
     let hash = result.unwrap();
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
-
     // Tweak the chunk contents so the future hash calculation will fail
     fs::write(format!("service/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
-    let result = file_protocol::upload(
+    let result = upload(
         "127.0.0.1",
         "127.0.0.1:7003",
         &source,
@@ -304,14 +302,9 @@ fn upload_bad_hash() {
     );
     assert!(result.unwrap_err().contains("File hash mismatch"));
 
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(1, 0));
-
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    //fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
+    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 }
 
 #[test]
@@ -330,11 +323,11 @@ fn upload_multi_client() {
             let test_dir_str = test_dir.path().to_str().unwrap();
             let source = format!("{}/source", test_dir_str);
             let dest = format!("{}/dest", test_dir_str);
-            let contents = [num; 5000];
+            let contents = [num; 6000];
 
             create_test_file(&source, &contents);
 
-            let result = file_protocol::upload(
+            let result = upload(
                 "127.0.0.1",
                 "127.0.0.1:7004",
                 &source,
@@ -367,7 +360,7 @@ fn upload_multi_client() {
 }
 
 // Massive upload
-
+// Note: This test will take several minutes to run. Ignore the Rust warning about the test taking to long
 #[test]
 fn upload_large() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -394,22 +387,17 @@ fn upload_large() {
 
     service_new!(service_port);
 
-    let result = file_protocol::upload(
+    let result = upload(
         "127.0.0.1",
         "127.0.0.1:7006",
         &source,
         &dest,
         Some("client".to_owned()),
     );
-    println!("Result: {:?}", result);
+
     assert!(result.is_ok());
 
     let hash = result.unwrap();
-
-    // TODO: Remove this sleep. We need it to let the service
-    // finish its work. The upload logic needs to wait on
-    // the final ACK message before returning
-    thread::sleep(Duration::new(15, 0));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -419,6 +407,7 @@ fn upload_large() {
     let mut source_file = File::open(source).unwrap();
     let mut dest_file = File::open(dest).unwrap();
     // 24415 = 100M / 4096
+    // 2442 = 10/M / 4096
     for num in 0..24415 {
         let mut source_buf = [0u8; 4096];
         let mut dest_buf = [0u8; 4096];

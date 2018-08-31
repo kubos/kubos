@@ -25,7 +25,7 @@ use kubos_system::Config as ServiceConfig;
 use file_service_rust::recv_loop;
 use std::thread;
 use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::FileProtocol;
+use file_protocol::{messages, storage, FileProtocol, State};
 use rand::{thread_rng, Rng};
 use std::env;
 use std::path::Path;
@@ -60,6 +60,29 @@ macro_rules! service_new {
     }};
 }
 
+fn download(
+    host_ip: &str,
+    remote_addr: &str,
+    source_path: &str,
+    target_path: &str,
+    prefix: Option<String>,
+) -> Result<String, String> {
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
+
+    // Send our file request to the remote addr and verify that it's
+    // going to be able to send it
+    f_protocol.send_import(source_path)?;
+
+    let hash = f_protocol.message_engine(
+        Duration::from_secs(2),
+        State::StartReceive {
+            path: target_path.to_string(),
+        },
+    )?;
+
+    Ok(hash)
+}
+
 fn create_test_file(name: &str, contents: &[u8]) {
     let mut file = File::create(name).unwrap();
     file.write_all(contents).unwrap();
@@ -80,7 +103,7 @@ fn download_single() {
 
     service_new!(service_port);
 
-    let result = file_protocol::download(
+    let result = download(
         "127.0.0.1",
         "127.0.0.1:8000",
         &source,
@@ -115,7 +138,7 @@ fn download_multi_clean() {
 
     service_new!(service_port);
 
-    let result = file_protocol::download(
+    let result = download(
         "127.0.0.1",
         "127.0.0.1:8001",
         &source,
@@ -152,7 +175,7 @@ fn download_multi_resume() {
     service_new!(service_port);
 
     // Go ahead and download the whole file so we can manipulate the temporary directory
-    let result = file_protocol::download(
+    let result = download(
         "127.0.0.1",
         "127.0.0.1:8002",
         &source,
@@ -166,7 +189,7 @@ fn download_multi_resume() {
     fs::remove_file(format!("service/storage/{}/0", hash)).unwrap();
 
     // download the file again
-    let result = file_protocol::download(
+    let result = download(
         "127.0.0.1",
         "127.0.0.1:8002",
         &source,
@@ -201,7 +224,7 @@ fn download_multi_complete() {
     service_new!(service_port);
 
     // download the file once (clean download)
-    let result = file_protocol::download(
+    let result = download(
         "127.0.0.1",
         "127.0.0.1:8005",
         &source,
@@ -211,7 +234,7 @@ fn download_multi_complete() {
     assert!(result.is_ok());
 
     // download the file again
-    let result = file_protocol::download(
+    let result = download(
         "127.0.0.1",
         "127.0.0.1:8005",
         &source,
@@ -247,7 +270,7 @@ fn download_bad_hash() {
     service_new!(service_port);
 
     // download the file so we can mess with the temporary storage
-    let result = file_protocol::download(
+    let result = download(
         "127.0.0.1",
         "127.0.0.1:8003",
         &source,
@@ -260,7 +283,7 @@ fn download_bad_hash() {
     // Tweak the chunk contents so the future hash calculation will fail
     fs::write(format!("client/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
-    let result = file_protocol::download(
+    let result = download(
         "127.0.0.1",
         "127.0.0.1:8003",
         &source,
@@ -294,7 +317,7 @@ fn download_multi_client() {
 
             create_test_file(&source, &contents);
 
-            let result = file_protocol::download(
+            let result = download(
                 "127.0.0.1",
                 "127.0.0.1:8004",
                 &source,
@@ -353,7 +376,7 @@ fn download_large() {
 
     service_new!(service_port);
 
-    let result = file_protocol::download(
+    let result = download(
         "127.0.0.1",
         "127.0.0.1:8006",
         &source,

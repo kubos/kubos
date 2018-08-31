@@ -26,15 +26,13 @@ extern crate serde;
 extern crate serde_cbor;
 extern crate time;
 
-use std::time::Duration;
-
-mod messages;
+pub mod messages;
 mod parsers;
 pub mod protocol;
 pub mod storage;
 
 pub use protocol::Protocol as FileProtocol;
-pub use protocol::Role;
+pub use protocol::State;
 
 const CHUNK_SIZE: usize = 4096;
 
@@ -52,7 +50,7 @@ pub enum Message {
     /// Receiver is missing the specified file data chunks
     NAK(String, Option<Vec<(u32, u32)>>),
     /// (Client Only) Message requesting the recipient to receive the specified file
-    ReqReceive(u64, String, u32, String, Option<u32>),
+    ReqReceive(u64, String, String, Option<u32>),
     /// (Client Only) Message requesting the recipient to transmit the specified file
     ReqTransmit(u64, String),
     /// (Server Only) Recipient has successfully processed a request to receive a file
@@ -61,67 +59,4 @@ pub enum Message {
     SuccessTransmit(u64, String, u32, Option<u32>),
     /// (Server Only) The transmit or receive request has failed to be completed
     Failure(u64, String),
-}
-
-/// Upload a file to the target server location
-pub fn upload(
-    host_ip: &str,
-    remote_addr: &str,
-    source_path: &str,
-    target_path: &str,
-    prefix: Option<String>,
-) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(host_ip, remote_addr, Role::Client, prefix);
-
-    info!(
-        "Uploading local:{} to remote:{}",
-        &source_path, &target_path
-    );
-
-    // Copy file to upload to temp storage. Calculate the hash and chunk info
-    let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
-
-    // Send export command for file
-    f_protocol.send_export(&hash, num_chunks, &target_path, mode)?;
-
-    // Start the engine to send the file data chunks
-    f_protocol.message_engine(Some(&hash), Some(Duration::from_secs(2)), true)?;
-
-    Ok(hash)
-}
-
-/// Download a file from the target server location
-pub fn download(
-    host_ip: &str,
-    remote_addr: &str,
-    source_path: &str,
-    target_path: &str,
-    prefix: Option<String>,
-) -> Result<String, String> {
-    let f_protocol = protocol::Protocol::new(host_ip, remote_addr, Role::Client, prefix);
-
-    info!(
-        "Downloading remote: {} to local: {}",
-        source_path, target_path
-    );
-
-    // Send our file request to the remote addr and verify that it's
-    // going to be able to send it
-    f_protocol.send_import(source_path)?;
-
-    // Wait forever for our sucessful response message
-    // (It can take the service a while -- multiple seconds -- to prepare large files for transfer)
-    match f_protocol.message_engine(None, None, false) {
-        Ok(Some(Message::SuccessTransmit(_id, hash, _num_chunks, mode))) => {
-            // Receive the data and then save received data to the requested path
-            f_protocol.finalize_file(&hash, target_path, mode)?;
-            return Ok(hash);
-        }
-        Ok(msg) => {
-            return Err(format!("Wrong first message found! {:?}", msg));
-        }
-        Err(msg) => {
-            return Err(format!("Error message found! {:?}", msg));
-        }
-    }
 }

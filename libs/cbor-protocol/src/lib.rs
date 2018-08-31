@@ -20,7 +20,9 @@ use serde_cbor::de;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Duration;
 
-const MAX_MSG_SIZE: usize = 5000;
+// Was 4136
+// Somewhere we are sending packets bigger than this...
+const MSG_SIZE: usize = 4500;
 
 pub struct Protocol {
     pub handle: UdpSocket,
@@ -40,9 +42,6 @@ impl Protocol {
     pub fn send_message(&self, message: &[u8], dest: SocketAddr) -> Result<(), String> {
         // TODO: If paused, just queue up the message
 
-        // let mut e = Encoder::from_memory();
-        //e.encode(&message).unwrap();
-        //let mut payload = e.as_bytes().to_vec();
         let mut payload = vec![];
         payload.extend(message);
         payload.insert(0, 0);
@@ -79,7 +78,7 @@ impl Protocol {
     }
 
     pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, Option<String>> {
-        let mut buf = [0; MAX_MSG_SIZE];
+        let mut buf = [0; MSG_SIZE];
         let (size, _peer) = self.handle
             .recv_from(&mut buf)
             .map_err(|err| Some(format!("Failed to receive a message: {}", err)))?;
@@ -90,7 +89,8 @@ impl Protocol {
     // Gets the peer attempting to send a message
     // But does *not* retrieve the message
     pub fn peek_peer(&self) -> Result<SocketAddr, String> {
-        let mut buf = [0; MAX_MSG_SIZE];
+        let mut buf = [0; MSG_SIZE];
+
         let (size, peer) = self.handle
             .peek_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
@@ -98,15 +98,13 @@ impl Protocol {
         Ok(peer)
     }
 
-    pub fn recv_message_peer(
-        &self,
-    ) -> Result<(SocketAddr, Option<serde_cbor::Value>), Option<String>> {
-        let mut buf = [0; MAX_MSG_SIZE];
+    pub fn recv_message_peer(&self) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
+        let mut buf = [0; MSG_SIZE];
         let (size, peer) = self.handle
             .recv_from(&mut buf)
-            .map_err(|err| Some(format!("Failed to receive a message: {}", err)))?;
+            .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
-        let message = self.recv_start(&buf[0..size]).map_err(|err| Some(err))?;
+        let message = self.recv_start(&buf[0..size])?;
         Ok((peer, message))
     }
 
@@ -119,7 +117,8 @@ impl Protocol {
             .set_read_timeout(Some(timeout))
             .map_err(|err| format!("Failed to set timeout: {}", err))?;
 
-        let mut buf = [0; MAX_MSG_SIZE];
+        let mut buf = [0; MSG_SIZE];
+
         let result = self.handle.recv_from(&mut buf);
 
         // Reset the timeout for future calls
@@ -147,7 +146,8 @@ impl Protocol {
             .set_read_timeout(Some(timeout))
             .map_err(|err| format!("Failed to set timeout: {}", err))?;
 
-        let mut buf = [0; MAX_MSG_SIZE];
+        let mut buf = [0; MSG_SIZE];
+
         let result = self.handle.recv_from(&mut buf);
 
         // Reset the timeout for future calls
