@@ -25,6 +25,7 @@ use serde_cbor::Value;
 use std::cell::Cell;
 use std::net::UdpSocket;
 use std::str;
+use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 // How many times do we read no messages
@@ -173,6 +174,7 @@ impl Protocol {
                 let chunk = storage::load_chunk(hash, chunk_index).unwrap();
                 self.send(messages::chunk(hash, chunk_index, &chunk).unwrap())
                     .unwrap();
+                thread::sleep(Duration::from_millis(1));
             }
         }
         Ok(())
@@ -190,6 +192,8 @@ impl Protocol {
                     self.dest_port.set(peer.port());
                     message
                 }
+                // I don't think recv_message reports the difference between
+                // no message/timeout and an actual error
                 _ => match state.clone() {
                     State::Receiving {
                         channel_id,

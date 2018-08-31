@@ -17,6 +17,7 @@
 extern crate cbor_protocol;
 extern crate file_protocol;
 extern crate kubos_system;
+#[macro_use]
 extern crate log;
 extern crate simplelog;
 
@@ -45,9 +46,10 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                     state = new_state;
                 }
             }
-            f_protocol
-                .message_engine(Duration::from_secs(2), state)
-                .unwrap();
+            match f_protocol.message_engine(Duration::from_secs(2), state) {
+                Err(e) => warn!("message_engine exited with {:?}", e),
+                _ => {}
+            }
         });
     }
 }

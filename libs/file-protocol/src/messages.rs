@@ -59,12 +59,19 @@ pub fn ack(hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, Error> {
 
 // Sends a nak with ranges of missing chunks
 pub fn nak(hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8>, Error> {
-    info!("-> {{ {}, false, {:?} }}", hash, missing_chunks);
+    let chunks = if missing_chunks.len() > 20 {
+        &missing_chunks[0..20]
+    } else {
+        &missing_chunks
+    };
+
+    info!("-> {{ {}, false, {:?} }}", hash, chunks);
     let mut vec = ser::to_vec_packed(&(hash, false))?;
+
     // Make the array indefinite-length
     vec[0] |= 0x1F;
 
-    for chunk in missing_chunks.iter() {
+    for chunk in chunks.iter() {
         // Add the chunk number to the end of the CBOR array
         vec.append(&mut ser::to_vec_packed(&chunk).unwrap());
     }
