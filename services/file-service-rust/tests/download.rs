@@ -73,21 +73,12 @@ fn download(
     // going to be able to send it
     f_protocol.send_import(source_path)?;
 
-    let reply = match f_protocol.recv(None) {
-        Ok(Some(message)) => message,
-        Ok(None) => return Err("Failed to import file".to_owned()),
-        Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
-        Err(None) => return Err("Failed to import file".to_owned()),
-    };
-
-    let state = f_protocol.process_message(
-        reply,
+    let hash = f_protocol.message_engine(
+        Duration::from_secs(2),
         State::StartReceive {
             path: target_path.to_string(),
         },
     )?;
-
-    let hash = f_protocol.message_engine(Duration::from_secs(2), state)?;
 
     Ok(hash)
 }
@@ -97,7 +88,7 @@ fn create_test_file(name: &str, contents: &[u8]) {
     file.write_all(contents).unwrap();
 }
 
-// upload single-chunk file from scratch
+// Download single-chunk file from scratch
 #[test]
 fn download_single() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -114,7 +105,7 @@ fn download_single() {
 
     let result = download(
         "127.0.0.1",
-        "127.0.0.1:8000",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -132,7 +123,7 @@ fn download_single() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// download multi-chunk file from scratch
+// Download multi-chunk file from scratch
 #[test]
 fn download_multi_clean() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -149,7 +140,7 @@ fn download_multi_clean() {
 
     let result = download(
         "127.0.0.1",
-        "127.0.0.1:8001",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -168,7 +159,7 @@ fn download_multi_clean() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// download multi-chunk file which we already have 1 chunk for
+// Download multi-chunk file which we already have 1 chunk for
 #[test]
 fn download_multi_resume() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -186,7 +177,7 @@ fn download_multi_resume() {
     // Go ahead and download the whole file so we can manipulate the temporary directory
     let result = download(
         "127.0.0.1",
-        "127.0.0.1:8002",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -217,7 +208,7 @@ fn download_multi_resume() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// download multi-chunk file which we already have all chunks for
+// Download multi-chunk file which we already have all chunks for
 #[test]
 fn download_multi_complete() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -235,7 +226,7 @@ fn download_multi_complete() {
     // download the file once (clean download)
     let result = download(
         "127.0.0.1",
-        "127.0.0.1:8005",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -263,7 +254,7 @@ fn download_multi_complete() {
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// download. Create hash mismatch.
+// Download. Create hash mismatch.
 #[test]
 fn download_bad_hash() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -281,7 +272,7 @@ fn download_bad_hash() {
     // download the file so we can mess with the temporary storage
     let result = download(
         "127.0.0.1",
-        "127.0.0.1:8003",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -306,6 +297,7 @@ fn download_bad_hash() {
     fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 }
 
+// Download a single file in 5 simultaneous client instances
 #[test]
 fn download_multi_client() {
     let service_port = 8004;
@@ -328,7 +320,7 @@ fn download_multi_client() {
 
             let result = download(
                 "127.0.0.1",
-                "127.0.0.1:8004",
+                &format!("127.0.0.1:{}", service_port),
                 &source,
                 &dest,
                 Some("client".to_owned()),
@@ -391,7 +383,7 @@ fn large_down() {
 
     let result = download(
         "127.0.0.1",
-        "127.0.0.1:8006",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),

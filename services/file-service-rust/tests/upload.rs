@@ -111,7 +111,7 @@ fn upload_single() {
 
     let result = upload(
         "127.0.0.1",
-        "127.0.0.1:7000",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -151,7 +151,7 @@ fn upload_multi_clean() {
 
     let result = upload(
         "127.0.0.1",
-        "127.0.0.1:7001",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -202,7 +202,7 @@ fn upload_multi_resume() {
     // Upload the file again
     let result = upload(
         "127.0.0.1",
-        "127.0.0.1:7002",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -237,7 +237,7 @@ fn upload_multi_complete() {
     // Upload the file once (clean upload)
     let result = upload(
         "127.0.0.1",
-        "127.0.0.1:7005",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -282,7 +282,7 @@ fn upload_bad_hash() {
     // Upload the file so we can mess with the temporary storage
     let result = upload(
         "127.0.0.1",
-        "127.0.0.1:7003",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -307,6 +307,7 @@ fn upload_bad_hash() {
     fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 }
 
+// Upload a single file in 5 simultaneous client instances
 #[test]
 fn upload_multi_client() {
     let service_port = 7004;
@@ -329,7 +330,7 @@ fn upload_multi_client() {
 
             let result = upload(
                 "127.0.0.1",
-                "127.0.0.1:7004",
+                &format!("127.0.0.1:{}", service_port),
                 &source,
                 &dest,
                 Some("client".to_owned()),
@@ -387,7 +388,7 @@ fn large_up() {
 
     let result = upload(
         "127.0.0.1",
-        "127.0.0.1:7006",
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
