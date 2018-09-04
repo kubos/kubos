@@ -64,12 +64,25 @@ fn download(
     // going to be able to send it
     f_protocol.send_import(source_path)?;
 
-    let hash = f_protocol.message_engine(
-        Duration::from_secs(2),
+    // Wait for the request reply.
+    // Note/TODO: We don't use a timeout here because we don't know how long it will
+    // take the server to prepare the file we've requested.
+    // Larger files (> 100MB) can take over a minute to process.
+    let reply = match f_protocol.recv(None) {
+        Ok(Some(message)) => message,
+        Ok(None) => return Err("Failed to import file".to_owned()),
+        Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
+        Err(None) => return Err("Failed to import file".to_owned()),
+    };
+
+    let state = f_protocol.process_message(
+        reply,
         State::StartReceive {
             path: target_path.to_string(),
         },
     )?;
+
+    let hash = f_protocol.message_engine(Duration::from_secs(2), state)?;
 
     Ok(hash)
 }
