@@ -322,7 +322,7 @@ fn download_multi_client() {
             let test_dir_str = test_dir.path().to_str().unwrap();
             let source = format!("{}/source", test_dir_str);
             let dest = format!("{}/dest", test_dir_str);
-            let contents = [num; 6000];
+            let contents = [num; 6500];
 
             create_test_file(&source, &contents);
 
@@ -358,9 +358,13 @@ fn download_multi_client() {
     }
 }
 
-// Massive download
+// Massive (100MB) download
+// Note 1: This test will take several minutes to run.
+//         Ignore the Rust warning about the test taking to long
+// Note 2: This is named differently so that the not-massive tests can
+//         all be (quickly) run at the same time with `cargo test download`
 #[test]
-fn download_large() {
+fn large_down() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
