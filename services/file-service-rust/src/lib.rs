@@ -40,8 +40,6 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         None => None,
     };
 
-    let mut counter = 0;
-
     loop {
         // Listen on UDP port
         let (source, first_message) = c_protocol.recv_message_peer()?;
@@ -54,9 +52,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         thread::spawn(move || {
             let mut state = State::Holding {
                 count: 0,
-                prev_state: Box::new(State::Done {
-                    hash: "".to_owned(),
-                }),
+                prev_state: Box::new(State::Done),
             };
 
             // Set up the file system processor with the reply socket information

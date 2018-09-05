@@ -21,8 +21,7 @@ extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
 
-use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::{messages, storage, FileProtocol, State};
+use file_protocol::{FileProtocol, State};
 use file_service_rust::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use std::thread;
@@ -81,11 +80,10 @@ fn upload(
     f_protocol.send_export(&hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    f_protocol.message_engine(
-        Duration::from_secs(2),
-        State::Transmitting { hash: hash.clone() },
-    )?;
+    f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?;
 
+    // Note: The original upload client function does not return the hash.
+    // We're only doing it here so that we can manipulate the temporary storage
     Ok(hash.to_owned())
 }
 
@@ -319,6 +317,11 @@ fn upload_multi_client() {
 
     // Spawn 5 simultaneous clients
     for num in 0..5 {
+        // Need a tiny pause between starting threads, otherwise an initial
+        // operation request might get dropped because the main service socket
+        // just gets overloaded with UDP packets.
+        thread::sleep(Duration::new(0, 1));
+
         thread_handles.push(thread::spawn(move || {
             let test_dir = TempDir::new().expect("Failed to create test dir");
             let test_dir_str = test_dir.path().to_str().unwrap();

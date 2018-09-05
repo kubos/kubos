@@ -304,6 +304,7 @@ dependencies = [
 name = "file-service-rust"
 version = "0.1.0"
 dependencies = [
+ "blake2-rfc 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "cbor-protocol 0.1.0",
  "file-protocol 0.1.0",
  "kubos-system 0.1.0",

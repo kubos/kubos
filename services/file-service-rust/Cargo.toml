@@ -11,5 +11,6 @@ file-protocol = { path = "../../libs/file-protocol" }
 kubos-system = { path = "../../apis/system-api" }
 
 [dev-dependencies]
+blake2-rfc = "0.2.18"
 rand = "0.5.5"
 tempfile = "3"

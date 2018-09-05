@@ -16,7 +16,7 @@ fn upload(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
-) -> Result<String, String> {
+) -> Result<(), String> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     info!(
@@ -38,12 +38,7 @@ fn upload(
     f_protocol.send_export(&hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    f_protocol.message_engine(
-        Duration::from_secs(2),
-        State::Transmitting { hash: hash.clone() },
-    )?;
-
-    Ok(hash.to_owned())
+    Ok(f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?)
 }
 
 fn download(
@@ -52,7 +47,7 @@ fn download(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
-) -> Result<String, String> {
+) -> Result<(), String> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     info!(
@@ -82,9 +77,7 @@ fn download(
         },
     )?;
 
-    let hash = f_protocol.message_engine(Duration::from_secs(2), state)?;
-
-    Ok(hash)
+    Ok(f_protocol.message_engine(Duration::from_secs(2), state)?)
 }
 
 fn main() {

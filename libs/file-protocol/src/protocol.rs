@@ -65,16 +65,10 @@ pub enum State {
         mode: Option<u32>,
     },
     // Currenty transmitting a file
-    Transmitting {
-        hash: String,
-    },
-    TransmittingDone {
-        hash: String,
-    },
+    Transmitting,
+    TransmittingDone,
     // Finished transmitting/receiving, thread or process may end
-    Done {
-        hash: String,
-    },
+    Done,
 }
 
 impl Protocol {
@@ -205,7 +199,7 @@ impl Protocol {
 
     /// Listen for and process file protocol messages
     /// TODO: Make this more descriptive
-    pub fn message_engine(&self, timeout: Duration, start_state: State) -> Result<String, String> {
+    pub fn message_engine(&self, timeout: Duration, start_state: State) -> Result<(), String> {
         let mut state = start_state.clone();
         loop {
             // Listen on UDP port
@@ -254,7 +248,7 @@ impl Protocol {
 
                         match self.finalize_file(channel_id, &hash, &path, mode) {
                             Ok(_) => {
-                                return Ok(hash);
+                                return Ok(());
                             }
                             Err(e) => {
                                 // We need a way to error out here...
@@ -275,14 +269,14 @@ impl Protocol {
                         // We've got all the chunks of data we want.
                         // Stitch it back together and verify the hash of the official file
                         self.finalize_file(channel_id, &hash, &path, mode)?;
-                        return Ok(hash);
+                        return Ok(());
                     }
-                    State::Done { hash } => {
-                        return Ok(hash);
+                    State::Done => {
+                        return Ok(());
                     }
                     State::Holding { count, prev_state } => {
                         if count > HOLD_TIMEOUT {
-                            return Ok("".to_owned());
+                            return Ok(());
                         } else {
                             state = State::Holding {
                                 count: count + 1,
@@ -316,9 +310,9 @@ impl Protocol {
                     // We've got all the chunks of data we want.
                     // Stitch it back together and verify the hash of the official file
                     self.finalize_file(channel_id, &hash, &path, mode)?;
-                    return Ok(hash);
+                    return Ok(());
                 }
-                State::Done { hash } => return Ok(hash),
+                State::Done => return Ok(()),
                 _ => continue,
             };
         }
@@ -348,16 +342,12 @@ impl Protocol {
                     Message::ACK(ack_hash) => {
                         info!("<- {{ {}, true }}", ack_hash);
                         // TODO: Figure out hash verification here
-                        new_state = State::TransmittingDone {
-                            hash: ack_hash.to_owned(),
-                        };
+                        new_state = State::TransmittingDone;
                     }
                     Message::NAK(hash, Some(missing_chunks)) => {
                         info!("<- {{ {}, false, {:?} }}", hash, missing_chunks);
                         self.send_chunks(&hash, &missing_chunks)?;
-                        new_state = State::Transmitting {
-                            hash: hash.to_owned(),
-                        };
+                        new_state = State::Transmitting;
                     }
                     Message::NAK(hash, None) => {
                         info!("<- {{ {}, false }}", hash);
@@ -411,7 +401,7 @@ impl Protocol {
                                     ).unwrap(),
                                 ).unwrap();
 
-                                new_state = State::Transmitting { hash };
+                                new_state = State::Transmitting;
                             }
                             Err(error) => {
                                 // It failed. Let the requester know that we can't transmit
@@ -420,26 +410,13 @@ impl Protocol {
                                     messages::operation_failure(*channel_id, &error).unwrap(),
                                 ).unwrap();
 
-                                new_state = State::Done {
-                                    hash: "".to_owned(),
-                                };
+                                new_state = State::Done;
                             }
                         }
                     }
                     Message::SuccessReceive(channel_id) => {
                         info!("<- {{ {}, true }}", channel_id);
-                        new_state = match state {
-                            State::Transmitting { hash } => State::Done { hash },
-                            State::TransmittingDone { hash } => State::Done { hash },
-                            _ => {
-                                // In theory, we shouldn't ever be in a non-transmitting state
-                                // if our peer is reporting that they've successfully received
-                                // something
-                                State::Done {
-                                    hash: "".to_owned(),
-                                }
-                            }
-                        };
+                        new_state = State::Done;
                     }
                     Message::SuccessTransmit(channel_id, hash, num_chunks, mode) => {
                         match mode {
@@ -464,9 +441,7 @@ impl Protocol {
                                         path: path.to_string(),
                                         mode: *mode,
                                     },
-                                    _ => State::Done {
-                                        hash: hash.to_owned(),
-                                    },
+                                    _ => State::Done,
                                 };
                             }
                             Ok((false, chunks)) => {

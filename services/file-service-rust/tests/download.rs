@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+extern crate blake2_rfc;
 extern crate cbor_protocol;
 extern crate file_protocol;
 extern crate file_service_rust;
@@ -21,17 +22,15 @@ extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
 
+use blake2_rfc::blake2s::Blake2s;
 use kubos_system::Config as ServiceConfig;
+use file_protocol::{FileProtocol, State};
 use file_service_rust::recv_loop;
-use std::thread;
-use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::{messages, storage, FileProtocol, State};
 use rand::{thread_rng, Rng};
-use std::env;
-use std::path::Path;
 use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
+use std::thread;
 use std::time::Duration;
 use tempfile::TempDir;
 
@@ -66,19 +65,24 @@ fn download(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
-) -> Result<String, String> {
+) -> Result<(), String> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     // Send our file request to the remote addr and verify that it's
     // going to be able to send it
     f_protocol.send_import(source_path)?;
 
+    // Wait for the request reply.
+    // Note/TODO: We don't use a timeout here because we don't know how long it will
+    // take the server to prepare the file we've requested.
+    // Larger files (> 100MB) can take over a minute to process.
     let reply = match f_protocol.recv(None) {
         Ok(Some(message)) => message,
         Ok(None) => return Err("Failed to import file".to_owned()),
         Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
         Err(None) => return Err("Failed to import file".to_owned()),
     };
+
     let state = f_protocol.process_message(
         reply,
         State::StartReceive {
@@ -86,14 +90,23 @@ fn download(
         },
     )?;
 
-    let hash = f_protocol.message_engine(Duration::from_secs(2), state)?;
-
-    Ok(hash)
+    Ok(f_protocol.message_engine(Duration::from_secs(2), state)?)
 }
 
-fn create_test_file(name: &str, contents: &[u8]) {
+fn create_test_file(name: &str, contents: &[u8]) -> String {
     let mut file = File::create(name).unwrap();
     file.write_all(contents).unwrap();
+
+    let mut hasher = Blake2s::new(16);
+    hasher.update(contents);
+    let hash = hasher.finalize();
+
+    let hash_str = hash.as_bytes()
+        .iter()
+        .map(|byte| format!("{:02x}", byte))
+        .collect();
+
+    hash_str
 }
 
 // Download single-chunk file from scratch
@@ -107,7 +120,7 @@ fn download_single() {
 
     let contents = "download_single".as_bytes();
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
     service_new!(service_port);
 
@@ -119,8 +132,6 @@ fn download_single() {
         Some("client".to_owned()),
     );
     assert!(result.is_ok());
-
-    let hash = result.unwrap();
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -142,7 +153,7 @@ fn download_multi_clean() {
 
     let contents = [1; 6000];
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
     service_new!(service_port);
 
@@ -153,10 +164,7 @@ fn download_multi_clean() {
         &dest,
         Some("client".to_owned()),
     );
-
     assert!(result.is_ok());
-
-    let hash = result.unwrap();
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -178,7 +186,7 @@ fn download_multi_resume() {
 
     let contents = [2; 6000];
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
     service_new!(service_port);
 
@@ -191,7 +199,6 @@ fn download_multi_resume() {
         Some("client".to_owned()),
     );
     assert!(result.is_ok());
-    let hash = result.unwrap();
 
     // Remove a chunk so we can test the retry logic
     fs::remove_file(format!("service/storage/{}/0", hash)).unwrap();
@@ -205,7 +212,6 @@ fn download_multi_resume() {
         Some("client".to_owned()),
     );
     assert!(result.is_ok());
-    let hash = result.unwrap();
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -227,7 +233,7 @@ fn download_multi_complete() {
 
     let contents = [3; 6000];
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
     service_new!(service_port);
 
@@ -251,7 +257,6 @@ fn download_multi_complete() {
     );
 
     assert!(result.is_ok());
-    let hash = result.unwrap();
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
@@ -273,11 +278,11 @@ fn download_bad_hash() {
 
     let contents = "download_bad_hash".as_bytes();
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
     service_new!(service_port);
 
-    // download the file so we can mess with the temporary storage
+    // Download the file so we can mess with the temporary storage
     let result = download(
         "127.0.0.1",
         &format!("127.0.0.1:{}", service_port),
@@ -286,7 +291,6 @@ fn download_bad_hash() {
         Some("client".to_owned()),
     );
     assert!(result.is_ok());
-    let hash = result.unwrap();
 
     // Tweak the chunk contents so the future hash calculation will fail
     fs::write(format!("client/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
@@ -317,6 +321,11 @@ fn download_multi_client() {
 
     // Spawn 5 simultaneous clients
     for num in 0..5 {
+        // Need a tiny pause between starting threads, otherwise an initial
+        // operation request might get dropped because the main service socket
+        // just gets overloaded with UDP packets.
+        thread::sleep(Duration::new(0, 1));
+
         thread_handles.push(thread::spawn(move || {
             let test_dir = TempDir::new().expect("Failed to create test dir");
             let test_dir_str = test_dir.path().to_str().unwrap();
@@ -324,7 +333,7 @@ fn download_multi_client() {
             let dest = format!("{}/dest", test_dir_str);
             let contents = [num; 6500];
 
-            create_test_file(&source, &contents);
+            let hash = create_test_file(&source, &contents);
 
             let result = download(
                 "127.0.0.1",
@@ -334,8 +343,6 @@ fn download_multi_client() {
                 Some("client".to_owned()),
             );
             assert!(result.is_ok());
-
-            let hash = result.unwrap();
 
             // TODO: Remove this sleep. We need it to let the service
             // finish its work. The upload logic needs to wait on
@@ -372,7 +379,8 @@ fn large_down() {
     let service_port = 8006;
 
     // Create a 100MB file filled with random data
-    {
+    let hash: String = {
+        let mut hasher = Blake2s::new(16);
         let mut file = OpenOptions::new()
             .create(true)
             .write(true)
@@ -384,8 +392,17 @@ fn large_down() {
             thread_rng().fill(&mut contents[..]);
 
             file.write(&contents).unwrap();
+            hasher.update(&contents);
         }
-    }
+
+        let hash_result = hasher.finalize();
+
+        hash_result
+            .as_bytes()
+            .iter()
+            .map(|byte| format!("{:02x}", byte))
+            .collect()
+    };
 
     service_new!(service_port);
 
@@ -398,8 +415,6 @@ fn large_down() {
     );
 
     assert!(result.is_ok());
-
-    let hash = result.unwrap();
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
