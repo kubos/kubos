@@ -10,4 +10,4 @@ juniper = "0.9"
 kubos-system = { path = "../../apis/system-api" }
 
 [dev-dependencies]
-failure = { git = "https://github.com/rust-lang-nursery/failure", branch = "evolution/1.0" }
+failure = "0.1.2"

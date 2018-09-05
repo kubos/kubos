@@ -25,17 +25,17 @@
 /// #[macro_use]
 /// extern crate failure;
 ///
-/// use failure::Fail;
+/// use failure::Error;
 ///
-/// #[derive(Fail, Display, Debug)]
+/// #[derive(Clone, Debug, Fail)]
 /// pub enum RootError {
-///     #[display(fmt = "RootError: {}", message)]
+///     #[fail(display = "RootError: {}", message)]
 ///     RootError { message: String },
 /// }
 ///
-/// #[derive(Fail, Display, Debug)]
+/// #[derive(Clone, Debug, Fail)]
 /// pub enum TopError {
-///     #[display(fmt = "TopError: {}", message)]
+///     #[fail(display = "TopError: {}", message)]
 ///     Error {
 ///         #[fail(cause)]
 ///         cause: RootError,
@@ -49,10 +49,12 @@
 ///         message: "top".to_owned(),
 ///     };
 ///
+///     let chain_clone = chain.clone();
+///
 ///     let errors = process_errors!(chain);
 ///     assert_eq!(errors, "TopError: top, RootError: root");
 ///
-///     let errors = process_errors!(chain, '\n');
+///     let errors = process_errors!(chain_clone, '\n');
 ///     assert_eq!(errors, "TopError: top\nRootError: root");
 /// }
 /// ```
@@ -65,7 +67,11 @@ macro_rules! process_errors {
     ($err:ident, $delim:expr) => {{
         {
             let mut results = String::new();
-            let mut chain = $err.causes();
+
+            // We need the "as_fail()" to make sure that we were given
+            // a failure::Error as our input parameter
+            let error: Error = $err.into();
+            let mut chain = error.as_fail().iter_chain();
 
             if let Some(err) = chain.next() {
                 results.push_str(&format!("{}", err));
@@ -123,15 +129,15 @@ macro_rules! push_err {
 /// use failure::{Error, Fail};
 /// use std::cell::RefCell;
 ///
-/// #[derive(Fail, Display, Debug)]
+/// #[derive(Fail, Debug)]
 /// pub enum RootError {
-///     #[display(fmt = "RootError: {}", message)]
+///     #[fail(display = "RootError: {}", message)]
 ///     RootError { message: String },
 /// }
 ///
-/// #[derive(Fail, Display, Debug)]
+/// #[derive(Fail, Debug)]
 /// pub enum TopError {
-///     #[display(fmt = "TopError: {}", message)]
+///     #[fail(display = "TopError: {}", message)]
 ///     Error {
 ///         #[fail(cause)]
 ///         cause: RootError,
@@ -203,18 +209,18 @@ macro_rules! run {
 
 #[cfg(test)]
 mod tests {
-    use failure::{Error, Fail};
+    use failure::Error;
     use std::cell::RefCell;
 
-    #[derive(Fail, Display, Debug)]
+    #[derive(Debug, Fail)]
     pub enum RootError {
-        #[display(fmt = "RootError: {}", message)]
+        #[fail(display = "RootError: {}", message)]
         RootError { message: String },
     }
 
-    #[derive(Fail, Display, Debug)]
+    #[derive(Debug, Fail)]
     pub enum TopError {
-        #[display(fmt = "TopError: {}", message)]
+        #[fail(display = "TopError: {}", message)]
         Error {
             #[fail(cause)]
             cause: RootError,
@@ -300,7 +306,7 @@ mod tests {
 
         assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
         assert_eq!(
-            vec!["test_func (services/kubos-service/src/macros.rs:299): TopError: top, RootError: root".to_owned()],
+            vec!["test_func (services/kubos-service/src/macros.rs:305): TopError: top, RootError: root".to_owned()],
             master_err.borrow().clone()
         );
     }
@@ -314,4 +320,5 @@ mod tests {
         let test_vec: Vec<String> = vec![];
         assert_eq!(test_vec, master_err.borrow().clone());
     }
+
 }
