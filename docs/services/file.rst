@@ -11,10 +11,53 @@ which means a connection is required between the OBC and ground segment
 capable of transferring UDP packets. This could be established using the
 :doc:`communication service <communication>` or a standard network connection.
 
+Overview
+--------
+
+The file transfer service listens for requests on its configured UDP socket.
+
+When a message is received, it is then processed using the file protocol message engine.
+This logic keeps track of the current state of each client connection and takes
+the appropriate action depending on the current state and the particular message received.
+
+Actions may also be taken if the service experiences a timeout while waiting for
+a follow-up message from a client. For example, if a client initiates an export operation
+and then stops communicating while in the middle of sending file chunks, the service
+will timeout, check the current status of the file, and then send a NAK to the client
+with the current missing chunks. Receiving this NAK should cause the client to
+resume transmitting file chunk data.
+
+In order to support simultaneous client connections, whenever a message is received
+on the main UDP socket, a new socket is spawned in order to handle the rest
+of the transaction. As a result, after sending the initial import or export request,
+the transfer client should listen for a reply and then use the new socket
+as the destination for future transmissions.
+
 Configuration
 -------------
 
-//TODO...
+The file transfer service has several configuration options which may be
+defined in the system's ``config.toml`` file:
+
+    - ``[file-transfer-service]``
+    
+        - ``storage_dir`` - `Default: "file-transfer".` The directory which should be
+          used for temporary storage of file chunks. Note: The directory will be
+          created if it does not already exist.
+          
+    - ``[file-transfer-service.addr]``
+    
+        - ``ip`` - Specifies the service's IP address
+        - ``port`` - Specifies the port on which the service will be listening for UDP packets
+        
+For example::
+
+    [file-transfer-service]
+    storage_dir = "my/storage/directory"
+    
+    [file-transfer-service.addr]
+    ip = "0.0.0.0"
+    port = 7000
 
 Running the Service from KubOS
 ------------------------------

@@ -139,7 +139,7 @@ It contains the file hash, chunk index, and raw chunk data.
 
 Each raw chunk is 4KB in size. Individual chunk messages will not get
 an immediate reply. However, if no chunks are received within the
-timeout window then an ``ack`` or ``nak`` will be sent depending
+timeout window then an ``ACK`` or ``NAK`` will be sent depending
 on whether all the chunks have been received or not.
 
     ``{ hash, chunk_index, data }``
@@ -162,18 +162,18 @@ message sender does not have all chunks for a given file. It
 contains the file's hash, the boolean value ``false``, and a list
 of missing chunk ranges. The ranges are pairs of numbers where
 the first number is inclusive and the second is exclusive.
-For example ``0, 2`` means the first two chunks are missing.
+For example ``0, 2`` means the first two chunks, ``0`` and ``1``, are missing.
 
-A NAK may be sent in response to a ``sync`` or after a
-timeout during a file ``import`` or ``export`` operation.
+A NAK may be sent after receiving an export request message,
+after receiving a succes message in reply to an import request message,
+or after a timeout during a file ``import`` or ``export`` operation.
 The message sender should expect the message receiver to send
-the missing file chunks upon receipt of a ``nak``.
+the missing file chunks upon receipt of a ``NAK``.
 
     ``{ hash, false, 1, 4, 6, 7 }``
 
-The above example ``nak`` indicates that chunks 1-3 and 6
+The above example ``NAK`` indicates that chunks 1-3 and 6
 are missing.
-    
 
 Request Success
 ~~~~~~~~~~~~~~~
