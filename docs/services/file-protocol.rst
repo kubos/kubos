@@ -1,7 +1,7 @@
-File Protocol
-=============
+File Transfer Protocol
+======================
 
-The file protocol is implemented by both the
+The file transfer protocol is implemented by both the
 :doc:`file transfer service <file>` and clients interacting
 with the service. This protocol uses a content-addressable
 methodology similar to Git for storing and chunking files.
@@ -53,33 +53,33 @@ All messages in the file protocol are encoded as `CBOR <http://cbor.io/>`__ arra
 in UDP packets.
 
 The first value in the encoded list is the ``channel_id``
-for request/response type messages and the ``hash`` for content-addressable
+for request/response type messages or the ``hash`` for content-addressable
 messages.
 
     - The ``channel_id`` parameter corresponds to an in-memory array of coroutines
-created as part of the file transfer process.
+      created as part of the file transfer process.
     - The ``hash`` parameter is the BLAKE2 hash for the corresponding file
-which is being transferred.
+      which is being transferred.
 
-+=================+==========================================================+
-| Name            | Syntax                                                   |
-+=================+==========================================================+
-| Metadata        | ``{ hash, num_chunks }``                                 |
-+-----------------+----------------------------------------------------------+
-| Export Request  | ``{ channel_id, "export", hash, path, mode }``           |
-+-----------------+----------------------------------------------------------+
-| Import Request  | ``{ channel_id, "import", path }``                       |
-+-----------------+----------------------------------------------------------+
-| File Chunk      | ``{ hash, chunk_index, data }``                          |
-+-----------------+----------------------------------------------------------+
-| ACK             | ``{ hash, true, num_chunks }``                           |
-+-----------------+----------------------------------------------------------+
-| NAK             | ``{ hash, false, x_start, x_end, y_start, y_end, ... }`` |
-+-----------------+----------------------------------------------------------+
-| Request Success | ``{ channel_id, true, ..values }``                       |
-+-----------------+----------------------------------------------------------+
-| Request Failure | ``{ channel_id, false, error_message }``                 |
-+-----------------+----------------------------------------------------------+
++-------------------------------+----------------------------------------------------------------+
+| Name                          | Syntax                                                         |
++===============================+================================================================+
+| `Metadata`_                   | { `hash`, `num_chunks` }                                       |
++-------------------------------+----------------------------------------------------------------+
+| `Export Request`_             | { `channel_id`, export, `hash`, `path`, `mode` }               |
++-------------------------------+----------------------------------------------------------------+
+| `Import Request`_             | { `channel_id`, import, `path` }                               |
++-------------------------------+----------------------------------------------------------------+
+| `File Chunk`_                 | { `hash`, `chunk_index`, `data` }                              |
++-------------------------------+----------------------------------------------------------------+
+| `Acknowledge (ACK)`_          | { `hash`, true, `num_chunks` }                                 |
++-------------------------------+----------------------------------------------------------------+
+| `Negative Acknowledge (NAK)`_ | { `hash`, false, `x_start`, `x_end`, `y_start`, `y_end`, ... } |
++-------------------------------+----------------------------------------------------------------+
+| `Request Success`_            | { `channel_id`, true, ..`values` }                             |
++-------------------------------+----------------------------------------------------------------+
+| `Request Failure`_            | { `channel_id`, false, `error_message` }                       |
++-------------------------------+----------------------------------------------------------------+
 
 Metadata
 ~~~~~~~~
@@ -96,8 +96,8 @@ to ensure the expected number of chunks is known.
 
     ``{ hash, num_chunks }``
 
-Export
-~~~~~~
+Export Request
+~~~~~~~~~~~~~~
 
 This message is sent to initiate the process of transferring
 a file from the message sender to the message receiver. It
@@ -115,8 +115,8 @@ the local filesystem. This message is sent after the
     ``{ channel_id, "export", hash, path, mode }``
 
 
-Import
-~~~~~~
+Import Request
+~~~~~~~~~~~~~~
 
 This message is sent to initiate the process of transferring
 a file to the message sender from the message receiver. It
@@ -144,7 +144,7 @@ on whether all the chunks have been received or not.
 
     ``{ hash, chunk_index, data }``
     
-Acknowledge (Ack)
+Acknowledge (ACK)
 ~~~~~~~~~~~~~~~~~
 
 This message is sent to inform the message receiver that the
@@ -154,7 +154,7 @@ chunks in the file.
 
     ``{ hash, true, num_chunks }``
 
-Negative Acknowledge (Nak)
+Negative Acknowledge (NAK)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This message is sent to inform the message receiver that the
@@ -175,26 +175,30 @@ The above example ``nak`` indicates that chunks 1-3 and 6
 are missing.
     
 
-Success
-~~~~~~~
+Request Success
+~~~~~~~~~~~~~~~
 
-This message is sent as part of the ``import`` or ``export``
-processes. It contains the channel ID, the boolean value true
-and potentially other values depending on the situation.
+This message is sent as part of the ``import`` or ``export`` process.
+It contains the channel ID and the boolean value ``true``.
 
-This message is primarily sent in two different situations:
-at the end of an ``export`` and near the beginning of an ``import``.
-The message sender would send a ``success`` if an ``export``
-has completed successfully. The ``success`` is also used
-during an ``import`` to indicate a file is ready for sending
-and to communicate the file's hash.
+When this message is sent as part of the ``export`` process,
+it will be sent at the very end, indicating that all file chunks were
+successfully transmitted to the requester.
 
-Extra values in this command appear as extra items in the list.
+    ``{ channel_id, true }``
+    
+When this message is sent as part of the ``import`` process,
+it will be sent after receiving the initial import request,
+once the receiver has successfully prepared the file for transfer.
+The requester will then need to send a NAK to begin the transfer process.
 
-    ``{ channel_id, true, ..values }``
+In this case, the message will also contain file's hash, number of chunks,
+and mode.
 
-Failure
-~~~~~~~
+    ``{ channel_id, true, hash, num_chunks, mode }``
+
+Request Failure
+~~~~~~~~~~~~~~~
 
 This message is sent if there as an error in the ``import`` or
 ``export`` process. It contains the channel ID, the boolean false
@@ -214,11 +218,11 @@ Uploading a single chunk file from a ground station to an OBC:
     participant "Ground Station" as ground
     participant "OBC" as obc
 
-    ground -> obc : Sync 
+    ground -> obc : Metadata
     ground -> obc : Export 
-    obc -> ground : Nak
+    obc -> ground : NAK
     ground -> obc : Send Chunk
-    obc -> ground : Ack
+    obc -> ground : ACK
     obc -> ground : Success
 
     @enduml
@@ -234,9 +238,9 @@ Downloading a single chunk file from an OBC to a ground station:
 
     ground -> obc : Import 
     obc -> ground : Success 
-    ground -> obc : Nak
+    ground -> obc : NAK
     obc -> ground : Send Chunk
-    ground -> obc : Ack
+    ground -> obc : ACK
 
     @enduml
 
@@ -249,14 +253,14 @@ Uploading a three chunk file from ground station with a chunk re-request:
     participant "Ground Station" as ground
     participant "OBC" as obc
 
-    ground -> obc : Sync 
+    ground -> obc : Metadata 
     ground -> obc : Export 
-    obc -> ground : Nak
+    obc -> ground : NAK
     ground -> obc : Send Chunk
     ground -> obc : Send Chunk
-    obc -> ground : Nak
+    obc -> ground : NAK
     ground -> obc : Send Chunk
-    obc -> ground : Ack
+    obc -> ground : ACK
     obc -> ground : Success
 
     @enduml
