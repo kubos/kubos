@@ -612,22 +612,22 @@ impl OEM6 {
 
         // Make sure we got specifically a response message
         if hdr.msg_type & 0x80 != 0x80 {
-            throw!(OEMError::NoResponse);
+            return Err(OEMError::NoResponse);
         }
 
         let resp = match Response::new(body) {
             Some(v) => v,
             None => {
-                throw!(OEMError::NoResponse);
+                return Err(OEMError::NoResponse);
             }
         };
 
         if hdr.msg_id != id {
-            throw!(OEMError::ResponseMismatch);
+            return Err(OEMError::ResponseMismatch);
         }
 
         if resp.resp_id != ResponseID::Ok {
-            throw!(OEMError::CommandError {
+            return Err(OEMError::CommandError {
                 id: resp.resp_id,
                 description: resp.resp_string.clone(),
             });
@@ -679,7 +679,7 @@ impl OEM6 {
             {
                 Ok(v) => v,
                 Err(RecvTimeoutError::Timeout) => continue,
-                Err(RecvTimeoutError::Disconnected) => throw!(OEMError::ThreadCommError),
+                Err(RecvTimeoutError::Disconnected) => return Err(OEMError::ThreadCommError),
             };
 
             // Make sure it's not a response message
@@ -705,25 +705,25 @@ impl OEM6 {
 }
 
 /// Common Error for OEM Actions
-#[derive(Fail, Display, Debug, Clone, PartialEq)]
+#[derive(Fail, Debug, Clone, PartialEq)]
 pub enum OEMError {
     /// Catch-all error
-    #[display(fmt = "Generic Error")]
+    #[fail(display = "Generic Error")]
     GenericError,
     /// An issue occurred while attempted to obtain a mutex lock
-    #[display(fmt = "Mutex Error")]
+    #[fail(display = "Mutex Error")]
     MutexError,
     /// A response message was received, but the ID doesn't match the command that was sent
-    #[display(fmt = "Response ID Mismatch")]
+    #[fail(display = "Response ID Mismatch")]
     ResponseMismatch,
     /// A command was sent, but we were unable to get the response
-    #[display(fmt = "Failed to get command response")]
+    #[fail(display = "Failed to get command response")]
     NoResponse,
     /// The thread reading messages from the device is no longer working
-    #[display(fmt = "Failed to communicate with read thread")]
+    #[fail(display = "Failed to communicate with read thread")]
     ThreadCommError,
     /// A response was recieved and indicates an error with the previously sent command
-    #[display(fmt = "Command Error({:?}): {}", id, description)]
+    #[fail(display = "Command Error({:?}): {}", id, description)]
     CommandError {
         /// The underlying error
         id: ResponseID,
@@ -731,13 +731,13 @@ pub enum OEMError {
         description: String,
     },
     /// Received a valid message, but the message ID doesn't match any known message type
-    #[display(fmt = "Unknown Message Received: {:X}", id)]
+    #[fail(display = "Unknown Message Received: {:X}", id)]
     UnknownMessage {
         /// ID of message received
         id: u16,
     },
     /// An error was thrown by the serial communication driver
-    #[display(fmt = "UART Error")]
+    #[fail(display = "UART Error")]
     UartError {
         /// The underlying error
         #[fail(cause)]
