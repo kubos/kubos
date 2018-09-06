@@ -409,7 +409,7 @@ fn large_up() {
     let mut source_file = File::open(source).unwrap();
     let mut dest_file = File::open(dest).unwrap();
     // 24415 = 100M / 4096
-    // 2442 = 10/M / 4096
+    // 2442 = 10M / 4096
     for num in 0..24415 {
         let mut source_buf = [0u8; 4096];
         let mut dest_buf = [0u8; 4096];

@@ -77,7 +77,11 @@ pub fn load_chunk(prefix: &str, hash: &str, index: u32) -> Result<Vec<u8>, Strin
         .join(hash)
         .join(format!("{}", index));
 
-    File::open(path).unwrap().read_to_end(&mut data).unwrap();
+    File::open(path)
+        .map_err(|err| format!("Failed to open chunk file {}: {}", index, err))?
+        .read_to_end(&mut data)
+        .map_err(|err| format!("Failed to read chunk file {}: {}", index, err))?;
+
     Ok(data)
 }
 
