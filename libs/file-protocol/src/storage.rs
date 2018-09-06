@@ -41,9 +41,19 @@ pub fn store_chunk(prefix: &str, hash: &str, index: u32, data: &[u8]) -> Result<
         .join(hash)
         .join(file_name);
 
-    fs::create_dir_all(&storage_path.parent().unwrap()).unwrap();
-    let mut file = File::create(&storage_path).unwrap();
-    file.write_all(data).unwrap();
+    fs::create_dir_all(&storage_path
+        .parent()
+        .ok_or(format!("Failed to get path parent for {:?}", storage_path))?)
+        .map_err(|err| {
+        format!(
+            "Failed to create storage directory {:?}: {}",
+            storage_path, err
+        )
+    })?;
+    let mut file = File::create(&storage_path)
+        .map_err(|err| format!("Failed to create storage file {:?}: {}", storage_path, err))?;
+    file.write_all(data)
+        .map_err(|err| format!("Failed to write chunk to {:?}: {}", storage_path, err))?;
 
     Ok(())
 }
@@ -51,9 +61,7 @@ pub fn store_chunk(prefix: &str, hash: &str, index: u32, data: &[u8]) -> Result<
 pub fn store_meta(prefix: &str, hash: &str, num_chunks: u32) -> Result<(), String> {
     let data = vec![("num_chunks", num_chunks)];
 
-    // let mut e = Encoder::from_memory();
-    // e.encode(&data).unwrap();
-    let vec = to_vec(&data).unwrap();
+    let vec = to_vec(&data).map_err(|err| format!("Failed to serialize metadata: {}", err))?;
 
     let file_dir = Path::new(&format!("{}/storage", prefix)).join(hash);
     // Make sure the directory exists
@@ -63,9 +71,17 @@ pub fn store_meta(prefix: &str, hash: &str, num_chunks: u32) -> Result<(), Strin
     let meta_path = file_dir.join("meta");
     let temp_path = file_dir.join(".meta.tmp");
 
-    File::create(&temp_path).unwrap().write_all(&vec).unwrap();
+    File::create(&temp_path)
+        .map_err(|err| format!("Failed to create/open {:?} for writing: {}", temp_path, err))?
+        .write_all(&vec)
+        .map_err(|err| format!("Failed to write metadata to {:?}: {}", temp_path, err))?;
 
-    fs::rename(temp_path, meta_path).unwrap();
+    fs::rename(temp_path.clone(), meta_path.clone()).map_err(|err| {
+        format!(
+            "Failed to rename {:?} to {:?}: {}",
+            temp_path, meta_path, err
+        )
+    })?;
 
     Ok(())
 }
@@ -97,7 +113,8 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, String> {
         .read_to_end(&mut data)
         .map_err(|err| format!("Unable to read {} metadata file: {}", hash, err))?;
 
-    let metadata: Value = de::from_slice(&data).unwrap();
+    let metadata: Value = de::from_slice(&data)
+        .map_err(|err| format!("Unable to parse metadata for {}: {}", hash, err))?;
 
     // Returned data should be CBOR: '[["num_chunks", value]]'
     let num_chunks = metadata
@@ -129,7 +146,7 @@ pub fn validate_file(
     num_chunks: Option<u32>,
 ) -> Result<(bool, Vec<u32>), String> {
     let num_chunks = if let Some(num) = num_chunks {
-        store_meta(prefix, hash, num).unwrap();
+        store_meta(prefix, hash, num)?;
         num
     } else {
         load_meta(prefix, hash)?
@@ -215,9 +232,11 @@ pub fn initialize_file(prefix: &str, source_path: &str) -> Result<(String, u32, 
     let temp_path = Path::new(&storage_path).join(format!(".{}", time::get_time().nsec));
     let mut hasher = Blake2s::new(HASH_SIZE);
     {
-        let mut input = File::open(&source_path).unwrap();
+        let input = File::open(&source_path)
+            .map_err(|err| format!("Failed to open {:?}: {}", source_path, err))?;
         let mut reader = BufReader::with_capacity(CHUNK_SIZE * 2, input);
-        let mut output = File::create(&temp_path).unwrap();
+        let mut output = File::create(&temp_path)
+            .map_err(|err| format!("Failed to create/open {:?} for writing: {}", temp_path, err))?;
 
         // Need to bring in blake2fs here to create hash
         loop {
@@ -227,7 +246,9 @@ pub fn initialize_file(prefix: &str, source_path: &str) -> Result<(String, u32, 
                     Err(e) => return Err(format!("Failed to read chunk from source {:?}", e)),
                 };
                 if chunk.len() == 0 {
-                    output.sync_all().unwrap();
+                    output
+                        .sync_all()
+                        .map_err(|err| format!("Failed to sync {:?}: {}", temp_path, err))?;
                     break;
                 }
                 hasher.update(&chunk);
@@ -266,20 +287,20 @@ pub fn initialize_file(prefix: &str, source_path: &str) -> Result<(String, u32, 
                 if n == 0 {
                     break;
                 }
-                store_chunk(prefix, &hash, index, &chunk[0..n]).unwrap();
+                store_chunk(prefix, &hash, index, &chunk[0..n])?;
                 index = index + 1;
                 offset = offset + n;
             }
             Err(e) => {
                 return Err(format!(
-                    "failed to read chunk from temp {:?}: {:?}",
+                    "Failed to read chunk from temp {:?}: {:?}",
                     temp_path, e
                 ))
             }
         }
     }
 
-    store_meta(prefix, &hash, index).unwrap();
+    store_meta(prefix, &hash, index)?;
 
     if let Ok(meta) = fs::metadata(source_path) {
         Ok((hash, index, meta.mode()))

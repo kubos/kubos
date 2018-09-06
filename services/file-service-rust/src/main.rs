@@ -21,11 +21,11 @@ extern crate kubos_system;
 #[macro_use]
 extern crate log;
 extern crate simplelog;
-use std::fs::File;
 
 use file_service_rust::*;
 use kubos_system::Config as ServiceConfig;
 use simplelog::*;
+use std::fs::File;
 
 fn main() {
     let mut loggers: Vec<Box<SharedLogger>> = vec![];
@@ -38,7 +38,7 @@ fn main() {
     loggers.push(WriteLogger::new(
         LevelFilter::Info,
         Config::default(),
-        // Should this log path come from the config file?
+        // TODO: Making log file directory configurable
         File::create("/var/log/kubos/file-transfer-service.log").unwrap(),
     ));
 

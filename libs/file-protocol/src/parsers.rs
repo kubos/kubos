@@ -18,31 +18,36 @@ use super::Message;
 use serde_cbor::Value;
 
 pub fn parse_message(message: Value) -> Result<Message, String> {
-    if let Some(msg) = parse_export_request(message.to_owned())? {
+    let data = match message {
+        Value::Array(val) => val.to_owned(),
+        _ => return Err("Unable to parse message: Data not an array".to_owned()),
+    };
+
+    if let Some(msg) = parse_export_request(data.to_owned())? {
         return Ok(msg);
     }
-    if let Some(msg) = parse_import_request(message.to_owned())? {
+    if let Some(msg) = parse_import_request(data.to_owned())? {
         return Ok(msg);
     }
-    if let Some(msg) = parse_success_receive(message.to_owned())? {
+    if let Some(msg) = parse_success_receive(data.to_owned())? {
         return Ok(msg);
     }
-    if let Some(msg) = parse_success_transmit(message.to_owned())? {
+    if let Some(msg) = parse_success_transmit(data.to_owned())? {
         return Ok(msg);
     }
-    if let Some(msg) = parse_bad_op(message.to_owned())? {
+    if let Some(msg) = parse_bad_op(data.to_owned())? {
         return Ok(msg);
     }
-    if let Some(msg) = parse_ack(message.to_owned())? {
+    if let Some(msg) = parse_ack(data.to_owned())? {
         return Ok(msg);
     }
-    if let Some(msg) = parse_nak(message.to_owned())? {
+    if let Some(msg) = parse_nak(data.to_owned())? {
         return Ok(msg);
     }
-    if let Some(msg) = parse_chunk(message.to_owned())? {
+    if let Some(msg) = parse_chunk(data.to_owned())? {
         return Ok(msg);
     }
-    if let Some(msg) = parse_sync(message.to_owned())? {
+    if let Some(msg) = parse_sync(data.to_owned())? {
         return Ok(msg);
     }
 
@@ -51,11 +56,7 @@ pub fn parse_message(message: Value) -> Result<Message, String> {
 
 // Parse out export request
 // { channel_id, "export", hash, path, [, mode] }
-pub fn parse_export_request(message: Value) -> Result<Option<Message>, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
-    };
+pub fn parse_export_request(data: Vec<Value>) -> Result<Option<Message>, String> {
     let mut pieces = data.iter();
 
     let first_param: Value = pieces
@@ -64,7 +65,7 @@ pub fn parse_export_request(message: Value) -> Result<Option<Message>, String> {
         .to_owned();
 
     if let Value::U64(channel_id) = first_param {
-        if let Value::String(op) = pieces.next().ok_or("".to_owned()).unwrap() {
+        if let Some(Value::String(op)) = pieces.next() {
             if op == "export" {
                 let hash = match pieces
                     .next()
@@ -106,11 +107,7 @@ pub fn parse_export_request(message: Value) -> Result<Option<Message>, String> {
 
 // Parse out import request
 // { channel_id, "import", path }
-pub fn parse_import_request(message: Value) -> Result<Option<Message>, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
-    };
+pub fn parse_import_request(data: Vec<Value>) -> Result<Option<Message>, String> {
     let mut pieces = data.iter();
 
     let first_param: Value = pieces
@@ -119,7 +116,7 @@ pub fn parse_import_request(message: Value) -> Result<Option<Message>, String> {
         .to_owned();
 
     if let Value::U64(channel_id) = first_param {
-        if let Value::String(op) = pieces.next().ok_or("".to_owned()).unwrap() {
+        if let Some(Value::String(op)) = pieces.next() {
             if op == "import" {
                 let path = match pieces
                     .next()
@@ -140,11 +137,7 @@ pub fn parse_import_request(message: Value) -> Result<Option<Message>, String> {
 
 // Parse out success received message
 // { channel_id, true }
-pub fn parse_success_receive(message: Value) -> Result<Option<Message>, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
-    };
+pub fn parse_success_receive(data: Vec<Value>) -> Result<Option<Message>, String> {
     let mut pieces = data.iter();
 
     let first_param: Value = pieces
@@ -153,12 +146,10 @@ pub fn parse_success_receive(message: Value) -> Result<Option<Message>, String> 
         .to_owned();
 
     if let Value::U64(channel_id) = first_param {
-        if let Value::Bool(result) = pieces.next().ok_or("".to_owned()).unwrap() {
-            if *result == true {
-                // Good - { channel_id, true, ...values }
-                if let None = pieces.next() {
-                    return Ok(Some(Message::SuccessReceive(channel_id)));
-                }
+        if let Some(Value::Bool(true)) = pieces.next() {
+            // Good - { channel_id, true, ...values }
+            if let None = pieces.next() {
+                return Ok(Some(Message::SuccessReceive(channel_id)));
             }
         }
     }
@@ -168,11 +159,7 @@ pub fn parse_success_receive(message: Value) -> Result<Option<Message>, String> 
 
 // Parse out success transmit message
 // { channel_id, "true", ..values }
-pub fn parse_success_transmit(message: Value) -> Result<Option<Message>, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
-    };
+pub fn parse_success_transmit(data: Vec<Value>) -> Result<Option<Message>, String> {
     let mut pieces = data.iter();
 
     let first_param: Value = pieces
@@ -181,41 +168,38 @@ pub fn parse_success_transmit(message: Value) -> Result<Option<Message>, String>
         .to_owned();
 
     if let Value::U64(channel_id) = first_param {
-        if let Value::Bool(result) = pieces.next().ok_or("".to_owned()).unwrap() {
-            if *result == true {
-                // Good - { channel_id, true, ...values }
-                if let Some(piece) = pieces.next() {
-                    // It's a good result after an 'import' operation
-                    let hash = match piece {
-                        Value::String(val) => val,
-                        _ => {
-                            return Err("Unable to parse success message: Invalid hash param".to_owned())
-                        }
-                    };
+        if let Some(Value::Bool(true)) = pieces.next() {
+            // Good - { channel_id, true, ...values }
+            if let Some(piece) = pieces.next() {
+                // It's a good result after an 'import' operation
+                let hash = match piece {
+                    Value::String(val) => val,
+                    _ => {
+                        return Err("Unable to parse success message: Invalid hash param".to_owned())
+                    }
+                };
 
-                    let num_chunks = match pieces.next().ok_or(format!(
-                        "Unable to parse success message: No num_chunks param"
-                    ))? {
-                        Value::U64(val) => *val,
-                        _ => {
-                            return Err("Unable to parse success message: Invalid num_chunks param"
-                                .to_owned())
-                        }
-                    };
+                let num_chunks = match pieces.next().ok_or(format!(
+                    "Unable to parse success message: No num_chunks param"
+                ))? {
+                    Value::U64(val) => *val,
+                    _ => {
+                        return Err("Unable to parse success message: Invalid num_chunks param".to_owned())
+                    }
+                };
 
-                    let mode = match pieces.next() {
-                        Some(Value::U64(val)) => Some(*val as u32),
-                        _ => None,
-                    };
+                let mode = match pieces.next() {
+                    Some(Value::U64(val)) => Some(*val as u32),
+                    _ => None,
+                };
 
-                    // Return the file info
-                    return Ok(Some(Message::SuccessTransmit(
-                        channel_id,
-                        hash.to_string(),
-                        num_chunks as u32,
-                        mode,
-                    )));
-                }
+                // Return the file info
+                return Ok(Some(Message::SuccessTransmit(
+                    channel_id,
+                    hash.to_string(),
+                    num_chunks as u32,
+                    mode,
+                )));
             }
         }
     }
@@ -225,11 +209,7 @@ pub fn parse_success_transmit(message: Value) -> Result<Option<Message>, String>
 
 // Parse out bad
 // { channel_id, "false", ..values }
-pub fn parse_bad_op(message: Value) -> Result<Option<Message>, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
-    };
+pub fn parse_bad_op(data: Vec<Value>) -> Result<Option<Message>, String> {
     let mut pieces = data.iter();
 
     let first_param: Value = pieces
@@ -238,20 +218,16 @@ pub fn parse_bad_op(message: Value) -> Result<Option<Message>, String> {
         .to_owned();
 
     if let Value::U64(channel_id) = first_param {
-        if let Value::Bool(result) = pieces.next().ok_or("".to_owned()).unwrap() {
-            if *result == false {
-                let error = match pieces
-                    .next()
-                    .ok_or(format!("Unable to parse failure message: No error param"))?
-                {
-                    Value::String(val) => val,
-                    _ => {
-                        return Err("Unable to parse failure message: Invalid error param".to_owned())
-                    }
-                };
+        if let Some(Value::Bool(false)) = pieces.next() {
+            let error = match pieces
+                .next()
+                .ok_or(format!("Unable to parse failure message: No error param"))?
+            {
+                Value::String(val) => val,
+                _ => return Err("Unable to parse failure message: Invalid error param".to_owned()),
+            };
 
-                return Ok(Some(Message::Failure(channel_id, error.to_owned())));
-            }
+            return Ok(Some(Message::Failure(channel_id, error.to_owned())));
         }
     }
 
@@ -260,11 +236,7 @@ pub fn parse_bad_op(message: Value) -> Result<Option<Message>, String> {
 
 // Parse out ack
 // { hash, true, num_chunks }
-pub fn parse_ack(message: Value) -> Result<Option<Message>, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
-    };
+pub fn parse_ack(data: Vec<Value>) -> Result<Option<Message>, String> {
     let mut pieces = data.iter();
 
     let first_param: Value = pieces
@@ -273,7 +245,7 @@ pub fn parse_ack(message: Value) -> Result<Option<Message>, String> {
         .to_owned();
 
     if let Value::String(hash) = first_param {
-        if let Value::Bool(true) = pieces.next().ok_or("".to_owned()).unwrap() {
+        if let Some(Value::Bool(true)) = pieces.next() {
             // It's an ACK: { hash, true, num_chunks }
             // Our data transfer (export) completed succesfully
             // self.stop_push(&hash)?;
@@ -289,11 +261,7 @@ pub fn parse_ack(message: Value) -> Result<Option<Message>, String> {
 
 // Parse out nak
 // { hash, false, ..missing_chunks }
-pub fn parse_nak(message: Value) -> Result<Option<Message>, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
-    };
+pub fn parse_nak(data: Vec<Value>) -> Result<Option<Message>, String> {
     let mut pieces = data.iter();
 
     let first_param: Value = pieces
@@ -302,7 +270,7 @@ pub fn parse_nak(message: Value) -> Result<Option<Message>, String> {
         .to_owned();
 
     if let Value::String(hash) = first_param {
-        if let Value::Bool(false) = pieces.next().ok_or("".to_owned()).unwrap() {
+        if let Some(Value::Bool(false)) = pieces.next() {
             let mut remaining_chunks: Vec<(u32, u32)> = vec![];
             let mut chunk_nums: Vec<u32> = vec![];
             for entry in pieces {
@@ -326,11 +294,7 @@ pub fn parse_nak(message: Value) -> Result<Option<Message>, String> {
 
 // Parse out chunk
 // { hash, chunk_index, data }
-pub fn parse_chunk(message: Value) -> Result<Option<Message>, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
-    };
+pub fn parse_chunk(data: Vec<Value>) -> Result<Option<Message>, String> {
     let mut pieces = data.iter();
 
     let first_param: Value = pieces
@@ -339,7 +303,7 @@ pub fn parse_chunk(message: Value) -> Result<Option<Message>, String> {
         .to_owned();
 
     if let Value::String(hash) = first_param {
-        if let Value::U64(num) = pieces.next().ok_or("".to_owned()).unwrap() {
+        if let Some(Value::U64(num)) = pieces.next() {
             if let Some(third_param) = pieces.next() {
                 if let Value::Bytes(data) = third_param {
                     return Ok(Some(Message::ReceiveChunk(
@@ -363,11 +327,7 @@ pub fn parse_chunk(message: Value) -> Result<Option<Message>, String> {
 // { hash, num_chunks }
 // or
 // { hash }
-pub fn parse_sync(message: Value) -> Result<Option<Message>, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
-    };
+pub fn parse_sync(data: Vec<Value>) -> Result<Option<Message>, String> {
     let mut pieces = data.iter();
 
     let first_param: Value = pieces

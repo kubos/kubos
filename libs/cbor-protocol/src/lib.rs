@@ -46,7 +46,9 @@ impl Protocol {
         payload.extend(message);
         payload.insert(0, 0);
 
-        self.handle.send_to(&payload, &dest).unwrap();
+        self.handle
+            .send_to(&payload, &dest)
+            .map_err(|err| format!("Failed to send message to {:?}: {}", err))?;
         Ok(())
     }
 
@@ -64,7 +66,9 @@ impl Protocol {
         println!("-> pause");
 
         let payload = vec![1];
-        self.handle.send_to(&payload, &dest).unwrap();
+        self.handle
+            .send_to(&payload, &dest)
+            .map_err(|err| format!("Failed to send message to {:?}: {}", err))?;
         Ok(())
     }
 
@@ -73,7 +77,9 @@ impl Protocol {
         println!("-> resume");
 
         let payload = vec![2];
-        self.handle.send_to(&payload, &dest).unwrap();
+        self.handle
+            .send_to(&payload, &dest)
+            .map_err(|err| format!("Failed to send message to {:?}: {}", err))?;
         Ok(())
     }
 
@@ -192,7 +198,7 @@ impl Protocol {
             2 => {
                 println!("<- resume");
                 // TODO: This might need to be a channel message/signal
-                self.resume().unwrap();
+                self.resume()?;
                 None
             }
             x => {
