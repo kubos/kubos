@@ -28,6 +28,11 @@ this within the KubOS environment.
 Hold Time Tracking
 ------------------
 
+.. note::
+
+        This implementation requires an accurate realtime clock (RTC) to update
+        the system time. These are currently present on all supported OBCs.
+
 Tracking hold time through reboots is best achieved by using the most reliable
 persistent storage location on the OBC, the U-boot environment variables. These
 variables are always stored in the most reliable storage environment possible,
@@ -49,4 +54,4 @@ completed successfully. This is to ensure that these are continually attempted
 until they are successfully completed so the satellite does not put itself into
 an unrecoverable state. This is only one possible way to implement the
 deployment hold time countdown within KubOS. It can be achieved in many other
-ways, depending on the mission's needs! 
+ways, depending on the mission's needs!
