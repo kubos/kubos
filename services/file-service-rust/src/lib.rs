@@ -29,17 +29,35 @@ use file_protocol::{FileProtocol, State};
 
 // We need this in this lib.rs file so we can build integration tests
 pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
-    let c_protocol = cbor_protocol::Protocol::new(config.hosturl());
-    let mut counter = 0;
+    let host = config.hosturl();
+    let c_protocol = cbor_protocol::Protocol::new(host.clone());
+
+    let mut host_parts = host.split(':').map(|val| val.to_owned());
+    let host_ip = host_parts.next().unwrap();
+
+    let prefix = match config.get("storage_dir") {
+        Some(val) => val.as_str().and_then(|str| Some(str.to_owned())),
+        None => None,
+    };
 
     loop {
+        // Listen on UDP port
         let (source, first_message) = c_protocol.recv_message_peer()?;
 
-        thread::spawn(move || {
-            let mut state = State::Holding { count: 0 };
+        let prefix_ref = prefix.clone();
+        let host_ref = host_ip.clone();
 
-            // TODO: Fix hardcoded addr
-            let f_protocol = FileProtocol::new(String::from("127.0.0.1"), source.port());
+        // Break the processing work off into its own thread so we can
+        // listen for requests from other clients
+        thread::spawn(move || {
+            let mut state = State::Holding {
+                count: 0,
+                prev_state: Box::new(State::Done),
+            };
+
+            // Set up the file system processor with the reply socket information
+            // TODO: Opening a second local port might be a terrible plan. Though it is kind of what TCP does
+            let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref);
 
             if let Some(msg) = first_message {
                 if let Ok(new_state) = f_protocol.process_message(msg, state.clone()) {

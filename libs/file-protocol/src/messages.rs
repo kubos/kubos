@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-use super::storage;
 use serde_cbor::{ser, Value};
 use serde_cbor::error::Error;
 
@@ -84,7 +83,7 @@ pub fn nak(hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8>, Error> {
 // Create chunk message
 pub fn chunk(hash: &str, index: u32, chunk: &[u8]) -> Result<Vec<u8>, Error> {
     let chunk_bytes = Value::Bytes(chunk.to_vec());
-    info!("-> {{ {}, {}, chunk_data", hash, index);
+    info!("-> {{ {}, {}, chunk_data }}", hash, index);
     Ok(ser::to_vec_packed(&(hash, index, chunk_bytes))?)
 }
 

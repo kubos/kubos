@@ -1,56 +1,83 @@
+extern crate clap;
 extern crate file_protocol;
 #[macro_use]
 extern crate log;
 extern crate simplelog;
 
+use clap::{App, Arg};
 use simplelog::*;
-
-use std::env;
 use std::path::Path;
 use std::time::Duration;
-use std::thread;
-use file_protocol::{messages, storage, FileProtocol, State};
+use file_protocol::{FileProtocol, State};
 
-fn upload(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
-    let f_protocol = FileProtocol::new(String::from("127.0.0.1"), port);
+fn upload(
+    host_ip: &str,
+    remote_addr: &str,
+    source_path: &str,
+    target_path: &str,
+    prefix: Option<String>,
+) -> Result<(), String> {
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     info!(
         "Uploading local:{} to remote:{}",
         &source_path, &target_path
     );
+
     // Copy file to upload to temp storage. Calculate the hash and chunk info
-    // Q: What's `mode` for? `initialize_file` always returns 0. Looks like it should be file permissions
-    let (hash, num_chunks, mode) = storage::initialize_file(&source_path)?;
+    let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
+
     // Tell our destination the hash and number of chunks to expect
-    f_protocol.send(messages::metadata(&hash, num_chunks).unwrap())?;
-    // TODO: Remove this sleep - see below
-    // There is currently a race condition where sync and export are both sent
-    // quickly and the server processes them concurrently, but the folder
-    // structure from sync isn't ready when export starts
-    thread::sleep(Duration::from_millis(100));
+    f_protocol.send_metadata(&hash, num_chunks)?;
+
+    // TODO: We need this sleep so that the service can have time to set up the temporary
+    // storage directory. Do something to make this unnecessary
+    ::std::thread::sleep(Duration::from_millis(1));
+
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
-    // Start the engine
+
+    // Start the engine to send the file data chunks
     Ok(f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?)
 }
 
-fn download(port: u16, source_path: &str, target_path: &str) -> Result<(), String> {
-    let f_protocol = FileProtocol::new(String::from("127.0.0.1"), port);
+fn download(
+    host_ip: &str,
+    remote_addr: &str,
+    source_path: &str,
+    target_path: &str,
+    prefix: Option<String>,
+) -> Result<(), String> {
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     info!(
         "Downloading remote: {} to local: {}",
         source_path, target_path
     );
 
-    // Send our file request to the remote addr and get the returned data
+    // Send our file request to the remote addr and verify that it's
+    // going to be able to send it
     f_protocol.send_import(source_path)?;
 
-    Ok(f_protocol.message_engine(
-        Duration::from_secs(2),
+    // Wait for the request reply.
+    // Note/TODO: We don't use a timeout here because we don't know how long it will
+    // take the server to prepare the file we've requested.
+    // Larger files (> 100MB) can take over a minute to process.
+    let reply = match f_protocol.recv(None) {
+        Ok(Some(message)) => message,
+        Ok(None) => return Err("Failed to import file".to_owned()),
+        Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
+        Err(None) => return Err("Failed to import file".to_owned()),
+    };
+
+    let state = f_protocol.process_message(
+        reply,
         State::StartReceive {
             path: target_path.to_string(),
         },
-    )?)
+    )?;
+
+    Ok(f_protocol.message_engine(Duration::from_secs(2), state)?)
 }
 
 fn main() {
@@ -60,31 +87,39 @@ fn main() {
 
     info!("Starting file transfer client");
 
-    let mut args = env::args();
-    // Skip the first command arg
-    args.next();
+    let args = App::new("File transfer client")
+        .arg(
+            Arg::with_name("operation")
+                .index(1)
+                .required(true)
+                .possible_values(&["upload", "download"])
+                .case_insensitive(true),
+        )
+        .arg(Arg::with_name("source_file").index(2).required(true))
+        .arg(Arg::with_name("target_file").index(3))
+        .arg(
+            Arg::with_name("local_ip")
+                .short("i")
+                .takes_value(true)
+                .default_value("0.0.0.0"),
+        )
+        .arg(
+            Arg::with_name("remote_addr")
+                .short("-a")
+                .takes_value(true)
+                .default_value("0.0.0.0:7000"),
+        )
+        .get_matches();
 
     // get upload vs download (required)
-    let command = match args.next() {
-        Some(ref cmd) if cmd == "upload" || cmd == "download" => cmd.clone(),
-        _ => {
-            error!("Missing first arg: 'upload' or 'download' must be specified");
-            return;
-        }
-    };
+    let command = args.value_of("operation").unwrap();
 
     // get source file (required)
-    let source_path = match args.next() {
-        Some(path) => path,
-        None => {
-            error!("Missing source file path");
-            return;
-        }
-    };
+    let source_path = args.value_of("source_file").unwrap();
 
     // get target file. If not present, just copy the filename from the source path
-    let target_path = match args.next() {
-        Some(path) => path,
+    let target_path: String = match args.value_of("target_file") {
+        Some(path) => path.to_owned(),
         None => Path::new(&source_path)
             .file_name()
             .unwrap()
@@ -92,9 +127,12 @@ fn main() {
             .into_owned(),
     };
 
+    let local_ip = args.value_of("local_ip").unwrap();
+    let remote_addr = args.value_of("remote_addr").unwrap();
+
     let result = match command.as_ref() {
-        "upload" => upload(7000, &source_path, &target_path),
-        "download" => download(7000, &source_path, &target_path),
+        "upload" => upload(local_ip, remote_addr, &source_path, &target_path, None),
+        "download" => download(local_ip, remote_addr, &source_path, &target_path, None),
         // This shouldn't be possible, since we checked the string earlier
         _ => {
             error!("Unknown command given");
