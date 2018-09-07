@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-//! TODO: Module documentation
+//! File transfer protocol module
 
 use super::messages;
 use super::parsers;
@@ -33,46 +33,79 @@ use std::net::SocketAddr;
 // while holding before killing the thread
 const HOLD_TIMEOUT: u16 = 5;
 
-/// File Protocol information Structure
+/// File protocol information structure
 pub struct Protocol {
     prefix: String,
     cbor_proto: CborProtocol,
     remote_addr: Cell<SocketAddr>,
 }
 
+/// Current state of the file protocol transaction
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum State {
-    // Neutral state, neither transmitting nor receiving
+    /// Neutral state, neither transmitting nor receiving
     Holding {
+        /// Number of consecutive times the holding state has been hit
         count: u16,
+        /// Previous state to return to once we exit the holding state
         prev_state: Box<State>,
     },
-    // Receiving a file has been requested
+    /// Preparing to receive file chunks
     StartReceive {
+        /// Destination file path
         path: String,
     },
-    // Currently receiving a file
+    /// Currently receiving a file
     Receiving {
+        /// Transaction identifier
         channel_id: u64,
+        /// File hash
         hash: String,
+        /// Destination file path
         path: String,
+        /// File mode
         mode: Option<u32>,
     },
+    /// All file chunks have been received
     ReceivingDone {
+        /// Transaction identifier
         channel_id: u64,
+        /// File hash
         hash: String,
+        /// Destination file path
         path: String,
+        /// File mode
         mode: Option<u32>,
     },
-    // Currenty transmitting a file
+    /// Currenty transmitting a file
     Transmitting,
+    /// All file chunks have been transmitted
     TransmittingDone,
-    // Finished transmitting/receiving, thread or process may end
+    /// Finished transmitting/receiving, thread or process may end
     Done,
 }
 
 impl Protocol {
     /// Create a new file protocol instance using an automatically assigned UDP socket
+    ///
+    /// # Arguments
+    ///
+    /// * host_ip - The local IP address
+    /// * remote_addr - The remote IP and port to communicate with
+    /// * prefix - Temporary storage directory prefix
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will panic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use file_protocol::*;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "192.168.0.1:7000", Some("my/file/storage".to_owned()));
+    /// ```
+    ///
     pub fn new(host_ip: &str, remote_addr: &str, prefix: Option<String>) -> Self {
         // Get a local UDP socket (Bind)
         let c_protocol = CborProtocol::new(format!("{}:0", host_ip));
@@ -86,6 +119,28 @@ impl Protocol {
     }
 
     /// Create a new file protocol instance using a specific UDP socket
+    ///
+    /// # Arguments
+    ///
+    /// * socket - The local socket to use for communication
+    /// * remote_addr - The remote IP and port to communicate with
+    /// * prefix - Temporary storage directory prefix
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will panic
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use file_protocol::*;
+    /// use std::net::UdpSocket;
+    ///
+    /// let socket = UdpSocket::bind("0.0.0.0:8000").unwrap();
+    ///
+    /// let f_protocol = FileProtocol::new_from_socket(socket, "192.168.0.1:7000", None);
+    /// ```
+    ///
     pub fn new_from_socket(socket: UdpSocket, remote_addr: &str, prefix: Option<String>) -> Self {
         Protocol {
             prefix: prefix.unwrap_or("file-transfer".to_owned()),
@@ -94,12 +149,68 @@ impl Protocol {
         }
     }
 
-    /// Wrap the specified data into a CBOR packet and then send to the destination port
+    /// Send CBOR packet to the destination port
+    ///
+    /// # Arguments
+    ///
+    /// * vec - CBOR packet to send
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// extern crate file_protocol;
+    /// extern crate serde_cbor;
+    ///
+    /// use file_protocol::*;
+    /// use serde_cbor::ser;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let message = ser::to_vec_packed(&"ping").unwrap();
+    ///
+    /// f_protocol.send(message);
+    /// ```
+    ///
     pub fn send(&self, vec: Vec<u8>) -> Result<(), String> {
         self.cbor_proto.send_message(&vec, self.remote_addr.get())?;
         Ok(())
     }
 
+    /// Receive a file protocol message
+    ///
+    /// # Arguments
+    ///
+    /// * timeout - Maximum time to wait for a reply. If `None`, will block indefinitely
+    ///
+    /// # Errors
+    ///
+    /// - If this function times out, it will return `Err(None)`
+    /// - If this function encounters any errors, it will return an error message string
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// extern crate file_protocol;
+    ///
+    /// use file_protocol::*;
+    /// use std::time::Duration;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    ///
+    /// let message = match f_protocol.recv(Some(Duration::from_secs(1))) {
+    /// 	Ok(data) => data,
+    /// 	Err(None) => {
+    ///			println!("Timeout waiting for message");
+    ///			return;
+    ///		}
+    /// 	Err(Some(err)) => panic!("Failed to receive message: {}", err),
+    /// };
+    /// ```
+    ///
     pub fn recv(&self, timeout: Option<Duration>) -> Result<Option<Value>, Option<String>> {
         match timeout {
             Some(value) => self.cbor_proto.recv_message_timeout(value),
@@ -107,12 +218,59 @@ impl Protocol {
         }
     }
 
-    /// Request a file from a remote target
+    /// Send a file's metadata information to the remote target
+    ///
+    /// # Arguments
+    ///
+    /// * hash - BLAKE2s hash of file
+    /// * num_chunks - Number of data chunks needed for file
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use file_protocol::*;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    ///
+    /// # ::std::fs::File::create("client.txt").unwrap();
+    ///
+    /// let (hash, num_chunks, _mode) = f_protocol.initialize_file("client.txt").unwrap();
+    /// f_protocol.send_metadata(&hash, num_chunks);
+    /// ```
+    ///
     pub fn send_metadata(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
         self.send(messages::metadata(&hash, num_chunks)?)
     }
 
     /// Request remote target to receive file from host
+    ///
+    /// # Arguments
+    ///
+    /// * hash - BLAKE2s hash of file
+    /// * target_path - Destination file path
+    /// * mode - File mode
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use file_protocol::*;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    ///
+    /// # ::std::fs::File::create("client.txt").unwrap();
+    ///
+    /// let (hash, _num_chunks, mode) = f_protocol.initialize_file("client.txt").unwrap();
+    /// f_protocol.send_export(&hash, "final/dir/service.txt", mode);
+    /// ```
+    ///
     pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -133,6 +291,25 @@ impl Protocol {
     }
 
     /// Request a file from a remote target
+    ///
+    /// # Arguments
+    ///
+    /// * source_path - File remote target should send
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use file_protocol::*;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    ///
+    /// f_protocol.send_import("service.txt");
+    /// ```
+    ///
     pub fn send_import(&self, source_path: &str) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -146,21 +323,42 @@ impl Protocol {
         Ok(())
     }
 
-    /// Create temporary folder for chunks
-    /// Stream copy file from mutable space to immutable space
-    /// Move folder to hash of contents
+    /// Prepare a file for transfer
+    ///
+    /// Imports the file into temporary storage and calculates the BLAKE2s hash
+    ///
+    /// # Arguments
+    ///
+    /// * source_path - File to initialize for transfer
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use file_protocol::*;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    ///
+    /// # ::std::fs::File::create("client.txt").unwrap();
+    ///
+    /// let (_hash, _num_chunks, _mode) = f_protocol.initialize_file("client.txt").unwrap();
+    /// ```
+    ///
     pub fn initialize_file(&self, source_path: &str) -> Result<(String, u32, u32), String> {
         storage::initialize_file(&self.prefix, source_path)
     }
 
-    /// Verify the integrity of received file data and then transfer into the requested permanent file location.
-    /// Notify the connection peer of the results
-    ///
-    /// Verifies:
-    ///     a) All of the chunks of a file have been received
-    ///     b) That the calculated hash of said chunks matches the expected hash
-    ///
-    pub fn finalize_file(
+    // Verify the integrity of received file data and then transfer into the requested permanent file location.
+    // Notify the connection peer of the results
+    //
+    // Verifies:
+    //     a) All of the chunks of a file have been received
+    //     b) That the calculated hash of said chunks matches the expected hash
+    //
+    fn finalize_file(
         &self,
         channel_id: u64,
         hash: &str,
@@ -179,13 +377,8 @@ impl Protocol {
         }
     }
 
-    /// Store a files metadata into the appropriate temporary storage location
-    pub fn store_meta(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
-        storage::store_meta(&self.prefix, hash, num_chunks)
-    }
-
-    /// Send all requested chunks of a file to the remote destination
-    pub fn send_chunks(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
+    // Send all requested chunks of a file to the remote destination
+    fn send_chunks(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
         for (first, last) in chunks {
             for chunk_index in *first..*last {
                 let chunk = storage::load_chunk(&self.prefix, hash, chunk_index)?;
@@ -198,7 +391,29 @@ impl Protocol {
     }
 
     /// Listen for and process file protocol messages
-    /// TODO: Make this more descriptive
+    ///
+    /// # Arguments
+    ///
+    /// * timeout - Maximum time to listen for a single message
+    /// * start_state - Current transaction state
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// extern crate file_protocol;
+    ///
+    /// use file_protocol::*;
+    /// use std::time::Duration;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    ///
+    /// f_protocol.message_engine(Duration::from_millis(10), State::Transmitting);
+    /// ```
+    ///
     pub fn message_engine(&self, timeout: Duration, start_state: State) -> Result<(), String> {
         let mut state = start_state.clone();
         loop {
@@ -324,6 +539,38 @@ impl Protocol {
     }
 
     /// Process a file protocol message
+    ///
+    /// Returns the new transaction state
+    ///
+    /// # Arguments
+    ///
+    /// * message - File protocol message to process
+    /// * state - Current transaction state
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// extern crate file_protocol;
+    ///
+    /// use file_protocol::*;
+    /// use std::time::Duration;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    ///
+    /// if let Ok(Some(message)) = f_protocol.recv(Some(Duration::from_millis(100))) {
+    /// 	let _state = f_protocol.process_message(
+    ///			message,
+    ///			State::StartReceive {
+    ///				path: "target/dir/file.bin".to_owned()
+    ///         }
+    ///		);
+    /// }
+    /// ```
+    ///
     pub fn process_message(&self, message: Value, state: State) -> Result<State, String> {
         let parsed_message = parsers::parse_message(message);
         let new_state;
