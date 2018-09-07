@@ -1,6 +1,21 @@
 Kubos Changelog
 ===============
 
+v1.5.0 - Sep 7th 2018
+---------------------
+
+- `Added a community Trello board for contributors and KubOS team members <https://trello.com/b/pIWxmFua/kubos-community>`__
+- `The file transfer service and client have both been rewritten into Rust <https://github.com/kubos/kubos/tree/master/services/file-service>`__
+- `Added documentation for how to handle the deployment hold time countdown <https://docs.kubos.com/latest/app-docs/deployment.html>`__
+- Updated the app APIs to commonize behaviour between the `Python <https://github.com/kubos/kubos/tree/master/apis/app-api/python>`__ and `Rust <https://github.com/kubos/kubos/tree/master/apis/app-api/rust>`__ versions
+- Added example mission applications for both `Rust <https://github.com/kubos/kubos/tree/master/examples/rust-mission-app>`__ and `Python <https://github.com/kubos/kubos/tree/master/examples/python-mission-app>`__
+- `Added a verbose example mission application in Python for mission design <https://github.com/kubos/kubos/tree/master/examples/python-mission-application>`__
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Standardized usage of the Rust failure crate for version 0.1.2 
+
 v1.4.0 - July 23 2018
 ---------------------
 
