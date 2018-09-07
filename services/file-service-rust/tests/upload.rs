@@ -315,19 +315,21 @@ fn upload_multi_client() {
 
     let mut thread_handles = vec![];
 
-    // Spawn 5 simultaneous clients
-    for num in 0..5 {
+    // Spawn 4 simultaneous clients
+    for _num in 0..4 {
         // Need a tiny pause between starting threads, otherwise an initial
         // operation request might get dropped because the main service socket
         // just gets overloaded with UDP packets.
-        thread::sleep(Duration::new(0, 1));
+        thread::sleep(Duration::from_millis(100));
 
         thread_handles.push(thread::spawn(move || {
             let test_dir = TempDir::new().expect("Failed to create test dir");
             let test_dir_str = test_dir.path().to_str().unwrap();
             let source = format!("{}/source", test_dir_str);
             let dest = format!("{}/dest", test_dir_str);
-            let contents = [num; 6000];
+
+            let mut contents = [0u8; 10_000];
+            thread_rng().fill(&mut contents[..]);
 
             create_test_file(&source, &contents);
 

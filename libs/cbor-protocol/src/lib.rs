@@ -46,7 +46,9 @@ impl Protocol {
         payload.extend(message);
         payload.insert(0, 0);
 
-        self.handle.send_to(&payload, &dest).unwrap();
+        self.handle
+            .send_to(&payload, &dest)
+            .map_err(|err| format!("Failed to send message to {:?}: {}", dest, err))?;
         Ok(())
     }
 
@@ -64,7 +66,9 @@ impl Protocol {
         println!("-> pause");
 
         let payload = vec![1];
-        self.handle.send_to(&payload, &dest).unwrap();
+        self.handle
+            .send_to(&payload, &dest)
+            .map_err(|err| format!("Failed to send message to {:?}: {}", dest, err))?;
         Ok(())
     }
 
@@ -73,7 +77,9 @@ impl Protocol {
         println!("-> resume");
 
         let payload = vec![2];
-        self.handle.send_to(&payload, &dest).unwrap();
+        self.handle
+            .send_to(&payload, &dest)
+            .map_err(|err| format!("Failed to send message to {:?}: {}", dest, err))?;
         Ok(())
     }
 
@@ -91,7 +97,7 @@ impl Protocol {
     pub fn peek_peer(&self) -> Result<SocketAddr, String> {
         let mut buf = [0; MSG_SIZE];
 
-        let (size, peer) = self.handle
+        let (_size, peer) = self.handle
             .peek_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
@@ -129,7 +135,7 @@ impl Protocol {
             Ok(data) => data,
             Err(err) => match err.kind() {
                 ::std::io::ErrorKind::WouldBlock => return Err(None), // For some reason, UDP recv returns WouldBlock for timeouts
-                other => return Err(Some(format!("Failed to receive a message: {:?}", err))),
+                _ => return Err(Some(format!("Failed to receive a message: {:?}", err))),
             },
         };
 
@@ -158,7 +164,7 @@ impl Protocol {
             Ok(data) => data,
             Err(err) => match err.kind() {
                 ::std::io::ErrorKind::WouldBlock => return Err(None), // For some reason, UDP recv returns WouldBlock for timeouts
-                other => return Err(Some(format!("Failed to receive a message: {:?}", err))),
+                _ => return Err(Some(format!("Failed to receive a message: {:?}", err))),
             },
         };
 
@@ -192,7 +198,7 @@ impl Protocol {
             2 => {
                 println!("<- resume");
                 // TODO: This might need to be a channel message/signal
-                self.resume().unwrap();
+                self.resume()?;
                 None
             }
             x => {

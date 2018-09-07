@@ -111,13 +111,13 @@ fn main() {
         )
         .get_matches();
 
-    // get upload vs download (required)
+    // Get upload vs download (required)
     let command = args.value_of("operation").unwrap();
 
-    // get source file (required)
+    // Get source file (required)
     let source_path = args.value_of("source_file").unwrap();
 
-    // get target file. If not present, just copy the filename from the source path
+    // Get target file. If not present, just copy the filename from the source path
     let target_path: String = match args.value_of("target_file") {
         Some(path) => path.to_owned(),
         None => Path::new(&source_path)

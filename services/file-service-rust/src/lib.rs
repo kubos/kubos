@@ -21,20 +21,23 @@ extern crate kubos_system;
 extern crate log;
 extern crate simplelog;
 
+use file_protocol::{FileProtocol, State};
 use kubos_system::Config as ServiceConfig;
 use std::thread;
 use std::time::Duration;
 
-use file_protocol::{FileProtocol, State};
-
 // We need this in this lib.rs file so we can build integration tests
 pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
+    // Get and bind our UDP listening socket
     let host = config.hosturl();
     let c_protocol = cbor_protocol::Protocol::new(host.clone());
 
+    // Extract our local IP address so we can spawn child sockets later
     let mut host_parts = host.split(':').map(|val| val.to_owned());
     let host_ip = host_parts.next().unwrap();
 
+    // Get the storage directory prefix that we'll be using for our
+    // temporary/intermediate storage location
     let prefix = match config.get("storage_dir") {
         Some(val) => val.as_str().and_then(|str| Some(str.to_owned())),
         None => None,
@@ -56,16 +59,19 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
             };
 
             // Set up the file system processor with the reply socket information
-            // TODO: Opening a second local port might be a terrible plan. Though it is kind of what TCP does
             let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref);
 
+            // Process that first message that we got
             if let Some(msg) = first_message {
                 if let Ok(new_state) = f_protocol.process_message(msg, state.clone()) {
                     state = new_state;
                 }
             }
+
+            // Listen, process, and react to the remaining messages in the
+            // requested operation
             match f_protocol.message_engine(Duration::from_secs(2), state) {
-                Err(e) => warn!("message_engine exited with {:?}", e),
+                Err(e) => warn!("Encountered errors while processing transaction: {}", e),
                 _ => {}
             }
         });
