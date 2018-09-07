@@ -5,4 +5,4 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
 nom = "4.0.0-beta1"
-failure = "0.1.1"
+failure = "0.1.2"

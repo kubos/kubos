@@ -336,11 +336,13 @@ impl MAI400 {
     /// [`MAIError`]: enum.MAIError.html
     pub fn get_message(
         &self,
-    ) -> MAIResult<(
-        Option<StandardTelemetry>,
-        Option<RawIMU>,
-        Option<IREHSTelemetry>,
-    )> {
+    ) -> MAIResult<
+        (
+            Option<StandardTelemetry>,
+            Option<RawIMU>,
+            Option<IREHSTelemetry>,
+        ),
+    > {
         let mut msg = vec![];
         loop {
             {
@@ -357,7 +359,7 @@ impl MAI400 {
                     Ok(v) => v,
                     Err(err) => match err {
                         #[cfg(test)]
-                        UartError::GenericError => throw!(MAIError::GenericError),
+                        UartError::GenericError => return Err(MAIError::GenericError),
                         UartError::IoError {
                             cause: ::std::io::ErrorKind::TimedOut,
                             description: _,
@@ -407,22 +409,22 @@ impl MAI400 {
 }
 
 /// Common Error for MAI Actions
-#[derive(Fail, Display, Debug, Clone, PartialEq)]
+#[derive(Fail, Debug, Clone, PartialEq)]
 pub enum MAIError {
     /// Catch-all error
-    #[display(fmt = "Generic Error")]
+    #[fail(display = "Generic Error")]
     GenericError,
     /// The thread reading messages from the device is no longer working
-    #[display(fmt = "Failed to communicate with read thread")]
+    #[fail(display = "Failed to communicate with read thread")]
     ThreadCommError,
     /// Received a valid message, but the message ID doesn't match any known message type
-    #[display(fmt = "Unknown Message Received: {:X}", id)]
+    #[fail(display = "Unknown Message Received: {:X}", id)]
     UnknownMessage {
         /// ID of message received
         id: u16,
     },
     /// An error was thrown by the serial communication driver
-    #[display(fmt = "UART Error")]
+    #[fail(display = "UART Error")]
     UartError {
         /// The underlying error
         #[fail(cause)]

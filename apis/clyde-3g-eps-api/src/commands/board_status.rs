@@ -56,7 +56,7 @@ pub fn parse(data: &[u8]) -> EpsResult<BoardStatus> {
             daughterboard: Some(StatusCode::from_bits(data[0]).unwrap_or_default()),
         })
     } else {
-        throw!(EpsError::parsing_failure("Board Status"))
+        return Err(EpsError::parsing_failure("Board Status"));
     }
 }
 

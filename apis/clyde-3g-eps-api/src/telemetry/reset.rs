@@ -109,7 +109,7 @@ pub fn parse(data: &[u8]) -> EpsResult<Data> {
             daughterboard: Some(data[3]),
         })
     } else {
-        throw!(EpsError::parsing_failure("Reset Telemetry"))
+        return Err(EpsError::parsing_failure("Reset Telemetry"));
     }
 }
 
@@ -140,7 +140,7 @@ mod tests {
             parse(&input),
             Ok(Data {
                 motherboard: 1,
-                daughterboard: None
+                daughterboard: None,
             })
         );
     }
@@ -152,7 +152,7 @@ mod tests {
             parse(&input),
             Ok(Data {
                 motherboard: 1,
-                daughterboard: Some(0x10)
+                daughterboard: Some(0x10),
             })
         );
     }

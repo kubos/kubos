@@ -16,7 +16,7 @@ fn upload(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
-) -> Result<String, String> {
+) -> Result<(), String> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     info!(
@@ -38,12 +38,7 @@ fn upload(
     f_protocol.send_export(&hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    f_protocol.message_engine(
-        Duration::from_secs(2),
-        State::Transmitting { hash: hash.clone() },
-    )?;
-
-    Ok(hash.to_owned())
+    Ok(f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?)
 }
 
 fn download(
@@ -52,7 +47,7 @@ fn download(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
-) -> Result<String, String> {
+) -> Result<(), String> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     info!(
@@ -70,8 +65,8 @@ fn download(
             path: target_path.to_string(),
         },
     )?;
-
-    Ok(hash)
+  
+    Ok(f_protocol.message_engine(Duration::from_secs(2), state)?)
 }
 
 fn main() {
@@ -111,13 +106,13 @@ fn main() {
         )
         .get_matches();
 
-    // get upload vs download (required)
+    // Get upload vs download (required)
     let command = args.value_of("operation").unwrap();
 
-    // get source file (required)
+    // Get source file (required)
     let source_path = args.value_of("source_file").unwrap();
 
-    // get target file. If not present, just copy the filename from the source path
+    // Get target file. If not present, just copy the filename from the source path
     let target_path: String = match args.value_of("target_file") {
         Some(path) => path.to_owned(),
         None => Path::new(&source_path)

@@ -21,8 +21,7 @@ extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
 
-use cbor_protocol::Protocol as CborProtocol;
-use file_protocol::{messages, storage, FileProtocol, State};
+use file_protocol::{FileProtocol, State};
 use file_service_rust::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use std::thread;
@@ -81,11 +80,10 @@ fn upload(
     f_protocol.send_export(&hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    f_protocol.message_engine(
-        Duration::from_secs(2),
-        State::Transmitting { hash: hash.clone() },
-    )?;
+    f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?;
 
+    // Note: The original upload client function does not return the hash.
+    // We're only doing it here so that we can manipulate the temporary storage
     Ok(hash.to_owned())
 }
 
@@ -317,14 +315,21 @@ fn upload_multi_client() {
 
     let mut thread_handles = vec![];
 
-    // Spawn 5 simultaneous clients
-    for num in 0..5 {
+    // Spawn 4 simultaneous clients
+    for _num in 0..4 {
+        // Need a tiny pause between starting threads, otherwise an initial
+        // operation request might get dropped because the main service socket
+        // just gets overloaded with UDP packets.
+        thread::sleep(Duration::from_millis(100));
+
         thread_handles.push(thread::spawn(move || {
             let test_dir = TempDir::new().expect("Failed to create test dir");
             let test_dir_str = test_dir.path().to_str().unwrap();
             let source = format!("{}/source", test_dir_str);
             let dest = format!("{}/dest", test_dir_str);
-            let contents = [num; 6000];
+
+            let mut contents = [0u8; 10_000];
+            thread_rng().fill(&mut contents[..]);
 
             create_test_file(&source, &contents);
 
@@ -406,7 +411,7 @@ fn large_up() {
     let mut source_file = File::open(source).unwrap();
     let mut dest_file = File::open(dest).unwrap();
     // 24415 = 100M / 4096
-    // 2442 = 10/M / 4096
+    // 2442 = 10M / 4096
     for num in 0..24415 {
         let mut source_buf = [0u8; 4096];
         let mut dest_buf = [0u8; 4096];

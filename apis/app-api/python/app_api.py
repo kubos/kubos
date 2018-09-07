@@ -26,7 +26,8 @@ class Services:
 
         # Check inputs
         if service not in self.config:
-            raise KeyError("Service not available.")
+            raise KeyError(
+                "Service name invalid. Check config file for service names.")
         if type(query) not in [str, unicode]:
             raise TypeError("Query must be str or unicode.")
 
