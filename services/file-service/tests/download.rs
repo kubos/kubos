@@ -17,15 +17,15 @@
 extern crate blake2_rfc;
 extern crate cbor_protocol;
 extern crate file_protocol;
-extern crate file_service_rust;
+extern crate file_service;
 extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
 
 use blake2_rfc::blake2s::Blake2s;
-use kubos_system::Config as ServiceConfig;
 use file_protocol::{FileProtocol, State};
-use file_service_rust::recv_loop;
+use file_service::recv_loop;
+use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
 use std::fs;
 use std::fs::{File, OpenOptions};
