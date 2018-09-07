@@ -74,7 +74,7 @@ fn upload(
 
     // TODO: We need this sleep so that the service can have time to set up the temporary
     // storage directory. Do something to make this unnecessary
-    ::std::thread::sleep(Duration::from_millis(1));
+    ::std::thread::sleep(Duration::from_millis(100));
 
     // Send export command for file
     f_protocol.send_export(&hash, &target_path, mode)?;
