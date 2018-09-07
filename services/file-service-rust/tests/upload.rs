@@ -316,7 +316,7 @@ fn upload_multi_client() {
     let mut thread_handles = vec![];
 
     // Spawn 4 simultaneous clients
-    for num in 0..4 {
+    for _num in 0..4 {
         // Need a tiny pause between starting threads, otherwise an initial
         // operation request might get dropped because the main service socket
         // just gets overloaded with UDP packets.

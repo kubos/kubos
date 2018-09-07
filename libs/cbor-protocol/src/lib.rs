@@ -48,7 +48,7 @@ impl Protocol {
 
         self.handle
             .send_to(&payload, &dest)
-            .map_err(|err| format!("Failed to send message to {:?}: {}", err))?;
+            .map_err(|err| format!("Failed to send message to {:?}: {}", dest, err))?;
         Ok(())
     }
 
@@ -68,7 +68,7 @@ impl Protocol {
         let payload = vec![1];
         self.handle
             .send_to(&payload, &dest)
-            .map_err(|err| format!("Failed to send message to {:?}: {}", err))?;
+            .map_err(|err| format!("Failed to send message to {:?}: {}", dest, err))?;
         Ok(())
     }
 
@@ -79,7 +79,7 @@ impl Protocol {
         let payload = vec![2];
         self.handle
             .send_to(&payload, &dest)
-            .map_err(|err| format!("Failed to send message to {:?}: {}", err))?;
+            .map_err(|err| format!("Failed to send message to {:?}: {}", dest, err))?;
         Ok(())
     }
 
@@ -97,7 +97,7 @@ impl Protocol {
     pub fn peek_peer(&self) -> Result<SocketAddr, String> {
         let mut buf = [0; MSG_SIZE];
 
-        let (size, peer) = self.handle
+        let (_size, peer) = self.handle
             .peek_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
@@ -135,7 +135,7 @@ impl Protocol {
             Ok(data) => data,
             Err(err) => match err.kind() {
                 ::std::io::ErrorKind::WouldBlock => return Err(None), // For some reason, UDP recv returns WouldBlock for timeouts
-                other => return Err(Some(format!("Failed to receive a message: {:?}", err))),
+                _ => return Err(Some(format!("Failed to receive a message: {:?}", err))),
             },
         };
 
@@ -164,7 +164,7 @@ impl Protocol {
             Ok(data) => data,
             Err(err) => match err.kind() {
                 ::std::io::ErrorKind::WouldBlock => return Err(None), // For some reason, UDP recv returns WouldBlock for timeouts
-                other => return Err(Some(format!("Failed to receive a message: {:?}", err))),
+                _ => return Err(Some(format!("Failed to receive a message: {:?}", err))),
             },
         };
 
