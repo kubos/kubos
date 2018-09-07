@@ -222,7 +222,8 @@ impl Protocol {
     ///
     /// # Arguments
     ///
-    /// * timeout - Maximum time to wait for a reply. If `None`, will block indefinitely
+    /// * hash - BLAKE2s hash of file
+    /// * num_chunks - Number of data chunks needed for file
     ///
     /// # Errors
     ///
