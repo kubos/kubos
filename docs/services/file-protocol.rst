@@ -9,11 +9,25 @@ This document covers the content-addressable storage, all
 messages used in the protocol, and includes diagrams
 of common use cases.
 
+APIs
+----
+
+- |file-protocol|
+- |cbor-protocol|
+
+ .. |file-protocol| raw:: html
+ 
+    <a href="../rust-docs/file_protocol/index.html" target="_blank">File Protocol</a>
+    
+ .. |cbor-protocol| raw:: html
+ 
+    <a href="../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
+
 Content-Addressable Storage
 ---------------------------
 
 The file protocol uses a content-addressable system to store file data.
-All files are broken up into 4KB chunks prior to sending. This chunking
+All files are broken up into chunks prior to sending. This chunking
 is initiated either by an ``export`` or ``import`` message. A local
 storage folder is created by the file transfer service and client
 for storing the content-addressable information.
@@ -56,8 +70,8 @@ The first value in the encoded list is the ``channel_id``
 for request/response type messages or the ``hash`` for content-addressable
 messages.
 
-    - The ``channel_id`` parameter corresponds to an in-memory array of coroutines
-      created as part of the file transfer process.
+    - The ``channel_id`` parameter is used to indicate a group of messages associated with
+      a particular file protocol transaction.
     - The ``hash`` parameter is the BLAKE2 hash for the corresponding file
       which is being transferred.
 
@@ -137,12 +151,17 @@ File Chunk
 This message is sent as part of the file ``import`` or ``export`` process.
 It contains the file hash, chunk index, and raw chunk data.
 
-Each raw chunk is 4KB in size. Individual chunk messages will not get
+By default, each raw chunk is 4KB in size. Individual chunk messages will not get
 an immediate reply. However, if no chunks are received within the
 timeout window then an ``ACK`` or ``NAK`` will be sent depending
 on whether all the chunks have been received or not.
 
     ``{ hash, chunk_index, data }``
+    
+.. note::
+
+    Chunk size configuration is not currently available, but will be added
+    in a future release.
     
 Acknowledge (ACK)
 ~~~~~~~~~~~~~~~~~

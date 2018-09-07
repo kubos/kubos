@@ -64,25 +64,12 @@ fn download(
     // going to be able to send it
     f_protocol.send_import(source_path)?;
 
-    // Wait for the request reply.
-    // Note/TODO: We don't use a timeout here because we don't know how long it will
-    // take the server to prepare the file we've requested.
-    // Larger files (> 100MB) can take over a minute to process.
-    let reply = match f_protocol.recv(None) {
-        Ok(Some(message)) => message,
-        Ok(None) => return Err("Failed to import file".to_owned()),
-        Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
-        Err(None) => return Err("Failed to import file".to_owned()),
-    };
-
-    let state = f_protocol.process_message(
-        reply,
+    let hash = f_protocol.message_engine(
+        Duration::from_secs(2),
         State::StartReceive {
             path: target_path.to_string(),
         },
     )?;
-
-    let hash = f_protocol.message_engine(Duration::from_secs(2), state)?;
 
     Ok(hash)
 }
@@ -105,16 +92,22 @@ fn main() {
         .arg(Arg::with_name("source_file").index(2).required(true))
         .arg(Arg::with_name("target_file").index(3))
         .arg(
-            Arg::with_name("local_ip")
-                .short("i")
+            Arg::with_name("host_ip")
+                .short("h")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
         .arg(
-            Arg::with_name("remote_addr")
-                .short("-a")
+            Arg::with_name("remote_ip")
+                .short("-r")
                 .takes_value(true)
-                .default_value("0.0.0.0:7000"),
+                .default_value("0.0.0.0"),
+        )
+        .arg(
+            Arg::with_name("remote_port")
+                .short("-p")
+                .takes_value(true)
+                .default_value("7000"),
         )
         .get_matches();
 
@@ -134,12 +127,16 @@ fn main() {
             .into_owned(),
     };
 
-    let local_ip = args.value_of("local_ip").unwrap();
-    let remote_addr = args.value_of("remote_addr").unwrap();
+    let host_ip = args.value_of("host_ip").unwrap();
+    let remote_addr = format!(
+        "{}:{}",
+        args.value_of("remote_ip").unwrap(),
+        args.value_of("remote_port").unwrap()
+    );
 
     let result = match command.as_ref() {
-        "upload" => upload(local_ip, remote_addr, &source_path, &target_path, None),
-        "download" => download(local_ip, remote_addr, &source_path, &target_path, None),
+        "upload" => upload(host_ip, &remote_addr, &source_path, &target_path, None),
+        "download" => download(host_ip, &remote_addr, &source_path, &target_path, None),
         // This shouldn't be possible, since we checked the string earlier
         _ => {
             error!("Unknown command given");

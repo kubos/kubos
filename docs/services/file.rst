@@ -14,6 +14,118 @@ capable of transferring UDP packets. This could be established using the
 Overview
 --------
 
+.. uml::
+
+    @startuml
+    
+    hide empty description
+    
+    state "Receive Message" as Receive
+    state "Export Request" as Export
+    state "Import Request" as Import
+
+    [*] --> Receive
+    Receive : Process transaction request from client
+    
+    Receive -down-> Metadata
+    Metadata : Save file metadata information
+    Metadata --> Done
+    
+    Receive -left-> Export
+    Export : Prepare to receive file from client
+    Export --> Receiving
+    
+    state Receiving {
+        state "Chunk Message" as Chunk
+        state "Success" as Receive_Success
+        state "Failure" as Receive_Failure
+        state "Wait" as Receive_Wait
+        state "ACK" as Receive_ACK
+        state "NAK" as Receive_NAK
+        state "Timeout" as Receive_Timeout
+        
+        [*] -down-> Verify
+        Verify : Check file status
+        
+        Verify -right-> Receive_ACK : All chunks received
+        Receive_ACK : Send ACK message to client
+        Receive_ACK --> Finalize
+        
+        Verify -left-> Receive_NAK : Some chunks missing
+        Receive_NAK : Send NAK message to client
+        
+        Receive_NAK --> Receive_Wait
+        Receive_Wait : Wait for chunk data from client
+        
+        Receive_Wait -down-> Chunk
+        Chunk : Save chunk data
+        Chunk --> Receive_Wait
+        
+        Receive_Wait -right-> Receive_Timeout
+        Receive_Timeout : Increase timeout counter
+        Receive_Timeout -up-> Verify : Counter < limit
+        Receive_Timeout --> Finalize : Counter >= limit
+        
+        Finalize : Re-assemble chunks and verify integrity
+        
+        Finalize --> Receive_Success : Hash verification passed
+        Receive_Success : Send success message to client
+        Receive_Success --> [*]
+        
+        Finalize --> Receive_Failure : Hash verification failed
+        Receive_Failure : Send failure message to client
+        Receive_Failure --> [*]
+    }
+    Receiving --> Done
+    
+    Receive -right-> Import
+    Import : Prepare to transmit file to client
+    
+    Import --> Initialize
+    Initialize : Import file into temporary storage and calculate hash
+    
+    Initialize --> Transmit_Failure
+    Transmit_Failure : Send failure message to client
+    Transmit_Failure --> Done    
+    
+    Initialize --> Transmit_Success
+    Transmit_Success : Send success message to client with file metadata
+    Transmit_Success --> Transmitting
+    
+    state Transmitting {
+        state "Success" as Transmit_Success
+        state "Failure" as Transmit_Failure
+        state "Wait" as Transmit_Wait
+        state "ACK" as Transmit_ACK
+        state "NAK" as Transmit_NAK
+        state "Timeout" as Transmit_Timeout
+        state "Send Chunk" as Send
+        
+        [*] --> Transmit_Wait
+        Transmit_Wait : Wait for file status message from client
+        
+        Transmit_Wait --> Transmit_ACK
+        Transmit_ACK : Receive ACK from client
+        Transmit_ACK --> [*]
+        
+        Transmit_Wait --> Transmit_NAK
+        Transmit_NAK : Receive NAK from client
+        Transmit_NAK -up-> Send
+        
+        Send --> Send : For all missing chunks
+        Send : Send chunk data message to client
+        Send -left-> Transmit_Wait
+        
+        Transmit_Wait --> Transmit_Timeout
+        Transmit_Timeout --> Transmit_Wait : Counter < limit
+        Transmit_Timeout : Increase timeout counter
+        Transmit_Timeout --> [*] : Counter >= limit
+    }
+    
+    Transmitting --> Done
+    
+    @enduml
+
 The file transfer service listens for requests on its configured UDP socket.
 
 When a message is received, it is then processed using the file protocol message engine.
@@ -26,6 +138,11 @@ and then stops communicating while in the middle of sending file chunks, the ser
 will timeout, check the current status of the file, and then send a NAK to the client
 with the current missing chunks. Receiving this NAK should cause the client to
 resume transmitting file chunk data.
+
+.. note::
+
+    This timeout is currently hardcoded to two seconds.
+    It will be a configurable option in a future release.
 
 In order to support simultaneous client connections, whenever a message is received
 on the main UDP socket, a new socket is spawned in order to handle the rest
@@ -58,6 +175,12 @@ For example::
     [file-transfer-service.addr]
     ip = "0.0.0.0"
     port = 7000
+    
+Future configuration options:
+
+    - Intra-transaction message timeout duration
+    - Maximum number of timeout-retry attempts
+    - Non-default destination IP/port
 
 Running the Service from KubOS
 ------------------------------
@@ -81,10 +204,4 @@ in the KubOS source repo. The service can be started like so::
     $ cargo run -- -c config.toml
 
 The service will look for the given ``config.toml`` file in order to get the
-needed configuration options.
-
-Communicating with the Service
-------------------------------
-
-The KubOS repo contains a `file transfer client program <https://github.com/kubos/kubos/tree/master/clients/file-client-rust>`__ 
-which can be used to send and receive files to/from the service.
+needed configuration options.    

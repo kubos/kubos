@@ -27,5 +27,6 @@ Optional arguments:
     - ``target-file`` - Final destination path for the transferred file. 
                         If not specified, the root file name from ``source-file`` will be used
                         and the file will be placed in the current directory of the destination.
-    - ``-a {socket}`` - Default: `0.0.0.0:7000`. UDP socket of the file transfer service to connect to. 
-    - ``-i {IP addr}`` - Default: `0.0.0.0`. IP address of the local host to use.
+    - ``-h {host IP}`` - Default: `0.0.0.0`. IP address of the local host to use.
+    - ``-r {remote IP}`` - Default: `0.0.0.0`. IP address of the file transfer service to connect to.
+    - ``-p {remote port}`` - Default: `7000`. UDP port of the file transfer service to connect to.
