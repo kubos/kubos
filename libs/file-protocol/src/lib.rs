@@ -25,11 +25,11 @@
 //! use std::time::Duration;
 //!
 //! fn upload() -> Result<(), String> {
-//!    let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", Some("storage/dir".to_owned()));
+//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", Some("storage/dir".to_owned()));
 //!
-//!    # ::std::fs::File::create("client.txt").unwrap();
-//!    let source_path = "client.txt";
-//!    let target_path = "service.txt";
+//!     # ::std::fs::File::create("client.txt").unwrap();
+//!     let source_path = "client.txt";
+//!     let target_path = "service.txt";
 //!
 //!     // Copy file to upload to temp storage. Calculate the hash and chunk info
 //!     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
@@ -55,11 +55,11 @@
 //! use std::time::Duration;
 //!
 //! fn download() -> Result<(), String> {
-//!    let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:8000", None);
+//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:8000", None);
 //!
-//!    # ::std::fs::File::create("service.txt").unwrap();
-//!    let source_path = "service.txt";
-//!    let target_path = "client.txt";
+//!     # ::std::fs::File::create("service.txt").unwrap();
+//!     let source_path = "service.txt";
+//!     let target_path = "client.txt";
 //!
 //!     // Send our file request to the remote addr and verify that it's
 //!     // going to be able to send it

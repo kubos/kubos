@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-//! TODO: Module documentation
+//! File transfer protocol module
 
 use super::messages;
 use super::parsers;
@@ -33,7 +33,7 @@ use std::net::SocketAddr;
 // while holding before killing the thread
 const HOLD_TIMEOUT: u16 = 5;
 
-/// File Protocol information Structure
+/// File protocol information structure
 pub struct Protocol {
     prefix: String,
     cbor_proto: CborProtocol,
@@ -187,7 +187,7 @@ impl Protocol {
     ///
     /// # Errors
     ///
-    /// - If this function times out, it will return Err(None)
+    /// - If this function times out, it will return `Err(None)`
     /// - If this function encounters any errors, it will return an error message string
     ///
     ///

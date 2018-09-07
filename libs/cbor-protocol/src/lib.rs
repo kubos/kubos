@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-//! CBOR over UDP communication crate
+//! Kubos CBOR over UDP communication crate
 //!
 //! # Examples
 //!
@@ -33,11 +33,11 @@
 //!
 //! match cbor_connection.recv_message_peer_timeout(Duration::from_millis(10)) {
 //!     Ok((source, message)) => {
-//! 		if let Some(msg) = message {
-//! 			println!("Received message from {:?}: {:?}", source, msg);
-//!			}
-//!		}
-//!		Err(None) => println!("Timed out waiting for reply"),
+//!         if let Some(msg) = message {
+//!             println!("Received message from {:?}: {:?}", source, msg);
+//!            }
+//!        }
+//!        Err(None) => println!("Timed out waiting for reply"),
 //!     Err(Some(err)) => eprintln!("Failed to receive message: {}", err)
 //! }
 //! ```
@@ -58,8 +58,7 @@ const MSG_SIZE: usize = 4500;
 
 /// CBOR protocol communication structure
 pub struct Protocol {
-    /// Host UDP socket to use for communication
-    pub handle: UdpSocket,
+    handle: UdpSocket,
 }
 
 impl Protocol {
@@ -308,12 +307,12 @@ impl Protocol {
     /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
     ///
     /// let (source, message) = match cbor_connection.recv_message_peer_timeout(Duration::from_secs(1)) {
-    /// 	Ok(data) => data,
-    /// 	Err(None) => {
-    ///			println!("Timeout waiting for message");
-    ///			return;
-    ///		}
-    /// 	Err(Some(err)) => panic!("Failed to receive message: {}", err),
+    ///     Ok(data) => data,
+    ///     Err(None) => {
+    ///            println!("Timeout waiting for message");
+    ///            return;
+    ///        }
+    ///     Err(Some(err)) => panic!("Failed to receive message: {}", err),
     /// };
     /// ```
     ///
@@ -368,12 +367,12 @@ impl Protocol {
     /// let cbor_connection = Protocol::new("0.0.0.0:9000".to_owned());
     ///
     /// let message = match cbor_connection.recv_message_timeout(Duration::from_secs(1)) {
-    /// 	Ok(data) => data,
-    /// 	Err(None) => {
-    ///			println!("Timeout waiting for message");
-    ///			return;
-    ///		}
-    /// 	Err(Some(err)) => panic!("Failed to receive message: {}", err),
+    ///     Ok(data) => data,
+    ///     Err(None) => {
+    ///            println!("Timeout waiting for message");
+    ///            return;
+    ///        }
+    ///     Err(Some(err)) => panic!("Failed to receive message: {}", err),
     /// };
     /// ```
     ///

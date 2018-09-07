@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#![deny(warnings)]
+
 extern crate cbor_protocol;
 extern crate file_protocol;
 extern crate file_service_rust;
