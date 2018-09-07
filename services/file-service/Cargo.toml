@@ -1,5 +1,5 @@
 [package]
-name = "file-service-rust"
+name = "file-service"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 

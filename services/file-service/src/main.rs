@@ -18,13 +18,13 @@
 
 extern crate cbor_protocol;
 extern crate file_protocol;
-extern crate file_service_rust;
+extern crate file_service;
 extern crate kubos_system;
 #[macro_use]
 extern crate log;
 extern crate simplelog;
 
-use file_service_rust::*;
+use file_service::*;
 use kubos_system::Config as ServiceConfig;
 use simplelog::*;
 use std::fs::File;
