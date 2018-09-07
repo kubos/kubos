@@ -14,9 +14,78 @@
 // limitations under the License.
 //
 
-//! TODO: Crate documentation
+//! Kubos File Transfer Protocol
+//!
+//! # Examples
+//!
+//! ```no_run
+//! extern crate file_protocol;
+//!
+//! use file_protocol::*;
+//! use std::time::Duration;
+//!
+//! fn upload() -> Result<(), String> {
+//!    let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", Some("storage/dir".to_owned()));
+//!
+//!    # ::std::fs::File::create("client.txt").unwrap();
+//!    let source_path = "client.txt";
+//!    let target_path = "service.txt";
+//!
+//!     // Copy file to upload to temp storage. Calculate the hash and chunk info
+//!     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
+//!
+//!     // Tell our destination the hash and number of chunks to expect
+//!     f_protocol.send_metadata(&hash, num_chunks)?;
+//!
+//!     // Give the service can have time to set up the temporary storage directory
+//!     ::std::thread::sleep(Duration::from_millis(1));
+//!
+//!     // Send export command for file
+//!     f_protocol.send_export(&hash, &target_path, mode)?;
+//!
+//!     // Start the engine to send the file data chunks
+//!     Ok(f_protocol.message_engine(Duration::from_millis(10), State::Transmitting)?)
+//! }
+//! ```
+//!
+//! ```no_run
+//! extern crate file_protocol;
+//!
+//! use file_protocol::*;
+//! use std::time::Duration;
+//!
+//! fn download() -> Result<(), String> {
+//!    let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:8000", None);
+//!
+//!    # ::std::fs::File::create("service.txt").unwrap();
+//!    let source_path = "service.txt";
+//!    let target_path = "client.txt";
+//!
+//!     // Send our file request to the remote addr and verify that it's
+//!     // going to be able to send it
+//!     f_protocol.send_import(source_path)?;
+//!
+//!     // Wait for the request reply
+//!     let reply = match f_protocol.recv(None) {
+//!         Ok(Some(message)) => message,
+//!         Ok(None) => return Err("Failed to import file".to_owned()),
+//!         Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
+//!         Err(None) => return Err("Failed to import file".to_owned()),
+//!     };
+//!
+//!     let state = f_protocol.process_message(
+//!         reply,
+//!         State::StartReceive {
+//!             path: target_path.to_string(),
+//!         },
+//!     )?;
+//!
+//!     Ok(f_protocol.message_engine(Duration::from_millis(10), state)?)
+//! }
+//! ```
+//!
 
-//#![deny(missing_docs)]
+#![deny(missing_docs)]
 
 extern crate blake2_rfc;
 extern crate cbor_protocol;
@@ -26,10 +95,10 @@ extern crate serde;
 extern crate serde_cbor;
 extern crate time;
 
-pub mod messages;
+mod messages;
 mod parsers;
 pub mod protocol;
-pub mod storage;
+mod storage;
 
 pub use protocol::Protocol as FileProtocol;
 pub use protocol::State;
