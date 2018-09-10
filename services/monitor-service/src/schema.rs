@@ -38,10 +38,14 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
             .map_err(|err| FieldError::new(err, juniper::Value::null()))
     }
 
-    field ps(&executor, pids: Option<Vec<i32>>) -> Vec<PSResponse>
+    field ps(&executor, pids: Option<Vec<i32>>) -> FieldResult<Vec<PSResponse>>
     {
-        pids.unwrap_or_else(|| process::running_pids())
-            .into_iter().map(|pid| PSResponse::new(pid)).collect()
+        let pids_vec: Vec<i32> = match pids {
+            Some(vec) => vec,
+            None => process::running_pids()?
+        };
+
+        Ok(pids_vec.into_iter().map(|pid| PSResponse::new(pid)).collect())
     }
 });
 

@@ -7,7 +7,7 @@ authors = ["Marshall Culpepper <marshall@kubos.com>"]
 failure = "0.1.2"
 juniper = "0.9"
 kubos-service = { path = "../kubos-service" }
-text_io = "0.1"
+regex = "1"
 
 [dev-dependencies]
 serde = "1.0"

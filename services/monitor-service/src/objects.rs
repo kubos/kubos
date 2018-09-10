@@ -14,7 +14,8 @@
 // limitations under the License.
 //
 use meminfo::MemInfo;
-use process::{ProcStat, UserInfo};
+use process::ProcStat;
+use userinfo::UserInfo;
 
 pub struct MemInfoResponse {
     pub info: MemInfo,

@@ -12,78 +12,79 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 use failure;
+use regex::Regex;
 
+use std::i32;
 use std::fs::{self, File};
-use std::os::unix::fs::MetadataExt;
-use std::io::{Read, BufRead, BufReader};
-use std::path::{Path, PathBuf};
+use std::io::{Read, BufReader};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Stats provided by the Linux /proc/<pid>/stat file format
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ProcStat {
-    pid: i32,
-    comm: String,
-    state: char,
-    ppid: i32,
-    pgrp: i32,
-    session: i32,
-    tty_nr: i32,
-    tpgid: i32,
-    flags: u32,
-    minflt: u32,
-    cminflt: u32,
-    majflt: u32,
-    cmajflt: u32,
-    utime: u32,
-    stime: u32,
-    cutime: i32,
-    cstime: i32,
-    priority: i32,
-    nice: i32,
-    num_threads: i32,
-    itrealvalue: i32,
-    starttime: i64,
-    vsize: u32,
-    rss: i32,
-    rsslim: u32,
-    startcode: u32,
-    endcode: u32,
-    startstack: u32,
-    kstkesp: u32,
-    kstkeip: u32,
-    signal: u32,
-    blocked: u32,
-    sigignore: u32,
-    sigcatch: u32,
-    wchan: u32,
-    nswap: u32,
-    cnswap: u32,
-    exit_signal: i32,
-    processor: i32,
-    rt_priority: u32,
-    policy: u32,
-    delayacct_blkio_ticks: u64,
-    guest_time: u32,
-    cguest_time: i32,
-    start_data: u32,
-    end_data: u32,
-    start_brk: u32,
-    arg_start: u32,
-    arg_end: u32,
-    env_start: u32,
-    env_end: u32,
-    exit_code: i32,
+    pid: i32,                   // %d
+    comm: String,               // %s
+    state: char,                // %c
+    ppid: i32,                  // %d
+    pgrp: i32,                  // %d
+    session: i32,               // %d
+    tty_nr: i32,                // %d
+    tpgid: i32,                 // %d
+    flags: u32,                 // %u
+    minflt: u64,                // %lu
+    cminflt: u64,               // %lu
+    majflt: u64,                // %lu
+    cmajflt: u64,               // %lu
+    utime: u64,                 // %lu
+    stime: u64,                 // %lu
+    cutime: i64,                // %ld
+    cstime: i64,                // %ld
+    priority: i64,              // %ld
+    nice: i64,                  // %ld
+    num_threads: i64,           // %ld
+    itrealvalue: i64,           // %ld
+    starttime: u64,             // %llu
+    vsize: u64,                 // %lu
+    rss: i64,                   // %ld
+    rsslim: u64,                // %lu
+    startcode: u64,             // %lu
+    endcode: u64,               // %lu
+    startstack: u64,            // %lu
+    kstkesp: u64,               // %lu
+    kstkeip: u64,               // %lu
+    signal: u64,                // %lu
+    blocked: u64,               // %lu
+    sigignore: u64,             // %lu
+    sigcatch: u64,              // %lu
+    wchan: u64,                 // %lu
+    nswap: u64,                 // %lu
+    cnswap: u64,                // %lu
+    exit_signal: i32,           // %d
+    processor: i32,             // %d
+    rt_priority: u32,           // %u
+    policy: u32,                // %u
+    delayacct_blkio_ticks: u64, // %llu
+    guest_time: u64,            // %lu
+    cguest_time: i64,           // %ld
+    start_data: u64,            // %lu
+    end_data: u64,              // %lu
+    start_brk: u64,             // %lu
+    arg_start: u64,             // %lu
+    arg_end: u64,               // %lu
+    env_start: u64,             // %lu
+    env_end: u64,               // %lu
+    exit_code: i32,             // %d
 }
 
 #[cfg(not(test))]
 #[inline]
-fn root_dir() -> PathBuf {
+pub fn root_dir() -> PathBuf {
     PathBuf::from("/")
 }
 
+#[macro_export]
 macro_rules! root_path {
     ( $( $x:expr ),* ) => {
         {
@@ -96,37 +97,93 @@ macro_rules! root_path {
     };
 }
 
+fn unwrap_optstr<'a, T>(opt: Option<&'a str>) -> T
+    where T: FromStr, T: Default
+{
+    opt.map_or_else(|| T::default(), |s| {
+        T::from_str(s).unwrap_or_default()
+    })
+}
+
 impl ProcStat {
     /// Convenience function that parses the stat file for a specific process ID
     /// See ProcStat::parse for more information
     pub fn from_pid(pid: i32) -> Result<Self, failure::Error> {
         let file = File::open(root_path!("proc", pid, "stat"))?;
-        Ok(Self::parse(BufReader::new(file)))
+        Self::parse(BufReader::new(file))
     }
 
     /// Parse a String with the format of a /proc/[pid]/stat file
     /// See http://man7.org/linux/man-pages/man5/proc.5.html for more information
-    pub fn parse<R>(stat: R) -> Self
+    pub fn parse<R>(stat: R) -> Result<Self, failure::Error>
         where R: Read
     {
         let mut ps = Self::default();
 
         // Order and format of these fields taken from
         // http://man7.org/linux/man-pages/man5/proc.5.html
-        scan!(stat.bytes().map(|c| c.unwrap()) =>
-            "{} ({}) {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} \
-             {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}",
-            ps.pid, ps.comm, ps.state, ps.ppid, ps.pgrp, ps.session, ps.tty_nr, ps.tpgid,
-            ps.flags, ps.minflt, ps.cminflt, ps.majflt, ps.cmajflt, ps.utime, ps.stime, ps.cutime,
-            ps.cstime, ps.priority, ps.nice, ps.num_threads, ps.itrealvalue, ps.starttime,
-            ps.vsize, ps.rss, ps.rsslim, ps.startcode, ps.endcode, ps.startstack, ps.kstkesp,
-            ps.kstkeip, ps.signal, ps.blocked, ps.sigignore, ps.sigcatch, ps.wchan, ps.nswap,
-            ps.cnswap, ps.exit_signal, ps.processor, ps.rt_priority, ps.policy,
-            ps.delayacct_blkio_ticks, ps.guest_time, ps.cguest_time, ps.start_data, ps.end_data,
-            ps.start_brk, ps.arg_start, ps.arg_end, ps.env_start, ps.env_end, ps.exit_code
-        );
+        let data: Result<Vec<_>, _> = stat.bytes().collect();
+        let data_vec = data?;
+        let data_str = String::from_utf8_lossy(&data_vec);
 
-        ps
+        let re = Regex::new(r"(?P<pid>\d+) \((?P<comm>.+)\) (?P<the_rest>.+)")?;
+        let caps = re.captures(&data_str).ok_or(format_err!("Invalid procstat format"))?;
+
+        ps.pid = i32::from_str(&caps["pid"]).unwrap_or_default();
+        ps.comm = caps["comm"].into();
+
+        let mut iter = caps["the_rest"].split_whitespace();
+        ps.state = unwrap_optstr(iter.next());
+        ps.ppid = unwrap_optstr(iter.next());
+        ps.pgrp = unwrap_optstr(iter.next());
+        ps.session = unwrap_optstr(iter.next());
+        ps.tty_nr = unwrap_optstr(iter.next());
+        ps.tpgid = unwrap_optstr(iter.next());
+        ps.flags = unwrap_optstr(iter.next());
+        ps.minflt = unwrap_optstr(iter.next());
+        ps.cminflt = unwrap_optstr(iter.next());
+        ps.majflt = unwrap_optstr(iter.next());
+        ps.cmajflt = unwrap_optstr(iter.next());
+        ps.utime = unwrap_optstr(iter.next());
+        ps.stime = unwrap_optstr(iter.next());
+        ps.cutime = unwrap_optstr(iter.next());
+        ps.cstime = unwrap_optstr(iter.next());
+        ps.priority = unwrap_optstr(iter.next());
+        ps.nice = unwrap_optstr(iter.next());
+        ps.num_threads = unwrap_optstr(iter.next());
+        ps.itrealvalue = unwrap_optstr(iter.next());
+        ps.starttime = unwrap_optstr(iter.next());
+        ps.vsize = unwrap_optstr(iter.next());
+        ps.rss = unwrap_optstr(iter.next());
+        ps.rsslim = unwrap_optstr(iter.next());
+        ps.startcode = unwrap_optstr(iter.next());
+        ps.endcode = unwrap_optstr(iter.next());
+        ps.startstack = unwrap_optstr(iter.next());
+        ps.kstkesp = unwrap_optstr(iter.next());
+        ps.kstkeip = unwrap_optstr(iter.next());
+        ps.signal = unwrap_optstr(iter.next());
+        ps.blocked = unwrap_optstr(iter.next());
+        ps.sigignore = unwrap_optstr(iter.next());
+        ps.sigcatch = unwrap_optstr(iter.next());
+        ps.wchan = unwrap_optstr(iter.next());
+        ps.nswap = unwrap_optstr(iter.next());
+        ps.cnswap = unwrap_optstr(iter.next());
+        ps.exit_signal = unwrap_optstr(iter.next());
+        ps.processor = unwrap_optstr(iter.next());
+        ps.rt_priority = unwrap_optstr(iter.next());
+        ps.policy = unwrap_optstr(iter.next());
+        ps.delayacct_blkio_ticks = unwrap_optstr(iter.next());
+        ps.guest_time = unwrap_optstr(iter.next());
+        ps.cguest_time = unwrap_optstr(iter.next());
+        ps.start_data = unwrap_optstr(iter.next());
+        ps.end_data = unwrap_optstr(iter.next());
+        ps.start_brk = unwrap_optstr(iter.next());
+        ps.arg_start = unwrap_optstr(iter.next());
+        ps.arg_end = unwrap_optstr(iter.next());
+        ps.env_start = unwrap_optstr(iter.next());
+        ps.env_end = unwrap_optstr(iter.next());
+        ps.exit_code = unwrap_optstr(iter.next());
+        Ok(ps)
     }
 
     /// One of the following characters, indicating process state:
@@ -153,7 +210,7 @@ impl ProcStat {
     }
 
     /// Virtual memory size in bytes
-    pub fn mem_usage(&self) -> u32 {
+    pub fn mem_usage(&self) -> u64 {
         self.vsize
     }
 
@@ -161,12 +218,12 @@ impl ProcStat {
     /// which count toward text, data, or stack space.  This does not include pages which have not
     /// been demand-loaded in, or which are swapped out.
     pub fn rss(&self) -> i32 {
-        self.rss
+        self.rss as i32
     }
 
     /// Number of threads in this process
     pub fn num_threads(&self) -> i32 {
-        self.num_threads
+        self.num_threads as i32
     }
 
     /// Attempts to read the command line arguments used to execute this process, and falls
@@ -179,86 +236,28 @@ impl ProcStat {
         if contents.len() == 0 {
             Ok(vec![self.comm.clone()])
         } else {
-            Ok(contents.split('\0').into_iter().map(|a| String::from(a)).collect())
+            let mut argv: Vec<String> = contents.split('\0').into_iter().map(
+                                            |a| String::from(a)).collect();
+            argv.pop();
+            Ok(argv)
         }
     }
 }
 
 /// Finds the running process IDs by finding the valid numerical directory names in /proc
-pub fn running_pids() -> Vec<i32> {
+pub fn running_pids() -> Result<Vec<i32>, failure::Error> {
     let mut info: Vec<i32> = Vec::new();
-    let entries = match fs::read_dir(root_path!("proc")) {
-        Ok(e) => e,
-        Err(_) => return info,
-    };
+    let entries = fs::read_dir(root_path!("proc"))?;
 
     for entry in entries.filter_map(|e| e.ok()).filter(|e| e.path().is_dir()) {
         if let Ok(pid) = i32::from_str(&entry.file_name().to_string_lossy()) {
             info.push(pid);
         }
     }
-    info
+    Ok(info)
 }
 
-#[derive(Clone)]
-pub struct UserInfo {
-    uid: u32,
-    gid: u32,
-}
 
-impl UserInfo {
-
-    /// Build user/group info for a running process by PID
-    pub fn from_pid(pid: i32) -> Result<UserInfo, failure::Error> {
-        let meta = fs::metadata(root_path!("proc", pid))?;
-        Ok(UserInfo::new(meta.uid(), meta.gid()))
-    }
-
-    /// Parse a user or group name given it's ID in the format used by /etc/passwd and /etc/group
-    fn name_from_id<R>(read: R, id: u32) -> Option<String>
-        where R: Read
-    {
-        for line in BufReader::new(read).lines().filter_map(|l| l.ok()) {
-            let tokens: Vec<&str> = line.split(':').collect();
-            if tokens.len() < 3 {
-                continue;
-            }
-
-            if Ok(id) == u32::from_str(tokens[2]) {
-                return Some(String::from(tokens[0]));
-            }
-        }
-        None
-    }
-
-    pub fn new(uid: u32, gid: u32) -> Self {
-        Self { uid, gid }
-    }
-
-    /// The user ID used by the system
-    pub fn uid(&self) -> u32 { self.uid }
-
-    /// The group ID used by the system
-    pub fn gid(&self) -> u32 { self.gid }
-
-    /// Returns the username associated with `uid` in `/etc/passwd`, or `None` if a username for
-    /// the uid was not found
-    pub fn user(&self) -> Option<String> {
-        match File::open(root_path!("etc", "passwd")) {
-            Ok(file) => Self::name_from_id(file, self.uid),
-            Err(_) => None,
-        }
-    }
-
-    /// Returns the group name associated with `gid` in `/etc/group`, or `None` if a group name for
-    /// the gid was not found
-    pub fn group(&self) -> Option<String> {
-        match File::open(root_path!("etc", "group")) {
-            Ok(file) => Self::name_from_id(file, self.gid),
-            Err(_) => None,
-        }
-    }
-}
 
 // Unit tests
 
@@ -268,12 +267,12 @@ lazy_static! {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push("tests");
         path.push("testroot");
-        path 
+        path
     };
 }
 
 #[cfg(test)]
-fn root_dir() -> PathBuf {
+pub fn root_dir() -> PathBuf {
     ROOTFS.clone()
 }
 
@@ -288,7 +287,9 @@ mod tests {
 
     #[test]
     fn procstat_parse() {
-        assert_eq!(ProcStat::parse(STAT), ProcStat {
+        let stat = ProcStat::parse(STAT);
+        assert!(stat.is_ok());
+        assert_eq!(stat.unwrap(), ProcStat {
             pid: 720, comm: "sh".into(),
             state: 'S', ppid: 1,
             pgrp: 720, session: 720,
@@ -321,6 +322,9 @@ mod tests {
     #[test]
     fn procstat_getters() {
         let stat = ProcStat::parse(STAT);
+        assert!(stat.is_ok());
+
+        let stat = stat.unwrap();
         assert_eq!(stat.state(), 'S');
         assert_eq!(stat.parent_pid(), 1);
         assert_eq!(stat.mem_usage(), 2981888);
@@ -343,60 +347,43 @@ mod tests {
     }
 
     #[test]
-    fn userinfo_user() {
-        let passwd: &[u8] = b"root:x:0:0:root:/root:/bin/sh\n\
-                              daemon:x:1:1:daemon:/usr/sbin:/bin/false\n\
-                              bin:x:2:2:bin:/bin:/bin/false\n\
-                              kubos:x:1000:100::/home/kubos:/bin/sh";
-        let username = |uid| UserInfo::name_from_id(passwd, uid);
+    fn procstat_sd_pam() {
+        let sdpam_stat: &[u8] = b"1149 ((sd-pam)) S 1148 1148 1148 0 -1 1077936448 22 0 0 0 0 0 \
+                                  0 0 20 0 1 0 2838 62562304 447 18446744073709551615 1 1 0 0 0 \
+                                  0 0 4096 0 0 0 0 17 0 0 0 0 0 0 0 0 0 0 0 0 0 0";
+        let stat = ProcStat::parse(sdpam_stat);
+        assert!(stat.is_ok(), "{:?}", stat.err());
 
-        assert_eq!(username(0), Some("root".into()));
-        assert_eq!(username(1), Some("daemon".into()));
-        assert_eq!(username(2), Some("bin".into()));
-        assert_eq!(username(1000), Some("kubos".into()));
-        assert_eq!(username(100), None);
+        let stat = stat.unwrap();
+        assert_eq!(stat.state(), 'S');
+        assert_eq!(stat.parent_pid(), 1148);
+        assert_eq!(stat.mem_usage(), 62562304);
+        assert_eq!(stat.rss(), 447);
+        assert_eq!(stat.num_threads(), 1);
+        assert_eq!(stat.cmd().unwrap(), ["(sd-pam)"]);
+        assert_eq!(stat.rsslim, 18446744073709551615);
     }
 
     #[test]
-    fn userinfo_group() {
-        let groups: &[u8] = b"root:x:0:\n\
-                              daemon:x:1:\n\
-                              bin:x:2:\n\
-                              users:x:100:";
-        let groupname = |gid| UserInfo::name_from_id(groups, gid);
-
-        assert_eq!(groupname(0), Some("root".into()));
-        assert_eq!(groupname(1), Some("daemon".into()));
-        assert_eq!(groupname(2), Some("bin".into()));
-        assert_eq!(groupname(100), Some("users".into()));
-        assert_eq!(groupname(1000), None);
-    }
-
-    #[test]
-    fn userinfo_from_uid_gid() {
-        // Loaded from info in tests/testroot/etc/group and tests/testroot/etc/passwd
-        let operator = UserInfo::new(37, 37);
-        assert_eq!(operator.user(), Some("operator".into()));
-        assert_eq!(operator.group(), Some("operator".into()));
-
-        let kubos = UserInfo::new(1000, 100);
-        assert_eq!(kubos.user(), Some("kubos".into()));
-        assert_eq!(kubos.group(), Some("users".into()));
-
-        let system = UserInfo::new(1001, 100);
-        assert_eq!(system.user(), Some("system".into()));
-        assert_eq!(system.group(), Some("users".into()));
-
-        let nouser = UserInfo::new(5000, 5000);
-        assert_eq!(nouser.user(), None);
-        assert_eq!(nouser.group(), None);
+    fn procstat_cron() {
+        let stat = ProcStat::from_pid(1492).unwrap();
+        assert_eq!(stat.pid, 1492);
+        assert_eq!(stat.state(), 'S');
+        assert_eq!(stat.parent_pid(), 1);
+        assert_eq!(stat.mem_usage(), 28397568);
+        assert_eq!(stat.rss(), 522);
+        assert_eq!(stat.num_threads(), 1);
+        assert_eq!(stat.cmd().unwrap(), ["/usr/sbin/cron", "-f"]);
     }
 
     #[test]
     fn running_pids() {
-        let mut pids = super::running_pids();
+        let pids = super::running_pids();
+        assert!(pids.is_ok());
+
+        let mut pids = pids.unwrap();
         pids.sort_unstable();
 
-        assert_eq!(pids, vec![232, 380, 720, 761]);
+        assert_eq!(pids, vec![232, 380, 720, 761, 1149, 1492]);
     }
 }

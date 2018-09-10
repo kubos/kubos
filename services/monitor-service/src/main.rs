@@ -15,12 +15,12 @@
 //
 
 //! Service for monitoring KubOS Linux processes, memory, and CPU usage
+#[macro_use]
 extern crate failure;
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;
-#[macro_use]
-extern crate text_io;
+extern crate regex;
 
 #[cfg(test)]
 #[macro_use]
@@ -31,8 +31,10 @@ use schema::{MutationRoot, QueryRoot};
 
 mod meminfo;
 mod objects;
+#[macro_use]
 mod process;
 mod schema;
+mod userinfo;
 
 fn main() {
     let config = Config::new("monitor-service");
