@@ -15,6 +15,42 @@
 //
 
 //! Service for monitoring KubOS Linux processes, memory, and CPU usage
+//!
+//! # GraphQL Schema
+//!
+//! ```graphql
+//! schema {
+//!     query: Query
+//! }
+//!
+//! type Query {
+//!     ping: String!
+//!     memInfo: MemInfo!
+//!     ps(pids: [Int!] = null): [ProcInfo!]!
+//! }
+//!
+//! type MemInfo {
+//!     total: Int
+//!     free: Int
+//!     available: Int
+//!     lowFree: Int
+//! }
+//!
+//! type ProcInfo {
+//!     pid: Int!
+//!     uid: Int
+//!     gid: Int
+//!     usr: String
+//!     grp: String
+//!     state: String
+//!     ppid: Int
+//!     mem: Int
+//!     rss: Int
+//!     threads: Int
+//!     cmd: String
+//! }
+//! ```
+
 #[macro_use]
 extern crate failure;
 #[macro_use]
