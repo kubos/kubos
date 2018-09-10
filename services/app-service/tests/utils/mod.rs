@@ -161,7 +161,7 @@ impl MockAppBuilder {
 pub struct AppServiceFixture {
     pub registry_dir: TempDir,
     pub addr: String,
-    pub config_toml: PathBuf,
+    config_toml: PathBuf,
     join_handle: Option<JoinHandle<()>>,
     sender: Option<Sender<bool>>,
 }

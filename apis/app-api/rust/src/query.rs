@@ -15,7 +15,7 @@
  */
 
 use failure;
-use kubos_system::Config;
+use kubos_system::Config as ServiceConfig;
 use serde_json;
 use std::net::UdpSocket;
 use std::time::Duration;
@@ -43,7 +43,7 @@ type AppResult<T> = Result<T, failure::Error>;
 /// # extern crate failure;
 /// # extern crate kubos_app;
 /// # use failure;
-/// use kubos_app::query;
+/// use kubos_app::*;
 /// use std::time::Duration;
 ///
 /// # fn func() -> Result<(), failure::Error> {
@@ -51,7 +51,7 @@ type AppResult<T> = Result<T, failure::Error>;
 /// 		ping
 /// 	}"#;
 ///
-/// let result = query("radio-service", Some("/home/kubos/config.toml"), request, Some(Duration::from_secs(1)))?;
+/// let result = query(ServiceConfig::new_from_path("radio-service", "/home/kubos/config.toml".to_owned()), request, Some(Duration::from_secs(1)))?;
 ///
 /// let data = result.get("ping").unwrap().as_str();
 ///
@@ -60,17 +60,32 @@ type AppResult<T> = Result<T, failure::Error>;
 /// # }
 /// ```
 ///
+/// ```
+/// # extern crate failure;
+/// # extern crate kubos_app;
+/// # use failure;
+/// use kubos_app::*;
+/// use std::time::Duration;
+///
+/// # fn func() -> Result<(), failure::Error> {
+/// let request = r#"{
+/// 		power
+/// 	}"#;
+///
+/// let result = query(ServiceConfig::new("antenna-service"), request, Some(Duration::from_secs(1)))?;
+///
+/// let data = result.get("power").unwrap().as_str();
+///
+/// assert_eq!(data, Some("ON"));
+/// # Ok(())
+/// # }
+/// ```
+///
 pub fn query(
-    service: &str,
-    config_path: Option<&str>,
+    config: ServiceConfig,
     query: &str,
     timeout: Option<Duration>,
 ) -> AppResult<serde_json::Value> {
-    let config = match config_path {
-        Some(path) => Config::new_from_path(service, path.to_owned()),
-        None => Config::new(service),
-    };
-
     let socket = UdpSocket::bind("0.0.0.0:0")?;
     socket.connect(config.hosturl())?;
     socket.send(query.as_bytes())?;
@@ -89,7 +104,7 @@ pub fn query(
             if errs_str.len() > 0 {
                 return Err(format_err!("{}", errs_str.to_string()));
             }
-        } else {
+        } else if !errs.is_null() {
             match errs.get("message") {
                 Some(message) => {
                     return Err(format_err!("{}", message.as_str().unwrap().to_string()));

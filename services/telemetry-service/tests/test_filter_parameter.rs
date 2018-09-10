@@ -37,8 +37,8 @@ fn test() {
             "errs": "",
             "msg": {
                 "telemetry": [
-                    {"parameter":"voltage","value":"3.3"},
-                    {"parameter":"voltage","value":"3.4"}
+                    {"parameter":"voltage","value":"3.4"},
+                    {"parameter":"voltage","value":"3.3"}
                 ]
             }
         })

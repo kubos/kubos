@@ -14,10 +14,9 @@
 // limitations under the License.
 //
 
-use failure::Fail;
+use failure::Error;
 use mai400_api::*;
 use std::cell::{Cell, RefCell};
-use std::io::{Error, ErrorKind};
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
 use std::sync::{Arc, Mutex};
@@ -306,10 +305,7 @@ impl Subsystem {
 
     pub fn set_mode(&self, mode: u8, qbi_cmd: Vec<i32>) -> Result<GenericResponse, Error> {
         if qbi_cmd.len() != 4 {
-            return Err(Error::new(
-                ErrorKind::InvalidInput,
-                "qbi_cmd must contain exactly 4 elements",
-            ));
+            bail!("qbi_cmd must contain exactly 4 elements");
         }
 
         let result = run!(
@@ -372,17 +368,11 @@ impl Subsystem {
 
         if let Some(params) = rv {
             if params.eci_pos.len() != 3 {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    "eci_pos must contain exactly 3 elements",
-                ));
+                bail!("eci_pos must contain exactly 3 elements");
             }
 
             if params.eci_vel.len() != 3 {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    "eci_vel must contain exactly 3 elements",
-                ));
+                bail!("eci_vel must contain exactly 3 elements");
             }
 
             let result = run!(

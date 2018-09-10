@@ -20,6 +20,7 @@ extern crate kubos_system;
 extern crate serde_json;
 extern crate tempfile;
 
+use kubos_app::ServiceConfig;
 use std::panic;
 use std::path::Path;
 use std::time::Duration;
@@ -58,8 +59,8 @@ fn setup_apps(registry_dir: &Path) {
         .install(&registry_dir);
 }
 
-fn apps_query(service: &str, config: Option<&str>, query: &str) -> Vec<serde_json::Value> {
-    let result = kubos_app::query(service, config, query, Some(Duration::from_secs(5)));
+fn apps_query(config: ServiceConfig, query: &str) -> Vec<serde_json::Value> {
+    let result = kubos_app::query(config, query, Some(Duration::from_secs(5)));
     assert!(result.is_ok());
 
     let apps = result.unwrap()["apps"].clone();
@@ -97,7 +98,7 @@ macro_rules! test_query {
 
             let result = panic::catch_unwind(|| {
                 let test: &Fn(Vec<serde_json::Value>) = &$test_closure;
-                test(apps_query("app-service", Some(&config), $query));
+                test(apps_query(ServiceConfig::new_from_path("app-service", config.to_owned()), $query));
             });
 
             fixture.teardown();

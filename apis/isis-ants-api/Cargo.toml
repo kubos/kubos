@@ -6,7 +6,7 @@ license = "Apache-2.0"
 repository = "https://github.com/kubos/kubos"
 
 [dependencies]
-failure = { git = "https://github.com/rust-lang-nursery/failure" }
+failure = "0.1.2"
 nom = "4.0.0-beta1"
 
 [build-dependencies]
