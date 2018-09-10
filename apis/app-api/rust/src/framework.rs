@@ -44,10 +44,10 @@ impl fmt::Display for RunLevel {
 /// Common trait which is used to ensure handlers for all required run levels are defined
 pub trait AppHandler {
     /// Called when the application is started at system boot time
-    fn on_boot(&self);
+    fn on_boot(&self, args: Vec<String>);
 
     /// Called when the application is started on-demand through the `start_app` GraphQL mutation
-    fn on_command(&self);
+    fn on_command(&self, args: Vec<String>);
 }
 
 /// A helper macro which detects the requested run level and calls the appropriate handler function
@@ -118,10 +118,10 @@ pub fn app_start(_pid: u32, handler: &AppHandler) {
 
     match run_level.as_ref() {
         "OnBoot" => {
-            handler.on_boot();
+            handler.on_boot(args);
         }
         "OnCommand" => {
-            handler.on_command();
+            handler.on_command(args);
         }
         level => {
             eprintln!(
