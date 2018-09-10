@@ -215,7 +215,7 @@ This logic may also be triggered by manually starting the applications service w
     Is not a thing that actually exists yet...
     
     TODO: Automatic and manual rollback
-    
+
 Customizing the Applications Service
 ------------------------------------
 
