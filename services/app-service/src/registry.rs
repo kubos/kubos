@@ -13,91 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+use app_entry::*;
+use failure::Error;
 use kubos_app::RunLevel;
 use std::cell::RefCell;
 use std::fs;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::os::unix;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-
 use toml;
 use uuid::Uuid;
 
 /// The default application registry directory in KubOS
 pub const K_APPS_DIR: &'static str = "/home/system/kubos/apps";
-
-/// The high level metadata of an application
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct AppMetadata {
-    /// A unique name for the application (usually the same as the name of the binary)
-    pub name: String,
-    /// The version of this application
-    pub version: String,
-    /// The author of the application
-    pub author: String,
-}
-
-/// Kubos App struct
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct App {
-    /// The generated UUID for the application
-    pub uuid: String,
-    /// The process ID of the application, if it's currently running (0 otherwise)
-    pub pid: u32,
-    /// The absolute path to the application binary
-    pub path: String,
-    /// The associated metadata of the application
-    pub metadata: AppMetadata,
-}
-
-/// AppRegistryEntry
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct AppRegistryEntry {
-    /// Whether or not this application is the active installation
-    pub active_version: bool,
-    /// The app itself
-    pub app: App,
-}
-
-impl AppRegistryEntry {
-    fn from_dir(dir: &str) -> Option<AppRegistryEntry> {
-        let app_toml: PathBuf = [dir, "app.toml"].iter().collect();
-        if !app_toml.exists() {
-            return None;
-        }
-
-        match fs::File::open(app_toml) {
-            Ok(mut f) => {
-                let mut buffer = String::new();
-                match f.read_to_string(&mut buffer) {
-                    Ok(_) => match toml::from_str::<AppRegistryEntry>(&buffer) {
-                        Ok(entry) => Some(entry),
-                        Err(_) => None,
-                    },
-                    Err(_) => None,
-                }
-            }
-            Err(_) => None,
-        }
-    }
-
-    fn save(&self) -> Result<bool, String> {
-        let mut app_toml = PathBuf::from(self.app.path.clone());
-        app_toml.set_file_name("app.toml");
-
-        match fs::File::create(app_toml) {
-            Ok(mut file) => match toml::to_string(&self) {
-                Ok(toml_str) => match file.write_all(&toml_str.into_bytes()) {
-                    Ok(_) => Ok(true),
-                    Err(err) => Err(format!("{}", err)),
-                },
-                Err(err) => Err(format!("{}", err)),
-            },
-            Err(err) => Err(format!("{}", err)),
-        }
-    }
-}
 
 /// AppRegistry
 #[derive(Deserialize, Serialize)]
@@ -121,37 +51,23 @@ impl AppRegistry {
     /// # use kubos_app::registry::AppRegistry;
     /// let registry = AppRegistry::new_from_dir("/my/apps");
     /// ```
-    pub fn new_from_dir(apps_dir: &str) -> AppRegistry {
+    pub fn new_from_dir(apps_dir: &str) -> Result<AppRegistry, Error> {
         let registry = AppRegistry {
             entries: RefCell::new(Vec::new()),
             apps_dir: String::from(apps_dir),
         };
 
-        let apps_dir = Path::new(apps_dir);
-        if !apps_dir.exists() {
-            if let Err(err) = fs::create_dir(apps_dir) {
-                eprintln!("Couldn't create apps dir {}: {:?}", apps_dir.display(), err);
-                return registry;
-            }
-        }
-
-        let active_dir = apps_dir.clone().join("active");
+        let active_dir = PathBuf::from(format!("{}/active", apps_dir));
         if !active_dir.exists() {
-            if let Err(err) = fs::create_dir_all(&active_dir) {
-                eprintln!(
-                    "Couldn't create 'active' dir {}: {:?}",
-                    active_dir.display(),
-                    err
-                );
-                return registry;
-            }
+            fs::create_dir_all(&active_dir)?;
         }
 
         registry
             .entries
             .borrow_mut()
-            .extend(registry.discover_apps());
-        return registry;
+            .extend(registry.discover_apps()?);
+
+        Ok(registry)
     }
 
     /// Create a new AppRegistry located at the default directory (see [`K_APPS_DIR`])
@@ -163,56 +79,56 @@ impl AppRegistry {
     /// # use kubos_app::registry::AppRegistry;
     /// let registry = AppRegistry::new();
     /// ```
-    pub fn new() -> AppRegistry {
+    pub fn new() -> Result<AppRegistry, Error> {
         Self::new_from_dir(K_APPS_DIR)
     }
 
-    fn discover_apps(&self) -> Vec<AppRegistryEntry> {
+    fn discover_apps(&self) -> Result<Vec<AppRegistryEntry>, Error> {
         let mut reg_entries: Vec<AppRegistryEntry> = Vec::new();
 
-        if let Ok(entries) = fs::read_dir(&self.apps_dir) {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    if let Ok(file_type) = entry.file_type() {
-                        if file_type.is_dir() && entry.file_name().to_str() != Some("active") {
-                            reg_entries.extend(self.discover_versions(entry.path()));
-                        }
+        for entry in fs::read_dir(&self.apps_dir)? {
+            if let Ok(entry) = entry {
+                if let Ok(file_type) = entry.file_type() {
+                    if file_type.is_dir() && entry.file_name().to_str() != Some("active") {
+                        reg_entries.extend(self.discover_versions(entry.path())?);
                     }
                 }
             }
+            //TODO: Remove bad entries
         }
 
-        reg_entries
+        Ok(reg_entries)
     }
 
-    fn discover_versions(&self, app_dir: PathBuf) -> Vec<AppRegistryEntry> {
+    fn discover_versions(&self, app_dir: PathBuf) -> Result<Vec<AppRegistryEntry>, Error> {
         let mut reg_entries: Vec<AppRegistryEntry> = Vec::new();
-        if let Ok(versions) = fs::read_dir(app_dir) {
-            for version in versions {
-                if version.is_err() {
-                    continue;
-                }
 
-                let version = version.unwrap();
-                match version.file_type() {
-                    Ok(v_file_type) => {
-                        if v_file_type.is_dir() {
-                            let v_path = version.path();
-                            let version_path = match v_path.to_str() {
-                                Some(v) => v,
-                                None => continue,
-                            };
+        for version in fs::read_dir(app_dir)? {
+            if version.is_err() {
+                // TODO: Remove bad directory
+                continue;
+            }
 
-                            if let Some(entry) = AppRegistryEntry::from_dir(version_path) {
-                                reg_entries.push(entry);
-                            }
-                        }
+            let version = version.unwrap();
+            match version
+                .file_type()
+                .and_then(|file_type| Ok(file_type.is_dir()))
+            {
+                Ok(true) => {
+                    if let Ok(entry) = AppRegistryEntry::from_dir(&version.path()) {
+                        reg_entries.push(entry);
+                    } else {
+                        // TODO: Remove bad directory
                     }
-                    Err(_) => continue,
+                }
+                _ => {
+                    // TODO: Remove bad directory
+                    continue;
                 }
             }
         }
-        reg_entries
+
+        Ok(reg_entries)
     }
 
     /// Register an application binary with the AppRegistry, extracting metadata and installing it
@@ -229,23 +145,22 @@ impl AppRegistry {
     /// let registry = AppRegistry::new();
     /// registry.register("/home/kubos/my-app-bin");
     /// ```
-    pub fn register(&self, path: &str) -> Result<AppRegistryEntry, String> {
+    pub fn register(&self, path: &str) -> Result<AppRegistryEntry, Error> {
         let app_path = Path::new(path);
         if !app_path.exists() {
-            return Err(format!("{} does not exist", path));
+            bail!("{} does not exist", path);
         }
 
         if !app_path.is_dir() {
-            return Err(format!("{} is not a directory", path));
+            bail!("{} is not a directory", path);
         }
 
-        let files: Vec<fs::DirEntry> = match fs::read_dir(app_path) {
-            Ok(v) => v.filter_map(|file| file.ok()).collect(),
-            Err(error) => return Err(format!("Failed to read directory: {}", error)),
-        };
+        let files: Vec<fs::DirEntry> = fs::read_dir(app_path)?
+            .filter_map(|file| file.ok())
+            .collect();
 
         if files.len() != 2 {
-            return Err("Exactly two files should be present in the app directory".to_owned());
+            bail!("Exactly two files should be present in the app directory");
         }
 
         let mut manifest_file: Option<fs::DirEntry> = None;
@@ -261,20 +176,17 @@ impl AppRegistry {
 
         let manifest = match manifest_file {
             Some(file) => file,
-            None => return Err("Failed to find manifest file".to_owned()),
+            None => bail!("Failed to find manifest file"),
         };
         let app = match app_file {
             Some(file) => file,
-            None => return Err("Failed to find app file".to_owned()),
+            None => bail!("Failed to find app file"),
         };
 
         let mut data = String::new();
-        fs::File::open(manifest.path())
-            .and_then(|mut fp| fp.read_to_string(&mut data))
-            .or_else(|error| return Err(format!("Failed to read manifest: {}", error)))?;
+        fs::File::open(manifest.path()).and_then(|mut fp| fp.read_to_string(&mut data))?;
 
-        let metadata: AppMetadata = toml::from_str(&data)
-            .or_else(|error| return Err(format!("Failed to parse manifest: {}", error)))?;
+        let metadata: AppMetadata = toml::from_str(&data)?;
 
         let mut entries = self.entries.borrow_mut();
         let mut app_uuid = Uuid::new_v4().hyphenated().to_string();
@@ -300,31 +212,20 @@ impl AppRegistry {
         let app_dir = Path::new(&app_dir_str);
 
         if !app_dir.exists() {
-            fs::create_dir_all(app_dir).or_else(|err| {
-                return Err(format!(
-                    "Couldn't create app dir {}: {:?}",
-                    app_dir.display(),
-                    err
-                ));
-            })?;
+            fs::create_dir_all(app_dir)?;
         }
 
-        match fs::copy(app.path(), app_dir.join(app.file_name())) {
-            Err(err) => {
-                return Err(format!("Couldn't copy app binary: {:?}", err));
-            }
-            Ok(_) => {}
-        }
+        fs::copy(app.path(), app_dir.join(app.file_name()))?;
 
         let active_symlink = PathBuf::from(format!("{}/active/{}", self.apps_dir, app_uuid));
         if active_symlink.exists() {
             match fs::remove_file(active_symlink.clone()) {
                 Err(err) => {
-                    return Err(format!(
+                    bail!(
                         "Couldn't remove symlink {}: {:?}",
                         active_symlink.display(),
                         err
-                    ));
+                    );
                 }
                 Ok(_) => {}
             }
@@ -332,12 +233,12 @@ impl AppRegistry {
 
         match unix::fs::symlink(&app_dir_str, active_symlink.clone()) {
             Err(err) => {
-                return Err(format!(
+                bail!(
                     "Couldn't symlink {} to {}: {:?}",
                     active_symlink.display(),
                     app_dir_str,
                     err
-                ));
+                );
             }
             Ok(_) => {}
         }
@@ -374,7 +275,7 @@ impl AppRegistry {
     /// registry.uninstall("01234567-89ab-cdef0-1234-56789abcdef0", "1.0");
     /// ```
     ///
-    pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, String> {
+    pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, Error> {
         let mut entries = self.entries.borrow_mut();
         let app_index = match entries.binary_search_by(|ref e| {
             e.app
@@ -383,7 +284,7 @@ impl AppRegistry {
                 .then(e.app.metadata.version.cmp(&String::from(version)))
         }) {
             Ok(index) => index,
-            Err(_) => return Err(format!("Active app with UUID {} does not exist", app_uuid)),
+            Err(_) => bail!("Active app with UUID {} does not exist", app_uuid),
         };
 
         let app_path = PathBuf::from(&entries[app_index].app.path);
@@ -391,11 +292,11 @@ impl AppRegistry {
             let parent = match app_path.parent() {
                 Some(parent) => parent,
                 // This should never happen
-                None => return Err(String::from("Error finding parent path of app")),
+                None => bail!("Error finding parent path of app"),
             };
 
             if let Err(err) = fs::remove_dir_all(parent.clone()) {
-                return Err(format!("Error removing app directory: {}", err));
+                bail!("Error removing app directory: {}", err);
             }
         }
 
@@ -420,7 +321,7 @@ impl AppRegistry {
     /// let registry = AppRegistry::new();
     /// registry.start_app("01234567-89ab-cdef0-1234-56789abcdef0", RunLevel::OnCommand);
     /// ```
-    pub fn start_app(&self, app_uuid: &str, run_level: RunLevel) -> Result<u32, String> {
+    pub fn start_app(&self, app_uuid: &str, run_level: RunLevel) -> Result<u32, Error> {
         let entries = self.entries.borrow();
 
         let app = match entries
@@ -428,13 +329,13 @@ impl AppRegistry {
             .find(|ref e| e.active_version && e.app.uuid == app_uuid)
         {
             Some(entry) => &entry.app,
-            None => return Err(format!("Active app with UUID {} does not exist", app_uuid)),
+            None => bail!("Active app with UUID {} does not exist", app_uuid),
         };
 
         let app_path = PathBuf::from(&app.path);
         if !app_path.exists() {
             // TODO: Unregister app if path doesn't exist
-            return Err(format!("{} does not exist", &app.path));
+            bail!("{} does not exist", &app.path);
         }
 
         match Command::new(app_path)
@@ -444,7 +345,7 @@ impl AppRegistry {
             .spawn()
         {
             Ok(child) => Ok(child.id()),
-            Err(err) => Err(format!("Failed to spawn app: {:?}", err)),
+            Err(err) => bail!("Failed to spawn app: {:?}", err),
         }
     }
 
@@ -457,18 +358,18 @@ impl AppRegistry {
     /// let registry = AppRegistry::new();
     /// registry.run_onboot();
     /// ```
-    pub fn run_onboot(&self) -> Result<(), String> {
+    pub fn run_onboot(&self) -> Result<(), Error> {
         // TODO: Decide whether or not we actually want to track started/failed apps
         let mut apps_started = 0;
         let mut apps_not_started = 0;
 
         let active_symlink = PathBuf::from(format!("{}/active", self.apps_dir));
         if !active_symlink.exists() {
-            return Err(format!("Failed to get list of active UUIDs"));
+            bail!("Failed to get list of active UUIDs");
         }
 
         for entry in fs::read_dir(active_symlink)
-            .or_else(|error| return Err(format!("Failed to process existing apps: {}", error)))?
+            .or_else(|error| bail!("Failed to process existing apps: {}", error))?
         {
             match entry {
                 Ok(file) => {
@@ -489,7 +390,7 @@ impl AppRegistry {
         );
 
         if apps_not_started != 0 {
-            return Err(format!("Failed to start {} app/s", apps_not_started));
+            bail!("Failed to start {} app/s", apps_not_started);
         }
 
         Ok(())

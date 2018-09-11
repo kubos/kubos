@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![deny(warnings)]
+//#![deny(warnings)]
 
+#[macro_use]
+extern crate failure;
 extern crate getopts;
 #[macro_use]
 extern crate juniper;
@@ -30,17 +32,19 @@ extern crate tempfile;
 extern crate toml;
 extern crate uuid;
 
+mod app_entry;
 mod registry;
 mod schema;
 #[cfg(test)]
 mod tests;
 
+use failure::Error;
 use getopts::Options;
 use kubos_service::{Config, Service};
 use registry::AppRegistry;
 use std::env;
 
-fn main() {
+fn main() -> Result<(), Error> {
     let args: Vec<String> = env::args().collect();
     let mut opts = Options::new();
 
@@ -49,8 +53,7 @@ fn main() {
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
         Err(err) => {
-            eprintln!("Unable to parse command options: {}", err);
-            return;
+            bail!("Unable to parse command options: {}", err);
         }
     };
 
@@ -61,8 +64,8 @@ fn main() {
 
     let registry = {
         match config.get("registry-dir") {
-            Some(dir) => AppRegistry::new_from_dir(dir.as_str().unwrap()),
-            None => AppRegistry::new(),
+            Some(dir) => AppRegistry::new_from_dir(dir.as_str().unwrap())?,
+            None => AppRegistry::new()?,
         }
     };
 
@@ -74,4 +77,6 @@ fn main() {
     }
 
     Service::new(config, registry, schema::QueryRoot, schema::MutationRoot).start();
+
+    Ok(())
 }

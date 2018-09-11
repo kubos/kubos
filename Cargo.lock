@@ -492,6 +492,7 @@ dependencies = [
 name = "kubos-app-service"
 version = "0.1.0"
 dependencies = [
+ "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "getopts 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "juniper 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-app 0.1.0",
