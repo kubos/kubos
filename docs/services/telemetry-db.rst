@@ -12,11 +12,52 @@ Interface Details
 
 Specific details about the available GraphQL queries can be found in the |telem-db| Rust docs.
 
-.. note:: 
-
-    At this time, the service can only query existing data in the database. New entries must be manually added.
-    The service will be expanded to allow mutations to add new data in the upcoming release.
-
  .. |telem-db| raw:: html
  
     <a href="../rust-docs/telemetry_service/index.html" target="_blank">telemetry database service</a>
+    
+Querying the Service
+--------------------
+
+The ``telemetry`` query can be used to fetch a certain selection of data from the telemetry database.
+It will return an array of database entries.
+
+The query has the following schema::
+
+    query {
+        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): [{
+            timestamp: Integer!
+            subsystem: String!
+            parameter: String!
+            value: Float!
+        }]
+    }
+    
+Each of the query arguments acts as a filter for the database query:
+
+    - timestampGe - Return entries with timestamps occurring on or after the given value
+    - timestampLe - Return entries with timestamps occurring on or before the given value
+    - subsystem - Return entries which match the given subsystem name
+    - parameter - Return entries which match the given parameter name
+    
+Note: ``timestampGe`` and ``timestampLe`` can be combined to create a timestamp selection range.
+For example, entries with timestamps after ``1000``, but before ``5000``.
+
+Adding Entries to the Database
+------------------------------
+
+The ``insert`` query can be used to add an entry to the telemetry database.
+
+It has the following schema::
+
+    mutation {
+        insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!): {
+            success: Boolean!,
+            errors: String!
+        }
+    }
+    
+The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time.
+
+
+    
