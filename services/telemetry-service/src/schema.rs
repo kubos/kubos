@@ -97,4 +97,25 @@ graphql_object!(QueryRoot: Context |&self| {
 
 pub struct MutationRoot;
 
-graphql_object!(MutationRoot: Context | &self | {});
+#[derive(GraphQLObject)]
+struct InsertResponse {
+    success: bool,
+    errors: String,
+}
+
+graphql_object!(MutationRoot: Context | &self | {
+    field insert(&executor, timestamp: Option<i32>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
+        let result = match timestamp {
+            Some(time) => executor.context().subsystem().insert(time, &subsystem, &parameter, &value),
+            None => executor.context().subsystem().insert_systime(&subsystem, &parameter, &value),
+        };
+        
+        Ok(InsertResponse {
+            success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => format!("{}", err),
+            },
+        })
+    }
+});
