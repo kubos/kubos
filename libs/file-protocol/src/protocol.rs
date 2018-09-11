@@ -23,11 +23,11 @@ use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
 use serde_cbor::Value;
 use std::cell::Cell;
+use std::net::SocketAddr;
 use std::net::UdpSocket;
 use std::str;
 use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::net::SocketAddr;
 
 // How many times do we read no messages
 // while holding before killing the thread
@@ -274,9 +274,9 @@ impl Protocol {
     pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .and_then(
-                |duration| Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
-            )
+            .and_then(|duration| {
+                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
+            })
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
@@ -313,9 +313,9 @@ impl Protocol {
     pub fn send_import(&self, source_path: &str) -> Result<(), String> {
         let time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .and_then(
-                |duration| Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
-            )
+            .and_then(|duration| {
+                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
+            })
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
         let channel_id: u32 = (time % 100000) as u32;
 
@@ -414,14 +414,24 @@ impl Protocol {
     /// f_protocol.message_engine(Duration::from_millis(10), State::Transmitting);
     /// ```
     ///
-    pub fn message_engine(&self, timeout: Duration, start_state: State) -> Result<(), String> {
+    pub fn message_engine<F>(
+        &self,
+        pump: F,
+        timeout: Duration,
+        start_state: State,
+    ) -> Result<(), String>
+    where
+        F: Fn(Duration) -> Result<Option<Value>, Option<String>>,
+    {
         let mut state = start_state.clone();
         loop {
             // Listen on UDP port
-            let message = match self.cbor_proto.recv_message_peer_timeout(timeout) {
-                Ok((peer, Some(message))) => {
+            let message = match pump(timeout) {
+                //let message = match self.cbor_proto.recv_message_peer_timeout(timeout) {
+                Ok(Some(message)) => {
+                    // Ok((peer, Some(message))) => {
                     // Update our response port
-                    self.remote_addr.set(peer);
+                    // self.remote_addr.set(peer);
 
                     // If we previously timed out, restore the old state
                     if let State::Holding {

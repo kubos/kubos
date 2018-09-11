@@ -79,7 +79,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
 
             // Listen, process, and react to the remaining messages in the
             // requested operation
-            match f_protocol.message_engine(timeout_ref, state) {
+            match f_protocol.message_engine(|d| f_protocol.recv(Some(d)), timeout_ref, state) {
                 Err(e) => warn!("Encountered errors while processing transaction: {}", e),
                 _ => {}
             }

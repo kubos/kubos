@@ -226,7 +226,8 @@ impl Protocol {
     ///
     pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, Option<String>> {
         let mut buf = [0; MSG_SIZE];
-        let (size, _peer) = self.handle
+        let (size, _peer) = self
+            .handle
             .recv_from(&mut buf)
             .map_err(|err| Some(format!("Failed to receive a message: {}", err)))?;
 
@@ -252,7 +253,8 @@ impl Protocol {
     pub fn peek_peer(&self) -> Result<SocketAddr, String> {
         let mut buf = [0; MSG_SIZE];
 
-        let (_size, peer) = self.handle
+        let (_size, peer) = self
+            .handle
             .peek_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
@@ -277,7 +279,8 @@ impl Protocol {
     ///
     pub fn recv_message_peer(&self) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
         let mut buf = [0; MSG_SIZE];
-        let (size, peer) = self.handle
+        let (size, peer) = self
+            .handle
             .recv_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 

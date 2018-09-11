@@ -5,10 +5,10 @@ extern crate log;
 extern crate simplelog;
 
 use clap::{App, Arg};
+use file_protocol::{FileProtocol, State};
 use simplelog::*;
 use std::path::Path;
 use std::time::Duration;
-use file_protocol::{FileProtocol, State};
 
 fn upload(
     host_ip: &str,
@@ -38,7 +38,11 @@ fn upload(
     f_protocol.send_export(&hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    Ok(f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?)
+    Ok(f_protocol.message_engine(
+        |d| f_protocol.recv(Some(d)),
+        Duration::from_secs(2),
+        State::Transmitting,
+    )?)
 }
 
 fn download(
@@ -77,7 +81,7 @@ fn download(
         },
     )?;
 
-    Ok(f_protocol.message_engine(Duration::from_secs(2), state)?)
+    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), state)?)
 }
 
 fn main() {
