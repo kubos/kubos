@@ -161,6 +161,9 @@ defined in the system's ``config.toml`` file:
         - ``storage_dir`` - `Default: "file-transfer".` The directory which should be
           used for temporary storage of file chunks. Note: The directory will be
           created if it does not already exist.
+        - ``timeout`` - `Default: 2.` The length of time, in seconds, for which the service
+          should wait for new messages from the client once a file protocol transaction has
+          been started
           
     - ``[file-transfer-service.addr]``
     
@@ -171,6 +174,7 @@ For example::
 
     [file-transfer-service]
     storage_dir = "my/storage/directory"
+    timeout = 3600
     
     [file-transfer-service.addr]
     ip = "0.0.0.0"
@@ -178,7 +182,6 @@ For example::
     
 Future configuration options:
 
-    - Intra-transaction message timeout duration
     - Maximum number of timeout-retry attempts
     - Non-default destination IP/port
 
