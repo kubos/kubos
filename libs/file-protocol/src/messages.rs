@@ -18,7 +18,7 @@ use serde_cbor::{ser, Value};
 
 // Create export message
 pub fn export_request(
-    channel_id: u32,
+    channel_id: u64,
     hash: &str,
     target_path: &str,
     mode: u32,
@@ -40,29 +40,29 @@ pub fn import_request(channel_id: u32, source_path: &str) -> Result<Vec<u8>, Str
 }
 
 // Create sync message
-pub fn metadata(hash: &str, num_chunks: u32) -> Result<Vec<u8>, String> {
-    info!("-> {{ {}, {} }}", hash, num_chunks);
-    ser::to_vec_packed(&(hash, num_chunks))
+pub fn metadata(channel_id: u64, hash: &str, num_chunks: u32) -> Result<Vec<u8>, String> {
+    info!("-> {{ {}, {}, {} }}", channel_id, hash, num_chunks);
+    ser::to_vec_packed(&(channel_id, hash, num_chunks))
         .map_err(|err| format!("Failed to create metadata message: {}", err))
 }
 
 // Send an acknowledge to the remote address
-pub fn ack(hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, String> {
-    info!("-> {{ {}, true, {:?} }}", hash, num_chunks);
-    ser::to_vec_packed(&(hash, true, num_chunks))
+pub fn ack(channel_id: u64, hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, String> {
+    info!("-> {{ {}, {}, true, {:?} }}", channel_id, hash, num_chunks);
+    ser::to_vec_packed(&(channel_id, hash, true, num_chunks))
         .map_err(|err| format!("Failed to create ACK message: {}", err))
 }
 
 // Sends a nak with ranges of missing chunks
-pub fn nak(hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8>, String> {
+pub fn nak(channel_id: u64, hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8>, String> {
     let chunks = if missing_chunks.len() > 20 {
         &missing_chunks[0..20]
     } else {
         &missing_chunks
     };
 
-    info!("-> {{ {}, false, {:?} }}", hash, chunks);
-    let mut vec = ser::to_vec_packed(&(hash, false))
+    info!("-> {{ {}, {}, false, {:?} }}", channel_id, hash, chunks);
+    let mut vec = ser::to_vec_packed(&(channel_id, hash, false))
         .map_err(|err| format!("Failed to create NAK message: {}", err))?;
 
     // Make the array indefinite-length
@@ -70,8 +70,10 @@ pub fn nak(hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8>, String> {
 
     for chunk in chunks.iter() {
         // Add the chunk number to the end of the CBOR array
-        vec.append(&mut ser::to_vec_packed(&chunk)
-            .map_err(|err| format!("Failed to append chunk to NAK message: {}", err))?);
+        vec.append(
+            &mut ser::to_vec_packed(&chunk)
+                .map_err(|err| format!("Failed to append chunk to NAK message: {}", err))?,
+        );
     }
 
     // Add the array break character
@@ -80,10 +82,10 @@ pub fn nak(hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8>, String> {
 }
 
 // Create chunk message
-pub fn chunk(hash: &str, index: u32, chunk: &[u8]) -> Result<Vec<u8>, String> {
+pub fn chunk(channel_id: u64, hash: &str, index: u32, chunk: &[u8]) -> Result<Vec<u8>, String> {
     let chunk_bytes = Value::Bytes(chunk.to_vec());
-    info!("-> {{ {}, {}, chunk_data }}", hash, index);
-    ser::to_vec_packed(&(hash, index, chunk_bytes))
+    info!("-> {{ {}, {}, {}, chunk_data }}", channel_id, hash, index);
+    ser::to_vec_packed(&(channel_id, hash, index, chunk_bytes))
         .map_err(|err| format!("Failed to create chunk message: {}", err))
 }
 
@@ -115,4 +117,11 @@ pub fn operation_failure(channel_id: u64, error: &str) -> Result<Vec<u8>, String
     info!("-> {{ {}, false, {} }}", channel_id, error);
     ser::to_vec_packed(&(channel_id, false, error))
         .map_err(|err| format!("Failed to create operation failure message: {}", err))
+}
+
+// Create sync message
+pub fn sync(channel_id: u64, hash: &str) -> Result<Vec<u8>, String> {
+    info!("-> {{ {}, {} }}", channel_id, hash);
+    ser::to_vec_packed(&(channel_id, hash))
+        .map_err(|err| format!("Failed to create sync message: {}", err))
 }

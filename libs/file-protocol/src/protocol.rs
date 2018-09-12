@@ -243,7 +243,15 @@ impl Protocol {
     /// ```
     ///
     pub fn send_metadata(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
-        self.send(messages::metadata(&hash, num_chunks)?)
+        let time = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .and_then(|duration| {
+                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
+            })
+            .map_err(|err| format!("Failed to get current system time: {}", err))?;
+        let channel_id: u64 = (time % 100000) as u64;
+
+        self.send(messages::metadata(channel_id, &hash, num_chunks)?)
     }
 
     /// Request remote target to receive file from host
@@ -278,7 +286,7 @@ impl Protocol {
                 Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
             })
             .map_err(|err| format!("Failed to get current system time: {}", err))?;
-        let channel_id: u32 = (time % 100000) as u32;
+        let channel_id: u64 = (time % 100000) as u64;
 
         self.send(messages::export_request(
             channel_id,
@@ -378,11 +386,16 @@ impl Protocol {
     }
 
     // Send all requested chunks of a file to the remote destination
-    fn send_chunks(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
+    fn send_chunks(
+        &self,
+        channel_id: u64,
+        hash: &str,
+        chunks: &[(u32, u32)],
+    ) -> Result<(), String> {
         for (first, last) in chunks {
             for chunk_index in *first..*last {
                 let chunk = storage::load_chunk(&self.prefix, hash, chunk_index)?;
-                self.send(messages::chunk(hash, chunk_index, &chunk)?)?;
+                self.send(messages::chunk(channel_id, hash, chunk_index, &chunk)?)?;
 
                 thread::sleep(Duration::from_millis(1));
             }
@@ -457,7 +470,7 @@ impl Protocol {
                     } => {
                         match storage::validate_file(&self.prefix, &hash, None) {
                             Ok((true, _)) => {
-                                self.send(messages::ack(&hash, None)?)?;
+                                self.send(messages::ack(channel_id, &hash, None)?)?;
                                 state = State::ReceivingDone {
                                     channel_id,
                                     hash: hash.clone(),
@@ -466,7 +479,7 @@ impl Protocol {
                                 };
                             }
                             Ok((false, chunks)) => {
-                                self.send(messages::nak(&hash, &chunks)?)?;
+                                self.send(messages::nak(channel_id, &hash, &chunks)?)?;
                                 state = State::Holding {
                                     count: 0,
                                     prev_state: Box::new(state.clone()),
@@ -588,32 +601,38 @@ impl Protocol {
         match parsed_message.to_owned() {
             Ok(parsed_message) => {
                 match &parsed_message {
-                    Message::Sync(hash) => {
-                        info!("<- {{ {} }}", hash);
+                    Message::Sync(channel_id, hash) => {
+                        info!("<- {{ {}, {} }}", channel_id, hash);
                         new_state = state.clone();
                     }
-                    Message::Metadata(hash, num_chunks) => {
-                        info!("<- {{ {}, {} }}", hash, num_chunks);
+                    Message::Metadata(channel_id, hash, num_chunks) => {
+                        info!("<- {{ {}, {}, {} }}", channel_id, hash, num_chunks);
                         storage::store_meta(&self.prefix, &hash, *num_chunks)?;
                         new_state = state.clone();
                     }
-                    Message::ReceiveChunk(hash, chunk_num, data) => {
-                        info!("<- {{ {}, {}, chunk_data }}", hash, chunk_num);
+                    Message::ReceiveChunk(channel_id, hash, chunk_num, data) => {
+                        info!(
+                            "<- {{ {}, {}, {}, chunk_data }}",
+                            channel_id, hash, chunk_num
+                        );
                         storage::store_chunk(&self.prefix, &hash, *chunk_num, &data)?;
                         new_state = state.clone();
                     }
-                    Message::ACK(ack_hash) => {
+                    Message::ACK(channel_id, ack_hash) => {
                         info!("<- {{ {}, true }}", ack_hash);
                         // TODO: Figure out hash verification here
                         new_state = State::TransmittingDone;
                     }
-                    Message::NAK(hash, Some(missing_chunks)) => {
-                        info!("<- {{ {}, false, {:?} }}", hash, missing_chunks);
-                        self.send_chunks(&hash, &missing_chunks)?;
+                    Message::NAK(channel_id, hash, Some(missing_chunks)) => {
+                        info!(
+                            "<- {{ {}, {}, false, {:?} }}",
+                            channel_id, hash, missing_chunks
+                        );
+                        self.send_chunks(*channel_id, &hash, &missing_chunks)?;
                         new_state = State::Transmitting;
                     }
-                    Message::NAK(hash, None) => {
-                        info!("<- {{ {}, false }}", hash);
+                    Message::NAK(channel_id, hash, None) => {
+                        info!("<- {{ {}, {}, false }}", channel_id, hash);
                         // TODO: Maybe trigger a failure?
                         new_state = state.clone();
                     }
@@ -627,7 +646,7 @@ impl Protocol {
                         match storage::validate_file(&self.prefix, hash, None) {
                             Ok((true, _)) => {
                                 // We've already got all the file data in temporary storage
-                                self.send(messages::ack(&hash, None)?)?;
+                                self.send(messages::ack(*channel_id, &hash, None)?)?;
 
                                 new_state = State::ReceivingDone {
                                     channel_id: *channel_id,
@@ -638,7 +657,7 @@ impl Protocol {
                             }
                             Ok((false, chunks)) => {
                                 // We're missing some number of data chunks of the requrested file
-                                self.send(messages::nak(&hash, &chunks)?)?;
+                                self.send(messages::nak(*channel_id, &hash, &chunks)?)?;
                                 new_state = State::Receiving {
                                     channel_id: *channel_id,
                                     hash: hash.to_string(),
@@ -691,7 +710,7 @@ impl Protocol {
                         // TODO: handle channel_id mismatch
                         match storage::validate_file(&self.prefix, hash, Some(*num_chunks)) {
                             Ok((true, _)) => {
-                                self.send(messages::ack(&hash, Some(*num_chunks))?)?;
+                                self.send(messages::ack(*channel_id, &hash, Some(*num_chunks))?)?;
                                 new_state = match state.clone() {
                                     State::StartReceive { path } => State::ReceivingDone {
                                         channel_id: *channel_id,
@@ -703,7 +722,7 @@ impl Protocol {
                                 };
                             }
                             Ok((false, chunks)) => {
-                                self.send(messages::nak(&hash, &chunks)?)?;
+                                self.send(messages::nak(*channel_id, &hash, &chunks)?)?;
                                 new_state = match state.clone() {
                                     State::StartReceive { path } => State::Receiving {
                                         channel_id: *channel_id,

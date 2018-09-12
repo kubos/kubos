@@ -247,15 +247,17 @@ pub fn parse_ack(data: Vec<Value>) -> Result<Option<Message>, String> {
         .ok_or(format!("Unable to parse message: No contents"))?
         .to_owned();
 
-    if let Value::String(hash) = first_param {
-        if let Some(Value::Bool(true)) = pieces.next() {
-            // It's an ACK: { hash, true, num_chunks }
-            // Our data transfer (export) completed succesfully
-            // self.stop_push(&hash)?;
+    if let Value::U64(channel_id) = first_param {
+        if let Some(Value::String(hash)) = pieces.next() {
+            if let Some(Value::Bool(true)) = pieces.next() {
+                // It's an ACK: { hash, true, num_chunks }
+                // Our data transfer (export) completed successfully
+                // self.stop_push(&hash)?;
 
-            //TODO: Do something with the third param? (num_chunks)
-            // Doesn't look like we do anything with num_chunks
-            return Ok(Some(Message::ACK(hash)));
+                //TODO: Do something with the third param? (num_chunks)
+                // Doesn't look like we do anything with num_chunks
+                return Ok(Some(Message::ACK(channel_id, hash.to_owned())));
+            }
         }
     }
 
@@ -272,23 +274,29 @@ pub fn parse_nak(data: Vec<Value>) -> Result<Option<Message>, String> {
         .ok_or(format!("Unable to parse message: No contents"))?
         .to_owned();
 
-    if let Value::String(hash) = first_param {
-        if let Some(Value::Bool(false)) = pieces.next() {
-            let mut remaining_chunks: Vec<(u32, u32)> = vec![];
-            let mut chunk_nums: Vec<u32> = vec![];
-            for entry in pieces {
-                if let Value::U64(chunk_num) = entry {
-                    chunk_nums.push(*chunk_num as u32);
+    if let Value::U64(channel_id) = first_param {
+        if let Some(Value::String(hash)) = pieces.next() {
+            if let Some(Value::Bool(false)) = pieces.next() {
+                let mut remaining_chunks: Vec<(u32, u32)> = vec![];
+                let mut chunk_nums: Vec<u32> = vec![];
+                for entry in pieces {
+                    if let Value::U64(chunk_num) = entry {
+                        chunk_nums.push(*chunk_num as u32);
+                    }
                 }
-            }
 
-            for chunk in chunk_nums.chunks(2) {
-                let first = chunk[0];
-                let last = chunk[1];
-                remaining_chunks.push((first, last));
-            }
+                for chunk in chunk_nums.chunks(2) {
+                    let first = chunk[0];
+                    let last = chunk[1];
+                    remaining_chunks.push((first, last));
+                }
 
-            return Ok(Some(Message::NAK(hash, Some(remaining_chunks))));
+                return Ok(Some(Message::NAK(
+                    channel_id,
+                    hash.to_owned(),
+                    Some(remaining_chunks),
+                )));
+            }
         }
     }
 
@@ -305,19 +313,22 @@ pub fn parse_chunk(data: Vec<Value>) -> Result<Option<Message>, String> {
         .ok_or(format!("Unable to parse message: No contents"))?
         .to_owned();
 
-    if let Value::String(hash) = first_param {
-        if let Some(Value::U64(num)) = pieces.next() {
-            if let Some(third_param) = pieces.next() {
-                if let Value::Bytes(data) = third_param {
-                    return Ok(Some(Message::ReceiveChunk(
-                        hash,
-                        *num as u32,
-                        data.to_vec(),
-                    )));
-                } else {
-                    return Err(format!(
-                        "Unable to parse chunk message: Invalid data format"
-                    ));
+    if let Value::U64(channel_id) = first_param {
+        if let Some(Value::String(hash)) = pieces.next() {
+            if let Some(Value::U64(num)) = pieces.next() {
+                if let Some(third_param) = pieces.next() {
+                    if let Value::Bytes(data) = third_param {
+                        return Ok(Some(Message::ReceiveChunk(
+                            channel_id,
+                            hash.to_owned(),
+                            *num as u32,
+                            data.to_vec(),
+                        )));
+                    } else {
+                        return Err(format!(
+                            "Unable to parse chunk message: Invalid data format"
+                        ));
+                    }
                 }
             }
         }
@@ -338,21 +349,27 @@ pub fn parse_sync(data: Vec<Value>) -> Result<Option<Message>, String> {
         .ok_or(format!("Unable to parse message: No contents"))?
         .to_owned();
 
-    if let Value::String(hash) = first_param {
-        if let Some(second_param) = pieces.next() {
-            if let Value::U64(num) = second_param {
-                if let None = pieces.next() {
-                    // It's a sync message: { hash, num_chunks }
-                    // TODO: Whoever processes this message should do the sync_and_send
-                    //self.sync_and_send(&hash, Some(*num as u32));
-                    return Ok(Some(Message::Metadata(hash, *num as u32)));
+    if let Value::U64(channel_id) = first_param {
+        if let Some(Value::String(hash)) = pieces.next() {
+            if let Some(second_param) = pieces.next() {
+                if let Value::U64(num) = second_param {
+                    if let None = pieces.next() {
+                        // It's a sync message: { hash, num_chunks }
+                        // TODO: Whoever processes this message should do the sync_and_send
+                        //self.sync_and_send(&hash, Some(*num as u32));
+                        return Ok(Some(Message::Metadata(
+                            channel_id,
+                            hash.to_owned(),
+                            *num as u32,
+                        )));
+                    }
                 }
+            } else {
+                // It's a sync message: { hash }
+                // TODO: Whoever processes this message should do the sync_and_send
+                //self.sync_and_send(&hash, None)?;
+                return Ok(Some(Message::Sync(channel_id, hash.to_owned())));
             }
-        } else {
-            // It's a sync message: { hash }
-            // TODO: Whoever processes this message should do the sync_and_send
-            //self.sync_and_send(&hash, None)?;
-            return Ok(Some(Message::Sync(hash)));
         }
     }
 

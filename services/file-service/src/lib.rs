@@ -96,28 +96,26 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                 // Set up the file system processor with the reply socket information
                 let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref);
 
-                loop {
-                    // // Process that first message that we got
-                    // if let Some(msg) = first_message {
-                    //     if let Ok(new_state) = f_protocol.process_message(msg, state.clone()) {
-                    //         state = new_state;
-                    //     }
-                    // }
+                // // Process that first message that we got
+                // if let Some(msg) = first_message {
+                //     if let Ok(new_state) = f_protocol.process_message(msg, state.clone()) {
+                //         state = new_state;
+                //     }
+                // }
 
-                    // Listen, process, and react to the remaining messages in the
-                    // requested operation
-                    match f_protocol.message_engine(
-                        |d| match receiver.recv_timeout(d) {
-                            Ok(v) => Ok(v),
-                            Err(RecvTimeoutError) => Ok(None),
-                            Err(e) => Err(Some(format!("Error {:?}", e))),
-                        },
-                        timeout_ref,
-                        state.clone(),
-                    ) {
-                        Err(e) => warn!("Encountered errors while processing transaction: {}", e),
-                        _ => {}
-                    }
+                // Listen, process, and react to the remaining messages in the
+                // requested operation
+                match f_protocol.message_engine(
+                    |d| match receiver.recv_timeout(d) {
+                        Ok(v) => Ok(v),
+                        Err(RecvTimeoutError) => Ok(None),
+                        Err(e) => Err(Some(format!("Error {:?}", e))),
+                    },
+                    timeout_ref,
+                    state.clone(),
+                ) {
+                    Err(e) => warn!("Encountered errors while processing transaction: {}", e),
+                    _ => {}
                 }
 
                 info!("thread {} done", my_channel);
