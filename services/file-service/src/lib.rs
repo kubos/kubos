@@ -43,12 +43,21 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         None => None,
     };
 
+    let timeout = config
+        .get("timeout")
+        .and_then(|val| {
+            val.as_integer()
+                .and_then(|num| Some(Duration::from_secs(num as u64)))
+        })
+        .unwrap_or(Duration::from_secs(2));
+
     loop {
         // Listen on UDP port
         let (source, first_message) = c_protocol.recv_message_peer()?;
 
         let prefix_ref = prefix.clone();
         let host_ref = host_ip.clone();
+        let timeout_ref = timeout.clone();
 
         // Break the processing work off into its own thread so we can
         // listen for requests from other clients
@@ -70,7 +79,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
 
             // Listen, process, and react to the remaining messages in the
             // requested operation
-            match f_protocol.message_engine(Duration::from_secs(2), state) {
+            match f_protocol.message_engine(timeout_ref, state) {
                 Err(e) => warn!("Encountered errors while processing transaction: {}", e),
                 _ => {}
             }
