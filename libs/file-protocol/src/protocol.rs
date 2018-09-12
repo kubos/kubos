@@ -426,6 +426,7 @@ impl Protocol {
         let mut state = start_state.clone();
         loop {
             // Listen on UDP port
+            info!("engine pump {:?}", state);
             let message = match pump(timeout) {
                 //let message = match self.cbor_proto.recv_message_peer_timeout(timeout) {
                 Ok(Some(message)) => {

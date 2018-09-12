@@ -49,12 +49,34 @@
 extern crate serde_cbor;
 
 use serde_cbor::de;
+use serde_cbor::Value;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Duration;
 
 // Was 4136
 // Somewhere we are sending packets bigger than this...
 const MSG_SIZE: usize = 4500;
+
+/// Parse and return the channel_id for a message
+pub fn peek_channel_id(message: &Option<serde_cbor::Value>) -> Result<Option<u64>, String> {
+    let data = match message {
+        Some(Value::Array(val)) => val.to_owned(),
+        _ => return Err("Unable to parse message: Data not an array".to_owned()),
+    };
+
+    let mut pieces = data.iter();
+
+    let first_param: Value = pieces
+        .next()
+        .ok_or(format!("Unable to parse message: No contents"))?
+        .to_owned();
+
+    if let Value::U64(channel_id) = first_param {
+        Ok(Some(channel_id))
+    } else {
+        Ok(None)
+    }
+}
 
 /// CBOR protocol communication structure
 pub struct Protocol {

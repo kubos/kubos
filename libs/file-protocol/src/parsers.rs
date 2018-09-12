@@ -18,6 +18,7 @@ use super::Message;
 use serde_cbor::Value;
 
 pub fn parse_message(message: Value) -> Result<Message, String> {
+    info!("parsing {:?}", message);
     let data = match message {
         Value::Array(val) => val.to_owned(),
         _ => return Err("Unable to parse message: Data not an array".to_owned()),
@@ -184,7 +185,9 @@ pub fn parse_success_transmit(data: Vec<Value>) -> Result<Option<Message>, Strin
                 ))? {
                     Value::U64(val) => *val,
                     _ => {
-                        return Err("Unable to parse success message: Invalid num_chunks param".to_owned())
+                        return Err(
+                            "Unable to parse success message: Invalid num_chunks param".to_owned()
+                        )
                     }
                 };
 
