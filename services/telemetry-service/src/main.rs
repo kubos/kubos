@@ -166,6 +166,9 @@ extern crate diesel;
 extern crate juniper;
 extern crate kubos_service;
 extern crate kubos_telemetry_db;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 
 mod schema;
 

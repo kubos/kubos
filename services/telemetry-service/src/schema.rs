@@ -18,9 +18,15 @@ use diesel::prelude::*;
 use juniper::FieldResult;
 use kubos_service;
 use kubos_telemetry_db::{self, Database};
+use serde_json;
+use std::fs;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
 
 type Context = kubos_service::Context<Database>;
 
+#[derive(Serialize)]
 pub struct Entry(kubos_telemetry_db::Entry);
 
 graphql_object!(Entry: () |&self| {
@@ -43,6 +49,51 @@ graphql_object!(Entry: () |&self| {
     }
 });
 
+fn query_db(
+    database: &Database,
+    timestamp_ge: Option<i32>,
+    timestamp_le: Option<i32>,
+    subsystem: Option<String>,
+    parameter: Option<String>,
+    limit: Option<i32>,
+) -> FieldResult<Vec<Entry>> {
+    use kubos_telemetry_db::telemetry::dsl;
+    use kubos_telemetry_db::telemetry;
+    use diesel::sqlite::SqliteConnection;
+
+    let mut query = telemetry::table.into_boxed::<<SqliteConnection as Connection>::Backend>();
+
+    if let Some(sub) = subsystem {
+        query = query.filter(dsl::subsystem.eq(sub));
+    }
+
+    if let Some(param) = parameter {
+        query = query.filter(dsl::parameter.eq(param));
+    }
+
+    if let Some(time_ge) = timestamp_ge {
+        query = query.filter(dsl::timestamp.ge(time_ge));
+    }
+
+    if let Some(time_le) = timestamp_le {
+        query = query.filter(dsl::timestamp.le(time_le));
+    }
+
+    if let Some(l) = limit {
+        query = query.limit(l.into());
+    }
+
+    query = query.order(dsl::timestamp.desc());
+
+    let entries = query.load::<kubos_telemetry_db::Entry>(&database.connection)?;
+    let mut g_entries: Vec<Entry> = Vec::new();
+    for entry in entries {
+        g_entries.push(Entry(entry));
+    }
+
+    Ok(g_entries)
+}
+
 pub struct QueryRoot;
 
 graphql_object!(QueryRoot: Context |&self| {
@@ -56,42 +107,33 @@ graphql_object!(QueryRoot: Context |&self| {
     ) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
-        use kubos_telemetry_db::telemetry::dsl;
-        use kubos_telemetry_db::telemetry;
-        use diesel::sqlite::SqliteConnection;
-
-        let mut query = telemetry::table.into_boxed::<<SqliteConnection as Connection>::Backend>();
-
-        if let Some(sub) = subsystem {
-            query = query.filter(dsl::subsystem.eq(sub));
+        query_db(executor.context().subsystem(), timestamp_ge, timestamp_le, subsystem, parameter, limit)
+    }
+    field routed_telemetry(
+        &executor,
+        timestamp_ge: Option<i32>,
+        timestamp_le: Option<i32>,
+        subsystem: Option<String>,
+        parameter: Option<String>,
+        limit: Option<i32>,
+        output: String
+    ) -> FieldResult<String>
+        as "Telemetry entries in database"
+    {
+        let entries = query_db(executor.context().subsystem(), timestamp_ge, timestamp_le, subsystem, parameter, limit)?;
+        let entries = serde_json::to_vec(&entries)?;
+        
+        let output_str = output.clone();
+        let output_path = Path::new(&output_str);
+        
+        if let Some(parent) = output_path.parent() {
+            fs::create_dir_all(parent)?;
         }
-
-        if let Some(param) = parameter {
-            query = query.filter(dsl::parameter.eq(param));
-        }
-
-        if let Some(time_ge) = timestamp_ge {
-            query = query.filter(dsl::timestamp.ge(time_ge));
-        }
-
-        if let Some(time_le) = timestamp_le {
-            query = query.filter(dsl::timestamp.le(time_le));
-        }
-
-        if let Some(l) = limit {
-            query = query.limit(l.into());
-        }
-
-        query = query.order(dsl::timestamp.desc());
-
-        let entries = query.load::<kubos_telemetry_db::Entry>(
-            &executor.context().subsystem().connection)?;
-        let mut g_entries: Vec<Entry> = Vec::new();
-        for entry in entries {
-            g_entries.push(Entry(entry));
-        }
-
-        Ok(g_entries)
+        
+        let mut output_file = File::create(output_path)?;
+        output_file.write_all(&entries)?;
+        
+        Ok(output)
     }
 });
 
