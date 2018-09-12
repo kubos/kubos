@@ -1,32 +1,45 @@
-//
-// Copyright (C) 2018 Kubos Corporation
-//
-// Licensed under the Apache License, Version 2.0 (the "License")
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-
+extern crate getopts;
 #[macro_use]
 extern crate kubos_app;
 
+use getopts::Options;
 use kubos_app::*;
+use std::fs;
+use std::fs::OpenOptions;
+use std::io::Write;
 
 struct MyApp;
 
 impl AppHandler for MyApp {
-    fn on_boot(&self) {
-        println!("OnBoot logic");
+    fn on_boot(&self, args: Vec<String>) {
+        let mut opts = Options::new();
+        opts.optflag("v", "verbose", "Enable verbose output");
+        opts.optflagopt("l", "log", "Log file path", "LOG_FILE");
+
+        // Parse the command args (skip the first arg with the application name)
+        let matches = match opts.parse(&args[1..]) {
+            Ok(r) => r,
+            Err(f) => panic!(f.to_string()),
+        };
+
+        // Get the path to use for logging
+        let log_path = matches
+            .opt_str("l")
+            .unwrap_or("/home/kubos/test-output".to_owned());
+        println!("Log file set to: {}", log_path);
+
+        // Set up the log file
+        let mut log_file = OpenOptions::new().append(true).open(log_path).unwrap();
+
+        writeln!(log_file, "OnBoot logic called").unwrap();
+
+        // Check for our other command line argument
+        if matches.opt_present("v") {
+            writeln!(log_file, "Verbose output enabled").unwrap();
+        }
     }
-    fn on_command(&self) {
-        println!("OnCommand logic");
+    fn on_command(&self, _args: Vec<String>) {
+        fs::write("/home/kubos/test-output", "OnCommand logic\r\n").unwrap();
     }
 }
 

@@ -72,6 +72,11 @@ For instance, an application might be set up to fetch the current time from a GP
     Two U-Boot variables help keep track of this: `deployed` - boolean indicating whether deployment has been completed or not,
     and `deploy_start` - a timestamp that's generated the first time deployment is started. This is used to keep track of the
     delay required between initial launch and when deployment is allowed to begin.
+    
+Additional Arguments
+--------------------
+
+Additional command line arguments may be used by the application. They will be automatically passed through to the application by the applications service.
 
 .. _app-manifest:
 
@@ -114,19 +119,47 @@ If we want our application to be written in Rust, we'll start by creating a new 
 
 We'll update the `src/main.rs` file to have the following::
 
+    extern crate getopts;
     #[macro_use]
     extern crate kubos_app;
     
+    use getopts::Options;
     use kubos_app::*;
     use std::fs;
+    use std::fs::OpenOptions;
+    use std::io::Write;
     
     struct MyApp;
     
     impl AppHandler for MyApp {
-        fn on_boot(&self) {
-            fs::write("/home/kubos/test-output", "OnBoot logic\r\n").unwrap();
+        fn on_boot(&self, args: Vec<String>) {
+            let mut opts = Options::new();
+            opts.optflag("v", "verbose", "Enable verbose output");
+            opts.optflagopt("l", "log", "Log file path", "LOG_FILE");
+    
+            // Parse the command args (skip the first arg with the application name)
+            let matches = match opts.parse(&args[1..]) {
+                Ok(r) => r,
+                Err(f) => panic!(f.to_string()),
+            };
+    
+            // Get the path to use for logging
+            let log_path = matches
+                .opt_str("l")
+                .unwrap_or("/home/kubos/test-output".to_owned());
+            println!("Log file set to: {}", log_path);
+    
+            // Set up the log file
+            let mut log_file = OpenOptions::new().append(true).open(log_path).unwrap();
+    
+            writeln!(log_file, "OnBoot logic called").unwrap();
+    
+            // Check for our other command line argument
+            if matches.opt_present("v") {
+                writeln!(log_file, "Verbose output enabled").unwrap();
+            }
         }
-        fn on_command(&self) {
+        fn on_command(&self, _args: Vec<String>) {
             fs::write("/home/kubos/test-output", "OnCommand logic\r\n").unwrap();
         }
     }
@@ -157,10 +190,13 @@ making sure to include ``#!/usr/bin/env python`` at the top of the file::
     
     import argparse
     
-    def on_boot():
+    def on_boot(cmd_args):
         
-        file = open("/home/kubos/test-output","w+")
+        file = open(cmd_args.log_file, "a+")
         file.write("OnBoot logic\r\n")
+        
+        if cmd_args.verbose:
+            file.write("Verbose output enabled\r\n")
         
     def on_command():
         
@@ -171,11 +207,13 @@ making sure to include ``#!/usr/bin/env python`` at the top of the file::
         parser = argparse.ArgumentParser()
         
         parser.add_argument('--run', '-r', default='OnCommand')
+        parser.add_argument('--log_file', '-l', nargs='?', default='/home/kubos/test-output')
+        parser.add_argument('--verbose', '-v', action='store_true')
         
         args = parser.parse_args()
         
         if args.run == 'OnBoot':
-            on_boot()
+            on_boot(args)
         else:
             on_command()
         
