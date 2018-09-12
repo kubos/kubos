@@ -43,6 +43,27 @@ Each of the query arguments acts as a filter for the database query:
 Note: ``timestampGe`` and ``timestampLe`` can be combined to create a timestamp selection range.
 For example, entries with timestamps after ``1000``, but before ``5000``.
 
+Saving Results for Later Processing
+-----------------------------------
+
+Sometimes we might want to periodically query the database for telemetry data, but not immediately use the results.
+
+In this case, we can use the ``routedTelemetry`` query to write our results to an on-system file.
+
+It has the following schema::
+
+    query {
+        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!): String! 
+    }
+
+The ``output`` argument specifies the output file to write the query results to.
+The other arguments are the same as in the ``telemetry`` query.
+
+The query will return a single field echoing the file that was written to.
+
+The results file will contain an array of database entries in JSON format.
+This matches the return fields of the ``telemetry`` query.
+
 Adding Entries to the Database
 ------------------------------
 

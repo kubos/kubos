@@ -62,6 +62,7 @@
 //! }
 //!
 //! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): Entry
+//! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!): String!
 //!
 //! mutation insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!): { success: Boolean!, errors: String! }
 //! ```
@@ -137,6 +138,13 @@
 //!     parameter,
 //!     value
 //!   }
+//! }
+//! ```
+//!
+//! ## Repeat the previous query, but route the output to `/home/system/recent_telem`
+//! ```graphql
+//! {
+//!   telemetry(limit: 10, timestampGe: 1008, output: "/home/system/recent_telem")
 //! }
 //! ```
 //!
