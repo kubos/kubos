@@ -58,7 +58,7 @@ use std::time::Duration;
 const MSG_SIZE: usize = 4500;
 
 /// Parse and return the channel_id for a message
-pub fn peek_channel_id(message: &Option<serde_cbor::Value>) -> Result<Option<u64>, String> {
+pub fn peek_channel_id(message: &Option<serde_cbor::Value>) -> Result<Option<u32>, String> {
     let data = match message {
         Some(Value::Array(val)) => val.to_owned(),
         _ => return Err("Unable to parse message: Data not an array".to_owned()),
@@ -72,7 +72,7 @@ pub fn peek_channel_id(message: &Option<serde_cbor::Value>) -> Result<Option<u64
         .to_owned();
 
     if let Value::U64(channel_id) = first_param {
-        Ok(Some(channel_id))
+        Ok(Some(channel_id as u32))
     } else {
         Ok(None)
     }

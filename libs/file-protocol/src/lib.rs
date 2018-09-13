@@ -110,25 +110,25 @@ const CHUNK_SIZE: usize = 4096;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Message {
     /// TODO: Decide whether or not to keep this
-    Sync(u64, String),
+    Sync(u32, String),
     /// Receiver should prepare a new temporary storage folder with the specified metadata
-    Metadata(u64, String, u32),
+    Metadata(u32, String, u32),
     /// File data chunk message
-    ReceiveChunk(u64, String, u32, Vec<u8>),
+    ReceiveChunk(u32, String, u32, Vec<u8>),
     /// Receiver has successfully gotten all data chunks of the requested file
-    ACK(u64, String),
+    ACK(u32, String),
     /// Receiver is missing the specified file data chunks
-    NAK(u64, String, Option<Vec<(u32, u32)>>),
+    NAK(u32, String, Option<Vec<(u32, u32)>>),
     /// (Client Only) Message requesting the recipient to receive the specified file
-    ReqReceive(u64, String, String, Option<u32>),
+    ReqReceive(u32, String, String, Option<u32>),
     /// (Client Only) Message requesting the recipient to transmit the specified file
-    ReqTransmit(u64, String),
+    ReqTransmit(u32, String),
     /// (Server Only) Recipient has successfully processed a request to receive a file
-    SuccessReceive(u64),
+    SuccessReceive(u32),
     /// (Server Only) Recipient has successfully prepared to transmit a file
-    SuccessTransmit(u64, String, u32, Option<u32>),
+    SuccessTransmit(u32, String, u32, Option<u32>),
     /// (Server Only) The transmit or receive request has failed to be completed
-    Failure(u64, String),
+    Failure(u32, String),
 }
 
 #[cfg(test)]
@@ -138,7 +138,7 @@ mod tests {
 
     #[test]
     fn create_parse_export_request() {
-        let channel_id: u64 = 10;
+        let channel_id = 10;
         let hash = "abcdedf".to_owned();
         let target_path = "/path/to/file".to_owned();
         let mode = 0o623;

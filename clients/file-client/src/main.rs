@@ -61,7 +61,7 @@ fn download(
 
     // Send our file request to the remote addr and verify that it's
     // going to be able to send it
-    f_protocol.send_import(channel as u32, source_path)?;
+    f_protocol.send_import(channel, source_path)?;
 
     // Wait for the request reply.
     // Note/TODO: We don't use a timeout here because we don't know how long it will

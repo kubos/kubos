@@ -54,7 +54,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         })
         .unwrap_or(Duration::from_secs(2));
     // Setup maps of channel_id -> tx channel
-    let mut threads: HashMap<u64, Sender<Option<serde_cbor::Value>>> = HashMap::new();
+    let mut threads: HashMap<u32, Sender<Option<serde_cbor::Value>>> = HashMap::new();
 
     loop {
         // Listen on UDP port

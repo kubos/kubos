@@ -39,7 +39,6 @@ pub struct Protocol {
     prefix: String,
     cbor_proto: CborProtocol,
     remote_addr: Cell<SocketAddr>,
-    channel_id: Option<u64>,
 }
 
 /// Current state of the file protocol transaction
@@ -60,7 +59,7 @@ pub enum State {
     /// Currently receiving a file
     Receiving {
         /// Transaction identifier
-        channel_id: u64,
+        channel_id: u32,
         /// File hash
         hash: String,
         /// Destination file path
@@ -71,7 +70,7 @@ pub enum State {
     /// All file chunks have been received
     ReceivingDone {
         /// Transaction identifier
-        channel_id: u64,
+        channel_id: u32,
         /// File hash
         hash: String,
         /// Destination file path
@@ -117,7 +116,6 @@ impl Protocol {
             prefix: prefix.unwrap_or("file-transfer".to_owned()),
             cbor_proto: c_protocol,
             remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
-            channel_id: None,
         }
     }
 
@@ -149,7 +147,6 @@ impl Protocol {
             prefix: prefix.unwrap_or("file-transfer".to_owned()),
             cbor_proto: CborProtocol::new_from_socket(socket),
             remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
-            channel_id: None,
         }
     }
 
@@ -223,9 +220,9 @@ impl Protocol {
     }
 
     /// Generate channel id
-    pub fn generate_channel(&self) -> Result<u64, String> {
+    pub fn generate_channel(&self) -> Result<u32, String> {
         let mut rng = rand::thread_rng();
-        let channel_id: u64 = rng.gen_range(100000, 999999);
+        let channel_id: u32 = rng.gen_range(100000, 999999);
         Ok(channel_id)
     }
 
@@ -255,7 +252,7 @@ impl Protocol {
     ///
     pub fn send_metadata(
         &self,
-        channel_id: u64,
+        channel_id: u32,
         hash: &str,
         num_chunks: u32,
     ) -> Result<(), String> {
@@ -289,7 +286,7 @@ impl Protocol {
     ///
     pub fn send_export(
         &self,
-        channel_id: u64,
+        channel_id: u32,
         hash: &str,
         target_path: &str,
         mode: u32,
@@ -366,7 +363,7 @@ impl Protocol {
     //
     fn finalize_file(
         &self,
-        channel_id: u64,
+        channel_id: u32,
         hash: &str,
         target_path: &str,
         mode: Option<u32>,
@@ -386,7 +383,7 @@ impl Protocol {
     // Send all requested chunks of a file to the remote destination
     fn send_chunks(
         &self,
-        channel_id: u64,
+        channel_id: u32,
         hash: &str,
         chunks: &[(u32, u32)],
     ) -> Result<(), String> {
