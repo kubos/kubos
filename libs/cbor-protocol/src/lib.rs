@@ -27,7 +27,7 @@
 //! use std::time::Duration;
 //!
 //! let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
-//! let message = ser::to_vec_packed(&"ping").unwrap();
+//! let message = ser::to_vec_packed(&("hello", "world")).unwrap();
 //!
 //! cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap()).unwrap();
 //!
@@ -113,7 +113,7 @@ impl Protocol {
     ///
     /// # Arguments
     ///
-    /// * message - CBOR packet to send
+    /// * message - CBOR packet to send. Packet must be a serialized array or tuple.
     /// * dest - UDP socket destination
     ///
     /// # Errors
@@ -130,7 +130,20 @@ impl Protocol {
     /// use serde_cbor::ser;
     ///
     /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
-    /// let message = ser::to_vec_packed(&"ping").unwrap();
+    /// let message = ser::to_vec_packed(&["ping"]).unwrap();
+    ///
+    /// cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap());
+    /// ```
+    ///
+    /// ```
+    /// extern crate cbor_protocol;
+    /// extern crate serde_cbor;
+    ///
+    /// use cbor_protocol::*;
+    /// use serde_cbor::ser;
+    ///
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let message = ser::to_vec_packed(&("hello", "world")).unwrap();
     ///
     /// cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap());
     /// ```
@@ -280,6 +293,8 @@ impl Protocol {
         let (size, peer) = self.handle
             .recv_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
+
+        println!("Received: {:?}", &buf[0..size]);
 
         let message = self.recv_start(&buf[0..size])?;
         Ok((peer, message))

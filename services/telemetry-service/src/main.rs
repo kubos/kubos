@@ -15,7 +15,7 @@
 //
 
 #![deny(missing_docs)]
-#![deny(warnings)]
+//#![deny(warnings)]
 
 //! Kubos Service for interacting with the telemetry database.
 //!
@@ -161,16 +161,21 @@
 //! 	}
 //! }
 //! ```
+extern crate cbor_protocol;
 extern crate diesel;
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;
 extern crate kubos_telemetry_db;
+extern crate serde_cbor;
 
+mod model;
 mod schema;
+mod udp;
 
 use kubos_service::{Config, Service};
 use kubos_telemetry_db::Database;
+use model::Subsystem;
 use schema::{MutationRoot, QueryRoot};
 
 fn main() {
@@ -184,5 +189,5 @@ fn main() {
     let db = Database::new(&db_path);
     db.setup();
 
-    Service::new(config, db, QueryRoot, MutationRoot).start();
+    Service::new(config, Subsystem::new(db), QueryRoot, MutationRoot).start();
 }

@@ -17,9 +17,10 @@
 use diesel::prelude::*;
 use juniper::FieldResult;
 use kubos_service;
-use kubos_telemetry_db::{self, Database};
+use kubos_telemetry_db;
+use model::*;
 
-type Context = kubos_service::Context<Database>;
+type Context = kubos_service::Context<Subsystem>;
 
 pub struct Entry(kubos_telemetry_db::Entry);
 
@@ -85,7 +86,7 @@ graphql_object!(QueryRoot: Context |&self| {
         query = query.order(dsl::timestamp.desc());
 
         let entries = query.load::<kubos_telemetry_db::Entry>(
-            &executor.context().subsystem().connection)?;
+            &executor.context().subsystem().database.lock()?.connection)?;
         let mut g_entries: Vec<Entry> = Vec::new();
         for entry in entries {
             g_entries.push(Entry(entry));
@@ -106,8 +107,8 @@ struct InsertResponse {
 graphql_object!(MutationRoot: Context | &self | {
     field insert(&executor, timestamp: Option<i32>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
         let result = match timestamp {
-            Some(time) => executor.context().subsystem().insert(time, &subsystem, &parameter, &value),
-            None => executor.context().subsystem().insert_systime(&subsystem, &parameter, &value),
+            Some(time) => executor.context().subsystem().database.lock()?.insert(time, &subsystem, &parameter, &value),
+            None => executor.context().subsystem().database.lock()?.insert_systime(&subsystem, &parameter, &value),
         };
         
         Ok(InsertResponse {
