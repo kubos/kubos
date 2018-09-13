@@ -21,12 +21,16 @@ extern crate file_service;
 extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
+#[macro_use]
+extern crate log;
+extern crate simplelog;
 
 use blake2_rfc::blake2s::Blake2s;
 use file_protocol::{FileProtocol, State};
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
+use simplelog::*;
 use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
@@ -68,9 +72,11 @@ fn download(
 ) -> Result<(), String> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
+    let channel = f_protocol.generate_channel()?;
+
     // Send our file request to the remote addr and verify that it's
     // going to be able to send it
-    f_protocol.send_import(source_path)?;
+    f_protocol.send_import(channel as u32, source_path)?;
 
     // Wait for the request reply.
     // Note/TODO: We don't use a timeout here because we don't know how long it will
@@ -90,7 +96,7 @@ fn download(
         },
     )?;
 
-    Ok(f_protocol.message_engine(Duration::from_secs(2), state)?)
+    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(4), state)?)
 }
 
 fn create_test_file(name: &str, contents: &[u8]) -> String {
@@ -101,7 +107,8 @@ fn create_test_file(name: &str, contents: &[u8]) -> String {
     hasher.update(contents);
     let hash = hasher.finalize();
 
-    let hash_str = hash.as_bytes()
+    let hash_str = hash
+        .as_bytes()
         .iter()
         .map(|byte| format!("{:02x}", byte))
         .collect();
@@ -321,11 +328,6 @@ fn download_multi_client() {
 
     // Spawn 5 simultaneous clients
     for num in 0..5 {
-        // Need a tiny pause between starting threads, otherwise an initial
-        // operation request might get dropped because the main service socket
-        // just gets overloaded with UDP packets.
-        thread::sleep(Duration::new(0, 1));
-
         thread_handles.push(thread::spawn(move || {
             let test_dir = TempDir::new().expect("Failed to create test dir");
             let test_dir_str = test_dir.path().to_str().unwrap();
@@ -335,6 +337,7 @@ fn download_multi_client() {
 
             let hash = create_test_file(&source, &contents);
 
+            println!("download thread {} -> {}", source, dest);
             let result = download(
                 "127.0.0.1",
                 &format!("127.0.0.1:{}", service_port),
@@ -344,18 +347,16 @@ fn download_multi_client() {
             );
             assert!(result.is_ok());
 
-            // TODO: Remove this sleep. We need it to let the service
-            // finish its work. The upload logic needs to wait on
-            // the final ACK message before returning
-            thread::sleep(Duration::new(2, 0));
-
             // Cleanup the temporary files so that the test can be repeatable
             fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
             fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
             // Verify the final file's contents
-            let dest_contents = fs::read(dest).unwrap();
-            assert_eq!(&contents[..], dest_contents.as_slice());
+            if let Ok(dest_contents) = fs::read(&dest) {
+                assert_eq!(&contents[..], dest_contents.as_slice());
+            } else {
+                println!("error reading file {:?}", dest);
+            }
         }));
     }
 

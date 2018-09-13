@@ -20,11 +20,15 @@ extern crate file_service;
 extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
+#[macro_use]
+extern crate log;
+extern crate simplelog;
 
 use file_protocol::{FileProtocol, State};
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
+use simplelog::*;
 use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
@@ -53,7 +57,7 @@ macro_rules! service_new {
             )).unwrap();
         });
 
-        thread::sleep(Duration::new(0,500));
+        thread::sleep(Duration::new(1, 0));
     }};
 }
 
@@ -69,18 +73,20 @@ fn upload(
     // Copy file to upload to temp storage. Calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 
-    // Tell our destination the hash and number of chunks to expect
-    f_protocol.send_metadata(&hash, num_chunks)?;
+    let channel = f_protocol.generate_channel()?;
 
-    // TODO: We need this sleep so that the service can have time to set up the temporary
-    // storage directory. Do something to make this unnecessary
-    ::std::thread::sleep(Duration::from_millis(100));
+    // Tell our destination the hash and number of chunks to expect
+    f_protocol.send_metadata(channel, &hash, num_chunks)?;
 
     // Send export command for file
-    f_protocol.send_export(&hash, &target_path, mode)?;
+    f_protocol.send_export(channel, &hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?;
+    f_protocol.message_engine(
+        |d| f_protocol.recv(Some(d)),
+        Duration::from_secs(2),
+        State::Transmitting,
+    )?;
 
     // Note: The original upload client function does not return the hash.
     // We're only doing it here so that we can manipulate the temporary storage
@@ -123,6 +129,8 @@ fn upload_single() {
 
     let hash = result.unwrap();
 
+    thread::sleep(Duration::from_secs(10));
+
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
     fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
@@ -141,7 +149,7 @@ fn upload_multi_clean() {
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7001;
 
-    let contents = [1; 5000];
+    let contents = [1; 10];
 
     create_test_file(&source, &contents);
 
@@ -306,8 +314,6 @@ fn upload_bad_hash() {
 }
 
 // Upload a single file in 5 simultaneous client instances
-// TODO: Make this work 100% of the time
-/*
 #[test]
 fn upload_multi_client() {
     let service_port = 7004;
@@ -319,11 +325,6 @@ fn upload_multi_client() {
 
     // Spawn 4 simultaneous clients
     for _num in 0..4 {
-        // Need a tiny pause between starting threads, otherwise an initial
-        // operation request might get dropped because the main service socket
-        // just gets overloaded with UDP packets.
-        thread::sleep(Duration::from_millis(100));
-
         thread_handles.push(thread::spawn(move || {
             let test_dir = TempDir::new().expect("Failed to create test dir");
             let test_dir_str = test_dir.path().to_str().unwrap();
@@ -361,7 +362,6 @@ fn upload_multi_client() {
         assert!(entry.join().is_ok());
     }
 }
-*/
 
 // Massive (100MB) upload
 // Note 1: This test will take several minutes to run.

@@ -27,15 +27,13 @@ fn upload(
     // Copy file to upload to temp storage. Calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 
-    // Tell our destination the hash and number of chunks to expect
-    f_protocol.send_metadata(&hash, num_chunks)?;
+    let channel = f_protocol.generate_channel()?;
 
-    // TODO: We need this sleep so that the service can have time to set up the temporary
-    // storage directory. Do something to make this unnecessary
-    ::std::thread::sleep(Duration::from_millis(100));
+    // Tell our destination the hash and number of chunks to expect
+    f_protocol.send_metadata(channel, &hash, num_chunks)?;
 
     // Send export command for file
-    f_protocol.send_export(&hash, &target_path, mode)?;
+    f_protocol.send_export(channel, &hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
     Ok(f_protocol.message_engine(
@@ -59,9 +57,11 @@ fn download(
         source_path, target_path
     );
 
+    let channel = f_protocol.generate_channel()?;
+
     // Send our file request to the remote addr and verify that it's
     // going to be able to send it
-    f_protocol.send_import(source_path)?;
+    f_protocol.send_import(channel as u32, source_path)?;
 
     // Wait for the request reply.
     // Note/TODO: We don't use a timeout here because we don't know how long it will

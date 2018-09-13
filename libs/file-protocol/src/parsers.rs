@@ -18,7 +18,6 @@ use super::Message;
 use serde_cbor::Value;
 
 pub fn parse_message(message: Value) -> Result<Message, String> {
-    info!("parsing {:?}", message);
     let data = match message {
         Value::Array(val) => val.to_owned(),
         _ => return Err("Unable to parse message: Data not an array".to_owned()),

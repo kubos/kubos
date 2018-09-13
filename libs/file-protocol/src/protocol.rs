@@ -21,6 +21,7 @@ use super::parsers;
 use super::storage;
 use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
+use rand::{self, Rng};
 use serde_cbor::Value;
 use std::cell::Cell;
 use std::net::SocketAddr;
@@ -38,6 +39,7 @@ pub struct Protocol {
     prefix: String,
     cbor_proto: CborProtocol,
     remote_addr: Cell<SocketAddr>,
+    channel_id: Option<u64>,
 }
 
 /// Current state of the file protocol transaction
@@ -115,6 +117,7 @@ impl Protocol {
             prefix: prefix.unwrap_or("file-transfer".to_owned()),
             cbor_proto: c_protocol,
             remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
+            channel_id: None,
         }
     }
 
@@ -146,6 +149,7 @@ impl Protocol {
             prefix: prefix.unwrap_or("file-transfer".to_owned()),
             cbor_proto: CborProtocol::new_from_socket(socket),
             remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
+            channel_id: None,
         }
     }
 
@@ -218,6 +222,13 @@ impl Protocol {
         }
     }
 
+    /// Generate channel id
+    pub fn generate_channel(&self) -> Result<u64, String> {
+        let mut rng = rand::thread_rng();
+        let channel_id: u64 = rng.gen_range(100000, 999999);
+        Ok(channel_id)
+    }
+
     /// Send a file's metadata information to the remote target
     ///
     /// # Arguments
@@ -242,15 +253,12 @@ impl Protocol {
     /// f_protocol.send_metadata(&hash, num_chunks);
     /// ```
     ///
-    pub fn send_metadata(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
-        let time = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .and_then(|duration| {
-                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
-            })
-            .map_err(|err| format!("Failed to get current system time: {}", err))?;
-        let channel_id: u64 = (time % 100000) as u64;
-
+    pub fn send_metadata(
+        &self,
+        channel_id: u64,
+        hash: &str,
+        num_chunks: u32,
+    ) -> Result<(), String> {
         self.send(messages::metadata(channel_id, &hash, num_chunks)?)
     }
 
@@ -279,15 +287,13 @@ impl Protocol {
     /// f_protocol.send_export(&hash, "final/dir/service.txt", mode);
     /// ```
     ///
-    pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
-        let time = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .and_then(|duration| {
-                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
-            })
-            .map_err(|err| format!("Failed to get current system time: {}", err))?;
-        let channel_id: u64 = (time % 100000) as u64;
-
+    pub fn send_export(
+        &self,
+        channel_id: u64,
+        hash: &str,
+        target_path: &str,
+        mode: u32,
+    ) -> Result<(), String> {
         self.send(messages::export_request(
             channel_id,
             hash,
@@ -318,15 +324,7 @@ impl Protocol {
     /// f_protocol.send_import("service.txt");
     /// ```
     ///
-    pub fn send_import(&self, source_path: &str) -> Result<(), String> {
-        let time = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .and_then(|duration| {
-                Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000)
-            })
-            .map_err(|err| format!("Failed to get current system time: {}", err))?;
-        let channel_id: u32 = (time % 100000) as u32;
-
+    pub fn send_import(&self, channel_id: u32, source_path: &str) -> Result<(), String> {
         self.send(messages::import_request(channel_id, source_path)?)?;
         Ok(())
     }
@@ -608,7 +606,9 @@ impl Protocol {
                     Message::Metadata(channel_id, hash, num_chunks) => {
                         info!("<- {{ {}, {}, {} }}", channel_id, hash, num_chunks);
                         storage::store_meta(&self.prefix, &hash, *num_chunks)?;
-                        new_state = state.clone();
+                        new_state = State::StartReceive {
+                            path: hash.to_owned(),
+                        };
                     }
                     Message::ReceiveChunk(channel_id, hash, chunk_num, data) => {
                         info!(
