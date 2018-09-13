@@ -1,6 +1,3 @@
 {
-    ps {
-        pid,
-        cmd
-    }
+    ping
 }
