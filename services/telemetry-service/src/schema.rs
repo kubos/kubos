@@ -15,7 +15,9 @@
 //
 
 use diesel::prelude::*;
-use juniper::FieldResult;
+use flate2::Compression;
+use flate2::write::GzEncoder;
+use juniper::{FieldError, FieldResult, Value};
 use kubos_service;
 use kubos_telemetry_db::{self, Database};
 use serde_json;
@@ -23,6 +25,7 @@ use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
+use tar;
 
 type Context = kubos_service::Context<Database>;
 
@@ -116,7 +119,8 @@ graphql_object!(QueryRoot: Context |&self| {
         subsystem: Option<String>,
         parameter: Option<String>,
         limit: Option<i32>,
-        output: String
+        output: String,
+        compress = true: bool,
     ) -> FieldResult<String>
         as "Telemetry entries in database"
     {
@@ -126,14 +130,33 @@ graphql_object!(QueryRoot: Context |&self| {
         let output_str = output.clone();
         let output_path = Path::new(&output_str);
         
+        let file_name_raw = output_path.file_name()
+            .ok_or_else(|| return FieldError::new("Unable to parse output file name", Value::null()))?;
+        let file_name = file_name_raw.to_str().ok_or_else(|| return FieldError::new("Unable to parse output file name to string", Value::null()))?;
+        
         if let Some(parent) = output_path.parent() {
             fs::create_dir_all(parent)?;
         }
         
-        let mut output_file = File::create(output_path)?;
-        output_file.write_all(&entries)?;
+        {
+            let mut output_file = File::create(output_path)?;
+            output_file.write_all(&entries)?;
+        }
         
-        Ok(output)
+        if compress {   
+            let tar_path = format!("{}.tar.gz", output_str);
+            let tar_file = File::create(&tar_path)?;
+            let encoder = GzEncoder::new(tar_file, Compression::default());
+            let mut tar = tar::Builder::new(encoder);
+            tar.append_file(file_name, &mut File::open(output_path)?)?;
+            tar.finish()?;
+            
+            fs::remove_file(output_path)?;
+            
+            Ok(tar_path)       
+        } else {
+            Ok(output)
+        }
     }
 });
 

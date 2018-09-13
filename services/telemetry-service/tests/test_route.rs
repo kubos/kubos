@@ -14,12 +14,15 @@
 // limitations under the License.
 //
 
+extern crate flate2;
 #[macro_use]
 extern crate serde_json;
+extern crate tar;
 extern crate tempfile;
 
 mod utils;
 
+use flate2::read::GzDecoder;
 use tempfile::TempDir;
 use utils::*;
 use std::fs::{self, File};
@@ -53,7 +56,7 @@ fn test_route_file() {
 
     let query = format!(
         r#"{{
-        routedTelemetry(output: "{}")
+        routedTelemetry(output: "{}", compress: false)
     }}"#,
         output_path.to_str().unwrap()
     );
@@ -100,7 +103,7 @@ fn test_route_response() {
 
     let query = format!(
         r#"{{
-        routedTelemetry(output: "{}")
+        routedTelemetry(output: "{}", compress: false)
     }}"#,
         output_path
     );
@@ -141,7 +144,8 @@ fn test_route_filter() {
             timestampLe: 1003, 
             subsystem: "eps", 
             parameter: "current", 
-            output: "{}"
+            output: "{}",
+            compress: false
             )
     }}"#,
         output_path.to_str().unwrap()
@@ -164,4 +168,97 @@ fn test_route_filter() {
             {"timestamp":1001,"subsystem":"eps","parameter":"current","value":"3.4"},
         ])
     );
+}
+
+#[test]
+fn test_route_compress_file() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8114;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(SQL));
+
+    let output_dir = TempDir::new().unwrap();
+    let output_name = "output";
+    let output_path = output_dir.path().join(output_name);
+
+    let query = format!(
+        r#"{{
+        routedTelemetry(output: "{}", compress: true)
+    }}"#,
+        output_path.to_str().unwrap()
+    );
+
+    do_query(Some(port), &query);
+
+    teardown(handle, sender);
+
+    let tar_path = output_dir.path().join(format!("{}.tar.gz", output_name));
+    let result_dir = output_dir.path().join("final");
+    let result_path = result_dir.join(output_name);
+
+    let tar_file = File::open(tar_path).unwrap();
+    let tar = GzDecoder::new(tar_file);
+    let mut archive = tar::Archive::new(tar);
+    archive.unpack(result_dir).unwrap();
+
+    let mut output_file = File::open(result_path).unwrap();
+    let mut contents = String::new();
+    output_file.read_to_string(&mut contents).unwrap();
+
+    let entries: serde_json::Value = serde_json::from_str(&contents).unwrap();
+
+    assert_eq!(
+        entries,
+        json!([
+            {"timestamp":1004,"subsystem":"mcu","parameter":"voltage","value":"4.6"},
+            {"timestamp":1004,"subsystem":"eps","parameter":"voltage","value":"3.6"},
+            {"timestamp":1003,"subsystem":"mcu","parameter":"current","value":"4.5"},
+            {"timestamp":1003,"subsystem":"eps","parameter":"current","value":"3.5"},
+            {"timestamp":1002,"subsystem":"mcu","parameter":"voltage","value":"4.2"},
+            {"timestamp":1002,"subsystem":"eps","parameter":"voltage","value":"3.2"},
+            {"timestamp":1001,"subsystem":"mcu","parameter":"current","value":"4.4"},
+            {"timestamp":1001,"subsystem":"eps","parameter":"current","value":"3.4"},
+            {"timestamp":1000,"subsystem":"mcu","parameter":"voltage","value":"4.3"},
+            {"timestamp":1000,"subsystem":"eps","parameter":"voltage","value":"3.3"},
+        ])
+    );
+}
+
+#[test]
+fn test_route_compress_response() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8115;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(SQL));
+
+    // Use a file that won't have a randomly generated path
+    let output_path = "output";
+
+    let query = format!(
+        r#"{{
+        routedTelemetry(output: "{}", compress: true)
+    }}"#,
+        output_path
+    );
+
+    let res = do_query(Some(port), &query);
+
+    teardown(handle, sender);
+    // Since it's not a temporary file, we'll need to delete it ourselves
+    fs::remove_file(&format!("{}.tar.gz", output_path)).unwrap();
+
+    let expected = json!({
+            "errs": "",
+            "msg": {
+                "routedTelemetry": "output.tar.gz"
+            }
+        });
+
+    assert_eq!(res, expected);
 }

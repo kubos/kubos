@@ -53,13 +53,18 @@ In this case, we can use the ``routedTelemetry`` query to write our results to a
 It has the following schema::
 
     query {
-        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!): String! 
+        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String! 
     }
 
-The ``output`` argument specifies the output file to write the query results to.
+The ``output`` argument specifies the output file to write the query results to. It may be a relative or absolute path.
+
+The ``compress`` argument specifies whether the service should compress the output file after writing the results to it.
+
 The other arguments are the same as in the ``telemetry`` query.
 
 The query will return a single field echoing the file that was written to.
+If the ``compress`` argument is true, then the result will be the output file name suffixed with ".tar.gz" to indicate
+that the file was compressed using ``Gzip <https://www.gnu.org/software/gzip/manual/gzip.html>``__.
 
 The results file will contain an array of database entries in JSON format.
 This matches the return fields of the ``telemetry`` query.
