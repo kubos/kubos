@@ -62,6 +62,8 @@
 //! }
 //!
 //! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): Entry
+//!
+//! mutation insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!): { success: Boolean!, errors: String! }
 //! ```
 //!
 //! # Example Queries
@@ -135,6 +137,28 @@
 //!     parameter,
 //!     value
 //!   }
+//! }
+//! ```
+//!
+//! # Example Mutations
+//!
+//! ## Insert a new entry, allowing the service to generate the timestamp
+//! ```graphql
+//! mutation {
+//! 	insert(subsystem: "eps", parameter: "voltage", value: "4.0") {
+//! 		success,
+//! 		errors
+//! 	}
+//! }
+//! ```
+//!
+//! ## Insert a new entry with a custom timestamp
+//! ```graphql
+//! mutation {
+//! 	insert(timestamp: 533, subsystem: "eps", parameter: "voltage", value: "5.1") {
+//! 		success,
+//! 		errors
+//! 	}
 //! }
 //! ```
 extern crate diesel;
