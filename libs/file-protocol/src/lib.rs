@@ -137,7 +137,7 @@ pub enum Message {
 #[cfg(test)]
 mod tests {
     use super::{messages, parsers, Message};
-    use serde_cbor::{self, de, ser, Value};
+    use serde_cbor::de;
 
     #[test]
     fn create_parse_export_request() {
@@ -165,7 +165,6 @@ mod tests {
     fn create_parse_sync() {
         let channel_id = 10;
         let hash = "abcdefg".to_owned();
-        let num_chunks = 100;
 
         let raw = messages::sync(channel_id, &hash).unwrap();
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());

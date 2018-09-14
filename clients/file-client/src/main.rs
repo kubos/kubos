@@ -5,10 +5,10 @@ extern crate log;
 extern crate simplelog;
 
 use clap::{App, Arg};
+use file_protocol::{FileProtocol, State};
 use simplelog::*;
 use std::path::Path;
 use std::time::Duration;
-use file_protocol::{FileProtocol, State};
 
 fn upload(
     host_ip: &str,
