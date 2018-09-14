@@ -20,15 +20,11 @@ extern crate file_service;
 extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
-#[macro_use]
-extern crate log;
-extern crate simplelog;
 
 use file_protocol::{FileProtocol, State};
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
-use simplelog::*;
 use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
@@ -57,7 +53,7 @@ macro_rules! service_new {
             )).unwrap();
         });
 
-        thread::sleep(Duration::new(1, 0));
+        thread::sleep(Duration::new(0, 500));
     }};
 }
 
@@ -129,8 +125,6 @@ fn upload_single() {
 
     let hash = result.unwrap();
 
-    thread::sleep(Duration::from_secs(10));
-
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
     fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
@@ -149,7 +143,7 @@ fn upload_multi_clean() {
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7001;
 
-    let contents = [1; 10];
+    let contents = [1; 5000];
 
     create_test_file(&source, &contents);
 

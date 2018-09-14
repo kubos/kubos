@@ -34,17 +34,17 @@
 //!     // Copy file to upload to temp storage. Calculate the hash and chunk info
 //!     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 //!
-//!     // Tell our destination the hash and number of chunks to expect
-//!     f_protocol.send_metadata(&hash, num_chunks)?;
+//!     // Generate channel id
+//!     let channel_id = f_protocol.generate_channel()?;
 //!
-//!     // Give the service can have time to set up the temporary storage directory
-//!     ::std::thread::sleep(Duration::from_millis(1));
+//!     // Tell our destination the hash and number of chunks to expect
+//!     f_protocol.send_metadata(channel_id, &hash, num_chunks)?;
 //!
 //!     // Send export command for file
-//!     f_protocol.send_export(&hash, &target_path, mode)?;
+//!     f_protocol.send_export(channel_id, &hash, &target_path, mode)?;
 //!
 //!     // Start the engine to send the file data chunks
-//!     Ok(f_protocol.message_engine(Duration::from_millis(10), State::Transmitting)?)
+//!     Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_millis(10), State::Transmitting)?)
 //! }
 //! ```
 //!
@@ -57,13 +57,14 @@
 //! fn download() -> Result<(), String> {
 //!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:8000", None);
 //!
+//!     let channel_id = f_protocol.generate_channel()?;
 //!     # ::std::fs::File::create("service.txt").unwrap();
 //!     let source_path = "service.txt";
 //!     let target_path = "client.txt";
 //!
 //!     // Send our file request to the remote addr and verify that it's
 //!     // going to be able to send it
-//!     f_protocol.send_import(source_path)?;
+//!     f_protocol.send_import(channel_id, source_path)?;
 //!
 //!     // Wait for the request reply
 //!     let reply = match f_protocol.recv(None) {
@@ -80,7 +81,7 @@
 //!         },
 //!     )?;
 //!
-//!     Ok(f_protocol.message_engine(Duration::from_millis(10), state)?)
+//!     Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_millis(10), state)?)
 //! }
 //! ```
 //!
@@ -103,6 +104,8 @@ mod storage;
 
 pub use protocol::Protocol as FileProtocol;
 pub use protocol::State;
+
+pub use parsers::parse_channel_id;
 
 const CHUNK_SIZE: usize = 4096;
 

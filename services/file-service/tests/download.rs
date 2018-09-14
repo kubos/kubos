@@ -21,16 +21,12 @@ extern crate file_service;
 extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
-#[macro_use]
-extern crate log;
-extern crate simplelog;
 
 use blake2_rfc::blake2s::Blake2s;
 use file_protocol::{FileProtocol, State};
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
-use simplelog::*;
 use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::prelude::*;
@@ -76,7 +72,7 @@ fn download(
 
     // Send our file request to the remote addr and verify that it's
     // going to be able to send it
-    f_protocol.send_import(channel as u32, source_path)?;
+    f_protocol.send_import(channel, source_path)?;
 
     // Wait for the request reply.
     // Note/TODO: We don't use a timeout here because we don't know how long it will
@@ -96,7 +92,7 @@ fn download(
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(4), state)?)
+    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), state)?)
 }
 
 fn create_test_file(name: &str, contents: &[u8]) -> String {
@@ -337,7 +333,6 @@ fn download_multi_client() {
 
             let hash = create_test_file(&source, &contents);
 
-            println!("download thread {} -> {}", source, dest);
             let result = download(
                 "127.0.0.1",
                 &format!("127.0.0.1:{}", service_port),
@@ -352,11 +347,8 @@ fn download_multi_client() {
             fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
             // Verify the final file's contents
-            if let Ok(dest_contents) = fs::read(&dest) {
-                assert_eq!(&contents[..], dest_contents.as_slice());
-            } else {
-                println!("error reading file {:?}", dest);
-            }
+            let dest_contents = fs::read(dest).unwrap();
+            assert_eq!(&contents[..], dest_contents.as_slice());
         }));
     }
 

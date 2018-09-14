@@ -5,10 +5,10 @@ extern crate log;
 extern crate simplelog;
 
 use clap::{App, Arg};
-use file_protocol::{FileProtocol, State};
 use simplelog::*;
 use std::path::Path;
 use std::time::Duration;
+use file_protocol::{FileProtocol, State};
 
 fn upload(
     host_ip: &str,
@@ -27,6 +27,7 @@ fn upload(
     // Copy file to upload to temp storage. Calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 
+    // Generate channel id for transaction
     let channel = f_protocol.generate_channel()?;
 
     // Tell our destination the hash and number of chunks to expect
@@ -57,6 +58,7 @@ fn download(
         source_path, target_path
     );
 
+    // Generate channel id for transaction
     let channel = f_protocol.generate_channel()?;
 
     // Send our file request to the remote addr and verify that it's

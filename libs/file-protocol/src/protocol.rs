@@ -28,7 +28,7 @@ use std::net::SocketAddr;
 use std::net::UdpSocket;
 use std::str;
 use std::thread;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 
 // How many times do we read no messages
 // while holding before killing the thread
@@ -219,7 +219,23 @@ impl Protocol {
         }
     }
 
-    /// Generate channel id
+    /// Generates a new random channel id for use when initiating a
+    /// file transfer.
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use file_protocol::*;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    ///
+    /// let channel_id = f_protocol.generate_channel();
+    /// ```
+    ///
     pub fn generate_channel(&self) -> Result<u32, String> {
         let mut rng = rand::thread_rng();
         let channel_id: u32 = rng.gen_range(100000, 999999);
@@ -230,6 +246,7 @@ impl Protocol {
     ///
     /// # Arguments
     ///
+    /// * channel_id - Channel ID for transaction
     /// * hash - BLAKE2s hash of file
     /// * num_chunks - Number of data chunks needed for file
     ///
@@ -247,7 +264,8 @@ impl Protocol {
     /// # ::std::fs::File::create("client.txt").unwrap();
     ///
     /// let (hash, num_chunks, _mode) = f_protocol.initialize_file("client.txt").unwrap();
-    /// f_protocol.send_metadata(&hash, num_chunks);
+    /// let channel_id = f_protocol.generate_channel().unwrap();
+    /// f_protocol.send_metadata(channel_id, &hash, num_chunks);
     /// ```
     ///
     pub fn send_metadata(
@@ -263,6 +281,7 @@ impl Protocol {
     ///
     /// # Arguments
     ///
+    /// * channel_id - Channel ID used for transaction
     /// * hash - BLAKE2s hash of file
     /// * target_path - Destination file path
     /// * mode - File mode
@@ -281,7 +300,8 @@ impl Protocol {
     /// # ::std::fs::File::create("client.txt").unwrap();
     ///
     /// let (hash, _num_chunks, mode) = f_protocol.initialize_file("client.txt").unwrap();
-    /// f_protocol.send_export(&hash, "final/dir/service.txt", mode);
+    /// let channel_id = f_protocol.generate_channel().unwrap();
+    /// f_protocol.send_export(channel_id, &hash, "final/dir/service.txt", mode);
     /// ```
     ///
     pub fn send_export(
@@ -317,8 +337,9 @@ impl Protocol {
     /// use file_protocol::*;
     ///
     /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let channel_id = f_protocol.generate_channel().unwrap();
     ///
-    /// f_protocol.send_import("service.txt");
+    /// f_protocol.send_import(channel_id, "service.txt");
     /// ```
     ///
     pub fn send_import(&self, channel_id: u32, source_path: &str) -> Result<(), String> {
@@ -402,6 +423,7 @@ impl Protocol {
     ///
     /// # Arguments
     ///
+    /// * pump - Function which returns the next message for processing
     /// * timeout - Maximum time to listen for a single message
     /// * start_state - Current transaction state
     ///
@@ -419,7 +441,11 @@ impl Protocol {
     ///
     /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
     ///
-    /// f_protocol.message_engine(Duration::from_millis(10), State::Transmitting);
+    /// f_protocol.message_engine(
+    ///     |d| f_protocol.recv(Some(d)),
+    ///     Duration::from_millis(10),
+    ///     State::Transmitting
+    /// );
     /// ```
     ///
     pub fn message_engine<F>(
@@ -434,14 +460,8 @@ impl Protocol {
         let mut state = start_state.clone();
         loop {
             // Listen on UDP port
-            info!("engine pump {:?}", state);
             let message = match pump(timeout) {
-                //let message = match self.cbor_proto.recv_message_peer_timeout(timeout) {
                 Ok(Some(message)) => {
-                    // Ok((peer, Some(message))) => {
-                    // Update our response port
-                    // self.remote_addr.set(peer);
-
                     // If we previously timed out, restore the old state
                     if let State::Holding {
                         count: _,
@@ -615,7 +635,7 @@ impl Protocol {
                         storage::store_chunk(&self.prefix, &hash, *chunk_num, &data)?;
                         new_state = state.clone();
                     }
-                    Message::ACK(channel_id, ack_hash) => {
+                    Message::ACK(_channel_id, ack_hash) => {
                         info!("<- {{ {}, true }}", ack_hash);
                         // TODO: Figure out hash verification here
                         new_state = State::TransmittingDone;

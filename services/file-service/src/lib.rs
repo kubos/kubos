@@ -25,7 +25,7 @@ extern crate simplelog;
 use file_protocol::{FileProtocol, State};
 use kubos_system::Config as ServiceConfig;
 use std::collections::HashMap;
-use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
 use std::thread;
 use std::time::Duration;
 
@@ -53,19 +53,19 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                 .and_then(|num| Some(Duration::from_secs(num as u64)))
         })
         .unwrap_or(Duration::from_secs(2));
-    // Setup maps of channel_id -> tx channel
+
+    // Setup map of channel IDs to thread channels
     let mut threads: HashMap<u32, Sender<Option<serde_cbor::Value>>> = HashMap::new();
 
     loop {
         // Listen on UDP port
         let (source, first_message) = c_protocol.recv_message_peer()?;
-        info!("msg from {:?}", source);
 
         let prefix_ref = prefix.clone();
         let host_ref = host_ip.clone();
         let timeout_ref = timeout.clone();
 
-        let channel_id = match cbor_protocol::peek_channel_id(&first_message) {
+        let channel_id = match file_protocol::parse_channel_id(&first_message) {
             Ok(Some(channel_id)) => channel_id,
             Ok(None) => 0,
             Err(e) => {
@@ -75,40 +75,28 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         };
 
         if !threads.contains_key(&channel_id) {
-            println!("create new thread {}", channel_id);
-            let (tx, rx): (
+            let (sender, receiver): (
                 Sender<Option<serde_cbor::Value>>,
                 Receiver<Option<serde_cbor::Value>>,
             ) = mpsc::channel();
-            threads.insert(channel_id, tx.clone());
+            threads.insert(channel_id, sender.clone());
             // Break the processing work off into its own thread so we can
             // listen for requests from other clients
             thread::spawn(move || {
-                let mut state = State::Holding {
+                let state = State::Holding {
                     count: 0,
                     prev_state: Box::new(State::Done),
                 };
 
-                let my_channel = channel_id;
-
-                let receiver = rx;
-
                 // Set up the file system processor with the reply socket information
                 let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref);
-
-                // // Process that first message that we got
-                // if let Some(msg) = first_message {
-                //     if let Ok(new_state) = f_protocol.process_message(msg, state.clone()) {
-                //         state = new_state;
-                //     }
-                // }
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation
                 match f_protocol.message_engine(
                     |d| match receiver.recv_timeout(d) {
                         Ok(v) => Ok(v),
-                        Err(RecvTimeoutError) => Ok(None),
+                        Err(RecvTimeoutError::Timeout) => Ok(None),
                         Err(e) => Err(Some(format!("Error {:?}", e))),
                     },
                     timeout_ref,
@@ -117,46 +105,16 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                     Err(e) => warn!("Encountered errors while processing transaction: {}", e),
                     _ => {}
                 }
-
-                info!("thread {} done", my_channel);
             });
         }
 
         if let Some(sender) = threads.get(&channel_id) {
-            info!("send msg {:?} to channel {}", first_message, channel_id);
-            sender.send(first_message);
+            match sender.send(first_message) {
+                Err(e) => warn!("Error when sending to channel {}: {:?}", channel_id, e),
+                _ => {}
+            };
         } else {
             warn!("no sender found for {}", channel_id);
         }
     }
 }
-
-// Break the processing work off into its own thread so we can
-// // listen for requests from other clients
-// thread::spawn(move || {
-//     let mut state = State::Holding {
-//         count: 0,
-//         prev_state: Box::new(State::Done),
-//     };
-
-//     // Set up the file system processor with the reply socket information
-//     let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref);
-
-//     // Process that first message that we got
-//     if let Some(msg) = first_message {
-//         if let Ok(new_state) = f_protocol.process_message(msg, state.clone()) {
-//             state = new_state;
-//         }
-//     }
-
-//     // Listen, process, and react to the remaining messages in the
-//     // requested operation
-//     match f_protocol.message_engine(
-//         |d| f_protocol.recv(Some(d)),
-//         Duration::from_secs(2),
-//         state,
-//     ) {
-//         Err(e) => warn!("Encountered errors while processing transaction: {}", e),
-//         _ => {}
-//     }
-// });
