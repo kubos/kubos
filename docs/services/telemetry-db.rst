@@ -46,11 +46,15 @@ For example, entries with timestamps after ``1000``, but before ``5000``.
 Saving Results for Later Processing
 -----------------------------------
 
-Sometimes we might want to periodically query the database for telemetry data, but not immediately use the results.
+Immediate, large query results might consume more downlink bandwidth than is allowable.
+Alternatively, downlink and uplink could be asynchronous from each other.
 
 In this case, we can use the ``routedTelemetry`` query to write our results to an on-system file.
+This way, we can choose the specific time at which to downlink the results using the
+:doc:`file transfer service <file>`. Additionally, by default, the output file will be in a
+compressed format, reducing the amount of data which needs to be transferred.
 
-It has the following schema::
+The query has the following schema::
 
     query {
         telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String! 
@@ -63,7 +67,7 @@ The ``compress`` argument specifies whether the service should compress the outp
 The other arguments are the same as in the ``telemetry`` query.
 
 The query will return a single field echoing the file that was written to.
-If the ``compress`` argument is true, then the result will be the output file name suffixed with ".tar.gz" to indicate
+If the ``compress`` argument is true (which is the default), then the result will be the output file name suffixed with ".tar.gz" to indicate
 that the file was compressed using ``Gzip <https://www.gnu.org/software/gzip/manual/gzip.html>``__.
 
 The results file will contain an array of database entries in JSON format.
