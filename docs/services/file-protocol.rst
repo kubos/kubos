@@ -67,33 +67,33 @@ All messages in the file protocol are encoded as `CBOR <http://cbor.io/>`__ arra
 in UDP packets.
 
 The first value in the encoded list is the ``channel_id``
-for request/response type messages or the ``hash`` for content-addressable
-messages.
+for request/response type messages and it is followed by
+the ``hash`` for content-addressable messages.
 
     - The ``channel_id`` parameter is used to indicate a group of messages associated with
       a particular file protocol transaction.
     - The ``hash`` parameter is the BLAKE2 hash for the corresponding file
       which is being transferred.
 
-+-------------------------------+----------------------------------------------------------------+
-| Name                          | Syntax                                                         |
-+===============================+================================================================+
-| `Metadata`_                   | { `hash`, `num_chunks` }                                       |
-+-------------------------------+----------------------------------------------------------------+
-| `Export Request`_             | { `channel_id`, export, `hash`, `path`, `mode` }               |
-+-------------------------------+----------------------------------------------------------------+
-| `Import Request`_             | { `channel_id`, import, `path` }                               |
-+-------------------------------+----------------------------------------------------------------+
-| `File Chunk`_                 | { `hash`, `chunk_index`, `data` }                              |
-+-------------------------------+----------------------------------------------------------------+
-| `Acknowledge (ACK)`_          | { `hash`, true, `num_chunks` }                                 |
-+-------------------------------+----------------------------------------------------------------+
-| `Negative Acknowledge (NAK)`_ | { `hash`, false, `x_start`, `x_end`, `y_start`, `y_end`, ... } |
-+-------------------------------+----------------------------------------------------------------+
-| `Request Success`_            | { `channel_id`, true, ..`values` }                             |
-+-------------------------------+----------------------------------------------------------------+
-| `Request Failure`_            | { `channel_id`, false, `error_message` }                       |
-+-------------------------------+----------------------------------------------------------------+
++-------------------------------+------------------------------------------------------------------------------+
+| Name                          | Syntax                                                                       |
++===============================+==============================================================================+
+| `Metadata`_                   | { `channel_id`, `hash`, `num_chunks` }                                       |
++-------------------------------+------------------------------------------------------------------------------+
+| `Export Request`_             | { `channel_id`, export, `hash`, `path`, `mode` }                             |
++-------------------------------+------------------------------------------------------------------------------+
+| `Import Request`_             | { `channel_id`, import, `path` }                                             |
++-------------------------------+------------------------------------------------------------------------------+
+| `File Chunk`_                 | { `channel_id`, `hash`, `chunk_index`, `data` }                              |
++-------------------------------+------------------------------------------------------------------------------+
+| `Acknowledge (ACK)`_          | { `channel_id`, `hash`, true, `num_chunks` }                                 |
++-------------------------------+------------------------------------------------------------------------------+
+| `Negative Acknowledge (NAK)`_ | { `channel_id`, `hash`, false, `x_start`, `x_end`, `y_start`, `y_end`, ... } |
++-------------------------------+------------------------------------------------------------------------------+
+| `Request Success`_            | { `channel_id`, true, ..`values` }                                           |
++-------------------------------+------------------------------------------------------------------------------+
+| `Request Failure`_            | { `channel_id`, false, `error_message` }                                     |
++-------------------------------+------------------------------------------------------------------------------+
 
 Metadata
 ~~~~~~~~
@@ -108,7 +108,7 @@ the accompanying ``meta`` file.
 This message should be sent prior to an ``export`` request
 to ensure the expected number of chunks is known.
 
-    ``{ hash, num_chunks }``
+    ``{ channel_id, hash, num_chunks }``
 
 Export Request
 ~~~~~~~~~~~~~~
@@ -156,7 +156,7 @@ an immediate reply. However, if no chunks are received within the
 timeout window then an ``ACK`` or ``NAK`` will be sent depending
 on whether all the chunks have been received or not.
 
-    ``{ hash, chunk_index, data }``
+    ``{ channel_id, hash, chunk_index, data }``
     
 .. note::
 
@@ -171,7 +171,7 @@ message sender has all chunks for a given file. It contains the
 file's hash, the boolean value true, and the number of
 chunks in the file.
 
-    ``{ hash, true, num_chunks }``
+    ``{ channel_id, hash, true, num_chunks }``
 
 Negative Acknowledge (NAK)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -189,7 +189,7 @@ or after a timeout during a file ``import`` or ``export`` operation.
 The message sender should expect the message receiver to send
 the missing file chunks upon receipt of a ``NAK``.
 
-    ``{ hash, false, 1, 4, 6, 7 }``
+    ``{ channel_id, hash, false, 1, 4, 6, 7 }``
 
 The above example ``NAK`` indicates that chunks 1-3 and 6
 are missing.
