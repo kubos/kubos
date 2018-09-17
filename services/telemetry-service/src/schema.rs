@@ -18,9 +18,25 @@ use diesel::prelude::*;
 use juniper::FieldResult;
 use kubos_service;
 use kubos_telemetry_db;
-use model::*;
+use std::sync::{Arc, Mutex};
+use std::thread::spawn;
+use udp::*;
 
 type Context = kubos_service::Context<Subsystem>;
+
+pub struct Subsystem {
+    pub database: Arc<Mutex<kubos_telemetry_db::Database>>,
+}
+
+impl Subsystem {
+    pub fn new(database: kubos_telemetry_db::Database) -> Self {
+        let db = Arc::new(Mutex::new(database));
+        let udp = DirectUdp::new(db.clone());
+        spawn(move || udp.start());
+
+        Subsystem { database: db }
+    }
+}
 
 pub struct Entry(kubos_telemetry_db::Entry);
 

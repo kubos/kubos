@@ -34,7 +34,7 @@ fn test_insert_auto_timestamp() {
     let (handle, sender) = setup(Some(db), Some(port), None);
 
     let mutation = r#"mutation {
-            insert(timestamp: 5, subsystem: "test2", parameter: "voltage", value: "4.0") {
+            insert(subsystem: "test2", parameter: "voltage", value: "4.0") {
                 success,
                 errors
             }
@@ -52,7 +52,6 @@ fn test_insert_auto_timestamp() {
 
     let query = r#"{
             telemetry(subsystem: "test2", parameter: "voltage") {
-                timestamp,
                 subsystem,
                 parameter,
                 value
@@ -62,7 +61,6 @@ fn test_insert_auto_timestamp() {
             "errs": "",
             "msg": {
                 "telemetry": [{
-                    "timestamp": 5,
                     "subsystem": "test2",
                     "parameter": "voltage",
                     "value": "4.0"

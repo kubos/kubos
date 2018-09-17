@@ -161,22 +161,19 @@
 //! 	}
 //! }
 //! ```
-extern crate cbor_protocol;
 extern crate diesel;
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;
 extern crate kubos_telemetry_db;
-extern crate serde_cbor;
+extern crate serde_json;
 
-mod model;
 mod schema;
 mod udp;
 
 use kubos_service::{Config, Service};
 use kubos_telemetry_db::Database;
-use model::Subsystem;
-use schema::{MutationRoot, QueryRoot};
+use schema::{MutationRoot, QueryRoot, Subsystem};
 
 fn main() {
     let config = Config::new("telemetry-service");

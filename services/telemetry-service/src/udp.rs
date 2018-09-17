@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-use cbor_protocol;
 use kubos_telemetry_db::Database;
-use serde_cbor::Value;
+use serde_json::{self, Value};
 use std::sync::{Arc, Mutex};
+use std::net::{SocketAddr, UdpSocket};
 
 pub struct DirectUdp {
     db: Arc<Mutex<Database>>,
@@ -29,77 +29,44 @@ impl DirectUdp {
     }
 
     pub fn start(&self) {
+        eprintln!("Starting UDP port listener");
         //let addr = self.config.hosturl().parse::<SocketAddr>().unwrap();
         let host = "0.0.0.0:8000";
 
-        let socket = cbor_protocol::Protocol::new(host.to_owned());
+        let socket = UdpSocket::bind(host.parse::<SocketAddr>().unwrap()).unwrap();
 
         loop {
             // Wait for an incoming message
-            let (peer, message) = socket
-                .recv_message_peer()
-                .expect("Failed to receive a message");
+            let mut buf = [0; 4096];
+            let (size, peer) = socket
+                .recv_from(&mut buf)
+                .map_err(|err| format!("Failed to receive a message: {}", err))
+                .unwrap();
 
-            if let Some(msg) = message {
+            if let Ok(msg) = serde_json::from_slice(&buf[0..(size)]) {
                 // Go process the request
                 let res = self.process(msg);
 
-                println!("Result: {:?}", res);
-
-                // And then send the response back
-                //let _amt = socket.send_to(&res.as_bytes(), &peer);
-                //println!("[{}] -> [{}] {}", socket.local_addr().unwrap(), peer, &res);
+                eprintln!("Result: {:?}", res);
             }
         }
     }
 
     fn process(&self, message: Value) -> Result<(), String> {
-        println!("Received: {:?}", message);
+        eprintln!("Received: {:?}", message);
 
-        let data = match message {
-            Value::Array(val) => val.to_owned(),
-            _ => return Err("Unable to parse message: Data not an array".to_owned()),
-        };
+        let timestamp = serde_json::from_value::<i32>(message["timestamp"].clone()).ok();
 
-        let len = data.len();
+        let subsystem = serde_json::from_value::<String>(message["subsystem"].clone())
+            .map_err(|err| format!("Failed to parse subsystem parameter: {}", err))?;
 
-        let mut pieces = data.iter();
+        let param = serde_json::from_value::<String>(message["parameter"].clone())
+            .map_err(|err| format!("Failed to parse parameter parameter: {}", err))?;
 
-        let timestamp = match len {
-            3 => None,
-            4 => match pieces.next().ok_or("Failed to read timestamp param")? {
-                Value::U64(val) => Some(*val as i32),
-                Value::I64(val) => Some(*val as i32),
-                _ => return Err("Unable to parse message: Invalid timestamp param".to_owned()),
-            },
-            other => return Err(format!("Incorrect number of parameters: {}", other)),
-        };
+        let value = serde_json::from_value::<String>(message["value"].clone())
+            .map_err(|err| format!("Failed to parse value parameter: {}", err))?;
 
-        let subsystem = match pieces
-            .next()
-            .ok_or(format!("Unable to parse message: No subsystem param"))?
-        {
-            Value::String(val) => val,
-            _ => return Err("Unable to parse message: Invalid subsystem param".to_owned()),
-        };
-
-        let param = match pieces
-            .next()
-            .ok_or(format!("Unable to parse message: No parameter param"))?
-        {
-            Value::String(val) => val,
-            _ => return Err("Unable to parse message: Invalid parameter param".to_owned()),
-        };
-
-        let value = match pieces
-            .next()
-            .ok_or(format!("Unable to parse message: No value param"))?
-        {
-            Value::String(val) => val,
-            _ => return Err("Unable to parse message: Invalid value param".to_owned()),
-        };
-
-        println!(
+        eprintln!(
             "Inserting: {:?}, {}, {}, {}",
             timestamp, subsystem, param, value
         );
@@ -108,13 +75,13 @@ impl DirectUdp {
             self.db
                 .lock()
                 .map_err(|err| format!("{}", err))?
-                .insert(time, subsystem, param, value)
+                .insert(time, &subsystem, &param, &value)
                 .map_err(|err| format!("{}", err))?;
         } else {
             self.db
                 .lock()
                 .map_err(|err| format!("{}", err))?
-                .insert_systime(subsystem, param, value)
+                .insert_systime(&subsystem, &param, &value)
                 .map_err(|err| format!("{}", err))?;
         }
 

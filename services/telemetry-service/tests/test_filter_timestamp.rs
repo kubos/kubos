@@ -127,7 +127,7 @@ fn test_single() {
     let db_path = db_dir.path().join("test.db");
 
     let db = db_path.to_str().unwrap();
-    let port = 8111;
+    let port = 8115;
 
     let (handle, sender) = setup(Some(db), Some(port), Some(SQL));
 
