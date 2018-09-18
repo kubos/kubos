@@ -35,11 +35,12 @@ fn test_udp_timestamp() {
 
     let db = db_path.to_str().unwrap();
     let port = 8111;
+    let udp = 8121;
 
-    let (handle, sender) = setup(Some(db), Some(port), None);
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
-    let service = "0.0.0.0:8000".to_owned();
+    let service = format!("0.0.0.0:{}", udp);
 
     let entry1 = json!({
             "timestamp": 1000,
@@ -102,11 +103,12 @@ fn test_udp_no_timestamp() {
     let db = db_path.to_str().unwrap();
 
     let port = 8112;
+    let udp = 8122;
 
-    let (handle, sender) = setup(Some(db), Some(port), None);
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
-    let service = "0.0.0.0:8000".to_owned();
+    let service = format!("0.0.0.0:{}", udp);
 
     let entry1 = json!({
             "subsystem": "test1",

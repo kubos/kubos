@@ -29,10 +29,13 @@ pub struct Subsystem {
 }
 
 impl Subsystem {
-    pub fn new(database: kubos_telemetry_db::Database) -> Self {
+    pub fn new(database: kubos_telemetry_db::Database, direct_udp: Option<String>) -> Self {
         let db = Arc::new(Mutex::new(database));
-        let udp = DirectUdp::new(db.clone());
-        spawn(move || udp.start());
+
+        if let Some(udp_url) = direct_udp {
+            let udp = DirectUdp::new(db.clone());
+            spawn(move || udp.start(udp_url.to_owned()));
+        }
 
         Subsystem { database: db }
     }

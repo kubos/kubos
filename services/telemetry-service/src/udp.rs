@@ -28,12 +28,9 @@ impl DirectUdp {
         DirectUdp { db }
     }
 
-    pub fn start(&self) {
-        eprintln!("Starting UDP port listener");
-        //let addr = self.config.hosturl().parse::<SocketAddr>().unwrap();
-        let host = "0.0.0.0:8000";
-
-        let socket = UdpSocket::bind(host.parse::<SocketAddr>().unwrap()).unwrap();
+    pub fn start(&self, url: String) {
+        let socket = UdpSocket::bind(url.parse::<SocketAddr>().unwrap()).unwrap();
+        println!("Direct UDP listening on: {}", socket.local_addr().unwrap());
 
         loop {
             // Wait for an incoming message
@@ -46,15 +43,11 @@ impl DirectUdp {
             if let Ok(msg) = serde_json::from_slice(&buf[0..(size)]) {
                 // Go process the request
                 let res = self.process(msg);
-
-                eprintln!("Result: {:?}", res);
             }
         }
     }
 
     fn process(&self, message: Value) -> Result<(), String> {
-        eprintln!("Received: {:?}", message);
-
         let timestamp = serde_json::from_value::<i32>(message["timestamp"].clone()).ok();
 
         let subsystem = serde_json::from_value::<String>(message["subsystem"].clone())
@@ -65,11 +58,6 @@ impl DirectUdp {
 
         let value = serde_json::from_value::<String>(message["value"].clone())
             .map_err(|err| format!("Failed to parse value parameter: {}", err))?;
-
-        eprintln!(
-            "Inserting: {:?}, {}, {}, {}",
-            timestamp, subsystem, param, value
-        );
 
         if let Some(time) = timestamp {
             self.db

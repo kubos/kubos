@@ -30,8 +30,9 @@ fn test_insert_auto_timestamp() {
 
     let db = db_path.to_str().unwrap();
     let port = 8111;
+    let udp = 8121;
 
-    let (handle, sender) = setup(Some(db), Some(port), None);
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let mutation = r#"mutation {
             insert(subsystem: "test2", parameter: "voltage", value: "4.0") {
@@ -82,8 +83,9 @@ fn test_insert_custom_timestamp() {
 
     let db = db_path.to_str().unwrap();
     let port = 8112;
+    let udp = 8122;
 
-    let (handle, sender) = setup(Some(db), Some(port), None);
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let mutation = r#"mutation {
             insert(timestamp: 5, subsystem: "test2", parameter: "voltage", value: "4.0") {

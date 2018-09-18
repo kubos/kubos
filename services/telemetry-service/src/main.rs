@@ -186,5 +186,18 @@ fn main() {
     let db = Database::new(&db_path);
     db.setup();
 
-    Service::new(config, Subsystem::new(db), QueryRoot, MutationRoot).start();
+    let direct_udp = config.get("direct_port").map(|port| {
+        let host = config.hosturl();
+        let mut host_parts = host.split(':').map(|val| val.to_owned());
+        let host_ip = host_parts.next().unwrap();
+
+        format!("{}:{}", host_ip, port)
+    });
+
+    Service::new(
+        config,
+        Subsystem::new(db, direct_udp),
+        QueryRoot,
+        MutationRoot,
+    ).start();
 }

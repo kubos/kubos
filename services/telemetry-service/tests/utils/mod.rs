@@ -89,12 +89,14 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
 
 pub fn setup(
     db: Option<&str>,
-    port: Option<u16>,
+    service_port: Option<u16>,
+    udp_port: Option<u16>,
     sql: Option<&str>,
 ) -> (JoinHandle<()>, Sender<bool>) {
     let db = db.unwrap_or("test.db");
 
-    let port = port.unwrap_or(8111);
+    let service_port = service_port.unwrap_or(8111);
+    let udp_port = udp_port.unwrap_or(8112);
 
     setup_db(&db, sql);
 
@@ -105,12 +107,13 @@ pub fn setup(
         r#"
         [telemetry-service]
         database = "{}"
+        direct_port = {}
         
         [telemetry-service.addr]
         ip = "127.0.0.1"
         port = {}
         "#,
-        db, port
+        db, udp_port, service_port
     );
 
     let mut config_file = File::create(config_path.clone()).unwrap();

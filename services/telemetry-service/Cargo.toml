@@ -9,8 +9,7 @@ diesel = { version = "1.0.0", features = ["sqlite"] }
 juniper =  "0.9.2"
 kubos-service = { path = "../kubos-service" }
 kubos-telemetry-db = { path = "../../apis/telemetry-db-api" }
-serde_cbor = "0.8"
+serde_json = "1.0"
 
 [dev-dependencies]
-serde_json = "1.0"
 tempfile = "3"
