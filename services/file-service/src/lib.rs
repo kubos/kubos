@@ -66,10 +66,9 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         let timeout_ref = timeout.clone();
 
         let channel_id = match file_protocol::parse_channel_id(&first_message) {
-            Ok(Some(channel_id)) => channel_id,
-            Ok(None) => 0,
+            Ok(channel_id) => channel_id,
             Err(e) => {
-                warn!("Error parsing channel id: {:?}", e);
+                warn!("Error parsing channel ID: {:?}", e);
                 continue;
             }
         };
@@ -100,7 +99,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                         Err(e) => Err(Some(format!("Error {:?}", e))),
                     },
                     timeout_ref,
-                    state.clone(),
+                    state,
                 ) {
                     Err(e) => warn!("Encountered errors while processing transaction: {}", e),
                     _ => {}
@@ -113,8 +112,11 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                 Err(e) => warn!("Error when sending to channel {}: {:?}", channel_id, e),
                 _ => {}
             };
-        } else {
-            warn!("no sender found for {}", channel_id);
+        }
+
+        if !threads.contains_key(&channel_id) {
+            warn!("No sender found for {}", channel_id);
+            threads.remove(&channel_id);
         }
     }
 }

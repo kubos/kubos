@@ -19,7 +19,7 @@ use serde_cbor::Value;
 use std::slice::Iter;
 
 /// Parse out just the channel ID from a message
-pub fn parse_channel_id(message: &Option<Value>) -> Result<Option<u32>, String> {
+pub fn parse_channel_id(message: &Option<Value>) -> Result<u32, String> {
     let data = match message {
         Some(Value::Array(val)) => val.to_owned(),
         _ => return Err("Unable to parse message: Data not an array".to_owned()),
@@ -33,9 +33,9 @@ pub fn parse_channel_id(message: &Option<Value>) -> Result<Option<u32>, String> 
         .to_owned();
 
     if let Value::U64(channel_id) = first_param {
-        Ok(Some(channel_id as u32))
+        Ok(channel_id as u32)
     } else {
-        Ok(None)
+        Err("No channel ID found".to_owned())
     }
 }
 
