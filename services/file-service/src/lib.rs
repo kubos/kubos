@@ -26,6 +26,7 @@ use file_protocol::{FileProtocol, State};
 use kubos_system::Config as ServiceConfig;
 use std::collections::HashMap;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -55,7 +56,9 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         .unwrap_or(Duration::from_secs(2));
 
     // Setup map of channel IDs to thread channels
-    let mut threads: HashMap<u32, Sender<Option<serde_cbor::Value>>> = HashMap::new();
+    let raw_threads: HashMap<u32, Sender<Option<serde_cbor::Value>>> = HashMap::new();
+    // Create thread sharable wrapper
+    let threads = Arc::new(Mutex::new(raw_threads));
 
     loop {
         // Listen on UDP port
@@ -73,14 +76,15 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
             }
         };
 
-        if !threads.contains_key(&channel_id) {
+        if !threads.lock().unwrap().contains_key(&channel_id) {
             let (sender, receiver): (
                 Sender<Option<serde_cbor::Value>>,
                 Receiver<Option<serde_cbor::Value>>,
             ) = mpsc::channel();
-            threads.insert(channel_id, sender.clone());
+            threads.lock().unwrap().insert(channel_id, sender.clone());
             // Break the processing work off into its own thread so we can
             // listen for requests from other clients
+            let shared_threads = threads.clone();
             thread::spawn(move || {
                 let state = State::Holding {
                     count: 0,
@@ -104,19 +108,22 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                     Err(e) => warn!("Encountered errors while processing transaction: {}", e),
                     _ => {}
                 }
+
+                // Remove ourselves from threads list if we are finished
+                shared_threads.lock().unwrap().remove(&channel_id);
             });
         }
 
-        if let Some(sender) = threads.get(&channel_id) {
+        if let Some(sender) = threads.lock().unwrap().get(&channel_id) {
             match sender.send(first_message) {
                 Err(e) => warn!("Error when sending to channel {}: {:?}", channel_id, e),
                 _ => {}
             };
         }
 
-        if !threads.contains_key(&channel_id) {
+        if !threads.lock().unwrap().contains_key(&channel_id) {
             warn!("No sender found for {}", channel_id);
-            threads.remove(&channel_id);
+            threads.lock().unwrap().remove(&channel_id);
         }
     }
 }
