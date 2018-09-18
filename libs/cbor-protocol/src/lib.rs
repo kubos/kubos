@@ -294,8 +294,6 @@ impl Protocol {
             .recv_from(&mut buf)
             .map_err(|err| format!("Failed to receive a message: {}", err))?;
 
-        println!("Received: {:?}", &buf[0..size]);
-
         let message = self.recv_start(&buf[0..size])?;
         Ok((peer, message))
     }
