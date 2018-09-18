@@ -81,8 +81,7 @@ fn download(
     let reply = match f_protocol.recv(None) {
         Ok(Some(message)) => message,
         Ok(None) => return Err("Failed to import file".to_owned()),
-        Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
-        Err(None) => return Err("Failed to import file".to_owned()),
+        Err(error) => return Err(format!("Failed to import file: {}", error)),
     };
 
     let state = f_protocol.process_message(

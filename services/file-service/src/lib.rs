@@ -100,7 +100,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                     |d| match receiver.recv_timeout(d) {
                         Ok(v) => Ok(v),
                         Err(RecvTimeoutError::Timeout) => Ok(None),
-                        Err(e) => Err(Some(format!("Error {:?}", e))),
+                        Err(e) => Err(format!("Error {:?}", e)),
                     },
                     timeout_ref,
                     state,

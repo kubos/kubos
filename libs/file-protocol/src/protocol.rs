@@ -194,7 +194,7 @@ impl Protocol {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// extern crate file_protocol;
     ///
     /// use file_protocol::*;
@@ -204,15 +204,11 @@ impl Protocol {
     ///
     /// let message = match f_protocol.recv(Some(Duration::from_secs(1))) {
     /// 	Ok(data) => data,
-    /// 	Err(None) => {
-    ///			println!("Timeout waiting for message");
-    ///			return;
-    ///		}
-    /// 	Err(Some(err)) => panic!("Failed to receive message: {}", err),
+    /// 	Err(err) => panic!("Failed to receive message: {}", err),
     /// };
     /// ```
     ///
-    pub fn recv(&self, timeout: Option<Duration>) -> Result<Option<Value>, Option<String>> {
+    pub fn recv(&self, timeout: Option<Duration>) -> Result<Option<Value>, String> {
         match timeout {
             Some(value) => self.cbor_proto.recv_message_timeout(value),
             None => self.cbor_proto.recv_message(),
@@ -455,7 +451,7 @@ impl Protocol {
         start_state: State,
     ) -> Result<(), String>
     where
-        F: Fn(Duration) -> Result<Option<Value>, Option<String>>,
+        F: Fn(Duration) -> Result<Option<Value>, String>,
     {
         let mut state = start_state.clone();
         loop {
