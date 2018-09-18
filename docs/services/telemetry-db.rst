@@ -29,7 +29,7 @@ The query has the following schema::
             timestamp: Integer!
             subsystem: String!
             parameter: String!
-            value: Float!
+            value: String!
         }]
     }
     
@@ -59,5 +59,31 @@ It has the following schema::
     
 The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time.
 
+Adding Entries to the Database Asynchronously
+---------------------------------------------
 
+If you would like to add many entries to the database quickly, and don't care about verifying that the request
+was successful, the service's direct UDP port may be used.
+This UDP port is configured with the ``direct_port`` value in the system's ``config.toml`` file.
+
+Insert requests should be sent as individual UDP messages in JSON format.
+
+The requests have the following schema::
+
+    {
+        "timestamp": Integer,
+        "subsystem": String!,
+        "parameter": String!,
+        "value": String!,
+    }
+    
+`timestamp` is optional (one will be generated based on the current system time), but the other parameters are all required.
+
+For example::
+
+    {
+        "subsystem": "eps",
+        "parameter": "voltage",
+        "value": "3.5"
+    }
     

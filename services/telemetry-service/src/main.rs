@@ -15,7 +15,7 @@
 //
 
 #![deny(missing_docs)]
-//#![deny(warnings)]
+#![deny(warnings)]
 
 //! Kubos Service for interacting with the telemetry database.
 //!

@@ -35,14 +35,14 @@ impl DirectUdp {
         loop {
             // Wait for an incoming message
             let mut buf = [0; 4096];
-            let (size, peer) = socket
+            let (size, _peer) = socket
                 .recv_from(&mut buf)
                 .map_err(|err| format!("Failed to receive a message: {}", err))
                 .unwrap();
 
             if let Ok(msg) = serde_json::from_slice(&buf[0..(size)]) {
                 // Go process the request
-                let res = self.process(msg);
+                let _res = self.process(msg);
             }
         }
     }
