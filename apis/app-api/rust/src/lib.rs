@@ -29,7 +29,7 @@
 //! struct MyApp;
 //!
 //! impl AppHandler for MyApp {
-//!   fn on_boot(&self) {
+//!   fn on_boot(&self, _args: Vec<String>) {
 //!     println!("OnBoot logic");
 //!
 //!     let request = r#"mutation {
@@ -59,7 +59,7 @@
 //!         }
 //!     }
 //!   }
-//!   fn on_command(&self) {
+//!   fn on_command(&self, _args: Vec<String>) {
 //!     println!("OnCommand logic");
 //!   }
 //! }
