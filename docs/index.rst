@@ -32,8 +32,8 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
 .. _supported-boards:
 
-Boards Currently Supported by Kubos
------------------------------------
+Supported OBCs
+--------------
 
 +------------+---------------------------------------------------------------------+
 | Vendor     | Description                                                         |
@@ -45,6 +45,15 @@ Boards Currently Supported by Kubos
 | Beaglebone | :doc:`Beaglebone Black, Rev. C <os-docs/working-with-the-bbb>`      |
 +------------+---------------------------------------------------------------------+
 
+Supported Hardware Devices
+--------------------------
+
+KubOS supports a selection of hardware devices in varying capacities.
+
+All supported devices have a :doc:`device API <apis/device-api/index>` which may be used.
+
+Some devices have an additional :doc:`hardware service <services/hardware-services>` which can be built into
+KubOS and provides a long-running process which allows easy, streamlined communication with the device.
 
 Contributing to KubOS:
 ----------------------
