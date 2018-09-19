@@ -130,3 +130,89 @@ fn test_insert_custom_timestamp() {
     assert_eq!(mutation_result, mutation_expected);
     assert_eq!(query_result, query_expected);
 }
+
+#[test]
+fn test_insert_multi_auto() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8113;
+
+    let (handle, sender) = setup(Some(db), Some(port), None);
+
+    let mutation_expected = json!({
+            "errs": "",
+            "msg": {
+                "insert": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        });
+
+    // It currently takes more than 1ms for each round-trip GraphQL request,
+    // so we're safe to fire these off one after another
+    for num in 0..5 {
+        let mutation = format!(
+            r#"mutation {{
+            insert(subsystem: "eps", parameter: "voltage", value: "4.{}") {{
+                success,
+                errors
+            }}
+        }}"#,
+            num
+        );
+
+        let mutation_result = do_query(Some(port), &mutation);
+        if mutation_result != mutation_expected {
+            teardown(handle, sender);
+            panic!();
+        }
+    }
+
+    let query = r#"{
+            telemetry(subsystem: "eps", parameter: "voltage") {
+                subsystem,
+                parameter,
+                value
+            }
+        }"#;
+    let query_expected = json!({
+            "errs": "",
+            "msg": {
+                "telemetry": [
+                {
+                    "subsystem": "eps",
+                    "parameter": "voltage",
+                    "value": "4.4"
+                },
+                {
+                    "subsystem": "eps",
+                    "parameter": "voltage",
+                    "value": "4.3"
+                },
+                {
+                    "subsystem": "eps",
+                    "parameter": "voltage",
+                    "value": "4.2"
+                },
+                {
+                    "subsystem": "eps",
+                    "parameter": "voltage",
+                    "value": "4.1"
+                },
+                {
+                    "subsystem": "eps",
+                    "parameter": "voltage",
+                    "value": "4.0"
+                },
+                ]
+            }
+        });
+    let query_result = do_query(Some(port), query);
+
+    teardown(handle, sender);
+
+    assert_eq!(query_result, query_expected);
+}
