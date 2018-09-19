@@ -41,10 +41,11 @@ pub fn store_chunk(prefix: &str, hash: &str, index: u32, data: &[u8]) -> Result<
         .join(hash)
         .join(file_name);
 
-    fs::create_dir_all(&storage_path
-        .parent()
-        .ok_or(format!("Failed to get path parent for {:?}", storage_path))?)
-        .map_err(|err| {
+    fs::create_dir_all(
+        &storage_path
+            .parent()
+            .ok_or(format!("Failed to get path parent for {:?}", storage_path))?,
+    ).map_err(|err| {
         format!(
             "Failed to create storage directory {:?}: {}",
             storage_path, err
