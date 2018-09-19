@@ -18,7 +18,7 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```no_run
 //! extern crate cbor_protocol;
 //! extern crate serde_cbor;
 //!
@@ -35,9 +35,9 @@
 //!     Ok((source, message)) => {
 //!         if let Some(msg) = message {
 //!             println!("Received message from {:?}: {:?}", source, msg);
-//!            }
-//!        }
-//!        Err(None) => println!("Timed out waiting for reply"),
+//!         }
+//!     }
+//!     Err(None) => println!("Timed out waiting for reply"),
 //!     Err(Some(err)) => eprintln!("Failed to receive message: {}", err)
 //! }
 //! ```
@@ -94,7 +94,7 @@ impl Protocol {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// extern crate cbor_protocol;
     ///
     /// use cbor_protocol::*;
@@ -122,7 +122,7 @@ impl Protocol {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// extern crate cbor_protocol;
     /// extern crate serde_cbor;
     ///
@@ -160,7 +160,7 @@ impl Protocol {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// use cbor_protocol::*;
     ///
     /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
@@ -190,7 +190,7 @@ impl Protocol {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// use cbor_protocol::*;
     ///
     /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
@@ -361,7 +361,7 @@ impl Protocol {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// extern crate cbor_protocol;
     ///
     /// use cbor_protocol::*;
@@ -370,12 +370,12 @@ impl Protocol {
     /// let cbor_connection = Protocol::new("0.0.0.0:9000".to_owned());
     ///
     /// let message = match cbor_connection.recv_message_timeout(Duration::from_secs(1)) {
-    ///     Ok(data) => data,
-    ///     Err(None) => {
-    ///            println!("Timeout waiting for message");
-    ///            return;
-    ///        }
-    ///     Err(Some(err)) => panic!("Failed to receive message: {}", err),
+    ///     Ok(Some(data)) => data,
+    ///     Ok(None) => {
+    ///        println!("Timeout waiting for message");
+    ///        return;
+    ///     }
+    ///     Err(err) => panic!("Failed to receive message: {}", err),
     /// };
     /// ```
     ///
