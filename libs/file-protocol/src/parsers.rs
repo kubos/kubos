@@ -313,8 +313,6 @@ pub fn parse_sync(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Mes
             if let Value::U64(num) = second_param {
                 if let None = pieces.next() {
                     // It's a sync message: { hash, num_chunks }
-                    // TODO: Whoever processes this message should do the sync_and_send
-                    //self.sync_and_send(&hash, Some(*num as u32));
                     return Ok(Some(Message::Metadata(
                         channel_id,
                         hash.to_owned(),
@@ -324,8 +322,6 @@ pub fn parse_sync(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Mes
             }
         } else {
             // It's a sync message: { hash }
-            // TODO: Whoever processes this message should do the sync_and_send
-            //self.sync_and_send(&hash, None)?;
             return Ok(Some(Message::Sync(channel_id, hash.to_owned())));
         }
     }

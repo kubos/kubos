@@ -66,9 +66,8 @@ Messages
 All messages in the file protocol are encoded as `CBOR <http://cbor.io/>`__ arrays and are sent
 in UDP packets.
 
-The first value in the encoded list is the ``channel_id``
-for request/response type messages and it is followed by
-the ``hash`` for content-addressable messages.
+The first value in the encoded list is the ``channel_id`` for all messages
+and it is followed by the ``hash`` for content-addressable messages.
 
     - The ``channel_id`` parameter is used to indicate a group of messages associated with
       a particular file protocol transaction.

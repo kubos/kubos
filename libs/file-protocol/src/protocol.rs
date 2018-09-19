@@ -203,8 +203,12 @@ impl Protocol {
     /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
     ///
     /// let message = match f_protocol.recv(Some(Duration::from_secs(1))) {
-    /// 	Ok(data) => data,
-    /// 	Err(err) => panic!("Failed to receive message: {}", err),
+    ///     Ok(Some(data)) => data,
+    ///     Ok(None) =>  {
+    ///         println!("Timeout waiting for message");
+    ///         return;
+    ///     }
+    ///     Err(err) => panic!("Failed to receive message: {}", err),
     /// };
     /// ```
     ///
@@ -215,7 +219,7 @@ impl Protocol {
         }
     }
 
-    /// Generates a new random channel id for use when initiating a
+    /// Generates a new random channel ID for use when initiating a
     /// file transfer.
     ///
     /// # Errors

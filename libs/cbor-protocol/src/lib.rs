@@ -399,9 +399,8 @@ impl Protocol {
         let (size, _peer) = match result {
             Ok(data) => data,
             Err(err) => match err.kind() {
-                ::std::io::ErrorKind::WouldBlock => {
-                    return Err(format!("Failed to receive a message: WouldBlock"))
-                } // For some reason, UDP recv returns WouldBlock for timeouts
+                // For some reason, UDP recv returns WouldBlock for timeouts
+                ::std::io::ErrorKind::WouldBlock => return Ok(None),
                 _ => return Err(format!("Failed to receive a message: {:?}", err)),
             },
         };
