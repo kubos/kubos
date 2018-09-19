@@ -56,8 +56,8 @@ Vagrant image. Use ``cargo kubos -c run`` to trigger execution in this case.
 
 .. _rust-targets:
 
-Cross-compilation Targets
--------------------------
+Cross-compilation
+-----------------
 
 The Kubos SDK provides Rust cross-compilation targets for each of the supported OBCs.
 
@@ -72,6 +72,26 @@ The target name varies depending which command is used to compile the project.
 +------------------+-------------------------------+------------------------------+
 | Pumpkin MBM2     | arm-unknown-linux-gnueabihf   | kubos-linux-pumpkin-mbm2-gcc |
 +------------------+-------------------------------+------------------------------+
+
+Some Rust crates require that the C compiler be explicitly declared when cross-compiling.
+
++------------------+-----------------------------------------------+
+| OBC              | Compiler Path                                 |
++------------------+-----------------------------------------------+
+| Beaglebone Black | /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc  |
++------------------+-----------------------------------------------+
+| ISIS-OBC         | /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc |
++------------------+-----------------------------------------------+
+| Pumpkin MBM2     | /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc  |
++------------------+-----------------------------------------------+
+
+This can be done by specifying the C compiler path in the ``CC`` envar like so::
+
+    $ CC={path} cargo build --target {target}
+    
+For example::
+
+    $ CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo build --target armv5te-unknown-linux-gnueabi
 
 .. _rust-transfer:
 
