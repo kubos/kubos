@@ -21,7 +21,9 @@ use juniper::FieldResult;
 /// which don't return any specific data
 #[derive(GraphQLObject)]
 pub struct GenericResponse {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
 }
 
@@ -30,27 +32,39 @@ pub struct GenericResponse {
 /// Indicates last mutation executed by the service
 #[derive(GraphQLEnum, Clone, Copy)]
 pub enum AckCommand {
+    /// No mutations have been executed
     None,
+    /// No-Op
     Noop,
+    /// System power state was changed
     ControlPower,
+    /// System configuration was updated
     ConfigureHardware,
+    /// A hardware test was performed
     TestHardware,
+    /// A raw command was passed through to the system
     IssueRawCommand,
+    /// Arm state was changed
     Arm,
+    /// Antenna/s were deployed
     Deploy,
 }
 
 /// Return field for 'armStatus' query
 #[derive(GraphQLEnum, Eq, PartialEq, Debug)]
 pub enum ArmStatus {
+    /// System is armed
     Armed,
+    /// System is disarmed
     Disarmed,
 }
 
 /// Input field for 'arm' mutation
 #[derive(GraphQLEnum)]
 pub enum ArmState {
+    /// Arm the system
     Arm,
+    /// Disarm the system
     Disarm,
 }
 
@@ -63,15 +77,20 @@ pub type ArmResponse = GenericResponse;
 /// commands to the antennas
 #[derive(GraphQLEnum, Clone, Copy, Eq, PartialEq, Debug)]
 pub enum ConfigureController {
+    /// Primary controller should be used
     Primary,
+    /// Secondary controller should be used
     Secondary,
 }
 
 /// Response fields for 'configureHardware' mutation
 #[derive(GraphQLObject)]
 pub struct ConfigureHardwareResponse {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
+    /// Controller which is being used to issue commands to the antennas
     pub config: ConfigureController,
 }
 
@@ -79,14 +98,19 @@ pub struct ConfigureHardwareResponse {
 /// response field for 'power' query
 #[derive(GraphQLEnum, Clone, Eq, PartialEq, Debug)]
 pub enum PowerState {
+    /// System is on
     On,
+    /// System is off or unavailable
     Off,
+    /// System will be reset
     Reset,
 }
 
 /// Response fields for 'power' query
 pub struct GetPowerResponse {
+    /// Current power status
     pub state: PowerState,
+    /// System uptime, in seconds
     pub uptime: u32,
 }
 
@@ -103,8 +127,11 @@ graphql_object!(GetPowerResponse: () |&self| {
 /// Response fields for 'controlPower' mutation
 #[derive(GraphQLObject)]
 pub struct ControlPowerResponse {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
+    /// Current power status
     pub power: PowerState,
 }
 
@@ -127,7 +154,9 @@ pub enum DeploymentStatus {
 
 /// Response fields for 'deploymentStatus' query
 pub struct GetDeployResponse {
+    /// Overall deployment status
     pub status: DeploymentStatus,
+    /// Full deployment status
     pub details: DeployStatus,
 }
 
@@ -199,15 +228,17 @@ graphql_object!(GetDeployResponse: () |&self| {
 });
 
 /// Input field for 'deploy' mutation
-///
-/// Indicates which antenna should be deployed.
-/// `All` indicates that all antennas should be sequentially deployed
 #[derive(GraphQLEnum)]
 pub enum DeployType {
+    /// Deploy all antennas sequentially
     All,
+    /// Deploy antenna 1
     Antenna1,
+    /// Deploy antenna 2
     Antenna2,
+    /// Deploy antenna 3
     Antenna3,
+    /// Deploy antenna 4
     Antenna4,
 }
 
@@ -218,17 +249,19 @@ pub type DeployResponse = GenericResponse;
 pub type NoopResponse = GenericResponse;
 
 /// Input field for 'testHardware' mutation
-///
-/// Indicates which test should be run against the AntS device
 #[derive(GraphQLEnum)]
 pub enum TestType {
+    /// Integration (non-invasive) test
     Integration,
+    /// Hardware (invasive) test
     Hardware,
 }
 
 /// Enum for the 'testHardware' mutation response union
 pub enum TestResults {
+    /// Integration test results
     Integration(IntegrationTestResults),
+    /// Hardware test results
     Hardware(HardwareTestResults),
 }
 
@@ -243,32 +276,44 @@ graphql_union!(TestResults: () |&self| {
 /// Response fields for 'testHardware(test: INTEGRATION)' mutation
 #[derive(GraphQLObject)]
 pub struct IntegrationTestResults {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
+    /// Nominal telemetry
     pub telemetry_nominal: TelemetryNominal,
+    /// Debug telemetry
     pub telemetry_debug: TelemetryDebug,
 }
 
 /// Response fields for 'testHardware(test: HARDWARE)' mutation
 #[derive(GraphQLObject)]
 pub struct HardwareTestResults {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
+    /// Test results
     pub data: String,
 }
 
 /// Response fields for 'issueRawCommand' mutation
 #[derive(GraphQLObject)]
 pub struct RawCommandResponse {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
+    /// Command response from system
     pub response: String,
 }
 
 /// Response fields for 'telemetry' query
 #[derive(GraphQLObject)]
 pub struct Telemetry {
+    /// Nominal telemetry
     pub nominal: TelemetryNominal,
+    /// Debug telemetry
     pub debug: TelemetryDebug,
 }
 
@@ -350,15 +395,22 @@ graphql_object!(TelemetryNominal: () |&self| {
 /// Debug telemetry data
 #[derive(Debug, Default, PartialEq)]
 pub struct TelemetryDebug {
+    /// Antenna 1 status
     pub ant1: AntennaStats,
+    /// Antenna 2 status
     pub ant2: AntennaStats,
+    /// Antenna 3 status
     pub ant3: AntennaStats,
+    /// Antenna 4 status
     pub ant4: AntennaStats,
 }
 
+/// Antenna status data
 #[derive(Debug, Default, PartialEq)]
 pub struct AntennaStats {
+    /// Number of times deployment has been attempted without success
     pub act_count: u8,
+    /// Cummulative amount of time, in 50ms steps, which has been spent deploying the antenna
     pub act_time: u16,
 }
 
