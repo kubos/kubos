@@ -16,6 +16,14 @@ Specific details about the available GraphQL queries can be found in the |telem-
  
     <a href="../rust-docs/telemetry_service/index.html" target="_blank">telemetry database service</a>
     
+Benchmark
+~~~~~~~~~
+
+When run from within the SDK, we have gathered the following benchmark statistics:
+
+- Building and sending UDP requests takes 10-11 microseconds.
+- Round-trip GraphQL transacations take 1.8-2.1 milliseconds.
+    
 Querying the Service
 --------------------
 
@@ -87,3 +95,15 @@ For example::
         "value": "3.5"
     }
     
+Limitations
+~~~~~~~~~~~
+
+The entry submission rate should be limited to no more than 256 entries every half second.
+
+This is calculated based on the average entry processing time of 2 milliseconds and the UDP socket receive buffer size of
+256 full-sized packets (if the packets are smaller than the maximum size of 4096 bytes, then the entries may be sent at a faster rate).
+
+.. note::
+
+    The default receive buffer size is determined by the kernel constant ``SK_RMEM_MAX``. This value may be updated using
+    the ``SO_RCVBUF`` socket option. 
