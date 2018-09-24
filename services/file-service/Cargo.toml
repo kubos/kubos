@@ -9,6 +9,7 @@ log = "^0.4.0"
 cbor-protocol = { path = "../../libs/cbor-protocol" }
 file-protocol = { path = "../../libs/file-protocol" }
 kubos-system = { path = "../../apis/system-api" }
+serde_cbor = "0.8"
 
 [dev-dependencies]
 blake2-rfc = "0.2.18"

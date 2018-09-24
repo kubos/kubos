@@ -21,13 +21,14 @@ use super::parsers;
 use super::storage;
 use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
+use rand::{self, Rng};
 use serde_cbor::Value;
 use std::cell::Cell;
+use std::net::SocketAddr;
 use std::net::UdpSocket;
 use std::str;
 use std::thread;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use std::net::SocketAddr;
+use std::time::Duration;
 
 // How many times do we read no messages
 // while holding before killing the thread
@@ -58,7 +59,7 @@ pub enum State {
     /// Currently receiving a file
     Receiving {
         /// Transaction identifier
-        channel_id: u64,
+        channel_id: u32,
         /// File hash
         hash: String,
         /// Destination file path
@@ -69,7 +70,7 @@ pub enum State {
     /// All file chunks have been received
     ReceivingDone {
         /// Transaction identifier
-        channel_id: u64,
+        channel_id: u32,
         /// File hash
         hash: String,
         /// Destination file path
@@ -193,7 +194,7 @@ impl Protocol {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// extern crate file_protocol;
     ///
     /// use file_protocol::*;
@@ -202,26 +203,50 @@ impl Protocol {
     /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
     ///
     /// let message = match f_protocol.recv(Some(Duration::from_secs(1))) {
-    /// 	Ok(data) => data,
-    /// 	Err(None) => {
-    ///			println!("Timeout waiting for message");
-    ///			return;
-    ///		}
-    /// 	Err(Some(err)) => panic!("Failed to receive message: {}", err),
+    ///     Ok(Some(data)) => data,
+    ///     Ok(None) =>  {
+    ///         println!("Timeout waiting for message");
+    ///         return;
+    ///     }
+    ///     Err(err) => panic!("Failed to receive message: {}", err),
     /// };
     /// ```
     ///
-    pub fn recv(&self, timeout: Option<Duration>) -> Result<Option<Value>, Option<String>> {
+    pub fn recv(&self, timeout: Option<Duration>) -> Result<Option<Value>, String> {
         match timeout {
             Some(value) => self.cbor_proto.recv_message_timeout(value),
             None => self.cbor_proto.recv_message(),
         }
     }
 
+    /// Generates a new random channel ID for use when initiating a
+    /// file transfer.
+    ///
+    /// # Errors
+    ///
+    /// If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use file_protocol::*;
+    ///
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    ///
+    /// let channel_id = f_protocol.generate_channel();
+    /// ```
+    ///
+    pub fn generate_channel(&self) -> Result<u32, String> {
+        let mut rng = rand::thread_rng();
+        let channel_id: u32 = rng.gen_range(100000, 999999);
+        Ok(channel_id)
+    }
+
     /// Send a file's metadata information to the remote target
     ///
     /// # Arguments
     ///
+    /// * channel_id - Channel ID for transaction
     /// * hash - BLAKE2s hash of file
     /// * num_chunks - Number of data chunks needed for file
     ///
@@ -239,17 +264,24 @@ impl Protocol {
     /// # ::std::fs::File::create("client.txt").unwrap();
     ///
     /// let (hash, num_chunks, _mode) = f_protocol.initialize_file("client.txt").unwrap();
-    /// f_protocol.send_metadata(&hash, num_chunks);
+    /// let channel_id = f_protocol.generate_channel().unwrap();
+    /// f_protocol.send_metadata(channel_id, &hash, num_chunks);
     /// ```
     ///
-    pub fn send_metadata(&self, hash: &str, num_chunks: u32) -> Result<(), String> {
-        self.send(messages::metadata(&hash, num_chunks)?)
+    pub fn send_metadata(
+        &self,
+        channel_id: u32,
+        hash: &str,
+        num_chunks: u32,
+    ) -> Result<(), String> {
+        self.send(messages::metadata(channel_id, &hash, num_chunks)?)
     }
 
     /// Request remote target to receive file from host
     ///
     /// # Arguments
     ///
+    /// * channel_id - Channel ID used for transaction
     /// * hash - BLAKE2s hash of file
     /// * target_path - Destination file path
     /// * mode - File mode
@@ -268,18 +300,17 @@ impl Protocol {
     /// # ::std::fs::File::create("client.txt").unwrap();
     ///
     /// let (hash, _num_chunks, mode) = f_protocol.initialize_file("client.txt").unwrap();
-    /// f_protocol.send_export(&hash, "final/dir/service.txt", mode);
+    /// let channel_id = f_protocol.generate_channel().unwrap();
+    /// f_protocol.send_export(channel_id, &hash, "final/dir/service.txt", mode);
     /// ```
     ///
-    pub fn send_export(&self, hash: &str, target_path: &str, mode: u32) -> Result<(), String> {
-        let time = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .and_then(
-                |duration| Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
-            )
-            .map_err(|err| format!("Failed to get current system time: {}", err))?;
-        let channel_id: u32 = (time % 100000) as u32;
-
+    pub fn send_export(
+        &self,
+        channel_id: u32,
+        hash: &str,
+        target_path: &str,
+        mode: u32,
+    ) -> Result<(), String> {
         self.send(messages::export_request(
             channel_id,
             hash,
@@ -306,19 +337,12 @@ impl Protocol {
     /// use file_protocol::*;
     ///
     /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let channel_id = f_protocol.generate_channel().unwrap();
     ///
-    /// f_protocol.send_import("service.txt");
+    /// f_protocol.send_import(channel_id, "service.txt");
     /// ```
     ///
-    pub fn send_import(&self, source_path: &str) -> Result<(), String> {
-        let time = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .and_then(
-                |duration| Ok(duration.as_secs() * 1000 + duration.subsec_nanos() as u64 / 1000000),
-            )
-            .map_err(|err| format!("Failed to get current system time: {}", err))?;
-        let channel_id: u32 = (time % 100000) as u32;
-
+    pub fn send_import(&self, channel_id: u32, source_path: &str) -> Result<(), String> {
         self.send(messages::import_request(channel_id, source_path)?)?;
         Ok(())
     }
@@ -360,7 +384,7 @@ impl Protocol {
     //
     fn finalize_file(
         &self,
-        channel_id: u64,
+        channel_id: u32,
         hash: &str,
         target_path: &str,
         mode: Option<u32>,
@@ -378,11 +402,16 @@ impl Protocol {
     }
 
     // Send all requested chunks of a file to the remote destination
-    fn send_chunks(&self, hash: &str, chunks: &[(u32, u32)]) -> Result<(), String> {
+    fn send_chunks(
+        &self,
+        channel_id: u32,
+        hash: &str,
+        chunks: &[(u32, u32)],
+    ) -> Result<(), String> {
         for (first, last) in chunks {
             for chunk_index in *first..*last {
                 let chunk = storage::load_chunk(&self.prefix, hash, chunk_index)?;
-                self.send(messages::chunk(hash, chunk_index, &chunk)?)?;
+                self.send(messages::chunk(channel_id, hash, chunk_index, &chunk)?)?;
 
                 thread::sleep(Duration::from_millis(1));
             }
@@ -394,6 +423,7 @@ impl Protocol {
     ///
     /// # Arguments
     ///
+    /// * pump - Function which returns the next message for processing
     /// * timeout - Maximum time to listen for a single message
     /// * start_state - Current transaction state
     ///
@@ -411,18 +441,27 @@ impl Protocol {
     ///
     /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
     ///
-    /// f_protocol.message_engine(Duration::from_millis(10), State::Transmitting);
+    /// f_protocol.message_engine(
+    ///     |d| f_protocol.recv(Some(d)),
+    ///     Duration::from_millis(10),
+    ///     State::Transmitting
+    /// );
     /// ```
     ///
-    pub fn message_engine(&self, timeout: Duration, start_state: State) -> Result<(), String> {
+    pub fn message_engine<F>(
+        &self,
+        pump: F,
+        timeout: Duration,
+        start_state: State,
+    ) -> Result<(), String>
+    where
+        F: Fn(Duration) -> Result<Option<Value>, String>,
+    {
         let mut state = start_state.clone();
         loop {
             // Listen on UDP port
-            let message = match self.cbor_proto.recv_message_peer_timeout(timeout) {
-                Ok((peer, Some(message))) => {
-                    // Update our response port
-                    self.remote_addr.set(peer);
-
+            let message = match pump(timeout) {
+                Ok(Some(message)) => {
                     // If we previously timed out, restore the old state
                     if let State::Holding {
                         count: _,
@@ -446,7 +485,7 @@ impl Protocol {
                     } => {
                         match storage::validate_file(&self.prefix, &hash, None) {
                             Ok((true, _)) => {
-                                self.send(messages::ack(&hash, None)?)?;
+                                self.send(messages::ack(channel_id, &hash, None)?)?;
                                 state = State::ReceivingDone {
                                     channel_id,
                                     hash: hash.clone(),
@@ -455,7 +494,7 @@ impl Protocol {
                                 };
                             }
                             Ok((false, chunks)) => {
-                                self.send(messages::nak(&hash, &chunks)?)?;
+                                self.send(messages::nak(channel_id, &hash, &chunks)?)?;
                                 state = State::Holding {
                                     count: 0,
                                     prev_state: Box::new(state.clone()),
@@ -577,32 +616,40 @@ impl Protocol {
         match parsed_message.to_owned() {
             Ok(parsed_message) => {
                 match &parsed_message {
-                    Message::Sync(hash) => {
-                        info!("<- {{ {} }}", hash);
+                    Message::Sync(channel_id, hash) => {
+                        info!("<- {{ {}, {} }}", channel_id, hash);
                         new_state = state.clone();
                     }
-                    Message::Metadata(hash, num_chunks) => {
-                        info!("<- {{ {}, {} }}", hash, num_chunks);
+                    Message::Metadata(channel_id, hash, num_chunks) => {
+                        info!("<- {{ {}, {}, {} }}", channel_id, hash, num_chunks);
                         storage::store_meta(&self.prefix, &hash, *num_chunks)?;
-                        new_state = state.clone();
+                        new_state = State::StartReceive {
+                            path: hash.to_owned(),
+                        };
                     }
-                    Message::ReceiveChunk(hash, chunk_num, data) => {
-                        info!("<- {{ {}, {}, chunk_data }}", hash, chunk_num);
+                    Message::ReceiveChunk(channel_id, hash, chunk_num, data) => {
+                        info!(
+                            "<- {{ {}, {}, {}, chunk_data }}",
+                            channel_id, hash, chunk_num
+                        );
                         storage::store_chunk(&self.prefix, &hash, *chunk_num, &data)?;
                         new_state = state.clone();
                     }
-                    Message::ACK(ack_hash) => {
+                    Message::ACK(_channel_id, ack_hash) => {
                         info!("<- {{ {}, true }}", ack_hash);
                         // TODO: Figure out hash verification here
                         new_state = State::TransmittingDone;
                     }
-                    Message::NAK(hash, Some(missing_chunks)) => {
-                        info!("<- {{ {}, false, {:?} }}", hash, missing_chunks);
-                        self.send_chunks(&hash, &missing_chunks)?;
+                    Message::NAK(channel_id, hash, Some(missing_chunks)) => {
+                        info!(
+                            "<- {{ {}, {}, false, {:?} }}",
+                            channel_id, hash, missing_chunks
+                        );
+                        self.send_chunks(*channel_id, &hash, &missing_chunks)?;
                         new_state = State::Transmitting;
                     }
-                    Message::NAK(hash, None) => {
-                        info!("<- {{ {}, false }}", hash);
+                    Message::NAK(channel_id, hash, None) => {
+                        info!("<- {{ {}, {}, false }}", channel_id, hash);
                         // TODO: Maybe trigger a failure?
                         new_state = state.clone();
                     }
@@ -616,7 +663,7 @@ impl Protocol {
                         match storage::validate_file(&self.prefix, hash, None) {
                             Ok((true, _)) => {
                                 // We've already got all the file data in temporary storage
-                                self.send(messages::ack(&hash, None)?)?;
+                                self.send(messages::ack(*channel_id, &hash, None)?)?;
 
                                 new_state = State::ReceivingDone {
                                     channel_id: *channel_id,
@@ -627,7 +674,7 @@ impl Protocol {
                             }
                             Ok((false, chunks)) => {
                                 // We're missing some number of data chunks of the requrested file
-                                self.send(messages::nak(&hash, &chunks)?)?;
+                                self.send(messages::nak(*channel_id, &hash, &chunks)?)?;
                                 new_state = State::Receiving {
                                     channel_id: *channel_id,
                                     hash: hash.to_string(),
@@ -680,7 +727,7 @@ impl Protocol {
                         // TODO: handle channel_id mismatch
                         match storage::validate_file(&self.prefix, hash, Some(*num_chunks)) {
                             Ok((true, _)) => {
-                                self.send(messages::ack(&hash, Some(*num_chunks))?)?;
+                                self.send(messages::ack(*channel_id, &hash, Some(*num_chunks))?)?;
                                 new_state = match state.clone() {
                                     State::StartReceive { path } => State::ReceivingDone {
                                         channel_id: *channel_id,
@@ -692,7 +739,7 @@ impl Protocol {
                                 };
                             }
                             Ok((false, chunks)) => {
-                                self.send(messages::nak(&hash, &chunks)?)?;
+                                self.send(messages::nak(*channel_id, &hash, &chunks)?)?;
                                 new_state = match state.clone() {
                                     State::StartReceive { path } => State::Receiving {
                                         channel_id: *channel_id,
