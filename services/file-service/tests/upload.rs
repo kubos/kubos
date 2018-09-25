@@ -313,8 +313,8 @@ fn upload_bad_hash() {
     );
 
     // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
+    fs::remove_dir_all(format!("client/storage/{}", hash));
+    fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Upload a single file in 5 simultaneous client instances

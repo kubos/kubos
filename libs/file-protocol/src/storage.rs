@@ -387,7 +387,17 @@ pub fn finalize_file(
     let mut calc_hash = Blake2s::new(HASH_SIZE);
 
     for chunk_num in 0..num_chunks {
-        let chunk = load_chunk(prefix, hash, chunk_num)?;
+        let chunk = match load_chunk(prefix, hash, chunk_num) {
+            Ok(c) => c,
+            Err(e) => {
+                warn!(
+                    "Error encountered loading chunk {}, deleting : {}",
+                    chunk_num, e
+                );
+                delete_chunk(prefix, hash, chunk_num)?;
+                return Err(e);
+            }
+        };
 
         // Update our verification hash
         calc_hash.update(&chunk);
@@ -411,6 +421,32 @@ pub fn finalize_file(
         // Alternatively, the service can be resposible for that
         Ok(())
     } else {
+        // If the hash doesn't match then we start over
+        delete_file(&prefix, &hash)?;
         Err(ProtocolError::HashMismatch)
     }
+}
+
+fn delete_chunk(prefix: &str, hash: &str, index: u32) -> Result<(), ProtocolError> {
+    let path = Path::new(&format!("{}/storage", prefix))
+        .join(hash)
+        .join(format!("{}", index));
+
+    fs::remove_file(path).map_err(|err| ProtocolError::Storage {
+        action: format!("deleting chunk file {}", index),
+        err,
+    })?;
+
+    Ok(())
+}
+
+fn delete_file(prefix: &str, hash: &str) -> Result<(), ProtocolError> {
+    let path = Path::new(&format!("{}/storage", prefix)).join(hash);
+
+    fs::remove_dir_all(path).map_err(|err| ProtocolError::Storage {
+        action: format!("deleting file {}", hash),
+        err,
+    })?;
+
+    Ok(())
 }

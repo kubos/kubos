@@ -306,8 +306,8 @@ fn download_bad_hash() {
     assert_eq!("File hash mismatch", format!("{}", result.unwrap_err()));
 
     // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
+    fs::remove_dir_all(format!("client/storage/{}", hash));
+    fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Download a single file in 5 simultaneous client instances
