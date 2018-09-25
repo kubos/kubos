@@ -23,7 +23,7 @@ extern crate rand;
 extern crate tempfile;
 
 use blake2_rfc::blake2s::Blake2s;
-use file_protocol::{FileProtocol, State};
+use file_protocol::{FileProtocol, ProtocolError, State};
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
@@ -65,7 +65,7 @@ fn download(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
-) -> Result<(), String> {
+) -> Result<(), ProtocolError> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     let channel = f_protocol.generate_channel()?;
@@ -79,9 +79,8 @@ fn download(
     // take the server to prepare the file we've requested.
     // Larger files (> 100MB) can take over a minute to process.
     let reply = match f_protocol.recv(None) {
-        Ok(Some(message)) => message,
-        Ok(None) => return Err("Failed to import file".to_owned()),
-        Err(error) => return Err(format!("Failed to import file: {}", error)),
+        Ok(message) => message,
+        Err(error) => return Err(error),
     };
 
     let state = f_protocol.process_message(
@@ -304,7 +303,7 @@ fn download_bad_hash() {
         &dest,
         Some("client".to_owned()),
     );
-    assert_eq!(result.unwrap_err(), "File hash mismatch");
+    assert_eq!("File hash mismatch", format!("{}", result.unwrap_err()));
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();

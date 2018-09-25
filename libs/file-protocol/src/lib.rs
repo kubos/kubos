@@ -24,7 +24,7 @@
 //! use file_protocol::*;
 //! use std::time::Duration;
 //!
-//! fn upload() -> Result<(), String> {
+//! fn upload() -> Result<(), ProtocolError> {
 //!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", Some("storage/dir".to_owned()));
 //!
 //!     # ::std::fs::File::create("client.txt").unwrap();
@@ -54,7 +54,7 @@
 //! use file_protocol::*;
 //! use std::time::Duration;
 //!
-//! fn download() -> Result<(), String> {
+//! fn download() -> Result<(), ProtocolError> {
 //!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:8000", None);
 //!
 //!     let channel_id = f_protocol.generate_channel()?;
@@ -68,9 +68,8 @@
 //!
 //!     // Wait for the request reply
 //!     let reply = match f_protocol.recv(None) {
-//!         Ok(Some(message)) => message,
-//!         Ok(None) => return Err("Failed to import file".to_owned()),
-//!         Err(error) => return Err(format!("Failed to import file: {}", error)),
+//!         Ok(message) => message,
+//!         Err(error) => return Err(error)
 //!     };
 //!
 //!     let state = f_protocol.process_message(
@@ -85,7 +84,7 @@
 //! ```
 //!
 
-#![deny(missing_docs)]
+// #![deny(missing_docs)]
 
 extern crate blake2_rfc;
 extern crate cbor_protocol;
@@ -95,6 +94,8 @@ extern crate rand;
 extern crate serde;
 extern crate serde_cbor;
 extern crate time;
+#[macro_use]
+extern crate failure;
 
 mod messages;
 mod parsers;
@@ -107,6 +108,59 @@ pub use protocol::State;
 pub use parsers::parse_channel_id;
 
 const CHUNK_SIZE: usize = 4096;
+
+#[derive(Debug, Fail)]
+pub enum ProtocolError {
+    #[fail(display = "Cbor Error: {}", err)]
+    CborError { err: cbor_protocol::ProtocolError },
+    #[fail(display = "Failed to create {} message: {}", message, err)]
+    Message {
+        message: String,
+        err: serde_cbor::error::Error,
+    },
+    #[fail(display = "Storage failed to {}: {}", action, err)]
+    Storage { action: String, err: std::io::Error },
+    #[fail(display = "Failed to serialize: {}", err)]
+    Serialize { err: serde_cbor::error::Error },
+    #[fail(display = "File hash mismatch")]
+    HashMismatch,
+    #[fail(display = "Failed to finalize file: {}", cause)]
+    FinializeFailed { cause: String },
+    #[fail(display = "Failed to {}: {}", action, err)]
+    IoError { action: String, err: std::io::Error },
+    #[fail(display = "Transmission failure on channel {}: {}", channel_id, error_message)]
+    TransmissionError {
+        channel_id: u32,
+        error_message: String,
+    },
+    #[fail(display = "{}", _0)]
+    ParseError(String),
+    #[fail(display = "Unable to parse {} message: No {} param", _0, _1)]
+    MissingParam(String, String),
+    #[fail(display = "Unable to parse {} message: Invalid {} param", _0, _1)]
+    InvalidParam(String, String),
+    #[fail(display = "A timeout was encountered")]
+    Timeout,
+    #[fail(display = "Failure receiving message: {}", err)]
+    ReceiveError { err: String },
+    #[fail(display = "Unable to parse message: {}", err)]
+    MessageParseError { err: String },
+}
+
+impl From<cbor_protocol::ProtocolError> for ProtocolError {
+    fn from(error: cbor_protocol::ProtocolError) -> Self {
+        match error {
+            cbor_protocol::ProtocolError::Timeout => ProtocolError::Timeout,
+            err => ProtocolError::CborError { err },
+        }
+    }
+}
+
+impl From<serde_cbor::error::Error> for ProtocolError {
+    fn from(error: serde_cbor::error::Error) -> Self {
+        ProtocolError::Serialize { err: error }
+    }
+}
 
 /// File protocol message types
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -150,13 +204,8 @@ mod tests {
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
         assert_eq!(
-            msg,
-            Ok(Message::ReqReceive(
-                channel_id,
-                hash,
-                target_path,
-                Some(mode)
-            ))
+            msg.unwrap(),
+            Message::ReqReceive(channel_id, hash, target_path, Some(mode))
         );
     }
 
@@ -168,7 +217,7 @@ mod tests {
         let raw = messages::sync(channel_id, &hash).unwrap();
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
-        assert_eq!(msg, Ok(Message::Sync(channel_id, hash)));
+        assert_eq!(msg.unwrap(), Message::Sync(channel_id, hash));
     }
 
     #[test]
@@ -180,7 +229,10 @@ mod tests {
         let raw = messages::metadata(channel_id, &hash, num_chunks).unwrap();
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
-        assert_eq!(msg, Ok(Message::Metadata(channel_id, hash, num_chunks)));
+        assert_eq!(
+            msg.unwrap(),
+            Message::Metadata(channel_id, hash, num_chunks)
+        );
     }
 
     #[test]
@@ -194,10 +246,8 @@ mod tests {
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
         assert_eq!(
-            msg,
-            Ok(Message::ReceiveChunk(
-                channel_id, hash, chunk_num, chunk_data
-            ))
+            msg.unwrap(),
+            Message::ReceiveChunk(channel_id, hash, chunk_num, chunk_data)
         );
     }
 
@@ -210,7 +260,7 @@ mod tests {
         let raw = messages::ack(channel_id, &hash, Some(num_chunks)).unwrap();
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
-        assert_eq!(msg, Ok(Message::ACK(channel_id, hash)));
+        assert_eq!(msg.unwrap(), Message::ACK(channel_id, hash));
     }
 
     #[test]
@@ -223,6 +273,9 @@ mod tests {
         let raw = messages::nak(channel_id, &hash, &missing_chunks).unwrap();
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
-        assert_eq!(msg, Ok(Message::NAK(channel_id, hash, Some(chunk_ranges))));
+        assert_eq!(
+            msg.unwrap(),
+            Message::NAK(channel_id, hash, Some(chunk_ranges))
+        );
     }
 }

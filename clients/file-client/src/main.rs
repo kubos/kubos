@@ -2,6 +2,8 @@ extern crate clap;
 extern crate file_protocol;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate failure;
 extern crate simplelog;
 
 use clap::{App, Arg};
@@ -16,7 +18,7 @@ fn upload(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
-) -> Result<(), String> {
+) -> Result<(), failure::Error> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     info!(
@@ -50,7 +52,7 @@ fn download(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
-) -> Result<(), String> {
+) -> Result<(), failure::Error> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     info!(
@@ -70,9 +72,8 @@ fn download(
     // take the server to prepare the file we've requested.
     // Larger files (> 100MB) can take over a minute to process.
     let reply = match f_protocol.recv(None) {
-        Ok(Some(message)) => message,
-        Ok(None) => return Err("Failed to import file".to_owned()),
-        Err(error) => return Err(format!("Failed to import file: {}", error)),
+        Ok(message) => message,
+        Err(error) => bail!("Failed to import file: {}", error),
     };
 
     let state = f_protocol.process_message(
