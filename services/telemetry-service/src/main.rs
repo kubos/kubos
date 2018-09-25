@@ -160,6 +160,18 @@
 //! 		errors
 //! 	}
 //! }
+//!
+//! ```
+//!
+//! ## Delete all entries from the EPS subsystem occuring before timestamp 1003
+//! ```graphql
+//! mutation {
+//!     delete(subsystem: "eps", timestampLe: 1004) {
+//!         success,
+//!         errors,
+//!         entriesDeleted
+//!     }
+//! }
 //! ```
 extern crate diesel;
 #[macro_use]

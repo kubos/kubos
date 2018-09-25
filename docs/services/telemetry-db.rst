@@ -25,7 +25,7 @@ It will return an array of database entries.
 The query has the following schema::
 
     query {
-        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): [{
+        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, limit: Integer): [{
             timestamp: Integer!
             subsystem: String!
             parameter: String!
@@ -39,6 +39,7 @@ Each of the query arguments acts as a filter for the database query:
     - timestampLe - Return entries with timestamps occurring on or before the given value
     - subsystem - Return entries which match the given subsystem name
     - parameter - Return entries which match the given parameter name
+    - limit - Return only the first `n` entries found
     
 Note: ``timestampGe`` and ``timestampLe`` can be combined to create a timestamp selection range.
 For example, entries with timestamps after ``1000``, but before ``5000``.
@@ -46,7 +47,7 @@ For example, entries with timestamps after ``1000``, but before ``5000``.
 Adding Entries to the Database
 ------------------------------
 
-The ``insert`` query can be used to add an entry to the telemetry database.
+The ``insert`` mutation can be used to add an entry to the telemetry database.
 
 It has the following schema::
 
@@ -59,5 +60,30 @@ It has the following schema::
     
 The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time.
 
+Removing Entries from the Database
+----------------------------------
 
+The ``delete`` mutation can be used to remove a selection of entries from the telemetry database.
+
+It has the following schema::
+
+    mutation {
+        delete(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): [{
+            success: Boolean!,
+            errors: String!,
+            entriesDeleted: Integer
+        }]
+    }
     
+Each of the mutation arguments acts as a filter for the database query:
+
+    - timestampGe - Delete entries with timestamps occurring on or after the given value
+    - timestampLe - Delete entries with timestamps occurring on or before the given value
+    - subsystem - Delete entries which match the given subsystem name
+    - parameter - Delete entries which match the given parameter name
+
+The mutation has the following response fields:
+
+    - success - Indicates whether the delete operation was successful
+    - errors - Any errors encountered by the delete operation
+    - entriesDeleted - The number of entries deleted by the operation
