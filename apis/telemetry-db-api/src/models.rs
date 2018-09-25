@@ -16,7 +16,7 @@
 
 use super::telemetry;
 
-#[derive(Debug, Queryable)]
+#[derive(Debug, Queryable, Serialize, Deserialize)]
 pub struct Entry {
     pub timestamp: i32,
     pub subsystem: String,
