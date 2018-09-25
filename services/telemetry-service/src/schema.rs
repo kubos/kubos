@@ -16,12 +16,21 @@
 
 use diesel;
 use diesel::prelude::*;
-use juniper::FieldResult;
+use flate2::Compression;
+use flate2::write::GzEncoder;
+use juniper::{FieldError, FieldResult, Value};
 use kubos_service;
 use kubos_telemetry_db::{self, Database};
+use serde_json;
+use std::fs;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
+use tar;
 
 type Context = kubos_service::Context<Database>;
 
+#[derive(Serialize)]
 pub struct Entry(kubos_telemetry_db::Entry);
 
 graphql_object!(Entry: () |&self| {
@@ -44,6 +53,51 @@ graphql_object!(Entry: () |&self| {
     }
 });
 
+fn query_db(
+    database: &Database,
+    timestamp_ge: Option<i32>,
+    timestamp_le: Option<i32>,
+    subsystem: Option<String>,
+    parameter: Option<String>,
+    limit: Option<i32>,
+) -> FieldResult<Vec<Entry>> {
+    use kubos_telemetry_db::telemetry::dsl;
+    use kubos_telemetry_db::telemetry;
+    use diesel::sqlite::SqliteConnection;
+
+    let mut query = telemetry::table.into_boxed::<<SqliteConnection as Connection>::Backend>();
+
+    if let Some(sub) = subsystem {
+        query = query.filter(dsl::subsystem.eq(sub));
+    }
+
+    if let Some(param) = parameter {
+        query = query.filter(dsl::parameter.eq(param));
+    }
+
+    if let Some(time_ge) = timestamp_ge {
+        query = query.filter(dsl::timestamp.ge(time_ge));
+    }
+
+    if let Some(time_le) = timestamp_le {
+        query = query.filter(dsl::timestamp.le(time_le));
+    }
+
+    if let Some(l) = limit {
+        query = query.limit(l.into());
+    }
+
+    query = query.order(dsl::timestamp.desc());
+
+    let entries = query.load::<kubos_telemetry_db::Entry>(&database.connection)?;
+    let mut g_entries: Vec<Entry> = Vec::new();
+    for entry in entries {
+        g_entries.push(Entry(entry));
+    }
+
+    Ok(g_entries)
+}
+
 pub struct QueryRoot;
 
 graphql_object!(QueryRoot: Context |&self| {
@@ -57,42 +111,53 @@ graphql_object!(QueryRoot: Context |&self| {
     ) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
-        use kubos_telemetry_db::telemetry::dsl;
-        use kubos_telemetry_db::telemetry;
-        use diesel::sqlite::SqliteConnection;
-
-        let mut query = telemetry::table.into_boxed::<<SqliteConnection as Connection>::Backend>();
-
-        if let Some(sub) = subsystem {
-            query = query.filter(dsl::subsystem.eq(sub));
+        query_db(executor.context().subsystem(), timestamp_ge, timestamp_le, subsystem, parameter, limit)
+    }
+    field routed_telemetry(
+        &executor,
+        timestamp_ge: Option<i32>,
+        timestamp_le: Option<i32>,
+        subsystem: Option<String>,
+        parameter: Option<String>,
+        limit: Option<i32>,
+        output: String,
+        compress = true: bool,
+    ) -> FieldResult<String>
+        as "Telemetry entries in database"
+    {
+        let entries = query_db(executor.context().subsystem(), timestamp_ge, timestamp_le, subsystem, parameter, limit)?;
+        let entries = serde_json::to_vec(&entries)?;
+        
+        let output_str = output.clone();
+        let output_path = Path::new(&output_str);
+        
+        let file_name_raw = output_path.file_name()
+            .ok_or_else(|| return FieldError::new("Unable to parse output file name", Value::null()))?;
+        let file_name = file_name_raw.to_str().ok_or_else(|| return FieldError::new("Unable to parse output file name to string", Value::null()))?;
+        
+        if let Some(parent) = output_path.parent() {
+            fs::create_dir_all(parent)?;
         }
-
-        if let Some(param) = parameter {
-            query = query.filter(dsl::parameter.eq(param));
+        
+        {
+            let mut output_file = File::create(output_path)?;
+            output_file.write_all(&entries)?;
         }
-
-        if let Some(time_ge) = timestamp_ge {
-            query = query.filter(dsl::timestamp.ge(time_ge));
+        
+        if compress {   
+            let tar_path = format!("{}.tar.gz", output_str);
+            let tar_file = File::create(&tar_path)?;
+            let encoder = GzEncoder::new(tar_file, Compression::default());
+            let mut tar = tar::Builder::new(encoder);
+            tar.append_file(file_name, &mut File::open(output_path)?)?;
+            tar.finish()?;
+            
+            fs::remove_file(output_path)?;
+            
+            Ok(tar_path)       
+        } else {
+            Ok(output)
         }
-
-        if let Some(time_le) = timestamp_le {
-            query = query.filter(dsl::timestamp.le(time_le));
-        }
-
-        if let Some(l) = limit {
-            query = query.limit(l.into());
-        }
-
-        query = query.order(dsl::timestamp.desc());
-
-        let entries = query.load::<kubos_telemetry_db::Entry>(
-            &executor.context().subsystem().connection)?;
-        let mut g_entries: Vec<Entry> = Vec::new();
-        for entry in entries {
-            g_entries.push(Entry(entry));
-        }
-
-        Ok(g_entries)
     }
 });
 

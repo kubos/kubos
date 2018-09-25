@@ -44,6 +44,36 @@ Each of the query arguments acts as a filter for the database query:
 Note: ``timestampGe`` and ``timestampLe`` can be combined to create a timestamp selection range.
 For example, entries with timestamps after ``1000``, but before ``5000``.
 
+Saving Results for Later Processing
+-----------------------------------
+
+Immediate, large query results might consume more downlink bandwidth than is allowable.
+Alternatively, downlink and uplink could be asynchronous from each other.
+
+In this case, we can use the ``routedTelemetry`` query to write our results to an on-system file.
+This way, we can choose the specific time at which to downlink the results using the
+:doc:`file transfer service <file>`. Additionally, by default, the output file will be in a
+compressed format, reducing the amount of data which needs to be transferred.
+
+The query has the following schema::
+
+    query {
+        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String! 
+    }
+
+The ``output`` argument specifies the output file to write the query results to. It may be a relative or absolute path.
+
+The ``compress`` argument specifies whether the service should compress the output file after writing the results to it.
+
+The other arguments are the same as in the ``telemetry`` query.
+
+The query will return a single field echoing the file that was written to.
+If the ``compress`` argument is true (which is the default), then the result will be the output file name suffixed with ".tar.gz" to indicate
+that the file was compressed using ``Gzip <https://www.gnu.org/software/gzip/manual/gzip.html>``__.
+
+The results file will contain an array of database entries in JSON format.
+This matches the return fields of the ``telemetry`` query.
+
 Adding Entries to the Database
 ------------------------------
 
@@ -58,7 +88,17 @@ It has the following schema::
         }
     }
     
-The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time.
+The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time,
+in milliseconds.
+
+Limitations
+~~~~~~~~~~~
+
+The generated timestamp value will be the current system time in milliseconds.
+The database uses the combination of timestamp, subsystem, and parameter as the primary key.
+This primary key must be unique for each entry.
+
+As a result, any one subsystem parameter may not be logged more than once per millisecond. 
 
 Removing Entries from the Database
 ----------------------------------
