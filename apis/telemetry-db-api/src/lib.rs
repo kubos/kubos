@@ -116,7 +116,8 @@ impl Database {
         parameter: &'a str,
         value: &'a str,
     ) -> QueryResult<usize> {
-        let timestamp = time::now_utc().to_timespec().sec;
+        let time = time::now_utc().to_timespec();
+        let timestamp = (time.sec * 1000) as i32 + (time.nsec / 1000000);
         self.insert(timestamp as i32, subsystem, parameter, value)
     }
 }

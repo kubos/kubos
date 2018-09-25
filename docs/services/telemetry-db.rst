@@ -87,7 +87,14 @@ It has the following schema::
         }
     }
     
-The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time.
+The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time,
+in milliseconds.
 
+Limitations
+~~~~~~~~~~~
 
-    
+The generated timestamp value will be the current system time in milliseconds.
+The database uses the combination of timestamp, subsystem, and parameter as the primary key.
+This primary key must be unique for each entry.
+
+As a result, any one subsystem parameter may not be logged more than once per millisecond. 
