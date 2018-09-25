@@ -411,8 +411,13 @@ impl Protocol {
     ) -> Result<(), ProtocolError> {
         for (first, last) in chunks {
             for chunk_index in *first..*last {
-                let chunk = storage::load_chunk(&self.prefix, hash, chunk_index)?;
-                self.send(messages::chunk(channel_id, hash, chunk_index, &chunk)?)?;
+                match storage::load_chunk(&self.prefix, hash, chunk_index) {
+                    Ok(c) => self.send(messages::chunk(channel_id, hash, chunk_index, &c)?)?,
+                    Err(e) => {
+                        warn!("Failed to load chunk {}:{} : {}", hash, chunk_index, e);
+                        storage::delete_chunk(&self.prefix, hash, chunk_index)?;
+                    }
+                };
 
                 thread::sleep(Duration::from_millis(1));
             }

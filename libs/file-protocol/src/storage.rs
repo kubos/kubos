@@ -427,12 +427,12 @@ pub fn finalize_file(
     }
 }
 
-fn delete_chunk(prefix: &str, hash: &str, index: u32) -> Result<(), ProtocolError> {
+pub fn delete_chunk(prefix: &str, hash: &str, index: u32) -> Result<(), ProtocolError> {
     let path = Path::new(&format!("{}/storage", prefix))
         .join(hash)
         .join(format!("{}", index));
 
-    fs::remove_file(path).map_err(|err| ProtocolError::Storage {
+    fs::remove_file(path).map_err(|err| ProtocolError::StorageError {
         action: format!("deleting chunk file {}", index),
         err,
     })?;
@@ -440,10 +440,10 @@ fn delete_chunk(prefix: &str, hash: &str, index: u32) -> Result<(), ProtocolErro
     Ok(())
 }
 
-fn delete_file(prefix: &str, hash: &str) -> Result<(), ProtocolError> {
+pub fn delete_file(prefix: &str, hash: &str) -> Result<(), ProtocolError> {
     let path = Path::new(&format!("{}/storage", prefix)).join(hash);
 
-    fs::remove_dir_all(path).map_err(|err| ProtocolError::Storage {
+    fs::remove_dir_all(path).map_err(|err| ProtocolError::StorageError {
         action: format!("deleting file {}", hash),
         err,
     })?;
