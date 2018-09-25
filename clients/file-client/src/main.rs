@@ -5,10 +5,10 @@ extern crate log;
 extern crate simplelog;
 
 use clap::{App, Arg};
+use file_protocol::{FileProtocol, State};
 use simplelog::*;
 use std::path::Path;
 use std::time::Duration;
-use file_protocol::{FileProtocol, State};
 
 fn upload(
     host_ip: &str,
@@ -27,18 +27,21 @@ fn upload(
     // Copy file to upload to temp storage. Calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 
-    // Tell our destination the hash and number of chunks to expect
-    f_protocol.send_metadata(&hash, num_chunks)?;
+    // Generate channel id for transaction
+    let channel = f_protocol.generate_channel()?;
 
-    // TODO: We need this sleep so that the service can have time to set up the temporary
-    // storage directory. Do something to make this unnecessary
-    ::std::thread::sleep(Duration::from_millis(100));
+    // Tell our destination the hash and number of chunks to expect
+    f_protocol.send_metadata(channel, &hash, num_chunks)?;
 
     // Send export command for file
-    f_protocol.send_export(&hash, &target_path, mode)?;
+    f_protocol.send_export(channel, &hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    Ok(f_protocol.message_engine(Duration::from_secs(2), State::Transmitting)?)
+    Ok(f_protocol.message_engine(
+        |d| f_protocol.recv(Some(d)),
+        Duration::from_secs(2),
+        State::Transmitting,
+    )?)
 }
 
 fn download(
@@ -55,9 +58,12 @@ fn download(
         source_path, target_path
     );
 
+    // Generate channel id for transaction
+    let channel = f_protocol.generate_channel()?;
+
     // Send our file request to the remote addr and verify that it's
     // going to be able to send it
-    f_protocol.send_import(source_path)?;
+    f_protocol.send_import(channel, source_path)?;
 
     // Wait for the request reply.
     // Note/TODO: We don't use a timeout here because we don't know how long it will
@@ -66,8 +72,7 @@ fn download(
     let reply = match f_protocol.recv(None) {
         Ok(Some(message)) => message,
         Ok(None) => return Err("Failed to import file".to_owned()),
-        Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
-        Err(None) => return Err("Failed to import file".to_owned()),
+        Err(error) => return Err(format!("Failed to import file: {}", error)),
     };
 
     let state = f_protocol.process_message(
@@ -77,7 +82,7 @@ fn download(
         },
     )?;
 
-    Ok(f_protocol.message_engine(Duration::from_secs(2), state)?)
+    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), state)?)
 }
 
 fn main() {

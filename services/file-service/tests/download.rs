@@ -68,9 +68,11 @@ fn download(
 ) -> Result<(), String> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
+    let channel = f_protocol.generate_channel()?;
+
     // Send our file request to the remote addr and verify that it's
     // going to be able to send it
-    f_protocol.send_import(source_path)?;
+    f_protocol.send_import(channel, source_path)?;
 
     // Wait for the request reply.
     // Note/TODO: We don't use a timeout here because we don't know how long it will
@@ -79,8 +81,7 @@ fn download(
     let reply = match f_protocol.recv(None) {
         Ok(Some(message)) => message,
         Ok(None) => return Err("Failed to import file".to_owned()),
-        Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
-        Err(None) => return Err("Failed to import file".to_owned()),
+        Err(error) => return Err(format!("Failed to import file: {}", error)),
     };
 
     let state = f_protocol.process_message(
@@ -90,7 +91,7 @@ fn download(
         },
     )?;
 
-    Ok(f_protocol.message_engine(Duration::from_secs(2), state)?)
+    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), state)?)
 }
 
 fn create_test_file(name: &str, contents: &[u8]) -> String {
@@ -101,7 +102,8 @@ fn create_test_file(name: &str, contents: &[u8]) -> String {
     hasher.update(contents);
     let hash = hasher.finalize();
 
-    let hash_str = hash.as_bytes()
+    let hash_str = hash
+        .as_bytes()
         .iter()
         .map(|byte| format!("{:02x}", byte))
         .collect();
@@ -321,11 +323,6 @@ fn download_multi_client() {
 
     // Spawn 5 simultaneous clients
     for num in 0..5 {
-        // Need a tiny pause between starting threads, otherwise an initial
-        // operation request might get dropped because the main service socket
-        // just gets overloaded with UDP packets.
-        thread::sleep(Duration::new(0, 1));
-
         thread_handles.push(thread::spawn(move || {
             let test_dir = TempDir::new().expect("Failed to create test dir");
             let test_dir_str = test_dir.path().to_str().unwrap();
@@ -343,11 +340,6 @@ fn download_multi_client() {
                 Some("client".to_owned()),
             );
             assert!(result.is_ok());
-
-            // TODO: Remove this sleep. We need it to let the service
-            // finish its work. The upload logic needs to wait on
-            // the final ACK message before returning
-            thread::sleep(Duration::new(2, 0));
 
             // Cleanup the temporary files so that the test can be repeatable
             fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
