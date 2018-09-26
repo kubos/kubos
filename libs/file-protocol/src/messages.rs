@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use super::ProtocolError;
+use error::ProtocolError;
 use serde_cbor::{ser, Value};
 
 // Create export message
@@ -30,7 +30,7 @@ pub fn export_request(
     );
 
     ser::to_vec_packed(&(channel_id, "export", hash, target_path, mode)).map_err(|err| {
-        ProtocolError::Message {
+        ProtocolError::MessageCreationError {
             message: "export".to_owned(),
             err,
         }
@@ -40,18 +40,22 @@ pub fn export_request(
 // Create import message
 pub fn import_request(channel_id: u32, source_path: &str) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ import, {} }}", source_path);
-    ser::to_vec_packed(&(channel_id, "import", source_path)).map_err(|err| ProtocolError::Message {
-        message: "import".to_owned(),
-        err,
+    ser::to_vec_packed(&(channel_id, "import", source_path)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "import".to_owned(),
+            err,
+        }
     })
 }
 
 // Create sync message
 pub fn metadata(channel_id: u32, hash: &str, num_chunks: u32) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, {}, {} }}", channel_id, hash, num_chunks);
-    ser::to_vec_packed(&(channel_id, hash, num_chunks)).map_err(|err| ProtocolError::Message {
-        message: "metadata".to_owned(),
-        err,
+    ser::to_vec_packed(&(channel_id, hash, num_chunks)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "metadata".to_owned(),
+            err,
+        }
     })
 }
 
@@ -59,7 +63,7 @@ pub fn metadata(channel_id: u32, hash: &str, num_chunks: u32) -> Result<Vec<u8>,
 pub fn ack(channel_id: u32, hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, {}, true, {:?} }}", channel_id, hash, num_chunks);
     ser::to_vec_packed(&(channel_id, hash, true, num_chunks)).map_err(|err| {
-        ProtocolError::Message {
+        ProtocolError::MessageCreationError {
             message: "ACK".to_owned(),
             err,
         }
@@ -75,23 +79,24 @@ pub fn nak(channel_id: u32, hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8
     };
 
     info!("-> {{ {}, {}, false, {:?} }}", channel_id, hash, chunks);
-    let mut vec =
-        ser::to_vec_packed(&(channel_id, hash, false)).map_err(|err| ProtocolError::Message {
+    let mut vec = ser::to_vec_packed(&(channel_id, hash, false)).map_err(|err| {
+        ProtocolError::MessageCreationError {
             message: "NAK".to_owned(),
             err,
-        })?;
+        }
+    })?;
 
     // Make the array indefinite-length
     vec[0] |= 0x1F;
 
     for chunk in chunks.iter() {
         // Add the chunk number to the end of the CBOR array
-        vec.append(
-            &mut ser::to_vec_packed(&chunk).map_err(|err| ProtocolError::Message {
+        vec.append(&mut ser::to_vec_packed(&chunk).map_err(|err| {
+            ProtocolError::MessageCreationError {
                 message: "NAK".to_owned(),
                 err,
-            })?,
-        );
+            }
+        })?);
     }
 
     // Add the array break character
@@ -109,7 +114,7 @@ pub fn chunk(
     let chunk_bytes = Value::Bytes(chunk.to_vec());
     info!("-> {{ {}, {}, {}, chunk_data }}", channel_id, hash, index);
     ser::to_vec_packed(&(channel_id, hash, index, chunk_bytes)).map_err(|err| {
-        ProtocolError::Message {
+        ProtocolError::MessageCreationError {
             message: "chunk".to_owned(),
             err,
         }
@@ -129,7 +134,7 @@ pub fn import_setup_success(
     );
 
     ser::to_vec_packed(&(channel_id, true, hash, num_chunks, mode)).map_err(|err| {
-        ProtocolError::Message {
+        ProtocolError::MessageCreationError {
             message: "import success".to_owned(),
             err,
         }
@@ -139,7 +144,7 @@ pub fn import_setup_success(
 // Create successful export request response message
 pub fn operation_success(channel_id: u32) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, true }}", channel_id);
-    ser::to_vec_packed(&(channel_id, true)).map_err(|err| ProtocolError::Message {
+    ser::to_vec_packed(&(channel_id, true)).map_err(|err| ProtocolError::MessageCreationError {
         message: "operation success".to_owned(),
         err,
     })
@@ -148,16 +153,18 @@ pub fn operation_success(channel_id: u32) -> Result<Vec<u8>, ProtocolError> {
 // Create an operation failure response message
 pub fn operation_failure(channel_id: u32, error: &str) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, false, {} }}", channel_id, error);
-    ser::to_vec_packed(&(channel_id, false, error)).map_err(|err| ProtocolError::Message {
-        message: "operation failure".to_owned(),
-        err,
+    ser::to_vec_packed(&(channel_id, false, error)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "operation failure".to_owned(),
+            err,
+        }
     })
 }
 
 // Create sync message
 pub fn sync(channel_id: u32, hash: &str) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, {} }}", channel_id, hash);
-    ser::to_vec_packed(&(channel_id, hash)).map_err(|err| ProtocolError::Message {
+    ser::to_vec_packed(&(channel_id, hash)).map_err(|err| ProtocolError::MessageCreationError {
         message: "sync".to_owned(),
         err,
     })

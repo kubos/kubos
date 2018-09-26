@@ -305,7 +305,7 @@ fn upload_bad_hash() {
         "File hash mismatch",
         match result.unwrap_err() {
             ProtocolError::TransmissionError {
-                channel_id,
+                channel_id: _,
                 error_message,
             } => error_message,
             _ => "".to_owned(),

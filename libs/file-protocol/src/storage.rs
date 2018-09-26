@@ -15,9 +15,8 @@
 //
 
 use super::CHUNK_SIZE;
-
-use super::ProtocolError;
 use blake2_rfc::blake2s::Blake2s;
+use error::ProtocolError;
 use serde_cbor::{de, to_vec, Value};
 use std::fs;
 use std::fs::File;
@@ -35,29 +34,28 @@ const HASH_SIZE: usize = 16;
 
 // Save new chunk in a temporary storage file
 pub fn store_chunk(prefix: &str, hash: &str, index: u32, data: &[u8]) -> Result<(), ProtocolError> {
-    // if data is type uint8_t[]
-    // change data to ffi.string
     let file_name = format!("{}", index);
     let storage_path = Path::new(&format!("{}/storage", prefix))
         .join(hash)
         .join(file_name);
 
     if let Some(parent) = &storage_path.parent() {
-        fs::create_dir_all(parent).map_err(|err| ProtocolError::Storage {
+        fs::create_dir_all(parent).map_err(|err| ProtocolError::StorageError {
             action: format!("create storage directory {:?}", storage_path),
             err,
         })?;
     }
 
-    let mut file = File::create(&storage_path).map_err(|err| ProtocolError::Storage {
+    let mut file = File::create(&storage_path).map_err(|err| ProtocolError::StorageError {
         action: "create storage file".to_owned(),
         err,
     })?;
 
-    file.write_all(data).map_err(|err| ProtocolError::Storage {
-        action: "write chunk".to_owned(),
-        err,
-    })?;
+    file.write_all(data)
+        .map_err(|err| ProtocolError::StorageError {
+            action: "write chunk".to_owned(),
+            err,
+        })?;
 
     Ok(())
 }
@@ -69,28 +67,29 @@ pub fn store_meta(prefix: &str, hash: &str, num_chunks: u32) -> Result<(), Proto
 
     let file_dir = Path::new(&format!("{}/storage", prefix)).join(hash);
     // Make sure the directory exists
-    fs::create_dir_all(file_dir.clone()).map_err(|err| ProtocolError::Storage {
+    fs::create_dir_all(file_dir.clone()).map_err(|err| ProtocolError::StorageError {
         action: "create temp storage directory".to_owned(),
         err,
     })?;
 
     let meta_path = file_dir.join("meta");
-    let temp_path = file_dir.join(".meta.mp");
+    let temp_path = file_dir.join(".meta.tmp");
 
     File::create(&temp_path)
-        .map_err(|err| ProtocolError::Storage {
+        .map_err(|err| ProtocolError::StorageError {
             action: format!("create/open {:?} for writing", temp_path),
             err,
-        })?
-        .write_all(&vec)
-        .map_err(|err| ProtocolError::Storage {
+        })?.write_all(&vec)
+        .map_err(|err| ProtocolError::StorageError {
             action: format!("write metadata to {:?}", temp_path),
             err,
         })?;
 
-    fs::rename(temp_path.clone(), meta_path.clone()).map_err(|err| ProtocolError::Storage {
-        action: format!("rename {:?} to {:?}", temp_path, meta_path),
-        err,
+    fs::rename(temp_path.clone(), meta_path.clone()).map_err(|err| {
+        ProtocolError::StorageError {
+            action: format!("rename {:?} to {:?}", temp_path, meta_path),
+            err,
+        }
     })?;
 
     Ok(())
@@ -104,12 +103,11 @@ pub fn load_chunk(prefix: &str, hash: &str, index: u32) -> Result<Vec<u8>, Proto
         .join(format!("{}", index));
 
     File::open(path)
-        .map_err(|err| ProtocolError::Storage {
+        .map_err(|err| ProtocolError::StorageError {
             action: format!("open chunk file {}", index),
             err,
-        })?
-        .read_to_end(&mut data)
-        .map_err(|err| ProtocolError::Storage {
+        })?.read_to_end(&mut data)
+        .map_err(|err| ProtocolError::StorageError {
             action: format!("read chunk file {}", index),
             err,
         })?;
@@ -125,18 +123,17 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, ProtocolError> {
         .join("meta");
 
     File::open(meta_path)
-        .map_err(|err| ProtocolError::IoError {
+        .map_err(|err| ProtocolError::StorageError {
             action: format!("Unable to open {} metadata file", hash),
             err,
-        })?
-        .read_to_end(&mut data)
-        .map_err(|err| ProtocolError::IoError {
+        })?.read_to_end(&mut data)
+        .map_err(|err| ProtocolError::StorageError {
             action: format!("Unable to read {} metadata file", hash),
             err,
         })?;
 
     let metadata: Value = de::from_slice(&data).map_err(|err| {
-        ProtocolError::ParseError(format!("Unable to parse metadata for {}: {}", hash, err))
+        ProtocolError::StorageParseError(format!("Unable to parse metadata for {}: {}", hash, err))
     })?;
 
     // Returned data should be CBOR: '[["num_chunks", value]]'
@@ -156,8 +153,7 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, ProtocolError> {
                         None
                     }
                 })
-        })
-        .ok_or(ProtocolError::ParseError(
+        }).ok_or(ProtocolError::StorageParseError(
             "Failed to parse temporary file's metadata".to_owned(),
         ))?;
     //.ok_or("Failed to parse temporary file's metadata".to_owned())?;
@@ -184,7 +180,7 @@ pub fn validate_file(
 
     let mut prev_entry: i32 = -1;
 
-    let entries = fs::read_dir(hash_path.clone()).map_err(|err| ProtocolError::IoError {
+    let entries = fs::read_dir(hash_path.clone()).map_err(|err| ProtocolError::StorageError {
         action: format!("Failed to read {:?} directory", hash_path),
         err,
     })?;
@@ -203,8 +199,7 @@ pub fn validate_file(
                 Ok(num) => Some(num),
                 _ => None,
             }
-        })
-        .collect();
+        }).collect();
 
     converted_entries.sort();
 
@@ -251,13 +246,13 @@ pub fn initialize_file(
 ) -> Result<(String, u32, u32), ProtocolError> {
     let storage_path = format!("{}/storage", prefix);
 
-    fs::metadata(source_path).map_err(|err| ProtocolError::IoError {
+    fs::metadata(source_path).map_err(|err| ProtocolError::StorageError {
         action: format!("stat file {}", source_path),
         err,
     })?;
 
     // Copy input file to storage area and calculate hash
-    fs::create_dir_all(&storage_path).map_err(|err| ProtocolError::IoError {
+    fs::create_dir_all(&storage_path).map_err(|err| ProtocolError::StorageError {
         action: format!("create dir {}", storage_path),
         err,
     })?;
@@ -265,12 +260,12 @@ pub fn initialize_file(
     let temp_path = Path::new(&storage_path).join(format!(".{}", time::get_time().nsec));
     let mut hasher = Blake2s::new(HASH_SIZE);
     {
-        let input = File::open(&source_path).map_err(|err| ProtocolError::IoError {
+        let input = File::open(&source_path).map_err(|err| ProtocolError::StorageError {
             action: format!("open {:?}", source_path),
             err,
         })?;
         let mut reader = BufReader::with_capacity(CHUNK_SIZE * 2, input);
-        let mut output = File::create(&temp_path).map_err(|err| ProtocolError::IoError {
+        let mut output = File::create(&temp_path).map_err(|err| ProtocolError::StorageError {
             action: format!("create/open {:?} for writing", temp_path),
             err,
         })?;
@@ -278,22 +273,28 @@ pub fn initialize_file(
         // Need to bring in blake2fs here to create hash
         loop {
             let length = {
-                let chunk = reader.fill_buf().map_err(|err| ProtocolError::IoError {
-                    action: format!("read chunk from source"),
-                    err,
-                })?;
-                if chunk.len() == 0 {
-                    output.sync_all().map_err(|err| ProtocolError::IoError {
-                        action: format!("Failed to sync {:?}", temp_path),
+                let chunk = reader
+                    .fill_buf()
+                    .map_err(|err| ProtocolError::StorageError {
+                        action: format!("read chunk from source"),
                         err,
                     })?;
+                if chunk.len() == 0 {
+                    output
+                        .sync_all()
+                        .map_err(|err| ProtocolError::StorageError {
+                            action: format!("failed to sync {:?}", temp_path),
+                            err,
+                        })?;
                     break;
                 }
                 hasher.update(&chunk);
-                output.write(&chunk).map_err(|err| ProtocolError::IoError {
-                    action: "write chunk".to_owned(),
-                    err,
-                })?;
+                output
+                    .write(&chunk)
+                    .map_err(|err| ProtocolError::StorageError {
+                        action: "write chunk".to_owned(),
+                        err,
+                    })?;
                 chunk.len()
             };
             reader.consume(length);
@@ -306,7 +307,7 @@ pub fn initialize_file(
         hash = format!("{}{:02x}", hash, c);
     }
 
-    let mut output = File::open(&temp_path).map_err(|err| ProtocolError::IoError {
+    let mut output = File::open(&temp_path).map_err(|err| ProtocolError::StorageError {
         action: format!("open temp file {:?}", temp_path),
         err,
     })?;
@@ -326,7 +327,7 @@ pub fn initialize_file(
                 offset = offset + n;
             }
             Err(e) => {
-                return Err(ProtocolError::IoError {
+                return Err(ProtocolError::StorageError {
                     action: format!("read chunk from temp {:?}", temp_path),
                     err: e,
                 });
@@ -354,7 +355,7 @@ pub fn finalize_file(
     let (result, _) = validate_file(prefix, hash, None)?;
 
     if result != true {
-        return Err(ProtocolError::FinializeFailed {
+        return Err(ProtocolError::FinalizeError {
             cause: "file missing chunks".to_owned(),
         });
     }
@@ -363,14 +364,14 @@ pub fn finalize_file(
     let num_chunks = load_meta(prefix, hash)?;
 
     // Q: Do we want to create the parent directories if they don't exist?
-    let mut file = File::create(target_path).map_err(|err| ProtocolError::IoError {
+    let mut file = File::create(target_path).map_err(|err| ProtocolError::StorageError {
         action: format!("create/open file for writing {}", target_path),
         err,
     })?;
 
     if let Some(mode_val) = mode {
         file.set_permissions(Permissions::from_mode(mode_val))
-            .map_err(|err| ProtocolError::IoError {
+            .map_err(|err| ProtocolError::StorageError {
                 action: format!("set target file's mode"),
                 err,
             })?;
@@ -385,7 +386,7 @@ pub fn finalize_file(
         calc_hash.update(&chunk);
         // Write the chunk to the destination file
         file.write_all(&chunk)
-            .map_err(|err| ProtocolError::IoError {
+            .map_err(|err| ProtocolError::StorageError {
                 action: format!("write chunk {}", chunk_num),
                 err,
             })?;

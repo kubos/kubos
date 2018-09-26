@@ -53,8 +53,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         .and_then(|val| {
             val.as_integer()
                 .and_then(|num| Some(Duration::from_secs(num as u64)))
-        })
-        .unwrap_or(Duration::from_secs(2));
+        }).unwrap_or(Duration::from_secs(2));
 
     // Setup map of channel IDs to thread channels
     let raw_threads: HashMap<u32, Sender<serde_cbor::Value>> = HashMap::new();
@@ -100,7 +99,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                 match f_protocol.message_engine(
                     |d| match receiver.recv_timeout(d) {
                         Ok(v) => Ok(v),
-                        Err(RecvTimeoutError::Timeout) => Err(ProtocolError::Timeout),
+                        Err(RecvTimeoutError::Timeout) => Err(ProtocolError::ReceiveTimeout),
                         Err(e) => Err(ProtocolError::ReceiveError {
                             err: format!("Error {:?}", e),
                         }),

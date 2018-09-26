@@ -269,7 +269,7 @@ impl Protocol {
             .recv_from(&mut buf)
             .map_err(|err| ProtocolError::ReceiveFailed { err })?;
 
-        Ok(self.recv_start(&buf[0..size])?)
+        self.recv_start(&buf[0..size])
     }
 
     /// Peek at the sender information for the next message in the UDP receive buffer

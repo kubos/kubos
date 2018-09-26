@@ -84,83 +84,32 @@
 //! ```
 //!
 
-// #![deny(missing_docs)]
+#![deny(missing_docs)]
 
 extern crate blake2_rfc;
 extern crate cbor_protocol;
+#[macro_use]
+extern crate failure;
 #[macro_use]
 extern crate log;
 extern crate rand;
 extern crate serde;
 extern crate serde_cbor;
 extern crate time;
-#[macro_use]
-extern crate failure;
 
+mod error;
 mod messages;
 mod parsers;
 pub mod protocol;
 mod storage;
 
+pub use error::ProtocolError;
 pub use protocol::Protocol as FileProtocol;
 pub use protocol::State;
 
 pub use parsers::parse_channel_id;
 
 const CHUNK_SIZE: usize = 4096;
-
-#[derive(Debug, Fail)]
-pub enum ProtocolError {
-    #[fail(display = "Cbor Error: {}", err)]
-    CborError { err: cbor_protocol::ProtocolError },
-    #[fail(display = "Failed to create {} message: {}", message, err)]
-    Message {
-        message: String,
-        err: serde_cbor::error::Error,
-    },
-    #[fail(display = "Storage failed to {}: {}", action, err)]
-    Storage { action: String, err: std::io::Error },
-    #[fail(display = "Failed to serialize: {}", err)]
-    Serialize { err: serde_cbor::error::Error },
-    #[fail(display = "File hash mismatch")]
-    HashMismatch,
-    #[fail(display = "Failed to finalize file: {}", cause)]
-    FinializeFailed { cause: String },
-    #[fail(display = "Failed to {}: {}", action, err)]
-    IoError { action: String, err: std::io::Error },
-    #[fail(display = "Transmission failure on channel {}: {}", channel_id, error_message)]
-    TransmissionError {
-        channel_id: u32,
-        error_message: String,
-    },
-    #[fail(display = "{}", _0)]
-    ParseError(String),
-    #[fail(display = "Unable to parse {} message: No {} param", _0, _1)]
-    MissingParam(String, String),
-    #[fail(display = "Unable to parse {} message: Invalid {} param", _0, _1)]
-    InvalidParam(String, String),
-    #[fail(display = "A timeout was encountered")]
-    Timeout,
-    #[fail(display = "Failure receiving message: {}", err)]
-    ReceiveError { err: String },
-    #[fail(display = "Unable to parse message: {}", err)]
-    MessageParseError { err: String },
-}
-
-impl From<cbor_protocol::ProtocolError> for ProtocolError {
-    fn from(error: cbor_protocol::ProtocolError) -> Self {
-        match error {
-            cbor_protocol::ProtocolError::Timeout => ProtocolError::Timeout,
-            err => ProtocolError::CborError { err },
-        }
-    }
-}
-
-impl From<serde_cbor::error::Error> for ProtocolError {
-    fn from(error: serde_cbor::error::Error) -> Self {
-        ProtocolError::Serialize { err: error }
-    }
-}
 
 /// File protocol message types
 #[derive(Debug, Clone, Eq, PartialEq)]

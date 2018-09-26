@@ -19,8 +19,9 @@
 use super::messages;
 use super::parsers;
 use super::storage;
-use super::{Message, ProtocolError};
+use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
+use error::ProtocolError;
 use rand::{self, Rng};
 use serde_cbor::Value;
 use std::cell::Cell;
@@ -204,7 +205,7 @@ impl Protocol {
     ///
     /// let message = match f_protocol.recv(Some(Duration::from_secs(1))) {
     ///     Ok(data) => data,
-    ///     Err(ProtocolError::Timeout) =>  {
+    ///     Err(ProtocolError::ReceiveTimeout) =>  {
     ///         println!("Timeout waiting for message");
     ///         return;
     ///     }
@@ -473,10 +474,7 @@ impl Protocol {
 
                     message
                 }
-                // I don't think recv_message reports the difference between
-                // no message/timeout and an actual error
-                // TODO: Fix that
-                Err(ProtocolError::Timeout) => match state.clone() {
+                Err(ProtocolError::ReceiveTimeout) => match state.clone() {
                     State::Receiving {
                         channel_id,
                         hash,
