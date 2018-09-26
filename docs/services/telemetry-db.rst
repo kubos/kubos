@@ -16,6 +16,20 @@ Specific details about the available GraphQL queries can be found in the |telem-
  
     <a href="../rust-docs/telemetry_service/index.html" target="_blank">telemetry database service</a>
     
+Benchmark
+~~~~~~~~~
+
+The Kubos repo contains a `database benchmark project <https://github.com/kubos/kubos/tree/master/test/benchmark/db-test>`__
+which we have used to measure various behaviors of the telemetry database service.
+
+Because each OBC has its own unique system resources, we recommend :doc:`compiling and running <../sdk-docs/sdk-rust>`
+the test project on your OBC to obtain the most accurate results.
+
+When run on a Beaglebone Black, we gathered the following benchmark statistics:
+
+- Building and sending UDP requests takes 10-11 microseconds.
+- Round-trip GraphQL transactions take roughly 17 milliseconds.
+    
 Querying the Service
 --------------------
 
