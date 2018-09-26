@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+use diesel;
 use diesel::prelude::*;
 use flate2::Compression;
 use flate2::write::GzEncoder;
@@ -168,13 +169,20 @@ struct InsertResponse {
     errors: String,
 }
 
+#[derive(GraphQLObject)]
+struct DeleteResponse {
+    success: bool,
+    errors: String,
+    entries_deleted: Option<i32>,
+}
+
 graphql_object!(MutationRoot: Context | &self | {
     field insert(&executor, timestamp: Option<i32>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
         let result = match timestamp {
             Some(time) => executor.context().subsystem().insert(time, &subsystem, &parameter, &value),
             None => executor.context().subsystem().insert_systime(&subsystem, &parameter, &value),
         };
-        
+
         Ok(InsertResponse {
             success: result.is_ok(),
             errors: match result {
@@ -182,5 +190,51 @@ graphql_object!(MutationRoot: Context | &self | {
                 Err(err) => format!("{}", err),
             },
         })
+    }
+    
+    field delete(
+        &executor,
+        timestamp_ge: Option<i32>,
+        timestamp_le: Option<i32>,
+        subsystem: Option<String>,
+        parameter: Option<String>,
+    ) -> FieldResult<DeleteResponse>
+    {
+        use kubos_telemetry_db::telemetry::dsl;
+        use kubos_telemetry_db::telemetry;
+        use diesel::sqlite::SqliteConnection;
+
+        let mut selection = diesel::delete(telemetry::table).into_boxed::<<SqliteConnection as Connection>::Backend>();
+
+        if let Some(sub) = subsystem {
+            selection = selection.filter(dsl::subsystem.eq(sub));
+        }
+
+        if let Some(param) = parameter {
+            selection = selection.filter(dsl::parameter.eq(param));
+        }
+
+        if let Some(time_ge) = timestamp_ge {
+            selection = selection.filter(dsl::timestamp.ge(time_ge));
+        }
+
+        if let Some(time_le) = timestamp_le {
+            selection = selection.filter(dsl::timestamp.le(time_le));
+        }
+
+        let result = selection.execute(&executor.context().subsystem().connection);
+
+        match result {
+            Ok(num) => Ok(DeleteResponse {
+                    success: true,
+                    errors: "".to_owned(),
+                    entries_deleted: Some(num as i32),
+                }),
+            Err(err) => Ok(DeleteResponse {
+                    success: false,
+                    errors: format!("{}", err),
+                    entries_deleted: None
+                }),
+        }
     }
 });
