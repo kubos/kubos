@@ -32,7 +32,7 @@ The query has the following schema::
             value: String!
         }]
     }
-    
+
 Each of the query arguments acts as a filter for the database query:
 
     - timestampGe - Return entries with timestamps occurring on or after the given value
@@ -40,7 +40,7 @@ Each of the query arguments acts as a filter for the database query:
     - subsystem - Return entries which match the given subsystem name
     - parameter - Return entries which match the given parameter name
     - limit - Return only the first `n` entries found
-    
+
 Note: ``timestampGe`` and ``timestampLe`` can be combined to create a timestamp selection range.
 For example, entries with timestamps after ``1000``, but before ``5000``.
 
@@ -87,7 +87,7 @@ It has the following schema::
             errors: String!
         }
     }
-    
+
 The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time,
 in milliseconds.
 
@@ -117,7 +117,7 @@ The requests have the following schema::
         "parameter": String!,
         "value": String!,
     }
-    
+
 `timestamp` is optional (one will be generated based on the current system time), but the other parameters are all required.
 
 For example::
@@ -127,7 +127,7 @@ For example::
         "parameter": "voltage",
         "value": "3.5"
     }
-    
+
 Limitations
 ~~~~~~~~~~~
 
@@ -151,14 +151,14 @@ It has the following schema::
             entriesDeleted: Integer
         }]
     }
-    
+
 Each of the mutation arguments acts as a filter for the database query:
 
     - timestampGe - Delete entries with timestamps occurring on or after the given value
     - timestampLe - Delete entries with timestamps occurring on or before the given value
     - subsystem - Delete entries which match the given subsystem name
     - parameter - Delete entries which match the given parameter name
-    
+
 The mutation has the following response fields:
 
     - success - Indicates whether the delete operation was successful

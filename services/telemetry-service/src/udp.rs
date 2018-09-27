@@ -16,8 +16,8 @@
 
 use kubos_telemetry_db::Database;
 use serde_json::{self, Value};
-use std::sync::{Arc, Mutex};
 use std::net::{SocketAddr, UdpSocket};
+use std::sync::{Arc, Mutex};
 
 pub struct DirectUdp {
     db: Arc<Mutex<Database>>,
