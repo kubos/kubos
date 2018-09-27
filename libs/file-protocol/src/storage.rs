@@ -386,6 +386,7 @@ pub fn finalize_file(
 
     let mut calc_hash = Blake2s::new(HASH_SIZE);
 
+    let mut load_chunk_err = None;
     for chunk_num in 0..num_chunks {
         let chunk = match load_chunk(prefix, hash, chunk_num) {
             Ok(c) => c,
@@ -395,7 +396,8 @@ pub fn finalize_file(
                     chunk_num, e
                 );
                 delete_chunk(prefix, hash, chunk_num)?;
-                return Err(e);
+                load_chunk_err = Some(e);
+                continue;
             }
         };
 
@@ -407,6 +409,10 @@ pub fn finalize_file(
                 action: format!("write chunk {}", chunk_num),
                 err,
             })?;
+    }
+
+    if let Some(e) = load_chunk_err {
+        return Err(e);
     }
 
     let calc_hash_str = calc_hash
