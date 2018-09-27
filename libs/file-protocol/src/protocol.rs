@@ -30,16 +30,15 @@ use std::str;
 use std::thread;
 use std::time::Duration;
 
-// How many times do we read no messages
-// while holding before killing the thread
-const HOLD_TIMEOUT: u16 = 5;
-
 /// File protocol information structure
 pub struct Protocol {
     prefix: String,
     cbor_proto: CborProtocol,
     remote_addr: Cell<SocketAddr>,
     chunk_size: usize,
+    // How many times do we read and timeout
+    // while in the Hold state before stopping
+    hold_timeout: u16,
 }
 
 /// Current state of the file protocol transaction
@@ -108,7 +107,13 @@ impl Protocol {
     /// let f_protocol = FileProtocol::new("0.0.0.0", "192.168.0.1:7000", Some("my/file/storage".to_owned()), 4096);
     /// ```
     ///
-    pub fn new(host_ip: &str, remote_addr: &str, prefix: Option<String>, chunk_size: u32) -> Self {
+    pub fn new(
+        host_ip: &str,
+        remote_addr: &str,
+        prefix: Option<String>,
+        chunk_size: u32,
+        hold_timeout: u16,
+    ) -> Self {
         // Get a local UDP socket (Bind)
         let c_protocol = CborProtocol::new(format!("{}:0", host_ip), chunk_size);
 
@@ -118,6 +123,7 @@ impl Protocol {
             cbor_proto: c_protocol,
             remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
             chunk_size: chunk_size as usize,
+            hold_timeout,
         }
     }
 
@@ -140,7 +146,7 @@ impl Protocol {
     /// use file_protocol::*;
     /// use serde_cbor::ser;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096, 5);
     /// let message = ser::to_vec_packed(&"ping").unwrap();
     ///
     /// f_protocol.send(message);
@@ -508,7 +514,7 @@ impl Protocol {
                         return Ok(());
                     }
                     State::Holding { count, prev_state } => {
-                        if count > HOLD_TIMEOUT {
+                        if count > self.hold_timeout {
                             return Ok(());
                         } else {
                             state = State::Holding {

@@ -53,6 +53,11 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         None => 4096,
     } as u32;
 
+    let hold_timeout = match config.get("hold_timeout") {
+        Some(val) => val.as_integer().unwrap_or(5),
+        None => 5,
+    } as u16;
+
     let c_protocol = cbor_protocol::Protocol::new(host.clone(), chunk_size);
 
     let timeout = config
@@ -99,8 +104,13 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                 };
 
                 // Set up the file system processor with the reply socket information
-                let f_protocol =
-                    FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref, chunk_size);
+                let f_protocol = FileProtocol::new(
+                    &host_ref,
+                    &format!("{}", source),
+                    prefix_ref,
+                    chunk_size,
+                    hold_timeout,
+                );
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation
