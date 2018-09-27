@@ -21,7 +21,7 @@ extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
 
-use file_protocol::{FileProtocol, State};
+use file_protocol::{FileProtocol, ProtocolError, State};
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
@@ -63,7 +63,7 @@ fn upload(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
-) -> Result<String, String> {
+) -> Result<String, ProtocolError> {
     let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
 
     // Copy file to upload to temp storage. Calculate the hash and chunk info
@@ -117,7 +117,7 @@ fn upload_single() {
         Some("client".to_owned()),
     );
 
-    if let Err(err) = result.clone() {
+    if let Err(err) = &result {
         println!("Error: {}", err);
     }
 
@@ -300,7 +300,17 @@ fn upload_bad_hash() {
         &dest,
         Some("client".to_owned()),
     );
-    assert!(result.unwrap_err().contains("File hash mismatch"));
+
+    assert_eq!(
+        "File hash mismatch",
+        match result.unwrap_err() {
+            ProtocolError::TransmissionError {
+                channel_id: _,
+                error_message,
+            } => error_message,
+            _ => "".to_owned(),
+        }
+    );
 
     // Cleanup the temporary files so that the test can be repeatable
     fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();

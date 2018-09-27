@@ -12,3 +12,4 @@ blake2-rfc = "0.2.18"
 serde = "1.0.58"
 rand = "0.5"
 cbor-protocol = { path = "../cbor-protocol" }
+failure = "0.1.2"

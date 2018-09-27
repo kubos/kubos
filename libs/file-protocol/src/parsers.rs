@@ -15,42 +15,55 @@
 //
 
 use super::Message;
+use error::ProtocolError;
 use serde_cbor::Value;
 use std::slice::Iter;
 
 /// Parse out just the channel ID from a message
-pub fn parse_channel_id(message: &Option<Value>) -> Result<u32, String> {
+pub fn parse_channel_id(message: &Value) -> Result<u32, ProtocolError> {
     let data = match message {
-        Some(Value::Array(val)) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
+        Value::Array(val) => val.to_owned(),
+        _ => {
+            return Err(ProtocolError::MessageParseError {
+                err: "Data not an array".to_owned(),
+            })
+        }
     };
 
     let mut pieces = data.iter();
 
     let first_param: Value = pieces
         .next()
-        .ok_or(format!("Unable to parse message: No contents"))?
-        .to_owned();
+        .ok_or(ProtocolError::MessageParseError {
+            err: "No contents".to_owned(),
+        })?.to_owned();
 
     if let Value::U64(channel_id) = first_param {
         Ok(channel_id as u32)
     } else {
-        Err("No channel ID found".to_owned())
+        Err(ProtocolError::MessageParseError {
+            err: "No channel ID found".to_owned(),
+        })
     }
 }
 
-pub fn parse_message(message: Value) -> Result<Message, String> {
+pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
     let raw = match message {
         Value::Array(val) => val.to_owned(),
-        _ => return Err("Unable to parse message: Data not an array".to_owned()),
+        _ => {
+            return Err(ProtocolError::MessageParseError {
+                err: "Data not an array".to_owned(),
+            })
+        }
     };
 
     let mut pieces = raw.iter();
 
     let channel_param: Value = pieces
         .next()
-        .ok_or(format!("Unable to parse message: No contents"))?
-        .to_owned();
+        .ok_or(ProtocolError::MessageParseError {
+            err: "No contents".to_owned(),
+        })?.to_owned();
 
     if let Value::U64(channel) = channel_param {
         let channel_id = channel as u32;
@@ -83,7 +96,9 @@ pub fn parse_message(message: Value) -> Result<Message, String> {
         }
     }
 
-    return Err("No message found".to_string());
+    return Err(ProtocolError::MessageParseError {
+        err: "No message found".to_owned(),
+    });
 }
 
 // Parse out export request
@@ -91,23 +106,33 @@ pub fn parse_message(message: Value) -> Result<Message, String> {
 pub fn parse_export_request(
     channel_id: u32,
     mut pieces: Iter<Value>,
-) -> Result<Option<Message>, String> {
+) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::String(op)) = pieces.next() {
         if op == "export" {
-            let hash = match pieces
-                .next()
-                .ok_or(format!("Unable to parse export message: No hash param"))?
-            {
+            let hash = match pieces.next().ok_or(ProtocolError::MissingParam(
+                "export".to_owned(),
+                "hash".to_owned(),
+            ))? {
                 Value::String(val) => val,
-                _ => return Err("Unable to parse export message: Invalid hash param".to_owned()),
+                _ => {
+                    return Err(ProtocolError::InvalidParam(
+                        "export".to_owned(),
+                        "hash".to_owned(),
+                    ))
+                }
             };
 
-            let path = match pieces
-                .next()
-                .ok_or(format!("Unable to parse export message: No path param"))?
-            {
+            let path = match pieces.next().ok_or(ProtocolError::MissingParam(
+                "export".to_owned(),
+                "path".to_owned(),
+            ))? {
                 Value::String(val) => val,
-                _ => return Err("Unable to parse export message: Invalid path param".to_owned()),
+                _ => {
+                    return Err(ProtocolError::InvalidParam(
+                        "export".to_owned(),
+                        "path".to_owned(),
+                    ))
+                }
             };
 
             let mode = match pieces.next() {
@@ -132,15 +157,20 @@ pub fn parse_export_request(
 pub fn parse_import_request(
     channel_id: u32,
     mut pieces: Iter<Value>,
-) -> Result<Option<Message>, String> {
+) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::String(op)) = pieces.next() {
         if op == "import" {
-            let path = match pieces
-                .next()
-                .ok_or(format!("Unable to parse import message: No path param"))?
-            {
+            let path = match pieces.next().ok_or(ProtocolError::MissingParam(
+                "export".to_owned(),
+                "hash".to_owned(),
+            ))? {
                 Value::String(val) => val,
-                _ => return Err("Unable to parse import message: Invalid path param".to_owned()),
+                _ => {
+                    return Err(ProtocolError::InvalidParam(
+                        "export".to_owned(),
+                        "hash".to_owned(),
+                    ))
+                }
             };
             return Ok(Some(Message::ReqTransmit(
                 channel_id as u32,
@@ -157,7 +187,7 @@ pub fn parse_import_request(
 pub fn parse_success_receive(
     channel_id: u32,
     mut pieces: Iter<Value>,
-) -> Result<Option<Message>, String> {
+) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::Bool(true)) = pieces.next() {
         // Good - { channel_id, true, ...values }
         if let None = pieces.next() {
@@ -173,24 +203,31 @@ pub fn parse_success_receive(
 pub fn parse_success_transmit(
     channel_id: u32,
     mut pieces: Iter<Value>,
-) -> Result<Option<Message>, String> {
+) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::Bool(true)) = pieces.next() {
         // Good - { channel_id, true, ...values }
         if let Some(piece) = pieces.next() {
             // It's a good result after an 'import' operation
             let hash = match piece {
                 Value::String(val) => val,
-                _ => return Err("Unable to parse success message: Invalid hash param".to_owned()),
+                _ => {
+                    return Err(ProtocolError::InvalidParam(
+                        "success".to_owned(),
+                        "hash".to_owned(),
+                    ))
+                }
             };
 
-            let num_chunks = match pieces.next().ok_or(format!(
-                "Unable to parse success message: No num_chunks param"
+            let num_chunks = match pieces.next().ok_or(ProtocolError::MissingParam(
+                "success".to_owned(),
+                "num chunks".to_owned(),
             ))? {
                 Value::U64(val) => *val,
                 _ => {
-                    return Err(
-                        "Unable to parse success message: Invalid num_chunks param".to_owned()
-                    )
+                    return Err(ProtocolError::InvalidParam(
+                        "success".to_owned(),
+                        "num chunks".to_owned(),
+                    ))
                 }
             };
 
@@ -214,14 +251,22 @@ pub fn parse_success_transmit(
 
 // Parse out bad
 // { channel_id, "false", ..values }
-pub fn parse_bad_op(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Message>, String> {
+pub fn parse_bad_op(
+    channel_id: u32,
+    mut pieces: Iter<Value>,
+) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::Bool(false)) = pieces.next() {
-        let error = match pieces
-            .next()
-            .ok_or(format!("Unable to parse failure message: No error param"))?
-        {
+        let error = match pieces.next().ok_or(ProtocolError::MissingParam(
+            "failure".to_owned(),
+            "error".to_owned(),
+        ))? {
             Value::String(val) => val,
-            _ => return Err("Unable to parse failure message: Invalid error param".to_owned()),
+            _ => {
+                return Err(ProtocolError::InvalidParam(
+                    "failure".to_owned(),
+                    "error".to_owned(),
+                ))
+            }
         };
 
         return Ok(Some(Message::Failure(channel_id, error.to_owned())));
@@ -232,7 +277,10 @@ pub fn parse_bad_op(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<M
 
 // Parse out ack
 // { hash, true, num_chunks }
-pub fn parse_ack(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Message>, String> {
+pub fn parse_ack(
+    channel_id: u32,
+    mut pieces: Iter<Value>,
+) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::String(hash)) = pieces.next() {
         if let Some(Value::Bool(true)) = pieces.next() {
             // It's an ACK: { hash, true, num_chunks }
@@ -250,7 +298,10 @@ pub fn parse_ack(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Mess
 
 // Parse out nak
 // { hash, false, ..missing_chunks }
-pub fn parse_nak(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Message>, String> {
+pub fn parse_nak(
+    channel_id: u32,
+    mut pieces: Iter<Value>,
+) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::String(hash)) = pieces.next() {
         if let Some(Value::Bool(false)) = pieces.next() {
             let mut remaining_chunks: Vec<(u32, u32)> = vec![];
@@ -280,7 +331,10 @@ pub fn parse_nak(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Mess
 
 // Parse out chunk
 // { hash, chunk_index, data }
-pub fn parse_chunk(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Message>, String> {
+pub fn parse_chunk(
+    channel_id: u32,
+    mut pieces: Iter<Value>,
+) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::String(hash)) = pieces.next() {
         if let Some(Value::U64(num)) = pieces.next() {
             if let Some(third_param) = pieces.next() {
@@ -292,8 +346,9 @@ pub fn parse_chunk(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Me
                         data.to_vec(),
                     )));
                 } else {
-                    return Err(format!(
-                        "Unable to parse chunk message: Invalid data format"
+                    return Err(ProtocolError::InvalidParam(
+                        "chunk".to_owned(),
+                        "chunk data".to_owned(),
                     ));
                 }
             }
@@ -307,7 +362,10 @@ pub fn parse_chunk(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Me
 // { hash, num_chunks }
 // or
 // { hash }
-pub fn parse_sync(channel_id: u32, mut pieces: Iter<Value>) -> Result<Option<Message>, String> {
+pub fn parse_sync(
+    channel_id: u32,
+    mut pieces: Iter<Value>,
+) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::String(hash)) = pieces.next() {
         if let Some(second_param) = pieces.next() {
             if let Value::U64(num) = second_param {
