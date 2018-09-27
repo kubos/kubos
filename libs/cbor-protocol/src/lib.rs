@@ -26,7 +26,7 @@
 //! use serde_cbor::ser;
 //! use std::time::Duration;
 //!
-//! let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+//! let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
 //! let message = ser::to_vec_packed(&("hello", "world")).unwrap();
 //!
 //! cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap()).unwrap();
@@ -113,7 +113,7 @@ impl Protocol {
     /// ```
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     /// ```
     ///
     pub fn new(host_url: String, data_size: usize) -> Self {
@@ -143,20 +143,20 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use serde_cbor::ser;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     /// let message = ser::to_vec_packed(&["ping"]).unwrap();
     ///
     /// cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap());
     /// ```
     ///
-    /// ```
+    /// ```no_run
     /// extern crate cbor_protocol;
     /// extern crate serde_cbor;
     ///
     /// use cbor_protocol::*;
     /// use serde_cbor::ser;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     /// let message = ser::to_vec_packed(&("hello", "world")).unwrap();
     ///
     /// cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap());
@@ -190,7 +190,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// cbor_connection.send_pause("0.0.0.0:8001".parse().unwrap());
     /// ```
@@ -220,7 +220,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// cbor_connection.send_resume("0.0.0.0:8001".parse().unwrap());
     /// ```
@@ -246,7 +246,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let message = cbor_connection.recv_message().unwrap();
     /// ```
@@ -272,7 +272,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let source = cbor_connection.peek_peer();
     /// ```
@@ -299,7 +299,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let (source, message) = cbor_connection.recv_message_peer().unwrap();
     /// ```
@@ -334,7 +334,7 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use std::time::Duration;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let (source, message) = match cbor_connection.recv_message_peer_timeout(Duration::from_secs(1)) {
     ///     Ok(data) => data,
@@ -395,7 +395,7 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use std::time::Duration;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:9000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:9000".to_owned(), 4096);
     ///
     /// let message = match cbor_connection.recv_message_timeout(Duration::from_secs(1)) {
     ///     Ok(data) => data,
