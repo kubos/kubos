@@ -124,11 +124,11 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, ProtocolError> {
 
     File::open(meta_path)
         .map_err(|err| ProtocolError::StorageError {
-            action: format!("Unable to open {} metadata file", hash),
+            action: format!("open {} metadata file", hash),
             err,
         })?.read_to_end(&mut data)
         .map_err(|err| ProtocolError::StorageError {
-            action: format!("Unable to read {} metadata file", hash),
+            action: format!("read {} metadata file", hash),
             err,
         })?;
 
@@ -156,7 +156,6 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, ProtocolError> {
         }).ok_or(ProtocolError::StorageParseError(
             "Failed to parse temporary file's metadata".to_owned(),
         ))?;
-    //.ok_or("Failed to parse temporary file's metadata".to_owned())?;
 
     Ok(num_chunks as u32)
 }
@@ -181,7 +180,7 @@ pub fn validate_file(
     let mut prev_entry: i32 = -1;
 
     let entries = fs::read_dir(hash_path.clone()).map_err(|err| ProtocolError::StorageError {
-        action: format!("Failed to read {:?} directory", hash_path),
+        action: format!("read {:?} directory", hash_path),
         err,
     })?;
 
@@ -191,10 +190,18 @@ pub fn validate_file(
             match entry
                 .file_name()
                 .into_string()
-                .map_err(|err| format!("Failed to parse file name: {:?}", err))
-                .and_then(|val| {
-                    val.parse::<i32>()
-                        .map_err(|err| format!("Failed to parse chunk number: {:?}", err))
+                .map_err(|err| {
+                    ProtocolError::StorageParseError(format!(
+                        "Failed to parse file name: {:?}",
+                        err
+                    ))
+                }).and_then(|val| {
+                    val.parse::<i32>().map_err(|err| {
+                        ProtocolError::StorageParseError(format!(
+                            "Failed to parse chunk_number {:?}",
+                            err
+                        ))
+                    })
                 }) {
                 Ok(num) => Some(num),
                 _ => None,
