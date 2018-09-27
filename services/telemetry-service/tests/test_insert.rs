@@ -138,8 +138,9 @@ fn test_insert_multi_auto() {
 
     let db = db_path.to_str().unwrap();
     let port = 8113;
+    let udp = 8123;
 
-    let (handle, sender) = setup(Some(db), Some(port), None);
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let mutation_expected = json!({
             "errs": "",

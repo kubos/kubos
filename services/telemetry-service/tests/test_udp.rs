@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-extern crate cbor_protocol;
 extern crate kubos_telemetry_db;
 #[macro_use]
 extern crate serde_json;

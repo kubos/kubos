@@ -48,8 +48,9 @@ fn test_route_file() {
 
     let db = db_path.to_str().unwrap();
     let port = 8111;
+    let udp = 8121;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(SQL));
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
 
     let output_dir = TempDir::new().unwrap();
     let output_path = output_dir.path().join("output");
@@ -95,8 +96,9 @@ fn test_route_response() {
 
     let db = db_path.to_str().unwrap();
     let port = 8112;
+    let udp = 8122;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(SQL));
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
 
     // Use a file that won't have a randomly generated path
     let output_path = "output";
@@ -131,8 +133,9 @@ fn test_route_filter() {
 
     let db = db_path.to_str().unwrap();
     let port = 8113;
+    let udp = 8123;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(SQL));
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
 
     let output_dir = TempDir::new().unwrap();
     let output_path = output_dir.path().join("output");
@@ -177,8 +180,9 @@ fn test_route_compress_file() {
 
     let db = db_path.to_str().unwrap();
     let port = 8114;
+    let udp = 8124;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(SQL));
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
 
     let output_dir = TempDir::new().unwrap();
     let output_name = "output";
@@ -234,8 +238,9 @@ fn test_route_compress_response() {
 
     let db = db_path.to_str().unwrap();
     let port = 8115;
+    let udp = 8125;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(SQL));
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
 
     // Use a file that won't have a randomly generated path
     let output_path = "output";
