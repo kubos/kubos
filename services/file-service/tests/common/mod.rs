@@ -19,7 +19,7 @@ extern crate blake2_rfc;
 extern crate file_protocol;
 
 use common::blake2_rfc::blake2s::Blake2s;
-use file_protocol::{FileProtocol, ProtocolError, State};
+use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use std::fs::File;
 use std::io::prelude::*;
 use std::time::Duration;
@@ -56,7 +56,9 @@ pub fn download(
     prefix: Option<String>,
     chunk_size: u32,
 ) -> Result<(), ProtocolError> {
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix, chunk_size);
+    let hold_timeout = 5;
+    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_timeout);
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
 
     let channel = f_protocol.generate_channel()?;
 
@@ -91,7 +93,9 @@ pub fn upload(
     prefix: Option<String>,
     chunk_size: u32,
 ) -> Result<String, ProtocolError> {
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix, chunk_size);
+    let hold_timeout = 5;
+    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_timeout);
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
 
     // copy file to upload to temp storage. calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;

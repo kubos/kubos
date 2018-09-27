@@ -23,7 +23,7 @@ extern crate failure;
 extern crate serde_cbor;
 extern crate simplelog;
 
-use file_protocol::{FileProtocol, ProtocolError, State};
+use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;
 use std::collections::HashMap;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
@@ -51,12 +51,14 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     let chunk_size = match config.get("chunk_size") {
         Some(val) => val.as_integer().unwrap_or(4096),
         None => 4096,
-    } as u32;
+    } as usize;
 
     let hold_timeout = match config.get("hold_timeout") {
         Some(val) => val.as_integer().unwrap_or(5),
         None => 5,
     } as u16;
+
+    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_timeout);
 
     let c_protocol = cbor_protocol::Protocol::new(host.clone(), chunk_size);
 
@@ -76,7 +78,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         // Listen on UDP port
         let (source, first_message) = c_protocol.recv_message_peer()?;
 
-        let prefix_ref = prefix.clone();
+        let config_ref = f_config.clone();
         let host_ref = host_ip.clone();
         let timeout_ref = timeout.clone();
 
@@ -104,13 +106,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                 };
 
                 // Set up the file system processor with the reply socket information
-                let f_protocol = FileProtocol::new(
-                    &host_ref,
-                    &format!("{}", source),
-                    prefix_ref,
-                    chunk_size,
-                    hold_timeout,
-                );
+                let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), config_ref);
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation

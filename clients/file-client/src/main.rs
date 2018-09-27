@@ -7,7 +7,7 @@ extern crate failure;
 extern crate simplelog;
 
 use clap::{App, Arg};
-use file_protocol::{FileProtocol, State};
+use file_protocol::{FileProtocol, FileProtocolConfig, State};
 use simplelog::*;
 use std::path::Path;
 use std::time::Duration;
@@ -18,8 +18,11 @@ fn upload(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
+    chunk_size: u32,
+    hold_timeout: u16,
 ) -> Result<(), failure::Error> {
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
+    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_timeout);
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
 
     info!(
         "Uploading local:{} to remote:{}",
@@ -52,8 +55,11 @@ fn download(
     source_path: &str,
     target_path: &str,
     prefix: Option<String>,
+    chunk_size: u32,
+    hold_timeout: u16,
 ) -> Result<(), failure::Error> {
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
+    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_timeout);
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
 
     info!(
         "Downloading remote: {} to local: {}",
@@ -100,28 +106,39 @@ fn main() {
                 .required(true)
                 .possible_values(&["upload", "download"])
                 .case_insensitive(true),
-        )
-        .arg(Arg::with_name("source_file").index(2).required(true))
+        ).arg(Arg::with_name("source_file").index(2).required(true))
         .arg(Arg::with_name("target_file").index(3))
         .arg(
             Arg::with_name("host_ip")
                 .short("h")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("remote_ip")
                 .short("-r")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("remote_port")
                 .short("-p")
                 .takes_value(true)
                 .default_value("7000"),
-        )
-        .get_matches();
+        ).arg(
+            Arg::with_name("storage_prefix")
+                .short("-s")
+                .takes_value(true)
+                .default_value("file-storage"),
+        ).arg(
+            Arg::with_name("chunk_size")
+                .short("-c")
+                .takes_value(true)
+                .default_value("4096"),
+        ).arg(
+            Arg::with_name("hold_timeout")
+                .short("-t")
+                .takes_value(true)
+                .default_value("6"),
+        ).get_matches();
 
     // Get upload vs download (required)
     let command = args.value_of("operation").unwrap();
@@ -146,9 +163,29 @@ fn main() {
         args.value_of("remote_port").unwrap()
     );
 
+    let chunk_size: u32 = args.value_of("chunk_size").unwrap().parse().unwrap();
+    let hold_timeout: u16 = args.value_of("hold_timeout").unwrap().parse().unwrap();
+    let storage_prefix = args.value_of("storage_prefix").unwrap().to_string();
+
     let result = match command.as_ref() {
-        "upload" => upload(host_ip, &remote_addr, &source_path, &target_path, None),
-        "download" => download(host_ip, &remote_addr, &source_path, &target_path, None),
+        "upload" => upload(
+            host_ip,
+            &remote_addr,
+            &source_path,
+            &target_path,
+            Some(storage_prefix),
+            chunk_size,
+            hold_timeout,
+        ),
+        "download" => download(
+            host_ip,
+            &remote_addr,
+            &source_path,
+            &target_path,
+            Some(storage_prefix),
+            chunk_size,
+            hold_timeout,
+        ),
         // This shouldn't be possible, since we checked the string earlier
         _ => {
             error!("Unknown command given");

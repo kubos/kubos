@@ -116,10 +116,10 @@ impl Protocol {
     /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
     /// ```
     ///
-    pub fn new(host_url: String, data_size: u32) -> Self {
+    pub fn new(host_url: String, data_size: usize) -> Self {
         Self {
             handle: UdpSocket::bind(host_url.parse::<SocketAddr>().unwrap()).unwrap(),
-            msg_size: data_size as usize + 50,
+            msg_size: data_size + 50,
         }
     }
 
