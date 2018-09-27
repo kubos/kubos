@@ -40,7 +40,7 @@ It will return an array of database entries.
 The query has the following schema::
 
     query {
-        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): [{
+        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, limit: Integer): [{
             timestamp: Integer!
             subsystem: String!
             parameter: String!
@@ -54,6 +54,7 @@ Each of the query arguments acts as a filter for the database query:
     - timestampLe - Return entries with timestamps occurring on or before the given value
     - subsystem - Return entries which match the given subsystem name
     - parameter - Return entries which match the given parameter name
+    - limit - Return only the first `n` entries found
     
 Note: ``timestampGe`` and ``timestampLe`` can be combined to create a timestamp selection range.
 For example, entries with timestamps after ``1000``, but before ``5000``.
@@ -91,7 +92,7 @@ This matches the return fields of the ``telemetry`` query.
 Adding Entries to the Database
 ------------------------------
 
-The ``insert`` query can be used to add an entry to the telemetry database.
+The ``insert`` mutation can be used to add an entry to the telemetry database.
 
 It has the following schema::
 
