@@ -411,8 +411,14 @@ impl Protocol {
     ) -> Result<(), ProtocolError> {
         for (first, last) in chunks {
             for chunk_index in *first..*last {
-                let chunk = storage::load_chunk(&self.prefix, hash, chunk_index)?;
-                self.send(messages::chunk(channel_id, hash, chunk_index, &chunk)?)?;
+                match storage::load_chunk(&self.prefix, hash, chunk_index) {
+                    Ok(c) => self.send(messages::chunk(channel_id, hash, chunk_index, &c)?)?,
+                    Err(e) => {
+                        warn!("Failed to load chunk {}:{} : {}", hash, chunk_index, e);
+                        storage::delete_file(&self.prefix, hash)?;
+                        return Err(ProtocolError::CorruptFile(hash.to_string()));
+                    }
+                };
 
                 thread::sleep(Duration::from_millis(1));
             }
@@ -644,7 +650,13 @@ impl Protocol {
                             "<- {{ {}, {}, false, {:?} }}",
                             channel_id, hash, missing_chunks
                         );
-                        self.send_chunks(*channel_id, &hash, &missing_chunks)?;
+                        match self.send_chunks(*channel_id, &hash, &missing_chunks) {
+                            Ok(()) => {}
+                            Err(error) => self.send(messages::operation_failure(
+                                *channel_id,
+                                &format!("{}", error),
+                            )?)?,
+                        };
                         new_state = State::Transmitting;
                     }
                     Message::NAK(channel_id, hash, None) => {

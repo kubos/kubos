@@ -21,6 +21,9 @@ use std::io;
 /// Errors which occur when using FileProtocol
 #[derive(Debug, Fail)]
 pub enum ProtocolError {
+    /// A file in storage was corrupt
+    #[fail(display = "File was corrupt: {}", _0)]
+    CorruptFile(String),
     /// An error was encountered by the cbor protocol
     #[fail(display = "Cbor Error: {}", err)]
     CborError {
