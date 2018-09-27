@@ -27,9 +27,10 @@ the test project on your OBC to obtain the most accurate results.
 
 When run on a Beaglebone Black, we gathered the following benchmark statistics:
 
-- Building and sending UDP requests takes 10-11 microseconds.
-- Round-trip GraphQL transactions take roughly 17 milliseconds.
-    
+- Sending UDP requests takes ~45 microseconds
+- Round-trip GraphQL transactions (including database insert action) take ~17 milliseconds
+- Telemetry database inserts take ~16 milliseconds
+
 Querying the Service
 --------------------
 
@@ -82,7 +83,7 @@ The other arguments are the same as in the ``telemetry`` query.
 
 The query will return a single field echoing the file that was written to.
 If the ``compress`` argument is true (which is the default), then the result will be the output file name suffixed with ".tar.gz" to indicate
-that the file was compressed using ``Gzip <https://www.gnu.org/software/gzip/manual/gzip.html>``__.
+that the file was compressed using `Gzip <https://www.gnu.org/software/gzip/manual/gzip.html>`__.
 
 The results file will contain an array of database entries in JSON format.
 This matches the return fields of the ``telemetry`` query.
@@ -108,7 +109,85 @@ Limitations
 ~~~~~~~~~~~
 
 The generated timestamp value will be the current system time in milliseconds.
-The database uses the combination of timestamp, subsystem, and parameter as the primary key.
+The database uses the combination of ``timestamp``, ``subsystem``, and ``parameter`` as the primary key.
 This primary key must be unique for each entry.
 
-As a result, any one subsystem parameter may not be logged more than once per millisecond. 
+    - As a result, any one subsystem parameter may not be logged more than once per millisecond.
+
+Adding Entries to the Database Asynchronously
+---------------------------------------------
+
+If you would like to add many entries to the database quickly, and don't care about verifying that the request
+was successful, the service's direct UDP port may be used.
+This UDP port is configured with the ``direct_port`` value in the system's ``config.toml`` file.
+
+Insert requests should be sent as individual UDP messages in JSON format.
+
+The requests have the following schema::
+
+    {
+        "timestamp": Integer,
+        "subsystem": String!,
+        "parameter": String!,
+        "value": String!,
+    }
+
+The ``timestamp`` argument is optional (one will be generated based on the current system time), but the other parameters are all required.
+
+For example::
+
+    {
+        "subsystem": "eps",
+        "parameter": "voltage",
+        "value": "3.5"
+    }
+
+Limitations
+~~~~~~~~~~~
+
+The generated timestamp value will be the current system time in milliseconds.
+The database uses the combination of ``timestamp``, ``subsystem``, and ``parameter`` as the primary key.
+This primary key must be unique for each entry.
+
+    - As a result, any one subsystem parameter may not be logged more than once per millisecond.
+
+This asynchronous method sends requests to the telemetry database service much more quickly than time needed for the
+service to process each request. The service's direct UDP socket buffer can store up to 256 packets at a time.
+
+    - As a result, no more than 256 messages should be sent (from any and all sources) using this direct method in the time
+      period required for the service to process them (this can be calculated by multiplying 256 by the amount of time required
+      to process a single message. See the `Benchmark`_ section for more information).
+
+The service processes requests from both the direct UDP method and the traditional GraphQL method one at a time,
+rather than simultaneously.
+
+    - As a result, if the service is receiving requests from both methods at the same time, the time period required
+      to process 256 direct UDP messages should be doubled.
+
+Removing Entries from the Database
+----------------------------------
+
+The ``delete`` mutation can be used to remove a selection of entries from the telemetry database.
+
+It has the following schema::
+
+    mutation {
+        delete(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): [{
+            success: Boolean!,
+            errors: String!,
+            entriesDeleted: Integer
+        }]
+    }
+
+Each of the mutation arguments acts as a filter for the database query:
+
+    - timestampGe - Delete entries with timestamps occurring on or after the given value
+    - timestampLe - Delete entries with timestamps occurring on or before the given value
+    - subsystem - Delete entries which match the given subsystem name
+    - parameter - Delete entries which match the given parameter name
+
+The mutation has the following response fields:
+
+    - success - Indicates whether the delete operation was successful
+    - errors - Any errors encountered by the delete operation
+    - entriesDeleted - The number of entries deleted by the operation

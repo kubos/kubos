@@ -62,8 +62,7 @@
 //! }
 //!
 //! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): Entry
-//! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String,
-//!                       output: String!, compress: Boolean = true): String!
+//! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String!
 //!
 //! mutation insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!):{ success: Boolean!, errors: String! }
 //! ```
