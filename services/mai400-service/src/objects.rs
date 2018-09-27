@@ -21,7 +21,9 @@ use mai400_api::*;
 /// which don't return any specific data
 #[derive(GraphQLObject)]
 pub struct GenericResponse {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
 }
 
@@ -30,20 +32,30 @@ pub struct GenericResponse {
 /// Indicates last mutation executed by the service
 #[derive(GraphQLEnum, Clone, Copy)]
 pub enum AckCommand {
+    /// No mutations have been executed
     None,
+    /// No-Op
     Noop,
+    /// System power state was changed
     ControlPower,
+    /// System configuration was updated
     ConfigureHardware,
+    /// A hardware test was performed
     TestHardware,
+    /// A raw command was passed through to the system
     IssueRawCommand,
+    /// System mode was changed
     SetMode,
+    /// GPS time and/or rv values were updated
     Update,
 }
 
 /// Response fields for 'configureHardware' mutation
 #[derive(GraphQLObject)]
 pub struct ConfigureHardwareResponse {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
 }
 
@@ -51,23 +63,37 @@ pub struct ConfigureHardwareResponse {
 /// response field for 'power' query
 #[derive(GraphQLEnum, Clone, Eq, PartialEq, Debug)]
 pub enum PowerState {
+    /// System is on
     On,
+    /// System is off or unavailable
     Off,
+    /// System will be reset
     Reset,
 }
 
 /// Response fields for 'power' query
 #[derive(GraphQLObject)]
 pub struct GetPowerResponse {
+    /// Current power state of the system
     pub state: PowerState,
+    /// Number of valid commands run by the system.
+    /// This corresponds to the gus_cmdValidCntr parameter of the
+    /// standard telemetry packet.
+    ///
+    /// Note: This field is named "uptime" to help maintain parity
+    /// with the other services. The MAI-400 does not give a
+    /// traditional uptime value.
     pub uptime: i32,
 }
 
 /// Response fields for 'controlPower' mutation
 #[derive(GraphQLObject)]
 pub struct ControlPowerResponse {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
+    /// Current power state
     pub power: PowerState,
 }
 
@@ -76,13 +102,17 @@ pub struct ControlPowerResponse {
 /// Indicates which test should be run against the AntS device
 #[derive(GraphQLEnum)]
 pub enum TestType {
+    /// Integration (non-invasive) test
     Integration,
+    /// Hardware (invasive) test
     Hardware,
 }
 
 /// Enum for the 'testHardware' mutation response union
 pub enum TestResults {
+    /// Integration test results
     Integration(IntegrationTestResults),
+    /// Hardware test results
     Hardware(HardwareTestResults),
 }
 
@@ -100,35 +130,57 @@ graphql_union!(TestResults: () |&self| {
 /// Response fields for 'testHardware(test: INTEGRATION)' mutation
 #[derive(GraphQLObject)]
 pub struct IntegrationTestResults {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
+    /// Nominal telemetry
     pub telemetry_nominal: StdTelem,
+    /// Debug telemetry
     pub telemetry_debug: TelemetryDebug,
 }
 
 /// Response fields for 'testHardware(test: HARDWARE)' mutation
 #[derive(GraphQLObject)]
 pub struct HardwareTestResults {
+    /// Any errors encountered by the request
     pub errors: String,
+    /// Request completion success or failure
     pub success: bool,
+    /// Test results
     pub data: String,
 }
 
+/// System mode
 #[derive(GraphQLEnum, Clone, Copy)]
 pub enum Mode {
+    /// Test mode
     TestMode = 0,
+    /// Rate nulling
     RateNulling = 1,
+    /// Reserved for future use
     Reserved1 = 2,
+    /// Nadir pointing (normal mode)
     NadirPointing = 3,
+    /// Lat/Long pointing
     LatLongPointing = 4,
+    /// QbX mode
     QbxMode = 5,
+    /// Reserved for future use
     Reserved2 = 6,
+    /// Normal sun (nadir with sun rotation)
     NormalSun = 7,
+    /// Lat/long sun
     LatLongSun = 8,
+    /// Qinertial
     Qintertial = 9,
+    /// Reserved for future use
     Reserved3 = 10,
+    /// QTable
     Qtable = 11,
+    /// Sun-Ram
     SunRam = 12,
+    /// Unknown mode detected
     Unknown = 0xFF,
 }
 
@@ -153,26 +205,38 @@ impl From<u8> for Mode {
     }
 }
 
+/// RV input fields for `update` mutation
 #[derive(GraphQLInputObject)]
 pub struct RVInput {
+    /// X, Y, Z ECI position values
     pub eci_pos: Vec<f64>,
+    /// X, Y, Z ECI velocity values
     pub eci_vel: Vec<f64>,
+    /// GPS time at Epoch
     pub time_epoch: i32,
 }
 
+/// Response fields for `spin` query
 #[derive(GraphQLObject)]
 pub struct Spin {
+    /// X-axis
     pub x: f64,
+    /// Y-axis
     pub y: f64,
+    /// Z-axis
     pub z: f64,
 }
 
+/// Response fields for `telemetry` query
 #[derive(GraphQLObject)]
 pub struct Telemetry {
+    /// Nominal telemetry
     pub nominal: StdTelem,
+    /// Debug telemetry
     pub debug: TelemetryDebug,
 }
 
+/// Response fields for 'telemetry(telem: NOMINAL)' query
 #[derive(Debug, Default, PartialEq)]
 pub struct StdTelem(pub StandardTelemetry);
 
@@ -298,28 +362,43 @@ graphql_object!(StdTelem: () |&self| {
 /// Response fields for 'telemetry(telem: DEBUG)' query
 #[derive(GraphQLObject)]
 pub struct TelemetryDebug {
+    /// IREHS telemetry values
     pub irehs: IREHSTelem,
+    /// Raw IMU telemetry values
     pub raw_imu: RawIMUTelem,
+    /// Rotating telemetry values
     pub rotating: Rotating,
 }
 
+/// IR Earth horizon sensor telemetry values
 #[derive(Debug, Default, PartialEq)]
 pub struct IREHSTelem(pub IREHSTelemetry);
 
+/// Thermopile telemetry values
 #[derive(GraphQLObject)]
 pub struct ThermopileStruct {
+    /// Calculated dip angle of Earth limb, in degrees
     dip_angle: i32,
+    /// Earth limb thermopile sensor
     earth_limb: ThermopileSensor,
+    /// Earth reference thermopile sensor
     earth_ref: ThermopileSensor,
+    /// Space reference thermopile sensor
     space_ref: ThermopileSensor,
+    /// Wide FOV thermopile sensor
     wide_fov: ThermopileSensor,
 }
 
+/// Thermopile sensor telemetry values
 #[derive(GraphQLObject)]
 pub struct ThermopileSensor {
+    /// Thermopile sensor ADC value
     adc: i32,
+    /// Thermistor temperature ADC value
     temp: i32,
+    /// Indicates whether the following `flag` field is empty
     errors: bool,
+    /// Solution degradation codes
     flags: Vec<String>,
 }
 
@@ -424,6 +503,7 @@ graphql_object!(IREHSTelem: () |&self| {
     }
 });
 
+/// Raw IMU telemetry values
 #[derive(Debug, Default, PartialEq)]
 pub struct RawIMUTelem(pub RawIMU);
 
@@ -441,6 +521,10 @@ graphql_object!(RawIMUTelem: () |&self| {
     }
 });
 
+/// Rotating telemetry values.
+/// These values aren't updated with each returned telemetry packet.
+/// Instead, sections are updated each iteration.
+/// The full rotation is updated every six seconds.
 #[derive(Debug, Default, PartialEq)]
 pub struct Rotating(pub RotatingTelemetry);
 
@@ -612,6 +696,7 @@ graphql_object!(Rotating: () |&self| {
 
 });
 
+/// Kepler element telemetry values
 #[derive(Debug, Default, PartialEq)]
 pub struct Kepler(pub KeplerElem);
 

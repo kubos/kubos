@@ -62,8 +62,10 @@
 //! }
 //!
 //! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): Entry
+//! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String,
+//!                       output: String!, compress: Boolean = true): String!
 //!
-//! mutation insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!): { success: Boolean!, errors: String! }
+//! mutation insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!):{ success: Boolean!, errors: String! }
 //! ```
 //!
 //! # Example Queries
@@ -140,6 +142,20 @@
 //! }
 //! ```
 //!
+//! ## Repeat the previous query, but route the output to compressed file `/home/system/recent_telem.tar.gz`
+//! ```graphql
+//! {
+//!   telemetry(limit: 10, timestampGe: 1008, output: "/home/system/recent_telem")
+//! }
+//! ```
+//!
+//! ## Repeat the previous query, but route the output to uncompressed file `/home/system/recent_telem`
+//! ```graphql
+//! {
+//!   telemetry(limit: 10, timestampGe: 1008, output: "/home/system/recent_telem", compress: false)
+//! }
+//! ```
+//!
 //! # Example Mutations
 //!
 //! ## Insert a new entry, allowing the service to generate the timestamp
@@ -160,13 +176,29 @@
 //! 		errors
 //! 	}
 //! }
+//!
+//! ```
+//!
+//! ## Delete all entries from the EPS subsystem occuring before timestamp 1003
+//! ```graphql
+//! mutation {
+//!     delete(subsystem: "eps", timestampLe: 1004) {
+//!         success,
+//!         errors,
+//!         entriesDeleted
+//!     }
+//! }
 //! ```
 extern crate diesel;
+extern crate flate2;
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;
 extern crate kubos_telemetry_db;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde_json;
+extern crate tar;
 
 mod schema;
 mod udp;

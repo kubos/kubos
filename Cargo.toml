@@ -25,6 +25,7 @@ members = [
 "libs/cbor-protocol",
 "libs/file-protocol",
 "services/app-service",
+"services/monitor-service",
 "services/comms-service",
 "services/file-service",
 "services/kubos-service",
