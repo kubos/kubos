@@ -24,13 +24,13 @@ extern crate time;
 use kubos_system::Config;
 use kubos_telemetry_db::Database;
 use rand::{thread_rng, Rng};
-use serde_json::ser;
+use serde_json::{ser, Value};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
 use std::time::Duration;
 use time::PreciseTime;
 
-const ITERATIONS: i64 = 1000;
+const ITERATIONS: i64 = 100;
 
 fn db_test(config: &Config) {
     let db_path = config
@@ -48,7 +48,7 @@ fn db_test(config: &Config) {
         let timestamp = rng.gen_range(0, ::std::i32::MAX);
 
         let start = PreciseTime::now();
-        if db.insert(timestamp, "subsystem", "parameter", "value")
+        if db.insert(timestamp, "db-test", "parameter", "value")
             .is_ok()
         {
             times.push(start.to(PreciseTime::now()).num_microseconds().unwrap());
@@ -75,7 +75,7 @@ fn graphql_test(config: &Config) {
 
         let mutation = format!(
             r#"mutation {{
-            insert(timestamp: {}, subsystem: "test2", parameter: "voltage", value: "4.0") {{
+            insert(timestamp: {}, subsystem: "db-test", parameter: "voltage", value: "4.0") {{
                 success,
                 errors
             }}
@@ -123,7 +123,7 @@ fn direct_udp_test(config: &Config) {
 
         let message = json!({
             "timestamp": 1,
-            "subsystem": "eps",
+            "subsystem": "db-test",
             "parameter": "voltage",
             "value": "3.3"
         });
@@ -148,8 +148,56 @@ fn direct_udp_test(config: &Config) {
     );
 }
 
+fn test_cleanup(config: &Config) {
+    let mutation = r#"mutation {
+            delete(subsystem: "db-test") {
+                success,
+                errors,
+                entriesDeleted
+            }
+        }"#;
+
+    let remote_addr = config.hosturl();
+    let local_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
+
+    let socket = UdpSocket::bind(local_addr).expect("Couldn't bind to address");
+
+    socket
+        .send_to(&mutation.as_bytes(), &remote_addr)
+        .expect("Couldn't send message");
+    socket.set_read_timeout(Some(Duration::new(1, 0))).unwrap();
+
+    let mut buf = [0; 1024];
+    match socket.recv_from(&mut buf) {
+        Ok((amt, _)) => {
+            let mut v: serde_json::Value = serde_json::from_slice(&buf[0..(amt)]).unwrap();
+            println!("{}", serde_json::to_string_pretty(&v).unwrap());
+            match v.get("msg") {
+                Some(message) => {
+                    let success =
+                        serde_json::from_value::<bool>(message["success"].clone()).unwrap();
+
+                    let errors =
+                        serde_json::from_value::<String>(message["errors"].clone()).unwrap();
+
+                    let entries_deleted =
+                        serde_json::from_value::<i64>(message["entriesDeleted"].clone()).unwrap();
+
+                    println!(
+                        "Delete operation: {} {} {}",
+                        success, errors, entries_deleted
+                    );
+                }
+                None => println!("Failed to process delete response"),
+            }
+        }
+        Err(e) => panic!("recv function failed: {:?}", e),
+    }
+}
+
 fn main() {
     let config = Config::new("telemetry-service");
+    /*
     db_test(&config);
 
     // This sleep likely isn't necessary, but I'd like to make extra sure nothing about a test
@@ -161,4 +209,7 @@ fn main() {
     thread::sleep(Duration::new(1, 0));
 
     direct_udp_test(&config);
+    */
+
+    test_cleanup(&config);
 }
