@@ -22,8 +22,10 @@ extern crate kubos_system;
 extern crate rand;
 extern crate tempfile;
 
+mod common;
+
 use blake2_rfc::blake2s::Blake2s;
-use file_protocol::{FileProtocol, ProtocolError, State};
+use common::*;
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
@@ -36,79 +38,6 @@ use tempfile::TempDir;
 
 // NOTE: Each test's file contents must be unique. Otherwise the hash is the same, so
 // the same storage directory is used across all of them, creating conflicts
-
-macro_rules! service_new {
-    ($port:expr) => {{
-        thread::spawn(move || {
-            recv_loop(ServiceConfig::new_from_str(
-                "file-transfer-service",
-                &format!(
-                    r#"
-                [file-transfer-service]
-                storage_dir = "service"
-                [file-transfer-service.addr]
-                ip = "127.0.0.1"
-                port = {}
-                "#,
-                    $port
-                ),
-            )).unwrap();
-        });
-
-        thread::sleep(Duration::new(1, 0));
-    }};
-}
-
-fn download(
-    host_ip: &str,
-    remote_addr: &str,
-    source_path: &str,
-    target_path: &str,
-    prefix: Option<String>,
-) -> Result<(), ProtocolError> {
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, prefix);
-
-    let channel = f_protocol.generate_channel()?;
-
-    // Send our file request to the remote addr and verify that it's
-    // going to be able to send it
-    f_protocol.send_import(channel, source_path)?;
-
-    // Wait for the request reply.
-    // Note/TODO: We don't use a timeout here because we don't know how long it will
-    // take the server to prepare the file we've requested.
-    // Larger files (> 100MB) can take over a minute to process.
-    let reply = match f_protocol.recv(None) {
-        Ok(message) => message,
-        Err(error) => return Err(error),
-    };
-
-    let state = f_protocol.process_message(
-        reply,
-        State::StartReceive {
-            path: target_path.to_string(),
-        },
-    )?;
-
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), state)?)
-}
-
-fn create_test_file(name: &str, contents: &[u8]) -> String {
-    let mut file = File::create(name).unwrap();
-    file.write_all(contents).unwrap();
-
-    let mut hasher = Blake2s::new(16);
-    hasher.update(contents);
-    let hash = hasher.finalize();
-
-    let hash_str = hash
-        .as_bytes()
-        .iter()
-        .map(|byte| format!("{:02x}", byte))
-        .collect();
-
-    hash_str
-}
 
 // Download single-chunk file from scratch
 #[test]
@@ -123,7 +52,7 @@ fn download_single() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port);
+    service_new!(service_port, 4096);
 
     let result = download(
         "127.0.0.1",
@@ -131,6 +60,7 @@ fn download_single() {
         &source,
         &dest,
         Some("client".to_owned()),
+        4096,
     );
     assert!(result.is_ok());
 
@@ -156,7 +86,7 @@ fn download_multi_clean() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port);
+    service_new!(service_port, 4096);
 
     let result = download(
         "127.0.0.1",
@@ -164,6 +94,7 @@ fn download_multi_clean() {
         &source,
         &dest,
         Some("client".to_owned()),
+        4096,
     );
     assert!(result.is_ok());
 
@@ -189,7 +120,7 @@ fn download_multi_resume() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port);
+    service_new!(service_port, 4096);
 
     // Go ahead and download the whole file so we can manipulate the temporary directory
     let result = download(
@@ -198,6 +129,7 @@ fn download_multi_resume() {
         &source,
         &dest,
         Some("client".to_owned()),
+        4096,
     );
     assert!(result.is_ok());
 
@@ -211,6 +143,7 @@ fn download_multi_resume() {
         &source,
         &dest,
         Some("client".to_owned()),
+        4096,
     );
     assert!(result.is_ok());
 
@@ -236,7 +169,7 @@ fn download_multi_complete() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port);
+    service_new!(service_port, 4096);
 
     // download the file once (clean download)
     let result = download(
@@ -245,6 +178,7 @@ fn download_multi_complete() {
         &source,
         &dest,
         Some("client".to_owned()),
+        4096,
     );
     assert!(result.is_ok());
 
@@ -255,6 +189,7 @@ fn download_multi_complete() {
         &source,
         &dest,
         Some("client".to_owned()),
+        4096,
     );
 
     assert!(result.is_ok());
@@ -281,7 +216,7 @@ fn download_bad_hash() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port);
+    service_new!(service_port, 4096);
 
     // Download the file so we can mess with the temporary storage
     let result = download(
@@ -290,6 +225,7 @@ fn download_bad_hash() {
         &source,
         &dest,
         Some("client".to_owned()),
+        4096,
     );
     assert!(result.is_ok());
 
@@ -302,12 +238,14 @@ fn download_bad_hash() {
         &source,
         &dest,
         Some("client".to_owned()),
+        4096,
     );
     assert_eq!("File hash mismatch", format!("{}", result.unwrap_err()));
 
     // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash));
-    fs::remove_dir_all(format!("service/storage/{}", hash));
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 }
 
 // Download a single file in 5 simultaneous client instances
@@ -316,7 +254,7 @@ fn download_multi_client() {
     let service_port = 8004;
 
     // Spawn our single service
-    service_new!(service_port);
+    service_new!(service_port, 4096);
 
     let mut thread_handles = vec![];
 
@@ -337,6 +275,7 @@ fn download_multi_client() {
                 &source,
                 &dest,
                 Some("client".to_owned()),
+                4096,
             );
             assert!(result.is_ok());
 
@@ -395,7 +334,7 @@ fn large_down() {
             .collect()
     };
 
-    service_new!(service_port);
+    service_new!(service_port, 4096);
 
     let result = download(
         "127.0.0.1",
@@ -403,6 +342,7 @@ fn large_down() {
         &source,
         &dest,
         Some("client".to_owned()),
+        4096,
     );
 
     assert!(result.is_ok());

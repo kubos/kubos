@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-use super::CHUNK_SIZE;
 use blake2_rfc::blake2s::Blake2s;
 use error::ProtocolError;
 use serde_cbor::{de, to_vec, Value};
@@ -250,6 +249,7 @@ pub fn validate_file(
 pub fn initialize_file(
     prefix: &str,
     source_path: &str,
+    chunk_size: usize,
 ) -> Result<(String, u32, u32), ProtocolError> {
     let storage_path = format!("{}/storage", prefix);
 
@@ -271,7 +271,7 @@ pub fn initialize_file(
             action: format!("open {:?}", source_path),
             err,
         })?;
-        let mut reader = BufReader::with_capacity(CHUNK_SIZE * 2, input);
+        let mut reader = BufReader::with_capacity(chunk_size * 2, input);
         let mut output = File::create(&temp_path).map_err(|err| ProtocolError::StorageError {
             action: format!("create/open {:?} for writing", temp_path),
             err,
@@ -323,7 +323,7 @@ pub fn initialize_file(
     let mut offset = 0;
 
     loop {
-        let mut chunk = vec![0u8; CHUNK_SIZE];
+        let mut chunk = vec![0u8; chunk_size];
         match output.read(&mut chunk) {
             Ok(n) => {
                 if n == 0 {

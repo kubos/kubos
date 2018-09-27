@@ -26,7 +26,6 @@ use rand::{self, Rng};
 use serde_cbor::Value;
 use std::cell::Cell;
 use std::net::SocketAddr;
-use std::net::UdpSocket;
 use std::str;
 use std::thread;
 use std::time::Duration;
@@ -40,6 +39,7 @@ pub struct Protocol {
     prefix: String,
     cbor_proto: CborProtocol,
     remote_addr: Cell<SocketAddr>,
+    chunk_size: usize,
 }
 
 /// Current state of the file protocol transaction
@@ -105,49 +105,19 @@ impl Protocol {
     /// ```
     /// use file_protocol::*;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "192.168.0.1:7000", Some("my/file/storage".to_owned()));
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "192.168.0.1:7000", Some("my/file/storage".to_owned()), 4096);
     /// ```
     ///
-    pub fn new(host_ip: &str, remote_addr: &str, prefix: Option<String>) -> Self {
+    pub fn new(host_ip: &str, remote_addr: &str, prefix: Option<String>, chunk_size: u32) -> Self {
         // Get a local UDP socket (Bind)
-        let c_protocol = CborProtocol::new(format!("{}:0", host_ip));
+        let c_protocol = CborProtocol::new(format!("{}:0", host_ip), chunk_size);
 
         // Set up the full connection info
         Protocol {
             prefix: prefix.unwrap_or("file-transfer".to_owned()),
             cbor_proto: c_protocol,
             remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
-        }
-    }
-
-    /// Create a new file protocol instance using a specific UDP socket
-    ///
-    /// # Arguments
-    ///
-    /// * socket - The local socket to use for communication
-    /// * remote_addr - The remote IP and port to communicate with
-    /// * prefix - Temporary storage directory prefix
-    ///
-    /// # Errors
-    ///
-    /// If this function encounters any errors, it will panic
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use file_protocol::*;
-    /// use std::net::UdpSocket;
-    ///
-    /// let socket = UdpSocket::bind("0.0.0.0:8000").unwrap();
-    ///
-    /// let f_protocol = FileProtocol::new_from_socket(socket, "192.168.0.1:7000", None);
-    /// ```
-    ///
-    pub fn new_from_socket(socket: UdpSocket, remote_addr: &str, prefix: Option<String>) -> Self {
-        Protocol {
-            prefix: prefix.unwrap_or("file-transfer".to_owned()),
-            cbor_proto: CborProtocol::new_from_socket(socket),
-            remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
+            chunk_size: chunk_size as usize,
         }
     }
 
@@ -170,7 +140,7 @@ impl Protocol {
     /// use file_protocol::*;
     /// use serde_cbor::ser;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
     /// let message = ser::to_vec_packed(&"ping").unwrap();
     ///
     /// f_protocol.send(message);
@@ -201,7 +171,7 @@ impl Protocol {
     /// use file_protocol::*;
     /// use std::time::Duration;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
     ///
     /// let message = match f_protocol.recv(Some(Duration::from_secs(1))) {
     ///     Ok(data) => data,
@@ -232,7 +202,7 @@ impl Protocol {
     /// ```no_run
     /// use file_protocol::*;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
     ///
     /// let channel_id = f_protocol.generate_channel();
     /// ```
@@ -260,7 +230,7 @@ impl Protocol {
     /// ```no_run
     /// use file_protocol::*;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
     ///
     /// # ::std::fs::File::create("client.txt").unwrap();
     ///
@@ -296,7 +266,7 @@ impl Protocol {
     /// ```
     /// use file_protocol::*;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
     ///
     /// # ::std::fs::File::create("client.txt").unwrap();
     ///
@@ -337,7 +307,7 @@ impl Protocol {
     /// ```
     /// use file_protocol::*;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
     /// let channel_id = f_protocol.generate_channel().unwrap();
     ///
     /// f_protocol.send_import(channel_id, "service.txt");
@@ -365,7 +335,7 @@ impl Protocol {
     /// ```
     /// use file_protocol::*;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
     ///
     /// # ::std::fs::File::create("client.txt").unwrap();
     ///
@@ -373,7 +343,7 @@ impl Protocol {
     /// ```
     ///
     pub fn initialize_file(&self, source_path: &str) -> Result<(String, u32, u32), ProtocolError> {
-        storage::initialize_file(&self.prefix, source_path)
+        storage::initialize_file(&self.prefix, source_path, self.chunk_size)
     }
 
     // Verify the integrity of received file data and then transfer into the requested permanent file location.
@@ -446,7 +416,7 @@ impl Protocol {
     /// use file_protocol::*;
     /// use std::time::Duration;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
     ///
     /// f_protocol.message_engine(
     ///     |d| f_protocol.recv(Some(d)),
@@ -603,7 +573,7 @@ impl Protocol {
     /// use file_protocol::*;
     /// use std::time::Duration;
     ///
-    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
+    /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None, 4096);
     ///
     /// if let Ok(message) = f_protocol.recv(Some(Duration::from_millis(100))) {
     /// 	let _state = f_protocol.process_message(
@@ -699,7 +669,7 @@ impl Protocol {
                     Message::ReqTransmit(channel_id, path) => {
                         info!("<- {{ {}, import, {} }}", channel_id, path);
                         // Set up the requested file for transmission
-                        match storage::initialize_file(&self.prefix, path) {
+                        match self.initialize_file(path) {
                             Ok((hash, num_chunks, mode)) => {
                                 // It worked, let the requester know we're ready to send
                                 self.send(messages::import_setup_success(

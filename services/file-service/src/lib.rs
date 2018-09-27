@@ -35,7 +35,6 @@ use std::time::Duration;
 pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
     let host = config.hosturl();
-    let c_protocol = cbor_protocol::Protocol::new(host.clone());
 
     // Extract our local IP address so we can spawn child sockets later
     let mut host_parts = host.split(':').map(|val| val.to_owned());
@@ -47,6 +46,14 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         Some(val) => val.as_str().and_then(|str| Some(str.to_owned())),
         None => None,
     };
+
+    // Get the chunk size to be used for transfers
+    let chunk_size = match config.get("chunk_size") {
+        Some(val) => val.as_integer().unwrap_or(4096),
+        None => 4096,
+    } as u32;
+
+    let c_protocol = cbor_protocol::Protocol::new(host.clone(), chunk_size);
 
     let timeout = config
         .get("timeout")
@@ -92,7 +99,8 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                 };
 
                 // Set up the file system processor with the reply socket information
-                let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref);
+                let f_protocol =
+                    FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref, chunk_size);
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation
