@@ -23,7 +23,7 @@ use utils::*;
 
 #[test]
 fn test() {
-    let (handle, sender) = setup(None, None, None);
+    let (handle, sender) = setup(None, None, None, None);
     let res = do_query(None, "{telemetry{timestamp,subsystem,parameter,value}}");
     teardown(handle, sender);
     assert_eq!(

@@ -16,19 +16,39 @@
 
 use diesel;
 use diesel::prelude::*;
-use flate2::Compression;
 use flate2::write::GzEncoder;
+use flate2::Compression;
 use juniper::{FieldError, FieldResult, Value};
 use kubos_service;
-use kubos_telemetry_db::{self, Database};
+use kubos_telemetry_db;
 use serde_json;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
+use std::thread::spawn;
 use tar;
+use udp::*;
 
-type Context = kubos_service::Context<Database>;
+type Context = kubos_service::Context<Subsystem>;
+
+pub struct Subsystem {
+    pub database: Arc<Mutex<kubos_telemetry_db::Database>>,
+}
+
+impl Subsystem {
+    pub fn new(database: kubos_telemetry_db::Database, direct_udp: Option<String>) -> Self {
+        let db = Arc::new(Mutex::new(database));
+
+        if let Some(udp_url) = direct_udp {
+            let udp = DirectUdp::new(db.clone());
+            spawn(move || udp.start(udp_url.to_owned()));
+        }
+
+        Subsystem { database: db }
+    }
+}
 
 #[derive(Serialize)]
 pub struct Entry(kubos_telemetry_db::Entry);
@@ -54,16 +74,16 @@ graphql_object!(Entry: () |&self| {
 });
 
 fn query_db(
-    database: &Database,
+    database: &Arc<Mutex<kubos_telemetry_db::Database>>,
     timestamp_ge: Option<i32>,
     timestamp_le: Option<i32>,
     subsystem: Option<String>,
     parameter: Option<String>,
     limit: Option<i32>,
 ) -> FieldResult<Vec<Entry>> {
-    use kubos_telemetry_db::telemetry::dsl;
-    use kubos_telemetry_db::telemetry;
     use diesel::sqlite::SqliteConnection;
+    use kubos_telemetry_db::telemetry;
+    use kubos_telemetry_db::telemetry::dsl;
 
     let mut query = telemetry::table.into_boxed::<<SqliteConnection as Connection>::Backend>();
 
@@ -89,7 +109,8 @@ fn query_db(
 
     query = query.order(dsl::timestamp.desc());
 
-    let entries = query.load::<kubos_telemetry_db::Entry>(&database.connection)?;
+    let entries = query.load::<kubos_telemetry_db::Entry>(&database.lock()?.connection)?;
+
     let mut g_entries: Vec<Entry> = Vec::new();
     for entry in entries {
         g_entries.push(Entry(entry));
@@ -111,7 +132,7 @@ graphql_object!(QueryRoot: Context |&self| {
     ) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
-        query_db(executor.context().subsystem(), timestamp_ge, timestamp_le, subsystem, parameter, limit)
+        query_db(&executor.context().subsystem().database, timestamp_ge, timestamp_le, subsystem, parameter, limit)
     }
     field routed_telemetry(
         &executor,
@@ -125,36 +146,36 @@ graphql_object!(QueryRoot: Context |&self| {
     ) -> FieldResult<String>
         as "Telemetry entries in database"
     {
-        let entries = query_db(executor.context().subsystem(), timestamp_ge, timestamp_le, subsystem, parameter, limit)?;
+        let entries = query_db(&executor.context().subsystem().database, timestamp_ge, timestamp_le, subsystem, parameter, limit)?;
         let entries = serde_json::to_vec(&entries)?;
-        
+
         let output_str = output.clone();
         let output_path = Path::new(&output_str);
-        
+
         let file_name_raw = output_path.file_name()
             .ok_or_else(|| return FieldError::new("Unable to parse output file name", Value::null()))?;
         let file_name = file_name_raw.to_str().ok_or_else(|| return FieldError::new("Unable to parse output file name to string", Value::null()))?;
-        
+
         if let Some(parent) = output_path.parent() {
             fs::create_dir_all(parent)?;
         }
-        
+
         {
             let mut output_file = File::create(output_path)?;
             output_file.write_all(&entries)?;
         }
-        
-        if compress {   
+
+        if compress {
             let tar_path = format!("{}.tar.gz", output_str);
             let tar_file = File::create(&tar_path)?;
             let encoder = GzEncoder::new(tar_file, Compression::default());
             let mut tar = tar::Builder::new(encoder);
             tar.append_file(file_name, &mut File::open(output_path)?)?;
             tar.finish()?;
-            
+
             fs::remove_file(output_path)?;
-            
-            Ok(tar_path)       
+
+            Ok(tar_path)
         } else {
             Ok(output)
         }
@@ -179,8 +200,8 @@ struct DeleteResponse {
 graphql_object!(MutationRoot: Context | &self | {
     field insert(&executor, timestamp: Option<i32>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
         let result = match timestamp {
-            Some(time) => executor.context().subsystem().insert(time, &subsystem, &parameter, &value),
-            None => executor.context().subsystem().insert_systime(&subsystem, &parameter, &value),
+            Some(time) => executor.context().subsystem().database.lock()?.insert(time, &subsystem, &parameter, &value),
+            None => executor.context().subsystem().database.lock()?.insert_systime(&subsystem, &parameter, &value),
         };
 
         Ok(InsertResponse {
@@ -191,7 +212,7 @@ graphql_object!(MutationRoot: Context | &self | {
             },
         })
     }
-    
+
     field delete(
         &executor,
         timestamp_ge: Option<i32>,
@@ -222,7 +243,7 @@ graphql_object!(MutationRoot: Context | &self | {
             selection = selection.filter(dsl::timestamp.le(time_le));
         }
 
-        let result = selection.execute(&executor.context().subsystem().connection);
+        let result = selection.execute(&executor.context().subsystem().database.lock()?.connection);
 
         match result {
             Ok(num) => Ok(DeleteResponse {

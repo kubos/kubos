@@ -37,7 +37,7 @@ insert into telemetry values(1010, 'eps', 'voltage', '2.4');
 
 #[test]
 fn test() {
-    let (handle, sender) = setup(None, None, Some(SQL));
+    let (handle, sender) = setup(None, None, None, Some(SQL));
     let res = do_query(
         None,
         "{telemetry(limit: 2, timestampGe: 1008){timestamp,subsystem,parameter,value}}",

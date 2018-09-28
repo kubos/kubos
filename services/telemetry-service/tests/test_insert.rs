@@ -30,11 +30,12 @@ fn test_insert_auto_timestamp() {
 
     let db = db_path.to_str().unwrap();
     let port = 8111;
+    let udp = 8121;
 
-    let (handle, sender) = setup(Some(db), Some(port), None);
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let mutation = r#"mutation {
-            insert(timestamp: 5, subsystem: "test2", parameter: "voltage", value: "4.0") {
+            insert(subsystem: "test2", parameter: "voltage", value: "4.0") {
                 success,
                 errors
             }
@@ -52,7 +53,6 @@ fn test_insert_auto_timestamp() {
 
     let query = r#"{
             telemetry(subsystem: "test2", parameter: "voltage") {
-                timestamp,
                 subsystem,
                 parameter,
                 value
@@ -62,7 +62,6 @@ fn test_insert_auto_timestamp() {
             "errs": "",
             "msg": {
                 "telemetry": [{
-                    "timestamp": 5,
                     "subsystem": "test2",
                     "parameter": "voltage",
                     "value": "4.0"
@@ -84,8 +83,9 @@ fn test_insert_custom_timestamp() {
 
     let db = db_path.to_str().unwrap();
     let port = 8112;
+    let udp = 8122;
 
-    let (handle, sender) = setup(Some(db), Some(port), None);
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let mutation = r#"mutation {
             insert(timestamp: 5, subsystem: "test2", parameter: "voltage", value: "4.0") {
@@ -138,8 +138,9 @@ fn test_insert_multi_auto() {
 
     let db = db_path.to_str().unwrap();
     let port = 8113;
+    let udp = 8123;
 
-    let (handle, sender) = setup(Some(db), Some(port), None);
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let mutation_expected = json!({
             "errs": "",
