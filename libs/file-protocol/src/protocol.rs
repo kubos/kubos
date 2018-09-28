@@ -37,16 +37,16 @@ pub struct ProtocolConfig {
     chunk_size: usize,
     // How many times do we read and timeout
     // while in the Hold state before stopping
-    hold_timeout: u16,
+    hold_count: u16,
 }
 
 impl ProtocolConfig {
     /// Creates new ProtocolConfig struct
-    pub fn new(storage_prefix: Option<String>, chunk_size: usize, hold_timeout: u16) -> Self {
+    pub fn new(storage_prefix: Option<String>, chunk_size: usize, hold_count: u16) -> Self {
         ProtocolConfig {
             storage_prefix: storage_prefix.unwrap_or("file-storage".to_owned()),
             chunk_size,
-            hold_timeout,
+            hold_count,
         }
     }
 }
@@ -537,7 +537,7 @@ impl Protocol {
                         return Ok(());
                     }
                     State::Holding { count, prev_state } => {
-                        if count > self.config.hold_timeout {
+                        if count > self.config.hold_count {
                             return Ok(());
                         } else {
                             state = State::Holding {

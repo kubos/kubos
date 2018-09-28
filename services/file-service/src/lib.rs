@@ -53,12 +53,12 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         None => 4096,
     } as usize;
 
-    let hold_timeout = match config.get("hold_timeout") {
+    let hold_count = match config.get("hold_count") {
         Some(val) => val.as_integer().unwrap_or(5),
         None => 5,
     } as u16;
 
-    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_timeout);
+    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
 
     let c_protocol = cbor_protocol::Protocol::new(host.clone(), chunk_size);
 

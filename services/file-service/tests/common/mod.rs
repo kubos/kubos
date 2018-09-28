@@ -35,6 +35,7 @@ macro_rules! service_new {
                 [file-transfer-service]
                 storage_dir = "service"
                 chunk_size = {}
+                hold_count = 5
                 [file-transfer-service.addr]
                 ip = "127.0.0.1"
                 port = {}
@@ -56,8 +57,8 @@ pub fn download(
     prefix: Option<String>,
     chunk_size: u32,
 ) -> Result<(), ProtocolError> {
-    let hold_timeout = 5;
-    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_timeout);
+    let hold_count = 5;
+    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
     let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
 
     let channel = f_protocol.generate_channel()?;
@@ -93,8 +94,8 @@ pub fn upload(
     prefix: Option<String>,
     chunk_size: u32,
 ) -> Result<String, ProtocolError> {
-    let hold_timeout = 5;
-    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_timeout);
+    let hold_count = 5;
+    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
     let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
 
     // copy file to upload to temp storage. calculate the hash and chunk info
