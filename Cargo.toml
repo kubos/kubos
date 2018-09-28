@@ -34,6 +34,7 @@ members = [
 "services/mai400-service",
 "services/novatel-oem6-service",
 "services/telemetry-service",
+"test/benchmark/db-test",
 "test/integration/linux/isis-ants",
 "test/integration/linux/mai400",
 ]

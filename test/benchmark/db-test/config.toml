@@ -1,0 +1,7 @@
+[telemetry-service]
+database = "telemetry.db"
+direct_port = 8090
+
+[telemetry-service.addr]
+ip = "0.0.0.0"
+port = 8089
