@@ -29,7 +29,7 @@ insert into telemetry values(1001, 'eps', 'voltage', '3.4');
 
 #[test]
 fn test() {
-    let (handle, sender) = setup(None, None, Some(SQL));
+    let (handle, sender) = setup(None, None, None, Some(SQL));
     let res = do_query(None, "{telemetry(parameter: \"voltage\"){parameter,value}}");
     teardown(handle, sender);
     assert_eq!(
