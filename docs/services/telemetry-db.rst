@@ -28,8 +28,15 @@ the test project on your OBC to obtain the most accurate results.
 When run on a Beaglebone Black, we gathered the following benchmark statistics:
 
 - Sending UDP requests takes ~45 microseconds
-- Round-trip GraphQL transactions (including database insert action) take ~17 milliseconds
+
+    - This means that a client can send UDP requests at a rate of 22,000 requests per second, if they don't wait for
+      a response. Note: This is far faster than rate at which the service processes requests, meaning that packets
+      will be dropped if this maximum speed is used.
+    
 - Telemetry database inserts take ~16 milliseconds
+- Round-trip service transactions (including UDP receive request, database insert, and UDP send response) take ~17 milliseconds
+
+    - This means that the service can process roughly 58 database insert requests per second
 
 Querying the Service
 --------------------
