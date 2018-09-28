@@ -164,6 +164,11 @@ defined in the system's ``config.toml`` file:
         - ``timeout`` - `Default: 2.` The length of time, in seconds, for which the service
           should wait for new messages from the client once a file protocol transaction has
           been started
+        - ``chunk_size`` - `Default: 4096.` Each file is broken up into equally sized
+          chunks prior to transfer. This option specifies the size of those chunks
+          in bytes.
+        - ``hold_count`` - `Default: 5.` The number of times the protocol waits for
+          a new message before ending the transaction.
           
     - ``[file-transfer-service.addr]``
     
