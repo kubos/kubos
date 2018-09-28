@@ -23,7 +23,7 @@ extern crate failure;
 extern crate serde_cbor;
 extern crate simplelog;
 
-use file_protocol::{FileProtocol, ProtocolError, State};
+use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;
 use std::collections::HashMap;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
@@ -35,7 +35,6 @@ use std::time::Duration;
 pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
     let host = config.hosturl();
-    let c_protocol = cbor_protocol::Protocol::new(host.clone());
 
     // Extract our local IP address so we can spawn child sockets later
     let mut host_parts = host.split(':').map(|val| val.to_owned());
@@ -47,6 +46,21 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         Some(val) => val.as_str().and_then(|str| Some(str.to_owned())),
         None => None,
     };
+
+    // Get the chunk size to be used for transfers
+    let chunk_size = match config.get("chunk_size") {
+        Some(val) => val.as_integer().unwrap_or(4096),
+        None => 4096,
+    } as usize;
+
+    let hold_count = match config.get("hold_count") {
+        Some(val) => val.as_integer().unwrap_or(5),
+        None => 5,
+    } as u16;
+
+    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
+
+    let c_protocol = cbor_protocol::Protocol::new(host.clone(), chunk_size);
 
     let timeout = config
         .get("timeout")
@@ -64,7 +78,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         // Listen on UDP port
         let (source, first_message) = c_protocol.recv_message_peer()?;
 
-        let prefix_ref = prefix.clone();
+        let config_ref = f_config.clone();
         let host_ref = host_ip.clone();
         let timeout_ref = timeout.clone();
 
@@ -92,7 +106,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                 };
 
                 // Set up the file system processor with the reply socket information
-                let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref);
+                let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), config_ref);
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation

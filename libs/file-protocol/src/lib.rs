@@ -25,7 +25,8 @@
 //! use std::time::Duration;
 //!
 //! fn upload() -> Result<(), ProtocolError> {
-//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", Some("storage/dir".to_owned()));
+//!     let config = FileProtocolConfig::new(Some("storage/dir".to_owned()), 4096, 5);
+//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", config);
 //!
 //!     # ::std::fs::File::create("client.txt").unwrap();
 //!     let source_path = "client.txt";
@@ -55,7 +56,8 @@
 //! use std::time::Duration;
 //!
 //! fn download() -> Result<(), ProtocolError> {
-//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:8000", None);
+//!     let config = FileProtocolConfig::new(None, 4096, 5);
+//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", config);
 //!
 //!     let channel_id = f_protocol.generate_channel()?;
 //!     # ::std::fs::File::create("service.txt").unwrap();
@@ -105,11 +107,10 @@ mod storage;
 
 pub use error::ProtocolError;
 pub use protocol::Protocol as FileProtocol;
+pub use protocol::ProtocolConfig as FileProtocolConfig;
 pub use protocol::State;
 
 pub use parsers::parse_channel_id;
-
-const CHUNK_SIZE: usize = 4096;
 
 /// File protocol message types
 #[derive(Debug, Clone, Eq, PartialEq)]

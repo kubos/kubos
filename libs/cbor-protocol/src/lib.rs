@@ -26,7 +26,7 @@
 //! use serde_cbor::ser;
 //! use std::time::Duration;
 //!
-//! let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+//! let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
 //! let message = ser::to_vec_packed(&("hello", "world")).unwrap();
 //!
 //! cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap()).unwrap();
@@ -52,10 +52,6 @@ use serde_cbor::de;
 use std::io;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Duration;
-
-// Was 4136
-// Somewhere we are sending packets bigger than this...
-const MSG_SIZE: usize = 4500;
 
 /// An error generated during protocol execution
 #[derive(Debug, Fail)]
@@ -97,6 +93,7 @@ pub enum ProtocolError {
 /// CBOR protocol communication structure
 pub struct Protocol {
     handle: UdpSocket,
+    msg_size: usize,
 }
 
 impl Protocol {
@@ -105,6 +102,7 @@ impl Protocol {
     /// # Arguments
     ///
     /// * host_url - The IP address and port to bind
+    /// * data_size - Expected max size of payload in messages
     ///
     /// # Errors
     ///
@@ -115,36 +113,14 @@ impl Protocol {
     /// ```
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     /// ```
     ///
-    pub fn new(host_url: String) -> Self {
+    pub fn new(host_url: String, data_size: usize) -> Self {
         Self {
             handle: UdpSocket::bind(host_url.parse::<SocketAddr>().unwrap()).unwrap(),
+            msg_size: data_size + 50,
         }
-    }
-
-    /// Creates a protocol instance using an existing socket
-    ///
-    /// # Arguments
-    ///
-    /// * handle - The socket to use for future communication
-    ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// extern crate cbor_protocol;
-    ///
-    /// use cbor_protocol::*;
-    /// use std::net::UdpSocket;
-    ///
-    /// let socket = UdpSocket::bind("0.0.0.0:8000").unwrap();
-    ///
-    /// let cbor_connection = Protocol::new_from_socket(socket);
-    /// ```
-    ///
-    pub fn new_from_socket(handle: UdpSocket) -> Self {
-        Self { handle }
     }
 
     /// Send a CBOR packet to a specified UDP socket destination
@@ -167,20 +143,20 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use serde_cbor::ser;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     /// let message = ser::to_vec_packed(&["ping"]).unwrap();
     ///
     /// cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap());
     /// ```
     ///
-    /// ```
+    /// ```no_run
     /// extern crate cbor_protocol;
     /// extern crate serde_cbor;
     ///
     /// use cbor_protocol::*;
     /// use serde_cbor::ser;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     /// let message = ser::to_vec_packed(&("hello", "world")).unwrap();
     ///
     /// cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap());
@@ -214,7 +190,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// cbor_connection.send_pause("0.0.0.0:8001".parse().unwrap());
     /// ```
@@ -244,7 +220,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// cbor_connection.send_resume("0.0.0.0:8001".parse().unwrap());
     /// ```
@@ -270,13 +246,13 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let message = cbor_connection.recv_message().unwrap();
     /// ```
     ///
     pub fn recv_message(&self) -> Result<serde_cbor::Value, ProtocolError> {
-        let mut buf = [0; MSG_SIZE];
+        let mut buf = vec![0; self.msg_size];
         let (size, _peer) = self
             .handle
             .recv_from(&mut buf)
@@ -296,13 +272,13 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let source = cbor_connection.peek_peer();
     /// ```
     ///
     pub fn peek_peer(&self) -> Result<SocketAddr, ProtocolError> {
-        let mut buf = [0; MSG_SIZE];
+        let mut buf = vec![0; self.msg_size];
 
         let (_size, peer) = self
             .handle
@@ -323,13 +299,13 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let (source, message) = cbor_connection.recv_message_peer().unwrap();
     /// ```
     ///
     pub fn recv_message_peer(&self) -> Result<(SocketAddr, serde_cbor::Value), ProtocolError> {
-        let mut buf = [0; MSG_SIZE];
+        let mut buf = vec![0; self.msg_size];
         let (size, peer) = self
             .handle
             .recv_from(&mut buf)
@@ -358,7 +334,7 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use std::time::Duration;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let (source, message) = match cbor_connection.recv_message_peer_timeout(Duration::from_secs(1)) {
     ///     Ok(data) => data,
@@ -379,7 +355,7 @@ impl Protocol {
             .set_read_timeout(Some(timeout))
             .map_err(|err| ProtocolError::IoError { err })?;
 
-        let mut buf = [0; MSG_SIZE];
+        let mut buf = vec![0; self.msg_size];
 
         let result = self.handle.recv_from(&mut buf);
 
@@ -419,7 +395,7 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use std::time::Duration;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:9000".to_owned());
+    /// let cbor_connection = Protocol::new("0.0.0.0:9000".to_owned(), 4096);
     ///
     /// let message = match cbor_connection.recv_message_timeout(Duration::from_secs(1)) {
     ///     Ok(data) => data,
@@ -440,7 +416,7 @@ impl Protocol {
             .set_read_timeout(Some(timeout))
             .map_err(|err| ProtocolError::IoError { err })?;
 
-        let mut buf = [0; MSG_SIZE];
+        let mut buf = vec![0; self.msg_size];
 
         let result = self.handle.recv_from(&mut buf);
 
