@@ -16,6 +16,28 @@ Specific details about the available GraphQL queries can be found in the |telem-
  
     <a href="../rust-docs/telemetry_service/index.html" target="_blank">telemetry database service</a>
     
+Benchmark
+~~~~~~~~~
+
+The Kubos repo contains a `database benchmark project <https://github.com/kubos/kubos/tree/master/test/benchmark/db-test>`__
+which we have used to measure various behaviors of the telemetry database service.
+
+Because each OBC has its own unique system resources, we recommend :doc:`compiling and running <../sdk-docs/sdk-rust>`
+the test project on your OBC to obtain the most accurate results.
+
+When run on a Beaglebone Black, we gathered the following benchmark statistics:
+
+- Sending UDP requests takes ~45 microseconds
+
+    - This means that a client can send UDP requests at a rate of 22,000 requests per second, if they don't wait for
+      a response. Note: This is far faster than rate at which the service processes requests, meaning that packets
+      will be dropped if this maximum speed is used.
+    
+- Telemetry database inserts take ~16 milliseconds
+- Round-trip service transactions (including UDP receive request, database insert, and UDP send response) take ~17 milliseconds
+
+    - This means that the service can process roughly 58 database insert requests per second
+
 Querying the Service
 --------------------
 
@@ -69,7 +91,7 @@ The other arguments are the same as in the ``telemetry`` query.
 
 The query will return a single field echoing the file that was written to.
 If the ``compress`` argument is true (which is the default), then the result will be the output file name suffixed with ".tar.gz" to indicate
-that the file was compressed using ``Gzip <https://www.gnu.org/software/gzip/manual/gzip.html>``__.
+that the file was compressed using `Gzip <https://www.gnu.org/software/gzip/manual/gzip.html>`__.
 
 The results file will contain an array of database entries in JSON format.
 This matches the return fields of the ``telemetry`` query.
@@ -95,10 +117,10 @@ Limitations
 ~~~~~~~~~~~
 
 The generated timestamp value will be the current system time in milliseconds.
-The database uses the combination of timestamp, subsystem, and parameter as the primary key.
+The database uses the combination of ``timestamp``, ``subsystem``, and ``parameter`` as the primary key.
 This primary key must be unique for each entry.
 
-As a result, any one subsystem parameter may not be logged more than once per millisecond. 
+    - As a result, any one subsystem parameter may not be logged more than once per millisecond.
 
 Adding Entries to the Database Asynchronously
 ---------------------------------------------
@@ -118,7 +140,7 @@ The requests have the following schema::
         "value": String!,
     }
 
-`timestamp` is optional (one will be generated based on the current system time), but the other parameters are all required.
+The ``timestamp`` argument is optional (one will be generated based on the current system time), but the other parameters are all required.
 
 For example::
 
@@ -132,10 +154,23 @@ Limitations
 ~~~~~~~~~~~
 
 The generated timestamp value will be the current system time in milliseconds.
-The database uses the combination of timestamp, subsystem, and parameter as the primary key.
+The database uses the combination of ``timestamp``, ``subsystem``, and ``parameter`` as the primary key.
 This primary key must be unique for each entry.
 
-As a result, any one subsystem parameter may not be logged more than once per millisecond. 
+    - As a result, any one subsystem parameter may not be logged more than once per millisecond.
+
+This asynchronous method sends requests to the telemetry database service much more quickly than time needed for the
+service to process each request. The service's direct UDP socket buffer can store up to 256 packets at a time.
+
+    - As a result, no more than 256 messages should be sent (from any and all sources) using this direct method in the time
+      period required for the service to process them (this can be calculated by multiplying 256 by the amount of time required
+      to process a single message. See the `Benchmark`_ section for more information).
+
+The service processes requests from both the direct UDP method and the traditional GraphQL method one at a time,
+rather than simultaneously.
+
+    - As a result, if the service is receiving requests from both methods at the same time, the time period required
+      to process 256 direct UDP messages should be doubled.
 
 Removing Entries from the Database
 ----------------------------------
