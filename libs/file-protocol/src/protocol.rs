@@ -21,6 +21,7 @@ use super::parsers;
 use super::storage;
 use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
+use error::ProtocolError;
 use rand::{self, Rng};
 use serde_cbor::Value;
 use std::cell::Cell;
@@ -175,7 +176,7 @@ impl Protocol {
     /// f_protocol.send(message);
     /// ```
     ///
-    pub fn send(&self, vec: Vec<u8>) -> Result<(), String> {
+    pub fn send(&self, vec: Vec<u8>) -> Result<(), ProtocolError> {
         self.cbor_proto.send_message(&vec, self.remote_addr.get())?;
         Ok(())
     }
@@ -203,8 +204,8 @@ impl Protocol {
     /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
     ///
     /// let message = match f_protocol.recv(Some(Duration::from_secs(1))) {
-    ///     Ok(Some(data)) => data,
-    ///     Ok(None) =>  {
+    ///     Ok(data) => data,
+    ///     Err(ProtocolError::ReceiveTimeout) =>  {
     ///         println!("Timeout waiting for message");
     ///         return;
     ///     }
@@ -212,10 +213,10 @@ impl Protocol {
     /// };
     /// ```
     ///
-    pub fn recv(&self, timeout: Option<Duration>) -> Result<Option<Value>, String> {
+    pub fn recv(&self, timeout: Option<Duration>) -> Result<Value, ProtocolError> {
         match timeout {
-            Some(value) => self.cbor_proto.recv_message_timeout(value),
-            None => self.cbor_proto.recv_message(),
+            Some(value) => Ok(self.cbor_proto.recv_message_timeout(value)?),
+            None => Ok(self.cbor_proto.recv_message()?),
         }
     }
 
@@ -236,7 +237,7 @@ impl Protocol {
     /// let channel_id = f_protocol.generate_channel();
     /// ```
     ///
-    pub fn generate_channel(&self) -> Result<u32, String> {
+    pub fn generate_channel(&self) -> Result<u32, ProtocolError> {
         let mut rng = rand::thread_rng();
         let channel_id: u32 = rng.gen_range(100000, 999999);
         Ok(channel_id)
@@ -273,7 +274,7 @@ impl Protocol {
         channel_id: u32,
         hash: &str,
         num_chunks: u32,
-    ) -> Result<(), String> {
+    ) -> Result<(), ProtocolError> {
         self.send(messages::metadata(channel_id, &hash, num_chunks)?)
     }
 
@@ -310,7 +311,7 @@ impl Protocol {
         hash: &str,
         target_path: &str,
         mode: u32,
-    ) -> Result<(), String> {
+    ) -> Result<(), ProtocolError> {
         self.send(messages::export_request(
             channel_id,
             hash,
@@ -342,7 +343,7 @@ impl Protocol {
     /// f_protocol.send_import(channel_id, "service.txt");
     /// ```
     ///
-    pub fn send_import(&self, channel_id: u32, source_path: &str) -> Result<(), String> {
+    pub fn send_import(&self, channel_id: u32, source_path: &str) -> Result<(), ProtocolError> {
         self.send(messages::import_request(channel_id, source_path)?)?;
         Ok(())
     }
@@ -371,7 +372,7 @@ impl Protocol {
     /// let (_hash, _num_chunks, _mode) = f_protocol.initialize_file("client.txt").unwrap();
     /// ```
     ///
-    pub fn initialize_file(&self, source_path: &str) -> Result<(String, u32, u32), String> {
+    pub fn initialize_file(&self, source_path: &str) -> Result<(String, u32, u32), ProtocolError> {
         storage::initialize_file(&self.prefix, source_path)
     }
 
@@ -388,14 +389,14 @@ impl Protocol {
         hash: &str,
         target_path: &str,
         mode: Option<u32>,
-    ) -> Result<(), String> {
+    ) -> Result<(), ProtocolError> {
         match storage::finalize_file(&self.prefix, hash, target_path, mode) {
             Ok(_) => {
                 self.send(messages::operation_success(channel_id)?)?;
                 return Ok(());
             }
             Err(e) => {
-                self.send(messages::operation_failure(channel_id, &e)?)?;
+                self.send(messages::operation_failure(channel_id, &format!("{}", e))?)?;
                 return Err(e);
             }
         }
@@ -407,11 +408,17 @@ impl Protocol {
         channel_id: u32,
         hash: &str,
         chunks: &[(u32, u32)],
-    ) -> Result<(), String> {
+    ) -> Result<(), ProtocolError> {
         for (first, last) in chunks {
             for chunk_index in *first..*last {
-                let chunk = storage::load_chunk(&self.prefix, hash, chunk_index)?;
-                self.send(messages::chunk(channel_id, hash, chunk_index, &chunk)?)?;
+                match storage::load_chunk(&self.prefix, hash, chunk_index) {
+                    Ok(c) => self.send(messages::chunk(channel_id, hash, chunk_index, &c)?)?,
+                    Err(e) => {
+                        warn!("Failed to load chunk {}:{} : {}", hash, chunk_index, e);
+                        storage::delete_file(&self.prefix, hash)?;
+                        return Err(ProtocolError::CorruptFile(hash.to_string()));
+                    }
+                };
 
                 thread::sleep(Duration::from_millis(1));
             }
@@ -453,15 +460,15 @@ impl Protocol {
         pump: F,
         timeout: Duration,
         start_state: State,
-    ) -> Result<(), String>
+    ) -> Result<(), ProtocolError>
     where
-        F: Fn(Duration) -> Result<Option<Value>, String>,
+        F: Fn(Duration) -> Result<Value, ProtocolError>,
     {
         let mut state = start_state.clone();
         loop {
             // Listen on UDP port
             let message = match pump(timeout) {
-                Ok(Some(message)) => {
+                Ok(message) => {
                     // If we previously timed out, restore the old state
                     if let State::Holding {
                         count: _,
@@ -473,10 +480,7 @@ impl Protocol {
 
                     message
                 }
-                // I don't think recv_message reports the difference between
-                // no message/timeout and an actual error
-                // TODO: Fix that
-                _ => match state.clone() {
+                Err(ProtocolError::ReceiveTimeout) => match state.clone() {
                     State::Receiving {
                         channel_id,
                         hash,
@@ -552,6 +556,7 @@ impl Protocol {
                         continue;
                     }
                 },
+                Err(e) => return Err(e),
             };
 
             match self.process_message(message, state.clone()) {
@@ -600,7 +605,7 @@ impl Protocol {
     ///
     /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", None);
     ///
-    /// if let Ok(Some(message)) = f_protocol.recv(Some(Duration::from_millis(100))) {
+    /// if let Ok(message) = f_protocol.recv(Some(Duration::from_millis(100))) {
     /// 	let _state = f_protocol.process_message(
     ///			message,
     ///			State::StartReceive {
@@ -610,11 +615,11 @@ impl Protocol {
     /// }
     /// ```
     ///
-    pub fn process_message(&self, message: Value, state: State) -> Result<State, String> {
-        let parsed_message = parsers::parse_message(message);
+    pub fn process_message(&self, message: Value, state: State) -> Result<State, ProtocolError> {
+        let parsed_message = parsers::parse_message(message)?;
         let new_state;
         match parsed_message.to_owned() {
-            Ok(parsed_message) => {
+            parsed_message => {
                 match &parsed_message {
                     Message::Sync(channel_id, hash) => {
                         info!("<- {{ {}, {} }}", channel_id, hash);
@@ -645,7 +650,13 @@ impl Protocol {
                             "<- {{ {}, {}, false, {:?} }}",
                             channel_id, hash, missing_chunks
                         );
-                        self.send_chunks(*channel_id, &hash, &missing_chunks)?;
+                        match self.send_chunks(*channel_id, &hash, &missing_chunks) {
+                            Ok(()) => {}
+                            Err(error) => self.send(messages::operation_failure(
+                                *channel_id,
+                                &format!("{}", error),
+                            )?)?,
+                        };
                         new_state = State::Transmitting;
                     }
                     Message::NAK(channel_id, hash, None) => {
@@ -703,7 +714,10 @@ impl Protocol {
                             Err(error) => {
                                 // It failed. Let the requester know that we can't transmit
                                 // the file they want.
-                                self.send(messages::operation_failure(*channel_id, &error)?)?;
+                                self.send(messages::operation_failure(
+                                    *channel_id,
+                                    &format!("{}", error),
+                                )?)?;
 
                                 new_state = State::Done;
                             }
@@ -755,17 +769,13 @@ impl Protocol {
                     }
                     Message::Failure(channel_id, error_message) => {
                         info!("<- {{ {}, false, {} }}", channel_id, error_message);
-                        return Err(format!(
-                            "Transmission failure on channel {}. Error returned from server: {}",
-                            channel_id, error_message
-                        ));
+                        return Err(ProtocolError::TransmissionError {
+                            channel_id: *channel_id,
+                            error_message: error_message.to_string(),
+                        });
                     }
                 }
                 Ok(new_state)
-            }
-            Err(e) => {
-                info!("<- what did we get?? {}", e);
-                Err(e)
             }
         }
     }

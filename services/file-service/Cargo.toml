@@ -10,6 +10,7 @@ cbor-protocol = { path = "../../libs/cbor-protocol" }
 file-protocol = { path = "../../libs/file-protocol" }
 kubos-system = { path = "../../apis/system-api" }
 serde_cbor = "0.8"
+failure = "0.1.2"
 
 [dev-dependencies]
 blake2-rfc = "0.2.18"

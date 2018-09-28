@@ -24,7 +24,7 @@
 //! use file_protocol::*;
 //! use std::time::Duration;
 //!
-//! fn upload() -> Result<(), String> {
+//! fn upload() -> Result<(), ProtocolError> {
 //!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", Some("storage/dir".to_owned()));
 //!
 //!     # ::std::fs::File::create("client.txt").unwrap();
@@ -54,7 +54,7 @@
 //! use file_protocol::*;
 //! use std::time::Duration;
 //!
-//! fn download() -> Result<(), String> {
+//! fn download() -> Result<(), ProtocolError> {
 //!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:8000", None);
 //!
 //!     let channel_id = f_protocol.generate_channel()?;
@@ -68,9 +68,8 @@
 //!
 //!     // Wait for the request reply
 //!     let reply = match f_protocol.recv(None) {
-//!         Ok(Some(message)) => message,
-//!         Ok(None) => return Err("Failed to import file".to_owned()),
-//!         Err(error) => return Err(format!("Failed to import file: {}", error)),
+//!         Ok(message) => message,
+//!         Err(error) => return Err(error)
 //!     };
 //!
 //!     let state = f_protocol.process_message(
@@ -90,17 +89,21 @@
 extern crate blake2_rfc;
 extern crate cbor_protocol;
 #[macro_use]
+extern crate failure;
+#[macro_use]
 extern crate log;
 extern crate rand;
 extern crate serde;
 extern crate serde_cbor;
 extern crate time;
 
+mod error;
 mod messages;
 mod parsers;
 pub mod protocol;
 mod storage;
 
+pub use error::ProtocolError;
 pub use protocol::Protocol as FileProtocol;
 pub use protocol::State;
 
@@ -150,13 +153,8 @@ mod tests {
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
         assert_eq!(
-            msg,
-            Ok(Message::ReqReceive(
-                channel_id,
-                hash,
-                target_path,
-                Some(mode)
-            ))
+            msg.unwrap(),
+            Message::ReqReceive(channel_id, hash, target_path, Some(mode))
         );
     }
 
@@ -168,7 +166,7 @@ mod tests {
         let raw = messages::sync(channel_id, &hash).unwrap();
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
-        assert_eq!(msg, Ok(Message::Sync(channel_id, hash)));
+        assert_eq!(msg.unwrap(), Message::Sync(channel_id, hash));
     }
 
     #[test]
@@ -180,7 +178,10 @@ mod tests {
         let raw = messages::metadata(channel_id, &hash, num_chunks).unwrap();
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
-        assert_eq!(msg, Ok(Message::Metadata(channel_id, hash, num_chunks)));
+        assert_eq!(
+            msg.unwrap(),
+            Message::Metadata(channel_id, hash, num_chunks)
+        );
     }
 
     #[test]
@@ -194,10 +195,8 @@ mod tests {
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
         assert_eq!(
-            msg,
-            Ok(Message::ReceiveChunk(
-                channel_id, hash, chunk_num, chunk_data
-            ))
+            msg.unwrap(),
+            Message::ReceiveChunk(channel_id, hash, chunk_num, chunk_data)
         );
     }
 
@@ -210,7 +209,7 @@ mod tests {
         let raw = messages::ack(channel_id, &hash, Some(num_chunks)).unwrap();
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
-        assert_eq!(msg, Ok(Message::ACK(channel_id, hash)));
+        assert_eq!(msg.unwrap(), Message::ACK(channel_id, hash));
     }
 
     #[test]
@@ -223,6 +222,9 @@ mod tests {
         let raw = messages::nak(channel_id, &hash, &missing_chunks).unwrap();
         let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
 
-        assert_eq!(msg, Ok(Message::NAK(channel_id, hash, Some(chunk_ranges))));
+        assert_eq!(
+            msg.unwrap(),
+            Message::NAK(channel_id, hash, Some(chunk_ranges))
+        );
     }
 }

@@ -33,12 +33,10 @@
 //!
 //! match cbor_connection.recv_message_peer_timeout(Duration::from_millis(10)) {
 //!     Ok((source, message)) => {
-//!         if let Some(msg) = message {
-//!             println!("Received message from {:?}: {:?}", source, msg);
-//!         }
+//!         println!("Received message from {:?}: {:?}", source, message);
 //!     }
-//!     Err(None) => println!("Timed out waiting for reply"),
-//!     Err(Some(err)) => eprintln!("Failed to receive message: {}", err)
+//!     Err(ProtocolError::Timeout) => println!("Timed out waiting for reply"),
+//!     Err(err) => eprintln!("Failed to receive message: {}", err)
 //! }
 //! ```
 //!
@@ -46,15 +44,55 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
+#[macro_use]
+extern crate failure;
 extern crate serde_cbor;
 
 use serde_cbor::de;
+use std::io;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Duration;
 
 // Was 4136
 // Somewhere we are sending packets bigger than this...
 const MSG_SIZE: usize = 4500;
+
+/// An error generated during protocol execution
+#[derive(Debug, Fail)]
+pub enum ProtocolError {
+    /// Indicates a timeout when sending or receiving
+    #[fail(display = "Protocol timed out")]
+    Timeout,
+    /// Indicates no data was received
+    #[fail(display = "No valid data received")]
+    NoDataReceived,
+    /// Indicates a failure to receive
+    #[fail(display = "Failed to receive message from: {}", err)]
+    ReceiveFailed {
+        /// Cause of receive failure
+        err: io::Error,
+    },
+    /// Indicates a failure to send
+    #[fail(display = "Failed to send message to {}: {}", dest, err)]
+    SendFailed {
+        /// Intended send destination
+        dest: SocketAddr,
+        /// Cause of send failure
+        err: io::Error,
+    },
+    #[fail(display = "Encountered io Error: {}", err)]
+    /// Indicates a non-send/received Io error
+    IoError {
+        /// Root Io Error
+        err: io::Error,
+    },
+    /// Indicates a failure to parse a message
+    #[fail(display = "Failed to parse data: {:?}", err)]
+    ParseFail {
+        /// Cause of parsing failure
+        err: String,
+    },
+}
 
 /// CBOR protocol communication structure
 pub struct Protocol {
@@ -148,7 +186,7 @@ impl Protocol {
     /// cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap());
     /// ```
     ///
-    pub fn send_message(&self, message: &[u8], dest: SocketAddr) -> Result<(), String> {
+    pub fn send_message(&self, message: &[u8], dest: SocketAddr) -> Result<(), ProtocolError> {
         // TODO: If paused, just queue up the message
 
         let mut payload = vec![];
@@ -157,7 +195,7 @@ impl Protocol {
 
         self.handle
             .send_to(&payload, &dest)
-            .map_err(|err| format!("Failed to send message to {:?}: {}", dest, err))?;
+            .map_err(|err| ProtocolError::SendFailed { dest, err })?;
         Ok(())
     }
 
@@ -181,13 +219,13 @@ impl Protocol {
     /// cbor_connection.send_pause("0.0.0.0:8001".parse().unwrap());
     /// ```
     ///
-    pub fn send_pause(&self, dest: SocketAddr) -> Result<(), String> {
+    pub fn send_pause(&self, dest: SocketAddr) -> Result<(), ProtocolError> {
         println!("-> pause");
 
         let payload = vec![1];
         self.handle
             .send_to(&payload, &dest)
-            .map_err(|err| format!("Failed to send message to {:?}: {}", dest, err))?;
+            .map_err(|err| ProtocolError::SendFailed { dest, err })?;
         Ok(())
     }
 
@@ -211,13 +249,13 @@ impl Protocol {
     /// cbor_connection.send_resume("0.0.0.0:8001".parse().unwrap());
     /// ```
     ///
-    pub fn send_resume(&self, dest: SocketAddr) -> Result<(), String> {
+    pub fn send_resume(&self, dest: SocketAddr) -> Result<(), ProtocolError> {
         println!("-> resume");
 
         let payload = vec![2];
         self.handle
             .send_to(&payload, &dest)
-            .map_err(|err| format!("Failed to send message to {:?}: {}", dest, err))?;
+            .map_err(|err| ProtocolError::SendFailed { dest, err })?;
         Ok(())
     }
 
@@ -237,14 +275,14 @@ impl Protocol {
     /// let message = cbor_connection.recv_message().unwrap();
     /// ```
     ///
-    pub fn recv_message(&self) -> Result<Option<serde_cbor::Value>, String> {
+    pub fn recv_message(&self) -> Result<serde_cbor::Value, ProtocolError> {
         let mut buf = [0; MSG_SIZE];
         let (size, _peer) = self
             .handle
             .recv_from(&mut buf)
-            .map_err(|err| format!("Failed to receive a message: {}", err))?;
+            .map_err(|err| ProtocolError::ReceiveFailed { err })?;
 
-        self.recv_start(&buf[0..size]).map_err(|err| err)
+        self.recv_start(&buf[0..size])
     }
 
     /// Peek at the sender information for the next message in the UDP receive buffer
@@ -263,13 +301,13 @@ impl Protocol {
     /// let source = cbor_connection.peek_peer();
     /// ```
     ///
-    pub fn peek_peer(&self) -> Result<SocketAddr, String> {
+    pub fn peek_peer(&self) -> Result<SocketAddr, ProtocolError> {
         let mut buf = [0; MSG_SIZE];
 
         let (_size, peer) = self
             .handle
             .peek_from(&mut buf)
-            .map_err(|err| format!("Failed to receive a message: {}", err))?;
+            .map_err(|err| ProtocolError::ReceiveFailed { err })?;
 
         Ok(peer)
     }
@@ -290,12 +328,12 @@ impl Protocol {
     /// let (source, message) = cbor_connection.recv_message_peer().unwrap();
     /// ```
     ///
-    pub fn recv_message_peer(&self) -> Result<(SocketAddr, Option<serde_cbor::Value>), String> {
+    pub fn recv_message_peer(&self) -> Result<(SocketAddr, serde_cbor::Value), ProtocolError> {
         let mut buf = [0; MSG_SIZE];
         let (size, peer) = self
             .handle
             .recv_from(&mut buf)
-            .map_err(|err| format!("Failed to receive a message: {}", err))?;
+            .map_err(|err| ProtocolError::ReceiveFailed { err })?;
 
         let message = self.recv_start(&buf[0..size])?;
         Ok((peer, message))
@@ -324,22 +362,22 @@ impl Protocol {
     ///
     /// let (source, message) = match cbor_connection.recv_message_peer_timeout(Duration::from_secs(1)) {
     ///     Ok(data) => data,
-    ///     Err(None) => {
-    ///            println!("Timeout waiting for message");
-    ///            return;
-    ///        }
-    ///     Err(Some(err)) => panic!("Failed to receive message: {}", err),
+    ///     Err(ProtocolError::Timeout) => {
+    ///         println!("Timeout waiting for message");
+    ///         return;
+    ///     }
+    ///     Err(err) => panic!("Failed to receive message: {}", err),
     /// };
     /// ```
     ///
     pub fn recv_message_peer_timeout(
         &self,
         timeout: Duration,
-    ) -> Result<(SocketAddr, Option<serde_cbor::Value>), Option<String>> {
+    ) -> Result<(SocketAddr, serde_cbor::Value), ProtocolError> {
         // Set the timeout for this particular receive
         self.handle
             .set_read_timeout(Some(timeout))
-            .map_err(|err| format!("Failed to set timeout: {}", err))?;
+            .map_err(|err| ProtocolError::IoError { err })?;
 
         let mut buf = [0; MSG_SIZE];
 
@@ -352,12 +390,13 @@ impl Protocol {
         let (size, peer) = match result {
             Ok(data) => data,
             Err(err) => match err.kind() {
-                ::std::io::ErrorKind::WouldBlock => return Err(None), // For some reason, UDP recv returns WouldBlock for timeouts
-                _ => return Err(Some(format!("Failed to receive a message: {:?}", err))),
+                // For some reason, UDP recv returns WouldBlock for timeouts
+                io::ErrorKind::WouldBlock => return Err(ProtocolError::Timeout),
+                _ => return Err(ProtocolError::ReceiveFailed { err }),
             },
         };
 
-        let message = self.recv_start(&buf[0..size]).map_err(|err| Some(err))?;
+        let message = self.recv_start(&buf[0..size])?;
         Ok((peer, message))
     }
 
@@ -383,10 +422,10 @@ impl Protocol {
     /// let cbor_connection = Protocol::new("0.0.0.0:9000".to_owned());
     ///
     /// let message = match cbor_connection.recv_message_timeout(Duration::from_secs(1)) {
-    ///     Ok(Some(data)) => data,
-    ///     Ok(None) => {
-    ///        println!("Timeout waiting for message");
-    ///        return;
+    ///     Ok(data) => data,
+    ///     Err(ProtocolError::Timeout) => {
+    ///         println!("Timeout while waiting for message");
+    ///         return;
     ///     }
     ///     Err(err) => panic!("Failed to receive message: {}", err),
     /// };
@@ -395,11 +434,11 @@ impl Protocol {
     pub fn recv_message_timeout(
         &self,
         timeout: Duration,
-    ) -> Result<Option<serde_cbor::Value>, String> {
+    ) -> Result<serde_cbor::Value, ProtocolError> {
         // Set the timeout for this particular receive
         self.handle
             .set_read_timeout(Some(timeout))
-            .map_err(|err| format!("Failed to set timeout: {}", err))?;
+            .map_err(|err| ProtocolError::IoError { err })?;
 
         let mut buf = [0; MSG_SIZE];
 
@@ -413,44 +452,49 @@ impl Protocol {
             Ok(data) => data,
             Err(err) => match err.kind() {
                 // For some reason, UDP recv returns WouldBlock for timeouts
-                ::std::io::ErrorKind::WouldBlock => return Ok(None),
-                _ => return Err(format!("Failed to receive a message: {:?}", err)),
+                ::std::io::ErrorKind::WouldBlock => return Err(ProtocolError::Timeout),
+                _ => return Err(ProtocolError::ReceiveFailed { err }),
             },
         };
 
-        self.recv_start(&buf[0..size]).map_err(|err| err)
+        Ok(self.recv_start(&buf[0..size])?)
     }
 
     // Parse the received CBOR message
-    fn recv_start(&self, data: &[u8]) -> Result<Option<serde_cbor::Value>, String> {
+    fn recv_start(&self, data: &[u8]) -> Result<serde_cbor::Value, ProtocolError> {
         if data.len() == 0 {
-            return Ok(None);
+            return Err(ProtocolError::NoDataReceived);
         }
 
-        let result: Option<serde_cbor::Value> = match data[0] {
+        let result = match data[0] {
             0 => {
-                let message: serde_cbor::Value = de::from_slice(&data[1..])
-                    .map_err(|err| format!("Failed to parse data: {:?}", err))?;
+                let message: serde_cbor::Value =
+                    de::from_slice(&data[1..]).map_err(|err| ProtocolError::ParseFail {
+                        err: format!("{:?}", err),
+                    })?;
 
                 if message.is_array() {
-                    Some(message)
+                    message
                 } else {
-                    return Err(format!("Failed to parse data: Body not an array"));
+                    return Err(ProtocolError::ParseFail {
+                        err: "Body is not an array".to_owned(),
+                    });
                 }
             }
             1 => {
                 println!("<- pause");
+                //TODO: Evaluate whether to keep/use pause & resume
                 //TODO: self.pause()?;
-                None
+                return Err(ProtocolError::NoDataReceived);
             }
             2 => {
                 println!("<- resume");
                 // TODO: self.resume()?;
-                None
+                return Err(ProtocolError::NoDataReceived);
             }
             x => {
                 eprintln!("Ignoring unknown control frame: {}", x);
-                None
+                return Err(ProtocolError::NoDataReceived);
             }
         };
 

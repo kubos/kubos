@@ -19,10 +19,11 @@ extern crate file_protocol;
 extern crate kubos_system;
 #[macro_use]
 extern crate log;
+extern crate failure;
 extern crate serde_cbor;
 extern crate simplelog;
 
-use file_protocol::{FileProtocol, State};
+use file_protocol::{FileProtocol, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;
 use std::collections::HashMap;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
@@ -31,7 +32,7 @@ use std::thread;
 use std::time::Duration;
 
 // We need this in this lib.rs file so we can build integration tests
-pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
+pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
     let host = config.hosturl();
     let c_protocol = cbor_protocol::Protocol::new(host.clone());
@@ -52,11 +53,10 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         .and_then(|val| {
             val.as_integer()
                 .and_then(|num| Some(Duration::from_secs(num as u64)))
-        })
-        .unwrap_or(Duration::from_secs(2));
+        }).unwrap_or(Duration::from_secs(2));
 
     // Setup map of channel IDs to thread channels
-    let raw_threads: HashMap<u32, Sender<Option<serde_cbor::Value>>> = HashMap::new();
+    let raw_threads: HashMap<u32, Sender<serde_cbor::Value>> = HashMap::new();
     // Create thread sharable wrapper
     let threads = Arc::new(Mutex::new(raw_threads));
 
@@ -78,8 +78,8 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
 
         if !threads.lock().unwrap().contains_key(&channel_id) {
             let (sender, receiver): (
-                Sender<Option<serde_cbor::Value>>,
-                Receiver<Option<serde_cbor::Value>>,
+                Sender<serde_cbor::Value>,
+                Receiver<serde_cbor::Value>,
             ) = mpsc::channel();
             threads.lock().unwrap().insert(channel_id, sender.clone());
             // Break the processing work off into its own thread so we can
@@ -99,8 +99,10 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
                 match f_protocol.message_engine(
                     |d| match receiver.recv_timeout(d) {
                         Ok(v) => Ok(v),
-                        Err(RecvTimeoutError::Timeout) => Ok(None),
-                        Err(e) => Err(format!("Error {:?}", e)),
+                        Err(RecvTimeoutError::Timeout) => Err(ProtocolError::ReceiveTimeout),
+                        Err(e) => Err(ProtocolError::ReceiveError {
+                            err: format!("Error {:?}", e),
+                        }),
                     },
                     timeout_ref,
                     state,
