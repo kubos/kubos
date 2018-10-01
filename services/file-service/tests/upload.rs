@@ -384,3 +384,53 @@ fn large_up() {
         assert_eq!(&source_buf[..], &dest_buf[..], "Chunk mismatch: {}", num);
     }
 }
+
+// Verify an upload still works after the server has
+// received invalid input
+#[test]
+fn upload_single_after_bad_input() {
+    use std::net::{SocketAddr, UdpSocket};
+
+    let test_dir = TempDir::new().expect("Failed to create test dir");
+    let test_dir_str = test_dir.path().to_str().unwrap();
+    let source = format!("{}/source", test_dir_str);
+    let dest = format!("{}/dest", test_dir_str);
+    let service_port = 7007;
+
+    let contents = "upload_single".as_bytes();
+
+    create_test_file(&source, &contents);
+
+    service_new!(service_port, 4096);
+
+    {
+        let send_socket = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let send_buf = "{ping}".as_bytes();
+        send_socket.send_to(&send_buf, "127.0.0.1:7007").unwrap();
+    }
+
+    let result = upload(
+        "127.0.0.1",
+        &format!("127.0.0.1:{}", service_port),
+        &source,
+        &dest,
+        Some("client".to_owned()),
+        4096,
+    );
+
+    if let Err(err) = &result {
+        println!("Error: {}", err);
+    }
+
+    assert!(result.is_ok());
+
+    let hash = result.unwrap();
+
+    // Cleanup the temporary files so that the test can be repeatable
+    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
+    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
+
+    // Verify the final file's contents
+    let dest_contents = fs::read(dest).unwrap();
+    assert_eq!(&contents[..], dest_contents.as_slice());
+}
