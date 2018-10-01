@@ -76,7 +76,13 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
 
     loop {
         // Listen on UDP port
-        let (source, first_message) = c_protocol.recv_message_peer()?;
+        let (source, first_message) = match c_protocol.recv_message_peer() {
+            Ok((source, first_message)) => (source, first_message),
+            Err(e) => {
+                warn!("Error receiving message: {:?}", e);
+                continue;
+            }
+        };
 
         let config_ref = f_config.clone();
         let host_ref = host_ip.clone();
