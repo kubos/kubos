@@ -3,7 +3,7 @@
     :align: center
 
 Overview
-========
+--------
 
 +----------------------------------------+------------------------------------------------+---------------------------+-------------------------------------------------+
 | `Stable Docs <http://docs.kubos.co>`__ | `Nightly Docs <http://docs.kubos.co/master>`__ | :doc:`dev-docs/changelog` | `Kubos Repo <https://github.com/kubos/kubos>`__ |
@@ -33,7 +33,7 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 .. _supported-boards:
 
 Supported OBCs
-==============
+--------------
 
 +------------+---------------------------------------------------------------------+
 | Vendor     | Description                                                         |
@@ -46,7 +46,7 @@ Supported OBCs
 +------------+---------------------------------------------------------------------+
 
 Supported Hardware Devices
-==========================
+--------------------------
 
 KubOS supports a selection of hardware devices in varying capacities.
 
@@ -55,8 +55,8 @@ All supported devices have a :doc:`device API <apis/device-api/index>` which may
 Some devices have an additional :doc:`hardware service <services/hardware-services>` which can be built into
 KubOS and provides a long-running process which allows easy, streamlined communication with the device.
 
-Contributing to KubOS:
-======================
+Contributing to KubOS
+---------------------
 
 Want to get your code into space? Become a KubOS contributor and you will!
 We welcome community developers, and are always looking for new people to collaborate with us.
@@ -78,7 +78,7 @@ Come check out our `community Trello Board <https://trello.com/b/pIWxmFua/kubos-
     FAQs and Troubleshooting Tips <faq-troubleshooting>
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`search`
