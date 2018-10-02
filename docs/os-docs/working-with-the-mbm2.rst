@@ -16,13 +16,13 @@ Pumpkin Documentation
 ~~~~~~~~~~~~~~~~~~~~~
 
 The :title:`CubeSat Kit Motherboard Module (MBM) 2` reference document
-is available from Pumpkin and is a useful document for learning what 
+is available from Pumpkin and is a useful document for learning what
 each of the hardware components are and how they are connected.
 
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`first-linux-project` - Basic tutorial for creating your first Kubos SDK project
+-  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KuboOS project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`kubos-linux-on-mbm2` - Steps to build Kubos Linux for the Pumpkin MBM2
@@ -55,9 +55,9 @@ This connection will be passed through to a Kubos Vagrant image as
 Peripherals
 -----------
 
-The Pumpkin MBM2 has several different ports available for interacting 
-with peripheral devices. Currently, users should interact with these 
-devices using the standard Linux functions. A Kubos HAL will be added 
+The Pumpkin MBM2 has several different ports available for interacting
+with peripheral devices. Currently, users should interact with these
+devices using the standard Linux functions. A Kubos HAL will be added
 in the future to abstract this process.
 
 ADC
@@ -101,9 +101,9 @@ To convert the raw ADC value to a voltage, use this equation:
 Where:
 
     - :math:`D` = Raw ADC value
-    - :math:`n` = Number of ADC resolution bits 
+    - :math:`n` = Number of ADC resolution bits
     - :math:`V_{ref}` =  Reference voltage
-    
+
 The Pumpkin MBM2 uses 12 resolution bits and a reference voltage of 1.8V, so the
 resulting equation is
 
@@ -118,7 +118,7 @@ The Pumpkin MBM2, via the embedded Beaglebone Black, provides an ethernet
 port which can be used for things like inter-system communication.
 
 The ethernet port is configured to have support for static IPv4 addressing and
-can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__ 
+can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__
 package.
 
 Kubos Linux currently guarantees support for TCP, UDP, and SCTP.
@@ -127,7 +127,7 @@ Other protocols might be supported by default, but have not been verified.
 Resources
 ^^^^^^^^^
 
-- :ref:`Kubos Ethernet Communication Guide <ethernet>` 
+- :ref:`Kubos Ethernet Communication Guide <ethernet>`
 - `TCP tutorial <http://www.linuxhowtos.org/C_C++/socket.htm>`__
 - `UDP tutorial <https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html>`__
 - `SCTP tutorial <http://petanode.com/blog/posts/introduction-to-the-sctp-socket-api-in-linux.html>`__
@@ -153,7 +153,7 @@ GPIO
 ~~~~
 
 The CSK headers have 6 GPIO pins available for use.
-These pins can be dynamically controlled via the `Linux GPIO Sysfs 
+These pins can be dynamically controlled via the `Linux GPIO Sysfs
 Interface for Userspace <https://www.kernel.org/doc/Documentation/gpio/sysfs.txt>`__
 as long as they have not already been assigned to another peripheral.
 
@@ -176,7 +176,7 @@ as long as they have not already been assigned to another peripheral.
 CLI and Script Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To interact with a pin from the command line or from a script, the user will first need to 
+To interact with a pin from the command line or from a script, the user will first need to
 generate the pin's device name:
 
 ::
@@ -212,7 +212,7 @@ Once finished, the pin can be released:
 
 Application Interface
 ^^^^^^^^^^^^^^^^^^^^^
-    
+
 This functionality can also be used from a user's application with Linux's sysfs
 interface.
 
@@ -302,7 +302,7 @@ User Data Partitions
 --------------------
 
 The Pumpkin MBM2 has multiple user data partitions available, one on each storage
-device. 
+device.
 
 eMMC
 ~~~~
@@ -338,7 +338,7 @@ microSD
 /home/microsd
 ^^^^^^^^^^^^^
 
-This directory points to a partition on the microSD device included with the 
+This directory points to a partition on the microSD device included with the
 base Beaglebone Black board
 
 .. todo::

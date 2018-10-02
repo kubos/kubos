@@ -4,10 +4,10 @@ Kubos Linux
 Kubos Linux is a custom Linux distribution designed with embedded devices in mind.
 
 It focuses on including only drivers that are useful for space applications (eg.
-I2C and SPI, rather than display drivers) and multi-layer system validation and 
+I2C and SPI, rather than display drivers) and multi-layer system validation and
 recovery logic.
 
-Kubos Linux projects are built into binaries which will run as Linux user space 
+Kubos Linux projects are built into binaries which will run as Linux user space
 applications.
 
 Installation Docs
@@ -26,12 +26,11 @@ General Guides
 .. toctree::
     :maxdepth: 1
     
-    First Linux Project <first-linux-project>
     Using Kubos Linux <using-kubos-linux>
     
 System Guides
 -------------
-    
+
 .. toctree::
     :maxdepth: 1
     
@@ -43,7 +42,7 @@ System Guides
     
 SysAdmin Docs
 -------------
-    
+
 .. toctree::
     :maxdepth: 1
     

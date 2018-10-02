@@ -19,7 +19,7 @@ New to KubOS? Want to know what it is? Check out our architecture guide for an o
 
 Getting set up with KubOS for the first time? Check out our SDK and try your own project:
 
- - :doc:`First Time Users <first-time-users>`
+ - :doc:`New User Tutorials <tutorials/index>`
 
 Trying to integrate a payload or create your mission code? Check out our mission-specific code documentation:
 

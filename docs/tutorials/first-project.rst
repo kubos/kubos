@@ -17,7 +17,7 @@ Prerequisites
 - Have an OBC available with both Python and SSH capabilities
   (preferably with an :doc:`installation of Kubos Linux <../installation-docs/index>`)
 
-    - :ref:`Configuring Ethernet <os-docs/using-kubos-linux.html#ethernet>`
+    - :ref:`Configuring Ethernet <ethernet>`
 
 Creating your Project
 ---------------------
@@ -87,7 +87,9 @@ Once the project has been transferred, we can log in to the OBC and run it::
     /home/kubos # python hello_world.py
     Hello, World!
 
-Next Steps
-----------
-
-In the :doc:`next tutorial <first-mission-app>`, we'll create and run our first mission application.
+.. todo::
+    
+    Next Steps
+    <add section header>
+    
+    In the :doc:`next tutorial <first-mission-app>`, we'll create and run our first mission application.
