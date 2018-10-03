@@ -87,9 +87,7 @@ Once the project has been transferred, we can log in to the OBC and run it::
     /home/kubos # python hello_world.py
     Hello, World!
 
-.. todo::
-    
-    Next Steps
-    <add section header>
-    
-    In the :doc:`next tutorial <first-mission-app>`, we'll create and run our first mission application.
+Next Steps
+----------
+
+In the :doc:`next tutorial <first-mission-app>`, we'll create and run our first mission application.

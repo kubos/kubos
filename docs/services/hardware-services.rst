@@ -40,6 +40,8 @@ Creating a Service
 The :doc:`service outline guide.<../dev-docs/service-outline-guide>` documents the preferred schema for all hardware services.
 Commonizing the queries available from each service allows greater code re-use and reduces the number of new queries users must learn when swapping between different hardware devices.
 
+.. _pre-built-services:
+
 Pre-Built Services
 ------------------
 
@@ -52,7 +54,7 @@ The following list gives links to each service's documentation:
     - |iOBC-Supervisor|
     - |NovAtel-OEM6|
     - `Pumpkin Supervisor MCUs <https://github.com/kubos/kubos/blob/master/services/pumpkin-mcu-service/README.rst>`__
-    
+
 .. |MAI-400| raw:: html
  
     <a href="../rust-docs/mai400_service/index.html" target="_blank">Adcole Maryland Aerospace MAI-400 ADACS</a>

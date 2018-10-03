@@ -11,7 +11,7 @@ database.
 .. note:: 
 
     The iOBC does not support Python. If this is the board which you are using,
-    please refer to TODO
+    please refer to the `example Rust mission application <https://github.com/kubos/kubos/blob/master/examples/rust-mission-app/src/main.rs>`__
 
 Pre-Requisites
 --------------
@@ -28,13 +28,12 @@ Pre-Requisites
 Mission Application Overview
 ----------------------------
 
-In order to be compatible with the applications service, mission applications must comply with the
-applications framework:
+Mission applications are user-created programs which are used to control satellite behavior and
+execute mission logic.
 
-- The application should have separate handler functions for each supported run level
-- The application must be packaged with a manifest file which details the name, version, and author
-  information for the binary
-
+These applications are registered with the :doc:`applications service <../app-docs/app-service>`,
+which is responsible for tracking versioning, kicking off applications at boot time, and controlling
+application upgrades and rollbacks.
 
 Run Levels
 ~~~~~~~~~~
@@ -42,40 +41,18 @@ Run Levels
 Run levels allow users the option to define differing behaviors depending on when and how their
 application is started.
 
-Each application should have a definition for each of the available run levels:
+Each application must have a definition for each of the available run levels:
 
-    - OnBoot
-    - OnCommand
+    - OnBoot - Defines logic which should be executed automatically at system boot time
+    - OnCommand - Defines logic which should be executed when the :ref:`application is started manually <start-app>`
 
-When the application is first called, the run level will be fetched,
+When the application is first called, the requested run level will be checked,
 and then the corresponding run level function will be called.
-
-It is acceptable to only have a single set of logic no matter which run level is specified.
-In this case, each of the run level options should simply call the common logic function.
-
-On Command
-^^^^^^^^^^
-
-The ``OnCommand`` run level defines logic which should be executed when the :ref:`application is started manually <start-app>`.
-
-For example, a user might want a custom batch of telemetry to be gathered and returned occassionally.
-Rather than sending individual telemetry requests, they could code their application to take care of
-the work, so then they only have to send a single query in order to trigger the process.
-
-On Boot
-^^^^^^^
-
-The ``OnBoot`` run level defines logic which should be executed when the applications service is
-started at system boot time.
-
-This run level is frequently used for setting up continuous fetching and processing of data from the
-other system services and hardware.
-For instance, an application might be set up to fetch the current time from a GPS device and then
-pass that information through to the ADCS device.
-
 
 Laying Out the Framework
 ------------------------
+
+We'll be creating a new file for this tutorial, ``my-mission-app.py``.
 
 In order to allow the applications service to run our mission application, we'll need to start by
 placing the following line at the top of our new file::
@@ -125,6 +102,11 @@ and then call the appropriate run level function based on the input:
     if __name__ == "__main__":
         main()
 
+.. note::
+    
+    This ``-r`` argument is used by the applications service, so must be included in all
+    mission applications
+
 All together, it should look like this:
 
 .. code-block:: python
@@ -170,7 +152,7 @@ Adding Logging
 
 When our mission application is running in-flight, we likely won't have constant access to ``stdout``.
 
-As a result, it would be better if we were routing all our messages to a log file.
+As a result, it would be better if we were routing our messages to a log file.
 That way we can check the status of our application at our discretion.
 
 Because our on-boot logic will perform different tasks than our on-command logic, we'll have two
@@ -225,10 +207,110 @@ If we run the program locally, we can check that the files are being successfull
     $ cat oncommand-output
     OnCommand logic
     
-GraphQL
--------
+Kubos Services and GraphQL
+--------------------------
 
-TODO
+A major component of most mission applications will be interacting with
+:doc:`Kubos services <../services/index>`.
+
+These services provided interfaces to underlying hardware and other system resources.
+
+All services work by consuming `GraphQL <http://graphql.org/>`__ requests over UDP, running the
+requested operation, and then returning a JSON response.
+
+GraphQL is a query language which allows users to create readable requests which will return only
+the data they specify.
+
+GraphQL requests come in two varieties: queries and mutations.
+
+Queries
+~~~~~~~
+
+GraphQL queries perform informational, read-only operations. For example, a query might request that
+an underlying piece of hardware be contacted for its current temperature or last data reading.
+
+An example query for the telemetry database service might look like this::
+
+    {
+        telemetry(subsystem: "EPS") {
+            timestamp,
+            parameter,
+            value
+        }
+    }
+
+This translates to "please fetch all of the stored telemetry entries for the EPS subsystem and
+return only their timestamp, parameter, and value values."
+
+The response might look like this::
+
+    {
+        "telemetry": [
+            {
+                "timestamp": 1100,
+                "parameter": "voltage",
+                "value": "4.4"
+            },
+            {
+                "timestamp": 1100,
+                "parameter": "current",
+                "value": "0.25"
+            },
+            {
+                "timestamp": 1002,
+                "parameter": "voltage",
+                "value": "4.5"
+            },
+            {
+                "timestamp": 1002,
+                "parameter": "current",
+                "value": "0.20"
+            }
+        ]
+    }
+
+Mutations
+~~~~~~~~~
+
+GraphQL mutations perform actions which can be invasive or destructive, for example, writing data to
+a file or rebooting a hardware device.
+
+An example mutation for the telemetry database service might look like this::
+
+    mutation {
+        insert(subsystem: "GPS", parameter: "lock_status", value: "good") {
+            success,
+            errors
+        }
+    } 
+
+This translates to "please create a new telemetry database entry for the GPS subsystem's lock status
+parameter with a value of 'good'. Return the overall success of the operation and any errors."
+
+Worth noting, all mutation requests are prefixed with ``mutation`` to quickly indicate to the service
+what kind of action is being requested.
+
+The response might look like this::
+
+    {
+        "insert": {
+            "success": false,
+            "errors": "Failed to connect to database"
+        }
+    }
+    
+Schemas
+~~~~~~~
+
+Each service has a schema which defines all of its queries and mutations.
+
+Users should refer to these to determine what actions are available for each service and how their
+requests should be structured.
+
+Documentation for Kubos services can be found within the :doc:`services <../services/index>` section.
+
+For example, links to the schemas for all of the pre-built hardware services can be found
+:ref:`here <pre-built-services>`.
 
 Querying a Service
 ------------------
@@ -239,12 +321,23 @@ For this tutorial, we'll be querying the monitor service for the current amount 
 We intend for this to be an ad-hoc action, so we'll be adding code to the on-command section of
 our program.
 
-The service has the following schema::
+The service's ``memInfo`` query has the following schema::
 
-    TODO
-    
-To make the communication process simpler, we'll be using the Python app API to send our GraphQL
-requests.
+    {
+        MemInfo {
+            total: Int,
+            free: Int,
+            available: Int,
+            lowFree: Int,
+        }
+    }
+
+This indicates that there are four possible return fields, however, the lack of an exclamation mark
+means if any of them are not available on the system (for example, ``lowFree`` isn't available on
+all systems), it will be omitted.
+
+To make the communication process simpler, we'll be using the :doc:`Python app API <../app-docs/python-app-api>`
+to send our GraphQL requests.
 
 For each request, it:
 
@@ -273,7 +366,9 @@ And finally, we'll parse the result to get our current available memory quantity
     available = data["available"]
     file.write("Current available memory: %d kB \r\n" % (available))
 
-After adding error handling, our program should look like this::
+After adding error handling, our program should look like this:
+
+.. code-block:: python
 
     #!/usr/bin/env python
 
@@ -324,12 +419,25 @@ After adding error handling, our program should look like this::
     if __name__ == "__main__":
         main()
     
+Transferring the program to our OBC and running it should look like this::
+
+    $ scp my-mission-app.py kubos@10.0.2.20:/home/kubos
+    kubos@10.0.2.20's password: ********
+    my-mission-app.py                                     100% 1078     1.1KB/s   00:00
+    $ ssh kubos@10.0.2.20
+    kubos@10.0.2.20's password: ********
+    /home/kubos # ./my-mission-app.py -r OnCommand
+    OnCommand logic completed successfully
+    /home/kubos # cat oncommand-output
+    Current available memory: 496768 kB
+
 Writing Data to the Telemetry Database
 --------------------------------------
 
 Now that we have a data point, we need to save it somewhere useful.
 The telemetry database is the main storage location for all telemetry data.
-The telemetry database _service_ is the preferred interface point for storing and retrieving that data.
+The :doc:`telemetry database service <../services/telemetry-db>` is the preferred interface point
+for storing and retrieving that data.
 
 We'll be using the service's ``insert`` mutation in order to add a new telemetry entry.
 This operation is a mutation rather than a query, because it will cause the system to perform a write,
@@ -337,7 +445,15 @@ rather than simply reading data.
 
 The mutation has the following schema::
     
-    TODO
+    mutation {
+        insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!) { 
+            success: Boolean!, 
+            errors: String!
+        }
+    }
+    
+This indicates that there are four possible input parameters, all of which are required except for
+``timestamp``, and two return fields which, when requested, will always return a value.
 
 Our mutation will have the following parameters:
 
@@ -363,7 +479,7 @@ the telemetry database service rather than the monitor service::
 
     response = SERVICES.query(service="telemetry-service", query=request)
 
-And finally, we'll check the response to make sure the operation finished successfully::
+Finally, we'll check the response to make sure the operation finished successfully::
 
     data = response["insert"]
     success = data["success"]
@@ -372,7 +488,9 @@ And finally, we'll check the response to make sure the operation finished succes
     if success == False:
         print "Telemetry insert encountered errors: " + str(errors)
 
-With some additional error handling, our final application looks like this::
+With some additional error handling, our final application looks like this:
+
+.. code-block:: python
 
     #!/usr/bin/env python
     
@@ -447,6 +565,24 @@ With some additional error handling, our final application looks like this::
     if __name__ == "__main__":
         main()
 
+Transferring the program to our OBC and running it should look like this::
+
+    $ scp my-mission-app.py kubos@10.0.2.20:/home/kubos
+    kubos@10.0.2.20's password: ********
+    my-mission-app.py                                     100% 1814     1.8KB/s   00:00
+    $ ssh kubos@10.0.2.20
+    kubos@10.0.2.20's password: ********
+    /home/kubos # ./my-mission-app.py -r OnCommand
+    OnCommand logic completed successfully
+    /home/kubos # cat oncommand-output
+    Current available memory: 496768 kB
+    Current available memory: 497060 kB
+
+.. note::
+
+    If you'd like to double-check the results, you could add an additional action which sends a
+    ``telemetry`` query to the telemetry database service to fetch the entries which were just added.
+    
 Creating the Manifest File
 --------------------------
 
