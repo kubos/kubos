@@ -19,7 +19,18 @@ use serde_cbor::Value;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Message {
-    Spawn(u32, String),
+    Spawn {
+        channel_id: u32,
+        command: String,
+        args: Option<Vec<String>>,
+        // TODO: Add these options:
+        // - pty - boolean specifying need for a pty
+        // - env - list of environment variables
+        // - cwd - current working directory of process
+        // - uid - uid of process
+        // - gid - gid of processs
+        // - detached - boolean specifying if child process should be detached
+    },
 }
 
 pub mod spawn;

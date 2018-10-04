@@ -16,7 +16,8 @@
 
 use super::*;
 use error::ProtocolError;
-use serde_cbor::{ser, Value};
+use serde_cbor::{ser, ObjectKey, Value};
+use std::collections::BTreeMap;
 use std::process::{Child, Command, Stdio};
 
 /// cbor -> spawn
@@ -39,7 +40,27 @@ pub fn from_cbor(message: Value) -> Result<Option<Message>, ProtocolError> {
         let channel_id = channel_id as u32;
         if let Some(Value::String(_message)) = pieces.next() {
             if let Some(Value::String(command)) = pieces.next() {
-                return Ok(Some(Message::Spawn(channel_id, command.to_owned())));
+                if let Some(Value::Object(options)) = pieces.next() {
+                    if let Some(Value::Array(args)) =
+                        options.get(&ObjectKey::String("args".to_owned()))
+                    {
+                        let real_args: Vec<String> = args
+                            .to_vec()
+                            .iter()
+                            .map(|s| s.as_string().unwrap().to_owned())
+                            .collect();
+                        return Ok(Some(Message::Spawn {
+                            channel_id: channel_id,
+                            command: command.to_owned(),
+                            args: Some(real_args),
+                        }));
+                    }
+                }
+                return Ok(Some(Message::Spawn {
+                    channel_id: channel_id,
+                    command: command.to_owned(),
+                    args: None,
+                }));
             }
         }
     }
@@ -47,9 +68,19 @@ pub fn from_cbor(message: Value) -> Result<Option<Message>, ProtocolError> {
 }
 
 /// spawn -> cbor
-pub fn to_cbor(channel_id: u32, command: &str) -> Result<Vec<u8>, String> {
+pub fn to_cbor(channel_id: u32, command: &str, args: Option<&[String]>) -> Result<Vec<u8>, String> {
     info!("-> {{ {}, spawn, {} }}", channel_id, command);
-    ser::to_vec_packed(&(channel_id, "spawn", command))
+    let mut options = BTreeMap::new();
+    if let Some(args) = args {
+        let args_vec = args
+            .to_vec()
+            .iter()
+            .map(|s| Value::String(s.to_owned()))
+            .collect();
+        options.insert(ObjectKey::String("args".to_owned()), Value::Array(args_vec));
+    }
+
+    ser::to_vec_packed(&(channel_id, "spawn", command, options))
         .map_err(|_err| "Error creating spawn message".to_owned())
 }
 
@@ -72,12 +103,54 @@ mod tests {
         let channel_id = 10;
         let command = "/bin/pwd";
 
-        let raw = to_cbor(channel_id, command).unwrap();
+        let raw = to_cbor(channel_id, command, None).unwrap();
         let msg = from_cbor(de::from_slice(&raw).unwrap());
 
         assert_eq!(
             msg.unwrap(),
-            Some(Message::Spawn(channel_id, command.to_owned()))
+            Some(Message::Spawn {
+                channel_id: channel_id,
+                command: command.to_owned(),
+                args: None
+            })
+        );
+    }
+
+    #[test]
+    fn create_parse_spawn_single_arg() {
+        let channel_id = 10;
+        let command = "/bin/sleep";
+        let args: Vec<String> = vec!["100".to_owned()];
+
+        let raw = to_cbor(channel_id, command, Some(&args)).unwrap();
+        let msg = from_cbor(de::from_slice(&raw).unwrap());
+
+        assert_eq!(
+            msg.unwrap(),
+            Some(Message::Spawn {
+                channel_id: channel_id,
+                command: command.to_owned(),
+                args: Some(args)
+            })
+        );
+    }
+
+    #[test]
+    fn create_parse_spawn_multi_args() {
+        let channel_id = 10;
+        let command = "/usr/bin/echo";
+        let args: Vec<String> = vec!["hello".to_owned(), "world".to_owned()];
+
+        let raw = to_cbor(channel_id, command, Some(&args)).unwrap();
+        let msg = from_cbor(de::from_slice(&raw).unwrap());
+
+        assert_eq!(
+            msg.unwrap(),
+            Some(Message::Spawn {
+                channel_id: channel_id,
+                command: command.to_owned(),
+                args: Some(args)
+            })
         );
     }
 }

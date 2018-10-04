@@ -70,19 +70,24 @@ impl Protocol {
         let parsed_message = messages::parse_message(message)?;
 
         match parsed_message {
-            messages::Message::Spawn(channel_id, command) => {
-                info!("{}: spawning command {}", channel_id, command);
-                self.spawn(command)?;
+            messages::Message::Spawn {
+                channel_id,
+                command,
+                args,
+            } => {
+                info!("{}: spawning command {} {:?}", channel_id, command, args);
+                self.spawn(command, args)?;
             }
         }
 
         Ok(())
     }
 
-    fn spawn(&self, command: String) -> Result<(), ProtocolError> {
+    fn spawn(&self, command: String, args: Option<Vec<String>>) -> Result<(), ProtocolError> {
         match Command::new(command.to_owned())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
+            .args(args.unwrap_or(vec![]))
             .spawn()
         {
             Ok(_) => Ok(()),
