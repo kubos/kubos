@@ -20,9 +20,8 @@ extern crate cbor_protocol;
 extern crate serde_cbor;
 #[macro_use]
 extern crate failure;
+extern crate channel_protocol;
 extern crate rand;
-
-use serde_cbor::Value;
 
 pub mod error;
 pub mod messages;
@@ -30,21 +29,3 @@ mod protocol;
 
 pub use error::ProtocolError;
 pub use protocol::Protocol as ShellProtocol;
-
-/// Parse out just the channel ID from a message
-pub fn parse_channel_id(message: &Value) -> Result<u32, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Data not an array".to_owned()),
-    };
-
-    let mut pieces = data.iter();
-
-    let first_param: Value = pieces.next().ok_or("No contents".to_owned())?.to_owned();
-
-    if let Value::U64(channel_id) = first_param {
-        Ok(channel_id as u32)
-    } else {
-        Err("No channel ID found".to_owned())
-    }
-}

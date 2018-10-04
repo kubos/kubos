@@ -23,6 +23,7 @@ members = [
 "hal/rust-hal/rust-uart",
 "kubos-build-helper",
 "libs/cbor-protocol",
+"libs/channel-protocol",
 "libs/file-protocol",
 "libs/shell-protocol",
 "services/app-service",

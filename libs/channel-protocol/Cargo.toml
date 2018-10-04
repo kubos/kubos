@@ -1,5 +1,5 @@
 [package]
-name = "shell-protocol"
+name = "channel-protocol"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 
@@ -8,6 +8,5 @@ simplelog = "^0.5.0"
 serde_cbor = "0.8"
 log = "^0.4.0"
 cbor-protocol = { path = "../cbor-protocol" }
-channel-protocol = { path = "../channel-protocol" }
 failure = "0.1.2"
 rand = "0.5"

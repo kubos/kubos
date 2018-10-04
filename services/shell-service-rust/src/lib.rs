@@ -19,6 +19,7 @@ extern crate kubos_system;
 extern crate shell_protocol;
 #[macro_use]
 extern crate log;
+extern crate channel_protocol;
 extern crate failure;
 extern crate serde_cbor;
 extern crate simplelog;
@@ -67,7 +68,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         let host_ref = host_ip.clone();
         let timeout_ref = timeout.clone();
 
-        let channel_id = match shell_protocol::parse_channel_id(&first_message) {
+        let channel_id = match channel_protocol::parse_channel_id(&first_message) {
             Ok(channel_id) => channel_id,
             Err(e) => {
                 warn!("Error parsing channel ID: {:?}", e);

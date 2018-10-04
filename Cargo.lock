@@ -116,6 +116,18 @@ version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "channel-protocol"
+version = "0.1.0"
+dependencies = [
+ "cbor-protocol 0.1.0",
+ "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_cbor 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "simplelog 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1064,6 +1076,7 @@ name = "shell-protocol"
 version = "0.1.0"
 dependencies = [
  "cbor-protocol 0.1.0",
+ "channel-protocol 0.1.0",
  "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1076,6 +1089,7 @@ name = "shell-service-rust"
 version = "0.1.0"
 dependencies = [
  "cbor-protocol 0.1.0",
+ "channel-protocol 0.1.0",
  "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-system 0.1.0",
  "log 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -75,6 +75,9 @@ mod tests {
         let raw = to_cbor(channel_id, command).unwrap();
         let msg = from_cbor(de::from_slice(&raw).unwrap());
 
-        assert_eq!(msg.unwrap(), Message::Spawn(channel_id, command.to_owned()));
+        assert_eq!(
+            msg.unwrap(),
+            Some(Message::Spawn(channel_id, command.to_owned()))
+        );
     }
 }
