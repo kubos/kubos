@@ -1,15 +1,15 @@
 Registering a Mission Application
 =================================
 
-The Kubos applications service is responsible for monitoring and managing all mission applications
-for a system.
+The Kubos :doc:`applications service <../app-docs/app-service>` is responsible for monitoring and
+managing all mission applications for a system.
 
 This tutorial walks the user through:
 
     - Registering a new application
-    - Requesting the applications service to start the application
+    - Sending a request to the applications service to start the application
     - Updating the application to a newer version
-    - Verifying what versions of an application have been registered
+    - Verifying what versions of the application have been registered
 
 Setup
 -----
@@ -62,26 +62,26 @@ The ``path`` input parameter specifies the directory where the application and m
 They must be the only files in this directory in order for the service to be able to complete the
 registration process.
 
-The mutating can return the following fields:
+The mutation can return the following fields:
 
     - ``app``
 
         - ``uuid`` - The unique identifier for our newly registered application. This will be used for
-          all future interaction with our application.
+          all future interaction with our application
         - ``name`` - The name of the registered application, taken from the manifest file
         - ``version`` - The version number of this particular iteration of the application, taken
           from the manifest file
-        - ``author`` - The author information for the application, taken from the manifest files
-        - ``path`` - The abosolute path of the newly register application file
+        - ``author`` - The author information for the application, taken from the manifest file
+        - ``path`` - The abosolute path of the newly registered application file
 
     - ``active`` - Specifies whether the newly registered application is the current active version
-      of the application which will be used when the service attempts to run it. This should always
-      return ``true`` when returned by this mutation
+      of the application which will be used when the service attempts to run it. This value should
+      always be ``true`` when returned by this mutation
 
-We'll be interacting with the OBC from our SDK instance using the netcat utility.
+We'll be interacting with the OBC from our SDK instance using the `netcat <https://linux.die.net/man/1/nc>`__ utility.
 By default, the applications service uses port 8000.
 
-Our registration process should look like this::
+Our registration process should look like this:
 
     $ echo "mutation {register(path: \"/home/kubos/my-app\"){app{uuid,name,path}}}" | nc -uw1 10.0.2.20 8000
     {"errs":"","msg":{"register":{"app":{"name":"my-mission-app.py","path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py","uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"}}}}
@@ -142,68 +142,116 @@ To verify that the app ran successfully, we'll check the contents of our log fil
 Updating
 --------
 
-Now let's create a new version of our application.
+After looking at our log output, it would be nice if our log message included the timestamp of
+when the system memory was checked.
 
-We'll change the "OnCommand logic" string to "Updated OnCommand logic", and then update our `manifest.toml`
+Let's add the ``datetime`` module to our file with ``import datetime`` and then update the log line like so:
+
+.. code-block:: python
+
+    file.write("%s: Current available memory: %s kB \r\n" % (str(datetime.datetime.now()), available))
+
+Since this is a new version of our application, we'll then need to update our ``manifest.toml``
 file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
 
-After compiling (for Rust) and transferring the new files into a new folder, `/home/kubos/example-app-2`,
-we can register the updated application::
+After transferring both of the files into our remote folder, ``/home/kubos/my-app``,
+we can register the updated application using the same ``register`` mutation as before::
  
-    mutation {
-        register(path: "/home/kubos/example-app-2") {
-            app {
-                uuid,
-                name,
-                version
-            }
-        }
-    }
+    $ echo "mutation {register(path: \"/home/kubos/my-app\"){app{uuid,name,path}}}" | nc -uw1 10.0.2.20 8000
 
 The returned UUID should match our original UUID::
 
     {
-        "app": {
-            "uuid": "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a",
-            "name": "example-mission-app",
-            "version": "2.0"
+        "errs": "",
+        "msg": {
+            "register": {
+                "app": {
+                    "name":"my-mission-app.py",
+                    "path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/2.0/my-mission-app.py",
+                    "uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"
+                }
+            }
         }
     }
+    
+After running our app again with the ``startApp`` mutation, our log file should now look like this:
+
+.. code-block:: none
+
+    /home/kubos # cat oncommand-output
+    Current available memory: 496768 kB
+    1970-01-01 01:11:23.947890: Current available memory: 496952 kB
 
 Verifying
 ---------
 
-We can now query the service to see all of the registered applications and versions::
+We can now query the service to see the registered versions of our application using the ``apps`` query.
+
+The query has the following schema::
 
     {
-        apps {
-            active,
-            app {
-                uuid,
-                name,
-                version
-            }
+        apps(uuid: String, name: String, version: String, active: Bool): [{
+            app: {
+                uuid: String!,
+                name: String!,
+                version: String!,
+                author: String!,
+                path: String!
+            },
+            active: Bool
+        }]
     }
+    
+By default, the query will return information about all versions of all registered applications.
+The queries input fields can be used to filter the results:
 
-The response should show the two versions of our app, with the latest version being marked as active::
+    - ``uuid`` - Specifies that the service should only return entries with this UUID
+    - ``name`` - Returns entries with this specific application file name
+    - ``version`` - Returns only entries with the specified version
+    - ``active`` - Returns only the current active version of the particular application
+
+The query has the following response fields:
+
+    - ``app``
+
+        - ``uuid`` - The unique identifier for the application
+        - ``name`` - The name of the application file
+        - ``version`` - The version number of this particular iteration of the application
+        - ``author`` - The author information for the application
+        - ``path`` - The abosolute path of the registered application file
+
+    - ``active`` - Specifies whether this iteration of the application is the current active version
+      which will be used when the service attempts to run it
+
+We want to query the service to make sure that:
+
+    - We have two registered versions of our application
+    - Version 2.0 is the current active version
+
+Our request should look like this::
+
+    $ echo "{apps(uuid:\"8052dbe9-bab1-428e-8414-fb72b4af90bc\"){active,app{name,version}}}" | nc -uw1 10.0.2.20 8000    
+
+The response should look like this::
 
     {
-        "apps": [
-            { 
-                "active": false,
-                "app": {
-                    "uuid": "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a",
-                    "name": "example-mission-app",
-                    "version": "1.0"
+        "errs": "",
+        "msg": {
+            "apps": [
+                {
+                    "active":false,
+                    "app": {
+                        "name":"my-mission-app.py",
+                        "version":"1.0"
+                    }
+                },
+                {
+                    "active":true,
+                    "app": {
+                        "name":"my-mission-app.py",
+                        "version":"2.0"
+                    }
                 }
-            },
-            { 
-                "active": true,
-                "app": {
-                    "uuid": "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a",
-                    "name": "example-mission-app",
-                    "version": "2.0"
-                }
-            },
-        ]
+            ]
+        }
     }

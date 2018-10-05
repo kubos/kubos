@@ -63,8 +63,8 @@ data and then storing that data into the telemetry database.
     Communicating with Hardware Services <querying-hardware>
     Storing Telemetry <storing-telemetry>
     
-System Interation Tutorials
----------------------------
+System Interaction Tutorials
+----------------------------
 
 These tutorials cover all of the ways a user might directly interact with a system from the ground.
 
