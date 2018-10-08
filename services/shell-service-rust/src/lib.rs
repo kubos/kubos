@@ -69,15 +69,14 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         let host_ref = host_ip.clone();
         let timeout_ref = timeout.clone();
 
-        let channel_id = match channel_protocol::parse_channel_id(&first_message) {
-            Ok(channel_id) => channel_id,
+        let parsed_message = match channel_protocol::parse_message(first_message) {
+            Ok(parsed_message) => parsed_message,
             Err(e) => {
-                warn!("Error parsing channel ID: {:?}", e);
+                warn!("Error parsing channel message: {:?}", e);
                 continue;
             }
         };
-
-        let parsed_message = channel_protocol::parse_message(first_message)?;
+        let channel_id = parsed_message.channel_id;
 
         if !threads.lock().unwrap().contains_key(&channel_id) {
             let (sender, receiver): (Sender<ChannelMessage>, Receiver<ChannelMessage>) =
