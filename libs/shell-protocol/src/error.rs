@@ -15,15 +15,22 @@
 //
 
 use cbor_protocol;
+use channel_protocol;
 use std::io;
 
-/// Errors which occur when using FileProtocol
+/// Errors which occur when using ShellProtocol
 #[derive(Debug, Fail)]
 pub enum ProtocolError {
     #[fail(display = "Cbor Error: {}", err)]
     CborError {
-        /// The specific cbor protocol error
+        /// The specific CBOR protocol error
         err: cbor_protocol::ProtocolError,
+    },
+    /// An error was encountered in the channel protocol
+    #[fail(display = "Channel protocol error: {}", err)]
+    ChannelError {
+        /// The specific channel protocol error
+        err: channel_protocol::ProtocolError,
     },
     /// A general error was encountered when parsing a message
     #[fail(display = "Unable to parse message: {}", err)]
@@ -54,6 +61,15 @@ impl From<cbor_protocol::ProtocolError> for ProtocolError {
         match error {
             cbor_protocol::ProtocolError::Timeout => ProtocolError::ReceiveTimeout,
             err => ProtocolError::CborError { err },
+        }
+    }
+}
+
+impl From<channel_protocol::ProtocolError> for ProtocolError {
+    fn from(error: channel_protocol::ProtocolError) -> Self {
+        match error {
+            channel_protocol::ProtocolError::ReceiveTimeout => ProtocolError::ReceiveTimeout,
+            err => ProtocolError::ChannelError { err },
         }
     }
 }

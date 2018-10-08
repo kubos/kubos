@@ -15,15 +15,16 @@
 //
 
 extern crate cbor_protocol;
-extern crate kubos_system;
-extern crate shell_protocol;
-#[macro_use]
-extern crate log;
 extern crate channel_protocol;
 extern crate failure;
+extern crate kubos_system;
+#[macro_use]
+extern crate log;
 extern crate serde_cbor;
+extern crate shell_protocol;
 extern crate simplelog;
 
+use channel_protocol::ChannelMessage;
 use kubos_system::Config as ServiceConfig;
 use shell_protocol::{ProtocolError, ShellProtocol};
 use std::collections::HashMap;
@@ -51,7 +52,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         }).unwrap_or(Duration::from_secs(2));
 
     // Setup map of channel IDs to thread channels
-    let raw_threads: HashMap<u32, Sender<serde_cbor::Value>> = HashMap::new();
+    let raw_threads: HashMap<u32, Sender<ChannelMessage>> = HashMap::new();
     // Create thread sharable wrapper
     let threads = Arc::new(Mutex::new(raw_threads));
 
@@ -76,11 +77,11 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
             }
         };
 
+        let parsed_message = channel_protocol::parse_message(first_message)?;
+
         if !threads.lock().unwrap().contains_key(&channel_id) {
-            let (sender, receiver): (
-                Sender<serde_cbor::Value>,
-                Receiver<serde_cbor::Value>,
-            ) = mpsc::channel();
+            let (sender, receiver): (Sender<ChannelMessage>, Receiver<ChannelMessage>) =
+                mpsc::channel();
             threads.lock().unwrap().insert(channel_id, sender.clone());
             // Break the processing work off into its own thread so we can
             // listen for requests from other clients
@@ -110,13 +111,11 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         }
 
         if let Some(sender) = threads.lock().unwrap().get(&channel_id) {
-            match sender.send(first_message) {
+            match sender.send(parsed_message) {
                 Err(e) => warn!("Error when sending to channel {}: {:?}", channel_id, e),
                 _ => {}
             };
-        }
-
-        if !threads.lock().unwrap().contains_key(&channel_id) {
+        } else {
             warn!("No sender found for {}", channel_id);
             threads.lock().unwrap().remove(&channel_id);
         }

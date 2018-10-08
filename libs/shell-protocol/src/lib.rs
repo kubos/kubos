@@ -14,14 +14,14 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate log;
 extern crate cbor_protocol;
-extern crate serde_cbor;
+extern crate channel_protocol;
 #[macro_use]
 extern crate failure;
-extern crate channel_protocol;
+#[macro_use]
+extern crate log;
 extern crate rand;
+extern crate serde_cbor;
 
 pub mod error;
 pub mod messages;

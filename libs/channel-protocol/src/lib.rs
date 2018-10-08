@@ -15,11 +15,11 @@
 //
 
 extern crate cbor_protocol;
-extern crate log;
-extern crate serde_cbor;
 #[macro_use]
 extern crate failure;
+extern crate log;
 extern crate rand;
+extern crate serde_cbor;
 
 mod error;
 mod parsers;

@@ -21,7 +21,7 @@ use cbor_protocol;
 pub enum ProtocolError {
     #[fail(display = "Cbor Error: {}", err)]
     CborError {
-        /// The specific cbor protocol error
+        /// The specific CBOR protocol error
         err: cbor_protocol::ProtocolError,
     },
     /// A general error was encountered when parsing a message

@@ -14,10 +14,9 @@
 // limitations under the License.
 //
 
-use channel_protocol::ChannelProtocol;
+use channel_protocol::{ChannelMessage, ChannelProtocol};
 use error::ProtocolError;
 use messages;
-use serde_cbor::Value;
 use std::process::{Command, Stdio};
 use std::time::Duration;
 
@@ -33,13 +32,12 @@ impl Protocol {
         }
     }
 
-    /// Listen for and process file protocol messages
+    /// Listen for and process shell protocol messages
     ///
     /// # Arguments
     ///
     /// * pump - Function which returns the next message for processing
     /// * timeout - Maximum time to listen for a single message
-    /// * start_state - Current transaction state
     ///
     /// # Errors
     ///
@@ -47,10 +45,23 @@ impl Protocol {
     ///
     /// # Examples
     ///
+    /// ```no_run
+    /// extern crate shell_protocol;
+    ///
+    /// use shell_protocol::*;
+    /// use std::time::Duration;
+    ///
+    /// let s_protocol = ShellProtocol::new("0.0.0.0", "0.0.0.0:7000");
+    ///
+    /// s_protocol.message_engine(
+    ///     |d| Ok(s_protocol.channel_protocol.recv_message(Some(d))?),
+    ///     Duration::from_millis(10),
+    /// );
+    /// ```
     ///
     pub fn message_engine<F>(&self, pump: F, timeout: Duration) -> Result<(), ProtocolError>
     where
-        F: Fn(Duration) -> Result<Value, ProtocolError>,
+        F: Fn(Duration) -> Result<ChannelMessage, ProtocolError>,
     {
         loop {
             let message = match pump(timeout) {
@@ -66,7 +77,7 @@ impl Protocol {
         }
     }
 
-    pub fn process_message(&self, message: Value) -> Result<(), ProtocolError> {
+    pub fn process_message(&self, message: ChannelMessage) -> Result<(), ProtocolError> {
         let parsed_message = messages::parse_message(message)?;
 
         match parsed_message {

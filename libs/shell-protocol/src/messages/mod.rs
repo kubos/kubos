@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+use channel_protocol::ChannelMessage;
 use error::ProtocolError;
 use serde_cbor::Value;
 
@@ -35,12 +36,12 @@ pub enum Message {
 
 pub mod spawn;
 
-pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
-    if let Some(msg) = spawn::from_cbor(message)? {
-        return Ok(msg);
+pub fn parse_message(message: ChannelMessage) -> Result<Message, ProtocolError> {
+    if message.name == "spawn" {
+        Ok(spawn::from_cbor(&message)?)
+    } else {
+        Err(ProtocolError::MessageParseError {
+            err: "No message found".to_owned(),
+        })
     }
-
-    return Err(ProtocolError::MessageParseError {
-        err: "No message found".to_owned(),
-    });
 }

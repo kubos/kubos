@@ -18,10 +18,10 @@
 
 extern crate cbor_protocol;
 extern crate kubos_system;
-extern crate shell_protocol;
-extern crate shell_service_rust;
 #[macro_use]
 extern crate log;
+extern crate shell_protocol;
+extern crate shell_service_rust;
 extern crate simplelog;
 
 use kubos_system::Config as ServiceConfig;
@@ -41,7 +41,7 @@ fn main() {
         LevelFilter::Info,
         Config::default(),
         // TODO: Making log file directory configurable
-        File::create("/var/log/kubos/shell-service.log").unwrap(),
+        File::create("/var/log/kubos-shell-service.log").unwrap(),
     ));
 
     match CombinedLogger::init(loggers) {
