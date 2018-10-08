@@ -22,13 +22,15 @@ extern crate failure;
 extern crate rand;
 
 mod error;
+mod parsers;
 mod protocol;
 
 pub use error::ProtocolError;
+pub use parsers::*;
+pub use protocol::Message as ChannelMessage;
 pub use protocol::Protocol as ChannelProtocol;
 
 use rand::Rng;
-use serde_cbor::Value;
 
 /// Generates a new random channel ID for use when initiating a
 /// file transfer.
@@ -39,27 +41,14 @@ use serde_cbor::Value;
 ///
 /// # Examples
 ///
+/// ```no_run
+/// use channel_protocol::*;
+///
+/// let channel_id = generate_channel();
+/// ```
 ///
 pub fn generate_channel() -> u32 {
     let mut rng = rand::thread_rng();
     let channel_id: u32 = rng.gen_range(100000, 999999);
     channel_id
-}
-
-/// Parse out just the channel ID from a message
-pub fn parse_channel_id(message: &Value) -> Result<u32, String> {
-    let data = match message {
-        Value::Array(val) => val.to_owned(),
-        _ => return Err("Data not an array".to_owned()),
-    };
-
-    let mut pieces = data.iter();
-
-    let first_param: Value = pieces.next().ok_or("No contents".to_owned())?.to_owned();
-
-    if let Value::U64(channel_id) = first_param {
-        Ok(channel_id as u32)
-    } else {
-        Err("No channel ID found".to_owned())
-    }
 }

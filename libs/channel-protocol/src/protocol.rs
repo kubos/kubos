@@ -16,10 +16,18 @@
 
 use cbor_protocol::Protocol as CborProtocol;
 use error::ProtocolError;
+use parsers::parse_message;
 use serde_cbor::Value;
 use std::cell::Cell;
 use std::net::SocketAddr;
 use std::time::Duration;
+
+#[derive(Debug)]
+pub struct Message {
+    pub channel_id: u32,
+    pub name: String,
+    pub payload: Vec<Value>,
+}
 
 pub struct Protocol {
     cbor_proto: CborProtocol,
@@ -49,7 +57,6 @@ impl Protocol {
     ///
     pub fn new(host_ip: &str, remote_addr: &str, data_len: u32) -> Self {
         // Get a local UDP socket (Bind)
-
         let c_protocol = CborProtocol::new(format!("{}:0", host_ip), data_len as usize);
 
         // Set up the full connection info
@@ -89,7 +96,7 @@ impl Protocol {
         Ok(())
     }
 
-    /// Receive a file protocol message
+    /// Receive a raw cbor message message
     ///
     /// # Arguments
     ///
@@ -97,9 +104,8 @@ impl Protocol {
     ///
     /// # Errors
     ///
-    /// - If this function times out, it will return `Err(None)`
+    /// - If this function times out, it will return `Err(ProtocolError::ReceiveTimeout)`
     /// - If this function encounters any errors, it will return an error message string
-    ///
     ///
     /// # Examples
     ///
@@ -111,7 +117,7 @@ impl Protocol {
     ///
     /// let c_protocol = ChannelProtocol::new("0.0.0.0", "0.0.0.0:7000", 4096);
     ///
-    /// let message = match c_protocol.recv(Some(Duration::from_secs(1))) {
+    /// let message = match c_protocol.recv_raw(Some(Duration::from_secs(1))) {
     ///     Ok(data) => data,
     ///     Err(ProtocolError::ReceiveTimeout) =>  {
     ///         println!("Timeout waiting for message");
@@ -121,10 +127,46 @@ impl Protocol {
     /// };
     /// ```
     ///
-    pub fn recv(&self, timeout: Option<Duration>) -> Result<Value, ProtocolError> {
+    pub fn recv_raw(&self, timeout: Option<Duration>) -> Result<Value, ProtocolError> {
         match timeout {
             Some(value) => Ok(self.cbor_proto.recv_message_timeout(value)?),
             None => Ok(self.cbor_proto.recv_message()?),
         }
+    }
+
+    /// Receive a parsed channel procotol message
+    ///
+    /// # Arguments
+    ///
+    /// * timeout - Maximum time to wait for a reply. If `None`, will block indefinitely
+    ///
+    /// # Errors
+    ///
+    /// - If this function times out, it will return `Err(ProtocolError::ReceiveTimeout)`
+    /// - If this function encounters any errors, it will return an error message string
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// extern crate channel_protocol;
+    ///
+    /// use channel_protocol::*;
+    /// use std::time::Duration;
+    ///
+    /// let c_protocol = ChannelProtocol::new("0.0.0.0", "0.0.0.0:7000", 4096);
+    ///
+    /// let message = match c_protocol.recv_message(Some(Duration::from_secs(1))) {
+    ///     Ok(data) => data,
+    ///     Err(ProtocolError::ReceiveTimeout) =>  {
+    ///         println!("Timeout waiting for message");
+    ///         return;
+    ///     }
+    ///     Err(err) => panic!("Failed to receive message: {}", err),
+    /// };
+    /// ```
+    ///
+    pub fn recv_message(&self, timeout: Option<Duration>) -> Result<Message, ProtocolError> {
+        let raw = self.recv_raw(timeout)?;
+        Ok(parse_message(raw)?)
     }
 }
