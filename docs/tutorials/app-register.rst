@@ -59,7 +59,7 @@ It has the following schema::
      }
      
 The ``path`` input parameter specifies the directory where the application and manifest files reside.
-They must be the only files in this directory in order for the service to be able to complete the
+They **must be the only files in this directory** in order for the service to be able to complete the
 registration process.
 
 The mutation can return the following fields:
@@ -81,7 +81,7 @@ The mutation can return the following fields:
 We'll be interacting with the OBC from our SDK instance using the `netcat <https://linux.die.net/man/1/nc>`__ utility.
 By default, the applications service uses port 8000.
 
-Our registration process should look like this:
+Our registration process should look like this::
 
     $ echo "mutation {register(path: \"/home/kubos/my-app\"){app{uuid,name,path}}}" | nc -uw1 10.0.2.20 8000
     {"errs":"","msg":{"register":{"app":{"name":"my-mission-app.py","path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py","uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"}}}}
