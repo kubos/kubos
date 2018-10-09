@@ -22,7 +22,7 @@ each of the hardware components are and how they are connected.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KuboOS project
+-  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KubOS project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`kubos-linux-on-mbm2` - Steps to build Kubos Linux for the Pumpkin MBM2
