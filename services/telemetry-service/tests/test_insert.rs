@@ -22,6 +22,8 @@ mod utils;
 
 use tempfile::TempDir;
 use utils::*;
+use std::thread::sleep;
+use std::time::Duration;
 
 #[test]
 fn test_insert_auto_timestamp() {
@@ -170,6 +172,7 @@ fn test_insert_multi_auto() {
             teardown(handle, sender);
             panic!();
         }
+        sleep(Duration::from_millis(1));
     }
 
     let query = r#"{
