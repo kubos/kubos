@@ -74,10 +74,10 @@ There is no coding required for these actions, however some scripting may used f
     :maxdepth: 1
     
     Registering an Application <app-register>
+    Transferring Files <file-transfer>
     
 .. todo::
     Querying the System <querying-telemetry>
-    Transferring Files <file-transfer>
     Creating a Shell Connection <shell>
     Communicating Over a Radio <comms>
     
