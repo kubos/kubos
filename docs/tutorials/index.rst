@@ -76,9 +76,6 @@ There is no coding required for these actions, however some scripting may used f
     Registering an Application <app-register>
     Transferring Files <file-transfer>
     Querying the System <querying-telemetry>
-    
-.. todo::
-    
     Creating a Shell Connection <shell>
     Communicating Over a Radio <comms>
     
