@@ -158,7 +158,8 @@ As a result, it would be better if we were routing our messages to a log file.
 That way we can check the status of our application at our discretion.
 
 Because our on-boot logic will perform different tasks than our on-command logic, we'll have two
-separate logging files, ``onboot-output`` and ``oncommand-output``.
+separate logging files, ``onboot-output`` and ``oncommand-output``. We'll also add a third log file,
+``mission-errors``, for any errors which occur before either of the run levels have been called.
 
 Additionally, we don't know how many times our mission application will be called before we're able
 to check the logs, so we'll open the files in "append" mode.
@@ -182,6 +183,9 @@ Our new file should look like this:
         file.write("OnCommand logic\r\n")
     
     def main():
+    
+        errors = open("mission-errors","a+")
+        
         parser = argparse.ArgumentParser()
         
         parser.add_argument('--run', '-r')
@@ -193,6 +197,7 @@ Our new file should look like this:
         elif args.run == 'OnCommand':
             on_command()
         else:
+            errors.write("Unknown run level specified\r\n")
             print "Unknown run level specified"
         
     if __name__ == "__main__":
@@ -424,6 +429,8 @@ After adding error handling, our program should look like this:
         print "OnCommand logic completed successfully"
     
     def main():
+        errors = open("mission-errors","a+")
+    
         parser = argparse.ArgumentParser()
         
         parser.add_argument('--run', '-r')
@@ -435,6 +442,7 @@ After adding error handling, our program should look like this:
         elif args.run == 'OnCommand':
             on_command()
         else:
+            errors.write("Unknown run level specified\r\n")
             print "Unknown run level specified"
         
     if __name__ == "__main__":
