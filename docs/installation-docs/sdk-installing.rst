@@ -218,7 +218,7 @@ all of the required dependencies installed.
 
 That's it! From here see more on:
 
-  - :doc:`Creating your first Kubos Linux project <../os-docs/first-linux-project>`
+  - :doc:`Creating your first Kubos Linux project <../tutorials/first-project>`
 
 After a little bit of usage you may want to look at :doc:`how to upgrade the
 Kubos SDK <../sdk-docs/sdk-upgrading>`
