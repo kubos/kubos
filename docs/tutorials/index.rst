@@ -63,21 +63,23 @@ data and then storing that data into the telemetry database.
     Communicating with Hardware Services <querying-hardware>
     Storing Telemetry <storing-telemetry>
     
-    System Interation Tutorials
-    <add section marker>
+System Interaction Tutorials
+----------------------------
+
+These tutorials cover all of the ways a user might directly interact with a system from the ground.
+
+There is no coding required for these actions, however some scripting may used for example purposes.
+
+.. toctree::
+    :maxdepth: 1
     
-    These tutorials cover all of the ways a user might directly interact with a system from the ground.
+    Registering an Application <app-register>
     
-    There is no coding required for these actions, however some scripting may used for example purposes.
-    
-    toctree::
-        :maxdepth: 1
-        
-        Registering an Application <app-register>
-        Querying the System <querying-telemetry>
-        Transferring Files <file-transfer>
-        Creating a Shell Connection <shell>
-        Communicating Over a Radio <comms>
+.. todo::
+    Querying the System <querying-telemetry>
+    Transferring Files <file-transfer>
+    Creating a Shell Connection <shell>
+    Communicating Over a Radio <comms>
     
 Other Resources
 ---------------

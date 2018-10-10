@@ -14,7 +14,7 @@ Applications are also used to accomplish specific mission goals. Some possible e
 - Image analysis
 - Payload operation
 - Payload monitoring
-- `Deployment <deployment>`
+- :doc:`Deployment <deployment>`
 
 KubOS is built to support multiple mission application files existing and running on a system concurrently.
 This allows customers to break their logic into specific, siloed portions which can be updated or replaced piecemeal
