@@ -12,6 +12,8 @@ database.
 
     The iOBC does not support Python. If this is the board which you are using,
     please refer to the `example Rust mission application <https://github.com/kubos/kubos/blob/master/examples/rust-mission-app/src/main.rs>`__
+    for the specific application code. The rest of this document should still be useful for the
+    high-level concepts which are involved when developing a mission application.
 
 Pre-Requisites
 --------------
@@ -290,7 +292,16 @@ parameter with a value of 'good'. Return the overall success of the operation an
 Worth noting, all mutation requests are prefixed with ``mutation`` to quickly indicate to the service
 what kind of action is being requested.
 
-The response might look like this::
+A successful response should look like this::
+
+    {
+        "insert": {
+            "success": true,
+            "errors": ""
+        }
+    }
+
+If the request failed, the response might look like this::
 
     {
         "insert": {
@@ -317,7 +328,17 @@ Querying a Service
 
 From this point on, we'll be testing on the target OBC, rather than locally.
 
-For this tutorial, we'll be querying the monitor service for the current amount of available memory.
+For this tutorial, we'll be querying the :doc:`monitor service <../services/monitor-service>` for
+the current amount of available memory.
+
+The monitor service is a unique hardware service which communicates with the OBC itself in order to
+obtain information about current processes running and the amount of memory both available and
+generally present on the system.
+It is unique because it is not tied to a particular hardware device and can, instead, be run on any
+supported OBC.
+Worth noting, the process of communicating with this service is the same as communicating with any
+other core or hardware service.
+
 We intend for this to be an ad-hoc action, so we'll be adding code to the on-command section of
 our program.
 
