@@ -4,7 +4,7 @@ Setting up the Kubos Windows Development Environment
 What is the Kubos Windows Development Environment?
 --------------------------------------------------
 
-The Kubos Windows Development Environment is a way to edit files on the SDK through an IDE. Since Windows does not support symlinks, editing the files can be a pain, as they are only accessible to tools within the SDK such as ``vim`` or ``nano``. This guide walks through a single method to edit those files through an IDE on the host machine, rather than through these command line tools. 
+The Kubos Windows Development Environment is a way to edit files on the SDK through an IDE. Since Windows does not support symlinks, editing the files can be a pain, as they are only accessible to tools within the SDK such as ``vim`` or ``nano``. This guide walks through a single method to edit those files through an IDE on the host machine, rather than through these command line tools.
 
 .. Note:: 
 	Before proceeding, please make sure you have :doc:`installed the SDK. <../installation-docs/sdk-installing>`
@@ -12,15 +12,15 @@ The Kubos Windows Development Environment is a way to edit files on the SDK thro
 How does it work?
 -----------------
 
-The environment is set up to treat the SDK like a remote machine, and uses an automatic FTP plug-in to allow the user to view and edit files on the SDK as if they were being edited locally. 
+The environment is set up to treat the SDK like a remote machine, and uses an automatic FTP plug-in to allow the user to view and edit files on the SDK as if they were being edited locally.
 
 The chosen environment consists of:
 
 - Notepad++
 - NppFTP Plugin
 
-This same method can be used with many common IDEs that have FTP packages for working on remote servers. 
-  
+This same method can be used with many common IDEs that have FTP packages for working on remote servers.
+
 Installation
 ------------
 
@@ -29,12 +29,12 @@ Install Notepad++ `here. <https://notepad-plus-plus.org/download/v7.4.2.html>`_ 
 Install the NppFTP plugin using the Plugin Manager.
 
 - Go to "Plugins" -> "Plugin Manager" -> "Show Plugin Manager"
-- Under "Available", find "NppFTP". Click the box next to it to select it, then select "Install". 
+- Under "Available", find "NppFTP". Click the box next to it to select it, then select "Install".
 
 .. Note:: 
 	It might prompt you to update the Plugin Manager before installing. I would recommend doing this once. It will require a restart of Notepad++, and you will have to repeat all the steps. If it prompts again after the first time, select "No" and it should install normally. 
 
-- After Notepad++ has restarted, you should now see "NppFTP" as one of the options under "Plugins". 
+- After Notepad++ has restarted, you should now see "NppFTP" as one of the options under "Plugins".
 
 
 Setup
@@ -74,7 +74,7 @@ Go to the install location of the Kubos SDK and bring up your Vagrant. As it ini
 
 Record the SSH address (127.0.0.1:2222) and the SSH username (vagrant).
 
-If the VM is already up, you can also issue ``vagrant ssh-config`` to get the hostname and port info. 
+If the VM is already up, you can also issue ``vagrant ssh-config`` to get the hostname and port info.
 
 .. Note:: 
 	If you update your Vagrant box, this information could change. 
@@ -82,13 +82,13 @@ If the VM is already up, you can also issue ``vagrant ssh-config`` to get the ho
 Configure NppFTP to access the SDK
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Go to "Plugins" -> "NppFTP" -> "Show NppFTP Window". This should bring up the NppFTP windown on the right side. 
+- Go to "Plugins" -> "NppFTP" -> "Show NppFTP Window". This should bring up the NppFTP windown on the right side.
 - In the NppFTP window, go to "Settings" (the gear) -> "Profile Settings"
 - Select "Add New" in the bottom left, and name it "Kubos SDK".
-- Edit the settings to match the picture below. You'll need to input: 
+- Edit the settings to match the picture below. You'll need to input:
 
   + Hostname and Port from the SSH address recorded previously
-  + Username: "vagrant"  
+  + Username: "vagrant"
   + Password: "vagrant"
   + Initial remote directory: "/home/vagrant/"
   + Connection type: SFTP
@@ -98,9 +98,70 @@ Configure NppFTP to access the SDK
 Usage
 -----
 
-Connect to the Vagrant box by selecting "(Dis)Connect" -> "Kubos SDK". This should automatically pull up the file system of the Vagrant with the /home/vagrant directory open. It should say "NppFTP - Connected to Kubos SDK" at the top of the NppFTP window. 
+Connect to the Vagrant box by selecting "(Dis)Connect" -> "Kubos SDK". This should automatically pull up the file system of the Vagrant with the /home/vagrant directory open. It should say "NppFTP - Connected to Kubos SDK" at the top of the NppFTP window.
 
-Now you can open and edit files! Double clicking on a file in the file tree will open it locally. If you make changes to any file, it will automatically tranfer the file over and replace it on the host machine whenever you hit save. 
+Now you can open and edit files! Double clicking on a file in the file tree will open it locally. If you make changes to any file, it will automatically tranfer the file over and replace it on the host machine whenever you hit save.
 
+.. _windows-udp:
 
+Allowing UDP Communication
+--------------------------
 
+There are certain scenarios where the SDK needs to be able to receive UDP packets from an OBC when
+connected via a local ethernet port.
+For example, when using the :doc:`file transfer client <../tutorials/file-transfer>`.
+
+In this case, Windows Firewall may need to be updated to allow this traffic.
+
+1. Open 'Windows Firewall with Advanced Security'. You can find this program by opening the start
+   menu and searching for "firewall"
+
+.. image:: ../images/windows_firewall.PNG
+
+2. Click on "Inbound Rules", then scroll down to the "VBoxHeadless" rules. Find the rule which blocks
+   UDP traffic on Public networks.
+
+.. image:: ../images/vbox_firewall_rule.PNG
+
+3. Right-click on the rule and select "Disable Rule"
+
+.. image:: ../images/vbox_firewall_rule_disable.PNG
+
+4. Right-click on "Inbound Rules" and select "New Rule"
+
+.. image:: ../images/inbound_new_rule.PNG
+
+5. Select "Custom" for the type of rule
+
+.. image:: ../images/inbound_rule_custom.PNG
+
+6. Select "All programs"
+
+.. image:: ../images/inbound_rule_programs.PNG
+
+7. Select "UDP" as the protocol type. Leave the "Local port" and "Remote port" settings as "All Ports"
+
+.. image:: ../images/inbound_rule_ports.PNG
+
+8. Under "Which remote IP addresses does this rule apply to?", click "These IP addresses", then click
+   "Add"
+
+.. image:: ../images/inbound_rule_ip.PNG
+
+9. In the "This IP address or subnet" field, add the IP address of your OBC, then click "OK", then
+   click "Next"
+
+.. image:: ../images/inbound_rule_new_ip.PNG
+
+10. Select "Allow the connection"
+
+.. image:: ../images/inbound_rule_connection.PNG
+
+11. In the "When does this rule apply?" menu, leave all checkboxes selected
+
+.. image:: ../images/inbound_rule_network.PNG
+
+12. In the "Name" field, enter something descriptive for the rule. For example, "Allow UDP from OBC".
+    Then click "Finish" to finalize and activate the new rule.
+
+.. image:: ../images/inbound_rule_name.PNG
