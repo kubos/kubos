@@ -22,11 +22,10 @@ Mutations
 Mutations are hardware commands.
 Submitting a mutation changes the state of the hardware.
 
-
 Service Types
 -------------
 
-There are a few common categories of satellite bus hadware:
+There are a few common categories of satellite bus hardware:
 
  - Power Systems (EPS and/or Battery)
  - Attitude Determination and Control Systems (ADCS)
@@ -49,6 +48,8 @@ Some hardware services have been created by Kubos and are available for use.
 
 The following list gives links to each service's documentation:
 
+    - :doc:`Monitor Service <monitor-service>` - This service is unique in that it communicates with
+      the OBC itself, rather than an external hardware device
     - |MAI-400|
     - |ISIS-AntS|
     - |iOBC-Supervisor|
