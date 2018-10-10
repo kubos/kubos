@@ -49,7 +49,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         .and_then(|val| {
             val.as_integer()
                 .and_then(|num| Some(Duration::from_secs(num as u64)))
-        }).unwrap_or(Duration::from_secs(2));
+        }).unwrap_or(Duration::from_millis(2));
 
     // Setup map of channel IDs to thread channels
     let raw_threads: HashMap<u32, Sender<ChannelMessage>> = HashMap::new();
@@ -86,7 +86,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
             // listen for requests from other clients
             let shared_threads = threads.clone();
             thread::spawn(move || {
-                let s_protocol = ShellProtocol::new(&host_ref, &format!("{}", source));
+                let mut s_protocol = ShellProtocol::new(&host_ref, &format!("{}", source));
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation

@@ -19,7 +19,6 @@ use channel_protocol::ChannelMessage;
 use error::ProtocolError;
 use serde_cbor::{ser, ObjectKey};
 use std::collections::BTreeMap;
-use std::process::{Child, Command, Stdio};
 
 /// CBOR -> Message::Spawn
 pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
@@ -73,15 +72,6 @@ pub fn to_cbor(channel_id: u32, command: &str, args: Option<&[String]>) -> Resul
 
     ser::to_vec_packed(&(channel_id, "spawn", command, options))
         .map_err(|_err| "Error creating spawn message".to_owned())
-}
-
-/// Perform a spawn action
-pub fn run(command: &str) -> Child {
-    Command::new(command)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap()
 }
 
 #[cfg(test)]

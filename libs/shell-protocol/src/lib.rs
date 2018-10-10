@@ -25,6 +25,7 @@ extern crate serde_cbor;
 
 pub mod error;
 pub mod messages;
+mod process;
 mod protocol;
 
 pub use error::ProtocolError;

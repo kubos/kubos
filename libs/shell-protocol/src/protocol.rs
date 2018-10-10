@@ -17,11 +17,12 @@
 use channel_protocol::{ChannelMessage, ChannelProtocol};
 use error::ProtocolError;
 use messages;
-use std::process::{Command, Stdio};
+use process::ProcessHandler;
 use std::time::Duration;
 
 pub struct Protocol {
     pub channel_protocol: ChannelProtocol,
+    pub process: Box<Option<ProcessHandler>>,
 }
 
 impl Protocol {
@@ -29,6 +30,7 @@ impl Protocol {
         // Set up the full connection info
         Protocol {
             channel_protocol: ChannelProtocol::new(host_ip, remote_addr, 4096),
+            process: Box::new(None),
         }
     }
 
@@ -43,27 +45,55 @@ impl Protocol {
     ///
     /// If this function encounters any errors, it will return an error message string
     ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// extern crate shell_protocol;
-    ///
-    /// use shell_protocol::*;
-    /// use std::time::Duration;
-    ///
-    /// let s_protocol = ShellProtocol::new("0.0.0.0", "0.0.0.0:7000");
-    ///
-    /// s_protocol.message_engine(
-    ///     |d| Ok(s_protocol.channel_protocol.recv_message(Some(d))?),
-    ///     Duration::from_millis(10),
-    /// );
-    /// ```
-    ///
-    pub fn message_engine<F>(&self, pump: F, timeout: Duration) -> Result<(), ProtocolError>
+    pub fn message_engine<F>(&mut self, pump: F, timeout: Duration) -> Result<(), ProtocolError>
     where
         F: Fn(Duration) -> Result<ChannelMessage, ProtocolError>,
     {
         loop {
+            // Check child for new stdout data
+            if self.process.as_mut().as_mut().is_some() {
+                if self
+                    .process
+                    .as_ref()
+                    .as_ref()
+                    .unwrap()
+                    .stdout_reader
+                    .is_some()
+                {
+                    match self.process.as_mut().as_mut().unwrap().read_stdout() {
+                        Some(data) => {
+                            self.channel_protocol
+                                .send(messages::stdout::to_cbor(10, Some(&data)).unwrap())?;
+                        }
+                        _ => {
+                            self.channel_protocol
+                                .send(messages::stdout::to_cbor(10, None).unwrap())?;
+                            self.process.as_mut().as_mut().unwrap().stdout_reader = None;
+                        }
+                    }
+                }
+
+                if self
+                    .process
+                    .as_ref()
+                    .as_ref()
+                    .unwrap()
+                    .stderr_reader
+                    .is_some()
+                {
+                    match self.process.as_mut().as_mut().unwrap().read_stderr() {
+                        Some(data) => {
+                            self.channel_protocol
+                                .send(messages::stderr::to_cbor(10, Some(&data)).unwrap())?;
+                        }
+                        _ => {
+                            self.channel_protocol
+                                .send(messages::stderr::to_cbor(10, None).unwrap())?;
+                            self.process.as_mut().as_mut().unwrap().stderr_reader = None;
+                        }
+                    }
+                }
+            }
             let message = match pump(timeout) {
                 Ok(message) => message,
                 Err(ProtocolError::ReceiveTimeout) => {
@@ -77,7 +107,7 @@ impl Protocol {
         }
     }
 
-    pub fn process_message(&self, message: ChannelMessage) -> Result<(), ProtocolError> {
+    pub fn process_message(&mut self, message: ChannelMessage) -> Result<(), ProtocolError> {
         let parsed_message = messages::parse_message(message)?;
 
         match parsed_message {
@@ -87,22 +117,17 @@ impl Protocol {
                 args,
             } => {
                 info!("{}: spawning command {} {:?}", channel_id, command, args);
-                self.spawn(command, args)?;
+
+                self.process = Box::new(Some(ProcessHandler::spawn(command, args)?));
+            }
+            messages::Message::Stdout { channel_id, data } => {
+                info!("{}: {}", channel_id, data);
+            }
+            messages::Message::Stderr { channel_id, data } => {
+                info!("{}: {}", channel_id, data);
             }
         }
 
         Ok(())
-    }
-
-    fn spawn(&self, command: String, args: Option<Vec<String>>) -> Result<(), ProtocolError> {
-        match Command::new(command.to_owned())
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .args(args.unwrap_or(vec![]))
-            .spawn()
-        {
-            Ok(_) => Ok(()),
-            Err(err) => Err(ProtocolError::SpawnError { cmd: command, err }),
-        }
     }
 }
