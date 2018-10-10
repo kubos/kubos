@@ -1,6 +1,24 @@
 Kubos Changelog
 ===============
 
+v1.6.0 - Sept 28th 2018
+-----------------------
+
+- Added corrupted chunk and file hash mismatch error handling to the file transfer service
+- Improved file transfer service multi-client handling
+- `Added timeout and chunk-size configuration options to the file transfer service <https://docs.kubos.com/latest/services/file.html#configuration>`__
+- `Updated the telemetry database service to allow query results to be written to an output file <https://docs.kubos.com/latest/services/telemetry-db.html#saving-results-for-later-processing>`__
+- `Added insert and delete capabilities to the telemetry database service <https://docs.kubos.com/latest/services/telemetry-db.html#adding-entries-to-the-database>`__
+- Increased telemetry database timestamp key resolution from seconds to milliseconds
+- `Updated applications service to add ability to passthrough arguments to the application being called <https://docs.kubos.com/latest/app-docs/app-guide.html#additional-arguments>`__
+- `Added a basic system-resource monitoring service <https://github.com/kubos/kubos/tree/master/services/monitor-service>`__
+
+Bug Fixes:
+~~~~~~~~~~
+
+- `Updated Rust cross-compiling instructions to handle new CC arg requirement <https://docs.kubos.com/latest/sdk-docs/sdk-rust.html#cross-compilation>`__
+- `Added doc links to the pre-built hardware services' documentation <https://docs.kubos.com/latest/services/hardware-services.html#pre-built-services>`__
+
 v1.5.0 - Sep 7th 2018
 ---------------------
 
