@@ -58,7 +58,8 @@ It has the following schema::
         }
      }
      
-The ``path`` input parameter specifies the directory where the application and manifest files reside.
+The ``path`` input parameter specifies the directory *on the OBC* where the application and manifest
+files reside.
 They **must be the only files in this directory** in order for the service to be able to complete the
 registration process.
 
