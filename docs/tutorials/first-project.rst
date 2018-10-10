@@ -9,10 +9,9 @@ and installing and running it on a target OBC.
     The iOBC does not support Python. If this is the board which you are using,
     please refer to the :doc:`Using Rust with the Kubos SDK <../sdk-docs/sdk-rust>`
     doc to get your first project built and running on the OBC.
-    
+
     After going through that document, please refer to the :doc:`mission application tutorial <first-mission-app>`
     for information about creating your first mission application.
-    
 
 Prerequisites
 -------------
@@ -70,12 +69,18 @@ the target IP's authenticity. Enter "yes" if this occurs::
     kubos@10.0.2.20's password: ********
 
 Please confirm that you are able to connect to the board via SSH from the SDK before proceeding
-with the next step.
+with the next step. If you are unable to do so, please verify that your OBC's network connection
+has been :ref:`successfully configured and activated <ethernet>`.
+
+Once you are logged in to the OBC, you can use the ``exit`` command to end the SSH connection and
+return to the SDK.
 
 Transferring the Project to a Target OBC
 ----------------------------------------
 
-We can now transfer the project to the ``kubos`` user home directory on the target OBC using SCP::
+We can now transfer the project to the ``kubos`` user home directory on the target OBC using SCP.
+From the SDK's command line, run the following (be sure to replace ``10.0.2.20`` with your OBC's
+IP address)::
 
     $ scp hello_world.py kubos@10.0.2.20:/home/kubos
     kubos@10.0.2.20's password: ********
