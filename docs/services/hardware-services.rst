@@ -39,6 +39,8 @@ Creating a Service
 The :doc:`service outline guide.<../dev-docs/service-outline-guide>` documents the preferred schema for all hardware services.
 Commonizing the queries available from each service allows greater code re-use and reduces the number of new queries users must learn when swapping between different hardware devices.
 
+.. _pre-built-services:
+
 Pre-Built Services
 ------------------
 
