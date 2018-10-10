@@ -59,7 +59,7 @@ The `kubos repository <https://github.com/kubos/kubos>`__ is a collection of
 loaded inside the Kubos Vagrant box. They can also be built locally
 using the ``kubos link`` and ``kubos link-target`` commands.
 
-See the :doc:`Kubos Linux quick start guide <../os-docs/first-linux-project>` 
+See the :doc:`Kubos Linux quick start guide <../tutorials/first-project>` 
 for instructions on setting up and building Kubos SDK projects.
 
 Linking in a Local Module

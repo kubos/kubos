@@ -42,7 +42,7 @@ class Services:
         (data, errors) = self._format(response, service)
 
         # Check for endpoint errors
-        if errors not in ([], None):
+        if errors not in ([], None, ""):
             raise EnvironmentError(
                 "{} Endpoint Error: {}".format(service, errors))
 
