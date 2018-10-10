@@ -23,7 +23,7 @@ Beaglebone Documentation
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KuboOS project
+-  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KubOS project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`kubos-linux-on-bbb` - Steps to build Kubos Linux for the Beaglebone Black
