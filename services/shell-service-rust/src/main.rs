@@ -17,15 +17,15 @@
 #![deny(warnings)]
 
 extern crate cbor_protocol;
-extern crate file_protocol;
-extern crate file_service;
 extern crate kubos_system;
 #[macro_use]
 extern crate log;
+extern crate shell_protocol;
+extern crate shell_service_rust;
 extern crate simplelog;
 
-use file_service::*;
 use kubos_system::Config as ServiceConfig;
+use shell_service_rust::*;
 use simplelog::*;
 use std::fs::File;
 
@@ -41,7 +41,7 @@ fn main() {
         LevelFilter::Info,
         Config::default(),
         // TODO: Making log file directory configurable
-        File::create("/var/log/kubos-file-transfer-service.log").unwrap(),
+        File::create("/var/log/kubos-shell-service.log").unwrap(),
     ));
 
     match CombinedLogger::init(loggers) {
@@ -49,9 +49,9 @@ fn main() {
         _ => {}
     }
 
-    let config = ServiceConfig::new("file-transfer-service");
+    let config = ServiceConfig::new("shell-service");
 
-    info!("Starting file transfer service");
+    info!("Starting shell service at {}", config.hosturl());
 
     match recv_loop(config) {
         Ok(()) => warn!("Service listener loop exited successfully?"),
