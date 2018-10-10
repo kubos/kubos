@@ -56,10 +56,10 @@ data and then storing that data into the telemetry database.
     
     Installing the Kubos SDK <../installation-docs/sdk-installing>
     Creating Your First KubOS Project <first-project>
+    Creating Your First Mission Application <first-mission-app>
     
 .. todo::
 
-    Creating Your First Mission Application <first-mission-app>
     Communicating with Hardware Services <querying-hardware>
     Storing Telemetry <storing-telemetry>
     

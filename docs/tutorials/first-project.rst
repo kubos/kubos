@@ -10,6 +10,9 @@ and installing and running it on a target OBC.
     please refer to the :doc:`Using Rust with the Kubos SDK <../sdk-docs/sdk-rust>`
     doc to get your first project built and running on the OBC.
 
+    After going through that document, please refer to the :doc:`mission application tutorial <first-mission-app>`
+    for information about creating your first mission application.
+
 Prerequisites
 -------------
 
@@ -93,9 +96,7 @@ Once the project has been transferred, we can log in to the OBC and run it::
     /home/kubos # python hello_world.py
     Hello, World!
 
-.. todo::
-    
-    Next Steps
-    <add section header>
-    
-    In the :doc:`next tutorial <first-mission-app>`, we'll create and run our first mission application.
+Next Steps
+----------
+
+In the :doc:`next tutorial <first-mission-app>`, we'll create and run our first mission application.
