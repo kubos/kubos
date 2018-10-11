@@ -38,10 +38,11 @@ def on_boot():
 
     with open(BOOTFILE, 'a+') as file:
         write_log(file, "OnBoot logic")
-
+        
     while True:
         # Get the current amount of available memory from the monitor service
         try:
+            request = '{memInfo{available}}'
             response = SERVICES.query(service="monitor-service", query=request)
         except Exception as e: 
             write_log(file, "Something went wrong: " + str(e) + "")
