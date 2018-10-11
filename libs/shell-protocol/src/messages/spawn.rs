@@ -58,7 +58,11 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
 }
 
 /// Spawn -> CBOR
-pub fn to_cbor(channel_id: u32, command: &str, args: Option<&[String]>) -> Result<Vec<u8>, String> {
+pub fn to_cbor(
+    channel_id: u32,
+    command: &str,
+    args: Option<&[String]>,
+) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, spawn, {} }}", channel_id, command);
     let mut options = BTreeMap::new();
     if let Some(args) = args {
@@ -70,8 +74,14 @@ pub fn to_cbor(channel_id: u32, command: &str, args: Option<&[String]>) -> Resul
         options.insert(ObjectKey::String("args".to_owned()), Value::Array(args_vec));
     }
 
-    ser::to_vec_packed(&(channel_id, "spawn", command, options))
-        .map_err(|_err| "Error creating spawn message".to_owned())
+    Ok(
+        ser::to_vec_packed(&(channel_id, "spawn", command, options)).map_err(|err| {
+            ProtocolError::MessageCreationError {
+                message: "spawn".to_owned(),
+                err,
+            }
+        })?,
+    )
 }
 
 #[cfg(test)]

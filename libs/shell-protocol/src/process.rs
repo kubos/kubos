@@ -19,7 +19,7 @@ use std::io::{BufRead, BufReader};
 use std::process::{Child, ChildStderr, ChildStdout, Command, Stdio};
 
 pub struct ProcessHandler {
-    _process: Child,
+    process: Child,
     pub stdout_reader: Option<BufReader<ChildStdout>>,
     pub stderr_reader: Option<BufReader<ChildStderr>>,
 }
@@ -52,7 +52,7 @@ impl ProcessHandler {
         };
 
         Ok(ProcessHandler {
-            _process: process,
+            process,
             stdout_reader,
             stderr_reader,
         })
@@ -106,5 +106,10 @@ impl ProcessHandler {
             }
             None => Ok(None),
         }
+    }
+
+    /// Retrieve id of process
+    pub fn id(&self) -> Result<u32, ProtocolError> {
+        Ok(self.process.id())
     }
 }

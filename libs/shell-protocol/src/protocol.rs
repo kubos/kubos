@@ -107,15 +107,25 @@ impl Protocol {
                 command,
                 args,
             } => {
-                info!("{}: spawning command {} {:?}", channel_id, command, args);
+                info!(
+                    "<- {{ {}, spawn, {}, {{ args = {:?} }} }}",
+                    channel_id, command, args
+                );
 
                 self.process = Box::new(Some(ProcessHandler::spawn(command, args)?));
+                if let Some(process) = self.process.as_ref().as_ref() {
+                    self.channel_protocol
+                        .send(messages::pid::to_cbor(channel_id, process.id()?)?)?;
+                }
             }
             messages::Message::Stdout { channel_id, data } => {
-                info!("{}: {}", channel_id, data);
+                info!("<- {{ {}, stdout, {} }}", channel_id, data);
             }
             messages::Message::Stderr { channel_id, data } => {
-                info!("{}: {}", channel_id, data);
+                info!("<- {{ {}, stderr, {} }}", channel_id, data);
+            }
+            messages::Message::Pid { channel_id, pid } => {
+                info!("<- {{ {}, pid, {} }}", channel_id, pid);
             }
         }
 

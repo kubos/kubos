@@ -20,6 +20,10 @@ use serde_cbor::Value;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Message {
+    Pid {
+        channel_id: u32,
+        pid: u32,
+    },
     /// This message is sent to the shell service to request a child process to be spawned.
     Spawn {
         channel_id: u32,
@@ -44,6 +48,7 @@ pub enum Message {
     },
 }
 
+pub mod pid;
 pub mod spawn;
 pub mod stderr;
 pub mod stdout;
@@ -55,6 +60,8 @@ pub fn parse_message(message: ChannelMessage) -> Result<Message, ProtocolError> 
         Ok(stdout::from_cbor(&message)?)
     } else if message.name == "stderr" {
         Ok(stderr::from_cbor(&message)?)
+    } else if message.name == "pid" {
+        Ok(pid::from_cbor(&message)?)
     } else {
         Err(ProtocolError::MessageParseError {
             err: "No message found".to_owned(),
