@@ -17,65 +17,107 @@ without the environment indicator at the top of the file:
 """
 
 import argparse
+import app_api
+import datetime
 import toml
 import time
-import app_api
 
-
-MANIFEST = toml.load('manifest.toml')
 SERVICES = app_api.Services()
-LOGFILE = '/home/system/var/app-log'
+BOOTFILE = '/home/system/var/onboot-output'
+COMMANDFILE = '/home/system/var/oncommand-output'
+ERRORSFILE = '/home/system/var/mission-errors'
 
+# Helper function to insert a timestamp into the log message
+def write_log(logfile, message):
 
+    logfile.write("%s: %s\n" % (str(datetime.datetime.now()), message))
+
+# On-boot logic which will be called at boottime if this app is registered with
+# the applications service
 def on_boot():
 
-    with open(LOGFILE, 'a+') as log:
-        log.write("OnBoot logic\n")
-    query = '{ apps { active, app { uuid, name, version, author } } }'
+    with open(BOOTFILE, 'a+') as file:
+        write_log(file, "OnBoot logic")
+
     while True:
+        # Get the current amount of available memory from the monitor service
         try:
-            with open(LOGFILE, 'a+') as log:
-                log.write("###############################################\n")
-                log.write("I'm performing recurring system housekeeping\n")
-                log.write("Querying for active applications!\n")
-                log.write("Query: {}\n".format(query))
-                apps = SERVICES.query(service="app-service", query=query)
-                log.write("Active applications are: {}\n".format(apps))
-        except Exception as e:
-            with open(LOGFILE, 'a+') as log:
-                log.write("Housekeeping caused an error: {},{},{}\n".format(
-                    type(e), e.args, e))
+            response = SERVICES.query(service="monitor-service", query=request)
+        except Exception as e: 
+            write_log(file, "Something went wrong: " + str(e) + "")
+            continue
+        
+        data = response["memInfo"]
+        available = data["available"]
+        
+        write_log(file, "%s: Current available memory: %s kB" % (str(datetime.datetime.now()), available))
+        
+        request = '''
+            mutation {
+                insert(subsystem: "OBC", parameter: "available_mem", value: "%s") {
+                    success,
+                    errors
+                }
+            }
+            ''' % (available)
+        
+        # Save the result to the telemetry database
+        try:
+            response = SERVICES.query(service="telemetry-service", query=request)
+        except Exception as e: 
+            write_log(file, "Something went wrong: " + str(e) + "")
+            print "OnCommand logic encountered errors"
+            continue
+            
+        data = response["insert"]
+        success = data["success"]
+        errors = data["errors"]
+        
+        if success == False:
+            write_log(file, "Telemetry insert encountered errors: " + str(errors) + "")
 
-        with open(LOGFILE, 'a+') as log:
-            log.write("\n\n")
-        time.sleep(10)
+        with open(BOOTFILE, 'a+') as file:
+            write_log(file, "\n")
+        
+        # Wait five minutes before checking again
+        time.sleep(300)
 
-
+# On-demand logic which will be called manually by the user (potentially via the applications service)
 def on_command(cmd_args):
 
-    with open(LOGFILE, 'a+') as log:
-        log.write("OnCommand logic\n")
+    with open(COMMANDFILE, 'a+') as file:
+        write_log(file, "OnCommand logic")
 
     if cmd_args.cmd_string == 'safemode':
         if cmd_args.cmd_int > 0:
-            with open(LOGFILE, 'a+') as log:
-                log.write(
-                    "Going into safemode for {} seconds\n".format(
+            with open(LOGFILE, 'a+') as file:
+                write_log(file, 
+                    "Going into safemode for {} seconds".format(
                         cmd_args.cmd_int))
-                log.write("Sending commands to hardware to go into safemode\n")
+                write_log(file, "Sending commands to hardware to go into safemode")
                 time.sleep(cmd_args.cmd_int)
-                log.write("Sending commands to hardware to normal operation\n")
+                write_log(file, "Sending commands to hardware to normal operation")
         else:
-            raise ValueError("Command Integer must be positive and non-zero\n")
+            raise ValueError("Command Integer must be positive and non-zero")
+                    
     else:
-        # If no command args are given, just print manifest info
-        with open(LOGFILE, 'a+') as log:
-            log.write("My manifest information: {}\n".format(MANIFEST))
-
+        query = '{ apps { active, app { uuid, name, version, author } } }'
+        try:
+            with open(COMMANDFILE, 'a+') as file:
+                write_log(file, "Querying for active applications")
+                write_log(file, "Query: {}".format(query))
+                apps = SERVICES.query(service="app-service", query=query)
+                write_log(file, "Active applications are: {}".format(apps))
+        except Exception as e:
+            with open(COMMANDFILE, 'a+') as file:
+                write_log(file, "Housekeeping caused an error: {},{},{}".format(
+                    type(e), e.args, e))
+        
 
 def main():
     parser = argparse.ArgumentParser()
 
+    # The -r argument is required to be present by the applications service
     parser.add_argument(
         '-r',
         '--run',
@@ -83,6 +125,8 @@ def main():
         default='OnBoot',
         help='Determines run behavior. Either "OnBoot" or "OnCommand"',
         required=True)
+    
+    # Other optional arguments
     parser.add_argument(
         '-s',
         '--cmd_string',
@@ -99,8 +143,12 @@ def main():
 
     if args.run[0] == 'OnBoot':
         on_boot()
-    else:
+    elif args.run[0] == 'OnCommand':
         on_command(args)
+    else:
+        with open(ERRORSFILE, 'a+') as file:
+            write_log(file, "Unknown run level specified")
+        print "Unknown run level specified"
 
 
 if __name__ == "__main__":
