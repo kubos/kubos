@@ -38,7 +38,7 @@ def on_boot():
 
     with open(BOOTFILE, 'a+') as file:
         write_log(file, "OnBoot logic")
-        
+
     while True:
         # Get the current amount of available memory from the monitor service
         try:

@@ -1,20 +1,111 @@
+extern crate chrono;
 extern crate getopts;
 #[macro_use]
 extern crate kubos_app;
 
+use chrono::Utc;
 use getopts::Options;
 use kubos_app::*;
-use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
+use std::thread;
+use std::time::Duration;
 
 struct MyApp;
 
+const BOOTFILE: &str = "/home/system/var/onboot-output";
+const COMMANDFILE: &str = "/home/system/var/oncommand-output";
+
+macro_rules! log {
+    ($log_file:ident, $msg:expr) => {{
+        writeln!($log_file, "{}: {}", Utc::now(), $msg).unwrap();
+    }};
+    ($log_file:ident, $msg:expr, $($arg:tt)*) => {{
+        let message = format!($msg, $($arg)*);
+        writeln!($log_file, "{}: {}", Utc::now(), message).unwrap();
+    }};
+}
+
 impl AppHandler for MyApp {
-    fn on_boot(&self, args: Vec<String>) {
+    fn on_boot(&self, _args: Vec<String>) {
+        let monitor_service = ServiceConfig::new("monitor-service");
+        let telemetry_service = ServiceConfig::new("telemetry-service");
+
+        loop {
+            thread::sleep(Duration::from_secs(3));
+            // Set up the log file
+            let mut log_file = OpenOptions::new().create(true).append(true).open(BOOTFILE).unwrap();
+            log!(log_file, "OnBoot logic called");
+
+            // Get the amount of memory currently available on the OBC
+            let request = "{memInfo{available}}";
+            let response = match query(
+                monitor_service.clone(),
+                request,
+                Some(Duration::from_secs(1)),
+            ) {
+                Ok(msg) => msg,
+                Err(err) => {
+                    log!(log_file, "Monitor service query failed: {}", err);
+                    continue;
+                }
+            };
+
+            let memory = response.get("memInfo").and_then(|msg| msg.get("available"));
+
+            // Save the amount to the telemetry database
+            if let Some(mem) = memory {
+                let request = format!(
+                    r#"
+                    mutation {{
+                        insert(subsystem: "OBC", parameter: "available_mem", value: "{}") {{
+                            success,
+                            errors
+                        }}
+                    }}
+                "#,
+                    mem
+                );
+
+                match query(
+                    telemetry_service.clone(),
+                    &request,
+                    Some(Duration::from_secs(1)),
+                ) {
+                    Ok(msg) => {
+                        let success = msg.get("insert").and_then(|data| {
+                            data.get("success").and_then(|val| {
+                                val.as_bool()
+                            })
+                        });
+
+                        if success == Some(true) {
+                            log!(log_file, "Current memory value saved to database");
+                        } else {
+                            match msg.get("errors") {
+                                Some(errors) => log!(log_file,
+                                    "Failed to save value to database: {}",
+                                    errors
+                                ),
+                                None => log!(log_file, "Failed to save value to database"),
+                            };
+                        }
+                    }
+                    Err(err) => {
+                        log!(log_file, "Monitor service mutation failed: {}", err);
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    fn on_command(&self, args: Vec<String>) {
         let mut opts = Options::new();
-        opts.optflag("v", "verbose", "Enable verbose output");
-        opts.optflagopt("l", "log", "Log file path", "LOG_FILE");
+
+        opts.optflagopt("r", "run", "Run level which should be executed", "RUN_LEVEL");
+        opts.optflagopt("s", "cmd_string", "Subcommand", "CMD_STR");
+        opts.optflagopt("t", "cmd_sleep", "Safe-mode sleep time", "CMD_INT");
 
         // Parse the command args (skip the first arg with the application name)
         let matches = match opts.parse(&args[1..]) {
@@ -22,24 +113,55 @@ impl AppHandler for MyApp {
             Err(f) => panic!(f.to_string()),
         };
 
-        // Get the path to use for logging
-        let log_path = matches
-            .opt_str("l")
-            .unwrap_or("/home/kubos/test-output".to_owned());
-        println!("Log file set to: {}", log_path);
-
         // Set up the log file
-        let mut log_file = OpenOptions::new().append(true).open(log_path).unwrap();
+        let mut log_file = OpenOptions::new().create(true).append(true).open(COMMANDFILE).unwrap();
 
-        writeln!(log_file, "OnBoot logic called").unwrap();
+        log!(log_file, "OnCommand logic called");
 
-        // Check for our other command line argument
-        if matches.opt_present("v") {
-            writeln!(log_file, "Verbose output enabled").unwrap();
+        let subcommand = matches.opt_str("s").unwrap_or("".to_owned());
+
+        match subcommand.as_ref() {
+            "safemode" => {
+                let time: u64 = match matches.opt_get("t") {
+                    Ok(Some(val)) => val,
+                    _ => {
+                        log!(log_file, "Command Integer must be positive and non-zero");
+                        return;
+                    }
+                };
+
+                log!(log_file, "Going into safemode for {} seconds", time);
+                thread::sleep(Duration::from_secs(time));
+                log!(log_file, "Resuming normal operations");
+            }
+            _ => {
+                // Get a list of all the currently registered applications
+                log!(log_file, "Querying for active applications");
+                
+                let request = r#"{
+                    apps {
+                        active,
+                        app {
+                            uuid,
+                            name,
+                            version,
+                            author
+                        }
+                    }
+                }"#;
+                
+                match query(
+                    ServiceConfig::new("app-service"),
+                    request,
+                    Some(Duration::from_secs(1)),
+                ) {
+                    Ok(msg) => log!(log_file, "App query result: {:?}", msg),
+                    Err(err) => {
+                        log!(log_file, "App service query failed: {}", err)
+                    }
+                }
+            }
         }
-    }
-    fn on_command(&self, _args: Vec<String>) {
-        fs::write("/home/kubos/test-output", "OnCommand logic\r\n").unwrap();
     }
 }
 
