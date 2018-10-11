@@ -37,11 +37,17 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
 }
 
 /// Stdout -> CBOR
-pub fn to_cbor(channel_id: u32, data: Option<&str>) -> Result<Vec<u8>, String> {
+pub fn to_cbor(channel_id: u32, data: Option<&str>) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, stdout, '{:?}' }}", channel_id, data);
 
-    ser::to_vec_packed(&(channel_id, "stdout", data))
-        .map_err(|_err| "Error creating stdout message".to_owned())
+    Ok(
+        ser::to_vec_packed(&(channel_id, "stdout", data)).map_err(|err| {
+            ProtocolError::MessageCreationError {
+                message: "stdout".to_owned(),
+                err,
+            }
+        })?,
+    )
 }
 
 #[cfg(test)]

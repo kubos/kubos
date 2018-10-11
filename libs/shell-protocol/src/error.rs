@@ -16,6 +16,7 @@
 
 use cbor_protocol;
 use channel_protocol;
+use serde_cbor;
 use std::io;
 
 /// Errors which occur when using ShellProtocol
@@ -32,12 +33,19 @@ pub enum ProtocolError {
         /// The specific channel protocol error
         err: channel_protocol::ProtocolError,
     },
+    #[fail(display = "Unable to create message {}: {}", message, err)]
+    MessageCreationError {
+        message: String,
+        err: serde_cbor::error::Error,
+    },
     /// A general error was encountered when parsing a message
     #[fail(display = "Unable to parse message: {}", err)]
     MessageParseError {
         /// Underlying error encountered
         err: String,
     },
+    #[fail(display = "Process error when {}: {}", action, err)]
+    ProcesssError { action: String, err: io::Error },
     /// A timeout occurred when receiving data
     #[fail(display = "A receive timeout was encountered")]
     ReceiveTimeout,

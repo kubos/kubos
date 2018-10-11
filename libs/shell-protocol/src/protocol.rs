@@ -25,6 +25,7 @@ pub struct Protocol {
     pub process: Box<Option<ProcessHandler>>,
 }
 
+/// Shell Protocol structure used in the shell service
 impl Protocol {
     pub fn new(host_ip: &str, remote_addr: &str) -> Self {
         // Set up the full connection info
@@ -51,49 +52,39 @@ impl Protocol {
     {
         loop {
             // Check child for new stdout data
-            if self.process.as_mut().as_mut().is_some() {
-                if self
-                    .process
-                    .as_ref()
-                    .as_ref()
-                    .unwrap()
-                    .stdout_reader
-                    .is_some()
-                {
-                    match self.process.as_mut().as_mut().unwrap().read_stdout() {
-                        Some(data) => {
+            // Reading from stdout/stderr is currently a blocking operation...
+            // This code should probably get refactored into something akin
+            // to an event loop with non-blocking io.
+            if let Some(process) = self.process.as_mut().as_mut() {
+                if process.stdout_reader.is_some() {
+                    match process.read_stdout() {
+                        Ok(Some(data)) => {
                             self.channel_protocol
-                                .send(messages::stdout::to_cbor(10, Some(&data)).unwrap())?;
+                                .send(messages::stdout::to_cbor(10, Some(&data))?)?;
                         }
                         _ => {
                             self.channel_protocol
-                                .send(messages::stdout::to_cbor(10, None).unwrap())?;
-                            self.process.as_mut().as_mut().unwrap().stdout_reader = None;
+                                .send(messages::stdout::to_cbor(10, None)?)?;
+                            process.stdout_reader = None;
                         }
                     }
                 }
 
-                if self
-                    .process
-                    .as_ref()
-                    .as_ref()
-                    .unwrap()
-                    .stderr_reader
-                    .is_some()
-                {
-                    match self.process.as_mut().as_mut().unwrap().read_stderr() {
-                        Some(data) => {
+                if process.stderr_reader.is_some() {
+                    match process.read_stderr() {
+                        Ok(Some(data)) => {
                             self.channel_protocol
-                                .send(messages::stderr::to_cbor(10, Some(&data)).unwrap())?;
+                                .send(messages::stderr::to_cbor(10, Some(&data))?)?;
                         }
                         _ => {
                             self.channel_protocol
-                                .send(messages::stderr::to_cbor(10, None).unwrap())?;
-                            self.process.as_mut().as_mut().unwrap().stderr_reader = None;
+                                .send(messages::stderr::to_cbor(10, None)?)?;
+                            process.stderr_reader = None;
                         }
                     }
                 }
             }
+            // Check for new messages from the client
             let message = match pump(timeout) {
                 Ok(message) => message,
                 Err(ProtocolError::ReceiveTimeout) => {

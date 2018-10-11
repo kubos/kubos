@@ -25,6 +25,7 @@ pub struct ProcessHandler {
 }
 
 impl ProcessHandler {
+    /// Spawn a process and setup stdout/stderr streams
     pub fn spawn(
         command: String,
         args: Option<Vec<String>>,
@@ -57,37 +58,53 @@ impl ProcessHandler {
         })
     }
 
-    pub fn read_stdout(&mut self) -> Option<String> {
+    /// Attempt to read from stdout
+    ///
+    /// This will block as long as the process is running.
+    /// A return value of `None` indicates the stream is
+    /// no longer available and likewise the process
+    /// is likely no longer alive.
+    pub fn read_stdout(&mut self) -> Result<Option<String>, ProtocolError> {
         match self.stdout_reader {
             Some(ref mut stdout_reader) => {
                 let mut data = String::new();
                 match stdout_reader.read_line(&mut data) {
-                    Ok(0) => None,
-                    Err(e) => {
-                        warn!("stdout err {:?}", e);
-                        None
+                    Ok(0) => Ok(None),
+                    Ok(_) => Ok(Some(data)),
+                    Err(err) => {
+                        return Err(ProtocolError::ProcesssError {
+                            action: "read stdout".to_owned(),
+                            err,
+                        })
                     }
-                    Ok(_) => Some(data),
                 }
             }
-            None => None,
+            None => Ok(None),
         }
     }
 
-    pub fn read_stderr(&mut self) -> Option<String> {
+    /// Attempt to read from stderr
+    ///
+    /// This will block as long as the process is running.
+    /// A return value of `None` indicates the stream is
+    /// no longer available and likewise the process
+    /// is likely no longer alive.
+    pub fn read_stderr(&mut self) -> Result<Option<String>, ProtocolError> {
         match self.stderr_reader {
             Some(ref mut stderr_reader) => {
                 let mut data = String::new();
                 match stderr_reader.read_line(&mut data) {
-                    Ok(0) => None,
-                    Err(e) => {
-                        warn!("stderr err {:?}", e);
-                        None
+                    Ok(0) => Ok(None),
+                    Ok(_) => Ok(Some(data)),
+                    Err(err) => {
+                        return Err(ProtocolError::ProcesssError {
+                            action: "read stderr".to_owned(),
+                            err,
+                        })
                     }
-                    Ok(_) => Some(data),
                 }
             }
-            None => None,
+            None => Ok(None),
         }
     }
 }
