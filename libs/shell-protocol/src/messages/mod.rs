@@ -20,6 +20,11 @@ use serde_cbor::Value;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Message {
+    Exit {
+        channel_id: u32,
+        code: u32,
+        signal: u32,
+    },
     Pid {
         channel_id: u32,
         pid: u32,
@@ -48,6 +53,7 @@ pub enum Message {
     },
 }
 
+pub mod exit;
 pub mod pid;
 pub mod spawn;
 pub mod stderr;

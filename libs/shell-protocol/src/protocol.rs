@@ -56,6 +56,7 @@ impl Protocol {
             // This code should probably get refactored into something akin
             // to an event loop with non-blocking io.
             if let Some(process) = self.process.as_mut().as_mut() {
+                // Check if process has stdout output
                 if process.stdout_reader.is_some() {
                     match process.read_stdout() {
                         Ok(Some(data)) => {
@@ -70,6 +71,7 @@ impl Protocol {
                     }
                 }
 
+                // Check if process has stderr output
                 if process.stderr_reader.is_some() {
                     match process.read_stderr() {
                         Ok(Some(data)) => {
@@ -82,6 +84,14 @@ impl Protocol {
                             process.stderr_reader = None;
                         }
                     }
+                }
+
+                // Check if process has exited
+                if let Some((code, signal)) = process.status()? {
+                    self.channel_protocol
+                        .send(messages::exit::to_cbor(10, code, signal)?)?;
+                    // If the process is done then we can exit this loop
+                    return Ok(());
                 }
             }
             // Check for new messages from the client
@@ -126,6 +136,13 @@ impl Protocol {
             }
             messages::Message::Pid { channel_id, pid } => {
                 info!("<- {{ {}, pid, {} }}", channel_id, pid);
+            }
+            messages::Message::Exit {
+                channel_id,
+                code,
+                signal,
+            } => {
+                info!("-< {{ {}, exit, {}, {} }}", channel_id, code, signal);
             }
         }
 

@@ -16,7 +16,8 @@
 
 use error::ProtocolError;
 use std::io::{BufRead, BufReader};
-use std::process::{Child, ChildStderr, ChildStdout, Command, Stdio};
+use std::os::unix::prelude::*;
+use std::process::{Child, ChildStderr, ChildStdout, Command, ExitStatus, Stdio};
 
 pub struct ProcessHandler {
     process: Child,
@@ -111,5 +112,21 @@ impl ProcessHandler {
     /// Retrieve id of process
     pub fn id(&self) -> Result<u32, ProtocolError> {
         Ok(self.process.id())
+    }
+
+    /// Check to see if a process has exited and if the exit
+    /// status is available
+    pub fn status(&mut self) -> Result<Option<(u32, u32)>, ProtocolError> {
+        match self.process.try_wait() {
+            Ok(Some(status)) => Ok(Some((
+                status.code().unwrap_or(0) as u32,
+                status.signal().unwrap_or(0) as u32,
+            ))),
+            Ok(None) => Ok(None),
+            Err(err) => Err(ProtocolError::ProcesssError {
+                action: "get exit status".to_owned(),
+                err,
+            }),
+        }
     }
 }
