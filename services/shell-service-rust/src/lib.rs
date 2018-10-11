@@ -86,7 +86,8 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
             // listen for requests from other clients
             let shared_threads = threads.clone();
             thread::spawn(move || {
-                let mut s_protocol = ShellProtocol::new(&host_ref, &format!("{}", source));
+                let mut s_protocol =
+                    ShellProtocol::new(&host_ref, &format!("{}", source), channel_id);
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation

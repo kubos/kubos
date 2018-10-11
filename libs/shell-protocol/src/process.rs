@@ -17,7 +17,7 @@
 use error::ProtocolError;
 use std::io::{BufRead, BufReader};
 use std::os::unix::prelude::*;
-use std::process::{Child, ChildStderr, ChildStdout, Command, ExitStatus, Stdio};
+use std::process::{Child, ChildStderr, ChildStdout, Command, Stdio};
 
 pub struct ProcessHandler {
     process: Child,

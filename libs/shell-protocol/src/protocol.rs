@@ -23,15 +23,17 @@ use std::time::Duration;
 pub struct Protocol {
     pub channel_protocol: ChannelProtocol,
     pub process: Box<Option<ProcessHandler>>,
+    channel_id: u32,
 }
 
 /// Shell Protocol structure used in the shell service
 impl Protocol {
-    pub fn new(host_ip: &str, remote_addr: &str) -> Self {
+    pub fn new(host_ip: &str, remote_addr: &str, channel_id: u32) -> Self {
         // Set up the full connection info
         Protocol {
             channel_protocol: ChannelProtocol::new(host_ip, remote_addr, 4096),
             process: Box::new(None),
+            channel_id: channel_id,
         }
     }
 
@@ -61,11 +63,11 @@ impl Protocol {
                     match process.read_stdout() {
                         Ok(Some(data)) => {
                             self.channel_protocol
-                                .send(messages::stdout::to_cbor(10, Some(&data))?)?;
+                                .send(messages::stdout::to_cbor(self.channel_id, Some(&data))?)?;
                         }
                         _ => {
                             self.channel_protocol
-                                .send(messages::stdout::to_cbor(10, None)?)?;
+                                .send(messages::stdout::to_cbor(self.channel_id, None)?)?;
                             process.stdout_reader = None;
                         }
                     }
@@ -76,11 +78,11 @@ impl Protocol {
                     match process.read_stderr() {
                         Ok(Some(data)) => {
                             self.channel_protocol
-                                .send(messages::stderr::to_cbor(10, Some(&data))?)?;
+                                .send(messages::stderr::to_cbor(self.channel_id, Some(&data))?)?;
                         }
                         _ => {
                             self.channel_protocol
-                                .send(messages::stderr::to_cbor(10, None)?)?;
+                                .send(messages::stderr::to_cbor(self.channel_id, None)?)?;
                             process.stderr_reader = None;
                         }
                     }
@@ -88,8 +90,11 @@ impl Protocol {
 
                 // Check if process has exited
                 if let Some((code, signal)) = process.status()? {
-                    self.channel_protocol
-                        .send(messages::exit::to_cbor(10, code, signal)?)?;
+                    self.channel_protocol.send(messages::exit::to_cbor(
+                        self.channel_id,
+                        code,
+                        signal,
+                    )?)?;
                     // If the process is done then we can exit this loop
                     return Ok(());
                 }
@@ -125,7 +130,7 @@ impl Protocol {
                 self.process = Box::new(Some(ProcessHandler::spawn(command, args)?));
                 if let Some(process) = self.process.as_ref().as_ref() {
                     self.channel_protocol
-                        .send(messages::pid::to_cbor(channel_id, process.id()?)?)?;
+                        .send(messages::pid::to_cbor(self.channel_id, process.id()?)?)?;
                 }
             }
             messages::Message::Stdout { channel_id, data } => {
