@@ -29,10 +29,7 @@ type AppResult<T> = Result<T, failure::Error>;
 ///
 /// # Arguments
 ///
-/// * `service` - The name of the service to send the query to
-/// * `config_path` - The system location of the `config.toml` file which has the IP and port information
-///                   of the service to query. If `None` is specified, the default config location will be
-///                   used
+/// * `config` - The configuration information for the service which should be queried
 /// * `query` - The raw GraphQL query as a string
 /// * `timeout` - The timeout provided to the UDP socket. Note: This function will block when `None`
 ///               is provided here
