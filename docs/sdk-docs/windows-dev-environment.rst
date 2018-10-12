@@ -116,52 +116,52 @@ In this case, Windows Firewall may need to be updated to allow this traffic.
 1. Open 'Windows Firewall with Advanced Security'. You can find this program by opening the start
    menu and searching for "firewall"
 
-.. image:: ../images/windows_firewall.PNG
+.. image:: ../images/windows_firewall.png
 
 2. Click on "Inbound Rules", then scroll down to the "VBoxHeadless" rules. Find the rule which blocks
    UDP traffic on Public networks.
 
-.. image:: ../images/vbox_firewall_rule.PNG
+.. image:: ../images/vbox_firewall_rule.png
 
 3. Right-click on the rule and select "Disable Rule"
 
-.. image:: ../images/vbox_firewall_rule_disable.PNG
+.. image:: ../images/vbox_firewall_rule_disable.png
 
 4. Right-click on "Inbound Rules" and select "New Rule"
 
-.. image:: ../images/inbound_new_rule.PNG
+.. image:: ../images/inbound_new_rule.png
 
 5. Select "Custom" for the type of rule
 
-.. image:: ../images/inbound_rule_custom.PNG
+.. image:: ../images/inbound_rule_custom.png
 
 6. Select "All programs"
 
-.. image:: ../images/inbound_rule_programs.PNG
+.. image:: ../images/inbound_rule_programs.png
 
 7. Select "UDP" as the protocol type. Leave the "Local port" and "Remote port" settings as "All Ports"
 
-.. image:: ../images/inbound_rule_ports.PNG
+.. image:: ../images/inbound_rule_ports.png
 
 8. Under "Which remote IP addresses does this rule apply to?", click "These IP addresses", then click
    "Add"
 
-.. image:: ../images/inbound_rule_ip.PNG
+.. image:: ../images/inbound_rule_ip.png
 
 9. In the "This IP address or subnet" field, add the IP address of your OBC, then click "OK", then
    click "Next"
 
-.. image:: ../images/inbound_rule_new_ip.PNG
+.. image:: ../images/inbound_rule_new_ip.png
 
 10. Select "Allow the connection"
 
-.. image:: ../images/inbound_rule_connection.PNG
+.. image:: ../images/inbound_rule_connection.png
 
 11. In the "When does this rule apply?" menu, leave all checkboxes selected
 
-.. image:: ../images/inbound_rule_network.PNG
+.. image:: ../images/inbound_rule_network.png
 
 12. In the "Name" field, enter something descriptive for the rule. For example, "Allow UDP from OBC".
     Then click "Finish" to finalize and activate the new rule.
 
-.. image:: ../images/inbound_rule_name.PNG
+.. image:: ../images/inbound_rule_name.png
