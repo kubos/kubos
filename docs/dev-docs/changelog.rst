@@ -5,7 +5,7 @@ v1.7.0 - Oct 12th 2018
 ----------------------
 
 - `Added overview documentation for the monitor service <https://docs.kubos.com/latest/services/monitor-service.html>`__
-- `Added tutorials to help new users write their first mission application <https://docs.kubos.com/latest/tutorials/index.html#mission-development-tutorials`__
+- `Added tutorials to help new users write their first mission application <https://docs.kubos.com/latest/tutorials/index.html#mission-development-tutorials>`__
 - `Added tutorials to help new users interact with the telemetry database and file transfer services <https://docs.kubos.com/latest/tutorials/index.html#system-interaction-tutorials>`__
 
 Bug Fixes:
