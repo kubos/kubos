@@ -23,12 +23,12 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`first-linux-project` - Basic tutorial for creating your first Kubos SDK project
+-  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KubOS project
 -  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`kubos-linux-on-iobc` - Steps to build Kubos Linux for the iOBC
 -  :doc:`../installation-docs/installing-linux-iobc` - Steps to install Kubos Linux
-   
+
 Status LEDs
 -----------
 
@@ -83,10 +83,10 @@ Linux AIN number.
 This raw value can then be converted to microvolts by multiplying it by the value
 found in ``/sys/bus/iio/devices/iio\:device0/in_voltage_scale``.
 
-More information about the capture and use of ADC can be found in 
+More information about the capture and use of ADC can be found in
 `this guide from Atmel <https://www.at91.com/linux4sam/bin/view/Linux4SAM/IioAdcDriver>`__.
 
-An `ADC example <http://github.com/kubos/kubos/tree/master/examples/adc-thermistor>`__ is 
+An `ADC example <http://github.com/kubos/kubos/tree/master/examples/adc-thermistor>`__ is
 also available for reference in the Kubos repo.
 
 GPIO
@@ -207,7 +207,7 @@ The iOBC has 6 PWM pins available for use, grouped into three pairs:
     - PWM0 and PWM1
     - PWM2 and PWM3
     - PWM4 and PWM5
-    
+
 Users can interact with these pins through the `PWM sysfs interface <https://www.kernel.org/doc/Documentation/pwm.txt>`__,
 and the ``/sys/class/pwm/pwmchip0/`` directory
 
@@ -246,7 +246,7 @@ SPI
 ~~~
 
 The iOBC has one SPI bus available for external use with three pre-allocated chip select pins.
-All pins are exposed via either an iOBC daughterboard (J5 connection) or optional iOBC header (J3 connection). 
+All pins are exposed via either an iOBC daughterboard (J5 connection) or optional iOBC header (J3 connection).
 
 **SPI Bus 1**
 
@@ -335,7 +335,7 @@ Users can interact with these ports using Linux's `termios <http://man7.org/linu
 User Data Partition
 -------------------
 
-The iOBC has a single user data partition which maps to the `/home` 
+The iOBC has a single user data partition which maps to the `/home`
 directory.
 
 The home directories of all user accounts, except root, should live
