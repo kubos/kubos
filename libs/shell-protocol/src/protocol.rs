@@ -136,6 +136,9 @@ impl Protocol {
                         .send(messages::pid::to_cbor(self.channel_id, process.id()?)?)?;
                 }
             }
+            messages::Message::Stdin { channel_id, data } => {
+                info!("-< {{ {}, stdin, {} }}", channel_id, data);
+            }
             messages::Message::Stdout { channel_id, data } => {
                 info!("<- {{ {}, stdout, {:?} }}", channel_id, data);
             }
