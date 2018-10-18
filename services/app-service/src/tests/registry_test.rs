@@ -19,15 +19,15 @@ extern crate toml;
 
 use tempfile::TempDir;
 
+use app_entry::*;
 use error::*;
 use registry::*;
-use app_entry::*;
 
 #[test]
 fn custom_apps_dir() {
     let registry_dir = TempDir::new().unwrap();
     let registry_path = registry_dir.path().to_string_lossy();
-    
+
     let registry = AppRegistry::new_from_dir(&registry_path).unwrap();
     assert_eq!(registry.apps_dir, String::from(registry_path));
 }
@@ -36,7 +36,13 @@ fn custom_apps_dir() {
 fn invalid_apps_dir_empty_reg() {
     let result = AppRegistry::new_from_dir("/i/dont/exist");
     let err = result.unwrap_err();
-    assert_eq!(err, AppError::IoError{ cause: ::std::io::ErrorKind::PermissionDenied, description: "Permission denied (os error 13)".to_owned()});
+    assert_eq!(
+        err,
+        AppError::IoError {
+            cause: ::std::io::ErrorKind::PermissionDenied,
+            description: "Permission denied (os error 13)".to_owned()
+        }
+    );
 }
 
 #[test]

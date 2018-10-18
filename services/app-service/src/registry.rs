@@ -182,24 +182,30 @@ impl AppRegistry {
 
         let manifest = match manifest_file {
             Some(file) => file,
-            None => return Err(AppError::RegisterError {
-                err: "Failed to find manifest file".to_owned()}),
+            None => {
+                return Err(AppError::RegisterError {
+                    err: "Failed to find manifest file".to_owned(),
+                })
+            }
         };
         let app = match app_file {
             Some(file) => file,
-            None => return Err(AppError::RegisterError {
-                err: "Failed to find app file".to_owned()}),
+            None => {
+                return Err(AppError::RegisterError {
+                    err: "Failed to find app file".to_owned(),
+                })
+            }
         };
 
         let mut data = String::new();
         fs::File::open(manifest.path()).and_then(|mut fp| fp.read_to_string(&mut data))?;
 
-        let metadata: AppMetadata = match toml::from_str(&data)  {
+        let metadata: AppMetadata = match toml::from_str(&data) {
             Ok(val) => val,
             Err(error) => {
                 return Err(AppError::ParseError {
                     entity: "manifest.toml".to_owned(),
-                    err: error.to_string()
+                    err: error.to_string(),
                 })
             }
         };
@@ -236,26 +242,32 @@ impl AppRegistry {
         let active_symlink = PathBuf::from(format!("{}/active/{}", self.apps_dir, app_uuid));
         if active_symlink.exists() {
             match fs::remove_file(active_symlink.clone()) {
-                Err(err) => 
+                Err(err) => {
                     return Err(AppError::RegisterError {
-                err: format!("Couldn't remove symlink {}: {:?}",
-                        active_symlink.display(),
-                        err),
-            }),
-                
+                        err: format!(
+                            "Couldn't remove symlink {}: {:?}",
+                            active_symlink.display(),
+                            err
+                        ),
+                    })
+                }
+
                 Ok(_) => {}
             }
         }
 
         match unix::fs::symlink(&app_dir_str, active_symlink.clone()) {
-            Err(err) => return Err(AppError::RegisterError {
-                err: format!(
-                    "Couldn't symlink {} to {}: {:?}",
-                    active_symlink.display(),
-                    app_dir_str,
-                    err
-                )}),
-            
+            Err(err) => {
+                return Err(AppError::RegisterError {
+                    err: format!(
+                        "Couldn't symlink {} to {}: {:?}",
+                        active_symlink.display(),
+                        app_dir_str,
+                        err
+                    ),
+                })
+            }
+
             Ok(_) => {}
         }
 
@@ -300,8 +312,11 @@ impl AppRegistry {
                 .then(e.app.metadata.version.cmp(&String::from(version)))
         }) {
             Ok(index) => index,
-            Err(_) => return Err(AppError::UninstallError {
-                err: format!("Active app with UUID {} does not exist", app_uuid)}.into()),
+            Err(_) => {
+                return Err(AppError::UninstallError {
+                    err: format!("Active app with UUID {} does not exist", app_uuid),
+                }.into())
+            }
         };
 
         let app_path = PathBuf::from(&entries[app_index].app.path);
@@ -309,13 +324,17 @@ impl AppRegistry {
             let parent = match app_path.parent() {
                 Some(parent) => parent,
                 // This should never happen
-                None => return Err(AppError::UninstallError {
-                err: "Error finding parent path of app".to_owned()}),
+                None => {
+                    return Err(AppError::UninstallError {
+                        err: "Error finding parent path of app".to_owned(),
+                    })
+                }
             };
 
             if let Err(err) = fs::remove_dir_all(parent.clone()) {
                 return Err(AppError::UninstallError {
-                err: format!("Error removing app directory: {}", err)});
+                    err: format!("Error removing app directory: {}", err),
+                });
             }
         }
 
@@ -353,15 +372,19 @@ impl AppRegistry {
             .find(|ref e| e.active_version && e.app.uuid == app_uuid)
         {
             Some(entry) => &entry.app,
-            None => return Err(AppError::StartError {
-                err: format!("Active app with UUID {} does not exist", app_uuid)}),
+            None => {
+                return Err(AppError::StartError {
+                    err: format!("Active app with UUID {} does not exist", app_uuid),
+                })
+            }
         };
 
         let app_path = PathBuf::from(&app.path);
         if !app_path.exists() {
             // TODO: Unregister app if path doesn't exist
             return Err(AppError::StartError {
-                err: format!("{} does not exist", &app.path)});
+                err: format!("{} does not exist", &app.path),
+            });
         }
 
         let mut cmd = Command::new(app_path);
@@ -376,8 +399,11 @@ impl AppRegistry {
 
         match cmd.spawn() {
             Ok(child) => Ok(child.id()),
-            Err(err) => return Err(AppError::StartError {
-                err: format!("Failed to spawn app: {:?}", err)}),
+            Err(err) => {
+                return Err(AppError::StartError {
+                    err: format!("Failed to spawn app: {:?}", err),
+                })
+            }
         }
     }
 
@@ -397,11 +423,12 @@ impl AppRegistry {
 
         let active_symlink = PathBuf::from(format!("{}/active", self.apps_dir));
         if !active_symlink.exists() {
-            return Err(AppError::FileError{err: "Failed to get list of active UUIDs".to_owned()});
+            return Err(AppError::FileError {
+                err: "Failed to get list of active UUIDs".to_owned(),
+            });
         }
 
-        for entry in fs::read_dir(active_symlink)?
-        {
+        for entry in fs::read_dir(active_symlink)? {
             match entry {
                 Ok(file) => {
                     let uuid = file.file_name();
@@ -421,7 +448,9 @@ impl AppRegistry {
         );
 
         if apps_not_started != 0 {
-            return Err(AppError::FileError{err: format!("Failed to start {} app/s", apps_not_started)});
+            return Err(AppError::FileError {
+                err: format!("Failed to start {} app/s", apps_not_started),
+            });
         }
 
         Ok(())

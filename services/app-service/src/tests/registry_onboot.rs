@@ -87,6 +87,8 @@ fn registry_onboot_fail() {
 
     assert_eq!(
         registry.run_onboot().unwrap_err(),
-        AppError::FileError{err: "Failed to start 1 app/s".to_owned()}
+        AppError::FileError {
+            err: "Failed to start 1 app/s".to_owned()
+        }
     );
 }

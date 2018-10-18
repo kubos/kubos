@@ -69,7 +69,7 @@ impl AppRegistryEntry {
             Err(error) => {
                 return Err(AppError::ParseError {
                     entity: "app.toml".to_owned(),
-                    err: error.to_string()
+                    err: error.to_string(),
                 })
             }
         }
