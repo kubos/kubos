@@ -41,7 +41,8 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
                 Some(Value::Array(args)) => Some(
                     args.to_vec()
                         .iter()
-                        .map(|s| s.as_string().unwrap_or(&"".to_owned()).to_owned())
+                        .filter_map(|s| s.as_string())
+                        .map(|s| s.to_owned())
                         .collect(),
                 ),
                 _ => None,
