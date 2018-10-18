@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#[derive(Debug, Fail)]
+#[derive(Debug, Fail, PartialEq)]
 pub enum AppError {
     /// An error was encountered while interacting with a file
     #[fail(display = "File Error: {}", err)]
@@ -40,4 +40,29 @@ pub enum AppError {
         /// Underlying error encountered
         err: String,
     },
+    /// An error was encountered while parsing data
+    #[fail(display = "Failed to parse {}: {}", entity, err)]
+    ParseError {
+        /// Item being parsed
+        entity: String,
+        /// Underlying error encountered
+        err: String,
+    },
+    /// An I/O error was thrown by the kernel
+    #[fail(display = "IO Error: {}", description)]
+    IoError {
+        /// The underlying error type
+        cause: ::std::io::ErrorKind,
+        /// Error description
+        description: String,
+    },
+}
+
+impl From<::std::io::Error> for AppError {
+    fn from(error: ::std::io::Error) -> Self {
+        AppError::IoError {
+            cause: error.kind(),
+            description: error.to_string(),
+        }
+    }
 }

@@ -16,7 +16,6 @@
 
 use app_entry::*;
 use error::*;
-use failure::Error;
 use kubos_app::RunLevel;
 use std::cell::RefCell;
 use std::fs;
@@ -31,7 +30,7 @@ use uuid::Uuid;
 pub const K_APPS_DIR: &'static str = "/home/system/kubos/apps";
 
 /// AppRegistry
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct AppRegistry {
     #[doc(hidden)]
     pub entries: RefCell<Vec<AppRegistryEntry>>,
@@ -52,7 +51,7 @@ impl AppRegistry {
     /// # use kubos_app::registry::AppRegistry;
     /// let registry = AppRegistry::new_from_dir("/my/apps");
     /// ```
-    pub fn new_from_dir(apps_dir: &str) -> Result<AppRegistry, Error> {
+    pub fn new_from_dir(apps_dir: &str) -> Result<AppRegistry, AppError> {
         let registry = AppRegistry {
             entries: RefCell::new(Vec::new()),
             apps_dir: String::from(apps_dir),
@@ -80,11 +79,11 @@ impl AppRegistry {
     /// # use kubos_app::registry::AppRegistry;
     /// let registry = AppRegistry::new();
     /// ```
-    pub fn new() -> Result<AppRegistry, Error> {
+    pub fn new() -> Result<AppRegistry, AppError> {
         Self::new_from_dir(K_APPS_DIR)
     }
 
-    fn discover_apps(&self) -> Result<Vec<AppRegistryEntry>, Error> {
+    fn discover_apps(&self) -> Result<Vec<AppRegistryEntry>, AppError> {
         let mut reg_entries: Vec<AppRegistryEntry> = Vec::new();
 
         for entry in fs::read_dir(&self.apps_dir)? {
@@ -101,7 +100,7 @@ impl AppRegistry {
         Ok(reg_entries)
     }
 
-    fn discover_versions(&self, app_dir: PathBuf) -> Result<Vec<AppRegistryEntry>, Error> {
+    fn discover_versions(&self, app_dir: PathBuf) -> Result<Vec<AppRegistryEntry>, AppError> {
         let mut reg_entries: Vec<AppRegistryEntry> = Vec::new();
 
         for version in fs::read_dir(app_dir)? {
@@ -146,18 +145,18 @@ impl AppRegistry {
     /// let registry = AppRegistry::new();
     /// registry.register("/home/kubos/my-app-bin");
     /// ```
-    pub fn register(&self, path: &str) -> Result<AppRegistryEntry, Error> {
+    pub fn register(&self, path: &str) -> Result<AppRegistryEntry, AppError> {
         let app_path = Path::new(path);
         if !app_path.exists() {
             return Err(AppError::RegisterError {
                 err: format!("{} does not exist", path),
-            }.into());
+            });
         }
 
         if !app_path.is_dir() {
             return Err(AppError::RegisterError {
                 err: format!("{} is not a directory", path),
-            }.into());
+            });
         }
 
         let files: Vec<fs::DirEntry> = fs::read_dir(app_path)?
@@ -167,7 +166,7 @@ impl AppRegistry {
         if files.len() != 2 {
             return Err(AppError::RegisterError {
                 err: "Exactly two files should be present in the app directory".to_owned(),
-            }.into());
+            });
         }
 
         let mut manifest_file: Option<fs::DirEntry> = None;
@@ -184,18 +183,26 @@ impl AppRegistry {
         let manifest = match manifest_file {
             Some(file) => file,
             None => return Err(AppError::RegisterError {
-                err: "Failed to find manifest file".to_owned()}.into()),
+                err: "Failed to find manifest file".to_owned()}),
         };
         let app = match app_file {
             Some(file) => file,
             None => return Err(AppError::RegisterError {
-                err: "Failed to find app file".to_owned()}.into()),
+                err: "Failed to find app file".to_owned()}),
         };
 
         let mut data = String::new();
         fs::File::open(manifest.path()).and_then(|mut fp| fp.read_to_string(&mut data))?;
 
-        let metadata: AppMetadata = toml::from_str(&data)?;
+        let metadata: AppMetadata = match toml::from_str(&data)  {
+            Ok(val) => val,
+            Err(error) => {
+                return Err(AppError::ParseError {
+                    entity: "manifest.toml".to_owned(),
+                    err: error.to_string()
+                })
+            }
+        };
 
         let mut entries = self.entries.borrow_mut();
         let mut app_uuid = Uuid::new_v4().hyphenated().to_string();
@@ -234,7 +241,7 @@ impl AppRegistry {
                 err: format!("Couldn't remove symlink {}: {:?}",
                         active_symlink.display(),
                         err),
-            }.into()),
+            }),
                 
                 Ok(_) => {}
             }
@@ -247,7 +254,7 @@ impl AppRegistry {
                     active_symlink.display(),
                     app_dir_str,
                     err
-                )}.into()),
+                )}),
             
             Ok(_) => {}
         }
@@ -284,7 +291,7 @@ impl AppRegistry {
     /// registry.uninstall("01234567-89ab-cdef0-1234-56789abcdef0", "1.0");
     /// ```
     ///
-    pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, Error> {
+    pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, AppError> {
         let mut entries = self.entries.borrow_mut();
         let app_index = match entries.binary_search_by(|ref e| {
             e.app
@@ -303,12 +310,12 @@ impl AppRegistry {
                 Some(parent) => parent,
                 // This should never happen
                 None => return Err(AppError::UninstallError {
-                err: "Error finding parent path of app".to_owned()}.into()),
+                err: "Error finding parent path of app".to_owned()}),
             };
 
             if let Err(err) = fs::remove_dir_all(parent.clone()) {
                 return Err(AppError::UninstallError {
-                err: format!("Error removing app directory: {}", err)}.into());
+                err: format!("Error removing app directory: {}", err)});
             }
         }
 
@@ -338,7 +345,7 @@ impl AppRegistry {
         app_uuid: &str,
         run_level: RunLevel,
         args: Option<Vec<String>>,
-    ) -> Result<u32, Error> {
+    ) -> Result<u32, AppError> {
         let entries = self.entries.borrow();
 
         let app = match entries
@@ -347,14 +354,14 @@ impl AppRegistry {
         {
             Some(entry) => &entry.app,
             None => return Err(AppError::StartError {
-                err: format!("Active app with UUID {} does not exist", app_uuid)}.into()),
+                err: format!("Active app with UUID {} does not exist", app_uuid)}),
         };
 
         let app_path = PathBuf::from(&app.path);
         if !app_path.exists() {
             // TODO: Unregister app if path doesn't exist
             return Err(AppError::StartError {
-                err: format!("{} does not exist", &app.path)}.into());
+                err: format!("{} does not exist", &app.path)});
         }
 
         let mut cmd = Command::new(app_path);
@@ -370,7 +377,7 @@ impl AppRegistry {
         match cmd.spawn() {
             Ok(child) => Ok(child.id()),
             Err(err) => return Err(AppError::StartError {
-                err: format!("Failed to spawn app: {:?}", err)}.into()),
+                err: format!("Failed to spawn app: {:?}", err)}),
         }
     }
 
@@ -383,18 +390,17 @@ impl AppRegistry {
     /// let registry = AppRegistry::new();
     /// registry.run_onboot();
     /// ```
-    pub fn run_onboot(&self) -> Result<(), Error> {
+    pub fn run_onboot(&self) -> Result<(), AppError> {
         // TODO: Decide whether or not we actually want to track started/failed apps
         let mut apps_started = 0;
         let mut apps_not_started = 0;
 
         let active_symlink = PathBuf::from(format!("{}/active", self.apps_dir));
         if !active_symlink.exists() {
-            bail!("Failed to get list of active UUIDs");
+            return Err(AppError::FileError{err: "Failed to get list of active UUIDs".to_owned()});
         }
 
-        for entry in fs::read_dir(active_symlink)
-            .or_else(|error| bail!("Failed to process existing apps: {}", error))?
+        for entry in fs::read_dir(active_symlink)?
         {
             match entry {
                 Ok(file) => {
@@ -415,7 +421,7 @@ impl AppRegistry {
         );
 
         if apps_not_started != 0 {
-            bail!("Failed to start {} app/s", apps_not_started);
+            return Err(AppError::FileError{err: format!("Failed to start {} app/s", apps_not_started)});
         }
 
         Ok(())

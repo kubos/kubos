@@ -22,12 +22,13 @@ use std::time::Duration;
 
 use tempfile::TempDir;
 
+use error::*;
 use registry::*;
 
 #[test]
 fn registry_onboot_good() {
     let registry_dir = TempDir::new().unwrap();
-    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy());
+    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
     let app_dir = TempDir::new().unwrap();
     let app_bin = app_dir.path().join("tiny-app");
@@ -66,7 +67,7 @@ fn registry_onboot_good() {
 #[test]
 fn registry_onboot_fail() {
     let registry_dir = TempDir::new().unwrap();
-    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy());
+    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
     let app_dir = TempDir::new().unwrap();
     let app_bin = app_dir.path().join("dummy");
@@ -85,7 +86,7 @@ fn registry_onboot_fail() {
     registry.register(&app_bin.to_string_lossy()).unwrap();
 
     assert_eq!(
-        registry.run_onboot(),
-        Err("Failed to start 1 app/s".to_owned())
+        registry.run_onboot().unwrap_err(),
+        AppError::FileError{err: "Failed to start 1 app/s".to_owned()}
     );
 }

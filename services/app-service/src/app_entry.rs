@@ -15,7 +15,6 @@
  */
 
 use error::*;
-use failure::Error;
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
@@ -54,13 +53,13 @@ pub struct AppRegistryEntry {
 
 impl AppRegistryEntry {
     // Fetch a registered apps entry information
-    pub fn from_dir(dir: &PathBuf) -> Result<AppRegistryEntry, Error> {
+    pub fn from_dir(dir: &PathBuf) -> Result<AppRegistryEntry, AppError> {
         let mut app_toml = dir.clone();
         app_toml.push("app.toml");
         if !app_toml.exists() {
             return Err(AppError::FileError {
                 err: "No app.toml file found".to_owned(),
-            }.into());
+            });
         }
 
         let app_entry = fs::read_to_string(app_toml)?;
@@ -68,15 +67,16 @@ impl AppRegistryEntry {
         match toml::from_str::<AppRegistryEntry>(&app_entry) {
             Ok(entry) => Ok(entry),
             Err(error) => {
-                return Err(AppError::FileError {
-                    err: format!("Failed to parse app.toml file: {}", error),
-                }.into())
+                return Err(AppError::ParseError {
+                    entity: "app.toml".to_owned(),
+                    err: error.to_string()
+                })
             }
         }
     }
 
     // Create or update a registered apps entry information
-    pub fn save(&self) -> Result<(), Error> {
+    pub fn save(&self) -> Result<(), AppError> {
         let mut app_toml = PathBuf::from(self.app.path.clone());
         app_toml.set_file_name("app.toml");
 
@@ -86,7 +86,7 @@ impl AppRegistryEntry {
             Err(error) => {
                 return Err(AppError::FileError {
                     err: format!("Failed to serialize app entry: {}", error),
-                }.into())
+                })
             }
         };
 
