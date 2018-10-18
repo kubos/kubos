@@ -326,7 +326,7 @@ impl AppRegistry {
         app_uuid: &str,
         run_level: RunLevel,
         args: Option<Vec<String>>,
-    ) -> Result<u32, String> {
+    ) -> Result<u32, Error> {
         let entries = self.entries.borrow();
 
         let app = match entries

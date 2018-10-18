@@ -15,5 +15,5 @@
  */
 
 mod register_app;
-mod registry_test;
 mod registry_onboot;
+mod registry_test;

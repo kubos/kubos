@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use std::io::Write;
 use std::fs;
+use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::thread;
 use std::time::Duration;
