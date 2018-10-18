@@ -53,11 +53,7 @@ impl Protocol {
         F: Fn(Duration) -> Result<ChannelMessage, ProtocolError>,
     {
         loop {
-            // Check child for new stdout data
-            // Reading from stdout/stderr is currently a blocking operation...
-            // This code should probably get refactored into something akin
-            // to an event loop with non-blocking io.
-            if let Some(process) = self.process.as_mut().as_mut() {
+            if let Some(process) = self.process.as_mut() {
                 // Check if process has stdout output
                 if process.stdout_reader.is_some() {
                     match process.read_stdout() {
@@ -65,7 +61,7 @@ impl Protocol {
                             self.channel_protocol
                                 .send(messages::stdout::to_cbor(self.channel_id, Some(&data))?)?;
                         }
-                        Err(ProtocolError::Timedout) => {}
+                        Err(ProtocolError::ReadTimeout) => {}
                         _ => {
                             self.channel_protocol
                                 .send(messages::stdout::to_cbor(self.channel_id, None)?)?;
@@ -81,7 +77,7 @@ impl Protocol {
                             self.channel_protocol
                                 .send(messages::stderr::to_cbor(self.channel_id, Some(&data))?)?;
                         }
-                        Err(ProtocolError::Timedout) => {}
+                        Err(ProtocolError::ReadTimeout) => {}
                         _ => {
                             self.channel_protocol
                                 .send(messages::stderr::to_cbor(self.channel_id, None)?)?;
@@ -135,16 +131,16 @@ impl Protocol {
                 );
 
                 self.process = Box::new(Some(ProcessHandler::spawn(command, args)?));
-                if let Some(process) = self.process.as_ref().as_ref() {
+                if let Some(process) = self.process.as_ref() {
                     self.channel_protocol
                         .send(messages::pid::to_cbor(self.channel_id, process.id()?)?)?;
                 }
             }
             messages::Message::Stdout { channel_id, data } => {
-                info!("<- {{ {}, stdout, {} }}", channel_id, data);
+                info!("<- {{ {}, stdout, {:?} }}", channel_id, data);
             }
             messages::Message::Stderr { channel_id, data } => {
-                info!("<- {{ {}, stderr, {} }}", channel_id, data);
+                info!("<- {{ {}, stderr, {:?} }}", channel_id, data);
             }
             messages::Message::Pid { channel_id, pid } => {
                 info!("<- {{ {}, pid, {} }}", channel_id, pid);

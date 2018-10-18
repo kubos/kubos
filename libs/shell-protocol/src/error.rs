@@ -22,6 +22,7 @@ use std::io;
 /// Errors which occur when using ShellProtocol
 #[derive(Debug, Fail)]
 pub enum ProtocolError {
+    /// An error was raised by the cbor protocol
     #[fail(display = "Cbor Error: {}", err)]
     CborError {
         /// The specific CBOR protocol error
@@ -33,6 +34,7 @@ pub enum ProtocolError {
         /// The specific channel protocol error
         err: channel_protocol::ProtocolError,
     },
+    /// An error was encountered when creating a message
     #[fail(display = "Unable to create message {}: {}", message, err)]
     MessageCreationError {
         message: String,
@@ -44,6 +46,7 @@ pub enum ProtocolError {
         /// Underlying error encountered
         err: String,
     },
+    /// A general error was raised by the process
     #[fail(display = "Process error when {}: {}", action, err)]
     ProcesssError { action: String, err: io::Error },
     /// A timeout occurred when receiving data
@@ -55,6 +58,7 @@ pub enum ProtocolError {
         /// Underlying error encountered
         err: String,
     },
+    /// An error was encountered when spawning a process
     #[fail(display = "Error spawning command {}: {}", cmd, err)]
     SpawnError {
         /// Command spawned
@@ -62,8 +66,9 @@ pub enum ProtocolError {
         /// Underlying error
         err: io::Error,
     },
-    #[fail(display = "Timedout")]
-    Timedout,
+    /// A timeout was encountered when reading data
+    #[fail(display = "Timeout was encountered when reading data")]
+    ReadTimeout,
 }
 
 impl From<cbor_protocol::ProtocolError> for ProtocolError {

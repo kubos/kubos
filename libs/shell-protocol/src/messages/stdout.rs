@@ -21,19 +21,17 @@ use serde_cbor::ser;
 
 /// CBOR -> Message::Stdout
 pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
-    let data = match message.payload.get(0) {
-        Some(Value::String(data)) => data,
-        _ => {
-            return Err(ProtocolError::MessageParseError {
-                err: "No stdout data found".to_owned(),
-            })
-        }
-    };
-
-    Ok(Message::Stdout {
-        channel_id: message.channel_id,
-        data: data.to_owned(),
-    })
+    if let Some(Value::String(data)) = message.payload.get(0) {
+        Ok(Message::Stdout {
+            channel_id: message.channel_id,
+            data: Some(data.to_owned()),
+        })
+    } else {
+        Ok(Message::Stdout {
+            channel_id: message.channel_id,
+            data: None,
+        })
+    }
 }
 
 /// Stdout -> CBOR
@@ -53,23 +51,40 @@ pub fn to_cbor(channel_id: u32, data: Option<&str>) -> Result<Vec<u8>, ProtocolE
 #[cfg(test)]
 mod tests {
     use super::*;
-    use channel_protocol::parse_message;
+    use channel_protocol;
     use serde_cbor::de;
 
     #[test]
-    fn create_parse_stdout_message() {
+    fn create_parse_message() {
         let channel_id = 13;
         let data = "hello world";
 
         let raw = to_cbor(channel_id, Some(data)).unwrap();
-        let parsed = parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = from_cbor(&parsed);
+        let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
+        let msg = parse_message(parsed);
 
         assert_eq!(
             msg.unwrap(),
             Message::Stdout {
                 channel_id: channel_id,
-                data: data.to_owned(),
+                data: Some(data.to_owned()),
+            }
+        );
+    }
+
+    #[test]
+    fn create_parse_message_empty() {
+        let channel_id = 13;
+
+        let raw = to_cbor(channel_id, None).unwrap();
+        let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
+        let msg = parse_message(parsed);
+
+        assert_eq!(
+            msg.unwrap(),
+            Message::Stdout {
+                channel_id: channel_id,
+                data: None,
             }
         );
     }

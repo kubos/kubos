@@ -87,7 +87,7 @@ pub fn to_cbor(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use channel_protocol::parse_message;
+    use channel_protocol;
     use serde_cbor::de;
 
     #[test]
@@ -96,8 +96,8 @@ mod tests {
         let command = "/bin/pwd";
 
         let raw = to_cbor(channel_id, command, None).unwrap();
-        let parsed = parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = from_cbor(&parsed);
+        let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
+        let msg = parse_message(parsed);
 
         assert_eq!(
             msg.unwrap(),
@@ -116,8 +116,8 @@ mod tests {
         let args: Vec<String> = vec!["100".to_owned()];
 
         let raw = to_cbor(channel_id, command, Some(&args)).unwrap();
-        let parsed = parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = from_cbor(&parsed);
+        let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
+        let msg = parse_message(parsed);
 
         assert_eq!(
             msg.unwrap(),
@@ -136,8 +136,8 @@ mod tests {
         let args: Vec<String> = vec!["hello".to_owned(), "world".to_owned()];
 
         let raw = to_cbor(channel_id, command, Some(&args)).unwrap();
-        let parsed = parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = from_cbor(&parsed);
+        let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
+        let msg = parse_message(parsed);
 
         assert_eq!(
             msg.unwrap(),

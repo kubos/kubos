@@ -22,13 +22,14 @@ use std::process::{Child, ChildStderr, ChildStdout, Command, Stdio};
 use std::time::Duration;
 use timeout_readwrite::TimeoutReader;
 
+// Helper function for reading a line from a BufReader
 fn do_read<R: BufRead>(mut reader: R) -> Result<Option<String>, ProtocolError> {
     let mut data = String::new();
     match reader.read_line(&mut data) {
         Ok(0) => Ok(None),
         Ok(_) => Ok(Some(data)),
         Err(err) => match err.kind() {
-            io::ErrorKind::TimedOut => return Err(ProtocolError::Timedout),
+            io::ErrorKind::TimedOut => return Err(ProtocolError::ReadTimeout),
             _ => {
                 return Err(ProtocolError::ProcesssError {
                     action: "reading".to_owned(),
@@ -87,7 +88,6 @@ impl ProcessHandler {
 
     /// Attempt to read from stdout
     ///
-    /// This will block as long as the process is running.
     /// A return value of `None` indicates the stream is
     /// no longer available and likewise the process
     /// is likely no longer alive.
@@ -100,7 +100,6 @@ impl ProcessHandler {
 
     /// Attempt to read from stderr
     ///
-    /// This will block as long as the process is running.
     /// A return value of `None` indicates the stream is
     /// no longer available and likewise the process
     /// is likely no longer alive.
@@ -111,7 +110,7 @@ impl ProcessHandler {
         }
     }
 
-    /// Retrieve id of process
+    /// Retrieve ID of process
     pub fn id(&self) -> Result<u32, ProtocolError> {
         Ok(self.process.id())
     }

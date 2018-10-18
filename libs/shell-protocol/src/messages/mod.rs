@@ -45,11 +45,11 @@ pub enum Message {
     /// This message is sent from the shell service when a process has produced data via stdout.
     Stdout {
         channel_id: u32,
-        data: String,
+        data: Option<String>,
     },
     Stderr {
         channel_id: u32,
-        data: String,
+        data: Option<String>,
     },
 }
 
@@ -60,14 +60,16 @@ pub mod stderr;
 pub mod stdout;
 
 pub fn parse_message(message: ChannelMessage) -> Result<Message, ProtocolError> {
-    if message.name == "spawn" {
-        Ok(spawn::from_cbor(&message)?)
-    } else if message.name == "stdout" {
-        Ok(stdout::from_cbor(&message)?)
-    } else if message.name == "stderr" {
-        Ok(stderr::from_cbor(&message)?)
+    if message.name == "exit" {
+        Ok(exit::from_cbor(&message)?)
     } else if message.name == "pid" {
         Ok(pid::from_cbor(&message)?)
+    } else if message.name == "spawn" {
+        Ok(spawn::from_cbor(&message)?)
+    } else if message.name == "stderr" {
+        Ok(stderr::from_cbor(&message)?)
+    } else if message.name == "stdout" {
+        Ok(stdout::from_cbor(&message)?)
     } else {
         Err(ProtocolError::MessageParseError {
             err: "No message found".to_owned(),
