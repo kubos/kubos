@@ -84,8 +84,9 @@ impl AppRegistryEntry {
         let toml_str = match toml::to_string(&self) {
             Ok(toml) => toml,
             Err(error) => {
-                return Err(AppError::FileError {
-                    err: format!("Failed to serialize app entry: {}", error),
+                return Err(AppError::ParseError {
+                    entity: "app entry".to_owned(),
+                    err: error.to_string(),
                 })
             }
         };
