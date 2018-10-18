@@ -53,17 +53,17 @@ pub fn to_cbor(channel_id: u32, data: Option<&str>) -> Result<Vec<u8>, ProtocolE
 #[cfg(test)]
 mod tests {
     use super::*;
-    use channel_protocol::parse_message;
+    use channel_protocol;
     use serde_cbor::de;
 
     #[test]
-    fn create_parse_stdin_message() {
+    fn create_parse_message() {
         let channel_id = 13;
         let data = "hello world";
 
         let raw = to_cbor(channel_id, Some(data)).unwrap();
-        let parsed = parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = from_cbor(&parsed);
+        let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
+        let msg = parse_message(parsed);
 
         assert_eq!(
             msg.unwrap(),

@@ -74,7 +74,7 @@ pub fn parse_message(message: ChannelMessage) -> Result<Message, ProtocolError> 
     } else if message.name == "stderr" {
         Ok(stderr::from_cbor(&message)?)
     } else if message.name == "stdin" {
-        Ok(stderr::from_cbor(&message)?)
+        Ok(stdin::from_cbor(&message)?)
     } else if message.name == "stdout" {
         Ok(stdout::from_cbor(&message)?)
     } else {

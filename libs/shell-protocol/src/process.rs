@@ -16,11 +16,11 @@
 
 use error::ProtocolError;
 use std::io;
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::os::unix::prelude::*;
-use std::process::{Child, ChildStderr, ChildStdout, Command, Stdio};
+use std::process::{Child, ChildStderr, ChildStdin, ChildStdout, Command, Stdio};
 use std::time::Duration;
-use timeout_readwrite::TimeoutReader;
+use timeout_readwrite::{TimeoutReader, TimeoutWriter};
 
 // Helper function for reading a line from a BufReader
 fn do_read<R: BufRead>(mut reader: R) -> Result<Option<String>, ProtocolError> {
@@ -44,6 +44,7 @@ pub struct ProcessHandler {
     process: Child,
     pub stdout_reader: Option<BufReader<TimeoutReader<ChildStdout>>>,
     pub stderr_reader: Option<BufReader<TimeoutReader<ChildStderr>>>,
+    pub stdin_writer: Option<BufWriter<TimeoutWriter<ChildStdin>>>,
 }
 
 impl ProcessHandler {
@@ -79,10 +80,19 @@ impl ProcessHandler {
             None => None,
         };
 
+        let stdin_writer = match process.stdin.take() {
+            Some(stdin) => Some(BufWriter::new(TimeoutWriter::new(
+                stdin,
+                Duration::from_millis(5),
+            ))),
+            None => None,
+        };
+
         Ok(ProcessHandler {
             process,
             stdout_reader,
             stderr_reader,
+            stdin_writer,
         })
     }
 
@@ -107,6 +117,23 @@ impl ProcessHandler {
         match self.stderr_reader {
             Some(ref mut stderr_reader) => Ok(do_read(stderr_reader)?),
             None => Ok(None),
+        }
+    }
+
+    /// Attempt to write to stdin
+    pub fn write_stdin(&mut self, data: &[u8]) -> Result<(), ProtocolError> {
+        match self.stdin_writer {
+            Some(ref mut stdin_writer) => {
+                stdin_writer
+                    .write_all(data)
+                    .map_err(|err| ProtocolError::ProcesssError {
+                        action: "write to stdin".to_owned(),
+                        err,
+                    })?;
+                stdin_writer.flush();
+                Ok(())
+            }
+            None => Ok(()),
         }
     }
 
