@@ -24,8 +24,9 @@
 //! use file_protocol::*;
 //! use std::time::Duration;
 //!
-//! fn upload() -> Result<(), String> {
-//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", Some("storage/dir".to_owned()));
+//! fn upload() -> Result<(), ProtocolError> {
+//!     let config = FileProtocolConfig::new(Some("storage/dir".to_owned()), 4096, 5);
+//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", config);
 //!
 //!     # ::std::fs::File::create("client.txt").unwrap();
 //!     let source_path = "client.txt";
@@ -34,17 +35,17 @@
 //!     // Copy file to upload to temp storage. Calculate the hash and chunk info
 //!     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 //!
-//!     // Tell our destination the hash and number of chunks to expect
-//!     f_protocol.send_metadata(&hash, num_chunks)?;
+//!     // Generate channel id
+//!     let channel_id = f_protocol.generate_channel()?;
 //!
-//!     // Give the service can have time to set up the temporary storage directory
-//!     ::std::thread::sleep(Duration::from_millis(1));
+//!     // Tell our destination the hash and number of chunks to expect
+//!     f_protocol.send_metadata(channel_id, &hash, num_chunks)?;
 //!
 //!     // Send export command for file
-//!     f_protocol.send_export(&hash, &target_path, mode)?;
+//!     f_protocol.send_export(channel_id, &hash, &target_path, mode)?;
 //!
 //!     // Start the engine to send the file data chunks
-//!     Ok(f_protocol.message_engine(Duration::from_millis(10), State::Transmitting)?)
+//!     Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_millis(10), State::Transmitting)?)
 //! }
 //! ```
 //!
@@ -54,23 +55,23 @@
 //! use file_protocol::*;
 //! use std::time::Duration;
 //!
-//! fn download() -> Result<(), String> {
-//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:8000", None);
+//! fn download() -> Result<(), ProtocolError> {
+//!     let config = FileProtocolConfig::new(None, 4096, 5);
+//!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", config);
 //!
+//!     let channel_id = f_protocol.generate_channel()?;
 //!     # ::std::fs::File::create("service.txt").unwrap();
 //!     let source_path = "service.txt";
 //!     let target_path = "client.txt";
 //!
 //!     // Send our file request to the remote addr and verify that it's
 //!     // going to be able to send it
-//!     f_protocol.send_import(source_path)?;
+//!     f_protocol.send_import(channel_id, source_path)?;
 //!
 //!     // Wait for the request reply
 //!     let reply = match f_protocol.recv(None) {
-//!         Ok(Some(message)) => message,
-//!         Ok(None) => return Err("Failed to import file".to_owned()),
-//!         Err(Some(error)) => return Err(format!("Failed to import file: {}", error)),
-//!         Err(None) => return Err("Failed to import file".to_owned()),
+//!         Ok(message) => message,
+//!         Err(error) => return Err(error)
 //!     };
 //!
 //!     let state = f_protocol.process_message(
@@ -80,7 +81,7 @@
 //!         },
 //!     )?;
 //!
-//!     Ok(f_protocol.message_engine(Duration::from_millis(10), state)?)
+//!     Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_millis(10), state)?)
 //! }
 //! ```
 //!
@@ -90,42 +91,141 @@
 extern crate blake2_rfc;
 extern crate cbor_protocol;
 #[macro_use]
+extern crate failure;
+#[macro_use]
 extern crate log;
+extern crate rand;
 extern crate serde;
 extern crate serde_cbor;
 extern crate time;
 
+mod error;
 mod messages;
 mod parsers;
 pub mod protocol;
 mod storage;
 
+pub use error::ProtocolError;
 pub use protocol::Protocol as FileProtocol;
+pub use protocol::ProtocolConfig as FileProtocolConfig;
 pub use protocol::State;
 
-const CHUNK_SIZE: usize = 4096;
+pub use parsers::parse_channel_id;
 
 /// File protocol message types
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Message {
     /// TODO: Decide whether or not to keep this
-    Sync(String),
+    Sync(u32, String),
     /// Receiver should prepare a new temporary storage folder with the specified metadata
-    Metadata(String, u32),
+    Metadata(u32, String, u32),
     /// File data chunk message
-    ReceiveChunk(String, u32, Vec<u8>),
+    ReceiveChunk(u32, String, u32, Vec<u8>),
     /// Receiver has successfully gotten all data chunks of the requested file
-    ACK(String),
+    ACK(u32, String),
     /// Receiver is missing the specified file data chunks
-    NAK(String, Option<Vec<(u32, u32)>>),
+    NAK(u32, String, Option<Vec<(u32, u32)>>),
     /// (Client Only) Message requesting the recipient to receive the specified file
-    ReqReceive(u64, String, String, Option<u32>),
+    ReqReceive(u32, String, String, Option<u32>),
     /// (Client Only) Message requesting the recipient to transmit the specified file
-    ReqTransmit(u64, String),
+    ReqTransmit(u32, String),
     /// (Server Only) Recipient has successfully processed a request to receive a file
-    SuccessReceive(u64),
+    SuccessReceive(u32),
     /// (Server Only) Recipient has successfully prepared to transmit a file
-    SuccessTransmit(u64, String, u32, Option<u32>),
+    SuccessTransmit(u32, String, u32, Option<u32>),
     /// (Server Only) The transmit or receive request has failed to be completed
-    Failure(u64, String),
+    Failure(u32, String),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{messages, parsers, Message};
+    use serde_cbor::de;
+
+    #[test]
+    fn create_parse_export_request() {
+        let channel_id = 10;
+        let hash = "abcdedf".to_owned();
+        let target_path = "/path/to/file".to_owned();
+        let mode = 0o623;
+
+        let raw = messages::export_request(channel_id, &hash, &target_path, mode).unwrap();
+
+        let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
+
+        assert_eq!(
+            msg.unwrap(),
+            Message::ReqReceive(channel_id, hash, target_path, Some(mode))
+        );
+    }
+
+    #[test]
+    fn create_parse_sync() {
+        let channel_id = 10;
+        let hash = "abcdefg".to_owned();
+
+        let raw = messages::sync(channel_id, &hash).unwrap();
+        let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
+
+        assert_eq!(msg.unwrap(), Message::Sync(channel_id, hash));
+    }
+
+    #[test]
+    fn create_parse_metadata() {
+        let channel_id = 10;
+        let hash = "abcdefg".to_owned();
+        let num_chunks = 100;
+
+        let raw = messages::metadata(channel_id, &hash, num_chunks).unwrap();
+        let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
+
+        assert_eq!(
+            msg.unwrap(),
+            Message::Metadata(channel_id, hash, num_chunks)
+        );
+    }
+
+    #[test]
+    fn create_parse_chunk() {
+        let channel_id = 10;
+        let hash = "abcdefg".to_owned();
+        let chunk_num = 10;
+        let chunk_data: Vec<u8> = vec![1, 2, 3, 4, 5, 6];
+
+        let raw = messages::chunk(channel_id, &hash, chunk_num, &chunk_data).unwrap();
+        let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
+
+        assert_eq!(
+            msg.unwrap(),
+            Message::ReceiveChunk(channel_id, hash, chunk_num, chunk_data)
+        );
+    }
+
+    #[test]
+    fn create_parse_ack() {
+        let channel_id = 14;
+        let hash = "abcdefg".to_owned();
+        let num_chunks = 10;
+
+        let raw = messages::ack(channel_id, &hash, Some(num_chunks)).unwrap();
+        let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
+
+        assert_eq!(msg.unwrap(), Message::ACK(channel_id, hash));
+    }
+
+    #[test]
+    fn create_parse_nak() {
+        let channel_id = 11;
+        let hash = "abcdefg".to_owned();
+        let missing_chunks = vec![0, 1, 4, 10];
+        let chunk_ranges: Vec<(u32, u32)> = vec![(0, 1), (4, 10)];
+
+        let raw = messages::nak(channel_id, &hash, &missing_chunks).unwrap();
+        let msg = parsers::parse_message(de::from_slice(&raw).unwrap());
+
+        assert_eq!(
+            msg.unwrap(),
+            Message::NAK(channel_id, hash, Some(chunk_ranges))
+        );
+    }
 }

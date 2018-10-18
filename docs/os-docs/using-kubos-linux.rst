@@ -15,7 +15,7 @@ SDK Documentation
 ~~~~~~~~~~~~~~~~~
 
 -  :doc:`../installation-docs/sdk-installing`
--  :doc:`first-linux-project`
+-  :doc:`../tutorials/first-project`
 -  :doc:`../sdk-docs/sdk-reference`
 
 Board-Specific Documentation
@@ -40,7 +40,7 @@ Each board will have some debug port available, which will then be connected
 to your computer via USB. See the appropriate `Working with {board}` document
 for more information.
 
-If the target board is correctly connected to your host computer, you should 
+If the target board is correctly connected to your host computer, you should
 see a `/dev/ttyUSB\*` device in your Vagrant box. The VM is set up to
 automatically forward any FTDI cables that connect to a `/dev/FTDI` device
 for ease-of-use.
@@ -101,7 +101,7 @@ Setup
 
 Connect an ethernet cable from the board to either your computer or an open network port.
 
-Log into the board using the debug console and then edit ``/etc/network/interfaces``. 
+Log into the board using the debug console and then edit ``/etc/network/interfaces``.
 Update the IP address field to be an address of your choosing.
 
 Once updated, run the following commands in order to make the board use the new address::
@@ -121,7 +121,7 @@ To connect from the command line, run ``ssh kubos@{ip-address}``.
 You will be prompted for the `kubos` account password.
 
 You can also use a tool, like PuTTY, to create an SSH connection.
-    
+
 File Transfer
 ^^^^^^^^^^^^^
 
@@ -238,7 +238,7 @@ The board should be connected to your computer and it should be fully powered.
     Please make sure to either logout of your board, or change it back to the
     root user's home directory before beginning any file transfer
 
-Assuming you've successfully built a Kubos SDK project for the desired target, 
+Assuming you've successfully built a Kubos SDK project for the desired target,
 when you issue the ``kubos flash`` the output should look like this:
 
 ::

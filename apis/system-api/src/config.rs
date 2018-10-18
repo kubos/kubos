@@ -28,7 +28,7 @@ pub static DEFAULT_IP: &str = "127.0.0.1";
 /// The default port for service bindings
 pub const DEFAULT_PORT: u16 = 8080;
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 /// A simple address consisting of an IP address and port number
 pub struct Address {
     ip: Option<String>,
@@ -76,7 +76,7 @@ impl Address {
 ///
 /// When `addr`, `addr.ip`, or `addr.port` are not provided in the config file, the default IP
 /// `"127.0.0.1"` and default port `8080` are used instead.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Config {
     addr: Address,
     raw: Value,

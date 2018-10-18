@@ -5,3 +5,4 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 
 [dependencies]
 serde_cbor = "0.8"
+failure = "0.1.2"

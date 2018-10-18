@@ -16,6 +16,7 @@
 
 #[macro_use]
 extern crate serde_json;
+extern crate tempfile;
 
 mod utils;
 use utils::*;
@@ -28,8 +29,8 @@ insert into telemetry values(1001, 'eps', 'voltage', '3.4');
 
 #[test]
 fn test() {
-    let (handle, sender) = setup(Some(SQL));
-    let res = do_query("{telemetry(parameter: \"voltage\"){parameter,value}}");
+    let (handle, sender) = setup(None, None, None, Some(SQL));
+    let res = do_query(None, "{telemetry(parameter: \"voltage\"){parameter,value}}");
     teardown(handle, sender);
     assert_eq!(
         res,

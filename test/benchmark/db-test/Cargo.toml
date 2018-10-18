@@ -1,0 +1,12 @@
+[package]
+name = "db-test"
+version = "0.1.0"
+authors = ["Catherine Garabedian <catherine@kubos.co>"]
+
+[dependencies]
+diesel = { version = "1.0.0", features = ["sqlite"] }
+kubos-system = { path = "../../../apis/system-api" }
+kubos-telemetry-db = { path = "../../../apis/telemetry-db-api" }
+rand = "0.5"
+serde_json = "1.0"
+time = "0.1"

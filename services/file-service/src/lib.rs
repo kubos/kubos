@@ -19,18 +19,22 @@ extern crate file_protocol;
 extern crate kubos_system;
 #[macro_use]
 extern crate log;
+extern crate failure;
+extern crate serde_cbor;
 extern crate simplelog;
 
-use file_protocol::{FileProtocol, State};
+use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;
+use std::collections::HashMap;
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
 // We need this in this lib.rs file so we can build integration tests
-pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
+pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
     let host = config.hosturl();
-    let c_protocol = cbor_protocol::Protocol::new(host.clone());
 
     // Extract our local IP address so we can spawn child sockets later
     let mut host_parts = host.split(':').map(|val| val.to_owned());
@@ -43,37 +47,105 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), String> {
         None => None,
     };
 
+    // Get the chunk size to be used for transfers
+    let chunk_size = match config.get("chunk_size") {
+        Some(val) => val.as_integer().unwrap_or(4096),
+        None => 4096,
+    } as usize;
+
+    let hold_count = match config.get("hold_count") {
+        Some(val) => val.as_integer().unwrap_or(5),
+        None => 5,
+    } as u16;
+
+    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
+
+    let c_protocol = cbor_protocol::Protocol::new(host.clone(), chunk_size);
+
+    let timeout = config
+        .get("timeout")
+        .and_then(|val| {
+            val.as_integer()
+                .and_then(|num| Some(Duration::from_secs(num as u64)))
+        }).unwrap_or(Duration::from_secs(2));
+
+    // Setup map of channel IDs to thread channels
+    let raw_threads: HashMap<u32, Sender<serde_cbor::Value>> = HashMap::new();
+    // Create thread sharable wrapper
+    let threads = Arc::new(Mutex::new(raw_threads));
+
     loop {
         // Listen on UDP port
-        let (source, first_message) = c_protocol.recv_message_peer()?;
+        let (source, first_message) = match c_protocol.recv_message_peer() {
+            Ok((source, first_message)) => (source, first_message),
+            Err(e) => {
+                warn!("Error receiving message: {:?}", e);
+                continue;
+            }
+        };
 
-        let prefix_ref = prefix.clone();
+        let config_ref = f_config.clone();
         let host_ref = host_ip.clone();
+        let timeout_ref = timeout.clone();
 
-        // Break the processing work off into its own thread so we can
-        // listen for requests from other clients
-        thread::spawn(move || {
-            let mut state = State::Holding {
-                count: 0,
-                prev_state: Box::new(State::Done),
-            };
+        let channel_id = match file_protocol::parse_channel_id(&first_message) {
+            Ok(channel_id) => channel_id,
+            Err(e) => {
+                warn!("Error parsing channel ID: {:?}", e);
+                continue;
+            }
+        };
 
-            // Set up the file system processor with the reply socket information
-            let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), prefix_ref);
+        if !threads.lock().unwrap().contains_key(&channel_id) {
+            let (sender, receiver): (
+                Sender<serde_cbor::Value>,
+                Receiver<serde_cbor::Value>,
+            ) = mpsc::channel();
+            threads.lock().unwrap().insert(channel_id, sender.clone());
+            // Break the processing work off into its own thread so we can
+            // listen for requests from other clients
+            let shared_threads = threads.clone();
+            thread::spawn(move || {
+                let state = State::Holding {
+                    count: 0,
+                    prev_state: Box::new(State::Done),
+                };
 
-            // Process that first message that we got
-            if let Some(msg) = first_message {
-                if let Ok(new_state) = f_protocol.process_message(msg, state.clone()) {
-                    state = new_state;
+                // Set up the file system processor with the reply socket information
+                let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), config_ref);
+
+                // Listen, process, and react to the remaining messages in the
+                // requested operation
+                match f_protocol.message_engine(
+                    |d| match receiver.recv_timeout(d) {
+                        Ok(v) => Ok(v),
+                        Err(RecvTimeoutError::Timeout) => Err(ProtocolError::ReceiveTimeout),
+                        Err(e) => Err(ProtocolError::ReceiveError {
+                            err: format!("Error {:?}", e),
+                        }),
+                    },
+                    timeout_ref,
+                    state,
+                ) {
+                    Err(e) => warn!("Encountered errors while processing transaction: {}", e),
+                    _ => {}
                 }
-            }
 
-            // Listen, process, and react to the remaining messages in the
-            // requested operation
-            match f_protocol.message_engine(Duration::from_secs(2), state) {
-                Err(e) => warn!("Encountered errors while processing transaction: {}", e),
+                // Remove ourselves from threads list if we are finished
+                shared_threads.lock().unwrap().remove(&channel_id);
+            });
+        }
+
+        if let Some(sender) = threads.lock().unwrap().get(&channel_id) {
+            match sender.send(first_message) {
+                Err(e) => warn!("Error when sending to channel {}: {:?}", channel_id, e),
                 _ => {}
-            }
-        });
+            };
+        }
+
+        if !threads.lock().unwrap().contains_key(&channel_id) {
+            warn!("No sender found for {}", channel_id);
+            threads.lock().unwrap().remove(&channel_id);
+        }
     }
 }

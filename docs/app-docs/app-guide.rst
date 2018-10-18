@@ -8,7 +8,7 @@ In order to be compatible with the applications service, mission applications mu
 
 - The application should have separate handler functions for each supported run level
 - The application must be packaged with a manifest file which details the name, version, and author information for the binary
-    
+
 Once an application has been built, it should be transferred to the system, along with its manifest, and then :ref:`registered with the applications service <register-app>`.
 
 APIs
@@ -26,7 +26,7 @@ Our supported languages for mission applications are:
     Rust <rust-app-api>
     
 These APIs abstract the run level definitions and provide helper functions for use when querying other system and hardware services.
-    
+
 Run Levels
 ----------
 
@@ -72,6 +72,11 @@ For instance, an application might be set up to fetch the current time from a GP
     Two U-Boot variables help keep track of this: `deployed` - boolean indicating whether deployment has been completed or not,
     and `deploy_start` - a timestamp that's generated the first time deployment is started. This is used to keep track of the
     delay required between initial launch and when deployment is allowed to begin.
+    
+Additional Arguments
+--------------------
+
+Additional command line arguments may be used by the application. They will be automatically passed through to the application by the applications service.
 
 .. _app-manifest:
 
@@ -92,228 +97,29 @@ For example::
     version = "1.1"
     author = "Me"
 
-Example Walkthrough
--------------------
+Additional Resources
+--------------------
 
-Let's walkthrough the process of creating, installing, and updating an application
-on a Beaglebone Black target OBC.
+Reference Docs:
 
-Creating
-~~~~~~~~
+    - :doc:`Applications Service Guide <app-service>` - Goes over the basic capabilities of the
+      applications service and how it can be customized
+    - :doc:`Deployment Application Guide <deployment>` - Goes over the basic architecture required
+      to execute a mission's deployment logic
 
-For our application, we'll start by creating a simple skeleton application, 
-containing only the required run level handlers and some simple debug statements.
+Tutorials:
 
-Rust
-^^^^
+    - :doc:`../tutorials/first-mission-app` - Walks the user through the process of creating their
+      first mission application which is capable of interacting with Kubos services
+    - :doc:`../tutorials/app-register` - Walks the user through the process of registering a
+      mission application with the applications service and then starting, updating, and verifying
+      the application
 
-If we want our application to be written in Rust, we'll start by creating a new project::
+Example applications:
 
-    $ cargo new --bin example-mission-app
-    $ cd example-mission-app
-
-We'll update the `src/main.rs` file to have the following::
-
-    #[macro_use]
-    extern crate kubos_app;
-    
-    use kubos_app::*;
-    use std::fs;
-    
-    struct MyApp;
-    
-    impl AppHandler for MyApp {
-        fn on_boot(&self) {
-            fs::write("/home/kubos/test-output", "OnBoot logic\r\n").unwrap();
-        }
-        fn on_command(&self) {
-            fs::write("/home/kubos/test-output", "OnCommand logic\r\n").unwrap();
-        }
-    }
-    
-    fn main() {
-        let app = MyApp;
-        app_main!(&app);
-    }
-
-And then update the `config.toml` file to add the `kubos-app` dependency ::
-
-    [dependencies]
-    kubos-app = { git = "https://github.com/kubos/kubos" }
-    
-And then compile the project for the Beaglebone Black target::
-
-    $ cargo build --target arm-unknown-linux-gnueabihf --release
-    
-The compiled binary will be in `example-mission-app/target/arm-unknown-linux-gnueabihf/release/example-mission-app`
-
-Python
-^^^^^^
-
-If we want our application to be written in Python, we'll create a single new file, `example-mission-app`,
-making sure to include ``#!/usr/bin/env python`` at the top of the file::
-
-    #!/usr/bin/env python
-    
-    import argparse
-    
-    def on_boot():
-        
-        file = open("/home/kubos/test-output","w+")
-        file.write("OnBoot logic\r\n")
-        
-    def on_command():
-        
-        file = open("/home/kubos/test-output","w+")
-        file.write("OnCommand logic\r\n")
-    
-    def main():
-        parser = argparse.ArgumentParser()
-        
-        parser.add_argument('--run', '-r', default='OnCommand')
-        
-        args = parser.parse_args()
-        
-        if args.run == 'OnBoot':
-            on_boot()
-        else:
-            on_command()
-        
-    if __name__ == "__main__":
-        main()
-        
-And then we'll update the file permissions to allow execution::
-
-    $ chmod +x example-mission-app
-    
-.. note::
-
-    We're foregoing the usual ".py" extension so that the file name is the same as the Rust example file name
-    for the remainder of this walkthrough. It has no impact on actual execution.
-
-Manifest
-^^^^^^^^
-
-No matter which language we use, we'll need a companion `manifest.toml` file::
-
-    name = "example-mission-app"
-    version = "1.0"
-    author = "Kubos User"
-
-Transferring
-~~~~~~~~~~~~
-
-Next, we'll transfer the `example-mission-app` file and the `manifest.toml` file into a new
-directory, `/home/kubos/example-app`, on the OBC. 
-
-Registering
-~~~~~~~~~~~
-
-Once both files have been transferred, we can register the application using the ``register`` query::
-
-    mutation {
-        register(path: "/home/kubos/example-app") {
-            app {
-                uuid,
-                name,
-                version
-            }
-        }
-    }
-
-The response JSON should look like this::
-
-    {
-        "app": {
-            "uuid": "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a",
-            "name": "example-mission-app",
-            "version": "1.0"
-        }
-    }
-    
-.. note:: The UUID will be a custom value for each application which is registered
-
-Starting
-~~~~~~~~
-
-We'll go ahead and start our app now to verify it works::
-
-    mutation {
-        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand")
-    }
-    
-The response JSON should contain a number indicating the PID of our started application.
-
-To verify that the app ran successfully, we'll check the contents of our new `test-output` file::
-
-    $ cat /home/kubos/test-output
-    OnCommand logic
-
-Updating
-~~~~~~~~
-
-Now let's create a new version of our application.
-
-We'll change the "OnCommand logic" string to "Updated OnCommand logic", and then update our `manifest.toml`
-file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
-
-After compiling (for Rust) and transferring the new files into a new folder, `/home/kubos/example-app-2`,
-we can register the updated application::
- 
-    mutation {
-        register(path: "/home/kubos/example-app-2") {
-            app {
-                uuid,
-                name,
-                version
-            }
-        }
-    }
-
-The returned UUID should match our original UUID::
-
-    {
-        "app": {
-            "uuid": "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a",
-            "name": "example-mission-app",
-            "version": "2.0"
-        }
-    }
-
-Verifying
-~~~~~~~~~
-
-We can now query the service to see all of the registered applications and versions::
-
-    {
-        apps {
-            active,
-            app {
-                uuid,
-                name,
-                version
-            }
-    }
-
-The response should show the two versions of our app, with the latest version being marked as active::
-
-    {
-        "apps": [
-            { 
-                "active": false,
-                "app": {
-                    "uuid": "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a",
-                    "name": "example-mission-app",
-                    "version": "1.0"
-                }
-            },
-            { 
-                "active": true,
-                "app": {
-                    "uuid": "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a",
-                    "name": "example-mission-app",
-                    "version": "2.0"
-                }
-            },
-        ]
-    }
+    - `Basic application written in Rust <https://github.com/kubos/kubos/tree/master/examples/rust-mission-app>`__ -
+      Demonstrates the basic application framework and how passthrough arguments can be used
+    - `Framework application written in Python <https://github.com/kubos/kubos/blob/master/examples/python-mission-app/python-mission-app.py>`__ -
+      Can be used as a starting template when creating Python applications
+    - `Basic application wrtting in Python <https://github.com/kubos/kubos/tree/master/examples/python-mission-application>`__ -
+      Demonstrates the basic application framework and how to communicate with Kubos services
