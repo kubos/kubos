@@ -34,15 +34,15 @@ fn custom_apps_dir() {
 
 #[test]
 fn invalid_apps_dir_empty_reg() {
-    let result = AppRegistry::new_from_dir("/i/dont/exist");
-    let err = result.unwrap_err();
-    assert_eq!(
-        err,
-        AppError::IoError {
+    let result = AppRegistry::new_from_dir("/sys/fake");
+    match result {
+        Ok(val) => panic!("Bad test didn't throw error: {:?}", val),
+        Err(AppError::IoError {
             cause: ::std::io::ErrorKind::PermissionDenied,
-            description: "Permission denied (os error 13)".to_owned()
-        }
-    );
+            description: _
+        }) => {}, // Expected result
+        Err(other) => panic!("Unexpected error: {:?}", other)
+    }
 }
 
 #[test]
