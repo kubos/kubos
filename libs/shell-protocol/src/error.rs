@@ -62,6 +62,8 @@ pub enum ProtocolError {
         /// Underlying error
         err: io::Error,
     },
+    #[fail(display = "Timedout")]
+    Timedout,
 }
 
 impl From<cbor_protocol::ProtocolError> for ProtocolError {

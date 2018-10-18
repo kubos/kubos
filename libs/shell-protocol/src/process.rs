@@ -15,14 +15,34 @@
 //
 
 use error::ProtocolError;
+use std::io;
 use std::io::{BufRead, BufReader};
 use std::os::unix::prelude::*;
 use std::process::{Child, ChildStderr, ChildStdout, Command, Stdio};
+use std::time::Duration;
+use timeout_readwrite::TimeoutReader;
+
+fn do_read<R: BufRead>(mut reader: R) -> Result<Option<String>, ProtocolError> {
+    let mut data = String::new();
+    match reader.read_line(&mut data) {
+        Ok(0) => Ok(None),
+        Ok(_) => Ok(Some(data)),
+        Err(err) => match err.kind() {
+            io::ErrorKind::TimedOut => return Err(ProtocolError::Timedout),
+            _ => {
+                return Err(ProtocolError::ProcesssError {
+                    action: "reading".to_owned(),
+                    err,
+                });
+            }
+        },
+    }
+}
 
 pub struct ProcessHandler {
     process: Child,
-    pub stdout_reader: Option<BufReader<ChildStdout>>,
-    pub stderr_reader: Option<BufReader<ChildStderr>>,
+    pub stdout_reader: Option<BufReader<TimeoutReader<ChildStdout>>>,
+    pub stderr_reader: Option<BufReader<TimeoutReader<ChildStderr>>>,
 }
 
 impl ProcessHandler {
@@ -43,12 +63,18 @@ impl ProcessHandler {
         };
 
         let stdout_reader = match process.stdout.take() {
-            Some(stdout) => Some(BufReader::new(stdout)),
+            Some(stdout) => Some(BufReader::new(TimeoutReader::new(
+                stdout,
+                Duration::from_millis(5),
+            ))),
             None => None,
         };
 
         let stderr_reader = match process.stderr.take() {
-            Some(stderr) => Some(BufReader::new(stderr)),
+            Some(stderr) => Some(BufReader::new(TimeoutReader::new(
+                stderr,
+                Duration::from_millis(5),
+            ))),
             None => None,
         };
 
@@ -67,19 +93,7 @@ impl ProcessHandler {
     /// is likely no longer alive.
     pub fn read_stdout(&mut self) -> Result<Option<String>, ProtocolError> {
         match self.stdout_reader {
-            Some(ref mut stdout_reader) => {
-                let mut data = String::new();
-                match stdout_reader.read_line(&mut data) {
-                    Ok(0) => Ok(None),
-                    Ok(_) => Ok(Some(data)),
-                    Err(err) => {
-                        return Err(ProtocolError::ProcesssError {
-                            action: "read stdout".to_owned(),
-                            err,
-                        })
-                    }
-                }
-            }
+            Some(ref mut stdout_reader) => Ok(do_read(stdout_reader)?),
             None => Ok(None),
         }
     }
@@ -92,19 +106,7 @@ impl ProcessHandler {
     /// is likely no longer alive.
     pub fn read_stderr(&mut self) -> Result<Option<String>, ProtocolError> {
         match self.stderr_reader {
-            Some(ref mut stderr_reader) => {
-                let mut data = String::new();
-                match stderr_reader.read_line(&mut data) {
-                    Ok(0) => Ok(None),
-                    Ok(_) => Ok(Some(data)),
-                    Err(err) => {
-                        return Err(ProtocolError::ProcesssError {
-                            action: "read stderr".to_owned(),
-                            err,
-                        })
-                    }
-                }
-            }
+            Some(ref mut stderr_reader) => Ok(do_read(stderr_reader)?),
             None => Ok(None),
         }
     }

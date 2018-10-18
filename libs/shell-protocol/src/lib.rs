@@ -22,6 +22,7 @@ extern crate failure;
 extern crate log;
 extern crate rand;
 extern crate serde_cbor;
+extern crate timeout_readwrite;
 
 pub mod error;
 pub mod messages;

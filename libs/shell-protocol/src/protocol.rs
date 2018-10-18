@@ -65,6 +65,7 @@ impl Protocol {
                             self.channel_protocol
                                 .send(messages::stdout::to_cbor(self.channel_id, Some(&data))?)?;
                         }
+                        Err(ProtocolError::Timedout) => {}
                         _ => {
                             self.channel_protocol
                                 .send(messages::stdout::to_cbor(self.channel_id, None)?)?;
@@ -80,6 +81,7 @@ impl Protocol {
                             self.channel_protocol
                                 .send(messages::stderr::to_cbor(self.channel_id, Some(&data))?)?;
                         }
+                        Err(ProtocolError::Timedout) => {}
                         _ => {
                             self.channel_protocol
                                 .send(messages::stderr::to_cbor(self.channel_id, None)?)?;
@@ -88,15 +90,20 @@ impl Protocol {
                     }
                 }
 
-                // Check if process has exited
-                if let Some((code, signal)) = process.status()? {
-                    self.channel_protocol.send(messages::exit::to_cbor(
-                        self.channel_id,
-                        code,
-                        signal,
-                    )?)?;
-                    // If the process is done then we can exit this loop
-                    return Ok(());
+                // When the process ends we will start to get `None` on stdout/stderr
+                // Once we have closed those pipes we can check for the status code
+                // and clean up. Other wise we might miss output
+                if process.stdout_reader.is_none() && process.stderr_reader.is_none() {
+                    // Check if process has exited
+                    if let Some((code, signal)) = process.status()? {
+                        self.channel_protocol.send(messages::exit::to_cbor(
+                            self.channel_id,
+                            code,
+                            signal,
+                        )?)?;
+                        // If the process is done then we can exit this loop
+                        return Ok(());
+                    }
                 }
             }
             // Check for new messages from the client
