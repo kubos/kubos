@@ -33,6 +33,7 @@ extern crate toml;
 extern crate uuid;
 
 mod app_entry;
+mod error;
 mod registry;
 mod schema;
 #[cfg(test)]

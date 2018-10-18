@@ -15,6 +15,7 @@
  */
 
 use app_entry::*;
+use error::*;
 use failure::Error;
 use kubos_app::RunLevel;
 use std::cell::RefCell;
@@ -148,11 +149,15 @@ impl AppRegistry {
     pub fn register(&self, path: &str) -> Result<AppRegistryEntry, Error> {
         let app_path = Path::new(path);
         if !app_path.exists() {
-            bail!("{} does not exist", path);
+            return Err(AppError::RegisterError {
+                err: format!("{} does not exist", path),
+            }.into());
         }
 
         if !app_path.is_dir() {
-            bail!("{} is not a directory", path);
+            return Err(AppError::RegisterError {
+                err: format!("{} is not a directory", path),
+            }.into());
         }
 
         let files: Vec<fs::DirEntry> = fs::read_dir(app_path)?
@@ -160,7 +165,9 @@ impl AppRegistry {
             .collect();
 
         if files.len() != 2 {
-            bail!("Exactly two files should be present in the app directory");
+            return Err(AppError::RegisterError {
+                err: "Exactly two files should be present in the app directory".to_owned(),
+            }.into());
         }
 
         let mut manifest_file: Option<fs::DirEntry> = None;
@@ -176,11 +183,13 @@ impl AppRegistry {
 
         let manifest = match manifest_file {
             Some(file) => file,
-            None => bail!("Failed to find manifest file"),
+            None => return Err(AppError::RegisterError {
+                err: "Failed to find manifest file".to_owned()}.into()),
         };
         let app = match app_file {
             Some(file) => file,
-            None => bail!("Failed to find app file"),
+            None => return Err(AppError::RegisterError {
+                err: "Failed to find app file".to_owned()}.into()),
         };
 
         let mut data = String::new();
@@ -220,26 +229,26 @@ impl AppRegistry {
         let active_symlink = PathBuf::from(format!("{}/active/{}", self.apps_dir, app_uuid));
         if active_symlink.exists() {
             match fs::remove_file(active_symlink.clone()) {
-                Err(err) => {
-                    bail!(
-                        "Couldn't remove symlink {}: {:?}",
+                Err(err) => 
+                    return Err(AppError::RegisterError {
+                err: format!("Couldn't remove symlink {}: {:?}",
                         active_symlink.display(),
-                        err
-                    );
-                }
+                        err),
+            }.into()),
+                
                 Ok(_) => {}
             }
         }
 
         match unix::fs::symlink(&app_dir_str, active_symlink.clone()) {
-            Err(err) => {
-                bail!(
+            Err(err) => return Err(AppError::RegisterError {
+                err: format!(
                     "Couldn't symlink {} to {}: {:?}",
                     active_symlink.display(),
                     app_dir_str,
                     err
-                );
-            }
+                )}.into()),
+            
             Ok(_) => {}
         }
 
@@ -284,7 +293,8 @@ impl AppRegistry {
                 .then(e.app.metadata.version.cmp(&String::from(version)))
         }) {
             Ok(index) => index,
-            Err(_) => bail!("Active app with UUID {} does not exist", app_uuid),
+            Err(_) => return Err(AppError::UninstallError {
+                err: format!("Active app with UUID {} does not exist", app_uuid)}.into()),
         };
 
         let app_path = PathBuf::from(&entries[app_index].app.path);
@@ -292,11 +302,13 @@ impl AppRegistry {
             let parent = match app_path.parent() {
                 Some(parent) => parent,
                 // This should never happen
-                None => bail!("Error finding parent path of app"),
+                None => return Err(AppError::UninstallError {
+                err: "Error finding parent path of app".to_owned()}.into()),
             };
 
             if let Err(err) = fs::remove_dir_all(parent.clone()) {
-                bail!("Error removing app directory: {}", err);
+                return Err(AppError::UninstallError {
+                err: format!("Error removing app directory: {}", err)}.into());
             }
         }
 
@@ -334,13 +346,15 @@ impl AppRegistry {
             .find(|ref e| e.active_version && e.app.uuid == app_uuid)
         {
             Some(entry) => &entry.app,
-            None => bail!("Active app with UUID {} does not exist", app_uuid),
+            None => return Err(AppError::StartError {
+                err: format!("Active app with UUID {} does not exist", app_uuid)}.into()),
         };
 
         let app_path = PathBuf::from(&app.path);
         if !app_path.exists() {
             // TODO: Unregister app if path doesn't exist
-            bail!("{} does not exist", &app.path);
+            return Err(AppError::StartError {
+                err: format!("{} does not exist", &app.path)}.into());
         }
 
         let mut cmd = Command::new(app_path);
@@ -355,7 +369,8 @@ impl AppRegistry {
 
         match cmd.spawn() {
             Ok(child) => Ok(child.id()),
-            Err(err) => bail!("Failed to spawn app: {:?}", err),
+            Err(err) => return Err(AppError::StartError {
+                err: format!("Failed to spawn app: {:?}", err)}.into()),
         }
     }
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use error::*;
 use failure::Error;
 use std::fs;
 use std::io::Write;
@@ -57,14 +58,20 @@ impl AppRegistryEntry {
         let mut app_toml = dir.clone();
         app_toml.push("app.toml");
         if !app_toml.exists() {
-            bail!("No app.toml file found");
+            return Err(AppError::FileError {
+                err: "No app.toml file found".to_owned(),
+            }.into());
         }
 
         let app_entry = fs::read_to_string(app_toml)?;
 
         match toml::from_str::<AppRegistryEntry>(&app_entry) {
             Ok(entry) => Ok(entry),
-            Err(error) => bail!("Failed to parse app.toml file: {}", error),
+            Err(error) => {
+                return Err(AppError::FileError {
+                    err: format!("Failed to parse app.toml file: {}", error),
+                }.into())
+            }
         }
     }
 
@@ -72,13 +79,17 @@ impl AppRegistryEntry {
     pub fn save(&self) -> Result<(), Error> {
         let mut app_toml = PathBuf::from(self.app.path.clone());
         app_toml.set_file_name("app.toml");
-        
+
         let mut file = fs::File::create(app_toml)?;
         let toml_str = match toml::to_string(&self) {
             Ok(toml) => toml,
-            Err(error) => bail!("Failed to serialize app entry: {}", error),
+            Err(error) => {
+                return Err(AppError::FileError {
+                    err: format!("Failed to serialize app entry: {}", error),
+                }.into())
+            }
         };
-        
+
         Ok(file.write_all(&toml_str.into_bytes())?)
     }
 }
