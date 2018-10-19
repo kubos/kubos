@@ -37,11 +37,10 @@ fn invalid_apps_dir_empty_reg() {
     let result = AppRegistry::new_from_dir("/sys/fake");
     match result {
         Ok(val) => panic!("Bad test didn't throw error: {:?}", val),
-        Err(AppError::IoError {
-            cause: ::std::io::ErrorKind::PermissionDenied,
-            description: _
-        }) => {}, // Expected result
-        Err(other) => panic!("Unexpected error: {:?}", other)
+        // Expected result. Specific error varies depending on whether the test is run by a
+        // normal user or root
+        Err(AppError::IoError { .. }) => {}
+        Err(other) => panic!("Unexpected error: {:?}", other),
     }
 }
 
