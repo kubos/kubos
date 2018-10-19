@@ -236,6 +236,7 @@ impl AppServiceFixture {
                 service.arg("-b");
             }
 
+            eprintln!("Starting service");
             let mut service_proc = service.spawn().unwrap();
 
             thread::sleep(Duration::from_millis(100));

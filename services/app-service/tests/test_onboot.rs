@@ -19,7 +19,10 @@ extern crate kubos_system;
 extern crate serde_json;
 extern crate tempfile;
 
+use std::fs;
 use std::path::Path;
+use std::thread;
+use std::time::Duration;
 
 mod utils;
 pub use utils::*;
@@ -61,5 +64,31 @@ fn onboot_good() {
     setup_apps(&fixture.registry_dir.path());
 
     fixture.start_service(true);
+    thread::sleep(Duration::from_secs(1));
     fixture.teardown();
+}
+
+#[test]
+fn onboot_cleanup() {
+    let mut fixture = AppServiceFixture::setup();
+    setup_apps(&fixture.registry_dir.path());
+    
+    let control_str = format!("{}/{}/{}", fixture.registry_dir.path().to_string_lossy(), "1-2-3-4-5", "1.0.0");
+    let control = Path::new(&control_str);
+    assert!(control.exists());
+    
+    let app_str = format!("{}/{}/{}", fixture.registry_dir.path().to_string_lossy(), "a-b-c-d-e", "0.0.3");
+    let app_dir = Path::new(&app_str);
+    assert!(app_dir.exists());
+    
+    assert!(fs::remove_file(app_dir.join("app3")).is_ok());
+
+    fixture.start_service(true);
+    
+    thread::sleep(Duration::from_millis(200));
+    
+    fixture.teardown();
+    
+    assert!(!app_dir.exists());
+    assert!(control.exists());
 }

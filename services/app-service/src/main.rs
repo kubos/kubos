@@ -71,9 +71,9 @@ fn main() -> Result<(), Error> {
     };
 
     match matches.opt_present("b") {
-        true => registry
+        true => {eprintln!("Running onBoot"); registry
             .run_onboot()
-            .unwrap_or_else(|err| eprintln!("Error starting applications: {}", err)),
+            .unwrap_or_else(|err| eprintln!("Error starting applications: {}", err))},
         false => {}
     }
 
