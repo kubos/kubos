@@ -137,9 +137,12 @@ impl Protocol {
                 }
             }
             messages::Message::Stdin { channel_id, data } => {
-                info!("-< {{ {}, stdin, {} }}", channel_id, data);
+                info!("-< {{ {}, stdin, {:?} }}", channel_id, data);
                 if let Some(process) = self.process.as_mut() {
-                    process.write_stdin(&data.as_bytes())?;
+                    match data {
+                        Some(data) => process.write_stdin(&data.as_bytes())?,
+                        None => process.close_stdin()?,
+                    }
                 }
             }
             messages::Message::Stdout { channel_id, data } => {

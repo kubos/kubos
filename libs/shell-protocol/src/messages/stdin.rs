@@ -21,19 +21,17 @@ use serde_cbor::ser;
 
 /// CBOR -> Message::Stdin
 pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
-    let data = match message.payload.get(0) {
-        Some(Value::String(data)) => data,
-        _ => {
-            return Err(ProtocolError::MessageParseError {
-                err: "No stdin data found".to_owned(),
-            })
-        }
-    };
-
-    Ok(Message::Stdin {
-        channel_id: message.channel_id,
-        data: data.to_owned(),
-    })
+    if let Some(Value::String(data)) = message.payload.get(0) {
+        Ok(Message::Stdin {
+            channel_id: message.channel_id,
+            data: Some(data.to_owned()),
+        })
+    } else {
+        Ok(Message::Stdin {
+            channel_id: message.channel_id,
+            data: None,
+        })
+    }
 }
 
 /// Stdin -> CBOR
@@ -69,7 +67,7 @@ mod tests {
             msg.unwrap(),
             Message::Stdin {
                 channel_id: channel_id,
-                data: data.to_owned(),
+                data: Some(data.to_owned()),
             }
         );
     }

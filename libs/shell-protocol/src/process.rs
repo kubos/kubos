@@ -137,6 +137,18 @@ impl ProcessHandler {
         }
     }
 
+    /// Close process' stdin pipe
+    pub fn close_stdin(&mut self) -> Result<(), ProtocolError> {
+        match self.stdin_writer {
+            Some(ref mut stdin_writer) => {
+                drop(stdin_writer);
+            }
+            None => {}
+        }
+        self.stdin_writer = None;
+        Ok(())
+    }
+
     /// Retrieve ID of process
     pub fn id(&self) -> Result<u32, ProtocolError> {
         Ok(self.process.id())
