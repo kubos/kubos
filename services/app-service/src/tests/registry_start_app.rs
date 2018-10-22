@@ -163,16 +163,16 @@ fn start_app_bad() {
 
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
-    
+
     let result = registry.start_app("a-b-c-d-e", RunLevel::OnCommand, None);
-    
+
     match result.unwrap_err() {
         AppError::StartError { err } => {
             assert!(err.contains("a-b-c-d-e/1.0/tiny-app does not exist. a-b-c-d-e version 1.0 automatically uninstalled"));
-        },
+        }
         other => panic!("Unexpected error received: {}", other),
     }
-    
+
     // Make sure our bad app entry was removed from the registry directory
     assert!(!app_dir.exists());
 }
