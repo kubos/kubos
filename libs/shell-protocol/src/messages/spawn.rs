@@ -19,7 +19,6 @@ use channel_protocol::ChannelMessage;
 use error::ProtocolError;
 use serde_cbor::{ser, ObjectKey};
 use std::collections::BTreeMap;
-use std::process::{Child, Command, Stdio};
 
 /// CBOR -> Message::Spawn
 pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
@@ -42,7 +41,8 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
                 Some(Value::Array(args)) => Some(
                     args.to_vec()
                         .iter()
-                        .map(|s| s.as_string().unwrap().to_owned())
+                        .filter_map(|s| s.as_string())
+                        .map(|s| s.to_owned())
                         .collect(),
                 ),
                 _ => None,
@@ -59,7 +59,11 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
 }
 
 /// Spawn -> CBOR
-pub fn to_cbor(channel_id: u32, command: &str, args: Option<&[String]>) -> Result<Vec<u8>, String> {
+pub fn to_cbor(
+    channel_id: u32,
+    command: &str,
+    args: Option<&[String]>,
+) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, spawn, {} }}", channel_id, command);
     let mut options = BTreeMap::new();
     if let Some(args) = args {
@@ -71,23 +75,20 @@ pub fn to_cbor(channel_id: u32, command: &str, args: Option<&[String]>) -> Resul
         options.insert(ObjectKey::String("args".to_owned()), Value::Array(args_vec));
     }
 
-    ser::to_vec_packed(&(channel_id, "spawn", command, options))
-        .map_err(|_err| "Error creating spawn message".to_owned())
-}
-
-/// Perform a spawn action
-pub fn run(command: &str) -> Child {
-    Command::new(command)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .spawn()
-        .unwrap()
+    Ok(
+        ser::to_vec_packed(&(channel_id, "spawn", command, options)).map_err(|err| {
+            ProtocolError::MessageCreationError {
+                message: "spawn".to_owned(),
+                err,
+            }
+        })?,
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use channel_protocol::parse_message;
+    use channel_protocol;
     use serde_cbor::de;
 
     #[test]
@@ -96,8 +97,8 @@ mod tests {
         let command = "/bin/pwd";
 
         let raw = to_cbor(channel_id, command, None).unwrap();
-        let parsed = parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = from_cbor(&parsed);
+        let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
+        let msg = parse_message(parsed);
 
         assert_eq!(
             msg.unwrap(),
@@ -116,8 +117,8 @@ mod tests {
         let args: Vec<String> = vec!["100".to_owned()];
 
         let raw = to_cbor(channel_id, command, Some(&args)).unwrap();
-        let parsed = parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = from_cbor(&parsed);
+        let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
+        let msg = parse_message(parsed);
 
         assert_eq!(
             msg.unwrap(),
@@ -136,8 +137,8 @@ mod tests {
         let args: Vec<String> = vec!["hello".to_owned(), "world".to_owned()];
 
         let raw = to_cbor(channel_id, command, Some(&args)).unwrap();
-        let parsed = parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = from_cbor(&parsed);
+        let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
+        let msg = parse_message(parsed);
 
         assert_eq!(
             msg.unwrap(),

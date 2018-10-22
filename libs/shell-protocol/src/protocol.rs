@@ -17,18 +17,23 @@
 use channel_protocol::{ChannelMessage, ChannelProtocol};
 use error::ProtocolError;
 use messages;
-use std::process::{Command, Stdio};
+use process::ProcessHandler;
 use std::time::Duration;
 
 pub struct Protocol {
     pub channel_protocol: ChannelProtocol,
+    pub process: Box<Option<ProcessHandler>>,
+    channel_id: u32,
 }
 
+/// Shell Protocol structure used in the shell service
 impl Protocol {
-    pub fn new(host_ip: &str, remote_addr: &str) -> Self {
+    pub fn new(host_ip: &str, remote_addr: &str, channel_id: u32) -> Self {
         // Set up the full connection info
         Protocol {
             channel_protocol: ChannelProtocol::new(host_ip, remote_addr, 4096),
+            process: Box::new(None),
+            channel_id: channel_id,
         }
     }
 
@@ -43,27 +48,61 @@ impl Protocol {
     ///
     /// If this function encounters any errors, it will return an error message string
     ///
-    /// # Examples
-    ///
-    /// ```no_run
-    /// extern crate shell_protocol;
-    ///
-    /// use shell_protocol::*;
-    /// use std::time::Duration;
-    ///
-    /// let s_protocol = ShellProtocol::new("0.0.0.0", "0.0.0.0:7000");
-    ///
-    /// s_protocol.message_engine(
-    ///     |d| Ok(s_protocol.channel_protocol.recv_message(Some(d))?),
-    ///     Duration::from_millis(10),
-    /// );
-    /// ```
-    ///
-    pub fn message_engine<F>(&self, pump: F, timeout: Duration) -> Result<(), ProtocolError>
+    pub fn message_engine<F>(&mut self, pump: F, timeout: Duration) -> Result<(), ProtocolError>
     where
         F: Fn(Duration) -> Result<ChannelMessage, ProtocolError>,
     {
         loop {
+            if let Some(process) = self.process.as_mut() {
+                // Check if process has stdout output
+                if process.stdout_reader.is_some() {
+                    match process.read_stdout() {
+                        Ok(Some(data)) => {
+                            self.channel_protocol
+                                .send(messages::stdout::to_cbor(self.channel_id, Some(&data))?)?;
+                        }
+                        Err(ProtocolError::ReadTimeout) => {}
+                        _ => {
+                            self.channel_protocol
+                                .send(messages::stdout::to_cbor(self.channel_id, None)?)?;
+                            process.stdout_reader = None;
+                        }
+                    }
+                }
+
+                // Check if process has stderr output
+                if process.stderr_reader.is_some() {
+                    match process.read_stderr() {
+                        Ok(Some(data)) => {
+                            self.channel_protocol
+                                .send(messages::stderr::to_cbor(self.channel_id, Some(&data))?)?;
+                        }
+                        Err(ProtocolError::ReadTimeout) => {}
+                        _ => {
+                            self.channel_protocol
+                                .send(messages::stderr::to_cbor(self.channel_id, None)?)?;
+                            process.stderr_reader = None;
+                        }
+                    }
+                }
+
+                // When the process ends we will start to get `None` on stdout/stderr
+                // Once we have closed those pipes we can check for the status code
+                // and clean up. Other wise we might miss output
+                if process.stdout_reader.is_none() && process.stderr_reader.is_none() {
+                    // Check if process has exited
+                    if let Some((code, signal)) = process.status()? {
+                        self.channel_protocol.send(messages::exit::to_cbor(
+                            self.channel_id,
+                            code,
+                            signal,
+                        )?)?;
+                        // If the process is done then we can exit this loop
+                        return Ok(());
+                    }
+                }
+            }
+            // Check for new messages from the client
             let message = match pump(timeout) {
                 Ok(message) => message,
                 Err(ProtocolError::ReceiveTimeout) => {
@@ -77,7 +116,7 @@ impl Protocol {
         }
     }
 
-    pub fn process_message(&self, message: ChannelMessage) -> Result<(), ProtocolError> {
+    pub fn process_message(&mut self, message: ChannelMessage) -> Result<(), ProtocolError> {
         let parsed_message = messages::parse_message(message)?;
 
         match parsed_message {
@@ -86,23 +125,35 @@ impl Protocol {
                 command,
                 args,
             } => {
-                info!("{}: spawning command {} {:?}", channel_id, command, args);
-                self.spawn(command, args)?;
+                info!(
+                    "<- {{ {}, spawn, {}, {{ args = {:?} }} }}",
+                    channel_id, command, args
+                );
+
+                self.process = Box::new(Some(ProcessHandler::spawn(command, args)?));
+                if let Some(process) = self.process.as_ref() {
+                    self.channel_protocol
+                        .send(messages::pid::to_cbor(self.channel_id, process.id()?)?)?;
+                }
+            }
+            messages::Message::Stdout { channel_id, data } => {
+                info!("<- {{ {}, stdout, {:?} }}", channel_id, data);
+            }
+            messages::Message::Stderr { channel_id, data } => {
+                info!("<- {{ {}, stderr, {:?} }}", channel_id, data);
+            }
+            messages::Message::Pid { channel_id, pid } => {
+                info!("<- {{ {}, pid, {} }}", channel_id, pid);
+            }
+            messages::Message::Exit {
+                channel_id,
+                code,
+                signal,
+            } => {
+                info!("-< {{ {}, exit, {}, {} }}", channel_id, code, signal);
             }
         }
 
         Ok(())
-    }
-
-    fn spawn(&self, command: String, args: Option<Vec<String>>) -> Result<(), ProtocolError> {
-        match Command::new(command.to_owned())
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .args(args.unwrap_or(vec![]))
-            .spawn()
-        {
-            Ok(_) => Ok(()),
-            Err(err) => Err(ProtocolError::SpawnError { cmd: command, err }),
-        }
     }
 }
