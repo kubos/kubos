@@ -102,7 +102,7 @@ Registering
 -----------
 
 Once an application has been written and compiled, the application and its accompanying :ref:`manifest.toml file <app-manifest>`
-should be transferred to a new directory on the OBC. 
+should be transferred to a new directory on the OBC.
 This file transfer can be done using the :doc:`file transfer service <../services/file>`.
 
 The application and manifest *must* be the only files in the directory.
@@ -117,28 +117,44 @@ For example::
 
     mutation {
         register(path: "/home/kubos/payload-app") {
-            active,
-            app {
-                name,
-                version
+            success,
+            errors,
+            entry {
+                active,
+                app {
+                    name,
+                    version
+                }
             }
         }
     }
 
-If the ``active`` response field is ``True``, then the registration completed successfully.
-If the registration fails for some reason, then the service will return an error response.    
+The ``success`` response field is a boolean value which reflects whether the registration process
+completed successfully.
+
+If ``true``, then the ``entry`` field will contain the registration information about the newly
+registered application.
+
+If ``false,`` then the ``entry`` field will be empty, and the ``errors`` field will contain an
+error message detailing what went wrong.
 
 De-Registering
 --------------
 
 A particular version of an application can be removed using the ``uninstall`` mutation.
 
-The mutation returns a single boolean value to indicate success or failure.
+The mutation returns two fields:
+
+    - ``success`` - Indicating the overall result of the uninstall operation
+    - ``errors`` - Any errors which were encountered during the uninstall process
 
 For example::
 
     mutation {
-        uninstall(uuid: "46d01f19-ab45-4c6f-896e-88f90266f12e", version: "1.1")
+        uninstall(uuid: "46d01f19-ab45-4c6f-896e-88f90266f12e", version: "1.1") {
+            success,
+            errors
+        }
     }
     
     
@@ -152,12 +168,20 @@ To manually start an application, the ``startApp`` mutation can be used.
 The mutation takes two arguments: the UUID of the application to start and the run level which the
 app should execute with.
 
-On success, the mutation will return the PID of the running application.
+The mutation will return three fields:
+
+    - ``success`` - Indicating the overall result of the operation
+    - ``errors`` - Any errors which were encountered while starting the application
+    - ``pid`` - The PID of the started application. This will be empty if any errors are encountered
 
 For example::
 
     mutation {
-        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand")
+        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand") {
+            success,
+            errors,
+            pid
+        }
     }
     
 Under the covers, the service receives the mutation and identifies the current active version of the
@@ -171,7 +195,9 @@ To pass additional arguments to the underlying application, the ``args`` input a
 For example::
 
     mutation {
-        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand", args: "--verbose --release")
+        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand", args: "--verbose --release") {
+            success
+        }
     }
     
 Under the covers, the application would be called like so::
@@ -184,7 +210,7 @@ Automatically Starting on Boot
 All applications will be started with the ``OnBoot`` run level automatically when the applications service is
 started during system initialization.
 
-This logic may also be triggered by manually starting the applications service with the ``-b`` flag. 
+This logic may also be triggered by manually starting the applications service with the ``-b`` flag.
 
 .. todo::
 
@@ -226,7 +252,7 @@ This file can be editted to add or modify the following fields:
 
     - ``ip`` - The IP address that the service will use
     - ``port`` - The UDP port GraphQL requests should be sent to
-    
+
 - ``[app-service]``
 
     - ``registry-dir`` - *(Default: /home/system/kubos/apps)* The directory under which all registry entries should be stored

@@ -50,13 +50,16 @@ fn uninstall_app() {
         let result = kubos_app::query(
             ServiceConfig::new_from_path("app-service", config.to_owned()),
             r#"mutation {
-            uninstall(uuid: "a-b-c-d-e", version: "0.0.1")
+            uninstall(uuid: "a-b-c-d-e", version: "0.0.1") {
+                errors,
+                success
+            }
         }"#,
             Some(Duration::from_secs(5)),
         );
 
         assert!(result.is_ok(), "{:?}", result.err());
-        assert!(result.unwrap()["uninstall"].as_bool().unwrap());
+        assert!(result.unwrap()["uninstall"]["success"].as_bool().unwrap());
 
         let result = kubos_app::query(
             ServiceConfig::new_from_path("app-service", config.to_owned()),

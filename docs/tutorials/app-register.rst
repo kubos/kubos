@@ -47,14 +47,18 @@ It has the following schema::
 
      mutation {
         register(path: String!) {
-            app: {
-                uuid: String!,
-                name: String!,
-                version: String!,
-                author: String!,
-                path: String!
-            },
-            active: Bool
+            success: Bool!,
+            errors: String,
+            entry: {
+                app: {
+                    uuid: String!,
+                    name: String!,
+                    version: String!,
+                    author: String!,
+                    path: String!
+                },
+                active: Bool
+            }
         }
      }
      
@@ -65,27 +69,33 @@ registration process.
 
 The mutation can return the following fields:
 
-    - ``app``
+    - ``success`` - Indicating the overall result of the register operation
+    - ``errors`` - Any errors which were encountered while registering the application
 
-        - ``uuid`` - The unique identifier for our newly registered application. This will be used for
-          all future interaction with our application
-        - ``name`` - The name of the registered application, taken from the manifest file
-        - ``version`` - The version number of this particular iteration of the application, taken
-          from the manifest file
-        - ``author`` - The author information for the application, taken from the manifest file
-        - ``path`` - The abosolute path of the newly registered application file
+    - ``entry`` - The registration information about the newly registered application.
+      Will be empty if the registration process fails
 
-    - ``active`` - Specifies whether the newly registered application is the current active version
-      of the application which will be used when the service attempts to run it. This value should
-      always be ``true`` when returned by this mutation
+        - ``app``
+
+            - ``uuid`` - The unique identifier for our newly registered application. This will be used for
+              all future interaction with our application
+            - ``name`` - The name of the registered application, taken from the manifest file
+            - ``version`` - The version number of this particular iteration of the application, taken
+              from the manifest file
+            - ``author`` - The author information for the application, taken from the manifest file
+            - ``path`` - The abosolute path of the newly registered application file
+
+        - ``active`` - Specifies whether the newly registered application is the current active version
+          of the application which will be used when the service attempts to run it. This value should
+          always be ``true`` when returned by this mutation
 
 We'll be interacting with the OBC from our SDK instance using the `netcat <https://linux.die.net/man/1/nc>`__ utility.
 By default, the applications service uses port 8000.
 
 Our registration process should look like this::
 
-    $ echo "mutation {register(path: \"/home/kubos/my-app\"){app{uuid,name,path}}}" | nc -uw1 10.0.2.20 8000
-    {"errs":"","msg":{"register":{"app":{"name":"my-mission-app.py","path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py","uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"}}}}
+    $ echo "mutation {register(path: \"/home/kubos/my-app\"){success,entry{app{uuid,name,path}}}}" | nc -uw1 10.0.2.20 8000
+    {"errs":"","msg":{"register":{"success":true,"entry":{"app":{"name":"my-mission-app.py","path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py","uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"}}}}}
 
 Adding a bit of formatting, the response looks like this::
 
@@ -93,10 +103,13 @@ Adding a bit of formatting, the response looks like this::
         "errs": "",
         "msg": {
             "register": {
-                "app": {
-                    "name":"my-mission-app.py",
-                    "path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py",
-                    "uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"
+                "success": true,
+                "entry": {
+                    "app": {
+                        "name":"my-mission-app.py",
+                        "path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py",
+                        "uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"
+                    }
                 }
             }
         }
@@ -118,20 +131,28 @@ We'll go ahead and start our app now to verify it works using the ``startApp`` m
 It has the following schema::
 
     mutation {
-        startApp(uuid: String!, runLevel: String!): Int!
+        startApp(uuid: String!, runLevel: String!): {
+            success: Bool!
+            errors: String,
+            pid: Int
+        }
     }
 
 The ``uuid`` input parameter specifies the UUID of the application which should be started.
 The ``runLevel`` input parameter specifies which run case should be called; it must be either
 "OnBoot" or "OnCommand".
 
-The mutation returns the process ID of the started application.
+The mutation returns three fields:
+
+    - ``success`` - Indicating the overall result of the operation
+    - ``errors`` - Any errors which were encountered while starting the application
+    - ``pid`` - The PID of the started application. This will be empty if any errors are encountered
 
 Using the UUID returned from our registration, our request should look like this::
 
-    $ echo "mutation {startApp(uuid: \"8052dbe9-bab1-428e-8414-fb72b4af90bc\", runLevel: \"OnCommand\")}" \
+    $ echo "mutation {startApp(uuid: \"8052dbe9-bab1-428e-8414-fb72b4af90bc\", runLevel: \"OnCommand\"){success,pid}}" \
     > | nc -uw1 10.0.2.20 8000
-    {"errs":"","msg":{"startApp":501}}
+    {"errs":"","msg":{"startApp":{"success":true,"pid":501}}}
 
 To verify that the app ran successfully, we'll check the contents of our log file::
 
@@ -158,7 +179,7 @@ file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
 After transferring both of the files into our remote folder, ``/home/kubos/my-app``,
 we can register the updated application using the same ``register`` mutation as before::
  
-    $ echo "mutation {register(path: \"/home/kubos/my-app\"){app{uuid,name,path}}}" | nc -uw1 10.0.2.20 8000
+    $ echo "mutation {register(path: \"/home/kubos/my-app\"){success,entry{app{uuid,name,path}}}}" | nc -uw1 10.0.2.20 8000
 
 The returned UUID should match our original UUID::
 
@@ -166,10 +187,13 @@ The returned UUID should match our original UUID::
         "errs": "",
         "msg": {
             "register": {
-                "app": {
-                    "name":"my-mission-app.py",
-                    "path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/2.0/my-mission-app.py",
-                    "uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"
+                "success": true,
+                "entry": {
+                    "app": {
+                        "name":"my-mission-app.py",
+                        "path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/2.0/my-mission-app.py",
+                        "uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"
+                    }
                 }
             }
         }
