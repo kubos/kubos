@@ -26,8 +26,6 @@ extern crate serde_json;
 extern crate tempfile;
 
 use std::path::Path;
-use std::thread;
-use std::time::Duration;
 
 mod utils;
 pub use utils::*;
@@ -69,6 +67,5 @@ fn onboot_good() {
     setup_apps(&fixture.registry_dir.path());
 
     fixture.start_service(true);
-    thread::sleep(Duration::from_secs(1));
     fixture.teardown();
 }

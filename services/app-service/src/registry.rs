@@ -122,14 +122,12 @@ impl AppRegistry {
                     } else {
                         // Don't really care if this fails, since this is just trying to help
                         // prevent orphan files
-                        eprintln!("Removing version");
                         let _ = fs::remove_dir_all(version.path());
                     }
                 }
                 _ => {
                     // Don't really care if this fails, since this is just trying to help
                     // prevent orphan files
-                    eprintln!("Removing version");
                     let _ = fs::remove_dir_all(version.path());
                 }
             }
