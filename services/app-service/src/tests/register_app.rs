@@ -24,7 +24,7 @@ use schema;
 
 macro_rules! mock_service {
     ($registry_dir:ident) => {{
-        let registry = AppRegistry::new_from_dir(&$registry_dir.path().to_string_lossy());
+        let registry = AppRegistry::new_from_dir(&$registry_dir.path().to_string_lossy()).unwrap();
 
         let config = format!(
             r#"
@@ -118,7 +118,7 @@ fn register_no_manifest() {
         app_bin.to_str().unwrap()
     );
 
-    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Exactly two files should be present in the app directory\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to register app: Exactly two files should be present in the app directory\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
 
     assert_eq!(service.process(register_query.to_owned()), expected);
 }
@@ -158,7 +158,7 @@ fn register_extra_file() {
         app_bin.to_str().unwrap()
     );
 
-    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Exactly two files should be present in the app directory\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to register app: Exactly two files should be present in the app directory\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
 
     assert_eq!(service.process(register_query.to_owned()), expected);
 }
@@ -194,7 +194,7 @@ fn register_no_name() {
         app_bin.to_str().unwrap()
     );
 
-    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to parse manifest: missing field `name`\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to parse manifest.toml: missing field `name`\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
 
     assert_eq!(service.process(register_query.to_owned()), expected);
 }
@@ -230,7 +230,7 @@ fn register_no_version() {
         app_bin.to_str().unwrap()
     );
 
-    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to parse manifest: missing field `version`\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to parse manifest.toml: missing field `version`\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
 
     assert_eq!(service.process(register_query.to_owned()), expected);
 }
@@ -266,7 +266,7 @@ fn register_no_author() {
         app_bin.to_str().unwrap()
     );
 
-    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to parse manifest: missing field `author`\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to parse manifest.toml: missing field `author`\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
 
     assert_eq!(service.process(register_query.to_owned()), expected);
 }
@@ -284,7 +284,7 @@ fn register_bad_path() {
         }
     }"#;
 
-    let expected = "{\"errs\":\"{\\\"message\\\":\\\"fake/files does not exist\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
+    let expected = "{\"errs\":\"{\\\"message\\\":\\\"Failed to register app: fake/files does not exist\\\",\\\"locations\\\":[{\\\"line\\\":2,\\\"column\\\":9}],\\\"path\\\":[\\\"register\\\"]}\",\"msg\":null}";
 
     assert_eq!(service.process(register_query.to_owned()), expected);
 }

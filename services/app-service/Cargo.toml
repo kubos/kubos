@@ -7,6 +7,7 @@ authors = ["Marshall Culpepper <marshall@kubos.com>"]
 kubos-app = { path = "../../apis/app-api/rust" }
 kubos-service = { path = "../kubos-service" }
 
+failure = "0.1.2"
 getopts = "0.2"
 juniper =  "0.9.2"
 serde = "1.0"

@@ -17,47 +17,38 @@
 extern crate kubos_app;
 extern crate toml;
 
-use std::env;
-use std::fs;
-use std::path::PathBuf;
+use tempfile::TempDir;
 
+use app_entry::*;
+use error::*;
 use registry::*;
-
-fn setup_registry() -> PathBuf {
-    let mut registry_dir = env::temp_dir();
-    registry_dir.push("apps");
-    if registry_dir.exists() {
-        assert!(fs::remove_dir_all(registry_dir.clone()).is_ok());
-    }
-
-    assert!(fs::create_dir_all(registry_dir.clone()).is_ok());
-
-    registry_dir
-}
-
-#[test]
-fn default_apps_dir() {
-    let registry = AppRegistry::new();
-    assert_eq!(registry.apps_dir, K_APPS_DIR);
-}
 
 #[test]
 fn custom_apps_dir() {
-    let registry = AppRegistry::new_from_dir("/custom/dir");
-    assert_eq!(registry.apps_dir, String::from("/custom/dir"));
+    let registry_dir = TempDir::new().unwrap();
+    let registry_path = registry_dir.path().to_string_lossy();
+
+    let registry = AppRegistry::new_from_dir(&registry_path).unwrap();
+    assert_eq!(registry.apps_dir, String::from(registry_path));
 }
 
 #[test]
 fn invalid_apps_dir_empty_reg() {
-    let registry = AppRegistry::new_from_dir("/i/dont/exist");
-    assert_eq!(registry.entries.borrow().len(), 0);
+    let result = AppRegistry::new_from_dir("/sys/fake");
+    match result {
+        Ok(val) => panic!("Bad test didn't throw error: {:?}", val),
+        // Expected result. Specific error varies depending on whether the test is run by a
+        // normal user or root
+        Err(AppError::IoError { .. }) => {}
+        Err(other) => panic!("Unexpected error: {:?}", other),
+    }
 }
 
 #[test]
 fn empty_apps_dir_empty_reg() {
-    let registry_dir = setup_registry();
+    let registry_dir = TempDir::new().unwrap();
 
-    let registry = AppRegistry::new_from_dir(registry_dir.to_str().unwrap());
+    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
     assert_eq!(registry.entries.borrow().len(), 0);
 }
 
