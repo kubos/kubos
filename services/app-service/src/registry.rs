@@ -90,7 +90,6 @@ impl AppRegistry {
             if let Ok(entry) = entry {
                 if let Ok(file_type) = entry.file_type() {
                     if file_type.is_dir() && entry.file_name().to_str() != Some("active") {
-                        eprintln!("Checking {:?}", entry.file_name().to_str());
                         reg_entries.extend(self.discover_versions(entry.path())?);
                     }
                 }
@@ -109,8 +108,7 @@ impl AppRegistry {
             }
 
             let version = version.unwrap();
-            
-            eprintln!("Checking version {}", version.path().to_string_lossy());
+
             match version
                 .file_type()
                 .and_then(|file_type| Ok(file_type.is_dir()))
@@ -139,10 +137,9 @@ impl AppRegistry {
 
         Ok(reg_entries)
     }
-    
+
     // Create or update the active version symlink for an application
     fn set_active(&self, uuid: &str, app_dir: &str) -> Result<(), AppError> {
-        
         let active_symlink = PathBuf::from(format!("{}/active/{}", self.apps_dir, uuid));
         if active_symlink.exists() {
             if let Err(err) = fs::remove_file(active_symlink.clone()) {
@@ -152,7 +149,7 @@ impl AppRegistry {
                         active_symlink.display(),
                         err
                     ),
-                })    
+                });
             }
         }
 
@@ -164,9 +161,9 @@ impl AppRegistry {
                     app_dir,
                     err
                 ),
-            })
+            });
         }
-        
+
         Ok(())
     }
 
@@ -314,14 +311,14 @@ impl AppRegistry {
     ///
     pub fn uninstall(&self, app_uuid: &str, version: &str) -> Result<bool, AppError> {
         let mut errors = None;
-        
+
         // Delete the application files
         let app_dir = format!("{}/{}/{}", self.apps_dir, app_uuid, version);
-        
+
         if let Err(error) = fs::remove_dir_all(app_dir) {
             errors = Some(format!("Failed to remove app directory: {}", error));
         }
-        
+
         // Remove the app entry from the registry list
         let mut entries = self.entries.borrow_mut();
         match entries.binary_search_by(|ref e| {
@@ -330,20 +327,27 @@ impl AppRegistry {
                 .cmp(&String::from(app_uuid))
                 .then(e.app.metadata.version.cmp(&String::from(version)))
         }) {
-            Ok(index) => {entries.remove(index);},
+            Ok(index) => {
+                entries.remove(index);
+            }
             Err(_) => {
                 if let Some(error) = errors {
-                    errors = Some(format!("{}. {} version {} not found in registry", error, app_uuid, version));
-                }
-                else {
-                    errors = Some(format!("{} version {} not found in registry", app_uuid, version));
+                    errors = Some(format!(
+                        "{}. {} version {} not found in registry",
+                        error, app_uuid, version
+                    ));
+                } else {
+                    errors = Some(format!(
+                        "{} version {} not found in registry",
+                        app_uuid, version
+                    ));
                 }
             }
         }
 
         match errors {
             Some(err) => Err(AppError::UninstallError { err }),
-            None => Ok(true)
+            None => Ok(true),
         }
     }
 
@@ -367,32 +371,33 @@ impl AppRegistry {
         run_level: RunLevel,
         args: Option<Vec<String>>,
     ) -> Result<u32, AppError> {
-        eprintln!("Starting {}", app_uuid);
-        let entries = self.entries.borrow();
-
         // Look up the active version of the requested application
-        let app = match entries
-            .iter()
-            .find(|ref e| e.active_version && e.app.uuid == app_uuid)
-        {
-            Some(entry) => &entry.app,
-            None => {
-                return Err(AppError::StartError {
-                    err: format!("No active version found for UUID {}", app_uuid),
-                })
+        let app = {
+            let entries = self.entries.borrow();
+            match entries
+                .iter()
+                .find(|ref e| e.active_version && e.app.uuid == app_uuid)
+            {
+                Some(entry) => entry.app.clone(),
+                None => {
+                    return Err(AppError::StartError {
+                        err: format!("No active version found for UUID {}", app_uuid),
+                    })
+                }
             }
         };
 
         let app_path = PathBuf::from(&app.path);
         if !app_path.exists() {
             let msg = match self.uninstall(&app.uuid, &app.metadata.version) {
-                Ok(_) => format!("{} does not exist. {} version {} automatically uninstalled", app.path, app.uuid, app.metadata.version),
+                Ok(_) => format!(
+                    "{} does not exist. {} version {} automatically uninstalled",
+                    app.path, app.uuid, app.metadata.version
+                ),
                 Err(error) => format!("{} does not exist. {}", app.path, error),
             };
 
-            return Err(AppError::StartError {
-                err: msg,
-            });
+            return Err(AppError::StartError { err: msg });
         }
 
         let mut cmd = Command::new(app_path);
@@ -430,7 +435,6 @@ impl AppRegistry {
 
         let active_symlink = PathBuf::from(format!("{}/active", self.apps_dir));
         if !active_symlink.exists() {
-            eprintln!("no symlink");
             return Err(AppError::FileError {
                 err: "Failed to get list of active UUIDs".to_owned(),
             });
