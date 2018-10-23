@@ -46,7 +46,7 @@ To register an application, we use the service's ``register`` mutation.
 It has the following schema::
 
      mutation {
-        register(path: String!) {
+        register(path: String!, uuid: String) {
             success: Bool!,
             errors: String,
             entry: {
@@ -66,6 +66,10 @@ The ``path`` input parameter specifies the directory *on the OBC* where the appl
 files reside.
 They **must be the only files in this directory** in order for the service to be able to complete the
 registration process.
+
+The ``uuid`` input parameter specifies the desired UUID for the registered application.
+If not specified, one will be automatically generated.
+This field is normally used when updating an existing application.
 
 The mutation can return the following fields:
 
@@ -177,9 +181,10 @@ Since this is a new version of our application, we'll then need to update our ``
 file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
 
 After transferring both of the files into our remote folder, ``/home/kubos/my-app``,
-we can register the updated application using the same ``register`` mutation as before::
+we can register the updated application using the same ``register`` mutation as before,
+except this time we'll add the ``uuid`` input parameter::
  
-    $ echo "mutation {register(path: \"/home/kubos/my-app\"){success,entry{app{uuid,name,path}}}}" | nc -uw1 10.0.2.20 8000
+    $ echo "mutation {register(path: \"/home/kubos/my-app\", uuid: \"8052dbe9-bab1-428e-8414-fb72b4af90bc\"){success,entry{app{uuid,name,path}}}}" | nc -uw1 10.0.2.20 8000
 
 The returned UUID should match our original UUID::
 

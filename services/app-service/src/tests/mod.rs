@@ -14,7 +14,31 @@
  * limitations under the License.
  */
 
+macro_rules! mock_service {
+    ($registry_dir:ident) => {{
+        let registry = AppRegistry::new_from_dir(&$registry_dir.path().to_string_lossy()).unwrap();
+
+        let config = format!(
+            r#"
+            [app-service]
+            registry-dir = "{}"
+            [app-service.addr]
+            ip = "127.0.0.1"
+            port = 9999"#,
+            $registry_dir.path().to_str().unwrap(),
+        );
+
+        Service::new(
+            Config::new_from_str("app-service", &config),
+            registry,
+            schema::QueryRoot,
+            schema::MutationRoot,
+        )
+    }};
+}
+
 mod register_app;
 mod registry_onboot;
 mod registry_start_app;
 mod registry_test;
+mod upgrade_app;

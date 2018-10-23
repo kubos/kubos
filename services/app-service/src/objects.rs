@@ -35,7 +35,7 @@ pub struct RegisterResponse {
     /// Request completion success or failure
     pub success: bool,
     /// The new registry entry created after successfully registration
-    pub entry: Option<KAppRegistryEntry>
+    pub entry: Option<KAppRegistryEntry>,
 }
 
 /// Response fields for the `startApp` mutation
@@ -46,7 +46,7 @@ pub struct StartResponse {
     /// Request completion success or failure
     pub success: bool,
     /// PID of the started process
-    pub pid: Option<i32>
+    pub pid: Option<i32>,
 }
 
 pub struct KApp(pub app_entry::App);

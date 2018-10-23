@@ -179,7 +179,7 @@ impl AppRegistry {
     /// let registry = AppRegistry::new();
     /// registry.register("/home/kubos/my-app-bin");
     /// ```
-    pub fn register(&self, path: &str) -> Result<AppRegistryEntry, AppError> {
+    pub fn register(&self, path: &str, uuid: Option<String>) -> Result<AppRegistryEntry, AppError> {
         let app_path = Path::new(path);
         if !app_path.exists() {
             return Err(AppError::RegisterError {
@@ -245,19 +245,22 @@ impl AppRegistry {
         };
 
         let mut entries = self.entries.borrow_mut();
-        let mut app_uuid = Uuid::new_v4().hyphenated().to_string();
-        // TODO: Do the lookup based on the passed UUID
-        // Also TODO: Allow a UUID to be passed...
-        for entry in entries.iter_mut() {
-            // Find the existing active version of the app and make it inactive.
-            // Use the existing UUID for our new app
-            if entry.active_version && entry.app.metadata.name == metadata.name {
-                entry.active_version = false;
-                app_uuid = entry.app.uuid.clone();
-                entry.save()?;
-                break;
+        let app_uuid = match uuid {
+            Some(val) => {
+                for entry in entries.iter_mut() {
+                    // Find the existing active version of the app and make it inactive.
+                    // Use the existing UUID for our new app
+                    if entry.active_version && entry.app.uuid == val {
+                        entry.active_version = false;
+                        entry.save()?;
+                        break;
+                    }
+                }
+
+                val
             }
-        }
+            None => Uuid::new_v4().hyphenated().to_string(),
+        };
 
         let app_dir_str = format!(
             "{}/{}/{}",
