@@ -12,6 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This test file tests solely that the full top-to-bottom process of finding and kicking off
+ * registered applcations at boot time doesn't mysteriously break down anywhere.
+ *
+ * The majority of the onBoot-related test cases are in src/tests/registry_onboot.rs, since the
+ * return status of the run_onboot() function can be directly examined and verified from there.
  */
 #![deny(warnings)]
 extern crate kubos_app;

@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-use std::io::Write;
 use std::fs;
+use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::thread;
 use std::time::Duration;
 
 use tempfile::TempDir;
 
+use error::*;
 use registry::*;
 
 #[test]
 fn registry_onboot_good() {
     let registry_dir = TempDir::new().unwrap();
-    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy());
+    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
     let app_dir = TempDir::new().unwrap();
     let app_bin = app_dir.path().join("tiny-app");
@@ -66,7 +67,7 @@ fn registry_onboot_good() {
 #[test]
 fn registry_onboot_fail() {
     let registry_dir = TempDir::new().unwrap();
-    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy());
+    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
     let app_dir = TempDir::new().unwrap();
     let app_bin = app_dir.path().join("dummy");
@@ -85,7 +86,67 @@ fn registry_onboot_fail() {
     registry.register(&app_bin.to_string_lossy()).unwrap();
 
     assert_eq!(
-        registry.run_onboot(),
-        Err("Failed to start 1 app/s".to_owned())
+        registry.run_onboot().unwrap_err(),
+        AppError::FileError {
+            err: "Failed to start 1 app/s".to_owned()
+        }
     );
+}
+
+#[test]
+fn registry_onboot_preexisting() {
+    let registry_dir = TempDir::new().unwrap();
+
+    // Create a pre-existing app for our registry to discover
+    //
+    // Since we're creating the app files directly in the app registry, we need to manually
+    // control the lifetime of the app binary so that all the data gets written and the file gets
+    // closed before we attempt to execute it
+    {
+        let app_dir = registry_dir.path().join("a-b-c-d-e/1.0");
+
+        fs::create_dir_all(app_dir.clone()).unwrap();
+
+        let src = r#"
+            #!/bin/bash
+            exit 0
+            "#;
+
+        let mut bin = fs::File::create(app_dir.join("tiny-app")).unwrap();
+        bin.write_all(src.as_bytes()).unwrap();
+        let mut perms = bin.metadata().unwrap().permissions();
+        perms.set_mode(0o755);
+        bin.set_permissions(perms).unwrap();
+
+        let toml = format!(
+            r#"
+                active_version = true
+                run_level = "onCommand"
+    
+                [app]
+                uuid = "a-b-c-d-e"
+                pid = 0
+                path = "{}/a-b-c-d-e/1.0/tiny-app"
+    
+                [app.metadata]
+                name = "tiny-app"
+                version = "1.0"
+                author = "user"
+                "#,
+            registry_dir.path().to_string_lossy(),
+        );
+
+        fs::write(app_dir.join("app.toml"), toml).unwrap();
+    }
+
+    // Create the registry
+    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
+
+    let result = registry.run_onboot();
+
+    // Small sleep to prevent tiny-app from being destroyed before
+    // the system finishes calling it
+    thread::sleep(Duration::from_millis(10));
+
+    assert!(result.is_ok());
 }

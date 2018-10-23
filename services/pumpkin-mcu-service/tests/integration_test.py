@@ -60,7 +60,7 @@ for module in modules:
     query = 'query {mcuTelemetry(module: "' + module + '")}'
     print "\nquery:", query
     sock.sendto(query, (c.ip, c.port))
-    mcuTelemetry, addr = sock.recvfrom(1024)
+    mcuTelemetry, addr = sock.recvfrom(4096)
     print 'All fields for mcuTelemetry: ' + mcuTelemetry
     dict_result_mcuTelemetry = json.loads(mcuTelemetry)
     if dict_result_mcuTelemetry['errs'] != None:

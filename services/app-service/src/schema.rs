@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+use app_entry;
 use juniper::{FieldError, FieldResult, Value};
 use kubos_app::RunLevel;
 use kubos_service;
-use registry::{self, AppRegistry};
+use registry::AppRegistry;
 
 type Context = kubos_service::Context<AppRegistry>;
 
-pub struct KApp(pub registry::App);
+pub struct KApp(pub app_entry::App);
 
 graphql_object!(KApp: () as "App" |&self| {
     description: "Kubos Application"
@@ -62,7 +64,7 @@ graphql_object!(KApp: () as "App" |&self| {
     }
 });
 
-pub struct KAppRegistryEntry(pub registry::AppRegistryEntry);
+pub struct KAppRegistryEntry(pub app_entry::AppRegistryEntry);
 
 graphql_object!(KAppRegistryEntry: () as "AppRegistryEntry" |&self| {
     field app() -> FieldResult<KApp>
