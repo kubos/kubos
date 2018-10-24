@@ -169,4 +169,14 @@ impl ProcessHandler {
             }),
         }
     }
+
+    /// Send killing signal to process
+    pub fn kill(&mut self, signal: Option<u32>) -> Result<(), ProtocolError> {
+        self.process
+            .kill()
+            .map_err(|err| ProtocolError::ProcesssError {
+                action: "kill process".to_owned(),
+                err,
+            })
+    }
 }

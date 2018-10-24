@@ -170,7 +170,13 @@ impl Protocol {
                 channel_id,
                 process_list,
             } => {
-                info!("-< {{ {}, list, {:?} }}", channel_id, process_list);
+                info!("<- {{ {}, list, {:?} }}", channel_id, process_list);
+            }
+            messages::Message::Kill { channel_id, signal } => {
+                info!("<- {{ {}, kill, {:?} }}", channel_id, signal);
+                if let Some(process) = self.process.as_mut() {
+                    process.kill(signal)?;
+                }
             }
         }
 
