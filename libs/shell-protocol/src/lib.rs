@@ -30,4 +30,7 @@ mod process;
 mod protocol;
 
 pub use error::ProtocolError;
+pub use messages::parse_message;
+pub use messages::Message as ShellMessage;
+pub use process::ProcessHandler;
 pub use protocol::Protocol as ShellProtocol;

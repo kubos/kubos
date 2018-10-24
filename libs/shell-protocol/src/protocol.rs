@@ -28,11 +28,16 @@ pub struct Protocol {
 
 /// Shell Protocol structure used in the shell service
 impl Protocol {
-    pub fn new(host_ip: &str, remote_addr: &str, channel_id: u32) -> Self {
+    pub fn new(
+        host_ip: &str,
+        remote_addr: &str,
+        channel_id: u32,
+        process: Box<Option<ProcessHandler>>,
+    ) -> Self {
         // Set up the full connection info
         Protocol {
             channel_protocol: ChannelProtocol::new(host_ip, remote_addr, 4096),
-            process: Box::new(None),
+            process: process,
             channel_id: channel_id,
         }
     }
@@ -160,6 +165,12 @@ impl Protocol {
                 signal,
             } => {
                 info!("<- {{ {}, exit, {}, {} }}", channel_id, code, signal);
+            }
+            messages::Message::List {
+                channel_id,
+                process_list,
+            } => {
+                info!("-< {{ {}, list, {:?} }}", channel_id, process_list);
             }
         }
 
