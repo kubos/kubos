@@ -41,7 +41,7 @@ To perform a full default installation, two files are needed:
   
 All of these files can be obtained from `our Kubos Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
-Download the latest `Kubos_Linux.zip` file and then unzip the files for the Beaglebone Black. They're located in the `Kubos_Linux/{version}/Beaglebone-Black` folder.
+Download the latest `KubOS-v{version}.tar.gz` file and then unzip the files for the Beaglebone Black. They're located in the `KubOS-v{version}/Beaglebone-Black` folder.
 
 .. note::
 
