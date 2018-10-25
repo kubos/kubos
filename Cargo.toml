@@ -14,6 +14,7 @@ members = [
 "apis/system-api",
 "apis/telemetry-db-api",
 "clients/file-client",
+"clients/shell-client-rust",
 "examples/rust-c-service/extern-lib",
 "examples/rust-c-service/service",
 "examples/rust-mission-app",
