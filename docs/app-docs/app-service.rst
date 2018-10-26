@@ -212,28 +212,29 @@ started during system initialization.
 
 This logic may also be triggered by manually starting the applications service with the ``-b`` flag.
 
-.. todo::
+Upgrading
+---------
 
-    Upgrading
-    //---------
+Users may register a new version of an application without needing to remove the existing registration.
+
+To do this, they will use the ``register`` mutation with the optional ``uuid`` input parameter.
+An application's UUID is given as a return field of the ``register`` mutation and can also be looked up
+using the ``apps`` query.
+
+::
     
-    Users may register a new version of an application without needing to remove the existing registration.
-    
-    To do this, they will use the ``register`` mutation with the optional ``uuid`` input parameter.
-    An application's UUID is given as a return field of the ``register`` mutation and can also be looked up
-    using the ``apps`` query.
-    
-    ::
-    
-        mutation {
-            register(path: /home/kubos/payload-app, uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a) {
-                active,
-                app {
-                    name,
-                    version
-                }
+    mutation {
+        register(path: /home/kubos/payload-app, uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a) {
+            active,
+            app {
+                name,
+                version
             }
         }
+    }
+        
+        
+.. todo::
     
     Recovery
     //--------

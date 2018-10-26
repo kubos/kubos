@@ -22,8 +22,6 @@ use registry::AppRegistry;
 
 type Context = kubos_service::Context<AppRegistry>;
 
-
-
 ///
 pub struct QueryRoot;
 
@@ -68,11 +66,11 @@ pub struct MutationRoot;
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
-    field register(&executor, path: String) -> FieldResult<RegisterResponse>
+    field register(&executor, path: String, uuid: Option<String>) -> FieldResult<RegisterResponse>
         as "Register App"
     {
         let registry = executor.context().subsystem();
-        Ok(match registry.register(&path) {
+        Ok(match registry.register(&path, uuid) {
             Ok(app) =>  RegisterResponse { success: true, errors: "".to_owned(), entry: Some(KAppRegistryEntry(app))},
             Err(error) => RegisterResponse {
                 success: false,

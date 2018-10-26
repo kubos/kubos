@@ -22,29 +22,6 @@ use tempfile::TempDir;
 use registry::*;
 use schema;
 
-macro_rules! mock_service {
-    ($registry_dir:ident) => {{
-        let registry = AppRegistry::new_from_dir(&$registry_dir.path().to_string_lossy()).unwrap();
-
-        let config = format!(
-            r#"
-            [app-service]
-            registry-dir = "{}"
-            [app-service.addr]
-            ip = "127.0.0.1"
-            port = 9999"#,
-            $registry_dir.path().to_str().unwrap(),
-        );
-
-        Service::new(
-            Config::new_from_str("app-service", &config),
-            registry,
-            schema::QueryRoot,
-            schema::MutationRoot,
-        )
-    }};
-}
-
 #[test]
 fn register_good() {
     let registry_dir = TempDir::new().unwrap();
@@ -146,7 +123,7 @@ fn register_no_manifest() {
                }
             }
         }).to_string();
-    
+
     assert_eq!(service.process(register_query.to_owned()), expected);
 }
 
@@ -191,8 +168,8 @@ fn register_extra_file() {
     }}"#,
         app_bin.to_str().unwrap()
     );
-    
-        let expected = json!({
+
+    let expected = json!({
             "errs": "",
             "msg": {
                "register": {
@@ -243,8 +220,8 @@ fn register_no_name() {
     }}"#,
         app_bin.to_str().unwrap()
     );
-    
-        let expected = json!({
+
+    let expected = json!({
             "errs": "",
             "msg": {
                "register": {
@@ -295,8 +272,8 @@ fn register_no_version() {
     }}"#,
         app_bin.to_str().unwrap()
     );
-    
-        let expected = json!({
+
+    let expected = json!({
             "errs": "",
             "msg": {
                "register": {
@@ -347,7 +324,7 @@ fn register_no_author() {
     }}"#,
         app_bin.to_str().unwrap()
     );
-    
+
     let expected = json!({
             "errs": "",
             "msg": {
@@ -381,7 +358,7 @@ fn register_bad_path() {
             }
         }
     }"#;
-    
+
     let expected = json!({
             "errs": "",
             "msg": {

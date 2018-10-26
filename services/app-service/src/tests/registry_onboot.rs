@@ -53,7 +53,7 @@ fn registry_onboot_good() {
             "#;
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
-    registry.register(&app_bin.to_string_lossy()).unwrap();
+    registry.register(&app_bin.to_string_lossy(), None).unwrap();
 
     let result = registry.run_onboot();
 
@@ -83,7 +83,7 @@ fn registry_onboot_fail() {
             "#;
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
-    registry.register(&app_bin.to_string_lossy()).unwrap();
+    registry.register(&app_bin.to_string_lossy(), None).unwrap();
 
     assert_eq!(
         registry.run_onboot().unwrap_err(),
