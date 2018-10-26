@@ -18,6 +18,7 @@ use channel_protocol::{ChannelMessage, ChannelProtocol};
 use error::ProtocolError;
 use messages;
 use process::ProcessHandler;
+use std::net::SocketAddr;
 use std::time::Duration;
 
 pub struct Protocol {
@@ -54,7 +55,7 @@ impl Protocol {
     ///
     pub fn message_engine<F>(&mut self, pump: F, timeout: Duration) -> Result<(), ProtocolError>
     where
-        F: Fn(Duration) -> Result<ChannelMessage, ProtocolError>,
+        F: Fn(Duration) -> Result<(ChannelMessage, SocketAddr), ProtocolError>,
     {
         loop {
             {
@@ -108,7 +109,7 @@ impl Protocol {
                 }
             }
             // Check for new messages from the client
-            let message = match pump(timeout) {
+            let (message, remote) = match pump(timeout) {
                 Ok(message) => message,
                 Err(ProtocolError::ReceiveTimeout) => {
                     // TODO when do we end this?
@@ -116,6 +117,10 @@ impl Protocol {
                 }
                 Err(e) => return Err(e),
             };
+
+            // Update the remote so that responses go to the
+            // last client that we had contact with
+            self.channel_protocol.set_remote(remote);
 
             self.process_message(message)?;
         }
