@@ -171,7 +171,10 @@ impl ProcessHandler {
     }
 
     /// Send killing signal to process
-    pub fn kill(&mut self, signal: Option<u32>) -> Result<(), ProtocolError> {
+    /// Currently the signal parameter is ignored because
+    /// the Rust process API doesn't provide a straightforward
+    /// way to send specific signals to processes.
+    pub fn kill(&mut self, _signal: Option<u32>) -> Result<(), ProtocolError> {
         self.process
             .kill()
             .map_err(|err| ProtocolError::ProcesssError {

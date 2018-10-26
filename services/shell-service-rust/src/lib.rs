@@ -34,13 +34,89 @@ use std::thread;
 use std::time::Duration;
 
 #[derive(Debug)]
-struct ProcessHandle {
+struct ThreadProcess {
     pub sender: Sender<ChannelMessage>,
     pub pid: u32,
     pub path: String,
 }
 
-// We need this in this lib.rs file so we can build integration tests
+// Create process list and send back to requester
+fn list_processes(
+    channel_id: u32,
+    host: &str,
+    remote: &str,
+    threads: &Arc<Mutex<HashMap<u32, ThreadProcess>>>,
+) -> Result<(), failure::Error> {
+    let proc_list: HashMap<u32, (String, u32)> = threads
+        .lock()
+        .unwrap()
+        .iter()
+        .map(|(channel_id, data)| (*channel_id, (data.path.to_owned(), data.pid)))
+        .collect();
+
+    let chan_proto = channel_protocol::ChannelProtocol::new(host, remote, 4096);
+
+    chan_proto.send(shell_protocol::messages::list::to_cbor(
+        channel_id,
+        Some(proc_list),
+    )?)?;
+
+    Ok(())
+}
+
+// Main function of process handling thread
+fn thread_body(
+    host: &str,
+    remote: &str,
+    channel_id: u32,
+    timeout: Duration,
+    proc_handle: ProcessHandler,
+    shared_threads: Arc<Mutex<HashMap<u32, ThreadProcess>>>,
+    receiver: Receiver<ChannelMessage>,
+) -> () {
+    let mut s_protocol =
+        ShellProtocol::new(&host, &remote, channel_id, Box::new(Some(proc_handle)));
+
+    // Receive and react to incoming shell protocol messages
+    match s_protocol.message_engine(
+        |d| match receiver.recv_timeout(d) {
+            Ok(v) => Ok(v),
+            Err(RecvTimeoutError::Timeout) => Err(ProtocolError::ReceiveTimeout),
+            Err(e) => Err(ProtocolError::ReceiveError {
+                err: format!("Error {:?}", e),
+            }),
+        },
+        timeout,
+    ) {
+        Err(e) => warn!("Encountered errors while processing transaction: {}", e),
+        _ => {}
+    }
+
+    // Remove ourselves from threads list if we are finished
+    shared_threads.lock().unwrap().remove(&channel_id);
+}
+
+// Retrieves and parses next shell message
+fn get_message(
+    cbor_proto: &cbor_protocol::Protocol,
+) -> Result<
+    (
+        channel_protocol::ChannelMessage,
+        shell_protocol::ShellMessage,
+        std::net::SocketAddr,
+    ),
+    failure::Error,
+> {
+    let (source, message) = cbor_proto.recv_message_peer()?;
+
+    let channel_message = channel_protocol::parse_message(message)?;
+
+    let shell_message = shell_protocol::parse_message(channel_message.clone())?;
+
+    Ok((channel_message, shell_message, source))
+}
+
+//
 pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
     let host = config.hosturl();
@@ -59,70 +135,38 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         }).unwrap_or(Duration::from_millis(2));
 
     // Setup map of channel IDs to thread channels
-    let raw_threads: HashMap<u32, ProcessHandle> = HashMap::new();
+    let raw_threads: HashMap<u32, ThreadProcess> = HashMap::new();
     // Create thread sharable wrapper
     let threads = Arc::new(Mutex::new(raw_threads));
 
     loop {
-        // Listen on UDP port
-        let (source, first_message) = match c_protocol.recv_message_peer() {
-            Ok((source, first_message)) => (source, first_message),
-            Err(e) => {
-                warn!("Failed to receive message: {}", e);
-                continue;
-            }
-        };
-
         let host_ref = host_ip.clone();
         let timeout_ref = timeout.clone();
 
-        let parsed_channel_message = match channel_protocol::parse_message(first_message) {
-            Ok(parsed_message) => parsed_message,
+        let (channel_message, shell_message, message_source) = match get_message(&c_protocol) {
+            Ok((c, s, m)) => (c, s, m),
             Err(e) => {
-                warn!("Error parsing channel message: {:?}", e);
+                warn!("Failed to get next message: {}", e);
                 continue;
             }
         };
-        let channel_id = parsed_channel_message.channel_id;
+        let channel_id = channel_message.channel_id;
 
-        let parsed_shell_message =
-            match shell_protocol::parse_message(parsed_channel_message.clone()) {
-                Ok(shell_message) => shell_message,
-                Err(e) => {
-                    warn!("Error parsing shell message: {:?}", e);
-                    continue;
-                }
-            };
-
-        match parsed_shell_message {
-            // Send back list of processes
+        match shell_message {
+            // Gather and send back list of processes
             ShellMessage::List {
                 channel_id,
-                process_list,
+                process_list: None,
             } => {
-                println!("got list");
-                for (k, v) in threads.lock().unwrap().iter() {
-                    println!("{:?} -> {:?}", k, v);
-                }
-
-                let proc_list: HashMap<u32, (String, u32)> = threads
-                    .lock()
-                    .unwrap()
-                    .iter()
-                    .map(|(channel_id, data)| (*channel_id, (data.path.to_owned(), data.pid)))
-                    .collect();
-
-                let chan_sender =
-                    channel_protocol::ChannelProtocol::new(&host_ref, &format!("{}", source), 4096);
-
-                chan_sender.send(shell_protocol::messages::list::to_cbor(
+                list_processes(
                     channel_id,
-                    Some(proc_list),
-                )?);
-
+                    &host_ref,
+                    &format!("{}", message_source),
+                    &threads,
+                )?;
                 continue;
             }
-            // Spawn a new thread for this process
+            // Spawn up a new process & thread
             ShellMessage::Spawn {
                 channel_id,
                 command,
@@ -133,56 +177,35 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                         Sender<ChannelMessage>,
                         Receiver<ChannelMessage>,
                     ) = mpsc::channel();
-                    // Break the processing work off into its own thread so we can
-                    // listen for requests from other clients
+
+                    let proc_handle = match ProcessHandler::spawn(command.to_owned(), args) {
+                        Ok(p) => p,
+                        Err(e) => {
+                            warn!("Failed to spawn {:?}", e);
+                            continue;
+                        }
+                    };
+
+                    threads.lock().unwrap().insert(
+                        channel_id,
+                        ThreadProcess {
+                            sender: sender.clone(),
+                            pid: proc_handle.id().unwrap_or(0),
+                            path: command.to_owned(),
+                        },
+                    );
+
                     let shared_threads = threads.clone();
                     thread::spawn(move || {
-                        let proc_handle = match ProcessHandler::spawn(command.to_owned(), args) {
-                            Ok(p) => p,
-                            Err(e) => {
-                                warn!("Failed to spawn {:?}", e);
-                                return;
-                            }
-                        };
-
-                        shared_threads.lock().unwrap().insert(
-                            channel_id,
-                            ProcessHandle {
-                                sender: sender.clone(),
-                                pid: proc_handle.id().unwrap_or(0),
-                                path: command.to_owned(),
-                            },
-                        );
-
-                        let mut s_protocol = ShellProtocol::new(
+                        thread_body(
                             &host_ref,
-                            &format!("{}", source),
+                            &format!("{}", message_source),
                             channel_id,
-                            Box::new(Some(proc_handle)),
-                        );
-
-                        // Listen, process, and react to the remaining messages in the
-                        // requested operation
-                        match s_protocol.message_engine(
-                            |d| match receiver.recv_timeout(d) {
-                                Ok(v) => Ok(v),
-                                Err(RecvTimeoutError::Timeout) => {
-                                    Err(ProtocolError::ReceiveTimeout)
-                                }
-                                Err(e) => Err(ProtocolError::ReceiveError {
-                                    err: format!("Error {:?}", e),
-                                }),
-                            },
                             timeout_ref,
-                        ) {
-                            Err(e) => {
-                                warn!("Encountered errors while processing transaction: {}", e)
-                            }
-                            _ => {}
-                        }
-
-                        // Remove ourselves from threads list if we are finished
-                        shared_threads.lock().unwrap().remove(&channel_id);
+                            proc_handle,
+                            shared_threads,
+                            receiver,
+                        )
                     });
                 } else {
                     warn!("Process on channel {} already exists", channel_id);
@@ -191,11 +214,13 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
             // Pass along the message to existing process
             _ => {
                 if let Some(process_handle) = threads.lock().unwrap().get(&channel_id) {
-                    match process_handle.sender.send(parsed_channel_message) {
+                    match process_handle.sender.send(channel_message) {
                         Err(e) => warn!("Error when sending to channel {}: {:?}", channel_id, e),
                         _ => {}
                     };
-                } else {
+                }
+
+                if !threads.lock().unwrap().contains_key(&channel_id) {
                     warn!("No sender found for {}", channel_id);
                     threads.lock().unwrap().remove(&channel_id);
                 }

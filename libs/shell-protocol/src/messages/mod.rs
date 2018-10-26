@@ -26,10 +26,13 @@ pub enum Message {
         code: u32,
         signal: u32,
     },
+    /// This message is sent to the shell service to send a kill signal to the child process
     Kill {
         channel_id: u32,
         signal: Option<u32>,
     },
+    /// This message is used to request and respond with the lists of processes
+    /// currently running under the shell service.
     List {
         channel_id: u32,
         process_list: Option<HashMap<u32, (String, u32)>>,

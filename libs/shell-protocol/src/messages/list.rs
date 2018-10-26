@@ -30,7 +30,7 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
             process_list = Some(
                 raw_list
                     .into_iter()
-                    // Check if channel and path/pid array are some
+                    // Map and filter on channel and path/pid array as Some
                     .map(|(channel, data)| (channel.as_u64(), data.as_array()))
                     .filter(|(channel, data)| channel.is_some() && data.is_some())
                     // Extract path/pid
@@ -39,7 +39,7 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
                         let pid = data.unwrap().get(1).and_then(|v| v.as_u64());
                         (channel, path, pid)
                     })
-                    // Check if path/pid are some
+                    // Check if path/pid are Some
                     .filter(|(_channel, path, pid)| path.is_some() && pid.is_some())
                     // Combine
                     .map(|(channel, path, pid)| {

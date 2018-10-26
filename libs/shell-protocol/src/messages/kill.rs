@@ -21,17 +21,16 @@ use serde_cbor::ser;
 
 /// CBOR -> Message::Kill
 pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
-    if let Some(Value::U64(signal)) = message.payload.get(0) {
-        Ok(Message::Kill {
-            channel_id: message.channel_id,
-            signal: Some(*signal as u32),
-        })
-    } else {
-        Ok(Message::Kill {
-            channel_id: message.channel_id,
-            signal: None,
-        })
-    }
+    let signal: Option<u32> = message
+        .payload
+        .get(0)
+        .and_then(|v| v.as_u64())
+        .and_then(|n| Some(n as u32));
+
+    Ok(Message::Kill {
+        channel_id: message.channel_id,
+        signal: signal,
+    })
 }
 
 /// Kill -> CBOR
