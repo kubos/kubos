@@ -14,71 +14,15 @@
  * limitations under the License.
  */
 
-use app_entry;
-use juniper::{FieldError, FieldResult, Value};
+use juniper::FieldResult;
 use kubos_app::RunLevel;
 use kubos_service;
+use objects::*;
 use registry::AppRegistry;
 
 type Context = kubos_service::Context<AppRegistry>;
 
-pub struct KApp(pub app_entry::App);
 
-graphql_object!(KApp: () as "App" |&self| {
-    description: "Kubos Application"
-
-    field uuid() -> FieldResult<&String>
-        as "UUID"
-    {
-        Ok(&(self.0.uuid))
-    }
-
-    field name() -> FieldResult<&String>
-        as "Name"
-    {
-        Ok(&self.0.metadata.name)
-    }
-
-    field version() -> FieldResult<&String>
-        as "Version"
-    {
-        Ok(&self.0.metadata.version)
-    }
-
-    field author() -> FieldResult<&String>
-        as "Author"
-    {
-        Ok(&self.0.metadata.author)
-    }
-
-    field pid() -> FieldResult<i32>
-        as "Process ID"
-    {
-        Ok(self.0.pid as i32)
-    }
-
-    field path() -> FieldResult<&String>
-        as "Absolute Path"
-    {
-        Ok(&self.0.path)
-    }
-});
-
-pub struct KAppRegistryEntry(pub app_entry::AppRegistryEntry);
-
-graphql_object!(KAppRegistryEntry: () as "AppRegistryEntry" |&self| {
-    field app() -> FieldResult<KApp>
-        as "App"
-    {
-        Ok(KApp(self.0.app.clone()))
-    }
-
-    field active() -> FieldResult<bool>
-        as "Active"
-    {
-        Ok(self.0.active_version)
-    }
-});
 
 ///
 pub struct QueryRoot;
@@ -124,29 +68,30 @@ pub struct MutationRoot;
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
-    field register(&executor, path: String) -> FieldResult<KAppRegistryEntry>
+    field register(&executor, path: String) -> FieldResult<RegisterResponse>
         as "Register App"
     {
         let registry = executor.context().subsystem();
-        match registry.register(&path) {
-            Ok(entry) => Ok(KAppRegistryEntry(entry)),
-            Err(e) => Err(FieldError::new(e, Value::null()))
-        }
+        Ok(match registry.register(&path) {
+            Ok(app) =>  RegisterResponse { success: true, errors: "".to_owned(), entry: Some(KAppRegistryEntry(app))},
+            Err(error) => RegisterResponse {
+                success: false,
+                errors: error.to_string(),
+                entry: None
+            }
+        })
     }
 
-    field uninstall(&executor, uuid: String, version: String) -> FieldResult<bool>
+    field uninstall(&executor, uuid: String, version: String) -> FieldResult<GenericResponse>
         as "Uninstall App"
     {
-        match executor.context().subsystem().uninstall(&uuid, &version) {
-            Ok(v) => Ok(v),
-            Err(msg) => {
-                println!("{}", msg);
-                Err(FieldError::new(msg, Value::null()))
-            }
-        }
+        Ok(match executor.context().subsystem().uninstall(&uuid, &version) {
+            Ok(v) => GenericResponse { success: true, errors: "".to_owned() },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() },
+        })
     }
 
-    field start_app(&executor, uuid: String, run_level: String, args: Option<Vec<String>>) -> FieldResult<i32>
+    field start_app(&executor, uuid: String, run_level: String, args: Option<Vec<String>>) -> FieldResult<StartResponse>
         as "Start App"
     {
         let run_level_o = {
@@ -156,9 +101,9 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             }
         };
 
-        match executor.context().subsystem().start_app(&uuid, run_level_o, args) {
-            Ok(pid) => Ok(pid as i32),
-            Err(err) => Err(FieldError::new(err, Value::null()))
-        }
+        Ok(match executor.context().subsystem().start_app(&uuid, run_level_o, args) {
+            Ok(num) => StartResponse { success: true, errors: "".to_owned(), pid: Some(num as i32)},
+            Err(error) => StartResponse { success: false, errors: error.to_string(), pid: None },
+        })
     }
 });

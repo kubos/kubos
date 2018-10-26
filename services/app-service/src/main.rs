@@ -34,6 +34,7 @@ extern crate uuid;
 
 mod app_entry;
 mod error;
+mod objects;
 mod registry;
 mod schema;
 #[cfg(test)]
