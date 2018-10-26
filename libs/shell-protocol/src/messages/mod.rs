@@ -51,28 +51,29 @@ pub enum Message {
         channel_id: u32,
         data: Option<String>,
     },
+    Stdin {
+        channel_id: u32,
+        data: Option<String>,
+    },
 }
 
 pub mod exit;
 pub mod pid;
 pub mod spawn;
 pub mod stderr;
+pub mod stdin;
 pub mod stdout;
 
 pub fn parse_message(message: ChannelMessage) -> Result<Message, ProtocolError> {
-    if message.name == "exit" {
-        Ok(exit::from_cbor(&message)?)
-    } else if message.name == "pid" {
-        Ok(pid::from_cbor(&message)?)
-    } else if message.name == "spawn" {
-        Ok(spawn::from_cbor(&message)?)
-    } else if message.name == "stderr" {
-        Ok(stderr::from_cbor(&message)?)
-    } else if message.name == "stdout" {
-        Ok(stdout::from_cbor(&message)?)
-    } else {
-        Err(ProtocolError::MessageParseError {
+    match message.name.as_ref() {
+        "exit" => Ok(exit::from_cbor(&message)?),
+        "pid" => Ok(pid::from_cbor(&message)?),
+        "spawn" => Ok(spawn::from_cbor(&message)?),
+        "stderr" => Ok(stderr::from_cbor(&message)?),
+        "stdin" => Ok(stdin::from_cbor(&message)?),
+        "stdout" => Ok(stdout::from_cbor(&message)?),
+        _ => Err(ProtocolError::MessageParseError {
             err: "No message found".to_owned(),
-        })
+        }),
     }
 }

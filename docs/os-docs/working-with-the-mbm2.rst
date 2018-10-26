@@ -275,6 +275,13 @@ For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubo
 
 .. note:: The I2C bus is available through the Kubos C HAL as ``K_I2C1``.
 
+RTC
+~~~
+
+The Pumpkin MBM2 has a real-time clock (RTC) which is used to maintain system time.
+
+This clock can be queried or set using the ``hwclock`` command.
+
 UART
 ~~~~
 
