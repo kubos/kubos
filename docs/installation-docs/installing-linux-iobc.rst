@@ -42,7 +42,7 @@ To perform a default installation, three files are needed:
   
 All of these files can be obtained from `our Kubos Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
-Download the latest `Kubos_Linux.zip` file and then unzip the files for the iOBC. They're located in the `Kubos_Linux/{version}/iOBC` folder.
+Download the latest `KubOS-v{version}.tar.gz` file and then unzip the files for the iOBC. They're located in the `KubOS-v{version}/iOBC` folder.
 
 .. _install-sd:
 
