@@ -136,6 +136,15 @@ impl Protocol {
                         .send(messages::pid::to_cbor(self.channel_id, process.id()?)?)?;
                 }
             }
+            messages::Message::Stdin { channel_id, data } => {
+                info!("<- {{ {}, stdin, {:?} }}", channel_id, data);
+                if let Some(process) = self.process.as_mut() {
+                    match data {
+                        Some(data) => process.write_stdin(&data.as_bytes())?,
+                        None => process.close_stdin()?,
+                    }
+                }
+            }
             messages::Message::Stdout { channel_id, data } => {
                 info!("<- {{ {}, stdout, {:?} }}", channel_id, data);
             }
@@ -150,7 +159,7 @@ impl Protocol {
                 code,
                 signal,
             } => {
-                info!("-< {{ {}, exit, {}, {} }}", channel_id, code, signal);
+                info!("<- {{ {}, exit, {}, {} }}", channel_id, code, signal);
             }
         }
 
