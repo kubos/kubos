@@ -1,9 +1,12 @@
 extern crate chrono;
+#[macro_use]
+extern crate failure;
 extern crate getopts;
 #[macro_use]
 extern crate kubos_app;
 
 use chrono::Utc;
+use failure::Error;
 use getopts::Options;
 use kubos_app::*;
 use std::fs::OpenOptions;
@@ -27,14 +30,14 @@ macro_rules! log {
 }
 
 impl AppHandler for MyApp {
-    fn on_boot(&self, _args: Vec<String>) {
+    fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
         let monitor_service = ServiceConfig::new("monitor-service");
         let telemetry_service = ServiceConfig::new("telemetry-service");
 
         loop {
             thread::sleep(Duration::from_secs(3));
             // Set up the log file
-            let mut log_file = OpenOptions::new().create(true).append(true).open(BOOTFILE).unwrap();
+            let mut log_file = OpenOptions::new().create(true).append(true).open(BOOTFILE)?;
             log!(log_file, "OnBoot logic called");
 
             // Get the amount of memory currently available on the OBC
@@ -100,7 +103,7 @@ impl AppHandler for MyApp {
         }
     }
 
-    fn on_command(&self, args: Vec<String>) {
+    fn on_command(&self, args: Vec<String>) -> Result<(), Error> {
         let mut opts = Options::new();
 
         opts.optflagopt("r", "run", "Run level which should be executed", "RUN_LEVEL");
@@ -114,7 +117,7 @@ impl AppHandler for MyApp {
         };
 
         // Set up the log file
-        let mut log_file = OpenOptions::new().create(true).append(true).open(COMMANDFILE).unwrap();
+        let mut log_file = OpenOptions::new().create(true).append(true).open(COMMANDFILE)?;
 
         log!(log_file, "OnCommand logic called");
 
@@ -126,7 +129,7 @@ impl AppHandler for MyApp {
                     Ok(Some(val)) => val,
                     _ => {
                         log!(log_file, "Command Integer must be positive and non-zero");
-                        return;
+                        bail!("Command Integer must be positive and non-zero");
                     }
                 };
 
@@ -157,15 +160,20 @@ impl AppHandler for MyApp {
                 ) {
                     Ok(msg) => log!(log_file, "App query result: {:?}", msg),
                     Err(err) => {
-                        log!(log_file, "App service query failed: {}", err)
+                        log!(log_file, "App service query failed: {}", err);
+                        bail!("App service query failed: {}", err)
                     }
                 }
             }
         }
+        
+        Ok(())
     }
 }
 
-fn main() {
+fn main() -> Result<(), Error> {
     let app = MyApp;
-    app_main!(&app);
+    app_main!(&app)?;
+    
+    Ok(())
 }

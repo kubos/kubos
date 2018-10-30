@@ -21,15 +21,18 @@
 //!
 //! ```
 //! #[macro_use]
+//! extern crate failure;
+//! #[macro_use]
 //! extern crate kubos_app;
 //!
+//! use failure::Error;
 //! use kubos_app::*;
 //! use std::time::Duration;
 //!
 //! struct MyApp;
 //!
 //! impl AppHandler for MyApp {
-//!   fn on_boot(&self, _args: Vec<String>) {
+//!   fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
 //!     println!("OnBoot logic");
 //!
 //!     let request = r#"mutation {
@@ -39,10 +42,7 @@
 //!         }"#;
 //!
 //!     match query(ServiceConfig::new("radio-service"), request, Some(Duration::from_secs(1))) {
-//!         Err(error) => {
-//!             eprintln!("Failed to communicate with radio service: {}", error);
-//!             return;
-//!         }
+//!         Err(error) => bail!("Failed to communicate with radio service: {}", error),
 //!         Ok(data) => {
 //!             if let Some(success) = data.get("power")
 //!                 .and_then(|power| power.get("success"))
@@ -53,20 +53,23 @@
 //!                     None => eprintln!("Failed to fetch radio power state")
 //!                 }
 //!             } else {
-//!                 eprintln!("Failed to fetch radio power state");
-//!                 return;
+//!                 bail!("Failed to fetch radio power state");
 //!             }
 //!         }
 //!     }
+//!
+//!     Ok(())
 //!   }
-//!   fn on_command(&self, _args: Vec<String>) {
+//!   fn on_command(&self, _args: Vec<String>) Result<(), Error> {
 //!     println!("OnCommand logic");
+//!     Ok(())
 //!   }
 //! }
 //!
-//! fn main() {
+//! fn main() -> Result<(), Error> {
 //!     let app = MyApp { };
-//!     app_main!(&app);
+//!     app_main!(&app)?;
+//!     Ok(())
 //! }
 //! ```
 //!
