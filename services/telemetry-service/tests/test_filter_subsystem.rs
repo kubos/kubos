@@ -41,7 +41,7 @@ fn test() {
             "errs": "",
             "msg": {
                 "telemetry":[
-                    {"timestamp":1010,"subsystem":"gps","parameter":"x_position","value":"-1.0"}
+                    {"timestamp":1010.0,"subsystem":"gps","parameter":"x_position","value":"-1.0"}
                 ]
             }
         })

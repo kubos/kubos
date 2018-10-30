@@ -118,7 +118,7 @@ fn test_insert_custom_timestamp() {
             "errs": "",
             "msg": {
                 "telemetry": [{
-                    "timestamp": 5,
+                    "timestamp": 5.0,
                     "subsystem": "test2",
                     "parameter": "voltage",
                     "value": "4.0"

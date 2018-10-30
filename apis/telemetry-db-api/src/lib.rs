@@ -91,7 +91,7 @@ impl Database {
 
     pub fn insert<'a>(
         &self,
-        timestamp: i32,
+        timestamp: f64,
         subsystem: &'a str,
         parameter: &'a str,
         value: &'a str,
@@ -117,14 +117,14 @@ impl Database {
         value: &'a str,
     ) -> QueryResult<usize> {
         let time = time::now_utc().to_timespec();
-        let timestamp = (time.sec * 1000) as i32 + (time.nsec / 1000000);
-        self.insert(timestamp as i32, subsystem, parameter, value)
+        let timestamp = time.sec as f64 + (time.nsec as f64 / 1000000000.0);
+        self.insert(timestamp, subsystem, parameter, value)
     }
 }
 
 table! {
     telemetry (timestamp) {
-        timestamp -> Integer,
+        timestamp -> Double,
         subsystem -> Text,
         parameter -> Text,
         value -> Text,

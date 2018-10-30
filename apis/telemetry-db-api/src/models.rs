@@ -18,7 +18,7 @@ use super::telemetry;
 
 #[derive(Debug, Queryable, Serialize, Deserialize)]
 pub struct Entry {
-    pub timestamp: i32,
+    pub timestamp: f64,
     pub subsystem: String,
     pub parameter: String,
     pub value: String,
@@ -27,7 +27,7 @@ pub struct Entry {
 #[derive(Insertable)]
 #[table_name = "telemetry"]
 pub struct NewEntry<'a> {
-    pub timestamp: i32,
+    pub timestamp: f64,
     pub subsystem: &'a str,
     pub parameter: &'a str,
     pub value: &'a str,

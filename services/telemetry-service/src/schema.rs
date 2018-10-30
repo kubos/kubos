@@ -56,8 +56,8 @@ pub struct Entry(kubos_telemetry_db::Entry);
 graphql_object!(Entry: () |&self| {
     description: "A telemetry entry"
 
-    field timestamp() -> i32 as "Timestamp" {
-        self.0.timestamp
+    field timestamp() -> f64 as "Timestamp" {
+        self.0.timestamp as f64
     }
 
     field subsystem() -> &String as "Subsystem name" {
@@ -75,8 +75,8 @@ graphql_object!(Entry: () |&self| {
 
 fn query_db(
     database: &Arc<Mutex<kubos_telemetry_db::Database>>,
-    timestamp_ge: Option<i32>,
-    timestamp_le: Option<i32>,
+    timestamp_ge: Option<f64>,
+    timestamp_le: Option<f64>,
     subsystem: Option<String>,
     parameter: Option<String>,
     limit: Option<i32>,
@@ -124,8 +124,8 @@ pub struct QueryRoot;
 graphql_object!(QueryRoot: Context |&self| {
     field telemetry(
         &executor,
-        timestamp_ge: Option<i32>,
-        timestamp_le: Option<i32>,
+        timestamp_ge: Option<f64>,
+        timestamp_le: Option<f64>,
         subsystem: Option<String>,
         parameter: Option<String>,
         limit: Option<i32>,
@@ -136,8 +136,8 @@ graphql_object!(QueryRoot: Context |&self| {
     }
     field routed_telemetry(
         &executor,
-        timestamp_ge: Option<i32>,
-        timestamp_le: Option<i32>,
+        timestamp_ge: Option<f64>,
+        timestamp_le: Option<f64>,
         subsystem: Option<String>,
         parameter: Option<String>,
         limit: Option<i32>,
@@ -198,7 +198,7 @@ struct DeleteResponse {
 }
 
 graphql_object!(MutationRoot: Context | &self | {
-    field insert(&executor, timestamp: Option<i32>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
+    field insert(&executor, timestamp: Option<f64>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
         let result = match timestamp {
             Some(time) => executor.context().subsystem().database.lock()?.insert(time, &subsystem, &parameter, &value),
             None => executor.context().subsystem().database.lock()?.insert_systime(&subsystem, &parameter, &value),
@@ -215,8 +215,8 @@ graphql_object!(MutationRoot: Context | &self | {
 
     field delete(
         &executor,
-        timestamp_ge: Option<i32>,
-        timestamp_le: Option<i32>,
+        timestamp_ge: Option<f64>,
+        timestamp_le: Option<f64>,
         subsystem: Option<String>,
         parameter: Option<String>,
     ) -> FieldResult<DeleteResponse>

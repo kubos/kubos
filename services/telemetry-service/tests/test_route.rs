@@ -75,16 +75,16 @@ fn test_route_file() {
     assert_eq!(
         entries,
         json!([
-            {"timestamp":1004,"subsystem":"mcu","parameter":"voltage","value":"4.6"},
-            {"timestamp":1004,"subsystem":"eps","parameter":"voltage","value":"3.6"},
-            {"timestamp":1003,"subsystem":"mcu","parameter":"current","value":"4.5"},
-            {"timestamp":1003,"subsystem":"eps","parameter":"current","value":"3.5"},
-            {"timestamp":1002,"subsystem":"mcu","parameter":"voltage","value":"4.2"},
-            {"timestamp":1002,"subsystem":"eps","parameter":"voltage","value":"3.2"},
-            {"timestamp":1001,"subsystem":"mcu","parameter":"current","value":"4.4"},
-            {"timestamp":1001,"subsystem":"eps","parameter":"current","value":"3.4"},
-            {"timestamp":1000,"subsystem":"mcu","parameter":"voltage","value":"4.3"},
-            {"timestamp":1000,"subsystem":"eps","parameter":"voltage","value":"3.3"},
+            {"timestamp":1004.0,"subsystem":"mcu","parameter":"voltage","value":"4.6"},
+            {"timestamp":1004.0,"subsystem":"eps","parameter":"voltage","value":"3.6"},
+            {"timestamp":1003.0,"subsystem":"mcu","parameter":"current","value":"4.5"},
+            {"timestamp":1003.0,"subsystem":"eps","parameter":"current","value":"3.5"},
+            {"timestamp":1002.0,"subsystem":"mcu","parameter":"voltage","value":"4.2"},
+            {"timestamp":1002.0,"subsystem":"eps","parameter":"voltage","value":"3.2"},
+            {"timestamp":1001.0,"subsystem":"mcu","parameter":"current","value":"4.4"},
+            {"timestamp":1001.0,"subsystem":"eps","parameter":"current","value":"3.4"},
+            {"timestamp":1000.0,"subsystem":"mcu","parameter":"voltage","value":"4.3"},
+            {"timestamp":1000.0,"subsystem":"eps","parameter":"voltage","value":"3.3"},
         ])
     );
 }
@@ -167,8 +167,8 @@ fn test_route_filter() {
     assert_eq!(
         entries,
         json!([
-            {"timestamp":1003,"subsystem":"eps","parameter":"current","value":"3.5"},
-            {"timestamp":1001,"subsystem":"eps","parameter":"current","value":"3.4"},
+            {"timestamp":1003.0,"subsystem":"eps","parameter":"current","value":"3.5"},
+            {"timestamp":1001.0,"subsystem":"eps","parameter":"current","value":"3.4"},
         ])
     );
 }
@@ -217,16 +217,16 @@ fn test_route_compress_file() {
     assert_eq!(
         entries,
         json!([
-            {"timestamp":1004,"subsystem":"mcu","parameter":"voltage","value":"4.6"},
-            {"timestamp":1004,"subsystem":"eps","parameter":"voltage","value":"3.6"},
-            {"timestamp":1003,"subsystem":"mcu","parameter":"current","value":"4.5"},
-            {"timestamp":1003,"subsystem":"eps","parameter":"current","value":"3.5"},
-            {"timestamp":1002,"subsystem":"mcu","parameter":"voltage","value":"4.2"},
-            {"timestamp":1002,"subsystem":"eps","parameter":"voltage","value":"3.2"},
-            {"timestamp":1001,"subsystem":"mcu","parameter":"current","value":"4.4"},
-            {"timestamp":1001,"subsystem":"eps","parameter":"current","value":"3.4"},
-            {"timestamp":1000,"subsystem":"mcu","parameter":"voltage","value":"4.3"},
-            {"timestamp":1000,"subsystem":"eps","parameter":"voltage","value":"3.3"},
+            {"timestamp":1004.0,"subsystem":"mcu","parameter":"voltage","value":"4.6"},
+            {"timestamp":1004.0,"subsystem":"eps","parameter":"voltage","value":"3.6"},
+            {"timestamp":1003.0,"subsystem":"mcu","parameter":"current","value":"4.5"},
+            {"timestamp":1003.0,"subsystem":"eps","parameter":"current","value":"3.5"},
+            {"timestamp":1002.0,"subsystem":"mcu","parameter":"voltage","value":"4.2"},
+            {"timestamp":1002.0,"subsystem":"eps","parameter":"voltage","value":"3.2"},
+            {"timestamp":1001.0,"subsystem":"mcu","parameter":"current","value":"4.4"},
+            {"timestamp":1001.0,"subsystem":"eps","parameter":"current","value":"3.4"},
+            {"timestamp":1000.0,"subsystem":"mcu","parameter":"voltage","value":"4.3"},
+            {"timestamp":1000.0,"subsystem":"eps","parameter":"voltage","value":"3.3"},
         ])
     );
 }

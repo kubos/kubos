@@ -81,25 +81,25 @@ fn test_delete_ge() {
             "msg": {
                 "telemetry": [
                     {
-                    "timestamp": 1003,
+                    "timestamp": 1003.0,
                     "subsystem": "eps",
                     "parameter": "current",
                     "value": "3.1"
                     },
                     {
-                    "timestamp": 1002,
+                    "timestamp": 1002.0,
                     "subsystem": "gps",
                     "parameter": "voltage",
                     "value": "3.2"
                     },
                     {
-                    "timestamp": 1001,
+                    "timestamp": 1001.0,
                     "subsystem": "mcu",
                     "parameter": "voltage",
                     "value": "3.4"
                     },
                     {
-                    "timestamp": 1000,
+                    "timestamp": 1000.0,
                     "subsystem": "eps",
                     "parameter": "voltage",
                     "value": "3.3"
@@ -159,13 +159,13 @@ fn test_delete_le() {
             "msg": {
                 "telemetry": [
                     {
-                    "timestamp": 1010,
+                    "timestamp": 1010.0,
                     "subsystem": "mcu",
                     "parameter": "current",
                     "value": "2.4"
                     },
                     {
-                    "timestamp": 1009,
+                    "timestamp": 1009.0,
                     "subsystem": "eps",
                     "parameter": "current",
                     "value": "2.5"
@@ -225,13 +225,13 @@ fn test_delete_range() {
             "msg": {
                 "telemetry": [
                     {
-                    "timestamp": 1010,
+                    "timestamp": 1010.0,
                     "subsystem": "mcu",
                     "parameter": "current",
                     "value": "2.4"
                     },
                     {
-                    "timestamp": 1000,
+                    "timestamp": 1000.0,
                     "subsystem": "eps",
                     "parameter": "voltage",
                     "value": "3.3"
@@ -289,31 +289,31 @@ fn test_delete_subsystem() {
             "msg": {
                 "telemetry": [
                     {
-                    "timestamp": 1010,
+                    "timestamp": 1010.0,
                     "subsystem": "mcu",
                     },
                     {
-                    "timestamp": 1008,
+                    "timestamp": 1008.0,
                     "subsystem": "gps",
                     },
                     {
-                    "timestamp": 1007,
+                    "timestamp": 1007.0,
                     "subsystem": "mcu",
                     },
                     {
-                    "timestamp": 1005,
+                    "timestamp": 1005.0,
                     "subsystem": "gps",
                     },
                     {
-                    "timestamp": 1004,
+                    "timestamp": 1004.0,
                     "subsystem": "mcu",
                     },
                     {
-                    "timestamp": 1002,
+                    "timestamp": 1002.0,
                     "subsystem": "gps",
                     },
                     {
-                    "timestamp": 1001,
+                    "timestamp": 1001.0,
                     "subsystem": "mcu",
                     },
                 ]
@@ -369,23 +369,23 @@ fn test_delete_parameter() {
             "msg": {
                 "telemetry": [
                     {
-                    "timestamp": 1010,
+                    "timestamp": 1010.0,
                     "subsystem": "mcu",
                     },
                     {
-                    "timestamp": 1009,
+                    "timestamp": 1009.0,
                     "subsystem": "eps",
                     },
                     {
-                    "timestamp": 1005,
+                    "timestamp": 1005.0,
                     "subsystem": "gps",
                     },
                     {
-                    "timestamp": 1004,
+                    "timestamp": 1004.0,
                     "subsystem": "mcu",
                     },
                     {
-                    "timestamp": 1003,
+                    "timestamp": 1003.0,
                     "subsystem": "eps",
                     },
                 ]
