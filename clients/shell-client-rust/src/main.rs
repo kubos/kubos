@@ -21,13 +21,24 @@ extern crate shell_protocol;
 extern crate failure;
 
 use channel_protocol::ChannelProtocol;
-use clap::{App, Arg};
+use clap::{App, Arg, SubCommand};
 use failure::Error;
 use std::collections::HashMap;
 use std::io::{self, Write};
 use std::time::Duration;
 
-fn select_channel(channel_proto: &ChannelProtocol) -> Result<Option<u32>, Error> {
+fn start_session(channel_proto: ChannelProtocol, remote: &str) -> Result<(), Error> {
+    let channel_id = channel_protocol::generate_channel();
+    channel_proto.send(shell_protocol::messages::spawn::to_cbor(
+        channel_id,
+        &"/bin/bash".to_owned(),
+        None,
+    )?)?;
+    run_shell(channel_proto, remote, channel_id)?;
+    Ok(())
+}
+
+fn list_sessions(channel_proto: ChannelProtocol) -> Result<(), Error> {
     channel_proto.send(shell_protocol::messages::list::to_cbor(
         channel_protocol::generate_channel(),
         None,
@@ -46,64 +57,30 @@ fn select_channel(channel_proto: &ChannelProtocol) -> Result<Option<u32>, Error>
                 Some(l) => l,
                 None => HashMap::<u32, (String, u32)>::new(),
             };
-            let channels_list = process_list
-                .iter()
-                .map(|(channel_id, (_, _))| *channel_id)
-                .collect::<Vec<u32>>();
 
-            loop {
-                println!("Choose an option:");
-                println!("Press enter to start a new sh shell.");
-                println!("Press Control-C to exit");
-                println!("Or enter session ID to take over an existing session.");
-                for (channel_id, (path, pid)) in process_list.iter() {
-                    println!("{}\t{{ path = '{}', pid = {} }}", channel_id, path, pid);
-                }
-
-                let mut input = String::new();
-                match io::stdin().read_line(&mut input) {
-                    Ok(_n) => match input.as_ref() {
-                        "\n" => return Ok(None),
-                        s => match s.trim().parse::<u32>() {
-                            Ok(n) => if channels_list.contains(&n) {
-                                return Ok(Some(n));
-                            },
-                            _ => {}
-                        },
-                    },
-                    _ => {}
-                }
+            for (channel_id, (path, pid)) in process_list.iter() {
+                println!("{}\t{{ path = '{}', pid = {} }}", channel_id, path, pid);
             }
         }
         _ => bail!("Shell service is not responding correctly".to_owned()),
     }
+
+    Ok(())
 }
 
-fn get_channel(channel_proto: &ChannelProtocol) -> Result<u32, Error> {
-    let selected_channel = select_channel(&channel_proto)?;
-
-    match selected_channel {
-        Some(c) => Ok(c),
-        None => {
-            let channel_id = channel_protocol::generate_channel();
-            channel_proto.send(shell_protocol::messages::spawn::to_cbor(
-                channel_id,
-                &"/bin/bash".to_owned(),
-                None,
-            )?)?;
-            Ok(channel_id)
-        }
-    }
+fn kill_session(channel_proto: ChannelProtocol, channel_id: u32) -> Result<(), Error> {
+    channel_proto.send(shell_protocol::messages::kill::to_cbor(channel_id, None)?)?;
+    Ok(())
 }
 
 fn run_shell(
-    channel_id: u32,
+    channel_proto: ChannelProtocol,
     remote_addr: &str,
-    channel_proto: &ChannelProtocol,
+    channel_id: u32,
 ) -> Result<(), Error> {
     loop {
         let mut input = String::new();
-        print!("{}>", remote_addr);
+        print!("{}>$ ", remote_addr);
         let _ = io::stdout().flush();
         match io::stdin().read_line(&mut input) {
             Ok(_n) => {
@@ -139,7 +116,27 @@ fn run_shell(
 
 fn main() {
     let args = App::new("Shell client")
-        .arg(
+        .subcommand(SubCommand::with_name("start").about("Starts new shell session"))
+        .subcommand(SubCommand::with_name("list").about("Lists existing shell sessions"))
+        .subcommand(
+            SubCommand::with_name("join")
+                .about("Joins an existing shell session")
+                .arg(
+                    Arg::with_name("channel_id")
+                        .short("c")
+                        .takes_value(true)
+                        .required(true),
+                ),
+        ).subcommand(
+            SubCommand::with_name("kill")
+                .about("Kills an existing shell session")
+                .arg(
+                    Arg::with_name("channel_id")
+                        .short("c")
+                        .takes_value(true)
+                        .required(true),
+                ),
+        ).arg(
             Arg::with_name("service_ip")
                 .short("i")
                 .takes_value(true)
@@ -153,18 +150,41 @@ fn main() {
 
     let ip = args.value_of("service_ip").unwrap();
     let port = args.value_of("service_port").unwrap();
+    let remote = format!("{}:{}", ip, port);
+    let channel_proto = channel_protocol::ChannelProtocol::new("0.0.0.0", &remote, 4096);
 
-    println!("Starting shell client -> {}:{}", ip, port);
-
-    let channel_proto =
-        channel_protocol::ChannelProtocol::new("0.0.0.0", &format!("{}:{}", ip, port), 4096);
-
-    if let Ok(channel_id) = get_channel(&channel_proto) {
-        match run_shell(channel_id, &format!("{}:{}", ip, port), &channel_proto) {
-            Ok(_) => {}
-            Err(e) => {
-                eprintln!("Error encountered: {}", e);
-            }
+    match match args.subcommand_name() {
+        Some("start") => {
+            println!("starting new shell session");
+            start_session(channel_proto, &remote)
         }
+        Some("list") => {
+            println!("listing existing shell sessions");
+            list_sessions(channel_proto)
+        }
+        Some("join") => {
+            let channel_id = args
+                .subcommand_matches("join")
+                .unwrap()
+                .value_of("channel_id")
+                .unwrap();
+            println!("Joining existing shell session: {}", channel_id);
+            let channel_id = channel_id.parse::<u32>().unwrap();
+            run_shell(channel_proto, &remote, channel_id)
+        }
+        Some("kill") => {
+            let channel_id = args
+                .subcommand_matches("kill")
+                .unwrap()
+                .value_of("channel_id")
+                .unwrap();
+            println!("killing existing shell session: {}", channel_id);
+            let channel_id = channel_id.parse::<u32>().unwrap();
+            kill_session(channel_proto, channel_id)
+        }
+        _ => panic!("Invalid command"),
+    } {
+        Ok(_) => {}
+        Err(e) => eprintln!("Error encountered: {}", e),
     }
 }
