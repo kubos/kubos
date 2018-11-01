@@ -169,7 +169,8 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     let mut host_parts = host.split(':').map(|val| val.to_owned());
     let host_addr = host_parts.next().unwrap();
 
-    let c_protocol = cbor_protocol::Protocol::new(host.clone(), 4096);
+    let c_protocol =
+        cbor_protocol::Protocol::new(host.clone(), shell_protocol::CHUNK_SIZE as usize);
 
     let timeout = config
         .get("timeout")
