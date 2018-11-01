@@ -18,8 +18,10 @@ extern crate cbor_protocol;
 extern crate channel_protocol;
 #[macro_use]
 extern crate failure;
+extern crate libc;
 #[macro_use]
 extern crate log;
+extern crate nix;
 extern crate rand;
 extern crate serde_cbor;
 extern crate timeout_readwrite;

@@ -16,6 +16,7 @@
 
 extern crate cbor_protocol;
 extern crate channel_protocol;
+#[macro_use]
 extern crate failure;
 extern crate kubos_system;
 #[macro_use]
@@ -24,7 +25,7 @@ extern crate serde_cbor;
 extern crate shell_protocol;
 extern crate simplelog;
 
-use channel_protocol::ChannelMessage;
+use channel_protocol::{ChannelMessage, ChannelProtocol};
 use kubos_system::Config as ServiceConfig;
 use shell_protocol::{ProcessHandler, ProtocolError, ShellMessage, ShellProtocol};
 use std::collections::HashMap;
@@ -64,18 +65,57 @@ fn list_processes(
     Ok(())
 }
 
+// Spawn new process and spin up thread for handling it
+fn spawn_process(
+    channel_id: u32,
+    command: &str,
+    args: Option<Vec<String>>,
+    host_addr: &str,
+    remote_addr: &str,
+    timeout: Duration,
+    shared_threads: Arc<Mutex<HashMap<u32, ThreadProcess>>>,
+) -> Result<(u32, Sender<ChannelMessage>), failure::Error> {
+    let (sender, receiver): (Sender<ChannelMessage>, Receiver<ChannelMessage>) = mpsc::channel();
+
+    let proc_handle = match ProcessHandler::spawn(command, args) {
+        Ok(p) => p,
+        Err(e) => {
+            bail!("Failed to spawn {:?}", e);
+        }
+    };
+    let pid = proc_handle.id();
+
+    let channel_protocol = ChannelProtocol::new(host_addr, remote_addr, 4096);
+
+    channel_protocol.send(shell_protocol::messages::pid::to_cbor(
+        channel_id,
+        proc_handle.id(),
+    )?)?;
+
+    thread::spawn(move || {
+        thread_body(
+            channel_protocol,
+            channel_id,
+            timeout,
+            proc_handle,
+            shared_threads,
+            receiver,
+        )
+    });
+
+    Ok((pid, sender))
+}
+
 // Main function of process handling thread
 fn thread_body(
-    host: &str,
-    remote: &str,
+    channel_protocol: ChannelProtocol,
     channel_id: u32,
     timeout: Duration,
     proc_handle: ProcessHandler,
     shared_threads: Arc<Mutex<HashMap<u32, ThreadProcess>>>,
     receiver: Receiver<ChannelMessage>,
 ) -> () {
-    let mut s_protocol =
-        ShellProtocol::new(&host, &remote, channel_id, Box::new(Some(proc_handle)));
+    let mut s_protocol = ShellProtocol::new(channel_protocol, channel_id, Box::new(proc_handle));
 
     // Receive and react to incoming shell protocol messages
     match s_protocol.message_engine(
@@ -92,7 +132,7 @@ fn thread_body(
         _ => {}
     }
 
-    // Remove ourselves from threads list if we are finished
+    // Remove ourselves from threads list once we are finished
     shared_threads.lock().unwrap().remove(&channel_id);
 }
 
@@ -116,14 +156,14 @@ fn get_message(
     Ok((channel_message, shell_message, source))
 }
 
-//
+// Starts and runs the main loop receiving new shell protocol messages
 pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
     let host = config.hosturl();
 
     // Extract our local IP address so we can spawn child sockets later
     let mut host_parts = host.split(':').map(|val| val.to_owned());
-    let host_ip = host_parts.next().unwrap();
+    let host_addr = host_parts.next().unwrap();
 
     let c_protocol = cbor_protocol::Protocol::new(host.clone(), 4096);
 
@@ -140,9 +180,6 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     let threads = Arc::new(Mutex::new(raw_threads));
 
     loop {
-        let host_ref = host_ip.clone();
-        let timeout_ref = timeout.clone();
-
         let (channel_message, shell_message, message_source) = match get_message(&c_protocol) {
             Ok((c, s, m)) => (c, s, m),
             Err(e) => {
@@ -151,6 +188,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
             }
         };
         let channel_id = channel_message.channel_id;
+        let remote_addr = format!("{}", message_source);
 
         match shell_message {
             // Gather and send back list of processes
@@ -160,7 +198,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
             } => {
                 list_processes(
                     channel_id,
-                    &host_ref,
+                    &host_addr,
                     &format!("{}", message_source),
                     &threads,
                 )?;
@@ -173,40 +211,24 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                 args,
             } => {
                 if !threads.lock().unwrap().contains_key(&channel_id) {
-                    let (sender, receiver): (
-                        Sender<ChannelMessage>,
-                        Receiver<ChannelMessage>,
-                    ) = mpsc::channel();
-
-                    let proc_handle = match ProcessHandler::spawn(command.to_owned(), args) {
-                        Ok(p) => p,
-                        Err(e) => {
-                            warn!("Failed to spawn {:?}", e);
-                            continue;
-                        }
-                    };
-
-                    threads.lock().unwrap().insert(
+                    if let Ok((pid, sender)) = spawn_process(
                         channel_id,
-                        ThreadProcess {
-                            sender: sender.clone(),
-                            pid: proc_handle.id().unwrap_or(0),
-                            path: command.to_owned(),
-                        },
-                    );
-
-                    let shared_threads = threads.clone();
-                    thread::spawn(move || {
-                        thread_body(
-                            &host_ref,
-                            &format!("{}", message_source),
+                        &command,
+                        args,
+                        &host_addr,
+                        &remote_addr,
+                        timeout,
+                        threads.clone(),
+                    ) {
+                        threads.lock().unwrap().insert(
                             channel_id,
-                            timeout_ref,
-                            proc_handle,
-                            shared_threads,
-                            receiver,
-                        )
-                    });
+                            ThreadProcess {
+                                sender: sender.clone(),
+                                pid: pid,
+                                path: command.to_owned(),
+                            },
+                        );
+                    }
                 } else {
                     warn!("Process on channel {} already exists", channel_id);
                 }

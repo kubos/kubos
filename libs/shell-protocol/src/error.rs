@@ -34,6 +34,12 @@ pub enum ProtocolError {
         /// The specific channel protocol error
         err: channel_protocol::ProtocolError,
     },
+    /// An error was encountered when killing a process
+    #[fail(display = "Kill error: {}", err)]
+    KillError {
+        /// Underlying error encountered
+        err: nix::Error,
+    },
     /// An error was encountered when creating a message
     #[fail(display = "Unable to create message {}: {}", message, err)]
     MessageCreationError {
