@@ -36,3 +36,9 @@ pub use messages::parse_message;
 pub use messages::Message as ShellMessage;
 pub use process::ProcessHandler;
 pub use protocol::Protocol as ShellProtocol;
+
+/// Default chunk size used by shell protocol
+pub const CHUNK_SIZE: u32 = 4096;
+
+/// Default port used by shell protocol
+pub const PORT: &str = "6000";

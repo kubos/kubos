@@ -145,13 +145,14 @@ fn main() {
             Arg::with_name("service_port")
                 .short("p")
                 .takes_value(true)
-                .default_value("8080"),
+                .default_value(shell_protocol::PORT),
         ).get_matches();
 
     let ip = args.value_of("service_ip").unwrap();
     let port = args.value_of("service_port").unwrap();
     let remote = format!("{}:{}", ip, port);
-    let channel_proto = channel_protocol::ChannelProtocol::new("0.0.0.0", &remote, 4096);
+    let channel_proto =
+        channel_protocol::ChannelProtocol::new("0.0.0.0", &remote, shell_protocol::CHUNK_SIZE);
 
     match match args.subcommand_name() {
         Some("start") => {
