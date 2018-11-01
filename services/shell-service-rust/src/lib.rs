@@ -196,6 +196,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                 channel_id,
                 process_list: None,
             } => {
+                info!("<- {{ {}, list }}", channel_id);
                 list_processes(
                     channel_id,
                     &host_addr,
@@ -210,6 +211,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                 command,
                 args,
             } => {
+                info!("<- {{ {}, spawn, {}, {:?} }}", channel_id, command, args);
                 if !threads.lock().unwrap().contains_key(&channel_id) {
                     if let Ok((pid, sender)) = spawn_process(
                         channel_id,
