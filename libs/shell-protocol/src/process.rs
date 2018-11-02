@@ -181,7 +181,6 @@ impl ProcessHandler {
     /// Send killing signal to process
     pub fn kill(&mut self, signal: Option<u32>) -> Result<(), ProtocolError> {
         let pid = Pid::from_raw(self.process.id() as pid_t);
-        // let sig = Some(signal::Signal::from_c_int(signal.unwrap_or(9) as i32));
         let sig = signal::Signal::from_c_int(signal.unwrap_or(9) as i32)
             .unwrap_or(signal::Signal::SIGKILL);
         signal::kill(pid, sig).map_err(|err| ProtocolError::KillError { err })

@@ -18,6 +18,7 @@ use cbor_protocol;
 use channel_protocol;
 use serde_cbor;
 use std::io;
+use nix;
 
 /// Errors which occur when using ShellProtocol
 #[derive(Debug, Fail)]
