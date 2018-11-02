@@ -56,7 +56,8 @@ fn list_processes(
         .map(|(channel_id, data)| (*channel_id, (data.path.to_owned(), data.pid)))
         .collect();
 
-    let chan_proto = channel_protocol::ChannelProtocol::new(host, remote, 4096);
+    let chan_proto =
+        channel_protocol::ChannelProtocol::new(host, remote, shell_protocol::CHUNK_SIZE);
 
     chan_proto.send(shell_protocol::messages::list::to_cbor(
         channel_id,
@@ -89,7 +90,7 @@ fn spawn_process(
     };
     let pid = proc_handle.id();
 
-    let channel_protocol = ChannelProtocol::new(host_addr, remote_addr, 4096);
+    let channel_protocol = ChannelProtocol::new(host_addr, remote_addr, shell_protocol::CHUNK_SIZE);
 
     channel_protocol.send(shell_protocol::messages::pid::to_cbor(
         channel_id,

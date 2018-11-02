@@ -15,13 +15,14 @@
 //
 
 extern crate channel_protocol;
+#[macro_use]
 extern crate clap;
 extern crate shell_protocol;
 #[macro_use]
 extern crate failure;
 
 use channel_protocol::ChannelProtocol;
-use clap::{App, Arg, SubCommand};
+use clap::{App, AppSettings, Arg, SubCommand};
 use failure::Error;
 use std::collections::HashMap;
 use std::io::{self, Write};
@@ -68,8 +69,12 @@ fn list_sessions(channel_proto: ChannelProtocol) -> Result<(), Error> {
     Ok(())
 }
 
-fn kill_session(channel_proto: ChannelProtocol, channel_id: u32) -> Result<(), Error> {
-    channel_proto.send(shell_protocol::messages::kill::to_cbor(channel_id, None)?)?;
+fn kill_session(
+    channel_proto: ChannelProtocol,
+    channel_id: u32,
+    signal: Option<u32>,
+) -> Result<(), Error> {
+    channel_proto.send(shell_protocol::messages::kill::to_cbor(channel_id, signal)?)?;
     Ok(())
 }
 
@@ -83,30 +88,42 @@ fn run_shell(
         print!("{}>$ ", remote_addr);
         let _ = io::stdout().flush();
         match io::stdin().read_line(&mut input) {
-            Ok(_n) => {
+            Ok(n) => {
+                if n == 0 {
+                    return Ok(());
+                }
+
                 channel_proto.send(shell_protocol::messages::stdin::to_cbor(
                     channel_id,
                     Some(&input),
                 )?)?;
 
+                let mut received_msg = false;
                 loop {
                     match channel_proto.recv_message(Some(Duration::from_millis(100))) {
-                        Ok(m) => match shell_protocol::messages::parse_message(m) {
-                            Ok(shell_protocol::messages::Message::Stdout {
-                                channel_id: _channel_id,
-                                data: Some(data),
-                            }) => print!("{}", data),
-                            Ok(shell_protocol::messages::Message::Stderr {
-                                channel_id: _channel_id,
-                                data: Some(data),
-                            }) => print!("{}", data),
-                            Ok(shell_protocol::messages::Message::Exit { .. }) => {
-                                return Ok(());
+                        Ok(m) => {
+                            received_msg = true;
+                            match shell_protocol::messages::parse_message(m) {
+                                Ok(shell_protocol::messages::Message::Stdout {
+                                    channel_id: _channel_id,
+                                    data: Some(data),
+                                }) => print!("{}", data),
+                                Ok(shell_protocol::messages::Message::Stderr {
+                                    channel_id: _channel_id,
+                                    data: Some(data),
+                                }) => eprint!("{}", data),
+                                Ok(shell_protocol::messages::Message::Exit { .. }) => {
+                                    return Ok(());
+                                }
+                                _ => {}
                             }
-                            _ => {}
-                        },
+                        }
                         _ => break,
                     }
+                }
+
+                if !received_msg {
+                    bail!("No message received from shell service");
                 }
             }
             Err(err) => bail!("Error encountered: {}", err),
@@ -114,7 +131,7 @@ fn run_shell(
     }
 }
 
-fn main() {
+fn main() -> Result<(), failure::Error> {
     let args = App::new("Shell client")
         .subcommand(SubCommand::with_name("start").about("Starts new shell session"))
         .subcommand(SubCommand::with_name("list").about("Lists existing shell sessions"))
@@ -135,7 +152,7 @@ fn main() {
                         .short("c")
                         .takes_value(true)
                         .required(true),
-                ),
+                ).arg(Arg::with_name("signal").short("s").takes_value(true)),
         ).arg(
             Arg::with_name("service_ip")
                 .short("i")
@@ -146,7 +163,8 @@ fn main() {
                 .short("p")
                 .takes_value(true)
                 .default_value(shell_protocol::PORT),
-        ).get_matches();
+        ).setting(AppSettings::SubcommandRequiredElseHelp)
+        .get_matches();
 
     let ip = args.value_of("service_ip").unwrap();
     let port = args.value_of("service_port").unwrap();
@@ -169,8 +187,9 @@ fn main() {
                 .unwrap()
                 .value_of("channel_id")
                 .unwrap();
+
             println!("Joining existing shell session: {}", channel_id);
-            let channel_id = channel_id.parse::<u32>().unwrap();
+            let channel_id = channel_id.parse::<u32>()?;
             run_shell(channel_proto, &remote, channel_id)
         }
         Some("kill") => {
@@ -179,13 +198,24 @@ fn main() {
                 .unwrap()
                 .value_of("channel_id")
                 .unwrap();
-            println!("killing existing shell session: {}", channel_id);
-            let channel_id = channel_id.parse::<u32>().unwrap();
-            kill_session(channel_proto, channel_id)
+
+            let signal: Option<u32> = args
+                .subcommand_matches("kill")
+                .unwrap()
+                .value_of("signal")
+                .map(|s| {
+                    s.parse::<u32>()
+                        .map_err(|e| panic!("Failed to parse signal: {}", e))
+                        .unwrap()
+                });
+
+            println!("Sending signal {:?} to session {}", signal, channel_id);
+            let channel_id = channel_id.parse::<u32>()?;
+            kill_session(channel_proto, channel_id, signal)
         }
         _ => panic!("Invalid command"),
     } {
-        Ok(_) => {}
-        Err(e) => eprintln!("Error encountered: {}", e),
+        Ok(_) => Ok(()),
+        Err(e) => bail!("Error encountered: {}", e),
     }
 }
