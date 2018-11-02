@@ -6,7 +6,5 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 [dependencies]
 clap = "2.32"
 failure = "0.1.2"
-simplelog = "^0.5.0"
-log = "^0.4.0"
 shell-protocol = { path = "../../libs/shell-protocol" }
 channel-protocol = { path = "../../libs/channel-protocol" }
