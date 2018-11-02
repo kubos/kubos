@@ -60,9 +60,11 @@ pub trait AppHandler {
 /// # Examples
 ///
 /// ```
+/// extern crate failure;
 /// #[macro_use]
 /// extern crate kubos_app;
 ///
+/// use failure::Error;
 /// use kubos_app::AppHandler;
 ///
 /// struct MyApp;
@@ -70,15 +72,18 @@ pub trait AppHandler {
 /// impl AppHandler for MyApp {
 ///   fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
 ///     println!("OnBoot logic");
+///     Ok(())
 ///   }
 ///   fn on_command(&self, _args: Vec<String>) -> Result<(), Error> {
 ///     println!("OnCommand logic");
+///     Ok(())
 ///   }
 /// }
 ///
-/// fn main() {
+/// fn main() -> Result<(), Error> {
 ///     let app = MyApp { };
-///     app_main!(&app);
+///     app_main!(&app)?;
+///     Ok(())
 /// }
 /// ```
 #[macro_export]

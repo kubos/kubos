@@ -60,7 +60,7 @@
 //!
 //!     Ok(())
 //!   }
-//!   fn on_command(&self, _args: Vec<String>) Result<(), Error> {
+//!   fn on_command(&self, _args: Vec<String>) -> Result<(), Error> {
 //!     println!("OnCommand logic");
 //!     Ok(())
 //!   }
