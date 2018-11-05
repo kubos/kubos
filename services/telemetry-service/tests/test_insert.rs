@@ -17,6 +17,7 @@
 #[macro_use]
 extern crate serde_json;
 extern crate tempfile;
+extern crate time;
 
 mod utils;
 
@@ -219,4 +220,58 @@ fn test_insert_multi_auto() {
     teardown(handle, sender);
 
     assert_eq!(query_result, query_expected);
+}
+
+#[test]
+fn test_insert_current_timestamp() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8114;
+    let udp = 8124;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+
+    let time = time::now_utc().to_timespec();
+    let now = time.sec as f64 + (time.nsec as f64 / 1000000000.0);
+
+    let mutation = format!(r#"mutation {{
+            insert(timestamp: {}, subsystem: "test2", parameter: "voltage", value: "4.0") {{
+                success,
+                errors
+            }}
+        }}"#, now);
+    
+    let mutation_expected = json!({
+            "errs": "",
+            "msg": {
+                "insert": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        });
+    let mutation_result = do_query(Some(port), &mutation);
+
+    let query = r#"{
+            telemetry(subsystem: "test2", parameter: "voltage") {
+                timestamp
+            }
+        }"#;
+        
+    let query_result = do_query(Some(port), query);
+
+    teardown(handle, sender);
+
+    assert_eq!(mutation_result, mutation_expected);
+    
+    let timestamp = query_result["msg"]["telemetry"][0]["timestamp"].as_f64().unwrap();
+    
+    // The original f64 value gets converted to a string and then back to f64.
+    // This is notoriously complicated and frequently results in discrepencies.
+    // We really only care that the timestamp value doesn't overflow anything, so
+    // we're allowing some variation between the original and final timestamp values.
+    let difference = (now - timestamp).abs();
+    assert!(difference < 1.0);
 }
