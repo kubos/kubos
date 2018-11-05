@@ -22,18 +22,22 @@ use std::time::Duration;
 
 pub struct Protocol {
     pub channel_protocol: ChannelProtocol,
-    pub process: Box<Option<ProcessHandler>>,
+    pub process: Box<ProcessHandler>,
     channel_id: u32,
 }
 
 /// Shell Protocol structure used in the shell service
 impl Protocol {
-    pub fn new(host_ip: &str, remote_addr: &str, channel_id: u32) -> Self {
+    pub fn new(
+        channel_protocol: ChannelProtocol,
+        channel_id: u32,
+        process: Box<ProcessHandler>,
+    ) -> Self {
         // Set up the full connection info
         Protocol {
-            channel_protocol: ChannelProtocol::new(host_ip, remote_addr, 4096),
-            process: Box::new(None),
-            channel_id: channel_id,
+            channel_protocol,
+            process,
+            channel_id,
         }
     }
 
@@ -53,7 +57,8 @@ impl Protocol {
         F: Fn(Duration) -> Result<ChannelMessage, ProtocolError>,
     {
         loop {
-            if let Some(process) = self.process.as_mut() {
+            {
+                let process = self.process.as_mut();
                 // Check if process has stdout output
                 if process.stdout_reader.is_some() {
                     match process.read_stdout() {
@@ -120,47 +125,24 @@ impl Protocol {
         let parsed_message = messages::parse_message(message)?;
 
         match parsed_message {
-            messages::Message::Spawn {
-                channel_id,
-                command,
-                args,
-            } => {
-                info!(
-                    "<- {{ {}, spawn, {}, {{ args = {:?} }} }}",
-                    channel_id, command, args
-                );
-
-                self.process = Box::new(Some(ProcessHandler::spawn(command, args)?));
-                if let Some(process) = self.process.as_ref() {
-                    self.channel_protocol
-                        .send(messages::pid::to_cbor(self.channel_id, process.id()?)?)?;
-                }
-            }
             messages::Message::Stdin { channel_id, data } => {
                 info!("<- {{ {}, stdin, {:?} }}", channel_id, data);
-                if let Some(process) = self.process.as_mut() {
+                {
+                    let process = self.process.as_mut();
                     match data {
                         Some(data) => process.write_stdin(&data.as_bytes())?,
                         None => process.close_stdin()?,
                     }
                 }
             }
-            messages::Message::Stdout { channel_id, data } => {
-                info!("<- {{ {}, stdout, {:?} }}", channel_id, data);
+            messages::Message::Kill { channel_id, signal } => {
+                info!("<- {{ {}, kill, {:?} }}", channel_id, signal);
+                {
+                    let process = self.process.as_mut();
+                    process.kill(signal)?;
+                }
             }
-            messages::Message::Stderr { channel_id, data } => {
-                info!("<- {{ {}, stderr, {:?} }}", channel_id, data);
-            }
-            messages::Message::Pid { channel_id, pid } => {
-                info!("<- {{ {}, pid, {} }}", channel_id, pid);
-            }
-            messages::Message::Exit {
-                channel_id,
-                code,
-                signal,
-            } => {
-                info!("<- {{ {}, exit, {}, {} }}", channel_id, code, signal);
-            }
+            message => warn!("Shell service received unexpected message: {:?}", message),
         }
 
         Ok(())

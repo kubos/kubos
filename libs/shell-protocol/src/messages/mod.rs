@@ -17,6 +17,7 @@
 use channel_protocol::ChannelMessage;
 use error::ProtocolError;
 use serde_cbor::Value;
+use std::collections::HashMap;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Message {
@@ -24,6 +25,17 @@ pub enum Message {
         channel_id: u32,
         code: u32,
         signal: u32,
+    },
+    /// This message is sent to the shell service to send a kill signal to the child process
+    Kill {
+        channel_id: u32,
+        signal: Option<u32>,
+    },
+    /// This message is used to request and respond with the lists of processes
+    /// currently running under the shell service.
+    List {
+        channel_id: u32,
+        process_list: Option<HashMap<u32, (String, u32)>>,
     },
     Pid {
         channel_id: u32,
@@ -58,6 +70,8 @@ pub enum Message {
 }
 
 pub mod exit;
+pub mod kill;
+pub mod list;
 pub mod pid;
 pub mod spawn;
 pub mod stderr;
@@ -67,6 +81,8 @@ pub mod stdout;
 pub fn parse_message(message: ChannelMessage) -> Result<Message, ProtocolError> {
     match message.name.as_ref() {
         "exit" => Ok(exit::from_cbor(&message)?),
+        "kill" => Ok(kill::from_cbor(&message)?),
+        "list" => Ok(list::from_cbor(&message)?),
         "pid" => Ok(pid::from_cbor(&message)?),
         "spawn" => Ok(spawn::from_cbor(&message)?),
         "stderr" => Ok(stderr::from_cbor(&message)?),
