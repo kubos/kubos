@@ -86,6 +86,7 @@ and then call the appropriate run level function based on the input:
 .. code-block:: python
     
     import argparse
+    import sys
 
     def main():
         parser = argparse.ArgumentParser()
@@ -100,6 +101,7 @@ and then call the appropriate run level function based on the input:
             on_command()
         else:
             print "Unknown run level specified"
+            sys.exit(1)
         
     if __name__ == "__main__":
         main()
@@ -116,6 +118,7 @@ All together, it should look like this:
     #!/usr/bin/env python
     
     import argparse
+    import sys
     
     def on_boot():
         
@@ -138,6 +141,7 @@ All together, it should look like this:
             on_command()
         else:
             print "Unknown run level specified"
+            sys.exit(1)
         
     if __name__ == "__main__":
         main()
@@ -171,6 +175,7 @@ Our new file should look like this:
     #!/usr/bin/env python
     
     import argparse
+    import sys
     
     def on_boot():
         
@@ -199,6 +204,7 @@ Our new file should look like this:
         else:
             errors.write("Unknown run level specified\r\n")
             print "Unknown run level specified"
+            sys.exit(1)
         
     if __name__ == "__main__":
         main()
@@ -400,6 +406,7 @@ After adding error handling, our program should look like this:
 
     import argparse
     import app_api
+    import sys
     
     SERVICES = app_api.Services()
     
@@ -419,7 +426,7 @@ After adding error handling, our program should look like this:
         except Exception as e: 
             file.write("Something went wrong: " + str(e) + "\r\n")
             print "OnCommand logic encountered errors"
-            exit()
+            sys.exit(1)
         
         data = response["memInfo"]
         available = data["available"]
@@ -444,6 +451,7 @@ After adding error handling, our program should look like this:
         else:
             errors.write("Unknown run level specified\r\n")
             print "Unknown run level specified"
+            sys.exit(1)
         
     if __name__ == "__main__":
         main()
@@ -525,6 +533,7 @@ With some additional error handling, our final application looks like this:
     
     import argparse
     import app_api
+    import sys
     
     SERVICES = app_api.Services()
     
@@ -544,7 +553,7 @@ With some additional error handling, our final application looks like this:
         except Exception as e: 
             file.write("Something went wrong: " + str(e) + "\r\n")
             print "OnCommand logic encountered errors"
-            exit()
+            sys.exit(1)
         
         data = response["memInfo"]
         available = data["available"]
@@ -565,7 +574,7 @@ With some additional error handling, our final application looks like this:
         except Exception as e: 
             file.write("Something went wrong: " + str(e) + "\r\n")
             print "OnCommand logic encountered errors"
-            exit()
+            sys.exit(1)
             
         data = response["insert"]
         success = data["success"]
@@ -574,6 +583,7 @@ With some additional error handling, our final application looks like this:
         if success == False:
             file.write("Telemetry insert encountered errors: " + str(errors) + "\r\n")
             print "OnCommand logic encountered errors"
+            sys.exit(1)
         else :
             print "OnCommand logic completed successfully"
     
@@ -590,6 +600,7 @@ With some additional error handling, our final application looks like this:
             on_command()
         else:
             print "Unknown run level specified"
+            sys.exit(1)
         
     if __name__ == "__main__":
         main()

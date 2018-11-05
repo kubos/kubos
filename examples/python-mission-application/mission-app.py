@@ -19,6 +19,7 @@ without the environment indicator at the top of the file:
 import argparse
 import app_api
 import datetime
+import sys
 import toml
 import time
 
@@ -100,6 +101,7 @@ def on_command(cmd_args):
                 write_log(file, "Sending commands to hardware to normal operation")
         else:
             raise ValueError("Command Integer must be positive and non-zero")
+            sys.exit(1)
                     
     else:
         query = '{ apps { active, app { uuid, name, version, author } } }'
@@ -113,6 +115,7 @@ def on_command(cmd_args):
             with open(COMMANDFILE, 'a+') as file:
                 write_log(file, "Housekeeping caused an error: {},{},{}".format(
                     type(e), e.args, e))
+                sys.exit(1)
         
 
 def main():
@@ -123,7 +126,6 @@ def main():
         '-r',
         '--run',
         nargs=1,
-        default='OnBoot',
         help='Determines run behavior. Either "OnBoot" or "OnCommand"',
         required=True)
     
@@ -150,6 +152,7 @@ def main():
         with open(ERRORSFILE, 'a+') as file:
             write_log(file, "Unknown run level specified")
         print "Unknown run level specified"
+        sys.exit(1)
 
 
 if __name__ == "__main__":
