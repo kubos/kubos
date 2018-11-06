@@ -2,7 +2,7 @@ Establishing a Shell Connection with an OBC
 ===========================================
 
 The :doc:`shell service <../services/shell>` is used to provide shell access and commanding from
-mission operations to the OBC.
+mission operations or a development environment to the OBC.
 
 Pre-Requisites
 --------------
@@ -16,12 +16,17 @@ Pre-Requisites
 - Have the file transfer service running on a target OBC (this happens by default when running KubOS)
 - Windows users: :ref:`Make sure Windows is setup to allow UDP packets from the OBC <windows-udp>`
 
+Setup
+-----
+
+This tutorial is written under the assumption that you are working inside of the
+Kubos SDK. The shell client can be easily run from inside of the SDK with
+the follow command::
+
+   ``$ kubos-shell-client``
+
 Syntax
 ------
-
-The shell client can be run from inside of the Kubos SDK with the following command::
-
-    ``$ kubos-shell-client``
 
 The shell client has the following command syntax::
 
@@ -33,13 +38,13 @@ Required arguments:
 
         - ``start`` - Start a new shell session
         - ``list`` - List current shell sessions
-        - ``join`` - Join existing shell session
-        - ``kill`` - Kill existing shell session
+        - ``join`` - Join an existing shell session
+        - ``kill`` - Kill an existing shell session
 
 Optional arguments:
 
     - ``-i {remote IP}`` - Default: `0.0.0.0`. IP address of the shell service to connect to.
-    - ``-p {remote port}`` - Default: `6000`. UDP port of the shell service to connect to.
+    - ``-p {remote port}`` - Default: `8080`. UDP port of the shell service to connect to.
 
 
 Starting a New Shell Session
@@ -55,26 +60,54 @@ The output from the client should look like this:
 
 .. code-block:: none
 
-   Starting shell client -> 0.0.0.0:6000
+   Starting shell client -> 0.0.0.0:8080
    Starting shell session -> 672612
-   Press enter to send input to the shell session.
-   Press Control-D to detach from the session.
-   $ 
+   Press enter to send input to the shell session
+   Press Control-D to detach from the session
+   $
+
+The shell service has spawned an instance of ``/bin/bash`` on the
+remote system. Any lines on input given to the shell client will be
+sent to the shell service and executed by the ``bash`` instance.
+
+You can send ``exit`` to quit this ``bash`` session, or you can
+hit Control-D to detach from the session.
 
 Listing Existing Shell Sessions
 -------------------------------
+
+Next we will look at listing the existing shell sessions on the OBC.
 
 Our command should look like this::
 
    $ kubos-shell-client list
 
-The output from the client should look like this:
+The output from the client should look like this if sessions exist:
 
 .. code-block:: none
 
    Starting shell client -> 0.0.0.0:6000
    Listing shell sessions
-   672612	{ path = '/bin/bash', pid = 24939 }
+       672612	{ path = '/bin/bash', pid = 24939 }
+
+
+The entries in the sessions list are structured like so:
+
+.. code-block:: none
+
+   [channel-id] { path = [process-path], pid = [process-id] }
+
+The channel id can be used to join or kill the process.
+The process path is the path to the executable running in the session.
+The pid is the pid of the process on the remote system.
+
+If no sessions exist then the output from the client will look like this:
+
+.. code-block:: none
+
+   Starting shell client -> 0.0.0.0:6000
+   Listing shell sessions
+       No active sessions found
 
 Joining an Existing Shell Session
 ---------------------------------
