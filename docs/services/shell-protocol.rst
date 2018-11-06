@@ -13,7 +13,7 @@ and any additional values will be parameters for the ``command``.
     ``{ channel_id, command, parameters.. }``
 
 Messages
---------------
+--------
 
 The primary purpose of the shell protocol is to allow the
 spawning and controlling of remote processes. These messages
@@ -30,20 +30,14 @@ absolute path to a binary or something in the system ``$PATH``.
 
     ``{ channel_id, 'spawn', command, options.. }``
 
-The possible values in the ``options``
-argument are as follows:
+There is currently only one available option for the ``options``
+argument:
 
     - ``args`` - An array of arguments to pass to the child process
-    - ``pty`` - A boolean specifying whether a new pty is needed
-    - ``env`` - An array of environment variable entries in the form ``"KEY=val"``
-    - ``cwd`` - The current working directory of the child process
-    - ``uid`` - The uid of the process
-    - ``gid`` - The gid of the process
-    - ``detached`` - Determines if the child process should be detached from the service
 
-Example of starting a long running shell:
+Example of starting a shell:
 
-    ``{ 1, 'spawn', 'sh', { detached = true, pty = true, args = { '-l' } } }``
+    ``{ 1, 'spawn', 'sh', { args = { '-l' } } }``
 
 Write to Stdin
 ~~~~~~~~~~~~~~
@@ -91,20 +85,6 @@ Send `SIGTERM` to a child process:
 Send `SIGKILL` to a child process:
 
     ``{ channel_id, 'kill', 9 }``
-
-Resize Terminal
-~~~~~~~~~~~~~~~
-
-This message is sent to the shell service to resize the pseudo
-terminal of a child process, if one exists. It contains a
-channel ID, the string 'resize', the desired number of columns
-and the desired number of rows.
-
-    ``{ channel_id, 'resize', columns, rows }``
-
-Example message - Resizing a pseudo terminal to 10x10:
-
-    ``{ 1, 'resize', 10, 10 }``
 
 Process Created
 ~~~~~~~~~~~~~~~
@@ -206,6 +186,39 @@ process in the list.
 Example list of processes:
 
     ``{ 16, 'list', { [12] = { path = 'sh', pid = 45 }, [14] = { path = 'sh', pid = 50 } } }``
+
+Future Messages
+---------------
+
+These messages may be implemented in the shell protocol in the future,
+but are not implemented as of KubOS release v1.8.0.
+
+Spawn Process
+~~~~~~~~~~~~~
+
+The spawn process is currently implemented, however the following
+optional arguments are not currently implemented:
+
+    - ``pty`` - A boolean specifying whether a new pty is needed
+    - ``env`` - An array of environment variable entries in the form ``"KEY=val"``
+    - ``cwd`` - The current working directory of the child process
+    - ``uid`` - The uid of the process
+    - ``gid`` - The gid of the process
+    - ``detached`` - Determines if the child process should be detached from the service
+
+Resize Terminal
+~~~~~~~~~~~~~~~
+
+This message is sent to the shell service to resize the pseudo
+terminal of a child process, if one exists. It contains a
+channel ID, the string 'resize', the desired number of columns
+and the desired number of rows.
+
+    ``{ channel_id, 'resize', columns, rows }``
+
+Example message - Resizing a pseudo terminal to 10x10:
+
+    ``{ 1, 'resize', 10, 10 }``
 
 
 Example Usages

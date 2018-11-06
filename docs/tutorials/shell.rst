@@ -112,7 +112,16 @@ If no sessions exist then the output from the client will look like this:
 Joining an Existing Shell Session
 ---------------------------------
 
-Our command should look like this::
+If sessions already exist on the OBC then we are able to join them using
+the join command.
+
+The join command has the following synatx::
+
+   kubos-shell-client join -c <channel_id>
+
+The channel id must be that of a session that already exists.
+
+To join the session started earlier our command will look like this::
 
    $ kubos-shell-client join -c 672612
 
@@ -122,9 +131,22 @@ The output from the client should look like this:
 
    Starting shell client -> 0.0.0.0:6000
    Joining existing shell session 672612
+   Press enter to send input to the shell session
+   Press Control-D to detach from the session
+   $
 
-Killing Existing Shell Session
-------------------------------
+Killing an Existing Shell Session
+---------------------------------
+
+We are also able to kill existing sessions on the OBC.
+
+The kill command has the following syntax::
+
+   kubos-shell-client kill [-s signal] -c <channel_id>
+
+The kill command requires a channel_id to know which session to kill.
+Optionally a signal number may also be passed in. If no signal is
+specified then ``SIGKILL`` will be sent.
 
 Our command should look like this::
 
