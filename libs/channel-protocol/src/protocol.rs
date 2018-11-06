@@ -66,6 +66,10 @@ impl Protocol {
         }
     }
 
+    pub fn set_remote(&mut self, remote: SocketAddr) -> () {
+        self.remote_addr.set(remote);
+    }
+
     /// Send CBOR packet to the destination port
     ///
     /// # Arguments

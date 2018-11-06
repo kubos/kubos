@@ -29,6 +29,7 @@ use channel_protocol::{ChannelMessage, ChannelProtocol};
 use kubos_system::Config as ServiceConfig;
 use shell_protocol::{ProcessHandler, ProtocolError, ShellMessage, ShellProtocol};
 use std::collections::HashMap;
+use std::net::SocketAddr;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -36,7 +37,7 @@ use std::time::Duration;
 
 #[derive(Debug)]
 struct ThreadProcess {
-    pub sender: Sender<ChannelMessage>,
+    pub sender: Sender<(ChannelMessage, SocketAddr)>,
     pub pid: u32,
     pub path: String,
 }
@@ -55,7 +56,8 @@ fn list_processes(
         .map(|(channel_id, data)| (*channel_id, (data.path.to_owned(), data.pid)))
         .collect();
 
-    let chan_proto = channel_protocol::ChannelProtocol::new(host, remote, 4096);
+    let chan_proto =
+        channel_protocol::ChannelProtocol::new(host, remote, shell_protocol::CHUNK_SIZE);
 
     chan_proto.send(shell_protocol::messages::list::to_cbor(
         channel_id,
@@ -74,8 +76,11 @@ fn spawn_process(
     remote_addr: &str,
     timeout: Duration,
     shared_threads: Arc<Mutex<HashMap<u32, ThreadProcess>>>,
-) -> Result<(u32, Sender<ChannelMessage>), failure::Error> {
-    let (sender, receiver): (Sender<ChannelMessage>, Receiver<ChannelMessage>) = mpsc::channel();
+) -> Result<(u32, Sender<(ChannelMessage, SocketAddr)>), failure::Error> {
+    let (sender, receiver): (
+        Sender<(ChannelMessage, SocketAddr)>,
+        Receiver<(ChannelMessage, SocketAddr)>,
+    ) = mpsc::channel();
 
     let proc_handle = match ProcessHandler::spawn(command, args) {
         Ok(p) => p,
@@ -85,7 +90,7 @@ fn spawn_process(
     };
     let pid = proc_handle.id();
 
-    let channel_protocol = ChannelProtocol::new(host_addr, remote_addr, 4096);
+    let channel_protocol = ChannelProtocol::new(host_addr, remote_addr, shell_protocol::CHUNK_SIZE);
 
     channel_protocol.send(shell_protocol::messages::pid::to_cbor(
         channel_id,
@@ -113,14 +118,14 @@ fn thread_body(
     timeout: Duration,
     proc_handle: ProcessHandler,
     shared_threads: Arc<Mutex<HashMap<u32, ThreadProcess>>>,
-    receiver: Receiver<ChannelMessage>,
+    receiver: Receiver<(ChannelMessage, SocketAddr)>,
 ) -> () {
     let mut s_protocol = ShellProtocol::new(channel_protocol, channel_id, Box::new(proc_handle));
 
     // Receive and react to incoming shell protocol messages
     match s_protocol.message_engine(
         |d| match receiver.recv_timeout(d) {
-            Ok(v) => Ok(v),
+            Ok((v, s)) => Ok((v, s)),
             Err(RecvTimeoutError::Timeout) => Err(ProtocolError::ReceiveTimeout),
             Err(e) => Err(ProtocolError::ReceiveError {
                 err: format!("Error {:?}", e),
@@ -165,7 +170,8 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     let mut host_parts = host.split(':').map(|val| val.to_owned());
     let host_addr = host_parts.next().unwrap();
 
-    let c_protocol = cbor_protocol::Protocol::new(host.clone(), 4096);
+    let c_protocol =
+        cbor_protocol::Protocol::new(host.clone(), shell_protocol::CHUNK_SIZE as usize);
 
     let timeout = config
         .get("timeout")
@@ -238,14 +244,24 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
             // Pass along the message to existing process
             _ => {
                 if let Some(process_handle) = threads.lock().unwrap().get(&channel_id) {
-                    match process_handle.sender.send(channel_message) {
+                    match process_handle
+                        .sender
+                        .send((channel_message, message_source))
+                    {
                         Err(e) => warn!("Error when sending to channel {}: {:?}", channel_id, e),
                         _ => {}
                     };
                 }
 
                 if !threads.lock().unwrap().contains_key(&channel_id) {
-                    warn!("No sender found for {}", channel_id);
+                    warn!("No session found for {}", channel_id);
+                    let channel_protocol =
+                        ChannelProtocol::new(&host_addr, &remote_addr, shell_protocol::CHUNK_SIZE);
+
+                    channel_protocol.send(shell_protocol::messages::error::to_cbor(
+                        channel_id,
+                        &format!("No session found on channel {}", channel_id),
+                    )?)?;
                     threads.lock().unwrap().remove(&channel_id);
                 }
             }

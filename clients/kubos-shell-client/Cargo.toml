@@ -1,0 +1,10 @@
+[package]
+name = "kubos-shell-client"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+
+[dependencies]
+clap = "2.32"
+failure = "0.1.2"
+shell-protocol = { path = "../../libs/shell-protocol" }
+channel-protocol = { path = "../../libs/channel-protocol" }
