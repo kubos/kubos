@@ -15,6 +15,9 @@
 //
 
 use error::ProtocolError;
+use libc::pid_t;
+use nix::sys::signal;
+use nix::unistd::Pid;
 use std::io;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::os::unix::prelude::*;
@@ -50,7 +53,7 @@ pub struct ProcessHandler {
 impl ProcessHandler {
     /// Spawn a process and setup stdout/stderr streams
     pub fn spawn(
-        command: String,
+        command: &str,
         args: Option<Vec<String>>,
     ) -> Result<ProcessHandler, ProtocolError> {
         let mut process = match Command::new(command.to_owned())
@@ -61,7 +64,12 @@ impl ProcessHandler {
             .spawn()
         {
             Ok(process) => process,
-            Err(err) => return Err(ProtocolError::SpawnError { cmd: command, err }),
+            Err(err) => {
+                return Err(ProtocolError::SpawnError {
+                    cmd: command.to_owned(),
+                    err,
+                })
+            }
         };
 
         let stdout_reader = match process.stdout.take() {
@@ -150,8 +158,8 @@ impl ProcessHandler {
     }
 
     /// Retrieve ID of process
-    pub fn id(&self) -> Result<u32, ProtocolError> {
-        Ok(self.process.id())
+    pub fn id(&self) -> u32 {
+        self.process.id()
     }
 
     /// Check to see if a process has exited and if the exit
@@ -168,5 +176,13 @@ impl ProcessHandler {
                 err,
             }),
         }
+    }
+
+    /// Send killing signal to process
+    pub fn kill(&mut self, signal: Option<u32>) -> Result<(), ProtocolError> {
+        let pid = Pid::from_raw(self.process.id() as pid_t);
+        let sig = signal::Signal::from_c_int(signal.unwrap_or(9) as i32)
+            .unwrap_or(signal::Signal::SIGKILL);
+        signal::kill(pid, sig).map_err(|err| ProtocolError::KillError { err })
     }
 }

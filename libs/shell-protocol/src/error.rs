@@ -18,6 +18,7 @@ use cbor_protocol;
 use channel_protocol;
 use serde_cbor;
 use std::io;
+use nix;
 
 /// Errors which occur when using ShellProtocol
 #[derive(Debug, Fail)]
@@ -33,6 +34,12 @@ pub enum ProtocolError {
     ChannelError {
         /// The specific channel protocol error
         err: channel_protocol::ProtocolError,
+    },
+    /// An error was encountered when killing a process
+    #[fail(display = "Kill error: {}", err)]
+    KillError {
+        /// Underlying error encountered
+        err: nix::Error,
     },
     /// An error was encountered when creating a message
     #[fail(display = "Unable to create message {}: {}", message, err)]

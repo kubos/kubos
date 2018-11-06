@@ -22,7 +22,7 @@ use std::cell::Cell;
 use std::net::SocketAddr;
 use std::time::Duration;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Message {
     pub channel_id: u32,
     pub name: String,
