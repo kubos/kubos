@@ -36,7 +36,7 @@ fn start_session(channel_proto: ChannelProtocol) -> Result<(), Error> {
 
     channel_proto.send(shell_protocol::messages::spawn::to_cbor(
         channel_id,
-        &"/bin/bash".to_owned(),
+        &"/bin/sh".to_owned(),
         None,
     )?)?;
     run_shell(channel_proto, channel_id)?;
