@@ -607,6 +607,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "kubos-shell-client"
+version = "0.1.0"
+dependencies = [
+ "channel-protocol 0.1.0",
+ "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "shell-protocol 0.1.0",
+]
+
+[[package]]
 name = "kubos-system"
 version = "0.1.0"
 dependencies = [
@@ -1130,16 +1140,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.2.43 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial-core 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "shell-client-rust"
-version = "0.1.0"
-dependencies = [
- "channel-protocol 0.1.0",
- "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "failure 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "shell-protocol 0.1.0",
 ]
 
 [[package]]
