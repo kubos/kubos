@@ -48,7 +48,7 @@ impl DirectUdp {
     }
 
     fn process(&self, message: Value) -> Result<(), String> {
-        let timestamp = serde_json::from_value::<i32>(message["timestamp"].clone()).ok();
+        let timestamp = serde_json::from_value::<f64>(message["timestamp"].clone()).ok();
 
         let subsystem = serde_json::from_value::<String>(message["subsystem"].clone())
             .map_err(|err| format!("Failed to parse subsystem parameter: {}", err))?;

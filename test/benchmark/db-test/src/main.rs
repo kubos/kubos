@@ -41,22 +41,22 @@ fn db_test(config: &Config) {
     let db = Database::new(&db_path);
     db.setup();
 
-    let mut times: Vec<i64> = Vec::new();
+    let mut times: Vec<f64> = Vec::new();
 
     for _ in 0..ITERATIONS {
         let mut rng = thread_rng();
-        let timestamp = rng.gen_range(0, ::std::i32::MAX);
+        let timestamp: f64 = rng.gen_range(0.0, ::std::f64::MAX);
 
         let start = PreciseTime::now();
         if db.insert(timestamp, "db-test", "parameter", "value")
             .is_ok()
         {
-            times.push(start.to(PreciseTime::now()).num_microseconds().unwrap());
+            times.push(start.to(PreciseTime::now()).num_seconds() as f64);
         }
     }
 
-    let num_entries = times.len() as i64;
-    let sum: i64 = times.iter().sum();
+    let num_entries = times.len() as f64;
+    let sum: f64 = times.iter().sum();
 
     let average = sum / num_entries;
 
