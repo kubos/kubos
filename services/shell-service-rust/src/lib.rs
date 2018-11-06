@@ -254,7 +254,14 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                 }
 
                 if !threads.lock().unwrap().contains_key(&channel_id) {
-                    warn!("No sender found for {}", channel_id);
+                    warn!("No session found for {}", channel_id);
+                    let channel_protocol =
+                        ChannelProtocol::new(&host_addr, &remote_addr, shell_protocol::CHUNK_SIZE);
+
+                    channel_protocol.send(shell_protocol::messages::error::to_cbor(
+                        channel_id,
+                        &format!("No session found on channel {}", channel_id),
+                    )?)?;
                     threads.lock().unwrap().remove(&channel_id);
                 }
             }

@@ -26,6 +26,11 @@ pub enum Message {
         code: u32,
         signal: u32,
     },
+    /// This message is sent when an error occurs within the shell protocol
+    Error {
+        channel_id: u32,
+        message: String
+    },
     /// This message is sent to the shell service to send a kill signal to the child process
     Kill {
         channel_id: u32,
@@ -70,6 +75,7 @@ pub enum Message {
 }
 
 pub mod exit;
+pub mod error;
 pub mod kill;
 pub mod list;
 pub mod pid;
@@ -81,6 +87,7 @@ pub mod stdout;
 pub fn parse_message(message: ChannelMessage) -> Result<Message, ProtocolError> {
     match message.name.as_ref() {
         "exit" => Ok(exit::from_cbor(&message)?),
+        "error" => Ok(error::from_cbor(&message)?),
         "kill" => Ok(kill::from_cbor(&message)?),
         "list" => Ok(list::from_cbor(&message)?),
         "pid" => Ok(pid::from_cbor(&message)?),
