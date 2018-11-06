@@ -159,7 +159,12 @@ fn main() -> Result<(), failure::Error> {
                         .short("c")
                         .takes_value(true)
                         .required(true),
-                ).arg(Arg::with_name("signal").short("s").takes_value(true)),
+                ).arg(
+                    Arg::with_name("signal")
+                        .help("Signal to send to shell session")
+                        .short("s")
+                        .takes_value(true),
+                ),
         ).arg(
             Arg::with_name("service_ip")
                 .help("IP address of remote shell service")
