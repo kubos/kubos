@@ -1,6 +1,26 @@
 Kubos Changelog
 ===============
 
+v1.8.0 - Nov 9th 2018
+---------------------
+
+- `The shell service and client have both been rewritten into Rust <https://github.com/kubos/kubos/tree/master/services/shell-service>`__
+- `Updated the applications service's schema to match the styling of the other services <https://docs.kubos.com/latest/app-docs/app-service.html>`__
+- Added cleanup logic when the app service encounters a corrupted app entry
+- `Added the ability to upgrade an application with the applications service <https://docs.kubos.com/latest/app-docs/app-service.html#upgrading>`__
+- `Updated the Rust app API to utilize exit codes <https://docs.kubos.com/latest/rust-docs/kubos_app/index.html>`__
+- `Added Pumpkin MBM2 RTC support <https://docs.kubos.com/master/1.7.1+14/os-docs/working-with-the-mbm2.html#rtc>`__
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Updating telemetry database API to use a double to store the timestamp, rather than a 32-bit integer
+
+Community Contributions:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Updated link descriptions for Kubos Linux release files
+
 v1.7.0 - Oct 12th 2018
 ----------------------
 
@@ -46,7 +66,7 @@ v1.5.0 - Sep 7th 2018
 Bug Fixes:
 ~~~~~~~~~~
 
-- Standardized usage of the Rust failure crate for version 0.1.2 
+- Standardized usage of the Rust failure crate for version 0.1.2
 
 v1.4.0 - July 23 2018
 ---------------------
