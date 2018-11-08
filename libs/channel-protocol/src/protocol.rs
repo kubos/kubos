@@ -22,13 +22,18 @@ use std::cell::Cell;
 use std::net::SocketAddr;
 use std::time::Duration;
 
+/// Channel message structure
 #[derive(Clone, Debug)]
 pub struct Message {
+    /// Channel ID
     pub channel_id: u32,
+    /// Message name
     pub name: String,
+    /// Message payload
     pub payload: Vec<Value>,
 }
 
+/// Channel protocol structure
 pub struct Protocol {
     cbor_proto: CborProtocol,
     remote_addr: Cell<SocketAddr>,
@@ -66,6 +71,12 @@ impl Protocol {
         }
     }
 
+    /// Set new remote address on existing channel procotol structure
+    ///
+    /// # Arguments
+    ///
+    /// * remote - New remote address
+    ///
     pub fn set_remote(&mut self, remote: SocketAddr) -> () {
         self.remote_addr.set(remote);
     }

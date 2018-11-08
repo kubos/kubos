@@ -19,6 +19,7 @@ use cbor_protocol;
 /// Errors which occur when using ChannelProtocol
 #[derive(Debug, Fail)]
 pub enum ProtocolError {
+    /// An error was encountered by serde_cbor
     #[fail(display = "Cbor Error: {}", err)]
     CborError {
         /// The specific CBOR protocol error

@@ -14,6 +14,42 @@
 // limitations under the License.
 //
 
+//! Channel Protocol
+//!
+//! This protocol is used to send and receive cbor-encoded channel based
+//! messages over UDP. Each message consists of three parts: channel ID,
+//! message name, message payload, all contained in a cbor array.
+//!
+//!   { channel_id, name, payload.. }
+//!
+//! The channel ID is typically used to group all messages related to a transaction
+//! or logical action. Any example would be all messages related to uploading
+//! a single file.
+//! The message name is used to determine the type of message.
+//! The message payload contains any other message data.
+//!
+//! # Examples
+//!
+//! ```no_run
+//! use channel_protocol::*;
+//!
+//! let channel_proto = ChannelProtocol::new(
+//!                         &"0.0.0.0:0".to_owned(),
+//!                         &"127.0.0.1:8000".to_owned(),
+//!                         4096);
+//!
+//! let message = vec![0, 1, 1, 2];
+//!
+//! channel_proto.send(message);
+//! match channel_proto.recv_message(None) {
+//!     Ok(message) => println!("Received: {:?}", message),
+//!     Err(e) => eprintln!("Error receiving: {}", e)
+//! }
+//! ```
+
+#![deny(missing_docs)]
+#![deny(warnings)]
+
 extern crate cbor_protocol;
 #[macro_use]
 extern crate failure;
