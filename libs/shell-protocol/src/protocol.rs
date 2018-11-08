@@ -21,14 +21,24 @@ use process::ProcessHandler;
 use std::net::SocketAddr;
 use std::time::Duration;
 
+/// Shell Service Protocol structure
+///
+/// This structure is only intended for usage inside of the
+/// shell service. It is not required for usage by shell clients.
 pub struct Protocol {
-    pub channel_protocol: ChannelProtocol,
-    pub process: Box<ProcessHandler>,
+    channel_protocol: ChannelProtocol,
+    process: Box<ProcessHandler>,
     channel_id: u32,
 }
 
-/// Shell Protocol structure used in the shell service
 impl Protocol {
+    /// Create new instance of shell protocol structure
+    ///
+    /// # Arguments
+    ///
+    /// * channel_protocol - Instance of ChannelProtocol
+    /// * channel_id - Channel ID of shell session
+    /// * process - Instance of ProcessHandler
     pub fn new(
         channel_protocol: ChannelProtocol,
         channel_id: u32,
@@ -126,7 +136,7 @@ impl Protocol {
         }
     }
 
-    pub fn process_message(&mut self, message: ChannelMessage) -> Result<(), ProtocolError> {
+    fn process_message(&mut self, message: ChannelMessage) -> Result<(), ProtocolError> {
         let parsed_message = messages::parse_message(message)?;
 
         match parsed_message {

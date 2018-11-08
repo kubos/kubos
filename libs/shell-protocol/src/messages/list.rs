@@ -47,7 +47,8 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
                             channel.unwrap() as u32,
                             (path.unwrap().to_owned(), pid.unwrap() as u32),
                         )
-                    }).collect::<HashMap<u32, (String, u32)>>(),
+                    })
+                    .collect::<HashMap<u32, (String, u32)>>(),
             )
         }
         _ => {}
