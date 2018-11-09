@@ -43,15 +43,39 @@ fn do_read<R: BufRead>(mut reader: R) -> Result<Option<String>, ProtocolError> {
     }
 }
 
+/// Structure to handle lifetime and communications with child process
 pub struct ProcessHandler {
+    /// Handle to actual child process
     process: Child,
+    /// Buffered timeout reader pointed to stdout pipe
     pub stdout_reader: Option<BufReader<TimeoutReader<ChildStdout>>>,
+    /// Buffered timeout reader pointed to stderr pipe
     pub stderr_reader: Option<BufReader<TimeoutReader<ChildStderr>>>,
-    pub stdin_writer: Option<BufWriter<TimeoutWriter<ChildStdin>>>,
+    /// Buffered timeout writer pointed to stdin pipe
+    stdin_writer: Option<BufWriter<TimeoutWriter<ChildStdin>>>,
 }
 
 impl ProcessHandler {
-    /// Spawn a process and setup stdout/stderr streams
+    /// Spawn a process and setup handler structure
+    ///
+    /// # Arguments
+    ///
+    /// * command - Path to binary to execute
+    /// * args - Optional arguments for binary
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use shell_protocol::*;
+    ///
+    /// let proc = ProcessHandler::spawn(&"/bin/bash".to_owned(), None);
+    /// ```
+    ///
+    /// ```
+    /// use shell_protocol::*;
+    ///
+    /// let proc = ProcessHandler::spawn(&"ls".to_owned(), Some(vec!["-l".to_owned()]));
+    /// ```
     pub fn spawn(
         command: &str,
         args: Option<Vec<String>>,
@@ -109,6 +133,19 @@ impl ProcessHandler {
     /// A return value of `None` indicates the stream is
     /// no longer available and likewise the process
     /// is likely no longer alive.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use shell_protocol::*;
+    ///
+    /// let mut proc = ProcessHandler::spawn(&"ls".to_owned(), None).unwrap();
+    /// match proc.read_stdout() {
+    ///     Ok(Some(output)) => println!("Stdout: {}", output),
+    ///     Ok(None) => println!("Stdout time out"),
+    ///     Err(e) => eprintln!("Stdout err {}", e),
+    /// }
+    /// ```
     pub fn read_stdout(&mut self) -> Result<Option<String>, ProtocolError> {
         match self.stdout_reader {
             Some(ref mut stdout_reader) => Ok(do_read(stdout_reader)?),
@@ -121,6 +158,19 @@ impl ProcessHandler {
     /// A return value of `None` indicates the stream is
     /// no longer available and likewise the process
     /// is likely no longer alive.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use shell_protocol::*;
+    ///
+    /// let mut proc = ProcessHandler::spawn(&"ls".to_owned(), None).unwrap();
+    /// match proc.read_stderr() {
+    ///     Ok(Some(output)) => println!("Stderr: {}", output),
+    ///     Ok(None) => println!("Stderr time out"),
+    ///     Err(e) => eprintln!("Stderr err {}", e),
+    /// }
+    /// ```
     pub fn read_stderr(&mut self) -> Result<Option<String>, ProtocolError> {
         match self.stderr_reader {
             Some(ref mut stderr_reader) => Ok(do_read(stderr_reader)?),
@@ -129,6 +179,23 @@ impl ProcessHandler {
     }
 
     /// Attempt to write to stdin
+    ///
+    /// # Arguments
+    ///
+    /// * data - Slice of bytes to write
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use shell_protocol::*;
+    ///
+    /// let cmd = "ls\n".as_bytes();
+    /// let mut proc = ProcessHandler::spawn(&"/bin/bash".to_owned(), None).unwrap();
+    /// match proc.write_stdin(&cmd) {
+    ///     Ok(()) => println!("Stdin write success"),
+    ///     Err(e) => eprintln!("Stdin err {}", e),
+    /// }
+    /// ```
     pub fn write_stdin(&mut self, data: &[u8]) -> Result<(), ProtocolError> {
         match self.stdin_writer {
             Some(ref mut stdin_writer) => {
@@ -138,7 +205,12 @@ impl ProcessHandler {
                         action: "write to stdin".to_owned(),
                         err,
                     })?;
-                stdin_writer.flush();
+                stdin_writer
+                    .flush()
+                    .map_err(|err| ProtocolError::ProcesssError {
+                        action: "flush stdin".to_owned(),
+                        err,
+                    })?;
                 Ok(())
             }
             None => Ok(()),
@@ -146,6 +218,18 @@ impl ProcessHandler {
     }
 
     /// Close process' stdin pipe
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use shell_protocol::*;
+    ///
+    /// let mut proc = ProcessHandler::spawn(&"/bin/bash".to_owned(), None).unwrap();
+    /// match proc.close_stdin() {
+    ///     Ok(()) => println!("Stdin closed"),
+    ///     Err(e) => eprintln!("Stdin close err {}", e),
+    /// }
+    /// ```
     pub fn close_stdin(&mut self) -> Result<(), ProtocolError> {
         match self.stdin_writer {
             Some(ref mut stdin_writer) => {
@@ -158,12 +242,34 @@ impl ProcessHandler {
     }
 
     /// Retrieve ID of process
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use shell_protocol::*;
+    ///
+    /// let proc = ProcessHandler::spawn(&"/bin/bash".to_owned(), None).unwrap();
+    /// let pid = proc.id();
+    /// ```
     pub fn id(&self) -> u32 {
         self.process.id()
     }
 
     /// Check to see if a process has exited and if the exit
     /// status is available
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use shell_protocol::*;
+    ///
+    /// let mut proc = ProcessHandler::spawn(&"/bin/bash".to_owned(), None).unwrap();
+    /// match proc.status() {
+    ///     Ok(Some((code, signal))) => println!("Process has exited: {}, {}", code, signal),
+    ///     Ok(None) => println!("Process has not exited"),
+    ///     Err(e) => eprintln!("Error getting process status {}", e)
+    /// }
+    /// ```
     pub fn status(&mut self) -> Result<Option<(u32, u32)>, ProtocolError> {
         match self.process.try_wait() {
             Ok(Some(status)) => Ok(Some((
@@ -179,6 +285,22 @@ impl ProcessHandler {
     }
 
     /// Send killing signal to process
+    ///
+    /// # Arguments
+    ///
+    /// * signal - Optional signal to send to process
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use shell_protocol::*;
+    ///
+    /// let mut proc = ProcessHandler::spawn(&"/bin/bash".to_owned(), None).unwrap();
+    /// match proc.kill(None) {
+    ///     Ok(()) => println!("Process killed"),
+    ///     Err(e) => eprintln!("Error killing process: {}", e),
+    /// }
+    /// ```
     pub fn kill(&mut self, signal: Option<u32>) -> Result<(), ProtocolError> {
         let pid = Pid::from_raw(self.process.id() as pid_t);
         let sig = signal::Signal::from_c_int(signal.unwrap_or(9) as i32)

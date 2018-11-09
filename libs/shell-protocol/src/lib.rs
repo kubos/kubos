@@ -14,6 +14,14 @@
 // limitations under the License.
 //
 
+#![deny(missing_docs)]
+#![deny(warnings)]
+
+//! Kubos Shell Protocol
+//!
+//! This crate contains structures and functions used by the Kubos shell service
+//! and shell client to send and receive messages using the shell protocol.
+
 extern crate cbor_protocol;
 extern crate channel_protocol;
 #[macro_use]
@@ -26,8 +34,12 @@ extern crate rand;
 extern crate serde_cbor;
 extern crate timeout_readwrite;
 
+/// Shell protocol errors
 pub mod error;
+
+/// Shell protocol messages
 pub mod messages;
+
 mod process;
 mod protocol;
 

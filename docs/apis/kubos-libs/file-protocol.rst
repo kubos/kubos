@@ -2,7 +2,7 @@ File Transfer Protocol
 ======================
 
 The file transfer protocol is implemented by both the
-:doc:`file transfer service <file>` and clients interacting
+:doc:`file transfer service <../../services/file>` and clients interacting
 with the service. This protocol uses a content-addressable
 methodology similar to Git for storing and chunking files.
 This document covers the content-addressable storage, all
@@ -17,11 +17,11 @@ APIs
 
  .. |file-protocol| raw:: html
  
-    <a href="../rust-docs/file_protocol/index.html" target="_blank">File Protocol</a>
+    <a href="../../rust-docs/file_protocol/index.html" target="_blank">File Protocol</a>
     
  .. |cbor-protocol| raw:: html
  
-    <a href="../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
+    <a href="../../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
 
 Content-Addressable Storage
 ---------------------------

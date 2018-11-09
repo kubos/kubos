@@ -16,9 +16,9 @@
 
 use cbor_protocol;
 use channel_protocol;
+use nix;
 use serde_cbor;
 use std::io;
-use nix;
 
 /// Errors which occur when using ShellProtocol
 #[derive(Debug, Fail)]
@@ -44,7 +44,9 @@ pub enum ProtocolError {
     /// An error was encountered when creating a message
     #[fail(display = "Unable to create message {}: {}", message, err)]
     MessageCreationError {
+        /// Message which was being created
         message: String,
+        /// Underlying serde_cbor error
         err: serde_cbor::error::Error,
     },
     /// A general error was encountered when parsing a message
@@ -55,7 +57,12 @@ pub enum ProtocolError {
     },
     /// A general error was raised by the process
     #[fail(display = "Process error when {}: {}", action, err)]
-    ProcesssError { action: String, err: io::Error },
+    ProcesssError {
+        /// Action which caused error
+        action: String,
+        /// Underlying error
+        err: io::Error,
+    },
     /// A timeout occurred when receiving data
     #[fail(display = "A receive timeout was encountered")]
     ReceiveTimeout,
