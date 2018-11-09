@@ -13,7 +13,7 @@ members = [
 "apis/rust-radio-api",
 "apis/system-api",
 "apis/telemetry-db-api",
-"clients/file-client",
+"clients/kubos-file-client",
 "clients/kubos-shell-client",
 "examples/rust-c-service/extern-lib",
 "examples/rust-c-service/service",
