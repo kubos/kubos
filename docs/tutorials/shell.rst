@@ -115,7 +115,7 @@ client's ``join`` and ``kill`` commands.
 The process path is the path to the executable running in the session.
 The process ID is the PID of the running executable on the remote system.
 
-If no sessions, exist then the output from the client will look like this:
+If no sessions exist, then the output from the client will look like this:
 
 .. code-block:: none
 
