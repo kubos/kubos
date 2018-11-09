@@ -6,7 +6,7 @@ operations center and the OBC. It may also be used to transfer files
 between a developer's system and the OBC when in a development environment.
 
 The service provides file transfer functionality by implementing the
-:doc:`file protocol <file-protocol>`. The file protocol is UDP-based
+:doc:`file protocol <../apis/kubos-libs/file-protocol>`. The file protocol is UDP-based
 which means a connection is required between the OBC and ground segment
 capable of transferring UDP packets. This should be established using
 a standard network connection.

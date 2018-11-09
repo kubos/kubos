@@ -20,7 +20,7 @@ This tutorial is written under the assumption that you are working inside of the
 Kubos SDK. The shell client can be easily run from inside of the SDK with
 the follow command::
 
-   ``$ kubos-shell-client``
+  $ kubos-shell-client
 
 Syntax
 ------
@@ -100,7 +100,7 @@ started a session in the previous step:
 .. code-block:: none
 
    Starting shell client -> 10.0.2.20:8010
-   Listing shell sessions
+   Fetching existing shell sessions:
        672612	{ path = '/bin/bash', pid = 24939 }
 
 
@@ -115,7 +115,7 @@ client's ``join`` and ``kill`` commands.
 The process path is the path to the executable running in the session.
 The process ID is the PID of the running executable on the remote system.
 
-If no sessions, exist then the output from the client will look like this:
+If no sessions exist, then the output from the client will look like this:
 
 .. code-block:: none
 

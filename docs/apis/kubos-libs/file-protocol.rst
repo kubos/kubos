@@ -17,11 +17,11 @@ APIs
 
  .. |file-protocol| raw:: html
  
-    <a href="../rust-docs/file_protocol/index.html" target="_blank">File Protocol</a>
+    <a href="../../rust-docs/file_protocol/index.html" target="_blank">File Protocol</a>
     
  .. |cbor-protocol| raw:: html
  
-    <a href="../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
+    <a href="../../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
 
 Content-Addressable Storage
 ---------------------------

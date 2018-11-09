@@ -21,15 +21,15 @@ APIs
 
  .. |shell-protocol| raw:: html
  
-    <a href="../rust-docs/shell_protocol/index.html" target="_blank">Shell Protocol</a>
+    <a href="../../rust-docs/shell_protocol/index.html" target="_blank">Shell Protocol</a>
 
  .. |cbor-protocol| raw:: html
  
-    <a href="../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
+    <a href="../../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
     
  .. |channel-protocol| raw:: html
  
-    <a href="../rust-docs/channel_protocol/index.html" target="_blank">Channel Protocol</a>
+    <a href="../../rust-docs/channel_protocol/index.html" target="_blank">Channel Protocol</a>
 
 Messages
 --------
