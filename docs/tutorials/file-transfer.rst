@@ -16,38 +16,17 @@ Pre-Requisites
 - Have the file transfer service running on a target OBC (this happens by default when running KubOS)
 - Windows users: :ref:`Make sure Windows is setup to allow UDP packets from the OBC <windows-udp>`
 
-Setup
------
-
 We'll be using the `file transfer client <https://github.com/kubos/kubos/tree/master/clients/file-client>`__
-in order to communicate with the file transfer service on our OBC.
-
-From your instance of the Kubos SDK, clone the kubos repo and then navigate to the client directory::
-
-    $ git clone https://github.com/kubos/kubos
-    Cloning into 'kubos'...
-    remote: Enumerating objects: 6, done.
-    remote: Counting objects: 100% (6/6), done.
-    remote: Compressing objects: 100% (6/6), done.
-    remote: Total 52659 (delta 0), reused 3 (delta 0), pack-reused 52653
-    Receiving objects: 100% (52659/52659), 17.71 MiB | 1.40 MiB/s, done.
-    Resolving deltas: 100% (32375/32375), done.
-    Checking connectivity... done.
-    
-    $ cd kubos/clients/file-client
-    
-All file transfers will be initiated from this directory.
-
-We'll go ahead and build the client so that it runs quickly going forward::
-
-    $ cargo build
+in order to communicate with the file transfer service on our OBC, which is automatically included
+with the Kubos SDK (as of v1.8.0).
+As a result, this tutorial assumes that all commands will be run from within an instance of the SDK.
 
 Syntax
 ------
 
 The file transfer client has the following command syntax::
 
-    (upload | download) source-file [target-file] [options]
+    kubos-file-client (upload | download) source-file [target-file] [options]
     
 Required arguments:
 
@@ -82,7 +61,7 @@ on. By default, this is port 8008.
 
 Our transfer command should look like this::
 
-    $ cargo run -- upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py -r 10.0.2.20 -p 8008
+    $ kubos-file-client upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py -r 10.0.2.20 -p 8008
     
 The output from the client should look like this:
 
@@ -117,7 +96,7 @@ Receiving a File from an OBC
 Next, we'll request that the OBC send us the log file that was created by running the on-command
 logic in our mission application::
 
-    $ cargo run -- download /home/kubos/oncommand-output -r 10.0.2.20 -p 8008
+    $ kubos-file-client download /home/kubos/oncommand-output -r 10.0.2.20 -p 8008
     
 We're not specifying a destination file, which will result in the transferred file being saved as
 `oncommand-output` in our current directory.
