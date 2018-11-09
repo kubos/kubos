@@ -12,6 +12,25 @@ and any additional values will be parameters for the ``command``.
 
     ``{ channel_id, command, parameters.. }``
 
+APIs
+----
+
+- |shell-protocol|
+- |cbor-protocol|
+- |channel-protocol|
+
+ .. |shell-protocol| raw:: html
+ 
+    <a href="../rust-docs/shell_protocol/index.html" target="_blank">Shell Protocol</a>
+
+ .. |cbor-protocol| raw:: html
+ 
+    <a href="../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
+    
+ .. |channel-protocol| raw:: html
+ 
+    <a href="../rust-docs/channel_protocol/index.html" target="_blank">Channel Protocol</a>
+
 Messages
 --------
 
@@ -187,39 +206,6 @@ Example list of processes:
 
     ``{ 16, 'list', { [12] = { path = 'sh', pid = 45 }, [14] = { path = 'sh', pid = 50 } } }``
 
-Future Messages
----------------
-
-These messages may be implemented in the shell protocol in the future,
-but are not implemented as of KubOS release v1.8.0.
-
-Spawn Process
-~~~~~~~~~~~~~
-
-The spawn process is currently implemented, however the following
-optional arguments are not currently implemented:
-
-    - ``pty`` - A boolean specifying whether a new pty is needed
-    - ``env`` - An array of environment variable entries in the form ``"KEY=val"``
-    - ``cwd`` - The current working directory of the child process
-    - ``uid`` - The uid of the process
-    - ``gid`` - The gid of the process
-    - ``detached`` - Determines if the child process should be detached from the service
-
-Resize Terminal
-~~~~~~~~~~~~~~~
-
-This message is sent to the shell service to resize the pseudo
-terminal of a child process, if one exists. It contains a
-channel ID, the string 'resize', the desired number of columns
-and the desired number of rows.
-
-    ``{ channel_id, 'resize', columns, rows }``
-
-Example message - Resizing a pseudo terminal to 10x10:
-
-    ``{ 1, 'resize', 10, 10 }``
-
 
 Example Usages
 --------------
@@ -327,3 +313,35 @@ sent via ``stdout`` or ``stderr`` and send the ``exit`` message.
     Server: { 55, 'stdout', 'logout\r\n' }
     Server: { 55, 'exit', 0, 0 }
 
+Future Messages
+---------------
+
+These messages may be implemented in the shell protocol in the future,
+but are not implemented as of KubOS release v1.8.0.
+
+Spawn Process
+~~~~~~~~~~~~~
+
+The spawn process is currently implemented, however the following
+optional arguments are not currently implemented:
+
+    - ``pty`` - A boolean specifying whether a new pty is needed
+    - ``env`` - An array of environment variable entries in the form ``"KEY=val"``
+    - ``cwd`` - The current working directory of the child process
+    - ``uid`` - The uid of the process
+    - ``gid`` - The gid of the process
+    - ``detached`` - Determines if the child process should be detached from the service
+
+Resize Terminal
+~~~~~~~~~~~~~~~
+
+This message is sent to the shell service to resize the pseudo
+terminal of a child process, if one exists. It contains a
+channel ID, the string 'resize', the desired number of columns
+and the desired number of rows.
+
+    ``{ channel_id, 'resize', columns, rows }``
+
+Example message - Resizing a pseudo terminal to 10x10:
+
+    ``{ 1, 'resize', 10, 10 }``
