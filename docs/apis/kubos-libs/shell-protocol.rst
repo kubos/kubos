@@ -127,9 +127,9 @@ the string 'stdout', and a string of the stdout data.
 
     ``{ channel_id, 'stdout', data }``
 
-Example message - ``ls`` producing directory output of `shell-client`:
+Example message - ``ls`` producing directory output of `kubos-shell-client`:
 
-    ``{ 12, 'stdout', 'deps\ninit.lua\nlibs\nmain.lua\npackage.lua\nREADME.md\ntests\n' }``
+    ``{ 12, 'stdout', 'Cargo.toml\nsrc\n' }``
 
 Stdout Closed
 ~~~~~~~~~~~~~

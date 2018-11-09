@@ -130,7 +130,6 @@ Space/Ground Communication
 
 The communication service is responsible for maintaining the space/ground link.
 This service provides UDP passthrough so the details of the radio link (packetization, the encryption, etc.) are transparent to the onboard services.
-See the :doc:`service documentation <services/communication>` for more details of how this is accomplished.
 
 The usage of this UDP passthrough over the space/ground link is governed by two major use cases: nominal operations and error recovery.
 

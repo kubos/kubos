@@ -8,8 +8,8 @@ between a developer's system and the OBC when in a development environment.
 The service provides file transfer functionality by implementing the
 :doc:`file protocol <../apis/kubos-libs/file-protocol>`. The file protocol is UDP-based
 which means a connection is required between the OBC and ground segment
-capable of transferring UDP packets. This could be established using the
-:doc:`communication service <communication>` or a standard network connection.
+capable of transferring UDP packets. This should be established using
+a standard network connection.
 
 Overview
 --------

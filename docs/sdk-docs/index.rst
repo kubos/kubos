@@ -57,7 +57,6 @@ This documentation section contains the various guides related to using the Kubo
     - :doc:`sdk-reference` - The full list of Kubos CLI commands
     - :doc:`sdk-rust` - How to develop and run Kubos projects using Rust
     - :doc:`sdk-python` - How to develop and run Kubos projects using Python
-    - :doc:`sdk-lua` - How to use Kubos projects written in Lua
     - :doc:`windows-dev-environment` - How to develop Kubos projects from a Windows-based host computer
     - :doc:`sdk-upgrading` - How to upgrade to the latest version of the Kubos SDK
 
@@ -71,6 +70,5 @@ This documentation section contains the various guides related to using the Kubo
     sdk-reference
     sdk-rust
     sdk-python
-    sdk-lua
     windows-dev-environment
     Upgrading Kubos SDK <sdk-upgrading>
