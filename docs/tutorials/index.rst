@@ -77,7 +77,6 @@ There is no coding required for these actions, however some scripting may used f
     Transferring Files <file-transfer>
     Querying the System <querying-telemetry>
     Creating a Shell Connection <shell>
-    Communicating Over a Radio <comms>
     
 Other Resources
 ---------------
