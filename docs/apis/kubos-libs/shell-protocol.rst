@@ -2,7 +2,7 @@ Shell Protocol
 ==============
 
 The shell protocol is implemented by both the
-:doc:`shell service <shell>` and any clients interfacing
+:doc:`shell service <../../services/shell>` and any clients interfacing
 with the service.
 
 All messages in the shell protocol are encoded as `CBOR` arrays
@@ -12,8 +12,27 @@ and any additional values will be parameters for the ``command``.
 
     ``{ channel_id, command, parameters.. }``
 
+APIs
+----
+
+- |shell-protocol|
+- |cbor-protocol|
+- |channel-protocol|
+
+ .. |shell-protocol| raw:: html
+ 
+    <a href="../../rust-docs/shell_protocol/index.html" target="_blank">Shell Protocol</a>
+
+ .. |cbor-protocol| raw:: html
+ 
+    <a href="../../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
+    
+ .. |channel-protocol| raw:: html
+ 
+    <a href="../../rust-docs/channel_protocol/index.html" target="_blank">Channel Protocol</a>
+
 Messages
---------------
+--------
 
 The primary purpose of the shell protocol is to allow the
 spawning and controlling of remote processes. These messages
@@ -30,20 +49,14 @@ absolute path to a binary or something in the system ``$PATH``.
 
     ``{ channel_id, 'spawn', command, options.. }``
 
-The possible values in the ``options``
-argument are as follows:
+There is currently only one available option for the ``options``
+argument:
 
     - ``args`` - An array of arguments to pass to the child process
-    - ``pty`` - A boolean specifying whether a new pty is needed
-    - ``env`` - An array of environment variable entries in the form ``"KEY=val"``
-    - ``cwd`` - The current working directory of the child process
-    - ``uid`` - The uid of the process
-    - ``gid`` - The gid of the process
-    - ``detached`` - Determines if the child process should be detached from the service
 
-Example of starting a long running shell:
+Example of starting a shell:
 
-    ``{ 1, 'spawn', 'sh', { detached = true, pty = true, args = { '-l' } } }``
+    ``{ 1, 'spawn', 'sh', { args = { '-l' } } }``
 
 Write to Stdin
 ~~~~~~~~~~~~~~
@@ -92,20 +105,6 @@ Send `SIGKILL` to a child process:
 
     ``{ channel_id, 'kill', 9 }``
 
-Resize Terminal
-~~~~~~~~~~~~~~~
-
-This message is sent to the shell service to resize the pseudo
-terminal of a child process, if one exists. It contains a
-channel ID, the string 'resize', the desired number of columns
-and the desired number of rows.
-
-    ``{ channel_id, 'resize', columns, rows }``
-
-Example message - Resizing a pseudo terminal to 10x10:
-
-    ``{ 1, 'resize', 10, 10 }``
-
 Process Created
 ~~~~~~~~~~~~~~~
 
@@ -128,9 +127,9 @@ the string 'stdout', and a string of the stdout data.
 
     ``{ channel_id, 'stdout', data }``
 
-Example message - ``ls`` producing directory output of `shell-client`:
+Example message - ``ls`` producing directory output of `kubos-shell-client`:
 
-    ``{ 12, 'stdout', 'deps\ninit.lua\nlibs\nmain.lua\npackage.lua\nREADME.md\ntests\n' }``
+    ``{ 12, 'stdout', 'Cargo.toml\nsrc\n' }``
 
 Stdout Closed
 ~~~~~~~~~~~~~
@@ -314,3 +313,35 @@ sent via ``stdout`` or ``stderr`` and send the ``exit`` message.
     Server: { 55, 'stdout', 'logout\r\n' }
     Server: { 55, 'exit', 0, 0 }
 
+Future Messages
+---------------
+
+These messages may be implemented in the shell protocol in the future,
+but are not implemented as of KubOS release v1.8.0.
+
+Spawn Process
+~~~~~~~~~~~~~
+
+The spawn process is currently implemented, however the following
+optional arguments are not currently implemented:
+
+    - ``pty`` - A boolean specifying whether a new pty is needed
+    - ``env`` - An array of environment variable entries in the form ``"KEY=val"``
+    - ``cwd`` - The current working directory of the child process
+    - ``uid`` - The uid of the process
+    - ``gid`` - The gid of the process
+    - ``detached`` - Determines if the child process should be detached from the service
+
+Resize Terminal
+~~~~~~~~~~~~~~~
+
+This message is sent to the shell service to resize the pseudo
+terminal of a child process, if one exists. It contains a
+channel ID, the string 'resize', the desired number of columns
+and the desired number of rows.
+
+    ``{ channel_id, 'resize', columns, rows }``
+
+Example message - Resizing a pseudo terminal to 10x10:
+
+    ``{ 1, 'resize', 10, 10 }``

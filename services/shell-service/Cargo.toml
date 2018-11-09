@@ -1,5 +1,5 @@
 [package]
-name = "shell-service-rust"
+name = "shell-service"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 

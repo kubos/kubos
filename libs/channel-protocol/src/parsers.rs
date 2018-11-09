@@ -35,7 +35,8 @@ pub fn parse_channel_id(message: &Value) -> Result<u32, ProtocolError> {
         .next()
         .ok_or(ProtocolError::MessageParseError {
             err: "No contents".to_owned(),
-        })?.to_owned();
+        })?
+        .to_owned();
 
     if let Value::U64(channel_id) = first_param {
         Ok(channel_id as u32)
@@ -46,6 +47,7 @@ pub fn parse_channel_id(message: &Value) -> Result<u32, ProtocolError> {
     }
 }
 
+/// Parses raw cbor message into ChannelMessage
 pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
     let data = match message {
         Value::Array(val) => val.to_owned(),
@@ -70,7 +72,8 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
                 err: "No message name found".to_owned(),
             })
         }
-    }.to_owned();
+    }
+    .to_owned();
     Ok(Message {
         channel_id: channel_id,
         name: name,

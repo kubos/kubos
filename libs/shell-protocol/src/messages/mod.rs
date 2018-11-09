@@ -19,37 +19,56 @@ use error::ProtocolError;
 use serde_cbor::Value;
 use std::collections::HashMap;
 
+/// Messages available in shell protocol
 #[derive(Debug, Eq, PartialEq)]
 pub enum Message {
+    /// This message is sent by the shell service when a process exits
     Exit {
+        /// Channel ID of shell session
         channel_id: u32,
+        /// Exit code
         code: u32,
+        /// Exit signal
         signal: u32,
     },
     /// This message is sent when an error occurs within the shell protocol
     Error {
+        /// Channel ID of shell session
         channel_id: u32,
-        message: String
+        /// Error condition encountered
+        message: String,
     },
     /// This message is sent to the shell service to send a kill signal to the child process
     Kill {
+        /// Channel ID of shell session
         channel_id: u32,
+        /// Optional signal to use. Default is SIGKILL
         signal: Option<u32>,
     },
     /// This message is used to request and respond with the lists of processes
     /// currently running under the shell service.
     List {
+        /// Channel ID of shell session
         channel_id: u32,
+        /// Optional list of processes. No list is sent when
+        /// a request is sent.
         process_list: Option<HashMap<u32, (String, u32)>>,
     },
+    /// This message is sent by the shell service after a process is spawned
+    /// to indicate the process' PID
     Pid {
+        /// Channel ID of shell session
         channel_id: u32,
+        /// PID of remote process
         pid: u32,
     },
     /// This message is sent to the shell service to request a child process to be spawned.
     Spawn {
+        /// Channel ID of shell session
         channel_id: u32,
+        /// Process command to spawn
         command: String,
+        /// Optional arguments to pass into command when spawning
         args: Option<Vec<String>>,
         // TODO: Add these options:
         // - pty - boolean specifying need for a pty
@@ -59,31 +78,52 @@ pub enum Message {
         // - gid - gid of processs
         // - detached - boolean specifying if child process should be detached
     },
-    /// This message is sent from the shell service when a process has produced data via stdout.
+    /// This message is sent by the shell service when a process has produced stdout data.
+    /// The shell service will send this message with no data when the stdout pipe is closed.
     Stdout {
+        /// Channel ID of shell session
         channel_id: u32,
+        /// Optional stdout data
         data: Option<String>,
     },
+    /// This message is sent by the shell service when a process has produced stderr data.
+    /// The shell service will send this message with no data when the stderr pipe is closed.
     Stderr {
+        /// Channel ID of shell session
         channel_id: u32,
+        /// Optional stdout data
         data: Option<String>,
     },
+    /// This message is sent by the shell client with stdin for a shell process.
+    /// If sent without any data the shell service will close the stdin pipe.
     Stdin {
+        /// Channel ID of shell session
         channel_id: u32,
+        /// Optional stdin data
         data: Option<String>,
     },
 }
 
-pub mod exit;
+/// Helper functions for Message::Error
 pub mod error;
+/// Helper functions for Message::Exit
+pub mod exit;
+/// Helper functions for Message::Kill
 pub mod kill;
+/// Helper functions for Message::List
 pub mod list;
+/// Helper functions for Message::Pid
 pub mod pid;
+/// Helper functions for Message::Spawn
 pub mod spawn;
+/// Helper functions for Message::Stderr
 pub mod stderr;
+/// Helper functions for Message::Stdin
 pub mod stdin;
+/// Helper functions for Message::Stdout
 pub mod stdout;
 
+/// Parse a ChannelMessage into a ShellMessage
 pub fn parse_message(message: ChannelMessage) -> Result<Message, ProtocolError> {
     match message.name.as_ref() {
         "exit" => Ok(exit::from_cbor(&message)?),

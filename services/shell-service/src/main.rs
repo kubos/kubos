@@ -21,11 +21,11 @@ extern crate kubos_system;
 #[macro_use]
 extern crate log;
 extern crate shell_protocol;
-extern crate shell_service_rust;
+extern crate shell_service;
 extern crate simplelog;
 
 use kubos_system::Config as ServiceConfig;
-use shell_service_rust::*;
+use shell_service::*;
 use simplelog::*;
 use std::fs::File;
 
