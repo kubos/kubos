@@ -8,8 +8,8 @@ system and the OBC when in a development or testing environment.
 The shell service provides shell functionality by implementing the
 :doc:`shell protocol <../../apis/kubos-libs/shell-protocol>`. The shell protocol is UDP-based
 which means a connection is required between the OBC and ground segment
-capable of transferring UDP packets. This could be established using the
-:doc:`communication service <communication>` or a standard network connection.
+capable of transferring UDP packets. This should be established using
+a standard network connection.
 
 Configuration
 -------------
