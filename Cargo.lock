@@ -1159,7 +1159,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "shell-service-rust"
+name = "shell-service"
 version = "0.1.0"
 dependencies = [
  "cbor-protocol 0.1.0",
