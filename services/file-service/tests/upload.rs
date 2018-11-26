@@ -397,7 +397,7 @@ fn upload_single_after_bad_input() {
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7007;
 
-    let contents = "upload_single".as_bytes();
+    let contents = "upload_single_after_bad_input".as_bytes();
 
     create_test_file(&source, &contents);
 
