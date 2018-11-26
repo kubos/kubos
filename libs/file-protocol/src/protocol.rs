@@ -538,7 +538,12 @@ impl Protocol {
                     }
                     State::Holding { count, prev_state } => {
                         if count > self.config.hold_count {
-                            return Ok(());
+                            match prev_state.as_ref() {
+                                State::Holding { .. } => return Ok(()),
+                                _other => {
+                                    return Err(ProtocolError::ReceiveTimeout);
+                                }
+                            }
                         } else {
                             state = State::Holding {
                                 count: count + 1,
