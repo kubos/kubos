@@ -189,9 +189,21 @@ pub fn parse_success_receive(
     mut pieces: Iter<Value>,
 ) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::Bool(true)) = pieces.next() {
-        // Good - { channel_id, true, ...values }
-        if let None = pieces.next() {
-            return Ok(Some(Message::SuccessReceive(channel_id)));
+        // Good - { channel_id, true, hash}
+        if let Some(piece) = pieces.next() {
+            let hash = match piece {
+                Value::String(val) => val,
+                _ => {
+                    return Err(ProtocolError::InvalidParam(
+                        "success_receive".to_owned(),
+                        "hash".to_owned(),
+                    ))
+                }
+            };
+
+            if let None = pieces.next() {
+                return Ok(Some(Message::SuccessReceive(channel_id, hash.to_owned())));
+            }
         }
     }
 

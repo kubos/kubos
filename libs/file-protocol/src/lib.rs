@@ -130,7 +130,7 @@ pub enum Message {
     /// (Client Only) Message requesting the recipient to transmit the specified file
     ReqTransmit(u32, String),
     /// (Server Only) Recipient has successfully processed a request to receive a file
-    SuccessReceive(u32),
+    SuccessReceive(u32, String),
     /// (Server Only) Recipient has successfully prepared to transmit a file
     SuccessTransmit(u32, String, u32, Option<u32>),
     /// (Server Only) The transmit or receive request has failed to be completed

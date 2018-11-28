@@ -390,7 +390,7 @@ impl Protocol {
     ) -> Result<(), ProtocolError> {
         match storage::finalize_file(&self.config.storage_prefix, hash, target_path, mode) {
             Ok(_) => {
-                self.send(messages::operation_success(channel_id)?)?;
+                self.send(messages::operation_success(channel_id, hash)?)?;
                 storage::delete_file(&self.config.storage_prefix, hash)?;
                 return Ok(());
             }
@@ -734,9 +734,10 @@ impl Protocol {
                             }
                         }
                     }
-                    Message::SuccessReceive(channel_id) => {
+                    Message::SuccessReceive(channel_id, hash) => {
                         info!("<- {{ {}, true }}", channel_id);
                         new_state = State::Done;
+                        storage::delete_file(&self.config.storage_prefix, hash)?;
                     }
                     Message::SuccessTransmit(channel_id, hash, num_chunks, mode) => {
                         match mode {
