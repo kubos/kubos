@@ -287,23 +287,26 @@ UART
 
 The Pumpkin MBM2 has 5 UART ports available for use in varying capacities:
 
-+--------------+--------+--------+---------+---------+
-| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
-+==============+========+========+=========+=========+
-| /dev/ttyS1   | H1.18  | H1.17  | H1.10   | H1.9    |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS2   | H1.8   | H1.7   |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS3   | H1.5   |        |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS4   | H1.16  | H1.15  |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS5   | H1.20  | H1.19  | H1.12   | H1.11   |
-+--------------+--------+--------+---------+---------+
++-------------------+--------+--------+---------+---------+
+| Linux Device      | TX Pin | RX Pin | RTS Pin | CTS Pin |
++===================+========+========+=========+=========+
+| /dev/ttyS1        | H1.18  | H1.17  | H1.10   | H1.9    |
++-------------------+--------+--------+---------+---------+
+| /dev/ttyS2        | H1.8   | H1.7   |         |         |
++-------------------+--------+--------+---------+---------+
+| /dev/ttyS3        | H1.5   |        |         |         |
++-------------------+--------+--------+---------+---------+
+| /dev/ttyS4        | H1.16  | H1.15  |         |         |
++-------------------+--------+--------+---------+---------+
+| /dev/ttyS5 (SLIP) | H1.20  | H1.19  | H1.12   | H1.11   |
++-------------------+--------+--------+---------+---------+
 
 Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
 
 `A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
+
+The ``/dev/ttyS5`` device has be preconfigured to be used for SLIP connections.
+Please refer to the :ref:`SLIP instructions <slip>` for more information.
 
 User Data Partitions
 --------------------
