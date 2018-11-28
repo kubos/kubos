@@ -391,6 +391,7 @@ impl Protocol {
         match storage::finalize_file(&self.config.storage_prefix, hash, target_path, mode) {
             Ok(_) => {
                 self.send(messages::operation_success(channel_id)?)?;
+                storage::delete_file(&self.config.storage_prefix, hash)?;
                 return Ok(());
             }
             Err(e) => {
