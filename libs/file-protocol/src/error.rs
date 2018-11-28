@@ -40,11 +40,7 @@ pub enum ProtocolError {
     #[fail(display = "File hash mismatch")]
     HashMismatch,
     /// An invalid value was found when parsing a message
-    #[fail(
-        display = "Unable to parse {} message: Invalid {} param",
-        _0,
-        _1
-    )]
+    #[fail(display = "Unable to parse {} message: Invalid {} param", _0, _1)]
     InvalidParam(String, String),
     /// An error was encountered when creating a message
     #[fail(display = "Failed to create {} message: {}", message, err)]
@@ -92,8 +88,7 @@ pub enum ProtocolError {
     /// An error was encountered when transmitting
     #[fail(
         display = "Transmission failure on channel {}: {}",
-        channel_id,
-        error_message
+        channel_id, error_message
     )]
     TransmissionError {
         /// Channel where the error occurred

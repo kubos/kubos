@@ -42,7 +42,8 @@ macro_rules! service_new {
                 "#,
                     $chunk_size, $port
                 ),
-            )).unwrap();
+            ))
+            .unwrap();
         });
 
         thread::sleep(Duration::new(1, 0));

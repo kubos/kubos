@@ -36,7 +36,8 @@ pub fn parse_channel_id(message: &Value) -> Result<u32, ProtocolError> {
         .next()
         .ok_or(ProtocolError::MessageParseError {
             err: "No contents".to_owned(),
-        })?.to_owned();
+        })?
+        .to_owned();
 
     if let Value::U64(channel_id) = first_param {
         Ok(channel_id as u32)
@@ -63,7 +64,8 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
         .next()
         .ok_or(ProtocolError::MessageParseError {
             err: "No contents".to_owned(),
-        })?.to_owned();
+        })?
+        .to_owned();
 
     if let Value::U64(channel) = channel_param {
         let channel_id = channel as u32;

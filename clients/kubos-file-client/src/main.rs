@@ -94,8 +94,9 @@ fn download(
 
 fn main() {
     CombinedLogger::init(vec![
-        TermLogger::new(LevelFilter::Info, Config::default()).unwrap(),
-    ]).unwrap();
+        TermLogger::new(LevelFilter::Info, Config::default()).unwrap()
+    ])
+    .unwrap();
 
     info!("Starting file transfer client");
 
@@ -106,39 +107,46 @@ fn main() {
                 .required(true)
                 .possible_values(&["upload", "download"])
                 .case_insensitive(true),
-        ).arg(Arg::with_name("source_file").index(2).required(true))
+        )
+        .arg(Arg::with_name("source_file").index(2).required(true))
         .arg(Arg::with_name("target_file").index(3))
         .arg(
             Arg::with_name("host_ip")
                 .short("h")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("remote_ip")
                 .short("-r")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("remote_port")
                 .short("-p")
                 .takes_value(true)
                 .default_value("7000"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("storage_prefix")
                 .short("-s")
                 .takes_value(true)
                 .default_value("file-storage"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("chunk_size")
                 .short("-c")
                 .takes_value(true)
                 .default_value("4096"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("hold_count")
                 .short("-t")
                 .takes_value(true)
                 .default_value("6"),
-        ).get_matches();
+        )
+        .get_matches();
 
     // Get upload vs download (required)
     let command = args.value_of("operation").unwrap();
