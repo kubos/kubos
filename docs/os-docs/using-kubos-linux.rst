@@ -113,6 +113,24 @@ to do the following:
     - CTS -> RTS (Might not be available on all boards/UART ports)
     - Vcc -> ignore
 
+    FTDI cables typically have the following pinout:
+
+    +-----+--------+----------+
+    | Pin | Color  | Function |
+    +=====+========+==========+
+    | 1   | Black  | Ground   |
+    +-----+--------+----------+
+    | 2   | Brown  | CTS      |
+    +-----+--------+----------+
+    | 3   | Red    | Vcc      |
+    +-----+--------+----------+
+    | 4   | Orange | TX       |
+    +-----+--------+----------+
+    | 5   | Yellow | RX       |
+    +-----+--------+----------+
+    | 6   | Green  | RTS      |
+    +-----+--------+----------+
+
 - Connect the USB portion of the FTDI cable to the host machine
 - Issue ``ls /dev`` and identify the ``/dev/ttyUSB*`` device associated with the FTDI cable
 - Set up the SLIP device
