@@ -38,7 +38,7 @@ Debug Console
 ~~~~~~~~~~~~~
 
 Each board will have some debug port available, which will then be connected
-to your computer via USB. See the appropriate `Working with {board}` document
+to your computer via USB. See the appropriate :ref:`Working with {board} <system-guides>` document
 for more information.
 
 If the target board is correctly connected to your host computer, you should
@@ -104,7 +104,8 @@ In order to communicate with an OBC from the :doc:`Kubos SDK <../sdk-docs/index>
 to do the following:
 
 - Connect an FTDI cable to the pins of the UART port (please refer to the UART section of the
-  appropriate `Working with {board}` document for details about the default SLIP UART port for the board)
+  appropriate :ref:`Working with {board} <system-guides>` document for details about the default
+  SLIP UART port for the board)
 
     - Ground -> Ground
     - TX -> RX
@@ -203,7 +204,8 @@ given a stack IP of ``10.50.1.10``, I would enter::
 .. note::
 
     While file transfer can be done over a SLIP connection, it is significantly faster and more
-    reliable when done over an ethernet connection instead.
+    reliable when done over an ethernet connection instead (for boards which have an ethernet port
+    available)
 
 User Applications
 -----------------
@@ -597,7 +599,7 @@ peripheral devices. Currently, users should interact with these devices
 using the standard Linux functions. A Kubos HAL will be added in the
 future.
 
-Please refer to the appropriate `Working with {board}` document for more
+Please refer to the appropriate :ref:`Working with {board} <system-guides>` document for more
 information about the specific peripheral availability.
 
 .. _user-accounts:

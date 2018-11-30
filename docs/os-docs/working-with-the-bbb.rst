@@ -381,7 +381,7 @@ pin. For example::
 
     $ cat < /dev/ttyS1
     
-The ``/dev/ttyS5`` device has be preconfigured to be used for SLIP connections.
+The ``/dev/ttyS5`` device has been preconfigured to be used for SLIP connections.
 Please refer to the :ref:`SLIP instructions <slip>` for more information.
 
 User Data Partitions

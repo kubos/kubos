@@ -305,7 +305,7 @@ Users can interact with these ports using Linux's `termios <http://man7.org/linu
 
 `A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
 
-The ``/dev/ttyS5`` device has be preconfigured to be used for SLIP connections.
+The ``/dev/ttyS5`` device has been preconfigured to be used for SLIP connections.
 Please refer to the :ref:`SLIP instructions <slip>` for more information.
 
 User Data Partitions
