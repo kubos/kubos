@@ -6,7 +6,7 @@ extern crate log;
 extern crate failure;
 extern crate simplelog;
 
-use clap::{App, Arg};
+use clap::{App, AppSettings, Arg, SubCommand};
 use file_protocol::{FileProtocol, FileProtocolConfig, State};
 use simplelog::*;
 use std::path::Path;
@@ -92,6 +92,32 @@ fn download(
     Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), state)?)
 }
 
+fn cleanup(
+    host_ip: &str,
+    remote_addr: &str,
+    hash: Option<String>,
+    prefix: Option<String>,
+    chunk_size: usize,
+    hold_count: u16,
+) -> Result<(), failure::Error> {
+    match &hash {
+        Some(s) => info!("Requesting remote cleanup of temp storage for hash {}", s),
+        None => info!("Requesting remote cleanup of all temp storage"),
+    }
+
+    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+
+    // Generate channel id for transaction
+    let channel = f_protocol.generate_channel()?;
+
+    // Send our cleanup request to the remote addr and verify that it's
+    // going to be able to send it
+    f_protocol.send_cleanup(channel, hash)?;
+
+    Ok(())
+}
+
 fn main() {
     CombinedLogger::init(vec![
         TermLogger::new(LevelFilter::Info, Config::default()).unwrap()
@@ -101,15 +127,45 @@ fn main() {
     info!("Starting file transfer client");
 
     let args = App::new("File transfer client")
-        .arg(
-            Arg::with_name("operation")
-                .index(1)
-                .required(true)
-                .possible_values(&["upload", "download"])
-                .case_insensitive(true),
+        .subcommand(
+            SubCommand::with_name("upload")
+                .about("Initiates upload of local file")
+                .arg(
+                    Arg::with_name("source_path")
+                        .help("Local file path to upload")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("target_path")
+                        .help("Destination path on remote target")
+                        .takes_value(true),
+                ),
         )
-        .arg(Arg::with_name("source_file").index(2).required(true))
-        .arg(Arg::with_name("target_file").index(3))
+        .subcommand(
+            SubCommand::with_name("download")
+                .about("Requests download of remote file")
+                .arg(
+                    Arg::with_name("source_path")
+                        .help("Remote file path to download")
+                        .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("target_path")
+                        .help("Local destination path")
+                        .takes_value(true),
+                ),
+        )
+        .subcommand(
+            SubCommand::with_name("cleanup")
+                .about("Requests cleanup of remote temporary storage")
+                .arg(
+                    Arg::with_name("hash")
+                        .help("Specific file storage to clean up")
+                        .takes_value(true),
+                ),
+        )
         .arg(
             Arg::with_name("host_ip")
                 .short("h")
@@ -146,23 +202,9 @@ fn main() {
                 .takes_value(true)
                 .default_value("6"),
         )
+        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .setting(AppSettings::DeriveDisplayOrder)
         .get_matches();
-
-    // Get upload vs download (required)
-    let command = args.value_of("operation").unwrap();
-
-    // Get source file (required)
-    let source_path = args.value_of("source_file").unwrap();
-
-    // Get target file. If not present, just copy the filename from the source path
-    let target_path: String = match args.value_of("target_file") {
-        Some(path) => path.to_owned(),
-        None => Path::new(&source_path)
-            .file_name()
-            .unwrap()
-            .to_string_lossy()
-            .into_owned(),
-    };
 
     let host_ip = args.value_of("host_ip").unwrap();
     let remote_addr = format!(
@@ -170,35 +212,72 @@ fn main() {
         args.value_of("remote_ip").unwrap(),
         args.value_of("remote_port").unwrap()
     );
-
     let chunk_size: usize = args.value_of("chunk_size").unwrap().parse().unwrap();
     let hold_count: u16 = args.value_of("hold_count").unwrap().parse().unwrap();
     let storage_prefix = args.value_of("storage_prefix").unwrap().to_string();
 
-    let result = match command.as_ref() {
-        "upload" => upload(
-            host_ip,
-            &remote_addr,
-            &source_path,
-            &target_path,
-            Some(storage_prefix),
-            chunk_size,
-            hold_count,
-        ),
-        "download" => download(
-            host_ip,
-            &remote_addr,
-            &source_path,
-            &target_path,
-            Some(storage_prefix),
-            chunk_size,
-            hold_count,
-        ),
-        // This shouldn't be possible, since we checked the string earlier
-        _ => {
-            error!("Unknown command given");
-            return;
+    let result = match args.subcommand_name() {
+        Some("upload") => {
+            let upload_args = args.subcommand_matches("upload").unwrap();
+            let source_path = upload_args.value_of("source_path").unwrap();
+            let target_path = match upload_args.value_of("target_path") {
+                Some(path) => path.to_owned(),
+                None => Path::new(&source_path)
+                    .file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .into_owned(),
+            };
+
+            upload(
+                host_ip,
+                &remote_addr,
+                &source_path,
+                &target_path,
+                Some(storage_prefix),
+                chunk_size,
+                hold_count,
+            )
         }
+        Some("download") => {
+            let download_args = args.subcommand_matches("download").unwrap();
+            let source_path = download_args.value_of("source_path").unwrap();
+            let target_path = match download_args.value_of("target_path") {
+                Some(path) => path.to_owned(),
+                None => Path::new(&source_path)
+                    .file_name()
+                    .unwrap()
+                    .to_string_lossy()
+                    .into_owned(),
+            };
+
+            download(
+                host_ip,
+                &remote_addr,
+                &source_path,
+                &target_path,
+                Some(storage_prefix),
+                chunk_size,
+                hold_count,
+            )
+        }
+        Some("cleanup") => {
+            let hash = args
+                .subcommand_matches("cleanup")
+                .unwrap()
+                .value_of("hash")
+                .to_owned()
+                .map(|v| v.to_owned());
+            cleanup(
+                host_ip,
+                &remote_addr,
+                hash,
+                Some(storage_prefix),
+                chunk_size,
+                hold_count,
+            )
+        }
+        _ => panic!("Invalid command"),
     };
 
     if let Err(err) = result {
