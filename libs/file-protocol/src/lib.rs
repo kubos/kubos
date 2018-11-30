@@ -135,6 +135,8 @@ pub enum Message {
     SuccessTransmit(u32, String, u32, Option<u32>),
     /// (Server Only) The transmit or receive request has failed to be completed
     Failure(u32, String),
+    /// Request Cleanup of either whole storage directory or individual file's storage
+    Cleanup(u32, Option<String>),
 }
 
 #[cfg(test)]

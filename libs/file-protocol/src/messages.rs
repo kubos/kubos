@@ -171,3 +171,13 @@ pub fn sync(channel_id: u32, hash: &str) -> Result<Vec<u8>, ProtocolError> {
         err,
     })
 }
+
+pub fn cleanup(channel_id: u32, hash: Option<String>) -> Result<Vec<u8>, ProtocolError> {
+    info!("-> {{ {}, cleanup, {:?}, }}", channel_id, hash);
+    ser::to_vec_packed(&(channel_id, "cleanup", hash)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "cleanup".to_owned(),
+            err,
+        }
+    })
+}

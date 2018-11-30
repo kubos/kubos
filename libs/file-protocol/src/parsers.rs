@@ -69,6 +69,9 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
 
     if let Value::U64(channel) = channel_param {
         let channel_id = channel as u32;
+        if let Some(msg) = parse_cleanup_request(channel_id, pieces.to_owned())? {
+            return Ok(msg);
+        }
         if let Some(msg) = parse_export_request(channel_id, pieces.to_owned())? {
             return Ok(msg);
         }
@@ -101,6 +104,33 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
     return Err(ProtocolError::MessageParseError {
         err: "No message found".to_owned(),
     });
+}
+
+// Parse out cleanup request
+// { channel_id, "cleanup", [hash] }
+pub fn parse_cleanup_request(
+    channel_id: u32,
+    mut pieces: Iter<Value>,
+) -> Result<Option<Message>, ProtocolError> {
+    if let Some(Value::String(op)) = pieces.next() {
+        if op == "cleanup" {
+            match pieces.next() {
+                Some(Value::String(hash)) => {
+                    return Ok(Some(Message::Cleanup(channel_id, Some(hash.to_owned()))))
+                }
+                Some(Value::Null) => return Ok(Some(Message::Cleanup(channel_id, None))),
+                None => return Ok(Some(Message::Cleanup(channel_id, None))),
+                _ => {
+                    return Err(ProtocolError::MissingParam(
+                        "cleanup".to_owned(),
+                        "hash".to_owned(),
+                    ));
+                }
+            }
+        }
+    }
+
+    return Ok(None);
 }
 
 // Parse out export request

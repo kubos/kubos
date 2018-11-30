@@ -455,9 +455,19 @@ pub fn delete_chunk(prefix: &str, hash: &str, index: u32) -> Result<(), Protocol
 
 pub fn delete_file(prefix: &str, hash: &str) -> Result<(), ProtocolError> {
     let path = Path::new(&format!("{}/storage", prefix)).join(hash);
-
     fs::remove_dir_all(path).map_err(|err| ProtocolError::StorageError {
         action: format!("deleting file {}", hash),
+        err,
+    })?;
+
+    Ok(())
+}
+
+pub fn delete_storage(prefix: &str) -> Result<(), ProtocolError> {
+    let path = format!("{}", prefix);
+    let path = Path::new(&path);
+    fs::remove_dir_all(path).map_err(|err| ProtocolError::StorageError {
+        action: format!("deleting path {:?}", path),
         err,
     })?;
 

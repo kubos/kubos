@@ -19,11 +19,12 @@ extern crate blake2_rfc;
 extern crate file_protocol;
 extern crate serde_cbor;
 
-use self::serde_cbor::{from_slice, ser, Value};
+use self::serde_cbor::{from_slice, ser};
 use common::blake2_rfc::blake2s::Blake2s;
-use file_protocol::{FileProtocol, FileProtocolConfig, Message, ProtocolError, State};
+use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use std::fs::File;
 use std::io::prelude::*;
+use std::thread;
 use std::time::Duration;
 
 #[macro_export]
@@ -116,8 +117,10 @@ pub fn download_partial(
         Err(error) => return Err(error),
     };
 
+    // Modify the reply so that we don't attempt to download
+    // all of the chunks
     let mut mod_reply = reply.clone();
-    let mut reply_vec = mod_reply.as_array_mut().unwrap();
+    let reply_vec = mod_reply.as_array_mut().unwrap();
     let channel = reply_vec.remove(0);
     // Pull out bool
     reply_vec.remove(0);
@@ -208,6 +211,27 @@ pub fn upload_partial(
     // note: the original upload client function does not return the hash.
     // we're only doing it here so that we can manipulate the temporary storage
     Ok(hash.to_owned())
+}
+
+pub fn cleanup(
+    host_ip: &str,
+    remote_addr: &str,
+    hash: Option<String>,
+    prefix: Option<String>,
+    chunk_size: u32,
+) -> Result<(), ProtocolError> {
+    let hold_count = 5;
+    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
+    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+
+    let channel = f_protocol.generate_channel()?;
+
+    // Request the remote side to perform a cleanup
+    f_protocol.send_cleanup(channel, hash)?;
+
+    thread::sleep(Duration::from_millis(100));
+
+    Ok(())
 }
 
 pub fn create_test_file(name: &str, contents: &[u8]) -> String {
