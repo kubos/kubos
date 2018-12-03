@@ -21,7 +21,7 @@ extern crate kubos_system;
 extern crate log;
 extern crate failure;
 extern crate serde_cbor;
-extern crate simplelog;
+extern crate syslog;
 
 use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;

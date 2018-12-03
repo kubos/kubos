@@ -22,32 +22,18 @@ extern crate file_service;
 extern crate kubos_system;
 #[macro_use]
 extern crate log;
-extern crate simplelog;
+extern crate syslog;
 
 use file_service::*;
 use kubos_system::Config as ServiceConfig;
-use simplelog::*;
-use std::fs::File;
+use syslog::Facility;
 
 fn main() {
-    let mut loggers: Vec<Box<SharedLogger>> = vec![];
-    if let Some(l) = TermLogger::new(LevelFilter::Info, Config::default()) {
-        loggers.push(l);
-    }
-
-    // This will panic if the log file fails to open
-    // But I think that is correct
-    loggers.push(WriteLogger::new(
-        LevelFilter::Info,
-        Config::default(),
-        // TODO: Making log file directory configurable
-        File::create("/var/log/kubos-file-transfer-service.log").unwrap(),
-    ));
-
-    match CombinedLogger::init(loggers) {
-        Err(e) => panic!("Logging failed to start {:?}", e),
-        _ => {}
-    }
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("kubos-shell-service"),
+    ).unwrap();
 
     let config = ServiceConfig::new("file-transfer-service");
 
