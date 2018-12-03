@@ -28,16 +28,17 @@ Board-Specific Documentation
 Communicating with an OBC
 -------------------------
 
-There are currently two primary methods for users to communicate directly with their OBCs:
+There are currently three primary methods for users to communicate directly with their OBCs:
 
     - Via a debug UART port
+    - Via SLIP using a UART port
     - Via an ethernet port (not supported by all boards)
 
 Debug Console
 ~~~~~~~~~~~~~
 
 Each board will have some debug port available, which will then be connected
-to your computer via USB. See the appropriate `Working with {board}` document
+to your computer via USB. See the appropriate :ref:`Working with {board} <system-guides>` document
 for more information.
 
 If the target board is correctly connected to your host computer, you should
@@ -88,6 +89,73 @@ Fully logged in, the console should look like this:
     Please make sure to either logout of your board, or change it back to the
     root user's home directory before beginning any file transfer
 
+.. _slip:
+    
+SLIP
+~~~~
+
+Using `SLIP <https://en.wikipedia.org/wiki/Serial_Line_Internet_Protocol>`__ over a UART port allows
+users to communicate with a target OBC as though it has a normal network connection set up.
+This is most useful for communicating with OBCs which do not provide an ethernet port.
+
+All supported boards include SLIP configuration in their ``/etc/network/interfaces`` file.
+
+In order to communicate with an OBC from the :doc:`Kubos SDK <../sdk-docs/index>`, users will need
+to do the following:
+
+- Connect an FTDI cable to the pins of the UART port (please refer to the UART section of the
+  appropriate :ref:`Working with {board} <system-guides>` document for details about the default
+  SLIP UART port for the board)
+
+    - Ground -> Ground
+    - TX -> RX
+    - RX -> TX
+    - RTS -> CTS (Might not be available on all boards/UART ports)
+    - CTS -> RTS (Might not be available on all boards/UART ports)
+    - Vcc -> ignore
+
+    FTDI cables typically have the following pinout:
+
+    +-----+--------+----------+
+    | Pin | Color  | Function |
+    +=====+========+==========+
+    | 1   | Black  | Ground   |
+    +-----+--------+----------+
+    | 2   | Brown  | CTS      |
+    +-----+--------+----------+
+    | 3   | Red    | Vcc      |
+    +-----+--------+----------+
+    | 4   | Orange | TX       |
+    +-----+--------+----------+
+    | 5   | Yellow | RX       |
+    +-----+--------+----------+
+    | 6   | Green  | RTS      |
+    +-----+--------+----------+
+
+- Connect the USB portion of the FTDI cable to the host machine
+- Issue ``ls /dev`` and identify the ``/dev/ttyUSB*`` device associated with the FTDI cable
+- Set up the SLIP device
+
+    - If the UART port has RTS/CTS available, issue the following::
+    
+        $ sudo slattach -s 115200 -p cslip {USB-device} &
+        
+    - Otherwise, issue this command instead::
+    
+        $ sudo slattach -FL -s 115200 -p cslip {USB-device} &
+
+- Define a new network interface for the device::
+
+    $ sudo ifconfig sl0 192.168.0.1 pointopoint 192.168.0.2 up
+    
+- Finally, ensure that the SLIP traffic will be routed to the SDK's host IP::
+
+    $ sudo route add 192.168.0.1 dev lo
+    
+Worth noting, the baud rate, protocol, and IP addresses may all be changed.
+In this case, the corresponding values in the OBC's ``/etc/network/interfaces`` file should also be
+changed to match.
+
 .. _ethernet:
 
 Ethernet
@@ -111,9 +179,9 @@ Once updated, run the following commands in order to make the board use the new 
 The address can be verified by running the ``ipaddr`` command
 
 Communicating via SSH
-^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~
 
-Once a board has been given a valid IP address, you can create an SSH connection to it.
+Once a board has been given a valid IP address (via ethernet or SLIP), you can create an SSH connection to it.
 
 This can be done from either the SDK or your host machine.
 
@@ -123,7 +191,7 @@ You will be prompted for the `kubos` account password.
 You can also use a tool, like PuTTY, to create an SSH connection.
 
 File Transfer
-^^^^^^^^^^^^^
+~~~~~~~~~~~~~
 
 Once the IP address has been set, you can also transfer files to and from the stack using the ``scp`` command.
 Again, this command can be run from either the SDK or your host machine.
@@ -132,6 +200,12 @@ For example, if I wanted to send a file on my host machine, `test.txt`, to resid
 given a stack IP of ``10.50.1.10``, I would enter::
 
     $ scp test.txt kubos@10.50.1.10:/home/kubos
+    
+.. note::
+
+    While file transfer can be done over a SLIP connection, it is significantly faster and more
+    reliable when done over an ethernet connection instead (for boards which have an ethernet port
+    available)
 
 User Applications
 -----------------
@@ -525,7 +599,7 @@ peripheral devices. Currently, users should interact with these devices
 using the standard Linux functions. A Kubos HAL will be added in the
 future.
 
-Please refer to the appropriate `Working with {board}` document for more
+Please refer to the appropriate :ref:`Working with {board} <system-guides>` document for more
 information about the specific peripheral availability.
 
 .. _user-accounts:

@@ -341,19 +341,19 @@ UART
 
 The Beaglebone Black has 5 UART ports available for use:
 
-+--------------+--------+--------+---------+---------+
-| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
-+==============+========+========+=========+=========+
-| /dev/ttyS1   | P9.24  | P9.26  |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS2   | P9.21  | P9.22  |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS3   | P9.42  |        | P8.34   | P8.36   |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS4   | P9.13  | P9.11  | P8.33   | P8.35   |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS5   | P8.37  | P8.38  | P8.32   | P8.31   |
-+--------------+--------+--------+---------+---------+
++-------------------+--------+--------+---------+---------+
+| Linux Device      | TX Pin | RX Pin | RTS Pin | CTS Pin |
++===================+========+========+=========+=========+
+| /dev/ttyS1        | P9.24  | P9.26  |         |         |
++-------------------+--------+--------+---------+---------+
+| /dev/ttyS2        | P9.21  | P9.22  |         |         |
++-------------------+--------+--------+---------+---------+
+| /dev/ttyS3        | P9.42  |        | P8.34   | P8.36   |
++-------------------+--------+--------+---------+---------+
+| /dev/ttyS4        | P9.13  | P9.11  | P8.33   | P8.35   |
++-------------------+--------+--------+---------+---------+
+| /dev/ttyS5 (SLIP) | P8.37  | P8.38  | P8.32   | P8.31   |
++-------------------+--------+--------+---------+---------+
 
 .. note:: /dev/ttyS3 (UART3) is TX-only. /dev/ttyS1 and /dev/ttyS2 do not 
     have RTS/CTS due to pin conflicts with other buses.
@@ -380,6 +380,9 @@ The ``cat`` command can be used to read any data from the RX
 pin. For example::
 
     $ cat < /dev/ttyS1
+    
+The ``/dev/ttyS5`` device has been preconfigured to be used for SLIP connections.
+Please refer to the :ref:`SLIP instructions <slip>` for more information.
 
 User Data Partitions
 --------------------
