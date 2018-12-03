@@ -28,6 +28,8 @@ General Guides
     
     Using Kubos Linux <using-kubos-linux>
     
+.. _system-guides:
+    
 System Guides
 -------------
 

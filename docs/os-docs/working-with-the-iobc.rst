@@ -320,17 +320,20 @@ UART
 
 The iOBC has 2 UART ports available for use in varying capacities:
 
-+--------------+--------+--------+---------+---------+
-| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
-+==============+========+========+=========+=========+
-| /dev/ttyS1   | TX0    | RX0    |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS3   | TX2    | RX2    | RTS2    | CTS2    |
-+--------------+--------+--------+---------+---------+
++--------------------+--------+--------+---------+---------+
+| Linux Device       | TX Pin | RX Pin | RTS Pin | CTS Pin |
++====================+========+========+=========+=========+
+| /dev/ttyS1 (SLIP)  | TX0    | RX0    |         |         |
++--------------------+--------+--------+---------+---------+
+| /dev/ttyS3         | TX2    | RX2    | RTS2    | CTS2    |
++--------------------+--------+--------+---------+---------+
 
 Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
 
 `A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
+
+The ``/dev/ttyS1`` device has been preconfigured to be used for SLIP connections.
+Please refer to the :ref:`SLIP instructions <slip>` for more information.
 
 User Data Partition
 -------------------
