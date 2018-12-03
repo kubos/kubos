@@ -7,7 +7,9 @@ authors = ["Catherine Garabedian <catherine@kubos.co>"]
 failure = "0.1.2"
 juniper =  "0.9"
 kubos-service = { path = "../kubos-service" }
+log = "^0.4.0"
 mai400-api = { path = "../../apis/mai400-api" }
+syslog = "4.0"
 
 [dev-dependencies]
 double = "0.2"
