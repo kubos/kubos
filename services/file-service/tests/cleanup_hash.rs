@@ -24,14 +24,10 @@ extern crate tempfile;
 
 mod common;
 
-use blake2_rfc::blake2s::Blake2s;
 use common::*;
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
-use rand::{thread_rng, Rng};
 use std::fs;
-use std::fs::{File, OpenOptions};
-use std::io::prelude::*;
 use std::thread;
 use std::time::Duration;
 use tempfile::TempDir;
@@ -52,7 +48,7 @@ fn cleanup_hash_dir() {
     service_new!(service_port, 4096);
 
     // Download a partial file so that we can resume the download later
-    let result = download_partial(
+    let _result = download_partial(
         "127.0.0.1",
         &format!("127.0.0.1:{}", service_port),
         &source,
@@ -70,7 +66,8 @@ fn cleanup_hash_dir() {
         Some(hash.to_owned()),
         Some("client".to_owned()),
         4069,
-    );
+    )
+    .unwrap();
 
     // Hash's storage directory should be gone after request for cleanup
     assert!(fs::read_dir(format!("service/storage/{}", hash)).is_err());

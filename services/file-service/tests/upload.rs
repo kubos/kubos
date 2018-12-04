@@ -353,7 +353,7 @@ fn large_up() {
 // received invalid input
 #[test]
 fn upload_single_after_bad_input() {
-    use std::net::{SocketAddr, UdpSocket};
+    use std::net::UdpSocket;
 
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();

@@ -108,7 +108,7 @@ fn cleanup(
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
     let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
 
-    // Generate channel id for transaction
+    // Generate channel ID for transaction
     let channel = f_protocol.generate_channel()?;
 
     // Send our cleanup request to the remote addr and verify that it's

@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 #![macro_use]
+#![allow(dead_code)]
 
 extern crate blake2_rfc;
 extern crate file_protocol;
@@ -190,25 +191,25 @@ pub fn upload_partial(
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
     let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
 
-    // copy file to upload to temp storage. calculate the hash and chunk info
+    // Copy file to upload to temp storage. calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
 
     let channel = f_protocol.generate_channel()?;
 
-    // tell our destination the hash and number of chunks (- 1) to expect
+    // Tell our destination the hash and number of chunks (- 1) to expect
     f_protocol.send_metadata(channel, &hash, num_chunks - 1)?;
 
-    // send export command for file
+    // Send export command for file
     f_protocol.send_export(channel, &hash, &target_path, mode)?;
 
-    // start the engine to send the file data chunks
+    // Start the engine to send the file data chunks
     f_protocol.message_engine(
         |d| f_protocol.recv(Some(d)),
         Duration::from_secs(2),
         State::Transmitting,
     )?;
 
-    // note: the original upload client function does not return the hash.
+    // Note: The original upload client function does not return the hash.
     // we're only doing it here so that we can manipulate the temporary storage
     Ok(hash.to_owned())
 }
