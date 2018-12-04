@@ -32,7 +32,7 @@ fn main() {
     syslog::init(
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
-        Some("kubos-shell-service"),
+        Some("kubos-file-service"),
     ).unwrap();
 
     let config = ServiceConfig::new("file-transfer-service");
