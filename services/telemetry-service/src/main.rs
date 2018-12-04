@@ -214,7 +214,7 @@ fn main() {
     syslog::init(
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
-        Some("kubos-shell-service"),
+        Some("kubos-telemetry-service"),
     ).unwrap();
     
     let config = Config::new("telemetry-service");
