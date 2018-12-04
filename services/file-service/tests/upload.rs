@@ -68,14 +68,9 @@ fn upload_single() {
 
     assert!(result.is_ok());
 
-    let hash = result.unwrap();
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
-
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
+
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
@@ -105,12 +100,6 @@ fn upload_multi_clean() {
 
     assert!(result.is_ok());
 
-    let hash = result.unwrap();
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
-
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
@@ -131,8 +120,8 @@ fn upload_multi_resume() {
 
     service_new!(service_port, 4096);
 
-    // Go ahead and upload the whole file so we can manipulate the temporary directory
-    let result = upload(
+    // Upload a partial version of the file
+    let result = upload_partial(
         "127.0.0.1",
         "127.0.0.1:7002",
         &source,
@@ -140,13 +129,9 @@ fn upload_multi_resume() {
         Some("client".to_owned()),
         4096,
     );
-    assert!(result.is_ok());
-    let hash = result.unwrap();
+    assert!(result.is_err());
 
-    // Remove a chunk so we can test the retry logic
-    fs::remove_file(format!("service/storage/{}/0", hash)).unwrap();
-
-    // Upload the file again
+    // Upload the whole file this time
     let result = upload(
         "127.0.0.1",
         &format!("127.0.0.1:{}", service_port),
@@ -156,11 +141,6 @@ fn upload_multi_resume() {
         4096,
     );
     assert!(result.is_ok());
-    let hash = result.unwrap();
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -203,11 +183,6 @@ fn upload_multi_complete() {
         4096,
     );
     assert!(result.is_ok());
-    let hash = result.unwrap();
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -241,7 +216,8 @@ fn upload_bad_hash() {
     assert!(result.is_ok());
     let hash = result.unwrap();
 
-    // Tweak the chunk contents so the future hash calculation will fail
+    // Create temp folder with bad chunk so that future hash calculation will fail
+    fs::create_dir(format!("service/storage/{}", hash)).unwrap();
     fs::write(format!("service/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
     let result = upload(
@@ -303,12 +279,6 @@ fn upload_multi_client() {
             );
             assert!(result.is_ok());
 
-            let hash = result.unwrap();
-
-            // Cleanup the temporary files so that the test can be repeatable
-            fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-            fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
-
             // Verify the final file's contents
             let dest_contents = fs::read(dest).unwrap();
             assert_eq!(&contents[..], dest_contents.as_slice());
@@ -363,12 +333,6 @@ fn large_up() {
 
     assert!(result.is_ok());
 
-    let hash = result.unwrap();
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
-
     // Verify the final file's contents
     let mut source_file = File::open(source).unwrap();
     let mut dest_file = File::open(dest).unwrap();
@@ -389,7 +353,7 @@ fn large_up() {
 // received invalid input
 #[test]
 fn upload_single_after_bad_input() {
-    use std::net::{SocketAddr, UdpSocket};
+    use std::net::UdpSocket;
 
     let test_dir = TempDir::new().expect("Failed to create test dir");
     let test_dir_str = test_dir.path().to_str().unwrap();
@@ -423,12 +387,6 @@ fn upload_single_after_bad_input() {
     }
 
     assert!(result.is_ok());
-
-    let hash = result.unwrap();
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
