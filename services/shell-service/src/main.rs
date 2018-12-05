@@ -22,32 +22,18 @@ extern crate kubos_system;
 extern crate log;
 extern crate shell_protocol;
 extern crate shell_service;
-extern crate simplelog;
+extern crate syslog;
 
 use kubos_system::Config as ServiceConfig;
 use shell_service::*;
-use simplelog::*;
-use std::fs::File;
+use syslog::Facility;
 
 fn main() {
-    let mut loggers: Vec<Box<SharedLogger>> = vec![];
-    if let Some(l) = TermLogger::new(LevelFilter::Info, Config::default()) {
-        loggers.push(l);
-    }
-
-    // This will panic if the log file fails to open
-    // But I think that is correct
-    loggers.push(WriteLogger::new(
-        LevelFilter::Info,
-        Config::default(),
-        // TODO: Making log file directory configurable
-        File::create("/var/log/kubos-shell-service.log").unwrap(),
-    ));
-
-    match CombinedLogger::init(loggers) {
-        Err(e) => panic!("Logging failed to start {:?}", e),
-        _ => {}
-    }
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("kubos-shell-service"),
+    ).unwrap();
 
     let config = ServiceConfig::new("shell-service");
 
