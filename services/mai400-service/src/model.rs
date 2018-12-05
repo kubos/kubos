@@ -135,7 +135,7 @@ impl Subsystem {
 
         spawn(move || read_thread(mai_ref, data_ref, sender));
 
-        println!("Kubos MAI-400 service started");
+        info!("Kubos MAI-400 service started");
 
         Ok(Subsystem {
             mai,
