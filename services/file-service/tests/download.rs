@@ -24,7 +24,6 @@ extern crate tempfile;
 
 mod common;
 
-use blake2_rfc::blake2s::Blake2s;
 use common::*;
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
@@ -50,7 +49,7 @@ fn download_single() {
 
     let contents = "download_single".as_bytes();
 
-    let hash = create_test_file(&source, &contents);
+    create_test_file(&source, &contents);
 
     service_new!(service_port, 4096);
 
@@ -63,10 +62,6 @@ fn download_single() {
         4096,
     );
     assert!(result.is_ok());
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -84,7 +79,7 @@ fn download_multi_clean() {
 
     let contents = [1; 6000];
 
-    let hash = create_test_file(&source, &contents);
+    create_test_file(&source, &contents);
 
     service_new!(service_port, 4096);
 
@@ -97,10 +92,6 @@ fn download_multi_clean() {
         4096,
     );
     assert!(result.is_ok());
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -118,12 +109,12 @@ fn download_multi_resume() {
 
     let contents = [2; 6000];
 
-    let hash = create_test_file(&source, &contents);
+    create_test_file(&source, &contents);
 
     service_new!(service_port, 4096);
 
-    // Go ahead and download the whole file so we can manipulate the temporary directory
-    let result = download(
+    // Download a partial file so that we can resume the download later
+    let result = download_partial(
         "127.0.0.1",
         &format!("127.0.0.1:{}", service_port),
         &source,
@@ -131,10 +122,9 @@ fn download_multi_resume() {
         Some("client".to_owned()),
         4096,
     );
-    assert!(result.is_ok());
-
-    // Remove a chunk so we can test the retry logic
-    fs::remove_file(format!("service/storage/{}/0", hash)).unwrap();
+    // The download should *not* complete with success because we aren't
+    // requesting all of the chunks
+    assert!(result.is_err());
 
     // download the file again
     let result = download(
@@ -147,16 +137,13 @@ fn download_multi_resume() {
     );
     assert!(result.is_ok());
 
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
-
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
 }
 
-// Download multi-chunk file which we already have all chunks for
+// Download multi-chunk file which we already have downloaded
+// This should behave the same as two independent clean downloads
 #[test]
 fn download_multi_complete() {
     let test_dir = TempDir::new().expect("Failed to create test dir");
@@ -167,7 +154,7 @@ fn download_multi_complete() {
 
     let contents = [3; 6000];
 
-    let hash = create_test_file(&source, &contents);
+    create_test_file(&source, &contents);
 
     service_new!(service_port, 4096);
 
@@ -193,10 +180,6 @@ fn download_multi_complete() {
     );
 
     assert!(result.is_ok());
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -229,7 +212,8 @@ fn download_bad_hash() {
     );
     assert!(result.is_ok());
 
-    // Tweak the chunk contents so the future hash calculation will fail
+    // Recreate temp folder with bad chunk so that future hash calculation will fail
+    fs::create_dir(format!("client/storage/{}", hash)).unwrap();
     fs::write(format!("client/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
 
     let result = download(
@@ -267,7 +251,7 @@ fn download_multi_client() {
             let dest = format!("{}/dest", test_dir_str);
             let contents = [num; 6500];
 
-            let hash = create_test_file(&source, &contents);
+            create_test_file(&source, &contents);
 
             let result = download(
                 "127.0.0.1",
@@ -278,10 +262,6 @@ fn download_multi_client() {
                 4096,
             );
             assert!(result.is_ok());
-
-            // Cleanup the temporary files so that the test can be repeatable
-            fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-            fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
             // Verify the final file's contents
             let dest_contents = fs::read(dest).unwrap();
@@ -309,30 +289,18 @@ fn large_down() {
     let service_port = 8006;
 
     // Create a 100MB file filled with random data
-    let hash: String = {
-        let mut hasher = Blake2s::new(16);
-        let mut file = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .append(true)
-            .open(source.clone())
-            .unwrap();
-        for _ in 0..100 {
-            let mut contents = [0u8; 1_000_000];
-            thread_rng().fill(&mut contents[..]);
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .append(true)
+        .open(source.clone())
+        .unwrap();
+    for _ in 0..100 {
+        let mut contents = [0u8; 1_000_000];
+        thread_rng().fill(&mut contents[..]);
 
-            file.write(&contents).unwrap();
-            hasher.update(&contents);
-        }
-
-        let hash_result = hasher.finalize();
-
-        hash_result
-            .as_bytes()
-            .iter()
-            .map(|byte| format!("{:02x}", byte))
-            .collect()
-    };
+        file.write(&contents).unwrap();
+    }
 
     service_new!(service_port, 4096);
 
@@ -346,10 +314,6 @@ fn large_down() {
     );
 
     assert!(result.is_ok());
-
-    // Cleanup the temporary files so that the test can be repeatable
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
     // Verify the final file's contents
     let mut source_file = File::open(source).unwrap();

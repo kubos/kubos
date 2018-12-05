@@ -55,7 +55,7 @@ fn download_multi_client_small_chunk() {
             let dest = format!("{}/dest", test_dir_str);
             let contents = [num; 100_000];
 
-            let hash = create_test_file(&source, &contents);
+            let _hash = create_test_file(&source, &contents);
 
             let result = download(
                 "127.0.0.1",
@@ -66,10 +66,6 @@ fn download_multi_client_small_chunk() {
                 256,
             );
             assert!(result.is_ok());
-
-            // Cleanup the temporary files so that the test can be repeatable
-            fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-            fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
             // Verify the final file's contents
             let dest_contents = fs::read(dest).unwrap();
@@ -102,7 +98,7 @@ fn download_multi_client_large_chunk() {
             let dest = format!("{}/dest", test_dir_str);
             let contents = [num * 10; 100_000];
 
-            let hash = create_test_file(&source, &contents);
+            let _hash = create_test_file(&source, &contents);
 
             let result = download(
                 "127.0.0.1",
@@ -113,10 +109,6 @@ fn download_multi_client_large_chunk() {
                 8192,
             );
             assert!(result.is_ok());
-
-            // Cleanup the temporary files so that the test can be repeatable
-            fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-            fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
             // Verify the final file's contents
             let dest_contents = fs::read(dest).unwrap();
@@ -163,12 +155,6 @@ fn upload_multi_client_small_chunk() {
             );
             assert!(result.is_ok());
 
-            let hash = result.unwrap();
-
-            // Cleanup the temporary files so that the test can be repeatable
-            fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-            fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
-
             // Verify the final file's contents
             let dest_contents = fs::read(dest).unwrap();
             assert_eq!(&contents[..], dest_contents.as_slice());
@@ -213,12 +199,6 @@ fn upload_multi_client_large_chunk() {
                 8192,
             );
             assert!(result.is_ok());
-
-            let hash = result.unwrap();
-
-            // Cleanup the temporary files so that the test can be repeatable
-            fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-            fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
 
             // Verify the final file's contents
             let dest_contents = fs::read(dest).unwrap();
