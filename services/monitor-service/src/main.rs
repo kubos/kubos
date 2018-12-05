@@ -56,7 +56,9 @@ extern crate failure;
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;
+extern crate log;
 extern crate regex;
+extern crate syslog;
 
 #[cfg(test)]
 #[macro_use]
@@ -64,6 +66,7 @@ extern crate lazy_static;
 
 use kubos_service::{Config, Service};
 use schema::{MutationRoot, QueryRoot};
+use syslog::Facility;
 
 mod meminfo;
 mod objects;
@@ -73,6 +76,13 @@ mod schema;
 mod userinfo;
 
 fn main() {
+    
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("kubos-monitor-service"),
+    ).unwrap();
+    
     let config = Config::new("monitor-service");
 
     Service::new(

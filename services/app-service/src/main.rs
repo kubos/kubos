@@ -23,10 +23,13 @@ extern crate juniper;
 extern crate kubos_app;
 extern crate kubos_service;
 #[macro_use]
+extern crate log;
+#[macro_use]
 extern crate serde_derive;
 #[cfg(test)]
 #[macro_use]
 extern crate serde_json;
+extern crate syslog;
 #[cfg(test)]
 extern crate tempfile;
 extern crate toml;
@@ -45,8 +48,15 @@ use getopts::Options;
 use kubos_service::{Config, Service};
 use registry::AppRegistry;
 use std::env;
+use syslog::Facility;
 
 fn main() -> Result<(), Error> {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("kubos-app-service"),
+    ).unwrap();
+        
     let args: Vec<String> = env::args().collect();
     let mut opts = Options::new();
 
@@ -74,7 +84,7 @@ fn main() -> Result<(), Error> {
     match matches.opt_present("b") {
         true => registry
             .run_onboot()
-            .unwrap_or_else(|err| eprintln!("Error starting applications: {}", err)),
+            .unwrap_or_else(|err| error!("Error starting applications: {}", err)),
         false => {}
     }
 
