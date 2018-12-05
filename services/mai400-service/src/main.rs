@@ -412,10 +412,13 @@ extern crate failure;
 extern crate juniper;
 #[macro_use]
 extern crate kubos_service;
+#[macro_use]
+extern crate log;
 extern crate mai400_api;
 #[cfg(test)]
 #[macro_use]
 extern crate serde_json;
+extern crate syslog;
 
 mod model;
 mod objects;
@@ -429,8 +432,15 @@ use model::{ReadData, Subsystem};
 pub use objects::*;
 use schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
+use syslog::Facility;
 
 fn main() -> MAIResult<()> {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("mai400-service"),
+    ).unwrap();
+    
     Service::new(
         Config::new("mai400-service"),
         Subsystem::new("/dev/ttyS5", Arc::new(ReadData::new()))?,

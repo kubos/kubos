@@ -39,7 +39,7 @@ impl Subsystem {
     ) -> AntSResult<Subsystem> {
         let ants = Box::new(AntS::new(bus, primary, secondary, count, timeout)?);
 
-        println!("Kubos antenna systems service started");
+        info!("Kubos antenna systems service started");
 
         Ok(Subsystem {
             ants,

@@ -144,7 +144,7 @@ impl Subsystem {
         let oem_ref = oem.clone();
         thread::spawn(move || log_thread(oem_ref, data_ref, error_send, version_send));
 
-        println!("Kubos OEM6 service started");
+        info!("Kubos OEM6 service started");
 
         Ok(Subsystem {
             oem,

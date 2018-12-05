@@ -317,10 +317,13 @@ extern crate failure;
 extern crate juniper;
 #[macro_use]
 extern crate kubos_service;
+#[macro_use]
+extern crate log;
 extern crate novatel_oem6_api;
 #[cfg(test)]
 #[macro_use]
 extern crate serde_json;
+extern crate syslog;
 
 mod model;
 mod objects;
@@ -334,8 +337,15 @@ use novatel_oem6_api::OEMResult;
 pub use objects::*;
 use schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
+use syslog::Facility;
 
 fn main() -> OEMResult<()> {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("novatel-oem6-service"),
+    ).unwrap();
+    
     let config = Config::new("novatel-oem6-service");
     let bus = config
         .get("bus")
