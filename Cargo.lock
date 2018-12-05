@@ -445,6 +445,8 @@ dependencies = [
  "isis-iobc-supervisor 0.1.0",
  "juniper 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-service 0.1.0",
+ "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syslog 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
