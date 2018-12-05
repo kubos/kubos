@@ -269,6 +269,11 @@ impl Protocol {
         self.send(messages::metadata(channel_id, &hash, num_chunks)?)
     }
 
+    /// Send a request to cleanup the remote storage folder
+    pub fn send_cleanup(&self, channel_id: u32, hash: Option<String>) -> Result<(), ProtocolError> {
+        self.send(messages::cleanup(channel_id, hash)?)
+    }
+
     /// Request remote target to receive file from host
     ///
     /// # Arguments
@@ -390,7 +395,8 @@ impl Protocol {
     ) -> Result<(), ProtocolError> {
         match storage::finalize_file(&self.config.storage_prefix, hash, target_path, mode) {
             Ok(_) => {
-                self.send(messages::operation_success(channel_id)?)?;
+                self.send(messages::operation_success(channel_id, hash)?)?;
+                storage::delete_file(&self.config.storage_prefix, hash)?;
                 return Ok(());
             }
             Err(e) => {
@@ -733,9 +739,10 @@ impl Protocol {
                             }
                         }
                     }
-                    Message::SuccessReceive(channel_id) => {
+                    Message::SuccessReceive(channel_id, hash) => {
                         info!("<- {{ {}, true }}", channel_id);
                         new_state = State::Done;
+                        storage::delete_file(&self.config.storage_prefix, hash)?;
                     }
                     Message::SuccessTransmit(channel_id, hash, num_chunks, mode) => {
                         match mode {
@@ -787,6 +794,16 @@ impl Protocol {
                             channel_id: *channel_id,
                             error_message: error_message.to_string(),
                         });
+                    }
+                    Message::Cleanup(channel_id, Some(hash)) => {
+                        info!("<- {{ {}, cleanup, {} }}", channel_id, hash);
+                        storage::delete_file(&self.config.storage_prefix, hash)?;
+                        new_state = State::Done;
+                    }
+                    Message::Cleanup(channel_id, None) => {
+                        info!("< {{ {}, cleanup }}", channel_id);
+                        storage::delete_storage(&self.config.storage_prefix)?;
+                        new_state = State::Done;
                     }
                 }
                 Ok(new_state)

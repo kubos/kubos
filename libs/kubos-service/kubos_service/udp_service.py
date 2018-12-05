@@ -11,10 +11,12 @@ Wrapper for creating a UDP based Kubos service
 
 import socket
 import json
+import logging
 
 
 def start(config, schema, context={}):
-    print "{} starting on {}:{}".format(config.name, config.ip, config.port)
+    logger = logging.getLogger(config.name)
+    logger.info("{} starting on {}:{}".format(config.name, config.ip, config.port))
     sock = socket.socket(socket.AF_INET,  # Internet
                          socket.SOCK_DGRAM)  # UDP
     sock.bind((config.ip, config.port))
@@ -42,4 +44,4 @@ def start(config, schema, context={}):
             })
             sock.sendto(result, source)
         except Exception as e:
-            print "Exception encountered {}".format(e)
+            logging.error("Exception encountered {}".format(e))
