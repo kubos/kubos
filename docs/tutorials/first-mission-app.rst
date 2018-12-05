@@ -602,7 +602,7 @@ With some additional error handling, our final application looks like this:
     
     import argparse
     import app_api
-        import logging
+    import logging
     from logging.handlers import SysLogHandler
     import sys
     
