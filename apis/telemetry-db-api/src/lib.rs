@@ -16,6 +16,8 @@
 #[macro_use]
 extern crate diesel;
 #[macro_use]
+extern crate log;
+#[macro_use]
 extern crate serde_derive;
 extern crate time;
 
@@ -45,7 +47,7 @@ impl Database {
     /// Attempts to connect to sqlite database and will `panic!` if connection fails.
     pub fn new(path: &str) -> Self {
         if !::std::path::Path::new(path).exists() {
-            println!("Creating database {}", path);
+            info!("Creating database {}", path);
         }
         Database {
             connection: SqliteConnection::establish(&String::from(path)).expect(&format!(
@@ -69,10 +71,13 @@ impl Database {
              AND name = 'telemetry')",
         )).get_result::<bool>(&self.connection)
         {
-            Err(err) => panic!("Error querying table: {:?}", err),
-            Ok(true) => println!("Table exists"),
+            Err(err) => {
+                error!("Error querying table: {:?}", err);
+                panic!("Error querying table: {:?}", err)
+            }
+            Ok(true) => info!("Table exists"),
             Ok(false) => {
-                println!("Telemetry table not found. Creating table.");
+                info!("Telemetry table not found. Creating table.");
                 match sql_query(
                     "CREATE TABLE telemetry (
                     timestamp INTEGER NOT NULL,
@@ -82,8 +87,11 @@ impl Database {
                     PRIMARY KEY (timestamp, subsystem, parameter))",
                 ).execute(&self.connection)
                 {
-                    Ok(_) => println!("Telemetry table created"),
-                    Err(err) => panic!("Error creating table: {:?}", err),
+                    Ok(_) => info!("Telemetry table created"),
+                    Err(err) => {
+                        error!("Error creating table: {:?}", err);
+                        panic!("Error creating table: {:?}", err)
+                    }
                 }
             }
         };

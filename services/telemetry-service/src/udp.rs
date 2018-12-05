@@ -30,7 +30,7 @@ impl DirectUdp {
 
     pub fn start(&self, url: String) {
         let socket = UdpSocket::bind(url.parse::<SocketAddr>().unwrap()).unwrap();
-        println!("Direct UDP listening on: {}", socket.local_addr().unwrap());
+        info!("Direct UDP listening on: {}", socket.local_addr().unwrap());
 
         loop {
             // Wait for an incoming message

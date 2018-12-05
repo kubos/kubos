@@ -195,8 +195,11 @@ extern crate juniper;
 extern crate kubos_service;
 extern crate kubos_telemetry_db;
 #[macro_use]
+extern crate log;
+#[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+extern crate syslog;
 extern crate tar;
 
 mod schema;
@@ -205,8 +208,15 @@ mod udp;
 use kubos_service::{Config, Service};
 use kubos_telemetry_db::Database;
 use schema::{MutationRoot, QueryRoot, Subsystem};
+use syslog::Facility;
 
 fn main() {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("kubos-telemetry-service"),
+    ).unwrap();
+    
     let config = Config::new("telemetry-service");
 
     let db_path = config
