@@ -35,8 +35,8 @@ fn test() {
     assert_eq!(
         res,
         json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry": [
                     {"parameter":"voltage","value":"3.4"},
                     {"parameter":"voltage","value":"3.3"}
