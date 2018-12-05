@@ -143,7 +143,7 @@ where
         let addr = self.config.hosturl().parse::<SocketAddr>().unwrap();
 
         let socket = UdpSocket::bind(&addr).unwrap();
-        println!("Listening on: {}", socket.local_addr().unwrap());
+        info!("Listening on: {}", socket.local_addr().unwrap());
 
         let mut buf = [0; 4096];
         loop {

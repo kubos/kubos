@@ -454,7 +454,7 @@ impl AppRegistry {
             }
         }
 
-        eprintln!(
+        info!(
             "Apps started: {}, Apps failed: {}",
             apps_started, apps_not_started
         );

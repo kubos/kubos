@@ -23,7 +23,7 @@ extern crate kubos_system;
 extern crate log;
 extern crate serde_cbor;
 extern crate shell_protocol;
-extern crate simplelog;
+extern crate syslog;
 
 use channel_protocol::{ChannelMessage, ChannelProtocol};
 use kubos_system::Config as ServiceConfig;

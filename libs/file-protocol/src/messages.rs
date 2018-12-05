@@ -142,11 +142,13 @@ pub fn import_setup_success(
 }
 
 // Create successful export request response message
-pub fn operation_success(channel_id: u32) -> Result<Vec<u8>, ProtocolError> {
-    info!("-> {{ {}, true }}", channel_id);
-    ser::to_vec_packed(&(channel_id, true)).map_err(|err| ProtocolError::MessageCreationError {
-        message: "operation success".to_owned(),
-        err,
+pub fn operation_success(channel_id: u32, hash: &str) -> Result<Vec<u8>, ProtocolError> {
+    info!("-> {{ {}, true, {} }}", channel_id, hash);
+    ser::to_vec_packed(&(channel_id, true, hash)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "operation success".to_owned(),
+            err,
+        }
     })
 }
 
@@ -167,5 +169,15 @@ pub fn sync(channel_id: u32, hash: &str) -> Result<Vec<u8>, ProtocolError> {
     ser::to_vec_packed(&(channel_id, hash)).map_err(|err| ProtocolError::MessageCreationError {
         message: "sync".to_owned(),
         err,
+    })
+}
+
+pub fn cleanup(channel_id: u32, hash: Option<String>) -> Result<Vec<u8>, ProtocolError> {
+    info!("-> {{ {}, cleanup, {:?}, }}", channel_id, hash);
+    ser::to_vec_packed(&(channel_id, "cleanup", hash)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "cleanup".to_owned(),
+            err,
+        }
     })
 }
