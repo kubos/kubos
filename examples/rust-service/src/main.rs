@@ -17,6 +17,9 @@
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;
+#[macro_use]
+extern crate log;
+extern crate syslog;
 
 mod model;
 mod schema;
@@ -24,8 +27,15 @@ mod schema;
 use kubos_service::{Config, Service};
 use model::Subsystem;
 use schema::{MutationRoot, QueryRoot};
+use syslog::Facility;
 
 fn main() {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("example-service"),
+    ).unwrap();
+    
     Service::new(
         Config::new("example-service"),
         Subsystem::new(),

@@ -6,3 +6,5 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 [dependencies]
 kubos-service = { path = "../../services/kubos-service" }
 juniper = "0.9"
+log = "^0.4.0"
+syslog = "4.0"

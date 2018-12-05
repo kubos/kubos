@@ -18,27 +18,19 @@ without the environment indicator at the top of the file:
 
 import argparse
 import app_api
-import datetime
+import logging
+from logging.handlers import SysLogHandler
 import sys
-import toml
 import time
+import toml
 
 SERVICES = app_api.Services()
-BOOTFILE = '/home/system/var/onboot-output'
-COMMANDFILE = '/home/system/var/oncommand-output'
-ERRORSFILE = '/home/system/var/mission-errors'
-
-# Helper function to insert a timestamp into the log message
-def write_log(logfile, message):
-
-    logfile.write("%s: %s\n" % (str(datetime.datetime.now()), message))
 
 # On-boot logic which will be called at boottime if this app is registered with
 # the applications service
-def on_boot():
-
-    with open(BOOTFILE, 'a+') as file:
-        write_log(file, "OnBoot logic")
+def on_boot(logger):
+        
+    logger.info("OnBoot logic")
 
     while True:
         # Get the current amount of available memory from the monitor service
@@ -46,13 +38,13 @@ def on_boot():
             request = '{memInfo{available}}'
             response = SERVICES.query(service="monitor-service", query=request)
         except Exception as e: 
-            write_log(file, "Something went wrong: " + str(e) + "")
+            logger.error("Something went wrong: " + str(e) + "")
             continue
         
         data = response["memInfo"]
         available = data["available"]
         
-        write_log(file, "%s: Current available memory: %s kB" % (str(datetime.datetime.now()), available))
+        logger.info("Current available memory: %s kB" % (available))
         
         request = '''
             mutation {
@@ -67,7 +59,7 @@ def on_boot():
         try:
             response = SERVICES.query(service="telemetry-service", query=request)
         except Exception as e: 
-            write_log(file, "Something went wrong: " + str(e) + "")
+            logger.info("Something went wrong: " + str(e) + "")
             print "OnCommand logic encountered errors"
             continue
             
@@ -76,29 +68,25 @@ def on_boot():
         errors = data["errors"]
         
         if success == False:
-            write_log(file, "Telemetry insert encountered errors: " + str(errors) + "")
-
-        with open(BOOTFILE, 'a+') as file:
-            write_log(file, "\n")
+            logger.error("Telemetry insert encountered errors: " + str(errors) + "")
         
         # Wait five minutes before checking again
         time.sleep(300)
 
 # On-demand logic which will be called manually by the user (potentially via the applications service)
-def on_command(cmd_args):
+def on_command(logger, cmd_args):
 
-    with open(COMMANDFILE, 'a+') as file:
-        write_log(file, "OnCommand logic")
+    logger.info("OnCommand logic")
 
     if cmd_args.cmd_string == 'safemode':
         if cmd_args.cmd_int > 0:
             with open(LOGFILE, 'a+') as file:
-                write_log(file, 
+                logger.info(
                     "Going into safemode for {} seconds".format(
                         cmd_args.cmd_int))
-                write_log(file, "Sending commands to hardware to go into safemode")
+                logger.info("Sending commands to hardware to go into safemode")
                 time.sleep(cmd_args.cmd_int)
-                write_log(file, "Sending commands to hardware to normal operation")
+                logger.info("Sending commands to hardware to normal operation")
         else:
             raise ValueError("Command Integer must be positive and non-zero")
             sys.exit(1)
@@ -106,19 +94,27 @@ def on_command(cmd_args):
     else:
         query = '{ apps { active, app { uuid, name, version, author } } }'
         try:
-            with open(COMMANDFILE, 'a+') as file:
-                write_log(file, "Querying for active applications")
-                write_log(file, "Query: {}".format(query))
-                apps = SERVICES.query(service="app-service", query=query)
-                write_log(file, "Active applications are: {}".format(apps))
+            logger.info("Querying for active applications")
+            logger.info("Query: {}".format(query))
+            apps = SERVICES.query(service="app-service", query=query)
+            logger.info("Active applications are: {}".format(apps))
         except Exception as e:
-            with open(COMMANDFILE, 'a+') as file:
-                write_log(file, "Housekeeping caused an error: {},{},{}".format(
-                    type(e), e.args, e))
-                sys.exit(1)
+            logger.error("Housekeeping caused an error: {},{},{}".format(
+                type(e), e.args, e))
+            sys.exit(1)
         
 
 def main():
+    logger = logging.getLogger('mission-app')
+    logger.setLevel(logging.INFO)
+    
+    handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+    
+    formatter = logging.Formatter('mission-app: %(message)s')
+    
+    handler.formatter = formatter
+    logger.addHandler(handler)
+    
     parser = argparse.ArgumentParser()
 
     # The -r argument is required to be present by the applications service
@@ -145,12 +141,11 @@ def main():
     args = parser.parse_args()
 
     if args.run[0] == 'OnBoot':
-        on_boot()
+        on_boot(logger)
     elif args.run[0] == 'OnCommand':
-        on_command(args)
+        on_command(logger, args)
     else:
-        with open(ERRORSFILE, 'a+') as file:
-            write_log(file, "Unknown run level specified")
+        logger.error("Unknown run level specified")
         print "Unknown run level specified"
         sys.exit(1)
 
