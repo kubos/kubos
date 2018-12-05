@@ -93,6 +93,8 @@
 #[macro_use]
 extern crate juniper;
 extern crate kubos_service;
+extern crate log;
+extern crate syslog;
 
 mod model;
 mod schema;
@@ -100,8 +102,15 @@ mod schema;
 use kubos_service::{Config, Service};
 use model::Supervisor;
 use schema::{MutationRoot, QueryRoot};
+use syslog::Facility;
 
 fn main() {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("iobc-supervisor-service"),
+    ).unwrap();
+    
     Service::new(
         Config::new("iobc-supervisor-service"),
         Supervisor::new(),

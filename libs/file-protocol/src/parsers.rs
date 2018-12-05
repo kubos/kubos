@@ -36,7 +36,8 @@ pub fn parse_channel_id(message: &Value) -> Result<u32, ProtocolError> {
         .next()
         .ok_or(ProtocolError::MessageParseError {
             err: "No contents".to_owned(),
-        })?.to_owned();
+        })?
+        .to_owned();
 
     if let Value::U64(channel_id) = first_param {
         Ok(channel_id as u32)
@@ -63,10 +64,14 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
         .next()
         .ok_or(ProtocolError::MessageParseError {
             err: "No contents".to_owned(),
-        })?.to_owned();
+        })?
+        .to_owned();
 
     if let Value::U64(channel) = channel_param {
         let channel_id = channel as u32;
+        if let Some(msg) = parse_cleanup_request(channel_id, pieces.to_owned())? {
+            return Ok(msg);
+        }
         if let Some(msg) = parse_export_request(channel_id, pieces.to_owned())? {
             return Ok(msg);
         }
@@ -99,6 +104,33 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
     return Err(ProtocolError::MessageParseError {
         err: "No message found".to_owned(),
     });
+}
+
+// Parse out cleanup request
+// { channel_id, "cleanup", [hash] }
+pub fn parse_cleanup_request(
+    channel_id: u32,
+    mut pieces: Iter<Value>,
+) -> Result<Option<Message>, ProtocolError> {
+    if let Some(Value::String(op)) = pieces.next() {
+        if op == "cleanup" {
+            match pieces.next() {
+                Some(Value::String(hash)) => {
+                    return Ok(Some(Message::Cleanup(channel_id, Some(hash.to_owned()))))
+                }
+                Some(Value::Null) => return Ok(Some(Message::Cleanup(channel_id, None))),
+                None => return Ok(Some(Message::Cleanup(channel_id, None))),
+                _ => {
+                    return Err(ProtocolError::MissingParam(
+                        "cleanup".to_owned(),
+                        "hash".to_owned(),
+                    ));
+                }
+            }
+        }
+    }
+
+    return Ok(None);
 }
 
 // Parse out export request
@@ -189,9 +221,21 @@ pub fn parse_success_receive(
     mut pieces: Iter<Value>,
 ) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::Bool(true)) = pieces.next() {
-        // Good - { channel_id, true, ...values }
-        if let None = pieces.next() {
-            return Ok(Some(Message::SuccessReceive(channel_id)));
+        // Good - { channel_id, true, hash}
+        if let Some(piece) = pieces.next() {
+            let hash = match piece {
+                Value::String(val) => val,
+                _ => {
+                    return Err(ProtocolError::InvalidParam(
+                        "success_receive".to_owned(),
+                        "hash".to_owned(),
+                    ))
+                }
+            };
+
+            if let None = pieces.next() {
+                return Ok(Some(Message::SuccessReceive(channel_id, hash.to_owned())));
+            }
         }
     }
 

@@ -37,7 +37,7 @@ fn main() {
 
     let config = ServiceConfig::new("file-transfer-service");
 
-    info!("Starting file transfer service");
+    info!("Starting file transfer service at {}", config.hosturl());
 
     match recv_loop(config) {
         Ok(()) => warn!("Service listener loop exited successfully?"),

@@ -78,7 +78,8 @@ pub fn store_meta(prefix: &str, hash: &str, num_chunks: u32) -> Result<(), Proto
         .map_err(|err| ProtocolError::StorageError {
             action: format!("create/open {:?} for writing", temp_path),
             err,
-        })?.write_all(&vec)
+        })?
+        .write_all(&vec)
         .map_err(|err| ProtocolError::StorageError {
             action: format!("write metadata to {:?}", temp_path),
             err,
@@ -105,7 +106,8 @@ pub fn load_chunk(prefix: &str, hash: &str, index: u32) -> Result<Vec<u8>, Proto
         .map_err(|err| ProtocolError::StorageError {
             action: format!("open chunk file {}", index),
             err,
-        })?.read_to_end(&mut data)
+        })?
+        .read_to_end(&mut data)
         .map_err(|err| ProtocolError::StorageError {
             action: format!("read chunk file {}", index),
             err,
@@ -125,7 +127,8 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, ProtocolError> {
         .map_err(|err| ProtocolError::StorageError {
             action: format!("open {} metadata file", hash),
             err,
-        })?.read_to_end(&mut data)
+        })?
+        .read_to_end(&mut data)
         .map_err(|err| ProtocolError::StorageError {
             action: format!("read {} metadata file", hash),
             err,
@@ -152,7 +155,8 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, ProtocolError> {
                         None
                     }
                 })
-        }).ok_or(ProtocolError::StorageParseError(
+        })
+        .ok_or(ProtocolError::StorageParseError(
             "Failed to parse temporary file's metadata".to_owned(),
         ))?;
 
@@ -194,7 +198,8 @@ pub fn validate_file(
                         "Failed to parse file name: {:?}",
                         err
                     ))
-                }).and_then(|val| {
+                })
+                .and_then(|val| {
                     val.parse::<i32>().map_err(|err| {
                         ProtocolError::StorageParseError(format!(
                             "Failed to parse chunk_number {:?}",
@@ -205,7 +210,8 @@ pub fn validate_file(
                 Ok(num) => Some(num),
                 _ => None,
             }
-        }).collect();
+        })
+        .collect();
 
     converted_entries.sort();
 
@@ -343,6 +349,7 @@ pub fn initialize_file(
     }
 
     store_meta(prefix, &hash, index)?;
+    fs::remove_file(&temp_path);
 
     if let Ok(meta) = fs::metadata(source_path) {
         Ok((hash, index, meta.mode()))
@@ -448,9 +455,19 @@ pub fn delete_chunk(prefix: &str, hash: &str, index: u32) -> Result<(), Protocol
 
 pub fn delete_file(prefix: &str, hash: &str) -> Result<(), ProtocolError> {
     let path = Path::new(&format!("{}/storage", prefix)).join(hash);
-
     fs::remove_dir_all(path).map_err(|err| ProtocolError::StorageError {
         action: format!("deleting file {}", hash),
+        err,
+    })?;
+
+    Ok(())
+}
+
+pub fn delete_storage(prefix: &str) -> Result<(), ProtocolError> {
+    let path = format!("{}", prefix);
+    let path = Path::new(&path);
+    fs::remove_dir_all(path).map_err(|err| ProtocolError::StorageError {
+        action: format!("deleting path {:?}", path),
         err,
     })?;
 
