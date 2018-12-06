@@ -16,7 +16,7 @@ def on_command(logger):
 def main():
 
     logger = logging.getLogger('mission-framework')
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     
     handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
     
