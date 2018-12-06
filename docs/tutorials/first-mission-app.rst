@@ -161,12 +161,60 @@ When our mission application is running in-flight, we likely won't have constant
 As a result, it would be better if we were routing our messages to a log file.
 That way we can check the status of our application at our discretion.
 
-Because our on-boot logic will perform different tasks than our on-command logic, we'll have two
-separate logging files, ``onboot-output`` and ``oncommand-output``. We'll also add a third log file,
-``mission-errors``, for any errors which occur before either of the run levels have been called.
+Kubos Linux is uses `rsyslog <https://www.rsyslog.com/>`__ to automatically route log messages to the
+appropriate logg file and then rotate those files when they become too large.
 
-Additionally, we don't know how many times our mission application will be called before we're able
-to check the logs, so we'll open the files in "append" mode.
+All user applications should setup their logging to write to the user facility.
+This will cause all log messages to be routed to files in ``/home/system/log/apps``
+
+.. note::
+
+    Log files are traditionally stored in ``/var/log``. ``/var/log`` has been set up as a symlink to
+    ``/home/system/log``.
+    
+Within this directory, there may be several files:
+
+    - ``debug.log`` - Records all log messages
+    - ``info.log`` - Records log messages with a priority of ``info`` or higher
+    - ``warn.log`` - Records log messages with a priority of ``warn`` or higher
+
+Additionally, there may be files which match one of the above names, but are suffixed with a time
+stamp.
+For example, ``debug.log.2018.12.01-00.12.07``.
+These are archived log files. Each log file has a maximum file size.
+Once this size is reached, the current file is renamed as an archive file and a new log file is started.
+By default, five archive files of each log type will be retained.
+If a new archive file is created and there are already five files, the oldest will be deleted.
+
+Logging should be setup like so:
+
+.. code-block:: python
+
+    import logging
+    from logging.handlers import SysLogHandler
+    
+    # Create a new logger. We'll give it a name that matches our application
+    logger = logging.getLogger('my-mission-app')
+    
+    # Set the lowest log level which should be routed to rsyslog for processing
+    logger.setLevel(logging.INFO)
+    
+    # We'll send our messages to the standard Unix domain socket for logging (`/dev/log`)
+    # Since this is a user program, we'll use the LOG_USER facility
+    handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+    
+    # Prefix all messages with the application name so that SysLog will set the
+    # `programname` and `APP-NAME` property values accordingly.
+    # This way we can easily see that the messages came from this application when viewing the log
+    formatter = logging.Formatter('my-mission-app: %(message)s')
+    
+    # Finalize our settings
+    handler.formatter = formatter
+    logger.addHandler(handler)
+    
+    # Write a test message
+    logger.info("Test Message")
+
 
 Our new file should look like this:
 
@@ -175,21 +223,29 @@ Our new file should look like this:
     #!/usr/bin/env python
     
     import argparse
+    import logging
+    from logging.handlers import SysLogHandler
     import sys
     
-    def on_boot():
+    def on_boot(logger):
         
-        file = open("onboot-output", "a+")
-        file.write("OnBoot logic\r\n")
+        logger.info("OnBoot logic")
         
-    def on_command():
+    def on_command(logger):
         
-        file = open("oncommand-output","a+")
-        file.write("OnCommand logic\r\n")
+        logger.info("OnCommand logic")
     
     def main():
     
-        errors = open("mission-errors","a+")
+        logger = logging.getLogger('my-mission-app')
+        logger.setLevel(logging.INFO)
+        
+        handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+        
+        formatter = logging.Formatter('my-mission-app: %(message)s')
+        
+        handler.formatter = formatter
+        logger.addHandler(handler)
         
         parser = argparse.ArgumentParser()
         
@@ -198,27 +254,35 @@ Our new file should look like this:
         args = parser.parse_args()
         
         if args.run == 'OnBoot':
-            on_boot()
+            on_boot(logger)
         elif args.run == 'OnCommand':
-            on_command()
+            on_command(logger)
         else:
-            errors.write("Unknown run level specified\r\n")
+            logger.error("Unknown run level specified")
             print "Unknown run level specified"
             sys.exit(1)
         
     if __name__ == "__main__":
         main()
         
-If we run the program locally, we can check that the files are being successfully created::
+After transferring the file to the target OBC, we can log in to the OBC and test that the logging
+works::
 
-    $ ./my-mission-app.py -r OnBoot
-    $ ./my-mission-app.py -r OnBoot
-    $ cat onboot-output
-    OnBoot logic
-    OnBoot logic
-    $ ./my-mission-app.py -r OnCommand
-    $ cat oncommand-output
-    OnCommand logic
+    $ scp my-mission-app.py kubos@10.0.2.20:/home/kubos
+    kubos@10.0.2.20's password: ********
+    my-mission-app.py                                    100%   970    1.0KB/s   00:00
+    $ ssh kubos@10.0.2.20
+    kubos@10.0.2.20's password: ********
+    /home/kubos # ./my-mission-app.py -r OnBoot
+    /home/kubos # ./my-mission-app.py -r OnBoot
+    /home/kubos # ./my-mission-app.py -r OnCommand
+    /home/kubos # cd /var/log/apps
+    /home/system/log/apps # ls
+    debug.log  info.log
+    /home/system/log/apps # cat info.log
+    Jan  1 00:07:18 Kubos my-mission-app: OnBoot logic
+    Jan  1 00:07:21 Kubos my-mission-app: OnBoot logic
+    Jan  1 00:07:24 Kubos my-mission-app: OnCommand logic
     
 Kubos Services and GraphQL
 --------------------------
@@ -337,8 +401,6 @@ For example, links to the schemas for all of the pre-built hardware services can
 Querying a Service
 ------------------
 
-From this point on, we'll be testing on the target OBC, rather than locally.
-
 For this tutorial, we'll be querying the :doc:`monitor service <../services/monitor-service>` for
 the current amount of available memory.
 
@@ -396,7 +458,7 @@ And finally, we'll parse the result to get our current available memory quantity
 
     data = response["memInfo"]
     available = data["available"]
-    file.write("Current available memory: %d kB \r\n" % (available))
+    logger.info("Current available memory: %d kB \r\n" % (available))
 
 After adding error handling, our program should look like this:
 
@@ -406,37 +468,44 @@ After adding error handling, our program should look like this:
 
     import argparse
     import app_api
+    import logging
+    from logging.handlers import SysLogHandler
     import sys
     
     SERVICES = app_api.Services()
     
-    def on_boot():
+    def on_boot(logger):
         
-        file = open("onboot-output", "a+")
-        file.write("OnBoot logic\r\n")
+        logger.info("OnBoot logic")
         
-    def on_command():
-        
-        file = open("oncommand-output","a+")
-        
+    def on_command(logger):
+
         request = '{ memInfo { available } }'
         
         try:
             response = SERVICES.query(service="monitor-service", query=request)
         except Exception as e: 
-            file.write("Something went wrong: " + str(e) + "\r\n")
+            logger.error("Something went wrong: " + str(e) + "\r\n")
             print "OnCommand logic encountered errors"
             sys.exit(1)
         
         data = response["memInfo"]
         available = data["available"]
         
-        file.write("Current available memory: %d kB \r\n" % (available))
+        logger.info("Current available memory: %d kB \r\n" % (available))
         
         print "OnCommand logic completed successfully"
     
     def main():
-        errors = open("mission-errors","a+")
+        logger = logging.getLogger('my-mission-app')
+        logger.setLevel(logging.INFO)
+        
+        handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+        
+        formatter = logging.Formatter('my-mission-app: %(message)s')
+        
+        handler.formatter = formatter
+        logger.addHandler(handler)
     
         parser = argparse.ArgumentParser()
         
@@ -445,11 +514,11 @@ After adding error handling, our program should look like this:
         args = parser.parse_args()
         
         if args.run == 'OnBoot':
-            on_boot()
+            on_boot(logger)
         elif args.run == 'OnCommand':
-            on_command()
+            on_command(logger)
         else:
-            errors.write("Unknown run level specified\r\n")
+            logger.error("Unknown run level specified\r\n")
             print "Unknown run level specified"
             sys.exit(1)
         
@@ -533,32 +602,31 @@ With some additional error handling, our final application looks like this:
     
     import argparse
     import app_api
+    import logging
+    from logging.handlers import SysLogHandler
     import sys
     
     SERVICES = app_api.Services()
     
-    def on_boot():
+    def on_boot(logger):
         
-        file = open("onboot-output", "a+")
-        file.write("OnBoot logic\r\n")
+        logger.info("OnBoot logic")
         
-    def on_command():
-        
-        file = open("oncommand-output","a+")
+    def on_command(logger):
         
         request = '{memInfo{available}}'
         
         try:
             response = SERVICES.query(service="monitor-service", query=request)
         except Exception as e: 
-            file.write("Something went wrong: " + str(e) + "\r\n")
+            logger.error("Something went wrong: " + str(e) + "\r\n")
             print "OnCommand logic encountered errors"
             sys.exit(1)
         
         data = response["memInfo"]
         available = data["available"]
         
-        file.write("Current available memory: %s kB \r\n" % (available))
+        logger.info("Current available memory: %s kB \r\n" % (available))
         
         request = '''
             mutation {
@@ -572,7 +640,7 @@ With some additional error handling, our final application looks like this:
         try:
             response = SERVICES.query(service="telemetry-service", query=request)
         except Exception as e: 
-            file.write("Something went wrong: " + str(e) + "\r\n")
+            logger.error("Something went wrong: " + str(e) + "\r\n")
             print "OnCommand logic encountered errors"
             sys.exit(1)
             
@@ -581,13 +649,23 @@ With some additional error handling, our final application looks like this:
         errors = data["errors"]
         
         if success == False:
-            file.write("Telemetry insert encountered errors: " + str(errors) + "\r\n")
+            logger.error("Telemetry insert encountered errors: " + str(errors) + "\r\n")
             print "OnCommand logic encountered errors"
             sys.exit(1)
         else :
             print "OnCommand logic completed successfully"
     
     def main():
+        logger = logging.getLogger('my-mission-app')
+        logger.setLevel(logging.INFO)
+        
+        handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+        
+        formatter = logging.Formatter('my-mission-app: %(message)s')
+        
+        handler.formatter = formatter
+        logger.addHandler(handler)
+        
         parser = argparse.ArgumentParser()
         
         parser.add_argument('--run', '-r')
@@ -595,10 +673,11 @@ With some additional error handling, our final application looks like this:
         args = parser.parse_args()
         
         if args.run == 'OnBoot':
-            on_boot()
+            on_boot(logger)
         elif args.run == 'OnCommand':
-            on_command()
+            on_command(logger)
         else:
+            logger.error("Unknown run level specified")
             print "Unknown run level specified"
             sys.exit(1)
         
