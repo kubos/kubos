@@ -17,6 +17,7 @@
 
 #[macro_use]
 extern crate failure;
+extern crate fs_extra;
 extern crate getopts;
 #[macro_use]
 extern crate juniper;
@@ -56,7 +57,7 @@ fn main() -> Result<(), Error> {
         log::LevelFilter::Debug,
         Some("kubos-app-service"),
     ).unwrap();
-        
+
     let args: Vec<String> = env::args().collect();
     let mut opts = Options::new();
 

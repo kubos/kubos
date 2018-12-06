@@ -16,6 +16,7 @@
 
 use app_entry::*;
 use error::*;
+use fs_extra;
 use kubos_app::RunLevel;
 use std::cell::RefCell;
 use std::fs;
@@ -193,46 +194,10 @@ impl AppRegistry {
             });
         }
 
-        let files: Vec<fs::DirEntry> = fs::read_dir(app_path)?
-            .filter_map(|file| file.ok())
-            .collect();
-
-        if files.len() != 2 {
-            return Err(AppError::RegisterError {
-                err: "Exactly two files should be present in the app directory".to_owned(),
-            });
-        }
-
-        let mut manifest_file: Option<fs::DirEntry> = None;
-        let mut app_file: Option<fs::DirEntry> = None;
-
-        for file in files {
-            match file.file_name().to_str() {
-                Some("manifest.toml") => manifest_file = Some(file),
-                Some(_) => app_file = Some(file),
-                _ => {}
-            }
-        }
-
-        let manifest = match manifest_file {
-            Some(file) => file,
-            None => {
-                return Err(AppError::RegisterError {
-                    err: "Failed to find manifest file".to_owned(),
-                })
-            }
-        };
-        let app = match app_file {
-            Some(file) => file,
-            None => {
-                return Err(AppError::RegisterError {
-                    err: "Failed to find app file".to_owned(),
-                })
-            }
-        };
-
+        // Load the metadata
         let mut data = String::new();
-        fs::File::open(manifest.path()).and_then(|mut fp| fp.read_to_string(&mut data))?;
+        fs::File::open(app_path.join("manifest.toml"))
+            .and_then(|mut fp| fp.read_to_string(&mut data))?;
 
         let metadata: AppMetadata = match toml::from_str(&data) {
             Ok(val) => val,
@@ -243,6 +208,14 @@ impl AppRegistry {
                 })
             }
         };
+
+        // Make sure the file which should be called for execution is present in the directory
+        let app_name = metadata.name.clone();
+        if !app_path.join(app_name.clone()).exists() {
+            return Err(AppError::RegisterError {
+                err: format!("Application file {} not found in given path", app_name),
+            });
+        }
 
         let mut entries = self.entries.borrow_mut();
         let app_uuid = match uuid {
@@ -274,7 +247,21 @@ impl AppRegistry {
             fs::create_dir_all(app_dir)?;
         }
 
-        fs::copy(app.path(), app_dir.join(app.file_name()))?;
+        // Copy everything into the official registry directory
+        let files: Vec<PathBuf> = fs::read_dir(app_path)?
+            .filter_map(|file| 
+                if let Some(entry) = file.ok() {
+                    Some(entry.path())
+                } else {
+                    None
+                }
+            ).collect();
+
+        fs_extra::copy_items(&files, app_dir, &fs_extra::dir::CopyOptions::new()).map_err(
+            |error| AppError::RegisterError {
+                err: format!("Error copying files into registry dir: {}", error),
+            },
+        )?;
 
         self.set_active(&app_uuid, &app_dir_str)?;
 
@@ -283,7 +270,7 @@ impl AppRegistry {
                 uuid: app_uuid,
                 metadata: metadata,
                 pid: 0,
-                path: format!("{}/{}", app_dir_str, app.file_name().to_string_lossy()),
+                path: format!("{}/{}", app_dir_str, app_name),
             },
             active_version: true,
         };
@@ -447,7 +434,10 @@ impl AppRegistry {
                     let uuid = file.file_name();
                     match self.start_app(&uuid.to_string_lossy(), RunLevel::OnBoot, None) {
                         Ok(_) => apps_started += 1,
-                        Err(_) => apps_not_started += 1,
+                        Err(error) => {
+                            eprintln!("Failed to start {}: {:?}", uuid.to_string_lossy(), error);
+                            apps_not_started += 1
+                        }
                     }
                 }
                 Err(_) => apps_not_started += 1,
