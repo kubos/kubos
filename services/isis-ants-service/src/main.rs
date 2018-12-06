@@ -357,15 +357,19 @@ extern crate isis_ants_api;
 extern crate juniper;
 #[macro_use]
 extern crate kubos_service;
+#[macro_use]
+extern crate log;
 #[cfg(test)]
 #[macro_use]
 extern crate serde_json;
+extern crate syslog;
 
 use isis_ants_api::AntSResult;
 use kubos_service::{Config, Service};
 use model::Subsystem;
 pub use objects::*;
 use schema::{MutationRoot, QueryRoot};
+use syslog::Facility;
 
 mod model;
 mod objects;
@@ -374,6 +378,12 @@ mod schema;
 mod tests;
 
 fn main() -> AntSResult<()> {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("isis-ants-service"),
+    ).unwrap();
+    
     let config = Config::new("isis-ants-service");
 
     let bus = config
