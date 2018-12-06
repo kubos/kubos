@@ -96,7 +96,7 @@ Receiving a File from an OBC
 Next, we'll request that the OBC send us the log file that was created by running the on-command
 logic in our mission application::
 
-    $ kubos-file-client download /home/kubos/oncommand-output -r 10.0.2.20 -p 8008
+    $ kubos-file-client download /home/system/log/apps/info.log -r 10.0.2.20 -p 8008
     
 We're not specifying a destination file, which will result in the transferred file being saved as
 `oncommand-output` in our current directory.
@@ -106,8 +106,8 @@ The output from the client should look like this:
 .. code-block:: none
 
     17:56:27 [INFO] Starting file transfer client
-    17:56:27 [INFO] Downloading remote: /home/kubos/oncommand-output to local: oncommand-output
-    17:56:27 [INFO] -> { import, /home/kubos/oncommand-output }
+    17:56:27 [INFO] Downloading remote: /home/system/log/apps/info.log to local: info.log
+    17:56:27 [INFO] -> { import, /home/system/log/apps/info.log }
     17:56:27 [INFO] <- { 796611, true, 1a564e8da7b83c2d6a2a44d447855f6d, 1, 33188 }
     17:56:27 [INFO] -> { 796611, 1a564e8da7b83c2d6a2a44d447855f6d, false, [0, 1] }
     17:56:27 [INFO] <- { 796611, 1a564e8da7b83c2d6a2a44d447855f6d, 0, chunk_data }
@@ -117,8 +117,12 @@ The output from the client should look like this:
 
 We can then check the contents of the transferred file::
 
-    $ cat oncommand-output
-    Current available memory: 496768 kB
-    Current available memory: 497060 kB
-    1970-01-01 01:11:23.947890: Current available memory: 496952 kB
+    $ cat info.log
+    /home/system/log/apps # cat info.log
+    Jan  1 00:07:18 Kubos my-mission-app: OnBoot logic
+    Jan  1 00:07:21 Kubos my-mission-app: OnBoot logic
+    Jan  1 00:07:24 Kubos my-mission-app: OnCommand logic
+    Jan  1 00:18:55 Kubos my-mission-app: Current available memory: 496768 kB
+    Jan  1 00:23:21 Kubos my-mission-app: Current available memory: 497060 kB
+    Jan  1 00:25:43 Kubos my-mission-app: Current available memory: 496952 kB
     
