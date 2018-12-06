@@ -39,7 +39,7 @@ impl Subsystem {
     /// Code initializing subsystems communications
     /// would likely be placed here
     pub fn new() -> Subsystem {
-        println!("getting new subsystem data");
+        info!("Getting new subsystem data");
         Subsystem {}
     }
 
@@ -47,7 +47,7 @@ impl Subsystem {
     /// Code querying for new power value
     /// could be placed here
     pub fn power(&self) -> Result<bool, Error> {
-        println!("getting power");
+        info!("Getting power");
         // Low level query here
         Ok(true)
     }
@@ -56,7 +56,7 @@ impl Subsystem {
     /// Here we would call into the low level
     /// device function
     pub fn set_power(&self, _power: bool) -> Result<SetPower, Error> {
-        println!("Setting power state");
+        info!("Setting power state");
         // Send command to device here
         if _power {
             Ok(SetPower { power: true })
@@ -72,14 +72,14 @@ impl Subsystem {
     /// Code querying for new uptime value
     /// could be placed here
     pub fn uptime(&self) -> Result<i32, Error> {
-        println!("getting uptime");
+        info!("Getting uptime");
         // Low level query here
         Ok(111001)
     }
 
     /// Uptime reset function
     pub fn reset_uptime(&self) -> Result<ResetUptime, Error> {
-        println!("Resetting uptime");
+        info!("Resetting uptime");
         // Send command to device here
         Ok(ResetUptime { uptime: 0 })
     }
@@ -87,7 +87,7 @@ impl Subsystem {
     /// Temperature getter
     /// Demonstrates returning an error condition
     pub fn temperature(&self) -> Result<i32, Error> {
-        println!("getting temperature");
+        info!("Getting temperature");
         // Low level query here
         Err(Error::new(
             ErrorKind::TimedOut,
@@ -98,7 +98,7 @@ impl Subsystem {
     /// Temperature calibration
     /// Demonstrates a mutation with error condition
     pub fn calibrate_thermometer(&self) -> Result<CalibrateThermometer, Error> {
-        println!("calibrating thermometer");
+        info!("Calibrating thermometer");
         Ok(CalibrateThermometer { temperature: 98 })
     }
 }
@@ -108,6 +108,6 @@ impl Drop for Subsystem {
     /// Here is where we would clean up
     /// any subsystem communications stuff
     fn drop(&mut self) {
-        println!("Destructing subsystem");
+        info!("Destructing subsystem");
     }
 }

@@ -1,33 +1,20 @@
-extern crate chrono;
 #[macro_use]
 extern crate failure;
 extern crate getopts;
 #[macro_use]
 extern crate kubos_app;
+#[macro_use]
+extern crate log;
+extern crate syslog;
 
-use chrono::Utc;
-use failure::Error;
+use failure::{Error, SyncFailure};
 use getopts::Options;
 use kubos_app::*;
-use std::fs::OpenOptions;
-use std::io::Write;
 use std::thread;
 use std::time::Duration;
+use syslog::Facility;
 
 struct MyApp;
-
-const BOOTFILE: &str = "/home/system/var/onboot-output";
-const COMMANDFILE: &str = "/home/system/var/oncommand-output";
-
-macro_rules! log {
-    ($log_file:ident, $msg:expr) => {{
-        writeln!($log_file, "{}: {}", Utc::now(), $msg).unwrap();
-    }};
-    ($log_file:ident, $msg:expr, $($arg:tt)*) => {{
-        let message = format!($msg, $($arg)*);
-        writeln!($log_file, "{}: {}", Utc::now(), message).unwrap();
-    }};
-}
 
 impl AppHandler for MyApp {
     fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
@@ -36,9 +23,7 @@ impl AppHandler for MyApp {
 
         loop {
             thread::sleep(Duration::from_secs(3));
-            // Set up the log file
-            let mut log_file = OpenOptions::new().create(true).append(true).open(BOOTFILE)?;
-            log!(log_file, "OnBoot logic called");
+            info!("OnBoot logic called");
 
             // Get the amount of memory currently available on the OBC
             let request = "{memInfo{available}}";
@@ -49,7 +34,7 @@ impl AppHandler for MyApp {
             ) {
                 Ok(msg) => msg,
                 Err(err) => {
-                    log!(log_file, "Monitor service query failed: {}", err);
+                    info!("Monitor service query failed: {}", err);
                     continue;
                 }
             };
@@ -83,19 +68,19 @@ impl AppHandler for MyApp {
                         });
 
                         if success == Some(true) {
-                            log!(log_file, "Current memory value saved to database");
+                            info!("Current memory value saved to database");
                         } else {
                             match msg.get("errors") {
-                                Some(errors) => log!(log_file,
+                                Some(errors) => info!(
                                     "Failed to save value to database: {}",
                                     errors
                                 ),
-                                None => log!(log_file, "Failed to save value to database"),
+                                None => info!("Failed to save value to database"),
                             };
                         }
                     }
                     Err(err) => {
-                        log!(log_file, "Monitor service mutation failed: {}", err);
+                        info!("Monitor service mutation failed: {}", err);
                         continue;
                     }
                 }
@@ -116,10 +101,7 @@ impl AppHandler for MyApp {
             Err(f) => panic!(f.to_string()),
         };
 
-        // Set up the log file
-        let mut log_file = OpenOptions::new().create(true).append(true).open(COMMANDFILE)?;
-
-        log!(log_file, "OnCommand logic called");
+        info!("OnCommand logic called");
 
         let subcommand = matches.opt_str("s").unwrap_or("".to_owned());
 
@@ -128,18 +110,18 @@ impl AppHandler for MyApp {
                 let time: u64 = match matches.opt_get("t") {
                     Ok(Some(val)) => val,
                     _ => {
-                        log!(log_file, "Command Integer must be positive and non-zero");
+                        info!("Command Integer must be positive and non-zero");
                         bail!("Command Integer must be positive and non-zero");
                     }
                 };
 
-                log!(log_file, "Going into safemode for {} seconds", time);
+                info!("Going into safemode for {} seconds", time);
                 thread::sleep(Duration::from_secs(time));
-                log!(log_file, "Resuming normal operations");
+                info!("Resuming normal operations");
             }
             _ => {
                 // Get a list of all the currently registered applications
-                log!(log_file, "Querying for active applications");
+                info!("Querying for active applications");
                 
                 let request = r#"{
                     apps {
@@ -158,9 +140,9 @@ impl AppHandler for MyApp {
                     request,
                     Some(Duration::from_secs(1)),
                 ) {
-                    Ok(msg) => log!(log_file, "App query result: {:?}", msg),
+                    Ok(msg) => info!("App query result: {:?}", msg),
                     Err(err) => {
-                        log!(log_file, "App service query failed: {}", err);
+                        info!("App service query failed: {}", err);
                         bail!("App service query failed: {}", err)
                     }
                 }
@@ -172,6 +154,21 @@ impl AppHandler for MyApp {
 }
 
 fn main() -> Result<(), Error> {
+    
+    if let Err(error) = syslog::init(
+        // Log using the User facility (Kubos services will use LOG_DAEMON)
+        Facility::LOG_USER,
+        // Set the minimum log level we care about
+        log::LevelFilter::Debug,
+        // Set the application/program name
+        Some("rust-mission-app"),
+        // Have to do `map_err(SyncFailure::new)` in order to convert
+        // error-chain Error into something `failure` can handle
+    ).map_err(SyncFailure::new)
+    {
+        eprintln!("Failed to start logging: {}", error);
+    }
+        
     let app = MyApp;
     app_main!(&app)?;
     
