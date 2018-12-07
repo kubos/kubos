@@ -30,6 +30,7 @@ members = [
 "services/app-service",
 "services/monitor-service",
 "services/comms-service",
+"services/ethernet-service",
 "services/file-service",
 "services/kubos-service",
 "services/iobc-supervisor-service",

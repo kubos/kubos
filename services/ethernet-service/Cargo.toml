@@ -1,0 +1,9 @@
+[package]
+name = "ethernet-service"
+version = "0.1.0"
+authors = ["William Greer <wgreer184@gmail.com>"]
+
+[dependencies]
+failure = "0.1.3"
+comms-service = { path = "../comms-service" }
+kubos-service = { path = "../kubos-service" }
