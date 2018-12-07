@@ -12,6 +12,20 @@ Two logging policy files are included in ``/etc/rsyslog.d/``:
     - ``kubos-apps.conf`` - Specifies the logging and rotation policies for mission applications
     - ``kubos-services.conf`` - Specifies the logging and rotation policision for services
 
+Within those files, and the main ``/etc/rsyslog.conf`` file which controls other system logs, each
+policy has the following format::
+
+    $outchannel {policy_name},/var/log/{desination_file},{max_size},{log_rotation_script}
+    {facility}.{priority} :omfile:${policy_name}
+    
+An example policy looks like this::
+
+    $outchannel service_debug,/var/log/kubos/debug.log,1000000,/home/system/kubos/kubos-rotate.sh debug.log
+    daemon.debug :omfile:$service_debug
+    
+Any of these components may be updated within their respective files in order to change the policy
+to match the user's desired behavior.
+
 Log Creation
 ~~~~~~~~~~~~
 
@@ -37,13 +51,18 @@ Within each of these sub-directories, the following files may be automatically c
 Log Rotation
 ~~~~~~~~~~~~
 
-All log files have a maximum size of 1MB.
+The ``/home/system/kubos/kubos-rotate.sh`` script is used to execute the rotation behavior.
+
+All log files have a maximum size of 1MB by default. This value can be updated by changing the
+max size parameter of the appropriate logging policy.
+
 Once this size is reached, the current file is renamed as an archive file and a new log file is
 started. Archive files use their original name, but are suffixed with the current timestamp.
 For example, ``debug.log.2018.12.01-00.12.07``.
 
 By default, five archive files of each log type will be retained.
 If a new archive file is created and there are already five files, the oldest will be deleted.
+This value is controlled by the ``MAX_COUNT`` variable in the ``kubos-rotate.sh`` script.
 
 Examples
 --------
@@ -91,7 +110,7 @@ and `syslog <https://docs.rs/syslog/4.0.1/syslog/>`__
 Python
 ~~~~~~
 
-Python programs will import two things: the main `logging library <https://docs.python.org/2/library/logging.html>`__,
+Python programs will import two things: the main `logging library <https://docs.python.org/2/library/logging.html>`__s
 and the `SysLogHandler log handler <https://docs.python.org/2/library/logging.handlers.html#sysloghandler>`__.
 
 .. code-block:: python
