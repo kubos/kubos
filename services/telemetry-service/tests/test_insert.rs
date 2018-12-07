@@ -44,8 +44,8 @@ fn test_insert_auto_timestamp() {
             }
         }"#;
     let mutation_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "insert": {
                     "errors": "",
                     "success": true
@@ -62,8 +62,8 @@ fn test_insert_auto_timestamp() {
             }
         }"#;
     let query_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry": [{
                     "subsystem": "test2",
                     "parameter": "voltage",
@@ -97,8 +97,8 @@ fn test_insert_custom_timestamp() {
             }
         }"#;
     let mutation_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "insert": {
                     "errors": "",
                     "success": true
@@ -116,8 +116,8 @@ fn test_insert_custom_timestamp() {
             }
         }"#;
     let query_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry": [{
                     "timestamp": 5.0,
                     "subsystem": "test2",
@@ -146,8 +146,8 @@ fn test_insert_multi_auto() {
     let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let mutation_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "insert": {
                     "errors": "",
                     "success": true
@@ -184,8 +184,8 @@ fn test_insert_multi_auto() {
             }
         }"#;
     let query_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry": [
                 {
                     "subsystem": "eps",
@@ -244,8 +244,8 @@ fn test_insert_current_timestamp() {
         }}"#, now);
     
     let mutation_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "insert": {
                     "errors": "",
                     "success": true
@@ -266,7 +266,7 @@ fn test_insert_current_timestamp() {
 
     assert_eq!(mutation_result, mutation_expected);
     
-    let timestamp = query_result["msg"]["telemetry"][0]["timestamp"].as_f64().unwrap();
+    let timestamp = query_result["data"]["telemetry"][0]["timestamp"].as_f64().unwrap();
     
     // The original f64 value gets converted to a string and then back to f64.
     // This is notoriously complicated and frequently results in discrepencies.

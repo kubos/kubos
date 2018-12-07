@@ -57,8 +57,8 @@ fn test_delete_ge() {
         }"#;
 
     let mutation_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "delete": {
                     "entriesDeleted": 7,
                     "errors": "",
@@ -77,8 +77,8 @@ fn test_delete_ge() {
             }
         }"#;
     let query_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry": [
                     {
                     "timestamp": 1003.0,
@@ -135,8 +135,8 @@ fn test_delete_le() {
         }"#;
 
     let mutation_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "delete": {
                     "entriesDeleted": 9,
                     "errors": "",
@@ -155,8 +155,8 @@ fn test_delete_le() {
             }
         }"#;
     let query_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry": [
                     {
                     "timestamp": 1010.0,
@@ -201,8 +201,8 @@ fn test_delete_range() {
         }"#;
 
     let mutation_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "delete": {
                     "entriesDeleted": 9,
                     "errors": "",
@@ -221,8 +221,8 @@ fn test_delete_range() {
             }
         }"#;
     let query_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry": [
                     {
                     "timestamp": 1010.0,
@@ -267,8 +267,8 @@ fn test_delete_subsystem() {
         }"#;
 
     let mutation_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "delete": {
                     "entriesDeleted": 4,
                     "errors": "",
@@ -285,8 +285,8 @@ fn test_delete_subsystem() {
             }
         }"#;
     let query_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry": [
                     {
                     "timestamp": 1010.0,
@@ -347,8 +347,8 @@ fn test_delete_parameter() {
         }"#;
 
     let mutation_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "delete": {
                     "entriesDeleted": 6,
                     "errors": "",
@@ -365,8 +365,8 @@ fn test_delete_parameter() {
             }
         }"#;
     let query_expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry": [
                     {
                     "timestamp": 1010.0,

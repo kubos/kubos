@@ -101,8 +101,8 @@ impl IAntS for MockAntS {
 macro_rules! wrap {
     ($result:ident) => {{
         json!({
-                        "msg": $result,
-                        "errs": ""
+                        "data": $result,
+                        "errors": ""
                 }).to_string()
     }};
 }

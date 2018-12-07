@@ -62,8 +62,8 @@ fn register_good() {
     );
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": {
                       "active": true,
@@ -114,8 +114,8 @@ fn register_no_manifest() {
     );
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": null,
                    "errors": "Failed to register app: Exactly two files should be present in the app directory",
@@ -170,8 +170,8 @@ fn register_extra_file() {
     );
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": null,
                    "errors": "Failed to register app: Exactly two files should be present in the app directory",
@@ -222,8 +222,8 @@ fn register_no_name() {
     );
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": null,
                    "errors": "Failed to parse manifest.toml: missing field `name`",
@@ -274,8 +274,8 @@ fn register_no_version() {
     );
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": null,
                    "errors": "Failed to parse manifest.toml: missing field `version`",
@@ -326,8 +326,8 @@ fn register_no_author() {
     );
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": null,
                    "errors": "Failed to parse manifest.toml: missing field `author`",
@@ -360,8 +360,8 @@ fn register_bad_path() {
     }"#;
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": null,
                    "errors": "Failed to register app: fake/files does not exist",
