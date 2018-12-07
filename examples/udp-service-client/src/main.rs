@@ -143,9 +143,9 @@ fn main() {
         Ok((amt, src)) => {
             println!("Received {} bytes from {}", amt, src);
             let mut v: serde_json::Value = serde_json::from_slice(&buf[0..(amt)]).unwrap();
-            // If there's  'msg' field in the returned JSON, then our query went (atleast mostly) successfully.
+            // If there's  'data' field in the returned JSON, then our query went (atleast mostly) successfully.
             // Extract the query response JSON from the field
-            match serde_json::from_value::<String>(v["msg"].clone()) {
+            match serde_json::from_value::<String>(v["data"].clone()) {
                 Ok(msg) => {
                     v = serde_json::from_str(&msg).unwrap_or_default();
                 }

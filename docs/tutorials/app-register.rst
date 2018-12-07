@@ -99,13 +99,13 @@ By default, the applications service uses port 8000.
 Our registration process should look like this::
 
     $ echo "mutation {register(path: \"/home/kubos/my-app\"){success,entry{app{uuid,name,path}}}}" | nc -uw1 10.0.2.20 8000
-    {"errs":"","msg":{"register":{"success":true,"entry":{"app":{"name":"my-mission-app.py","path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py","uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"}}}}}
+    {"errors":"","data":{"register":{"success":true,"entry":{"app":{"name":"my-mission-app.py","path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py","uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"}}}}}
 
 Adding a bit of formatting, the response looks like this::
 
     {
-        "errs": "",
-        "msg": {
+        "errors": "",
+        "data": {
             "register": {
                 "success": true,
                 "entry": {
@@ -156,7 +156,7 @@ Using the UUID returned from our registration, our request should look like this
 
     $ echo "mutation {startApp(uuid: \"8052dbe9-bab1-428e-8414-fb72b4af90bc\", runLevel: \"OnCommand\"){success,pid}}" \
     > | nc -uw1 10.0.2.20 8000
-    {"errs":"","msg":{"startApp":{"success":true,"pid":501}}}
+    {"errors":"","data":{"startApp":{"success":true,"pid":501}}}
 
 To verify that the app ran successfully, we'll check the contents of our log file::
 
@@ -189,8 +189,8 @@ except this time we'll add the ``uuid`` input parameter::
 The returned UUID should match our original UUID::
 
     {
-        "errs": "",
-        "msg": {
+        "errors": "",
+        "data": {
             "register": {
                 "success": true,
                 "entry": {
@@ -265,8 +265,8 @@ Our request should look like this::
 The response should look like this::
 
     {
-        "errs": "",
-        "msg": {
+        "errors": "",
+        "data": {
             "apps": [
                 {
                     "active":false,

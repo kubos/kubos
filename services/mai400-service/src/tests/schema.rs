@@ -654,7 +654,7 @@ fn telemetry_debug_irehs() {
     assert_eq!(result, wrap!(expected));
 
     let mut actual: serde_json::Value = serde_json::from_slice(&result.as_bytes()).unwrap();
-    actual = actual["msg"].clone();
+    actual = actual["data"].clone();
 
     // Make sure derived structure values matche original values from arrays
 

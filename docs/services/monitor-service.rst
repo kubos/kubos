@@ -76,8 +76,8 @@ An example query might look like this::
 The response from the service might look like this::
 
     {
-        "errs":"",
-        "msg": {
+        "errors":"",
+        "data": {
             "ps":[
                 {
                     "cmd": "/usr/sbin/file-service",
