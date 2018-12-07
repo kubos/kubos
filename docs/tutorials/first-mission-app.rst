@@ -161,8 +161,8 @@ When our mission application is running in-flight, we likely won't have constant
 As a result, it would be better if we were routing our messages to a log file.
 That way we can check the status of our application at our discretion.
 
-Kubos Linux is uses `rsyslog <https://www.rsyslog.com/>`__ to automatically route log messages to the
-appropriate logg file and then rotate those files when they become too large.
+Kubos Linux uses `rsyslog <https://www.rsyslog.com/>`__ to automatically route log messages to the
+appropriate log file and then rotate those files when they become too large.
 
 All user applications should setup their logging to write to the user facility.
 This will cause all log messages to be routed to files in ``/home/system/log/apps``

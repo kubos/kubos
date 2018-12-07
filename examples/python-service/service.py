@@ -8,10 +8,21 @@
 Boilerplate main for service application.
 """
 
+import logging
+
 from service import schema
 from kubos_service.config import Config
+from logging.handlers import SysLogHandler
 
 config = Config("example-service")
+
+# Setup logging
+logger = logging.getLogger("example-service")
+logger.setLevel(logging.DEBUG)
+handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_DAEMON)
+formatter = logging.Formatter('example-service: %(message)s')
+handler.formatter = formatter
+logger.addHandler(handler)
 
 # from kubos_service import http_service
 # Start an http service
