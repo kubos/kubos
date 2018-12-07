@@ -6,7 +6,7 @@
 //!
 //! # Example Usage
 //!
-//! ```rust
+//! ```rust,no_run
 //! # extern crate comms_service;
 //!
 //! use comms_service::*;
