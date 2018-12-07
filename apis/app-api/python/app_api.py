@@ -78,7 +78,7 @@ class Services:
             raise
 
         # Check that it follows GraphQL format
-        if 'data' not in response or 'errors' not in response:
+        if 'errors' not in response:
             raise KeyError(
                 "{} Endpoint Error: ".format(service) +
                 "Response contains incorrect fields: \n{}".format(response))
