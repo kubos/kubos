@@ -1,6 +1,22 @@
 Kubos Changelog
 ===============
 
+v1.9.0 - Dec 6th 2018
+---------------------
+
+- `Added support for logging using rsyslog <https://docs.kubos.com/latest/tutorials/first-mission-app.html#adding-logging>`__
+- Updated all Kubos services to use new logging
+- `Updated file transfer service to clean up temporary storage directories after successful transfer and on-request <https://docs.kubos.com/latest/apis/kubos-libs/file-protocol.html#cleanup-request>`__
+- `Added SLIP support to all boards <https://docs.kubos.com/latest/os-docs/using-kubos-linux.html#slip>`__
+- Updated the applications service to allow more than two files to be present in the directory used
+  to register an application
+
+Bug Fixes:
+~~~~~~~~~~
+
+- File transfer client now returns error when it fails to communicate with the file service
+- Updated all Kubos services' GraphQL responses to follow the official response spec
+
 v1.8.0 - Nov 9th 2018
 ---------------------
 
