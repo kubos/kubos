@@ -11,6 +11,9 @@ In order to be compatible with the applications service, mission applications mu
 
 Once an application has been built, it should be transferred to the system, along with its manifest, and then :ref:`registered with the applications service <register-app>`.
 
+For projects written in languages like Python, where there is no executable file, multiple files
+may be used for the application.
+
 APIs
 ----
 
@@ -87,7 +90,7 @@ In order for the applications service to properly maintain versioning informatio
 
 This file must have the following key values:
 
-- ``name`` - The name of the application
+- ``name`` - The name of the application which will be called for execution
 - ``version`` - The version number of the application
 - ``author`` - The author of the application
 
@@ -96,6 +99,11 @@ For example::
     name = "mission-app"
     version = "1.1"
     author = "Me"
+
+.. note::
+
+    The ``name`` parameter must exactly match the name of the file which should be called for
+    execution
 
 Additional Resources
 --------------------

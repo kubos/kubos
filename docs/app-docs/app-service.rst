@@ -9,7 +9,8 @@ The Kubos applications service is responsible for monitoring and managing all mi
     
     TODO: User/App/Service interaction diagram
 
-Whenever a new application is registered with the service, its path and manifest file are copied into the service's application registry.
+Whenever a new application is registered with the service, its manifest file and all other files in
+the specified directory are copied into the service's application registry.
 By default, this registry is stored under `/home/system/kubos/apps`.
 
 Each application will be automatically assigned a UUID to be used for identification purposes internally.
@@ -105,7 +106,9 @@ Once an application has been written and compiled, the application and its accom
 should be transferred to a new directory on the OBC.
 This file transfer can be done using the :doc:`file transfer service <../services/file>`.
 
-The application and manifest *must* be the only files in the directory.
+The application may be split into multiple files (which is useful for large Python apps), however,
+the name of the initial file which should be called for execution must exactly match the ``name``
+property in the manifest file.
 
 It can then be registered with the applications service using the ``register`` mutation by specifying
 the directory containing the application files.

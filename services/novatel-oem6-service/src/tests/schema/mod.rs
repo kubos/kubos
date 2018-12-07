@@ -25,8 +25,8 @@ use std::sync::mpsc::sync_channel;
 macro_rules! wrap {
     ($result:ident) => {{
         json!({
-                                    "msg": $result,
-                                    "errs": ""
+                                    "data": $result,
+                                    "errors": ""
                             }).to_string()
     }};
 }

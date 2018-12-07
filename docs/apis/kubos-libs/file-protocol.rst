@@ -16,11 +16,11 @@ APIs
 - |cbor-protocol|
 
  .. |file-protocol| raw:: html
- 
+
     <a href="../../rust-docs/file_protocol/index.html" target="_blank">File Protocol</a>
-    
+
  .. |cbor-protocol| raw:: html
- 
+
     <a href="../../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
 
 Content-Addressable Storage
@@ -31,9 +31,9 @@ All files are broken up into chunks prior to sending. This chunking
 is initiated either by an ``export`` or ``import`` message. A local
 storage folder is created by the file transfer service and client
 for storing the content-addressable information.
-Inside of this directory, each file has its own folder. 
+Inside of this directory, each file has its own folder.
 The folder name is a 16-bit `BLAKE2 hash <https://BLAKE2.net/>`_ of the file's
-contents. 
+contents.
 This folder is created as part of the import/export process.
 
 Inside of each file's folder there is a ``meta`` file and numbered chunk files.
@@ -82,6 +82,8 @@ and it is followed by the ``hash`` for content-addressable messages.
 | `Export Request`_             | { `channel_id`, export, `hash`, `path`, `mode` }                             |
 +-------------------------------+------------------------------------------------------------------------------+
 | `Import Request`_             | { `channel_id`, import, `path` }                                             |
++-------------------------------+------------------------------------------------------------------------------+
+| `Cleanup Request`_            | { `channel_id`, cleanup, `hash` }                                            |
 +-------------------------------+------------------------------------------------------------------------------+
 | `File Chunk`_                 | { `channel_id`, `hash`, `chunk_index`, `data` }                              |
 +-------------------------------+------------------------------------------------------------------------------+
@@ -143,7 +145,7 @@ will contain the file`s hash and allow the original message
 sender to determine which file chunks are required.
 
     ``{ channel_id, "import", path }``
-    
+
 File Chunk
 ~~~~~~~~~~
 
@@ -156,7 +158,7 @@ timeout window then an ``ACK`` or ``NAK`` will be sent depending
 on whether all the chunks have been received or not.
 
     ``{ channel_id, hash, chunk_index, data }``
-    
+
 .. note::
 
     Chunk size configuration is not currently available, but will be added
@@ -204,7 +206,7 @@ it will be sent at the very end, indicating that all file chunks were
 successfully transmitted to the requester.
 
     ``{ channel_id, true }``
-    
+
 When this message is sent as part of the ``import`` process,
 it will be sent after receiving the initial import request,
 once the receiver has successfully prepared the file for transfer.
@@ -223,6 +225,23 @@ This message is sent if there as an error in the ``import`` or
 and the error message.
 
     ``{ channel_id, false, error_message }``
+
+Cleanup Request
+~~~~~~~~~~~~~~~
+
+This message is sent to request that some portion of the temporary storage directory be deleted.
+
+If the ``hash`` parameter is specified, then the storage sub-directory associated with that ID will
+be deleted.
+
+If the ``hash`` parameter is omitted, then the entire temporary storage directory will be deleted.
+
+By default, the temporary directory associated with a particular file will be automatically deleted
+upon the successful completion of its transfer.
+The cleanup request is useful when a file transfer fails for some reason and the user wishes to start
+the transfer over from scratch.
+
+   ``{ `channel_id`, cleanup, `hash` }``
 
 Common Protocol Usages
 ----------------------

@@ -184,11 +184,15 @@ where
                     .collect();
 
                 json!({
-                    "msg": val,
-                    "errs": errs_msg})
+                    "data": val,
+                    "errors": errs_msg})
                     .to_string()
             }
-            Err(e) => serde_json::to_string(&e).unwrap(),
+            Err(e) => {
+                json!({
+                    "errors": e
+                }).to_string()
+            }
         }
     }
 }
