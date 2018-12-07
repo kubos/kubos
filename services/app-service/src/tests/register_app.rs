@@ -118,63 +118,7 @@ fn register_no_manifest() {
             "data": {
                "register": {
                    "entry": null,
-                   "errors": "Failed to register app: Exactly two files should be present in the app directory",
-                   "success": false,
-               }
-            }
-        }).to_string();
-
-    assert_eq!(service.process(register_query.to_owned()), expected);
-}
-
-#[test]
-fn register_extra_file() {
-    let registry_dir = TempDir::new().unwrap();
-    let service = mock_service!(registry_dir);
-
-    let app_dir = TempDir::new().unwrap();
-    let app_bin = app_dir.path().join("dummy-app");
-
-    fs::create_dir(app_bin.clone()).unwrap();
-
-    // Create dummy app file
-    fs::File::create(app_bin.join("dummy")).unwrap();
-
-    // Create extra app file
-    fs::File::create(app_bin.join("extra")).unwrap();
-
-    // Create manifest file
-    let manifest = r#"
-            name = "dummy"
-            version = "0.0.1"
-            author = "user"
-            "#;
-    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
-
-    let register_query = format!(
-        r#"mutation {{
-        register(path: "{}") {{
-            success,
-            errors,
-            entry {{
-                active, 
-                app {{
-                    name,
-                    version,
-                    author
-                }}
-            }}
-        }}
-    }}"#,
-        app_bin.to_str().unwrap()
-    );
-
-    let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": null,
-                   "errors": "Failed to register app: Exactly two files should be present in the app directory",
+                   "errors": "IO Error: No such file or directory (os error 2)",
                    "success": false,
                }
             }
@@ -227,6 +171,59 @@ fn register_no_name() {
                "register": {
                    "entry": null,
                    "errors": "Failed to parse manifest.toml: missing field `name`",
+                   "success": false,
+               }
+            }
+        }).to_string();
+
+    assert_eq!(service.process(register_query.to_owned()), expected);
+}
+
+#[test]
+fn register_bad_name() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    // Create dummy app file
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    // Create manifest file
+    let manifest = r#"
+            name = "fake"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: "{}") {{
+            success,
+            errors,
+            entry {{
+                active, 
+                app {{
+                    name,
+                    version,
+                    author
+                }}
+            }}
+        }}
+    }}"#,
+        app_bin.to_str().unwrap()
+    );
+
+    let expected = json!({
+            "errors": "",
+            "data": {
+               "register": {
+                   "entry": null,
+                   "errors": "Failed to register app: Application file fake not found in given path",
                    "success": false,
                }
             }
