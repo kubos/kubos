@@ -35,7 +35,7 @@ class TestAppAPI(unittest.TestCase):
         query = "test query"
         ip = "0.0.0.0"
         port = 8000
-        query_response = '{"errs":[],"msg":"test data"}'
+        query_response = '{"errors":[],"data":"test data"}'
         timeout = 0.03
         with mock.patch('socket.socket') as mock_sock:
             mock_sock.return_value.recv.return_value = query_response
@@ -45,7 +45,7 @@ class TestAppAPI(unittest.TestCase):
     def test_timeout(self):
         service = "test-service"
         query = "test query"
-        query_response = '{"errs":[],"msg":"test data"}'
+        query_response = '{"errors":[],"data":"test data"}'
         timeout = 0.03
         with mock.patch('socket.socket') as mock_sock:
             mock_sock.return_value.recv.return_value = query_response
@@ -55,7 +55,7 @@ class TestAppAPI(unittest.TestCase):
     def test_endpoint_error(self):
         service = "test-service"
         query = "test query"
-        bad_query_response = '{"errs":["Lots of errors"],"msg":""}'
+        bad_query_response = '{"errors":["Lots of errors"],"data":""}'
         timeout = 0.03
         with mock.patch('socket.socket') as mock_sock:
             mock_sock.return_value.recv.return_value = bad_query_response
@@ -65,7 +65,7 @@ class TestAppAPI(unittest.TestCase):
     def test_errs_field_error(self):
         service = "test-service"
         query = "test query"
-        bad_query_response = '{"bad_field_name":[], "msg":""}'
+        bad_query_response = '{"bad_field_name":[], "data":""}'
         timeout = 0.03
         with mock.patch('socket.socket') as mock_sock:
             mock_sock.return_value.recv.return_value = bad_query_response
@@ -75,7 +75,7 @@ class TestAppAPI(unittest.TestCase):
     def test_msg_field_error(self):
         service = "test-service"
         query = "test query"
-        bad_query_response = '{"bad_field_name":[], "errs":""}'
+        bad_query_response = '{"bad_field_name":[], "errors":""}'
         timeout = 0.03
         with mock.patch('socket.socket') as mock_sock:
             mock_sock.return_value.recv.return_value = bad_query_response

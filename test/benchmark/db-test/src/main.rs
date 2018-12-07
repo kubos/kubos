@@ -171,7 +171,7 @@ fn test_cleanup(config: &Config) {
     match socket.recv_from(&mut buf) {
         Ok((amt, _)) => {
             let mut v: serde_json::Value = serde_json::from_slice(&buf[0..(amt)]).unwrap();
-            match v.get("msg").and_then(|msg| msg.get("delete")) {
+            match v.get("data").and_then(|msg| msg.get("delete")) {
                 Some(message) => {
                     let success =
                         serde_json::from_value::<bool>(message["success"].clone()).unwrap();

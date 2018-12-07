@@ -39,8 +39,8 @@ def start(config, schema, context={}):
                 errs = "Exception encountered {}".format(e)
 
             result = json.dumps({
-                "msg": msg,
-                "errs": errs
+                "data": msg,
+                "errors": errs
             })
             sock.sendto(result, source)
         except Exception as e:
