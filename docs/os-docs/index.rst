@@ -27,6 +27,7 @@ General Guides
     :maxdepth: 1
     
     Using Kubos Linux <using-kubos-linux>
+    Logging <logging>
     
 .. _system-guides:
     

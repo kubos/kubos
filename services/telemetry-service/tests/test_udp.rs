@@ -82,8 +82,8 @@ fn test_udp_timestamp() {
     assert_eq!(
         res,
         json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry":[
                     {"timestamp":1002.0,"subsystem":"eps","parameter":"voltage","value":"3.2"},
                     {"timestamp":1001.0,"subsystem":"eps","parameter":"voltage","value":"3.4"},
@@ -152,8 +152,8 @@ fn test_udp_no_timestamp() {
     assert_eq!(
         res,
         json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                 "telemetry":[
                     {"subsystem":"test4","parameter":"current","value":"2.2"},
                     {"subsystem":"test3","parameter":"current","value":"2.1"},

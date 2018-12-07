@@ -79,6 +79,7 @@ fn start_app_good() {
     // the system finishes calling it
     thread::sleep(Duration::from_millis(10));
 
+    eprintln!("Result: {:?}", result);
     assert!(result.is_ok());
 }
 

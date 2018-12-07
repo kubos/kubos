@@ -95,7 +95,7 @@ pub fn query(
 
     let v: serde_json::Value = serde_json::from_slice(&buf[0..(amt)])?;
 
-    if let Some(errs) = v.get("errs") {
+    if let Some(errs) = v.get("errors") {
         if errs.is_string() {
             let errs_str = errs.as_str().unwrap();
             if errs_str.len() > 0 {
@@ -123,10 +123,10 @@ pub fn query(
         _ => {}
     }
 
-    match v.get("msg") {
+    match v.get("data") {
         Some(result) => Ok(result.clone()),
         None => Err(format_err!(
-            "No result returned in 'msg' key: {}",
+            "No result returned in 'data' key: {}",
             serde_json::to_string(&v).unwrap()
         )),
     }

@@ -64,8 +64,8 @@ fn upgrade_new() {
     );
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": {
                       "active": true,
@@ -122,8 +122,8 @@ fn upgrade_good() {
     );
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": {
                       "active": true,
@@ -151,8 +151,8 @@ fn upgrade_good() {
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": {
                       "active": true,
@@ -176,8 +176,8 @@ fn upgrade_good() {
     "#;
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "apps": [
                  {
                       "active": false,
@@ -243,8 +243,8 @@ fn upgrade_new_name() {
     );
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": {
                       "active": true,
@@ -278,8 +278,8 @@ fn upgrade_new_name() {
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "register": {
                    "entry": {
                       "active": true,
@@ -303,8 +303,8 @@ fn upgrade_new_name() {
     "#;
 
     let expected = json!({
-            "errs": "",
-            "msg": {
+            "errors": "",
+            "data": {
                "apps": [
                  {
                       "active": false,

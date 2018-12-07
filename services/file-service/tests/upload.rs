@@ -215,6 +215,9 @@ fn upload_bad_hash() {
     );
     assert!(result.is_ok());
     let hash = result.unwrap();
+    
+    // Give the service a moment to go through its cleanup logic before we mess with things
+    thread::sleep(Duration::from_millis(10));
 
     // Create temp folder with bad chunk so that future hash calculation will fail
     fs::create_dir(format!("service/storage/{}", hash)).unwrap();
