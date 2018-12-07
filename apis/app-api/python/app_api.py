@@ -78,13 +78,13 @@ class Services:
             raise
 
         # Check that it follows GraphQL format
-        if 'msg' not in response or 'errs' not in response:
+        if 'data' not in response or 'errors' not in response:
             raise KeyError(
                 "{} Endpoint Error: ".format(service) +
                 "Response contains incorrect fields: \n{}".format(response))
 
         # Parse response according to GraphQL standard format
-        data = response['msg']
-        errors = response['errs']
+        data = response['data']
+        errors = response['errors']
 
         return (data, errors)
