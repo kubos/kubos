@@ -186,6 +186,9 @@ Once this size is reached, the current file is renamed as an archive file and a 
 By default, five archive files of each log type will be retained.
 If a new archive file is created and there are already five files, the oldest will be deleted.
 
+More information about the logging infrastructure can be found in the
+:doc:`Kubos Linux logging doc <../os-docs/logging>`.
+
 Logging should be setup like so:
 
 .. code-block:: python

@@ -10,12 +10,12 @@ Default Behavior
 Two logging policy files are included in ``/etc/rsyslog.d/``:
 
     - ``kubos-apps.conf`` - Specifies the logging and rotation policies for mission applications
-    - ``kubos-services.conf`` - Specifies the logging and rotation policision for services
+    - ``kubos-services.conf`` - Specifies the logging and rotation policies for services
 
 Within those files, and the main ``/etc/rsyslog.conf`` file which controls other system logs, each
 policy has the following format::
 
-    $outchannel {policy_name},/var/log/{desination_file},{max_size},{log_rotation_script}
+    $outchannel {policy_name},/var/log/{destination_file},{max_size},{log_rotation_script}
     {facility}.{priority} :omfile:${policy_name}
     
 An example policy looks like this::
@@ -32,7 +32,7 @@ Log Creation
 Log files are traditionally stored in ``/var/log``.
 
 ``/var/log`` has been set up as a symlink to ``/home/system/log``.
-This way log files are reside in permanent storage and will be preserved through OS upgrades.
+This way log files reside in permanent storage and will be preserved through OS upgrades.
 
 Messages written using the `daemon` facility will be routed to the appropriate log file in the
 ``/home/system/log/kubos`` folder.
@@ -110,7 +110,7 @@ and `syslog <https://docs.rs/syslog/4.0.1/syslog/>`__
 Python
 ~~~~~~
 
-Python programs will import two things: the main `logging library <https://docs.python.org/2/library/logging.html>`__s
+Python programs will import two things: the main `logging library <https://docs.python.org/2/library/logging.html>`__
 and the `SysLogHandler log handler <https://docs.python.org/2/library/logging.handlers.html#sysloghandler>`__.
 
 .. code-block:: python
