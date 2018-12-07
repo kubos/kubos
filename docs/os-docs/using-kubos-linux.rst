@@ -642,6 +642,17 @@ under this directory.
 
     Any files not residing under the /home directory will be destroyed
     during an upgrade/downgrade
+    
+/home/system/logs
+^^^^^^^^^^^^^^^^^
+
+All log files generated with rsyslog reside in this directory.
+
+Service-related logs are located in the ``kubos`` sub-directory.
+
+Application related logs are located in the ``apps`` sub-directory.
+
+All other system logs are located in this top-level directory.
 
 /home/system/usr/bin
 ^^^^^^^^^^^^^^^^^^^^
