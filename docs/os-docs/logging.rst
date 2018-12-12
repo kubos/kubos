@@ -48,6 +48,8 @@ Within each of these sub-directories, the following files may be automatically c
 - ``info.log`` - Records log messages with a priority of ``info`` or higher
 - ``warn.log`` - Records log messages with a priority of ``warn`` or higher
 
+.. _log-rotation:
+
 Log Rotation
 ~~~~~~~~~~~~
 
