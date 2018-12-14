@@ -28,6 +28,7 @@ General Guides
     
     Using Kubos Linux <using-kubos-linux>
     Logging <logging>
+    Process Monitoring <monitoring>
     
 .. _system-guides:
     
