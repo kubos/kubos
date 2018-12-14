@@ -10,14 +10,15 @@ restart the process.
 
 The default behavior for Monit is defined in ``/etc/monitrc``.
 
-Monit will be started as a background daemon during system boot.
+Monit is started as a background daemon during system boot.
 The daemon will sleep for 60 seconds between each process-checking cycle.
 
-Monit will have its own dedicated log file, ``/var/log/monit.log``.
+Monit has its own dedicated log file, ``/var/log/monit.log``.
 If and when the log file becomes too large, it will be moved to an archive file using the
 :ref:`standard log rotation method <log-rotation>`.
 
 If, for some reason, the Monit daemon process dies, it will automatically be restarted.
+This behavior is controlled by the init system and is defined in ``/etc/inittab``.
 
 Monitoring Status
 -----------------
@@ -91,6 +92,9 @@ By default, all Kubos services are set up with the following behavior:
 - If Monit has already tried to restart the service 3 times within the last 10 minutes, then the
   service is assumed to be bad and is removed from Monit's list of items to monitor
   (this count is reset with a system reboot)
+
+If a service has had to be restarted too many times, the ``status`` and ``monitoring status`` fields
+returned by ``monit status`` will both be set to ``unmonitored``.
 
 Additional Configuration Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
