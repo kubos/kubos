@@ -1,3 +1,21 @@
+//
+// Copyright (C) 2018 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
+//
+
 //! TOML parser for the `comms-service`. This module parses a `toml` file and returns a
 //! struct containing configuration information for a `comms-service`.
 
@@ -28,9 +46,9 @@ pub struct CommsConfig {
     pub downlink_ports: Option<Vec<u16>>,
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
     pub timeout: u64,
-    /// IP address of the computer that is running Agent Tom.
+    /// IP address of the ground gateway.
     pub ground_ip: String,
-    /// Specifies the port to which Agent Tom is bound.
+    /// Specifies the port to which the ground gateway is bound.
     pub ground_port: Option<u16>,
     /// Satellite's IP address.
     pub satellite_ip: String,
