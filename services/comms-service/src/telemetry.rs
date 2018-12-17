@@ -24,18 +24,26 @@ use std::sync::{Arc, Mutex};
 pub struct CommsTelemetry {
     /// Errors that have occured within the communication service.
     pub errors: Vec<String>,
+    /// Number of packets uplinked where an error occured.
+    pub failed_packets_up: i32,
+    /// Number of packets downlinked where an error occured.
+    pub failed_packets_down: i32,
     /// Number of packets successfully uplinked.
     pub packets_up: i32,
-    /// Number of packets downlinked.
+    /// Number of packets successfully downlinked.
     pub packets_down: i32,
 }
 
 /// Enum used to differentiate types of telemetry collected by the communication service.
 pub enum TelemType {
-    /// Packets up
-    Up,
     /// Packets down
     Down,
+    /// Packets down that failed
+    DownFailed,
+    /// Packets up
+    Up,
+    /// Packets up that failed
+    UpFailed,
 }
 
 // Function used to obtain a mutex lock and update communication service errors.
@@ -54,8 +62,10 @@ pub fn log_telemetry(data: &Arc<Mutex<CommsTelemetry>>, telem_type: TelemType) -
     match data.lock() {
         Ok(mut telem) => {
             match telem_type {
-                TelemType::Up => telem.packets_up += 1,
                 TelemType::Down => telem.packets_down += 1,
+                TelemType::DownFailed => telem.failed_packets_down += 1,
+                TelemType::Up => telem.packets_up += 1,
+                TelemType::UpFailed => telem.failed_packets_up += 1,
             };
             Ok(())
         }

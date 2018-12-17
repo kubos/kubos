@@ -61,7 +61,7 @@ pub struct CommsControlBlock<T: Clone> {
     pub timeout: u64,
     /// IP address of the ground gateway.
     pub ground_ip: Ipv4Addr,
-    /// Satellite's IP address.
+    /// IP address of the computer that is running the communication service.
     pub satellite_ip: Ipv4Addr,
     /// Optional list of ports used by downlink endpoints that send messages to the ground.
     /// Each port in the list will be used by one downlink endpoint.
@@ -148,6 +148,7 @@ fn read_thread<T: Clone + Send + 'static>(
         let packet = match UdpPacket::owned(bytes) {
             Some(packet) => packet,
             None => {
+                log_telemetry(&data, TelemType::UpFailed).unwrap();
                 log_error(&data, CommsServiceError::HeaderParsing.to_string()).unwrap();
                 continue;
             }
@@ -155,12 +156,14 @@ fn read_thread<T: Clone + Send + 'static>(
 
         // Verify the length of the UDP Packet.
         if byte_length != packet.get_length() as usize {
+            log_telemetry(&data, TelemType::UpFailed).unwrap();
             log_error(&data, CommsServiceError::InvalidPacketLength.to_string()).unwrap();
             continue;
         }
 
         // Verify checksum of the UDP Packet.
         if packet.get_checksum() != ipv4_checksum(&packet, &comms.ground_ip, &comms.satellite_ip) {
+            log_telemetry(&data, TelemType::UpFailed).unwrap();
             log_error(&data, CommsServiceError::InvalidChecksum.to_string()).unwrap();
             continue;
         }
@@ -244,7 +247,10 @@ fn handle_message<T: Clone>(
     // Write packet to the gateway and update telemetry.
     match write(write_conn.clone(), packet.as_slice()) {
         Ok(_) => log_telemetry(&data, TelemType::Down).unwrap(),
-        Err(e) => log_error(&data, e.to_string()).unwrap(),
+        Err(e) => {
+            log_telemetry(&data, TelemType::DownFailed).unwrap();
+            log_error(&data, e.to_string()).unwrap()
+        }
     };
 }
 
