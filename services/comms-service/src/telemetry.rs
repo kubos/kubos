@@ -24,9 +24,9 @@ use std::sync::{Arc, Mutex};
 pub struct CommsTelemetry {
     /// Errors that have occured within the communication service.
     pub errors: Vec<String>,
-    /// Number of packets uplinked where an error occured.
+    /// Number of bad uplink packets.
     pub failed_packets_up: i32,
-    /// Number of packets downlinked where an error occured.
+    /// Number of bad downlink packets.
     pub failed_packets_down: i32,
     /// Number of packets successfully uplinked.
     pub packets_up: i32,
