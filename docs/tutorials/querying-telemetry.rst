@@ -39,7 +39,7 @@ From your instance of the SDK, run the following::
     
 Each of these commands should return the following::
 
-    {"errs":"","msg":{"insert":{"success":true}}}
+    {"errors":"","data":{"insert":{"success":true}}}
 
 Schema
 ------
@@ -89,8 +89,8 @@ For example, to get only telemetry from our (fake) EPS subsystem, we'll send the
 Adding a little bit of formatting, the request should return something like this::
 
     {
-        "errs": "",
-        "msg": {
+        "errors": "",
+        "data": {
         "telemetry": [
             {
                 "parameter": "current",
@@ -143,8 +143,8 @@ You will need to update the query for your specific timestamp range.
 The response should look something like this::
 
     {
-        "errs": "",
-        "msg": {
+        "errors": "",
+        "data": {
         "telemetry": [
             {
                 "parameter": "voltage",
@@ -172,8 +172,8 @@ Our request should look like this::
 The response should look like this::
 
     {
-        "errs": "",
-        "msg": {
+        "errors": "",
+        "data": {
         "telemetry": [
             {
                 "parameter": "voltage",
