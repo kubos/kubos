@@ -118,6 +118,7 @@ impl CommsService {
             }
         }
 
+        info!("Communication service started");
         Ok(())
     }
 }
@@ -170,6 +171,7 @@ fn read_thread<T: Clone + Send + 'static>(
 
         // Update number of packets up.
         log_telemetry(&data, TelemType::Up).unwrap();
+        info!("UDP Packet successfully uplinked");
 
         // Spawn new message handler.
         let conn_ref = comms.write_conn.clone();
@@ -224,6 +226,7 @@ fn handle_message<T: Clone>(
         Ok(_) => (),
         Err(e) => return log_error(&data, e.to_string()).unwrap(),
     };
+    info!("UDP Packet sent to port {}", message.get_destination());
 
     // Receive response back from the service.
     let (size, _) = match socket.recv_from(&mut buf) {
@@ -246,7 +249,10 @@ fn handle_message<T: Clone>(
 
     // Write packet to the gateway and update telemetry.
     match write(write_conn.clone(), packet.as_slice()) {
-        Ok(_) => log_telemetry(&data, TelemType::Down).unwrap(),
+        Ok(_) => {
+            log_telemetry(&data, TelemType::Down).unwrap();
+            info!("UDP Packet successfully downlinked");
+        }
         Err(e) => {
             log_telemetry(&data, TelemType::DownFailed).unwrap();
             log_error(&data, e.to_string()).unwrap()
@@ -300,8 +306,14 @@ fn downlink_endpoint<T: Clone>(
 
         // Write packet to the gateway and update telemetry.
         match write(write_conn.clone(), packet.as_slice()) {
-            Ok(_) => log_telemetry(&data, TelemType::Down).unwrap(),
-            Err(e) => log_error(&data, e.to_string()).unwrap(),
+            Ok(_) => {
+                log_telemetry(&data, TelemType::Down).unwrap();
+                info!("UDP Packet successfully downlinked");
+            }
+            Err(e) => {
+                log_telemetry(&data, TelemType::DownFailed).unwrap();
+                log_error(&data, e.to_string()).unwrap();
+            }
         };
     }
 }

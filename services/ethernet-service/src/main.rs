@@ -28,6 +28,8 @@
 
 extern crate comms_service;
 extern crate failure;
+extern crate log;
+extern crate syslog;
 
 use comms::*;
 use comms_service::*;
@@ -35,6 +37,7 @@ use failure::Error;
 use std::net::{Ipv4Addr, UdpSocket};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
+use syslog::Facility;
 
 mod comms;
 
@@ -49,6 +52,14 @@ const WRITE_PORT: u16 = 13001;
 type EthernetServiceResult<T> = Result<T, Error>;
 
 fn main() -> EthernetServiceResult<()> {
+    // Setup new system logging for ethernet service.
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("ethernet-service"),
+    )
+    .unwrap();
+
     // Read configuration from config file.
     let config = CommsConfig::new("ethernet-service", CONFIG_PATH.to_string());
 

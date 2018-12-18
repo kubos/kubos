@@ -6,4 +6,5 @@ authors = ["William Greer <wgreer184@gmail.com>"]
 [dependencies]
 failure = "0.1.3"
 comms-service = { path = "../comms-service" }
-kubos-service = { path = "../kubos-service" }
+log = "^0.4.0"
+syslog = "4.0"
