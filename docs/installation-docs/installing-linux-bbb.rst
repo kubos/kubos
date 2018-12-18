@@ -25,7 +25,7 @@ Kubos Documentation
 -  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`../os-docs/working-with-the-bbb` - Guide for interacting with BBB-specific features
 -  :doc:`../os-docs/kubos-linux-on-bbb` - Steps to build Kubos Linux
-   
+
 Components
 ----------
 
@@ -33,12 +33,12 @@ The Kubos Linux installation process is composed of two high-level steps:
 
   - Flashing the eMMC
   - Flashing the microSD card
-    
+
 To perform a full default installation, two files are needed:
 
   - A Kubos Linux SD card image
   - An aux_sd image
-  
+
 All of these files can be obtained from `our Kubos Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
 Download the latest `KubOS-v{version}.tar.gz` file and then unzip the files for the Beaglebone Black. They're located in the `KubOS-v{version}/Beaglebone-Black` folder.
@@ -77,7 +77,7 @@ Using `Etcher <https://etcher.io/>`__:
   - Make sure the SD card device is correct (may be auto-detected if there is only one SD card present
     in your system.)
   - Click the "Flash!" button to start the flashing process
-  
+
 .. figure:: ../images/iOBC/etcher.png
    :alt: Etcher Setup
 
@@ -98,7 +98,7 @@ We now want to overwrite the eMMC, so we'll need to use U-Boot in order to boot
 Kubos Linux from the SD card.
 
 You'll need to establish a serial connection with the board in order to connect
-to the console. 
+to the console.
 
 Hold down any key while the board is booting. This will exit out of the auto-boot and
 bring up the CLI.
@@ -126,37 +126,42 @@ the eMMC.
 Flash the eMMC
 ~~~~~~~~~~~~~~
 
-To flash the eMMC, log into the board and then run these commands:
+To flash the eMMC, log into the board and then run the installation script, ``install-os``.
+It has been placed within the system PATH, so may be called from any location.
 
-::
+A confirmation dialog will be issued. Enter ``y`` to proceed with the installation.
 
-    $ umount /home/microsd
-    $ umount /home
-    $ dd if=/dev/mmcblk0 of=/dev/mmcblk1
-    
-.. figure:: ../images/kubos_bbb_linux_dd.png
-   :alt: dd complaints.
+You will see a variety of messages which will vary depending on the current state of the system
+(for example, whether you are currently running a version of Kubos Linux or some other distribution).
 
-It is possible that you will see some errors when you try to unmount the directories. 
-That's likely not a problem. 
-At some point, You may see an informational message, 
-``random: nonblocking pool is initialized``. 
-This message can be safely ignored.
+It should be safe to ignore any messages which are issued prior to the actual copying of data.
 
-The four status LEDs on the board should start flashing in a random pattern. 
-This indicates that the eMMC is currently being flashed. 
+The installation script will produce a few informational messages prefixed with ``OS Install``.
 
-The process should take roughly ten minutes, after which the LEDs should return to normal, 
+The resulting installation messages should look like this::
+
+    ~ # install-os
+    ** Warning ** This script will wipe out the current contents of the eMMC
+    Are you sure you want to proceed? (y/N)
+    y
+    OS Install: Pausing monitoring
+    OS Install: Stopping running services
+    OS Install: Prepping the file system
+    OS Install: Copying SD card contents over to eMMC. This process should take 10-15 minutes to complete
+
+The four status LEDs on the board should start flashing in a random pattern.
+This indicates that the eMMC is currently being flashed.
+
+The process should take roughly ten minutes, after which the LEDs should return to normal,
 with one LED blinking to indicate a successfully running Kubos Linux system.
 
-The system will complain that there is no space left on the device, however this message
-can be ignored.
-To explain: the eMMC is 4GB, but a small portion is set up as read-only and 
-dedicated to boot-time processing. That area means the contents of the 4 GB 
-SD card will be larger than the writeable area of the eMMC. The 
-``No space left on device`` message will be issued *but is not an error.*
+The console should show a summary of the transfer::
 
-After this has completed, shutdown and de-power the system.
+    7471104+0 records in
+    7471104+0 records out
+    3825205248 bytes (3.6GB) copied, 659.546105 seconds, 5.5MB/s
+
+After this process has completed, shutdown and de-power the system.
 
 Install the Auxiliary Image
 ---------------------------
@@ -178,8 +183,8 @@ You will see messages as the data partitions are mounted. For example::
 
     EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities.
 
-While they may seem like errors, they are a normal part of the boot process as 
-the system detects the partition file type. If there are *actual* issues 
+While they may seem like errors, they are a normal part of the boot process as
+the system detects the partition file type. If there are *actual* issues
 mounting a partition, the resulting error message will look like this::
 
     mount: can't find PARTUUID=41555820-02
