@@ -158,7 +158,7 @@ Adding Logging
 
 When our mission application is running in-flight, we likely won't have constant access to ``stdout``.
 
-As a result, it would be better if we were routing our messages to a log file.
+As a result, it would be better if we were also routing our messages to a log file.
 That way we can check the status of our application at our discretion.
 
 Kubos Linux uses `rsyslog <https://www.rsyslog.com/>`__ to automatically route log messages to the
@@ -202,18 +202,26 @@ Logging should be setup like so:
     # Set the lowest log level which should be routed to rsyslog for processing
     logger.setLevel(logging.INFO)
     
-    # We'll send our messages to the standard Unix domain socket for logging (`/dev/log`)
-    # Since this is a user program, we'll use the LOG_USER facility
-    handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
-    
     # Prefix all messages with the application name so that SysLog will set the
     # `programname` and `APP-NAME` property values accordingly.
     # This way we can easily see that the messages came from this application when viewing the log
     formatter = logging.Formatter('my-mission-app: %(message)s')
     
-    # Finalize our settings
-    handler.formatter = formatter
-    logger.addHandler(handler)
+    # We'll send our messages to the standard Unix domain socket for logging (`/dev/log`)
+    # Since this is a user program, we'll use the LOG_USER facility
+    syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+    
+    # Set the message formatting for this log handler
+    syslog.setFormatter(formatter)
+
+    # We also want to echo all our log messages to stdout, for easy viewing
+    stdout = logging.StreamHandler(stream=sys.stdout)
+    # Set the message formatting for this log handler
+    stdout.setFormatter(formatter)
+    
+    # Finally, add our handlers to our logger
+    logger.addHandler(syslog)
+    logger.addHandler(stdout)
     
     # Write a test message
     logger.info("Test Message")
@@ -242,13 +250,16 @@ Our new file should look like this:
     
         logger = logging.getLogger('my-mission-app')
         logger.setLevel(logging.INFO)
-        
-        handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
-        
         formatter = logging.Formatter('my-mission-app: %(message)s')
         
-        handler.formatter = formatter
-        logger.addHandler(handler)
+        syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+        syslog.setFormatter(formatter)
+        
+        stdout = logging.StreamHandler(stream=sys.stdout)
+        stdout.setFormatter(formatter)
+        
+        logger.addHandler(syslog)
+        logger.addHandler(stdout)
         
         parser = argparse.ArgumentParser()
         
@@ -262,7 +273,6 @@ Our new file should look like this:
             on_command(logger)
         else:
             logger.error("Unknown run level specified")
-            print "Unknown run level specified"
             sys.exit(1)
         
     if __name__ == "__main__":
@@ -277,15 +287,18 @@ works::
     $ ssh kubos@10.0.2.20
     kubos@10.0.2.20's password: ********
     /home/kubos # ./my-mission-app.py -r OnBoot
+    my-mission-app: OnBoot logic
     /home/kubos # ./my-mission-app.py -r OnBoot
+    my-mission-app: OnBoot logic
     /home/kubos # ./my-mission-app.py -r OnCommand
+    my-mission-app: OnCommand logic
     /home/kubos # cd /var/log/apps
     /home/system/log/apps # ls
     debug.log  info.log
     /home/system/log/apps # cat info.log
-    Jan  1 00:07:18 Kubos my-mission-app: OnBoot logic
-    Jan  1 00:07:21 Kubos my-mission-app: OnBoot logic
-    Jan  1 00:07:24 Kubos my-mission-app: OnCommand logic
+    1970-01-01T03:23:08.491359+00:00 Kubos my-mission-app:<info> OnBoot logic
+    1970-01-01T03:24:00.334330+00:00 Kubos my-mission-app:<info> OnBoot logic
+    1970-01-01T03:27:20.841483+00:00 Kubos my-mission-app:<info> OnCommand logic
     
 Kubos Services and GraphQL
 --------------------------
@@ -489,26 +502,26 @@ After adding error handling, our program should look like this:
             response = SERVICES.query(service="monitor-service", query=request)
         except Exception as e: 
             logger.error("Something went wrong: " + str(e) + "\r\n")
-            print "OnCommand logic encountered errors"
             sys.exit(1)
         
         data = response["memInfo"]
         available = data["available"]
         
         logger.info("Current available memory: %d kB \r\n" % (available))
-        
-        print "OnCommand logic completed successfully"
     
     def main():
         logger = logging.getLogger('my-mission-app')
         logger.setLevel(logging.INFO)
-        
-        handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
-        
         formatter = logging.Formatter('my-mission-app: %(message)s')
         
-        handler.formatter = formatter
-        logger.addHandler(handler)
+        syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+        syslog.setFormatter(formatter)
+        
+        stdout = logging.StreamHandler(stream=sys.stdout)
+        stdout.setFormatter(formatter)
+        
+        logger.addHandler(syslog)
+        logger.addHandler(stdout)
     
         parser = argparse.ArgumentParser()
         
@@ -522,7 +535,6 @@ After adding error handling, our program should look like this:
             on_command(logger)
         else:
             logger.error("Unknown run level specified\r\n")
-            print "Unknown run level specified"
             sys.exit(1)
         
     if __name__ == "__main__":
@@ -536,9 +548,9 @@ Transferring the program to our OBC and running it should look like this::
     $ ssh kubos@10.0.2.20
     kubos@10.0.2.20's password: ********
     /home/kubos # ./my-mission-app.py -r OnCommand
-    OnCommand logic completed successfully
-    /home/kubos # cat oncommand-output
-    Current available memory: 496768 kB
+    my-mission-app: Current available memory: 496768 kB
+    /home/kubos # cat /var/log/apps/debug.log
+    1970-01-01T03:23:08.491359+00:00 Kubos my-mission-app:<info> Current available memory: 496768 kB
 
 Writing Data to the Telemetry Database
 --------------------------------------
@@ -595,7 +607,9 @@ Finally, we'll check the response to make sure the operation finished successful
     errors = data["errors"]
     
     if success == False:
-        print "Telemetry insert encountered errors: " + str(errors)
+        logger.error("Telemetry insert encountered errors: " + str(errors) + "\r\n")
+    else:
+        logger.info("Telemetry insert completed successfully")
 
 With some additional error handling, our final application looks like this:
 
@@ -623,7 +637,6 @@ With some additional error handling, our final application looks like this:
             response = SERVICES.query(service="monitor-service", query=request)
         except Exception as e: 
             logger.error("Something went wrong: " + str(e) + "\r\n")
-            print "OnCommand logic encountered errors"
             sys.exit(1)
         
         data = response["memInfo"]
@@ -644,7 +657,6 @@ With some additional error handling, our final application looks like this:
             response = SERVICES.query(service="telemetry-service", query=request)
         except Exception as e: 
             logger.error("Something went wrong: " + str(e) + "\r\n")
-            print "OnCommand logic encountered errors"
             sys.exit(1)
             
         data = response["insert"]
@@ -653,21 +665,23 @@ With some additional error handling, our final application looks like this:
         
         if success == False:
             logger.error("Telemetry insert encountered errors: " + str(errors) + "\r\n")
-            print "OnCommand logic encountered errors"
             sys.exit(1)
-        else :
-            print "OnCommand logic completed successfully"
+        else:
+            logger.info("Telemetry insert completed successfully")
     
     def main():
         logger = logging.getLogger('my-mission-app')
         logger.setLevel(logging.INFO)
-        
-        handler = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
-        
         formatter = logging.Formatter('my-mission-app: %(message)s')
         
-        handler.formatter = formatter
-        logger.addHandler(handler)
+        syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+        syslog.setFormatter(formatter)
+        
+        stdout = logging.StreamHandler(stream=sys.stdout)
+        stdout.setFormatter(formatter)
+        
+        logger.addHandler(syslog)
+        logger.addHandler(stdout)
         
         parser = argparse.ArgumentParser()
         
@@ -681,7 +695,6 @@ With some additional error handling, our final application looks like this:
             on_command(logger)
         else:
             logger.error("Unknown run level specified")
-            print "Unknown run level specified"
             sys.exit(1)
         
     if __name__ == "__main__":
@@ -695,10 +708,12 @@ Transferring the program to our OBC and running it should look like this::
     $ ssh kubos@10.0.2.20
     kubos@10.0.2.20's password: ********
     /home/kubos # ./my-mission-app.py -r OnCommand
-    OnCommand logic completed successfully
-    /home/kubos # cat oncommand-output
-    Current available memory: 496768 kB
-    Current available memory: 497060 kB
+    my-mission-app: Current available memory: 497060 kB
+    my-mission-app: Telemetry insert completed successfully
+    /home/kubos # cat /var/log/apps/debug.log
+    1970-01-01T03:23:08.491359+00:00 Kubos my-mission-app:<info> Current available memory: 496768 kB
+    1970-01-01T03:23:13.246358+00:00 Kubos my-mission-app:<info> Current available memory: 497060 kB
+    1970-01-01T03:23:13.867534+00:00 Kubos my-mission-app:<info> Telemetry insert completed successfully
 
 .. note::
 

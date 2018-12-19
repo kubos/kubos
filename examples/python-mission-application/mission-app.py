@@ -59,8 +59,7 @@ def on_boot(logger):
         try:
             response = SERVICES.query(service="telemetry-service", query=request)
         except Exception as e: 
-            logger.info("Something went wrong: " + str(e) + "")
-            print "OnCommand logic encountered errors"
+            logger.error("Something went wrong: " + str(e) + "")
             continue
             
         data = response["insert"]
@@ -69,6 +68,8 @@ def on_boot(logger):
         
         if success == False:
             logger.error("Telemetry insert encountered errors: " + str(errors) + "")
+        else:
+            logger.info("Telemetry insert completed successfully")
         
         # Wait five minutes before checking again
         time.sleep(300)
@@ -156,7 +157,6 @@ def main():
         on_command(logger, args)
     else:
         logger.error("Unknown run level specified")
-        print "Unknown run level specified"
         sys.exit(1)
 
 

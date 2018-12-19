@@ -74,8 +74,9 @@ The following examples show how to set up and use the logging capabilities.
 Rust
 ~~~~
 
-Rust programs will use two crates to create syslog messages: `log <https://docs.rs/log/0.4.6/log/>`__
-and `syslog <https://docs.rs/syslog/4.0.1/syslog/>`__
+Rust programs will use the standard `log framework crate <https://docs.rs/log/0.4.6/log/>`__ in
+conjunction with a crate capable of writing syslog messages.
+For example, using `syslog <https://docs.rs/syslog/4.0.1/syslog/>`__::
 
 .. code-block:: rust
 
