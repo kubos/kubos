@@ -76,7 +76,7 @@ Rust
 
 Rust programs will use the standard `log framework crate <https://docs.rs/log/0.4.6/log/>`__ in
 conjunction with a crate capable of writing syslog messages.
-For example, using `syslog <https://docs.rs/syslog/4.0.1/syslog/>`__::
+For example, using `syslog <https://docs.rs/syslog/4.0.1/syslog/>`__:
 
 .. code-block:: rust
 
