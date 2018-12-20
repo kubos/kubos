@@ -165,8 +165,14 @@ fn read_thread<T: Clone + Send + 'static>(
         log_telemetry(&data, TelemType::Up).unwrap();
         info!("UDP Packet successfully uplinked");
 
-        // Bind socket to a port and pass to the message handler
-        let socket = socket_manager(comms.satellite_ip, &mut port, comms.handler_port_max, comms.handler_port_min);
+        // Bind socket to a port and pass to the message handler.
+        let socket = match socket_manager(comms.satellite_ip, &mut port, comms.handler_port_min, comms.handler_port_max) {
+            Some(sock) => sock,
+            None => {
+                log_error(&data, CommsServiceError::NoAvailablePorts.to_string()).unwrap();
+                continue;
+            },
+        };
 
         // Spawn new message handler.
         let conn_ref = comms.write_conn.clone();
@@ -180,28 +186,25 @@ fn read_thread<T: Clone + Send + 'static>(
                 socket, data_ref, conn_ref, write_ref, packet, time_ref, sat_ref, ground_ref,
             );
         });
-
-        // Increment port number.
-        if port < comms.handler_port_max {
-            port += 1;
-        } else {
-            port = comms.handler_port_min;
-        }
     }
 }
 
-// Helper function to manage binding sockets to available ports.
-fn socket_manager(ip: Ipv4Addr, port: &mut u16, max: u16, min: u16) -> UdpSocket {
-    let mut socket = UdpSocket::bind((ip, *port));
-    while socket.is_err() {
+// Helper function to manage binding sockets to the next available port if any are available.
+fn socket_manager(ip: Ipv4Addr, port: &mut u16, min: u16, max: u16) -> Option<UdpSocket> {
+    let mut socket = None;
+    let last = port.clone();
+    while socket.is_none() {
         if *port < max {
             *port += 1;
         } else {
             *port = min;
         }
-        socket = UdpSocket::bind((ip, *port));
+        socket = UdpSocket::bind((ip, *port)).ok();
+        if last == *port {
+            break;
+        }
     }
-    socket.unwrap()
+    socket
 }
 
 // This thread sends a query/mutation to its intended destination and waits for a response.
