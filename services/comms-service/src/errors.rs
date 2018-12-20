@@ -27,9 +27,6 @@ pub enum CommsServiceError {
     /// A UDP header was unable to be correctly parsed.
     #[fail(display = "A UDP header was unable to be correctly parsed.")]
     HeaderParsing,
-    /// The length of a UDP packet does not match the length found in the header.
-    #[fail(display = "The length of a UDP packet does not match the length found in the header.")]
-    InvalidPacketLength,
     /// The checksum of a UDP packet does not match the one found in the header.
     #[fail(display = "The checksum of a UDP packet does not match the one found in the header.")]
     InvalidChecksum,
@@ -43,6 +40,9 @@ pub enum CommsServiceError {
         display = "The read thread could not be started because no write method was specified."
     )]
     MissingWriteMethod,
+    /// The endpoint thread could not be started because no `ground_port` was specified.
+    #[fail(display = "The endpoint thread could not be started because no ground port was specified.")]
+    MissingGroundPort,
 }
 
 /// Result returned by the `comms-service`.
