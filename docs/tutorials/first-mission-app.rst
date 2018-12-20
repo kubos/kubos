@@ -189,39 +189,18 @@ If a new archive file is created and there are already five files, the oldest wi
 More information about the logging infrastructure can be found in the
 :doc:`Kubos Linux logging doc <../os-docs/logging>`.
 
+For ease-of-use, the Python applications API contains a helper function, ``logging_setup``,
+which will make all of the system calls required in order to set up the logger for the application.
+All the user needs to do is specify the name of the application which should be used when generating
+log messages.
+
 Logging should be setup like so:
 
 .. code-block:: python
 
-    import logging
-    from logging.handlers import SysLogHandler
+    import app_api
     
-    # Create a new logger. We'll give it a name that matches our application
-    logger = logging.getLogger('my-mission-app')
-    
-    # Set the lowest log level which should be routed to rsyslog for processing
-    logger.setLevel(logging.INFO)
-    
-    # Prefix all messages with the application name so that SysLog will set the
-    # `programname` and `APP-NAME` property values accordingly.
-    # This way we can easily see that the messages came from this application when viewing the log
-    formatter = logging.Formatter('my-mission-app: %(message)s')
-    
-    # We'll send our messages to the standard Unix domain socket for logging (`/dev/log`)
-    # Since this is a user program, we'll use the LOG_USER facility
-    syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
-    
-    # Set the message formatting for this log handler
-    syslog.setFormatter(formatter)
-
-    # We also want to echo all our log messages to stdout, for easy viewing
-    stdout = logging.StreamHandler(stream=sys.stdout)
-    # Set the message formatting for this log handler
-    stdout.setFormatter(formatter)
-    
-    # Finally, add our handlers to our logger
-    logger.addHandler(syslog)
-    logger.addHandler(stdout)
+    logger = app_api.logging_setup("mission-app")
     
     # Write a test message
     logger.info("Test Message")
@@ -233,9 +212,8 @@ Our new file should look like this:
 
     #!/usr/bin/env python
     
+    import app_api
     import argparse
-    import logging
-    from logging.handlers import SysLogHandler
     import sys
     
     def on_boot(logger):
@@ -248,18 +226,7 @@ Our new file should look like this:
     
     def main():
     
-        logger = logging.getLogger('my-mission-app')
-        logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('my-mission-app: %(message)s')
-        
-        syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
-        syslog.setFormatter(formatter)
-        
-        stdout = logging.StreamHandler(stream=sys.stdout)
-        stdout.setFormatter(formatter)
-        
-        logger.addHandler(syslog)
-        logger.addHandler(stdout)
+        logger = app_api.logging_setup("my-mission-app")
         
         parser = argparse.ArgumentParser()
         
@@ -484,8 +451,6 @@ After adding error handling, our program should look like this:
 
     import argparse
     import app_api
-    import logging
-    from logging.handlers import SysLogHandler
     import sys
     
     SERVICES = app_api.Services()
@@ -510,18 +475,7 @@ After adding error handling, our program should look like this:
         logger.info("Current available memory: %d kB \r\n" % (available))
     
     def main():
-        logger = logging.getLogger('my-mission-app')
-        logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('my-mission-app: %(message)s')
-        
-        syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
-        syslog.setFormatter(formatter)
-        
-        stdout = logging.StreamHandler(stream=sys.stdout)
-        stdout.setFormatter(formatter)
-        
-        logger.addHandler(syslog)
-        logger.addHandler(stdout)
+        logger = app_api.logging_setup("my-mission-app")
     
         parser = argparse.ArgumentParser()
         
@@ -619,8 +573,6 @@ With some additional error handling, our final application looks like this:
     
     import argparse
     import app_api
-    import logging
-    from logging.handlers import SysLogHandler
     import sys
     
     SERVICES = app_api.Services()
@@ -670,18 +622,8 @@ With some additional error handling, our final application looks like this:
             logger.info("Telemetry insert completed successfully")
     
     def main():
-        logger = logging.getLogger('my-mission-app')
-        logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('my-mission-app: %(message)s')
-        
-        syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
-        syslog.setFormatter(formatter)
-        
-        stdout = logging.StreamHandler(stream=sys.stdout)
-        stdout.setFormatter(formatter)
-        
-        logger.addHandler(syslog)
-        logger.addHandler(stdout)
+    
+        logger = app_api.logging_setup("my-mission-app")
         
         parser = argparse.ArgumentParser()
         
