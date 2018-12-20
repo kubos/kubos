@@ -85,6 +85,9 @@ extern crate juniper;
 #[cfg(test)]
 extern crate kubos_service;
 extern crate kubos_system;
+extern crate log;
+extern crate log4rs;
+extern crate log4rs_syslog;
 #[cfg(not(test))]
 extern crate serde_json;
 #[cfg(test)]

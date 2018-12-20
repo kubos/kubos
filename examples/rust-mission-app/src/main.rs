@@ -1,19 +1,14 @@
 #[macro_use]
 extern crate failure;
 extern crate getopts;
-#[macro_use]
 extern crate kubos_app;
 #[macro_use]
 extern crate log;
-extern crate log4rs;
-extern crate log4rs_syslog;
 
 use failure::Error;
 use getopts::Options;
 use kubos_app::*;
-use log4rs::append::console::ConsoleAppender;
-use log4rs::encode::pattern::PatternEncoder;
-use log4rs_syslog::SyslogAppender;
+
 use std::thread;
 use std::time::Duration;
 
@@ -156,39 +151,7 @@ impl AppHandler for MyApp {
     }
 }
 
-fn main() -> Result<(), Error> {
-    // Use custom PatternEncoder to avoid duplicate timestamps in logs.
-    let syslog_encoder = Box::new(PatternEncoder::new("{m}"));
-    // Set up logging which will be routed to syslog for processing
-    let syslog = Box::new(
-        SyslogAppender::builder()
-            .encoder(syslog_encoder)
-            .openlog(
-                "rust-mission-app",
-                log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
-                log4rs_syslog::Facility::User,
-            )
-            .build(),
-    );
-    
-    // Set up logging which will be routed to stdout
-    let stdout = Box::new(ConsoleAppender::builder().build());
-
-    // Combine the loggers into one master config
-    let config = log4rs::config::Config::builder()
-        .appender(log4rs::config::Appender::builder().build("syslog", syslog))
-        .appender(log4rs::config::Appender::builder().build("stdout", stdout))
-        .build(
-            log4rs::config::Root::builder()
-                .appender("syslog")
-                .appender("stdout")
-                // Set the minimum logging level to record
-                .build(log::LevelFilter::Debug),
-        )?;
-    
-    // Start the logger  
-    log4rs::init_config(config).unwrap();
-        
+fn main() -> Result<(), Error> {    
     let app = MyApp;
     app_main!(&app)?;
     

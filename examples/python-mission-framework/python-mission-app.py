@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
+import app_api
 import argparse
-import logging
-from logging.handlers import SysLogHandler
 import sys
 
 def on_boot(logger):
@@ -15,24 +14,7 @@ def on_command(logger):
 
 def main():
 
-    # Create a new logger
-    logger = logging.getLogger('mission-framework')
-    # We'll log everything of Debug level or higher
-    logger.setLevel(logging.DEBUG)
-    # Set the log message template
-    formatter = logging.Formatter('mission-framework: %(message)s')
-    
-    # Set up a handler for logging to syslog
-    syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
-    syslog.setFormatter(formatter)
-    
-    # Set up a handler for logging to stdout
-    stdout = logging.StreamHandler(stream=sys.stdout)
-    stdout.setFormatter(formatter)
-    
-    # Finally, add our handlers to our logger
-    logger.addHandler(syslog)
-    logger.addHandler(stdout)
+    logger = app_api.logging_setup("mission-framework")
     
     parser = argparse.ArgumentParser()
     
