@@ -8,9 +8,12 @@
 Mission Application API for Python Mission Applications.
 """
 
-import toml
-import socket
 import json
+import logging
+from logging.handlers import SysLogHandler
+import socket
+import sys
+import toml
 
 SERVICE_CONFIG_PATH = "/home/system/etc/config.toml"
 UDP_BUFF_LEN = 1024
@@ -88,3 +91,26 @@ class Services:
         errors = response['errors']
 
         return (data, errors)
+
+def logging_setup(app_name):
+    
+    # Create a new logger
+    logger = logging.getLogger(app_name)
+    # We'll log everything of Debug level or higher
+    logger.setLevel(logging.DEBUG)
+    # Set the log message template
+    formatter = logging.Formatter(app_name + ' %(message)s')
+    
+    # Set up a handler for logging to syslog
+    syslog = SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_USER)
+    syslog.setFormatter(formatter)
+    
+    # Set up a handler for logging to stdout
+    stdout = logging.StreamHandler(stream=sys.stdout)
+    stdout.setFormatter(formatter)
+    
+    # Finally, add our handlers to our logger
+    logger.addHandler(syslog)
+    logger.addHandler(stdout)
+    
+    return logger
