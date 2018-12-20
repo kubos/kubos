@@ -8,4 +8,5 @@ failure = "0.1.2"
 getopts = "0.2"
 kubos-app = { path = "../../apis/app-api/rust" }
 log = "^0.4.0"
-syslog = "4.0"
+log4rs = "0.8"
+log4rs-syslog = "3.0"
