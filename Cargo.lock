@@ -1169,8 +1169,6 @@ dependencies = [
  "getopts 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-app 0.1.0",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "log4rs 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "log4rs-syslog 3.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
