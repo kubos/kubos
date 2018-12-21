@@ -66,12 +66,10 @@ impl AppRegistryEntry {
 
         match toml::from_str::<AppRegistryEntry>(&app_entry) {
             Ok(entry) => Ok(entry),
-            Err(error) => {
-                return Err(AppError::ParseError {
-                    entity: "app.toml".to_owned(),
-                    err: error.to_string(),
-                })
-            }
+            Err(error) => Err(AppError::ParseError {
+                entity: "app.toml".to_owned(),
+                err: error.to_string(),
+            }),
         }
     }
 

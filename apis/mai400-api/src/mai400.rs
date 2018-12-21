@@ -86,10 +86,10 @@ impl MAI400 {
     // Resetting requires a pair of commands: request, then confirm
     pub fn reset(&self) -> MAIResult<()> {
         let request = RequestReset::default();
-        self.send_message(request)?;
+        self.send_message(&request)?;
 
         let request = ConfirmReset::default();
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Set the ACS mode
@@ -125,7 +125,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Set the ACS mode (Normal-Sun or Lat/Long-Sun)
@@ -168,7 +168,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Set the ADACS clock with the desired GPS time
@@ -200,7 +200,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Set orbital position and velocity at epoch for RK4 integration method of orbit propagation
@@ -235,7 +235,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Directly send a message without formatting or checksum calculation
@@ -277,20 +277,21 @@ impl MAI400 {
         // preserve functionality, but inform the caller afterwards
         match self.conn.lock() {
             Ok(conn) => conn.write(msg).map_err(|err| err.into()),
-            Err(conn) => conn.into_inner()
+            Err(conn) => conn
+                .into_inner()
                 .write(msg)
                 .map_err(|err| err.into())
                 .and(Err(MAIError::ThreadCommError)),
         }
     }
 
-    fn send_message<T: Message>(&self, msg: T) -> MAIResult<()> {
+    fn send_message<T: Message>(&self, msg: &T) -> MAIResult<()> {
         let mut raw = msg.serialize();
 
         // Get the calculated CRC
         let mut crc: u16 = 0;
         for byte in raw.iter() {
-            crc += *byte as u16;
+            crc += u16::from(*byte);
         }
         raw.write_u16::<LittleEndian>(crc).unwrap();
 
@@ -299,7 +300,8 @@ impl MAI400 {
         // preserve functionality, but inform the caller afterwards
         match self.conn.lock() {
             Ok(conn) => conn.write(raw.as_slice()).map_err(|err| err.into()),
-            Err(conn) => conn.into_inner()
+            Err(conn) => conn
+                .into_inner()
                 .write(raw.as_slice())
                 .map_err(|err| err.into())
                 .and(Err(MAIError::ThreadCommError)),
@@ -336,13 +338,11 @@ impl MAI400 {
     /// [`MAIError`]: enum.MAIError.html
     pub fn get_message(
         &self,
-    ) -> MAIResult<
-        (
-            Option<StandardTelemetry>,
-            Option<RawIMU>,
-            Option<IREHSTelemetry>,
-        ),
-    > {
+    ) -> MAIResult<(
+        Option<StandardTelemetry>,
+        Option<RawIMU>,
+        Option<IREHSTelemetry>,
+    )> {
         let mut msg = vec![];
         loop {
             {
@@ -362,7 +362,7 @@ impl MAI400 {
                         UartError::GenericError => return Err(MAIError::GenericError),
                         UartError::IoError {
                             cause: ::std::io::ErrorKind::TimedOut,
-                            description: _,
+                            ..
                         } => continue,
                         _ => panic!(err),
                     },
@@ -380,7 +380,7 @@ impl MAI400 {
                     Err(err) => match err {
                         UartError::IoError {
                             cause: ::std::io::ErrorKind::TimedOut,
-                            description: _,
+                            ..
                         } => continue,
                         _ => panic!(err),
                     },

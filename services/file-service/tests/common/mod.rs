@@ -83,12 +83,12 @@ pub fn download(
 
     let state = f_protocol.process_message(
         reply,
-        State::StartReceive {
+        &State::StartReceive {
             path: target_path.to_string(),
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), state)?)
+    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?)
 }
 
 pub fn download_partial(
@@ -136,12 +136,12 @@ pub fn download_partial(
 
     let state = f_protocol.process_message(
         new_reply,
-        State::StartReceive {
+        &State::StartReceive {
             path: target_path.to_string(),
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), state)?)
+    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?)
 }
 
 pub fn upload(
@@ -171,7 +171,7 @@ pub fn upload(
     f_protocol.message_engine(
         |d| f_protocol.recv(Some(d)),
         Duration::from_secs(2),
-        State::Transmitting,
+        &State::Transmitting,
     )?;
 
     // note: the original upload client function does not return the hash.
@@ -206,7 +206,7 @@ pub fn upload_partial(
     f_protocol.message_engine(
         |d| f_protocol.recv(Some(d)),
         Duration::from_secs(2),
-        State::Transmitting,
+        &State::Transmitting,
     )?;
 
     // Note: The original upload client function does not return the hash.

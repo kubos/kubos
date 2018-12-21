@@ -42,7 +42,7 @@ macro_rules! make_telemetry {
         ///
         /// `data` - Raw telemetry data from eps
         /// `telem_type` - `Type` of telemetry to parse
-        pub fn parse(data: &[u8], telem_type: Type) -> EpsResult<f32> {
+        pub fn parse(data: &[u8], telem_type: Type) -> EpsResult<f64> {
             let adc_data = get_adc_result(data)?;
             Ok(match telem_type {
                 $(Type::$type => $parser(adc_data),)+
@@ -65,14 +65,14 @@ macro_rules! make_telemetry {
     }
 }
 
-pub fn get_adc_result(data: &[u8]) -> EpsResult<f32> {
+pub fn get_adc_result(data: &[u8]) -> EpsResult<f64> {
     // It appears the ADCS actually sends back 4 bytes
     // The first two contain the actual response and
     // the second two are 0s
     if data.len() < 2 {
-        return Err(EpsError::parsing_failure("ADC Result"));
+        Err(EpsError::parsing_failure("ADC Result"))
     } else {
-        Ok(f32::from(
+        Ok(f64::from(
             u16::from(data[0]) | (u16::from(data[1]) & 0xF) << 8,
         ))
     }

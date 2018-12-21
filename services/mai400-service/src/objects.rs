@@ -243,7 +243,7 @@ pub struct StdTelem(pub StandardTelemetry);
 graphql_object!(StdTelem: () |&self| {
 
     field tlm_counter() -> FieldResult<i32> {
-        Ok(self.0.tlm_counter as i32)
+        Ok(i32::from(self.0.tlm_counter))
     }
 
     field gps_time() -> FieldResult<i32> {
@@ -251,23 +251,23 @@ graphql_object!(StdTelem: () |&self| {
     }
 
     field time_subsec() -> FieldResult<i32> {
-        Ok(self.0.time_subsec as i32)
+        Ok(i32::from(self.0.time_subsec))
     }
 
     field cmd_valid_cntr() -> FieldResult<i32> {
-        Ok(self.0.cmd_valid_cntr as i32)
+        Ok(i32::from(self.0.cmd_valid_cntr))
     }
 
     field cmd_invalid_cntr() -> FieldResult<i32> {
-        Ok(self.0.cmd_invalid_cntr as i32)
+        Ok(i32::from(self.0.cmd_invalid_cntr))
     }
 
     field cmd_invalid_chksum_cntr() -> FieldResult<i32> {
-        Ok(self.0.cmd_invalid_chksum_cntr as i32)
+        Ok(i32::from(self.0.cmd_invalid_chksum_cntr))
     }
 
     field last_command() -> FieldResult<i32> {
-        Ok(self.0.last_command as i32)
+        Ok(i32::from(self.0.last_command))
     }
 
     field acs_mode() -> FieldResult<Mode> {
@@ -275,67 +275,67 @@ graphql_object!(StdTelem: () |&self| {
     }
 
     field css() -> FieldResult<Vec<i32>> {
-        Ok(self.0.css.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.css.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field eclipse_flag() -> FieldResult<i32> {
-        Ok(self.0.eclipse_flag as i32)
+        Ok(i32::from(self.0.eclipse_flag))
     }
 
     field sun_vec_b() -> FieldResult<Vec<i32>> {
-        Ok(self.0.sun_vec_b.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.sun_vec_b.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field i_b_field_meas() -> FieldResult<Vec<i32>> {
-        Ok(self.0.i_b_field_meas.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.i_b_field_meas.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field bd() -> FieldResult<Vec<f64>> {
-        Ok(self.0.bd.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.bd.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field rws_speed_cmd() -> FieldResult<Vec<i32>> {
-        Ok(self.0.rws_speed_cmd.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.rws_speed_cmd.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field rws_speed_tach() -> FieldResult<Vec<i32>> {
-        Ok(self.0.rws_speed_tach.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.rws_speed_tach.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field rwa_torque_cmd() -> FieldResult<Vec<f64>> {
-        Ok(self.0.rwa_torque_cmd.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.rwa_torque_cmd.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field gc_rwa_torque_cmd() -> FieldResult<Vec<i32>> {
-        Ok(self.0.gc_rwa_torque_cmd.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.gc_rwa_torque_cmd.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field torque_coil_cmd() -> FieldResult<Vec<f64>> {
-        Ok(self.0.torque_coil_cmd.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.torque_coil_cmd.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field gc_torque_coil_cmd() -> FieldResult<Vec<i32>> {
-        Ok(self.0.gc_torque_coil_cmd.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.gc_torque_coil_cmd.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field qbo_cmd() -> FieldResult<Vec<i32>> {
-        Ok(self.0.qbo_cmd.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.qbo_cmd.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field qbo_hat() -> FieldResult<Vec<i32>> {
-        Ok(self.0.qbo_hat.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.qbo_hat.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field angle_to_go() -> FieldResult<f64> {
-        Ok(self.0.angle_to_go as f64)
+        Ok(f64::from(self.0.angle_to_go))
     }
 
     field q_error() -> FieldResult<Vec<i32>> {
-        Ok(self.0.q_error.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.q_error.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field omega_b() -> FieldResult<Vec<f64>> {
-        Ok(self.0.omega_b.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.omega_b.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field rotating_variable_a() -> FieldResult<i32> {
@@ -351,11 +351,11 @@ graphql_object!(StdTelem: () |&self| {
     }
 
     field nb() -> FieldResult<Vec<i32>> {
-        Ok(self.0.nb.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.nb.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field neci() -> FieldResult<Vec<i32>> {
-        Ok(self.0.neci.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.neci.iter().map(|&elem| i32::from(elem)).collect())
     }
 });
 
@@ -466,27 +466,27 @@ graphql_object!(IREHSTelem: () |&self| {
     }
 
     field thermopiles_a() -> FieldResult<Vec<i32>> {
-        Ok(self.0.thermopiles_a.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.thermopiles_a.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field thermopiles_b() -> FieldResult<Vec<i32>> {
-        Ok(self.0.thermopiles_b.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.thermopiles_b.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field temp_a() -> FieldResult<Vec<i32>> {
-        Ok(self.0.temp_a.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.temp_a.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field temp_b() -> FieldResult<Vec<i32>> {
-        Ok(self.0.temp_b.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.temp_b.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field dip_angle_a() -> FieldResult<i32> {
-        Ok(self.0.dip_angle_a as i32)
+        Ok(i32::from(self.0.dip_angle_a))
     }
 
     field dip_angle_b() -> FieldResult<i32> {
-        Ok(self.0.dip_angle_b as i32)
+        Ok(i32::from(self.0.dip_angle_b))
     }
 
     field solution_degraded() -> FieldResult<Vec<Vec<String>>> {
@@ -509,15 +509,15 @@ pub struct RawIMUTelem(pub RawIMU);
 
 graphql_object!(RawIMUTelem: () |&self| {
     field accel() -> FieldResult<Vec<i32>> {
-        Ok(self.0.accel.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.accel.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field gyro() -> FieldResult<Vec<i32>> {
-        Ok(self.0.gyro.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.gyro.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field gyro_temp() -> FieldResult<i32> {
-        Ok(self.0.gyro_temp as i32)
+        Ok(i32::from(self.0.gyro_temp))
     }
 });
 
@@ -531,19 +531,19 @@ pub struct Rotating(pub RotatingTelemetry);
 graphql_object!(Rotating: () |&self| {
 
     field b_field_igrf() -> FieldResult<Vec<f64>> {
-        Ok(self.0.b_field_igrf.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.b_field_igrf.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field sun_vec_eph() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sun_vec_eph.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.sun_vec_eph.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field sc_pos_eci() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sc_pos_eci.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.sc_pos_eci.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field sc_vel_eci() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sc_vel_eci.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.sc_vel_eci.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field kepler_elem() -> FieldResult<Kepler> {
@@ -551,83 +551,83 @@ graphql_object!(Rotating: () |&self| {
     }
 
     field k_bdot() -> FieldResult<Vec<f64>> {
-        Ok(self.0.k_bdot.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.k_bdot.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field kp() -> FieldResult<Vec<f64>> {
-        Ok(self.0.kp.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.kp.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field kd() -> FieldResult<Vec<f64>> {
-        Ok(self.0.kd.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.kd.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field k_unload() -> FieldResult<Vec<f64>> {
-        Ok(self.0.k_unload.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.k_unload.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field css_bias() -> FieldResult<Vec<i32>> {
-        Ok(self.0.css_bias.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.css_bias.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field mag_bias() -> FieldResult<Vec<i32>> {
-        Ok(self.0.mag_bias.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.mag_bias.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field rws_volt() -> FieldResult<i32> {
-        Ok(self.0.rws_volt as i32)
+        Ok(i32::from(self.0.rws_volt))
     }
 
     field rws_press() -> FieldResult<i32> {
-        Ok(self.0.rws_press as i32)
+        Ok(i32::from(self.0.rws_press))
     }
 
     field att_det_mode() -> FieldResult<i32> {
-        Ok(self.0.att_det_mode as i32)
+        Ok(i32::from(self.0.att_det_mode))
     }
 
     field rws_reset_cntr() -> FieldResult<Vec<i32>> {
-        Ok(self.0.rws_reset_cntr.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.rws_reset_cntr.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field sun_mag_aligned() -> FieldResult<i32> {
-        Ok(self.0.sun_mag_aligned as i32)
+        Ok(i32::from(self.0.sun_mag_aligned))
     }
 
     field minor_version() -> FieldResult<i32> {
-        Ok(self.0.minor_version as i32)
+        Ok(i32::from(self.0.minor_version))
     }
 
     field mai_sn() -> FieldResult<i32> {
-        Ok(self.0.mai_sn as i32)
+        Ok(i32::from(self.0.mai_sn))
     }
 
     field orbit_prop_mode() -> FieldResult<i32> {
-        Ok(self.0.orbit_prop_mode as i32)
+        Ok(i32::from(self.0.orbit_prop_mode))
     }
 
     field acs_op_mode() -> FieldResult<i32> {
-        Ok(self.0.acs_op_mode as i32)
+        Ok(i32::from(self.0.acs_op_mode))
     }
 
     field proc_reset_cntr() -> FieldResult<i32> {
-        Ok(self.0.proc_reset_cntr as i32)
+        Ok(i32::from(self.0.proc_reset_cntr))
     }
 
     field major_version() -> FieldResult<i32> {
-        Ok(self.0.major_version as i32)
+        Ok(i32::from(self.0.major_version))
     }
 
     field ads_op_mode() -> FieldResult<i32> {
-        Ok(self.0.ads_op_mode as i32)
+        Ok(i32::from(self.0.ads_op_mode))
     }
 
     field css_gain() -> FieldResult<Vec<f64>> {
-        Ok(self.0.css_gain.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.css_gain.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field mag_gain() -> FieldResult<Vec<f64>> {
-        Ok(self.0.mag_gain.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.mag_gain.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field orbit_epoch() -> FieldResult<i32> {
@@ -635,7 +635,7 @@ graphql_object!(Rotating: () |&self| {
     }
 
     field true_anomoly_epoch() -> FieldResult<f64> {
-        Ok(self.0.true_anomoly_epoch as f64)
+        Ok(f64::from(self.0.true_anomoly_epoch))
     }
 
     field orbit_epoch_next() -> FieldResult<i32> {
@@ -643,55 +643,55 @@ graphql_object!(Rotating: () |&self| {
     }
 
     field sc_pos_eci_epoch() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sc_pos_eci_epoch.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.sc_pos_eci_epoch.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field sc_vel_eci_epoch() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sc_vel_eci_epoch.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.sc_vel_eci_epoch.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field qb_x_wheel_speed() -> FieldResult<i32> {
-        Ok(self.0.qb_x_wheel_speed as i32)
+        Ok(i32::from(self.0.qb_x_wheel_speed))
     }
 
     field qb_x_filter_gain() -> FieldResult<f64> {
-        Ok(self.0.qb_x_filter_gain as f64)
+        Ok(f64::from(self.0.qb_x_filter_gain))
     }
 
     field qb_x_dipole_gain() -> FieldResult<f64> {
-        Ok(self.0.qb_x_dipole_gain as f64)
+        Ok(f64::from(self.0.qb_x_dipole_gain))
     }
 
     field dipole_gain() -> FieldResult<Vec<f64>> {
-        Ok(self.0.dipole_gain.iter().map(|&elem| elem as f64).collect())
+        Ok(self.0.dipole_gain.iter().map(|&elem| f64::from(elem)).collect())
     }
 
     field wheel_speed_bias() -> FieldResult<Vec<i32>> {
-        Ok(self.0.wheel_speed_bias.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.wheel_speed_bias.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field cos_sun_mag_align_thresh() -> FieldResult<f64> {
-        Ok(self.0.cos_sun_mag_align_thresh as f64)
+        Ok(f64::from(self.0.cos_sun_mag_align_thresh))
     }
 
     field unload_ang_thresh() -> FieldResult<f64> {
-        Ok(self.0.unload_ang_thresh as f64)
+        Ok(f64::from(self.0.unload_ang_thresh))
     }
 
     field q_sat() -> FieldResult<f64> {
-        Ok(self.0.q_sat as f64)
+        Ok(f64::from(self.0.q_sat))
     }
 
     field rwa_trq_max() -> FieldResult<f64> {
-        Ok(self.0.rwa_trq_max as f64)
+        Ok(f64::from(self.0.rwa_trq_max))
     }
 
     field rws_motor_current() -> FieldResult<Vec<i32>> {
-        Ok(self.0.rws_motor_current.iter().map(|&elem| elem as i32).collect())
+        Ok(self.0.rws_motor_current.iter().map(|&elem| i32::from(elem)).collect())
     }
 
     field rws_motor_temp() -> FieldResult<i32> {
-        Ok(self.0.rws_motor_temp as i32)
+        Ok(i32::from(self.0.rws_motor_temp))
     }
 
 });
@@ -702,26 +702,26 @@ pub struct Kepler(pub KeplerElem);
 
 graphql_object!(Kepler: () |&self| {
     field semi_major_axis() -> FieldResult<f64> {
-        Ok(self.0.semi_major_axis as f64)
+        Ok(f64::from(self.0.semi_major_axis))
     }
 
     field eccentricity() -> FieldResult<f64> {
-        Ok(self.0.eccentricity as f64)
+        Ok(f64::from(self.0.eccentricity))
     }
 
     field inclination() -> FieldResult<f64> {
-        Ok(self.0.inclination as f64)
+        Ok(f64::from(self.0.inclination))
     }
 
     field raan() -> FieldResult<f64> {
-        Ok(self.0.raan as f64)
+        Ok(f64::from(self.0.raan))
     }
 
     field arg_parigee() -> FieldResult<f64> {
-        Ok(self.0.arg_parigee as f64)
+        Ok(f64::from(self.0.arg_parigee))
     }
 
     field true_anomoly() -> FieldResult<f64> {
-        Ok(self.0.true_anomoly as f64)
+        Ok(f64::from(self.0.true_anomoly))
     }
 });

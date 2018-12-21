@@ -52,7 +52,6 @@ extern crate byteorder;
 extern crate crc16;
 #[macro_use]
 extern crate failure;
-#[macro_use]
 extern crate nom;
 extern crate rust_uart;
 extern crate serial;

@@ -48,7 +48,7 @@ fn uninstall_app() {
 
     let result = panic::catch_unwind(|| {
         let result = kubos_app::query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            &ServiceConfig::new_from_path("app-service", config.to_owned()),
             r#"mutation {
             uninstall(uuid: "a-b-c-d-e", version: "0.0.1") {
                 errors,
@@ -62,7 +62,7 @@ fn uninstall_app() {
         assert!(result.unwrap()["uninstall"]["success"].as_bool().unwrap());
 
         let result = kubos_app::query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            &ServiceConfig::new_from_path("app-service", config.to_owned()),
             "{ apps { active } }",
             Some(Duration::from_secs(1)),
         );

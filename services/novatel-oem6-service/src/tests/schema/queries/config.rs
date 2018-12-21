@@ -30,5 +30,5 @@ fn get_config() {
             "config": "Not Implemented"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

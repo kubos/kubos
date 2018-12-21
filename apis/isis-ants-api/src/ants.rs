@@ -113,15 +113,15 @@ impl IAntS for AntS {
                 if timeout > 0 {
                     match unsafe { ffi::k_ants_watchdog_start() } {
                         ffi::KANTSStatus::AntsOK => Ok(AntS),
-                        ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-                        _ => Err(AntsError::GenericError.into()),
+                        ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+                        _ => Err(AntsError::GenericError),
                     }
                 } else {
                     Ok(AntS)
                 }
             }
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -148,10 +148,10 @@ impl IAntS for AntS {
     ///
     /// [`AntsError`]: enum.AntsError.html
     fn configure(&self, config: KANTSController) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_configure(convert_controller(config)) } {
+        match unsafe { ffi::k_ants_configure(convert_controller(&config)) } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -176,8 +176,8 @@ impl IAntS for AntS {
     fn reset(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_reset() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -202,8 +202,8 @@ impl IAntS for AntS {
     fn arm(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_arm() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -228,8 +228,8 @@ impl IAntS for AntS {
     fn disarm(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_disarm() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -258,10 +258,10 @@ impl IAntS for AntS {
     ///
     /// [`AntsError`]: enum.AntsError.html
     fn deploy(&self, antenna: KANTSAnt, force: bool, timeout: u8) -> AntSResult<()> {
-        match unsafe { ffi::k_ants_deploy(convert_antenna(antenna), force, timeout) } {
+        match unsafe { ffi::k_ants_deploy(convert_antenna(&antenna), force, timeout) } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -290,8 +290,8 @@ impl IAntS for AntS {
     fn auto_deploy(&self, timeout: u8) -> AntSResult<()> {
         match unsafe { ffi::k_ants_auto_deploy(timeout) } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -316,8 +316,8 @@ impl IAntS for AntS {
     fn cancel_deploy(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_cancel_deploy() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -349,8 +349,8 @@ impl IAntS for AntS {
                 let decoded = DeployStatus::new(&status)?;
                 Ok(decoded)
             }
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -380,8 +380,8 @@ impl IAntS for AntS {
 
         match unsafe { ffi::k_ants_get_uptime(&mut uptime) } {
             ffi::KANTSStatus::AntsOK => Ok(uptime),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -419,11 +419,11 @@ impl IAntS for AntS {
 
         match unsafe { ffi::k_ants_get_system_telemetry(&mut c_telem) } {
             ffi::KANTSStatus::AntsOK => {
-                let telem = AntsTelemetry::new(c_telem)?;
+                let telem = AntsTelemetry::new(&c_telem)?;
                 Ok(telem)
             }
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -454,10 +454,10 @@ impl IAntS for AntS {
     fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8> {
         let mut count: u8 = 0;
 
-        match unsafe { ffi::k_ants_get_activation_count(convert_antenna(antenna), &mut count) } {
+        match unsafe { ffi::k_ants_get_activation_count(convert_antenna(&antenna), &mut count) } {
             ffi::KANTSStatus::AntsOK => Ok(count),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -490,10 +490,10 @@ impl IAntS for AntS {
     fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16> {
         let mut time: u16 = 0;
 
-        match unsafe { ffi::k_ants_get_activation_time(convert_antenna(antenna), &mut time) } {
+        match unsafe { ffi::k_ants_get_activation_time(convert_antenna(&antenna), &mut time) } {
             ffi::KANTSStatus::AntsOK => Ok(time),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -518,8 +518,8 @@ impl IAntS for AntS {
     fn watchdog_kick(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_watchdog_kick() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -545,8 +545,8 @@ impl IAntS for AntS {
     fn watchdog_start(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_watchdog_start() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -573,8 +573,8 @@ impl IAntS for AntS {
     fn watchdog_stop(&self) -> AntSResult<()> {
         match unsafe { ffi::k_ants_watchdog_stop() } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 
@@ -618,8 +618,8 @@ impl IAntS for AntS {
 
         match unsafe { ffi::k_ants_passthrough(tx.as_ptr(), tx_len, rx, rx_len) } {
             ffi::KANTSStatus::AntsOK => Ok(()),
-            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError.into()),
-            _ => Err(AntsError::GenericError.into()),
+            ffi::KANTSStatus::AntsErrorConfig => Err(AntsError::ConfigError),
+            _ => Err(AntsError::GenericError),
         }
     }
 }

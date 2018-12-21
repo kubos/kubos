@@ -79,7 +79,7 @@ type AppResult<T> = Result<T, failure::Error>;
 /// ```
 ///
 pub fn query(
-    config: ServiceConfig,
+    config: &ServiceConfig,
     query: &str,
     timeout: Option<Duration>,
 ) -> AppResult<serde_json::Value> {
@@ -98,7 +98,7 @@ pub fn query(
     if let Some(errs) = v.get("errors") {
         if errs.is_string() {
             let errs_str = errs.as_str().unwrap();
-            if errs_str.len() > 0 {
+            if !errs_str.is_empty() {
                 return Err(format_err!("{}", errs_str.to_string()));
             }
         } else if !errs.is_null() {

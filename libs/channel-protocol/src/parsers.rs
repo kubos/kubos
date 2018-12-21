@@ -75,8 +75,8 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
     }
     .to_owned();
     Ok(Message {
-        channel_id: channel_id,
-        name: name,
+        channel_id,
+        name,
         payload: data[2..].to_owned(),
     })
 }

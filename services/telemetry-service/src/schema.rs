@@ -153,8 +153,8 @@ graphql_object!(QueryRoot: Context |&self| {
         let output_path = Path::new(&output_str);
 
         let file_name_raw = output_path.file_name()
-            .ok_or_else(|| return FieldError::new("Unable to parse output file name", Value::null()))?;
-        let file_name = file_name_raw.to_str().ok_or_else(|| return FieldError::new("Unable to parse output file name to string", Value::null()))?;
+            .ok_or_else(|| FieldError::new("Unable to parse output file name", Value::null()))?;
+        let file_name = file_name_raw.to_str().ok_or_else(|| FieldError::new("Unable to parse output file name to string", Value::null()))?;
 
         if let Some(parent) = output_path.parent() {
             fs::create_dir_all(parent)?;

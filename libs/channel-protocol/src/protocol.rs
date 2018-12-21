@@ -62,7 +62,7 @@ impl Protocol {
     ///
     pub fn new(host_ip: &str, remote_addr: &str, data_len: u32) -> Self {
         // Get a local UDP socket (Bind)
-        let c_protocol = CborProtocol::new(format!("{}:0", host_ip), data_len as usize);
+        let c_protocol = CborProtocol::new(&format!("{}:0", host_ip), data_len as usize);
 
         // Set up the full connection info
         Protocol {
@@ -77,7 +77,7 @@ impl Protocol {
     ///
     /// * remote - New remote address
     ///
-    pub fn set_remote(&mut self, remote: SocketAddr) -> () {
+    pub fn set_remote(&mut self, remote: SocketAddr) {
         self.remote_addr.set(remote);
     }
 
@@ -106,7 +106,7 @@ impl Protocol {
     /// c_protocol.send(message);
     /// ```
     ///
-    pub fn send(&self, vec: Vec<u8>) -> Result<(), ProtocolError> {
+    pub fn send(&self, vec: &[u8]) -> Result<(), ProtocolError> {
         self.cbor_proto.send_message(&vec, self.remote_addr.get())?;
         Ok(())
     }

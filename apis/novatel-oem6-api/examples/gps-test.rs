@@ -138,7 +138,7 @@ fn main() -> OEMResult<()> {
 
     let rx_conn = oem.conn.clone();
 
-    thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
 
     get_version(&oem)?;
 

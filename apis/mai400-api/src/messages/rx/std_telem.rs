@@ -93,19 +93,18 @@ impl StandardTelemetry {
         // Get the calculated CRC
         let mut calc: u16 = 0;
         for byte in msg.iter() {
-            calc += *byte as u16;
+            calc += u16::from(*byte);
         }
 
         // Make sure they match
-        match calc == crc {
-            true => {
-                // Convert the raw data to an official struct
-                match standardtelem(&msg) {
-                    Ok(conv) => Some(conv.1),
-                    _ => None,
-                }
+        if calc == crc {
+            // Convert the raw data to an official struct
+            match standardtelem(&msg) {
+                Ok(conv) => Some(conv.1),
+                _ => None,
             }
-            false => None,
+        } else {
+            None
         }
     }
 }

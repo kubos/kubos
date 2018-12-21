@@ -116,7 +116,7 @@ impl Protocol {
     /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
     /// ```
     ///
-    pub fn new(host_url: String, data_size: usize) -> Self {
+    pub fn new(host_url: &str, data_size: usize) -> Self {
         Self {
             handle: UdpSocket::bind(host_url.parse::<SocketAddr>().unwrap()).unwrap(),
             msg_size: data_size + 50,
@@ -438,7 +438,7 @@ impl Protocol {
 
     // Parse the received CBOR message
     fn recv_start(&self, data: &[u8]) -> Result<serde_cbor::Value, ProtocolError> {
-        if data.len() == 0 {
+        if data.is_empty() {
             return Err(ProtocolError::NoDataReceived);
         }
 

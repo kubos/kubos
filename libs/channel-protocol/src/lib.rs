@@ -85,6 +85,6 @@ use rand::Rng;
 ///
 pub fn generate_channel() -> u32 {
     let mut rng = rand::thread_rng();
-    let channel_id: u32 = rng.gen_range(100000, 999999);
+    let channel_id: u32 = rng.gen_range(100_000, 999_999);
     channel_id
 }

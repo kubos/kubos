@@ -45,7 +45,7 @@ macro_rules! service_new {
 
         let rx_conn = oem.conn.clone();
 
-        thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+        thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
 
         let data = Arc::new(LockData::new());
         let (error_send, error_recv) = sync_channel(10);
@@ -53,7 +53,7 @@ macro_rules! service_new {
 
         let data_ref = data.clone();
         let oem_ref = oem.clone();
-        thread::spawn(move || log_thread(oem_ref, data_ref, error_send, version_send));
+        thread::spawn(move || log_thread(&oem_ref, &data_ref, &error_send, &version_send));
 
         // The read thread needs some time to intake and process the
         // sample data we give it.

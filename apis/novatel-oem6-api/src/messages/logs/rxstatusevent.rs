@@ -45,7 +45,7 @@ impl RxStatusEventLog {
         time_status: u8,
         week: u16,
         ms: i32,
-        raw: Vec<u8>,
+        raw: &[u8],
     ) -> Option<Self> {
         let mut log = match parse_rxstatusevent(&raw) {
             Ok(conv) => conv.1,

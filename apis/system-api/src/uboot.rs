@@ -19,13 +19,14 @@ use failure::Error;
 use std::process::Command;
 use std::str::FromStr;
 
-pub const VAR_KUBOS_CURR_VERSION: &'static str = "kubos_curr_version";
-pub const VAR_KUBOS_PREV_VERSION: &'static str = "kubos_prev_version";
-pub const VAR_KUBOS_INITIAL_DEPLOY: &'static str = "kubos_initial_deploy";
+pub const VAR_KUBOS_CURR_VERSION: &str = "kubos_curr_version";
+pub const VAR_KUBOS_PREV_VERSION: &str = "kubos_prev_version";
+pub const VAR_KUBOS_INITIAL_DEPLOY: &str = "kubos_initial_deploy";
 
-const PRINTENV_PATH: &'static str = "/usr/sbin/fw_printenv";
+const PRINTENV_PATH: &str = "/usr/sbin/fw_printenv";
 
 /// A convenience wrapper for fetching UBoot variables used by KubOS
+#[derive(Default)]
 pub struct UBootVars {
     cmd_path: String,
 }

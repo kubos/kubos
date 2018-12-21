@@ -37,7 +37,7 @@ fn query_good() {
         });
 
     let result = query(
-        ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap();
@@ -56,7 +56,7 @@ fn query_error() {
         }"#;
 
     let result = query(
-        ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap_err();
@@ -77,7 +77,7 @@ fn query_bad_service() {
         }"#;
 
     let result = query(
-        ServiceConfig::new_from_path("fake-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("fake-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap_err();
@@ -94,7 +94,7 @@ fn query_bad_file() {
         }"#;
 
     let result = query(
-        ServiceConfig::new_from_path("mock-service", "/fake/path".to_string()),
+        &ServiceConfig::new_from_path("mock-service", "/fake/path".to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap_err();
@@ -119,7 +119,7 @@ fn query_mutation() {
         });
 
     let result = query(
-        ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
     ).unwrap();

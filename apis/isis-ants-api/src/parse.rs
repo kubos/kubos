@@ -150,7 +150,7 @@ named!(parse_status<&[u8], DeployStatus>,
 
 impl AntsTelemetry {
     #[doc(hidden)]
-    pub fn new(c_telem: ffi::AntsTelemetry) -> Result<AntsTelemetry, AntsError> {
+    pub fn new(c_telem: &ffi::AntsTelemetry) -> Result<AntsTelemetry, AntsError> {
         let raw_status: [u8; 2] = unsafe { transmute(c_telem.deploy_status) };
 
         let status = DeployStatus::new(&raw_status)?;
@@ -172,7 +172,7 @@ impl DeployStatus {
                 let (_input, status) = v;
                 Ok(status)
             }
-            _ => Err(AntsError::GenericError.into()),
+            _ => Err(AntsError::GenericError),
         }
     }
 }
@@ -186,15 +186,15 @@ pub fn convert_bus(bus: &str) -> ffi::KI2CNum {
     }
 }
 
-pub fn convert_controller(controller: KANTSController) -> ffi::KANTSController {
-    match controller {
+pub fn convert_controller(controller: &KANTSController) -> ffi::KANTSController {
+    match *controller {
         self::KANTSController::Primary => ffi::KANTSController::Primary,
         self::KANTSController::Secondary => ffi::KANTSController::Secondary,
     }
 }
 
-pub fn convert_antenna(antenna: KANTSAnt) -> ffi::KANTSAnt {
-    match antenna {
+pub fn convert_antenna(antenna: &KANTSAnt) -> ffi::KANTSAnt {
+    match *antenna {
         self::KANTSAnt::Ant1 => ffi::KANTSAnt::Ant1,
         self::KANTSAnt::Ant2 => ffi::KANTSAnt::Ant2,
         self::KANTSAnt::Ant3 => ffi::KANTSAnt::Ant3,

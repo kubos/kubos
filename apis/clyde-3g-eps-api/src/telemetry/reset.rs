@@ -109,7 +109,7 @@ pub fn parse(data: &[u8]) -> EpsResult<Data> {
             daughterboard: Some(data[3]),
         })
     } else {
-        return Err(EpsError::parsing_failure("Reset Telemetry"));
+        Err(EpsError::parsing_failure("Reset Telemetry"))
     }
 }
 
