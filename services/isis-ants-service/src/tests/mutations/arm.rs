@@ -38,7 +38,7 @@ fn arm_good_arm() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -61,7 +61,7 @@ fn arm_error_arm() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -86,7 +86,7 @@ fn arm_good_disarm() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -109,5 +109,5 @@ fn arm_error_disarm() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

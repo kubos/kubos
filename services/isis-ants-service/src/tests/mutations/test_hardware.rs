@@ -124,7 +124,7 @@ fn integration_test_good() {
         }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -224,7 +224,7 @@ fn integration_test_bad() {
         }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -250,5 +250,5 @@ fn hardware_test() {
         }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

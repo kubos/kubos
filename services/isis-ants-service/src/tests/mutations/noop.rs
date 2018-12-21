@@ -37,7 +37,7 @@ fn noop_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -60,5 +60,5 @@ fn noop_bad() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

@@ -67,7 +67,7 @@ fn deploy_status_bad() {
                 },
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -138,7 +138,7 @@ fn deploy_status_deployed() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -180,7 +180,7 @@ fn deploy_status_deployed_2_antennas() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -211,7 +211,7 @@ fn deploy_status_stowed() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -253,7 +253,7 @@ fn deploy_status_stowed_2_antennas() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -284,7 +284,7 @@ fn deploy_status_partial() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -312,7 +312,7 @@ fn deploy_status_inprogress_1() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -340,7 +340,7 @@ fn deploy_status_inprogress_2() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -368,7 +368,7 @@ fn deploy_status_inprogress_3() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -396,5 +396,5 @@ fn deploy_status_inprogress_4() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

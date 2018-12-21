@@ -215,7 +215,7 @@ mod tests {
             33,
         ]);
 
-        let version = convert_raw_version(raw);
+        let version = convert_raw_version(&raw);
 
         assert_eq!(version.dummy, 0);
         assert_eq!(version.spi_command_status, 1);
@@ -260,7 +260,7 @@ mod tests {
             13,
         ]);
 
-        let housekeeping = convert_raw_housekeeping(raw);
+        let housekeeping = convert_raw_housekeeping(&raw);
 
         assert_eq!(housekeeping.dummy, 0);
         assert_eq!(housekeeping.spi_command_status, 1);
