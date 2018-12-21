@@ -1,6 +1,14 @@
 Kubos Changelog
 ===============
 
+v1.10.0 - Dec 20th 2018
+-----------------------
+
+- `Added process monitoring to most Kubos services <https://docs.kubos.com/latest/os-docs/monitoring.html>`__
+- `Updated the default logging template to include message severity <https://github.com/kubos/kubos-linux-build/blob/master/common/overlay/etc/rsyslog.conf#L31>`__
+- `Updated the logging tutorial and examples to use the app API's logging initialization <https://docs.kubos.com/master/1.9.1+3/tutorials/first-mission-app.html#adding-logging>`__
+- `Updated the BBB and MBM2 installation instructions to use the new eMMC install script <https://docs.kubos.com/master/1.9.1+3/installation-docs/installing-linux-bbb.html#flash-the-emmc>`__
+
 v1.9.0 - Dec 6th 2018
 ---------------------
 
