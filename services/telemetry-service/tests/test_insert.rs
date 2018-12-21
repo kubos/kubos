@@ -21,10 +21,10 @@ extern crate time;
 
 mod utils;
 
-use tempfile::TempDir;
-use utils::*;
 use std::thread::sleep;
 use std::time::Duration;
+use tempfile::TempDir;
+use utils::*;
 
 #[test]
 fn test_insert_auto_timestamp() {
@@ -44,14 +44,14 @@ fn test_insert_auto_timestamp() {
             }
         }"#;
     let mutation_expected = json!({
-            "errors": "",
-            "data": {
-                "insert": {
-                    "errors": "",
-                    "success": true
-                }
+        "errors": "",
+        "data": {
+            "insert": {
+                "errors": "",
+                "success": true
             }
-        });
+        }
+    });
     let mutation_result = do_query(Some(port), mutation);
 
     let query = r#"{
@@ -62,15 +62,15 @@ fn test_insert_auto_timestamp() {
             }
         }"#;
     let query_expected = json!({
-            "errors": "",
-            "data": {
-                "telemetry": [{
-                    "subsystem": "test2",
-                    "parameter": "voltage",
-                    "value": "4.0"
-                }]
-            }
-        });
+        "errors": "",
+        "data": {
+            "telemetry": [{
+                "subsystem": "test2",
+                "parameter": "voltage",
+                "value": "4.0"
+            }]
+        }
+    });
     let query_result = do_query(Some(port), query);
 
     teardown(handle, sender);
@@ -97,14 +97,14 @@ fn test_insert_custom_timestamp() {
             }
         }"#;
     let mutation_expected = json!({
-            "errors": "",
-            "data": {
-                "insert": {
-                    "errors": "",
-                    "success": true
-                }
+        "errors": "",
+        "data": {
+            "insert": {
+                "errors": "",
+                "success": true
             }
-        });
+        }
+    });
     let mutation_result = do_query(Some(port), mutation);
 
     let query = r#"{
@@ -116,16 +116,16 @@ fn test_insert_custom_timestamp() {
             }
         }"#;
     let query_expected = json!({
-            "errors": "",
-            "data": {
-                "telemetry": [{
-                    "timestamp": 5.0,
-                    "subsystem": "test2",
-                    "parameter": "voltage",
-                    "value": "4.0"
-                }]
-            }
-        });
+        "errors": "",
+        "data": {
+            "telemetry": [{
+                "timestamp": 5.0,
+                "subsystem": "test2",
+                "parameter": "voltage",
+                "value": "4.0"
+            }]
+        }
+    });
     let query_result = do_query(Some(port), query);
 
     teardown(handle, sender);
@@ -146,14 +146,14 @@ fn test_insert_multi_auto() {
     let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let mutation_expected = json!({
-            "errors": "",
-            "data": {
-                "insert": {
-                    "errors": "",
-                    "success": true
-                }
+        "errors": "",
+        "data": {
+            "insert": {
+                "errors": "",
+                "success": true
             }
-        });
+        }
+    });
 
     // It currently takes more than 1ms for each round-trip GraphQL request,
     // so we're safe to fire these off one after another
@@ -184,37 +184,37 @@ fn test_insert_multi_auto() {
             }
         }"#;
     let query_expected = json!({
-            "errors": "",
-            "data": {
-                "telemetry": [
-                {
-                    "subsystem": "eps",
-                    "parameter": "voltage",
-                    "value": "4.4"
-                },
-                {
-                    "subsystem": "eps",
-                    "parameter": "voltage",
-                    "value": "4.3"
-                },
-                {
-                    "subsystem": "eps",
-                    "parameter": "voltage",
-                    "value": "4.2"
-                },
-                {
-                    "subsystem": "eps",
-                    "parameter": "voltage",
-                    "value": "4.1"
-                },
-                {
-                    "subsystem": "eps",
-                    "parameter": "voltage",
-                    "value": "4.0"
-                },
-                ]
-            }
-        });
+        "errors": "",
+        "data": {
+            "telemetry": [
+            {
+                "subsystem": "eps",
+                "parameter": "voltage",
+                "value": "4.4"
+            },
+            {
+                "subsystem": "eps",
+                "parameter": "voltage",
+                "value": "4.3"
+            },
+            {
+                "subsystem": "eps",
+                "parameter": "voltage",
+                "value": "4.2"
+            },
+            {
+                "subsystem": "eps",
+                "parameter": "voltage",
+                "value": "4.1"
+            },
+            {
+                "subsystem": "eps",
+                "parameter": "voltage",
+                "value": "4.0"
+            },
+            ]
+        }
+    });
     let query_result = do_query(Some(port), query);
 
     teardown(handle, sender);
@@ -236,22 +236,25 @@ fn test_insert_current_timestamp() {
     let time = time::now_utc().to_timespec();
     let now = time.sec as f64 + (time.nsec as f64 / 1000000000.0);
 
-    let mutation = format!(r#"mutation {{
+    let mutation = format!(
+        r#"mutation {{
             insert(timestamp: {}, subsystem: "test2", parameter: "voltage", value: "4.0") {{
                 success,
                 errors
             }}
-        }}"#, now);
-    
+        }}"#,
+        now
+    );
+
     let mutation_expected = json!({
-            "errors": "",
-            "data": {
-                "insert": {
-                    "errors": "",
-                    "success": true
-                }
+        "errors": "",
+        "data": {
+            "insert": {
+                "errors": "",
+                "success": true
             }
-        });
+        }
+    });
     let mutation_result = do_query(Some(port), &mutation);
 
     let query = r#"{
@@ -259,15 +262,17 @@ fn test_insert_current_timestamp() {
                 timestamp
             }
         }"#;
-        
+
     let query_result = do_query(Some(port), query);
 
     teardown(handle, sender);
 
     assert_eq!(mutation_result, mutation_expected);
-    
-    let timestamp = query_result["data"]["telemetry"][0]["timestamp"].as_f64().unwrap();
-    
+
+    let timestamp = query_result["data"]["telemetry"][0]["timestamp"]
+        .as_f64()
+        .unwrap();
+
     // The original f64 value gets converted to a string and then back to f64.
     // This is notoriously complicated and frequently results in discrepencies.
     // We really only care that the timestamp value doesn't overflow anything, so

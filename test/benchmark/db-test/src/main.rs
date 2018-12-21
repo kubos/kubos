@@ -48,7 +48,8 @@ fn db_test(config: &Config) {
         let timestamp: f64 = rng.gen_range(0.0, ::std::f64::MAX);
 
         let start = PreciseTime::now();
-        if db.insert(timestamp, "db-test", "parameter", "value")
+        if db
+            .insert(timestamp, "db-test", "parameter", "value")
             .is_ok()
         {
             times.push(start.to(PreciseTime::now()).num_seconds() as f64);

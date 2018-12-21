@@ -344,8 +344,9 @@ fn main() -> OEMResult<()> {
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
         Some("novatel-oem6-service"),
-    ).unwrap();
-    
+    )
+    .unwrap();
+
     let config = Config::new("novatel-oem6-service");
     let bus = config
         .get("bus")

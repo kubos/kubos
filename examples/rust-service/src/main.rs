@@ -34,12 +34,14 @@ fn main() {
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
         Some("example-service"),
-    ).unwrap();
-    
+    )
+    .unwrap();
+
     Service::new(
         Config::new("example-service"),
         Subsystem::new(),
         QueryRoot,
         MutationRoot,
-    ).start();
+    )
+    .start();
 }

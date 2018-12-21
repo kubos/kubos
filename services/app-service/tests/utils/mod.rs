@@ -203,8 +203,10 @@ impl AppServiceFixture {
             port = {}"#,
                 registry_dir.path().to_str().unwrap(),
                 port
-            ).as_bytes(),
-        ).expect("Failed to write config.toml");
+            )
+            .as_bytes(),
+        )
+        .expect("Failed to write config.toml");
 
         Self {
             registry_dir: registry_dir,

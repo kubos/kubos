@@ -97,7 +97,10 @@ impl SerialStream {
 // Read and write implementations for the serial stream
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> UartResult<()> {
-        let mut port = self.port.try_borrow_mut().map_err(|_| UartError::PortBusy)?;
+        let mut port = self
+            .port
+            .try_borrow_mut()
+            .map_err(|_| UartError::PortBusy)?;
         port.set_timeout(self.timeout)?;
 
         port.write_all(data)?;
@@ -106,7 +109,10 @@ impl Stream for SerialStream {
     }
 
     fn read(&self, len: usize, timeout: Duration) -> UartResult<Vec<u8>> {
-        let mut port = self.port.try_borrow_mut().map_err(|_| UartError::PortBusy)?;
+        let mut port = self
+            .port
+            .try_borrow_mut()
+            .map_err(|_| UartError::PortBusy)?;
 
         port.set_timeout(timeout)?;
 

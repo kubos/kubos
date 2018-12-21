@@ -76,19 +76,14 @@ mod schema;
 mod userinfo;
 
 fn main() {
-    
     syslog::init(
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
         Some("kubos-monitor-service"),
-    ).unwrap();
-    
+    )
+    .unwrap();
+
     let config = Config::new("monitor-service");
 
-    Service::new(
-        config,
-        (),
-        QueryRoot,
-        MutationRoot,
-    ).start();
+    Service::new(config, (), QueryRoot, MutationRoot).start();
 }

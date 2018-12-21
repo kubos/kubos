@@ -31,5 +31,6 @@ fn main() {
         Subsystem::new(),
         QueryRoot,
         MutationRoot,
-    ).start();
+    )
+    .start();
 }
