@@ -66,7 +66,7 @@ fn get_telemetry_nominal() {
                         "position": [1.1, 2.2, 3.3],
                         "time": {
                             "ms": 164195000,
-                        	"week": 3025
+                            "week": 3025
                         },
                         "velocity": [4.4, 5.5, 6.6],
                     },
@@ -75,7 +75,7 @@ fn get_telemetry_nominal() {
                         "positionType": "PSRDIFF",
                         "time": {
                             "ms": 164195000,
-                        	"week": 3025
+                            "week": 3025
                         },
                         "timeStatus": "FINE_STEERING",
                         "velocityStatus": "SOL_COMPUTED",
@@ -133,7 +133,7 @@ fn get_telemetry_debug() {
                         "hwVersion": "OEM615-2.00",
                         "model": "G1SB0GTT0",
                         "serialNum": "BJYA15120038H",
-                        "swVersion": "OEM060600RN0000",   
+                        "swVersion": "OEM060600RN0000",
                     }],
                     "numComponents": 1
                 }
@@ -210,7 +210,7 @@ fn get_telemetry_both() {
                         "hwVersion": "OEM615-2.00",
                         "model": "G1SB0GTT0",
                         "serialNum": "BJYA15120038H",
-                        "swVersion": "OEM060600RN0000",   
+                        "swVersion": "OEM060600RN0000",
                     }],
                     "numComponents": 1
                 },
@@ -219,7 +219,7 @@ fn get_telemetry_both() {
                         "position": [1.1, 2.2, 3.3],
                         "time": {
                             "ms": 164195000,
-                        	"week": 3025
+                            "week": 3025
                         },
                         "velocity": [4.4, 5.5, 6.6],
                     },
@@ -228,7 +228,7 @@ fn get_telemetry_both() {
                         "positionType": "PSRDIFF",
                         "time": {
                             "ms": 164195000,
-                        	"week": 3025
+                            "week": 3025
                         },
                         "timeStatus": "FINE_STEERING",
                         "velocityStatus": "SOL_COMPUTED",
@@ -315,7 +315,7 @@ fn get_telemetry_empty() {
                         "positionType": "NONE",
                         "time": {
                             "ms": 0,
-                        	"week": 0
+                            "week": 0
                         },
                         "timeStatus": "UNKNOWN",
                         "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
@@ -324,30 +324,30 @@ fn get_telemetry_empty() {
                     "systemStatus": {
                         "errors": ["Get Telemetry: Failed to receive version info - timed out waiting on channel"],
                         "status": [
-                           "ERROR_PRESENT", 
-                           "TEMPERATURE_WARNING", 
-                           "VOLTAGE_SUPPLY_WARNING", 
-                           "ANTENNA_NOT_POWERED", 
-                           "LNA_FAILURE", 
-                           "ANTENNA_OPEN", 
-                           "ANTENNA_SHORTENED", 
-                           "CPU_OVERLOAD", 
-                           "COM1_BUFFER_OVERRUN", 
-                           "COM2_BUFFER_OVERRUN", 
-                           "COM3_BUFFER_OVERRUN", 
-                           "LINK_OVERRUN", 
-                           "AUX_TRANSMIT_OVERRUN", 
-                           "AGC_OUT_OF_RANGE", 
-                           "INS_RESET", 
-                           "GPS_ALMANAC_INVALID", 
-                           "POSITION_SOLUTION_INVALID", 
-                           "POSITION_FIXED", 
-                           "CLOCK_STEERING_DISABLED", 
-                           "CLOCK_MODEL_INVALID", 
-                           "EXTERNAL_OSCILLATOR_LOCKED", 
-                           "SOFTWARE_RESOURCE_WARNING", 
-                           "AUX3_STATUS_EVENT", 
-                           "AUX2_STATUS_EVENT", 
+                           "ERROR_PRESENT",
+                           "TEMPERATURE_WARNING",
+                           "VOLTAGE_SUPPLY_WARNING",
+                           "ANTENNA_NOT_POWERED",
+                           "LNA_FAILURE",
+                           "ANTENNA_OPEN",
+                           "ANTENNA_SHORTENED",
+                           "CPU_OVERLOAD",
+                           "COM1_BUFFER_OVERRUN",
+                           "COM2_BUFFER_OVERRUN",
+                           "COM3_BUFFER_OVERRUN",
+                           "LINK_OVERRUN",
+                           "AUX_TRANSMIT_OVERRUN",
+                           "AGC_OUT_OF_RANGE",
+                           "INS_RESET",
+                           "GPS_ALMANAC_INVALID",
+                           "POSITION_SOLUTION_INVALID",
+                           "POSITION_FIXED",
+                           "CLOCK_STEERING_DISABLED",
+                           "CLOCK_MODEL_INVALID",
+                           "EXTERNAL_OSCILLATOR_LOCKED",
+                           "SOFTWARE_RESOURCE_WARNING",
+                           "AUX3_STATUS_EVENT",
+                           "AUX2_STATUS_EVENT",
                            "AUX1_STATUS_EVENT"
                            ]
                     }

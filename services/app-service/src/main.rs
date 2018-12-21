@@ -56,7 +56,8 @@ fn main() -> Result<(), Error> {
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
         Some("kubos-app-service"),
-    ).unwrap();
+    )
+    .unwrap();
 
     let args: Vec<String> = env::args().collect();
     let mut opts = Options::new();

@@ -15,9 +15,9 @@
 use failure;
 use regex::Regex;
 
-use std::i32;
 use std::fs::{self, File};
-use std::io::{Read, BufReader};
+use std::i32;
+use std::io::{BufReader, Read};
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -98,11 +98,11 @@ macro_rules! root_path {
 }
 
 fn unwrap_optstr<'a, T>(opt: Option<&'a str>) -> T
-    where T: FromStr, T: Default
+where
+    T: FromStr,
+    T: Default,
 {
-    opt.map_or_else(|| T::default(), |s| {
-        T::from_str(s).unwrap_or_default()
-    })
+    opt.map_or_else(|| T::default(), |s| T::from_str(s).unwrap_or_default())
 }
 
 impl ProcStat {
@@ -116,7 +116,8 @@ impl ProcStat {
     /// Parse a String with the format of a /proc/[pid]/stat file
     /// See http://man7.org/linux/man-pages/man5/proc.5.html for more information
     pub fn parse<R>(stat: R) -> Result<Self, failure::Error>
-        where R: Read
+    where
+        R: Read,
     {
         let mut ps = Self::default();
 
@@ -127,7 +128,9 @@ impl ProcStat {
         let data_str = String::from_utf8_lossy(&data_vec);
 
         let re = Regex::new(r"(?P<pid>\d+) \((?P<comm>.+)\) (?P<the_rest>.+)")?;
-        let caps = re.captures(&data_str).ok_or(format_err!("Invalid procstat format"))?;
+        let caps = re
+            .captures(&data_str)
+            .ok_or(format_err!("Invalid procstat format"))?;
 
         ps.pid = i32::from_str(&caps["pid"]).unwrap_or_default();
         ps.comm = caps["comm"].into();
@@ -236,8 +239,11 @@ impl ProcStat {
         if contents.len() == 0 {
             Ok(vec![self.comm.clone()])
         } else {
-            let mut argv: Vec<String> = contents.split('\0').into_iter().map(
-                                            |a| String::from(a)).collect();
+            let mut argv: Vec<String> = contents
+                .split('\0')
+                .into_iter()
+                .map(|a| String::from(a))
+                .collect();
             argv.pop();
             Ok(argv)
         }
@@ -256,8 +262,6 @@ pub fn running_pids() -> Result<Vec<i32>, failure::Error> {
     }
     Ok(info)
 }
-
-
 
 // Unit tests
 
@@ -289,34 +293,63 @@ mod tests {
     fn procstat_parse() {
         let stat = ProcStat::parse(STAT);
         assert!(stat.is_ok());
-        assert_eq!(stat.unwrap(), ProcStat {
-            pid: 720, comm: "sh".into(),
-            state: 'S', ppid: 1,
-            pgrp: 720, session: 720,
-            tty_nr: 0, tpgid: -1,
-            flags: 4194560, minflt: 240,
-            cminflt: 1400, majflt: 0,
-            cmajflt: 0, utime: 1,
-            stime: 2, cutime: 9,
-            cstime: 3, priority: 20,
-            nice: 0, num_threads: 1,
-            itrealvalue: 0, starttime: 248701832,
-            vsize: 2981888, rss: 458,
-            rsslim: 4294967295, startcode: 65536,
-            endcode: 425632, startstack: 3200257616,
-            kstkesp: 3200256600, kstkeip: 3068202372,
-            signal: 0, blocked: 0,
-            sigignore: 3670016, sigcatch: 95335,
-            wchan: 1, nswap: 0,
-            cnswap: 0, exit_signal: 17,
-            processor: 0, rt_priority: 0,
-            policy: 0, delayacct_blkio_ticks: 0,
-            guest_time: 0, cguest_time: 0,
-            start_data: 491520, end_data: 492921,
-            start_brk: 2895872, arg_start: 3200257854,
-            arg_end: 3200257858, env_start: 3200257858,
-            env_end: 3200258036, exit_code: 0,
-        });
+        assert_eq!(
+            stat.unwrap(),
+            ProcStat {
+                pid: 720,
+                comm: "sh".into(),
+                state: 'S',
+                ppid: 1,
+                pgrp: 720,
+                session: 720,
+                tty_nr: 0,
+                tpgid: -1,
+                flags: 4194560,
+                minflt: 240,
+                cminflt: 1400,
+                majflt: 0,
+                cmajflt: 0,
+                utime: 1,
+                stime: 2,
+                cutime: 9,
+                cstime: 3,
+                priority: 20,
+                nice: 0,
+                num_threads: 1,
+                itrealvalue: 0,
+                starttime: 248701832,
+                vsize: 2981888,
+                rss: 458,
+                rsslim: 4294967295,
+                startcode: 65536,
+                endcode: 425632,
+                startstack: 3200257616,
+                kstkesp: 3200256600,
+                kstkeip: 3068202372,
+                signal: 0,
+                blocked: 0,
+                sigignore: 3670016,
+                sigcatch: 95335,
+                wchan: 1,
+                nswap: 0,
+                cnswap: 0,
+                exit_signal: 17,
+                processor: 0,
+                rt_priority: 0,
+                policy: 0,
+                delayacct_blkio_ticks: 0,
+                guest_time: 0,
+                cguest_time: 0,
+                start_data: 491520,
+                end_data: 492921,
+                start_brk: 2895872,
+                arg_start: 3200257854,
+                arg_end: 3200257858,
+                env_start: 3200257858,
+                env_end: 3200258036,
+                exit_code: 0,
+            }
+        );
     }
 
     #[test]
@@ -331,7 +364,6 @@ mod tests {
         assert_eq!(stat.rss(), 458);
         assert_eq!(stat.num_threads(), 1);
     }
-
 
     #[test]
     fn procstat_from_pid() {

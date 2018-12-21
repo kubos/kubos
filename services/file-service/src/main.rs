@@ -33,7 +33,8 @@ fn main() {
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
         Some("kubos-file-service"),
-    ).unwrap();
+    )
+    .unwrap();
 
     let config = ServiceConfig::new("file-transfer-service");
 

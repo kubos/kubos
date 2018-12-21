@@ -112,7 +112,7 @@ pub fn app_start(_pid: u32, handler: &AppHandler) -> Result<(), Error> {
             )
             .build(),
     );
-    
+
     // Set up logging which will be routed to stdout
     let stdout = Box::new(ConsoleAppender::builder().build());
 
@@ -127,10 +127,10 @@ pub fn app_start(_pid: u32, handler: &AppHandler) -> Result<(), Error> {
                 // Set the minimum logging level to record
                 .build(log::LevelFilter::Debug),
         )?;
-    
-    // Start the logger  
+
+    // Start the logger
     log4rs::init_config(config)?;
-    
+
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
 
