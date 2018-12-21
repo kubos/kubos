@@ -103,7 +103,7 @@ impl Protocol {
     /// let c_protocol = ChannelProtocol::new("0.0.0.0", "0.0.0.0:7000", 4096);
     /// let message = ser::to_vec_packed(&"ping").unwrap();
     ///
-    /// c_protocol.send(message);
+    /// c_protocol.send(&message);
     /// ```
     ///
     pub fn send(&self, vec: &[u8]) -> Result<(), ProtocolError> {

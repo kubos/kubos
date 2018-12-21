@@ -45,7 +45,7 @@
 //!     f_protocol.send_export(channel_id, &hash, &target_path, mode)?;
 //!
 //!     // Start the engine to send the file data chunks
-//!     Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_millis(10), State::Transmitting)?)
+//!     Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_millis(10), &State::Transmitting)?)
 //! }
 //! ```
 //!
@@ -76,12 +76,12 @@
 //!
 //!     let state = f_protocol.process_message(
 //!         reply,
-//!         State::StartReceive {
+//!         &State::StartReceive {
 //!             path: target_path.to_string(),
 //!         },
 //!     )?;
 //!
-//!     Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_millis(10), state)?)
+//!     Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_millis(10), &state)?)
 //! }
 //! ```
 //!

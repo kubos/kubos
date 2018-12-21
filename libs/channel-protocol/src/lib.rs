@@ -40,7 +40,7 @@
 //!
 //! let message = vec![0, 1, 1, 2];
 //!
-//! channel_proto.send(message);
+//! channel_proto.send(&message);
 //! match channel_proto.recv_message(None) {
 //!     Ok(message) => println!("Received: {:?}", message),
 //!     Err(e) => eprintln!("Error receiving: {}", e)

@@ -60,7 +60,7 @@ const TIMEOUT: Duration = Duration::from_millis(60);
 ///
 /// let rx_conn = oem.conn.clone();
 ///
-/// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+/// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
 /// # Ok(())
 /// # }
 /// ```
@@ -276,7 +276,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
     ///
     /// oem.request_version()?;
     ///
@@ -351,7 +351,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
     ///
     /// oem.request_position(1.0, 0.0, false)?;
     ///
@@ -659,7 +659,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
     ///
     /// let entry = oem.get_log()?;
     ///

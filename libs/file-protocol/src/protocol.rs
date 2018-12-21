@@ -161,7 +161,7 @@ impl Protocol {
     /// let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", config);
     /// let message = ser::to_vec_packed(&"ping").unwrap();
     ///
-    /// f_protocol.send(message);
+    /// f_protocol.send(&message);
     /// ```
     ///
     pub fn send(&self, vec: &[u8]) -> Result<(), ProtocolError> {
@@ -456,7 +456,7 @@ impl Protocol {
     /// f_protocol.message_engine(
     ///     |d| f_protocol.recv(Some(d)),
     ///     Duration::from_millis(10),
-    ///     State::Transmitting
+    ///     &State::Transmitting
     /// );
     /// ```
     ///
@@ -615,7 +615,7 @@ impl Protocol {
     /// if let Ok(message) = f_protocol.recv(Some(Duration::from_millis(100))) {
     /// 	let _state = f_protocol.process_message(
     ///			message,
-    ///			State::StartReceive {
+    ///			&State::StartReceive {
     ///				path: "target/dir/file.bin".to_owned()
     ///         }
     ///		);
