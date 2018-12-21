@@ -5,7 +5,7 @@
 # Needed to run cargo kubos -c doc
 ./tools/kubos_link.py
 
-latest_tag=`git tag --sort=-creatordate | head -n 1`
+latest_tag=`git tag --sort=-creatordate --sort=-v:refname| head -n 1`
 
 echo "Tag for docs: $latest_tag"
 
