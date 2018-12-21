@@ -112,7 +112,7 @@ pub fn app_start(_pid: u32, handler: &AppHandler) -> Result<(), Error> {
             )
             .build(),
     );
-    
+
     // Set up logging which will be routed to stdout
     let stdout = Box::new(ConsoleAppender::builder().build());
 
@@ -127,10 +127,10 @@ pub fn app_start(_pid: u32, handler: &AppHandler) -> Result<(), Error> {
                 // Set the minimum logging level to record
                 .build(log::LevelFilter::Debug),
         )?;
-    
-    // Start the logger  
+
+    // Start the logger
     log4rs::init_config(config)?;
-    
+
     let args: Vec<String> = env::args().collect();
     let program = args[0].clone();
 
@@ -151,11 +151,13 @@ pub fn app_start(_pid: u32, handler: &AppHandler) -> Result<(), Error> {
     if matches.opt_present("h") {
         let brief = format!("Usage: {} [options]", program);
         print!("{}", opts.usage(&brief));
-        return Ok(())
+        return Ok(());
     }
 
     let _uuid = env::var_os("KUBOS_APP_UUID");
-    let run_level = matches.opt_str("r").unwrap_or("OnCommand".to_owned());
+    let run_level = matches
+        .opt_str("r")
+        .unwrap_or_else(|| "OnCommand".to_owned());
 
     match run_level.as_ref() {
         "OnBoot" => handler.on_boot(args),

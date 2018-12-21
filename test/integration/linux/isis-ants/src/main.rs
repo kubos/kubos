@@ -30,11 +30,11 @@ fn arm(ants: &AntS, logger: &Logger) -> u8 {
     match ants.arm() {
         Ok(()) => {
             info!(logger, "[Arm Test] Test completed successfully");
-            return 0;
+            0
         }
         Err(err) => {
             error!(logger, "[Arm Test] Failed to arm AntS: {}", err);
-            return 1;
+            1
         }
     }
 }
@@ -43,11 +43,11 @@ fn disarm(ants: &AntS, logger: &Logger) -> u8 {
     match ants.disarm() {
         Ok(()) => {
             info!(logger, "[Disarm Test] Test completed successfully");
-            return 0;
+            0
         }
         Err(err) => {
             error!(logger, "[Disarm Test] Failed to disarm AntS: {}", err);
-            return 1;
+            1
         }
     }
 }
@@ -56,11 +56,11 @@ fn configure(ants: &AntS, logger: &Logger) -> u8 {
     match ants.configure(KANTSController::Secondary) {
         Ok(()) => {
             info!(logger, "[Configure Test] Test completed successfully");
-            return 0;
+            0
         }
         Err(err) => {
             error!(logger, "[Configure Test] Failed to configure AntS: {}", err);
-            return 1;
+            1
         }
     }
 }
@@ -69,11 +69,11 @@ fn deploy(ants: &AntS, logger: &Logger) -> u8 {
     match ants.deploy(KANTSAnt::Ant3, false, 1) {
         Ok(()) => {
             info!(logger, "[Deploy Test] Test completed successfully");
-            return 0;
+            0
         }
         Err(err) => {
             error!(logger, "[Deploy Test] Failed to deploy antenna 3: {}", err);
-            return 1;
+            1
         }
     }
 }
@@ -82,14 +82,14 @@ fn deploy_override(ants: &AntS, logger: &Logger) -> u8 {
     match ants.deploy(KANTSAnt::Ant1, true, 1) {
         Ok(()) => {
             info!(logger, "[Deploy Override Test] Test completed successfully");
-            return 0;
+            0
         }
         Err(err) => {
             error!(
                 logger,
                 "[Deploy Override Test] Failed to deploy antenna 1: {}", err
             );
-            return 1;
+            1
         }
     }
 }
@@ -98,14 +98,14 @@ fn auto_deploy(ants: &AntS, logger: &Logger) -> u8 {
     match ants.auto_deploy(2) {
         Ok(()) => {
             info!(logger, "[Auto-Deploy Test] Test completed successfully");
-            return 0;
+            0
         }
         Err(err) => {
             error!(
                 logger,
                 "[Auto-Deploy Test] Failed to auto-deploy antennas: {}", err
             );
-            return 1;
+            1
         }
     }
 }
@@ -114,14 +114,14 @@ fn cancel_deploy(ants: &AntS, logger: &Logger) -> u8 {
     match ants.cancel_deploy() {
         Ok(()) => {
             info!(logger, "[Disarm Test] Test completed successfully");
-            return 0;
+            0
         }
         Err(err) => {
             error!(
                 logger,
                 "[Disarm Test] Failed to cancel AntS deployment: {}", err
             );
-            return 1;
+            1
         }
     }
 }
@@ -133,14 +133,14 @@ fn passthrough(ants: &AntS, logger: &Logger) -> u8 {
     match ants.passthrough(&tx, &mut rx) {
         Ok(()) => {
             info!(logger, "[Passthrough Test] Result: {:?}", rx);
-            return 0;
+            0
         }
         Err(err) => {
             error!(
                 logger,
                 "[Passthrough Test] Failed to read AntS deployment status: {}", err
             );
-            return 1;
+            1
         }
     }
 }
@@ -149,11 +149,11 @@ fn reset(ants: &AntS, logger: &Logger) -> u8 {
     match ants.reset() {
         Ok(()) => {
             info!(logger, "[Reset Test] Test completed successfully");
-            return 0;
+            0
         }
         Err(err) => {
             error!(logger, "[Reset Test] Failed to reset AntS: {}", err);
-            return 1;
+            1
         }
     }
 }
@@ -220,7 +220,7 @@ fn get_deploy(ants: &AntS, logger: &Logger) -> u8 {
     }
 
     info!(logger, "[Deploy Status Test] Test completed successfully");
-    return 0;
+    0
 }
 
 fn get_sys_telem(ants: &AntS, logger: &Logger) -> u8 {
@@ -305,7 +305,7 @@ fn get_sys_telem(ants: &AntS, logger: &Logger) -> u8 {
         "[System Telemetry Test] Test completed successfully"
     );
 
-    return 0;
+    0
 }
 
 fn get_act_counts(ants: &AntS, logger: &Logger) -> u8 {
@@ -366,7 +366,7 @@ fn get_act_counts(ants: &AntS, logger: &Logger) -> u8 {
         "[Activation Counts Test] Test completed successfully"
     );
 
-    return 0;
+    0
 }
 
 fn get_act_times(ants: &AntS, logger: &Logger) -> u8 {
@@ -427,7 +427,7 @@ fn get_act_times(ants: &AntS, logger: &Logger) -> u8 {
         "[Activation Times Test] Test completed successfully"
     );
 
-    return 0;
+    0
 }
 
 fn get_uptime(ants: &AntS, logger: &Logger) -> u8 {
@@ -445,7 +445,7 @@ fn get_uptime(ants: &AntS, logger: &Logger) -> u8 {
     info!(logger, "System uptime: {}", uptime);
     info!(logger, "[Uptime Test] Test completed successfully");
 
-    return 0;
+    0
 }
 
 pub fn main() {

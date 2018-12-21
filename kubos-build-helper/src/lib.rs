@@ -34,7 +34,7 @@ pub fn build_module() {
 /// get set when the `cargo kubos` command is run.
 fn determine_target() -> String {
     match env::var("CARGO_KUBOS_TARGET") {
-        Ok(val) => String::from(val),
+        Ok(val) => val,
         Err(e) => panic!("Error retrieving cargo-kubos target: {}", e),
     }
 }
@@ -67,7 +67,7 @@ fn do_build(target: &str) {
 
     // Build with target set explicitly
     if !Command::new("kubos")
-        .args(&["-t", target.as_ref(), "build"])
+        .args(&["-t", target, "build"])
         .status()
         .unwrap()
         .success()

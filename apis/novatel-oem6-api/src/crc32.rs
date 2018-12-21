@@ -35,7 +35,7 @@ pub fn calc_crc(msg: &[u8]) -> u32 {
 
     for elem in msg.iter() {
         let val1 = crc.wrapping_shr(8);
-        let arg: u32 = crc ^ (elem.clone() as u32);
+        let arg: u32 = crc ^ u32::from(*elem);
         let val2 = calc_val(arg as u8);
         crc = val2 ^ val1;
     }

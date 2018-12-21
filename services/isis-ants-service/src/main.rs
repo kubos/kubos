@@ -382,8 +382,9 @@ fn main() -> AntSResult<()> {
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
         Some("isis-ants-service"),
-    ).unwrap();
-    
+    )
+    .unwrap();
+
     let config = Config::new("isis-ants-service");
 
     let bus = config
@@ -424,7 +425,8 @@ fn main() -> AntSResult<()> {
         Subsystem::new(bus, primary, secondary, antennas, wd_timeout)?,
         QueryRoot,
         MutationRoot,
-    ).start();
+    )
+    .start();
 
     Ok(())
 }

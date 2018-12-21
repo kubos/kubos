@@ -47,7 +47,7 @@ fn ping() {
             "ping": "pong"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -64,7 +64,7 @@ fn ack_default() {
             "ack": "NONE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -79,7 +79,7 @@ fn ack_noop() {
             }
         }"#;
 
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             ack
@@ -89,7 +89,7 @@ fn ack_noop() {
             "ack": "NOOP"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -104,7 +104,7 @@ fn ack_control_power() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -114,7 +114,7 @@ fn ack_control_power() {
             "ack": "CONTROL_POWER"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -127,7 +127,7 @@ fn ack_configure_hardware() {
             configureHardware
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -137,7 +137,7 @@ fn ack_configure_hardware() {
             "ack": "CONFIGURE_HARDWARE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -153,7 +153,7 @@ fn ack_test_hardware() {
             }}
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -163,7 +163,7 @@ fn ack_test_hardware() {
             "ack": "TEST_HARDWARE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -179,7 +179,7 @@ fn ack_issue_raw_command() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -189,7 +189,7 @@ fn ack_issue_raw_command() {
             "ack": "ISSUE_RAW_COMMAND"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -205,7 +205,7 @@ fn ack_set_mode() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -215,7 +215,7 @@ fn ack_set_mode() {
             "ack": "SET_MODE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -231,7 +231,7 @@ fn ack_update() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -241,7 +241,7 @@ fn ack_update() {
             "ack": "UPDATE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -258,7 +258,7 @@ fn query_errors_empty() {
             "errors": []
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -273,7 +273,7 @@ fn query_errors_single() {
             }
         }"#;
 
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             errors
@@ -283,7 +283,7 @@ fn query_errors_single() {
             "errors": ["Noop: Unable to communicate with MAI400"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -298,8 +298,8 @@ fn query_errors_multiple() {
             }
         }"#;
 
-    service.process(noop.to_owned());
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             errors
@@ -309,7 +309,7 @@ fn query_errors_multiple() {
             "errors": ["Noop: Unable to communicate with MAI400", "Noop: Unable to communicate with MAI400"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -324,20 +324,20 @@ fn query_errors_clear_after_query() {
             }
         }"#;
 
-    service.process(noop.to_owned());
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             errors
         }"#;
 
-    service.process(query.to_owned());
+    service.process(&query.to_owned());
 
     let expected = json!({
             "errors": []
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -377,7 +377,7 @@ fn get_power_on() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -400,7 +400,7 @@ fn get_power_off() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -417,7 +417,7 @@ fn config() {
             "config": "Not Implemented"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 // telemetry: nominal, debug {rotating, irehs, imu}
@@ -491,7 +491,7 @@ fn telemetry_nominal() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -649,7 +649,7 @@ fn telemetry_debug_irehs() {
             }
     });
 
-    let result = service.process(query.to_owned());
+    let result = service.process(&query.to_owned());
 
     assert_eq!(result, wrap!(expected));
 
@@ -727,7 +727,7 @@ fn telemetry_debug_imu() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -797,7 +797,7 @@ fn telemetry_debug_rotating() {
             "telemetry": {
                 "debug": {
                     "rotating": {
-                    	"acsOpMode": 169,
+                        "acsOpMode": 169,
                         "adsOpMode": 0,
                         "attDetMode": 24,
                         "bFieldIgrf": [-0.000015042761333461386, 2.054659944406012e-7, 0.0000222020080400398],
@@ -809,12 +809,12 @@ fn telemetry_debug_rotating() {
                         "kUnload": [-5000000.0, -5000000.0, -5000000.0],
                         "kd": [-12.100000381469727, -12.0, -4.0],
                         "keplerElem": {
-                        	"argParigee": 0.0,
-                        	"eccentricity": 0.0,
-                        	"inclination": 45.0,
-                        	"raan": 0.0,
-                        	"semiMajorAxis": 6787.47021484375,
-                        	"trueAnomoly": 0.0,
+                            "argParigee": 0.0,
+                            "eccentricity": 0.0,
+                            "inclination": 45.0,
+                            "raan": 0.0,
+                            "semiMajorAxis": 6787.47021484375,
+                            "trueAnomoly": 0.0,
                         },
                         "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
                         "magBias": [1028, 0, 0],
@@ -850,7 +850,7 @@ fn telemetry_debug_rotating() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1094,7 +1094,7 @@ fn test_results() {
                         "gyroTemp": 19,
                     },
                     "rotating": {
-                    	"acsOpMode": 169,
+                        "acsOpMode": 169,
                         "adsOpMode": 0,
                         "attDetMode": 24,
                         "bFieldIgrf": [-0.000015042761333461386, 2.054659944406012e-7, 0.0000222020080400398],
@@ -1106,12 +1106,12 @@ fn test_results() {
                         "kUnload": [-5000000.0, -5000000.0, -5000000.0],
                         "kd": [-12.100000381469727, -12.0, -4.0],
                         "keplerElem": {
-                        	"argParigee": 0.0,
-                        	"eccentricity": 0.0,
-                        	"inclination": 45.0,
-                        	"raan": 0.0,
-                        	"semiMajorAxis": 6787.47021484375,
-                        	"trueAnomoly": 0.0,
+                            "argParigee": 0.0,
+                            "eccentricity": 0.0,
+                            "inclination": 45.0,
+                            "raan": 0.0,
+                            "semiMajorAxis": 6787.47021484375,
+                            "trueAnomoly": 0.0,
                         },
                         "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
                         "magBias": [1028, 0, 0],
@@ -1174,7 +1174,7 @@ fn test_results() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1191,7 +1191,7 @@ fn mode() {
             "mode": "RATE_NULLING"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1208,7 +1208,7 @@ fn orientation() {
             "orientation": "Not Implemented"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1233,7 +1233,7 @@ fn spin() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1250,7 +1250,7 @@ fn mutation_errors_empty() {
             "errors": []
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1266,7 +1266,7 @@ fn mutation_errors_single() {
             errors
         }"#;
 
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             errors
@@ -1276,7 +1276,7 @@ fn mutation_errors_single() {
             "errors": ["Noop: Unable to communicate with MAI400"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1291,8 +1291,8 @@ fn mutation_errors_multiple() {
             }
         }"#;
 
-    service.process(noop.to_owned());
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             errors
@@ -1302,7 +1302,7 @@ fn mutation_errors_multiple() {
             "errors": ["Noop: Unable to communicate with MAI400", "Noop: Unable to communicate with MAI400"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1341,7 +1341,7 @@ fn noop_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1365,7 +1365,7 @@ fn noop_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1393,7 +1393,7 @@ fn control_power_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1418,7 +1418,7 @@ fn control_power_bad() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1443,7 +1443,7 @@ fn control_power_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1460,7 +1460,7 @@ fn configure_hardware() {
             "configureHardware": "Not Implemented"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1707,7 +1707,7 @@ fn test_hardware_integration() {
                         "gyroTemp": 19,
                     },
                     "rotating": {
-                    	"acsOpMode": 169,
+                        "acsOpMode": 169,
                         "adsOpMode": 0,
                         "attDetMode": 24,
                         "bFieldIgrf": [-0.000015042761333461386, 2.054659944406012e-7, 0.0000222020080400398],
@@ -1719,12 +1719,12 @@ fn test_hardware_integration() {
                         "kUnload": [-5000000.0, -5000000.0, -5000000.0],
                         "kd": [-12.100000381469727, -12.0, -4.0],
                         "keplerElem": {
-                        	"argParigee": 0.0,
-                        	"eccentricity": 0.0,
-                        	"inclination": 45.0,
-                        	"raan": 0.0,
-                        	"semiMajorAxis": 6787.47021484375,
-                        	"trueAnomoly": 0.0,
+                            "argParigee": 0.0,
+                            "eccentricity": 0.0,
+                            "inclination": 45.0,
+                            "raan": 0.0,
+                            "semiMajorAxis": 6787.47021484375,
+                            "trueAnomoly": 0.0,
                         },
                         "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
                         "magBias": [1028, 0, 0],
@@ -1787,7 +1787,7 @@ fn test_hardware_integration() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1814,7 +1814,7 @@ fn test_hardware_hardware() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1839,7 +1839,7 @@ fn issue_raw_command_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1862,7 +1862,7 @@ fn issue_raw_command_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1887,7 +1887,7 @@ fn set_mode_default() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1912,7 +1912,7 @@ fn set_mode_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1935,7 +1935,7 @@ fn set_mode_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1960,7 +1960,7 @@ fn set_mode_normal_sun() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -1985,7 +1985,7 @@ fn set_mode_latlong_sun() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2010,7 +2010,7 @@ fn set_mode_sun_default() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2033,7 +2033,7 @@ fn set_mode_sun_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2058,7 +2058,7 @@ fn update_gps_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2081,7 +2081,7 @@ fn update_gps_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2106,7 +2106,7 @@ fn update_rv_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2129,7 +2129,7 @@ fn update_rv_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2155,7 +2155,7 @@ fn update_both_both_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2178,7 +2178,7 @@ fn update_both_both_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2204,7 +2204,7 @@ fn update_both_gps_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -2229,5 +2229,5 @@ fn update_both_rv_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

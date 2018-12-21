@@ -40,7 +40,7 @@
 //!
 //! let message = vec![0, 1, 1, 2];
 //!
-//! channel_proto.send(message);
+//! channel_proto.send(&message);
 //! match channel_proto.recv_message(None) {
 //!     Ok(message) => println!("Received: {:?}", message),
 //!     Err(e) => eprintln!("Error receiving: {}", e)
@@ -85,6 +85,6 @@ use rand::Rng;
 ///
 pub fn generate_channel() -> u32 {
     let mut rng = rand::thread_rng();
-    let channel_id: u32 = rng.gen_range(100000, 999999);
+    let channel_id: u32 = rng.gen_range(100_000, 999_999);
     channel_id
 }

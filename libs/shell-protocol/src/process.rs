@@ -32,13 +32,11 @@ fn do_read<R: BufRead>(mut reader: R) -> Result<Option<String>, ProtocolError> {
         Ok(0) => Ok(None),
         Ok(_) => Ok(Some(data)),
         Err(err) => match err.kind() {
-            io::ErrorKind::TimedOut => return Err(ProtocolError::ReadTimeout),
-            _ => {
-                return Err(ProtocolError::ProcesssError {
-                    action: "reading".to_owned(),
-                    err,
-                });
-            }
+            io::ErrorKind::TimedOut => Err(ProtocolError::ReadTimeout),
+            _ => Err(ProtocolError::ProcesssError {
+                action: "reading".to_owned(),
+                err,
+            }),
         },
     }
 }
@@ -84,7 +82,7 @@ impl ProcessHandler {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
-            .args(args.unwrap_or(vec![]))
+            .args(args.unwrap_or_else(|| vec![]))
             .spawn()
         {
             Ok(process) => process,
@@ -231,13 +229,9 @@ impl ProcessHandler {
     /// }
     /// ```
     pub fn close_stdin(&mut self) -> Result<(), ProtocolError> {
-        match self.stdin_writer {
-            Some(ref mut stdin_writer) => {
-                drop(stdin_writer);
-            }
-            None => {}
+        if let Some(ref mut stdin_writer) = self.stdin_writer {
+            drop(stdin_writer);
         }
-        self.stdin_writer = None;
         Ok(())
     }
 

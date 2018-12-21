@@ -57,15 +57,15 @@ fn test_delete_ge() {
         }"#;
 
     let mutation_expected = json!({
-            "errors": "",
-            "data": {
-                "delete": {
-                    "entriesDeleted": 7,
-                    "errors": "",
-                    "success": true
-                }
+        "errors": "",
+        "data": {
+            "delete": {
+                "entriesDeleted": 7,
+                "errors": "",
+                "success": true
             }
-        });
+        }
+    });
     let mutation_result = do_query(Some(port), mutation);
 
     let query = r#"{
@@ -77,36 +77,36 @@ fn test_delete_ge() {
             }
         }"#;
     let query_expected = json!({
-            "errors": "",
-            "data": {
-                "telemetry": [
-                    {
-                    "timestamp": 1003.0,
-                    "subsystem": "eps",
-                    "parameter": "current",
-                    "value": "3.1"
-                    },
-                    {
-                    "timestamp": 1002.0,
-                    "subsystem": "gps",
-                    "parameter": "voltage",
-                    "value": "3.2"
-                    },
-                    {
-                    "timestamp": 1001.0,
-                    "subsystem": "mcu",
-                    "parameter": "voltage",
-                    "value": "3.4"
-                    },
-                    {
-                    "timestamp": 1000.0,
-                    "subsystem": "eps",
-                    "parameter": "voltage",
-                    "value": "3.3"
-                    },
-                ]
-            }
-        });
+        "errors": "",
+        "data": {
+            "telemetry": [
+                {
+                "timestamp": 1003.0,
+                "subsystem": "eps",
+                "parameter": "current",
+                "value": "3.1"
+                },
+                {
+                "timestamp": 1002.0,
+                "subsystem": "gps",
+                "parameter": "voltage",
+                "value": "3.2"
+                },
+                {
+                "timestamp": 1001.0,
+                "subsystem": "mcu",
+                "parameter": "voltage",
+                "value": "3.4"
+                },
+                {
+                "timestamp": 1000.0,
+                "subsystem": "eps",
+                "parameter": "voltage",
+                "value": "3.3"
+                },
+            ]
+        }
+    });
     let query_result = do_query(Some(port), query);
 
     teardown(handle, sender);
@@ -135,15 +135,15 @@ fn test_delete_le() {
         }"#;
 
     let mutation_expected = json!({
-            "errors": "",
-            "data": {
-                "delete": {
-                    "entriesDeleted": 9,
-                    "errors": "",
-                    "success": true
-                }
+        "errors": "",
+        "data": {
+            "delete": {
+                "entriesDeleted": 9,
+                "errors": "",
+                "success": true
             }
-        });
+        }
+    });
     let mutation_result = do_query(Some(port), mutation);
 
     let query = r#"{
@@ -155,24 +155,24 @@ fn test_delete_le() {
             }
         }"#;
     let query_expected = json!({
-            "errors": "",
-            "data": {
-                "telemetry": [
-                    {
-                    "timestamp": 1010.0,
-                    "subsystem": "mcu",
-                    "parameter": "current",
-                    "value": "2.4"
-                    },
-                    {
-                    "timestamp": 1009.0,
-                    "subsystem": "eps",
-                    "parameter": "current",
-                    "value": "2.5"
-                    },
-                ]
-            }
-        });
+        "errors": "",
+        "data": {
+            "telemetry": [
+                {
+                "timestamp": 1010.0,
+                "subsystem": "mcu",
+                "parameter": "current",
+                "value": "2.4"
+                },
+                {
+                "timestamp": 1009.0,
+                "subsystem": "eps",
+                "parameter": "current",
+                "value": "2.5"
+                },
+            ]
+        }
+    });
     let query_result = do_query(Some(port), query);
 
     teardown(handle, sender);
@@ -201,15 +201,15 @@ fn test_delete_range() {
         }"#;
 
     let mutation_expected = json!({
-            "errors": "",
-            "data": {
-                "delete": {
-                    "entriesDeleted": 9,
-                    "errors": "",
-                    "success": true
-                }
+        "errors": "",
+        "data": {
+            "delete": {
+                "entriesDeleted": 9,
+                "errors": "",
+                "success": true
             }
-        });
+        }
+    });
     let mutation_result = do_query(Some(port), mutation);
 
     let query = r#"{
@@ -221,24 +221,24 @@ fn test_delete_range() {
             }
         }"#;
     let query_expected = json!({
-            "errors": "",
-            "data": {
-                "telemetry": [
-                    {
-                    "timestamp": 1010.0,
-                    "subsystem": "mcu",
-                    "parameter": "current",
-                    "value": "2.4"
-                    },
-                    {
-                    "timestamp": 1000.0,
-                    "subsystem": "eps",
-                    "parameter": "voltage",
-                    "value": "3.3"
-                    },
-                ]
-            }
-        });
+        "errors": "",
+        "data": {
+            "telemetry": [
+                {
+                "timestamp": 1010.0,
+                "subsystem": "mcu",
+                "parameter": "current",
+                "value": "2.4"
+                },
+                {
+                "timestamp": 1000.0,
+                "subsystem": "eps",
+                "parameter": "voltage",
+                "value": "3.3"
+                },
+            ]
+        }
+    });
     let query_result = do_query(Some(port), query);
 
     teardown(handle, sender);
@@ -267,15 +267,15 @@ fn test_delete_subsystem() {
         }"#;
 
     let mutation_expected = json!({
-            "errors": "",
-            "data": {
-                "delete": {
-                    "entriesDeleted": 4,
-                    "errors": "",
-                    "success": true
-                }
+        "errors": "",
+        "data": {
+            "delete": {
+                "entriesDeleted": 4,
+                "errors": "",
+                "success": true
             }
-        });
+        }
+    });
     let mutation_result = do_query(Some(port), mutation);
 
     let query = r#"{
@@ -285,40 +285,40 @@ fn test_delete_subsystem() {
             }
         }"#;
     let query_expected = json!({
-            "errors": "",
-            "data": {
-                "telemetry": [
-                    {
-                    "timestamp": 1010.0,
-                    "subsystem": "mcu",
-                    },
-                    {
-                    "timestamp": 1008.0,
-                    "subsystem": "gps",
-                    },
-                    {
-                    "timestamp": 1007.0,
-                    "subsystem": "mcu",
-                    },
-                    {
-                    "timestamp": 1005.0,
-                    "subsystem": "gps",
-                    },
-                    {
-                    "timestamp": 1004.0,
-                    "subsystem": "mcu",
-                    },
-                    {
-                    "timestamp": 1002.0,
-                    "subsystem": "gps",
-                    },
-                    {
-                    "timestamp": 1001.0,
-                    "subsystem": "mcu",
-                    },
-                ]
-            }
-        });
+        "errors": "",
+        "data": {
+            "telemetry": [
+                {
+                "timestamp": 1010.0,
+                "subsystem": "mcu",
+                },
+                {
+                "timestamp": 1008.0,
+                "subsystem": "gps",
+                },
+                {
+                "timestamp": 1007.0,
+                "subsystem": "mcu",
+                },
+                {
+                "timestamp": 1005.0,
+                "subsystem": "gps",
+                },
+                {
+                "timestamp": 1004.0,
+                "subsystem": "mcu",
+                },
+                {
+                "timestamp": 1002.0,
+                "subsystem": "gps",
+                },
+                {
+                "timestamp": 1001.0,
+                "subsystem": "mcu",
+                },
+            ]
+        }
+    });
     let query_result = do_query(Some(port), query);
 
     teardown(handle, sender);
@@ -347,15 +347,15 @@ fn test_delete_parameter() {
         }"#;
 
     let mutation_expected = json!({
-            "errors": "",
-            "data": {
-                "delete": {
-                    "entriesDeleted": 6,
-                    "errors": "",
-                    "success": true
-                }
+        "errors": "",
+        "data": {
+            "delete": {
+                "entriesDeleted": 6,
+                "errors": "",
+                "success": true
             }
-        });
+        }
+    });
     let mutation_result = do_query(Some(port), mutation);
 
     let query = r#"{
@@ -365,32 +365,32 @@ fn test_delete_parameter() {
             }
         }"#;
     let query_expected = json!({
-            "errors": "",
-            "data": {
-                "telemetry": [
-                    {
-                    "timestamp": 1010.0,
-                    "subsystem": "mcu",
-                    },
-                    {
-                    "timestamp": 1009.0,
-                    "subsystem": "eps",
-                    },
-                    {
-                    "timestamp": 1005.0,
-                    "subsystem": "gps",
-                    },
-                    {
-                    "timestamp": 1004.0,
-                    "subsystem": "mcu",
-                    },
-                    {
-                    "timestamp": 1003.0,
-                    "subsystem": "eps",
-                    },
-                ]
-            }
-        });
+        "errors": "",
+        "data": {
+            "telemetry": [
+                {
+                "timestamp": 1010.0,
+                "subsystem": "mcu",
+                },
+                {
+                "timestamp": 1009.0,
+                "subsystem": "eps",
+                },
+                {
+                "timestamp": 1005.0,
+                "subsystem": "gps",
+                },
+                {
+                "timestamp": 1004.0,
+                "subsystem": "mcu",
+                },
+                {
+                "timestamp": 1003.0,
+                "subsystem": "eps",
+                },
+            ]
+        }
+    });
     let query_result = do_query(Some(port), query);
 
     teardown(handle, sender);

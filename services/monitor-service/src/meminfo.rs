@@ -51,7 +51,8 @@ impl MemInfo {
     }
 
     pub fn parse<R>(info: R) -> Result<MemInfo, failure::Error>
-        where R: BufRead
+    where
+        R: BufRead,
     {
         let mut mem_info = MemInfo::new();
 
@@ -62,14 +63,14 @@ impl MemInfo {
             let val = iter.next();
 
             match (key, val) {
-                (Some(key), Some(val)) => match key.get(0..key.len()-1).unwrap_or("") {
+                (Some(key), Some(val)) => match key.get(0..key.len() - 1).unwrap_or("") {
                     "MemTotal" => mem_info.total = Self::parse_amount(val),
                     "MemFree" => mem_info.free = Self::parse_amount(val),
                     "MemAvailable" => mem_info.available = Self::parse_amount(val),
                     "LowFree" => mem_info.low_free = Self::parse_amount(val),
-                    _ => {},
+                    _ => {}
                 },
-                _ => {},
+                _ => {}
             }
         }
         Ok(mem_info)
@@ -82,13 +83,21 @@ impl MemInfo {
     }
 
     /// Total system memory available in kB
-    pub fn total(&self) -> Option<u32> { self.total }
+    pub fn total(&self) -> Option<u32> {
+        self.total
+    }
     /// Total system memory free in kB
-    pub fn free(&self) -> Option<u32> { self.free }
+    pub fn free(&self) -> Option<u32> {
+        self.free
+    }
     /// Total system memory available in kB
-    pub fn available(&self) -> Option<u32> { self.available }
+    pub fn available(&self) -> Option<u32> {
+        self.available
+    }
     /// The low mark for system memory free in kB
-    pub fn low_free(&self) -> Option<u32> { self.low_free }
+    pub fn low_free(&self) -> Option<u32> {
+        self.low_free
+    }
 }
 
 #[cfg(test)]
@@ -120,12 +129,15 @@ mod tests {
     #[test]
     fn meminfo_parse() {
         let info = MemInfo::parse(RAW);
-        assert_eq!(info.ok(), Some(MemInfo {
-            total: Some(515352),
-            free: Some(317980),
-            available: Some(498232),
-            low_free: Some(317980),
-        }));
+        assert_eq!(
+            info.ok(),
+            Some(MemInfo {
+                total: Some(515352),
+                free: Some(317980),
+                available: Some(498232),
+                low_free: Some(317980),
+            })
+        );
     }
 
     #[test]
@@ -146,12 +158,15 @@ mod tests {
         assert!(info.is_ok());
 
         let info = info.unwrap();
-        assert_eq!(info, MemInfo {
-            total: Some(515352),
-            free: Some(317980),
-            available: None,
-            low_free: None,
-        });
+        assert_eq!(
+            info,
+            MemInfo {
+                total: Some(515352),
+                free: Some(317980),
+                available: None,
+                low_free: None,
+            }
+        );
 
         assert_eq!(info.total(), Some(515352));
         assert_eq!(info.free(), Some(317980));

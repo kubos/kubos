@@ -33,9 +33,9 @@ pub use config::*;
 pub use uboot::UBootVars;
 
 /// The name of the KubOS app service that can be used to derive service configuration
-pub const SERVICE_APP: &'static str = "app-service";
+pub const SERVICE_APP: &str = "app-service";
 /// The name of the KubOS telemetry db service that can be used to dervice service configuration
-pub const SERVICE_TELEMETRY: &'static str = "telemetry-service";
+pub const SERVICE_TELEMETRY: &str = "telemetry-service";
 
 /// Information about the version(s) of KubOS installed in the system
 pub struct KubosVersions {

@@ -30,7 +30,7 @@ fn ack_default() {
             "ack": "NONE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -45,7 +45,7 @@ fn ack_noop() {
             }
         }"#;
 
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             ack
@@ -55,7 +55,7 @@ fn ack_noop() {
             "ack": "NOOP"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -68,7 +68,7 @@ fn ack_control_power() {
             controlPower
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -78,7 +78,7 @@ fn ack_control_power() {
             "ack": "CONTROL_POWER"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -93,7 +93,7 @@ fn ack_configure_hardware() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -103,7 +103,7 @@ fn ack_configure_hardware() {
             "ack": "CONFIGURE_HARDWARE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -120,7 +120,7 @@ fn ack_test_hardware() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -130,7 +130,7 @@ fn ack_test_hardware() {
             "ack": "TEST_HARDWARE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -145,7 +145,7 @@ fn ack_issue_raw_command() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"{
             ack
@@ -155,5 +155,5 @@ fn ack_issue_raw_command() {
             "ack": "ISSUE_RAW_COMMAND"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

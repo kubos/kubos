@@ -34,7 +34,7 @@ impl Default for KADCSStatus {
     }
 }
 
-pub fn adcs_status_to_err(status: KADCSStatus) -> Result<(), AdcsError> {
+pub fn adcs_status_to_err(status: &KADCSStatus) -> Result<(), AdcsError> {
     match status {
         KADCSStatus::Ok => Ok(()),
         KADCSStatus::Error => Err(AdcsError::Generic),

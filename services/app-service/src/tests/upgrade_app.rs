@@ -64,24 +64,25 @@ fn upgrade_new() {
     );
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": {
-                      "active": true,
-                       "app": {
-                           "name": "dummy",
-                           "version": "0.0.1",
-                           "uuid": "a-b-c-d-e"
-                       }
-                   },
-                   "errors": "",
-                   "success": true,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": {
+                  "active": true,
+                   "app": {
+                       "name": "dummy",
+                       "version": "0.0.1",
+                       "uuid": "a-b-c-d-e"
+                   }
+               },
+               "errors": "",
+               "success": true,
+           }
+        }
+    })
+    .to_string();
 
-    assert_eq!(service.process(upgrade_query.to_owned()), expected);
+    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
 }
 
 #[test]
@@ -122,25 +123,26 @@ fn upgrade_good() {
     );
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": {
-                      "active": true,
-                       "app": {
-                           "name": "dummy",
-                           "version": "0.0.1",
-                           "uuid": "a-b-c-d-e"
-                       }
-                   },
-                   "errors": "",
-                   "success": true,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": {
+                  "active": true,
+                   "app": {
+                       "name": "dummy",
+                       "version": "0.0.1",
+                       "uuid": "a-b-c-d-e"
+                   }
+               },
+               "errors": "",
+               "success": true,
+           }
+        }
+    })
+    .to_string();
 
     // Register the initial app so we have something to upgrade
-    assert_eq!(service.process(upgrade_query.to_owned()), expected);
+    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
 
     // Update the manifest for the new version of the app
     let manifest = r#"
@@ -151,25 +153,26 @@ fn upgrade_good() {
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": {
-                      "active": true,
-                       "app": {
-                           "name": "dummy",
-                           "version": "0.0.2",
-                           "uuid": "a-b-c-d-e"
-                       }
-                   },
-                   "errors": "",
-                   "success": true,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": {
+                  "active": true,
+                   "app": {
+                       "name": "dummy",
+                       "version": "0.0.2",
+                       "uuid": "a-b-c-d-e"
+                   }
+               },
+               "errors": "",
+               "success": true,
+           }
+        }
+    })
+    .to_string();
 
     // Register the new version
-    assert_eq!(service.process(upgrade_query.to_owned()), expected);
+    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
 
     let app_query = r#"
         { apps(uuid: "a-b-c-d-e") { active, app { name, version, uuid } } }
@@ -197,12 +200,13 @@ fn upgrade_good() {
                    }
                ]
             }
-    }).to_string();
+    })
+    .to_string();
 
     // Verify:
     //   - There are two registered versions of the app
     //   - The 0.0.2 version is the active version
-    assert_eq!(service.process(app_query.to_owned()), expected);
+    assert_eq!(service.process(&app_query.to_owned()), expected);
 }
 
 #[test]
@@ -243,25 +247,26 @@ fn upgrade_new_name() {
     );
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": {
-                      "active": true,
-                       "app": {
-                           "name": "dummy",
-                           "version": "0.0.1",
-                           "uuid": "a-b-c-d-e"
-                       }
-                   },
-                   "errors": "",
-                   "success": true,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": {
+                  "active": true,
+                   "app": {
+                       "name": "dummy",
+                       "version": "0.0.1",
+                       "uuid": "a-b-c-d-e"
+                   }
+               },
+               "errors": "",
+               "success": true,
+           }
+        }
+    })
+    .to_string();
 
     // Register the initial app so we have something to upgrade
-    assert_eq!(service.process(upgrade_query.to_owned()), expected);
+    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
 
     // Delete the old app file
     fs::remove_file(app_bin.join("dummy")).unwrap();
@@ -278,25 +283,26 @@ fn upgrade_new_name() {
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": {
-                      "active": true,
-                       "app": {
-                           "name": "dummy2",
-                           "version": "0.0.2",
-                           "uuid": "a-b-c-d-e"
-                       }
-                   },
-                   "errors": "",
-                   "success": true,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": {
+                  "active": true,
+                   "app": {
+                       "name": "dummy2",
+                       "version": "0.0.2",
+                       "uuid": "a-b-c-d-e"
+                   }
+               },
+               "errors": "",
+               "success": true,
+           }
+        }
+    })
+    .to_string();
 
     // Register the new version
-    assert_eq!(service.process(upgrade_query.to_owned()), expected);
+    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
 
     let app_query = r#"
         { apps(uuid: "a-b-c-d-e") { active, app { name, version, uuid } } }
@@ -324,11 +330,12 @@ fn upgrade_new_name() {
                    }
                ]
             }
-    }).to_string();
+    })
+    .to_string();
 
     // Verify:
     //   - There are two registered versions of the app
     //   - The 0.0.2 version is the active version
     //   - The app names are different
-    assert_eq!(service.process(app_query.to_owned()), expected);
+    assert_eq!(service.process(&app_query.to_owned()), expected);
 }

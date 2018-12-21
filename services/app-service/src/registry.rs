@@ -28,7 +28,7 @@ use toml;
 use uuid::Uuid;
 
 /// The default application registry directory in KubOS
-pub const K_APPS_DIR: &'static str = "/home/system/kubos/apps";
+pub const K_APPS_DIR: &str = "/home/system/kubos/apps";
 
 /// AppRegistry
 #[derive(Deserialize, Serialize, Debug)]
@@ -249,13 +249,14 @@ impl AppRegistry {
 
         // Copy everything into the official registry directory
         let files: Vec<PathBuf> = fs::read_dir(app_path)?
-            .filter_map(|file| 
+            .filter_map(|file| {
                 if let Some(entry) = file.ok() {
                     Some(entry.path())
                 } else {
                     None
                 }
-            ).collect();
+            })
+            .collect();
 
         fs_extra::copy_items(&files, app_dir, &fs_extra::dir::CopyOptions::new()).map_err(
             |error| AppError::RegisterError {
@@ -268,7 +269,7 @@ impl AppRegistry {
         let reg_entry = AppRegistryEntry {
             app: App {
                 uuid: app_uuid,
-                metadata: metadata,
+                metadata,
                 pid: 0,
                 path: format!("{}/{}", app_dir_str, app_name),
             },
@@ -400,11 +401,9 @@ impl AppRegistry {
 
         match cmd.spawn() {
             Ok(child) => Ok(child.id()),
-            Err(err) => {
-                return Err(AppError::StartError {
-                    err: format!("Failed to spawn app: {:?}", err),
-                })
-            }
+            Err(err) => Err(AppError::StartError {
+                err: format!("Failed to spawn app: {:?}", err),
+            }),
         }
     }
 

@@ -195,11 +195,11 @@ impl Default for MockStream {
     fn default() -> Self {
         MockStream {
             write: WriteStruct {
-                result: Err(UartError::GenericError.into()),
+                result: Err(UartError::GenericError),
                 input: RefCell::new(VecDeque::new()),
             },
             read: ReadStruct {
-                result: Err(UartError::GenericError.into()),
+                result: Err(UartError::GenericError),
                 output: None,
             },
         }

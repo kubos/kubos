@@ -36,7 +36,7 @@ fn arm_status_armed() {
             "armStatus": "ARMED"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -59,5 +59,5 @@ fn arm_status_disarmed() {
             "armStatus": "DISARMED"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

@@ -67,9 +67,10 @@ fn read_panic() {
     });
 
     let expected = json!({
-                "data": expected,
-                "errors": ""
-        }).to_string();
+            "data": expected,
+            "errors": ""
+    })
+    .to_string();
 
-    assert_eq!(service.process(query.to_owned()), expected);
+    assert_eq!(service.process(&query.to_owned()), expected);
 }

@@ -108,7 +108,7 @@ impl Config {
     /// `name` - Category name used as a key in the config file
     /// `path` - Path to configuration file
     pub fn new_from_path(name: &str, path: String) -> Self {
-        parse_config_file(name, path).unwrap_or(Config::default())
+        parse_config_file(name, path).unwrap_or_default()
     }
 
     /// Creates and parses configuration data from the passed in configuration
@@ -117,7 +117,7 @@ impl Config {
     /// `name` - Category name used as a key in the config
     /// `config` - Config data as a string
     pub fn new_from_str(name: &str, config: &str) -> Self {
-        parse_config_str(name, config).unwrap_or(Config::default())
+        parse_config_str(name, config).unwrap_or_default()
     }
 
     /// Returns the configured hosturl string in the following
@@ -182,7 +182,7 @@ fn get_file_data(path: String) -> Result<String, io::Error> {
 }
 
 fn parse_config_file(name: &str, path: String) -> Result<Config, toml::de::Error> {
-    let contents = get_file_data(path).unwrap_or("".to_string());
+    let contents = get_file_data(path).unwrap_or_else(|_| "".to_string());
     parse_config_str(name, &contents)
 }
 

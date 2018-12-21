@@ -439,14 +439,16 @@ fn main() -> MAIResult<()> {
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
         Some("mai400-service"),
-    ).unwrap();
-    
+    )
+    .unwrap();
+
     Service::new(
         Config::new("mai400-service"),
         Subsystem::new("/dev/ttyS5", Arc::new(ReadData::new()))?,
         QueryRoot,
         MutationRoot,
-    ).start();
+    )
+    .start();
 
     Ok(())
 }

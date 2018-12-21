@@ -62,13 +62,14 @@ impl LockData {
 // - Error information. If enabled, this will be output by the OEM6 when an
 //   error or event occurs.
 pub fn log_thread(
-    oem: OEM6,
-    data: Arc<LockData>,
-    error_send: SyncSender<RxStatusEventLog>,
-    version_send: SyncSender<VersionLog>,
+    oem: &OEM6,
+    data: &Arc<LockData>,
+    error_send: &SyncSender<RxStatusEventLog>,
+    version_send: &SyncSender<VersionLog>,
 ) {
     loop {
-        match oem.get_log()
+        match oem
+            .get_log()
             .expect("Underlying read thread no longer communicating")
         {
             BestXYZ(log) => {
@@ -135,14 +136,14 @@ impl Subsystem {
         let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv)?;
 
         let rx_conn = oem.conn.clone();
-        thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+        thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
 
         let (error_send, error_recv) = sync_channel(10);
         let (version_send, version_recv) = sync_channel(1);
 
         let data_ref = data.clone();
         let oem_ref = oem.clone();
-        thread::spawn(move || log_thread(oem_ref, data_ref, error_send, version_send));
+        thread::spawn(move || log_thread(&oem_ref, &data_ref, &error_send, &version_send));
 
         info!("Kubos OEM6 service started");
 
@@ -267,7 +268,8 @@ impl Subsystem {
                 log.recv_status,
                 Some(VersionInfo {
                     num_components: log.num_components as i32,
-                    components: log.components
+                    components: log
+                        .components
                         .iter()
                         .map(|comp| VersionComponent(comp.clone()))
                         .collect(),

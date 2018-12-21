@@ -215,8 +215,9 @@ fn main() {
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
         Some("kubos-telemetry-service"),
-    ).unwrap();
-    
+    )
+    .unwrap();
+
     let config = Config::new("telemetry-service");
 
     let db_path = config
@@ -240,5 +241,6 @@ fn main() {
         Subsystem::new(db, direct_udp),
         QueryRoot,
         MutationRoot,
-    ).start();
+    )
+    .start();
 }

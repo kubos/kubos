@@ -68,7 +68,7 @@ pub fn parse(data: &[u8]) -> EpsResult<LastError> {
             daughterboard: ErrorCode::from_bits(data[3]),
         })
     } else {
-        return Err(EpsError::parsing_failure("Last Error"));
+        Err(EpsError::parsing_failure("Last Error"))
     }
 }
 

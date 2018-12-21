@@ -141,5 +141,5 @@ fn ping() {
             "ping": "pong"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

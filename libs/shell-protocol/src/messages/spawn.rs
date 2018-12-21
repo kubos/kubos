@@ -34,27 +34,24 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
     };
 
     // Parse out options
-    match message.payload.get(1) {
-        Some(Value::Object(raw_options)) => {
-            // Parse out command arguments
-            args = match raw_options.get(&ObjectKey::String("args".to_owned())) {
-                Some(Value::Array(args)) => Some(
-                    args.to_vec()
-                        .iter()
-                        .filter_map(|s| s.as_string())
-                        .map(|s| s.to_owned())
-                        .collect(),
-                ),
-                _ => None,
-            };
-        }
-        _ => {}
-    };
+    if let Some(Value::Object(raw_options)) = message.payload.get(1) {
+        // Parse out command arguments
+        args = match raw_options.get(&ObjectKey::String("args".to_owned())) {
+            Some(Value::Array(args)) => Some(
+                args.to_vec()
+                    .iter()
+                    .filter_map(|s| s.as_string())
+                    .map(|s| s.to_owned())
+                    .collect(),
+            ),
+            _ => None,
+        };
+    }
 
     Ok(Message::Spawn {
         channel_id: message.channel_id,
         command: command.to_owned(),
-        args: args,
+        args,
     })
 }
 
@@ -98,7 +95,7 @@ mod tests {
 
         let raw = to_cbor(channel_id, command, None).unwrap();
         let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = parse_message(parsed);
+        let msg = parse_message(&parsed);
 
         assert_eq!(
             msg.unwrap(),
@@ -118,7 +115,7 @@ mod tests {
 
         let raw = to_cbor(channel_id, command, Some(&args)).unwrap();
         let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = parse_message(parsed);
+        let msg = parse_message(&parsed);
 
         assert_eq!(
             msg.unwrap(),
@@ -138,7 +135,7 @@ mod tests {
 
         let raw = to_cbor(channel_id, command, Some(&args)).unwrap();
         let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = parse_message(parsed);
+        let msg = parse_message(&parsed);
 
         assert_eq!(
             msg.unwrap(),

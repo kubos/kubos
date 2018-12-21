@@ -59,7 +59,7 @@ fn list_processes(
     let chan_proto =
         channel_protocol::ChannelProtocol::new(host, remote, shell_protocol::CHUNK_SIZE);
 
-    chan_proto.send(shell_protocol::messages::list::to_cbor(
+    chan_proto.send(&shell_protocol::messages::list::to_cbor(
         channel_id,
         Some(proc_list),
     )?)?;
@@ -92,7 +92,7 @@ fn spawn_process(
 
     let channel_protocol = ChannelProtocol::new(host_addr, remote_addr, shell_protocol::CHUNK_SIZE);
 
-    channel_protocol.send(shell_protocol::messages::pid::to_cbor(
+    channel_protocol.send(&shell_protocol::messages::pid::to_cbor(
         channel_id,
         proc_handle.id(),
     )?)?;
@@ -156,7 +156,7 @@ fn get_message(
 
     let channel_message = channel_protocol::parse_message(message)?;
 
-    let shell_message = shell_protocol::parse_message(channel_message.clone())?;
+    let shell_message = shell_protocol::parse_message(&channel_message.clone())?;
 
     Ok((channel_message, shell_message, source))
 }
@@ -171,14 +171,15 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
     let host_addr = host_parts.next().unwrap();
 
     let c_protocol =
-        cbor_protocol::Protocol::new(host.clone(), shell_protocol::CHUNK_SIZE as usize);
+        cbor_protocol::Protocol::new(&host.clone(), shell_protocol::CHUNK_SIZE as usize);
 
     let timeout = config
         .get("timeout")
         .and_then(|val| {
             val.as_integer()
                 .and_then(|num| Some(Duration::from_secs(num as u64)))
-        }).unwrap_or(Duration::from_millis(2));
+        })
+        .unwrap_or(Duration::from_millis(2));
 
     // Setup map of channel IDs to thread channels
     let raw_threads: HashMap<u32, ThreadProcess> = HashMap::new();
@@ -258,7 +259,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                     let channel_protocol =
                         ChannelProtocol::new(&host_addr, &remote_addr, shell_protocol::CHUNK_SIZE);
 
-                    channel_protocol.send(shell_protocol::messages::error::to_cbor(
+                    channel_protocol.send(&shell_protocol::messages::error::to_cbor(
                         channel_id,
                         &format!("No session found on channel {}", channel_id),
                     )?)?;

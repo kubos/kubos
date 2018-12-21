@@ -26,7 +26,7 @@
 //! use serde_cbor::ser;
 //! use std::time::Duration;
 //!
-//! let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+//! let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
 //! let message = ser::to_vec_packed(&("hello", "world")).unwrap();
 //!
 //! cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap()).unwrap();
@@ -113,10 +113,10 @@ impl Protocol {
     /// ```
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
     /// ```
     ///
-    pub fn new(host_url: String, data_size: usize) -> Self {
+    pub fn new(host_url: &str, data_size: usize) -> Self {
         Self {
             handle: UdpSocket::bind(host_url.parse::<SocketAddr>().unwrap()).unwrap(),
             msg_size: data_size + 50,
@@ -143,7 +143,7 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use serde_cbor::ser;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
     /// let message = ser::to_vec_packed(&["ping"]).unwrap();
     ///
     /// cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap());
@@ -156,7 +156,7 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use serde_cbor::ser;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
     /// let message = ser::to_vec_packed(&("hello", "world")).unwrap();
     ///
     /// cbor_connection.send_message(&message, "0.0.0.0:8001".parse().unwrap());
@@ -190,7 +190,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
     ///
     /// cbor_connection.send_pause("0.0.0.0:8001".parse().unwrap());
     /// ```
@@ -220,7 +220,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
     ///
     /// cbor_connection.send_resume("0.0.0.0:8001".parse().unwrap());
     /// ```
@@ -246,7 +246,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let message = cbor_connection.recv_message().unwrap();
     /// ```
@@ -272,7 +272,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let source = cbor_connection.peek_peer();
     /// ```
@@ -299,7 +299,7 @@ impl Protocol {
     /// ```no_run
     /// use cbor_protocol::*;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let (source, message) = cbor_connection.recv_message_peer().unwrap();
     /// ```
@@ -334,7 +334,7 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use std::time::Duration;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:8000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
     ///
     /// let (source, message) = match cbor_connection.recv_message_peer_timeout(Duration::from_secs(1)) {
     ///     Ok(data) => data,
@@ -395,7 +395,7 @@ impl Protocol {
     /// use cbor_protocol::*;
     /// use std::time::Duration;
     ///
-    /// let cbor_connection = Protocol::new("0.0.0.0:9000".to_owned(), 4096);
+    /// let cbor_connection = Protocol::new(&"0.0.0.0:9000".to_owned(), 4096);
     ///
     /// let message = match cbor_connection.recv_message_timeout(Duration::from_secs(1)) {
     ///     Ok(data) => data,
@@ -438,7 +438,7 @@ impl Protocol {
 
     // Parse the received CBOR message
     fn recv_start(&self, data: &[u8]) -> Result<serde_cbor::Value, ProtocolError> {
-        if data.len() == 0 {
+        if data.is_empty() {
             return Err(ProtocolError::NoDataReceived);
         }
 

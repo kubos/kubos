@@ -33,14 +33,15 @@ fn query_good() {
         }"#;
 
     let expected = json!({
-            "ping": "query"
-        });
+        "ping": "query"
+    });
 
     let result = query(
-        ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
-    ).unwrap();
+    )
+    .unwrap();
 
     assert_eq!(result, expected);
 }
@@ -56,10 +57,11 @@ fn query_error() {
         }"#;
 
     let result = query(
-        ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
-    ).unwrap_err();
+    )
+    .unwrap_err();
 
     let result_str = format!("{}", result);
 
@@ -77,10 +79,11 @@ fn query_bad_service() {
         }"#;
 
     let result = query(
-        ServiceConfig::new_from_path("fake-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("fake-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
-    ).unwrap_err();
+    )
+    .unwrap_err();
 
     let result_str = format!("{}", result);
 
@@ -94,10 +97,11 @@ fn query_bad_file() {
         }"#;
 
     let result = query(
-        ServiceConfig::new_from_path("mock-service", "/fake/path".to_string()),
+        &ServiceConfig::new_from_path("mock-service", "/fake/path".to_string()),
         request,
         Some(Duration::from_secs(1)),
-    ).unwrap_err();
+    )
+    .unwrap_err();
 
     let result_str = format!("{}", result);
 
@@ -115,14 +119,15 @@ fn query_mutation() {
         }"#;
 
     let expected = json!({
-            "ping": "mutation"
-        });
+        "ping": "mutation"
+    });
 
     let result = query(
-        ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
         request,
         Some(Duration::from_secs(1)),
-    ).unwrap();
+    )
+    .unwrap();
 
     assert_eq!(result, expected);
 }

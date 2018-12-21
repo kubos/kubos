@@ -88,7 +88,7 @@ fn test_hardware_integration_good() {
                         "hwVersion": "OEM615-2.00",
                         "model": "G1SB0GTT0",
                         "serialNum": "BJYA15120038H",
-                        "swVersion": "OEM060600RN0000",   
+                        "swVersion": "OEM060600RN0000",
                     }],
                     "numComponents": 1
                 },
@@ -106,7 +106,7 @@ fn test_hardware_integration_good() {
                         "positionType": "NONE",
                         "time": {
                             "ms": 0,
-                        	"week": 0
+                            "week": 0
                         },
                         "timeStatus": "UNKNOWN",
                         "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
@@ -120,7 +120,7 @@ fn test_hardware_integration_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -197,7 +197,7 @@ fn test_hardware_integration_no_response() {
                         "positionType": "NONE",
                         "time": {
                             "ms": 0,
-                        	"week": 0
+                            "week": 0
                         },
                         "timeStatus": "UNKNOWN",
                         "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
@@ -206,30 +206,30 @@ fn test_hardware_integration_no_response() {
                     "systemStatus": {
                         "errors": ["Get Telemetry: Failed to get command response"],
                         "status": [
-                           "ERROR_PRESENT", 
-                           "TEMPERATURE_WARNING", 
-                           "VOLTAGE_SUPPLY_WARNING", 
-                           "ANTENNA_NOT_POWERED", 
-                           "LNA_FAILURE", 
-                           "ANTENNA_OPEN", 
-                           "ANTENNA_SHORTENED", 
-                           "CPU_OVERLOAD", 
-                           "COM1_BUFFER_OVERRUN", 
-                           "COM2_BUFFER_OVERRUN", 
-                           "COM3_BUFFER_OVERRUN", 
-                           "LINK_OVERRUN", 
-                           "AUX_TRANSMIT_OVERRUN", 
-                           "AGC_OUT_OF_RANGE", 
-                           "INS_RESET", 
-                           "GPS_ALMANAC_INVALID", 
-                           "POSITION_SOLUTION_INVALID", 
-                           "POSITION_FIXED", 
-                           "CLOCK_STEERING_DISABLED", 
-                           "CLOCK_MODEL_INVALID", 
-                           "EXTERNAL_OSCILLATOR_LOCKED", 
-                           "SOFTWARE_RESOURCE_WARNING", 
-                           "AUX3_STATUS_EVENT", 
-                           "AUX2_STATUS_EVENT", 
+                           "ERROR_PRESENT",
+                           "TEMPERATURE_WARNING",
+                           "VOLTAGE_SUPPLY_WARNING",
+                           "ANTENNA_NOT_POWERED",
+                           "LNA_FAILURE",
+                           "ANTENNA_OPEN",
+                           "ANTENNA_SHORTENED",
+                           "CPU_OVERLOAD",
+                           "COM1_BUFFER_OVERRUN",
+                           "COM2_BUFFER_OVERRUN",
+                           "COM3_BUFFER_OVERRUN",
+                           "LINK_OVERRUN",
+                           "AUX_TRANSMIT_OVERRUN",
+                           "AGC_OUT_OF_RANGE",
+                           "INS_RESET",
+                           "GPS_ALMANAC_INVALID",
+                           "POSITION_SOLUTION_INVALID",
+                           "POSITION_FIXED",
+                           "CLOCK_STEERING_DISABLED",
+                           "CLOCK_MODEL_INVALID",
+                           "EXTERNAL_OSCILLATOR_LOCKED",
+                           "SOFTWARE_RESOURCE_WARNING",
+                           "AUX3_STATUS_EVENT",
+                           "AUX2_STATUS_EVENT",
                            "AUX1_STATUS_EVENT"
                            ]
                     }
@@ -237,7 +237,7 @@ fn test_hardware_integration_no_response() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -316,7 +316,7 @@ fn test_hardware_integration_no_log() {
                         "positionType": "NONE",
                         "time": {
                             "ms": 0,
-                        	"week": 0
+                            "week": 0
                         },
                         "timeStatus": "UNKNOWN",
                         "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
@@ -325,30 +325,30 @@ fn test_hardware_integration_no_log() {
                     "systemStatus": {
                         "errors": ["Get Telemetry: Failed to receive version info - timed out waiting on channel"],
                         "status": [
-                           "ERROR_PRESENT", 
-                           "TEMPERATURE_WARNING", 
-                           "VOLTAGE_SUPPLY_WARNING", 
-                           "ANTENNA_NOT_POWERED", 
-                           "LNA_FAILURE", 
-                           "ANTENNA_OPEN", 
-                           "ANTENNA_SHORTENED", 
-                           "CPU_OVERLOAD", 
-                           "COM1_BUFFER_OVERRUN", 
-                           "COM2_BUFFER_OVERRUN", 
-                           "COM3_BUFFER_OVERRUN", 
-                           "LINK_OVERRUN", 
-                           "AUX_TRANSMIT_OVERRUN", 
-                           "AGC_OUT_OF_RANGE", 
-                           "INS_RESET", 
-                           "GPS_ALMANAC_INVALID", 
-                           "POSITION_SOLUTION_INVALID", 
-                           "POSITION_FIXED", 
-                           "CLOCK_STEERING_DISABLED", 
-                           "CLOCK_MODEL_INVALID", 
-                           "EXTERNAL_OSCILLATOR_LOCKED", 
-                           "SOFTWARE_RESOURCE_WARNING", 
-                           "AUX3_STATUS_EVENT", 
-                           "AUX2_STATUS_EVENT", 
+                           "ERROR_PRESENT",
+                           "TEMPERATURE_WARNING",
+                           "VOLTAGE_SUPPLY_WARNING",
+                           "ANTENNA_NOT_POWERED",
+                           "LNA_FAILURE",
+                           "ANTENNA_OPEN",
+                           "ANTENNA_SHORTENED",
+                           "CPU_OVERLOAD",
+                           "COM1_BUFFER_OVERRUN",
+                           "COM2_BUFFER_OVERRUN",
+                           "COM3_BUFFER_OVERRUN",
+                           "LINK_OVERRUN",
+                           "AUX_TRANSMIT_OVERRUN",
+                           "AGC_OUT_OF_RANGE",
+                           "INS_RESET",
+                           "GPS_ALMANAC_INVALID",
+                           "POSITION_SOLUTION_INVALID",
+                           "POSITION_FIXED",
+                           "CLOCK_STEERING_DISABLED",
+                           "CLOCK_MODEL_INVALID",
+                           "EXTERNAL_OSCILLATOR_LOCKED",
+                           "SOFTWARE_RESOURCE_WARNING",
+                           "AUX3_STATUS_EVENT",
+                           "AUX2_STATUS_EVENT",
                            "AUX1_STATUS_EVENT"
                            ]
                     }
@@ -356,7 +356,7 @@ fn test_hardware_integration_no_log() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -383,5 +383,5 @@ fn test_hardware_hardware() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

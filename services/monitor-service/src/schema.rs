@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use juniper::{self, FieldResult, FieldError};
+use juniper::{self, FieldError, FieldResult};
 use kubos_service;
 
 use meminfo;

@@ -62,24 +62,25 @@ fn register_good() {
     );
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": {
-                      "active": true,
-                       "app": {
-                           "name": "dummy",
-                           "version": "0.0.1",
-                           "author": "user"
-                       }
-                   },
-                   "errors": "",
-                   "success": true,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": {
+                  "active": true,
+                   "app": {
+                       "name": "dummy",
+                       "version": "0.0.1",
+                       "author": "user"
+                   }
+               },
+               "errors": "",
+               "success": true,
+           }
+        }
+    })
+    .to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -114,17 +115,18 @@ fn register_no_manifest() {
     );
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": null,
-                   "errors": "IO Error: No such file or directory (os error 2)",
-                   "success": false,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": null,
+               "errors": "IO Error: No such file or directory (os error 2)",
+               "success": false,
+           }
+        }
+    })
+    .to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -166,17 +168,18 @@ fn register_no_name() {
     );
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": null,
-                   "errors": "Failed to parse manifest.toml: missing field `name`",
-                   "success": false,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": null,
+               "errors": "Failed to parse manifest.toml: missing field `name`",
+               "success": false,
+           }
+        }
+    })
+    .to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -219,17 +222,18 @@ fn register_bad_name() {
     );
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": null,
-                   "errors": "Failed to register app: Application file fake not found in given path",
-                   "success": false,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": null,
+               "errors": "Failed to register app: Application file fake not found in given path",
+               "success": false,
+           }
+        }
+    })
+    .to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -271,17 +275,18 @@ fn register_no_version() {
     );
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": null,
-                   "errors": "Failed to parse manifest.toml: missing field `version`",
-                   "success": false,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": null,
+               "errors": "Failed to parse manifest.toml: missing field `version`",
+               "success": false,
+           }
+        }
+    })
+    .to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -323,17 +328,18 @@ fn register_no_author() {
     );
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": null,
-                   "errors": "Failed to parse manifest.toml: missing field `author`",
-                   "success": false,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": null,
+               "errors": "Failed to parse manifest.toml: missing field `author`",
+               "success": false,
+           }
+        }
+    })
+    .to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -357,15 +363,16 @@ fn register_bad_path() {
     }"#;
 
     let expected = json!({
-            "errors": "",
-            "data": {
-               "register": {
-                   "entry": null,
-                   "errors": "Failed to register app: fake/files does not exist",
-                   "success": false,
-               }
-            }
-        }).to_string();
+        "errors": "",
+        "data": {
+           "register": {
+               "entry": null,
+               "errors": "Failed to register app: fake/files does not exist",
+               "success": false,
+           }
+        }
+    })
+    .to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }

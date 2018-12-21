@@ -109,12 +109,14 @@ fn main() {
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
         Some("iobc-supervisor-service"),
-    ).unwrap();
-    
+    )
+    .unwrap();
+
     Service::new(
         Config::new("iobc-supervisor-service"),
         Supervisor::new(),
         QueryRoot,
         MutationRoot,
-    ).start();
+    )
+    .start();
 }

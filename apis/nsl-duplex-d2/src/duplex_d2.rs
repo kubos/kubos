@@ -131,7 +131,7 @@ mod tests {
     }
 
     fn test_connection(data: Vec<u8>) -> Connection {
-        Connection::new(Box::new(TestStream { data: data }))
+        Connection::new(Box::new(TestStream { data }))
     }
 
     #[test]

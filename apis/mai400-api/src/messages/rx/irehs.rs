@@ -65,15 +65,14 @@ impl IREHSTelemetry {
         let calc = State::<ARC>::calculate(&data);
 
         // Verify the CRC bytes at the end of the message
-        match calc == crc {
-            true => {
-                // Convert the raw data to an official struct
-                match irehs_telem(&data) {
-                    Ok(conv) => Some(conv.1),
-                    _ => None,
-                }
+        if calc == crc {
+            // Convert the raw data to an official struct
+            match irehs_telem(&data) {
+                Ok(conv) => Some(conv.1),
+                _ => None,
             }
-            false => None,
+        } else {
+            None
         }
     }
 }
@@ -187,7 +186,7 @@ impl ThermopileFlags {
     /// # }
     /// ```
     ///
-    pub fn to_vec(&self) -> Vec<String> {
+    pub fn to_vec(self) -> Vec<String> {
         format!("{:?}", self)
             .to_owned()
             .split(" | ")

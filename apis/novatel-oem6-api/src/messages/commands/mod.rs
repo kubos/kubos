@@ -36,7 +36,7 @@ pub struct Response {
 }
 
 impl Response {
-    pub fn new(msg: Vec<u8>) -> Option<Self> {
+    pub fn new(msg: &[u8]) -> Option<Self> {
         match le_u32(&msg) {
             Ok(conv) => {
                 let mut resp: Response = Response {

@@ -15,8 +15,8 @@
 use failure;
 
 use std::fs::{self, File};
+use std::io::{BufRead, BufReader, Read};
 use std::os::unix::fs::MetadataExt;
-use std::io::{Read, BufRead, BufReader};
 use std::str::FromStr;
 
 use process::root_dir;
@@ -36,7 +36,8 @@ impl UserInfo {
 
     /// Parse a user or group name given it's ID in the format used by /etc/passwd and /etc/group
     fn name_from_id<R>(read: R, id: u32) -> Option<String>
-        where R: Read
+    where
+        R: Read,
     {
         for line in BufReader::new(read).lines().filter_map(|l| l.ok()) {
             let tokens: Vec<&str> = line.split(':').collect();
@@ -56,10 +57,14 @@ impl UserInfo {
     }
 
     /// The user ID used by the system
-    pub fn uid(&self) -> u32 { self.uid }
+    pub fn uid(&self) -> u32 {
+        self.uid
+    }
 
     /// The group ID used by the system
-    pub fn gid(&self) -> u32 { self.gid }
+    pub fn gid(&self) -> u32 {
+        self.gid
+    }
 
     /// Returns the username associated with `uid` in `/etc/passwd`, or `None` if a username for
     /// the uid was not found

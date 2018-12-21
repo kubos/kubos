@@ -41,8 +41,8 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
 
     Ok(Message::Exit {
         channel_id: message.channel_id,
-        code: code,
-        signal: signal,
+        code,
+        signal,
     })
 }
 
@@ -74,7 +74,7 @@ mod tests {
 
         let raw = to_cbor(channel_id, code, signal).unwrap();
         let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = parse_message(parsed);
+        let msg = parse_message(&parsed);
 
         assert_eq!(
             msg.unwrap(),

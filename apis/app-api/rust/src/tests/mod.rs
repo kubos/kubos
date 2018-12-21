@@ -37,7 +37,8 @@ macro_rules! mock_service {
                 Subsystem,
                 QueryRoot,
                 MutationRoot,
-            ).start()
+            )
+            .start()
         });
 
         ::std::thread::sleep(::std::time::Duration::from_millis(100));
