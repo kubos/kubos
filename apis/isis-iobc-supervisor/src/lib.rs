@@ -199,20 +199,19 @@ mod tests {
     #[test]
     fn test_convert_version() {
         let raw: ffi::supervisor_version = ffi::supervisor_version([
-            // dummy (u8)
-            0, // spi_command_status (u8)
-            1, // index_of_subsystem (u8)
-            2, // major_version (u8)
-            3, // minor version (u8)
-            4, // patch version (u8)
-            5, // git_head_version (u32)
-            6, 7, 8, 9, // serial_number (u16)
-            10, 11, // compile_information (i8 * 19)
+            0, // dummy (u8)
+            1, // spi_command_status (u8)
+            2, // index_of_subsystem (u8)
+            3, // major_version (u8)
+            4, // minor version (u8)
+            5, // patch version (u8)
+            6, 7, 8, 9, // git_head_version (u32)
+            10, 11, // serial_number (u16)
+            // compile_information (i8 * 19)
             12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-            // clock_speed (u8)
-            31, // code_type (i8)
-            32, // crc8 (u8)
-            33,
+            31, // clock_speed (u8)
+            32, // code_type (i8)
+            33, // crc8 (u8)
         ]);
 
         let version = convert_raw_version(&raw);
@@ -237,9 +236,9 @@ mod tests {
     #[test]
     fn test_convert_housekeeping() {
         let raw: ffi::supervisor_housekeeping = ffi::supervisor_housekeeping([
-            // dummy (u8), spi_command_status (u8), enable_status (u8)
-            0, 1,
-            // enable_status (u8) is a bitfield in the C structure
+            0,  // dummy (u8)
+            1,  // spi_command_status (u8)
+            34, // enable_status (u8) is a bitfield in the C structure
             // power_obc : 1
             // power_rtc : 1
             // supervisor_mode : 1
@@ -250,14 +249,13 @@ mod tests {
             // Using 34 gives us -
             // 0 0 1 0 0 0 1 0
             // which results in alternating 1/0 field values
-            34, // super_uptime (u32)
-            3, 2, 1, 0, // iobc_uptime (u32)
-            4, 3, 2, 1, // iobc_reset_count (u32)
-            5, 4, 3, 2, // adc_data (u16 * 10)
+            3, 2, 1, 0, // super_uptime (u32)
+            4, 3, 2, 1, // iobc_uptime (u32)
+            5, 4, 3, 2, // iobc_reset_count (u32)
+            // adc_data (u16 * 10)
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-            // adc_update_flag (u8)
-            12, // crc8
-            13,
+            12, // adc_update_flag (u8)
+            13, // crc8
         ]);
 
         let housekeeping = convert_raw_housekeeping(&raw);

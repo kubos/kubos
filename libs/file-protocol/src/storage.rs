@@ -347,7 +347,7 @@ pub fn initialize_file(
     }
 
     store_meta(prefix, &hash, index)?;
-    fs::remove_file(&temp_path).is_err();
+    fs::remove_file(&temp_path);
 
     if let Ok(meta) = fs::metadata(source_path) {
         Ok((hash, index, meta.mode()))
