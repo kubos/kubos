@@ -75,12 +75,12 @@ impl Protocol {
                     match process.read_stdout() {
                         Ok(Some(data)) => {
                             self.channel_protocol
-                                .send(messages::stdout::to_cbor(self.channel_id, Some(&data))?)?;
+                                .send(&messages::stdout::to_cbor(self.channel_id, Some(&data))?)?;
                         }
                         Err(ProtocolError::ReadTimeout) => {}
                         _ => {
                             self.channel_protocol
-                                .send(messages::stdout::to_cbor(self.channel_id, None)?)?;
+                                .send(&messages::stdout::to_cbor(self.channel_id, None)?)?;
                             process.stdout_reader = None;
                         }
                     }
@@ -91,12 +91,12 @@ impl Protocol {
                     match process.read_stderr() {
                         Ok(Some(data)) => {
                             self.channel_protocol
-                                .send(messages::stderr::to_cbor(self.channel_id, Some(&data))?)?;
+                                .send(&messages::stderr::to_cbor(self.channel_id, Some(&data))?)?;
                         }
                         Err(ProtocolError::ReadTimeout) => {}
                         _ => {
                             self.channel_protocol
-                                .send(messages::stderr::to_cbor(self.channel_id, None)?)?;
+                                .send(&messages::stderr::to_cbor(self.channel_id, None)?)?;
                             process.stderr_reader = None;
                         }
                     }
@@ -108,7 +108,7 @@ impl Protocol {
                 if process.stdout_reader.is_none() && process.stderr_reader.is_none() {
                     // Check if process has exited
                     if let Some((code, signal)) = process.status()? {
-                        self.channel_protocol.send(messages::exit::to_cbor(
+                        self.channel_protocol.send(&messages::exit::to_cbor(
                             self.channel_id,
                             code,
                             signal,
@@ -132,12 +132,12 @@ impl Protocol {
             // last client that we had contact with
             self.channel_protocol.set_remote(remote);
 
-            self.process_message(message)?;
+            self.process_message(&message)?;
         }
     }
 
-    fn process_message(&mut self, message: ChannelMessage) -> Result<(), ProtocolError> {
-        let parsed_message = messages::parse_message(message)?;
+    fn process_message(&mut self, message: &ChannelMessage) -> Result<(), ProtocolError> {
+        let parsed_message = messages::parse_message(&message)?;
 
         match parsed_message {
             messages::Message::Stdin { channel_id, data } => {

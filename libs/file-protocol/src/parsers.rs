@@ -101,9 +101,9 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
         }
     }
 
-    return Err(ProtocolError::MessageParseError {
+    Err(ProtocolError::MessageParseError {
         err: "No message found".to_owned(),
-    });
+    })
 }
 
 // Parse out cleanup request
@@ -130,7 +130,7 @@ pub fn parse_cleanup_request(
         }
     }
 
-    return Ok(None);
+    Ok(None)
 }
 
 // Parse out export request
@@ -141,10 +141,9 @@ pub fn parse_export_request(
 ) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::String(op)) = pieces.next() {
         if op == "export" {
-            let hash = match pieces.next().ok_or(ProtocolError::MissingParam(
-                "export".to_owned(),
-                "hash".to_owned(),
-            ))? {
+            let hash = match pieces.next().ok_or_else(|| {
+                ProtocolError::MissingParam("export".to_owned(), "hash".to_owned())
+            })? {
                 Value::String(val) => val,
                 _ => {
                     return Err(ProtocolError::InvalidParam(
@@ -154,10 +153,9 @@ pub fn parse_export_request(
                 }
             };
 
-            let path = match pieces.next().ok_or(ProtocolError::MissingParam(
-                "export".to_owned(),
-                "path".to_owned(),
-            ))? {
+            let path = match pieces.next().ok_or_else(|| {
+                ProtocolError::MissingParam("export".to_owned(), "path".to_owned())
+            })? {
                 Value::String(val) => val,
                 _ => {
                     return Err(ProtocolError::InvalidParam(
@@ -181,7 +179,7 @@ pub fn parse_export_request(
         }
     }
 
-    return Ok(None);
+    Ok(None)
 }
 
 // Parse out import request
@@ -192,10 +190,9 @@ pub fn parse_import_request(
 ) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::String(op)) = pieces.next() {
         if op == "import" {
-            let path = match pieces.next().ok_or(ProtocolError::MissingParam(
-                "export".to_owned(),
-                "hash".to_owned(),
-            ))? {
+            let path = match pieces.next().ok_or_else(|| {
+                ProtocolError::MissingParam("export".to_owned(), "hash".to_owned())
+            })? {
                 Value::String(val) => val,
                 _ => {
                     return Err(ProtocolError::InvalidParam(
@@ -211,7 +208,7 @@ pub fn parse_import_request(
         }
     }
 
-    return Ok(None);
+    Ok(None)
 }
 
 // Parse out success received message
@@ -233,13 +230,13 @@ pub fn parse_success_receive(
                 }
             };
 
-            if let None = pieces.next() {
+            if pieces.next().is_none() {
                 return Ok(Some(Message::SuccessReceive(channel_id, hash.to_owned())));
             }
         }
     }
 
-    return Ok(None);
+    Ok(None)
 }
 
 // Parse out success transmit message
@@ -262,10 +259,9 @@ pub fn parse_success_transmit(
                 }
             };
 
-            let num_chunks = match pieces.next().ok_or(ProtocolError::MissingParam(
-                "success".to_owned(),
-                "num chunks".to_owned(),
-            ))? {
+            let num_chunks = match pieces.next().ok_or_else(|| {
+                ProtocolError::MissingParam("success".to_owned(), "num chunks".to_owned())
+            })? {
                 Value::U64(val) => *val,
                 _ => {
                     return Err(ProtocolError::InvalidParam(
@@ -290,7 +286,7 @@ pub fn parse_success_transmit(
         }
     }
 
-    return Ok(None);
+    Ok(None)
 }
 
 // Parse out bad
@@ -300,10 +296,10 @@ pub fn parse_bad_op(
     mut pieces: Iter<Value>,
 ) -> Result<Option<Message>, ProtocolError> {
     if let Some(Value::Bool(false)) = pieces.next() {
-        let error = match pieces.next().ok_or(ProtocolError::MissingParam(
-            "failure".to_owned(),
-            "error".to_owned(),
-        ))? {
+        let error = match pieces
+            .next()
+            .ok_or_else(|| ProtocolError::MissingParam("failure".to_owned(), "error".to_owned()))?
+        {
             Value::String(val) => val,
             _ => {
                 return Err(ProtocolError::InvalidParam(
@@ -316,7 +312,7 @@ pub fn parse_bad_op(
         return Ok(Some(Message::Failure(channel_id, error.to_owned())));
     }
 
-    return Ok(None);
+    Ok(None)
 }
 
 // Parse out ack
@@ -337,7 +333,7 @@ pub fn parse_ack(
         }
     }
 
-    return Ok(None);
+    Ok(None)
 }
 
 // Parse out nak
@@ -370,7 +366,7 @@ pub fn parse_nak(
         }
     }
 
-    return Ok(None);
+    Ok(None)
 }
 
 // Parse out chunk
@@ -399,7 +395,7 @@ pub fn parse_chunk(
         }
     }
 
-    return Ok(None);
+    Ok(None)
 }
 
 // Parse out sync
@@ -413,7 +409,7 @@ pub fn parse_sync(
     if let Some(Value::String(hash)) = pieces.next() {
         if let Some(second_param) = pieces.next() {
             if let Value::U64(num) = second_param {
-                if let None = pieces.next() {
+                if pieces.next().is_none() {
                     // It's a sync message: { hash, num_chunks }
                     return Ok(Some(Message::Metadata(
                         channel_id,
@@ -428,5 +424,5 @@ pub fn parse_sync(
         }
     }
 
-    return Ok(None);
+    Ok(None)
 }

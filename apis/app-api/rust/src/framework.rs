@@ -151,11 +151,13 @@ pub fn app_start(_pid: u32, handler: &AppHandler) -> Result<(), Error> {
     if matches.opt_present("h") {
         let brief = format!("Usage: {} [options]", program);
         print!("{}", opts.usage(&brief));
-        return Ok(())
+        return Ok(());
     }
 
     let _uuid = env::var_os("KUBOS_APP_UUID");
-    let run_level = matches.opt_str("r").unwrap_or("OnCommand".to_owned());
+    let run_level = matches
+        .opt_str("r")
+        .unwrap_or_else(|| "OnCommand".to_owned());
 
     match run_level.as_ref() {
         "OnBoot" => handler.on_boot(args),

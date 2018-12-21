@@ -156,9 +156,9 @@ pub fn load_meta(prefix: &str, hash: &str) -> Result<u32, ProtocolError> {
                     }
                 })
         })
-        .ok_or(ProtocolError::StorageParseError(
-            "Failed to parse temporary file's metadata".to_owned(),
-        ))?;
+        .ok_or_else(|| {
+            ProtocolError::StorageParseError("Failed to parse temporary file's metadata".to_owned())
+        })?;
 
     Ok(num_chunks as u32)
 }
@@ -289,10 +289,10 @@ pub fn initialize_file(
                 let chunk = reader
                     .fill_buf()
                     .map_err(|err| ProtocolError::StorageError {
-                        action: format!("read chunk from source"),
+                        action: "read chunk from source".to_owned(),
                         err,
                     })?;
-                if chunk.len() == 0 {
+                if chunk.is_empty() {
                     output
                         .sync_all()
                         .map_err(|err| ProtocolError::StorageError {
@@ -326,7 +326,6 @@ pub fn initialize_file(
     })?;
 
     let mut index = 0;
-    let mut offset = 0;
 
     loop {
         let mut chunk = vec![0u8; chunk_size];
@@ -336,8 +335,7 @@ pub fn initialize_file(
                     break;
                 }
                 store_chunk(prefix, &hash, index, &chunk[0..n])?;
-                index = index + 1;
-                offset = offset + n;
+                index += 1;
             }
             Err(e) => {
                 return Err(ProtocolError::StorageError {
@@ -386,7 +384,7 @@ pub fn finalize_file(
     if let Some(mode_val) = mode {
         file.set_permissions(Permissions::from_mode(mode_val))
             .map_err(|err| ProtocolError::StorageError {
-                action: format!("set target file's mode"),
+                action: "set target file's mode".to_owned(),
                 err,
             })?;
     }
@@ -464,7 +462,7 @@ pub fn delete_file(prefix: &str, hash: &str) -> Result<(), ProtocolError> {
 }
 
 pub fn delete_storage(prefix: &str) -> Result<(), ProtocolError> {
-    let path = format!("{}", prefix);
+    let path = prefix.to_owned();
     let path = Path::new(&path);
     fs::remove_dir_all(path).map_err(|err| ProtocolError::StorageError {
         action: format!("deleting path {:?}", path),

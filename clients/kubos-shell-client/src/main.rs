@@ -34,7 +34,7 @@ fn start_session(channel_proto: ChannelProtocol) -> Result<(), Error> {
 
     println!("Starting shell session -> {}", channel_id);
 
-    channel_proto.send(shell_protocol::messages::spawn::to_cbor(
+    channel_proto.send(&shell_protocol::messages::spawn::to_cbor(
         channel_id,
         &"/bin/sh".to_owned(),
         None,
@@ -44,13 +44,13 @@ fn start_session(channel_proto: ChannelProtocol) -> Result<(), Error> {
 }
 
 fn list_sessions(channel_proto: ChannelProtocol) -> Result<(), Error> {
-    channel_proto.send(shell_protocol::messages::list::to_cbor(
+    channel_proto.send(&shell_protocol::messages::list::to_cbor(
         channel_protocol::generate_channel(),
         None,
     )?)?;
 
     let parsed_msg = shell_protocol::messages::parse_message(
-        channel_proto.recv_message(Some(Duration::from_millis(100)))?,
+        &channel_proto.recv_message(Some(Duration::from_millis(100)))?,
     )?;
 
     match parsed_msg {
@@ -82,7 +82,9 @@ fn kill_session(
     channel_id: u32,
     signal: Option<u32>,
 ) -> Result<(), Error> {
-    channel_proto.send(shell_protocol::messages::kill::to_cbor(channel_id, signal)?)?;
+    channel_proto.send(&shell_protocol::messages::kill::to_cbor(
+        channel_id, signal,
+    )?)?;
     Ok(())
 }
 
@@ -99,14 +101,14 @@ fn run_shell(channel_proto: ChannelProtocol, channel_id: u32) -> Result<(), Erro
                     return Ok(());
                 }
 
-                channel_proto.send(shell_protocol::messages::stdin::to_cbor(
+                channel_proto.send(&shell_protocol::messages::stdin::to_cbor(
                     channel_id,
                     Some(&input),
                 )?)?;
 
                 loop {
                     match channel_proto.recv_message(Some(Duration::from_millis(100))) {
-                        Ok(m) => match shell_protocol::messages::parse_message(m) {
+                        Ok(m) => match shell_protocol::messages::parse_message(&m) {
                             Ok(shell_protocol::messages::Message::Stdout {
                                 channel_id: _channel_id,
                                 data: Some(data),
@@ -150,7 +152,8 @@ fn main() -> Result<(), failure::Error> {
                         .takes_value(true)
                         .required(true),
                 ),
-        ).subcommand(
+        )
+        .subcommand(
             SubCommand::with_name("kill")
                 .about("Kills an existing shell session")
                 .arg(
@@ -159,25 +162,29 @@ fn main() -> Result<(), failure::Error> {
                         .short("c")
                         .takes_value(true)
                         .required(true),
-                ).arg(
+                )
+                .arg(
                     Arg::with_name("signal")
                         .help("Signal to send to shell session")
                         .short("s")
                         .takes_value(true),
                 ),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("service_ip")
                 .help("IP address of remote shell service")
                 .short("i")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
-        ).arg(
+        )
+        .arg(
             Arg::with_name("service_port")
                 .help("Port number of remote shell service")
                 .short("p")
                 .takes_value(true)
                 .default_value(shell_protocol::PORT),
-        ).setting(AppSettings::SubcommandRequiredElseHelp)
+        )
+        .setting(AppSettings::SubcommandRequiredElseHelp)
         .setting(AppSettings::DeriveDisplayOrder)
         .get_matches();
 

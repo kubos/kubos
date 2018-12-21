@@ -50,10 +50,9 @@ impl Database {
             info!("Creating database {}", path);
         }
         Database {
-            connection: SqliteConnection::establish(&String::from(path)).expect(&format!(
-                "Could not create SQLite database connection to: {}",
-                path
-            )),
+            connection: SqliteConnection::establish(&String::from(path)).unwrap_or_else(|_| {
+                panic!("Could not create SQLite database connection to: {}", path)
+            }),
         }
     }
 
@@ -69,7 +68,8 @@ impl Database {
              FROM sqlite_master \
              WHERE type = 'table' \
              AND name = 'telemetry')",
-        )).get_result::<bool>(&self.connection)
+        ))
+        .get_result::<bool>(&self.connection)
         {
             Err(err) => {
                 error!("Error querying table: {:?}", err);
@@ -85,7 +85,8 @@ impl Database {
                     parameter VARCHAR(255) NOT NULL,
                     value VARCHAR(255) NOT NULL,
                     PRIMARY KEY (timestamp, subsystem, parameter))",
-                ).execute(&self.connection)
+                )
+                .execute(&self.connection)
                 {
                     Ok(_) => info!("Telemetry table created"),
                     Err(err) => {
@@ -107,10 +108,10 @@ impl Database {
         use self::telemetry;
 
         let new_entry = NewEntry {
-            timestamp: timestamp,
-            subsystem: subsystem,
-            parameter: parameter,
-            value: value,
+            timestamp,
+            subsystem,
+            parameter,
+            value,
         };
 
         insert_into(telemetry::table)
@@ -125,7 +126,7 @@ impl Database {
         value: &'a str,
     ) -> QueryResult<usize> {
         let time = time::now_utc().to_timespec();
-        let timestamp = time.sec as f64 + (time.nsec as f64 / 1000000000.0);
+        let timestamp = time.sec as f64 + (f64::from(time.nsec) / 1_000_000_000.0);
         self.insert(timestamp, subsystem, parameter, value)
     }
 }

@@ -63,8 +63,8 @@ impl<T: ImtqFFI> Imtq<T> {
     ///
     /// The one argument *must* implement the `ImtqFFI` trait.
     fn new(handle: &T, bus: u8, addr: u16, timeout: i32) -> AdcsResult<Self> {
-        adcs_status_to_err(handle.k_adcs_init(KI2CNum::from(bus), addr, timeout))?;
-        adcs_status_to_err(handle.k_imtq_watchdog_start())?;
+        adcs_status_to_err(&handle.k_adcs_init(KI2CNum::from(bus), addr, timeout))?;
+        adcs_status_to_err(&handle.k_imtq_watchdog_start())?;
         Ok(Imtq {
             handle: handle.clone(),
         })
@@ -109,7 +109,7 @@ impl<T: ImtqFFI> Imtq<T> {
             tv_nsec: delay_nsecs,
         };
 
-        adcs_status_to_err(self.handle.k_adcs_passthrough(
+        adcs_status_to_err(&self.handle.k_adcs_passthrough(
             command.as_ptr(),
             command.len() as i32,
             rx_buffer.as_mut_ptr(),
@@ -140,11 +140,13 @@ impl<T: ImtqFFI> Imtq<T> {
     /// # }
     /// ```
     pub fn reset(&self) -> AdcsResult<()> {
-        Ok(adcs_status_to_err(self.handle.k_imtq_reset())?)
+        adcs_status_to_err(&self.handle.k_imtq_reset())?;
+        Ok(())
     }
 
     fn watchdog_stop(&self) -> AdcsResult<()> {
-        Ok(adcs_status_to_err(self.handle.k_imtq_watchdog_stop())?)
+        adcs_status_to_err(&self.handle.k_imtq_watchdog_stop())?;
+        Ok(())
     }
 }
 

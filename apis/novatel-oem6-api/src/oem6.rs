@@ -60,16 +60,16 @@ const TIMEOUT: Duration = Duration::from_millis(60);
 ///
 /// let rx_conn = oem.conn.clone();
 ///
-/// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+/// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
 /// # Ok(())
 /// # }
 /// ```
 ///
 
 pub fn read_thread(
-    rx_conn: Arc<Mutex<Connection>>,
-    log_send: SyncSender<(Header, Vec<u8>)>,
-    response_send: SyncSender<(Header, Vec<u8>)>,
+    rx_conn: &Arc<Mutex<Connection>>,
+    log_send: &SyncSender<(Header, Vec<u8>)>,
+    response_send: &SyncSender<(Header, Vec<u8>)>,
 ) {
     let mut log_err = false;
     let mut response_err = false;
@@ -95,7 +95,7 @@ pub fn read_thread(
                     UartError::GenericError => continue,
                     UartError::IoError {
                         cause: ::std::io::ErrorKind::TimedOut,
-                        description: _,
+                        ..
                     } => continue,
                     _ => panic!(err),
                 },
@@ -111,7 +111,7 @@ pub fn read_thread(
                 Err(err) => match err {
                     UartError::IoError {
                         cause: ::std::io::ErrorKind::TimedOut,
-                        description: _,
+                        ..
                     } => continue,
                     _ => panic!(err),
                 },
@@ -131,7 +131,7 @@ pub fn read_thread(
                 Err(err) => match err {
                     UartError::IoError {
                         cause: ::std::io::ErrorKind::TimedOut,
-                        description: _,
+                        ..
                     } => continue,
                     _ => panic!(err),
                 },
@@ -153,8 +153,8 @@ pub fn read_thread(
 
             let body = message.split_off(HDR_LEN.into());
 
-            match hdr.msg_type & 0x80 == 0x80 {
-                true => response_send
+            if hdr.msg_type & 0x80 == 0x80 {
+                response_send
                     .try_send((hdr, body))
                     .or_else::<TrySendError<(Header, Vec<u8>)>, _>(|err| match err {
                         // Our buffer is full, but the receiver should still be alive, so let's keep going
@@ -169,8 +169,9 @@ pub fn read_thread(
                             Ok(())
                         }
                     })
-                    .unwrap(),
-                false => log_send
+                    .unwrap();
+            } else {
+                log_send
                     .try_send((hdr, body))
                     .or_else::<TrySendError<(Header, Vec<u8>)>, _>(|err| match err {
                         TrySendError::Full(_) => Ok(()),
@@ -182,8 +183,8 @@ pub fn read_thread(
                             Ok(())
                         }
                     })
-                    .unwrap(),
-            };
+                    .unwrap();
+            }
         }
     }
 }
@@ -275,7 +276,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
     ///
     /// oem.request_version()?;
     ///
@@ -318,7 +319,7 @@ impl OEM6 {
             false,
         );
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::Log))
     }
 
@@ -350,7 +351,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
     ///
     /// oem.request_position(1.0, 0.0, false)?;
     ///
@@ -391,7 +392,7 @@ impl OEM6 {
             hold,
         );
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::Log))
     }
 
@@ -436,7 +437,7 @@ impl OEM6 {
             hold,
         );
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::Log))
     }
 
@@ -472,7 +473,7 @@ impl OEM6 {
     pub fn request_unlog(&self, id: MessageID) -> OEMResult<()> {
         let request = UnlogCmd::new(Port::COM1 as u32, id as u16);
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::Unlog))
     }
 
@@ -534,7 +535,7 @@ impl OEM6 {
     pub fn request_unlog_all(&self, clear_holds: bool) -> OEMResult<()> {
         let request = UnlogAllCmd::new(Port::COM1 as u32, clear_holds);
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::UnlogAll))
     }
 
@@ -577,14 +578,15 @@ impl OEM6 {
         // preserve functionality, but inform the caller afterwards
         match self.conn.lock() {
             Ok(conn) => conn.write(msg).map_err(|err| err.into()),
-            Err(conn) => conn.into_inner()
+            Err(conn) => conn
+                .into_inner()
                 .write(msg)
                 .map_err(|err| err.into())
                 .and(Err(OEMError::ThreadCommError)),
         }
     }
 
-    fn send_message<T: Message>(&self, msg: T) -> OEMResult<()> {
+    fn send_message<T: Message>(&self, msg: &T) -> OEMResult<()> {
         let mut raw = msg.serialize();
 
         // Get the calculated CRC
@@ -596,7 +598,8 @@ impl OEM6 {
         // preserve functionality, but inform the caller afterwards
         match self.conn.lock() {
             Ok(conn) => conn.write(raw.as_slice()).map_err(|err| err.into()),
-            Err(conn) => conn.into_inner()
+            Err(conn) => conn
+                .into_inner()
                 .write(raw.as_slice())
                 .map_err(|err| err.into())
                 .and(Err(OEMError::ThreadCommError)),
@@ -604,7 +607,8 @@ impl OEM6 {
     }
 
     fn get_response(&self, id: MessageID) -> OEMResult<()> {
-        let (hdr, body) = self.response_recv
+        let (hdr, body) = self
+            .response_recv
             .lock()
             .map_err(|_| OEMError::MutexError)?
             .recv_timeout(Duration::from_millis(500))
@@ -615,7 +619,7 @@ impl OEM6 {
             return Err(OEMError::NoResponse);
         }
 
-        let resp = match Response::new(body) {
+        let resp = match Response::new(&body) {
             Some(v) => v,
             None => {
                 return Err(OEMError::NoResponse);
@@ -655,7 +659,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
     ///
     /// let entry = oem.get_log()?;
     ///
@@ -672,7 +676,8 @@ impl OEM6 {
     /// [`OEMError`]: enum.OEMError.html
     pub fn get_log(&self) -> OEMResult<Log> {
         loop {
-            let (hdr, body) = match self.log_recv
+            let (hdr, body) = match self
+                .log_recv
                 .lock()
                 .map_err(|_| OEMError::MutexError)?
                 .recv_timeout(Duration::from_secs(5))

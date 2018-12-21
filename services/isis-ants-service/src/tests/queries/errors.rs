@@ -30,7 +30,7 @@ fn query_errors_empty() {
             "errors": []
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -45,7 +45,7 @@ fn query_errors_single() {
             }
         }"#;
 
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             errors
@@ -55,7 +55,7 @@ fn query_errors_single() {
             "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:351): Configuration error"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -70,8 +70,8 @@ fn query_errors_multiple() {
             }
         }"#;
 
-    service.process(noop.to_owned());
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             errors
@@ -81,7 +81,7 @@ fn query_errors_multiple() {
             "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:351): Configuration error", "watchdog_kick (services/isis-ants-service/src/model.rs:351): Configuration error"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -96,17 +96,17 @@ fn query_errors_clear_after_query() {
             }
         }"#;
 
-    service.process(noop.to_owned());
+    service.process(&noop.to_owned());
 
     let query = r#"{
             errors
         }"#;
 
-    service.process(query.to_owned());
+    service.process(&query.to_owned());
 
     let expected = json!({
             "errors": []
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

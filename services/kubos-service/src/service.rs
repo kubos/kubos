@@ -65,7 +65,7 @@ impl<T> Context<T> {
     /// # Arguments
     ///
     /// `key` - Key to clear (along with corresponding value)
-    pub fn clear(&self, name: &String) {
+    pub fn clear(&self, name: &str) {
         let mut storage = self.storage.borrow_mut();
         storage.remove(name);
     }
@@ -122,10 +122,10 @@ where
     /// `mutation` - The root mutation struct holding all other GraphQL mutations.
     pub fn new(config: Config, subsystem: S, query: Query, mutation: Mutation) -> Self {
         Service {
-            config: config,
+            config,
             root_node: RootNode::new(query, mutation),
             context: Context {
-                subsystem: subsystem,
+                subsystem,
                 storage: RefCell::new(HashMap::new()),
             },
         }
@@ -160,7 +160,7 @@ where
                 //);
 
                 // Go process the request
-                let res = self.process(query_string);
+                let res = self.process(&query_string);
 
                 // And then send the response back
                 let _amt = socket.send_to(&res.as_bytes(), &peer);
@@ -170,7 +170,7 @@ where
     }
 
     /// Processes a GraphQL query
-    pub fn process(&self, query: String) -> String {
+    pub fn process(&self, query: &str) -> String {
         match execute(
             &query,
             None,
@@ -179,20 +179,17 @@ where
             &self.context,
         ) {
             Ok((val, errs)) => {
-                let errs_msg: String = errs.into_iter()
+                let errs_msg: String = errs
+                    .into_iter()
                     .map(|x| serde_json::to_string(&x).unwrap())
                     .collect();
 
                 json!({
                     "data": val,
                     "errors": errs_msg})
-                    .to_string()
+                .to_string()
             }
-            Err(e) => {
-                json!({
-                    "errors": e
-                }).to_string()
-            }
+            Err(e) => json!({ "errors": e }).to_string(),
         }
     }
 }

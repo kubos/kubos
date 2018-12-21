@@ -60,7 +60,7 @@ fn setup_apps(registry_dir: &Path) {
 }
 
 fn apps_query(config: ServiceConfig, query: &str) -> Vec<serde_json::Value> {
-    let result = kubos_app::query(config, query, Some(Duration::from_secs(5)));
+    let result = kubos_app::query(&config, query, Some(Duration::from_secs(5)));
     assert!(result.is_ok());
 
     let apps = result.unwrap()["apps"].clone();

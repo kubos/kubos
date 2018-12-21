@@ -79,7 +79,7 @@ fn register_good() {
             }
         }).to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -124,7 +124,7 @@ fn register_no_manifest() {
             }
         }).to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -176,7 +176,7 @@ fn register_no_name() {
             }
         }).to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -229,7 +229,7 @@ fn register_bad_name() {
             }
         }).to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -281,7 +281,7 @@ fn register_no_version() {
             }
         }).to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -333,7 +333,7 @@ fn register_no_author() {
             }
         }).to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }
 
 #[test]
@@ -367,5 +367,5 @@ fn register_bad_path() {
             }
         }).to_string();
 
-    assert_eq!(service.process(register_query.to_owned()), expected);
+    assert_eq!(service.process(&register_query.to_owned()), expected);
 }

@@ -30,7 +30,7 @@ fn config_default() {
             "config": "PRIMARY"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn config_primary() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let mutation = r#"mutation {
             configureHardware(config: PRIMARY) {
@@ -55,7 +55,7 @@ fn config_primary() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"
         {
@@ -66,7 +66,7 @@ fn config_primary() {
             "config": "PRIMARY"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }
 
 #[test]
@@ -83,7 +83,7 @@ fn config_secondary() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    service.process(&mutation.to_owned());
 
     let query = r#"
         {
@@ -94,5 +94,5 @@ fn config_secondary() {
             "config": "SECONDARY"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
 }

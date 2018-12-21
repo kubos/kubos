@@ -28,13 +28,13 @@ use rust_i2c::Command;
 bitflags! {
     #[derive(Default)]
     pub struct StatusCode: u8 {
-        const LAST_COMMAND_FAILED = 0b00000001;
-        const WATCHDOG_ERROR = 0b00000010;
-        const BAD_COMMAND_DATA = 0b00000100;
-        const BAD_COMMAND_CHANNEL = 0b00001000;
-        const ERROR_READING_EEPROM = 0b00010000;
-        const POWER_ON_RESET = 0b00100000;
-        const BROWN_OUT_RESET = 0b01000000;
+        const LAST_COMMAND_FAILED = 0b0000_0001;
+        const WATCHDOG_ERROR = 0b0000_0010;
+        const BAD_COMMAND_DATA = 0b0000_0100;
+        const BAD_COMMAND_CHANNEL = 0b0000_1000;
+        const ERROR_READING_EEPROM = 0b0001_0000;
+        const POWER_ON_RESET = 0b0010_0000;
+        const BROWN_OUT_RESET = 0b0100_0000;
     }
 }
 
@@ -56,7 +56,7 @@ pub fn parse(data: &[u8]) -> EpsResult<BoardStatus> {
             daughterboard: Some(StatusCode::from_bits(data[0]).unwrap_or_default()),
         })
     } else {
-        return Err(EpsError::parsing_failure("Board Status"));
+        Err(EpsError::parsing_failure("Board Status"))
     }
 }
 

@@ -124,7 +124,7 @@ pub mod stdin;
 pub mod stdout;
 
 /// Parse a ChannelMessage into a ShellMessage
-pub fn parse_message(message: ChannelMessage) -> Result<Message, ProtocolError> {
+pub fn parse_message(message: &ChannelMessage) -> Result<Message, ProtocolError> {
     match message.name.as_ref() {
         "exit" => Ok(exit::from_cbor(&message)?),
         "error" => Ok(error::from_cbor(&message)?),

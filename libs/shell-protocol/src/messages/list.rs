@@ -25,38 +25,35 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
     let mut process_list: Option<HashMap<u32, (String, u32)>> = None;
 
     // Parse out options
-    match message.payload.get(0) {
-        Some(Value::Object(raw_list)) => {
-            process_list = Some(
-                raw_list
-                    .into_iter()
-                    // Map and filter on channel and path/pid array as Some
-                    .map(|(channel, data)| (channel.as_u64(), data.as_array()))
-                    .filter(|(channel, data)| channel.is_some() && data.is_some())
-                    // Extract path/pid
-                    .map(|(channel, data)| {
-                        let path = data.unwrap().get(0).and_then(|v| v.as_string());
-                        let pid = data.unwrap().get(1).and_then(|v| v.as_u64());
-                        (channel, path, pid)
-                    })
-                    // Check if path/pid are Some
-                    .filter(|(_channel, path, pid)| path.is_some() && pid.is_some())
-                    // Combine
-                    .map(|(channel, path, pid)| {
-                        (
-                            channel.unwrap() as u32,
-                            (path.unwrap().to_owned(), pid.unwrap() as u32),
-                        )
-                    })
-                    .collect::<HashMap<u32, (String, u32)>>(),
-            )
-        }
-        _ => {}
+    if let Some(Value::Object(raw_list)) = message.payload.get(0) {
+        process_list = Some(
+            raw_list
+                .into_iter()
+                // Map and filter on channel and path/pid array as Some
+                .map(|(channel, data)| (channel.as_u64(), data.as_array()))
+                .filter(|(channel, data)| channel.is_some() && data.is_some())
+                // Extract path/pid
+                .map(|(channel, data)| {
+                    let path = data.unwrap().get(0).and_then(|v| v.as_string());
+                    let pid = data.unwrap().get(1).and_then(|v| v.as_u64());
+                    (channel, path, pid)
+                })
+                // Check if path/pid are Some
+                .filter(|(_channel, path, pid)| path.is_some() && pid.is_some())
+                // Combine
+                .map(|(channel, path, pid)| {
+                    (
+                        channel.unwrap() as u32,
+                        (path.unwrap().to_owned(), pid.unwrap() as u32),
+                    )
+                })
+                .collect::<HashMap<u32, (String, u32)>>(),
+        )
     };
 
     Ok(Message::List {
         channel_id: message.channel_id,
-        process_list: process_list,
+        process_list,
     })
 }
 
@@ -92,7 +89,7 @@ mod tests {
 
         let raw = to_cbor(channel_id, Some(process_list.to_owned())).unwrap();
         let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = parse_message(parsed);
+        let msg = parse_message(&parsed);
 
         assert_eq!(
             msg.unwrap(),
@@ -109,7 +106,7 @@ mod tests {
 
         let raw = to_cbor(channel_id, None).unwrap();
         let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
-        let msg = parse_message(parsed);
+        let msg = parse_message(&parsed);
 
         assert_eq!(
             msg.unwrap(),

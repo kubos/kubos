@@ -45,7 +45,7 @@ fn upload(
     Ok(f_protocol.message_engine(
         |d| f_protocol.recv(Some(d)),
         Duration::from_secs(2),
-        State::Transmitting,
+        &State::Transmitting,
     )?)
 }
 
@@ -84,12 +84,12 @@ fn download(
 
     let state = f_protocol.process_message(
         reply,
-        State::StartReceive {
+        &State::StartReceive {
             path: target_path.to_string(),
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), state)?)
+    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?)
 }
 
 fn cleanup(

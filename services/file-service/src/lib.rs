@@ -60,7 +60,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
 
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
 
-    let c_protocol = cbor_protocol::Protocol::new(host.clone(), chunk_size);
+    let c_protocol = cbor_protocol::Protocol::new(&host.clone(), chunk_size);
 
     let timeout = config
         .get("timeout")
@@ -124,7 +124,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                         }),
                     },
                     timeout_ref,
-                    state,
+                    &state,
                 ) {
                     Err(e) => warn!("Encountered errors while processing transaction: {}", e),
                     _ => {}

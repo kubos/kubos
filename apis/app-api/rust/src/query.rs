@@ -48,7 +48,7 @@ type AppResult<T> = Result<T, failure::Error>;
 /// 		ping
 /// 	}"#;
 ///
-/// let result = query(ServiceConfig::new_from_path("radio-service", "/home/kubos/config.toml".to_owned()), request, Some(Duration::from_secs(1)))?;
+/// let result = query(&ServiceConfig::new_from_path("radio-service", "/home/kubos/config.toml".to_owned()), request, Some(Duration::from_secs(1)))?;
 ///
 /// let data = result.get("ping").unwrap().as_str();
 ///
@@ -69,7 +69,7 @@ type AppResult<T> = Result<T, failure::Error>;
 /// 		power
 /// 	}"#;
 ///
-/// let result = query(ServiceConfig::new("antenna-service"), request, Some(Duration::from_secs(1)))?;
+/// let result = query(&ServiceConfig::new("antenna-service"), request, Some(Duration::from_secs(1)))?;
 ///
 /// let data = result.get("power").unwrap().as_str();
 ///
@@ -79,7 +79,7 @@ type AppResult<T> = Result<T, failure::Error>;
 /// ```
 ///
 pub fn query(
-    config: ServiceConfig,
+    config: &ServiceConfig,
     query: &str,
     timeout: Option<Duration>,
 ) -> AppResult<serde_json::Value> {
@@ -98,7 +98,7 @@ pub fn query(
     if let Some(errs) = v.get("errors") {
         if errs.is_string() {
             let errs_str = errs.as_str().unwrap();
-            if errs_str.len() > 0 {
+            if !errs_str.is_empty() {
                 return Err(format_err!("{}", errs_str.to_string()));
             }
         } else if !errs.is_null() {

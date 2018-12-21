@@ -25,11 +25,7 @@ impl AppHandler for MyApp {
 
             // Get the amount of memory currently available on the OBC
             let request = "{memInfo{available}}";
-            let response = match query(
-                monitor_service.clone(),
-                request,
-                Some(Duration::from_secs(1)),
-            ) {
+            let response = match query(&monitor_service, request, Some(Duration::from_secs(1))) {
                 Ok(msg) => msg,
                 Err(err) => {
                     info!("Monitor service query failed: {}", err);
@@ -53,26 +49,19 @@ impl AppHandler for MyApp {
                     mem
                 );
 
-                match query(
-                    telemetry_service.clone(),
-                    &request,
-                    Some(Duration::from_secs(1)),
-                ) {
+                match query(&telemetry_service, &request, Some(Duration::from_secs(1))) {
                     Ok(msg) => {
-                        let success = msg.get("insert").and_then(|data| {
-                            data.get("success").and_then(|val| {
-                                val.as_bool()
-                            })
-                        });
+                        let success = msg
+                            .get("insert")
+                            .and_then(|data| data.get("success").and_then(|val| val.as_bool()));
 
                         if success == Some(true) {
                             info!("Current memory value saved to database");
                         } else {
                             match msg.get("errors") {
-                                Some(errors) => info!(
-                                    "Failed to save value to database: {}",
-                                    errors
-                                ),
+                                Some(errors) => {
+                                    info!("Failed to save value to database: {}", errors)
+                                }
                                 None => info!("Failed to save value to database"),
                             };
                         }
@@ -89,7 +78,12 @@ impl AppHandler for MyApp {
     fn on_command(&self, args: Vec<String>) -> Result<(), Error> {
         let mut opts = Options::new();
 
-        opts.optflagopt("r", "run", "Run level which should be executed", "RUN_LEVEL");
+        opts.optflagopt(
+            "r",
+            "run",
+            "Run level which should be executed",
+            "RUN_LEVEL",
+        );
         opts.optflagopt("s", "cmd_string", "Subcommand", "CMD_STR");
         opts.optflagopt("t", "cmd_sleep", "Safe-mode sleep time", "CMD_INT");
 
@@ -120,7 +114,7 @@ impl AppHandler for MyApp {
             _ => {
                 // Get a list of all the currently registered applications
                 info!("Querying for active applications");
-                
+
                 let request = r#"{
                     apps {
                         active,
@@ -132,9 +126,9 @@ impl AppHandler for MyApp {
                         }
                     }
                 }"#;
-                
+
                 match query(
-                    ServiceConfig::new("app-service"),
+                    &ServiceConfig::new("app-service"),
                     request,
                     Some(Duration::from_secs(1)),
                 ) {
@@ -146,14 +140,14 @@ impl AppHandler for MyApp {
                 }
             }
         }
-        
+
         Ok(())
     }
 }
 
-fn main() -> Result<(), Error> {    
+fn main() -> Result<(), Error> {
     let app = MyApp;
     app_main!(&app)?;
-    
+
     Ok(())
 }

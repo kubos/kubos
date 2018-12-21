@@ -71,7 +71,7 @@ pub fn parse(data: &[u8]) -> EpsResult<VersionInfo> {
             }),
         })
     } else {
-        return Err(EpsError::parsing_failure("Version Info"));
+        Err(EpsError::parsing_failure("Version Info"))
     }
 }
 

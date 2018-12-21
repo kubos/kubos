@@ -41,7 +41,7 @@
 //! let rx_conn = oem.conn.clone();
 //!
 //! // Start up a read thread to consume messages from the device
-//! thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+//! thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
 //!
 //! // Request that the device send position information once per second
 //! oem.request_position(1.0, 0.0, false)?;
@@ -74,7 +74,6 @@ extern crate bitflags;
 extern crate byteorder;
 #[macro_use]
 extern crate failure;
-#[macro_use]
 extern crate nom;
 extern crate rust_uart;
 extern crate serial;
