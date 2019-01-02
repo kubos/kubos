@@ -22,46 +22,37 @@ the KubOS or payload services.
 
 TODO: Packet diagram?
 
-Downlink Endpoints
-~~~~~~~~~~~~~~~~~~
-
-A downlink endpoint is the mechanism by which data is sent to the ground.
-For example, a radio.
-
-Each endpoint is assigned its own UDP port and maintains a constant read thread which listens for
-messages from within the satellite which should be transmitted.
-
-While any process may communicate with this port, the two main sources will be the communication
-service's master read thread, which handles uplink messages, and mission applications.
-
-When the endpoint's read thread receives a message, it wraps it up in a UDP packet and then sends
-it to the endpoint device, via the :doc:`appropriate hardware API <../apis/device-api/index>`.
-
 Ground Communication
 ~~~~~~~~~~~~~~~~~~~~
 
-For each radio (or other communication source device), the communications service maintains a
-constant read thread which listens for messages from the ground.
+The communications service maintains a constant read thread which listens for messages from the
+ground via the primary communications device (ex. radio).
 
 Once a message is received, a message handler thread is spawned and assigned one of the available
 handler UDP ports.
 This message handler examines the message to determine the internal message destination and then
 forwards it on to the appropriate service.
-The handler then waits for a reply (within a specified timeout duration) and then passes that reply
-on to the downlink endpoint via UDP.
+The handler then waits for a reply (within a specified timeout duration), wraps the response in a
+UDP packet, and then sends the packet to the primary radio for transmission.
 
 .. figure:: ../images/comms_from_ground.png
     :align: center
 
-Satellite Communication
-~~~~~~~~~~~~~~~~~~~~~~~
+Downlink Endpoints
+~~~~~~~~~~~~~~~~~~
 
-There are some instances where the satellite might need to send a message to the ground without it
-being requested.
-For example, when sending a periodic health-and-status beacon.
+There are some instances where the satellite might need to send a message to the ground without
+first receiving a request for data.
+An example would be when sending a periodic health-and-status beacon.
 
-In this case, the mission application will send the message directly to the desired downlink
-endpoint via UDP.
+In this case, the communications service may be defined with a downlink endpoint thread (or multiple
+threads if more than one radio is available for downlink communication).
+
+Each endpoint is assigned its own UDP port and maintains a constant read thread which listens for
+messages from within the satellite which should be transmitted.
+
+When the endpoint's read thread receives a message, it wraps it up in a UDP packet and then sends
+it to the endpoint device, via the :doc:`appropriate hardware API <../apis/device-api/index>`.
 
 .. figure:: ../images/comms_to_ground.png
     :align: center
