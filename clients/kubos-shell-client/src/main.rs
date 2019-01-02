@@ -15,15 +15,14 @@
 //
 
 #[deny(warnings)]
-
 use channel_protocol::ChannelProtocol;
-use clap::{App, AppSettings, Arg, SubCommand, value_t};
+use clap::{value_t, App, AppSettings, Arg, SubCommand};
 use failure::{bail, Error};
 use std::collections::HashMap;
 use std::io::{self, Write};
 use std::time::Duration;
 
-fn start_session(channel_proto: ChannelProtocol) -> Result<(), Error> {
+fn start_session(channel_proto: &ChannelProtocol) -> Result<(), Error> {
     let channel_id = channel_protocol::generate_channel();
 
     println!("Starting shell session -> {}", channel_id);
@@ -37,7 +36,7 @@ fn start_session(channel_proto: ChannelProtocol) -> Result<(), Error> {
     Ok(())
 }
 
-fn list_sessions(channel_proto: ChannelProtocol) -> Result<(), Error> {
+fn list_sessions(channel_proto: &ChannelProtocol) -> Result<(), Error> {
     channel_proto.send(&shell_protocol::messages::list::to_cbor(
         channel_protocol::generate_channel(),
         None,
@@ -72,7 +71,7 @@ fn list_sessions(channel_proto: ChannelProtocol) -> Result<(), Error> {
 }
 
 fn kill_session(
-    channel_proto: ChannelProtocol,
+    channel_proto: &ChannelProtocol,
     channel_id: u32,
     signal: Option<u32>,
 ) -> Result<(), Error> {
@@ -82,7 +81,7 @@ fn kill_session(
     Ok(())
 }
 
-fn run_shell(channel_proto: ChannelProtocol, channel_id: u32) -> Result<(), Error> {
+fn run_shell(channel_proto: &ChannelProtocol, channel_id: u32) -> Result<(), Error> {
     println!("Press enter to send input to the shell session");
     println!("Press Control-D to detach from the session");
     loop {
@@ -191,10 +190,10 @@ fn main() -> Result<(), failure::Error> {
     println!("Starting shell client -> {}", remote);
 
     match args.subcommand_name() {
-        Some("start") => start_session(channel_proto),
+        Some("start") => start_session(&channel_proto),
         Some("list") => {
             println!("Fetching existing shell sessions:");
-            list_sessions(channel_proto)
+            list_sessions(&channel_proto)
         }
         Some("join") => {
             let channel_id = if let Some(kill_args) = args.subcommand_matches("join") {
@@ -204,7 +203,7 @@ fn main() -> Result<(), failure::Error> {
             };
 
             println!("Joining existing shell session: {}", channel_id);
-            run_shell(channel_proto, channel_id)
+            run_shell(&channel_proto, channel_id)
         }
         Some("kill") => {
             let channel_id = if let Some(kill_args) = args.subcommand_matches("kill") {
@@ -232,7 +231,7 @@ fn main() -> Result<(), failure::Error> {
                 channel_id,
                 signal.unwrap_or(9)
             );
-            kill_session(channel_proto, channel_id, signal)
+            kill_session(&channel_proto, channel_id, signal)
         }
         _ => panic!("Invalid command"),
     }

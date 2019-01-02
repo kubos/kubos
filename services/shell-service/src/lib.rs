@@ -94,8 +94,8 @@ fn spawn_process(
             channel_id,
             timeout,
             proc_handle,
-            shared_threads,
-            receiver,
+            &shared_threads,
+            &receiver,
         )
     });
 
@@ -108,13 +108,13 @@ fn thread_body(
     channel_id: u32,
     timeout: Duration,
     proc_handle: ProcessHandler,
-    shared_threads: Arc<Mutex<HashMap<u32, ThreadProcess>>>,
-    receiver: Receiver<(ChannelMessage, SocketAddr)>,
-) -> () {
+    shared_threads: &Arc<Mutex<HashMap<u32, ThreadProcess>>>,
+    receiver: &Receiver<(ChannelMessage, SocketAddr)>,
+) {
     let mut s_protocol = ShellProtocol::new(channel_protocol, channel_id, Box::new(proc_handle));
 
     // Receive and react to incoming shell protocol messages
-    match s_protocol.message_engine(
+    if let Err(e) = s_protocol.message_engine(
         |d| match receiver.recv_timeout(d) {
             Ok((v, s)) => Ok((v, s)),
             Err(RecvTimeoutError::Timeout) => Err(ProtocolError::ReceiveTimeout),
@@ -124,8 +124,7 @@ fn thread_body(
         },
         timeout,
     ) {
-        Err(e) => warn!("Encountered errors while processing transaction: {}", e),
-        _ => {}
+        warn!("Encountered errors while processing transaction: {}", e);
     }
 
     // Remove ourselves from threads list once we are finished
@@ -153,7 +152,7 @@ fn get_message(
 }
 
 // Starts and runs the main loop receiving new shell protocol messages
-pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
+pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
     let host = config.hosturl();
 
@@ -236,13 +235,12 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
             // Pass along the message to existing process
             _ => {
                 if let Some(process_handle) = threads.lock().unwrap().get(&channel_id) {
-                    match process_handle
+                    if let Err(e) = process_handle
                         .sender
                         .send((channel_message, message_source))
                     {
-                        Err(e) => warn!("Error when sending to channel {}: {:?}", channel_id, e),
-                        _ => {}
-                    };
+                        warn!("Error when sending to channel {}: {:?}", channel_id, e);
+                    }
                 }
 
                 if !threads.lock().unwrap().contains_key(&channel_id) {

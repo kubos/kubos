@@ -24,7 +24,7 @@ use std::thread;
 use std::time::Duration;
 
 // We need this in this lib.rs file so we can build integration tests
-pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
+pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
     let host = config.hosturl();
 
@@ -79,7 +79,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
 
         let config_ref = f_config.clone();
         let host_ref = host_ip.clone();
-        let timeout_ref = timeout.clone();
+        let timeout_ref = timeout;
 
         let channel_id = match file_protocol::parse_channel_id(&first_message) {
             Ok(channel_id) => channel_id,
@@ -107,7 +107,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation
-                match f_protocol.message_engine(
+                if let Err(e) = f_protocol.message_engine(
                     |d| match receiver.recv_timeout(d) {
                         Ok(v) => Ok(v),
                         Err(RecvTimeoutError::Timeout) => Err(ProtocolError::ReceiveTimeout),
@@ -118,8 +118,7 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
                     timeout_ref,
                     &state,
                 ) {
-                    Err(e) => warn!("Encountered errors while processing transaction: {}", e),
-                    _ => {}
+                    warn!("Encountered errors while processing transaction: {}", e);
                 }
 
                 // Remove ourselves from threads list if we are finished
@@ -128,10 +127,9 @@ pub fn recv_loop(config: ServiceConfig) -> Result<(), failure::Error> {
         }
 
         if let Some(sender) = threads.lock().unwrap().get(&channel_id) {
-            match sender.send(first_message) {
-                Err(e) => warn!("Error when sending to channel {}: {:?}", channel_id, e),
-                _ => {}
-            };
+            if let Err(e) = sender.send(first_message) {
+                warn!("Error when sending to channel {}: {:?}", channel_id, e);
+            }
         }
 
         if !threads.lock().unwrap().contains_key(&channel_id) {
