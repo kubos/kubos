@@ -74,12 +74,14 @@
 //! satellite-ip = "192.168.8.2"
 //! ```
 
+extern crate byteorder;
 #[macro_use]
 extern crate failure;
-extern crate pnet;
 #[macro_use]
 extern crate juniper;
-extern crate byteorder;
+#[macro_use]
+extern crate log;
+extern crate pnet;
 extern crate toml;
 
 mod config;
