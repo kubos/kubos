@@ -59,7 +59,7 @@ Each endpoint is assigned its own UDP port and maintains a constant read thread 
 messages from within the satellite which should be transmitted.
 
 When the endpoint's read thread receives a message, it wraps it up in a UDP packet and then sends
-it to the endpoint device, via the :doc:`appropriate hardware API <../apis/device-api/index>`.
+it to the endpoint device, via the user-defined write function.
 
 .. figure:: ../images/comms_to_ground.png
     :align: center
@@ -88,7 +88,7 @@ The service's `config.toml` file should contain the following parameters:
 - ``ground_port`` - UDP port of the ground gateway
 - ``satellite_ip`` - IP address of the communications service
 
-The service which implements the framework should create a `CommsControlBlock <TODO>`, which
+The service which implements the framework should create a |CommsControlBlock|, which
 provides the final configuration to the main communication logic.
 It contains the following members:
 
@@ -126,14 +126,30 @@ The service should contain the following components:
 - At least one function capable of writing messages to the communications device
 - Initialized connection structure/s capable of reading and/or writing from/to the communications
   device (this structure will be used by the previous read and/or write functions)
-- A `CommsControlBlock <TODO>` structure containing all of the communications configuration
+- A |CommsControlBlock| structure containing all of the communications configuration
   information
+- A |CommsTelemetry| structure which will be used to gather communication statisticss
 
 It is recommended that the service also follow the guidelines for
 :doc:`normal hardware services <hardware-services>`.
 
+Some support for communicating with specific hardware devices has been provided in various
+:doc:`hardware APIs <../apis/device-api/index>`.
+
 For more information about how to implement a communications service, please refer to the following
 resources:
 
-- `Rust documentation <TODO>`
-- `Comms service tutorial <TODO>`
+- |comms-service|
+- :doc:`Comms service tutorial <TODO>`
+
+.. |comms-service| raw:: html
+
+    <a href="../rust-docs/comms_service/index.html" target="_blank">Framework Rust documentation</a>
+    
+.. |CommsControlBlock| raw:: html
+
+    <a href="../rust-docs/comms_service/struct.CommsControlBlock.html" target="_blank">CommsControlBlock</a>
+
+.. |CommsTelemetry| raw:: html
+
+    <a href="../rust-docs/comms_service/struct.CommsTelemetry.html" target="_blank">CommsTelemetry</a>
