@@ -3,8 +3,11 @@ Communications Service
 
 The hardware used to establish communication between a satellite and the ground varies wildly from
 mission to mission.
-As a result, the communications service provided by KubOS is not a true service.
-Instead, it is a framework which can be used to establish communications on a per-device basis.
+As a result, KubOS provides a communications service framework which can be used by developers when
+creating their specific radio's hardware service.
+This framework is used to simplify the process of reading messages from the ground, forwarding them
+to the appropriate internal destination, and then sending properly formatted messages back to the
+ground.
 
 .. note::
 
@@ -24,10 +27,14 @@ All packets sent to/from the communication device will be encapsulated in severa
 The first layer will be whatever communication protocol the device requires.
 For example, AX.25 is frequently used as the header protocol for radio communication.
 
-Inside of this will be a UDP packet, most likely containing a GraphQL request intended for one of
-the KubOS or payload services.
+Inside of this will be a UDP packet containing one of the following:
 
-TODO: Packet diagram?
+- GraphQL query or mutation
+- JSON GraphQL responses
+- File/shell service commands or data
+- Any other application data a payload or mission application might need
+
+TODO: Packet diagram
 
 Ground Communication
 ~~~~~~~~~~~~~~~~~~~~
@@ -37,10 +44,10 @@ ground via the communications device.
 
 Once a message is received, a message handler thread is spawned and assigned one of the available
 handler UDP ports.
-This message handler examines the message to determine the internal message destination and then
-forwards it on to the appropriate service.
+This message handler examines the destination port embedded in the message's UDP packet header to
+determine the internal message destination and then forwards it on to the appropriate service.
 The handler then waits for a reply (within a specified timeout duration), wraps the response in a
-UDP packet, and then sends the packet to the device for transmission.
+UDP packet, and then sends the packet to the communications device for transmission.
 
 .. figure:: ../images/comms_from_ground.png
     :align: center
@@ -59,7 +66,7 @@ Each endpoint is assigned its own UDP port and maintains a constant read thread 
 messages from within the satellite which should be transmitted.
 
 When the endpoint's read thread receives a message, it wraps it up in a UDP packet and then sends
-it to the endpoint device, via the user-defined write function.
+it to the communications device, via the user-defined write function.
 
 .. figure:: ../images/comms_to_ground.png
     :align: center
@@ -73,7 +80,8 @@ However, some missions have more complex communications systems; for example, ha
 more reliable downlink method for transmitting a small health-and-status beacon and then a faster,
 but more error-prone method for transmitting more detailed telemetry information.
 
-The communications framework provides mechanisms to handle these more complex configurations.
+The communications service framework provides mechanisms to handle these more complex
+configurations.
 
 The service's `config.toml` file should contain the following parameters:
 
@@ -82,7 +90,7 @@ The service's `config.toml` file should contain the following parameters:
 - ``handler_port_max`` - Ending port used to define a range of ports that are used in the message
   handlers that handle messages received from the ground
 - ``downlink_ports`` - (Optional) List of ports used by downlink endpoints that send messages to the
-  ground each port in the list will be used by one downlink endpoint
+  ground. Each port in the list will be used by one downlink endpoint
 - ``timeout`` - Length of time a message handler should wait for a reply, in milliseconds
 - ``ground_ip`` - IP address of the ground gateway
 - ``ground_port`` - UDP port of the ground gateway
@@ -108,14 +116,20 @@ It contains the following members:
 - ``ground_port`` - Should be copied from the corresponding `config.toml` value
 - ``satellite_ip`` - Should be copied from the corresponding `config.toml` value
 
+.. warning::
+
+    If downlink endpoints are being used, the number of function pointers in the ``write`` list
+    **must be equal** to the number of ports in the ``downlink_ports`` list.
+
+
 Implementation
 --------------
 
 Because communication methods may vary from mission to mission, it is up to the user to create the
 final hardware service/s which will be used for communication with the ground.
 
-The service which implements the communications framework should utilize only a single communication
-device.
+The service which implements the communications service framework should utilize only a single
+communication device.
 If multiple devices are present in the system, a service should be created for each of them.
 
 The service should contain the following components:
@@ -128,7 +142,7 @@ The service should contain the following components:
   device (this structure will be used by the previous read and/or write functions)
 - A |CommsControlBlock| structure containing all of the communications configuration
   information
-- A |CommsTelemetry| structure which will be used to gather communication statisticss
+- A |CommsTelemetry| structure which will be used to gather communication statistics
 
 It is recommended that the service also follow the guidelines for
 :doc:`normal hardware services <hardware-services>`.
