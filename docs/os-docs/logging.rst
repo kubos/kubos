@@ -20,7 +20,7 @@ policy has the following format::
     
 An example policy looks like this::
 
-    $outchannel service_debug,/var/log/kubos/debug.log,1000000,/home/system/kubos/kubos-rotate.sh debug.log
+    $outchannel service_debug,/var/log/kubos-debug.log,100000,/home/system/kubos/log-rotate.sh kubos-debug.log
     daemon.debug :omfile:$service_debug
     
 Any of these components may be updated within their respective files in order to change the policy
@@ -34,37 +34,38 @@ Log files are traditionally stored in ``/var/log``.
 ``/var/log`` has been set up as a symlink to ``/home/system/log``.
 This way log files reside in permanent storage and will be preserved through OS upgrades.
 
-Messages written using the `daemon` facility will be routed to the appropriate log file in the
-``/home/system/log/kubos`` folder.
+Messages written using the `daemon` facility will be routed to files with the naming scheme
+``kubos-*.log``.
 This facility is used by all :doc:`Kubos services <../services/index>`.
 
-Messages written using the `user` facility will be routed to the appropriate log file in the
-``/home/system/log/apps`` folder.
+Messages written using the `user` facility will be routed to files with the naming scheme
+``app-*.log``.
 This facility should be used by all :doc:`mission applications <../app-docs/index>`.
 
-Within each of these sub-directories, the following files may be automatically created:
+For each of these naming schemes, the following files may be created:
 
-- ``debug.log`` - Records all log messages
-- ``info.log`` - Records log messages with a priority of ``info`` or higher
-- ``warn.log`` - Records log messages with a priority of ``warn`` or higher
+- ``*-debug.log`` - Records all log messages
+- ``*-info.log`` - Records log messages with a priority of ``info`` or higher
+- ``*-warn.log`` - Records log messages with a priority of ``warn`` or higher
 
 .. _log-rotation:
 
 Log Rotation
 ~~~~~~~~~~~~
 
-The ``/home/system/kubos/kubos-rotate.sh`` script is used to execute the rotation behavior.
+The ``/home/system/kubos/log-rotate.sh`` script is used to execute the rotation behavior.
 
-All log files have a maximum size of 1MB by default. This value can be updated by changing the
-max size parameter of the appropriate logging policy.
+By default, all debug log files have a maximum size of 100KB and all other log files have a maximum
+size of 10KB.
+This value can be updated by changing the max size parameter of the appropriate logging policy.
 
 Once this size is reached, the current file is renamed as an archive file and a new log file is
 started. Archive files use their original name, but are suffixed with the current timestamp.
-For example, ``debug.log.2018.12.01-00.12.07``.
+For example, ``kubos-debug.log.2018.12.01-00.12.07``.
 
-By default, five archive files of each log type will be retained.
+By default, nine archive files of each log type will be retained.
 If a new archive file is created and there are already five files, the oldest will be deleted.
-This value is controlled by the ``MAX_COUNT`` variable in the ``kubos-rotate.sh`` script.
+This value is controlled by the ``MAX_COUNT`` variable in the ``log-rotate.sh`` script.
 
 Examples
 --------
