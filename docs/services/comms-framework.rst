@@ -101,9 +101,9 @@ provides the final configuration to the main communication logic.
 It contains the following members:
 
 - ``read_conn`` - This is the connection structure which is used for reading from the communications
-  device, for example a UART port or UDP socket. It should implement the Read trait.
+  device, for example a UART port or UDP socket
 - ``write_conn`` - This is the connection structure which is used for reading from the
-  communications device, for example a UART port or UDP socket. It should implement the Write trait.
+  communications device, for example a UART port or UDP socket
 - ``read`` - (Optional) A pointer to the function which should be used to read a message from the
   communications device
 - ``write`` - A list of function pointers for all available ways that messages may be written to
@@ -138,8 +138,7 @@ The service should contain the following components:
   (note: this may be omitted in the case where the communications device will only be used for
   transmitting data)
 - At least one function capable of writing messages to the communications device
-- Initialized connection structure/s capable of reading and/or writing from/to the communications
-  device (this structure will be used by the previous read and/or write functions)
+- Initialized connection structure/s which will be used by the previous read and/or write functions
 - A |CommsControlBlock| structure containing all of the communications configuration
   information
 - A |CommsTelemetry| structure which will be used to gather communication statistics
