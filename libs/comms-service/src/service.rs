@@ -17,11 +17,13 @@
 //
 
 use byteorder::{BigEndian, ByteOrder};
+use config::CommsConfig;
 use errors::*;
 use pnet::packet::udp::{ipv4_checksum, UdpPacket};
 use pnet::packet::Packet;
 use std::net::{Ipv4Addr, UdpSocket};
 use std::ops::Range;
+use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -70,6 +72,31 @@ pub struct CommsControlBlock<T: Clone> {
     pub ground_port: Option<u16>,
 }
 
+impl<T: Clone> CommsControlBlock<T> {
+    /// Creates a new instance of the CommsControlBlock
+    pub fn new(
+        read: Option<Arc<ReadFn<T>>>,
+        write: Vec<Arc<WriteFn<T>>>,
+        read_conn: T,
+        write_conn: T,
+        config: CommsConfig,
+    ) -> Self {
+        CommsControlBlock {
+            read,
+            write,
+            read_conn,
+            write_conn,
+            handler_port_min: config.handler_port_min,
+            handler_port_max: config.handler_port_max,
+            timeout: config.timeout,
+            ground_ip: Ipv4Addr::from_str(&config.ground_ip).unwrap(),
+            satellite_ip: Ipv4Addr::from_str(&config.satellite_ip).unwrap(),
+            downlink_ports: config.downlink_ports,
+            ground_port: config.ground_port,
+        }
+    }
+}
+
 /// Struct that enables users to start the Communication Service.
 pub struct CommsService;
 
@@ -100,7 +127,9 @@ impl CommsService {
                     let write_ref = control.write[index].clone();
                     let ground_ip = control.ground_ip.clone();
                     let sat_ip = control.satellite_ip.clone();
-                    let ground_port = control.ground_port.ok_or(CommsServiceError::MissingGroundPort)?;
+                    let ground_port = control
+                        .ground_port
+                        .ok_or(CommsServiceError::MissingGroundPort)?;
                     thread::spawn(move || {
                         downlink_endpoint(
                             telem_ref,
@@ -141,7 +170,7 @@ fn read_thread<T: Clone + Send + 'static>(
             Err(e) => {
                 log_error(&data, e.to_string()).unwrap();
                 continue;
-            },
+            }
         };
 
         // Create a UDP packet from the received information.
@@ -166,12 +195,17 @@ fn read_thread<T: Clone + Send + 'static>(
         info!("UDP Packet successfully uplinked");
 
         // Bind socket to a port and pass to the message handler.
-        let socket = match socket_manager(comms.satellite_ip, &mut port, comms.handler_port_min, comms.handler_port_max) {
+        let socket = match socket_manager(
+            comms.satellite_ip,
+            &mut port,
+            comms.handler_port_min,
+            comms.handler_port_max,
+        ) {
             Some(sock) => sock,
             None => {
                 log_error(&data, CommsServiceError::NoAvailablePorts.to_string()).unwrap();
                 continue;
-            },
+            }
         };
 
         // Spawn new message handler.

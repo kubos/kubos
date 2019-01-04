@@ -34,8 +34,7 @@ extern crate syslog;
 use comms::*;
 use comms_service::*;
 use failure::Error;
-use std::net::{Ipv4Addr, UdpSocket};
-use std::str::FromStr;
+use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
 use syslog::Facility;
 
@@ -70,19 +69,13 @@ fn main() -> EthernetServiceResult<()> {
     let write_conn = Arc::new(UdpSocket::bind((config.satellite_ip.as_str(), WRITE_PORT))?);
 
     // Control block to configure communication service.
-    let controls = CommsControlBlock {
-        read: Some(Arc::new(read)),
-        write: vec![Arc::new(write)],
+    let controls = CommsControlBlock::new(
+        Some(Arc::new(read)),
+        vec![Arc::new(write)],
         read_conn,
         write_conn,
-        handler_port_min: config.handler_port_min,
-        handler_port_max: config.handler_port_max,
-        timeout: config.timeout,
-        ground_ip: Ipv4Addr::from_str(&config.ground_ip)?,
-        satellite_ip: Ipv4Addr::from_str(&config.satellite_ip)?,
-        downlink_ports: config.downlink_ports,
-        ground_port: config.ground_port,
-    };
+        config,
+    );
 
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
