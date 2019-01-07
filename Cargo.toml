@@ -19,6 +19,8 @@ members = [
 "examples/rust-c-service/service",
 "examples/rust-mission-app",
 "examples/rust-service",
+"examples/uart-comms-client",
+"examples/uart-comms-service",
 "examples/udp-service-client",
 "hal/rust-hal/rust-i2c",
 "hal/rust-hal/rust-uart",

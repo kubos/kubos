@@ -1,0 +1,14 @@
+[package]
+name = "uart-comms-service"
+version = "0.1.0"
+authors = ["Catherine Garabedian <catherine@kubos.co>"]
+edition = "2018"
+
+[dependencies]
+comms-service = { path = "../../libs/comms-service" }
+failure = "0.1.2"
+kubos-service = { path = "../../services/kubos-service" }
+log = "^0.4.0"
+log4rs = "0.8"
+log4rs-syslog = "3.0"
+serial = "0.4"
