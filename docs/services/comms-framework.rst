@@ -1,5 +1,5 @@
-Communications Service
-======================
+Communications Service Framework
+================================
 
 The hardware used to establish communication between a satellite and the ground varies wildly from
 mission to mission.
@@ -17,12 +17,24 @@ ground.
 Architecture
 ------------
 
-TODO: Overall architecture diagram
+.. figure:: ../images/comms_arch.png
 
 Data Packets
 ~~~~~~~~~~~~
 
 All packets sent to/from the communication device will be encapsulated in several layers.
+
+.. uml::
+
+    @startuml
+    
+    package "Radio Protocol" {
+        package "UDP" {
+            rectangle "Message Data"
+        }
+    }
+    
+    @enduml
 
 The first layer will be whatever communication protocol the device requires.
 For example, AX.25 is frequently used as the header protocol for radio communication.
@@ -33,8 +45,6 @@ Inside of this will be a UDP packet containing one of the following:
 - JSON GraphQL responses
 - File/shell service commands or data
 - Any other application data a payload or mission application might need
-
-TODO: Packet diagram
 
 Ground Communication
 ~~~~~~~~~~~~~~~~~~~~
