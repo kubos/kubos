@@ -48,7 +48,7 @@
 //!     satellite_ip: Ipv4Addr::new(192, 168, 8, 1),
 //!     downlink_ports: Some(vec![13011]),
 //!     ground_port: Some(9001)
-//! }
+//! };
 //!
 //! // Putting everything into the control block.
 //! let controls = CommsControlBlock {
