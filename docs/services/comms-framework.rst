@@ -18,6 +18,7 @@ Architecture
 ------------
 
 .. figure:: ../images/comms_arch.png
+    :align: center
 
 Data Packets
 ~~~~~~~~~~~~
@@ -59,8 +60,41 @@ determine the internal message destination and then forwards it on to the approp
 The handler then waits for a reply (within a specified timeout duration), wraps the response in a
 UDP packet, and then sends the packet to the communications device for transmission.
 
-.. figure:: ../images/comms_from_ground.png
-    :align: center
+.. uml::
+
+    @startuml
+    
+    hide footbox
+    
+    actor "Ground Station" as ground
+    participant Radio
+    
+    ground -> Radio : 1. Send command to satellite
+    
+    box "Communications Service" #LightBlue
+        participant "Read Thread" as read
+
+        Radio <- read : 2. Read data packets from radio
+        read -> read : 3. Deframe data packets
+        read -> read : 4. Reassemble data packet
+        
+        create "Message Handler" as handler
+        read -> handler : 5. Spawn new message handler
+        activate handler
+    end box
+    
+    participant "Kubos Service" as service
+    
+    handler -> service : 6. Send GraphQL query/mutation to service
+    service -> handler : 7. Return result of query/mutation
+    handler -> handler : 8. Wrap result in UDP packet
+    handler -> Radio : 9. Send response packet to radio
+    destroy handler
+    
+    Radio -> ground : 10. Send response packet to ground
+    
+    
+    @enduml
 
 Downlink Endpoints
 ~~~~~~~~~~~~~~~~~~
@@ -78,8 +112,23 @@ messages from within the satellite which should be transmitted.
 When the endpoint's read thread receives a message, it wraps it up in a UDP packet and then sends
 it to the communications device, via the user-defined write function.
 
-.. figure:: ../images/comms_to_ground.png
-    :align: center
+.. uml::
+
+    @startuml
+    
+    hide footbox
+    
+    actor "Mission application" as app
+    participant "Communications Service\nDownlink Endpoint" as downlink
+    participant Radio
+    actor "Ground Station" as ground
+    
+    app -> downlink : 1. Send data to downlink endpoint
+    downlink -> downlink : 2. Wrap data in UDP packet
+    downlink -> Radio : 3. Send data packet to radio
+    Radio -> ground : 4. Send data packet to ground
+    
+    @enduml
 
 Configuration
 -------------
