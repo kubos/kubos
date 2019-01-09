@@ -39,12 +39,8 @@
 //! let read_conn = Arc::new(UdpSocket::bind(("192.168.8.1", 13000)).unwrap());
 //! let write_conn = Arc::new(UdpSocket::bind(("192.168.8.1", 13001)).unwrap());
 //!
-//! // Putting everything into the control block.
-//! let controls = CommsControlBlock {
-//!     read: Some(Arc::new(read)),
-//!     write: vec![Arc::new(write)],
-//!     read_conn,
-//!     write_conn,
+//! // Setting up the communication settings.
+//! let config = CommsConfig {
 //!     handler_port_min: 13002,
 //!     handler_port_max: 13099,
 //!     timeout: 1500,
@@ -52,6 +48,15 @@
 //!     satellite_ip: Ipv4Addr::new(192, 168, 8, 1),
 //!     downlink_ports: Some(vec![13011]),
 //!     ground_port: Some(9001)
+//! }
+//!
+//! // Putting everything into the control block.
+//! let controls = CommsControlBlock {
+//!     read: Some(Arc::new(read)),
+//!     write: vec![Arc::new(write)],
+//!     read_conn,
+//!     write_conn,
+//!     config
 //! };
 //!
 //! // Get telemetry from communication service.
@@ -64,7 +69,7 @@
 //! ## Comms Service Config File Format
 //!
 //! ```toml
-//! [service-name]
+//! [service-name.comms]
 //! handler_port_min = 13002
 //! handler_port_max = 13010
 //! downlink_ports = [13011]
@@ -82,6 +87,8 @@ extern crate juniper;
 #[macro_use]
 extern crate log;
 extern crate pnet;
+#[macro_use]
+extern crate serde_derive;
 extern crate toml;
 
 mod config;
