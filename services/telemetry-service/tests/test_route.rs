@@ -243,7 +243,7 @@ fn test_route_compress_response() {
     let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
 
     // Use a file that won't have a randomly generated path
-    let output_path = "output";
+    let output_path = "compressed-output";
 
     let query = format!(
         r#"{{
@@ -261,7 +261,7 @@ fn test_route_compress_response() {
     let expected = json!({
         "errors": "",
         "data": {
-            "routedTelemetry": "output.tar.gz"
+            "routedTelemetry": "compressed-output.tar.gz"
         }
     });
 
