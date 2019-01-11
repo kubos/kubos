@@ -59,6 +59,8 @@ This message handler examines the destination port embedded in the message's UDP
 determine the internal message destination and then forwards it on to the appropriate service.
 The handler then waits for a reply (within a specified timeout duration), wraps the response in a
 UDP packet, and then sends the packet to the communications device for transmission.
+Once this transaction has completed, the message handler thread exits, freeing up the UDP port for
+future use.
 
 .. uml::
 
