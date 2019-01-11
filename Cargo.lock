@@ -1513,6 +1513,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "serial-comms-service"
+version = "0.1.0"
+dependencies = [
+ "comms-service 0.1.0",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kubos-system 0.1.0",
+ "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust-uart 0.2.0",
+ "serial 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "simplelog 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syslog 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "serial-core"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
