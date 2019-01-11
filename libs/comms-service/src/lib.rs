@@ -39,25 +39,18 @@
 //! let read_conn = Arc::new(UdpSocket::bind(("192.168.8.1", 13000)).unwrap());
 //! let write_conn = Arc::new(UdpSocket::bind(("192.168.8.1", 13001)).unwrap());
 //!
-//! // Setting up the communication settings.
-//! let config = CommsConfig {
-//!     handler_port_min: 13002,
-//!     handler_port_max: 13099,
-//!     timeout: 1500,
-//!     ground_ip: Ipv4Addr::new(192, 168, 8, 40),
-//!     satellite_ip: Ipv4Addr::new(192, 168, 8, 1),
-//!     downlink_ports: Some(vec![13011]),
-//!     ground_port: Some(9001)
-//! };
+//! // Fetching communications settings from the common config.toml file.
+//! let service_config = kubos_system::Config::new("service-name");
+//! let comms_config = CommsConfig::new(service_config);
 //!
 //! // Putting everything into the control block.
-//! let controls = CommsControlBlock {
-//!     read: Some(Arc::new(read)),
-//!     write: vec![Arc::new(write)],
+//! let controls = CommsControlBlock::new(
+//!     Some(Arc::new(read)),
+//!     vec![Arc::new(write)],
 //!     read_conn,
 //!     write_conn,
-//!     config
-//! };
+//!     comms_config
+//! );
 //!
 //! // Get telemetry from communication service.
 //! let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
