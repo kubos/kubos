@@ -23,7 +23,7 @@ use std::sync::{Arc, Mutex};
 use std::thread::{sleep, spawn};
 use std::time::Duration;
 
-use objects::*;
+use crate::objects::*;
 
 pub struct ReadData {
     pub std_telem: Mutex<StandardTelemetry>,

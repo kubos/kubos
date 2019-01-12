@@ -24,7 +24,7 @@
 
 use eps_api::EpsResult;
 use rust_i2c::Command;
-use telemetry::lib::get_adc_result;
+use crate::telemetry::lib::get_adc_result;
 
 const TELEM_CMD: u8 = 0x10;
 

@@ -47,7 +47,7 @@ mod tests;
 use failure::Error;
 use getopts::Options;
 use kubos_service::{Config, Service};
-use registry::AppRegistry;
+use crate::registry::AppRegistry;
 use std::env;
 use syslog::Facility;
 

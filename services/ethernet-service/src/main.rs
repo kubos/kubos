@@ -31,7 +31,7 @@ extern crate failure;
 extern crate log;
 extern crate syslog;
 
-use comms::*;
+use crate::comms::*;
 use comms_service::*;
 use failure::Error;
 use std::net::UdpSocket;

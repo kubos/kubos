@@ -15,11 +15,11 @@
  */
 
 use super::*;
-use model::*;
+use crate::model::*;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use tests::test_data::*;
+use crate::tests::test_data::*;
 
 #[test]
 fn read_good() {

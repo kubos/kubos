@@ -15,8 +15,8 @@
 //
 
 use cbor_protocol::Protocol as CborProtocol;
-use error::ProtocolError;
-use parsers::parse_message;
+use crate::error::ProtocolError;
+use crate::parsers::parse_message;
 use serde_cbor::Value;
 use std::cell::Cell;
 use std::net::SocketAddr;

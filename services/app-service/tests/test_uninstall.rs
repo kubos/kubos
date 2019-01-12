@@ -24,7 +24,7 @@ use std::panic;
 use std::time::Duration;
 
 mod utils;
-pub use utils::*;
+pub use crate::utils::*;
 
 #[test]
 fn uninstall_app() {

@@ -26,7 +26,7 @@ use flate2::read::GzDecoder;
 use std::fs::{self, File};
 use std::io::Read;
 use tempfile::TempDir;
-use utils::*;
+use crate::utils::*;
 
 static SQL: &'static str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');

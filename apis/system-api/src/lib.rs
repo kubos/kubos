@@ -29,8 +29,8 @@ extern crate toml;
 mod config;
 mod uboot;
 
-pub use config::*;
-pub use uboot::UBootVars;
+pub use crate::config::*;
+pub use crate::uboot::UBootVars;
 
 /// The name of the KubOS app service that can be used to derive service configuration
 pub const SERVICE_APP: &str = "app-service";

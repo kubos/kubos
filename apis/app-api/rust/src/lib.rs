@@ -101,6 +101,6 @@ mod query;
 #[cfg(test)]
 mod tests;
 
-pub use framework::*;
+pub use crate::framework::*;
 pub use kubos_system::Config as ServiceConfig;
-pub use query::query;
+pub use crate::query::query;

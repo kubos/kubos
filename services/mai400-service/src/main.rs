@@ -428,9 +428,9 @@ mod tests;
 
 use kubos_service::{Config, Service};
 use mai400_api::MAIResult;
-use model::{ReadData, Subsystem};
-pub use objects::*;
-use schema::{MutationRoot, QueryRoot};
+use crate::model::{ReadData, Subsystem};
+pub use crate::objects::*;
+use crate::schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
 use syslog::Facility;
 

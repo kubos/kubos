@@ -15,7 +15,7 @@
 //
 
 use super::*;
-use messages::ReceiverStatusFlags;
+use crate::messages::ReceiverStatusFlags;
 
 #[test]
 fn test_request_errors() {

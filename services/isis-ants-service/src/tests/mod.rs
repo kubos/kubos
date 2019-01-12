@@ -17,9 +17,9 @@
 use double;
 use isis_ants_api::*;
 use kubos_service::{Config, Service};
-use model::*;
-use objects::*;
-use schema::*;
+use crate::model::*;
+use crate::objects::*;
+use crate::schema::*;
 use std::cell::{Cell, RefCell};
 
 macro_rules! mock_new {

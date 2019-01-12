@@ -26,7 +26,7 @@ use std::path::Path;
 use std::time::Duration;
 
 mod utils;
-pub use utils::*;
+pub use crate::utils::*;
 
 fn setup_apps(registry_dir: &Path) {
     MockAppBuilder::new("app1", "a-b-c-d-e")

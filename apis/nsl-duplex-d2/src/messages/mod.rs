@@ -23,10 +23,10 @@ mod file;
 mod geo_record;
 mod state_of_health;
 
-pub use messages::file::File;
+pub use crate::messages::file::File;
 pub type Message = File;
-pub use messages::geo_record::GeoRecord;
-pub use messages::state_of_health::StateOfHealth;
+pub use crate::messages::geo_record::GeoRecord;
+pub use crate::messages::state_of_health::StateOfHealth;
 
 /// Parse 4 byte integer
 pub fn parse_u32(input: &[u8]) -> IResult<&[u8], u32> {

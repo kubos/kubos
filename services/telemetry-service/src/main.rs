@@ -207,7 +207,7 @@ mod udp;
 
 use kubos_service::{Config, Service};
 use kubos_telemetry_db::Database;
-use schema::{MutationRoot, QueryRoot, Subsystem};
+use crate::schema::{MutationRoot, QueryRoot, Subsystem};
 use syslog::Facility;
 
 fn main() {

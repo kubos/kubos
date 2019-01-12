@@ -28,4 +28,4 @@ extern crate adcs_api;
 mod ffi;
 mod imtq;
 
-pub use imtq::Imtq;
+pub use crate::imtq::Imtq;

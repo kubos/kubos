@@ -24,7 +24,7 @@ extern crate tempfile;
 
 mod common;
 
-use common::*;
+use crate::common::*;
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};

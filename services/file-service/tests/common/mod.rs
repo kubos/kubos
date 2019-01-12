@@ -21,7 +21,7 @@ extern crate file_protocol;
 extern crate serde_cbor;
 
 use self::serde_cbor::{from_slice, ser};
-use common::blake2_rfc::blake2s::Blake2s;
+use crate::common::blake2_rfc::blake2s::Blake2s;
 use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use std::fs::File;
 use std::io::prelude::*;

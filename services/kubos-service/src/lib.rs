@@ -121,4 +121,4 @@ mod macros;
 mod service;
 
 pub use kubos_system::Config;
-pub use service::{Context, Service};
+pub use crate::service::{Context, Service};

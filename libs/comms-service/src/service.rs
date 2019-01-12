@@ -17,8 +17,8 @@
 //
 
 use byteorder::{BigEndian, ByteOrder};
-use config::CommsConfig;
-use errors::*;
+use crate::config::CommsConfig;
+use crate::errors::*;
 use pnet::packet::udp::{ipv4_checksum, UdpPacket};
 use pnet::packet::Packet;
 use std::net::{Ipv4Addr, UdpSocket};
@@ -27,7 +27,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use telemetry::*;
+use crate::telemetry::*;
 
 // UDP header length.
 const HEADER_LEN: usize = 8;

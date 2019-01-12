@@ -366,9 +366,9 @@ extern crate syslog;
 
 use isis_ants_api::AntSResult;
 use kubos_service::{Config, Service};
-use model::Subsystem;
-pub use objects::*;
-use schema::{MutationRoot, QueryRoot};
+use crate::model::Subsystem;
+pub use crate::objects::*;
+use crate::schema::{MutationRoot, QueryRoot};
 use syslog::Facility;
 
 mod model;

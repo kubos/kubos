@@ -23,7 +23,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use objects::*;
+use crate::objects::*;
 
 pub const RECV_TIMEOUT: Duration = Duration::from_millis(350);
 

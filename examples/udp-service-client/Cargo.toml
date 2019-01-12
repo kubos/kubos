@@ -2,6 +2,7 @@
 name = "udp-client"
 version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
+edition = "2018"
 
 [dependencies]
 nix = "0.10.0"

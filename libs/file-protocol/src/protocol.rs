@@ -21,7 +21,7 @@ use super::parsers;
 use super::storage;
 use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
-use error::ProtocolError;
+use crate::error::ProtocolError;
 use rand::{self, Rng};
 use serde_cbor::Value;
 use std::cell::Cell;

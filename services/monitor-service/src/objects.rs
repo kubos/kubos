@@ -13,9 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-use meminfo::MemInfo;
-use process::ProcStat;
-use userinfo::UserInfo;
+use crate::meminfo::MemInfo;
+use crate::process::ProcStat;
+use crate::userinfo::UserInfo;
 
 pub struct MemInfoResponse {
     pub info: MemInfo,

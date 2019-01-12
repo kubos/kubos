@@ -29,7 +29,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::thread::spawn;
 use tar;
-use udp::*;
+use crate::udp::*;
 
 type Context = kubos_service::Context<Subsystem>;
 

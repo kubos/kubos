@@ -43,11 +43,11 @@ pub mod messages;
 mod process;
 mod protocol;
 
-pub use error::ProtocolError;
-pub use messages::parse_message;
-pub use messages::Message as ShellMessage;
-pub use process::ProcessHandler;
-pub use protocol::Protocol as ShellProtocol;
+pub use crate::error::ProtocolError;
+pub use crate::messages::parse_message;
+pub use crate::messages::Message as ShellMessage;
+pub use crate::process::ProcessHandler;
+pub use crate::protocol::Protocol as ShellProtocol;
 
 /// Default chunk size used by shell protocol
 pub const CHUNK_SIZE: u32 = 4096;

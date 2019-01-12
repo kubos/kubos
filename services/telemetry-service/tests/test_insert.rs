@@ -24,7 +24,7 @@ mod utils;
 use std::thread::sleep;
 use std::time::Duration;
 use tempfile::TempDir;
-use utils::*;
+use crate::utils::*;
 
 #[test]
 fn test_insert_auto_timestamp() {

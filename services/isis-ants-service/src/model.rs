@@ -19,7 +19,7 @@ use isis_ants_api::*;
 use std::cell::{Cell, RefCell};
 use std::str;
 
-use objects::*;
+use crate::objects::*;
 
 pub struct Subsystem {
     pub ants: Box<IAntS>,

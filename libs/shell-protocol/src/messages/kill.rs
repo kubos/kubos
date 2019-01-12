@@ -16,7 +16,7 @@
 
 use super::*;
 use channel_protocol::ChannelMessage;
-use error::ProtocolError;
+use crate::error::ProtocolError;
 use serde_cbor::ser;
 
 /// CBOR -> Message::Kill

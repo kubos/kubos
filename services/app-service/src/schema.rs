@@ -17,8 +17,8 @@
 use juniper::FieldResult;
 use kubos_app::RunLevel;
 use kubos_service;
-use objects::*;
-use registry::AppRegistry;
+use crate::objects::*;
+use crate::registry::AppRegistry;
 
 type Context = kubos_service::Context<AppRegistry>;
 

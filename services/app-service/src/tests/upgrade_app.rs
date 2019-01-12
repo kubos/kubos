@@ -19,8 +19,8 @@ use std::fs;
 
 use tempfile::TempDir;
 
-use registry::*;
-use schema;
+use crate::registry::*;
+use crate::schema;
 
 // Perform an "upgrade" of a brand new application.
 // It's basically allowing a user to register a new application with a custom UUID

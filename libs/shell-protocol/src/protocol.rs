@@ -15,9 +15,9 @@
 //
 
 use channel_protocol::{ChannelMessage, ChannelProtocol};
-use error::ProtocolError;
-use messages;
-use process::ProcessHandler;
+use crate::error::ProtocolError;
+use crate::messages;
+use crate::process::ProcessHandler;
 use std::net::SocketAddr;
 use std::time::Duration;
 

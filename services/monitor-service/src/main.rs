@@ -65,7 +65,7 @@ extern crate syslog;
 extern crate lazy_static;
 
 use kubos_service::{Config, Service};
-use schema::{MutationRoot, QueryRoot};
+use crate::schema::{MutationRoot, QueryRoot};
 use syslog::Facility;
 
 mod meminfo;

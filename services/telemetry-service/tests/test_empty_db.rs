@@ -19,7 +19,7 @@ extern crate serde_json;
 extern crate tempfile;
 
 mod utils;
-use utils::*;
+use crate::utils::*;
 
 #[test]
 fn test() {

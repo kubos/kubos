@@ -19,9 +19,9 @@ extern crate toml;
 
 use tempfile::TempDir;
 
-use app_entry::*;
-use error::*;
-use registry::*;
+use crate::app_entry::*;
+use crate::error::*;
+use crate::registry::*;
 
 #[test]
 fn custom_apps_dir() {

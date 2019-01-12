@@ -105,12 +105,12 @@ mod parsers;
 pub mod protocol;
 mod storage;
 
-pub use error::ProtocolError;
-pub use protocol::Protocol as FileProtocol;
-pub use protocol::ProtocolConfig as FileProtocolConfig;
-pub use protocol::State;
+pub use crate::error::ProtocolError;
+pub use crate::protocol::Protocol as FileProtocol;
+pub use crate::protocol::ProtocolConfig as FileProtocolConfig;
+pub use crate::protocol::State;
 
-pub use parsers::parse_channel_id;
+pub use crate::parsers::parse_channel_id;
 
 /// File protocol message types
 #[derive(Debug, Clone, Eq, PartialEq)]

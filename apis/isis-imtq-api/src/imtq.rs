@@ -15,7 +15,7 @@
  */
 
 use adcs_api::*;
-use ffi::*;
+use crate::ffi::*;
 
 /// Structure for interacting with the ISIS iMTQ
 pub struct Imtq<T: ImtqFFI> {

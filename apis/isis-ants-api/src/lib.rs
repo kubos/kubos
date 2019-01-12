@@ -58,8 +58,8 @@ extern crate failure;
 #[macro_use]
 extern crate nom;
 
-pub use ants::*;
-pub use parse::{AntsTelemetry, DeployStatus, KANTSAnt, KANTSController, KI2CNum};
+pub use crate::ants::*;
+pub use crate::parse::{AntsTelemetry, DeployStatus, KANTSAnt, KANTSController, KI2CNum};
 
 mod ants;
 mod ffi;

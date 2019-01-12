@@ -61,6 +61,6 @@ mod messages;
 #[cfg(test)]
 mod tests;
 
-pub use mai400::*;
-pub use messages::rx::*;
+pub use crate::mai400::*;
+pub use crate::messages::rx::*;
 pub use rust_uart::{mock, Connection, UartError};

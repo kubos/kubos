@@ -100,8 +100,8 @@ mod model;
 mod schema;
 
 use kubos_service::{Config, Service};
-use model::Supervisor;
-use schema::{MutationRoot, QueryRoot};
+use crate::model::Supervisor;
+use crate::schema::{MutationRoot, QueryRoot};
 use syslog::Facility;
 
 fn main() {

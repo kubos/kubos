@@ -20,8 +20,8 @@
 // function, so can't be explicitly tested.
 
 use super::*;
-use messages::commands::ResponseID;
-use messages::ReceiverStatusFlags;
+use crate::messages::commands::ResponseID;
+use crate::messages::ReceiverStatusFlags;
 
 #[test]
 fn test_request_version_good() {

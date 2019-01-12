@@ -22,5 +22,5 @@ pub mod checksum;
 pub mod last_error;
 pub mod version;
 
-pub use commands::reset::*;
-pub use commands::watchdog::*;
+pub use crate::commands::reset::*;
+pub use crate::commands::watchdog::*;

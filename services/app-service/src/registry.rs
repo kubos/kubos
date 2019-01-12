@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use app_entry::*;
-use error::*;
+use crate::app_entry::*;
+use crate::error::*;
 use fs_extra;
 use kubos_app::RunLevel;
 use std::cell::RefCell;

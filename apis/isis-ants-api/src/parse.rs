@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use ants::*;
-use ffi;
+use crate::ants::*;
+use crate::ffi;
 use std::mem::transmute;
 
 /// I<sup>2</sup>C bus which will be used for communication

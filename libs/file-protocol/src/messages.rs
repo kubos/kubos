@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use error::ProtocolError;
+use crate::error::ProtocolError;
 use serde_cbor::{ser, Value};
 
 // Create export message

@@ -2,6 +2,7 @@
 name = "adcs-api"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
+edition = "2018"
 
 [dependencies]
 failure = "0.1.2"

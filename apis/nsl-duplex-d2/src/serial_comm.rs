@@ -41,7 +41,7 @@ fn serial_send(data: &[u8]) -> io::Result<()> {
     use serial::prelude::*;
     use std::io::prelude::*;
 
-    let mut port = try!(serial::open("/dev/ttyUSB0"));
+    let mut port = r#try!(serial::open("/dev/ttyUSB0"));
     let settings: serial::PortSettings = serial::PortSettings {
         baud_rate: serial::Baud38400,
         char_size: serial::Bits8,
@@ -49,9 +49,9 @@ fn serial_send(data: &[u8]) -> io::Result<()> {
         stop_bits: serial::Stop1,
         flow_control: serial::FlowNone,
     };
-    try!(port.configure(&settings));
+    r#try!(port.configure(&settings));
 
-    try!(port.set_timeout(Duration::from_secs(1)));
+    r#try!(port.set_timeout(Duration::from_secs(1)));
 
     let be_data = {
         let mut v = Vec::<u8>::new();
@@ -61,8 +61,8 @@ fn serial_send(data: &[u8]) -> io::Result<()> {
         v
     };
 
-    try!(port.flush());
-    try!(port.write_all(&be_data[..]));
+    r#try!(port.flush());
+    r#try!(port.write_all(&be_data[..]));
 
     Ok(())
 }
@@ -72,7 +72,7 @@ fn serial_receive() -> io::Result<Vec<u8>> {
     use std::io::prelude::*;
 
     let mut ret_msg: Vec<u8> = Vec::new();
-    let mut port = try!(serial::open("/dev/ttyUSB0"));
+    let mut port = r#try!(serial::open("/dev/ttyUSB0"));
 
     let settings: serial::PortSettings = serial::PortSettings {
         baud_rate: serial::Baud38400,
@@ -81,9 +81,9 @@ fn serial_receive() -> io::Result<Vec<u8>> {
         stop_bits: serial::Stop1,
         flow_control: serial::FlowNone,
     };
-    try!(port.configure(&settings));
+    r#try!(port.configure(&settings));
 
-    try!(port.set_timeout(Duration::from_millis(100)));
+    r#try!(port.set_timeout(Duration::from_millis(100)));
 
     let mut tries = 0;
 

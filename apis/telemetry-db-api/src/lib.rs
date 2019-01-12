@@ -22,7 +22,7 @@ extern crate serde_derive;
 extern crate time;
 
 pub mod models;
-pub use models::*;
+pub use crate::models::*;
 
 use diesel::dsl::sql;
 use diesel::insert_into;

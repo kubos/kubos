@@ -15,8 +15,8 @@
  */
 
 use byteorder::{LittleEndian, WriteBytesExt};
-use crc32::*;
-use messages::*;
+use crate::crc32::*;
+use crate::messages::*;
 use nom;
 use rust_uart::UartError;
 use rust_uart::*;

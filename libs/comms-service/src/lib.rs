@@ -90,13 +90,13 @@ mod service;
 mod telemetry;
 
 /// Communication Service library.
-pub use service::*;
+pub use crate::service::*;
 
 /// Communication Service errors.
-pub use errors::*;
+pub use crate::errors::*;
 
 /// Communication Service telemetry.
-pub use telemetry::CommsTelemetry;
+pub use crate::telemetry::CommsTelemetry;
 
 /// Communication Service configuration parsing.
-pub use config::*;
+pub use crate::config::*;

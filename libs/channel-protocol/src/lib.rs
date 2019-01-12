@@ -61,10 +61,10 @@ mod error;
 mod parsers;
 mod protocol;
 
-pub use error::ProtocolError;
-pub use parsers::*;
-pub use protocol::Message as ChannelMessage;
-pub use protocol::Protocol as ChannelProtocol;
+pub use crate::error::ProtocolError;
+pub use crate::parsers::*;
+pub use crate::protocol::Message as ChannelMessage;
+pub use crate::protocol::Protocol as ChannelProtocol;
 
 use rand::Rng;
 
