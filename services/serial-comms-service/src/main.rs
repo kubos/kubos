@@ -45,9 +45,6 @@ use std::sync::{Arc, Mutex};
 mod comms;
 mod kiss;
 
-// Path to configuration file.
-const CONFIG_PATH: &'static str = "comms.toml";
-
 // Return type for the ethernet service.
 type SerialServiceResult<T> = Result<T, Error>;
 
@@ -67,10 +64,12 @@ fn main() -> SerialServiceResult<()> {
 
     let bus = "/dev/ttyUSB0";
 
-    let _service_config = kubos_system::Config::new("serial-comms-service");
+    let service_config = kubos_system::Config::new("serial-comms-service");
+
+    println!("service_config {:?}", service_config);
 
     // Read configuration from config file.
-    let comms_config = CommsConfig::new("serial-comms-service", CONFIG_PATH.to_string());
+    let comms_config = CommsConfig::new(service_config);
 
     // Open serial port
     let serial_comms = Arc::new(Mutex::new(SerialComms::new(bus)));
