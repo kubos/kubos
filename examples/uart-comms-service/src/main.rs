@@ -38,7 +38,6 @@ use comms_service::*;
 use failure::Error;
 use std::sync::{Arc, Mutex};
 
-const CONFIG_PATH: &str = "comms.toml";
 const BUS: &str = "/dev/ttyS2";
 
 // Initialize logging for the service
@@ -85,6 +84,12 @@ fn log_init() -> ServiceResult<()> {
 fn main() -> ServiceResult<()> {
     // Initialize logging for the program
     log_init()?;
+    
+    // Get the main service configuration from the system's config.toml file
+    let service_config = kubos_system::Config::new("uart-comms-service");
+    
+    // Pull out our communication settings
+    let config = CommsConfig::new(service_config);
 
     // Initialize the serial port
     let conn = comms::serial_init(BUS)?;
@@ -95,7 +100,6 @@ fn main() -> ServiceResult<()> {
     let read_conn = conn.clone();
     let write_conn = conn;
 
-    let config = CommsConfig::new("uart-comms-service", CONFIG_PATH.to_string());
     let control = CommsControlBlock::new(
         Some(Arc::new(comms::read)),
         vec![Arc::new(comms::write)],

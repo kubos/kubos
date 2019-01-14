@@ -8,6 +8,7 @@ edition = "2018"
 comms-service = { path = "../../libs/comms-service" }
 failure = "0.1.2"
 kubos-service = { path = "../../services/kubos-service" }
+kubos-system = { path = "../../apis/system-api" }
 log = "^0.4.0"
 log4rs = "0.8"
 log4rs-syslog = "3.0"
