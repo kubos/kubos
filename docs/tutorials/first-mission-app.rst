@@ -165,7 +165,7 @@ Kubos Linux uses `rsyslog <https://www.rsyslog.com/>`__ to automatically route l
 appropriate log file and then rotate those files when they become too large.
 
 All user applications should setup their logging to write to the user facility.
-This will cause all log messages to be routed to files in ``/home/system/log/apps``
+This will cause all log messages to be routed to files in ``/home/system/log``,
 
 .. note::
 
@@ -174,17 +174,17 @@ This will cause all log messages to be routed to files in ``/home/system/log/app
     
 Within this directory, there may be several files:
 
-    - ``debug.log`` - Records all log messages
-    - ``info.log`` - Records log messages with a priority of ``info`` or higher
-    - ``warn.log`` - Records log messages with a priority of ``warn`` or higher
+    - ``app-debug.log`` - Records all log messages
+    - ``app-info.log`` - Records log messages with a priority of ``info`` or higher
+    - ``app-warn.log`` - Records log messages with a priority of ``warn`` or higher
 
 Additionally, there may be files which match one of the above names, but are suffixed with a time
 stamp.
-For example, ``debug.log.2018.12.01-00.12.07``.
+For example, ``app-debug.log.2018.12.01-00.12.07``.
 These are archived log files. Each log file has a maximum file size.
 Once this size is reached, the current file is renamed as an archive file and a new log file is started.
-By default, five archive files of each log type will be retained.
-If a new archive file is created and there are already five files, the oldest will be deleted.
+By default, nine archive files of each log type will be retained.
+If a new archive file is created and there are already nine files, the oldest will be deleted.
 
 More information about the logging infrastructure can be found in the
 :doc:`Kubos Linux logging doc <../os-docs/logging>`.
@@ -260,9 +260,9 @@ works::
     /home/kubos # ./my-mission-app.py -r OnCommand
     my-mission-app: OnCommand logic
     /home/kubos # cd /var/log/apps
-    /home/system/log/apps # ls
-    debug.log  info.log
-    /home/system/log/apps # cat info.log
+    /home/system/log # ls app*
+    app-debug.log  app-info.log
+    /home/system/log # cat app-info.log
     1970-01-01T03:23:08.491359+00:00 Kubos my-mission-app:<info> OnBoot logic
     1970-01-01T03:24:00.334330+00:00 Kubos my-mission-app:<info> OnBoot logic
     1970-01-01T03:27:20.841483+00:00 Kubos my-mission-app:<info> OnCommand logic
@@ -503,7 +503,7 @@ Transferring the program to our OBC and running it should look like this::
     kubos@10.0.2.20's password: ********
     /home/kubos # ./my-mission-app.py -r OnCommand
     my-mission-app: Current available memory: 496768 kB
-    /home/kubos # cat /var/log/apps/debug.log
+    /home/kubos # cat /var/log/app-debug.log
     1970-01-01T03:23:08.491359+00:00 Kubos my-mission-app:<info> Current available memory: 496768 kB
 
 Writing Data to the Telemetry Database
@@ -652,7 +652,7 @@ Transferring the program to our OBC and running it should look like this::
     /home/kubos # ./my-mission-app.py -r OnCommand
     my-mission-app: Current available memory: 497060 kB
     my-mission-app: Telemetry insert completed successfully
-    /home/kubos # cat /var/log/apps/debug.log
+    /home/kubos # cat /var/log/app-debug.log
     1970-01-01T03:23:08.491359+00:00 Kubos my-mission-app:<info> Current available memory: 496768 kB
     1970-01-01T03:23:13.246358+00:00 Kubos my-mission-app:<info> Current available memory: 497060 kB
     1970-01-01T03:23:13.867534+00:00 Kubos my-mission-app:<info> Telemetry insert completed successfully
