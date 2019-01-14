@@ -39,7 +39,6 @@ use failure::Error;
 use std::sync::{Arc, Mutex};
 
 const BUS: &str = "/dev/ttyS2";
-const CONFIG_PATH: &str = "comms.toml";
 
 // Initialize logging for the service
 // All messages will be routed to syslog and echoed to the console
@@ -103,22 +102,6 @@ fn main() -> ServiceResult<()> {
         write_conn,
         config,
     );
-
-    /*
-    let config = CommsControlBlock {
-        read: Some(Arc::new(read)),
-        write: vec![Arc::new(write)],
-        read_conn,
-        write_conn,
-        handler_port_min: 9000,
-        handler_port_max: 9100,
-        timeout: 500,
-        ground_ip: Ipv4Addr::new(192, 168, 8, 40),
-        satellite_ip: Ipv4Addr::new(0, 0, 0, 0),
-        downlink_ports: None,
-        ground_port: Some(9001)
-    };
-    */
 
     // Start the comms service thread
     CommsService::start(control, Arc::new(Mutex::new(CommsTelemetry::default())))?;

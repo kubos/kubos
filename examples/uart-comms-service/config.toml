@@ -1,0 +1,7 @@
+[uart-comms-service.comms]
+handler_port_min = 9000
+handler_port_max = 9100
+timeout = 500
+ground_ip = 192.168.8.40
+satellite_ip = 0.0.0.0
+ground_port = 9001

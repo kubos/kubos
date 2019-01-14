@@ -1,29 +1,55 @@
+//
+// Copyright (C) 2019 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// Example UDP client "radio" over UART program
+//
+// Sends a GraphQL request wrapped in a UDP packet over the UART port
+// The example communication service, `uart-comms-service`, should be running and listening for
+// these messages.
+// The service will forward the message on to the requested destination port and then return the
+// response once the request has completed.
+
+#[macro_use]
 extern crate failure;
 
-use serial;
-use std::time::Duration;
-use std::io::prelude::*;
-use serial::prelude::*;
-use std::thread;
+mod comms;
 
 use byteorder::{BigEndian, ByteOrder};
+use failure::Error;
 use pnet::packet::udp::{ipv4_checksum, UdpPacket};
-use pnet::packet::Packet;
-use std::net::{Ipv4Addr, UdpSocket};
+use std::net::Ipv4Addr;
 use std::ops::Range;
+use std::time::Duration;
 
-const MAX_READ: usize = 48;
-const TIMEOUT: Duration = Duration::from_millis(1000);
+const BUS: &str = "/dev/ttyS1";
+// UDP connection information
+// Note: This MUST MATCH what the communications service is expecting.
+// It's used to verify the checsum of all incoming packets, so if the IP addresses are different,
+// then the checksum is different and the message is rejected.
+const SOURCE_PORT: u16 = 1000;
+const SOURCE_IP: &str = "192.168.8.40";
+const DEST_PORT: u16 = 8006; // Telemetry service port
+const DEST_IP: &str = "0.0.0.0";
 
 // UDP header length.
 const HEADER_LEN: u16 = 8;
 // Checksum location in UDP packet.
 const CHKSUM_RNG: Range<usize> = 6..8;
 
-const SOURCE_PORT: u16 = 1000;
-const SOURCE_IP: &str = "192.168.8.40";
-const DEST_PORT: u16 = 8006; // Telemetry service
-const DEST_IP: &str = "0.0.0.0";
+// Return type for this service.
+type ClientResult<T> = Result<T, Error>;
 
 // Takes the payload and then wraps it into a UDP packet.
 fn build_packet(
@@ -58,90 +84,48 @@ fn build_packet(
     packet
 }
 
-fn main() {
-    let settings = serial::PortSettings {
-        baud_rate: serial::Baud115200,
-        char_size: serial::Bits8,
-        parity: serial::ParityNone,
-        stop_bits: serial::Stop1,
-        flow_control: serial::FlowNone,
+fn main() -> ClientResult<()> {
+    let mut conn = comms::serial_init(BUS)?;
+
+    let sat = DEST_IP.parse()?;
+    let ground = SOURCE_IP.parse()?;
+
+    let query = "{telemetry(limit: 1){timestamp,subsystem,parameter,value}}";
+
+    let packet = build_packet(
+        query.as_bytes(),
+        SOURCE_PORT,
+        DEST_PORT,
+        query.len() as u16,
+        sat,
+        ground,
+    );
+
+    println!("Writing {} bytes", packet.len());
+
+    // Write our request out through the "radio"
+    comms::write(&mut conn, &packet)?;
+
+    // Get our response
+    let msg = comms::read(&mut conn)?;
+
+    // Parse a UDP packet from the received information.
+    let packet = match UdpPacket::owned(msg.clone()) {
+        Some(packet) => packet,
+        None => {
+            bail!("Failed to parse UDP packet");
+        }
     };
-    
-    let mut port = serial::open("/dev/ttyS1").unwrap();
 
-    port.configure(&settings).unwrap();
-    port.set_timeout(TIMEOUT).unwrap();
-    
-    let mut counter = 0;
-    
-    let sat = DEST_IP.parse().unwrap();
-    let ground = SOURCE_IP.parse().unwrap();
-
-    loop {
-        //let msg = format!("Test Message {:03}", counter);
-        let msg = "{telemetry(limit: 1){timestamp,subsystem,parameter,value}}";
-        counter += 1;
-        
-        //let packet = msg.as_bytes();
-        let packet = build_packet(msg.as_bytes(), SOURCE_PORT, DEST_PORT, msg.len() as u16, sat, ground);
-
-        println!("Writing {} bytes", packet.len());
-        
-        if let Some(error) = port.write(&packet).err() {
-            eprintln!("Write failed: {:?}", error);
-        }
-        
-        // Get response
-        let mut packet = vec![];
-        loop {
-            let mut buffer: Vec<u8> = vec![0; MAX_READ];
-            match port.read(buffer.as_mut_slice()) {
-                Ok(num) => {
-                    println!("Ground read fragment: {}", num);
-                    buffer.resize(num, 0);
-                    packet.append(&mut buffer);
-    
-                    if num < MAX_READ {
-                        break;
-                    }
-                },
-                Err(ref err) => match err.kind() {
-                    ::std::io::ErrorKind::TimedOut => {
-                        eprintln!("Timed out waiting for response");
-                        panic!();
-                    },
-                    _ => panic!()
-                }
-            };
-        }
-        
-        let msg = packet.clone();
-        
-        // Create a UDP packet from the received information.
-        let packet = match UdpPacket::owned(packet) {
-            Some(packet) => packet,
-            None => {
-                panic!("Failed to parse UDP packet");
-            }
-        };
-        
-        eprintln!("re-constructed udp packet");
-
-        // Verify checksum of the UDP Packet.
-        let calc = ipv4_checksum(&packet, &sat, &ground);
-        println!("Ground read: Source: {}, Dest: {}, Checksum-real: {}, Checksum-calc: {}",
-                &sat, &ground, packet.get_checksum(), calc
-        );
-        if packet.get_checksum() != calc {
-            // The most likely reason that this would fail is if the source and dest IP addresses
-            // don't match what we're expecting
-            panic!("Checksum mismatch");
-        }
-        
-        let msg = ::std::str::from_utf8(&msg[8..]).unwrap();
-        
-        println!("Response: {}", msg);
-        
-        thread::sleep(Duration::from_secs(2));
+    // Verify checksum of the UDP Packet.
+    let calc = ipv4_checksum(&packet, &sat, &ground);
+    if packet.get_checksum() != calc {
+        bail!("Checksum mismatch");
     }
+
+    let msg = ::std::str::from_utf8(&msg[8..])?;
+
+    println!("Response: {}", msg);
+
+    Ok(())
 }
