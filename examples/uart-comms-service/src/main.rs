@@ -38,6 +38,7 @@ use comms_service::*;
 use failure::Error;
 use std::sync::{Arc, Mutex};
 
+const CONFIG_PATH: &str = "comms.toml";
 const BUS: &str = "/dev/ttyS2";
 
 // Initialize logging for the service
