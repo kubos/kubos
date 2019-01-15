@@ -19,6 +19,8 @@
 //! TOML parser for the `comms-service`. This module parses a `toml` file and returns a
 //! struct containing configuration information for a `comms-service`.
 
+use serde_derive::Deserialize;
+
 // Default values for control block configurations.
 const DEFAULT_HANDLER_START: u16 = 13100;
 const DEFAULT_HANDLER_END: u16 = 13149;

@@ -52,7 +52,7 @@ fn mutation_errors_single() {
         }"#;
 
     let expected = json!({
-            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:355): Configuration error"]
+            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:357): Configuration error"]
     });
 
     assert_eq!(service.process(&query.to_owned()), wrap!(expected));
@@ -78,7 +78,7 @@ fn mutation_errors_multiple() {
         }"#;
 
     let expected = json!({
-            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:355): Configuration error", "watchdog_kick (services/isis-ants-service/src/model.rs:355): Configuration error"]
+            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:357): Configuration error", "watchdog_kick (services/isis-ants-service/src/model.rs:357): Configuration error"]
     });
 
     assert_eq!(service.process(&query.to_owned()), wrap!(expected));
