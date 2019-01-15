@@ -17,9 +17,6 @@
 #![deny(missing_docs)]
 
 //! A generalized HAL for communicating over serial ports
-#[macro_use]
-extern crate failure;
-extern crate serial;
 
 mod error;
 pub mod mock;

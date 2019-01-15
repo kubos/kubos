@@ -18,14 +18,6 @@
 
 //! KubOS System level APIs
 
-#[macro_use]
-extern crate failure;
-
-extern crate getopts;
-#[macro_use]
-extern crate serde_derive;
-extern crate toml;
-
 mod config;
 mod uboot;
 

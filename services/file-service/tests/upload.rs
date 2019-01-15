@@ -14,13 +14,6 @@
 // limitations under the License.
 //
 
-extern crate cbor_protocol;
-extern crate file_protocol;
-extern crate file_service;
-extern crate kubos_system;
-extern crate rand;
-extern crate tempfile;
-
 mod common;
 
 use crate::common::*;

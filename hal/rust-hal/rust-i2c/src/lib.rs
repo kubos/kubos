@@ -19,8 +19,6 @@
 
 //! I2C device connection abstractions
 
-extern crate i2c_linux;
-
 use i2c_linux::I2c;
 use std::io::Result;
 use std::thread;

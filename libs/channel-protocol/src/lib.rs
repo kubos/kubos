@@ -50,13 +50,6 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-extern crate cbor_protocol;
-#[macro_use]
-extern crate failure;
-extern crate log;
-extern crate rand;
-extern crate serde_cbor;
-
 mod error;
 mod parsers;
 mod protocol;

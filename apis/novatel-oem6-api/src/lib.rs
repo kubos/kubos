@@ -69,15 +69,6 @@
 //Need a higher recursion limit for nom when parsing larger (>60 bytes) structures
 #![recursion_limit = "256"]
 
-#[macro_use]
-extern crate bitflags;
-extern crate byteorder;
-#[macro_use]
-extern crate failure;
-extern crate nom;
-extern crate rust_uart;
-extern crate serial;
-
 mod crc32;
 mod messages;
 mod oem6;

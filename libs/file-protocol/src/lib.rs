@@ -19,8 +19,6 @@
 //! # Examples
 //!
 //! ```no_run
-//! extern crate file_protocol;
-//!
 //! use file_protocol::*;
 //! use std::time::Duration;
 //!
@@ -87,17 +85,6 @@
 //!
 
 #![deny(missing_docs)]
-
-extern crate blake2_rfc;
-extern crate cbor_protocol;
-#[macro_use]
-extern crate failure;
-#[macro_use]
-extern crate log;
-extern crate rand;
-extern crate serde;
-extern crate serde_cbor;
-extern crate time;
 
 mod error;
 mod messages;

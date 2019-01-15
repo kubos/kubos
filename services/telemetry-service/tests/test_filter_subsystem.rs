@@ -14,10 +14,7 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate serde_json;
-extern crate tempfile;
-
+use serde_json::json;
 mod utils;
 use crate::utils::*;
 

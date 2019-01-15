@@ -20,10 +20,6 @@
  * return status of the run_onboot() function can be directly examined and verified from there.
  */
 #![deny(warnings)]
-extern crate kubos_app;
-extern crate kubos_system;
-extern crate serde_json;
-extern crate tempfile;
 
 use std::path::Path;
 

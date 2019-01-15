@@ -22,6 +22,7 @@ use juniper::{FieldError, FieldResult, Value};
 use kubos_service;
 use kubos_telemetry_db;
 use serde_json;
+use serde_derive::Serialize;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;

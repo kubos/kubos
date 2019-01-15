@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-extern crate glob;
-
 use std::env;
 use std::process::Command;
 

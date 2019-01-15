@@ -19,12 +19,6 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-#[cfg(test)]
-#[macro_use]
-extern crate double;
-
-extern crate adcs_api;
-
 mod ffi;
 mod imtq;
 

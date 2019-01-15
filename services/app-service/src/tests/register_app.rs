@@ -15,6 +15,7 @@
  */
 
 use kubos_service::{Config, Service};
+use serde_json::json;
 use std::fs;
 
 use tempfile::TempDir;

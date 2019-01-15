@@ -53,11 +53,6 @@
 
 #![deny(missing_docs)]
 
-#[macro_use]
-extern crate failure;
-#[macro_use]
-extern crate nom;
-
 pub use crate::ants::*;
 pub use crate::parse::{AntsTelemetry, DeployStatus, KANTSAnt, KANTSController, KI2CNum};
 

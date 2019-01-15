@@ -16,12 +16,8 @@
 #![macro_use]
 #![allow(dead_code)]
 
-extern crate blake2_rfc;
-extern crate file_protocol;
-extern crate serde_cbor;
-
-use self::serde_cbor::{from_slice, ser};
-use crate::common::blake2_rfc::blake2s::Blake2s;
+use serde_cbor::{from_slice, ser};
+use blake2_rfc::blake2s::Blake2s;
 use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use std::fs::File;
 use std::io::prelude::*;

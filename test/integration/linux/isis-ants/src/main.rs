@@ -14,15 +14,8 @@
 // limitations under the License.
 //
 
-extern crate isis_ants_api;
-#[macro_use]
-extern crate slog;
-extern crate slog_async;
-extern crate slog_stream;
-extern crate slog_term;
-
 use isis_ants_api::*;
-use slog::{Drain, Logger};
+use slog::{Drain, Logger, o, error, info, warn};
 use std::fs::File;
 use std::sync::Mutex;
 

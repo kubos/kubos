@@ -21,11 +21,8 @@
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate kubos_service;
-/// #[macro_use]
-/// extern crate failure;
-///
-/// use failure::Error;
+/// use kubos_service::process_errors;
+/// use failure::{Error, Fail};
 ///
 /// #[derive(Clone, Debug, Fail)]
 /// pub enum RootError {
@@ -91,7 +88,7 @@ macro_rules! process_errors {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate kubos_service;
+/// use kubos_service::push_err;
 /// use std::cell::RefCell;
 /// # fn main() {
 /// let master_err = RefCell::new(vec![]);
@@ -122,9 +119,8 @@ macro_rules! push_err {
 /// # Examples
 ///
 /// ```
-/// # #[macro_use] extern crate kubos_service;
-/// #[macro_use]
-/// extern crate failure;
+/// use kubos_service::run;
+/// use failure::{fail, Fail};
 ///
 /// use failure::{Error, Fail};
 /// use std::cell::RefCell;
@@ -209,7 +205,7 @@ macro_rules! run {
 
 #[cfg(test)]
 mod tests {
-    use failure::Error;
+    use failure::{Error, Fail};
     use std::cell::RefCell;
 
     #[derive(Debug, Fail)]

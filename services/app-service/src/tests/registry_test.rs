@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 #![deny(warnings)]
-extern crate kubos_app;
-extern crate toml;
 
 use tempfile::TempDir;
 

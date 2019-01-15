@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-extern crate extern_lib;
-
 use std::io::{Error, ErrorKind};
 
 /// Model for power mutations

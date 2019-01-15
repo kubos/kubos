@@ -16,6 +16,7 @@
 
 use blake2_rfc::blake2s::Blake2s;
 use crate::error::ProtocolError;
+use log::warn;
 use serde_cbor::{de, to_vec, Value};
 use std::fs;
 use std::fs::File;

@@ -20,6 +20,7 @@ use super::*;
 use kubos_service::{Config, Service};
 use crate::model::*;
 use crate::schema::*;
+use serde_json::json;
 use std::sync::mpsc::sync_channel;
 
 macro_rules! wrap {

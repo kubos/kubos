@@ -188,19 +188,9 @@
 //!     }
 //! }
 //! ```
-extern crate diesel;
-extern crate flate2;
+
 #[macro_use]
 extern crate juniper;
-extern crate kubos_service;
-extern crate kubos_telemetry_db;
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-extern crate syslog;
-extern crate tar;
 
 mod schema;
 mod udp;

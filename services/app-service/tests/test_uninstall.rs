@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 #![deny(warnings)]
-extern crate kubos_app;
-extern crate kubos_system;
-extern crate serde_json;
-extern crate tempfile;
 
 use kubos_app::ServiceConfig;
 use std::panic;

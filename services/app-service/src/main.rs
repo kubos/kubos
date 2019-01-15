@@ -16,25 +16,7 @@
 #![deny(warnings)]
 
 #[macro_use]
-extern crate failure;
-extern crate fs_extra;
-extern crate getopts;
-#[macro_use]
 extern crate juniper;
-extern crate kubos_app;
-extern crate kubos_service;
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate serde_derive;
-#[cfg(test)]
-#[macro_use]
-extern crate serde_json;
-extern crate syslog;
-#[cfg(test)]
-extern crate tempfile;
-extern crate toml;
-extern crate uuid;
 
 mod app_entry;
 mod error;
@@ -44,9 +26,10 @@ mod schema;
 #[cfg(test)]
 mod tests;
 
-use failure::Error;
+use failure::{bail, Error};
 use getopts::Options;
 use kubos_service::{Config, Service};
+use log::error;
 use crate::registry::AppRegistry;
 use std::env;
 use syslog::Facility;

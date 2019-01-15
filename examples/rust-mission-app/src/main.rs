@@ -1,14 +1,7 @@
-#[macro_use]
-extern crate failure;
-extern crate getopts;
-extern crate kubos_app;
-#[macro_use]
-extern crate log;
-
-use failure::Error;
+use failure::{bail, Error};
 use getopts::Options;
 use kubos_app::*;
-
+use log::info;
 use std::thread;
 use std::time::Duration;
 

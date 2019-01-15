@@ -19,13 +19,6 @@
 
 //! Low level interface for interacting with a ClydeSpace 3G EPS
 
-#[macro_use]
-extern crate bitflags;
-extern crate eps_api;
-extern crate failure;
-extern crate nom;
-extern crate rust_i2c;
-
 mod commands;
 mod eps;
 mod telemetry;

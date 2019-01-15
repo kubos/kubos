@@ -16,6 +16,7 @@
 
 use crate::ants::*;
 use crate::ffi;
+use nom::{named, do_parse, bits, bits_impl, tuple, error_position, tuple_parser, take_bits};
 use std::mem::transmute;
 
 /// I<sup>2</sup>C bus which will be used for communication

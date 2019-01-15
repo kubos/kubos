@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use bitflags::bitflags;
 use eps_api::{EpsError, EpsResult};
 use rust_i2c::Command;
 

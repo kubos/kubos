@@ -18,7 +18,7 @@ use super::*;
 use kubos_service::{Config, Service};
 use crate::model::*;
 use crate::schema::*;
-use serde_json;
+use serde_json::json;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;

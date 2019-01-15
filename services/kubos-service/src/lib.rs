@@ -105,18 +105,6 @@
 //! $ ./example-service -c config.toml
 //! ```
 
-#[cfg(test)]
-#[macro_use]
-extern crate failure;
-extern crate juniper;
-#[macro_use]
-extern crate log;
-extern crate serde;
-#[macro_use]
-extern crate serde_json;
-
-extern crate kubos_system;
-
 mod macros;
 mod service;
 

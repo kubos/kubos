@@ -26,11 +26,6 @@
 //! Telemetry queries will be added as desired for testing.
 //!
 
-extern crate comms_service;
-extern crate failure;
-extern crate log;
-extern crate syslog;
-
 use crate::comms::*;
 use comms_service::*;
 use failure::Error;

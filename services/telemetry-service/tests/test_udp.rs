@@ -14,14 +14,9 @@
 // limitations under the License.
 //
 
-extern crate kubos_telemetry_db;
-#[macro_use]
-extern crate serde_json;
-extern crate tempfile;
-
 mod utils;
 
-use serde_json::ser;
+use serde_json::{ser, json};
 use std::net::UdpSocket;
 use std::time::Duration;
 use tempfile::TempDir;

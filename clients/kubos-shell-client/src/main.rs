@@ -15,16 +15,10 @@
 //
 
 #[deny(warnings)]
-extern crate channel_protocol;
-#[macro_use]
-extern crate clap;
-extern crate shell_protocol;
-#[macro_use]
-extern crate failure;
 
 use channel_protocol::ChannelProtocol;
-use clap::{App, AppSettings, Arg, SubCommand};
-use failure::Error;
+use clap::{App, AppSettings, Arg, SubCommand, value_t};
+use failure::{bail, Error};
 use std::collections::HashMap;
 use std::io::{self, Write};
 use std::time::Duration;

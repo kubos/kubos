@@ -16,6 +16,7 @@
 
 use byteorder::{LittleEndian, WriteBytesExt};
 use crate::crc32::*;
+use failure::Fail;
 use crate::messages::*;
 use nom;
 use rust_uart::UartError;

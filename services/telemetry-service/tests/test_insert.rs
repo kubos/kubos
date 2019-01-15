@@ -14,13 +14,9 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate serde_json;
-extern crate tempfile;
-extern crate time;
-
 mod utils;
 
+use serde_json::json;
 use std::thread::sleep;
 use std::time::Duration;
 use tempfile::TempDir;

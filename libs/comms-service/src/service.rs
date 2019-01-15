@@ -19,6 +19,7 @@
 use byteorder::{BigEndian, ByteOrder};
 use crate::config::CommsConfig;
 use crate::errors::*;
+use log::info;
 use pnet::packet::udp::{ipv4_checksum, UdpPacket};
 use pnet::packet::Packet;
 use std::net::{Ipv4Addr, UdpSocket};

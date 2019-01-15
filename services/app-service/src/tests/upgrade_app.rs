@@ -16,11 +16,10 @@
 
 use kubos_service::{Config, Service};
 use std::fs;
-
 use tempfile::TempDir;
-
 use crate::registry::*;
 use crate::schema;
+use serde_json::json;
 
 // Perform an "upgrade" of a brand new application.
 // It's basically allowing a user to register a new application with a custom UUID

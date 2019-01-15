@@ -17,6 +17,8 @@
 use failure::Error;
 use novatel_oem6_api::Log::*;
 use novatel_oem6_api::*;
+use kubos_service::{process_errors, push_err, run};
+use log::info;
 use std::cell::{Cell, RefCell};
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError, TrySendError};
 use std::sync::{Arc, Mutex};

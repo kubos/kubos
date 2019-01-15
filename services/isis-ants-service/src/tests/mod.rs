@@ -14,12 +14,13 @@
 // limitations under the License.
 //
 #[allow(unused_parens)]
-use double;
+use double::*;
 use isis_ants_api::*;
 use kubos_service::{Config, Service};
 use crate::model::*;
 use crate::objects::*;
 use crate::schema::*;
+use serde_json::json;
 use std::cell::{Cell, RefCell};
 
 macro_rules! mock_new {

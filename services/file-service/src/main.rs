@@ -16,16 +16,9 @@
 
 #![deny(warnings)]
 
-extern crate cbor_protocol;
-extern crate file_protocol;
-extern crate file_service;
-extern crate kubos_system;
-#[macro_use]
-extern crate log;
-extern crate syslog;
-
 use file_service::*;
 use kubos_system::Config as ServiceConfig;
+use log::{error, info, warn};
 use syslog::Facility;
 
 fn main() {

@@ -52,17 +52,7 @@
 //! ```
 
 #[macro_use]
-extern crate failure;
-#[macro_use]
 extern crate juniper;
-extern crate kubos_service;
-extern crate log;
-extern crate regex;
-extern crate syslog;
-
-#[cfg(test)]
-#[macro_use]
-extern crate lazy_static;
 
 use kubos_service::{Config, Service};
 use crate::schema::{MutationRoot, QueryRoot};
