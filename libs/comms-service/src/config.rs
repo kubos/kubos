@@ -20,11 +20,16 @@
 //! struct containing configuration information for a `comms-service`.
 
 // Default values for control block configurations.
-const DEFAULT_HANDLER_START: u16 = 13100;
-const DEFAULT_HANDLER_END: u16 = 13149;
-const DEFAULT_TIMEOUT: u64 = 1500;
-static DEFAULT_GROUND_IP: &str = "192.168.8.1";
-static DEFAULT_SATELLITE_IP: &str = "192.168.8.2";
+/// Default message handler starting port
+pub const DEFAULT_HANDLER_START: u16 = 13100;
+/// Default message handler ending port
+pub const DEFAULT_HANDLER_END: u16 = 13149;
+/// Default message handler timeout
+pub const DEFAULT_TIMEOUT: u64 = 1500;
+/// Default ground gateway IP address
+pub static DEFAULT_GROUND_IP: &str = "192.168.8.1";
+/// Default satellite IP address
+pub static DEFAULT_SATELLITE_IP: &str = "192.168.8.2";
 
 /// A struct that holds useful configuration options to use in a `comms-service` implementation.
 /// Created by parsing a configuration file in the `toml` file format.
@@ -32,34 +37,34 @@ static DEFAULT_SATELLITE_IP: &str = "192.168.8.2";
 pub struct CommsConfig {
     /// Starting port used to define a range of ports that are used in the message handlers
     /// that handle messages received from the ground.
-    pub handler_port_min: u16,
+    pub handler_port_min: Option<u16>,
     /// Ending port used to define a range of ports that are used in the message handlers
     /// that handle messages received from the ground.
-    pub handler_port_max: u16,
+    pub handler_port_max: Option<u16>,
     /// Optional list of ports used by downlink endpoints that send messages to the ground.
     /// Each port in the list will be used by one downlink endpoint.
     pub downlink_ports: Option<Vec<u16>>,
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
-    pub timeout: u64,
+    pub timeout: Option<u64>,
     /// IP address of the ground gateway.
-    pub ground_ip: String,
+    pub ground_ip: Option<String>,
     /// Specifies the port to which the ground gateway is bound.
     pub ground_port: Option<u16>,
     /// Satellite's IP address.
-    pub satellite_ip: String,
+    pub satellite_ip: Option<String>,
 }
 
 // Implementation of `Default` trait for `CommsConfig`.
 impl Default for CommsConfig {
     fn default() -> Self {
         CommsConfig {
-            handler_port_min: DEFAULT_HANDLER_START,
-            handler_port_max: DEFAULT_HANDLER_END,
+            handler_port_min: Some(DEFAULT_HANDLER_START),
+            handler_port_max: Some(DEFAULT_HANDLER_END),
             downlink_ports: None,
             ground_port: None,
-            timeout: DEFAULT_TIMEOUT,
-            ground_ip: DEFAULT_GROUND_IP.to_string(),
-            satellite_ip: DEFAULT_SATELLITE_IP.to_string(),
+            timeout: Some(DEFAULT_TIMEOUT),
+            ground_ip: Some(DEFAULT_GROUND_IP.to_string()),
+            satellite_ip: Some(DEFAULT_SATELLITE_IP.to_string()),
         }
     }
 }
