@@ -1,0 +1,12 @@
+[package]
+name = "uart-comms-client"
+version = "0.1.0"
+authors = ["Catherine Garabedian <catherine@kubos.co>"]
+edition = "2018"
+
+[dependencies]
+byteorder = "1.2.7"
+failure = "0.1.2"
+getopts = "0.2"
+pnet = "0.21.0"
+serial = "0.4"
