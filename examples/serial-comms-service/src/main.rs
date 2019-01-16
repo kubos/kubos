@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#![deny(missing_docs)]
-#![deny(warnings)]
+// #![deny(missing_docs)]
+// #![deny(warnings)]
 
 //!
 //! Hardware service to allow for ethernet debugging. This service starts up a communication
@@ -28,6 +28,10 @@ extern crate comms_service;
 #[macro_use]
 extern crate failure;
 extern crate kubos_system;
+#[macro_use]
+extern crate kubos_service;
+#[macro_use]
+extern crate juniper;
 extern crate rust_uart;
 extern crate serial;
 #[macro_use]
@@ -35,13 +39,16 @@ extern crate log;
 extern crate log4rs;
 extern crate log4rs_syslog;
 
+mod comms;
+mod graphql;
+mod kiss;
+
 use comms::*;
 use comms_service::*;
 use failure::Error;
+use graphql::{MutationRoot, QueryRoot, Subsystem};
+use kubos_service::{Config, Service};
 use std::sync::{Arc, Mutex};
-
-mod comms;
-mod kiss;
 
 // Return type for the ethernet service.
 type SerialServiceResult<T> = Result<T, Error>;
@@ -90,7 +97,7 @@ fn log_init() -> SerialServiceResult<()> {
 fn main() -> SerialServiceResult<()> {
     log_init()?;
 
-    let service_config = kubos_system::Config::new("serial-comms-service");
+    let service_config = Config::new("serial-comms-service");
 
     let bus = service_config
         .get("bus")
@@ -100,7 +107,7 @@ fn main() -> SerialServiceResult<()> {
         .to_owned();
 
     // Read configuration from config file.
-    let comms_config = CommsConfig::new(service_config);
+    let comms_config = CommsConfig::new(service_config.clone());
 
     // Open serial port
     let serial_comms = Arc::new(Mutex::new(SerialComms::new(&bus)));
@@ -121,8 +128,11 @@ fn main() -> SerialServiceResult<()> {
 
     info!("Serial Communications Service starting on {}", bus);
     // Start communication service.
-    CommsService::start(controls, telem)?;
+    CommsService::start(controls, telem.clone())?;
 
+    let subsystem = Subsystem::new(telem);
     // We will eventually start the GraphQL service here.
-    loop {}
+    Service::new(service_config, subsystem, QueryRoot, MutationRoot).start();
+
+    Ok(())
 }
