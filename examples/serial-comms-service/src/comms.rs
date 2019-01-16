@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 Kubos Corporation
+// Copyright (C) 2019 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 use comms_service::CommsResult;
 use kiss;
 use rust_uart::Connection;
+use std::cell::RefCell;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 pub struct SerialComms {
     conn: Connection,
+    buffer: RefCell<Vec<u8>>,
 }
 
 impl SerialComms {
@@ -36,14 +38,16 @@ impl SerialComms {
 
         let conn = Connection::from_path(path, serial_settings, Duration::from_millis(1)).unwrap();
 
-        SerialComms { conn }
+        SerialComms {
+            conn,
+            buffer: RefCell::new(vec![]),
+        }
     }
 
     // Function to allow reading a whole udp packet from a serial socket
     // using KISS framing
     pub fn read(&self) -> CommsResult<Vec<u8>> {
-        let mut packet_buf = Vec::<u8>::new();
-        let mut tries = 0;
+        let mut buffer = self.buffer.borrow_mut();
         loop {
             let mut buf = match self.conn.read(1, Duration::from_millis(1)) {
                 Ok(buf) => buf,
@@ -51,21 +55,17 @@ impl SerialComms {
                     break;
                 }
             };
-            packet_buf.append(&mut buf);
-            if tries > 409 {
-                bail!("Failed to parse");
+            buffer.append(&mut buf);
+            if buffer.len() > 4096 {
+                break;
             }
-            match kiss::decode(&packet_buf) {
-                Ok(parsed) => {
-                    return Ok(parsed);
-                }
-                Err(_e) => {}
-            }
-            tries += 1;
         }
 
-        match kiss::decode(&packet_buf) {
-            Ok(parsed) => {
+        match kiss::decode(&buffer) {
+            Ok((parsed, mut pre, mut post)) => {
+                buffer.clear();
+                buffer.append(&mut pre);
+                buffer.append(&mut post);
                 return Ok(parsed);
             }
             Err(e) => {

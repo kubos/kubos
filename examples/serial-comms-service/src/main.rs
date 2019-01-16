@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-// #![deny(missing_docs)]
+#![deny(missing_docs)]
 #![deny(warnings)]
 
 //!
@@ -27,20 +27,18 @@
 extern crate comms_service;
 #[macro_use]
 extern crate failure;
-#[macro_use]
-extern crate log;
 extern crate kubos_system;
 extern crate rust_uart;
 extern crate serial;
-extern crate simplelog;
-extern crate syslog;
+#[macro_use]
+extern crate log;
+extern crate log4rs;
+extern crate log4rs_syslog;
 
 use comms::*;
 use comms_service::*;
 use failure::Error;
-use simplelog::*;
 use std::sync::{Arc, Mutex};
-//use syslog::Facility;
 
 mod comms;
 mod kiss;
@@ -48,31 +46,64 @@ mod kiss;
 // Return type for the ethernet service.
 type SerialServiceResult<T> = Result<T, Error>;
 
+// Initialize logging for the service
+// All messages will be routed to syslog and echoed to the console
+fn log_init() -> SerialServiceResult<()> {
+    use log4rs::append::console::ConsoleAppender;
+    use log4rs::encode::pattern::PatternEncoder;
+    use log4rs_syslog::SyslogAppender;
+    // Use custom PatternEncoder to avoid duplicate timestamps in logs.
+    let syslog_encoder = Box::new(PatternEncoder::new("{m}"));
+    // Set up logging which will be routed to syslog for processing
+    let syslog = Box::new(
+        SyslogAppender::builder()
+            .encoder(syslog_encoder)
+            .openlog(
+                "serial-comms-service",
+                log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
+                log4rs_syslog::Facility::Daemon,
+            )
+            .build(),
+    );
+
+    // Set up logging which will be routed to stdout
+    let stdout = Box::new(ConsoleAppender::builder().build());
+
+    // Combine the loggers into one master config
+    let config = log4rs::config::Config::builder()
+        .appender(log4rs::config::Appender::builder().build("syslog", syslog))
+        .appender(log4rs::config::Appender::builder().build("stdout", stdout))
+        .build(
+            log4rs::config::Root::builder()
+                .appender("syslog")
+                .appender("stdout")
+                // Set the minimum logging level to record
+                .build(log::LevelFilter::Debug),
+        )?;
+
+    // Start the logger
+    log4rs::init_config(config)?;
+
+    Ok(())
+}
+
 fn main() -> SerialServiceResult<()> {
-    // Setup new system logging for serial service.
-    // syslog::init(
-    //     Facility::LOG_DAEMON,
-    //     log::LevelFilter::Debug,
-    //     Some("serial-comms-service"),
-    // )
-    //     .unwrap();
-
-    CombinedLogger::init(vec![
-        TermLogger::new(LevelFilter::Info, Config::default()).unwrap()
-    ])
-    .unwrap();
-
-    let bus = "/dev/ttyUSB0";
+    log_init()?;
 
     let service_config = kubos_system::Config::new("serial-comms-service");
 
-    println!("service_config {:?}", service_config);
+    let bus = service_config
+        .get("bus")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .to_owned();
 
     // Read configuration from config file.
     let comms_config = CommsConfig::new(service_config);
 
     // Open serial port
-    let serial_comms = Arc::new(Mutex::new(SerialComms::new(bus)));
+    let serial_comms = Arc::new(Mutex::new(SerialComms::new(&bus)));
 
     info!("comms config {:?}", comms_config);
 
