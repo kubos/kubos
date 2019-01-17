@@ -24,7 +24,7 @@ const MAX_READ: usize = 4096;
 const TIMEOUT: Duration = Duration::from_millis(2000);
 
 // Initialize the serial bus connection for reading and writing from the "radio"
-pub fn serial_init(bus: String) -> ClientResult<serial::SystemPort> {
+pub fn serial_init(bus: &str) -> ClientResult<serial::SystemPort> {
     let settings = serial::PortSettings {
         baud_rate: serial::Baud115200,
         char_size: serial::Bits8,
@@ -33,7 +33,7 @@ pub fn serial_init(bus: String) -> ClientResult<serial::SystemPort> {
         flow_control: serial::FlowNone,
     };
 
-    let mut port = serial::open(&bus)?;
+    let mut port = serial::open(bus)?;
 
     port.configure(&settings)?;
     port.set_timeout(TIMEOUT)?;

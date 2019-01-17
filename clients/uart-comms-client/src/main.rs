@@ -15,33 +15,30 @@
 //
 // Example UDP client "radio" over UART program
 //
-// Sends a GraphQL request wrapped in a UDP packet over the UART port
+// Wraps the user's data in a UDP packet and then sends it over the UART port
 // The example communication service, `uart-comms-service`, should be running and listening for
 // these messages.
 // The service will forward the message on to the requested destination port and then return the
 // response once the request has completed.
 
-#[macro_use]
-extern crate failure;
-
 mod comms;
 
 use byteorder::{BigEndian, ByteOrder};
-use failure::Error;
-use getopts::Options;
+use clap::{App, Arg};
+use failure::{bail, Error};
 use pnet::packet::udp::{ipv4_checksum, UdpPacket};
-use std::env;
+use std::fs::File;
+use std::io::Read;
 use std::net::Ipv4Addr;
 use std::ops::Range;
 use std::time::Duration;
 
-// UDP connection information
+// Default UDP connection information
 // Note: This MUST MATCH what the communications service is expecting.
 // It's used to verify the checsum of all incoming packets, so if the IP addresses are different,
 // then the checksum is different and the message is rejected.
 const SOURCE_PORT: u16 = 1000;
 const SOURCE_IP: &str = "192.168.0.1";
-const DEST_PORT: u16 = 8006; // Telemetry service port
 const DEST_IP: &str = "0.0.0.0";
 
 // UDP header length.
@@ -86,38 +83,62 @@ fn build_packet(
 }
 
 fn main() -> ClientResult<()> {
-    let args: Vec<String> = env::args().collect();
-    
-    let mut opts = Options::new();
-    opts.reqopt("b", "bus", "Serial Device", "BUS");
-    opts.optopt("s", "source_ip", "Source IP address", "SOURCE_IP");
-    opts.optopt("d", "dest_ip", "Destination IP address", "DEST_IP");
-    opts.reqopt("p", "port", "Destination port", "DEST_PORT");
-    opts.optopt("f", "file", "File containing data to send", "FILE");
-    opts.optflag("v", "verbose", "Enable verbose output");
-    // TODO: time, data to send
-    let matches = opts.parse(&args[1..])?;
-    
-    let bus = matches.opt_str("b").unwrap();
-    
-    let mut conn = comms::serial_init(bus)?;
-    
-    let source_ip = match matches.opt_str("s") {
-        Some(s) => s,
-        None => SOURCE_IP.to_string(),
-    }.parse()?;
+    let args = App::new("UART Comms Client")
+        .arg(
+            Arg::with_name("bus")
+            .help("Serial Device")
+            .short("b")
+            .takes_value(true)
+            .required(true)
+        )
+        .arg(
+            Arg::with_name("source_ip")
+            .help("Source IP address")
+            .short("s")
+            .takes_value(true)
+            .default_value(SOURCE_IP)
+        )
+        .arg(
+            Arg::with_name("dest_ip")
+            .help("Destination IP address")
+            .short("d")
+            .takes_value(true)
+            .default_value(DEST_IP)
+        )
+        .arg(
+            Arg::with_name("port")
+            .help("Destination port")
+            .short("p")
+            .takes_value(true)
+            .required(true)
+        )
+        .arg(
+            Arg::with_name("file")
+            .help("File containing data to send")
+            .short("f")
+            .takes_value(true)
+        )
+        .arg(
+            Arg::with_name("data")
+            .help("Data to send")
+            .required_unless("file")
+            .conflicts_with("file")
+        )
+        .get_matches();
 
-    let dest_ip = match matches.opt_str("d") {
-        Some(s) => s,
-        None => DEST_IP.to_string(),
-    }.parse()?;
-    
-    let dest_port = match matches.opt_get("p")? {
-        Some(s) => s,
-        None => DEST_PORT,
+    let bus = args.value_of("bus").unwrap();
+    let source_ip = args.value_of("source_ip").unwrap().parse()?;
+    let dest_ip = args.value_of("dest_ip").unwrap().parse()?;
+    let dest_port = args.value_of("port").unwrap().parse()?;
+
+    let query = if let Some(file) = args.value_of("file") {
+        let mut raw = String::new();
+        File::open(file).and_then(|mut f| f.read_to_string(&mut raw))?;
+        raw
+    } else {
+        args.value_of("data").unwrap().to_string()
     };
 
-    let query = "{telemetry(limit: 10){timestamp,subsystem,parameter,value}}";
     println!("Request: {}", query);
 
     let packet = build_packet(
@@ -128,6 +149,8 @@ fn main() -> ClientResult<()> {
         dest_ip,
         dest_port,
     );
+        
+    let mut conn = comms::serial_init(bus)?;
 
     // Write our request out through the "radio"
     comms::write(&mut conn, &packet)?;
