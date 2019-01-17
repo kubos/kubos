@@ -22,6 +22,7 @@
 // response once the request has completed.
 
 mod comms;
+mod kiss;
 
 use byteorder::{BigEndian, ByteOrder};
 use clap::{App, Arg};
@@ -35,7 +36,7 @@ use std::time::Duration;
 
 // Default UDP connection information
 // Note: This MUST MATCH what the communications service is expecting.
-// It's used to verify the checsum of all incoming packets, so if the IP addresses are different,
+// It's used to verify the checksum of all incoming packets, so if the IP addresses are different,
 // then the checksum is different and the message is rejected.
 const SOURCE_PORT: u16 = 1000;
 const SOURCE_IP: &str = "192.168.0.1";
@@ -124,6 +125,11 @@ fn main() -> ClientResult<()> {
             .required_unless("file")
             .conflicts_with("file")
         )
+        .arg(
+            Arg::with_name("kiss")
+            .help("Enable KISS framing")
+            .short("k")
+        )
         .get_matches();
 
     let bus = args.value_of("bus").unwrap();
@@ -140,10 +146,17 @@ fn main() -> ClientResult<()> {
     };
 
     println!("Request: {}", query);
+    
+    let msg = if args.is_present("kiss") {
+        // Add KISS framing
+        kiss::encode(query.as_bytes())
+    } else {
+        query.into_bytes()
+    };
 
     let packet = build_packet(
-        query.as_bytes(),
-        query.len() as u16,
+        &msg,
+        msg.len() as u16,
         source_ip,
         SOURCE_PORT,
         dest_ip,
@@ -171,8 +184,16 @@ fn main() -> ClientResult<()> {
     if packet.get_checksum() != calc {
         bail!("Checksum mismatch");
     }
+    
+    let msg = if args.is_present("kiss") {
+        // Parse the KISS frame
+        let (frame, _, _) = kiss::decode(&msg[8..])?;
+        frame
+    } else {
+        msg[8..].to_vec()
+    };
 
-    let msg = ::std::str::from_utf8(&msg[8..])?;
+    let msg = ::std::str::from_utf8(&msg)?;
 
     println!("Response: {}", msg);
 
