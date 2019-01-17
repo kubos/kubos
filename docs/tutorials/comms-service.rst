@@ -6,15 +6,25 @@ The method used for this communication varies greatly from mission to mission.
 As a result, a communications service which facilitates passing messages between the radio/s and the
 rest of the satellite must be constructed on an individual basis.
 
-This tutorial walks the user through the process of using the :doc:`communications service framework <TODO>`
-in order to create a basic hardware service for a radio.
+This tutorial walks the user through the process of using the
+:doc:`communications service framework <../services/comms-framework>` in order to create a basic
+hardware service for a radio.
 To allow testing, the radio connection will be simulated by a UART connection.
 
 Overview
 --------
 
-- brief overview of how the comms service works
-- description of steps of how to write a comms service
+.. figure:: ../images/comms_arch.png
+    :align: center
+
+The communications service works by maintaining read thread which fetches incoming messages from the
+radio.
+It then parses the intended internal destination, forwards the message on, and waits for a response.
+Once a response is received, it can be sent to the radio, to then be transmitted to the ground.
+
+For this tutorial, we'll be setting up the functions needed to read and write from a UART port
+(the "radio"), passing them to the standard communications service framework implementation, and
+then creating a GraphQL front-end to fetch communications statistics from.
 
 Configuration
 -------------
@@ -62,10 +72,11 @@ Cargo.toml
 
 Edit the ``Cargo.toml`` file to have the following dependencies::
 
-    comms-service = { git = https://github.com/kubos/kubos }
+    comms-service = { git = "https://github.com/kubos/kubos" }
     failure = "0.1.2"
-    kubos-service = { git = https://github.com/kubos/kubos }
-    kubos-system = { git = https://github.com/kubos/kubos }
+    juniper =  "0.9.2"
+    kubos-service = { git = "https://github.com/kubos/kubos" }
+    kubos-system = { git = "https://github.com/kubos/kubos" }
     log = "^0.4.0"
     log4rs = "0.8"
     log4rs-syslog = "3.0"
@@ -398,22 +409,509 @@ For the moment, we'll put a loop at the end of our program to keep from exiting.
             config,
         );
     
+        // Set up our communications telemetry structure
+        let telemetry = Arc::new(Mutex::new(CommsTelemetry::default()));
+    
         // Start the comms service thread
-        CommsService::start(control, Arc::new(Mutex::new(CommsTelemetry::default())))?;
+        CommsService::start(control, telemetry.clone())?;
         
         // TODO: Start the GraphQL service
         loop {}
     }
+    
+Final Code
+~~~~~~~~~~
+
+All together, our code so far should look like this::
+
+    // Return type for this service.
+    type ServiceResult<T> = Result<T, Error>;
+    
+    use comms_service::*;
+    use failure::*;
+    use log::*;
+    use log4rs::append::console::ConsoleAppender;
+    use log4rs::encode::pattern::PatternEncoder;
+    use log4rs_syslog::SyslogAppender;
+    use serial;
+    use serial::prelude::*;
+    use std::cell::RefCell;
+    use std::io::prelude::*;
+    use std::sync::{Arc, Mutex};
+    use std::thread;
+    use std::time::Duration;
+    
+    const BUS: &str = "/dev/ttyS2";
+    // Maximum number of bytes to attempt to read at one time
+    const MAX_READ: usize = 48;
+    const TIMEOUT: Duration = Duration::from_millis(100);
+
+    // Initialize logging for the service
+    // All messages will be routed to syslog and echoed to the console
+    fn log_init() -> ServiceResult<()> {
+        // Use custom PatternEncoder to avoid duplicate timestamps in logs.
+        let syslog_encoder = Box::new(PatternEncoder::new("{m}"));
+        // Set up logging which will be routed to syslog for processing
+        let syslog = Box::new(
+            SyslogAppender::builder()
+                .encoder(syslog_encoder)
+                .openlog(
+                    "uart-comms-service",
+                    log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
+                    log4rs_syslog::Facility::Daemon,
+                )
+                .build(),
+        );
+
+        // Set up logging which will be routed to stdout
+        let stdout = Box::new(ConsoleAppender::builder().build());
+
+        // Combine the loggers into one master config
+        let config = log4rs::config::Config::builder()
+            .appender(log4rs::config::Appender::builder().build("syslog", syslog))
+            .appender(log4rs::config::Appender::builder().build("stdout", stdout))
+            .build(
+                log4rs::config::Root::builder()
+                    .appender("syslog")
+                    .appender("stdout")
+                    // Set the minimum logging level to record
+                    .build(log::LevelFilter::Debug),
+            )?;
+
+        // Start the logger
+        log4rs::init_config(config)?;
+
+        Ok(())
+    }
+    
+    // Initialize the serial bus connection for reading and writing from/to the "radio"
+    pub fn serial_init(bus: &str) -> ServiceResult<Arc<Mutex<RefCell<serial::SystemPort>>>> {
+        let settings = serial::PortSettings {
+            baud_rate: serial::Baud115200,
+            char_size: serial::Bits8,
+            parity: serial::ParityNone,
+            stop_bits: serial::Stop1,
+            flow_control: serial::FlowNone,
+        };
+    
+        let mut port = serial::open(bus)?;
+    
+        port.configure(&settings)?;
+        port.set_timeout(TIMEOUT)?;
+        
+        // Wrap the port in a mutex so that multiple threads can access it
+        let conn = Arc::new(Mutex::new(RefCell::new(port)));
+        
+        Ok(conn)
+    }
+    
+    // The read function that the comms service read thread will call to wait for messages from the
+    // "radio"
+    //
+    // Returns once a message has been received
+    pub fn read(conn: Arc<Mutex<RefCell<serial::SystemPort>>>) -> ServiceResult<Vec<u8>> {
+        loop {
+            // Note: These brackets force the program to release the serial port's mutex so that any
+            // threads waiting on it in order to perform a write may do so
+            {
+                // Take ownership of the serial port
+                let conn = match conn.lock() {
+                    Ok(val) => val,
+                    Err(e) => {
+                        error!("Failed to take mutex: {:?}", e);
+                        panic!();
+                    }
+                };
+                let mut conn = conn.try_borrow_mut()?;
+    
+                // Loop until either a full message has been received or a non-timeout error has occured
+                //
+                // Note: This program was written for the Beaglebone Black. The BBB UART driver
+                // (8250_omap.c) has a peculiar behavior where it will only read, at most, 48 bytes at
+                // a time before triggering an interrupt and returning the bytes to the `read` caller.
+                // As a result, we'll continue to make `read` calls until either a) we read less than
+                // 48 bytes in one go, or b) the read call returns a timeout
+                let mut packet = vec![];
+                loop {
+                    let mut buffer: Vec<u8> = vec![0; MAX_READ];
+                    match conn.read(buffer.as_mut_slice()) {
+                        Ok(num) => {
+                            buffer.resize(num, 0);
+                            packet.append(&mut buffer);
+    
+                            debug!("Read {} bytes from radio", packet.len());
+    
+                            if num < MAX_READ {
+                                return Ok(packet);
+                            }
+                        }
+                        Err(ref err) => match err.kind() {
+                            ::std::io::ErrorKind::TimedOut => {
+                                if packet.len() > 0 {
+                                    return Ok(packet);
+                                } else {
+                                    break;
+                                }
+                            }
+                            other => bail!("Radio read failed: {:?}", other),
+                        },
+                    };
+                }
+            }
+    
+            // Sleep for a moment so that other threads have the chance to grab the serial port mutex
+            thread::sleep(Duration::from_millis(10));
+        }
+    }
+    
+    // The write function that the comms service will use to write messages to the "radio"
+    //
+    // This function may be called from either a message handler thread or from a downlink endpoint
+    pub fn write(conn: Arc<Mutex<RefCell<serial::SystemPort>>>, msg: &[u8]) -> ServiceResult<()> {
+        let conn = match conn.lock() {
+            Ok(val) => val,
+            Err(e) => bail!("Failed to take mutex: {:?}", e),
+        };
+        let mut conn = conn.try_borrow_mut()?;
+    
+        conn.write(msg).and_then(|num| {
+            debug!("Wrote {} bytes to radio", num);
+            Ok(())
+        })?;
+    
+        Ok(())
+    }
+
+    fn main() -> ServiceResult<()> {
+        // Initialize logging for the program
+        log_init()?;
+
+        // Get the main service configuration from the system's config.toml file
+        let service_config = kubos_system::Config::new("uart-comms-service");
+
+        // Pull out our communication settings
+        let config = CommsConfig::new(service_config);
+
+        // Initialize the serial port
+        let conn = serial_init(BUS)?;
+
+        // Set up the comms configuration
+        // In this instance, reading and writing are done over the same connection,
+        // so we'll just clone the UART port connection
+        let read_conn = conn.clone();
+        let write_conn = conn;
+
+        let control = CommsControlBlock::new(
+            Some(Arc::new(read)),
+            vec![Arc::new(write)],
+            read_conn,
+            write_conn,
+            config,
+        );
+
+        // Set up our communications telemetry structure
+        let telemetry = Arc::new(Mutex::new(CommsTelemetry::default()));
+    
+        // Start the comms service thread
+        CommsService::start(control, telemetry.clone())?;
+
+        // TODO: Start the GraphQL service
+        loop {}
+    }
+
 
 Testing
 -------
 
-`nc`
+The SDK is packaged with a client to help test our new UART comms service,
+`uart-comms-client <https://github.com/kubos/kubos/tree/master/clients/uart-comms-client>`__.
+
+This client program will take the input data, wrap it in a UDP packet, and then send it over the
+requested serial device.
+
+The program has the following syntax::
+
+    UART Comms Client
+
+    USAGE:
+        uart-comms-client [OPTIONS] <data> -b <bus> -p <port>
+    
+    FLAGS:
+        -h, --help       Prints help information
+        -V, --version    Prints version information
+    
+    OPTIONS:
+        -b <bus>              Serial Device
+        -d <dest_ip>          Destination IP address [default: 0.0.0.0]
+        -f <file>             File containing data to send
+        -p <port>             Destination port
+        -s <source_ip>        Source IP address [default: 192.168.0.1]
+    
+    ARGS:
+        <data>    Data to send
+
+Setup
+~~~~~
+
+Software
+^^^^^^^^
+
+Build the comms service, being careful to cross-compile for the target OBC, then transfer the binary
+to the OBC.
+
+Information about building and transferring Rust projects can be found in the
+:doc:`Rust SDK <../sdk-docs/sdk-rust>` doc.
+
+Once transferred, log into the board and start the service.
+Leave this connection to the OBC open so that you can view the service's output
+
+Hardware
+^^^^^^^^
+
+To test, connect an FTDI cable between the OBC's UART port and your PC.
+At a minimum, the FTDI's ground (black), TX (orange), and RX (yellow) lines should be connected.
+
+The cable should automatically be detected by the SDK and given an alias of ``/dev/FTDI``.
+Note: If you have more than one FTDI cable connected, you will have to identify and use the correct
+``/dev/ttyUSB*`` device instead.
+
+Execution
+~~~~~~~~~
+
+To start, we'll send a simple telemetry request to the telemetry service running on the OBC.
+By default, the telemetry service uses port 8006 for GraphQL requests.
+
+From the SDK, run the following command::
+
+    $ uart-comms-client "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8006
+
+You should see the following output::
+
+    Request: {telemetry(limit: 10){subsystem, parameter, value}}
+
+    Source: 192.168.0.1:1000, Destination: 0.0.0.0:8006
+    Response: {"data":{"telemetry":[]},"errors":""}
+
+.. note::
+
+    It is possible that data will be dropped during the transfer process.
+    This will be indicated by an output message of ``Error: ErrorMessage { msg: "Checksum mismatch" }``.
+    If this occurs, re-run the client command.
+
+Troubleshooting
+~~~~~~~~~~~~~~~
+
+If the client program times out (indicated by ``Error: ErrorMessage { msg: "Timed out waiting for response" }``),
+check the following:
+
+    - Communications service is running on the target OBC
+    - Telemetry service is running on the target OBC
+    - OBC's UART port is correctly wired to the user's PC
+    - Source IP given to the client matches the ``ground_ip`` configuration parameter in the service
+    - Destination IP given to the client matches the ``satellite_ip`` parameter in the service
+    - Port given to the client matches the port of the telemetry service (this is defined in
+      the systems ``config.toml`` file. The default location is ``/home/system/etc/config.toml``)
 
 GraphQL
 -------
 
-Fetching telemetry and other standard hardware service stuff
+To finish the communications service, we want to expose all telemetry data collected through a
+GraphQL front-end.
+
+The telemetry structure, |CommsTelemetry|, has the following fields:
+
+    - ``packets_up`` - Number of packets successfully uplinked (transferred from a client to the
+      service)
+    - ``packets_down`` - Number of packets successfully downlinked (transferred from the service to
+      a client)
+    - ``failed_packets_up`` - Number of bad packets received from a client
+    - ``failed_packets_down`` - Number of packets the service failed to write to a client
+    - ``error`` - General list of errors which have occurred within the service
+
+We'll create two new files to handle the GraphQL portion of the service: `model.rs` and `schema.rs`.
+
+Schema
+~~~~~~
+
+The schema file defines the front-end queries that will be available.
+We'll also need to define a mutation section (which will remain empty for now) in order to be able
+to compile the program.
+
+The file should look like this::
+
+    use juniper::FieldResult;
+    use crate::model::Subsystem;
+    
+    type Context = kubos_service::Context<Subsystem>;
+    
+    pub struct QueryRoot;
+    
+    graphql_object!(QueryRoot: Context as "Query" |&self| {
+        // Test query to verify service is running without attempting
+        // to communicate with the underlying subsystem
+        field ping() -> FieldResult<String>
+        {
+            Ok(String::from("pong"))
+        }
+    
+        // Request number of bad uplink packets
+        field failed_packets_up(&executor) -> FieldResult<i32>
+        {
+            Ok(executor.context().subsystem().failed_packets_up()?)
+        }
+    
+        // Request number of bad downlink packets
+        field failed_packets_down(&executor) -> FieldResult<i32>
+        {
+            Ok(executor.context().subsystem().failed_packets_down()?)
+        }
+    
+        // Request number of packets successfully uplinked
+        field packets_up(&executor) -> FieldResult<i32>
+        {
+            Ok(executor.context().subsystem().packets_up()?)
+        }
+    
+        // Request number of packets successfully downlinked
+        field packets_down(&executor) -> FieldResult<i32>
+        {
+            Ok(executor.context().subsystem().packets_down()?)
+        }
+    
+        // Request errors that have occured
+        field errors(&executor) -> FieldResult<Vec<String>>
+        {
+            Ok(executor.context().subsystem().errors()?)
+        }
+    });
+    
+    pub struct MutationRoot;
+    
+    /// Base GraphQL mutation model
+    graphql_object!(MutationRoot: Context as "Mutation" |&self| {
+    
+    });
+    
+Model
+~~~~~
+
+The model file is used to define the back-end functions which fetch the actual data requested.
+
+Each function will take ownership of the telemetry structure's mutex and then return a particular
+field.
+
+The file should look like this::
+
+    use comms_service::CommsTelemetry;
+    use std::sync::{Arc, Mutex};
+    
+    pub struct Subsystem {
+        telem: Arc<Mutex<CommsTelemetry>>,
+    }
+    
+    impl Subsystem {
+        pub fn new(telem: Arc<Mutex<CommsTelemetry>>) -> Subsystem {
+            Subsystem { telem }
+        }
+    
+        pub fn failed_packets_up(&self) -> Result<i32, String> {
+            match self.telem.lock() {
+                Ok(data) => Ok(data.failed_packets_up),
+                Err(_) => Err("Failed to lock telemetry".to_owned()),
+            }
+        }
+    
+        pub fn failed_packets_down(&self) -> Result<i32, String> {
+            match self.telem.lock() {
+                Ok(data) => Ok(data.failed_packets_down),
+                Err(_) => Err("Failed to lock telemetry".to_owned()),
+            }
+        }
+    
+        pub fn packets_up(&self) -> Result<i32, String> {
+            match self.telem.lock() {
+                Ok(data) => Ok(data.packets_up),
+                Err(_) => Err("Failed to lock telemetry".to_owned()),
+            }
+        }
+    
+        pub fn packets_down(&self) -> Result<i32, String> {
+            match self.telem.lock() {
+                Ok(data) => Ok(data.packets_down),
+                Err(_) => Err("Failed to lock telemetry".to_owned()),
+            }
+        }
+    
+        pub fn errors(&self) -> Result<Vec<String>, String> {
+            match self.telem.lock() {
+                Ok(data) => {
+                    println!("get errors {:?}", data.errors);
+                    Ok(data.errors.to_owned())
+                }
+                Err(_) => Err("Failed to lock telemetry".to_owned()),
+            }
+        }
+    }
+    
+Main Logic
+~~~~~~~~~~
+
+We can now define and start our GraphQL front-end in the main code::
+
+    mod schema;
+    mod model;
+    
+    use crate::model::*;
+    use crate::schema::*;
+
+    fn main() -> ServiceResult<()> {
+        // Initialize logging for the program
+        log_init()?;
+    
+        // Get the main service configuration from the system's config.toml file
+        let service_config = kubos_system::Config::new("uart-comms-service");
+    
+        // Pull out our communication settings
+        let config = CommsConfig::new(service_config.clone());
+        debug!("Config: {:?}", config);
+    
+        // Initialize the serial port
+        let conn = serial_init(BUS)?;
+    
+        // Set up the comms configuration
+        // In this instance, reading and writing are done over the same connection,
+        // so we'll just clone the UART port connection
+        let read_conn = conn.clone();
+        let write_conn = conn;
+    
+        let control = CommsControlBlock::new(
+            Some(Arc::new(read)),
+            vec![Arc::new(write)],
+            read_conn,
+            write_conn,
+            config,
+        );
+        
+        let telemetry = Arc::new(Mutex::new(CommsTelemetry::default()));
+    
+        // Start the comms service thread
+        CommsService::start(control, telemetry.clone())?;
+    
+        // Start the GraphQL front-end
+        Service::new(service_config, Subsystem::new(telemetry), QueryRoot, MutationRoot).start();
+        
+        Ok(())
+    }
+
+Testing
+~~~~~~~
+
+Now that the code is complete, we can use our communications service to send a query to itself::
+
+    $ uart-comms-client -b /dev/FTDI -p 8020 "{packetsUp,packetsDown,failedPacketsUp,failedPacketsDown,errors}"
+    Request: {packetsUp,packetsDown,failedPacketsUp,failedPacketsDown,errors}
+    Source: 192.168.0.1:1000, Destination: 0.0.0.0:8020
+    Response: {"data":{"errors":[],"failedPacketsDown":0,"failedPacketsUp":0,"packetsDown":4,"packetsUp":5},"errors":""}
 
 .. |comms-service| raw:: html
 
