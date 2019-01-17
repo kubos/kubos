@@ -33,7 +33,7 @@ fn main() {
 
     info!("Starting file transfer service at {}", config.hosturl());
 
-    match recv_loop(config) {
+    match recv_loop(&config) {
         Ok(()) => warn!("Service listener loop exited successfully?"),
         Err(err) => error!("Service listener exited early: {}", err),
     }

@@ -100,12 +100,12 @@ macro_rules! root_path {
     };
 }
 
-fn unwrap_optstr<'a, T>(opt: Option<&'a str>) -> T
+fn unwrap_optstr<T>(opt: Option<&str>) -> T
 where
     T: FromStr,
     T: Default,
 {
-    opt.map_or_else(|| T::default(), |s| T::from_str(s).unwrap_or_default())
+    opt.map_or_else(T::default, |s| T::from_str(s).unwrap_or_default())
 }
 
 impl ProcStat {
@@ -133,7 +133,7 @@ impl ProcStat {
         let re = Regex::new(r"(?P<pid>\d+) \((?P<comm>.+)\) (?P<the_rest>.+)")?;
         let caps = re
             .captures(&data_str)
-            .ok_or(format_err!("Invalid procstat format"))?;
+            .ok_or_else(|| format_err!("Invalid procstat format"))?;
 
         ps.pid = i32::from_str(&caps["pid"]).unwrap_or_default();
         ps.comm = caps["comm"].into();
@@ -239,14 +239,10 @@ impl ProcStat {
         let mut reader = BufReader::new(file);
         let mut contents = String::new();
         reader.read_to_string(&mut contents)?;
-        if contents.len() == 0 {
+        if contents.is_empty() {
             Ok(vec![self.comm.clone()])
         } else {
-            let mut argv: Vec<String> = contents
-                .split('\0')
-                .into_iter()
-                .map(|a| String::from(a))
-                .collect();
+            let mut argv: Vec<String> = contents.split('\0').map(String::from).collect();
             argv.pop();
             Ok(argv)
         }

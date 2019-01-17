@@ -66,11 +66,10 @@ fn main() -> Result<(), Error> {
         }
     };
 
-    match matches.opt_present("b") {
-        true => registry
+    if matches.opt_present("b") {
+        registry
             .run_onboot()
-            .unwrap_or_else(|err| error!("Error starting applications: {}", err)),
-        false => {}
+            .unwrap_or_else(|err| error!("Error starting applications: {}", err));
     }
 
     Service::new(config, registry, schema::QueryRoot, schema::MutationRoot).start();

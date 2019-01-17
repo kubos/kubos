@@ -21,20 +21,22 @@ use std::net::UdpSocket;
 use std::sync::Arc;
 
 // Function to allow reading from a UDP socket.
-pub fn read(socket: Arc<UdpSocket>) -> CommsResult<Vec<u8>> {
+pub fn read(socket: &Arc<UdpSocket>) -> CommsResult<Vec<u8>> {
     let mut buf = [0; 4096];
     let (size, _) = socket.recv_from(&mut buf)?;
     Ok(buf[0..size].to_vec())
 }
 
 // Function to allow writing over a UDP socket.
-pub fn write(socket: Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> {
+pub fn write(socket: &Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> {
     let service_config = kubos_system::Config::new("ethernet-service");
     let config = CommsConfig::new(service_config);
-    
     socket.send_to(
         data,
-        (&*config.ground_ip.unwrap(), config.ground_port.unwrap_or_default()),
+        (
+            &*config.ground_ip.unwrap(),
+            config.ground_port.unwrap_or_default(),
+        ),
     )?;
     Ok(())
 }

@@ -39,9 +39,9 @@ const CHKSUM_RNG: Range<usize> = 6..8;
 const MAX_SIZE: usize = 65499;
 
 /// Type definition for a "read" function pointer.
-pub type ReadFn<T> = Fn(T) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
+pub type ReadFn<T> = Fn(&T) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
 /// Type definition for a "write" function pointer.
-pub type WriteFn<T> = Fn(T, &[u8]) -> CommsResult<()> + Send + Sync + 'static;
+pub type WriteFn<T> = Fn(&T, &[u8]) -> CommsResult<()> + Send + Sync + 'static;
 
 /// Struct that holds configuration data to allow users to set up a Communication Service.
 #[derive(Clone)]
@@ -174,7 +174,7 @@ fn read_thread<T: Clone + Send + 'static>(
 
     loop {
         // Read bytes from the radio.
-        let bytes = match (read)(comms.read_conn.clone()) {
+        let bytes = match (read)(&comms.read_conn.clone()) {
             Ok(bytes) => bytes,
             Err(e) => {
                 log_error(&data, e.to_string()).unwrap();
@@ -300,7 +300,7 @@ fn handle_message<T: Clone>(
     };
 
     // Write packet to the gateway and update telemetry.
-    match write(write_conn.clone(), packet.as_slice()) {
+    match write(&write_conn.clone(), packet.as_slice()) {
         Ok(_) => {
             log_telemetry(&data, &TelemType::Down).unwrap();
             info!("UDP Packet successfully downlinked");
@@ -358,7 +358,7 @@ fn downlink_endpoint<T: Clone>(
         };
 
         // Write packet to the gateway and update telemetry.
-        match write(write_conn.clone(), packet.as_slice()) {
+        match write(&write_conn.clone(), packet.as_slice()) {
             Ok(_) => {
                 log_telemetry(&data, &TelemType::Down).unwrap();
                 info!("UDP Packet successfully downlinked");

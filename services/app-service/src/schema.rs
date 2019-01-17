@@ -99,7 +99,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             }
         };
 
-        Ok(match executor.context().subsystem().start_app(&uuid, run_level_o, args) {
+        Ok(match executor.context().subsystem().start_app(&uuid, &run_level_o, args) {
             Ok(num) => StartResponse { success: true, errors: "".to_owned(), pid: Some(num as i32)},
             Err(error) => StartResponse { success: false, errors: error.to_string(), pid: None },
         })
