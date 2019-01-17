@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+/// Finds and escapes any of the kiss frame separators
+/// in a data buffer
 fn escape(buf: &[u8]) -> Vec<u8> {
     let mut new_buf = vec![];
     for (_, e) in buf.iter().enumerate() {
@@ -32,6 +34,8 @@ fn escape(buf: &[u8]) -> Vec<u8> {
     new_buf
 }
 
+/// Finds and unescapes any escaped kiss frame separators
+/// in a data buffer
 fn unescape(buf: &[u8]) -> (Vec<u8>, bool) {
     let mut new_buf = vec![];
 
@@ -57,6 +61,7 @@ fn unescape(buf: &[u8]) -> (Vec<u8>, bool) {
     (new_buf, true)
 }
 
+/// Encodes a data buffer into a kiss frame
 pub fn encode(frame: &[u8]) -> Result<Vec<u8>, String> {
     let mut buff = vec![0xC0, 0x00];
 
@@ -66,7 +71,7 @@ pub fn encode(frame: &[u8]) -> Result<Vec<u8>, String> {
     Ok(buff)
 }
 
-/// Finds and decodes kiss frame found inside of chunk
+/// Finds and decodes kiss frame found inside of data buffer
 /// Will also return any data found before and after
 /// the complete frame.
 pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), String> {

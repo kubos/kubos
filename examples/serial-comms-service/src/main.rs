@@ -14,22 +14,19 @@
 // limitations under the License.
 //
 
-// #![deny(missing_docs)]
-// #![deny(warnings)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 //!
-//! Hardware service to allow for ethernet debugging. This service starts up a communication
-//! service to allow communication over an ethernet cable to the satellite.
-//!
-//! Telemetry queries will be added as desired for testing.
+//! Hardware service to allow for serial debugging. This service starts up a communication
+//! service to allow communication over a serial link to the satellite.
 //!
 
 extern crate comms_service;
 #[macro_use]
 extern crate failure;
-extern crate kubos_system;
-#[macro_use]
 extern crate kubos_service;
+extern crate kubos_system;
 #[macro_use]
 extern crate juniper;
 extern crate rust_uart;
@@ -40,14 +37,16 @@ extern crate log4rs;
 extern crate log4rs_syslog;
 
 mod comms;
-mod graphql;
 mod kiss;
+mod model;
+mod schema;
 
 use comms::*;
 use comms_service::*;
 use failure::Error;
-use graphql::{MutationRoot, QueryRoot, Subsystem};
 use kubos_service::{Config, Service};
+use model::Subsystem;
+use schema::{MutationRoot, QueryRoot};
 use std::sync::{Arc, Mutex};
 
 // Return type for the ethernet service.
@@ -111,8 +110,6 @@ fn main() -> SerialServiceResult<()> {
 
     // Open serial port
     let serial_comms = Arc::new(Mutex::new(SerialComms::new(&bus)));
-
-    info!("comms config {:?}", comms_config);
 
     // Control block to configure communication service.
     let controls = CommsControlBlock::new(

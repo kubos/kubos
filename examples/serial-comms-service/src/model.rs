@@ -15,7 +15,6 @@
 //
 
 use comms_service::CommsTelemetry;
-use juniper::FieldResult;
 use std::sync::{Arc, Mutex};
 
 pub struct Subsystem {
@@ -54,48 +53,14 @@ impl Subsystem {
             Err(_) => Err("Failed to lock telemetry".to_owned()),
         }
     }
+
+    pub fn errors(&self) -> Result<Vec<String>, String> {
+        match self.telem.lock() {
+            Ok(data) => {
+                println!("get errors {:?}", data.errors);
+                Ok(data.errors.to_owned())
+            }
+            Err(_) => Err("Failed to lock telemetry".to_owned()),
+        }
+    }
 }
-
-type Context = kubos_service::Context<Subsystem>;
-
-pub struct QueryRoot;
-
-graphql_object!(QueryRoot: Context as "Query" |&self| {
-    // Test query to verify service is running without attempting
-    // to communicate with the underlying subsystem
-    //
-    // {
-    //     ping: "pong"
-    // }
-    field ping() -> FieldResult<String>
-    {
-        Ok(String::from("pong"))
-    }
-
-    field failed_packets_up(&executor) -> FieldResult<i32>
-    {
-        Ok(executor.context().subsystem().failed_packets_up()?)
-    }
-
-    field failed_packets_down(&executor) -> FieldResult<i32>
-    {
-        Ok(executor.context().subsystem().failed_packets_down()?)
-    }
-
-    field packets_up(&executor) -> FieldResult<i32>
-    {
-        Ok(executor.context().subsystem().packets_up()?)
-    }
-
-    field packets_down(&executor) -> FieldResult<i32>
-    {
-        Ok(executor.context().subsystem().packets_down()?)
-    }
-});
-
-pub struct MutationRoot;
-
-/// Base GraphQL mutation model
-graphql_object!(MutationRoot: Context as "Mutation" |&self| {
-
-});
