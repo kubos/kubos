@@ -17,14 +17,22 @@ Overview
 .. figure:: ../images/comms_arch.png
     :align: center
 
-The communications service works by maintaining read thread which fetches incoming messages from the
-radio.
+The communications service works by maintaining a read thread which fetches incoming messages from
+the radio.
 It then parses the intended internal destination, forwards the message on, and waits for a response.
 Once a response is received, it can be sent to the radio, to then be transmitted to the ground.
 
 For this tutorial, we'll be setting up the functions needed to read and write from a UART port
 (the "radio"), passing them to the standard communications service framework implementation, and
 then creating a GraphQL front-end to fetch communications statistics from.
+
+This tutorial will *not* cover:
+
+    - Downlink endpoints
+    - Radio packet framing
+
+A more `in-depth example <https://github.com/kubos/kubos/tree/master/examples/serial-comms-service>`__
+can be found in the Kubos repo.
 
 Configuration
 -------------
@@ -103,7 +111,9 @@ recorded.
 
 Logging
 ^^^^^^^
-We'll start by initializing our logging::
+We'll start by initializing our logging:
+
+.. code-block:: rust
 
     use log::*;
     use log4rs::append::console::ConsoleAppender;
@@ -147,22 +157,15 @@ We'll start by initializing our logging::
     
         Ok(())
     }
-    
-    fn main() -> ServiceResult<()> {
-        // Initialize logging for the programs
-        log_init()?;
-        
-        Ok(())
-    }
 
 Serial Initialization
 ^^^^^^^^^^^^^^^^^^^^^
 
-The initialization function will need to create a connection to the serial port and set the ports
+The initialization function will need to create a connection to the serial port and set the port's
 communication settings. It should return the final connection object in a mutex, since it will need
 to be shared across multiple threads.
 
-.. code-block::
+.. code-block:: rust
 
     use std::sync::{Arc, Mutex};
 
@@ -202,7 +205,7 @@ There's no need to encapsulate the data in a radio-specific protocol (like AX.25
 The function should take two arguments: the data to write and the serial port to write to.
 We'll need to take ownership of the mutex and then perform a UART write.
 
-.. code-block::
+.. code-block:: rust
 
     // The write function that the comms service will use to write messages to the "radio"
     //
@@ -225,14 +228,78 @@ We'll need to take ownership of the mutex and then perform a UART write.
 Read
 ^^^^
 
-TODO
+The read function will take ownership of the mutex and then wait for a message from the "radio".
 
-.. code-block::
+It should continue to attempt to fetch messages until either:
+
+    a) A message is returned
+    b) A non-timeout error is encountered
+
+The read loop should take care to free the mutex after each read attempt so that any threads wanting
+to perform write operations are not perpetually blocked.
+
+.. code-block:: rust
 
     // The read function that the comms service read thread will call to wait for messages from the
     // "radio"
     //
     // Returns once a message has been received
+    const MAX_READ: usize = 4096;
+    pub fn read(conn: Arc<Mutex<RefCell<serial::SystemPort>>>) -> ServiceResult<Vec<u8>> {
+        loop {
+            // Note: These brackets force the program to release the serial port's mutex so that any
+            // threads waiting on it in order to perform a write may do so
+            {
+                // Take ownership of the serial port
+                let conn = match conn.lock() {
+                    Ok(val) => val,
+                    Err(e) => {
+                        error!("Failed to take mutex: {:?}", e);
+                        panic!();
+                    }
+                };
+                let mut conn = conn.try_borrow_mut()?;
+    
+                // Try to get a message from the radio
+                let mut packet: Vec<u8> = vec![0; MAX_READ];
+                match conn.read(packet.as_mut_slice()) {
+                    Ok(num) => {
+                        packet.resize(num, 0);
+
+                        debug!("Read {} bytes from radio", packet.len());
+                        return Ok(packet);
+                    }
+                    Err(ref err) => match err.kind() {
+                        ::std::io::ErrorKind::TimedOut => {}
+                        other => bail!("Radio read failed: {:?}", other),
+                    },
+                }
+            }
+    
+            // Sleep for a moment so that other threads have the chance to grab the serial port mutex
+            thread::sleep(Duration::from_millis(10));
+        }
+    }
+
+Beaglebone Black
+################
+
+The Beaglebone Black's `UART kernel driver <https://github.com/torvalds/linux/blob/master/drivers/tty/serial/8250/8250_omap.c>`__
+has a peculiar behavior where it will only read, at most, 48 bytes at a time before triggering an
+interrupt and returning the bytes to the `read` caller.
+
+As a result, we'll need to modify our read function to continue to make `read` calls until either
+a) we read less than 48 bytes in one go, or b) the read call returns a timeout.
+
+The resulting function should look like this:
+
+.. code-block:: rust
+
+    // The read function that the comms service read thread will call to wait for messages from the
+    // "radio"
+    //
+    // Returns once a message has been received
+    const MAX_READ: usize = 48;
     pub fn read(conn: Arc<Mutex<RefCell<serial::SystemPort>>>) -> ServiceResult<Vec<u8>> {
         loop {
             // Note: These brackets force the program to release the serial port's mutex so that any
@@ -249,12 +316,6 @@ TODO
                 let mut conn = conn.try_borrow_mut()?;
     
                 // Loop until either a full message has been received or a non-timeout error has occured
-                //
-                // Note: This program was written for the Beaglebone Black. The BBB UART driver
-                // (8250_omap.c) has a peculiar behavior where it will only read, at most, 48 bytes at
-                // a time before triggering an interrupt and returning the bytes to the `read` caller.
-                // As a result, we'll continue to make `read` calls until either a) we read less than
-                // 48 bytes in one go, or b) the read call returns a timeout
                 let mut packet = vec![];
                 loop {
                     let mut buffer: Vec<u8> = vec![0; MAX_READ];
@@ -287,7 +348,7 @@ TODO
             thread::sleep(Duration::from_millis(10));
         }
     }
-    
+
 Main Logic
 ~~~~~~~~~~
 
@@ -306,7 +367,9 @@ Configuration
 ^^^^^^^^^^^^^
 
 After setting up logging, we'll want to fetch our service's configuration settings from the
-``config.toml`` file and extract the communications settings::
+``config.toml`` file and extract the communications settings:
+
+.. code-block:: rust
     
     fn main() -> ServiceResult<()> {
         // Initialize logging for the program
@@ -341,7 +404,9 @@ Our read function pointer will correspond with the ``read`` helper function we c
 
 The write function list will consist of a single entry: the ``write`` helper function.
 
-The initialization should look like this::
+The initialization should look like this:
+
+.. code-block:: rust
 
     fn main() -> ServiceResult<()> {
         // Initialize logging for the program
@@ -375,12 +440,12 @@ Starting Communication
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Finally, we can start our communication threads.
-We'll use the ``CommsService::start<TODO>`` function, passing it our control block as well as a
+We'll use the |comms-service-start| function, passing it our control block as well as a
 |CommsTelemetry| instance to use for recording communication metrics.
 
 For the moment, we'll put a loop at the end of our program to keep from exiting.
 
-.. code-block::
+.. code-block:: rust
 
     fn main() -> ServiceResult<()> {
         // Initialize logging for the program
@@ -422,7 +487,9 @@ For the moment, we'll put a loop at the end of our program to keep from exiting.
 Final Code
 ~~~~~~~~~~
 
-All together, our code so far should look like this::
+All together, our code so far should look like this:
+
+.. code-block:: rust
 
     // Return type for this service.
     type ServiceResult<T> = Result<T, Error>;
@@ -668,12 +735,15 @@ Leave this connection to the OBC open so that you can view the service's output
 Hardware
 ^^^^^^^^
 
-To test, connect an FTDI cable between the OBC's UART port and your PC.
+Connect an FTDI cable between the OBC's UART port and your PC.
 At a minimum, the FTDI's ground (black), TX (orange), and RX (yellow) lines should be connected.
 
 The cable should automatically be detected by the SDK and given an alias of ``/dev/FTDI``.
-Note: If you have more than one FTDI cable connected, you will have to identify and use the correct
-``/dev/ttyUSB*`` device instead.
+
+.. note::
+
+    If you have more than one FTDI cable connected, you will have to identify and use the correct
+    ``/dev/ttyUSB*`` device instead.
 
 Execution
 ~~~~~~~~~
@@ -688,7 +758,6 @@ From the SDK, run the following command::
 You should see the following output::
 
     Request: {telemetry(limit: 10){subsystem, parameter, value}}
-
     Source: 192.168.0.1:1000, Destination: 0.0.0.0:8006
     Response: {"data":{"telemetry":[]},"errors":""}
 
@@ -737,7 +806,9 @@ The schema file defines the front-end queries that will be available.
 We'll also need to define a mutation section (which will remain empty for now) in order to be able
 to compile the program.
 
-The file should look like this::
+The file should look like this:
+
+.. code-block:: rust
 
     use juniper::FieldResult;
     use crate::model::Subsystem;
@@ -800,7 +871,9 @@ The model file is used to define the back-end functions which fetch the actual d
 Each function will take ownership of the telemetry structure's mutex and then return a particular
 field.
 
-The file should look like this::
+The file should look like this:
+
+.. code-block:: rust
 
     use comms_service::CommsTelemetry;
     use std::sync::{Arc, Mutex};
@@ -845,7 +918,6 @@ The file should look like this::
         pub fn errors(&self) -> Result<Vec<String>, String> {
             match self.telem.lock() {
                 Ok(data) => {
-                    println!("get errors {:?}", data.errors);
                     Ok(data.errors.to_owned())
                 }
                 Err(_) => Err("Failed to lock telemetry".to_owned()),
@@ -856,7 +928,9 @@ The file should look like this::
 Main Logic
 ~~~~~~~~~~
 
-We can now define and start our GraphQL front-end in the main code::
+We can now define and start our GraphQL front-end in the main code:
+
+.. code-block:: rust
 
     mod schema;
     mod model;
@@ -913,9 +987,9 @@ Now that the code is complete, we can use our communications service to send a q
     Source: 192.168.0.1:1000, Destination: 0.0.0.0:8020
     Response: {"data":{"errors":[],"failedPacketsDown":0,"failedPacketsUp":0,"packetsDown":4,"packetsUp":5},"errors":""}
 
-.. |comms-service| raw:: html
+.. |comms-service-start| raw:: html
 
-    <a href="../rust-docs/comms_service/index.html" target="_blank">Framework Rust documentation</a>
+    <a href="../rust-docs/comms_service/struct.CommsService.html#method.start" target="_blank">CommsService::start</a>
     
 .. |CommsControlBlock| raw:: html
 

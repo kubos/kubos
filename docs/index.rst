@@ -67,7 +67,7 @@ Come check out our `community Trello Board <https://trello.com/b/pIWxmFua/kubos-
     :hidden:
     
     KubOS Architecture <architecture-overview>
-    New User Tutorials <tutorials/index>
+    Tutorials <tutorials/index>
     Installation Docs <installation-docs/index>
     Kubos SDK <sdk-docs/index>
     Kubos Mission Applications <app-docs/index>
