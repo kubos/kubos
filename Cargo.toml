@@ -15,6 +15,7 @@ members = [
 "apis/telemetry-db-api",
 "clients/kubos-file-client",
 "clients/kubos-shell-client",
+"clients/uart-comms-client",
 "examples/rust-c-service/extern-lib",
 "examples/rust-c-service/service",
 "examples/rust-mission-app",
