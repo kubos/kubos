@@ -159,14 +159,14 @@ mod tests {
 
     #[test]
     fn test_encode() {
-        let encoded = encode(&vec![0x00, 0x01, 0x02, 0x03]).unwrap();
+        let encoded = encode(&vec![0x00, 0x01, 0x02, 0x03]);
 
         assert_eq!(encoded, vec![0xC0, 0x00, 0x00, 0x01, 0x02, 0x03, 0xC0]);
     }
 
     #[test]
     fn test_encode_with_escape() {
-        let encoded = encode(&vec![0x01, 0x02, 0xC0, 0x04]).unwrap();
+        let encoded = encode(&vec![0x01, 0x02, 0xC0, 0x04]);
 
         assert_eq!(
             encoded,
@@ -176,7 +176,7 @@ mod tests {
 
     #[test]
     fn test_encode_with_n_escapes() {
-        let encoded = encode(&vec![0x01, 0xDB, 0x02, 0xC0, 0x04, 0xDB, 0xC0]).unwrap();
+        let encoded = encode(&vec![0x01, 0xDB, 0x02, 0xC0, 0x04, 0xDB, 0xC0]);
 
         assert_eq!(
             encoded,
@@ -248,20 +248,20 @@ mod tests {
     #[test]
     fn test_decode_frame_no_start() {
         assert_eq!(
-            decode(&vec![
+            format!("{}", decode(&vec![
                 0x1, 0xF, 0xC1, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF, 0x2
-            ],),
-            Err(String::from("Kiss frame start not found"))
+            ],).unwrap_err()),
+            "Kiss frame start not found"
         );
     }
 
     #[test]
     fn test_decode_frame_no_end() {
         assert_eq!(
-            decode(&vec![
+            format!("{}", decode(&vec![
                 0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0x10, 0x1, 0xF, 0x2
-            ],),
-            Err(String::from("Kiss frame end not found"))
+            ],).unwrap_err()),
+            "Kiss frame end not found"
         );
     }
 
@@ -283,7 +283,7 @@ mod tests {
     fn test_encode_decode() {
         let orig = vec![0, 130, 26, 0, 1, 218, 134, 245];
 
-        let encoded = encode(&orig).unwrap();
+        let encoded = encode(&orig);
         let (decoded, pre, post) = decode(&encoded).unwrap();
 
         assert_eq!(decoded, orig);
