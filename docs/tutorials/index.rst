@@ -1,5 +1,5 @@
-New User Tutorials
-==================
+Tutorials
+=========
 
 Kubos users develop custom flight software for their OBCs using the :doc:`Kubos SDK <../sdk-docs/index>`.
 
@@ -58,11 +58,6 @@ data and then storing that data into the telemetry database.
     Creating Your First KubOS Project <first-project>
     Creating Your First Mission Application <first-mission-app>
     
-.. todo::
-
-    Communicating with Hardware Services <querying-hardware>
-    Storing Telemetry <storing-telemetry>
-    
 System Interaction Tutorials
 ----------------------------
 
@@ -77,7 +72,17 @@ There is no coding required for these actions, however some scripting may used f
     Transferring Files <file-transfer>
     Querying the System <querying-telemetry>
     Creating a Shell Connection <shell>
+
+Advanced Tutorials
+------------------
+
+Important system tutorials which should be approached after mastering basic system interaction.
+
+.. toctree::
+    :maxdepth: 1
     
+    Creating Your Communications Service <comms-service>
+
 Other Resources
 ---------------
 

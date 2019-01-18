@@ -40,8 +40,6 @@ use syslog::Facility;
 
 mod comms;
 
-// Path to configuration file.
-const CONFIG_PATH: &'static str = "comms.toml";
 // Read port for the socket used in the 'read' function.
 const READ_PORT: u16 = 13000;
 // Write port for the socket used in the 'write' function.
@@ -59,14 +57,19 @@ fn main() -> EthernetServiceResult<()> {
     )
     .unwrap();
 
-    // Read configuration from config file.
-    let config = CommsConfig::new("ethernet-service", CONFIG_PATH.to_string());
-
+    // Get the main service configuration from the system's config.toml file
+    let service_config = kubos_system::Config::new("ethernet-service");
+    
+    // Pull out our communication settings
+    let config = CommsConfig::new(service_config);
+    
+    let satellite_ip = config.satellite_ip.clone().unwrap();
+    
     // Create socket to mock reading from a radio.
-    let read_conn = Arc::new(UdpSocket::bind((config.satellite_ip.as_str(), READ_PORT))?);
+    let read_conn = Arc::new(UdpSocket::bind((satellite_ip.as_str(), READ_PORT))?);
 
     // Create socket to mock writing to a radio.
-    let write_conn = Arc::new(UdpSocket::bind((config.satellite_ip.as_str(), WRITE_PORT))?);
+    let write_conn = Arc::new(UdpSocket::bind((satellite_ip.as_str(), WRITE_PORT))?);
 
     // Control block to configure communication service.
     let controls = CommsControlBlock::new(
