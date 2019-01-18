@@ -19,13 +19,7 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-#[cfg(test)]
-#[macro_use]
-extern crate double;
-
-extern crate adcs_api;
-
 mod ffi;
 mod imtq;
 
-pub use imtq::Imtq;
+pub use crate::imtq::Imtq;

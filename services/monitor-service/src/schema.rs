@@ -17,9 +17,9 @@
 use juniper::{self, FieldError, FieldResult};
 use kubos_service;
 
-use meminfo;
-use objects::*;
-use process;
+use crate::meminfo;
+use crate::objects::*;
+use crate::process;
 
 type Context = kubos_service::Context<()>;
 

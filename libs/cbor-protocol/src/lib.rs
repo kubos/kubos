@@ -19,9 +19,6 @@
 //! # Examples
 //!
 //! ```no_run
-//! extern crate cbor_protocol;
-//! extern crate serde_cbor;
-//!
 //! use cbor_protocol::*;
 //! use serde_cbor::ser;
 //! use std::time::Duration;
@@ -44,10 +41,7 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-#[macro_use]
-extern crate failure;
-extern crate serde_cbor;
-
+use failure::Fail;
 use serde_cbor::de;
 use std::io;
 use std::net::{SocketAddr, UdpSocket};
@@ -137,9 +131,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```no_run
-    /// extern crate cbor_protocol;
-    /// extern crate serde_cbor;
-    ///
     /// use cbor_protocol::*;
     /// use serde_cbor::ser;
     ///
@@ -150,9 +141,6 @@ impl Protocol {
     /// ```
     ///
     /// ```no_run
-    /// extern crate cbor_protocol;
-    /// extern crate serde_cbor;
-    ///
     /// use cbor_protocol::*;
     /// use serde_cbor::ser;
     ///
@@ -329,8 +317,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```
-    /// extern crate cbor_protocol;
-    ///
     /// use cbor_protocol::*;
     /// use std::time::Duration;
     ///
@@ -390,8 +376,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```no_run
-    /// extern crate cbor_protocol;
-    ///
     /// use cbor_protocol::*;
     /// use std::time::Duration;
     ///

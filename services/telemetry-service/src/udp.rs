@@ -15,6 +15,7 @@
 //
 
 use kubos_telemetry_db::Database;
+use log::info;
 use serde_json::{self, Value};
 use std::net::{SocketAddr, UdpSocket};
 use std::sync::{Arc, Mutex};

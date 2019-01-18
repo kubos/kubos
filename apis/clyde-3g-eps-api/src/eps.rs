@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-use commands::*;
+use crate::commands::*;
 use eps_api::EpsResult;
 use rust_i2c::Connection;
 use std::time::Duration;
-use telemetry;
+use crate::telemetry;
 
 /// EPS structure containing low level connection and functionality
 /// required for commanding and requesting telemetry from EPS device.

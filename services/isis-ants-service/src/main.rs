@@ -348,27 +348,14 @@
 #![deny(missing_docs)]
 #![recursion_limit = "256"]
 
-#[cfg(test)]
-#[macro_use]
-extern crate double;
-extern crate failure;
-extern crate isis_ants_api;
 #[macro_use]
 extern crate juniper;
-#[macro_use]
-extern crate kubos_service;
-#[macro_use]
-extern crate log;
-#[cfg(test)]
-#[macro_use]
-extern crate serde_json;
-extern crate syslog;
 
 use isis_ants_api::AntSResult;
 use kubos_service::{Config, Service};
-use model::Subsystem;
-pub use objects::*;
-use schema::{MutationRoot, QueryRoot};
+use crate::model::Subsystem;
+pub use crate::objects::*;
+use crate::schema::{MutationRoot, QueryRoot};
 use syslog::Facility;
 
 mod model;

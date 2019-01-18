@@ -21,9 +21,7 @@
 //! This crate contains high level types and functions for use
 //! by other crates implementing EPS APIs.
 
-#[macro_use]
-extern crate failure;
-
+use failure::Fail;
 use std::error::Error;
 use std::io;
 

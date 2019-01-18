@@ -16,7 +16,7 @@
 // Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
 //
 
-use errors::*;
+use crate::errors::*;
 use std::sync::{Arc, Mutex};
 
 /// Generic telemetry collected by the communication service.

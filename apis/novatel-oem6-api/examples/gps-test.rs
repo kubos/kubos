@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-extern crate novatel_oem6_api;
-
 use novatel_oem6_api::*;
 use std::sync::mpsc::sync_channel;
 use std::thread;

@@ -16,13 +16,13 @@
 
 use super::*;
 use kubos_service::{Config, Service};
-use model::*;
-use schema::*;
-use serde_json;
+use crate::model::*;
+use crate::schema::*;
+use serde_json::json;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use tests::test_data::*;
+use crate::tests::test_data::*;
 
 macro_rules! wrap {
     ($result:ident) => {{

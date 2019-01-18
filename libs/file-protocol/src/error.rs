@@ -15,6 +15,7 @@
 //
 
 use cbor_protocol;
+use failure::Fail;
 use serde_cbor;
 use std::io;
 

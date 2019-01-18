@@ -14,7 +14,9 @@
 // limitations under the License.
 //
 
-use failure::Error;
+use failure::{bail, Error};
+use kubos_service::{process_errors, run, push_err};
+use log::info;
 use mai400_api::*;
 use std::cell::{Cell, RefCell};
 use std::sync::mpsc::channel;
@@ -23,7 +25,7 @@ use std::sync::{Arc, Mutex};
 use std::thread::{sleep, spawn};
 use std::time::Duration;
 
-use objects::*;
+use crate::objects::*;
 
 pub struct ReadData {
     pub std_telem: Mutex<StandardTelemetry>,

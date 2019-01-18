@@ -2,6 +2,7 @@
 name = "mai400"
 version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
+edition = "2018"
 
 [dependencies]
 mai400-api = { path = "../../../../apis/mai400-api" }

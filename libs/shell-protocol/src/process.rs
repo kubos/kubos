@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use error::ProtocolError;
+use crate::error::ProtocolError;
 use libc::pid_t;
 use nix::sys::signal;
 use nix::unistd::Pid;

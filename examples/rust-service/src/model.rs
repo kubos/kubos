@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+use log::info;
 use std::io::{Error, ErrorKind};
 
 /// Model for power mutations

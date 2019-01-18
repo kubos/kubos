@@ -407,18 +407,7 @@
 #![recursion_limit = "256"]
 
 #[macro_use]
-extern crate failure;
-#[macro_use]
 extern crate juniper;
-#[macro_use]
-extern crate kubos_service;
-#[macro_use]
-extern crate log;
-extern crate mai400_api;
-#[cfg(test)]
-#[macro_use]
-extern crate serde_json;
-extern crate syslog;
 
 mod model;
 mod objects;
@@ -428,9 +417,9 @@ mod tests;
 
 use kubos_service::{Config, Service};
 use mai400_api::MAIResult;
-use model::{ReadData, Subsystem};
-pub use objects::*;
-use schema::{MutationRoot, QueryRoot};
+use crate::model::{ReadData, Subsystem};
+pub use crate::objects::*;
+use crate::schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
 use syslog::Facility;
 

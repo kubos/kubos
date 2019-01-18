@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 #![deny(warnings)]
-extern crate kubos_system;
-extern crate tempfile;
-extern crate toml;
 
 use std::io::Write;
 use tempfile::NamedTempFile;

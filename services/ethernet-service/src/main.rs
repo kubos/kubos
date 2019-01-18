@@ -26,12 +26,7 @@
 //! Telemetry queries will be added as desired for testing.
 //!
 
-extern crate comms_service;
-extern crate failure;
-extern crate log;
-extern crate syslog;
-
-use comms::*;
+use crate::comms::*;
 use comms_service::*;
 use failure::Error;
 use std::net::UdpSocket;

@@ -20,15 +20,11 @@
  * return status of the run_onboot() function can be directly examined and verified from there.
  */
 #![deny(warnings)]
-extern crate kubos_app;
-extern crate kubos_system;
-extern crate serde_json;
-extern crate tempfile;
 
 use std::path::Path;
 
 mod utils;
-pub use utils::*;
+pub use crate::utils::*;
 
 fn setup_apps(registry_dir: &Path) {
     MockAppBuilder::new("app1", "a-b-c-d-e")

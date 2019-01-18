@@ -16,14 +16,13 @@
 
 #[macro_use]
 extern crate juniper;
-extern crate kubos_service;
 
 mod model;
 mod schema;
 
 use kubos_service::{Config, Service};
-use model::Subsystem;
-use schema::{MutationRoot, QueryRoot};
+use crate::model::Subsystem;
+use crate::schema::{MutationRoot, QueryRoot};
 
 fn main() {
     Service::new(
