@@ -312,18 +312,8 @@
 
 #![recursion_limit = "256"]
 
-extern crate failure;
 #[macro_use]
 extern crate juniper;
-#[macro_use]
-extern crate kubos_service;
-#[macro_use]
-extern crate log;
-extern crate novatel_oem6_api;
-#[cfg(test)]
-#[macro_use]
-extern crate serde_json;
-extern crate syslog;
 
 mod model;
 mod objects;
@@ -332,10 +322,10 @@ mod schema;
 mod tests;
 
 use kubos_service::{Config, Service};
-use model::{LockData, Subsystem};
+use crate::model::{LockData, Subsystem};
 use novatel_oem6_api::OEMResult;
-pub use objects::*;
-use schema::{MutationRoot, QueryRoot};
+pub use crate::objects::*;
+use crate::schema::{MutationRoot, QueryRoot};
 use std::sync::Arc;
 use syslog::Facility;
 

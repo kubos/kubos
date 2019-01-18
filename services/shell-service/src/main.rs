@@ -16,15 +16,8 @@
 
 #![deny(warnings)]
 
-extern crate cbor_protocol;
-extern crate kubos_system;
-#[macro_use]
-extern crate log;
-extern crate shell_protocol;
-extern crate shell_service;
-extern crate syslog;
-
 use kubos_system::Config as ServiceConfig;
+use log::{error, info, warn};
 use shell_service::*;
 use syslog::Facility;
 

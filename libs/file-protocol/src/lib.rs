@@ -19,8 +19,6 @@
 //! # Examples
 //!
 //! ```no_run
-//! extern crate file_protocol;
-//!
 //! use file_protocol::*;
 //! use std::time::Duration;
 //!
@@ -88,29 +86,18 @@
 
 #![deny(missing_docs)]
 
-extern crate blake2_rfc;
-extern crate cbor_protocol;
-#[macro_use]
-extern crate failure;
-#[macro_use]
-extern crate log;
-extern crate rand;
-extern crate serde;
-extern crate serde_cbor;
-extern crate time;
-
 mod error;
 mod messages;
 mod parsers;
 pub mod protocol;
 mod storage;
 
-pub use error::ProtocolError;
-pub use protocol::Protocol as FileProtocol;
-pub use protocol::ProtocolConfig as FileProtocolConfig;
-pub use protocol::State;
+pub use crate::error::ProtocolError;
+pub use crate::protocol::Protocol as FileProtocol;
+pub use crate::protocol::ProtocolConfig as FileProtocolConfig;
+pub use crate::protocol::State;
 
-pub use parsers::parse_channel_id;
+pub use crate::parsers::parse_channel_id;
 
 /// File protocol message types
 #[derive(Debug, Clone, Eq, PartialEq)]

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #![deny(warnings)]
-extern crate kubos_system;
 
 use std::env;
 use std::fs;

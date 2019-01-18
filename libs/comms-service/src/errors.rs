@@ -16,7 +16,7 @@
 // Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
 //
 
-use failure::Error;
+use failure::{Error, Fail};
 
 /// This enum defines all errors that can occur within the `comms-service`.
 #[derive(Fail, Debug, PartialEq)]

@@ -14,16 +14,9 @@
 // limitations under the License.
 //
 
-extern crate cbor_protocol;
-extern crate file_protocol;
-extern crate file_service;
-extern crate kubos_system;
-extern crate rand;
-extern crate tempfile;
-
 mod common;
 
-use common::*;
+use crate::common::*;
 use file_protocol::ProtocolError;
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;

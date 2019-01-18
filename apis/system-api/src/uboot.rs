@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use failure::Error;
-
+use failure::{Error, format_err};
 use std::process::Command;
 use std::str::FromStr;
 

@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 #![deny(warnings)]
-extern crate kubos_app;
-extern crate kubos_system;
-#[macro_use]
-extern crate serde_json;
-extern crate tempfile;
 
 use kubos_app::ServiceConfig;
+use serde_json::json;
 use std::panic;
 use std::path::Path;
 use std::time::Duration;
 
 mod utils;
-pub use utils::*;
+pub use crate::utils::*;
 
 fn setup_apps(registry_dir: &Path) {
     MockAppBuilder::new("app1", "a-b-c-d-e")

@@ -2,6 +2,7 @@
 name = "kubos-system"
 version = "0.1.0"
 authors = ["Marshall Culpepper <marshall@kubos.com>"]
+edition = "2018"
 
 [dependencies]
 failure = "0.1.2"

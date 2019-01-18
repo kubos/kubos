@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use app_entry;
+use crate::app_entry;
 use juniper::FieldResult;
 
 /// Common response fields structure for requests

@@ -20,12 +20,7 @@
 //! # Examples
 //!
 //! ```
-//! #[macro_use]
-//! extern crate failure;
-//! #[macro_use]
-//! extern crate kubos_app;
-//!
-//! use failure::Error;
+//! use failure::{bail, Error};
 //! use kubos_app::*;
 //! use std::time::Duration;
 //!
@@ -76,31 +71,16 @@
 
 #![deny(missing_docs)]
 #![deny(warnings)]
-#[macro_use]
-extern crate failure;
-extern crate getopts;
+
 #[cfg(test)]
 #[macro_use]
 extern crate juniper;
-#[cfg(test)]
-extern crate kubos_service;
-extern crate kubos_system;
-extern crate log;
-extern crate log4rs;
-extern crate log4rs_syslog;
-#[cfg(not(test))]
-extern crate serde_json;
-#[cfg(test)]
-#[macro_use]
-extern crate serde_json;
-#[cfg(test)]
-extern crate tempfile;
 
 mod framework;
 mod query;
 #[cfg(test)]
 mod tests;
 
-pub use framework::*;
+pub use crate::framework::*;
 pub use kubos_system::Config as ServiceConfig;
-pub use query::query;
+pub use crate::query::query;

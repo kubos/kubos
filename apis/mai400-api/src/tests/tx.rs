@@ -15,7 +15,7 @@
  */
 
 use super::*;
-use mai400::*;
+use crate::mai400::*;
 
 #[test]
 fn reset_good() {

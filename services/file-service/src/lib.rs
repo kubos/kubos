@@ -14,17 +14,9 @@
 // limitations under the License.
 //
 
-extern crate cbor_protocol;
-extern crate file_protocol;
-extern crate kubos_system;
-#[macro_use]
-extern crate log;
-extern crate failure;
-extern crate serde_cbor;
-extern crate syslog;
-
 use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;
+use log::warn;
 use std::collections::HashMap;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
 use std::sync::{Arc, Mutex};

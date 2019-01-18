@@ -21,7 +21,8 @@ use super::parsers;
 use super::storage;
 use super::Message;
 use cbor_protocol::Protocol as CborProtocol;
-use error::ProtocolError;
+use crate::error::ProtocolError;
+use log::{info, warn};
 use rand::{self, Rng};
 use serde_cbor::Value;
 use std::cell::Cell;
@@ -151,9 +152,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```
-    /// extern crate file_protocol;
-    /// extern crate serde_cbor;
-    ///
     /// use file_protocol::*;
     /// use serde_cbor::ser;
     ///
@@ -184,8 +182,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```no_run
-    /// extern crate file_protocol;
-    ///
     /// use file_protocol::*;
     /// use std::time::Duration;
     ///
@@ -445,8 +441,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```
-    /// extern crate file_protocol;
-    ///
     /// use file_protocol::*;
     /// use std::time::Duration;
     ///
@@ -604,8 +598,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```
-    /// extern crate file_protocol;
-    ///
     /// use file_protocol::*;
     /// use std::time::Duration;
     ///

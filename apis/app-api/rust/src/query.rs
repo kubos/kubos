@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use failure;
+use failure::format_err;
 use kubos_system::Config as ServiceConfig;
 use serde_json;
 use std::net::UdpSocket;
@@ -37,8 +37,6 @@ type AppResult<T> = Result<T, failure::Error>;
 /// # Examples
 ///
 /// ```
-/// # extern crate failure;
-/// # extern crate kubos_app;
 /// # use failure;
 /// use kubos_app::*;
 /// use std::time::Duration;
@@ -58,8 +56,6 @@ type AppResult<T> = Result<T, failure::Error>;
 /// ```
 ///
 /// ```
-/// # extern crate failure;
-/// # extern crate kubos_app;
 /// # use failure;
 /// use kubos_app::*;
 /// use std::time::Duration;

@@ -15,12 +15,13 @@
  */
 
 use kubos_service::{Config, Service};
+use serde_json::json;
 use std::fs;
 
 use tempfile::TempDir;
 
-use registry::*;
-use schema;
+use crate::registry::*;
+use crate::schema;
 
 #[test]
 fn register_good() {

@@ -15,6 +15,7 @@
 //
 
 use super::*;
+use serde_json::json;
 
 #[test]
 fn query_errors_empty() {

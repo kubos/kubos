@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+use serde_derive::{Deserialize, Serialize};
 use super::telemetry;
 
 #[derive(Debug, Queryable, Serialize, Deserialize)]

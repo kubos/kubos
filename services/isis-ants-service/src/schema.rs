@@ -16,8 +16,8 @@
 
 use juniper::FieldResult;
 use kubos_service;
-use model::*;
-use objects::*;
+use crate::model::*;
+use crate::objects::*;
 
 type Context = kubos_service::Context<Subsystem>;
 

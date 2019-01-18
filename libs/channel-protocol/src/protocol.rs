@@ -15,8 +15,8 @@
 //
 
 use cbor_protocol::Protocol as CborProtocol;
-use error::ProtocolError;
-use parsers::parse_message;
+use crate::error::ProtocolError;
+use crate::parsers::parse_message;
 use serde_cbor::Value;
 use std::cell::Cell;
 use std::net::SocketAddr;
@@ -94,9 +94,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```no_run
-    /// extern crate channel_protocol;
-    /// extern crate serde_cbor;
-    ///
     /// use channel_protocol::*;
     /// use serde_cbor::ser;
     ///
@@ -125,8 +122,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```no_run
-    /// extern crate channel_protocol;
-    ///
     /// use channel_protocol::*;
     /// use std::time::Duration;
     ///
@@ -163,8 +158,6 @@ impl Protocol {
     /// # Examples
     ///
     /// ```no_run
-    /// extern crate channel_protocol;
-    ///
     /// use channel_protocol::*;
     /// use std::time::Duration;
     ///

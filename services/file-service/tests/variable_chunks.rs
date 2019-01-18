@@ -14,17 +14,9 @@
 // limitations under the License.
 //
 
-extern crate blake2_rfc;
-extern crate cbor_protocol;
-extern crate file_protocol;
-extern crate file_service;
-extern crate kubos_system;
-extern crate rand;
-extern crate tempfile;
-
 mod common;
 
-use common::*;
+use crate::common::*;
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};

@@ -15,7 +15,7 @@
 //
 
 use channel_protocol::ChannelMessage;
-use error::ProtocolError;
+use crate::error::ProtocolError;
 use serde_cbor::Value;
 use std::collections::HashMap;
 

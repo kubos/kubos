@@ -2,6 +2,7 @@
 name = "rust-i2c"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
+edition = "2018"
 
 [dependencies]
 i2c-linux = "0.1"

@@ -16,13 +16,8 @@
 // Example client program for interacting with a Kubos Service using UDP
 //
 
-#[macro_use]
-extern crate nix;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-extern crate toml;
-
+use nix::{convert_ioctl_res, ioctl};
+use serde_derive::Deserialize;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;

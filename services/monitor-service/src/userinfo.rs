@@ -19,7 +19,7 @@ use std::io::{BufRead, BufReader, Read};
 use std::os::unix::fs::MetadataExt;
 use std::str::FromStr;
 
-use process::root_dir;
+use crate::process::root_dir;
 
 #[derive(Clone)]
 pub struct UserInfo {

@@ -15,7 +15,7 @@
  */
 
 use adcs_api::*;
-use ffi::*;
+use crate::ffi::*;
 
 /// Structure for interacting with the ISIS iMTQ
 pub struct Imtq<T: ImtqFFI> {
@@ -160,7 +160,7 @@ impl<T: ImtqFFI> Drop for Imtq<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use double;
+    use double::*;
 
     mock_trait!(
         MockImtq,

@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use error::ProtocolError;
-use protocol::Message;
+use crate::error::ProtocolError;
+use crate::protocol::Message;
 use serde_cbor::Value;
 
 /// Parse out just the channel ID from a message
