@@ -20,11 +20,11 @@ use std::env;
 use std::fs::File;
 use std::io::*;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
+use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::time::Duration;
 use std::{thread, thread::JoinHandle};
-use tempfile::TempDir;
 
 static UP_SQL: &'static str = r"CREATE TABLE telemetry (
     timestamp INTEGER NOT NULL,
@@ -64,7 +64,6 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
 
     let (tx, rx): (Sender<bool>, Receiver<bool>) = channel();
     let telem_thread = thread::spawn(move || {
-        assert!(Path::new(config).exists());
         let mut telem_proc = Command::new(telem_path)
             .arg("-c")
             .arg(config)
@@ -85,7 +84,6 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
 
     // Give the process a bit to actually start
     thread::sleep(Duration::from_millis(100));
-    assert!(Path::new(config).exists());
     return (telem_thread, tx);
 }
 
@@ -104,9 +102,9 @@ pub fn setup(
 
     let config_dir = match Path::new(db).parent() {
         Some(dir) => dir,
-        None => TempDir::new().unwrap(),
-    }
-    let config_path = config_dir.path().join("config.toml");
+        None => Path::new(""),
+    };
+    let config_path = config_dir.join("config.toml");
 
     let config = format!(
         r#"
