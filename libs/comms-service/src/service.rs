@@ -188,6 +188,7 @@ fn read_thread<T: Clone + Send + 'static>(
             None => {
                 log_telemetry(&data, TelemType::UpFailed).unwrap();
                 log_error(&data, CommsServiceError::HeaderParsing.to_string()).unwrap();
+                error!("Failed to parse packet header");
                 continue;
             }
         };
@@ -196,6 +197,7 @@ fn read_thread<T: Clone + Send + 'static>(
         if packet.get_checksum() != ipv4_checksum(&packet, &comms.ground_ip, &comms.satellite_ip) {
             log_telemetry(&data, TelemType::UpFailed).unwrap();
             log_error(&data, CommsServiceError::InvalidChecksum.to_string()).unwrap();
+            error!("Packet checksum failed");
             continue;
         }
 
@@ -213,6 +215,7 @@ fn read_thread<T: Clone + Send + 'static>(
             Some(sock) => sock,
             None => {
                 log_error(&data, CommsServiceError::NoAvailablePorts.to_string()).unwrap();
+                error!("No message handler ports available");
                 continue;
             }
         };
@@ -304,7 +307,8 @@ fn handle_message<T: Clone>(
         }
         Err(e) => {
             log_telemetry(&data, TelemType::DownFailed).unwrap();
-            log_error(&data, e.to_string()).unwrap()
+            log_error(&data, e.to_string()).unwrap();
+            error!("UDP packet failed to downlink");
         }
     };
 }
@@ -362,6 +366,7 @@ fn downlink_endpoint<T: Clone>(
             Err(e) => {
                 log_telemetry(&data, TelemType::DownFailed).unwrap();
                 log_error(&data, e.to_string()).unwrap();
+                error!("UDP Packet failed to downlink");
             }
         };
     }
