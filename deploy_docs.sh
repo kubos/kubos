@@ -1,6 +1,6 @@
 #! /bin/bash
 
-latest_tag=`git tag --sort=-creatordate | head -n 1`
+latest_tag=`git tag --sort=-creatordate --sort=-v:refname| head -n 1`
 
 echo "Uploading new docs.."
 git clone https://github.com/kubos/pm-tools
