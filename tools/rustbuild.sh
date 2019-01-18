@@ -10,4 +10,4 @@ set -e
 cargo kubos -c check
 
 # Run all unit tests
-RUST_BACKTRACE=1 cargo kubos -c test -- -- --test-threads=1
+RUST_BACKTRACE=1 cargo kubos -c test
