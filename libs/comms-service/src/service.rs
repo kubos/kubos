@@ -16,9 +16,10 @@
 // Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
 //
 
-use byteorder::{BigEndian, ByteOrder};
-use crate::config::CommsConfig;
+use crate::config::*;
 use crate::errors::*;
+use crate::telemetry::*;
+use byteorder::{BigEndian, ByteOrder};
 use log::info;
 use pnet::packet::udp::{ipv4_checksum, UdpPacket};
 use pnet::packet::Packet;
@@ -28,7 +29,6 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use crate::telemetry::*;
 
 // UDP header length.
 const HEADER_LEN: usize = 8;
@@ -87,11 +87,19 @@ impl<T: Clone> CommsControlBlock<T> {
             write,
             read_conn,
             write_conn,
-            handler_port_min: config.handler_port_min,
-            handler_port_max: config.handler_port_max,
-            timeout: config.timeout,
-            ground_ip: Ipv4Addr::from_str(&config.ground_ip).unwrap(),
-            satellite_ip: Ipv4Addr::from_str(&config.satellite_ip).unwrap(),
+            handler_port_min: config.handler_port_min.unwrap_or(DEFAULT_HANDLER_START),
+            handler_port_max: config.handler_port_max.unwrap_or(DEFAULT_HANDLER_END),
+            timeout: config.timeout.unwrap_or(DEFAULT_TIMEOUT),
+            ground_ip: Ipv4Addr::from_str(
+                &config.ground_ip.unwrap_or(DEFAULT_GROUND_IP.to_string()),
+            )
+            .unwrap(),
+            satellite_ip: Ipv4Addr::from_str(
+                &config
+                    .satellite_ip
+                    .unwrap_or(DEFAULT_SATELLITE_IP.to_string()),
+            )
+            .unwrap(),
             downlink_ports: config.downlink_ports,
             ground_port: config.ground_port,
         }
