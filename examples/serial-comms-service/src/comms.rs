@@ -14,8 +14,14 @@
 // limitations under the License.
 //
 
-use comms_service::CommsResult;
-use kiss;
+//!
+//! Serial communications functionality for use in conjunction
+//! with the communications service library. KISS framing is
+//! implemented for data integrity over the serial link.
+//!
+
+use crate::kiss;
+use crate::SerialServiceResult;
 use rust_uart::Connection;
 use std::cell::RefCell;
 use std::sync::{Arc, Mutex};
@@ -44,9 +50,9 @@ impl SerialComms {
         }
     }
 
-    // Function to allow reading a whole udp packet from a serial socket
+    // Function to allow reading a whole UDP packet from a serial socket
     // using KISS framing
-    pub fn read(&self) -> CommsResult<Vec<u8>> {
+    pub fn read(&self) -> SerialServiceResult<Vec<u8>> {
         let mut buffer = self.buffer.borrow_mut();
         loop {
             let mut buf = match self.conn.read(1, Duration::from_millis(1)) {
@@ -69,27 +75,27 @@ impl SerialComms {
                 return Ok(parsed);
             }
             Err(e) => {
-                bail!("parse err {:?}", e);
+                bail!("Parse err {:?}", e);
             }
         }
     }
 
     // Function to allow writing over a UDP socket.
-    pub fn write(&self, data: &[u8]) -> CommsResult<()> {
-        let wrapped = kiss::encode(data).unwrap();
+    pub fn write(&self, data: &[u8]) -> SerialServiceResult<()> {
+        let wrapped = kiss::encode(data);
         self.conn.write(&wrapped)?;
         Ok(())
     }
 }
 
-pub fn read_ser(socket: Arc<Mutex<SerialComms>>) -> CommsResult<Vec<u8>> {
+pub fn read_ser(socket: Arc<Mutex<SerialComms>>) -> SerialServiceResult<Vec<u8>> {
     if let Ok(socket) = socket.lock() {
         return Ok(socket.read()?);
     }
     bail!("Failed to lock socket");
 }
 
-pub fn write_ser(socket: Arc<Mutex<SerialComms>>, data: &[u8]) -> CommsResult<()> {
+pub fn write_ser(socket: Arc<Mutex<SerialComms>>, data: &[u8]) -> SerialServiceResult<()> {
     if let Ok(socket) = socket.lock() {
         socket.write(data)?;
     }

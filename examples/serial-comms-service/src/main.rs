@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 Kubos Corporation
+// Copyright (C) 2019 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 #![deny(warnings)]
 
 //!
-//! Hardware service to allow for serial debugging. This service starts up a communication
-//! service to allow communication over a serial link to the satellite.
+//! Hardware service to allow for serial communications. This service starts up a communication
+//! service to allow transfer of udp packets over a serial link to the satellite.
 //!
 
 extern crate comms_service;
@@ -41,12 +41,12 @@ mod kiss;
 mod model;
 mod schema;
 
-use comms::*;
+use crate::comms::*;
+use crate::model::Subsystem;
+use crate::schema::{MutationRoot, QueryRoot};
 use comms_service::*;
 use failure::Error;
 use kubos_service::{Config, Service};
-use model::Subsystem;
-use schema::{MutationRoot, QueryRoot};
 use std::sync::{Arc, Mutex};
 
 // Return type for the ethernet service.
@@ -123,12 +123,11 @@ fn main() -> SerialServiceResult<()> {
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
-    info!("Serial Communications Service starting on {}", bus);
     // Start communication service.
+    info!("Serial Communications Service starting on {}", bus);
     CommsService::start(controls, telem.clone())?;
 
     let subsystem = Subsystem::new(telem);
-    // We will eventually start the GraphQL service here.
     Service::new(service_config, subsystem, QueryRoot, MutationRoot).start();
 
     Ok(())

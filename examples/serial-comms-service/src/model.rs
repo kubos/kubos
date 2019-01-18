@@ -14,6 +14,11 @@
 // limitations under the License.
 //
 
+//!
+//! Data model used to expose communications service telemetry
+//! information over the GraphQL interface.
+//!
+
 use comms_service::CommsTelemetry;
 use std::sync::{Arc, Mutex};
 
@@ -56,10 +61,7 @@ impl Subsystem {
 
     pub fn errors(&self) -> Result<Vec<String>, String> {
         match self.telem.lock() {
-            Ok(data) => {
-                println!("get errors {:?}", data.errors);
-                Ok(data.errors.to_owned())
-            }
+            Ok(data) => Ok(data.errors.to_owned()),
             Err(_) => Err("Failed to lock telemetry".to_owned()),
         }
     }

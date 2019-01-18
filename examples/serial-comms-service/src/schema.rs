@@ -14,8 +14,13 @@
 // limitations under the License.
 //
 
+//!
+//! GraphQL schema for exposing communications service
+//! telemetry information.
+//!
+
+use crate::model::Subsystem;
 use juniper::FieldResult;
-use model::Subsystem;
 
 type Context = kubos_service::Context<Subsystem>;
 
@@ -24,6 +29,14 @@ pub struct QueryRoot;
 graphql_object!(QueryRoot: Context as "Query" |&self| {
     // Test query to verify service is running without attempting
     // to communicate with the underlying subsystem
+    //
+    // Query
+    //
+    // {
+    //     ping
+    // }
+    //
+    // Response
     //
     // {
     //     ping: "pong"

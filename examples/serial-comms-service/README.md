@@ -1,0 +1,40 @@
+# Serial Communications Service
+
+This example communications service provides communications functionality over a
+serial link and gives a template for how to structure a communications service project.
+
+KISS framing is implemented to preserve message integrity over the serial link.
+
+A more detailed tutorial on how to create a new communications service can be found
+[here](https://docs.kubos.com/1.10.0/tutorials/file-transfer.html).
+
+## Running 
+
+This service expects a service configuration file in either the default location
+or to be passed in at runtime like so `cargo run -- -c config.toml`.
+
+The service expects the following sections and settings to be present:
+
+```toml
+[serial-comms-service] -- Service specific configuration
+bus = "/dev/ttyUSB0" -- Serial bus to use
+[serial-comms-service.addr] -- GraphQL configuration
+ip = "127.0.0.1" -- IP to bind GraphQL server to
+port = 8012 -- Port to listen on for GraphQL queries
+[serial-comms-service.comms] -- Communications service configuration
+handler_port_min = 14000 -- Starting port to bind to when creating message handlers
+handler_port_max = 14010 -- Ending port to bind to when creating message handlers
+downlink_ports = [14011] -- Ports to listen for local traffic on
+timeout = 1 -- Timeout when listening for packet response
+ground_port = 14020 -- Port to send ground communications on
+ground_ip = "192.168.0.1" -- IP to expect ground communications from
+satellite_ip = "0.0.0.0" -- IP to bind Communications service listener to
+```
+
+When the service has started correctly it will display output like so:
+
+```
+2019-01-18T13:00:32.512854973-06:00 INFO serial_comms_service - Serial Communications Service starting on /dev/ttyUSB0
+2019-01-18T13:00:32.513053752-06:00 INFO comms_service::service - Communication service started
+2019-01-18T13:00:32.513855-06:00 INFO kubos_service::service - Listening on: 127.0.0.1:8080
+```

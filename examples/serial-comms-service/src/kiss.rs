@@ -14,7 +14,15 @@
 // limitations under the License.
 //
 
-/// Finds and escapes any of the kiss frame separators
+//!
+//! KISS encoding and decoding functionality to provide framing
+//! over the serial link.
+//! An overview of KISS can be found here: https://en.wikipedia.org/wiki/KISS_(TNC)
+//!
+
+use failure::Error;
+
+/// Finds and escapes any of the KISS frame separators
 /// in a data buffer
 fn escape(buf: &[u8]) -> Vec<u8> {
     let mut new_buf = vec![];
@@ -34,7 +42,7 @@ fn escape(buf: &[u8]) -> Vec<u8> {
     new_buf
 }
 
-/// Finds and unescapes any escaped kiss frame separators
+/// Finds and unescapes any escaped KISS frame separators
 /// in a data buffer
 fn unescape(buf: &[u8]) -> (Vec<u8>, bool) {
     let mut new_buf = vec![];
@@ -61,20 +69,20 @@ fn unescape(buf: &[u8]) -> (Vec<u8>, bool) {
     (new_buf, true)
 }
 
-/// Encodes a data buffer into a kiss frame
-pub fn encode(frame: &[u8]) -> Result<Vec<u8>, String> {
+/// Encodes a data buffer into a KISS frame
+pub fn encode(frame: &[u8]) -> Vec<u8> {
     let mut buff = vec![0xC0, 0x00];
 
     buff.extend(escape(frame).iter().clone());
     buff.push(0xC0);
 
-    Ok(buff)
+    buff
 }
 
-/// Finds and decodes kiss frame found inside of data buffer
+/// Finds and decodes KISS frame found inside of data buffer
 /// Will also return any data found before and after
 /// the complete frame.
-pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), String> {
+pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Error> {
     let mut frame = vec![];
     let mut pre_frame = vec![];
     let mut post_frame = vec![];
@@ -82,7 +90,7 @@ pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), String> {
     let mut valid = false;
 
     if chunk.len() < 2 {
-        return Err(String::from("Kiss frame start not found"));
+        bail!("KISS frame start not found");
     }
 
     while !valid {
@@ -90,7 +98,7 @@ pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), String> {
         let mut index_a = 0;
         let mut index_b;
 
-        // Search for first full kiss frame
+        // Search for first full KISS frame
         for (i, e) in chunk.iter().skip(index_l).enumerate() {
             if *e == 0xC0 {
                 if let Some(piece) = chunk.get(i + 1) {
@@ -102,7 +110,7 @@ pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), String> {
             }
         }
         if index_a == 0 {
-            return Err(String::from("Kiss frame start not found"));
+            bail!("KISS frame start not found");
         }
 
         index_b = 0;
@@ -114,7 +122,7 @@ pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), String> {
             }
         }
         if index_b == 0 {
-            return Err(String::from("Kiss frame end not found"));
+            bail!("KISS frame end not found");
         }
 
         // Extract the frame payload
@@ -157,14 +165,14 @@ mod tests {
 
     #[test]
     fn test_encode() {
-        let encoded = encode(&vec![0x00, 0x01, 0x02, 0x03]).unwrap();
+        let encoded = encode(&vec![0x00, 0x01, 0x02, 0x03]);
 
         assert_eq!(encoded, vec![0xC0, 0x00, 0x00, 0x01, 0x02, 0x03, 0xC0]);
     }
 
     #[test]
     fn test_encode_with_escape() {
-        let encoded = encode(&vec![0x01, 0x02, 0xC0, 0x04]).unwrap();
+        let encoded = encode(&vec![0x01, 0x02, 0xC0, 0x04]);
 
         assert_eq!(
             encoded,
@@ -174,7 +182,7 @@ mod tests {
 
     #[test]
     fn test_encode_with_n_escapes() {
-        let encoded = encode(&vec![0x01, 0xDB, 0x02, 0xC0, 0x04, 0xDB, 0xC0]).unwrap();
+        let encoded = encode(&vec![0x01, 0xDB, 0x02, 0xC0, 0x04, 0xDB, 0xC0]);
 
         assert_eq!(
             encoded,
@@ -187,8 +195,8 @@ mod tests {
     #[test]
     fn test_decode_frame() {
         let (decoded, pre, post) = decode(&vec![0xC0, 0x00, 0x01, 0x01, 0x01, 0xC0]).unwrap();
-        assert_eq!(pre, vec![]);
-        assert_eq!(post, vec![]);
+        assert_eq!(pre, Vec::<u8>::new());
+        assert_eq!(post, Vec::<u8>::new());
         assert_eq!(decoded, vec![0x01, 0x1, 0x1]);
     }
 
@@ -197,7 +205,7 @@ mod tests {
         let (decoded, pre, post) =
             decode(&vec![0xFF, 0xBB, 0xCC, 0xC0, 0x00, 0x01, 0x02, 0x03, 0xC0]).unwrap();
         assert_eq!(pre, vec![0xFF, 0xBB, 0xCC]);
-        assert_eq!(post, vec![]);
+        assert_eq!(post, Vec::<u8>::new());
         assert_eq!(decoded, vec![0x01, 0x2, 0x3]);
     }
 
@@ -205,7 +213,7 @@ mod tests {
     fn test_decode_frame_post_junk() {
         let (decoded, pre, post) =
             decode(&vec![0xC0, 0x00, 0x03, 0x02, 0x01, 0xC0, 0xFF, 0xBB, 0xCC]).unwrap();
-        assert_eq!(pre, vec![]);
+        assert_eq!(pre, Vec::<u8>::new());
         assert_eq!(post, vec![0xFF, 0xBB, 0xCC]);
         assert_eq!(decoded, vec![0x03, 0x2, 0x1]);
     }
@@ -227,8 +235,8 @@ mod tests {
             0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0,
         ])
         .unwrap();
-        assert_eq!(pre, vec![]);
-        assert_eq!(post, vec![]);
+        assert_eq!(pre, Vec::<u8>::new());
+        assert_eq!(post, Vec::<u8>::new());
         assert_eq!(decoded, vec![0x03, 0xC0, 0x4, 0xDB, 0x5]);
     }
 
@@ -246,20 +254,32 @@ mod tests {
     #[test]
     fn test_decode_frame_no_start() {
         assert_eq!(
-            decode(&vec![
-                0x1, 0xF, 0xC1, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF, 0x2
-            ],),
-            Err(String::from("Kiss frame start not found"))
+            format!(
+                "{}",
+                decode(&vec![
+                    0x1, 0xF, 0xC1, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF,
+                    0x2
+                ],)
+                .err()
+                .unwrap()
+            ),
+            String::from("KISS frame start not found")
         );
     }
 
     #[test]
     fn test_decode_frame_no_end() {
         assert_eq!(
-            decode(&vec![
-                0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0x10, 0x1, 0xF, 0x2
-            ],),
-            Err(String::from("Kiss frame end not found"))
+            format!(
+                "{}",
+                decode(&vec![
+                    0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0x10, 0x1, 0xF,
+                    0x2
+                ],)
+                .err()
+                .unwrap()
+            ),
+            String::from("KISS frame end not found")
         );
     }
 
@@ -273,20 +293,20 @@ mod tests {
             decoded,
             vec![27, 88, 143, 61, 0, 98, 85, 98, 0, 130, 26, 0, 4, 124, 82, 245]
         );
-        assert_eq!(pre, vec![]);
-        assert_eq!(post, vec![]);
+        assert_eq!(pre, Vec::<u8>::new());
+        assert_eq!(post, Vec::<u8>::new());
     }
 
     #[test]
     fn test_encode_decode() {
         let orig = vec![0, 130, 26, 0, 1, 218, 134, 245];
 
-        let encoded = encode(&orig).unwrap();
+        let encoded = encode(&orig);
         let (decoded, pre, post) = decode(&encoded).unwrap();
 
         assert_eq!(decoded, orig);
-        assert_eq!(pre, vec![]);
-        assert_eq!(post, vec![]);
+        assert_eq!(pre, Vec::<u8>::new());
+        assert_eq!(post, Vec::<u8>::new());
     }
 
     #[test]
@@ -295,13 +315,13 @@ mod tests {
             decode(&vec![0xC0, 0x00, 0x01, 0xC0, 0xC0, 0x00, 0x02, 0xC0]).unwrap();
 
         assert_eq!(decoded, vec![0x1]);
-        assert_eq!(pre, vec![]);
+        assert_eq!(pre, Vec::<u8>::new());
         assert_eq!(post, vec![0xC0, 0x00, 0x02, 0xC0]);
 
         let (decoded_2, pre_2, post_2) = decode(&post).unwrap();
 
         assert_eq!(decoded_2, vec![0x2]);
-        assert_eq!(pre_2, vec![]);
-        assert_eq!(post_2, vec![]);
+        assert_eq!(pre_2, Vec::<u8>::new());
+        assert_eq!(post_2, Vec::<u8>::new());
     }
 }
