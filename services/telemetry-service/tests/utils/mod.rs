@@ -20,11 +20,11 @@ use std::env;
 use std::fs::File;
 use std::io::*;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
+use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::time::Duration;
 use std::{thread, thread::JoinHandle};
-use tempfile::TempDir;
 
 static UP_SQL: &'static str = r"CREATE TABLE telemetry (
     timestamp INTEGER NOT NULL,
@@ -100,8 +100,11 @@ pub fn setup(
 
     setup_db(&db, sql);
 
-    let config_dir = TempDir::new().unwrap();
-    let config_path = config_dir.path().join("config.toml");
+    let config_dir = match Path::new(db).parent() {
+        Some(dir) => dir,
+        None => Path::new(""),
+    };
+    let config_path = config_dir.join("config.toml");
 
     let config = format!(
         r#"
