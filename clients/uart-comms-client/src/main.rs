@@ -21,12 +21,8 @@
 // The service will forward the message on to the requested destination port and then return the
 // response once the request has completed.
 //
-// Options:
-//     - Packets can be additionally encapsulated using the KISS protocol to simulate additional
-//       radio-specific framing. Resulting packet is `KISS<UDP<payload>>`.
-//     - Program can be used as a UDP->serial forwarder. When started with the `-l` option, it will
-//       listen on the specified port for UDP packets, re-package them, and then transmit over the
-//       serial port. Once a response is received, it will be returned back to the original sender
+// Packets can be additionally encapsulated using the KISS protocol to simulate additional 
+// radio-specific framing. Resulting packet is `KISS<UDP<payload>>`.
 
 mod comms;
 mod kiss;
@@ -37,7 +33,7 @@ use failure::{bail, Error};
 use pnet::packet::udp::{ipv4_checksum, UdpPacket};
 use std::fs::File;
 use std::io::Read;
-use std::net::{Ipv4Addr, UdpSocket};
+use std::net::Ipv4Addr;
 use std::ops::Range;
 use std::time::Duration;
 
@@ -139,12 +135,6 @@ fn main() -> ClientResult<()> {
             .help("Enable KISS framing")
             .short("k")
         )
-        .arg(
-            Arg::with_name("listen")
-            .help("UDP passthrough port")
-            .short("l")
-            .takes_value(true)
-        )
         .get_matches();
 
     let bus = args.value_of("bus").unwrap();
@@ -152,82 +142,67 @@ fn main() -> ClientResult<()> {
     let dest_ip = args.value_of("dest_ip").unwrap().parse()?;
     let dest_port = args.value_of("port").unwrap().parse()?;
     
-    loop {
-        let (query, socket, peer) = if let Some(file) = args.value_of("file") {
-            let mut raw = String::new();
-            File::open(file).and_then(|mut f| f.read_to_string(&mut raw))?;
-            (raw.to_string(), None, None)
-        } else if let Some(data) = args.value_of("data") {
-            (data.to_string(), None, None)
-        } else {
-            let mut buf = [0; 4096];
-            let port = args.value_of("listen").unwrap();
-            let socket = UdpSocket::bind(("0.0.0.0", port.parse()?))?;
-            let (size, peer) = socket
-                .recv_from(&mut buf)
-                .expect("Failed to receive a message");
-            (String::from_utf8(buf[0..(size)].to_vec())?, Some(socket), Some(peer))
-        };
+    let query = if let Some(file) = args.value_of("file") {
+        let mut raw = String::new();
+        File::open(file).and_then(|mut f| f.read_to_string(&mut raw))?;
+        raw
+    } else {
+        args.value_of("data").unwrap().to_string()
+    };
+
+    println!("Request: {}", query);
+
+    // Wrap the request in a UDP packet
+    let packet = build_packet(
+        query.as_bytes(),
+        query.len() as u16,
+        source_ip,
+        SOURCE_PORT,
+        dest_ip,
+        dest_port,
+    );
     
-        println!("Request: {}", query);
-    
-        // Wrap the request in a UDP packet
-        let packet = build_packet(
-            query.as_bytes(),
-            query.len() as u16,
-            source_ip,
-            SOURCE_PORT,
-            dest_ip,
-            dest_port,
-        );
+    let packet = if args.is_present("kiss") {
+        // Add KISS framing
+        kiss::encode(&packet)
+    } else {
+        packet
+    };
         
-        let packet = if args.is_present("kiss") {
-            // Add KISS framing
-            kiss::encode(&packet)
-        } else {
-            packet
-        };
-            
-        let mut conn = comms::serial_init(bus)?;
+    let mut conn = comms::serial_init(bus)?;
+
+    // Write our request out through the "radio"
+    comms::write(&mut conn, &packet)?;
+
+    // Get our response
+    let msg = comms::read(&mut conn)?;
     
-        // Write our request out through the "radio"
-        comms::write(&mut conn, &packet)?;
-    
-        // Get our response
-        let msg = comms::read(&mut conn)?;
-        
-        let msg = if args.is_present("kiss") {
-            // Parse the KISS frame
-            let (frame, _, _) = kiss::decode(&msg)?;
-            frame
-        } else {
-            msg
-        };
-    
-        // Parse a UDP packet from the received information.
-        let packet = match UdpPacket::owned(msg.clone()) {
-            Some(packet) => packet,
-            None => {
-                bail!("Failed to parse UDP packet");
-            }
-        };
-    
-        // Verify checksum of the UDP Packet.
-        let calc = ipv4_checksum(&packet, &dest_ip, &source_ip);
-        if packet.get_checksum() != calc {
-            eprintln!("Checksum mismatch");
-        } else {
-            let msg = ::std::str::from_utf8(&msg[8..])?;
-        
-            println!("Response: {}", msg);
+    let msg = if args.is_present("kiss") {
+        // Parse the KISS frame
+        let (frame, _, _) = kiss::decode(&msg)?;
+        frame
+    } else {
+        msg
+    };
+
+    // Parse a UDP packet from the received information.
+    let packet = match UdpPacket::owned(msg.clone()) {
+        Some(packet) => packet,
+        None => {
+            bail!("Failed to parse UDP packet");
         }
-        
-        if args.is_present("listen") {
-            let _ = socket.unwrap().send_to(&msg[8..], peer.unwrap());
-        } else {
-            break;
-        }
+    };
+
+    // Verify checksum of the UDP Packet.
+    let calc = ipv4_checksum(&packet, &dest_ip, &source_ip);
+    if packet.get_checksum() != calc {
+        eprintln!("Checksum mismatch");
+    } else {
+        let msg = ::std::str::from_utf8(&msg[8..])?;
+    
+        println!("Response: {}", msg);
     }
+    
 
     Ok(())
 }
