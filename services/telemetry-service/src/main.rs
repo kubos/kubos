@@ -219,6 +219,8 @@ fn main() {
     .unwrap();
 
     let config = Config::new("telemetry-service");
+    
+    eprintln!("Config: {:?}", config);
 
     let db_path = config
         .get("database")

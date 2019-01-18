@@ -187,7 +187,13 @@ fn parse_config_file(name: &str, path: String) -> Result<Config, toml::de::Error
 }
 
 fn parse_config_str(name: &str, contents: &str) -> Result<Config, toml::de::Error> {
-    let data: Value = toml::from_str(&contents)?;
+    let data: Value = match toml::from_str(&contents) {
+        Ok(val) => val,
+        Err(err) => {
+            eprintln!("Failed to parse config: {:?}", err);
+            return Err(err);    
+        }
+    };
     let mut config = Config::default();
 
     if let Some(data) = data.get(name) {
