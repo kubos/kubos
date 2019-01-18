@@ -3,7 +3,7 @@
 echo "Fetching latest tags"
 git fetch origin --tags
 
-latest_tag=`git tag --sort=-creatordate | head -n 1`
+latest_tag=`git tag --sort=-creatordate --sort=-v:refname| head -n 1`
 new_build_field="+1"
 
 echo "Latest tag: $latest_tag"
