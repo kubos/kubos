@@ -73,6 +73,9 @@
 #[macro_use]
 extern crate juniper;
 
+#[macro_use]
+extern crate log;
+
 mod config;
 mod errors;
 mod service;
