@@ -58,7 +58,7 @@ pub fn log_error(data: &Arc<Mutex<CommsTelemetry>>, error: String) -> CommsResul
 }
 
 // Function used to obtain a mutex lock and update communcation service telemetry.
-pub fn log_telemetry(data: &Arc<Mutex<CommsTelemetry>>, telem_type: TelemType) -> CommsResult<()> {
+pub fn log_telemetry(data: &Arc<Mutex<CommsTelemetry>>, telem_type: &TelemType) -> CommsResult<()> {
     match data.lock() {
         Ok(mut telem) => {
             match telem_type {

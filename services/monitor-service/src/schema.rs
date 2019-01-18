@@ -45,7 +45,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
             None => process::running_pids()?
         };
 
-        Ok(pids_vec.into_iter().map(|pid| PSResponse::new(pid)).collect())
+        Ok(pids_vec.into_iter().map(PSResponse::new).collect())
     }
 });
 

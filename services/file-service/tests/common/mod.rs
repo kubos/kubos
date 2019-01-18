@@ -28,7 +28,7 @@ use std::time::Duration;
 macro_rules! service_new {
     ($port:expr, $chunk_size:expr) => {{
         thread::spawn(move || {
-            recv_loop(ServiceConfig::new_from_str(
+            recv_loop(&ServiceConfig::new_from_str(
                 "file-transfer-service",
                 &format!(
                     r#"

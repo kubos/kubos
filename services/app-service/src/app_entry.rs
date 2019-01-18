@@ -90,6 +90,7 @@ impl AppRegistryEntry {
             }
         };
 
-        Ok(file.write_all(&toml_str.into_bytes())?)
+        file.write_all(&toml_str.into_bytes())?;
+        Ok(())
     }
 }

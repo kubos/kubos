@@ -31,6 +31,8 @@ use comms_service::*;
 use failure::Error;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 use syslog::Facility;
 
 mod comms;
@@ -54,12 +56,12 @@ fn main() -> EthernetServiceResult<()> {
 
     // Get the main service configuration from the system's config.toml file
     let service_config = kubos_system::Config::new("ethernet-service");
-    
+
     // Pull out our communication settings
     let config = CommsConfig::new(service_config);
-    
+
     let satellite_ip = config.satellite_ip.clone().unwrap();
-    
+
     // Create socket to mock reading from a radio.
     let read_conn = Arc::new(UdpSocket::bind((satellite_ip.as_str(), READ_PORT))?);
 
@@ -79,8 +81,10 @@ fn main() -> EthernetServiceResult<()> {
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
     // Start communication service.
-    CommsService::start(controls, telem)?;
+    CommsService::start(controls, &telem)?;
 
     // We will eventually start the GraphQL service here.
-    loop {}
+    loop {
+        thread::sleep(Duration::from_millis(1))
+    }
 }

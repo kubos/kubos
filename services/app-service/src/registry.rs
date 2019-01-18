@@ -118,7 +118,7 @@ impl AppRegistry {
             {
                 Ok(true) => {
                     if let Ok(entry) = AppRegistryEntry::from_dir(&version.path()) {
-                        if entry.active_version == true {
+                        if entry.active_version {
                             self.set_active(&entry.app.uuid, &version.path().to_string_lossy())?;
                         }
                         reg_entries.push(entry);
@@ -252,7 +252,7 @@ impl AppRegistry {
         // Copy everything into the official registry directory
         let files: Vec<PathBuf> = fs::read_dir(app_path)?
             .filter_map(|file| {
-                if let Some(entry) = file.ok() {
+                if let Ok(entry) = file {
                     Some(entry.path())
                 } else {
                     None
@@ -359,7 +359,7 @@ impl AppRegistry {
     pub fn start_app(
         &self,
         app_uuid: &str,
-        run_level: RunLevel,
+        run_level: &RunLevel,
         args: Option<Vec<String>>,
     ) -> Result<u32, AppError> {
         // Look up the active version of the requested application
@@ -433,7 +433,7 @@ impl AppRegistry {
             match entry {
                 Ok(file) => {
                     let uuid = file.file_name();
-                    match self.start_app(&uuid.to_string_lossy(), RunLevel::OnBoot, None) {
+                    match self.start_app(&uuid.to_string_lossy(), &RunLevel::OnBoot, None) {
                         Ok(_) => apps_started += 1,
                         Err(error) => {
                             eprintln!("Failed to start {}: {:?}", uuid.to_string_lossy(), error);

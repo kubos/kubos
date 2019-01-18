@@ -229,9 +229,7 @@ impl ProcessHandler {
     /// }
     /// ```
     pub fn close_stdin(&mut self) -> Result<(), ProtocolError> {
-        if let Some(ref mut stdin_writer) = self.stdin_writer {
-            drop(stdin_writer);
-        }
+        self.stdin_writer = None;
         Ok(())
     }
 

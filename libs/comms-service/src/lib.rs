@@ -30,8 +30,8 @@
 //! use std::sync::{Arc, Mutex};
 //!
 //! // Example setup.
-//! fn read(socket: Arc<UdpSocket>) -> CommsResult<Vec<u8>> { Ok(vec![]) }
-//! fn write(socket: Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> { Ok(()) }
+//! fn read(socket: &Arc<UdpSocket>) -> CommsResult<Vec<u8>> { Ok(vec![]) }
+//! fn write(socket: &Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> { Ok(()) }
 //!
 //! // Defining connections.
 //! let read_conn = Arc::new(UdpSocket::bind(("192.168.8.1", 13000)).unwrap());
@@ -54,7 +54,7 @@
 //! let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 //!
 //! // Start communication service.
-//! CommsService::start(controls, telem);
+//! CommsService::start(controls, &telem);
 //! ```
 //!
 //! ## Comms Service Config File Format

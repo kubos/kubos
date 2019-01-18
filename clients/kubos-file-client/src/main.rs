@@ -36,11 +36,12 @@ fn upload(
     f_protocol.send_export(channel, &hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    Ok(f_protocol.message_engine(
+    f_protocol.message_engine(
         |d| f_protocol.recv(Some(d)),
         Duration::from_secs(2),
         &State::Transmitting,
-    )?)
+    )?;
+    Ok(())
 }
 
 fn download(
@@ -83,7 +84,8 @@ fn download(
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?)
+    f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?;
+    Ok(())
 }
 
 fn cleanup(

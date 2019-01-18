@@ -39,9 +39,9 @@ const CHKSUM_RNG: Range<usize> = 6..8;
 const MAX_SIZE: usize = 65499;
 
 /// Type definition for a "read" function pointer.
-pub type ReadFn<T> = Fn(T) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
+pub type ReadFn<T> = Fn(&T) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
 /// Type definition for a "write" function pointer.
-pub type WriteFn<T> = Fn(T, &[u8]) -> CommsResult<()> + Send + Sync + 'static;
+pub type WriteFn<T> = Fn(&T, &[u8]) -> CommsResult<()> + Send + Sync + 'static;
 
 /// Struct that holds configuration data to allow users to set up a Communication Service.
 #[derive(Clone)]
@@ -113,14 +113,14 @@ impl CommsService {
     /// Starts an instance of the Communication Service and its associated background threads.
     pub fn start<T: Clone + Send + 'static>(
         control: CommsControlBlock<T>,
-        telem: Arc<Mutex<CommsTelemetry>>,
+        telem: &Arc<Mutex<CommsTelemetry>>,
     ) -> CommsResult<()> {
         // Make sure a `read()` function and a `write()` function exist before starting the read thread.
-        if control.write.len() > 0 {
+        if control.write.is_empty() {
             if control.read.is_some() {
                 let telem_ref = telem.clone();
                 let control_ref = control.clone();
-                thread::spawn(move || read_thread(control_ref, telem_ref));
+                thread::spawn(move || read_thread(control_ref, &telem_ref));
             }
         } else {
             return Err(CommsServiceError::MissingWriteMethod.into());
@@ -129,22 +129,22 @@ impl CommsService {
         // For each provided `write()` function, spawn a downlink endpoint thread.
         if let Some(ports) = control.downlink_ports {
             if control.write.len() == ports.len() {
-                for index in 0..control.write.len() {
+                for (_, (port, write)) in ports.iter().zip(control.write.iter()).enumerate() {
                     let telem_ref = telem.clone();
-                    let port_ref = ports[index];
+                    let port_ref = *port;
                     let conn_ref = control.write_conn.clone();
-                    let write_ref = control.write[index].clone();
-                    let ground_ip = control.ground_ip.clone();
-                    let sat_ip = control.satellite_ip.clone();
+                    let write_ref = write.clone();
+                    let ground_ip = control.ground_ip;
+                    let sat_ip = control.satellite_ip;
                     let ground_port = control
                         .ground_port
                         .ok_or(CommsServiceError::MissingGroundPort)?;
                     thread::spawn(move || {
                         downlink_endpoint(
-                            telem_ref,
+                            &telem_ref,
                             port_ref,
                             conn_ref,
-                            write_ref,
+                            &write_ref,
                             ground_ip,
                             sat_ip,
                             ground_port,
@@ -164,7 +164,7 @@ impl CommsService {
 // This thread reads from a gateway and passes received messages to message handlers.
 fn read_thread<T: Clone + Send + 'static>(
     comms: CommsControlBlock<T>,
-    data: Arc<Mutex<CommsTelemetry>>,
+    data: &Arc<Mutex<CommsTelemetry>>,
 ) {
     // Setup port rotation for message handlers.
     let mut port = comms.handler_port_min;
@@ -174,7 +174,7 @@ fn read_thread<T: Clone + Send + 'static>(
 
     loop {
         // Read bytes from the radio.
-        let bytes = match (read)(comms.read_conn.clone()) {
+        let bytes = match (read)(&comms.read_conn.clone()) {
             Ok(bytes) => bytes,
             Err(e) => {
                 log_error(&data, e.to_string()).unwrap();
@@ -186,7 +186,7 @@ fn read_thread<T: Clone + Send + 'static>(
         let packet = match UdpPacket::owned(bytes) {
             Some(packet) => packet,
             None => {
-                log_telemetry(&data, TelemType::UpFailed).unwrap();
+                log_telemetry(&data, &TelemType::UpFailed).unwrap();
                 log_error(&data, CommsServiceError::HeaderParsing.to_string()).unwrap();
                 error!("Failed to parse packet header");
                 continue;
@@ -195,14 +195,14 @@ fn read_thread<T: Clone + Send + 'static>(
 
         // Verify checksum of the UDP Packet.
         if packet.get_checksum() != ipv4_checksum(&packet, &comms.ground_ip, &comms.satellite_ip) {
-            log_telemetry(&data, TelemType::UpFailed).unwrap();
+            log_telemetry(&data, &TelemType::UpFailed).unwrap();
             log_error(&data, CommsServiceError::InvalidChecksum.to_string()).unwrap();
             error!("Packet checksum failed");
             continue;
         }
 
         // Update number of packets up.
-        log_telemetry(&data, TelemType::Up).unwrap();
+        log_telemetry(&data, &TelemType::Up).unwrap();
         info!("UDP Packet successfully uplinked");
 
         // Bind socket to a port and pass to the message handler.
@@ -224,12 +224,12 @@ fn read_thread<T: Clone + Send + 'static>(
         let conn_ref = comms.write_conn.clone();
         let write_ref = comms.write[0].clone();
         let data_ref = data.clone();
-        let sat_ref = comms.satellite_ip.clone();
-        let ground_ref = comms.ground_ip.clone();
-        let time_ref = comms.timeout.clone();
+        let sat_ref = comms.satellite_ip;
+        let ground_ref = comms.ground_ip;
+        let time_ref = comms.timeout;
         thread::spawn(move || {
             handle_message(
-                socket, data_ref, conn_ref, write_ref, packet, time_ref, sat_ref, ground_ref,
+                &socket, &data_ref, conn_ref, &write_ref, &packet, time_ref, sat_ref, ground_ref,
             );
         });
     }
@@ -238,7 +238,7 @@ fn read_thread<T: Clone + Send + 'static>(
 // Helper function to manage binding sockets to the next available port if any are available.
 fn socket_manager(ip: Ipv4Addr, port: &mut u16, min: u16, max: u16) -> Option<UdpSocket> {
     let mut socket = None;
-    let last = port.clone();
+    let last = *port;
     while socket.is_none() {
         if *port < max {
             *port += 1;
@@ -256,11 +256,11 @@ fn socket_manager(ip: Ipv4Addr, port: &mut u16, min: u16, max: u16) -> Option<Ud
 // This thread sends a query/mutation to its intended destination and waits for a response.
 // The thread then writes the response to the gateway.
 fn handle_message<T: Clone>(
-    socket: UdpSocket,
-    data: Arc<Mutex<CommsTelemetry>>,
+    socket: &UdpSocket,
+    data: &Arc<Mutex<CommsTelemetry>>,
     write_conn: T,
-    write: Arc<WriteFn<T>>,
-    message: UdpPacket,
+    write: &Arc<WriteFn<T>>,
+    message: &UdpPacket,
     timeout: u64,
     sat_ip: Ipv4Addr,
     ground_ip: Ipv4Addr,
@@ -300,13 +300,13 @@ fn handle_message<T: Clone>(
     };
 
     // Write packet to the gateway and update telemetry.
-    match write(write_conn.clone(), packet.as_slice()) {
+    match write(&write_conn.clone(), packet.as_slice()) {
         Ok(_) => {
-            log_telemetry(&data, TelemType::Down).unwrap();
+            log_telemetry(&data, &TelemType::Down).unwrap();
             info!("UDP Packet successfully downlinked");
         }
         Err(e) => {
-            log_telemetry(&data, TelemType::DownFailed).unwrap();
+            log_telemetry(&data, &TelemType::DownFailed).unwrap();
             log_error(&data, e.to_string()).unwrap();
             error!("UDP packet failed to downlink");
         }
@@ -315,10 +315,10 @@ fn handle_message<T: Clone>(
 
 // This thread reads indefinitely from a UDP socket and then writes received packets to a gateway.
 fn downlink_endpoint<T: Clone>(
-    data: Arc<Mutex<CommsTelemetry>>,
+    data: &Arc<Mutex<CommsTelemetry>>,
     port: u16,
     write_conn: T,
-    write: Arc<WriteFn<T>>,
+    write: &Arc<WriteFn<T>>,
     ground_ip: Ipv4Addr,
     sat_ip: Ipv4Addr,
     ground_port: u16,
@@ -358,13 +358,13 @@ fn downlink_endpoint<T: Clone>(
         };
 
         // Write packet to the gateway and update telemetry.
-        match write(write_conn.clone(), packet.as_slice()) {
+        match write(&write_conn.clone(), packet.as_slice()) {
             Ok(_) => {
-                log_telemetry(&data, TelemType::Down).unwrap();
+                log_telemetry(&data, &TelemType::Down).unwrap();
                 info!("UDP Packet successfully downlinked");
             }
             Err(e) => {
-                log_telemetry(&data, TelemType::DownFailed).unwrap();
+                log_telemetry(&data, &TelemType::DownFailed).unwrap();
                 log_error(&data, e.to_string()).unwrap();
                 error!("UDP Packet failed to downlink");
             }

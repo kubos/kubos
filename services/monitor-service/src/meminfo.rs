@@ -62,15 +62,14 @@ impl MemInfo {
             let key = iter.next();
             let val = iter.next();
 
-            match (key, val) {
-                (Some(key), Some(val)) => match key.get(0..key.len() - 1).unwrap_or("") {
+            if let (Some(key), Some(val)) = (key, val) {
+                match key.get(0..key.len() - 1).unwrap_or("") {
                     "MemTotal" => mem_info.total = Self::parse_amount(val),
                     "MemFree" => mem_info.free = Self::parse_amount(val),
                     "MemAvailable" => mem_info.available = Self::parse_amount(val),
                     "LowFree" => mem_info.low_free = Self::parse_amount(val),
                     _ => {}
-                },
-                _ => {}
+                }
             }
         }
         Ok(mem_info)

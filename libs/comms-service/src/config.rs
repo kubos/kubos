@@ -74,7 +74,9 @@ impl Default for CommsConfig {
 impl CommsConfig {
     /// Builds a new configuration for a specific `comms-service`.
     pub fn new(service_config: kubos_system::Config) -> Self {
-        let config = service_config.get("comms").and_then(|raw| raw.try_into().ok());
+        let config = service_config
+            .get("comms")
+            .and_then(|raw| raw.try_into().ok());
         config.unwrap_or_default()
     }
 }
