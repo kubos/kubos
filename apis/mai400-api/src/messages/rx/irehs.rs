@@ -15,6 +15,7 @@
 //
 
 use super::*;
+use bitflags::bitflags;
 use byteorder::{LittleEndian, ReadBytesExt};
 use crc16::*;
 use nom::*;

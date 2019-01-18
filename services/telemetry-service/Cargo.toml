@@ -2,6 +2,7 @@
 name = "telemetry-service"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
+edition = "2018"
 
 [dependencies]
 diesel = { version = "1.0.0", features = ["sqlite"] }

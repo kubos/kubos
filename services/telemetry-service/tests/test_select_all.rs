@@ -14,12 +14,9 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate serde_json;
-extern crate tempfile;
-
+use serde_json::json;
 mod utils;
-use utils::*;
+use crate::utils::*;
 
 static SQL: &'static str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');

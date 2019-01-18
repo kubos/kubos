@@ -25,8 +25,6 @@
 //! # Example Usage
 //!
 //! ```rust,no_run
-//! # extern crate comms_service;
-//!
 //! use comms_service::*;
 //! use std::net::{Ipv4Addr, UdpSocket};
 //! use std::sync::{Arc, Mutex};
@@ -72,17 +70,11 @@
 //! satellite-ip = "192.168.8.2"
 //! ```
 
-extern crate byteorder;
-#[macro_use]
-extern crate failure;
 #[macro_use]
 extern crate juniper;
+
 #[macro_use]
 extern crate log;
-extern crate pnet;
-#[macro_use]
-extern crate serde_derive;
-extern crate toml;
 
 mod config;
 mod errors;
@@ -90,13 +82,13 @@ mod service;
 mod telemetry;
 
 /// Communication Service library.
-pub use service::*;
+pub use crate::service::*;
 
 /// Communication Service errors.
-pub use errors::*;
+pub use crate::errors::*;
 
 /// Communication Service telemetry.
-pub use telemetry::CommsTelemetry;
+pub use crate::telemetry::CommsTelemetry;
 
 /// Communication Service configuration parsing.
-pub use config::*;
+pub use crate::config::*;

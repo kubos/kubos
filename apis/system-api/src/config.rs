@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 use getopts::Options;
+use serde_derive::Deserialize;
 use std::env;
 use std::fs::File;
 use std::io;

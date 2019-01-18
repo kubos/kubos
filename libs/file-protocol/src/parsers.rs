@@ -15,7 +15,7 @@
 //
 
 use super::Message;
-use error::ProtocolError;
+use crate::error::ProtocolError;
 use serde_cbor::Value;
 use std::slice::Iter;
 

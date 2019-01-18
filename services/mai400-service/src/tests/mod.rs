@@ -32,7 +32,7 @@ macro_rules! service_new {
     }};
     ($mock:ident, $data:ident) => {{
         use mai400_api::Connection;
-        use objects::AckCommand;
+        use crate::objects::AckCommand;
         use std::cell::{Cell, RefCell};
         use std::sync::{Arc, Mutex};
         use std::thread;
@@ -71,7 +71,7 @@ macro_rules! service_new {
 macro_rules! service_new_with_read {
     ($mock:ident, $data:ident) => {{
         use mai400_api::Connection;
-        use objects::AckCommand;
+        use crate::objects::AckCommand;
         use std::cell::{Cell, RefCell};
         use std::sync::{Arc, Mutex};
         use std::thread;

@@ -13,16 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+// Must be kept until diesel is updated:
+//   https://github.com/diesel-rs/diesel/pull/1787
+//   https://github.com/diesel-rs/diesel/issues/1785
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate serde_derive;
-extern crate time;
 
 pub mod models;
-pub use models::*;
+pub use crate::models::*;
 
 use diesel::dsl::sql;
 use diesel::insert_into;
@@ -31,6 +30,7 @@ use diesel::sql_query;
 use diesel::sql_types::Bool;
 use diesel::sqlite::SqliteConnection;
 use diesel::*;
+use log::{error, info};
 
 pub struct Database {
     pub connection: SqliteConnection,

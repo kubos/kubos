@@ -1,13 +1,7 @@
-extern crate clap;
-extern crate file_protocol;
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate failure;
-extern crate simplelog;
-
 use clap::{App, AppSettings, Arg, SubCommand};
+use failure::bail;
 use file_protocol::{FileProtocol, FileProtocolConfig, State};
+use log::{error, info};
 use simplelog::*;
 use std::path::Path;
 use std::time::Duration;

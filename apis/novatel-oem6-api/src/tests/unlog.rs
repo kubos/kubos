@@ -15,7 +15,7 @@
 //
 
 use super::*;
-use messages::MessageID;
+use crate::messages::MessageID;
 
 #[test]
 fn test_unlog() {

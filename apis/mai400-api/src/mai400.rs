@@ -15,7 +15,8 @@
  */
 
 use byteorder::{LittleEndian, WriteBytesExt};
-use messages::*;
+use failure::Fail;
+use crate::messages::*;
 use rust_uart::UartError;
 use rust_uart::*;
 use serial;

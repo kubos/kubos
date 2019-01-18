@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use messages::{parse_ack_or_nak, parse_u32, File, GeoRecord, Message, StateOfHealth};
+use crate::messages::{parse_ack_or_nak, parse_u32, File, GeoRecord, Message, StateOfHealth};
 use radio_api::{Connection, RadioResult};
 
 /// Structure for interacting with Duplex-D2 Radio API

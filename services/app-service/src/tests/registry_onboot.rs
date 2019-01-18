@@ -22,8 +22,8 @@ use std::time::Duration;
 
 use tempfile::TempDir;
 
-use error::*;
-use registry::*;
+use crate::error::*;
+use crate::registry::*;
 
 #[test]
 fn registry_onboot_good() {

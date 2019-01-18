@@ -2,6 +2,7 @@
 name = "comms-service"
 version = "0.1.0"
 authors = ["William Greer <wgreer184@gmail.com>", "Sam Justice <sam.justice1@gmail.com"]
+edition = "2018"
 
 [dependencies]
 failure = "0.1.3"

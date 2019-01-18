@@ -18,17 +18,9 @@
 // Note: The I2C commands are needed when the MAI is connected to the stack via
 //       an AIM module. If no AIM is present, they should be removed
 
-extern crate i2c_linux;
-extern crate mai400_api;
-#[macro_use]
-extern crate slog;
-extern crate slog_async;
-extern crate slog_stream;
-extern crate slog_term;
-
 use i2c_linux::I2c;
 use mai400_api::*;
-use slog::{Drain, Logger};
+use slog::{Drain, Logger, o, error, info, warn};
 use std::fs::File;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{channel, Sender};

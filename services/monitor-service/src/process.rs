@@ -12,14 +12,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use failure;
-use regex::Regex;
 
+use failure::format_err;
+use regex::Regex;
 use std::fs::{self, File};
 use std::i32;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
 use std::str::FromStr;
+
+#[cfg(test)]
+use lazy_static::lazy_static;
 
 /// Stats provided by the Linux /proc/<pid>/stat file format
 #[derive(Clone, Debug, Default, PartialEq)]

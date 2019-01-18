@@ -15,6 +15,7 @@
 //
 
 use cbor_protocol;
+use failure::Fail;
 
 /// Errors which occur when using ChannelProtocol
 #[derive(Debug, Fail)]

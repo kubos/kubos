@@ -14,11 +14,9 @@
 // limitations under the License.
 //
 
-extern crate isis_iobc_supervisor;
-
 use juniper::FieldResult;
 use kubos_service;
-use model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
+use crate::model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 
 type Context = kubos_service::Context<Supervisor>;
 

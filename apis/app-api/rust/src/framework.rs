@@ -19,7 +19,7 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-use failure::Error;
+use failure::{Error, bail};
 use getopts::Options;
 use std::env;
 use std::fmt;
@@ -60,12 +60,8 @@ pub trait AppHandler {
 /// # Examples
 ///
 /// ```
-/// extern crate failure;
-/// #[macro_use]
-/// extern crate kubos_app;
-///
 /// use failure::Error;
-/// use kubos_app::AppHandler;
+/// use kubos_app::{AppHandler, app_main};
 ///
 /// struct MyApp;
 ///

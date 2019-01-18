@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 #![deny(warnings)]
-extern crate kubos_app;
-extern crate kubos_system;
-extern crate serde_json;
-extern crate tempfile;
 
 use kubos_app::ServiceConfig;
 use std::panic;
 use std::time::Duration;
 
 mod utils;
-pub use utils::*;
+pub use crate::utils::*;
 
 #[test]
 fn uninstall_app() {

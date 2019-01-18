@@ -14,19 +14,10 @@
 // limitations under the License.
 //
 
-extern crate cbor_protocol;
-extern crate channel_protocol;
-#[macro_use]
-extern crate failure;
-extern crate kubos_system;
-#[macro_use]
-extern crate log;
-extern crate serde_cbor;
-extern crate shell_protocol;
-extern crate syslog;
-
 use channel_protocol::{ChannelMessage, ChannelProtocol};
+use failure::bail;
 use kubos_system::Config as ServiceConfig;
+use log::{info, warn};
 use shell_protocol::{ProcessHandler, ProtocolError, ShellMessage, ShellProtocol};
 use std::collections::HashMap;
 use std::net::SocketAddr;

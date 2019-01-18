@@ -3,6 +3,7 @@ name = "extern-lib"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 build = "build.rs"
+edition = "2018"
 
 [build-dependencies]
 kubos-build-helper = { path = "../../../kubos-build-helper" }

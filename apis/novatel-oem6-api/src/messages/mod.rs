@@ -19,6 +19,7 @@ pub mod logs;
 
 pub use self::commands::*;
 pub use self::logs::*;
+use bitflags::bitflags;
 use byteorder::{LittleEndian, WriteBytesExt};
 use nom::*;
 

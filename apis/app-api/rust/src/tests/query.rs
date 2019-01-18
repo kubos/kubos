@@ -17,8 +17,8 @@
 use super::mock_service::*;
 use kubos_service::Service;
 use kubos_system::Config as ServiceConfig;
-use query::query;
-
+use crate::query::query;
+use serde_json::json;
 use std::time::Duration;
 use tempfile::TempDir;
 

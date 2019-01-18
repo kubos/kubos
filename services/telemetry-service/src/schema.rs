@@ -22,6 +22,7 @@ use juniper::{FieldError, FieldResult, Value};
 use kubos_service;
 use kubos_telemetry_db;
 use serde_json;
+use serde_derive::Serialize;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -29,7 +30,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::thread::spawn;
 use tar;
-use udp::*;
+use crate::udp::*;
 
 type Context = kubos_service::Context<Subsystem>;
 

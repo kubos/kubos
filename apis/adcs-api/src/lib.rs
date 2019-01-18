@@ -18,8 +18,7 @@
 
 //! High level ADCS interfaces
 
-#[macro_use]
-extern crate failure;
+use failure::Fail;
 
 /// Errors for ADCS devices
 #[derive(Fail, Debug, PartialEq)]

@@ -81,11 +81,7 @@ For example, using `syslog <https://docs.rs/syslog/4.0.1/syslog/>`__:
 
 .. code-block:: rust
 
-    #[macro_use]
-    extern crate failure;
-    #[macro_use]
-    extern crate log;
-    extern crate syslog;
+    use log::{debug, error};
     
     use failure::{Error, SyncFailure};
     use syslog::Facility;

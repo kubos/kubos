@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-extern crate libc;
-
 use std::mem;
 
 mod ffi;

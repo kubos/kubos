@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use failure::Fail;
+
 #[derive(Debug, Fail, PartialEq)]
 pub enum AppError {
     /// An error was encountered while interacting with a file
