@@ -116,8 +116,16 @@ pub fn setup(
         db, udp_port, service_port
     );
 
-    let mut config_file = File::create(config_path.clone()).unwrap();
-    config_file.write_all(&config.as_bytes()).unwrap();
+    {
+        let mut config_file = File::create(config_path.clone()).unwrap();
+        config_file.write_all(&config.as_bytes()).unwrap();
+    }
+    
+    let mut file = File::open(config_path.clone()).unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    
+    eprintln!("Config: {}", contents);
 
     return start_telemetry(config_path.to_str().unwrap().to_owned());
 }
