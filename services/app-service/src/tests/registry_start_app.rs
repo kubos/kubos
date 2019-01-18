@@ -73,7 +73,7 @@ fn start_app_good() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("a-b-c-d-e", RunLevel::OnCommand, None);
+    let result = registry.start_app("a-b-c-d-e", &RunLevel::OnCommand, None);
 
     // Small sleep to prevent tiny-app from being destroyed before
     // the system finishes calling it
@@ -122,7 +122,7 @@ fn start_app_fail() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("a-b-c-d-e", RunLevel::OnCommand, None);
+    let result = registry.start_app("a-b-c-d-e", &RunLevel::OnCommand, None);
 
     assert_eq!(
         result.unwrap_err(),
@@ -165,7 +165,7 @@ fn start_app_bad() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("a-b-c-d-e", RunLevel::OnCommand, None);
+    let result = registry.start_app("a-b-c-d-e", &RunLevel::OnCommand, None);
 
     match result.unwrap_err() {
         AppError::StartError { err } => {

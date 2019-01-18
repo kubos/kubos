@@ -164,6 +164,15 @@ pub fn operation_failure(channel_id: u32, error: &str) -> Result<Vec<u8>, Protoc
     })
 }
 
+// Create sync message
+pub fn sync(channel_id: u32, hash: &str) -> Result<Vec<u8>, ProtocolError> {
+    info!("-> {{ {}, {} }}", channel_id, hash);
+    ser::to_vec_packed(&(channel_id, hash)).map_err(|err| ProtocolError::MessageCreationError {
+        message: "sync".to_owned(),
+        err,
+    })
+}
+
 pub fn cleanup(channel_id: u32, hash: Option<String>) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, cleanup, {:?}, }}", channel_id, hash);
     ser::to_vec_packed(&(channel_id, "cleanup", hash)).map_err(|err| {
