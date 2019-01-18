@@ -83,7 +83,7 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
     });
 
     // Give the process a bit to actually start
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(300));
     return (telem_thread, tx);
 }
 
