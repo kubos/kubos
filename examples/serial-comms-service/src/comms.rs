@@ -88,14 +88,14 @@ impl SerialComms {
     }
 }
 
-pub fn read_ser(socket: Arc<Mutex<SerialComms>>) -> SerialServiceResult<Vec<u8>> {
+pub fn read_ser(socket: &Arc<Mutex<SerialComms>>) -> SerialServiceResult<Vec<u8>> {
     if let Ok(socket) = socket.lock() {
         return Ok(socket.read()?);
     }
     bail!("Failed to lock socket");
 }
 
-pub fn write_ser(socket: Arc<Mutex<SerialComms>>, data: &[u8]) -> SerialServiceResult<()> {
+pub fn write_ser(socket: &Arc<Mutex<SerialComms>>, data: &[u8]) -> SerialServiceResult<()> {
     if let Ok(socket) = socket.lock() {
         socket.write(data)?;
     }
