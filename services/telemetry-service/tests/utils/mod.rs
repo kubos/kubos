@@ -64,6 +64,7 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
 
     let (tx, rx): (Sender<bool>, Receiver<bool>) = channel();
     let telem_thread = thread::spawn(move || {
+        assert!(Path::new(config).exists());
         let mut telem_proc = Command::new(telem_path)
             .arg("-c")
             .arg(config)
@@ -84,6 +85,7 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
 
     // Give the process a bit to actually start
     thread::sleep(Duration::from_millis(100));
+    assert!(Path::new(config).exists());
     return (telem_thread, tx);
 }
 
@@ -100,7 +102,10 @@ pub fn setup(
 
     setup_db(&db, sql);
 
-    let config_dir = TempDir::new().unwrap();
+    let config_dir = match Path::new(db).parent() {
+        Some(dir) => dir,
+        None => TempDir::new().unwrap(),
+    }
     let config_path = config_dir.path().join("config.toml");
 
     let config = format!(
@@ -140,8 +145,7 @@ pub fn do_query(service_port: Option<u16>, query: &str) -> serde_json::Value {
     let remote_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port);
     let local_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 0);
 
-    let socket = UdpSocket::bind(local_addr).expect("couldn't bind to address");
-    socket.set_nonblocking(false).unwrap();    
+    let socket = UdpSocket::bind(local_addr).expect("couldn't bind to address");    
     socket
         .send_to(&query.as_bytes(), &remote_addr)
         .expect("couldn't send message");
