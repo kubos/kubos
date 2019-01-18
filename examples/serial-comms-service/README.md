@@ -6,7 +6,7 @@ serial link and gives a template for how to structure a communications service p
 KISS framing is implemented to preserve message integrity over the serial link.
 
 A more detailed tutorial on how to create a new communications service can be found
-[here](https://docs.kubos.com/1.10.0/tutorials/file-transfer.html).
+[here](https://docs.kubos.com/latest/tutorials/comms-service.html)
 
 ## Running 
 
