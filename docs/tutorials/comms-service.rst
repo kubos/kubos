@@ -202,6 +202,9 @@ Write
 Writing to the "radio" is straight-forward in this case.
 There's no need to encapsulate the data in a radio-specific protocol (like AX.25) before writing it.
 
+Worth noting: if a mission's radio *does* require some sort of additional framing, this would be the
+location where that wrapping logic would occur.
+
 The function should take two arguments: the data to write and the serial port to write to.
 We'll need to take ownership of the mutex and then perform a UART write.
 
