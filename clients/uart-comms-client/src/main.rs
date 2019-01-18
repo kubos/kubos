@@ -20,6 +20,13 @@
 // these messages.
 // The service will forward the message on to the requested destination port and then return the
 // response once the request has completed.
+//
+// Options:
+//     - Packets can be additionally encapsulated using the KISS protocol to simulate additional
+//       radio-specific framing. Resulting packet is `KISS<UDP<payload>>`.
+//     - Program can be used as a UDP->serial forwarder. When started with the `-l` option, it will
+//       listen on the specified port for UDP packets, re-package them, and then transmit over the
+//       serial port. Once a response is received, it will be returned back to the original sender
 
 mod comms;
 mod kiss;
