@@ -141,8 +141,8 @@ pub fn do_query(service_port: Option<u16>, query: &str) -> serde_json::Value {
     let local_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 0);
 
     let socket = UdpSocket::bind(local_addr).expect("couldn't bind to address");
-socket.set_nonblocking(false).unwrap();    
-socket
+    socket.set_nonblocking(false).unwrap();    
+    socket
         .send_to(&query.as_bytes(), &remote_addr)
         .expect("couldn't send message");
     socket.set_read_timeout(Some(Duration::new(10, 0))).unwrap();

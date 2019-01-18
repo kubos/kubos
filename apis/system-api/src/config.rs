@@ -182,7 +182,7 @@ fn get_file_data(path: String) -> Result<String, io::Error> {
 }
 
 fn parse_config_file(name: &str, path: String) -> Result<Config, toml::de::Error> {
-    let contents = get_file_data(path).unwrap_or_else(|_| "".to_string());
+    let contents = get_file_data(path).unwrap();
     parse_config_str(name, &contents)
 }
 
