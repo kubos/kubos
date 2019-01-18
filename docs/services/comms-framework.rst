@@ -214,7 +214,7 @@ For more information about how to implement a communications service, please ref
 resources:
 
 - |comms-service|
-- :doc:`Comms service tutorial <TODO>`
+- :doc:`Comms service tutorial <../tutorials/comms-service>`
 
 .. |comms-service| raw:: html
 
