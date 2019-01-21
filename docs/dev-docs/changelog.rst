@@ -1,6 +1,19 @@
 Kubos Changelog
 ===============
 
+v1.11.0 - Jan 18 2019
+---------------------
+
+- `Added communications service framework overview doc <https://docs.kubos.com/latest/services/comms-framework.html>`__
+- `Added example communications service <https://github.com/kubos/kubos/tree/master/examples/serial-comms-service>`__
+- `Added communications service tutorial <https://docs.kubos.com/latest/tutorials/comms-service.html>`__
+- Updated all Rust modules to use Rust 2018
+
+Community Contributions:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- `Added communications service framework <https://docs.kubos.com/latest/services/comms-framework.html>`__
+
 v1.10.0 - Dec 20th 2018
 -----------------------
 
