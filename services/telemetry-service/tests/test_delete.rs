@@ -16,9 +16,9 @@
 
 mod utils;
 
+use crate::utils::*;
 use serde_json::json;
 use tempfile::TempDir;
-use crate::utils::*;
 
 static SQL: &'static str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');

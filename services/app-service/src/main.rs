@@ -26,11 +26,11 @@ mod schema;
 #[cfg(test)]
 mod tests;
 
+use crate::registry::AppRegistry;
 use failure::{bail, Error};
 use getopts::Options;
 use kubos_service::{Config, Service};
 use log::error;
-use crate::registry::AppRegistry;
 use std::env;
 use syslog::Facility;
 

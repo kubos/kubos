@@ -415,11 +415,11 @@ mod schema;
 #[cfg(test)]
 mod tests;
 
-use kubos_service::{Config, Service};
-use mai400_api::MAIResult;
 use crate::model::{ReadData, Subsystem};
 pub use crate::objects::*;
 use crate::schema::{MutationRoot, QueryRoot};
+use kubos_service::{Config, Service};
+use mai400_api::MAIResult;
 use std::sync::Arc;
 use syslog::Facility;
 

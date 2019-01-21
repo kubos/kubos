@@ -17,9 +17,9 @@
 use self::test_data::*;
 use super::*;
 
-use kubos_service::{Config, Service};
 use crate::model::*;
 use crate::schema::*;
+use kubos_service::{Config, Service};
 use serde_json::json;
 use std::sync::mpsc::sync_channel;
 

@@ -20,7 +20,7 @@
 
 use i2c_linux::I2c;
 use mai400_api::*;
-use slog::{Drain, Logger, o, error, info, warn};
+use slog::{error, info, o, warn, Drain, Logger};
 use std::fs::File;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{channel, Sender};

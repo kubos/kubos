@@ -248,9 +248,14 @@ mod tests {
     #[test]
     fn test_decode_frame_no_start() {
         assert_eq!(
-            format!("{}", decode(&vec![
-                0x1, 0xF, 0xC1, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF, 0x2
-            ],).unwrap_err()),
+            format!(
+                "{}",
+                decode(&vec![
+                    0x1, 0xF, 0xC1, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF,
+                    0x2
+                ],)
+                .unwrap_err()
+            ),
             "Kiss frame start not found"
         );
     }
@@ -258,9 +263,14 @@ mod tests {
     #[test]
     fn test_decode_frame_no_end() {
         assert_eq!(
-            format!("{}", decode(&vec![
-                0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0x10, 0x1, 0xF, 0x2
-            ],).unwrap_err()),
+            format!(
+                "{}",
+                decode(&vec![
+                    0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0x10, 0x1, 0xF,
+                    0x2
+                ],)
+                .unwrap_err()
+            ),
             "Kiss frame end not found"
         );
     }

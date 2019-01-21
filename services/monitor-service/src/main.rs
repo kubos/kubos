@@ -54,8 +54,8 @@
 #[macro_use]
 extern crate juniper;
 
-use kubos_service::{Config, Service};
 use crate::schema::{MutationRoot, QueryRoot};
+use kubos_service::{Config, Service};
 use syslog::Facility;
 
 mod meminfo;

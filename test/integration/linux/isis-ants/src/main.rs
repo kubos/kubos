@@ -15,7 +15,7 @@
 //
 
 use isis_ants_api::*;
-use slog::{Drain, Logger, o, error, info, warn};
+use slog::{error, info, o, warn, Drain, Logger};
 use std::fs::File;
 use std::sync::Mutex;
 

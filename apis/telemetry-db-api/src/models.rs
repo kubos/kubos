@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use serde_derive::{Deserialize, Serialize};
 use super::telemetry;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Queryable, Serialize, Deserialize)]
 pub struct Entry {

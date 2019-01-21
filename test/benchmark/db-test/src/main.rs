@@ -17,7 +17,7 @@
 use kubos_system::Config;
 use kubos_telemetry_db::Database;
 use rand::{thread_rng, Rng};
-use serde_json::{ser, json};
+use serde_json::{json, ser};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
 use std::thread;
 use std::time::Duration;

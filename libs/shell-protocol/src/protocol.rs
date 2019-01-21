@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-use channel_protocol::{ChannelMessage, ChannelProtocol};
 use crate::error::ProtocolError;
-use log::{info, warn};
 use crate::messages;
 use crate::process::ProcessHandler;
+use channel_protocol::{ChannelMessage, ChannelProtocol};
+use log::{info, warn};
 use std::net::SocketAddr;
 use std::time::Duration;
 

@@ -20,8 +20,8 @@ use novatel_oem6_api::*;
 #[macro_export]
 macro_rules! service_new {
     ($mock:ident) => {{
-        use novatel_oem6_api::Connection;
         use crate::objects::AckCommand;
+        use novatel_oem6_api::Connection;
         use std::cell::{Cell, RefCell};
         use std::sync::{Arc, Mutex};
         use std::thread;

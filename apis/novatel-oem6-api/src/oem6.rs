@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-use byteorder::{LittleEndian, WriteBytesExt};
 use crate::crc32::*;
-use failure::Fail;
 use crate::messages::*;
+use byteorder::{LittleEndian, WriteBytesExt};
+use failure::Fail;
 use nom;
 use rust_uart::UartError;
 use rust_uart::*;

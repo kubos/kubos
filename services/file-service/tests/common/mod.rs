@@ -16,9 +16,9 @@
 #![macro_use]
 #![allow(dead_code)]
 
-use serde_cbor::{from_slice, ser};
 use blake2_rfc::blake2s::Blake2s;
 use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
+use serde_cbor::{from_slice, ser};
 use std::fs::File;
 use std::io::prelude::*;
 use std::thread;

@@ -82,5 +82,5 @@ mod query;
 mod tests;
 
 pub use crate::framework::*;
-pub use kubos_system::Config as ServiceConfig;
 pub use crate::query::query;
+pub use kubos_system::Config as ServiceConfig;

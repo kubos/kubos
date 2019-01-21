@@ -16,11 +16,11 @@
 
 mod utils;
 
+use crate::utils::*;
 use serde_json::json;
 use std::thread::sleep;
 use std::time::Duration;
 use tempfile::TempDir;
-use crate::utils::*;
 
 #[test]
 fn test_insert_auto_timestamp() {

@@ -16,7 +16,7 @@
 
 use failure::Error;
 use isis_ants_api::*;
-use kubos_service::{process_errors, run, push_err};
+use kubos_service::{process_errors, push_err, run};
 use log::info;
 use std::cell::{Cell, RefCell};
 use std::str;

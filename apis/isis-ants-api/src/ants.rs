@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-use failure::Fail;
 use crate::ffi;
 use crate::parse::*;
+use failure::Fail;
 use std::ptr;
 
 /// Common Error for AntS Actions

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+use crate::objects::*;
+use crate::registry::AppRegistry;
 use juniper::FieldResult;
 use kubos_app::RunLevel;
 use kubos_service;
-use crate::objects::*;
-use crate::registry::AppRegistry;
 
 type Context = kubos_service::Context<AppRegistry>;
 
