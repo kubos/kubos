@@ -53,7 +53,7 @@ Pre-Requisites
     resulting system will still only have 4GB of space available to it.
 
  
-2. Install `Etcher <https://etcher.io/>`__. Other software to flash SD cards does exist,
+2. Install `Etcher <https://www.balena.io/etcher/>`__. Other software to flash SD cards does exist,
    but Etcher is the Kubos software of choice.
 
 3. Obtain the SD card images
@@ -64,7 +64,7 @@ Install the eMMC Image
 Flash the SD Card
 ~~~~~~~~~~~~~~~~~
 
-Using `Etcher <https://etcher.io/>`__:
+Using `Etcher <https://www.balena.io/etcher/>`__:
 
   - Select the Kubos Linux image to flash
   - Make sure the SD card device is correct (may be auto-detected if there is only one SD card present

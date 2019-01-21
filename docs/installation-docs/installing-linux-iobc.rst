@@ -33,13 +33,13 @@ The Kubos Linux installation process is composed of two high-level steps:
 
   - Flashing the SD card
   - Flashing the on-board NOR flash
-    
+
 To perform a default installation, three files are needed:
 
   - A Kubos Linux SD card image
   - u-boot.bin
   - at91sam9g20isis.dtb
-  
+
 All of these files can be obtained from `our Kubos Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
 Download the latest `KubOS-v{version}.tar.gz` file and then unzip the files for the iOBC. They're located in the `KubOS-v{version}/iOBC` folder.
@@ -50,7 +50,7 @@ Install the SD Card Files
 -------------------------
 
 All users should install the SD card files using a distributed Kubos Linux image, unless they have
-created a custom Kubos Linux build. In that case, the SD card files can be installed by either 
+created a custom Kubos Linux build. In that case, the SD card files can be installed by either
 flashing a complete Kubos Linux image onto an SD card or :ref:`by alternate means <alt-sd-setup>`.
 
 Pre-Requisites
@@ -64,7 +64,7 @@ Pre-Requisites
     resulting system will still only have 4GB of space available to it.
 
  
-2. Install `Etcher <https://etcher.io/>`__. Other software to flash SD cards does exist,
+2. Install `Etcher <https://www.balena.io/etcher/>`__. Other software to flash SD cards does exist,
    but Etcher is the Kubos software of choice.
 
 3. Obtain a Kubos Linux image
@@ -73,13 +73,13 @@ Pre-Requisites
 Flash the SD Card
 ~~~~~~~~~~~~~~~~~
 
-Using `Etcher <https://etcher.io/>`__:
+Using `Etcher <https://www.balena.io/etcher/>`__:
 
   - Select the Kubos Linux image to flash
   - Make sure the SD card device is correct (may be auto-detected if there is only one SD card present
     in your system.)
   - Click the "Flash!" button to start the flashing process
-  
+
 .. figure:: ../images/iOBC/etcher.png
    :alt: Etcher Setup
 
@@ -117,9 +117,9 @@ Pre-Requisites
 1. Obtain an `Atmel SAM-ICE programmer/debugger <http://www.atmel.com/tools/atmelsam-ice.aspx>`__.
 2. Install programming drivers from https://www.segger.com/jlink-software.html.
 3. Install FTDI USB-to-serial drivers from http://www.ftdichip.com/Drivers/VCP.htm
-4. Install SAM-BA from the ISIS-OBC SDK installer. 
+4. Install SAM-BA from the ISIS-OBC SDK installer.
    (Refer to Section 3.3 of the `ISIS-OBC Quick Start Guide`)
-   
+
    **Note:** You must use the ISIS version of SAM-BA, rather than the default
    Atmel installation. It includes several configuration files that are required
    to connect to the iOBC.
@@ -142,12 +142,12 @@ Pre-Requisites
 9. Change line 44 in `{path to SAM-BA}/tcl_lib/boards.tcl` from this:
 
    ``"at91sam9g20-ISISOBC"    "at91sam9g20-ISISOBC/at91sam9g20-ISISOBC.tcl"``
-   
+
    to this:
-   
+
    ``"at91sam9g20-isisobc"    "at91sam9g20-ISISOBC/at91sam9g20-ISISOBC.tcl"``
-   
-   (the SAM-BA application converts everything to lower case, which will lead to 
+
+   (the SAM-BA application converts everything to lower case, which will lead to
    a "board not found" error if you don't change this file)
 
 
@@ -161,7 +161,7 @@ U-Boot console rather than the Linux console in order to be able to flash the
 board.
 
 You'll need to establish a serial connection with the board in order to connect
-to the console. 
+to the console.
 
 You can do this via a Kubos SDK Vagrant image with the ``minicom kubos`` command
 after booting the board.
@@ -195,11 +195,11 @@ Where the input arguments are as follows:
   - uboot={uboot file} - Path to U-Boot binary
   - dtb={dtb file} - Path to Device Tree binary
   - altos={alt file} - Path to alternate OS binary
-  
+
 Multiple input arguments can be specified and should be space-separated.
-  
+
 The optional logfile parameter is highly recommended, as the SAM-BA application will not
-give any other response to this command. The log file will contain all of the output as the 
+give any other response to this command. The log file will contain all of the output as the
 script connects to the board and transfers the files.
 
 Example command:
@@ -245,9 +245,9 @@ Alternate SD Card Setup
 If you do not have a Kubos Linux image, you can load the required files onto an SD card:
 
   - by using our flashing script
-  
+
     or
-  
+
   - manually
 
 Pre-Requisites
@@ -302,20 +302,20 @@ Navigate to the 'kubos-linux-build/tools' directory.
 Run the ``format-sd.sh`` script. You might need to run as root to get
 permissions for certain steps.
 
-The script has optional parameters: 
+The script has optional parameters:
 
 - ``-d {device}`` - Specify the name of the SD card device. The default is
-  '/dev/sdb' 
-- ``-s {size}`` - Size, in MB, of the SD card. The default is 4000 (4GB). 
+  '/dev/sdb'
+- ``-s {size}`` - Size, in MB, of the SD card. The default is 4000 (4GB).
 - ``-w`` - Specify that the SD card should be wiped before formatting. Useful
   if there was any data previously on the card. **Note** Wiping a 4GB SD card
-  takes about 10 minutes. 
+  takes about 10 minutes.
 - ``-p`` - Specify that existing kpack-base.itb and kernel files should be
-  copied into the appropriate partitions 
+  copied into the appropriate partitions
 - ``-pp`` - Specify that the kpack-base.itb and kernel files should be built
-  and then copied to their partitions 
+  and then copied to their partitions
 - ``-ppp`` - Specify that the SD card should not be formatted. Only build and
-  copy the kpack and kernel files. 
+  copy the kpack and kernel files.
 - ``-b {branch}`` - Specify the branch name of U-Boot that has been built. The
   default is 'master'. This option should not need to be used outside of
   development.
@@ -379,13 +379,13 @@ Navigate to your 'kubos-linux-build' folder and open the 'tools' directory.
 
 Run the ``kubos-kernel.sh`` script.
 
-The script has optional parameters (which are unlikely to be needed): 
+The script has optional parameters (which are unlikely to be needed):
 
 - ``-i {input-file}`` - Specify the name of the
-  \*.its file to use. This file describes the files that will be packaged and their usage configuration options. The default is 'kubos-kernel.its', which should also be located in the 'tools' directory. 
+  \*.its file to use. This file describes the files that will be packaged and their usage configuration options. The default is 'kubos-kernel.its', which should also be located in the 'tools' directory.
 -  ``-b {branch}`` - Specify the branch name of U-Boot that has been built.
    The default is 'master'. This option should not need to be used outside of
-   development. 
+   development.
 
 The script will create the 'kubos-kernel.itb' file.
 
@@ -448,9 +448,9 @@ Pre-Requisites
 1. Obtain an `Atmel SAM-ICE programmer/debugger <http://www.atmel.com/tools/atmelsam-ice.aspx>`__.
 2. Install programming drivers from https://www.segger.com/jlink-software.html.
 3. Install FTDI USB-to-serial drivers from http://www.ftdichip.com/Drivers/VCP.htm
-4. Install SAM-BA from the ISIS-OBC SDK installer. 
+4. Install SAM-BA from the ISIS-OBC SDK installer.
    (Refer to Section 3.3 of the `ISIS-OBC Quick Start Guide`)
-   
+
    **Note:** You must use the ISIS version of SAM-BA, rather than the default
    Atmel installation. It includes several configuration files that are required
    to connect to the iOBC.
@@ -466,12 +466,12 @@ Pre-Requisites
     able to flash anything.
 
 7. Turn on the board.
-    
+
 8. Obtain the NOR flash files either from Kubos, or from your own :ref:`local build <build-os>`:
-    
+
     - u-boot.bin
-    - at91sam9g20isis.dtb    
-    
+    - at91sam9g20isis.dtb
+
 Boot into U-Boot
 ^^^^^^^^^^^^^^^^
 
@@ -482,7 +482,7 @@ U-Boot console rather than the Linux console in order to be able to flash the
 board.
 
 You'll need to establish a serial connection with the board in order to connect
-to the console. 
+to the console.
 
 You can do this via a Kubos Vagrant image with the ``minicom kubos`` command
 after booting the board.
@@ -499,8 +499,8 @@ bring up the CLI.
 
    U-Boot Console
 
-The board is now ready to be flashed.    
-    
+The board is now ready to be flashed.
+
 Installation
 ^^^^^^^^^^^^
 
