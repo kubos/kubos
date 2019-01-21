@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use adcs_api::*;
 use crate::ffi::*;
+use adcs_api::*;
 
 /// Structure for interacting with the ISIS iMTQ
 pub struct Imtq<T: ImtqFFI> {

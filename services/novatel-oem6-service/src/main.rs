@@ -321,11 +321,11 @@ mod schema;
 #[cfg(test)]
 mod tests;
 
-use kubos_service::{Config, Service};
 use crate::model::{LockData, Subsystem};
-use novatel_oem6_api::OEMResult;
 pub use crate::objects::*;
 use crate::schema::{MutationRoot, QueryRoot};
+use kubos_service::{Config, Service};
+use novatel_oem6_api::OEMResult;
 use std::sync::Arc;
 use syslog::Facility;
 

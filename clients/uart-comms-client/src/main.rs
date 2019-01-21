@@ -21,7 +21,7 @@
 // The service will forward the message on to the requested destination port and then return the
 // response once the request has completed.
 //
-// Packets can be additionally encapsulated using the KISS protocol to simulate additional 
+// Packets can be additionally encapsulated using the KISS protocol to simulate additional
 // radio-specific framing. Resulting packet is `KISS<UDP<payload>>`.
 
 mod comms;
@@ -75,7 +75,10 @@ fn build_packet(
         None => panic!(),
     };
     let mut checksum = [0; 2];
-    println!("Source: {}:{}, Destination: {}:{}", source_ip, source_port, dest_ip, dest_port);
+    println!(
+        "Source: {}:{}, Destination: {}:{}",
+        source_ip, source_port, dest_ip, dest_port
+    );
     BigEndian::write_u16(
         &mut checksum,
         ipv4_checksum(&packet_without_checksum, &source_ip, &dest_ip),
@@ -90,50 +93,50 @@ fn main() -> ClientResult<()> {
     let args = App::new("UART Comms Client")
         .arg(
             Arg::with_name("bus")
-            .help("Serial Device")
-            .short("b")
-            .takes_value(true)
-            .required(true)
+                .help("Serial Device")
+                .short("b")
+                .takes_value(true)
+                .required(true),
         )
         .arg(
             Arg::with_name("source_ip")
-            .help("Source IP address")
-            .short("s")
-            .takes_value(true)
-            .default_value(SOURCE_IP)
+                .help("Source IP address")
+                .short("s")
+                .takes_value(true)
+                .default_value(SOURCE_IP),
         )
         .arg(
             Arg::with_name("dest_ip")
-            .help("Destination IP address")
-            .short("d")
-            .takes_value(true)
-            .default_value(DEST_IP)
+                .help("Destination IP address")
+                .short("d")
+                .takes_value(true)
+                .default_value(DEST_IP),
         )
         .arg(
             Arg::with_name("port")
-            .help("Destination port")
-            .short("p")
-            .takes_value(true)
-            .required(true)
+                .help("Destination port")
+                .short("p")
+                .takes_value(true)
+                .required(true),
         )
         .arg(
             Arg::with_name("file")
-            .help("File containing data to send")
-            .short("f")
-            .takes_value(true)
-            .conflicts_with("listen")
+                .help("File containing data to send")
+                .short("f")
+                .takes_value(true)
+                .conflicts_with("listen"),
         )
         .arg(
             Arg::with_name("data")
-            .help("Data to send")
-            .required_unless_one(&["file", "listen"])
-            .conflicts_with("file")
-            .conflicts_with("listen")
+                .help("Data to send")
+                .required_unless_one(&["file", "listen"])
+                .conflicts_with("file")
+                .conflicts_with("listen"),
         )
         .arg(
             Arg::with_name("kiss")
-            .help("Enable KISS framing")
-            .short("k")
+                .help("Enable KISS framing")
+                .short("k"),
         )
         .get_matches();
 
@@ -141,7 +144,7 @@ fn main() -> ClientResult<()> {
     let source_ip = args.value_of("source_ip").unwrap().parse()?;
     let dest_ip = args.value_of("dest_ip").unwrap().parse()?;
     let dest_port = args.value_of("port").unwrap().parse()?;
-    
+
     let query = if let Some(file) = args.value_of("file") {
         let mut raw = String::new();
         File::open(file).and_then(|mut f| f.read_to_string(&mut raw))?;
@@ -161,14 +164,14 @@ fn main() -> ClientResult<()> {
         dest_ip,
         dest_port,
     );
-    
+
     let packet = if args.is_present("kiss") {
         // Add KISS framing
         kiss::encode(&packet)
     } else {
         packet
     };
-        
+
     let mut conn = comms::serial_init(bus)?;
 
     // Write our request out through the "radio"
@@ -176,7 +179,7 @@ fn main() -> ClientResult<()> {
 
     // Get our response
     let msg = comms::read(&mut conn)?;
-    
+
     let msg = if args.is_present("kiss") {
         // Parse the KISS frame
         let (frame, _, _) = kiss::decode(&msg)?;
@@ -199,10 +202,9 @@ fn main() -> ClientResult<()> {
         eprintln!("Checksum mismatch");
     } else {
         let msg = ::std::str::from_utf8(&msg[8..])?;
-    
+
         println!("Response: {}", msg);
     }
-    
 
     Ok(())
 }

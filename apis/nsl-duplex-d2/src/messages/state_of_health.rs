@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use nom::{be_u32, be_u8, IResult, take_until_and_consume};
+use nom::{be_u32, be_u8, take_until_and_consume, IResult};
 
 #[derive(Debug, PartialEq)]
 /// Struct for storing state of health records

@@ -16,11 +16,11 @@
 
 mod utils;
 
-use serde_json::{ser, json};
+use crate::utils::*;
+use serde_json::{json, ser};
 use std::net::UdpSocket;
 use std::time::Duration;
 use tempfile::TempDir;
-use crate::utils::*;
 
 #[test]
 fn test_udp_timestamp() {

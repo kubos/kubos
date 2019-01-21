@@ -41,7 +41,9 @@ pub enum CommsServiceError {
     )]
     MissingWriteMethod,
     /// The endpoint thread could not be started because no `ground_port` was specified.
-    #[fail(display = "The endpoint thread could not be started because no ground port was specified.")]
+    #[fail(
+        display = "The endpoint thread could not be started because no ground port was specified."
+    )]
     MissingGroundPort,
     /// All of the ports allocated for handling packets are binded and unable to be used.
     #[fail(display = "All of the ports allocated for handling packets are binded.")]

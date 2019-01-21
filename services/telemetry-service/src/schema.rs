@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+use crate::udp::*;
 use diesel;
 use diesel::prelude::*;
 use flate2::write::GzEncoder;
@@ -21,8 +22,8 @@ use flate2::Compression;
 use juniper::{FieldError, FieldResult, Value};
 use kubos_service;
 use kubos_telemetry_db;
-use serde_json;
 use serde_derive::Serialize;
+use serde_json;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -30,7 +31,6 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::thread::spawn;
 use tar;
-use crate::udp::*;
 
 type Context = kubos_service::Context<Subsystem>;
 

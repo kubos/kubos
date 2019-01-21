@@ -15,7 +15,7 @@
  */
 
 use crc16;
-use nom::{be_u16, IResult, map_res, call, error_position, take_str, take, take_until_and_consume};
+use nom::{be_u16, call, error_position, map_res, take, take_str, take_until_and_consume, IResult};
 use std::io::Write;
 use std::str::FromStr;
 

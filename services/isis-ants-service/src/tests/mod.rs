@@ -13,13 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+use crate::model::*;
+use crate::objects::*;
+use crate::schema::*;
 #[allow(unused_parens)]
 use double::*;
 use isis_ants_api::*;
 use kubos_service::{Config, Service};
-use crate::model::*;
-use crate::objects::*;
-use crate::schema::*;
 use serde_json::json;
 use std::cell::{Cell, RefCell};
 

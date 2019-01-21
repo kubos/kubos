@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
+use crate::model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 use juniper::FieldResult;
 use kubos_service;
-use crate::model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 
 type Context = kubos_service::Context<Supervisor>;
 

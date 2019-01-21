@@ -22,9 +22,9 @@
 //! The macro `make_telemetry!` is responsibly for generating the enum `Type`, the
 //! `parse` function and the `command` function.
 
+use crate::telemetry::lib::get_adc_result;
 use eps_api::EpsResult;
 use rust_i2c::Command;
-use crate::telemetry::lib::get_adc_result;
 
 const TELEM_CMD: u8 = 0x10;
 

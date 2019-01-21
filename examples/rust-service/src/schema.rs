@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
+use crate::model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
 use juniper::FieldResult;
 use kubos_service;
 use log::info;
-use crate::model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
 
 type Context = kubos_service::Context<Subsystem>;
 

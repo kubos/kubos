@@ -16,12 +16,12 @@
 
 mod utils;
 
+use crate::utils::*;
 use flate2::read::GzDecoder;
 use serde_json::json;
 use std::fs::{self, File};
 use std::io::Read;
 use tempfile::TempDir;
-use crate::utils::*;
 
 static SQL: &'static str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');

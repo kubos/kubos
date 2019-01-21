@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use channel_protocol::ChannelMessage;
 use crate::error::ProtocolError;
+use channel_protocol::ChannelMessage;
 use serde_cbor::Value;
 use std::collections::HashMap;
 

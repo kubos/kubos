@@ -195,9 +195,9 @@ extern crate juniper;
 mod schema;
 mod udp;
 
+use crate::schema::{MutationRoot, QueryRoot, Subsystem};
 use kubos_service::{Config, Service};
 use kubos_telemetry_db::Database;
-use crate::schema::{MutationRoot, QueryRoot, Subsystem};
 use syslog::Facility;
 
 fn main() {

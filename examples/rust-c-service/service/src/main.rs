@@ -20,9 +20,9 @@ extern crate juniper;
 mod model;
 mod schema;
 
-use kubos_service::{Config, Service};
 use crate::model::Subsystem;
 use crate::schema::{MutationRoot, QueryRoot};
+use kubos_service::{Config, Service};
 
 fn main() {
     Service::new(

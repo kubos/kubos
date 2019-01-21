@@ -15,8 +15,8 @@
 //
 
 use super::*;
-use channel_protocol::ChannelMessage;
 use crate::error::ProtocolError;
+use channel_protocol::ChannelMessage;
 use log::info;
 use serde_cbor::ser;
 use std::collections::HashMap;

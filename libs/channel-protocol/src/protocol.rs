@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-use cbor_protocol::Protocol as CborProtocol;
 use crate::error::ProtocolError;
 use crate::parsers::parse_message;
+use cbor_protocol::Protocol as CborProtocol;
 use serde_cbor::Value;
 use std::cell::Cell;
 use std::net::SocketAddr;

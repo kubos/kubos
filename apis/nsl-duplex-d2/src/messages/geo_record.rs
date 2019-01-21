@@ -16,7 +16,10 @@
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use nom::simple_errors::Context;
-use nom::{float, multispace, Err, ErrorKind, IResult, call, error_position, map_res, take_until_and_consume, take_until, tag};
+use nom::{
+    call, error_position, float, map_res, multispace, tag, take_until, take_until_and_consume, Err,
+    ErrorKind, IResult,
+};
 use std::str::from_utf8;
 
 #[derive(Debug, PartialEq)]

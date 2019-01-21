@@ -16,11 +16,11 @@
 
 use super::*;
 use crate::model::*;
+use crate::tests::test_data::*;
 use serde_json::json;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use crate::tests::test_data::*;
 
 #[test]
 fn read_good() {

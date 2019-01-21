@@ -67,6 +67,6 @@ pub fn read(port: &mut serial::SystemPort) -> ClientResult<Vec<u8>> {
             other => bail!("Failed to read response: {:?}", other),
         },
     };
-    
+
     Ok(buffer)
 }

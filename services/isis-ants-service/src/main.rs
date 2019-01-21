@@ -351,11 +351,11 @@
 #[macro_use]
 extern crate juniper;
 
-use isis_ants_api::AntSResult;
-use kubos_service::{Config, Service};
 use crate::model::Subsystem;
 pub use crate::objects::*;
 use crate::schema::{MutationRoot, QueryRoot};
+use isis_ants_api::AntSResult;
+use kubos_service::{Config, Service};
 use syslog::Facility;
 
 mod model;

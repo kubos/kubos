@@ -19,7 +19,7 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-use failure::{Error, bail};
+use failure::{bail, Error};
 use getopts::Options;
 use std::env;
 use std::fmt;
