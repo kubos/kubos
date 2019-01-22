@@ -6,7 +6,7 @@ jobs:
     build:
       docker:
         - image: kubos/kubos-dev:latest
-      parallelism: 4
+      parallelism: 2
       steps:
         - checkout
         - run: python test/integration/integration_test.py
