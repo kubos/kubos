@@ -2,13 +2,24 @@ version: 2
 jobs:
     # Rust build + tests
     # Run for all PR commits
-    rust:
+    rust_check_x86:
       docker:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: ./tools/rustbuild.sh
+        - run: ./tools/kubos_link.py
+        - run: cargo kubos -c check
 
+    # Rust testing
+    # Run for all PR commits
+    rust_test:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: ./tools/kubos_link.py
+        - run: cargo kubos -c test
+      
     # CLI tests
     # Run for all PR commits
     cli_test:
@@ -18,7 +29,6 @@ jobs:
         - checkout
         - run: python test/integration/integration_test.py
         - run: python -m tools.ci.lint
-        - run: python tools/build.py --all-tests
 
     # C build + tests
     # Run for all PR commits
@@ -67,7 +77,11 @@ workflows:
   version: 2
   build:
     jobs:
-      - rust:
+      - rust_check_x86:
+          filters:
+            branches:
+              ignore: master
+      - rust_test:
           filters:
             branches:
               ignore: master
