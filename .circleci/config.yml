@@ -19,6 +19,24 @@ jobs:
         - checkout
         - run: ./tools/kubos_link.py
         - run: cargo kubos -c test
+
+    # Rust testing - large upload test
+    # Run for all PR commits
+    rust_test_large_upload:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: cargo run --bin large_upload
+
+    # Rust testing - large download
+    # Run for all PR commits
+    rust_test_large_download:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: cargo run --bin large_download
       
     # CLI tests
     # Run for all PR commits
@@ -82,6 +100,14 @@ workflows:
             branches:
               ignore: master
       - rust_test:
+          filters:
+            branches:
+              ignore: master
+      - rust_test_large_download:
+          filters:
+            branches:
+              ignore: master
+      - rust_test_large_upload:
           filters:
             branches:
               ignore: master

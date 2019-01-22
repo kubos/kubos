@@ -1,0 +1,12 @@
+[package]
+name = "large_upload"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+edition = "2018"
+
+[dependencies]
+rand = "0.5.5"
+tempfile = "3"
+kubos-system = { path = "../../../apis/system-api" }
+file-protocol = { path = "../../../libs/file-protocol" }
+file-service = { path = "../../../services/file-service" }

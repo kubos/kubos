@@ -287,64 +287,6 @@ fn upload_multi_client() {
     }
 }
 
-// Massive (100MB) upload
-// Note 1: This test will take several minutes to run.
-//         Ignore the Rust warning about the test taking to long
-// Note 2: This is named differently so that the not-massive tests can
-//         all be (quickly) run at the same time with `cargo test upload`
-#[test]
-fn large_up() {
-    let test_dir = TempDir::new().expect("Failed to create test dir");
-    let test_dir_str = test_dir.path().to_str().unwrap();
-    let source = format!("{}/source", test_dir_str);
-    let dest = format!("{}/dest", test_dir_str);
-    let service_port = 7006;
-
-    // Create a 100MB file filled with random data
-    {
-        let mut file = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .append(true)
-            .open(source.clone())
-            .unwrap();
-        for _ in 0..100 {
-            let mut contents = [0u8; 1_000_000];
-            thread_rng().fill(&mut contents[..]);
-
-            file.write(&contents).unwrap();
-        }
-    }
-
-    service_new!(service_port, 4096);
-
-    let result = upload(
-        "127.0.0.1",
-        &format!("127.0.0.1:{}", service_port),
-        &source,
-        &dest,
-        Some("client".to_owned()),
-        4096,
-    );
-
-    assert!(result.is_ok());
-
-    // Verify the final file's contents
-    let mut source_file = File::open(source).unwrap();
-    let mut dest_file = File::open(dest).unwrap();
-    // 24415 = 100M / 4096
-    // 2442 = 10M / 4096
-    for num in 0..24415 {
-        let mut source_buf = [0u8; 4096];
-        let mut dest_buf = [0u8; 4096];
-
-        source_file.read(&mut source_buf).unwrap();
-        dest_file.read(&mut dest_buf).unwrap();
-
-        assert_eq!(&source_buf[..], &dest_buf[..], "Chunk mismatch: {}", num);
-    }
-}
-
 // Verify an upload still works after the server has
 // received invalid input
 #[test]

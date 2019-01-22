@@ -743,6 +743,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "large_download"
+version = "0.1.0"
+dependencies = [
+ "file-protocol 0.1.0",
+ "file-service 0.1.0",
+ "kubos-system 0.1.0",
+ "rand 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tempfile 3.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "large_upload"
+version = "0.1.0"
+dependencies = [
+ "file-protocol 0.1.0",
+ "file-service 0.1.0",
+ "kubos-system 0.1.0",
+ "rand 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tempfile 3.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
