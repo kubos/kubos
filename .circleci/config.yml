@@ -36,34 +36,18 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cargo run --bin large_download
-      
-    # CLI tests
+        - run: cargo run --bin large_download   
+
+    # CLI, C and Python testing
     # Run for all PR commits
-    cli_test:
+    non_rust_tests:
       docker:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: python test/integration/integration_test.py
         - run: python -m tools.ci.lint
-
-    # C build + tests
-    # Run for all PR commits
-    c_test:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
         - run: python tools/build.py --all-tests
-
-    # Python tests
-    # Run for all PR commits
-    python_test:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
         - run: python hal/python-hal/i2c/test_i2c.py
         - run: cd hal/python-hal/i2c; python setup.py install
         - run: cd apis/pumpkin-mcu-api; python test_mcu_api.py
@@ -111,15 +95,7 @@ workflows:
           filters:
             branches:
               ignore: master
-      - cli_test:
-          filters:
-            branches:
-              ignore: master
-      - c_test:
-          filters:
-            branches:
-              ignore: master
-      - python_test:
+      - non_rust_tests:
           filters:
             branches:
               ignore: master
