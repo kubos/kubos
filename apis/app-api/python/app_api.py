@@ -26,7 +26,26 @@ class Services:
         self.config = toml.load(service_config_filepath)
 
     def query(self, service, query, timeout=DEFAULT_TIMEOUT):
-
+        """Send a GraphQL request to a service
+        
+        Args:
+        
+            - service (str): The service that the request should be sent to. Must be defined in
+              the system's ``config.toml`` file
+            - query (str): The GraphQL request
+            - timeout (int): The amount of time that this function should wait for a response from the
+              service
+        
+        Returns:
+            The JSON response from the service
+            
+        Raises:
+            EnvironmentError: An error was returned within the JSON response from the service
+            KeyError: The `service` value was invalid
+            TimeoutError: The function timed out while waiting for a response from teh service
+            TypeError: The `query` value was invalid
+            
+        """
         # Check inputs
         if service not in self.config:
             raise KeyError(
@@ -93,7 +112,17 @@ class Services:
         return (data, errors)
 
 def logging_setup(app_name):
+    """Set up the logger for the program
+    All log messages will be sent to rsyslog using the User facility.
+    Additionally, they will also be echoed to ``stdout``
     
+    Args:
+    
+        - app_name (:obj:`str`): The application name which should be used for all log messages
+
+    Returns:
+        An initialized Logger object
+    """
     # Create a new logger
     logger = logging.getLogger(app_name)
     # We'll log everything of Debug level or higher
