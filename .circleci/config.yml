@@ -1,22 +1,45 @@
 version: 2
 jobs:
-
-    # Main CI tests
+    # Rust build + tests
     # Run for all PR commits
-    build:
+    rust:
       docker:
         - image: kubos/kubos-dev:latest
-      parallelism: 2
+      steps:
+        - checkout
+        - run: ./tools/rustbuild.sh
+
+    # CLI tests
+    # Run for all PR commits
+    cli_test:
+      docker:
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: python test/integration/integration_test.py
         - run: python -m tools.ci.lint
         - run: python tools/build.py --all-tests
+
+    # C build + tests
+    # Run for all PR commits
+    c_test:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: python tools/build.py --all-tests
+
+    # Python tests
+    # Run for all PR commits
+    python_test:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
         - run: python hal/python-hal/i2c/test_i2c.py
         - run: cd hal/python-hal/i2c; python setup.py install
         - run: cd apis/pumpkin-mcu-api; python test_mcu_api.py
         - run: cd apis/app-api/python; python test_app_api.py
-        - run: ./tools/rustbuild.sh
 
     # Create and push new git version tag (n.n.n+{new build number})
     # Run when code is merged into master
@@ -44,10 +67,23 @@ workflows:
   version: 2
   build:
     jobs:
-      - build:
+      - rust:
           filters:
             branches:
               ignore: master
+      - cli_test:
+          filters:
+            branches:
+              ignore: master
+      - c_test:
+          filters:
+            branches:
+              ignore: master
+      - python_test:
+          filters:
+            branches:
+              ignore: master
+
   deploy:
     jobs:
       - deploy:
