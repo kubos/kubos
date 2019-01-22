@@ -27,12 +27,12 @@ http://code.google.com/p/c-pthread-queue/
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <stdint.h>
-#include <mach/clock.h>
-#include <mach/mach.h>
+#include <sys/time.h>
 
 /* CSP includes */
-#include <csp/arch/posix/pthread_queue.h>
+#include "kubos-hal/pthread_queue.h"
 
 pthread_queue_t * pthread_queue_create(int length, size_t item_size) {
 	
@@ -72,6 +72,7 @@ void pthread_queue_delete(pthread_queue_t * q) {
 	return;
 
 }
+	
 
 int pthread_queue_enqueue(pthread_queue_t * queue, void * value, uint32_t timeout) {
 	
@@ -79,15 +80,9 @@ int pthread_queue_enqueue(pthread_queue_t * queue, void * value, uint32_t timeou
 
 	/* Calculate timeout */
 	struct timespec ts;
-
-	clock_serv_t cclock;
-	mach_timespec_t mts;
-	host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-	clock_get_time(cclock, &mts);
-	mach_port_deallocate(mach_task_self(), cclock);
-	ts.tv_sec = mts.tv_sec;
-	ts.tv_nsec = mts.tv_nsec;
-
+	if (clock_gettime(CLOCK_REALTIME, &ts))
+		return PTHREAD_QUEUE_ERROR;
+	
 	uint32_t sec = timeout / 1000;
 	uint32_t nsec = (timeout - 1000 * sec) * 1000000;
 
@@ -127,13 +122,8 @@ int pthread_queue_dequeue(pthread_queue_t * queue, void * buf, uint32_t timeout)
 	
 	/* Calculate timeout */
 	struct timespec ts;
-	clock_serv_t cclock;
-	mach_timespec_t mts;
-	host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-	clock_get_time(cclock, &mts);
-	mach_port_deallocate(mach_task_self(), cclock);
-	ts.tv_sec = mts.tv_sec;
-	ts.tv_nsec = mts.tv_nsec;
+	if (clock_gettime(CLOCK_REALTIME, &ts))
+		return PTHREAD_QUEUE_ERROR;
 	
 	uint32_t sec = timeout / 1000;
 	uint32_t nsec = (timeout - 1000 * sec) * 1000000;

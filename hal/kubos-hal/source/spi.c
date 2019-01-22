@@ -13,7 +13,7 @@ void k_spi_init(KSPINum spi, KSPIConf * conf)
         memcpy(&k_spi->config, conf, sizeof(KSPIConf));
 
         k_spi->bus_num = spi;
-        csp_mutex_create(&(k_spi->spi_lock));
+        pthread_mutex_init(&(k_spi->spi_lock), NULL);
         kprv_spi_dev_init(spi);
     }
 }
@@ -22,7 +22,7 @@ void k_spi_terminate(KSPINum spi)
 {
     KSPI * k_spi = kprv_spi_get(spi);
     kprv_spi_dev_terminate(spi);
-    csp_mutex_remove(&(k_spi->spi_lock));
+    pthread_mutex_destroy(&(k_spi->spi_lock));
     k_spi->bus_num = K_SPI_NO_BUS;
 }
 
@@ -51,10 +51,10 @@ KSPIStatus k_spi_write(KSPINum spi, uint8_t * buffer, uint32_t len)
     KSPIStatus ret = SPI_ERROR;
     if ((kspi->bus_num != K_SPI_NO_BUS) && (buffer != NULL))
     {
-        if (csp_mutex_lock(&(kspi->spi_lock), CSP_MAX_DELAY) == CSP_SEMAPHORE_OK)
+        if (pthread_mutex_lock(&(kspi->spi_lock)) == 0)
         {
             ret = kprv_spi_write(spi, buffer, len);
-            csp_mutex_unlock(&(kspi->spi_lock));
+            pthread_mutex_unlock(&(kspi->spi_lock));
         }
     }
     return ret;
@@ -66,10 +66,10 @@ KSPIStatus k_spi_read(KSPINum spi, uint8_t * buffer, uint32_t len)
     KSPIStatus ret = SPI_ERROR;
     if ((kspi->bus_num != K_SPI_NO_BUS) && (buffer != NULL))
     {
-        if (csp_mutex_lock(&(kspi->spi_lock), CSP_MAX_DELAY) == CSP_SEMAPHORE_OK)
+        if (pthread_mutex_lock(&(kspi->spi_lock)) == 0)
         {
             ret = kprv_spi_read(spi, buffer, len);
-            csp_mutex_unlock(&(kspi->spi_lock));
+            pthread_mutex_unlock(&(kspi->spi_lock));
         }
     }
     return ret;
@@ -81,10 +81,10 @@ KSPIStatus k_spi_write_read(KSPINum spi, uint8_t * txBuffer, uint8_t * rxBuffer,
     KSPIStatus ret = SPI_ERROR;
     if (kspi->bus_num != K_SPI_NO_BUS)
     {
-        if (csp_mutex_lock(&(kspi->spi_lock), CSP_MAX_DELAY) == CSP_SEMAPHORE_OK)
+        if (pthread_mutex_lock(&(kspi->spi_lock)) == 0)
         {
             ret = kprv_spi_write_read(spi, txBuffer, rxBuffer, len);
-            csp_mutex_unlock(&(kspi->spi_lock));
+            pthread_mutex_unlock(&(kspi->spi_lock));
         }
     }
     return ret;

@@ -38,9 +38,9 @@ void kprv_uart_enable_tx_int(KUARTNum uart)
     if (k_uart != NULL)
     {
         // Simulate UART loopback
-        while(csp_queue_dequeue(k_uart->tx_queue, &data, 0) == CSP_QUEUE_OK)
+        while(pthread_queue_dequeue(k_uart->tx_queue, &data, 0) == PTHREAD_QUEUE_OK)
         {
-            csp_queue_enqueue(k_uart->rx_queue, &data, CSP_MAX_DELAY);
+            pthread_queue_enqueue(k_uart->rx_queue, &data, PTHREAD_MAX_DELAY);
         }
     }
 }

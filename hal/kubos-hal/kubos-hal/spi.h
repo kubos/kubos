@@ -24,7 +24,10 @@
 #ifndef K_SPI_H
 #define K_SPI_H
 
-#include <csp/arch/csp_semaphore.h>
+#include <pthread.h>
+#include <stdint.h>
+#include <string.h>
+//#include <csp/arch/csp_semaphore.h>
 
 /**
  * @brief Number of SPI buses available. 
@@ -225,7 +228,7 @@ typedef struct {
     /**
      * Mutex used to lock access to SPI device
      */
-    csp_mutex_t spi_lock;
+    pthread_mutex_t spi_lock;
 } KSPI;
 
 /**

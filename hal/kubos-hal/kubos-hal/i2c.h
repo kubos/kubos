@@ -24,8 +24,9 @@
 #ifndef K_I2C_H
 #define K_I2C_H
 
+#include <pthread.h>
 #include <stdint.h>
-#include <csp/arch/csp_semaphore.h>
+//#include <csp/arch/csp_semaphore.h>
 
 /**
  * Number of I2C buses available. Derived from value in target.json
@@ -130,7 +131,7 @@ typedef struct {
     /**
      * Mutex for guarding device access
      */
-    csp_mutex_t i2c_lock;
+    pthread_mutex_t i2c_lock;
 } KI2C;
 
 /**

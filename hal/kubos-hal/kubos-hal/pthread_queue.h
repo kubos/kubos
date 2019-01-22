@@ -34,12 +34,12 @@ extern "C" {
 #include <stdint.h>
 #include <sys/time.h>
 
-#include <csp/arch/csp_queue.h>
+//#include <csp/arch/csp_queue.h>
 
-#define PTHREAD_QUEUE_ERROR CSP_QUEUE_ERROR
-#define PTHREAD_QUEUE_EMPTY CSP_QUEUE_ERROR
-#define PTHREAD_QUEUE_FULL CSP_QUEUE_ERROR
-#define PTHREAD_QUEUE_OK CSP_QUEUE_OK
+#define PTHREAD_QUEUE_ERROR 0
+#define PTHREAD_QUEUE_EMPTY 0
+#define PTHREAD_QUEUE_FULL 0
+#define PTHREAD_QUEUE_OK 1
 
 typedef struct pthread_queue_s {
 	void * buffer;

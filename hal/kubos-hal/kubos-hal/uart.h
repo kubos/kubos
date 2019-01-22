@@ -29,8 +29,13 @@
 #define K_UART_H
 
 #include "pins.h"
-#include <csp/arch/csp_queue.h>
+#include "pthread_queue.h"
+//#include <csp/arch/csp_queue.h>
 #include <stdint.h>
+#include <pthread.h>
+
+// TODO: Maybe remove
+#define PTHREAD_MAX_DELAY UINT32_MAX
 
 /**
  * Number of UART interfaces available. Derived from value in target.json
@@ -201,11 +206,11 @@ typedef struct
     /**
      * Queue filled with received UART data
      */
-    csp_queue_handle_t rx_queue;
+    pthread_queue_t *rx_queue;
     /**
      * Queue filled with data to be sent
      */
-    csp_queue_handle_t tx_queue;
+    pthread_queue_t *tx_queue;
 } KUART;
 
 /**

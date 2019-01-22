@@ -79,13 +79,15 @@ int k_uart_tx_pin(KUARTNum uart) {
     return -1;
 }
 
-static inline int queue_push(csp_queue_handle_t *queue, char c,
-                                    int timeout, void *task_woken)
+static inline int queue_push(pthread_queue_t *queue, char c,
+                                    int timeout, int *task_woken)
 {
     if (!task_woken) {
-        return csp_queue_enqueue(queue, &c, timeout);
+        return pthread_queue_enqueue(queue, &c, timeout);
     } else {
-        return csp_queue_enqueue_isr(queue, &c, task_woken);
+        if (task_woken != NULL)
+            *task_woken = 0;
+        return pthread_queue_enqueue(queue, &c, 0);
     }
 }
 
@@ -125,16 +127,16 @@ KUARTStatus k_uart_init(KUARTNum uart, KUARTConf *conf)
     memcpy(&k_uart->conf, conf, sizeof(KUARTConf));
 
     k_uart->dev = uart;
-    k_uart->rx_queue = csp_queue_create(k_uart->conf.rx_queue_len, sizeof(char));
-    k_uart->tx_queue = csp_queue_create(k_uart->conf.tx_queue_len, sizeof(char));
+    k_uart->rx_queue = pthread_queue_create(k_uart->conf.rx_queue_len, sizeof(char));
+    k_uart->tx_queue = pthread_queue_create(k_uart->conf.tx_queue_len, sizeof(char));
 
     ret = kprv_uart_dev_init(uart);
 
     if(ret != UART_OK)
     {
-        csp_queue_remove(k_uart->rx_queue);
+        pthread_queue_delete(k_uart->rx_queue);
         k_uart->rx_queue = NULL;
-        csp_queue_remove(k_uart->tx_queue);
+        pthread_queue_delete(k_uart->tx_queue);
         k_uart->tx_queue = NULL;
     }
 
@@ -151,9 +153,9 @@ void k_uart_terminate(KUARTNum uart)
 
     kprv_uart_dev_terminate(uart);
 
-    csp_queue_remove(k_uart->rx_queue);
+    pthread_queue_delete(k_uart->rx_queue);
     k_uart->rx_queue = NULL;
-    csp_queue_remove(k_uart->tx_queue);
+    pthread_queue_delete(k_uart->tx_queue);
     k_uart->tx_queue = NULL;
 }
 
@@ -180,8 +182,8 @@ int k_uart_read(KUARTNum uart, char *ptr, int len)
     if ((k_uart->rx_queue != NULL) && (ptr != NULL))
     {
         for (; i < len; i++, ptr++) {
-            result = csp_queue_dequeue(k_uart->rx_queue, ptr, 0);
-            if (result != CSP_QUEUE_OK) {
+            result = pthread_queue_dequeue(k_uart->rx_queue, ptr, 0);
+            if (result != PTHREAD_QUEUE_OK) {
                 return i;
             }
         }
@@ -203,8 +205,8 @@ int k_uart_write(KUARTNum uart, char *ptr, int len)
     if ((k_uart->tx_queue != NULL) && (ptr != NULL))
     {
         for (; i < len; i++, ptr++) {
-            int result = queue_push(k_uart->tx_queue, *ptr, CSP_MAX_DELAY, NULL);
-            if (result != CSP_QUEUE_OK) {
+            int result = queue_push(k_uart->tx_queue, *ptr, PTHREAD_MAX_DELAY, NULL);
+            if (result != PTHREAD_QUEUE_OK) {
                 return i;
             }
             kprv_uart_enable_tx_int(uart);
@@ -223,7 +225,7 @@ int k_uart_rx_queue_len(KUARTNum uart)
 
     if (k_uart->rx_queue != NULL)
     {
-        return (int) csp_queue_size(k_uart->rx_queue);
+        return (int) pthread_queue_items(k_uart->rx_queue);
     }
     return -2;
 }
