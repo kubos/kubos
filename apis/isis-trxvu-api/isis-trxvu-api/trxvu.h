@@ -33,7 +33,7 @@
 #ifdef YOTTA_CFG_RADIO_TRXVU_I2C_BUS
 #define TRXVU_I2C_BUS YOTTA_CFG_RADIO_TRXVU_I2C_BUS
 #else
-#define TRXVU_I2C_BUS K_I2C1
+#define TRXVU_I2C_BUS "/dev/i2c-0"
 #endif
 
 /**
@@ -124,6 +124,8 @@
 #define HARD_RESET                  0xAB
 #define WATCHDOG_RESET              0xCC
 /** \endcond */
+
+int radio_bus;
 
 /**
  * Radio function return values

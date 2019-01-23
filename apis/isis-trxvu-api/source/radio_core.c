@@ -19,17 +19,12 @@
 #include <stdio.h>
 #include <unistd.h>
 
+int radio_bus = 0;
+
 KRadioStatus k_radio_init()
 {
-    /*
-     * All I2C configuration is done at the kernel level,
-     * but we still need to pass a config structure to make
-     * our I2C API happy.
-     */
-    KI2CConf conf = k_i2c_conf_defaults();
-
     KI2CStatus status;
-    status = k_i2c_init(TRXVU_I2C_BUS, &conf);
+    status = k_i2c_init(TRXVU_I2C_BUS, &radio_bus);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize radio: %d\n", status);
@@ -41,7 +36,7 @@ KRadioStatus k_radio_init()
 
 void k_radio_terminate()
 {
-    k_i2c_terminate(TRXVU_I2C_BUS);
+    k_i2c_terminate(&radio_bus);
 
     return;
 }
