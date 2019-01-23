@@ -167,7 +167,7 @@ static void test_init_no_bus(void ** arg)
 static void test_init_no_addr(void ** arg)
 {
     KEPSConf config = {
-            .bus = K_I2C1
+            .bus = "/dev/i2c-0"
     };
 
     assert_int_equal(k_eps_init(config), EPS_ERROR_CONFIG);
@@ -779,7 +779,7 @@ static void test_transfer_error(void ** arg)
 static int init(void ** state)
 {
     KEPSConf config = {
-            .bus = K_I2C1,
+            .bus = "/dev/i2c-0",
             .addr = 0x02
     };
 

@@ -62,7 +62,7 @@ typedef enum {
  */
 typedef struct
 {
-    KI2CNum bus;                            /**< I2C bus number EPS is connected to */
+    char * bus;                             /**< I2C bus device EPS is connected to */
     uint8_t addr;                           /**< EPS I2C slave address */
 } KEPSConf;
 
