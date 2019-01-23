@@ -34,17 +34,6 @@ For example:
     $ kubos config
     
     {
-      "hardware": {
-        "i2c": {
-          "count": 1, // kubos-linux-isis-gcc
-          "defaults": {
-            "bus": "K_I2C1", // kubos-linux-isis-gcc
-          },
-          "i2c1": {
-            "device": "/dev/i2c-0" // kubos-linux-isis-gcc
-          }
-        },
-      },
       "system": {
         "initAfterFlash": false, // kubos-linux-gcc
         "initAtBoot": false, // kubos-linux-gcc
@@ -123,59 +112,7 @@ System
               "destDir": "/home/myUser/storage",
               "password": "password"
             }
-        }
-
-Hardware
-########
-
-.. json:object:: hardware
-
-    Description of target board's hardware peripherals
-
-    :property i2c: Availability and properties of I2C
-    :proptype i2c: :json:object:`i2c <hardware.i2c>`
-    
-.. json:object:: hardware.i2c
-
-    Availability and properties of I2C on the target device
-    
-    :property integer count: Number of I2C buses available
-    :property defaults: Default I2C connection settings
-    :proptype defaults: :json:object:`defaults <hardware.i2c.defaults>`
-    :property i2c{n}: I2C bus definitions
-    :proptype i2c{n}: :json:object:`bus <hardware.i2c.i2c{n}>`
-    
-    **Example**::
-    
-        {
-            "hardware": {
-              "i2c": {
-                "count": 2,
-                "defaults": {
-                  "bus": "K_I2C1",
-                },
-                "i2c1": {
-                  "device": "/dev/i2c-1"
-                },
-                "i2c2": {
-                  "device": "/dev/i2c-2"
-                }
-              }
-            }
-        }
-    
-.. json:object:: hardware.i2c.defaults
-
-    Default I2C connection settings
-    
-    :property bus: The default I2C bus
-    :proptype bus: :cpp:type:`KI2CNum`
-    
-.. json:object:: hardware.i2c.i2c{n}
-
-    I2C bus definition
-    
-    :property string device: Linux bus device name   
+        } 
 
 module.json
 -----------

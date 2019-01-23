@@ -1,9 +1,4 @@
 {
-    "arch": {
-        "arm": {
-            
-        },
-    },
     "system": {
         "initAfterFlash": "boolean",
         "initAtBoot": "boolean",
@@ -11,15 +6,4 @@
         "destDir": "file location",
         "password": "string"
     },
-    "hardware": {
-        "i2c": {
-            "count": "number",
-            "defaults": {
-                "bus": "pin",
-            },
-            "i2c{n}": {
-                "device": "string"
-            }
-        },
-    }
 }
