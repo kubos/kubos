@@ -245,4 +245,3 @@ These are the configuration options which are most likely to be changed for a pr
             - "kubos-hal" : "kubos/kubos-hal"
         
     - "isis-iobc-supervisor": "kubos/isis-iobc-supervisor"
-    - "tinycbor": "kubos/tinycbor"
