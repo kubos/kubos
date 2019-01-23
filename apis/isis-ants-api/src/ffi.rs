@@ -16,15 +16,6 @@
 
 #[allow(dead_code)]
 #[repr(C)]
-pub enum KI2CNum {
-    KI2CNoBus,
-    KI2C1,
-    KI2C2,
-    KI2C3,
-}
-
-#[allow(dead_code)]
-#[repr(C)]
 pub enum KANTSStatus {
     AntsOK,
     AntsError,
@@ -56,7 +47,7 @@ pub struct AntsTelemetry {
 /// Bring in C functions from isis-ants-api
 extern "C" {
     pub fn k_ants_init(
-        bus: KI2CNum,
+        bus: *const u8,
         primary: u8,
         secondary: u8,
         ant_count: u8,

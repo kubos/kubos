@@ -41,7 +41,7 @@
 //! port = 8006
 //!
 //! [isis-ants-service]
-//! bus = "KI2C1"
+//! bus = "/dev/i2c-0"
 //! primary = "0x31"
 //! secondary = "0x32"
 //! antennas = 4

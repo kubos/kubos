@@ -54,7 +54,7 @@
 #![deny(missing_docs)]
 
 pub use crate::ants::*;
-pub use crate::parse::{AntsTelemetry, DeployStatus, KANTSAnt, KANTSController, KI2CNum};
+pub use crate::parse::{AntsTelemetry, DeployStatus, KANTSAnt, KANTSController};
 
 mod ants;
 mod ffi;
