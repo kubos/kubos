@@ -54,7 +54,7 @@ pub struct timespec {
 }
 
 pub trait ImtqFFI: Clone {
-    fn k_adcs_init(&self, bus: &str, addr: u16, timeout: i32) -> KADCSStatus;
+    fn k_adcs_init(&self, bus: *const u8, addr: u16, timeout: i32) -> KADCSStatus;
     fn k_adcs_terminate(&self);
     fn k_adcs_passthrough(
         &self,
@@ -73,7 +73,7 @@ pub trait ImtqFFI: Clone {
 pub struct ImtqRaw {}
 
 impl ImtqFFI for ImtqRaw {
-    fn k_adcs_init(&self, bus: KI2CNum, addr: u16, timeout: i32) -> KADCSStatus {
+    fn k_adcs_init(&self, bus: *const u8, addr: u16, timeout: i32) -> KADCSStatus {
         unsafe { k_adcs_init(bus, addr, timeout) }
     }
 
@@ -108,7 +108,7 @@ impl ImtqFFI for ImtqRaw {
 }
 
 extern "C" {
-    pub fn k_adcs_init(bus: KI2CNum, addr: u16, timeout: i32) -> KADCSStatus;
+    pub fn k_adcs_init(bus: *const u8, addr: u16, timeout: i32) -> KADCSStatus;
     pub fn k_adcs_terminate();
     pub fn k_adcs_passthrough(
         tx: *const u8,
