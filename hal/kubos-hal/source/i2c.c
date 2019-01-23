@@ -29,7 +29,11 @@
 
 KI2CStatus k_i2c_init(char * device, int * fp)
 {
-    *fp = open(device, O_RDWR);
+
+    char bus[] = "/dev/i2c-n\0";
+    // Make sure the device name is null terminated
+    snprintf(bus, 11, "%s", device);
+    *fp = open(bus, O_RDWR);
 
     if (*fp <= 0)
     {
