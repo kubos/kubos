@@ -39,38 +39,11 @@ For example:
           "count": 1, // kubos-linux-isis-gcc
           "defaults": {
             "bus": "K_I2C1", // kubos-linux-isis-gcc
-            "role": "K_MASTER", // kubos-gcc
-            "clockSpeed": 100000, // kubos-gcc
-            "addressingMode": "K_ADDRESSINGMODE_7BIT" // kubos-gcc
           },
           "i2c1": {
             "device": "/dev/i2c-0" // kubos-linux-isis-gcc
           }
         },
-        "uart": {
-          "count": 0, // kubos-gcc
-          "defaults": {
-            "baudRate": 9600, // kubos-gcc
-            "wordLen": "K_WORD_LEN_8BIT", // kubos-gcc
-            "stopBits": "K_STOP_BITS_1", // kubos-gcc
-            "parity": "K_PARITY_NONE", // kubos-gcc
-            "rxQueueLen": 128, // kubos-gcc
-            "txQueueLen": 128 // kubos-gcc
-          }
-        },
-        "spi": {
-          "count": 0, // kubos-gcc
-          "defaults": {
-            "bus": "K_SPI1", // kubos-gcc
-            "role": "K_SPI_MASTER", // kubos-gcc
-            "direction": "K_SPI_DIRECTION_2LINES", // kubos-gcc
-            "dataSize": "K_SPI_DATASIZE_8BIT", // kubos-gcc
-            "clockPolarity": "K_SPI_CPOL_HIGH", // kubos-gcc
-            "clockPhase": "K_SPI_CPHA_1EDGE", // kubos-gcc
-            "firstBit": "K_SPI_FIRSTBIT_LSB", // kubos-gcc
-            "speed": "10000" // kubos-gcc
-          }
-        }
       },
       "system": {
         "initAfterFlash": false, // kubos-linux-gcc
@@ -112,38 +85,7 @@ Will generate the following statements:
     #define YOTTA_CFG_TEST_PORT 10
     #define YOTTA_CFG_TEST_UART_BUS K_UART6
     #define YOTTA_CFG_TEST_UART_BAUDRATE 115200
-    #define YOTTA_CFG_TEST_USART
-    
-
-    
-Non-Default Settings
-^^^^^^^^^^^^^^^^^^^^
-
-These are settings which are not included by default as part of any target device, so must
-be explicitly provided in a `config.json` file in order to be made available to the project.
-
-SDIO
-####
-
-General SDIO support is turned on via the ``hardware.sdio`` object. This support is not
-automatically included with any target device.
-
-.. json:object:: hardware.sdio
-
-    SDIO support
-    
-    `There are no configuration properties for this object. It simply enables the use
-    of the HAL SDIO library`
-    
-    **Example**:: 
-
-        {
-            "hardware": {
-                "sdio": {}
-            }
-        }
-    
-                
+    #define YOTTA_CFG_TEST_USART      
     
 User-Configurable Included Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -189,57 +131,9 @@ Hardware
 .. json:object:: hardware
 
     Description of target board's hardware peripherals
-    
-    :property console: Debug console
-    :proptype console: :json:object:`console <hardware.console>`
-    :property integer externalClock: Clock rate of external clock
-    :property pins: Custom name -> pin mapping
-    :proptype pins: :json:object:`pins <hardware.pins>`
+
     :property i2c: Availability and properties of I2C
     :proptype i2c: :json:object:`i2c <hardware.i2c>`
-    :property uart: Availability and properties of UART
-    :proptype uart: :json:object:`uart <hardware.uart>`
-    :property spi: Availability and properites of SPI
-    :proptype spi: :json:object:`spi <hardware.spi>`
-    :proptype sdio: Availability of SDIO
-    :proptype sdio: :json:object:`sdio <hardware.sdio>`
-    
-.. json:object:: hardware.console
-
-    The debug UART console
-
-    :property uart: UART bus to connect to
-    :proptype uart: :cpp:type:`KUARTNum`
-    :property string baudRate: `(Default: "115200")` Connection speed
-    
-    **Example**::
-    
-        {
-            "hardware": {
-                "console": {
-                    "uart": "K_UART1",
-                    "baudRate": "9600"
-                }
-            }
-        }
-    
-.. json:object:: hardware.pins
-
-    Custom name -> pin mapping. Allows more readable pin names to be used in Kubos projects.
-    
-    :property pin {pin-name}: Pin name/value pair
-    
-    **Example**::
-     
-        {
-            "hardware": {
-                "pins": {
-                    "LED1": "PA1",
-                    "LED2": "PA2",
-                    "USER_BUTTON": "PA3"
-                }
-            }
-        }
     
 .. json:object:: hardware.i2c
 
@@ -259,39 +153,12 @@ Hardware
                 "count": 2,
                 "defaults": {
                   "bus": "K_I2C1",
-                  "role": "K_MASTER",
-                  "clockSpeed": 100000,
-                  "addressingMode": "K_ADDRESSINGMODE_7BIT"
                 },
                 "i2c1": {
-                  "scl": {
-                    "pin": "PB6",
-                    "mode": "GPIO_MODE_AF_PP",
-                    "pullup": "GPIO_NOPULL",
-                    "speed": "GPIO_SPEED_MEDIUM"
-                  },
-                  "sda": {
-                    "pin": "PB7",
-                    "mode": "GPIO_MODE_AF_OD",
-                    "pullup": "GPIO_PULLUP",
-                    "speed": "GPIO_SPEED_MEDIUM"
-                  },
-                  "alt": "GPIO_AF4_I2C1"
+                  "device": "/dev/i2c-1"
                 },
                 "i2c2": {
-                  "scl": {
-                    "pin": "PB10",
-                    "mode": "GPIO_MODE_AF_PP",
-                    "pullup": "GPIO_NOPULL",
-                    "speed": "GPIO_SPEED_MEDIUM"
-                  },
-                  "sda": {
-                    "pin": "PB11",
-                    "mode": "GPIO_MODE_AF_OD",
-                    "pullup": "GPIO_PULLUP",
-                    "speed": "GPIO_SPEED_MEDIUM"
-                  },
-                  "alt": "GPIO_AF4_I2C2"
+                  "device": "/dev/i2c-2"
                 }
               }
             }
@@ -303,190 +170,12 @@ Hardware
     
     :property bus: The default I2C bus
     :proptype bus: :cpp:type:`KI2CNum`
-    :property role: Default communication role
-    :proptype role: :cpp:type:`I2CRole`
-    :property integer clockSpeed: Default bus speed
-    :property addressingMode: I2C addressing mode
-    :proptype addressingMode: :cpp:type:`I2CAddressingMode`
     
 .. json:object:: hardware.i2c.i2c{n}
 
     I2C bus definition
     
-    :property scl: Clock line settings
-    :proptype scl: :json:object:`scl <hardware.i2c.i2c{n}.scl>`
-    :property sda: Data line settings
-    :proptype sda: :json:object:`sda <hardware.i2c.i2c{n}.sda>`
-    :property string alt: `(STM32F4* only)` GPIO alternate function mapping
-    :options alt: GPIO_AFx_I2Cy
-    
-.. json:object:: hardware.i2c.i2c{n}.scl
-
-    I2C bus clock line settings
-    
-    :property pin pin: Clock line pin
-    :property mode: Pin GPIO mode
-    :proptype mode: :cpp:type:`KGPIOMode`
-    :property pullup: Pin pullup/pulldown setting
-    :proptype pullup: :cpp:type:`KGPIOPullup`
-    :property type speed: Clock line speed
-    :options speed: GPIO_SPEED_[LOW, MEDIUM, FAST, HIGH]
-
-.. json:object:: hardware.i2c.i2c{n}.sda
-
-    I2C bus data line settings
-    
-    :property pin pin: Data line pin
-    :property mode: Pin GPIO mode
-    :proptype mode: :cpp:type:`KGPIOMode`
-    :property pullup: Pin pullup/pulldown setting
-    :proptype pullup: :cpp:type:`KGPIOPullup`
-    :property string speed: Data line speed
-    :options speed: GPIO_SPEED_[LOW, MEDIUM, FAST, HIGH]
-    
-
-.. json:object:: hardware.uart
-
-    Availability and properties of UART on the target device
-    
-    :property integer count: Number of UART buses available
-    :property defaults: Default UART connection settings
-    :proptype defaults: :json:object:`defaults <hardware.uart.defaults>`
-    :property uart{n}: UART bus definitions
-    :proptype uart{n}: :json:object:`bus <hardware.uart.uart{n}>`
-    
-    **Example**::
-    
-        {
-            "hardware": {
-              "uart": {
-                "count": 2,
-                "defaults": {
-                  "baudRate": 9600,
-                  "wordLen": "K_WORD_LEN_8BIT",
-                  "stopBits": "K_STOP_BITS_1",
-                  "parity": "K_PARITY_NONE",
-                  "rxQueueLen": 128,
-                  "txQueueLen": 128
-                },
-                "uart1": {
-                    "tx": "P33",
-                    "rx": "P34"
-                },
-                "uart2": {
-                    "tx": "P44",
-                    "rx": "P45"
-                }
-              }
-            }
-        }
-    
-.. json:object:: hardware.uart.defaults
-
-    Default UART connection settings
-    
-    :property integer baudRate: Default bus speed
-    :property wordLen: Default word length
-    :proptype wordLen: :cpp:type:`KWordLen`
-    :property stopBits: Default number of stop bits
-    :proptype stopBits: :cpp:type:`KStopBits`
-    :property parity: Default parity setting
-    :proptype parity: :cpp:type:`KParity`
-    :property integer rxQueueLen: Default size of RX queue
-    :property integer txQueueLen: Default size of TX queue
-    
-.. json:object:: hardware.uart.uart{n}
-
-    UART bus definition
-    
-    :property pin tx: Bus transmit pin
-    :property pin rx: Bus receive pin
-    
-.. json:object:: hardware.spi
-
-    Availability and properties of SPI on the target device
-    
-    :property integer count: Number of SPI buses available
-    :property defaults: Default SPI connection settings
-    :proptype defaults: :json:object:`defaults <hardware.spi.defaults>`
-    :property spi{n}: SPI bus definitions
-    :proptype spi{n}: :json:object:`bus <hardware.spi.spi{n}>`
-    
-    **Example**::
-    
-        {
-            "hardware": {
-              "spi": {
-                "count": 3,
-                "defaults": {
-                  "bus": "K_SPI1",
-                  "role": "K_SPI_MASTER",
-                  "direction": "K_SPI_DIRECTION_2LINES",
-                  "dataSize": "K_SPI_DATASIZE_8BIT",
-                  "clockPolarity": "K_SPI_CPOL_HIGH",
-                  "clockPhase": "K_SPI_CPHA_1EDGE",
-                  "firstBit": "K_SPI_FIRSTBIT_LSB",
-                  "speed": "10000"
-                },
-                "spi1": {
-                  "mosi": "PA7",
-                  "miso": "PA6",
-                  "sck": "PA5",
-                  "cs": "PA4",
-                  "port": "GPIOA",
-                  "alt": "GPIO_AF5_SPI1"
-                },
-                "spi2": {
-                  "mosi": "PB15",
-                  "miso": "PB14",
-                  "sck": "PB13",
-                  "cs": "PB12",
-                  "port": "GPIOB",
-                  "alt": "GPIO_AF5_SPI2"
-                },
-                "spi3": {
-                  "mosi": "PC12",
-                  "miso": "PC11",
-                  "sck": "PC10",
-                  "cs": "PC8",
-                  "port": "GPIOC",
-                  "alt": "GPIO_AF6_SPI3"
-                }
-              }
-            }
-        }
-    
-.. json:object:: hardware.spi.defaults
-
-    Default SPI connection settings
-    
-    :property bus: Default SPI bus
-    :proptype bus: :cpp:type:`KSPINum`
-    :property role: Default communication role
-    :proptype role: :cpp:type:`SPIRole`
-    :property direction: Default SPI communication direction/s
-    :proptype direction: :cpp:type:`SPIDirection`
-    :property dataSize: Default data size
-    :proptype dataSize: :cpp:type:`SPIDataSize`
-    :property clockPolarity: Default clock polarity
-    :proptype clockPolarity: :cpp:type:`SPIClockPolarity`
-    :property clockPhase: Defaut clock phase
-    :proptype clockPhase: :cpp:type:`SPIClockPhase`
-    :property firstBit: Default endianness
-    :proptype firstBit: :cpp:type:`SPIFirstBit`
-    :property integer speed: Default bus speed
-    
-.. json:object:: hardware.spi.spi{n}
-
-    SPI bus definition
-    
-    :property pin mosi: Master-out pin
-    :property pin miso: Master-in pin
-    :property pin sck: Clock pin
-    :property pin cs: Chip-select pin
-    :property pin port: GPIO port that the SPI pins belong to
-    :property string alt: `(STM32F4* only)` GPIO alternate function mapping
-    :options alt: GPIO_AFx_I2Cy
+    :property string device: Linux bus device name   
 
 module.json
 -----------
