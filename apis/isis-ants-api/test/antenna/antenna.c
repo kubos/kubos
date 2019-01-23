@@ -38,7 +38,7 @@ uint8_t  activation_count = 3;
 static void test_init(void ** state)
 {
     will_return(__wrap_open, 1);
-    assert_int_equal(k_ants_init(K_I2C1, ANTS_PRIMARY, ANTS_SECONDARY, ANT_COUNT, 10), ANTS_OK);
+    assert_int_equal(k_ants_init("/dev/i2c-1", ANTS_PRIMARY, ANTS_SECONDARY, ANT_COUNT, 10), ANTS_OK);
 }
 
 static void test_no_init_arm(void ** arg)
@@ -665,7 +665,7 @@ static void test_passthrough(void ** arg)
 static int init(void ** state)
 {
     will_return(__wrap_open, 1);
-    k_ants_init(1, ANTS_PRIMARY, ANTS_SECONDARY, ANT_COUNT, 10);
+    k_ants_init("/dev/i2c-1", ANTS_PRIMARY, ANTS_SECONDARY, ANT_COUNT, 10);
 
     return 0;
 }
