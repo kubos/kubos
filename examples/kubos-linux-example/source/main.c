@@ -20,6 +20,8 @@
  * command is executed.
  */
 
+#include <stdio.h>
+
 int main(void)
 {
     printf("Hello World!");

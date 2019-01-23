@@ -1,27 +1,27 @@
 Kubos Project Configuration
 ===========================
 
-For Kubos projects using C, the project configuration is derived from yotta's `configuration system <http://docs.yottabuild.org/reference/config.html>`__ 
+For Kubos projects using C, the project configuration is derived from yotta's `configuration system <http://docs.yottabuild.org/reference/config.html>`__
 and `module.json <http://docs.yottabuild.org/reference/module.html>`__ files.
 
 If a project's configuration is changed, the new settings will be incorporated during the next execution of ``kubos build``.
 
 config.json
 -----------
-    
+
 Overview
 ^^^^^^^^
 
 Each Kubos target comes with a set of default configuration options. These options describe things
 like hardware bus availability and communication settings.
-The `config.json` file, which lives in the top level directory of a Kubos project, allows users to 
+The `config.json` file, which lives in the top level directory of a Kubos project, allows users to
 override any of these options with a custom value.
 
 Under the covers, the `target.json` and `config.json` files are used to generate a `yotta_config.h` file,
 which contains ``#define YOTTA_CFG_{option}`` statements for each defined option. These ``YOTTA_CFG_*``
 variables can then be referenced within the Kubos project's source code.
 
-The current configuration of a project can be seen using the ``kubos config`` command. 
+The current configuration of a project can be seen using the ``kubos config`` command.
 Each configuration option in the output will have a comment showing the origin of the value.
 Anything marked with "application's config.json" will have been taken from the project's `config.json` file.
 All other comments will have "\*-gcc", which indicates that that option is a default value taken from
@@ -92,7 +92,7 @@ during project compilation time.
 For example::
 
     {
-      "CSP": {
+      "TEST": {
         "my_address": "1",
         "target_address": "2",
         "port": "10",
@@ -107,12 +107,12 @@ Will generate the following statements:
 
 .. code-block:: c
 
-    #define YOTTA_CFG_CSP_MY_ADDRESS 1
-    #define YOTTA_CFG_CSP_TARGET_ADDRESS 2
-    #define YOTTA_CFG_CSP_PORT 10
-    #define YOTTA_CFG_CSP_UART_BUS K_UART6
-    #define YOTTA_CFG_CSP_UART_BAUDRATE 115200
-    #define YOTTA_CFG_CSP_USART
+    #define YOTTA_CFG_TEST_MY_ADDRESS 1
+    #define YOTTA_CFG_TEST_TARGET_ADDRESS 2
+    #define YOTTA_CFG_TEST_PORT 10
+    #define YOTTA_CFG_TEST_UART_BUS K_UART6
+    #define YOTTA_CFG_TEST_UART_BAUDRATE 115200
+    #define YOTTA_CFG_TEST_USART
     
 
     
@@ -121,11 +121,11 @@ Non-Default Settings
 
 These are settings which are not included by default as part of any target device, so must
 be explicitly provided in a `config.json` file in order to be made available to the project.
-        
+
 SDIO
 ####
 
-General SDIO support is turned on via the ``hardware.sdio`` object. This support is not 
+General SDIO support is turned on via the ``hardware.sdio`` object. This support is not
 automatically included with any target device.
 
 .. json:object:: hardware.sdio
@@ -507,9 +507,7 @@ When you run ``kubos init -l``, a `module.json` file is created for you with som
             "type": "git"
         },
         "version": "0.1.0",
-        "dependencies":{
-            "csp": "kubos/libcsp#~1.5.0"
-        },
+        "dependencies":{},
         "homepage": "https://<homepage>",
         "description": "Example app running on Kubos Linux."
     }
@@ -551,14 +549,8 @@ These are the configuration options which are most likely to be changed for a pr
                 
     - "ccan-json": "kubos/ccan-json"
     - "cmocka": "kubos/cmocka"             
-    - "csp": "kubos/libcsp"
-    
-        - `"kubos-hal": "kubos/kubos-hal"`
-        - `"tinycbor": "kubos/tinycbor"`
-        
     - "kubos-hal": "kubos/kubos-hal"
     
-        - "csp": "kubos/libcsp"
         - `"kubos-hal-linux": "kubos/kubos-hal-linux"`
         
             - "kubos-hal" : "kubos/kubos-hal"
