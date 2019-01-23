@@ -6,11 +6,6 @@
   "author": "kubos.co",
   "homepage": "https://www.kubos.co",
   "license": "Apache-2.0",
-  "targetDependencies": {
-    "linux": {
-      "kubos-hal-linux": "kubos/kubos-hal-linux"
-    }
-  },
   "testDependencies": {
     "unity": "kubos/unity",
     "cmocka": "kubos/cmocka"
