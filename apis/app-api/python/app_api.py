@@ -50,15 +50,15 @@ class Services:
         if service not in self.config:
             raise KeyError(
                 "Service name invalid. Check config file for service names.")
-        if type(query) not in [str, unicode]:
-            raise TypeError("Query must be str or unicode.")
+        if type(query) not in [str, bytes]:
+            raise TypeError("Query must be str or bytes.")
 
         # Lookup port/ip
         ip = self.config[service]["addr"]["ip"]
         port = self.config[service]["addr"]["port"]
 
         # Talk to the server
-        response = self._udp_query(query, (ip, port), timeout)
+        response = self._udp_query(query, ip, port, timeout)
 
         # Format the response and detect errors
         (data, errors) = self._format(response, service)
@@ -70,7 +70,7 @@ class Services:
 
         return data
 
-    def _udp_query(self, query, (ip, port), timeout):
+    def _udp_query(self, query, ip, port, timeout):
         # Set up the socket
         sock = socket.socket(socket.AF_INET,  # Internet
                              socket.SOCK_DGRAM)  # UDP
@@ -95,8 +95,8 @@ class Services:
         except Exception as e:
             print("Response was unable to be parsed as JSON.")
             print("It is likely incomplete or the endpoint is misbehaving")
-            print("response: ", response)
-            print("error: ", e)
+            print("response: {}".format(response))
+            print("error: {}".format(e))
             raise
 
         # Check that it follows GraphQL format
