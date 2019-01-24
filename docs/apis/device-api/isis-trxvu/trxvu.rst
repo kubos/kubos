@@ -1,7 +1,7 @@
 Using the ISIS TRXVU Radio in a Kubos Project
 =============================================
 
-This document covers the particular capabilities and requirements of the Kubos API for the 
+This document covers the particular capabilities and requirements of the Kubos API for the
 `ISIS TRXVU <https://www.isispace.nl/product/isis-uhf-downlink-vhf-uplink-full-duplex-transceiver/>`__ radio.
 
 .. toctree::
@@ -26,62 +26,26 @@ Kubos
     - :doc:`Using Kubos Linux <../../../os-docs/using-kubos-linux>`
     - :doc:`Working with the iOBC <../../../os-docs/working-with-the-iobc>`
 
-Project Configuration
----------------------
-
-There are several options which may be specified within a project's ``config.json`` file under the ``radio.trxvu`` structure. 
-These option values should match what was specified in your TRXVU options sheet. 
-If they are not specified, the default value will be used.
-
-For example::
-
-    {
-      "radio": {
-        "trxvu": {
-          "watchdog": {
-            "timeout": 3600
-          },
-          "tx": {
-            "address": "0x70",
-            "max_size": 500,
-            "max_frames": 20
-          },
-          "rx": {
-            "address": "0x71",
-            "max_size": 500,
-            "max_frames": 20
-          }
-        }
-      }
-    }
-
-
-.. json:object:: watchdog
-
-    Watchdog properties
-    
-    :property integer timeout: `(Default: 60)` Radio watchdog timeout period (in seconds). If the radio does not receive any commands from main iOBC in this time period, it will restart itself. Specify a value of ``0`` to indicate that the watchdog has been disabled.
-
-.. json:object:: tx
-
-    Transmitter properties
-    
-    :property string address: `(Default: "0x61")` I2C address
-    :property integer max_size: `(Default: 235)` Maximum payload size
-    :property integer max_frames: `(Default: 40)` Maximum number of frames that can be buffered before transmission
-
-.. json:object:: rx
-
-    Receiver properties
-    
-    :property string address: `(Default: "0x60")` I2C address
-    :property integer max_size: `(Default: 200)` Maximum payload size
-    :property integer max_frames: `(Default: 40)` Maximum number of frames that can be buffered after reception
-
 Run-Time Radio Configuration
 ----------------------------
 
-The ISIS TRXVU radio supports in-flight configuration changes. These changes can be made using the :cpp:func:`k_radio_configure` function.
+The ISIS TRXVU radio will need to be initialized via :cpp:func:`k_radio_init` with a few different options.
+These option values should match what was specified in your TRXVU options sheet.
+
+The :cpp:func:`k_radio_init function takes the following arguments:
+
+    - ``bus`` - The I2C bus device name (ex. ``"/dev/i2c-0"``)
+    - ``tx`` - The transmitter's properties
+    - ``rx`` - The receiver's properties
+    - ``timeout`` - The radio's watchdog timeout (in seconds)
+
+The transmitter and receiver property structures contain the following elements:
+
+    - ``addr`` - The I2C address of the component
+    - ``max_size`` - The maximum payload size
+    - ``max_frames`` - The maximum number of frames that the component's buffer can store
+
+The radio also supports in-flight configuration changes. These changes can be made using the :cpp:func:`k_radio_configure` function.
 
 .. note::
 
@@ -130,9 +94,9 @@ The response byte will have one of two values:
     - The transmit buffer is full
     - The message length given was zero
     - The message length given was greater than the maximum payload size
-    
+
 - 0x{nn} - The number of remaining transmission buffer slots
-    
+
 For example:
 
 .. code-block:: c
@@ -148,7 +112,7 @@ For example:
     
 Overriding Call-Signs
 ~~~~~~~~~~~~~~~~~~~~~
-    
+
 To send a message with non-default AX.25 call-signs, use the :cpp:func:`k_radio_send_override` function instead.
 
 For example:
@@ -175,9 +139,10 @@ Receiving a Message
 
 In order to read a message from a radio's receive buffer, call the :cpp:func:`k_radio_recv` function.
 
-The function takes two parameters:
+The function takes three parameters:
 
-    - A pointer to a :cpp:type:`radio_rx_message` structure where the meta-data and message should be put
+    - A pointer to a :cpp:type:`radio_rx_header` structure where the meta-data should be put
+    - A pointer to a buffer where the message payload should be put
     - *(Optional. Value of 'NULL' may be passed)* A pointer to a 2-byte variable which will be updated to contain the length of the message received.
 
 The function will return one of three values:
@@ -190,16 +155,16 @@ If the receive process is successful, the retrieved message will be automaticall
 If the receive process fails for any reason, the receiver buffer will not be modified.
 
 The message will be returned in the :cpp:member:`radio_rx_message.message <radio_rx_message::message>` structure member.
-    
+
 Message Meta-Data
 ~~~~~~~~~~~~~~~~~
 
 If the function completes successfully, there will be three meta-data fields which can be examined:
 
     - :cpp:member:`msg_size <radio_rx_message::msg_size>` - The length of the message received
-    - :cpp:member:`doppler_offset <radio_rx_message::doppler_offset>` - The doppler shift on the packet at the time it was received by the radio 
+    - :cpp:member:`doppler_offset <radio_rx_message::doppler_offset>` - The doppler shift on the packet at the time it was received by the radio
       (convert to human-readable units using the :cpp:func:`get_doppler_offset` function)
-    - :cpp:member:`signal_strength <radio_rx_message::signal_strength>` - The measured Received Signal Strength Indicator (RSSI) at the time the packet was received by the radio 
+    - :cpp:member:`signal_strength <radio_rx_message::signal_strength>` - The measured Received Signal Strength Indicator (RSSI) at the time the packet was received by the radio
       (convert to human-readable units using the :cpp:func:`get_signal_strength` function)
 
 Example
@@ -210,9 +175,11 @@ Example
     #include "isis-trxvu-api/trxvu.h"
     
     KRadioStatus status;
-    radio_rx_msg buffer = {0};
+    radio_rx_header header = { 0 };
+    // Allocate room for the maximum payload size
+    uint8_t message[200] = { 0 };
 
-    status = k_radio_recv(&buffer, NULL);
+    status = k_radio_recv(&header, message, NULL);
     if (status == RADIO_RX_EMPTY)
     {
         printf("No messages to receive\n");
@@ -220,8 +187,8 @@ Example
     else if (status == RADIO_OK)
     {
         printf("Received message(%d %fHz %fdBm): %s\n",
-                buffer.msg_size, get_doppler_offset(buffer.doppler_offset), get_signal_strength(buffer.signal_strength),
-                buffer.message);
+                len, get_doppler_offset(header.doppler_offset), get_signal_strength(header.signal_strength),
+                message);
     }
     else
     {
@@ -244,7 +211,18 @@ For example::
 
     #include "isis-trxvu-api/trxvu.h"
 
-    k_radio_init();
+    trx_prop tx = {
+            .addr = 0x60,
+            .max_size = TX_SIZE,
+            .max_frames = 40,
+    };
+    trx_prop rx = {
+                .addr = 0x61,
+                .max_size = RX_SIZE,
+                .max_frames = 40,
+    };
+
+    k_radio_init("/dev/i2c-0", tx, rx, 10);
     
     radio_telem tx_telem = {0};
     k_radio_get_telemetry(&tx_telem, RADIO_TX_TELEM_ALL);
@@ -264,10 +242,10 @@ These values can be converted as desired into human-readable `float` values.
     - :cpp:func:`get_signal_strength`
     - :cpp:func:`get_rf_power_dbm`
     - :cpp:func:`get_rf_power_mw`
-    
+
 Transmitter
 ~~~~~~~~~~~
-    
+
 RADIO_TX_TELEM_ALL
 ^^^^^^^^^^^^^^^^^^
 
@@ -281,7 +259,7 @@ Returns the current measurements of all the transmitter's telemetry channels:
 - Local oscillator temperature
 
 A pointer to a :cpp:type:`radio_telem` structure should be passed to the :cpp:func:`k_radio_get_telemetry` function.
-The values can then be read from the :cpp:type:`trxvu_tx_telem_raw` sub-structure. 
+The values can then be read from the :cpp:type:`trxvu_tx_telem_raw` sub-structure.
 
 RADIO_TX_TELEM_LAST
 ^^^^^^^^^^^^^^^^^^^
@@ -295,7 +273,7 @@ Returns the telemetry channels that were sampled during the last frame transmiss
 - Local oscillator temperature
 
 A pointer to a :cpp:type:`radio_telem` structure should be passed to the :cpp:func:`k_radio_get_telemetry` function.
-The values can then be read from the :cpp:type:`trxvu_tx_telem_raw` sub-structure. 
+The values can then be read from the :cpp:type:`trxvu_tx_telem_raw` sub-structure.
 
 RADIO_TX_UPTIME
 ^^^^^^^^^^^^^^^
@@ -303,7 +281,7 @@ RADIO_TX_UPTIME
 Returns the amount of time, in seconds, that the transmitter portion of the radio has been active.
 
 A pointer to a :cpp:type:`radio_telem` structure should be passed to the :cpp:func:`k_radio_get_telemetry` function.
-The values can then be read from the :cpp:type:`uptime` sub-structure. 
+The values can then be read from the :cpp:type:`uptime` sub-structure.
 
 RADIO_TX_STATE
 ^^^^^^^^^^^^^^
@@ -311,7 +289,7 @@ RADIO_TX_STATE
 Returns the current state of the transmitter.
 
 A pointer to a :cpp:type:`radio_telem` structure should be passed to the :cpp:func:`k_radio_get_telemetry` function.
-The values can then be read from the :cpp:type:`tx_state` sub-structure. 
+The values can then be read from the :cpp:type:`tx_state` sub-structure.
 
 The returned value contains several flags:
 
@@ -365,7 +343,7 @@ Returns the current measurements of all the receiver's telemetry channels:
 - Supply voltage
 
 A pointer to a :cpp:type:`radio_telem` structure should be passed to the :cpp:func:`k_radio_get_telemetry` function.
-The values can then be read from the :cpp:type:`trxvu_rx_telem_raw` sub-structure. 
+The values can then be read from the :cpp:type:`trxvu_rx_telem_raw` sub-structure.
 
 RADIO_RX_UPTIME
 ^^^^^^^^^^^^^^^
@@ -373,8 +351,8 @@ RADIO_RX_UPTIME
 Returns the amount of time, in seconds, that the receiver portion of the radio has been active.
 
 A pointer to a :cpp:type:`radio_telem` structure should be passed to the :cpp:func:`k_radio_get_telemetry` function.
-The values can then be read from the :cpp:type:`uptime` sub-structure. 
-    
+The values can then be read from the :cpp:type:`uptime` sub-structure.
+
 Special Functions
 -----------------
 
@@ -453,7 +431,18 @@ For example::
     
     int main(void)
     {  
-        k_radio_init();
+        trx_prop tx = {
+                .addr = 0x60,
+                .max_size = TX_SIZE,
+                .max_frames = 40,
+        };
+        trx_prop rx = {
+                    .addr = 0x61,
+                    .max_size = RX_SIZE,
+                    .max_frames = 40,
+        };
+    
+        k_radio_init("/dev/i2c-0", tx, rx, 10);
         k_radio_watchdog_start();
         
         //Program logic
@@ -467,7 +456,7 @@ For example::
 Reset
 ~~~~~
 
-The radio can be manually reset using the :cpp:func:`k_radio_reset` function. 
+The radio can be manually reset using the :cpp:func:`k_radio_reset` function.
 There are two available reset types: a full hardware reset (``RADIO_HARD_RESET``), and a software-only reset (``RADIO_SOFT_RESET``).
 
 To specify which reset is desired, pass the appropriate :cpp:type:`RadioResetType`  value to the function.
@@ -476,6 +465,17 @@ For example::
 
     #include "isis-trxvu-api/trxvu.h"
     
-    k_radio_init();
+    trx_prop tx = {
+            .addr = 0x60,
+            .max_size = TX_SIZE,
+            .max_frames = 40,
+    };
+    trx_prop rx = {
+                .addr = 0x61,
+                .max_size = RX_SIZE,
+                .max_frames = 40,
+    };
+
+    k_radio_init("/dev/i2c-0", tx, rx, 10);
     k_radio_reset(RADIO_SOFT_RESET);
 

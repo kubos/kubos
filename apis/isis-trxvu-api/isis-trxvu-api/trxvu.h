@@ -309,6 +309,10 @@ inline float get_rf_power_mw(uint16_t raw) {return raw * raw * powf(10, -2) * 0.
 
 /**
  * Initialize the radio interface
+ * @param [in] bus The I2C bus device the radio is connected to
+ * @param [in] tx The transmitter's properties
+ * @param [in] rx The receiver's properties
+ * @param [in] timeout The radio's watchdog timeout (in seconds)
  * @return KRadioStatus RADIO_OK if OK, error otherwise
  */
 KRadioStatus k_radio_init(char * bus, trx_prop tx, trx_prop rx, uint16_t timeout);
@@ -340,7 +344,8 @@ KRadioStatus k_radio_reset(KRadioReset type);
 KRadioStatus k_radio_send(char * buffer, int len, uint8_t * response);
 /**
  * Receive a message from the radio's receive buffer
- * @param [in] buffer Pointer where the message should be copied to
+ * @param [out] frame Pointer where the header properties should be stored
+ * @param [out] message Pointer to where the message payload should be stored
  * @param [out] len Length of the received message
  * @return KRadioStatus RADIO_OK if a message was received successfully, RADIO_RX_EMPTY if there are no messages to receive, error otherwise
  */
@@ -432,8 +437,9 @@ KRadioStatus kprv_radio_rx_get_count(uint8_t * count);
 KRadioStatus kprv_radio_rx_remove_frame(void);
 /**
  * Retrieve oldest frame from receive buffer
- * @param[out] buffer Pointer to storage area for frame
- * @param[out] len Pointer to storage are for length of frame payload
+ * @param [out] frame Pointer where the header properties should be stored
+ * @param [out] message Pointer to where the message payload should be stored
+ * @param [out] len Pointer to storage are for length of frame payload
  * @return KRadioStatus `RADIO_OK` if OK, error otherwise
  */
 KRadioStatus kprv_radio_rx_get_frame(radio_rx_header * frame, uint8_t * message, uint8_t * len);
