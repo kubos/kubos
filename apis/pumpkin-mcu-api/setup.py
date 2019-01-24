@@ -10,5 +10,8 @@ from setuptools import setup
 setup(name='pumpkin_mcu',
       version='0.1.5',
       description='KubOS API for communicating with Pumpkin module MCUs',
-      py_modules=["mcu_api"]
+      py_modules=["mcu_api"],
+      install_requires=[
+          'i2c'
+      ]
       )

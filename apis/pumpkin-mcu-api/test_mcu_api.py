@@ -13,7 +13,6 @@ Unit test module for the pumpkin mcu api
 import unittest
 import mcu_api
 import mock
-from contextlib import nested
 
 ############################
 # Testing configuration data
@@ -121,7 +120,7 @@ class TestMCUAPI(unittest.TestCase):
             output_assert)
 
     def test_unpack_hex(self):
-        result_data = '00010203040506'
+        result_data = b'00010203040506'
         input_data = '\x00\x01\x02\x03\x04\x05\x06'
         output_assert = (result_data,)
         self.assertEqual(
@@ -245,10 +244,7 @@ class TestMCUAPI(unittest.TestCase):
             'timestamp': fake_timestamp,
             'data': output_data
         }}
-        with nested(
-                mock.patch('mcu_api.MCU.write'),
-                mock.patch('mcu_api.MCU.read')) as \
-                (mock_write, mock_read):
+        with mock.patch('mcu_api.MCU.write') as mock_write, mock.patch('mcu_api.MCU.read') as mock_read:
             mock_read.return_value = return_data
             self.assertEqual(
                 self.mcu._read_telemetry_items(dict=input_dict),

@@ -10,7 +10,7 @@ API for interacting with all Pumpkin SupMCUs.
 See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.28
 """
 
-
+import binascii
 import struct
 import time
 import i2c
@@ -308,7 +308,7 @@ class MCU:
             return {'timestamp': 0, 'data': data[HEADER_SIZE:]}
 
         # Unpack timestamp in seconds.
-        timestamp = struct.unpack('<i', data[1:HEADER_SIZE])[0]/100.0
+        timestamp = struct.unpack('<i', str.encode(data[1:HEADER_SIZE]))[0]/100.0
         # Return the valid packet timestamp and data
         return {'timestamp': timestamp, 'data': data[HEADER_SIZE:]}
 
@@ -323,7 +323,7 @@ class MCU:
 
         Outputs a tuple where each field is an item parsed.
         """
-        if type(parsing) not in [str, unicode]:
+        if type(parsing) not in [str, bytes]:
             # Check that parsing is a valid type
             raise TypeError(
                 'Parsing field must be a valid struct parsing string. Input: '
@@ -337,7 +337,7 @@ class MCU:
         elif parsing == "hex":
             # Store as a hex string. This is so we can return binary data.
             # Return as a single field in a tuple
-            return (data.encode('hex'),)
+            return (binascii.hexlify(str.encode(data)),)
 
         # All others parse directly with the parsing string.
         return struct.unpack(parsing, data)
