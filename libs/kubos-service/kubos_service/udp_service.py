@@ -14,8 +14,7 @@ import json
 import logging
 
 
-def start(config, schema, context={}):
-    logger = logging.getLogger(config.name)
+def start(logger, config, schema, context={}):
     logger.info("{} starting on {}:{}".format(config.name, config.ip, config.port))
     sock = socket.socket(socket.AF_INET,  # Internet
                          socket.SOCK_DGRAM)  # UDP
@@ -28,12 +27,12 @@ def start(config, schema, context={}):
             errs = None
             msg = None
             try:
-                result = base_schema.execute(data, context_value=context)
+                result = base_schema.execute(data.decode(), context_value=context)
                 msg = result.data
                 if result.errors:
                     errs = []
                     for e in result.errors:
-                        errs.append(e.message)
+                        errs.append(str(e))
 
             except Exception as e:
                 errs = "Exception encountered {}".format(e)
@@ -42,6 +41,6 @@ def start(config, schema, context={}):
                 "data": msg,
                 "errors": errs
             })
-            sock.sendto(result, source)
+            sock.sendto(str.encode(result), source)
         except Exception as e:
             logging.error("Exception encountered {}".format(e))
