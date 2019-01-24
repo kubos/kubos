@@ -24,7 +24,7 @@ class Config:
     name = ""
     ip = ""
     port = 0
-    raw = []
+    raw = {}
 
     def __init__(self, name):
         args = get_args(name)

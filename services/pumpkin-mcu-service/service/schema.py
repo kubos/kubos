@@ -9,7 +9,7 @@ Graphene schema setup to enable queries.
 """
 
 import graphene
-from models import *
+from .models import *
 import mcu_api
 
 # Initialize MODULES global. This is then configured in the service file.
@@ -34,7 +34,7 @@ class Query(graphene.ObjectType):
         module=graphene.String(),
         fields=graphene.List(graphene.String, default_value=["all"]))
 
-    def resolve_ping(self):
+    def resolve_ping(self, info):
         return "PONG"
 
     def resolve_moduleList(self, info):
@@ -90,7 +90,7 @@ class Query(graphene.ObjectType):
         if module not in MODULES:
             raise KeyError('Module not configured: {}'.format(module))
         address = MODULES[module]['address']
-        fields = map(str, fields)
+        fields = list(map(str, fields))
         mcu = mcu_api.MCU(address=address)
         out = mcu.read_telemetry(module=module, fields=fields)
         return out
@@ -113,7 +113,7 @@ class Passthrough(graphene.Mutation):
         """
         if module not in MODULES:
             raise KeyError('Module not configured', module)
-        if type(command) == unicode:
+        if type(command) == bytes:
             command = str(command)
         mcu = mcu_api.MCU(address=MODULES[module]['address'])
         out = mcu.write(command)
