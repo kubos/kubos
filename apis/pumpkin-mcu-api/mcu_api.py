@@ -197,9 +197,9 @@ class MCU:
         """
         Write command used to append the proper stopbyte to all writes.
         """
-        if type(command) is str:
+        if type(command) is bytes:
             return self.i2cfile.write(
-                device=self.address, data=command+'\x0A')
+                device=self.address, data=command+b'\x0A')
         else:
             raise TypeError('Commands must be strings.')
 

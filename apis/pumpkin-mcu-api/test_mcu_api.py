@@ -42,11 +42,11 @@ class TestMCUAPI(unittest.TestCase):
             self.mcu.write(command=bad_command)
 
     def test_stopbyte_appending(self):
-        fake_command = "SUP:LED ON"
+        fake_command = b'SUP:LED ON'
         with mock.patch('i2c.I2C.write') as mock_i2cwrite:
             self.mcu.write(command=fake_command)
             mock_i2cwrite.assert_called_with(
-                data=fake_command + '\x0a',
+                data=fake_command + b'\x0a',
                 device=self.mcu.address)
 
     def test_read(self):

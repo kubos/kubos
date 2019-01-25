@@ -113,8 +113,8 @@ class Passthrough(graphene.Mutation):
         """
         if module not in MODULES:
             raise KeyError('Module not configured', module)
-        if type(command) == bytes:
-            command = str(command)
+        if type(command) == str:
+            command = str.encode(command)
         mcu = mcu_api.MCU(address=MODULES[module]['address'])
         out = mcu.write(command)
 
