@@ -335,12 +335,12 @@ class MCU:
         if parsing == "str":
             # Search for the null terminator,
             # return the leading string in a tuple
-            str_data = data.split('\0')[0]
-            return (str_data,)
+            str_data = data.split(b'\0')[0]
+            return (str_data.decode(),)
         elif parsing == "hex":
             # Store as a hex string. This is so we can return binary data.
             # Return as a single field in a tuple
-            return (binascii.hexlify(str.encode(data)),)
+            return (binascii.hexlify(data).decode(),)
 
         # All others parse directly with the parsing string.
         return struct.unpack(parsing, data)
