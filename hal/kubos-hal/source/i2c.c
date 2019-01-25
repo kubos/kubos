@@ -29,6 +29,10 @@
 
 KI2CStatus k_i2c_init(char * device, int * fp)
 {
+    if (device == NULL || fp == NULL)
+    {
+        return I2C_ERROR;
+    }
 
     char bus[] = "/dev/i2c-n\0";
     // Make sure the device name is null terminated
@@ -47,7 +51,7 @@ KI2CStatus k_i2c_init(char * device, int * fp)
 
 void k_i2c_terminate(int * fp)
 {
-    if (*fp == 0)
+    if (fp == NULL || *fp == 0)
     {
         return;
     }

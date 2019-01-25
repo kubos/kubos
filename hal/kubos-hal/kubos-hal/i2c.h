@@ -59,7 +59,8 @@ typedef enum {
  *
  * Example usage:
  * @code
- k_i2c_init("/dev/i2c-1");
+int bus = 0;
+k_i2c_init("/dev/i2c-1", &bus);
  * @endcode
  *
  * @param device I2C device name to initialize
@@ -77,8 +78,8 @@ KI2CStatus k_i2c_init(char * device, int * fp);
  * Example usage:
  * @code
 // initialize bus
-int bus;
-k_i2c_init("/dev/i2c-1", bus);
+int bus = 0;
+k_i2c_init("/dev/i2c-1", &bus);
 // read some data
 k_i2c_read(bus, addr, buffer, 10);
 // shut down bus
@@ -97,8 +98,8 @@ void k_i2c_terminate(int * fp);
  * 
  * Example usage:
  * @code
-int bus;
-k_i2c_init("/dev/i2c-1", bus);
+int bus = 0;
+k_i2c_init("/dev/i2c-1", &bus);
 uint8_t cmd = 0x40;
 uint16_t slave_addr = 0x80;
 KI2CStatus write_status;
@@ -126,8 +127,8 @@ KI2CStatus k_i2c_write(int i2c, uint16_t addr, uint8_t *ptr, int len);
  *
  * Example usage:
  * @code
-int bus;
-k_i2c_init("/dev/i2c-1", bus);
+int bus = 0;
+k_i2c_init("/dev/i2c-1", &bus);
 uint8_t buffer[10];
 int read_len = 10;
 uint16_t slave_addr = 0x80;
