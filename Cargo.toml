@@ -44,6 +44,8 @@ members = [
 "test/benchmark/db-test",
 "test/integration/linux/isis-ants",
 "test/integration/linux/mai400",
+"test/integration/large_download",
+"test/integration/large_upload"
 ]
 
 [profile.release]
