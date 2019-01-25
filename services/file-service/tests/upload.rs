@@ -31,6 +31,9 @@ use tempfile::TempDir;
 // NOTE: Each test's file contents must be unique. Otherwise the hash is the same, so
 // the same storage directory is used across all of them, creating conflicts
 
+// NOTE: The large_upload test has been moved from this location to a new location:
+//       test/integration/large_upload
+
 // Upload single-chunk file from scratch
 #[test]
 fn upload_single() {
