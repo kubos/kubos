@@ -197,11 +197,14 @@ class MCU:
         """
         Write command used to append the proper stopbyte to all writes.
         """
+        if type(command) is str:
+            command = str.encode(command)
+            
         if type(command) is bytes:
             return self.i2cfile.write(
                 device=self.address, data=command+b'\x0A')
         else:
-            raise TypeError('Commands must be strings.')
+            raise TypeError('Commands must be str or bytes.')
 
     def read(self, count):
         return self.i2cfile.read(device=self.address, count=count)
