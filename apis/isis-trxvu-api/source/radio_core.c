@@ -26,6 +26,11 @@ trx_prop radio_rx;
 
 KRadioStatus k_radio_init(char * bus, trx_prop tx, trx_prop rx, uint16_t timeout)
 {
+    if (bus == NULL)
+    {
+        return RADIO_ERROR_CONFIG;
+    }
+
     KI2CStatus status;
     status = k_i2c_init(bus, &radio_bus);
     if (status != I2C_OK)
