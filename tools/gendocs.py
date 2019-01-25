@@ -20,7 +20,6 @@ DOCS_DIRS = [
     "apis/isis-trxvu-api",
     "hal/kubos-hal",
     "hal/kubos-hal-linux",
-    "libcsp",
 
 ]
 

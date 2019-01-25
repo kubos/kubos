@@ -7,9 +7,7 @@
         "type":"git"
     },
     "version":"0.1.0",
-    "dependencies":{
-        "csp":"kubos/libcsp#~1.5.0"
-    },
+    "dependencies":{},
     "homepage":"https://<homepage>",
     "description":"Example app running on Kubos Linux."
 }

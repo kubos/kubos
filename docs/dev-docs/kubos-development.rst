@@ -59,7 +59,7 @@ The `kubos repository <https://github.com/kubos/kubos>`__ is a collection of
 loaded inside the Kubos Vagrant box. They can also be built locally
 using the ``kubos link`` and ``kubos link-target`` commands.
 
-See the :doc:`Kubos Linux quick start guide <../tutorials/first-project>` 
+See the :doc:`Kubos Linux quick start guide <../tutorials/first-project>`
 for instructions on setting up and building Kubos SDK projects.
 
 Linking in a Local Module
@@ -142,8 +142,6 @@ file path. Any modules which are using the native Kubos code will have a
     my-project 0.1.0
       ┗━ isis-imtq-api 1.0.0 yotta_modules/isis-imtq-api -> /home/vagrant/iobc/isis-imtq-api
       ┣━ kubos-hal 0.1.2 yotta_modules/kubos-hal -> /home/vagrant/.kubos/kubos/hal/kubos-hal
-      ┃ ┣━ csp 1.5.1 yotta_modules/csp -> /home/vagrant/.kubos/kubos/libcsp
-      ┃ ┃ ┗━ tinycbor 0.5.0 yotta_modules/tinycbor -> /home/vagrant/.kubos/kubos/tinycbor
       ┃ ┗━ kubos-hal-linux 0.1.0 yotta_modules/kubos-hal-linux -> /home/vagrant/.kubos/kubos/hal/kubos-hal-linux
       ┃   ┗━ isis-iobc-supervisor 0.1.0 yotta_modules/isis-iobc-supervisor -> /home/vagrant/.kubos/kubos/apis/isis-iobc-supervisor
       ┗━ ccan-json 1.0.0 yotta_modules/ccan-json -> /home/vagrant/.kubos/kubos/ccan/json

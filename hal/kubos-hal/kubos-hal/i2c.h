@@ -24,8 +24,8 @@
 #ifndef K_I2C_H
 #define K_I2C_H
 
+#include <pthread.h>
 #include <stdint.h>
-#include <csp/arch/csp_semaphore.h>
 
 /**
  * Number of I2C buses available. Derived from value in target.json
@@ -130,7 +130,7 @@ typedef struct {
     /**
      * Mutex for guarding device access
      */
-    csp_mutex_t i2c_lock;
+    pthread_mutex_t i2c_lock;
 } KI2C;
 
 /**
@@ -375,42 +375,6 @@ KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int l
  * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
  */
 KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
-
-/**
- * @brief Low-level HAL I2C write (as slave)
- *
- * This function will be called by k_i2c_write and is intended to perform the neccesary low-level
- * actions for an I2C write (as a slave).
- *
- * ** This function must be implemented for each platform specific HAL. **
- *
- * @warning I2C slave functionality is not implemented as of v0.0.4
- *
- * @param i2c I2C bus to write from
- * @param addr I2C addr to write to
- * @param ptr data buffer
- * @param len length of data in buffer
- * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
- */
-KI2CStatus kprv_i2c_slave_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
-
-/**
- * @brief Low-level HAL I2C read (as slave)
- *
- * This function will be called by k_i2c_read and is intended to perform the neccesary low-level
- * actions for an I2C read (as a slave). 
- *
- * ** This function must be implemented for each platform specific HAL. **
- *
- * @warning I2C slave functionality is not implemented as of v0.0.4
- *
- * @param i2c I2C bus to read from
- * @param addr I2C addr to read from
- * @param ptr data buffer
- * @param len length of data expected to read
- * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
- */
-KI2CStatus kprv_i2c_slave_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
 
 #endif
 #endif

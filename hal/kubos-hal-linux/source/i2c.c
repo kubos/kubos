@@ -187,38 +187,6 @@ KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t * ptr,
     return I2C_OK;
 }
 
-/**
- * Low level HAL I2C write (as slave)
- * @warning Not currently implemented
- * @param i2c I2C bus to write from
- * @param addr I2C addr to write to
- * @param ptr data buffer
- * @param len length of data in buffer
- * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
- */
-KI2CStatus kprv_i2c_slave_write(KI2CNum i2c, uint16_t addr, uint8_t * ptr,
-                                int len)
-{
-    fprintf(stderr, "Unsupported function: Kubos I2C slave write\n");
-    return I2C_ERROR;
-}
-
-/**
- * Low level HAL I2C read (as slave)
- * @warning Not currently implemented
- * @param i2c I2C bus to read from
- * @param addr I2C addr to read from
- * @param ptr data buffer
- * @param len length of data expected to read
- * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
- */
-KI2CStatus kprv_i2c_slave_read(KI2CNum i2c, uint16_t addr, uint8_t * ptr,
-                               int len)
-{
-    fprintf(stderr, "Unsupported function: Kubos I2C slave read\n");
-    return I2C_ERROR;
-}
-
 #endif
 
 /* @} */
