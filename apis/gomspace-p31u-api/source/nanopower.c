@@ -16,15 +16,16 @@
 
 #include <gomspace-p31u-api/gomspace-p31u-api.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
-static uint8_t eps_bus = 0;
+static int eps_bus = 0;
 static uint8_t eps_addr = 0;
 
 KEPSStatus k_eps_init(KEPSConf config)
 {
-    if (config.bus == K_I2C_NO_BUS || config.addr == 0)
+    if (config.bus == NULL || config.addr == 0)
     {
         return EPS_ERROR_CONFIG;
     }
@@ -35,18 +36,10 @@ KEPSStatus k_eps_init(KEPSConf config)
         return EPS_ERROR;
     }
 
-    eps_bus = config.bus;
     eps_addr = config.addr;
 
-    /*
-     * All I2C configuration is done at the kernel level,
-     * but we still need to pass a config structure to make
-     * our I2C API happy.
-     */
-    KI2CConf conf = k_i2c_conf_defaults();
-
     KI2CStatus status;
-    status = k_i2c_init(eps_bus, &conf);
+    status = k_i2c_init(config.bus, &eps_bus);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize EPS: %d\n", status);
@@ -58,7 +51,7 @@ KEPSStatus k_eps_init(KEPSConf config)
 
 void k_eps_terminate()
 {
-    k_i2c_terminate(eps_bus);
+    k_i2c_terminate(&eps_bus);
 
     eps_bus = 0;
     eps_addr = 0;

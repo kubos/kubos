@@ -19,19 +19,6 @@ use crate::ffi;
 use nom::{bits, bits_impl, do_parse, error_position, named, take_bits, tuple, tuple_parser};
 use std::mem::transmute;
 
-/// I<sup>2</sup>C bus which will be used for communication
-///
-/// *Note: Not all OBCs will have all of these buses avaialable*
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum KI2CNum {
-    /// I<sup>2</sup>C Bus 1
-    KI2C1,
-    /// I<sup>2</sup>C Bus 2
-    KI2C2,
-    /// I<sup>2</sup>C Bus 3
-    KI2C3,
-}
-
 /// Specific antenna to control
 ///
 /// *Note: Not all antenna systems have four antennas*
@@ -175,15 +162,6 @@ impl DeployStatus {
             }
             _ => Err(AntsError::GenericError),
         }
-    }
-}
-
-pub fn convert_bus(bus: &str) -> ffi::KI2CNum {
-    match bus {
-        "KI2C1" => ffi::KI2CNum::KI2C1,
-        "KI2C2" => ffi::KI2CNum::KI2C2,
-        "KI2C3" => ffi::KI2CNum::KI2C3,
-        _ => ffi::KI2CNum::KI2CNoBus,
     }
 }
 

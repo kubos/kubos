@@ -17,6 +17,7 @@
 #include <kubos-hal/i2c.h>
 #include <isis-trxvu-api/trxvu.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Public functions */
 
@@ -33,7 +34,7 @@ KRadioStatus k_radio_send(char * buffer, int len, uint8_t * response)
 
     memcpy(packet + 1, buffer, len);
 
-    KI2CStatus status = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, packet, len + 1);
+    KI2CStatus status = k_i2c_write(radio_bus, RADIO_TX_ADDR, packet, len + 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send radio TX frame: %d\n", status);
@@ -41,7 +42,7 @@ KRadioStatus k_radio_send(char * buffer, int len, uint8_t * response)
     }
 
     /* Read number of remaining TX buffer slots available */
-    status = k_i2c_read(TRXVU_I2C_BUS, RADIO_TX_ADDR, response, 1);
+    status = k_i2c_read(radio_bus, RADIO_TX_ADDR, response, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to read radio TX slots remaining: %d\n",
@@ -70,7 +71,7 @@ KRadioStatus k_radio_send_override(ax25_callsign to, ax25_callsign from,
     memcpy(packet + 8, &from, sizeof(ax25_callsign));
     memcpy(packet + 15, buffer, len);
 
-    KI2CStatus status = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, packet,
+    KI2CStatus status = k_i2c_write(radio_bus, RADIO_TX_ADDR, packet,
                                     len + sizeof(ax25_callsign) * 2 + 1);
     if (status != I2C_OK)
     {
@@ -80,7 +81,7 @@ KRadioStatus k_radio_send_override(ax25_callsign to, ax25_callsign from,
     }
 
     /* Read number of remaining TX buffer slots available */
-    status = k_i2c_read(TRXVU_I2C_BUS, RADIO_TX_ADDR, response, 1);
+    status = k_i2c_read(radio_bus, RADIO_TX_ADDR, response, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to read radio TX slots remaining: %d\n",
@@ -110,7 +111,7 @@ KRadioStatus k_radio_set_beacon_override(ax25_callsign to, ax25_callsign from,
     memcpy(packet + 10, &from, sizeof(ax25_callsign));
     memcpy(packet + 17, beacon.msg, beacon.len);
 
-    status = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, packet,
+    status = k_i2c_write(radio_bus, RADIO_TX_ADDR, packet,
                          beacon.len + sizeof(ax25_callsign) * 2 + 3);
     if (status != I2C_OK)
     {
@@ -128,7 +129,7 @@ KRadioStatus k_radio_clear_beacon(void)
     KI2CStatus status;
     uint8_t    cmd = CLEAR_BEACON;
 
-    status = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(radio_bus, RADIO_TX_ADDR, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to clear radio TX beacon: %d\n", status);
@@ -176,7 +177,7 @@ KRadioStatus kprv_radio_tx_get_telemetry(radio_telem *  buffer,
     }
 
     KI2CStatus status
-        = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, (uint8_t *) &cmd, 1);
+        = k_i2c_write(radio_bus, RADIO_TX_ADDR, (uint8_t *) &cmd, 1);
 
     if (status != I2C_OK)
     {
@@ -184,7 +185,7 @@ KRadioStatus kprv_radio_tx_get_telemetry(radio_telem *  buffer,
         return RADIO_ERROR;
     }
 
-    status = k_i2c_read(TRXVU_I2C_BUS, RADIO_TX_ADDR, (char *) buffer, len);
+    status = k_i2c_read(radio_bus, RADIO_TX_ADDR, (char *) buffer, len);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to read radio TX telemetry: %d\n", status);
@@ -199,7 +200,7 @@ KRadioStatus kprv_radio_tx_watchdog_kick(void)
     KI2CStatus status;
     uint8_t    cmd = WATCHDOG_RESET;
 
-    status = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(radio_bus, RADIO_TX_ADDR, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to kick radio TX watchdog: %d\n", status);
@@ -227,7 +228,7 @@ KRadioStatus kprv_radio_tx_reset(KRadioReset type)
             return RADIO_ERROR_CONFIG;
     }
 
-    status = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(radio_bus, RADIO_TX_ADDR, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reset TX radio: %d\n", status);
@@ -251,7 +252,7 @@ KRadioStatus kprv_radio_tx_set_beacon(uint16_t rate, char * buffer, int len)
     memcpy(packet + 1, (void *) &rate, 2);
     memcpy(packet + 3, buffer, len);
 
-    KI2CStatus status = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, packet, len + 3);
+    KI2CStatus status = k_i2c_write(radio_bus, RADIO_TX_ADDR, packet, len + 3);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to set radio TX beacon: %d\n", status);
@@ -269,7 +270,7 @@ KRadioStatus kprv_radio_tx_set_default_to(ax25_callsign to)
     memcpy(packet + 1, &to, sizeof(ax25_callsign));
 
     KI2CStatus status
-        = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, packet, sizeof(packet));
+        = k_i2c_write(radio_bus, RADIO_TX_ADDR, packet, sizeof(packet));
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to set radio TX destination callsign: %d\n",
@@ -288,7 +289,7 @@ KRadioStatus kprv_radio_tx_set_default_from(ax25_callsign from)
     memcpy(packet + 1, &from, sizeof(ax25_callsign));
 
     KI2CStatus status
-        = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, packet, sizeof(packet));
+        = k_i2c_write(radio_bus, RADIO_TX_ADDR, packet, sizeof(packet));
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to set radio TX sender callsign: %d\n", status);
@@ -317,7 +318,7 @@ KRadioStatus kprv_radio_tx_set_idle(RadioIdleState state)
     }
 
     KI2CStatus status
-        = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, packet, sizeof(packet));
+        = k_i2c_write(radio_bus, RADIO_TX_ADDR, packet, sizeof(packet));
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to set radio TX idle state: %d\n", status);
@@ -335,7 +336,7 @@ KRadioStatus kprv_radio_tx_set_rate(RadioTXRate rate)
     packet[1]      = (uint8_t) rate;
 
     KI2CStatus status
-        = k_i2c_write(TRXVU_I2C_BUS, RADIO_TX_ADDR, packet, sizeof(packet));
+        = k_i2c_write(radio_bus, RADIO_TX_ADDR, packet, sizeof(packet));
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to set radio TX data rate: %d\n", status);

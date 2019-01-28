@@ -20,118 +20,16 @@
  * @{
  */
 
-#if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #ifndef K_I2C_H
 #define K_I2C_H
 
 #include <pthread.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-/**
- * Number of I2C buses available. Derived from value in target.json
- * @code
- * "config": {
- *   "hardware": {
- *     "i2c": {
- *       "count": 2
- *     }
- *   }
- * }
- * @endcode
- */
-#ifndef K_NUM_I2CS
-#define K_NUM_I2CS YOTTA_CFG_HARDWARE_I2C_COUNT
-#endif
-
-/**
- * Default I2C bus. Derived from value in target.json
- * @code
- * "config": {
- *   "hardware": {
- *     "i2c": {
- *       "defaults": {
- *         "bus": "K_I2C1"
- *       }
- *     }
- *   }
- * }
- * @endcode
- */
-#ifndef DEFAULT_I2C
-#define DEFAULT_I2C YOTTA_CFG_HARDWARE_I2C_DEFAULTS_BUS
-#endif
-
-/**
- * Available I2C buses
- */
-typedef enum {
-    K_I2C_NO_BUS = 0,
-#ifdef YOTTA_CFG_HARDWARE_I2C_I2C1
-    K_I2C1,
-#endif
-#ifdef YOTTA_CFG_HARDWARE_I2C_I2C2
-    K_I2C2,
-#endif
-#ifdef YOTTA_CFG_HARDWARE_I2C_I2C3
-    K_I2C3
-#endif
-} KI2CNum;
-
-/**
- * Expected addressing mode of I2C bus
- */
-typedef enum {
-    K_ADDRESSINGMODE_7BIT = 0,
-    K_ADDRESSINGMODE_10BIT
-} I2CAddressingMode;
-
-/**
- * Expected role of I2C bus
- * @warning Only the Master role is available as of v0.0.4
- */
-typedef enum {
-    K_MASTER = 0,
-    K_SLAVE
-} I2CRole;
-
-/**
- * Structure used to store I2C bus configuration options
- */
-typedef struct {
-	/**
-	 * The size of the slave address.
-	 * Should be either 7-bits long or 10-bits long, as specified by the @ref I2CAddressingMode enumerator
-	 */
-    I2CAddressingMode addressing_mode;
-	/**
-	 * The role of the I2C bus.
-	 * Should be either master or slave, as specified by the @ref I2CRole enumerator
-	 * @warning Only the Master role is available as of v0.1.0
-	 */
-    I2CRole role;
-    /**
-     * The clock speed of the I2C bus
-     */
-    uint32_t clock_speed;
-} KI2CConf;
-
-/**
- * Structure used to store I2C bus description/configuration information
- */
-typedef struct {
-    /**
-     * I2C device number
-     */
-    KI2CNum bus_num;
-    /**
-     * I2C device configuration values
-     */
-    KI2CConf conf;
-    /**
-     * Mutex for guarding device access
-     */
-    pthread_mutex_t i2c_lock;
-} KI2C;
+#define I2C_MASTER  0
+#define I2C_SLAVE   1
 
 /**
  * I2C function status
@@ -154,117 +52,42 @@ typedef enum {
  * 
  * This function is used to configure and enable I2C buses for further usage (reading/writing).
  * It is always the first required step before using any I2C peripheral. The k_i2c_init function
- * takes an I2C bus number (KI2CNum) and I2C configuration structure (KI2CConf). The I2C bus number *must* be a valid
- * value of the KI2CNum enum. The configuration can either be manually created or k_i2c_conf_defaults
- * can be used to retreive the default configuration. 
- 
- * After correctly calling k_i2c_init, the bus number used may be used with the k_i2c_read/k_i2c_write/k_i2c_terminate functions.
+ * takes an I2C device name and a pointer to where the returned file descriptor
+ * should be stored
+ * After correctly calling k_i2c_init, the returned file descriptor may be used with
+ * the k_i2c_read/k_i2c_write/k_i2c_terminate functions.
  *
  * Example usage:
  * @code
- KI2CConf conf = {
-     .addressing_mode = K_ADDRESSING_MODE_7BIT,
-     .role = K_MASTER,
-     .clock_speed = 100000
- };
- k_i2c_init(K_I2C1, &conf);
+int bus = 0;
+k_i2c_init("/dev/i2c-1", &bus);
  * @endcode
  *
- * @note The functions k_i2c_default_init or k_i2c_default_dev_init can also be used to initialize an
- * I2C device. They provide nice convience wrappers around k_i2c_init.
- *
- * @param i2c I2C bus to initialize
- * @param conf config values to initialize with
+ * @param device I2C device name to initialize
  * @return KI2CStatus I2C_OK on success, otherwise return I2C_ERROR_*
  */
-KI2CStatus k_i2c_init(KI2CNum i2c, KI2CConf *conf);
+KI2CStatus k_i2c_init(char * device, int * fp);
 
 /**
  * @brief Terminates an I2C bus
  *
- * This fuction is used to terminate an active I2C bus. It takes the bus number of an active I2C bus.
- * After calling this function the bus number used will *not* be available for usage in the reading/writing functions.
+ * This fuction is used to terminate an active I2C bus connection.
+ * It takes a pointer to the file descriptor to be closed.
+ * After calling this function the device will *not* be available for usage in the reading/writing functions.
  *
  * Example usage:
  * @code
 // initialize bus
-k_i2c_init(K_I2C1, &conf);
+int bus = 0;
+k_i2c_init("/dev/i2c-1", &bus);
 // read some data
-k_i2c_read(K_I2C1, addr, buffer, 10);
+k_i2c_read(bus, addr, buffer, 10);
 // shut down bus
-k_i2C_terminate(K_I2C1);
+k_i2C_terminate(bus);
  * @endcode
  * @param i2c I2C bus to terminate
  */
-void k_i2c_terminate(KI2CNum i2c);
-
-/**
- * @brief Generate KI2CConf with default I2C values
- *
- * This function returns a KI2CConf structure with the default I2C values already set.
- * These default values are derived from the target.json file of the selected hardware target.
- * New default values can easily be set by creating a config.json file in the project directory.
- *
- * Example contents of config.json overriding defaults:
- * @code{.json}
-"hardware": {
-  "i2c": {
-    "defaults": {
-      "addressingmode": "K_ADDRESSING_MODE_7BIT",
-      "role": "K_MASTER",
-      "clockspeed": 50000
-    }
-  }
-}
- * @endcode
- * @return KI2CConf
- */
-KI2CConf k_i2c_conf_defaults(void);
-
-/**
- * @brief Initialize default I2C configuration
- *
- * This function initializes the default I2C bus using the preset default I2C configuration.
- * The default I2C bus and configuration are set in the target.json file and can be overriden in a project's config.json.
- *
- * Calling this function is equivalent to the following code:
- * @code{.c}    
-KI2CConf default_conf = k_i2c_conf_defaults();
-k_i2c_init(DEFAULT_I2C, &default_conf);
- * @endcode
- * The DEFAULT_I2C define is derived from the json default values.
- *
- * Example contents of config.json overriding defaults:
- * @code
-"hardware": {
-  "i2c": {
-    "defaults": {
-      "addressingmode": "K_ADDRESSING_MODE_7BIT",
-      "role": "K_MASTER",
-      "clockspeed": 50000
-      "bus": "K_I2C1"
-    }
-  }
-}
- * @endcode
- */
-void k_i2c_default_init();
-
-/**
- * @brief Initialize specified I2C bus with default values.
- *
- * This function initializes a specified I2C bus with the preset default I2C configuration.
- * The default I2C configuration is derived from the target.json file and can be overriden in a project's config.json.
- *
- * Calling this function is equivalent to the following code (K_I2C3 could be any I2C bus number):
- * @code{.c}
-KI2CConf default_conf = k_i2c_conf_defaults();
-k_i2c_init(K_I2C3, &default_conf);
- * @endcode
- *
- * @param i2c I2C bus num to initialize
- */
-void k_i2c_default_dev_init(KI2CNum i2c);
+void k_i2c_terminate(int * fp);
 
 /**
  * @brief Write data over the I2C bus to specified address
@@ -275,10 +98,12 @@ void k_i2c_default_dev_init(KI2CNum i2c);
  * 
  * Example usage:
  * @code
+int bus = 0;
+k_i2c_init("/dev/i2c-1", &bus);
 uint8_t cmd = 0x40;
 uint16_t slave_addr = 0x80;
 KI2CStatus write_status;
-write_status = k_i2c_write(K_I2C1, slave_addr, &cmd, 1);
+write_status = k_i2c_write(bus, slave_addr, &cmd, 1);
  * @endcode
  *
  * In order to ensure safe I2C sharing, this function is semaphore locked.
@@ -291,7 +116,7 @@ write_status = k_i2c_write(K_I2C1, slave_addr, &cmd, 1);
  * @param len length of data in buffer
  * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
  */
-KI2CStatus k_i2c_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
+KI2CStatus k_i2c_write(int i2c, uint16_t addr, uint8_t *ptr, int len);
 
 /**
  * @brief Read data over the I2C bus from specified address
@@ -302,11 +127,13 @@ KI2CStatus k_i2c_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
  *
  * Example usage:
  * @code
+int bus = 0;
+k_i2c_init("/dev/i2c-1", &bus);
 uint8_t buffer[10];
 int read_len = 10;
 uint16_t slave_addr = 0x80;
 KI2CStatus read_status;
-read_status = k_i2c_read(K_I2C1, slave_addr, buffer, read_len);
+read_status = k_i2c_read(bus, slave_addr, buffer, read_len);
  * @endcode
  *
  * In order to ensure safe I2C sharing, this function is semaphore locked.
@@ -319,64 +146,7 @@ read_status = k_i2c_read(K_I2C1, slave_addr, buffer, read_len);
  * @param len length of data to read
  * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
  */
-KI2CStatus k_i2c_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
-
-/**
- * Fetches I2C bus data structure
- * @param i2c number of I2C bus to fetch
- * @return KI2C* pointer to data structure
- */
-KI2C* kprv_i2c_get(KI2CNum i2c);
-
-/**
- * Low-level HAL device initialization
- * This is implemented by the device specific HAL
- * @param i2c I2C bus to initialize
- * @return KI2CStatus I2C_OK if success, otherwise specific error
- */
-KI2CStatus kprv_i2c_dev_init(KI2CNum i2c);
-
-/**
- * Low-level HAL I2C termination
- * This is implemented by the device specific HAL
- * @param i2c I2C bus to terminate
- * @return KI2CStatus I2C_OK if success, otherwise specific error
- */
-KI2CStatus kprv_i2c_dev_terminate(KI2CNum i2c);
-
-/**
- * @brief Low-level HAL I2C write (as master)
- *
- * This function is called by k_i2c_write and is intended to perform the neccesary low-level
- * actions for an I2C write (as a master).
- *
- * ** This function must be implemented for each platform specific HAL. **
- *
- * @param i2c I2C bus to write from
- * @param addr I2C addr to write to
- * @param ptr data buffer
- * @param len length of data in buffer
- * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
- */
-KI2CStatus kprv_i2c_master_write(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
-
-/**
- * @brief Low-level HAL I2C read (as master)
- *
- * This function is called by k_i2c_read and is intended to perform the neccesary low-level
- * actions for an I2C read (as a master).
- *
- * ** This function must be implemented for each platform specific HAL. **
- *
- * @param i2c I2C bus to read from
- * @param addr I2C addr to read from
- * @param ptr data buffer
- * @param len length of data expected to read
- * @return KI2CStatus I2C_OK on success, I2C_ERROR on error
- */
-KI2CStatus kprv_i2c_master_read(KI2CNum i2c, uint16_t addr, uint8_t *ptr, int len);
+KI2CStatus k_i2c_read(int i2c, uint16_t addr, uint8_t *ptr, int len);
 
 #endif
-#endif
-
 /* @} */

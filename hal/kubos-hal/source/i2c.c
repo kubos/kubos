@@ -15,100 +15,97 @@
  * limitations under the License.
  */
 
-#if (defined YOTTA_CFG_HARDWARE_I2C) && (YOTTA_CFG_HARDWARE_I2C_COUNT > 0)
 #include "kubos-hal/i2c.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <linux/i2c-dev.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <stdio.h> //Test line
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-static KI2C k_i2cs[K_NUM_I2CS];
-
-KI2CStatus k_i2c_init(KI2CNum i2c, KI2CConf *conf)
+KI2CStatus k_i2c_init(char * device, int * fp)
 {
-    KI2C *k_i2c = kprv_i2c_get(i2c);
-    if ((k_i2c != NULL) && (k_i2c->bus_num == K_I2C_NO_BUS))
+    if (device == NULL || fp == NULL)
     {
-        memcpy(&k_i2c->conf, conf, sizeof(KI2CConf));
-        k_i2c->bus_num = i2c;
-        pthread_mutex_init(&(k_i2c->i2c_lock), NULL);
-        return kprv_i2c_dev_init(i2c);
+        return I2C_ERROR;
+    }
+
+    char bus[] = "/dev/i2c-n\0";
+    // Make sure the device name is null terminated
+    snprintf(bus, 11, "%s", device);
+    *fp = open(bus, O_RDWR);
+
+    if (*fp <= 0)
+    {
+        perror("Couldn't open I2C bus");
+        *fp = 0;
+        return I2C_ERROR_CONFIG;
     }
 
     return I2C_OK;
 }
 
-void k_i2c_terminate(KI2CNum i2c)
+void k_i2c_terminate(int * fp)
 {
-    KI2C *k_i2c = kprv_i2c_get(i2c);
-    if ((k_i2c != NULL) && (k_i2c->bus_num != K_I2C_NO_BUS))
+    if (fp == NULL || *fp == 0)
     {
-        kprv_i2c_dev_terminate(i2c);
-        pthread_mutex_destroy(&(k_i2c->i2c_lock));
-        k_i2c->bus_num = K_I2C_NO_BUS;
+        return;
     }
+
+    close(*fp);
+    *fp = 0;
+
+    return;
 }
 
-KI2CConf k_i2c_conf_defaults(void)
+KI2CStatus k_i2c_write(int i2c, uint16_t addr, uint8_t* ptr, int len)
 {
-    return (KI2CConf) {
-        .addressing_mode = YOTTA_CFG_HARDWARE_I2C_DEFAULTS_ADDRESSINGMODE,
-        .role = YOTTA_CFG_HARDWARE_I2C_DEFAULTS_ROLE,
-        .clock_speed = YOTTA_CFG_HARDWARE_I2C_DEFAULTS_CLOCKSPEED
-    };
-}
-
-void k_i2c_default_init()
-{
-    KI2CConf conf = k_i2c_conf_defaults();
-    k_i2c_init(DEFAULT_I2C, &conf);
-}
-
-void k_i2c_default_dev_init(KI2CNum i2c)
-{
-    KI2CConf conf = k_i2c_conf_defaults();
-    k_i2c_init(i2c, &conf);
-}
-
-KI2CStatus k_i2c_write(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
-{
-    KI2C * ki2c = kprv_i2c_get(i2c);
-    KI2CStatus ret = I2C_ERROR;
-    if ((ki2c != NULL) && (ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
+    if (i2c == 0 || ptr == NULL)
     {
-        // Today...block indefinitely
-        if (pthread_mutex_lock(&(ki2c->i2c_lock)) == 0)
-        {
-            ret = kprv_i2c_master_write(i2c, addr, ptr, len);
-            pthread_mutex_unlock(&(ki2c->i2c_lock));
-        }
+        return I2C_ERROR;
     }
-    return ret;
-}
 
-KI2CStatus k_i2c_read(KI2CNum i2c, uint16_t addr, uint8_t* ptr, int len)
-{
-    KI2C * ki2c = kprv_i2c_get(i2c);
-    KI2CStatus ret = I2C_ERROR;
-    if ((ki2c != NULL) && (ki2c->bus_num != K_I2C_NO_BUS) && (ptr != NULL))
+    /* Set the desired slave's address */
+    if (ioctl(i2c, I2C_SLAVE, addr) < 0)
     {
-        // Today...block indefinitely
-        if (pthread_mutex_lock(&(ki2c->i2c_lock)) == 0)
-        {
-            ret = kprv_i2c_master_read(i2c, addr, ptr, len);
-            pthread_mutex_unlock(&(ki2c->i2c_lock));
-        }
+        perror("Couldn't reach requested address");
+        return I2C_ERROR_ADDR_TIMEOUT;
     }
-    return ret;
+
+    /* Transmit buffer */
+    if (write(i2c, ptr, len) != len)
+    {
+        perror("I2C write failed");
+        return I2C_ERROR;
+    }
+
+    return I2C_OK;
 }
 
-KI2C* kprv_i2c_get(KI2CNum i2c)
+KI2CStatus k_i2c_read(int i2c, uint16_t addr, uint8_t* ptr, int len)
 {
-	//Validate I2C number
-	if(i2c > (K_NUM_I2CS) || i2c < 1)
-	{
-		return NULL;
-	}
+    if (i2c == 0 || ptr == NULL)
+    {
+        return I2C_ERROR;
+    }
 
-    return &k_i2cs[i2c - 1];
+    /* Set the desired slave's address */
+    if (ioctl(i2c, I2C_SLAVE, addr) < 0)
+    {
+        perror("Couldn't reach requested address");
+        return I2C_ERROR_ADDR_TIMEOUT;
+    }
+
+    /* Read in data */
+    if (read(i2c, ptr, len) != len)
+    {
+        perror("I2C read failed");
+        return I2C_ERROR;
+    }
+
+    return I2C_OK;
 }
-
-#endif
