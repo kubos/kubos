@@ -1,7 +1,7 @@
 Getting Started with KubOS and the Kubos SDK
 ============================================
 
-This tutorial guides the user through the process of creating a new Kubos project using Python2.7
+This tutorial guides the user through the process of creating a new Kubos project using Python3.5
 and installing and running it on a target OBC.
 
 .. note:: 
