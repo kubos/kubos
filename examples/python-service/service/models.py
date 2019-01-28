@@ -24,7 +24,7 @@ class Subsystem(graphene.ObjectType):
         model based on queries to the actual hardware.
         """
 
-        print "Querying for subsystem status"
+        print("Querying for subsystem status")
         self.power_on = not self.power_on
 
     def set_power_on(self, power_on):
@@ -32,9 +32,9 @@ class Subsystem(graphene.ObjectType):
         Controls the power state of the subsystem
         """
 
-        print "Sending new power state to subsystem"
-        print "Previous State: %s" % self.power_on
-        print "New State: %s" % power_on
+        print("Sending new power state to subsystem")
+        print("Previous State: {}".format(self.power_on))
+        print("New State: {}".format(power_on))
         self.power_on = power_on
         return Status(status=True, subsystem=self)
 

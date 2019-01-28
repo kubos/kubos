@@ -22,35 +22,35 @@ MODULES = {
 # Sending commands
 module = "sim"
 address = MODULES[module]['address']
-print('\nModule: ' + module)
-print('Address: ' + str(address))
+print('\nModule: {}'.format(module))
+print('Address: {}'.format(str(address)))
 mcu = mcu_api.MCU(address=address)
 turn_led_on_cmd = "SUP:LED ON"
 turn_led_off_cmd = "SUP:LED OFF"
-print mcu.write(turn_led_on_cmd)
+print(mcu.write(turn_led_on_cmd))
 time.sleep(3)
-print mcu.write(turn_led_off_cmd)
+print(mcu.write(turn_led_off_cmd))
 
 # Read a selection of telemetry items
 module = "sim"
 address = MODULES[module]['address']
 fields = ["firmware_version", "commands_parsed", "scpi_errors", "time"]
-print('\nModule: ' + module)
-print('Address: ' + str(address))
-print('Fields: ' + str(fields) + '\n')
+print('\nModule: {}'.format(module))
+print('Address: {}'.format(str(address)))
+print('Fields: {}\n'.format(str(fields)))
 mcu = mcu_api.MCU(address=address)
 out = mcu.read_telemetry(module=module, fields=fields)
 for field in out:
-    print(field, out[field])
+    print("{}{}".format(field, out[field]))
 
 
 # Read all telemetry from all modules
 for module in MODULES:
     module = str(module)
     address = MODULES[module]['address']
-    print('\nModule: ' + module)
-    print('Address: ' + str(address) + '\n')
+    print('\nModule: {}'.format(module))
+    print('Address: {}\n'.format(str(address)))
     mcu = mcu_api.MCU(address=address)
     out = mcu.read_telemetry(module=module)
     for field in out:
-        print(field, out[field])
+        print("{}{}".format(field, out[field]))
