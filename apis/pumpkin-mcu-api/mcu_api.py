@@ -10,7 +10,7 @@ API for interacting with all Pumpkin SupMCUs.
 See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.28
 """
 
-
+import binascii
 import struct
 import time
 import i2c
@@ -198,10 +198,13 @@ class MCU:
         Write command used to append the proper stopbyte to all writes.
         """
         if type(command) is str:
+            command = str.encode(command)
+            
+        if type(command) is bytes:
             return self.i2cfile.write(
-                device=self.address, data=command+'\x0A')
+                device=self.address, data=command+b'\x0A')
         else:
-            raise TypeError('Commands must be strings.')
+            raise TypeError('Commands must be str or bytes.')
 
     def read(self, count):
         return self.i2cfile.read(device=self.address, count=count)
@@ -308,7 +311,7 @@ class MCU:
             return {'timestamp': 0, 'data': data[HEADER_SIZE:]}
 
         # Unpack timestamp in seconds.
-        timestamp = struct.unpack('<i', data[1:HEADER_SIZE])[0]/100.0
+        timestamp = struct.unpack('<i', str.encode(data[1:HEADER_SIZE]))[0]/100.0
         # Return the valid packet timestamp and data
         return {'timestamp': timestamp, 'data': data[HEADER_SIZE:]}
 
@@ -323,7 +326,7 @@ class MCU:
 
         Outputs a tuple where each field is an item parsed.
         """
-        if type(parsing) not in [str, unicode]:
+        if type(parsing) not in [str, bytes]:
             # Check that parsing is a valid type
             raise TypeError(
                 'Parsing field must be a valid struct parsing string. Input: '
@@ -332,12 +335,12 @@ class MCU:
         if parsing == "str":
             # Search for the null terminator,
             # return the leading string in a tuple
-            str_data = data.split('\0')[0]
-            return (str_data,)
+            str_data = data.split(b'\0')[0]
+            return (str_data.decode(),)
         elif parsing == "hex":
             # Store as a hex string. This is so we can return binary data.
             # Return as a single field in a tuple
-            return (data.encode('hex'),)
+            return (binascii.hexlify(data).decode(),)
 
         # All others parse directly with the parsing string.
         return struct.unpack(parsing, data)
