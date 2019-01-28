@@ -20,16 +20,28 @@
 #include <unistd.h>
 
 int radio_bus = 0;
+uint16_t wd_timeout = 0;
+trx_prop radio_tx;
+trx_prop radio_rx;
 
-KRadioStatus k_radio_init()
+KRadioStatus k_radio_init(char * bus, trx_prop tx, trx_prop rx, uint16_t timeout)
 {
+    if (bus == NULL)
+    {
+        return RADIO_ERROR_CONFIG;
+    }
+
     KI2CStatus status;
-    status = k_i2c_init(TRXVU_I2C_BUS, &radio_bus);
+    status = k_i2c_init(bus, &radio_bus);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize radio: %d\n", status);
         return RADIO_ERROR;
     }
+
+    wd_timeout = timeout;
+    radio_tx = tx;
+    radio_rx = rx;
 
     return RADIO_OK;
 }
@@ -102,7 +114,7 @@ void * kprv_radio_watchdog_thread(void * args)
         kprv_radio_tx_watchdog_kick();
         kprv_radio_rx_watchdog_kick();
 
-        sleep(TRXVU_WD_TIMEOUT / 3);
+        sleep(wd_timeout / 3);
     }
 
     return NULL;
@@ -118,11 +130,11 @@ KRadioStatus k_radio_watchdog_start()
         return RADIO_OK;
     }
 
-    if (TRXVU_WD_TIMEOUT == 0)
+    if (wd_timeout == 0)
     {
         fprintf(
             stderr,
-            "TRXVU watchdog has been disabled. No thread will be startd\n");
+            "TRXVU watchdog has been disabled. No thread will be started\n");
         return RADIO_OK;
     }
 

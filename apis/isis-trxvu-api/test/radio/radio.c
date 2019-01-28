@@ -18,12 +18,16 @@
 #include <cmocka.h>
 #include <isis-trxvu-api/trxvu.h>
 
+#define TX_SIZE 100
+#define RX_SIZE 100
+
 /* Test Data */
-radio_rx_message test_packet
+radio_rx_header test_header
     = {.msg_size        = 8,
        .doppler_offset  = 5,    // todo: get real value
        .signal_strength = 2,    // todo
-       .message         = "hi there" };
+};
+char * test_message = "hi there";
 
 uint16_t frame_count = 5;
 uint8_t  remaining   = 39;
@@ -48,19 +52,12 @@ uint8_t tx_state = RADIO_STATE_IDLE_ON | RADIO_STATE_BEACON_ACTIVE
                    | (RADIO_STATE_RATE_4800 << 2);
 /* End of Test Data */
 
-static void test_no_init_send(void ** arg)
-{
-    char    data = 'A';
-    uint8_t resp;
-
-    assert_int_equal(k_radio_send(&data, 1, &resp), RADIO_ERROR);
-}
-
 static void test_no_init_recv(void ** arg)
 {
-    radio_rx_message buffer = { 0 };
+    radio_rx_header header = { 0 };
+    uint8_t buffer[RX_SIZE] = { 0 };
 
-    assert_int_equal(k_radio_recv(&buffer, NULL), RADIO_ERROR);
+    assert_int_equal(k_radio_recv(&header, buffer, NULL), RADIO_ERROR);
 }
 
 static void test_send(void ** arg)
@@ -115,7 +112,9 @@ static void test_send_override(void ** arg)
 
 static void test_recv(void ** arg)
 {
-    radio_rx_message buffer = { 0 };
+    radio_rx_header header = { 0 };
+    uint8_t buffer[RX_SIZE] = { 0 };
+
     KRadioStatus     ret;
 
     /* get_frame_count */
@@ -125,13 +124,13 @@ static void test_recv(void ** arg)
 
     /* get_frame */
     expect_value(__wrap_write, cmd, GET_RX_FRAME);
-    will_return(__wrap_read, sizeof(radio_rx_message));
-    will_return(__wrap_read, &test_packet);
+    will_return(__wrap_read, sizeof(radio_rx_header) + RX_SIZE);
+    will_return(__wrap_read, &test_header);
 
     /* remove_frame */
     expect_value(__wrap_write, cmd, REMOVE_RX_FRAME);
 
-    ret = k_radio_recv(&buffer, NULL);
+    ret = k_radio_recv(&header, buffer, NULL);
 
     assert_int_equal(ret, RADIO_OK);
 }
@@ -140,14 +139,16 @@ static void test_recv_null(void ** arg)
 {
     KRadioStatus ret;
 
-    ret = k_radio_recv(NULL, NULL);
+    ret = k_radio_recv(NULL, NULL, NULL);
 
     assert_int_equal(ret, RADIO_ERROR_CONFIG);
 }
 
 static void test_recv_len(void ** arg)
 {
-    radio_rx_message buffer = { 0 };
+    radio_rx_header header = { 0 };
+    uint8_t buffer[RX_SIZE] = { 0 };
+
     uint16_t         len    = 0;
     KRadioStatus     ret;
 
@@ -156,15 +157,15 @@ static void test_recv_len(void ** arg)
     will_return(__wrap_read, &frame_count);
 
     expect_value(__wrap_write, cmd, GET_RX_FRAME);
-    will_return(__wrap_read, sizeof(radio_rx_message));
-    will_return(__wrap_read, &test_packet);
+    will_return(__wrap_read, sizeof(radio_rx_header) + RX_SIZE);
+    will_return(__wrap_read, &test_header);
 
     expect_value(__wrap_write, cmd, REMOVE_RX_FRAME);
 
-    ret = k_radio_recv(&buffer, (uint8_t *) &len);
+    ret = k_radio_recv(&header, buffer, (uint8_t *) &len);
 
     assert_int_equal(ret, RADIO_OK);
-    assert_int_equal(len, buffer.msg_size);
+    assert_int_equal(len, header.msg_size);
 }
 
 static void test_config_null(void ** arg)
@@ -427,8 +428,19 @@ static void test_telem_rx_uptime(void ** arg)
 
 static int init(void ** state)
 {
+    trx_prop tx = {
+            .addr = 0x60,
+            .max_size = TX_SIZE,
+            .max_frames = 40,
+    };
+    trx_prop rx = {
+                .addr = 0x61,
+                .max_size = RX_SIZE,
+                .max_frames = 40,
+    };
+
     will_return(__wrap_open, 1);
-    k_radio_init();
+    k_radio_init("/dev/i2c-0", tx, rx, 10);
 
     return 0;
 }
@@ -444,7 +456,6 @@ static int term(void ** state)
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test(test_no_init_send),
         cmocka_unit_test(test_no_init_recv),
         cmocka_unit_test_setup_teardown(test_send, init, term),
         cmocka_unit_test_setup_teardown(test_send_null, init, term),
