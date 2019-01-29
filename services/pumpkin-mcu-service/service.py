@@ -14,7 +14,7 @@ import sys
 
 from service import schema
 
-from kubos_service import udp_service
+from kubos_service import http_service
 from kubos_service.config import Config
 
 c = Config("pumpkin-mcu-service")
@@ -35,5 +35,5 @@ logger.addHandler(stdout)
 # Set which modules are present and their addresses from the config file.
 schema.MODULES = c.raw['modules']
 
-# Starts the UDP service
-udp_service.start(logger, c, schema)
+# Starts the HTTP service
+http_service.start(c, schema.schema)
