@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include <isis-imtq-api/imtq.h>
+#include <imtq.h>
 #include <cmocka.h>
 
 static char * bus = "/dev/i2c-1";

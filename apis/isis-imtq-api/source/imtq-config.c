@@ -16,7 +16,7 @@
  * ISIS iMTQ API - Configuration Commands
  */
 
-#include <isis-imtq-api/imtq.h>
+#include <imtq.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

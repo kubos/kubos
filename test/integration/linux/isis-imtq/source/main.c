@@ -17,7 +17,7 @@
  * ADCS Integration Test for the ISIS iMTQ
  */
 
-#include <isis-imtq-api/imtq.h>
+#include <imtq.h>
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>
@@ -306,7 +306,7 @@ int main(int argc, char * argv[])
 {
     KADCSStatus status;
 
-    status = k_adcs_init();
+    status = k_adcs_init("/dev/i2c0-1", 0, 10);
     if (status != ADCS_OK)
     {
         fprintf(stderr, "k_adcs_init failed: %d\n", status);

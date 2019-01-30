@@ -24,8 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <stdint.h>
 
-#include "isis-trxvu-api/trxvu.h"
+#include "trxvu.h"
 
 #define check_status()           \
     ({                           \

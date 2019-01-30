@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "kubos-hal/i2c.h"
+#include "i2c.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>

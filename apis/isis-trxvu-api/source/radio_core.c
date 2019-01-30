@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <kubos-hal/i2c.h>
-#include <isis-trxvu-api/trxvu.h>
+#include <i2c.h>
+#include <trxvu.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -196,3 +196,17 @@ KRadioStatus k_radio_get_telemetry(radio_telem * buffer, RadioTelemType type)
         return kprv_radio_tx_get_telemetry(buffer, type);
     }
 }
+
+float get_voltage(uint16_t raw) {return raw * 0.00488;}
+
+float get_current(uint16_t raw) {return raw * 0.16643964;}
+
+float get_temperature(uint16_t raw) {return raw * -0.07669 + 195.6037;}
+
+float get_doppler_offset(uint16_t raw) {return raw * 13.352 - 22300;}
+
+float get_signal_strength(uint16_t raw) {return raw * 0.03 - 152;}
+
+float get_rf_power_dbm(uint16_t raw) {return 20 * log10(raw * 0.00767);}
+
+float get_rf_power_mw(uint16_t raw) {return raw * raw * powf(10, -2) * 0.00005887;}

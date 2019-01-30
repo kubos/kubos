@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "isis-iobc-supervisor/supervisor.h"
-#include "isis-iobc-supervisor/checksum.h"
+#include <supervisor.h>
+#include <checksum.h>
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
 #include <stdio.h>

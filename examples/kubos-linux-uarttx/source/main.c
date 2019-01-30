@@ -127,12 +127,14 @@ int main(int argc, char * argv[])
     {
 
         char testmsg[] = "Test Message nnn\n";
+        int ret = 0;
 
         printf("Writing message %d\n", counter);
 
         sprintf(testmsg, "Test Message %03d\n", counter++);
 
-        if(write(fd, testmsg, sizeof(testmsg) < 0)
+
+        if((ret = write(fd, testmsg, sizeof(testmsg)) < 0))
         {
             perror("Error from write");
             break;

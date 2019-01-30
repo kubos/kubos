@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 glob = "0.2"
+cmake = "0.1"
