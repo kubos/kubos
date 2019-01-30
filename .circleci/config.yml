@@ -43,8 +43,6 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-#       This test is tied very tightly into our old yotta based cli
-#       - run: python test/integration/integration_test.py
         - run: python -m tools.ci.lint
         - run: python3 tools/ci_c.py
         - run: python hal/python-hal/i2c/test_i2c.py
