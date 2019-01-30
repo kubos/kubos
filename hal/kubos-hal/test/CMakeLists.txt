@@ -12,10 +12,8 @@ add_executable(kubos-hal-test-i2c
   i2c/sysfs.c)
 
 target_include_directories(kubos-hal-test-i2c
-  PRIVATE
-  "${cmocka_dir}/cmocka-1.1.0/include"
-  PRIVATE
-  "${hal_dir}/kubos-hal"
+  PRIVATE "${cmocka_dir}/cmocka-1.1.0/include"
+  PRIVATE "${hal_dir}/kubos-hal"
 )
 
 set_target_properties(kubos-hal-test-i2c
@@ -33,5 +31,4 @@ target_link_libraries(kubos-hal-test-i2c
 )
 
 add_test(kubos-hal-test-i2c kubos-hal-test-i2c)
-
 enable_testing()

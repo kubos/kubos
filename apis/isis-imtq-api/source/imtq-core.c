@@ -168,6 +168,12 @@ KADCSStatus k_imtq_watchdog_start(void)
 
 KADCSStatus k_imtq_watchdog_stop(void)
 {
+    if (handle_watchdog == 0)
+    {
+        perror("ADCS watchdog has not been started");
+        return ADCS_ERROR;
+    }
+
     /* Send the cancel request */
     if (pthread_cancel(handle_watchdog) != 0)
     {

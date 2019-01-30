@@ -21,8 +21,7 @@ set_target_properties(gomspace-p31u-api-nanopower-test
          -Wl,--wrap=read")
 
 target_include_directories(gomspace-p31u-api-nanopower-test
-  PRIVATE
-  "${nanopower_api_dir}/gomspace-p31u-api"
+  PRIVATE "${nanopower_api_dir}/gomspace-p31u-api"
 )
 
 target_link_libraries(gomspace-p31u-api-nanopower-test
@@ -33,5 +32,4 @@ target_link_libraries(gomspace-p31u-api-nanopower-test
 )
 
 add_test(gomspace-p31u-api-nanopower-test gomspace-p31u-api-nanopower-test)
-
 enable_testing()

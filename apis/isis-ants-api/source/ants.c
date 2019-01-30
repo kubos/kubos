@@ -494,6 +494,12 @@ KANTSStatus k_ants_watchdog_start()
 
 KANTSStatus k_ants_watchdog_stop()
 {
+    if (handle_watchdog == 0)
+    {
+      perror("AntS watchdog thread has not been started");
+      return ANTS_ERROR;
+    }
+
     /* Send the cancel request */
     if (pthread_cancel(handle_watchdog) != 0)
     {

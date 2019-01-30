@@ -151,6 +151,12 @@ KRadioStatus k_radio_watchdog_start()
 
 KRadioStatus k_radio_watchdog_stop()
 {
+    if (handle_watchdog == 0)
+    {
+        perror("TRXVU watchdog thread has not been started");
+        return RADIO_ERROR;
+    }
+    
     /* Send the cancel request */
     if (pthread_cancel(handle_watchdog) != 0)
     {

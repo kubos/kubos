@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(json VERSION 0.1.2 LANGUAGES C)
+project(json VERSION 1.0.0)
 
 add_library(json
   source/json.c

@@ -25,7 +25,7 @@ target_link_libraries(isis-ants-api-test
   isis-ants-api
   kubos-hal
   pthread
-  )
+)
 
 target_include_directories(isis-ants-api-test
   PRIVATE "${ants_api_dir}/isis-ants-api"

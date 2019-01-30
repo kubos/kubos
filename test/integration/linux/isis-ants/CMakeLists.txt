@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(isis-ants)
+project(isis-ants VERSION 0.1.0)
 
 set(ants_api_dir "${isis-ants_SOURCE_DIR}/../../../../apis/isis-ants-api/")
 add_subdirectory("${ants_api_dir}" "${CMAKE_BINARY_DIR}/ants-api-build")
