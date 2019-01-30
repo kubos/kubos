@@ -351,7 +351,7 @@ dependencies = [
 name = "extern-lib"
 version = "0.1.0"
 dependencies = [
- "kubos-build-helper 0.1.0",
+ "kubos-build-helper 0.1.1",
 ]
 
 [[package]]
@@ -575,7 +575,7 @@ name = "isis-ants-api"
 version = "0.1.0"
 dependencies = [
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "kubos-build-helper 0.1.0",
+ "kubos-build-helper 0.1.1",
  "nom 4.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -599,7 +599,7 @@ dependencies = [
 name = "isis-iobc-supervisor"
 version = "0.1.0"
 dependencies = [
- "kubos-build-helper 0.1.0",
+ "kubos-build-helper 0.1.1",
  "libc 0.2.46 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -609,7 +609,7 @@ version = "0.1.0"
 dependencies = [
  "adcs-api 0.1.0",
  "double 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "kubos-build-helper 0.1.0",
+ "kubos-build-helper 0.1.1",
 ]
 
 [[package]]
@@ -689,7 +689,7 @@ dependencies = [
 
 [[package]]
 name = "kubos-build-helper"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "cmake 0.1.35 (registry+https://github.com/rust-lang/crates.io-index)",
  "glob 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -883,7 +883,7 @@ dependencies = [
  "byteorder 1.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "crc16 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "kubos-build-helper 0.1.0",
+ "kubos-build-helper 0.1.1",
  "nom 4.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-uart 0.2.0",
  "serial 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",

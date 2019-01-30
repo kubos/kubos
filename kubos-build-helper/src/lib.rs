@@ -16,28 +16,21 @@
 
 use cmake;
 use glob::glob;
-use std::env;
 use std::process::Command;
 
 /// Performs all the setup, build and configuration neccesary
-/// to compile and link a C-based yotta module under Cargo
+/// to compile and link a C-based cmake project under Cargo
 pub fn build_module() {
-    //    let kubos_target = determine_target();
-    //do_build(&kubos_target);
-    //setup_libraries(&kubos_target);
-
     let dst = cmake::Config::new("").build_target("").build();
-
     setup_libraries(dst.to_str().unwrap());
 }
 
-// The default behavior of yotta is to create
+// The default behavior of cmake is to create
 // multiple static libraries which are linked into
 // the final executable. We will copy all of the static
-// libraries created by yotta into the folder where
+// libraries created by cmake into the folder where
 // rustc can link against them.
 fn setup_libraries(out_dir: &str) {
-    //let out_dir = env::var("OUT_DIR").unwrap();
     let lib_glob = format!("{}/build/**/*.a", out_dir);
 
     // Inform Cargo -> Rustc about which folder our static
@@ -73,15 +66,5 @@ fn setup_libraries(out_dir: &str) {
             }
             Err(e) => println!("bad path {:?}", e),
         }
-    }
-}
-
-/// Retrieve the kubos target from the environment
-/// variable CARGO_KUBOS_TARGET. This variable *should*
-/// get set when the `cargo kubos` command is run.
-fn determine_target() -> String {
-    match env::var("CARGO_KUBOS_TARGET") {
-        Ok(val) => val,
-        Err(e) => panic!("Error retrieving cargo-kubos target: {}", e),
     }
 }
