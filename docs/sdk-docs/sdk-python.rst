@@ -5,6 +5,11 @@ The Kubos SDK Vagrant box comes with a Python interperter and all the modules
 needed to develop a basic hardware service. Services can be tested locally
 in the Vagrant box up until the point that they need hardware interaction.
 
+.. note::
+
+    The SDK comes with support for both Python2.7 and Python3.5.
+    However, only Python3.5 is available on OBCs running Kubos Linux.
+
 Flashing
 --------
 
@@ -18,7 +23,7 @@ There are currently two ways to add Python programs to a system running Kubos Li
 
     - Fork and clone `kubos-linux-build <https://github.com/kubos/kubos-linux-build>`__
       and add additional Python packages to the `package/python` directory
-    - You can see our current system packages and how they are structured 
+    - You can see our current system packages and how they are structured
       `here <https://github.com/kubos/kubos-linux-build/tree/master/package/python>`__.
     - See the :ref:`SysAdmin docs <sysadmin>` for more information on
       building Kubos Linux.
@@ -34,7 +39,7 @@ There are currently two ways to add Python programs to a system running Kubos Li
 Running on Target
 -----------------
 
-The following steps will allow you to run Python files which have been flashed
+The following steps will allow you to run Python3.5 files which have been flashed
 to a Linux target:
 
 0. Make sure the target hardware is attached to your computer via a serial cable.

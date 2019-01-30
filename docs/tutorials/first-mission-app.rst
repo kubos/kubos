@@ -2,7 +2,7 @@ Creating Your First Mission Application
 =======================================
 
 This tutorial guides the user through the process of creating a basic mission application using
-Python2.7.
+Python3.5.
 
 At the end of the tutorial, the user will have a mission application which is capable of querying
 the monitor service for current system memory usage and then storing that data into the telemetry
