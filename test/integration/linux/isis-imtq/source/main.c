@@ -306,7 +306,7 @@ int main(int argc, char * argv[])
 {
     KADCSStatus status;
 
-    status = k_adcs_init("/dev/i2c0-1", 0, 10);
+    status = k_adcs_init("/dev/i2c-0", 0, 10);
     if (status != ADCS_OK)
     {
         fprintf(stderr, "k_adcs_init failed: %d\n", status);

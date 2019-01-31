@@ -590,7 +590,7 @@ int main(int argc, char * argv[])
 
     KEPSStatus status;
     KEPSConf config = {
-            .bus = "/dev/i2c1-0",
+            .bus = "/dev/i2c-0",
             .addr = 0x02
     };
 
@@ -620,13 +620,13 @@ int main(int argc, char * argv[])
     status |= get_heater();
     status |= set_heater();
 
-    // status |= test_battery_config();
+    status |= battery_config();
 
     const struct timespec INTERTEST_DELAY
         = {.tv_sec = 0, .tv_nsec = 20000000 };
     nanosleep(&INTERTEST_DELAY, NULL);
 
-    // status |= test_system_config();
+    status |= system_config();
 
     nanosleep(&INTERTEST_DELAY, NULL);
 
