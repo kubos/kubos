@@ -47,7 +47,7 @@ def main():
     subprocess.call("sphinx-build docs/ html/", shell=True)
     shutil.rmtree("./xml")
     
-    subprocess.call("cargo kubos -c doc -t x86-linux-native -- --no-deps", shell=True)
+    subprocess.call("cargo doc -t x86-linux-native -- --no-deps", shell=True)
     dir_util.copy_tree("target/x86_64-unknown-linux-gnu/doc", "html/rust-docs")
 
 if __name__ == '__main__':
