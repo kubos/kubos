@@ -43,7 +43,6 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: python -m tools.ci.lint
         - run: python3 tools/ci_c.py
         - run: python hal/python-hal/i2c/test_i2c.py
         - run: cd hal/python-hal/i2c; python setup.py install
