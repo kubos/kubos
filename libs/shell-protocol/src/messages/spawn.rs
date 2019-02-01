@@ -30,7 +30,7 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "No spawn command found".to_owned(),
-            })
+            });
         }
     };
 

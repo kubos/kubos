@@ -27,7 +27,7 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "No exit code found".to_owned(),
-            })
+            });
         }
     }) as u32;
 
@@ -36,7 +36,7 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "No exit signal found".to_owned(),
-            })
+            });
         }
     }) as u32;
 
