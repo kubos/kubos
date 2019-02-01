@@ -34,7 +34,7 @@ and then exit.
 
 .. code-block:: python
 
-    print "Hello, World!"
+    print("Hello, World!")
 
 Running the Project Locally
 ---------------------------

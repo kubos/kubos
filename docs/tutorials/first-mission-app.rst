@@ -74,11 +74,11 @@ We'll then define our OnBoot and OnCommand run level functions with a basic prin
 
     def on_boot():
         
-        print "OnBoot logic"
+        print("OnBoot logic")
         
     def on_command():
         
-        print "OnCommand logic"
+        print("OnCommand logic")
 
 And, finally, we'll define our main function which will check for an ``-r`` command line argument
 and then call the appropriate run level function based on the input:
@@ -122,11 +122,11 @@ All together, it should look like this:
     
     def on_boot():
         
-        print "OnBoot logic"
+        print("OnBoot logic")
         
     def on_command():
         
-        print "OnCommand logic"
+        print("OnCommand logic")
     
     def main():
         parser = argparse.ArgumentParser()
@@ -140,7 +140,7 @@ All together, it should look like this:
         elif args.run == 'OnCommand':
             on_command()
         else:
-            print "Unknown run level specified"
+            print("Unknown run level specified")
             sys.exit(1)
         
     if __name__ == "__main__":
