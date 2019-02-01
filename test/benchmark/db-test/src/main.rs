@@ -176,9 +176,10 @@ fn test_cleanup(config: &Config) {
                     let entries_deleted =
                         serde_json::from_value::<i64>(message["entriesDeleted"].clone()).unwrap();
 
-                    match success {
-                        true => println!("Cleaned up {} test entries", entries_deleted),
-                        false => eprintln!("Failed to deleted test entries: {}", errors),
+                    if success {
+                        println!("Cleaned up {} test entries", entries_deleted);
+                    } else {
+                        eprintln!("Failed to deleted test entries: {}", errors);
                     }
                 }
                 None => eprintln!("Failed to process delete response"),

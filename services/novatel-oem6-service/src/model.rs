@@ -78,7 +78,7 @@ pub fn log_thread(
                 if log.pos_status == 0 && log.vel_status == 0 {
                     data.update_info(LockInfo {
                         time: OEMTime {
-                            week: log.week as i32,
+                            week: i32::from(log.week),
                             ms: log.ms,
                         },
                         position: log.position,
@@ -88,7 +88,7 @@ pub fn log_thread(
                 data.update_status(LockStatus {
                     time_status: log.time_status,
                     time: OEMTime {
-                        week: log.week as i32,
+                        week: i32::from(log.week),
                         ms: log.ms,
                     },
                     position_status: log.pos_status,
@@ -204,9 +204,10 @@ impl Subsystem {
     }
 
     pub fn get_power(&self) -> Result<GetPowerResponse, Error> {
-        let (state, uptime) = match self.get_version_log().is_ok() {
-            true => (PowerState::On, 1),
-            false => (PowerState::Off, 0),
+        let (state, uptime) = if self.get_version_log().is_ok() {
+            (PowerState::On, 1)
+        } else {
+            (PowerState::Off, 0)
         };
 
         Ok(GetPowerResponse { state, uptime })
@@ -250,7 +251,7 @@ impl Subsystem {
         let telem = self.get_telemetry()?;
 
         Ok(IntegrationTestResults {
-            success: !telem.debug.is_none(),
+            success: telem.debug.is_some(),
             errors: telem.nominal.system_status.errors.clone().join("; "),
             telemetry_debug: telem.debug.clone(),
             telemetry_nominal: telem.nominal.clone(),
@@ -375,7 +376,6 @@ impl Subsystem {
         let tx: Vec<u8> = command
             .as_bytes()
             .chunks(2)
-            .into_iter()
             .map(|chunk| u8::from_str_radix(::std::str::from_utf8(chunk).unwrap(), 16).unwrap())
             .collect();
 
