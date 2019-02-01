@@ -18,15 +18,19 @@ use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variabl
 use kubos_system::Config;
 use log::info;
 use serde_json::json;
-use std::cell::RefCell;
+//use std::cell::RefCell;
+use std::sync::{Arc, RwLock};
 use std::collections::HashMap;
 use std::net::{SocketAddr, UdpSocket};
 
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.
+#[derive(Clone)]
 pub struct Context<T> {
-    subsystem: T,
-    storage: RefCell<HashMap<String, String>>,
+    ///
+    pub subsystem: T,
+    ///
+    pub storage: Arc<RwLock<HashMap<String, String>>>,
 }
 
 impl<T> JuniperContext for Context<T> {}
@@ -43,7 +47,7 @@ impl<T> Context<T> {
     ///
     /// `name` - Key to search for in storage
     pub fn get(&self, name: &str) -> String {
-        let stor = self.storage.borrow();
+        let stor = self.storage.read().unwrap();
         match stor.get(&name.to_string()) {
             Some(s) => s.clone(),
             None => "".to_string(),
@@ -57,7 +61,7 @@ impl<T> Context<T> {
     /// `key` - Key to store value under
     /// `value` - Value to store
     pub fn set(&self, key: &str, value: &str) {
-        let mut stor = self.storage.borrow_mut();
+        let mut stor = self.storage.write().unwrap();
         stor.insert(key.to_string(), value.to_string());
     }
 
@@ -67,13 +71,13 @@ impl<T> Context<T> {
     ///
     /// `key` - Key to clear (along with corresponding value)
     pub fn clear(&self, name: &str) {
-        let mut storage = self.storage.borrow_mut();
+        let mut storage = self.storage.write().unwrap();
         storage.remove(name);
     }
 
     /// Clears all key/value pairs from storage
     pub fn clear_all(&self) {
-        self.storage.borrow_mut().clear();
+        self.storage.write().unwrap().clear();
     }
 }
 
@@ -127,7 +131,7 @@ where
             root_node: RootNode::new(query, mutation),
             context: Context {
                 subsystem,
-                storage: RefCell::new(HashMap::new()),
+                storage: Arc::new(RwLock::new(HashMap::new())),
             },
         }
     }

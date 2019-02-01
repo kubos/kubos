@@ -6,6 +6,9 @@ edition = "2018"
 
 [dependencies]
 kubos-service = { path = "../../services/kubos-service" }
-juniper = "0.9"
+juniper =  "0.11"
+juniper_warp = "0.2.0"
 log = "^0.4.0"
+mount = "0.3.0"
 syslog = "4.0"
+warp = "0.1.12"
