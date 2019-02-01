@@ -225,7 +225,7 @@ typedef struct
 KRadioStatus k_radio_watchdog_kick(void);
 
 /**
- * Start a thread to kick the radio's watchdogs at an interval of (::TRXVU_WD_TIMEOUT/3) seconds
+ * Start a thread to kick the radio's watchdogs at an interval of (timeout/3) seconds
  * @return KRadioStatus `RADIO_OK` if OK, error otherwise
  */
 KRadioStatus k_radio_watchdog_start(void);
@@ -364,7 +364,7 @@ KRadioStatus k_radio_get_telemetry(radio_telem * buffer, RadioTelemType type);
  */
 
 /**
- * Thread which kicks the radio's watchdogs every (::TRXVU_WD_TIMEOUT/3) seconds
+ * Thread which kicks the radio's watchdogs every (timeout/3) seconds
  */
 void * kprv_radio_watchdog_thread(void * args);
 
@@ -463,8 +463,17 @@ KRadioStatus kprv_radio_rx_watchdog_kick(void);
  */
 KRadioStatus kprv_radio_rx_reset(KRadioReset type);
 
+/**
+ * File descriptor for the radio's I2C bus
+ */
 int radio_bus;
+/**
+ * Radio transmitter properties
+ */
 trx_prop radio_tx;
+/**
+ * Radio receiver properties
+ */
 trx_prop radio_rx;
 
 /* @} */
