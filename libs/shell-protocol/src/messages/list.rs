@@ -29,7 +29,7 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
     if let Some(Value::Object(raw_list)) = message.payload.get(0) {
         process_list = Some(
             raw_list
-                .into_iter()
+                .iter()
                 // Map and filter on channel and path/pid array as Some
                 .map(|(channel, data)| (channel.as_u64(), data.as_array()))
                 .filter(|(channel, data)| channel.is_some() && data.is_some())
