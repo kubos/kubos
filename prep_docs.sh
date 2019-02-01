@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Link in yotta modules for those rust
 # modules that need them
 # Needed to run cargo kubos -c doc

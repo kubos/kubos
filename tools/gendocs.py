@@ -19,8 +19,6 @@ DOCS_DIRS = [
     "apis/isis-iobc-supervisor",
     "apis/isis-trxvu-api",
     "hal/kubos-hal",
-    "hal/kubos-hal-linux",
-
 ]
 
 def gendocs_xml(dir, doxyfile, version, doc_dir):
