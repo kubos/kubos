@@ -17,7 +17,7 @@ jobs:
       steps:
         - checkout
         - run: ./tools/kubos_link.py
-        - run: cargo kubos -c check -t  kubos-linux-pumpkin-mbm2-gcc
+        - run: CC=/usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc cargo kubos -c check -t  kubos-linux-pumpkin-mbm2-gcc
 
     # Run for all PR commits
     rust_check_iobc:
