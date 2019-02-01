@@ -25,7 +25,7 @@ pub fn parse_channel_id(message: &Value) -> Result<u32, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "Data not an array".to_owned(),
-            })
+            });
         }
     };
 
@@ -54,7 +54,7 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "Data not an array".to_owned(),
-            })
+            });
         }
     };
     let channel_id = *(match data.get(0) {
@@ -62,7 +62,7 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "No channel ID found".to_owned(),
-            })
+            });
         }
     }) as u32;
     let name = match data.get(1) {
@@ -70,7 +70,7 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "No message name found".to_owned(),
-            })
+            });
         }
     }
     .to_owned();
