@@ -30,6 +30,7 @@ RUN rm ./bbb_toolchain.tar.gz
 
 # Setup Python package dependencies
 RUN pip install toml
+RUN pip install mock
 
 # Setup rust stuff
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
