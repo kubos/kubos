@@ -4,7 +4,7 @@ jobs:
     # Run for all PR commits
     rust_check_x86:
       docker:
-        - image: kubos/kubos-dev:test
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo check
@@ -39,7 +39,7 @@ jobs:
     # Run for all PR commits
     rust_test:
       docker:
-        - image: kubos/kubos-dev:test
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo test
@@ -48,7 +48,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_upload:
       docker:
-        - image: kubos/kubos-dev:test
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo run --bin large_upload
@@ -57,7 +57,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_download:
       docker:
-        - image: kubos/kubos-dev:test
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo run --bin large_download   
@@ -66,7 +66,7 @@ jobs:
     # Run for all PR commits
     non_rust_tests:
       docker:
-        - image: kubos/kubos-dev:test
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: python3 tools/ci_c.py
