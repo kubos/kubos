@@ -15,8 +15,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: ./tools/kubos_link.py
-        - run: CC=/usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc cargo kubos -c check -t  kubos-linux-pumpkin-mbm2-gcc
+        - run: CC=/usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc cargo check --target arm-unknown-linux-gnueabihf
 
     # Run for all PR commits
     rust_check_iobc:
@@ -24,8 +23,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: ./tools/kubos_link.py
-        - run: CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo kubos -c check -t kubos-linux-isis-gcc
+        - run: CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo check --target armv5te-unknown-linux-gnueabi
 
     # Rust testing
     # Run for all PR commits
