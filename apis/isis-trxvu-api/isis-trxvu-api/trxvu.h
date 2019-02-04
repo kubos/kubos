@@ -270,37 +270,37 @@ KRadioStatus k_radio_clear_beacon(void);
  * @param [in] raw Raw ADC value
  * @return Voltage in volts
  */
-inline float get_voltage(uint16_t raw) {return raw * 0.00488;}
+float get_voltage(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Current in milliamps
  */
-inline float get_current(uint16_t raw) {return raw * 0.16643964;}
+float get_current(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Temperature in degrees Celsius
  */
-inline float get_temperature(uint16_t raw) {return raw * -0.07669 + 195.6037;}
+float get_temperature(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Doppler shift in hertz
  */
-inline float get_doppler_offset(uint16_t raw) {return raw * 13.352 - 22300;}
+float get_doppler_offset(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Received signal strength power in decibel-milliwatts
  */
-inline float get_signal_strength(uint16_t raw) {return raw * 0.03 - 152;}
+float get_signal_strength(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return RF reflected power in decibel-milliwatts
  */
-inline float get_rf_power_dbm(uint16_t raw) {return 20 * log10(raw * 0.00767);}
+float get_rf_power_dbm(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return RF reflected power in milliwatts
  */
-inline float get_rf_power_mw(uint16_t raw) {return raw * raw * powf(10, -2) * 0.00005887;}
+float get_rf_power_mw(uint16_t raw);
 /**@}*/
 
 /*

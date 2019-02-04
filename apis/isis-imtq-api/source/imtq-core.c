@@ -16,8 +16,8 @@
  * ISIS iMTQ API - Core Functions and Configuration Commands
  */
 
-#include <isis-imtq-api/imtq.h>
-#include <kubos-hal/i2c.h>
+#include <imtq.h>
+#include <i2c.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <sys/syscall.h>
@@ -168,6 +168,12 @@ KADCSStatus k_imtq_watchdog_start(void)
 
 KADCSStatus k_imtq_watchdog_stop(void)
 {
+    if (handle_watchdog == 0)
+    {
+        perror("ADCS watchdog has not been started");
+        return ADCS_ERROR;
+    }
+
     /* Send the cancel request */
     if (pthread_cancel(handle_watchdog) != 0)
     {

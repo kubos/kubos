@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <kubos-hal/i2c.h>
+#include <i2c.h>
 #include <stdbool.h>
 #include <stdint.h>
 

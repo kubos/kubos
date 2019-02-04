@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include <isis-ants-api/ants-api.h>
+#include <ants-api.h>
 #include <cmocka.h>
 
 /* Test Data */

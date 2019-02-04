@@ -7,8 +7,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: ./tools/kubos_link.py
-        - run: cargo kubos -c check
+        - run: cargo check
 
     # Run for all PR commits
     rust_check_mbm2:
@@ -35,8 +34,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: ./tools/kubos_link.py
-        - run: cargo kubos -c test
+        - run: cargo test
 
     # Rust testing - large upload test
     # Run for all PR commits
@@ -63,9 +61,8 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: python test/integration/integration_test.py
         - run: python -m tools.ci.lint
-        - run: python tools/build.py --all-tests
+        - run: python3 tools/ci_c.py
         - run: python hal/python-hal/i2c/test_i2c.py
         - run: cd hal/python-hal/i2c; python setup.py install
         - run: cd apis/pumpkin-mcu-api; python test_mcu_api.py
