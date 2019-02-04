@@ -15,7 +15,12 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: CC=/usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc cargo check --target arm-unknown-linux-gnueabihf
+        - run:
+            name: Cargo check for BBB
+            command: cargo check --target arm-unknown-linux-gnueabihf
+            environment:
+              CC: /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc
+              CXX: /usr/bin/bbb_toolchain/usr/bin/arm-linux-g++
 
     # Run for all PR commits
     rust_check_iobc:
@@ -23,7 +28,12 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo check --target armv5te-unknown-linux-gnueabi
+        - run:
+            name: Cargo check for iOBC
+            command: cargo check --target armv5te-unknown-linux-gnueabi
+            environment:
+              CC: /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc
+              CXX: /usr/bin/iobc_toolchain/usr/bin/arm-linux-g++
 
     # Rust testing
     # Run for all PR commits
