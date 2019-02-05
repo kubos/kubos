@@ -23,12 +23,33 @@ use kubos_service::{Config, Service};
 use serde_json::json;
 use std::sync::mpsc::sync_channel;
 
+macro_rules! request {
+    ($service:ident, $query:ident) => {{
+        // Warp doesn't like control characters (ie. new line characters)
+        // so we need to remove them before we send the request
+        let query = $query.replace("\n","");
+        warp::test::request()
+            .header("Content-Type", "application/json")
+            .method("POST")
+            .body(format!("{{\"query\": \"{}\"}}", query))
+            .reply(&$service.filter)
+    }};
+}
+
 macro_rules! wrap {
     ($result:ident) => {{
-        json!({
-                                    "data": $result,
-                                    "errors": ""
-                            }).to_string()
+        &json!({
+                "data": $result
+        }).to_string()
+    }};
+}
+
+macro_rules! test {
+    ($service:ident, $query:ident, $expected:ident) => {{
+        let res = request!($service, $query);
+
+        assert_eq!(res.body(), wrap!($expected));
+        
     }};
 }
 
@@ -49,6 +70,6 @@ fn ping() {
     let expected = json!({
             "ping": "pong"
     });
-
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    
+    test!(service, query, expected);
 }

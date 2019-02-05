@@ -25,24 +25,9 @@ use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Service, Context};
 use syslog::Facility;
 
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::env;
-use warp::{http::Response, log, Filter};
-use juniper::RootNode;
-use std::sync::{Arc, Mutex};
-use std::sync::RwLock;
-
+/*
 fn main() {
-
-    let homepage = warp::path::end().map(|| {
-        Response::builder()
-            .header("content-type", "text/html")
-            .body(format!(
-                "<html><h1>juniper_warp</h1><div>visit <a href=\"/graphiql\">/graphiql</a></html>"
-            ))
-    });
-
+    
     print!("Listening on 127.0.0.1:8080");
     
     let context = Context {
@@ -50,20 +35,22 @@ fn main() {
         storage: Arc::new(RwLock::new(HashMap::new()))
     };
 
-    let state = warp::any().map(move || context.clone());
-    let graphql_filter = juniper_warp::make_graphql_filter(RootNode::new(QueryRoot, MutationRoot), state.boxed());
+    // Make the subsystem and other persistent data available to all endpoints
+    let context = warp::any().map(move || context.clone());
+    
+    
+    let graphql_filter = juniper_warp::make_graphql_filter(RootNode::new(QueryRoot, MutationRoot), context.boxed());
 
     warp::serve(
-        warp::get2()
-            .and(warp::path("graphiql"))
-            .and(juniper_warp::graphiql_filter("/graphql"))
-            .or(homepage)
-            .or(warp::path("graphql").and(graphql_filter)),
+        // If the path ends in "graphiql" process the request using the graphiql interface
+       warp::path("graphiql").and(juniper_warp::graphiql_filter("/graphql"))
+            // Otherwise, just process the request as normal GraphQL
+            .or(graphql_filter),
     )
-    .run(([0, 0, 0, 0], 8080));
+    .run(([192, 168, 33, 10], 8080));
 }
+*/
 
-/*
 fn main() {
     syslog::init(
         Facility::LOG_DAEMON,
@@ -78,7 +65,5 @@ fn main() {
         Subsystem::new(),
         QueryRoot,
         MutationRoot,
-    )
-    .start();
+    ).start();
 }
-*/

@@ -43,7 +43,7 @@ fn get_power_on() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -68,5 +68,5 @@ fn get_power_off() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

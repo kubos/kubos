@@ -89,9 +89,9 @@ macro_rules! process_errors {
 ///
 /// ```
 /// use kubos_service::push_err;
-/// use std::cell::RefCell;
+/// use std::sync::{Arc, RwLock};
 /// # fn main() {
-/// let master_err = RefCell::new(vec![]);
+/// let master_err = Arc::new(RwLock::new(vec![]));
 ///
 /// push_err!(master_err, "Message1".to_owned());
 /// push_err!(master_err, "Message2".to_owned());
@@ -105,7 +105,7 @@ macro_rules! process_errors {
 #[macro_export]
 macro_rules! push_err {
     ($master:expr, $err:expr) => {{
-        if let Ok(mut master_vec) = $master.try_borrow_mut() {
+        if let Ok(mut master_vec) = $master.write() {
             master_vec.push($err);
         }
     }};

@@ -14,14 +14,16 @@
 // limitations under the License.
 //
 
-use juniper::{execute, Context as JuniperContext, GraphQLType, RootNode, Variables};
+use juniper::{Context as JuniperContext, GraphQLType, RootNode};
 use kubos_system::Config;
 use log::info;
-use serde_json::json;
+//use serde_json::json;
 //use std::cell::RefCell;
 use std::sync::{Arc, RwLock};
 use std::collections::HashMap;
-use std::net::{SocketAddr, UdpSocket};
+use std::net::SocketAddr;
+
+use warp::{filters::BoxedFilter, Filter};
 
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.
@@ -102,20 +104,15 @@ impl<T> Context<T> {
 ///     schema::MutationRoot,
 /// ).start();
 /// ```
-pub struct Service<'a, Query, Mutation, S>
-where
-    Query: GraphQLType<Context = Context<S>> + Send + Sync + 'static,
-    Mutation: GraphQLType<Context = Context<S>> + Send + Sync + 'static,
+pub struct Service
 {
     config: Config,
-    root_node: RootNode<'a, Query, Mutation>,
-    context: Context<S>,
+    ///
+    pub filter: BoxedFilter<(warp::http::response::Response<std::vec::Vec<u8>>,)>
 }
 
-impl<'a, Query, Mutation, S> Service<'a, Query, Mutation, S>
-where
-    Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
-    Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+impl Service
+
 {
     /// Creates a new service instance
     ///
@@ -125,15 +122,36 @@ where
     /// `subsystem` - An instance of the subsystem struct. This one instance will be used by all queries.
     /// `query` - The root query struct holding all other GraphQL queries.
     /// `mutation` - The root mutation struct holding all other GraphQL mutations.
-    pub fn new(config: Config, subsystem: S, query: Query, mutation: Mutation) -> Self {
-        Service {
-            config,
-            root_node: RootNode::new(query, mutation),
-            context: Context {
+    pub fn new<Query, Mutation, S>(config: Config, subsystem: S, query: Query, mutation: Mutation) -> 
+        Self
+        where
+    Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+    Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+    S: Send + Sync + Clone + 'static
+    {
+        let root_node = RootNode::new(query, mutation);
+        let context = Context {
                 subsystem,
                 storage: Arc::new(RwLock::new(HashMap::new())),
-            },
+            };
+        
+        // Make the subsystem and other persistent data available to all endpoints        
+        let context = warp::any().map(move || context.clone()).boxed();
+        
+        let graphql_filter = juniper_warp::make_graphql_filter(root_node, context);
+    
+        // If the path ends in "graphiql" process the request using the graphiql interface
+        let filter = warp::path("graphiql").and(juniper_warp::graphiql_filter("/graphql"))
+            // Otherwise, just process the request as normal GraphQL
+            .or(graphql_filter)
+            // Wrap it all up nicely so we can save the filter for later
+            .unify().boxed();
+            
+        Service {
+            config,
+            filter
         }
+        
     }
 
     /// Starts the service's GraphQL/UDP server. This function runs
@@ -144,57 +162,14 @@ where
     /// The UDP interface will panic if the ip address and port provided
     /// cannot be bound (like if they are already in use), or if for some reason the socket fails
     /// to receive a message.
-    pub fn start(&self) {
+    pub fn start(self) {
         let addr = self.config.hosturl().parse::<SocketAddr>().unwrap();
-
-        let socket = UdpSocket::bind(&addr).unwrap();
-        info!("Listening on: {}", socket.local_addr().unwrap());
-
-        let mut buf = [0; 4096];
-        loop {
-            // Wait for an incoming message
-            let (size, peer) = socket
-                .recv_from(&mut buf)
-                .expect("Failed to receive a message");
-            if let Ok(query_string) = String::from_utf8(buf[0..(size)].to_vec()) {
-                //println!(
-                //  "[{}] <- [{}] {}",
-                //  peer,
-                //  socket.local_addr().unwrap(),
-                //  &query_string
-                //);
-
-                // Go process the request
-                let res = self.process(&query_string);
-
-                // And then send the response back
-                let _amt = socket.send_to(&res.as_bytes(), &peer);
-                //println!("[{}] -> [{}] {}", socket.local_addr().unwrap(), peer, &res);
-            }
-        }
-    }
-
-    /// Processes a GraphQL query
-    pub fn process(&self, query: &str) -> String {
-        match execute(
-            &query,
-            None,
-            &self.root_node,
-            &Variables::new(),
-            &self.context,
-        ) {
-            Ok((val, errs)) => {
-                let errs_msg: String = errs
-                    .into_iter()
-                    .map(|x| serde_json::to_string(&x).unwrap())
-                    .collect();
-
-                json!({
-                    "data": val,
-                    "errors": errs_msg})
-                .to_string()
-            }
-            Err(e) => json!({ "errors": e }).to_string(),
-        }
+        info!("Listening on: {}", addr);
+    
+        warp::serve(
+           self.filter
+        )
+        .run(addr);
+        
     }
 }

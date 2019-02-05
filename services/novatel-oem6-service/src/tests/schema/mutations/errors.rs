@@ -31,7 +31,7 @@ fn mutation_errors_empty() {
             "errors": []
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -50,7 +50,7 @@ fn mutation_errors_local_single() {
             }
         }"#;
 
-    service.process(&noop.to_owned());
+    request!(service, noop);
 
     let query = r#"mutation {
             errors
@@ -60,7 +60,7 @@ fn mutation_errors_local_single() {
             "errors": ["Noop: Failed to receive version info - timed out waiting on channel"]
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -81,8 +81,8 @@ fn mutation_errors_local_multiple() {
             }
         }"#;
 
-    service.process(&noop.to_owned());
-    service.process(&noop.to_owned());
+    request!(service, noop);
+    request!(service, noop);
 
     let query = r#"mutation {
             errors
@@ -92,7 +92,7 @@ fn mutation_errors_local_multiple() {
             "errors": ["Noop: Failed to receive version info - timed out waiting on channel", "Noop: UART Error, Generic Error"]
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -111,7 +111,7 @@ fn mutation_errors_device_single() {
             "errors": ["RxStatusEvent(1, 19, 1): No Valid Position Calculated"]
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -132,7 +132,7 @@ fn mutation_errors_device_multiple() {
             "errors": ["RxStatusEvent(1, 19, 1): No Valid Position Calculated", "RxStatusEvent(1, 19, 1): No Valid Position Calculated"]
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -153,7 +153,7 @@ fn mutation_errors_mixed() {
             }
         }"#;
 
-    service.process(&noop.to_owned());
+    request!(service, noop);
 
     let query = r#"mutation {
             errors
@@ -163,5 +163,5 @@ fn mutation_errors_mixed() {
             "errors": ["Noop: Failed to receive version info - timed out waiting on channel", "RxStatusEvent(1, 19, 1): No Valid Position Calculated"]
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
