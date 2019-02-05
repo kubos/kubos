@@ -15,7 +15,7 @@
 //
 
 #![deny(missing_docs)]
-//#![deny(warnings)]
+#![deny(warnings)]
 
 //! Kubos Service for interacting with a [NovAtel OEM6 High Precision GNSS Receiver](https://www.novatel.com/products/gnss-receivers/oem-receiver-boards/oem6-receivers/)
 //!
