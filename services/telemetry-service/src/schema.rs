@@ -34,6 +34,7 @@ use tar;
 
 type Context = kubos_service::Context<Subsystem>;
 
+#[derive(Clone)]
 pub struct Subsystem {
     pub database: Arc<Mutex<kubos_telemetry_db::Database>>,
 }

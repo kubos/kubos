@@ -112,7 +112,6 @@ fn test_route_response() {
     fs::remove_file(output_path).unwrap();
 
     let expected = json!({
-        "errors": "",
         "data": {
             "routedTelemetry": "output"
         }
@@ -254,7 +253,6 @@ fn test_route_compress_response() {
     fs::remove_file(&format!("{}.tar.gz", output_path)).unwrap();
 
     let expected = json!({
-        "errors": "",
         "data": {
             "routedTelemetry": "compressed-output.tar.gz"
         }

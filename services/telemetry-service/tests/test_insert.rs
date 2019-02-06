@@ -40,7 +40,6 @@ fn test_insert_auto_timestamp() {
             }
         }"#;
     let mutation_expected = json!({
-        "errors": "",
         "data": {
             "insert": {
                 "errors": "",
@@ -58,7 +57,6 @@ fn test_insert_auto_timestamp() {
             }
         }"#;
     let query_expected = json!({
-        "errors": "",
         "data": {
             "telemetry": [{
                 "subsystem": "test2",
@@ -93,7 +91,6 @@ fn test_insert_custom_timestamp() {
             }
         }"#;
     let mutation_expected = json!({
-        "errors": "",
         "data": {
             "insert": {
                 "errors": "",
@@ -112,7 +109,6 @@ fn test_insert_custom_timestamp() {
             }
         }"#;
     let query_expected = json!({
-        "errors": "",
         "data": {
             "telemetry": [{
                 "timestamp": 5.0,
@@ -142,7 +138,6 @@ fn test_insert_multi_auto() {
     let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
 
     let mutation_expected = json!({
-        "errors": "",
         "data": {
             "insert": {
                 "errors": "",
@@ -180,7 +175,6 @@ fn test_insert_multi_auto() {
             }
         }"#;
     let query_expected = json!({
-        "errors": "",
         "data": {
             "telemetry": [
             {
@@ -243,7 +237,6 @@ fn test_insert_current_timestamp() {
     );
 
     let mutation_expected = json!({
-        "errors": "",
         "data": {
             "insert": {
                 "errors": "",

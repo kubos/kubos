@@ -32,7 +32,6 @@ fn test() {
     assert_eq!(
         res,
         json!({
-            "errors": "",
             "data": {
                 "telemetry":[
                     {"timestamp":1002.0,"subsystem":"eps","parameter":"voltage","value":"3.2"},
