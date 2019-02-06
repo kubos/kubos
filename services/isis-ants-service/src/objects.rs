@@ -266,7 +266,7 @@ pub enum TestResults {
 }
 
 /// Response union for 'testHardware' mutation
-graphql_union!(TestResults: () |&self| {
+graphql_union!(TestResults: () where Scalar = <S> |&self| {
     instance_resolvers: |&_| {
         &IntegrationTestResults => match *self { TestResults::Integration(ref i) => Some(i), _ => None},
         &HardwareTestResults => match *self { TestResults::Hardware(ref h) => Some(h), _ => None},
@@ -321,73 +321,73 @@ pub struct Telemetry {
 #[derive(Debug, Default, PartialEq)]
 pub struct TelemetryNominal(pub AntsTelemetry);
 
-graphql_object!(TelemetryNominal: () |&self| {
-    field raw_temp() -> FieldResult<i32> {
-        Ok(self.0.raw_temp as i32)
+graphql_object!(TelemetryNominal: () where Scalar = <S> |&self| {
+    field raw_temp() -> i32 {
+        self.0.raw_temp as i32
     }
 
-    field uptime() -> FieldResult<i32> {
-        Ok(self.0.uptime as i32)
+    field uptime() -> i32 {
+        self.0.uptime as i32
     }
 
-    field sys_burn_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.sys_burn_active)
+    field sys_burn_active() -> bool {
+        self.0.deploy_status.sys_burn_active
     }
 
-    field sys_ignore_deploy() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.sys_ignore_deploy)
+    field sys_ignore_deploy() -> bool {
+        self.0.deploy_status.sys_ignore_deploy
     }
 
-    field sys_armed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.sys_armed)
+    field sys_armed() -> bool {
+        self.0.deploy_status.sys_armed
     }
 
-    field ant_1_not_deployed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_1_not_deployed)
+    field ant_1_not_deployed() -> bool {
+        self.0.deploy_status.ant_1_not_deployed
     }
 
-    field ant_1_stopped_time() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_1_stopped_time)
+    field ant_1_stopped_time() -> bool {
+        self.0.deploy_status.ant_1_stopped_time
     }
 
-    field ant_1_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_1_active)
+    field ant_1_active() -> bool {
+        self.0.deploy_status.ant_1_active
     }
 
-    field ant_2_not_deployed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_2_not_deployed)
+    field ant_2_not_deployed() -> bool {
+        self.0.deploy_status.ant_2_not_deployed
     }
 
-    field ant_2_stopped_time() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_2_stopped_time)
+    field ant_2_stopped_time() -> bool {
+        self.0.deploy_status.ant_2_stopped_time
     }
 
-    field ant_2_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_2_active)
+    field ant_2_active() -> bool {
+        self.0.deploy_status.ant_2_active
     }
 
-    field ant_3_not_deployed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_3_not_deployed)
+    field ant_3_not_deployed() -> bool {
+        self.0.deploy_status.ant_3_not_deployed
     }
 
-    field ant_3_stopped_time() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_3_stopped_time)
+    field ant_3_stopped_time() -> bool {
+        self.0.deploy_status.ant_3_stopped_time
     }
 
-    field ant_3_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_3_active)
+    field ant_3_active() -> bool {
+        self.0.deploy_status.ant_3_active
     }
 
-    field ant_4_not_deployed() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_4_not_deployed)
+    field ant_4_not_deployed() -> bool {
+        self.0.deploy_status.ant_4_not_deployed
     }
 
-    field ant_4_stopped_time() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_4_stopped_time)
+    field ant_4_stopped_time() -> bool {
+        self.0.deploy_status.ant_4_stopped_time
     }
 
-    field ant_4_active() -> FieldResult<bool> {
-        Ok(self.0.deploy_status.ant_4_active)
+    field ant_4_active() -> bool {
+        self.0.deploy_status.ant_4_active
     }
 
 });
@@ -414,36 +414,36 @@ pub struct AntennaStats {
     pub act_time: u16,
 }
 
-graphql_object!(TelemetryDebug: () |&self| {
-    field ant_1_activation_count() -> FieldResult<i32> {
-        Ok(self.ant1.act_count as i32)
+graphql_object!(TelemetryDebug: () where Scalar = <S> |&self| {
+    field ant_1_activation_count() -> i32 {
+        self.ant1.act_count as i32
     }
 
-    field ant_1_activation_time() -> FieldResult<i32> {
-        Ok(self.ant1.act_time as i32)
+    field ant_1_activation_time() -> i32 {
+        self.ant1.act_time as i32
     }
 
-    field ant_2_activation_count() -> FieldResult<i32> {
-        Ok(self.ant2.act_count as i32)
+    field ant_2_activation_count() -> i32 {
+        self.ant2.act_count as i32
     }
 
-    field ant_2_activation_time() -> FieldResult<i32> {
-        Ok(self.ant2.act_time as i32)
+    field ant_2_activation_time() -> i32 {
+        self.ant2.act_time as i32
     }
 
-    field ant_3_activation_count() -> FieldResult<i32> {
-        Ok(self.ant3.act_count as i32)
+    field ant_3_activation_count() -> i32 {
+        self.ant3.act_count as i32
     }
 
-    field ant_3_activation_time() -> FieldResult<i32> {
-        Ok(self.ant3.act_time as i32)
+    field ant_3_activation_time() -> i32 {
+        self.ant3.act_time as i32
     }
 
-    field ant_4_activation_count() -> FieldResult<i32> {
-        Ok(self.ant4.act_count as i32)
+    field ant_4_activation_count() -> i32 {
+        self.ant4.act_count as i32
     }
 
-    field ant_4_activation_time() -> FieldResult<i32> {
-        Ok(self.ant4.act_time as i32)
+    field ant_4_activation_time() -> i32 {
+        self.ant4.act_time as i32
     }
 });

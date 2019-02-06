@@ -18,9 +18,9 @@ use super::*;
 
 #[test]
 fn control_power_good() {
-    let mock = mock_new!();
-
-    mock.reset.return_value(Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
+    
     let service = service_new!(mock);
 
     let query = r#"mutation {
@@ -39,12 +39,13 @@ fn control_power_good() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn control_power_bad() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -64,13 +65,12 @@ fn control_power_bad() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn control_power_invalid() {
     let mock = mock_new!();
-
     let service = service_new!(mock);
 
     let query = r#"mutation {
@@ -89,5 +89,5 @@ fn control_power_invalid() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

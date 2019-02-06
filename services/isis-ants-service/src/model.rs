@@ -18,17 +18,18 @@ use failure::Error;
 use isis_ants_api::*;
 use kubos_service::{process_errors, push_err, run};
 use log::info;
-use std::cell::{Cell, RefCell};
+use std::sync::{Arc, RwLock};
 use std::str;
 
 use crate::objects::*;
 
+#[derive(Clone)]
 pub struct Subsystem {
     pub ants: Box<IAntS>,
     pub count: u8,
-    pub controller: Cell<ConfigureController>,
-    pub errors: RefCell<Vec<String>>,
-    pub last_cmd: Cell<AckCommand>,
+    pub controller: Arc<RwLock<ConfigureController>>,
+    pub errors: Arc<RwLock<Vec<String>>>,
+    pub last_cmd: Arc<RwLock<AckCommand>>,
 }
 
 impl Subsystem {
@@ -46,16 +47,17 @@ impl Subsystem {
         Ok(Subsystem {
             ants,
             count,
-            controller: Cell::new(ConfigureController::Primary),
-            errors: RefCell::new(vec![]),
-            last_cmd: Cell::new(AckCommand::None),
+            controller: Arc::new(RwLock::new(ConfigureController::Primary)),
+            errors: Arc::new(RwLock::new(vec![])),
+            last_cmd: Arc::new(RwLock::new(AckCommand::None)),
         })
     }
 
     // Queries
 
     pub fn get_config(&self) -> AntSResult<ConfigureController> {
-        Ok(self.controller.get())
+        let controller = self.controller.read().map_err(|_| AntsError::GenericError)?.clone();
+        Ok(controller)
     }
 
     pub fn get_arm_status(&self) -> AntSResult<ArmStatus> {
@@ -220,7 +222,8 @@ impl Subsystem {
         let result = run!(self.ants.configure(conv), self.errors);
 
         if result.is_ok() {
-            self.controller.set(controller);
+            let mut curr_controller = self.controller.write().map_err(|_| AntsError::GenericError)?;
+            *curr_controller = controller;
         }
 
         Ok(ConfigureHardwareResponse {
@@ -294,7 +297,7 @@ impl Subsystem {
     pub fn integration_test(&self) -> AntSResult<IntegrationTestResults> {
         let nom_result = run!(self.ants.get_system_telemetry(), self.errors);
 
-        let debug_errors: RefCell<Vec<String>> = RefCell::new(vec![]);
+        let debug_errors: RwLock<Vec<String>> = RwLock::new(vec![]);
 
         let debug = TelemetryDebug {
             ant1: AntennaStats {
@@ -323,7 +326,7 @@ impl Subsystem {
             },
         };
 
-        let debug_errors = debug_errors.into_inner();
+        let debug_errors = debug_errors.into_inner().map_err(|_| AntsError::GenericError)?;
 
         let success = nom_result.is_ok() && debug_errors.is_empty();
         let mut errors = String::new();
