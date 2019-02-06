@@ -18,6 +18,12 @@ use failure::Fail;
 
 #[derive(Debug, Fail, PartialEq)]
 pub enum AppError {
+    /// An error was encountered while interacting with the app registry
+    #[fail(display = "Registry Error: {}", err)]
+    RegistryError {
+        /// Underlying error encountered
+        err: String,
+    },
     /// An error was encountered while interacting with a file
     #[fail(display = "File Error: {}", err)]
     FileError {
