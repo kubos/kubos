@@ -32,6 +32,7 @@ pub struct CalibrateThermometer {
 }
 
 /// Model for service's subsystem
+#[derive(Clone)]
 pub struct Subsystem;
 
 impl Subsystem {

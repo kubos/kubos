@@ -17,8 +17,6 @@
 use juniper::{Context as JuniperContext, GraphQLType, RootNode};
 use kubos_system::Config;
 use log::info;
-//use serde_json::json;
-//use std::cell::RefCell;
 use std::sync::{Arc, RwLock};
 use std::collections::HashMap;
 use std::net::SocketAddr;

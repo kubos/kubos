@@ -70,7 +70,8 @@
 //!
 
 #![deny(missing_docs)]
-#![deny(warnings)]
+// TODO: THIS IS A TEMPORARY THING. DO NOT MERGE INTO MASTER
+//#![deny(warnings)]
 
 #[cfg(test)]
 #[macro_use]

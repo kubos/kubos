@@ -98,7 +98,7 @@ macro_rules! process_errors {
 ///
 /// assert_eq!(
 ///     vec!["Message1".to_owned(), "Message2".to_owned()],
-///     master_err.borrow().clone()
+///     *master_err.read().unwrap()
 /// );
 /// # }
 /// ```
@@ -123,7 +123,7 @@ macro_rules! push_err {
 /// extern crate kubos_service;
 /// use kubos_service::run;
 /// use failure::{Error, Fail};
-/// use std::cell::RefCell;
+/// use std::sync::{Arc, RwLock};
 ///
 /// #[derive(Fail, Debug)]
 /// pub enum RootError {
@@ -156,13 +156,13 @@ macro_rules! push_err {
 /// }
 ///
 /// fn main() {
-///     let master_err = RefCell::new(vec![]);
+///     let master_err = Arc::new(RwLock::new(vec![]));
 ///     let result = run!(test_func(true, "test".to_owned()), master_err);
 ///
 ///     assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
 ///     assert_eq!(
 ///         vec!["test_func (src/macros.rs:40): TopError: top, RootError: root".to_owned()],
-///         master_err.borrow().clone()
+///         *master_err.read().unwrap()
 ///     );
 /// }
 /// ```
@@ -206,7 +206,7 @@ macro_rules! run {
 #[cfg(test)]
 mod tests {
     use failure::{Error, Fail};
-    use std::cell::RefCell;
+    use std::sync::{Arc, RwLock};
 
     #[derive(Debug, Fail)]
     pub enum RootError {
@@ -268,23 +268,23 @@ mod tests {
 
     #[test]
     fn push_err() {
-        let master_err = RefCell::new(vec![]);
+        let master_err = Arc::new(RwLock::new(vec![]));
 
         push_err!(master_err, "Message".to_owned());
 
-        assert_eq!(vec!["Message".to_owned()], master_err.borrow().clone());
+        assert_eq!(vec!["Message".to_owned()], *master_err.read().unwrap());
     }
 
     #[test]
     fn push_err_mult() {
-        let master_err = RefCell::new(vec![]);
+        let master_err = Arc::new(RwLock::new(vec![]));
 
         push_err!(master_err, "Message1".to_owned());
         push_err!(master_err, "Message2".to_owned());
 
         assert_eq!(
             vec!["Message1".to_owned(), "Message2".to_owned()],
-            master_err.borrow().clone()
+            *master_err.read().unwrap()
         );
     }
 
@@ -297,24 +297,24 @@ mod tests {
 
     #[test]
     fn run_push() {
-        let master_err = RefCell::new(vec![]);
+        let master_err = Arc::new(RwLock::new(vec![]));
         let result = run!(test_func(true, "test".to_owned()), master_err);
 
         assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
         assert_eq!(
             vec!["test_func (services/kubos-service/src/macros.rs:301): TopError: top, RootError: root".to_owned()],
-            master_err.borrow().clone()
+            *master_err.read().unwrap()
         );
     }
 
     #[test]
     fn run_push_good() {
-        let master_err = RefCell::new(vec![]);
+        let master_err = Arc::new(RwLock::new(vec![]));
         let result = run!(test_func(false, "test".to_owned()), master_err);
 
         assert_eq!(result, Ok("test".to_owned()));
         let test_vec: Vec<String> = vec![];
-        assert_eq!(test_vec, master_err.borrow().clone());
+        assert_eq!(test_vec, *master_err.read().unwrap());
     }
 
 }
