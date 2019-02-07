@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <isis-imtq-api/imtq.h>
+#include <imtq.h>
 #include <cmocka.h>
 #include <errno.h>
 #include <unistd.h>

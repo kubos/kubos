@@ -225,7 +225,7 @@ typedef struct
 KRadioStatus k_radio_watchdog_kick(void);
 
 /**
- * Start a thread to kick the radio's watchdogs at an interval of (::TRXVU_WD_TIMEOUT/3) seconds
+ * Start a thread to kick the radio's watchdogs at an interval of (timeout/3) seconds
  * @return KRadioStatus `RADIO_OK` if OK, error otherwise
  */
 KRadioStatus k_radio_watchdog_start(void);
@@ -270,37 +270,37 @@ KRadioStatus k_radio_clear_beacon(void);
  * @param [in] raw Raw ADC value
  * @return Voltage in volts
  */
-inline float get_voltage(uint16_t raw) {return raw * 0.00488;}
+float get_voltage(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Current in milliamps
  */
-inline float get_current(uint16_t raw) {return raw * 0.16643964;}
+float get_current(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Temperature in degrees Celsius
  */
-inline float get_temperature(uint16_t raw) {return raw * -0.07669 + 195.6037;}
+float get_temperature(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Doppler shift in hertz
  */
-inline float get_doppler_offset(uint16_t raw) {return raw * 13.352 - 22300;}
+float get_doppler_offset(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Received signal strength power in decibel-milliwatts
  */
-inline float get_signal_strength(uint16_t raw) {return raw * 0.03 - 152;}
+float get_signal_strength(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return RF reflected power in decibel-milliwatts
  */
-inline float get_rf_power_dbm(uint16_t raw) {return 20 * log10(raw * 0.00767);}
+float get_rf_power_dbm(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return RF reflected power in milliwatts
  */
-inline float get_rf_power_mw(uint16_t raw) {return raw * raw * powf(10, -2) * 0.00005887;}
+float get_rf_power_mw(uint16_t raw);
 /**@}*/
 
 /*
@@ -364,7 +364,7 @@ KRadioStatus k_radio_get_telemetry(radio_telem * buffer, RadioTelemType type);
  */
 
 /**
- * Thread which kicks the radio's watchdogs every (::TRXVU_WD_TIMEOUT/3) seconds
+ * Thread which kicks the radio's watchdogs every (timeout/3) seconds
  */
 void * kprv_radio_watchdog_thread(void * args);
 
@@ -463,8 +463,17 @@ KRadioStatus kprv_radio_rx_watchdog_kick(void);
  */
 KRadioStatus kprv_radio_rx_reset(KRadioReset type);
 
+/**
+ * File descriptor for the radio's I2C bus
+ */
 int radio_bus;
+/**
+ * Radio transmitter properties
+ */
 trx_prop radio_tx;
+/**
+ * Radio receiver properties
+ */
 trx_prop radio_rx;
 
 /* @} */

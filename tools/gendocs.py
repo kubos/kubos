@@ -19,8 +19,6 @@ DOCS_DIRS = [
     "apis/isis-iobc-supervisor",
     "apis/isis-trxvu-api",
     "hal/kubos-hal",
-    "hal/kubos-hal-linux",
-
 ]
 
 def gendocs_xml(dir, doxyfile, version, doc_dir):
@@ -49,8 +47,8 @@ def main():
     subprocess.call("sphinx-build docs/ html/", shell=True)
     shutil.rmtree("./xml")
     
-    subprocess.call("cargo kubos -c doc -t x86-linux-native -- --no-deps", shell=True)
-    dir_util.copy_tree("target/x86_64-unknown-linux-gnu/doc", "html/rust-docs")
+    subprocess.call("cargo doc --no-deps", shell=True)
+    dir_util.copy_tree("target/doc", "html/rust-docs")
 
 if __name__ == '__main__':
     main()

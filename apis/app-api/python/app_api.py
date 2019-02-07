@@ -52,6 +52,9 @@ class Services:
                 "Service name invalid. Check config file for service names.")
         if type(query) not in [str, bytes]:
             raise TypeError("Query must be str or bytes.")
+        
+        if type(query) is str:
+            query = str.encode(query)
 
         # Lookup port/ip
         ip = self.config[service]["addr"]["ip"]
@@ -91,7 +94,7 @@ class Services:
 
         # Parse JSON response
         try:
-            response = json.loads(response)
+            response = json.loads(response.decode())
         except Exception as e:
             print("Response was unable to be parsed as JSON.")
             print("It is likely incomplete or the endpoint is misbehaving")

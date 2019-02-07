@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <gomspace-p31u-api/gomspace-p31u-api.h>
+#include <gomspace-p31u-api.h>
 #include <cmocka.h>
 #include <errno.h>
 #include <unistd.h>

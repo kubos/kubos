@@ -211,7 +211,7 @@ impl AppRegistry {
                 return Err(AppError::ParseError {
                     entity: "manifest.toml".to_owned(),
                     err: error.to_string(),
-                })
+                });
             }
         };
 
@@ -392,7 +392,7 @@ impl AppRegistry {
                 None => {
                     return Err(AppError::StartError {
                         err: format!("No active version found for UUID {}", app_uuid),
-                    })
+                    });
                 }
             }
         };

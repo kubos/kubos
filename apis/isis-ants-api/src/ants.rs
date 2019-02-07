@@ -131,8 +131,7 @@ impl IAntS for AntS {
     ///
     /// [`AntsError`]: enum.AntsError.html
     fn new(bus: &str, primary: u8, secondary: u8, ant_count: u8, timeout: u32) -> AntSResult<AntS> {
-        match unsafe { ffi::k_ants_init(bus.as_ptr(), primary, secondary, ant_count, timeout) }
-        {
+        match unsafe { ffi::k_ants_init(bus.as_ptr(), primary, secondary, ant_count, timeout) } {
             ffi::KANTSStatus::AntsOK => {
                 if timeout > 0 {
                     match unsafe { ffi::k_ants_watchdog_start() } {

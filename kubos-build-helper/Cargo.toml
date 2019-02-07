@@ -1,8 +1,9 @@
 [package]
 name = "kubos-build-helper"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 edition = "2018"
 
 [dependencies]
 glob = "0.2"
+cmake = "0.1"

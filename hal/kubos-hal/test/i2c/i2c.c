@@ -16,7 +16,7 @@
  */
 
 #include <cmocka.h>
-#include "kubos-hal/i2c.h"
+#include "i2c.h"
 
 #define TEST_I2C "/dev/i2c-1"
 #define TEST_ADDR 0x50

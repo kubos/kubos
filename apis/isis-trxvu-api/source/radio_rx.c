@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <kubos-hal/i2c.h>
-#include <isis-trxvu-api/trxvu.h>
+#include <i2c.h>
+#include <trxvu.h>
 #include <stdio.h>
 #include <string.h>
 

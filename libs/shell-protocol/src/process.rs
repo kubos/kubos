@@ -90,7 +90,7 @@ impl ProcessHandler {
                 return Err(ProtocolError::SpawnError {
                     cmd: command.to_owned(),
                     err,
-                })
+                });
             }
         };
 

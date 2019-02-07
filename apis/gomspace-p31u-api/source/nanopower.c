@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <gomspace-p31u-api/gomspace-p31u-api.h>
+#include <gomspace-p31u-api.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -655,6 +655,13 @@ KEPSStatus k_eps_watchdog_start(uint32_t interval)
 
 KEPSStatus k_eps_watchdog_stop()
 {
+    /* Check if watchdog thread has been started */
+    if (handle_watchdog == 0)
+    {
+        perror("EPS watchdog thread has not been started\n");
+        return EPS_ERROR;
+    }
+
     /* Send the cancel request */
     if (pthread_cancel(handle_watchdog) != 0)
     {
