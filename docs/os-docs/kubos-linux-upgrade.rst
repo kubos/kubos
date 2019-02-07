@@ -61,55 +61,17 @@ Installation
 
 Acquire an upgrade package from https://github.com/kubos/kubos-linux-build/releases.
 
+
 .. note::
 
     Not all releases can be installed via upgrade. Some releases contain
     changes which massively alter the system, causing a full install to be
     required instead.
 
-Load the package into a shared folder accessible by your Kubos SDK VM.
 
-Create or navigate to a Kubos SDK project. The content of the project
-does not matter; it will only be used to flash the package correctly
-onto the target.
+Transfer the package to the target system using scp::
 
-::
-
-    $ kubos init -l fakeproj
-    $ cd fakeproj
-
-Set the target to the desired Kubos Linux target type. 
-
-For example::
-
-    $ kubos target kubos-linux-isis-gcc
-
-Build the project. This does not need to complete successfully. The
-build process just brings in some files and settings that are required
-in order to flash files to the board.
-
-::
-
-    $ kubos build
-
-Use the ``kubos flash`` command to load the package onto your board. Note:
-You might need to update your config.json file with the appropriate
-login information to access your board. See the section :ref:`updating-credentials`
-for more information.
-
-::
-
-    $ kubos flash /home/vagrant/shared/kpack-{version}.itb
-
-Wait for the transfer to complete. This can take roughly 30 minutes. The
-transfer rate via serial connection is slow because a) the upgrade
-packages are large and b) it runs some CRC functions during transfer to
-ensure that the package does not become corrupted. You should see a
-progress bar indicating the time remaining for the transfer.
-
-::
-
-    Bytes Sent: 693248/1769379 BPS:8343 ETA 02:08
+   $ scp kpack-{version}.itb kubos@{target_ip}:/upgrade/
 
 Refer to the :ref:`flash-troubleshooting` section if anything goes wrong
 with the transfer.

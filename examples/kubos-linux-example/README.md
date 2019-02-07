@@ -1,8 +1,6 @@
 # Kubos Linux Example App
 
 This is a simple "Hello World!" application built on top of the [Kubos Linux Platform](https://github.com/kubos/kubos-linux-build). 
-
-This is the default application included when the `kubos init --linux` command is executed.
     
 # Resources
 

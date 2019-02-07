@@ -9,220 +9,124 @@ Kubos SDK Cheatsheet
 Creating a Project
 ------------------
 
-Run the ``kubos init -l`` command followed by the name of your project to
-bootstrap your Kubos project. This will create a new directory under
-your current working directory with your project's name and add the
-source files for a basic Kubos C project (kubos-linux-example).
+Create a folder for your project with the ``mkdir`` command followed by
+the name of your project.
 
-::
+Inside of this folder you will create three new folders: one named after
+your project, one named ``source`` and one named ``test``. This is the skeleton
+folder structure of your C project.
 
-        $ kubos init -l linux-project-name # Creates a project
+You also need to create a text file called ``CMakeLists.txt``. This is where
+the build instructions for your project will go.
 
-.. note:: 
+Here is a sample ``CMakeLists.txt`` for a library project::
 
-    Inside of the build system there are several reserved words,
-    which cannot be used as the name of the project. These are ``test``,
-    ``source``, ``include``, ``yotta_modules`` and ``yotta_targets``.
 
-The contents of your project directory should look something like this:
+        cmake_minimum_required(VERSION 3.5)
+        project(project-name VERSION 0.1.0)
 
-::
+        add_library(project-name
+          source/lib.c
+        )
 
-        $ ls
-        CONTRIBUTING LICENSE.txt module.json README source yotta_modules yotta_targets
+        target_include_directories(project-name
+          PUBLIC "${project-name_SOURCE_DIR}/project-name"
+        )
 
-Here is a quick rundown of the files that were generated:
 
-+-------------------+-------------------------------------------------------------------------------------------+
-| File/folder       | Description                                                                               |
-+===================+===========================================================================================+
-| `project-name`    | This folder is where header files live                                                    |
-+-------------------+-------------------------------------------------------------------------------------------+
-| `source`          | This folder is where source files live                                                    |
-+-------------------+-------------------------------------------------------------------------------------------+
-| `test`            | This folder is where test source files live                                               |
-+-------------------+-------------------------------------------------------------------------------------------+
-| `module.json`     | This file is yotta's module description file                                              |
-+-------------------+-------------------------------------------------------------------------------------------+
-| `yotta_modules`   | This directory holds the symlinks for the project's module dependencies                   |
-+-------------------+-------------------------------------------------------------------------------------------+
-| `yotta_targets`   | This directory holds the symlinks for the available Kubos targets                         |
-+-------------------+-------------------------------------------------------------------------------------------+
-| `CONTRIBUTING.md` | The doc outlining the process of contributing to a Kubos project                          |
-+-------------------+-------------------------------------------------------------------------------------------+
-| `LICENSE.txt`     | The software license associated with the example project                                  |
-+-------------------+-------------------------------------------------------------------------------------------+
-| `README.md`       | The readme for the example project that outlines some of the basic details of the example |
-+-------------------+-------------------------------------------------------------------------------------------+
+Here is a sample ``CMakeLists.txt`` for an executable project::
 
-Kubos uses the yotta build/module system, which is where this file
-structure comes from. You can read more about yotta
-`here <http://yottadocs.mbed.com/>`__.
+        cmake_minimum_required(VERSION 3.5)
+        project(project-name VERSION 0.1.0)
 
-.. _selecting-a-target:
+        add_executable(project-name
+          source/main.c
+        )
 
-Selecting a Target
+
+Here is a quick rundown of the files needed to start your project:
+
++-------------------+---------------------------------------------------------------------------+
+| File/folder       | Description                                                               |
++===================+===========================================================================+
+| `project-name`    | This folder is where header files live                                    |
++-------------------+---------------------------------------------------------------------------+
+| `source`          | This folder is where source files live                                    |
++-------------------+---------------------------------------------------------------------------+
+| `test`            | This folder is where test source files live                               |
++-------------------+---------------------------------------------------------------------------+
+| `CMakeLists.txt`  | This file contains the CMake build configuration                          |
++-------------------+---------------------------------------------------------------------------+
+
+Kubos uses the CMake build system, along with our own folder conventions, for C projects.
+ You can read more about CMake `here https://cmake.org/cmake-tutorial/`__.
+
+Building a Project
 ------------------
 
-Kubos needs to know which target you intend to build for so it can
+To build a Kubos C project, the ``CMake`` build mechanism needs to be invoked.
+
+First a folder will be created to store the build artifacts::
+
+        $ mkdir build
+        $ cd build
+
+Next ``CMake`` will be called and told where to find the build instructions::
+
+        $ cmake ..
+
+Lastly ``make`` will be called to execute the build setup by ``Cmake``::
+
+        $ make
+
+All build artifacts will be generated in the ``build`` folder.
+If the project is an executable then the binary will be named ``project-name``.
+If the project is a library then the library file will be named ``libproject-name.a``.
+
+To pick up on any changes to the project`s CMake files run ``cmake ..``
+again followed by ``make``.
+
+To build a project from scratch run ``make clean`` to remove all prior
+build artifacts followed by ``make``.
+
+.. _cross-compiling:
+
+Cross Compiling
+---------------
+
+CMake needs to know which target you intend to build for so it can
 select the proper cross compiler. Kubos currently supports several
 different targets:
 
-+------------+------------------------------+---------------------------------------------------+
-| Vendor     | Kubos Target                 | Description                                       |
-+============+==============================+===================================================+
-| ISIS       | kubos-linux-isis-gcc         | ISIS-OBC                                          |
-+------------+------------------------------+---------------------------------------------------+
-| Pumpkin    | kubos-linux-pumpkin-mbm2-gcc | Pumpkin Motherboard Module 2                      |
-+------------+------------------------------+---------------------------------------------------+
-| Beaglebone | kubos-linux-beaglebone-gcc   | Beaglebone Black, Rev. C                          |
-+------------+------------------------------+---------------------------------------------------+
-| (Vagrant)  | x86-linux-native             | Native target for the Kubos Vagrant image         |
-+------------+------------------------------+---------------------------------------------------+
++------------+-----------------------------------------------+---------------------------------------------------+
+| Vendor     | Toolchain                                     | Description                                       |
++============+===============================================+===================================================+
+| ISIS       | /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc | ISIS-OBC                                          |
++------------+-----------------------------------------------+---------------------------------------------------+
+| Pumpkin    | /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc  | Pumpkin Motherboard Module 2                      |
++------------+-----------------------------------------------+---------------------------------------------------+
+| Beaglebone | /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc  | Beaglebone Black, Rev. C                          |
++------------+-----------------------------------------------+---------------------------------------------------+
+| (Vagrant)  | /usr/bin/gcc                                  | Native x86 Linux                                  |
++------------+-----------------------------------------------+---------------------------------------------------+
 
-To select a target, use the ``kubos target`` command with the appropriate value from the
-"Kubos Target" column. 
+By default CMake will compile with the local ``gcc`` toolchain found on the PATH.
+If you are working inside of the SDK VM then the native target is x86 Linux.
+
+If you would like to cross-compile for one of the supported embedded boards then
+CMake will need to be informed about which cross-compiling toolchain to use. CMake
+looks at two environment variables when compiling to determine which toolchain it should use.
+These variables are ``CC`` and ``CXX``.
 
 For example
 
 ::
 
-        $ kubos target kubos-linux-beaglebone-gcc
+       $ mkdir build && cd build
+       $ export CC=/usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc
+       $ export CXX=/usr/bin/bbb_toolchain/usr/bin/arm-linux-g++
+       $ cmake .. && make
 
-To see all of the available targets run:
-
-::
-
-        $ kubos target --list
-
-Building a Project
-------------------
-
-To build a Kubos project, all we need to do is run the ``kubos build``
-command. The Kubos CLI will read the module.json file, determine what
-libraries are needed, and build them.
-
-Basic build command:
-
-::
-
-        $ kubos build
-
-Build with verbose output:
-
-::
-
-        $ kubos build -- -v
-
-.. note::
-
-    The Kubos CLI commands have their own specific arguments that
-    can be used. There are also global arguments (like ``--verbose`` or
-    ``-v``). A double hyphen ``--`` separates the command specific arguments
-    from the global arguments
-
-Clean command:
-
-::
-
-        $ kubos clean
-
-To build a project from scratch run ``kubos clean`` to remove all
-remaining files generated for previous builds followed by
-``kubos build``.
-
-Linking Local Modules and Targets
----------------------------------
-
-The Kubos SDK comes with all of the latest Kubos modules and targets
-pre-packaged and pre-linked. If a module or target needs to be modified
-locally, the CLI comes with the ability to link that local module into
-the build process.
-
-Modules and Targets
-^^^^^^^^^^^^^^^^^^^
-
-Modules are groups of source code that implement a feature or unit of
-functionality. Kubos operating systems are split into a number of
-modules. An example of a Kubos module is the `Kubos
-HAL <https://github.com/kubos/kubos/tree/master/hal/kubos-hal>`__
-
-Targets are groups of configuration files that allow toolchains to build
-and cross-compile modules for specific hardware targets. One example of
-a Kubos target is the `Beaglebone Black
-Target <https://github.com/kubos/kubos/tree/master/targets/target-beaglebone-gcc>`__
-
-Linking Modules
-^^^^^^^^^^^^^^^
-
-Links are made in two steps - first globally, then locally.
-
-By linking a module globally you are making it available to link into
-any of your projects. By linking the module locally you are including
-the linked module in your build.
-
--  To link a module globally:
-
-   ::
-
-       $ cd .../<module-directory>/
-       $ kubos link
-
--  To link a module that is already globally linked into a project:
-
-   ::
-
-       $ cd .../<project-directory>/
-       $ kubos link <module name>
-
-The next time your project is built it will use your local development
-module, rather than the packaged version.
-
-.. note:: 
-
-    Use ``kubos list`` to see the modules and depencies being used by 
-    your project as well as the directories they are being referenced from
-
-Linking Targets
-^^^^^^^^^^^^^^^
-
-Custom or modified targets are linked in a very similar way to modules.
-
-Links are made in two steps - first globally, then locally.
-
-By linking a target globally you are making it available to link into
-any of your projects. By linking the target locally you are now able to
-use the linked target in your build.
-
--  To link a target globally:
-
-   ::
-
-       $ cd .../<target-directory>/
-       $ kubos link-target
-
--  To link a target that is already globally linked into a project:
-
-   ::
-
-       $ cd .../<project-directory>/
-       $ kubos link-target <target name>
-
--  You may now use the standard target command to select the newly
-   linked target:
-
-   ::
-
-       $ cd ../<project-directory>/
-       $ kubos target <target name>
-
-The next time your project is built it will use your local development
-target, rather than the packaged version.
-
-.. note:: 
-
-    Running ``kubos target`` will show you whether you are using a
-    local or a linked copy of a target
 
 Flashing your Project
 ---------------------
@@ -235,41 +139,3 @@ Kubos SDK box.
    ::
 
        $ lsusb
-
-Run the flash command
-
-   ::
-
-       $ kubos flash
-
-.. note:: 
-
-    If your current user does not have read/write permission to your
-    hardware device you may need to run this command as root
-
-::
-
-        $ sudo kubos flash
-        
-.. todo::
-
-    Debugging your Project
-    //----------------------
-    
-    A gdb server must be started to allow your gdb instance to connect and
-    debug directly on your hardware device. After building your project with
-    ``kubos build`` the kubos-cli can start a gdb server and gdb instance
-    for you.
-    
-    Start a gdb server and instance: **Note:** This may need to run as root
-    depending on your USB device permissions
-    
-    ::
-    
-            $ kubos debug
-    
-    If the debug command is successful you will be prompted with a gdb
-    instance attached to your device and ready to debug!
-    
-    **Note:** The ``kubos debug`` command is not yet implemented for Kubos
-    Linux projects.

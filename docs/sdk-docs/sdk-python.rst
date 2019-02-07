@@ -28,13 +28,30 @@ There are currently two ways to add Python programs to a system running Kubos Li
     - See the :ref:`SysAdmin docs <sysadmin>` for more information on
       building Kubos Linux.
 
-- Add individual Python files on the fly by flashing them to an attached hardware target
+- Add individual Python files on the fly by transferring them to an attached hardware target
 
-    - Navigate to an existing example Kubos module like ``kubos-linux-example``.
-    - Run ``kubos linux -a``.
-    - Run ``kubos -t [target] build`` using the same target you cross-compiled with.
-    - Run ``kubos flash /absolute/path/to/python/file``. You must use the absolute
-      path to the Python file you'd like to flash. Relative paths will not work.
+Via Ethernet
+~~~~~~~~~~~~
+
+Python project files can be transferred to the target OBC :ref:`via ethernet <ethernet>` for
+targets which have ethernet enabled.
+
+Binaries may be transferred to any location on the target board, however, they should be copied
+to `/home/system/usr/bin` if you would like them to be automatically accessible via the system PATH.
+
+Via Serial
+~~~~~~~~~~
+
+Python project files can also be transferred to the target OBC :ref:`via slip <slip>` for
+targets which only have serial connectivity.
+
+If you would like the transferred binary to be accessible from any location in the system,
+it will then need to be manually transferred to a location the system PATH:
+
+1. Run ``minicom kubos`` from inside of the Vagrant box.
+2. Enter the username ``kubos`` and the password ``Kubos123``.
+3. Navigate to the folder ``/home/system/usr/local/bin``.
+4. Run ``mv {binary-name} ../../bin``.
 
 Running on Target
 -----------------

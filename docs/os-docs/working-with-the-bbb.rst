@@ -399,18 +399,13 @@ All system-related `/home/` paths will reside here.
 /home/system/usr/bin
 ^^^^^^^^^^^^^^^^^^^^
 
-All user-created applications will be loaded into this folder during the
-``kubos flash`` process. The directory is included in the system's PATH,
-so applications can then be called directly from anywhere, without
-needing to know the full file path.
+This directory is included in the system's PATH, so applications placed
+here can be called directly from anywhere, without needing to know the
+full file path.
 
 /home/system/usr/local/bin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-All user-created non-application files will be loaded into this folder
-during the ``kubos flash`` process. There is currently not a way to set
-a destination folder for the ``kubos flash`` command, so if a different
-endpoint directory is desired, the files will need to be manually moved.
 
 /home/system/etc/init.d
 ^^^^^^^^^^^^^^^^^^^^^^^
