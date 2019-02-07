@@ -4,7 +4,7 @@ jobs:
     # Run for all PR commits
     rust_check_x86:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:cattest
       steps:
         - checkout
         - run: ./tools/kubos_link.py
@@ -14,7 +14,7 @@ jobs:
     # Run for all PR commits
     rust_test:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:cattest
       steps:
         - checkout
         - run: ./tools/kubos_link.py
@@ -24,7 +24,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_upload:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:cattest
       steps:
         - checkout
         - run: cargo run --bin large_upload
@@ -33,7 +33,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_download:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:cattest
       steps:
         - checkout
         - run: cargo run --bin large_download   
@@ -42,7 +42,7 @@ jobs:
     # Run for all PR commits
     non_rust_tests:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:cattest
       steps:
         - checkout
         - run: python test/integration/integration_test.py
@@ -57,7 +57,7 @@ jobs:
     # Run when code is merged into master
     deploy:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:cattest
       steps:
         - checkout
         - run: pip install semantic-version
@@ -67,7 +67,7 @@ jobs:
     # Run when code is merged into master or when an official release tag is generated
     docs:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:cattest
       steps:
         - checkout
         - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
