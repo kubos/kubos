@@ -15,8 +15,12 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: ./tools/kubos_link.py
-        - run: CC=/usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc cargo kubos -c check -t  kubos-linux-pumpkin-mbm2-gcc
+        - run:
+            name: Cargo check for BBB
+            command: cargo check --target arm-unknown-linux-gnueabihf
+            environment:
+              CC: /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc
+              CXX: /usr/bin/bbb_toolchain/usr/bin/arm-linux-g++
 
     # Run for all PR commits
     rust_check_iobc:
@@ -24,8 +28,12 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: ./tools/kubos_link.py
-        - run: CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo kubos -c check -t kubos-linux-isis-gcc
+        - run:
+            name: Cargo check for iOBC
+            command: cargo check --target armv5te-unknown-linux-gnueabi
+            environment:
+              CC: /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc
+              CXX: /usr/bin/iobc_toolchain/usr/bin/arm-linux-g++
 
     # Rust testing
     # Run for all PR commits
@@ -61,7 +69,6 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: python -m tools.ci.lint
         - run: python3 tools/ci_c.py
         - run: python hal/python-hal/i2c/test_i2c.py
         - run: cd hal/python-hal/i2c; python setup.py install
