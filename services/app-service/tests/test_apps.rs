@@ -19,7 +19,6 @@ use kubos_app::ServiceConfig;
 use serde_json::json;
 use std::panic;
 use std::path::Path;
-use std::time::Duration;
 
 mod utils;
 pub use crate::utils::*;
@@ -56,10 +55,9 @@ fn setup_apps(registry_dir: &Path) {
 }
 
 fn apps_query(config: ServiceConfig, query: &str) -> Vec<serde_json::Value> {
-    let result = kubos_app::query(&config, query, Some(Duration::from_secs(5)));
-    assert!(result.is_ok());
-
-    let apps = result.unwrap()["apps"].clone();
+    let result = send_query(config, query);
+    
+    let apps = result["apps"].clone();
     assert!(apps.is_array());
 
     let mut apps_sorted = apps.as_array().unwrap().clone();

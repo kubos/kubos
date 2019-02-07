@@ -47,7 +47,7 @@ fn empty_apps_dir_empty_reg() {
     let registry_dir = TempDir::new().unwrap();
 
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
-    assert_eq!(registry.entries.borrow().len(), 0);
+    assert_eq!(registry.entries.lock().unwrap().len(), 0);
 }
 
 #[test]
