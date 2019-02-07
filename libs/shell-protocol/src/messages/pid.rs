@@ -27,7 +27,7 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "No pid found".to_owned(),
-            })
+            });
         }
     }) as u32;
 

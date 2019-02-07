@@ -17,7 +17,7 @@
  * ANTS Integration Test for the ISIS iMTQ
  */
 
-#include <isis-ants-api/ants-api.h>
+#include <ants-api.h>
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>

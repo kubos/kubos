@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# Link in yotta modules for those rust
-# modules that need them
-# Needed to run cargo kubos -c doc
-./tools/kubos_link.py
+set -e
 
 latest_tag=`git tag --sort=-creatordate --sort=-v:refname| head -n 1`
 

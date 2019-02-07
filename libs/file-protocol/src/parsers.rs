@@ -26,7 +26,7 @@ pub fn parse_channel_id(message: &Value) -> Result<u32, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "Data not an array".to_owned(),
-            })
+            });
         }
     };
 
@@ -54,7 +54,7 @@ pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "Data not an array".to_owned(),
-            })
+            });
         }
     };
 
@@ -116,7 +116,7 @@ pub fn parse_cleanup_request(
         if op == "cleanup" {
             match pieces.next() {
                 Some(Value::String(hash)) => {
-                    return Ok(Some(Message::Cleanup(channel_id, Some(hash.to_owned()))))
+                    return Ok(Some(Message::Cleanup(channel_id, Some(hash.to_owned()))));
                 }
                 Some(Value::Null) => return Ok(Some(Message::Cleanup(channel_id, None))),
                 None => return Ok(Some(Message::Cleanup(channel_id, None))),
@@ -149,7 +149,7 @@ pub fn parse_export_request(
                     return Err(ProtocolError::InvalidParam(
                         "export".to_owned(),
                         "hash".to_owned(),
-                    ))
+                    ));
                 }
             };
 
@@ -161,7 +161,7 @@ pub fn parse_export_request(
                     return Err(ProtocolError::InvalidParam(
                         "export".to_owned(),
                         "path".to_owned(),
-                    ))
+                    ));
                 }
             };
 
@@ -198,7 +198,7 @@ pub fn parse_import_request(
                     return Err(ProtocolError::InvalidParam(
                         "export".to_owned(),
                         "hash".to_owned(),
-                    ))
+                    ));
                 }
             };
             return Ok(Some(Message::ReqTransmit(
@@ -226,7 +226,7 @@ pub fn parse_success_receive(
                     return Err(ProtocolError::InvalidParam(
                         "success_receive".to_owned(),
                         "hash".to_owned(),
-                    ))
+                    ));
                 }
             };
 
@@ -255,7 +255,7 @@ pub fn parse_success_transmit(
                     return Err(ProtocolError::InvalidParam(
                         "success".to_owned(),
                         "hash".to_owned(),
-                    ))
+                    ));
                 }
             };
 
@@ -267,7 +267,7 @@ pub fn parse_success_transmit(
                     return Err(ProtocolError::InvalidParam(
                         "success".to_owned(),
                         "num chunks".to_owned(),
-                    ))
+                    ));
                 }
             };
 
@@ -305,7 +305,7 @@ pub fn parse_bad_op(
                 return Err(ProtocolError::InvalidParam(
                     "failure".to_owned(),
                     "error".to_owned(),
-                ))
+                ));
             }
         };
 

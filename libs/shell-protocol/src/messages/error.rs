@@ -27,7 +27,7 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "No message found".to_owned(),
-            })
+            });
         }
     };
 

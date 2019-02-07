@@ -16,7 +16,7 @@
  */
 
 #include <cmocka.h>
-#include <isis-trxvu-api/trxvu.h>
+#include <trxvu.h>
 
 #define TX_SIZE 100
 #define RX_SIZE 100

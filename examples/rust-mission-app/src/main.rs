@@ -88,7 +88,7 @@ impl AppHandler for MyApp {
 
         info!("OnCommand logic called");
 
-        let subcommand = matches.opt_str("s").unwrap_or("".to_owned());
+        let subcommand = matches.opt_str("s").unwrap_or_else(|| "".to_owned());
 
         match subcommand.as_ref() {
             "safemode" => {

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "isis-iobc-supervisor/supervisor.h"
+#include "supervisor.h"
 
 int main(int argc, char ** argv)
 {

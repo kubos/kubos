@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * EPS Integration Test for the ISIS iMTQ
+ * Integration Test for the Gomspace P31u
  */
 
-#include <gomspace-p31u-api/gomspace-p31u-api.h>
+#include <gomspace-p31u-api.h>
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>
@@ -261,7 +261,6 @@ KEPSStatus system_config()
     }
 
     /* Get current config */
-    eps_system_config_t current_config = {0};
     status = k_eps_get_system_config(&current_config);
     if (status != EPS_OK)
     {
@@ -591,7 +590,7 @@ int main(int argc, char * argv[])
 
     KEPSStatus status;
     KEPSConf config = {
-            .bus = K_I2C1,
+            .bus = "/dev/i2c-0",
             .addr = 0x02
     };
 
@@ -621,13 +620,13 @@ int main(int argc, char * argv[])
     status |= get_heater();
     status |= set_heater();
 
-    status |= test_battery_config();
+    status |= battery_config();
 
     const struct timespec INTERTEST_DELAY
         = {.tv_sec = 0, .tv_nsec = 20000000 };
     nanosleep(&INTERTEST_DELAY, NULL);
 
-    status |= test_system_config();
+    status |= system_config();
 
     nanosleep(&INTERTEST_DELAY, NULL);
 

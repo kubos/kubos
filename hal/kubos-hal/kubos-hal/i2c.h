@@ -28,7 +28,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * IOCTL master role value
+ */
 #define I2C_MASTER  0
+/**
+ * IOCTL slave role value
+ */
 #define I2C_SLAVE   1
 
 /**
@@ -64,6 +70,7 @@ k_i2c_init("/dev/i2c-1", &bus);
  * @endcode
  *
  * @param device I2C device name to initialize
+ * @param fp Pointer to storage for file descriptor of I2C bus
  * @return KI2CStatus I2C_OK on success, otherwise return I2C_ERROR_*
  */
 KI2CStatus k_i2c_init(char * device, int * fp);
@@ -85,7 +92,7 @@ k_i2c_read(bus, addr, buffer, 10);
 // shut down bus
 k_i2C_terminate(bus);
  * @endcode
- * @param i2c I2C bus to terminate
+ * @param fp Pointer to file descriptor of I2C bus which should be closed
  */
 void k_i2c_terminate(int * fp);
 

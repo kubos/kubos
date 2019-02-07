@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <isis-ants-api/ants-api.h>
-#include <kubos-hal/i2c.h>
+#include <ants-api.h>
+#include <i2c.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
@@ -494,6 +494,12 @@ KANTSStatus k_ants_watchdog_start()
 
 KANTSStatus k_ants_watchdog_stop()
 {
+    if (handle_watchdog == 0)
+    {
+      perror("AntS watchdog thread has not been started");
+      return ANTS_ERROR;
+    }
+
     /* Send the cancel request */
     if (pthread_cancel(handle_watchdog) != 0)
     {

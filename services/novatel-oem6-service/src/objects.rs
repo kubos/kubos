@@ -469,7 +469,7 @@ pub struct ReceiverStatus(pub ReceiverStatusFlags);
 
 graphql_scalar!(ReceiverStatus {
    resolve(&self) -> Value {
-        Value::list(self.0.to_vec().iter().map(|flag| Value::string(flag)).collect())
+        Value::list(self.0.to_vec().iter().map(Value::string).collect())
     }
 
     // The macro requires that we have this function,

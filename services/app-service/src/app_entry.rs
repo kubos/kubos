@@ -86,7 +86,7 @@ impl AppRegistryEntry {
                 return Err(AppError::ParseError {
                     entity: "app entry".to_owned(),
                     err: error.to_string(),
-                })
+                });
             }
         };
 

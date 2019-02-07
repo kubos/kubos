@@ -1,6 +1,15 @@
 Kubos Changelog
 ===============
 
+v1.12.0 - Feb 1 2019
+--------------------
+
+- Updated all Python code to be compatible with Python3.5
+- `Updated the Python App API doc to be more verbose <https://docs.kubos.com/1.11.0/app-docs/python-app-api.html>`__
+- `Updated the C HAL to directly use Linux conventions <https://docs.kubos.com/1.11.0/apis/kubos-hal/i2c-hal/c-i2c/c-i2c.html>`__
+- Removed CSP from the code base
+- Removed remaining usage of yotta configuration constants
+
 v1.11.0 - Jan 18 2019
 ---------------------
 
