@@ -7,6 +7,7 @@ MAINTAINER catherine@kubos.com, ryan@kubos.com
 RUN apt-get update -y
 
 RUN apt-get upgrade -y python2.7
+RUN apt-get install -y pkg-config
 RUN apt-get install -y build-essential 
 RUN apt-get install -y python-setuptools build-essential 
 RUN apt-get install -y git
