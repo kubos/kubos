@@ -42,7 +42,7 @@ jobs:
         - image: kubos/kubos-dev:cattest
       steps:
         - checkout
-        - run: cargo test
+        - run: cargo test -j 8
 
     # Rust testing - large upload test
     # Run for all PR commits
