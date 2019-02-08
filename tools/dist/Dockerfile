@@ -14,6 +14,7 @@ RUN apt-get install -y git
 RUN apt-get install -y cmake
 RUN apt-get install -y unzip wget
 RUN apt-get install -y sqlite3 libsqlite3-dev
+RUN apt-get install -y libssl-dev
 
 #do the pip setup and installation things
 RUN easy_install pip
