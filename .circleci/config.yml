@@ -4,7 +4,7 @@ jobs:
     # Run for all PR commits
     rust_check_x86:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo check
@@ -12,12 +12,12 @@ jobs:
     # Run for all PR commits
     rust_check_mbm2:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run:
             name: Cargo check for BBB
-            command: PKG_CONFIG_ALLOW_CROSS=1 cargo check --target arm-unknown-linux-gnueabihf
+            command: cargo check --target arm-unknown-linux-gnueabihf
             environment:
               CC: /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc
               CXX: /usr/bin/bbb_toolchain/usr/bin/arm-linux-g++
@@ -25,12 +25,12 @@ jobs:
     # Run for all PR commits
     rust_check_iobc:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run:
             name: Cargo check for iOBC
-            command: PKG_CONFIG_ALLOW_CROSS=1 cargo check --target armv5te-unknown-linux-gnueabi
+            command: cargo check --target armv5te-unknown-linux-gnueabi
             environment:
               CC: /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc
               CXX: /usr/bin/iobc_toolchain/usr/bin/arm-linux-g++
@@ -39,7 +39,7 @@ jobs:
     # Run for all PR commits
     rust_test:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo test -j 8
@@ -48,7 +48,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_upload:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo run --bin large_upload
@@ -57,7 +57,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_download:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo run --bin large_download   
@@ -66,20 +66,20 @@ jobs:
     # Run for all PR commits
     non_rust_tests:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: python3 tools/ci_c.py
-        - run: python3 hal/python-hal/i2c/test_i2c.py
-        - run: cd hal/python-hal/i2c; python3 setup.py install
-        - run: cd apis/pumpkin-mcu-api; python3 test_mcu_api.py
-        - run: cd apis/app-api/python; python3 test_app_api.py
+        - run: python hal/python-hal/i2c/test_i2c.py
+        - run: cd hal/python-hal/i2c; python setup.py install
+        - run: cd apis/pumpkin-mcu-api; python test_mcu_api.py
+        - run: cd apis/app-api/python; python test_app_api.py
 
     # Create and push new git version tag (n.n.n+{new build number})
     # Run when code is merged into master
     deploy:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: pip install semantic-version
@@ -89,7 +89,7 @@ jobs:
     # Run when code is merged into master or when an official release tag is generated
     docs:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
