@@ -17,7 +17,7 @@ jobs:
         - checkout
         - run:
             name: Cargo check for BBB
-            command: cargo check --target arm-unknown-linux-gnueabihf
+            command: PKG_CONFIG_ALLOW_CROSS=1 cargo check --target arm-unknown-linux-gnueabihf
             environment:
               CC: /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc
               CXX: /usr/bin/bbb_toolchain/usr/bin/arm-linux-g++
@@ -30,7 +30,7 @@ jobs:
         - checkout
         - run:
             name: Cargo check for iOBC
-            command: cargo check --target armv5te-unknown-linux-gnueabi
+            command: PKG_CONFIG_ALLOW_CROSS=1 cargo check --target armv5te-unknown-linux-gnueabi
             environment:
               CC: /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc
               CXX: /usr/bin/iobc_toolchain/usr/bin/arm-linux-g++
