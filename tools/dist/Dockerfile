@@ -1,32 +1,28 @@
-# kubos/kubos-dev:0.1.8
+# kubos/kubos-dev:0.1.14
 
 FROM phusion/baseimage:0.9.22
 
-MAINTAINER kyle@kubos.co
-
-RUN add-apt-repository -y ppa:george-edison55/cmake-3.x
+MAINTAINER catherine@kubos.com, ryan@kubos.com
 
 RUN apt-get update -y
 
-RUN apt-get upgrade -y python2.7
-RUN apt-get install -y build-essential libssl-dev libffi-dev libhidapi-hidraw0 clang
-RUN apt-get install -y python-setuptools build-essential ninja-build python-dev libffi-dev libssl-dev
+RUN apt-get upgrade -y python3.5
+RUN apt-get install -y pkg-config
+RUN apt-get install -y build-essential 
+RUN apt-get install -y python-setuptools build-essential 
 RUN apt-get install -y git
 RUN apt-get install -y cmake
 RUN apt-get install -y unzip wget
 RUN apt-get install -y sqlite3 libsqlite3-dev
+RUN apt-get install -y libssl-dev
 
 #do the pip setup and installation things
 RUN easy_install pip
-# Need to install pip<v10 due to this issue: https://github.com/ARMmbed/yotta/issues/835
-# Forcibly controlling version until this is resolved
-RUN pip install pip==9.0.3
+# Set up pip for Python3.5
+RUN apt-get install -y python3-pip
 
 #Kubos Linux setup
 RUN echo "Installing Kubos Linux Toolchain"
-
-RUN apt-get install -y minicom
-RUN apt-get install -y libc6-i386 lib32stdc++6 lib32z1
 
 RUN wget https://s3.amazonaws.com/kubos-world-readable-assets/iobc_toolchain.tar.gz
 RUN tar -xf ./iobc_toolchain.tar.gz -C /usr/bin
@@ -36,16 +32,10 @@ RUN wget https://s3.amazonaws.com/kubos-world-readable-assets/bbb_toolchain.tar.
 RUN tar -xf ./bbb_toolchain.tar.gz -C /usr/bin
 RUN rm ./bbb_toolchain.tar.gz
 
-RUN pip install --upgrade setuptools
-RUN pip install -r https://raw.githubusercontent.com/kubos/kubos-cli/master/requirements.txt
-RUN pip install git+https://github.com/kubos/kubos-cli
-
-RUN mkdir -p /usr/local/lib/yotta_modules
-RUN mkdir -p /usr/local/lib/yotta_targets
-RUN mkdir -p /home/vagrant/.kubos
-
 # Setup Python package dependencies
-RUN pip install toml
+RUN pip3 install toml
+RUN pip3 install mock
+RUN pip3 install responses
 
 # Setup rust stuff
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
