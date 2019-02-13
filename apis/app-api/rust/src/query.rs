@@ -17,7 +17,6 @@
 use failure::format_err;
 use kubos_system::Config as ServiceConfig;
 use serde_json;
-use std::net::UdpSocket;
 use std::time::Duration;
 
 /// The result type used by `query`
@@ -79,19 +78,23 @@ pub fn query(
     query: &str,
     timeout: Option<Duration>,
 ) -> AppResult<serde_json::Value> {
-    let socket = UdpSocket::bind("0.0.0.0:0")?;
-    socket.connect(config.hosturl())?;
-    socket.send(query.as_bytes())?;
 
-    // Allow the caller to set a read timeout on the socket
-    socket.set_read_timeout(timeout).unwrap();
+    let client = match timeout {
+        Some(time) => reqwest::Client::builder().timeout(time).build()?,
+        None => reqwest::Client::builder().build()?
+    };
 
-    let mut buf = [0; 4096];
-    let (amt, _) = socket.recv_from(&mut buf)?;
+    let uri = format!("http://{}", config.hosturl());
 
-    let v: serde_json::Value = serde_json::from_slice(&buf[0..(amt)])?;
+    let mut map = ::std::collections::HashMap::new();
+    map.insert("query", query);
 
-    if let Some(errs) = v.get("errors") {
+    let response: serde_json::Value = client.post(&uri)
+        .json(&map)
+        .send()?
+        .json()?;
+
+    if let Some(errs) = response.get("errors") {
         if errs.is_string() {
             let errs_str = errs.as_str().unwrap();
             if !errs_str.is_empty() {
@@ -109,7 +112,7 @@ pub fn query(
         }
     }
 
-    match v.get(0) {
+    match response.get(0) {
         Some(err) if err.get("message").is_some() => {
             return Err(format_err!(
                 "{}",
@@ -119,11 +122,11 @@ pub fn query(
         _ => {}
     }
 
-    match v.get("data") {
+    match response.get("data") {
         Some(result) => Ok(result.clone()),
         None => Err(format_err!(
             "No result returned in 'data' key: {}",
-            serde_json::to_string(&v).unwrap()
+            serde_json::to_string(&response).unwrap()
         )),
     }
 }

@@ -65,7 +65,7 @@ fn query_error() {
 
     let result_str = format!("{}", result);
 
-    assert_eq!(result_str, "{\"message\":\"Query failed\",\"locations\":[{\"line\":2,\"column\":13}],\"path\":[\"ping\"]}");
+    assert_eq!(result_str, "[{\"locations\":[{\"column\":13,\"line\":2}],\"message\":\"Query failed\",\"path\":[\"ping\"]}]");
 }
 
 #[test]
@@ -87,7 +87,7 @@ fn query_bad_service() {
 
     let result_str = format!("{}", result);
 
-    assert_eq!(result_str, "Connection refused (os error 111)");
+    assert_eq!(result_str, "http://127.0.0.1:8080/: an error occurred trying to connect: Connection refused (os error 111)");
 }
 
 #[test]
@@ -105,7 +105,7 @@ fn query_bad_file() {
 
     let result_str = format!("{}", result);
 
-    assert_eq!(result_str, "Connection refused (os error 111)");
+    assert_eq!(result_str, "http://127.0.0.1:8080/: an error occurred trying to connect: Connection refused (os error 111)");
 }
 
 #[test]
