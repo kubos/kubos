@@ -11,6 +11,7 @@ Mission Application API for Python Mission Applications.
 import json
 import logging
 from logging.handlers import SysLogHandler
+import requests
 import socket
 import sys
 import toml
@@ -53,15 +54,15 @@ class Services:
         if type(query) not in [str, bytes]:
             raise TypeError("Query must be str or bytes.")
         
-        if type(query) is str:
-            query = str.encode(query)
+        if type(query) is bytes:
+            query = query.decode()
 
         # Lookup port/ip
         ip = self.config[service]["addr"]["ip"]
         port = self.config[service]["addr"]["port"]
 
         # Talk to the server
-        response = self._udp_query(query, ip, port, timeout)
+        response = self._http_query(query, ip, port, timeout)
 
         # Format the response and detect errors
         (data, errors) = self._format(response, service)
@@ -73,28 +74,28 @@ class Services:
 
         return data
 
-    def _udp_query(self, query, ip, port, timeout):
-        # Set up the socket
-        sock = socket.socket(socket.AF_INET,  # Internet
-                             socket.SOCK_DGRAM)  # UDP
-        try:
-            sock.settimeout(timeout)
-            sock.bind(("", 0))  # Binds to an available port
+    def _http_query(self, query, ip, port, timeout):
 
-            # Send Query
-            sock.sendto(query, (ip, port))
+        # Service connection info
+        url = "http://{}:{}".format(ip, port)
 
-            # Wait for response (until timeout occurs)
-            response = sock.recv(UDP_BUFF_LEN)
-            return response
-        finally:
-            sock.close()
+        # Put our query in the message body as JSON
+        body = {'query':query} 
+        
+        # Send the request and wait for the response
+        response = requests.post(str.encode(url), json=body, timeout=timeout)
+        
+        # Make sure that we got a good response
+        response.raise_for_status()
+
+        # Return the good message body
+        return response.text
 
     def _format(self, response, service):
 
         # Parse JSON response
         try:
-            response = json.loads(response.decode())
+            response = json.loads(response)
         except Exception as e:
             print("Response was unable to be parsed as JSON.")
             print("It is likely incomplete or the endpoint is misbehaving")
@@ -103,14 +104,27 @@ class Services:
             raise
 
         # Check that it follows GraphQL format
-        if 'errors' not in response:
-            raise KeyError(
-                "{} Endpoint Error: ".format(service) +
-                "Response contains incorrect fields: \n{}".format(response))
+        data = ""
+        errors = ""
 
-        # Parse response according to GraphQL standard format
-        data = response['data']
-        errors = response['errors']
+        for key,value in response.items():
+            if key not in ['data', 'errors']:
+                raise KeyError(
+                    "{} Endpoint Error: ".format(service) +
+                    "Response contains incorrect fields: \n{}".format(response))
+
+        if 'errors' in response:
+            # Collect any errors
+            errors = response['errors']
+
+        if 'data' in response:
+            data = response['data']
+        else:
+            # If the 'data' field isn't returned, there *must* be at least one error message
+            if errors == "":
+                raise KeyError(
+                    "{} Endpoint Error: ".format(service) +
+                    "Response contains incorrect fields: \n{}".format(response))
 
         return (data, errors)
 
