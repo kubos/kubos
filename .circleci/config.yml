@@ -4,7 +4,7 @@ jobs:
     # Run for all PR commits
     rust_check_x86:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo check
@@ -12,7 +12,7 @@ jobs:
     # Run for all PR commits
     rust_check_mbm2:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run:
@@ -26,7 +26,7 @@ jobs:
     # Run for all PR commits
     rust_check_iobc:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run:
@@ -41,7 +41,7 @@ jobs:
     # Run for all PR commits
     rust_test:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo test -j 8
@@ -50,7 +50,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_upload:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo run --bin large_upload
@@ -59,7 +59,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_download:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: cargo run --bin large_download   
@@ -68,7 +68,7 @@ jobs:
     # Run for all PR commits
     non_rust_tests:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: python3 tools/ci_c.py
@@ -81,7 +81,7 @@ jobs:
     # Run when code is merged into master
     deploy:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: pip install semantic-version
@@ -91,7 +91,7 @@ jobs:
     # Run when code is merged into master or when an official release tag is generated
     docs:
       docker:
-        - image: kubos/kubos-dev:cattest
+        - image: kubos/kubos-dev:latest
       steps:
         - checkout
         - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
