@@ -10,6 +10,10 @@ It is highly recommended that you first read about GraphQL:
 Hardware services function mostly as a passthrough to the API, managing control of the resource.
 Each hardware service has only a single worker thread, so the hardware will not be damaged or report an incorrect state due to simultaneous conflicting transactions.
 
+In order to see the the full schema of a service, which details its available commands and telemetry
+objects, connect to the service's :ref:`GraphiQL <graphiql>` endpoint and click the "Docs" button
+in the upper-right hand corner.
+
 Queries
 -------
 
