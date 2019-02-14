@@ -39,6 +39,45 @@ We can then transfer our application file, ``my-mission-app.py``, and our manife
     
 Our application is now ready to be registered.
 
+.. _graphiql:
+
+GraphiQL
+--------
+
+All Kubos services which provide an HTTP interface have a special endpoint which can be used to
+send and receive GraphQL data via an in-browser graphical interface, GraphiQL.
+
+This graphical interface makes it easier to create and consume more lengthy GraphQL requests.
+
+To access this endpoint, make sure that your OBC is available from your host computer via an IP
+address, then open a web browser and navigate to ``http://{ip}:{port}/grapiql``.
+The ``ip`` and ``port`` parameters should match the IP address of the OBC and the port belonging to
+the service you wish to query.
+
+The resulting interface should look like this:
+
+.. figure:: ../images/graphiql.png
+
+From here, you can enter any valid GraphQL query or mutation on the left-hand side and then run
+the request by clicking the triangle button.
+The resulting JSON response will be displayed on the right-hand side:
+
+.. figure:: ../images/graphiql_ping.png
+
+Please navigate to ``http://{ip}:8000/graphiql`` in order to communicate with the applications
+service for this tutorial.
+
+.. note::
+
+    You may also send GraphQL requests by using the `curl <https://linux.die.net/man/1/curl>`__
+    facility. Requests should be sent as POST operations, specifying the GraphQL request inside the
+    body of the message under the "query" parameter. The content-type for the message should be
+    "application/json".
+    
+    For example::
+    
+        $ curl 10.0.2.20:8008 -H "Content-Type: application/json" --data "{\"query\":\"{ping}\"}"
+
 Registering
 -----------
 
@@ -93,37 +132,48 @@ The mutation can return the following fields:
           of the application which will be used when the service attempts to run it. This value should
           always be ``true`` when returned by this mutation
 
-We'll be interacting with the OBC from our SDK instance using the `netcat <https://linux.die.net/man/1/nc>`__ utility.
+We'll be interacting with the OBC from our SDK instance using the service's GraphiQL interface.
 By default, the applications service uses port 8000.
 
-Our registration process should look like this::
+Our registration mutation should look like this::
 
-    $ echo "mutation {register(path: \"/home/kubos/my-app\"){success,entry{app{uuid,name,path}}}}" | nc -uw1 10.0.2.20 8000
-    {"errors":"","data":{"register":{"success":true,"entry":{"app":{"name":"my-mission-app.py","path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py","uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"}}}}}
-
-Adding a bit of formatting, the response looks like this::
+    mutation {
+      register(path: "/home/kubos/my-app") {
+        success,
+        errors,
+        entry {
+          app {
+            uuid
+            name
+            path
+          }
+        }
+      }
+    }
+    
+The response should like this::
 
     {
-        "errors": "",
-        "data": {
-            "register": {
-                "success": true,
-                "entry": {
-                    "app": {
-                        "name":"my-mission-app.py",
-                        "path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/1.0/my-mission-app.py",
-                        "uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"
-                    }
-                }
+      "data": {
+        "register": {
+          "success": true,
+          "errors": "",
+          "entry": {
+            "app": {
+              "uuid": "5eb20cf9-3b18-4713-b03f-681f1c1ca4b5",
+              "name": "my-mission-app.py",
+              "path": "/home/system/kubos/apps/5eb20cf9-3b18-4713-b03f-681f1c1ca4b5/1.0/my-mission-app.py"
             }
+          }
         }
+      }
     }
 
 We can break down the resulting file path like so:
 
     - ``/home/system/kubos/apps`` - This is the default directory that the applications service uses to
       save all registered applications
-    - ``8052dbe9-bab1-428e-8414-fb72b4af90bc`` - This is the generated UUID of our application, which
+    - ``5eb20cf9-3b18-4713-b03f-681f1c1ca4b5`` - This is the generated UUID of our application, which
       is echoed in the ``uuid`` response field
     - ``1.0`` - Our manifest file specified that this was version 1.0 of our application
     - ``my-mission-app.py`` - Our application file
@@ -154,9 +204,23 @@ The mutation returns three fields:
 
 Using the UUID returned from our registration, our request should look like this::
 
-    $ echo "mutation {startApp(uuid: \"8052dbe9-bab1-428e-8414-fb72b4af90bc\", runLevel: \"OnCommand\"){success,pid}}" \
-    > | nc -uw1 10.0.2.20 8000
-    {"errors":"","data":{"startApp":{"success":true,"pid":501}}}
+    mutation {
+      startApp(uuid: "5eb20cf9-3b18-4713-b03f-681f1c1ca4b5", runLevel: "OnCommand") {
+        success,
+        pid
+      }
+    }
+
+And the response should look like this::
+
+    {
+      "data": {
+        "startApp": {
+          "success": true,
+          "pid": 575
+        }
+      }
+    }
 
 To verify that the app ran successfully, we'll check the contents of our log file::
 
@@ -183,8 +247,20 @@ file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
 After transferring both of the files into our remote folder, ``/home/kubos/my-app``,
 we can register the updated application using the same ``register`` mutation as before,
 except this time we'll add the ``uuid`` input parameter::
- 
-    $ echo "mutation {register(path: \"/home/kubos/my-app\", uuid: \"8052dbe9-bab1-428e-8414-fb72b4af90bc\"){success,entry{app{uuid,name,path}}}}" | nc -uw1 10.0.2.20 8000
+
+    mutation {
+      register(path: "/home/kubos/my-app", uuid: "5eb20cf9-3b18-4713-b03f-681f1c1ca4b5") {
+        success,
+        errors,
+        entry {
+          app {
+            uuid
+            name
+            path
+          }
+        }
+      }
+    }
 
 The returned UUID should match our original UUID::
 
@@ -193,11 +269,12 @@ The returned UUID should match our original UUID::
         "data": {
             "register": {
                 "success": true,
+                "errors": "",
                 "entry": {
                     "app": {
                         "name":"my-mission-app.py",
-                        "path":"/home/system/kubos/apps/8052dbe9-bab1-428e-8414-fb72b4af90bc/2.0/my-mission-app.py",
-                        "uuid":"8052dbe9-bab1-428e-8414-fb72b4af90bc"
+                        "path":"/home/system/kubos/apps/5eb20cf9-3b18-4713-b03f-681f1c1ca4b5/2.0/my-mission-app.py",
+                        "uuid":"5eb20cf9-3b18-4713-b03f-681f1c1ca4b5"
                     }
                 }
             }
@@ -260,12 +337,19 @@ We want to query the service to make sure that:
 
 Our request should look like this::
 
-    $ echo "{apps(uuid:\"8052dbe9-bab1-428e-8414-fb72b4af90bc\"){active,app{name,version}}}" | nc -uw1 10.0.2.20 8000    
+    {
+      apps(uuid: "5eb20cf9-3b18-4713-b03f-681f1c1ca4b5") {
+        active
+        app {
+          name
+          version
+        }
+      }
+    }
 
 The response should look like this::
 
     {
-        "errors": "",
         "data": {
             "apps": [
                 {
