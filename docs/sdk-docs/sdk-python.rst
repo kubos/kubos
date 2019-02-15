@@ -42,9 +42,7 @@ Running on Target
 The following steps will allow you to run Python3.5 files which have been flashed
 to a Linux target:
 
-0. Make sure the target hardware is attached to your computer via a serial cable.
-1. Run ``minicom kubos`` from inside of the Vagrant box.
-2. Enter the username ``kubos`` and the password ``Kubos123``.
-3. Navigate to the folder ``/home/system/usr/local/bin``.
-4. This folder is the default destination for flashed files. Your
-   Python files should be here. You can now run them with ``python file.py``.
+0. Make sure you can :ref:`communicate with your obc <obc-communication>`.
+1. Transfer your python script using a supported :ref:`file transfer method <file-transfer>`.
+2. Navigate to the destination folder of the transfer.
+3. Your Python files should be here. You can now run them with ``python file.py``.

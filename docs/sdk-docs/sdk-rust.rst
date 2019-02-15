@@ -93,28 +93,11 @@ Flashing
    The addition of Rust to the Kubos SDK is pretty recent and SDK tooling is
    currently undergoing revision to make the flashing process smoother!
 
-Via Ethernet
-~~~~~~~~~~~~
-
-Rust project binaries can be transferred to the target OBC :ref:`via ethernet <ethernet>` for
-targets which have ethernet enabled.
+Rust binaries can be transferred to the target OBC :ref:`via a supported file transfer
+method <file-transfer>`.
 
 Binaries may be transferred to any location on the target board, however, they should be copied
 to `/home/system/usr/bin` if you would like them to be automatically accessible via the system PATH.
-
-Via Serial
-~~~~~~~~~~
-
-Rust project binaries can also be transferred to the target OBC :ref:`via slip <slip>` for
-targets which only have serial connectivity.
-
-If you would like the transferred binary to be accessible from any location in the system,
-it will then need to be manually transferred to a location the system PATH:
-
-1. Run ``minicom kubos`` from inside of the Vagrant box.
-2. Enter the username ``kubos`` and the password ``Kubos123``.
-3. Navigate to the folder ``/home/system/usr/local/bin``.
-4. Run ``mv {binary-name} ../../bin``.
 
 Running on Target
 -----------------

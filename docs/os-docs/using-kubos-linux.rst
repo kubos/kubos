@@ -24,6 +24,8 @@ Board-Specific Documentation
 -  :doc:`working-with-the-iobc`
 -  :doc:`working-with-the-mbm2`
 
+.. _obc-communication:
+
 Communicating with an OBC
 -------------------------
 
