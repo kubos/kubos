@@ -18,6 +18,7 @@ RUN apt-get install -y libssl-dev
 
 #do the pip setup and installation things
 RUN easy_install pip
+
 # Set up pip for Python3.5
 RUN apt-get install -y python3-pip
 
