@@ -23,9 +23,9 @@ for instance if the overall purpose of the application changes and they would li
 Communicating with the Service
 ------------------------------
 
-The applications service uses the same UDP+GraphQL communication scheme as the :doc:`other services <../services/graphql>`.
+The applications service uses the same HTTP+GraphQL communication scheme as the :doc:`other services <../services/graphql>`.
 
-Users will send GraphQL queries and mutations to the service's UDP port.
+Users will send GraphQL queries and mutations to the service's HTTP listener port.
 The port number can be found in the systems configuration file in `/home/system/etc/config.toml`
 
 Querying
@@ -255,7 +255,7 @@ This file can be editted to add or modify the following fields:
 - ``[app-service.addr]``
 
     - ``ip`` - The IP address that the service will use
-    - ``port`` - The UDP port GraphQL requests should be sent to
+    - ``port`` - The port GraphQL requests should be sent to
 
 - ``[app-service]``
 

@@ -28,13 +28,13 @@ There are currently two ways to add Python programs to a system running Kubos Li
     - See the :ref:`SysAdmin docs <sysadmin>` for more information on
       building Kubos Linux.
 
-- Add individual Python files on the fly by flashing them to an attached hardware target
+- Add individual Python files on the fly by transferring them to an attached hardware target
 
-    - Navigate to an existing example Kubos module like ``kubos-linux-example``.
-    - Run ``kubos linux -a``.
-    - Run ``kubos -t [target] build`` using the same target you cross-compiled with.
-    - Run ``kubos flash /absolute/path/to/python/file``. You must use the absolute
-      path to the Python file you'd like to flash. Relative paths will not work.
+Python project files can be transferred to the target OBC :ref:`via a supported file transfer
+method <file-transfer>`.
+
+Binaries may be transferred to any location on the target board, however, they should be copied
+to `/home/system/usr/bin` if you would like them to be automatically accessible via the system PATH.
 
 Running on Target
 -----------------
@@ -42,9 +42,7 @@ Running on Target
 The following steps will allow you to run Python3.5 files which have been flashed
 to a Linux target:
 
-0. Make sure the target hardware is attached to your computer via a serial cable.
-1. Run ``minicom kubos`` from inside of the Vagrant box.
-2. Enter the username ``kubos`` and the password ``Kubos123``.
-3. Navigate to the folder ``/home/system/usr/local/bin``.
-4. This folder is the default destination for flashed files. Your
-   Python files should be here. You can now run them with ``python file.py``.
+0. Make sure you can :ref:`communicate with your obc <obc-communication>`.
+1. Transfer your python script using a supported :ref:`file transfer method <file-transfer>`.
+2. Navigate to the destination folder of the transfer.
+3. Your Python files should be here. You can now run them with ``python file.py``.
