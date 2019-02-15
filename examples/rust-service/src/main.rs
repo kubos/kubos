@@ -22,14 +22,14 @@ mod schema;
 
 use crate::model::Subsystem;
 use crate::schema::{MutationRoot, QueryRoot};
-use kubos_service::{Config, Service, Context};
+use kubos_service::{Config, Context, Service};
 use syslog::Facility;
 
 /*
 fn main() {
-    
+
     print!("Listening on 127.0.0.1:8080");
-    
+
     let context = Context {
         subsystem: Subsystem::new(),
         storage: Arc::new(RwLock::new(HashMap::new()))
@@ -37,8 +37,8 @@ fn main() {
 
     // Make the subsystem and other persistent data available to all endpoints
     let context = warp::any().map(move || context.clone());
-    
-    
+
+
     let graphql_filter = juniper_warp::make_graphql_filter(RootNode::new(QueryRoot, MutationRoot), context.boxed());
 
     warp::serve(
@@ -58,12 +58,12 @@ fn main() {
         Some("example-service"),
     )
     .unwrap();
-    
-    
+
     Service::new(
         Config::new("example-service"),
         Subsystem::new(),
         QueryRoot,
         MutationRoot,
-    ).start();
+    )
+    .start();
 }

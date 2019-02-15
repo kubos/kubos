@@ -18,8 +18,8 @@ use failure::Error;
 use isis_ants_api::*;
 use kubos_service::{process_errors, push_err, run};
 use log::info;
-use std::sync::{Arc, RwLock};
 use std::str;
+use std::sync::{Arc, RwLock};
 
 use crate::objects::*;
 
@@ -56,7 +56,11 @@ impl Subsystem {
     // Queries
 
     pub fn get_config(&self) -> AntSResult<ConfigureController> {
-        let controller = self.controller.read().map_err(|_| AntsError::GenericError)?.clone();
+        let controller = self
+            .controller
+            .read()
+            .map_err(|_| AntsError::GenericError)?
+            .clone();
         Ok(controller)
     }
 
@@ -222,7 +226,10 @@ impl Subsystem {
         let result = run!(self.ants.configure(conv), self.errors);
 
         if result.is_ok() {
-            let mut curr_controller = self.controller.write().map_err(|_| AntsError::GenericError)?;
+            let mut curr_controller = self
+                .controller
+                .write()
+                .map_err(|_| AntsError::GenericError)?;
             *curr_controller = controller;
         }
 
@@ -326,7 +333,9 @@ impl Subsystem {
             },
         };
 
-        let debug_errors = debug_errors.into_inner().map_err(|_| AntsError::GenericError)?;
+        let debug_errors = debug_errors
+            .into_inner()
+            .map_err(|_| AntsError::GenericError)?;
 
         let success = nom_result.is_ok() && debug_errors.is_empty();
         let mut errors = String::new();

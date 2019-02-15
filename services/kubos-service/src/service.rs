@@ -17,9 +17,9 @@
 use juniper::{Context as JuniperContext, GraphQLType, RootNode};
 use kubos_system::Config;
 use log::info;
-use std::sync::{Arc, RwLock};
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::sync::{Arc, RwLock};
 
 use warp::{filters::BoxedFilter, Filter};
 
@@ -102,16 +102,13 @@ impl<T> Context<T> {
 ///     schema::MutationRoot,
 /// ).start();
 /// ```
-pub struct Service
-{
+pub struct Service {
     config: Config,
     ///
-    pub filter: BoxedFilter<(warp::http::response::Response<std::vec::Vec<u8>>,)>
+    pub filter: BoxedFilter<(warp::http::response::Response<std::vec::Vec<u8>>,)>,
 }
 
-impl Service
-
-{
+impl Service {
     /// Creates a new service instance
     ///
     /// # Arguments
@@ -120,36 +117,38 @@ impl Service
     /// `subsystem` - An instance of the subsystem struct. This one instance will be used by all queries.
     /// `query` - The root query struct holding all other GraphQL queries.
     /// `mutation` - The root mutation struct holding all other GraphQL mutations.
-    pub fn new<Query, Mutation, S>(config: Config, subsystem: S, query: Query, mutation: Mutation) -> 
-        Self
-        where
-    Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
-    Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
-    S: Send + Sync + Clone + 'static
+    pub fn new<Query, Mutation, S>(
+        config: Config,
+        subsystem: S,
+        query: Query,
+        mutation: Mutation,
+    ) -> Self
+    where
+        Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+        Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+        S: Send + Sync + Clone + 'static,
     {
         let root_node = RootNode::new(query, mutation);
         let context = Context {
-                subsystem,
-                storage: Arc::new(RwLock::new(HashMap::new())),
-            };
-        
-        // Make the subsystem and other persistent data available to all endpoints        
+            subsystem,
+            storage: Arc::new(RwLock::new(HashMap::new())),
+        };
+
+        // Make the subsystem and other persistent data available to all endpoints
         let context = warp::any().map(move || context.clone()).boxed();
-        
+
         let graphql_filter = juniper_warp::make_graphql_filter(root_node, context);
-    
+
         // If the path ends in "graphiql" process the request using the graphiql interface
-        let filter = warp::path("graphiql").and(juniper_warp::graphiql_filter("/graphql"))
+        let filter = warp::path("graphiql")
+            .and(juniper_warp::graphiql_filter("/graphql"))
             // Otherwise, just process the request as normal GraphQL
             .or(graphql_filter)
             // Wrap it all up nicely so we can save the filter for later
-            .unify().boxed();
-            
-        Service {
-            config,
-            filter
-        }
-        
+            .unify()
+            .boxed();
+
+        Service { config, filter }
     }
 
     /// Starts the service's GraphQL/UDP server. This function runs
@@ -163,11 +162,7 @@ impl Service
     pub fn start(self) {
         let addr = self.config.hosturl().parse::<SocketAddr>().unwrap();
         info!("Listening on: {}", addr);
-    
-        warp::serve(
-           self.filter
-        )
-        .run(addr);
-        
+
+        warp::serve(self.filter).run(addr);
     }
 }

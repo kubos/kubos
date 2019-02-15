@@ -20,9 +20,9 @@ use super::*;
 fn integration_test_good() {
     let mut mock = mock_new!();
     mock.state = true;
-    
+
     let service = service_new!(mock);
-    
+
     let query = r#"
         mutation {
             testHardware(test: INTEGRATION) {
@@ -212,7 +212,7 @@ fn hardware_test() {
             "data": "",
             "errors": "Not Implemented",
             "success": true,
-            
+
         }
     });
 

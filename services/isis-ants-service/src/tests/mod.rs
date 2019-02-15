@@ -26,15 +26,20 @@ use std::sync::{Arc, RwLock};
 #[derive(Clone)]
 pub struct MockAntS {
     pub state: bool,
-    pub deploy_status: DeployStatus
+    pub deploy_status: DeployStatus,
 }
 
 impl IAntS for MockAntS {
-
-    fn new(_bus: &str, _primary: u8, _secondary: u8, _ant_count: u8, _timeout: u32) -> AntSResult<MockAntS> {
-        Ok(MockAntS{ 
+    fn new(
+        _bus: &str,
+        _primary: u8,
+        _secondary: u8,
+        _ant_count: u8,
+        _timeout: u32,
+    ) -> AntSResult<MockAntS> {
+        Ok(MockAntS {
             state: true,
-            deploy_status: DeployStatus::default()
+            deploy_status: DeployStatus::default(),
         })
     }
 
@@ -98,7 +103,7 @@ impl IAntS for MockAntS {
         if self.state == true {
             Ok(self.deploy_status.clone())
         } else {
-           Err(AntsError::GenericError)
+            Err(AntsError::GenericError)
         }
     }
 
@@ -126,14 +131,14 @@ impl IAntS for MockAntS {
             Err(AntsError::GenericError)
         }
     }
-	
+
     fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8> {
         if self.state == true {
             match antenna {
                 KANTSAnt::Ant1 => Ok(1),
                 KANTSAnt::Ant2 => Ok(2),
                 KANTSAnt::Ant3 => Ok(3),
-                KANTSAnt::Ant4 => Ok(4)
+                KANTSAnt::Ant4 => Ok(4),
             }
         } else {
             Err(AntsError::GenericError)
@@ -146,7 +151,7 @@ impl IAntS for MockAntS {
                 KANTSAnt::Ant1 => Ok(11),
                 KANTSAnt::Ant2 => Ok(22),
                 KANTSAnt::Ant3 => Ok(33),
-                KANTSAnt::Ant4 => Ok(44)
+                KANTSAnt::Ant4 => Ok(44),
             }
         } else {
             Err(AntsError::GenericError)
@@ -179,7 +184,7 @@ impl IAntS for MockAntS {
 
     fn passthrough(&self, _tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()> {
         if self.state == true {
-            for (i, elem) in rx_in.iter_mut().enumerate () {
+            for (i, elem) in rx_in.iter_mut().enumerate() {
                 *elem = i as u8;
             }
             Ok(())
@@ -191,7 +196,7 @@ impl IAntS for MockAntS {
 
 macro_rules! mock_new {
     () => {{
-        MockAntS::new("/dev/i2c-1", 0x30, 0x31, 4, 10).unwrap()        
+        MockAntS::new("/dev/i2c-1", 0x30, 0x31, 4, 10).unwrap()
     }};
 }
 
@@ -199,7 +204,7 @@ macro_rules! request {
     ($service:ident, $query:ident) => {{
         // Warp doesn't like control characters (ie. new line characters)
         // so we need to remove them before we send the request
-        let query = $query.replace("\n","");
+        let query = $query.replace("\n", "");
         warp::test::request()
             .header("Content-Type", "application/json")
             .method("POST")
@@ -210,9 +215,7 @@ macro_rules! request {
 
 macro_rules! wrap {
     ($result:ident) => {{
-        &json!({
-                "data": $result
-        }).to_string()
+        &json!({ "data": $result }).to_string()
     }};
 }
 
@@ -221,7 +224,6 @@ macro_rules! test {
         let res = request!($service, $query);
 
         assert_eq!(res.body(), wrap!($expected));
-        
     }};
 }
 
@@ -248,7 +250,7 @@ mod queries;
 #[test]
 fn ping() {
     let mock = mock_new!();
-    
+
     let service = service_new!(mock);
 
     let query = r#"

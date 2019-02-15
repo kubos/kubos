@@ -131,20 +131,21 @@ pub fn teardown(handle: JoinHandle<()>, sender: Sender<bool>) {
 
 pub fn do_query(service_port: Option<u16>, query: &str) -> serde_json::Value {
     let port = service_port.unwrap_or(8111);
-    
+
     let client = reqwest::Client::new();
-    
+
     let uri = format!("http://127.0.0.1:{}", port);
-    
+
     let mut map = ::std::collections::HashMap::new();
     map.insert("query", query);
-    
-    let response = client.post(&uri)
+
+    let response = client
+        .post(&uri)
         .json(&map)
         .send()
         .expect("Couldn't send request")
         .json()
         .expect("Couldn't deserialize response");
-        
+
     response
 }

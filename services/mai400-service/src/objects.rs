@@ -430,7 +430,7 @@ graphql_object!(IREHSTelem: () where Scalar = <S> |&self| {
                     flags: self.0.solution_degraded[3].to_vec()
                 }
             }
-        
+
     }
 
     field thermopile_struct_b() -> ThermopileStruct {
@@ -461,7 +461,7 @@ graphql_object!(IREHSTelem: () where Scalar = <S> |&self| {
                     flags: self.0.solution_degraded[7].to_vec()
                 }
             }
-        
+
     }
 
     field thermopiles_a() -> Vec<i32> {
