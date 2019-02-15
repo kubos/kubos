@@ -17,6 +17,7 @@
 use juniper::{FieldError, FieldResult, Value};
 use kubos_service;
 
+#[derive(Clone)]
 pub struct Subsystem;
 type Context = kubos_service::Context<Subsystem>;
 

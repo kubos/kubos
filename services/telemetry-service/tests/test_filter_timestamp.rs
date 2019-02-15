@@ -47,7 +47,6 @@ fn test_ge() {
     assert_eq!(
         ge_res,
         json!({
-            "errors": "",
             "data": {
                 "telemetry": [
                     {"value":"3.8"},
@@ -76,7 +75,6 @@ fn test_le() {
     assert_eq!(
         le_res,
         json!({
-            "errors": "",
             "data": {
                 "telemetry": [
                     {"value":"3.5"},
@@ -109,7 +107,6 @@ fn test_range() {
     assert_eq!(
         range_res,
         json!({
-            "errors": "",
             "data": {
                 "telemetry": [
                     {"value":"3.6"},
@@ -142,7 +139,6 @@ fn test_single() {
     assert_eq!(
         single_res,
         json!({
-            "errors": "",
             "data": {
                 "telemetry": [
                     {"value":"3.6"},

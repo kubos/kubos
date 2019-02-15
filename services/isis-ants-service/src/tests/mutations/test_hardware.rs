@@ -18,63 +18,17 @@ use super::*;
 
 #[test]
 fn integration_test_good() {
-    let mock = mock_new!();
-
-    let nominal = AntsTelemetry {
-        raw_temp: 15,
-        uptime: 35,
-        deploy_status: DeployStatus {
-            sys_armed: true,
-            ant_1_active: true,
-            ant_4_not_deployed: false,
-            ..Default::default()
-        },
-    };
-    mock.get_system_telemetry.return_value(Ok(nominal.clone()));
-
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant1, Ok(1));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant1, Ok(11));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant2, Ok(2));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant2, Ok(22));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant3, Ok(3));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant3, Ok(33));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant4, Ok(4));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant4, Ok(44));
+    let mut mock = mock_new!();
+    mock.state = true;
+    
     let service = service_new!(mock);
-
+    
     let query = r#"
         mutation {
             testHardware(test: INTEGRATION) {
             ... on IntegrationTestResults {
                 errors,
                 success,
-                telemetryNominal {
-                     rawTemp,
-                     uptime,
-                     sysBurnActive,
-                     sysIgnoreDeploy,
-                     sysArmed,
-                     ant1NotDeployed,
-                     ant1StoppedTime,
-                     ant1Active,
-                     ant2NotDeployed,
-                     ant2StoppedTime,
-                     ant2Active,
-                     ant3NotDeployed,
-                     ant3StoppedTime,
-                     ant3Active,
-                     ant4NotDeployed,
-                     ant4StoppedTime,
-                     ant4Active
-                },
                 telemetryDebug {
                      ant1ActivationCount,
                      ant1ActivationTime,
@@ -84,7 +38,26 @@ fn integration_test_good() {
                      ant3ActivationTime,
                      ant4ActivationCount,
                      ant4ActivationTime,
-                }
+                },
+                telemetryNominal {
+                     ant1Active,
+                     ant1NotDeployed,
+                     ant1StoppedTime,
+                     ant2Active,
+                     ant2NotDeployed,
+                     ant2StoppedTime,
+                     ant3Active,
+                     ant3NotDeployed,
+                     ant3StoppedTime,
+                     ant4Active,
+                     ant4NotDeployed,
+                     ant4StoppedTime,
+                     rawTemp,
+                     sysArmed,
+                     sysBurnActive,
+                     sysIgnoreDeploy,
+                     uptime,
+                },
             }}
         }"#;
 
@@ -92,25 +65,6 @@ fn integration_test_good() {
         "testHardware": {
             "errors": "",
             "success": true,
-            "telemetryNominal": {
-                 "rawTemp": 15,
-                 "uptime": 35,
-                 "sysBurnActive": false,
-                 "sysIgnoreDeploy": false,
-                 "sysArmed": true,
-                 "ant1NotDeployed": false,
-                 "ant1StoppedTime": false,
-                 "ant1Active": true,
-                 "ant2NotDeployed": false,
-                 "ant2StoppedTime": false,
-                 "ant2Active": false,
-                 "ant3NotDeployed": false,
-                 "ant3StoppedTime": false,
-                 "ant3Active": false,
-                 "ant4NotDeployed": false,
-                 "ant4StoppedTime": false,
-                 "ant4Active": false
-            },
             "telemetryDebug": {
                  "ant1ActivationCount": 1,
                  "ant1ActivationTime": 11,
@@ -120,33 +74,36 @@ fn integration_test_good() {
                  "ant3ActivationTime": 33,
                  "ant4ActivationCount": 4,
                  "ant4ActivationTime": 44,
-            }
+            },
+            "telemetryNominal": {
+                 "ant1Active": true,
+                 "ant1NotDeployed": false,
+                 "ant1StoppedTime": false,
+                 "ant2Active": false,
+                 "ant2NotDeployed": false,
+                 "ant2StoppedTime": false,
+                 "ant3Active": false,
+                 "ant3NotDeployed": false,
+                 "ant3StoppedTime": false,
+                 "ant4Active": false,
+                 "ant4NotDeployed": false,
+                 "ant4StoppedTime": false,
+                 "rawTemp": 15,
+                 "sysArmed": true,
+                 "sysBurnActive": false,
+                 "sysIgnoreDeploy": false,
+                 "uptime": 35,
+            },
         }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn integration_test_bad() {
-    let mock = mock_new!();
-
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant1, Ok(1));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant1, Ok(11));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant2, Ok(2));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant2, Ok(22));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant3, Ok(3));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant3, Ok(33));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant4, Ok(4));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant4, Ok(44));
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -156,25 +113,6 @@ fn integration_test_bad() {
             ... on IntegrationTestResults {
                 errors,
                 success,
-                telemetryNominal {
-                     rawTemp,
-                     uptime,
-                     sysBurnActive,
-                     sysIgnoreDeploy,
-                     sysArmed,
-                     ant1NotDeployed,
-                     ant1StoppedTime,
-                     ant1Active,
-                     ant2NotDeployed,
-                     ant2StoppedTime,
-                     ant2Active,
-                     ant3NotDeployed,
-                     ant3StoppedTime,
-                     ant3Active,
-                     ant4NotDeployed,
-                     ant4StoppedTime,
-                     ant4Active
-                },
                 telemetryDebug {
                      ant1ActivationCount,
                      ant1ActivationTime,
@@ -184,47 +122,73 @@ fn integration_test_bad() {
                      ant3ActivationTime,
                      ant4ActivationCount,
                      ant4ActivationTime,
-                }
+                },
+                telemetryNominal {
+                     ant1Active,
+                     ant1NotDeployed,
+                     ant1StoppedTime,
+                     ant2Active,
+                     ant2NotDeployed,
+                     ant2StoppedTime,
+                     ant3Active,
+                     ant3NotDeployed,
+                     ant3StoppedTime,
+                     ant4Active,
+                     ant4NotDeployed,
+                     ant4StoppedTime,
+                     rawTemp,
+                     sysArmed,
+                     sysBurnActive,
+                     sysIgnoreDeploy,
+                     uptime,
+                },
             }}
         }"#;
 
     let expected = json!({
         "testHardware": {
-            "errors": "Nominal: Configuration error",
+            "errors": "Nominal: Generic error; Debug: get_activation_count (services/isis-ants-service/src/model.rs:304): Generic error, \
+                get_activation_time (services/isis-ants-service/src/model.rs:306): Generic error, \
+                get_activation_count (services/isis-ants-service/src/model.rs:310): Generic error, \
+                get_activation_time (services/isis-ants-service/src/model.rs:312): Generic error, \
+                get_activation_count (services/isis-ants-service/src/model.rs:316): Generic error, \
+                get_activation_time (services/isis-ants-service/src/model.rs:318): Generic error, \
+                get_activation_count (services/isis-ants-service/src/model.rs:322): Generic error, \
+                get_activation_time (services/isis-ants-service/src/model.rs:324): Generic error",
             "success": false,
+            "telemetryDebug": {
+                 "ant1ActivationCount": 0,
+                 "ant1ActivationTime": 0,
+                 "ant2ActivationCount": 0,
+                 "ant2ActivationTime": 0,
+                 "ant3ActivationCount": 0,
+                 "ant3ActivationTime": 0,
+                 "ant4ActivationCount": 0,
+                 "ant4ActivationTime": 0,
+            },
             "telemetryNominal": {
-                 "rawTemp": 0,
-                 "uptime": 0,
-                 "sysBurnActive": false,
-                 "sysIgnoreDeploy": false,
-                 "sysArmed": false,
+                 "ant1Active": false,
                  "ant1NotDeployed": false,
                  "ant1StoppedTime": false,
-                 "ant1Active": false,
+                 "ant2Active": false,
                  "ant2NotDeployed": false,
                  "ant2StoppedTime": false,
-                 "ant2Active": false,
+                 "ant3Active": false,
                  "ant3NotDeployed": false,
                  "ant3StoppedTime": false,
-                 "ant3Active": false,
+                 "ant4Active": false,
                  "ant4NotDeployed": false,
                  "ant4StoppedTime": false,
-                 "ant4Active": false
+                 "rawTemp": 0,
+                 "sysArmed": false,
+                 "sysBurnActive": false,
+                 "sysIgnoreDeploy": false,
+                 "uptime": 0,
             },
-            "telemetryDebug": {
-                 "ant1ActivationCount": 1,
-                 "ant1ActivationTime": 11,
-                 "ant2ActivationCount": 2,
-                 "ant2ActivationTime": 22,
-                 "ant3ActivationCount": 3,
-                 "ant3ActivationTime": 33,
-                 "ant4ActivationCount": 4,
-                 "ant4ActivationTime": 44,
-            }
         }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -236,19 +200,21 @@ fn hardware_test() {
         mutation {
             testHardware(test: HARDWARE) {
             ... on HardwareTestResults {
+                data,
                 errors,
                 success,
-                data
+                
             }}
         }"#;
 
     let expected = json!({
         "testHardware": {
+            "data": "",
             "errors": "Not Implemented",
             "success": true,
-            "data": ""
+            
         }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

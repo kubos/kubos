@@ -22,8 +22,7 @@ macro_rules! service_new {
     ($mock:ident) => {{
         use crate::objects::AckCommand;
         use novatel_oem6_api::Connection;
-        use std::cell::{Cell, RefCell};
-        use std::sync::{Arc, Mutex};
+        use std::sync::{Arc, Mutex, RwLock};
         use std::thread;
         use std::time::Duration;
 
@@ -65,11 +64,11 @@ macro_rules! service_new {
             Config::new("novatel-oem6-service"),
             Subsystem {
                 oem,
-                last_cmd: Cell::new(AckCommand::None),
-                errors: RefCell::new(vec![]),
-                lock_data: data,
-                error_recv,
-                version_recv,
+                last_cmd: Arc::new(RwLock::new(AckCommand::None)),
+                errors: Arc::new(RwLock::new(vec![])),
+                lock_data: data.clone(),
+                error_recv: Arc::new(Mutex::new(error_recv)),
+                version_recv: Arc::new(Mutex::new(version_recv)),
             },
             QueryRoot,
             MutationRoot,

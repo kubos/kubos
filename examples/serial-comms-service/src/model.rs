@@ -22,6 +22,7 @@
 use comms_service::CommsTelemetry;
 use std::sync::{Arc, Mutex};
 
+#[derive(Clone)]
 pub struct Subsystem {
     telem: Arc<Mutex<CommsTelemetry>>,
 }

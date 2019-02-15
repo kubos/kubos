@@ -14,7 +14,8 @@
 // limitations under the License.
 //
 
-use juniper::{FieldResult, Value};
+use juniper::{ParseScalarResult, Value};
+use juniper::parser::{ParseError, ScalarToken, Token};
 use novatel_oem6_api::{Component, ReceiverStatusFlags};
 
 /// Common response fields structure for requests
@@ -113,7 +114,7 @@ pub enum TestResults {
 }
 
 /// Response union for 'testHardware' mutation
-graphql_union!(TestResults: () |&self| {
+graphql_union!(TestResults: () where Scalar = <S> |&self| {
     instance_resolvers: |&_| {
         &IntegrationTestResults => match *self {
             TestResults::Integration(ref i) => Some(i),
@@ -377,30 +378,30 @@ impl From<u8> for RefTimeStatus {
     }
 }
 
-graphql_object!(LockStatus: () | &self | {
+graphql_object!(LockStatus: () where Scalar = <S> | &self | {
 
-    field time_status() -> FieldResult<RefTimeStatus> {
-        Ok(self.time_status.into())
+    field time_status() -> RefTimeStatus {
+        self.time_status.into()
     }
 
-    field time() -> FieldResult<OEMTime> {
-        Ok(self.time.clone())
+    field time() -> OEMTime {
+        self.time.clone()
     }
 
-    field position_status() -> FieldResult<SolutionStatus> {
-        Ok(self.position_status.into())
+    field position_status() -> SolutionStatus {
+        self.position_status.into()
     }
 
-    field position_type() -> FieldResult<PosVelType> {
-        Ok(self.position_type.into())
+    field position_type() -> PosVelType {
+        self.position_type.into()
     }
 
-    field velocity_status() -> FieldResult<SolutionStatus> {
-        Ok(self.velocity_status.into())
+    field velocity_status() -> SolutionStatus {
+        self.velocity_status.into()
     }
 
-    field velocity_type() -> FieldResult<PosVelType> {
-        Ok(self.velocity_type.into())
+    field velocity_type() -> PosVelType {
+        self.velocity_type.into()
     }
 });
 
@@ -416,17 +417,17 @@ pub struct LockInfo {
     pub velocity: [f64; 3],
 }
 
-graphql_object!(LockInfo: () | &self | {
-    field time() -> FieldResult<OEMTime> {
-        Ok(self.time.clone())
+graphql_object!(LockInfo: ()  where Scalar = <S> | &self | {
+    field time() -> OEMTime {
+        self.time.clone()
     }
 
-    field position() -> FieldResult<Vec<f64>> {
-        Ok(self.position.to_vec())
+    field position() -> Vec<f64> {
+        self.position.to_vec()
     }
 
-    field velocity() -> FieldResult<Vec<f64>> {
-        Ok(self.velocity.to_vec())
+    field velocity() -> Vec<f64> {
+        self.velocity.to_vec()
     }
 });
 
@@ -467,15 +468,25 @@ pub struct SystemStatus {
 #[derive(Clone)]
 pub struct ReceiverStatus(pub ReceiverStatusFlags);
 
-graphql_scalar!(ReceiverStatus {
+graphql_scalar!(ReceiverStatus where Scalar = <S> {
    resolve(&self) -> Value {
-        Value::list(self.0.to_vec().iter().map(Value::string).collect())
+        Value::list(self.0.to_vec().iter().map(|flag| Value::scalar(flag.to_owned())).collect())
     }
 
     // The macro requires that we have this function,
     // but it won't ever actually be used
     from_input_value(_v: &InputValue) -> Option<ReceiverStatus> {
         None
+    }
+
+    // The macro requires that we have this function,
+    // but it won't ever actually be used
+    from_str<'a>(value: ScalarToken<'a>) -> ParseScalarResult<'a, S> {
+        if let ScalarToken::String(value) =  value {
+            Ok(S::from(value.to_owned()))
+        } else {
+            Err(ParseError::UnexpectedToken(Token::Scalar(value)))
+        }
     }
 });
 
@@ -513,36 +524,36 @@ pub struct VersionInfo {
 #[derive(Clone)]
 pub struct VersionComponent(pub Component);
 
-graphql_object!(VersionComponent: () | &self | {
-    field comp_type() -> FieldResult<i32> {
-        Ok(self.0.comp_type as i32)
+graphql_object!(VersionComponent: () where Scalar = <S> | &self | {
+    field comp_type() -> i32 {
+        self.0.comp_type as i32
     }
 
-    field model() -> FieldResult<String> {
-        Ok(self.0.model.clone())
+    field model() -> String {
+        self.0.model.clone()
     }
 
-    field serial_num() -> FieldResult<String> {
-        Ok(self.0.serial_num.clone())
+    field serial_num() -> String {
+        self.0.serial_num.clone()
     }
 
-    field hw_version() -> FieldResult<String> {
-        Ok(self.0.hw_version.clone())
+    field hw_version() -> String {
+        self.0.hw_version.clone()
     }
 
-    field sw_version() -> FieldResult<String> {
-        Ok(self.0.sw_version.clone())
+    field sw_version() -> String {
+        self.0.sw_version.clone()
     }
 
-    field boot_version() -> FieldResult<String> {
-        Ok(self.0.boot_version.clone())
+    field boot_version() -> String {
+        self.0.boot_version.clone()
     }
 
-    field compile_date() -> FieldResult<String> {
-        Ok(self.0.compile_date.clone())
+    field compile_date() -> String {
+        self.0.compile_date.clone()
     }
 
-    field compile_time() -> FieldResult<String> {
-        Ok(self.0.compile_time.clone())
+    field compile_time() -> String {
+        self.0.compile_time.clone()
     }
 });

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+use kubos_app::ServiceConfig;
 use std::io::{self, Write};
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
@@ -271,4 +272,25 @@ impl AppServiceFixture {
             self.join_handle.take().unwrap().join().unwrap();
         }
     }
+}
+
+pub fn send_query(config: ServiceConfig, query: &str) -> serde_json::Value {
+    
+    let client = reqwest::Client::new();
+    
+    let uri = format!("http://{}", config.hosturl());
+    
+    let mut map = ::std::collections::HashMap::new();
+    map.insert("query", query);
+    
+    let response: serde_json::Value = client.post(&uri)
+        .json(&map)
+        .send()
+        .expect("Couldn't send request")
+        .json()
+        .expect("Couldn't deserialize response");
+        
+    let data = response.get("data").unwrap();
+    
+    data.clone()
 }

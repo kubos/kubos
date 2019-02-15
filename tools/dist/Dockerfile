@@ -1,4 +1,4 @@
-# kubos/kubos-dev:0.1.13
+# kubos/kubos-dev:1.13.0
 
 FROM phusion/baseimage:0.9.22
 
@@ -6,7 +6,7 @@ MAINTAINER catherine@kubos.com, ryan@kubos.com
 
 RUN apt-get update -y
 
-RUN apt-get upgrade -y python2.7
+RUN apt-get upgrade -y python3.5
 RUN apt-get install -y pkg-config
 RUN apt-get install -y build-essential 
 RUN apt-get install -y python-setuptools build-essential 
@@ -18,6 +18,9 @@ RUN apt-get install -y libssl-dev
 
 #do the pip setup and installation things
 RUN easy_install pip
+
+# Set up pip for Python3.5
+RUN apt-get install -y python3-pip
 
 #Kubos Linux setup
 RUN echo "Installing Kubos Linux Toolchain"
@@ -31,8 +34,9 @@ RUN tar -xf ./bbb_toolchain.tar.gz -C /usr/bin
 RUN rm ./bbb_toolchain.tar.gz
 
 # Setup Python package dependencies
-RUN pip install toml
-RUN pip install mock
+RUN pip3 install toml
+RUN pip3 install mock
+RUN pip3 install responses
 
 # Setup rust stuff
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y

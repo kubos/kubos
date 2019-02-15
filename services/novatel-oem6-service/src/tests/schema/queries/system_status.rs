@@ -43,7 +43,7 @@ fn get_system_status_good() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -73,7 +73,7 @@ fn get_system_status_good_with_error() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -126,5 +126,5 @@ fn get_system_status_bad() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

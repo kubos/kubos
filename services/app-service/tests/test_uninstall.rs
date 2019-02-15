@@ -17,7 +17,6 @@
 
 use kubos_app::ServiceConfig;
 use std::panic;
-use std::time::Duration;
 
 mod utils;
 pub use crate::utils::*;
@@ -43,28 +42,24 @@ fn uninstall_app() {
     fixture.start_service(false);
 
     let result = panic::catch_unwind(|| {
-        let result = kubos_app::query(
-            &ServiceConfig::new_from_path("app-service", config.to_owned()),
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()),
             r#"mutation {
             uninstall(uuid: "a-b-c-d-e", version: "0.0.1") {
                 errors,
                 success
             }
-        }"#,
-            Some(Duration::from_secs(5)),
+        }"#);
+
+        assert!(result["uninstall"]["success"].as_bool().unwrap());
+
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            "{ apps { active } }"
         );
 
-        assert!(result.is_ok(), "{:?}", result.err());
-        assert!(result.unwrap()["uninstall"]["success"].as_bool().unwrap());
-
-        let result = kubos_app::query(
-            &ServiceConfig::new_from_path("app-service", config.to_owned()),
-            "{ apps { active } }",
-            Some(Duration::from_secs(1)),
-        );
-        assert!(result.is_ok(), "{:?}", result.err());
         assert_eq!(
-            result.unwrap()["apps"]
+            result["apps"]
                 .as_array()
                 .expect("Not an array")
                 .len(),

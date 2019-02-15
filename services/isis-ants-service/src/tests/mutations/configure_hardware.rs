@@ -18,10 +18,8 @@ use super::*;
 
 #[test]
 fn configure_good_primary() {
-    let mock = mock_new!();
-
-    mock.configure
-        .return_value_for(KANTSController::Primary, Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -41,15 +39,13 @@ fn configure_good_primary() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn configure_good_secondary() {
-    let mock = mock_new!();
-
-    mock.configure
-        .return_value_for(KANTSController::Secondary, Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -69,12 +65,13 @@ fn configure_good_secondary() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn configure_bad() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -94,5 +91,5 @@ fn configure_bad() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

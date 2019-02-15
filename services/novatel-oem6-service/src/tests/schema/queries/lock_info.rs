@@ -44,7 +44,7 @@ fn get_lock_info_default() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -77,7 +77,7 @@ fn get_lock_info_no_lock() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -110,7 +110,7 @@ fn get_lock_info_good() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -145,5 +145,5 @@ fn get_lock_info_nolock_after_good() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
