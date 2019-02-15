@@ -199,9 +199,11 @@ All functions should be fully documented in the header file that they
 belong to. Use the '/\*\* ... \*/' comment style so that Doxygen can add
 the function to the generated API documenation.
 
-The function comment block should include: - A brief description of the
-function - The name, type, and purpose of all input variables - The
-name, type, and purpose of the returned value/s
+The function comment block should include:
+
+ - A brief description of the function
+ - The name, type, and purpose of all input variables
+ - The name, type, and purpose of the returned value/s
 
 For example:
 

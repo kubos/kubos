@@ -410,12 +410,6 @@ under this directory.
 
 All log files generated with rsyslog reside in this directory.
 
-Service-related logs are located in the ``kubos`` sub-directory.
-
-Application related logs are located in the ``apps`` sub-directory.
-
-All other system logs are located in this top-level directory.
-
 /home/system/usr/bin
 ^^^^^^^^^^^^^^^^^^^^
 

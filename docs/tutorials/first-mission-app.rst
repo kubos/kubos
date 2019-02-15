@@ -100,7 +100,7 @@ and then call the appropriate run level function based on the input:
         elif args.run == 'OnCommand':
             on_command()
         else:
-            print "Unknown run level specified"
+            print("Unknown run level specified")
             sys.exit(1)
         
     if __name__ == "__main__":

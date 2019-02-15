@@ -16,7 +16,7 @@ Pre-Requisites
 - Have the file transfer service running on a target OBC (this happens by default when running KubOS)
 - Windows users: :ref:`Make sure Windows is setup to allow UDP packets from the OBC <windows-udp>`
 
-We'll be using the `file transfer client <https://github.com/kubos/kubos/tree/master/clients/file-client>`__
+We'll be using the `file transfer client <https://github.com/kubos/kubos/tree/master/clients/kubos-file-client>`__
 in order to communicate with the file transfer service on our OBC, which is automatically included
 with the Kubos SDK (as of v1.8.0).
 As a result, this tutorial assumes that all commands will be run from within an instance of the SDK.
