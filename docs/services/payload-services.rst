@@ -229,7 +229,7 @@ the following external crate:
 
 And one internal helper crate:
 
-- `Kubos Service <../rust-docs/kubos_service/index.html>`__ - UDP service interface
+- `Kubos Service <../rust-docs/kubos_service/index.html>`__ - HTTP service interface
 
 The ``Cargo.toml`` in the example payload service gives a good list of crate
 dependencies to start with.
@@ -438,7 +438,7 @@ Building and Running
 From inside of a Kubos SDK Vagrant box, navigate to the ``service`` folder of your
 copy of the Rust service example.
 
-Issue ``cargo build`` in order to build the service. 
+Issue ``cargo build`` in order to build the service.
 
 .. note:: 
 
@@ -450,5 +450,10 @@ In order to run the service locally:
     - Verify that port 8000 is being forwarded out of your Vagrant box
     - Issue ``cargo run``
 
-Once it is up and running you can use the `udp-service-client <https://github.com/kubos/kubos/tree/master/examples/udp-service-client>`_
-to issue queries or mutations against the service.
+Once it is up and running you can use the GraphiQL endpoint to issue queries or mutations against
+the service.
+
+On your host machine, open a web browser and navigate to `http://0.0.0.0:8000/graphiql`.
+
+Note: If your service is using something other than the default IP address and/or port, you'll need
+to update the address in the URL.

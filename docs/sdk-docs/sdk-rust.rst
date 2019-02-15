@@ -92,6 +92,11 @@ This can be done by specifying the C compiler path in the ``CC`` envar like so::
 For example::
 
     $ CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo build --target armv5te-unknown-linux-gnueabi
+    
+Some crates depend on pkg-config, which requires that an additional flag, ``PKG_CONFIG_ALLOW_CROSS``,
+be set in order to enable cross-compiling::
+
+    $ PKG_CONFIG_ALLOW_CROSS=1 CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo build --target armv5te-unknown-linux-gnueabi
 
 .. _rust-transfer:
 
@@ -165,6 +170,6 @@ Important Notes
 ~~~~~~~~~~~~~~~
 
 - Kubos is currently using the ``0.4.2-stable`` version of ``rustfmt``.
-- Using ``cargo install rustfmt`` to install ``rustfmt`` will result in the deprecated version being installed, 
+- Using ``cargo install rustfmt`` to install ``rustfmt`` will result in the deprecated version being installed,
   which has slightly different formatting rules. Please use the ``rustup`` installation method instead.
 

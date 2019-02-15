@@ -275,7 +275,7 @@ A major component of most mission applications will be interacting with
 
 These services provided interfaces to underlying hardware and other system resources.
 
-All services work by consuming `GraphQL <http://graphql.org/>`__ requests over UDP, running the
+All services work by consuming `GraphQL <http://graphql.org/>`__ requests over HTTP, running the
 requested operation, and then returning a JSON response.
 
 GraphQL is a query language which allows users to create readable requests which will return only
@@ -418,8 +418,8 @@ to send our GraphQL requests.
 
 For each request, it:
 
-    - Looks up the UDP port of the service name which is given from the system's `config.toml` file
-    - Wraps the given request into a proper UDP packet and sends it to the target service
+    - Looks up the HTTP address of the service name which is given from the system's `config.toml` file
+    - Wraps the given request into a proper HTTP packet and sends it to the target service
     - Parses the response message and checks for errors
     - Returns the message payload if the request was successful
 
