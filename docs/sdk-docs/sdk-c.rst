@@ -29,7 +29,7 @@ Your final directory structure should look like this::
     |_ test
 
 Kubos uses the CMake build system, along with our own folder conventions, for C projects.
- You can read more about CMake `here <https://cmake.org/cmake-tutorial/>`__.
+You can read more about CMake `here <https://cmake.org/cmake-tutorial/>`__.
 
 Working with CMakeLists.txt
 ---------------------------
