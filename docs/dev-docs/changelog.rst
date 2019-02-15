@@ -1,6 +1,13 @@
 Kubos Changelog
 ===============
 
+v1.13.0 - Feb 15 2019
+---------------------
+
+- `Updated all Kubos services to use HTTP as their GraphQL front-end instead of UDP, allowing them to expose GraphiQL endpoints <https://docs.kubos.com/latest/tutorials/app-register.html#graphiql>`__
+- Removed all yotta usage. `C-based projects are now compiled using CMake <https://docs.kubos.com/latest/sdk-docs/sdk-c.html>`__
+- Pinning Rust version at v1.32.0 to prevent accidental version discrepancies
+
 v1.12.0 - Feb 1 2019
 --------------------
 
