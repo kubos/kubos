@@ -67,11 +67,5 @@ fn read_panic() {
             "errors": ["Read thread panicked. Service restart required."]
     });
 
-    let expected = json!({
-            "data": expected,
-            "errors": ""
-    })
-    .to_string();
-
-    assert_eq!(service.process(&query.to_owned()), expected);
+    test!(service, query, expected);
 }

@@ -18,9 +18,8 @@ use super::*;
 
 #[test]
 fn deploy_good_default() {
-    let mock = mock_new!();
-
-    mock.auto_deploy.return_value(Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -38,14 +37,13 @@ fn deploy_good_default() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_good_all() {
-    let mock = mock_new!();
-
-    mock.auto_deploy.return_value(Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -63,15 +61,13 @@ fn deploy_good_all() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_good_ant1() {
-    let mock = mock_new!();
-
-    mock.deploy
-        .return_value_for((KANTSAnt::Ant1, false, 5), Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -89,15 +85,13 @@ fn deploy_good_ant1() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_good_ant1_override() {
-    let mock = mock_new!();
-
-    mock.deploy
-        .return_value_for((KANTSAnt::Ant1, true, 5), Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -115,15 +109,13 @@ fn deploy_good_ant1_override() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_good_ant2() {
-    let mock = mock_new!();
-
-    mock.deploy
-        .return_value_for((KANTSAnt::Ant2, false, 5), Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -141,16 +133,14 @@ fn deploy_good_ant2() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_good_ant2_override() {
-    let mock = mock_new!();
-
-    mock.deploy
-        .return_value_for((KANTSAnt::Ant2, true, 5), Ok(()));
-
+    let mut mock = mock_new!();
+    mock.state = true;
+    
     let service = service_new!(mock);
 
     let query = r#"mutation {
@@ -167,15 +157,13 @@ fn deploy_good_ant2_override() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_good_ant3() {
-    let mock = mock_new!();
-
-    mock.deploy
-        .return_value_for((KANTSAnt::Ant3, false, 5), Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -193,15 +181,13 @@ fn deploy_good_ant3() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_good_ant3_override() {
-    let mock = mock_new!();
-
-    mock.deploy
-        .return_value_for((KANTSAnt::Ant3, true, 5), Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -219,15 +205,13 @@ fn deploy_good_ant3_override() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_good_ant4() {
-    let mock = mock_new!();
-
-    mock.deploy
-        .return_value_for((KANTSAnt::Ant4, false, 5), Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -245,15 +229,13 @@ fn deploy_good_ant4() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_good_ant4_override() {
-    let mock = mock_new!();
-
-    mock.deploy
-        .return_value_for((KANTSAnt::Ant4, true, 5), Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -271,12 +253,13 @@ fn deploy_good_ant4_override() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_bad() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -294,5 +277,5 @@ fn deploy_bad() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

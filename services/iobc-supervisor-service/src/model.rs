@@ -25,6 +25,7 @@ pub struct SupervisorEnableStatus(pub isis_iobc_supervisor::SupervisorEnableStat
 
 pub struct SupervisorHousekeeping(pub isis_iobc_supervisor::SupervisorHousekeeping);
 
+#[derive(Clone)]
 pub struct Supervisor;
 
 impl Supervisor {

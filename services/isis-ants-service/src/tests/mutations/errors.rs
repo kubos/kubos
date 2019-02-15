@@ -18,7 +18,8 @@ use super::*;
 
 #[test]
 fn mutation_errors_empty() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -30,12 +31,13 @@ fn mutation_errors_empty() {
             "errors": []
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn mutation_errors_single() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -45,22 +47,23 @@ fn mutation_errors_single() {
             }
         }"#;
 
-    service.process(&noop.to_owned());
+    request!(service, noop);
 
     let query = r#"mutation {
             errors
         }"#;
 
     let expected = json!({
-            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:357): Configuration error"]
+            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:360): Configuration error"]
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn mutation_errors_multiple() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -70,16 +73,16 @@ fn mutation_errors_multiple() {
             }
         }"#;
 
-    service.process(&noop.to_owned());
-    service.process(&noop.to_owned());
+    request!(service, noop);
+    request!(service, noop);
 
     let query = r#"mutation {
             errors
         }"#;
 
     let expected = json!({
-            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:357): Configuration error", "watchdog_kick (services/isis-ants-service/src/model.rs:357): Configuration error"]
+            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:360): Configuration error", "watchdog_kick (services/isis-ants-service/src/model.rs:360): Configuration error"]
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

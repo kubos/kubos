@@ -15,7 +15,6 @@
 //
 
 use crate::app_entry;
-use juniper::FieldResult;
 
 /// Common response fields structure for requests
 /// which don't return any specific data
@@ -51,58 +50,58 @@ pub struct StartResponse {
 
 pub struct KApp(pub app_entry::App);
 
-graphql_object!(KApp: () as "App" |&self| {
+graphql_object!(KApp: () as "App" where Scalar = <S> |&self| {
     description: "Kubos Application"
 
-    field uuid() -> FieldResult<&String>
+    field uuid() -> &String
         as "UUID"
     {
-        Ok(&(self.0.uuid))
+        &(self.0.uuid)
     }
 
-    field name() -> FieldResult<&String>
+    field name() -> &String
         as "Name"
     {
-        Ok(&self.0.metadata.name)
+        &self.0.metadata.name
     }
 
-    field version() -> FieldResult<&String>
+    field version() -> &String
         as "Version"
     {
-        Ok(&self.0.metadata.version)
+        &self.0.metadata.version
     }
 
-    field author() -> FieldResult<&String>
+    field author() -> &String
         as "Author"
     {
-        Ok(&self.0.metadata.author)
+        &self.0.metadata.author
     }
 
-    field pid() -> FieldResult<i32>
+    field pid() -> i32
         as "Process ID"
     {
-        Ok(self.0.pid as i32)
+        self.0.pid as i32
     }
 
-    field path() -> FieldResult<&String>
+    field path() -> &String
         as "Absolute Path"
     {
-        Ok(&self.0.path)
+        &self.0.path
     }
 });
 
 pub struct KAppRegistryEntry(pub app_entry::AppRegistryEntry);
 
-graphql_object!(KAppRegistryEntry: () as "AppRegistryEntry" |&self| {
-    field app() -> FieldResult<KApp>
+graphql_object!(KAppRegistryEntry: () as "AppRegistryEntry" where Scalar = <S> |&self| {
+    field app() -> KApp
         as "App"
     {
-        Ok(KApp(self.0.app.clone()))
+        KApp(self.0.app.clone())
     }
 
-    field active() -> FieldResult<bool>
+    field active() -> bool
         as "Active"
     {
-        Ok(self.0.active_version)
+        self.0.active_version
     }
 });

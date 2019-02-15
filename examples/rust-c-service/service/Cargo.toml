@@ -7,4 +7,4 @@ edition = "2018"
 [dependencies]
 extern-lib = { path = "../extern-lib" }
 kubos-service = { path = "../../../services/kubos-service" }
-juniper = "0.9"
+juniper = "0.11"

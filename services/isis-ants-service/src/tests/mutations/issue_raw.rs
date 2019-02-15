@@ -20,13 +20,10 @@ use super::*;
 fn issue_raw_good_defaultresponse() {
     let mock = mock_new!();
 
-    mock.passthrough
-        .return_value_for((vec![0xc3, 0xc2], vec![]), Ok(()));
-
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            issueRawCommand(command: "C3C2") {
+            issueRawCommand(command: \"C3C2\") {
                 errors,
                 response,
                 success
@@ -41,20 +38,17 @@ fn issue_raw_good_defaultresponse() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn issue_raw_good_noresponse() {
     let mock = mock_new!();
 
-    mock.passthrough
-        .return_value_for((vec![0xc3, 0xc2], vec![]), Ok(()));
-
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            issueRawCommand(command: "C3C2", rxLen: 0) {
+            issueRawCommand(command: \"C3C2\", rxLen: 0) {
                 errors,
                 response,
                 success
@@ -69,20 +63,17 @@ fn issue_raw_good_noresponse() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn issue_raw_good_withresponse() {
     let mock = mock_new!();
 
-    mock.passthrough
-        .return_value_for((vec![0xc3, 0xc2], vec![0x00, 0x01]), Ok(()));
-
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            issueRawCommand(command: "C3C2", rxLen: 2) {
+            issueRawCommand(command: \"C3C2\", rxLen: 2) {
                 errors,
                 response,
                 success
@@ -97,17 +88,18 @@ fn issue_raw_good_withresponse() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn issue_raw_bad() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            issueRawCommand(command: "C3C2", rxLen: 2) {
+            issueRawCommand(command: \"C3C2\", rxLen: 2) {
                 errors,
                 response,
                 success
@@ -122,5 +114,5 @@ fn issue_raw_bad() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

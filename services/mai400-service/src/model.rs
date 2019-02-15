@@ -18,10 +18,9 @@ use failure::{bail, Error};
 use kubos_service::{process_errors, push_err, run};
 use log::info;
 use mai400_api::*;
-use std::cell::{Cell, RefCell};
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock, Mutex};
 use std::thread::{sleep, spawn};
 use std::time::Duration;
 
@@ -118,12 +117,13 @@ pub fn read_thread(mai: MAI400, data: Arc<ReadData>, sender: Sender<String>) {
     }
 }
 
+#[derive(Clone)]
 pub struct Subsystem {
     pub mai: MAI400,
-    pub last_cmd: Cell<AckCommand>,
-    pub errors: RefCell<Vec<String>>,
+    pub last_cmd: Arc<RwLock<AckCommand>>,
+    pub errors: Arc<RwLock<Vec<String>>>,
     pub persistent: Arc<ReadData>,
-    pub receiver: Receiver<String>,
+    pub receiver: Arc<Mutex<Receiver<String>>>,
 }
 
 impl Subsystem {
@@ -141,19 +141,29 @@ impl Subsystem {
 
         Ok(Subsystem {
             mai,
-            last_cmd: Cell::new(AckCommand::None),
-            errors: RefCell::new(vec![]),
+            last_cmd: Arc::new(RwLock::new(AckCommand::None)),
+            errors: Arc::new(RwLock::new(vec![])),
             persistent: data.clone(),
-            receiver,
+            receiver: Arc::new(Mutex::new(receiver)),
         })
     }
 
     pub fn get_read_health(&self) {
-        match self.receiver.try_recv() {
+        let receiver = match self.receiver.lock() {
+            Ok(v) => v,
+            Err(err) => {
+                push_err!(
+                    self.errors,
+                    format!("Failed to get read thread receiver mutex: {:?}", err)
+                );
+                return;
+            }
+        };
+        match receiver.try_recv() {
             Ok(msg) => {
                 push_err!(self.errors, msg);
 
-                while let Ok(err) = self.receiver.try_recv() {
+                while let Ok(err) = receiver.try_recv() {
                     push_err!(self.errors, err);
                 }
             }

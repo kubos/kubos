@@ -19,13 +19,12 @@ use crate::error::*;
 use fs_extra;
 use kubos_app::RunLevel;
 use log::info;
-use serde_derive::{Deserialize, Serialize};
-use std::cell::RefCell;
 use std::fs;
 use std::io::Read;
 use std::os::unix;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::{Arc, Mutex};
 use toml;
 use uuid::Uuid;
 
@@ -33,10 +32,10 @@ use uuid::Uuid;
 pub const K_APPS_DIR: &str = "/home/system/kubos/apps";
 
 /// AppRegistry
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Clone, Debug)]
 pub struct AppRegistry {
     #[doc(hidden)]
-    pub entries: RefCell<Vec<AppRegistryEntry>>,
+    pub entries: Arc<Mutex<Vec<AppRegistryEntry>>>,
     /// The managed root directory of the AppRegistry
     pub apps_dir: String,
 }
@@ -56,7 +55,7 @@ impl AppRegistry {
     /// ```
     pub fn new_from_dir(apps_dir: &str) -> Result<AppRegistry, AppError> {
         let registry = AppRegistry {
-            entries: RefCell::new(Vec::new()),
+            entries: Arc::new(Mutex::new(Vec::new())),
             apps_dir: String::from(apps_dir),
         };
 
@@ -67,7 +66,12 @@ impl AppRegistry {
 
         registry
             .entries
-            .borrow_mut()
+            .lock().map_err(|err| AppError::RegistryError {
+                    err: format!(
+                        "Couldn't get entries mutex: {:?}",
+                        err
+                    ),
+                })?
             .extend(registry.discover_apps()?);
 
         Ok(registry)
@@ -219,7 +223,12 @@ impl AppRegistry {
             });
         }
 
-        let mut entries = self.entries.borrow_mut();
+        let mut entries = self.entries.lock().map_err(|err| AppError::RegisterError {
+                    err: format!(
+                        "Couldn't get entries mutex: {:?}",
+                        err
+                    ),
+                })?;
         let app_uuid = match uuid {
             Some(val) => {
                 for entry in entries.iter_mut() {
@@ -311,7 +320,12 @@ impl AppRegistry {
         }
 
         // Remove the app entry from the registry list
-        let mut entries = self.entries.borrow_mut();
+        let mut entries = self.entries.lock().map_err(|err| AppError::UninstallError {
+                    err: format!(
+                        "Couldn't get entries mutex: {:?}",
+                        err
+                    ),
+                })?;
         match entries.binary_search_by(|ref e| {
             e.app
                 .uuid
@@ -364,7 +378,12 @@ impl AppRegistry {
     ) -> Result<u32, AppError> {
         // Look up the active version of the requested application
         let app = {
-            let entries = self.entries.borrow();
+            let entries = self.entries.lock().map_err(|err| AppError::StartError {
+                    err: format!(
+                        "Couldn't get entries mutex: {:?}",
+                        err
+                    ),
+                })?;
             match entries
                 .iter()
                 .find(|ref e| e.active_version && e.app.uuid == app_uuid)

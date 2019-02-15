@@ -18,63 +18,62 @@ use super::*;
 
 #[test]
 fn deploy_status_bad() {
-    let mock = mock_new!();
-
-    mock.get_deploy.return_value(Err(AntsError::GenericError));
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
     let query = r#"
         {
             deploymentStatus {
-                 status,
-                 sysBurnActive,
-                 sysIgnoreDeploy,
-                 sysArmed,
+                 ant1Active,
                  ant1NotDeployed,
                  ant1StoppedTime,
-                 ant1Active,
+                 ant2Active,
                  ant2NotDeployed,
                  ant2StoppedTime,
-                 ant2Active,
+                 ant3Active,
                  ant3NotDeployed,
                  ant3StoppedTime,
-                 ant3Active,
+                 ant4Active,
                  ant4NotDeployed,
                  ant4StoppedTime,
-                 ant4Active
+                 status,
+                 sysArmed,
+                 sysBurnActive,
+                 sysIgnoreDeploy,
             }
         }"#;
 
     let expected = json!({
             "deploymentStatus": {
+                 "ant1Active": false,
+                 "ant1NotDeployed": false,
+                 "ant1StoppedTime": false,
+                 "ant2Active": false,
+                 "ant2NotDeployed": false,
+                 "ant2StoppedTime": false,
+                 "ant3Active": false,
+                 "ant3NotDeployed": false,
+                 "ant3StoppedTime": false,
+                 "ant4Active": false,
+                 "ant4NotDeployed": false,
+                 "ant4StoppedTime": false,
+                 "sysArmed": false,
                  "status": "ERROR",
-                     "sysBurnActive": false,
-                     "sysIgnoreDeploy": false,
-                     "sysArmed": false,
-                     "ant1NotDeployed": false,
-                     "ant1StoppedTime": false,
-                     "ant1Active": false,
-                     "ant2NotDeployed": false,
-                     "ant2StoppedTime": false,
-                     "ant2Active": false,
-                     "ant3NotDeployed": false,
-                     "ant3StoppedTime": false,
-                     "ant3Active": false,
-                     "ant4NotDeployed": false,
-                     "ant4StoppedTime": false,
-                     "ant4Active": false
-                },
+                 "sysBurnActive": false,
+                 "sysIgnoreDeploy": false,
+            },
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_status_deployed() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
 
-    let deploy_status = DeployStatus {
+    mock.deploy_status = DeployStatus {
         sys_burn_active: false,
         sys_ignore_deploy: false,
         sys_armed: false,
@@ -91,76 +90,74 @@ fn deploy_status_deployed() {
         ant_4_stopped_time: false,
         ant_4_active: false,
     };
-    mock.get_deploy.return_value(Ok(deploy_status));
 
     let service = service_new!(mock);
 
     let query = r#"
         {
             deploymentStatus {
-                 status,
-                 sysBurnActive,
-                 sysIgnoreDeploy,
-                 sysArmed,
+                 ant1Active,
                  ant1NotDeployed,
                  ant1StoppedTime,
-                 ant1Active,
+                 ant2Active,
                  ant2NotDeployed,
                  ant2StoppedTime,
-                 ant2Active,
+                 ant3Active,
                  ant3NotDeployed,
                  ant3StoppedTime,
-                 ant3Active,
+                 ant4Active,
                  ant4NotDeployed,
                  ant4StoppedTime,
-                 ant4Active
+                 status,
+                 sysArmed,
+                 sysBurnActive,
+                 sysIgnoreDeploy,
             }
         }"#;
 
     let expected = json!({
             "deploymentStatus": {
-                 "status": "DEPLOYED",
-                 "sysBurnActive": false,
-                 "sysIgnoreDeploy": false,
-                 "sysArmed": false,
+                 "ant1Active": false,
                  "ant1NotDeployed": false,
                  "ant1StoppedTime": false,
-                 "ant1Active": false,
+                 "ant2Active": false,
                  "ant2NotDeployed": false,
                  "ant2StoppedTime": false,
-                 "ant2Active": false,
+                 "ant3Active": false,
                  "ant3NotDeployed": false,
                  "ant3StoppedTime": false,
-                 "ant3Active": false,
+                 "ant4Active": false,
                  "ant4NotDeployed": false,
                  "ant4StoppedTime": false,
-                 "ant4Active": false
+                 "status": "DEPLOYED",
+                 "sysArmed": false,
+                 "sysBurnActive": false,
+                 "sysIgnoreDeploy": false,
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_status_deployed_2_antennas() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
 
-    let deploy_status = DeployStatus {
+    mock.deploy_status = DeployStatus {
         ant_1_not_deployed: false,
         ant_2_not_deployed: false,
         ant_3_not_deployed: false,
         ant_4_not_deployed: false,
         ..Default::default()
     };
-    mock.get_deploy.return_value(Ok(deploy_status));
 
     let service = Service::new(
         Config::new("isis-ants-service"),
         Subsystem {
             ants: Box::new(mock),
-            errors: RefCell::new(vec![]),
-            controller: Cell::new(ConfigureController::Primary),
-            last_cmd: Cell::new(AckCommand::None),
+            controller: Arc::new(RwLock::new(ConfigureController::Primary)),
+            errors: Arc::new(RwLock::new(vec![])),
+            last_cmd: Arc::new(RwLock::new(AckCommand::None)),
             count: 2,
         },
         QueryRoot,
@@ -180,21 +177,20 @@ fn deploy_status_deployed_2_antennas() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_status_stowed() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
 
-    let deploy_status = DeployStatus {
+    mock.deploy_status = DeployStatus {
         ant_1_not_deployed: true,
         ant_2_not_deployed: true,
         ant_3_not_deployed: true,
         ant_4_not_deployed: true,
         ..Default::default()
     };
-    mock.get_deploy.return_value(Ok(deploy_status));
 
     let service = service_new!(mock);
 
@@ -211,29 +207,28 @@ fn deploy_status_stowed() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_status_stowed_2_antennas() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
 
-    let deploy_status = DeployStatus {
+    mock.deploy_status = DeployStatus {
         ant_1_not_deployed: true,
         ant_2_not_deployed: true,
         ant_3_not_deployed: false,
         ant_4_not_deployed: false,
         ..Default::default()
     };
-    mock.get_deploy.return_value(Ok(deploy_status));
 
     let service = Service::new(
         Config::new("isis-ants-service"),
         Subsystem {
             ants: Box::new(mock),
-            errors: RefCell::new(vec![]),
-            controller: Cell::new(ConfigureController::Primary),
-            last_cmd: Cell::new(AckCommand::None),
+            controller: Arc::new(RwLock::new(ConfigureController::Primary)),
+            errors: Arc::new(RwLock::new(vec![])),
+            last_cmd: Arc::new(RwLock::new(AckCommand::None)),
             count: 2,
         },
         QueryRoot,
@@ -253,21 +248,20 @@ fn deploy_status_stowed_2_antennas() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_status_partial() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
 
-    let deploy_status = DeployStatus {
+    mock.deploy_status = DeployStatus {
         ant_1_not_deployed: true,
         ant_2_not_deployed: false,
         ant_3_not_deployed: true,
         ant_4_not_deployed: false,
         ..Default::default()
     };
-    mock.get_deploy.return_value(Ok(deploy_status));
 
     let service = service_new!(mock);
 
@@ -284,18 +278,17 @@ fn deploy_status_partial() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_status_inprogress_1() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
 
-    let deploy_status = DeployStatus {
+    mock.deploy_status = DeployStatus {
         ant_1_active: true,
         ..Default::default()
     };
-    mock.get_deploy.return_value(Ok(deploy_status.clone()));
 
     let service = service_new!(mock);
 
@@ -312,18 +305,17 @@ fn deploy_status_inprogress_1() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_status_inprogress_2() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
 
-    let deploy_status = DeployStatus {
+    mock.deploy_status = DeployStatus {
         ant_2_active: true,
         ..Default::default()
     };
-    mock.get_deploy.return_value(Ok(deploy_status.clone()));
 
     let service = service_new!(mock);
 
@@ -340,18 +332,17 @@ fn deploy_status_inprogress_2() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_status_inprogress_3() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
 
-    let deploy_status = DeployStatus {
+    mock.deploy_status = DeployStatus {
         ant_3_active: true,
         ..Default::default()
     };
-    mock.get_deploy.return_value(Ok(deploy_status.clone()));
 
     let service = service_new!(mock);
 
@@ -368,18 +359,17 @@ fn deploy_status_inprogress_3() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn deploy_status_inprogress_4() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
 
-    let deploy_status = DeployStatus {
+    mock.deploy_status = DeployStatus {
         ant_4_active: true,
         ..Default::default()
     };
-    mock.get_deploy.return_value(Ok(deploy_status.clone()));
 
     let service = service_new!(mock);
 
@@ -396,5 +386,5 @@ fn deploy_status_inprogress_4() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

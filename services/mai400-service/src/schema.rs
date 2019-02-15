@@ -46,7 +46,8 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field ack(&executor) -> FieldResult<AckCommand>
     {
-        Ok(executor.context().subsystem().last_cmd.get())
+        let last_cmd = executor.context().subsystem().last_cmd.read()?;
+        Ok(*last_cmd)
     }
 
     // Get all errors encountered since the last time this field was queried
@@ -58,7 +59,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     {
         executor.context().subsystem().get_read_health();
 
-        match executor.context().subsystem().errors.try_borrow_mut() {
+        match executor.context().subsystem().errors.write() {
             Ok(mut master_vec) => {
                 let current = master_vec.clone();
                 master_vec.clear();
@@ -273,7 +274,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        match executor.context().subsystem().errors.try_borrow() {
+        match executor.context().subsystem().errors.read() {
             Ok(master_vec) => Ok(master_vec.clone()),
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
         }
@@ -289,7 +290,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field noop(&executor) -> FieldResult<GenericResponse>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::Noop);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::Noop;
         Ok(executor.context().subsystem().noop()?)
     }
 
@@ -307,7 +309,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field control_power(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::ControlPower);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::ControlPower;
         Ok(executor.context().subsystem().control_power(state)?)
     }
 
@@ -318,7 +321,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field configure_hardware(&executor) -> FieldResult<String>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::ConfigureHardware);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::ConfigureHardware;
         Ok(String::from("Not Implemented"))
     }
 
@@ -343,7 +347,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field test_hardware(&executor, test: TestType) -> FieldResult<TestResults>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::TestHardware);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::TestHardware;
+        
         match test {
             TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem()
                     .get_test_results().unwrap())),
@@ -366,7 +372,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field issue_raw_command(&executor, command: String) -> FieldResult<GenericResponse>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::IssueRawCommand);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::IssueRawCommand;
         Ok(executor.context().subsystem().passthrough(command)?)
     }
 
@@ -392,7 +399,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         sun_angle_enable = false: bool,
         sun_rot_angle = 0.0: f64)
     -> FieldResult<GenericResponse> {
-        executor.context().subsystem().last_cmd.set(AckCommand::SetMode);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::SetMode;
         match mode {
             Mode::NormalSun | Mode::LatLongSun => Ok(executor.context().subsystem().set_mode_sun(
                     mode as u8, sun_angle_enable as i16, sun_rot_angle as f32)?),
@@ -418,7 +426,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field update(&executor, gps_time: Option<i32>, rv: Option<RVInput>)
     -> FieldResult<GenericResponse> {
-        executor.context().subsystem().last_cmd.set(AckCommand::Update);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::Update;
         Ok(executor.context().subsystem().update(gps_time, rv)?)
     }
 

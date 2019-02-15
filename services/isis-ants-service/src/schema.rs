@@ -46,7 +46,8 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field ack(&executor) -> FieldResult<AckCommand>
     {
-        Ok(executor.context().subsystem().last_cmd.get())
+        let last_cmd = executor.context().subsystem().last_cmd.read()?;
+        Ok(*last_cmd)
     }
 
     // Get all errors encountered since the last time this field was queried
@@ -56,7 +57,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        match executor.context().subsystem().errors.try_borrow_mut() {
+        match executor.context().subsystem().errors.write() {
             Ok(mut master_vec) => {
                 let current = master_vec.clone();
                 master_vec.clear();
@@ -205,7 +206,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field errors(&executor) -> FieldResult<Vec<String>>
     {
-        match executor.context().subsystem().errors.try_borrow() {
+        match executor.context().subsystem().errors.read() {
             Ok(master_vec) => Ok(master_vec.clone()),
             _ => Ok(vec!["Error: Failed to borrow master errors vector".to_owned()])
         }
@@ -221,7 +222,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field noop(&executor) -> FieldResult<NoopResponse>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::Noop);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::Noop;
         Ok(executor.context().subsystem().noop()?)
     }
 
@@ -239,7 +241,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field control_power(&executor, state: PowerState) -> FieldResult<ControlPowerResponse>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::ControlPower);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::ControlPower;
         Ok(executor.context().subsystem().control_power(state)?)
     }
 
@@ -256,7 +259,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field configure_hardware(&executor, config: ConfigureController) -> FieldResult<ConfigureHardwareResponse>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::ConfigureHardware);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::ConfigureHardware;
         Ok(executor.context().subsystem().configure_hardware(config)?)
     }
 
@@ -281,8 +285,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field test_hardware(&executor, test: TestType) -> FieldResult<TestResults>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::TestHardware);
-
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::TestHardware;
+        
         match test {
             TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem().integration_test().unwrap())),
             TestType::Hardware => Ok(TestResults::Hardware(HardwareTestResults { errors: "Not Implemented".to_owned(), success: true, data: "".to_owned()}))
@@ -304,7 +309,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field issue_raw_command(&executor, command: String, rx_len = 0: i32) -> FieldResult<RawCommandResponse>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::IssueRawCommand);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::IssueRawCommand;
         Ok(executor.context().subsystem().passthrough(command, rx_len)?)
     }
 
@@ -322,7 +328,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field arm(&executor, state: ArmState) -> FieldResult<ArmResponse>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::Arm);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::Arm;
         Ok(executor.context().subsystem().arm(state)?)
     }
 
@@ -341,7 +348,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field deploy(&executor, ant = (DeployType::All): DeployType, force = false: bool, time: i32) -> FieldResult<DeployResponse>
     {
-        executor.context().subsystem().last_cmd.set(AckCommand::Deploy);
+        let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
+        *last_cmd = AckCommand::Deploy;
         Ok(executor.context().subsystem().deploy(ant, force, time)?)
     }
 

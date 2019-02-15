@@ -46,25 +46,23 @@ fn upgrade_new() {
 
     let upgrade_query = format!(
         r#"mutation {{
-        register(path: "{}", uuid: "a-b-c-d-e") {{
-            success,
-            errors,
+        register(path: \"{}\", uuid: \"a-b-c-d-e\") {{
             entry {{
                 active, 
                 app {{
                     name,
+                    uuid,
                     version,
-                    uuid
                 }}
-            }}
+            }},
+            errors,
+            success,
         }}
     }}"#,
         app_bin.to_str().unwrap()
     );
 
     let expected = json!({
-        "errors": "",
-        "data": {
            "register": {
                "entry": {
                   "active": true,
@@ -77,11 +75,9 @@ fn upgrade_new() {
                "errors": "",
                "success": true,
            }
-        }
-    })
-    .to_string();
+    });
 
-    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
+    test!(service, upgrade_query, expected);
 }
 
 #[test]
@@ -105,25 +101,23 @@ fn upgrade_good() {
 
     let upgrade_query = format!(
         r#"mutation {{
-        register(path: "{}", uuid: "a-b-c-d-e") {{
-            success,
-            errors,
+        register(path: \"{}\", uuid: \"a-b-c-d-e\") {{
             entry {{
                 active, 
                 app {{
                     name,
+                    uuid,
                     version,
-                    uuid
                 }}
-            }}
+            }},
+            errors,
+            success,
         }}
     }}"#,
         app_bin.to_str().unwrap()
     );
 
     let expected = json!({
-        "errors": "",
-        "data": {
            "register": {
                "entry": {
                   "active": true,
@@ -136,12 +130,10 @@ fn upgrade_good() {
                "errors": "",
                "success": true,
            }
-        }
-    })
-    .to_string();
+    });
 
     // Register the initial app so we have something to upgrade
-    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
+    test!(service, upgrade_query, expected);
 
     // Update the manifest for the new version of the app
     let manifest = r#"
@@ -152,8 +144,6 @@ fn upgrade_good() {
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
     let expected = json!({
-        "errors": "",
-        "data": {
            "register": {
                "entry": {
                   "active": true,
@@ -166,20 +156,24 @@ fn upgrade_good() {
                "errors": "",
                "success": true,
            }
-        }
-    })
-    .to_string();
+    });
 
     // Register the new version
-    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
+    test!(service, upgrade_query, expected);
 
-    let app_query = r#"
-        { apps(uuid: "a-b-c-d-e") { active, app { name, version, uuid } } }
+    let app_query = r#"{ 
+            apps(uuid: \"a-b-c-d-e\") {
+                active,
+                app {
+                    name,
+                    uuid,
+                    version,
+                }
+            }
+        }
     "#;
 
     let expected = json!({
-            "errors": "",
-            "data": {
                "apps": [
                  {
                       "active": false,
@@ -198,14 +192,12 @@ fn upgrade_good() {
                        }
                    }
                ]
-            }
-    })
-    .to_string();
+    });
 
     // Verify:
     //   - There are two registered versions of the app
     //   - The 0.0.2 version is the active version
-    assert_eq!(service.process(&app_query.to_owned()), expected);
+    test!(service, app_query, expected);
 }
 
 #[test]
@@ -229,25 +221,23 @@ fn upgrade_new_name() {
 
     let upgrade_query = format!(
         r#"mutation {{
-        register(path: "{}", uuid: "a-b-c-d-e") {{
-            success,
-            errors,
+        register(path: \"{}\", uuid: \"a-b-c-d-e\") {{
             entry {{
                 active, 
                 app {{
                     name,
+                    uuid,
                     version,
-                    uuid
                 }}
-            }}
+            }},
+            errors,
+            success
         }}
     }}"#,
         app_bin.to_str().unwrap()
     );
 
     let expected = json!({
-        "errors": "",
-        "data": {
            "register": {
                "entry": {
                   "active": true,
@@ -260,12 +250,10 @@ fn upgrade_new_name() {
                "errors": "",
                "success": true,
            }
-        }
-    })
-    .to_string();
+    });
 
     // Register the initial app so we have something to upgrade
-    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
+    test!(service, upgrade_query, expected);
 
     // Delete the old app file
     fs::remove_file(app_bin.join("dummy")).unwrap();
@@ -282,8 +270,6 @@ fn upgrade_new_name() {
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
     let expected = json!({
-        "errors": "",
-        "data": {
            "register": {
                "entry": {
                   "active": true,
@@ -296,20 +282,24 @@ fn upgrade_new_name() {
                "errors": "",
                "success": true,
            }
-        }
-    })
-    .to_string();
+    });
 
     // Register the new version
-    assert_eq!(service.process(&upgrade_query.to_owned()), expected);
+    test!(service, upgrade_query, expected);
 
-    let app_query = r#"
-        { apps(uuid: "a-b-c-d-e") { active, app { name, version, uuid } } }
+    let app_query = r#"{ 
+            apps(uuid: \"a-b-c-d-e\") {
+                active,
+                app {
+                    name,
+                    uuid,
+                    version,
+                }
+            }
+        }
     "#;
 
     let expected = json!({
-            "errors": "",
-            "data": {
                "apps": [
                  {
                       "active": false,
@@ -328,13 +318,11 @@ fn upgrade_new_name() {
                        }
                    }
                ]
-            }
-    })
-    .to_string();
+    });
 
     // Verify:
     //   - There are two registered versions of the app
     //   - The 0.0.2 version is the active version
     //   - The app names are different
-    assert_eq!(service.process(&app_query.to_owned()), expected);
+    test!(service, app_query, expected);
 }

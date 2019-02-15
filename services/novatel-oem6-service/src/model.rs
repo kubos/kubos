@@ -19,9 +19,8 @@ use kubos_service::{process_errors, push_err, run};
 use log::info;
 use novatel_oem6_api::Log::*;
 use novatel_oem6_api::*;
-use std::cell::{Cell, RefCell};
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError, TrySendError};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
 use std::time::Duration;
 
@@ -121,13 +120,14 @@ pub fn log_thread(
     }
 }
 
+#[derive(Clone)]
 pub struct Subsystem {
     pub oem: OEM6,
-    pub last_cmd: Cell<AckCommand>,
-    pub errors: RefCell<Vec<String>>,
+    pub last_cmd: Arc<RwLock<AckCommand>>,
+    pub errors: Arc<RwLock<Vec<String>>>,
     pub lock_data: Arc<LockData>,
-    pub error_recv: Receiver<RxStatusEventLog>,
-    pub version_recv: Receiver<VersionLog>,
+    pub error_recv: Arc<Mutex<Receiver<RxStatusEventLog>>>,
+    pub version_recv: Arc<Mutex<Receiver<VersionLog>>>,
 }
 
 impl Subsystem {
@@ -151,17 +151,22 @@ impl Subsystem {
 
         Ok(Subsystem {
             oem,
-            last_cmd: Cell::new(AckCommand::None),
-            errors: RefCell::new(vec![]),
+            last_cmd: Arc::new(RwLock::new(AckCommand::None)),
+            errors: Arc::new(RwLock::new(vec![])),
             lock_data: data.clone(),
-            error_recv,
-            version_recv,
+            error_recv: Arc::new(Mutex::new(error_recv)),
+            version_recv: Arc::new(Mutex::new(version_recv)),
         })
     }
 
     fn get_version_log(&self) -> Result<VersionLog, String> {
         match self.oem.request_version() {
-            Ok(_) => match self.version_recv.recv_timeout(RECV_TIMEOUT) {
+            Ok(_) => match self
+                .version_recv
+                .lock()
+                .map_err(|err| format!("Failed to obtain version_recv mutex: {:?}", err))?
+                .recv_timeout(RECV_TIMEOUT)
+            {
                 Ok(log) => Ok(log),
                 Err(err) => Err(format!("Failed to receive version info - {}", err).to_owned()),
             },
@@ -172,34 +177,41 @@ impl Subsystem {
     // Queries
 
     pub fn get_errors(&self) {
-        match self.error_recv.try_recv() {
-            Ok(msg) => {
-                push_err!(
-                    self.errors,
-                    format!(
-                        "RxStatusEvent({}, {}, {}): {}",
-                        msg.word, msg.bit, msg.event, msg.description
-                    )
-                );
-
-                while let Ok(err) = self.error_recv.try_recv() {
+        if let Ok(recv) = self.error_recv.lock() {
+            match recv.try_recv() {
+                Ok(msg) => {
                     push_err!(
                         self.errors,
                         format!(
                             "RxStatusEvent({}, {}, {}): {}",
-                            err.word, err.bit, err.event, err.description
+                            msg.word, msg.bit, msg.event, msg.description
                         )
                     );
+    
+                    while let Ok(err) = recv.try_recv() {
+                        push_err!(
+                            self.errors,
+                            format!(
+                                "RxStatusEvent({}, {}, {}): {}",
+                                err.word, err.bit, err.event, err.description
+                            )
+                        );
+                    }
                 }
+                Err(err) => match err {
+                    // Do nothing. This is the good case
+                    TryRecvError::Empty => {}
+                    // We've lost connection with the errors channel
+                    TryRecvError::Disconnected => {
+                        push_err!(self.errors, "Errors sender disconnected".to_owned());
+                    }
+                },
             }
-            Err(err) => match err {
-                // Do nothing. This is the good case
-                TryRecvError::Empty => {}
-                // We've lost connection with the errors channel
-                TryRecvError::Disconnected => {
-                    push_err!(self.errors, "Errors sender disconnected".to_owned());
-                }
-            },
+        } else {
+            push_err!(
+                self.errors,
+                "Failed to obtain error_recv mutex".to_owned()
+            );
         }
     }
 
@@ -216,7 +228,7 @@ impl Subsystem {
     pub fn get_system_status(&self) -> Result<SystemStatus, Error> {
         self.get_errors();
 
-        let mut errors = match self.errors.try_borrow() {
+        let mut errors = match self.errors.read() {
             Ok(master_vec) => master_vec.clone(),
             _ => vec!["Error: Failed to borrow master errors vector".to_owned()],
         };
@@ -261,7 +273,7 @@ impl Subsystem {
     pub fn get_telemetry(&self) -> Result<Telemetry, Error> {
         self.get_errors();
 
-        let mut errors = match self.errors.try_borrow() {
+        let mut errors = match self.errors.read() {
             Ok(master_vec) => master_vec.clone(),
             _ => vec!["Error: Failed to borrow master errors vector".to_owned()],
         };

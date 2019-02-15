@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-use juniper::FieldResult;
 use mai400_api::*;
 
 /// Common response fields structure for requests
@@ -117,7 +116,7 @@ pub enum TestResults {
 }
 
 /// Response union for 'testHardware' mutation
-graphql_union!(TestResults: () |&self| {
+graphql_union!(TestResults: () where Scalar = <S> |&self| {
     instance_resolvers: |&_| {
         &IntegrationTestResults => match *self {
             TestResults::Integration(ref i) => Some(i),
@@ -240,122 +239,122 @@ pub struct Telemetry {
 #[derive(Debug, Default, PartialEq)]
 pub struct StdTelem(pub StandardTelemetry);
 
-graphql_object!(StdTelem: () |&self| {
+graphql_object!(StdTelem: () where Scalar = <S> |&self| {
 
-    field tlm_counter() -> FieldResult<i32> {
-        Ok(i32::from(self.0.tlm_counter))
+    field tlm_counter() -> i32 {
+        i32::from(self.0.tlm_counter)
     }
 
-    field gps_time() -> FieldResult<i32> {
-        Ok(self.0.gps_time as i32)
+    field gps_time() -> i32 {
+        self.0.gps_time as i32
     }
 
-    field time_subsec() -> FieldResult<i32> {
-        Ok(i32::from(self.0.time_subsec))
+    field time_subsec() -> i32 {
+        i32::from(self.0.time_subsec)
     }
 
-    field cmd_valid_cntr() -> FieldResult<i32> {
-        Ok(i32::from(self.0.cmd_valid_cntr))
+    field cmd_valid_cntr() -> i32 {
+        i32::from(self.0.cmd_valid_cntr)
     }
 
-    field cmd_invalid_cntr() -> FieldResult<i32> {
-        Ok(i32::from(self.0.cmd_invalid_cntr))
+    field cmd_invalid_cntr() -> i32 {
+        i32::from(self.0.cmd_invalid_cntr)
     }
 
-    field cmd_invalid_chksum_cntr() -> FieldResult<i32> {
-        Ok(i32::from(self.0.cmd_invalid_chksum_cntr))
+    field cmd_invalid_chksum_cntr() -> i32 {
+        i32::from(self.0.cmd_invalid_chksum_cntr)
     }
 
-    field last_command() -> FieldResult<i32> {
-        Ok(i32::from(self.0.last_command))
+    field last_command() -> i32 {
+        i32::from(self.0.last_command)
     }
 
-    field acs_mode() -> FieldResult<Mode> {
-        Ok(Mode::from(self.0.acs_mode))
+    field acs_mode() -> Mode {
+        Mode::from(self.0.acs_mode)
     }
 
-    field css() -> FieldResult<Vec<i32>> {
-        Ok(self.0.css.iter().map(|&elem| i32::from(elem)).collect())
+    field css() -> Vec<i32> {
+        self.0.css.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field eclipse_flag() -> FieldResult<i32> {
-        Ok(i32::from(self.0.eclipse_flag))
+    field eclipse_flag() -> i32 {
+        i32::from(self.0.eclipse_flag)
     }
 
-    field sun_vec_b() -> FieldResult<Vec<i32>> {
-        Ok(self.0.sun_vec_b.iter().map(|&elem| i32::from(elem)).collect())
+    field sun_vec_b() -> Vec<i32> {
+        self.0.sun_vec_b.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field i_b_field_meas() -> FieldResult<Vec<i32>> {
-        Ok(self.0.i_b_field_meas.iter().map(|&elem| i32::from(elem)).collect())
+    field i_b_field_meas() -> Vec<i32> {
+        self.0.i_b_field_meas.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field bd() -> FieldResult<Vec<f64>> {
-        Ok(self.0.bd.iter().map(|&elem| f64::from(elem)).collect())
+    field bd() -> Vec<f64> {
+        self.0.bd.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field rws_speed_cmd() -> FieldResult<Vec<i32>> {
-        Ok(self.0.rws_speed_cmd.iter().map(|&elem| i32::from(elem)).collect())
+    field rws_speed_cmd() -> Vec<i32> {
+        self.0.rws_speed_cmd.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field rws_speed_tach() -> FieldResult<Vec<i32>> {
-        Ok(self.0.rws_speed_tach.iter().map(|&elem| i32::from(elem)).collect())
+    field rws_speed_tach() -> Vec<i32> {
+        self.0.rws_speed_tach.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field rwa_torque_cmd() -> FieldResult<Vec<f64>> {
-        Ok(self.0.rwa_torque_cmd.iter().map(|&elem| f64::from(elem)).collect())
+    field rwa_torque_cmd() -> Vec<f64> {
+        self.0.rwa_torque_cmd.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field gc_rwa_torque_cmd() -> FieldResult<Vec<i32>> {
-        Ok(self.0.gc_rwa_torque_cmd.iter().map(|&elem| i32::from(elem)).collect())
+    field gc_rwa_torque_cmd() -> Vec<i32> {
+        self.0.gc_rwa_torque_cmd.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field torque_coil_cmd() -> FieldResult<Vec<f64>> {
-        Ok(self.0.torque_coil_cmd.iter().map(|&elem| f64::from(elem)).collect())
+    field torque_coil_cmd() -> Vec<f64> {
+        self.0.torque_coil_cmd.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field gc_torque_coil_cmd() -> FieldResult<Vec<i32>> {
-        Ok(self.0.gc_torque_coil_cmd.iter().map(|&elem| i32::from(elem)).collect())
+    field gc_torque_coil_cmd() -> Vec<i32> {
+        self.0.gc_torque_coil_cmd.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field qbo_cmd() -> FieldResult<Vec<i32>> {
-        Ok(self.0.qbo_cmd.iter().map(|&elem| i32::from(elem)).collect())
+    field qbo_cmd() -> Vec<i32> {
+        self.0.qbo_cmd.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field qbo_hat() -> FieldResult<Vec<i32>> {
-        Ok(self.0.qbo_hat.iter().map(|&elem| i32::from(elem)).collect())
+    field qbo_hat() -> Vec<i32> {
+        self.0.qbo_hat.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field angle_to_go() -> FieldResult<f64> {
-        Ok(f64::from(self.0.angle_to_go))
+    field angle_to_go() -> f64 {
+        f64::from(self.0.angle_to_go)
     }
 
-    field q_error() -> FieldResult<Vec<i32>> {
-        Ok(self.0.q_error.iter().map(|&elem| i32::from(elem)).collect())
+    field q_error() -> Vec<i32> {
+        self.0.q_error.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field omega_b() -> FieldResult<Vec<f64>> {
-        Ok(self.0.omega_b.iter().map(|&elem| f64::from(elem)).collect())
+    field omega_b() -> Vec<f64> {
+        self.0.omega_b.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field rotating_variable_a() -> FieldResult<i32> {
-        Ok(self.0.rotating_variable_a as i32)
+    field rotating_variable_a() -> i32 {
+        self.0.rotating_variable_a as i32
     }
 
-    field rotating_variable_b() -> FieldResult<i32> {
-        Ok(self.0.rotating_variable_b as i32)
+    field rotating_variable_b() -> i32 {
+        self.0.rotating_variable_b as i32
     }
 
-    field rotating_variable_c() -> FieldResult<i32> {
-        Ok(self.0.rotating_variable_c as i32)
+    field rotating_variable_c() -> i32 {
+        self.0.rotating_variable_c as i32
     }
 
-    field nb() -> FieldResult<Vec<i32>> {
-        Ok(self.0.nb.iter().map(|&elem| i32::from(elem)).collect())
+    field nb() -> Vec<i32> {
+        self.0.nb.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field neci() -> FieldResult<Vec<i32>> {
-        Ok(self.0.neci.iter().map(|&elem| i32::from(elem)).collect())
+    field neci() -> Vec<i32> {
+        self.0.neci.iter().map(|&elem| i32::from(elem)).collect()
     }
 });
 
@@ -402,9 +401,9 @@ pub struct ThermopileSensor {
     flags: Vec<String>,
 }
 
-graphql_object!(IREHSTelem: () |&self| {
-    field thermopile_struct_a() -> FieldResult<ThermopileStruct> {
-        Ok(ThermopileStruct {
+graphql_object!(IREHSTelem: () where Scalar = <S> |&self| {
+    field thermopile_struct_a() -> ThermopileStruct {
+        ThermopileStruct {
                 dip_angle: self.0.dip_angle_a as i32,
                 earth_limb: ThermopileSensor {
                     adc: self.0.thermopiles_a[0] as i32,
@@ -431,11 +430,11 @@ graphql_object!(IREHSTelem: () |&self| {
                     flags: self.0.solution_degraded[3].to_vec()
                 }
             }
-        )
+        
     }
 
-    field thermopile_struct_b() -> FieldResult<ThermopileStruct> {
-        Ok(ThermopileStruct {
+    field thermopile_struct_b() -> ThermopileStruct {
+        ThermopileStruct {
                 dip_angle: self.0.dip_angle_b as i32,
                 earth_limb: ThermopileSensor {
                     adc: self.0.thermopiles_b[0] as i32,
@@ -462,34 +461,34 @@ graphql_object!(IREHSTelem: () |&self| {
                     flags: self.0.solution_degraded[7].to_vec()
                 }
             }
-        )
+        
     }
 
-    field thermopiles_a() -> FieldResult<Vec<i32>> {
-        Ok(self.0.thermopiles_a.iter().map(|&elem| i32::from(elem)).collect())
+    field thermopiles_a() -> Vec<i32> {
+        self.0.thermopiles_a.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field thermopiles_b() -> FieldResult<Vec<i32>> {
-        Ok(self.0.thermopiles_b.iter().map(|&elem| i32::from(elem)).collect())
+    field thermopiles_b() -> Vec<i32> {
+        self.0.thermopiles_b.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field temp_a() -> FieldResult<Vec<i32>> {
-        Ok(self.0.temp_a.iter().map(|&elem| i32::from(elem)).collect())
+    field temp_a() -> Vec<i32> {
+        self.0.temp_a.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field temp_b() -> FieldResult<Vec<i32>> {
-        Ok(self.0.temp_b.iter().map(|&elem| i32::from(elem)).collect())
+    field temp_b() -> Vec<i32> {
+        self.0.temp_b.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field dip_angle_a() -> FieldResult<i32> {
-        Ok(i32::from(self.0.dip_angle_a))
+    field dip_angle_a() -> i32 {
+        i32::from(self.0.dip_angle_a)
     }
 
-    field dip_angle_b() -> FieldResult<i32> {
-        Ok(i32::from(self.0.dip_angle_b))
+    field dip_angle_b() -> i32 {
+        i32::from(self.0.dip_angle_b)
     }
 
-    field solution_degraded() -> FieldResult<Vec<Vec<String>>> {
+    field solution_degraded() -> Vec<Vec<String>> {
         let mut parent = vec![];
         for elem in self.0.solution_degraded.iter() {
             if elem.is_empty() {
@@ -499,7 +498,7 @@ graphql_object!(IREHSTelem: () |&self| {
             }
         }
 
-        Ok(parent)
+        parent
     }
 });
 
@@ -507,17 +506,17 @@ graphql_object!(IREHSTelem: () |&self| {
 #[derive(Debug, Default, PartialEq)]
 pub struct RawIMUTelem(pub RawIMU);
 
-graphql_object!(RawIMUTelem: () |&self| {
-    field accel() -> FieldResult<Vec<i32>> {
-        Ok(self.0.accel.iter().map(|&elem| i32::from(elem)).collect())
+graphql_object!(RawIMUTelem: () where Scalar = <S> |&self| {
+    field accel() -> Vec<i32> {
+        self.0.accel.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field gyro() -> FieldResult<Vec<i32>> {
-        Ok(self.0.gyro.iter().map(|&elem| i32::from(elem)).collect())
+    field gyro() -> Vec<i32> {
+        self.0.gyro.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field gyro_temp() -> FieldResult<i32> {
-        Ok(i32::from(self.0.gyro_temp))
+    field gyro_temp() -> i32 {
+        i32::from(self.0.gyro_temp)
     }
 });
 
@@ -528,170 +527,170 @@ graphql_object!(RawIMUTelem: () |&self| {
 #[derive(Debug, Default, PartialEq)]
 pub struct Rotating(pub RotatingTelemetry);
 
-graphql_object!(Rotating: () |&self| {
+graphql_object!(Rotating: () where Scalar = <S> |&self| {
 
-    field b_field_igrf() -> FieldResult<Vec<f64>> {
-        Ok(self.0.b_field_igrf.iter().map(|&elem| f64::from(elem)).collect())
+    field b_field_igrf() -> Vec<f64> {
+        self.0.b_field_igrf.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field sun_vec_eph() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sun_vec_eph.iter().map(|&elem| f64::from(elem)).collect())
+    field sun_vec_eph() -> Vec<f64> {
+        self.0.sun_vec_eph.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field sc_pos_eci() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sc_pos_eci.iter().map(|&elem| f64::from(elem)).collect())
+    field sc_pos_eci() -> Vec<f64> {
+        self.0.sc_pos_eci.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field sc_vel_eci() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sc_vel_eci.iter().map(|&elem| f64::from(elem)).collect())
+    field sc_vel_eci() -> Vec<f64> {
+        self.0.sc_vel_eci.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field kepler_elem() -> FieldResult<Kepler> {
-        Ok(Kepler(self.0.kepler_elem.clone()))
+    field kepler_elem() -> Kepler {
+        Kepler(self.0.kepler_elem.clone())
     }
 
-    field k_bdot() -> FieldResult<Vec<f64>> {
-        Ok(self.0.k_bdot.iter().map(|&elem| f64::from(elem)).collect())
+    field k_bdot() -> Vec<f64> {
+        self.0.k_bdot.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field kp() -> FieldResult<Vec<f64>> {
-        Ok(self.0.kp.iter().map(|&elem| f64::from(elem)).collect())
+    field kp() -> Vec<f64> {
+        self.0.kp.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field kd() -> FieldResult<Vec<f64>> {
-        Ok(self.0.kd.iter().map(|&elem| f64::from(elem)).collect())
+    field kd() -> Vec<f64> {
+        self.0.kd.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field k_unload() -> FieldResult<Vec<f64>> {
-        Ok(self.0.k_unload.iter().map(|&elem| f64::from(elem)).collect())
+    field k_unload() -> Vec<f64> {
+        self.0.k_unload.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field css_bias() -> FieldResult<Vec<i32>> {
-        Ok(self.0.css_bias.iter().map(|&elem| i32::from(elem)).collect())
+    field css_bias() -> Vec<i32> {
+        self.0.css_bias.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field mag_bias() -> FieldResult<Vec<i32>> {
-        Ok(self.0.mag_bias.iter().map(|&elem| i32::from(elem)).collect())
+    field mag_bias() -> Vec<i32> {
+        self.0.mag_bias.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field rws_volt() -> FieldResult<i32> {
-        Ok(i32::from(self.0.rws_volt))
+    field rws_volt() -> i32 {
+        i32::from(self.0.rws_volt)
     }
 
-    field rws_press() -> FieldResult<i32> {
-        Ok(i32::from(self.0.rws_press))
+    field rws_press() -> i32 {
+        i32::from(self.0.rws_press)
     }
 
-    field att_det_mode() -> FieldResult<i32> {
-        Ok(i32::from(self.0.att_det_mode))
+    field att_det_mode() -> i32 {
+        i32::from(self.0.att_det_mode)
     }
 
-    field rws_reset_cntr() -> FieldResult<Vec<i32>> {
-        Ok(self.0.rws_reset_cntr.iter().map(|&elem| i32::from(elem)).collect())
+    field rws_reset_cntr() -> Vec<i32> {
+        self.0.rws_reset_cntr.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field sun_mag_aligned() -> FieldResult<i32> {
-        Ok(i32::from(self.0.sun_mag_aligned))
+    field sun_mag_aligned() -> i32 {
+        i32::from(self.0.sun_mag_aligned)
     }
 
-    field minor_version() -> FieldResult<i32> {
-        Ok(i32::from(self.0.minor_version))
+    field minor_version() -> i32 {
+        i32::from(self.0.minor_version)
     }
 
-    field mai_sn() -> FieldResult<i32> {
-        Ok(i32::from(self.0.mai_sn))
+    field mai_sn() -> i32 {
+        i32::from(self.0.mai_sn)
     }
 
-    field orbit_prop_mode() -> FieldResult<i32> {
-        Ok(i32::from(self.0.orbit_prop_mode))
+    field orbit_prop_mode() -> i32 {
+        i32::from(self.0.orbit_prop_mode)
     }
 
-    field acs_op_mode() -> FieldResult<i32> {
-        Ok(i32::from(self.0.acs_op_mode))
+    field acs_op_mode() -> i32 {
+        i32::from(self.0.acs_op_mode)
     }
 
-    field proc_reset_cntr() -> FieldResult<i32> {
-        Ok(i32::from(self.0.proc_reset_cntr))
+    field proc_reset_cntr() -> i32 {
+        i32::from(self.0.proc_reset_cntr)
     }
 
-    field major_version() -> FieldResult<i32> {
-        Ok(i32::from(self.0.major_version))
+    field major_version() -> i32 {
+        i32::from(self.0.major_version)
     }
 
-    field ads_op_mode() -> FieldResult<i32> {
-        Ok(i32::from(self.0.ads_op_mode))
+    field ads_op_mode() -> i32 {
+        i32::from(self.0.ads_op_mode)
     }
 
-    field css_gain() -> FieldResult<Vec<f64>> {
-        Ok(self.0.css_gain.iter().map(|&elem| f64::from(elem)).collect())
+    field css_gain() -> Vec<f64> {
+        self.0.css_gain.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field mag_gain() -> FieldResult<Vec<f64>> {
-        Ok(self.0.mag_gain.iter().map(|&elem| f64::from(elem)).collect())
+    field mag_gain() -> Vec<f64> {
+        self.0.mag_gain.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field orbit_epoch() -> FieldResult<i32> {
-        Ok(self.0.orbit_epoch as i32)
+    field orbit_epoch() -> i32 {
+        self.0.orbit_epoch as i32
     }
 
-    field true_anomoly_epoch() -> FieldResult<f64> {
-        Ok(f64::from(self.0.true_anomoly_epoch))
+    field true_anomoly_epoch() -> f64 {
+        f64::from(self.0.true_anomoly_epoch)
     }
 
-    field orbit_epoch_next() -> FieldResult<i32> {
-        Ok(self.0.orbit_epoch_next as i32)
+    field orbit_epoch_next() -> i32 {
+        self.0.orbit_epoch_next as i32
     }
 
-    field sc_pos_eci_epoch() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sc_pos_eci_epoch.iter().map(|&elem| f64::from(elem)).collect())
+    field sc_pos_eci_epoch() -> Vec<f64> {
+        self.0.sc_pos_eci_epoch.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field sc_vel_eci_epoch() -> FieldResult<Vec<f64>> {
-        Ok(self.0.sc_vel_eci_epoch.iter().map(|&elem| f64::from(elem)).collect())
+    field sc_vel_eci_epoch() -> Vec<f64> {
+        self.0.sc_vel_eci_epoch.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field qb_x_wheel_speed() -> FieldResult<i32> {
-        Ok(i32::from(self.0.qb_x_wheel_speed))
+    field qb_x_wheel_speed() -> i32 {
+        i32::from(self.0.qb_x_wheel_speed)
     }
 
-    field qb_x_filter_gain() -> FieldResult<f64> {
-        Ok(f64::from(self.0.qb_x_filter_gain))
+    field qb_x_filter_gain() -> f64 {
+        f64::from(self.0.qb_x_filter_gain)
     }
 
-    field qb_x_dipole_gain() -> FieldResult<f64> {
-        Ok(f64::from(self.0.qb_x_dipole_gain))
+    field qb_x_dipole_gain() -> f64 {
+        f64::from(self.0.qb_x_dipole_gain)
     }
 
-    field dipole_gain() -> FieldResult<Vec<f64>> {
-        Ok(self.0.dipole_gain.iter().map(|&elem| f64::from(elem)).collect())
+    field dipole_gain() -> Vec<f64> {
+        self.0.dipole_gain.iter().map(|&elem| f64::from(elem)).collect()
     }
 
-    field wheel_speed_bias() -> FieldResult<Vec<i32>> {
-        Ok(self.0.wheel_speed_bias.iter().map(|&elem| i32::from(elem)).collect())
+    field wheel_speed_bias() -> Vec<i32> {
+        self.0.wheel_speed_bias.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field cos_sun_mag_align_thresh() -> FieldResult<f64> {
-        Ok(f64::from(self.0.cos_sun_mag_align_thresh))
+    field cos_sun_mag_align_thresh() -> f64 {
+        f64::from(self.0.cos_sun_mag_align_thresh)
     }
 
-    field unload_ang_thresh() -> FieldResult<f64> {
-        Ok(f64::from(self.0.unload_ang_thresh))
+    field unload_ang_thresh() -> f64 {
+        f64::from(self.0.unload_ang_thresh)
     }
 
-    field q_sat() -> FieldResult<f64> {
-        Ok(f64::from(self.0.q_sat))
+    field q_sat() -> f64 {
+        f64::from(self.0.q_sat)
     }
 
-    field rwa_trq_max() -> FieldResult<f64> {
-        Ok(f64::from(self.0.rwa_trq_max))
+    field rwa_trq_max() -> f64 {
+        f64::from(self.0.rwa_trq_max)
     }
 
-    field rws_motor_current() -> FieldResult<Vec<i32>> {
-        Ok(self.0.rws_motor_current.iter().map(|&elem| i32::from(elem)).collect())
+    field rws_motor_current() -> Vec<i32> {
+        self.0.rws_motor_current.iter().map(|&elem| i32::from(elem)).collect()
     }
 
-    field rws_motor_temp() -> FieldResult<i32> {
-        Ok(i32::from(self.0.rws_motor_temp))
+    field rws_motor_temp() -> i32 {
+        i32::from(self.0.rws_motor_temp)
     }
 
 });
@@ -700,28 +699,28 @@ graphql_object!(Rotating: () |&self| {
 #[derive(Debug, Default, PartialEq)]
 pub struct Kepler(pub KeplerElem);
 
-graphql_object!(Kepler: () |&self| {
-    field semi_major_axis() -> FieldResult<f64> {
-        Ok(f64::from(self.0.semi_major_axis))
+graphql_object!(Kepler: () where Scalar = <S> |&self| {
+    field semi_major_axis() -> f64 {
+        f64::from(self.0.semi_major_axis)
     }
 
-    field eccentricity() -> FieldResult<f64> {
-        Ok(f64::from(self.0.eccentricity))
+    field eccentricity() -> f64 {
+        f64::from(self.0.eccentricity)
     }
 
-    field inclination() -> FieldResult<f64> {
-        Ok(f64::from(self.0.inclination))
+    field inclination() -> f64 {
+        f64::from(self.0.inclination)
     }
 
-    field raan() -> FieldResult<f64> {
-        Ok(f64::from(self.0.raan))
+    field raan() -> f64 {
+        f64::from(self.0.raan)
     }
 
-    field arg_parigee() -> FieldResult<f64> {
-        Ok(f64::from(self.0.arg_parigee))
+    field arg_parigee() -> f64 {
+        f64::from(self.0.arg_parigee)
     }
 
-    field true_anomoly() -> FieldResult<f64> {
-        Ok(f64::from(self.0.true_anomoly))
+    field true_anomoly() -> f64 {
+        f64::from(self.0.true_anomoly)
     }
 });

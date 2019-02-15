@@ -18,24 +18,9 @@ use super::*;
 
 #[test]
 fn debug_telem_good() {
-    let mock = mock_new!();
-
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant1, Ok(1));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant1, Ok(11));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant2, Ok(2));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant2, Ok(22));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant3, Ok(3));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant3, Ok(33));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant4, Ok(4));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant4, Ok(44));
+    let mut mock = mock_new!();
+    mock.state = true;
+    
     let service = service_new!(mock);
 
     let query = r#"
@@ -69,17 +54,13 @@ fn debug_telem_good() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn debug_telem_bad() {
-    let mock = mock_new!();
-
-    mock.get_activation_count
-        .return_value(Err(AntsError::GenericError));
-    mock.get_activation_time
-        .return_value(Err(AntsError::GenericError));
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -114,48 +95,37 @@ fn debug_telem_bad() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn nominal_telem_good() {
-    let mock = mock_new!();
-
-    let nominal = AntsTelemetry {
-        raw_temp: 15,
-        uptime: 35,
-        deploy_status: DeployStatus {
-            sys_armed: true,
-            ant_1_active: true,
-            ant_4_not_deployed: false,
-            ..Default::default()
-        },
-    };
-    mock.get_system_telemetry.return_value(Ok(nominal.clone()));
-
+    let mut mock = mock_new!();
+    mock.state = true;
+    
     let service = service_new!(mock);
 
     let query = r#"
         {
             telemetry {
                 nominal {
-                     rawTemp,
-                     uptime,
-                     sysBurnActive,
-                     sysIgnoreDeploy,
-                     sysArmed,
+                     ant1Active,
                      ant1NotDeployed,
                      ant1StoppedTime,
-                     ant1Active,
+                     ant2Active,
                      ant2NotDeployed,
                      ant2StoppedTime,
-                     ant2Active,
+                     ant3Active,
                      ant3NotDeployed,
                      ant3StoppedTime,
-                     ant3Active,
+                     ant4Active,
                      ant4NotDeployed,
                      ant4StoppedTime,
-                     ant4Active
+                     rawTemp,
+                     sysArmed,
+                     sysBurnActive,
+                     sysIgnoreDeploy,
+                     uptime,
                 }
             }
         }"#;
@@ -163,117 +133,34 @@ fn nominal_telem_good() {
     let expected = json!({
             "telemetry": {
                 "nominal": {
-                     "rawTemp": 15,
-                     "uptime": 35,
-                     "sysBurnActive": false,
-                     "sysIgnoreDeploy": false,
-                     "sysArmed": true,
+                     "ant1Active": true,
                      "ant1NotDeployed": false,
                      "ant1StoppedTime": false,
-                     "ant1Active": true,
+                     "ant2Active": false,
                      "ant2NotDeployed": false,
                      "ant2StoppedTime": false,
-                     "ant2Active": false,
+                     "ant3Active": false,
                      "ant3NotDeployed": false,
                      "ant3StoppedTime": false,
-                     "ant3Active": false,
+                     "ant4Active": false,
                      "ant4NotDeployed": false,
                      "ant4StoppedTime": false,
-                     "ant4Active": false
-                }
-            }
-    });
-
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
-}
-
-#[test]
-fn nominal_telem_nondefault() {
-    let mock = mock_new!();
-
-    let nominal = AntsTelemetry {
-        raw_temp: 15,
-        uptime: 35,
-        deploy_status: DeployStatus {
-            sys_burn_active: true,
-            sys_ignore_deploy: true,
-            sys_armed: true,
-            ant_1_not_deployed: true,
-            ant_1_stopped_time: true,
-            ant_1_active: true,
-            ant_2_not_deployed: true,
-            ant_2_stopped_time: true,
-            ant_2_active: true,
-            ant_3_not_deployed: true,
-            ant_3_stopped_time: true,
-            ant_3_active: true,
-            ant_4_not_deployed: true,
-            ant_4_stopped_time: true,
-            ant_4_active: true,
-        },
-    };
-    mock.get_system_telemetry.return_value(Ok(nominal.clone()));
-
-    let service = service_new!(mock);
-
-    let query = r#"
-        {
-            telemetry {
-                nominal {
-                     rawTemp,
-                     uptime,
-                     sysBurnActive,
-                     sysIgnoreDeploy,
-                     sysArmed,
-                     ant1NotDeployed,
-                     ant1StoppedTime,
-                     ant1Active,
-                     ant2NotDeployed,
-                     ant2StoppedTime,
-                     ant2Active,
-                     ant3NotDeployed,
-                     ant3StoppedTime,
-                     ant3Active,
-                     ant4NotDeployed,
-                     ant4StoppedTime,
-                     ant4Active
-                }
-            }
-        }"#;
-
-    let expected = json!({
-            "telemetry": {
-                "nominal": {
                      "rawTemp": 15,
-                     "uptime": 35,
-                     "sysBurnActive": true,
-                     "sysIgnoreDeploy": true,
                      "sysArmed": true,
-                     "ant1NotDeployed": true,
-                     "ant1StoppedTime": true,
-                     "ant1Active": true,
-                     "ant2NotDeployed": true,
-                     "ant2StoppedTime": true,
-                     "ant2Active": true,
-                     "ant3NotDeployed": true,
-                     "ant3StoppedTime": true,
-                     "ant3Active": true,
-                     "ant4NotDeployed": true,
-                     "ant4StoppedTime": true,
-                     "ant4Active": true
+                     "sysBurnActive": false,
+                     "sysIgnoreDeploy": false,
+                     "uptime": 35,
                 }
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn nominal_telem_bad() {
-    let mock = mock_new!();
-
-    mock.get_system_telemetry
-        .return_value(Err(AntsError::GenericError));
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -281,23 +168,23 @@ fn nominal_telem_bad() {
         {
             telemetry {
                 nominal {
-                     rawTemp,
-                     uptime,
-                     sysBurnActive,
-                     sysIgnoreDeploy,
-                     sysArmed,
+                     ant1Active,
                      ant1NotDeployed,
                      ant1StoppedTime,
-                     ant1Active,
+                     ant2Active,
                      ant2NotDeployed,
                      ant2StoppedTime,
-                     ant2Active,
+                     ant3Active,
                      ant3NotDeployed,
                      ant3StoppedTime,
-                     ant3Active,
+                     ant4Active,
                      ant4NotDeployed,
                      ant4StoppedTime,
-                     ant4Active
+                     rawTemp,
+                     sysArmed,
+                     sysBurnActive,
+                     sysIgnoreDeploy,
+                     uptime,
                 }
             }
         }"#;
@@ -305,63 +192,34 @@ fn nominal_telem_bad() {
     let expected = json!({
             "telemetry": {
                 "nominal": {
-                     "rawTemp": 0,
-                     "uptime": 0,
-                     "sysBurnActive": false,
-                     "sysIgnoreDeploy": false,
-                     "sysArmed": false,
+                     "ant1Active": false,
                      "ant1NotDeployed": false,
                      "ant1StoppedTime": false,
-                     "ant1Active": false,
+                     "ant2Active": false,
                      "ant2NotDeployed": false,
                      "ant2StoppedTime": false,
-                     "ant2Active": false,
+                     "ant3Active": false,
                      "ant3NotDeployed": false,
                      "ant3StoppedTime": false,
-                     "ant3Active": false,
+                     "ant4Active": false,
                      "ant4NotDeployed": false,
                      "ant4StoppedTime": false,
-                     "ant4Active": false
+                     "rawTemp": 0,
+                     "sysArmed": false,
+                     "sysBurnActive": false,
+                     "sysIgnoreDeploy": false,
+                     "uptime": 0,
                 }
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn telemetry_full() {
-    let mock = mock_new!();
-
-    let nominal = AntsTelemetry {
-        raw_temp: 15,
-        uptime: 35,
-        deploy_status: DeployStatus {
-            sys_armed: true,
-            ant_1_active: true,
-            ant_4_not_deployed: false,
-            ..Default::default()
-        },
-    };
-
-    mock.get_system_telemetry.return_value(Ok(nominal.clone()));
-
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant1, Ok(1));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant1, Ok(11));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant2, Ok(2));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant2, Ok(22));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant3, Ok(3));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant3, Ok(33));
-    mock.get_activation_count
-        .return_value_for(KANTSAnt::Ant4, Ok(4));
-    mock.get_activation_time
-        .return_value_for(KANTSAnt::Ant4, Ok(44));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -379,23 +237,23 @@ fn telemetry_full() {
                      ant4ActivationTime,
                 },
                 nominal {
-                     rawTemp,
-                     uptime,
-                     sysBurnActive,
-                     sysIgnoreDeploy,
-                     sysArmed,
+                     ant1Active,
                      ant1NotDeployed,
                      ant1StoppedTime,
-                     ant1Active,
+                     ant2Active,
                      ant2NotDeployed,
                      ant2StoppedTime,
-                     ant2Active,
+                     ant3Active,
                      ant3NotDeployed,
                      ant3StoppedTime,
-                     ant3Active,
+                     ant4Active,
                      ant4NotDeployed,
                      ant4StoppedTime,
-                     ant4Active
+                     rawTemp,
+                     sysArmed,
+                     sysBurnActive,
+                     sysIgnoreDeploy,
+                     uptime,
                 }
             }
         }"#;
@@ -413,26 +271,26 @@ fn telemetry_full() {
                          "ant4ActivationTime": 44,
                 },
                 "nominal": {
-                     "rawTemp": 15,
-                     "uptime": 35,
-                     "sysBurnActive": false,
-                     "sysIgnoreDeploy": false,
-                     "sysArmed": true,
+                     "ant1Active": true,
                      "ant1NotDeployed": false,
                      "ant1StoppedTime": false,
-                     "ant1Active": true,
+                     "ant2Active": false,
                      "ant2NotDeployed": false,
                      "ant2StoppedTime": false,
-                     "ant2Active": false,
+                     "ant3Active": false,
                      "ant3NotDeployed": false,
                      "ant3StoppedTime": false,
-                     "ant3Active": false,
+                     "ant4Active": false,
                      "ant4NotDeployed": false,
                      "ant4StoppedTime": false,
-                     "ant4Active": false
+                     "rawTemp": 15,
+                     "sysArmed": true,
+                     "sysBurnActive": false,
+                     "sysIgnoreDeploy": false,
+                     "uptime": 35,
                 }
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

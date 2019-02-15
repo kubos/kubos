@@ -35,8 +35,8 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         -> FieldResult<Vec<KAppRegistryEntry>> as "Kubos Apps Query"
     {
         let mut result: Vec<KAppRegistryEntry> = Vec::new();
-        let entries = executor.context().subsystem().entries.borrow();
-        let mut final_iter = entries.iter().filter(|ref e| {
+        let entries = executor.context().subsystem().entries.lock()?;
+        let final_iter = entries.iter().filter(|ref e| {
             if uuid.is_some() && &e.app.uuid != uuid.as_ref().unwrap() {
                 return false;
             }
