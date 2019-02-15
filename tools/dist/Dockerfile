@@ -41,6 +41,7 @@ RUN pip3 install responses
 # Setup rust stuff
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH "$PATH:/root/.cargo/bin"
+RUN rustup default 1.32.0
 RUN rustup target install arm-unknown-linux-gnueabihf
 RUN rustup target install armv5te-unknown-linux-gnueabi
 RUN /root/.cargo/bin/cargo install --git https://github.com/kubos/cargo-kubos
