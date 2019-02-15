@@ -18,13 +18,14 @@ use super::*;
 
 #[test]
 fn arm_status_armed() {
-    let mock = mock_new!();
-
-    mock.get_deploy.return_value(Ok(DeployStatus {
+    let mut mock = mock_new!();
+    mock.state = true;
+    
+    mock.deploy_status = DeployStatus {
         sys_armed: true,
         ..Default::default()
-    }));
-
+    };
+    
     let service = service_new!(mock);
 
     let query = r#"
@@ -36,17 +37,18 @@ fn arm_status_armed() {
             "armStatus": "ARMED"
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn arm_status_disarmed() {
-    let mock = mock_new!();
-
-    mock.get_deploy.return_value(Ok(DeployStatus {
+    let mut mock = mock_new!();
+    mock.state = true;
+    
+    mock.deploy_status = DeployStatus {
         sys_armed: false,
         ..Default::default()
-    }));
+    };
 
     let service = service_new!(mock);
 
@@ -59,5 +61,5 @@ fn arm_status_disarmed() {
             "armStatus": "DISARMED"
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

@@ -46,42 +46,38 @@ fn register_good() {
 
     let register_query = format!(
         r#"mutation {{
-        register(path: "{}") {{
-            success,
-            errors,
+        register(path: \"{}\") {{
             entry {{
                 active, 
                 app {{
+                    author,
                     name,
                     version,
-                    author
                 }}
-            }}
+            }},
+            errors,
+            success,
         }}
     }}"#,
         app_bin.to_str().unwrap()
     );
 
     let expected = json!({
-        "errors": "",
-        "data": {
-           "register": {
-               "entry": {
-                  "active": true,
-                   "app": {
-                       "name": "dummy",
-                       "version": "0.0.1",
-                       "author": "user"
-                   }
-               },
-               "errors": "",
-               "success": true,
-           }
-        }
-    })
-    .to_string();
+       "register": {
+           "entry": {
+              "active": true,
+               "app": {
+                   "author": "user",
+                   "name": "dummy",
+                   "version": "0.0.1",
+               }
+           },
+           "errors": "",
+           "success": true,
+       }
+    });
 
-    assert_eq!(service.process(&register_query.to_owned()), expected);
+    test!(service, register_query, expected);
 }
 
 #[test]
@@ -99,9 +95,7 @@ fn register_no_manifest() {
 
     let register_query = format!(
         r#"mutation {{
-        register(path: "{}") {{
-            success,
-            errors,
+        register(path: \"{}\") {{
             entry {{
                 active, 
                 app {{
@@ -109,25 +103,23 @@ fn register_no_manifest() {
                     version,
                     author
                 }}
-            }}
+            }},
+            errors,
+            success,
         }}
     }}"#,
         app_bin.to_str().unwrap()
     );
 
     let expected = json!({
-        "errors": "",
-        "data": {
-           "register": {
-               "entry": null,
-               "errors": "IO Error: No such file or directory (os error 2)",
-               "success": false,
-           }
-        }
-    })
-    .to_string();
+       "register": {
+           "entry": null,
+           "errors": "IO Error: No such file or directory (os error 2)",
+           "success": false,
+       }
+    });
 
-    assert_eq!(service.process(&register_query.to_owned()), expected);
+    test!(service, register_query, expected);
 }
 
 #[test]
@@ -152,9 +144,7 @@ fn register_no_name() {
 
     let register_query = format!(
         r#"mutation {{
-        register(path: "{}") {{
-            success,
-            errors,
+        register(path: \"{}\") {{
             entry {{
                 active, 
                 app {{
@@ -162,25 +152,23 @@ fn register_no_name() {
                     version,
                     author
                 }}
-            }}
+            }},
+            errors,
+            success,
         }}
     }}"#,
         app_bin.to_str().unwrap()
     );
 
     let expected = json!({
-        "errors": "",
-        "data": {
-           "register": {
-               "entry": null,
-               "errors": "Failed to parse manifest.toml: missing field `name`",
-               "success": false,
-           }
-        }
-    })
-    .to_string();
+       "register": {
+           "entry": null,
+           "errors": "Failed to parse manifest.toml: missing field `name`",
+           "success": false,
+       }
+    });
 
-    assert_eq!(service.process(&register_query.to_owned()), expected);
+    test!(service, register_query, expected);
 }
 
 #[test]
@@ -206,9 +194,7 @@ fn register_bad_name() {
 
     let register_query = format!(
         r#"mutation {{
-        register(path: "{}") {{
-            success,
-            errors,
+        register(path: \"{}\") {{
             entry {{
                 active, 
                 app {{
@@ -216,25 +202,23 @@ fn register_bad_name() {
                     version,
                     author
                 }}
-            }}
+            }},
+            errors,
+            success,
         }}
     }}"#,
         app_bin.to_str().unwrap()
     );
 
     let expected = json!({
-        "errors": "",
-        "data": {
-           "register": {
-               "entry": null,
-               "errors": "Failed to register app: Application file fake not found in given path",
-               "success": false,
-           }
-        }
-    })
-    .to_string();
+       "register": {
+           "entry": null,
+           "errors": "Failed to register app: Application file fake not found in given path",
+           "success": false,
+       }
+    });
 
-    assert_eq!(service.process(&register_query.to_owned()), expected);
+    test!(service, register_query, expected);
 }
 
 #[test]
@@ -259,9 +243,7 @@ fn register_no_version() {
 
     let register_query = format!(
         r#"mutation {{
-        register(path: "{}") {{
-            success,
-            errors,
+        register(path: \"{}\") {{
             entry {{
                 active, 
                 app {{
@@ -269,25 +251,23 @@ fn register_no_version() {
                     version,
                     author
                 }}
-            }}
+            }},
+            errors,
+            success,
         }}
     }}"#,
         app_bin.to_str().unwrap()
     );
 
     let expected = json!({
-        "errors": "",
-        "data": {
-           "register": {
-               "entry": null,
-               "errors": "Failed to parse manifest.toml: missing field `version`",
-               "success": false,
-           }
-        }
-    })
-    .to_string();
+       "register": {
+           "entry": null,
+           "errors": "Failed to parse manifest.toml: missing field `version`",
+           "success": false,
+       }
+    });
 
-    assert_eq!(service.process(&register_query.to_owned()), expected);
+    test!(service, register_query, expected);
 }
 
 #[test]
@@ -312,9 +292,7 @@ fn register_no_author() {
 
     let register_query = format!(
         r#"mutation {{
-        register(path: "{}") {{
-            success,
-            errors,
+        register(path: \"{}\") {{
             entry {{
                 active, 
                 app {{
@@ -322,25 +300,23 @@ fn register_no_author() {
                     version,
                     author
                 }}
-            }}
+            }},
+            errors,
+            success,
         }}
     }}"#,
         app_bin.to_str().unwrap()
     );
 
     let expected = json!({
-        "errors": "",
-        "data": {
-           "register": {
-               "entry": null,
-               "errors": "Failed to parse manifest.toml: missing field `author`",
-               "success": false,
-           }
-        }
-    })
-    .to_string();
+       "register": {
+           "entry": null,
+           "errors": "Failed to parse manifest.toml: missing field `author`",
+           "success": false,
+       }
+    });
 
-    assert_eq!(service.process(&register_query.to_owned()), expected);
+    test!(service, register_query, expected);
 }
 
 #[test]
@@ -349,9 +325,7 @@ fn register_bad_path() {
     let service = mock_service!(registry_dir);
 
     let register_query = r#"mutation {
-        register(path: "fake/files") {
-            success,
-            errors,
+        register(path: \"fake/files\") {
             entry {
                 active, 
                 app {
@@ -359,21 +333,19 @@ fn register_bad_path() {
                     version,
                     author
                 }
-            }
+            },
+            errors,
+            success,
         }
     }"#;
 
     let expected = json!({
-        "errors": "",
-        "data": {
-           "register": {
-               "entry": null,
-               "errors": "Failed to register app: fake/files does not exist",
-               "success": false,
-           }
-        }
-    })
-    .to_string();
+       "register": {
+           "entry": null,
+           "errors": "Failed to register app: fake/files does not exist",
+           "success": false,
+       }
+    });
 
-    assert_eq!(service.process(&register_query.to_owned()), expected);
+    test!(service, register_query, expected);
 }

@@ -18,9 +18,9 @@ use super::*;
 
 #[test]
 fn noop_good() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = true;
 
-    mock.watchdog_kick.return_value(Ok(()));
     let service = service_new!(mock);
 
     let query = r#"mutation {
@@ -37,12 +37,13 @@ fn noop_good() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn noop_bad() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -60,5 +61,5 @@ fn noop_bad() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

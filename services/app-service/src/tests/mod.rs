@@ -37,6 +37,36 @@ macro_rules! mock_service {
     }};
 }
 
+macro_rules! request {
+    ($service:ident, $query:ident) => {{
+        // Warp doesn't like control characters (ie. new line characters)
+        // so we need to remove them before we send the request
+        let query = $query.replace("\n","");
+        warp::test::request()
+            .header("Content-Type", "application/json")
+            .method("POST")
+            .body(format!("{{\"query\": \"{}\"}}", query))
+            .reply(&$service.filter)
+    }};
+}
+
+macro_rules! wrap {
+    ($result:ident) => {{
+        &json!({
+                "data": $result
+        }).to_string()
+    }};
+}
+
+macro_rules! test {
+    ($service:ident, $query:ident, $expected:ident) => {{
+        let res = request!($service, $query);
+
+        assert_eq!(res.body(), wrap!($expected));
+        
+    }};
+}
+
 mod register_app;
 mod registry_onboot;
 mod registry_start_app;

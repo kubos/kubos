@@ -18,9 +18,8 @@ use super::*;
 
 #[test]
 fn arm_good_arm() {
-    let mock = mock_new!();
-
-    mock.arm.return_value(Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -38,12 +37,13 @@ fn arm_good_arm() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn arm_error_arm() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -61,14 +61,13 @@ fn arm_error_arm() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn arm_good_disarm() {
-    let mock = mock_new!();
-
-    mock.disarm.return_value(Ok(()));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -86,12 +85,13 @@ fn arm_good_disarm() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn arm_error_disarm() {
-    let mock = mock_new!();
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -109,5 +109,5 @@ fn arm_error_disarm() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

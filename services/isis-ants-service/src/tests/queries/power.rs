@@ -18,9 +18,8 @@ use super::*;
 
 #[test]
 fn power_on() {
-    let mock = mock_new!();
-
-    mock.get_uptime.return_value(Ok(10));
+    let mut mock = mock_new!();
+    mock.state = true;
 
     let service = service_new!(mock);
 
@@ -39,14 +38,13 @@ fn power_on() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
 fn power_off() {
-    let mock = mock_new!();
-
-    mock.get_uptime.return_value(Ok(0));
+    let mut mock = mock_new!();
+    mock.state = false;
 
     let service = service_new!(mock);
 
@@ -65,5 +63,5 @@ fn power_off() {
             }
     });
 
-    assert_eq!(service.process(&query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
