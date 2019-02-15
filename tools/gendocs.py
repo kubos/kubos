@@ -46,6 +46,7 @@ def main():
 
     subprocess.call("sphinx-build docs/ html/", shell=True)
     shutil.rmtree("./xml")
+
     subprocess.call("cargo doc --no-deps", shell=True)
     dir_util.copy_tree("target/doc", "html/rust-docs")
 

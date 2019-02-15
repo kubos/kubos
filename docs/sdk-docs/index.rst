@@ -6,7 +6,7 @@ to build Kubos projects:
 
 -  Vagrant box - The VM that contains the "ready to run" Kubos development
    environment
--  Kubos source modules - the underlying libraries on which Kubos projects
+-  Kubos source modules - The underlying libraries on which Kubos projects
    are built
 
 .. uml::
@@ -28,7 +28,7 @@ to build Kubos projects:
         }
     }
 
-    () "flash" as flash
+    () "transfer" as flash
 
     node "OBC - Kubos Linux" {
         cloud "kubos-proj" as application
@@ -50,7 +50,7 @@ This documentation section contains the various guides related to using the Kubo
 
     - :doc:`../installation-docs/sdk-installing` - How to install the SDK onto your host machine
     - :doc:`sdk-examples` - A list of example projects using the SDK
-    - :doc:`sdk-cheatsheet` - A quick guide for the most common SDK tasks
+    - :doc:`sdk-c` - A guide to using C with the Kubos SDK
     - :doc:`sdk-rust` - How to develop and run Kubos projects using Rust
     - :doc:`sdk-python` - How to develop and run Kubos projects using Python
     - :doc:`windows-dev-environment` - How to develop Kubos projects from a Windows-based host computer
@@ -61,7 +61,7 @@ This documentation section contains the various guides related to using the Kubo
 
     ../installation-docs/sdk-installing
     sdk-examples
-    sdk-cheatsheet
+    sdk-c
     sdk-rust
     sdk-python
     windows-dev-environment

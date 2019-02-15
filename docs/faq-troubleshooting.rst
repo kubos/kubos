@@ -82,6 +82,26 @@ only. Change the project file permissions to allow the local ``vagrant`` user to
 Interacting with an OBC
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+Can't Connect via Serial Debug
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If the SDK was unable to connect to the Kubos Linux target using ``minicom kubos``::
+
+-  Check that the Kubos Linux target is turned on and connected to your computer
+
+-  Check that no other Vagrant images are running. Only one VM can have
+   control of the USB, so it may be that another instance currently has
+   control of the device. You can shutdown a Vagrant image with the
+   command ``vagrant halt``
+
+-  Verify that the USB is showing up within the Vagrant environment with
+   the ``lsusb`` command. You should see an FTDI device
+
+-  Verify that the USB has been mapped to a linux device. Issue the
+   command ``ls /dev``. You should see a /dev/ttyUSB\* device. If you
+   don't, try rebooting your Vagrant image (``vagrant halt``,
+   ``vagrant up``)
+
 Can't Connect via SSH
 ^^^^^^^^^^^^^^^^^^^^^
 

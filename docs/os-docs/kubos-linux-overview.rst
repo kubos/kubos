@@ -261,9 +261,6 @@ This directory is included in the system's PATH, so applications placed
 here can be called directly from anywhere, without needing to know the
 full file path.
 
-/home/system/usr/local/bin
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 /home/system/etc/init.d
 ^^^^^^^^^^^^^^^^^^^^^^^
 

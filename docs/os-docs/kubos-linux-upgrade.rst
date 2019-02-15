@@ -61,7 +61,6 @@ Installation
 
 Acquire an upgrade package from https://github.com/kubos/kubos-linux-build/releases.
 
-
 .. note::
 
     Not all releases can be installed via upgrade. Some releases contain
@@ -69,12 +68,9 @@ Acquire an upgrade package from https://github.com/kubos/kubos-linux-build/relea
     required instead.
 
 
-Transfer the package to the target system using scp::
+Transfer the package to the target system using ``scp``::
 
    $ scp kpack-{version}.itb kubos@{target_ip}:/upgrade/
-
-Refer to the :ref:`flash-troubleshooting` section if anything goes wrong
-with the transfer.
 
 Once the transfer has completed successfully, trigger a reboot of the
 board. This can be done with the Linux ``reboot`` command. Once job

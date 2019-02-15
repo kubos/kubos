@@ -24,7 +24,6 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KubOS project
--  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`kubos-linux-on-bbb` - Steps to build Kubos Linux for the Beaglebone Black
 -  :doc:`../installation-docs/installing-linux-bbb` - Steps to install Kubos Linux
@@ -402,10 +401,6 @@ All system-related `/home/` paths will reside here.
 This directory is included in the system's PATH, so applications placed
 here can be called directly from anywhere, without needing to know the
 full file path.
-
-/home/system/usr/local/bin
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
 /home/system/etc/init.d
 ^^^^^^^^^^^^^^^^^^^^^^^

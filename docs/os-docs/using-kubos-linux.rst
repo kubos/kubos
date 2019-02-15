@@ -16,7 +16,6 @@ SDK Documentation
 
 -  :doc:`../installation-docs/sdk-installing`
 -  :doc:`../tutorials/first-project`
--  :doc:`../sdk-docs/sdk-reference`
 
 Board-Specific Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -190,11 +189,22 @@ You will be prompted for the `kubos` account password.
 
 You can also use a tool, like PuTTY, to create an SSH connection.
 
-File Transfer
-~~~~~~~~~~~~~
+.. _file-transfer:
 
-Once the IP address has been set, you can also transfer files to and from the stack using the ``scp`` command.
-Again, this command can be run from either the SDK or your host machine.
+File Transfer
+-------------
+
+Once your board is connected and running you can begin transferring files
+to it. There are two supported methods of file transfer: ``scp`` and ``minicom``.
+
+SCP
+~~~
+
+Transferring files using ``scp`` requires the board to have an IP
+connection using either ethernet or SLIP.
+
+Once the IP address has been set, you can transfer files to and from the stack using the ``scp`` command.
+This command can be run from either the SDK or your host machine.
 
 For example, if I wanted to send a file on my host machine, `test.txt`, to reside in the `kubos` account's home directory,
 given a stack IP of ``10.50.1.10``, I would enter::
@@ -207,26 +217,11 @@ given a stack IP of ``10.50.1.10``, I would enter::
     reliable when done over an ethernet connection instead (for boards which have an ethernet port
     available)
 
-User Applications
------------------
+Minicom
+~~~~~~~
 
-User applications are created, built, and flashed onto a target board
-as Kubos SDK projects. Check out the `Kubos SDK page <sdk-docs>` for
-details on creating and building new applications.
-
-.. _updating-credentials:
-
-Flash Troubleshooting
----------------------
-
-See the :ref:`flash-troubleshooting` of our FAQ guide for troubleshooting
-tips.
-
-Manual File Transfer
---------------------
-
-If for some reason you want to manually transfer a specific file onto
-the target board, for example a custom script, you'll need to do the following:
+If your board only has serial connections and there is no spare UART for SLIP,
+you can still transfer files over the debug serial console using ``minicom``.
 
 Connect to the board through minicom (the file transfer protocol is not
 guaranteed to work with any other terminal program)
@@ -370,6 +365,8 @@ future.
 Please refer to the appropriate :ref:`Working with {board} <system-guides>` document for more
 information about the specific peripheral availability.
 
+.. _updating-credentials:
+
 .. _user-accounts:
 
 User Accounts
@@ -428,11 +425,6 @@ All other system logs are located in this top-level directory.
 This directory is included in the system's PATH, so applications placed
 here can be called directly from anywhere, without needing to know the
 full file path.
-
-/home/system/usr/local/bin
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Do we even need this directory anymore?
 
 /home/system/etc/init.d
 ^^^^^^^^^^^^^^^^^^^^^^^
