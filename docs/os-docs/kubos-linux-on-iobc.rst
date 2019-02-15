@@ -164,28 +164,6 @@ If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
 main "buildroot-2017.02.8" directory in a new "output/host" folder.
 
-Reset the Global Links
-~~~~~~~~~~~~~~~~~~~~~~
-
-If you run a full build, the links to all the Kubos SDK modules will be changed to
-point at modules within the buildroot directory. As a result, you will be unable
-to build any future Kubos SDK projects as a non-privileged user.
-
-To fix this, run these commands:
-
-::
-
-    $ cd $HOME/.kubos/kubos/tools
-    $ ./kubos_link.py
-    
-Depending on the state of your Kubos SDK project, you might also need to change the
-module links locally:
-
-::
-
-    $ cd {project folder}
-    $ kubos link -a
-
 Create an SD Card Image
 ~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -21,7 +21,6 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../tutorials/first-project` - Basic tutorial for creating your first SDK project
--  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`../os-docs/working-with-the-iobc` - Guide for interacting with iOBC-specific features
 -  :doc:`../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux

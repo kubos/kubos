@@ -106,7 +106,7 @@ For example, when creating a new ADCS API, a new folder should be created within
     |           +-- <new-api>.h
     |       +-- docs
     |           +-- Doxyfile
-    |       +-- module.json
+    |       +-- CMakeLists.txt
     |       +-- source\
     |           +-- main.c
     |       +-- test\
@@ -120,7 +120,7 @@ For example, when creating a new ADCS API, a new folder should be created within
     +-- circle.yml
     +-- cmocka\
     
-See the :doc:`module development doc <kubos-development>` for steps to create a new Kubos module in C.
+See the :doc:`C module development doc <../sdk-docs/sdk-c>` for steps to create a new Kubos module in C.
 
 APIs written in Rust will reside under the same parent folder, but their files will be generated with ``cargo``.
 
@@ -225,15 +225,6 @@ C
 
 Unit tests for APIs written in C are run using `CMocka <https://api.cmocka.org/>`__.
 
-The C API will contain the following lines in its ``module.json`` file::
-
-    "testDependencies": {
-        "cmocka": "kubos/cmocka"
-    },
-    "testTargets": [
-        "x86-linux-native"
-    ]
-
 The C API should contain a ``test`` folder with a subfolder containing the test set/s (most APIs will only have one test set).
 
 Within each test set should be three files:
@@ -243,7 +234,8 @@ Within each test set should be three files:
     - ``stubs.cmake`` - Makes the stub functions available to the test builder/runner
 
     
-Unit tests can be run locally by navigating to the API folder and running ``kubos test``.
+Unit tests can be run locally by navigating to the test folder under the API folder,
+creating a ``build`` dir in the test folder and running ``cmake .. && make``.
 
 To run the tests the same way that CircleCI does, navigate to the top level of the Kubos repo and issue this command::
 
@@ -261,12 +253,6 @@ Python
 
 Python's ``unittest`` and ``mock`` packages should be used to create unit tests
 for Python APIs.
-    
-Test Configuration
-^^^^^^^^^^^^^^^^^^
-
-If your unit tests require project configuration (for example, to test a maximum system buffer size when the default value is smaller),
-add the needed options to the `config` section of ``targets/target-x86-linux-native/target.json``.
 
 Integration Tests
 ~~~~~~~~~~~~~~~~~

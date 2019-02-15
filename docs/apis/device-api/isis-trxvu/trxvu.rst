@@ -22,7 +22,6 @@ Kubos
 ~~~~~
 
     - :doc:`Creating a Kubos Project <../../../tutorials/first-project>`
-    - :doc:`Configuring a Kubos Project <../../../sdk-docs/sdk-project-config>`
     - :doc:`Using Kubos Linux <../../../os-docs/using-kubos-linux>`
     - :doc:`Working with the iOBC <../../../os-docs/working-with-the-iobc>`
 
@@ -32,7 +31,7 @@ Run-Time Radio Configuration
 The ISIS TRXVU radio will need to be initialized via :cpp:func:`k_radio_init` with a few different options.
 These option values should match what was specified in your TRXVU options sheet.
 
-The :cpp:func:`k_radio_init function takes the following arguments:
+The :cpp:func:`k_radio_init` function takes the following arguments:
 
     - ``bus`` - The I2C bus device name (ex. ``"/dev/i2c-0"``)
     - ``tx`` - The transmitter's properties
