@@ -20,6 +20,9 @@ In order to use them, navigate to the desired example project's folder and then 
     $ cmake ..
     $ make
 
+Please refer to the :ref:`cross compiling <cross-compiling>` section of the C SDK for the list
+of supported toolchains.
+
 From here, please refer to the :ref:`C project transfer instructions <c-transfer>` for information about how to transfer and run
 a C project.
 
@@ -31,12 +34,7 @@ Using a Rust Example Application
 To use a Rust example, copy the example into the desired location, then run::
 
     $ cargo build --target {desired target}
-    
-.. note:: 
-
-    While they ultimately resolve to the same underlying target, the target names for Cargo are not the same as the
-    target names used by ``kubos target``. For more information, see :ref:`Rust SDK doc <rust-targets>`.
-    
+        
 From here, please refer to the :ref:`Rust project transfer instructions <rust-transfer>` for information about how to transfer and run
 a Rust project.
 

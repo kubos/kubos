@@ -42,24 +42,24 @@ All ``CMakeLists.txt`` files need to start with these two lines::
         cmake_minimum_required(VERSION 3.5)
         project(project-name VERSION 0.1.0)
 
-Next ``cmake`` must be told what type of project it is building
+Next, ``cmake`` must be told what type of project it is building
 and which source files to compile.
 
-If the project is a library then the ``add_library`` command
+If the project is a library, then the ``add_library`` command
 will be used::
 
         add_library(project-name
           source/lib.c
         )
 
-If the project is an executable then the ``add_executable``
+If the project is an executable, then the ``add_executable``
 command will be used::
 
         add_executable(project-name
           source/main.c
         )
 
-Lastly the header folder needs to be added using the
+Lastly, the header folder needs to be added using the
 ``target_include_directories`` command::
 
         target_include_directories(project-name
@@ -71,31 +71,31 @@ Building a Project
 
 To build a Kubos C project, the ``CMake`` build mechanism needs to be invoked.
 
-First a folder will be created to store the build artifacts::
+First, a folder will be created to store the build artifacts::
 
         $ mkdir build
         $ cd build
 
-Next ``CMake`` will be called and told where to find the build instructions::
+Next, ``CMake`` will be called and told where to find the build instructions::
 
         $ cmake ..
 
-Lastly ``make`` will be called to execute the build setup by ``Cmake``::
+Lastly, ``make`` will be called to execute the build setup by ``Cmake``::
 
         $ make
 
 All build artifacts will be generated in the ``build`` folder.
-If the project is an executable then the binary will be named ``project-name``.
-If the project is a library then the library file will be named ``libproject-name.a``.
+If the project is an executable, then the binary will be named ``project-name``.
+If the project is a library, then the library file will be named ``libproject-name.a``.
 
-To build a project from scratch run ``make clean`` to remove all prior
+To build a project from scratch, run ``make clean`` to remove all prior
 build artifacts followed by ``make``.
 
-To pick up on any changes to the project`s CMake files run ``cmake ..``
-again followed by ``make``.
+To pick up on any changes to the project`s CMake files, run ``cmake ..``
+again, followed by ``make``.
 
 To build a project without any of the prior ``make`` or ``cmake`` artifacts,
-remove the ``build`` directory with all of it`s contents and start the build
+remove the ``build`` directory with all of its contents and start the build
 process over.
 
 .. _cross-compiling:
@@ -104,8 +104,8 @@ Cross Compiling
 ---------------
 
 
-By default CMake will compile with the local ``gcc`` toolchain found on the PATH.
-If you are working inside of the SDK VM then the native target is x86 Linux.
+By default, CMake will compile with the local ``gcc`` toolchain found on the PATH.
+If you are working inside of the SDK VM, then the native target is x86 Linux.
 
 The SDK also provides cross-compiling toolchains for several different targets:
 
@@ -121,7 +121,7 @@ The SDK also provides cross-compiling toolchains for several different targets:
 | (Vagrant)  | /usr/bin/gcc                                  | Native x86 Linux                                  |
 +------------+-----------------------------------------------+---------------------------------------------------+
 
-If you would like to cross-compile for one of the supported embedded boards then
+If you would like to cross-compile for one of the supported embedded boards, then
 CMake will need to be informed about which cross-compiling toolchain to use. CMake
 looks at two environment variables when compiling to determine which toolchain it should use.
 These variables are ``CC`` and ``CXX``.

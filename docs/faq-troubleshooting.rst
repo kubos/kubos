@@ -85,7 +85,7 @@ Interacting with an OBC
 Can't Connect via Serial Debug
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If the SDK was unable to connect to the Kubos Linux target using ``minicom kubos``::
+If the SDK was unable to connect to the Kubos Linux target using ``minicom kubos``:
 
 -  Check that the Kubos Linux target is turned on and connected to your computer
 

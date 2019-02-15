@@ -197,7 +197,7 @@ File Transfer
 -------------
 
 Once your board is connected and running you can begin transferring files
-to it. There are two supported methods of file transfer: ``scp`` and ``minicom``.
+to it. There are two supported methods of file transfer: ``scp`` and ZMODEM over ``minicom``.
 
 SCP
 ~~~
@@ -367,8 +367,6 @@ future.
 Please refer to the appropriate :ref:`Working with {board} <system-guides>` document for more
 information about the specific peripheral availability.
 
-.. _updating-credentials:
-
 .. _user-accounts:
 
 User Accounts
@@ -384,9 +382,6 @@ All user accounts should have a home directory in the format
 
 The ``passwd`` command can be used to change the password of existing user
 accounts.
-
-If you change the root user's password, be sure to also update the password in
-any :ref:`Kubos SDK project configurations <updating-credentials>`.
 
 Kubos Linux File System
 -----------------------
