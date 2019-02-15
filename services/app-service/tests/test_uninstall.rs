@@ -49,22 +49,17 @@ fn uninstall_app() {
                 errors,
                 success
             }
-        }"#);
+        }"#,
+        );
 
         assert!(result["uninstall"]["success"].as_bool().unwrap());
 
         let result = send_query(
             ServiceConfig::new_from_path("app-service", config.to_owned()),
-            "{ apps { active } }"
+            "{ apps { active } }",
         );
 
-        assert_eq!(
-            result["apps"]
-                .as_array()
-                .expect("Not an array")
-                .len(),
-            0
-        );
+        assert_eq!(result["apps"].as_array().expect("Not an array").len(), 0);
     });
 
     fixture.teardown();

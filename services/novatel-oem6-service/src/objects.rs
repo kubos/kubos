@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use juniper::{ParseScalarResult, Value};
 use juniper::parser::{ParseError, ScalarToken, Token};
+use juniper::{ParseScalarResult, Value};
 use novatel_oem6_api::{Component, ReceiverStatusFlags};
 
 /// Common response fields structure for requests

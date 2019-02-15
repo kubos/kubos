@@ -89,8 +89,7 @@ where
     }
 }
 
-impl Clone for Box<IAntS>
-{
+impl Clone for Box<IAntS> {
     fn clone(&self) -> Box<IAntS> {
         self.box_clone()
     }

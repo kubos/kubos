@@ -20,9 +20,9 @@ use super::*;
 fn integration_test_good() {
     let mut mock = mock_new!();
     mock.state = true;
-    
+
     let service = service_new!(mock);
-    
+
     let query = r#"
         mutation {
             testHardware(test: INTEGRATION) {
@@ -147,14 +147,14 @@ fn integration_test_bad() {
 
     let expected = json!({
         "testHardware": {
-            "errors": "Nominal: Generic error; Debug: get_activation_count (services/isis-ants-service/src/model.rs:304): Generic error, \
-                get_activation_time (services/isis-ants-service/src/model.rs:306): Generic error, \
-                get_activation_count (services/isis-ants-service/src/model.rs:310): Generic error, \
-                get_activation_time (services/isis-ants-service/src/model.rs:312): Generic error, \
-                get_activation_count (services/isis-ants-service/src/model.rs:316): Generic error, \
-                get_activation_time (services/isis-ants-service/src/model.rs:318): Generic error, \
-                get_activation_count (services/isis-ants-service/src/model.rs:322): Generic error, \
-                get_activation_time (services/isis-ants-service/src/model.rs:324): Generic error",
+            "errors": "Nominal: Generic error; Debug: get_activation_count (services/isis-ants-service/src/model.rs:311): Generic error, \
+                get_activation_time (services/isis-ants-service/src/model.rs:313): Generic error, \
+                get_activation_count (services/isis-ants-service/src/model.rs:317): Generic error, \
+                get_activation_time (services/isis-ants-service/src/model.rs:319): Generic error, \
+                get_activation_count (services/isis-ants-service/src/model.rs:323): Generic error, \
+                get_activation_time (services/isis-ants-service/src/model.rs:325): Generic error, \
+                get_activation_count (services/isis-ants-service/src/model.rs:329): Generic error, \
+                get_activation_time (services/isis-ants-service/src/model.rs:331): Generic error",
             "success": false,
             "telemetryDebug": {
                  "ant1ActivationCount": 0,
@@ -212,7 +212,7 @@ fn hardware_test() {
             "data": "",
             "errors": "Not Implemented",
             "success": true,
-            
+
         }
     });
 
