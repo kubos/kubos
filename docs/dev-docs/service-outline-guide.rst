@@ -1,15 +1,15 @@
 KubOS Service Outlines
-=======================
+======================
 
-This guide covers the development of KubOS hardware services and provides an outline for several major types of hardware. 
+This guide covers the development of KubOS hardware services and provides an outline for several major types of hardware.
 For general information about hardware services, their role, and how they work, check out :doc:`the hardware services documentation. <../services/hardware-services>`
-Make sure you reference the general hardware service when looking at the schema for all others, because they simply build on that schema, and each section covers what is added to that base schema. 
+Make sure you reference the general hardware service when looking at the schema for all others, because they simply build on that schema, and each section covers what is added to that base schema.
 
 
 General Hardware Service
--------------------------
+------------------------
 
-A general hardware service is a service for any piece of hardware that does not fit into any of the other categories. These queries/mutations will be expected to be present regardless of the hardware. All other service outlines build on top of what is present here. 
+A general hardware service is a service for any piece of hardware that does not fit into any of the other categories. These queries/mutations will be expected to be present regardless of the hardware. All other service outlines build on top of what is present here.
 
 GraphQL Schema::
 
@@ -147,7 +147,7 @@ GraphQL Schema::
 ADCS Service
 ------------
 
-The ADCS service outline and all following service outlines aim to abstract just the telemetry items and commands that are useful for mission logic. If you need a certain telemetry item for your mission application, please let us know! 
+The ADCS service outline and all following service outlines aim to abstract just the telemetry items and commands that are useful for mission logic. If you need a certain telemetry item for your mission application, please let us know!
 
 Additional GraphQL Schema::
 
@@ -228,7 +228,7 @@ Additional GraphQL Schema::
 Battery and EPS Service(s)
 --------------------------
 
-These functions are often combined into a single piece of hardware. If so, then the schema holds for that single service. If they are separate pieces of hardware, implement everything possible for each service. 
+These functions are often combined into a single piece of hardware. If so, then the schema holds for that single service. If they are separate pieces of hardware, implement everything possible for each service.
 
 Additional GraphQL Schema::
 
@@ -316,7 +316,7 @@ Additional GraphQL Schema::
 Deployables Service
 -------------------
 
-The deployables service covers anything that needs to be deployed. It focuses on abstracting the logic for deploying panels, antenna, etc. from the mission logic to keep it as clean as possible. This schema should be added for any services that control hardware with deployables. 
+The deployables service covers anything that needs to be deployed. It focuses on abstracting the logic for deploying panels, antenna, etc. from the mission logic to keep it as clean as possible. This schema should be added for any services that control hardware with deployables.
 
 Additional GraphQL Schema::
 
@@ -371,5 +371,5 @@ Additional GraphQL Schema::
 Additional Services
 -------------------
 
-If there are any major service categories that should be added, or if you feel that any sections are missing Queries or Mutations that would be essential for Mission Applications, please let us know on our `Slack <https://slack.kubos.co/>` or open a PR to add them yourself! 
+If there are any major service categories that should be added, or if you feel that any sections are missing Queries or Mutations that would be essential for Mission Applications, please let us know on our `Slack <https://slack.kubos.co/>`__ or open a PR to add them yourself!
 
