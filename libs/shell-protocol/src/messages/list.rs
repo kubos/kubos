@@ -59,6 +59,7 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
 }
 
 /// Stdout -> CBOR
+#[allow(clippy::implicit_hasher)]
 pub fn to_cbor(
     channel_id: u32,
     process_list: Option<HashMap<u32, (String, u32)>>,

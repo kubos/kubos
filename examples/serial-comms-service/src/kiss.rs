@@ -22,6 +22,13 @@
 
 use failure::Error;
 
+/// Used by decode to hold decoded data
+pub struct DecodedData {
+    pub frame: Vec<u8>,
+    pub pre_data: Vec<u8>,
+    pub post_data: Vec<u8>,
+}
+
 /// Finds and escapes any of the KISS frame separators
 /// in a data buffer
 fn escape(buf: &[u8]) -> Vec<u8> {
@@ -82,10 +89,10 @@ pub fn encode(frame: &[u8]) -> Vec<u8> {
 /// Finds and decodes KISS frame found inside of data buffer
 /// Will also return any data found before and after
 /// the complete frame.
-pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Error> {
+pub fn decode(chunk: &[u8]) -> Result<DecodedData, Error> {
     let mut frame = vec![];
-    let mut pre_frame = vec![];
-    let mut post_frame = vec![];
+    let mut pre_data = vec![];
+    let mut post_data = vec![];
     let mut index_l = 0;
     let mut valid = false;
 
@@ -127,8 +134,8 @@ pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Error> {
 
         // Extract the frame payload
         frame.extend(chunk[index_a + 1..index_b - 1].iter().clone());
-        pre_frame.extend(chunk[0..index_a - 1].iter().clone());
-        post_frame.extend(chunk[index_b..].iter().clone());
+        pre_data.extend(chunk[0..index_a - 1].iter().clone());
+        post_data.extend(chunk[index_b..].iter().clone());
         index_l = index_b;
 
         // Unescape KISS control characters
@@ -137,7 +144,11 @@ pub fn decode(chunk: &[u8]) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Error> {
         frame = un_frame;
     }
 
-    Ok((frame, pre_frame, post_frame))
+    Ok(DecodedData {
+        frame,
+        pre_data,
+        post_data,
+    })
 }
 
 #[cfg(test)]

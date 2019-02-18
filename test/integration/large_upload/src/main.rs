@@ -73,7 +73,7 @@ fn main() {
             let mut contents = [0u8; 1_000_000];
             thread_rng().fill(&mut contents[..]);
 
-            file.write(&contents).unwrap();
+            file.write_all(&contents).unwrap();
         }
     }
 
@@ -99,8 +99,8 @@ fn main() {
         let mut source_buf = [0u8; 4096];
         let mut dest_buf = [0u8; 4096];
 
-        source_file.read(&mut source_buf).unwrap();
-        dest_file.read(&mut dest_buf).unwrap();
+        source_file.read_exact(&mut source_buf).unwrap();
+        dest_file.read_exact(&mut dest_buf).unwrap();
 
         assert_eq!(&source_buf[..], &dest_buf[..], "Chunk mismatch: {}", num);
     }

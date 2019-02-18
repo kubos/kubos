@@ -49,19 +49,19 @@ fn setup_libraries(out_dir: &str) {
                     out_dir,
                     path.file_stem().unwrap().to_str().unwrap()
                 );
-                if !Command::new("cp")
+                if Command::new("cp")
                     .args(&[path.to_str().unwrap(), &out_path])
                     .status()
                     .unwrap()
                     .success()
                 {
-                    panic!("Failed to copy lib {}", path.display())
-                } else {
                     // Inform Cargo -> Rust about this library file
                     println!(
                         "cargo:rustc-link-lib=static={}",
                         path.file_stem().unwrap().to_str().unwrap()
                     );
+                } else {
+                    panic!("Failed to copy lib {}", path.display())
                 }
             }
             Err(e) => println!("bad path {:?}", e),

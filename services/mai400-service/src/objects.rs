@@ -108,6 +108,7 @@ pub enum TestType {
 }
 
 /// Enum for the 'testHardware' mutation response union
+#[allow(clippy::large_enum_variant)]
 pub enum TestResults {
     /// Integration test results
     Integration(IntegrationTestResults),
@@ -406,57 +407,56 @@ graphql_object!(IREHSTelem: () where Scalar = <S> |&self| {
         ThermopileStruct {
                 dip_angle: self.0.dip_angle_a as i32,
                 earth_limb: ThermopileSensor {
-                    adc: self.0.thermopiles_a[0] as i32,
-                    temp: self.0.temp_a[0] as i32,
+                    adc: i32::from(self.0.thermopiles_a[0]),
+                    temp: i32::from(self.0.temp_a[0]),
                     errors: !self.0.solution_degraded[0].is_empty(),
                     flags: self.0.solution_degraded[0].to_vec()
                 },
                 earth_ref: ThermopileSensor {
-                    adc: self.0.thermopiles_a[1] as i32,
-                    temp: self.0.temp_a[1] as i32,
+                    adc: i32::from(self.0.thermopiles_a[1]),
+                    temp: i32::from(self.0.temp_a[1]),
                     errors: !self.0.solution_degraded[1].is_empty(),
                     flags: self.0.solution_degraded[1].to_vec()
                 },
                 space_ref: ThermopileSensor {
-                    adc: self.0.thermopiles_a[2] as i32,
-                    temp: self.0.temp_a[2] as i32,
+                    adc: i32::from(self.0.thermopiles_a[2]),
+                    temp: i32::from(self.0.temp_a[2]),
                     errors: !self.0.solution_degraded[2].is_empty(),
                     flags: self.0.solution_degraded[2].to_vec()
                 },
                 wide_fov: ThermopileSensor {
-                    adc: self.0.thermopiles_a[3] as i32,
-                    temp: self.0.temp_a[3] as i32,
+                    adc: i32::from(self.0.thermopiles_a[3]),
+                    temp: i32::from(self.0.temp_a[3]),
                     errors: !self.0.solution_degraded[3].is_empty(),
                     flags: self.0.solution_degraded[3].to_vec()
                 }
             }
-
     }
 
     field thermopile_struct_b() -> ThermopileStruct {
         ThermopileStruct {
                 dip_angle: self.0.dip_angle_b as i32,
                 earth_limb: ThermopileSensor {
-                    adc: self.0.thermopiles_b[0] as i32,
-                    temp: self.0.temp_b[0] as i32,
+                    adc: i32::from(self.0.thermopiles_b[0]),
+                    temp: i32::from(self.0.temp_b[0]),
                     errors: !self.0.solution_degraded[4].is_empty(),
                     flags: self.0.solution_degraded[4].to_vec()
                 },
                 earth_ref: ThermopileSensor {
-                    adc: self.0.thermopiles_b[1] as i32,
-                    temp: self.0.temp_b[1] as i32,
+                    adc: i32::from(self.0.thermopiles_b[1]),
+                    temp: i32::from(self.0.temp_b[1]),
                     errors: !self.0.solution_degraded[5].is_empty(),
                     flags: self.0.solution_degraded[5].to_vec()
                 },
                 space_ref: ThermopileSensor {
-                    adc: self.0.thermopiles_b[2] as i32,
-                    temp: self.0.temp_b[2] as i32,
+                    adc: i32::from(self.0.thermopiles_b[2]),
+                    temp: i32::from(self.0.temp_b[2]),
                     errors: !self.0.solution_degraded[6].is_empty(),
                     flags: self.0.solution_degraded[6].to_vec()
                 },
                 wide_fov: ThermopileSensor {
-                    adc: self.0.thermopiles_b[3] as i32,
-                    temp: self.0.temp_b[3] as i32,
+                    adc: i32::from(self.0.thermopiles_b[3]),
+                    temp: i32::from(self.0.temp_b[3]),
                     errors: !self.0.solution_degraded[7].is_empty(),
                     flags: self.0.solution_degraded[7].to_vec()
                 }
@@ -481,11 +481,11 @@ graphql_object!(IREHSTelem: () where Scalar = <S> |&self| {
     }
 
     field dip_angle_a() -> i32 {
-        i32::from(self.0.dip_angle_a)
+        self.0.dip_angle_a
     }
 
     field dip_angle_b() -> i32 {
-        i32::from(self.0.dip_angle_b)
+        self.0.dip_angle_b
     }
 
     field solution_degraded() -> Vec<Vec<String>> {

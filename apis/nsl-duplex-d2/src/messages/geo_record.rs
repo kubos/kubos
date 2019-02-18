@@ -17,8 +17,7 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 use nom::simple_errors::Context;
 use nom::{
-    call, error_position, float, map_res, multispace, tag, take_until, take_until_and_consume, Err,
-    ErrorKind, IResult,
+    float, map_res, multispace, tag, take_until, take_until_and_consume, Err, ErrorKind, IResult,
 };
 use std::str::from_utf8;
 

@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#![deny(warnings)]
+
 #[macro_use]
 extern crate juniper;
 
@@ -22,7 +24,7 @@ mod schema;
 
 use crate::model::Subsystem;
 use crate::schema::{MutationRoot, QueryRoot};
-use kubos_service::{Config, Context, Service};
+use kubos_service::{Config, Service};
 use syslog::Facility;
 
 /*
