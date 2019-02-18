@@ -16,8 +16,6 @@
  *
  * Kubos Linux Example Project
  *
- * This is the default application included when the `kubos init --linux`
- * command is executed.
  */
 
 #include <stdio.h>

@@ -20,7 +20,7 @@ use super::*;
 fn control_power_good() {
     let mut mock = mock_new!();
     mock.state = true;
-    
+
     let service = service_new!(mock);
 
     let query = r#"mutation {

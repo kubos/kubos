@@ -140,7 +140,7 @@ fn deploy_good_ant2() {
 fn deploy_good_ant2_override() {
     let mut mock = mock_new!();
     mock.state = true;
-    
+
     let service = service_new!(mock);
 
     let query = r#"mutation {

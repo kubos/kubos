@@ -20,7 +20,7 @@ use super::*;
 fn debug_telem_good() {
     let mut mock = mock_new!();
     mock.state = true;
-    
+
     let service = service_new!(mock);
 
     let query = r#"
@@ -102,7 +102,7 @@ fn debug_telem_bad() {
 fn nominal_telem_good() {
     let mut mock = mock_new!();
     mock.state = true;
-    
+
     let service = service_new!(mock);
 
     let query = r#"

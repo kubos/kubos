@@ -66,12 +66,10 @@ impl AppRegistry {
 
         registry
             .entries
-            .lock().map_err(|err| AppError::RegistryError {
-                    err: format!(
-                        "Couldn't get entries mutex: {:?}",
-                        err
-                    ),
-                })?
+            .lock()
+            .map_err(|err| AppError::RegistryError {
+                err: format!("Couldn't get entries mutex: {:?}", err),
+            })?
             .extend(registry.discover_apps()?);
 
         Ok(registry)
@@ -224,11 +222,8 @@ impl AppRegistry {
         }
 
         let mut entries = self.entries.lock().map_err(|err| AppError::RegisterError {
-                    err: format!(
-                        "Couldn't get entries mutex: {:?}",
-                        err
-                    ),
-                })?;
+            err: format!("Couldn't get entries mutex: {:?}", err),
+        })?;
         let app_uuid = match uuid {
             Some(val) => {
                 for entry in entries.iter_mut() {
@@ -320,12 +315,12 @@ impl AppRegistry {
         }
 
         // Remove the app entry from the registry list
-        let mut entries = self.entries.lock().map_err(|err| AppError::UninstallError {
-                    err: format!(
-                        "Couldn't get entries mutex: {:?}",
-                        err
-                    ),
-                })?;
+        let mut entries = self
+            .entries
+            .lock()
+            .map_err(|err| AppError::UninstallError {
+                err: format!("Couldn't get entries mutex: {:?}", err),
+            })?;
         match entries.binary_search_by(|ref e| {
             e.app
                 .uuid
@@ -379,11 +374,8 @@ impl AppRegistry {
         // Look up the active version of the requested application
         let app = {
             let entries = self.entries.lock().map_err(|err| AppError::StartError {
-                    err: format!(
-                        "Couldn't get entries mutex: {:?}",
-                        err
-                    ),
-                })?;
+                err: format!("Couldn't get entries mutex: {:?}", err),
+            })?;
             match entries
                 .iter()
                 .find(|ref e| e.active_version && e.app.uuid == app_uuid)

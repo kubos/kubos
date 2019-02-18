@@ -187,7 +187,7 @@ impl Subsystem {
                             msg.word, msg.bit, msg.event, msg.description
                         )
                     );
-    
+
                     while let Ok(err) = recv.try_recv() {
                         push_err!(
                             self.errors,
@@ -208,10 +208,7 @@ impl Subsystem {
                 },
             }
         } else {
-            push_err!(
-                self.errors,
-                "Failed to obtain error_recv mutex".to_owned()
-            );
+            push_err!(self.errors, "Failed to obtain error_recv mutex".to_owned());
         }
     }
 

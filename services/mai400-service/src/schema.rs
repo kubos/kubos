@@ -349,7 +349,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     {
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
         *last_cmd = AckCommand::TestHardware;
-        
+
         match test {
             TestType::Integration => Ok(TestResults::Integration(executor.context().subsystem()
                     .get_test_results().unwrap())),

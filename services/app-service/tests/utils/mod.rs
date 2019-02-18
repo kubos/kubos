@@ -275,22 +275,22 @@ impl AppServiceFixture {
 }
 
 pub fn send_query(config: ServiceConfig, query: &str) -> serde_json::Value {
-    
     let client = reqwest::Client::new();
-    
+
     let uri = format!("http://{}", config.hosturl());
-    
+
     let mut map = ::std::collections::HashMap::new();
     map.insert("query", query);
-    
-    let response: serde_json::Value = client.post(&uri)
+
+    let response: serde_json::Value = client
+        .post(&uri)
         .json(&map)
         .send()
         .expect("Couldn't send request")
         .json()
         .expect("Couldn't deserialize response");
-        
+
     let data = response.get("data").unwrap();
-    
+
     data.clone()
 }

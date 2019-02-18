@@ -20,12 +20,12 @@ use super::*;
 fn arm_status_armed() {
     let mut mock = mock_new!();
     mock.state = true;
-    
+
     mock.deploy_status = DeployStatus {
         sys_armed: true,
         ..Default::default()
     };
-    
+
     let service = service_new!(mock);
 
     let query = r#"
@@ -44,7 +44,7 @@ fn arm_status_armed() {
 fn arm_status_disarmed() {
     let mut mock = mock_new!();
     mock.state = true;
-    
+
     mock.deploy_status = DeployStatus {
         sys_armed: false,
         ..Default::default()

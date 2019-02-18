@@ -56,7 +56,7 @@ fn setup_apps(registry_dir: &Path) {
 
 fn apps_query(config: ServiceConfig, query: &str) -> Vec<serde_json::Value> {
     let result = send_query(config, query);
-    
+
     let apps = result["apps"].clone();
     assert!(apps.is_array());
 

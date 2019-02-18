@@ -33,7 +33,7 @@ macro_rules! service_new {
     ($mock:ident, $data:ident) => {{
         use crate::objects::AckCommand;
         use mai400_api::Connection;
-        use std::sync::{Arc, RwLock, Mutex};
+        use std::sync::{Arc, Mutex, RwLock};
         use std::thread;
 
         let (sender, receiver) = channel();
@@ -71,7 +71,7 @@ macro_rules! service_new_with_read {
     ($mock:ident, $data:ident) => {{
         use crate::objects::AckCommand;
         use mai400_api::Connection;
-        use std::sync::{Arc, RwLock, Mutex};
+        use std::sync::{Arc, Mutex, RwLock};
         use std::thread;
 
         let (sender, receiver) = channel();
@@ -106,7 +106,7 @@ macro_rules! request {
     ($service:ident, $query:ident) => {{
         // Warp doesn't like control characters (ie. new line characters)
         // so we need to remove them before we send the request
-        let query = $query.replace("\n","");
+        let query = $query.replace("\n", "");
         warp::test::request()
             .header("Content-Type", "application/json")
             .method("POST")
@@ -117,9 +117,7 @@ macro_rules! request {
 
 macro_rules! wrap {
     ($result:ident) => {{
-        &json!({
-                "data": $result
-        }).to_string()
+        &json!({ "data": $result }).to_string()
     }};
 }
 
@@ -128,7 +126,6 @@ macro_rules! test {
         let res = request!($service, $query);
 
         assert_eq!(res.body(), wrap!($expected));
-        
     }};
 }
 

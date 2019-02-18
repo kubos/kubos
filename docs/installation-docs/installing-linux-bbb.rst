@@ -21,7 +21,6 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../tutorials/first-project` - Basic tutorial for creating your first Kubos SDK project
--  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
 -  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`../os-docs/working-with-the-bbb` - Guide for interacting with BBB-specific features
 -  :doc:`../os-docs/kubos-linux-on-bbb` - Steps to build Kubos Linux
