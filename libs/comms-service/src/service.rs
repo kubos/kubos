@@ -23,6 +23,7 @@ use byteorder::{BigEndian, ByteOrder};
 use log::info;
 use pnet::packet::udp::{ipv4_checksum, UdpPacket};
 use pnet::packet::Packet;
+use std::fmt::Debug;
 use std::net::{Ipv4Addr, UdpSocket};
 use std::ops::Range;
 use std::str::FromStr;
@@ -73,6 +74,42 @@ pub struct CommsControlBlock<T: Clone> {
     pub ground_port: Option<u16>,
 }
 
+impl<T: Clone + Debug> Debug for CommsControlBlock<T> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        let read = if self.read.is_some() {
+            "Some(fn)"
+        } else {
+            "None"
+        };
+
+        let mut write = vec![];
+
+        if !self.write.is_empty() {
+            for _n in 0..self.write.len() {
+                write.push("Fn");
+            }
+        }
+
+        write!(
+            f,
+            "CommsControlBlock {{ read: {}, write: {:?}, read_conn: {:?}, write_conn: {:?},
+            handler_port_min: {:?}, handler_port_max: {:?}, timeout: {:?}, ground_ip: {:?},
+            satellite_ip: {:?}, downlink_ports: {:?}, ground_port: {:?} }}",
+            read,
+            write,
+            self.read_conn,
+            self.write_conn,
+            self.handler_port_min,
+            self.handler_port_max,
+            self.timeout,
+            self.ground_ip,
+            self.satellite_ip,
+            self.downlink_ports,
+            self.ground_port
+        )
+    }
+}
+
 impl<T: Clone> CommsControlBlock<T> {
     /// Creates a new instance of the CommsControlBlock
     pub fn new(
@@ -81,14 +118,23 @@ impl<T: Clone> CommsControlBlock<T> {
         read_conn: T,
         write_conn: T,
         config: CommsConfig,
-    ) -> Self {
-        assert!(!write.is_empty(), "No `write` function provided");
-        
-        if let Some(ports) = config.clone().downlink_ports {
-            assert_eq!(write.len(), ports.len(), "There must be a unique write function for each downlink port");
+    ) -> CommsResult<Self> {
+        if write.is_empty() {
+            return Err(
+                CommsServiceError::ConfigError("No `write` function provided".to_owned()).into(),
+            );
         }
-        
-        CommsControlBlock {
+
+        if let Some(ports) = config.clone().downlink_ports {
+            if write.len() != ports.len() {
+                return Err(CommsServiceError::ConfigError(
+                    "There must be a unique write function for each downlink port".to_owned(),
+                )
+                .into());
+            }
+        }
+
+        Ok(CommsControlBlock {
             read,
             write,
             read_conn,
@@ -96,18 +142,11 @@ impl<T: Clone> CommsControlBlock<T> {
             handler_port_min: config.handler_port_min.unwrap_or(DEFAULT_HANDLER_START),
             handler_port_max: config.handler_port_max.unwrap_or(DEFAULT_HANDLER_END),
             timeout: config.timeout.unwrap_or(DEFAULT_TIMEOUT),
-            ground_ip: Ipv4Addr::from_str(
-                &config.ground_ip,
-            )
-            .unwrap(),
-            satellite_ip: Ipv4Addr::from_str(
-                &config
-                    .satellite_ip,
-            )
-            .unwrap(),
+            ground_ip: Ipv4Addr::from_str(&config.ground_ip)?,
+            satellite_ip: Ipv4Addr::from_str(&config.satellite_ip)?,
             downlink_ports: config.downlink_ports,
             ground_port: config.ground_port,
-        }
+        })
     }
 }
 
@@ -136,9 +175,9 @@ impl CommsService {
                 let write_ref = write.clone();
                 let ground_ip = control.ground_ip;
                 let sat_ip = control.satellite_ip;
-                let ground_port = control
-                    .ground_port
-                    .ok_or(CommsServiceError::MissingGroundPort)?;
+                let ground_port = control.ground_port.ok_or(CommsServiceError::ConfigError(
+                    "Missing ground_port parameter".to_owned(),
+                ))?;
                 thread::spawn(move || {
                     downlink_endpoint(
                         &telem_ref,

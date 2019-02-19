@@ -19,6 +19,7 @@
 //! TOML parser for the `comms-service`. This module parses a `toml` file and returns a
 //! struct containing configuration information for a `comms-service`.
 
+use crate::errors::*;
 use serde_derive::Deserialize;
 
 // Default values for control block configurations.
@@ -56,17 +57,27 @@ pub struct CommsConfig {
 impl CommsConfig {
     /// Builds a new configuration for a specific `comms-service`.
     /// Configuration parameters are read from the service's `config.toml` file.
-    pub fn new(service_config: kubos_system::Config) -> Self {
-        let config = service_config
+    pub fn new(service_config: kubos_system::Config) -> CommsResult<Self> {
+        let raw_config = service_config
             .get("comms")
-            .and_then(|raw| raw.try_into().unwrap());
-            
-        let config: CommsConfig = config.unwrap();
-        
+            .ok_or(CommsServiceError::ConfigError(
+                "Unable to get `comms` config".to_owned(),
+            ))?;
+
+        let config: CommsConfig = raw_config.try_into().map_err(|err| {
+            let msg = format!("Failed to parse config: {}", err);
+            CommsServiceError::ConfigError(msg)
+        })?;
+
         if config.downlink_ports.is_some() {
-            assert!(config.ground_port.is_some(), "Config ground_port parameter is required when downlink_ports is used");
+            if config.ground_port.is_none() {
+                return Err(CommsServiceError::ConfigError(
+                    "ground_port parameter is required when downlink_ports is used".to_owned(),
+                )
+                .into());
+            }
         }
-        
-        config
+
+        Ok(config)
     }
 }

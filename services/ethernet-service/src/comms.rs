@@ -30,7 +30,7 @@ pub fn read(socket: &Arc<UdpSocket>) -> CommsResult<Vec<u8>> {
 // Function to allow writing over a UDP socket.
 pub fn write(socket: &Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> {
     let service_config = kubos_system::Config::new("ethernet-service");
-    let config = CommsConfig::new(service_config);
+    let config = CommsConfig::new(service_config)?;
     socket.send_to(
         data,
         (

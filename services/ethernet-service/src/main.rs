@@ -58,7 +58,7 @@ fn main() -> EthernetServiceResult<()> {
     let service_config = kubos_system::Config::new("ethernet-service");
 
     // Pull out our communication settings
-    let config = CommsConfig::new(service_config);
+    let config = CommsConfig::new(service_config)?;
 
     let satellite_ip = config.satellite_ip.clone();
 
@@ -75,7 +75,7 @@ fn main() -> EthernetServiceResult<()> {
         read_conn,
         write_conn,
         config,
-    );
+    )?;
 
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
