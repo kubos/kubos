@@ -51,5 +51,4 @@ members = [
 [profile.release]
 lto = true
 opt-level = 3
-opt-size = 2
 panic = "abort"
