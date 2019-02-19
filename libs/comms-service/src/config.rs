@@ -28,55 +28,45 @@ pub const DEFAULT_HANDLER_START: u16 = 13100;
 pub const DEFAULT_HANDLER_END: u16 = 13149;
 /// Default message handler timeout
 pub const DEFAULT_TIMEOUT: u64 = 1500;
-/// Default ground gateway IP address
-pub static DEFAULT_GROUND_IP: &str = "192.168.8.1";
-/// Default satellite IP address
-pub static DEFAULT_SATELLITE_IP: &str = "192.168.8.2";
 
 /// A struct that holds useful configuration options to use in a `comms-service` implementation.
 /// Created by parsing a configuration file in the `toml` file format.
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct CommsConfig {
     /// Starting port used to define a range of ports that are used in the message handlers
-    /// that handle messages received from the ground.
+    /// that handle messages received from the ground. Default: 13100
     pub handler_port_min: Option<u16>,
     /// Ending port used to define a range of ports that are used in the message handlers
-    /// that handle messages received from the ground.
+    /// that handle messages received from the ground. Default: 13149
     pub handler_port_max: Option<u16>,
     /// Optional list of ports used by downlink endpoints that send messages to the ground.
     /// Each port in the list will be used by one downlink endpoint.
     pub downlink_ports: Option<Vec<u16>>,
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
+    /// Default: 1500
     pub timeout: Option<u64>,
-    /// IP address of the ground gateway.
-    pub ground_ip: Option<String>,
-    /// Specifies the port to which the ground gateway is bound.
+    /// Required. IP address of the ground gateway.
+    pub ground_ip: String,
+    /// Required if downlink_ports is not `None`. Specifies the port to which the ground gateway is bound.
     pub ground_port: Option<u16>,
-    /// Satellite's IP address.
-    pub satellite_ip: Option<String>,
-}
-
-// Implementation of `Default` trait for `CommsConfig`.
-impl Default for CommsConfig {
-    fn default() -> Self {
-        CommsConfig {
-            handler_port_min: Some(DEFAULT_HANDLER_START),
-            handler_port_max: Some(DEFAULT_HANDLER_END),
-            downlink_ports: None,
-            ground_port: None,
-            timeout: Some(DEFAULT_TIMEOUT),
-            ground_ip: Some(DEFAULT_GROUND_IP.to_string()),
-            satellite_ip: Some(DEFAULT_SATELLITE_IP.to_string()),
-        }
-    }
+    /// Required. Satellite's IP address.
+    pub satellite_ip: String,
 }
 
 impl CommsConfig {
     /// Builds a new configuration for a specific `comms-service`.
+    /// Configuration parameters are read from the service's `config.toml` file.
     pub fn new(service_config: kubos_system::Config) -> Self {
         let config = service_config
             .get("comms")
-            .and_then(|raw| raw.try_into().ok());
-        config.unwrap_or_default()
+            .and_then(|raw| raw.try_into().unwrap());
+            
+        let config: CommsConfig = config.unwrap();
+        
+        if config.downlink_ports.is_some() {
+            assert!(config.ground_port.is_some(), "Config ground_port parameter is required when downlink_ports is used");
+        }
+        
+        config
     }
 }

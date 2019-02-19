@@ -60,7 +60,7 @@ fn main() -> EthernetServiceResult<()> {
     // Pull out our communication settings
     let config = CommsConfig::new(service_config);
 
-    let satellite_ip = config.satellite_ip.clone().unwrap();
+    let satellite_ip = config.satellite_ip.clone();
 
     // Create socket to mock reading from a radio.
     let read_conn = Arc::new(UdpSocket::bind((satellite_ip.as_str(), READ_PORT))?);

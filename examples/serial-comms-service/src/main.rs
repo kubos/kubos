@@ -100,7 +100,7 @@ fn main() -> SerialServiceResult<()> {
 
     let bus = service_config
         .get("bus")
-        .unwrap()
+        .expect("No 'bus' parameter in config.toml")
         .as_str()
         .unwrap()
         .to_owned();

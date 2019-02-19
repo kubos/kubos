@@ -34,7 +34,7 @@ pub fn write(socket: &Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> {
     socket.send_to(
         data,
         (
-            &*config.ground_ip.unwrap(),
+            &*config.ground_ip,
             config.ground_port.unwrap_or_default(),
         ),
     )?;

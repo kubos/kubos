@@ -82,6 +82,12 @@ impl<T: Clone> CommsControlBlock<T> {
         write_conn: T,
         config: CommsConfig,
     ) -> Self {
+        assert!(!write.is_empty(), "No `write` function provided");
+        
+        if let Some(ports) = config.clone().downlink_ports {
+            assert_eq!(write.len(), ports.len(), "There must be a unique write function for each downlink port");
+        }
+        
         CommsControlBlock {
             read,
             write,
@@ -91,13 +97,12 @@ impl<T: Clone> CommsControlBlock<T> {
             handler_port_max: config.handler_port_max.unwrap_or(DEFAULT_HANDLER_END),
             timeout: config.timeout.unwrap_or(DEFAULT_TIMEOUT),
             ground_ip: Ipv4Addr::from_str(
-                &config.ground_ip.unwrap_or(DEFAULT_GROUND_IP.to_string()),
+                &config.ground_ip,
             )
             .unwrap(),
             satellite_ip: Ipv4Addr::from_str(
                 &config
-                    .satellite_ip
-                    .unwrap_or(DEFAULT_SATELLITE_IP.to_string()),
+                    .satellite_ip,
             )
             .unwrap(),
             downlink_ports: config.downlink_ports,
@@ -115,44 +120,36 @@ impl CommsService {
         control: CommsControlBlock<T>,
         telem: &Arc<Mutex<CommsTelemetry>>,
     ) -> CommsResult<()> {
-        // Make sure a `read()` function and a `write()` function exist before starting the read thread.
-        if control.write.is_empty() {
-            if control.read.is_some() {
-                let telem_ref = telem.clone();
-                let control_ref = control.clone();
-                thread::spawn(move || read_thread(control_ref, &telem_ref));
-            }
-        } else {
-            return Err(CommsServiceError::MissingWriteMethod.into());
+        // If desired, spawn a read thread
+        if control.read.is_some() {
+            let telem_ref = telem.clone();
+            let control_ref = control.clone();
+            thread::spawn(move || read_thread(control_ref, &telem_ref));
         }
 
         // For each provided `write()` function, spawn a downlink endpoint thread.
         if let Some(ports) = control.downlink_ports {
-            if control.write.len() == ports.len() {
-                for (_, (port, write)) in ports.iter().zip(control.write.iter()).enumerate() {
-                    let telem_ref = telem.clone();
-                    let port_ref = *port;
-                    let conn_ref = control.write_conn.clone();
-                    let write_ref = write.clone();
-                    let ground_ip = control.ground_ip;
-                    let sat_ip = control.satellite_ip;
-                    let ground_port = control
-                        .ground_port
-                        .ok_or(CommsServiceError::MissingGroundPort)?;
-                    thread::spawn(move || {
-                        downlink_endpoint(
-                            &telem_ref,
-                            port_ref,
-                            conn_ref,
-                            &write_ref,
-                            ground_ip,
-                            sat_ip,
-                            ground_port,
-                        );
-                    });
-                }
-            } else {
-                return Err(CommsServiceError::ParameterLengthMismatch.into());
+            for (_, (port, write)) in ports.iter().zip(control.write.iter()).enumerate() {
+                let telem_ref = telem.clone();
+                let port_ref = *port;
+                let conn_ref = control.write_conn.clone();
+                let write_ref = write.clone();
+                let ground_ip = control.ground_ip;
+                let sat_ip = control.satellite_ip;
+                let ground_port = control
+                    .ground_port
+                    .ok_or(CommsServiceError::MissingGroundPort)?;
+                thread::spawn(move || {
+                    downlink_endpoint(
+                        &telem_ref,
+                        port_ref,
+                        conn_ref,
+                        &write_ref,
+                        ground_ip,
+                        sat_ip,
+                        ground_port,
+                    );
+                });
             }
         }
 

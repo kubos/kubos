@@ -64,10 +64,10 @@
 //! handler_port_min = 13002
 //! handler_port_max = 13010
 //! downlink_ports = [13011]
-//! ground-port = 9001
+//! ground_port = 9001
 //! timeout = 1500
-//! ground-ip = "192.168.8.1"
-//! satellite-ip = "192.168.8.2"
+//! ground_ip = "192.168.8.1"
+//! satellite_ip = "192.168.8.2"
 //! ```
 
 #[macro_use]
