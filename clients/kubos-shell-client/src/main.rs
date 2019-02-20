@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#[deny(warnings)]
+#![deny(warnings)]
 use channel_protocol::ChannelProtocol;
 use clap::{value_t, App, AppSettings, Arg, SubCommand};
 use failure::{bail, Error};
@@ -99,30 +99,24 @@ fn run_shell(channel_proto: &ChannelProtocol, channel_id: u32) -> Result<(), Err
                     Some(&input),
                 )?)?;
 
-                loop {
-                    match channel_proto.recv_message(Some(Duration::from_millis(100))) {
-                        Ok(m) => match shell_protocol::messages::parse_message(&m) {
-                            Ok(shell_protocol::messages::Message::Stdout {
-                                channel_id: _channel_id,
-                                data: Some(data),
-                            }) => print!("{}", data),
-                            Ok(shell_protocol::messages::Message::Stderr {
-                                channel_id: _channel_id,
-                                data: Some(data),
-                            }) => eprint!("{}", data),
-                            Ok(shell_protocol::messages::Message::Exit { .. }) => {
-                                return Ok(());
-                            }
-                            Ok(shell_protocol::messages::Message::Error {
-                                channel_id: _,
-                                message,
-                            }) => {
-                                eprintln!("Error received from service: {}", message);
-                                return Ok(());
-                            }
-                            _ => {}
-                        },
-                        _ => break,
+                while let Ok(m) = channel_proto.recv_message(Some(Duration::from_millis(100))) {
+                    match shell_protocol::messages::parse_message(&m) {
+                        Ok(shell_protocol::messages::Message::Stdout {
+                            channel_id: _channel_id,
+                            data: Some(data),
+                        }) => print!("{}", data),
+                        Ok(shell_protocol::messages::Message::Stderr {
+                            channel_id: _channel_id,
+                            data: Some(data),
+                        }) => eprint!("{}", data),
+                        Ok(shell_protocol::messages::Message::Exit { .. }) => {
+                            return Ok(());
+                        }
+                        Ok(shell_protocol::messages::Message::Error { message, .. }) => {
+                            eprintln!("Error received from service: {}", message);
+                            return Ok(());
+                        }
+                        _ => {}
                     }
                 }
             }

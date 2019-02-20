@@ -192,6 +192,7 @@ pub fn read_thread(
 
 /// Structure for OEM6 device instance
 #[derive(Clone)]
+#[allow(clippy::type_complexity)]
 pub struct OEM6 {
     /// Device connection structure
     pub conn: Arc<Mutex<Connection>>,

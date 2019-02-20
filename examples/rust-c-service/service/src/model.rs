@@ -77,7 +77,7 @@ impl Subsystem {
     pub fn uptime(&self) -> Result<i32, Error> {
         println!("getting uptime");
         // Low level query here
-        Ok(111001)
+        Ok(111_001)
     }
 
     /// Uptime reset function

@@ -16,7 +16,7 @@
 
 use crate::ants::*;
 use crate::ffi;
-use nom::{bits, bits_impl, do_parse, error_position, named, take_bits, tuple, tuple_parser};
+use nom::{bits, do_parse, named, take_bits, tuple};
 use std::mem::transmute;
 
 /// Specific antenna to control

@@ -54,13 +54,7 @@ impl SerialComms {
     // using KISS framing
     pub fn read(&self) -> SerialServiceResult<Vec<u8>> {
         let mut buffer = self.buffer.borrow_mut();
-        loop {
-            let mut buf = match self.conn.read(1, Duration::from_millis(1)) {
-                Ok(buf) => buf,
-                Err(_e) => {
-                    break;
-                }
-            };
+        while let Ok(mut buf) = self.conn.read(1, Duration::from_millis(1)) {
             buffer.append(&mut buf);
             if buffer.len() > 4096 {
                 break;
@@ -68,11 +62,15 @@ impl SerialComms {
         }
 
         match kiss::decode(&buffer) {
-            Ok((parsed, mut pre, mut post)) => {
+            Ok(kiss::DecodedData {
+                frame,
+                mut pre_data,
+                mut post_data,
+            }) => {
                 buffer.clear();
-                buffer.append(&mut pre);
-                buffer.append(&mut post);
-                return Ok(parsed);
+                buffer.append(&mut pre_data);
+                buffer.append(&mut post_data);
+                Ok(frame)
             }
             Err(e) => {
                 bail!("Parse err {:?}", e);

@@ -291,6 +291,7 @@ fn socket_manager(ip: Ipv4Addr, port: &mut u16, min: u16, max: u16) -> Option<Ud
 
 // This thread sends a query/mutation to its intended destination and waits for a response.
 // The thread then writes the response to the gateway.
+#[allow(clippy::too_many_arguments)]
 fn handle_message<T: Clone>(
     socket: &UdpSocket,
     data: &Arc<Mutex<CommsTelemetry>>,
