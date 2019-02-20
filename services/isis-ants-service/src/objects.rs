@@ -323,7 +323,7 @@ pub struct TelemetryNominal(pub AntsTelemetry);
 
 graphql_object!(TelemetryNominal: () where Scalar = <S> |&self| {
     field raw_temp() -> i32 {
-        self.0.raw_temp as i32
+        i32::from(self.0.raw_temp)
     }
 
     field uptime() -> i32 {
@@ -416,34 +416,34 @@ pub struct AntennaStats {
 
 graphql_object!(TelemetryDebug: () where Scalar = <S> |&self| {
     field ant_1_activation_count() -> i32 {
-        self.ant1.act_count as i32
+        i32::from(self.ant1.act_count)
     }
 
     field ant_1_activation_time() -> i32 {
-        self.ant1.act_time as i32
+        i32::from(self.ant1.act_time)
     }
 
     field ant_2_activation_count() -> i32 {
-        self.ant2.act_count as i32
+        i32::from(self.ant2.act_count)
     }
 
     field ant_2_activation_time() -> i32 {
-        self.ant2.act_time as i32
+        i32::from(self.ant2.act_time)
     }
 
     field ant_3_activation_count() -> i32 {
-        self.ant3.act_count as i32
+        i32::from(self.ant3.act_count)
     }
 
     field ant_3_activation_time() -> i32 {
-        self.ant3.act_time as i32
+        i32::from(self.ant3.act_time)
     }
 
     field ant_4_activation_count() -> i32 {
-        self.ant4.act_count as i32
+        i32::from(self.ant4.act_count)
     }
 
     field ant_4_activation_time() -> i32 {
-        self.ant4.act_time as i32
+        i32::from(self.ant4.act_time)
     }
 });

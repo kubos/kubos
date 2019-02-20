@@ -383,18 +383,20 @@ fn main() -> AntSResult<()> {
         .get("primary")
         .expect("No 'primary' value found in 'isis-ants-service' section of config");
     let primary = primary.as_str().unwrap();
-    let primary: u8 = match primary.starts_with("0x") {
-        true => u8::from_str_radix(&primary[2..], 16).unwrap(),
-        false => u8::from_str_radix(primary, 16).unwrap(),
+    let primary: u8 = if primary.starts_with("0x") {
+        u8::from_str_radix(&primary[2..], 16).unwrap()
+    } else {
+        u8::from_str_radix(primary, 16).unwrap()
     };
 
     let secondary = config
         .get("secondary")
         .expect("No 'secondary' value found in 'isis-ants-service' section of config");
     let secondary = secondary.as_str().unwrap();
-    let secondary: u8 = match secondary.starts_with("0x") {
-        true => u8::from_str_radix(&secondary[2..], 16).unwrap(),
-        false => u8::from_str_radix(secondary, 16).unwrap(),
+    let secondary: u8 = if secondary.starts_with("0x") {
+        u8::from_str_radix(&secondary[2..], 16).unwrap()
+    } else {
+        u8::from_str_radix(secondary, 16).unwrap()
     };
 
     let antennas = config

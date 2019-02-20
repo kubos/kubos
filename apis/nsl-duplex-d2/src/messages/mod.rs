@@ -17,7 +17,7 @@
 //! This module contains structs and parsers for messages received on
 //! serial connection.
 
-use nom::{be_u32, error_position, one_of, take_until_and_consume, IResult};
+use nom::{be_u32, one_of, take_until_and_consume, IResult};
 
 mod file;
 mod geo_record;

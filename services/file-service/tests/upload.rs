@@ -22,8 +22,6 @@ use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
 use rand::{thread_rng, Rng};
 use std::fs;
-use std::fs::{File, OpenOptions};
-use std::io::prelude::*;
 use std::thread;
 use std::time::Duration;
 use tempfile::TempDir;

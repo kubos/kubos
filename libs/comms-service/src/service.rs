@@ -91,13 +91,15 @@ impl<T: Clone> CommsControlBlock<T> {
             handler_port_max: config.handler_port_max.unwrap_or(DEFAULT_HANDLER_END),
             timeout: config.timeout.unwrap_or(DEFAULT_TIMEOUT),
             ground_ip: Ipv4Addr::from_str(
-                &config.ground_ip.unwrap_or(DEFAULT_GROUND_IP.to_string()),
+                &config
+                    .ground_ip
+                    .unwrap_or_else(|| DEFAULT_GROUND_IP.to_string()),
             )
             .unwrap(),
             satellite_ip: Ipv4Addr::from_str(
                 &config
                     .satellite_ip
-                    .unwrap_or(DEFAULT_SATELLITE_IP.to_string()),
+                    .unwrap_or_else(|| DEFAULT_SATELLITE_IP.to_string()),
             )
             .unwrap(),
             downlink_ports: config.downlink_ports,
@@ -255,6 +257,7 @@ fn socket_manager(ip: Ipv4Addr, port: &mut u16, min: u16, max: u16) -> Option<Ud
 
 // This thread sends a query/mutation to its intended destination and waits for a response.
 // The thread then writes the response to the gateway.
+#[allow(clippy::too_many_arguments)]
 fn handle_message<T: Clone>(
     socket: &UdpSocket,
     data: &Arc<Mutex<CommsTelemetry>>,

@@ -62,7 +62,27 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cargo run --bin large_download   
+        - run: cargo run --bin large_download
+
+    # Rust testing - Check formatting
+    # Run for all PR commits
+    rust_fmt:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: cargo fmt -- --check
+
+
+    # Rust testing - Clippy linter
+    # Run for all PR commits
+    rust_clippy:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: cargo clippy
+
 
     # CLI, C and Python testing
     # Run for all PR commits
@@ -124,6 +144,14 @@ workflows:
             branches:
               ignore: master
       - rust_test_large_upload:
+          filters:
+            branches:
+              ignore: master
+      - rust_fmt:
+          filters:
+            branches:
+              ignore: master
+      - rust_clippy:
           filters:
             branches:
               ignore: master

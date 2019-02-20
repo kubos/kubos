@@ -191,12 +191,13 @@ impl Subsystem {
 
         let new_ctr = { self.persistent.std_telem.lock().unwrap().tlm_counter };
 
-        let (state, uptime) = match new_ctr != old_ctr {
-            true => (
+        let (state, uptime) = if new_ctr != old_ctr {
+            (
                 PowerState::On,
-                self.persistent.std_telem.lock().unwrap().cmd_valid_cntr as i32,
-            ),
-            false => (PowerState::Off, 0),
+                i32::from(self.persistent.std_telem.lock().unwrap().cmd_valid_cntr),
+            )
+        } else {
+            (PowerState::Off, 0)
         };
 
         Ok(GetPowerResponse { state, uptime })
@@ -238,9 +239,9 @@ impl Subsystem {
     pub fn get_spin(&self) -> Result<Spin, Error> {
         let rotating = self.persistent.rotating.lock().unwrap();
         Ok(Spin {
-            x: rotating.k_bdot[0] as f64,
-            y: rotating.k_bdot[1] as f64,
-            z: rotating.k_bdot[2] as f64,
+            x: f64::from(rotating.k_bdot[0]),
+            y: f64::from(rotating.k_bdot[1]),
+            z: f64::from(rotating.k_bdot[2]),
         })
     }
 
@@ -254,15 +255,14 @@ impl Subsystem {
 
         let new_ctr = { self.persistent.std_telem.lock().unwrap().tlm_counter };
 
-        let (success, errors) = match new_ctr != old_ctr {
-            true => (true, "".to_owned()),
-            false => {
-                push_err!(
-                    self.errors,
-                    "Noop: Unable to communicate with MAI400".to_owned()
-                );
-                (false, "Unable to communicate with MAI400".to_owned())
-            }
+        let (success, errors) = if new_ctr != old_ctr {
+            (true, "".to_owned())
+        } else {
+            push_err!(
+                self.errors,
+                "Noop: Unable to communicate with MAI400".to_owned()
+            );
+            (false, "Unable to communicate with MAI400".to_owned())
         };
 
         Ok(GenericResponse { success, errors })
@@ -300,7 +300,6 @@ impl Subsystem {
         let tx: Vec<u8> = command
             .as_bytes()
             .chunks(2)
-            .into_iter()
             .map(|chunk| u8::from_str_radix(::std::str::from_utf8(chunk).unwrap(), 16).unwrap())
             .collect();
 

@@ -72,7 +72,7 @@ fn main() {
         let mut contents = [0u8; 1_000_000];
         thread_rng().fill(&mut contents[..]);
 
-        file.write(&contents).unwrap();
+        file.write_all(&contents).unwrap();
     }
 
     service_new!(service_port, 4096);
@@ -96,8 +96,8 @@ fn main() {
         let mut source_buf = [0u8; 4096];
         let mut dest_buf = [0u8; 4096];
 
-        source_file.read(&mut source_buf).unwrap();
-        dest_file.read(&mut dest_buf).unwrap();
+        let _ = source_file.read(&mut source_buf).unwrap();
+        let _ = dest_file.read(&mut dest_buf).unwrap();
 
         assert_eq!(&source_buf[..], &dest_buf[..], "Chunk mismatch: {}", num);
     }
@@ -137,5 +137,6 @@ pub fn download(
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?)
+    f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?;
+    Ok(())
 }

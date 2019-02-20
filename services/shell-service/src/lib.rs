@@ -68,6 +68,7 @@ fn spawn_process(
     timeout: Duration,
     shared_threads: Arc<Mutex<HashMap<u32, ThreadProcess>>>,
 ) -> Result<(u32, Sender<(ChannelMessage, SocketAddr)>), failure::Error> {
+    #[allow(clippy::type_complexity)]
     let (sender, receiver): (
         Sender<(ChannelMessage, SocketAddr)>,
         Receiver<(ChannelMessage, SocketAddr)>,
@@ -223,7 +224,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
                             channel_id,
                             ThreadProcess {
                                 sender: sender.clone(),
-                                pid: pid,
+                                pid,
                                 path: command.to_owned(),
                             },
                         );

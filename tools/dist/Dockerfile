@@ -1,4 +1,4 @@
-# kubos/kubos-dev:1.13.0
+# kubos/kubos-dev:1.14.0
 
 FROM phusion/baseimage:0.9.22
 
@@ -44,6 +44,8 @@ ENV PATH "$PATH:/root/.cargo/bin"
 RUN rustup default 1.32.0
 RUN rustup target install arm-unknown-linux-gnueabihf
 RUN rustup target install armv5te-unknown-linux-gnueabi
+RUN rustup component add clippy
+RUN rustup component add rustfmt
 RUN /root/.cargo/bin/cargo install --git https://github.com/kubos/cargo-kubos
 COPY cargo_config /root/.cargo/config
 

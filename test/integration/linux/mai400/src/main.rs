@@ -301,6 +301,7 @@ fn reset(mai: &MAI400, logger: &Logger) -> u8 {
     }
 }
 
+#[allow(clippy::cyclomatic_complexity)]
 fn read(mai: &MAI400, logger: &Logger) -> u8 {
     let mut rc = 0;
 
@@ -667,6 +668,7 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
     rc
 }
 
+#[allow(clippy::type_complexity)]
 fn read_loop(
     mai: &MAI400,
     exit: &Arc<AtomicBool>,

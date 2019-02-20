@@ -55,6 +55,7 @@ impl Subsystem {
 
     // Queries
 
+    #[allow(clippy::clone_on_copy)]
     pub fn get_config(&self) -> AntSResult<ConfigureController> {
         let controller = self
             .controller
@@ -68,9 +69,10 @@ impl Subsystem {
         let result = run!(self.ants.get_deploy(), self.errors);
         let armed = result.unwrap_or_default().sys_armed;
 
-        Ok(match armed {
-            true => ArmStatus::Armed,
-            false => ArmStatus::Disarmed,
+        Ok(if armed {
+            ArmStatus::Armed
+        } else {
+            ArmStatus::Disarmed
         })
     }
 
@@ -151,10 +153,7 @@ impl Subsystem {
             _ => PowerState::On,
         };
 
-        Ok(GetPowerResponse {
-            state: state,
-            uptime: uptime,
-        })
+        Ok(GetPowerResponse { state, uptime })
     }
 
     pub fn get_telemetry(&self) -> AntSResult<Telemetry> {
@@ -270,11 +269,7 @@ impl Subsystem {
     }
 
     pub fn deploy(&self, ant: DeployType, force: bool, time: i32) -> AntSResult<DeployResponse> {
-        let mut conv = time as u8;
-
-        if time > 255 {
-            conv = 255;
-        }
+        let conv = if time > 255 { 255 } else { time as u8 };
 
         let result = match ant {
             DeployType::All => run!(self.ants.auto_deploy(conv), self.errors),
@@ -383,7 +378,6 @@ impl Subsystem {
         let tx: Vec<u8> = command
             .as_bytes()
             .chunks(2)
-            .into_iter()
             .map(|chunk| u8::from_str_radix(str::from_utf8(chunk).unwrap(), 16).unwrap())
             .collect();
 
