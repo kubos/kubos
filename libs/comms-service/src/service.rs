@@ -175,9 +175,9 @@ impl CommsService {
                 let write_ref = write.clone();
                 let ground_ip = control.ground_ip;
                 let sat_ip = control.satellite_ip;
-                let ground_port = control.ground_port.ok_or(CommsServiceError::ConfigError(
-                    "Missing ground_port parameter".to_owned(),
-                ))?;
+                let ground_port = control.ground_port.ok_or_else(|| {
+                    CommsServiceError::ConfigError("Missing ground_port parameter".to_owned())
+                })?;
                 thread::spawn(move || {
                     downlink_endpoint(
                         &telem_ref,
