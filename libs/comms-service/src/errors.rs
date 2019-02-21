@@ -21,6 +21,9 @@ use failure::{Error, Fail};
 /// This enum defines all errors that can occur within the `comms-service`.
 #[derive(Fail, Debug, PartialEq)]
 pub enum CommsServiceError {
+    /// A component of the service's configuration was incorrect
+    #[fail(display = "Config error: {}", _0)]
+    ConfigError(String),
     /// The mutex guarding the telemetry cache has been poisoned.
     #[fail(display = "The mutex guarding the telemetry cache has been poisoned.")]
     MutexPoisoned,
@@ -35,16 +38,6 @@ pub enum CommsServiceError {
         display = "The number of write methods and the number of downlink ports are not the same."
     )]
     ParameterLengthMismatch,
-    /// The read thread could not be started because a no `write()` method was specified.
-    #[fail(
-        display = "The read thread could not be started because no write method was specified."
-    )]
-    MissingWriteMethod,
-    /// The endpoint thread could not be started because no `ground_port` was specified.
-    #[fail(
-        display = "The endpoint thread could not be started because no ground port was specified."
-    )]
-    MissingGroundPort,
     /// All of the ports allocated for handling packets are binded and unable to be used.
     #[fail(display = "All of the ports allocated for handling packets are binded.")]
     NoAvailablePorts,

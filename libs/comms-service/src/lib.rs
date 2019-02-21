@@ -33,13 +33,14 @@
 //! fn read(socket: &Arc<UdpSocket>) -> CommsResult<Vec<u8>> { Ok(vec![]) }
 //! fn write(socket: &Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> { Ok(()) }
 //!
+//! # fn func() -> CommsResult<()> {
 //! // Defining connections.
 //! let read_conn = Arc::new(UdpSocket::bind(("192.168.8.1", 13000)).unwrap());
 //! let write_conn = Arc::new(UdpSocket::bind(("192.168.8.1", 13001)).unwrap());
 //!
 //! // Fetching communications settings from the common config.toml file.
 //! let service_config = kubos_system::Config::new("service-name");
-//! let comms_config = CommsConfig::new(service_config);
+//! let comms_config = CommsConfig::new(service_config)?;
 //!
 //! // Putting everything into the control block.
 //! let controls = CommsControlBlock::new(
@@ -48,13 +49,15 @@
 //!     read_conn,
 //!     write_conn,
 //!     comms_config
-//! );
+//! )?;
 //!
 //! // Get telemetry from communication service.
 //! let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 //!
 //! // Start communication service.
 //! CommsService::start(controls, &telem);
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! ## Comms Service Config File Format
@@ -64,10 +67,10 @@
 //! handler_port_min = 13002
 //! handler_port_max = 13010
 //! downlink_ports = [13011]
-//! ground-port = 9001
+//! ground_port = 9001
 //! timeout = 1500
-//! ground-ip = "192.168.8.1"
-//! satellite-ip = "192.168.8.2"
+//! ground_ip = "192.168.8.1"
+//! satellite_ip = "192.168.8.2"
 //! ```
 
 #[macro_use]
@@ -80,6 +83,8 @@ mod config;
 mod errors;
 mod service;
 mod telemetry;
+#[cfg(test)]
+mod tests;
 
 /// Communication Service library.
 pub use crate::service::*;
