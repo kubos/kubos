@@ -77,7 +77,10 @@ pub fn read_thread(mai: MAI400, data: Arc<ReadData>, sender: Sender<String>) {
                         // While unlikely, maybe EIO or EINTR could be thrown?
                         // This would indicate that a random issue happened, so
                         // go ahead and retry a few times to see if it clears up
+                        info!("UartError: {:?}", cause);
                         if err_count > 10 {
+                            error!("UartError: {:?}. Read thread bailing. Service restart required.",
+                                    cause);
                             sender
                                 .send(format!(
                                     "UartError: {:?}. Read thread bailing. Service restart required.",
@@ -91,10 +94,12 @@ pub fn read_thread(mai: MAI400, data: Arc<ReadData>, sender: Sender<String>) {
                         err_count += 1;
                     }
                     _ => {
+                        let errors = process_errors!(err);
+                        error!("Unexpected read errors encountered: {}. Service restart required.", errors);
                         sender
                             .send(format!(
                                 "Unexpected read errors encountered: {}. Service restart required.",
-                                process_errors!(err)
+                                errors
                             ))
                             .unwrap();
                         break;

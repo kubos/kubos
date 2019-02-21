@@ -105,8 +105,13 @@ macro_rules! process_errors {
 #[macro_export]
 macro_rules! push_err {
     ($master:expr, $err:expr) => {{
+        // Send the error to syslog
+        error!("{}", err);
+        
         if let Ok(mut master_vec) = $master.write() {
             master_vec.push($err);
+        } else {
+            error!("Unable to add error to master list");
         }
     }};
 }
