@@ -105,8 +105,9 @@ macro_rules! process_errors {
 #[macro_export]
 macro_rules! push_err {
     ($master:expr, $err:expr) => {{
+        use log::error;
         // Send the error to syslog
-        error!("{}", err);
+        error!("{}", $err);
         
         if let Ok(mut master_vec) = $master.write() {
             master_vec.push($err);
