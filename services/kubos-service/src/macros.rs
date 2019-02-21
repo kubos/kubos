@@ -108,7 +108,7 @@ macro_rules! push_err {
         use log::error;
         // Send the error to syslog
         error!("{}", $err);
-        
+
         if let Ok(mut master_vec) = $master.write() {
             master_vec.push($err);
         } else {
