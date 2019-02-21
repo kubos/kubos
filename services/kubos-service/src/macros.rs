@@ -308,7 +308,7 @@ mod tests {
 
         assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
         assert_eq!(
-            vec!["test_func (services/kubos-service/src/macros.rs:301): TopError: top, RootError: root".to_owned()],
+            vec!["test_func (services/kubos-service/src/macros.rs:307): TopError: top, RootError: root".to_owned()],
             *master_err.read().unwrap()
         );
     }
