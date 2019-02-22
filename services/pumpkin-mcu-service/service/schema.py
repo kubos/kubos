@@ -22,7 +22,6 @@ MODULES = {
 
 logger = logging.getLogger("pumpkin-mcu-service")
 
-
 class Query(graphene.ObjectType):
     """
     Creates query endpoints exposed by graphene.

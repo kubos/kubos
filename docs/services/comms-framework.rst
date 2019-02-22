@@ -146,16 +146,16 @@ configurations.
 
 The service's `config.toml` file should contain the following parameters:
 
-- ``handler_port_min`` - Starting port used to define a range of ports that are used in the message
+- ``handler_port_min`` - (Default: 13100) Starting port used to define a range of ports that are used in the message
   handlers that handle messages received from the ground
-- ``handler_port_max`` - Ending port used to define a range of ports that are used in the message
+- ``handler_port_max`` - (Default: 13149) Ending port used to define a range of ports that are used in the message
   handlers that handle messages received from the ground
 - ``downlink_ports`` - (Optional) List of ports used by downlink endpoints that send messages to the
   ground. Each port in the list will be used by one downlink endpoint
-- ``timeout`` - Length of time a message handler should wait for a reply, in milliseconds
-- ``ground_ip`` - IP address of the ground gateway
-- ``ground_port`` - UDP port of the ground gateway
-- ``satellite_ip`` - IP address of the communications service
+- ``timeout`` - (Default: 1500) Length of time a message handler should wait for a reply, in milliseconds
+- ``ground_ip`` - (Required) IP address of the ground gateway
+- ``ground_port`` - (Required if ``downlink_ports`` is present) UDP port of the ground gateway
+- ``satellite_ip`` - (Required) IP address of the communications service
 
 The service which implements the framework should create a |CommsControlBlock|, which
 provides the final configuration to the main communication logic.

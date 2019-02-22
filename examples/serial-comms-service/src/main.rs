@@ -100,13 +100,13 @@ fn main() -> SerialServiceResult<()> {
 
     let bus = service_config
         .get("bus")
-        .unwrap()
+        .expect("No 'bus' parameter in config.toml")
         .as_str()
         .unwrap()
         .to_owned();
 
     // Read configuration from config file.
-    let comms_config = CommsConfig::new(service_config.clone());
+    let comms_config = CommsConfig::new(service_config.clone())?;
 
     // Open serial port
     let serial_comms = Arc::new(Mutex::new(SerialComms::new(&bus)));
@@ -118,7 +118,7 @@ fn main() -> SerialServiceResult<()> {
         serial_comms.clone(),
         serial_comms,
         comms_config,
-    );
+    )?;
 
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
