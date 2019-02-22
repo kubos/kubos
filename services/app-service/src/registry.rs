@@ -25,6 +25,8 @@ use std::os::unix;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 use toml;
 use uuid::Uuid;
 
@@ -412,11 +414,30 @@ impl AppRegistry {
             cmd.args(&add_args);
         }
 
-        match cmd.spawn() {
-            Ok(child) => Ok(child.id()),
-            Err(err) => Err(AppError::StartError {
-                err: format!("Failed to spawn app: {:?}", err),
-            }),
+        let mut child = cmd.spawn().map_err(|err| AppError::StartError {
+            err: format!("Failed to spawn app: {:?}", err),
+        })?;
+
+        // Give the app a moment to run
+        thread::sleep(Duration::from_millis(100));
+
+        // See if the app already exited
+        //
+        // try_wait returns 1 of 3 things:
+        //   - Ok(Some(status)) - App exited. Status is the exit code.
+        //   - Ok(None) - App is still running
+        //   - Err(err) - Something went wrong while trying to check if the app is still running.
+        //                We're going to go ahead and assume that it is.
+        if let Some(status) = child.try_wait().unwrap_or(None) {
+            if !status.success() {
+                Err(AppError::StartError {
+                    err: format!("App returned non-zero exit code: {}", status),
+                })
+            } else {
+                Ok(child.id())
+            }
+        } else {
+            Ok(child.id())
         }
     }
 
