@@ -177,3 +177,64 @@ fn start_app_bad() {
     // Make sure our bad app entry was removed from the registry directory
     assert!(!app_dir.exists());
 }
+
+#[test]
+fn start_app_nonzero_rc() {
+    let registry_dir = TempDir::new().unwrap();
+
+    // Since we're creating the app files directly in the app registry, we need to manually
+    // control the lifetime of the app binary so that all the data gets written and the file gets
+    // closed before we attempt to execute it
+    {
+        let app_dir = registry_dir.path().join("a-b-c-d-e/1.0");
+
+        fs::create_dir_all(app_dir.clone()).unwrap();
+
+        let src = r#"
+            #!/bin/bash
+            exit 1
+            "#;
+
+        let mut bin = fs::File::create(app_dir.join("tiny-app")).unwrap();
+        bin.write_all(src.as_bytes()).unwrap();
+        let mut perms = bin.metadata().unwrap().permissions();
+        perms.set_mode(0o755);
+        bin.set_permissions(perms).unwrap();
+
+        let toml = format!(
+            r#"
+                active_version = true
+                run_level = "onCommand"
+    
+                [app]
+                uuid = "a-b-c-d-e"
+                pid = 0
+                path = "{}/a-b-c-d-e/1.0/tiny-app"
+    
+                [app.metadata]
+                name = "tiny-app"
+                version = "1.0"
+                author = "user"
+                "#,
+            registry_dir.path().to_string_lossy(),
+        );
+
+        fs::write(app_dir.join("app.toml"), toml).unwrap();
+    }
+
+    // Create the registry
+    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
+
+    let result = registry.start_app("a-b-c-d-e", &RunLevel::OnCommand, None);
+
+    // Small sleep to prevent tiny-app from being destroyed before
+    // the system finishes calling it
+    thread::sleep(Duration::from_millis(10));
+
+    assert_eq!(
+        result.unwrap_err(),
+        AppError::StartError {
+            err: "App returned exit code: 1".to_owned()
+        }
+    );
+}

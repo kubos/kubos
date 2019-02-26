@@ -18,7 +18,7 @@ use crate::app_entry::*;
 use crate::error::*;
 use fs_extra;
 use kubos_app::RunLevel;
-use log::info;
+use log::*;
 use std::fs;
 use std::io::Read;
 use std::os::unix;
@@ -431,7 +431,7 @@ impl AppRegistry {
         if let Some(status) = child.try_wait().unwrap_or(None) {
             if !status.success() {
                 Err(AppError::StartError {
-                    err: format!("App returned non-zero exit code: {}", status),
+                    err: format!("App returned {}", status),
                 })
             } else {
                 Ok(child.id())
@@ -468,7 +468,7 @@ impl AppRegistry {
                     match self.start_app(&uuid.to_string_lossy(), &RunLevel::OnBoot, None) {
                         Ok(_) => apps_started += 1,
                         Err(error) => {
-                            eprintln!("Failed to start {}: {:?}", uuid.to_string_lossy(), error);
+                            error!("Failed to start {}: {}", uuid.to_string_lossy(), error);
                             apps_not_started += 1
                         }
                     }
@@ -483,7 +483,7 @@ impl AppRegistry {
         );
 
         if apps_not_started != 0 {
-            return Err(AppError::FileError {
+            return Err(AppError::SystemError {
                 err: format!("Failed to start {} app/s", apps_not_started),
             });
         }
