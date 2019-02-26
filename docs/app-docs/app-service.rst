@@ -190,6 +190,9 @@ For example::
 Under the covers, the service receives the mutation and identifies the current active version of the
 application specified. It then calls that version's binary, passing along the run level as a command argument.
 
+If the application immediately fails, the ``errors`` field will contain a message with the
+application's return code.
+
 Passing Additional Arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -214,6 +217,9 @@ All applications will be started with the ``OnBoot`` run level automatically whe
 started during system initialization.
 
 This logic may also be triggered by manually starting the applications service with the ``-b`` flag.
+
+If an application cannot be started, or immediately fails, an error message will be written to the
+service's log with the failure reason.
 
 Upgrading
 ---------
