@@ -53,7 +53,7 @@ fn registry_onboot_good() {
             "#;
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
-    registry.register(&app_bin.to_string_lossy(), None).unwrap();
+    registry.register(&app_bin.to_string_lossy()).unwrap();
 
     let result = registry.run_onboot();
 
@@ -83,7 +83,7 @@ fn registry_onboot_bad() {
             "#;
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
-    registry.register(&app_bin.to_string_lossy(), None).unwrap();
+    registry.register(&app_bin.to_string_lossy()).unwrap();
 
     assert_eq!(
         registry.run_onboot().unwrap_err(),
@@ -121,7 +121,7 @@ fn registry_onboot_fail() {
             "#;
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
-    registry.register(&app_bin.to_string_lossy(), None).unwrap();
+    registry.register(&app_bin.to_string_lossy()).unwrap();
 
     let result = registry.run_onboot();
 
@@ -143,7 +143,7 @@ fn registry_onboot_preexisting() {
     // control the lifetime of the app binary so that all the data gets written and the file gets
     // closed before we attempt to execute it
     {
-        let app_dir = registry_dir.path().join("a-b-c-d-e/1.0");
+        let app_dir = registry_dir.path().join("tiny-app/1.0");
 
         fs::create_dir_all(app_dir.clone()).unwrap();
 
@@ -164,11 +164,8 @@ fn registry_onboot_preexisting() {
                 run_level = "onCommand"
     
                 [app]
-                uuid = "a-b-c-d-e"
                 pid = 0
-                path = "{}/a-b-c-d-e/1.0/tiny-app"
-    
-                [app.metadata]
+                path = "{}/tiny-app/1.0/tiny-app"
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"

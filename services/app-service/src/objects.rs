@@ -53,28 +53,22 @@ pub struct KApp(pub app_entry::App);
 graphql_object!(KApp: () as "App" where Scalar = <S> |&self| {
     description: "Kubos Application"
 
-    field uuid() -> &String
-        as "UUID"
-    {
-        &(self.0.uuid)
-    }
-
     field name() -> &String
         as "Name"
     {
-        &self.0.metadata.name
+        &self.0.name
     }
 
     field version() -> &String
         as "Version"
     {
-        &self.0.metadata.version
+        &self.0.version
     }
 
     field author() -> &String
         as "Author"
     {
-        &self.0.metadata.author
+        &self.0.author
     }
 
     field pid() -> i32

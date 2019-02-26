@@ -21,11 +21,15 @@ use std::io::Write;
 use std::path::PathBuf;
 use toml;
 
-/// The high level metadata of an application
+/// The high level metadata of an application derived from the `manifest.toml` file during
+/// registration
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AppMetadata {
-    /// A unique name for the application (usually the same as the name of the binary)
+    /// A unique name for the application
     pub name: String,
+    /// Optional. The path of the file which should be called to kick off execution.
+    /// If not specified, ``name`` will be used.
+    pub executable: Option<String>,
     /// The version of this application
     pub version: String,
     /// The author of the application
@@ -34,14 +38,16 @@ pub struct AppMetadata {
 /// Kubos App struct
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct App {
-    /// The generated UUID for the application
-    pub uuid: String,
+    /// The name of the application
+    pub name: String,
     /// The process ID of the application, if it's currently running (0 otherwise)
     pub pid: u32,
-    /// The absolute path to the application binary
+    /// The absolute path to the application executable
     pub path: String,
-    /// The associated metadata of the application
-    pub metadata: AppMetadata,
+    /// The version of this instance of the application
+    pub version: String,
+    /// The author of the application
+    pub author: String,
 }
 /// AppRegistryEntry
 #[derive(Clone, Debug, Deserialize, Serialize)]
