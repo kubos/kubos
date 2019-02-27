@@ -76,13 +76,20 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         })
     }
 
-    field uninstall(&executor, name: String, version: String) -> FieldResult<GenericResponse>
+    field uninstall(&executor, name: String, version: Option<String>) -> FieldResult<GenericResponse>
         as "Uninstall App"
     {
-        Ok(match executor.context().subsystem().uninstall(&name, &version) {
-            Ok(v) => GenericResponse { success: true, errors: "".to_owned() },
-            Err(error) => GenericResponse { success: false, errors: error.to_string() },
-        })
+        if let Some(val) = version {
+            Ok(match executor.context().subsystem().uninstall(&name, &val) {
+                Ok(v) => GenericResponse { success: true, errors: "".to_owned() },
+                Err(error) => GenericResponse { success: false, errors: error.to_string() },
+            })
+        } else {
+            Ok(match executor.context().subsystem().uninstall_all(&name) {
+                Ok(v) => GenericResponse { success: true, errors: "".to_owned() },
+                Err(error) => GenericResponse { success: false, errors: error.to_string() },
+            })
+        }
     }
 
     field start_app(&executor, name: String, run_level: String, args: Option<Vec<String>>) -> FieldResult<StartResponse>

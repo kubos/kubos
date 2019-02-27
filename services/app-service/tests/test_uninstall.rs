@@ -130,3 +130,62 @@ fn uninstall_notlast_app() {
     fixture.teardown();
     assert!(result.is_ok());
 }
+
+#[test]
+fn uninstall_all_app() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = format!(
+        "{}",
+        fixture
+            .registry_dir
+            .path()
+            .join("config.toml")
+            .to_string_lossy()
+    );
+    let mut app = MockAppBuilder::new("dummy");
+    app.active(true)
+        .run_level("OnBoot")
+        .version("0.0.1")
+        .author("user");
+
+    app.install(&fixture.registry_dir.path());
+
+    let mut app = MockAppBuilder::new("dummy");
+    app.active(true)
+        .run_level("OnBoot")
+        .version("0.0.2")
+        .author("user");
+
+    app.install(&fixture.registry_dir.path());
+    fixture.start_service(false);
+
+    // Make sure our app directory exists
+    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
+
+    let result = panic::catch_unwind(|| {
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            r#"mutation {
+            uninstall(name: "dummy") {
+                errors,
+                success
+            }
+        }"#,
+        );
+
+        assert!(result["uninstall"]["success"].as_bool().unwrap());
+
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            "{ apps { active } }",
+        );
+
+        assert_eq!(result["apps"].as_array().expect("Not an array").len(), 0);
+    });
+
+    // Our app directory should now no longer exist
+    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), false);
+
+    fixture.teardown();
+    assert!(result.is_ok());
+}

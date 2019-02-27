@@ -302,7 +302,7 @@ impl AppRegistry {
         Ok(entries[entries.len() - 1].clone())
     }
 
-    /// Uninstall an application from the AppRegistry
+    /// Uninstall a version of an application from the AppRegistry
     ///
     /// # Arguments
     ///
@@ -367,6 +367,56 @@ impl AppRegistry {
         match errors {
             Some(err) => Err(AppError::UninstallError { err }),
             None => Ok(true),
+        }
+    }
+
+    /// Uninstall all versions of an application from the AppRegistry
+    ///
+    /// # Arguments
+    ///
+    /// * `app_name` - The name of the application
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::AppRegistry;
+    /// let registry = AppRegistry::new();
+    /// registry.uninstall("my-app", "1.0");
+    /// ```
+    ///
+    pub fn uninstall_all(&self, app_name: &str) -> Result<bool, AppError> {
+        let mut errors = vec![];
+
+        // Delete the application files
+        let app_dir = format!("{}/{}", self.apps_dir, app_name);
+
+        if let Err(error) = fs::remove_dir_all(app_dir) {
+            errors.push(format!("Failed to remove app directory: {}", error));
+        }
+
+        // Remove the active version symlink
+        if let Err(error) = fs::remove_file(format!("{}/active/{}", self.apps_dir, app_name)) {
+            errors.push(format!(
+                "Failed to remove active symlink for {}: {}",
+                app_name, error
+            ));
+        }
+
+        match self.entries.lock() {
+            Ok(mut entries) => {
+                // Remove the app entries from the registry list.
+                // `drain_filter` is currently a nightly-only function, so instead we'll just keep
+                // the apps that don't have the name we're trying to remove...
+                entries.retain(|entry| entry.app.name != app_name);
+            }
+            Err(err) => errors.push(format!("Couldn't get entries mutex: {:?}", err)),
+        }
+
+        if errors.is_empty() {
+            Ok(true)
+        } else {
+            let err = errors.join(". ");
+            Err(AppError::UninstallError { err })
         }
     }
 
