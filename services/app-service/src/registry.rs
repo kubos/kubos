@@ -216,7 +216,7 @@ impl AppRegistry {
 
         let app_name = metadata.name.clone();
 
-        // If the file which should be called for execution wasn't explicitly defined, used the
+        // If the file which should be called for execution wasn't explicitly defined, use the
         // application name instead.
         let app_exec = if let Some(path) = metadata.executable.clone() {
             path

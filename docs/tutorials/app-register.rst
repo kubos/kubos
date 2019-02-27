@@ -192,7 +192,7 @@ The mutation returns three fields:
     - ``errors`` - Any errors which were encountered while starting the application
     - ``pid`` - The PID of the started application. This will be empty if any errors are encountered
 
-UOur request should look like this::
+Our request should look like this::
 
     mutation {
       startApp(name: "my-mission-app", runLevel: "OnCommand") {

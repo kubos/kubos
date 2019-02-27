@@ -150,7 +150,6 @@ pub fn app_start(_pid: u32, handler: &AppHandler) -> Result<(), Error> {
         return Ok(());
     }
 
-    let _uuid = env::var_os("KUBOS_APP_UUID");
     let run_level = matches
         .opt_str("r")
         .unwrap_or_else(|| "OnCommand".to_owned());
