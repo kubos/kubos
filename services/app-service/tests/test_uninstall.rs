@@ -40,7 +40,7 @@ fn uninstall_last_app() {
 
     app.install(&fixture.registry_dir.path());
     fixture.start_service(false);
-    
+
     // Make sure our app directory exists
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
 
@@ -90,7 +90,7 @@ fn uninstall_notlast_app() {
         .author("user");
 
     app.install(&fixture.registry_dir.path());
-    
+
     let mut app = MockAppBuilder::new("dummy");
     app.active(true)
         .run_level("OnBoot")
@@ -99,7 +99,7 @@ fn uninstall_notlast_app() {
 
     app.install(&fixture.registry_dir.path());
     fixture.start_service(false);
-    
+
     // Make sure our app directory exists
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
 

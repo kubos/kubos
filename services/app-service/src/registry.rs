@@ -326,7 +326,7 @@ impl AppRegistry {
         if let Err(error) = fs::remove_dir_all(app_dir) {
             errors = Some(format!("Failed to remove app directory: {}", error));
         }
-        
+
         // If that was the last version, also remove the parent directory.
         // (If this call fails, it's probably because the directory wasn't empty because some
         // version of the app still exists, so ignore the error)
