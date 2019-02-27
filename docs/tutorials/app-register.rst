@@ -85,12 +85,11 @@ To register an application, we use the service's ``register`` mutation.
 It has the following schema::
 
      mutation {
-        register(path: String!, uuid: String) {
+        register(path: String!) {
             success: Bool!,
             errors: String,
             entry: {
                 app: {
-                    uuid: String!,
                     name: String!,
                     version: String!,
                     author: String!,
@@ -103,12 +102,8 @@ It has the following schema::
      
 The ``path`` input parameter specifies the directory *on the OBC* where the application and manifest
 files reside.
-They **must be the only files in this directory** in order for the service to be able to complete the
-registration process.
-
-The ``uuid`` input parameter specifies the desired UUID for the registered application.
-If not specified, one will be automatically generated.
-This field is normally used when updating an existing application.
+The registration process will copy all of the contents at that path, so care should be taken to
+ensure that only the desired application files are present.
 
 The mutation can return the following fields:
 
@@ -120,8 +115,6 @@ The mutation can return the following fields:
 
         - ``app``
 
-            - ``uuid`` - The unique identifier for our newly registered application. This will be used for
-              all future interaction with our application
             - ``name`` - The name of the registered application, taken from the manifest file
             - ``version`` - The version number of this particular iteration of the application, taken
               from the manifest file
@@ -143,7 +136,6 @@ Our registration mutation should look like this::
         errors,
         entry {
           app {
-            uuid
             name
             path
           }
@@ -160,9 +152,8 @@ The response should like this::
           "errors": "",
           "entry": {
             "app": {
-              "uuid": "5eb20cf9-3b18-4713-b03f-681f1c1ca4b5",
-              "name": "my-mission-app.py",
-              "path": "/home/system/kubos/apps/5eb20cf9-3b18-4713-b03f-681f1c1ca4b5/1.0/my-mission-app.py"
+              "name": "my-mission-app",
+              "path": "/home/system/kubos/apps/my-mission-app/1.0/my-mission-app.py"
             }
           }
         }
@@ -173,8 +164,7 @@ We can break down the resulting file path like so:
 
     - ``/home/system/kubos/apps`` - This is the default directory that the applications service uses to
       save all registered applications
-    - ``5eb20cf9-3b18-4713-b03f-681f1c1ca4b5`` - This is the generated UUID of our application, which
-      is echoed in the ``uuid`` response field
+    - ``my-mission-app`` - The name of our application
     - ``1.0`` - Our manifest file specified that this was version 1.0 of our application
     - ``my-mission-app.py`` - Our application file
 
@@ -185,14 +175,14 @@ We'll go ahead and start our app now to verify it works using the ``startApp`` m
 It has the following schema::
 
     mutation {
-        startApp(uuid: String!, runLevel: String!): {
+        startApp(name: String!, runLevel: String!): {
             success: Bool!
             errors: String,
             pid: Int
         }
     }
 
-The ``uuid`` input parameter specifies the UUID of the application which should be started.
+The ``name`` input parameter specifies the name of the application which should be started.
 The ``runLevel`` input parameter specifies which run case should be called; it must be either
 "OnBoot" or "OnCommand".
 
@@ -202,10 +192,10 @@ The mutation returns three fields:
     - ``errors`` - Any errors which were encountered while starting the application
     - ``pid`` - The PID of the started application. This will be empty if any errors are encountered
 
-Using the UUID returned from our registration, our request should look like this::
+UOur request should look like this::
 
     mutation {
-      startApp(uuid: "5eb20cf9-3b18-4713-b03f-681f1c1ca4b5", runLevel: "OnCommand") {
+      startApp(name: "my-mission-app", runLevel: "OnCommand") {
         success,
         pid
       }
@@ -245,16 +235,14 @@ Since this is a new version of our application, we'll then need to update our ``
 file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
 
 After transferring both of the files into our remote folder, ``/home/kubos/my-app``,
-we can register the updated application using the same ``register`` mutation as before,
-except this time we'll add the ``uuid`` input parameter::
+we can register the updated application using the same ``register`` mutation as before::
 
     mutation {
-      register(path: "/home/kubos/my-app", uuid: "5eb20cf9-3b18-4713-b03f-681f1c1ca4b5") {
+      register(path: "/home/kubos/my-app") {
         success,
         errors,
         entry {
           app {
-            uuid
             name
             path
           }
@@ -262,7 +250,7 @@ except this time we'll add the ``uuid`` input parameter::
       }
     }
 
-The returned UUID should match our original UUID::
+The response should look almost identical::
 
     {
         "errors": "",
@@ -272,9 +260,8 @@ The returned UUID should match our original UUID::
                 "errors": "",
                 "entry": {
                     "app": {
-                        "name":"my-mission-app.py",
-                        "path":"/home/system/kubos/apps/5eb20cf9-3b18-4713-b03f-681f1c1ca4b5/2.0/my-mission-app.py",
-                        "uuid":"5eb20cf9-3b18-4713-b03f-681f1c1ca4b5"
+                        "name":"my-mission-app",
+                        "path":"/home/system/kubos/apps/my-mission-app/2.0/my-mission-app.py",
                     }
                 }
             }
@@ -297,9 +284,8 @@ We can now query the service to see the registered versions of our application u
 The query has the following schema::
 
     {
-        apps(uuid: String, name: String, version: String, active: Bool): [{
+        apps(name: String, version: String, active: Bool): [{
             app: {
-                uuid: String!,
                 name: String!,
                 version: String!,
                 author: String!,
@@ -312,7 +298,6 @@ The query has the following schema::
 By default, the query will return information about all versions of all registered applications.
 The queries input fields can be used to filter the results:
 
-    - ``uuid`` - Specifies that the service should only return entries with this UUID
     - ``name`` - Returns entries with this specific application file name
     - ``version`` - Returns only entries with the specified version
     - ``active`` - Returns only the current active version of the particular application
@@ -321,8 +306,7 @@ The query has the following response fields:
 
     - ``app``
 
-        - ``uuid`` - The unique identifier for the application
-        - ``name`` - The name of the application file
+        - ``name`` - The name of the application
         - ``version`` - The version number of this particular iteration of the application
         - ``author`` - The author information for the application
         - ``path`` - The abosolute path of the registered application file
@@ -338,7 +322,7 @@ We want to query the service to make sure that:
 Our request should look like this::
 
     {
-      apps(uuid: "5eb20cf9-3b18-4713-b03f-681f1c1ca4b5") {
+      apps(name: "my-mission-app") {
         active
         app {
           name
@@ -355,14 +339,14 @@ The response should look like this::
                 {
                     "active":false,
                     "app": {
-                        "name":"my-mission-app.py",
+                        "name":"my-mission-app",
                         "version":"1.0"
                     }
                 },
                 {
                     "active":true,
                     "app": {
-                        "name":"my-mission-app.py",
+                        "name":"my-mission-app",
                         "version":"2.0"
                     }
                 }
