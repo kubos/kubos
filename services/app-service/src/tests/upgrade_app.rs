@@ -161,7 +161,6 @@ fn upgrade_good() {
                 active,
                 app {
                     name,
-                    uuid,
                     version,
                 }
             }

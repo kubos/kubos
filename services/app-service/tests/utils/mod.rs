@@ -27,7 +27,6 @@ use tempfile::TempDir;
 
 pub struct MockAppBuilder {
     _name: String,
-    _uuid: String,
     _bin: Option<String>,
     _version: Option<String>,
     _author: Option<String>,
@@ -36,10 +35,9 @@ pub struct MockAppBuilder {
 }
 
 impl MockAppBuilder {
-    pub fn new(name: &str, uuid: &str) -> Self {
+    pub fn new(name: &str) -> Self {
         Self {
             _name: String::from(name),
-            _uuid: String::from(uuid),
             _bin: None,
             _version: None,
             _author: None,
@@ -80,16 +78,12 @@ impl MockAppBuilder {
             run_level = "{run_level}"
 
             [app]
-            uuid = "{uuid}"
             pid = 0
-            path = "{dir}/{uuid}/{version}/{bin}"
-
-            [app.metadata]
+            path = "{dir}/{name}/{version}/{bin}"
             name = "{name}"
             version = "{version}"
             author = "{author}"
             "#,
-            uuid = self._uuid,
             name = self._name,
             dir = registry_dir,
             active = self._active.unwrap_or(true),
@@ -109,7 +103,6 @@ impl MockAppBuilder {
                 echo version = \"{version}\"
                 echo author = \"{author}\"
             else
-                echo uuid = \"$KUBOS_APP_UUID\"
                 echo run_level = \"$KUBOS_APP_RUN_LEVEL\"
             fi
             "#,
@@ -121,7 +114,7 @@ impl MockAppBuilder {
 
     pub fn install(&self, registry_dir: &Path) {
         let mut parent_dir = registry_dir.to_path_buf().clone();
-        parent_dir.push(&self._uuid);
+        parent_dir.push(&self._name);
         parent_dir.push(self._version.as_ref().unwrap_or(&String::from("0.0.1")));
         assert!(fs::create_dir_all(parent_dir.clone()).is_ok());
 

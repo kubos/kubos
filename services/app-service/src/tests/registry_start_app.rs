@@ -103,7 +103,7 @@ fn start_app_fail() {
                 [app]
                 pid = 0
                 path = "{}/tiny-app/1.0/dummy"
-                name = "dummy"
+                name = "tiny-app"
                 version = "1.0"
                 author = "user"
                 "#,

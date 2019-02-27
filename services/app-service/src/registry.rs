@@ -213,7 +213,7 @@ impl AppRegistry {
                 });
             }
         };
-        
+
         let app_name = metadata.name.clone();
 
         // If the file which should be called for execution wasn't explicitly defined, used the
@@ -223,7 +223,7 @@ impl AppRegistry {
         } else {
             metadata.name.clone()
         };
-        
+
         // Make sure the file which should be called for execution is present in the directory
         if !app_path.join(app_exec.clone()).exists() {
             return Err(AppError::RegisterError {
@@ -235,11 +235,7 @@ impl AppRegistry {
             err: format!("Couldn't get entries mutex: {:?}", err),
         })?;
 
-        let app_dir_str = format!(
-            "{}/{}",
-            self.apps_dir,
-            app_name,
-        );
+        let app_dir_str = format!("{}/{}", self.apps_dir, app_name,);
         let app_dir = Path::new(&app_dir_str);
 
         // Check if the app has been registered before
@@ -253,20 +249,18 @@ impl AppRegistry {
                 }
             }
         }
-        
+
         // Set up the directory for this new version of the app
-        let app_dir_str = format!(
-            "{}/{}/{}",
-            self.apps_dir,
-            app_name,
-            metadata.version
-        );
+        let app_dir_str = format!("{}/{}/{}", self.apps_dir, app_name, metadata.version);
         let app_dir = Path::new(&app_dir_str);
 
         if app_dir.exists() {
             return Err(AppError::RegisterError {
-                   err: format!("App {} version {} already exists", app_name, metadata.version)
-                });
+                err: format!(
+                    "App {} version {} already exists",
+                    app_name, metadata.version
+                ),
+            });
         } else {
             fs::create_dir_all(app_dir)?;
         }
@@ -296,7 +290,7 @@ impl AppRegistry {
                 pid: 0,
                 path: format!("{}/{}", app_dir_str, app_exec),
                 version: metadata.version,
-                author: metadata.author
+                author: metadata.author,
             },
             active_version: true,
         };
@@ -424,8 +418,7 @@ impl AppRegistry {
 
         let mut cmd = Command::new(app_path);
 
-        cmd.arg("-r")
-            .arg(format!("{}", run_level));
+        cmd.arg("-r").arg(format!("{}", run_level));
 
         if let Some(add_args) = args {
             cmd.args(&add_args);

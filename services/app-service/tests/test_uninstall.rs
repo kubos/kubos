@@ -32,7 +32,7 @@ fn uninstall_app() {
             .join("config.toml")
             .to_string_lossy()
     );
-    let mut app = MockAppBuilder::new("dummy", "a-b-c-d-e");
+    let mut app = MockAppBuilder::new("dummy");
     app.active(true)
         .run_level("OnBoot")
         .version("0.0.1")
@@ -45,7 +45,7 @@ fn uninstall_app() {
         let result = send_query(
             ServiceConfig::new_from_path("app-service", config.to_owned()),
             r#"mutation {
-            uninstall(uuid: "a-b-c-d-e", version: "0.0.1") {
+            uninstall(name: "dummy", version: "0.0.1") {
                 errors,
                 success
             }
