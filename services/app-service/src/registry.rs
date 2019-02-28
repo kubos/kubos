@@ -437,7 +437,7 @@ impl AppRegistry {
             Err(AppError::UninstallError { err })
         }
     }
-    
+
     /// Set the current active version of an application
     ///
     /// # Arguments
@@ -454,18 +454,14 @@ impl AppRegistry {
     /// ```
     ///
     pub fn set_version(&self, app_name: &str, version: &str) -> Result<(), AppError> {
+        let mut entries = self.entries.lock().map_err(|err| AppError::RegistryError {
+            err: format!("Couldn't get entries mutex: {:?}", err),
+        })?;
 
-        let mut entries = self
-            .entries
-            .lock()
-            .map_err(|err| AppError::RegistryError {
-                err: format!("Couldn't get entries mutex: {:?}", err),
-            })?;
-            
         // Get the current active version of the application
         let curr_active = entries
-                .iter()
-                .position(|ref e| e.active_version && e.app.name == app_name);
+            .iter()
+            .position(|ref e| e.active_version && e.app.name == app_name);
 
         if let Some(index) = curr_active {
             if entries[index].app.version == version {
@@ -475,28 +471,36 @@ impl AppRegistry {
 
         // Get the desired active version of the application
         let new_active = entries
-                .iter()
-                .position(|ref e| e.app.name == app_name && e.app.version == version)
-                .ok_or(AppError::RegistryError { err: format!("App {} version {} not found in registry",
-                        app_name, version)})?;
+            .iter()
+            .position(|ref e| e.app.name == app_name && e.app.version == version)
+            .ok_or(AppError::RegistryError {
+                err: format!("App {} version {} not found in registry", app_name, version),
+            })?;
 
         // Mark the new version as active
         entries[new_active].active_version = true;
-        entries[new_active].save().map_err(|error| AppError::RegistryError {
-                        err: format!("Failed to update new active version entry: {:?}", error)
-                })?;
-                    
+        entries[new_active]
+            .save()
+            .map_err(|error| AppError::RegistryError {
+                err: format!("Failed to update new active version entry: {:?}", error),
+            })?;
+
         // Mark the old version as inactive
         if let Some(index) = curr_active {
             entries[index].active_version = false;
-            entries[index].save().map_err(|error| AppError::RegistryError {
-                        err: format!("Failed to update old active version entry: {:?}", error)
+            entries[index]
+                .save()
+                .map_err(|error| AppError::RegistryError {
+                    err: format!("Failed to update old active version entry: {:?}", error),
                 })?;
         }
 
         // Update the active app symlink
-        self.set_active(&app_name, &format!("{}/{}/{}", self.apps_dir, app_name, version))?;
-                
+        self.set_active(
+            &app_name,
+            &format!("{}/{}/{}", self.apps_dir, app_name, version),
+        )?;
+
         Ok(())
     }
 

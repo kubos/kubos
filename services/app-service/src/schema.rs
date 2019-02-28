@@ -91,7 +91,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             })
         }
     }
-    
+
     field set_version(&executor, name: String, version: String) -> FieldResult<GenericResponse>
         as "Set App Active Version"
     {

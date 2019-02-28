@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Kubos Corporation
+ * Copyright (C) 2019 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,21 +79,21 @@ fn set_version_good() {
     let service = mock_service!(registry_dir);
 
     test_setup(&service);
-    
+
     let query = r#"mutation {
         setVersion(name: \"dummy\", version: \"0.0.1\") {
             errors,
             success
         }
     }"#;
-    
+
     let expected = json!({
        "setVersion": {
            "errors": "",
            "success": true,
        }
     });
-    
+
     test!(service, query, expected);
 
     let app_query = r#"{ 
@@ -134,21 +134,21 @@ fn set_version_same() {
     let service = mock_service!(registry_dir);
 
     test_setup(&service);
-    
+
     let query = r#"mutation {
         setVersion(name: \"dummy\", version: \"0.0.2\") {
             errors,
             success
         }
     }"#;
-    
+
     let expected = json!({
        "setVersion": {
            "errors": "",
            "success": true,
        }
     });
-    
+
     test!(service, query, expected);
 
     let app_query = r#"{ 
@@ -183,27 +183,26 @@ fn set_version_same() {
     test!(service, app_query, expected);
 }
 
-
 #[test]
 fn set_version_bad() {
     let registry_dir = TempDir::new().unwrap();
     let service = mock_service!(registry_dir);
 
     test_setup(&service);
-    
+
     let query = r#"mutation {
         setVersion(name: \"dummy\", version: \"0.0.3\") {
             errors,
             success
         }
     }"#;
-    
+
     let expected = json!({
        "setVersion": {
            "errors": "Registry Error: App dummy version 0.0.3 not found in registry",
            "success": false,
        }
     });
-    
+
     test!(service, query, expected);
 }
