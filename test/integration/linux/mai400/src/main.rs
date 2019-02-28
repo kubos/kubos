@@ -18,17 +18,9 @@
 // Note: The I2C commands are needed when the MAI is connected to the stack via
 //       an AIM module. If no AIM is present, they should be removed
 
-extern crate i2c_linux;
-extern crate mai400_api;
-#[macro_use]
-extern crate slog;
-extern crate slog_async;
-extern crate slog_stream;
-extern crate slog_term;
-
 use i2c_linux::I2c;
 use mai400_api::*;
-use slog::{Drain, Logger};
+use slog::{error, info, o, warn, Drain, Logger};
 use std::fs::File;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{channel, Sender};
@@ -39,7 +31,7 @@ use std::time::Duration;
 
 const RV_POS_ECI: [f32; 3] = [1.1, 2.2, 3.3];
 const RV_VEL_ECI: [f32; 3] = [4.4, 5.5, 6.6];
-const RV_EPOCH: u32 = 1198800018;
+const RV_EPOCH: u32 = 1_198_800_018;
 
 fn i2c_cmds() {
     // Make sure the power line that goes to the MAI is turned on
@@ -52,7 +44,7 @@ fn i2c_cmds() {
 }
 
 fn set_gps_time(mai: &MAI400, logger: &Logger) -> u8 {
-    let gps_time = 1198800018;
+    let gps_time = 1_198_800_018;
     // Set GPS time to Jan 01, 2018
     let result = mai.set_gps_time(gps_time);
 
@@ -67,7 +59,7 @@ fn set_gps_time(mai: &MAI400, logger: &Logger) -> u8 {
 
     let (telem, _imu, _irehs) = mai.get_message().unwrap();
 
-    let rc = if let Some(std) = telem {
+    if let Some(std) = telem {
         // last command matches + gps time matches-ish
         if std.last_command == 0x44 {
             if std.gps_time >= gps_time {
@@ -107,9 +99,7 @@ fn set_gps_time(mai: &MAI400, logger: &Logger) -> u8 {
             "[Set GPS Time] Failed to read after sending command"
         );
         1
-    };
-
-    return rc;
+    }
 }
 
 fn set_mode(mai: &MAI400, logger: &Logger) -> u8 {
@@ -129,7 +119,7 @@ fn set_mode(mai: &MAI400, logger: &Logger) -> u8 {
 
     let (telem, _imu, _irehs) = mai.get_message().unwrap();
 
-    let rc = if let Some(std) = telem {
+    if let Some(std) = telem {
         if std.last_command == 0x0 {
             if std.acs_mode == mode {
                 info!(logger, "[Set Mode] Test completed successfully");
@@ -153,9 +143,7 @@ fn set_mode(mai: &MAI400, logger: &Logger) -> u8 {
     } else {
         error!(logger, "[Set Mode] Failed to read after sending command");
         1
-    };
-
-    return rc;
+    }
 }
 
 fn set_mode_sun(mai: &MAI400, logger: &Logger) -> u8 {
@@ -175,7 +163,7 @@ fn set_mode_sun(mai: &MAI400, logger: &Logger) -> u8 {
 
     let (telem, _imu, _irehs) = mai.get_message().unwrap();
 
-    let rc = if let Some(std) = telem {
+    if let Some(std) = telem {
         if std.last_command == 0x0 {
             if std.acs_mode == mode {
                 info!(logger, "[Set Mode (Sun)] Test completed successfully");
@@ -202,9 +190,7 @@ fn set_mode_sun(mai: &MAI400, logger: &Logger) -> u8 {
             "[Set Mode (Sun)] Failed to read after sending command"
         );
         1
-    };
-
-    return rc;
+    }
 }
 
 fn set_rv(mai: &MAI400, logger: &Logger) -> u8 {
@@ -222,7 +208,7 @@ fn set_rv(mai: &MAI400, logger: &Logger) -> u8 {
 
     let (telem, _imu, _irehs) = mai.get_message().unwrap();
 
-    let rc = if let Some(std) = telem {
+    if let Some(std) = telem {
         if std.last_command == 0x41 {
             // The other telemetry values we can check are part of the rotating variable set,
             // so we'll need to wait to vrify them until we've read in all of the rotating variables.
@@ -238,8 +224,7 @@ fn set_rv(mai: &MAI400, logger: &Logger) -> u8 {
     } else {
         error!(logger, "[Set RV] Failed to read after sending command");
         1
-    };
-    return rc;
+    }
 }
 
 fn passthrough(mai: &MAI400, logger: &Logger) -> u8 {
@@ -265,7 +250,7 @@ fn passthrough(mai: &MAI400, logger: &Logger) -> u8 {
 
     let (telem, _imu, _irehs) = mai.get_message().unwrap();
 
-    let rc = if let Some(std) = telem {
+    if let Some(std) = telem {
         if std.last_command == msg_id {
             info!(logger, "[Passthrough] Test completed successfully");
             0
@@ -281,9 +266,7 @@ fn passthrough(mai: &MAI400, logger: &Logger) -> u8 {
     } else {
         error!(logger, "[Passthrough] Failed to read after sending command");
         1
-    };
-
-    return rc;
+    }
 }
 
 fn reset(mai: &MAI400, logger: &Logger) -> u8 {
@@ -300,7 +283,7 @@ fn reset(mai: &MAI400, logger: &Logger) -> u8 {
 
     let (telem, _imu, _irehs) = mai.get_message().unwrap();
 
-    let rc = if let Some(std) = telem {
+    if let Some(std) = telem {
         let cmds = std.cmd_valid_cntr + std.cmd_invalid_cntr + std.cmd_invalid_chksum_cntr;
         if cmds == 0 {
             info!(logger, "[Reset] Test completed successfully");
@@ -315,11 +298,10 @@ fn reset(mai: &MAI400, logger: &Logger) -> u8 {
     } else {
         error!(logger, "[Reset] Failed to read after sending command");
         1
-    };
-
-    return rc;
+    }
 }
 
+#[allow(clippy::cyclomatic_complexity)]
 fn read(mai: &MAI400, logger: &Logger) -> u8 {
     let mut rc = 0;
 
@@ -331,7 +313,7 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
 
     let mai_ref = mai.clone();
 
-    let handle = thread::spawn(move || read_loop(mai_ref, thread_exit, sender));
+    let handle = thread::spawn(move || read_loop(&mai_ref, &thread_exit, &sender));
 
     // Let read loop run for 10 seconds to ensure that we get all of the
     // rotating variable values
@@ -683,13 +665,14 @@ fn read(mai: &MAI400, logger: &Logger) -> u8 {
         info!(logger, "[Read] Test completed successfully");
     }
 
-    return rc;
+    rc
 }
 
+#[allow(clippy::type_complexity)]
 fn read_loop(
-    mai: MAI400,
-    exit: Arc<AtomicBool>,
-    sender: Sender<(
+    mai: &MAI400,
+    exit: &Arc<AtomicBool>,
+    sender: &Sender<(
         Option<StandardTelemetry>,
         Option<RawIMU>,
         Option<IREHSTelemetry>,

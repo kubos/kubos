@@ -14,22 +14,19 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate serde_json;
-
+use serde_json::json;
 mod utils;
-use utils::*;
+use crate::utils::*;
 
 #[test]
 fn test() {
-    let (handle, sender) = setup(None);
-    let res = do_query("{telemetry{timestamp,subsystem,parameter,value}}");
+    let (handle, sender) = setup(None, None, None, None);
+    let res = do_query(None, "{telemetry{timestamp,subsystem,parameter,value}}");
     teardown(handle, sender);
     assert_eq!(
         res,
         json!({
-            "errs": "",
-            "msg": {
+            "data": {
                 "telemetry":[]
             }
         })

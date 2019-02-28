@@ -62,6 +62,9 @@
 //! }
 //!
 //! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): Entry
+//! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String!
+//!
+//! mutation insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!):{ success: Boolean!, errors: String! }
 //! ```
 //!
 //! # Example Queries
@@ -137,22 +140,74 @@
 //!   }
 //! }
 //! ```
+//!
+//! ## Repeat the previous query, but route the output to compressed file `/home/system/recent_telem.tar.gz`
+//! ```graphql
+//! {
+//!   telemetry(limit: 10, timestampGe: 1008, output: "/home/system/recent_telem")
+//! }
+//! ```
+//!
+//! ## Repeat the previous query, but route the output to uncompressed file `/home/system/recent_telem`
+//! ```graphql
+//! {
+//!   telemetry(limit: 10, timestampGe: 1008, output: "/home/system/recent_telem", compress: false)
+//! }
+//! ```
+//!
+//! # Example Mutations
+//!
+//! ## Insert a new entry, allowing the service to generate the timestamp
+//! ```graphql
+//! mutation {
+//! 	insert(subsystem: "eps", parameter: "voltage", value: "4.0") {
+//! 		success,
+//! 		errors
+//! 	}
+//! }
+//! ```
+//!
+//! ## Insert a new entry with a custom timestamp
+//! ```graphql
+//! mutation {
+//! 	insert(timestamp: 533, subsystem: "eps", parameter: "voltage", value: "5.1") {
+//! 		success,
+//! 		errors
+//! 	}
+//! }
+//!
+//! ```
+//!
+//! ## Delete all entries from the EPS subsystem occuring before timestamp 1003
+//! ```graphql
+//! mutation {
+//!     delete(subsystem: "eps", timestampLe: 1004) {
+//!         success,
+//!         errors,
+//!         entriesDeleted
+//!     }
+//! }
+//! ```
 
-#[macro_use]
-extern crate diesel;
 #[macro_use]
 extern crate juniper;
-extern crate kubos_service;
 
-mod db;
-mod models;
 mod schema;
+mod udp;
 
-use db::Database;
+use crate::schema::{MutationRoot, QueryRoot, Subsystem};
 use kubos_service::{Config, Service};
-use schema::{MutationRoot, QueryRoot};
+use kubos_telemetry_db::Database;
+use syslog::Facility;
 
 fn main() {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("kubos-telemetry-service"),
+    )
+    .unwrap();
+
     let config = Config::new("telemetry-service");
 
     let db_path = config
@@ -163,5 +218,19 @@ fn main() {
     let db = Database::new(&db_path);
     db.setup();
 
-    Service::new(config, db, QueryRoot, MutationRoot).start();
+    let direct_udp = config.get("direct_port").map(|port| {
+        let host = config.hosturl();
+        let mut host_parts = host.split(':').map(|val| val.to_owned());
+        let host_ip = host_parts.next().unwrap();
+
+        format!("{}:{}", host_ip, port)
+    });
+
+    Service::new(
+        config,
+        Subsystem::new(db, direct_udp),
+        QueryRoot,
+        MutationRoot,
+    )
+    .start();
 }

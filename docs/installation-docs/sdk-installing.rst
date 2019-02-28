@@ -9,8 +9,6 @@ to build and run a Kubos project on a target device:
 
 -  Kubos source modules - The individual components of the APIs, services,
    and mission applications
--  Kubos CLI - The command-line tool used to create, configure, build,
-   and debug Kubos projects
 -  Vagrant box - A command-line based VM that contains a "ready to run"
    Kubos development environment
 
@@ -53,7 +51,7 @@ Install Windows PowerShell v3+ (Windows 7 SP1 Only)
 
 If you are running Windows 7 SP1, you **must** upgrade your version of
 Windows PowerShell to atleast v3.0.
- 
+
 You can verify your current version by opening Windows Command Prompt
 and running the following commands::
 
@@ -86,14 +84,14 @@ provider that Kubos officially supports is VirtualBox.
    VirtualBox Extension Pack to enable passing USB devices into a
    virtual machine.
 
-If you're using Linux as your host operating system you will need to add 
+If you're using Linux as your host operating system you will need to add
 yourself to the ``vboxusers`` group with the following command:
 
 ::
 
         sudo usermod -aG vboxusers <username>
 
-You will need to logout and log back in to your host computer, otherwise 
+You will need to logout and log back in to your host computer, otherwise
 passing USB devices through to your development environment will not work correctly.
 
 Install Vagrant
@@ -155,7 +153,7 @@ host. By keeping your project on your host it will protect them in the
 event your box is destroyed or re-built.
 
 .. Note:: There is not a supported method of this for Windows hosts at
-  this time, as Windows does not support Linux symlinks. There is an 
+  this time, as Windows does not support Linux symlinks. There is an
   alternate method for editing files on the SDK listed :doc:`here. <../sdk-docs/windows-dev-environment>`
 
 To mount a specific directory from your host, open the Vagrantfile
@@ -170,13 +168,13 @@ following lines:
         # argument is a set of non-required options.
         # config.vm.synced_folder "../data", "/vagrant_data"
 
-.. Note:: 
-  The default home directory in the Kubos Vagrant boxes is ``/home/vagrant`` 
+.. Note::
+  The default home directory in the Kubos Vagrant boxes is ``/home/vagrant``
 
 Uncomment the last line in this block and change the paths to match your
 host directory and a desired mount point in the box.
 
-.. Note:: 
+.. Note::
   The path in the box must be an absolute path
 
 After a volume is mounted into the box all of the data from the host
@@ -186,7 +184,7 @@ example the host path (``../data``) would be exposed at
 editor of your choosing to edit the project files from your host machine
 at the host directory path.
 
-.. Note:: 
+.. Note::
   If you make changes to the Vagrantfile after the box has been
   started you will need to run ``vagrant reload`` for these changes to
   take effect in the box.
@@ -218,7 +216,7 @@ all of the required dependencies installed.
 
 That's it! From here see more on:
 
-  - :doc:`Creating your first Kubos Linux project <../os-docs/first-linux-project>`
+  - :doc:`Creating your first Kubos Linux project <../tutorials/first-project>`
 
 After a little bit of usage you may want to look at :doc:`how to upgrade the
 Kubos SDK <../sdk-docs/sdk-upgrading>`

@@ -23,12 +23,11 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`first-linux-project` - Basic tutorial for creating your first Kubos SDK project
--  :doc:`../sdk-docs/sdk-cheatsheet` - Overview of the common Kubos SDK commands
+-  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KubOS project
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`kubos-linux-on-iobc` - Steps to build Kubos Linux for the iOBC
 -  :doc:`../installation-docs/installing-linux-iobc` - Steps to install Kubos Linux
-   
+
 Status LEDs
 -----------
 
@@ -83,10 +82,10 @@ Linux AIN number.
 This raw value can then be converted to microvolts by multiplying it by the value
 found in ``/sys/bus/iio/devices/iio\:device0/in_voltage_scale``.
 
-More information about the capture and use of ADC can be found in 
+More information about the capture and use of ADC can be found in
 `this guide from Atmel <https://www.at91.com/linux4sam/bin/view/Linux4SAM/IioAdcDriver>`__.
 
-An `ADC example <http://github.com/kubos/kubos/tree/master/examples/adc-thermistor>`__ is 
+An `ADC example <http://github.com/kubos/kubos/tree/master/examples/adc-thermistor>`__ is
 also available for reference in the Kubos repo.
 
 GPIO
@@ -195,7 +194,7 @@ Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 Kubos Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
-The I2C bus is available through the Kubos HAL as ``K_I2C1``.
+The I2C bus is available as ``/dev/i2c-0``, or through the Kubos C HAL as ``K_I2C1``.
 
 For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubos-hal/i2c-hal/index>`.
 
@@ -207,7 +206,7 @@ The iOBC has 6 PWM pins available for use, grouped into three pairs:
     - PWM0 and PWM1
     - PWM2 and PWM3
     - PWM4 and PWM5
-    
+
 Users can interact with these pins through the `PWM sysfs interface <https://www.kernel.org/doc/Documentation/pwm.txt>`__,
 and the ``/sys/class/pwm/pwmchip0/`` directory
 
@@ -246,7 +245,7 @@ SPI
 ~~~
 
 The iOBC has one SPI bus available for external use with three pre-allocated chip select pins.
-All pins are exposed via either an iOBC daughterboard (J5 connection) or optional iOBC header (J3 connection). 
+All pins are exposed via either an iOBC daughterboard (J5 connection) or optional iOBC header (J3 connection).
 
 **SPI Bus 1**
 
@@ -320,22 +319,25 @@ UART
 
 The iOBC has 2 UART ports available for use in varying capacities:
 
-+--------------+--------+--------+---------+---------+
-| Linux Device | TX Pin | RX Pin | RTS Pin | CTS Pin |
-+==============+========+========+=========+=========+
-| /dev/ttyS1   | TX0    | RX0    |         |         |
-+--------------+--------+--------+---------+---------+
-| /dev/ttyS3   | TX2    | RX2    | RTS2    | CTS2    |
-+--------------+--------+--------+---------+---------+
++--------------------+--------+--------+---------+---------+
+| Linux Device       | TX Pin | RX Pin | RTS Pin | CTS Pin |
++====================+========+========+=========+=========+
+| /dev/ttyS1 (SLIP)  | TX0    | RX0    |         |         |
++--------------------+--------+--------+---------+---------+
+| /dev/ttyS3         | TX2    | RX2    | RTS2    | CTS2    |
++--------------------+--------+--------+---------+---------+
 
 Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
 
 `A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
 
+The ``/dev/ttyS1`` device has been preconfigured to be used for SLIP connections.
+Please refer to the :ref:`SLIP instructions <slip>` for more information.
+
 User Data Partition
 -------------------
 
-The iOBC has a single user data partition which maps to the `/home` 
+The iOBC has a single user data partition which maps to the `/home`
 directory.
 
 The home directories of all user accounts, except root, should live

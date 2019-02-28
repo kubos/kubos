@@ -15,6 +15,7 @@
 //
 
 use super::*;
+use serde_json::json;
 
 #[test]
 fn get_lock_status_default() {
@@ -42,7 +43,7 @@ fn get_lock_status_default() {
                 "positionType": "NONE",
                 "time": {
                     "ms": 0,
-                	"week": 0
+                    "week": 0
                 },
                 "timeStatus": "UNKNOWN",
                 "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
@@ -50,7 +51,7 @@ fn get_lock_status_default() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -81,7 +82,7 @@ fn get_lock_status_good() {
                 "positionType": "NONE",
                 "time": {
                     "ms": 164195000,
-                	"week": 3025
+                    "week": 3025
                 },
                 "timeStatus": "COARSE_STEERING",
                 "velocityStatus": "INSUFFICIENT_OBSERVATIONS",
@@ -89,7 +90,7 @@ fn get_lock_status_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -120,7 +121,7 @@ fn get_lock_status_nondefault() {
                 "positionType": "PSRDIFF",
                 "time": {
                     "ms": 164195000,
-                	"week": 3025
+                    "week": 3025
                 },
                 "timeStatus": "FINE_STEERING",
                 "velocityStatus": "SOL_COMPUTED",
@@ -128,5 +129,5 @@ fn get_lock_status_nondefault() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

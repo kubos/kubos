@@ -14,22 +14,58 @@
 // limitations under the License.
 //
 
+#![deny(warnings)]
+
 #[macro_use]
 extern crate juniper;
-extern crate kubos_service;
 
 mod model;
 mod schema;
 
+use crate::model::Subsystem;
+use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Service};
-use model::Subsystem;
-use schema::{MutationRoot, QueryRoot};
+use syslog::Facility;
+
+/*
+fn main() {
+
+    print!("Listening on 127.0.0.1:8080");
+
+    let context = Context {
+        subsystem: Subsystem::new(),
+        storage: Arc::new(RwLock::new(HashMap::new()))
+    };
+
+    // Make the subsystem and other persistent data available to all endpoints
+    let context = warp::any().map(move || context.clone());
+
+
+    let graphql_filter = juniper_warp::make_graphql_filter(RootNode::new(QueryRoot, MutationRoot), context.boxed());
+
+    warp::serve(
+        // If the path ends in "graphiql" process the request using the graphiql interface
+       warp::path("graphiql").and(juniper_warp::graphiql_filter("/graphql"))
+            // Otherwise, just process the request as normal GraphQL
+            .or(graphql_filter),
+    )
+    .run(([192, 168, 33, 10], 8080));
+}
+*/
 
 fn main() {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("example-service"),
+    )
+    .unwrap();
+
     Service::new(
         Config::new("example-service"),
         Subsystem::new(),
         QueryRoot,
         MutationRoot,
-    ).start();
+    )
+    .start();
 }

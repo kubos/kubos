@@ -4,13 +4,14 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 license = "Apache-2.0"
 repository = "https://github.com/kubos/kubos"
+edition = "2018"
 
 [dependencies]
 bincode = "1.0.0"
 bitflags = "1.0"
 byteorder = "1.2"
 crc16 = "0.3.4"
-failure = { git = "https://github.com/rust-lang-nursery/failure" }
+failure = "0.1.2"
 nom = "4.0.0-beta1"
 rust-uart = { path = "../../hal/rust-hal/rust-uart" }
 serial = "0.4"

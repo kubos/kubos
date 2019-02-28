@@ -2,7 +2,8 @@
 name = "rust-uart"
 version = "0.2.0"
 authors = ["William Greer <wgreer184@gmail.com>", "Catherine Garabedian <catherine@kubos.co>"]
+edition = "2018"
 
 [dependencies]
 serial = "0.4.0"
-failure = { git = "https://github.com/rust-lang-nursery/failure" }
+failure = "0.1.2"

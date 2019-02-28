@@ -4,11 +4,11 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 license = "Apache-2.0"
 repository = "https://github.com/kubos/kubos"
+edition = "2018"
 
 [dependencies]
-failure = { git = "https://github.com/rust-lang-nursery/failure" }
+failure = "0.1.2"
 nom = "4.0.0-beta1"
-
 
 [build-dependencies]
 kubos-build-helper = {path = "../../kubos-build-helper"}

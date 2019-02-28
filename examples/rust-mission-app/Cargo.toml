@@ -1,0 +1,11 @@
+[package]
+name = "rust-mission-app"
+version = "0.1.0"
+authors = ["Catherine Garabedian <catherine@kubos.co>"]
+edition = "2018"
+
+[dependencies]
+failure = "0.1.2"
+getopts = "0.2"
+kubos-app = { path = "../../apis/app-api/rust" }
+log = "^0.4.0"

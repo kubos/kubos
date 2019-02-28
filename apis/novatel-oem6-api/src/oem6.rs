@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+use crate::crc32::*;
+use crate::messages::*;
 use byteorder::{LittleEndian, WriteBytesExt};
-use crc32::*;
-use messages::*;
+use failure::Fail;
 use nom;
 use rust_uart::UartError;
 use rust_uart::*;
@@ -60,16 +61,16 @@ const TIMEOUT: Duration = Duration::from_millis(60);
 ///
 /// let rx_conn = oem.conn.clone();
 ///
-/// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+/// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
 /// # Ok(())
 /// # }
 /// ```
 ///
 
 pub fn read_thread(
-    rx_conn: Arc<Mutex<Connection>>,
-    log_send: SyncSender<(Header, Vec<u8>)>,
-    response_send: SyncSender<(Header, Vec<u8>)>,
+    rx_conn: &Arc<Mutex<Connection>>,
+    log_send: &SyncSender<(Header, Vec<u8>)>,
+    response_send: &SyncSender<(Header, Vec<u8>)>,
 ) {
     let mut log_err = false;
     let mut response_err = false;
@@ -95,7 +96,7 @@ pub fn read_thread(
                     UartError::GenericError => continue,
                     UartError::IoError {
                         cause: ::std::io::ErrorKind::TimedOut,
-                        description: _,
+                        ..
                     } => continue,
                     _ => panic!(err),
                 },
@@ -111,7 +112,7 @@ pub fn read_thread(
                 Err(err) => match err {
                     UartError::IoError {
                         cause: ::std::io::ErrorKind::TimedOut,
-                        description: _,
+                        ..
                     } => continue,
                     _ => panic!(err),
                 },
@@ -131,7 +132,7 @@ pub fn read_thread(
                 Err(err) => match err {
                     UartError::IoError {
                         cause: ::std::io::ErrorKind::TimedOut,
-                        description: _,
+                        ..
                     } => continue,
                     _ => panic!(err),
                 },
@@ -153,8 +154,8 @@ pub fn read_thread(
 
             let body = message.split_off(HDR_LEN.into());
 
-            match hdr.msg_type & 0x80 == 0x80 {
-                true => response_send
+            if hdr.msg_type & 0x80 == 0x80 {
+                response_send
                     .try_send((hdr, body))
                     .or_else::<TrySendError<(Header, Vec<u8>)>, _>(|err| match err {
                         // Our buffer is full, but the receiver should still be alive, so let's keep going
@@ -169,8 +170,9 @@ pub fn read_thread(
                             Ok(())
                         }
                     })
-                    .unwrap(),
-                false => log_send
+                    .unwrap();
+            } else {
+                log_send
                     .try_send((hdr, body))
                     .or_else::<TrySendError<(Header, Vec<u8>)>, _>(|err| match err {
                         TrySendError::Full(_) => Ok(()),
@@ -182,14 +184,15 @@ pub fn read_thread(
                             Ok(())
                         }
                     })
-                    .unwrap(),
-            };
+                    .unwrap();
+            }
         }
     }
 }
 
 /// Structure for OEM6 device instance
 #[derive(Clone)]
+#[allow(clippy::type_complexity)]
 pub struct OEM6 {
     /// Device connection structure
     pub conn: Arc<Mutex<Connection>>,
@@ -275,7 +278,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
     ///
     /// oem.request_version()?;
     ///
@@ -318,7 +321,7 @@ impl OEM6 {
             false,
         );
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::Log))
     }
 
@@ -350,7 +353,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
     ///
     /// oem.request_position(1.0, 0.0, false)?;
     ///
@@ -391,7 +394,7 @@ impl OEM6 {
             hold,
         );
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::Log))
     }
 
@@ -436,7 +439,7 @@ impl OEM6 {
             hold,
         );
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::Log))
     }
 
@@ -472,7 +475,7 @@ impl OEM6 {
     pub fn request_unlog(&self, id: MessageID) -> OEMResult<()> {
         let request = UnlogCmd::new(Port::COM1 as u32, id as u16);
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::Unlog))
     }
 
@@ -534,7 +537,7 @@ impl OEM6 {
     pub fn request_unlog_all(&self, clear_holds: bool) -> OEMResult<()> {
         let request = UnlogAllCmd::new(Port::COM1 as u32, clear_holds);
 
-        self.send_message(request)
+        self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::UnlogAll))
     }
 
@@ -577,14 +580,15 @@ impl OEM6 {
         // preserve functionality, but inform the caller afterwards
         match self.conn.lock() {
             Ok(conn) => conn.write(msg).map_err(|err| err.into()),
-            Err(conn) => conn.into_inner()
+            Err(conn) => conn
+                .into_inner()
                 .write(msg)
                 .map_err(|err| err.into())
                 .and(Err(OEMError::ThreadCommError)),
         }
     }
 
-    fn send_message<T: Message>(&self, msg: T) -> OEMResult<()> {
+    fn send_message<T: Message>(&self, msg: &T) -> OEMResult<()> {
         let mut raw = msg.serialize();
 
         // Get the calculated CRC
@@ -596,7 +600,8 @@ impl OEM6 {
         // preserve functionality, but inform the caller afterwards
         match self.conn.lock() {
             Ok(conn) => conn.write(raw.as_slice()).map_err(|err| err.into()),
-            Err(conn) => conn.into_inner()
+            Err(conn) => conn
+                .into_inner()
                 .write(raw.as_slice())
                 .map_err(|err| err.into())
                 .and(Err(OEMError::ThreadCommError)),
@@ -604,7 +609,8 @@ impl OEM6 {
     }
 
     fn get_response(&self, id: MessageID) -> OEMResult<()> {
-        let (hdr, body) = self.response_recv
+        let (hdr, body) = self
+            .response_recv
             .lock()
             .map_err(|_| OEMError::MutexError)?
             .recv_timeout(Duration::from_millis(500))
@@ -612,22 +618,22 @@ impl OEM6 {
 
         // Make sure we got specifically a response message
         if hdr.msg_type & 0x80 != 0x80 {
-            throw!(OEMError::NoResponse);
+            return Err(OEMError::NoResponse);
         }
 
-        let resp = match Response::new(body) {
+        let resp = match Response::new(&body) {
             Some(v) => v,
             None => {
-                throw!(OEMError::NoResponse);
+                return Err(OEMError::NoResponse);
             }
         };
 
         if hdr.msg_id != id {
-            throw!(OEMError::ResponseMismatch);
+            return Err(OEMError::ResponseMismatch);
         }
 
         if resp.resp_id != ResponseID::Ok {
-            throw!(OEMError::CommandError {
+            return Err(OEMError::CommandError {
                 id: resp.resp_id,
                 description: resp.resp_string.clone(),
             });
@@ -655,7 +661,7 @@ impl OEM6 {
     /// # let (response_send, response_recv) = sync_channel(5);
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(rx_conn, log_send, response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
     ///
     /// let entry = oem.get_log()?;
     ///
@@ -672,14 +678,15 @@ impl OEM6 {
     /// [`OEMError`]: enum.OEMError.html
     pub fn get_log(&self) -> OEMResult<Log> {
         loop {
-            let (hdr, body) = match self.log_recv
+            let (hdr, body) = match self
+                .log_recv
                 .lock()
                 .map_err(|_| OEMError::MutexError)?
                 .recv_timeout(Duration::from_secs(5))
             {
                 Ok(v) => v,
                 Err(RecvTimeoutError::Timeout) => continue,
-                Err(RecvTimeoutError::Disconnected) => throw!(OEMError::ThreadCommError),
+                Err(RecvTimeoutError::Disconnected) => return Err(OEMError::ThreadCommError),
             };
 
             // Make sure it's not a response message
@@ -705,25 +712,25 @@ impl OEM6 {
 }
 
 /// Common Error for OEM Actions
-#[derive(Fail, Display, Debug, Clone, PartialEq)]
+#[derive(Fail, Debug, Clone, PartialEq)]
 pub enum OEMError {
     /// Catch-all error
-    #[display(fmt = "Generic Error")]
+    #[fail(display = "Generic Error")]
     GenericError,
     /// An issue occurred while attempted to obtain a mutex lock
-    #[display(fmt = "Mutex Error")]
+    #[fail(display = "Mutex Error")]
     MutexError,
     /// A response message was received, but the ID doesn't match the command that was sent
-    #[display(fmt = "Response ID Mismatch")]
+    #[fail(display = "Response ID Mismatch")]
     ResponseMismatch,
     /// A command was sent, but we were unable to get the response
-    #[display(fmt = "Failed to get command response")]
+    #[fail(display = "Failed to get command response")]
     NoResponse,
     /// The thread reading messages from the device is no longer working
-    #[display(fmt = "Failed to communicate with read thread")]
+    #[fail(display = "Failed to communicate with read thread")]
     ThreadCommError,
     /// A response was recieved and indicates an error with the previously sent command
-    #[display(fmt = "Command Error({:?}): {}", id, description)]
+    #[fail(display = "Command Error({:?}): {}", id, description)]
     CommandError {
         /// The underlying error
         id: ResponseID,
@@ -731,13 +738,13 @@ pub enum OEMError {
         description: String,
     },
     /// Received a valid message, but the message ID doesn't match any known message type
-    #[display(fmt = "Unknown Message Received: {:X}", id)]
+    #[fail(display = "Unknown Message Received: {:X}", id)]
     UnknownMessage {
         /// ID of message received
         id: u16,
     },
     /// An error was thrown by the serial communication driver
-    #[display(fmt = "UART Error")]
+    #[fail(display = "UART Error")]
     UartError {
         /// The underlying error
         #[fail(cause)]

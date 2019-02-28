@@ -1,0 +1,20 @@
+[package]
+name = "kubos-app"
+version = "0.1.0"
+authors = ["Marshall Culpepper <marshall@kubos.com>", "Catherine Garabedian <catherine@kubos.com>"]
+edition = "2018"
+
+[dependencies]
+failure = "0.1.2"
+getopts = "0.2"
+kubos-system = { path = "../../system-api" }
+log = "^0.4.0"
+log4rs = "0.8"
+log4rs-syslog = "3.0"
+reqwest = "0.9.9"
+serde_json = "1.0"
+
+[dev-dependencies]
+kubos-service = { path = "../../../services/kubos-service" }
+juniper =  "0.11"
+tempfile = "3"

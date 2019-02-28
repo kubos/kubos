@@ -62,9 +62,8 @@ impl VersionLog {
         };
 
         for elem in raw_comp.chunks(COMPONENT_SIZE) {
-            match parse_component(elem) {
-                Ok(conv) => log.components.push(conv.1),
-                _ => {}
+            if let Ok(conv) = parse_component(elem) {
+                log.components.push(conv.1);
             }
         }
 

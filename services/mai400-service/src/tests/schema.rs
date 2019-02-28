@@ -15,23 +15,14 @@
  */
 
 use super::*;
+use crate::model::*;
+use crate::schema::*;
+use crate::tests::test_data::*;
 use kubos_service::{Config, Service};
-use model::*;
-use schema::*;
-use serde_json;
+use serde_json::json;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use tests::test_data::*;
-
-macro_rules! wrap {
-    ($result:ident) => {{
-        json!({
-                                    "msg": $result,
-                                    "errs": ""
-                            }).to_string()
-    }};
-}
 
 #[test]
 fn ping() {
@@ -47,7 +38,7 @@ fn ping() {
             "ping": "pong"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -64,7 +55,7 @@ fn ack_default() {
             "ack": "NONE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -79,7 +70,7 @@ fn ack_noop() {
             }
         }"#;
 
-    service.process(noop.to_owned());
+    request!(service, noop);
 
     let query = r#"{
             ack
@@ -89,7 +80,7 @@ fn ack_noop() {
             "ack": "NOOP"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -104,7 +95,7 @@ fn ack_control_power() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    request!(service, mutation);
 
     let query = r#"{
             ack
@@ -114,7 +105,7 @@ fn ack_control_power() {
             "ack": "CONTROL_POWER"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -127,7 +118,7 @@ fn ack_configure_hardware() {
             configureHardware
         }"#;
 
-    service.process(mutation.to_owned());
+    request!(service, mutation);
 
     let query = r#"{
             ack
@@ -137,7 +128,7 @@ fn ack_configure_hardware() {
             "ack": "CONFIGURE_HARDWARE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -153,7 +144,7 @@ fn ack_test_hardware() {
             }}
         }"#;
 
-    service.process(mutation.to_owned());
+    request!(service, mutation);
 
     let query = r#"{
             ack
@@ -163,7 +154,7 @@ fn ack_test_hardware() {
             "ack": "TEST_HARDWARE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -173,13 +164,13 @@ fn ack_issue_raw_command() {
     let service = service_new!(mock);
 
     let mutation = r#"mutation {
-            issueRawCommand(command: "90EB5AD501"){
+            issueRawCommand(command: \"90EB5AD501\"){
                 errors,
                 success
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    request!(service, mutation);
 
     let query = r#"{
             ack
@@ -189,7 +180,7 @@ fn ack_issue_raw_command() {
             "ack": "ISSUE_RAW_COMMAND"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -205,7 +196,7 @@ fn ack_set_mode() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    request!(service, mutation);
 
     let query = r#"{
             ack
@@ -215,7 +206,7 @@ fn ack_set_mode() {
             "ack": "SET_MODE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -231,7 +222,7 @@ fn ack_update() {
             }
         }"#;
 
-    service.process(mutation.to_owned());
+    request!(service, mutation);
 
     let query = r#"{
             ack
@@ -241,7 +232,7 @@ fn ack_update() {
             "ack": "UPDATE"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -258,7 +249,7 @@ fn query_errors_empty() {
             "errors": []
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -273,7 +264,7 @@ fn query_errors_single() {
             }
         }"#;
 
-    service.process(noop.to_owned());
+    request!(service, noop);
 
     let query = r#"{
             errors
@@ -283,7 +274,7 @@ fn query_errors_single() {
             "errors": ["Noop: Unable to communicate with MAI400"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -298,8 +289,8 @@ fn query_errors_multiple() {
             }
         }"#;
 
-    service.process(noop.to_owned());
-    service.process(noop.to_owned());
+    request!(service, noop);
+    request!(service, noop);
 
     let query = r#"{
             errors
@@ -309,7 +300,7 @@ fn query_errors_multiple() {
             "errors": ["Noop: Unable to communicate with MAI400", "Noop: Unable to communicate with MAI400"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -324,20 +315,20 @@ fn query_errors_clear_after_query() {
             }
         }"#;
 
-    service.process(noop.to_owned());
-    service.process(noop.to_owned());
+    request!(service, noop);
+    request!(service, noop);
 
     let query = r#"{
             errors
         }"#;
 
-    service.process(query.to_owned());
+    request!(service, query);
 
     let expected = json!({
             "errors": []
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -377,7 +368,7 @@ fn get_power_on() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -400,7 +391,7 @@ fn get_power_off() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -417,7 +408,7 @@ fn config() {
             "config": "Not Implemented"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 // telemetry: nominal, debug {rotating, irehs, imu}
@@ -491,7 +482,7 @@ fn telemetry_nominal() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -649,12 +640,12 @@ fn telemetry_debug_irehs() {
             }
     });
 
-    let result = service.process(query.to_owned());
+    let result = request!(service, query);
 
-    assert_eq!(result, wrap!(expected));
+    assert_eq!(result.body(), wrap!(expected));
 
-    let mut actual: serde_json::Value = serde_json::from_slice(&result.as_bytes()).unwrap();
-    actual = actual["msg"].clone();
+    let mut actual: serde_json::Value = serde_json::from_slice(result.body()).unwrap();
+    actual = actual["data"].clone();
 
     // Make sure derived structure values matche original values from arrays
 
@@ -727,7 +718,7 @@ fn telemetry_debug_imu() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -797,7 +788,7 @@ fn telemetry_debug_rotating() {
             "telemetry": {
                 "debug": {
                     "rotating": {
-                    	"acsOpMode": 169,
+                        "acsOpMode": 169,
                         "adsOpMode": 0,
                         "attDetMode": 24,
                         "bFieldIgrf": [-0.000015042761333461386, 2.054659944406012e-7, 0.0000222020080400398],
@@ -809,12 +800,12 @@ fn telemetry_debug_rotating() {
                         "kUnload": [-5000000.0, -5000000.0, -5000000.0],
                         "kd": [-12.100000381469727, -12.0, -4.0],
                         "keplerElem": {
-                        	"argParigee": 0.0,
-                        	"eccentricity": 0.0,
-                        	"inclination": 45.0,
-                        	"raan": 0.0,
-                        	"semiMajorAxis": 6787.47021484375,
-                        	"trueAnomoly": 0.0,
+                            "argParigee": 0.0,
+                            "eccentricity": 0.0,
+                            "inclination": 45.0,
+                            "raan": 0.0,
+                            "semiMajorAxis": 6787.47021484375,
+                            "trueAnomoly": 0.0,
                         },
                         "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
                         "magBias": [1028, 0, 0],
@@ -850,7 +841,7 @@ fn telemetry_debug_rotating() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1094,7 +1085,7 @@ fn test_results() {
                         "gyroTemp": 19,
                     },
                     "rotating": {
-                    	"acsOpMode": 169,
+                        "acsOpMode": 169,
                         "adsOpMode": 0,
                         "attDetMode": 24,
                         "bFieldIgrf": [-0.000015042761333461386, 2.054659944406012e-7, 0.0000222020080400398],
@@ -1106,12 +1097,12 @@ fn test_results() {
                         "kUnload": [-5000000.0, -5000000.0, -5000000.0],
                         "kd": [-12.100000381469727, -12.0, -4.0],
                         "keplerElem": {
-                        	"argParigee": 0.0,
-                        	"eccentricity": 0.0,
-                        	"inclination": 45.0,
-                        	"raan": 0.0,
-                        	"semiMajorAxis": 6787.47021484375,
-                        	"trueAnomoly": 0.0,
+                            "argParigee": 0.0,
+                            "eccentricity": 0.0,
+                            "inclination": 45.0,
+                            "raan": 0.0,
+                            "semiMajorAxis": 6787.47021484375,
+                            "trueAnomoly": 0.0,
                         },
                         "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
                         "magBias": [1028, 0, 0],
@@ -1174,7 +1165,7 @@ fn test_results() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1191,7 +1182,7 @@ fn mode() {
             "mode": "RATE_NULLING"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1208,7 +1199,7 @@ fn orientation() {
             "orientation": "Not Implemented"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1233,7 +1224,7 @@ fn spin() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1250,7 +1241,7 @@ fn mutation_errors_empty() {
             "errors": []
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1266,7 +1257,7 @@ fn mutation_errors_single() {
             errors
         }"#;
 
-    service.process(noop.to_owned());
+    request!(service, noop);
 
     let query = r#"{
             errors
@@ -1276,7 +1267,7 @@ fn mutation_errors_single() {
             "errors": ["Noop: Unable to communicate with MAI400"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1291,8 +1282,8 @@ fn mutation_errors_multiple() {
             }
         }"#;
 
-    service.process(noop.to_owned());
-    service.process(noop.to_owned());
+    request!(service, noop);
+    request!(service, noop);
 
     let query = r#"{
             errors
@@ -1302,7 +1293,7 @@ fn mutation_errors_multiple() {
             "errors": ["Noop: Unable to communicate with MAI400", "Noop: Unable to communicate with MAI400"]
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1341,7 +1332,7 @@ fn noop_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1365,7 +1356,7 @@ fn noop_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1393,7 +1384,7 @@ fn control_power_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1418,7 +1409,7 @@ fn control_power_bad() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1443,7 +1434,7 @@ fn control_power_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1460,7 +1451,7 @@ fn configure_hardware() {
             "configureHardware": "Not Implemented"
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1707,7 +1698,7 @@ fn test_hardware_integration() {
                         "gyroTemp": 19,
                     },
                     "rotating": {
-                    	"acsOpMode": 169,
+                        "acsOpMode": 169,
                         "adsOpMode": 0,
                         "attDetMode": 24,
                         "bFieldIgrf": [-0.000015042761333461386, 2.054659944406012e-7, 0.0000222020080400398],
@@ -1719,12 +1710,12 @@ fn test_hardware_integration() {
                         "kUnload": [-5000000.0, -5000000.0, -5000000.0],
                         "kd": [-12.100000381469727, -12.0, -4.0],
                         "keplerElem": {
-                        	"argParigee": 0.0,
-                        	"eccentricity": 0.0,
-                        	"inclination": 45.0,
-                        	"raan": 0.0,
-                        	"semiMajorAxis": 6787.47021484375,
-                        	"trueAnomoly": 0.0,
+                            "argParigee": 0.0,
+                            "eccentricity": 0.0,
+                            "inclination": 45.0,
+                            "raan": 0.0,
+                            "semiMajorAxis": 6787.47021484375,
+                            "trueAnomoly": 0.0,
                         },
                         "kp": [-1.1100000143051148, -1.100000023841858, -0.25],
                         "magBias": [1028, 0, 0],
@@ -1787,7 +1778,7 @@ fn test_hardware_integration() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1814,7 +1805,7 @@ fn test_hardware_hardware() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1826,7 +1817,7 @@ fn issue_raw_command_good() {
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            issueRawCommand(command: "90EB5A0000000000000000000000000000000000000000000000000000000000000000000000D501"){
+            issueRawCommand(command: \"90EB5A0000000000000000000000000000000000000000000000000000000000000000000000D501\"){
                 errors,
                 success
             }
@@ -1839,7 +1830,7 @@ fn issue_raw_command_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1849,7 +1840,7 @@ fn issue_raw_command_fail() {
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            issueRawCommand(command: "90EB5A0000000000000000000000000000000000000000000000000000000000000000000000D501"){
+            issueRawCommand(command: \"90EB5A0000000000000000000000000000000000000000000000000000000000000000000000D501\"){
                 errors,
                 success
             }
@@ -1862,7 +1853,7 @@ fn issue_raw_command_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1887,7 +1878,7 @@ fn set_mode_default() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1912,7 +1903,7 @@ fn set_mode_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1935,7 +1926,7 @@ fn set_mode_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1960,7 +1951,7 @@ fn set_mode_normal_sun() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -1985,7 +1976,7 @@ fn set_mode_latlong_sun() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2010,7 +2001,7 @@ fn set_mode_sun_default() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2033,7 +2024,7 @@ fn set_mode_sun_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2058,7 +2049,7 @@ fn update_gps_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2081,7 +2072,7 @@ fn update_gps_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2106,7 +2097,7 @@ fn update_rv_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2129,7 +2120,7 @@ fn update_rv_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2155,7 +2146,7 @@ fn update_both_both_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2178,7 +2169,7 @@ fn update_both_both_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2204,7 +2195,7 @@ fn update_both_gps_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -2229,5 +2220,5 @@ fn update_both_rv_fail() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#include <kubos-hal/i2c.h>
-#include <isis-trxvu-api/trxvu.h>
+#include <i2c.h>
+#include <trxvu.h>
 #include <stdio.h>
+#include <string.h>
 
-KRadioStatus k_radio_recv(radio_rx_message * buffer, uint8_t * len)
+KRadioStatus k_radio_recv(radio_rx_header * frame, uint8_t * message, uint8_t * len)
 {
-    if (buffer == NULL)
+    if (frame == NULL || message == NULL)
     {
         return RADIO_ERROR_CONFIG;
     }
@@ -46,7 +47,7 @@ KRadioStatus k_radio_recv(radio_rx_message * buffer, uint8_t * len)
         return RADIO_RX_EMPTY;
     }
 
-    status = kprv_radio_rx_get_frame(buffer, len);
+    status = kprv_radio_rx_get_frame(frame, message, len);
     if (status != RADIO_OK)
     {
         fprintf(stderr, "Failed to receive frame from radio\n");
@@ -91,7 +92,7 @@ KRadioStatus kprv_radio_rx_get_telemetry(radio_telem *  buffer,
     }
 
     KI2CStatus status
-        = k_i2c_write(TRXVU_I2C_BUS, RADIO_RX_ADDR, (uint8_t *) &cmd, 1);
+        = k_i2c_write(radio_bus, radio_rx.addr, (uint8_t *) &cmd, 1);
 
     if (status != I2C_OK)
     {
@@ -100,7 +101,7 @@ KRadioStatus kprv_radio_rx_get_telemetry(radio_telem *  buffer,
         return RADIO_ERROR;
     }
 
-    status = k_i2c_read(TRXVU_I2C_BUS, RADIO_RX_ADDR, (char *) buffer, len);
+    status = k_i2c_read(radio_bus, radio_rx.addr, (char *) buffer, len);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to retrieve radio RX telemetry type %d: %d\n",
@@ -116,7 +117,7 @@ KRadioStatus kprv_radio_rx_watchdog_kick(void)
     uint8_t cmd = WATCHDOG_RESET;
 
     KI2CStatus status
-        = k_i2c_write(TRXVU_I2C_BUS, RADIO_RX_ADDR, (uint8_t *) &cmd, 1);
+        = k_i2c_write(radio_bus, radio_rx.addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to kick radio RX watchdog: %d\n", status);
@@ -144,7 +145,7 @@ KRadioStatus kprv_radio_rx_reset(KRadioReset type)
             return RADIO_ERROR_CONFIG;
     }
 
-    status = k_i2c_write(TRXVU_I2C_BUS, RADIO_RX_ADDR, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(radio_bus, radio_rx.addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reset RX radio: %d\n", status);
@@ -164,14 +165,14 @@ KRadioStatus kprv_radio_rx_get_count(uint8_t * count)
     uint8_t    cmd = GET_RX_FRAME_COUNT;
     KI2CStatus status;
 
-    status = k_i2c_write(TRXVU_I2C_BUS, RADIO_RX_ADDR, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(radio_bus, radio_rx.addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to request radio frame count: %d\n", status);
         return RADIO_ERROR;
     }
 
-    status = k_i2c_read(TRXVU_I2C_BUS, RADIO_RX_ADDR, count, 2);
+    status = k_i2c_read(radio_bus, radio_rx.addr, count, 2);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to read radio frame count: %d\n", status);
@@ -186,7 +187,7 @@ KRadioStatus kprv_radio_rx_remove_frame(void)
     uint8_t    cmd = REMOVE_RX_FRAME;
     KI2CStatus status;
 
-    status = k_i2c_write(TRXVU_I2C_BUS, RADIO_RX_ADDR, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(radio_bus, radio_rx.addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to remove radio frame: %d\n", status);
@@ -196,9 +197,9 @@ KRadioStatus kprv_radio_rx_remove_frame(void)
     return RADIO_OK;
 }
 
-KRadioStatus kprv_radio_rx_get_frame(radio_rx_message * buffer, uint8_t * len)
+KRadioStatus kprv_radio_rx_get_frame(radio_rx_header * frame, uint8_t * message, uint8_t * len)
 {
-    if (buffer == NULL)
+    if (frame == NULL || message == NULL)
     {
         return RADIO_ERROR_CONFIG;
     }
@@ -207,26 +208,38 @@ KRadioStatus kprv_radio_rx_get_frame(radio_rx_message * buffer, uint8_t * len)
 
     KI2CStatus status;
 
-    status = k_i2c_write(TRXVU_I2C_BUS, RADIO_RX_ADDR, (uint8_t *) &cmd, 1);
+    status = k_i2c_write(radio_bus, radio_rx.addr, (uint8_t *) &cmd, 1);
     if (status != I2C_OK)
     {
-        fprintf(stderr, "Failed to request radio RX frame's length: %d\n",
+        fprintf(stderr, "Failed to request radio RX frame: %d\n",
                 status);
         return RADIO_ERROR;
     }
 
-    status = k_i2c_read(TRXVU_I2C_BUS, RADIO_RX_ADDR, (char *) buffer,
-                        sizeof(radio_rx_message));
+    uint8_t * buffer = malloc(sizeof(radio_rx_header) + radio_rx.max_size);
+
+    status = k_i2c_read(radio_bus, radio_rx.addr, (char *) buffer,
+            sizeof(radio_rx_header) + radio_rx.max_size);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to read radio RX frame: %d\n", status);
+        free(buffer);
         return RADIO_ERROR;
     }
 
+    radio_rx_header * temp = (radio_rx_header *) buffer;
+
+    frame->msg_size = temp->msg_size;
+    frame->doppler_offset = temp->doppler_offset;
+    frame->signal_strength = temp->signal_strength;
+
+    memcpy(message, buffer+sizeof(radio_rx_header), frame->msg_size);
+
     if (len != NULL)
     {
-        *len = buffer->msg_size;
+        *len = frame->msg_size;
     }
 
+    free(buffer);
     return RADIO_OK;
 }

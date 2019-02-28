@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use bitflags::bitflags;
 use eps_api::{EpsError, EpsResult};
 use rust_i2c::Command;
 
@@ -68,7 +69,7 @@ pub fn parse(data: &[u8]) -> EpsResult<BoardStatus> {
             daughterboard: Some(StatusCode::from_bits(data[0]).unwrap_or_default()),
         })
     } else {
-        throw!(EpsError::parsing_failure("Board Status"))
+        Err(EpsError::parsing_failure("Board Status"))
     }
 }
 

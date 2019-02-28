@@ -22,7 +22,7 @@
 
 #include <pthread.h>
 #include <stdint.h>
-#include <kubos-hal/i2c.h>
+#include <i2c.h>
 
 /**
  *  @name Command Response Flags
@@ -120,12 +120,12 @@ extern pthread_mutex_t imtq_mutex;
 /* Public Functions */
 /**
  * Initialize the ADCS interface
- * @param [in] bus I2C bus
+ * @param [in] bus I2C bus device name
  * @param [in] addr I2C address
  * @param [in] timeout Watchdog timeout in seconds
  * @return KADCSStatus ADCS_OK if OK, error otherwise
  */
-KADCSStatus k_adcs_init(KI2CNum bus, uint16_t addr, int timeout);
+KADCSStatus k_adcs_init(char * bus, uint16_t addr, int timeout);
 /**
  * Terminate the ADCS interface
  */

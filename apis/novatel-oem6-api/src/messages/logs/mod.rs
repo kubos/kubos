@@ -45,12 +45,12 @@ impl Log {
         raw: Vec<u8>,
     ) -> Option<Log> {
         match id {
-            MessageID::BestXYZ => match BestXYZLog::new(recv_status, time_status, week, ms, raw) {
+            MessageID::BestXYZ => match BestXYZLog::new(recv_status, time_status, week, ms, &raw) {
                 Some(log) => Some(Log::BestXYZ(log)),
                 _ => None,
             },
             MessageID::RxStatusEvent => {
-                match RxStatusEventLog::new(recv_status, time_status, week, ms, raw) {
+                match RxStatusEventLog::new(recv_status, time_status, week, ms, &raw) {
                     Some(log) => Some(Log::RxStatusEvent(log)),
                     _ => None,
                 }

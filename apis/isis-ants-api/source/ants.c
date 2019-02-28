@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <isis-ants-api/ants-api.h>
-#include <kubos-hal/i2c.h>
+#include <ants-api.h>
+#include <i2c.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 
-static KI2CNum ants_bus = 0;
+static int ants_bus = 0;
 static uint8_t ants_primary = 0;
 static uint8_t ants_secondary = 0;
 static uint8_t ants_addr = 0; /* Address of the antenna microcontroller commands should be issued against */
@@ -36,31 +36,21 @@ static pthread_t handle_watchdog = { 0 };
  */
 const struct timespec TRANSFER_DELAY = {.tv_sec = 0, .tv_nsec = 1000001 };
 
-KANTSStatus k_ants_init(KI2CNum bus, uint8_t primary, uint8_t secondary, uint8_t count, uint32_t timeout)
+KANTSStatus k_ants_init(char * bus, uint8_t primary, uint8_t secondary, uint8_t count, uint32_t timeout)
 {
     /* Save internal configuration values */
-    ants_bus = bus;
     ants_primary = primary;
     ants_secondary = secondary;
     ant_count = count;
     ants_wd_timeout = timeout;
 
-    /*
-     * All I2C configuration is done at the kernel level,
-     * but we still need to pass a config structure to make
-     * our I2C API happy.
-     */
-    KI2CConf conf = k_i2c_conf_defaults();
-
     KI2CStatus status;
-    status = k_i2c_init(ants_bus, &conf);
+    status = k_i2c_init(bus, &ants_bus);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize AntS: %d\n", status);
         return ANTS_ERROR;
     }
-
-
 
     /* Set default I2C slave address */
     ants_addr = ants_primary;
@@ -71,7 +61,7 @@ KANTSStatus k_ants_init(KI2CNum bus, uint8_t primary, uint8_t secondary, uint8_t
 void k_ants_terminate()
 {
     ants_addr = 0;
-    k_i2c_terminate(ants_bus);
+    k_i2c_terminate(&ants_bus);
 
     return;
 }
@@ -504,6 +494,12 @@ KANTSStatus k_ants_watchdog_start()
 
 KANTSStatus k_ants_watchdog_stop()
 {
+    if (handle_watchdog == 0)
+    {
+      perror("AntS watchdog thread has not been started");
+      return ANTS_ERROR;
+    }
+
     /* Send the cancel request */
     if (pthread_cancel(handle_watchdog) != 0)
     {

@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-extern crate extern_lib;
-
 use std::io::{Error, ErrorKind};
 
 /// Model for power mutations
@@ -34,6 +32,7 @@ pub struct CalibrateThermometer {
 }
 
 /// Model for service's subsystem
+#[derive(Clone)]
 pub struct Subsystem;
 
 impl Subsystem {
@@ -78,7 +77,7 @@ impl Subsystem {
     pub fn uptime(&self) -> Result<i32, Error> {
         println!("getting uptime");
         // Low level query here
-        Ok(111001)
+        Ok(111_001)
     }
 
     /// Uptime reset function

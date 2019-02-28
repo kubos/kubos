@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-extern crate clyde_3g_eps_api;
-extern crate rust_i2c;
-
 use clyde_3g_eps_api::*;
 use rust_i2c::*;
 use std::thread;

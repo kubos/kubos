@@ -1,0 +1,21 @@
+[package]
+name = "file-service"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+edition = "2018"
+
+[dependencies]
+cbor-protocol = { path = "../../libs/cbor-protocol" }
+failure = "0.1.2"
+file-protocol = { path = "../../libs/file-protocol" }
+kubos-system = { path = "../../apis/system-api" }
+log = "^0.4.0"
+serde_cbor = "0.8"
+syslog = "4.0"
+
+[dev-dependencies]
+blake2-rfc = "0.2.18"
+rand = "0.5.5"
+serde = "1.0.58"
+serde_cbor = "0.8"
+tempfile = "3"

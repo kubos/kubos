@@ -17,7 +17,9 @@
 use serde_json;
 
 use std::env;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
+use std::fs::File;
+use std::io::*;
+use std::path::Path;
 use std::process::{Command, Stdio};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::time::Duration;
@@ -32,29 +34,29 @@ static UP_SQL: &'static str = r"CREATE TABLE telemetry (
 
 static DOWN_SQL: &'static str = r"DROP TABLE telemetry;";
 
-fn setup_db(sql: Option<&str>) {
+fn setup_db(db: &str, sql: Option<&str>) {
     Command::new("sqlite3")
-        .arg("test.db")
+        .arg(db)
         .arg(DOWN_SQL)
         .output()
-        .expect("Sql cmd failed");
+        .expect("SQL cmd failed");
 
     Command::new("sqlite3")
-        .arg("test.db")
+        .arg(db)
         .arg(UP_SQL)
         .output()
-        .expect("Sql cmd failed");
+        .expect("SQL cmd failed");
 
     if let Some(sql) = sql {
         Command::new("sqlite3")
-            .arg("test.db")
+            .arg(db)
             .arg(sql)
             .output()
-            .expect("Sql cmd failed");
+            .expect("SQL cmd failed");
     }
 }
 
-fn start_telemetry() -> (JoinHandle<()>, Sender<bool>) {
+fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
     let mut telem_path = env::current_exe().unwrap();
     telem_path.pop();
     telem_path.set_file_name("telemetry-service");
@@ -63,7 +65,7 @@ fn start_telemetry() -> (JoinHandle<()>, Sender<bool>) {
     let telem_thread = thread::spawn(move || {
         let mut telem_proc = Command::new(telem_path)
             .arg("-c")
-            .arg("tests/config.toml")
+            .arg(config)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()
@@ -80,14 +82,46 @@ fn start_telemetry() -> (JoinHandle<()>, Sender<bool>) {
     });
 
     // Give the process a bit to actually start
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(300));
     return (telem_thread, tx);
 }
 
-pub fn setup(sql: Option<&str>) -> (JoinHandle<()>, Sender<bool>) {
-    setup_db(sql);
+pub fn setup(
+    db: Option<&str>,
+    service_port: Option<u16>,
+    udp_port: Option<u16>,
+    sql: Option<&str>,
+) -> (JoinHandle<()>, Sender<bool>) {
+    let db = db.unwrap_or("test.db");
 
-    return start_telemetry();
+    let service_port = service_port.unwrap_or(8111);
+    let udp_port = udp_port.unwrap_or(8112);
+
+    setup_db(&db, sql);
+
+    let config_dir = match Path::new(db).parent() {
+        Some(dir) => dir,
+        None => Path::new(""),
+    };
+    let config_path = config_dir.join("config.toml");
+
+    let config = format!(
+        r#"
+        [telemetry-service]
+        database = "{}"
+        direct_port = {}
+        
+        [telemetry-service.addr]
+        ip = "127.0.0.1"
+        port = {}
+        "#,
+        db, udp_port, service_port
+    );
+
+    let mut config_file = File::create(config_path.clone()).unwrap();
+    config_file.write_all(&config.as_bytes()).unwrap();
+
+    return start_telemetry(config_path.to_str().unwrap().to_owned());
 }
 
 pub fn teardown(handle: JoinHandle<()>, sender: Sender<bool>) {
@@ -95,19 +129,23 @@ pub fn teardown(handle: JoinHandle<()>, sender: Sender<bool>) {
     handle.join().unwrap();
 }
 
-pub fn do_query(query: &str) -> serde_json::Value {
-    let remote_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8111);
-    let local_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8110);
+pub fn do_query(service_port: Option<u16>, query: &str) -> serde_json::Value {
+    let port = service_port.unwrap_or(8111);
 
-    let socket = UdpSocket::bind(local_addr).expect("couldn't bind to address");
-    socket
-        .send_to(&query.as_bytes(), &remote_addr)
-        .expect("couldn't send message");
-    socket.set_read_timeout(Some(Duration::new(10, 0))).unwrap();
+    let client = reqwest::Client::new();
 
-    let mut buf = [0; 1024];
-    match socket.recv_from(&mut buf) {
-        Ok((amt, _)) => serde_json::from_slice(&buf[0..amt]).unwrap(),
-        Err(e) => panic!("recv function failed: {:?}", e),
-    }
+    let uri = format!("http://127.0.0.1:{}", port);
+
+    let mut map = ::std::collections::HashMap::new();
+    map.insert("query", query);
+
+    let response = client
+        .post(&uri)
+        .json(&map)
+        .send()
+        .expect("Couldn't send request")
+        .json()
+        .expect("Couldn't deserialize response");
+
+    response
 }

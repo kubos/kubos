@@ -14,11 +14,9 @@
 // limitations under the License.
 //
 
-extern crate isis_iobc_supervisor;
-
+use crate::model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 use juniper::FieldResult;
 use kubos_service;
-use model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 
 type Context = kubos_service::Context<Supervisor>;
 
@@ -237,19 +235,22 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     field reset(&executor) -> FieldResult<()>
         as "Reset Supervisor"
     {
-        Ok(isis_iobc_supervisor::supervisor_reset()?)
+        isis_iobc_supervisor::supervisor_reset()?;
+        Ok(())
     }
 
     field emergency_reset(&executor) -> FieldResult<()>
         as "Supervisor Emergency Reset"
     {
-        Ok(isis_iobc_supervisor::supervisor_emergency_reset()?)
+        isis_iobc_supervisor::supervisor_emergency_reset()?;
+        Ok(())
     }
 
     field powercycle(&executor) -> FieldResult<()>
         as "Supervisor Powercycle"
     {
-        Ok(isis_iobc_supervisor::supervisor_powercycle()?)
+        isis_iobc_supervisor::supervisor_powercycle()?;
+        Ok(())
     }
 
 });

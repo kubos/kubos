@@ -15,11 +15,12 @@
  */
 
 use super::*;
-use model::*;
+use crate::model::*;
+use crate::tests::test_data::*;
+use serde_json::json;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use tests::test_data::*;
 
 #[test]
 fn read_good() {
@@ -66,10 +67,5 @@ fn read_panic() {
             "errors": ["Read thread panicked. Service restart required."]
     });
 
-    let expected = json!({
-                "msg": expected,
-                "errs": ""
-        }).to_string();
-
-    assert_eq!(service.process(query.to_owned()), expected);
+    test!(service, query, expected);
 }

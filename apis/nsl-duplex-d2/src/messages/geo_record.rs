@@ -16,7 +16,9 @@
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use nom::simple_errors::Context;
-use nom::{float, multispace, Err, ErrorKind, IResult};
+use nom::{
+    float, map_res, multispace, tag, take_until, take_until_and_consume, Err, ErrorKind, IResult,
+};
 use std::str::from_utf8;
 
 #[derive(Debug, PartialEq)]
@@ -43,7 +45,7 @@ fn parse_date(input: &[u8]) -> IResult<&[u8], i64> {
     let (input, date) = map_res!(input, take_until!("\n"), from_utf8)?;
     let dt = DateTime::<Utc>::from_utc(
         NaiveDateTime::parse_from_str(date, "%d %m %Y %H:%M:%S")
-            .or(Err(Err::Error(Context::Code(input, ErrorKind::Tag))))?,
+            .or_else(|_| Err(Err::Error(Context::Code(input, ErrorKind::Tag))))?,
         Utc,
     );
     Ok((input, dt.timestamp()))
@@ -83,7 +85,7 @@ impl GeoRecord {
                 lon: -w,
                 lat: n,
                 time,
-                max_error: max_error,
+                max_error,
             },
         ))
     }

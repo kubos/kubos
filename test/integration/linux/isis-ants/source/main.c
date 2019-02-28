@@ -17,7 +17,7 @@
  * ANTS Integration Test for the ISIS iMTQ
  */
 
-#include <isis-ants-api/ants-api.h>
+#include <ants-api.h>
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>
@@ -28,6 +28,12 @@
 #include <stdbool.h>
 
 FILE * fp;
+
+#define BUS             "/dev/i2c-0"
+#define PRIMARY_ADDR    0x31
+#define SECONDARY_ADDR  0x32
+#define ANT_COUNT       4
+#define TIMEOUT         10
 
 KANTSStatus reset()
 {
@@ -315,7 +321,7 @@ int main(int argc, char * argv[])
 
     KANTSStatus status;
 
-    status = k_ants_init();
+    status = k_ants_init(BUS, PRIMARY_ADDR, SECONDARY_ADDR, ANT_COUNT, TIMEOUT);
     if (status != ANTS_OK)
     {
         fprintf(stderr, "k_ants_init failed: %d\n", status);

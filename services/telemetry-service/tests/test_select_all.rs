@@ -14,11 +14,9 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate serde_json;
-
+use serde_json::json;
 mod utils;
-use utils::*;
+use crate::utils::*;
 
 static SQL: &'static str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');
@@ -28,18 +26,17 @@ insert into telemetry values(1002, 'eps', 'voltage', '3.2');
 
 #[test]
 fn test() {
-    let (handle, sender) = setup(Some(SQL));
-    let res = do_query("{telemetry{timestamp,subsystem,parameter,value}}");
+    let (handle, sender) = setup(None, None, None, Some(SQL));
+    let res = do_query(None, "{telemetry{timestamp,subsystem,parameter,value}}");
     teardown(handle, sender);
     assert_eq!(
         res,
         json!({
-            "errs": "",
-            "msg": {
+            "data": {
                 "telemetry":[
-                    {"timestamp":1000,"subsystem":"eps","parameter":"voltage","value":"3.3"},
-                    {"timestamp":1001,"subsystem":"eps","parameter":"voltage","value":"3.4"},
-                    {"timestamp":1002,"subsystem":"eps","parameter":"voltage","value":"3.2"}
+                    {"timestamp":1002.0,"subsystem":"eps","parameter":"voltage","value":"3.2"},
+                    {"timestamp":1001.0,"subsystem":"eps","parameter":"voltage","value":"3.4"},
+                    {"timestamp":1000.0,"subsystem":"eps","parameter":"voltage","value":"3.3"},
                 ]
             }
         })

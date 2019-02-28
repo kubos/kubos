@@ -14,17 +14,17 @@
 // limitations under the License.
 //
 
-use failure::Fail;
+use failure::{bail, Error};
+use kubos_service::{process_errors, push_err, run};
+use log::info;
 use mai400_api::*;
-use std::cell::{Cell, RefCell};
-use std::io::{Error, ErrorKind};
 use std::sync::mpsc::channel;
 use std::sync::mpsc::{Receiver, Sender, TryRecvError};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::thread::{sleep, spawn};
 use std::time::Duration;
 
-use objects::*;
+use crate::objects::*;
 
 pub struct ReadData {
     pub std_telem: Mutex<StandardTelemetry>,
@@ -117,12 +117,13 @@ pub fn read_thread(mai: MAI400, data: Arc<ReadData>, sender: Sender<String>) {
     }
 }
 
+#[derive(Clone)]
 pub struct Subsystem {
     pub mai: MAI400,
-    pub last_cmd: Cell<AckCommand>,
-    pub errors: RefCell<Vec<String>>,
+    pub last_cmd: Arc<RwLock<AckCommand>>,
+    pub errors: Arc<RwLock<Vec<String>>>,
     pub persistent: Arc<ReadData>,
-    pub receiver: Receiver<String>,
+    pub receiver: Arc<Mutex<Receiver<String>>>,
 }
 
 impl Subsystem {
@@ -136,23 +137,33 @@ impl Subsystem {
 
         spawn(move || read_thread(mai_ref, data_ref, sender));
 
-        println!("Kubos MAI-400 service started");
+        info!("Kubos MAI-400 service started");
 
         Ok(Subsystem {
             mai,
-            last_cmd: Cell::new(AckCommand::None),
-            errors: RefCell::new(vec![]),
+            last_cmd: Arc::new(RwLock::new(AckCommand::None)),
+            errors: Arc::new(RwLock::new(vec![])),
             persistent: data.clone(),
-            receiver,
+            receiver: Arc::new(Mutex::new(receiver)),
         })
     }
 
     pub fn get_read_health(&self) {
-        match self.receiver.try_recv() {
+        let receiver = match self.receiver.lock() {
+            Ok(v) => v,
+            Err(err) => {
+                push_err!(
+                    self.errors,
+                    format!("Failed to get read thread receiver mutex: {:?}", err)
+                );
+                return;
+            }
+        };
+        match receiver.try_recv() {
             Ok(msg) => {
                 push_err!(self.errors, msg);
 
-                while let Ok(err) = self.receiver.try_recv() {
+                while let Ok(err) = receiver.try_recv() {
                     push_err!(self.errors, err);
                 }
             }
@@ -180,12 +191,13 @@ impl Subsystem {
 
         let new_ctr = { self.persistent.std_telem.lock().unwrap().tlm_counter };
 
-        let (state, uptime) = match new_ctr != old_ctr {
-            true => (
+        let (state, uptime) = if new_ctr != old_ctr {
+            (
                 PowerState::On,
-                self.persistent.std_telem.lock().unwrap().cmd_valid_cntr as i32,
-            ),
-            false => (PowerState::Off, 0),
+                i32::from(self.persistent.std_telem.lock().unwrap().cmd_valid_cntr),
+            )
+        } else {
+            (PowerState::Off, 0)
         };
 
         Ok(GetPowerResponse { state, uptime })
@@ -227,9 +239,9 @@ impl Subsystem {
     pub fn get_spin(&self) -> Result<Spin, Error> {
         let rotating = self.persistent.rotating.lock().unwrap();
         Ok(Spin {
-            x: rotating.k_bdot[0] as f64,
-            y: rotating.k_bdot[1] as f64,
-            z: rotating.k_bdot[2] as f64,
+            x: f64::from(rotating.k_bdot[0]),
+            y: f64::from(rotating.k_bdot[1]),
+            z: f64::from(rotating.k_bdot[2]),
         })
     }
 
@@ -243,15 +255,14 @@ impl Subsystem {
 
         let new_ctr = { self.persistent.std_telem.lock().unwrap().tlm_counter };
 
-        let (success, errors) = match new_ctr != old_ctr {
-            true => (true, "".to_owned()),
-            false => {
-                push_err!(
-                    self.errors,
-                    "Noop: Unable to communicate with MAI400".to_owned()
-                );
-                (false, "Unable to communicate with MAI400".to_owned())
-            }
+        let (success, errors) = if new_ctr != old_ctr {
+            (true, "".to_owned())
+        } else {
+            push_err!(
+                self.errors,
+                "Noop: Unable to communicate with MAI400".to_owned()
+            );
+            (false, "Unable to communicate with MAI400".to_owned())
         };
 
         Ok(GenericResponse { success, errors })
@@ -289,7 +300,6 @@ impl Subsystem {
         let tx: Vec<u8> = command
             .as_bytes()
             .chunks(2)
-            .into_iter()
             .map(|chunk| u8::from_str_radix(::std::str::from_utf8(chunk).unwrap(), 16).unwrap())
             .collect();
 
@@ -306,10 +316,7 @@ impl Subsystem {
 
     pub fn set_mode(&self, mode: u8, qbi_cmd: Vec<i32>) -> Result<GenericResponse, Error> {
         if qbi_cmd.len() != 4 {
-            return Err(Error::new(
-                ErrorKind::InvalidInput,
-                "qbi_cmd must contain exactly 4 elements",
-            ));
+            bail!("qbi_cmd must contain exactly 4 elements");
         }
 
         let result = run!(
@@ -372,17 +379,11 @@ impl Subsystem {
 
         if let Some(params) = rv {
             if params.eci_pos.len() != 3 {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    "eci_pos must contain exactly 3 elements",
-                ));
+                bail!("eci_pos must contain exactly 3 elements");
             }
 
             if params.eci_vel.len() != 3 {
-                return Err(Error::new(
-                    ErrorKind::InvalidInput,
-                    "eci_vel must contain exactly 3 elements",
-                ));
+                bail!("eci_vel must contain exactly 3 elements");
             }
 
             let result = run!(

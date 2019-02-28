@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+use crate::ffi::*;
 use adcs_api::*;
-use ffi::*;
 
 /// Structure for interacting with the ISIS iMTQ
 pub struct Imtq<T: ImtqFFI> {
@@ -26,14 +26,11 @@ impl Imtq<ImtqRaw> {
     /// Constructor - Returns an `AdcsResult<Imtq>`
     ///
     /// Opens a connection to the underlying Imtq device.
-    /// The I2C bus number here may not correspond directly to the
-    /// device named assigned in Linux. See the hardware specific docs
-    /// for a listing of available I2C interfaces and their bus numbers.
     ///
     /// # Arguments
     ///
-    /// * `bus` - I2C Bus of iMTQ
-    /// * `addr` - I2C Address of iMTQ
+    /// * `bus` - I2C bus device of iMTQ
+    /// * `addr` - I2C address of iMTQ
     /// * `timeout` - Timeout for watchdog kicking (in seconds)
     ///
     /// # Example
@@ -46,11 +43,11 @@ impl Imtq<ImtqRaw> {
     /// # fn main() { func(); }
     ///
     /// # fn func() -> AdcsResult<()> {
-    /// let imtq = Imtq::imtq(1, 0x40, 60)?;
+    /// let imtq = Imtq::imtq("/dev/i2c-0", 0x40, 60)?;
     /// # Ok(())
     /// # }
     /// ```
-    pub fn imtq(bus: u8, addr: u16, timeout: i32) -> AdcsResult<Self> {
+    pub fn imtq(bus: &str, addr: u16, timeout: i32) -> AdcsResult<Self> {
         let handle = ImtqRaw {};
         Imtq::new(&handle, bus, addr, timeout)
     }
@@ -62,9 +59,9 @@ impl<T: ImtqFFI> Imtq<T> {
     /// appropriate ImtqFFI object.
     ///
     /// The one argument *must* implement the `ImtqFFI` trait.
-    fn new(handle: &T, bus: u8, addr: u16, timeout: i32) -> AdcsResult<Self> {
-        adcs_status_to_err(handle.k_adcs_init(KI2CNum::from(bus), addr, timeout))?;
-        adcs_status_to_err(handle.k_imtq_watchdog_start())?;
+    fn new(handle: &T, bus: &str, addr: u16, timeout: i32) -> AdcsResult<Self> {
+        adcs_status_to_err(&handle.k_adcs_init(bus.as_ptr(), addr, timeout))?;
+        adcs_status_to_err(&handle.k_imtq_watchdog_start())?;
         Ok(Imtq {
             handle: handle.clone(),
         })
@@ -90,7 +87,7 @@ impl<T: ImtqFFI> Imtq<T> {
     /// # fn main() { func(); }
     ///
     /// # fn func() -> AdcsResult<()> {
-    /// let imtq = Imtq::imtq(1, 0x40, 60)?;
+    /// let imtq = Imtq::imtq("/dev/i2c-0", 0x40, 60)?;
     /// let cmd = vec![10, 10, 10, 10];
     /// let result = imtq.passthrough(&cmd, 10, 0, 0)?;
     /// # Ok(())
@@ -109,7 +106,7 @@ impl<T: ImtqFFI> Imtq<T> {
             tv_nsec: delay_nsecs,
         };
 
-        adcs_status_to_err(self.handle.k_adcs_passthrough(
+        adcs_status_to_err(&self.handle.k_adcs_passthrough(
             command.as_ptr(),
             command.len() as i32,
             rx_buffer.as_mut_ptr(),
@@ -134,17 +131,19 @@ impl<T: ImtqFFI> Imtq<T> {
     /// # fn main() { func(); }
     ///
     /// # fn func() -> AdcsResult<()> {
-    /// let imtq = Imtq::imtq(1, 0x40, 60)?;
+    /// let imtq = Imtq::imtq("/dev/i2c-0", 0x40, 60)?;
     /// imtq.reset()?;
     /// # Ok(())
     /// # }
     /// ```
     pub fn reset(&self) -> AdcsResult<()> {
-        Ok(adcs_status_to_err(self.handle.k_imtq_reset())?)
+        adcs_status_to_err(&self.handle.k_imtq_reset())?;
+        Ok(())
     }
 
     fn watchdog_stop(&self) -> AdcsResult<()> {
-        Ok(adcs_status_to_err(self.handle.k_imtq_watchdog_stop())?)
+        adcs_status_to_err(&self.handle.k_imtq_watchdog_stop())?;
+        Ok(())
     }
 }
 
@@ -158,11 +157,11 @@ impl<T: ImtqFFI> Drop for Imtq<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use double;
+    use double::*;
 
     mock_trait!(
         MockImtq,
-        k_adcs_init(KI2CNum, u16, i32) -> KADCSStatus,
+        k_adcs_init(*const u8, u16, i32) -> KADCSStatus,
         k_adcs_terminate() -> (),
         k_adcs_passthrough(*const u8, i32, *mut u8, i32, *const timespec) -> KADCSStatus,
         k_imtq_reset() -> KADCSStatus,
@@ -171,7 +170,7 @@ mod tests {
     );
 
     impl ImtqFFI for MockImtq {
-        mock_method!(k_adcs_init(&self, bus: KI2CNum, addr: u16, timeout: i32) -> KADCSStatus);
+        mock_method!(k_adcs_init(&self, bus: *const u8, addr: u16, timeout: i32) -> KADCSStatus);
         mock_method!(k_adcs_terminate(&self));
         mock_method!(k_adcs_passthrough(&self, tx: *const u8,
         tx_len: i32,
@@ -188,7 +187,7 @@ mod tests {
         let mock = MockImtq::default();
         mock.k_adcs_init.return_value(KADCSStatus::Ok);
 
-        let imtq = Imtq::new(&mock, 1, 0x40, 60);
+        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60);
         assert!(imtq.is_ok());
         assert_eq!(1, mock.k_adcs_init.num_calls());
         assert_eq!(1, mock.k_imtq_watchdog_start.num_calls());
@@ -199,7 +198,7 @@ mod tests {
         let mock = MockImtq::default();
         mock.k_adcs_init.return_value(KADCSStatus::Error);
 
-        let imtq = Imtq::new(&mock, 1, 0x40, 60);
+        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60);
         assert!(imtq.is_err());
     }
 
@@ -207,7 +206,7 @@ mod tests {
     fn test_on_drop() {
         let mock = MockImtq::default();
 
-        let imtq = Imtq::new(&mock, 1, 0x40, 60);
+        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60);
         drop(imtq);
         assert_eq!(1, mock.k_adcs_terminate.num_calls());
         assert_eq!(1, mock.k_imtq_watchdog_stop.num_calls());
@@ -235,7 +234,7 @@ mod tests {
                 KADCSStatus::Ok
             },
         ));
-        let imtq = Imtq::new(&mock, 1, 0x40, 60).unwrap();
+        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60).unwrap();
 
         let cmd = vec![0, 1, 1, 1];
         let result = imtq.passthrough(&cmd, 4, 0, 100);
@@ -246,14 +245,14 @@ mod tests {
     #[test]
     fn test_reset() {
         let mock = MockImtq::default();
-        let imtq = Imtq::new(&mock, 1, 0x40, 60).unwrap();
+        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60).unwrap();
         assert_eq!(Ok(()), imtq.reset());
     }
 
     #[test]
     fn test_watchdog_stop() {
         let mock = MockImtq::default();
-        let imtq = Imtq::new(&mock, 1, 0x40, 60).unwrap();
+        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60).unwrap();
         assert_eq!(Ok(()), imtq.watchdog_stop());
     }
 }

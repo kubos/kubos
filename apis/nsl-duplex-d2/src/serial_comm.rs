@@ -29,7 +29,8 @@ struct SerialStream {}
 
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> RadioResult<()> {
-        Ok(serial_send(data)?)
+        serial_send(data)?;
+        Ok(())
     }
     fn read(&self) -> RadioResult<Vec<u8>> {
         Ok(serial_receive()?)
@@ -40,7 +41,7 @@ fn serial_send(data: &[u8]) -> io::Result<()> {
     use serial::prelude::*;
     use std::io::prelude::*;
 
-    let mut port = try!(serial::open("/dev/ttyUSB0"));
+    let mut port = serial::open("/dev/ttyUSB0")?;
     let settings: serial::PortSettings = serial::PortSettings {
         baud_rate: serial::Baud38400,
         char_size: serial::Bits8,
@@ -48,20 +49,20 @@ fn serial_send(data: &[u8]) -> io::Result<()> {
         stop_bits: serial::Stop1,
         flow_control: serial::FlowNone,
     };
-    try!(port.configure(&settings));
+    port.configure(&settings)?;
 
-    try!(port.set_timeout(Duration::from_secs(1)));
+    port.set_timeout(Duration::from_secs(1))?;
 
     let be_data = {
         let mut v = Vec::<u8>::new();
-        for i in 0..data.len() {
-            v.push(data[i].to_be());
+        for item in data {
+            v.push(item.to_be());
         }
         v
     };
 
-    try!(port.flush());
-    try!(port.write(&be_data[..]));
+    port.flush()?;
+    port.write_all(&be_data[..])?;
 
     Ok(())
 }
@@ -71,7 +72,7 @@ fn serial_receive() -> io::Result<Vec<u8>> {
     use std::io::prelude::*;
 
     let mut ret_msg: Vec<u8> = Vec::new();
-    let mut port = try!(serial::open("/dev/ttyUSB0"));
+    let mut port = serial::open("/dev/ttyUSB0")?;
 
     let settings: serial::PortSettings = serial::PortSettings {
         baud_rate: serial::Baud38400,
@@ -80,9 +81,9 @@ fn serial_receive() -> io::Result<Vec<u8>> {
         stop_bits: serial::Stop1,
         flow_control: serial::FlowNone,
     };
-    try!(port.configure(&settings));
+    port.configure(&settings)?;
 
-    try!(port.set_timeout(Duration::from_millis(100)));
+    port.set_timeout(Duration::from_millis(100))?;
 
     let mut tries = 0;
 
@@ -94,7 +95,7 @@ fn serial_receive() -> io::Result<Vec<u8>> {
                 if c > 0 {
                     ret_msg.extend(read_buffer);
                 } else {
-                    tries = tries + 1;
+                    tries += 1;
                 }
             }
             Err(_) => break,

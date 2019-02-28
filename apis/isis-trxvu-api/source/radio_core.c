@@ -14,34 +14,41 @@
  * limitations under the License.
  */
 
-#include <kubos-hal/i2c.h>
-#include <isis-trxvu-api/trxvu.h>
+#include <i2c.h>
+#include <trxvu.h>
 #include <stdio.h>
 #include <unistd.h>
 
-KRadioStatus k_radio_init()
+int radio_bus = 0;
+uint16_t wd_timeout = 0;
+trx_prop radio_tx;
+trx_prop radio_rx;
+
+KRadioStatus k_radio_init(char * bus, trx_prop tx, trx_prop rx, uint16_t timeout)
 {
-    /*
-     * All I2C configuration is done at the kernel level,
-     * but we still need to pass a config structure to make
-     * our I2C API happy.
-     */
-    KI2CConf conf = k_i2c_conf_defaults();
+    if (bus == NULL)
+    {
+        return RADIO_ERROR_CONFIG;
+    }
 
     KI2CStatus status;
-    status = k_i2c_init(TRXVU_I2C_BUS, &conf);
+    status = k_i2c_init(bus, &radio_bus);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize radio: %d\n", status);
         return RADIO_ERROR;
     }
 
+    wd_timeout = timeout;
+    radio_tx = tx;
+    radio_rx = rx;
+
     return RADIO_OK;
 }
 
 void k_radio_terminate()
 {
-    k_i2c_terminate(TRXVU_I2C_BUS);
+    k_i2c_terminate(&radio_bus);
 
     return;
 }
@@ -107,7 +114,7 @@ void * kprv_radio_watchdog_thread(void * args)
         kprv_radio_tx_watchdog_kick();
         kprv_radio_rx_watchdog_kick();
 
-        sleep(TRXVU_WD_TIMEOUT / 3);
+        sleep(wd_timeout / 3);
     }
 
     return NULL;
@@ -123,11 +130,11 @@ KRadioStatus k_radio_watchdog_start()
         return RADIO_OK;
     }
 
-    if (TRXVU_WD_TIMEOUT == 0)
+    if (wd_timeout == 0)
     {
         fprintf(
             stderr,
-            "TRXVU watchdog has been disabled. No thread will be startd\n");
+            "TRXVU watchdog has been disabled. No thread will be started\n");
         return RADIO_OK;
     }
 
@@ -144,6 +151,12 @@ KRadioStatus k_radio_watchdog_start()
 
 KRadioStatus k_radio_watchdog_stop()
 {
+    if (handle_watchdog == 0)
+    {
+        perror("TRXVU watchdog thread has not been started");
+        return RADIO_ERROR;
+    }
+    
     /* Send the cancel request */
     if (pthread_cancel(handle_watchdog) != 0)
     {
@@ -189,3 +202,17 @@ KRadioStatus k_radio_get_telemetry(radio_telem * buffer, RadioTelemType type)
         return kprv_radio_tx_get_telemetry(buffer, type);
     }
 }
+
+float get_voltage(uint16_t raw) {return raw * 0.00488;}
+
+float get_current(uint16_t raw) {return raw * 0.16643964;}
+
+float get_temperature(uint16_t raw) {return raw * -0.07669 + 195.6037;}
+
+float get_doppler_offset(uint16_t raw) {return raw * 13.352 - 22300;}
+
+float get_signal_strength(uint16_t raw) {return raw * 0.03 - 152;}
+
+float get_rf_power_dbm(uint16_t raw) {return 20 * log10(raw * 0.00767);}
+
+float get_rf_power_mw(uint16_t raw) {return raw * raw * powf(10, -2) * 0.00005887;}

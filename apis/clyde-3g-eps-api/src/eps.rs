@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-use commands::*;
+use crate::commands::*;
+use crate::telemetry;
 use eps_api::EpsResult;
 use rust_i2c::{Command, Connection};
 use std::time::Duration;
-use telemetry;
 
 /// Trait defining expected functionality for Clyde 3g EPS
 pub trait Clyde3gEps {
@@ -218,7 +218,7 @@ impl Clyde3gEps for Eps {
     fn get_motherboard_telemetry(
         &self,
         telem_type: telemetry::motherboard::Type,
-    ) -> EpsResult<f32> {
+    ) -> EpsResult<f64> {
         telemetry::motherboard::parse(
             &self.connection.transfer(
                 telemetry::motherboard::command(telem_type),
@@ -240,7 +240,7 @@ impl Clyde3gEps for Eps {
     fn get_daughterboard_telemetry(
         &self,
         telem_type: telemetry::daughterboard::Type,
-    ) -> EpsResult<f32> {
+    ) -> EpsResult<f64> {
         telemetry::daughterboard::parse(
             &self.connection.transfer(
                 telemetry::daughterboard::command(telem_type),

@@ -1,0 +1,15 @@
+[package]
+name = "kubos-system"
+version = "0.1.0"
+authors = ["Marshall Culpepper <marshall@kubos.com>"]
+edition = "2018"
+
+[dependencies]
+failure = "0.1.2"
+getopts = "0.2"
+serde = "1.0"
+serde_derive = "1.0"
+toml = "0.4"
+
+[dev-dependencies]
+tempfile = "3"

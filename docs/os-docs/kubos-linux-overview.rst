@@ -8,7 +8,7 @@ This is intended as a higher-level overview of the Kubos Linux
 configuration, installation, and distribution for the Kubos clients'
 embedded systems.
 
-The high level components of every system will be: 
+The high level components of every system will be:
 
 - Low-level bootloader/s
 - U-Boot (mid-level bootloader. Loads Kubos Linux)
@@ -175,7 +175,7 @@ examples for the various component definitions.
 Connecting to the System
 ------------------------
 
-All supported OBCs have a debug UART connection which is intended as the 
+All supported OBCs have a debug UART connection which is intended as the
 primary way to connect to the system console.
 
 You'll need to establish a serial connection with the board in order to connect
@@ -254,21 +254,17 @@ during an upgrade/downgrade**
 
 --------------
 
+/home/system/logs
+^^^^^^^^^^^^^^^^^
+
+All log files generated with rsyslog reside in this directory.
+
 /home/system/usr/bin
 ^^^^^^^^^^^^^^^^^^^^
 
-All user-created applications will be loaded into this folder during the
-``kubos flash`` process. The directory is included in the system's PATH,
-so applications can then be called directly from anywhere, without
-needing to know the full file path.
-
-/home/system/usr/local/bin
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-All user-created non-application files will be loaded into this folder
-during the ``kubos flash`` process. There is currently not a way to set
-a destination folder for the ``kubos flash`` command, so if a different
-endpoint directory is desired, the files will need to be manually moved.
+This directory is included in the system's PATH, so applications placed
+here can be called directly from anywhere, without needing to know the
+full file path.
 
 /home/system/etc/init.d
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -306,8 +302,8 @@ Upgrade Process
 ---------------
 
 If you already have Kubos Linux installed on your system, but would like to
-upgrade to the latest version, check out the :ref:`upgrade-installation` section. 
-Alternatively, if you would like to rollback to a previously installed version, 
+upgrade to the latest version, check out the :ref:`upgrade-installation` section.
+Alternatively, if you would like to rollback to a previously installed version,
 refer to the :ref:`upgrade-rollback` section.
 
 Recovery Process
@@ -357,6 +353,6 @@ These commands will:
   - Restore the relevant environment variables to their default values
   - Save the new values to persistent storage
   - Reboot the system
-  
+
 As long as a valid kernel and rootfs are available, your system should now successfully boot
 into Kubos Linux.

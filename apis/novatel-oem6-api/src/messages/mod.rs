@@ -19,6 +19,7 @@ pub mod logs;
 
 pub use self::commands::*;
 pub use self::logs::*;
+use bitflags::bitflags;
 use byteorder::{LittleEndian, WriteBytesExt};
 use nom::*;
 
@@ -101,7 +102,7 @@ impl Header {
         }
     }
 
-    pub fn parse(raw: &Vec<u8>) -> Option<Self> {
+    pub fn parse(raw: &[u8]) -> Option<Self> {
         match parse_header(raw) {
             Ok(conv) => Some(conv.1),
             _ => None,
@@ -180,55 +181,55 @@ bitflags! {
     #[derive(Default)]
     pub struct ReceiverStatusFlags: u32 {
         /// System has encountered an error
-        const ERROR_PRESENT = 0x00000001;
+        const ERROR_PRESENT = 0x0000_0001;
         /// Temperature warning
-        const TEMPERATURE_WARNING = 0x00000002;
+        const TEMPERATURE_WARNING = 0x0000_0002;
         /// Voltage supply warning
-        const VOLTAGE_SUPPLY_WARNING = 0x00000004;
+        const VOLTAGE_SUPPLY_WARNING = 0x0000_0004;
         /// Antenna not powered
-        const ANTENNA_NOT_POWERED = 0x00000008;
+        const ANTENNA_NOT_POWERED = 0x0000_0008;
         /// LNA failure encountered
-        const LNA_FAILURE = 0x00000010;
+        const LNA_FAILURE = 0x0000_0010;
         /// Antenna open
-        const ANTENNA_OPEN = 0x00000020;
+        const ANTENNA_OPEN = 0x0000_0020;
         /// Antenna shortened
-        const ANTENNA_SHORTENED = 0x00000040;
+        const ANTENNA_SHORTENED = 0x0000_0040;
         /// CPU overloaded
-        const CPU_OVERLOAD = 0x00000080;
+        const CPU_OVERLOAD = 0x0000_0080;
         /// The COM1 buffer has been overrun
-        const COM1_BUFFER_OVERRUN = 0x00000100;
+        const COM1_BUFFER_OVERRUN = 0x0000_0100;
         /// The COM2 buffer has been overrun
-        const COM2_BUFFER_OVERRUN = 0x00000200;
+        const COM2_BUFFER_OVERRUN = 0x0000_0200;
         /// The COM3 buffer has been overrun
-        const COM3_BUFFER_OVERRUN = 0x00000400;
+        const COM3_BUFFER_OVERRUN = 0x0000_0400;
         /// Link overrun
-        const LINK_OVERRUN = 0x00000800;
+        const LINK_OVERRUN = 0x0000_0800;
         /// Auxilliary transmit overrun
-        const AUX_TRANSMIT_OVERRUN = 0x00002000;
+        const AUX_TRANSMIT_OVERRUN = 0x0000_2000;
         /// AGC out of range
-        const AGC_OUT_OF_RANGE = 0x00004000;
+        const AGC_OUT_OF_RANGE = 0x0000_4000;
         /// INS has been reset
-        const INS_RESET = 0x00010000;
+        const INS_RESET = 0x0001_0000;
         /// GPS almanac invalid and/or UTC unknown
-        const GPS_ALMANAC_INVALID = 0x00040000;
+        const GPS_ALMANAC_INVALID = 0x0004_0000;
         /// Position solution is invalid
-        const POSITION_SOLUTION_INVALID = 0x00080000;
+        const POSITION_SOLUTION_INVALID = 0x0008_0000;
         /// A fixed position is in place
-        const POSITION_FIXED = 0x00100000;
+        const POSITION_FIXED = 0x0010_0000;
         /// Clock steering is disabled
-        const CLOCK_STEERING_DISABLED = 0x00200000;
+        const CLOCK_STEERING_DISABLED = 0x0020_0000;
         /// The clock model is invalid
-        const CLOCK_MODEL_INVALID = 0x00400000;
+        const CLOCK_MODEL_INVALID = 0x0040_0000;
         /// The external oscillator is locked
-        const EXTERNAL_OSCILLATOR_LOCKED = 0x00800000;
+        const EXTERNAL_OSCILLATOR_LOCKED = 0x0080_0000;
         /// Software resource warning
-        const SOFTWARE_RESOURCE_WARNING = 0x01000000;
+        const SOFTWARE_RESOURCE_WARNING = 0x0100_0000;
         /// An auxilliary 3 status event has occurred
-        const AUX3_STATUS_EVENT = 0x20000000;
+        const AUX3_STATUS_EVENT = 0x2000_0000;
         /// An auxilliary 2 status event has occurred
-        const AUX2_STATUS_EVENT = 0x40000000;
+        const AUX2_STATUS_EVENT = 0x4000_0000;
         /// An auxilliary 1 status event has occurred
-        const AUX1_STATUS_EVENT = 0x80000000;
+        const AUX1_STATUS_EVENT = 0x8000_0000;
     }
 }
 
@@ -252,7 +253,7 @@ impl ReceiverStatusFlags {
     /// # }
     /// ```
     ///
-    pub fn to_vec(&self) -> Vec<String> {
+    pub fn to_vec(self) -> Vec<String> {
         format!("{:?}", self)
             .to_owned()
             .split(" | ")

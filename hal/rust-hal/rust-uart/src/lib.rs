@@ -17,16 +17,13 @@
 #![deny(missing_docs)]
 
 //! A generalized HAL for communicating over serial ports
-#[macro_use]
-extern crate failure;
-extern crate serial;
 
 mod error;
 pub mod mock;
 #[cfg(test)]
 mod tests;
 
-pub use error::*;
+pub use crate::error::*;
 use serial::prelude::*;
 use std::cell::RefCell;
 use std::io::prelude::*;
@@ -97,7 +94,10 @@ impl SerialStream {
 // Read and write implementations for the serial stream
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> UartResult<()> {
-        let mut port = self.port.try_borrow_mut().map_err(|_| UartError::PortBusy)?;
+        let mut port = self
+            .port
+            .try_borrow_mut()
+            .map_err(|_| UartError::PortBusy)?;
         port.set_timeout(self.timeout)?;
 
         port.write_all(data)?;
@@ -106,7 +106,10 @@ impl Stream for SerialStream {
     }
 
     fn read(&self, len: usize, timeout: Duration) -> UartResult<Vec<u8>> {
-        let mut port = self.port.try_borrow_mut().map_err(|_| UartError::PortBusy)?;
+        let mut port = self
+            .port
+            .try_borrow_mut()
+            .map_err(|_| UartError::PortBusy)?;
 
         port.set_timeout(timeout)?;
 

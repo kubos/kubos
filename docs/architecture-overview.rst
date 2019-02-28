@@ -40,7 +40,7 @@ They govern state management, accomplish scripted tasks, monitor onboard behavio
 Each application is typically dedicated to a certain mode or isolated task the satellite is supposed to accomplish to keep them lightweight and portable.
 They can be simple, such as a telemetry beacon app, or complex, such as a payload operations app.
 
-- :doc:`Mission Applications <what-is-a-mission-application>`
+- :doc:`Mission Applications <app-docs/index>`
 
 
 Typical Mission Architecture
@@ -107,12 +107,13 @@ These are, by nature, mission specific, but some of them can be largely reused d
 These are typically written or adapted by the user and are the backbone of the operation of the satellite.
 It is highly recommended to read more in depth on them to truly understand KubOS.
 
- - :doc:`Mission Applications <what-is-a-mission-application>`
+ - :doc:`Mission Applications <app-docs/index>`
 
 Communication and KubOS
 -----------------------
 
-UDP is used for all communication, both onboard and over the space/ground link.
+HTTP is used for most internal communication.
+UDP is used for the remaining onboard communication as well as over the space/ground link.
 The rest of this overview is broken into onboard and space/ground sections to give an example of what to expect from these communication mediums.
 These descriptions will not cover every possible use case, but you can also come `talk to us on Slack <https://slack.kubos.co/>`__ if you have additional cases you would like to know about.
 
@@ -120,7 +121,7 @@ Onboard Communication
 ~~~~~~~~~~~~~~~~~~~~~
 
 Onboard the spacecraft, most communication is centered around mission applications.
-Mission applications use :doc:`Graphql <services/graphql>` over UDP for controlling hardware services and payloads to change the state of the spacecraft or execute operations.
+Mission applications use :doc:`Graphql <services/graphql>` over HTTP for controlling hardware services and payloads to change the state of the spacecraft or execute operations.
 Mission applications get all of their data directly from the hardware services, to ensure they have the most up-to-date information to make decisions.
 Typically, a telemetry application will fulfill the role of polling all the services to generate the health and status beacon and log data into the :doc:`telemetry database. <services/telemetry-db>`
 There is no other onboard communication that is required by the KubOS system.
@@ -129,23 +130,22 @@ Space/Ground Communication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The communication service is responsible for maintaining the space/ground link.
-This service provides UDP passthrough so the details of the radio link (packetization, the encryption, etc.) are transparent to the onboard services.
-See the :doc:`service documentation <services/communication>` for more details of how this is accomplished.
+This service provides packet passthrough so the details of the radio link (packetization, the encryption, etc.) are transparent to the onboard services.
 
-The usage of this UDP passthrough over the space/ground link is governed by two major use cases: nominal operations and error recovery.
+The usage of this packet passthrough over the space/ground link is governed by two major use cases: nominal operations and error recovery.
 
 Nominal Operations
 ^^^^^^^^^^^^^^^^^^
 
 In day-to-day operations, the space/ground link will most commonly be used for a few different purposes:
 
-- Executing :doc:`mission applications <what-is-a-mission-application>` on-demand. For instance, triggering a mission application which orients an imaging device to the requested coordinates and takes a picture.
+- Executing :doc:`mission applications <app-docs/index>` on-demand. For instance, triggering a mission application which orients an imaging device to the requested coordinates and takes a picture.
 - Automatically sending and receiving health and status information (health and status beacon).
 - Querying the :doc:`telemetry database <services/telemetry-db>` for specific hardware status information.
 - Downloading payload data files through the :doc:`file transfer service <services/file>`.
 
 These are just examples of nominal communication.
-The core function of the communication service is providing a UDP passthrough, so a mission operator or flight software developer can really use it in any way they see fit.
+The core function of the communication service is providing a packet passthrough, so a mission operator or flight software developer can really use it in any way they see fit.
 
 Error Recovery
 ^^^^^^^^^^^^^^

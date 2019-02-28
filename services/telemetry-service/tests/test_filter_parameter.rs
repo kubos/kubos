@@ -14,11 +14,9 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate serde_json;
-
+use serde_json::json;
 mod utils;
-use utils::*;
+use crate::utils::*;
 
 static SQL: &'static str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');
@@ -28,17 +26,16 @@ insert into telemetry values(1001, 'eps', 'voltage', '3.4');
 
 #[test]
 fn test() {
-    let (handle, sender) = setup(Some(SQL));
-    let res = do_query("{telemetry(parameter: \"voltage\"){parameter,value}}");
+    let (handle, sender) = setup(None, None, None, Some(SQL));
+    let res = do_query(None, "{telemetry(parameter: \"voltage\"){parameter,value}}");
     teardown(handle, sender);
     assert_eq!(
         res,
         json!({
-            "errs": "",
-            "msg": {
+            "data": {
                 "telemetry": [
-                    {"parameter":"voltage","value":"3.3"},
-                    {"parameter":"voltage","value":"3.4"}
+                    {"parameter":"voltage","value":"3.4"},
+                    {"parameter":"voltage","value":"3.3"}
                 ]
             }
         })

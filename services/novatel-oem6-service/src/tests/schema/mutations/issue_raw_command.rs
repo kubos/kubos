@@ -15,6 +15,7 @@
 //
 
 use super::*;
+use serde_json::json;
 
 #[test]
 fn issue_raw_command_good() {
@@ -25,7 +26,7 @@ fn issue_raw_command_good() {
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            issueRawCommand(command: "01020304FA"){
+            issueRawCommand(command: \"01020304FA\"){
                 errors,
                 success
             }
@@ -38,7 +39,7 @@ fn issue_raw_command_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -48,7 +49,7 @@ fn issue_raw_command_bad() {
     let service = service_new!(mock);
 
     let query = r#"mutation {
-            issueRawCommand(command: "01020304FA"){
+            issueRawCommand(command: \"01020304FA\"){
                 errors,
                 success
             }
@@ -61,5 +62,5 @@ fn issue_raw_command_bad() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

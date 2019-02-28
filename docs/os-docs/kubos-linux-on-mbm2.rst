@@ -152,8 +152,11 @@ The relevant files are:
 -  pumpkin-mbm2.dtb - The Device Tree Binary that Linux uses to configure itself
    for the Pumpkin MBM2 board
 -  rootfs.tar - The root file system. Contains BusyBox and other libraries
--  kubos-linux.img - The complete Kubos Linux SD card image. It has a disk
-   signature of 0x4B4C4E58 ("KLNX").
+-  kubos-linux.tar.gz - A compressed file containing the complete Kubos Linux SD card
+   image, ``kubos-linux.img``. It has a disk signature of 0x4B4C4E58 ("KLNX").
+-  aux-sd.tar.gz - A compressed file containing the auxilliary SD card image which
+   contains the upgrade partition and the ``kpack-base.itb`` file which is used for
+   OS recovery. It has a disk signature of 0x41555820 ("AUX ").
 
 Changing the Output Toolchain Directory (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -165,56 +168,3 @@ If you would like to build your toolchain in somewhere other than the
 If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
 main "buildroot-2017.02.8" directory in a new "output/host" folder.
-
-Create auxilliary SD Card Image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-By default, the build process will create a bootable SD card image. This will be flashed
-onto the eMMC. In order to create a full Kubos Linux setup, you'll want to also create
-an auxiliary image for the microSD card containing the upgrade partition and an additional
-user data partition.
-
-Follow the :ref:`upgrade-creation` instructions in order to create a base Kubos Package file
-(`kpack-base.itb`) to be used for recovery.
-
-Then, from the `kubos-linux-build/tools` folder, run the ``format-aux.sh`` script. 
-This will create a new SD card image, `aux-sd.img`, with two partitions:
-
-- An upgrade partition containing `kpack-base.itb`
-- A user data partition
-
-The image's disk signature will be 0x41555820 ("AUX ").
-
-There are two parameters which may be specified:
-
--  -s : Sets the size of the aux-sd.img file, specified in MB. The default is 3800 (3.8GB)
--  -i : Specifies the name and location of the kpack-\*.itb file to use as kpack-base.itb
-
-For example:
-
-::
-
-    $ ./format-aux.sh -i ../kpack-2017.07.21.itb
-
-
-Reset the Global Links
-~~~~~~~~~~~~~~~~~~~~~~
-
-If you run a full build, the links to all the Kubos SDK modules will be changed to
-point at modules within the buildroot directory. As a result, you will be unable
-to build any future Kubos SDK projects as a non-privileged user.
-
-To fix this, run these commands:
-
-::
-
-    $ cd $HOME/.kubos/kubos/tools
-    $ ./kubos_link.py
-    
-Depending on the state of your Kubos SDK project, you might also need to change the
-module links locally:
-
-::
-
-    $ cd {project folder}
-    $ kubos link -a

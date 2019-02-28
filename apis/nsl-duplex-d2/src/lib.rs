@@ -19,20 +19,12 @@
 
 #![deny(missing_docs)]
 
-extern crate chrono;
-extern crate crc16;
-extern crate radio_api;
-extern crate serial;
-
-#[macro_use]
-extern crate nom;
-
 mod duplex_d2;
 mod messages;
 mod serial_comm;
 
-pub use duplex_d2::DuplexD2;
-pub use messages::File;
-pub use messages::GeoRecord;
-pub use messages::StateOfHealth;
-pub use serial_comm::serial_connection;
+pub use crate::duplex_d2::DuplexD2;
+pub use crate::messages::File;
+pub use crate::messages::GeoRecord;
+pub use crate::messages::StateOfHealth;
+pub use crate::serial_comm::serial_connection;

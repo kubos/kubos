@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate serde_json;
-
 mod utils;
-use utils::*;
+
+use crate::utils::*;
+use serde_json::json;
+use tempfile::TempDir;
 
 static SQL: &'static str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');
@@ -29,66 +29,117 @@ insert into telemetry values(1004, 'eps', 'voltage', '3.7');
 insert into telemetry values(1005, 'eps', 'voltage', '3.8');
 ";
 
-/// These four test cases are all in one test function because
-/// rust runs tests functions concurrently and this was the fastest
-/// way around that.
 #[test]
-fn tests() {
-    let (handle, sender) = setup(Some(SQL));
+fn test_ge() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
 
-    let ge_res = do_query("{telemetry(timestampGe: 1004){value}}");
-    let le_res = do_query("{telemetry(timestampLe: 1002){value}}");
-    let range_res = do_query("{telemetry(timestampGe: 1001, timestampLe:1003){value}}");
-    let single_res = do_query("{telemetry(timestampGe: 1003, timestampLe:1003){value}}");
+    let db = db_path.to_str().unwrap();
+    let port = 8112;
+    let udp = 8122;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+
+    let ge_res = do_query(Some(port), "{telemetry(timestampGe: 1004){value}}");
 
     teardown(handle, sender);
 
     assert_eq!(
         ge_res,
         json!({
-            "errs": "",
-            "msg": {
+            "data": {
                 "telemetry": [
-                    {"value":"3.7"},
-                    {"value":"3.8"}
+                    {"value":"3.8"},
+                    {"value":"3.7"}
                 ]
             }
         })
     );
+}
+
+#[test]
+fn test_le() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8113;
+    let udp = 8123;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+
+    let le_res = do_query(Some(port), "{telemetry(timestampLe: 1002){value}}");
+
+    teardown(handle, sender);
 
     assert_eq!(
         le_res,
         json!({
-            "errs": "",
-            "msg": {
+            "data": {
                 "telemetry": [
-                    {"value":"3.3"},
+                    {"value":"3.5"},
                     {"value":"3.4"},
-                    {"value":"3.5"}
+                    {"value":"3.3"}
                 ]
             }
         })
     );
+}
+
+#[test]
+fn test_range() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8114;
+    let udp = 8124;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+
+    let range_res = do_query(
+        Some(port),
+        "{telemetry(timestampGe: 1001, timestampLe:1003){value}}",
+    );
+
+    teardown(handle, sender);
 
     assert_eq!(
         range_res,
         json!({
-            "errs": "",
-            "msg": {
+            "data": {
                 "telemetry": [
-                    {"value":"3.4"},
+                    {"value":"3.6"},
                     {"value":"3.5"},
-                    {"value":"3.6"}
+                    {"value":"3.4"}
                 ]
             }
         })
     );
+}
+
+#[test]
+fn test_single() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8115;
+    let udp = 8125;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+
+    let single_res = do_query(
+        Some(port),
+        "{telemetry(timestampGe: 1003, timestampLe:1003){value}}",
+    );
+
+    teardown(handle, sender);
 
     assert_eq!(
         single_res,
         json!({
-            "errs": "",
-            "msg": {
+            "data": {
                 "telemetry": [
                     {"value":"3.6"},
                 ]

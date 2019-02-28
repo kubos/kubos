@@ -17,10 +17,10 @@
  * Unit tests for the generic ADCS API functions
  */
 
-#include <isis-imtq-api/imtq.h>
+#include <imtq.h>
 #include <cmocka.h>
 
-static KI2CNum bus = K_I2C1;
+static char * bus = "/dev/i2c-1";
 static uint16_t addr = 0x40;
 static int timeout = 60;
 

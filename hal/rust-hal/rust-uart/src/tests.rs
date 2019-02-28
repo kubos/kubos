@@ -15,7 +15,7 @@
 //
 
 use super::*;
-use mock::*;
+use crate::mock::*;
 use std::time::Duration;
 
 #[test]

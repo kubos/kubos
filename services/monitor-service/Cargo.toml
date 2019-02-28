@@ -1,0 +1,19 @@
+[package]
+name = "monitor-service"
+version = "0.1.0"
+authors = ["Marshall Culpepper <marshall@kubos.com>"]
+edition = "2018"
+
+[dependencies]
+failure = "0.1.2"
+juniper = "0.11"
+kubos-service = { path = "../kubos-service" }
+log = "^0.4.0"
+regex = "1"
+syslog = "4.0"
+
+[dev-dependencies]
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0.10"
+lazy_static = "1.1.0"

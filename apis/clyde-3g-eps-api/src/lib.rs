@@ -19,23 +19,15 @@
 
 //! Low level interface for interacting with a ClydeSpace 3G EPS
 
-#[macro_use]
-extern crate bitflags;
-extern crate eps_api;
-#[macro_use]
-extern crate failure;
-extern crate nom;
-extern crate rust_i2c;
-
 mod commands;
 mod eps;
 mod telemetry;
 
-pub use commands::board_status::{BoardStatus, StatusCode};
-pub use commands::checksum::Checksum;
-pub use commands::last_error::{ErrorCode, LastError};
-pub use commands::version::{Version, VersionInfo};
-pub use eps::{Clyde3gEps, Eps};
-pub use telemetry::daughterboard as DaughterboardTelemetry;
-pub use telemetry::motherboard as MotherboardTelemetry;
-pub use telemetry::reset as ResetTelemetry;
+pub use crate::commands::board_status::{BoardStatus, StatusCode};
+pub use crate::commands::checksum::Checksum;
+pub use crate::commands::last_error::{ErrorCode, LastError};
+pub use crate::commands::version::{Version, VersionInfo};
+pub use crate::eps::Eps;
+pub use crate::telemetry::daughterboard as DaughterboardTelemetry;
+pub use crate::telemetry::motherboard as MotherboardTelemetry;
+pub use crate::telemetry::reset as ResetTelemetry;

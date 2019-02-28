@@ -1,6 +1,138 @@
 Kubos Changelog
 ===============
 
+v1.13.0 - Feb 15 2019
+---------------------
+
+- `Updated all Kubos services to use HTTP as their GraphQL front-end instead of UDP, allowing them to expose GraphiQL endpoints <https://docs.kubos.com/latest/tutorials/app-register.html#graphiql>`__
+- Removed all yotta usage. `C-based projects are now compiled using CMake <https://docs.kubos.com/latest/sdk-docs/sdk-c.html>`__
+- Pinning Rust version at v1.32.0 to prevent accidental version discrepancies
+
+v1.12.0 - Feb 1 2019
+--------------------
+
+- Updated all Python code to be compatible with Python3.5
+- `Updated the Python App API doc to be more verbose <https://docs.kubos.com/1.11.0/app-docs/python-app-api.html>`__
+- `Updated the C HAL to directly use Linux conventions <https://docs.kubos.com/1.11.0/apis/kubos-hal/i2c-hal/c-i2c/c-i2c.html>`__
+- Removed CSP from the code base
+- Removed remaining usage of yotta configuration constants
+
+v1.11.0 - Jan 18 2019
+---------------------
+
+- `Added communications service framework overview doc <https://docs.kubos.com/latest/services/comms-framework.html>`__
+- `Added example communications service <https://github.com/kubos/kubos/tree/master/examples/serial-comms-service>`__
+- `Added communications service tutorial <https://docs.kubos.com/latest/tutorials/comms-service.html>`__
+- Updated all Rust modules to use Rust 2018
+
+Community Contributions:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- `Added communications service framework <https://docs.kubos.com/latest/services/comms-framework.html>`__
+
+v1.10.0 - Dec 20th 2018
+-----------------------
+
+- `Added process monitoring to most Kubos services <https://docs.kubos.com/latest/os-docs/monitoring.html>`__
+- `Updated the default logging template to include message severity <https://github.com/kubos/kubos-linux-build/blob/master/common/overlay/etc/rsyslog.conf#L31>`__
+- `Updated the logging tutorial and examples to use the app API's logging initialization <https://docs.kubos.com/master/1.9.1+3/tutorials/first-mission-app.html#adding-logging>`__
+- `Updated the BBB and MBM2 installation instructions to use the new eMMC install script <https://docs.kubos.com/master/1.9.1+3/installation-docs/installing-linux-bbb.html#flash-the-emmc>`__
+
+v1.9.0 - Dec 6th 2018
+---------------------
+
+- `Added support for logging using rsyslog <https://docs.kubos.com/latest/tutorials/first-mission-app.html#adding-logging>`__
+- Updated all Kubos services to use new logging
+- `Updated file transfer service to clean up temporary storage directories after successful transfer and on-request <https://docs.kubos.com/latest/apis/kubos-libs/file-protocol.html#cleanup-request>`__
+- `Added SLIP support to all boards <https://docs.kubos.com/latest/os-docs/using-kubos-linux.html#slip>`__
+- Updated the applications service to allow more than two files to be present in the directory used
+  to register an application
+
+Bug Fixes:
+~~~~~~~~~~
+
+- File transfer client now returns error when it fails to communicate with the file service
+- Updated all Kubos services' GraphQL responses to follow the official response spec
+
+v1.8.0 - Nov 9th 2018
+---------------------
+
+- `The shell service and client have both been rewritten into Rust <https://github.com/kubos/kubos/tree/master/services/shell-service>`__
+- `Updated the applications service's schema to match the styling of the other services <https://docs.kubos.com/latest/app-docs/app-service.html>`__
+- Added cleanup logic when the app service encounters a corrupted app entry
+- `Added the ability to upgrade an application with the applications service <https://docs.kubos.com/latest/app-docs/app-service.html#upgrading>`__
+- `Updated the Rust app API to utilize exit codes <https://docs.kubos.com/latest/rust-docs/kubos_app/index.html>`__
+- `Added Pumpkin MBM2 RTC support <https://docs.kubos.com/master/1.7.1+14/os-docs/working-with-the-mbm2.html#rtc>`__
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Updating telemetry database API to use a double to store the timestamp, rather than a 32-bit integer
+
+Community Contributions:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Updated link descriptions for Kubos Linux release files
+
+v1.7.0 - Oct 12th 2018
+----------------------
+
+- `Added overview documentation for the monitor service <https://docs.kubos.com/latest/services/monitor-service.html>`__
+- `Added tutorials to help new users write their first mission application <https://docs.kubos.com/latest/tutorials/index.html#mission-development-tutorials>`__
+- `Added tutorials to help new users interact with the telemetry database and file transfer services <https://docs.kubos.com/latest/tutorials/index.html#system-interaction-tutorials>`__
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Updated the Python app API to accept an empty string in the 'errors' field of GraphQL responses
+- Updated the file transfer service to not exit if an invalid data packet is received
+- Updated the file transfer service's log location
+
+v1.6.0 - Sept 28th 2018
+-----------------------
+
+- Added corrupted chunk and file hash mismatch error handling to the file transfer service
+- Improved file transfer service multi-client handling
+- `Added timeout and chunk-size configuration options to the file transfer service <https://docs.kubos.com/latest/services/file.html#configuration>`__
+- `Updated the telemetry database service to allow query results to be written to an output file <https://docs.kubos.com/latest/services/telemetry-db.html#saving-results-for-later-processing>`__
+- `Added insert and delete capabilities to the telemetry database service <https://docs.kubos.com/latest/services/telemetry-db.html#adding-entries-to-the-database>`__
+- Increased telemetry database timestamp key resolution from seconds to milliseconds
+- `Updated applications service to add ability to passthrough arguments to the application being called <https://docs.kubos.com/latest/app-docs/app-guide.html#additional-arguments>`__
+- `Added a basic system-resource monitoring service <https://github.com/kubos/kubos/tree/master/services/monitor-service>`__
+
+Bug Fixes:
+~~~~~~~~~~
+
+- `Updated Rust cross-compiling instructions to handle new CC arg requirement <https://docs.kubos.com/latest/sdk-docs/sdk-rust.html#cross-compilation>`__
+- `Added doc links to the pre-built hardware services' documentation <https://docs.kubos.com/latest/services/hardware-services.html#pre-built-services>`__
+
+v1.5.0 - Sep 7th 2018
+---------------------
+
+- `Added a community Trello board for contributors and KubOS team members <https://trello.com/b/pIWxmFua/kubos-community>`__
+- `The file transfer service and client have both been rewritten into Rust <https://github.com/kubos/kubos/tree/master/services/file-service>`__
+- `Added documentation for how to handle the deployment hold time countdown <https://docs.kubos.com/latest/app-docs/deployment.html>`__
+- Updated the app APIs to commonize behaviour between the `Python <https://github.com/kubos/kubos/tree/master/apis/app-api/python>`__ and `Rust <https://github.com/kubos/kubos/tree/master/apis/app-api/rust>`__ versions
+- Added example mission applications for both `Rust <https://github.com/kubos/kubos/tree/master/examples/rust-mission-app>`__ and `Python <https://github.com/kubos/kubos/tree/master/examples/python-mission-app>`__
+- `Added a verbose example mission application in Python for mission design <https://github.com/kubos/kubos/tree/master/examples/python-mission-application>`__
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Standardized usage of the Rust failure crate for version 0.1.2
+
+v1.4.0 - July 23 2018
+---------------------
+
+- `Added UDP/GraphQL service for ISIS Antenna Systems <https://github.com/kubos/kubos/tree/master/services/isis-ants-service>`__
+- `Updated Pumpkin MCU service to be compliant with the latest ICD <https://github.com/kubos/kubos/tree/master/services/pumpkin-mcu-service>`__
+- `Added initial version of the mission applications service <https://github.com/kubos/kubos/tree/master/services/app-service>`__
+- `Added initial mission applications Rust API <https://github.com/kubos/kubos/tree/master/apis/app-api>`__
+- `Added initial mission applications Python API <https://github.com/kubos/kubos/tree/master/apis/python-app-api>`__
+- `Added system Rust API for system-wide common functionality <https://github.com/kubos/kubos/tree/master/apis/system-api>`__
+- `Upgraded CircleCI automation config to use the 2.0 configuration format <https://github.com/kubos/kubos/blob/master/.circleci/config.yml>`__
+- Updated docs to reflect changes in how auxiliary SD images are generated
+
 v1.3.0 - Jun 21 2018
 --------------------
 

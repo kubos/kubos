@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "isis-iobc-supervisor/checksum.h"
+#include <checksum.h>
 
 #define CRC8_POLYNOMIAL 0x07
 

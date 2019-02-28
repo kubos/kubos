@@ -15,6 +15,7 @@
 //
 
 use super::*;
+use serde_json::json;
 
 #[test]
 fn noop_good() {
@@ -42,7 +43,7 @@ fn noop_good() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -67,7 +68,7 @@ fn noop_no_response() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }
 
 #[test]
@@ -94,5 +95,5 @@ fn noop_no_log() {
             }
     });
 
-    assert_eq!(service.process(query.to_owned()), wrap!(expected));
+    test!(service, query, expected);
 }

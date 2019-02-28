@@ -14,9 +14,10 @@
 // limitations under the License.
 //
 
+use crate::model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
 use juniper::FieldResult;
 use kubos_service;
-use model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
+use log::info;
 
 type Context = kubos_service::Context<Subsystem>;
 
@@ -72,7 +73,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         as "Subsystem query"
     {
         let num_queries = executor.context().get("num_queries");
-        println!("Num queries {}", num_queries);
+        info!("Num queries {}", num_queries);
         let num = num_queries.parse::<i32>().unwrap_or(0) + 1;
         executor.context().set("num_queries", &format!("{}", num));
         Ok(executor.context().subsystem())

@@ -21,23 +21,21 @@
 //! This crate contains high level types and functions for use
 //! by other crates implementing EPS APIs.
 
-#[macro_use]
-extern crate failure;
-
+use failure::Fail;
 use std::error::Error;
 use std::io;
 
 /// EpsError
 ///
 /// Describes various errors which may result from using EPS APIs
-#[derive(Clone, Debug, Display, Eq, Fail, PartialEq)]
-#[display(fmt = "Eps Error")]
+#[derive(Debug, Eq, Fail, PartialEq)]
+#[fail(display = "Eps Error")]
 pub enum EpsError {
     /// Generic error condition
-    #[display(fmt = "Generic Error")]
+    #[fail(display = "Generic Error")]
     GenericError,
     /// Error resulting from underlying Io functions
-    #[display(fmt = "IO Error: {}", description)]
+    #[fail(display = "IO Error: {}", description)]
     IoError {
         /// Underlying cause captured from io function
         cause: std::io::ErrorKind,
@@ -45,13 +43,13 @@ pub enum EpsError {
         description: String,
     },
     /// Error resulting from receiving invalid data from EPS
-    #[display(fmt = "Parsing failed: {}", source)]
+    #[fail(display = "Parsing failed: {}", source)]
     ParsingFailure {
         /// Source where invalid data was received
         source: String,
     },
     /// Error resulting from a failure with an EPS command
-    #[display(fmt = "Failure in Eps command: {}", command)]
+    #[fail(display = "Failure in Eps command: {}", command)]
     CommandFailure {
         /// EPS command which failed
         command: String,

@@ -19,12 +19,14 @@
 
 #include <errno.h>
 #include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <stdint.h>
 
-#include "isis-trxvu-api/trxvu.h"
+#include "trxvu.h"
 
 #define check_status()           \
     ({                           \
@@ -34,6 +36,9 @@
             exit(-1);            \
         }                        \
     })
+
+#define RX_SIZE 200
+#define TX_SIZE 235
 
 KRadioStatus get_tx_telem()
 {
@@ -242,10 +247,12 @@ KRadioStatus send_override()
 KRadioStatus read_message()
 {
     KRadioStatus status;
-    radio_rx_message buffer;
+    radio_rx_header header;
+    uint8_t message[RX_SIZE];
+
     uint8_t len;
 
-    status = k_radio_recv(&buffer, &len);
+    status = k_radio_recv(&header, message, &len);
     if (status == RADIO_RX_EMPTY)
     {
         printf("No messages to receive\n");
@@ -253,8 +260,8 @@ KRadioStatus read_message()
     else if (status == RADIO_OK)
     {
         printf("Received message(%d %fHz %fdBm): %s\n",
-                len, get_doppler_offset(buffer.doppler_offset), get_signal_strength(buffer.signal_strength),
-                buffer.message);
+                len, get_doppler_offset(header.doppler_offset), get_signal_strength(header.signal_strength),
+                message);
     }
     else
     {
@@ -269,21 +276,22 @@ KRadioStatus set_options()
     radio_config config = {0};
     char beacon_msg[] = "Radio Beacon Message";
     char option[1] = {0};
+    int rc;
 
     printf("Set new 'to' callsign? (y/n)\n");
-    scanf("%s", option);
+    rc = scanf("%s", option);
 
     if (option[0] == 'y' || option[0] == 'Y')
     {
-        strcpy(config.to.ascii,"MJRTOM");
+        strncpy(config.to.ascii,"MJRTOM", 6);
     }
 
     printf("Set new 'from' callsign? (y/n)\n");
-    scanf("%s", option);
+    rc = scanf("%s", option);
 
     if (option[0] == 'y' || option[0] == 'Y')
     {
-        strcpy(config.from.ascii,"HMLTN1");
+        strncpy(config.from.ascii,"HMLTN1", 6);
     }
 
     printf("Enter a data rate: \n\t"
@@ -292,7 +300,7 @@ KRadioStatus set_options()
             "3 - 4800\n\t"
             "4 - 9600\n\t"
             "5 - Don't change data rate\n\t");
-    scanf("%s", option);
+    rc = scanf("%s", option);
 
     switch (option[0])
     {
@@ -313,7 +321,7 @@ KRadioStatus set_options()
     }
 
     printf("Turn on beacon? (y/n)\n");
-    scanf("%s", option);
+    rc = scanf("%s", option);
 
     if (option[0] == 'y' || option[0] == 'Y')
     {
@@ -323,7 +331,7 @@ KRadioStatus set_options()
     }
 
     printf("Idle On? (y/n/*)\n");
-    scanf("%s", option);
+    rc = scanf("%s", option);
 
     if (option[0] == 'y' || option[0] == 'Y')
     {
@@ -364,8 +372,20 @@ int main(int argc, char * argv[])
     action.sa_handler = sigint_handler;
     sigaction(SIGINT, &action, NULL);
 
+
+    trx_prop tx = {
+            .addr = 0x60,
+            .max_size = TX_SIZE,
+            .max_frames = 40,
+    };
+    trx_prop rx = {
+                .addr = 0x61,
+                .max_size = RX_SIZE,
+                .max_frames = 40,
+    };
+
     KRadioStatus status;
-    status = k_radio_init();
+    status = k_radio_init("/dev/i2c-0", tx, rx, 10);
     check_status();
 
     status = k_radio_watchdog_start();
@@ -375,7 +395,7 @@ int main(int argc, char * argv[])
     while (running)
     {
         printf("Enter a command option (enter 'h' to see list of commands): \n");
-        scanf("%s", option);
+        int rc = scanf("%s", option);
 
         switch (option[0])
         {

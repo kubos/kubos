@@ -27,7 +27,7 @@
 //!
 //! # fn func() -> AntSResult<()> {
 //! // Create a new AntS connection
-//! let ants = AntS::new(KI2CNum::KI2C1, 0x31, 0x32, 4, 10).unwrap();
+//! let ants = AntS::new("/dev/i2c-0", 0x31, 0x32, 4, 10).unwrap();
 //!
 //! // Configure it to run commands against the secondary controller
 //! ants.configure(KANTSController::Secondary)?;
@@ -51,15 +51,10 @@
 //!
 //! [`AntS`]: struct.AntS.html
 
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 
-#[macro_use]
-extern crate failure;
-#[macro_use]
-extern crate nom;
-
-pub use ants::*;
-pub use parse::{AntsTelemetry, DeployStatus, KANTSAnt, KANTSController, KI2CNum};
+pub use crate::ants::*;
+pub use crate::parse::{AntsTelemetry, DeployStatus, KANTSAnt, KANTSController};
 
 mod ants;
 mod ffi;

@@ -23,83 +23,6 @@
 
 #include <math.h>
 
-/**
- *  @name Radio config.json configuration options and default values
- */
-/**@{*/
-/**
- * I2C bus the TRXVU radio is connected to
- */
-#ifdef YOTTA_CFG_RADIO_TRXVU_I2C_BUS
-#define TRXVU_I2C_BUS YOTTA_CFG_RADIO_TRXVU_I2C_BUS
-#else
-#define TRXVU_I2C_BUS K_I2C1
-#endif
-
-/**
- * Transmitter I2C address
- */
-#ifdef YOTTA_CFG_RADIO_TRXVU_TX_ADDR
-#define RADIO_TX_ADDR YOTTA_CFG_RADIO_TRXVU_TX_ADDR
-#else
-#define RADIO_TX_ADDR 0x61
-#endif
-
-/**
- * Receiver I2C address
- */
-#ifdef YOTTA_CFG_RADIO_TRXVU_RX_ADDR
-#define RADIO_RX_ADDR YOTTA_CFG_RADIO_TRXVU_RX_ADDR
-#else
-#define RADIO_RX_ADDR 0x60
-#endif
-
-/**
- * Transmitter maximum message size
- */
-#ifdef YOTTA_CFG_RADIO_TRXVU_TX_MAX_PAYLOAD
-#define TX_MAX_SIZE YOTTA_CFG_RADIO_TRXVU_TX_MAX_PAYLOAD
-#else
-#define TX_MAX_SIZE 235
-#endif
-
-/**
- * Receiver maximum message size
- */
-#ifdef YOTTA_CFG_RADIO_TRXVU_RX_MAX_PAYLOAD
-#define RX_MAX_SIZE YOTTA_CFG_RADIO_TRXVU_RX_MAX_PAYLOAD
-#else
-#define RX_MAX_SIZE 200
-#endif
-
-/**
- * Transmitter buffer slots
- */
-#ifdef YOTTA_CFG_RADIO_TRXVU_TX_MAX_FRAMES
-#define TX_MAX_FRAMES YOTTA_CFG_RADIO_TRXVU_TX_MAX_FRAMES
-#else
-#define TX_MAX_FRAMES 40
-#endif
-
-/**
- * Receive buffer slots
- */
-#ifdef YOTTA_CFG_RADIO_TRXVU_RX_MAX_FRAMES
-#define RX_MAX_FRAMES YOTTA_CFG_RADIO_TRXVU_RX_MAX_FRAMES
-#else
-#define RX_MAX_FRAMES 40
-#endif
-
-/**
- * Watchdog timeout (in seconds)
- */
-#ifdef YOTTA_CFG_RADIO_TRXVU_WATCHDOG_TIMEOUT
-#define TRXVU_WD_TIMEOUT YOTTA_CFG_RADIO_TRXVU_WATCHDOG_TIMEOUT
-#else
-#define TRXVU_WD_TIMEOUT 60
-#endif
-/**@}*/
-
 /** \cond WE DO NOT WANT TO HAVE THESE IN OUR GENERATED DOCS */
 /* Radio command values */
 /* Note: There are some duplicate command values between the TX and RX MCUs */
@@ -194,6 +117,16 @@ typedef enum {
 } RadioTXState;
 
 /**
+ * TX/RX properties
+ */
+typedef struct
+{
+    uint8_t addr;       /**< I2C address of component */
+    uint16_t max_size;  /**< Maximum frame message size */
+    uint16_t max_frames; /**< Maximum number of frames that can be in the buffer */
+} trx_prop;
+
+/**
  * Transmitter raw telemetry fields returned from ::RADIO_TX_TELEM_ALL and ::RADIO_TX_TELEM_LAST requests
  */
 typedef struct
@@ -280,8 +213,7 @@ typedef struct
     uint16_t msg_size;              /**< Size of the frame payload */
     uint16_t doppler_offset;        /**< ADC value of doppler shift at receive time (convert with ::get_doppler_offset)*/
     uint16_t signal_strength;       /**< ADC value of signal strength at receive time (convert with ::get_signal_strength)*/
-    uint8_t message[RX_MAX_SIZE];   /**< Frame payload */
-} radio_rx_message;
+} radio_rx_header;
 
 /*
  * Public Functions
@@ -293,7 +225,7 @@ typedef struct
 KRadioStatus k_radio_watchdog_kick(void);
 
 /**
- * Start a thread to kick the radio's watchdogs at an interval of (::TRXVU_WD_TIMEOUT/3) seconds
+ * Start a thread to kick the radio's watchdogs at an interval of (timeout/3) seconds
  * @return KRadioStatus `RADIO_OK` if OK, error otherwise
  */
 KRadioStatus k_radio_watchdog_start(void);
@@ -338,37 +270,37 @@ KRadioStatus k_radio_clear_beacon(void);
  * @param [in] raw Raw ADC value
  * @return Voltage in volts
  */
-inline float get_voltage(uint16_t raw) {return raw * 0.00488;}
+float get_voltage(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Current in milliamps
  */
-inline float get_current(uint16_t raw) {return raw * 0.16643964;}
+float get_current(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Temperature in degrees Celsius
  */
-inline float get_temperature(uint16_t raw) {return raw * -0.07669 + 195.6037;}
+float get_temperature(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Doppler shift in hertz
  */
-inline float get_doppler_offset(uint16_t raw) {return raw * 13.352 - 22300;}
+float get_doppler_offset(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return Received signal strength power in decibel-milliwatts
  */
-inline float get_signal_strength(uint16_t raw) {return raw * 0.03 - 152;}
+float get_signal_strength(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return RF reflected power in decibel-milliwatts
  */
-inline float get_rf_power_dbm(uint16_t raw) {return 20 * log10(raw * 0.00767);}
+float get_rf_power_dbm(uint16_t raw);
 /**
  * @param [in] raw Raw ADC value
  * @return RF reflected power in milliwatts
  */
-inline float get_rf_power_mw(uint16_t raw) {return raw * raw * powf(10, -2) * 0.00005887;}
+float get_rf_power_mw(uint16_t raw);
 /**@}*/
 
 /*
@@ -377,9 +309,13 @@ inline float get_rf_power_mw(uint16_t raw) {return raw * raw * powf(10, -2) * 0.
 
 /**
  * Initialize the radio interface
+ * @param [in] bus The I2C bus device the radio is connected to
+ * @param [in] tx The transmitter's properties
+ * @param [in] rx The receiver's properties
+ * @param [in] timeout The radio's watchdog timeout (in seconds)
  * @return KRadioStatus RADIO_OK if OK, error otherwise
  */
-KRadioStatus k_radio_init(void);
+KRadioStatus k_radio_init(char * bus, trx_prop tx, trx_prop rx, uint16_t timeout);
 /**
  * Terminate the radio interface
  */
@@ -408,11 +344,12 @@ KRadioStatus k_radio_reset(KRadioReset type);
 KRadioStatus k_radio_send(char * buffer, int len, uint8_t * response);
 /**
  * Receive a message from the radio's receive buffer
- * @param [in] buffer Pointer where the message should be copied to
+ * @param [out] frame Pointer where the header properties should be stored
+ * @param [out] message Pointer to where the message payload should be stored
  * @param [out] len Length of the received message
  * @return KRadioStatus RADIO_OK if a message was received successfully, RADIO_RX_EMPTY if there are no messages to receive, error otherwise
  */
-KRadioStatus k_radio_recv(radio_rx_message * buffer, uint8_t * len);
+KRadioStatus k_radio_recv(radio_rx_header * frame, uint8_t * message, uint8_t * len);
 /**
  * Read radio telemetry values
  * @note See specific radio API documentation for available telemetry types
@@ -427,7 +364,7 @@ KRadioStatus k_radio_get_telemetry(radio_telem * buffer, RadioTelemType type);
  */
 
 /**
- * Thread which kicks the radio's watchdogs every (::TRXVU_WD_TIMEOUT/3) seconds
+ * Thread which kicks the radio's watchdogs every (timeout/3) seconds
  */
 void * kprv_radio_watchdog_thread(void * args);
 
@@ -500,11 +437,12 @@ KRadioStatus kprv_radio_rx_get_count(uint8_t * count);
 KRadioStatus kprv_radio_rx_remove_frame(void);
 /**
  * Retrieve oldest frame from receive buffer
- * @param[out] buffer Pointer to storage area for frame
- * @param[out] len Pointer to storage are for length of frame payload
+ * @param [out] frame Pointer where the header properties should be stored
+ * @param [out] message Pointer to where the message payload should be stored
+ * @param [out] len Pointer to storage are for length of frame payload
  * @return KRadioStatus `RADIO_OK` if OK, error otherwise
  */
-KRadioStatus kprv_radio_rx_get_frame(radio_rx_message * buffer, uint8_t * len);
+KRadioStatus kprv_radio_rx_get_frame(radio_rx_header * frame, uint8_t * message, uint8_t * len);
 /**
  * Get telemetry from receiver
  *
@@ -524,5 +462,18 @@ KRadioStatus kprv_radio_rx_watchdog_kick(void);
  * @return KRadioStatus `RADIO_OK` if OK, error otherwise
  */
 KRadioStatus kprv_radio_rx_reset(KRadioReset type);
+
+/**
+ * File descriptor for the radio's I2C bus
+ */
+int radio_bus;
+/**
+ * Radio transmitter properties
+ */
+trx_prop radio_tx;
+/**
+ * Radio receiver properties
+ */
+trx_prop radio_rx;
 
 /* @} */

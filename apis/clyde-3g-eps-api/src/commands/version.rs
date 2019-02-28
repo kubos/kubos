@@ -71,7 +71,7 @@ pub fn parse(data: &[u8]) -> EpsResult<VersionInfo> {
             }),
         })
     } else {
-        throw!(EpsError::parsing_failure("Version Info"))
+        Err(EpsError::parsing_failure("Version Info"))
     }
 }
 
@@ -92,7 +92,7 @@ mod tests {
             VersionInfo {
                 motherboard: Version {
                     revision: 0xD,
-                    firmware_number: 0xCBA
+                    firmware_number: 0xCBA,
                 },
                 daughterboard: None,
             },

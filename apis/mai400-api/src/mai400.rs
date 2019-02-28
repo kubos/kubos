@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+use crate::messages::*;
 use byteorder::{LittleEndian, WriteBytesExt};
-use messages::*;
+use failure::Fail;
 use rust_uart::UartError;
 use rust_uart::*;
 use serial;
@@ -86,10 +87,10 @@ impl MAI400 {
     // Resetting requires a pair of commands: request, then confirm
     pub fn reset(&self) -> MAIResult<()> {
         let request = RequestReset::default();
-        self.send_message(request)?;
+        self.send_message(&request)?;
 
         let request = ConfirmReset::default();
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Set the ACS mode
@@ -125,7 +126,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Set the ACS mode (Normal-Sun or Lat/Long-Sun)
@@ -168,7 +169,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Set the ADACS clock with the desired GPS time
@@ -200,7 +201,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Set orbital position and velocity at epoch for RK4 integration method of orbit propagation
@@ -235,7 +236,7 @@ impl MAI400 {
             ..Default::default()
         };
 
-        self.send_message(request)
+        self.send_message(&request)
     }
 
     /// Directly send a message without formatting or checksum calculation
@@ -277,20 +278,21 @@ impl MAI400 {
         // preserve functionality, but inform the caller afterwards
         match self.conn.lock() {
             Ok(conn) => conn.write(msg).map_err(|err| err.into()),
-            Err(conn) => conn.into_inner()
+            Err(conn) => conn
+                .into_inner()
                 .write(msg)
                 .map_err(|err| err.into())
                 .and(Err(MAIError::ThreadCommError)),
         }
     }
 
-    fn send_message<T: Message>(&self, msg: T) -> MAIResult<()> {
+    fn send_message<T: Message>(&self, msg: &T) -> MAIResult<()> {
         let mut raw = msg.serialize();
 
         // Get the calculated CRC
         let mut crc: u16 = 0;
         for byte in raw.iter() {
-            crc += *byte as u16;
+            crc += u16::from(*byte);
         }
         raw.write_u16::<LittleEndian>(crc).unwrap();
 
@@ -299,7 +301,8 @@ impl MAI400 {
         // preserve functionality, but inform the caller afterwards
         match self.conn.lock() {
             Ok(conn) => conn.write(raw.as_slice()).map_err(|err| err.into()),
-            Err(conn) => conn.into_inner()
+            Err(conn) => conn
+                .into_inner()
                 .write(raw.as_slice())
                 .map_err(|err| err.into())
                 .and(Err(MAIError::ThreadCommError)),
@@ -357,10 +360,10 @@ impl MAI400 {
                     Ok(v) => v,
                     Err(err) => match err {
                         #[cfg(test)]
-                        UartError::GenericError => throw!(MAIError::GenericError),
+                        UartError::GenericError => return Err(MAIError::GenericError),
                         UartError::IoError {
                             cause: ::std::io::ErrorKind::TimedOut,
-                            description: _,
+                            ..
                         } => continue,
                         _ => panic!(err),
                     },
@@ -378,7 +381,7 @@ impl MAI400 {
                     Err(err) => match err {
                         UartError::IoError {
                             cause: ::std::io::ErrorKind::TimedOut,
-                            description: _,
+                            ..
                         } => continue,
                         _ => panic!(err),
                     },
@@ -407,22 +410,22 @@ impl MAI400 {
 }
 
 /// Common Error for MAI Actions
-#[derive(Fail, Display, Debug, Clone, PartialEq)]
+#[derive(Fail, Debug, Clone, PartialEq)]
 pub enum MAIError {
     /// Catch-all error
-    #[display(fmt = "Generic Error")]
+    #[fail(display = "Generic Error")]
     GenericError,
     /// The thread reading messages from the device is no longer working
-    #[display(fmt = "Failed to communicate with read thread")]
+    #[fail(display = "Failed to communicate with read thread")]
     ThreadCommError,
     /// Received a valid message, but the message ID doesn't match any known message type
-    #[display(fmt = "Unknown Message Received: {:X}", id)]
+    #[fail(display = "Unknown Message Received: {:X}", id)]
     UnknownMessage {
         /// ID of message received
         id: u16,
     },
     /// An error was thrown by the serial communication driver
-    #[display(fmt = "UART Error")]
+    #[fail(display = "UART Error")]
     UartError {
         /// The underlying error
         #[fail(cause)]

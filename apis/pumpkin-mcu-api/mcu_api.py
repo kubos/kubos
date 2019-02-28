@@ -5,12 +5,12 @@
 # See LICENSE file for details.
 
 """
-API for interacting with all Pumpkin SupMCUs. 
+API for interacting with all Pumpkin SupMCUs.
 
-See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.5
+See Pumpkin SUPERNOVA Firmware Reference Manual Rev 3.28
 """
 
-
+import binascii
 import struct
 import time
 import i2c
@@ -22,19 +22,33 @@ I2C_BUS_NUM = 1
 HEADER_SIZE = 5
 TELEMETRY = {
     "supervisor": {
-        "firmware_version": {"command": "SUP:TEL? 0,data", "length": 48, "parsing": "str"},
-        "commands_parsed":  {"command": "SUP:TEL? 1,data", "length": 8, "parsing": "<Q"},
-        "scpi_errors":      {"command": "SUP:TEL? 2,data", "length": 8, "parsing": "<Q"},
-        "voltstat":         {"command": "SUP:TEL? 3,data", "length": 8, "parsing": "<hhhh",
+        "firmware_version": {"command": "SUP:TEL? 0,data",  "length": 48, "parsing": "str"},
+        "commands_parsed":  {"command": "SUP:TEL? 1,data",  "length": 8, "parsing": "<Q"},
+        "scpi_errors":      {"command": "SUP:TEL? 2,data",  "length": 8, "parsing": "<Q"},
+        "voltstat":         {"command": "SUP:TEL? 3,data",  "length": 8, "parsing": "<hhhh",
                              "names": ["voltstat0", "voltstat1", "voltstat2", "voltstat3"]},
-        "cpu_selftests":    {"command": "SUP:TEL? 4,data", "length": 22, "parsing": "<QQhhh",
+        "cpu_selftests":    {"command": "SUP:TEL? 4,data",  "length": 22, "parsing": "<QQhhh",
                              "names": ["selftest0", "selftest1", "selftest2", "selftest3", "selftest4"]},
-        "time":             {"command": "SUP:TEL? 5,data", "length": 8, "parsing": "<Q"},
-        "context_switches": {"command": "SUP:TEL? 6,data", "length": 8, "parsing": "<Q"},
-        "idling_hooks":     {"command": "SUP:TEL? 7,data", "length": 8, "parsing": "<Q"},
-        "mcu_load":         {"command": "SUP:TEL? 8,data", "length": 8, "parsing": "<Q"}
+        "time":             {"command": "SUP:TEL? 5,data",  "length": 8, "parsing": "<Q"},
+        "context_switches": {"command": "SUP:TEL? 6,data",  "length": 8, "parsing": "<Q"},
+        "idling_hooks":     {"command": "SUP:TEL? 7,data",  "length": 8, "parsing": "<Q"},
+        "mcu_load":         {"command": "SUP:TEL? 8,data",  "length": 4, "parsing": "<L"},
+        "reset_cause":      {"command": "SUP:TEL? 13,data", "length": 2, "parsing": "<H"}
     },
     "sim": {},
+    "bim": {
+        "temperature":         {"command": "BIM:TEL? 0,data", "length": 24, "parsing": "<ffffff",
+                                "names": ["temp0", "temp1", "temp2", "temp3", "temp4", "temp5"]},
+        "uart_status":         {"command": "BIM:TEL? 1,data", "length": 6, "parsing": "<hhh",
+                                "names": ["uart1_status", "uart2_status", "uart3_status"]},
+        "imu":                 {"command": "BIM:TEL? 2,data", "length": 12, "parsing": "<hhhhhh",
+                                "names": ["imu0", "imu1", "imu2", "imu3", "imu4", "imu5"]},
+        "tini_status":         {"command": "BIM:TEL? 3,data", "length": 1, "parsing": "<B"},
+        "temp_scaling_offsets": {"command": "BIM:TEL? 4,data", "length": 24, "parsing": "<ffffff",
+                                 "names": ["temp0_offset", "temp1_offset", "temp2_offset", "temp3_offset", "temp4_offset", "temp5_offset"]},
+        "temp_scaling_factors": {"command": "BIM:TEL? 5,data", "length": 24, "parsing": "<ffffff",
+                                 "names": ["temp0_factor", "temp1_factor", "temp2_factor", "temp3_factor", "temp4_factor", "temp5_factor"]}
+    },
     "gpsrm": {
         "status":           {"command": "GPS:TEL? 0,data", "length": 2,  "parsing": "hex"},
         "nmea_string":      {"command": "GPS:TEL? 1,data", "length": 512, "parsing": "str"},
@@ -58,18 +72,15 @@ TELEMETRY = {
         "adcs_power":       {"command": "AIM:TEL? 9,data", "length": 1,  "parsing": "hex"},
         "wdt_period":       {"command": "AIM:TEL? 10,data", "length": 4,  "parsing": "<I"}
     },
-    "bim": {
-        "temperature":         {"command": "BIM:TEL? 0,data", "length": 24, "parsing": "<ffff",
-                                "names": ["temp0", "temp1", "temp2", "temp3"]},
-        "uart_status":         {"command": "BIM:TEL? 1,data", "length": 6, "parsing": "<hhh",
-                                "names": ["uart1_status", "uart2_status", "uart3_status"]},
-        "imu":                 {"command": "BIM:TEL? 2,data", "length": 12, "parsing": "<hhhhhh",
-                                "names": ["imu0", "imu1", "imu2", "imu3", "imu4", "imu5"]},
-        "tini_status":         {"command": "BIM:TEL? 3,data", "length": 1, "parsing": "<B"},
-        "temp_scaling_offsets": {"command": "BIM:TEL? 4,data", "length": 24, "parsing": "<ffffff",
-                                 "names": ["temp0_offset", "temp1_offset", "temp2_offset", "temp3_offset", "temp4_offset", "temp5_offset"]},
-        "temp_scaling_factors": {"command": "BIM:TEL? 5,data", "length": 24, "parsing": "<ffffff",
-                                 "names": ["temp0_factor", "temp1_factor", "temp2_factor", "temp3_factor", "temp4_factor", "temp5_factor"]}
+    "rhm": {
+        "lithium_power":      {"command": "RHM:TEL? 0,data", "length": 1, "parsing": "hex"},
+        "lithium_uart":       {"command": "RHM:TEL? 1,data", "length": 1, "parsing": "<B"},
+        "lithium_config":     {"command": "RHM:TEL? 2,data", "length": 1, "parsing": "hex"},
+        "globalstar_power":   {"command": "RHM:TEL? 3,data", "length": 1, "parsing": "hex"},
+        "globalstar_uart":    {"command": "RHM:TEL? 4,data", "length": 1, "parsing": "<B"},
+        "globalstar_din_out": {"command": "RHM:TEL? 5,data", "length": 1, "parsing": "hex"},
+        "globalstar_busy":    {"command": "RHM:TEL? 6,data", "length": 1, "parsing": "hex"},
+        "watchdog_period":    {"command": "RHM:TEL? 7,data", "length": 4, "parsing": "<I"}
     },
     "pim": {
         "channel_currents": {"command": "PIM:TEL? 0,data", "length": 8, "parsing": "<HHHH",
@@ -82,21 +93,11 @@ TELEMETRY = {
                              "names": ["channel0_offset", "channel1_offset", "channel2_offset", "channel3_offset"]},
         "channel_factors":  {"command": "PIM:TEL? 4,data", "length": 16, "parsing": "<ffff",
                              "names": ["channel0_factor", "channel1_factor", "channel2_factor", "channel3_factor"]},
-        "status":           {"command": "PIM:TEL? 5,data", "length": 6, "parsing": "hex"},
+        "status":           {"command": "PIM:TEL? 5,data", "length": 1, "parsing": "hex"},
         "overcurrent_log":  {"command": "PIM:TEL? 6,data", "length": 8, "parsing": "<HHHH",
                              "names": ["channel0_overcurrent", "channel1_overcurrent", "channel2_overcurrent", "channel3_overcurrent"]},
         "channel_volts":    {"command": "PIM:TEL? 7,data", "length": 8, "parsing": "<HHHH",
                              "names": ["channel0_voltage", "channel1_voltage", "channel2_voltage", "channel3_voltage"]}
-    },
-    "rhm": {
-        "lithium_power":     {"command": "RHM:TEL? 0,data", "length": 1, "parsing": "str"},
-        "lithium_uart":      {"command": "RHM:TEL? 1,data", "length": 1, "parsing": "<B"},
-        "lithium_config":    {"command": "RHM:TEL? 2,data", "length": 1, "parsing": "hex"},
-        "globalstar_power":  {"command": "RHM:TEL? 3,data", "length": 1, "parsing": "hex"},
-        "globalstar_uart":   {"command": "RHM:TEL? 4,data", "length": 1, "parsing": "<B"},
-        "globalstar_din_out": {"command": "RHM:TEL? 5,data", "length": 1, "parsing": "hex"},
-        "globalstar_busy":   {"command": "RHM:TEL? 6,data", "length": 1, "parsing": "hex"},
-        "watchdog_period":   {"command": "RHM:TEL? 7,data", "length": 4, "parsing": "<I"}
     },
     "bsm": {
         "channel_currents":    {"command": "BSM:TEL? 0,data", "length": 10, "parsing": "<HHHHH",
@@ -197,10 +198,13 @@ class MCU:
         Write command used to append the proper stopbyte to all writes.
         """
         if type(command) is str:
+            command = str.encode(command)
+            
+        if type(command) is bytes:
             return self.i2cfile.write(
-                device=self.address, data=command+'\x0A')
+                device=self.address, data=command+b'\x0A')
         else:
-            raise TypeError('Commands must be strings.')
+            raise TypeError('Commands must be str or bytes.')
 
     def read(self, count):
         return self.i2cfile.read(device=self.address, count=count)
@@ -208,19 +212,19 @@ class MCU:
     def read_telemetry(self, module, fields=["all"]):
         """
         Read and parse specific fields from the MCUs that are contained in the
-        config file. 
+        config file.
 
-        Input: 
-        module = string module name. Must exactly match the module name in the 
+        Input:
+        module = string module name. Must exactly match the module name in the
         config file and the I2C address must be valid and non-zero. If address
         is 0, it assumes the module is not present/not configured.
-        fields = list of strings, strings must exactly match fields in 
+        fields = list of strings, strings must exactly match fields in
         the config file listed in the "telemetry" section under "supervisor" or
         the specific module name. If field is left blank it defaults to ["all"],
-        which pulls all available telemetry for that module. 
+        which pulls all available telemetry for that module.
 
         Output: A dict with keys for all fields requested with "timestamp" and
-        "data" keys for each field. 
+        "data" keys for each field.
         """
         requests = self._build_telemetry_dict(module=module, fields=fields)
         output = self._read_telemetry_items(dict=requests)
@@ -228,7 +232,7 @@ class MCU:
 
     def _build_telemetry_dict(self, module, fields=["all"]):
         """
-        This method builds the dictionary of requested data. 
+        This method builds the dictionary of requested data.
         """
         if module not in TELEMETRY:
             # Check that module is listed in config file
@@ -263,7 +267,7 @@ class MCU:
     def _read_telemetry_items(self, dict):
         """
         Creates the output_dict, reads the data, inputs it into parsing mehods,
-        then inserts and formats it in the output_dict. 
+        then inserts and formats it in the output_dict.
         """
         # Create empty dictionary
         output_dict = {}
@@ -307,22 +311,22 @@ class MCU:
             return {'timestamp': 0, 'data': data[HEADER_SIZE:]}
 
         # Unpack timestamp in seconds.
-        timestamp = struct.unpack('<i', data[1:HEADER_SIZE])[0]/100.0
+        timestamp = struct.unpack('<i', str.encode(data[1:HEADER_SIZE]))[0]/100.0
         # Return the valid packet timestamp and data
         return {'timestamp': timestamp, 'data': data[HEADER_SIZE:]}
 
     def _unpack(self, parsing, data):
         """
         Basically just an abstraction of struct.unpack() to allow for types that
-        are not standard in the method. 
+        are not standard in the method.
 
         Input data read over I2C from a Pumpkin module and parsing string that
         indicates a special parsing method or is a valid format string for the
-        python struct.unpack() method. 
+        python struct.unpack() method.
 
-        Outputs a tuple where each field is an item parsed. 
+        Outputs a tuple where each field is an item parsed.
         """
-        if type(parsing) not in [str, unicode]:
+        if type(parsing) not in [str, bytes]:
             # Check that parsing is a valid type
             raise TypeError(
                 'Parsing field must be a valid struct parsing string. Input: '
@@ -336,7 +340,7 @@ class MCU:
         elif parsing == "hex":
             # Store as a hex string. This is so we can return binary data.
             # Return as a single field in a tuple
-            return (data.encode('hex'),)
+            return (binascii.hexlify(str.encode(data)),)
 
         # All others parse directly with the parsing string.
         return struct.unpack(parsing, data)
@@ -346,7 +350,7 @@ class MCU:
         Takes in the read data, parsed data, and the input dictionary and outputs
         a formatted dictionary in the form of:
         {
-            'fieldname': {'timestamp': int,'data': parsed data}, 
+            'fieldname': {'timestamp': int,'data': parsed data},
             etc...
         }
         """

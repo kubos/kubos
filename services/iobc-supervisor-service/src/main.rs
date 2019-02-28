@@ -14,22 +14,106 @@
 // limitations under the License.
 //
 
+//! Kubos Service for interacting with the ISIS-OBC Supervisor
+//!
+//! # Configuration
+//!
+//! The service must be configured in `/home/system/etc/config.toml` with the following fields:
+//!
+//! - `[iobc-supervisor-service.addr]`
+//!
+//!     - `ip` - Specifies the service's IP address
+//!     - `port` - Specifies the port on which the service will be listening for UDP packets
+//!
+//! For example:
+//!
+//! ```toml
+//! [iobc-supervisor-service.addr]
+//! ip = "0.0.0.0"
+//! port = 8006
+//! ```
+//!
+//! # Starting the Service
+//!
+//! The service should be started automatically by its init script, but may also be started manually:
+//!
+//! ```shell
+//! $ iobc-supervisor-service
+//! Kubos antenna systems service started
+//! Listening on: 0.0.0.0:8006
+//! ```
+//!
+//! # Available Fields
+//!
+//! ```json
+//! query {
+//! 	supervisor: {
+//! 		version: {
+//! 			dummy,
+//! 			spiCommandStatus,
+//! 			indexOfSubsystem,
+//! 			majorVersion,
+//! 			minorVersion,
+//! 			patchVersion,
+//! 			gitHeadVersion,
+//! 			serialNumber,
+//! 			compileInformation,
+//! 			clockSpeed,
+//! 			codeType,
+//! 			crc
+//! 		},
+//! 		housekeeping: {
+//! 			dummy,
+//! 			spiCommandStatus,
+//! 			enableStatus: {
+//! 				powerObc,
+//! 				powerRtc,
+//! 				supervisorMode,
+//! 				busyRtc,
+//! 				powerOffRtc
+//! 			},
+//! 			supervisorUptime,
+//! 			iobcUptime,
+//! 			iobcResetCount,
+//! 			adcData,
+//! 			adcUpdateFlag,
+//! 			crc8
+//! 		}
+//! 	}
+//! }
+//!
+//! mutation {
+//! 	reset,
+//! 	emergencyReset,
+//! 	powercycle
+//! }
+//! ```
+//!
+
 #[macro_use]
 extern crate juniper;
-extern crate kubos_service;
 
 mod model;
 mod schema;
 
+use crate::model::Supervisor;
+use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Service};
-use model::Supervisor;
-use schema::{MutationRoot, QueryRoot};
+use syslog::Facility;
 
 fn main() {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("iobc-supervisor-service"),
+    )
+    .unwrap();
+
     Service::new(
         Config::new("iobc-supervisor-service"),
         Supervisor::new(),
         QueryRoot,
         MutationRoot,
-    ).start();
+    )
+    .start();
 }

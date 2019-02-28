@@ -16,8 +16,8 @@
  * ISIS iMTQ API - Core Functions and Configuration Commands
  */
 
-#include <isis-imtq-api/imtq.h>
-#include <kubos-hal/i2c.h>
+#include <imtq.h>
+#include <i2c.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <sys/syscall.h>
@@ -29,7 +29,7 @@ pthread_mutex_t imtq_mutex;
 /**
  * I2C bus the iMTQ is connected to
  */
-static KI2CNum i2c_bus = K_I2C1;
+static int i2c_bus = 0;
 
 /**
  * iMTQ I2C address
@@ -41,20 +41,13 @@ static uint16_t imqt_addr = 0x10;
  */
 static int wd_timeout = 60;
 
-KADCSStatus k_adcs_init(KI2CNum bus, uint16_t addr, int timeout)
+KADCSStatus k_adcs_init(char * bus, uint16_t addr, int timeout)
 {
-    /*
-     * All I2C configuration is done at the kernel level,
-     * but we still need to pass a config structure to make
-     * our I2C API happy.
-     */
-    KI2CConf conf = k_i2c_conf_defaults();
-    i2c_bus = bus;
     imqt_addr = addr;
     wd_timeout = timeout;
 
     KI2CStatus status;
-    status = k_i2c_init(i2c_bus, &conf);
+    status = k_i2c_init(bus, &i2c_bus);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize iMTQ: %d\n", status);
@@ -111,7 +104,7 @@ void k_adcs_terminate(void)
     }
 
     /* Close the I2C bus */
-    k_i2c_terminate(i2c_bus);
+    k_i2c_terminate(&i2c_bus);
 
     return;
 }
@@ -175,6 +168,12 @@ KADCSStatus k_imtq_watchdog_start(void)
 
 KADCSStatus k_imtq_watchdog_stop(void)
 {
+    if (handle_watchdog == 0)
+    {
+        perror("ADCS watchdog has not been started");
+        return ADCS_ERROR;
+    }
+
     /* Send the cancel request */
     if (pthread_cancel(handle_watchdog) != 0)
     {

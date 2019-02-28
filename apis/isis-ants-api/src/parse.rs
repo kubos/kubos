@@ -14,25 +14,15 @@
 // limitations under the License.
 //
 
-use ants::*;
-use ffi;
+use crate::ants::*;
+use crate::ffi;
+use nom::{bits, do_parse, named, take_bits, tuple};
 use std::mem::transmute;
-
-/// I<sup>2</sup>C bus which will be used for communication
-///
-/// *Note: Not all OBCs will have all of these buses avaialable*
-pub enum KI2CNum {
-    /// I<sup>2</sup>C Bus 1
-    KI2C1,
-    /// I<sup>2</sup>C Bus 2
-    KI2C2,
-    /// I<sup>2</sup>C Bus 3
-    KI2C3,
-}
 
 /// Specific antenna to control
 ///
 /// *Note: Not all antenna systems have four antennas*
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum KANTSAnt {
     /// Antenna 1
     Ant1,
@@ -45,6 +35,7 @@ pub enum KANTSAnt {
 }
 
 /// Antenna microcontroller which any commands should be run against
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum KANTSController {
     /// Primary microcontroller
     Primary,
@@ -55,6 +46,7 @@ pub enum KANTSController {
 /// System telemetry fields returned from [`get_system_telemetry`]
 ///
 /// [`get_system_telemetry`]: struct.AntS.html#method.get_system_telemetry
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct AntsTelemetry {
     /// Current system temperature (raw value)
     pub raw_temp: u16,
@@ -67,6 +59,7 @@ pub struct AntsTelemetry {
 /// Current deployment status returned from [`get_deploy`]
 ///
 /// [`get_deploy`]: struct.AntS.html#method.get_deploy
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct DeployStatus {
     /// Whether antenna system independent burn is active
     pub sys_burn_active: bool,
@@ -145,7 +138,7 @@ named!(parse_status<&[u8], DeployStatus>,
 
 impl AntsTelemetry {
     #[doc(hidden)]
-    pub fn new(c_telem: ffi::AntsTelemetry) -> Result<AntsTelemetry, AntsError> {
+    pub fn new(c_telem: &ffi::AntsTelemetry) -> Result<AntsTelemetry, AntsError> {
         let raw_status: [u8; 2] = unsafe { transmute(c_telem.deploy_status) };
 
         let status = DeployStatus::new(&raw_status)?;
@@ -167,28 +160,20 @@ impl DeployStatus {
                 let (_input, status) = v;
                 Ok(status)
             }
-            _ => Err(AntsError::GenericError.into()),
+            _ => Err(AntsError::GenericError),
         }
     }
 }
 
-pub fn convert_bus(bus: KI2CNum) -> ffi::KI2CNum {
-    match bus {
-        self::KI2CNum::KI2C1 => ffi::KI2CNum::KI2C1,
-        self::KI2CNum::KI2C2 => ffi::KI2CNum::KI2C2,
-        self::KI2CNum::KI2C3 => ffi::KI2CNum::KI2C3,
-    }
-}
-
-pub fn convert_controller(controller: KANTSController) -> ffi::KANTSController {
-    match controller {
+pub fn convert_controller(controller: &KANTSController) -> ffi::KANTSController {
+    match *controller {
         self::KANTSController::Primary => ffi::KANTSController::Primary,
         self::KANTSController::Secondary => ffi::KANTSController::Secondary,
     }
 }
 
-pub fn convert_antenna(antenna: KANTSAnt) -> ffi::KANTSAnt {
-    match antenna {
+pub fn convert_antenna(antenna: &KANTSAnt) -> ffi::KANTSAnt {
+    match *antenna {
         self::KANTSAnt::Ant1 => ffi::KANTSAnt::Ant1,
         self::KANTSAnt::Ant2 => ffi::KANTSAnt::Ant2,
         self::KANTSAnt::Ant3 => ffi::KANTSAnt::Ant3,

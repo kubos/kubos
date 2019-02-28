@@ -18,10 +18,7 @@
 
 #![deny(missing_docs)]
 
-#[macro_use]
-extern crate failure;
-extern crate nom;
-
+use failure::Fail;
 use nom::IResult;
 use std::cell::RefCell;
 

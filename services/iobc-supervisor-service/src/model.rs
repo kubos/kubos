@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-extern crate isis_iobc_supervisor;
-
 // Why create a new SupervisorVersion struct which just holds a SupervisorVersion?
 // Because of E0117 (https://doc.rust-lang.org/error-index.html#E0117)
 // Basically we can't implement the (external) GraphQL traits on
@@ -27,6 +25,7 @@ pub struct SupervisorEnableStatus(pub isis_iobc_supervisor::SupervisorEnableStat
 
 pub struct SupervisorHousekeeping(pub isis_iobc_supervisor::SupervisorHousekeeping);
 
+#[derive(Clone)]
 pub struct Supervisor;
 
 impl Supervisor {

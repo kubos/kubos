@@ -60,7 +60,7 @@ pub fn parse(data: &[u8]) -> EpsResult<Checksum> {
             daughterboard: None,
         })
     } else {
-        throw!(EpsError::parsing_failure("Checksum"))
+        Err(EpsError::parsing_failure("Checksum"))
     }
 }
 

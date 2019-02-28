@@ -7,7 +7,7 @@
 import argparse
 import toml
 
-DEFAULT_IP = "127.0.01"
+DEFAULT_IP = "127.0.0.1"
 DEFAULT_PORT = 8001
 DEFAULT_PATH = "/home/system/etc/config.toml"
 
@@ -24,7 +24,7 @@ class Config:
     name = ""
     ip = ""
     port = 0
-    raw = []
+    raw = {}
 
     def __init__(self, name):
         args = get_args(name)

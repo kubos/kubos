@@ -34,7 +34,7 @@ impl Default for KADCSStatus {
     }
 }
 
-pub fn adcs_status_to_err(status: KADCSStatus) -> Result<(), AdcsError> {
+pub fn adcs_status_to_err(status: &KADCSStatus) -> Result<(), AdcsError> {
     match status {
         KADCSStatus::Ok => Ok(()),
         KADCSStatus::Error => Err(AdcsError::Generic),
@@ -48,33 +48,13 @@ pub fn adcs_status_to_err(status: KADCSStatus) -> Result<(), AdcsError> {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 #[repr(C)]
-pub enum KI2CNum {
-    KI2CNoBus,
-    KI2C1,
-    KI2C2,
-    KI2C3,
-}
-
-impl From<u8> for KI2CNum {
-    fn from(num: u8) -> Self {
-        match num {
-            1 => KI2CNum::KI2C1,
-            2 => KI2CNum::KI2C2,
-            3 => KI2CNum::KI2C3,
-            _ => KI2CNum::KI2CNoBus,
-        }
-    }
-}
-
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-#[repr(C)]
 pub struct timespec {
     pub tv_sec: i32,
     pub tv_nsec: i64,
 }
 
 pub trait ImtqFFI: Clone {
-    fn k_adcs_init(&self, bus: KI2CNum, addr: u16, timeout: i32) -> KADCSStatus;
+    fn k_adcs_init(&self, bus: *const u8, addr: u16, timeout: i32) -> KADCSStatus;
     fn k_adcs_terminate(&self);
     fn k_adcs_passthrough(
         &self,
@@ -93,7 +73,7 @@ pub trait ImtqFFI: Clone {
 pub struct ImtqRaw {}
 
 impl ImtqFFI for ImtqRaw {
-    fn k_adcs_init(&self, bus: KI2CNum, addr: u16, timeout: i32) -> KADCSStatus {
+    fn k_adcs_init(&self, bus: *const u8, addr: u16, timeout: i32) -> KADCSStatus {
         unsafe { k_adcs_init(bus, addr, timeout) }
     }
 
@@ -128,7 +108,7 @@ impl ImtqFFI for ImtqRaw {
 }
 
 extern "C" {
-    pub fn k_adcs_init(bus: KI2CNum, addr: u16, timeout: i32) -> KADCSStatus;
+    pub fn k_adcs_init(bus: *const u8, addr: u16, timeout: i32) -> KADCSStatus;
     pub fn k_adcs_terminate();
     pub fn k_adcs_passthrough(
         tx: *const u8,

@@ -38,11 +38,11 @@ class I2C:
 
             if type(data) is list:
                 data = bytearray(data)
-            elif type(data) is str:
+            elif type(data) is bytes:
                 pass
             else:
                 raise TypeError('Invalid data format: ' +
-                                str(type(data))+', must be string or list')
+                                str(type(data))+', must be bytes or list')
             file.write(data)
             return True, data
 

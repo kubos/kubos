@@ -11,7 +11,7 @@ Overview
 
 
 
-The KubOS platform provides satellite developers the tools and libraries necessary to quickly bring up space-ready software. We leverage multiple existing open source projects, along with our own custom framework and SDK. 
+The KubOS platform provides satellite developers the tools and libraries necessary to quickly bring up space-ready software. We leverage multiple existing open source projects, along with our own custom framework and SDK.
 
 New to KubOS? Want to know what it is? Check out our architecture guide for an overview of how KubOS works and what it provides:
 
@@ -19,12 +19,12 @@ New to KubOS? Want to know what it is? Check out our architecture guide for an o
 
 Getting set up with KubOS for the first time? Check out our SDK and try your own project:
 
- - :doc:`First Time Users <first-time-users>`
+ - :doc:`New User Tutorials <tutorials/index>`
 
-Trying to integrate a payload or create your mission code? Check out our mission-specific code documentation: 
+Trying to integrate a payload or create your mission code? Check out our mission-specific code documentation:
 
  - :doc:`Payload Services <services/payload-services>`
- - :doc:`Mission Applications <what-is-a-mission-application>`
+ - :doc:`Mission Applications <app-docs/index>`
 
 Having issues? Want a new feature? Just want to say hello? `Come talk to us! <https://slack.kubos.co/>`__
 
@@ -32,8 +32,8 @@ If for some reason Slack won't work for you, feel free to email us at info@kubos
 
 .. _supported-boards:
 
-Boards Currently Supported by Kubos
------------------------------------
+Supported OBCs
+--------------
 
 +------------+---------------------------------------------------------------------+
 | Vendor     | Description                                                         |
@@ -45,14 +45,32 @@ Boards Currently Supported by Kubos
 | Beaglebone | :doc:`Beaglebone Black, Rev. C <os-docs/working-with-the-bbb>`      |
 +------------+---------------------------------------------------------------------+
 
+Supported Hardware Devices
+--------------------------
+
+KubOS supports a selection of hardware devices in varying capacities.
+
+All supported devices have a :doc:`device API <apis/device-api/index>` which may be used.
+
+Some devices have an additional :doc:`hardware service <services/hardware-services>` which can be built into
+KubOS and provides a long-running process which allows easy, streamlined communication with the device.
+
+Contributing to KubOS
+---------------------
+
+Want to get your code into space? Become a KubOS contributor and you will!
+We welcome community developers, and are always looking for new people to collaborate with us.
+Come check out our `community Trello Board <https://trello.com/b/pIWxmFua/kubos-community>`__ to see what's being worked on and what's next on the horizon!
+`Join us on Slack <https://slack.kubos.co/>`__ to participate in discussion of features or bugs, see what you can work on, and to give feedback.
+
 .. toctree::
     :hidden:
     
     KubOS Architecture <architecture-overview>
-    First Time Users <first-time-users>
+    Tutorials <tutorials/index>
     Installation Docs <installation-docs/index>
     Kubos SDK <sdk-docs/index>
-    Kubos Mission Applications <what-is-a-mission-application>
+    Kubos Mission Applications <app-docs/index>
     Kubos Services <services/index>
     Kubos APIs <apis/index>
     Kubos Linux <os-docs/index>

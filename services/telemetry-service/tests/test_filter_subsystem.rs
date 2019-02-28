@@ -14,11 +14,9 @@
 // limitations under the License.
 //
 
-#[macro_use]
-extern crate serde_json;
-
+use serde_json::json;
 mod utils;
-use utils::*;
+use crate::utils::*;
 
 static SQL: &'static str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');
@@ -28,16 +26,18 @@ insert into telemetry values(1011, 'eps', 'voltage', '10');
 
 #[test]
 fn test() {
-    let (handle, sender) = setup(Some(SQL));
-    let res = do_query("{telemetry(subsystem: \"gps\"){timestamp,subsystem,parameter,value}}");
+    let (handle, sender) = setup(None, None, None, Some(SQL));
+    let res = do_query(
+        None,
+        "{telemetry(subsystem: \"gps\"){timestamp,subsystem,parameter,value}}",
+    );
     teardown(handle, sender);
     assert_eq!(
         res,
         json!({
-            "errs": "",
-            "msg": {
+            "data": {
                 "telemetry":[
-                    {"timestamp":1010,"subsystem":"gps","parameter":"x_position","value":"-1.0"}
+                    {"timestamp":1010.0,"subsystem":"gps","parameter":"x_position","value":"-1.0"}
                 ]
             }
         })
