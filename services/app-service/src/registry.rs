@@ -311,7 +311,7 @@ impl AppRegistry {
         // Mark the old version as inactive
         if let Some(index) = old_active {
             entries[index].active_version = false;
-            entries[index].save()?
+            entries[index].save()?;
         }
 
         // Update the active app symlink
@@ -436,6 +436,68 @@ impl AppRegistry {
             let err = errors.join(". ");
             Err(AppError::UninstallError { err })
         }
+    }
+    
+    /// Set the current active version of an application
+    ///
+    /// # Arguments
+    ///
+    /// * `app_name` - The name of the application
+    /// * `version` - The version of the app to use
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use kubos_app::registry::AppRegistry;
+    /// let registry = AppRegistry::new();
+    /// registry.set_version("my-app", "1.0");
+    /// ```
+    ///
+    pub fn set_version(&self, app_name: &str, version: &str) -> Result<(), AppError> {
+
+        let mut entries = self
+            .entries
+            .lock()
+            .map_err(|err| AppError::RegistryError {
+                err: format!("Couldn't get entries mutex: {:?}", err),
+            })?;
+            
+        // Get the current active version of the application
+        let curr_active = entries
+                .iter()
+                .position(|ref e| e.active_version && e.app.name == app_name);
+
+        if let Some(index) = curr_active {
+            if entries[index].app.version == version {
+                return Ok(());
+            }
+        }
+
+        // Get the desired active version of the application
+        let new_active = entries
+                .iter()
+                .position(|ref e| e.app.name == app_name && e.app.version == version)
+                .ok_or(AppError::RegistryError { err: format!("App {} version {} not found in registry",
+                        app_name, version)})?;
+
+        // Mark the new version as active
+        entries[new_active].active_version = true;
+        entries[new_active].save().map_err(|error| AppError::RegistryError {
+                        err: format!("Failed to update new active version entry: {:?}", error)
+                })?;
+                    
+        // Mark the old version as inactive
+        if let Some(index) = curr_active {
+            entries[index].active_version = false;
+            entries[index].save().map_err(|error| AppError::RegistryError {
+                        err: format!("Failed to update old active version entry: {:?}", error)
+                })?;
+        }
+
+        // Update the active app symlink
+        self.set_active(&app_name, &format!("{}/{}/{}", self.apps_dir, app_name, version))?;
+                
+        Ok(())
     }
 
     /// Start an application. If successful, returns the pid of the application process.
