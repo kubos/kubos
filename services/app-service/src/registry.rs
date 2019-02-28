@@ -271,18 +271,19 @@ impl AppRegistry {
             })
             .collect();
 
-        fs_extra::copy_items(&files, app_dir, &fs_extra::dir::CopyOptions::new())
-            .map_err(|error| {
+        fs_extra::copy_items(&files, app_dir, &fs_extra::dir::CopyOptions::new()).map_err(
+            |error| {
                 // Remove this new app version directory
                 let _ = fs::remove_dir_all(app_dir);
                 // Try to remove the parent directory. This will only work if no other versions of the
                 // app exist.
                 let _ = fs::remove_dir(format!("{}/{}", self.apps_dir, app_name));
-                
+
                 AppError::RegisterError {
                     err: format!("Error copying files into registry dir: {}", error),
                 }
-            })?;
+            },
+        )?;
 
         let reg_entry = AppRegistryEntry {
             app: App {
