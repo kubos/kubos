@@ -271,11 +271,18 @@ impl AppRegistry {
             })
             .collect();
 
-        fs_extra::copy_items(&files, app_dir, &fs_extra::dir::CopyOptions::new()).map_err(
-            |error| AppError::RegisterError {
-                err: format!("Error copying files into registry dir: {}", error),
-            },
-        )?;
+        fs_extra::copy_items(&files, app_dir, &fs_extra::dir::CopyOptions::new())
+            .map_err(|error| {
+                // Remove this new app version directory
+                let _ = fs::remove_dir_all(app_dir);
+                // Try to remove the parent directory. This will only work if no other versions of the
+                // app exist.
+                let _ = fs::remove_dir(format!("{}/{}", self.apps_dir, app_name));
+                
+                AppError::RegisterError {
+                    err: format!("Error copying files into registry dir: {}", error),
+                }
+            })?;
 
         let reg_entry = AppRegistryEntry {
             app: App {
@@ -291,7 +298,14 @@ impl AppRegistry {
         // Add the new registry entry
         entries.push(reg_entry);
         // Create the app.toml file and save the metadata information
-        entries[entries.len() - 1].save()?;
+        entries[entries.len() - 1].save().or_else(|err| {
+            // Remove this new app version directory
+            let _ = fs::remove_dir_all(app_dir);
+            // Try to remove the parent directory. This will only work if no other versions of the
+            // app exist.
+            let _ = fs::remove_dir(format!("{}/{}", self.apps_dir, app_name));
+            Err(err)
+        })?;
 
         // Mark the old version as inactive
         if let Some(index) = old_active {
