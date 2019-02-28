@@ -358,16 +358,14 @@ impl AppRegistry {
                 err: format!("Couldn't get entries mutex: {:?}", err),
             })?;
 
-        match entries.binary_search_by(|ref e| {
-            e.app
-                .name
-                .cmp(&String::from(app_name))
-                .then(e.app.version.cmp(&String::from(version)))
-        }) {
-            Ok(index) => {
+        match entries
+            .iter()
+            .position(|ref e| e.app.name == app_name && e.app.version == version)
+        {
+            Some(index) => {
                 entries.remove(index);
             }
-            Err(_) => {
+            None => {
                 if let Some(error) = errors {
                     errors = Some(format!(
                         "{}. {} version {} not found in registry",
