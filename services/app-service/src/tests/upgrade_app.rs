@@ -21,63 +21,6 @@ use serde_json::json;
 use std::fs;
 use tempfile::TempDir;
 
-// Perform an "upgrade" of a brand new application.
-// It's basically allowing a user to register a new application with a custom UUID
-#[test]
-fn upgrade_new() {
-    let registry_dir = TempDir::new().unwrap();
-    let service = mock_service!(registry_dir);
-
-    let app_dir = TempDir::new().unwrap();
-    let app_bin = app_dir.path().join("dummy-app");
-
-    fs::create_dir(app_bin.clone()).unwrap();
-
-    // Create dummy app file
-    fs::File::create(app_bin.join("dummy")).unwrap();
-
-    // Create manifest file
-    let manifest = r#"
-            name = "dummy"
-            version = "0.0.1"
-            author = "user"
-            "#;
-    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
-
-    let upgrade_query = format!(
-        r#"mutation {{
-        register(path: \"{}\") {{
-            entry {{
-                active, 
-                app {{
-                    name,
-                    version,
-                }}
-            }},
-            errors,
-            success,
-        }}
-    }}"#,
-        app_bin.to_str().unwrap()
-    );
-
-    let expected = json!({
-           "register": {
-               "entry": {
-                  "active": true,
-                   "app": {
-                       "name": "dummy",
-                       "version": "0.0.1",
-                   }
-               },
-               "errors": "",
-               "success": true,
-           }
-    });
-
-    test!(service, upgrade_query, expected);
-}
-
 #[test]
 fn upgrade_good() {
     let registry_dir = TempDir::new().unwrap();
@@ -189,5 +132,109 @@ fn upgrade_good() {
     // Verify:
     //   - There are two registered versions of the app
     //   - The 0.0.2 version is the active version
+    test!(service, app_query, expected);
+}
+
+#[test]
+fn upgrade_bad() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    let manifest = r#"
+            name = "dummy"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let upgrade_query = format!(
+        r#"mutation {{
+        register(path: \"{}\") {{
+            entry {{
+                active, 
+                app {{
+                    name,
+                    version,
+                }}
+            }},
+            errors,
+            success,
+        }}
+    }}"#,
+        app_bin.to_str().unwrap()
+    );
+
+    let expected = json!({
+           "register": {
+               "entry": {
+                  "active": true,
+                   "app": {
+                       "name": "dummy",
+                       "version": "0.0.1",
+                   }
+               },
+               "errors": "",
+               "success": true,
+           }
+    });
+
+    // Register the initial app so we have something to upgrade
+    test!(service, upgrade_query, expected);
+
+    // Update the manifest for the new version of the app
+    let manifest = r#"
+            name = "dummy"
+            version = "0.0.2"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    // Delete the app file so that the upgrade fails
+    fs::remove_file(app_bin.join("dummy")).unwrap();
+
+    let expected = json!({
+           "register": {
+               "entry": null,
+               "errors": "Failed to register app: Application file dummy not found in given path",
+               "success": false,
+           }
+    });
+
+    // Register the new version
+    test!(service, upgrade_query, expected);
+
+    let app_query = r#"{ 
+            apps(name: \"dummy\") {
+                active,
+                app {
+                    name,
+                    version,
+                }
+            }
+        }
+    "#;
+
+    let expected = json!({
+               "apps": [
+                 {
+                      "active": true,
+                       "app": {
+                           "name": "dummy",
+                           "version": "0.0.1",
+                       }
+                   }
+               ]
+    });
+
+    // Verify:
+    //   - There is only one registered versions of the app
+    //   - The 0.0.1 version is still the active version
     test!(service, app_query, expected);
 }
