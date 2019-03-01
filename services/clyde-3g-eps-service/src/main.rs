@@ -80,12 +80,17 @@
 //#![deny(missing_docs)]
 // #![deny(warnings)]
 
-extern crate clyde_3g_eps_service;
-extern crate kubos_service;
+#[macro_use]
+extern crate juniper;
 
-use clyde_3g_eps_service::models::subsystem::Subsystem;
-use clyde_3g_eps_service::schema::mutation::Root as MutationRoot;
-use clyde_3g_eps_service::schema::query::Root as QueryRoot;
+mod models;
+mod schema;
+#[cfg(test)]
+mod tests;
+
+use crate::models::subsystem::Subsystem;
+use crate::schema::mutation::Root as MutationRoot;
+use crate::schema::query::Root as QueryRoot;
 use kubos_service::{Config, Service};
 
 fn main() {

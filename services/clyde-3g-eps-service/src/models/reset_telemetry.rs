@@ -17,7 +17,7 @@
 use clyde_3g_eps_api::ResetTelemetry::Data as ResetTelemetryData;
 use clyde_3g_eps_api::ResetTelemetry::Type as ResetTelemetryType;
 use juniper::FieldResult;
-use schema::Context;
+use crate::schema::Context;
 
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct Data {

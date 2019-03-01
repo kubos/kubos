@@ -16,11 +16,10 @@
 
 use clyde_3g_eps_api::{Clyde3gEps, Eps};
 use eps_api::EpsResult;
-use kubos_service::MutationResponse;
-use models::*;
+//use kubos_service::MutationResponse;
+use crate::models::*;
 use rust_i2c::*;
-use std::cell::{Cell, RefCell};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
 use std::time::Duration;
 
@@ -40,24 +39,25 @@ fn watchdog_thread(eps: Arc<Mutex<Box<Clyde3gEps + Send>>>) {
     }
 }
 
+#[derive(Clone)]
 pub struct Subsystem {
     pub eps: Arc<Mutex<Box<Clyde3gEps + Send>>>,
-    pub last_mutation: Cell<Mutations>,
-    pub errors: RefCell<Vec<String>>,
-    pub watchdog_handle: thread::JoinHandle<()>,
+    pub last_mutation: Arc<RwLock<Mutations>>,
+    pub errors: Arc<RwLock<Vec<String>>>,
+    pub watchdog_handle: Arc<Mutex<thread::JoinHandle<()>>>,
 }
 
 impl Subsystem {
     pub fn new(eps: Box<Clyde3gEps + Send>) -> EpsResult<Self> {
         let eps = Arc::new(Mutex::new(eps));
         let thread_eps = eps.clone();
-        let watchdog_handle = thread::spawn(move || watchdog_thread(thread_eps));
+        let watchdog = thread::spawn(move || watchdog_thread(thread_eps));
 
         Ok(Self {
             eps,
-            last_mutation: Cell::new(Mutations::None),
-            errors: RefCell::new(vec![]),
-            watchdog_handle,
+            last_mutation: Arc::new(RwLock::new(Mutations::None)),
+            errors: Arc::new(RwLock::new(vec![])),
+            watchdog_handle: Arc::new(Mutex::new(watchdog)),
         })
     }
 
@@ -72,7 +72,7 @@ impl Subsystem {
     pub fn get_motherboard_telemetry(
         &self,
         telem_type: motherboard_telemetry::Type,
-    ) -> EpsResult<f32> {
+    ) -> EpsResult<f64> {
         Ok(self.eps
             .lock()
             .unwrap()
@@ -82,7 +82,7 @@ impl Subsystem {
     pub fn get_daughterboard_telemetry(
         &self,
         telem_type: daughterboard_telemetry::Type,
-    ) -> EpsResult<f32> {
+    ) -> EpsResult<f64> {
         Ok(self.eps
             .lock()
             .unwrap()
@@ -104,7 +104,7 @@ impl Subsystem {
         Ok(self.eps.lock().unwrap().get_comms_watchdog_period()?)
     }
 
-    pub fn get_version(&self) -> EpsResult<version::Data> {
+    pub fn get_version(&self) -> EpsResult<version::VersionData> {
         Ok(self.eps.lock().unwrap().get_version_info()?.into())
     }
 
@@ -122,7 +122,10 @@ impl Subsystem {
                 success: true,
                 errors: "".to_string(),
             }),
-            Err(e) => throw!(e),
+            Err(e) => Ok(MutationResponse {
+                success: false,
+                errors: e.to_string()
+            })
         }
     }
 
@@ -132,7 +135,10 @@ impl Subsystem {
                 success: true,
                 errors: "".to_string(),
             }),
-            Err(e) => throw!(e),
+            Err(e) => Ok(MutationResponse {
+                success: false,
+                errors: e.to_string()
+            })
         }
     }
 
@@ -142,17 +148,24 @@ impl Subsystem {
                 success: true,
                 errors: "".to_string(),
             }),
-            Err(e) => throw!(e),
+            Err(e) => Ok(MutationResponse {
+                success: false,
+                errors: e.to_string()
+            })
         }
     }
 
     pub fn raw_command(&self, command: u8, data: Vec<u8>) -> EpsResult<MutationResponse> {
         match self.eps.lock().unwrap().raw_command(command, data) {
+            // TODO: do something with the returned data?
             Ok(_v) => Ok(MutationResponse {
                 success: true,
                 errors: "".to_string(),
             }),
-            Err(e) => throw!(e),
+            Err(e) => Ok(MutationResponse {
+                success: false,
+                errors: e.to_string()
+            })
         }
     }
 
@@ -165,7 +178,7 @@ impl Subsystem {
     }
 
     pub fn get_errors(&self) -> EpsResult<Vec<String>> {
-        match self.errors.try_borrow_mut() {
+        match self.errors.write() {
             Ok(mut master_vec) => {
                 let current = master_vec.clone();
                 master_vec.clear();

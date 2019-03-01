@@ -72,7 +72,7 @@ pub trait Clyde3gEps {
     ///
     /// [`MotherboardTelemetry::Type`]: ./MotherboardTelemetry/enum.Type.html
     fn get_motherboard_telemetry(&self, telem_type: telemetry::motherboard::Type)
-        -> EpsResult<f32>;
+        -> EpsResult<f64>;
 
     /// Get Daughterboard Telemetry
     ///
@@ -86,7 +86,7 @@ pub trait Clyde3gEps {
     fn get_daughterboard_telemetry(
         &self,
         telem_type: telemetry::daughterboard::Type,
-    ) -> EpsResult<f32>;
+    ) -> EpsResult<f64>;
 
     /// Get Reset Telemetry
     ///

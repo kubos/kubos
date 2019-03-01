@@ -15,7 +15,7 @@
 //
 
 use kubos_service;
-use models::subsystem::Subsystem;
+use crate::models::subsystem::Subsystem;
 
 pub type Context = kubos_service::Context<Box<Subsystem>>;
 

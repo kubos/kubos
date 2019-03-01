@@ -15,28 +15,28 @@
 //
 
 use juniper::FieldResult;
-use models::*;
-use schema::Context;
+use crate::models::*;
+use crate::schema::Context;
 
 pub struct Telemetry;
 
 graphql_object!(Telemetry: Context as "telemetry" |&self| {
-    field motherboard() -> FieldResult<motherboard_telemetry::Telemetry>
+    field motherboard() -> motherboard_telemetry::Telemetry
         as "Motherboard Telemetry"
     {
-        Ok(motherboard_telemetry::Telemetry {})
+        motherboard_telemetry::Telemetry {}
     }
 
-    field daughterboard() -> FieldResult<daughterboard_telemetry::Telemetry>
+    field daughterboard() -> daughterboard_telemetry::Telemetry
         as "Daughterboard Telemetry"
     {
-        Ok(daughterboard_telemetry::Telemetry {})
+        daughterboard_telemetry::Telemetry {}
     }
 
-    field reset() -> FieldResult<reset_telemetry::Telemetry>
+    field reset() -> reset_telemetry::Telemetry
         as "Reset Telemetry"
     {
-        Ok(reset_telemetry::Telemetry {})
+        reset_telemetry::Telemetry {}
     }
 
     field watchdog_period(&executor) -> FieldResult<i32>
@@ -60,7 +60,7 @@ graphql_object!(Telemetry: Context as "telemetry" |&self| {
     //         }
     //     }
     // }
-    field version(&executor) -> FieldResult<version::Data>
+    field version(&executor) -> FieldResult<version::VersionData>
         as "Hardware version information"
     {
         Ok(executor.context().subsystem().get_version()?)
@@ -77,6 +77,7 @@ graphql_object!(Telemetry: Context as "telemetry" |&self| {
     {
         Ok(executor.context().subsystem().get_board_status()?)
     }
+    
 });
 
 pub struct Root;
@@ -136,9 +137,10 @@ graphql_object!(Root: Context as "Query" |&self| {
     //         watchdogPeriod: i32,
 
     //     }
-    // }
+    // } 
     field telemetry(&executor) -> FieldResult<Telemetry>
     {
-        Ok(Telemetry {})
+        Ok(Telemetry)
     }
+    
 });

@@ -17,30 +17,29 @@
 use clyde_3g_eps_api::{Version, VersionInfo};
 
 #[derive(Clone, Debug, GraphQLObject)]
-pub struct VersionData {
+pub struct VersionNum {
     pub revision: i32,
     pub firmware_number: i32,
 }
 
 #[derive(Clone, Debug, GraphQLObject)]
-#[graphql(name = "data")]
-pub struct Data {
-    pub motherboard: VersionData,
-    pub daughterboard: Option<VersionData>,
+pub struct VersionData {
+    pub motherboard: VersionNum,
+    pub daughterboard: Option<VersionNum>,
 }
 
-impl Into<VersionData> for Version {
-    fn into(self) -> VersionData {
-        VersionData {
+impl Into<VersionNum> for Version {
+    fn into(self) -> VersionNum {
+        VersionNum {
             revision: i32::from(self.revision),
             firmware_number: i32::from(self.firmware_number),
         }
     }
 }
 
-impl Into<Data> for VersionInfo {
-    fn into(self) -> Data {
-        Data {
+impl Into<VersionData> for VersionInfo {
+    fn into(self) -> VersionData {
+        VersionData {
             motherboard: self.motherboard.into(),
             daughterboard: self.daughterboard.map(|d| d.into()),
         }

@@ -14,6 +14,15 @@
 // limitations under the License.
 //
 
+/// GenericResponse struct for use in queries or mutations without an explicit response
+#[derive(GraphQLObject)]
+pub struct MutationResponse {
+    /// Any errors which occurred during query
+    pub errors: String,
+    /// Success or fail status of query
+    pub success: bool,
+}
+
 pub mod board_status;
 pub mod daughterboard_telemetry;
 pub mod last_error;

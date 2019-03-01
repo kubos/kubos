@@ -15,9 +15,9 @@
 //
 
 use juniper::FieldResult;
-use kubos_service::MutationResponse;
-use models::subsystem::Mutations;
-use schema::Context;
+use crate::models::MutationResponse;
+use crate::models::subsystem::Mutations;
+use crate::schema::Context;
 
 pub struct Root;
 

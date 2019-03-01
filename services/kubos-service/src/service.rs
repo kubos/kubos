@@ -23,15 +23,6 @@ use std::sync::{Arc, RwLock};
 
 use warp::{filters::BoxedFilter, Filter};
 
-/// GenericResponse struct for use in queries or mutations without an explicit response
-#[derive(Clone, Debug, GraphQLObject)]
-pub struct MutationResponse {
-    /// Any errors which occurred during query
-    pub errors: String,
-    /// Success or fail status of query
-    pub success: bool,
-}
-
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.
 #[derive(Clone)]
