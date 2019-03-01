@@ -169,12 +169,10 @@ impl Subsystem {
         }
     }
 
-    pub fn get_last_mutation(&self) -> Mutations {
-        Mutations::None
-    }
-
-    pub fn set_last_mutation(&self, _mutation: Mutations) {
-        ()
+    pub fn set_last_mutation(&self, mutation: Mutations) {
+        if let Ok(mut last_cmd) = self.last_mutation.write() {
+            *last_cmd = mutation;
+        }
     }
 
     pub fn get_errors(&self) -> EpsResult<Vec<String>> {

@@ -128,9 +128,16 @@ impl Clyde3gEps for MockGoodEps {
         &self,
         telem_type: ResetTelemetry::Type,
     ) -> EpsResult<ResetTelemetry::Data> {
+        let (motherboard, daughterboard) = match telem_type {
+            ResetTelemetry::Type::AutomaticSoftware => (1, 2),
+            ResetTelemetry::Type::BrownOut => (3, 4),
+            ResetTelemetry::Type::Manual => (5, 6),
+            ResetTelemetry::Type::Watchdog => (7, 8)
+        };
+        
         Ok(ResetTelemetry::Data {
-            motherboard: 89,
-            daughterboard: Some(99),
+            motherboard,
+            daughterboard: Some(daughterboard),
         })
     }
     fn set_comms_watchdog_period(&self, period: u8) -> EpsResult<()> {
@@ -176,3 +183,4 @@ macro_rules! test {
 }
 
 mod query;
+mod mutation;

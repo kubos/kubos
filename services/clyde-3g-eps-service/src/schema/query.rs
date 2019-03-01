@@ -105,7 +105,8 @@ graphql_object!(Root: Context as "Query" |&self| {
     field ack(&executor) -> FieldResult<subsystem::Mutations>
         as "Last run mutation"
     {
-        Ok(executor.context().subsystem().get_last_mutation())
+        let last_cmd = executor.context().subsystem().last_mutation.read()?;
+        Ok(*last_cmd)
     }
 
     // Get all errors encountered since the last time
