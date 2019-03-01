@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-use juniper::FieldResult;
 use crate::models::*;
 use crate::schema::Context;
+use juniper::FieldResult;
 
 pub struct Telemetry;
 
@@ -77,7 +77,6 @@ graphql_object!(Telemetry: Context as "telemetry" |&self| {
     {
         Ok(executor.context().subsystem().get_board_status()?)
     }
-    
 });
 
 pub struct Root;
@@ -143,5 +142,4 @@ graphql_object!(Root: Context as "Query" |&self| {
     {
         Ok(Telemetry)
     }
-    
 });

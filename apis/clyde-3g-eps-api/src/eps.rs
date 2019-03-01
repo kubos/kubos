@@ -152,8 +152,11 @@ impl Clyde3gEps for Eps {
     ///
     /// The status bytes are designed to supply operational data about the I2C Node.
     fn get_board_status(&self) -> EpsResult<board_status::BoardStatus> {
-        board_status::parse(&self.connection
-            .transfer(board_status::command(), Duration::from_millis(2))?)
+        board_status::parse(
+            &self
+                .connection
+                .transfer(board_status::command(), Duration::from_millis(2))?,
+        )
     }
 
     /// Get Checksum
@@ -162,8 +165,11 @@ impl Clyde3gEps for Eps {
     /// to generate a checksum. The value retrieved can be used to determine whether
     /// the contents of the ROM have changed during the operation of the device.
     fn get_checksum(&self) -> EpsResult<checksum::Checksum> {
-        checksum::parse(&self.connection
-            .transfer(checksum::command(), Duration::from_millis(50))?)
+        checksum::parse(
+            &self
+                .connection
+                .transfer(checksum::command(), Duration::from_millis(50))?,
+        )
     }
 
     /// Get Version
@@ -172,8 +178,11 @@ impl Clyde3gEps for Eps {
     /// The revision number returns the current revision of the firmware that is
     /// present on the board. The firmware number returns the current firmware on the board.
     fn get_version_info(&self) -> EpsResult<version::VersionInfo> {
-        version::parse(&self.connection
-            .transfer(version::command(), Duration::from_millis(2))?)
+        version::parse(
+            &self
+                .connection
+                .transfer(version::command(), Duration::from_millis(2))?,
+        )
     }
 
     /// Get Last Error
@@ -181,8 +190,11 @@ impl Clyde3gEps for Eps {
     /// If an error has been generated after attempting to execute a user's command,
     /// this command can be used to retrieve details about the error.
     fn get_last_error(&self) -> EpsResult<last_error::LastError> {
-        last_error::parse(&self.connection
-            .transfer(last_error::command(), Duration::from_millis(2))?)
+        last_error::parse(
+            &self
+                .connection
+                .transfer(last_error::command(), Duration::from_millis(2))?,
+        )
     }
 
     /// Manual Reset

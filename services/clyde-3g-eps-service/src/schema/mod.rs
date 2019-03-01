@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-use kubos_service;
 use crate::models::subsystem::Subsystem;
+use kubos_service;
 
 pub type Context = kubos_service::Context<Box<Subsystem>>;
 

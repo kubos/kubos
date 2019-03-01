@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
+use crate::schema::Context;
 use clyde_3g_eps_api::MotherboardTelemetry::Type as MotherboardTelemetryType;
 use juniper::FieldResult;
-use crate::schema::Context;
 
 pub struct Telemetry;
 

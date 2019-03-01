@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-use clyde_3g_eps_api::*;
 use crate::models::subsystem::{Mutations, Subsystem};
 use crate::models::*;
 use crate::schema::mutation::Root as MutationRoot;
 use crate::schema::query::Root as QueryRoot;
+use clyde_3g_eps_api::*;
 use eps_api::*;
 use kubos_service::{Config, Service};
 use serde_json::json;
@@ -132,9 +132,9 @@ impl Clyde3gEps for MockGoodEps {
             ResetTelemetry::Type::AutomaticSoftware => (1, 2),
             ResetTelemetry::Type::BrownOut => (3, 4),
             ResetTelemetry::Type::Manual => (5, 6),
-            ResetTelemetry::Type::Watchdog => (7, 8)
+            ResetTelemetry::Type::Watchdog => (7, 8),
         };
-        
+
         Ok(ResetTelemetry::Data {
             motherboard,
             daughterboard: Some(daughterboard),
@@ -182,5 +182,5 @@ macro_rules! test {
     }};
 }
 
-mod query;
 mod mutation;
+mod query;

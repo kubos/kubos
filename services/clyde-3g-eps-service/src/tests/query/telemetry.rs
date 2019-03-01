@@ -36,18 +36,18 @@ fn test_version() {
     }"#;
 
     let expected = json!({
-                "telemetry":{
-                    "version":{
-                        "daughterboard": {
-                            "revision": 12
-                        },
-                        "motherboard": {
-                            "revision": 10
-                        }
+            "telemetry":{
+                "version":{
+                    "daughterboard": {
+                        "revision": 12
+                    },
+                    "motherboard": {
+                        "revision": 10
                     }
                 }
-        });
-    
+            }
+    });
+
     test!(service, query, expected);
 }
 
@@ -60,13 +60,13 @@ fn test_motherboard_telemetry() {
     let query = r#"{ telemetry { motherboard { BoardTemperature }}}"#;
 
     let expected = json!({
-            "telemetry":{
-                "motherboard":{
-                    "BoardTemperature": 105.13,
-                }
+        "telemetry":{
+            "motherboard":{
+                "BoardTemperature": 105.13,
             }
-        });
-    
+        }
+    });
+
     test!(service, query, expected);
 }
 
@@ -79,13 +79,13 @@ fn test_daughterboard_telemetry() {
     let query = r#"{ telemetry { daughterboard { BoardTemperature }}}"#;
 
     let expected = json!({
-            "telemetry":{
-                "daughterboard":{
-                    "BoardTemperature": 101.55,
-                }
+        "telemetry":{
+            "daughterboard":{
+                "BoardTemperature": 101.55,
             }
-        });
-    
+        }
+    });
+
     test!(service, query, expected);
 }
 
@@ -107,14 +107,14 @@ fn test_last_error() {
     "#;
 
     let expected = json!({
-            "telemetry":{
-                "lastEpsError":{
-                    "daughterboard":null,
-                    "motherboard":"BAD_CRC",
-                },
-            }
-        });
-    
+        "telemetry":{
+            "lastEpsError":{
+                "daughterboard":null,
+                "motherboard":"BAD_CRC",
+            },
+        }
+    });
+
     test!(service, query, expected);
 }
 
@@ -136,14 +136,14 @@ fn test_board_status() {
     "#;
 
     let expected = json!({
-            "telemetry":{
-                "boardStatus":{
-                    "daughterboard":"WATCHDOG_ERROR",
-                    "motherboard":"LAST_COMMAND_FAILED",
-                },
-            }
-        });
-    
+        "telemetry":{
+            "boardStatus":{
+                "daughterboard":"WATCHDOG_ERROR",
+                "motherboard":"LAST_COMMAND_FAILED",
+            },
+        }
+    });
+
     test!(service, query, expected);
 }
 
@@ -180,28 +180,28 @@ fn test_reset_telemetry() {
     "#;
 
     let expected = json!({
-            "telemetry":{
-                "reset":{
-                    "automaticSoftware":{
-                        "daughterboard": 2,
-                        "motherboard": 1,
-                    },
-                    "brownOut":{
-                        "daughterboard": 4,
-                        "motherboard": 3,
-                    },
-                    "manual":{
-                        "daughterboard": 6,
-                        "motherboard": 5,
-                    },
-                    "watchdog":{
-                        "daughterboard": 8,
-                        "motherboard": 7,
-                    },
-                }
+        "telemetry":{
+            "reset":{
+                "automaticSoftware":{
+                    "daughterboard": 2,
+                    "motherboard": 1,
+                },
+                "brownOut":{
+                    "daughterboard": 4,
+                    "motherboard": 3,
+                },
+                "manual":{
+                    "daughterboard": 6,
+                    "motherboard": 5,
+                },
+                "watchdog":{
+                    "daughterboard": 8,
+                    "motherboard": 7,
+                },
             }
-        });
-    
+        }
+    });
+
     test!(service, query, expected);
 }
 
@@ -214,10 +214,10 @@ fn test_watchdog_period() {
     let query = r#"{ telemetry { watchdogPeriod }}"#;
 
     let expected = json!({
-            "telemetry":{
-                "watchdogPeriod": 10
-            }
-        });
-    
+        "telemetry":{
+            "watchdogPeriod": 10
+        }
+    });
+
     test!(service, query, expected);
 }

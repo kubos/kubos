@@ -27,8 +27,8 @@ fn test_ping() {
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
     let query = r#"{ ping }"#;
-    
+
     let expected = json!({"ping":"pong"});
-    
+
     test!(service, query, expected);
 }

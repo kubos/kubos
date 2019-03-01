@@ -28,7 +28,7 @@ fn reset_watchdog_good() {
                 success
             }
         }"#;
-        
+
     let expected = json!({
         "resetWatchdog": {
             "errors": "",
@@ -51,7 +51,7 @@ fn reset_watchdog_bad() {
                 success,
             }
         }"#;
-        
+
     let expected = json!({
         "resetWatchdog": {
             "errors": "Generic Error",

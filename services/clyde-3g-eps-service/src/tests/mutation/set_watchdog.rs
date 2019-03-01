@@ -46,7 +46,7 @@ fn set_watchdog_good() {
                 success
             }
         }"#;
-        
+
     let expected = json!({
         "setWatchdogPeriod": {
             "errors": "",
@@ -69,7 +69,7 @@ fn set_watchdog_bad() {
                 success,
             }
         }"#;
-        
+
     let expected = json!({
         "setWatchdogPeriod": {
             "errors": "Generic Error",

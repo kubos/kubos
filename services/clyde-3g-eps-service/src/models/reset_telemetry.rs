@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
+use crate::schema::Context;
 use clyde_3g_eps_api::ResetTelemetry::Data as ResetTelemetryData;
 use clyde_3g_eps_api::ResetTelemetry::Type as ResetTelemetryType;
 use juniper::FieldResult;
-use crate::schema::Context;
 
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct Data {
@@ -29,7 +29,7 @@ impl Into<Data> for ResetTelemetryData {
     fn into(self) -> Data {
         Data {
             motherboard: i32::from(self.motherboard),
-            daughterboard: self.daughterboard.map(|d| i32::from(d)),
+            daughterboard: self.daughterboard.map(i32::from),
         }
     }
 }

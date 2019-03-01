@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-use juniper::FieldResult;
-use crate::models::MutationResponse;
 use crate::models::subsystem::Mutations;
+use crate::models::MutationResponse;
 use crate::schema::Context;
+use juniper::FieldResult;
 
 pub struct Root;
 

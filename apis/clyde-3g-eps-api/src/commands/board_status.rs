@@ -32,19 +32,19 @@ bitflags! {
     #[derive(Default)]
     pub struct StatusCode: u8 {
         /// Last Command Failed
-        const LAST_COMMAND_FAILED = 0b00000001;
+        const LAST_COMMAND_FAILED = 0b0000_0001;
         /// Watchdog Error
-        const WATCHDOG_ERROR = 0b00000010;
+        const WATCHDOG_ERROR = 0b0000_0010;
         /// Bad Command Data
-        const BAD_COMMAND_DATA = 0b00000100;
+        const BAD_COMMAND_DATA = 0b0000_0100;
         /// Bad Command Channel
-        const BAD_COMMAND_CHANNEL = 0b00001000;
+        const BAD_COMMAND_CHANNEL = 0b0000_1000;
         /// Error Reading EEPROM
-        const ERROR_READING_EEPROM = 0b00010000;
+        const ERROR_READING_EEPROM = 0b0001_0000;
         /// Power On Reset
-        const POWER_ON_RESET = 0b00100000;
+        const POWER_ON_RESET = 0b0010_0000;
         /// Brown Out Reset
-        const BROWN_OUT_RESET = 0b01000000;
+        const BROWN_OUT_RESET = 0b0100_0000;
     }
 }
 

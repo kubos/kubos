@@ -64,7 +64,7 @@ impl Into<Data> for LastError {
     fn into(self) -> Data {
         Data {
             motherboard: to_error(self.motherboard),
-            daughterboard: self.daughterboard.map(|d| to_error(d)),
+            daughterboard: self.daughterboard.map(to_error),
         }
     }
 }

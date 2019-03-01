@@ -58,7 +58,7 @@ impl Into<Data> for BoardStatus {
     fn into(self) -> Data {
         Data {
             motherboard: to_status(self.motherboard),
-            daughterboard: self.daughterboard.map(|d| to_status(d)),
+            daughterboard: self.daughterboard.map(to_status),
         }
     }
 }

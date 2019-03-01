@@ -73,7 +73,8 @@ impl Subsystem {
         &self,
         telem_type: motherboard_telemetry::Type,
     ) -> EpsResult<f64> {
-        Ok(self.eps
+        Ok(self
+            .eps
             .lock()
             .unwrap()
             .get_motherboard_telemetry(telem_type.into())?)
@@ -83,7 +84,8 @@ impl Subsystem {
         &self,
         telem_type: daughterboard_telemetry::Type,
     ) -> EpsResult<f64> {
-        Ok(self.eps
+        Ok(self
+            .eps
             .lock()
             .unwrap()
             .get_daughterboard_telemetry(telem_type.into())?)
@@ -93,11 +95,12 @@ impl Subsystem {
         &self,
         telem_type: reset_telemetry::Type,
     ) -> EpsResult<reset_telemetry::Data> {
-        Ok((self.eps
+        Ok((self
+            .eps
             .lock()
             .unwrap()
             .get_reset_telemetry(telem_type.into())?)
-            .into())
+        .into())
     }
 
     pub fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
@@ -124,8 +127,8 @@ impl Subsystem {
             }),
             Err(e) => Ok(MutationResponse {
                 success: false,
-                errors: e.to_string()
-            })
+                errors: e.to_string(),
+            }),
         }
     }
 
@@ -137,8 +140,8 @@ impl Subsystem {
             }),
             Err(e) => Ok(MutationResponse {
                 success: false,
-                errors: e.to_string()
-            })
+                errors: e.to_string(),
+            }),
         }
     }
 
@@ -150,8 +153,8 @@ impl Subsystem {
             }),
             Err(e) => Ok(MutationResponse {
                 success: false,
-                errors: e.to_string()
-            })
+                errors: e.to_string(),
+            }),
         }
     }
 
@@ -164,8 +167,8 @@ impl Subsystem {
             }),
             Err(e) => Ok(MutationResponse {
                 success: false,
-                errors: e.to_string()
-            })
+                errors: e.to_string(),
+            }),
         }
     }
 
@@ -184,7 +187,7 @@ impl Subsystem {
                 Ok(current)
             }
             _ => Ok(vec![
-                "Error: Failed to borrow master errors vector".to_string(),
+                "Error: Failed to borrow master errors vector".to_string()
             ]),
         }
     }

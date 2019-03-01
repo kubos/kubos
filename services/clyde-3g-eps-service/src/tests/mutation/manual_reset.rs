@@ -28,7 +28,7 @@ fn manual_reset_good() {
                 success
             }
         }"#;
-        
+
     let expected = json!({
         "manualReset": {
             "errors": "",
@@ -51,7 +51,7 @@ fn manual_reset_bad() {
                 success,
             }
         }"#;
-        
+
     let expected = json!({
         "manualReset": {
             "errors": "Generic Error",
