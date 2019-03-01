@@ -17,7 +17,7 @@
 use super::*;
 
 mod ack;
-// TODO: Use the errors field. mod errors;
+mod errors;
 mod telemetry;
 
 #[test]

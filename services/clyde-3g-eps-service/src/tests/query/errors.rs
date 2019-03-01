@@ -40,21 +40,20 @@ fn query_errors_single() {
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
     
-        let reset = r#"mutation {
-            resetWatchdog {
-                success
-            }
-        }"#;
+    let reset = r#"mutation {
+        resetWatchdog {
+            success
+        }
+    }"#;
 
-    let result = request!(service, reset);
-    eprintln!("Result: {:?}", result);
+    request!(service, reset);
 
     let query = r#"{
             errors
         }"#;
 
     let expected = json!({
-            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:364): Configuration error"]
+            "errors": ["reset_comms_watchdog (services/clyde-3g-eps-service/src/models/subsystem.rs:140): Generic Error"]
     });
 
     test!(service, query, expected);
@@ -80,7 +79,8 @@ fn query_errors_multiple() {
         }"#;
 
     let expected = json!({
-            "errors": ["watchdog_kick (services/isis-ants-service/src/model.rs:364): Configuration error", "watchdog_kick (services/isis-ants-service/src/model.rs:364): Configuration error"]
+            "errors": ["reset_comms_watchdog (services/clyde-3g-eps-service/src/models/subsystem.rs:140): Generic Error",
+                    "reset_comms_watchdog (services/clyde-3g-eps-service/src/models/subsystem.rs:140): Generic Error"]
     });
 
     test!(service, query, expected);

@@ -16,6 +16,7 @@
 
 use clyde_3g_eps_api::{Clyde3gEps, Eps};
 use eps_api::EpsResult;
+use failure::Error;
 //use kubos_service::MutationResponse;
 use crate::models::*;
 use rust_i2c::*;
@@ -72,94 +73,99 @@ impl Subsystem {
     pub fn get_motherboard_telemetry(
         &self,
         telem_type: motherboard_telemetry::Type,
-    ) -> EpsResult<f64> {
-        Ok(self
+    ) -> Result<f64, String> {
+        let result = run!(self
             .eps
             .lock()
             .unwrap()
-            .get_motherboard_telemetry(telem_type.into())?)
+            .get_motherboard_telemetry(telem_type.into()),
+            self.errors)?;
+        
+        Ok(result)
     }
 
     pub fn get_daughterboard_telemetry(
         &self,
         telem_type: daughterboard_telemetry::Type,
-    ) -> EpsResult<f64> {
-        Ok(self
-            .eps
-            .lock()
-            .unwrap()
-            .get_daughterboard_telemetry(telem_type.into())?)
+    ) -> Result<f64, String> {
+        let eps = self.eps.lock().unwrap();
+        Ok(run!(eps.get_daughterboard_telemetry(telem_type.into()), self.errors)?)
     }
 
     pub fn get_reset_telemetry(
         &self,
         telem_type: reset_telemetry::Type,
-    ) -> EpsResult<reset_telemetry::Data> {
-        Ok((self
-            .eps
-            .lock()
-            .unwrap()
-            .get_reset_telemetry(telem_type.into())?)
-        .into())
+    ) -> Result<reset_telemetry::Data, String> {
+        let eps = self.eps.lock().unwrap();
+        Ok(run!(eps.get_reset_telemetry(telem_type.into()), self.errors)?.into())
     }
 
-    pub fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
-        Ok(self.eps.lock().unwrap().get_comms_watchdog_period()?)
+    pub fn get_comms_watchdog_period(&self) -> Result<u8, String> {
+        let eps = self.eps.lock().unwrap();
+        Ok(run!(eps.get_comms_watchdog_period(), self.errors)?)
     }
 
-    pub fn get_version(&self) -> EpsResult<version::VersionData> {
-        Ok(self.eps.lock().unwrap().get_version_info()?.into())
+    pub fn get_version(&self) -> Result<version::VersionData, String> {
+        let eps = self.eps.lock().unwrap();
+        Ok(run!(eps.get_version_info(), self.errors)?.into())
     }
 
-    pub fn get_board_status(&self) -> EpsResult<board_status::Data> {
-        Ok(self.eps.lock().unwrap().get_board_status()?.into())
+    pub fn get_board_status(&self) -> Result<board_status::Data, String> {
+        let eps = self.eps.lock().unwrap();
+        Ok(run!(eps.get_board_status(), self.errors)?.into())
     }
 
-    pub fn get_last_eps_error(&self) -> EpsResult<last_error::Data> {
-        Ok(self.eps.lock().unwrap().get_last_error()?.into())
+    pub fn get_last_eps_error(&self) -> Result<last_error::Data, String> {
+        let eps = self.eps.lock().unwrap();
+        Ok(run!(eps.get_last_error(), self.errors)?.into())
     }
 
-    pub fn manual_reset(&self) -> EpsResult<MutationResponse> {
-        match self.eps.lock().unwrap().manual_reset() {
+    pub fn manual_reset(&self) -> Result<MutationResponse, String> {
+        let eps = self.eps.lock().unwrap();
+        match run!(eps.manual_reset(), self.errors) {
+            // TODO: What does manual_reset return?
             Ok(_v) => Ok(MutationResponse {
                 success: true,
                 errors: "".to_string(),
             }),
             Err(e) => Ok(MutationResponse {
                 success: false,
-                errors: e.to_string(),
+                errors: e,
             }),
         }
     }
 
-    pub fn reset_watchdog(&self) -> EpsResult<MutationResponse> {
-        match self.eps.lock().unwrap().reset_comms_watchdog() {
+    pub fn reset_watchdog(&self) -> Result<MutationResponse, String> {
+        let eps = self.eps.lock().unwrap();
+        match run!(eps.reset_comms_watchdog(), self.errors) {
             Ok(_v) => Ok(MutationResponse {
                 success: true,
                 errors: "".to_string(),
             }),
             Err(e) => Ok(MutationResponse {
                 success: false,
-                errors: e.to_string(),
+                errors: e,
             }),
         }
     }
 
-    pub fn set_watchdog_period(&self, period: u8) -> EpsResult<MutationResponse> {
-        match self.eps.lock().unwrap().set_comms_watchdog_period(period) {
+    pub fn set_watchdog_period(&self, period: u8) -> Result<MutationResponse, String> {
+        let eps = self.eps.lock().unwrap();
+        match run!(eps.set_comms_watchdog_period(period), self.errors) {
             Ok(_v) => Ok(MutationResponse {
                 success: true,
                 errors: "".to_string(),
             }),
             Err(e) => Ok(MutationResponse {
                 success: false,
-                errors: e.to_string(),
+                errors: e,
             }),
         }
     }
 
-    pub fn raw_command(&self, command: u8, data: Vec<u8>) -> EpsResult<MutationResponse> {
-        match self.eps.lock().unwrap().raw_command(command, data) {
+    pub fn raw_command(&self, command: u8, data: Vec<u8>) -> Result<MutationResponse, String> {
+        let eps = self.eps.lock().unwrap();
+        match run!(eps.raw_command(command, data), self.errors) {
             // TODO: do something with the returned data?
             Ok(_v) => Ok(MutationResponse {
                 success: true,
@@ -167,7 +173,7 @@ impl Subsystem {
             }),
             Err(e) => Ok(MutationResponse {
                 success: false,
-                errors: e.to_string(),
+                errors: e,
             }),
         }
     }

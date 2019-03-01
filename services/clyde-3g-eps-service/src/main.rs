@@ -82,6 +82,8 @@
 
 #[macro_use]
 extern crate juniper;
+#[macro_use]
+extern crate kubos_service;
 
 mod models;
 mod schema;
