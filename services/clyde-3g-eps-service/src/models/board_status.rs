@@ -14,51 +14,26 @@
 // limitations under the License.
 //
 
-use clyde_3g_eps_api::{BoardStatus, StatusCode};
+//! Data returned by `boardStatus` telemetry query
 
-#[derive(Clone, Debug, GraphQLEnum)]
-pub enum Status {
-    NoStatus,
-    LastCommandFailed,
-    WatchdogError,
-    BadCommandData,
-    BadCommandChannel,
-    ErrorReadingEeprom,
-    PowerOnReset,
-    BrownOutReset,
-}
+use clyde_3g_eps_api::BoardStatus;
 
+/// Board status flags
+///
+/// Returned structure contains stringified versions of the [StatusCode flags](../clyde_3g_eps_api/struct.StatusCode.html)
 #[derive(Clone, Debug, GraphQLObject)]
-pub struct Data {
-    pub motherboard: Status,
-    pub daughterboard: Option<Status>,
+pub struct BoardData {
+    /// Status flags for the motherboard
+    pub motherboard: Vec<String>,
+    /// Status flags for the daughterboard
+    pub daughterboard: Option<Vec<String>>,
 }
 
-fn to_status(status_code: StatusCode) -> Status {
-    if status_code.contains(StatusCode::LAST_COMMAND_FAILED) {
-        Status::LastCommandFailed
-    } else if status_code.contains(StatusCode::WATCHDOG_ERROR) {
-        Status::WatchdogError
-    } else if status_code.contains(StatusCode::BAD_COMMAND_DATA) {
-        Status::BadCommandData
-    } else if status_code.contains(StatusCode::BAD_COMMAND_CHANNEL) {
-        Status::BadCommandChannel
-    } else if status_code.contains(StatusCode::ERROR_READING_EEPROM) {
-        Status::ErrorReadingEeprom
-    } else if status_code.contains(StatusCode::POWER_ON_RESET) {
-        Status::PowerOnReset
-    } else if status_code.contains(StatusCode::BROWN_OUT_RESET) {
-        Status::BrownOutReset
-    } else {
-        Status::NoStatus
-    }
-}
-
-impl Into<Data> for BoardStatus {
-    fn into(self) -> Data {
-        Data {
-            motherboard: to_status(self.motherboard),
-            daughterboard: self.daughterboard.map(to_status),
+impl Into<BoardData> for BoardStatus {
+    fn into(self) -> BoardData {
+        BoardData {
+            motherboard: self.motherboard.to_vec(),
+            daughterboard: self.daughterboard.map(|flags| flags.to_vec()),
         }
     }
 }

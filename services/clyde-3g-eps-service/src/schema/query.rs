@@ -72,7 +72,7 @@ graphql_object!(Telemetry: Context as "telemetry" |&self| {
         Ok(executor.context().subsystem().get_last_eps_error()?)
     }
 
-    field board_status(&executor) -> FieldResult<board_status::Data>
+    field board_status(&executor) -> FieldResult<board_status::BoardData>
         as "EPS board status"
     {
         Ok(executor.context().subsystem().get_board_status()?)

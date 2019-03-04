@@ -14,11 +14,10 @@
 // limitations under the License.
 //
 
+use crate::models::*;
 use clyde_3g_eps_api::{Clyde3gEps, Eps};
 use eps_api::EpsResult;
 use failure::Error;
-//use kubos_service::MutationResponse;
-use crate::models::*;
 use rust_i2c::*;
 use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
@@ -114,7 +113,7 @@ impl Subsystem {
         Ok(run!(eps.get_version_info(), self.errors)?.into())
     }
 
-    pub fn get_board_status(&self) -> Result<board_status::Data, String> {
+    pub fn get_board_status(&self) -> Result<board_status::BoardData, String> {
         let eps = self.eps.lock().unwrap();
         Ok(run!(eps.get_board_status(), self.errors)?.into())
     }

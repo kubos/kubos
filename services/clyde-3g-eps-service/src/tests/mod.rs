@@ -81,8 +81,8 @@ struct MockGoodEps {}
 impl Clyde3gEps for MockGoodEps {
     fn get_board_status(&self) -> EpsResult<BoardStatus> {
         Ok(BoardStatus {
-            motherboard: StatusCode::LAST_COMMAND_FAILED,
-            daughterboard: Some(StatusCode::WATCHDOG_ERROR),
+            motherboard: StatusCode::LAST_COMMAND_FAILED | StatusCode::POWER_ON_RESET,
+            daughterboard: Some(StatusCode::WATCHDOG_ERROR | StatusCode::BAD_COMMAND_DATA),
         })
     }
     fn get_checksum(&self) -> EpsResult<Checksum> {
@@ -105,7 +105,7 @@ impl Clyde3gEps for MockGoodEps {
     }
     fn get_last_error(&self) -> EpsResult<LastError> {
         Ok(LastError {
-            motherboard: ErrorCode::BAD_CRC,
+            motherboard: ErrorCode::BadCRC,
             daughterboard: None,
         })
     }

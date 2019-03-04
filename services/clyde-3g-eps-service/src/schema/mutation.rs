@@ -24,6 +24,8 @@ pub struct Root;
 /// Base GraphQL mutation model
 graphql_object!(Root: Context as "Mutation" |&self| {
 
+    // TODO: No-op. Reset watchdog
+
     field manual_reset(&executor) -> FieldResult<MutationResponse>
         as "Perform manual reset of EPS board"
     {

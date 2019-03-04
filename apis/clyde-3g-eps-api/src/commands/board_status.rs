@@ -48,6 +48,35 @@ bitflags! {
     }
 }
 
+impl StatusCode {
+    /// Convert the flags byte into a vector containing the string representations
+    /// of all flags present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use eps_api::EpsResult;
+    /// use clyde_3g_eps_api::*;
+    ///
+    /// # fn func() -> EpsResult<()> {
+    /// let flags = StatusCode::BAD_COMMAND_DATA | StatusCode::POWER_ON_RESET;
+    ///
+    /// let conv = flags.to_vec();
+    ///
+    /// assert_eq!(conv, vec!["BAD_COMMAND_DATA", "POWER_ON_RESET"]);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn to_vec(self) -> Vec<String> {
+        format!("{:?}", self)
+            .to_owned()
+            .split(" | ")
+            .map(|x| x.to_string())
+            .collect()
+    }
+}
+
 /// Status of EPS Motherboard and Daughterboard
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BoardStatus {

@@ -14,16 +14,22 @@
 // limitations under the License.
 //
 
+//! Data returned by `daughterboardTelemetry` telemetry query
+
 use crate::schema::Context;
 use clyde_3g_eps_api::DaughterboardTelemetry::Type as DaughterboardTelemetryType;
 use juniper::FieldResult;
 
+/// Daughterboard telemetry structure
 pub struct Telemetry;
 
 macro_rules! make_telemetry {
     (
         $($type: ident,)+
     ) => {
+        /// Daughterboard telemetry values
+        ///
+        /// See Table 11-8 in the EPS' User Manual for more information
         #[derive(Clone, Hash, Debug, Eq, GraphQLEnum, PartialEq)]
         pub enum Type {
             $($type,)+

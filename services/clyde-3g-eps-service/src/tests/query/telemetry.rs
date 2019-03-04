@@ -138,8 +138,8 @@ fn test_board_status() {
     let expected = json!({
         "telemetry":{
             "boardStatus":{
-                "daughterboard":"WATCHDOG_ERROR",
-                "motherboard":"LAST_COMMAND_FAILED",
+                "daughterboard":["WATCHDOG_ERROR", "BAD_COMMAND_DATA"],
+                "motherboard":["LAST_COMMAND_FAILED", "POWER_ON_RESET"],
             },
         }
     });
