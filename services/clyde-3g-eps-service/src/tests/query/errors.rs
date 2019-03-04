@@ -21,7 +21,7 @@ fn query_errors_empty() {
     let config: Config = Default::default();
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
-    
+
     let query = r#"{
             errors
         }"#;
@@ -35,11 +35,10 @@ fn query_errors_empty() {
 
 #[test]
 fn query_errors_single() {
-    
-        let config: Config = Default::default();
+    let config: Config = Default::default();
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
-    
+
     let reset = r#"mutation {
         resetWatchdog {
             success
@@ -64,7 +63,7 @@ fn query_errors_multiple() {
     let config: Config = Default::default();
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
-    
+
     let reset = r#"mutation {
             resetWatchdog {
                 success
@@ -88,7 +87,7 @@ fn query_errors_multiple() {
 
 #[test]
 fn query_errors_clear_after_query() {
-        let config: Config = Default::default();
+    let config: Config = Default::default();
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 

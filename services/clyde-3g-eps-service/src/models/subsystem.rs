@@ -74,13 +74,14 @@ impl Subsystem {
         &self,
         telem_type: motherboard_telemetry::Type,
     ) -> Result<f64, String> {
-        let result = run!(self
-            .eps
-            .lock()
-            .unwrap()
-            .get_motherboard_telemetry(telem_type.into()),
-            self.errors)?;
-        
+        let result = run!(
+            self.eps
+                .lock()
+                .unwrap()
+                .get_motherboard_telemetry(telem_type.into()),
+            self.errors
+        )?;
+
         Ok(result)
     }
 
@@ -89,7 +90,10 @@ impl Subsystem {
         telem_type: daughterboard_telemetry::Type,
     ) -> Result<f64, String> {
         let eps = self.eps.lock().unwrap();
-        Ok(run!(eps.get_daughterboard_telemetry(telem_type.into()), self.errors)?)
+        Ok(run!(
+            eps.get_daughterboard_telemetry(telem_type.into()),
+            self.errors
+        )?)
     }
 
     pub fn get_reset_telemetry(
