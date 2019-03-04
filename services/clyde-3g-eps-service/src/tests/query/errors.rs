@@ -51,11 +51,21 @@ fn query_errors_single() {
             errors
         }"#;
 
-    let expected = json!({
-            "errors": ["reset_comms_watchdog (services/clyde-3g-eps-service/src/models/subsystem.rs:140): Generic Error"]
-    });
+    // The resulting error containg a line number, which changes every time this crate changes.
+    // We'll verify this result by parts in order to avoid having to update the test repeatedly
+    let result: Vec<u8> = request!(service, query)
+        .body()
+        .iter()
+        .map(|entry| *entry)
+        .collect();
+    let result: serde_json::Value =
+        serde_json::from_str(::std::str::from_utf8(&result).unwrap()).unwrap();
 
-    test!(service, query, expected);
+    let data = &result["data"]["errors"][0].as_str().unwrap();
+
+    assert!(data
+        .contains("reset_comms_watchdog (services/clyde-3g-eps-service/src/models/subsystem.rs"));
+    assert!(data.ends_with("Generic Error"));
 }
 
 #[test]
@@ -77,12 +87,22 @@ fn query_errors_multiple() {
             errors
         }"#;
 
-    let expected = json!({
-            "errors": ["reset_comms_watchdog (services/clyde-3g-eps-service/src/models/subsystem.rs:140): Generic Error",
-                    "reset_comms_watchdog (services/clyde-3g-eps-service/src/models/subsystem.rs:140): Generic Error"]
-    });
+    let result: Vec<u8> = request!(service, query)
+        .body()
+        .iter()
+        .map(|entry| *entry)
+        .collect();
+    let result: serde_json::Value =
+        serde_json::from_str(::std::str::from_utf8(&result).unwrap()).unwrap();
 
-    test!(service, query, expected);
+    for index in 0..2 {
+        let data = &result["data"]["errors"][index].as_str().unwrap();
+
+        assert!(data.contains(
+            "reset_comms_watchdog (services/clyde-3g-eps-service/src/models/subsystem.rs"
+        ));
+        assert!(data.ends_with("Generic Error"));
+    }
 }
 
 #[test]
