@@ -190,7 +190,7 @@ impl Subsystem {
             }),
         }
     }
-    
+
     /// Pass raw command values through to the EPS
     pub fn raw_command(&self, command: u8, data: Vec<u8>) -> Result<MutationResponse, String> {
         let eps = self.eps.lock().unwrap();

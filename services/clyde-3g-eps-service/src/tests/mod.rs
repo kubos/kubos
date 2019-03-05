@@ -14,16 +14,13 @@
 // limitations under the License.
 //
 
-use crate::models::subsystem::{Mutations, Subsystem};
-use crate::models::*;
+use crate::models::subsystem::Subsystem;
 use crate::schema::mutation::Root as MutationRoot;
 use crate::schema::query::Root as QueryRoot;
 use clyde_3g_eps_api::*;
 use eps_api::*;
 use kubos_service::{Config, Service};
 use serde_json::json;
-use std::cell::{Cell, RefCell};
-use std::sync::{Arc, Mutex};
 
 struct MockBadEps {}
 
@@ -46,28 +43,28 @@ impl Clyde3gEps for MockBadEps {
     fn reset_comms_watchdog(&self) -> EpsResult<()> {
         Err(EpsError::GenericError)
     }
-    fn get_motherboard_telemetry(&self, telem_type: MotherboardTelemetry::Type) -> EpsResult<f64> {
+    fn get_motherboard_telemetry(&self, _telem_type: MotherboardTelemetry::Type) -> EpsResult<f64> {
         Err(EpsError::GenericError)
     }
     fn get_daughterboard_telemetry(
         &self,
-        telem_type: DaughterboardTelemetry::Type,
+        _telem_type: DaughterboardTelemetry::Type,
     ) -> EpsResult<f64> {
         Err(EpsError::GenericError)
     }
     fn get_reset_telemetry(
         &self,
-        telem_type: ResetTelemetry::Type,
+        _telem_type: ResetTelemetry::Type,
     ) -> EpsResult<ResetTelemetry::Data> {
         Err(EpsError::GenericError)
     }
-    fn set_comms_watchdog_period(&self, period: u8) -> EpsResult<()> {
+    fn set_comms_watchdog_period(&self, _period: u8) -> EpsResult<()> {
         Err(EpsError::GenericError)
     }
     fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
         Err(EpsError::GenericError)
     }
-    fn raw_command(&self, cmd: u8, data: Vec<u8>) -> EpsResult<()> {
+    fn raw_command(&self, _cmd: u8, _data: Vec<u8>) -> EpsResult<()> {
         Err(EpsError::GenericError)
     }
 }
@@ -115,12 +112,12 @@ impl Clyde3gEps for MockGoodEps {
     fn reset_comms_watchdog(&self) -> EpsResult<()> {
         Ok(())
     }
-    fn get_motherboard_telemetry(&self, telem_type: MotherboardTelemetry::Type) -> EpsResult<f64> {
+    fn get_motherboard_telemetry(&self, _telem_type: MotherboardTelemetry::Type) -> EpsResult<f64> {
         Ok(105.13)
     }
     fn get_daughterboard_telemetry(
         &self,
-        telem_type: DaughterboardTelemetry::Type,
+        _telem_type: DaughterboardTelemetry::Type,
     ) -> EpsResult<f64> {
         Ok(101.55)
     }
@@ -140,13 +137,13 @@ impl Clyde3gEps for MockGoodEps {
             daughterboard: Some(daughterboard),
         })
     }
-    fn set_comms_watchdog_period(&self, period: u8) -> EpsResult<()> {
+    fn set_comms_watchdog_period(&self, _period: u8) -> EpsResult<()> {
         Ok(())
     }
     fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
         Ok(10)
     }
-    fn raw_command(&self, cmd: u8, data: Vec<u8>) -> EpsResult<()> {
+    fn raw_command(&self, _cmd: u8, _data: Vec<u8>) -> EpsResult<()> {
         Ok(())
     }
 }
