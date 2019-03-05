@@ -32,7 +32,10 @@ macro_rules! make_telemetry {
         /// See Table 11-8 in the EPS' User Manual for more information
         #[derive(Clone, Hash, Debug, Eq, GraphQLEnum, PartialEq)]
         pub enum Type {
-            $($type,)+
+            $(
+                /// $type
+                $type,
+            )+
         }
 
         impl Into<DaughterboardTelemetryType> for Type {

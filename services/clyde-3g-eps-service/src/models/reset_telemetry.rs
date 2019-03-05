@@ -14,14 +14,19 @@
 // limitations under the License.
 //
 
+//! Data returned by `reset` telemetry query
+
 use crate::schema::Context;
 use clyde_3g_eps_api::ResetTelemetry::Data as ResetTelemetryData;
 use clyde_3g_eps_api::ResetTelemetry::Type as ResetTelemetryType;
 use juniper::FieldResult;
 
+/// Reset count telemetry structure used by each reset type
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct Data {
+    /// Motherboard reset count
     pub motherboard: i32,
+    /// Daughterboard reset count
     pub daughterboard: Option<i32>,
 }
 
@@ -34,11 +39,16 @@ impl Into<Data> for ResetTelemetryData {
     }
 }
 
+/// Reset types
 #[derive(Clone, Debug, Eq, Hash, GraphQLEnum, PartialEq)]
 pub enum Type {
+    /// Brown-out reset
     BrownOut,
+    /// Reset automatically triggered by the EPS when it experiences a malfunction
     AutomaticSoftware,
+    /// Manual reset
     Manual,
+    /// Reset triggered by the I2C watchdog
     Watchdog,
 }
 
@@ -53,6 +63,7 @@ impl Into<ResetTelemetryType> for Type {
     }
 }
 
+/// High-level reset telemetry structure
 pub struct Telemetry;
 
 graphql_object!(Telemetry: Context as "ResetTelemetry" |&self| {

@@ -14,11 +14,14 @@
 // limitations under the License.
 //
 
+//! Service mutations
+
 use crate::models::subsystem::Mutations;
 use crate::models::MutationResponse;
 use crate::schema::Context;
 use juniper::FieldResult;
 
+/// Top-level mutation root structure
 pub struct Root;
 
 /// Base GraphQL mutation model

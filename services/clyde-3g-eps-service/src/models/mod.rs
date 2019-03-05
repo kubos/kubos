@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+//! EPS system components
+
 /// GenericResponse struct for use in queries or mutations without an explicit response
 #[derive(GraphQLObject)]
 pub struct MutationResponse {

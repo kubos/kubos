@@ -14,19 +14,28 @@
 // limitations under the License.
 //
 
+//! Data returned by `motherboardTelemetry` telemetry query
+
 use crate::schema::Context;
 use clyde_3g_eps_api::MotherboardTelemetry::Type as MotherboardTelemetryType;
 use juniper::FieldResult;
 
+/// Motherboard telemetry structure
 pub struct Telemetry;
 
 macro_rules! make_telemetry {
     (
         $($type: ident,)+
     ) => {
+        /// Motherboard telemetry values
+        ///
+        /// See Table 11-7 in the EPS' User Manual for more information
         #[derive(Clone, Debug, Hash, Eq, GraphQLEnum, PartialEq)]
         pub enum Type {
-            $($type,)+
+            $(
+                /// $type
+                $type,
+            )+
         }
 
         impl Into<MotherboardTelemetryType> for Type {

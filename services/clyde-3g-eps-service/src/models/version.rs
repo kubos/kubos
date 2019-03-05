@@ -14,17 +14,25 @@
 // limitations under the License.
 //
 
+//! Data returned by the `version` telemetry query
+
 use clyde_3g_eps_api::{Version, VersionInfo};
 
+/// Board version informaton
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct VersionNum {
+    /// Revision number of the firmware
     pub revision: i32,
+    /// Firmware version number
     pub firmware_number: i32,
 }
 
+/// High-level version data structure
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct VersionData {
+    /// Motherboard version information
     pub motherboard: VersionNum,
+    /// Daugtherboard version information
     pub daughterboard: Option<VersionNum>,
 }
 

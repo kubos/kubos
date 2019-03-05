@@ -14,10 +14,13 @@
 // limitations under the License.
 //
 
+//! Service queries
+
 use crate::models::*;
 use crate::schema::Context;
 use juniper::FieldResult;
 
+/// Telemetry query structure
 pub struct Telemetry;
 
 graphql_object!(Telemetry: Context as "telemetry" |&self| {
@@ -79,6 +82,7 @@ graphql_object!(Telemetry: Context as "telemetry" |&self| {
     }
 });
 
+/// Top-level query root structure
 pub struct Root;
 
 /// Base GraphQL query

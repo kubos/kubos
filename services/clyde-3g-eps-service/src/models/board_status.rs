@@ -20,7 +20,7 @@ use clyde_3g_eps_api::BoardStatus;
 
 /// Board status flags
 ///
-/// Returned structure contains stringified versions of the [StatusCode flags](../clyde_3g_eps_api/struct.StatusCode.html)
+/// Returned structure contains stringified versions of the [StatusCode flags](../../../clyde_3g_eps_api/struct.StatusCode.html)
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct BoardData {
     /// Status flags for the motherboard

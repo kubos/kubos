@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+//! Main module used for interacting with the underlying EPS API
+
 use crate::models::*;
 use clyde_3g_eps_api::{Clyde3gEps, Eps};
 use eps_api::EpsResult;
@@ -23,12 +25,18 @@ use std::sync::{Arc, Mutex, RwLock};
 use std::thread;
 use std::time::Duration;
 
+/// Enum for tracking the last mutation executed
 #[derive(Copy, Clone, Debug, Eq, Hash, GraphQLEnum, PartialEq)]
 pub enum Mutations {
+    /// No mutation has been run since the service was started
     None,
+    /// Manual reset
     ManualReset,
+    /// Raw passthrough command
     RawCommand,
+    /// Watchdog reset
     ResetWatchdog,
+    /// Set watchdog period
     SetWatchdogPeriod,
 }
 
@@ -39,15 +47,21 @@ fn watchdog_thread(eps: Arc<Mutex<Box<Clyde3gEps + Send>>>) {
     }
 }
 
+/// Main structure for controlling and accessing system resources
 #[derive(Clone)]
 pub struct Subsystem {
+    /// Underlying EPS object
     pub eps: Arc<Mutex<Box<Clyde3gEps + Send>>>,
+    /// Last mutation executed
     pub last_mutation: Arc<RwLock<Mutations>>,
+    /// Errors accumulated over all queries and mutations
     pub errors: Arc<RwLock<Vec<String>>>,
+    /// Watchdog kicking thread handle
     pub watchdog_handle: Arc<Mutex<thread::JoinHandle<()>>>,
 }
 
 impl Subsystem {
+    /// Create a new subsystem instance for the service to use
     pub fn new(eps: Box<Clyde3gEps + Send>) -> EpsResult<Self> {
         let eps = Arc::new(Mutex::new(eps));
         let thread_eps = eps.clone();
@@ -61,6 +75,7 @@ impl Subsystem {
         })
     }
 
+    /// Create the underlying EPS object and then create a new subsystem which will use it
     pub fn from_path(bus: &str) -> EpsResult<Self> {
         let clyde_eps: Box<Clyde3gEps + Send> =
             Box::new(Eps::new(Connection::from_path(bus, 0x2B)));
@@ -69,6 +84,7 @@ impl Subsystem {
 }
 
 impl Subsystem {
+    /// Get the requested telemetry item from the motherboard
     pub fn get_motherboard_telemetry(
         &self,
         telem_type: motherboard_telemetry::Type,
@@ -84,6 +100,7 @@ impl Subsystem {
         Ok(result)
     }
 
+    /// Get the requested telemetry item from the daughterboard
     pub fn get_daughterboard_telemetry(
         &self,
         telem_type: daughterboard_telemetry::Type,
@@ -95,6 +112,7 @@ impl Subsystem {
         )?)
     }
 
+    /// Get the specific type of reset counts
     pub fn get_reset_telemetry(
         &self,
         telem_type: reset_telemetry::Type,
@@ -103,26 +121,31 @@ impl Subsystem {
         Ok(run!(eps.get_reset_telemetry(telem_type.into()), self.errors)?.into())
     }
 
+    /// Get the current watchdog period setting
     pub fn get_comms_watchdog_period(&self) -> Result<u8, String> {
         let eps = self.eps.lock().unwrap();
         Ok(run!(eps.get_comms_watchdog_period(), self.errors)?)
     }
 
+    /// Get the system version information
     pub fn get_version(&self) -> Result<version::VersionData, String> {
         let eps = self.eps.lock().unwrap();
         Ok(run!(eps.get_version_info(), self.errors)?.into())
     }
 
+    /// Get the current board status
     pub fn get_board_status(&self) -> Result<board_status::BoardData, String> {
         let eps = self.eps.lock().unwrap();
         Ok(run!(eps.get_board_status(), self.errors)?.into())
     }
 
+    /// Get the last error the EPS encountered
     pub fn get_last_eps_error(&self) -> Result<last_error::Data, String> {
         let eps = self.eps.lock().unwrap();
         Ok(run!(eps.get_last_error(), self.errors)?.into())
     }
 
+    /// Trigger a manual reset of the EPS
     pub fn manual_reset(&self) -> Result<MutationResponse, String> {
         let eps = self.eps.lock().unwrap();
         match run!(eps.manual_reset(), self.errors) {
@@ -138,6 +161,7 @@ impl Subsystem {
         }
     }
 
+    /// Kick the I2C watchdog
     pub fn reset_watchdog(&self) -> Result<MutationResponse, String> {
         let eps = self.eps.lock().unwrap();
         match run!(eps.reset_comms_watchdog(), self.errors) {
@@ -152,6 +176,7 @@ impl Subsystem {
         }
     }
 
+    /// Set the I2C watchdog timeout period
     pub fn set_watchdog_period(&self, period: u8) -> Result<MutationResponse, String> {
         let eps = self.eps.lock().unwrap();
         match run!(eps.set_comms_watchdog_period(period), self.errors) {
@@ -165,7 +190,8 @@ impl Subsystem {
             }),
         }
     }
-
+    
+    /// Pass raw command values through to the EPS
     pub fn raw_command(&self, command: u8, data: Vec<u8>) -> Result<MutationResponse, String> {
         let eps = self.eps.lock().unwrap();
         match run!(eps.raw_command(command, data), self.errors) {
@@ -181,12 +207,14 @@ impl Subsystem {
         }
     }
 
+    /// Record the last mutation executed by the service
     pub fn set_last_mutation(&self, mutation: Mutations) {
         if let Ok(mut last_cmd) = self.last_mutation.write() {
             *last_cmd = mutation;
         }
     }
 
+    /// Fetch all errors since the last time this function was called, then clear the errors storage
     pub fn get_errors(&self) -> EpsResult<Vec<String>> {
         match self.errors.write() {
             Ok(mut master_vec) => {
