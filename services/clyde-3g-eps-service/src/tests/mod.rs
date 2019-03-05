@@ -21,15 +21,21 @@ use clyde_3g_eps_api::*;
 use eps_api::*;
 use kubos_service::{Config, Service};
 use serde_json::json;
+use std::sync::{Arc, Mutex};
 
-struct MockBadEps {}
+struct MockBadEps {
+    checksum: Arc<Mutex<clyde_3g_eps_api::Checksum>>,
+}
 
 impl Clyde3gEps for MockBadEps {
     fn get_board_status(&self) -> EpsResult<BoardStatus> {
         Err(EpsError::GenericError)
     }
     fn get_checksum(&self) -> EpsResult<Checksum> {
-        Err(EpsError::GenericError)
+        let mut checksum = self.checksum.lock().unwrap();
+        checksum.motherboard += 1;
+        checksum.daughterboard = Some(checksum.daughterboard.clone().unwrap() + 1);
+        Ok(checksum.clone())
     }
     fn get_version_info(&self) -> EpsResult<VersionInfo> {
         Err(EpsError::GenericError)
@@ -70,7 +76,12 @@ impl Clyde3gEps for MockBadEps {
 }
 
 fn gen_mock_bad_eps() -> Box<Clyde3gEps + Send> {
-    Box::new(MockBadEps {})
+    Box::new(MockBadEps {
+        checksum: Arc::new(Mutex::new(clyde_3g_eps_api::Checksum {
+            motherboard: 5,
+            daughterboard: Some(6),
+        })),
+    })
 }
 
 struct MockGoodEps {}

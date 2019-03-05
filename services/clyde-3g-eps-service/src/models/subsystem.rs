@@ -17,7 +17,7 @@
 //! Main module used for interacting with the underlying EPS API
 
 use crate::models::*;
-use clyde_3g_eps_api::{Clyde3gEps, Eps};
+use clyde_3g_eps_api::{Checksum, Clyde3gEps, Eps};
 use eps_api::EpsResult;
 use failure::Error;
 use rust_i2c::*;
@@ -30,6 +30,8 @@ use std::time::Duration;
 pub enum Mutations {
     /// No mutation has been run since the service was started
     None,
+    /// No-op
+    Noop,
     /// Manual reset
     ManualReset,
     /// Raw passthrough command
@@ -38,6 +40,8 @@ pub enum Mutations {
     ResetWatchdog,
     /// Set watchdog period
     SetWatchdogPeriod,
+    /// Hardware test
+    TestHardware,
 }
 
 fn watchdog_thread(eps: Arc<Mutex<Box<Clyde3gEps + Send>>>) {
@@ -58,6 +62,8 @@ pub struct Subsystem {
     pub errors: Arc<RwLock<Vec<String>>>,
     /// Watchdog kicking thread handle
     pub watchdog_handle: Arc<Mutex<thread::JoinHandle<()>>>,
+    /// Last known checksum of EPS ROM
+    pub checksum: Arc<Mutex<Checksum>>,
 }
 
 impl Subsystem {
@@ -72,6 +78,7 @@ impl Subsystem {
             last_mutation: Arc::new(RwLock::new(Mutations::None)),
             errors: Arc::new(RwLock::new(vec![])),
             watchdog_handle: Arc::new(Mutex::new(watchdog)),
+            checksum: Arc::new(Mutex::new(Checksum::default())),
         })
     }
 
@@ -145,11 +152,32 @@ impl Subsystem {
         Ok(run!(eps.get_last_error(), self.errors)?.into())
     }
 
+    /// Get the current power state of the EPS
+    pub fn get_power(&self) -> Result<GetPowerResponse, String> {
+        let eps = self.eps.lock().unwrap();
+        if let Ok(data) = eps.get_version_info() {
+            let daughterboard = if data.daughterboard.is_some() {
+                PowerState::On
+            } else {
+                PowerState::Off
+            };
+
+            Ok(GetPowerResponse {
+                motherboard: PowerState::On,
+                daughterboard,
+            })
+        } else {
+            Ok(GetPowerResponse {
+                motherboard: PowerState::Off,
+                daughterboard: PowerState::Off,
+            })
+        }
+    }
+
     /// Trigger a manual reset of the EPS
     pub fn manual_reset(&self) -> Result<MutationResponse, String> {
         let eps = self.eps.lock().unwrap();
         match run!(eps.manual_reset(), self.errors) {
-            // TODO: What does manual_reset return?
             Ok(_v) => Ok(MutationResponse {
                 success: true,
                 errors: "".to_string(),
@@ -195,11 +223,55 @@ impl Subsystem {
     pub fn raw_command(&self, command: u8, data: Vec<u8>) -> Result<MutationResponse, String> {
         let eps = self.eps.lock().unwrap();
         match run!(eps.raw_command(command, data), self.errors) {
-            // TODO: do something with the returned data?
             Ok(_v) => Ok(MutationResponse {
                 success: true,
                 errors: "".to_string(),
             }),
+            Err(e) => Ok(MutationResponse {
+                success: false,
+                errors: e,
+            }),
+        }
+    }
+
+    /// Run hardware tests to check system health
+    pub fn test_hardware(&self) -> Result<MutationResponse, String> {
+        let eps = self.eps.lock().unwrap();
+        match run!(eps.get_checksum(), self.errors) {
+            Ok(new_data) => {
+                let mut errors = vec![];
+                let mut success = true;
+
+                let mut old_data = self.checksum.lock().unwrap();
+
+                // Compare the new checksum values to the previously fetched ones
+                if old_data.motherboard != 0 {
+                    if old_data.motherboard != new_data.motherboard {
+                        success = false;
+                        errors.push(format!(
+                            "Motherboard checksum changed: {} -> {}",
+                            old_data.motherboard, new_data.motherboard
+                        ));
+                    }
+
+                    if old_data.daughterboard != new_data.daughterboard {
+                        success = false;
+                        errors.push(format!(
+                            "Daughterboard checksum changed: {:?} -> {:?}",
+                            old_data.daughterboard, new_data.daughterboard
+                        ));
+                    }
+                }
+
+                // Update the stored values
+                old_data.motherboard = new_data.motherboard;
+                old_data.daughterboard = new_data.daughterboard;
+
+                Ok(MutationResponse {
+                    success,
+                    errors: errors.join(". "),
+                })
+            }
             Err(e) => Ok(MutationResponse {
                 success: false,
                 errors: e,

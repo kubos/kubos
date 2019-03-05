@@ -17,6 +17,8 @@
 use super::*;
 
 mod manual_reset;
-//TODO: mod raw_command;
+mod noop;
+mod raw_command;
 mod reset_watchdog;
 mod set_watchdog;
+mod test_hardware;

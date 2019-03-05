@@ -34,6 +34,31 @@ fn ack_default() {
 }
 
 #[test]
+fn ack_noop() {
+    let config: Config = Default::default();
+    let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_good_eps()).unwrap());
+    let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
+
+    let mutation = r#"mutation {
+            noop {
+                success
+            }
+        }"#;
+
+    request!(service, mutation);
+
+    let query = r#"{
+            ack
+        }"#;
+
+    let expected = json!({
+            "ack": "NOOP"
+    });
+
+    test!(service, query, expected);
+}
+
+#[test]
 fn ack_manual_reset() {
     let config: Config = Default::default();
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_good_eps()).unwrap());

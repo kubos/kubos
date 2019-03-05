@@ -78,6 +78,20 @@
 //! }
 //! ```
 //!
+//! ### Power
+//!
+//! Get the system power status
+//! Returns a [PowerState](models/enum.PowerState.html) value.
+//!
+//! ```json
+//! {
+//!		power {
+//! 		motherboard: PowerState,
+//!      	daughterboard: PowerState,
+//!    	}
+//! }
+//! ```
+//!
 //! ### Telemetry
 //!
 //! #### Version Info
@@ -298,6 +312,19 @@
 //!
 //! ## Mutations
 //!
+//! ### No-Op
+//!
+//! Execute a trivial command against the system.
+//!
+//! ```json
+//! mutation {
+//! 	noop {
+//! 		success: Boolean!
+//! 		errors: String!
+//! 	}
+//! }
+//! ```
+//!
 //! ### Manual Reset
 //!
 //! Manually reset the EPS.
@@ -355,6 +382,20 @@
 //! }
 //! ```
 //!
+//! ### Test Hardware
+//!
+//! Perform a system test
+//!
+//! - test: Specific test to perform. Should be `HARDWARE`
+//!
+//! ```json
+//!  mutation {
+//!  	testHardware(test: TestType) {
+//!  		success: Boolean!
+//!  		errors: String!
+//!  	}
+//!  }
+//! ```
 
 #![deny(missing_docs)]
 #![deny(warnings)]

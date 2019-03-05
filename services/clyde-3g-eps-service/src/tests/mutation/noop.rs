@@ -16,20 +16,48 @@
 
 use super::*;
 
-mod ack;
-mod errors;
-mod power;
-mod telemetry;
+#[test]
+fn noop_good() {
+    let config: Config = Default::default();
+    let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_good_eps()).unwrap());
+    let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
+
+    let query = r#"mutation {
+            noop {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+        "noop": {
+            "errors": "",
+            "success": true
+        }
+    });
+
+    test!(service, query, expected);
+}
 
 #[test]
-fn test_ping() {
+fn noop_bad() {
     let config: Config = Default::default();
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
-    let query = r#"{ ping }"#;
+    let query = r#"mutation {
+            noop {
+                errors,
+                success,
+            }
+        }"#;
 
-    let expected = json!({"ping":"pong"});
+    let expected = json!({
+        "noop": {
+            "errors": "Generic Error",
+            "success": false
+        }
+    });
 
     test!(service, query, expected);
 }

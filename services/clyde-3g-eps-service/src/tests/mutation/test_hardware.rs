@@ -17,22 +17,57 @@
 use super::*;
 
 #[test]
-fn issue_raw_good() {
+fn hardware_good() {
     let config: Config = Default::default();
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_good_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
     let query = r#"mutation {
-            issueRawCommand(command: 64, data: [0]) {
+            testHardware(test: HARDWARE) {
                 errors,
                 success
             }
         }"#;
 
     let expected = json!({
-        "issueRawCommand": {
+        "testHardware": {
             "errors": "",
             "success": true
+        }
+    });
+
+    test!(service, query, expected);
+    // Have to run the test twice in order for the service to actually have an old checksum
+    // value to compare against
+    test!(service, query, expected);
+}
+
+#[test]
+fn hardware_bad() {
+    let config: Config = Default::default();
+    let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
+    let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
+
+    let query = r#"mutation {
+            testHardware(test: HARDWARE) {
+                errors,
+                success
+            }
+        }"#;
+
+    let expected = json!({
+        "testHardware": {
+            "errors": "",
+            "success": true
+        }
+    });
+
+    test!(service, query, expected);
+
+    let expected = json!({
+        "testHardware": {
+            "errors": "Motherboard checksum changed: 6 -> 7. Daughterboard checksum changed: Some(7) -> Some(8)",
+            "success": false
         }
     });
 
@@ -40,21 +75,21 @@ fn issue_raw_good() {
 }
 
 #[test]
-fn issue_raw_bad() {
+fn integration() {
     let config: Config = Default::default();
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
     let query = r#"mutation {
-            issueRawCommand(command: 65, data: [0]) {
+            testHardware(test: INTEGRATION) {
                 errors,
                 success
             }
         }"#;
 
     let expected = json!({
-        "issueRawCommand": {
-            "errors": "Generic Error",
+        "testHardware": {
+            "errors": "Not Implemented",
             "success": false
         }
     });

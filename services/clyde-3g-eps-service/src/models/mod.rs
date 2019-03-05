@@ -16,13 +16,42 @@
 
 //! EPS system components
 
-/// GenericResponse struct for use in queries or mutations without an explicit response
+/// Generic mutation response struct
 #[derive(GraphQLObject)]
 pub struct MutationResponse {
     /// Any errors which occurred during query
     pub errors: String,
     /// Success or fail status of query
     pub success: bool,
+}
+
+/// Generic mutation response struct
+#[derive(GraphQLEnum)]
+pub enum PowerState {
+    /// System is on
+    On,
+    /// System is off
+    Off,
+}
+
+/// System power status
+#[derive(GraphQLObject)]
+pub struct GetPowerResponse {
+    /// Motherboard power status
+    pub motherboard: PowerState,
+    /// Daughterboard power status
+    pub daughterboard: PowerState,
+}
+
+/// Input field for 'testHardware' mutation
+///
+/// Indicates which test should be run against the AntS device
+#[derive(GraphQLEnum)]
+pub enum TestType {
+    /// Integration (non-invasive) test
+    Integration,
+    /// Hardware (invasive) test
+    Hardware,
 }
 
 pub mod board_status;

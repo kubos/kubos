@@ -16,20 +16,48 @@
 
 use super::*;
 
-mod ack;
-mod errors;
-mod power;
-mod telemetry;
+#[test]
+fn get_power_good() {
+    let config: Config = Default::default();
+    let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_good_eps()).unwrap());
+    let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
+
+    let query = r#"{
+            power {
+                daughterboard,
+                motherboard
+            }
+        }"#;
+
+    let expected = json!({
+        "power": {
+            "daughterboard": "ON",
+            "motherboard": "ON"
+        }
+    });
+
+    test!(service, query, expected);
+}
 
 #[test]
-fn test_ping() {
+fn get_power_bad() {
     let config: Config = Default::default();
     let subsystem: Box<Subsystem> = Box::new(Subsystem::new(gen_mock_bad_eps()).unwrap());
     let service = Service::new(config, subsystem, QueryRoot, MutationRoot);
 
-    let query = r#"{ ping }"#;
+    let query = r#"{
+            power {
+                daughterboard,
+                motherboard
+            }
+        }"#;
 
-    let expected = json!({"ping":"pong"});
+    let expected = json!({
+        "power": {
+            "daughterboard": "OFF",
+            "motherboard": "OFF"
+        }
+    });
 
     test!(service, query, expected);
 }
