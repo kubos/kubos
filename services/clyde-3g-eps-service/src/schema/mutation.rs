@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 Kubos Corporation
+// Copyright (C) 2019 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     // Execute a trivial command against the system
     // 
     //  mutation {
-    //  	noop {
-    //  		success: Boolean!
-    //  		errors: String!
-    //  	}
+    //      noop {
+    //          success: Boolean!
+    //          errors: String!
+    //      }
     //  }
     field noop(&executor) -> FieldResult<MutationResponse>
         as "Run no-op command"
@@ -45,10 +45,10 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     //  Manually reset the EPS
     // 
     //  mutation {
-    //  	manualReset {
-    //  		success: Boolean!
-    //  		errors: String!
-    //  	}
+    //      manualReset {
+    //          success: Boolean!
+    //          errors: String!
+    //      }
     //  }
     field manual_reset(&executor) -> FieldResult<MutationResponse>
         as "Perform manual reset of EPS board"
@@ -60,10 +60,10 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     //  Reset the communications watchdog timer
     // 
     //  mutation {
-    //  	resetWatchdog {
-    //  		success: Boolean!
-    //  		errors: String!
-    //  	}
+    //      resetWatchdog {
+    //          success: Boolean!
+    //          errors: String!
+    //      }
     //  }
     field reset_watchdog(&executor) -> FieldResult<MutationResponse>
         as "Reset/kick communications watchdog"
@@ -77,10 +77,10 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     //  - period: New timeout period, in minutes
     // 
     //  mutation {
-    //  	setWatchdogPeriod(period: Int!) {
-    //  		success: Boolean!
-    //  		errors: String!
-    //  	}
+    //      setWatchdogPeriod(period: Int!) {
+    //          success: Boolean!
+    //          errors: String!
+    //      }
     //  }
     field set_watchdog_period(&executor, period: i32) -> FieldResult<MutationResponse>
         as "Set watchdog period (in minutes)"
@@ -95,10 +95,10 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     //  - data: Decimal values of the command parameters to send. Should be `[0]` if there are no additional parameters required.
     // 
     //  mutation {
-    //  	issueRawCommand(command: Int!, data: [Int!]) {
-    //  		success: Boolean!
-    //  		errors: String!
-    //  	}
+    //      issueRawCommand(command: Int!, data: [Int!]) {
+    //          success: Boolean!
+    //          errors: String!
+    //      }
     //  }
     field issue_raw_command(&executor, command: i32, data: Vec<i32>) -> FieldResult<MutationResponse>
         as "Issue raw command to EPS"
@@ -113,10 +113,10 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     // - test: Specific test to perform. Should be `HARDWARE`
     // 
     //  mutation {
-    //  	testHardware(test: TestType) {
-    //  		success: Boolean!
-    //  		errors: String!
-    //  	}
+    //      testHardware(test: TestType) {
+    //          success: Boolean!
+    //          errors: String!
+    //      }
     //  }
     field testHardware(&executor, test: TestType) -> FieldResult<MutationResponse>
         as "Test hardware"
