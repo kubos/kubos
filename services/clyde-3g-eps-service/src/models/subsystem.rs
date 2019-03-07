@@ -266,6 +266,8 @@ impl Subsystem {
                 // Update the stored values
                 old_data.motherboard = new_data.motherboard;
                 old_data.daughterboard = new_data.daughterboard;
+                
+                eprintln!("EPS checksums: {}, {:?}", old_data.motherboard, old_data.daughterboard);
 
                 Ok(MutationResponse {
                     success,

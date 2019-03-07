@@ -80,7 +80,7 @@
 //!
 //! ### Power
 //!
-//! Get the system power status
+//! Get the system power status.
 //! Returns a [PowerState](models/enum.PowerState.html) value.
 //!
 //! ```json
