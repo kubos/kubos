@@ -334,19 +334,15 @@ class MCU:
             
         if type(data) is str:
             data = data.encode()
-            
-        print("Unpacking {} ({}): {}".format(parsing, type(data), data))
 
         if parsing == "str":
             # Search for the null terminator,
             # return the leading string in a tuple
             str_data = data.split(b'\0')[0]
-            print("Unpacked str: {}".format(str_data))
             return (str_data.decode(),)
         elif parsing == "hex":
             # Store as a hex string. This is so we can return binary data.
             # Return as a single field in a tuple
-            print("Unpacking hex: {}".format(data))
             return (binascii.hexlify(data).decode(),)
 
         # All others parse directly with the parsing string.

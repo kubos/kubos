@@ -128,9 +128,7 @@ class Passthrough(graphene.Mutation):
         mcu = mcu_api.MCU(address=MODULES[module]['address'])
         try:
             out = mcu.write(command)
-    
             commandStatus = CommandStatus(status=out[0], command=out[1])
-    
             return commandStatus
         except Exception as e:
             logger.error("Failed to send passthrough to {}: {}".format(module, e))
