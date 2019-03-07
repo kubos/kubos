@@ -40,8 +40,6 @@ pub struct AppMetadata {
 pub struct App {
     /// The name of the application
     pub name: String,
-    /// The process ID of the application, if it's currently running (0 otherwise)
-    pub pid: u32,
     /// The absolute path to the application executable
     pub path: String,
     /// The version of this instance of the application

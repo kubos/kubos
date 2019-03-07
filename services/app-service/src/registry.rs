@@ -287,7 +287,6 @@ impl AppRegistry {
         let reg_entry = AppRegistryEntry {
             app: App {
                 name: app_name,
-                pid: 0,
                 path: format!("{}/{}", app_dir_str, app_exec),
                 version: metadata.version,
                 author: metadata.author,
