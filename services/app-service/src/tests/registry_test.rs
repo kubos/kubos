@@ -57,7 +57,7 @@ fn serialize_entry() {
             name: String::from("dummy"),
             version: String::from("0.0.1"),
             author: String::from("noone"),
-            path: String::from("/fake/path"),
+            executable: String::from("/fake/path"),
         },
         active_version: true,
     };
@@ -66,7 +66,7 @@ fn serialize_entry() {
     let parsed: AppRegistryEntry = toml::from_str(&str).unwrap();
 
     assert_eq!(parsed.active_version, dummy.active_version);
-    assert_eq!(parsed.app.path, dummy.app.path);
+    assert_eq!(parsed.app.executable, dummy.app.executable);
     assert_eq!(parsed.app.name, dummy.app.name);
     assert_eq!(parsed.app.version, dummy.app.version);
     assert_eq!(parsed.app.author, dummy.app.author);

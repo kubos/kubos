@@ -71,10 +71,10 @@ graphql_object!(KApp: () as "App" where Scalar = <S> |&self| {
         &self.0.author
     }
 
-    field path() -> &String
-        as "Absolute Path"
+    field executable() -> &String
+        as "Absolute Path to Exectuable"
     {
-        &self.0.path
+        &self.0.executable
     }
 });
 

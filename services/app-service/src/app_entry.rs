@@ -41,7 +41,7 @@ pub struct App {
     /// The name of the application
     pub name: String,
     /// The absolute path to the application executable
-    pub path: String,
+    pub executable: String,
     /// The version of this instance of the application
     pub version: String,
     /// The author of the application
@@ -80,7 +80,7 @@ impl AppRegistryEntry {
 
     // Create or update a registered apps entry information
     pub fn save(&self) -> Result<(), AppError> {
-        let mut app_toml = PathBuf::from(self.app.path.clone());
+        let mut app_toml = PathBuf::from(self.app.executable.clone());
         app_toml.set_file_name("app.toml");
 
         let mut file = fs::File::create(app_toml)?;
