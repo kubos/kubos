@@ -16,7 +16,10 @@
 #![deny(warnings)]
 
 use kubos_app::ServiceConfig;
+use std::fs;
 use std::panic;
+
+use tempfile::TempDir;
 
 mod utils;
 pub use crate::utils::*;
@@ -185,6 +188,107 @@ fn uninstall_all_app() {
 
     // Our app directory should now no longer exist
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), false);
+
+    fixture.teardown();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn uninstall_new_app() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = format!(
+        "{}",
+        fixture
+            .registry_dir
+            .path()
+            .join("config.toml")
+            .to_string_lossy()
+    );
+
+    // Pre-load the app registry
+    let mut app = MockAppBuilder::new("dummy");
+    app.active(true)
+        .run_level("OnBoot")
+        .version("0.0.2")
+        .author("user");
+
+    app.install(&fixture.registry_dir.path());
+
+    let mut app = MockAppBuilder::new("dummy");
+    app.active(true)
+        .run_level("OnBoot")
+        .version("0.0.3")
+        .author("user");
+
+    app.install(&fixture.registry_dir.path());
+
+    let mut app = MockAppBuilder::new("dummy2");
+    app.active(true)
+        .run_level("OnBoot")
+        .version("0.0.2")
+        .author("user");
+
+    app.install(&fixture.registry_dir.path());
+    fixture.start_service(false);
+
+    // Create a new version of our app to be installed
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    // We're intentionally making the version number "smaller" than prior version because it's
+    // more likely to cause problems that way
+    let manifest = r#"
+            name = "dummy"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let result = panic::catch_unwind(|| {
+        // Register the new version of the app
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            &format!(
+                r#"mutation {{
+                register(path: "{}") {{
+                    entry {{
+                        active, 
+                        app {{
+                            author,
+                            name,
+                            version,
+                        }}
+                    }},
+                    errors,
+                    success,
+                }}
+            }}"#,
+                app_bin.to_str().unwrap()
+            ),
+        );
+
+        assert!(result["register"]["success"].as_bool().unwrap());
+
+        // Uninstall the version we just registered
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            r#"mutation {
+            uninstall(name: "dummy", version: "0.0.1") {
+                errors,
+                success
+            }
+        }"#,
+        );
+
+        assert!(result["uninstall"]["success"].as_bool().unwrap());
+    });
+
+    // Our app directory should still exist since there's a version left in the registry
+    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
 
     fixture.teardown();
     assert!(result.is_ok());
