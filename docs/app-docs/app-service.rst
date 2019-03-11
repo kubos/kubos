@@ -3,9 +3,10 @@ Kubos Applications Service
 
 The Kubos applications service is responsible for monitoring and managing all mission applications for a system.
 
+The service is capable of tracking multiple versions of each application, allowing users to easily
+upgrade and rollback their mission applications when necessary.
+
 .. todo::
-    
-    TODO: Something something installation, upgrades, and recovery
     
     TODO: User/App/Service interaction diagram
 
@@ -172,8 +173,13 @@ For example::
             errors
         }
     }
-    
-    
+
+If the version of the application being uninstalled is also the current active version, the
+:ref:`setVersion <set-version>` mutation should be used in order to manually roll back to a prior
+version first.
+If the active version is not changed, then the system will not know which version to use the next
+time the application is started.
+
 .. _start-app:
     
 Starting an Application
@@ -247,7 +253,7 @@ rejected.
 ::
     
     mutation {
-        register(path: /home/kubos/payload-app) {
+        register(path: "/home/kubos/payload-app") {
             active,
             app {
                 name,
@@ -256,15 +262,24 @@ rejected.
         }
     }
         
-        
-.. todo::
+.. _set-version:
+
+Changing Versions
+-----------------
+
+Users may swap between different versions of an application by using the ``setVersion`` mutation.
+
+This is useful for manually rolling back to an older version of an application prior to uninstalling
+the current version.
+
+::
     
-    Recovery
-    //--------
-    
-    Is not a thing that actually exists yet...
-    
-    TODO: Automatic and manual rollback
+    mutation {
+        setVersion(name: "mission-app", version: "1.0") {
+            success,
+            errors
+        }
+    }
 
 Customizing the Applications Service
 ------------------------------------

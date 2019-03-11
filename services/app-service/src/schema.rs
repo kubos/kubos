@@ -92,6 +92,15 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         }
     }
 
+    field set_version(&executor, name: String, version: String) -> FieldResult<GenericResponse>
+        as "Set App Active Version"
+    {
+        Ok(match executor.context().subsystem().set_version(&name, &version) {
+            Ok(v) => GenericResponse { success: true, errors: "".to_owned() },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() },
+        })
+    }
+
     field start_app(&executor, name: String, run_level: String, args: Option<Vec<String>>) -> FieldResult<StartResponse>
         as "Start App"
     {
