@@ -34,7 +34,7 @@ fn start_app_good() {
     // control the lifetime of the app binary so that all the data gets written and the file gets
     // closed before we attempt to execute it
     {
-        let app_dir = registry_dir.path().join("a-b-c-d-e/1.0");
+        let app_dir = registry_dir.path().join("tiny-app/1.0");
 
         fs::create_dir_all(app_dir.clone()).unwrap();
 
@@ -55,11 +55,7 @@ fn start_app_good() {
                 run_level = "onCommand"
     
                 [app]
-                uuid = "a-b-c-d-e"
-                pid = 0
-                path = "{}/a-b-c-d-e/1.0/tiny-app"
-    
-                [app.metadata]
+                executable = "{}/tiny-app/1.0/tiny-app"
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
@@ -73,7 +69,7 @@ fn start_app_good() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("a-b-c-d-e", &RunLevel::OnCommand, None);
+    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None);
 
     // Small sleep to prevent tiny-app from being destroyed before
     // the system finishes calling it
@@ -91,7 +87,7 @@ fn start_app_fail() {
     // control the lifetime of the app binary so that all the data gets written and the file gets
     // closed before we attempt to execute it
     {
-        let app_dir = registry_dir.path().join("a-b-c-d-e/1.0");
+        let app_dir = registry_dir.path().join("tiny-app/1.0");
 
         fs::create_dir_all(app_dir.clone()).unwrap();
 
@@ -104,12 +100,8 @@ fn start_app_fail() {
                 run_level = "onCommand"
     
                 [app]
-                uuid = "a-b-c-d-e"
-                pid = 0
-                path = "{}/a-b-c-d-e/1.0/dummy"
-    
-                [app.metadata]
-                name = "dummy"
+                executable = "{}/tiny-app/1.0/dummy"
+                name = "tiny-app"
                 version = "1.0"
                 author = "user"
                 "#,
@@ -122,7 +114,7 @@ fn start_app_fail() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("a-b-c-d-e", &RunLevel::OnCommand, None);
+    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None);
 
     assert_eq!(
         result.unwrap_err(),
@@ -138,7 +130,7 @@ fn start_app_bad() {
 
     // Create a pre-existing app for our registry to discover,
     // but omit the actual executable file
-    let app_dir = registry_dir.path().join("a-b-c-d-e/1.0");
+    let app_dir = registry_dir.path().join("tiny-app/1.0");
 
     fs::create_dir_all(app_dir.clone()).unwrap();
 
@@ -148,11 +140,7 @@ fn start_app_bad() {
             run_level = "onCommand"
 
             [app]
-            uuid = "a-b-c-d-e"
-            pid = 0
-            path = "{}/a-b-c-d-e/1.0/tiny-app"
-
-            [app.metadata]
+            executable = "{}/tiny-app/1.0/tiny-app"
             name = "tiny-app"
             version = "1.0"
             author = "user"
@@ -165,11 +153,11 @@ fn start_app_bad() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("a-b-c-d-e", &RunLevel::OnCommand, None);
+    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None);
 
     match result.unwrap_err() {
         AppError::StartError { err } => {
-            assert!(err.contains("a-b-c-d-e/1.0/tiny-app does not exist. a-b-c-d-e version 1.0 automatically uninstalled"));
+            assert!(err.contains("tiny-app/1.0/tiny-app does not exist. tiny-app version 1.0 automatically uninstalled"));
         }
         other => panic!("Unexpected error received: {}", other),
     }
@@ -186,7 +174,7 @@ fn start_app_nonzero_rc() {
     // control the lifetime of the app binary so that all the data gets written and the file gets
     // closed before we attempt to execute it
     {
-        let app_dir = registry_dir.path().join("a-b-c-d-e/1.0");
+        let app_dir = registry_dir.path().join("tiny-app/1.0");
 
         fs::create_dir_all(app_dir.clone()).unwrap();
 
@@ -207,11 +195,7 @@ fn start_app_nonzero_rc() {
                 run_level = "onCommand"
     
                 [app]
-                uuid = "a-b-c-d-e"
-                pid = 0
-                path = "{}/a-b-c-d-e/1.0/tiny-app"
-    
-                [app.metadata]
+                executable = "{}/tiny-app/1.0/tiny-app"
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
@@ -225,7 +209,7 @@ fn start_app_nonzero_rc() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("a-b-c-d-e", &RunLevel::OnCommand, None);
+    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None);
 
     // Small sleep to prevent tiny-app from being destroyed before
     // the system finishes calling it

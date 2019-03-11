@@ -46,12 +46,11 @@ fn upgrade_new() {
 
     let upgrade_query = format!(
         r#"mutation {{
-        register(path: \"{}\", uuid: \"a-b-c-d-e\") {{
+        register(path: \"{}\") {{
             entry {{
                 active, 
                 app {{
                     name,
-                    uuid,
                     version,
                 }}
             }},
@@ -69,7 +68,6 @@ fn upgrade_new() {
                    "app": {
                        "name": "dummy",
                        "version": "0.0.1",
-                       "uuid": "a-b-c-d-e"
                    }
                },
                "errors": "",
@@ -101,12 +99,11 @@ fn upgrade_good() {
 
     let upgrade_query = format!(
         r#"mutation {{
-        register(path: \"{}\", uuid: \"a-b-c-d-e\") {{
+        register(path: \"{}\") {{
             entry {{
                 active, 
                 app {{
                     name,
-                    uuid,
                     version,
                 }}
             }},
@@ -124,7 +121,6 @@ fn upgrade_good() {
                    "app": {
                        "name": "dummy",
                        "version": "0.0.1",
-                       "uuid": "a-b-c-d-e"
                    }
                },
                "errors": "",
@@ -150,7 +146,6 @@ fn upgrade_good() {
                    "app": {
                        "name": "dummy",
                        "version": "0.0.2",
-                       "uuid": "a-b-c-d-e"
                    }
                },
                "errors": "",
@@ -162,11 +157,10 @@ fn upgrade_good() {
     test!(service, upgrade_query, expected);
 
     let app_query = r#"{ 
-            apps(uuid: \"a-b-c-d-e\") {
+            apps(name: \"dummy\") {
                 active,
                 app {
                     name,
-                    uuid,
                     version,
                 }
             }
@@ -180,7 +174,6 @@ fn upgrade_good() {
                        "app": {
                            "name": "dummy",
                            "version": "0.0.1",
-                           "uuid": "a-b-c-d-e"
                        }
                    },
                    {
@@ -188,7 +181,6 @@ fn upgrade_good() {
                        "app": {
                            "name": "dummy",
                            "version": "0.0.2",
-                           "uuid": "a-b-c-d-e"
                        }
                    }
                ]
@@ -197,132 +189,5 @@ fn upgrade_good() {
     // Verify:
     //   - There are two registered versions of the app
     //   - The 0.0.2 version is the active version
-    test!(service, app_query, expected);
-}
-
-#[test]
-fn upgrade_new_name() {
-    let registry_dir = TempDir::new().unwrap();
-    let service = mock_service!(registry_dir);
-
-    let app_dir = TempDir::new().unwrap();
-    let app_bin = app_dir.path().join("dummy-app");
-
-    fs::create_dir(app_bin.clone()).unwrap();
-
-    fs::File::create(app_bin.join("dummy")).unwrap();
-
-    let manifest = r#"
-            name = "dummy"
-            version = "0.0.1"
-            author = "user"
-            "#;
-    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
-
-    let upgrade_query = format!(
-        r#"mutation {{
-        register(path: \"{}\", uuid: \"a-b-c-d-e\") {{
-            entry {{
-                active, 
-                app {{
-                    name,
-                    uuid,
-                    version,
-                }}
-            }},
-            errors,
-            success
-        }}
-    }}"#,
-        app_bin.to_str().unwrap()
-    );
-
-    let expected = json!({
-           "register": {
-               "entry": {
-                  "active": true,
-                   "app": {
-                       "name": "dummy",
-                       "version": "0.0.1",
-                       "uuid": "a-b-c-d-e"
-                   }
-               },
-               "errors": "",
-               "success": true,
-           }
-    });
-
-    // Register the initial app so we have something to upgrade
-    test!(service, upgrade_query, expected);
-
-    // Delete the old app file
-    fs::remove_file(app_bin.join("dummy")).unwrap();
-    // Create the new app file
-    fs::File::create(app_bin.join("dummy2")).unwrap();
-
-    // Update the manifest for the new version of the app,
-    // with the new app file name
-    let manifest = r#"
-            name = "dummy2"
-            version = "0.0.2"
-            author = "user"
-            "#;
-    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
-
-    let expected = json!({
-           "register": {
-               "entry": {
-                  "active": true,
-                   "app": {
-                       "name": "dummy2",
-                       "version": "0.0.2",
-                       "uuid": "a-b-c-d-e"
-                   }
-               },
-               "errors": "",
-               "success": true,
-           }
-    });
-
-    // Register the new version
-    test!(service, upgrade_query, expected);
-
-    let app_query = r#"{ 
-            apps(uuid: \"a-b-c-d-e\") {
-                active,
-                app {
-                    name,
-                    uuid,
-                    version,
-                }
-            }
-        }
-    "#;
-
-    let expected = json!({
-               "apps": [
-                 {
-                      "active": false,
-                       "app": {
-                           "name": "dummy",
-                           "version": "0.0.1",
-                           "uuid": "a-b-c-d-e"
-                       }
-                   },
-                   {
-                      "active": true,
-                       "app": {
-                           "name": "dummy2",
-                           "version": "0.0.2",
-                           "uuid": "a-b-c-d-e"
-                       }
-                   }
-               ]
-    });
-
-    // Verify:
-    //   - There are two registered versions of the app
-    //   - The 0.0.2 version is the active version
-    //   - The app names are different
     test!(service, app_query, expected);
 }

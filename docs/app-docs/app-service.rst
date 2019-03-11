@@ -13,12 +13,23 @@ Whenever a new application is registered with the service, its manifest file and
 the specified directory are copied into the service's application registry.
 By default, this registry is stored under `/home/system/kubos/apps`.
 
-Each application will be automatically assigned a UUID to be used for identification purposes internally.
-Using UUIDs, rather than the application's name, allows users the freedom to adjust the application name as they see fit,
-for instance if the overall purpose of the application changes and they would like to update the name to reflect that in later versions.
+.. uml::
 
-.. figure:: ../images/app_registry.png
-   :alt: Application Registry
+    @startuml
+    
+    frame "App Service" {
+        
+        package "Main Mission App" {
+            rectangle [Version: 1.0\nActive: False]
+            rectangle [Version: 2.0\nActive: True]
+        }
+        
+        package "Payload App" {
+            rectangle [Version: 0.1\nActive: False]
+        }
+    }
+    
+    @enduml
 
 Communicating with the Service
 ------------------------------
@@ -39,7 +50,6 @@ For example::
         apps {
             active,
             app {
-                uuid,
                 name,
                 version
             }
@@ -52,7 +62,6 @@ Using our example registry, the data returned by the service would be::
             { 
                 "active": false,
                 "app": {
-                    "uuid": "46d01f19-ab45-4c6f-896e-88f90266f12e",
                     "name": "main-mission",
                     "version": "1.0"
                 }
@@ -60,7 +69,6 @@ Using our example registry, the data returned by the service would be::
             { 
                 "active": false,
                 "app": {
-                    "uuid": "46d01f19-ab45-4c6f-896e-88f90266f12e",
                     "name": "main-mission",
                     "version": "1.1"
                 }
@@ -68,7 +76,6 @@ Using our example registry, the data returned by the service would be::
             { 
                 "active": true,
                 "app": {
-                    "uuid": "46d01f19-ab45-4c6f-896e-88f90266f12e",
                     "name": "main-mission",
                     "version": "2.0"
                 }
@@ -76,7 +83,6 @@ Using our example registry, the data returned by the service would be::
             { 
                 "active": true,
                 "app": {
-                    "uuid": "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a",
                     "name": "payload-app",
                     "version": "1.0"
                 }
@@ -84,12 +90,12 @@ Using our example registry, the data returned by the service would be::
         ]
     }
 
-To list all available versions of a specific application, specify the desired UUID as an input parameter.
+To list all available versions of a specific application, specify the app's name as an input parameter.
 
 For example::
 
     {
-        apps(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a") {
+        apps(name: "main-mission") {
             app {
                 name,
                 version
@@ -113,8 +119,8 @@ property in the manifest file.
 It can then be registered with the applications service using the ``register`` mutation by specifying
 the directory containing the application files.
 
-The service will copy the application from the specified path into the apps registry.
-Once registered, users may delete the original application.
+The service will copy all of the contents from the specified path into the apps registry.
+Once registered, users may delete the original application files.
 
 For example::
 
@@ -154,7 +160,7 @@ The mutation returns two fields:
 For example::
 
     mutation {
-        uninstall(uuid: "46d01f19-ab45-4c6f-896e-88f90266f12e", version: "1.1") {
+        uninstall(name: "main-mission", version: "1.1") {
             success,
             errors
         }
@@ -168,7 +174,7 @@ Starting an Application
 
 To manually start an application, the ``startApp`` mutation can be used.
 
-The mutation takes two arguments: the UUID of the application to start and the run level which the
+The mutation takes two arguments: the name of the application to start and the run level which the
 app should execute with.
 
 The mutation will return three fields:
@@ -180,7 +186,7 @@ The mutation will return three fields:
 For example::
 
     mutation {
-        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand") {
+        startApp(name: "mission-app", runLevel: "OnCommand") {
             success,
             errors,
             pid
@@ -201,7 +207,7 @@ To pass additional arguments to the underlying application, the ``args`` input a
 For example::
 
     mutation {
-        startApp(uuid: "60ff7516-a5c4-4fea-bdea-1b163ee9bd7a", runLevel: "OnCommand", args: "--verbose --release") {
+        startApp(name: "mission-app", runLevel: "OnCommand", args: "--verbose --release") {
             success
         }
     }
@@ -226,14 +232,15 @@ Upgrading
 
 Users may register a new version of an application without needing to remove the existing registration.
 
-To do this, they will use the ``register`` mutation with the optional ``uuid`` input parameter.
-An application's UUID is given as a return field of the ``register`` mutation and can also be looked up
-using the ``apps`` query.
+To do this, they will re-use the ``register`` mutation.
+However, the version number specified in the `manifest.toml` file must be unique.
+If an application with the specified name and version already exists, the registration will be
+rejected.
 
 ::
     
     mutation {
-        register(path: /home/kubos/payload-app, uuid: 60ff7516-a5c4-4fea-bdea-1b163ee9bd7a) {
+        register(path: /home/kubos/payload-app) {
             active,
             app {
                 name,
