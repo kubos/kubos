@@ -150,7 +150,14 @@ error message detailing what went wrong.
 De-Registering
 --------------
 
-A particular version of an application can be removed using the ``uninstall`` mutation.
+The ``uninstall`` mutation can be used to either uninstall a single version of an application, or
+to uninstall all versions of an application.
+
+The mutation takes one required argument, ``name``, specifying the name of the application to be
+removed.
+There is also one optional argument, ``version``, which specifies a particular version of the
+application which should be uninstalled.
+If ``version`` is omitted, then all known versions of the application are uninstalled.
 
 The mutation returns two fields:
 
