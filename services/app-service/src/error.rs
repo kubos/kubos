@@ -64,6 +64,12 @@ pub enum AppError {
         /// Error description
         description: String,
     },
+    /// A catch-all error for the service
+    #[fail(display = "{}", err)]
+    SystemError {
+        /// Underlying error encountered
+        err: String,
+    },
 }
 
 impl From<::std::io::Error> for AppError {
