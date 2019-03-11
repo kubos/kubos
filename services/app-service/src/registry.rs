@@ -235,20 +235,15 @@ impl AppRegistry {
             err: format!("Couldn't get entries mutex: {:?}", err),
         })?;
 
-        let app_dir_str = format!("{}/{}", self.apps_dir, app_name,);
-        let app_dir = Path::new(&app_dir_str);
-
-        // Check if the app has been registered before
-        if app_dir.exists() {
-            // Find the existing active version of the app and make it inactive
-            for entry in entries.iter_mut() {
-                if entry.active_version && entry.app.name == app_name {
-                    entry.active_version = false;
-                    entry.save()?;
-                    break;
-                }
-            }
-        }
+        // If the app has been registered before, get the index of the current active version.
+        // We'll use this information later
+        let old_active = if Path::new(&format!("{}/{}", self.apps_dir, app_name)).exists() {
+            entries
+                .iter()
+                .position(|ref e| e.active_version && e.app.name == app_name)
+        } else {
+            None
+        };
 
         // Set up the directory for this new version of the app
         let app_dir_str = format!("{}/{}/{}", self.apps_dir, app_name, metadata.version);
@@ -277,16 +272,22 @@ impl AppRegistry {
             .collect();
 
         fs_extra::copy_items(&files, app_dir, &fs_extra::dir::CopyOptions::new()).map_err(
-            |error| AppError::RegisterError {
-                err: format!("Error copying files into registry dir: {}", error),
+            |error| {
+                // Remove this new app version directory
+                let _ = fs::remove_dir_all(app_dir);
+                // Try to remove the parent directory. This will only work if no other versions of the
+                // app exist.
+                let _ = fs::remove_dir(format!("{}/{}", self.apps_dir, app_name));
+
+                AppError::RegisterError {
+                    err: format!("Error copying files into registry dir: {}", error),
+                }
             },
         )?;
 
-        self.set_active(&app_name, &app_dir_str)?;
-
         let reg_entry = AppRegistryEntry {
             app: App {
-                name: app_name,
+                name: app_name.clone(),
                 executable: format!("{}/{}", app_dir_str, app_exec),
                 version: metadata.version,
                 author: metadata.author,
@@ -297,7 +298,24 @@ impl AppRegistry {
         // Add the new registry entry
         entries.push(reg_entry);
         // Create the app.toml file and save the metadata information
-        entries[entries.len() - 1].save()?;
+        entries[entries.len() - 1].save().or_else(|err| {
+            // Remove this new app version directory
+            let _ = fs::remove_dir_all(app_dir);
+            // Try to remove the parent directory. This will only work if no other versions of the
+            // app exist.
+            let _ = fs::remove_dir(format!("{}/{}", self.apps_dir, app_name));
+            Err(err)
+        })?;
+
+        // Mark the old version as inactive
+        if let Some(index) = old_active {
+            entries[index].active_version = false;
+            entries[index].save()?
+        }
+
+        // Update the active app symlink
+        self.set_active(&app_name, &app_dir_str)?;
+
         Ok(entries[entries.len() - 1].clone())
     }
 
