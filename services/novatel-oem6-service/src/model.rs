@@ -16,7 +16,7 @@
 
 use failure::Error;
 use kubos_service::{process_errors, push_err, run};
-use log::info;
+use log::{error, info};
 use novatel_oem6_api::Log::*;
 use novatel_oem6_api::*;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender, TryRecvError, TrySendError};
@@ -69,10 +69,10 @@ pub fn log_thread(
     version_send: &SyncSender<VersionLog>,
 ) {
     loop {
-        match oem
-            .get_log()
-            .expect("Underlying read thread no longer communicating")
-        {
+        match oem.get_log().unwrap_or_else(|err| {
+            error!("get_log failed: {:?}. Log read thread bailing", err);
+            panic!("Underlying read thread no longer communicating")
+        }) {
             BestXYZ(log) => {
                 if log.pos_status == 0 && log.vel_status == 0 {
                     data.update_info(LockInfo {
@@ -102,7 +102,10 @@ pub fn log_thread(
                     // Our buffer is full, but the receiver should still be alive, so let's keep going
                     TrySendError::Full(_) => Ok(()),
                     TrySendError::Disconnected(_) => {
-                        panic!("Error receiver disconnected. Assuming system has become corrupted")
+                        let msg =
+                            "Error receiver disconnected. Assuming system has become corrupted";
+                        error!("{}", msg);
+                        panic!(msg);
                     }
                 })
                 .unwrap(),
@@ -111,9 +114,12 @@ pub fn log_thread(
                 .or_else::<TrySendError<VersionLog>, _>(|err| match err {
                     // Our buffer is full, but the receiver should still be alive, so let's keep going
                     TrySendError::Full(_) => Ok(()),
-                    TrySendError::Disconnected(_) => panic!(
-                        "Version receiver disconnected. Assuming system has become corrupted"
-                    ),
+                    TrySendError::Disconnected(_) => {
+                        let msg =
+                            "Version receiver disconnected. Assuming system has become corrupted";
+                        error!("{}", msg);
+                        panic!(msg)
+                    }
                 })
                 .unwrap(),
         }
@@ -160,7 +166,7 @@ impl Subsystem {
     }
 
     fn get_version_log(&self) -> Result<VersionLog, String> {
-        match self.oem.request_version() {
+        let result = match self.oem.request_version() {
             Ok(_) => match self
                 .version_recv
                 .lock()
@@ -171,7 +177,13 @@ impl Subsystem {
                 Err(err) => Err(format!("Failed to receive version info - {}", err).to_owned()),
             },
             Err(err) => Err(process_errors!(err)),
+        };
+
+        if result.is_err() {
+            error!("{:?}", result);
         }
+
+        result
     }
 
     // Queries
@@ -227,7 +239,10 @@ impl Subsystem {
 
         let mut errors = match self.errors.read() {
             Ok(master_vec) => master_vec.clone(),
-            _ => vec!["Error: Failed to borrow master errors vector".to_owned()],
+            _ => {
+                error!("get_system_status - Failed to borrow master errors vector");
+                vec!["Error: Failed to borrow master errors vector".to_owned()]
+            }
         };
 
         let status = match self.get_version_log() {
@@ -272,7 +287,10 @@ impl Subsystem {
 
         let mut errors = match self.errors.read() {
             Ok(master_vec) => master_vec.clone(),
-            _ => vec!["Error: Failed to borrow master errors vector".to_owned()],
+            _ => {
+                error!("get_telemetry - Failed to borrow master errors vector");
+                vec!["Error: Failed to borrow master errors vector".to_owned()]
+            }
         };
 
         let (status, version_info) = match self.get_version_log() {

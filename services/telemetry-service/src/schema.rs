@@ -111,7 +111,20 @@ fn query_db(
 
     query = query.order(dsl::timestamp.desc());
 
-    let entries = query.load::<kubos_telemetry_db::Entry>(&database.lock()?.connection)?;
+    let entries = query
+        .load::<kubos_telemetry_db::Entry>(
+            &database
+                .lock()
+                .or_else(|err| {
+                    log::error!("Failed to get lock on database: {:?}", err);
+                    Err(err)
+                })?
+                .connection,
+        )
+        .or_else(|err| {
+            log::error!("Failed to load database entries: {:?}", err);
+            Err(err)
+        })?;
 
     let mut g_entries: Vec<Entry> = Vec::new();
     for entry in entries {
@@ -202,8 +215,16 @@ struct DeleteResponse {
 graphql_object!(MutationRoot: Context | &self | {
     field insert(&executor, timestamp: Option<f64>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
         let result = match timestamp {
-            Some(time) => executor.context().subsystem().database.lock()?.insert(time, &subsystem, &parameter, &value),
-            None => executor.context().subsystem().database.lock()?.insert_systime(&subsystem, &parameter, &value),
+            Some(time) => executor.context().subsystem().database.lock().or_else(|err| {
+                    log::error!("insert - Failed to get lock on database: {:?}", err);
+                    Err(err)
+                })?
+            .insert(time, &subsystem, &parameter, &value),
+            None => executor.context().subsystem().database.lock().or_else(|err| {
+                    log::error!("insert - Failed to get lock on database: {:?}", err);
+                    Err(err)
+                })?
+            .insert_systime(&subsystem, &parameter, &value),
         };
 
         Ok(InsertResponse {
@@ -245,7 +266,10 @@ graphql_object!(MutationRoot: Context | &self | {
             selection = selection.filter(dsl::timestamp.le(time_le));
         }
 
-        let result = selection.execute(&executor.context().subsystem().database.lock()?.connection);
+        let result = selection.execute(&executor.context().subsystem().database.lock().or_else(|err| {
+                    log::error!("delete - Failed to get lock on database: {:?}", err);
+                    Err(err)
+                })?.connection);
 
         match result {
             Ok(num) => Ok(DeleteResponse {

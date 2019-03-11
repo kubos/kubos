@@ -55,8 +55,7 @@ fn start_app_good() {
                 run_level = "onCommand"
     
                 [app]
-                pid = 0
-                path = "{}/tiny-app/1.0/tiny-app"
+                executable = "{}/tiny-app/1.0/tiny-app"
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
@@ -101,8 +100,7 @@ fn start_app_fail() {
                 run_level = "onCommand"
     
                 [app]
-                pid = 0
-                path = "{}/tiny-app/1.0/dummy"
+                executable = "{}/tiny-app/1.0/dummy"
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
@@ -142,8 +140,7 @@ fn start_app_bad() {
             run_level = "onCommand"
 
             [app]
-            pid = 0
-            path = "{}/tiny-app/1.0/tiny-app"
+            executable = "{}/tiny-app/1.0/tiny-app"
             name = "tiny-app"
             version = "1.0"
             author = "user"
@@ -198,8 +195,7 @@ fn start_app_nonzero_rc() {
                 run_level = "onCommand"
     
                 [app]
-                pid = 0
-                path = "{}/tiny-app/1.0/tiny-app"
+                executable = "{}/tiny-app/1.0/tiny-app"
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
