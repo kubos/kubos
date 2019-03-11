@@ -164,8 +164,7 @@ fn registry_onboot_preexisting() {
                 run_level = "onCommand"
     
                 [app]
-                pid = 0
-                path = "{}/tiny-app/1.0/tiny-app"
+                executable = "{}/tiny-app/1.0/tiny-app"
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"

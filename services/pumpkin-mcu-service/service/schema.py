@@ -9,6 +9,7 @@ Graphene schema setup to enable queries.
 """
 
 import graphene
+import logging
 from .models import *
 import mcu_api
 
@@ -19,6 +20,7 @@ MODULES = {
     "module_name": {"address": 0xFF}
 }
 
+logger = logging.getLogger("pumpkin-mcu-service")
 
 class Query(graphene.ObjectType):
     """
@@ -68,9 +70,13 @@ class Query(graphene.ObjectType):
             raise KeyError('Module not configured: {}'.format(module))
         address = MODULES[module]['address']
         mcu = mcu_api.MCU(address=address)
-        bin_data = mcu.read(count=count)
+        try:
+            bin_data = mcu.read(count=count)
 
-        return bin_data.encode("hex")
+            return bin_data.encode("hex")
+        except Exception as e:
+            logger.error("Failed to read {} bytes from {}: {}".format(count, module, e))
+            raise
 
     def resolve_mcuTelemetry(self, info, module, fields):
         """
@@ -92,8 +98,12 @@ class Query(graphene.ObjectType):
         address = MODULES[module]['address']
         fields = list(map(str, fields))
         mcu = mcu_api.MCU(address=address)
-        out = mcu.read_telemetry(module=module, fields=fields)
-        return out
+        try:
+            out = mcu.read_telemetry(module=module, fields=fields)
+            return out
+        except Exception as e:
+            logger.error("Failed to read telemetry from {}: {}".format(module, e))
+            raise
 
 
 class Passthrough(graphene.Mutation):
@@ -116,11 +126,13 @@ class Passthrough(graphene.Mutation):
         if type(command) == str:
             command = str.encode(command)
         mcu = mcu_api.MCU(address=MODULES[module]['address'])
-        out = mcu.write(command)
-
-        commandStatus = CommandStatus(status=out[0], command=out[1])
-
-        return commandStatus
+        try:
+            out = mcu.write(command)
+            commandStatus = CommandStatus(status=out[0], command=out[1])
+            return commandStatus
+        except Exception as e:
+            logger.error("Failed to send passthrough to {}: {}".format(module, e))
+            raise
 
 
 class Test(graphene.Mutation):
@@ -151,8 +163,9 @@ class Test(graphene.Mutation):
                     test_output.update(mcu_out)
                 except Exception as e:
                     success = False
-                    errors.append(
-                        'Error with module : {} : {}'.format(module, e))
+                    msg = 'Error with module : {} : {}'.format(module, e)
+                    logger.error(msg)
+                    errors.append(msg)
 
         elif test == 2:  # INTEGRATION test
             for module in MODULES:
@@ -165,8 +178,9 @@ class Test(graphene.Mutation):
                     test_output.update(mcu_out)
                 except Exception as e:
                     success = False
-                    errors.append(
-                        'Error with module : {} : {}'.format(module, e))
+                    msg = 'Error with module : {} : {}'.format(module, e)
+                    logger.error(msg)
+                    errors.append(msg)
         else:
             raise NotImplementedError("Test type not implemented.")
 
