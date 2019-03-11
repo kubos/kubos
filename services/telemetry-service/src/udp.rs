@@ -15,7 +15,7 @@
 //
 
 use kubos_telemetry_db::Database;
-use log::info;
+use log::{error, info};
 use serde_json::{self, Value};
 use std::net::{SocketAddr, UdpSocket};
 use std::sync::{Arc, Mutex};
@@ -30,7 +30,21 @@ impl DirectUdp {
     }
 
     pub fn start(&self, url: String) {
-        let socket = UdpSocket::bind(url.parse::<SocketAddr>().unwrap()).unwrap();
+        let socket = UdpSocket::bind(url.parse::<SocketAddr>().unwrap_or_else(|err| {
+            error!(
+                "Couldn't start direct UDP connection. Failed to parse {}: {:?}",
+                url, err
+            );
+            panic!()
+        }))
+        .unwrap_or_else(|err| {
+            error!(
+                "Couldn't start direct UDP connection. Failed to bind {}: {:?}",
+                url, err
+            );
+            panic!()
+        });
+
         info!("Direct UDP listening on: {}", socket.local_addr().unwrap());
 
         loop {
@@ -63,15 +77,27 @@ impl DirectUdp {
         if let Some(time) = timestamp {
             self.db
                 .lock()
-                .map_err(|err| format!("{}", err))?
+                .map_err(|err| {
+                    error!("udp - Failed to get lock on database: {}", err);
+                    format!("{}", err)
+                })?
                 .insert(time, &subsystem, &param, &value)
-                .map_err(|err| format!("{}", err))?;
+                .map_err(|err| {
+                    error!("udp - Failed to get lock on database: {}", err);
+                    format!("{}", err)
+                })?;
         } else {
             self.db
                 .lock()
-                .map_err(|err| format!("{}", err))?
+                .map_err(|err| {
+                    error!("udp - Failed to get lock on database: {}", err);
+                    format!("{}", err)
+                })?
                 .insert_systime(&subsystem, &param, &value)
-                .map_err(|err| format!("{}", err))?;
+                .map_err(|err| {
+                    error!("udp - Failed to get lock on database: {}", err);
+                    format!("{}", err)
+                })?;
         }
 
         Ok(())
