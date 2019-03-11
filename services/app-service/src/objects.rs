@@ -71,16 +71,10 @@ graphql_object!(KApp: () as "App" where Scalar = <S> |&self| {
         &self.0.author
     }
 
-    field pid() -> i32
-        as "Process ID"
+    field executable() -> &String
+        as "Absolute Path to Exectuable"
     {
-        self.0.pid as i32
-    }
-
-    field path() -> &String
-        as "Absolute Path"
-    {
-        &self.0.path
+        &self.0.executable
     }
 });
 

@@ -34,14 +34,22 @@ impl Supervisor {
     }
 
     pub fn version(&self) -> Result<SupervisorVersion, String> {
-        Ok(SupervisorVersion(
-            isis_iobc_supervisor::supervisor_version()?
-        ))
+        match isis_iobc_supervisor::supervisor_version() {
+            Ok(version) => Ok(SupervisorVersion(version)),
+            Err(err) => {
+                log::error!("Failed to get iOBC supervisor version");
+                Err(err)
+            }
+        }
     }
 
     pub fn housekeeping(&self) -> Result<SupervisorHousekeeping, String> {
-        Ok(SupervisorHousekeeping(
-            isis_iobc_supervisor::supervisor_housekeeping()?,
-        ))
+        match isis_iobc_supervisor::supervisor_housekeeping() {
+            Ok(housekeeping) => Ok(SupervisorHousekeeping(housekeeping)),
+            Err(err) => {
+                log::error!("Failed to get iOBC supervisor housekeeping information");
+                Err(err)
+            }
+        }
     }
 }

@@ -14,12 +14,23 @@ Whenever a new application is registered with the service, its manifest file and
 the specified directory are copied into the service's application registry.
 By default, this registry is stored under `/home/system/kubos/apps`.
 
-Each application will be automatically assigned a UUID to be used for identification purposes internally.
-Using UUIDs, rather than the application's name, allows users the freedom to adjust the application name as they see fit,
-for instance if the overall purpose of the application changes and they would like to update the name to reflect that in later versions.
+.. uml::
 
-.. figure:: ../images/app_registry.png
-   :alt: Application Registry
+    @startuml
+    
+    frame "App Service" {
+        
+        package "Main Mission App" {
+            rectangle [Version: 1.0\nActive: False]
+            rectangle [Version: 2.0\nActive: True]
+        }
+        
+        package "Payload App" {
+            rectangle [Version: 0.1\nActive: False]
+        }
+    }
+    
+    @enduml
 
 Communicating with the Service
 ------------------------------
@@ -176,7 +187,7 @@ Starting an Application
 
 To manually start an application, the ``startApp`` mutation can be used.
 
-The mutation takes two arguments: the UUID of the application to start and the run level which the
+The mutation takes two arguments: the name of the application to start and the run level which the
 app should execute with.
 
 The mutation will return three fields:
