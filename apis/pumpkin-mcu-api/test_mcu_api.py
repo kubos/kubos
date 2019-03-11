@@ -120,7 +120,7 @@ class TestMCUAPI(unittest.TestCase):
             output_assert)
 
     def test_unpack_hex(self):
-        result_data = b'00010203040506'
+        result_data = '00010203040506'
         input_data = '\x00\x01\x02\x03\x04\x05\x06'
         output_assert = (result_data,)
         self.assertEqual(

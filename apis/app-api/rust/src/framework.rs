@@ -85,13 +85,13 @@ pub trait AppHandler {
 #[macro_export]
 macro_rules! app_main {
     ($handler:expr) => {{
-        kubos_app::app_start(std::process::id(), $handler)
+        kubos_app::app_start($handler)
     }};
 }
 
 /// The entry point for all KubOS applications. The preferred way to use this application
 /// is through the `app_main!` macro
-pub fn app_start(_pid: u32, handler: &AppHandler) -> Result<(), Error> {
+pub fn app_start(handler: &AppHandler) -> Result<(), Error> {
     use log4rs::append::console::ConsoleAppender;
     use log4rs::encode::pattern::PatternEncoder;
     use log4rs_syslog::SyslogAppender;
