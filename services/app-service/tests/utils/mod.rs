@@ -78,8 +78,7 @@ impl MockAppBuilder {
             run_level = "{run_level}"
 
             [app]
-            pid = 0
-            path = "{dir}/{name}/{version}/{bin}"
+            executable = "{dir}/{name}/{version}/{bin}"
             name = "{name}"
             version = "{version}"
             author = "{author}"

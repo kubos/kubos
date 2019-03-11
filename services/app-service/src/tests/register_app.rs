@@ -111,7 +111,7 @@ fn register_good_exec() {
                     author,
                     name,
                     version,
-                    path
+                    executable
                 }}
             }},
             errors,
@@ -146,7 +146,7 @@ fn register_good_exec() {
     assert_eq!(app["name"], "dummy");
     assert_eq!(app["version"], "0.0.1");
 
-    let path = app["path"].as_str().unwrap();
+    let path = app["executable"].as_str().unwrap();
 
     assert!(path.ends_with("dummy/0.0.1/dummy2"));
 }

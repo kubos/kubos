@@ -287,8 +287,7 @@ impl AppRegistry {
         let reg_entry = AppRegistryEntry {
             app: App {
                 name: app_name,
-                pid: 0,
-                path: format!("{}/{}", app_dir_str, app_exec),
+                executable: format!("{}/{}", app_dir_str, app_exec),
                 version: metadata.version,
                 author: metadata.author,
             },
@@ -408,14 +407,14 @@ impl AppRegistry {
             }
         };
 
-        let app_path = PathBuf::from(&app.path);
+        let app_path = PathBuf::from(&app.executable);
         if !app_path.exists() {
             let msg = match self.uninstall(&app.name, &app.version) {
                 Ok(_) => format!(
                     "{} does not exist. {} version {} automatically uninstalled",
-                    app.path, app.name, app.version
+                    app.executable, app.name, app.version
                 ),
-                Err(error) => format!("{} does not exist. {}", app.path, error),
+                Err(error) => format!("{} does not exist. {}", app.executable, error),
             };
 
             return Err(AppError::StartError { err: msg });

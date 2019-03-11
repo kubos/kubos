@@ -93,7 +93,7 @@ It has the following schema::
                     name: String!,
                     version: String!,
                     author: String!,
-                    path: String!
+                    executable: String!
                 },
                 active: Bool
             }
@@ -119,7 +119,8 @@ The mutation can return the following fields:
             - ``version`` - The version number of this particular iteration of the application, taken
               from the manifest file
             - ``author`` - The author information for the application, taken from the manifest file
-            - ``path`` - The abosolute path of the newly registered application file
+            - ``executable`` - The absolute path of the file which will kick off execution of the
+              newly registered application file
 
         - ``active`` - Specifies whether the newly registered application is the current active version
           of the application which will be used when the service attempts to run it. This value should
@@ -137,7 +138,7 @@ Our registration mutation should look like this::
         entry {
           app {
             name
-            path
+            executable
           }
         }
       }
@@ -153,14 +154,14 @@ The response should like this::
           "entry": {
             "app": {
               "name": "my-mission-app",
-              "path": "/home/system/kubos/apps/my-mission-app/1.0/my-mission-app.py"
+              "executable": "/home/system/kubos/apps/my-mission-app/1.0/my-mission-app.py"
             }
           }
         }
       }
     }
 
-We can break down the resulting file path like so:
+We can break down the resulting executable path like so:
 
     - ``/home/system/kubos/apps`` - This is the default directory that the applications service uses to
       save all registered applications
@@ -244,7 +245,7 @@ we can register the updated application using the same ``register`` mutation as 
         entry {
           app {
             name
-            path
+            executable
           }
         }
       }
@@ -261,7 +262,7 @@ The response should look almost identical::
                 "entry": {
                     "app": {
                         "name":"my-mission-app",
-                        "path":"/home/system/kubos/apps/my-mission-app/2.0/my-mission-app.py",
+                        "executable":"/home/system/kubos/apps/my-mission-app/2.0/my-mission-app.py",
                     }
                 }
             }
@@ -289,7 +290,7 @@ The query has the following schema::
                 name: String!,
                 version: String!,
                 author: String!,
-                path: String!
+                executable: String!
             },
             active: Bool
         }]
@@ -309,7 +310,8 @@ The query has the following response fields:
         - ``name`` - The name of the application
         - ``version`` - The version number of this particular iteration of the application
         - ``author`` - The author information for the application
-        - ``path`` - The abosolute path of the registered application file
+        - ``executable`` - The absolute path of the file which will kick off execution of the
+          registered application file
 
     - ``active`` - Specifies whether this iteration of the application is the current active version
       which will be used when the service attempts to run it
