@@ -29,28 +29,26 @@ fn db_test(config: &Config) {
     let db_path = config
         .get("database")
         .expect("No database path found in config file");
-    let db_path = db_path.as_str().unwrap_or("");
+    let db_path = db_path.as_str().unwrap();
 
     let db = Database::new(&db_path);
     db.setup();
 
-    let mut times: Vec<f64> = Vec::new();
+    let mut times: Vec<i64> = Vec::new();
 
     for _ in 0..ITERATIONS {
-        let mut rng = thread_rng();
-        let timestamp: f64 = rng.gen_range(0.0, ::std::f64::MAX);
+        let timestamp: f64 = thread_rng().gen_range(0.0, 99999999999999999.9);
 
         let start = PreciseTime::now();
         if db
-            .insert(timestamp, "db-test", "parameter", "value")
-            .is_ok()
-        {
-            times.push(start.to(PreciseTime::now()).num_seconds() as f64);
+            .insert(timestamp, "db-test", "parameter", "value").is_ok() {
+            times.push(start.to(PreciseTime::now()).num_microseconds().unwrap());
         }
+        
     }
 
-    let num_entries = times.len() as f64;
-    let sum: f64 = times.iter().sum();
+    let num_entries = times.len() as i64;
+    let sum: i64 = times.iter().sum();
 
     let average = sum / num_entries;
 
@@ -76,20 +74,17 @@ fn graphql_test(config: &Config) {
         }}"#,
             timestamp
         );
-
-        let remote_addr = config.hosturl();
-        let local_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
-
-        let socket = UdpSocket::bind(local_addr).expect("Couldn't bind to address");
-
+        
         let start = PreciseTime::now();
-        socket
-            .send_to(&mutation.as_bytes(), &remote_addr)
-            .expect("Couldn't send message");
-        socket.set_read_timeout(Some(Duration::new(1, 0))).unwrap();
+        
+        let client = reqwest::Client::builder().build().unwrap();
+    
+        let uri = format!("http://{}", config.hosturl());
+    
+        let mut map = ::std::collections::HashMap::new();
+        map.insert("query", mutation);
 
-        let mut buf = [0; 1024];
-        match socket.recv_from(&mut buf) {
+        match client.post(&uri).json(&map).send() {
             Ok(_) => times.push(start.to(PreciseTime::now()).num_microseconds().unwrap()),
             Err(e) => panic!("recv function failed: {:?}", e),
         }
@@ -108,27 +103,35 @@ fn graphql_test(config: &Config) {
 
 fn direct_udp_test(config: &Config) {
     let mut times: Vec<i64> = Vec::new();
+    
+    let port = config.get("direct_port").unwrap();
+    
+    let host = config.hosturl().to_owned();
+    let ip: Vec<&str> = host.split(':').collect();
+    
+    let remote_addr = format!("{}:{}", ip[0], port);
 
-    for _ in 0..ITERATIONS {
-        let remote_addr = config.hosturl();
-        let local_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
+    let local_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
 
-        let socket = UdpSocket::bind(local_addr).expect("Couldn't bind to address");
-
-        let message = json!({
-            "timestamp": 1,
+    let socket = UdpSocket::bind(local_addr).expect("Couldn't bind to address");
+    
+    let message = json!({
             "subsystem": "db-test",
             "parameter": "voltage",
             "value": "3.3"
         });
 
+    for _ in 0..ITERATIONS {
+        
         let start = PreciseTime::now();
 
         socket
-            .send_to(&ser::to_vec(&message).unwrap(), remote_addr)
+            .send_to(&ser::to_vec(&message).unwrap(), &remote_addr)
             .unwrap();
 
-        times.push(start.to(PreciseTime::now()).num_microseconds().unwrap())
+        times.push(start.to(PreciseTime::now()).num_microseconds().unwrap());
+        
+        thread::sleep(Duration::from_millis(2));
     }
 
     let num_entries = times.len() as i64;
@@ -150,43 +153,36 @@ fn test_cleanup(config: &Config) {
                 entriesDeleted
             }
         }"#;
+    
+    let client = reqwest::Client::builder().build().unwrap();
 
-    let remote_addr = config.hosturl();
-    let local_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
+    let uri = format!("http://{}", config.hosturl());
 
-    let socket = UdpSocket::bind(local_addr).expect("Couldn't bind to address");
+    let mut map = ::std::collections::HashMap::new();
+    map.insert("query", mutation);
 
-    socket
-        .send_to(&mutation.as_bytes(), &remote_addr)
-        .expect("Couldn't send message");
-    socket.set_read_timeout(Some(Duration::new(1, 0))).unwrap();
+    let result: serde_json::Value = client.post(&uri).json(&map).send().unwrap().json().unwrap();
+    
+    match result.get("data").and_then(|msg| msg.get("delete")) {
+        Some(message) => {
+            let success =
+                serde_json::from_value::<bool>(message["success"].clone()).unwrap();
 
-    let mut buf = [0; 1024];
-    match socket.recv_from(&mut buf) {
-        Ok((amt, _)) => {
-            let v: serde_json::Value = serde_json::from_slice(&buf[0..(amt)]).unwrap();
-            match v.get("data").and_then(|msg| msg.get("delete")) {
-                Some(message) => {
-                    let success =
-                        serde_json::from_value::<bool>(message["success"].clone()).unwrap();
+            let errors =
+                serde_json::from_value::<String>(message["errors"].clone()).unwrap();
 
-                    let errors =
-                        serde_json::from_value::<String>(message["errors"].clone()).unwrap();
+            let entries_deleted =
+                serde_json::from_value::<i64>(message["entriesDeleted"].clone()).unwrap();
 
-                    let entries_deleted =
-                        serde_json::from_value::<i64>(message["entriesDeleted"].clone()).unwrap();
-
-                    if success {
-                        println!("Cleaned up {} test entries", entries_deleted);
-                    } else {
-                        eprintln!("Failed to deleted test entries: {}", errors);
-                    }
-                }
-                None => eprintln!("Failed to process delete response"),
+            if success {
+                println!("Cleaned up {} test entries", entries_deleted);
+            } else {
+                eprintln!("Failed to deleted test entries: {}", errors);
             }
         }
-        Err(e) => panic!("recv function failed: {:?}", e),
+        None => eprintln!("Failed to process delete response"),
     }
+    
 }
 
 fn main() {

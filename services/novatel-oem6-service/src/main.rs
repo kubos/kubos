@@ -197,7 +197,10 @@
 //!         nominal{
 //!             lockInfo {...},
 //!             lockStatus {...},
-//!             systemStatus: Vec<String>
+//!             systemStatus: {
+//!                errors: Vec<String>,
+//!                status: Vec<String>
+//!             }
 //!         }
 //!     }
 //! }

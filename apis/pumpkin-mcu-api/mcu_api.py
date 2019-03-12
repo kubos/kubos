@@ -178,6 +178,34 @@ TELEMETRY = {
         "perm_fail_alert2":    {"command": "BM2:TEL? 106,data", "length": 2, "parsing": "<H"},
         "perm_fail_status2":   {"command": "BM2:TEL? 107,data", "length": 2, "parsing": "<H"},
         "temp_range":          {"command": "BM2:TEL? 114,data", "length": 2, "parsing": "<H"}
+    },
+    "epsm": {
+        "bcr1":                {"command": "EPS:TEL? 0,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr1_voltage", "bcr1_volt_max", "bcr1_current", "bcr1_curr_limit", "bcr1_status"]},
+        "bcr2":                {"command": "EPS:TEL? 1,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr2_voltage", "bcr2_volt_max", "bcr2_current", "bcr2_curr_limit", "bcr2_status"]},
+        "bcr3":                {"command": "EPS:TEL? 2,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr3_voltage", "bcr3_volt_max", "bcr3_current", "bcr3_curr_limit", "bcr3_status"]},
+        "bcr4":                {"command": "EPS:TEL? 3,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr4_voltage", "bcr4_volt_max", "bcr4_current", "bcr4_curr_limit", "bcr4_status"]},
+        "bcr5":                {"command": "EPS:TEL? 4,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr5_voltage", "bcr5_volt_max", "bcr5_current", "bcr5_curr_limit", "bcr5_status"]},
+        "bcr6":                {"command": "EPS:TEL? 5,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr6_voltage", "bcr6_volt_max", "bcr6_current", "bcr6_curr_limit", "bcr6_status"]},
+        "3_3v":                {"command": "EPS:TEL? 6,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["3_3v_voltage", "3_3v_volt_max", "3_3v_current", "3_3v_curr_limit", "3_3v_status"]},
+        "5v":                 {"command": "EPS:TEL? 7,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["5v_voltage", "5v_volt_max", "5v_current", "5v_curr_limit", "5v_status"]},
+        "12v":                {"command": "EPS:TEL? 8,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["12v_voltage", "12v_volt_max", "12v_current", "12v_curr_limit", "12v_status"]},
+        "aux":                {"command": "EPS:TEL? 9,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["aux_voltage", "aux_volt_max", "aux_current", "aux_curr_limit", "aux_status"]},
+        "fpga_version":       {"command": "EPS:TEL? 10,data", "length": 2, "parsing": "<BB",
+                                "names": ["fpga_version_0", "fpga_version_1"]},
+        "batt1":              {"command": "EPS:TEL? 11,data", "length": 5, "parsing": "<hHB",
+                                "names": ["batt1_current", "batt1_voltage", "batt1_status"]},
+        "batt2":              {"command": "EPS:TEL? 12,data", "length": 5, "parsing": "<hHB",
+                                "names": ["batt2_current", "batt2_voltage", "batt2_status"]},
     }
 }
 # End Config Data
@@ -331,16 +359,19 @@ class MCU:
             raise TypeError(
                 'Parsing field must be a valid struct parsing string. Input: '
                 + str(type(parsing)))
+            
+        if type(data) is str:
+            data = data.encode()
 
         if parsing == "str":
             # Search for the null terminator,
             # return the leading string in a tuple
-            str_data = data.split('\0')[0]
-            return (str_data,)
+            str_data = data.split(b'\0')[0]
+            return (str_data.decode(),)
         elif parsing == "hex":
             # Store as a hex string. This is so we can return binary data.
             # Return as a single field in a tuple
-            return (binascii.hexlify(str.encode(data)),)
+            return (binascii.hexlify(data).decode(),)
 
         # All others parse directly with the parsing string.
         return struct.unpack(parsing, data)

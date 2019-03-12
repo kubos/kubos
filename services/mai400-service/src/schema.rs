@@ -125,7 +125,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //             neci: [i32; 3],
     //         },
     //         debug{
-    //             irhes{
+    //             irehs{
     //                 thermopilesA: [i32; 4],
     //                 thermopilesB: [i32; 4],
     //                 tempA: [i32; 4],
