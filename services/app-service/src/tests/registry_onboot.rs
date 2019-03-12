@@ -53,7 +53,7 @@ fn registry_onboot_good() {
             "#;
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
-    registry.register(&app_bin.to_string_lossy(), None).unwrap();
+    registry.register(&app_bin.to_string_lossy()).unwrap();
 
     let result = registry.run_onboot();
 
@@ -65,7 +65,7 @@ fn registry_onboot_good() {
 }
 
 #[test]
-fn registry_onboot_fail() {
+fn registry_onboot_bad() {
     let registry_dir = TempDir::new().unwrap();
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
@@ -83,11 +83,51 @@ fn registry_onboot_fail() {
             "#;
     fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
 
-    registry.register(&app_bin.to_string_lossy(), None).unwrap();
+    registry.register(&app_bin.to_string_lossy()).unwrap();
 
     assert_eq!(
         registry.run_onboot().unwrap_err(),
-        AppError::FileError {
+        AppError::SystemError {
+            err: "Failed to start 1 app/s".to_owned()
+        }
+    );
+}
+
+#[test]
+fn registry_onboot_fail() {
+    let registry_dir = TempDir::new().unwrap();
+    let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("tiny-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    let src = r#"
+            #!/bin/bash
+            exit 1
+            "#;
+
+    let mut bin = fs::File::create(app_bin.join("tiny-app")).unwrap();
+    bin.write_all(src.as_bytes()).unwrap();
+    let mut perms = bin.metadata().unwrap().permissions();
+    perms.set_mode(0o755);
+    bin.set_permissions(perms).unwrap();
+
+    let manifest = r#"
+            name = "tiny-app"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    registry.register(&app_bin.to_string_lossy()).unwrap();
+
+    let result = registry.run_onboot();
+
+    assert_eq!(
+        result.unwrap_err(),
+        AppError::SystemError {
             err: "Failed to start 1 app/s".to_owned()
         }
     );
@@ -103,7 +143,7 @@ fn registry_onboot_preexisting() {
     // control the lifetime of the app binary so that all the data gets written and the file gets
     // closed before we attempt to execute it
     {
-        let app_dir = registry_dir.path().join("a-b-c-d-e/1.0");
+        let app_dir = registry_dir.path().join("tiny-app/1.0");
 
         fs::create_dir_all(app_dir.clone()).unwrap();
 
@@ -124,11 +164,7 @@ fn registry_onboot_preexisting() {
                 run_level = "onCommand"
     
                 [app]
-                uuid = "a-b-c-d-e"
-                pid = 0
-                path = "{}/a-b-c-d-e/1.0/tiny-app"
-    
-                [app.metadata]
+                executable = "{}/tiny-app/1.0/tiny-app"
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"

@@ -28,7 +28,6 @@ pub struct QueryRoot;
 /// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
     field apps(&executor,
-               uuid: Option<String>,
                name: Option<String>,
                version: Option<String>,
                active: Option<bool>)
@@ -37,13 +36,10 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         let mut result: Vec<KAppRegistryEntry> = Vec::new();
         let entries = executor.context().subsystem().entries.lock()?;
         let final_iter = entries.iter().filter(|ref e| {
-            if uuid.is_some() && &e.app.uuid != uuid.as_ref().unwrap() {
+            if name.is_some() && &e.app.name != name.as_ref().unwrap() {
                 return false;
             }
-            if name.is_some() && &e.app.metadata.name != name.as_ref().unwrap() {
-                return false;
-            }
-            if version.is_some() && &e.app.metadata.version != version.as_ref().unwrap() {
+            if version.is_some() && &e.app.version != version.as_ref().unwrap() {
                 return false;
             }
             if active.is_some() && e.active_version != active.unwrap() {
@@ -66,11 +62,11 @@ pub struct MutationRoot;
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
-    field register(&executor, path: String, uuid: Option<String>) -> FieldResult<RegisterResponse>
+    field register(&executor, path: String) -> FieldResult<RegisterResponse>
         as "Register App"
     {
         let registry = executor.context().subsystem();
-        Ok(match registry.register(&path, uuid) {
+        Ok(match registry.register(&path) {
             Ok(app) =>  RegisterResponse { success: true, errors: "".to_owned(), entry: Some(KAppRegistryEntry(app))},
             Err(error) => RegisterResponse {
                 success: false,
@@ -80,16 +76,32 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         })
     }
 
-    field uninstall(&executor, uuid: String, version: String) -> FieldResult<GenericResponse>
+    field uninstall(&executor, name: String, version: Option<String>) -> FieldResult<GenericResponse>
         as "Uninstall App"
     {
-        Ok(match executor.context().subsystem().uninstall(&uuid, &version) {
+        if let Some(val) = version {
+            Ok(match executor.context().subsystem().uninstall(&name, &val) {
+                Ok(v) => GenericResponse { success: true, errors: "".to_owned() },
+                Err(error) => GenericResponse { success: false, errors: error.to_string() },
+            })
+        } else {
+            Ok(match executor.context().subsystem().uninstall_all(&name) {
+                Ok(v) => GenericResponse { success: true, errors: "".to_owned() },
+                Err(error) => GenericResponse { success: false, errors: error.to_string() },
+            })
+        }
+    }
+
+    field set_version(&executor, name: String, version: String) -> FieldResult<GenericResponse>
+        as "Set App Active Version"
+    {
+        Ok(match executor.context().subsystem().set_version(&name, &version) {
             Ok(v) => GenericResponse { success: true, errors: "".to_owned() },
             Err(error) => GenericResponse { success: false, errors: error.to_string() },
         })
     }
 
-    field start_app(&executor, uuid: String, run_level: String, args: Option<Vec<String>>) -> FieldResult<StartResponse>
+    field start_app(&executor, name: String, run_level: String, args: Option<Vec<String>>) -> FieldResult<StartResponse>
         as "Start App"
     {
         let run_level_o = {
@@ -99,7 +111,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             }
         };
 
-        Ok(match executor.context().subsystem().start_app(&uuid, &run_level_o, args) {
+        Ok(match executor.context().subsystem().start_app(&name, &run_level_o, args) {
             Ok(num) => StartResponse { success: true, errors: "".to_owned(), pid: Some(num as i32)},
             Err(error) => StartResponse { success: false, errors: error.to_string(), pid: None },
         })
