@@ -423,7 +423,7 @@ fn main() {
         Some("clyde-3g-eps-service"),
     )
     .unwrap();
-    
+
     let config = Config::new("clyde-3g-eps-service");
     let bus = config
         .get("bus")

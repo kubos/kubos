@@ -41,10 +41,11 @@ fn db_test(config: &Config) {
 
         let start = PreciseTime::now();
         if db
-            .insert(timestamp, "db-test", "parameter", "value").is_ok() {
+            .insert(timestamp, "db-test", "parameter", "value")
+            .is_ok()
+        {
             times.push(start.to(PreciseTime::now()).num_microseconds().unwrap());
         }
-        
     }
 
     let num_entries = times.len() as i64;
@@ -74,13 +75,13 @@ fn graphql_test(config: &Config) {
         }}"#,
             timestamp
         );
-        
+
         let start = PreciseTime::now();
-        
+
         let client = reqwest::Client::builder().build().unwrap();
-    
+
         let uri = format!("http://{}", config.hosturl());
-    
+
         let mut map = ::std::collections::HashMap::new();
         map.insert("query", mutation);
 
@@ -103,26 +104,25 @@ fn graphql_test(config: &Config) {
 
 fn direct_udp_test(config: &Config) {
     let mut times: Vec<i64> = Vec::new();
-    
+
     let port = config.get("direct_port").unwrap();
-    
+
     let host = config.hosturl().to_owned();
     let ip: Vec<&str> = host.split(':').collect();
-    
+
     let remote_addr = format!("{}:{}", ip[0], port);
 
     let local_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0);
 
     let socket = UdpSocket::bind(local_addr).expect("Couldn't bind to address");
-    
+
     let message = json!({
-            "subsystem": "db-test",
-            "parameter": "voltage",
-            "value": "3.3"
-        });
+        "subsystem": "db-test",
+        "parameter": "voltage",
+        "value": "3.3"
+    });
 
     for _ in 0..ITERATIONS {
-        
         let start = PreciseTime::now();
 
         socket
@@ -130,7 +130,7 @@ fn direct_udp_test(config: &Config) {
             .unwrap();
 
         times.push(start.to(PreciseTime::now()).num_microseconds().unwrap());
-        
+
         thread::sleep(Duration::from_millis(2));
     }
 
@@ -153,7 +153,7 @@ fn test_cleanup(config: &Config) {
                 entriesDeleted
             }
         }"#;
-    
+
     let client = reqwest::Client::builder().build().unwrap();
 
     let uri = format!("http://{}", config.hosturl());
@@ -162,14 +162,12 @@ fn test_cleanup(config: &Config) {
     map.insert("query", mutation);
 
     let result: serde_json::Value = client.post(&uri).json(&map).send().unwrap().json().unwrap();
-    
+
     match result.get("data").and_then(|msg| msg.get("delete")) {
         Some(message) => {
-            let success =
-                serde_json::from_value::<bool>(message["success"].clone()).unwrap();
+            let success = serde_json::from_value::<bool>(message["success"].clone()).unwrap();
 
-            let errors =
-                serde_json::from_value::<String>(message["errors"].clone()).unwrap();
+            let errors = serde_json::from_value::<String>(message["errors"].clone()).unwrap();
 
             let entries_deleted =
                 serde_json::from_value::<i64>(message["entriesDeleted"].clone()).unwrap();
@@ -182,7 +180,6 @@ fn test_cleanup(config: &Config) {
         }
         None => eprintln!("Failed to process delete response"),
     }
-    
 }
 
 fn main() {
