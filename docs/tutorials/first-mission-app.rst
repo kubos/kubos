@@ -671,12 +671,14 @@ create a new file, `manifest.toml`, to accompany our mission app.
 This file has the following key values:
 
 - ``name`` - The name of the application
+- ``executable`` - (Optional) The name of the file to be called to begin application execution
 - ``version`` - The version number of the application
 - ``author`` - The author of the application
 
 Our file should look like this::
 
-    name = "my-mission-app.py"
+    name = "my-mission-app"
+    executable = "my-misison-app.py"
     version = "1.0"
     author = "Me"
 

@@ -94,16 +94,19 @@ This file must have the following key values:
 - ``version`` - The version number of the application
 - ``author`` - The author of the application
 
+Optionally, the file may also specify the ``executable`` key value.
+This parameter allows you to specify which file should be called in order to begin execution of the
+application.
+If it's omitted, the value of ``name`` will be used.
+This is particularly useful for Python applications, where the name of the application might not
+match the name of the file to be called.
+
 For example::
 
     name = "mission-app"
+    executable = "app.py"
     version = "1.1"
     author = "Me"
-
-.. note::
-
-    The ``name`` parameter must exactly match the name of the file which should be called for
-    execution
 
 Additional Resources
 --------------------

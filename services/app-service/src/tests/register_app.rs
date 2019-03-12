@@ -81,6 +81,77 @@ fn register_good() {
 }
 
 #[test]
+fn register_good_exec() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    // Create dummy app file
+    fs::File::create(app_bin.join("dummy2")).unwrap();
+
+    // Create manifest file
+    let manifest = r#"
+            name = "dummy"
+            executable = "dummy2"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: \"{}\") {{
+            entry {{
+                active, 
+                app {{
+                    author,
+                    name,
+                    version,
+                    executable
+                }}
+            }},
+            errors,
+            success,
+        }}
+    }}"#,
+        app_bin.to_str().unwrap()
+    );
+
+    // We have to manually check the results, rather than using the test! macro, because the
+    // path contains a dynamically created directory
+    let result: Vec<u8> = request!(service, register_query)
+        .body()
+        .iter()
+        .map(|entry| *entry)
+        .collect();
+    let result: serde_json::Value =
+        serde_json::from_str(::std::str::from_utf8(&result).unwrap()).unwrap();
+
+    let data = &result["data"]["register"];
+
+    assert_eq!(data["errors"], "");
+    assert_eq!(data["success"], true);
+
+    let entry = &data["entry"];
+
+    assert_eq!(entry["active"], true);
+
+    let app = &entry["app"];
+
+    assert_eq!(app["author"], "user");
+    assert_eq!(app["name"], "dummy");
+    assert_eq!(app["version"], "0.0.1");
+
+    let path = app["executable"].as_str().unwrap();
+
+    assert!(path.ends_with("dummy/0.0.1/dummy2"));
+}
+
+#[test]
 fn register_no_manifest() {
     let registry_dir = TempDir::new().unwrap();
     let service = mock_service!(registry_dir);
@@ -343,6 +414,73 @@ fn register_bad_path() {
        "register": {
            "entry": null,
            "errors": "Failed to register app: fake/files does not exist",
+           "success": false,
+       }
+    });
+
+    test!(service, register_query, expected);
+}
+
+#[test]
+fn register_duplicate() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    // Create dummy app file
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    // Create manifest file
+    let manifest = r#"
+            name = "dummy"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: \"{}\") {{
+            entry {{
+                active, 
+                app {{
+                    author,
+                    name,
+                    version,
+                }}
+            }},
+            errors,
+            success,
+        }}
+    }}"#,
+        app_bin.to_str().unwrap()
+    );
+
+    let expected = json!({
+       "register": {
+           "entry": {
+              "active": true,
+               "app": {
+                   "author": "user",
+                   "name": "dummy",
+                   "version": "0.0.1",
+               }
+           },
+           "errors": "",
+           "success": true,
+       }
+    });
+
+    test!(service, register_query, expected);
+
+    let expected = json!({
+       "register": {
+           "entry": null,
+           "errors": "Failed to register app: App dummy version 0.0.1 already exists",
            "success": false,
        }
     });

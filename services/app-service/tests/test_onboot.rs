@@ -27,28 +27,28 @@ mod utils;
 pub use crate::utils::*;
 
 fn setup_apps(registry_dir: &Path) {
-    MockAppBuilder::new("app1", "a-b-c-d-e")
+    MockAppBuilder::new("app1")
         .version("0.0.1")
         .active(false)
         .author("mham")
         .install(&registry_dir);
-    MockAppBuilder::new("app1", "a-b-c-d-e")
+    MockAppBuilder::new("app1")
         .version("0.0.2")
         .active(false)
         .install(&registry_dir);
-    MockAppBuilder::new("app2", "f-g-h-i-j")
+    MockAppBuilder::new("app2")
         .version("1.0.0")
         .active(false)
         .install(&registry_dir);
-    MockAppBuilder::new("app2", "f-g-h-i-j")
+    MockAppBuilder::new("app2")
         .version("1.0.1")
         .active(true)
         .install(&registry_dir);
-    MockAppBuilder::new("app3", "a-b-c-d-e")
+    MockAppBuilder::new("app3")
         .version("0.0.3")
         .active(true)
         .install(&registry_dir);
-    MockAppBuilder::new("app4", "1-2-3-4-5")
+    MockAppBuilder::new("app4")
         .version("1.0.0")
         .active(true)
         .author("user")
