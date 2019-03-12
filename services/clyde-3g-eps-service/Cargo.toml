@@ -10,6 +10,7 @@ eps-api = { path = "../../apis/eps-api" }
 failure = "0.1.2"
 juniper =  "0.11"
 kubos-service = { path = "../kubos-service" }
+log = "^0.4.0"
 rust-i2c = { path = "../../hal/rust-hal/rust-i2c" }
 
 [dev-dependencies]
