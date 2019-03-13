@@ -342,14 +342,14 @@ class MCU:
         {'timestamp':timestamp,'data':data}
         If the data ready flag is not set, it sets the timestamp to 0
         """
-        if data[0] != '\x01':
+        if data[0] != 1:
             # Returns 0 for timestamp if data was not ready, but still returns
             # the data for debugging purposes.
             # telemetry data}
             return {'timestamp': 0, 'data': data[HEADER_SIZE:]}
 
         # Unpack timestamp in seconds.
-        timestamp = struct.unpack('<i', str.encode(data[1:HEADER_SIZE]))[0]/100.0
+        timestamp = struct.unpack('<i', data[1:HEADER_SIZE])[0]/100.0
         # Return the valid packet timestamp and data
         return {'timestamp': timestamp, 'data': data[HEADER_SIZE:]}
 
