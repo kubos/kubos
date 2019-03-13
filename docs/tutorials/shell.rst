@@ -27,7 +27,7 @@ Syntax
 
 The shell client has the following command syntax::
 
-  kubos-shell-client  (start | list | join | kill) [options]
+  kubos-shell-client [options] (start | list | join | kill)
 
 Required arguments:
 
