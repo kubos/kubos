@@ -31,6 +31,7 @@ members = [
 "libs/file-protocol",
 "libs/shell-protocol",
 "services/app-service",
+"services/clyde-3g-eps-service",
 "services/monitor-service",
 "services/ethernet-service",
 "services/file-service",
