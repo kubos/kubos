@@ -17,7 +17,8 @@ Python Service
 Inside of the `Python service example <https://github.com/kubos/kubos/tree/master/examples/python-service>`_
 you will find several files and a folder:
 
-- ``config.yml`` - This YAML file holds configuration options for the GraphQL/HTTP endpoint.
+- ``config.toml`` - This TOML file holds :doc:`configuration options <../services/service-config>`
+  for the GraphQL/HTTP endpoint.
 - ``README.rst`` - Overview of the service project.
 - ``requirements.txt`` - Python module requirements file with list of module/version dependencies.
 - ``service.py`` - Boilerplate service code which reads the config file and starts up the GraphQL/HTTP endpoint.

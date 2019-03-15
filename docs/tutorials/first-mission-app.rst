@@ -418,7 +418,8 @@ to send our GraphQL requests.
 
 For each request, it:
 
-    - Looks up the HTTP address of the service name which is given from the system's `config.toml` file
+    - Looks up the HTTP address of the service name which is given from the system's
+      :doc:`config.toml <../services/service-config>` file
     - Wraps the given request into a proper HTTP packet and sends it to the target service
     - Parses the response message and checks for errors
     - Returns the message payload if the request was successful

@@ -11,7 +11,7 @@ Configuration
 -------------
 
 The service has the following available configuration parameters which may be specified in the
-``config.toml`` file::
+:doc:`config.toml <../services/service-config>` file::
 
     - ``database`` - (Default: "/home/system/kubos/telemetry.db") The path to the telemetry database
       file. The file will be created if it does not already exist.
