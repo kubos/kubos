@@ -26,7 +26,7 @@ Syntax
 
 The file transfer client has the following command syntax::
 
-    kubos-file-client (upload | download) source-file [target-file] [options]
+    kubos-file-client [options] (upload | download | cleanup) source-file [target-file]
     
 Required arguments:
 
@@ -36,6 +36,7 @@ Required arguments:
           on the remote target
         - ``download`` - Transfer ``source-file`` on the remote target to ``target-file`` location
           on the local host
+        - ``cleanup`` - Cleanup the endpoint service's temporary storage directory
 
     - ``source-file`` - The file to be transferred. May be a relative or absolute path.
 
@@ -47,6 +48,13 @@ Optional arguments:
     - ``-h {host IP}`` - Default: `0.0.0.0`. IP address of the local host to use.
     - ``-r {remote IP}`` - Default: `0.0.0.0`. IP address of the file transfer service to connect to.
     - ``-p {remote port}`` - Default: `7000`. UDP port of the file transfer service to connect to.
+    - ``-s {storage_prefix}`` - Default: `file-storage`. Name of the directory which should be used
+      for temporary file transfer storage.
+    - ``-c {chunk_size}`` - Default: `4096`. Size, in bytes, of the individual chunks the file
+      should be broken into before transfer.
+    - ``-t {hold_count}`` - Default: `6`. The number of times the client should fail to receive data
+      from the endpoint service before giving up and exiting.
+
 
 Sending a File to an OBC
 ------------------------
@@ -61,7 +69,7 @@ on. By default, this is port 8008.
 
 Our transfer command should look like this::
 
-    $ kubos-file-client upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py -r 10.0.2.20 -p 8008
+    $ kubos-file-client -r 10.0.2.20 -p 8008 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
     
 The output from the client should look like this:
 
@@ -96,7 +104,7 @@ Receiving a File from an OBC
 Next, we'll request that the OBC send us the log file that was created by running the on-command
 logic in our mission application::
 
-    $ kubos-file-client download /home/system/log/apps/info.log -r 10.0.2.20 -p 8008
+    $ kubos-file-client -r 10.0.2.20 -p 8008 download /home/system/log/apps/info.log
     
 We're not specifying a destination file, which will result in the transferred file being saved as
 `oncommand-output` in our current directory.
