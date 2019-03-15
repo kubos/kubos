@@ -26,22 +26,63 @@ use rust_i2c::Command;
 /// is shown below. Please note that Data[3] is the first byte returned from the
 /// EPS and Data[0] is the last.
 
+/// EPS Board Status Codes
 bitflags! {
+    /// EPS Board Status Codes
     #[derive(Default)]
     pub struct StatusCode: u8 {
+        /// Last Command Failed
         const LAST_COMMAND_FAILED = 0b0000_0001;
+        /// Watchdog Error
         const WATCHDOG_ERROR = 0b0000_0010;
+        /// Bad Command Data
         const BAD_COMMAND_DATA = 0b0000_0100;
+        /// Bad Command Channel
         const BAD_COMMAND_CHANNEL = 0b0000_1000;
+        /// Error Reading EEPROM
         const ERROR_READING_EEPROM = 0b0001_0000;
+        /// Power On Reset
         const POWER_ON_RESET = 0b0010_0000;
+        /// Brown Out Reset
         const BROWN_OUT_RESET = 0b0100_0000;
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+impl StatusCode {
+    /// Convert the flags byte into a vector containing the string representations
+    /// of all flags present.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use eps_api::EpsResult;
+    /// use clyde_3g_eps_api::*;
+    ///
+    /// # fn func() -> EpsResult<()> {
+    /// let flags = StatusCode::BAD_COMMAND_DATA | StatusCode::POWER_ON_RESET;
+    ///
+    /// let conv = flags.to_vec();
+    ///
+    /// assert_eq!(conv, vec!["BAD_COMMAND_DATA", "POWER_ON_RESET"]);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn to_vec(self) -> Vec<String> {
+        format!("{:?}", self)
+            .to_owned()
+            .split(" | ")
+            .map(|x| x.to_string())
+            .collect()
+    }
+}
+
+/// Status of EPS Motherboard and Daughterboard
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BoardStatus {
+    /// Motherboard status code
     pub motherboard: StatusCode,
+    /// Daughterboard status code
     pub daughterboard: Option<StatusCode>,
 }
 

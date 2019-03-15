@@ -23,8 +23,11 @@ mod commands;
 mod eps;
 mod telemetry;
 
+pub use crate::commands::board_status::{BoardStatus, StatusCode};
+pub use crate::commands::checksum::Checksum;
+pub use crate::commands::last_error::{ErrorCode, LastError};
 pub use crate::commands::version::{Version, VersionInfo};
-pub use crate::eps::Eps;
+pub use crate::eps::{Clyde3gEps, Eps};
 pub use crate::telemetry::daughterboard as DaughterboardTelemetry;
 pub use crate::telemetry::motherboard as MotherboardTelemetry;
 pub use crate::telemetry::reset as ResetTelemetry;

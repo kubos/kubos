@@ -31,6 +31,9 @@ use std::io;
 #[derive(Debug, Eq, Fail, PartialEq)]
 #[fail(display = "Eps Error")]
 pub enum EpsError {
+    /// Generic error condition
+    #[fail(display = "Generic Error")]
+    GenericError,
     /// Error resulting from underlying Io functions
     #[fail(display = "IO Error: {}", description)]
     IoError {
