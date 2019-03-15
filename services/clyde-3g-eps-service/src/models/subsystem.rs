@@ -88,9 +88,7 @@ impl Subsystem {
             Box::new(Eps::new(Connection::from_path(bus, 0x2B)));
         Subsystem::new(clyde_eps)
     }
-}
 
-impl Subsystem {
     /// Get the requested telemetry item from the motherboard
     pub fn get_motherboard_telemetry(
         &self,
