@@ -68,10 +68,9 @@ fn uplink_to_service_no_response() {
     )
     .unwrap();
 
-    // Insert data from ground into mock_comms read buffer
-    if let Ok(comms) = mock_comms.lock() {
-        comms.read_data(&ground_packet);
-    }
+    // Pretend to be the ground and provide a packet
+    // for the comms service to read from the radio
+    mock_comms.lock().unwrap().push_read(&ground_packet);
 
     // Setup service listener
     let service_listener = UdpSocket::bind((sat_ip, service_port)).unwrap();
@@ -127,10 +126,9 @@ fn uplink_to_service_with_handler_response() {
     )
     .unwrap();
 
-    // Insert data from ground into mock_comms read buffer
-    if let Ok(comms) = mock_comms.lock() {
-        comms.read_data(&ground_packet);
-    }
+    // Pretend to be the ground and provide a packet
+    // for the comms service to read from the radio
+    mock_comms.lock().unwrap().push_read(&ground_packet);
 
     // Setup service listener
     let service_listener = UdpSocket::bind((sat_ip, service_port)).unwrap();
@@ -157,9 +155,9 @@ fn uplink_to_service_with_handler_response() {
     // Let the wheels turn
     thread::sleep(Duration::from_millis(10));
 
-    // Read packet from "radio"
-    let comms = mock_comms.lock().unwrap();
-    let data = comms.write_buff.borrow_mut().pop().unwrap();
+    // Pretend to be the ground and read the
+    // packet which was written to the radio
+    let data = mock_comms.lock().unwrap().pop_write().unwrap();
     let packet = UdpPacket::new(&data).unwrap();
 
     assert_eq!(packet.payload().to_vec(), resp_payload);
@@ -203,10 +201,9 @@ fn uplink_to_service_with_downlink_response() {
     )
     .unwrap();
 
-    // Insert data from ground into mock_comms read buffer
-    if let Ok(comms) = mock_comms.lock() {
-        comms.read_data(&ground_packet);
-    }
+    // Pretend to be the ground and provide a packet
+    // for the comms service to read from the radio
+    mock_comms.lock().unwrap().push_read(&ground_packet);
 
     // Setup service listener
     let service_listener = UdpSocket::bind((sat_ip, service_port)).unwrap();
@@ -232,9 +229,9 @@ fn uplink_to_service_with_downlink_response() {
     // Let the wheels turn
     thread::sleep(Duration::from_millis(10));
 
-    // Read packet from "radio"
-    let comms = mock_comms.lock().unwrap();
-    let data = comms.write_buff.borrow_mut().pop().unwrap();
+    // Pretend to be the ground and read the
+    // packet which was written to the radio
+    let data = mock_comms.lock().unwrap().pop_write().unwrap();
     let packet = UdpPacket::new(&data).unwrap();
 
     assert_eq!(packet.payload().to_vec(), resp_payload);
