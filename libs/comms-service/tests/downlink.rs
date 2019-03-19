@@ -38,7 +38,6 @@ fn downlink_to_ground() {
     let ground_ip = "127.0.0.2";
     let ground_port = 16001;
     let downlink_port = 16002;
-    let service_port = 16005;
     let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![5, 4, 3, 2];
@@ -61,6 +60,7 @@ fn downlink_to_ground() {
 
     let downlink_writer = UdpSocket::bind((ground_ip, 0)).unwrap();
 
+    // Let the wheels turn
     thread::sleep(Duration::from_millis(1));
 
     downlink_writer
