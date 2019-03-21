@@ -304,24 +304,40 @@ fn handle_message<T: Clone>(
 ) {
     let mut buf = [0; MAX_SIZE];
 
-    // Set receive timeout for the socket.
-    match socket.set_read_timeout(Some(Duration::from_millis(timeout))) {
-        Ok(_) => (),
+    // // Set receive timeout for the socket.
+    // match socket.set_read_timeout(Some(Duration::from_millis(timeout))) {
+    //     Ok(_) => (),
+    //     Err(e) => return log_error(&data, e.to_string()).unwrap(),
+    // };
+
+    // // Send message to the intended service.
+    // match socket.send_to(message.payload(), (sat_ip, message.get_destination())) {
+    //     Ok(_) => (),
+    //     Err(e) => return log_error(&data, e.to_string()).unwrap(),
+    // };
+    // info!("UDP Packet sent to port {}", message.get_destination());
+
+    // // Receive response back from the service.
+    // let (size, _) = match socket.recv_from(&mut buf) {
+    //     Ok(tuple) => tuple,
+    //     Err(e) => return log_error(&data, e.to_string()).unwrap(),
+    // };
+
+    let payload = message.payload().to_vec();
+
+    let client = reqwest::Client::new();
+    let mut res = match client
+        .post(&format!("http://{}:{}", sat_ip, message.get_destination()))
+        .body(payload)
+        .send()
+    {
+        Ok(res) => res,
         Err(e) => return log_error(&data, e.to_string()).unwrap(),
     };
 
-    // Send message to the intended service.
-    match socket.send_to(message.payload(), (sat_ip, message.get_destination())) {
-        Ok(_) => (),
-        Err(e) => return log_error(&data, e.to_string()).unwrap(),
-    };
-    info!("UDP Packet sent to port {}", message.get_destination());
-
-    // Receive response back from the service.
-    let (size, _) = match socket.recv_from(&mut buf) {
-        Ok(tuple) => tuple,
-        Err(e) => return log_error(&data, e.to_string()).unwrap(),
-    };
+    let size = res.content_length().unwrap() as usize;
+    let buf = res.text().unwrap();
+    let buf = buf.as_bytes();
 
     // Take received message and wrap it in a UDP packet.
     let packet = match build_packet(
