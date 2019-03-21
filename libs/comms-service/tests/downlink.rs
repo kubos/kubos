@@ -59,7 +59,7 @@ fn downlink_to_ground() {
     let downlink_writer = UdpSocket::bind((sat_ip, 0)).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(1));
+    thread::sleep(Duration::from_millis(10));
 
     // Send packet to comm service's downlink port
     downlink_writer
@@ -67,7 +67,7 @@ fn downlink_to_ground() {
         .unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(1));
+    thread::sleep(Duration::from_millis(10));
 
     // Pretend to be the ground and read the
     // packet which was written to the radio
