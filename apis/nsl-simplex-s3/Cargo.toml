@@ -1,0 +1,10 @@
+[package]
+name = "nsl-simplex-s3"
+version = "0.1.0"
+authors = ["Catherine Garabedian <catherine@kubos.co>"]
+edition = "2018"
+
+[dependencies]
+failure = "0.1.2"
+rust-uart = { path = "../../hal/rust-hal/rust-uart" }
+serial = "0.4"

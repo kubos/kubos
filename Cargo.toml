@@ -10,6 +10,7 @@ members = [
 "apis/mai400-api",
 "apis/novatel-oem6-api",
 "apis/nsl-duplex-d2",
+"apis/nsl-simplex-s3",
 "apis/rust-radio-api",
 "apis/system-api",
 "apis/telemetry-db-api",
