@@ -233,7 +233,7 @@
 //!
 //! ## System Mode
 //!
-//! Get the current mode of the system
+//! Get the [current mode](enum.Mode.html) of the system
 //!
 //! ```json
 //! {
@@ -366,18 +366,17 @@
 //!
 //! Set the attitude control mode
 //!
-//! - mode: Control mode to change to
+//! - mode: [Control mode](enum.Mode.html) to change to
 //! - qbiCmd: Optional array of four values needed for Qinertial and Qtable mode
 //! - sunAngleEnable: Optional. Specifies whether the sun rotating angle should be updated when
 //!                 using Normal-Sun or LatLong-Sun mode
-//! sunRotAngle: Optional. The sun rotating angle for use in Normal-Sun and LatLong-Sun mode
+//! - sunRotAngle: Optional. The sun rotating angle for use in Normal-Sun and LatLong-Sun mode
 //!
 //! ```json
 //! mutation {
 //!     setMode(mode: Mode, qbiCmd: Vec<i32>, sunAngleEnable: bool, sunRotAngle: f64) {
 //!         errors: String,
 //!         success: Boolean,
-//!         response: String
 //!     }
 //! }
 //! ```

@@ -130,14 +130,14 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // {
     //     lockStatus {
     //         positionStatus: SolutionStatus,
-    //           positionType: PosVelType,
-    //           time {
+    //         positionType: PosVelType,
+    //         time {
     //             ms: Int,
-    //               week: Int
-    //           },
+    //             week: Int
+    //         },
     //         timeStatus: RefTimeStatus,
     //         velocityStatus: SolutionStatus,
-    //           velocityType: PosVelType
+    //         velocityType: PosVelType
     //     }
     // }
     field lock_status(&executor) -> FieldResult<LockStatus>
