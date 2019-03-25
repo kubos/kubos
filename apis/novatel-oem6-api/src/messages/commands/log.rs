@@ -72,7 +72,6 @@ impl Message for LogCmd {
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum LogTrigger {
-    OnNew = 0,
     OnChanged = 1,
     OnTime = 2,
     Once = 4,

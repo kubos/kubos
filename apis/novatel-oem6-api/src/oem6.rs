@@ -433,7 +433,7 @@ impl OEM6 {
         let request = LogCmd::new(
             Port::COM1 as u32,
             MessageID::RxStatusEvent as u16,
-            LogTrigger::OnNew,
+            LogTrigger::OnChanged,
             0.0,
             0.0,
             hold,
