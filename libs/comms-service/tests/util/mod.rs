@@ -94,8 +94,7 @@ pub fn comms_config(
     downlink_port: u16,
 ) -> CommsConfig {
     CommsConfig {
-        handler_port_min: Some(18000),
-        handler_port_max: Some(18100),
+        max_num_handlers: Some(10),
         downlink_ports: Some(vec![downlink_port]),
         timeout: Some(1000),
         ground_ip: ground_ip.to_owned(),

@@ -83,6 +83,7 @@ mod config;
 mod errors;
 mod service;
 mod telemetry;
+
 #[cfg(test)]
 mod tests;
 
