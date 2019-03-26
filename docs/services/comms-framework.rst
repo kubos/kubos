@@ -53,14 +53,12 @@ Ground Communication
 The communications service maintains a constant read thread which listens for messages from the
 ground via the communications device.
 
-Once a message is received, a message handler thread is spawned and assigned one of the available
-handler UDP ports.
-This message handler examines the destination port embedded in the message's UDP packet header to
-determine the internal message destination and then forwards it on to the appropriate service.
-The handler then waits for a reply (within a specified timeout duration), wraps the response in a
+Once a message is received, a message handler thread is spawned. This message handler examines the destination
+port embedded in the message's UDP packet header to determine the internal message destination
+and then makes a HTTP POST to the appropriate service.
+The handler then waits for a response (within a specified timeout duration), wraps the response in a
 UDP packet, and then sends the packet to the communications device for transmission.
-Once this transaction has completed, the message handler thread exits, freeing up the UDP port for
-future use.
+Once this transaction has completed, the message handler thread exits.
 
 .. uml::
 
@@ -87,7 +85,7 @@ future use.
     
     participant "Kubos Service" as service
     
-    handler -> service : 6. Send GraphQL query/mutation to service
+    handler -> service : 6. Posts GraphQL query/mutation to service
     service -> handler : 7. Return result of query/mutation
     handler -> handler : 8. Wrap result in UDP packet
     handler -> Radio : 9. Send response packet to radio
@@ -146,10 +144,7 @@ configurations.
 
 The service's :doc:`config.toml <../services/service-config>` file should contain the following parameters:
 
-- ``handler_port_min`` - (Default: 13100) Starting port used to define a range of ports that are used in the message
-  handlers that handle messages received from the ground
-- ``handler_port_max`` - (Default: 13149) Ending port used to define a range of ports that are used in the message
-  handlers that handle messages received from the ground
+- ``max_num_handlers`` - (Default: 50) The maximum number of concurrent message handlers allowed
 - ``downlink_ports`` - (Optional) List of ports used by downlink endpoints that send messages to the
   ground. Each port in the list will be used by one downlink endpoint
 - ``timeout`` - (Default: 1500) Length of time a message handler should wait for a reply, in milliseconds
@@ -169,8 +164,7 @@ It contains the following members:
   communications device
 - ``write`` - A list of function pointers for all available ways that messages may be written to
   the communications device
-- ``handler_port_min`` - Should be copied from the corresponding `config.toml` value
-- ``handler_port_max`` - Should be copied from the corresponding `config.toml` value
+- ``max_num_handlers`` - Should be copied from the corresponding `config.toml` value
 - ``downlink_ports`` - Should be copied from the corresponding `config.toml` value or ``None``
 - ``timeout`` - Should be copied from the corresponding `config.toml` value
 - ``ground_ip`` - Should be copied from the corresponding `config.toml` value
