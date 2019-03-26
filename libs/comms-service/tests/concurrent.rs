@@ -23,15 +23,11 @@ use comms_service::*;
 use pnet::packet::udp::UdpPacket;
 use pnet::packet::Packet;
 use std::net::Ipv4Addr;
-use std::net::UdpSocket;
-use std::str;
 use std::str::FromStr;
-use std::sync::mpsc::channel;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use util::*;
-use warp::{self, path, Buf, Filter};
 
 // Tests sending concurrent packets from the ground to a service through a handler
 // Service sends back a response via the message handler

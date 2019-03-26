@@ -16,8 +16,8 @@
 // Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
 //
 
-// #![deny(missing_docs)]
-// #![deny(warnings)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 //!
 //! This library allows users to define and start communication services within their hardware services.
@@ -64,8 +64,7 @@
 //!
 //! ```toml
 //! [service-name.comms]
-//! handler_port_min = 13002
-//! handler_port_max = 13010
+//! max_num_handlers = 50
 //! downlink_ports = [13011]
 //! ground_port = 9001
 //! timeout = 1500

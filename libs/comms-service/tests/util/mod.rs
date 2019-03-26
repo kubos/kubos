@@ -16,12 +16,10 @@
 
 use comms_service::*;
 use std::cell::RefCell;
-use std::collections::VecDeque;
 use std::str;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
-use warp::{self, path, Buf, Filter};
+use warp::{self, Buf, Filter};
 
 // This MockComms structure allows for easy integration testing
 // of the comms_service crate by giving direct access to the

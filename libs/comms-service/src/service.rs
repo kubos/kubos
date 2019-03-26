@@ -241,7 +241,7 @@ fn read_thread<T: Clone + Send + 'static>(
                 error!("No message handler ports available");
                 continue;
             } else {
-                *num_handlers = *num_handlers + 1;
+                *num_handlers += 1;
             }
         }
 
@@ -290,7 +290,7 @@ fn handle_message<T: Clone>(
         Ok(client) => client,
         Err(e) => {
             if let Ok(mut num_handlers) = num_handlers.lock() {
-                *num_handlers = *num_handlers - 1;
+                *num_handlers -= 1;
             }
             return log_error(&data, e.to_string()).unwrap();
         }
@@ -304,7 +304,7 @@ fn handle_message<T: Clone>(
         Ok(res) => res,
         Err(e) => {
             if let Ok(mut num_handlers) = num_handlers.lock() {
-                *num_handlers = *num_handlers - 1;
+                *num_handlers -= 1;
             }
             return log_error(&data, e.to_string()).unwrap();
         }
@@ -326,7 +326,7 @@ fn handle_message<T: Clone>(
         Ok(packet) => packet,
         Err(e) => {
             if let Ok(mut num_handlers) = num_handlers.lock() {
-                *num_handlers = *num_handlers - 1;
+                *num_handlers -= 1;
             }
             return log_error(&data, e.to_string()).unwrap();
         }
@@ -345,7 +345,7 @@ fn handle_message<T: Clone>(
         }
     };
     if let Ok(mut num_handlers) = num_handlers.lock() {
-        *num_handlers = *num_handlers - 1;
+        *num_handlers -= 1;
     }
 }
 
