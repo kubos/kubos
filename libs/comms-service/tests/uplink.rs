@@ -31,7 +31,6 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use util::*;
-
 use warp::{self, path, Buf, Filter};
 
 // Tests sending a packet from the ground to a service through a handler
@@ -40,9 +39,9 @@ use warp::{self, path, Buf, Filter};
 fn uplink_to_service_no_response() {
     let sat_ip = "127.0.0.3";
     let ground_ip = "127.0.0.2";
-    let ground_port = 16001;
-    let downlink_port = 16002;
-    let service_port = 16005;
+    let ground_port = 15001;
+    let downlink_port = 15002;
+    let service_port = 15005;
     let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
@@ -77,35 +76,13 @@ fn uplink_to_service_no_response() {
     // Setup & start http server
     let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
     let thread_data = recv_data.clone();
-    let routes = warp::post2()
-        .and(warp::any())
-        .and(warp::body::concat())
-        .map(move |mut body: warp::body::FullBody| {
-            let mut data = vec![];
-            let mut remaining = body.remaining();
-            while remaining != 0 {
-                let cnt = body.bytes().len();
-                let mut body_bytes = body.bytes().to_vec();
-                data.append(&mut body_bytes);
-                body.advance(cnt);
-                remaining -= cnt;
-            }
-
-            let mut thread_data = thread_data.lock().unwrap();
-            thread_data.append(&mut data);
-
-            // Send a response back to the ground via the handler port
-            ""
-        });
-    let service_ip: std::net::SocketAddrV4 =
-        format!("{}:{}", sat_ip, service_port).parse().unwrap();
-    thread::spawn(move || warp::serve(routes).run(service_ip));
+    spawn_http_server(vec![], thread_data, &format!("{}:{}", sat_ip, service_port));
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(200));
 
     // Retrieve the message for the service from shared buffer
     let rx_data = recv_data.lock().unwrap().to_owned();
@@ -157,35 +134,18 @@ fn uplink_to_service_with_handler_response() {
     // Setup & start http server
     let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
     let thread_data = recv_data.clone();
-    let routes = warp::post2()
-        .and(warp::any())
-        .and(warp::body::concat())
-        .map(move |mut body: warp::body::FullBody| {
-            let mut data = vec![];
-            let mut remaining = body.remaining();
-            while remaining != 0 {
-                let cnt = body.bytes().len();
-                let mut body_bytes = body.bytes().to_vec();
-                data.append(&mut body_bytes);
-                body.advance(cnt);
-                remaining -= cnt;
-            }
 
-            let mut thread_data = thread_data.lock().unwrap();
-            thread_data.append(&mut data);
-
-            // Send a response back to the ground via the handler port
-            str::from_utf8(&vec![9, 8, 7, 6]).unwrap().to_owned()
-        });
-    let service_ip: std::net::SocketAddrV4 =
-        format!("{}:{}", sat_ip, service_port).parse().unwrap();
-    thread::spawn(move || warp::serve(routes).run(service_ip));
+    spawn_http_server(
+        resp_payload.clone(),
+        thread_data,
+        &format!("{}:{}", sat_ip, service_port),
+    );
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(200));
 
     // Retrieve the message for the service from shared buffer
     let rx_data = recv_data.lock().unwrap().to_owned();
@@ -193,7 +153,7 @@ fn uplink_to_service_with_handler_response() {
     assert_eq!(rx_data, payload);
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(10));
+    thread::sleep(Duration::from_millis(200));
 
     // Pretend to be the ground and read the
     // packet which was written to the radio
@@ -210,9 +170,9 @@ fn uplink_to_service_with_handler_response() {
 fn uplink_to_service_with_downlink_response() {
     let sat_ip = "127.0.0.7";
     let ground_ip = "127.0.0.8";
-    let ground_port = 16001;
-    let downlink_port = 16002;
-    let service_port = 16005;
+    let ground_port = 17001;
+    let downlink_port = 17002;
+    let service_port = 17005;
     let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
@@ -247,36 +207,17 @@ fn uplink_to_service_with_downlink_response() {
 
     // Setup & start http server
     let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
-    let thread_data = recv_data.clone();
-    let routes = warp::post2()
-        .and(warp::any())
-        .and(warp::body::concat())
-        .map(move |mut body: warp::body::FullBody| {
-            let mut data = vec![];
-            let mut remaining = body.remaining();
-            while remaining != 0 {
-                let cnt = body.bytes().len();
-                let mut body_bytes = body.bytes().to_vec();
-                data.append(&mut body_bytes);
-                body.advance(cnt);
-                remaining -= cnt;
-            }
-
-            let mut thread_data = thread_data.lock().unwrap();
-            thread_data.append(&mut data);
-
-            // Don't respond back this way
-            ""
-        });
-    let service_ip: std::net::SocketAddrV4 =
-        format!("{}:{}", sat_ip, service_port).parse().unwrap();
-    thread::spawn(move || warp::serve(routes).run(service_ip));
+    spawn_http_server(
+        vec![],
+        recv_data.clone(),
+        &format!("{}:{}", sat_ip, service_port),
+    );
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(200));
 
     // Retrieve the message for the service from shared buffer
     let rx_data = recv_data.lock().unwrap().to_owned();
@@ -286,7 +227,7 @@ fn uplink_to_service_with_downlink_response() {
     let downlink_writer = UdpSocket::bind((sat_ip, 0)).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(10));
+    thread::sleep(Duration::from_millis(200));
 
     // Send packet to comm service's downlink port
     downlink_writer
