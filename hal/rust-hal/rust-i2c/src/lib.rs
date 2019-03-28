@@ -38,15 +38,17 @@ pub trait Stream {
     /// # Arguments
     ///
     /// `command` - Command to read result from
-    fn read(&self, command: Command) -> Result<Vec<u8>>;
+    /// `rx_len`  - Amount of data to read
+    fn read(&self, command: Command, rx_len: usize) -> Result<Vec<u8>>;
 
     /// Writes I2C command and reads result
     ///
     /// # Arguments
     ///
     /// `command` - Command to write and read from
-    /// `delay` - Delay between writing and reading
-    fn transfer(&self, command: Command, delay: Duration) -> Result<Vec<u8>>;
+    /// `rx_len`  - Amount of data to read
+    /// `delay`   - Delay between writing and reading
+    fn transfer(&self, command: Command, rx_len: usize, delay: Duration) -> Result<Vec<u8>>;
 }
 
 /// An implementation of `i2c_hal::Stream` which uses the `i2c_linux` crate
@@ -80,18 +82,18 @@ impl Stream for I2CStream {
     }
 
     /// Reading
-    fn read(&self, command: Command) -> Result<Vec<u8>> {
+    fn read(&self, command: Command, rx_len: usize) -> Result<Vec<u8>> {
         let mut i2c = I2c::from_path(self.path.clone())?;
         i2c.smbus_set_slave_address(self.slave, false)?;
-        let mut data = vec![0; 4];
+        let mut data = vec![0; rx_len];
         i2c.i2c_read_block_data(command.cmd, &mut data)?;
         Ok(data)
     }
 
     /// Read/Write transaction
-    fn transfer(&self, command: Command, delay: Duration) -> Result<Vec<u8>> {
+    fn transfer(&self, command: Command, rx_len: usize, delay: Duration) -> Result<Vec<u8>> {
         let mut i2c = I2c::from_path(self.path.clone())?;
-        let mut data = vec![0; 4];
+        let mut data = vec![0; rx_len];
         i2c.smbus_set_slave_address(self.slave, false)?;
 
         i2c.i2c_set_retries(5)?;
@@ -153,8 +155,9 @@ impl Connection {
     /// # Arguments
     ///
     /// `command` - Command to read result from
-    pub fn read(&self, command: Command) -> Result<Vec<u8>> {
-        self.stream.read(command)
+    /// `rx_len`  - Amount of data to read
+    pub fn read(&self, command: Command, rx_len: usize) -> Result<Vec<u8>> {
+        self.stream.read(command, rx_len)
     }
 
     /// Writes I2C command and reads result
@@ -162,8 +165,9 @@ impl Connection {
     /// # Arguments
     ///
     /// `command` - Command to write and read from
+    /// `rx_len`  - Amount of data to read
     /// `delay` - Delay between writing and reading
-    pub fn transfer(&self, command: Command, delay: Duration) -> Result<Vec<u8>> {
-        self.stream.transfer(command, delay)
+    pub fn transfer(&self, command: Command, rx_len: usize, delay: Duration) -> Result<Vec<u8>> {
+        self.stream.transfer(command, rx_len, delay)
     }
 }

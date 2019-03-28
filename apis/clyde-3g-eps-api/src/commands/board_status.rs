@@ -102,11 +102,14 @@ pub fn parse(data: &[u8]) -> EpsResult<BoardStatus> {
     }
 }
 
-pub fn command() -> Command {
-    Command {
-        cmd: 0x01,
-        data: vec![0x00],
-    }
+pub fn command() -> (Command, usize) {
+    (
+        Command {
+            cmd: 0x01,
+            data: vec![0x00],
+        },
+        4,
+    )
 }
 
 #[cfg(test)]

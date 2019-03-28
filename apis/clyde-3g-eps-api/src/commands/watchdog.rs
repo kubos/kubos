@@ -55,10 +55,13 @@ pub mod get_comms_watchdog_period {
         }
     }
 
-    pub fn command() -> Command {
-        Command {
-            cmd: 0x20,
-            data: vec![0x00],
-        }
+    pub fn command() -> (Command, usize) {
+        (
+            Command {
+                cmd: 0x20,
+                data: vec![0x00],
+            },
+            2,
+        )
     }
 }

@@ -149,7 +149,7 @@
 //!  ```json
 //! {
 //! 	telemetry {
-//! 		motherboardTelemetry {
+//! 		motherboard {
 //! 			VoltageFeedingBcr1: Float!
 //! 			CurrentBcr1Sa1a: Float!
 //! 			CurrentBcr1Sa1b: Float!
@@ -217,7 +217,7 @@
 //! ```json
 //! {
 //! 	telemetry {
-//! 		daughterboardTelemetry {
+//! 		daughterboard {
 //! 			VoltageFeedingBcr4: Float
 //! 			CurrentBcr4Sa4a: Float
 //! 			CurrentBcr4Sa4b: Float
@@ -414,8 +414,16 @@ use crate::models::subsystem::Subsystem;
 use crate::schema::mutation::Root as MutationRoot;
 use crate::schema::query::Root as QueryRoot;
 use kubos_service::{Config, Service};
+use syslog::Facility;
 
 fn main() {
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("clyde-3g-eps-service"),
+    )
+    .unwrap();
+
     let config = Config::new("clyde-3g-eps-service");
     let bus = config
         .get("bus")
