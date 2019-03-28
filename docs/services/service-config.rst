@@ -54,13 +54,13 @@ For example::
     [my-payload-service]
     watchdog-timeout = 60
         
-        [my-payload-service.addr]
-        ip = "0.0.0.0"
-        port = 8100
-        
-        [my-payload-service.device]
-        bus = "/dev/i2c-1"
-        addr = 60
+    [my-payload-service.addr]
+    ip = "0.0.0.0"
+    port = 8100
+    
+    [my-payload-service.device]
+    bus = "/dev/i2c-1"
+    addr = 60
         
 In this configuration, we are defining several custom options for a hypothetical
 :doc:`payload service <payload-services>`, ``my-payload-service``:

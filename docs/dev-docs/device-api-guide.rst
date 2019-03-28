@@ -86,8 +86,6 @@ Most APIs will likely implement most of these kinds of functions:
 Any internal configuration required (for example, setting an I2C slave address) should be done dynamically.
 For example, by using an argument in the API's ``{api}_init()`` function.
 
-A
-
 .. note::
 
     Historically, this kind of configuration has been done with `config.json` options, but this has been deprecated
