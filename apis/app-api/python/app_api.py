@@ -128,7 +128,7 @@ class Services:
 
         return (data, errors)
 
-def logging_setup(app_name):
+def logging_setup(app_name, level = logging.DEBUG):
     """Set up the logger for the program
     All log messages will be sent to rsyslog using the User facility.
     Additionally, they will also be echoed to ``stdout``
@@ -136,6 +136,8 @@ def logging_setup(app_name):
     Args:
     
         - app_name (:obj:`str`): The application name which should be used for all log messages
+        - level (:obj:`logging.level`): The minimum logging level which should be recorded.
+          Default: `logging.DEBUG`
 
     Returns:
         An initialized Logger object
@@ -143,7 +145,7 @@ def logging_setup(app_name):
     # Create a new logger
     logger = logging.getLogger(app_name)
     # We'll log everything of Debug level or higher
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(level)
     # Set the log message template
     formatter = logging.Formatter(app_name + ' %(message)s')
     
