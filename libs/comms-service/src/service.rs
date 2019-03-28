@@ -409,8 +409,8 @@ fn downlink_endpoint<T: Clone>(
     }
 }
 
-// Takes the payload and then wraps it into a UDP packet.
-fn build_packet(
+/// Takes the payload and then wraps it into a UDP packet.
+pub fn build_packet(
     payload: &[u8],
     source: u16,
     dest: u16,
