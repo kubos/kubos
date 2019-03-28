@@ -105,14 +105,13 @@ macro_rules! process_errors {
 #[macro_export]
 macro_rules! push_err {
     ($master:expr, $err:expr) => {{
-        use log::error;
         // Send the error to syslog
-        error!("{}", $err);
+        log::error!("{}", $err);
 
         if let Ok(mut master_vec) = $master.write() {
             master_vec.push($err);
         } else {
-            error!("Unable to add error to master list");
+            log::error!("Unable to add error to master list");
         }
     }};
 }
@@ -308,7 +307,7 @@ mod tests {
 
         assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
         assert_eq!(
-            vec!["test_func (services/kubos-service/src/macros.rs:307): TopError: top, RootError: root".to_owned()],
+            vec!["test_func (services/kubos-service/src/macros.rs:306): TopError: top, RootError: root".to_owned()],
             *master_err.read().unwrap()
         );
     }

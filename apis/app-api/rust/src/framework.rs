@@ -51,11 +51,15 @@ pub trait AppHandler {
     fn on_command(&self, args: Vec<String>) -> Result<(), Error>;
 }
 
-/// A helper macro which detects the requested run level and calls the appropriate handler function
+/// A helper macro which detects the requested run level and calls the appropriate handler function.
+/// Logging will be set up automatically for the application.
+/// The log name will be taken from the package name specified in the application's `Cargo.toml` file.
+/// Note: Any hyphens will be automatically converted to underscores (`test-app` -> `test_app`)
 ///
 /// # Arguments
 ///
 /// * `handler` - A reference to an object which implements the run level handler functions
+/// * `level` - Default: `log::LevelFilter::Debug`. The minimum log level to record
 ///
 /// # Examples
 ///
@@ -85,13 +89,21 @@ pub trait AppHandler {
 #[macro_export]
 macro_rules! app_main {
     ($handler:expr) => {{
-        kubos_app::app_start($handler)
+        app_main!($handler, log::LevelFilter::Debug)
+    }};
+    ($handler:expr, $level:expr) => {{
+        let name = env!("CARGO_PKG_NAME");
+        kubos_app::app_start($handler, name, $level)
     }};
 }
 
 /// The entry point for all KubOS applications. The preferred way to use this application
 /// is through the `app_main!` macro
-pub fn app_start(handler: &AppHandler) -> Result<(), Error> {
+pub fn app_start(
+    handler: &AppHandler,
+    name: &str,
+    log_level: log::LevelFilter,
+) -> Result<(), Error> {
     use log4rs::append::console::ConsoleAppender;
     use log4rs::encode::pattern::PatternEncoder;
     use log4rs_syslog::SyslogAppender;
@@ -102,7 +114,7 @@ pub fn app_start(handler: &AppHandler) -> Result<(), Error> {
         SyslogAppender::builder()
             .encoder(syslog_encoder)
             .openlog(
-                "rust-mission-app",
+                name,
                 log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
                 log4rs_syslog::Facility::User,
             )
@@ -121,7 +133,7 @@ pub fn app_start(handler: &AppHandler) -> Result<(), Error> {
                 .appender("syslog")
                 .appender("stdout")
                 // Set the minimum logging level to record
-                .build(log::LevelFilter::Debug),
+                .build(log_level),
         )?;
 
     // Start the logger

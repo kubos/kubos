@@ -36,7 +36,7 @@ macro_rules! make_reset_telemetry {
         )+
     ) => {
 
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         /// Reset Telemetry Variants
         pub enum Type {
             $(
@@ -62,7 +62,7 @@ macro_rules! make_reset_telemetry {
 }
 
 /// Common Reset Telemetry Structure
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Data {
     /// Motherboard telemetry value
     pub motherboard: u8,

@@ -55,6 +55,7 @@ The following list gives links to each service's documentation:
     - :doc:`Monitor Service <monitor-service>` - This service is unique in that it communicates with
       the OBC itself, rather than an external hardware device
     - |MAI-400|
+    - |Clydespace-EPS|
     - |ISIS-AntS|
     - |iOBC-Supervisor|
     - |NovAtel-OEM6|
@@ -63,6 +64,10 @@ The following list gives links to each service's documentation:
 .. |MAI-400| raw:: html
  
     <a href="../rust-docs/mai400_service/index.html" target="_blank">Adcole Maryland Aerospace MAI-400 ADACS</a>
+    
+.. |Clydespace-EPS| raw:: html
+ 
+    <a href="../rust-docs/clyde_3g_eps_service/index.html" target="_blank">Clyde Space 3rd Generation EPS</a>
 
 .. |ISIS-AntS| raw:: html
  

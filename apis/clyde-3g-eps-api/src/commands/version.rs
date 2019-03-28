@@ -24,7 +24,7 @@ use rust_i2c::Command;
 /// present on the board. The firmware number returns the current firmware on the board.
 
 /// Structure containing board firmware versions
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Version {
     /// Current firmware revision on board
     pub revision: u8,
@@ -34,7 +34,7 @@ pub struct Version {
 
 /// Structure containing version information for the EPS motherboard
 /// and daughterboard if present
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct VersionInfo {
     /// Motherboard version information
     pub motherboard: Version,

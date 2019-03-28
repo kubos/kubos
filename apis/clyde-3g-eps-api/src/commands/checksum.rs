@@ -24,7 +24,7 @@ use rust_i2c::Command;
 /// to generate a checksum. The value retrieved can be used to determine whether
 /// the contents of the ROM have changed during the operation of the device.
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Checksum {
     /// Motherboard ROM checksum
     pub motherboard: u16,
