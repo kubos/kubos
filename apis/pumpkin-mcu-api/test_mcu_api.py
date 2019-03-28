@@ -96,13 +96,13 @@ class TestMCUAPI(unittest.TestCase):
             0)
 
     def test_header_parse(self):
-        data_ready = '\x01'
-        timestamp = '\x02\x03\x04\x05'
-        data = '\x06'
+        data_ready = b'\x01'
+        timestamp = b'\x02\x03\x04\x05'
+        data = b'\x06'
         inputdata = data_ready+timestamp+data
         output_assert = {
             'timestamp': 841489.94,
-            'data': '\x06'
+            'data': b'\x06'
         }
         self.assertEqual(
             self.mcu._header_parse(
@@ -236,13 +236,13 @@ class TestMCUAPI(unittest.TestCase):
         fields = [field]
         input_dict = {}
         input_dict[field] = mcu_api.TELEMETRY[module][field]
-        output_data = 'this should be returned'
+        output_data = b'this should be returned'
         fake_timestamp = 841489.94
-        return_data = '\x01\x02\x03\x04\x05' + output_data + \
-            '\0this \0should be \0cut off'
+        return_data = b'\x01\x02\x03\x04\x05' + output_data + \
+            b'\0this \0should be \0cut off'
         output_assert = {field: {
             'timestamp': fake_timestamp,
-            'data': output_data
+            'data': output_data.decode()
         }}
         with mock.patch('mcu_api.MCU.write') as mock_write, mock.patch('mcu_api.MCU.read') as mock_read:
             mock_read.return_value = return_data

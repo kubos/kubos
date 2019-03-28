@@ -25,14 +25,16 @@ TELEMETRY = {
         "firmware_version": {"command": "SUP:TEL? 0,data",  "length": 48, "parsing": "str"},
         "commands_parsed":  {"command": "SUP:TEL? 1,data",  "length": 8, "parsing": "<Q"},
         "scpi_errors":      {"command": "SUP:TEL? 2,data",  "length": 8, "parsing": "<Q"},
-        "voltstat":         {"command": "SUP:TEL? 3,data",  "length": 8, "parsing": "<hhhh",
-                             "names": ["voltstat0", "voltstat1", "voltstat2", "voltstat3"]},
         "cpu_selftests":    {"command": "SUP:TEL? 4,data",  "length": 22, "parsing": "<QQhhh",
                              "names": ["selftest0", "selftest1", "selftest2", "selftest3", "selftest4"]},
         "time":             {"command": "SUP:TEL? 5,data",  "length": 8, "parsing": "<Q"},
         "context_switches": {"command": "SUP:TEL? 6,data",  "length": 8, "parsing": "<Q"},
         "idling_hooks":     {"command": "SUP:TEL? 7,data",  "length": 8, "parsing": "<Q"},
-        "mcu_load":         {"command": "SUP:TEL? 8,data",  "length": 4, "parsing": "<L"},
+        "mcu_load":         {"command": "SUP:TEL? 8,data",  "length": 4, "parsing": "<f"},
+        "serial_num":       {"command": "SUP:TEL? 9,data",  "length": 2, "parsing": "<H"},
+        "i2c_address":      {"command": "SUP:TEL? 10,data",  "length": 1, "parsing": "<B"},
+        "tuning":           {"command": "SUP:TEL? 11,data",  "length": 1, "parsing": "<b"},
+        "nvm_write_cycles": {"command": "SUP:TEL? 12,data",  "length": 2, "parsing": "<H"},
         "reset_cause":      {"command": "SUP:TEL? 13,data", "length": 2, "parsing": "<H"}
     },
     "sim": {},
@@ -178,6 +180,14 @@ TELEMETRY = {
         "perm_fail_alert2":    {"command": "BM2:TEL? 106,data", "length": 2, "parsing": "<H"},
         "perm_fail_status2":   {"command": "BM2:TEL? 107,data", "length": 2, "parsing": "<H"},
         "temp_range":          {"command": "BM2:TEL? 114,data", "length": 2, "parsing": "<H"}
+    },
+    "dasa": {
+        "motor_position":      {"command": "DASA:TEL? 0,data", "length": 4, "parsing": "<i"},
+        "motor_angle":         {"command": "DASA:TEL? 1,data", "length": 4, "parsing": "<f"},
+        "motor_status":        {"command": "DASA:TEL? 2,data", "length": 1, "parsing": "<B"},
+        "pinpull_status":      {"command": "DASA:TEL? 3,data", "length": 1, "parsing": "<B"},
+        "rail_status":         {"command": "DASA:TEL? 4,data", "length": 1, "parsing": "<B"},
+        "motor_stop_mode":     {"command": "DASA:TEL? 5,data", "length": 1, "parsing": "<B"},
     },
     "epsm": {
         "bcr1":                {"command": "EPS:TEL? 0,data", "length": 9, "parsing": "<HHhhB",
@@ -332,14 +342,14 @@ class MCU:
         {'timestamp':timestamp,'data':data}
         If the data ready flag is not set, it sets the timestamp to 0
         """
-        if data[0] != '\x01':
+        if data[0] != 1:
             # Returns 0 for timestamp if data was not ready, but still returns
             # the data for debugging purposes.
             # telemetry data}
             return {'timestamp': 0, 'data': data[HEADER_SIZE:]}
 
         # Unpack timestamp in seconds.
-        timestamp = struct.unpack('<i', str.encode(data[1:HEADER_SIZE]))[0]/100.0
+        timestamp = struct.unpack('<i', data[1:HEADER_SIZE])[0]/100.0
         # Return the valid packet timestamp and data
         return {'timestamp': timestamp, 'data': data[HEADER_SIZE:]}
 
