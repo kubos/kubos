@@ -25,14 +25,16 @@ TELEMETRY = {
         "firmware_version": {"command": "SUP:TEL? 0,data",  "length": 48, "parsing": "str"},
         "commands_parsed":  {"command": "SUP:TEL? 1,data",  "length": 8, "parsing": "<Q"},
         "scpi_errors":      {"command": "SUP:TEL? 2,data",  "length": 8, "parsing": "<Q"},
-        "voltstat":         {"command": "SUP:TEL? 3,data",  "length": 8, "parsing": "<hhhh",
-                             "names": ["voltstat0", "voltstat1", "voltstat2", "voltstat3"]},
         "cpu_selftests":    {"command": "SUP:TEL? 4,data",  "length": 22, "parsing": "<QQhhh",
                              "names": ["selftest0", "selftest1", "selftest2", "selftest3", "selftest4"]},
         "time":             {"command": "SUP:TEL? 5,data",  "length": 8, "parsing": "<Q"},
         "context_switches": {"command": "SUP:TEL? 6,data",  "length": 8, "parsing": "<Q"},
         "idling_hooks":     {"command": "SUP:TEL? 7,data",  "length": 8, "parsing": "<Q"},
-        "mcu_load":         {"command": "SUP:TEL? 8,data",  "length": 4, "parsing": "<L"},
+        "mcu_load":         {"command": "SUP:TEL? 8,data",  "length": 4, "parsing": "<f"},
+        "serial_num":       {"command": "SUP:TEL? 9,data",  "length": 2, "parsing": "<H"},
+        "i2c_address":      {"command": "SUP:TEL? 10,data",  "length": 1, "parsing": "<B"},
+        "tuning":           {"command": "SUP:TEL? 11,data",  "length": 1, "parsing": "<b"},
+        "nvm_write_cycles": {"command": "SUP:TEL? 12,data",  "length": 2, "parsing": "<H"},
         "reset_cause":      {"command": "SUP:TEL? 13,data", "length": 2, "parsing": "<H"}
     },
     "sim": {},
@@ -178,6 +180,42 @@ TELEMETRY = {
         "perm_fail_alert2":    {"command": "BM2:TEL? 106,data", "length": 2, "parsing": "<H"},
         "perm_fail_status2":   {"command": "BM2:TEL? 107,data", "length": 2, "parsing": "<H"},
         "temp_range":          {"command": "BM2:TEL? 114,data", "length": 2, "parsing": "<H"}
+    },
+    "dasa": {
+        "motor_position":      {"command": "DASA:TEL? 0,data", "length": 4, "parsing": "<i"},
+        "motor_angle":         {"command": "DASA:TEL? 1,data", "length": 4, "parsing": "<f"},
+        "motor_status":        {"command": "DASA:TEL? 2,data", "length": 1, "parsing": "<B"},
+        "pinpull_status":      {"command": "DASA:TEL? 3,data", "length": 1, "parsing": "<B"},
+        "rail_status":         {"command": "DASA:TEL? 4,data", "length": 1, "parsing": "<B"},
+        "motor_stop_mode":     {"command": "DASA:TEL? 5,data", "length": 1, "parsing": "<B"},
+    },
+    "epsm": {
+        "bcr1":                {"command": "EPS:TEL? 0,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr1_voltage", "bcr1_volt_max", "bcr1_current", "bcr1_curr_limit", "bcr1_status"]},
+        "bcr2":                {"command": "EPS:TEL? 1,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr2_voltage", "bcr2_volt_max", "bcr2_current", "bcr2_curr_limit", "bcr2_status"]},
+        "bcr3":                {"command": "EPS:TEL? 2,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr3_voltage", "bcr3_volt_max", "bcr3_current", "bcr3_curr_limit", "bcr3_status"]},
+        "bcr4":                {"command": "EPS:TEL? 3,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr4_voltage", "bcr4_volt_max", "bcr4_current", "bcr4_curr_limit", "bcr4_status"]},
+        "bcr5":                {"command": "EPS:TEL? 4,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr5_voltage", "bcr5_volt_max", "bcr5_current", "bcr5_curr_limit", "bcr5_status"]},
+        "bcr6":                {"command": "EPS:TEL? 5,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["bcr6_voltage", "bcr6_volt_max", "bcr6_current", "bcr6_curr_limit", "bcr6_status"]},
+        "3_3v":                {"command": "EPS:TEL? 6,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["3_3v_voltage", "3_3v_volt_max", "3_3v_current", "3_3v_curr_limit", "3_3v_status"]},
+        "5v":                 {"command": "EPS:TEL? 7,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["5v_voltage", "5v_volt_max", "5v_current", "5v_curr_limit", "5v_status"]},
+        "12v":                {"command": "EPS:TEL? 8,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["12v_voltage", "12v_volt_max", "12v_current", "12v_curr_limit", "12v_status"]},
+        "aux":                {"command": "EPS:TEL? 9,data", "length": 9, "parsing": "<HHhhB",
+                                "names": ["aux_voltage", "aux_volt_max", "aux_current", "aux_curr_limit", "aux_status"]},
+        "fpga_version":       {"command": "EPS:TEL? 10,data", "length": 2, "parsing": "<BB",
+                                "names": ["fpga_version_0", "fpga_version_1"]},
+        "batt1":              {"command": "EPS:TEL? 11,data", "length": 5, "parsing": "<hHB",
+                                "names": ["batt1_current", "batt1_voltage", "batt1_status"]},
+        "batt2":              {"command": "EPS:TEL? 12,data", "length": 5, "parsing": "<hHB",
+                                "names": ["batt2_current", "batt2_voltage", "batt2_status"]},
     }
 }
 # End Config Data
@@ -304,14 +342,14 @@ class MCU:
         {'timestamp':timestamp,'data':data}
         If the data ready flag is not set, it sets the timestamp to 0
         """
-        if data[0] != '\x01':
+        if data[0] != 1:
             # Returns 0 for timestamp if data was not ready, but still returns
             # the data for debugging purposes.
             # telemetry data}
             return {'timestamp': 0, 'data': data[HEADER_SIZE:]}
 
         # Unpack timestamp in seconds.
-        timestamp = struct.unpack('<i', str.encode(data[1:HEADER_SIZE]))[0]/100.0
+        timestamp = struct.unpack('<i', data[1:HEADER_SIZE])[0]/100.0
         # Return the valid packet timestamp and data
         return {'timestamp': timestamp, 'data': data[HEADER_SIZE:]}
 
