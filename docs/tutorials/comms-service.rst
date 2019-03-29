@@ -37,7 +37,8 @@ can be found in the Kubos repo.
 Configuration
 -------------
 
-Before we write any actual code, we want to update our system's ``config.toml`` file.
+Before we write any actual code, we want to update our system's :doc:`config.toml <../services/service-config>`
+file.
 
 We'll name our service `radio-service`.
 Under this new service name, we'll be adding two sections:
