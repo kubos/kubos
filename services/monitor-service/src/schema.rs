@@ -27,8 +27,9 @@ pub struct QueryRoot;
 
 /// Base GraphQL query model
 graphql_object!(QueryRoot: Context as "Query" |&self| {
-    field ping() -> String {
-        "pong".into()
+    field ping() -> FieldResult<String>
+    {
+        Ok(String::from("pong"))
     }
 
     field mem_info(&executor) -> FieldResult<MemInfoResponse> {
@@ -53,4 +54,8 @@ pub struct MutationRoot;
 
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
+    field noop(&executor) -> FieldResult<()>
+    {
+        Ok(())
+    }
 });
