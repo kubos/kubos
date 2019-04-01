@@ -254,16 +254,23 @@ fn read_thread<T: Clone + Send + 'static>(
         let time_ref = comms.timeout;
         let num_handlers_ref = num_handlers.clone();
         thread::spawn(move || {
-            handle_message(
-                &data_ref,
-                conn_ref,
-                &write_ref,
-                &packet,
-                time_ref,
-                sat_ref,
-                ground_ref,
-                num_handlers_ref,
-            );
+            let res = handle_message(conn_ref, &write_ref, &packet, time_ref, sat_ref, ground_ref);
+
+            if let Ok(mut num_handlers) = num_handlers_ref.lock() {
+                *num_handlers -= 1;
+            }
+
+            match res {
+                Ok(_) => {
+                    log_telemetry(&data_ref, &TelemType::Down).unwrap();
+                    info!("UDP Packet successfully downlinked");
+                }
+                Err(e) => {
+                    log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
+                    log_error(&data_ref, e.to_string()).unwrap();
+                    error!("UDP packet failed to downlink");
+                }
+            }
         });
     }
 }
@@ -272,81 +279,43 @@ fn read_thread<T: Clone + Send + 'static>(
 // The thread then writes the response to the gateway.
 #[allow(clippy::too_many_arguments)]
 fn handle_message<T: Clone>(
-    data: &Arc<Mutex<CommsTelemetry>>,
     write_conn: T,
     write: &Arc<WriteFn<T>>,
     message: &UdpPacket,
     timeout: u64,
     sat_ip: Ipv4Addr,
     ground_ip: Ipv4Addr,
-    num_handlers: Arc<Mutex<u16>>,
-) {
+) -> Result<(), String> {
     let payload = message.payload().to_vec();
 
-    let client = match reqwest::Client::builder()
+    let client = reqwest::Client::builder()
         .timeout(Duration::from_millis(timeout))
         .build()
-    {
-        Ok(client) => client,
-        Err(e) => {
-            if let Ok(mut num_handlers) = num_handlers.lock() {
-                *num_handlers -= 1;
-            }
-            return log_error(&data, e.to_string()).unwrap();
-        }
-    };
+        .map_err(|e| e.to_string())?;
 
-    let mut res = match client
+    let mut res = client
         .post(&format!("http://{}:{}", sat_ip, message.get_destination()))
         .body(payload)
         .send()
-    {
-        Ok(res) => res,
-        Err(e) => {
-            if let Ok(mut num_handlers) = num_handlers.lock() {
-                *num_handlers -= 1;
-            }
-            return log_error(&data, e.to_string()).unwrap();
-        }
-    };
+        .map_err(|e| e.to_string())?;
 
-    let size = res.content_length().unwrap() as usize;
-    let buf = res.text().unwrap();
+    let size = res.content_length().unwrap_or(0) as usize;
+    let buf = res.text().unwrap_or("".to_owned());
     let buf = buf.as_bytes();
 
     // Take received message and wrap it in a UDP packet.
-    let packet = match build_packet(
+    let packet = build_packet(
         &buf[0..size],
         message.get_destination(),
         message.get_source(),
         (size + HEADER_LEN) as u16,
         sat_ip,
         ground_ip,
-    ) {
-        Ok(packet) => packet,
-        Err(e) => {
-            if let Ok(mut num_handlers) = num_handlers.lock() {
-                *num_handlers -= 1;
-            }
-            return log_error(&data, e.to_string()).unwrap();
-        }
-    };
+    )
+    .map_err(|e| e.to_string())?;
 
-    // Write packet to the gateway and update telemetry.
-    match write(&write_conn.clone(), packet.as_slice()) {
-        Ok(_) => {
-            log_telemetry(&data, &TelemType::Down).unwrap();
-            info!("UDP Packet successfully downlinked");
-        }
-        Err(e) => {
-            log_telemetry(&data, &TelemType::DownFailed).unwrap();
-            log_error(&data, e.to_string()).unwrap();
-            error!("UDP packet failed to downlink");
-        }
-    };
-    if let Ok(mut num_handlers) = num_handlers.lock() {
-        *num_handlers -= 1;
-    }
+    // Write packet to the gateway
+    write(&write_conn.clone(), packet.as_slice()).map_err(|e| e.to_string())
 }
 
 // This thread reads indefinitely from a UDP socket and then writes received packets to a gateway.
