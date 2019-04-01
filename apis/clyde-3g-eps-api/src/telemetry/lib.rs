@@ -111,9 +111,6 @@ mod tests {
                 2
             )
         );
-        assert_eq!(
-            parse(&vec![0x01, 0x23], Type::TestVal1),
-            Ok(2900.0)
-        );
+        assert_eq!(parse(&vec![0x01, 0x23], Type::TestVal1), Ok(2900.0));
     }
 }
