@@ -72,7 +72,7 @@ pub fn get_adc_result(data: &[u8]) -> EpsResult<f64> {
     if data.len() < 2 {
         Err(EpsError::parsing_failure("ADC Result"))
     } else {
-        let be_val = u16::from(data[0]) | (u16::from(data[1]) & 0xFF) << 8;
+        let be_val = u16::from(data[0]) | u16::from(data[1]) << 8;
         let native_val = u16::from_be(be_val);
         Ok(f64::from(native_val))
     }
