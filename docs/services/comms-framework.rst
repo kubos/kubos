@@ -144,7 +144,7 @@ but more error-prone method for transmitting more detailed telemetry information
 The communications service framework provides mechanisms to handle these more complex
 configurations.
 
-The service's `config.toml` file should contain the following parameters:
+The service's :doc:`config.toml <../services/service-config>` file should contain the following parameters:
 
 - ``handler_port_min`` - (Default: 13100) Starting port used to define a range of ports that are used in the message
   handlers that handle messages received from the ground

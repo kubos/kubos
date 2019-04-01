@@ -38,7 +38,8 @@ Communicating with the Service
 The applications service uses the same HTTP+GraphQL communication scheme as the :doc:`other services <../services/graphql>`.
 
 Users will send GraphQL queries and mutations to the service's HTTP listener port.
-The port number can be found in the systems configuration file in `/home/system/etc/config.toml`
+The port number can be found in the system's :doc:`configuration file <../services/service-config>`
+in `/home/system/etc/config.toml`
 
 Querying
 --------

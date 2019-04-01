@@ -15,13 +15,13 @@ Configuration
 -------------
 
 The shell service has a couple configuration options which may be
-defined in the system's ``config.toml`` file:
-          
+defined in the system's :doc:`config.toml <../services/service-config>` file:
+
     - ``[shell-service.addr]``
-    
+
         - ``ip`` - Specifies the service's IP address
         - ``port`` - Specifies the port on which the service will be listening for UDP packets
-        
+
 For example::
 
     [shell-service.addr]
@@ -32,7 +32,7 @@ For example::
 Running the Service from KubOS
 ------------------------------
 
-The Kubos Linux distribution (as of v1.3.0) ships with the shell 
+The Kubos Linux distribution (as of v1.3.0) ships with the shell
 service installed and configured to run on boot. This can be verified by
 booting the KubOS system, running the ``ps`` command and looking for the
 ``shell-service`` process. If the service is not running then it can

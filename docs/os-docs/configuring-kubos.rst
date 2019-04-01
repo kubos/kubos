@@ -87,10 +87,10 @@ At a high-level, the instructions are:
 
 - Create a new folder, "your-package", in `kubos-linux-build/packages` containing at least:
 
-    - Config.in - The `KConfig file <https://buildroot.org/downloads/manual/manual.html#writing-rules-config-in>`__ defining ``BR2_PACKAGE_{YOUR_PACKAGE}``, 
+    - Config.in - The `KConfig file <https://buildroot.org/downloads/manual/manual.html#writing-rules-config-in>`__ defining ``BR2_PACKAGE_{YOUR_PACKAGE}``,
       along with any additional configuration options
     - {your-package}.mk - The Makefile defining the package and containing the build (``{YOUR_PACKAGE}_BUILD_CMDS``) and installation (``{YOUR_PACKAGE}_INSTALL_TARGET_CMDS``) commands.
-    
+
 - Update `kubos-linux-build/Config.in` to point to your new package's `Config.in` file
 
 Once these changes have been made, you can run ``sudo make menuconfig`` in order to select the new package.
@@ -106,3 +106,5 @@ The Kubos service system relies on a configuration file in `/home/system/etc/con
 This file is included in Kubos Linux from `kubos-linux-build/common/overlay/home/system/etc/config.toml`.
 
 Users may edit it prior to building their Linux image in order to add/remove/update service configurations.
+
+More information about this configuration may be found in the :doc:`service config doc <../services/service-config>`
