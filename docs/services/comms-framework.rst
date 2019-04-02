@@ -55,7 +55,7 @@ ground via the communications device.
 
 Once a message is received, a message handler thread is spawned. This message handler examines the destination
 port embedded in the message's UDP packet header to determine the internal message destination
-and then makes a HTTP POST to the appropriate service.
+and then makes an HTTP POST to the appropriate service.
 The handler then waits for a response (within a specified timeout duration), wraps the response in a
 UDP packet, and then sends the packet to the communications device for transmission.
 Once this transaction has completed, the message handler thread exits.

@@ -37,8 +37,8 @@ use std::time::Duration;
 use tempfile::tempdir;
 use util::*;
 
-// Tests sending a packet from the ground to a service through a handler
-// No response is sent from the service
+// Tests sending a ping from the ground to an instance of the actual
+// monitor service and reading back the response.
 #[test]
 fn query_monitor_service() {
     let sat_ip = "127.0.0.5";

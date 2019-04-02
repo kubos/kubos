@@ -92,9 +92,6 @@ fn concurrent_uplinks_to_service_with_handler_response() {
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
-    // Let the wheels turn
-    // thread::sleep(Duration::from_millis(5000));
-
     // Wait until http servers are ready
     barrier.wait();
 
@@ -180,9 +177,7 @@ fn too_many_concurrent_uplinks_to_service_with_handler_response() {
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
-    // Let the wheels turn
-    // thread::sleep(Duration::from_millis(5000));
-
+    // Wait for HTTP server to get ready
     barrier.wait();
 
     let mut num_rx_correct = 0;
