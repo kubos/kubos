@@ -300,7 +300,7 @@ fn handle_message<T: Clone>(
         .map_err(|e| e.to_string())?;
 
     let size = res.content_length().unwrap_or(0) as usize;
-    let buf = res.text().unwrap_or("".to_owned());
+    let buf = res.text().unwrap_or_else(|_| "".to_owned());
     let buf = buf.as_bytes();
 
     // Take received message and wrap it in a UDP packet.
