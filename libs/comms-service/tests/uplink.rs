@@ -25,7 +25,7 @@ use pnet::packet::Packet;
 use std::net::Ipv4Addr;
 use std::net::UdpSocket;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Barrier, Mutex};
 use std::thread;
 use std::time::Duration;
 use util::*;
@@ -71,15 +71,21 @@ fn uplink_to_service_no_response() {
     mock_comms.lock().unwrap().push_read(&ground_packet);
 
     // Setup & start http server
+    let barrier = Arc::new(Barrier::new(2));
     let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
     let thread_data = recv_data.clone();
-    spawn_http_server(vec![], thread_data, &format!("{}:{}", sat_ip, service_port));
+    spawn_http_server(
+        vec![],
+        thread_data,
+        &format!("{}:{}", sat_ip, service_port),
+        barrier.clone(),
+    );
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(200));
+    barrier.wait();
 
     // Retrieve the message for the service from shared buffer
     let rx_data = recv_data.lock().unwrap().to_owned();
@@ -129,6 +135,7 @@ fn uplink_to_service_with_handler_response() {
     mock_comms.lock().unwrap().push_read(&ground_packet);
 
     // Setup & start http server
+    let barrier = Arc::new(Barrier::new(2));
     let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
     let thread_data = recv_data.clone();
 
@@ -136,13 +143,14 @@ fn uplink_to_service_with_handler_response() {
         resp_payload.clone(),
         thread_data,
         &format!("{}:{}", sat_ip, service_port),
+        barrier.clone(),
     );
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(200));
+    barrier.wait();
 
     // Retrieve the message for the service from shared buffer
     let rx_data = recv_data.lock().unwrap().to_owned();
@@ -203,18 +211,20 @@ fn uplink_to_service_with_downlink_response() {
     mock_comms.lock().unwrap().push_read(&ground_packet);
 
     // Setup & start http server
+    let barrier = Arc::new(Barrier::new(2));
     let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
     spawn_http_server(
         vec![],
         recv_data.clone(),
         &format!("{}:{}", sat_ip, service_port),
+        barrier.clone(),
     );
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(200));
+    barrier.wait();
 
     // Retrieve the message for the service from shared buffer
     let rx_data = recv_data.lock().unwrap().to_owned();

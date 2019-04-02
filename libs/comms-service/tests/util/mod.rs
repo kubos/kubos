@@ -17,7 +17,7 @@
 use comms_service::*;
 use std::cell::RefCell;
 use std::str;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Barrier, Mutex};
 use std::thread;
 use warp::{self, Buf, Filter};
 
@@ -107,7 +107,12 @@ pub fn comms_config(
     }
 }
 
-pub fn spawn_http_server(payload: Vec<u8>, thread_data: Arc<Mutex<Vec<u8>>>, service_ip: &str) {
+pub fn spawn_http_server(
+    payload: Vec<u8>,
+    thread_data: Arc<Mutex<Vec<u8>>>,
+    service_ip: &str,
+    barrier: Arc<Barrier>,
+) {
     let routes = warp::post2()
         .and(warp::any())
         .and(warp::body::concat())
@@ -125,6 +130,8 @@ pub fn spawn_http_server(payload: Vec<u8>, thread_data: Arc<Mutex<Vec<u8>>>, ser
             if let Ok(mut thread_data_handle) = thread_data.lock() {
                 thread_data_handle.append(&mut data);
             }
+
+            barrier.wait();
 
             // Send a response back to the ground via the handler port
             str::from_utf8(&payload).unwrap().to_owned()

@@ -24,7 +24,7 @@ use pnet::packet::udp::UdpPacket;
 use pnet::packet::Packet;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Barrier, Mutex};
 use std::thread;
 use std::time::Duration;
 use util::*;
@@ -57,6 +57,7 @@ fn concurrent_uplinks_to_service_with_handler_response() {
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
     let num_tests = 10;
+    let barrier = Arc::new(Barrier::new(11));
     let mut recv_data_list: Vec<Arc<Mutex<Vec<u8>>>> = vec![];
     for i in 0..(num_tests) {
         let ground_packet = build_packet(
@@ -80,16 +81,22 @@ fn concurrent_uplinks_to_service_with_handler_response() {
             resp_payload.clone(),
             recv_data.clone(),
             &format!("{}:{}", sat_ip, service_port + i),
+            barrier.clone(),
         );
 
         recv_data_list.push(recv_data);
+
+        thread::sleep(Duration::from_millis(10));
     }
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(1000));
+    // thread::sleep(Duration::from_millis(5000));
+
+    // Wait until http servers are ready
+    barrier.wait();
 
     for _ in 0..(num_tests) {
         let recv_data = recv_data_list.pop().unwrap();
@@ -99,8 +106,7 @@ fn concurrent_uplinks_to_service_with_handler_response() {
         assert_eq!(rx_data, payload);
     }
 
-    // Let the wheels turn
-    thread::sleep(Duration::from_millis(1000));
+    thread::sleep(Duration::from_millis(100));
 
     for _ in 0..(num_tests) {
         // Pretend to be the ground and read the
@@ -139,7 +145,7 @@ fn too_many_concurrent_uplinks_to_service_with_handler_response() {
 
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
-
+    let barrier = Arc::new(Barrier::new(11));
     let num_tests = 15;
     let mut recv_data_list: Vec<Arc<Mutex<Vec<u8>>>> = vec![];
     for i in 0..(num_tests) {
@@ -163,16 +169,21 @@ fn too_many_concurrent_uplinks_to_service_with_handler_response() {
             resp_payload.clone(),
             recv_data.clone(),
             &format!("{}:{}", sat_ip, service_port + i),
+            barrier.clone(),
         );
 
         recv_data_list.push(recv_data);
+
+        thread::sleep(Duration::from_millis(10));
     }
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(1000));
+    // thread::sleep(Duration::from_millis(5000));
+
+    barrier.wait();
 
     let mut num_rx_correct = 0;
     let mut num_rx_empty = 0;
@@ -191,7 +202,7 @@ fn too_many_concurrent_uplinks_to_service_with_handler_response() {
     assert_eq!(num_rx_empty, 5);
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(1000));
+    thread::sleep(Duration::from_millis(100));
 
     let mut num_packet_correct = 0;
     let mut num_packet_empty = 0;
