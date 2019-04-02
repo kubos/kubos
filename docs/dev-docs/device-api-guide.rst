@@ -94,13 +94,11 @@ For example, by using an argument in the API's ``{api}_init()`` function.
 File Location
 -------------
 
-New APIs should be located in a new folder within the appropriate category of the `Kubos repo <https://github.com/kubos/kubos>`__.
-
-For example, when creating a new ADCS API, a new folder should be created within the ``ADCS`` folder of the Kubos repo.
+New APIs should be located in a new folder within the `apis` folder of the `Kubos repo <https://github.com/kubos/kubos>`__.
 
 ::
 
-    +-- adcs\
+    +-- apis\
     |   +-- <new-c-api>\
     |       +-- <new-c-api>\
     |           +-- <new-api>.h
@@ -117,7 +115,6 @@ For example, when creating a new ADCS API, a new folder should be created within
     |
     +-- cargo-kubos\
     +-- ccan\
-    +-- circle.yml
     +-- cmocka\
     
 See the :doc:`C module development doc <../sdk-docs/sdk-c>` for steps to create a new Kubos module in C.

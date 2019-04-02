@@ -154,10 +154,10 @@ Configuration
 -------------
 
 The file transfer service has several configuration options which may be
-defined in the system's ``config.toml`` file:
+defined in the system's :doc:`config.toml <../services/service-config>` file:
 
     - ``[file-transfer-service]``
-    
+
         - ``storage_dir`` - `Default: "file-transfer".` The directory which should be
           used for temporary storage of file chunks. Note: The directory will be
           created if it does not already exist.
@@ -169,12 +169,12 @@ defined in the system's ``config.toml`` file:
           in bytes.
         - ``hold_count`` - `Default: 5.` The number of times the protocol waits for
           a new message before ending the transaction.
-          
+
     - ``[file-transfer-service.addr]``
-    
+
         - ``ip`` - Specifies the service's IP address
         - ``port`` - Specifies the port on which the service will be listening for UDP packets
-        
+
 For example::
 
     [file-transfer-service]
@@ -212,4 +212,4 @@ in the KubOS source repo. The service can be started like so::
     $ cargo run -- -c config.toml
 
 The service will look for the given ``config.toml`` file in order to get the
-needed configuration options.    
+needed configuration options.

@@ -39,8 +39,8 @@ Mark the Issue as 'In Progress'
 -------------------------------
 
 In order to track what's being worked on and by whom, for every issue you work you should:
- 
-- Click the 'Assignees' link and select yourself 
+
+- Click the 'Assignees' link and select yourself
 - Mark the issue as 'In Progress' by editing the title of the project and adding "[WIP]"
 
 Create a Branch of the Code You Want to Work On
@@ -90,22 +90,18 @@ The :doc:`Kubos Standards <kubos-standards>` doc has some basic
 naming and coding standards that should be adhered to. When in doubt,
 try to match the styling of the surrounding code.
 
-Update any documentation areas that are affected by your changes. For
-instance, if you found that a UART configuration option was not
-available for a certain board type, you would edit
-kubos-hal/kubos-hal/uart.h in the appropriate comment section with a new
-note about the unsupported option. 
+Update any documentation areas that are affected by your changes.
 
-- If you want to test your documentation changes: 
+- If you want to test your documentation changes:
 
-  - Run the command 'doxygen Doxyfile' from the project folder with the new documentation to regenerate the html documentation 
-  - Open up {project}/html/index.html in a web browser 
+  - Run the command 'doxygen Doxyfile' from the project folder with the new documentation to regenerate the html documentation
+  - Open up {project}/html/index.html in a web browser
   - Browse to your doc updates to verify
 
 Add or update any unit tests that are affected by your changes. For
 instance, if support for SPI is added for the Kubos Linux HAL,
 then a new test folder would be added to `hal/kubos-hal/test` with the
-relavent new test cases. 
+relavent new test cases.
 
 Commit your changes and push to your remote branch (the branch will be
 created automatically if it doesn't exist):
@@ -132,12 +128,12 @@ can be merged into the main repo's master branch. You will need to
 create a pull request for each repository you are making changes to.
 
 From the GitHub page for the repository that contains the changes you
-want to merge: 
+want to merge:
 
-- Click the 'Branch:' dropdown on the left-hand side and select the local branch containing your changes 
-- Click the 'New pull request' button 
+- Click the 'Branch:' dropdown on the left-hand side and select the local branch containing your changes
+- Click the 'New pull request' button
 - The title of the pull request should clearly refer to its corresponding issue
-- In the description field, add a small summary of the changes you made. The title should have indicated the bulk of the changes you made, but it's also good to mention things like documentation updates and any miscellaneous changes that were made (for example, fixing any bugs that you ran into while working on your code changes). 
+- In the description field, add a small summary of the changes you made. The title should have indicated the bulk of the changes you made, but it's also good to mention things like documentation updates and any miscellaneous changes that were made (for example, fixing any bugs that you ran into while working on your code changes).
 - Click 'Create pull request'
 
 If you'd like specific people to review your code, you can either
@@ -216,10 +212,10 @@ into the master branch.
 Close the Issue
 ---------------
 
-Before you close the issue, verify the following: 
+Before you close the issue, verify the following:
 
-- All features listed in the issue have been completed 
-- All relevant documentation changes have been made 
-- All relevant unit tests have been created or updated 
-- All code changes and related code have been tested 
+- All features listed in the issue have been completed
+- All relevant documentation changes have been made
+- All relevant unit tests have been created or updated
+- All code changes and related code have been tested
 - All pull requests related to the issue have been approved and merged
