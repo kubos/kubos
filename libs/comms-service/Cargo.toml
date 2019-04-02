@@ -19,3 +19,4 @@ reqwest = "0.9"
 [dev-dependencies]
 warp = "0.1.12"
 bytes = "*"
+tempfile = "3.0"

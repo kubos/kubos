@@ -268,7 +268,7 @@ fn read_thread<T: Clone + Send + 'static>(
                 Err(e) => {
                     log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
                     log_error(&data_ref, e.to_string()).unwrap();
-                    error!("UDP packet failed to downlink");
+                    error!("UDP packet failed to downlink: {}", e.to_string());
                 }
             }
         });
