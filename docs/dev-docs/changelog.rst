@@ -1,6 +1,33 @@
 Kubos Changelog
 ===============
 
+v1.14.0 - Apr 3 2019
+--------------------
+
+- `Added logic to the applications service to check if an app immediately fails after being started <https://docs.kubos.com/latest/app-docs/app-service.html#starting-an-application>`__
+- `Removed UUIDs from the applications service. Apps will now be referenced by name <https://docs.kubos.com/latest/app-docs/app-service.html>`__
+- `Added ability to uninstall all versions of an application <https://docs.kubos.com/latest/app-docs/app-service.html#de-registering>`__
+- Updated app registration process to clean up all files if registration fails
+- `Added ability to manually set the active version of an application <https://docs.kubos.com/latest/app-docs/app-service.html#changing-versions>`__
+- `Added parameter to Rust app API to allow minimum logging level to be controlled <https://docs.kubos.com/latest/rust-docs/kubos_app/macro.app_main.html#arguments>`__
+- `Added parameter to Python app API to allow minimum logging level to be controlled <https://docs.kubos.com/latest/app-docs/python-app-api.html#app_api.logging_setup>`__
+- `Updated comms service framework to translate between UDP and HTTP <https://docs.kubos.com/latest/services/comms-framework.html>`__
+- Added comms service framework unit tests
+- `Added documentation for service configuration <https://docs.kubos.com/latest/services/service-config.html>`__
+- `Updated the Pumpkin supMCU API to match v4.22 of the firmware manual <https://github.com/kubos/kubos/blob/master/apis/pumpkin-mcu-api/mcu_api.py>`__
+- `Added GraphQL service for the Clyde Space 3rd generation EPS <https://docs.kubos.com/latest/rust-docs/clyde_3g_eps_service/index.html>`__
+- Improved logging for all Kubos services
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Updated the comms service framework to correctly validate that a write function is present
+- Updated the apps service to remove the parent directory if the last version of an app is uninstalled
+- Updated app registration process to ensure current active version remains active if new registration fails
+- Fixed Rust app API to use project name for logging
+- Migrated the Kubos contributor's agreement to https://cla-assistant.io/kubos/kubos
+- `Corrected the file transfer client syntax documentation <https://docs.kubos.com/latest/tutorials/file-transfer.html#syntax>`__
+
 v1.13.0 - Feb 15 2019
 ---------------------
 
