@@ -16,7 +16,10 @@
 
 use comms_service::*;
 use std::cell::RefCell;
-use std::sync::{Arc, Mutex};
+use std::str;
+use std::sync::{Arc, Barrier, Mutex};
+use std::thread;
+use warp::{self, Buf, Filter};
 
 // This MockComms structure allows for easy integration testing
 // of the comms_service crate by giving direct access to the
@@ -30,8 +33,8 @@ pub struct MockComms {
 impl MockComms {
     pub fn new() -> Self {
         MockComms {
-            read_buff: RefCell::new(vec![]),
-            write_buff: RefCell::new(vec![]),
+            read_buff: RefCell::new(Vec::<Vec<u8>>::with_capacity(50)),
+            write_buff: RefCell::new(Vec::<Vec<u8>>::with_capacity(50)),
         }
     }
 
@@ -63,7 +66,8 @@ impl MockComms {
     // "Ground is reading a packet from the radio"
     pub fn pop_write(&self) -> Option<Vec<u8>> {
         let mut buffer = self.write_buff.borrow_mut();
-        buffer.pop()
+        let ret_data = buffer.pop();
+        ret_data
     }
 }
 
@@ -94,12 +98,44 @@ pub fn comms_config(
     downlink_port: u16,
 ) -> CommsConfig {
     CommsConfig {
-        handler_port_min: Some(18000),
-        handler_port_max: Some(18100),
+        max_num_handlers: Some(10),
         downlink_ports: Some(vec![downlink_port]),
         timeout: Some(1000),
         ground_ip: ground_ip.to_owned(),
         ground_port: Some(ground_port),
         satellite_ip: sat_ip.to_owned(),
     }
+}
+
+pub fn spawn_http_server(
+    payload: Vec<u8>,
+    thread_data: Arc<Mutex<Vec<u8>>>,
+    service_ip: &str,
+    barrier: Arc<Barrier>,
+) {
+    let routes = warp::post2()
+        .and(warp::any())
+        .and(warp::body::concat())
+        .map(move |mut body: warp::body::FullBody| {
+            let mut data = vec![];
+            let mut remaining = body.remaining();
+            while remaining != 0 {
+                let cnt = body.bytes().len();
+                let mut body_bytes = body.bytes().to_vec();
+                data.append(&mut body_bytes);
+                body.advance(cnt);
+                remaining -= cnt;
+            }
+
+            if let Ok(mut thread_data_handle) = thread_data.lock() {
+                thread_data_handle.append(&mut data);
+            }
+
+            barrier.wait();
+
+            // Send a response back to the ground via the handler port
+            str::from_utf8(&payload).unwrap().to_owned()
+        });
+    let service_ip: std::net::SocketAddrV4 = service_ip.parse().unwrap();
+    thread::spawn(move || warp::serve(routes).run(service_ip));
 }

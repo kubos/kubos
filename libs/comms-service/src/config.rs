@@ -22,11 +22,8 @@
 use crate::errors::*;
 use serde_derive::Deserialize;
 
-// Default values for control block configurations.
-/// Default message handler starting port
-pub const DEFAULT_HANDLER_START: u16 = 13100;
-/// Default message handler ending port
-pub const DEFAULT_HANDLER_END: u16 = 13149;
+/// Default maximum number of message handlers
+pub const DEFAULT_MAX_HANDLERS: u16 = 50;
 /// Default message handler timeout
 pub const DEFAULT_TIMEOUT: u64 = 1500;
 
@@ -34,12 +31,9 @@ pub const DEFAULT_TIMEOUT: u64 = 1500;
 /// Created by parsing a configuration file in the `toml` file format.
 #[derive(Clone, Debug, Deserialize)]
 pub struct CommsConfig {
-    /// Starting port used to define a range of ports that are used in the message handlers
-    /// that handle messages received from the ground. Default: 13100
-    pub handler_port_min: Option<u16>,
-    /// Ending port used to define a range of ports that are used in the message handlers
-    /// that handle messages received from the ground. Default: 13149
-    pub handler_port_max: Option<u16>,
+    /// The maximum number of concurrent message handlers allowed
+    /// Default: 50
+    pub max_num_handlers: Option<u16>,
     /// Optional list of ports used by downlink endpoints that send messages to the ground.
     /// Each port in the list will be used by one downlink endpoint.
     pub downlink_ports: Option<Vec<u16>>,

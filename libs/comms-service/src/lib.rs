@@ -64,8 +64,7 @@
 //!
 //! ```toml
 //! [service-name.comms]
-//! handler_port_min = 13002
-//! handler_port_max = 13010
+//! max_num_handlers = 50
 //! downlink_ports = [13011]
 //! ground_port = 9001
 //! timeout = 1500
@@ -83,6 +82,7 @@ mod config;
 mod errors;
 mod service;
 mod telemetry;
+
 #[cfg(test)]
 mod tests;
 

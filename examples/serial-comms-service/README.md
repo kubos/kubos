@@ -22,8 +22,7 @@ bus = "/dev/ttyUSB0" -- Serial bus to use
 ip = "127.0.0.1" -- IP to bind GraphQL server to
 port = 8012 -- Port to listen on for GraphQL queries
 [serial-comms-service.comms] -- Communications service configuration
-handler_port_min = 14000 -- Starting port to bind to when creating message handlers
-handler_port_max = 14010 -- Ending port to bind to when creating message handlers
+max_num_handlers = 10 -- Maximum number of concurrent message handlers
 downlink_ports = [14011] -- Ports to listen for local traffic on
 timeout = 1 -- Timeout when listening for packet response
 ground_port = 14020 -- Port to send ground communications on

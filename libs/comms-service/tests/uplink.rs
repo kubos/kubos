@@ -25,7 +25,7 @@ use pnet::packet::Packet;
 use std::net::Ipv4Addr;
 use std::net::UdpSocket;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Barrier, Mutex};
 use std::thread;
 use std::time::Duration;
 use util::*;
@@ -36,9 +36,9 @@ use util::*;
 fn uplink_to_service_no_response() {
     let sat_ip = "127.0.0.3";
     let ground_ip = "127.0.0.2";
-    let ground_port = 16001;
-    let downlink_port = 16002;
-    let service_port = 16005;
+    let ground_port = 15001;
+    let downlink_port = 15002;
+    let service_port = 15005;
     let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
@@ -70,21 +70,27 @@ fn uplink_to_service_no_response() {
     // for the comms service to read from the radio
     mock_comms.lock().unwrap().push_read(&ground_packet);
 
-    // Setup service listener
-    let service_listener = UdpSocket::bind((sat_ip, service_port)).unwrap();
+    // Setup & start HTTP server
+    let barrier = Arc::new(Barrier::new(2));
+    let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
+    let thread_data = recv_data.clone();
+    spawn_http_server(
+        vec![],
+        thread_data,
+        &format!("{}:{}", sat_ip, service_port),
+        barrier.clone(),
+    );
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(100));
+    barrier.wait();
 
-    // Receive the message for the service
-    let mut buf = [0; 4096];
-    let (size, _) = service_listener.recv_from(&mut buf).unwrap();
-    let recv_data = buf[0..size].to_vec();
+    // Retrieve the message for the service from shared buffer
+    let rx_data = recv_data.lock().unwrap().to_owned();
 
-    assert_eq!(recv_data, payload);
+    assert_eq!(rx_data, payload);
 }
 
 // Tests sending a packet from the ground to a service through a handler
@@ -128,30 +134,31 @@ fn uplink_to_service_with_handler_response() {
     // for the comms service to read from the radio
     mock_comms.lock().unwrap().push_read(&ground_packet);
 
-    // Setup service listener
-    let service_listener = UdpSocket::bind((sat_ip, service_port)).unwrap();
+    // Setup & start HTTP server
+    let barrier = Arc::new(Barrier::new(2));
+    let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
+    let thread_data = recv_data.clone();
+
+    spawn_http_server(
+        resp_payload.clone(),
+        thread_data,
+        &format!("{}:{}", sat_ip, service_port),
+        barrier.clone(),
+    );
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(10));
+    barrier.wait();
 
-    // Receive the message for the service
-    let mut buf = [0; 64];
-    let (size, peer) = service_listener.recv_from(&mut buf).unwrap();
-    let handler_port = peer.port();
-    let recv_data = buf[0..size].to_vec();
+    // Retrieve the message for the service from shared buffer
+    let rx_data = recv_data.lock().unwrap().to_owned();
 
-    assert_eq!(recv_data, payload);
-
-    // Send a response back to the ground via the handler port
-    service_listener
-        .send_to(&resp_payload, (sat_ip, handler_port))
-        .unwrap();
+    assert_eq!(rx_data, payload);
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(10));
+    thread::sleep(Duration::from_millis(200));
 
     // Pretend to be the ground and read the
     // packet which was written to the radio
@@ -168,9 +175,9 @@ fn uplink_to_service_with_handler_response() {
 fn uplink_to_service_with_downlink_response() {
     let sat_ip = "127.0.0.7";
     let ground_ip = "127.0.0.8";
-    let ground_port = 16001;
-    let downlink_port = 16002;
-    let service_port = 16005;
+    let ground_port = 17001;
+    let downlink_port = 17002;
+    let service_port = 17005;
     let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
@@ -203,24 +210,34 @@ fn uplink_to_service_with_downlink_response() {
     // for the comms service to read from the radio
     mock_comms.lock().unwrap().push_read(&ground_packet);
 
-    // Setup service listener
-    let service_listener = UdpSocket::bind((sat_ip, service_port)).unwrap();
+    // Setup & start HTTP server
+    let barrier = Arc::new(Barrier::new(2));
+    let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
+    spawn_http_server(
+        vec![],
+        recv_data.clone(),
+        &format!("{}:{}", sat_ip, service_port),
+        barrier.clone(),
+    );
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(100));
+    barrier.wait();
 
-    // Receive the message for the service
-    let mut buf = [0; 64];
-    let (size, _) = service_listener.recv_from(&mut buf).unwrap();
-    let recv_data = buf[0..size].to_vec();
+    // Retrieve the message for the service from shared buffer
+    let rx_data = recv_data.lock().unwrap().to_owned();
 
-    assert_eq!(recv_data, payload);
+    assert_eq!(rx_data, payload);
 
-    // Send a response back to the ground via the downlink port
-    service_listener
+    let downlink_writer = UdpSocket::bind((sat_ip, 0)).unwrap();
+
+    // Let the wheels turn
+    thread::sleep(Duration::from_millis(200));
+
+    // Send packet to comm service's downlink port
+    downlink_writer
         .send_to(&resp_payload, (sat_ip, downlink_port))
         .unwrap();
 
