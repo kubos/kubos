@@ -18,7 +18,12 @@ use crate::commands::*;
 use crate::telemetry;
 use eps_api::EpsResult;
 use rust_i2c::{Command, Connection};
+use std::thread;
 use std::time::Duration;
+
+// Observed (but undocumented) inter-command delay required is 59ms
+// Rounding up to an even 60
+const INTER_COMMAND_DELAY: Duration = Duration::from_millis(60);
 
 /// Trait defining expected functionality for Clyde 3g EPS
 pub trait Clyde3gEps {
@@ -152,10 +157,12 @@ impl Clyde3gEps for Eps {
     ///
     /// The status bytes are designed to supply operational data about the I2C Node.
     fn get_board_status(&self) -> EpsResult<board_status::BoardStatus> {
+        thread::sleep(INTER_COMMAND_DELAY);
+        let (command, rx_len) = board_status::command();
         board_status::parse(
             &self
                 .connection
-                .transfer(board_status::command(), Duration::from_millis(2))?,
+                .transfer(command, rx_len, Duration::from_millis(3))?,
         )
     }
 
@@ -165,10 +172,12 @@ impl Clyde3gEps for Eps {
     /// to generate a checksum. The value retrieved can be used to determine whether
     /// the contents of the ROM have changed during the operation of the device.
     fn get_checksum(&self) -> EpsResult<checksum::Checksum> {
+        thread::sleep(INTER_COMMAND_DELAY);
+        let (command, rx_len) = checksum::command();
         checksum::parse(
             &self
                 .connection
-                .transfer(checksum::command(), Duration::from_millis(50))?,
+                .transfer(command, rx_len, Duration::from_millis(80))?,
         )
     }
 
@@ -178,10 +187,12 @@ impl Clyde3gEps for Eps {
     /// The revision number returns the current revision of the firmware that is
     /// present on the board. The firmware number returns the current firmware on the board.
     fn get_version_info(&self) -> EpsResult<version::VersionInfo> {
+        thread::sleep(INTER_COMMAND_DELAY);
+        let (command, rx_len) = version::command();
         version::parse(
             &self
                 .connection
-                .transfer(version::command(), Duration::from_millis(2))?,
+                .transfer(command, rx_len, Duration::from_millis(3))?,
         )
     }
 
@@ -190,10 +201,12 @@ impl Clyde3gEps for Eps {
     /// If an error has been generated after attempting to execute a user's command,
     /// this command can be used to retrieve details about the error.
     fn get_last_error(&self) -> EpsResult<last_error::LastError> {
+        thread::sleep(INTER_COMMAND_DELAY);
+        let (command, rx_len) = last_error::command();
         last_error::parse(
             &self
                 .connection
-                .transfer(last_error::command(), Duration::from_millis(2))?,
+                .transfer(command, rx_len, Duration::from_millis(3))?,
         )
     }
 
@@ -204,6 +217,7 @@ impl Clyde3gEps for Eps {
     /// being brought up in its defined initial condition. Resetting the board in
     /// this fashion will increment the Manual Reset Counter.
     fn manual_reset(&self) -> EpsResult<()> {
+        thread::sleep(INTER_COMMAND_DELAY);
         self.connection.write(manual_reset::command())?;
         Ok(())
     }
@@ -214,6 +228,7 @@ impl Clyde3gEps for Eps {
     /// does not require any telemetry from the board, this command can be sent
     /// to reset the communications watchdog.
     fn reset_comms_watchdog(&self) -> EpsResult<()> {
+        thread::sleep(INTER_COMMAND_DELAY);
         self.connection.write(reset_comms_watchdog::command())?;
         Ok(())
     }
@@ -231,11 +246,12 @@ impl Clyde3gEps for Eps {
         &self,
         telem_type: telemetry::motherboard::Type,
     ) -> EpsResult<f64> {
+        thread::sleep(INTER_COMMAND_DELAY);
+        let (command, rx_len) = telemetry::motherboard::command(telem_type);
         telemetry::motherboard::parse(
-            &self.connection.transfer(
-                telemetry::motherboard::command(telem_type),
-                Duration::from_millis(20),
-            )?,
+            &self
+                .connection
+                .transfer(command, rx_len, Duration::from_millis(20))?,
             telem_type,
         )
     }
@@ -253,11 +269,12 @@ impl Clyde3gEps for Eps {
         &self,
         telem_type: telemetry::daughterboard::Type,
     ) -> EpsResult<f64> {
+        thread::sleep(INTER_COMMAND_DELAY);
+        let (command, rx_len) = telemetry::daughterboard::command(telem_type);
         telemetry::daughterboard::parse(
-            &self.connection.transfer(
-                telemetry::daughterboard::command(telem_type),
-                Duration::from_millis(20),
-            )?,
+            &self
+                .connection
+                .transfer(command, rx_len, Duration::from_millis(20))?,
             telem_type,
         )
     }
@@ -275,9 +292,12 @@ impl Clyde3gEps for Eps {
         &self,
         telem_type: telemetry::reset::Type,
     ) -> EpsResult<telemetry::reset::Data> {
+        thread::sleep(INTER_COMMAND_DELAY);
+        let (command, rx_len) = telemetry::reset::command(telem_type);
         telemetry::reset::parse(&self.connection.transfer(
-            telemetry::reset::command(telem_type),
-            Duration::from_millis(20),
+            command,
+            rx_len,
+            Duration::from_millis(3),
         )?)
     }
 
@@ -293,6 +313,7 @@ impl Clyde3gEps for Eps {
     /// # Arguments
     /// `period` - Watchdog period to set in minutes
     fn set_comms_watchdog_period(&self, period: u8) -> EpsResult<()> {
+        thread::sleep(INTER_COMMAND_DELAY);
         self.connection
             .write(set_comms_watchdog_period::command(period))?;
         Ok(())
@@ -303,8 +324,11 @@ impl Clyde3gEps for Eps {
     /// This command provides the user with the current communications watchdog
     /// timeout that has been set. The returned value is indicated in minutes.
     fn get_comms_watchdog_period(&self) -> EpsResult<u8> {
+        thread::sleep(INTER_COMMAND_DELAY);
+        let (command, rx_len) = get_comms_watchdog_period::command();
         get_comms_watchdog_period::parse(&self.connection.transfer(
-            get_comms_watchdog_period::command(),
+            command,
+            rx_len,
             Duration::from_millis(2),
         )?)
     }
@@ -313,6 +337,7 @@ impl Clyde3gEps for Eps {
     ///
     /// This command sends a raw command to the EPS
     fn raw_command(&self, cmd: u8, data: Vec<u8>) -> EpsResult<()> {
+        thread::sleep(INTER_COMMAND_DELAY);
         self.connection.write(Command { cmd, data })?;
         Ok(())
     }

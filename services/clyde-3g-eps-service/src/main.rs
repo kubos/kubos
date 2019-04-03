@@ -149,7 +149,7 @@
 //!  ```json
 //! {
 //! 	telemetry {
-//! 		motherboardTelemetry {
+//! 		motherboard {
 //! 			VoltageFeedingBcr1: Float!
 //! 			CurrentBcr1Sa1a: Float!
 //! 			CurrentBcr1Sa1b: Float!
@@ -217,7 +217,7 @@
 //! ```json
 //! {
 //! 	telemetry {
-//! 		daughterboardTelemetry {
+//! 		daughterboard {
 //! 			VoltageFeedingBcr4: Float
 //! 			CurrentBcr4Sa4a: Float
 //! 			CurrentBcr4Sa4b: Float

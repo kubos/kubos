@@ -145,7 +145,7 @@ impl Subsystem {
     }
 
     /// Get the last error the EPS encountered
-    pub fn get_last_eps_error(&self) -> Result<last_error::Data, String> {
+    pub fn get_last_eps_error(&self) -> Result<last_error::ErrorData, String> {
         let eps = self.eps.lock().unwrap();
         Ok(run!(eps.get_last_error(), self.errors)?.into())
     }

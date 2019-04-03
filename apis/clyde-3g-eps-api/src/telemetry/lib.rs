@@ -54,27 +54,27 @@ macro_rules! make_telemetry {
         /// # Arguments
         ///
         /// `telem_type` - `Type` of telemetry to return command for
-        pub fn command(telem_type: Type) -> Command {
-            Command {
-                cmd: TELEM_CMD,
-                data: match telem_type {
-                    $(Type::$type => $data,)+
-                }
-            }
+        pub fn command(telem_type: Type) -> (Command, usize) {
+            (
+                Command {
+                    cmd: TELEM_CMD,
+                    data: match telem_type {
+                        $(Type::$type => $data,)+
+                    }
+                },
+                2
+            )
         }
     }
 }
 
 pub fn get_adc_result(data: &[u8]) -> EpsResult<f64> {
-    // It appears the ADCS actually sends back 4 bytes
-    // The first two contain the actual response and
-    // the second two are 0s
     if data.len() < 2 {
         Err(EpsError::parsing_failure("ADC Result"))
     } else {
-        Ok(f64::from(
-            u16::from(data[0]) | (u16::from(data[1]) & 0xF) << 8,
-        ))
+        let be_val = u16::from(data[0]) | u16::from(data[1]) << 8;
+        let native_val = u16::from_be(be_val);
+        Ok(f64::from(native_val))
     }
 }
 
@@ -84,10 +84,11 @@ mod tests {
 
     #[test]
     fn test_adcs_result() {
-        let raw = vec![0xAB, 0xCD, 0x12, 0x34];
+        let raw = vec![0x01, 0x23];
         let adc = get_adc_result(&raw).unwrap();
 
-        assert_eq!(adc, 3499.0);
+        // Test assumes native endianess is little endian
+        assert_eq!(adc, 291.0);
     }
 
     #[test]
@@ -102,14 +103,14 @@ mod tests {
 
         assert_eq!(
             command(Type::TestVal1),
-            Command {
-                cmd: TELEM_CMD,
-                data: vec![0xE1],
-            }
+            (
+                Command {
+                    cmd: TELEM_CMD,
+                    data: vec![0xE1],
+                },
+                2
+            )
         );
-        assert_eq!(
-            parse(&vec![0xAB, 0xCD, 0x0, 0x0], Type::TestVal1),
-            Ok(34980.0)
-        );
+        assert_eq!(parse(&vec![0x01, 0x23], Type::TestVal1), Ok(2900.0));
     }
 }

@@ -55,12 +55,8 @@ pub struct CommsControlBlock<T: Clone> {
     pub read_conn: T,
     /// Gateway connection to write to.
     pub write_conn: T,
-    /// Starting port used to define a range of ports that are used in the message handlers
-    /// that handle messages received from the ground.
-    pub handler_port_min: u16,
-    /// Ending port used to define a range of ports that are used in the message handlers
-    /// that handle messages received from the ground.
-    pub handler_port_max: u16,
+    /// Maximum number of concurrent message handlers allowed.
+    pub max_num_handlers: u16,
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
     pub timeout: u64,
     /// IP address of the ground gateway.
@@ -93,14 +89,13 @@ impl<T: Clone + Debug> Debug for CommsControlBlock<T> {
         write!(
             f,
             "CommsControlBlock {{ read: {}, write: {:?}, read_conn: {:?}, write_conn: {:?},
-            handler_port_min: {:?}, handler_port_max: {:?}, timeout: {:?}, ground_ip: {:?},
-            satellite_ip: {:?}, downlink_ports: {:?}, ground_port: {:?} }}",
+            max_num_handlers: {:?}, timeout: {:?}, ground_ip: {:?}, satellite_ip: {:?},
+            downlink_ports: {:?}, ground_port: {:?} }}",
             read,
             write,
             self.read_conn,
             self.write_conn,
-            self.handler_port_min,
-            self.handler_port_max,
+            self.max_num_handlers,
             self.timeout,
             self.ground_ip,
             self.satellite_ip,
@@ -139,8 +134,7 @@ impl<T: Clone> CommsControlBlock<T> {
             write,
             read_conn,
             write_conn,
-            handler_port_min: config.handler_port_min.unwrap_or(DEFAULT_HANDLER_START),
-            handler_port_max: config.handler_port_max.unwrap_or(DEFAULT_HANDLER_END),
+            max_num_handlers: config.max_num_handlers.unwrap_or(DEFAULT_MAX_HANDLERS),
             timeout: config.timeout.unwrap_or(DEFAULT_TIMEOUT),
             ground_ip: Ipv4Addr::from_str(&config.ground_ip)?,
             satellite_ip: Ipv4Addr::from_str(&config.satellite_ip)?,
@@ -202,11 +196,11 @@ fn read_thread<T: Clone + Send + 'static>(
     comms: CommsControlBlock<T>,
     data: &Arc<Mutex<CommsTelemetry>>,
 ) {
-    // Setup port rotation for message handlers.
-    let mut port = comms.handler_port_min;
-
     // Take reader from control block.
     let read = comms.read.unwrap();
+
+    // Initiate counter for handlers
+    let num_handlers: Arc<Mutex<u16>> = Arc::new(Mutex::new(0));
 
     loop {
         // Read bytes from the radio.
@@ -241,20 +235,15 @@ fn read_thread<T: Clone + Send + 'static>(
         log_telemetry(&data, &TelemType::Up).unwrap();
         info!("UDP Packet successfully uplinked");
 
-        // Bind socket to a port and pass to the message handler.
-        let socket = match socket_manager(
-            comms.satellite_ip,
-            &mut port,
-            comms.handler_port_min,
-            comms.handler_port_max,
-        ) {
-            Some(sock) => sock,
-            None => {
+        if let Ok(mut num_handlers) = num_handlers.lock() {
+            if *num_handlers >= comms.max_num_handlers {
                 log_error(&data, CommsServiceError::NoAvailablePorts.to_string()).unwrap();
                 error!("No message handler ports available");
                 continue;
+            } else {
+                *num_handlers += 1;
             }
-        };
+        }
 
         // Spawn new message handler.
         let conn_ref = comms.write_conn.clone();
@@ -263,91 +252,70 @@ fn read_thread<T: Clone + Send + 'static>(
         let sat_ref = comms.satellite_ip;
         let ground_ref = comms.ground_ip;
         let time_ref = comms.timeout;
+        let num_handlers_ref = num_handlers.clone();
         thread::spawn(move || {
-            handle_message(
-                &socket, &data_ref, conn_ref, &write_ref, &packet, time_ref, sat_ref, ground_ref,
-            );
+            let res = handle_message(conn_ref, &write_ref, &packet, time_ref, sat_ref, ground_ref);
+
+            if let Ok(mut num_handlers) = num_handlers_ref.lock() {
+                *num_handlers -= 1;
+            }
+
+            match res {
+                Ok(_) => {
+                    log_telemetry(&data_ref, &TelemType::Down).unwrap();
+                    info!("UDP Packet successfully downlinked");
+                }
+                Err(e) => {
+                    log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
+                    log_error(&data_ref, e.to_string()).unwrap();
+                    error!("UDP packet failed to downlink: {}", e.to_string());
+                }
+            }
         });
     }
-}
-
-// Helper function to manage binding sockets to the next available port if any are available.
-fn socket_manager(ip: Ipv4Addr, port: &mut u16, min: u16, max: u16) -> Option<UdpSocket> {
-    let mut socket = None;
-    let last = *port;
-    while socket.is_none() {
-        if *port < max {
-            *port += 1;
-        } else {
-            *port = min;
-        }
-        socket = UdpSocket::bind((ip, *port)).ok();
-        if last == *port {
-            break;
-        }
-    }
-    socket
 }
 
 // This thread sends a query/mutation to its intended destination and waits for a response.
 // The thread then writes the response to the gateway.
 #[allow(clippy::too_many_arguments)]
 fn handle_message<T: Clone>(
-    socket: &UdpSocket,
-    data: &Arc<Mutex<CommsTelemetry>>,
     write_conn: T,
     write: &Arc<WriteFn<T>>,
     message: &UdpPacket,
     timeout: u64,
     sat_ip: Ipv4Addr,
     ground_ip: Ipv4Addr,
-) {
-    let mut buf = [0; MAX_SIZE];
+) -> Result<(), String> {
+    let payload = message.payload().to_vec();
 
-    // Set receive timeout for the socket.
-    match socket.set_read_timeout(Some(Duration::from_millis(timeout))) {
-        Ok(_) => (),
-        Err(e) => return log_error(&data, e.to_string()).unwrap(),
-    };
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_millis(timeout))
+        .build()
+        .map_err(|e| e.to_string())?;
 
-    // Send message to the intended service.
-    match socket.send_to(message.payload(), (sat_ip, message.get_destination())) {
-        Ok(_) => (),
-        Err(e) => return log_error(&data, e.to_string()).unwrap(),
-    };
-    info!("UDP Packet sent to port {}", message.get_destination());
+    let mut res = client
+        .post(&format!("http://{}:{}", sat_ip, message.get_destination()))
+        .body(payload)
+        .send()
+        .map_err(|e| e.to_string())?;
 
-    // Receive response back from the service.
-    let (size, _) = match socket.recv_from(&mut buf) {
-        Ok(tuple) => tuple,
-        Err(e) => return log_error(&data, e.to_string()).unwrap(),
-    };
+    let size = res.content_length().unwrap_or(0) as usize;
+    let buf = res.text().unwrap_or_else(|_| "".to_owned());
+    let buf = buf.as_bytes();
 
     // Take received message and wrap it in a UDP packet.
-    let packet = match build_packet(
+    let packet = build_packet(
         &buf[0..size],
         message.get_destination(),
         message.get_source(),
         (size + HEADER_LEN) as u16,
         sat_ip,
         ground_ip,
-    ) {
-        Ok(packet) => packet,
-        Err(e) => return log_error(&data, e.to_string()).unwrap(),
-    };
+    )
+    .map_err(|e| e.to_string())?;
 
-    // Write packet to the gateway and update telemetry.
-    match write(&write_conn.clone(), packet.as_slice()) {
-        Ok(_) => {
-            log_telemetry(&data, &TelemType::Down).unwrap();
-            info!("UDP Packet successfully downlinked");
-        }
-        Err(e) => {
-            log_telemetry(&data, &TelemType::DownFailed).unwrap();
-            log_error(&data, e.to_string()).unwrap();
-            error!("UDP packet failed to downlink");
-        }
-    };
+    // Write packet to the gateway
+    write(&write_conn.clone(), packet.as_slice()).map_err(|e| e.to_string())
 }
 
 // This thread reads indefinitely from a UDP socket and then writes received packets to a gateway.

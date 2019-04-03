@@ -48,6 +48,8 @@ pub enum ErrorCode {
     FailReadingEEPROM = 0x20,
     /// Generic warning about an error on the internal SPI bus
     InternalSPIError = 0x30,
+    /// The command to fetch the last error failed
+    CommandError = 0xFF,
     /// Catch all for future error values
     UnknownError,
 }
@@ -65,6 +67,7 @@ impl ErrorCode {
             0x14 => ErrorCode::BadADCAcquisition,
             0x20 => ErrorCode::FailReadingEEPROM,
             0x30 => ErrorCode::InternalSPIError,
+            0xFF => ErrorCode::CommandError,
             _ => ErrorCode::UnknownError,
         }
     }
@@ -95,11 +98,14 @@ pub fn parse(data: &[u8]) -> EpsResult<LastError> {
     }
 }
 
-pub fn command() -> Command {
-    Command {
-        cmd: 0x03,
-        data: vec![0x00],
-    }
+pub fn command() -> (Command, usize) {
+    (
+        Command {
+            cmd: 0x03,
+            data: vec![0x00],
+        },
+        4,
+    )
 }
 
 #[cfg(test)]
