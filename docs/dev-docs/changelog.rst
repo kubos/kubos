@@ -1,8 +1,8 @@
 Kubos Changelog
 ===============
 
-v1.14.0 - Mar 29 2019
----------------------
+v1.14.0 - Apr 3 2019
+--------------------
 
 - `Added logic to the applications service to check if an app immediately fails after being started <https://docs.kubos.com/latest/app-docs/app-service.html#starting-an-application>`__
 - `Removed UUIDs from the applications service. Apps will now be referenced by name <https://docs.kubos.com/latest/app-docs/app-service.html>`__
