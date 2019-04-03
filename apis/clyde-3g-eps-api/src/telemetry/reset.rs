@@ -50,13 +50,16 @@ macro_rules! make_reset_telemetry {
         /// # Arguments
         ///
         /// `telem_type` - `Type` of telemetry to return command for
-        pub fn command(reset_type: Type) -> Command {
-            Command {
-                cmd: match reset_type {
-                    $(Type::$type => $cmd,)+
+        pub fn command(reset_type: Type) -> (Command, usize) {
+            (
+                Command {
+                    cmd: match reset_type {
+                        $(Type::$type => $cmd,)+
+                    },
+                    data: vec![0x00],
                 },
-                data: vec![0x00],
-            }
+                4,
+            )
         }
     }
 }
@@ -126,10 +129,13 @@ mod tests {
 
         assert_eq!(
             command(Type::TestVal1),
-            Command {
-                cmd: 0x30,
-                data: vec![0x00],
-            }
+            (
+                Command {
+                    cmd: 0x30,
+                    data: vec![0x00],
+                },
+                4,
+            )
         );
     }
 

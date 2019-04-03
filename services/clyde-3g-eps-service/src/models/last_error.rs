@@ -41,13 +41,15 @@ pub enum Error {
     FailReadingEEPROM,
     /// Generic warning about an error on the internal SPI bus
     InternalSPIError,
+    /// The command to fetch the last error failed
+    CommandError,
     /// Catch all for future error values
     UnknownError,
 }
 
 /// Last command status for the EPS
 #[derive(Clone, Debug, GraphQLObject)]
-pub struct Data {
+pub struct ErrorData {
     /// Last command status for the motherboard
     pub motherboard: Error,
     /// Last command status for the daughterboard
@@ -66,13 +68,14 @@ fn to_error(error_code: ErrorCode) -> Error {
         ErrorCode::BadADCAcquisition => Error::BadADCAcquisition,
         ErrorCode::FailReadingEEPROM => Error::FailReadingEEPROM,
         ErrorCode::InternalSPIError => Error::InternalSPIError,
+        ErrorCode::CommandError => Error::CommandError,
         ErrorCode::UnknownError => Error::UnknownError,
     }
 }
 
-impl Into<Data> for LastError {
-    fn into(self) -> Data {
-        Data {
+impl Into<ErrorData> for LastError {
+    fn into(self) -> ErrorData {
+        ErrorData {
             motherboard: to_error(self.motherboard),
             daughterboard: self.daughterboard.map(to_error),
         }

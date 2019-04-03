@@ -98,7 +98,7 @@ graphql_object!(Telemetry: Context as "telemetry" |&self| {
     //
     // telemetry {
     //         daughterboard {
-    //             VoltageFeedingBcr4: f64: f64,
+    //             VoltageFeedingBcr4: f64,
     //             CurrentBcr4Sa4a: f64,
     //             CurrentBcr4Sa4b: f64,
     //             ArrayTempSa4a: f64,
@@ -214,7 +214,7 @@ graphql_object!(Telemetry: Context as "telemetry" |&self| {
     //             daughterboard: last_error::Error,
     //        }
     // }
-    field last_eps_error(&executor) -> FieldResult<last_error::Data>
+    field last_eps_error(&executor) -> FieldResult<last_error::ErrorData>
         as "Last EPS error reported"
     {
         Ok(executor.context().subsystem().get_last_eps_error()?)
