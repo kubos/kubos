@@ -74,7 +74,7 @@ fn concurrent_uplinks_to_service_with_handler_response() {
         // for the comms service to read from the radio
         mock_comms.lock().unwrap().push_read(&ground_packet);
 
-        // Setup & start http server
+        // Setup & start HTTP server
         let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
 
         spawn_http_server(
@@ -92,7 +92,7 @@ fn concurrent_uplinks_to_service_with_handler_response() {
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
 
-    // Wait until http servers are ready
+    // Wait until HTTP servers are ready
     barrier.wait();
 
     for _ in 0..(num_tests) {
@@ -160,7 +160,7 @@ fn too_many_concurrent_uplinks_to_service_with_handler_response() {
         // for the comms service to read from the radio
         mock_comms.lock().unwrap().push_read(&ground_packet);
 
-        // Setup & start http server
+        // Setup & start HTTP server
         let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
         spawn_http_server(
             resp_payload.clone(),

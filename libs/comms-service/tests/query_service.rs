@@ -135,7 +135,7 @@ port = 15005"#;
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
-            .expect("failed to start");
+            .expect("Failed to start");
 
         sender.send(child).unwrap();
 

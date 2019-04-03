@@ -70,7 +70,7 @@ fn uplink_to_service_no_response() {
     // for the comms service to read from the radio
     mock_comms.lock().unwrap().push_read(&ground_packet);
 
-    // Setup & start http server
+    // Setup & start HTTP server
     let barrier = Arc::new(Barrier::new(2));
     let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
     let thread_data = recv_data.clone();
@@ -134,7 +134,7 @@ fn uplink_to_service_with_handler_response() {
     // for the comms service to read from the radio
     mock_comms.lock().unwrap().push_read(&ground_packet);
 
-    // Setup & start http server
+    // Setup & start HTTP server
     let barrier = Arc::new(Barrier::new(2));
     let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
     let thread_data = recv_data.clone();
@@ -210,7 +210,7 @@ fn uplink_to_service_with_downlink_response() {
     // for the comms service to read from the radio
     mock_comms.lock().unwrap().push_read(&ground_packet);
 
-    // Setup & start http server
+    // Setup & start HTTP server
     let barrier = Arc::new(Barrier::new(2));
     let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
     spawn_http_server(
