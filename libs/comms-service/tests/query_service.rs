@@ -54,7 +54,7 @@ fn query_monitor_service() {
     // Start up monitor service
     let service_handle_rx = spawn_monitor_service();
 
-    thread::sleep(Duration::from_millis(500));
+    thread::sleep(Duration::from_millis(1000));
 
     // Control block to configure communication service.
     let controls = CommsControlBlock::new(
@@ -87,7 +87,7 @@ fn query_monitor_service() {
     CommsService::start(controls, &telem).unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(500));
+    thread::sleep(Duration::from_millis(1000));
 
     // Pretend to be the ground and read the
     // packet which was written to the radio
@@ -108,6 +108,16 @@ fn spawn_monitor_service() -> Receiver<process::Child> {
     let config = r#"[monitor-service.addr]
 ip = "127.0.0.5"
 port = 15005"#;
+
+    // Block on building the service before we start it
+    // Otherwise we might run through the test before it
+    // is built and running.
+    Command::new("cargo")
+        .arg("build")
+        .arg("--package")
+        .arg("monitor-service")
+        .output()
+        .expect("Failed to build monitor-service");
 
     thread::spawn(move || {
         let dir = tempdir().unwrap();
