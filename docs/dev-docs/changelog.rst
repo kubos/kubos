@@ -11,6 +11,7 @@ v1.14.0 - Mar 29 2019
 - `Added ability to manually set the active version of an application <https://docs.kubos.com/latest/app-docs/app-service.html#changing-versions>`__
 - `Added parameter to Rust app API to allow minimum logging level to be controlled <https://docs.kubos.com/latest/rust-docs/kubos_app/macro.app_main.html#arguments>`__
 - `Added parameter to Python app API to allow minimum logging level to be controlled <https://docs.kubos.com/latest/app-docs/python-app-api.html#app_api.logging_setup>`__
+- `Updated comms service framework to translate between UDP and HTTP <https://docs.kubos.com/latest/services/comms-framework.html>`__
 - Added comms service framework unit tests
 - `Added documentation for service configuration <https://docs.kubos.com/latest/services/service-config.html>`__
 - `Updated the Pumpkin supMCU API to match v4.22 of the firmware manual <https://github.com/kubos/kubos/blob/master/apis/pumpkin-mcu-api/mcu_api.py>`__
