@@ -16,13 +16,13 @@
 
 extern crate tempfile;
 
+use std::cell::RefCell;
 use std::fs::File;
 use std::io::Write;
 use std::process;
 use std::process::{Command, Stdio};
 use std::str;
 use tempfile::tempdir;
-use std::cell::RefCell;
 
 /// This structure allows the creation of an instance
 /// of an actual service/binary crate for use in
