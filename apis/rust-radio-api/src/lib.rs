@@ -66,13 +66,13 @@ pub trait Stream {
 /// A connection is like a stream, but allowed parsed reads with properly buffered
 /// input data.
 pub struct Connection {
-    stream: Box<Stream>,
+    stream: Box<Stream + Send>,
     buffer: RefCell<Vec<u8>>,
 }
 
 impl Connection {
     /// Convenience constructor to create connection from stream.
-    pub fn new(stream: Box<Stream>) -> Connection {
+    pub fn new(stream: Box<Stream + Send>) -> Connection {
         Connection {
             stream,
             buffer: RefCell::new(Vec::new()),

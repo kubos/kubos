@@ -39,6 +39,7 @@ members = [
 "services/iobc-supervisor-service",
 "services/isis-ants-service",
 "services/mai400-service",
+"services/nsl-duplex-d2-comms-service",
 "services/novatel-oem6-service",
 "services/shell-service",
 "services/telemetry-service",
