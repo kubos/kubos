@@ -1,0 +1,9 @@
+[package]
+name = "dyn-lib-test"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+edition = "2018"
+build = "build.rs"
+
+[dependencies]
+libc = "0.2"
