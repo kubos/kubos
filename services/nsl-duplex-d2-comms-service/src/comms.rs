@@ -15,9 +15,8 @@
 //
 
 //!
-//! Serial communications functionality for use in conjunction
-//! with the communications service library. KISS framing is
-//! implemented for data integrity over the serial link.
+//! Wrapping radio uplink/downlink functionality in a way that can be
+//! consumed by the communications service library.
 //!
 
 use crate::NslDuplexCommsResult;
@@ -39,8 +38,6 @@ impl DuplexComms {
         DuplexComms { radio, counter: 0 }
     }
 
-    // Function to allow reading a whole UDP packet from a serial socket
-    // using KISS framing
     pub fn read(&self) -> NslDuplexCommsResult<Vec<u8>> {
         let count = self.radio.get_uploaded_file_count()?;
 
@@ -52,7 +49,6 @@ impl DuplexComms {
         }
     }
 
-    // Function to allow writing over a UDP socket.
     pub fn write(&mut self, data: &[u8]) -> NslDuplexCommsResult<()> {
         let file_name = format!("udp{:03}", self.counter);
         self.counter += 1;
