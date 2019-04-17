@@ -35,8 +35,7 @@ foreach(lib ${NOSENGINE_LIBRARIES})
 endforeach(lib)
 
 # This script doesn't actually build anything; all it has to do is print out the libraries.
-# However, the CMake crate expects an install target.
-# So I just make this meaningless installation that does nothing.
+# However, the CMake crate expects an install target, so I just make this meaningless installation that does nothing.
 
 file(WRITE __lib.c)
 set(nosengine_src __lib.c)
