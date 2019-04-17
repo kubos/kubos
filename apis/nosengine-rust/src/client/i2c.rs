@@ -167,7 +167,7 @@ impl<'a> I2CMaster<'a> {
         if address < 8 || address > 127 {
             return Err(I2CError::InvalidAddress { address });
         }
-        let mut rbuf: Vec<u8> = Vec::with_capacity(num_bytes);
+        let mut rbuf: Vec<u8> = vec![0; num_bytes];
         rbuf.resize(num_bytes, 0u8);
         match i2c::i2c_read(self.i2c_ptr, address, rbuf.as_mut_ptr(), num_bytes) {
             i2c::I2CStatus::Success => Ok(rbuf),
@@ -208,7 +208,7 @@ impl<'a> I2CMaster<'a> {
         tx_data: &[u8],
         rx_len: usize,
     ) -> Result<Vec<u8>, I2CError> {
-        let mut rbuf: Vec<u8> = Vec::with_capacity(rx_len);
+        let mut rbuf: Vec<u8> = vec![0; rx_len];
         rbuf.resize(rx_len, 0u8);
         match i2c::i2c_transaction(
             self.i2c_ptr,

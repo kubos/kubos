@@ -67,6 +67,7 @@
 extern crate libc;
 
 pub mod client;
+#[allow(clippy::all)]
 pub mod ffi;
 
 #[cfg(test)]

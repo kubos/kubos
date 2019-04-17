@@ -141,14 +141,8 @@ impl fmt::Display for NosError {
 impl Error for NosError {
     fn description(&self) -> &str {
         match self {
-            NosError::StringError {
-                description,
-                position: _,
-            } => &description,
-            NosError::NosEngineError {
-                error_code: _,
-                description,
-            } => &description,
+            NosError::StringError { description, .. } => &description,
+            NosError::NosEngineError { description, .. } => &description,
         }
     }
 }

@@ -134,7 +134,7 @@ impl<'a> SPIMaster<'a> {
     ///
     /// See [`nosengine-rust::client::spi`](../spi/index.html#examples)
     pub fn read(&self, num_bytes: usize) -> Result<Vec<u8>, SPIError> {
-        let mut rbuf: Vec<u8> = Vec::with_capacity(num_bytes);
+        let mut rbuf: Vec<u8> = vec![0; num_bytes];
         rbuf.resize(num_bytes, 0u8);
         match spi::spi_read(self.spi_ptr, rbuf.as_mut_ptr(), num_bytes) {
             spi::SPIStatus::Success => Ok(rbuf),
