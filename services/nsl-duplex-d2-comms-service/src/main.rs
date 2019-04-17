@@ -14,11 +14,13 @@
 // limitations under the License.
 //
 
+//!
+//! Hardware service to allow for communications over a NSL Duplex Radio.
+//! This service starts up a communication service to allow transfer of UDP
+//! packets over a serial link to and from the radio.
+//!
 
-//!
-//! Hardware service to allow for serial communications. This service starts up a communication
-//! service to allow transfer of udp packets over a serial link to the satellite.
-//!
+#![deny(warnings)]
 
 extern crate comms_service;
 #[macro_use]
@@ -36,7 +38,6 @@ extern crate log4rs_syslog;
 extern crate nsl_duplex_d2;
 
 mod comms;
-mod kiss;
 mod model;
 mod schema;
 
@@ -48,7 +49,7 @@ use failure::Error;
 use kubos_service::{Config, Service};
 use std::sync::{Arc, Mutex};
 
-// Return type for the ethernet service.
+// Generic return type
 type NslDuplexCommsResult<T> = Result<T, Error>;
 
 // Initialize logging for the service
@@ -107,13 +108,17 @@ fn main() -> NslDuplexCommsResult<()> {
     // Read configuration from config file.
     let comms_config = CommsConfig::new(service_config.clone())?;
 
-    // Open serial port
+    // Open radio serial connection
     let duplex_comms = Arc::new(Mutex::new(DuplexComms::new(&bus)));
+
+    // Start keep alive loop
+    let radio = duplex_comms.clone();
+    std::thread::spawn(|| ping_loop(radio));
 
     // Control block to configure communication service.
     let controls = CommsControlBlock::new(
-        Some(Arc::new(read_ser)),
-        vec![Arc::new(write_ser)],
+        Some(Arc::new(read)),
+        vec![Arc::new(write)],
         duplex_comms.clone(),
         duplex_comms,
         comms_config,
@@ -123,9 +128,10 @@ fn main() -> NslDuplexCommsResult<()> {
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
     // Start communication service.
-    info!("Serial Communications Service starting on {}", bus);
+    info!("NSL Duplex Communications Service starting on {}", bus);
     CommsService::start(controls, &telem.clone())?;
 
+    // Start up graphql server
     let subsystem = Subsystem::new(telem);
     Service::new(service_config, subsystem, QueryRoot, MutationRoot).start();
 
