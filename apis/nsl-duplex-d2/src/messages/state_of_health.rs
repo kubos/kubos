@@ -19,17 +19,29 @@ use nom::{be_u32, be_u8, take_until_and_consume, IResult};
 #[derive(Debug, PartialEq)]
 /// Struct for storing state of health records
 pub struct StateOfHealth {
-    reset_count: u32, // (4 byte integer) Current epoch reset count, starts at 0, incremented for each power system reset, persistent over the life of the mission
-    current_time: u32, // (4 byte integer) Current time (seconds) from start of most recent reset
-    current_rssi: u8, // (1 byte integer) Current RSSI (Received Signal Strength Indicator), 0 to 4
-    connection_status: u8, // (1 byte integer) Connection status, 0 (connected) or 1 (disconnected)
-    globalstar_gateway: u8, // (1 byte integer) Globalstar gateway connected to, proprietary ID, 0 to 255
-    last_contact_time: u32, // (4 byte integer) Last contact time, seconds since latest reset
-    last_attempt_time: u32, // (4 byte integer) Last attempt time, seconds since latest reset
-    call_attempts_since_reset: u32, // (4 byte integer) Count of call attempts since latest reset
-    successful_connects_since_reset: u32, // (4 byte integer) Count of successful connects since latest reset
-    average_connection_duration: u32,     // (4 byte integer) Average connection duration (seconds)
-    connection_duration_std_dev: u32, // (4 byte integer) Connection duration standard deviation (seconds)
+    /// (4 byte integer) Current epoch reset count, starts at 0,
+    /// incremented for each power system reset, persistent over the life of the mission
+    pub reset_count: u32,
+    /// (4 byte integer) Current time (seconds) from start of most recent reset
+    pub current_time: u32,
+    /// (1 byte integer) Current RSSI (Received Signal Strength Indicator), 0 to 4
+    pub current_rssi: u8,
+    /// (1 byte integer) Connection status, 0 (connected) or 1 (disconnected)
+    pub connection_status: u8,
+    /// (1 byte integer) Globalstar gateway connected to, proprietary ID, 0 to 255
+    pub globalstar_gateway: u8,
+    /// (4 byte integer) Last contact time, seconds since latest reset
+    pub last_contact_time: u32,
+    /// (4 byte integer) Last attempt time, seconds since latest reset
+    pub last_attempt_time: u32,
+    /// (4 byte integer) Count of call attempts since latest reset
+    pub call_attempts_since_reset: u32,
+    /// (4 byte integer) Count of successful connects since latest reset
+    pub successful_connects_since_reset: u32,
+    /// (4 byte integer) Average connection duration (seconds)
+    pub average_connection_duration: u32,
+    /// (4 byte integer) Connection duration standard deviation (seconds)
+    pub connection_duration_std_dev: u32,
 }
 
 impl StateOfHealth {

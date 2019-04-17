@@ -99,6 +99,7 @@ impl DuplexD2 {
     /// Put a new file on the download queue, returns true if accepted by EyeStar-D2.
     pub fn put_download_file(&self, file: &File) -> RadioResult<bool> {
         self.conn.write(b"GUPUT_DF")?;
+        self.conn.read(parse_ack_or_nak)?;
         self.conn.write(&file.encode())?;
         self.conn.read(parse_ack_or_nak)
     }
