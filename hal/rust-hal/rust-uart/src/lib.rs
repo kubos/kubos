@@ -24,10 +24,16 @@ pub mod mock;
 mod tests;
 
 pub use crate::error::*;
+#[cfg(feature = "nos3")]
+use nosengine_rust::client::uart;
+#[cfg(not(feature = "nos3"))]
 use serial::prelude::*;
 use std::cell::RefCell;
+#[allow(unused_imports)]
 use std::io::prelude::*;
 use std::time::Duration;
+#[cfg(feature = "nos3")]
+use std::{sync, thread, time::Instant};
 
 /// Wrapper for UART stream
 pub struct Connection {
@@ -73,11 +79,13 @@ pub trait Stream: Send {
 }
 
 // This is the actual stream that data is tranferred over
+#[cfg(not(feature = "nos3"))]
 struct SerialStream {
     port: RefCell<serial::SystemPort>,
     timeout: Duration,
 }
 
+#[cfg(not(feature = "nos3"))]
 impl SerialStream {
     fn new(bus: &str, settings: serial::PortSettings, timeout: Duration) -> UartResult<Self> {
         let mut port = serial::open(bus)?;
@@ -92,6 +100,7 @@ impl SerialStream {
 }
 
 // Read and write implementations for the serial stream
+#[cfg(not(feature = "nos3"))]
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> UartResult<()> {
         let mut port = self
@@ -118,5 +127,99 @@ impl Stream for SerialStream {
         port.read_exact(response.as_mut_slice())?;
 
         Ok(response)
+    }
+}
+
+#[cfg(feature = "nos3")]
+struct SerialStream {
+    port: sync::Arc<sync::Mutex<uart::UART>>,
+    min_timeout: Duration,
+}
+
+#[cfg(feature = "nos3")]
+impl SerialStream {
+    fn new(bus: &str, _settings: serial::PortSettings, _timeout: Duration) -> UartResult<Self> {
+        let mut config = (include_str!("../../SimConfig.toml"))
+            .parse::<toml::Value>()?
+            .try_into::<toml::value::Table>()?;
+
+        let connection = config
+            .remove("connection")
+            .ok_or(UartError::GenericError)?
+            .try_into::<String>()?;
+
+        let nodename = config
+            .remove("nodename")
+            .ok_or(UartError::GenericError)?
+            .try_into::<String>()?;
+
+        let busname = config
+            .remove("busnames")
+            .ok_or(UartError::GenericError)?
+            .try_into::<toml::value::Table>()?
+            .remove("uart")
+            .ok_or(UartError::GenericError)?
+            .try_into::<toml::value::Table>()?
+            .remove(bus)
+            .ok_or(UartError::GenericError)?
+            .try_into::<String>()?;
+
+        let min_timeout = config
+            .remove("min_timeout")
+            .ok_or(UartError::GenericError)?
+            .try_into::<i64>()?;
+
+        let port = uart::UART::new(nodename.as_str(), connection.as_str(), busname.as_str(), 1)?;
+        Ok(SerialStream {
+            port: sync::Arc::new(sync::Mutex::new(port)),
+            min_timeout: Duration::from_millis(min_timeout as u64),
+        })
+    }
+}
+
+#[cfg(feature = "nos3")]
+impl Stream for SerialStream {
+    fn write(&self, data: &[u8]) -> UartResult<()> {
+        self.port.lock().unwrap().write(data);
+        Ok(())
+    }
+
+    fn read(&self, len: usize, timeout: Duration) -> UartResult<Vec<u8>> {
+        let timeout = if timeout < self.min_timeout {
+            self.min_timeout
+        } else {
+            timeout
+        };
+
+        let (tx, rx) = sync::mpsc::channel::<Vec<u8>>();
+        let port = self.port.clone();
+
+        // Because NOSEngine doesn't support timeouts, I have to roll my own timeout
+        thread::spawn(move || {
+            let port = port.lock().unwrap();
+            let mut data: Vec<u8> = port.read(len);
+            let start = Instant::now();
+            // When reading from a NOSEngine port, it never blocks. This means it often returns
+            // zero bytes. However, the real UART port blocks until it either reads the requested
+            // number of bytes or times out. So to emulate that behavior, I poll the NOSEngine
+            // port until I either get the requested number of bytes or time out.
+            while data.len() < len && Instant::now() - start < timeout {
+                let mut newdata = port.read(len);
+                data.append(&mut newdata);
+                thread::sleep(Duration::from_millis(100))
+            }
+            tx.send(data).unwrap();
+        });
+
+        let result = rx.recv()?;
+        if result.len() < len {
+            let description = String::from("UART Read timed out");
+            Err(UartError::IoError {
+                cause: std::io::ErrorKind::TimedOut,
+                description,
+            })
+        } else {
+            Ok(result)
+        }
     }
 }

@@ -19,7 +19,12 @@
 
 //! I2C device connection abstractions
 
+#[cfg(not(feature = "nos3"))]
 use i2c_linux::I2c;
+#[cfg(feature = "nos3")]
+use nosengine_rust::client::i2c::I2CMaster;
+#[cfg(feature = "nos3")]
+use std::io::ErrorKind;
 use std::io::Result;
 use std::thread;
 use std::time::Duration;
@@ -54,10 +59,14 @@ pub trait Stream {
 /// An implementation of `i2c_hal::Stream` which uses the `i2c_linux` crate
 /// for communication with actual I2C hardware.
 pub struct I2CStream {
+    #[cfg(not(feature = "nos3"))]
     path: String,
     slave: u16,
+    #[cfg(feature = "nos3")]
+    nos: Option<(String, String, u16)>,
 }
 
+#[cfg(not(feature = "nos3"))]
 impl I2CStream {
     /// Creates new I2CStream instance
     ///
@@ -73,6 +82,7 @@ impl I2CStream {
     }
 }
 
+#[cfg(not(feature = "nos3"))]
 impl Stream for I2CStream {
     /// Writing
     fn write(&self, command: Command) -> Result<()> {
@@ -101,6 +111,140 @@ impl Stream for I2CStream {
         thread::sleep(delay);
         i2c.i2c_read_block_data(command.cmd, &mut data)?;
         Ok(data)
+    }
+}
+
+#[cfg(feature = "nos3")]
+impl I2CStream {
+    fn read_config(
+        path: &str,
+    ) -> std::result::Result<(String, String, u16), Box<std::error::Error>> {
+        let mut config = (include_str!("../../SimConfig.toml"))
+            .parse::<toml::Value>()?
+            .try_into::<toml::value::Table>()?;
+
+        let connection = config
+            .remove("connection")
+            .ok_or(std::io::Error::new(
+                ErrorKind::Other,
+                "Error parsing SimConfig.toml",
+            ))?
+            .try_into::<String>()?;
+
+        let mut table = config
+            .remove("i2c")
+            .ok_or(std::io::Error::new(
+                ErrorKind::Other,
+                "Error parsing SimConfig.toml",
+            ))?
+            .try_into::<toml::value::Table>()?;
+
+        let master_address = table
+            .remove("master_address")
+            .ok_or(std::io::Error::new(
+                ErrorKind::Other,
+                "Error parsing SimConfig.toml",
+            ))?
+            .try_into::<i32>()?;
+
+        let master_address = master_address as u16;
+
+        let busname = table
+            .remove("busnames")
+            .ok_or(std::io::Error::new(
+                ErrorKind::Other,
+                "Error parsing SimConfig.toml",
+            ))?
+            .try_into::<toml::value::Table>()?
+            .remove(path)
+            .ok_or(std::io::Error::new(
+                ErrorKind::Other,
+                "Error parsing SimConfig.toml",
+            ))?
+            .try_into::<String>()?;
+
+        Ok((connection, busname, master_address))
+    }
+
+    fn get_nos_connection(&self) -> Result<I2CMaster> {
+        match &self.nos {
+            Some((connection, busname, master_address)) => {
+                println!(
+                    "Conn: {}, busname: {}, addr: {}",
+                    connection, busname, master_address
+                );
+                match I2CMaster::new(*master_address, connection.as_str(), busname.as_str()) {
+                    Ok(i2c) => Ok(i2c),
+                    Err(_) => Err(std::io::Error::new(
+                        ErrorKind::Other,
+                        "Error connecting to NOSEngine.",
+                    )),
+                }
+            }
+            None => Err(std::io::Error::new(
+                ErrorKind::Other,
+                "Error connecting to NOSEngine.",
+            )),
+        }
+    }
+
+    /// Creates new I2CStream instance.
+    ///
+    /// # Arguments
+    ///
+    /// `path` - File system path to I2C device handle
+    /// `slave` - Address of slave I2C device
+    pub fn new(path: &str, slave: u16) -> Self {
+        match Self::read_config(path) {
+            Ok((connection, busname, master_address)) => Self {
+                slave,
+                nos: Some((connection, busname, master_address)),
+            },
+            Err(_) => Self { slave, nos: None },
+        }
+    }
+}
+
+#[cfg(feature = "nos3")]
+impl Stream for I2CStream {
+    /// Writing
+    fn write(&self, command: Command) -> Result<()> {
+        let i2c = self.get_nos_connection()?;
+        let cmd = &[command.cmd];
+        let data = command.data.as_slice();
+        let comm: Vec<_> = cmd.iter().chain(data).cloned().collect();
+        match i2c.write(self.slave, &comm) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(std::io::Error::new(
+                ErrorKind::Other,
+                "Error connecting to NOSEngine.".to_string(),
+            )),
+        }
+    }
+
+    /// Reading
+    fn read(&self, command: Command, rx_len: usize) -> Result<Vec<u8>> {
+        let i2c = self.get_nos_connection()?;
+        match i2c
+            .write(self.slave, &[command.cmd])
+            .and_then(|()| i2c.read(self.slave, rx_len))
+        {
+            Ok(data) => Ok(data),
+            Err(e) => Err(std::io::Error::new(ErrorKind::Other, e)),
+        }
+    }
+
+    /// Read/Write transaction
+    fn transfer(&self, command: Command, rx_len: usize, delay: Duration) -> Result<Vec<u8>> {
+        thread::sleep(delay);
+        let i2c = self.get_nos_connection()?;
+        let cmd = &[command.cmd];
+        let data = command.data.as_slice();
+        let comm: Vec<_> = cmd.iter().chain(data).cloned().collect();
+        match i2c.transaction(self.slave, &comm, rx_len) {
+            Ok(data) => Ok(data),
+            Err(e) => Err(std::io::Error::new(ErrorKind::Other, e)),
+        }
     }
 }
 

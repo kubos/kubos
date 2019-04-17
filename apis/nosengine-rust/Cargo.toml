@@ -1,0 +1,11 @@
+[package]
+name = "nosengine-rust"
+version = "0.1.0"
+authors = ["Timothy Scott <tmscott@mix.wvu.edu>"]
+build = "build.rs"
+
+[dependencies]
+libc = "0.2.0"
+
+[build-dependencies]
+cmake = "0.1"

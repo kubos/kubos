@@ -15,7 +15,13 @@
 //
 
 use failure::Fail;
+#[cfg(feature = "nos3")]
+use nosengine_rust::client::uart;
 use std::error::Error;
+#[cfg(feature = "nos3")]
+use std::sync;
+#[cfg(feature = "nos3")]
+use toml;
 
 /// Custom errors for UART actions
 #[derive(Fail, Debug, Clone, PartialEq)]
@@ -59,6 +65,34 @@ impl From<serial::Error> for UartError {
             cause: error.kind(),
             description: error.description().to_owned(),
         }
+    }
+}
+
+#[cfg(feature = "nos3")]
+impl From<uart::UARTError> for UartError {
+    fn from(_error: uart::UARTError) -> Self {
+        UartError::GenericError
+    }
+}
+
+#[cfg(feature = "nos3")]
+impl From<toml::ser::Error> for UartError {
+    fn from(_error: toml::ser::Error) -> Self {
+        UartError::GenericError
+    }
+}
+
+#[cfg(feature = "nos3")]
+impl From<toml::de::Error> for UartError {
+    fn from(_error: toml::de::Error) -> Self {
+        UartError::GenericError
+    }
+}
+
+#[cfg(feature = "nos3")]
+impl From<sync::mpsc::RecvError> for UartError {
+    fn from(_error: sync::mpsc::RecvError) -> Self {
+        UartError::GenericError
     }
 }
 
