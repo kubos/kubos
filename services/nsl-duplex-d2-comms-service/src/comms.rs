@@ -20,16 +20,15 @@
 //! implemented for data integrity over the serial link.
 //!
 
-use crate::kiss;
 use crate::NslDuplexCommsResult;
-use std::cell::RefCell;
+use nsl_duplex_d2::{serial_connection, DuplexD2, File};
 use std::sync::{Arc, Mutex};
+use std::thread;
 use std::time::Duration;
-use nsl_duplex_d2::{DuplexD2, serial_connection, File};
 
 pub struct DuplexComms {
-    radio: DuplexD2,
-    buffer: RefCell<Vec<u8>>,
+    pub radio: DuplexD2,
+    counter: u16,
 }
 
 impl DuplexComms {
@@ -37,54 +36,84 @@ impl DuplexComms {
         let serial_conn = serial_connection(path);
         let radio = DuplexD2::new(serial_conn);
 
-        DuplexComms {
-            radio,
-            buffer: RefCell::new(vec![]),
-        }
+        DuplexComms { radio, counter: 0 }
     }
 
     // Function to allow reading a whole UDP packet from a serial socket
     // using KISS framing
     pub fn read(&self) -> NslDuplexCommsResult<Vec<u8>> {
-        let mut buffer = self.buffer.borrow_mut();
-        let file = self.radio.get_uploaded_file().unwrap();
+        let count = self.radio.get_uploaded_file_count()?;
 
-        match kiss::decode(&file.body) {
-            Ok(kiss::DecodedData {
-                frame,
-                mut pre_data,
-                mut post_data,
-            }) => {
-                buffer.clear();
-                buffer.append(&mut pre_data);
-                buffer.append(&mut post_data);
-                Ok(frame)
-            }
-            Err(e) => {
-                bail!("Parse err {:?}", e);
-            }
+        if count > 0 {
+            let file = self.radio.get_uploaded_file()?;
+            Ok(file.body)
+        } else {
+            bail!("No data available");
         }
     }
 
     // Function to allow writing over a UDP socket.
-    pub fn write(&self, data: &[u8]) -> NslDuplexCommsResult<()> {
-        let wrapped = kiss::encode(data);
-        let file = File::new("", data);
-        self.radio.put_download_file(&file).unwrap();
+    pub fn write(&mut self, data: &[u8]) -> NslDuplexCommsResult<()> {
+        let file_name = format!("udp{:03}", self.counter);
+        self.counter += 1;
+        let file = File::new(&file_name, &data);
+        match self.radio.put_download_file(&file) {
+            Ok(true) => Ok(()),
+            Ok(false) => {
+                warn!("Failed to downlink file");
+                bail!("Failed to downlink file")
+            }
+            Err(e) => {
+                warn!("Duplex write failed {:?}", e);
+                bail!(e.to_string())
+            }
+        }
+    }
+
+    pub fn download_ping(&mut self) -> NslDuplexCommsResult<()> {
+        let count = self.radio.get_download_file_count()?;
+        if count == 0 {
+            let file = File::new("ping", &[]);
+            self.radio.put_download_file(&file)?;
+        }
         Ok(())
     }
 }
 
-pub fn read_ser(socket: &Arc<Mutex<DuplexComms>>) -> NslDuplexCommsResult<Vec<u8>> {
-    if let Ok(socket) = socket.lock() {
-        return Ok(socket.read()?);
+// The duplex radio must have a file queued up to download in order
+// to make contact with the ground. This loop is used to ensure
+// there is always at least one generic file queued up.
+pub fn ping_loop(radio: Arc<Mutex<DuplexComms>>) -> NslDuplexCommsResult<()> {
+    loop {
+        if let Ok(mut radio) = radio.lock() {
+            match radio.download_ping() {
+                Ok(_) => {}
+                Err(e) => {
+                    warn!("Failed to send ping to radio {}", e);
+                    // bail!("Failed to send ping to radio {}", e);
+                }
+            }
+        }
+        thread::sleep(Duration::from_secs(10));
     }
-    bail!("Failed to lock socket");
 }
 
-pub fn write_ser(socket: &Arc<Mutex<DuplexComms>>, data: &[u8]) -> NslDuplexCommsResult<()> {
-    if let Ok(socket) = socket.lock() {
-        socket.write(data)?;
+// Read wrapper used by comms service
+pub fn read(radio: &Arc<Mutex<DuplexComms>>) -> NslDuplexCommsResult<Vec<u8>> {
+    if let Ok(radio) = radio.lock() {
+        radio.read()
+    } else {
+        warn!("Failed to lock radio");
+        bail!("Failed to lock radio");
     }
-    Ok(())
+}
+
+// Write wrapper used by comms service
+pub fn write(radio: &Arc<Mutex<DuplexComms>>, data: &[u8]) -> NslDuplexCommsResult<()> {
+    if let Ok(mut radio) = radio.lock() {
+        radio.write(data)
+    } else {
+        warn!("Failed to lock radio");
+        bail!("Failed to lock radio");
+    }
 }

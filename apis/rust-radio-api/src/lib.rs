@@ -17,12 +17,15 @@
 //! A high level interface for interacting with radios
 
 #![deny(missing_docs)]
+#![deny(warnings)]
 
+#[macro_use]
+extern crate failure;
+
+use failure::Error;
 use failure::Fail;
 use nom::IResult;
 use std::cell::RefCell;
-
-use failure::Error;
 
 /// Common Error for Radio Actions
 #[derive(Debug, Fail)]
@@ -33,6 +36,9 @@ pub enum RadioError {
         /// The message from original error
         message: String,
     },
+    /// No data available
+    #[fail(display = "No data available")]
+    NoData,
 }
 
 fn nom_to_radio_error<T>(err: nom::Err<&[u8]>) -> Result<(&[u8], T), RadioError> {
@@ -87,13 +93,18 @@ impl Connection {
     /// Read the next object using provided parser.
     pub fn read<T>(&self, parse: ParseFn<T>) -> RadioResult<T> {
         let mut buffer = self.buffer.borrow_mut();
+        let mut tries = 0;
         loop {
+            if tries > 5 {
+                break;
+            }
             let copy = buffer.clone();
             let res = parse(&copy);
 
             if let Err(nom::Err::Incomplete(_)) = res {
                 let more = self.stream.read()?;
                 buffer.extend_from_slice(&more);
+                tries += 1;
                 continue;
             }
 
@@ -102,5 +113,6 @@ impl Connection {
             buffer.extend_from_slice(extra);
             return Ok(value);
         }
+        bail!("Incomplete parsing".to_owned())
     }
 }
